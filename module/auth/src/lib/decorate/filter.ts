@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { ObjectUtil } from "../../util";
+import { ObjectUtil, nodeToPromise } from "@encore/util";
+import { filterAdder } from '@encore/express';
 import * as passport from "passport";
-import { filterAdder } from '../../express';
-import { nodeToPromise } from '../../util';
 
 export function Authenticate(provider: string, failTo?: string) {
   let handler = passport.authenticate(provider, { failureRedirect: failTo })

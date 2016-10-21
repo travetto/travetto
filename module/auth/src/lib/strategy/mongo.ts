@@ -2,10 +2,10 @@ import * as crypto from "crypto";
 import * as passport from "passport";
 import * as moment from "moment";
 
-import { nodeToPromise } from '../../util';
-import { ModelService, BaseModel } from '../../model'
+import { nodeToPromise } from '@encore/util';
+import { ModelService, BaseModel } from '@encore/model'
 import { Strategy as LocalStrategy } from "passport-local";
-import { Context } from '../../express';
+import { Context } from '@encore/express';
 
 async function generateHash(password: string, salt: string, iterations: number = 25000, keylen: number = 512, digest: string = 'sha512') {
   return (await nodeToPromise<Buffer>(crypto, crypto.pbkdf2, password, salt, iterations, keylen, digest)).toString('hex');
