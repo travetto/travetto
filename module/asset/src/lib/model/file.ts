@@ -1,6 +1,6 @@
 import {Request,Response} from "express";
-import {Renderable} from '../../express';
-import {nodeToPromise} from '../../util';
+import {Renderable} from '@encore/express';
+import {nodeToPromise} from '@encore/util';
 import * as fs from "fs";
 import * as mime from "mime"; 
 
