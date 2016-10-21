@@ -1,6 +1,6 @@
 {
   "name": "@encore/init",
-  "version": "1.0.0-SNAPSHOT",
+  "version": "1.0.0",
   "description": "",
   "main": "src/lib/",
   "scripts": {
@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/basee.git",
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git",
     "flat": "^2.0.0"
   }
 }
