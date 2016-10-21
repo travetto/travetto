@@ -2,7 +2,7 @@ import * as mongoose from "mongoose";
 import { Cls, FieldCfg, ClsLst } from '../model';
 import { MongoService } from '@encore/mongo';
 import { Ready } from '@encore/init';
-import { ObjectUtil } from '@encore/util';
+import { ObjectUtil } from '@encore/base';
 import { Model } from '../model';
 
 let schemas: { [name: string]: any } = {};
