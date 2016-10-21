@@ -1,5 +1,5 @@
 import { Ready } from './ready';
-import { ObjectUtil, bulkRequire } from '../util';
+import { ObjectUtil, bulkRequire } from '@encore/util';
 
 let flatten = require('flat');
 let unflatten = flatten.unflatten;
@@ -106,7 +106,7 @@ function dropNulls(o: any) {
 */
 export function configure(name: string) {
   //Load all namespaces from core
-  bulkRequire('**/config.ts', __dirname + '/../');
+  bulkRequire('**/config.ts', process.cwd()+'/node_modules/@encore');
 
   //Load all namespaces from app
   bulkRequire('src/app/**/config.ts');
