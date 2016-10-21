@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { RequestHandler, Filter, FilterPromise, PathType } from './types';
 import { Renderable } from '../model';
-import { ObjectUtil, toPromise } from '@encore/util';
+import { ObjectUtil, toPromise } from '@encore/base';
 import { app } from '../initialize';
 
 async function outputHandler(handler: RequestHandler, res: Response, out: any) {

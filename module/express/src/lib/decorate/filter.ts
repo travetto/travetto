@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { FilterPromise } from './types';
-import { nodeToPromise } from '@encore/util';
+import { nodeToPromise } from '@encore/base';
 
 export function filterAdder(fn: any) {
   return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
