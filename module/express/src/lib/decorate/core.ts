@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { RequestHandler, Filter, FilterPromise, PathType } from './types';
 import { Renderable } from '../model';
-import { toPromise } from '../../util';
+import { ObjectUtil, toPromise } from '@encore/util';
 import { app } from '../initialize';
-import { ObjectUtil } from "../../util";
 
 async function outputHandler(handler: RequestHandler, res: Response, out: any) {
   if (!res.headersSent && out) {

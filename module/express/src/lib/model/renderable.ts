@@ -1,7 +1,5 @@
 import {Response} from "express"; 
 
-import {nodeToPromise} from '../../util';
-
 export abstract class Renderable {
 	abstract render(res:Response):any;
 }

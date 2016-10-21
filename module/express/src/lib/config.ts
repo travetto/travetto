@@ -1,4 +1,4 @@
-import { registerNamespace } from '../init';
+import { registerNamespace } from '@encore/init';
 export default registerNamespace('express', {
 	serve: true,
 	port: 3000,

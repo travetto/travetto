@@ -1,7 +1,7 @@
 import * as express from "express";
 import Config from './config';
 import { canAccept } from './util';
-import { Ready } from '../init';
+import { Ready } from '@encore/init';
 import * as http from 'http';
 import { Storage, Context } from './service';
 
