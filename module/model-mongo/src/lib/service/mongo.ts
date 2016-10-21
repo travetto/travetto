@@ -1,7 +1,7 @@
 import * as mongo from "mongodb";
 import Config from '../config';
 import { Named, Base, BulkState, BulkResponse, QueryOptions } from '../model';
-import { ObjectUtil } from '@encore/util'
+import { ObjectUtil } from '@encore/base'
 
 export class MongoService {
 

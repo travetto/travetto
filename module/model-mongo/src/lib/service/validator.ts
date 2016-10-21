@@ -1,6 +1,6 @@
 import * as mg from "mongoose";
 import { Base, Named } from '../model';
-import { nodeToPromise } from '@encore/util';
+import { nodeToPromise } from '@encore/base';
 
 let mongoose = require('mongoose/lib/browser');
 mongoose.Document = require('mongoose/lib/browserDocument.js');
