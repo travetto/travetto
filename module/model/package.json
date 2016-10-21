@@ -1,0 +1,18 @@
+{
+  "name": "@encore/model",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/lib/",
+  "scripts": {
+    "test": "mocha --require src/test/ --ui with-context src/test/**/*.ts",
+    "test:single": "mocha --require src/test/ --ui with-context",
+    "test:bamboo": "mocha -R json --require src/test/ --ui with-context src/test/**/*.ts > mocha.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git",
+    "mongoose": "^4.5.35",
+    "@types/mongoose": "^4.5.35"
+  }
+}
