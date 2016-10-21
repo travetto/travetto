@@ -4,7 +4,7 @@ import * as LRU from "lru-cache";
 import * as gm from 'gm';
 import { AssetService } from './asset';
 import { File } from '../model'
-import { nodeToPromise } from '@encore/util';
+import { nodeToPromise } from '@encore/base';
 let osTmpdir = require('os-tmpdir');
 
 let tmpDir = path.resolve(osTmpdir());
