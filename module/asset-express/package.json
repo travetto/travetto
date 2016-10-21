@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@encore/model": "git+ssh://git@git.eaiti.com/encore/model.git",
+    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git",
     "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git",
     "connect-multiparty": "^1.2.5",
     "express-fileupload": "0.0.4",
