@@ -1,7 +1,7 @@
 import * as passport from "passport";
 import Config from './config'
 import { app, Context } from '@encore/express';
-import { nodeToPromise } from '@encore/util';
+import { nodeToPromise } from '@encore/base';
 import { Request, Response } from "express";
 
 app.use(passport.initialize(), passport.session());
