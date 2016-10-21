@@ -1,0 +1,24 @@
+{
+  "name": "@encore/email",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/lib/",
+  "scripts": {
+    "test": "mocha --require src/test/ --ui with-context src/test/**/*.ts",
+    "test:single": "mocha --require src/test/ --ui with-context",
+    "test:bamboo": "mocha -R json --require src/test/ --ui with-context src/test/**/*.ts > mocha.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@encore/init": "git+ssh://git@git.eaiti.com/encore/init.git",
+    "juice": "^3.0.1",
+    "marked": "^0.3.6",
+    "mustache": "^2.2.1",
+    "nodemailer": "^2.6.4",
+    "nodemailer-markdown": "^1.0.1",
+    "nodemailer-sendmail-transport": "^1.0.0",
+    "@types/marked": "0.0.28",
+    "@types/nodemailer": "^1.3.32"
+  }
+}
