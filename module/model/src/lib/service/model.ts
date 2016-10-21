@@ -1,6 +1,6 @@
 import * as mongo from "mongodb";
 import { Model, BaseModel } from '../model';
-import { MongoService, QueryOptions, BulkState } from '@encore/mongsrc';
+import { MongoService, QueryOptions, BulkState } from '@encore/mongo';
 import { ModelValidator } from './modelValidator';
 import { getCls, convert } from '../util';
 import { ObjectUtil } from '@encore/base';
