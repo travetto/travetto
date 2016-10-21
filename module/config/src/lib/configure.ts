@@ -1,5 +1,5 @@
 import { Ready } from './ready';
-import { ObjectUtil, bulkRequire } from '@encore/util';
+import { ObjectUtil, bulkRequire } from '@encore/base';
 
 let flatten = require('flat');
 let unflatten = flatten.unflatten;
