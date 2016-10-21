@@ -1,0 +1,27 @@
+{
+  "name": "@encore/asset",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/lib/",
+  "scripts": {
+    "test": "mocha --require src/test/ --ui with-context src/test/**/*.ts",
+    "test:single": "mocha --require src/test/ --ui with-context",
+    "test:bamboo": "mocha -R json --require src/test/ --ui with-context src/test/**/*.ts > mocha.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@encore/model": "git+ssh://git@git.eaiti.com/encore/model.git",
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git",
+    "connect-multiparty": "^1.2.5",
+    "express-fileupload": "0.0.4",
+    "mime": "^1.3.4",
+    "gm": "^1.21.1",
+    "gridfs-stream": "^1.1.1",
+    "lru-cache": "^4.0.0",
+    "multiparty": "^4.1.2",
+    "os-tmpdir": "^1.0.1",
+    "@types/gridfs-stream": "^0.5.28",
+    "@types/lru-cache": "^2.5.32"
+  }
+}
