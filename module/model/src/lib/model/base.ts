@@ -1,5 +1,5 @@
 import { Field } from '../decorate';
-import { Base } from '../../mongo';
+import { Base } from '@encore/mongo';
 
 export abstract class BaseModel implements Base {
 

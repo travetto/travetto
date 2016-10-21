@@ -1,5 +1,5 @@
 import * as mongoose from "mongoose";
-import { Named } from '../../mongo';
+import { Named } from '@encore/mongo';
 
 export interface Model<T> {
   new (conf?: any): T;

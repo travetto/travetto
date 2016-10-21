@@ -1,8 +1,9 @@
-import { Request, Response } from 'express';
 import { BaseModel } from '../model';
 import { ModelValidator } from '../service';
-import { filterAdder } from '../../express';
-import { ObjectUtil } from "../../util";
+import { ObjectUtil } from "@encore/util";
+
+import { Request, Response } from 'express';
+import { filterAdder } from '@encore/express';
 
 export function ModelBody<T extends BaseModel>(cls: (new (a?: any) => T)) {
   return filterAdder(async (req: Request, res: Response) => {

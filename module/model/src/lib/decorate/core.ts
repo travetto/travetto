@@ -1,8 +1,8 @@
 import * as mongoose from "mongoose";
 import { Cls, FieldCfg, ClsLst } from '../model';
-import { MongoService } from '../../mongo';
-import { Ready } from '../../init';
-import { ObjectUtil } from '../../util';
+import { MongoService } from '@encore/mongo';
+import { Ready } from '@encore/init';
+import { ObjectUtil } from '@encore/util';
 import { Model } from '../model';
 
 let schemas: { [name: string]: any } = {};

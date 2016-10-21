@@ -1,7 +1,7 @@
 import * as mongoose from "mongoose";
 import { BaseModel, Model } from '../model';
 import { getCls } from '../util';
-import { Validator } from '../../mongo';
+import { Validator } from '@encore/mongo';
 
 
 export class ModelValidator {
