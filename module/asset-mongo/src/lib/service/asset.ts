@@ -4,9 +4,9 @@ import * as mongo from "mongodb";
 import * as Grid from "gridfs-stream";
 import * as mime from "mime";
 
-import { MongoService } from '../../mongo';
+import { MongoService } from '@encore/mongo';
 import { File } from '../model'
-import { nodeToPromise } from '../../util';
+import { nodeToPromise } from '@encore/util';
 
 let crypto = require('crypto');
 

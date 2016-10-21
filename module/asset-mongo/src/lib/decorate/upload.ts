@@ -1,8 +1,8 @@
 import {Request,Response} from 'express';
 import {AssetService} from '../service';
-import {filterAdder} from '../../express';
-import {nodeToPromise} from '../../util';
 import {File} from '../model';
+import {filterAdder} from '@encore/express';
+import {nodeToPromise} from '@encore/util';
 
 let multipart = require('connect-multiparty')({
     hash : 'sha256'
