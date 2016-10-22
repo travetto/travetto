@@ -1,8 +1,5 @@
-function init(ready?:Function) {
+function init(name, handler) {
   require('@encore/init/bootstrap').init('test');
-  if (ready) {
-    ready();
-  }
-  require('./mocha-ui');
+  require('./mocha').registerTest(name, handler);
 }
-module.exports =  { init };
+module.exports = { init };
