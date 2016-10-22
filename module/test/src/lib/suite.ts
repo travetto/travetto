@@ -1,9 +1,10 @@
 import * as mocha from "mocha";
 
-let _beforeTest: ActionFunction[] = [];
+let _beforeTest: (()=>Promise<any>)[] = [];
 let _beforeSuite: ActionFunction[] = [];
 let _afterTest: ActionFunction[] = [];
 let _afterSuite: ActionFunction[] = [];
+let _beforeAll : ActionFunction[] = [];
 
 export function suite(fn: Function) {
   return function () {
@@ -30,7 +31,16 @@ export function timeout(delay: number, fn: Function) {
   }
 }
 
+export function beforeRun(run) {
+  if (_beforeTest.length) {
+    Promise.all(_beforeTest).then(run);
+  } else {
+    Process.nextTick(run);
+  }
+}
+
 export const adder = <T>(arr: T[]) => (t: T) => arr.push(t);
+export const beforeAll = adder(_beforeAll);
 export const beforeSuite = adder(_beforeSuite);
 export const beforeTest = adder(_beforeTest);
 export const afterSuite = adder(_afterSuite);
