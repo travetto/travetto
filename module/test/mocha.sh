@@ -1,7 +1,13 @@
-#!/bin/sh
-CMD="./node_modules/mocha/bin/mocha"
+#!/bin/bash -x
+CMD="mocha"
 CMD="$CMD --delay"
-CMD="$CMD --require node_modules/@encore/base/src/lib/require-ts.js"
+ENV=${ENV:-test}
+
+if [[ -e './node_modules/@encore/init' ]]; then
+  CMD="$CMD --require node_modules/@encore/init/bootstrap.js"
+else
+  CMD="$CMD --require node_modules/@encore/base/src/lib/require-ts.js"
+fi
 
 if [[ -e "./src/test/setup.ts" ]]; then
   CMD="$CMD --require src/test/setup"
