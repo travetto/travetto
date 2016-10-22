@@ -4,7 +4,7 @@ let _afterTest: ActionFunction[] = [];
 let _afterSuite: ActionFunction[] = [];
 let _beforeAll : ActionFunction[] = [];
 
-export function suite(fn: Function) {
+export function declareSuite(fn: Function) {
   return function () {
     for (let fn of _beforeSuite) before(fn);
     for (let fn of _beforeTest) beforeEach(fn);

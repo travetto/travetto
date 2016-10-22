@@ -1,45 +1,56 @@
-import { suite as declareSuite, beforeRun } from './suite';
+import { declareSuite, beforeRun } from './suite';
+
+let Test = require('mocha/lib/test');
+let Common = require('mocha/lib/interfaces/common');
 
 module.exports = function (suite) {
-  let suites = [suite];
+  var suites = [suite];
 
   suite.on('pre-require', function (context, file, mocha) {
-    let common = require('mocha/lib/interfaces/common')(suites, context, mocha);
+    var common = Common(suites, context, mocha);
+
+    context.before = common.before;
+    context.after = common.after;
+    context.beforeEach = common.beforeEach;
+    context.afterEach = common.afterEach;
 
     if (mocha.options.delay) {
-      beforeRun(() => common.runWithSuite(suite))
+      beforeRun(() => common.runWithSuite(suite));
     }
 
-    Object.assign(context, {
-      before: common.before,
-      after: common.after,
-      beforeEach: common.beforeEach,
-      afterEach: common.afterEach,
-      describe: (title, fn) => common.suite.create({ title, file, declareSuite(fn) }),
-      describeOnly: (title, fn) => common.suite.only({ title, file, declareSuite(fn) }),
-      skip: (title, fn) => common.suite.skip({ title, file, fn }),
+    context.describe = context.context = function (title, fn) {
+      return common.suite.create({ title, file, fn });
+    };
 
-      it: (title, fn) => {
-        let Test = require('mocha/lib/test');
-        let suite = suites[0];
-        if (suite.isPending()) {
-          fn = null;
-        }
-        let test = new Test(title, fn);
-        test.file = file;
-        suite.addTest(test);
-        return test;
-      },
-      itOnly: (title, fn) => common.test.only(mocha, context.it(title, fn)),
-      itSkip: (title) => context.it(title),
-      itRetries: (n) => context.retries(n)
-    });
+    context.xdescribe = context.xcontext = context.describe.skip = function (title, fn) {
+      return common.suite.skip({ title, file, fn });
+    };
 
-    context.xdescribe = context.xcontext = context.describe;
-    context.describe.only = context.describeOnly;
-    context.specify = context.it;
-    context.it.only = context.itOnly;
-    context.xit = context.xspecify = context.it.skip = context.itSkip;
-    context.it.retries = context.itRetries;
+    context.describe.only = function (title, fn) {
+      return common.suite.only({ title, file, fn });
+    };
+
+    context.it = context.specify = function (title, fn) {
+      var suite = suites[0];
+      if (suite.isPending()) {
+        fn = null;
+      }
+      var test = new Test(title, fn);
+      test.file = file;
+      suite.addTest(test);
+      return test;
+    };
+
+    context.it.only = function (title, fn) {
+      return common.test.only(mocha, context.it(title, fn));
+    };
+
+    context.xit = context.xspecify = context.it.skip = function (title) {
+      context.it(title);
+    };
+
+    context.it.retries = function (n) {
+      context.retries(n);
+    };
   });
 };
