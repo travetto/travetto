@@ -4,10 +4,10 @@ let Test = require('mocha/lib/test');
 let Common = require('mocha/lib/interfaces/common');
 
 module.exports = function (suite) {
-  var suites = [suite];
+  let suites = [suite];
 
   suite.on('pre-require', function (context, file, mocha) {
-    var common = Common(suites, context, mocha);
+    let common = Common(suites, context, mocha);
 
     context.before = common.before;
     context.after = common.after;
@@ -15,7 +15,7 @@ module.exports = function (suite) {
     context.afterEach = common.afterEach;
 
     if (mocha.options.delay) {
-      beforeRun(() => common.runWithSuite(suite));
+      beforeRun(common.runWithSuite(suite));
     }
 
     context.describe = context.context = function (title, fn) {
@@ -33,11 +33,11 @@ module.exports = function (suite) {
     };
 
     context.it = context.specify = function (title, fn) {
-      var suite = suites[0];
+      let suite = suites[0];
       if (suite.isPending()) {
         fn = null;
       }
-      var test = new Test(title, fn);
+      let test = new Test(title, fn);
       test.file = file;
       suite.addTest(test);
       return test;
