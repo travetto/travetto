@@ -4,9 +4,10 @@
   "description": "",
   "main": "src/lib/",
   "scripts": {
-    "test": "mocha --require src/test/ --ui with-context src/test/**/*.ts",
-    "test:single": "mocha --require src/test/ --ui with-context",
-    "test:bamboo": "mocha -R json --require src/test/ --ui with-context src/test/**/*.ts > mocha.json"
+    "test": "npm run test:all",
+    "test:base": "mocha --require lib/ --ui with-context",
+    "test:all": "npm run test:base src/test/**/*.ts",
+    "test:bamboo": "npm run test:base src/test/**/*.ts -R json  src/test/**/*.ts > mocha.json"
   },
   "author": "",
   "license": "ISC",
@@ -15,11 +16,6 @@
     "lodash": "^4.6.1",
     "source-map-support": "^0.4.0",
     "typescript": "^2.0.2",
-    "@types/node": "^6.0.45",
-    "@types/chai": "^3.4.32",
-    "@types/lodash": "^4.14.34",
-    "chai": "^3.5.0",
-    "mocha": "^2.4.5",
-    "mocha-bamboo-reporter": "^1.1.0"
+    "@types/node": "^6.0.45"
   }
 }
