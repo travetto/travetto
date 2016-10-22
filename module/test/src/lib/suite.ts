@@ -15,6 +15,13 @@ export function suite(fn: Function) {
   };
 }
 
+export function timeout(delay: number, fn: Function) {
+  return function (...args: any[]) {
+    this.timeout(delay);
+    return fn.apply(this, args);
+  }
+}
+
 export const adder = <T>(arr: T[]) => (t: T) => arr.push(t);
 export const beforeSuite = adder(_beforeSuite);
 export const beforeTest = adder(_beforeTest);
