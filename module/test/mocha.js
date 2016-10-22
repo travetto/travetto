@@ -2,35 +2,36 @@
 
 let fs = require('fs');
 
-let hasInit = false;
-let hasSetup = false;
+let init = 'base/src/lib/require-ts.js';
+let setup = [];
+let root = process.cwd();
 
 try {
-  hasInit = !!fs.statSync(process.cwd() + '/node_modules/@encore/init');
+  if (!!fs.statSync(`${root}/node_modules/@encore/init`)) {
+    init = 'init/bootstrap.js';
+  }
 } catch (e) { }
 
 try {
-  hasSetup = !!fs.statSync(process.cwd() + "/src/test/setup.ts");
+  if (!!fs.statSync(`${root}/src/test/setup.ts`)) {
+    setup = ['--require', `src/test/setup.ts`];
+  }
 } catch (e) { }
 
 
 process.argv = [
+  process.argv[0],
   'mocha',
   '--delay',
   '--require',
-  `node_modules/@encore/${hasInit ? 'init/bootstrap.js' : 'base/src/lib/require-ts.js'}`,
+  `node_modules/@encore/${init}`,
   '--ui',
   '@encore/test/src/lib/user-interface',
-  ...(hasSetup ? [
-    '--require',
-    'src/test/setup'
-  ] : []),
+  ...setup,
   ...process.argv.slice(2)
 ];
 
 process.env.auto = true;
 process.env.env = process.env.env || 'test';
 
-console.log(process.argv);
-
-require(process.cwd() + '/node_modules/mocha/bin/mocha');
+require(`${root}/node_modules/mocha/bin/mocha`);
