@@ -1,5 +1,5 @@
 #!/bin/bash -x
-CMD="mocha"
+CMD="./node_modules/mocha/bin/mocha"
 CMD="$CMD --delay"
 ENV=${ENV:-test}
 
