@@ -29,7 +29,7 @@ export function timeout(delay: number, fn: Function) {
   }
 }
 
-export function beforeRun(run) {
+export function runWhenReady(run) {
   if (_beforeAll.length) {
     Promise.all(_beforeAll).then(run);
   } else {
