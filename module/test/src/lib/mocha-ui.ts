@@ -1,58 +1,83 @@
-var mocha = require('mocha');
-var Suite = require('mocha/lib/suite');
-var Test = require('mocha/lib/test');
+import * as mocha from "mocha";
+let Suite = require('mocha/lib/suite');
+let Test = require('mocha/lib/test');
 
-export function registerContext(name, handler) {
-  mocha.interfaces[name] = buildInterface();
+interface Handler {
+  defaultTimeout: number;
+  setup?: (callback: Function) => Promise<any>;
+  before?: () => any;
+  after?: () => any;
 }
 
-function buildInterface() {
- return (suite) => {
-  var suites = [suite];
+export function registerTest(name: string, handler: Handler) {
+  (mocha as any).interfaces[name] = (suite: mocha.ISuite) => {
+    let suites: mocha.ISuite[] = [suite];
+    (suite as any).on('pre-require',
+      preRequire.bind(null, handler, suites));
+  }
+}
 
-  suite.on('pre-require', (context, file, mocha) => {
-    var common = require('mocha/lib/interfaces/common')(suites, context);
+function preRequire(handler: Handler, suites: mocha.ISuite[], context: any, file: any, mocha: any) {
+  let common = require('mocha/lib/interfaces/common')(suites, context);
+  let init = (done: Function) => doInit(done)
+  let doInit: Function = (done: Function) => {
+    if (handler.setup) {
+      handler.setup(done).then(() => { doInit = process.nextTick });
+    } else {
+      doInit = process.nextTick;
+      done();
+    }
+  }
 
-    context.setup = common.beforeEach;
-    context.teardown = common.afterEach;
-    context.suiteSetup = common.before;
-    context.suiteTeardown = common.after;
+  context.suiteSetup(init)
 
-    context.describe = (title, fn) => {
-      var suite = Suite.create(suites[0], title);
-      suites.unshift(suite);
-      fn();
-      suites.shift();
-    };
+  context.setup = common.beforeEach;
+  context.teardown = common.afterEach;
+  context.suiteSetup = common.before;
+  context.suiteTeardown = common.after;
 
-    context.it = (name, fn) => {
-      var test = null;
-      var cb = fn.toString().indexOf('(done)') >= 0;
-      var gen = fn.toString().indexOf('yield ') >= 0;
-      var op = null;
+  context.describe = (title: string, fn: Function) => {
+    let suite = Suite.create(suites[0], title);
+    suites.unshift(suite);
+    fn();
+    suites.shift();
+  };
 
-      if (gen) {
-        op = (done) => {
-          fn().then(done).catch(e => {
-            console.log("Gen Error", e);
-            done(e)
-          });
-        }
-      } else {
-        op = (done) => {
-          try {
-            fn(cb ? done : undefined);
-            !cb && done();
-          } catch (e) {
-            done(e);
-          }
+  context.it = (name: string, fn: Function) => {
+    let test = null;
+    let cb = fn.toString().indexOf('(done)') >= 0;
+    let gen = fn.toString().indexOf('yield ') >= 0;
+    let op: Function;
+
+    if (gen) {
+      op = (done: Function) => {
+        if (handler.before) handler.before();
+        fn().then(done).catch((e: any) => {
+          console.log("Gen Error", e);
+          done(e)
+        })
+          .then(
+          (e: any) => { handler.after && handler.after(); return e },
+          (e: any) => { handler.after && handler.after(); throw e },
+        );
+      }
+    } else {
+      op = (done: Function) => {
+        try {
+          if (handler.before) handler.before();
+          fn(cb ? done : undefined);
+          !cb && done();
+        } catch (e) {
+          done(e);
+        } finally {
+          if (handler.after) handler.after();
         }
       }
-      suites[0].addTest(new Test(name, function (done) {
-        this.timeout(10000);
-        done.timeout = this.timeout.bind(this);
-        op(done);
-      }));
     }
-  });
-};
+    (suites[0] as any).addTest(new Test(name, function (done: mocha.IContextDefinition) {
+      this.timeout(handler.defaultTimeout);
+      done.timeout = this.timeout.bind(this);
+      op(done);
+    }));
+  }
+}
