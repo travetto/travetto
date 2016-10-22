@@ -1,7 +1,6 @@
 import { suite, beforeRun } from './suite';
-let mocha = require('mocha');
 
-mocha.interfaces.encore = function (suite) {
+module.exports = function (suite) {
   let suites = [suite];
 
   suite.on('pre-require', function (context, file, mocha) {
