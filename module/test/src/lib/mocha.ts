@@ -1,14 +1,7 @@
 import * as mocha from "mocha";
+import { Handler } from './types';
 let Suite = require('mocha/lib/suite');
 let Test = require('mocha/lib/test');
-
-interface Handler {
-  defaultTimeout: number;
-  init?: () => Promise<any>;
-  setup?: () => Promise<any>;
-  before?: () => any;
-  after?: () => any;
-}
 
 export function registerTest(name: string, handler: Handler) {
   if (handler.init) {
