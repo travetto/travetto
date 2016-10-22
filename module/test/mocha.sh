@@ -2,7 +2,6 @@
 CMD="mocha"
 CMD="$CMD --delay"
 ENV=${ENV:-test}
-auto=true
 
 if [[ -e './node_modules/@encore/init' ]]; then
   CMD="$CMD --require node_modules/@encore/init/bootstrap.js"
@@ -16,4 +15,4 @@ fi
 
 CMD="$CMD --ui @encore/test/src/lib/user-interface"
 
-$CMD $@
+auto=true $CMD $@
