@@ -105,8 +105,10 @@ function dropNulls(o: any) {
     - Environment vars -> Overrides everything
 */
 export function configure(name: string) {
+  console.log(`Initializing: ${name}`);
+
   //Load all namespaces from core
-  bulkRequire('**/config.ts', process.cwd()+'/node_modules/@encore');
+  bulkRequire('**/config.ts', process.cwd() + '/node_modules/@encore');
 
   //Load all namespaces from app
   bulkRequire('src/app/**/config.ts');
