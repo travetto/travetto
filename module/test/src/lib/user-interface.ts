@@ -1,4 +1,4 @@
-import { declareSuite, beforeRun } from './suite';
+import { declareSuite, runWhenReady } from './suite';
 
 let Test = require('mocha/lib/test');
 let Common = require('mocha/lib/interfaces/common');
