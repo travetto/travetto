@@ -19,6 +19,12 @@ export class Ready {
     }
   }
 
+  static onReadyPromise() {
+    return new Promise((resolve) => {
+      Ready.onReady(resolve);
+    });
+  }
+
   static onPromiseSuccess() {
     Ready.resolved++;
     process.nextTick(Ready.checkForDone)
