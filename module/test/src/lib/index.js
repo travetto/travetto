@@ -1,5 +1,5 @@
 function init(name, handler) {
-  require('@encore/init/bootstrap').init('test');
+  require('@encore/base/src/lib/require-ts');
   require('./mocha').registerTest(name, handler);
 }
 module.exports = { init };
