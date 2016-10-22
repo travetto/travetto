@@ -1,2 +1,2 @@
-export * from './mocha';
+export * from './suite';
 export * from './types';
