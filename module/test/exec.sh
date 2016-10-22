@@ -2,11 +2,12 @@
 CMD="mocha"
 CMD="$CMD --delay"
 CMD="$CMD --require node_modules/@encore/base/src/lib/require-ts.js"
-CMD="$CMD --ui @encore/test/src/lib/user-interface"
 
-if [[ -e "./src/test/index.js" ]]; then
-  CMD="$CMD --require src/test"
+if [[ -e "./src/test/setup.ts" ]]; then
+  CMD="$CMD --require src/test/setup"
 fi
+
+CMD="$CMD --ui @encore/test/src/lib/user-interface"
 
 if [[ "$1" == "bamboo" ]]; then
   $CMD -r json src/test/**/*.ts > mocha.json
