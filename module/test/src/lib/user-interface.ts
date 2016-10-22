@@ -1,4 +1,4 @@
-import { suite, beforeRun } from './suite';
+import { suite as declareSuite, beforeRun } from './suite';
 
 module.exports = function (suite) {
   let suites = [suite];
@@ -15,8 +15,8 @@ module.exports = function (suite) {
       after: common.after,
       beforeEach: common.beforeEach,
       afterEach: common.afterEach,
-      describe: (title, fn) => common.suite.create({ title, file, suite(fn) }),
-      describeOnly: (title, fn) => common.suite.only({ title, file, suite(fn) }),
+      describe: (title, fn) => common.suite.create({ title, file, declareSuite(fn) }),
+      describeOnly: (title, fn) => common.suite.only({ title, file, declareSuite(fn) }),
       skip: (title, fn) => common.suite.skip({ title, file, fn }),
 
       it: (title, fn) => {
