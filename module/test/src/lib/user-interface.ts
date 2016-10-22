@@ -15,7 +15,7 @@ module.exports = function (suite) {
     context.afterEach = common.afterEach;
 
     if (mocha.options.delay) {
-      beforeRun(common.runWithSuite(suite));
+      beforeRun(() => common.runWithSuite(suite)());
     }
 
     context.describe = context.context = function (title, fn) {
