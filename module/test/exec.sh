@@ -1,7 +1,6 @@
 #!/bin/sh
 CMD="mocha --require node_modules/@encore/base/src/lib/require-ts.js"
-CMD="$CMD --require node_modules/@encore/test/src/lib/user-interface"
-CMD="$CMD --ui encore"
+CMD="$CMD --ui @encore/test/src/lib/user-interface"
 
 if [[ -e "./src/test/index.js" ]]; then
   CMD="$CMD --require src/test"

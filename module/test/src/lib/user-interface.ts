@@ -1,5 +1,5 @@
-import {suite, beforeRun} from './suite';
-let Test = require('mocha/lib/test');
+import { suite, beforeRun } from './suite';
+let mocha = require('mocha');
 
 mocha.interfaces.encore = function (suite) {
   let suites = [suite];
@@ -12,15 +12,16 @@ mocha.interfaces.encore = function (suite) {
     }
 
     Object.assign(context, {
-      before : common.before,
-      after : common.after,
-      beforeEach : common.beforeEach,
-      afterEach : common.afterEach,
-      describe : (title, fn) => common.suite.create({title, file, suite(fn)}),
-      describeOnly : (title, fn) => common.suite.only({title, file, suite(fn)}),
-      skip : (title, fn) => common.suite.skip({title, file, fn}),      
+      before: common.before,
+      after: common.after,
+      beforeEach: common.beforeEach,
+      afterEach: common.afterEach,
+      describe: (title, fn) => common.suite.create({ title, file, suite(fn) }),
+      describeOnly: (title, fn) => common.suite.only({ title, file, suite(fn) }),
+      skip: (title, fn) => common.suite.skip({ title, file, fn }),
 
-      it : (title, fn) => {
+      it: (title, fn) => {
+        let Test = require('mocha/lib/test');
         let suite = suites[0];
         if (suite.isPending()) {
           fn = null;
@@ -30,9 +31,9 @@ mocha.interfaces.encore = function (suite) {
         suite.addTest(test);
         return test;
       },
-      itOnly : (title, fn) => common.test.only(mocha, context.it(title, fn)),
-      itSkip : (title) => context.it(title),
-      itRetries : (n) => context.retries(n)
+      itOnly: (title, fn) => common.test.only(mocha, context.it(title, fn)),
+      itSkip: (title) => context.it(title),
+      itRetries: (n) => context.retries(n)
     });
 
     context.xdescribe = context.xcontext = context.describe;
