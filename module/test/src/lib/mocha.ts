@@ -78,7 +78,7 @@ function preRequire(handler: Handler, suites: mocha.ISuite[], context: any, file
     (suites[0] as any).addTest(new Test(name, function (done: mocha.IContextDefinition) {
       this.timeout(handler.defaultTimeout);
       done.timeout = this.timeout.bind(this);
-      op(done);
+      handler.exec ? handler.exec(op.bind(null, done)) : op(done);
     }));
   }
 }
