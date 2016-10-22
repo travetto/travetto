@@ -3,14 +3,14 @@ import { Handler } from './types';
 let Suite = require('mocha/lib/suite');
 let Test = require('mocha/lib/test');
 
-export function registerTest(name: string, handler: Handler) {
+export function registerTest(handler: Handler) {
   if (handler.init) {
     handler.init().then((x: any) => {
       delete handler.init;
-      registerTest(name, handler);
+      registerTest(handler);
     })
   } else {
-    (mocha as any).interfaces[name] = (suite: mocha.ISuite) => {
+    (mocha as any).interfaces['encore'] = (suite: mocha.ISuite) => {
       let suites: mocha.ISuite[] = [suite];
       (suite as any).on('pre-require',
         preRequire.bind(null, handler, suites));
