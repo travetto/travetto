@@ -32,11 +32,9 @@ if (Config.session.cookie.secure) {
   app.enable('trust proxy');
 }
 
-if (Config.serve) {
-  Ready.onReady(() => {
-    if (Config.port > 0) {
-      console.log(`Listening on ${Config.port}`);
-      app.listen(Config.port)
-    }
-  })
-}
+Ready.onReady(() => {
+  if (Config.serve && Config.port > 0) {
+    console.log(`Listening on ${Config.port}`);
+    app.listen(Config.port)
+  }
+});
