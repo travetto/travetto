@@ -19,6 +19,7 @@ module.exports = function (suite) {
     }
 
     context.describe = context.context = function (title, fn) {
+      fn = declareSuite(fn);
       return common.suite.create({ title, file, fn });
     };
 
@@ -27,6 +28,7 @@ module.exports = function (suite) {
     };
 
     context.describe.only = function (title, fn) {
+      fn = declareSuite(fn);
       return common.suite.only({ title, file, fn });
     };
 
