@@ -1,59 +1,45 @@
-import { declareSuite, runWhenReady } from './suite';
+import { declareSuite, runWhenReady } from './util';
 
 let Test = require('mocha/lib/test');
 let Common = require('mocha/lib/interfaces/common');
 
-module.exports = function (suite) {
+module.exports = function (suite: any) {
   let suites = [suite];
+  suite.on('pre-require', function (ctx: any, file: any, mocha: any) {
+    let cmn = Common(suites, ctx, mocha);
 
-  suite.on('pre-require', function (context, file, mocha) {
-    let common = Common(suites, context, mocha);
-
-    context.before = common.before;
-    context.after = common.after;
-    context.beforeEach = common.beforeEach;
-    context.afterEach = common.afterEach;
+    ctx.before = cmn.before;
+    ctx.after = cmn.after;
+    ctx.beforeEach = cmn.beforeEach;
+    ctx.afterEach = cmn.afterEach;
 
     if (mocha.options.delay) {
-      process.nextTick(() => 
-        runWhenReady(common.runWithSuite(suite)));
+      process.nextTick(() =>
+        runWhenReady(cmn.runWithSuite(suite)));
     }
 
-    context.describe = context.context = function (title, fn) {
-      fn = declareSuite(fn);
-      return common.suite.create({ title, file, fn });
-    };
+    ctx.describe = ctx.ctx =
+      (title: string, fn: Function) => cmn.suite.create({ title, file, fn: declareSuite(fn) });
 
-    context.xdescribe = context.xcontext = context.describe.skip = function (title, fn) {
-      return common.suite.skip({ title, file, fn });
-    };
+    ctx.xdescribe = ctx.xctx = ctx.describe.skip =
+      (title: string, fn: Function) => cmn.suite.skip({ title, file, fn });
 
-    context.describe.only = function (title, fn) {
-      fn = declareSuite(fn);
-      return common.suite.only({ title, file, fn });
-    };
+    ctx.describe.only =
+      (title: string, fn: Function) => cmn.suite.only({ title, file, fn: declareSuite(fn) });
 
-    context.it = context.specify = function (title, fn) {
+    ctx.it = ctx.specify = (title: string, fn: Function | null) => {
       let suite = suites[0];
-      if (suite.isPending()) {
-        fn = null;
-      }
-      let test = new Test(title, fn);
+      let test = new Test(title, suite.isPending() ? null : fn);
       test.file = file;
       suite.addTest(test);
       return test;
     };
 
-    context.it.only = function (title, fn) {
-      return common.test.only(mocha, context.it(title, fn));
-    };
+    ctx.it.only =
+      (title: string, fn: Function) => cmn.test.only(mocha, ctx.it(title, fn));
 
-    context.xit = context.xspecify = context.it.skip = function (title) {
-      context.it(title);
-    };
+    ctx.xit = ctx.xspecify = ctx.it.skip = (title: string) => ctx.it(title);
 
-    context.it.retries = function (n) {
-      context.retries(n);
-    };
+    ctx.it.retries = (n: number) => ctx.retries(n);
   });
 };
