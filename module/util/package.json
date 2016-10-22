@@ -3,12 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/lib/",
-  "scripts": {
-    "test": "npm run test:all",
-    "test:base": "mocha --require lib/ --ui with-context",
-    "test:all": "npm run test:base src/test/**/*.ts",
-    "test:bamboo": "npm run test:base src/test/**/*.ts -R json  src/test/**/*.ts > mocha.json"
-  },
+  "scripts": {},
   "author": "",
   "license": "ISC",
   "dependencies": {
