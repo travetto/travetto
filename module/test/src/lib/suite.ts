@@ -30,8 +30,8 @@ export function timeout(delay: number, fn: Function) {
 }
 
 export function beforeRun(run) {
-  if (_beforeTest.length) {
-    Promise.all(_beforeTest).then(run);
+  if (_beforeAll.length) {
+    Promise.all(_beforeAll).then(run);
   } else {
     Process.nextTick(run);
   }
