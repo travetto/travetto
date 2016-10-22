@@ -11,16 +11,23 @@ export interface ContextEntry {
 	res?: Response
 }
 
+export interface IStorage {
+	set(key:string, value:any);
+	get(key:string):any;
+}
+
 export class Context {
+	static storage:IStorage = Storage;
+
 	static clear() {
-		Storage.set(KEY, null);
+		Context.storage.set(KEY, null);
 	}
 
 	static set(c: ContextEntry & any) {
-		Storage.set(KEY, c);
+		Context.storage.set(KEY, c);
 	}
 	static get(): ContextEntry & any {
-		let res = Storage.get(KEY) as ContextEntry;
+		let res = Context.storage.get(KEY) as ContextEntry;
 		if (res === null || res === undefined) {
 			Context.set(res = {});
 		}
