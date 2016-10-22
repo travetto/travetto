@@ -6,11 +6,13 @@ let _afterTest: ActionFunction[] = [];
 let _afterSuite: ActionFunction[] = [];
 
 export function suite(fn: Function) {
-  for (let fn of _beforeSuite) before(fn);
-  for (let fn of _beforeTest) beforeEach(fn);
-  for (let fn of _afterTest) afterEach(fn);
-  for (let fn of _afterSuite) after(fn);
-  fn();
+  return () => {
+    for (let fn of _beforeSuite) before(fn);
+    for (let fn of _beforeTest) beforeEach(fn);
+    for (let fn of _afterTest) afterEach(fn);
+    for (let fn of _afterSuite) after(fn);
+    fn();
+  };
 }
 
 export const adder = <T>(arr: T[]) => (t: T) => arr.push(t);
