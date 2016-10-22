@@ -6,12 +6,11 @@ let Test = require('mocha/lib/test');
 export function registerTest(handler: Handler) {
   if (handler.init) {
     handler.init();
-  } else {
-    (mocha as any).interfaces['encore'] = (suite: mocha.ISuite) => {
-      let suites: mocha.ISuite[] = [suite];
-      (suite as any).on('pre-require',
-        preRequire.bind(null, handler, suites));
-    }
+  }
+  (mocha as any).interfaces['encore'] = (suite: mocha.ISuite) => {
+    let suites: mocha.ISuite[] = [suite];
+    (suite as any).on('pre-require',
+      preRequire.bind(null, handler, suites));
   }
 }
 
