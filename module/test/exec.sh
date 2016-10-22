@@ -1,6 +1,6 @@
 #!/bin/sh
 function test() {
-  mocha --require node_modules/@encore/base/src/lib/bulk-require.js --require src/test/ --ui encore $@ 
+  mocha --require node_modules/@encore/base/src/lib/require-ts.js --require src/test/  $@ 
 }
 
 if [[ "$1" == "all" ]]; then
