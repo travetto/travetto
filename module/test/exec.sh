@@ -5,10 +5,10 @@ if [[ -e "./src/test/index.js" ]]; then
   CMD="$CMD --require src/test"
 fi
 
-if [[ "$1" == "all" ]]; then
-  $CMD src/test/**/*.ts
-elif [[ "$1" == "bamboo" ]]; then
+if [[ "$1" == "bamboo" ]]; then
   $CMD -r json src/test/**/*.ts > mocha.json
-else
+elif [[ $# -eq 0 ]]; then
+  $CMD src/test/**/*.ts
+else 
   $CMD $@
 fi
