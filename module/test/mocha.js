@@ -7,26 +7,30 @@ let hasSetup = false;
 
 try {
   hasInit = !!fs.statSync(process.cwd() + '/node_modules/@encore/init');
-} catch (e) {}
+} catch (e) { }
 
 try {
   hasSetup = !!fs.statSync(process.cwd() + "/src/test/setup.ts");
-} catch (e) {}
+} catch (e) { }
 
 
-process.args.unshift(
-  '--ui', 
-    '@encore/test/src/lib/user-interface', 
-  '--delay', 
+process.argv = [
+  'mocha',
+  '--delay',
   '--require',
-    `node_modules/@encore/${hasInit?'init/bootstrap.js':'base/src/lib/require-ts.js'}`,
+  `node_modules/@encore/${hasInit ? 'init/bootstrap.js' : 'base/src/lib/require-ts.js'}`,
+  '--ui',
+  '@encore/test/src/lib/user-interface',
   ...(hasSetup ? [
-    '--require', 
-      'src/test/setup'
-    ] : [])
-);
+    '--require',
+    'src/test/setup'
+  ] : []),
+  ...process.argv.slice(2)
+];
 
 process.env.auto = true;
-process.env.env = process.env.env || 'test'; 
+process.env.env = process.env.env || 'test';
 
-require('mocha/bin/mocha');
+console.log(process.argv);
+
+require(process.cwd() + '/node_modules/mocha/bin/mocha');
