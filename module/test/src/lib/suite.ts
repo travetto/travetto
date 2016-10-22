@@ -1,5 +1,3 @@
-import * as mocha from "mocha";
-
 let _beforeTest: (()=>Promise<any>)[] = [];
 let _beforeSuite: ActionFunction[] = [];
 let _afterTest: ActionFunction[] = [];
