@@ -1,6 +1,6 @@
 export interface Handler {
   defaultTimeout: number;
-  init?: () => Promise<any>;
+  init?: () => any;
   setup?: () => Promise<any>;
   before?: () => any;
   after?: () => any;
