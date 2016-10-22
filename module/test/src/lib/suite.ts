@@ -6,12 +6,12 @@ let _afterTest: ActionFunction[] = [];
 let _afterSuite: ActionFunction[] = [];
 
 export function suite(fn: Function) {
-  return () => {
+  return function () {
     for (let fn of _beforeSuite) before(fn);
     for (let fn of _beforeTest) beforeEach(fn);
     for (let fn of _afterTest) afterEach(fn);
     for (let fn of _afterSuite) after(fn);
-    fn();
+    fn.call(this);
   };
 }
 
