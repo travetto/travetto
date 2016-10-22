@@ -16,9 +16,17 @@ export function suite(fn: Function) {
 }
 
 export function timeout(delay: number, fn: Function) {
-  return function (...args: any[]) {
-    this.timeout(delay);
-    return fn.apply(this, args);
+  let cb = fn.toString().indexOf('(done)') >= 0;
+  if (cb) {
+    return function (done: Function) {
+      this.timeout(delay);
+      return fn.call(this, done);
+    }
+  } else {
+    return function () {
+      this.timeout(delay);
+      return fn.call(this);
+    }
   }
 }
 
