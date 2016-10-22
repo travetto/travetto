@@ -15,7 +15,8 @@ module.exports = function (suite) {
     context.afterEach = common.afterEach;
 
     if (mocha.options.delay) {
-      runWhenReady(() => common.runWithSuite(suite)());
+      process.nextTick(() => 
+        runWhenReady(common.runWithSuite(suite)));
     }
 
     context.describe = context.context = function (title, fn) {

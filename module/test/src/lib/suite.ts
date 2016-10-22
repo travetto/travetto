@@ -33,7 +33,7 @@ export function runWhenReady(run) {
   if (_beforeAll.length) {
     Promise.all(_beforeAll).then(run);
   } else {
-    Process.nextTick(run);
+    process.nextTick(run);
   }
 }
 
