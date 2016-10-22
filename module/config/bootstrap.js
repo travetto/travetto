@@ -9,7 +9,7 @@ function init(env, imports = null) {
 const registerNamespace = require('./src/lib').registerNamespace;
 
 if (!!process.env.auto) {
-  init(env = env || process.env.env);
+  init(process.env.env);
 } else {
   module.exports = { init, registerNamespace }
 }
