@@ -4,6 +4,9 @@ export class Ready {
   private static resolved: number = 0;
   private static done: boolean = false;
   private static initialized: boolean = false;
+  private static readyPromise = new Promise((resolve) => {
+    Ready.onReady(resolve);
+  });
 
   static waitFor<T>(p: Promise<T>) {
     Ready.promises.push(p);
@@ -20,9 +23,7 @@ export class Ready {
   }
 
   static onReadyPromise() {
-    return new Promise((resolve) => {
-      Ready.onReady(resolve);
-    });
+    return Ready.readyPromise;
   }
 
   static onPromiseSuccess() {
@@ -52,4 +53,3 @@ export class Ready {
     Ready.wait();
   }
 }
-
