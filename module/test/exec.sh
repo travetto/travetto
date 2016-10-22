@@ -1,5 +1,7 @@
 #!/bin/sh
-CMD="mocha --require node_modules/@encore/base/src/lib/require-ts.js"
+CMD="mocha"
+CMD="$CMD --delay"
+CMD="$CMD --require node_modules/@encore/base/src/lib/require-ts.js"
 CMD="$CMD --ui @encore/test/src/lib/user-interface"
 
 if [[ -e "./src/test/index.js" ]]; then
