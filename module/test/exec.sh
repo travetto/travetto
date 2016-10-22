@@ -1,6 +1,6 @@
 #!/bin/sh
 function test() {
-  mocha --require src/test/ --ui encore $@ 
+  mocha --require src/test/ --ui with-context $@ 
 }
 
 if [[ "$1" == "all" ]]; then

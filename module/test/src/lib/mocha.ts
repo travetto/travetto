@@ -10,7 +10,7 @@ export function registerTest(handler: Handler) {
       registerTest(handler);
     })
   } else {
-    (mocha as any).interfaces['encore'] = (suite: mocha.ISuite) => {
+    (mocha as any).interfaces['with-context'] = (suite: mocha.ISuite) => {
       let suites: mocha.ISuite[] = [suite];
       (suite as any).on('pre-require',
         preRequire.bind(null, handler, suites));
