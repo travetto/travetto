@@ -7,7 +7,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.0.0",
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.0.0#v1.0.0",
     "@types/passport": "^0.2.30",
     "@types/passport-local": "^1.0.29",
     "passport": "^0.3.2",
