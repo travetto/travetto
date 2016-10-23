@@ -1,0 +1,12 @@
+{
+  "name": "@encore/context",
+  "version": "1.0.6",
+  "description": "",
+  "main": "src/lib/",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "continuation-local-storage": "^3.1.6"
+  }
+}
