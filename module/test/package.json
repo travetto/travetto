@@ -9,7 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git",
+    "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git",
+    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git",
     "@types/chai": "^3.4.32",
     "@types/lodash": "^4.14.34",
     "@types/mocha": "^2.2.32",
