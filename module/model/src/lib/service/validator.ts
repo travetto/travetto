@@ -12,9 +12,13 @@ export class Validator {
 
   static getSchema<T extends BaseModel>(cls: Model<T>) {
     if (!Validator.schemas[cls.name]) {
-      Validator.schemas[cls.name] = new mongoose.Schema(cls.schema, cls.schemaOpts);
+      Validator.schemas[cls.name] = Validator.getSchemaRaw(cls.schema, cls.schemaOpts);
     }
     return Validator.schemas[cls.name];
+  }
+
+  static getSchemaRaw(schema:any, opts:any):mg.Schema {
+    return new mongoose.Schema(schema, opts);
   }
 
   static async validateRaw<T>(o: T, schema: mg.Schema): Promise<T> {
