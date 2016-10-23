@@ -2,7 +2,6 @@ import { registerNamespace } from '@encore/init';
 export default registerNamespace('express', {
 	serve: true,
 	port: 3000,
-	context: 'namespace',
 	session: {
 		secret: 'random key',
 		cookie: {
