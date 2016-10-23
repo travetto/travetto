@@ -1,5 +1,5 @@
 import { BaseModel } from '../model';
-import { ModelValidator } from '../service';
+import { Validator } from '../service';
 import { ObjectUtil } from "@encore/util";
 
 import { filterAdder } from '@encore/express';
@@ -9,7 +9,7 @@ export function ModelBody<T extends BaseModel>(cls: (new (a?: any) => T)) {
     if (ObjectUtil.isPlainObject(req.body)) {
       try {
         let o = new cls(req.body);
-        req.body = await ModelValidator.validate(o);
+        req.body = await Validator.validate(o);
       } catch (e) {
         console.log(e);
         throw e;
