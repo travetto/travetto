@@ -6,7 +6,7 @@ import * as mime from "mime";
 
 import { MongoService } from '@encore/mongo';
 import { File } from '../model'
-import { nodeToPromise } from '@encore/base';
+import { nodeToPromise } from '@encore/util';
 
 let crypto = require('crypto');
 
