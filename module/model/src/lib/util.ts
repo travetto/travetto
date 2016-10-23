@@ -1,5 +1,5 @@
 import { Model, BaseModel } from './model';
-import { ObjectUtil } from '@encore/base';
+import { ObjectUtil } from '@encore/util';
 
 export function convert<T extends BaseModel>(cls: Model<T>, o: any): T {
   if (cls.discriminiators) {

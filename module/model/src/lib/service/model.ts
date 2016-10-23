@@ -3,7 +3,7 @@ import { Model, BaseModel } from '../model';
 import { MongoService, QueryOptions, BulkState } from '@encore/mongo';
 import { ModelValidator } from './modelValidator';
 import { getCls, convert } from '../util';
-import { ObjectUtil } from '@encore/base';
+import { ObjectUtil } from '@encore/util';
 
 export class ModelService {
 
