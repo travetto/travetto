@@ -1,9 +1,9 @@
-require('@encore/base/src/lib/require-ts');
+require('@encore/bootstrap');
 
 function init(env, imports = null) {
   require('./src/lib').configure(env || 'local');
   if (imports) {
-    require('@encore/base').bulkRequire(imports);
+    require('@encore/util').bulkRequire(imports);
   }
 }
 const registerNamespace = require('./src/lib').registerNamespace;
