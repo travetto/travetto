@@ -20,6 +20,7 @@ export class Context {
 	static set(c: any) {
 		Context.storage.set(KEY, c);
 	}
+
 	static get(): any {
 		let res = Context.storage.get(KEY) as any;
 		if (res === null || res === undefined) {
