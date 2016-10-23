@@ -32,7 +32,7 @@ export class AssetService {
 			throw new Error("Unable to find file");
 		}
 
-		return files.map(t => new File(t));
+		return files.map((t: any) => new File(t));
 	}
 
 	static fromUpload(upload: Express.MultipartyUpload, prefix?: string): File {

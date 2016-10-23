@@ -12,7 +12,7 @@ let tmpDir = path.resolve(osTmpdir());
 export class ImageService {
 	private static imageCache = LRU<string>({
 		max: 1000,
-		dispose: (key, n) => fs.unlink(n)
+		dispose: (key: string, n: string) => fs.unlink(n)
 	});
 
 	static clear() {
