@@ -1,4 +1,4 @@
-import { ObjectUtil } from '@encore/base';
+import { ObjectUtil } from '@encore/util';
 import * as moment from "moment";
 import { RequestHandler, PathType } from './types';
 
