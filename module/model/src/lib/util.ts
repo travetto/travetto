@@ -14,5 +14,5 @@ export function getCls<T extends BaseModel>(o: T): Model<T> {
 }
 
 export function enumKeys(c: any): string[] {
-  return ObjectUtil.values(c).filter(x => typeof x === 'string') as string[];
+  return ObjectUtil.values(c).filter((x: any) => typeof x === 'string') as string[];
 }

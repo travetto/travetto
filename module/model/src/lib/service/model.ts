@@ -16,7 +16,7 @@ export class ModelService {
       options.sort = cls.defaultSort;
     }
     let res = await MongoService.getByQuery<T>(cls, query, options);
-    return res.map(o => convert(cls, o));
+    return res.map((o: any) => convert(cls, o));
   }
 
   static async getCountByQuery<T extends BaseModel>(cls: Model<T>, query: Object = {}, options: QueryOptions = {}): Promise<{ count: number }> {
