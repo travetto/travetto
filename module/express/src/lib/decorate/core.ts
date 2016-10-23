@@ -68,7 +68,7 @@ function registerRequestHandler(fn: Filter, handler: RequestHandler, filters?: F
   if (handler.method) {
     (app as any)[handler.method].call(app,
       /*url*/ buildPath(base, handler.path),
-      /*filters*/ ...(filters || []).map(toPromise).map(f => asyncHandler(f)),
+      /*filters*/ ...(filters || []).map(toPromise).map(f => asyncHandler(f as FilterPromise)),
       /*fn*/ asyncHandler(toPromise(fn), outputHandler.bind(null, handler))
     );
   }
