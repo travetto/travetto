@@ -38,7 +38,7 @@ export class MongoService {
     return db.collection(MongoService.getCollectionName(named));
   }
 
-  static async resetDatabse() {
+  static async resetDatabase() {
     let client = await MongoService.getClient();
     await client.dropDatabase();
     for (let args of MongoService.indices) {
