@@ -5,7 +5,7 @@ import * as moment from "moment";
 import { nodeToPromise } from '@encore/util';
 import { ModelService, BaseModel } from '@encore/model'
 import { Strategy as LocalStrategy } from "passport-local";
-import { Context } from '@encore/express';
+import { Context } from '@encore/context';
 
 async function generateHash(password: string, salt: string, iterations: number = 25000, keylen: number = 512, digest: string = 'sha512') {
   return (await nodeToPromise<Buffer>(crypto, crypto.pbkdf2, password, salt, iterations, keylen, digest)).toString('hex');

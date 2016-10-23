@@ -1,6 +1,7 @@
 import * as passport from "passport";
 import Config from './config'
-import { app, Context } from '@encore/express';
+import { Context } from '@encore/context';
+import { app } from '@encore/express';
 import { nodeToPromise } from '@encore/util';
 import { Request, Response } from "express";
 
