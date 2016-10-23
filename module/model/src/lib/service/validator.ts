@@ -17,19 +17,19 @@ export class Validator {
     return Validator.schemas[cls.name];
   }
 
-  static async validate<T extends BaseModel>(o: T): Promise<T> {
-    return await Validator.validate(o, Validator.getSchema(getCls(o)));
+  static async validateRaw<T>(o: T, schema: mg.Schema): Promise<T> {
+    let doc = new mongoose.Document(o, schema);
+    await doc.validate();
+    return o;
   }
 
-  static async validateAll<T>(o: T, schema:mg.Schema): Promise<T[]> {
+  static async validateAllRaw<T>(obj: T[], schema: mg.Schema): Promise<T[]> {
     return await Promise.all<T>((obj || [])
       .map((o, i) => Validator.validate(o, schema)));
   }
 
-  static async validate<T>(o: T, schema:mg.Schema): Promise<T> {
-    let doc = new mongoose.Document(o, schema);
-    await doc.validate();
-    return o;
+  static async validate<T extends BaseModel>(o: T): Promise<T> {
+    return await Validator.validate(o, Validator.getSchema(getCls(o)));
   }
 
   static async validateAll<T extends BaseModel>(obj: T[]): Promise<T[]> {
