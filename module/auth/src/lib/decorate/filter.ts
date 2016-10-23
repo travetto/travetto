@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ObjectUtil, nodeToPromise } from "@encore/base";
+import { ObjectUtil, nodeToPromise } from "@encore/util";
 import { filterAdder } from '@encore/express';
 import * as passport from "passport";
 
