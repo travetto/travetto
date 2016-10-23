@@ -17,7 +17,7 @@ export class Validator {
     return Validator.schemas[cls.name];
   }
 
-  static getSchemaRaw(schema:any, opts:any):mg.Schema {
+  static getSchemaRaw(schema:any, opts:any = {}):mg.Schema {
     return new mongoose.Schema(schema, opts);
   }
 
