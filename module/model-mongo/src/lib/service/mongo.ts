@@ -42,15 +42,15 @@ export class MongoService {
     let client = await MongoService.getClient();
     await client.dropDatabase();
     for (let args of MongoService.indices) {
-      await MongoService.createIndex.apply(null, args);
-    }    
+      let col = client.collection(args[0]);
+      await col.createIndex.apply(col, args.slice(1));
+    }
   }
 
   static async createIndex(named: Named, config: { fields: string[], unique?: boolean, sparse?: boolean }) {
-    MongoService.indices.push([named, config]);
-
     let col = await MongoService.collection(named);
     let map = ObjectUtil.fromPairs(config.fields.map(x => [x, 1]) as [string, number][]);
+    MongoService.indices.push([col.collectionName, map, config]);
     let res = await col.createIndex(map, config)
     return;
   }
