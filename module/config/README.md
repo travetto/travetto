@@ -16,4 +16,7 @@ infrastructure pattern used:
   - Ready
     - This provides mechanisms to define the following:
        - Define application readiness based on promises
-       - Wait for application readiness to trigger certain actions post setup       
+       - Wait for application readiness to trigger certain actions post setup
+  - Bootstrap
+    - Supports initializing the application, and then requiring classes using a glob pattern 
+      to handle the common initialization process.
