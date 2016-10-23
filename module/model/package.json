@@ -7,7 +7,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.0.0",
+    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.0.0#v1.0.0",
     "mongoose": "^4.5.35",
     "@types/mongoose": "^4.5.35"
   }
