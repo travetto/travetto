@@ -6,22 +6,22 @@ export const NAMESPACE = 'encore';
 export const Storage = cls.createNamespace(NAMESPACE);
 
 export interface IStorage {
-	set(key:string, value:any);
-	get(key:string):any;
+	set(key: string, value: any): void;
+	get(key: string): any;
 }
 
 export class Context {
-	static storage:IStorage = Storage;
+	static storage: IStorage = Storage;
 
 	static clear() {
 		Context.storage.set(KEY, null);
 	}
 
-	static set<T>(c: T) {
+	static set(c: any) {
 		Context.storage.set(KEY, c);
 	}
-	static get<T>(): T {
-		let res = Context.storage.get(KEY) as T;
+	static get(): any {
+		let res = Context.storage.get(KEY) as any;
 		if (res === null || res === undefined) {
 			Context.set(res = {});
 		}
