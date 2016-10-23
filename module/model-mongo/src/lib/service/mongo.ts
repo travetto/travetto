@@ -6,6 +6,7 @@ import { ObjectUtil } from '@encore/base'
 export class MongoService {
 
   private static clientPromise: Promise<mongo.Db>;
+  private static indices: any[] = [];
 
   static translateQueryIds(query: Object & { _id?: any }) {
     if (query._id) {
@@ -28,12 +29,26 @@ export class MongoService {
     return MongoService.clientPromise;
   }
 
+  static getCollectionName(named: Named): string {
+    return named.collection || named.name;
+  }
+
   static async collection(named: Named): Promise<mongo.Collection> {
     let db = await MongoService.getClient();
-    return db.collection(named.collection || named.name);
+    return db.collection(MongoService.getCollectionName(named));
+  }
+
+  static async resetDatabse() {
+    let client = await MongoService.getClient();
+    await client.dropDatabase();
+    for (let args of MongoService.indices) {
+      await MongoService.createIndex.apply(null, args);
+    }    
   }
 
   static async createIndex(named: Named, config: { fields: string[], unique?: boolean, sparse?: boolean }) {
+    MongoService.indices.push([named, config]);
+
     let col = await MongoService.collection(named);
     let map = ObjectUtil.fromPairs(config.fields.map(x => [x, 1]) as [string, number][]);
     let res = await col.createIndex(map, config)
