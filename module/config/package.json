@@ -7,8 +7,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git#v1.0.0#v1.0.0",
-    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v1.0.0#v1.0.0",
+    "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git#v1.0.0#v1.0.0#v1.0.0",
+    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v1.0.0#v1.0.0#v1.0.0",
     "flat": "^2.0.0"
   }
 }
