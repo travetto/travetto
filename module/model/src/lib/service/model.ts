@@ -1,7 +1,7 @@
 import * as mongo from "mongodb";
 import { Model, BaseModel } from '../model';
 import { MongoService, QueryOptions, BulkState } from '@encore/mongo';
-import { ModelValidator } from './modelValidator';
+import { Validator } from './validator';
 import { getCls, convert } from '../util';
 import { ObjectUtil } from '@encore/util';
 
@@ -71,7 +71,7 @@ export class ModelService {
   static async save<T extends BaseModel>(o: T): Promise<T> {
     let cls = getCls(o);
     try {
-      o = await ModelValidator.validate(o.preSave());
+      o = await Validator.validate(o.preSave());
       return await MongoService.save<T>(cls, o);
     } catch (e) {
       throw ModelService.rewriteError(cls, e);
@@ -81,7 +81,7 @@ export class ModelService {
   static async saveAll<T extends BaseModel>(objs: T[]): Promise<T[]> {
     let cls = getCls(objs[0]);
     try {
-      objs = await ModelValidator.validateAll(objs.map(o => o.preSave()));
+      objs = await Validator.validateAll(objs.map(o => o.preSave()));
       return await MongoService.saveAll<T>(cls, objs);
     } catch (e) {
       throw ModelService.rewriteError(cls, e);
@@ -91,7 +91,7 @@ export class ModelService {
   static async update<T extends BaseModel>(o: T): Promise<T> {
     let cls = getCls(o);
     try {
-      o = await ModelValidator.validate(o.preSave())
+      o = await Validator.validate(o.preSave())
       return await MongoService.update<T>(cls, o);
     } catch (e) {
       throw ModelService.rewriteError(cls, e);
