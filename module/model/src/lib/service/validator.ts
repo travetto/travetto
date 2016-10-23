@@ -25,11 +25,11 @@ export class Validator {
 
   static async validateAllRaw<T>(obj: T[], schema: mg.Schema): Promise<T[]> {
     return await Promise.all<T>((obj || [])
-      .map((o, i) => Validator.validate(o, schema)));
+      .map((o, i) => Validator.validateRaw(o, schema)));
   }
 
   static async validate<T extends BaseModel>(o: T): Promise<T> {
-    return await Validator.validate(o, Validator.getSchema(getCls(o)));
+    return await Validator.validateRaw(o, Validator.getSchema(getCls(o)));
   }
 
   static async validateAll<T extends BaseModel>(obj: T[]): Promise<T[]> {
