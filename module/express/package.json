@@ -7,7 +7,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@encore/init": "git+ssh://git@git.eaiti.com/encore/init.git#v1.0.0#v1.0.0",
+    "@encore/init": "git+ssh://git@git.eaiti.com/encore/init.git#v1.0.0#v1.0.0#v1.0.0",
     "body-parser": "^1.15.0",
     "compression": "^1.6.1",
     "continuation-local-storage": "^3.1.6",
