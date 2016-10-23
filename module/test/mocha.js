@@ -2,7 +2,7 @@
 
 let fs = require('fs');
 
-let init = 'base/src/lib/require-ts.js';
+let init = 'bootstrap';
 let setup = [];
 let root = process.cwd();
 
