@@ -12,7 +12,7 @@ async function logout(req: Request, res: Response) {
 	res.clearCookie('connect.sid', { path: '/' });
 }
 
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next?: Function) => {
 	req.principal = req.user as any;
 	Context.get().user = req.user;
 	req.doLogout = () => logout(req, res);

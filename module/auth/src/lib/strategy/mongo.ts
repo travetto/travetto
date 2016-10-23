@@ -146,8 +146,8 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
   // used to deserialize the user
   passport.deserializeUser(async (id: string, done: (err: any, user?: T) => void) => {
     ModelService.getById(cls, id).then(
-      u => done(null, u),
-      err => done(err));
+      (u: T) => done(null, u),
+      (err: any) => done(err));
   });
 
   passport.use('local', new LocalStrategy({
