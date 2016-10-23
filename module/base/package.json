@@ -1,0 +1,14 @@
+{
+  "name": "@encore/bootstrap",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/lib/",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "source-map-support": "^0.4.0",
+    "typescript": "^2.0.2",
+    "@types/node": "^6.0.45"
+  }
+}
