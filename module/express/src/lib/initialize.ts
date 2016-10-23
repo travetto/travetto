@@ -1,4 +1,4 @@
-import { Application } from "express";
+import * as express from "express";
 import Config from './config';
 import { Ready } from '@encore/init';
 import { requestContext } from '@encore/context/src/lib/express';
@@ -8,7 +8,7 @@ let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
 let session = require('express-session');
 
-export const app: Application = express();
+export const app: express.Application = express();
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
