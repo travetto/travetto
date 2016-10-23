@@ -7,8 +7,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git",
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git",
+    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.0.0",
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.0.0",
     "connect-multiparty": "^1.2.5",
     "express-fileupload": "0.0.4",
     "mime": "^1.3.4",
