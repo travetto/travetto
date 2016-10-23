@@ -70,7 +70,7 @@ export class MongoService {
       cursor = cursor.skip(Math.trunc(options.offset) || 0);
     }
     let res = await cursor.toArray();
-    res.forEach(r => r._id = (r._id as any).toHexString())
+    res.forEach((r: any) => r._id = (r._id as any).toHexString())
     return res;
   }
 
