@@ -2,7 +2,7 @@ import * as nodemailer from "nodemailer";
 import * as marked from "marked";
 import * as Mustache from "mustache";
 import Config from '../config';
-import { nodeToPromise } from '@encore/base';
+import { nodeToPromise } from '@encore/util';
 
 let juice = require('juice');
 
