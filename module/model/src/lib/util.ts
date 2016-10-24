@@ -1,7 +1,7 @@
-import { Model, BaseModel } from './model';
+import { ModelCls, BaseModel } from './model';
 import { ObjectUtil } from '@encore/util';
 
-export function convert<T extends BaseModel>(cls: Model<T>, o: any): T {
+export function convert<T extends BaseModel>(cls: ModelCls<T>, o: any): T {
   if (cls.discriminiators) {
     return new cls.discriminiators[o._type](o);
   } else {
@@ -9,7 +9,7 @@ export function convert<T extends BaseModel>(cls: Model<T>, o: any): T {
   }
 }
 
-export function getCls<T extends BaseModel>(o: T): Model<T> {
+export function getCls<T extends BaseModel>(o: T): ModelCls<T> {
   return o.constructor as any;
 }
 

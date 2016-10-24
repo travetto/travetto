@@ -1,9 +1,8 @@
 import * as mongoose from "mongoose";
-import { Cls, FieldCfg, ClsLst } from '../model';
+import { Cls, FieldCfg, ClsLst, ModelCls } from '../model';
 import { MongoService } from '@encore/mongo';
 import { Ready } from '@encore/init';
 import { ObjectUtil } from '@encore/util';
-import { Model } from '../model';
 
 let schemas: { [name: string]: any } = {};
 let fields: { [name: string]: string[] } = {};
@@ -23,7 +22,7 @@ export function getFieldsForType(cls: Cls) {
 
 export function Discriminate(key: string) {
   return (a: any) => {
-    let parent = Object.getPrototypeOf(a) as Model<any>;
+    let parent = Object.getPrototypeOf(a) as ModelCls<any>;
     a.collection = parent.collection;
     a.discriminatorKey = key;
     parent.discriminiators = parent.discriminiators || {};
