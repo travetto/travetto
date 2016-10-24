@@ -14,3 +14,6 @@ This module provides three main areas of functionality:
       - Provides standard set of filters for express
       - Supports configuration on the `express` namespace
          - Also handles session management
+      - Provides a `bootstrap.js` that is a target point for standard app initialization.
+        Not required to be used, but can easily suffice as the main entry point for the
+        application.
