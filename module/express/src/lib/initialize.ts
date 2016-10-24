@@ -1,7 +1,7 @@
 import * as express from "express";
 import Config from './config';
 import { Ready } from '@encore/init';
-import { requestContext } from '@encore/context/src/ext/express';
+import { requestContext } from '@encore/context/ext/express';
 
 let compression = require('compression');
 let cookieParser = require('cookie-parser');
