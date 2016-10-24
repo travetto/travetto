@@ -1,12 +1,12 @@
 import * as mongoose from "mongoose";
 import { Named } from '@encore/mongo';
 
-export interface Model<T> {
+export interface ModelCls<T> {
   new (conf?: any): T;
   name: string;
   collection?: string;
   discriminatorKey?: string;
-  discriminiators?: { [key: string]: Model<T> }
+  discriminiators?: { [key: string]: ModelCls<T> }
   defaultSort?: string[] | string
   schemaOpts?: mongoose.SchemaOptions;
   unique?: string[][];

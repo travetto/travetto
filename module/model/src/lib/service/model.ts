@@ -1,5 +1,5 @@
 import * as mongo from "mongodb";
-import { Model, BaseModel } from '../model';
+import { ModelCls, BaseModel } from '../model';
 import { MongoService, QueryOptions, BulkState } from '@encore/mongo';
 import { Validator } from './validator';
 import { getCls, convert } from '../util';
@@ -7,11 +7,11 @@ import { ObjectUtil } from '@encore/util';
 
 export class ModelService {
 
-  static async collection<T extends BaseModel>(cls: Model<T>) {
+  static async collection<T extends BaseModel>(cls: ModelCls<T>) {
     return await MongoService.collection(cls);
   }
 
-  static async getByQuery<T extends BaseModel>(cls: Model<T>, query: Object = {}, options: QueryOptions = {}): Promise<T[]> {
+  static async getByQuery<T extends BaseModel>(cls: ModelCls<T>, query: Object = {}, options: QueryOptions = {}): Promise<T[]> {
     if (!options.sort && cls.defaultSort) {
       options.sort = cls.defaultSort;
     }
@@ -19,12 +19,12 @@ export class ModelService {
     return res.map((o: any) => convert(cls, o));
   }
 
-  static async getCountByQuery<T extends BaseModel>(cls: Model<T>, query: Object = {}, options: QueryOptions = {}): Promise<{ count: number }> {
+  static async getCountByQuery<T extends BaseModel>(cls: ModelCls<T>, query: Object = {}, options: QueryOptions = {}): Promise<{ count: number }> {
     let res = await MongoService.getCountByQuery(cls, query, options);
     return res;
   }
 
-  static async findOne<T extends BaseModel>(cls: Model<T>, query: Object, options: QueryOptions = {}, failOnMany: boolean = true): Promise<T> {
+  static async findOne<T extends BaseModel>(cls: ModelCls<T>, query: Object, options: QueryOptions = {}, failOnMany: boolean = true): Promise<T> {
     let res = await MongoService.findOne<T>(cls, query, options, failOnMany);
     return convert(cls, res);
   }
@@ -40,12 +40,12 @@ export class ModelService {
     throw new Error(`Too many already exist: ${res.length}`)
   }
 
-  static async getById<T extends BaseModel>(cls: Model<T>, id: string): Promise<T> {
+  static async getById<T extends BaseModel>(cls: ModelCls<T>, id: string): Promise<T> {
     let res = await MongoService.getById<T>(cls, id);
     return convert(cls, res);
   }
 
-  static rewriteError<T extends BaseModel>(cls: Model<T>, e: any) {
+  static rewriteError<T extends BaseModel>(cls: ModelCls<T>, e: any) {
     if (e.code === 11000) { //Handle duplicate errors
       e = {
         message: "Duplicate entry already exists",
@@ -56,7 +56,7 @@ export class ModelService {
     return e;
   }
 
-  static async deleteById<T extends BaseModel>(cls: Model<T>, id: string): Promise<number> {
+  static async deleteById<T extends BaseModel>(cls: ModelCls<T>, id: string): Promise<number> {
     try {
       return await MongoService.deleteById(cls, id);
     } catch (e) {
@@ -98,7 +98,7 @@ export class ModelService {
     }
   }
 
-  static async bulkProcess<T extends BaseModel>(named: Model<T>, state: { upsert?: T[], delete?: T[] }) {
+  static async bulkProcess<T extends BaseModel>(named: ModelCls<T>, state: { upsert?: T[], delete?: T[] }) {
     let keys = ['_id'];
     if (named.unique) {
       keys = (named.unique as string[][])[0];
