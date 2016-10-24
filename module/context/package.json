@@ -8,5 +8,9 @@
   "license": "ISC",
   "dependencies": {
     "continuation-local-storage": "^3.1.6"
+  },
+  "optionalDependencies": {
+    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git",
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git"
   }
 }

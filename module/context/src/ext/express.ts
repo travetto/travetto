@@ -1,4 +1,4 @@
-import { Context, Storage } from './context';
+import { Context, Storage } from '../lib/context';
 import { Request, Response, Express } from 'express';
 
 export function requestContext(req: Request, res: Response, next?: Function) {

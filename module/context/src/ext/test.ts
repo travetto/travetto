@@ -1,4 +1,4 @@
-import { Context } from './context';
+import { Context } from '../lib/context';
 import { beforeTest, afterTest } from '@encore/test';
 
 let store: { [key: string]: any } = {};
