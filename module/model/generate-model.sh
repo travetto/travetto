@@ -5,27 +5,30 @@ CORE=node_modules/@encore
 MOD=src/lib/model
 
 rf -rf build/
+FILES=`find $ROOT/model -name '*.ts' | grep -v '.*.d.ts'`
+DECLS="-d $CORE/mongo/$MOD/*.ts  -d $CORE/model/$MOD/*.ts"
 
-COMPILE="tsc --lib es2015,es2016,dom -m es2015 --outDir build/ --experimentalDecorators"
-DECLS=$(find $ROOT/model -name '*.ts' |\
-  grep -v 'typings.d.ts' |\
-  grep -v 'index.ts' |\
-  grep -v 'index.d.ts')
-  
-for f in $DECLS; do
-  COMPILE="$COMPILE --declaration $f"
+for f in $FILES; do
+  DECLS="$DECLS -d $f"
 done
 
-echo $COMPILE
+COMPILE="tsc  
+  --lib es2015,es2016,dom  
+  -m es2015 
+  --outDir build/  
+  --experimentalDecorators  
+  --preserveConstEnums 
+  $DECLS"
 
-$COMPILE --declaration $CORE/mongo/$MOD/*.ts  --declaration $CORE/model/$MOD/*.ts
+$COMPILE 
 
-DECLS=`find build/ -name '*.d.ts' | grep 'model' `
+DECLS=`find build/ -name '*.d.ts' | grep 'model' | grep -v '@encore/model/src/lib/model/types'`
 
 cat $DECLS |\
   grep -v import |\
   grep -v \(\) |\
   grep -v static |\
+  grep -v 'reference types' |\
   tr '\t' ' ' |\
   sed \
     -e 's/export \*.*$//' \
