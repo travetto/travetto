@@ -12,5 +12,8 @@
     "@types/passport-local": "^1.0.29",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0"
+  },
+  "optionalDependencies": {
+    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git"
   }
 }
