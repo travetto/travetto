@@ -10,5 +10,8 @@
     "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git",
     "mongoose": "^4.5.35",
     "@types/mongoose": "^4.5.35"
+  },
+  "optionalDependencies": {
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git"
   }
 }

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { BaseModel } from '../model';
-import { Validator } from '../service';
+import { BaseModel } from '../lib/model';
+import { Validator } from '../lib/service';
 import { ObjectUtil } from "@encore/util";
 
 import { filterAdder } from '@encore/express';
