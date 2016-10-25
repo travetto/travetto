@@ -62,7 +62,7 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
         return user;
       }
     } catch (e) {
-      throw { message: "User is not found", statusCode: 404 };
+      throw { message: "User is not found", statusCode: 500 };
     }
   }
 
@@ -155,11 +155,20 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
     usernameField: config.usernameField,
     passwordField: config.passwordField,
     passReqToCallback: true // allows us to pass back the entire request to the callback
-  }, async (req, email, password, done) => {
+  }, async function (req, email, password, done) {
     try {
-      done(null, await login(email, password));
+      let res = await login(email, password);
+      if (req.passportOptions.successRedirect) {
+        this.success(res);
+      } else {
+        done(null, res);
+      }
     } catch (e) {
-      done(e);
+      if (req.passportOptions.failureRedirect) {
+        this.fail(e);
+      } else {
+        done(e);
+      }
     }
   }));
 

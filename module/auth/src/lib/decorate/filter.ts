@@ -4,8 +4,12 @@ import { filterAdder } from '@encore/express';
 import * as passport from "passport";
 
 export function Authenticate(provider: string, failTo?: string) {
-  let handler = passport.authenticate(provider, { failureRedirect: failTo })
-  let fn = (req: Request, res: Response, next: NextFunction): Promise<any> => nodeToPromise(null, handler, req, res);
+  let passportOptions = { failureRedirect: failTo };
+  let handler = passport.authenticate(provider, passportOptions)
+  let fn = (req: Request, res: Response, next: NextFunction): Promise<any> => {
+    req.passportOptions = passportOptions;
+    return nodeToPromise(null, handler, req, res);
+  }
   return filterAdder(fn);
 }
 
