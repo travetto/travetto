@@ -1,19 +1,19 @@
 {
   "name": "@encore/auth",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "",
   "main": "src/lib/",
   "scripts": {},
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git",
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x",
     "@types/passport": "^0.2.30",
     "@types/passport-local": "^1.0.29",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0"
   },
   "optionalDependencies": {
-    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git"
+    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x"
   }
 }
