@@ -1,6 +1,6 @@
 {
   "name": "@encore/context",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "",
   "main": "src/lib/",
   "scripts": {},
@@ -10,7 +10,7 @@
     "continuation-local-storage": "^3.1.6"
   },
   "optionalDependencies": {
-    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git",
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git"
+    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v1.x.x",
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x"
   }
 }
