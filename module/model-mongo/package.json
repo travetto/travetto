@@ -1,13 +1,13 @@
 {
   "name": "@encore/mongo",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "",
   "main": "src/lib/",
   "scripts": {},
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@encore/init": "git+ssh://git@git.eaiti.com/encore/init.git",
+    "@encore/init": "git+ssh://git@git.eaiti.com/encore/init.git#v1.x.x",
     "mongodb": "2.2.10",
     "@types/mongodb": "2.1.33"
   }
