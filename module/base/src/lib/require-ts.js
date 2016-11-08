@@ -1,17 +1,17 @@
-var sourcemap = require('source-map-support')
-var fs = require('fs');
-var path = require('path');
-var ts = require('typescript');
-var cwd = process.cwd();
-var tsOptions = getOptions(path.join(cwd, 'tsconfig.json'));
+let sourcemap = require('source-map-support')
+let fs = require('fs');
+let path = require('path');
+let ts = require('typescript');
+let cwd = process.cwd();
+let tsOptions = getOptions(path.join(cwd, 'tsconfig.json'));
 
-var dataUriRe = /data:application\/json[^,]+base64,/
-var sourceMaps = {};
+let dataUriRe = /data:application\/json[^,]+base64,/
+let sourceMaps = {};
 
-sourcemap.install({ retrieveSourceMap : function(path) { return sourceMaps[path]; }});
+sourcemap.install({ retrieveSourceMap: (path) => sourceMaps[path] });
 
 function getOptions(tsconfigFile) {
-  var o = require(tsconfigFile).compilerOptions;
+  let o = require(tsconfigFile).compilerOptions;
   o.target = ts.ScriptTarget[o.target.toUpperCase()];
   o.module = ts.ModuleKind[o.module == 'commonjs' ? 'CommonJS' : o.module.toUpperCase()];
   o.inlineSourceMap = o.sourceMap;
@@ -19,20 +19,32 @@ function getOptions(tsconfigFile) {
 }
 
 //Wrap sourcemap tool
-var prep = Error.prepareStackTrace;
-Error.prepareStackTrace = function(a, stack) {  
-  var res = prep(a, stack);
-  return res.split('\n').filter(function(l) {
-    return l.indexOf('node_modules') > 0 || (l.indexOf('(native)') < 0 && (l.indexOf(cwd)<0 || l.indexOf('.js')<0));
-  }).join('\n')
+let prep = Error.prepareStackTrace;
+Error.prepareStackTrace = function (a, stack) {
+  let res = prep(a, stack);
+  return res
+    .split('\n')
+    .filter(l =>
+      l.indexOf('require-ts.js') < 0 &&
+      l.indexOf('source-map-support.js') < 0 &&
+      (l.indexOf('node_modules') > 0 ||
+        (l.indexOf('(native)') < 0 && (l.indexOf(cwd) < 0 || l.indexOf('.js') < 0))))
+    .join('\n')
+}
+
+//TODO: Remove once mongoose fixes it's crap
+let cap = Error.captureStackTrace;
+Error.captureStackTrace = function (a) {
+  a.stack = new Error().stack;
 }
 
 require.extensions['.ts'] = function load(m, tsf) {
-  var jsf = tsf.replace(/\.ts$/, '.js');
-  var parts = tsf.split('/');
-  var name = parts.pop();
-  var folder = parts.pop();
-  var out = ts.transpile(fs.readFileSync(tsf, 'utf-8'), tsOptions, `${folder}/${name}`);
-  sourceMaps[jsf] = { content: out, url : tsf, map: new Buffer(out.split(dataUriRe)[1], "base64").toString()}
-  return m._compile(out, jsf);
+  let jsf = tsf.replace(/\.ts$/, '.js');
+  let parts = tsf.split('/');
+  let name = parts.pop();
+  let folder = parts.pop();
+  let content = ts.transpile(fs.readFileSync(tsf, 'utf-8'), tsOptions, `${folder}/${name}`);
+  let map = new Buffer(content.split(dataUriRe)[1], "base64").toString()
+  sourceMaps[jsf] = { content, url: tsf, map };
+  return m._compile(content, jsf);
 };
