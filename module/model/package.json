@@ -1,17 +1,17 @@
 {
-  "name": "@encore/model",
-  "version": "1.1.15",
-  "description": "",
-  "main": "src/lib/",
-  "scripts": {},
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x",
-    "mongoose": "^4.5.35",
-    "@types/mongoose": "^4.5.35"
-  },
+  "name": "@encore/model", 
+  "license": "ISC", 
+  "author": "", 
   "optionalDependencies": {
     "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x"
-  }
+  }, 
+  "version": "1.1.16", 
+  "dependencies": {
+    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x", 
+    "@types/mongoose": "^4.5.35", 
+    "mongoose": "^4.5.35"
+  }, 
+  "scripts": {}, 
+  "main": "src/lib/", 
+  "description": ""
 }
