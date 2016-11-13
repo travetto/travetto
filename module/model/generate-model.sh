@@ -4,7 +4,7 @@ ROOT='src/app';
 CORE=node_modules/@encore
 MOD=src/lib/model
 
-rf -rf build/
+rm -rf build/
 FILES=`find $ROOT/model -name '*.ts' | grep -v '.*.d.ts'`
 DECLS="-d $CORE/mongo/$MOD/*.ts  -d $CORE/model/$MOD/*.ts"
 
