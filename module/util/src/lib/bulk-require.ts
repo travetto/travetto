@@ -7,5 +7,5 @@ export default function (pattern: string, base: string | null = null) {
   return glob.sync(search)
     .map((f: string) => path.resolve(f))
     //.map((x: string) => { console.log(x); return x; })
-    .map(require)
+    .map(require);
 }
