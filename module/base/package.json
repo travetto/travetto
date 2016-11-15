@@ -1,14 +1,14 @@
 {
-  "name": "@encore/bootstrap",
-  "version": "1.1.16",
-  "description": "",
-  "main": "src/lib/",
-  "scripts": {},
-  "author": "",
-  "license": "ISC",
+  "name": "@encore/bootstrap", 
+  "license": "ISC", 
+  "author": "", 
+  "version": "1.1.17", 
   "dependencies": {
-    "source-map-support": "^0.4.0",
-    "typescript": "^2.0.9",
-    "@types/node": "^6.0.45"
-  }
+    "@types/node": "^6.0.45", 
+    "typescript": "^2.0.9", 
+    "source-map-support": "^0.4.0"
+  }, 
+  "scripts": {}, 
+  "main": "src/lib/", 
+  "description": ""
 }
