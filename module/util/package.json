@@ -1,13 +1,13 @@
 {
-  "name": "@encore/util", 
+  "version": "1.1.17", 
   "license": "ISC", 
   "author": "", 
-  "version": "1.1.16", 
+  "description": "", 
   "dependencies": {
     "glob": "^7.0.0", 
     "lodash": "^4.6.1"
   }, 
   "scripts": {}, 
   "main": "src/lib/", 
-  "description": ""
+  "name": "@encore/util"
 }
