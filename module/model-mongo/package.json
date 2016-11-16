@@ -8,7 +8,7 @@
   "license": "ISC",
   "dependencies": {
     "@encore/init": "git+ssh://git@git.eaiti.com/encore/init.git#v1.x.x",
-    "mongodb": "2.2.10",
-    "@types/mongodb": "2.1.33"
+    "@types/mongodb": "2.1.33",
+    "mongodb": "2.2.10"
   }
 }

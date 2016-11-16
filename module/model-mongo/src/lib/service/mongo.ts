@@ -1,7 +1,7 @@
 import * as mongo from "mongodb";
 import Config from '../config';
 import { Named, Base, BulkState, BulkResponse, QueryOptions } from '../model';
-import { ObjectUtil } from '@encore/util'
+import { ObjectUtil } from '@encore/util';
 
 export class MongoService {
 
@@ -102,6 +102,14 @@ export class MongoService {
     return res.deletedCount || 0;
   }
 
+  static async deleteByQuery(named: Named, query: Object & { _id?: any } = {}): Promise<number> {
+    query = MongoService.translateQueryIds(query);
+
+    let col = await MongoService.collection(named);
+    let res = await col.deleteMany(query);
+    return res.deletedCount || 0;
+  }
+
   static async save<T extends Base>(named: Named, o: T): Promise<T> {
     let col = await MongoService.collection(named);
     delete o._id;
@@ -125,6 +133,12 @@ export class MongoService {
     let obj = await col.replaceOne({ _id: o._id }, o);
     o._id = (o._id as any).toHexString();
     return o;
+  }
+
+  static async partialUpdate<T extends Base>(named: Named, id: string, data: any): Promise<T> {
+    let col = await MongoService.collection(named);
+    let obj = await col.updateOne({ _id: new mongo.ObjectID(id) }, { $set: data });
+    return await MongoService.getById<T>(named, id);
   }
 
   static async bulkProcess<T extends Base>(named: Named, state: BulkState<T>) {
