@@ -1,6 +1,6 @@
 import * as mg from "mongoose";
 import { BaseModel } from '../model';
-import { ModelCls, getModelConfig } from './registry';
+import { ModelCls, getModelConfig, DEFAULT_VIEW } from './registry';
 import { nodeToPromise } from '@encore/util';
 import { getCls } from '../util';
 
@@ -11,12 +11,13 @@ export class Validator {
 
   static schemas: { [cls: string]: mg.Schema } = {};
 
-  static getSchema<T extends BaseModel>(cls: ModelCls<T>) {
-    if (!Validator.schemas[cls.name]) {
+  static getSchema<T extends BaseModel>(cls: ModelCls<T>, view: string = DEFAULT_VIEW) {
+    const key = `${cls.name}::${view}`;
+    if (!Validator.schemas[key]) {
       let config = getModelConfig(cls);
-      Validator.schemas[cls.name] = Validator.getSchemaRaw(config.schema, config.schemaOpts);
+      Validator.schemas[key] = Validator.getSchemaRaw(config.schemas[view], config.schemaOpts);
     }
-    return Validator.schemas[cls.name];
+    return Validator.schemas[key];
   }
 
   static getSchemaRaw(schema: any, opts: any = {}): mg.Schema {
@@ -34,12 +35,12 @@ export class Validator {
       .map((o, i) => Validator.validateRaw(o, schema)));
   }
 
-  static async validate<T extends BaseModel>(o: T): Promise<T> {
-    return await Validator.validateRaw(o, Validator.getSchema(getCls(o)));
+  static async validate<T extends BaseModel>(o: T, view?: string): Promise<T> {
+    return await Validator.validateRaw(o, Validator.getSchema(getCls(o), view));
   }
 
-  static async validateAll<T extends BaseModel>(obj: T[]): Promise<T[]> {
+  static async validateAll<T extends BaseModel>(obj: T[], view?: string): Promise<T[]> {
     return await Promise.all<T>((obj || [])
-      .map((o, i) => Validator.validate(o)));
+      .map((o, i) => Validator.validate(o, view)));
   }
 }

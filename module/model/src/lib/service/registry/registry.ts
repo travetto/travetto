@@ -4,6 +4,8 @@ import * as mongoose from "mongoose";
 const schemas: { [name: string]: any } = {};
 const fields: { [name: string]: string[] } = {};
 const models: { [name: string]: ModelConfig } = {}
+const views: { [name: string]: string[] } = {}
+export const DEFAULT_VIEW = 'all';
 
 export function getAllProtoypeNames(cls: Cls) {
   const out: string[] = [];
@@ -18,8 +20,13 @@ export function getFieldsForType(cls: Cls) {
   return cls.name ? fields[cls.name] : null;
 }
 
-export function registerFieldFacet(target: any, prop: string, config: any) {
-  const name = target.constructor.name;
+export function registerFieldFacet(target: any, prop: string, config: any, view: string = DEFAULT_VIEW) {
+  const simpleName = target.constructor.name;
+  const name = `${simpleName}::${view}`;
+
+  if (!views[simpleName]) {
+    views[simpleName] = [];
+  }
   if (!schemas[name]) {
     fields[name] = [];
     schemas[name] = {};
@@ -28,18 +35,26 @@ export function registerFieldFacet(target: any, prop: string, config: any) {
     fields[name].push(prop);
     schemas[name][prop] = {};
   }
+
+  views[simpleName].push(view);
+
   Object.assign(schemas[name][prop], config);
+  if (view !== DEFAULT_VIEW) {
+    let def = `${target.constructor.name}::${DEFAULT_VIEW}`;
+    if (!schemas[def]) registerFieldFacet(target, prop, {});
+    schemas[name][prop] = schemas[def][prop];
+  }
   return target;
 }
 
-export function getSchema(name: string) {
-  return schemas[name];
+export function getSchema(name: string, view: string = DEFAULT_VIEW) {
+  return schemas[`${name}::${view}`];
 }
 
 export function getModelConfig<T>(cls: ModelCls<T>) {
   if (!models[cls.name]) {
     models[cls.name] = {
-      schema: {},
+      schemas: {},
       fields: [],
       indices: []
     };
@@ -57,11 +72,21 @@ export function registerModelFacet<T>(cls: ModelCls<T>, data: any) {
 export function registerModel<T>(cls: ModelCls<T>, opts: mongoose.SchemaOptions = {}) {
   let names = getAllProtoypeNames(cls);
   let config = getModelConfig(cls);
+  let finalSchemas: { [key: string]: { [key: string]: any } } = {};
+
+  let allViews = names.reduce((acc: string[], x: string) =>
+    acc.concat(
+      views[x].filter(y => acc.indexOf(y) < 0)), []);
+
+  for (let view of allViews) {
+    finalSchemas[view] = Object.assign({}, ...names.map(x => schemas[`${x}::${view}`]));
+  }
+
   registerModelFacet(cls, {
     collection: config.collection || cls.name,
     schemaOpts: opts,
     fields: ([] as string[]).concat(...names.map(x => fields[x])),
-    schema: Object.assign({}, ...names.map(x => schemas[x]))
+    schemas: finalSchemas
   });
   return cls;
 }

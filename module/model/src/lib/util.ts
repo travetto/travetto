@@ -27,8 +27,8 @@ export function bindData(obj: any, data?: any) {
       obj[k] = data[k];
     }
   } else if (!!data) {
-    if (cons.fields) {
-      cons.fields.forEach((f: string) => {
+    if (conf.fields) {
+      conf.fields.forEach((f: string) => {
         if (data[f] !== undefined) {
           obj[f] = data[f];
         }

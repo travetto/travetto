@@ -24,10 +24,6 @@ export function Field(type: ClsLst) {
   };
 }
 
-export function View() {
-
-}
-
 export function Required() {
   return (f: any, prop: string) => {
     registerFieldFacet(f, prop, { required: true })
@@ -38,6 +34,14 @@ export function Enum(values: string[] | any) {
   return (f: any, prop: string) => {
     registerFieldFacet(f, prop, {
       enum: Array.isArray(values) ? values : enumKeys(values)
+    });
+  }
+}
+
+export function View(...names: string[]) {
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, {
+
     });
   }
 }
