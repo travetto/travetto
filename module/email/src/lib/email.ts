@@ -1,6 +1,6 @@
-import * as nodemailer from "nodemailer";
-import * as marked from "marked";
-import * as Mustache from "mustache";
+import * as nodemailer from 'nodemailer';
+import * as marked from 'marked';
+import * as Mustache from 'mustache';
 import Config from './config';
 import { nodeToPromise } from '@encore/util';
 
@@ -17,7 +17,7 @@ marked.setOptions({
   smartypants: false
 });
 
-//Mock mail out
+// Mock mail out
 if (!Config.transport) {
   let mockTransport = require('nodemailer-mock-transport');
   Config.transport = mockTransport();
@@ -29,7 +29,7 @@ if (!Config.transport) {
 }
 
 export class EmailService {
-  static transport = nodemailer.createTransport(Config.transport)
+  static transport = nodemailer.createTransport(Config.transport);
 
   static template(template: string, context: any): string {
     let templ = Mustache.render(template, context);
