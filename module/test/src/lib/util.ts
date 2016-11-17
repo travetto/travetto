@@ -7,10 +7,10 @@ let _readyPromise: Promise<any>;
 
 export function declareSuite(fn: Function) {
   return function () {
-    for (let fn of _beforeSuite) before(fn);
-    for (let fn of _beforeTest) beforeEach(fn);
-    for (let fn of _afterTest) afterEach(fn);
-    for (let fn of _afterSuite) after(fn);
+    for (let f of _beforeSuite) { before(f); }
+    for (let f of _beforeTest) { beforeEach(f); }
+    for (let f of _afterTest) { afterEach(f); }
+    for (let f of _afterSuite) { after(f); }
     fn.call(this);
   };
 }
@@ -21,12 +21,12 @@ export function timeout(delay: number, fn: Function) {
     return function (done: Function) {
       this.timeout(delay);
       return fn.call(this, done);
-    }
+    };
   } else {
     return function () {
       this.timeout(delay);
       return fn.call(this);
-    }
+    };
   }
 }
 

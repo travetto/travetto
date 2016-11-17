@@ -28,10 +28,10 @@ module.exports = function (suite: any) {
       (title: string, fn: Function) => cmn.suite.only({ title, file, fn: declareSuite(fn) });
 
     ctx.it = ctx.specify = (title: string, fn: Function | null) => {
-      let suite = suites[0];
-      let test = new Test(title, suite.isPending() ? null : fn);
+      let singleSuite = suites[0];
+      let test = new Test(title, singleSuite.isPending() ? null : fn);
       test.file = file;
-      suite.addTest(test);
+      singleSuite.addTest(test);
       return test;
     };
 
