@@ -1,5 +1,6 @@
 import * as mg from "mongoose";
-import { BaseModel, ModelCls } from '../model';
+import { BaseModel } from '../model';
+import { ModelCls, getModelConfig } from './registry';
 import { nodeToPromise } from '@encore/util';
 import { getCls } from '../util';
 
@@ -12,7 +13,8 @@ export class Validator {
 
   static getSchema<T extends BaseModel>(cls: ModelCls<T>) {
     if (!Validator.schemas[cls.name]) {
-      Validator.schemas[cls.name] = Validator.getSchemaRaw(cls.schema, cls.schemaOpts);
+      let config = getModelConfig(cls);
+      Validator.schemas[cls.name] = Validator.getSchemaRaw(config.schema, config.schemaOpts);
     }
     return Validator.schemas[cls.name];
   }

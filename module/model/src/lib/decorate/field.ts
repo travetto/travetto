@@ -1,51 +1,34 @@
 import * as mongoose from "mongoose";
-import { Cls, FieldCfg, ClsLst, ModelCls } from '../model';
+import { Cls, FieldCfg, ClsLst, registerFieldFacet, getSchema } from '../service/registry';
 import { ObjectUtil } from '@encore/util';
-import { fields, schemas } from './registry';
 
-function configObjectCreator(config: FieldCfg | ClsLst) {
-  let configObject: FieldCfg = config as any;
+function buildFieldConfig(type: ClsLst) {
+  const isArray = Array.isArray(type);
+  const fieldConf: FieldCfg = { type };
+  const fieldType: Cls = Array.isArray(type) ? type[0] : type;
 
-  if (!ObjectUtil.isPlainObject(config)) {
-    configObject = { type: config as Cls };
+  //Get schema if exists
+  const schema = getSchema(fieldType.name || '');
+
+  if (schema) {
+    fieldConf.type = isArray ? [schema] : schema;
   }
 
-  let fieldType: any = configObject.type;
-  let isArray = Array.isArray(fieldType)
-
-  if (isArray) {
-    fieldType = fieldType[0];
-  }
-
-  let isNative = fieldType.toString().indexOf("[native code]") > 0;
-
-  return () => {
-    if (!isNative) {
-      let schema = fieldType.schema
-      if (schema) {
-        configObject.type = isArray ? [schema] : schema;
-      }
-    }
-
-    return configObject;
-  }
+  return fieldConf;
 }
 
-export function Field(config: FieldCfg | ClsLst) {
+export function Field(type: ClsLst) {
+  return (f: any, prop: string) => registerFieldFacet(f, prop, buildFieldConfig(type));
+}
 
-  let creator = config ? configObjectCreator(config) : null;
+export function View() {
 
-  return (target: any, propertyKey: string) => {
-    let name = target.constructor.name;
-    (fields[name] = fields[name] || []).push(propertyKey);
+}
 
-    if (creator) {
-      let val = creator();
-      let tname = (Array.isArray(val.type) ? val.type[0].name : val.type.name) || '';
-      if (schemas[tname]) {
-        val = !Array.isArray(val.type) ? schemas[tname] : [schemas[tname]];
-      }
-      (schemas[name] = schemas[name] || {})[propertyKey] = val;
-    }
-  };
+export function Required() {
+  return (f: any, prop: string) => registerFieldFacet(f, prop, { required: true });
+}
+
+export function Enum(values: string[]) {
+  return (f: any, prop: string) => registerFieldFacet(f, prop, { enum: values });
 }

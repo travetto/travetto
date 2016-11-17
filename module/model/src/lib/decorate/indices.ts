@@ -1,20 +1,20 @@
 import { MongoService } from '@encore/mongo';
 import { Ready } from '@encore/init';
+import { getModelConfig, IndexConfig } from '../service/registry';
 
-export function Index(config: { fields: string[], unique?: boolean, sparse?: boolean }) {
-  return (a: any) => {
-    Ready.waitFor(MongoService.createIndex(a, config)
-      .then((x: any) => console.log(`Created index ${config}`)))
-    return a;
-  }
+function createIndex(target: any, config: IndexConfig) {
+  getModelConfig(target).indices.push(config);
+
+  Ready.waitFor(MongoService.createIndex(target, config)
+    .then((x: any) => console.log(`Created ${config.unique ? 'unique' : ''} index ${config}`)))
+
+  return target;
+}
+
+export function Index(config: IndexConfig) {
+  return (target: any) => createIndex(target, config)
 }
 
 export function Unique(...fields: string[]) {
-  return (target: any) => {
-    target.unique = target.unique || [];
-    target.unique.push(fields);
-    Ready.waitFor(MongoService.createIndex(target, { fields, unique: true })
-      .then((x: any) => console.log(`Created unique index ${fields}`)))
-    return target;
-  }
+  return (target: any) => createIndex(target, { fields, unique: true })
 }

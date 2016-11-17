@@ -1,28 +1,8 @@
-import { Field } from '../decorate';
+import { Field, getDiscriminator } from '../decorate';
+import { bindData } from '../util';
 import { Base } from '@encore/mongo';
 
 export abstract class BaseModel implements Base {
-
-  static bindData(obj: any, data?: any) {
-    let cons = obj.constructor as any;
-    if (cons.schemaOpts && cons.schemaOpts.strict === false) {
-      for (var k in data) {
-        obj[k] = data[k];
-      }
-    } else if (!!data) {
-      if (cons.fields) {
-        cons.fields.forEach((f: string) => {
-          if (data[f] !== undefined) {
-            obj[f] = data[f];
-          }
-        });
-      } else {
-        for (let k of Object.keys(data)) {
-          obj[k] = data[k];
-        }
-      }
-    }
-  }
 
   @Field(String)
   _id: string;
@@ -31,7 +11,7 @@ export abstract class BaseModel implements Base {
   _version: string;
 
   @Field(String)
-  _type: string;
+  _type: string | undefined;
 
   @Field(Date)
   createdDate: Date;
@@ -40,8 +20,8 @@ export abstract class BaseModel implements Base {
   updatedDate: Date;
 
   constructor(data?: Object) {
-    BaseModel.bindData(this, data);
-    this._type = (this.constructor as any)['discriminatorKey'];
+    bindData(this, data);
+    this._type = getDiscriminator(this.constructor);
   }
 
   preSave(): this {

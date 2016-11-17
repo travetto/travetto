@@ -1,5 +1,6 @@
 import * as mongo from "mongodb";
-import { ModelCls, BaseModel } from '../model';
+import { BaseModel } from '../model';
+import { ModelCls, getModelConfig } from './registry';
 import { MongoService, QueryOptions, BulkState } from '@encore/mongo';
 import { Validator } from './validator';
 import { getCls, convert } from '../util';
@@ -12,8 +13,9 @@ export class ModelService {
   }
 
   static async getByQuery<T extends BaseModel>(cls: ModelCls<T>, query: Object = {}, options: QueryOptions = {}): Promise<T[]> {
-    if (!options.sort && cls.defaultSort) {
-      options.sort = cls.defaultSort;
+    const config = getModelConfig(cls);
+    if (!options.sort && config.defaultSort) {
+      options.sort = config.defaultSort;
     }
     let res = await MongoService.getByQuery<T>(cls, query, options);
     return res.map((o: any) => convert(cls, o));
@@ -68,6 +70,10 @@ export class ModelService {
     return await ModelService.deleteById(getCls(o), o._id);
   }
 
+  static async deleteByQuery<T extends BaseModel>(cls: ModelCls<T>, query: Object & { _id?: any } = {}): Promise<number> {
+    return await MongoService.deleteByQuery(cls, query);
+  }
+
   static async save<T extends BaseModel>(o: T): Promise<T> {
     let cls = getCls(o);
     try {
@@ -100,8 +106,9 @@ export class ModelService {
 
   static async bulkProcess<T extends BaseModel>(named: ModelCls<T>, state: { upsert?: T[], delete?: T[] }) {
     let keys = ['_id'];
-    if (named.unique) {
-      keys = (named.unique as string[][])[0];
+    let unique = getModelConfig(named).indices.find(x => !!x.unique);
+    if (unique) {
+      keys = unique.fields;
     }
 
     try {
