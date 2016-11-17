@@ -1,14 +1,14 @@
 {
-  "name": "@encore/init",
-  "version": "1.1.15",
-  "description": "",
-  "main": "src/lib/",
-  "scripts": {},
-  "author": "",
-  "license": "ISC",
+  "name": "@encore/init", 
+  "license": "ISC", 
+  "author": "", 
+  "version": "1.1.16", 
   "dependencies": {
-    "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git#v1.x.x",
-    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v1.x.x",
-    "flat": "^2.0.0"
-  }
+    "flat": "^2.0.0", 
+    "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git#v1.x.x", 
+    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v1.x.x"
+  }, 
+  "scripts": {}, 
+  "main": "src/lib/", 
+  "description": ""
 }
