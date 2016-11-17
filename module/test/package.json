@@ -1,21 +1,21 @@
 {
-  "name": "@encore/test",
-  "version": "1.1.15",
-  "description": "",
-  "main": "src/lib/",
+  "name": "@encore/test", 
+  "license": "ISC", 
+  "author": "", 
+  "version": "1.1.16", 
+  "dependencies": {
+    "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git#v1.x.x", 
+    "@types/lodash": "^4.14.34", 
+    "mocha-bamboo-reporter": "^1.1.0", 
+    "chai": "^3.5.0", 
+    "mocha": "^3.1.2", 
+    "@types/mocha": "^2.2.32", 
+    "@types/chai": "^3.4.32", 
+    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v1.x.x"
+  }, 
   "scripts": {
     "test": "./exec.sh"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git#v1.x.x",
-    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v1.x.x",
-    "@types/chai": "^3.4.32",
-    "@types/lodash": "^4.14.34",
-    "@types/mocha": "^2.2.32",
-    "chai": "^3.5.0",
-    "mocha": "^3.1.2",
-    "mocha-bamboo-reporter": "^1.1.0"
-  }
+  }, 
+  "main": "src/lib/", 
+  "description": ""
 }
