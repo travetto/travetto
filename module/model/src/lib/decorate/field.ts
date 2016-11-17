@@ -40,8 +40,8 @@ export function Enum(values: string[] | any) {
 
 export function View(...names: string[]) {
   return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, {
-
-    });
+    for (let name of names) {
+      registerFieldFacet(f, prop, {}, name);
+    }
   }
 }
