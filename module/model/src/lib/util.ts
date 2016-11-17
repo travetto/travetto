@@ -2,9 +2,9 @@ import { BaseModel } from './model';
 import { ModelCls, getModelConfig } from './service/registry';
 import { ObjectUtil } from '@encore/util';
 
-export function convert<T extends BaseModel>(cls: ModelCls<T>, o: any): T {
+export function convert<T extends BaseModel>(cls: ModelCls<T>, o: T): T {
   let config = getModelConfig(cls);
-  if (config.discriminated) {
+  if (config.discriminated && !!o._type) {
     return new config.discriminated[o._type](o);
   } else {
     return new cls(o);
