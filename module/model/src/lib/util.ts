@@ -1,10 +1,10 @@
 import { BaseModel } from './model';
-import { ModelCls, getModelConfig, DEFAULT_VIEW } from './service/registry';
+import { ModelCls, models, getModelConfig, DEFAULT_VIEW } from './service/registry';
 import { ObjectUtil } from '@encore/util';
 
 export function convert<T extends BaseModel>(cls: ModelCls<T>, o: T): T {
-  let config = getModelConfig(cls);
-  if (config.discriminated && !!o._type) {
+  let config = models[cls.name];
+  if (config && config.discriminated && !!o._type) {
     return new config.discriminated[o._type](o);
   } else {
     return new cls(o);
@@ -21,9 +21,9 @@ export function enumKeys(c: any): string[] {
 
 export function bindData(obj: any, data?: any, view: string = DEFAULT_VIEW) {
   let cons = obj.constructor as any;
-  let conf = getModelConfig(cons);
+  let conf = models[cons.name];
 
-  if (view === DEFAULT_VIEW && conf.schemaOpts && conf.schemaOpts.strict === false) {
+  if (!conf || (view === DEFAULT_VIEW && conf.schemaOpts && conf.schemaOpts.strict === false)) {
     for (var k in data) {
       obj[k] = data[k];
     }

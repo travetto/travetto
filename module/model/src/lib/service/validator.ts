@@ -1,6 +1,6 @@
 import * as mg from "mongoose";
 import { BaseModel } from '../model';
-import { ModelCls, getModelConfig, DEFAULT_VIEW } from './registry';
+import { ModelCls, models, DEFAULT_VIEW } from './registry';
 import { nodeToPromise } from '@encore/util';
 import { getCls } from '../util';
 
@@ -14,8 +14,8 @@ export class Validator {
   static getSchema<T extends BaseModel>(cls: ModelCls<T>, view: string = DEFAULT_VIEW) {
     const key = `${cls.name}::${view}`;
     if (!Validator.schemas[key]) {
-      let config = getModelConfig(cls);
-      if (!config.views[view]) {
+      let config = models[cls.name];
+      if (!config || !config.views[view]) {
         throw new Error(`Unknown view found: ${view}`);
       }
       Validator.schemas[key] = Validator.getSchemaRaw(config.views[view].schema, config.schemaOpts);

@@ -1,7 +1,7 @@
 import { Cls, ModelCls, ModelConfig } from './types';
 import * as mongoose from "mongoose";
 
-const models: { [name: string]: ModelConfig } = {}
+export const models: { [name: string]: ModelConfig } = {}
 export const DEFAULT_VIEW = 'all';
 
 export function getAllProtoypeNames(cls: Cls) {
