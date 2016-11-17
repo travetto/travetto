@@ -29,6 +29,9 @@ export function bindData(obj: any, data?: any, view: string = DEFAULT_VIEW) {
     }
   } else if (!!data) {
     let viewConf = conf.views[view];
+    if (!viewConf) {
+      throw new Error(`View not found: ${view}`)
+    }
     if (viewConf.fields) {
       viewConf.fields.forEach((f: string) => {
         if (data[f] !== undefined) {
