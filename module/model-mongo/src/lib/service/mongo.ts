@@ -1,4 +1,4 @@
-import * as mongo from "mongodb";
+import * as mongo from 'mongodb';
 import Config from '../config';
 import { Named, Base, BulkState, BulkResponse, QueryOptions } from '../model';
 import { ObjectUtil } from '@encore/util';
@@ -25,7 +25,7 @@ export class MongoService {
   static getClient(): Promise<mongo.Db> {
     if (!MongoService.clientPromise) {
       let url = `mongodb://${Config.host}:${Config.port}/${Config.schema}`;
-      MongoService.clientPromise = mongo.MongoClient.connect(url)
+      MongoService.clientPromise = mongo.MongoClient.connect(url);
     }
     return MongoService.clientPromise;
   }
@@ -52,7 +52,7 @@ export class MongoService {
     let col = await MongoService.collection(named);
     let map = ObjectUtil.fromPairs(config.fields.map(x => [x, 1]) as [string, number][]);
     MongoService.indices.push([col.collectionName, map, config]);
-    let res = await col.createIndex(map, config)
+    await col.createIndex(map, config);
     return;
   }
 
@@ -65,13 +65,13 @@ export class MongoService {
       cursor = cursor.sort(options.sort);
     }
 
-    cursor = cursor.limit(Math.trunc(options.limit || 200) || 200)
+    cursor = cursor.limit(Math.trunc(options.limit || 200) || 200);
 
     if (options.offset) {
       cursor = cursor.skip(Math.trunc(options.offset) || 0);
     }
     let res = await cursor.toArray();
-    res.forEach((r: any) => r._id = (r._id as any).toHexString())
+    res.forEach((r: any) => r._id = (r._id as any).toHexString());
     return res;
   }
 
@@ -85,7 +85,7 @@ export class MongoService {
     return { count: res };
   }
 
-  static async findOne<T extends Base>(named: Named, query: Object, options: QueryOptions = {}, failOnMany: boolean = true): Promise<T> {
+  static async findOne<T extends Base>(named: Named, query: Object, options: QueryOptions = {}, failOnMany = true): Promise<T> {
     let res = await MongoService.getByQuery(named, query, options);
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
       throw new Error(`Invalid number of results for find by id: ${res ? res.length : res}`);
@@ -99,7 +99,7 @@ export class MongoService {
 
   static async deleteById(named: Named, id: string): Promise<number> {
     let col = await MongoService.collection(named);
-    let res = await col.deleteOne({ _id: new mongo.ObjectID(id) })
+    let res = await col.deleteOne({ _id: new mongo.ObjectID(id) });
     return res.deletedCount || 0;
   }
 
@@ -129,16 +129,16 @@ export class MongoService {
   }
 
   static async update<T extends Base>(named: Named, o: T): Promise<T> {
-    let col = await MongoService.collection(named)
+    let col = await MongoService.collection(named);
     o._id = (new mongo.ObjectID(o._id) as any);
-    let obj = await col.replaceOne({ _id: o._id }, o);
+    await col.replaceOne({ _id: o._id }, o);
     o._id = (o._id as any).toHexString();
     return o;
   }
 
   static async partialUpdate<T extends Base>(named: Named, id: string, data: any): Promise<T> {
     let col = await MongoService.collection(named);
-    let obj = await col.updateOne({ _id: new mongo.ObjectID(id) }, { $set: flat(data) });
+    await col.updateOne({ _id: new mongo.ObjectID(id) }, { $set: flat(data) });
     return await MongoService.getById<T>(named, id);
   }
 
@@ -164,12 +164,12 @@ export class MongoService {
       bulk.find(id).upsert().updateOne({
         $setOnInsert: insert,
         $set: p
-      })
+      });
     });
 
     (state.delete || []).forEach(p => {
       count++;
-      bulk.find(state.getId(p)).removeOne()
+      bulk.find(state.getId(p)).removeOne();
     });
 
     let out: BulkResponse = {
@@ -178,11 +178,10 @@ export class MongoService {
         update: 0,
         insert: 0
       }
-    }
+    };
 
     if (count > 0) {
       let res = await bulk.execute({});
-      let updated = {}
       let updatedCount = 0;
 
       if (out.count) {
