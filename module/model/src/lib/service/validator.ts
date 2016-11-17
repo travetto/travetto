@@ -15,7 +15,10 @@ export class Validator {
     const key = `${cls.name}::${view}`;
     if (!Validator.schemas[key]) {
       let config = getModelConfig(cls);
-      Validator.schemas[key] = Validator.getSchemaRaw(config.schemas[view], config.schemaOpts);
+      if (!config.views[view]) {
+        throw new Error(`Unknown view found: ${view}`);
+      }
+      Validator.schemas[key] = Validator.getSchemaRaw(config.views[view].schema, config.schemaOpts);
     }
     return Validator.schemas[key];
   }

@@ -13,7 +13,7 @@ export function getAllProtoypeNames(cls: Cls) {
   return out;
 }
 
-export function getViewconf(target: any, view: string) {
+export function registerViewConf(target: any, view: string) {
   let mconf = getModelConfig(target.constructor);
   let viewConf = mconf.views[view];
   if (!viewConf) {
@@ -27,7 +27,7 @@ export function getViewconf(target: any, view: string) {
 
 export function registerFieldFacet(target: any, prop: string, config: any, view: string = DEFAULT_VIEW) {
   let mconf = getModelConfig(target.constructor);
-  let defViewConf = getViewconf(target, DEFAULT_VIEW);
+  let defViewConf = registerViewConf(target, DEFAULT_VIEW);
 
   if (!defViewConf.schema[prop]) {
     defViewConf.fields.push(prop);
@@ -35,7 +35,7 @@ export function registerFieldFacet(target: any, prop: string, config: any, view:
   }
 
   if (view !== DEFAULT_VIEW) {
-    let viewConf = getViewconf(target, view);
+    let viewConf = registerViewConf(target, view);
     if (!viewConf.schema[prop]) {
       viewConf.schema[prop] = defViewConf.schema[prop];
       viewConf.fields.push(prop);
@@ -79,23 +79,16 @@ export function registerModel<T>(cls: ModelCls<T>, schemaOpts: mongoose.SchemaOp
   let names = getAllProtoypeNames(cls);
   let mconf = getModelConfig(cls);
 
-  let schemas: { [key: string]: { [key: string]: any } } = {};
-  let fields: string[] = [];
-
   //Flatten views, fields, schemas
-  let views: string[] = [], seen: { [key: string]: boolean } = {};
   for (let name of names) {
-    let smconf = getModelConfig(name);
     for (let v of Object.keys(models[name].views)) {
-      if (!seen[v]) {
-        seen[v] = true;
-        views.push(v);
-        schemas[v] = schemas[v] || {};
-      }
-      Object.assign(mconf.views[v].schema, smconf.views[v].schema);
-      mconf.views[v].fields = mconf.views[v].fields.concat(smconf.views[v].fields);
+      let smconf = getModelConfig(name).views[v];
+      let viewConf = registerViewConf(cls, v);
+      let sViewConf = Object.assign(viewConf.schema, smconf.schema);
+      viewConf.fields = viewConf.fields.concat(smconf.fields);
     }
   }
+
   Object.assign(mconf, { collection: mconf.collection || cls.name, schemaOpts });
   return cls;
 }
