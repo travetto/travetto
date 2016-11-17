@@ -19,13 +19,13 @@ export function enumKeys(c: any): string[] {
   return ObjectUtil.values(c).filter((x: any) => typeof x === 'string') as string[];
 }
 
-export function bindData(obj: any, data?: any, view: string = DEFAULT_VIEW) {
+export function bindData<T>(obj: T, data?: any, view: string = DEFAULT_VIEW): T {
   let cons = obj.constructor as any;
   let conf = models[cons.name];
 
   if (!conf || (view === DEFAULT_VIEW && conf.schemaOpts && conf.schemaOpts.strict === false)) {
     for (var k in data) {
-      obj[k] = data[k];
+      (obj as any)[k] = data[k];
     }
   } else if (!!data) {
     let viewConf = conf.views[view];
@@ -35,13 +35,14 @@ export function bindData(obj: any, data?: any, view: string = DEFAULT_VIEW) {
     if (viewConf.fields) {
       viewConf.fields.forEach((f: string) => {
         if (data[f] !== undefined) {
-          obj[f] = data[f];
+          (obj as any)[f] = data[f];
         }
       });
     } else {
       for (let k of Object.keys(data)) {
-        obj[k] = data[k];
+        (obj as any)[k] = data[k];
       }
     }
   }
+  return obj;
 }

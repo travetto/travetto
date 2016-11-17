@@ -3,7 +3,7 @@ import { BaseModel } from '../model';
 import { ModelCls, models } from './registry';
 import { MongoService, QueryOptions, BulkState } from '@encore/mongo';
 import { Validator } from './validator';
-import { getCls, convert } from '../util';
+import { bindData, convert, getCls } from '../util';
 import { ObjectUtil } from '@encore/util';
 
 export class ModelService {
@@ -99,6 +99,17 @@ export class ModelService {
     try {
       o = await Validator.validate(o.preSave())
       return await MongoService.update<T>(cls, o);
+    } catch (e) {
+      throw ModelService.rewriteError(cls, e);
+    }
+  }
+
+  static async updateView<T extends BaseModel>(o: T, view: string): Promise<T> {
+    let cls = getCls(o);
+    try {
+      o = await Validator.validate(o.preSave(), view);
+      let partial = bindData({}, o, view);
+      return await MongoService.partialUpdate<T>(cls, o._id, partial);
     } catch (e) {
       throw ModelService.rewriteError(cls, e);
     }
