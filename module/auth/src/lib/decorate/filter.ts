@@ -1,21 +1,21 @@
-import { Request, Response, NextFunction } from "express";
-import { ObjectUtil, nodeToPromise } from "@encore/util";
+import { Request, Response, NextFunction } from 'express';
+import { ObjectUtil, nodeToPromise } from '@encore/util';
 import { filterAdder } from '@encore/express';
-import * as passport from "passport";
+import * as passport from 'passport';
 
 export function Authenticate(provider: string, failTo?: string) {
   let passportOptions = { failureRedirect: failTo };
-  let handler = passport.authenticate(provider, passportOptions)
+  let handler = passport.authenticate(provider, passportOptions);
   let fn = (req: Request, res: Response, next: NextFunction): Promise<any> => {
     req.passportOptions = passportOptions;
     return nodeToPromise(null, handler, req, res);
-  }
+  };
   return filterAdder(fn);
 }
 
 export async function requireAuth(config: { key?: string, include?: string[], exclude?: string[] }, req: Request, res: Response) {
   if (req.isUnauthenticated()) {
-    throw { message: "User is required", statusCode: 401 };
+    throw { message: 'User is required', statusCode: 401 };
   }
   if (config.key) {
     if (!req.principal.groupMap) {
@@ -25,10 +25,10 @@ export async function requireAuth(config: { key?: string, include?: string[], ex
     }
 
     if (config.exclude && config.exclude.length && config.exclude.find(x => req.principal.groupMap[x]) !== undefined) {
-      throw { message: "Access forbidden", statusCode: 403 };
+      throw { message: 'Access forbidden', statusCode: 403 };
     }
     if (config.include && config.include.length && config.include.find(x => req.principal.groupMap[x]) === undefined) {
-      throw { message: "Access forbidden", statusCode: 403 };
+      throw { message: 'Access forbidden', statusCode: 403 };
     }
   }
 }
@@ -47,20 +47,20 @@ export function Authenticated(key?: string, include: string[] = [], exclude: str
         descriptor: TypedPropertyDescriptor<any> = args[2];
       return filterAdder(auth)(target, propertyKey, descriptor);
     } else {
-      let cls = args[0]
+      let cls = args[0];
       cls.filters = cls.filters || [];
-      cls.filters.push(auth)
+      cls.filters.push(auth);
       return cls;
     }
-  }
+  };
 }
 
 export function Unauthenticated() {
   let unauth = (req: Express.Request) => {
     if (!req.isUnauthenticated()) {
-      throw { message: "User cannot be authenticated", statusCode: 401 };
+      throw { message: 'User cannot be authenticated', statusCode: 401 };
     }
-  }
+  };
   return (...args: any[]) => {
     if (args[2] && args[2].value) {
       let target: Object = args[0],
@@ -70,8 +70,8 @@ export function Unauthenticated() {
     } else {
       let cls = args[0]
       cls.filters = cls.filters || [];
-      cls.filters.push(unauth)
+      cls.filters.push(unauth);
       return cls;
     }
-  }
+  };
 }

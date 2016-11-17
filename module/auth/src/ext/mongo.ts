@@ -1,21 +1,21 @@
-import * as crypto from "crypto";
-import * as passport from "passport";
-import * as moment from "moment";
+import * as crypto from 'crypto';
+import * as passport from 'passport';
+import * as moment from 'moment';
 
 import { nodeToPromise } from '@encore/util';
 import { ModelService, BaseModel } from '@encore/model'
-import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as LocalStrategy } from 'passport-local';
 import { Context } from '@encore/context';
 
-async function generateHash(password: string, salt: string, iterations: number = 25000, keylen: number = 512, digest: string = 'sha512') {
+async function generateHash(password: string, salt: string, iterations = 25000, keylen = 512, digest = 'sha512') {
   return (await nodeToPromise<Buffer>(crypto, crypto.pbkdf2, password, salt, iterations, keylen, digest)).toString('hex');
 }
 
-async function generateSalt(saltlen: number = 32) {
+async function generateSalt(saltlen = 32) {
   return (await nodeToPromise<NodeBuffer>(crypto, crypto.randomBytes, saltlen)).toString('hex');
 }
 
-async function generatePassword(password: string, saltlen: number = 32, validator?: (password: string) => Promise<boolean>) {
+async function generatePassword(password: string, saltlen = 32, validator?: (password: string) => Promise<boolean>) {
   if (!password) {
     throw { message: 'Missing password exception', statusCode: 501 };
   }
@@ -33,12 +33,12 @@ async function generatePassword(password: string, saltlen: number = 32, validato
 }
 
 interface Config {
-  usernameField: string,
-  passwordField: string,
-  hashField: string,
-  saltField: string,
-  resetTokenField: string,
-  resetExpiresField: string
+  usernameField: string;
+  passwordField: string;
+  hashField: string;
+  saltField: string;
+  resetTokenField: string;
+  resetExpiresField: string;
 }
 
 export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Config) {
@@ -52,17 +52,17 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
       let user = await ModelService.findOne(cls, query);
       let hash = await generateHash(password, (user as any)[config.saltField]);
       if (hash !== (user as any)[config.hashField]) {
-        throw { message: "Invalid password", statusCode: 500 };
+        throw { message: 'Invalid password', statusCode: 500 };
       } else {
         try {
           Context.get().user = user;
         } catch (e) {
-          //Do nothing
+          // Do nothing
         }
         return user;
       }
     } catch (e) {
-      throw { message: "User is not found", statusCode: 500 };
+      throw { message: 'User is not found', statusCode: 500 };
     }
   }
 
@@ -87,7 +87,7 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
       try {
         Context.get().user = user;
       } catch (e) {
-        //Do nothing
+        // Do nothing
       }
       return res;
     }
@@ -133,10 +133,10 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
 
     Object.assign(user as any, {
       [config.resetTokenField]: password,
-      [config.resetExpiresField]: moment().add(1, "hour").toDate()
+      [config.resetExpiresField]: moment().add(1, 'hour').toDate()
     });
 
-    let res = await ModelService.update(user);
+    await ModelService.update(user);
     return user;
   }
 
@@ -177,5 +177,5 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
     register,
     changePassword,
     generateResetToken
-  }
+  };
 }

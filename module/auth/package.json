@@ -15,5 +15,8 @@
   },
   "optionalDependencies": {
     "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x"
+  },
+  "devDependencies": {
+    "tslint": "^3.15.1"
   }
 }
