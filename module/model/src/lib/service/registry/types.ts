@@ -26,6 +26,7 @@ export interface ModelConfig {
       [key: string]: any
     }
   };
+  views: string[];
   fields: string[];
   discriminator?: string;
   discriminated?: { [key: string]: ModelCls<any> };
@@ -38,6 +39,5 @@ export interface FieldCfg {
   required?: boolean;
   unique?: boolean;
   enum?: any[];
-
-  type: ClsLst;
+  type: any;
 }

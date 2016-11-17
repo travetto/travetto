@@ -1,65 +1,56 @@
+import { ReviewService } from '../../../../../../../src/app/service/review';
 import { Cls, ModelCls, ModelConfig } from './types';
 import * as mongoose from "mongoose";
 
-const schemas: { [name: string]: any } = {};
-const fields: { [name: string]: string[] } = {};
 const models: { [name: string]: ModelConfig } = {}
-const views: { [name: string]: string[] } = {}
 export const DEFAULT_VIEW = 'all';
 
 export function getAllProtoypeNames(cls: Cls) {
   const out: string[] = [];
-  while (cls && cls.name && fields[cls.name]) {
+  while (cls && cls.name && models[cls.name]) {
     out.push(cls.name);
     cls = Object.getPrototypeOf(cls) as Cls;
   }
   return out;
 }
 
-export function getFieldsForType(cls: Cls) {
-  return cls.name ? fields[cls.name] : null;
-}
-
 export function registerFieldFacet(target: any, prop: string, config: any, view: string = DEFAULT_VIEW) {
-  const simpleName = target.constructor.name;
-  const name = `${simpleName}::${view}`;
+  let mconf = getModelConfig(target.constructor);
 
-  if (!views[simpleName]) {
-    views[simpleName] = [];
+  if (!mconf.schemas[view]) {
+    mconf.schemas[view] = {};
+    mconf.views.push(view);
   }
-  if (!schemas[name]) {
-    fields[name] = [];
-    schemas[name] = {};
-  }
-  if (!schemas[name][prop]) {
-    fields[name].push(prop);
-    schemas[name][prop] = {};
+  if (!mconf.schemas[DEFAULT_VIEW][prop]) {
+    mconf.fields.push(prop);
+    mconf.schemas[DEFAULT_VIEW][prop] = {};
   }
 
-  views[simpleName].push(view);
-
-  Object.assign(schemas[name][prop], config);
   if (view !== DEFAULT_VIEW) {
-    let def = `${target.constructor.name}::${DEFAULT_VIEW}`;
-    if (!schemas[def]) registerFieldFacet(target, prop, {});
-    schemas[name][prop] = schemas[def][prop];
+    mconf.schemas[view][prop] = mconf.schemas[DEFAULT_VIEW][prop];
   }
+
+  Object.assign(mconf.schemas[DEFAULT_VIEW][prop], config);
+
   return target;
 }
 
-export function getSchema(name: string, view: string = DEFAULT_VIEW) {
-  return schemas[`${name}::${view}`];
+export function getSchema(cls: Cls) {
+  let conf = getModelConfig(cls);
+  return conf && conf.schemas[DEFAULT_VIEW];
 }
 
-export function getModelConfig<T>(cls: ModelCls<T>) {
-  if (!models[cls.name]) {
-    models[cls.name] = {
-      schemas: {},
+export function getModelConfig<T>(cls: string | ModelCls<T>) {
+  let name = typeof cls === 'string' ? cls : cls.name;
+  if (!models[name] && name) {
+    models[name] = {
+      schemas: { [DEFAULT_VIEW]: {} },
       fields: [],
-      indices: []
+      indices: [],
+      views: [DEFAULT_VIEW],
     };
   }
-  return models[cls.name];
+  return models[name];
 }
 
 export function registerModelFacet<T>(cls: ModelCls<T>, data: any) {
@@ -69,24 +60,31 @@ export function registerModelFacet<T>(cls: ModelCls<T>, data: any) {
   return cls;
 }
 
-export function registerModel<T>(cls: ModelCls<T>, opts: mongoose.SchemaOptions = {}) {
+export function registerModel<T>(cls: ModelCls<T>, schemaOpts: mongoose.SchemaOptions = {}) {
   let names = getAllProtoypeNames(cls);
-  let config = getModelConfig(cls);
-  let finalSchemas: { [key: string]: { [key: string]: any } } = {};
+  let mconf = getModelConfig(cls);
 
-  let allViews = names.reduce((acc: string[], x: string) =>
-    acc.concat(
-      views[x].filter(y => acc.indexOf(y) < 0)), []);
+  let schemas: { [key: string]: { [key: string]: any } } = {};
+  let fields: string[] = [];
 
-  for (let view of allViews) {
-    finalSchemas[view] = Object.assign({}, ...names.map(x => schemas[`${x}::${view}`]));
+  //Flatten views, fields, schemas
+  let views: string[] = [], seen: { [key: string]: boolean } = {};
+  for (let name of names) {
+    let smconf = getModelConfig(name);
+    for (let v of models[name].views) {
+      if (!seen[v]) {
+        seen[v] = true;
+        views.push(v);
+        schemas[v] = schemas[v] || {};
+      }
+      Object.assign(schemas[v], smconf.schemas[v]);
+    }
+    fields = fields.concat(smconf.fields)
   }
 
   registerModelFacet(cls, {
-    collection: config.collection || cls.name,
-    schemaOpts: opts,
-    fields: ([] as string[]).concat(...names.map(x => fields[x])),
-    schemas: finalSchemas
+    collection: mconf.collection || cls.name,
+    schemaOpts, fields, schemas, views
   });
   return cls;
 }

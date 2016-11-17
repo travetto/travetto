@@ -9,7 +9,7 @@ function buildFieldConfig(type: ClsLst) {
   const fieldType: Cls = Array.isArray(type) ? type[0] : type;
 
   //Get schema if exists
-  const schema = getSchema(fieldType.name || '');
+  const schema = getSchema(fieldType);
 
   if (schema) {
     fieldConf.type = isArray ? [schema] : schema;

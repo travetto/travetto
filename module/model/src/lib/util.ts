@@ -21,7 +21,7 @@ export function enumKeys(c: any): string[] {
 
 export function bindData(obj: any, data?: any) {
   let cons = obj.constructor as any;
-  let conf = getModelConfig(obj);
+  let conf = getModelConfig(cons);
   if (conf.schemaOpts && conf.schemaOpts.strict === false) {
     for (var k in data) {
       obj[k] = data[k];
