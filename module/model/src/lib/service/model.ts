@@ -1,7 +1,7 @@
-import * as mongo from "mongodb";
+import * as mongo from 'mongodb';
 import { BaseModel } from '../model';
 import { ModelCls, models } from './registry';
-import { MongoService, QueryOptions, BulkState } from '@encore/mongo';
+import { MongoService, QueryOptions } from '@encore/mongo';
 import { Validator } from './validator';
 import { bindData, convert, getCls } from '../util';
 import { ObjectUtil } from '@encore/util';
@@ -26,20 +26,20 @@ export class ModelService {
     return res;
   }
 
-  static async findOne<T extends BaseModel>(cls: ModelCls<T>, query: Object, options: QueryOptions = {}, failOnMany: boolean = true): Promise<T> {
+  static async findOne<T extends BaseModel>(cls: ModelCls<T>, query: Object, options: QueryOptions = {}, failOnMany = true): Promise<T> {
     let res = await MongoService.findOne<T>(cls, query, options, failOnMany);
     return convert(cls, res);
   }
 
   static async createOrUpdate<T extends BaseModel>(o: T, query: Object): Promise<T> {
     let res = await ModelService.getByQuery(getCls(o), query);
-    if (res.length == 1) {
+    if (res.length === 1) {
       o = ObjectUtil.merge(res[0], o);
       return await ModelService.update(o);
-    } else if (res.length == 0) {
+    } else if (res.length === 0) {
       return await ModelService.save(o);
     }
-    throw new Error(`Too many already exist: ${res.length}`)
+    throw new Error(`Too many already exist: ${res.length}`);
   }
 
   static async getById<T extends BaseModel>(cls: ModelCls<T>, id: string): Promise<T> {
@@ -48,11 +48,11 @@ export class ModelService {
   }
 
   static rewriteError<T extends BaseModel>(cls: ModelCls<T>, e: any) {
-    if (e.code === 11000) { //Handle duplicate errors
+    if (e.code === 11000) { // Handle duplicate errors
       e = {
-        message: "Duplicate entry already exists",
+        message: 'Duplicate entry already exists',
         statusCode: 501
-      }
+      };
     }
 
     return e;
@@ -97,7 +97,7 @@ export class ModelService {
   static async update<T extends BaseModel>(o: T): Promise<T> {
     let cls = getCls(o);
     try {
-      o = await Validator.validate(o.preSave())
+      o = await Validator.validate(o.preSave());
       return await MongoService.update<T>(cls, o);
     } catch (e) {
       throw ModelService.rewriteError(cls, e);

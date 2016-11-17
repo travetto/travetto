@@ -1,5 +1,5 @@
-import * as mongoose from "mongoose";
-import { Cls, ModelCls, models, getModelConfig, registerModel, registerModelFacet } from '../service/registry';
+import * as mongoose from 'mongoose';
+import { ModelCls, getModelConfig, registerModel, registerModelFacet } from '../service/registry';
 import { SortOptions } from '@encore/mongo';
 
 export function Discriminate(key: string) {
@@ -11,7 +11,7 @@ export function Discriminate(key: string) {
       discriminator: key
     });
 
-    //Register parent
+    // Register parent
     let parentConf = getModelConfig(parent);
     parentConf.discriminated = parentConf.discriminated || {};
     parentConf.discriminated[key] = target;
@@ -21,7 +21,7 @@ export function Discriminate(key: string) {
 }
 
 export function DefaultSort(sort: SortOptions) {
-  return (target: any) => registerModelFacet(target, { defaultSort: sort })
+  return (target: any) => registerModelFacet(target, { defaultSort: sort });
 }
 
 export function Model(opts: mongoose.SchemaOptions = {}) {

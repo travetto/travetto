@@ -1,7 +1,7 @@
 import { Cls, ModelCls, ModelConfig } from './types';
-import * as mongoose from "mongoose";
+import * as mongoose from 'mongoose';
 
-export const models: { [name: string]: ModelConfig } = {}
+export const models: { [name: string]: ModelConfig } = {};
 export const DEFAULT_VIEW = 'all';
 
 export function getAllProtoypeNames(cls: Cls) {
@@ -20,7 +20,7 @@ export function getViewConfig<T>(target: string | ModelCls<T>, view: string) {
     viewConf = mconf.views[view] = {
       schema: {},
       fields: []
-    }
+    };
   }
   return viewConf;
 }
@@ -48,7 +48,6 @@ export function getModelConfig<T>(cls: string | ModelCls<T>) {
 
 export function registerFieldFacet(target: any, prop: string, config: any, view: string = DEFAULT_VIEW) {
   let cons = target.constructor;
-  let mconf = getModelConfig(cons);
   let defViewConf = getViewConfig(cons, DEFAULT_VIEW);
 
   if (!defViewConf.schema[prop]) {
@@ -80,7 +79,7 @@ export function registerModel<T>(cls: ModelCls<T>, schemaOpts: mongoose.SchemaOp
   let names = getAllProtoypeNames(cls).slice(1);
   let mconf = getModelConfig(cls);
 
-  //Flatten views, fields, schemas
+  // Flatten views, fields, schemas
   for (let name of names) {
     for (let v of Object.keys(models[name].views)) {
       let sViewConf = getViewConfig(name, v);

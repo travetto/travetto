@@ -1,14 +1,12 @@
-import * as mongoose from "mongoose";
 import { enumKeys } from '../util';
 import { Cls, FieldCfg, ClsLst, registerFieldFacet, getSchema } from '../service/registry';
-import { ObjectUtil } from '@encore/util';
 
 function buildFieldConfig(type: ClsLst) {
   const isArray = Array.isArray(type);
   const fieldConf: FieldCfg = { type };
   const fieldType: Cls = Array.isArray(type) ? type[0] : type;
 
-  //Get schema if exists
+  // Get schema if exists
   const schema = getSchema(fieldType);
 
   if (schema) {
@@ -20,13 +18,13 @@ function buildFieldConfig(type: ClsLst) {
 
 export function Field(type: ClsLst) {
   return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, buildFieldConfig(type))
+    registerFieldFacet(f, prop, buildFieldConfig(type));
   };
 }
 
 export function Required() {
   return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, { required: true })
+    registerFieldFacet(f, prop, { required: true });
   };
 }
 
@@ -35,7 +33,7 @@ export function Enum(values: string[] | any) {
     registerFieldFacet(f, prop, {
       enum: Array.isArray(values) ? values : enumKeys(values)
     });
-  }
+  };
 }
 
 export function View(...names: string[]) {
@@ -43,5 +41,5 @@ export function View(...names: string[]) {
     for (let name of names) {
       registerFieldFacet(f, prop, {}, name);
     }
-  }
+  };
 }

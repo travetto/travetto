@@ -1,4 +1,4 @@
-import * as mongoose from "mongoose";
+import * as mongoose from 'mongoose';
 import { Named, SortOptions } from '@encore/mongo';
 
 export interface ModelCls<T> extends Named {

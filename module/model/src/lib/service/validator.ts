@@ -1,7 +1,6 @@
-import * as mg from "mongoose";
+import * as mg from 'mongoose';
 import { BaseModel } from '../model';
 import { ModelCls, models, DEFAULT_VIEW } from './registry';
-import { nodeToPromise } from '@encore/util';
 import { getCls } from '../util';
 
 let mongoose = require('mongoose/lib/browser');

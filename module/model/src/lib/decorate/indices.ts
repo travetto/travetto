@@ -11,13 +11,13 @@ function createIndex(target: any, config: IndexConfig) {
   }
 
   Ready.waitFor(MongoService.createIndex(target, config)
-    .then((x: any) => console.log(`Created ${config.unique ? 'unique' : ''} index ${config.fields}`)))
+    .then((x: any) => console.log(`Created ${config.unique ? 'unique' : ''} index ${config.fields}`)));
 
   return target;
 }
 
 export function Index(config: IndexConfig) {
-  return (target: any) => createIndex(target, config)
+  return (target: any) => createIndex(target, config);
 }
 
 export function Unique(...fields: string[]) {
