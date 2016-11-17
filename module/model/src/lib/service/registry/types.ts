@@ -21,13 +21,12 @@ export interface IndexConfig {
 export interface ModelConfig {
   collection?: string;
   schemaOpts?: mongoose.SchemaOptions;
-  schemas: {
+  views: {
     [key: string]: {
-      [key: string]: any
+      schema: { [key: string]: any },
+      fields: string[]
     }
   };
-  views: string[];
-  fields: string[];
   discriminator?: string;
   discriminated?: { [key: string]: ModelCls<any> };
   defaultSort?: SortOptions;
