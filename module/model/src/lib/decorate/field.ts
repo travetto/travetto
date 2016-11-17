@@ -19,7 +19,9 @@ function buildFieldConfig(type: ClsLst) {
 }
 
 export function Field(type: ClsLst) {
-  return (f: any, prop: string) => registerFieldFacet(f, prop, buildFieldConfig(type));
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, buildFieldConfig(type))
+  };
 }
 
 export function View() {
@@ -27,11 +29,15 @@ export function View() {
 }
 
 export function Required() {
-  return (f: any, prop: string) => registerFieldFacet(f, prop, { required: true });
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, { required: true })
+  };
 }
 
 export function Enum(values: string[] | any) {
-  return (f: any, prop: string) => registerFieldFacet(f, prop, {
-    enum: Array.isArray(values) ? values : enumKeys(values)
-  });
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, {
+      enum: Array.isArray(values) ? values : enumKeys(values)
+    });
+  }
 }
