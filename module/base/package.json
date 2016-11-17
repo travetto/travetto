@@ -1,15 +1,15 @@
 {
-  "name": "@encore/bootstrap",
-  "license": "ISC",
-  "author": "",
-  "version": "1.1.17",
+  "version": "1.1.18", 
+  "license": "ISC", 
+  "author": "", 
+  "description": "", 
   "dependencies": {
-    "@types/node": "^6.0.45",
-    "typescript": "^2.0.9",
-    "source-map-support": "^0.4.0",
-    "tslint": "^3.15.1"
-  },
-  "scripts": {},
-  "main": "src/lib/",
-  "description": ""
+    "@types/node": "^6.0.45", 
+    "tslint": "^3.15.1", 
+    "typescript": "^2.0.9", 
+    "source-map-support": "^0.4.0"
+  }, 
+  "scripts": {}, 
+  "main": "src/lib/", 
+  "name": "@encore/bootstrap"
 }
