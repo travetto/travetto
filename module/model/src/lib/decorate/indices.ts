@@ -3,7 +3,12 @@ import { Ready } from '@encore/init';
 import { getModelConfig, IndexConfig } from '../service/registry';
 
 function createIndex(target: any, config: IndexConfig) {
-  getModelConfig(target).indices.push(config);
+  let mconf = getModelConfig(target);
+  mconf.indices.push(config);
+
+  if (!mconf.primaryUnique && config.unique) {
+    mconf.primaryUnique = config.fields;
+  }
 
   Ready.waitFor(MongoService.createIndex(target, config)
     .then((x: any) => console.log(`Created ${config.unique ? 'unique' : ''} index ${config}`)))

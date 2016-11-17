@@ -105,11 +105,7 @@ export class ModelService {
   }
 
   static async bulkProcess<T extends BaseModel>(named: ModelCls<T>, state: { upsert?: T[], delete?: T[] }) {
-    let keys = ['_id'];
-    let unique = getModelConfig(named).indices.find(x => !!x.unique);
-    if (unique) {
-      keys = unique.fields;
-    }
+    let keys = getModelConfig(named).primaryUnique || ['_id'];
 
     try {
       return await MongoService.bulkProcess(named, {

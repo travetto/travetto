@@ -26,7 +26,8 @@ export interface ModelConfig {
   discriminator?: string;
   discriminated?: { [key: string]: ModelCls<any> };
   defaultSort?: SortOptions;
-  indices: IndexConfig[]
+  indices: IndexConfig[];
+  primaryUnique?: string[]
 }
 
 export interface FieldCfg {
