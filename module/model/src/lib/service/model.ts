@@ -1,6 +1,6 @@
 import * as mongo from "mongodb";
 import { BaseModel } from '../model';
-import { ModelCls, getModelConfig } from './registry';
+import { ModelCls, models } from './registry';
 import { MongoService, QueryOptions, BulkState } from '@encore/mongo';
 import { Validator } from './validator';
 import { getCls, convert } from '../util';
@@ -13,7 +13,7 @@ export class ModelService {
   }
 
   static async getByQuery<T extends BaseModel>(cls: ModelCls<T>, query: Object = {}, options: QueryOptions = {}): Promise<T[]> {
-    const config = getModelConfig(cls);
+    const config = models[cls.name];
     if (!options.sort && config.defaultSort) {
       options.sort = config.defaultSort;
     }

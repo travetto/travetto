@@ -1,5 +1,6 @@
-import { Field, getDiscriminator } from '../decorate';
+import { Field } from '../decorate';
 import { bindData } from '../util';
+import { models } from '../service';
 import { Base } from '@encore/mongo';
 
 export abstract class BaseModel implements Base {
@@ -21,7 +22,7 @@ export abstract class BaseModel implements Base {
 
   constructor(data?: Object) {
     bindData(this, data);
-    this._type = getDiscriminator(this.constructor);
+    this._type = models[this.constructor.name].discriminator;
   }
 
   preSave(): this {
