@@ -1,7 +1,7 @@
-import * as mongo from "mongodb";
+export type SortOptions = { [key: string]: number } | string | string[];
 
 export interface QueryOptions {
-  sort?:({[key:string]: number}|string|string[])
-  limit?:number,
-  offset?:number
+  sort?: SortOptions;
+  limit?: number;
+  offset?: number;
 }
