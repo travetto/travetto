@@ -47,8 +47,9 @@ export function getModelConfig<T>(cls: string | ModelCls<T>) {
 }
 
 export function registerFieldFacet(target: any, prop: string, config: any, view: string = DEFAULT_VIEW) {
-  let mconf = getModelConfig(target.constructor);
-  let defViewConf = getViewConfig(target.constructor, DEFAULT_VIEW);
+  let cons = target.constructor;
+  let mconf = getModelConfig(cons);
+  let defViewConf = getViewConfig(cons, DEFAULT_VIEW);
 
   if (!defViewConf.schema[prop]) {
     defViewConf.fields.push(prop);
@@ -56,7 +57,7 @@ export function registerFieldFacet(target: any, prop: string, config: any, view:
   }
 
   if (view !== DEFAULT_VIEW) {
-    let viewConf = getViewConfig(target, view);
+    let viewConf = getViewConfig(cons, view);
     if (!viewConf.schema[prop]) {
       viewConf.schema[prop] = defViewConf.schema[prop];
       viewConf.fields.push(prop);
