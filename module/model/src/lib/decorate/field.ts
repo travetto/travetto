@@ -1,4 +1,5 @@
 import * as mongoose from "mongoose";
+import { enumKeys } from '../util';
 import { Cls, FieldCfg, ClsLst, registerFieldFacet, getSchema } from '../service/registry';
 import { ObjectUtil } from '@encore/util';
 
@@ -29,6 +30,8 @@ export function Required() {
   return (f: any, prop: string) => registerFieldFacet(f, prop, { required: true });
 }
 
-export function Enum(values: string[]) {
-  return (f: any, prop: string) => registerFieldFacet(f, prop, { enum: values });
+export function Enum(values: string[] | any) {
+  return (f: any, prop: string) => registerFieldFacet(f, prop, {
+    enum: Array.isArray(values) ? values : enumKeys(values)
+  });
 }
