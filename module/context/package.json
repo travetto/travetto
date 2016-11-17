@@ -1,16 +1,16 @@
 {
-  "name": "@encore/context",
-  "version": "1.1.15",
-  "description": "",
-  "main": "src/lib/",
-  "scripts": {},
-  "author": "",
-  "license": "ISC",
+  "name": "@encore/context", 
+  "license": "ISC", 
+  "author": "", 
+  "optionalDependencies": {
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x", 
+    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v1.x.x"
+  }, 
+  "version": "1.1.16", 
   "dependencies": {
     "continuation-local-storage": "^3.1.6"
-  },
-  "optionalDependencies": {
-    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v1.x.x",
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x"
-  }
+  }, 
+  "scripts": {}, 
+  "main": "src/lib/", 
+  "description": ""
 }
