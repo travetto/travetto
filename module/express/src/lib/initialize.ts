@@ -1,4 +1,4 @@
-import * as express from "express";
+import * as express from 'express';
 import Config from './config';
 import { Ready } from '@encore/init';
 import { requestContext } from '@encore/context/ext/express';
@@ -18,7 +18,7 @@ app.use(session(Config.session)); // session secret
 
 app.use(requestContext);
 
-//Enable proxy for cookies
+// Enable proxy for cookies
 if (Config.session.cookie.secure) {
   app.enable('trust proxy');
 }

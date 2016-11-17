@@ -1,5 +1,5 @@
 import { ObjectUtil } from '@encore/util';
-import * as moment from "moment";
+import * as moment from 'moment';
 import { RequestHandler, PathType } from './types';
 
 function createRequestHandlerDecorator(rh: RequestHandler) {
@@ -41,7 +41,7 @@ export function Header(headers: { [key: string]: (string | (() => string)) }) {
   return createRequestHandlerDecorator({ headers });
 }
 
-export function Cache(value: number, unit: string = "second") {
+export function Cache(value: number, unit = 'second') {
   function getTime() {
     let end = moment().add(value as any, unit as any).toDate().getTime();
     let start = new Date().getTime();
@@ -50,5 +50,5 @@ export function Cache(value: number, unit: string = "second") {
   return Header({
     Expires: () => `${new Date(Date.now() + getTime()).toUTCString()}`,
     'Cache-Control': () => `max-age=${getTime()}`
-  })
+  });
 }

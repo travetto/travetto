@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 import { RequestHandler, Filter, FilterPromise, PathType } from './types';
 import { Renderable } from '../model';
 import { ObjectUtil, toPromise } from '@encore/util';
@@ -9,11 +9,11 @@ async function outputHandler(handler: RequestHandler, res: Response, out: any) {
     if (handler.headers) {
       (ObjectUtil.toPairs(handler.headers) as [string, string | (() => string)][]).forEach(pair => {
         if (typeof pair[1] === 'string') {
-          res.setHeader(pair[0], pair[1] as string)
+          res.setHeader(pair[0], pair[1] as string);
         } else {
-          res.setHeader(pair[0], (pair[1] as () => string)())
+          res.setHeader(pair[0], (pair[1] as () => string)());
         }
-      })
+      });
     }
     if (out instanceof Renderable) {
       out = (out as Renderable).render(res);
@@ -50,7 +50,7 @@ function asyncHandler(filter: FilterPromise, handler?: (res: Response, out: any)
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 }
 
 function buildPath(base: string, path: PathType | undefined): PathType {
@@ -63,8 +63,8 @@ function buildPath(base: string, path: PathType | undefined): PathType {
   }
 }
 
-function registerRequestHandler(fn: Filter, handler: RequestHandler, filters?: Filter[], base: string = '') {
-  //Ensure all filters match standard format
+function registerRequestHandler(fn: Filter, handler: RequestHandler, filters?: Filter[], base = '') {
+  // Ensure all filters match standard format
   if (handler.method) {
     (app as any)[handler.method].call(app,
       /*url*/ buildPath(base, handler.path),
@@ -83,11 +83,11 @@ function registerRequestHandlers(base: string, clz: any) {
     .forEach(k =>
       registerRequestHandler(
         o[k].bind(o), o[k].requestHandler,
-        [...(clz.filters || []), ...(o[k].filters || [])], base))
+        [...(clz.filters || []), ...(o[k].filters || [])], base));
 
   return clz;
 }
 
-export function Controller(path: string = '') {
+export function Controller(path = '') {
   return registerRequestHandlers.bind(null, path);
 }
