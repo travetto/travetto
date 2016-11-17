@@ -15,7 +15,7 @@ function writeProperty(o: any, k: string, v: any) {
     if (typeof o[k] === 'boolean') {
       v = v === 'true';
     } else if (typeof o[k] === 'number') {
-      v = v.indexOf('.') >= 0 ? parseFloat(v) : parseInt(v);
+      v = v.indexOf('.') >= 0 ? parseFloat(v) : parseInt(v, 10);
     } else if (typeof o[k] !== 'string' && v === 'null') {
       v = NULL;
     }
@@ -27,15 +27,15 @@ function merge(target: ConfigMap, source: ConfigMap) {
   let targetFlat = flatten(target, { delimiter: '_' });
   let sourceFlat = flatten(source, { delimiter: '_' });
 
-  //Flatten to lower case
+  // Flatten to lower case
   let keyMap: { [key: string]: string } = {};
   let lowerFlat: ConfigMap = {};
 
-  for (let k in targetFlat) {
+  for (let k of Object.keys(targetFlat)) {
     let lk = k.toLowerCase();
     lowerFlat[lk] = targetFlat[k];
 
-    //handle keys, and all substrings
+    // handle keys, and all substrings
     let end = k.length;
     while (end > 0) {
       let finalKey = lk.substring(0, end);
@@ -48,37 +48,37 @@ function merge(target: ConfigMap, source: ConfigMap) {
     }
   }
 
-  for (let k in sourceFlat) {
+  for (let k of Object.keys(sourceFlat)) {
     let lk = k.toLowerCase();
     let ns = lk.split('_', 2)[0];
 
     if (namespaces[ns]) {
-      if (!keyMap[lk]) keyMap[lk] = k;
+      if (!keyMap[lk]) { keyMap[lk] = k; }
       writeProperty(lowerFlat, lk, sourceFlat[k]);
     }
   }
 
-  //Return original case
+  // Return original case
   let out: ConfigMap = {};
-  for (let k in lowerFlat) {
+  for (let k of Object.keys(lowerFlat)) {
     out[keyMap[k]] = lowerFlat[k];
   }
   ObjectUtil.merge(target, unflatten(out, { delimiter: '_' }));
 }
 
 export function registerNamespace<T extends ConfigMap>(ns: string, base: T): T {
-  //Store ref
+  // Store ref
   namespaces[ns] = true;
   namespaces[ns.toLowerCase()] = true;
 
-  //Nest object
+  // Nest object
   let obj: ConfigMap = {};
   obj[ns] = base;
 
-  //merge
+  // merge
   merge(config, obj);
 
-  //Get ref to config object
+  // Get ref to config object
   config[ns] = config[ns] || {};
   return config[ns] as T;
 }
@@ -107,20 +107,20 @@ function dropNulls(o: any) {
 export function configure(name: string) {
   console.log(`Initializing: ${name}`);
 
-  //Load all namespaces from core
+  // Load all namespaces from core
   bulkRequire('**/config.ts', process.cwd() + '/node_modules/@encore');
 
-  //Load all namespaces from app
+  // Load all namespaces from app
   bulkRequire('src/app/**/config.ts');
 
-  //Load env config
+  // Load env config
   let data = require(`${process.cwd()}/src/env/${name}.json`) as ConfigMap;
   merge(config, data);
 
-  //Handle process.env
+  // Handle process.env
   merge(config, process.env);
 
-  //Drop out nulls
+  // Drop out nulls
   dropNulls(config);
 
   Ready.onReady(() => {

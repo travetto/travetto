@@ -1,6 +1,6 @@
 export class Ready {
   private static promises: Promise<any>[] = [];
-  private static listeners: ((...args: any[]) => any)[] = []
+  private static listeners: ((...args: any[]) => any)[] = [];
   private static resolved: number = 0;
   private static done: boolean = false;
   private static initialized: boolean = false;
@@ -11,7 +11,7 @@ export class Ready {
   static waitFor<T>(p: Promise<T>) {
     Ready.promises.push(p);
     p.then(Ready.onPromiseSuccess)
-      .catch(Ready.onPromiseFailure)
+      .catch(Ready.onPromiseFailure);
   }
 
   static onReady(cb: (...args: any[]) => any) {
@@ -28,7 +28,7 @@ export class Ready {
 
   static onPromiseSuccess() {
     Ready.resolved++;
-    process.nextTick(Ready.checkForDone)
+    process.nextTick(Ready.checkForDone);
   }
 
   static checkForDone() {
@@ -45,7 +45,7 @@ export class Ready {
   }
 
   static wait() {
-    setTimeout(Ready.checkForDone, 1000)
+    setTimeout(Ready.checkForDone, 1000);
   }
 
   static initialize() {
