@@ -33,5 +33,5 @@ export function getDefaultSort(cls: any): Object | undefined {
 }
 
 export function Model(opts: mongoose.SchemaOptions = {}) {
-  return (target: any) => registerModel(target, opts);
+  return (target: any) => registerModel<any>(target, opts);
 }
