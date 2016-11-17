@@ -2,6 +2,7 @@ import * as mongo from "mongodb";
 import Config from '../config';
 import { Named, Base, BulkState, BulkResponse, QueryOptions } from '../model';
 import { ObjectUtil } from '@encore/util';
+const flat = require('flat');
 
 export class MongoService {
 
@@ -137,7 +138,7 @@ export class MongoService {
 
   static async partialUpdate<T extends Base>(named: Named, id: string, data: any): Promise<T> {
     let col = await MongoService.collection(named);
-    let obj = await col.updateOne({ _id: new mongo.ObjectID(id) }, { $set: data });
+    let obj = await col.updateOne({ _id: new mongo.ObjectID(id) }, { $set: flat(data) });
     return await MongoService.getById<T>(named, id);
   }
 
@@ -169,7 +170,7 @@ export class MongoService {
     (state.delete || []).forEach(p => {
       count++;
       bulk.find(state.getId(p)).removeOne()
-    })
+    });
 
     let out: BulkResponse = {
       count: {
