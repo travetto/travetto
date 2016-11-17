@@ -1,6 +1,9 @@
-import * as _ from "lodash"
+import * as _ from 'lodash';
 
 export class ObjectUtil {
+  static merge = _.merge.bind(_) as typeof _.merge;
+  static isPlainObject = _.isPlainObject.bind(_) as typeof _.isPlainObject;
+
   static values(o: { [key: string]: any }): any[] {
     return Object.keys(o).map(x => o[x]);
   }
@@ -16,6 +19,4 @@ export class ObjectUtil {
       return acc;
     }, []);
   }
-  static merge = _.merge.bind(_) as typeof _.merge;
-  static isPlainObject = _.isPlainObject.bind(_) as typeof _.isPlainObject;
 }

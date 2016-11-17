@@ -1,13 +1,14 @@
 {
-  "version": "1.1.17", 
-  "license": "ISC", 
-  "author": "", 
-  "description": "", 
+  "version": "1.1.17",
+  "license": "ISC",
+  "author": "",
+  "description": "",
   "dependencies": {
-    "glob": "^7.0.0", 
-    "lodash": "^4.6.1"
-  }, 
-  "scripts": {}, 
-  "main": "src/lib/", 
+    "glob": "^7.0.0",
+    "lodash": "^4.6.1",
+    "tslint": "^3.15.1"
+  },
+  "scripts": {},
+  "main": "src/lib/",
   "name": "@encore/util"
 }
