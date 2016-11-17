@@ -13,8 +13,8 @@ export function Discriminate(key: string) {
 
     //Register parent
     let parentConf = getModelConfig(parent);
-    parentConf.childDiscriminators = parentConf.childDiscriminators || {};
-    parentConf.childDiscriminators[key] = target;
+    parentConf.discriminated = parentConf.discriminated || {};
+    parentConf.discriminated[key] = target;
 
     return target;
   };
