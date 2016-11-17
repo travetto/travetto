@@ -1,5 +1,5 @@
 import { BaseModel } from './model';
-import { ModelCls, models, getModelConfig, DEFAULT_VIEW } from './service/registry';
+import { ModelCls, models, getModelConfig, DEFAULT_VIEW, Cls } from './service/registry';
 import { ObjectUtil } from '@encore/util';
 
 export function convert<T extends BaseModel>(cls: ModelCls<T>, o: T): T {
@@ -19,8 +19,11 @@ export function enumKeys(c: any): string[] {
   return ObjectUtil.values(c).filter((x: any) => typeof x === 'string') as string[];
 }
 
-export function bindData<T>(obj: T, data?: any, view: string = DEFAULT_VIEW): T {
-  let cons = obj.constructor as any;
+export function bindModel<T>(model: T, data?: any, view: string = DEFAULT_VIEW): T {
+  return bindData(model.constructor as ModelCls<T>, model, data, view);
+}
+
+export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = DEFAULT_VIEW): T {
   let conf = models[cons.name];
 
   if (!conf || (view === DEFAULT_VIEW && conf.schemaOpts && conf.schemaOpts.strict === false)) {
@@ -44,5 +47,6 @@ export function bindData<T>(obj: T, data?: any, view: string = DEFAULT_VIEW): T 
       }
     }
   }
+
   return obj;
 }

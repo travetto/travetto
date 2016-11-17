@@ -1,5 +1,5 @@
 import { Field } from '../decorate';
-import { bindData } from '../util';
+import { bindModel } from '../util';
 import { models } from '../service';
 import { Base } from '@encore/mongo';
 
@@ -21,7 +21,7 @@ export abstract class BaseModel implements Base {
   updatedDate: Date;
 
   constructor(data?: Object) {
-    bindData(this, data);
+    bindModel(this, data);
     this._type = models[this.constructor.name].discriminator;
   }
 

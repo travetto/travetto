@@ -108,7 +108,7 @@ export class ModelService {
     let cls = getCls(o);
     try {
       o = await Validator.validate(o.preSave(), view);
-      let partial = bindData({}, o, view);
+      let partial = bindData(cls, {}, o, view);
       return await MongoService.partialUpdate<T>(cls, o._id, partial);
     } catch (e) {
       throw ModelService.rewriteError(cls, e);
