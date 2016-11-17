@@ -1,8 +1,8 @@
 {
-  "version": "1.1.18", 
+  "version": "1.1.19", 
   "license": "ISC", 
   "author": "", 
-  "name": "@encore/util", 
+  "description": "", 
   "dependencies": {
     "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git#v1.x.x", 
     "glob": "^7.0.0", 
@@ -10,5 +10,5 @@
   }, 
   "scripts": {}, 
   "main": "src/lib/", 
-  "description": ""
+  "name": "@encore/util"
 }
