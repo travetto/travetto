@@ -6,7 +6,7 @@ let store: { [key: string]: any } = {};
 Context.storage = {
   get: (key: string) => store[key],
   set: (key: string, val: any) => store[key] = val
-}
+};
 
 let ctx = {};
 
