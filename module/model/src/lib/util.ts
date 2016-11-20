@@ -1,8 +1,8 @@
-import { BaseModel } from './model';
+import { ModelCore } from './model';
 import { ModelCls, models, DEFAULT_VIEW, Cls } from './service/registry';
 import { ObjectUtil } from '@encore/util';
 
-export function convert<T extends BaseModel>(cls: ModelCls<T>, o: T): T {
+export function convert<T extends ModelCore>(cls: ModelCls<T>, o: T): T {
   let config = models[cls.name];
   if (config && config.discriminated && !!o._type) {
     return new config.discriminated[o._type](o);
@@ -11,7 +11,7 @@ export function convert<T extends BaseModel>(cls: ModelCls<T>, o: T): T {
   }
 }
 
-export function getCls<T extends BaseModel>(o: T): ModelCls<T> {
+export function getCls<T extends ModelCore>(o: T): ModelCls<T> {
   return o.constructor as any;
 }
 

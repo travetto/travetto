@@ -1,5 +1,5 @@
 import * as mg from 'mongoose';
-import { BaseModel } from '../model';
+import { ModelCore } from '../model';
 import { ModelCls, models, DEFAULT_VIEW } from './registry';
 import { getCls } from '../util';
 
@@ -10,7 +10,7 @@ export class Validator {
 
   static schemas: { [cls: string]: mg.Schema } = {};
 
-  static getSchema<T extends BaseModel>(cls: ModelCls<T>, view: string = DEFAULT_VIEW) {
+  static getSchema<T extends ModelCore>(cls: ModelCls<T>, view: string = DEFAULT_VIEW) {
     const key = `${cls.name}::${view}`;
     if (!Validator.schemas[key]) {
       let config = models[cls.name];
@@ -37,11 +37,11 @@ export class Validator {
       .map((o, i) => Validator.validateRaw(o, schema)));
   }
 
-  static async validate<T extends BaseModel>(o: T, view?: string): Promise<T> {
+  static async validate<T extends ModelCore>(o: T, view?: string): Promise<T> {
     return await Validator.validateRaw(o, Validator.getSchema(getCls(o), view));
   }
 
-  static async validateAll<T extends BaseModel>(obj: T[], view?: string): Promise<T[]> {
+  static async validateAll<T extends ModelCore>(obj: T[], view?: string): Promise<T[]> {
     return await Promise.all<T>((obj || [])
       .map((o, i) => Validator.validate(o, view)));
   }

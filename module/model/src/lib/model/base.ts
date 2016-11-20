@@ -1,9 +1,9 @@
 import { Field } from '../decorate';
 import { bindModel } from '../util';
 import { models } from '../service';
-import { Base } from '@encore/mongo';
+import { ModelCore } from './model';
 
-export abstract class BaseModel implements Base {
+export abstract class BaseModel implements ModelCore {
 
   @Field(String)
   _id: string;
