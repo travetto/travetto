@@ -18,6 +18,7 @@ function buildFieldConfig(type: ClsLst) {
 
 export function Field(type: ClsLst) {
   return (f: any, prop: string) => {
+    console.log('Field of type', Reflect.getMetadata('design:type', f, prop));
     registerFieldFacet(f, prop, buildFieldConfig(type));
   };
 }
