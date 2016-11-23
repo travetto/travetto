@@ -1,5 +1,6 @@
 import { enumKeys } from '../util';
 import { Cls, FieldCfg, ClsLst, registerFieldFacet, getSchema } from '../service/registry';
+import 'reflect-metadata';
 
 function buildFieldConfig(type: ClsLst) {
   const isArray = Array.isArray(type);
