@@ -7,7 +7,7 @@
         "sourceMap": true,
         "preserveConstEnums": true,
         "experimentalDecorators": true,
-        "rootDir" : "src/",
-        "outDir" : "build/"
-    }   
+        "rootDir": "src/",
+        "outDir": "build/"
+    }
 }
