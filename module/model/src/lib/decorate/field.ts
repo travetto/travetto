@@ -38,6 +38,42 @@ export function Enum(values: string[] | any) {
   };
 }
 
+export function Trimmed() {
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, { trim: true });
+  };
+}
+
+export function Match(regExp: RegExp) {
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, { regExp });
+  };
+}
+
+export function MinLength(minlength: number) {
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, { minlength });
+  };
+}
+
+export function MaxLength(maxlength: number) {
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, { maxlength });
+  };
+}
+
+export function Min(min: number | Date) {
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, { min });
+  };
+}
+
+export function Max(max: number | Date) {
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, { max });
+  };
+}
+
 export function View(...names: string[]) {
   return (f: any, prop: string) => {
     for (let name of names) {
