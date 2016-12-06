@@ -32,12 +32,6 @@ Error.prepareStackTrace = function (a, stack) {
     .join('\n');
 }
 
-// TODO: Remove once mongoose fixes it's crap
-let cap = Error.captureStackTrace;
-Error.captureStackTrace = function (a) {
-  a.stack = new Error().stack;
-}
-
 require.extensions['.ts'] = function load(m, tsf) {
   let jsf = tsf.replace(/\.ts$/, '.js');
   let parts = tsf.split('/');
