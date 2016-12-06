@@ -17,6 +17,12 @@ function buildFieldConfig(type: ClsLst) {
   return fieldConf;
 }
 
+function prop(obj: { [key: string]: any }) {
+  return (f: any, prop: string) => {
+    registerFieldFacet(f, prop, obj);
+  };
+}
+
 export function Field(type: ClsLst) {
   return (f: any, prop: string) => {
     console.log('Field of type', Reflect.getMetadata('design:type', f, prop));
@@ -24,55 +30,14 @@ export function Field(type: ClsLst) {
   };
 }
 
-export function Required() {
-  return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, { required: true });
-  };
-}
-
-export function Enum(values: string[] | any) {
-  return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, {
-      enum: Array.isArray(values) ? values : enumKeys(values)
-    });
-  };
-}
-
-export function Trimmed() {
-  return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, { trim: true });
-  };
-}
-
-export function Match(regExp: RegExp) {
-  return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, { regExp });
-  };
-}
-
-export function MinLength(minlength: number) {
-  return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, { minlength });
-  };
-}
-
-export function MaxLength(maxlength: number) {
-  return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, { maxlength });
-  };
-}
-
-export function Min(min: number | Date) {
-  return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, { min });
-  };
-}
-
-export function Max(max: number | Date) {
-  return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, { max });
-  };
-}
+export const Required = () => prop({ required: true });
+export const Enum = (vals: string[] | any) => prop({ enum: Array.isArray(vals) ? vals : enumKeys(vals) });
+export const Trimmed = () => prop({ trim: true });
+export const Match = (re: RegExp) => prop({ regExp: re });
+export const MinLength = (n: number) => prop({ minlength: n });
+export const MaxLength = (n: number) => prop({ maxlength: n });
+export const Min = (n: number | Date) => prop({ min: n });
+export const Max = (n: number | Date) => prop({ max: n });
 
 export function View(...names: string[]) {
   return (f: any, prop: string) => {
