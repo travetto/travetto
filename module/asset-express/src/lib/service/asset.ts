@@ -6,7 +6,7 @@ import * as mime from 'mime';
 import { MongoService } from '@encore/mongo';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
-import { generateTempFile } from '../util/index';
+import { generateTempFile } from '../util';
 
 let crypto = require('crypto');
 let request = require('request');
@@ -57,7 +57,7 @@ export class AssetService {
       }
     });
 
-   let ext = '';
+    let ext = '';
     if (f.contentType) {
       ext = mime.extension(f.contentType);
     } else if (f.filename.indexOf('.') > 0) {
