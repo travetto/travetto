@@ -6,7 +6,7 @@ import * as gm from 'gm';
 import { AssetService } from './asset';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
-import { generateTempFile } from '../util/index';
+import { generateTempFile } from '../util';
 
 export class ImageService {
   private static imageCache = LRU<string>({
