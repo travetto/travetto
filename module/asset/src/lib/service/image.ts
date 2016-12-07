@@ -5,8 +5,8 @@ import * as gm from 'gm';
 import { AssetService } from './asset';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
+import { generateTempFile } from '../util/index';
 let osTmpdir = require('os-tmpdir');
-
 let tmpDir = path.resolve(osTmpdir());
 
 export class ImageService {
@@ -19,12 +19,6 @@ export class ImageService {
     ImageService.imageCache.reset();
   }
 
-  static generateTempFile(ext: string): string {
-    let now = new Date();
-    let name = `image-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${process.pid}-${(Math.random() * 100000000 + 1).toString(36)}.${ext}`;
-    return path.join(tmpDir, name);
-  }
-
   static async getImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<File> {
     let info = await AssetService.get(filename, filter);
     if (options && (options.w || options.h)) {
@@ -32,7 +26,7 @@ export class ImageService {
       let res = ImageService.imageCache.get(key);
 
       if (!res) {
-        let filePath = ImageService.generateTempFile(info.filename.split('.').pop() as string);
+        let filePath = generateTempFile(info.filename.split('.').pop() as string);
         let op = gm(info.stream, info.filename)
           .resize(options.w, options.h)
           .autoOrient();

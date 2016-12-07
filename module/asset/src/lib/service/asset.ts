@@ -1,3 +1,4 @@
+import { generateTempFile } from '../../utils';
 import * as fs from 'fs';
 import * as mongo from 'mongodb';
 import * as Grid from 'gridfs-stream';
@@ -6,6 +7,7 @@ import * as mime from 'mime';
 import { MongoService } from '@encore/mongo';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
+import { generateTempFile } from '../util/index';
 
 let crypto = require('crypto');
 let request = require('request');
@@ -58,12 +60,12 @@ export class AssetService {
       }
     });
 
-    let ext = '';
+   let ext = '';
 
-    if (f.filename.indexOf('.') > 0) {
-      ext = f.filename.split('.').pop() as string;
-    } else if (f.contentType) {
+    if (f.contentType) {
       ext = mime.extension(f.contentType);
+    } else if (f.filename.indexOf('.') > 0) {
+      ext = f.filename.split('.').pop() as string;
     }
 
     f.filename = f.metadata.hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (all, ...others) =>
@@ -186,9 +188,7 @@ export class AssetService {
     return info;
   }
   static async uploadUrl(url: string, tags?: string[], prefix?: string): Promise<File> {
-    let now = new Date();
-    let name = `image-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${process.pid}-${(Math.random() * 100000000 + 1).toString(36)}.${url.split('/').pop() as string}`;
-    let filePath = path.join(tmpDir, name);
+    let filePath = generateTempFile(url.split('/').pop() as string)
     let promise: Promise<File> = new Promise((resolve, reject) => {
       let file = fs.createWriteStream(filePath);
       let req = request.get(url);
