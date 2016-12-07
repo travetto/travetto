@@ -2,12 +2,11 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as LRU from 'lru-cache';
 import * as gm from 'gm';
+
 import { AssetService } from './asset';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
 import { generateTempFile } from '../util/index';
-let osTmpdir = require('os-tmpdir');
-let tmpDir = path.resolve(osTmpdir());
 
 export class ImageService {
   private static imageCache = LRU<string>({

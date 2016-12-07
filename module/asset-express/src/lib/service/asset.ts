@@ -1,4 +1,3 @@
-import { generateTempFile } from '../../utils';
 import * as fs from 'fs';
 import * as mongo from 'mongodb';
 import * as Grid from 'gridfs-stream';
@@ -11,8 +10,6 @@ import { generateTempFile } from '../util/index';
 
 let crypto = require('crypto');
 let request = require('request');
-let osTmpdir = require('os-tmpdir');
-let tmpDir = path.resolve(osTmpdir());
 const fileType = require('file-type');
 
 export class AssetService {
@@ -61,16 +58,13 @@ export class AssetService {
     });
 
    let ext = '';
-
     if (f.contentType) {
       ext = mime.extension(f.contentType);
     } else if (f.filename.indexOf('.') > 0) {
       ext = f.filename.split('.').pop() as string;
     }
-
     f.filename = f.metadata.hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (all, ...others) =>
       (prefix || '') + others.slice(0, 5).join('/') + (ext ? '.' + ext.toLowerCase() : ''));
-
     return f;
   }
 
