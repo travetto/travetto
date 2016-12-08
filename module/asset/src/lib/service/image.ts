@@ -6,8 +6,7 @@ import * as gm from 'gm';
 import { AssetService } from './asset';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
-import { generateTempFile } from '../util';
-
+import { AssetUtil } from '../util';
 export class ImageService {
   private static imageCache = LRU<string>({
     max: 1000,
@@ -25,7 +24,7 @@ export class ImageService {
       let res = ImageService.imageCache.get(key);
 
       if (!res) {
-        let filePath = generateTempFile(info.filename.split('.').pop() as string);
+        let filePath = AssetUtil.generateTempFile(info.filename.split('.').pop() as string);
         let op = gm(info.stream, info.filename)
           .resize(options.w, options.h)
           .autoOrient();
