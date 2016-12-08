@@ -8,7 +8,6 @@ import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
 
 let crypto = require('crypto');
-let request = require('request');
 
 export class AssetService {
 

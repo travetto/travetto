@@ -7,6 +7,7 @@ import { AssetService } from './asset';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
 import { AssetUtil } from '../util';
+
 export class ImageService {
   private static imageCache = LRU<string>({
     max: 1000,
