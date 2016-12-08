@@ -1,8 +1,8 @@
 {
-  "version": "1.1.21", 
+  "version": "1.1.22", 
   "license": "ISC", 
   "author": "", 
-  "name": "@encore/bootstrap", 
+  "description": "", 
   "dependencies": {
     "@types/node": "^6.0.45", 
     "tslint": "^3.15.1", 
@@ -11,5 +11,5 @@
   }, 
   "scripts": {}, 
   "main": "src/lib/", 
-  "description": ""
+  "name": "@encore/bootstrap"
 }
