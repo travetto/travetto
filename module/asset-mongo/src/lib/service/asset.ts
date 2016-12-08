@@ -6,11 +6,10 @@ import * as mime from 'mime';
 import { MongoService } from '@encore/mongo';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
-import { generateTempFile } from '../util';
+import { AssetUtil } from '../util';
 
 let crypto = require('crypto');
 let request = require('request');
-const fileType = require('file-type');
 
 export class AssetService {
 
@@ -68,7 +67,7 @@ export class AssetService {
     return f;
   }
 
-  static async uploadFromPath(path: string, prefix?: string, tags?: string[]) {
+  static async uploadFromPath(path: string, prefix?: string, tags?: string[], removeOnComplete: boolean = false) {
     let hash = crypto.createHash('sha256');
     hash.setEncoding('hex');
 
@@ -88,7 +87,7 @@ export class AssetService {
     if (tags) {
       upload.metadata.tags = tags;
     }
-    return await AssetService.upload(upload, true, false);
+    return await AssetService.upload(upload, true, removeOnComplete);
   }
 
   static async writeFile(file: File, stream: NodeJS.ReadableStream) {
@@ -180,39 +179,5 @@ export class AssetService {
     }
     info.stream = await AssetService.readFile(filename);
     return info;
-  }
-  static async uploadUrl(url: string, tags?: string[], prefix?: string): Promise<File> {
-    let filePath = generateTempFile(url.split('/').pop() as string)
-    let promise: Promise<File> = new Promise((resolve, reject) => {
-      let file = fs.createWriteStream(filePath);
-      let req = request.get(url);
-      let type = '';
-      req.on('data', (chunk: any) => {
-        req.destroy();
-          if (fileType(chunk)) {
-            type = fileType(chunk).mime;
-          }
-      });
-      if (type === undefined) {
-        req.on('response', (res: any) => {
-        type = res.headers['content-type'];
-        });
-      }
-      file.on('finish', () => {
-        AssetService.uploadFromPath(filePath, prefix, tags, type).then(resolve, reject);
-      });
-      file.on('error', reject);
-      req.on('error', reject);
-      req.pipe(file);
-    });
-    try {
-      return await promise;
-    } finally {
-      try {
-        fs.unlink(filePath);
-      } catch (e) {
-            
-      }
-    }
   }
 }
