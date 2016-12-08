@@ -19,7 +19,9 @@
     "multiparty": "^4.1.2",
     "os-tmpdir": "^1.0.1"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "./node_modules/@encore/test/mocha.js"
+  },
   "main": "src/lib/",
   "name": "@encore/asset"
 }
