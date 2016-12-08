@@ -55,20 +55,17 @@ export class AssetService {
     });
 
     let ext = '';
-
-    if (f.filename.indexOf('.') > 0) {
-      ext = f.filename.split('.').pop() as string;
-    } else if (f.contentType) {
+    if (f.contentType) {
       ext = mime.extension(f.contentType);
+    } else if (f.filename.indexOf('.') > 0) {
+      ext = f.filename.split('.').pop() as string;
     }
-
     f.filename = f.metadata.hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (all, ...others) =>
       (prefix || '') + others.slice(0, 5).join('/') + (ext ? '.' + ext.toLowerCase() : ''));
-
     return f;
   }
 
-  static async uploadFromPath(path: string, prefix?: string, tags?: string[]) {
+  static async uploadFromPath(path: string, prefix?: string, tags?: string[], removeOnComplete: boolean = false) {
     let hash = crypto.createHash('sha256');
     hash.setEncoding('hex');
 
@@ -88,7 +85,7 @@ export class AssetService {
     if (tags) {
       upload.metadata.tags = tags;
     }
-    return await AssetService.upload(upload, true, false);
+    return await AssetService.upload(upload, true, removeOnComplete);
   }
 
   static async writeFile(file: File, stream: NodeJS.ReadableStream) {
