@@ -1,27 +1,27 @@
 {
-  "version": "1.1.18",
-  "license": "ISC",
-  "author": "",
-  "description": "",
+  "version": "1.1.20", 
+  "license": "ISC", 
+  "author": "", 
+  "description": "", 
   "dependencies": {
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x",
-    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x",
-    "@types/gm": "^1.17.29",
-    "@types/gridfs-stream": "^0.5.28",
-    "@types/lru-cache": "^2.5.32",
-    "connect-multiparty": "^1.2.5",
-    "express-fileupload": "0.0.4",
-    "file-type": "^3.9.0",
-    "gm": "^1.21.1",
-    "gridfs-stream": "^1.1.1",
-    "lru-cache": "^4.0.0",
-    "mime": "^1.3.4",
-    "multiparty": "^4.1.2",
-    "os-tmpdir": "^1.0.1"
-  },
+    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x", 
+    "@types/gridfs-stream": "^0.5.28", 
+    "express-fileupload": "0.0.4", 
+    "multiparty": "^4.1.2", 
+    "@types/lru-cache": "^2.5.32", 
+    "os-tmpdir": "^1.0.1", 
+    "file-type": "^3.9.0", 
+    "@types/gm": "^1.17.29", 
+    "mime": "^1.3.4", 
+    "connect-multiparty": "^1.2.5", 
+    "gm": "^1.21.1", 
+    "gridfs-stream": "^1.1.1", 
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x", 
+    "lru-cache": "^4.0.0"
+  }, 
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
-  },
-  "main": "src/lib/",
+  }, 
+  "main": "src/lib/", 
   "name": "@encore/asset"
 }
