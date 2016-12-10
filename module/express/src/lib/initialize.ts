@@ -2,6 +2,7 @@ import * as express from 'express';
 import Config from './config';
 import { Ready } from '@encore/init';
 import { requestContext } from '@encore/context/ext/express';
+import { Logger } from '@encore/logging';
 
 let compression = require('compression');
 let cookieParser = require('cookie-parser');
@@ -9,6 +10,10 @@ let bodyParser = require('body-parser');
 let session = require('express-session');
 
 export const app: express.Application = express();
+app.use((req, res, next) => {
+  Logger.info(`[${req.method}] ${req.path}`, req.params, req.query);
+  next();
+});
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
