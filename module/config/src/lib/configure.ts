@@ -113,9 +113,13 @@ export function configure(name: string) {
   // Load all namespaces from app
   bulkRequire('src/app/**/config.ts');
 
-  // Load env config
-  let data = require(`${process.cwd()}/src/env/${name}.json`) as ConfigMap;
-  merge(config, data);
+  try {
+    // Load env config
+    let data = require(`${process.cwd()}/src/env/${name}.json`) as ConfigMap;
+    merge(config, data);
+  } catch (e) {
+    console.log(`No config found at ${process.cwd()}/src/env/${name}.json`);
+  }
 
   // Handle process.env
   merge(config, process.env);
