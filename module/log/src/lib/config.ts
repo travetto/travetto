@@ -4,7 +4,7 @@ export default registerNamespace('logging', {
   console: {
     enabled: true,
     type: 'console',
-    format: 'standard'
+    formatter: 'standard'
   },
   log: {
     enabled: true,

@@ -10,15 +10,15 @@ describe('Logging', () => {
 
   before(async () => {
     try {
-      return await nodeToPromise<void>(fs, fs.unlinkSync, name);
+      return await nodeToPromise<void>(fs, fs.unlink, name);
     } catch (e) {
       // Do nothing
     }
   });
 
   it('Should log', async () => {
-    Logger.info('Hello world');
-    let contents = fs.readFileSync(name).toString();
-    expect(contents).to.contain('Hello world');
+    await Logger.info('Hello world');
+    let contents = await nodeToPromise(fs, fs.readFile, name);
+    expect(contents.toString()).to.contain('Hello world');
   });
 }) 
