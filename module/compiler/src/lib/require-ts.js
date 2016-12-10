@@ -22,14 +22,14 @@ function getOptions(tsconfigFile) {
 let prep = Error.prepareStackTrace;
 Error.prepareStackTrace = function (a, stack) {
   let res = prep(a, stack);
-  return res
-    .split('\n')
+  let parts = res.split('\n');
+  return [parts[0], ...parts.slice(1)
     .filter(l =>
       l.indexOf('require-ts.js') < 0 &&
       l.indexOf('source-map-support.js') < 0 &&
       (l.indexOf('node_modules') > 0 ||
         (l.indexOf('(native)') < 0 && (l.indexOf(cwd) < 0 || l.indexOf('.js') < 0))))
-    .join('\n');
+  ].join('\n');
 }
 
 require.extensions['.ts'] = function load(m, tsf) {
