@@ -6,7 +6,7 @@ import { Formatters } from './formatter';
 
 // Read package.json
 let pkg = JSON.parse(fs.readFileSync(process.cwd() + '/package.json').toString());
-let appName = (pkg.name as string).replace(/[@\/]/g, '_');
+let appName = (pkg.name as string).replace(/[@]/g, '').replace(/[\/]/g, '_');
 
 export function processTransportConfig(conf: typeof Config.log): winston.TransportInstance | undefined {
   if (conf.type === 'file') {
