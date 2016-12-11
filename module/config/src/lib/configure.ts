@@ -113,6 +113,9 @@ export function configure(name: string) {
   // Load all namespaces from app
   bulkRequire('src/app/**/config.ts');
 
+  // Load all namespaces from lib
+  bulkRequire('src/lib/**/config.ts');
+
   try {
     // Load env config
     let data = require(`${process.cwd()}/src/env/${name}.json`) as ConfigMap;
