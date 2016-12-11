@@ -11,7 +11,7 @@ let appName = (pkg.name as string).replace(/[@]/g, '').replace(/[\/]/g, '_');
 export function processTransportConfig(conf: typeof Config.log): winston.TransportInstance | undefined {
   if (conf.type === 'file') {
     if (!conf.filename) {
-      conf.filename = `${appName}.log`;
+      conf.filename = `${appName}-${conf.name}.log`;
     }
     if (!conf.filename.startsWith('/')) {
       conf.filename = `${process.cwd()}/logs/${conf.filename}`;

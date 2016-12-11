@@ -23,5 +23,3 @@ export default registerNamespace('logging', {
     level: 'error'
   }
 });
-
-console.log("Registered");
