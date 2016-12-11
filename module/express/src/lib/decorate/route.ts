@@ -1,17 +1,17 @@
 import * as moment from 'moment';
 import { PathType } from '../model';
-import { RouteService } from '../service';
+import { RouteRegistry } from '../service';
 
 export function Controller(path = '') {
-  return RouteService.registerRequestHandlers.bind(null, path);
+  return RouteRegistry.registerRequestHandlers.bind(null, path);
 }
 
 export function All(path: PathType) {
-  return RouteService.createRequestHandlerDecorator({ method: 'all', path });
+  return RouteRegistry.createRequestHandlerDecorator({ method: 'all', path });
 }
 
 export function Get(path: PathType) {
-  return RouteService.createRequestHandlerDecorator({
+  return RouteRegistry.createRequestHandlerDecorator({
     method: 'get',
     path,
     headers: {
@@ -22,19 +22,19 @@ export function Get(path: PathType) {
 }
 
 export function Put(path: PathType) {
-  return RouteService.createRequestHandlerDecorator({ method: 'put', path });
+  return RouteRegistry.createRequestHandlerDecorator({ method: 'put', path });
 }
 
 export function Delete(path: PathType) {
-  return RouteService.createRequestHandlerDecorator({ method: 'delete', path });
+  return RouteRegistry.createRequestHandlerDecorator({ method: 'delete', path });
 }
 
 export function Post(path: PathType) {
-  return RouteService.createRequestHandlerDecorator({ method: 'post', path });
+  return RouteRegistry.createRequestHandlerDecorator({ method: 'post', path });
 }
 
 export function Header(headers: { [key: string]: (string | (() => string)) }) {
-  return RouteService.createRequestHandlerDecorator({ headers });
+  return RouteRegistry.createRequestHandlerDecorator({ headers });
 }
 
 export function Cache(value: number, unit = 'second') {
