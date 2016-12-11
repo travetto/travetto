@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ObjectUtil, nodeToPromise } from '@encore/util';
-import { filterAdder } from '@encore/express';
+import { RouteRegistry } from '@encore/express';
 import * as passport from 'passport';
 
 export function Authenticate(provider: string, failTo?: string) {
@@ -10,7 +10,7 @@ export function Authenticate(provider: string, failTo?: string) {
     req.passportOptions = passportOptions;
     return nodeToPromise(null, handler, req, res);
   };
-  return filterAdder(fn);
+  return RouteRegistry.filterAdder(fn);
 }
 
 export async function requireAuth(config: { key?: string, include?: string[], exclude?: string[] }, req: Request, res: Response) {
@@ -45,7 +45,7 @@ export function Authenticated(key?: string, include: string[] = [], exclude: str
       let target: Object = args[0],
         propertyKey: string = args[1],
         descriptor: TypedPropertyDescriptor<any> = args[2];
-      return filterAdder(auth)(target, propertyKey, descriptor);
+      return RouteRegistry.filterAdder(auth)(target, propertyKey, descriptor);
     } else {
       let cls = args[0];
       cls.filters = cls.filters || [];
@@ -66,9 +66,9 @@ export function Unauthenticated() {
       let target: Object = args[0],
         propertyKey: string = args[1],
         descriptor: TypedPropertyDescriptor<any> = args[2];
-      return filterAdder(unauth)(target, propertyKey, descriptor);
+      return RouteRegistry.filterAdder(unauth)(target, propertyKey, descriptor);
     } else {
-      let cls = args[0]
+      let cls = args[0];
       cls.filters = cls.filters || [];
       cls.filters.push(unauth);
       return cls;
