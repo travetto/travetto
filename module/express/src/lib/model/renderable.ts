@@ -7,7 +7,7 @@ export abstract class Renderable {
 export class Redirect extends Renderable {
 
   constructor(private location: string, private status = 302) {
-    super()
+    super();
   }
 
   render(res: Response) {

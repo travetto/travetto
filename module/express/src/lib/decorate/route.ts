@@ -1,21 +1,17 @@
-import { ObjectUtil } from '@encore/util';
 import * as moment from 'moment';
-import { RequestHandler, PathType } from './types';
+import { PathType } from '../model';
+import { RouteService } from '../service';
 
-function createRequestHandlerDecorator(rh: RequestHandler) {
-  return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-    descriptor.value.requestHandler =
-      ObjectUtil.merge(descriptor.value.requestHandler || {}, rh);
-    return descriptor;
-  };
+export function Controller(path = '') {
+  return RouteService.registerRequestHandlers.bind(null, path);
 }
 
 export function All(path: PathType) {
-  return createRequestHandlerDecorator({ method: 'all', path });
+  return RouteService.createRequestHandlerDecorator({ method: 'all', path });
 }
 
 export function Get(path: PathType) {
-  return createRequestHandlerDecorator({
+  return RouteService.createRequestHandlerDecorator({
     method: 'get',
     path,
     headers: {
@@ -26,19 +22,19 @@ export function Get(path: PathType) {
 }
 
 export function Put(path: PathType) {
-  return createRequestHandlerDecorator({ method: 'put', path });
+  return RouteService.createRequestHandlerDecorator({ method: 'put', path });
 }
 
 export function Delete(path: PathType) {
-  return createRequestHandlerDecorator({ method: 'delete', path });
+  return RouteService.createRequestHandlerDecorator({ method: 'delete', path });
 }
 
 export function Post(path: PathType) {
-  return createRequestHandlerDecorator({ method: 'post', path });
+  return RouteService.createRequestHandlerDecorator({ method: 'post', path });
 }
 
 export function Header(headers: { [key: string]: (string | (() => string)) }) {
-  return createRequestHandlerDecorator({ headers });
+  return RouteService.createRequestHandlerDecorator({ headers });
 }
 
 export function Cache(value: number, unit = 'second') {
