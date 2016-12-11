@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { Logger } from '../lib';
 import { nodeToPromise } from '@encore/util';
 
-let name = process.cwd() + '/logs/_encore_logging.log';
+let name = process.cwd() + '/logs/encore_logging.log';
 
 describe('Logging', () => {
 

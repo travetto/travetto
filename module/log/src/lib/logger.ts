@@ -3,12 +3,16 @@ import * as winston from 'winston';
 import { nodeToPromise } from '@encore/util';
 import { processTransportConfig } from './transport';
 
-function asyncLogLevel(log: any, level: string) {
-  return async (msg: string, ...meta: any[]) => await nodeToPromise<void>(log, log[level], msg, ...meta);
-}
+type AsyncLogLevel = (msg: string, ...meta: any[]) => Promise<void>;
+type AsyncLog = (level: string, msg: string, ...meta: any[]) => Promise<void>;
 
-function asyncLog(log: any) {
-  return async (level: string, msg: string, ...meta: any[]) => await nodeToPromise<void>(log, log[level], msg, ...meta);
+function asyncLog(log: any, scope: string) {
+  return async (level: string, msg: string, ...meta: any[]) => {
+    if (scope) {
+      msg = msg ? `${scope} ${msg}` : scope;
+    }
+    return await nodeToPromise<void>(log, log[level], msg, ...meta);
+  };
 }
 
 let transports = Object
@@ -23,26 +27,27 @@ let transports = Object
 
 let logger = new winston.Logger({ transports });
 
-export const Logger = {
-  log: asyncLog(logger),
-  error: asyncLogLevel(logger, 'error'),
-  info: asyncLogLevel(logger, 'info'),
-  debug: asyncLogLevel(logger, 'debug'),
-  warn: asyncLogLevel(logger, 'warn'),
-  verbose: asyncLogLevel(logger, 'verbose'),
-  silly: asyncLogLevel(logger, 'silly')
+class LoggerWrapper {
+
+  log: AsyncLog;
+  error: AsyncLogLevel;
+  info: AsyncLogLevel;
+  debug: AsyncLogLevel;
+  warn: AsyncLogLevel;
+  verbose: AsyncLogLevel;
+  silly: AsyncLogLevel;
+
+  scope(scope: string) {
+    return new LoggerWrapper(scope);
+  }
+
+  constructor(scope: string = '') {
+    this.log = asyncLog(logger, scope);
+    for (let k of ['error', 'info', 'debug', 'warn', 'verbose', 'silly']) {
+      (this as any)[k] = asyncLog(logger, scope).bind(null, k);
+    }
+  }
 }
 
-export const SysLogger = {
-  log: asyncLog(logger),
-  emerg: asyncLogLevel(logger, 'emerg'),
-  alert: asyncLogLevel(logger, 'alert'),
-  crit: asyncLogLevel(logger, 'crit'),
-  warning: asyncLogLevel(logger, 'warning'),
-  notice: asyncLogLevel(logger, 'notice'),
-  error: asyncLogLevel(logger, 'error'),
-  info: asyncLogLevel(logger, 'info'),
-  debug: asyncLogLevel(logger, 'debug'),
-};
-
+export const Logger = new LoggerWrapper('');
 export const WinstoLogger = logger;
