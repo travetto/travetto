@@ -3,7 +3,7 @@ import * as passport from 'passport';
 import * as moment from 'moment';
 
 import { nodeToPromise } from '@encore/util';
-import { ModelService, BaseModel } from '@encore/model'
+import { ModelService, BaseModel } from '@encore/model';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Context } from '@encore/context';
 
