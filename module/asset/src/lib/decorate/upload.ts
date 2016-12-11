@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AssetService } from '../service';
-import { filterAdder } from '@encore/express';
+import { RouteRegistry } from '@encore/express';
 import { nodeToPromise } from '@encore/util';
 
 let multipart = require('connect-multiparty')({
@@ -10,7 +10,7 @@ let multipart = require('connect-multiparty')({
 function doUpload(after?: (req: Request) => Promise<any>) {
   return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
     let clz = target.constructor;
-    filterAdder(async (req: Request, res: Response) => {
+    RouteRegistry.filterAdder(async (req: Request, res: Response) => {
       await nodeToPromise<void>(null, multipart, req, res);
 
       Object.keys(req.files).forEach(f =>
