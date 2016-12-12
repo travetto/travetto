@@ -19,10 +19,6 @@ export function enumKeys(c: any): string[] {
   return ObjectUtil.values(c).filter((x: any) => typeof x === 'string') as string[];
 }
 
-export function bindModel<T>(model: T, data?: any, view: string = DEFAULT_VIEW): T {
-  return bindData(model.constructor as ModelCls<T>, model, data, view);
-}
-
 export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = DEFAULT_VIEW): T {
   if (!!data) {
     let conf = models[cons.name];
@@ -45,9 +41,9 @@ export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = DEFAUL
 
           if (models[declared.type.name]) {
             if (declared.array) {
-              v = v.map((x: any) => bindModel(new declared.type(), x, view));
+              v = v.map((x: any) => bindData(declared.type, new declared.type(), x, view));
             } else {
-              v = bindModel(new declared.type(), v, view);
+              v = bindData(declared.type, new declared.type(), v, view);
             }
           }
 

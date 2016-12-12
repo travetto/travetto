@@ -1,9 +1,9 @@
 import { Field } from '../decorate';
-import { bindModel } from '../util';
 import { models } from '../service';
 import { ModelCore } from './model';
+import { Bindable } from './bindable';
 
-export abstract class BaseModel implements ModelCore {
+export abstract class BaseModel extends Bindable implements ModelCore {
 
   @Field(String)
   _id: string;
@@ -21,7 +21,7 @@ export abstract class BaseModel implements ModelCore {
   updatedDate: Date;
 
   constructor(data?: Object) {
-    bindModel(this, data);
+    super(data);
     this._type = models[this.constructor.name].discriminator;
   }
 

@@ -1,7 +1,7 @@
-import { Model, Field, bindModel, View } from '../lib';
+import { Model, Field, Bindable, View, bindData } from '../lib';
 import { expect } from 'chai';
 
-class Address {
+class Address extends Bindable {
 
   @Field(String)
   @View('test')
@@ -11,7 +11,7 @@ class Address {
   street2: string;
 }
 
-class Count {
+class Count extends Bindable {
 
   @Field(String)
   @View('test')
@@ -22,7 +22,7 @@ class Count {
 }
 
 @Model()
-class Person {
+class Person extends Bindable {
 
   @Field(String)
   name: string;
@@ -38,7 +38,7 @@ class Person {
 
 describe('Data Binding', () => {
   it('Validate bind', () => {
-    let person = bindModel(new Person(), {
+    let person = new Person({
       name: 'Test',
       address: {
         street1: '1234 Fun',
@@ -54,7 +54,7 @@ describe('Data Binding', () => {
     expect(person.counts.length).to.equal(2);
     expect(person.counts[0]).instanceof(Count);
 
-    let viewPerson = bindModel(new Person(), {
+    let viewPerson = bindData(Person, new Person(), {
       name: 'Test',
       address: {
         street1: '1234 Fun',
