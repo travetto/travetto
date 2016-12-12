@@ -26,14 +26,14 @@ export function bindModel<T>(model: T, data?: any, view: string = DEFAULT_VIEW):
 export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = DEFAULT_VIEW): T {
   if (!!data) {
     let conf = models[cons.name];
-    let viewConf = conf && conf.views[view];
 
-    // If no configuration or viewConf has no fields
-    if (!conf || (viewConf && !viewConf.fields)) {
+    // If no configuration
+    if (!conf) {
       for (let k of Object.keys(data)) {
         (obj as any)[k] = data[k];
       }
     } else {
+      let viewConf = conf && conf.views[view];
       if (!viewConf) {
         throw new Error(`View not found: ${view}`);
       }
