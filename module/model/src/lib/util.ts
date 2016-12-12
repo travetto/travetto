@@ -37,13 +37,18 @@ export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = DEFAUL
         if (data.hasOwnProperty(f)) {
 
           let v = data[f];
-          let declared = viewConf.schema[f].declared;
 
-          if (models[declared.type.name]) {
-            if (declared.array) {
-              v = v.map((x: any) => bindData(declared.type, new declared.type(), x, view));
-            } else {
-              v = bindData(declared.type, new declared.type(), v, view);
+          if (v !== undefined && v !== null) {
+            let declared = viewConf.schema[f].declared;
+            if (models[declared.type.name]) {
+              if (declared.array) {
+                if (!Array.isArray(v)) {
+                  v = [v];
+                }
+                v = v.map((x: any) => bindData(declared.type, new declared.type(), x, view));
+              } else {
+                v = bindData(declared.type, new declared.type(), v, view);
+              }
             }
           }
 
