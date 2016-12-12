@@ -4,11 +4,13 @@ import 'reflect-metadata';
 
 function buildFieldConfig(type: ClsLst) {
   const isArray = Array.isArray(type);
-  const fieldConf: FieldCfg = { type };
-  const fieldType: Cls = Array.isArray(type) ? type[0] : type;
+  const fieldConf: FieldCfg = {
+    type,
+    declared: { array: isArray, type: isArray ? (type as any)[0] : type }
+  };
 
   // Get schema if exists
-  const schema = getSchema(fieldType);
+  const schema = getSchema(fieldConf.declared.type);
 
   if (schema) {
     fieldConf.type = isArray ? [schema] : schema;

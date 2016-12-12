@@ -23,7 +23,7 @@ export interface ModelConfig {
   schemaOpts?: mongoose.SchemaOptions;
   views: {
     [key: string]: {
-      schema: { [key: string]: any },
+      schema: { [key: string]: FieldCfg },
       fields: string[]
     }
   };
@@ -31,7 +31,7 @@ export interface ModelConfig {
   discriminated?: { [key: string]: ModelCls<any> };
   defaultSort?: SortOptions;
   indices: IndexConfig[];
-  primaryUnique?: string[]
+  primaryUnique?: string[];
 }
 
 export interface FieldCfg {
@@ -39,4 +39,5 @@ export interface FieldCfg {
   unique?: boolean;
   enum?: any[];
   type: any;
+  declared: { type: Cls, array: boolean };
 }

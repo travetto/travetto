@@ -38,7 +38,7 @@ export function getModelConfig<T>(cls: string | ModelCls<T>) {
       views: {
         [DEFAULT_VIEW]: {
           schema: {},
-          fields: [],
+          fields: []
         }
       }
     };
@@ -52,7 +52,7 @@ export function registerFieldFacet(target: any, prop: string, config: any, view:
 
   if (!defViewConf.schema[prop]) {
     defViewConf.fields.push(prop);
-    defViewConf.schema[prop] = {};
+    defViewConf.schema[prop] = {} as any;
   }
 
   if (view !== DEFAULT_VIEW) {

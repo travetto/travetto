@@ -24,26 +24,35 @@ export function bindModel<T>(model: T, data?: any, view: string = DEFAULT_VIEW):
 }
 
 export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = DEFAULT_VIEW): T {
-  let conf = models[cons.name];
+  if (!!data) {
+    let conf = models[cons.name];
+    let viewConf = conf && conf.views[view];
 
-  if (!conf || (view === DEFAULT_VIEW && conf.schemaOpts && conf.schemaOpts.strict === false)) {
-    for (let k of Object.keys(data)) {
-      (obj as any)[k] = data[k];
-    }
-  } else if (!!data) {
-    let viewConf = conf.views[view];
-    if (!viewConf) {
-      throw new Error(`View not found: ${view}`);
-    }
-    if (viewConf.fields) {
-      viewConf.fields.forEach((f: string) => {
-        if (data[f] !== undefined) {
-          (obj as any)[f] = data[f];
-        }
-      });
-    } else {
+    // If no configuration or viewConf has no fields
+    if (!conf || (viewConf && !viewConf.fields)) {
       for (let k of Object.keys(data)) {
         (obj as any)[k] = data[k];
+      }
+    } else {
+      if (!viewConf) {
+        throw new Error(`View not found: ${view}`);
+      }
+      for (let f of viewConf.fields) {
+        if (data.hasOwnProperty(f)) {
+
+          let v = data[f];
+          let declared = viewConf.schema[f].declared;
+
+          if (models[declared.type.name]) {
+            if (declared.array) {
+              v = v.map((x: any) => bindModel(new declared.type(), x, view));
+            } else {
+              v = bindModel(new declared.type(), v, view);
+            }
+          }
+
+          (obj as any)[f] = v;
+        }
       }
     }
   }
