@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { bindData } from '../lib/util';
-import { BaseModel, Bindable } from '../lib/model';
+import { BaseModel } from '../lib/model';
 import { Validator } from '../lib/service';
 import { ObjectUtil } from '@encore/util';
 let flat = require('flat');
