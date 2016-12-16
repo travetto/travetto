@@ -19,6 +19,23 @@ export function enumKeys(c: any): string[] {
   return ObjectUtil.values(c).filter((x: any) => typeof x === 'string') as string[];
 }
 
+export function coerceType(type: Cls, val: any) {
+  if (val.constructor !== type) {
+    if (type === Boolean) {
+      if (typeof val === 'string') {
+        val = val === 'true';
+      } else {
+        val = !!val;
+      }
+    } else if (type === Number) {
+      val = parseInt(`${val}`, 10);
+    } else {
+      val = `${val}`;
+    }
+  }
+  return val;
+}
+
 export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = DEFAULT_VIEW): T {
   if (!!data) {
     let conf = models[cons.name];
@@ -40,15 +57,21 @@ export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = DEFAUL
 
           if (v !== undefined && v !== null) {
             let declared = viewConf.schema[f].declared;
+            // Ensure its an array
+            if (!Array.isArray(v) && declared.array) {
+              v = [v];
+            }
+
             if (models[declared.type.name]) {
               if (declared.array) {
-                if (!Array.isArray(v)) {
-                  v = [v];
-                }
                 v = v.map((x: any) => bindData(declared.type, new declared.type(), x, view));
               } else {
                 v = bindData(declared.type, new declared.type(), v, view);
               }
+            } else {
+              v = declared.array ?
+                v.map((e: any) => coerceType(declared.type, e)) :
+                coerceType(declared.type, v);
             }
           }
 
