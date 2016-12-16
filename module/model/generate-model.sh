@@ -31,6 +31,7 @@ cat $DECLS |\
   grep -v 'reference types' |\
   tr '\t' ' ' |\
   sed \
+    -e 's/extends Bindable//' \
     -e 's/export \*.*$//' \
     -e 's/ default / /' \
     -e 's/export /declare /' \
