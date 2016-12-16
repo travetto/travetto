@@ -1,11 +1,11 @@
 {
   "name": "@encore/model", 
   "license": "ISC", 
-  "author": "", 
   "optionalDependencies": {
     "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x"
   }, 
-  "version": "1.2.28", 
+  "author": "", 
+  "version": "1.2.29", 
   "dependencies": {
     "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x", 
     "flat": "^2.0.0", 
