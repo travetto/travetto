@@ -13,16 +13,17 @@ for f in $FILES; do
 done
 
 COMPILE="tsc  
-  --lib es2015,es2016,dom  
+  --lib es2015,es2016,dom
+  -t es2015
   -m es2015 
   --outDir build/  
   --experimentalDecorators  
   --preserveConstEnums 
   $DECLS"
 
-$COMPILE 
+$COMPILE | grep -v 'Cannot find module'
 
-DECLS=`find build/ -name '*.d.ts' | grep 'model' | grep -v '@encore/model/src/lib/model/types'`
+DECLS=`find build/ -name '*.d.ts' | grep 'model' | grep -v '@encore/model/src/lib/model/types' | grep -v 'util' `
 
 cat $DECLS |\
   grep -v import |\
@@ -46,6 +47,6 @@ cat $DECLS |\
   tr '\n' '\t' |\
   perl -pe 's/export [_A-Z][^;]+;//g' |\
   perl -pe 's/constructor[^)]*\);//g' |\
-  tr '\t' '\n' > model.ts
+  tr '\t' '\n' > model.ts 
 
 rm -rf build/
