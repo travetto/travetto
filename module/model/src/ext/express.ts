@@ -7,7 +7,7 @@ let flat = require('flat');
 
 import { RouteRegistry } from '@encore/express';
 
-export function ModelBody<T extends Bindable>(cls: (new (a?: any) => T), view?: string) {
+export function ModelBody<T>(cls: (new (a?: any) => T), view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     if (ObjectUtil.isPlainObject(req.body)) {
       let o = bindData(cls, new cls(), req.body, view);
@@ -22,7 +22,7 @@ export function ModelBody<T extends Bindable>(cls: (new (a?: any) => T), view?: 
   });
 }
 
-export function ModelQuery<T extends Bindable>(cls: (new (a?: any) => T), view?: string) {
+export function ModelQuery<T>(cls: (new (a?: any) => T), view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     let o = bindData(cls, new cls(), flat.unflatten(req.query), view);
     if (o instanceof BaseModel) {
