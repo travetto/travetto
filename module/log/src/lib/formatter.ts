@@ -46,7 +46,7 @@ export const Formatters = {
     if (message) {
       out += message + ' ';
     }
-    if (meta) {
+    if (meta && Object.keys(meta).length) {
       out += meta + ' ';
     }
     return out.substring(0, out.length - 1);
