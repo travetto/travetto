@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { RouteRegistry } from '../service';
-
+import { AppError } from '../model';
 
 export function RequiredParam(name: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
@@ -12,7 +12,7 @@ export function RequiredParam(name: string) {
     ];
 
     if ((param !== null) && paramTypes.indexOf(typeof param) === -1) {
-      throw { message: `Missing field: ${name}`, statusCode: 400 };
+      throw new AppError(`Missing field: ${name}`, 400);
     }
   });
 }
@@ -21,7 +21,7 @@ export function Accepts(contentTypes: string[]) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     let contentType = req.header('content-type');
     if (contentTypes.indexOf(contentType) < 0) {
-      throw { message: `Content type ${contentType}`, statusCode: 400 };
+      throw new AppError(`Content type ${contentType}`, 400);
     }
   });
 }
