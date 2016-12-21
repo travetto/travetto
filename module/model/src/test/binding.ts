@@ -1,4 +1,4 @@
-import { Model, Field, Bindable, View, bindData } from '../lib';
+import { Model, Field, Bindable, View, Required, bindData } from '../lib';
 import { expect } from 'chai';
 
 class Address extends Bindable {
@@ -34,6 +34,22 @@ class Person extends Bindable {
   @View('test')
   @Field([Count])
   counts: Count[];
+}
+
+export class Response extends Bindable {
+
+  @Field(String)
+  @Required()
+  questionId: string;
+
+  @Field(Object)
+  answer?: any;
+
+  @Field(Boolean)
+  valid?: boolean;
+
+  @Field(Number)
+  validationCount?: number = 0;
 }
 
 describe('Data Binding', () => {
@@ -73,4 +89,14 @@ describe('Data Binding', () => {
     expect(viewPerson.counts[0]).instanceof(Count);
     expect(viewPerson.counts[0].value).to.equal(undefined);
   });
+
+  it('Validate Object', () => {
+    let res = new Response({
+      questionId: '20'
+      answer: ['a', 'd']
+    });
+    expect(res.questionId).to.equal('20');
+    expect(res.answer).to.not.equal(undefined);
+    expect(res.answer).to.deep.equal(['a', 'd']);
+  } );
 });

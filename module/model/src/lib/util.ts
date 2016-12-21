@@ -29,7 +29,7 @@ export function coerceType(type: Cls, val: any) {
       }
     } else if (type === Number) {
       val = parseInt(`${val}`, 10);
-    } else {
+    } else if (type === String) {
       val = `${val}`;
     }
   }
