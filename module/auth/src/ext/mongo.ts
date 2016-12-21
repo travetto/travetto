@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import * as passport from 'passport';
 import * as moment from 'moment';
 
+import { AppError } from '@encore/express';
 import { nodeToPromise } from '@encore/util';
 import { ModelService, BaseModel } from '@encore/model';
 import { Strategy as LocalStrategy } from 'passport-local';
@@ -17,12 +18,12 @@ async function generateSalt(saltlen = 32) {
 
 async function generatePassword(password: string, saltlen = 32, validator?: (password: string) => Promise<boolean>) {
   if (!password) {
-    throw { message: 'Missing password exception', statusCode: 501 };
+    throw new AppError('Missing password exception', 501);
   }
 
   if (validator !== undefined) {
     if (!await validator(password)) {
-      throw { message: 'Invalid password', statusCode: 503 };
+      throw new AppError('Invalid password', 503);
     }
   }
 
@@ -52,7 +53,7 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
       let user = await ModelService.findOne(cls, query);
       let hash = await generateHash(password, (user as any)[config.saltField]);
       if (hash !== (user as any)[config.hashField]) {
-        throw { message: 'Invalid password', statusCode: 500 };
+        throw new AppError('Invalid password');
       } else {
         try {
           Context.get().user = user;
@@ -62,7 +63,7 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
         return user;
       }
     } catch (e) {
-      throw { message: 'User is not found', statusCode: 500 };
+      throw new AppError('User is not found');
     }
   }
 
@@ -73,7 +74,7 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
 
     let existingUsers = await ModelService.getByQuery(cls, query);
     if (existingUsers.length) {
-      throw { message: 'That email is already taken.', statusCode: 500 };
+      throw new AppError('That email is already taken.');
     } else {
       let fields = await generatePassword(password);
       Object.assign(user as any, {
@@ -102,12 +103,12 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
     if (oldPassword !== undefined) {
       if (oldPassword === (user as any)[config.resetTokenField]) {
         if (moment((user as any)[config.resetExpiresField]).isBefore(new Date())) {
-          throw { message: 'Reset token has expired', statusCode: 500 };
+          throw new AppError('Reset token has expired');
         }
       } else {
         let pw = await generateHash(oldPassword, (user as any)[config.saltField]);
         if (pw !== (user as any)[config.hashField]) {
-          throw { message: 'Old password is required to change', statusCode: 500 };
+          throw new AppError('Old password is required to change');
         }
       }
     }

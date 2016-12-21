@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ObjectUtil, nodeToPromise } from '@encore/util';
-import { RouteRegistry } from '@encore/express';
+import { RouteRegistry, AppError } from '@encore/express';
 import * as passport from 'passport';
 
 export function Authenticate(provider: string, failTo?: string) {
@@ -15,7 +15,7 @@ export function Authenticate(provider: string, failTo?: string) {
 
 export async function requireAuth(config: { key?: string, include?: string[], exclude?: string[] }, req: Request, res: Response) {
   if (req.isUnauthenticated()) {
-    throw { message: 'User is required', statusCode: 401 };
+    throw new AppError('User is required', 401);
   }
   if (config.key) {
     if (!req.principal.groupMap) {
@@ -25,10 +25,10 @@ export async function requireAuth(config: { key?: string, include?: string[], ex
     }
 
     if (config.exclude && config.exclude.length && config.exclude.find(x => req.principal.groupMap[x]) !== undefined) {
-      throw { message: 'Access forbidden', statusCode: 403 };
+      throw new AppError('Access forbidden', 403);
     }
     if (config.include && config.include.length && config.include.find(x => req.principal.groupMap[x]) === undefined) {
-      throw { message: 'Access forbidden', statusCode: 403 };
+      throw new AppError('Access forbidden', 403);
     }
   }
 }
@@ -58,7 +58,7 @@ export function Authenticated(key?: string, include: string[] = [], exclude: str
 export function Unauthenticated() {
   let unauth = (req: Express.Request) => {
     if (!req.isUnauthenticated()) {
-      throw { message: 'User cannot be authenticated', statusCode: 401 };
+      throw new AppError('User cannot be authenticated', 401);
     }
   };
   return (...args: any[]) => {
