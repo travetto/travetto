@@ -26,9 +26,9 @@ export function ModelQuery<T>(cls: (new (a?: any) => T), view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     let o = bindData(cls, new cls(), flat.unflatten(req.query), view);
     if (o instanceof BaseModel) {
-      req.body = await Validator.validate(o, view);
+      req.query = await Validator.validate(o, view);
     } else {
-      req.body = o;
+      req.query = o;
     }
   });
 }
