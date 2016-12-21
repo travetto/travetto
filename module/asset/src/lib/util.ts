@@ -21,9 +21,9 @@ export class AssetUtil {
     return new Promise<Buffer>((resolve, reject) => {
       fs.open(filePath, 'r', function (status, fd) {
         if (status) {
-          return reject(status.message);
+          return reject(status);
         }
-        var buffer = new Buffer(bytes);
+        let buffer = new Buffer(bytes);
         fs.read(fd, buffer, 0, bytes, 0, function (err, num) {
           if (err) {
             return reject(err);
