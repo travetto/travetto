@@ -58,10 +58,7 @@ export class ModelService {
 
   static rewriteError<T extends ModelCore>(cls: ModelCls<T>, e: any) {
     if (e.code === 11000) { // Handle duplicate errors
-      e = {
-        message: 'Duplicate entry already exists',
-        statusCode: 501
-      };
+      e = new Error('Duplicate entry already exists');
     }
 
     return e;

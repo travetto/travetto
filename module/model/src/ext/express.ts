@@ -3,9 +3,10 @@ import { bindData } from '../lib/util';
 import { BaseModel } from '../lib/model';
 import { Validator } from '../lib/service';
 import { ObjectUtil } from '@encore/util';
-let flat = require('flat');
 
-import { RouteRegistry } from '@encore/express';
+import { RouteRegistry, AppError } from '@encore/express';
+
+let flat = require('flat');
 
 export function ModelBody<T>(cls: (new (a?: any) => T), view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
@@ -17,7 +18,7 @@ export function ModelBody<T>(cls: (new (a?: any) => T), view?: string) {
         req.body = o;
       }
     } else {
-      throw { message: `Body is missing or wrong type: ${req.body}`, statusCode: 503 };
+      throw new AppError(`Body is missing or wrong type: ${req.body}`, 503);
     }
   });
 }
