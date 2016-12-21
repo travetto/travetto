@@ -9,7 +9,7 @@ export class RouteRegistry {
 
   static async render(res: Response, out: any) {
     if (out && out.render) {
-      out = out.render(res);
+      out = (out as Renderable).render(res);
       if (out && out.then) {
         await out;
       }
