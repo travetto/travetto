@@ -7,6 +7,19 @@ import { Logger } from '@encore/logging';
 
 export class RouteRegistry {
 
+  static async render(res: Response, out: any) {
+    if (out && out.render) {
+      out = out.render(res);
+      if (out && out.then) {
+        await out;
+      }
+    } else if (typeof out === 'string') {
+      res.send(out);
+    } else {
+      res.json(out);
+    }
+  }
+
   static async outputHandler(handler: RequestHandler, req: Request, res: Response, out: any) {
     if (!res.headersSent && out) {
       if (handler.headers) {
@@ -19,16 +32,7 @@ export class RouteRegistry {
         });
       }
 
-      if (out instanceof Renderable) {
-        out = (out as Renderable).render(res);
-        if (out && out.then) {
-          await out;
-        }
-      } else if (typeof out === 'string') {
-        res.send(out);
-      } else {
-        res.json(out);
-      }
+      await RouteRegistry.render(res, out);
     }
 
     Logger.info(`Request [${req.method}] ${req.path}`, req.query, req.params, res.statusCode);
@@ -36,7 +40,7 @@ export class RouteRegistry {
     res.end();
   }
 
-  static errorHandler(error: any, req: Request, res: Response, next?: any) {
+  static async errorHandler(error: any, req: Request, res: Response, next?: any) {
 
     let status = error.status || error.statusCode || 500;
 
@@ -46,7 +50,7 @@ export class RouteRegistry {
     // Generally send the error directly to the output
     if (!res.headersSent) {
       res.status(status);
-      res.json(error);
+      await RouteRegistry.render(res, error);
     }
 
     res.end();
@@ -59,7 +63,7 @@ export class RouteRegistry {
         let out = await filter(req, res);
         handler ? handler(req, res, out) : next();
       } catch (error) {
-        RouteRegistry.errorHandler(error, req, res);
+        await RouteRegistry.errorHandler(error, req, res);
       }
     };
   }

@@ -2,9 +2,8 @@ import { Renderable } from './renderable';
 import { Response } from 'express';
 import * as stream from 'stream';
 
-export class StringResponse extends Renderable {
+export class StringResponse implements Renderable {
   constructor(public content: string) {
-    super();
   }
 
   render(res: Response): void {
