@@ -1,7 +1,7 @@
 import * as path from 'path';
 let glob = require('glob');
 
-export default function (pattern: string, base: string | null = null, exclude?: (name: string) => boolean) {
+export function bulkRequire(pattern: string, base: string | null = null, exclude?: (name: string) => boolean) {
   let search = `${base || process.cwd()}/${pattern}`;
   // console.log("Bulk Require", search);
   return (glob.sync(search) as string[])
