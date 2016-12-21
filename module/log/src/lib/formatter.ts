@@ -1,6 +1,6 @@
 export interface LoggingContext {
   level: string;
-  meta?: any[];
+  meta?: any;
   message?: string;
   timestamp(): string;
 }
@@ -8,10 +8,16 @@ export interface LoggingContext {
 export const Formatters = {
   standard(opts: LoggingContext) {
     // Return string will be passed to logger.
-    let meta = opts.meta && Object.keys(opts.meta).length ? JSON.stringify(opts.meta) : '';
+    let meta = '';
     let level = opts.level.toUpperCase();
     let timestamp = new Date().toISOString().split('.')[0];
     let message = opts.message || '';
+
+    if (opts.meta.stack) {
+      meta = opts.meta.stack;
+    } else if (opts.meta) {
+      meta = JSON.stringify(opts.meta);
+    }
 
     let out = `${timestamp} [${level}]`;
     if (message) {
