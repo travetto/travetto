@@ -8,6 +8,6 @@ export interface TypedBody<T> extends Request {
   body: T;
 }
 
-export interface TypeQuery<T> extends Request {
+export interface TypedQuery<T> extends Request {
   query: T;
 }
