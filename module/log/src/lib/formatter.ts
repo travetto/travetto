@@ -15,7 +15,6 @@ wConf.addColors({ white: 'bold white' });
 
 export const Formatters = {
   standard(opts: LoggingContext) {
-    console.log(opts);
     // Return string will be passed to logger.
     let meta = '';
     let message = opts.message || '';
