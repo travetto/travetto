@@ -1,14 +1,16 @@
 import { Response } from 'express';
-import { ExtendableError } from '@encore/util';
+import { BaseError } from '@encore/util';
 import { Renderable } from './renderable';
 
-export class AppError extends ExtendableError implements Renderable {
-  constructor(message: string, public status: number = 500) {
-    super(message);
+type Status = { status: number };
+
+export class AppError extends BaseError<Status> implements Renderable {
+  constructor(message: string, status: number = 500) {
+    super(message, { status });
   }
 
   render(res: Response) {
     res.status(this.status);
-    res.json({ message: this.message, status: this.status });
+    res.json({ message: this.message, status: this.payload.status });
   }
 }
