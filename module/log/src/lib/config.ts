@@ -4,7 +4,10 @@ export default registerNamespace('logging', {
   console: {
     enabled: true,
     type: 'console',
-    formatter: 'standard'
+    formatter: 'standard',
+    timestamp: true,
+    colorize: false,
+    align: true
   },
   log: {
     enabled: true,

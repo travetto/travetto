@@ -1,16 +1,23 @@
+let wConf = require('winston/lib/winston/config');
+
 export interface LoggingContext {
   level: string;
+  colorize: boolean;
+  showLevel: boolean;
+  timestamp: boolean;
   meta?: any;
+  align: boolean;
   message?: string;
-  timestamp(): string;
+  prettyPrint: boolean;
 }
+
+wConf.addColors({ white: 'bold white' });
 
 export const Formatters = {
   standard(opts: LoggingContext) {
+    console.log(opts);
     // Return string will be passed to logger.
     let meta = '';
-    let level = opts.level.toUpperCase();
-    let timestamp = new Date().toISOString().split('.')[0];
     let message = opts.message || '';
 
     if (opts.meta.stack) {
@@ -19,13 +26,30 @@ export const Formatters = {
       meta = JSON.stringify(opts.meta);
     }
 
-    let out = `${timestamp} [${level}]`;
+    let out = '';
+    if (opts.timestamp) {
+      let timestamp = new Date().toISOString().split('.')[0];
+      if (opts.colorize) {
+        timestamp = wConf.colorize('white', timestamp);
+      }
+      out += timestamp + ' ';
+    }
+    if (opts.level) {
+      let level = opts.level.toUpperCase();
+      if (opts.colorize) {
+        level = wConf.colorize(opts.level, level);
+      }
+      if (opts.align) {
+        level += ' '.repeat(8 - opts.level.length);
+      }
+      out += level + ' ';
+    }
     if (message) {
-      out += ' ' + message;
+      out += message + ' ';
     }
     if (meta) {
-      out += ' ' + meta;
+      out += meta + ' ';
     }
-    return out;
+    return out.substring(0, out.length - 1);
   }
 };
