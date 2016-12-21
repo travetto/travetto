@@ -3,6 +3,7 @@ import * as mongo from 'mongodb';
 import * as Grid from 'gridfs-stream';
 import * as mime from 'mime';
 
+import { AppError } from '@encore/express';
 import { MongoService } from '@encore/mongo';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
@@ -28,7 +29,7 @@ export class AssetService {
     let files = await gfs.files.find(filter).toArray();
 
     if (!files || !files.length) {
-      throw new Error('Unable to find file');
+      throw new AppError('Unable to find file', 404);
     }
 
     return files.map((t: any) => new File(t));
@@ -117,7 +118,7 @@ export class AssetService {
     let files = await gfs.files.find(query).toArray();
 
     if (!files || !files.length) {
-      throw new Error('Unable to find file');
+      throw new AppError('Unable to find file', 404);
     }
     let f = files[0];
     let out = new File(f);
@@ -143,7 +144,7 @@ export class AssetService {
 
       if (res) {
         if (!upsert) {
-          throw new Error(`File already exists: ${upload.filename}`);
+          throw new AppError(`File already exists: ${upload.filename}`, 409);
         } else if (upload.metadata.tags && upload.metadata.tags.length) {
           let gfs = await AssetService.getClient();
           let update = await gfs.files.findOneAndUpdate({ _id: new mongo.ObjectID(res._id) }, {

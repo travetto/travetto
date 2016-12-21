@@ -3,7 +3,7 @@ import { Renderable } from '@encore/express';
 import { nodeToPromise } from '@encore/util';
 import * as fs from 'fs';
 
-export class File extends Renderable {
+export class File implements Renderable {
 
   static fields = ['filename', 'length', 'contentType', 'path', 'metadata', 'stream'];
 
@@ -22,7 +22,6 @@ export class File extends Renderable {
   };
 
   constructor(conf: any = null) {
-    super();
     if (conf) {
       File.fields.forEach(k => {
         if (conf[k]) {
