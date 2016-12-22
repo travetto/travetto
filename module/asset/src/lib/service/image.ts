@@ -6,6 +6,7 @@ import { AssetService } from './asset';
 import { Asset } from '../model';
 import { nodeToPromise } from '@encore/util';
 import { AssetUtil } from '../util';
+import { Shutdown } from '@encore/init';
 
 export class ImageService {
   private static imageCache = LRU<string>({
@@ -37,18 +38,6 @@ export class ImageService {
     }
     return info;
   }
-
-  static onExit(exit: boolean, err: any) {
-    if (err) {
-      console.log(err.stack || err);
-    }
-    ImageService.clear();
-    if (exit) {
-      process.exit();
-    }
-  }
 }
 
-process.on('exit', ImageService.onExit.bind(null, false));
-process.on('SIGINT', ImageService.onExit.bind(null, true));
-process.on('uncaughtException', ImageService.onExit.bind(null, true));
+Shutdown.onExit(() => ImageService.clear());
