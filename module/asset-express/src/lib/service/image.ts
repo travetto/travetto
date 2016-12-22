@@ -40,4 +40,4 @@ export class ImageService {
   }
 }
 
-Shutdown.onShutdown(() => ImageService.clear());
+Shutdown.onShutdown(ImageService.name, () => ImageService.clear());
