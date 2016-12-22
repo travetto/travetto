@@ -1,4 +1,3 @@
-import { Ready } from '@encore/lifecycle';
 import { ObjectUtil, bulkRequire } from '@encore/util';
 
 let flatten = require('flat');
@@ -106,7 +105,7 @@ export class Configure {
       - External config file -> loaded from env/json
       - Environment vars -> Overrides everything
   */
-  static initialize(env: string) {
+  static initialize(env: string = 'local') {
     console.log(`Initializing: ${env}`);
 
     // Load all namespaces from core
@@ -131,11 +130,5 @@ export class Configure {
 
     // Drop out nulls
     Configure.dropNulls(Configure.data);
-
-    Ready.onReady(() => {
-      console.log(JSON.stringify(Configure.data, null, 2));
-    });
-
-    Ready.initialize();
   }
 }
