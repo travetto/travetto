@@ -1,4 +1,4 @@
-import { registerNamespace } from '@encore/init';
-export default registerNamespace('auth', {
+import { Configure } from '@encore/config';
+export default Configure.registerNamespace('auth', {
 
 });
