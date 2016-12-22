@@ -1,6 +1,6 @@
-import { registerNamespace } from '@encore/init';
+import { Configure } from '@encore/config';
 
-export default registerNamespace('logging', {
+export default Configure.registerNamespace('logging', {
   console: {
     enabled: true,
     type: 'console',
