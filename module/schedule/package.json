@@ -1,13 +1,13 @@
 {
-  "version": "1.1.26", 
+  "version": "1.1.27", 
   "license": "ISC", 
   "author": "", 
-  "name": "@encore/init", 
+  "description": "", 
   "dependencies": {
     "flat": "^2.0.0", 
     "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git#v1.x.x"
   }, 
   "scripts": {}, 
   "main": "src/lib/", 
-  "description": ""
+  "name": "@encore/init"
 }
