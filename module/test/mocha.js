@@ -7,7 +7,7 @@ let setup = [];
 let root = process.cwd();
 
 try {
-  if (!!fs.statSync(`${root}/node_modules/@encore/test/bootstrap`)) {
+  if (!!fs.statSync(`${root}/node_modules/@encore/test/bootstrap.js`)) {
     init = 'test/bootstrap';
   }
 } catch (e) { }
