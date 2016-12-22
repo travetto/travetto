@@ -1,7 +1,7 @@
 export class Shutdown {
-  private static listeners: Function[] = [];
-  static onShutdown(listener: Function) {
-    this.listeners.push(listener);
+  private static listeners: { name: string, handler: Function }[] = [];
+  static onShutdown(name: string, handler: Function) {
+    this.listeners.push({ name, handler });
   }
 
   static async quit(exitCode: number, err?: any) {
@@ -12,20 +12,19 @@ export class Shutdown {
       console.log(err.stack || err);
     }
 
-    if (Shutdown.listeners.length) {
-      console.log(`Shutting down, calling ${Shutdown.listeners.length} listeners`);
-    }
-
     Shutdown.listeners = [];
 
     for (let listener of listeners) {
       try {
-        let res = listener();
+        let {name, handler} = listener;
+        console.log(`Shutting down ${name}`);
+        let res = handler();
         if (res && res.then) {
           await res;
         }
+        console.log(`Successfully shut down ${name}`);
       } catch (e) {
-        // Do nothing
+        console.log(`Error shutting down ${name}`);
       }
     }
 
