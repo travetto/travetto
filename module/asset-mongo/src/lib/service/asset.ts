@@ -4,7 +4,7 @@ import * as Grid from 'gridfs-stream';
 
 import { AppError } from '@encore/express';
 import { MongoService } from '@encore/mongo';
-import { File } from '../model';
+import { Asset } from '../model';
 import { nodeToPromise } from '@encore/util';
 
 export class AssetService {
@@ -29,10 +29,10 @@ export class AssetService {
       throw new AppError('Unable to find file', 404);
     }
 
-    return files.map((t: any) => new File(t));
+    return files.map((t: any) => new Asset(t));
   }
 
-  static async writeFile(file: File, stream: NodeJS.ReadableStream) {
+  static async writeFile(file: Asset, stream: NodeJS.ReadableStream) {
     let gfs = await AssetService.getClient();
     let conf = Object.assign({ mode: 'w' }, file);
     let writeStream = gfs.createWriteStream(conf);
@@ -50,7 +50,7 @@ export class AssetService {
     return gfs.createReadStream({ filename });
   }
 
-  static async getInfo(filename: string, filter?: any): Promise<File> {
+  static async getInfo(filename: string, filter?: any): Promise<Asset> {
     let gfs = await AssetService.getClient();
     let query = { filename };
 
@@ -64,7 +64,7 @@ export class AssetService {
       throw new AppError('Unable to find file', 404);
     }
     let f = files[0];
-    let out = new File(f);
+    let out = new Asset(f);
     // Take out of mongo
     out._id = f._id.toHexString();
     return out;
@@ -76,9 +76,9 @@ export class AssetService {
     return;
   }
 
-  static async upload(upload: File, upsert = true, removeOnComplete = true) {
+  static async upload(upload: Asset, upsert = true, removeOnComplete = true) {
     try {
-      let res: File | null = null;
+      let res: Asset | null = null;
       try {
         res = await AssetService.getInfo(upload.filename);
       } catch (e) {
@@ -95,7 +95,7 @@ export class AssetService {
           }, {
               returnOriginal: false
             });
-          res = new File(update.value);
+          res = new Asset(update.value);
         }
         return res;
       } else {
@@ -110,11 +110,11 @@ export class AssetService {
     }
   }
 
-  static async uploadAll(uploads: File[]) {
+  static async uploadAll(uploads: Asset[]) {
     return await Promise.all(uploads.map(u => AssetService.upload(u)));
   }
 
-  static async get(filename: string, filter?: any): Promise<File> {
+  static async get(filename: string, filter?: any): Promise<Asset> {
     let info = await AssetService.getInfo(filename, filter);
     if (info.metadata.title) {
       info.filename = info.metadata.title;
