@@ -1,25 +1,26 @@
 {
-  "name": "@encore/model", 
-  "license": "ISC", 
+  "name": "@encore/model",
+  "license": "ISC",
   "optionalDependencies": {
     "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x"
-  }, 
-  "author": "", 
-  "version": "1.2.33", 
+  },
+  "author": "",
+  "version": "1.2.33",
   "dependencies": {
-    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x", 
-    "flat": "^2.0.0", 
-    "@types/reflect-metadata": "0.0.5", 
-    "@types/mongoose": "^4.7.0", 
-    "mongoose": "^4.7.0", 
+    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x",
+    "@encore/lifecycle": "git+ssh://git@git.eaiti.com/encore/lifecycle.git#v1.x.x",
+    "flat": "^2.0.0",
+    "@types/reflect-metadata": "0.0.5",
+    "@types/mongoose": "^4.7.0",
+    "mongoose": "^4.7.0",
     "reflect-metadata": "^0.1.8"
-  }, 
+  },
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
-  }, 
+  },
   "devDependencies": {
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v1.x.x"
-  }, 
-  "main": "src/lib/", 
+  },
+  "main": "src/lib/",
   "description": ""
 }

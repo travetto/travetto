@@ -1,5 +1,5 @@
 import { MongoService } from '@encore/mongo';
-import { Ready } from '@encore/init';
+import { Ready } from '@encore/lifecycle';
 import { getModelConfig, IndexConfig } from '../service/registry';
 
 function createIndex(target: any, config: IndexConfig) {
