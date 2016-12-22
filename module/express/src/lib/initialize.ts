@@ -1,6 +1,6 @@
 import * as express from 'express';
 import Config from './config';
-import { Ready } from '@encore/init';
+import { Ready } from '@encore/lifecycle';
 import { requestContext } from '@encore/context/ext/express';
 import { Logger } from '@encore/logging';
 import { RouteRegistry } from './service';
