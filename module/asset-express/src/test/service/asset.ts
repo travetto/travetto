@@ -8,7 +8,8 @@ describe('Assect Service', () => {
     let filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png')
     expect(filePath).to.not.be.undefined;
     expect(filePath.split('.').pop()).equals('png');
-    let file = await AssetService.uploadFromPath(filePath, undefined, undefined, true);
+    let file = await AssetUtil.localFileToAsset(filePath);
+    file = await AssetService.upload(file);
     expect(file.contentType).equals('image/png');
     expect(file.length).is.greaterThan(0);
 
