@@ -6,7 +6,6 @@ import { AppError } from '@encore/express';
 import { MongoService } from '@encore/mongo';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
-import { AssetUtil } from '../util';
 
 export class AssetService {
 
@@ -31,11 +30,6 @@ export class AssetService {
     }
 
     return files.map((t: any) => new File(t));
-  }
-
-  static async uploadFromPath(path: string, prefix?: string, tags?: string[], removeOnComplete: boolean = false) {
-    let upload = await AssetUtil.localFileToAsset(path, prefix, tags);
-    return await AssetService.upload(upload, true, removeOnComplete);
   }
 
   static async writeFile(file: File, stream: NodeJS.ReadableStream) {
