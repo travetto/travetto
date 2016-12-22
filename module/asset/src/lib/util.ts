@@ -4,6 +4,7 @@ import * as path from 'path';
 
 import { nodeToPromise } from '@encore/util';
 
+let crypto = require('crypto');
 let request = require('request');
 let osTmpdir = require('os-tmpdir');
 const fileType = require('file-type');
@@ -15,6 +16,64 @@ export class AssetUtil {
     let now = new Date();
     let name = `image-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${process.pid}-${(Math.random() * 100000000 + 1).toString(36)}.${ext}`;
     return path.join(tmpDir, name);
+  }
+
+  static async localFileToAsset(path: string, prefix?: string, tags?: string[]) {
+    let hash = crypto.createHash('sha256');
+    hash.setEncoding('hex');
+
+    let str = fs.createReadStream(path);
+    str.pipe(hash);
+    await nodeToPromise(str, str.on, 'end');
+
+    let size = (await nodeToPromise<fs.Stats>(fs, fs.stat, path)).size;
+
+    let upload = AssetUtil.uploadToAsset({
+      name: path,
+      hash: hash.read(),
+      size: size,
+      path: path,
+    }, prefix);
+
+    if (tags) {
+      upload.metadata.tags = tags;
+    }
+
+    return upload;
+  }
+
+  static uploadToAsset(upload: Express.MultipartyUpload, prefix?: string): File {
+    let name = upload.name;
+    let type = upload.type as string;
+    if (!type || type === 'application/octet-stream') {
+      type = mime.lookup(name) || type;
+    }
+
+    let uploadFile = new File({
+      filename: name,
+      length: upload.size,
+      contentType: type,
+      path: upload.path,
+      metadata: {
+        name: name,
+        title: name.replace(/-_/g, ' '),
+        hash: upload.hash,
+        createdDate: new Date()
+      }
+    });
+
+    let ext = '';
+
+    if (uploadFile.contentType) {
+      ext = mime.extension(uploadFile.contentType);
+    } else if (uploadFile.filename.indexOf('.') > 0) {
+      ext = uploadFile.filename.split('.').pop() as string;
+    }
+
+    uploadFile.filename = uploadFile.metadata.hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (all, ...others) =>
+      (prefix || '') + others.slice(0, 5).join('/') + (ext ? '.' + ext.toLowerCase() : ''));
+
+    return uploadFile;
   }
 
   static readChunk(filePath: string, bytes: number) {

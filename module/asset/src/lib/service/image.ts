@@ -1,4 +1,3 @@
-import * as path from 'path';
 import * as fs from 'fs';
 import * as LRU from 'lru-cache';
 import * as gm from 'gm';
