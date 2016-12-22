@@ -4,7 +4,7 @@ export class Shutdown {
     this.listeners.push(listener);
   }
 
-  static async quit(exit: boolean, err?: any) {
+  static async quit(exitCode: number, err?: any) {
 
     let listeners = Shutdown.listeners.slice(0);
 
@@ -29,12 +29,12 @@ export class Shutdown {
       }
     }
 
-    if (exit) {
-      process.exit();
+    if (exitCode) {
+      process.exit(exitCode);
     }
   }
 }
 
-process.on('exit', Shutdown.quit.bind(null, false));
-process.on('SIGINT', Shutdown.quit.bind(null, true));
-process.on('uncaughtException', Shutdown.quit.bind(null, true));
+process.on('exit', Shutdown.quit.bind(null, 0));
+process.on('SIGINT', Shutdown.quit.bind(null, 130));
+process.on('uncaughtException', Shutdown.quit.bind(null, 1));
