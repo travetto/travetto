@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { Renderable } from '@encore/express';
 import { nodeToPromise } from '@encore/util';
 import * as fs from 'fs';
 
-export class File implements Renderable {
+export class File implements Renderable, Express.File {
 
   static fields = ['filename', 'length', 'contentType', 'path', 'metadata', 'stream'];
 
@@ -13,7 +13,7 @@ export class File implements Renderable {
   filename: string;
   contentType: string;
   path: string;
-  metadata?: {
+  metadata: {
     name: string,
     title: string,
     hash: string,
@@ -42,8 +42,10 @@ export class File implements Renderable {
     }
 
     return new Promise<any>((resolve, reject) => {
-      this.stream.on('end', resolve);
-      this.stream.on('error', reject);
+      if (this.stream) {
+        this.stream.on('end', resolve);
+        this.stream.on('error', reject);
+      }
     });
   }
 

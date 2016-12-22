@@ -19,7 +19,7 @@ export class ImageService {
 
   static async getImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<File> {
     let info = await AssetService.get(filename, filter);
-    if (options && (options.w || options.h)) {
+    if (info.stream && options && (options.w || options.h)) {
       let key = `${filename}${JSON.stringify(options)}`;
       let res = ImageService.imageCache.get(key);
 
