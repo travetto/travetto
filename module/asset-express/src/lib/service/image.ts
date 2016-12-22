@@ -3,7 +3,7 @@ import * as LRU from 'lru-cache';
 import * as gm from 'gm';
 
 import { AssetService } from './asset';
-import { File } from '../model';
+import { Asset } from '../model';
 import { nodeToPromise } from '@encore/util';
 import { AssetUtil } from '../util';
 
@@ -17,7 +17,7 @@ export class ImageService {
     ImageService.imageCache.reset();
   }
 
-  static async getImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<File> {
+  static async getImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<Asset> {
     let info = await AssetService.get(filename, filter);
     if (info.stream && options && (options.w || options.h)) {
       let key = `${filename}${JSON.stringify(options)}`;
