@@ -1,8 +1,8 @@
 {
-  "version": "1.1.37", 
+  "version": "1.1.38", 
   "license": "ISC", 
   "author": "", 
-  "name": "@encore/asset", 
+  "description": "", 
   "dependencies": {
     "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x", 
     "@encore/lifecycle": "git+ssh://git@git.eaiti.com/encore/lifecycle.git#v1.x.x", 
@@ -10,14 +10,14 @@
     "multiparty": "^4.1.2", 
     "@types/lru-cache": "^2.5.32", 
     "os-tmpdir": "^1.0.1", 
-    "@types/gridfs-stream": "^0.5.28", 
+    "connect-multiparty": "^1.2.5", 
+    "gm": "^1.21.1", 
     "@types/gm": "^1.17.29", 
     "mime": "^1.3.4", 
+    "@types/gridfs-stream": "^0.5.28", 
     "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x", 
-    "connect-multiparty": "^1.2.5", 
-    "file-type": "^3.9.0", 
     "gridfs-stream": "^1.1.1", 
-    "gm": "^1.21.1", 
+    "file-type": "^3.9.0", 
     "lru-cache": "^4.0.0"
   }, 
   "scripts": {
@@ -27,5 +27,5 @@
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v1.x.x"
   }, 
   "main": "src/lib/", 
-  "description": ""
+  "name": "@encore/asset"
 }
