@@ -10,5 +10,5 @@
   }, 
   "scripts": {}, 
   "main": "src/lib/", 
-  "name": "@encore/init"
+  "name": "@encore/config"
 }
