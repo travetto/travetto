@@ -1,1 +1,1 @@
-export * from './file';
+export * from './asset';

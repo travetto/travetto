@@ -7,7 +7,8 @@ declare module Express {
 		hash: string;
 	}
 
-	export interface File {
+	export interface Asset {
+		_id?: string;
 		stream?: NodeJS.ReadableStream;
 		length: number;
 		filename: string;
@@ -24,6 +25,6 @@ declare module Express {
 	}
 
 	export interface Request {
-		files: { [key: string]: File }
+		files: { [key: string]: Asset }
 	}
 }

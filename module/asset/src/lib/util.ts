@@ -3,7 +3,7 @@ import * as mime from 'mime';
 import * as path from 'path';
 
 import { nodeToPromise } from '@encore/util';
-import { File } from './model';
+import { Asset } from './model';
 
 let crypto = require('crypto');
 let request = require('request');
@@ -43,14 +43,14 @@ export class AssetUtil {
     return upload;
   }
 
-  static uploadToAsset(upload: Express.MultipartyUpload, prefix?: string): File {
+  static uploadToAsset(upload: Express.MultipartyUpload, prefix?: string): Asset {
     let name = upload.name;
     let type = upload.type as string;
     if (!type || type === 'application/octet-stream') {
       type = mime.lookup(name) || type;
     }
 
-    let uploadFile = new File({
+    let uploadFile = new Asset({
       filename: name,
       length: upload.size,
       contentType: type,
