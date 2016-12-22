@@ -8,7 +8,7 @@
     "@types/marked": "0.0.28", 
     "nodemailer": "^2.6.4", 
     "@types/mustache": "^0.8.29", 
-    "@encore/init": "git+ssh://git@git.eaiti.com/encore/init.git#v1.x.x", 
+    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v1.x.x", 
     "marked": "^0.3.6", 
     "nodemailer-markdown": "^1.0.1", 
     "juice": "^3.0.1", 
