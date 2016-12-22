@@ -6,7 +6,7 @@ import { AssetService } from './asset';
 import { Asset } from '../model';
 import { nodeToPromise } from '@encore/util';
 import { AssetUtil } from '../util';
-import { Shutdown } from '@encore/lifecycle';
+import { OnShutdown } from '@encore/lifecycle';
 
 export class ImageService {
   private static imageCache = LRU<string>({
@@ -14,6 +14,7 @@ export class ImageService {
     dispose: (key: string, n: string) => fs.unlink(n)
   });
 
+  @OnShutdown()
   static clear() {
     ImageService.imageCache.reset();
   }
@@ -39,5 +40,3 @@ export class ImageService {
     return info;
   }
 }
-
-Shutdown.onShutdown(ImageService.name, () => ImageService.clear());
