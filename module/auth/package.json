@@ -1,16 +1,16 @@
 {
   "name": "@encore/auth", 
   "license": "ISC", 
-  "author": "", 
   "optionalDependencies": {
     "@encore/model": "git+ssh://git@git.eaiti.com/encore/model.git#v1.x.x"
   }, 
-  "version": "1.1.21", 
+  "author": "", 
+  "version": "1.1.22", 
   "dependencies": {
     "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x", 
     "@types/passport": "^0.2.30", 
-    "passport-local": "^1.0.0", 
     "passport": "^0.3.2", 
+    "passport-local": "^1.0.0", 
     "@types/passport-local": "^1.0.29"
   }, 
   "scripts": {}, 
