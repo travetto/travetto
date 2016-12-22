@@ -2,15 +2,9 @@
 
 let fs = require('fs');
 
-let init = 'bootstrap';
+let init = 'bootstrap.js';
 let setup = [];
 let root = process.cwd();
-
-try {
-  if (!!fs.statSync(`${root}/node_modules/@encore/init`)) {
-    init = 'init/bootstrap.js';
-  }
-} catch (e) { }
 
 try {
   if (!!fs.statSync(`${root}/src/test/setup.ts`)) {
