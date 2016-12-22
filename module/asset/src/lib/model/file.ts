@@ -8,12 +8,12 @@ export class File implements Renderable {
   static fields = ['filename', 'length', 'contentType', 'path', 'metadata', 'stream'];
 
   _id?: string;
-  stream: NodeJS.ReadableStream;
+  stream?: NodeJS.ReadableStream;
   length: number;
   filename: string;
   contentType: string;
   path: string;
-  metadata: {
+  metadata?: {
     name: string,
     title: string,
     hash: string,
