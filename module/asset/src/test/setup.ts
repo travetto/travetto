@@ -1,4 +1,4 @@
-import { Ready } from '@encore/init';
+import { Ready } from '@encore/lifecycle';
 import { beforeAll } from '@encore/test';
 import { MongoService } from '@encore/mongo';
 
