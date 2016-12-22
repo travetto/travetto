@@ -13,6 +13,9 @@ export class Shutdown {
     }
 
     Shutdown.listeners = [];
+    if (listeners.length) {
+      console.log('');
+    }
 
     for (let listener of listeners) {
       try {
