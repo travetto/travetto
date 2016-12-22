@@ -1,17 +1,20 @@
 export class Shutdown {
   private static listeners: Function[] = [];
-  static onExit(listener: Function) {
+  static onShutdown(listener: Function) {
     this.listeners.push(listener);
   }
 
-  static quit(exit: boolean, err?: any) {
+  static async quit(exit: boolean, err?: any) {
     if (err) {
       console.log(err.stack || err);
     }
 
     for (let listener of Shutdown.listeners) {
       try {
-        listener();
+        let res = listener();
+        if (res && res.then) {
+          await res;
+        }
       } catch (e) {
         // Do nothing
       }
