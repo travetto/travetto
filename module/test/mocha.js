@@ -18,7 +18,7 @@ process.argv = [
   'mocha',
   '--delay',
   '--require',
-  `node_modules/@encore/${init}`,
+  init,
   '--ui',
   '@encore/test/src/lib/user-interface',
   ...setup,
