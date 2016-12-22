@@ -1,6 +1,6 @@
 import * as express from 'express';
 import Config from './config';
-import { Ready } from '@encore/lifecycle';
+import { OnReady } from '@encore/lifecycle';
 import { requestContext } from '@encore/context/ext/express';
 import { Logger } from '@encore/logging';
 import { RouteRegistry } from './service';
@@ -26,9 +26,10 @@ if (Config.session.cookie.secure) {
   app.enable('trust proxy');
 }
 
-Ready.onReady(() => {
+@OnReady()
+export function serve() {
   if (Config.serve && Config.port > 0) {
     Logger.info(`Listening on ${Config.port}`);
     app.listen(Config.port);
   }
-});
+}
