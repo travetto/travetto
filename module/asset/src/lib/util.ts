@@ -3,6 +3,7 @@ import * as mime from 'mime';
 import * as path from 'path';
 
 import { nodeToPromise } from '@encore/util';
+import { File } from './model';
 
 let crypto = require('crypto');
 let request = require('request');
