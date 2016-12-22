@@ -53,3 +53,10 @@ export class Ready {
     Ready.wait();
   }
 }
+
+export function OnReady() {
+  return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
+    Ready.onReady(() => target[propertyKey]());
+    return descriptor;
+  };
+}

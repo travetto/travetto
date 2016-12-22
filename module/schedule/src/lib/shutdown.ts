@@ -40,3 +40,10 @@ export class Shutdown {
 process.on('exit', Shutdown.quit.bind(null, 0));
 process.on('SIGINT', Shutdown.quit.bind(null, 130));
 process.on('uncaughtException', Shutdown.quit.bind(null, 1));
+
+export function OnShutdown() {
+  return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
+    Shutdown.onShutdown(`${target.name}-${propertyKey}`, () => target[propertyKey]());
+    return descriptor;
+  };
+}
