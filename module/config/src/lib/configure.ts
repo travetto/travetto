@@ -1,4 +1,4 @@
-import { Ready } from './ready';
+import { Ready } from '@encore/lifecycle';
 import { ObjectUtil, bulkRequire } from '@encore/util';
 
 let flatten = require('flat');
