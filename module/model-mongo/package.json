@@ -6,7 +6,7 @@
   "dependencies": {
     "mongodb": "2.2.10", 
     "@types/mongodb": "2.1.33", 
-    "@encore/init": "git+ssh://git@git.eaiti.com/encore/init.git#v1.x.x"
+    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v1.x.x"
   }, 
   "scripts": {}, 
   "main": "src/lib/", 
