@@ -105,7 +105,7 @@ export class Configure {
       - External config file -> loaded from env/json
       - Environment vars -> Overrides everything
   */
-  static initialize(env: string = 'local') {
+  static initialize(env: string) {
     console.log(`Initializing: ${env}`);
 
     // Load all namespaces from core
@@ -130,5 +130,9 @@ export class Configure {
 
     // Drop out nulls
     Configure.dropNulls(Configure.data);
+  }
+
+  static log() {
+    console.log(JSON.stringify(Configure.data, null, 2));
   }
 }
