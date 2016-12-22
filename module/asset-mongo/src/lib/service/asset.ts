@@ -1,14 +1,12 @@
 import * as fs from 'fs';
 import * as mongo from 'mongodb';
 import * as Grid from 'gridfs-stream';
-import * as mime from 'mime';
 
 import { AppError } from '@encore/express';
 import { MongoService } from '@encore/mongo';
 import { File } from '../model';
 import { nodeToPromise } from '@encore/util';
-
-let crypto = require('crypto');
+import { AssetUtil } from '../util';
 
 export class AssetService {
 
@@ -35,57 +33,8 @@ export class AssetService {
     return files.map((t: any) => new File(t));
   }
 
-  static fromUpload(upload: Express.MultipartyUpload, prefix?: string): File {
-    let name = upload.name;
-    let type = upload.type as string;
-    if (!type || type === 'application/octet-stream') {
-      type = mime.lookup(name) || type;
-    }
-
-    let f = new File({
-      filename: name,
-      length: upload.size,
-      contentType: type,
-      path: upload.path,
-      metadata: {
-        name: name,
-        title: name.replace(/-_/g, ' '),
-        hash: upload.hash,
-        createdDate: new Date()
-      }
-    });
-
-    let ext = '';
-    if (f.contentType) {
-      ext = mime.extension(f.contentType);
-    } else if (f.filename.indexOf('.') > 0) {
-      ext = f.filename.split('.').pop() as string;
-    }
-    f.filename = f.metadata.hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (all, ...others) =>
-      (prefix || '') + others.slice(0, 5).join('/') + (ext ? '.' + ext.toLowerCase() : ''));
-    return f;
-  }
-
   static async uploadFromPath(path: string, prefix?: string, tags?: string[], removeOnComplete: boolean = false) {
-    let hash = crypto.createHash('sha256');
-    hash.setEncoding('hex');
-
-    let str = fs.createReadStream(path);
-    str.pipe(hash);
-    await nodeToPromise(str, str.on, 'end');
-
-    let size = (await nodeToPromise<fs.Stats>(fs, fs.stat, path)).size;
-
-    let upload = AssetService.fromUpload({
-      name: path,
-      hash: hash.read(),
-      size: size,
-      path: path,
-    }, prefix);
-
-    if (tags) {
-      upload.metadata.tags = tags;
-    }
+    let upload = await AssetUtil.localFileToAsset(path, prefix, tags);
     return await AssetService.upload(upload, true, removeOnComplete);
   }
 
