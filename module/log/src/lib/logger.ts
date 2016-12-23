@@ -64,6 +64,8 @@ if (Config.console) {
     console.info = consLogger.info.bind(consLogger);
     console.warn = consLogger.warn.bind(consLogger);
     console.error = consLogger.error.bind(consLogger);
-    console.trace = consLogger.debug.bind(consLogger);
+    console.debug = consLogger.debug.bind(consLogger);
+  } else {
+    console.debug = console.log;
   }
 }
