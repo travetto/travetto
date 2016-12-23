@@ -53,8 +53,8 @@ export const Logger = new LoggerWrapper('');
 export const WinstoLogger = logger;
 
 if (Config.console) {
-  let override: boolean | undefined = Config.console.overrideNative;
-  if (override === undefined) {
+  let override: boolean | null = Config.console.overrideNative;
+  if (override === null) {
     override = (process.env.env !== 'test' as any);
   }
 
