@@ -1,13 +1,13 @@
 {
-  "version": "1.1.31", 
-  "license": "ISC", 
-  "author": "", 
-  "description": "", 
+  "version": "1.1.31",
+  "license": "ISC",
+  "author": "",
+  "description": "",
   "dependencies": {
-    "flat": "^2.0.0", 
-    "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git#v1.x.x"
-  }, 
-  "scripts": {}, 
-  "main": "src/lib/", 
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x",
+    "flat": "^2.0.0"
+  },
+  "scripts": {},
+  "main": "src/lib/",
   "name": "@encore/lifecycle"
 }
