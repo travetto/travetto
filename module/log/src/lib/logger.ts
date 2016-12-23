@@ -51,3 +51,19 @@ class LoggerWrapper {
 
 export const Logger = new LoggerWrapper('');
 export const WinstoLogger = logger;
+
+if (Config.console) {
+  let override: boolean | undefined = Config.console.overrideNative;
+  if (override === undefined) {
+    override = (process.env.env !== 'test' as any);
+  }
+
+  if (override) {
+    let consLogger = Logger.scope('[console]');
+    console.log = consLogger.info.bind(consLogger);
+    console.info = consLogger.info.bind(consLogger);
+    console.warn = consLogger.warn.bind(consLogger);
+    console.error = consLogger.error.bind(consLogger);
+    console.trace = consLogger.debug.bind(consLogger);
+  }
+}
