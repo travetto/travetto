@@ -1,4 +1,4 @@
-require('@encore/bootstrap');
+require('ts-node/register');
 
 let {Configure} = require('@encore/config');
 let {Ready} = require('@encore/lifecycle');
