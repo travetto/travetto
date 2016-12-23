@@ -2,15 +2,8 @@
 
 let fs = require('fs');
 
-let init = 'bootstrap';
 let setup = [];
 let root = process.cwd();
-
-try {
-  if (!!fs.statSync(`${root}/node_modules/@encore/test/bootstrap.js`)) {
-    init = 'test/bootstrap';
-  }
-} catch (e) { }
 
 try {
   if (!!fs.statSync(`${root}/src/test/setup.ts`)) {
@@ -24,7 +17,7 @@ process.argv = [
   'mocha',
   '--delay',
   '--require',
-  `node_modules/@encore/${init}`,
+  `node_modules/@encore/bootstrap`,
   '--ui',
   '@encore/test/src/lib/user-interface',
   ...setup,
