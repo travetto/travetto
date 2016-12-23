@@ -1,14 +1,14 @@
 {
-  "version": "1.1.27", 
-  "license": "ISC", 
   "author": "", 
-  "name": "@encore/base", 
   "dependencies": {
     "@types/node": "^6.0.45", 
+    "source-map-support": "^0.4.0", 
     "tslint": "^4.2.0", 
-    "typescript": "^2.1.4", 
-    "source-map-support": "^0.4.0"
+    "typescript": "^2.1.4"
   }, 
+  "description": "", 
+  "license": "ISC", 
+  "name": "@encore/base", 
   "scripts": {}, 
-  "description": ""
+  "version": "1.1.28"
 }
