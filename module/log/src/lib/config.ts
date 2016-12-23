@@ -8,7 +8,7 @@ export default Configure.registerNamespace('logging', {
     timestamp: true,
     colorize: false,
     align: true,
-    overrideNative: false
+    overrideNative: null
   },
   log: {
     enabled: true,
