@@ -17,14 +17,13 @@ process.argv = [
   'mocha',
   '--delay',
   '--require',
-  `node_modules/@encore/bootstrap`,
+  `node_modules/@encore/bootstrap/init`,
   '--ui',
   '@encore/test/src/lib/user-interface',
   ...setup,
   ...process.argv.slice(2)
 ];
 
-process.env.auto = true;
-process.env.env = process.env.env || 'test';
+process.env.DEFAULT_ENV = 'test';
 
 require(`${root}/node_modules/mocha/bin/mocha`);
