@@ -3,6 +3,8 @@ require('@encore/bootstrap').init({
   defaultEnv: 'local',
   scan: 'src/app/route/**/*.ts',
   preInit: () => {
-    require('@encore/lifecycle').Ready.onReady(() => Configure.log());
+    let {Ready} = require('@encore/lifecycle');
+    let {Configure} = require('@encore/config');
+    Ready.onReady(() => Configure.log());
   }
 });
