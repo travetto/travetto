@@ -26,10 +26,12 @@ if (Config.session.cookie.secure) {
   app.enable('trust proxy');
 }
 
-@OnReady()
-export function serve() {
-  if (Config.serve && Config.port > 0) {
-    Logger.info(`Listening on ${Config.port}`);
-    app.listen(Config.port);
+export class Init {
+  @OnReady()
+  static serve() {
+    if (Config.serve && Config.port > 0) {
+      Logger.info(`Listening on ${Config.port}`);
+      app.listen(Config.port);
+    }
   }
 }
