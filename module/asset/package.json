@@ -4,6 +4,8 @@
   "author": "", 
   "description": "", 
   "dependencies": {
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x",
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x", 
     "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v1.x.x", 
     "@encore/lifecycle": "git+ssh://git@git.eaiti.com/encore/lifecycle.git#v1.x.x", 
     "express-fileupload": "0.0.4", 
@@ -15,7 +17,6 @@
     "@types/gm": "^1.17.29", 
     "mime": "^1.3.4", 
     "@types/gridfs-stream": "^0.5.28", 
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x", 
     "gridfs-stream": "^1.1.1", 
     "file-type": "^3.9.0", 
     "lru-cache": "^4.0.0"
