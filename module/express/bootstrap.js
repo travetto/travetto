@@ -1,4 +1,4 @@
-require('ts-node/register');
+require('@encore/base/typescript');
 
 let {Configure} = require('@encore/config');
 let {Ready} = require('@encore/lifecycle');
