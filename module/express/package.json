@@ -1,16 +1,16 @@
 {
-  "version": "1.1.43", 
+  "version": "1.1.44", 
   "license": "ISC", 
   "author": "", 
-  "name": "@encore/express", 
+  "description": "", 
   "dependencies": {
-    "@encore/context": "git+ssh://git@git.eaiti.com/encore/context.git#v1.x.x", 
+    "@types/supertest": "^1.1.30", 
     "@encore/lifecycle": "git+ssh://git@git.eaiti.com/encore/lifecycle.git#v1.x.x", 
     "compression": "^1.6.1", 
     "@types/superagent": "^2.0.32", 
-    "request": "^2.69.0", 
-    "express": "^4.13.4", 
     "supertest": "^1.2.0", 
+    "express": "^4.13.4", 
+    "request": "^2.69.0", 
     "body-parser": "^1.15.0", 
     "moment": "^2.15.2", 
     "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v1.x.x", 
@@ -18,10 +18,10 @@
     "@encore/logging": "git+ssh://git@git.eaiti.com/encore/logging.git#v1.x.x", 
     "express-session": "^1.13.0", 
     "cookie-parser": "^1.4.1", 
-    "@types/supertest": "^1.1.30", 
+    "@encore/context": "git+ssh://git@git.eaiti.com/encore/context.git#v1.x.x", 
     "@types/express": "^4.0.32"
   }, 
   "scripts": {}, 
   "main": "src/lib/", 
-  "description": ""
+  "name": "@encore/express"
 }
