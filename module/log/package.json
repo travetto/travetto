@@ -1,22 +1,22 @@
 {
-  "version": "1.1.32",
-  "license": "ISC",
-  "author": "",
-  "name": "@encore/logging",
+  "version": "1.1.33", 
+  "license": "ISC", 
+  "author": "", 
+  "description": "", 
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x",
-    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v1.x.x",
-    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v1.x.x",
-    "winston": "^2.3.0",
-    "@types/winston": "0.0.32",
-    "mkdirp": "^0.5.1"
-  },
+    "winston": "^2.3.0", 
+    "mkdirp": "^0.5.1", 
+    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v1.x.x", 
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x", 
+    "@types/winston": "0.0.32", 
+    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v1.x.x"
+  }, 
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
-  },
+  }, 
   "devDependencies": {
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v1.x.x"
-  },
-  "main": "src/lib/",
-  "description": ""
+  }, 
+  "main": "src/lib/", 
+  "name": "@encore/logging"
 }
