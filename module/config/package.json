@@ -1,14 +1,14 @@
 {
-  "version": "1.1.33", 
-  "license": "ISC", 
   "author": "", 
-  "description": "", 
   "dependencies": {
-    "flat": "^2.0.0", 
     "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x", 
-    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v1.x.x"
+    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v1.x.x", 
+    "flat": "^2.0.0"
   }, 
-  "scripts": {}, 
+  "description": "", 
+  "license": "ISC", 
   "main": "src/lib/", 
-  "name": "@encore/config"
+  "name": "@encore/config", 
+  "scripts": {}, 
+  "version": "1.1.34"
 }
