@@ -35,7 +35,11 @@ export class RouteRegistry {
       await RouteRegistry.render(res, out);
     }
 
-    Logger.info(`Request [${req.method}] ${req.path}`, req.query, req.params, res.statusCode);
+    Logger.info(`Request [${req.method}] ${req.path}`, {
+      query: req.query,
+      params: req.params,
+      statusCode: res.statusCode
+    });
 
     res.end();
   }
@@ -44,7 +48,12 @@ export class RouteRegistry {
 
     let status = error.status || error.statusCode || 500;
 
-    Logger.error(`Request [${req.method}] ${req.path}`, req.query, req.params, status);
+    Logger.error(`Request [${req.method}] ${req.path}`, {
+      query: req.query,
+      params: req.params,
+      statusCode: status
+    });
+
     Logger.debug(error);
 
     // Generally send the error directly to the output
