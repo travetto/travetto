@@ -11,7 +11,7 @@ function createIndex(target: any, config: IndexConfig) {
   }
 
   Ready.waitFor(MongoService.createIndex(target, config)
-    .then((x: any) => console.log(`Created ${config.unique ? 'unique' : ''} index ${config.fields}`)));
+    .then((x: any) => console.trace(`Created ${config.unique ? 'unique' : ''} index ${config.fields}`)));
 
   return target;
 }
