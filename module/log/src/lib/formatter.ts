@@ -1,23 +1,25 @@
 let wConf = require('winston/lib/winston/config');
-
-export interface LoggingContext {
-  level: string;
-  colorize: boolean;
-  showLevel: boolean;
-  timestamp: boolean;
-  meta?: any;
-  align: boolean;
-  message?: string;
-  prettyPrint: boolean;
-}
-
 wConf.addColors({ white: 'bold white' });
+
+import { LoggingContext, LoggerExtra } from './types';
+
+function extractExtra(meta: any) {
+  let extra: LoggerExtra = {};
+
+  if (meta && meta.__extra) {
+    extra = meta.__extra;
+    delete meta.__extra;
+  }
+
+  return extra;
+}
 
 export const Formatters = {
   standard(opts: LoggingContext) {
     // Return string will be passed to logger.
     let meta = '';
     let message = opts.message || '';
+    let extra: LoggerExtra = extractExtra(opts.meta);
 
     if (opts.meta.stack) {
       meta = opts.meta.stack;
@@ -43,6 +45,9 @@ export const Formatters = {
       }
       out += level + ' ';
     }
+    if (extra.scope) {
+      out += '[' + extra.scope + '] ';
+    }
     if (message) {
       out += message + ' ';
     }
@@ -50,5 +55,32 @@ export const Formatters = {
       out += meta + ' ';
     }
     return out.substring(0, out.length - 1);
+  },
+
+  json(opts: LoggingContext) {
+    let res: any = {};
+    let extra: LoggerExtra = extractExtra(opts.meta);
+
+    if (opts.timestamp) {
+      res.timestamp = new Date().toISOString().split('.')[0];
+    }
+
+    if (opts.level) {
+      res.level = opts.level;
+    }
+
+    if (extra.scope) {
+      res.scope = extra.scope;
+    }
+
+    if (opts.message) {
+      res.message = opts.message;
+    }
+
+    if (opts.meta && Object.keys(opts.meta).length > 0) {
+      res.meta = opts.meta;
+    }
+
+    return JSON.stringify(res);
   }
 };

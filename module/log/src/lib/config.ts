@@ -14,6 +14,7 @@ export default Configure.registerNamespace('logging', {
   log: {
     enabled: true,
     type: 'file',
+    json: false,
     name: 'out',
     filename: '',
     formatter: 'json',
@@ -22,6 +23,7 @@ export default Configure.registerNamespace('logging', {
   error: {
     enabled: true,
     type: 'file',
+    json: false,
     name: 'error',
     filename: '',
     formatter: 'json',

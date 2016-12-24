@@ -1,0 +1,7 @@
+{
+  "logging": {
+    "console": {
+      "enabled": false
+    }
+  }
+}

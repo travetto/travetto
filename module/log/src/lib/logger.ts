@@ -2,16 +2,25 @@ import Config from './config';
 import * as winston from 'winston';
 import { nodeToPromise } from '@encore/util';
 import { processTransportConfig } from './transport';
+import { LoggerExtra, AsyncLog, AsyncLogLevel } from './types';
 
-type AsyncLogLevel = (msg: string, ...meta: any[]) => Promise<void>;
-type AsyncLog = (level: string, msg: string, ...meta: any[]) => Promise<void>;
 
-function asyncLog(log: any, scope: string) {
-  return async (level: string, msg: string, ...meta: any[]) => {
-    if (scope) {
-      msg = msg ? `${scope} ${msg}` : scope;
+let primitives: { [key: string]: boolean } = {
+  boolean: true, string: true, number: true, undefined: true
+};
+
+function asyncLog(log: any, extra: LoggerExtra) {
+  return async (level: string, msg: string, ...args: any[]) => {
+    args = args || [];
+
+    let last = args[args.length - 1];
+    if (last === null || primitives[typeof last]) {
+      args.push(last = {});
     }
-    return await nodeToPromise<void>(log, log[level], msg, ...meta);
+
+    last.__extra = extra;
+
+    return await nodeToPromise<void>(log, log[level], msg, ...args);
   };
 }
 
@@ -38,18 +47,18 @@ class LoggerWrapper {
   silly: AsyncLogLevel;
 
   scope(scope: string) {
-    return new LoggerWrapper(scope);
+    return new LoggerWrapper({ scope });
   }
 
-  constructor(scope: string = '') {
-    this.log = asyncLog(logger, scope);
+  constructor(extra: LoggerExtra) {
+    this.log = asyncLog(logger, extra);
     for (let k of ['error', 'info', 'debug', 'warn', 'verbose', 'silly']) {
-      (this as any)[k] = asyncLog(logger, scope).bind(null, k);
+      (this as any)[k] = asyncLog(logger, extra).bind(null, k);
     }
   }
 }
 
-export const Logger = new LoggerWrapper('');
+export const Logger = new LoggerWrapper({ scope: 'default' });
 export const WinstoLogger = logger;
 
 if (Config.console) {
@@ -59,7 +68,7 @@ if (Config.console) {
   }
 
   if (override) {
-    let consLogger = Logger.scope('[console]');
+    let consLogger = Logger.scope('console');
     console.log = consLogger.info.bind(consLogger);
     console.info = consLogger.info.bind(consLogger);
     console.warn = consLogger.warn.bind(consLogger);

@@ -1,17 +1,15 @@
-import Config from './config';
 import * as winston from 'winston';
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import { Formatters } from './formatter';
-
-// Read package.json
+import { isFileTransport, BaseConfig } from './types';
 let pkg = JSON.parse(fs.readFileSync(process.cwd() + '/package.json').toString());
-let appName = (pkg.name as string).replace(/[@]/g, '').replace(/[\/]/g, '_');
+let simpleName = (pkg.name as string).replace(/[@]/g, '').replace(/[\/]/g, '_');
 
-export function processTransportConfig(conf: typeof Config.log): winston.TransportInstance | undefined {
-  if (conf.type === 'file') {
+export function processTransportConfig<T extends BaseConfig>(conf: T): winston.TransportInstance | undefined {
+  if (isFileTransport(conf)) {
     if (!conf.filename) {
-      conf.filename = `${appName}-${conf.name}.log`;
+      conf.filename = `${simpleName}-${conf.name}.log`;
     }
     if (!conf.filename.startsWith('/')) {
       conf.filename = `${process.cwd()}/logs/${conf.filename}`;
@@ -19,10 +17,6 @@ export function processTransportConfig(conf: typeof Config.log): winston.Transpo
 
     // Setup folder for logging
     mkdirp.sync(conf.filename.substring(0, conf.filename.lastIndexOf('/')));
-    if (conf.formatter === 'json') {
-      (conf as any).json = true;
-      conf.formatter = '';
-    }
   }
 
   if (conf.formatter) {
