@@ -1,2 +1,4 @@
 //Expose
-console.debug = console.log;
+if (!console.debug) {
+  console.debug = console.log;
+}
