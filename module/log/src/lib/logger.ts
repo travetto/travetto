@@ -10,7 +10,7 @@ let primitives: { [key: string]: boolean } = {
 };
 
 function asyncLog(log: any, extra: LoggerExtra) {
-  return async (level: string, msg: string, ...args: any[]) => {
+  return async (level: string, ...args: any[]) => {
     args = args || [];
 
     let last = args[args.length - 1];
@@ -20,7 +20,7 @@ function asyncLog(log: any, extra: LoggerExtra) {
 
     last.__extra = extra;
 
-    return await nodeToPromise<void>(log, log[level], msg, ...args);
+    return await nodeToPromise<void>(log, log[level], ...args);
   };
 }
 
