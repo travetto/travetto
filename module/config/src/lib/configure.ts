@@ -133,6 +133,6 @@ export class Configure {
   }
 
   static log() {
-    console.log(JSON.stringify(Configure.data, null, 2));
+    console.log('Configured', Configure.data);
   }
 }
