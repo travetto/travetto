@@ -1,5 +1,4 @@
 import * as winston from 'winston';
-import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import { Formatters } from './formatter';
 import { isFileTransport, BaseConfig } from './types';
