@@ -21,7 +21,7 @@ export const Formatters = {
 
     if (opts.meta.stack) {
       meta = opts.meta.stack;
-    } else if (opts.meta) {
+    } else if (opts.meta && Object.keys(opts.meta).length) {
       meta = JSON.stringify(opts.meta, undefined, opts.prettyPrint ? 2 : undefined);
     }
 
@@ -46,7 +46,7 @@ export const Formatters = {
     if (message) {
       out += message + ' ';
     }
-    if (meta && Object.keys(meta).length) {
+    if (meta) {
       out += meta + ' ';
     }
     return out.substring(0, out.length - 1);
