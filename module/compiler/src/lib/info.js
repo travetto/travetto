@@ -1,3 +1,5 @@
+let fs = require('fs');
+
 let pkg = JSON.parse(fs.readFileSync(process.cwd() + '/package.json').toString());
 let simpleName = pkg.name.replace(/[@]/g, '').replace(/[\/]/g, '_');
 
