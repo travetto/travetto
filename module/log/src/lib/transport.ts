@@ -3,8 +3,7 @@ import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import { Formatters } from './formatter';
 import { isFileTransport, BaseConfig } from './types';
-let pkg = JSON.parse(fs.readFileSync(process.cwd() + '/package.json').toString());
-let simpleName = (pkg.name as string).replace(/[@]/g, '').replace(/[\/]/g, '_');
+import { simpleName } from '@encore/base/info';
 
 export function processTransportConfig<T extends BaseConfig>(conf: T): winston.TransportInstance | undefined {
   if (isFileTransport(conf)) {
