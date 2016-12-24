@@ -3,23 +3,23 @@ import { Ready } from '@encore/lifecycle';
 import { getModelConfig, IndexConfig } from '../service/registry';
 
 function createIndex(target: any, config: IndexConfig) {
-  let mconf = getModelConfig(target);
-  mconf.indices.push(config);
+    let mconf = getModelConfig(target);
+    mconf.indices.push(config);
 
-  if (!mconf.primaryUnique && config.unique) {
-    mconf.primaryUnique = config.fields;
-  }
+    if (!mconf.primaryUnique && config.unique) {
+        mconf.primaryUnique = config.fields;
+    }
 
-  Ready.waitFor(MongoService.createIndex(target, config)
-    .then((x: any) => console.trace(`Created ${config.unique ? 'unique' : ''} index ${config.fields}`)));
+    Ready.waitFor(MongoService.createIndex(target, config)
+        .then((x: any) => console.debug(`Created ${config.unique ? 'unique' : ''} index ${config.fields}`)));
 
-  return target;
+    return target;
 }
 
 export function Index(config: IndexConfig) {
-  return (target: any) => createIndex(target, config);
+    return (target: any) => createIndex(target, config);
 }
 
 export function Unique(...fields: string[]) {
-  return (target: any) => createIndex(target, { fields, unique: true })
+    return (target: any) => createIndex(target, { fields, unique: true })
 }
