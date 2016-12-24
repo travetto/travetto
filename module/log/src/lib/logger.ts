@@ -65,7 +65,5 @@ if (Config.console) {
     console.warn = consLogger.warn.bind(consLogger);
     console.error = consLogger.error.bind(consLogger);
     console.debug = consLogger.debug.bind(consLogger);
-  } else {
-    console.debug = console.log;
   }
 }
