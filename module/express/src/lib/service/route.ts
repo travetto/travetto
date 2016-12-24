@@ -35,7 +35,9 @@ export class RouteRegistry {
       await RouteRegistry.render(res, out);
     }
 
-    Logger.info(`Request [${req.method}] ${req.path}`, {
+    Logger.info(`Request`, {
+      method: req.method,
+      path: req.path,
       query: req.query,
       params: req.params,
       statusCode: res.statusCode
@@ -48,7 +50,9 @@ export class RouteRegistry {
 
     let status = error.status || error.statusCode || 500;
 
-    Logger.error(`Request [${req.method}] ${req.path}`, {
+    Logger.error(`Request`, {
+      method: req.method,
+      path: req.path,
       query: req.query,
       params: req.params,
       statusCode: status
