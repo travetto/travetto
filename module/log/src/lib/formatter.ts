@@ -22,7 +22,7 @@ export const Formatters = {
     if (opts.meta.stack) {
       meta = opts.meta.stack;
     } else if (opts.meta) {
-      meta = JSON.stringify(opts.meta);
+      meta = JSON.stringify(opts.meta, undefined, opts.prettyPrint ? 2 : undefined);
     }
 
     let out = '';
