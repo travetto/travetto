@@ -28,10 +28,12 @@ export const Formatters = {
       let ctx = processEvent(ev);
       // Return string will be passed to logger.
 
-      if (ctx.meta.stack) {
-        ctx.meta = ctx.meta.stack;
-      } else if (ctx.meta && Object.keys(ctx.meta).length) {
-        ctx.meta = JSON.stringify(ctx.meta, undefined, opts['prettyPrint'] ? 2 : undefined);
+      if (ctx.meta) {
+        if (ctx.meta.stack) {
+          ctx.meta = ctx.meta.stack;
+        } else if (Object.keys(ctx.meta).length) {
+          ctx.meta = JSON.stringify(ctx.meta, undefined, opts['prettyPrint'] ? 2 : undefined);
+        }
       }
 
       let out = '';
