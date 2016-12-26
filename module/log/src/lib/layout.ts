@@ -12,11 +12,11 @@ function processEvent(ev: log4js.LogEvent) {
   let args = ev.data;
 
   if (args && typeof args[0] === 'string') {
-    out['message'] = args.shift();
+    out.message = args.shift();
   }
 
   if (args && args.length) {
-    out.meta = args;
+    out.meta = args.length === 1 ? args[0] : args;
   }
 
   return out;
