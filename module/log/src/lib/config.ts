@@ -2,31 +2,32 @@ import { Configure } from '@encore/config';
 
 export default Configure.registerNamespace('logging', {
   console: {
-    enabled: true,
     type: 'console',
-    formatter: 'standard',
-    timestamp: true,
-    colorize: false,
-    align: true,
-    overrideNative: null,
-    prettyPrint: true
+    enabled: true,
+    replaceConsole: null,
+    level: 'info',
+    layout: {
+      type: 'standard',
+      timestamp: true,
+      colorize: false,
+      align: true,
+      prettyPrint: true
+    },
   },
   log: {
-    enabled: true,
-    type: 'file',
-    json: false,
     name: 'out',
+    type: 'file',
+    enabled: true,
     filename: '',
-    formatter: 'json',
+    layout: { type: 'json' },
     level: 'info'
   },
   error: {
-    enabled: true,
-    type: 'file',
-    json: false,
     name: 'error',
+    type: 'file',
+    enabled: true,
     filename: '',
-    formatter: 'json',
+    layout: { type: 'json' },
     level: 'error'
   }
 });
