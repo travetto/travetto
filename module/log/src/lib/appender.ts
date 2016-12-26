@@ -6,7 +6,11 @@ import { simpleName } from '@encore/base/info';
 export function processAppenderConfig<T extends BaseConfig>(conf: T): log4js.Appender | undefined {
   if (isFileAppender(conf)) {
     if (!conf.filename) {
-      conf.filename = `${simpleName}-${conf.name}.log`;
+      conf.filename = simpleName;
+      if (conf.name) {
+        conf.filename += `-${conf.name}`;
+      }
+      conf.filename += '.log';
     }
     if (!conf.filename.startsWith('/')) {
       conf.filename = `${process.cwd()}/logs/${conf.filename}`;
@@ -21,5 +25,5 @@ export function processAppenderConfig<T extends BaseConfig>(conf: T): log4js.App
 
   log4js.loadAppender(conf.type);
 
-  return require(`log4js/appenders/${conf.type}`).configure(conf) as log4js.Appender;
+  return require(`log4js/lib/appenders/${conf.type}`).configure(conf) as log4js.Appender;
 }

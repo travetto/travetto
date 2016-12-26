@@ -6,7 +6,7 @@ function processEvent(ev: log4js.LogEvent) {
   let out: LogContext = {
     timestamp: new Date(ev.startTime).toISOString().split('.')[0],
     level: ev.level.toString().toUpperCase(),
-    category: ev.categoryName,
+    category: ev.categoryName.replace(/[\[\]]/g, ''),
   };
 
   let args = ev.data;
@@ -15,7 +15,7 @@ function processEvent(ev: log4js.LogEvent) {
     out['message'] = args.shift();
   }
 
-  if (args) {
+  if (args && args.length) {
     out.meta = args;
   }
 

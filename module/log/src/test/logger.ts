@@ -17,7 +17,7 @@ describe('Logging', () => {
   });
 
   it('Should log', async () => {
-    await Logger.info('Hello world');
+    Logger.info('Hello world');
     let contents = await nodeToPromise(fs, fs.readFile, name);
     expect(contents.toString()).to.contain('Hello world');
   });

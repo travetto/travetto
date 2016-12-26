@@ -1,5 +1,7 @@
-import Config from './config';
 import * as log4js from 'log4js';
+
+import Config from './config';
+import './layout';
 import { processAppenderConfig } from './appender';
 
 export const logger = log4js.getLogger();
@@ -21,11 +23,8 @@ Object
 
 if (Config.console) {
   let override: boolean | null = Config.console.replaceConsole;
-  if (override === null) {
-    override = (process.env.env !== 'test' as any);
-  }
 
-  if (override) {
+  if (override === null ? process.env.env === 'test' : !!override) {
     log4js.replaceConsole();
   }
 }
