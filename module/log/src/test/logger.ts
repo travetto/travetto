@@ -4,13 +4,13 @@ import * as fs from 'fs';
 import { Logger } from '../lib';
 import { nodeToPromise } from '@encore/util';
 
-let name = process.cwd() + '/logs/encore_logging.log';
+let name = process.cwd() + '/logs/encore_logging-out.log';
 
 describe('Logging', () => {
 
   before(async () => {
     try {
-      return await nodeToPromise<void>(fs, fs.unlink, name);
+      return await nodeToPromise<void>(fs, fs.truncate, name);
     } catch (e) {
       // Do nothing
     }

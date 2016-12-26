@@ -25,5 +25,8 @@ export function processAppenderConfig<T extends BaseConfig>(conf: T): log4js.App
 
   log4js.loadAppender(conf.type);
 
-  return require(`log4js/lib/appenders/${conf.type}`).configure(conf) as log4js.Appender;
+  let appender = require(`log4js/lib/appenders/${conf.type}`).configure(conf) as log4js.Appender;
+  let filtered = require(`log4js/lib/appenders/logLevelFilter`).appender(conf.level, 'fatal', appender) as log4js.Appender;
+
+  return filtered;
 }

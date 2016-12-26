@@ -24,7 +24,7 @@ Object
 if (Config.console) {
   let override: boolean | null = Config.console.replaceConsole;
 
-  if (override === null ? process.env.env === 'test' : !!override) {
+  if (override === null ? process.env.env !== 'test' : !!override) {
     log4js.replaceConsole();
   }
 }
