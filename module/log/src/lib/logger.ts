@@ -1,12 +1,12 @@
 import * as log4js from 'log4js';
 
 import Config from './config';
-import './layout';
+import { Layouts } from './layout';
 import { processAppenderConfig } from './appender';
 
-export const logger = log4js.getLogger();
-export const Logger = logger;
-
+for (let key of Object.keys(Layouts)) {
+  log4js.layouts.addLayout(key, Layouts[key]);
+}
 log4js.clearAppenders();
 
 Object
@@ -28,3 +28,7 @@ if (Config.console) {
     log4js.replaceConsole();
   }
 }
+
+
+export const logger = log4js.getLogger();
+export const Logger = logger;
