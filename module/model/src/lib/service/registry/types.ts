@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import * as mongo from 'mongodb';
 import { Named, SortOptions } from '@encore/mongo';
 
 export interface ModelCls<T> extends Named {
@@ -13,9 +14,8 @@ export interface Cls {
 export type ClsLst = Cls | [Cls];
 
 export interface IndexConfig {
-  fields: string[];
-  unique?: boolean;
-  sparse?: boolean;
+  fields: string[] | { [key: string]: number };
+  options: mongo.IndexOptions;
 }
 
 export interface ModelConfig {

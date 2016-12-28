@@ -1,3 +1,4 @@
+import { ObjectUtil } from '@encore/util';
 import { MongoService } from '@encore/mongo';
 import { Ready } from '@encore/lifecycle';
 import { getModelConfig, IndexConfig } from '../service/registry';
@@ -6,12 +7,22 @@ function createIndex(target: any, config: IndexConfig) {
     let mconf = getModelConfig(target);
     mconf.indices.push(config);
 
-    if (!mconf.primaryUnique && config.unique) {
-        mconf.primaryUnique = config.fields;
+    let fields: string[];
+    let fieldMap: { [key: string]: number };
+    if (!Array.isArray(config.fields)) {
+        fields = Object.keys(config.fields);
+        fieldMap = config.fields;
+    } else {
+        fields = config.fields;
+        fieldMap = ObjectUtil.fromPairs(config.fields.map(x => [x, 1] as [string, number]));
     }
 
-    Ready.waitFor(MongoService.createIndex(target, config)
-        .then((x: any) => console.debug(`Created ${config.unique ? 'unique' : ''} index ${config.fields}`)));
+    if (!mconf.primaryUnique && config.options.unique) {
+        mconf.primaryUnique = fields;
+    }
+
+    Ready.waitFor(MongoService.createIndex(target, fieldMap, config.options)
+        .then((x: any) => console.debug(`Created ${config.options.unique ? 'unique' : ''} index ${config.fields}`)));
 
     return target;
 }
@@ -21,5 +32,5 @@ export function Index(config: IndexConfig) {
 }
 
 export function Unique(...fields: string[]) {
-    return (target: any) => createIndex(target, { fields, unique: true })
+    return (target: any) => createIndex(target, { fields, options: { unique: true } })
 }
