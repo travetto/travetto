@@ -7,7 +7,7 @@ const flat = require('flat');
 export class MongoService {
 
   private static clientPromise: Promise<mongo.Db>;
-  private static indices: any[] = [];
+  private static indices: [string, any, mongo.IndexOptions][] = [];
 
   static translateQueryIds(query: Object & { _id?: any }) {
     if (query._id) {
@@ -42,17 +42,16 @@ export class MongoService {
   static async resetDatabase() {
     let client = await MongoService.getClient();
     await client.dropDatabase();
-    for (let args of MongoService.indices) {
-      let col = client.collection(args[0]);
-      await col.createIndex.apply(col, args.slice(1));
+    for (let [colName, fields, config] of MongoService.indices) {
+      let col = client.collection(colName);
+      await col.createIndex(fields, config);
     }
   }
 
-  static async createIndex(named: Named, config: { fields: string[], unique?: boolean, sparse?: boolean }) {
+  static async createIndex(named: Named, fields: { [key: string]: number }, config: mongo.IndexOptions) {
     let col = await MongoService.collection(named);
-    let map = ObjectUtil.fromPairs(config.fields.map(x => [x, 1]) as [string, number][]);
-    MongoService.indices.push([col.collectionName, map, config]);
-    await col.createIndex(map, config);
+    MongoService.indices.push([col.collectionName, fields, config]);
+    await col.createIndex(fields, config);
     return;
   }
 
