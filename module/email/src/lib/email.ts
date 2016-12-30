@@ -6,8 +6,6 @@ import { nodeToPromise } from '@encore/util';
 
 let juice = require('juice');
 
-
-
 export class EmailService {
   static transport = nodemailer.createTransport(Config.transport);
 
