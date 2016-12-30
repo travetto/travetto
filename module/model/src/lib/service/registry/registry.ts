@@ -93,3 +93,4 @@ export function registerModel<T>(cls: ModelCls<T>, schemaOpts: mongoose.SchemaOp
   Object.assign(mconf, { collection: mconf.collection || cls.name, schemaOpts });
   return cls;
 }
+

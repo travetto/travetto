@@ -21,6 +21,14 @@ export class ModelService {
     return await MongoService.collection(cls);
   }
 
+  static rewriteError<T extends ModelCore>(cls: ModelCls<T>, e: any) {
+    if (e.code === 11000) { // Handle duplicate errors
+      e = new Error('Duplicate entry already exists');
+    }
+
+    return e;
+  }
+
   static async getByQuery<T extends ModelCore>(cls: ModelCls<T>, query: Object = {}, options: QueryOptions = {}): Promise<T[]> {
     const config = models[cls.name];
     if (!options.sort && config.defaultSort) {
@@ -56,14 +64,6 @@ export class ModelService {
     return onRetrieve(cls, res);
   }
 
-  static rewriteError<T extends ModelCore>(cls: ModelCls<T>, e: any) {
-    if (e.code === 11000) { // Handle duplicate errors
-      e = new Error('Duplicate entry already exists');
-    }
-
-    return e;
-  }
-
   static async deleteById<T extends ModelCore>(cls: ModelCls<T>, id: string): Promise<number> {
     try {
       return await MongoService.deleteById(cls, id);
@@ -84,7 +84,8 @@ export class ModelService {
     let cls = getCls(o);
     try {
       o = await prePersist(o);
-      return await MongoService.save<T>(cls, o);
+      let res = await MongoService.save<T>(cls, o);
+      return onRetrieve(cls, res);
     } catch (e) {
       throw ModelService.rewriteError(cls, e);
     }
@@ -94,7 +95,8 @@ export class ModelService {
     let cls = getCls(objs[0]);
     try {
       objs = await Validator.validateAll(objs.map(o => o.preSave ? o.preSave() : o));
-      return await MongoService.saveAll<T>(cls, objs);
+      let res = await MongoService.saveAll<T>(cls, objs);
+      return res.map(x => onRetrieve(cls, x));
     } catch (e) {
       throw ModelService.rewriteError(cls, e);
     }
@@ -104,7 +106,8 @@ export class ModelService {
     let cls = getCls(o);
     try {
       o = await prePersist(o);
-      return await MongoService.update<T>(cls, o);
+      let res = await MongoService.update<T>(cls, o);
+      return onRetrieve(cls, res);
     } catch (e) {
       throw ModelService.rewriteError(cls, e);
     }
@@ -115,7 +118,8 @@ export class ModelService {
     try {
       o = await prePersist(o, view);
       let partial = bindData(cls, {}, o, view);
-      return await MongoService.partialUpdate<T>(cls, o._id, partial);
+      let res = await MongoService.partialUpdate<T>(cls, o._id, partial);
+      return onRetrieve(cls, res);
     } catch (e) {
       throw ModelService.rewriteError(cls, e);
     }
