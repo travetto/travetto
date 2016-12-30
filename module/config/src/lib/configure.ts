@@ -68,7 +68,7 @@ export class Configure {
     ObjectUtil.merge(target, unflatten(out, { delimiter: '_' }));
   }
 
-  static registerNamespace<T extends ConfigMap>(ns: string, base: T, postInit: (config: T) => void): T {
+  static registerNamespace<T extends ConfigMap>(ns: string, base: T, postInit?: (config: T) => void): T {
     // Store ref
     Configure.namespaces[ns] = true;
     Configure.namespaces[ns.toLowerCase()] = true;
@@ -83,7 +83,9 @@ export class Configure {
     // Get ref to config object
     Configure.data[ns] = Configure.data[ns] || {};
 
-    Configure.postInit.push([ns, postInit]);
+    if (postInit) {
+      Configure.postInit.push([ns, postInit]);
+    }
 
     return Configure.data[ns] as T;
   }
