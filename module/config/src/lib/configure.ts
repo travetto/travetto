@@ -1,4 +1,3 @@
-import { Config } from 'Chai';
 import { ObjectUtil, bulkRequire } from '@encore/util';
 
 let flatten = require('flat');
@@ -11,7 +10,7 @@ export class Configure {
   private static NULL = 'NULL' + (Math.random() * 1000) + (new Date().getTime());
   private static data: ConfigMap = {};
   private static namespaces: { [key: string]: boolean } = {};
-  private static postInit: Function[] = [];
+  private static postInit: [string, Function][] = [];
 
   private static writeProperty(o: any, k: string, v: any) {
     if (typeof v === 'string') {
@@ -69,7 +68,7 @@ export class Configure {
     ObjectUtil.merge(target, unflatten(out, { delimiter: '_' }));
   }
 
-  static registerNamespace<T extends ConfigMap>(ns: string, base: T): T {
+  static registerNamespace<T extends ConfigMap>(ns: string, base: T, postInit: (config: T) => void): T {
     // Store ref
     Configure.namespaces[ns] = true;
     Configure.namespaces[ns.toLowerCase()] = true;
@@ -83,6 +82,9 @@ export class Configure {
 
     // Get ref to config object
     Configure.data[ns] = Configure.data[ns] || {};
+
+    Configure.postInit.push([ns, postInit]);
+
     return Configure.data[ns] as T;
   }
 
@@ -134,16 +136,12 @@ export class Configure {
     Configure.dropNulls(Configure.data);
 
     // Wait for all post config inits to finish
-    for (let fn of Config.postInit) {
-      await fn();
+    for (let [ns, fn] of Configure.postInit) {
+      await fn(Configure.data[ns]);
     }
   }
 
   static log() {
     console.log('Configured', Configure.data);
-  }
-
-  static postInitialize(cb: Function) {
-    Config.postInit.push(cb);
   }
 }
