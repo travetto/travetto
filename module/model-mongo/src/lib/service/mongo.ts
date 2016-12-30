@@ -137,9 +137,16 @@ export class MongoService {
   }
 
   static async partialUpdate<T extends Base>(named: Named, id: string, data: any): Promise<T> {
+    return await MongoService.partialUpdateByQuery<T>(name, { _id: id }, data);
+  }
+
+  static async partialUpdateByQuery<T extends Base>(named: Named, query: any, data: any): Promise<T> {
     let col = await MongoService.collection(named);
-    await col.updateOne({ _id: new mongo.ObjectID(id) }, { $set: flat(data) });
-    return await MongoService.getById<T>(named, id);
+    query = MongoService.translateQueryIds(query);
+    let res = await col.findOneAndUpdate(query, { $set: flat(data) }, { returnOriginal: false });
+    let ret: T = res.value as T;
+    ret._id = (ret._id as any).toHexString();
+    return ret;
   }
 
   static async bulkProcess<T extends Base>(named: Named, state: BulkState<T>) {
