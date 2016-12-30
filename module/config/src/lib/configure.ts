@@ -1,3 +1,4 @@
+import { Config } from 'Chai';
 import { ObjectUtil, bulkRequire } from '@encore/util';
 
 let flatten = require('flat');
@@ -10,6 +11,7 @@ export class Configure {
   private static NULL = 'NULL' + (Math.random() * 1000) + (new Date().getTime());
   private static data: ConfigMap = {};
   private static namespaces: { [key: string]: boolean } = {};
+  private static postInit: Function[] = [];
 
   private static writeProperty(o: any, k: string, v: any) {
     if (typeof v === 'string') {
@@ -105,7 +107,7 @@ export class Configure {
       - External config file -> loaded from env/json
       - Environment vars -> Overrides everything
   */
-  static initialize(env: string) {
+  static async initialize(env: string) {
     console.log(`Initializing: ${env}`);
 
     // Load all namespaces from core
@@ -130,9 +132,18 @@ export class Configure {
 
     // Drop out nulls
     Configure.dropNulls(Configure.data);
+
+    // Wait for all post config inits to finish
+    for (let fn of Config.postInit) {
+      await fn();
+    }
   }
 
   static log() {
     console.log('Configured', Configure.data);
+  }
+
+  static postInitialize(cb: Function) {
+    Config.postInit.push(cb);
   }
 }
