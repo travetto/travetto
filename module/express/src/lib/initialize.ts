@@ -1,6 +1,6 @@
 import * as express from 'express';
 import Config from './config';
-import { OnReady } from '@encore/lifecycle';
+import { OnStartup } from '@encore/lifecycle';
 import { requestContext } from '@encore/context/ext/express';
 import { Logger } from '@encore/logging';
 import { RouteRegistry } from './service';
@@ -27,7 +27,7 @@ if (Config.session.cookie.secure) {
 }
 
 export class Init {
-  @OnReady()
+  @OnStartup()
   static serve() {
     if (Config.serve && Config.port > 0) {
       Logger.info(`Listening on ${Config.port}`);
