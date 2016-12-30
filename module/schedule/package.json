@@ -1,13 +1,13 @@
 {
-  "version": "1.1.32", 
-  "license": "ISC", 
   "author": "", 
-  "name": "@encore/lifecycle", 
   "dependencies": {
-    "flat": "^2.0.0", 
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x"
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x", 
+    "flat": "^2.0.0"
   }, 
-  "scripts": {}, 
+  "description": "", 
+  "license": "ISC", 
   "main": "src/lib/", 
-  "description": ""
+  "name": "@encore/lifecycle", 
+  "scripts": {}, 
+  "version": "1.1.33"
 }
