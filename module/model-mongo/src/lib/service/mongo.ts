@@ -136,14 +136,14 @@ export class MongoService {
     return o;
   }
 
-  static async partialUpdate<T extends Base>(named: Named, id: string, data: any): Promise<T> {
-    return await MongoService.partialUpdateByQuery<T>(name, { _id: id }, data);
+  static async partialUpdate<T extends Base>(named: Named, id: string, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
+    return await MongoService.partialUpdateByQuery<T>(name, { _id: id }, data, opts);
   }
 
-  static async partialUpdateByQuery<T extends Base>(named: Named, query: any, data: any): Promise<T> {
+  static async partialUpdateByQuery<T extends Base>(named: Named, query: any, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
     let col = await MongoService.collection(named);
     query = MongoService.translateQueryIds(query);
-    let res = await col.findOneAndUpdate(query, { $set: flat(data) }, { returnOriginal: false });
+    let res = await col.findOneAndUpdate(query, { $set: flat(data) }, Object.assign({ returnOriginal: false }, opts));
     if (!res.value) {
       throw new Error('Object not found for updating');
     }
