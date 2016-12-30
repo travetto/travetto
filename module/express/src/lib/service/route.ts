@@ -46,7 +46,7 @@ export class RouteRegistry {
     res.end();
   }
 
-  static async errorHandler(error: any, req: Request, res: Response) {
+  static async errorHandler(error: any, req: Request, res: Response, next?: NextFunction) {
 
     let status = error.status || error.statusCode || 500;
 
