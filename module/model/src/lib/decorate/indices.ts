@@ -1,36 +1,36 @@
 import { ObjectUtil } from '@encore/util';
 import { MongoService } from '@encore/mongo';
-import { Ready } from '@encore/lifecycle';
+import { Startup } from '@encore/lifecycle';
 import { getModelConfig, IndexConfig } from '../service/registry';
 
 function createIndex(target: any, config: IndexConfig) {
-    let mconf = getModelConfig(target);
-    mconf.indices.push(config);
+  let mconf = getModelConfig(target);
+  mconf.indices.push(config);
 
-    let fields: string[];
-    let fieldMap: { [key: string]: number };
-    if (!Array.isArray(config.fields)) {
-        fields = Object.keys(config.fields);
-        fieldMap = config.fields;
-    } else {
-        fields = config.fields;
-        fieldMap = ObjectUtil.fromPairs(config.fields.map(x => [x, 1] as [string, number]));
-    }
+  let fields: string[];
+  let fieldMap: { [key: string]: number };
+  if (!Array.isArray(config.fields)) {
+    fields = Object.keys(config.fields);
+    fieldMap = config.fields;
+  } else {
+    fields = config.fields;
+    fieldMap = ObjectUtil.fromPairs(config.fields.map(x => [x, 1] as [string, number]));
+  }
 
-    if (!mconf.primaryUnique && config.options.unique) {
-        mconf.primaryUnique = fields;
-    }
+  if (!mconf.primaryUnique && config.options.unique) {
+    mconf.primaryUnique = fields;
+  }
 
-    Ready.waitFor(MongoService.createIndex(target, fieldMap, config.options)
-        .then((x: any) => console.debug(`Created ${config.options.unique ? 'unique' : ''} index ${config.fields}`)));
+  Startup.waitFor(MongoService.createIndex(target, fieldMap, config.options)
+    .then((x: any) => console.debug(`Created ${config.options.unique ? 'unique' : ''} index ${config.fields}`)));
 
-    return target;
+  return target;
 }
 
 export function Index(config: IndexConfig) {
-    return (target: any) => createIndex(target, config);
+  return (target: any) => createIndex(target, config);
 }
 
 export function Unique(...fields: string[]) {
-    return (target: any) => createIndex(target, { fields, options: { unique: true } })
+  return (target: any) => createIndex(target, { fields, options: { unique: true } })
 }

@@ -27,3 +27,7 @@ export function DefaultSort(sort: SortOptions) {
 export function Model(opts: mongoose.SchemaOptions = {}) {
   return (target: any) => registerModel<any>(target, opts);
 }
+
+export function ProjectionModel(opts: mongoose.SchemaOptions = {}) {
+  return (target: any) => registerModel<any>(target, opts);
+}
