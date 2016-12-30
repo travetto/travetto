@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
 import { Renderable } from '../model';
 import { ObjectUtil, toPromise } from '@encore/util';
-import { app } from '../initialize';
+import { AppService } from './app';
 import { Logger } from '@encore/logging';
 
 export class RouteRegistry {
@@ -46,7 +46,7 @@ export class RouteRegistry {
     res.end();
   }
 
-  static async errorHandler(error: any, req: Request, res: Response, next?: any) {
+  static async errorHandler(error: any, req: Request, res: Response) {
 
     let status = error.status || error.statusCode || 500;
 
@@ -94,9 +94,9 @@ export class RouteRegistry {
   static registerRequestHandler(fn: Filter, handler: RequestHandler, filters?: Filter[], base = '') {
     // Ensure all filters match standard format
     if (handler.method) {
-      (app as any)[handler.method].call(app,
+      AppService.register(handler.method,
         /*url*/ RouteRegistry.buildPath(base, handler.path),
-        /*filters*/ ...(filters || []).map(toPromise).map(f => RouteRegistry.asyncHandler(f as FilterPromise)),
+        /*filters*/(filters || []).map(toPromise).map(f => RouteRegistry.asyncHandler(f as FilterPromise)),
         /*fn*/ RouteRegistry.asyncHandler(toPromise(fn), RouteRegistry.outputHandler.bind(null, handler))
       );
     }
