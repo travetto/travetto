@@ -6,16 +6,7 @@ import { nodeToPromise } from '@encore/util';
 
 let juice = require('juice');
 
-marked.setOptions({
-  renderer: new marked.Renderer(),
-  gfm: true,
-  tables: true,
-  breaks: false,
-  pedantic: false,
-  sanitize: false,
-  smartLists: true,
-  smartypants: false
-});
+
 
 export class EmailService {
   static transport = nodemailer.createTransport(Config.transport);
