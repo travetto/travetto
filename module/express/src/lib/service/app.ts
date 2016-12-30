@@ -5,15 +5,44 @@ import { OnStartup } from '@encore/lifecycle';
 import { Logger } from '@encore/logging';
 import { Filter, FilterPromise, PathType, Method } from '../model';
 
+let compression = require('compression');
+let cookieParser = require('cookie-parser');
+let bodyParser = require('body-parser');
+let session = require('express-session');
+
 export class AppService {
   private static app: express.Application;
 
-  static use(...filters: Filter[]): void {
-    AppService.app.use(...filters);
+  static get() {
+    return AppService.app;
   }
 
-  static errorHandler(handler: (err: any, req: express.Request, res: express.Response, next?: express.NextFunction) => void): void {
+  static use(...filters: Filter[]) {
+    AppService.app.use(...filters);
+    return AppService;
+  }
+
+  static enable(features: string) {
+    AppService.app.enable(features);
+    return AppService;
+  }
+
+  static disable(features: string) {
+    AppService.app.disable(features);
+    return AppService;
+  }
+
+  static enabled(features: string) {
+    return AppService.app.enabled(features);
+  }
+
+  static disabled(features: string) {
+    return AppService.app.disabled(features);
+  }
+
+  static errorHandler(handler: (err: any, req: express.Request, res: express.Response, next: express.NextFunction) => void) {
     AppService.app.use(handler);
+    return AppService;
   }
 
   static register(method: Method, pattern: PathType, filters: FilterPromise[], handler: FilterPromise) {
@@ -29,23 +58,21 @@ export class AppService {
   }
 
   static init() {
-    let app = AppService.app = express();
-    let compression = require('compression');
-    let cookieParser = require('cookie-parser');
-    let bodyParser = require('body-parser');
-    let session = require('express-session');
+    if (!AppService.app) {
+      AppService.app = express();
+      AppService.use(compression());
+      AppService.use(cookieParser());
+      AppService.use(bodyParser.json());
+      AppService.use(bodyParser.urlencoded());
+      AppService.use(bodyParser.raw({ type: 'image/*' }));
+      AppService.use(session(Config.session)); // session secret
 
-    app.use(compression());
-    app.use(cookieParser());
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded());
-    app.use(bodyParser.raw({ type: 'image/*' }));
-    app.use(session(Config.session)); // session secret
-
-    // Enable proxy for cookies
-    if (Config.session.cookie.secure) {
-      app.enable('trust proxy');
+      // Enable proxy for cookies
+      if (Config.session.cookie.secure) {
+        AppService.enable('trust proxy');
+      }
     }
+    return AppService;
   }
 
   @OnStartup()
