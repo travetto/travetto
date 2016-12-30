@@ -144,6 +144,9 @@ export class MongoService {
     let col = await MongoService.collection(named);
     query = MongoService.translateQueryIds(query);
     let res = await col.findOneAndUpdate(query, { $set: flat(data) }, { returnOriginal: false });
+    if (!res.value) {
+      throw new Error('Object not found for updating');
+    }
     let ret: T = res.value as T;
     ret._id = (ret._id as any).toHexString();
     return ret;
