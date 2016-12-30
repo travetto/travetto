@@ -1,48 +1,14 @@
-import * as crypto from 'crypto';
 import * as passport from 'passport';
 import * as moment from 'moment';
 
+import { MongoStrategyUtil } from './util';
+import { MongoStrategyConfig } from './types';
 import { AppError } from '@encore/express';
-import { nodeToPromise } from '@encore/util';
 import { ModelService, BaseModel } from '@encore/model';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Context } from '@encore/context';
 
-async function generateHash(password: string, salt: string, iterations = 25000, keylen = 512, digest = 'sha512') {
-  return (await nodeToPromise<Buffer>(crypto, crypto.pbkdf2, password, salt, iterations, keylen, digest)).toString('hex');
-}
-
-async function generateSalt(saltlen = 32) {
-  return (await nodeToPromise<NodeBuffer>(crypto, crypto.randomBytes, saltlen)).toString('hex');
-}
-
-async function generatePassword(password: string, saltlen = 32, validator?: (password: string) => Promise<boolean>) {
-  if (!password) {
-    throw new AppError('Missing password exception', 501);
-  }
-
-  if (validator !== undefined) {
-    if (!await validator(password)) {
-      throw new AppError('Invalid password', 503);
-    }
-  }
-
-  let salt = await generateSalt(saltlen);
-  let hash = await generateHash(password, salt);
-
-  return { salt, hash };
-}
-
-interface Config {
-  usernameField: string;
-  passwordField: string;
-  hashField: string;
-  saltField: string;
-  resetTokenField: string;
-  resetExpiresField: string;
-}
-
-export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Config) {
+export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: MongoStrategyConfig) {
 
   async function login(email: string, password: string) {
     let query: any = {
@@ -51,7 +17,7 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
 
     try {
       let user = await ModelService.findOne(cls, query);
-      let hash = await generateHash(password, (user as any)[config.saltField]);
+      let hash = await MongoStrategyUtil.generateHash(password, (user as any)[config.saltField]);
       if (hash !== (user as any)[config.hashField]) {
         throw new AppError('Invalid password');
       } else {
@@ -76,7 +42,7 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
     if (existingUsers.length) {
       throw new AppError('That email is already taken.');
     } else {
-      let fields = await generatePassword(password);
+      let fields = await MongoStrategyUtil.generatePassword(password);
       Object.assign(user as any, {
         [config.hashField]: fields.hash,
         [config.saltField]: fields.salt
@@ -106,14 +72,14 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
           throw new AppError('Reset token has expired');
         }
       } else {
-        let pw = await generateHash(oldPassword, (user as any)[config.saltField]);
+        let pw = await MongoStrategyUtil.generateHash(oldPassword, (user as any)[config.saltField]);
         if (pw !== (user as any)[config.hashField]) {
           throw new AppError('Old password is required to change');
         }
       }
     }
 
-    let fields = await generatePassword(password);
+    let fields = await MongoStrategyUtil.generatePassword(password);
 
     Object.assign(user as any, {
       [config.hashField]: fields.hash,
@@ -129,8 +95,8 @@ export function MongoStrategy<T extends BaseModel>(cls: new () => T, config: Con
     };
 
     let user = await ModelService.findOne(cls, query);
-    let salt = await generateSalt();
-    let password = await generateHash('' + (new Date().getTime()), salt, 25000, 32);
+    let salt = await MongoStrategyUtil.generateSalt();
+    let password = await MongoStrategyUtil.generateHash('' + (new Date().getTime()), salt, 25000, 32);
 
     Object.assign(user as any, {
       [config.resetTokenField]: password,
