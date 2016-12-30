@@ -1,40 +1,40 @@
-export class Ready {
+export class Startup {
   private static promises: Promise<any>[] = [];
   private static listeners: ((...args: any[]) => any)[] = [];
   private static resolved: number = 0;
   private static done: boolean = false;
   private static initialized: boolean = false;
-  private static readyPromise = new Promise((resolve) => {
-    Ready.onReady(resolve);
+  private static startupPromise = new Promise((resolve) => {
+    Startup.onStartup(resolve);
   });
 
   static waitFor<T>(p: Promise<T>) {
-    Ready.promises.push(p);
-    p.then(Ready.onPromiseSuccess)
-      .catch(Ready.onPromiseFailure);
+    Startup.promises.push(p);
+    p.then(Startup.onPromiseSuccess)
+      .catch(Startup.onPromiseFailure);
   }
 
-  static onReady(cb: (...args: any[]) => any) {
-    if (!Ready.done) {
-      Ready.listeners.push(cb);
+  static onStartup(cb: (...args: any[]) => any) {
+    if (!Startup.done) {
+      Startup.listeners.push(cb);
     } else {
       process.nextTick(cb);
     }
   }
 
-  static onReadyPromise() {
-    return Ready.readyPromise;
+  static onStartupPromise() {
+    return Startup.startupPromise;
   }
 
   static onPromiseSuccess() {
-    Ready.resolved++;
-    process.nextTick(Ready.checkForDone);
+    Startup.resolved++;
+    process.nextTick(Startup.checkForDone);
   }
 
   static checkForDone() {
-    if (Ready.initialized && Ready.resolved === Ready.promises.length) {
-      Ready.done = true;
-      Ready.listeners.splice(0, Ready.listeners.length)
+    if (Startup.initialized && Startup.resolved === Startup.promises.length) {
+      Startup.done = true;
+      Startup.listeners.splice(0, Startup.listeners.length)
         .forEach(p => p());
     }
   }
@@ -45,18 +45,18 @@ export class Ready {
   }
 
   static wait() {
-    setTimeout(Ready.checkForDone, 1000);
+    setTimeout(Startup.checkForDone, 1000);
   }
 
   static initialize() {
-    Ready.initialized = true;
-    Ready.wait();
+    Startup.initialized = true;
+    Startup.wait();
   }
 }
 
-export function OnReady() {
+export function OnStartup() {
   return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-    Ready.onReady(() => target[propertyKey]());
+    Startup.onStartup(() => target[propertyKey]());
     return descriptor;
   };
 }

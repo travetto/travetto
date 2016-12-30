@@ -1,4 +1,4 @@
-encore: Init
+encore: Lifecycle
 ===
 
 This module provides common infrastructure for application based initialization.  There is a common
@@ -13,10 +13,12 @@ infrastructure pattern used:
          in the `mail` namespace.
     - All configuration variables should be loaded before any modules use it. 
     - `config.ts` should not require any code from your modules to ensure the order of loading 
-  - Ready
+  - Startup
     - This provides mechanisms to define the following:
        - Define application readiness based on promises
        - Wait for application readiness to trigger certain actions post setup
-  - Bootstrap
-    - Supports initializing the application, and then requiring classes using a glob pattern 
-      to handle the common initialization process.
+  - Shutdown
+      - This provides mechanisms to define the following:
+        - Provide hooks for shutdown
+        - Ensure certain methods are called on system shutdown
+      
