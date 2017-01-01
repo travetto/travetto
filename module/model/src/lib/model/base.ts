@@ -1,5 +1,5 @@
 import { Field } from '../decorate';
-import { models } from '../service';
+import { SchemaRegistry } from '../service';
 import { ModelCore } from './model';
 import { Bindable } from './bindable';
 
@@ -22,7 +22,7 @@ export abstract class BaseModel extends Bindable implements ModelCore {
 
   constructor(data?: Object) {
     super(data);
-    this._type = models[this.constructor.name].discriminator;
+    this._type = SchemaRegistry.models[this.constructor.name].discriminator;
   }
 
   preSave(): this {

@@ -1,10 +1,10 @@
 import { ObjectUtil } from '@encore/util';
 import { MongoService } from '@encore/mongo';
 import { Startup } from '@encore/lifecycle';
-import { getModelConfig, IndexConfig } from '../service/registry';
+import { SchemaRegistry, IndexConfig } from '../service/registry';
 
 function createIndex(target: any, config: IndexConfig) {
-  let mconf = getModelConfig(target);
+  let mconf = SchemaRegistry.getModelConfig(target);
   mconf.indices.push(config);
 
   let fields: string[];

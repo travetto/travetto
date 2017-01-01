@@ -1,6 +1,6 @@
 import * as mg from 'mongoose';
 import { ModelCore } from '../model';
-import { ModelCls, models, DEFAULT_VIEW } from './registry';
+import { ModelCls, SchemaRegistry } from './registry';
 import { getCls } from '../util';
 
 let mongoose = require('mongoose/lib/browser');
@@ -10,10 +10,10 @@ export class Validator {
 
   static schemas: { [cls: string]: mg.Schema } = {};
 
-  static getSchema<T extends ModelCore>(cls: ModelCls<T>, view: string = DEFAULT_VIEW) {
+  static getSchema<T extends ModelCore>(cls: ModelCls<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
     const key = `${cls.name}::${view}`;
     if (!Validator.schemas[key]) {
-      let config = models[cls.name];
+      let config = SchemaRegistry.models[cls.name];
       if (!config || !config.views[view]) {
         throw new Error(`Unknown view found: ${view}`);
       }

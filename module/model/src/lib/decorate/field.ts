@@ -1,5 +1,5 @@
 import { enumKeys } from '../util';
-import { Cls, FieldCfg, ClsLst, registerFieldFacet, getSchema } from '../service/registry';
+import { Cls, FieldCfg, ClsLst, SchemaRegistry } from '../service/registry';
 import 'reflect-metadata';
 
 function buildFieldConfig(type: ClsLst) {
@@ -10,7 +10,7 @@ function buildFieldConfig(type: ClsLst) {
   };
 
   // Get schema if exists
-  const schema = getSchema(fieldConf.declared.type);
+  const schema = SchemaRegistry.getSchema(fieldConf.declared.type);
 
   if (schema) {
     fieldConf.type = isArray ? [schema] : schema;
@@ -21,13 +21,13 @@ function buildFieldConfig(type: ClsLst) {
 
 function prop(obj: { [key: string]: any }) {
   return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, obj);
+    SchemaRegistry.registerFieldFacet(f, prop, obj);
   };
 }
 
 export function Field(type: ClsLst) {
   return (f: any, prop: string) => {
-    registerFieldFacet(f, prop, buildFieldConfig(type));
+    SchemaRegistry.registerFieldFacet(f, prop, buildFieldConfig(type));
   };
 }
 
@@ -43,7 +43,7 @@ export const Max = (n: number | Date) => prop({ max: n });
 export function View(...names: string[]) {
   return (f: any, prop: string) => {
     for (let name of names) {
-      registerFieldFacet(f, prop, {}, name);
+      SchemaRegistry.registerFieldFacet(f, prop, {}, name);
     }
   };
 }
