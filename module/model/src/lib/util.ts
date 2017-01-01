@@ -1,9 +1,9 @@
 import { ModelCore } from './model';
-import { ModelCls, SchemaRegistry, Cls } from './service/registry';
+import { ModelCls, ModelRegistry, Cls } from './service/registry';
 import { ObjectUtil } from '@encore/util';
 
 export function convert<T extends ModelCore>(cls: ModelCls<T>, o: T): T {
-  let config = SchemaRegistry.models[cls.name];
+  let config = ModelRegistry.models[cls.name];
   if (config && config.discriminated && !!o._type) {
     return new config.discriminated[o._type](o);
   } else {
@@ -36,9 +36,9 @@ export function coerceType(type: Cls, val: any) {
   return val;
 }
 
-export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = SchemaRegistry.DEFAULT_VIEW): T {
+export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = ModelRegistry.DEFAULT_VIEW): T {
   if (!!data) {
-    let conf = SchemaRegistry.models[cons.name];
+    let conf = ModelRegistry.models[cons.name];
 
     // If no configuration
     if (!conf) {
@@ -62,7 +62,7 @@ export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = Schema
               v = [v];
             }
 
-            if (SchemaRegistry.models[declared.type.name]) {
+            if (ModelRegistry.models[declared.type.name]) {
               if (declared.array) {
                 v = v.map((x: any) => bindData(declared.type, new declared.type(), x, view));
               } else {

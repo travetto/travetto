@@ -1,12 +1,12 @@
 import * as mongo from 'mongodb';
 import { ModelCore } from '../model';
-import { ModelCls, SchemaRegistry } from './registry';
+import { ModelCls, ModelRegistry } from './registry';
 import { MongoService, QueryOptions } from '@encore/mongo';
 import { Validator } from './validator';
 import { bindData, convert, getCls } from '../util';
 import { ObjectUtil } from '@encore/util';
 
-async function prePersist<T extends ModelCore>(o: T, view: string = SchemaRegistry.DEFAULT_VIEW) {
+async function prePersist<T extends ModelCore>(o: T, view: string = ModelRegistry.DEFAULT_VIEW) {
   return await Validator.validate(o.preSave ? o.preSave() : o, view);
 }
 
@@ -30,7 +30,7 @@ export class ModelService {
   }
 
   static async getByQuery<T extends ModelCore>(cls: ModelCls<T>, query: Object = {}, options: QueryOptions = {}): Promise<T[]> {
-    const config = SchemaRegistry.models[cls.name];
+    const config = ModelRegistry.models[cls.name];
     if (!options.sort && config.defaultSort) {
       options.sort = config.defaultSort;
     }
@@ -126,7 +126,7 @@ export class ModelService {
   }
 
   static async bulkProcess<T extends ModelCore>(named: ModelCls<T>, state: { upsert?: T[], delete?: T[] }) {
-    let keys = SchemaRegistry.models[named.name].primaryUnique || ['_id'];
+    let keys = ModelRegistry.models[named.name].primaryUnique || ['_id'];
 
     try {
       return await MongoService.bulkProcess(named, {
