@@ -1,23 +1,6 @@
 import { enumKeys } from '../util';
-import { Cls, FieldCfg, ClsLst, ModelRegistry } from '../service/registry';
+import { ClsList, ModelRegistry } from '../service/registry';
 import 'reflect-metadata';
-
-function buildFieldConfig(type: ClsLst) {
-  const isArray = Array.isArray(type);
-  const fieldConf: FieldCfg = {
-    type,
-    declared: { array: isArray, type: isArray ? (type as any)[0] : type }
-  };
-
-  // Get schema if exists
-  const schema = ModelRegistry.getSchema(fieldConf.declared.type);
-
-  if (schema) {
-    fieldConf.type = isArray ? [schema] : schema;
-  }
-
-  return fieldConf;
-}
 
 function prop(obj: { [key: string]: any }) {
   return (f: any, prop: string) => {
@@ -25,9 +8,9 @@ function prop(obj: { [key: string]: any }) {
   };
 }
 
-export function Field(type: ClsLst) {
+export function Field(type: ClsList) {
   return (f: any, prop: string) => {
-    ModelRegistry.registerFieldFacet(f, prop, buildFieldConfig(type));
+    ModelRegistry.registerFieldFacet(f, prop, ModelRegistry.buildFieldConfig(type));
   };
 }
 

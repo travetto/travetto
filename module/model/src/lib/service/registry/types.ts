@@ -11,7 +11,7 @@ export interface Cls {
   name: string;
 }
 
-export type ClsLst = Cls | [Cls];
+export type ClsList = Cls | [Cls];
 
 export interface IndexConfig {
   fields: string[] | { [key: string]: number };

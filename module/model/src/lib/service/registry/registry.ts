@@ -1,4 +1,4 @@
-import { Cls, ModelCls, ModelConfig } from './types';
+import { Cls, ClsList, FieldCfg, ModelCls, ModelConfig } from './types';
 import * as mongoose from 'mongoose';
 
 export class ModelRegistry {
@@ -69,6 +69,23 @@ export class ModelRegistry {
     Object.assign(defViewConf.schema[prop], config);
 
     return target;
+  }
+
+  static buildFieldConfig(type: ClsList) {
+    const isArray = Array.isArray(type);
+    const fieldConf: FieldCfg = {
+      type,
+      declared: { array: isArray, type: isArray ? (type as any)[0] : type }
+    };
+
+    // Get schema if exists
+    const schema = ModelRegistry.getSchema(fieldConf.declared.type);
+
+    if (schema) {
+      fieldConf.type = isArray ? [schema] : schema;
+    }
+
+    return fieldConf;
   }
 
   static registerModelFacet<T>(cls: ModelCls<T>, data: any) {
