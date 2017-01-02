@@ -4,19 +4,19 @@ import { MongoService } from './mongo';
 
 const MongoOplog = require('mongo-oplog');
 
-export class MongoChangeService {
+export class ChangeService {
 
   private static opMap = { i: 'insert', u: 'update', d: 'delete' };
   private static listeners: ChangeListener[] = [];
   private static oplog: any = null;
 
   static registerChangeListeners(...listeners: ChangeListener[]) {
-    MongoChangeService.listeners.push(...listeners);
-    MongoService.getClient().then(() => MongoChangeService.initChangeListeners());
+    ChangeService.listeners.push(...listeners);
+    MongoService.getClient().then(() => ChangeService.initChangeListeners());
   }
 
   private static translateMongoOp(data: MongoOp): ChangeEvent | undefined {
-    let op = (MongoChangeService.opMap as any)[data.op] as any;
+    let op = (ChangeService.opMap as any)[data.op] as any;
     if (op && data.ns) {
       let ev: ChangeEvent = {
         timestamp: data.ts,
@@ -30,16 +30,16 @@ export class MongoChangeService {
   }
 
   static async initChangeListeners() {
-    if (!!MongoChangeService.oplog) {
+    if (!!ChangeService.oplog) {
       return;
     }
 
-    MongoChangeService.oplog = MongoOplog(MongoService.getUrl(), { ns: `${Config.schema}[.].*` });
-    MongoChangeService.oplog.tail();
-    MongoChangeService.oplog.on('op', (data: MongoOp) => {
-      let ev = MongoChangeService.translateMongoOp(data);
+    ChangeService.oplog = MongoOplog(MongoService.getUrl(), { ns: `${Config.schema}[.].*` });
+    ChangeService.oplog.tail();
+    ChangeService.oplog.on('op', (data: MongoOp) => {
+      let ev = ChangeService.translateMongoOp(data);
       if (ev) {
-        for (let listener of MongoChangeService.listeners) {
+        for (let listener of ChangeService.listeners) {
           listener.onChange(ev);
         }
       }

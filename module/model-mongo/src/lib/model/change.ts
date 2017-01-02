@@ -1,5 +1,5 @@
 export interface ChangeListener {
-  onChange(change: ChangeEvent): Promise<void>;
+  (change: ChangeEvent): Promise<void>;
 }
 
 export interface MongoOp {
