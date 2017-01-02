@@ -28,8 +28,8 @@ export class MongoService {
     return query;
   }
 
-  static getUrl() {
-    return `mongodb://${Config.host}:${Config.port}/${Config.schema}`;
+  static getUrl(schema: string = Config.schema) {
+    return `mongodb://${Config.host}:${Config.port}/${schema}`;
   }
 
   static getClient(): Promise<mongo.Db> {

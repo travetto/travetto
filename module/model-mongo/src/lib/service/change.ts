@@ -34,7 +34,7 @@ export class ChangeService {
       return;
     }
 
-    ChangeService.oplog = MongoOplog(MongoService.getUrl(), { ns: `${Config.schema}[.].*` });
+    ChangeService.oplog = MongoOplog(MongoService.getUrl(Config.change.schema), { ns: `${Config.schema}[.].*` });
     ChangeService.oplog.tail();
     ChangeService.oplog.on('op', (data: MongoOp) => {
       let ev = ChangeService.translateMongoOp(data);
