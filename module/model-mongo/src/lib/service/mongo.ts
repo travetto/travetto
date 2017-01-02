@@ -10,8 +10,6 @@ import { ObjectUtil } from '@encore/util';
 const flat = require('flat');
 const MongoOplog = require('mongo-oplog');
 
-
-
 export class MongoService {
 
   private static clientPromise: Promise<mongo.Db>;
