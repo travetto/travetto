@@ -12,7 +12,6 @@ export class MongoService {
 
   private static clientPromise: Promise<mongo.Db>;
   private static indices: [string, any, mongo.IndexOptions][] = [];
-  private static hasChangeListeners: boolean = false;
 
   static translateQueryIds(query: Object & { _id?: any }) {
     if (query._id) {
