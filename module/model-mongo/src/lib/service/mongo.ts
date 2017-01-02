@@ -32,6 +32,10 @@ export class MongoService {
     return `mongodb://${Config.host}:${Config.port}/${schema}`;
   }
 
+  static getSchema() {
+    return Config.schema;
+  }
+
   static getClient(): Promise<mongo.Db> {
     if (!MongoService.clientPromise) {
       MongoService.clientPromise = mongo.MongoClient.connect(MongoService.getUrl());
