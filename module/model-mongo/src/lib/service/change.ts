@@ -10,9 +10,9 @@ export class ChangeService {
   private static listeners: ChangeListener[] = [];
   private static oplog: any = null;
 
-  static registerChangeListeners(...listeners: ChangeListener[]) {
+  static register(...listeners: ChangeListener[]) {
     ChangeService.listeners.push(...listeners);
-    MongoService.getClient().then(() => ChangeService.initChangeListeners());
+    MongoService.getClient().then(() => ChangeService.init());
   }
 
   private static translateMongoOp(data: MongoOp): ChangeEvent | undefined {
@@ -29,7 +29,7 @@ export class ChangeService {
     }
   }
 
-  static async initChangeListeners() {
+  static async init() {
     if (!!ChangeService.oplog) {
       return;
     }
