@@ -19,3 +19,5 @@ export interface ChangeEvent {
   collection: string;
   document: any;
 }
+
+export const MongoOpMap = { i: 'insert', u: 'update', d: 'delete' };

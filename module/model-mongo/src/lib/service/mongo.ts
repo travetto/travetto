@@ -3,14 +3,14 @@ import Config from '../config';
 import {
   Named, Base,
   BulkState, BulkResponse, QueryOptions,
-  ChangeListener, MongoOp, ChangeEvent
+  ChangeListener, MongoOp, ChangeEvent, MongoOpMap
 } from '../model';
 import { ObjectUtil } from '@encore/util';
 
 const flat = require('flat');
 const MongoOplog = require('mongo-oplog');
 
-const opMap = { i: 'insert', u: 'update', d: 'delete' };
+
 
 export class MongoService {
 
@@ -30,7 +30,7 @@ export class MongoService {
     MongoService.oplog = MongoOplog(MongoService.getUrl(), { ns: `${Config.schema}[.].*` });
     MongoService.oplog.tail();
     MongoService.oplog.on('op', (data: MongoOp) => {
-      let op = (opMap as any)[data.op] as any;
+      let op = (MongoOpMap as any)[data.op] as any;
       if (op && data.ns) {
         let ev: ChangeEvent = {
           timestamp: data.ts,
