@@ -53,10 +53,3 @@ export class Startup {
     Startup.wait();
   }
 }
-
-export function OnStartup() {
-  return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-    Startup.onStartup(() => target[propertyKey]());
-    return descriptor;
-  };
-}
