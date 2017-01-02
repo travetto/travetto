@@ -2,47 +2,18 @@ import * as mongo from 'mongodb';
 import Config from '../config';
 import {
   Named, Base,
-  BulkState, BulkResponse, QueryOptions,
-  ChangeListener, MongoOp, ChangeEvent, MongoOpMap
+  BulkState, BulkResponse, QueryOptions
 } from '../model';
 import { ObjectUtil } from '@encore/util';
 
 const flat = require('flat');
-const MongoOplog = require('mongo-oplog');
 
 export class MongoService {
 
   private static clientPromise: Promise<mongo.Db>;
   private static indices: [string, any, mongo.IndexOptions][] = [];
-  private static changeListeners: ChangeListener[] = [];
-  private static oplog: any = null;
 
-  static registerChangeListeners(...listeners: ChangeListener[]) {
-    MongoService.changeListeners.push(...listeners);
-    if (!!MongoService.clientPromise) {
-      MongoService.initChangeListeners();
-    }
-  }
-
-  private static async initChangeListeners() {
-    MongoService.oplog = MongoOplog(MongoService.getUrl(), { ns: `${Config.schema}[.].*` });
-    MongoService.oplog.tail();
-    MongoService.oplog.on('op', (data: MongoOp) => {
-      let op = (MongoOpMap as any)[data.op] as any;
-      if (op && data.ns) {
-        let ev: ChangeEvent = {
-          timestamp: data.ts,
-          collection: data.ns.substring(data.ns.indexOf('.')),
-          operation: op,
-          version: data.v,
-          document: data.o,
-        };
-        for (let listener of MongoService.changeListeners) {
-          listener.onChange(ev);
-        }
-      }
-    });
-  }
+  static isActive() { return !!MongoService.clientPromise; }
 
   static translateQueryIds(query: Object & { _id?: any }) {
     if (query._id) {
@@ -64,9 +35,6 @@ export class MongoService {
   static getClient(): Promise<mongo.Db> {
     if (!MongoService.clientPromise) {
       MongoService.clientPromise = mongo.MongoClient.connect(MongoService.getUrl());
-      if (MongoService.changeListeners.length) {
-        MongoService.initChangeListeners();
-      }
     }
     return MongoService.clientPromise;
   }
