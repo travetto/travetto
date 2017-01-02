@@ -174,22 +174,16 @@ export class MongoService {
     let bulk = col.initializeUnorderedBulkOp({});
     let count = 0;
 
-    let batchKey = `${Date.now()}_${Math.random().toString().replace(/\./g, '')}`;
-    let updateKey = `update_${batchKey}`;
-    let insertKey = `insert_${batchKey}`;
-
-    let insert: { [key: string]: boolean } = {}, update: { [key: string]: boolean } = {};
-    insert[insertKey] = true;
-    update[updateKey] = true;
-
     (state.upsert || []).forEach(p => {
       count++;
-      let id = state.getId(p);
-      delete p._id;
-      (p as any)[updateKey] = true;
+      let id: any = state.getId(p);
+      if (id._id === undefined || id._id !== p._id) {
+        delete p._id;
+      } else {
+        id._id = (p as any)._id = new mongo.ObjectID(p._id);
+      }
 
       bulk.find(id).upsert().updateOne({
-        $setOnInsert: insert,
         $set: p
       });
     });
@@ -214,13 +208,8 @@ export class MongoService {
       if (out.count) {
         out.count.delete = res.nRemoved;
         out.count.update = updatedCount;
-        out.count.update = await col.find(update).count(false);
-        out.count.insert = await col.find(insert).count(false);
         out.count.update -= out.count.insert;
       }
-
-      await bulk.find(update).update({ $unset: [updateKey] });
-      await bulk.find(insert).update({ $unset: [insertKey] });
 
       if (res.hasWriteErrors()) {
         out.error = res.getWriteErrors();
