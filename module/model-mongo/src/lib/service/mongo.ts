@@ -26,7 +26,7 @@ export class MongoService {
     }
   }
 
-  static async initChangeListeners() {
+  private static async initChangeListeners() {
     MongoService.oplog = MongoOplog(MongoService.getUrl(), { ns: `${Config.schema}[.].*` });
     MongoService.oplog.tail();
     MongoService.oplog.on('op', (data: MongoOp) => {
