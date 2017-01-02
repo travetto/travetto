@@ -149,7 +149,7 @@ export class MongoService {
   }
 
   static async partialUpdate<T extends Base>(named: Named, id: string, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
-    return await MongoService.partialUpdateByQuery<T>(name, { _id: id }, data, opts);
+    return await MongoService.partialUpdateByQuery<T>(named, { _id: id }, data, opts);
   }
 
   static async partialUpdateByQuery<T extends Base>(named: Named, query: any, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
