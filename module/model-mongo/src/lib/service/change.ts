@@ -40,7 +40,7 @@ export class ChangeService {
       let ev = ChangeService.translateMongoOp(data);
       if (ev) {
         for (let listener of ChangeService.listeners) {
-          listener.onChange(ev);
+          listener(ev);
         }
       }
     });
