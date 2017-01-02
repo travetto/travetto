@@ -7,7 +7,7 @@ export interface MongoOp {
   t: number;
   h: number;
   v: number;
-  op: 'n' | 'i' | 'd';
+  op: string;
   ns: string;
   o: any;
 }
