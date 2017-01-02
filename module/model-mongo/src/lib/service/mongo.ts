@@ -2,8 +2,7 @@ import * as mongo from 'mongodb';
 import Config from '../config';
 import {
   Named, Base,
-  BulkState, BulkResponse, QueryOptions,
-  ChangeListener, ChangePayload, ChangeAction
+  BulkState, BulkResponse, QueryOptions
 } from '../model';
 import { ObjectUtil } from '@encore/util';
 
@@ -13,23 +12,7 @@ export class MongoService {
 
   private static clientPromise: Promise<mongo.Db>;
   private static indices: [string, any, mongo.IndexOptions][] = [];
-  private static changeListeners: ChangeListener[] = [];
   private static hasChangeListeners: boolean = false;
-
-  static registerChangeListener(...listener: ChangeListener[]) {
-    this.changeListeners.push(...listener);
-    MongoService.hasChangeListeners = true;
-  }
-
-  static notifyChangeListeners(col: mongo.Collection, action: ChangeAction, payloads: (ChangePayload[] | ChangePayload), partial: boolean = false) {
-    payloads = Array.isArray(payloads) ? payloads : [payloads];
-    let collection = col.namespace;
-    for (let listener of MongoService.changeListeners) {
-      for (let payload of payloads) {
-        listener.onChange({ action, collection, payload, partial });
-      }
-    }
-  }
 
   static translateQueryIds(query: Object & { _id?: any }) {
     if (query._id) {
@@ -122,28 +105,13 @@ export class MongoService {
     let col = await MongoService.collection(named);
     let res = await col.deleteOne({ _id: new mongo.ObjectID(id) });
 
-    MongoService.notifyChangeListeners(col, 'delete', { _id: id });
-
     return res.deletedCount || 0;
   }
 
   static async deleteByQuery(named: Named, query: Object & { _id?: any } = {}): Promise<number> {
     query = MongoService.translateQueryIds(query);
-
     let col = await MongoService.collection(named);
-
-    let notifyObjs: { _id: string }[] = [];
-
-    if (MongoService.hasChangeListeners) {
-      let idCursor = await col.find(query, { _id: 1 });
-      notifyObjs = await idCursor.toArray();
-      notifyObjs.forEach((r: any) => r._id = (r._id as any).toHexString());
-    }
-
     let res = await col.deleteMany(query);
-
-    MongoService.notifyChangeListeners(col, 'delete', notifyObjs);
-
     return res.deletedCount || 0;
   }
 
@@ -152,9 +120,6 @@ export class MongoService {
     delete o._id;
     let res = await col.insertOne(o);
     o._id = res.insertedId.toHexString();
-
-    MongoService.notifyChangeListeners(col, 'create', o);
-
     return o;
   }
 
@@ -164,7 +129,6 @@ export class MongoService {
     for (let i = 0; i < objs.length; i++) {
       objs[i]._id = res.insertedIds[i].toHexString();
     }
-    MongoService.notifyChangeListeners(col, 'create', objs);
     return objs;
   }
 
@@ -173,7 +137,6 @@ export class MongoService {
     o._id = (new mongo.ObjectID(o._id) as any);
     await col.replaceOne({ _id: o._id }, o);
     o._id = (o._id as any).toHexString();
-    MongoService.notifyChangeListeners(col, 'update', o);
     return o;
   }
 
@@ -195,7 +158,6 @@ export class MongoService {
     }
     let ret: T = res.value as T;
     ret._id = (ret._id as any).toHexString();
-    MongoService.notifyChangeListeners(col, 'update', ret, true);
     return ret;
   }
 
