@@ -68,6 +68,12 @@ export class MongoService {
     return;
   }
 
+  static async getIdsByQuery(named: Named, query: Object) {
+    let col = await MongoService.collection(named);
+    let objs = await col.find(query, { _id: true }).toArray();
+    return objs.map(x => x._id.toHexString());
+  }
+
   static async getByQuery<T extends Base>(named: Named, query: Object & { _id?: any } = {}, options: QueryOptions = {}): Promise<T[]> {
     query = MongoService.translateQueryIds(query);
 
