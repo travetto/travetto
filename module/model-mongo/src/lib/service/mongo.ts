@@ -169,6 +169,18 @@ export class MongoService {
     return ret;
   }
 
+  static async updateMany<T extends Base>(named: Named, query: any, data: any, options?: { upsert?: boolean; w?: any; wtimeout?: number; j?: boolean; }) {
+    let col = await MongoService.collection(named);
+    query = MongoService.translateQueryIds(query);
+
+    if (Object.keys(data)[0].charAt(0) !== '$') {
+      data = { $set: flat(data) };
+    }
+
+    let res = await col.updateMany(query, data, options);
+    return res.matchedCount;
+  }
+
   static async bulkProcess<T extends Base>(named: Named, state: BulkState<T>) {
     let col = await MongoService.collection(named);
     let bulk = col.initializeUnorderedBulkOp({});
