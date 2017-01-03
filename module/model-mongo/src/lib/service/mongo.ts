@@ -129,9 +129,11 @@ export class MongoService {
     return res.deletedCount || 0;
   }
 
-  static async save<T extends Base>(named: Named, o: T): Promise<T> {
+  static async save<T extends Base>(named: Named, o: T, removeId: boolean = true): Promise<T> {
     let col = await MongoService.collection(named);
-    delete o._id;
+    if (removeId) {
+      delete o._id;
+    }
     let res = await col.insertOne(o);
     o._id = res.insertedId.toHexString();
     return o;
