@@ -10,7 +10,7 @@ export class Configure {
   private static NULL = 'NULL' + (Math.random() * 1000) + (new Date().getTime());
   private static data: ConfigMap = {};
   private static namespaces: { [key: string]: boolean } = {};
-  private static postInit: [string, Function][] = [];
+  private static initialized: boolean = false;
 
   private static writeProperty(o: any, k: string, v: any) {
     if (typeof v === 'string') {
@@ -68,7 +68,7 @@ export class Configure {
     ObjectUtil.merge(target, unflatten(out, { delimiter: '_' }));
   }
 
-  static registerNamespace<T extends ConfigMap>(ns: string, base: T, postInit?: (config: T) => void): T {
+  static registerNamespace<T extends ConfigMap>(ns: string, base: T): T {
     // Store ref
     Configure.namespaces[ns] = true;
     Configure.namespaces[ns.toLowerCase()] = true;
@@ -83,11 +83,27 @@ export class Configure {
     // Get ref to config object
     Configure.data[ns] = Configure.data[ns] || {};
 
-    if (postInit) {
-      Configure.postInit.push([ns, postInit]);
-    }
-
-    return Configure.data[ns] as T;
+    return new Proxy<T>(Configure.data[ns] as T, {
+      has(target: T, p: PropertyKey): boolean {
+        if (!Configure.initialized) {
+          throw new Error('Configuration is not initialized');
+        }
+        return p in target;
+      },
+      get(target: T, p: PropertyKey, receiver: any): any {
+        if (!Configure.initialized) {
+          throw new Error('Configuration is not initialized');
+        }
+        return target[p];
+      },
+      set(target: T, p: PropertyKey, value: any, receiver: any): boolean {
+        if (!Configure.initialized) {
+          throw new Error('Configuration is not initialized');
+        }
+        target[p] = value;
+        return true;
+      },
+    });
   }
 
   private static dropNulls(o: any) {
@@ -111,7 +127,7 @@ export class Configure {
       - External config file -> loaded from env/json
       - Environment vars -> Overrides everything
   */
-  static async initialize(env: string) {
+  static initialize(env: string) {
     console.log(`Initializing: ${env}`);
 
     // Load all namespaces from core
@@ -137,10 +153,7 @@ export class Configure {
     // Drop out nulls
     Configure.dropNulls(Configure.data);
 
-    // Wait for all post config inits to finish
-    for (let [ns, fn] of Configure.postInit) {
-      await fn(Configure.data[ns]);
-    }
+    Configure.initialized = true;
   }
 
   static log() {
