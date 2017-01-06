@@ -1,4 +1,5 @@
 import { Configure } from '@encore/config';
+
 export default Configure.registerNamespace('mail', {
   transport: {
     host: 'mail-dev',
@@ -6,14 +7,14 @@ export default Configure.registerNamespace('mail', {
     ignoreTLS: true
   },
   from: 'Express Mongo <express@mongo.com>'
-}, (Config) => {
+}, (config) => {
   // Mock mail out
-  if (!Config.transport) {
+  if (!config.transport) {
     let mockTransport = require('nodemailer-mock-transport');
-    Config.transport = mockTransport();
-  } else if ((Config as any).transport === 'sendmail') {
+    config.transport = mockTransport();
+  } else if ((config as any).transport === 'sendmail') {
     let sendmailTransport = require('nodemailer-sendmail-transport');
-    Config.transport = sendmailTransport({
+    config.transport = sendmailTransport({
       path: '/usr/sbin/sendmail'
     });
   }
