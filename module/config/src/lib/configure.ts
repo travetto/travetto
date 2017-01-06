@@ -4,6 +4,10 @@ let flatten = require('flat');
 let unflatten = flatten.unflatten;
 
 type ConfigMap = { [key: string]: string | number | boolean | null | ConfigMap };
+interface Finalizer<T> {
+  namespace: string;
+  handler: (config: T) => T;
+}
 
 export class Configure {
 
@@ -11,6 +15,7 @@ export class Configure {
   private static data: ConfigMap = {};
   private static namespaces: { [key: string]: boolean } = {};
   private static initialized: boolean = false;
+  private static finalizers: Finalizer<any>[] = [];
 
   private static writeProperty(o: any, k: string, v: any) {
     if (typeof v === 'string') {
@@ -68,7 +73,7 @@ export class Configure {
     ObjectUtil.merge(target, unflatten(out, { delimiter: '_' }));
   }
 
-  static registerNamespace<T extends ConfigMap>(ns: string, base: T): T {
+  static registerNamespace<T extends ConfigMap>(ns: string, base: T, finalizer?: (conf: T) => T): T {
     // Store ref
     Configure.namespaces[ns] = true;
     Configure.namespaces[ns.toLowerCase()] = true;
@@ -82,6 +87,10 @@ export class Configure {
 
     // Get ref to config object
     Configure.data[ns] = Configure.data[ns] || {};
+
+    if (finalizer) {
+      Configure.finalizers.push({ namespace: ns, handler: finalizer });
+    }
 
     return new Proxy<T>(Configure.data[ns] as T, {
       has(target: T, p: PropertyKey): boolean {
@@ -152,6 +161,11 @@ export class Configure {
 
     // Drop out nulls
     Configure.dropNulls(Configure.data);
+
+    // Post process once all config sources are loaded
+    for (let finalizer of Configure.finalizers) {
+      finalizer.handler(Configure.data[finalizer.namespace]);
+    }
 
     Configure.initialized = true;
   }
