@@ -6,7 +6,7 @@ let unflatten = flatten.unflatten;
 type ConfigMap = { [key: string]: string | number | boolean | null | ConfigMap };
 interface Finalizer<T> {
   namespace: string;
-  handler: (config: T) => T;
+  handler: (config: T) => any;
 }
 
 export class Configure {
@@ -73,7 +73,7 @@ export class Configure {
     ObjectUtil.merge(target, unflatten(out, { delimiter: '_' }));
   }
 
-  static registerNamespace<T extends ConfigMap>(ns: string, base: T, finalizer?: (conf: T) => T): T {
+  static registerNamespace<T extends ConfigMap>(ns: string, base: T, finalizer?: (conf: T) => any): T {
     // Store ref
     Configure.namespaces[ns] = true;
     Configure.namespaces[ns.toLowerCase()] = true;
