@@ -101,27 +101,27 @@ export class AssetUtil {
   }
 
   static async downloadUrl(url: string) {
-    let filePath = AssetUtil.generateTempFile(url.split('/').pop() as string)
+    let filePath = AssetUtil.generateTempFile(url.split('/').pop() as string);
     return new Promise<string>((resolve, reject) => {
       let file = fs.createWriteStream(filePath);
       let req = request.get(url);
       let filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
       let responseExt = '';
       req.on('response', (res: any) => {
-        responseExt = mime.extension(res.headers['content-type']);
+        responseExt = mime.extension(res.headers['content-type'] || '');
       });
       file.on('finish', async () => {
 
         if (!responseExt) {
           let detectedType = await AssetUtil.detectFileType(filePath);
           if (detectedType) {
-            responseExt = mime.extension(detectedType);
+            responseExt = detectedType.ext;
           }
         }
         if (filePathExt !== responseExt && responseExt) {
           let newFilePath = filePath;
           if (filePathExt) {
-            newFilePath = newFilePath.replace('.' + filePathExt, '.' + responseExt)
+            newFilePath = newFilePath.replace('.' + filePathExt, '.' + responseExt);
           } else {
             newFilePath += '.' + responseExt;
           }
