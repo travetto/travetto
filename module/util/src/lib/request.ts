@@ -1,42 +1,106 @@
 import * as http from 'http';
 import * as https from 'https';
 
+export function parseQuery(query: string) {
+  if (typeof query !== 'string') {
+    return query;
+  }
+  return query.split('&')
+    .map(x => {
+      let [l, r] = x.split('=');
+      if (l) {
+        let out = [decodeURIComponent(l)];
+        if (r) {
+          out.push(decodeURIComponent(r));
+        }
+        return out;
+      }
+    })
+    .filter(x => !!x)
+    .reduce((acc: { [key: string]: string }, pair: [string, string]) => {
+      acc[pair[0]] = pair[1];
+      return acc;
+    }, {});
+}
+
+export function formatQuery(query: any) {
+  if (typeof query === 'string') {
+    return query;
+  }
+  return Object.keys(query)
+    .map(x => `${encodeURIComponent(x)}=${encodeURIComponent((query as any)[x])}`)
+    .join('&');
+}
+
 export function parseUrl(url: string) {
-  let [protocol, remainder] = url.split('//', 2);
-  let [hostRaw, ...path] = remainder.split('/');
-  let auth = '';
+  let protocol = '',
+    hostname = '',
+    hostRaw = '',
+    query = {},
+    path: string[] = [],
+    auth = '',
+    port = '';
+
+  [protocol, hostRaw] = url.split('//', 2);
+  [hostRaw, query] = hostRaw.split('?');
+  [hostRaw, ...path] = hostRaw.split('/');
+
   if (hostRaw.indexOf('@') > 0) {
     [auth, hostRaw] = hostRaw.split('@', 2);
   }
-  let [host, port] = hostRaw.split(':', 2);
-  let res: any = {
-    hostname: host,
+
+  [hostname, port] = hostRaw.split(':', 2);
+  port = port || (protocol === 'http:' ? '80' : '443');
+
+  let res: { [key: string]: any } = {
+    hostname,
     protocol,
-    port: port || (protocol === 'http:' ? 80 : 443),
+    port,
   };
-  if (path.length) {
-    res.path = `/${path.join('/')}`;
+
+  if (query) {
+    if (typeof query === 'string') {
+      res['query'] = parseQuery(query);
+    }
   }
+
+  if (path.length) {
+    res['path'] = `/${path.join('/')}`;
+  }
+
   if (auth) {
-    res.auth = auth;
+    res['auth'] = auth;
   }
   return res;
 }
 
-export async function request(opts: http.RequestOptions & { url: string }, data?: string): Promise<string> {
+export async function request(opts: http.RequestOptions & { url: string }, data?: any): Promise<string> {
   let {url} = opts;
   delete opts.url;
 
   opts = Object.assign({ method: 'GET', headers: {} }, opts, parseUrl(url));
 
-  let hasBody = (opts.method === 'post' || opts.method === 'put');
+  let client = ((opts.protocol === 'https' ? http : https) as any);
+  delete opts.protocol;
 
-  if (hasBody && data) {
-    (opts.headers as any)['Content-Length'] = Buffer.byteLength(data) + 1;
+  let hasBody = (opts.method === 'POST' || opts.method === 'PUT');
+  let bodyStr: string;
+
+  if (data) {
+    if (hasBody) {
+      bodyStr = data.toString();
+      (opts.headers as any)['Content-Length'] = Buffer.byteLength(bodyStr);
+    } else {
+      (opts as any)['query'] = Object.assign({}, (opts as any)['query'], parseQuery(data));
+    }
+  }
+
+  if ((opts as any)['query']) {
+    opts.path = `${opts.path || ''}?${(opts as any)['query']}`;
   }
 
   return await new Promise<string>((resolve, reject) => {
-    let req = ((opts.protocol === 'https' ? http : https) as any).request(opts, (msg: http.IncomingMessage) => {
+    let req = client.request(opts, (msg: http.IncomingMessage) => {
       let body = '';
       msg.setEncoding('utf8');
       msg.on('data', (chunk: string) => body += chunk);
@@ -49,8 +113,8 @@ export async function request(opts: http.RequestOptions & { url: string }, data?
       });
     });
     req.on('error', reject);
-    if (hasBody && data) {
-      req.write(data);
+    if (hasBody && bodyStr) {
+      req.write(bodyStr);
     }
     req.end();
   });
