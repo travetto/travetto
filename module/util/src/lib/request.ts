@@ -1,8 +1,6 @@
 import * as http from 'http';
 import * as https from 'https';
 
-export type Method = 'get' | 'post' | 'put' | 'delete';
-
 export function parseUrl(url: string) {
   let [protocol, remainder] = url.split('//', 2);
   let [hostRaw, path] = remainder.split('/', 2);
@@ -14,7 +12,7 @@ export function parseUrl(url: string) {
   let res: any = {
     hostname: host,
     protocol,
-    port: port || (protocol === 'http' ? 80 : 443),
+    port: port || (protocol === 'http:' ? 80 : 443),
   };
   if (path !== undefined) {
     res.path = `/${path}`;
@@ -22,26 +20,19 @@ export function parseUrl(url: string) {
   if (auth) {
     res.auth = auth;
   }
-  if (!res.method) {
-    res.method = 'GET';
-  }
   return res;
 }
 
-export async function request(method: Method, opts: http.RequestOptions & { url: string }, data?: string): Promise<string> {
+export async function request(opts: http.RequestOptions & { url: string }, data?: string): Promise<string> {
   let {url} = opts;
   delete opts.url;
 
-  Object.assign(opts, parseUrl(url));
+  opts = Object.assign({ method: 'GET', headers: {} }, opts, parseUrl(url));
 
-  if (!opts.headers) {
-    opts.headers = {};
-  }
-
-  let hasBody = (method === 'post' || method === 'put');
+  let hasBody = (opts.method === 'post' || opts.method === 'put');
 
   if (hasBody && data) {
-    opts.headers['Content-Length'] = Buffer.byteLength(data);
+    (opts.headers as any)['Content-Length'] = Buffer.byteLength(data) + 1;
   }
 
   return await new Promise<string>((resolve, reject) => {
@@ -65,7 +56,7 @@ export async function request(method: Method, opts: http.RequestOptions & { url:
   });
 }
 
-export async function requestJSON<T, U>(method: Method, opts: http.RequestOptions & { url: string }, data?: U): Promise<T> {
+export async function requestJSON<T, U>(opts: http.RequestOptions & { url: string }, data?: U): Promise<T> {
   if (!opts.headers) {
     opts.headers = {};
   }
@@ -75,11 +66,13 @@ export async function requestJSON<T, U>(method: Method, opts: http.RequestOption
     }
   }
   try {
-    let res = await request(method, opts, data && JSON.stringify(data));
+    let res = await request(opts, data && JSON.stringify(data));
     return JSON.parse(res) as T;
   } catch (e) {
     if (typeof e === 'string') {
-      throw JSON.parse(e);
+      e = JSON.parse(e);
     }
+    throw e;
   }
 }
+
