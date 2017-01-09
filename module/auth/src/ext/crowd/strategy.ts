@@ -1,4 +1,5 @@
 import * as passport from 'passport';
+import * as http from 'http';
 
 import { requestJSON } from '@encore/util';
 import { CrowdStrategyConfig } from './types';
@@ -8,16 +9,22 @@ import { Context } from '@encore/context';
 
 export function CrowdStrategy<T>(cls: new () => T, config: CrowdStrategyConfig) {
 
+  async function request<T, U>(path: string, options: http.RequestOptions = {}, data?: U) {
+    return await requestJSON<T, U>({
+      auth: `${config.application}:${config.password}`,
+      url: `${config.baseUrl}/rest/usermanagement/latest${path}`
+    }, data);
+  }
+
   async function login(username: string, password: string) {
     try {
-      let crowdUser = await requestJSON({
+      let crowdUser = await request(`/authentication?username=${username}`, {
         method: 'POST',
-        auth: `${config.application}:${config.password}`,
-        url: `${config.baseUrl}/rest/usermanagement/latest/authentication?username=${username}`
       }, { value: password });
       Context.get().user = crowdUser;
       return crowdUser;
     } catch (err) {
+      console.error(err);
       throw new AppError(err);
     }
   }
@@ -28,10 +35,7 @@ export function CrowdStrategy<T>(cls: new () => T, config: CrowdStrategyConfig) 
   // used to deserialize the user
   passport.deserializeUser(async (username: string, done: (err: any, user?: T) => void) => {
     try {
-      let crowdUser = await requestJSON<T, any>({
-        url: `${config.baseUrl}/rest/usermanagement/latest/user?username=${username}`,
-        auth: `${config.application}:${config.password}`,
-      });
+      let crowdUser = await request<T, any>(`/user?username=${username}`);
       done(null, crowdUser);
     } catch (err) {
       done(err);
