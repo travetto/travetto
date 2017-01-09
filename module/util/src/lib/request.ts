@@ -28,7 +28,14 @@ export function formatQuery(query: any) {
     return query;
   }
   return Object.keys(query)
-    .map(x => `${encodeURIComponent(x)}=${encodeURIComponent((query as any)[x])}`)
+    .map(x => {
+      let res = encodeURIComponent(x);
+      let val = (query as any)[x];
+      if (val !== undefined && val !== null) {
+        res = `${res}=${val}`;
+      }
+      return res;
+    })
     .join('&');
 }
 
