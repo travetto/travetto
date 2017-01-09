@@ -63,5 +63,8 @@ export function CrowdStrategy<T>(cls: new () => T, config: CrowdStrategyConfig) 
     }
   }));
 
-  return { login };
+  return {
+    login,
+    request
+  };
 }
