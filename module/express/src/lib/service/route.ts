@@ -3,7 +3,7 @@ import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
 import { Renderable } from '../model';
 import { ObjectUtil, toPromise } from '@encore/util';
 import { AppService } from './app';
-import { Logger } from '@encore/logging';
+import { Logger } from '@encore/log';
 
 export class RouteRegistry {
 

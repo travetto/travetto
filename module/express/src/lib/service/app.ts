@@ -2,7 +2,7 @@ import Config from '../config';
 
 import * as express from 'express';
 import { OnStartup } from '@encore/lifecycle';
-import { Logger } from '@encore/logging';
+import { Logger } from '@encore/log';
 import { Filter, FilterPromise, PathType, Method } from '../model';
 
 let compression = require('compression');
