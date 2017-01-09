@@ -39,8 +39,8 @@ export async function request(opts: http.RequestOptions & { url: string }, data?
     let req = ((opts.protocol === 'https' ? http : https) as any).request(opts, (msg: http.IncomingMessage) => {
       let body = '';
       msg.setEncoding('utf8');
-      msg.on('data', chunk => body += chunk);
-      msg.on('end', chunk => {
+      msg.on('data', (chunk: string) => body += chunk);
+      msg.on('end', () => {
         if (msg.statusCode > 299) {
           reject({ message: body, status: msg.statusCode });
         } else {
