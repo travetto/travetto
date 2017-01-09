@@ -3,7 +3,7 @@ import * as https from 'https';
 
 export function parseUrl(url: string) {
   let [protocol, remainder] = url.split('//', 2);
-  let [hostRaw, path] = remainder.split('/', 2);
+  let [hostRaw, ...path] = remainder.split('/');
   let auth = '';
   if (hostRaw.indexOf('@') > 0) {
     [auth, hostRaw] = hostRaw.split('@', 2);
@@ -14,8 +14,8 @@ export function parseUrl(url: string) {
     protocol,
     port: port || (protocol === 'http:' ? 80 : 443),
   };
-  if (path !== undefined) {
-    res.path = `/${path}`;
+  if (path.length) {
+    res.path = `/${path.join('/')}`;
   }
   if (auth) {
     res.auth = auth;
