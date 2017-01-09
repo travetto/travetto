@@ -5,7 +5,7 @@ import * as fs from 'fs';
 
 describe('Assect Service', () => {
   it('downloads an file from a url', async () => {
-    let filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png')
+    let filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
     expect(filePath).to.not.be.undefined;
     expect(filePath.split('.').pop()).equals('png');
     let file = await AssetUtil.localFileToAsset(filePath);
