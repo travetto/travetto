@@ -17,7 +17,7 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
       key = `${targetName}||${key}`;
       if (!cache.has(key)) {
         let res = orig.apply(target, args || []);
-        if (res.catch && res.then) { // If a promise, clear on error
+        if (res && res.catch && res.then) { // If a promise, clear on error
           res.catch((e: any) => cache.del(key));
         }
         cache.set(key, res);
