@@ -16,6 +16,10 @@ export function CrowdStrategy<T>(cls: new () => T, config: CrowdStrategyConfig) 
     }, data);
   }
 
+  async function getUser(username: string) {
+    return await request<T, any>(`/user?username=${username}`);
+  }
+
   async function login(username: string, password: string) {
     try {
       let crowdUser = await request(`/authentication?username=${username}`, {
@@ -35,8 +39,7 @@ export function CrowdStrategy<T>(cls: new () => T, config: CrowdStrategyConfig) 
   // used to deserialize the user
   passport.deserializeUser(async (username: string, done: (err: any, user?: T) => void) => {
     try {
-      let crowdUser = await request<T, any>(`/user?username=${username}`);
-      done(null, crowdUser);
+      done(null, await getUser(username));
     } catch (err) {
       done(err);
     }
@@ -65,6 +68,7 @@ export function CrowdStrategy<T>(cls: new () => T, config: CrowdStrategyConfig) 
 
   return {
     login,
+    getUser,
     request
   };
 }
