@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-export type Method = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+export type Method = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 export type PathType = string | RegExp;
 export interface RequestHandler {
   method?: Method;
