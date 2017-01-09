@@ -103,7 +103,7 @@ export async function request(opts: http.RequestOptions & { url: string }, data?
   }
 
   if ((opts as any)['query']) {
-    opts.path = `${opts.path || ''}?${(opts as any)['query']}`;
+    opts.path = `${opts.path || ''}?${formatQuery((opts as any)['query'])}`;
   }
 
   return await new Promise<string>((resolve, reject) => {
