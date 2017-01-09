@@ -13,7 +13,9 @@
     "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v1.x.x",
     "@encore/lifecycle": "git+ssh://git@git.eaiti.com/encore/lifecycle.git#v1.x.x"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "./node_modules/@encore/test/mocha.js"
+  },
   "main": "src/lib/",
   "description": ""
 }
