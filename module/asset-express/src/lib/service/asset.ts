@@ -100,6 +100,14 @@ export class AssetService {
         return res;
       } else {
         await AssetService.writeFile(upload, fs.createReadStream(upload.path));
+        let found = false;
+        while (!found) {
+          try {
+            await AssetService.getInfo(upload.filename);
+            found = true;
+            await new Promise(resolve => setTimeout(resolve, 100));
+          } catch (e) { }
+        }
         return upload;
       }
 
