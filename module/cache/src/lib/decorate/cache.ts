@@ -13,10 +13,10 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
     let orig = target[propertyKey];
 
     target[propertyKey] = (...args: any[]) => {
-      let key = keyFn ? keyFn(args) : JSON.stringify(args);
+      let key = keyFn ? keyFn(args) : JSON.stringify(args || []);
       key = `${targetName}||${key}`;
       if (!cache.has(key)) {
-        let res = orig.apply(target, args);
+        let res = orig.apply(target, args || []);
         cache.set(key, res);
       }
       return cache.get(key);
