@@ -19,24 +19,25 @@ export function enumKeys(c: any): string[] {
   return ObjectUtil.values(c).filter((x: any) => typeof x === 'string') as string[];
 }
 
-export function coerceType(type: Cls, val: any) {
+export function coerceType<T>(type: Cls<T>, val: any): T {
   if (val.constructor !== type) {
-    if (type === Boolean) {
+    let atype = type as Cls<any>;
+    if (atype === Boolean) {
       if (typeof val === 'string') {
         val = val === 'true';
       } else {
         val = !!val;
       }
-    } else if (type === Number) {
+    } else if (atype === Number) {
       val = parseInt(`${val}`, 10);
-    } else if (type === String) {
+    } else if (atype === String) {
       val = `${val}`;
     }
   }
-  return val;
+  return val as T;
 }
 
-export function bindData<T>(cons: Cls, obj: T, data?: any, view: string = ModelRegistry.DEFAULT_VIEW): T {
+export function bindData<T>(cons: Cls<any>, obj: T, data?: any, view: string = ModelRegistry.DEFAULT_VIEW): T {
   if (!!data) {
     let conf = ModelRegistry.models[cons.name];
 

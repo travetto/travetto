@@ -1,6 +1,5 @@
 import * as mg from 'mongoose';
-import { ModelCore } from '../model';
-import { ModelCls, ModelRegistry } from './registry';
+import { Cls, ModelRegistry } from './registry';
 import { getCls } from '../util';
 
 let mongoose = require('mongoose/lib/browser');
@@ -10,7 +9,7 @@ export class Validator {
 
   static schemas: { [cls: string]: mg.Schema } = {};
 
-  static getSchema<T extends ModelCore>(cls: ModelCls<T>, view: string = ModelRegistry.DEFAULT_VIEW) {
+  static getSchema<T>(cls: Cls<T>, view: string = ModelRegistry.DEFAULT_VIEW) {
     const key = `${cls.name}::${view}`;
     if (!Validator.schemas[key]) {
       let config = ModelRegistry.models[cls.name];
@@ -37,11 +36,11 @@ export class Validator {
       .map((o, i) => Validator.validateRaw(o, schema)));
   }
 
-  static async validate<T extends ModelCore>(o: T, view?: string): Promise<T> {
+  static async validate<T>(o: T, view?: string): Promise<T> {
     return await Validator.validateRaw(o, Validator.getSchema(getCls(o), view));
   }
 
-  static async validateAll<T extends ModelCore>(obj: T[], view?: string): Promise<T[]> {
+  static async validateAll<T>(obj: T[], view?: string): Promise<T[]> {
     return await Promise.all<T>((obj || [])
       .map((o, i) => Validator.validate(o, view)));
   }

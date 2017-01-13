@@ -1,4 +1,4 @@
-import { Model, Field, Bindable, View, Required, bindData } from '../lib';
+import { Model, Field, Url, Bindable, View, Required, bindData } from '../lib';
 import { expect } from 'chai';
 
 class Address extends Bindable {
@@ -50,6 +50,10 @@ export class Response extends Bindable {
 
   @Field(Number)
   validationCount?: number = 0;
+
+  @Url()
+  @Field(String)
+  url?: string;
 }
 
 describe('Data Binding', () => {

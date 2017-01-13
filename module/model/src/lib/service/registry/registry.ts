@@ -7,11 +7,11 @@ export class ModelRegistry {
   static DEFAULT_VIEW = 'all';
 
 
-  static getAllProtoypeNames(cls: Cls) {
+  static getAllProtoypeNames<T>(cls: Cls<T>) {
     const out: string[] = [];
     while (cls && cls.name && ModelRegistry.models[cls.name]) {
       out.push(cls.name);
-      cls = Object.getPrototypeOf(cls) as Cls;
+      cls = Object.getPrototypeOf(cls) as Cls<T>;
     }
     return out;
   }
@@ -28,7 +28,7 @@ export class ModelRegistry {
     return viewConf;
   }
 
-  static getSchema(cls: Cls) {
+  static getSchema<T>(cls: Cls<T>) {
     let conf = ModelRegistry.models[cls.name];
     return conf && conf.views[ModelRegistry.DEFAULT_VIEW].schema;
   }

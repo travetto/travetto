@@ -6,12 +6,12 @@ export interface ModelCls<T> extends Named {
   new (conf?: any): T;
 }
 
-export interface Cls {
-  new (...args: any[]): any;
+export interface Cls<T> {
+  new (...args: any[]): T;
   name: string;
 }
 
-export type ClsList = Cls | [Cls];
+export type ClsList = Cls<any> | [Cls<any>];
 
 export interface IndexConfig {
   fields: string[] | { [key: string]: number };
@@ -39,5 +39,5 @@ export interface FieldCfg {
   unique?: boolean;
   enum?: any[];
   type: any;
-  declared: { type: Cls, array: boolean };
+  declared: { type: Cls<any>, array: boolean };
 }
