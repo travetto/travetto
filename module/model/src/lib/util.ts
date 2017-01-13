@@ -11,7 +11,7 @@ export function convert<T extends ModelCore>(cls: ModelCls<T>, o: T): T {
   }
 }
 
-export function getCls<T extends ModelCore>(o: T): ModelCls<T> {
+export function getCls<T>(o: T): Cls<T> {
   return o.constructor as any;
 }
 
