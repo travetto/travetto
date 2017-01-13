@@ -92,11 +92,11 @@ describe('Data Binding', () => {
 
   it('Validate Object', () => {
     let res = new Response({
-      questionId: '20'
+      questionId: '20',
       answer: ['a', 'd']
     });
     expect(res.questionId).to.equal('20');
     expect(res.answer).to.not.equal(undefined);
     expect(res.answer).to.deep.equal(['a', 'd']);
-  } );
+  });
 });
