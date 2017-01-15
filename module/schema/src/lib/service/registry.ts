@@ -15,10 +15,10 @@ export class SchemaRegistry {
   }
 
   static getViewConfig<T>(target: string | Cls<T>, view: string) {
-    let mconf = SchemaRegistry.getSchemaConfig(target);
-    let viewConf = mconf.views[view];
+    let conf = SchemaRegistry.getClassConfig(target);
+    let viewConf = conf.views[view];
     if (!viewConf) {
-      viewConf = mconf.views[view] = {
+      viewConf = conf.views[view] = {
         schema: {},
         fields: []
       };
@@ -31,7 +31,7 @@ export class SchemaRegistry {
     return conf && conf.views[view].schema;
   }
 
-  static getSchemaConfig<T>(cls: string | Cls<T>) {
+  static getClassConfig<T>(cls: string | Cls<T>) {
     let name = typeof cls === 'string' ? cls : cls.name;
     if (!SchemaRegistry.schemas[name] && name) {
       SchemaRegistry.schemas[name] = {
@@ -71,7 +71,7 @@ export class SchemaRegistry {
     return target;
   }
 
-  static buildFieldConfig(type: ClsList) {
+  static getFieldConfig(type: ClsList) {
     const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
       type,
@@ -89,15 +89,15 @@ export class SchemaRegistry {
     return fieldConf;
   }
 
-  static registerSchemaFacet<T>(cls: Cls<T>, data: any) {
-    let conf = SchemaRegistry.getSchemaConfig(cls);
+  static registerClassFacet<T>(cls: Cls<T>, data: any) {
+    let conf = SchemaRegistry.getClassConfig(cls);
     Object.assign(conf, data);
     return cls;
   }
 
-  static registerSchema<T>(cls: Cls<T>) {
+  static registerClass<T>(cls: Cls<T>) {
     let names = SchemaRegistry.getAllProtoypeNames(cls).slice(1);
-    let mconf = SchemaRegistry.getSchemaConfig(cls);
+    let conf = SchemaRegistry.getClassConfig(cls);
 
     // Flatten views, fields, schemas
     for (let name of names) {
@@ -110,7 +110,7 @@ export class SchemaRegistry {
       }
     }
 
-    Object.assign(mconf, { name: mconf.name || cls.name });
+    Object.assign(conf, { name: conf.name || cls.name });
     return cls;
   }
 }
