@@ -1,1 +1,1 @@
-export * from './bindable';
+export * from './bound';

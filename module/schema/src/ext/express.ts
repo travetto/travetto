@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { SchemaRegistry, Cls, BindUtil, Validator } from '../lib';
+import { SchemaRegistry, Cls, BindUtil, SchemaValidator } from '../lib';
 import { ObjectUtil } from '@encore/util';
 
 import { RouteRegistry, AppError } from '@encore/express';
@@ -11,7 +11,7 @@ export function SchemaBody<T>(cls: Cls<T>, view?: string) {
     if (ObjectUtil.isPlainObject(req.body)) {
       let o = BindUtil.bindSchema(cls, new cls(), req.body, view);
       if (!!SchemaRegistry.schemas[cls.name]) {
-        req.body = await Validator.validate(o, view);
+        req.body = await SchemaValidator.validate(o, view);
       } else {
         req.body = o;
       }
@@ -25,7 +25,7 @@ export function SchemaQuery<T>(cls: Cls<T>, view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     let o = BindUtil.bindSchema(cls, new cls(), flat.unflatten(req.query), view);
     if (!!SchemaRegistry.schemas[cls.name]) {
-      req.query = await Validator.validate(o, view);
+      req.query = await SchemaValidator.validate(o, view);
     } else {
       req.query = o;
     }
