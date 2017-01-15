@@ -10,7 +10,7 @@ export function SchemaBody<T>(cls: Cls<T>, view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     if (ObjectUtil.isPlainObject(req.body)) {
       let o = BindUtil.bindSchema(cls, new cls(), req.body, view);
-      if (!!SchemaRegistry.schemas[cls.name]) {
+      if (!!SchemaRegistry.schemas.has(cls)) {
         req.body = await SchemaValidator.validate(o, view);
       } else {
         req.body = o;
@@ -24,7 +24,7 @@ export function SchemaBody<T>(cls: Cls<T>, view?: string) {
 export function SchemaQuery<T>(cls: Cls<T>, view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     let o = BindUtil.bindSchema(cls, new cls(), flat.unflatten(req.query), view);
-    if (!!SchemaRegistry.schemas[cls.name]) {
+    if (!!SchemaRegistry.schemas.has(cls)) {
       req.query = await SchemaValidator.validate(o, view);
     } else {
       req.query = o;

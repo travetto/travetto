@@ -9,14 +9,10 @@ export class SchemaValidator {
 
   static schemas: { [cls: string]: mg.Schema } = {};
 
-  static getCls<T>(o: T): Cls<T> {
-    return o.constructor as any;
-  }
-
   static getSchema<T>(cls: Cls<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
     const key = `${cls.name}::${view}`;
     if (!SchemaValidator.schemas[key]) {
-      let config = SchemaRegistry.schemas[cls.name];
+      let config = SchemaRegistry.schemas.get(cls);
       if (!config || !config.views[view]) {
         throw new Error(`Unknown view found: ${view}`);
       }
@@ -41,7 +37,7 @@ export class SchemaValidator {
   }
 
   static async validate<T>(o: T, view?: string): Promise<T> {
-    return await SchemaValidator.validateRaw(o, SchemaValidator.getSchema(SchemaValidator.getCls(o), view));
+    return await SchemaValidator.validateRaw(o, SchemaValidator.getSchema(SchemaRegistry.getCls(o), view));
   }
 
   static async validateAll<T>(obj: T[], view?: string): Promise<T[]> {

@@ -2,19 +2,19 @@ import { Cls, ClsList, FieldConfig, ClassConfig } from './types';
 
 export class SchemaRegistry {
 
-  static schemas: { [name: string]: ClassConfig } = {};
+  static schemas: Map<Cls<any>, ClassConfig> = new Map();
   static DEFAULT_VIEW = 'all';
 
-  static getAllProtoypeNames<T>(cls: Cls<T>) {
-    const out: string[] = [];
-    while (cls && cls.name && SchemaRegistry.schemas[cls.name]) {
-      out.push(cls.name);
+  static getAllProtoypes<T>(cls: Cls<T>) {
+    const out: Cls<any>[] = [];
+    while (cls && cls.name && SchemaRegistry.schemas.has(cls)) {
+      out.push(cls);
       cls = Object.getPrototypeOf(cls) as Cls<T>;
     }
     return out;
   }
 
-  static getViewConfig<T>(target: string | Cls<T>, view: string) {
+  static getViewConfig<T>(target: Cls<T>, view: string) {
     let conf = SchemaRegistry.getClassConfig(target);
     let viewConf = conf.views[view];
     if (!viewConf) {
@@ -27,14 +27,14 @@ export class SchemaRegistry {
   }
 
   static getViewSchema<T>(cls: Cls<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
-    let conf = SchemaRegistry.schemas[cls.name];
+    let conf = SchemaRegistry.schemas.get(cls);
     return conf && conf.views[view].schema;
   }
 
-  static getClassConfig<T>(cls: string | Cls<T>) {
+  static getClassConfig<T>(cls: Cls<T>) {
     let name = typeof cls === 'string' ? cls : cls.name;
-    if (!SchemaRegistry.schemas[name] && name) {
-      SchemaRegistry.schemas[name] = {
+    if (!SchemaRegistry.schemas.has(cls) && name) {
+      SchemaRegistry.schemas.set(cls, {
         name,
         subtypes: {},
         metadata: {},
@@ -44,9 +44,9 @@ export class SchemaRegistry {
             fields: []
           }
         }
-      };
+      });
     }
-    return SchemaRegistry.schemas[name];
+    return SchemaRegistry.schemas.get(cls) as ClassConfig;
   }
 
   static registerClassMetadata<T, U>(cls: Cls<T>, key: string, data: U) {
@@ -59,8 +59,12 @@ export class SchemaRegistry {
     return SchemaRegistry.getClassConfig(cls).metadata[key] as U;
   }
 
+  static getCls<T>(o: T): Cls<T> {
+    return o.constructor as any;
+  }
+
   static registerFieldFacet(target: any, prop: string, config: any, view: string = SchemaRegistry.DEFAULT_VIEW) {
-    let cons = target.constructor;
+    let cons = SchemaRegistry.getCls(target);
     let defViewConf = SchemaRegistry.getViewConfig(cons, SchemaRegistry.DEFAULT_VIEW);
 
     if (!defViewConf.schema[prop]) {
@@ -108,17 +112,20 @@ export class SchemaRegistry {
   }
 
   static registerClass<T>(cls: Cls<T>) {
-    let names = SchemaRegistry.getAllProtoypeNames(cls).slice(1);
+    let classes = SchemaRegistry.getAllProtoypes(cls).slice(1);
     let conf = SchemaRegistry.getClassConfig(cls);
 
     // Flatten views, fields, schemas
-    for (let name of names) {
-      for (let v of Object.keys(SchemaRegistry.schemas[name].views)) {
-        let sViewConf = SchemaRegistry.getViewConfig(name, v);
-        let viewConf = SchemaRegistry.getViewConfig(cls, v);
+    for (let pcls of classes) {
+      let schemaConf = SchemaRegistry.schemas.get(pcls);
+      if (schemaConf) {
+        for (let v of Object.keys(schemaConf.views)) {
+          let sViewConf = SchemaRegistry.getViewConfig(name, v);
+          let viewConf = SchemaRegistry.getViewConfig(cls, v);
 
-        Object.assign(viewConf.schema, sViewConf.schema);
-        viewConf.fields = viewConf.fields.concat(sViewConf.fields);
+          Object.assign(viewConf.schema, sViewConf.schema);
+          viewConf.fields = viewConf.fields.concat(sViewConf.fields);
+        }
       }
     }
 

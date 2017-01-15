@@ -3,7 +3,7 @@ import { Cls, SchemaRegistry } from '../service';
 export class BindUtil {
 
   static convert<T>(cls: Cls<T>, o: T, discriminatorField: string = 'type'): T {
-    let config = SchemaRegistry.schemas[cls.name];
+    let config = SchemaRegistry.schemas.get(cls);
     if (discriminatorField && config && config.subtypes && !!(o as any)[discriminatorField]) {
       return new config.subtypes[(o as any)[discriminatorField]](o);
     } else {
@@ -31,7 +31,7 @@ export class BindUtil {
 
   static bindSchema<T>(cons: Cls<any>, obj: T, data?: any, view: string = SchemaRegistry.DEFAULT_VIEW): T {
     if (!!data) {
-      let conf = SchemaRegistry.schemas[cons.name];
+      let conf = SchemaRegistry.schemas.get(cons);
 
       // If no configuration
       if (!conf) {
@@ -55,7 +55,7 @@ export class BindUtil {
                 v = [v];
               }
 
-              if (SchemaRegistry.schemas[declared.type.name]) {
+              if (SchemaRegistry.schemas.get(declared.type)) {
                 if (declared.array) {
                   v = v.map((x: any) => BindUtil.bindSchema(declared.type, new declared.type(), x, view));
                 } else {
