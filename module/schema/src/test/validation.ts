@@ -1,8 +1,8 @@
-import { Field, Url, Bindable, Required, Validator } from '../lib';
+import { Field, Url, SchemaBound, Required, SchemaValidator } from '../lib';
 import { expect } from 'chai';
 
 
-export class Response extends Bindable {
+export class Response extends SchemaBound {
 
   @Field(String)
   questionId: string;
@@ -27,7 +27,7 @@ describe('Validation', () => {
       url: 'htt://google'
     });
     try {
-      await Validator.validate(r);
+      await SchemaValidator.validate(r);
       expect(true).to.equal(false);
     } catch (e) {
       expect(e.errors.url.message).to.equal('BAD URL');

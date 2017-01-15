@@ -14,7 +14,7 @@ function enumKeys(c: any): string[] {
 
 export function Field(type: ClsList) {
   return (f: any, prop: string) => {
-    SchemaRegistry.registerFieldFacet(f, prop, SchemaRegistry.buildFieldConfig(type));
+    SchemaRegistry.registerFieldFacet(f, prop, SchemaRegistry.getFieldConfig(type));
   };
 }
 
