@@ -79,7 +79,6 @@ export class SchemaRegistry {
     const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
       type,
-      metadata: {},
       declared: { array: isArray, type: isArray ? (type as any)[0] : type }
     };
 
