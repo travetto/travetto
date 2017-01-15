@@ -66,6 +66,10 @@ export class SchemaRegistry {
       }
     }
 
+    if (config && config['metadata']) {
+      config['metadata'] = Object.assign({}, config.metadata, config['metadata']);
+    }
+
     Object.assign(defViewConf.schema[prop], config);
 
     return target;
@@ -89,9 +93,12 @@ export class SchemaRegistry {
     return fieldConf;
   }
 
-  static registerClassFacet<T>(cls: Cls<T>, data: any) {
+  static registerClassFacet<T>(cls: Cls<T>, config: any) {
     let conf = SchemaRegistry.getClassConfig(cls);
-    Object.assign(conf, data);
+    if (config && config['metadata']) {
+      config['metadata'] = Object.assign({}, conf.metadata, config['metadata']);
+    }
+    Object.assign(conf, config);
     return cls;
   }
 
