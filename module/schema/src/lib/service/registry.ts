@@ -49,13 +49,13 @@ export class SchemaRegistry {
     return SchemaRegistry.schemas[name];
   }
 
-  static registerClassMetadata<T, U>(cls: string | Cls<T>, key: string, data: U) {
+  static registerClassMetadata<T, U>(cls: Cls<T>, key: string, data: U) {
     let conf = SchemaRegistry.getClassConfig(cls);
     conf.metadata[key] = Object.assign({}, conf.metadata[key] || {}, data);
-    return conf.metadata[key];
+    return cls;
   }
 
-  static getClassMetadata<T, U>(cls: string | Cls<T>, key: string): U {
+  static getClassMetadata<T, U>(cls: Cls<T>, key: string): U {
     return SchemaRegistry.getClassConfig(cls).metadata[key] as U;
   }
 
