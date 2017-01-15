@@ -9,7 +9,7 @@ export interface ClassConfig {
   name: string;
   parent?: string;
   discriminator?: string;
-  metadata: any;
+  metadata: { [key: string]: any };
   subtypes: { [key: string]: Cls<any> };
   views: {
     [key: string]: {
@@ -21,6 +21,5 @@ export interface ClassConfig {
 
 export interface FieldConfig {
   type: any;
-  metadata: any;
   declared: { type: Cls<any>, array: boolean };
 }

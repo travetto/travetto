@@ -2,7 +2,7 @@ import { Cls, SchemaRegistry } from '../service';
 
 export class BindUtil {
 
-  static convert<T>(cls: Cls<T>, o: T, discriminatorField: string = '_type'): T {
+  static convert<T>(cls: Cls<T>, o: T, discriminatorField: string = 'type'): T {
     let config = SchemaRegistry.schemas[cls.name];
     if (discriminatorField && config && config.subtypes && !!(o as any)[discriminatorField]) {
       return new config.subtypes[(o as any)[discriminatorField]](o);

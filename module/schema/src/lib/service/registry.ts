@@ -49,6 +49,10 @@ export class SchemaRegistry {
     return SchemaRegistry.schemas[name];
   }
 
+  static getClassMetadata<T, U>(cls: string | Cls<T>, key: string): U {
+    return SchemaRegistry.getClassConfig(cls).metadata[key] as U;
+  }
+
   static registerFieldFacet(target: any, prop: string, config: any, view: string = SchemaRegistry.DEFAULT_VIEW) {
     let cons = target.constructor;
     let defViewConf = SchemaRegistry.getViewConfig(cons, SchemaRegistry.DEFAULT_VIEW);
@@ -66,16 +70,12 @@ export class SchemaRegistry {
       }
     }
 
-    if (config && config['metadata']) {
-      config['metadata'] = Object.assign({}, config.metadata, config['metadata']);
-    }
-
     Object.assign(defViewConf.schema[prop], config);
 
     return target;
   }
 
-  static getFieldConfig(type: ClsList) {
+  static buildFieldConfig(type: ClsList) {
     const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
       type,
