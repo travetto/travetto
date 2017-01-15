@@ -1,5 +1,5 @@
-import { enumKeys } from '../util';
-import { SchemaRegistry, SchemaClsList } from '../service';
+import { ObjectUtil } from '@encore/util';
+import { SchemaRegistry, ClsList } from '../service';
 import 'reflect-metadata';
 
 function prop(obj: { [key: string]: any }) {
@@ -8,7 +8,11 @@ function prop(obj: { [key: string]: any }) {
   };
 }
 
-export function Field(type: SchemaClsList) {
+function enumKeys(c: any): string[] {
+  return ObjectUtil.values(c).filter((x: any) => typeof x === 'string') as string[];
+}
+
+export function Field(type: ClsList) {
   return (f: any, prop: string) => {
     SchemaRegistry.registerFieldFacet(f, prop, SchemaRegistry.buildFieldConfig(type));
   };

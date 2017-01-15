@@ -1,27 +1,26 @@
-export interface SchemaInst {
-  _type?: string;
-}
-
-export interface SchemaCls<T extends SchemaInst> {
+export interface Cls<T> {
   new (...args: any[]): T;
   name: string;
-  alternateName?: string;
 }
 
-export type SchemaClsList = SchemaCls<any> | [SchemaCls<any>];
+export type ClsList = Cls<any> | [Cls<any>];
 
-export interface SchemaConfig {
+export interface ClassConfig {
   name: string;
-  discriminated: { [key: string]: SchemaCls<any> };
+  parent?: string;
+  discriminator?: string;
+  metadata: any;
+  subtypes: { [key: string]: Cls<any> };
   views: {
     [key: string]: {
-      schema: { [key: string]: FieldCfg },
+      schema: { [key: string]: FieldConfig },
       fields: string[]
     }
   };
 }
 
-export interface FieldCfg {
+export interface FieldConfig {
   type: any;
-  declared: { type: SchemaCls<any>, array: boolean };
+  metadata: any;
+  declared: { type: Cls<any>, array: boolean };
 }

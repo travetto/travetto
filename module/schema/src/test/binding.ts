@@ -1,7 +1,7 @@
-import { Field, Url, Bindable, View, Required, bindData } from '../lib';
+import { Field, Url, SchemaBound, View, Required, BindUtil } from '../lib';
 import { expect } from 'chai';
 
-class Address extends Bindable {
+class Address extends SchemaBound {
 
   @Field(String)
   @View('test')
@@ -11,7 +11,7 @@ class Address extends Bindable {
   street2: string;
 }
 
-class Count extends Bindable {
+class Count extends SchemaBound {
 
   @Field(String)
   @View('test')
@@ -21,7 +21,7 @@ class Count extends Bindable {
   value: number;
 }
 
-class Person extends Bindable {
+class Person extends SchemaBound {
 
   @Field(String)
   name: string;
@@ -35,7 +35,7 @@ class Person extends Bindable {
   counts: Count[];
 }
 
-export class Response extends Bindable {
+export class Response extends SchemaBound {
 
   @Field(String)
   @Required()
@@ -73,7 +73,7 @@ describe('Data Binding', () => {
     expect(person.counts.length).to.equal(2);
     expect(person.counts[0]).instanceof(Count);
 
-    let viewPerson = bindData(Person, new Person(), {
+    let viewPerson = BindUtil.bindSchema(Person, new Person(), {
       name: 'Test',
       address: {
         street1: '1234 Fun',

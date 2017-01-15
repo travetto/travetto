@@ -1,18 +1,16 @@
 import { Request, Response } from 'express';
-import { bindData } from '../lib/util';
-import { BaseModel } from '../lib/model';
-import { Validator } from '../lib/service';
+import { SchemaRegistry, Cls, BindUtil, Validator } from '../lib';
 import { ObjectUtil } from '@encore/util';
 
 import { RouteRegistry, AppError } from '@encore/express';
 
 let flat = require('flat');
 
-export function ModelBody<T>(cls: (new (a?: any) => T), view?: string) {
+export function SchemaBody<T>(cls: Cls<T>, view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     if (ObjectUtil.isPlainObject(req.body)) {
-      let o = bindData(cls, new cls(), req.body, view);
-      if (o instanceof BaseModel) {
+      let o = BindUtil.bindSchema(cls, new cls(), req.body, view);
+      if (!!SchemaRegistry.schemas[cls.name]) {
         req.body = await Validator.validate(o, view);
       } else {
         req.body = o;
@@ -23,10 +21,10 @@ export function ModelBody<T>(cls: (new (a?: any) => T), view?: string) {
   });
 }
 
-export function ModelQuery<T>(cls: (new (a?: any) => T), view?: string) {
+export function SchemaQuery<T>(cls: Cls<T>, view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
-    let o = bindData(cls, new cls(), flat.unflatten(req.query), view);
-    if (o instanceof BaseModel) {
+    let o = BindUtil.bindSchema(cls, new cls(), flat.unflatten(req.query), view);
+    if (!!SchemaRegistry.schemas[cls.name]) {
       req.query = await Validator.validate(o, view);
     } else {
       req.query = o;

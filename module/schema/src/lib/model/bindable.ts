@@ -1,8 +1,8 @@
-import { bindData } from '../util';
-import { SchemaCls } from '../service';
+import { BindUtil } from '../util';
+import { Cls } from '../service';
 
-export class Bindable {
+export class SchemaBound {
   constructor(data?: any) {
-    bindData(this.constructor as SchemaCls<any>, this, data);
+    BindUtil.bindSchema(this.constructor as Cls<any>, this, data);
   }
 }

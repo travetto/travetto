@@ -1,18 +1,18 @@
-import { SchemaCls, SchemaRegistry } from '../service';
+import { Cls, SchemaRegistry } from '../service';
 
-export function Discriminate(key: string) {
+export function Parent(key: string) {
   return (target: any) => {
-    const parent = Object.getPrototypeOf(target) as SchemaCls<any>;
+    const parent = Object.getPrototypeOf(target) as Cls<any>;
     const parentConfig = SchemaRegistry.getSchemaConfig(parent);
     SchemaRegistry.registerSchemaFacet(target, {
-      name: parentConfig.name,
+      parent: parentConfig.name,
       discriminator: key
     });
 
     // Register parent
     let parentConf = SchemaRegistry.getSchemaConfig(parent);
-    parentConf.discriminated = parentConf.discriminated || {};
-    parentConf.discriminated[key] = target;
+    parentConf.subtypes = parentConf.subtypes || {};
+    parentConf.subtypes[key] = target;
 
     return target;
   };

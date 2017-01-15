@@ -1,7 +1,6 @@
 import * as mg from 'mongoose';
-import { SchemaCls } from './types';
+import { Cls } from './types';
 import { SchemaRegistry } from './registry';
-import { getCls } from '../util';
 
 let mongoose = require('mongoose/lib/browser');
 mongoose.Document = require('mongoose/lib/browserDocument.js');
@@ -10,7 +9,11 @@ export class Validator {
 
   static schemas: { [cls: string]: mg.Schema } = {};
 
-  static getSchema<T>(cls: SchemaCls<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
+  static getCls<T>(o: T): Cls<T> {
+    return o.constructor as any;
+  }
+
+  static getSchema<T>(cls: Cls<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
     const key = `${cls.name}::${view}`;
     if (!Validator.schemas[key]) {
       let config = SchemaRegistry.schemas[cls.name];
@@ -38,7 +41,7 @@ export class Validator {
   }
 
   static async validate<T>(o: T, view?: string): Promise<T> {
-    return await Validator.validateRaw(o, Validator.getSchema(getCls(o), view));
+    return await Validator.validateRaw(o, Validator.getSchema(Validator.getCls(o), view));
   }
 
   static async validateAll<T>(obj: T[], view?: string): Promise<T[]> {

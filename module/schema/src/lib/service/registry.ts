@@ -1,20 +1,20 @@
-import { SchemaCls, SchemaClsList, FieldCfg, SchemaConfig } from './types';
+import { Cls, ClsList, FieldConfig, ClassConfig } from './types';
 
 export class SchemaRegistry {
 
-  static schemas: { [name: string]: SchemaConfig } = {};
+  static schemas: { [name: string]: ClassConfig } = {};
   static DEFAULT_VIEW = 'all';
 
-  static getAllProtoypeNames<T>(cls: SchemaCls<T>) {
+  static getAllProtoypeNames<T>(cls: Cls<T>) {
     const out: string[] = [];
     while (cls && cls.name && SchemaRegistry.schemas[cls.name]) {
       out.push(cls.name);
-      cls = Object.getPrototypeOf(cls) as SchemaCls<T>;
+      cls = Object.getPrototypeOf(cls) as Cls<T>;
     }
     return out;
   }
 
-  static getViewConfig<T>(target: string | SchemaCls<T>, view: string) {
+  static getViewConfig<T>(target: string | Cls<T>, view: string) {
     let mconf = SchemaRegistry.getSchemaConfig(target);
     let viewConf = mconf.views[view];
     if (!viewConf) {
@@ -26,17 +26,18 @@ export class SchemaRegistry {
     return viewConf;
   }
 
-  static getViewSchema<T>(cls: SchemaCls<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
+  static getViewSchema<T>(cls: Cls<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
     let conf = SchemaRegistry.schemas[cls.name];
     return conf && conf.views[view].schema;
   }
 
-  static getSchemaConfig<T>(cls: string | SchemaCls<T>) {
+  static getSchemaConfig<T>(cls: string | Cls<T>) {
     let name = typeof cls === 'string' ? cls : cls.name;
     if (!SchemaRegistry.schemas[name] && name) {
       SchemaRegistry.schemas[name] = {
-        name: name,
-        discriminated: {},
+        name,
+        subtypes: {},
+        metadata: {},
         views: {
           [SchemaRegistry.DEFAULT_VIEW]: {
             schema: {},
@@ -70,10 +71,11 @@ export class SchemaRegistry {
     return target;
   }
 
-  static buildFieldConfig(type: SchemaClsList) {
+  static buildFieldConfig(type: ClsList) {
     const isArray = Array.isArray(type);
-    const fieldConf: FieldCfg = {
+    const fieldConf: FieldConfig = {
       type,
+      metadata: {},
       declared: { array: isArray, type: isArray ? (type as any)[0] : type }
     };
 
@@ -87,13 +89,13 @@ export class SchemaRegistry {
     return fieldConf;
   }
 
-  static registerSchemaFacet<T>(cls: SchemaCls<T>, data: any) {
+  static registerSchemaFacet<T>(cls: Cls<T>, data: any) {
     let conf = SchemaRegistry.getSchemaConfig(cls);
     Object.assign(conf, data);
     return cls;
   }
 
-  static registerSchema<T>(cls: SchemaCls<T>) {
+  static registerSchema<T>(cls: Cls<T>) {
     let names = SchemaRegistry.getAllProtoypeNames(cls).slice(1);
     let mconf = SchemaRegistry.getSchemaConfig(cls);
 
@@ -108,7 +110,7 @@ export class SchemaRegistry {
       }
     }
 
-    Object.assign(mconf, { name: mconf.name || cls.alternateName || cls.name });
+    Object.assign(mconf, { name: mconf.name || cls.name });
     return cls;
   }
 }
