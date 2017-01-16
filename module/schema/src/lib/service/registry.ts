@@ -54,7 +54,11 @@ export class SchemaRegistry {
   }
 
   static getClassMetadata<T, U>(cls: Cls<T>, key: string): U {
-    return SchemaRegistry.getClassConfig(cls).metadata[key] as U;
+    let metadata = SchemaRegistry.getClassConfig(cls).metadata;
+    if (!metadata[key]) {
+      metadata[key] = {};
+    }
+    return metadata[key] as U;
   }
 
   static getCls<T>(o: T): Cls<T> {
