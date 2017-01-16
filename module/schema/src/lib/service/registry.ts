@@ -35,6 +35,7 @@ export class SchemaRegistry {
     if (!SchemaRegistry.schemas.has(cls)) {
       SchemaRegistry.schemas.set(cls, {
         name: cls.name,
+        finalized: false,
         metadata: {},
         views: {
           [SchemaRegistry.DEFAULT_VIEW]: {
@@ -43,6 +44,7 @@ export class SchemaRegistry {
           }
         }
       });
+      process.nextTick(() => SchemaRegistry.finalizeClass(cls));
     }
     return SchemaRegistry.schemas.get(cls) as ClassConfig;
   }
@@ -113,16 +115,23 @@ export class SchemaRegistry {
     return cls;
   }
 
-  static registerClass<T>(cls: Cls<T>) {
-    let classes = SchemaRegistry.getAllProtoypes(cls).slice(1);
+  static finalizeClass<T>(cls: Cls<T>) {
     let conf = SchemaRegistry.getClassConfig(cls);
+
+    if (conf.finalized) {
+      return cls;
+    }
+
+    conf.finalized = true;
+
+    let classes = SchemaRegistry.getAllProtoypes(cls).slice(1);
 
     // Flatten views, fields, schemas
     for (let pcls of classes) {
       let schemaConf = SchemaRegistry.schemas.get(pcls);
       if (schemaConf) {
         for (let v of Object.keys(schemaConf.views)) {
-          let sViewConf = SchemaRegistry.getViewConfig(name, v);
+          let sViewConf = SchemaRegistry.getViewConfig(pcls, v);
           let viewConf = SchemaRegistry.getViewConfig(cls, v);
 
           Object.assign(viewConf.schema, sViewConf.schema);
@@ -131,7 +140,6 @@ export class SchemaRegistry {
       }
     }
 
-    Object.assign(conf, { name: conf.name || cls.name });
     return cls;
   }
 }

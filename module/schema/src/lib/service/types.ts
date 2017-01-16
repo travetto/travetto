@@ -7,6 +7,7 @@ export type ClsList = Cls<any> | [Cls<any>];
 
 export interface ClassConfig {
   name: string;
+  finalized: boolean;
   metadata: { [key: string]: any };
   views: {
     [key: string]: {
