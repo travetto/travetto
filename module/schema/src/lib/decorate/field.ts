@@ -32,8 +32,6 @@ export const Max = (n: number | Date, message?: string) => prop({ max: [n, messa
 export const Email = (message?: string) => Match(Re.EMAIL, message);
 export const Telephone = (message?: string) => Match(Re.TELEPHONE, message);
 export const Url = (message?: string) => Match(Re.URL, message);
-export const SimpleName = (message?: string) => Match(Re.SIMPLE_NAME, message);
-export const PostalCode = (message?: string) => Match(Re.POSTAL_CODE, message);
 
 export function View(...names: string[]) {
   return (f: any, prop: string) => {
