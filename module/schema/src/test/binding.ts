@@ -11,6 +11,11 @@ class Address extends SchemaBound {
   street2: string;
 }
 
+class SuperAddress extends Address {
+  @Field(String)
+  unit: string;
+}
+
 class Count extends SchemaBound {
 
   @Field(String)
@@ -102,4 +107,13 @@ describe('Data Binding', () => {
     expect(res.answer).to.not.equal(undefined);
     expect(res.answer).to.deep.equal(['a', 'd']);
   });
+
+  it('SHould handle inheritance', () => {
+    let res = new SuperAddress({
+      street1: 'a',
+      street2: 'b',
+      unit: '20'
+    });
+    expect(res.unit).to.equal('20');
+  })
 });

@@ -5,15 +5,6 @@ export class SchemaRegistry {
   static schemas: Map<Cls<any>, ClassConfig> = new Map();
   static DEFAULT_VIEW = 'all';
 
-  static getAllProtoypes<T>(cls: Cls<T>) {
-    const out: Cls<any>[] = [];
-    while (cls && cls.name && SchemaRegistry.schemas.has(cls)) {
-      out.push(cls);
-      cls = Object.getPrototypeOf(cls) as Cls<T>;
-    }
-    return out;
-  }
-
   static getViewConfig<T>(target: Cls<T>, view: string) {
     let conf = SchemaRegistry.getClassConfig(target);
     let viewConf = conf.views[view];
@@ -33,19 +24,35 @@ export class SchemaRegistry {
 
   static getClassConfig<T>(cls: Cls<T>) {
     if (!SchemaRegistry.schemas.has(cls)) {
+
+      // Project super types to sub types on access
+      let views: { [key: string]: { schema: any, fields: any[] } } = {
+        [SchemaRegistry.DEFAULT_VIEW]: {
+          schema: {},
+          fields: []
+        }
+      };
+
+      let parent = Object.getPrototypeOf(cls) as Cls<any>;
+      if (parent.name && parent !== Object) {
+        let parentConfig = SchemaRegistry.getClassConfig(parent);
+
+        for (let v of Object.keys(parentConfig.views)) {
+          let view = parentConfig.views[v];
+          views[v] = {
+            schema: Object.assign({}, view.schema),
+            fields: view.fields.slice(0)
+          };
+        }
+      }
+
       SchemaRegistry.schemas.set(cls, {
-        name: cls.name,
         finalized: false,
         metadata: {},
-        views: {
-          [SchemaRegistry.DEFAULT_VIEW]: {
-            schema: {},
-            fields: []
-          }
-        }
+        views
       });
-      process.nextTick(() => SchemaRegistry.finalizeClass(cls));
     }
+
     return SchemaRegistry.schemas.get(cls) as ClassConfig;
   }
 
@@ -112,34 +119,6 @@ export class SchemaRegistry {
       config['metadata'] = Object.assign({}, conf.metadata, config['metadata']);
     }
     Object.assign(conf, config);
-    return cls;
-  }
-
-  static finalizeClass<T>(cls: Cls<T>) {
-    let conf = SchemaRegistry.getClassConfig(cls);
-
-    if (conf.finalized) {
-      return cls;
-    }
-
-    conf.finalized = true;
-
-    let classes = SchemaRegistry.getAllProtoypes(cls).slice(1);
-
-    // Flatten views, fields, schemas
-    for (let pcls of classes) {
-      let schemaConf = SchemaRegistry.schemas.get(pcls);
-      if (schemaConf) {
-        for (let v of Object.keys(schemaConf.views)) {
-          let sViewConf = SchemaRegistry.getViewConfig(pcls, v);
-          let viewConf = SchemaRegistry.getViewConfig(cls, v);
-
-          Object.assign(viewConf.schema, sViewConf.schema);
-          viewConf.fields = viewConf.fields.concat(sViewConf.fields);
-        }
-      }
-    }
-
     return cls;
   }
 }
