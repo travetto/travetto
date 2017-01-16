@@ -5,6 +5,11 @@ export class SchemaRegistry {
   static schemas: Map<Cls<any>, ClassConfig> = new Map();
   static DEFAULT_VIEW = 'all';
 
+  static getParent(cls: Cls<any>): Cls<any> | null {
+    let parent = Object.getPrototypeOf(cls) as Cls<any>;
+    return parent.name && parent !== Object ? parent : null;
+  }
+
   static getViewConfig<T>(target: Cls<T>, view: string) {
     let conf = SchemaRegistry.getClassConfig(target);
     let viewConf = conf.views[view];
@@ -33,8 +38,8 @@ export class SchemaRegistry {
         }
       };
 
-      let parent = Object.getPrototypeOf(cls) as Cls<any>;
-      if (parent.name && parent !== Object) {
+      let parent = SchemaRegistry.getParent(cls);
+      if (parent) {
         let parentConfig = SchemaRegistry.getClassConfig(parent);
 
         for (let v of Object.keys(parentConfig.views)) {
