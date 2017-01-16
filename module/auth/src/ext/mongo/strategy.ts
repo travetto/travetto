@@ -4,11 +4,12 @@ import * as moment from 'moment';
 import { MongoStrategyUtil } from './util';
 import { MongoStrategyConfig } from './types';
 import { AppError } from '@encore/express';
-import { ModelService, ModelCls, BaseModel } from '@encore/model';
+import { Cls } from '@encore/schema';
+import { ModelService, BaseModel } from '@encore/model';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Context } from '@encore/context';
 
-export function MongoStrategy<T extends BaseModel>(cls: ModelCls<T>, config: MongoStrategyConfig) {
+export function MongoStrategy<T extends BaseModel>(cls: Cls<T>, config: MongoStrategyConfig) {
 
   async function login(username: string, password: string) {
     let query: any = {
