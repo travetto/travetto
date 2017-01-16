@@ -18,7 +18,7 @@ function enumKeys(c: any): string[] {
 }
 
 export function Field(type: ClsList) {
-  return (f: any, prop: string) => SchemaRegistry.registerFieldConfig(f, prop, type);
+  return (f: any, prop: string) => { SchemaRegistry.registerFieldConfig(f, prop, type); };
 };
 export const Alias = (...aliases: string[]) => prop({ aliases });
 export const Required = () => prop({ required: true });
