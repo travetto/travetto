@@ -1,29 +1,34 @@
-import * as mongoose from 'mongoose';
-import { ModelCls, ModelRegistry } from '../service/registry';
+import { SchemaRegistry, Cls } from '@encore/schema';
 import { SortOptions } from '@encore/mongo';
+import { ModelOptions } from '../service';
 
-export function Discriminate(key: string) {
-  return (target: any) => {
-    const parent = Object.getPrototypeOf(target) as ModelCls<any>;
-    const parentConfig = ModelRegistry.getModelConfig(parent);
-    ModelRegistry.registerModelFacet(target, {
-      collection: parentConfig.collection,
+export function DefaultSort(sort: SortOptions) {
+  return (target: Cls<any>) => SchemaRegistry.registerClassMetadata(target, 'model', {
+    defaultSort: sort
+  });
+}
+
+export function SubType(key: string) {
+  return (target: Cls<any>) => {
+    const parent = Object.getPrototypeOf(target) as Cls<any>;
+    (target as any).collection = (parent as any).collection;
+
+    SchemaRegistry.registerClassMetadata(target, 'model', {
       discriminator: key
     });
 
     // Register parent
-    let parentConf = ModelRegistry.getModelConfig(parent);
-    parentConf.discriminated = parentConf.discriminated || {};
-    parentConf.discriminated[key] = target;
+    let parentConf = SchemaRegistry.getClassMetadata<any, ModelOptions>(parent, 'model');
+    parentConf.subtypes = parentConf.subtypes || {};
+    parentConf.subtypes[key] = target;
 
     return target;
   };
 }
 
-export function DefaultSort(sort: SortOptions) {
-  return (target: any) => ModelRegistry.registerModelFacet(target, { defaultSort: sort });
-}
-
-export function Model(opts: mongoose.SchemaOptions = {}) {
-  return (target: any) => ModelRegistry.registerModel<any>(target, opts);
+export function Model(collection?: string) {
+  return (target: any) => {
+    target.collection = `model.${collection || target.name}`;
+    return target;
+  };
 }

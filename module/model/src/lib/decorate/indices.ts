@@ -1,11 +1,16 @@
 import { ObjectUtil } from '@encore/util';
 import { MongoService } from '@encore/mongo';
 import { Startup } from '@encore/lifecycle';
-import { ModelRegistry, IndexConfig } from '../service/registry';
+import { SchemaRegistry, Cls } from '@encore/schema';
+import { ModelOptions, IndexConfig } from '../service';
 
-function createIndex(target: any, config: IndexConfig) {
-  let mconf = ModelRegistry.getModelConfig(target);
-  mconf.indices.push(config);
+function createIndex(target: Cls<any>, config: IndexConfig) {
+  let mconf = SchemaRegistry.getClassMetadata<any, ModelOptions>(target, 'model');
+  if (!mconf.indicies) {
+    mconf.indicies = [];
+  }
+
+  mconf.indicies.push(config);
 
   let fields: string[];
   let fieldMap: { [key: string]: number };
@@ -28,9 +33,9 @@ function createIndex(target: any, config: IndexConfig) {
 }
 
 export function Index(config: IndexConfig) {
-  return (target: any) => createIndex(target, config);
+  return (target: Cls<any>) => createIndex(target, config);
 }
 
 export function Unique(...fields: string[]) {
-  return (target: any) => createIndex(target, { fields, options: { unique: true } })
+  return (target: Cls<any>) => createIndex(target, { fields, options: { unique: true } })
 }

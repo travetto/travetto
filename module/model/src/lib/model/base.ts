@@ -1,9 +1,8 @@
-import { Field } from '../decorate';
-import { ModelRegistry } from '../service';
 import { ModelCore } from './model';
-import { Bindable } from './bindable';
+import { SchemaRegistry, BindUtil, Cls, Field } from '@encore/schema';
+import { ModelOptions } from '../service';
 
-export abstract class BaseModel extends Bindable implements ModelCore {
+export abstract class BaseModel implements ModelCore {
 
   @Field(String)
   _id: string;
@@ -21,8 +20,8 @@ export abstract class BaseModel extends Bindable implements ModelCore {
   updatedDate: Date;
 
   constructor(data?: Object) {
-    super(data);
-    this._type = ModelRegistry.models[this.constructor.name].discriminator;
+    BindUtil.bindSchema(this.constructor as Cls<any>, this, data, '_type');
+    this._type = SchemaRegistry.getClassMetadata<any, ModelOptions>(this.constructor as Cls<any>, 'model').discriminator;
   }
 
   preSave(): this {
