@@ -1,4 +1,4 @@
-import { Field, Url, SchemaBound, View, Required, BindUtil } from '../lib';
+import { Field, Url, SchemaBound, View, Required, Alias, BindUtil } from '../lib';
 import { expect } from 'chai';
 
 class Address extends SchemaBound {
@@ -50,6 +50,7 @@ export class Response extends SchemaBound {
   answer?: any;
 
   @Field(Boolean)
+  @Alias('correct', 'is_valid')
   valid?: boolean;
 
   @Field(Number)
@@ -108,12 +109,19 @@ describe('Data Binding', () => {
     expect(res.answer).to.deep.equal(['a', 'd']);
   });
 
-  it('SHould handle inheritance', () => {
+  it('Should handle inheritance', () => {
     let res = new SuperAddress({
       street1: 'a',
       street2: 'b',
       unit: '20'
     });
     expect(res.unit).to.equal('20');
-  })
+  });
+
+  it('Should handle aliases', () => {
+    let res = new Response({
+      correct: true
+    });
+    expect(res.valid).to.equal(true);
+  });
 });
