@@ -1,6 +1,7 @@
 import { Configure } from '@encore/config';
 export default Configure.registerNamespace('mongo', {
-  host: 'localhost',
+  hosts: 'localhost',
   schema: 'app',
-  port: 27017
+  port: 27017,
+  options: {}
 });

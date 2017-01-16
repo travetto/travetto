@@ -28,8 +28,10 @@ export class MongoService {
     return query;
   }
 
-  static getUrl(schema: string = Config.schema) {
-    return `mongodb://${Config.host}:${Config.port}/${schema}`;
+  static getUrl(schema: string = Config.schema, options: any = Config.options) {
+    let hosts = Config.hosts.split(',').map(h => `${h}:${Config.port}`).join(',');
+    let opts = Object.keys(options).map(k => `${k}=${options[k]}`).join('&');
+    return `mongodb://${hosts}/${schema}?${opts}`;
   }
 
   static getSchema() {
