@@ -28,7 +28,7 @@ export function SubType(key: string) {
 
 export function Model(collection?: string) {
   return (target: any) => {
-    target.collection = `model.${collection || target.name}`;
+    target.collection = collection || target.name;
     return target;
   };
 }
