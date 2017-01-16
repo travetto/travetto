@@ -10,7 +10,7 @@ export function DefaultSort(sort: SortOptions) {
 
 export function Subtype(key: string) {
   return (target: Cls<any>) => {
-    const parent = Object.getPrototypeOf(target) as Cls<any>;
+    const parent = SchemaRegistry.getParent(target) as Cls<any>;
     (target as any).collection = (parent as any).collection;
 
     SchemaRegistry.registerClassMetadata(target, 'model', {
