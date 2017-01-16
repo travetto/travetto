@@ -20,8 +20,9 @@ export abstract class BaseModel implements ModelCore {
   updatedDate: Date;
 
   constructor(data?: Object) {
-    BindUtil.bindSchema(this.constructor as Cls<any>, this, data);
-    this._type = SchemaRegistry.getClassMetadata<any, ModelOptions>(this.constructor as Cls<any>, 'model').discriminator;
+    let cons: Cls<any> = SchemaRegistry.getCls(this);
+    BindUtil.bindSchema(cons, this, data);
+    this._type = SchemaRegistry.getClassMetadata<any, ModelOptions>(cons, 'model').discriminator;
   }
 
   preSave(): this {
