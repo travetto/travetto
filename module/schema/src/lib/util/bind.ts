@@ -34,33 +34,47 @@ export class BindUtil {
         if (!viewConf) {
           throw new Error(`View not found: ${view}`);
         }
-        for (let f of viewConf.fields) {
-          if (data.hasOwnProperty(f)) {
+        for (let schemaFieldName of viewConf.fields) {
+          let inboundField: string | undefined = undefined;
 
-            let v = data[f];
-
-            if (v !== undefined && v !== null) {
-              let declared = viewConf.schema[f].declared;
-              // Ensure its an array
-              if (!Array.isArray(v) && declared.array) {
-                v = [v];
-              }
-
-              if (SchemaRegistry.schemas.get(declared.type)) {
-                if (declared.array) {
-                  v = v.map((x: any) => BindUtil.bindSchema(declared.type, new declared.type(), x, view));
-                } else {
-                  v = BindUtil.bindSchema(declared.type, new declared.type(), v, view);
-                }
-              } else {
-                v = declared.array ?
-                  v.map((e: any) => BindUtil.coerceType(declared.type, e)) :
-                  BindUtil.coerceType(declared.type, v);
+          if (schemaFieldName in data) {
+            inboundField = schemaFieldName;
+          } else if (viewConf.schema[schemaFieldName].aliases) {
+            for (let aliasedField of (viewConf.schema[schemaFieldName].aliases || [])) {
+              if (aliasedField in data) {
+                inboundField = aliasedField;
+                break;
               }
             }
-
-            (obj as any)[f] = v;
           }
+
+          if (!inboundField) {
+            continue;
+          }
+
+          let v = data[inboundField];
+
+          if (v !== undefined && v !== null) {
+            let declared = viewConf.schema[schemaFieldName].declared;
+            // Ensure its an array
+            if (!Array.isArray(v) && declared.array) {
+              v = [v];
+            }
+
+            if (SchemaRegistry.schemas.has(declared.type)) {
+              if (declared.array) {
+                v = v.map((x: any) => BindUtil.bindSchema(declared.type, new declared.type(), x, view));
+              } else {
+                v = BindUtil.bindSchema(declared.type, new declared.type(), v, view);
+              }
+            } else {
+              v = declared.array ?
+                v.map((e: any) => BindUtil.coerceType(declared.type, e)) :
+                BindUtil.coerceType(declared.type, v);
+            }
+          }
+
+          (obj as any)[schemaFieldName] = v;
         }
       }
     }

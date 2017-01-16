@@ -1,4 +1,4 @@
-import { Cls, ClsList, FieldConfig, ClassConfig } from './types';
+import { Cls, ClsList, FieldConfig, ClassConfig, ViewConfig } from './types';
 
 export class SchemaRegistry {
 
@@ -31,7 +31,7 @@ export class SchemaRegistry {
     if (!SchemaRegistry.schemas.has(cls)) {
 
       // Project super types to sub types on access
-      let views: { [key: string]: { schema: any, fields: any[] } } = {
+      let views: { [key: string]: ViewConfig } = {
         [SchemaRegistry.DEFAULT_VIEW]: {
           schema: {},
           fields: []
@@ -101,11 +101,14 @@ export class SchemaRegistry {
     return target;
   }
 
-  static buildFieldConfig(type: ClsList) {
+  static registerFieldConfig(target: any, prop: string, type: ClsList) {
     const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
       type,
-      declared: { array: isArray, type: isArray ? (type as any)[0] : type }
+      name: prop,
+      declared: {
+        array: isArray, type: isArray ? (type as any)[0] : type
+      }
     };
 
     // Get schema if exists
@@ -115,7 +118,7 @@ export class SchemaRegistry {
       fieldConf.type = isArray ? [schema] : schema;
     }
 
-    return fieldConf;
+    return SchemaRegistry.registerFieldFacet(target, prop, fieldConf);
   }
 
   static registerClassFacet<T>(cls: Cls<T>, config: any) {
