@@ -2,15 +2,6 @@ import { Cls, SchemaRegistry } from '../service';
 
 export class BindUtil {
 
-  static convert<T>(cls: Cls<T>, o: T, discriminatorField: string = 'type'): T {
-    let config = SchemaRegistry.schemas.get(cls);
-    if (discriminatorField && config && config.subtypes && !!(o as any)[discriminatorField]) {
-      return new config.subtypes[(o as any)[discriminatorField]](o);
-    } else {
-      return new cls(o);
-    }
-  }
-
   static coerceType<T>(type: Cls<T>, val: any): T {
     if (val.constructor !== type) {
       let atype = type as Cls<any>;

@@ -32,11 +32,9 @@ export class SchemaRegistry {
   }
 
   static getClassConfig<T>(cls: Cls<T>) {
-    let name = typeof cls === 'string' ? cls : cls.name;
-    if (!SchemaRegistry.schemas.has(cls) && name) {
+    if (!SchemaRegistry.schemas.has(cls)) {
       SchemaRegistry.schemas.set(cls, {
-        name,
-        subtypes: {},
+        name: cls.name,
         metadata: {},
         views: {
           [SchemaRegistry.DEFAULT_VIEW]: {

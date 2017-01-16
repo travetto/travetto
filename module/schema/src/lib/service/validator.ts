@@ -7,18 +7,21 @@ mongoose.Document = require('mongoose/lib/browserDocument.js');
 
 export class SchemaValidator {
 
-  static schemas: { [cls: string]: mg.Schema } = {};
+  static schemas: Map<Cls<any>, Map<string, mg.Schema>> = new Map();
 
   static getSchema<T>(cls: Cls<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
-    const key = `${cls.name}::${view}`;
-    if (!SchemaValidator.schemas[key]) {
+    if (!SchemaValidator.schemas.has(cls)) {
+      SchemaValidator.schemas.set(cls, new Map());
+    }
+    let viewMap: Map<string, mg.Schema> = SchemaValidator.schemas.get(cls) as Map<string, mg.Schema>;
+    if (!viewMap.has(view)) {
       let config = SchemaRegistry.schemas.get(cls);
       if (!config || !config.views[view]) {
         throw new Error(`Unknown view found: ${view}`);
       }
-      SchemaValidator.schemas[key] = SchemaValidator.getSchemaRaw(config.views[view].schema);
+      viewMap.set(view, SchemaValidator.getSchemaRaw(config.views[view].schema));
     }
-    return SchemaValidator.schemas[key];
+    return viewMap.get(view) as mg.Schema;
   }
 
   static getSchemaRaw(schema: any, opts: mg.SchemaOptions = {}): mg.Schema {

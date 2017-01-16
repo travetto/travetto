@@ -7,10 +7,7 @@ export type ClsList = Cls<any> | [Cls<any>];
 
 export interface ClassConfig {
   name: string;
-  parent?: string;
-  discriminator?: string;
   metadata: { [key: string]: any };
-  subtypes: { [key: string]: Cls<any> };
   views: {
     [key: string]: {
       schema: { [key: string]: FieldConfig },
