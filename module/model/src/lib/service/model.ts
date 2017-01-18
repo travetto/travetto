@@ -16,10 +16,17 @@ function onRetrieve<T extends ModelCore>(cls: Cls<T>, o: T): T {
 
 function convert<T>(cls: Cls<T>, o: T): T {
   let config = ModelService.getConfig(cls);
+
+  let cons = cls;
+
   if (config && config.subtypes && !!(o as any)['_type']) {
-    return new config.subtypes[(o as any)['_type']](o);
+    cons = config.subtypes[(o as any)['_type']];
+  }
+
+  if ((cons as any).new) { // Handle if the cls has a new constructor
+    return (cons as any).new(o);
   } else {
-    return new cls(o);
+    return new cons(o);
   }
 }
 
