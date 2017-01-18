@@ -1,5 +1,6 @@
 export interface Cls<T> {
   new (...args: any[]): T;
+  from?: (data: any) => T;
   name: string;
 }
 
