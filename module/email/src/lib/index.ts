@@ -1,2 +1,2 @@
-export * from './initialize';
 export * from './email';
+export * from './types';

@@ -1,10 +1,11 @@
 import { Configure } from '@encore/config';
 
 export default Configure.registerNamespace('mail', {
-  transport: {
-    host: 'mail-dev',
-    port: 25,
-    ignoreTLS: true
+  transport: 'sendmail',
+  defaults: {
+    title: 'Email Title',
+    from: 'Encore Mailer <mailer@encore.org>',
+    replyTo: 'Encore Mailer <mailer@encore.org>',
   },
-  from: 'Encore Mailer <mailer@encore.org>'
+  inky: {}
 });
