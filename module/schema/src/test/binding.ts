@@ -63,7 +63,7 @@ export class Response extends SchemaBound {
 
 describe('Data Binding', () => {
   it('Validate bind', () => {
-    let person = new Person({
+    let person = Person.new({
       name: 'Test',
       address: {
         street1: '1234 Fun',
@@ -100,7 +100,7 @@ describe('Data Binding', () => {
   });
 
   it('Validate Object', () => {
-    let res = new Response({
+    let res = Response.new({
       questionId: '20',
       answer: ['a', 'd']
     });
@@ -110,7 +110,7 @@ describe('Data Binding', () => {
   });
 
   it('Should handle inheritance', () => {
-    let res = new SuperAddress({
+    let res = SuperAddress.new({
       street1: 'a',
       street2: 'b',
       unit: '20'
@@ -119,7 +119,7 @@ describe('Data Binding', () => {
   });
 
   it('Should handle aliases', () => {
-    let res = new Response({
+    let res = Response.new({
       correct: true
     });
     expect(res.valid).to.equal(true);

@@ -1,8 +1,7 @@
 import { BindUtil } from '../util';
-import { Cls } from '../service';
 
 export class SchemaBound {
-  constructor(data?: any) {
-    BindUtil.bindSchema(this.constructor as Cls<any>, this, data);
+  static new<T>(this: new () => T, data: any): T {
+    return BindUtil.bindSchema(this, new this(), data);
   }
 }
