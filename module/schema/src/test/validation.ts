@@ -23,7 +23,7 @@ export class Response extends SchemaBound {
 
 describe('Validation', () => {
   it('Url and message', async () => {
-    let r = new Response({
+    let r = Response.from({
       url: 'htt://google'
     });
     try {
