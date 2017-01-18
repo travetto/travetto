@@ -23,8 +23,8 @@ function convert<T>(cls: Cls<T>, o: T): T {
     cons = config.subtypes[(o as any)['_type']];
   }
 
-  if ((cons as any).new) { // Handle if the cls has a new constructor
-    return (cons as any).new(o);
+  if ((cons as any).from) { // Handle if the cls has a from constructor
+    return (cons as any).from(o);
   } else {
     return new cons(o);
   }
