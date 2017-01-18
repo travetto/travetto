@@ -7,7 +7,6 @@ export interface TemplateMailOptions extends nodemailer.SendMailOptions {
 };
 
 export interface TemplateContext {
-  foundationHtml?: string;
-  foundationCss?: string;
+  wrapperName?: string;
   [key: string]: any;
 }

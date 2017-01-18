@@ -10,8 +10,16 @@ const Inky = require('inky').Inky;
 
 export class EmailService {
   private static transport: nodemailer.Transporter;
-  private static foundationCss = fs.readFileSync(require.resolve('../data/foundation.css')).toString();
-  private static foundationHtml = fs.readFileSync(require.resolve('../data/foundation.html')).toString();
+
+  private static partials: { [key: string]: string } = {
+    'foundationCss.html': fs.readFileSync(require.resolve('../data/foundationCss.html')).toString()
+  };
+
+  private static wrappers: { [key: string]: string } = {
+    base: fs.readFileSync(require.resolve('../data/foundation.html')).toString(),
+  };
+
+  private static cache: { [key: string]: { [key: string]: string } } = { base: {} };
 
   private static buildTransport() {
     let transport: nodemailer.Transport;
@@ -37,32 +45,46 @@ export class EmailService {
     return EmailService.transport;
   }
 
+  static registerPartial(name: string, partial: string) {
+    EmailService.partials[name] = partial;
+  }
+
+  static registerWrapper(name: string, wrapper: string) {
+    EmailService.wrappers[name] = wrapper;
+    EmailService.cache[name] = {};
+  }
 
   static template(template: string, context: TemplateContext = {}) {
+
+    let wrapperKey = context.wrapperName || 'base';
+
+    if (!EmailService.cache[wrapperKey][template]) {
+      let html = EmailService.wrappers[wrapperKey].replace('<!-- TEMPLATE -->', template);
+
+      html = html.replace(/\{\{>\s+(\S+)\s*\}\}/g, (all: string, name: string) => {
+        return EmailService.partials[name];
+      });
+
+      // The same plugin settings are passed in the constructor
+      html = new Inky(Config.inky).releaseTheKraken(html);
+
+      // Extract CSS
+      html = juice(html, { preserveImportant: true });
+
+      // Collect remaining styles (should be media queries) 
+      let styles: string[] = [];
+      html = html.replace(/<style[^>]*>[\s|\S]+<\/style>/g, function (style: string) {
+        styles.push(style);
+        return '';
+      });
+
+      // Move remaining styles into body
+      html = html.replace('<!-- STYLES -->', styles.join('\n'));
+      EmailService.cache[wrapperKey][template] = html;
+    }
+
     // Render final template
-    template = Mustache.render(template, context);
-
-    template = context.foundationHtml || EmailService.foundationHtml
-      .replace('/*STYLES*/', context.foundationCss || EmailService.foundationCss)
-      .replace('<!-- TEMPLATE -->', template);
-
-    // The same plugin settings are passed in the constructor
-    let html = new Inky(Config.inky).releaseTheKraken(template);
-
-    // Extract CSS
-    html = juice(html, { preserveImportant: true });
-
-    // Collect remaining styles (should be media queries) 
-    let styles: string[] = [];
-    html = html.replace(/<style[^>]*>[\s|\S]+<\/style>/g, function (style: string) {
-      styles.push(style);
-      return '';
-    });
-
-    // Move remaining styles into body
-    html = html.replace('<!-- STYLES -->', styles.join('\n'));
-
-    return html;
+    return Mustache.render(EmailService.cache[wrapperKey][template], context);
   }
 
   static async sendEmail(contexts: TemplateMailOptions | TemplateMailOptions[], base?: TemplateMailOptions) {
