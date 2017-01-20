@@ -64,21 +64,21 @@ export class EmailService {
     EmailService.cache[name] = {};
   }
 
+  static resolvePartials(template: string) {
+    return template.replace(/\{\{>\s+(\S+)\s*\}\}/g, (all: string, name: string): any => {
+      return EmailService.resolvePartials(EmailService.partials[name]);
+    });
+  }
+
   static template(template: string, context: TemplateContext = {}) {
 
     let wrapperKey = context.wrapperName || 'base';
 
     if (!EmailService.cache[wrapperKey][template]) {
       let html = EmailService.wrappers[wrapperKey].replace('<!-- TEMPLATE -->', template);
-      let recursiveReplace = (html: string) => html.replace(/\{\{>\s+(\S+)\s*\}\}/g, (all: string, name: string): any => {
-        html = EmailService.partials[name];
-        if (/\{\{>\s+(\S+)\s*\}\}/g.test(html)) {
-          return recursiveReplace(html);
-        } else {
-          return html;
-        }
-      });
-      html = recursiveReplace(html);
+
+      // Load templates
+      html = EmailService.resolvePartials(html);
 
       // The same plugin settings are passed in the constructor
       html = new Inky(Config.inky).releaseTheKraken(html);
