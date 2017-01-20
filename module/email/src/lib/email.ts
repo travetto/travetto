@@ -45,8 +45,22 @@ export class EmailService {
     return EmailService.transport;
   }
 
+  static registerPartialFile(path: string, name?: string) {
+    if (!name) {
+      name = path.split('/').pop() as string;
+    }
+    EmailService.registerPartial(name, fs.readFileSync(path).toString());
+  }
+
   static registerPartial(name: string, partial: string) {
     EmailService.partials[name] = partial;
+  }
+
+  static registerWrapperFile(path: string, name?: string) {
+    if (!name) {
+      name = path.split('/').pop() as string;
+    }
+    EmailService.registerWrapper(name, fs.readFileSync(path).toString());
   }
 
   static registerWrapper(name: string, wrapper: string) {
