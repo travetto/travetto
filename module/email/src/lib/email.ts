@@ -70,10 +70,15 @@ export class EmailService {
 
     if (!EmailService.cache[wrapperKey][template]) {
       let html = EmailService.wrappers[wrapperKey].replace('<!-- TEMPLATE -->', template);
-
-      html = html.replace(/\{\{>\s+(\S+)\s*\}\}/g, (all: string, name: string) => {
-        return EmailService.partials[name];
+      let recursiveReplace = (html: string) => html.replace(/\{\{>\s+(\S+)\s*\}\}/g, (all: string, name: string): any => {
+        html = EmailService.partials[name];
+        if (/\{\{>\s+(\S+)\s*\}\}/g.test(html)) {
+          return recursiveReplace(html);
+        } else {
+          return html;
+        }
       });
+      html = recursiveReplace(html);
 
       // The same plugin settings are passed in the constructor
       html = new Inky(Config.inky).releaseTheKraken(html);
