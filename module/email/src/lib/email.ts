@@ -11,13 +11,9 @@ const Inky = require('inky').Inky;
 export class EmailService {
   private static transport: nodemailer.Transporter;
 
-  private static partials: { [key: string]: string } = {
-    'foundationCss.html': fs.readFileSync(require.resolve('../data/foundationCss.html')).toString()
-  };
+  private static partials: { [key: string]: string } = {};
 
-  private static wrappers: { [key: string]: string } = {
-    base: fs.readFileSync(require.resolve('../data/foundation.html')).toString(),
-  };
+  private static wrappers: { [key: string]: string } = {};
 
   private static cache: { [key: string]: { [key: string]: string } } = { base: {} };
 
@@ -130,4 +126,7 @@ export class EmailService {
     let tp = EmailService.getTransport();
     return nodeToPromise<nodemailer.SentMessageInfo>(tp, tp.sendMail, options);
   }
-} 
+}
+
+EmailService.registerWrapperFile(require.resolve('../data/foundation.html'), 'base');
+EmailService.registerPartialFile(require.resolve('../data/foundationCss.html'));
