@@ -13,7 +13,7 @@ export class ImageService {
     max: 1000,
     dispose: (key: string, n: string) => fs.unlink(n)
   })
-  static async generateAndStoreImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<string> {
+  static async generateAndStoreImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<string | undefined> {
     let info = await AssetService.get(filename, filter);
     if (!info.stream) {
       throw new Error('Stream not found');
@@ -25,16 +25,16 @@ export class ImageService {
         .autoOrient();
       await nodeToPromise<void>(op, op.write, filePath);
       return filePath;
-    } else {
-      return info.filename;
     }
   }
 
   static async getImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<Asset> {
     let file = await ImageService.generateAndStoreImage(filename, options, filter);
     let info = await AssetService.get(filename, filter);
-    info.stream = fs.createReadStream(file);
-    delete info.length;
+    if (file) {
+      info.stream = fs.createReadStream(file);
+      delete info.length;
+    }
     return info;
   }
 }
