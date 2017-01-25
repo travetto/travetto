@@ -13,7 +13,11 @@ function readTypeArr(arr?: string[] | string) {
 }
 
 function matchType(types: string[], type: string, invert: boolean = false) {
-  return types.length && (invert ? !types.filter(match(type)).length : types.filter(match(type)).length);
+  if (types.length) {
+    let matches = types.filter(match(type));
+    return invert ? matches.length === 0 : matches.length > 0;
+  }
+  return false;
 }
 
 function doUpload(config: UploadConfig, after?: (req: Request) => Promise<any>) {
