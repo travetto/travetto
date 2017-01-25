@@ -9,7 +9,7 @@ const match = require('mime-match');
 type UploadConfig = { allowedTypes?: string[] | string, excludeTypes?: string[] | string, maxSize?: number };
 
 function readTypeArr(arr?: string[] | string) {
-  return Array.isArray(arr) ? arr : (arr || '').split(',');
+  return Array.isArray(arr) ? arr : (arr || '').split(',').filter(x => !!x);
 }
 
 function matchType(types: string[], type: string, invert: boolean = false) {
