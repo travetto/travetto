@@ -6,9 +6,9 @@ import Config from '../config';
 
 const match = require('mime-match');
 
-type UploadConfig = { allowedTypes: string[] | string, excludeTypes: string[] | string } & (typeof Config);
+type UploadConfig = { allowedTypes?: string[] | string, excludeTypes?: string[] | string, maxSize?: number };
 
-function readTypeArr(arr: string[] | string) {
+function readTypeArr(arr?: string[] | string) {
   return Array.isArray(arr) ? arr : (arr || '').split(',');
 }
 
@@ -47,6 +47,6 @@ function doUpload(config: UploadConfig, after?: (req: Request) => Promise<any>) 
   };
 }
 
-export function Upload(config: UploadConfig = Config) {
-  return doUpload(config);
+export function Upload(config: UploadConfig = {}) {
+  return doUpload(Object.assign({}, Config, config));
 }
