@@ -1,6 +1,7 @@
 import * as mg from 'mongoose';
 import { Cls } from './types';
 import { SchemaRegistry } from './registry';
+import { ObjectUtil } from '@encore/util';
 
 let mongoose = require('mongoose/lib/browser');
 mongoose.Document = require('mongoose/lib/browserDocument.js');
@@ -25,6 +26,10 @@ export class SchemaValidator {
   }
 
   static getSchemaRaw(schema: any, opts: mg.SchemaOptions = {}): mg.Schema {
+    let keys = Object.keys(schema).filter(k => ObjectUtil.isPlainObject(schema[k].type));
+    for (let key of keys) {
+      schema[key] = SchemaValidator.getSchemaRaw(schema[key].type);
+    }
     return new mongoose.Schema(schema, opts);
   }
 
