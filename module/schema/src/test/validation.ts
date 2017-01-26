@@ -2,9 +2,10 @@ import { Field, Url, SchemaBound, Required, SchemaValidator } from '../lib';
 import { expect } from 'chai';
 
 
-export class Response extends SchemaBound {
+class Response extends SchemaBound {
 
   @Field(String)
+  @Required()
   questionId: string;
 
   @Field(Object)
@@ -21,6 +22,16 @@ export class Response extends SchemaBound {
   url?: string;
 }
 
+class Parent extends SchemaBound {
+
+  @Field(Response)
+  @Required()
+  response: Response;
+
+  @Field([Response])
+  responses: Response[];
+}
+
 describe('Validation', () => {
   it('Url and message', async () => {
     let r = Response.from({
@@ -31,6 +42,21 @@ describe('Validation', () => {
       expect(true).to.equal(false);
     } catch (e) {
       expect(e.errors.url.message).to.equal('BAD URL');
+    }
+  });
+
+  it('Should validate nested', async () => {
+    let res = Parent.from({
+      response: {
+        url: 'a.b'
+      },
+      responses: [{}]
+    });
+    try {
+      await SchemaValidator.validate(res);
+      expect(true).to.equal(false);
+    } catch (e) {
+      expect(e.errors['response.url'].message).to.equal('BAD URL');
     }
   });
 });

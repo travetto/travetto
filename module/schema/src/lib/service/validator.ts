@@ -26,9 +26,13 @@ export class SchemaValidator {
   }
 
   static getSchemaRaw(schema: any, opts: mg.SchemaOptions = {}): mg.Schema {
-    let keys = Object.keys(schema).filter(k => ObjectUtil.isPlainObject(schema[k].type));
-    for (let key of keys) {
-      schema[key] = SchemaValidator.getSchemaRaw(schema[key].type);
+    for (let key of Object.keys(schema)) {
+      let isArray = Array.isArray(schema[key].type);
+      let type = isArray ? schema[key].type[0] : schema[key].type;
+      if (ObjectUtil.isPlainObject(type)) {
+        let sub = SchemaValidator.getSchemaRaw(type);
+        schema[key].type = isArray ? [sub] : sub;
+      }
     }
     return new mongoose.Schema(schema, opts);
   }
