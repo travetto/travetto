@@ -26,9 +26,9 @@ export const Enum = (vals: string[] | any, message?: string) => {
   let values = enumKeys(vals);
   message = message || `{PATH} is only allowed to be "${values.join('" or "')}"`;
   return prop({ enum: { values, message } });
-});
+};
 export const Trimmed = () => prop({ trim: true });
-export const Match = (re: RegExp, message?: string) => prop({ match: [re, message || re.message] });
+export const Match = (re: RegExp, message?: string) => prop({ match: [re, message || (re as any).message] });
 export const MinLength = (n: number, message?: string) => prop({ minlength: [n, message] });
 export const MaxLength = (n: number, message?: string) => prop({ maxlength: [n, message] });
 export const Min = (n: number | Date, message?: string) => prop({ min: [n, message] });
