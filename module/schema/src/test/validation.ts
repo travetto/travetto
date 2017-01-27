@@ -1,5 +1,11 @@
-import { Field, Url, SchemaBound, Required, SchemaValidator } from '../lib';
+import { Field, Url, SchemaBound, Required, SchemaValidator, Enum } from '../lib';
 import { expect } from 'chai';
+
+enum PandaState {
+  TIRED,
+  AMOROUS,
+  HUNGRY
+};
 
 
 class Response extends SchemaBound {
@@ -17,9 +23,13 @@ class Response extends SchemaBound {
   @Field(Number)
   validationCount?: number = 0;
 
-  @Url('BAD URL')
+  @Url()
   @Field(String)
   url?: string;
+
+  @Enum(PandaState)
+  @Field(String)
+  pandaState: string;
 }
 
 class Parent extends SchemaBound {
@@ -41,14 +51,15 @@ describe('Validation', () => {
       await SchemaValidator.validate(r);
       expect(true).to.equal(false);
     } catch (e) {
-      expect(e.errors.url.message).to.equal('BAD URL');
+      expect(e.errors.url.message).to.include('not a valid url');
     }
   });
 
   it('Should validate nested', async () => {
     let res = Parent.from({
       response: {
-        url: 'a.b'
+        url: 'a.b',
+        pandaState : 'orange'
       },
       responses: [{}]
     });
@@ -56,7 +67,8 @@ describe('Validation', () => {
       await SchemaValidator.validate(res);
       expect(true).to.equal(false);
     } catch (e) {
-      expect(e.errors['response.url'].message).to.equal('BAD URL');
+      console.log(JSON.stringify(e, null, 2));
+      expect(e.errors['response.url'].message).to.include('not a valid url');
     }
   });
 });
