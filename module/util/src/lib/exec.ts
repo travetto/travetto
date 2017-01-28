@@ -1,14 +1,14 @@
 import * as child_process from 'child_process';
 
-export type Options = child_process.SpawnOptions & { timeout?: number };
-export interface Result {
+export type ExecOptions = child_process.SpawnOptions & { timeout?: number };
+export interface ExecResult {
   code: number;
   stdout: string;
   stderr: string;
   message?: string;
   valid: boolean;
 }
-export async function run(cmd: string, options: Options = {}, kill?: (proc: child_process.ChildProcess) => Promise<void>): Promise<Result> {
+export async function exec(cmd: string, options: ExecOptions = {}, kill?: (proc: child_process.ChildProcess) => Promise<void>): Promise<ExecResult> {
   let args: string[] = [];
 
   let timeout = options.timeout || 15000;
@@ -17,13 +17,13 @@ export async function run(cmd: string, options: Options = {}, kill?: (proc: chil
     [cmd, ...args] = cmd.split(' ');
   }
 
-  let prom = new Promise<Result>((resolve, reject) => {
+  let prom = new Promise<ExecResult>((resolve, reject) => {
     let p = child_process.spawn(cmd, args, options);
     let stdout = '';
     let stderr = '';
     let timer: any;
     let done = false;
-    let finish = async function (result: Result) {
+    let finish = async function (result: ExecResult) {
       if (done) {
         return;
       }
