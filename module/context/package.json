@@ -1,20 +1,20 @@
 {
-  "name": "@encore/context",
-  "license": "ISC",
-  "optionalDependencies": {
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x",
-    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v1.x.x"
-  },
-  "author": "",
-  "version": "1.1.19",
+  "author": "", 
   "dependencies": {
-    "continuation-local-storage": "^3.1.6",
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x"
-  },
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x", 
+    "continuation-local-storage": "^3.1.6"
+  }, 
+  "description": "", 
   "devDependencies": {
     "tslint": "^4.4.1"
-  },
-  "scripts": {},
-  "main": "src/lib/",
-  "description": ""
+  }, 
+  "license": "ISC", 
+  "main": "src/lib/", 
+  "name": "@encore/context", 
+  "optionalDependencies": {
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x", 
+    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v1.x.x"
+  }, 
+  "scripts": {}, 
+  "version": "1.1.20"
 }
