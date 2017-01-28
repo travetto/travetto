@@ -4,6 +4,7 @@ let fs = require('fs');
 
 let setup = [];
 let root = process.cwd();
+let ui = '@encore/test/src/lib/user-interface';
 
 try {
   if (!!fs.statSync(`${root}/src/test/setup.ts`)) {
@@ -11,15 +12,17 @@ try {
   }
 } catch (e) { }
 
+try {
+  if (!!fs.statSync(`${root}/src/test/user-interface.ts`)) {
+    ui = `${root}/src/test/user-interface`;
+  }
+} catch (e) { }
 
 process.argv = [
   process.argv[0],
   'mocha',
-  '--delay',
-  '--require',
-  `node_modules/@encore/bootstrap/init`,
-  '--ui',
-  '@encore/test/src/lib/user-interface',
+  '--require', `node_modules/@encore/bootstrap/init`,
+  '--ui', ui,
   ...setup,
   ...process.argv.slice(2)
 ];

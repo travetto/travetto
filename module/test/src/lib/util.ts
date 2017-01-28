@@ -2,8 +2,16 @@ let _beforeTest: ActionFunction[] = [];
 let _beforeSuite: ActionFunction[] = [];
 let _afterTest: ActionFunction[] = [];
 let _afterSuite: ActionFunction[] = [];
-let _beforeAll: (() => Promise<any>)[] = [];
-let _readyPromise: Promise<any>;
+let _beforeAll: ((() => Promise<any>) | Promise<any>)[] = [];
+let _afterAll: ((() => Promise<any>) | Promise<any>)[] = [];
+
+function isPromise(x: any): x is Promise<any> {
+  return x.then && x.catch;
+}
+
+function resolveAll(arr: ((() => Promise<any>) | Promise<any>)[]) {
+  return Promise.all(arr.map(x => isPromise(x) ? x : x()));
+}
 
 export function declareSuite(fn: Function) {
   return function () {
@@ -30,15 +38,9 @@ export function timeout(delay: number, fn: Function) {
   }
 }
 
-export function runWhenReady(run: () => any) {
-  if (!_readyPromise) {
-    if (_beforeAll.length) {
-      _readyPromise = Promise.all(_beforeAll.map(x => x()));
-    } else {
-      _readyPromise = Promise.resolve();
-    }
-  }
-  _readyPromise.then(run);
+export function initialize() {
+  before(() => resolveAll(_beforeAll));
+  after(() => resolveAll(_afterAll));
 }
 
 export const adder = <T>(arr: T[]) => (t: T) => arr.push(t);
@@ -47,3 +49,4 @@ export const beforeSuite = adder(_beforeSuite);
 export const beforeTest = adder(_beforeTest);
 export const afterSuite = adder(_afterSuite);
 export const afterTest = adder(_afterTest);
+export const afterAll = adder(_afterAll);

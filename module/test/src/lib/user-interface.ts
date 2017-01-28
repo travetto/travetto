@@ -1,4 +1,4 @@
-import { declareSuite, runWhenReady } from './util';
+import { declareSuite, initialize } from './util';
 
 let Test = require('mocha/lib/test');
 let Common = require('mocha/lib/interfaces/common');
@@ -13,10 +13,9 @@ module.exports = function (suite: any) {
     ctx.beforeEach = cmn.beforeEach;
     ctx.afterEach = cmn.afterEach;
 
-    if (mocha.options.delay) {
-      process.nextTick(() =>
-        runWhenReady(cmn.runWithSuite(suite)));
-    }
+    initialize();
+
+    cmn.runWithSuite(suite);
 
     ctx.describe = ctx.ctx =
       (title: string, fn: Function) => cmn.suite.create({ title, file, fn: declareSuite(fn) });
