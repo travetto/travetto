@@ -47,8 +47,11 @@ export class Shutdown {
           let res = handler();
           if (res && res.then) {
             promises.push(res as Promise<any>);
-            let prefix = `Error shutting down ${name}`;
-            res.catch((e: any) => console.error(prefix, e));
+            res
+              .then(() => `Successfully shut down ${name}`)
+              .catch((e: any) => console.error(`Error shutting down ${name}`, e));
+          } else {
+            console.log(`Successfully shut down ${name}`);
           }
         } catch (e) {
           console.error(`Error shutting down ${name}`, e);
@@ -56,7 +59,6 @@ export class Shutdown {
       }
 
       await Promise.all(promises);
-      console.log(`Successfully shut down ${name}`);
     } catch (e) {
       console.error('Error on shutting down', e);
     }
