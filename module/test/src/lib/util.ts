@@ -1,15 +1,17 @@
+export type Promisable = (() => Promise<any>) | Promise<any>;
+
 let _beforeTest: ActionFunction[] = [];
 let _beforeSuite: ActionFunction[] = [];
 let _afterTest: ActionFunction[] = [];
 let _afterSuite: ActionFunction[] = [];
-let _beforeAll: ((() => Promise<any>) | Promise<any>)[] = [];
-let _afterAll: ((() => Promise<any>) | Promise<any>)[] = [];
+let _beforeAll: Promisable[] = [];
+let _afterAll: Promisable[] = [];
 
 function isPromise(x: any): x is Promise<any> {
   return x.then && x.catch;
 }
 
-function resolveAll(arr: ((() => Promise<any>) | Promise<any>)[]) {
+function resolveAll(arr: Promisable[]) {
   return Promise.all(arr.map(x => isPromise(x) ? x : x()));
 }
 
