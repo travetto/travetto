@@ -56,7 +56,9 @@ export class Shutdown {
 
     Shutdown.shutdownEvent.emit('shutdown');
 
-    process.nextTick(() => process.exit(Shutdown.shutdownCode));
+    if (Shutdown.shutdownCode >= 0) {
+      process.nextTick(() => process.exit(Shutdown.shutdownCode));
+    }
 
     return Shutdown.shutdownPromise;
   }
