@@ -48,11 +48,11 @@ export class Shutdown {
           }
           console.log(`Successfully shut down ${name}`);
         } catch (e) {
-          console.log(`Error shutting down ${name}`);
+          console.error(`Error shutting down ${name}`);
         }
       }
     } catch (e) {
-      console.log('Error on shutting down', e);
+      console.error('Error on shutting down', e);
     }
 
     Shutdown.shutdownEvent.emit('shutdown');
