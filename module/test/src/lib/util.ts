@@ -1,4 +1,4 @@
-export type Promisable = (() => Promise<any>) | Promise<any>;
+export type Promisable = Promise<any> | (() => Promise<any>);
 
 let _beforeTest: ActionFunction[] = [];
 let _beforeSuite: ActionFunction[] = [];
@@ -6,6 +6,9 @@ let _afterTest: ActionFunction[] = [];
 let _afterSuite: ActionFunction[] = [];
 let _beforeAll: Promisable[] = [];
 let _afterAll: Promisable[] = [];
+
+export let INIT_TIMEOUT = 10000;
+export let CLEANUP_TIMEOUT = 10000;
 
 function isPromise(x: any): x is Promise<any> {
   return x.then && x.catch;
@@ -41,8 +44,14 @@ export function timeout<T>(delay: number, fn: (...args: any[]) => T) {
 }
 
 export function initialize() {
-  before(() => resolveAll(_beforeAll));
-  after(() => resolveAll(_afterAll));
+  before(function () {
+    this.timeout(INIT_TIMEOUT);
+    return resolveAll(_beforeAll);
+  });
+  after(function () {
+    this.timeout(CLEANUP_TIMEOUT);
+    return resolveAll(_afterAll);
+  });
 }
 
 export const adder = <T>(arr: T[]) => (t: T) => arr.push(t);
