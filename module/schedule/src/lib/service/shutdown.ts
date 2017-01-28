@@ -25,33 +25,38 @@ export class Shutdown {
     Shutdown.shutdownCode = exitCode;
 
     let listeners = Shutdown.listeners.slice(0);
-
-    if (err) {
-      console.log(err.stack || err);
-    }
-
     Shutdown.listeners = [];
-    if (listeners.length) {
-      console.log('');
-    }
 
-    for (let listener of listeners) {
-      try {
-        let {name, handler} = listener;
-        console.log(`Shutting down ${name}`);
-        let res = handler();
-        if (res && res.then) {
-          await res;
-        }
-        console.log(`Successfully shut down ${name}`);
-      } catch (e) {
-        console.log(`Error shutting down ${name}`);
+    try {
+      if (err) {
+        console.log(err.stack || err);
       }
+
+      Shutdown.listeners = [];
+      if (listeners.length) {
+        console.log('');
+      }
+
+      for (let listener of listeners) {
+        try {
+          let {name, handler} = listener;
+          console.log(`Shutting down ${name}`);
+          let res = handler();
+          if (res && res.then) {
+            await res;
+          }
+          console.log(`Successfully shut down ${name}`);
+        } catch (e) {
+          console.log(`Error shutting down ${name}`);
+        }
+      }
+    } catch (e) {
+      console.log('Error on shutting down', e);
     }
 
     Shutdown.shutdownEvent.emit('shutdown');
 
-    process.exit(Shutdown.shutdownCode);
+    process.nextTick(() => process.exit(Shutdown.shutdownCode));
   }
 }
 
