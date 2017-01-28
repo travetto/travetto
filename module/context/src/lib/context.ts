@@ -1,4 +1,5 @@
 let cls = require('continuation-local-storage');
+require('./stack');
 
 export const KEY = 'ctx';
 export const NAMESPACE = 'encore';
