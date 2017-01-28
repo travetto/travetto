@@ -50,13 +50,13 @@ export class Shutdown {
             let prefix = `Error shutting down ${name}`;
             res.catch((e: any) => console.error(prefix, e));
           }
-          console.log(`Successfully shut down ${name}`);
         } catch (e) {
           console.error(`Error shutting down ${name}`, e);
         }
       }
 
       await Promise.all(promises);
+      console.log(`Successfully shut down ${name}`);
     } catch (e) {
       console.error('Error on shutting down', e);
     }
