@@ -37,6 +37,8 @@ export class Shutdown {
         console.log('');
       }
 
+      let promises: Promise<any>[] = [];
+
       for (let listener of listeners) {
         let {name, handler} = listener;
 
@@ -44,13 +46,17 @@ export class Shutdown {
           console.log(`Shutting down ${name}`);
           let res = handler();
           if (res && res.then) {
-            await res;
+            promises.push(res as Promise<any>);
+            let prefix = `Error shutting down ${name}`;
+            res.catch((e: any) => console.error(prefix, e));
           }
           console.log(`Successfully shut down ${name}`);
         } catch (e) {
-          console.error(`Error shutting down ${name}`);
+          console.error(`Error shutting down ${name}`, e);
         }
       }
+
+      await Promise.all(promises);
     } catch (e) {
       console.error('Error on shutting down', e);
     }
