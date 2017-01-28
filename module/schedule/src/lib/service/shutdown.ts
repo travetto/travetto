@@ -38,8 +38,9 @@ export class Shutdown {
       }
 
       for (let listener of listeners) {
+        let {name, handler} = listener;
+
         try {
-          let {name, handler} = listener;
           console.log(`Shutting down ${name}`);
           let res = handler();
           if (res && res.then) {
