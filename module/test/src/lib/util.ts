@@ -23,17 +23,17 @@ export function declareSuite(fn: Function) {
   };
 }
 
-export function timeout(delay: number, fn: Function) {
+export function timeout<T>(delay: number, fn: (...args: any[]) => T) {
   let cb = fn.toString().indexOf('(done)') >= 0;
   if (cb) {
-    return function (done: Function) {
+    return function (done?: Function) {
       this.timeout(delay);
-      return fn.call(this, done);
+      return fn.call(this, done) as T;
     };
   } else {
     return function () {
       this.timeout(delay);
-      return fn.call(this);
+      return fn.call(this) as T;
     };
   }
 }
