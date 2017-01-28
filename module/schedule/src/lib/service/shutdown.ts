@@ -43,15 +43,15 @@ export class Shutdown {
         let {name, handler} = listener;
 
         try {
-          console.log(`Shutting down ${name}`);
+          console.debug(`Shutting down ${name}`);
           let res = handler();
           if (res && res.then) {
             promises.push(res as Promise<any>);
             res
-              .then(() => `Successfully shut down ${name}`)
+              .then(() => console.debug(`Successfully shut down ${name}`))
               .catch((e: any) => console.error(`Error shutting down ${name}`, e));
           } else {
-            console.log(`Successfully shut down ${name}`);
+            console.debug(`Successfully shut down ${name}`);
           }
         } catch (e) {
           console.error(`Error shutting down ${name}`, e);
