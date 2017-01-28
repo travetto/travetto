@@ -19,7 +19,7 @@ export class Shutdown {
   static async shutdown(exitCode: number, err?: any) {
 
     if (Shutdown.shutdownCode > 0) {
-      return;
+      return Shutdown.shutdownPromise;
     }
 
     Shutdown.shutdownCode = exitCode;
@@ -57,6 +57,8 @@ export class Shutdown {
     Shutdown.shutdownEvent.emit('shutdown');
 
     process.nextTick(() => process.exit(Shutdown.shutdownCode));
+
+    return Shutdown.shutdownPromise;
   }
 }
 
