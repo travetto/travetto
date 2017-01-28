@@ -16,7 +16,7 @@ export class Shutdown {
     this.listeners.push({ name, handler });
   }
 
-  static async shutdown(exitCode: number, err?: any) {
+  static async shutdown(exitCode: number = 0, err?: any) {
 
     if (Shutdown.shutdownCode > 0) {
       return Shutdown.shutdownPromise;
