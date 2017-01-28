@@ -1,10 +1,28 @@
+import { EventEmitter } from 'events';
+
 export class Shutdown {
   private static listeners: { name: string, handler: Function }[] = [];
+  private static shutdownEvent = new EventEmitter();
+  private static shutdownCode = -1;
+  private static shutdownPromise = new Promise((resolve) => {
+    Shutdown.shutdownEvent.on('shutdown', resolve);
+  });
+
+  static onShutdownPromise() {
+    return Shutdown.shutdownPromise;
+  }
+
   static onShutdown(name: string, handler: Function) {
     this.listeners.push({ name, handler });
   }
 
-  static async quit(exitCode: number, err?: any) {
+  static async shutdown(exitCode: number, err?: any) {
+
+    if (Shutdown.shutdownCode > 0) {
+      return;
+    }
+
+    Shutdown.shutdownCode = exitCode;
 
     let listeners = Shutdown.listeners.slice(0);
 
@@ -31,12 +49,12 @@ export class Shutdown {
       }
     }
 
-    if (exitCode) {
-      process.exit(exitCode);
-    }
+    Shutdown.shutdownEvent.emit('shutdown');
+
+    process.exit(Shutdown.shutdownCode);
   }
 }
 
-process.on('exit', Shutdown.quit.bind(null, 0));
-process.on('SIGINT', Shutdown.quit.bind(null, 130));
-process.on('uncaughtException', Shutdown.quit.bind(null, 1));
+process.on('exit', Shutdown.shutdown.bind(null, 0));
+process.on('SIGINT', Shutdown.shutdown.bind(null, 130));
+process.on('uncaughtException', Shutdown.shutdown.bind(null, 1));
