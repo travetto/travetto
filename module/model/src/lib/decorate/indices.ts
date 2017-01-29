@@ -4,7 +4,7 @@ import { Startup } from '@encore/lifecycle';
 import { SchemaRegistry, Cls } from '@encore/schema';
 import { ModelOptions, IndexConfig } from '../service';
 
-function createIndex(target: Cls<any>, config: IndexConfig) {
+function createIndex<T extends Cls<any>>(target: T, config: IndexConfig) {
   let mconf = SchemaRegistry.getClassMetadata<any, ModelOptions>(target, 'model');
   if (!mconf.indicies) {
     mconf.indicies = [];
@@ -33,9 +33,13 @@ function createIndex(target: Cls<any>, config: IndexConfig) {
 }
 
 export function Index(config: IndexConfig) {
-  return (target: Cls<any>) => createIndex(target, config);
+  return function <T extends Cls<any>>(target: T) {
+    return createIndex(target, config);
+  };
 }
 
 export function Unique(...fields: string[]) {
-  return (target: Cls<any>) => createIndex(target, { fields, options: { unique: true } })
+  return function <T extends Cls<any>>(target: T) {
+    return createIndex(target, { fields, options: { unique: true } });
+  };
 }
