@@ -11,7 +11,7 @@ export function DefaultSort(sort: SortOptions) {
 }
 
 export function Subtype(key: string) {
-  return function <T extends Cls<any>>(target: Cls<any>) {
+  return function <T extends Cls<any>>(target: T) {
     const parent = SchemaRegistry.getParent(target) as Cls<any>;
     (target as any).collection = (parent as any).collection || (parent as any).name;
 
@@ -29,8 +29,8 @@ export function Subtype(key: string) {
 }
 
 export function Collection(collection: string) {
-  return function <T extends Cls<any>>(target: any) {
-    target.collection = collection;
+  return function <T extends Cls<any>>(target: T) {
+    (target as any).collection = collection;
     return target;
   };
 }
