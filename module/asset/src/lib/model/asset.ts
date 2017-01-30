@@ -33,7 +33,9 @@ export class Asset implements Renderable {
 
   render(res: Response) {
     res.setHeader('Content-Type', this.contentType);
-    res.setHeader('Content-Disposition', `attachment; filename='${this.filename}'`);
+    if (this.filename) {
+      res.setHeader('Content-Disposition', `attachment; filename='${this.filename}'`);
+    }
     if (this.length) {
       res.setHeader('Content-Length', `${this.length}`);
     }
