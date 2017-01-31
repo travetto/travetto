@@ -11,7 +11,7 @@ export class ImageService {
 
   @Cacheable({
     max: 1000,
-    dispose: (key: string, n: string) => fs.unlink(n)
+    dispose: (key: string, n: string) => nodeToPromise(fs, fs.unlink, n)
   })
   static async generateAndStoreImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<string | undefined> {
     let info = await AssetService.get(filename, filter);
