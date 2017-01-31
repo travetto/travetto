@@ -11,7 +11,7 @@ const flat = require('flat');
 export class MongoService {
 
   private static clientPromise: Promise<mongo.Db>;
-  private static indices: [string, any, mongo.IndexOptions][] = [];
+  private static indices: { [key: string]: [any, mongo.IndexOptions][] } = {};
 
   static isActive() { return !!MongoService.clientPromise; }
 
@@ -57,17 +57,24 @@ export class MongoService {
   static async resetDatabase() {
     let client = await MongoService.getClient();
     await client.dropDatabase();
-    for (let [colName, fields, config] of MongoService.indices) {
-      let col = client.collection(colName);
-      await col.createIndex(fields, config);
+    for (let colName of Object.keys(MongoService.indices)) {
+      for (let [fields, config] of MongoService.indices[colName]) {
+        let col = client.collection(colName);
+        await col.createIndex(fields, config);
+      }
     }
   }
 
   static async createIndex(named: Named, fields: { [key: string]: number }, config: mongo.IndexOptions) {
     let col = await MongoService.collection(named);
-    MongoService.indices.push([col.collectionName, fields, config]);
+    MongoService.indices[col.collectionName] = MongoService.indices[col.collectionName] || [];
+    MongoService.indices[col.collectionName].push([col.collectionName, fields, config]);
     await col.createIndex(fields, config);
     return;
+  }
+
+  static getIndices(named: Named) {
+    return MongoService.indices[MongoService.getCollectionName(named)];
   }
 
   static async getIdsByQuery(named: Named, query: Object) {
