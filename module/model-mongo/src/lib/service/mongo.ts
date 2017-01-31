@@ -1,7 +1,7 @@
 import * as mongo from 'mongodb';
 import Config from '../config';
 import {
-  Named, Base,
+  Named, Base, IndexConfig,
   BulkState, BulkResponse, QueryOptions
 } from '../model';
 import { ObjectUtil } from '@encore/util';
@@ -11,7 +11,7 @@ const flat = require('flat');
 export class MongoService {
 
   private static clientPromise: Promise<mongo.Db>;
-  private static indices: { [key: string]: [any, mongo.IndexOptions][] } = {};
+  private static indices: { [key: string]: IndexConfig[] } = {};
 
   static isActive() { return !!MongoService.clientPromise; }
 
