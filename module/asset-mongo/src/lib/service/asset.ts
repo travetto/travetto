@@ -113,7 +113,7 @@ export class AssetService {
 
     } finally {
       if (removeOnComplete) {
-        fs.unlink(upload.path);
+        nodeToPromise(fs, fs.unlink, upload.path);
       }
     }
   }
