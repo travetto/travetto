@@ -21,11 +21,12 @@ try {
 process.argv = [
   process.argv[0],
   'mocha',
+  ...(process.env.NODE_FLAGS || '').split(' '),
   '--require', `node_modules/@encore/bootstrap/init`,
   '--ui', ui,
   ...setup,
   ...process.argv.slice(2)
-];
+].filter(x => !!x);
 
 process.env.DEFAULT_ENV = 'test';
 
