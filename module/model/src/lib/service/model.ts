@@ -33,7 +33,7 @@ export class ModelService {
   }
 
   static async collection<T extends ModelCore>(cls: Cls<T>) {
-    return await MongoService.collection(cls);
+    return await MongoService.getCollection(cls);
   }
 
   static rewriteError<T extends ModelCore>(cls: Cls<T>, e: any) {
