@@ -67,7 +67,7 @@ export class MongoService {
   static registerIndex(named: Named, fields: { [key: string]: number }, config: mongo.IndexOptions) {
     let col = MongoService.getCollectionName(named);
     MongoService.indices[col] = MongoService.indices[col] || [];
-    MongoService.indices[col].push([col, fields, config]);
+    MongoService.indices[col].push([fields, config]);
   }
 
   static async establishIndices(client: mongo.Db) {
