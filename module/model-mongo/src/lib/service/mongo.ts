@@ -40,7 +40,11 @@ export class MongoService {
 
   static getClient(): Promise<mongo.Db> {
     if (!MongoService.clientPromise) {
-      MongoService.clientPromise = mongo.MongoClient.connect(MongoService.getUrl());
+      MongoService.clientPromise =
+        mongo.MongoClient.connect(MongoService.getUrl())
+          .then(client =>
+            MongoService.establishIndices(client)
+              .then(() => client));
     }
     return MongoService.clientPromise;
   }
@@ -57,20 +61,27 @@ export class MongoService {
   static async resetDatabase() {
     let client = await MongoService.getClient();
     await client.dropDatabase();
-    for (let colName of Object.keys(MongoService.indices)) {
-      for (let [fields, config] of MongoService.indices[colName]) {
-        let col = client.collection(colName);
-        await col.createIndex(fields, config);
-      }
-    }
+    delete MongoService.clientPromise;
   }
 
-  static async createIndex(named: Named, fields: { [key: string]: number }, config: mongo.IndexOptions) {
-    let col = await MongoService.collection(named);
-    MongoService.indices[col.collectionName] = MongoService.indices[col.collectionName] || [];
-    MongoService.indices[col.collectionName].push([col.collectionName, fields, config]);
-    await col.createIndex(fields, config);
-    return;
+  static registerIndex(named: Named, fields: { [key: string]: number }, config: mongo.IndexOptions) {
+    let col = MongoService.getCollectionName(named);
+    MongoService.indices[col] = MongoService.indices[col] || [];
+    MongoService.indices[col].push([col, fields, config]);
+  }
+
+  static async establishIndices(client: mongo.Db) {
+    let promises = [];
+
+    for (let colName of Object.keys(MongoService.indices)) {
+      let col = await client.collection(colName);
+
+      for (let [fields, config] of MongoService.indices[colName]) {
+        promises.push(col.createIndex(fields, config));
+      }
+    }
+
+    return Promise.all(promises);
   }
 
   static getIndices(named: Named) {
