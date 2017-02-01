@@ -136,8 +136,8 @@ export class Configure {
       - External config file -> loaded from env/json
       - Environment vars -> Overrides everything
   */
-  static initialize(env: string) {
-    console.log(`Initializing: ${env}`);
+  static initialize(...envs: string[]) {
+    console.log(`Initializing: ${envs.join(',')}`);
 
     // Load all namespaces from core
     bulkRequire('**/config.ts', process.cwd() + '/node_modules/@encore');
@@ -148,12 +148,14 @@ export class Configure {
     // Load all namespaces from lib
     bulkRequire('src/lib/**/config.ts');
 
-    try {
-      // Load env config
-      let data = require(`${process.cwd()}/src/env/${env}.json`) as ConfigMap;
-      Configure.merge(Configure.data, data);
-    } catch (e) {
-      console.log(`No config found at ${process.cwd()}/src/env/${env}.json`);
+    for (let env of envs) {
+      try {
+        // Load env config
+        let data = require(`${process.cwd()}/src/env/${env}.json`) as ConfigMap;
+        Configure.merge(Configure.data, data);
+      } catch (e) {
+        console.log(`No config found at ${process.cwd()}/src/env/${env}.json`);
+      }
     }
 
     // Handle process.env
