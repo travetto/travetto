@@ -1,6 +1,5 @@
 import { ObjectUtil } from '@encore/util';
 import { MongoService } from '@encore/mongo';
-import { Startup } from '@encore/lifecycle';
 import { SchemaRegistry, Cls } from '@encore/schema';
 import { ModelOptions, IndexConfig } from '../service';
 
@@ -26,8 +25,7 @@ function createIndex<T extends Cls<any>>(target: T, config: IndexConfig) {
     mconf.primaryUnique = fields;
   }
 
-  Startup.waitFor(MongoService.createIndex(target, fieldMap, config.options)
-    .then((x: any) => console.debug(`Created ${config.options.unique ? 'unique' : ''} index ${config.fields}`)));
+  MongoService.registerIndex(target, fieldMap, config.options);
 
   return target;
 }
