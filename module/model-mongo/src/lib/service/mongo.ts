@@ -53,7 +53,7 @@ export class MongoService {
     return named.collection || named.name;
   }
 
-  static async collection(named: Named): Promise<mongo.Collection> {
+  static async getCollection(named: Named): Promise<mongo.Collection> {
     let db = await MongoService.getClient();
     return db.collection(MongoService.getCollectionName(named));
   }
@@ -89,7 +89,7 @@ export class MongoService {
   }
 
   static async getIdsByQuery(named: Named, query: Object) {
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     let objs = await col.find(query, { _id: true }).toArray();
     return objs.map(x => x._id.toHexString());
   }
@@ -97,7 +97,7 @@ export class MongoService {
   static async getByQuery<T extends Base>(named: Named, query: Object & { _id?: any } = {}, options: QueryOptions = {}): Promise<T[]> {
     query = MongoService.translateQueryIds(query);
 
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     let cursor = col.find(query);
     if (options.sort) {
       cursor = cursor.sort(options.sort);
@@ -116,7 +116,7 @@ export class MongoService {
   static async getCountByQuery(named: Named, query: Object & { _id?: any } = {}, options: QueryOptions = {}): Promise<{ count: number }> {
     query = MongoService.translateQueryIds(query);
 
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     let cursor = col.count(query);
 
     let res = await cursor;
@@ -136,7 +136,7 @@ export class MongoService {
   }
 
   static async deleteById(named: Named, id: string): Promise<number> {
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     let res = await col.deleteOne({ _id: new mongo.ObjectID(id) });
 
     return res.deletedCount || 0;
@@ -144,13 +144,13 @@ export class MongoService {
 
   static async deleteByQuery(named: Named, query: Object & { _id?: any } = {}): Promise<number> {
     query = MongoService.translateQueryIds(query);
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     let res = await col.deleteMany(query);
     return res.deletedCount || 0;
   }
 
   static async save<T extends Base>(named: Named, o: T, removeId: boolean = true): Promise<T> {
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     if (removeId) {
       delete o._id;
     }
@@ -160,7 +160,7 @@ export class MongoService {
   }
 
   static async saveAll<T extends Base>(named: Named, objs: T[]): Promise<T[]> {
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     let res = await col.insertMany(objs);
     for (let i = 0; i < objs.length; i++) {
       objs[i]._id = res.insertedIds[i].toHexString();
@@ -169,7 +169,7 @@ export class MongoService {
   }
 
   static async update<T extends Base>(named: Named, o: T): Promise<T> {
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     o._id = (new mongo.ObjectID(o._id) as any);
     await col.replaceOne({ _id: o._id }, o);
     o._id = (o._id as any).toHexString();
@@ -181,7 +181,7 @@ export class MongoService {
   }
 
   static async partialUpdateByQuery<T extends Base>(named: Named, query: any, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     query = MongoService.translateQueryIds(query);
 
     if (Object.keys(data)[0].charAt(0) !== '$') {
@@ -198,7 +198,7 @@ export class MongoService {
   }
 
   static async updateMany<T extends Base>(named: Named, query: any, data: any, options?: { upsert?: boolean; w?: any; wtimeout?: number; j?: boolean; }) {
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     query = MongoService.translateQueryIds(query);
 
     if (Object.keys(data)[0].charAt(0) !== '$') {
@@ -210,7 +210,7 @@ export class MongoService {
   }
 
   static async bulkProcess<T extends Base>(named: Named, state: BulkState<T>) {
-    let col = await MongoService.collection(named);
+    let col = await MongoService.getCollection(named);
     let bulk = col.initializeUnorderedBulkOp({});
     let count = 0;
 
