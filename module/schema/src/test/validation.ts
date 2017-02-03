@@ -1,4 +1,4 @@
-import { Field, Url, SchemaBound, Required, SchemaValidator, Enum } from '../lib';
+import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum } from '../lib';
 import { expect } from 'chai';
 
 enum PandaState {
@@ -42,6 +42,12 @@ class Parent extends SchemaBound {
   responses: Response[];
 }
 
+class MinTest extends SchemaBound {
+  @Field(String)
+  @MinLength(10)
+  value: string;
+}
+
 describe('Validation', () => {
   it('Url and message', async () => {
     let r = Response.from({
@@ -59,7 +65,7 @@ describe('Validation', () => {
     let res = Parent.from({
       response: {
         url: 'a.b',
-        pandaState : 'orange'
+        pandaState: 'orange'
       },
       responses: [{}]
     });
@@ -67,8 +73,18 @@ describe('Validation', () => {
       await SchemaValidator.validate(res);
       expect(true).to.equal(false);
     } catch (e) {
-      console.log(JSON.stringify(e, null, 2));
       expect(e.errors['response.url'].message).to.include('not a valid url');
+    }
+  });
+
+  it('Should ensure message for min', async () => {
+    let o = MinTest.from({ value: 'hello' });
+
+    try {
+      await SchemaValidator.validate(o);
+      expect(true).to.equal(false);
+    } catch (e) {
+      expect(e.errors['value'].message).to.include('value is not long enough (10)');
     }
   });
 });
