@@ -36,7 +36,7 @@ export class AssetService {
     let gfs = await AssetService.getClient();
     let conf = Object.assign({ mode: 'w' }, file);
     let writeStream = gfs.createWriteStream(conf);
-
+    writeStream.options.content_type = conf.contentType;
     stream.pipe(writeStream);
 
     return new Promise<any>((resolve, reject) => {
