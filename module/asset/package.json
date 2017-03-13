@@ -30,5 +30,5 @@
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
   }, 
-  "version": "1.1.54"
+  "version": "1.1.55"
 }
