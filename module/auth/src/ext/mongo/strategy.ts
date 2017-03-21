@@ -30,7 +30,7 @@ export function MongoStrategy<T extends BaseModel>(cls: Cls<T>, config: MongoStr
         return user;
       }
     } catch (e) {
-      throw new AppError('User is not found');
+      throw new AppError('User and/or password combination is invalid');
     }
   }
 
