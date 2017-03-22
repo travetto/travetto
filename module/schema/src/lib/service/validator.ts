@@ -52,7 +52,7 @@ export class SchemaValidator {
     return await SchemaValidator.validateRaw(o, SchemaValidator.getSchema(SchemaRegistry.getCls(o), view));
   }
 
-  static async validateAll<T>(obj: T[], view?: string): Promise<T[]> {
+  static async validateAll<T>(obj: T[], view: string = SchemaRegistry.DEFAULT_VIEW): Promise<T[]> {
     return await Promise.all<T>((obj || [])
       .map((o, i) => SchemaValidator.validate(o, view)));
   }
