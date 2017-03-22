@@ -67,7 +67,7 @@ export class AssetService {
     let out = new Asset(f);
     // Take out of mongo
     out._id = f._id.toHexString();
-    return out;
+    return out; 
   }
 
   static async remove(filename: string): Promise<void> {
@@ -77,6 +77,11 @@ export class AssetService {
   }
 
   static async upload(upload: Asset, upsert = true, removeOnComplete = true) {
+    console.debug("Function is deprecated, use save");
+    return AssetService.save(upload, upsert, removeOnComplete);
+  }
+
+  static async save(upload: Asset, upsert = true, removeOnComplete = true) {
     try {
       let res: Asset | null = null;
       try {
@@ -119,6 +124,11 @@ export class AssetService {
   }
 
   static async uploadAll(uploads: Asset[]) {
+    console.debug("Function is deprecated, use saveAll");
+    return await AssetService.saveAll(uploads);
+  }
+
+  static async saveAll(uploads: Asset[]) {
     return await Promise.all(uploads.map(u => AssetService.upload(u)));
   }
 
