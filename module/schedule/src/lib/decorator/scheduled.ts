@@ -8,5 +8,10 @@ export function Scheduled(expression:string, options?: { timezone?: string }) {
     }, options || {});
     Schedule.schedule(expression, config);
     return descriptor;
-  };
+  }
 }
+
+
+export const Daily = <T>(options?:T) => Scheduled('0 0 0 * * ?', options);
+export const Hourly = <T>(options?:T) => Scheduled('0 0 * * * ?', options);
+
