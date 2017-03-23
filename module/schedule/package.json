@@ -1,18 +1,18 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x",
-    "@types/cron": "^1.2.0",
-    "cron": "^1.2.1",
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x", 
+    "@types/cron": "^1.2.0", 
+    "cron": "^1.2.1", 
     "flat": "^2.0.0"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "tslint": "^4.4.1"
-  },
-  "license": "ISC",
-  "main": "src/lib/",
-  "name": "@encore/lifecycle",
-  "scripts": {},
-  "version": "1.1.46"
+  }, 
+  "license": "ISC", 
+  "main": "src/lib/", 
+  "name": "@encore/lifecycle", 
+  "scripts": {}, 
+  "version": "1.1.47"
 }
