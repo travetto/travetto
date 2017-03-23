@@ -8,6 +8,10 @@ export class Startup {
     Startup.onStartup(resolve);
   });
 
+  static get isDone() {
+    return Startup.done;
+  }
+
   static waitFor<T>(p: Promise<T>) {
     Startup.promises.push(p);
     p.then(Startup.onPromiseSuccess)
