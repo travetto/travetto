@@ -1,6 +1,6 @@
 import * as cron from 'cron';
-import {Startup} from '../service';
-import {OnStartup, OnShutdown} from '../decorator';
+import { Startup } from './startup';
+import { Shutdown } from './shutdown';
 
 export interface CronOptions {
   timeZone?: string;
@@ -24,13 +24,14 @@ export class Schedule {
     }
   }
 
-  @OnStartup()
   static launch() {
     Schedule.JOBS.map(j => j.start())
   }
 
-  @OnShutdown()
   static kill() {
     Schedule.JOBS.map(j => j.stop());
   }
 }
+
+Startup.onStartup(() => Schedule.launch());
+Shutdown.onShutdown('Schedule.kill', () => Schedule.kill());
