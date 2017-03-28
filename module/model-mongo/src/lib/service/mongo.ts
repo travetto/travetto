@@ -8,6 +8,10 @@ import { ObjectUtil } from '@encore/util';
 
 const flat = require('flat');
 
+interface Cls<T> extends Named {
+  new (...args:any[]): T;
+}
+
 export class MongoService {
 
   private static clientPromise: Promise<mongo.Db>;
@@ -94,7 +98,7 @@ export class MongoService {
     return objs.map(x => x._id.toHexString());
   }
 
-  static async getByQuery<T extends Base>(named: Named, query: Object & { _id?: any } = {}, options: QueryOptions = {}): Promise<T[]> {
+  static async getByQuery<T extends Base>(named: Named | Cls<T>, query: Object & { _id?: any } = {}, options: QueryOptions = {}): Promise<T[]> {
     query = MongoService.translateQueryIds(query);
 
     let col = await MongoService.getCollection(named);
@@ -123,15 +127,16 @@ export class MongoService {
     return { count: res };
   }
 
-  static async findOne<T extends Base>(named: Named, query: Object, options: QueryOptions = {}, failOnMany = true): Promise<T> {
-    let res = await MongoService.getByQuery(named, query, options);
+  static async findOne<T extends Base>(named: Named | Cls<T>, query: Object, options: QueryOptions = {}, failOnMany = true): Promise<T> {
+    let res = await MongoService.getByQuery<T>(named, query, options);
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
       throw new Error(`Invalid number of results for find by id: ${res ? res.length : res}`);
     }
     return res[0] as T;
   }
 
-  static async getById<T extends Base>(named: Named, id: string): Promise<T> {
+  static async getById<T extends Base>(named: Named, id: string): Promise<T>;
+    static async getById<T extends Base>(named: Named | Cls<T>, id: string): Promise<T> {
     return await MongoService.findOne<T>(named, { _id: new mongo.ObjectID(id) });
   }
 
