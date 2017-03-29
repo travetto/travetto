@@ -27,8 +27,7 @@
     "no-console": [
       true,
       "time",
-      "timeEnd",
-      "trace"
+      "timeEnd"
     ],
     "no-construct": true,
     "no-debugger": true,
