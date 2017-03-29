@@ -17,7 +17,7 @@ export async function exec(cmd: string, options: ExecOptions = {}, kill?: (proc:
     [cmd, ...args] = cmd.split(' ');
   }
 
-  console.trace('exec:', [cmd, ...args].join(' '));
+  console.debug('exec:', [cmd, ...args].join(' '));
 
   let prom = new Promise<ExecResult>((resolve, reject) => {
     let p = child_process.spawn(cmd, args, options);
