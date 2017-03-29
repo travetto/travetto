@@ -2,7 +2,7 @@ import { createPool, Pool, PoolConfig, PoolFactory } from './pool';
 import { Shutdown } from '@encore/lifecycle';
 
 export interface BaseResource {
-  destroy?: boolean;
+  evict?: boolean;
 }
 
 export class PoolManager<T extends BaseResource> {
@@ -32,7 +32,7 @@ export class PoolManager<T extends BaseResource> {
     }
     let resource = await this.pool.acquire();
     let release = () => {
-      if (resource.destroy) {
+      if (resource.evict) {
         this.pool.destroy(resource);
       } else {
         this.pool.release(resource);
