@@ -1,7 +1,7 @@
 import { PoolConfig } from './pool';
 import { PoolManager } from './manager';
 
-export class IndexedPoolManager<T, U> {
+export class IndexedPoolManager<T extends { remove?: boolean }, U> {
 
   private pools: Map<U, PoolManager<T>> = new Map();
 
