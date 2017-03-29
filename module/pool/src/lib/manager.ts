@@ -31,11 +31,11 @@ export class PoolManager<T extends BaseResource> {
         Object.assign({}, PoolManager.POOL_OPTIONS, opts || {}));
     }
     let resource = await this.pool.acquire();
-    let release = () => {
+    let release = async () => {
       if (resource.evict) {
-        this.pool.destroy(resource);
+        await this.pool.destroy(resource);
       } else {
-        this.pool.release(resource);
+        await this.pool.release(resource);
       }
     };
     return { resource, release };
