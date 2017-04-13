@@ -37,7 +37,7 @@ function processEvent(ev: log4js.LogEvent) {
     category: ev.categoryName.replace(/[\[\]]/g, ''),
   };
 
-  let args = ev.data;
+  let args = (ev.data || []).slice(0);
 
   if (args && typeof args[0] === 'string') {
     out.message = args.shift();
