@@ -1,9 +1,13 @@
-let cls = require('continuation-local-storage');
 import Config from './config';
+import { EventEmitter } from 'events';
+
+let cls = require('continuation-local-storage');
 
 export const KEY = 'ctx';
 
 export interface IStorage {
+  bindEmitter(item:EventEmitter): any;
+  run(fn: () => any): any;
   set(key: string, value: any): void;
   get(key: string): any;
 }
@@ -26,6 +30,10 @@ export class Context {
     }
     return res;
   }
+}
+
+export function getStorage() {
+  return Context.storage;
 }
 
 export function initStorage() {
