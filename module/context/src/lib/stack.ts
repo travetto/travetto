@@ -1,5 +1,4 @@
-require('async-listener');
-
+import Config from './config';
 
 type StackType = any;
 
@@ -57,7 +56,12 @@ let listener:AsyncListener;
 
 export function enableLongStacktrace() {
   if (!listener) {
+    require('async-listener');    
     Error.stackTraceLimit = Infinity;    
     (process as any).addAsyncListener(listener = new AsyncListener());
   }
+}
+
+if (Config.longStackTraces) {
+  enableLongStacktrace();
 }

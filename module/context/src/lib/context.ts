@@ -1,7 +1,8 @@
 let cls = require('continuation-local-storage');
+import Config from './config';
 
 export const KEY = 'ctx';
-export const NAMESPACE = 'encore';
+export const NAMESPACE = Config.namespace;
 
 export const Storage = cls.createNamespace(NAMESPACE);
 
