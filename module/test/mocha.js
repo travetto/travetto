@@ -3,8 +3,13 @@
 let fs = require('fs');
 
 let setup = [];
+let extra = [];
 let root = process.cwd();
 let ui = '@encore/test/src/lib/user-interface';
+
+if (process.env.TIMEOUT) {
+  extra.push('--timeout', process.env.TIMEOUT);
+}
 
 try {
   if (!!fs.statSync(`${root}/src/test/setup.ts`)) {
@@ -25,6 +30,7 @@ process.argv = [
   '--require', `node_modules/@encore/bootstrap/init`,
   '--ui', ui,
   ...setup,
+  ...extra,
   ...process.argv.slice(2)
 ].filter(x => !!x);
 
