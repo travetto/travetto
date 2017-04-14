@@ -1,3 +1,3 @@
-import './initalize';
+import './initialize';
 export * from './context';
 export * from './stack';
