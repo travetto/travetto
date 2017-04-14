@@ -61,7 +61,3 @@ export function enableLongStacktrace() {
     (process as any).addAsyncListener(listener = new AsyncListener());
   }
 }
-
-if (Config.longStackTraces) {
-  enableLongStacktrace();
-}

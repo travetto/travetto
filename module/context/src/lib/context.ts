@@ -2,9 +2,6 @@ let cls = require('continuation-local-storage');
 import Config from './config';
 
 export const KEY = 'ctx';
-export const NAMESPACE = Config.namespace;
-
-export const Storage = cls.createNamespace(NAMESPACE);
 
 export interface IStorage {
   set(key: string, value: any): void;
@@ -12,7 +9,7 @@ export interface IStorage {
 }
 
 export class Context {
-  static storage: IStorage = Storage;
+  static storage: IStorage;
 
   static clear() {
     Context.storage.set(KEY, null);
@@ -29,4 +26,8 @@ export class Context {
     }
     return res;
   }
+}
+
+export function initStorage() {
+  Context.storage = cls.createNamespace(Config.namespace);
 }
