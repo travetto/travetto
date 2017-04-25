@@ -87,7 +87,7 @@ export async function request(opts: http.RequestOptions & { url: string }, data?
 
   opts = Object.assign({ method: 'GET', headers: {} }, opts, parseUrl(url));
 
-  let client = ((opts.protocol === 'https' ? http : https) as any);
+  let client = ((opts.protocol === 'https:' ? https : http) as any);
   delete opts.protocol;
 
   let hasBody = (opts.method === 'POST' || opts.method === 'PUT');
