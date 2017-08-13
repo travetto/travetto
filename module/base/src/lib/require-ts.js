@@ -4,9 +4,18 @@ let path = require('path');
 let ts = require('typescript');
 let cwd = process.cwd();
 let tsOptions = getOptions(path.join(cwd, 'tsconfig.json'));
+let glob = require('glob');
 
 let dataUriRe = /data:application\/json[^,]+base64,/;
 let sourceMaps = {};
+
+let transfomers = ['before', 'after']
+  .map(phase => [phase,
+    glob
+      .sync(`${process.cwd()}/**/transformer-${phase}.*.js`)
+      .map(f => require(path.resolve(f)))
+      .filter(x => !!x)
+  ]).reduce((acc, p) => (acc[p[0]] = p[1] && acc), {});
 
 sourcemap.install({ retrieveSourceMap: (path) => sourceMaps[path] });
 
@@ -32,12 +41,19 @@ Error.prepareStackTrace = function (a, stack) {
   ].join('\n');
 }
 
+function transpile(input, compilerOptions, filename, transformers) {
+  const output = ts.transpileModule(input, { compilerOptions, fileName, reportDiagnostics: !!diagnostics, moduleName, transformers });
+  // addRange correctly handles cases when wither 'from' or 'to' argument is missing
+  ts.addRange(diagnostics, output.diagnostics);
+  return output.outputText;
+}
+
 require.extensions['.ts'] = function load(m, tsf) {
   let jsf = tsf.replace(/\.ts$/, '.js');
   let parts = tsf.split('/');
   let name = parts.pop();
   let folder = parts.pop();
-  let content = ts.transpile(fs.readFileSync(tsf, 'utf-8'), tsOptions, `${folder}/${name}`);
+  let content = transpile(fs.readFileSync(tsf, 'utf-8'), tsOptions, `${folder}/${name}`, transfomers);
   let map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
   sourceMaps[jsf] = { content, url: tsf, map };
   return m._compile(content, jsf);
