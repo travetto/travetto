@@ -8,14 +8,7 @@ let glob = require('glob');
 
 let dataUriRe = /data:application\/json[^,]+base64,/;
 let sourceMaps = {};
-
-let transfomers = ['before', 'after']
-  .map(phase => [phase,
-    glob
-      .sync(`${process.cwd()}/**/transformer-${phase}.*.js`)
-      .map(f => require(path.resolve(f)))
-      .filter(x => !!x)
-  ]).reduce((acc, p) => (acc[p[0]] = p[1] && acc), {});
+let transformers = {};
 
 sourcemap.install({ retrieveSourceMap: (path) => sourceMaps[path] });
 
@@ -53,8 +46,21 @@ require.extensions['.ts'] = function load(m, tsf) {
   let parts = tsf.split('/');
   let name = parts.pop();
   let folder = parts.pop();
-  let content = transpile(fs.readFileSync(tsf, 'utf-8'), tsOptions, `${folder}/${name}`, transfomers);
+  let content = transpile(fs.readFileSync(tsf, 'utf-8'), tsOptions, `${folder}/${name}`, transformers);
   let map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
   sourceMaps[jsf] = { content, url: tsf, map };
   return m._compile(content, jsf);
 };
+
+// Load transformers
+for (let phase of ['before', 'after']) {
+  for (let f of glob.sync(`${process.cwd()}/**/transformer-${phase}*.ts`)) {
+    let res = require(path.resolve(f));
+    if (res) {
+      if (!transformers[phase]) {
+        transformers[phase] = [];
+      }
+      transformers[phase].push(...Object.values(res));
+    }
+  }
+}
