@@ -41,10 +41,10 @@ Error.prepareStackTrace = function (a, stack) {
   ].join('\n');
 }
 
-function transpile(input, compilerOptions, filename, transformers) {
-  const output = ts.transpileModule(input, { compilerOptions, fileName, reportDiagnostics: !!diagnostics, moduleName, transformers });
+function transpile(input, compilerOptions, fileName, transformers) {
+  const output = ts.transpileModule(input, { compilerOptions, fileName, reportDiagnostics: false, transformers });
   // addRange correctly handles cases when wither 'from' or 'to' argument is missing
-  ts.addRange(diagnostics, output.diagnostics);
+  ts.addRange(undefined, output.diagnostics);
   return output.outputText;
 }
 
