@@ -1,26 +1,26 @@
 {
-  "author": "", 
+  "author": "",
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x", 
-    "@types/mongoose": "~4.7.3", 
-    "@types/reflect-metadata": "0.0.5", 
-    "flat": "^2.0.0", 
-    "mongoose": "~4.7.4", 
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x",
+    "@types/mongoose": "~4.7.3",
+    "@types/reflect-metadata": "0.0.5",
+    "flat": "^2.0.0",
+    "mongoose": "~4.7.4",
     "reflect-metadata": "^0.1.8"
-  }, 
-  "description": "", 
+  },
+  "description": "",
   "devDependencies": {
-    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v1.x.x", 
+    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v1.x.x",
     "tslint": "^4.4.1"
-  }, 
-  "license": "ISC", 
-  "main": "src/lib/", 
-  "name": "@encore/schema", 
+  },
+  "license": "ISC",
+  "main": "src/lib/",
+  "name": "@encore/schema",
   "optionalDependencies": {
     "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x"
-  }, 
+  },
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
-  }, 
+  },
   "version": "1.2.84"
 }

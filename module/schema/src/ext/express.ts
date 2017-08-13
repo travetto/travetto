@@ -6,7 +6,7 @@ import { RouteRegistry, AppError } from '@encore/express';
 
 let flat = require('flat');
 
-function getBound<T>(cls:Cls<T>, obj:any, view?: string) {
+function getBound<T>(cls: Cls<T>, obj: any, view?: string) {
   try {
     return BindUtil.bindSchema(cls, new cls(), obj, view);
   } catch (e) {
@@ -36,6 +36,5 @@ export function SchemaQuery<T>(cls: Cls<T>, view?: string) {
       req.query = await SchemaValidator.validate(o, view);
     } else {
       req.query = o;
-    }
-  });
+    });
 }
