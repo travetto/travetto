@@ -10,3 +10,6 @@ export function AutoSchema(type?: ClsList) {
     return (target: any) => target
   }
 }
+export function Ignore(): PropertyDecorator {
+  return (target: any, property: string) => { }
+}
