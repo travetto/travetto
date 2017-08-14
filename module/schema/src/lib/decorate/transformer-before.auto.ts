@@ -3,7 +3,7 @@ import { AutoSchema, Ignore } from './auto';
 import { Field } from './field';
 
 type DecList = ts.NodeArray<ts.Decorator>;
-type SchemaList = (ts.Expression | null)[];
+type SchemaList = (ts.Expression | undefined)[];
 
 interface State {
   inSchema: SchemaList;
@@ -14,23 +14,29 @@ export const Transformer =
   (context: ts.TransformationContext) =>
     (file: ts.SourceFile) => {
       let state: State = { inSchema: [], declared: [] };
-      let res = visitNode(context, file, state);
-      return res;
+      let ret = visitNode(context, file, state);
+      return ret;
     };
+
+function getDecoratorIdent(d: ts.Decorator): ts.Identifier {
+  if (ts.isCallExpression(d.expression)) {
+    return d.expression.expression as ts.Identifier;
+  } else if (ts.isIdentifier(d.expression)) {
+    return d.expression;
+  } else {
+    throw new Error("No Identifier");
+  }
+}
 
 function computeClass(node: ts.ClassDeclaration) {
   let decs = (node.decorators || [] as any as DecList).filter(d => !!d.expression);
   if (decs && decs.length) {
-    let auto = decs.find(d => d.expression.getText().startsWith(AutoSchema.name));
-    if (auto) {
-      if (ts.isCallExpression(auto.expression)) {
-        return auto.expression.expression;
-      } else if (ts.isIdentifier(auto.expression)) {
-        return auto.expression;
-      }
-    }
+    let auto = decs
+      .map(d => getDecoratorIdent(d))
+      .find(d => d.getText() === AutoSchema.name)
+
+    return auto;
   }
-  return null;
 }
 
 function resolveType(type: ts.TypeNode | ts.TypeElement, state: State) {
@@ -72,12 +78,7 @@ function resolveType(type: ts.TypeNode | ts.TypeElement, state: State) {
 
 function computeProperty(node: ts.PropertyDeclaration, state: State) {
   let ignore = (node.decorators || [] as any as DecList).find(x => {
-    let ident: ts.Identifier | undefined;
-    if (ts.isCallExpression(x.expression)) {
-      ident = x.expression.expression as ts.Identifier;
-    } else if (ts.isIdentifier(x.expression)) {
-      ident = x.expression;
-    }
+    let ident = getDecoratorIdent(x);
     if (ident) {
       let name = ident.text;
       return name === Ignore.name || name === Field.name;
@@ -87,25 +88,36 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
   });
 
   if (!ignore) {
-    node.decorators = node.decorators || [] as any;
     let expr = resolveType(node.type!, state);
     let dec = ts.createDecorator(ts.createCall(state.inSchema[0] as ts.Expression, undefined, [expr]));
-    node.decorators!.unshift(dec);
+    let res = ts.createProperty(
+      (node.decorators! || []).concat([dec]),
+      node.modifiers,
+      node.name,
+      node.questionToken,
+      node.type,
+      node.initializer
+    );
+    return res;
+  } else {
+    return node;
   }
 }
 
-function visitNode(context: ts.TransformationContext, node: ts.Node, state: State): ts.Node {
+function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
   if (ts.isClassDeclaration(node)) {
     let res = computeClass(node);
-    state.inSchema.unshift(res);
-    ts.visitEachChild(node, c => visitNode(context, c, state), context);
-    state.inSchema.shift();
-  } else {
-    if (ts.isPropertyDeclaration(node) && state.inSchema[0]) {
-      computeProperty(node, state);
+    try {
+      state.inSchema.unshift(res);
+      let ret = ts.visitEachChild(node, c => visitNode(context, c, state), context);
+      return ret;
+    } finally {
+      state.inSchema.shift();
     }
-    ts.visitEachChild(node, c => visitNode(context, c, state), context);
+  } else if (ts.isPropertyDeclaration(node) && state.inSchema[0]) {
+    return computeProperty(node, state) as any as T;
+  } else {
+    return ts.visitEachChild(node, c => visitNode(context, c, state), context);
   }
-  return node;
 }
 
