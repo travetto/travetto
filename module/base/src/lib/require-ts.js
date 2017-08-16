@@ -12,6 +12,24 @@ let transformers = {};
 
 sourcemap.install({ retrieveSourceMap: (path) => sourceMaps[path] });
 
+function registerTransformers(transformers = {}) {
+  // Load transformers
+  for (let phase of ['before', 'after']) {
+    for (let f of glob.sync(`${process.cwd()}/**/transformer-${phase}*.ts`)) {
+      let res = require(path.resolve(f));
+      if (res) {
+        if (!transformers[phase]) {
+          transformers[phase] = [];
+        }
+        for (let k of Object.keys(res)) {
+          transformers[phase].push(res[k]);
+        }
+      }
+    }
+  }
+  return require('./ts-transform').createCustomTransformers(transformers);
+}
+
 function getOptions(tsconfigFile) {
   let o = require(tsconfigFile).compilerOptions;
   o.target = ts.ScriptTarget[o.target.toUpperCase()];
@@ -52,4 +70,4 @@ require.extensions['.ts'] = function load(m, tsf) {
   return m._compile(content, jsf);
 };
 
-require('./ts-transform').registerTransformers(transformers);
+registerTransformers(transformers);
