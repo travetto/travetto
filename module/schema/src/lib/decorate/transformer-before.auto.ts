@@ -34,7 +34,7 @@ function computeClass(node: ts.ClassDeclaration) {
   if (decs && decs.length) {
     let auto = decs
       .map(d => getDecoratorIdent(d))
-      .find(d => d.getText() === AutoSchema.name)
+      .find(d => d.getText() === AutoSchema.name);
 
     return auto;
   }
@@ -96,11 +96,12 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
         ts.createTrue(), ts.createLiteral(Messages.REQUIRED)
       ])));
     }
+
     let params = [expr];
     if (properties.length) {
       params.push(ts.createObjectLiteral(properties));
     }
-    let config = ts.createObjectLiteral();
+
     let dec = ts.createDecorator(ts.createCall(state.inSchema, undefined, params));
     let res = ts.createProperty(
       (node.decorators! || []).concat([dec]),
