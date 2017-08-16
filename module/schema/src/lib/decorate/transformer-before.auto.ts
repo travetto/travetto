@@ -97,6 +97,22 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
       ])));
     }
 
+    // If we have a union type
+    if (node.type!.kind === ts.SyntaxKind.UnionType) {
+      let types = (node.type! as ts.UnionTypeNode).types
+      let literalTypes: (ts.NumericLiteral | ts.StringLiteral)[] =
+        types.filter(x => x.kind === ts.SyntaxKind.StringLiteral || x.kind === ts.SyntaxKind.NumericLiteral) as any;
+
+      if (literalTypes.length === types.length) {
+        let values = literalTypes.map(x => x.text);
+
+        properties.push(ts.createPropertyAssignment('enum', ts.createObjectLiteral([
+          ts.createPropertyAssignment('values', ts.createArrayLiteral(literalTypes)),
+          ts.createPropertyAssignment('message', ts.createLiteral(`{PATH} is only allowed to be "${values.join('" or "')}"`))
+        ])));
+      }
+    }
+
     let params = [expr];
     if (properties.length) {
       params.push(ts.createObjectLiteral(properties));
