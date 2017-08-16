@@ -40,14 +40,16 @@ function computeClass(node: ts.ClassDeclaration) {
   }
 }
 
-function resolveType(type: ts.TypeNode | ts.TypeElement, state: State) {
-  let expr: ts.Expression;
+function resolveType(type: ts.Node, state: State): ts.Expression {
+  let expr: ts.Expression | undefined;
   let kind = type && type!.kind;
+
   switch (kind) {
     case ts.SyntaxKind.TypeReference:
       expr = ((type as ts.TypeReferenceNode).typeName) as ts.Expression;
       state.declared.push(expr as ts.Identifier);
       break;
+    case ts.SyntaxKind.LiteralType: expr = resolveType((type as any as ts.LiteralTypeNode).literal, state); break;
     case ts.SyntaxKind.StringLiteral:
     case ts.SyntaxKind.StringKeyword: expr = ts.createIdentifier('String'); break;
     case ts.SyntaxKind.NumericLiteral:
@@ -69,12 +71,25 @@ function resolveType(type: ts.TypeNode | ts.TypeElement, state: State) {
       }
       expr = ts.createObjectLiteral(properties);
       break;
+    case ts.SyntaxKind.UnionType: {
+      let types = (type as ts.UnionTypeNode).types;
+      expr = types.slice(1).reduce((fType, type) => {
+        let fTypeStr = (fType as any).text;
+        if (fTypeStr !== 'Object') {
+          let resolved = resolveType(type, state);
+          if ((resolved as any).text !== fTypeStr) {
+            fType = ts.createIdentifier('Object');
+          }
+        }
+        return fType;
+      }, resolveType(types[0], state));
+      break;
+    }
     case ts.SyntaxKind.ObjectKeyword:
     default:
-      expr = ts.createIdentifier('Object');
       break;
   }
-  return expr;
+  return expr || ts.createIdentifier('Object');
 }
 
 function computeProperty(node: ts.PropertyDeclaration, state: State) {
@@ -89,7 +104,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
   });
 
   if (!ignore && state.inSchema) {
-    let expr = resolveType(node.type!, state);
+    let typeExpr = resolveType(node.type!, state);
     let properties = [];
     if (!node.questionToken) {
       properties.push(ts.createPropertyAssignment('required', ts.createArrayLiteral([
@@ -98,22 +113,19 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
     }
 
     // If we have a union type
-    if (node.type!.kind === ts.SyntaxKind.UnionType) {
+    if (node.type!.kind === ts.SyntaxKind.UnionType && ['Number', 'String'].indexOf((typeExpr as any).text) > 0) {
+
       let types = (node.type! as ts.UnionTypeNode).types
-      let literalTypes: (ts.NumericLiteral | ts.StringLiteral)[] =
-        types.filter(x => x.kind === ts.SyntaxKind.StringLiteral || x.kind === ts.SyntaxKind.NumericLiteral) as any;
+      let literals = types.map(x => (x as ts.LiteralTypeNode).literal);
+      let values = literals.map(x => x.getText());
 
-      if (literalTypes.length === types.length) {
-        let values = literalTypes.map(x => x.text);
-
-        properties.push(ts.createPropertyAssignment('enum', ts.createObjectLiteral([
-          ts.createPropertyAssignment('values', ts.createArrayLiteral(literalTypes)),
-          ts.createPropertyAssignment('message', ts.createLiteral(`{PATH} is only allowed to be "${values.join('" or "')}"`))
-        ])));
-      }
+      properties.push(ts.createPropertyAssignment('enum', ts.createObjectLiteral([
+        ts.createPropertyAssignment('values', ts.createArrayLiteral(literals)),
+        ts.createPropertyAssignment('message', ts.createLiteral(`{PATH} is only allowed to be "${values.join('" or "')}"`))
+      ])));
     }
 
-    let params = [expr];
+    let params = [typeExpr];
     if (properties.length) {
       params.push(ts.createObjectLiteral(properties));
     }
