@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import { AutoSchema, Ignore } from './auto';
 import { Field } from './field';
+import { Messages } from "@encore/schema";
 
 type DecList = ts.NodeArray<ts.Decorator>;
 type SchemaList = (ts.Expression | undefined)[];
@@ -89,7 +90,18 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
 
   if (!ignore && state.inSchema) {
     let expr = resolveType(node.type!, state);
-    let dec = ts.createDecorator(ts.createCall(state.inSchema, undefined, [expr]));
+    let properties = [];
+    if (!node.questionToken) {
+      properties.push(ts.createPropertyAssignment('required', ts.createArrayLiteral([
+        ts.createTrue(), ts.createLiteral(Messages.REQUIRED)
+      ])));
+    }
+    let params = [expr];
+    if (properties.length) {
+      params.push(ts.createObjectLiteral(properties));
+    }
+    let config = ts.createObjectLiteral();
+    let dec = ts.createDecorator(ts.createCall(state.inSchema, undefined, params));
     let res = ts.createProperty(
       (node.decorators! || []).concat([dec]),
       node.modifiers,
