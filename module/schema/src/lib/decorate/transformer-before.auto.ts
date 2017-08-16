@@ -6,14 +6,14 @@ type DecList = ts.NodeArray<ts.Decorator>;
 type SchemaList = (ts.Expression | undefined)[];
 
 interface State {
-  inSchema: SchemaList;
+  inSchema?: ts.Expression;
   declared: ts.Identifier[]
 }
 
 export const Transformer =
   (context: ts.TransformationContext) =>
     (file: ts.SourceFile) => {
-      let state: State = { inSchema: [], declared: [] };
+      let state: State = { declared: [] };
       let ret = visitNode(context, file, state);
       return ret;
     };
@@ -24,7 +24,7 @@ function getDecoratorIdent(d: ts.Decorator): ts.Identifier {
   } else if (ts.isIdentifier(d.expression)) {
     return d.expression;
   } else {
-    throw new Error("No Identifier");
+    throw new Error('No Identifier');
   }
 }
 
@@ -87,9 +87,9 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
     }
   });
 
-  if (!ignore) {
+  if (!ignore && state.inSchema) {
     let expr = resolveType(node.type!, state);
-    let dec = ts.createDecorator(ts.createCall(state.inSchema[0] as ts.Expression, undefined, [expr]));
+    let dec = ts.createDecorator(ts.createCall(state.inSchema, undefined, [expr]));
     let res = ts.createProperty(
       (node.decorators! || []).concat([dec]),
       node.modifiers,
@@ -107,14 +107,9 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
   if (ts.isClassDeclaration(node)) {
     let res = computeClass(node);
-    try {
-      state.inSchema.unshift(res);
-      let ret = ts.visitEachChild(node, c => visitNode(context, c, state), context);
-      return ret;
-    } finally {
-      state.inSchema.shift();
-    }
-  } else if (ts.isPropertyDeclaration(node) && state.inSchema[0]) {
+    let ret = ts.visitEachChild(node, c => visitNode(context, c, { ...state, inSchema: res }), context);
+    return ret;
+  } else if (ts.isPropertyDeclaration(node) && !!state.inSchema) {
     return computeProperty(node, state) as any as T;
   } else {
     return ts.visitEachChild(node, c => visitNode(context, c, state), context);
