@@ -71,4 +71,4 @@ require.extensions['.ts'] = function load(m, tsf) {
   return m._compile(content, jsf);
 };
 
-transformers = registerTransformers(transformers);
+transformers = registerTransformers();
