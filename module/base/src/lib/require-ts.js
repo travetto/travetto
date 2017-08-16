@@ -52,15 +52,4 @@ require.extensions['.ts'] = function load(m, tsf) {
   return m._compile(content, jsf);
 };
 
-// Load transformers
-for (let phase of ['before', 'after']) {
-  for (let f of glob.sync(`${process.cwd()}/**/transformer-${phase}*.ts`)) {
-    let res = require(path.resolve(f));
-    if (res) {
-      if (!transformers[phase]) {
-        transformers[phase] = [];
-      }
-      transformers[phase].push(...Object.values(res));
-    }
-  }
-}
+require('./ts-transform').registerTransformers(transformers);
