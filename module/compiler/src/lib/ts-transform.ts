@@ -6,14 +6,12 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import * as ts from 'typescript';
-import * as glob from 'glob';
-import * as path from 'path';
 
 /**
  * Adjusts the given CustomTransformers with additional transformers
  * to fix bugs in TypeScript.
  */
-function createCustomTransformers(given: ts.CustomTransformers): ts.CustomTransformers {
+export function createCustomTransformers(given: ts.CustomTransformers): ts.CustomTransformers {
   if (!given.after && !given.before) {
     return given;
   }
@@ -638,23 +636,4 @@ function isTypeNodeKind(kind: ts.SyntaxKind) {
     kind === ts.SyntaxKind.ThisKeyword || kind === ts.SyntaxKind.VoidKeyword ||
     kind === ts.SyntaxKind.UndefinedKeyword || kind === ts.SyntaxKind.NullKeyword ||
     kind === ts.SyntaxKind.NeverKeyword || kind === ts.SyntaxKind.ExpressionWithTypeArguments;
-}
-
-
-export function registerTransformers(transformers: any = {}) {
-  // Load transformers
-  for (let phase of ['before', 'after']) {
-    for (let f of glob.sync(`${process.cwd()}/**/transformer-${phase}*.ts`)) {
-      let res = require(path.resolve(f));
-      if (res) {
-        if (!transformers[phase]) {
-          transformers[phase] = [];
-        }
-        for (let k of Object.keys(res)) {
-          transformers[phase].push(res[k]);
-        }
-      }
-    }
-  }
-  return createCustomTransformers(transformers);
 }
