@@ -12,7 +12,8 @@ let transformers = {};
 
 sourcemap.install({ retrieveSourceMap: (path) => sourceMaps[path] });
 
-function registerTransformers(transformers = {}) {
+function registerTransformers() {
+  const transformers = {}
   // Load transformers
   for (let phase of ['before', 'after']) {
     for (let f of glob.sync(`${process.cwd()}/**/transformer-${phase}*.ts`)) {
@@ -27,7 +28,7 @@ function registerTransformers(transformers = {}) {
       }
     }
   }
-  return require('./ts-transform').createCustomTransformers(transformers);
+  return require('./transform-ts').createCustomTransformers(transformers);
 }
 
 function getOptions(tsconfigFile) {
