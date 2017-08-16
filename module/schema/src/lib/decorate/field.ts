@@ -17,9 +17,13 @@ function enumKeys(c: any): string[] {
     return ObjectUtil.values(c).filter((x: any) => typeof x === 'string') as string[];
   }
 }
-
-export function Field(type: ClsList) {
-  return (f: any, prop: string) => { SchemaRegistry.registerFieldConfig(f, prop, type); };
+export function Field(type: ClsList, config?: { [key: string]: any }) {
+  return (f: any, prop: string) => {
+    SchemaRegistry.registerFieldConfig(f, prop, type);
+    if (config) {
+      SchemaRegistry.registerFieldFacet(f, prop, config);
+    }
+  };
 };
 export const Alias = (...aliases: string[]) => prop({ aliases });
 export const Required = (message?: string) => prop({ required: [true, message || Messages.REQUIRED] });
