@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { AutoSchema, Ignore } from './auto';
 import { Field } from './field';
-import { Messages } from "@encore/schema";
+import { Messages } from '../util';
 
 type DecList = ts.NodeArray<ts.Decorator>;
 type SchemaList = (ts.Expression | undefined)[];
