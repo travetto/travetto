@@ -3,8 +3,7 @@ import { AssetUtil } from '../util';
 import { RouteRegistry } from '@encore/express';
 import { nodeToPromise } from '@encore/util';
 import Config from '../config';
-
-const match = require('mime-match');
+import * as match from 'mime-match';
 
 type UploadConfig = { allowedTypes?: string[] | string, excludeTypes?: string[] | string, maxSize?: number };
 

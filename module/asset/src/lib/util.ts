@@ -1,14 +1,13 @@
 import * as fs from 'fs';
 import * as mime from 'mime';
 import * as path from 'path';
+import * as osTmpdir from 'os-tmpdir';
+import * as fileType from 'file-type';
+import * as crptyo from 'crypto';
 
-import { nodeToPromise } from '@encore/util';
+import { nodeToPromise, request } from '@encore/util';
 import { Asset } from './model';
 
-let crypto = require('crypto');
-let request = require('request');
-let osTmpdir = require('os-tmpdir');
-const fileType = require('file-type');
 let tmpDir = path.resolve(osTmpdir());
 
 export class AssetUtil {
@@ -102,38 +101,27 @@ export class AssetUtil {
 
   static async downloadUrl(url: string) {
     let filePath = AssetUtil.generateTempFile(url.split('/').pop() as string);
-    return new Promise<string>((resolve, reject) => {
-      let file = fs.createWriteStream(filePath);
-      let req = request.get(url);
-      let filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
-      let responseExt = '';
-      req.on('response', (res: any) => {
-        responseExt = mime.extension(res.headers['content-type'] || '');
-      });
-      file.on('finish', async () => {
-
-        if (!responseExt) {
-          let detectedType = await AssetUtil.detectFileType(filePath);
-          if (detectedType) {
-            responseExt = detectedType.ext;
-          }
-        }
-        if (filePathExt !== responseExt && responseExt) {
-          let newFilePath = filePath;
-          if (filePathExt) {
-            newFilePath = newFilePath.replace('.' + filePathExt, '.' + responseExt);
-          } else {
-            newFilePath += '.' + responseExt;
-          }
-          await nodeToPromise(fs, fs.rename, filePath, newFilePath);
-          filePath = newFilePath;
-        }
-        resolve(filePath);
-      });
-      file.on('error', reject);
-      req.on('error', reject);
-      req.pipe(file);
-    });
+    let file = fs.createWriteStream(filePath);
+    let filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
+    let res = await request({ url, pipeTo: file });
+    let responseExt = mime.extension(res.headers['content-type'] || '');
+    if (!responseExt) {
+      let detectedType = await AssetUtil.detectFileType(filePath);
+      if (detectedType) {
+        responseExt = detectedType.ext;
+      }
+    }
+    if (filePathExt !== responseExt && responseExt) {
+      let newFilePath = filePath;
+      if (filePathExt) {
+        newFilePath = newFilePath.replace('.' + filePathExt, '.' + responseExt);
+      } else {
+        newFilePath += '.' + responseExt;
+      }
+      await nodeToPromise(fs, fs.rename, filePath, newFilePath);
+      filePath = newFilePath;
+    }
+    return filePath;
   }
 }
 
