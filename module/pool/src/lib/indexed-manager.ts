@@ -1,4 +1,4 @@
-import { PoolConfig } from './pool';
+import { Options } from 'generic-pool';
 import { PoolManager, BaseResource } from './manager';
 
 export class IndexedPoolManager<T extends BaseResource, U> {
@@ -7,7 +7,7 @@ export class IndexedPoolManager<T extends BaseResource, U> {
 
   constructor(private factory: (index: U) => PoolManager<T>) { }
 
-  async acquire(index: U, opts?: PoolConfig) {
+  async acquire(index: U, opts?: Options) {
     if (!this.pools.has(index)) {
       this.pools.set(index, this.factory(index));
     }

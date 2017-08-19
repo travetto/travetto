@@ -1,4 +1,4 @@
-import { createPool, Pool, PoolConfig, PoolFactory } from './pool';
+import { createPool, Pool, Options, PoolFactory } from 'generic-pool';
 import { Shutdown } from '@encore/lifecycle';
 
 export interface BaseResource {
@@ -24,7 +24,7 @@ export class PoolManager<T extends BaseResource> {
     this.pool.clear();
   }
 
-  async acquire(opts?: PoolConfig) {
+  async acquire(opts?: Options) {
     if (!this.pool) {
       this.pool = createPool(
         this.factory(),
