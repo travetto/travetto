@@ -1,6 +1,6 @@
 import { ObjectUtil, bulkRequire } from '@encore/util';
+import * as flatten from 'flat';
 
-let flatten = require('flat');
 let unflatten = flatten.unflatten;
 
 type ConfigMap = { [key: string]: string | number | boolean | null | ConfigMap };
