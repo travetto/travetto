@@ -1,17 +1,17 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@types/glob": "^5.0.31",
-    "@types/node": "^8.0.24",
-    "glob": "^7.1.2",
-    "source-map-support": "^0.4.16",
-    "tslint": "^5.6.0",
+    "@types/glob": "^5.0.31", 
+    "@types/node": "^8.0.24", 
+    "glob": "^7.1.2", 
+    "source-map-support": "^0.4.16", 
+    "tslint": "^5.6.0", 
     "typescript": "^2.5.1"
-  },
-  "description": "",
-  "license": "ISC",
-  "main": "index.js",
-  "name": "@encore/base",
-  "scripts": {},
-  "version": "1.1.53"
+  }, 
+  "description": "", 
+  "license": "ISC", 
+  "main": "index.js", 
+  "name": "@encore/base", 
+  "scripts": {}, 
+  "version": "1.1.54"
 }
