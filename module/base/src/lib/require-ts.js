@@ -47,6 +47,7 @@ Error.prepareStackTrace = function (a, stack) {
   return [parts[0], ...parts.slice(1)
     .filter(l =>
       l.indexOf('require-ts.js') < 0 &&
+      l.indexOf('module.js') < 0 &&
       l.indexOf('source-map-support.js') < 0 &&
       (l.indexOf('node_modules') > 0 ||
         (l.indexOf('(native)') < 0 && (l.indexOf(cwd) < 0 || l.indexOf('.js') < 0))))
