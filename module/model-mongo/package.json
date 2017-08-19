@@ -1,17 +1,17 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x",
-    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v1.x.x",
-    "@types/flat": "0.0.28",
-    "@types/mongodb": "^2.2.10",
-    "mongodb": "^2.2.31",
-    "flat": "^2.0.0"
-  },
-  "description": "",
-  "license": "ISC",
-  "main": "src/lib/",
-  "name": "@encore/mongo",
-  "scripts": {},
-  "version": "1.1.59"
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x", 
+    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v1.x.x", 
+    "@types/flat": "0.0.28", 
+    "@types/mongodb": "^2.2.10", 
+    "flat": "^2.0.0", 
+    "mongodb": "^2.2.31"
+  }, 
+  "description": "", 
+  "license": "ISC", 
+  "main": "src/lib/", 
+  "name": "@encore/mongo", 
+  "scripts": {}, 
+  "version": "1.1.60"
 }
