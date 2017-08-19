@@ -2,7 +2,6 @@ import { ObjectUtil } from '@encore/util';
 import { SchemaRegistry, ClsList } from '../service';
 import { Re } from '../util';
 import { Messages } from '../util';
-import 'reflect-metadata';
 
 function prop(obj: { [key: string]: any }) {
   return (f: any, prop: string) => {
