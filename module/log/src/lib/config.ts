@@ -34,12 +34,8 @@ export default Configure.registerNamespace('logging', {
   },
   categories: {
     default: {
-      appenders: 'console,log',
-      level: 'info'
-    },
-    error: {
-      appenders: 'error',
-      level: 'error'
+      appenders: 'console,log,error',
+      level: 'trace'
     }
   }
 });
