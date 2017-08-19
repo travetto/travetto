@@ -81,8 +81,10 @@ export function parseUrl(url: string) {
   return res;
 }
 
-export async function request(opts: http.RequestOptions & { url: string }, data?: any): Promise<string> {
-  let {url} = opts;
+export async function request(opts: http.RequestOptions & { url: string }, data?: any): Promise<string>;
+export async function request(opts: http.RequestOptions & { url: string, pipeTo: any }, data?: any): Promise<http.IncomingMessage>;
+export async function request(opts: http.RequestOptions & { url: string, pipeTo?: any }, data?: any): Promise<string | http.IncomingMessage> {
+  let { url } = opts;
   delete opts.url;
 
   opts = Object.assign({ method: 'GET', headers: {} }, opts, parseUrl(url));
@@ -106,18 +108,28 @@ export async function request(opts: http.RequestOptions & { url: string }, data?
     opts.path = `${opts.path || ''}?${formatQuery((opts as any)['query'])}`;
   }
 
-  return await new Promise<string>((resolve, reject) => {
+  return await new Promise<string | http.IncomingMessage>((resolve, reject) => {
     let req = client.request(opts, (msg: http.IncomingMessage) => {
       let body = '';
       msg.setEncoding('utf8');
-      msg.on('data', (chunk: string) => body += chunk);
-      msg.on('end', () => {
-        if (msg.statusCode > 299) {
-          reject({ message: body, status: msg.statusCode });
-        } else {
-          resolve(body);
+      msg.on('data', (chunk: string) => {
+        if ((msg.statusCode && msg.statusCode > 299) || !opts.pipeTo) {
+          body += chunk
         }
       });
+      msg.on('end', () => {
+        if (msg.statusCode && msg.statusCode > 299) {
+          reject({ message: body, status: msg.statusCode });
+        } else {
+          resolve(opts.pipeTo ? msg : body);
+        }
+      });
+      if (opts.pipeTo) {
+        msg.pipe(opts.pipeTo);
+        if (opts.pipeTo.on) {
+          opts.pipeTo.on('error', reject);
+        }
+      }
     });
     req.on('error', reject);
     if (hasBody && bodyStr) {
