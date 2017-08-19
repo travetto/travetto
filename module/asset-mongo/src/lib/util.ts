@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as osTmpdir from 'os-tmpdir';
 import * as fileType from 'file-type';
 
-const crptyo = require('crypto');
+const crypto = require('crypto');
 
 import { nodeToPromise, request } from '@encore/util';
 import { Asset } from './model';
