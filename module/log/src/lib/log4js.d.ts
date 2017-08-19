@@ -71,16 +71,14 @@ declare module "log4js/types" {
   export class LogConfiguration {
     appenders: { [key: string]: Appender };
     categories?: { [key: string]: Category };
+    levels?: { [key: string]: LevelConfig };
     pm2?: any;
     pm2InstanceVar?: any;
-    levels?: {
-      [key: string]: LevelConfig
-    };
     configuredLevels?: Levels
   }
 }
 
-declare module 'log4js/layouts' {
+declare module 'log4js/lib/layouts' {
   import * as all from 'log4js/types';
 
   export const basicLayout: all.Layout;

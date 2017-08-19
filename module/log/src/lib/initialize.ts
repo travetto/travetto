@@ -1,5 +1,5 @@
 import * as log4js from 'log4js';
-import { addLayout } from 'log4js/layouts';
+import { addLayout } from 'log4js/lib/layouts';
 
 import Config from './config';
 import { Layouts } from './layout';
