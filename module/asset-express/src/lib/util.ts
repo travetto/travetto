@@ -3,7 +3,8 @@ import * as mime from 'mime';
 import * as path from 'path';
 import * as osTmpdir from 'os-tmpdir';
 import * as fileType from 'file-type';
-import * as crptyo from 'crypto';
+
+const crptyo = require('crypto');
 
 import { nodeToPromise, request } from '@encore/util';
 import { Asset } from './model';
