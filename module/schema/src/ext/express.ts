@@ -4,7 +4,7 @@ import { ObjectUtil } from '@encore/util';
 
 import { RouteRegistry, AppError } from '@encore/express';
 
-let flat = require('flat');
+import * as flat from 'flat';
 
 function getBound<T>(cls: Cls<T>, obj: any, view?: string) {
   try {
