@@ -6,10 +6,10 @@ import {
 } from '../model';
 import { ObjectUtil } from '@encore/util';
 
-const flat = require('flat');
+import * as flat from 'flat';
 
 interface Cls<T> extends Named {
-  new (...args:any[]): T;
+  new(...args: any[]): T;
 }
 
 export class MongoService {
@@ -136,7 +136,7 @@ export class MongoService {
   }
 
   static async getById<T extends Base>(named: Named, id: string): Promise<T>;
-    static async getById<T extends Base>(named: Named | Cls<T>, id: string): Promise<T> {
+  static async getById<T extends Base>(named: Named | Cls<T>, id: string): Promise<T> {
     return await MongoService.findOne<T>(named, { _id: new mongo.ObjectID(id) });
   }
 
