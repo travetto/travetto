@@ -36,4 +36,4 @@ process.argv = [
 
 process.env.DEFAULT_ENV = 'test';
 
-require(`${root}/node_modules/mocha/bin/mocha`);
+require(`${root}/node_modules/mocha/bin/_mocha`);
