@@ -2,8 +2,7 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es6",
-        "strictNullChecks": true,
-        "noImplicitAny": true,
+        "strict": true,
         "sourceMap": true,
         "preserveConstEnums": true,
         "experimentalDecorators": true,
