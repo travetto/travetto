@@ -1,28 +1,27 @@
-let sourcemap = require('source-map-support');
-let fs = require('fs');
-let path = require('path');
-let ts = require('typescript');
-let cwd = process.cwd();
-let tsOptions = getOptions(path.join(cwd, 'tsconfig.json'));
-let glob = require('glob');
+const sourcemap = require('source-map-support');
+const fs = require('fs');
+const path = require('path');
+const ts = require('typescript');
+const glob = require('glob');
 
-let dataUriRe = /data:application\/json[^,]+base64,/;
-let sourceMaps = {};
+const cwd = process.cwd();
+const tsOptions = getOptions(path.join(cwd, 'tsconfig.json'));
+
+const dataUriRe = /data:application\/json[^,]+base64,/;
+const sourceMaps = {};
 let transformers = {};
-
-sourcemap.install({ retrieveSourceMap: (path) => sourceMaps[path] });
 
 function registerTransformers() {
   const transformers = {}
   // Load transformers
-  for (let phase of ['before', 'after']) {
-    for (let f of glob.sync(`${process.cwd()}/**/transformer-${phase}*.ts`)) {
-      let res = require(path.resolve(f));
+  for (const phase of ['before', 'after']) {
+    for (const f of glob.sync(`${process.cwd()}/**/transformer-${phase}*.ts`)) {
+      const res = require(path.resolve(f));
       if (res) {
         if (!transformers[phase]) {
           transformers[phase] = [];
         }
-        for (let k of Object.keys(res)) {
+        for (const k of Object.keys(res)) {
           transformers[phase].push(res[k]);
         }
       }
@@ -31,19 +30,39 @@ function registerTransformers() {
   return require('./transform-ts').createCustomTransformers(transformers);
 }
 
-function getOptions(tsconfigFile) {
-  let o = require(tsconfigFile).compilerOptions;
-  o.target = ts.ScriptTarget[o.target.toUpperCase()];
-  o.module = ts.ModuleKind[o.module == 'commonjs' ? 'CommonJS' : o.module.toUpperCase()];
-  o.inlineSourceMap = o.sourceMap;
-  return o;
+function getOptions(path) {
+  const out = require(path);
+  while (out.extends) {
+    const base = path.split('tsconfig.json')[0];
+
+    path = out.extends;
+    if (!path.startsWith('/')) {
+      path = base + '/' + path.replace(/^.\//, '');
+      delete out.extends;
+    }
+    const outNext = require(path);
+    Object.assign(out, outNext, { compilerOptions: Object.assign(out.compilerOptions || {}, outNext.compilerOptions) });
+  }
+
+  const res = ts.convertCompilerOptionsFromJson(out.compilerOptions, process.cwd());
+  res.options.inlineSourceMap = res.options.sourceMap;
+  return res.options;
 }
 
+function transpile(input, compilerOptions, fileName, transformers) {
+  const output = ts.transpileModule(input, { compilerOptions, fileName, reportDiagnostics: false, transformers });
+  // addRange correctly handles cases when wither 'from' or 'to' argument is missing
+  ts.addRange(undefined, output.diagnostics);
+  return output.outputText;
+}
+
+sourcemap.install({ retrieveSourceMap: (path) => sourceMaps[path] });
+
 // Wrap sourcemap tool
-let prep = Error.prepareStackTrace;
+const prep = Error.prepareStackTrace;
 Error.prepareStackTrace = function (a, stack) {
-  let res = prep(a, stack);
-  let parts = res.split('\n');
+  const res = prep(a, stack);
+  const parts = res.split('\n');
   return [parts[0], ...parts.slice(1)
     .filter(l =>
       l.indexOf('require-ts.js') < 0 &&
@@ -54,20 +73,13 @@ Error.prepareStackTrace = function (a, stack) {
   ].join('\n');
 }
 
-function transpile(input, compilerOptions, fileName, transformers) {
-  const output = ts.transpileModule(input, { compilerOptions, fileName, reportDiagnostics: false, transformers });
-  // addRange correctly handles cases when wither 'from' or 'to' argument is missing
-  ts.addRange(undefined, output.diagnostics);
-  return output.outputText;
-}
-
 require.extensions['.ts'] = function load(m, tsf) {
-  let jsf = tsf.replace(/\.ts$/, '.js');
-  let parts = tsf.split('/');
-  let name = parts.pop();
-  let folder = parts.pop();
-  let content = transpile(fs.readFileSync(tsf, 'utf-8'), tsOptions, `${folder}/${name}`, transformers);
-  let map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
+  const jsf = tsf.replace(/\.ts$/, '.js');
+  const parts = tsf.split('/');
+  const name = parts.pop();
+  const folder = parts.pop();
+  const content = transpile(fs.readFileSync(tsf, 'utf-8'), tsOptions, `${folder}/${name}`, transformers);
+  const map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
   sourceMaps[jsf] = { content, url: tsf, map };
   return m._compile(content, jsf);
 };
