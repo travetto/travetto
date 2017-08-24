@@ -4,7 +4,6 @@
         "target": "es2017",
         "strict": true,
         "sourceMap": true,
-        "inlineSourceMap": true,
         "preserveConstEnums": true,
         "experimentalDecorators": true,
         "rootDir": "src/",

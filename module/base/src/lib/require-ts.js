@@ -45,6 +45,9 @@ function getOptions(path) {
   }
 
   const res = ts.convertCompilerOptionsFromJson(out.compilerOptions, process.cwd());
+  res.options.sourceMap = true;
+  res.options.inlineSourceMap = true;
+  res.options.outDir = './build';
   return res.options;
 }
 
