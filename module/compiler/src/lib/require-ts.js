@@ -45,7 +45,6 @@ function getOptions(path) {
   }
 
   const res = ts.convertCompilerOptionsFromJson(out.compilerOptions, process.cwd());
-  res.options.inlineSourceMap = res.options.sourceMap;
   return res.options;
 }
 
