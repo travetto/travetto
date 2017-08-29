@@ -8,7 +8,6 @@ import * as chokidar from 'chokidar';
 const Module = require('module');
 const originalLoader = Module._load;
 const dataUriRe = /data:application\/json[^,]+base64,/;
-
 export class Compiler {
 
   static srcRoot = 'src';
@@ -87,6 +86,15 @@ export class Compiler {
 
   static prepareSourceMaps() {
     sourcemap.install({
+      emptyCacheBetweenOperations: this.debug,
+      retrieveFile: (p: string) => {
+        let content = this.contents.get(p);
+        if (!content) {
+          content = fs.readFileSync(p).toString();
+          this.contents.set(p, content);
+        }
+        return content;
+      },
       retrieveSourceMap: (p: string) => this.sourceMaps.get(p)!,
     });
 
