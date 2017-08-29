@@ -1,9 +1,5 @@
 import { Injectable, Inject } from "../lib/decorator/injectable";
-
-@Injectable()
-class DbConfig {
-  /// Blah
-}
+import { DbConfig } from "./config";
 
 @Injectable()
 class Database {

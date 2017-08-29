@@ -1,38 +1,24 @@
 import * as ts from 'typescript';
 import { Compiler } from '@encore/base/src/lib/compiler';
-import { Injectable } from './injectable';
 
 type DecList = ts.NodeArray<ts.Decorator>;
 type SchemaList = (ts.Expression | undefined)[];
 
-interface State {
-  ident: ts.Identifier,
-  injected: boolean;
-  declared: ts.Identifier[]
-}
+type Import = { path: string, ident: ts.Identifier };
 
-const b = <T extends ts.Node>(n: T) => n; //ts.setTextRange(n, { pos: 0, end: 0 });
+interface State {
+  imports: Import[],
+  path: string
+}
 
 export const Transformer =
   (context: ts.TransformationContext) =>
     (file: ts.SourceFile) => {
-      let ident = ts.createUniqueName('injectable');
-      let state: State = { declared: [], injected: false, ident };
+      let state: State = { imports: [], path: require.resolve(file.fileName) };
       let ret = visitNode(context, file, state);
 
-      if (state.injected) {
-        let imptStmt = ts.createImportDeclaration(
-          undefined, undefined,
-          ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
-          ts.createLiteral(require.resolve('./injectable'))
-        );
-
-        imptStmt.parent = file;
-
-        ret.statements = ts.createNodeArray([
-          imptStmt,
-          ...ret.statements
-        ]);
+      if (state.imports.length) {
+        addImport(ret, state.imports);
       }
       return ret;
     };
@@ -47,7 +33,7 @@ function getDecoratorIdent(d: ts.Decorator): ts.Identifier {
   }
 }
 
-function getDecorators(node: ts.ClassDeclaration): ts.Decorator | undefined {
+function getDecorator(node: ts.Node, file: string, className: string | { name: string }): ts.Decorator | undefined {
   let decs = (node.decorators || [] as any as DecList).filter(d => !!d.expression);
   if (decs && decs.length) {
     let inject: ts.Decorator = decs
@@ -55,7 +41,7 @@ function getDecorators(node: ts.ClassDeclaration): ts.Decorator | undefined {
         let type = Compiler.getTypeChecker().getTypeAtLocation(getDecoratorIdent(d));
         if (type.symbol) {
           let name = Compiler.getTypeChecker().getFullyQualifiedName(type.symbol!);
-          return name === `"${require.resolve('./injectable').replace(/\.ts$/, '')}".${Injectable.name}`;
+          return name === `"${require.resolve(file).replace(/\.ts$/, '')}".${typeof className === 'string' ? className : className.name}`;
         } else {
           return false;
         }
@@ -65,9 +51,28 @@ function getDecorators(node: ts.ClassDeclaration): ts.Decorator | undefined {
   }
 }
 
+function addImport(file: ts.SourceFile, imports: { path: string, ident: ts.Identifier }[]) {
+  let importStmts = imports
+    .map(({ path, ident }) => {
+      let imptStmt = ts.createImportDeclaration(
+        undefined, undefined,
+        ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
+        ts.createLiteral(require.resolve(path))
+      );
+
+      imptStmt.parent = file;
+      return imptStmt;
+    });
+
+  file.statements = ts.createNodeArray([
+    ...importStmts,
+    ...file.statements
+  ]);
+}
+
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
   if (ts.isClassDeclaration(node)) {
-    let foundDec = getDecorators(node);
+    let foundDec = getDecorator(node, './injectable', 'Injectable');
     let cons;
     for (let member of node.members) {
       if (ts.isConstructorDeclaration(member)) {
@@ -88,7 +93,31 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         ...expr.properties,
         ts.createPropertyAssignment(
           ts.createLiteral('dependencies'),
-          ts.createArrayLiteral()
+          ts.createArrayLiteral(
+            (cons.parameters! || []).map(x => {
+              let name = getDecorator(x, './injectable', 'Inject');
+              let type = Compiler.getTypeChecker().getTypeAtLocation(x);
+              let decl = type!.symbol!.valueDeclaration!;
+              let path = (decl as any).parent.fileName;
+              let ident = ts.createUniqueName(`${(decl as any).name.text}`);
+              let importName = ts.createUniqueName(`import_${(decl as any).name.text}`);
+
+              if (require.resolve(path) !== state.path) {
+                state.imports.push({
+                  ident: importName,
+                  path
+                });
+
+                let obj = ts.createObjectLiteral([
+                  ts.createPropertyAssignment('type', ts.createPropertyAccess(importName, ident)),
+                  ts.createPropertyAssignment('name', name ? (name.expression as ts.CallExpression).arguments[0] : ts.createIdentifier('undefined'))
+                ]);
+                return obj;
+              } else {
+                return (decl as any).name;
+              }
+            })
+          )
         )
       ];
 
