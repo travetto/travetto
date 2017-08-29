@@ -4,7 +4,7 @@ export const DEFAULT_INSTANCE = '__default';
 
 export interface Dependency {
   name: string;
-  cls: Class<any>
+  type: Class<any>
 }
 
 export class Registry {
@@ -24,13 +24,18 @@ export class Registry {
     if (!this.providers.has(target)) {
       this.providers.set(target, new Map());
     }
+    for (let dep of dependencies) {
+      if (!dep.name) {
+        dep.name = DEFAULT_INSTANCE;
+      }
+    }
     this.providers.get(target)!.set(name, cls);
     this.dependencies.set(cls, dependencies.slice(0));
   }
 
   static construct<T>(cls: Class<T>, name: string = DEFAULT_INSTANCE): T {
     let deps = (this.dependencies.get(cls)! || [])
-      .map(x => this.getInstance(x.cls, x.name));
+      .map(x => this.getInstance(x.type, x.name));
     let inst = new cls(...deps);
     return inst;
   }
@@ -45,4 +50,3 @@ export class Registry {
     return this.instances.get(cls)!.get(name)!;
   }
 }
-

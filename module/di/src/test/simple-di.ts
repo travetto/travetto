@@ -5,16 +5,24 @@ import { Registry } from '../lib/service';
 @Injectable()
 class Database {
   constructor( @Inject('a') dbConfig: DbConfig) {
-    console.log("Creating database", dbConfig);
+    console.log("Creating database", dbConfig.getUrl());
+  }
+
+  query() {
+    console.log("Getting stuff");
   }
 }
 
 @Injectable()
 class Service {
-  constructor(db: Database) {
+  constructor(private db: Database) {
     console.log("Creating service", db);
+  }
+
+  doWork() {
+    this.db.query();
   }
 }
 
 
-Registry.getInstance(Service)
+Registry.getInstance(Service).doWork();
