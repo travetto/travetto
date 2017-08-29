@@ -1,2 +1,2 @@
-require('./console');
 require('./require-ts');
+require('./console');
