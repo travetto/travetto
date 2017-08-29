@@ -11,9 +11,9 @@ const dataUriRe = /data:application\/json[^,]+base64,/;
 
 export class Compiler {
 
-  static sourceMaps: { [key: string]: { url: string, map: string, content: string } } = {};
-  static files: { [key: string]: { version: number } } = {};
-  static contents: { [key: string]: string } = {};
+  static sourceMaps = new Map<string, { url: string, map: string, content: string }>();
+  static files = new Map<string, { version: number }>();
+  static contents = new Map<string, string>();
   static servicesHost: ts.LanguageServiceHost;
   static services: ts.LanguageService;
   static cwd: string;
@@ -71,19 +71,21 @@ export class Compiler {
 
   static requireHandler(m: NodeModule, tsf: string) {
     const jsf = tsf.replace(/\.ts$/, '.js');
-    let content: string = this.contents[jsf];
-    if (!content) {
+    let content: string;
+    if (!this.contents.has(jsf)) {
       content = this.transpile(fs.readFileSync(tsf).toString(), tsf);
+    } else {
+      content = this.contents.get(jsf)!;
     }
     this.required.set(tsf, m);
     const map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
-    this.sourceMaps[jsf] = { content, url: tsf, map };
+    this.sourceMaps.set(jsf, { content, url: tsf, map });
     return (m as any)._compile(content, jsf);
   }
 
   static prepareSourceMaps() {
     sourcemap.install({
-      retrieveSourceMap: (p: string) => this.sourceMaps[p],
+      retrieveSourceMap: (p: string) => this.sourceMaps.get(p)!,
     });
 
     // Wrap sourcemap tool
@@ -111,7 +113,7 @@ export class Compiler {
     }
 
     for (let o of output.outputFiles) {
-      this.contents[o.name] = o.text;
+      this.contents.set(o.name, o.text);
     }
 
     if (fileName in require.cache) {
@@ -123,7 +125,7 @@ export class Compiler {
 
   static watchFiles(fileNames: string[]) {
     for (let fileName of fileNames) {
-      this.files[fileName] = { version: 0 };
+      this.files.set(fileName, { version: 0 });
       this.emitFile(fileName);
     }
 
@@ -137,11 +139,11 @@ export class Compiler {
       watcher
         .on('add', fileName => {
           fileNames.push(fileName);
-          this.files[fileName] = { version: 0 };
+          this.files.set(fileName, { version: 0 });
           this.emitFile(fileName);
         })
         .on('change', fileName => {
-          this.files[fileName].version++;
+          this.files.get(fileName)!.version++;
           this.emitFile(fileName)
         });
     });
@@ -197,7 +199,7 @@ export class Compiler {
 
     this.servicesHost = {
       getScriptFileNames: () => rootFileNames,
-      getScriptVersion: (fileName) => this.files[fileName] && this.files[fileName].version.toString(),
+      getScriptVersion: (fileName) => this.files.has(fileName) ? this.files.get(fileName)!.version.toString() : '',
       getScriptSnapshot: (fileName) => fs.existsSync(fileName) ? ts.ScriptSnapshot.fromString(fs.readFileSync(fileName).toString()) : undefined,
       getCurrentDirectory: () => process.cwd(),
       getCompilationSettings: () => this.options,
