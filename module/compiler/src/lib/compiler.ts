@@ -11,6 +11,8 @@ const dataUriRe = /data:application\/json[^,]+base64,/;
 
 export class Compiler {
 
+  static srcRoot = 'src';
+  static configFile = 'tsconfig.json';
   static sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   static files = new Map<string, { version: number }>();
   static contents = new Map<string, string>();
@@ -23,19 +25,19 @@ export class Compiler {
   static required = new Map<string, { module?: NodeModule, exports?: any }>();
   static debug = false;
 
-  static resolveOptions(name = 'tsconfig.json') {
+  static resolveOptions(name = this.configFile) {
     let out = ts.parseJsonSourceFileConfigFileContent(
-      ts.readJsonConfigFile(`${this.cwd}/tsconfig.json`, x => ts.sys.readFile(x)), {
+      ts.readJsonConfigFile(`${this.cwd}/${this.configFile}`, x => ts.sys.readFile(x)), {
         useCaseSensitiveFileNames: true,
         fileExists: ts.sys.fileExists,
         readFile: ts.sys.readFile,
         readDirectory: ts.sys.readDirectory
       }, this.cwd, {
-        rootDir: `${this.cwd}/src`,
+        rootDir: `${this.cwd}/${this.srcRoot}`,
         sourceMap: false,
         inlineSourceMap: true,
-        outDir: `${this.cwd}/src`
-      }, `${this.cwd}/tsconfig.json`
+        outDir: `${this.cwd}/${this.srcRoot}`
+      }, `${this.cwd}/${this.configFile}`
     );
     return out;
   }
@@ -95,7 +97,7 @@ export class Compiler {
       const parts = res.split('\n');
       return [parts[0], ...parts.slice(1)
         .filter(l =>
-          l.indexOf('@encore/base/src/lib/this.ts') < 0 &&
+          l.indexOf(`@encore/base/${this.srcRoot}/lib/this.ts`) < 0 &&
           l.indexOf('module.js') < 0 &&
           l.indexOf('source-map-support.js') < 0 &&
           (l.indexOf('node_modules') > 0 ||
@@ -129,7 +131,7 @@ export class Compiler {
       this.emitFile(fileName);
     }
 
-    let watcher = chokidar.watch(`${this.cwd}/src/**/*.ts`, {
+    let watcher = chokidar.watch(`${this.cwd}/${this.srcRoot}/**/*.ts`, {
       persistent: true,
       interval: 250,
       ignoreInitial: false
