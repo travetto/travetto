@@ -95,7 +95,7 @@ export class Compiler {
 
   prepareSourceMaps() {
     sourcemap.install({
-      retrieveSourceMap: (path: string) => this.sourceMaps[path],
+      retrieveSourceMap: (p: string) => this.sourceMaps[p],
     });
 
     // Wrap sourcemap tool
@@ -142,8 +142,7 @@ export class Compiler {
 
     if (!output.emitSkipped) {
       console.log(`Emitting ${fileName}`);
-    }
-    else {
+    } else {
       console.log(`Emitting ${fileName} failed`);
       this.logErrors(fileName);
     }
