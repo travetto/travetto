@@ -17,7 +17,7 @@ export class Compiler {
       }, cwd, {
         inlineSourceMap: true,
         sourceMap: true,
-        outDir: 'build/'
+        outDir: `${cwd}/src`
       }, `${cwd}/tsconfig.json`
     );
     return out;
@@ -51,6 +51,7 @@ export class Compiler {
   options: ts.CompilerOptions;
   transformers: ts.CustomTransformers;
   registry: ts.DocumentRegistry;
+  required = new Map<string, NodeModule>()
 
   constructor() {
     this.cwd = process.cwd();
@@ -83,11 +84,11 @@ export class Compiler {
 
   requireHandler(m: NodeModule, tsf: string) {
     const jsf = tsf.replace(/\.ts$/, '.js');
-    let content: string = this.contents[tsf];
+    let content: string = this.contents[jsf];
     if (!content) {
       content = this.transpile(fs.readFileSync(tsf).toString(), tsf);
     }
-    console.log(content);
+    this.required.set(tsf, m);
     const map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
     this.sourceMaps[jsf] = { content, url: tsf, map };
     return (m as any)._compile(content, jsf);
@@ -146,10 +147,9 @@ export class Compiler {
       console.log(`Emitting ${fileName} failed`);
       this.logErrors(fileName);
     }
-
-    output.outputFiles.forEach(o => {
+    for (let o of output.outputFiles) {
       this.contents[o.name] = o.text;
-    });
+    }
   }
 
   logErrors(fileName: string) {
