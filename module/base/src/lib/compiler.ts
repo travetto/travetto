@@ -3,12 +3,14 @@ import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
 import * as path from 'path';
 import * as glob from 'glob';
+import * as chokidar from 'chokidar';
 
 const Module = require('module');
 const originalLoader = Module._load;
 const dataUriRe = /data:application\/json[^,]+base64,/;
 
 export class Compiler {
+
   static sourceMaps: { [key: string]: { url: string, map: string, content: string } } = {};
   static files: { [key: string]: { version: number } } = {};
   static contents: { [key: string]: string } = {};
@@ -100,29 +102,6 @@ export class Compiler {
     }
   }
 
-  static watchFile(fileName: string) {
-    this.files[fileName] = { version: 0 };
-
-    // First time around, emit all files
-    this.emitFile(fileName);
-
-    // Add a watch on the file to handle next change
-    fs.watchFile(fileName,
-      { persistent: true, interval: 250 },
-      (curr, prev) => {
-        // Check timestamp
-        if (+curr.mtime <= +prev.mtime) {
-          return;
-        }
-
-        // Update the version to signal a change in the file
-        this.files[fileName].version++;
-
-        // write the changes to disk
-        this.emitFile(fileName);
-      });
-  }
-
   static emitFile(fileName: string) {
     let output = this.services.getEmitOutput(fileName);
 
@@ -140,6 +119,32 @@ export class Compiler {
       delete require.cache[fileName];
       require(fileName);
     }
+  }
+
+  static watchFiles(fileNames: string[]) {
+    for (let fileName of fileNames) {
+      this.files[fileName] = { version: 0 };
+      this.emitFile(fileName);
+    }
+
+    let watcher = chokidar.watch(`${this.cwd}/src/**/*.ts`, {
+      persistent: true,
+      interval: 250,
+      ignoreInitial: false
+    })
+
+    watcher.on('ready', () => {
+      watcher
+        .on('add', fileName => {
+          fileNames.push(fileName);
+          this.files[fileName] = { version: 0 };
+          this.emitFile(fileName);
+        })
+        .on('change', fileName => {
+          this.files[fileName].version++;
+          this.emitFile(fileName)
+        });
+    });
   }
 
   static logErrors(fileName: string) {
@@ -188,8 +193,10 @@ export class Compiler {
       Module._load = this.moduleLoadHandler.bind(this);
     }
 
+    let rootFileNames = out.fileNames.slice(0);
+
     this.servicesHost = {
-      getScriptFileNames: () => out.fileNames,
+      getScriptFileNames: () => rootFileNames,
       getScriptVersion: (fileName) => this.files[fileName] && this.files[fileName].version.toString(),
       getScriptSnapshot: (fileName) => fs.existsSync(fileName) ? ts.ScriptSnapshot.fromString(fs.readFileSync(fileName).toString()) : undefined,
       getCurrentDirectory: () => process.cwd(),
@@ -206,9 +213,7 @@ export class Compiler {
 
     // Now let's watch the files
     if (this.debug) {
-      for (let fileName of out.fileNames) {
-        this.watchFile(fileName);
-      }
+      this.watchFiles(rootFileNames);
     }
   }
 }
