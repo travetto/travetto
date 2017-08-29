@@ -67,7 +67,7 @@ function getDecorators(node: ts.ClassDeclaration): ts.Decorator | undefined {
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
   if (ts.isClassDeclaration(node)) {
-    let dec = getDecorators(node);
+    let foundDec = getDecorators(node);
     let cons;
     for (let member of node.members) {
       if (ts.isConstructorDeclaration(member)) {
@@ -79,27 +79,34 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     let ret = ts.visitEachChild(node, c => visitNode(context, c, state), context);
 
     if (cons) {
-      let newDec = ts.createDecorator(
-        ts.createCall(
-          ts.createPropertyAccess(state.ident, 'Inject'),
-          undefined,
-          [
-            ts.createArrayLiteral(
-              cons.parameters.map(x => {
-                return (Compiler.getTypeChecker().getTypeAtLocation(x)!.symbol!.getDeclarations()![0] as any).name;
-              })
-            )
-          ]
+      let dec = foundDec!;
+      let expr = (dec.expression as ts.CallExpression).arguments[0] as ts.ObjectLiteralExpression;
+      if (!expr) {
+        expr = ts.createObjectLiteral([]);
+      }
+      let props = [
+        ...expr.properties,
+        ts.createPropertyAssignment(
+          ts.createLiteral('dependencies'),
+          ts.createArrayLiteral()
         )
-      );
-      state.injected = true;
+      ];
+
+      dec = ts.updateDecorator(dec, ts.updateCall(
+        (dec.expression as ts.CallExpression),
+        (dec.expression as ts.CallExpression).expression,
+        undefined,
+        [ts.updateObjectLiteral(expr!, props)]
+      ))
+
       ret = ts.updateClassDeclaration(ret,
-        ts.createNodeArray([newDec, ...node.decorators!]),
-        node.modifiers, node.name,
-        node.typeParameters,
-        node.heritageClauses as any, node.members
-      ) as any;
+        [dec, ...(ret.decorators! || []).filter(x => x !== foundDec)],
+        ret.modifiers, ret.name,
+        ret.typeParameters,
+        ret.heritageClauses as any,
+        ret.members) as any;
     }
+
     return ret;
   } else {
     return ts.visitEachChild(node, c => visitNode(context, c, state), context);
