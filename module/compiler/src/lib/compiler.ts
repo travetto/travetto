@@ -9,7 +9,6 @@ const Module = require('module');
 const originalLoader = Module._load;
 export class Compiler {
 
-  static srcRoot = 'src';
   static configFile = 'tsconfig.json';
   static sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   static files = new Map<string, { version: number }>();
@@ -31,10 +30,10 @@ export class Compiler {
         readFile: ts.sys.readFile,
         readDirectory: ts.sys.readDirectory
       }, this.cwd, {
-        rootDir: `${this.cwd}/${this.srcRoot}`,
+        rootDir: `${this.cwd}`,
         sourceMap: false,
         inlineSourceMap: true,
-        outDir: `${this.cwd}/${this.srcRoot}`
+        outDir: `${this.cwd}`
       }, `${this.cwd}/${this.configFile}`
     );
     return out;
@@ -86,6 +85,7 @@ export class Compiler {
       emptyCacheBetweenOperations: this.debug
     });
 
+    const compilerLoc = require.resolve('./compiler').split('@encore')[1];
     // Wrap sourcemap tool
     const prep = (Error as any).prepareStackTrace;
     (Error as any).prepareStackTrace = (a: any, stack: any) => {
@@ -93,7 +93,7 @@ export class Compiler {
       const parts = res.split('\n');
       return [parts[0], ...parts.slice(1)
         .filter(l =>
-          l.indexOf(`@encore/base/${this.srcRoot}/lib/this.ts`) < 0 &&
+          l.indexOf(compilerLoc) < 0 &&
           l.indexOf('module.js') < 0 &&
           l.indexOf('source-map-support.js') < 0 &&
           (l.indexOf('node_modules') > 0 ||
@@ -108,7 +108,7 @@ export class Compiler {
     }
     for (let fileName of files) {
       if (fileName in require.cache) {
-        console.log('Reloading', fileName);
+        console.log(this.files.get(fileName)!.version ? 'Reloading' : 'Loading', fileName);
         delete require.cache[fileName];
         require(fileName);
       }
@@ -120,10 +120,14 @@ export class Compiler {
 
     if (this.logErrors(fileName)) {
       console.log(`Emitting ${fileName} failed`);
+    }
+
+    if (!output.outputFiles.length) {
       return;
     }
 
     for (let o of output.outputFiles) {
+      console.log(o.name, o.text);
       this.contents.set(o.name, o.text);
     }
 
@@ -136,7 +140,8 @@ export class Compiler {
       this.emitFile(fileName);
     }
 
-    let watcher = chokidar.watch(`${this.cwd}/${this.srcRoot}/**/*.ts`, {
+    let watcher = chokidar.watch(`${this.cwd}/src/**/*.ts`, {
+      ignored: [/.*\/transformer-.*\.ts$/],
       persistent: true,
       interval: 250,
       ignoreInitial: false
@@ -186,6 +191,10 @@ export class Compiler {
       transformers: this.transformers
     });
     return output.outputText;
+  }
+
+  static getTypeChecker() {
+    return this.services.getProgram().getTypeChecker();
   }
 
   static init(cwd: string) {
