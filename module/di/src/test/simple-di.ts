@@ -1,4 +1,4 @@
-import { Injectable } from "../lib/decorator/injectable";
+import { Injectable, Inject } from "../lib/decorator/injectable";
 
 @Injectable()
 class DbConfig {
@@ -7,7 +7,7 @@ class DbConfig {
 
 @Injectable()
 class Database {
-  constructor(dbConfig: DbConfig) {
+  constructor( @Inject('a') dbConfig: DbConfig) {
 
   }
 }

@@ -20,11 +20,12 @@ export class Registry {
     this.instances.get(cls)!.set(name, instance);
   }
 
-  static registerProvider<T>(cls: Class<T>, target: Class<T> = cls, name: string = DEFAULT_INSTANCE) {
+  static registerProvider<T>(cls: Class<T>, target: Class<T> = cls, name: string = DEFAULT_INSTANCE, dependencies: Dependency[] = []) {
     if (!this.providers.has(target)) {
       this.providers.set(target, new Map());
     }
     this.providers.get(target)!.set(name, cls);
+    this.dependencies.set(target, dependencies);
   }
 
   static construct<T>(cls: Class<T>, name: string = DEFAULT_INSTANCE): T {

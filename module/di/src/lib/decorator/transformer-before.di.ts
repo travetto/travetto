@@ -11,22 +11,21 @@ interface State {
   declared: ts.Identifier[]
 }
 
-const b = <T extends ts.Node>(n: T) => ts.setTextRange(n, { pos: 0, end: 0 });
+const b = <T extends ts.Node>(n: T) => n; //ts.setTextRange(n, { pos: 0, end: 0 });
 
 export const Transformer =
   (context: ts.TransformationContext) =>
     (file: ts.SourceFile) => {
-      let ident = b(ts.createUniqueName('injectable'));
+      let ident = ts.createUniqueName('injectable');
       let state: State = { declared: [], injected: false, ident };
       let ret = visitNode(context, file, state);
 
       if (state.injected) {
-
-        let imptStmt = b(ts.createImportDeclaration(
+        let imptStmt = ts.createImportDeclaration(
           undefined, undefined,
-          b(ts.createImportClause(undefined, b(ts.createNamespaceImport(ident)))),
-          b(ts.createLiteral(require.resolve('./injectable')))
-        ));
+          ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
+          ts.createLiteral(require.resolve('./injectable'))
+        );
 
         imptStmt.parent = file;
 
@@ -80,9 +79,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     let ret = ts.visitEachChild(node, c => visitNode(context, c, state), context);
 
     if (cons) {
-      let newDec = b(ts.createDecorator(
-        b(ts.createCall(
-          b(ts.createPropertyAccess(state.ident, 'InjectParams')),
+      let newDec = ts.createDecorator(
+        ts.createCall(
+          ts.createPropertyAccess(state.ident, 'Inject'),
           undefined,
           [
             ts.createArrayLiteral(
@@ -91,15 +90,15 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
               })
             )
           ]
-        ))
-      ));
+        )
+      );
       state.injected = true;
-      ret = b(ts.updateClassDeclaration(ret,
+      ret = ts.updateClassDeclaration(ret,
         ts.createNodeArray([newDec, ...node.decorators!]),
         node.modifiers, node.name,
         node.typeParameters,
         node.heritageClauses as any, node.members
-      ) as any);
+      ) as any;
     }
     return ret;
   } else {
