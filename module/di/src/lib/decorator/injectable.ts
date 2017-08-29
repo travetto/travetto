@@ -8,7 +8,7 @@ export function Injectable(config: {
 } = {}) {
   return (target: Class<any>) => {
     config = { ...{ name: DEFAULT_INSTANCE }, ...config };
-    Registry.registerProvider(target, config.targetType, config.name);
+    Registry.registerProvider(target, config.targetType, config.name, config.dependencies);
     return target;
   };
 }

@@ -25,11 +25,11 @@ export class Registry {
       this.providers.set(target, new Map());
     }
     this.providers.get(target)!.set(name, cls);
-    this.dependencies.set(target, dependencies);
+    this.dependencies.set(cls, dependencies.slice(0));
   }
 
   static construct<T>(cls: Class<T>, name: string = DEFAULT_INSTANCE): T {
-    let deps = this.dependencies.get(cls)!
+    let deps = (this.dependencies.get(cls)! || [])
       .map(x => this.getInstance(x.cls, x.name));
     let inst = new cls(...deps);
     return inst;

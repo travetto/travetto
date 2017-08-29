@@ -1,6 +1,8 @@
 import { Injectable } from "../lib/decorator";
 
-@Injectable()
+@Injectable({ name: 'a' })
 export class DbConfig {
-  /// Blah
+  constructor() {
+    console.log("Creating dbconfig");
+  }
 }

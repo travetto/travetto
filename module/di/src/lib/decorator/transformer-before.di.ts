@@ -99,7 +99,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
               let type = Compiler.getTypeChecker().getTypeAtLocation(x);
               let decl = type!.symbol!.valueDeclaration!;
               let path = (decl as any).parent.fileName;
-              let ident = ts.createUniqueName(`${(decl as any).name.text}`);
+              let ident = ts.createIdentifier(`${(decl as any).name.text}`);
               let importName = ts.createUniqueName(`import_${(decl as any).name.text}`);
 
               if (require.resolve(path) !== state.path) {
@@ -114,7 +114,10 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
                 ]);
                 return obj;
               } else {
-                return (decl as any).name;
+                let obj = ts.createObjectLiteral([
+                  ts.createPropertyAssignment('type', (decl as any).name),
+                ]);
+                return obj;
               }
             })
           )
