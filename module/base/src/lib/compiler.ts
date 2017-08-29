@@ -4,6 +4,8 @@ import * as sourcemap from 'source-map-support';
 import * as path from 'path';
 import * as glob from 'glob';
 
+const Module = require('module');
+const originalLoader = Module._load;
 const dataUriRe = /data:application\/json[^,]+base64,/;
 
 export class Compiler {
@@ -15,8 +17,9 @@ export class Compiler {
         readFile: ts.sys.readFile,
         readDirectory: ts.sys.readDirectory
       }, cwd, {
+        rootDir: `${cwd}/src`,
+        sourceMap: false,
         inlineSourceMap: true,
-        sourceMap: true,
         outDir: `${cwd}/src`
       }, `${cwd}/tsconfig.json`
     );
@@ -51,7 +54,8 @@ export class Compiler {
   options: ts.CompilerOptions;
   transformers: ts.CustomTransformers;
   registry: ts.DocumentRegistry;
-  required = new Map<string, NodeModule>()
+  required = new Map<string, { module?: NodeModule, exports?: any }>();
+  debug = false;
 
   constructor() {
     this.cwd = process.cwd();
@@ -59,6 +63,13 @@ export class Compiler {
 
     this.options = out.options;
     this.transformers = Compiler.resolveTransformers(this.cwd);
+    this.debug = !process.env.PROD;
+
+    require.extensions['.ts'] = this.requireHandler.bind(this);
+
+    if (this.debug) {
+      Module._load = this.moduleLoadHandler.bind(this);
+    }
 
     this.servicesHost = {
       getScriptFileNames: () => out.fileNames,
@@ -77,9 +88,21 @@ export class Compiler {
     this.services = ts.createLanguageService(this.servicesHost, this.registry);
 
     // Now let's watch the files
-    for (let fileName of out.fileNames) {
-      this.watchFile(fileName);
+    if (this.debug) {
+      for (let fileName of out.fileNames) {
+        this.watchFile(fileName);
+      }
     }
+  }
+
+  moduleLoadHandler(request: string, parent: string) {
+    let p = Module._resolveFilename(request, parent);
+    if (!this.required.has(p)) {
+      this.required.set(p, {});
+    }
+    const req = this.required.get(p)!;
+
+    return originalLoader.apply(this, arguments);
   }
 
   requireHandler(m: NodeModule, tsf: string) {
@@ -141,14 +164,19 @@ export class Compiler {
   emitFile(fileName: string) {
     let output = this.services.getEmitOutput(fileName);
 
-    if (!output.emitSkipped) {
-      console.log(`Emitting ${fileName}`);
-    } else {
+    if (this.logErrors(fileName)) {
       console.log(`Emitting ${fileName} failed`);
-      this.logErrors(fileName);
+      return;
     }
+
     for (let o of output.outputFiles) {
       this.contents[o.name] = o.text;
+    }
+
+    if (fileName in require.cache) {
+      console.log('Reloading', fileName);
+      delete require.cache[fileName];
+      require(fileName);
     }
   }
 
@@ -156,6 +184,10 @@ export class Compiler {
     let allDiagnostics = this.services.getCompilerOptionsDiagnostics()
       .concat(this.services.getSyntacticDiagnostics(fileName))
       .concat(this.services.getSemanticDiagnostics(fileName));
+
+    if (!allDiagnostics.length) {
+      return false;
+    }
 
     for (let diagnostic of allDiagnostics) {
       let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
@@ -166,6 +198,8 @@ export class Compiler {
         console.log(`  Error: ${message}`);
       }
     }
+
+    return allDiagnostics.length !== 0;
   }
 
   transpile(input: string, fileName: string) {
@@ -178,3 +212,5 @@ export class Compiler {
     return output.outputText;
   }
 }
+
+new Compiler();

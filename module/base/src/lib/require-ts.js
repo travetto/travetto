@@ -7,10 +7,5 @@ require.extensions['.ts'] = function load(m, tsf) {
   ts.addRange(undefined, output.diagnostics);
   return m._compile(output.outputText, jsf);
 };
-const Compiler = require('./compiler.ts').Compiler;
 
-const compiler = new Compiler();
-require.extensions['.ts'] = compiler.requireHandler.bind(compiler);
-
-if (!process.env.PROD) {
-}
+require('./compiler.ts')
