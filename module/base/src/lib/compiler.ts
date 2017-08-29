@@ -106,6 +106,19 @@ export class Compiler {
     }
   }
 
+  static reload(files: string[] | string) {
+    if (!Array.isArray(files)) {
+      files = [files];
+    }
+    for (let fileName of files) {
+      if (fileName in require.cache) {
+        console.log('Reloading', fileName);
+        delete require.cache[fileName];
+        require(fileName);
+      }
+    }
+  }
+
   static emitFile(fileName: string) {
     let output = this.services.getEmitOutput(fileName);
 
@@ -118,11 +131,7 @@ export class Compiler {
       this.contents.set(o.name, o.text);
     }
 
-    if (fileName in require.cache) {
-      console.log('Reloading', fileName);
-      delete require.cache[fileName];
-      require(fileName);
-    }
+    this.reload(fileName);
   }
 
   static watchFiles(fileNames: string[]) {
