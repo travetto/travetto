@@ -127,7 +127,6 @@ export class Compiler {
     }
 
     for (let o of output.outputFiles) {
-      console.log(o.name, o.text);
       this.contents.set(o.name, o.text);
     }
 
