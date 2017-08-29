@@ -7,7 +7,6 @@ import * as chokidar from 'chokidar';
 
 const Module = require('module');
 const originalLoader = Module._load;
-const dataUriRe = /data:application\/json[^,]+base64,/;
 export class Compiler {
 
   static srcRoot = 'src';
@@ -79,23 +78,12 @@ export class Compiler {
       content = this.contents.get(jsf)!;
     }
     this.required.set(tsf, m);
-    const map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
-    this.sourceMaps.set(jsf, { content, url: tsf, map });
     return (m as any)._compile(content, jsf);
   }
 
   static prepareSourceMaps() {
     sourcemap.install({
-      emptyCacheBetweenOperations: this.debug,
-      retrieveFile: (p: string) => {
-        let content = this.contents.get(p);
-        if (!content) {
-          content = fs.readFileSync(p).toString();
-          this.contents.set(p, content);
-        }
-        return content;
-      },
-      retrieveSourceMap: (p: string) => this.sourceMaps.get(p)!,
+      emptyCacheBetweenOperations: this.debug
     });
 
     // Wrap sourcemap tool
