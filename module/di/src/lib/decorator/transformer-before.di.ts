@@ -18,7 +18,7 @@ export const Transformer =
       return ret;
     };
 
-function processParam(state: State, param: ts.ParameterDeclaration) {
+function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
   let name = TransformUtils.getDecorator(param, require.resolve('./injectable'), 'Inject');
   let type = TransformUtils.getTypeChecker().getTypeAtLocation(param);
   let decl = type!.symbol!.valueDeclaration!;
@@ -61,7 +61,14 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       let expr = (dec.expression as ts.CallExpression).arguments[0] as ts.ObjectLiteralExpression;
       let conf = TransformUtils.extendObjectLiteral({
         annotations: (node.decorators! || []).map(x => TransformUtils.getDecoratorIdent(x)),
-        dependencies: (cons.parameters! || []).map(x => processParam(state, x))
+        dependencies: {
+          cons: (cons.parameters! || [])
+            .map(x => processDeclaration(state, x)),
+          fields: node.members
+            .filter(x => ts.isPropertyDeclaration(x))
+            .filter(x => !!TransformUtils.getDecorator(x, require.resolve('./injectable'), 'Inject'))
+            .map(x => processDeclaration(state, x as ts.PropertyDeclaration))
+        }
       });
 
       dec = ts.updateDecorator(dec, ts.updateCall(

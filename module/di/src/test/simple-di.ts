@@ -4,8 +4,10 @@ import { Registry } from '../lib/service';
 
 @Injectable()
 class Database {
-  constructor( @Inject('a') dbConfig: DbConfig) {
-    console.log("Creating database", dbConfig.getUrl());
+  @Inject('a') dbConfig: DbConfig;
+
+  postConstruct() {
+    console.log("Creating database", this.dbConfig.getUrl());
   }
 
   query() {

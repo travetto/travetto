@@ -1,5 +1,5 @@
-import { Class } from '../types';
-import { Registry, DEFAULT_INSTANCE, InjectableConfig } from '../service';
+import { Class, InjectableConfig } from '../types';
+import { Registry, DEFAULT_INSTANCE } from '../service';
 
 export function Injectable(config: Partial<InjectableConfig<any>> = {}) {
   return (target: Class<any>) => {
@@ -9,6 +9,6 @@ export function Injectable(config: Partial<InjectableConfig<any>> = {}) {
   };
 }
 
-export function Inject(name: string) {
+export function Inject(name?: string) {
   return (...args: any[]) => { };
 }
