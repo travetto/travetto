@@ -27,7 +27,7 @@ export class TransformUtils {
           let type = this.getTypeChecker().getTypeAtLocation(this.getDecoratorIdent(d));
           if (type.symbol) {
             let name = this.getTypeChecker().getFullyQualifiedName(type.symbol!);
-            return name === `"${require.resolve(file).replace(/\.ts$/, '')}".${typeof className === 'string' ? className : className.name}`;
+            return name === `"${file.replace(/\.ts$/, '')}".${typeof className === 'string' ? className : className.name}`;
           } else {
             return false;
           }
