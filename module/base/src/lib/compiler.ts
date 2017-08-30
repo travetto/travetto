@@ -192,10 +192,6 @@ export class Compiler {
     return output.outputText;
   }
 
-  static getTypeChecker() {
-    return this.services.getProgram().getTypeChecker();
-  }
-
   static init(cwd: string) {
     this.cwd = cwd;
     let out = this.resolveOptions();
