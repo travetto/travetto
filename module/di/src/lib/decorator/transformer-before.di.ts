@@ -54,21 +54,31 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       }
     }
 
+    let fields = node.members
+      .filter(x => ts.isPropertyDeclaration(x))
+      .filter(x => !!TransformUtils.getDecorator(x, require.resolve('./injectable'), 'Inject'));
+
     let ret = ts.visitEachChild(node, c => visitNode(context, c, state), context);
 
-    if (cons) {
+    if (cons || fields.length) {
       let dec = foundDec!;
       let expr = (dec.expression as ts.CallExpression).arguments[0] as ts.ObjectLiteralExpression;
+      let deps: any = {};
+      if (cons) {
+        deps.cons = (cons.parameters! || [])
+          .map(x => processDeclaration(state, x));
+      }
+      if (fields) {
+        deps.fields = fields
+          .map(x => [x.name!.getText(), processDeclaration(state, x as ts.PropertyDeclaration)] as [string, ts.Node])
+          .reduce((acc, [name, node]) => {
+            acc[name] = node;
+            return acc;
+          }, {} as any);
+      }
       let conf = TransformUtils.extendObjectLiteral({
         annotations: (node.decorators! || []).map(x => TransformUtils.getDecoratorIdent(x)),
-        dependencies: {
-          cons: (cons.parameters! || [])
-            .map(x => processDeclaration(state, x)),
-          fields: node.members
-            .filter(x => ts.isPropertyDeclaration(x))
-            .filter(x => !!TransformUtils.getDecorator(x, require.resolve('./injectable'), 'Inject'))
-            .map(x => processDeclaration(state, x as ts.PropertyDeclaration))
-        }
+        dependencies: deps
       });
 
       dec = ts.updateDecorator(dec, ts.updateCall(
