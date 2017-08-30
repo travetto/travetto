@@ -1,10 +1,5 @@
 import * as ts from 'typescript';
-import { Compiler } from '@encore/base/src/lib/compiler';
-
-type DecList = ts.NodeArray<ts.Decorator>;
-type SchemaList = (ts.Expression | undefined)[];
-
-type Import = { path: string, ident: ts.Identifier };
+import { TransformUtils, Import } from '@encore/base';
 
 interface State {
   imports: Import[],
@@ -18,61 +13,15 @@ export const Transformer =
       let ret = visitNode(context, file, state);
 
       if (state.imports.length) {
-        addImport(ret, state.imports);
+        TransformUtils.addImport(ret, state.imports);
       }
       return ret;
     };
 
-function getDecoratorIdent(d: ts.Decorator): ts.Identifier {
-  if (ts.isCallExpression(d.expression)) {
-    return d.expression.expression as ts.Identifier;
-  } else if (ts.isIdentifier(d.expression)) {
-    return d.expression;
-  } else {
-    throw new Error('No Identifier');
-  }
-}
-
-function getDecorator(node: ts.Node, file: string, className: string | { name: string }): ts.Decorator | undefined {
-  let decs = (node.decorators || [] as any as DecList).filter(d => !!d.expression);
-  if (decs && decs.length) {
-    let inject: ts.Decorator = decs
-      .filter(d => {
-        let type = Compiler.getTypeChecker().getTypeAtLocation(getDecoratorIdent(d));
-        if (type.symbol) {
-          let name = Compiler.getTypeChecker().getFullyQualifiedName(type.symbol!);
-          return name === `"${require.resolve(file).replace(/\.ts$/, '')}".${typeof className === 'string' ? className : className.name}`;
-        } else {
-          return false;
-        }
-      })[0];
-
-    return inject;
-  }
-}
-
-function addImport(file: ts.SourceFile, imports: { path: string, ident: ts.Identifier }[]) {
-  let importStmts = imports
-    .map(({ path, ident }) => {
-      let imptStmt = ts.createImportDeclaration(
-        undefined, undefined,
-        ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
-        ts.createLiteral(require.resolve(path))
-      );
-
-      imptStmt.parent = file;
-      return imptStmt;
-    });
-
-  file.statements = ts.createNodeArray([
-    ...importStmts,
-    ...file.statements
-  ]);
-}
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
   if (ts.isClassDeclaration(node)) {
-    let foundDec = getDecorator(node, './injectable', 'Injectable');
+    let foundDec = TransformUtils.getDecorator(node, require.resolve('./injectable'), 'Injectable');
     let cons;
     for (let member of node.members) {
       if (ts.isConstructorDeclaration(member)) {
@@ -95,8 +44,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           ts.createLiteral('dependencies'),
           ts.createArrayLiteral(
             (cons.parameters! || []).map(x => {
-              let name = getDecorator(x, './injectable', 'Inject');
-              let type = Compiler.getTypeChecker().getTypeAtLocation(x);
+              let name = TransformUtils.getDecorator(x, require.resolve('./injectable'), 'Inject');
+              let type = TransformUtils.getTypeChecker().getTypeAtLocation(x);
               let decl = type!.symbol!.valueDeclaration!;
               let path = (decl as any).parent.fileName;
               let ident = ts.createIdentifier(`${(decl as any).name.text}`);
