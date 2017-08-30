@@ -4,7 +4,7 @@ import * as sourcemap from 'source-map-support';
 import * as path from 'path';
 import * as glob from 'glob';
 import * as chokidar from 'chokidar';
-import { dev } from './info';
+import { DEV_MODE } from './info';
 
 const Module = require('module');
 const originalLoader = Module._load;
@@ -82,7 +82,7 @@ export class Compiler {
 
   static prepareSourceMaps() {
     sourcemap.install({
-      emptyCacheBetweenOperations: this.debug
+      emptyCacheBetweenOperations: DEV_MODE
     });
 
     const compilerLoc = require.resolve('./compiler').split('@encore')[1];
@@ -202,11 +202,11 @@ export class Compiler {
 
     this.options = out.options;
     this.transformers = this.resolveTransformers();
-    this.debug = !process.env.PROD;
+    DEV_MODE = !process.env.PROD;
 
     require.extensions['.ts'] = this.requireHandler.bind(this);
 
-    if (this.debug) {
+    if (DEV_MODE) {
       Module._load = this.moduleLoadHandler.bind(this);
     }
 
@@ -229,7 +229,7 @@ export class Compiler {
     this.services = ts.createLanguageService(this.servicesHost, this.registry);
 
     // Now let's watch the files
-    if (this.debug) {
+    if (DEV_MODE) {
       this.watchFiles(rootFileNames);
     }
   }
