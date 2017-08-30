@@ -25,4 +25,9 @@ class Service {
 }
 
 
-Registry.getInstance(Service).doWork();
+async function run() {
+  let inst = await Registry.getInstance(Service);
+  inst.doWork();
+}
+
+run();

@@ -109,13 +109,13 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
                 });
 
                 let obj = ts.createObjectLiteral([
-                  ts.createPropertyAssignment('type', ts.createPropertyAccess(importName, ident)),
+                  ts.createPropertyAssignment('class', ts.createPropertyAccess(importName, ident)),
                   ts.createPropertyAssignment('name', name ? (name.expression as ts.CallExpression).arguments[0] : ts.createIdentifier('undefined'))
                 ]);
                 return obj;
               } else {
                 let obj = ts.createObjectLiteral([
-                  ts.createPropertyAssignment('type', (decl as any).name),
+                  ts.createPropertyAssignment('class', (decl as any).name),
                 ]);
                 return obj;
               }
