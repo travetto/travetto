@@ -57,4 +57,41 @@ export class TransformUtils {
 
     return file;
   }
+
+
+  static fromLiteral<T extends ts.Node>(val: T): T;
+  static fromLiteral(val: undefined): ts.Identifier;
+  static fromLiteral(val: null): ts.NullLiteral;
+  static fromLiteral(val: object): ts.ObjectLiteralExpression;
+  static fromLiteral(val: any[]): ts.ArrayLiteralExpression;
+  static fromLiteral(val: string | boolean | number): ts.LiteralExpression;
+  static fromLiteral(val: any) {
+    if (val && val.kind) { // If already a node
+      return val;
+    } else if (Array.isArray(val)) {
+      val = ts.createArrayLiteral(val.map(v => this.fromLiteral(v)));
+    } else if (val === undefined) {
+      val = ts.createLiteral('undefined');
+    } else if (val === null) {
+      val = ts.createNull();
+    } else if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+      val = ts.createLiteral(val);
+    } else {
+      let pairs: ts.PropertyAssignment[] = [];
+      for (let k of Object.keys(val)) {
+        pairs.push(
+          ts.createPropertyAssignment(k, this.fromLiteral(val[k]))
+        );
+      }
+      return ts.createObjectLiteral(pairs);
+    }
+    return val;
+  }
+
+  static extendObjectLiteral(addTo: object, lit?: ts.ObjectLiteralExpression) {
+    lit = lit || this.fromLiteral({});
+    let props = lit.properties;
+    let extra = this.fromLiteral(addTo).properties;
+    return ts.updateObjectLiteral(lit, [...props, ...extra]);
+  }
 }
