@@ -202,7 +202,6 @@ export class Compiler {
 
     this.options = out.options;
     this.transformers = this.resolveTransformers();
-    DEV_MODE = !process.env.PROD;
 
     require.extensions['.ts'] = this.requireHandler.bind(this);
 
