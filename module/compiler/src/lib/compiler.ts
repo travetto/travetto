@@ -229,5 +229,3 @@ export class Compiler {
     }
   }
 }
-
-Compiler.init(process.cwd());
