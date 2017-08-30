@@ -4,6 +4,7 @@ import * as sourcemap from 'source-map-support';
 import * as path from 'path';
 import * as glob from 'glob';
 import * as chokidar from 'chokidar';
+import { dev } from './info';
 
 const Module = require('module');
 const originalLoader = Module._load;
@@ -20,7 +21,6 @@ export class Compiler {
   static transformers: ts.CustomTransformers;
   static registry: ts.DocumentRegistry;
   static required = new Map<string, { module?: NodeModule, exports?: any }>();
-  static debug = false;
 
   static resolveOptions(name = this.configFile) {
     let out = ts.parseJsonSourceFileConfigFileContent(
