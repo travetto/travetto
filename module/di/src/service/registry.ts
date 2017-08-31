@@ -171,9 +171,7 @@ export class Registry {
   }
 
   static async initialize() {
-    if (this._waitingForInit) {
-      return await this.initalized;
-    } else {
+    if (!this._waitingForInit) {
       this._waitingForInit = true;
       let globs = (process.env.SCAN_GLOBS || 'src/**/*.ts').split(/\s+/);
       for (let glob of globs) {
@@ -181,5 +179,6 @@ export class Registry {
       }
       this.initalized.resolve(true);
     }
+    return await this.initalized;
   }
 }
