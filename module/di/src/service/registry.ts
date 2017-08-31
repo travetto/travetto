@@ -1,6 +1,5 @@
 import { Class, Dependency, InjectableConfig } from '../types';
-import { AppInfo } from "@encore/base";
-import { DefinableHandler } from "./proxy";
+import { AppInfo, RetargettingHandler } from '@encore/base';
 
 export const DEFAULT_INSTANCE = '__default';
 
@@ -55,9 +54,7 @@ export class Registry {
       this.proxyHandlers.has(config.target.__id!) &&
       this.proxyHandlers.get(config.target.__id!)!.has(config.name)
     ) {
-      console.log('Updating target');
-      let proxy: any = this.proxyHandlers.get(config.target.__id!)!.get(config.name);
-      this.construct(config.target, config.name).then(res => proxy.target = res);
+      this.createInstance(config.target, config.name);
     }
   }
 
@@ -89,7 +86,9 @@ export class Registry {
     return inst;
   }
 
-  private static registerInstance<T>(target: Class<T>, instance: T, name: string = DEFAULT_INSTANCE) {
+  private static async createInstance<T>(target: Class<T>, name: string = DEFAULT_INSTANCE) {
+    let instance = await this.construct(target, name);
+
     if (!this.instances.has(target.__id!)) {
       this.instances.set(target.__id!, new Map());
       this.proxyHandlers.set(target.__id!, new Map());
@@ -98,10 +97,17 @@ export class Registry {
     let out: any = instance;
 
     if (AppInfo.DEV_MODE) {
-      console.log('Registering proxy', target.name, name);
-      let handler = new DefinableHandler(out);
-      out = new Proxy({}, handler);
-      this.proxyHandlers.get(target.__id!)!.set(name, handler);
+      if (!this.instances.has(target.__id!)) {
+        console.log('Registering proxy', target.name, name);
+        let handler = new RetargettingHandler(out);
+        out = new Proxy({}, handler);
+        this.proxyHandlers.get(target.__id!)!.set(name, handler);
+      } else {
+        console.log('Updating target');
+        this.proxyHandlers.get(target.__id!)!.get(name)!.target = out;
+        // Don't re-set instance
+        return;
+      }
     }
 
     this.instances.get(target.__id!)!.set(name, out);
@@ -109,8 +115,7 @@ export class Registry {
 
   static async getInstance<T>(target: Class<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
     if (!this.instances.has(target.__id!) || !this.instances.get(target.__id!)!.has(name)) {
-      let res = await this.construct(target, name);
-      this.registerInstance(target, res, name);
+      this.createInstance(target, name);
     }
     return this.instances.get(target.__id!)!.get(name)!;
   }
