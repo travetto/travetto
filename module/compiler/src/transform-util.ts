@@ -109,7 +109,11 @@ export class TransformUtil {
     if (node && node.properties) {
       for (let prop of node.properties) {
         if (prop.name!.getText() === key) {
-          return prop;
+          if (ts.isPropertyAssignment(prop)) {
+            return prop.initializer;
+          } else if (ts.isShorthandPropertyAssignment(prop)) {
+            return prop.name;
+          }
         }
       }
     }
