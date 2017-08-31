@@ -11,8 +11,6 @@ export class ConfigLoader {
 
   private static NULL = 'NULL' + (Math.random() * 1000) + (new Date().getTime());
   private static data: ConfigMap = {};
-  private static namespaces: { [key: string]: boolean } = {};
-  private static initialized: boolean = false;
 
   private static writeProperty(o: any, k: string, v: any) {
     if (typeof v === 'string') {
@@ -22,12 +20,14 @@ export class ConfigLoader {
         v = v.indexOf('.') >= 0 ? parseFloat(v) : parseInt(v, 10);
       } else if (typeof o[k] !== 'string' && v === 'null') {
         v = this.NULL;
+      } else if (Array.isArray(o[k])) {
+        v = v.split(/,\s*/g);
       }
     }
     o[k] = v;
   }
 
-  private static merge(target: ConfigMap, source: ConfigMap) {
+  private static merge(target: ConfigMap, source: ConfigMap, gentle = false) {
     let targetFlat = flatten(target, { delimiter: '_' }) as any;
     let sourceFlat = flatten(source, { delimiter: '_' }) as any;
 
@@ -56,7 +56,7 @@ export class ConfigLoader {
       let lk = k.toLowerCase();
       let ns = lk.split('_', 2)[0];
 
-      if (this.namespaces[ns]) {
+      if (!gentle || ns in target) {
         if (!keyMap[lk]) { keyMap[lk] = k; }
         this.writeProperty(lowerFlat, lk, sourceFlat[k]);
       }
@@ -68,24 +68,6 @@ export class ConfigLoader {
       out[keyMap[k]] = lowerFlat[k];
     }
     ObjectUtil.merge(target, unflatten(out, { delimiter: '_' }));
-  }
-
-  static registerNamespace<T extends ConfigMap>(base: T) {
-    const ns = base['namespace'] as string;
-
-    // Store ref
-    this.namespaces[ns] = true;
-    this.namespaces[ns.toLowerCase()] = true;
-
-    // Nest object
-    let obj: ConfigMap = {};
-    obj[ns] = base;
-
-    // merge
-    this.merge(this.data, obj);
-
-    // Get ref to config object
-    this.data[ns] = this.data[ns] || {};
   }
 
   private static dropNulls(o: any) {
@@ -103,8 +85,14 @@ export class ConfigLoader {
     return o;
   }
 
-  static bindTo(obj: any, ns: string) {
-    ObjectUtil.merge(obj, this.data[ns]);
+  static bindTo(obj: any, key: string) {
+    let keys = key.split('.');
+    let sub: any = this.data;
+    while (keys.length && sub[keys[0]]) {
+      sub = sub[keys.shift()!];
+    }
+    console.log(obj, key, sub);
+    ObjectUtil.merge(obj, sub);
   }
 
   /*
@@ -117,33 +105,44 @@ export class ConfigLoader {
     console.log(`Initializing: ${envs.join(',')}`);
 
     // Load all namespaces from core
-    let files = await bulkRead('/node_modules/@encore**/config.yaml');
+    let files = await bulkRead('node_modules/@encore/**/config/*.yaml');
 
-    // Load all namespaces from app
-    files = files.concat(await bulkRead('src/**/config.yaml'));
+    // Load all configs, exclude env configs
+    files = files.concat(await bulkRead('config/*.yaml'));
 
     for (let file of files) {
-      let obj = yaml.safeLoad(file.data);
-      this.registerNamespace(obj);
+      let ns = file.name.split('/').pop()!.split('.yaml')[0];
+      yaml.safeLoadAll(file.data, doc => {
+        this.data[ns] = this.data[ns] || {};
+        this.merge(this.data, { [ns]: doc });
+      });
     }
 
-    files = await bulkRead(`src/env/{${envs.join(',')}}.yaml`)
-    let loaded = [];
-    for (let file of files) {
-      let obj = yaml.safeLoad(file.data);
-      this.merge(this.data, obj.data);
-      loaded.push(file.name.split('/').pop()!.split('.yaml')[0]);
-    }
+    if (envs.length) {
+      let loaded: string[] = [];
+      let envFiles = await bulkRead(`env/*.yaml`, undefined, x => {
+        let tested = x.split('/').pop()!.split('.yaml')[0];
+        let found = envs.indexOf(tested) >= 0;
+        if (found) {
+          loaded.push(tested);
+        }
+        return found;
+      });
 
-    console.log('Found configurations for', loaded);
+      console.log('Found configurations for', loaded);
+
+      for (let file of envFiles) {
+        yaml.safeLoadAll(file.data, doc => {
+          this.merge(this.data, doc);
+        });
+      }
+    }
 
     // Handle process.env
-    this.merge(this.data, process.env as { [key: string]: any });
+    this.merge(this.data, process.env as { [key: string]: any }, true);
 
     // Drop out nulls
     this.dropNulls(this.data);
-
-    this.initialized = true;
   }
 
   static log() {

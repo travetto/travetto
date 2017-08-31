@@ -1,20 +1,22 @@
 import { ConfigLoader } from '../service/config-loader';
 import { Registry, Class } from '@encore/di';
 
-export function Config(ns: string, name: string = ns) {
-  return (target: Class<any & { postLoad?: () => any }>) => {
-    let og = target.prototype.postLoad;
+export function Config(ns: string, depTarget?: Class<any>, name: string = ns) {
+  return (target: Class<any & { postConstruct?: () => any }>) => {
+    let og = target.prototype.postConstruct;
 
     Registry.register({
       name,
       class: target,
-      target: Config
+      target: depTarget || Config
     });
 
-    target.prototype.postLoad = function () {
+    target.prototype.postConstruct = function () {
       // Apply config
       ConfigLoader.bindTo(this, ns);
-      og.apply(this, arguments);
+      if (og) {
+        og.apply(this, arguments);
+      }
     }
     return target;
   };
