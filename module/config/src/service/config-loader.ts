@@ -20,8 +20,11 @@ export class ConfigLoader {
         v = v.indexOf('.') >= 0 ? parseFloat(v) : parseInt(v, 10);
       } else if (typeof o[k] !== 'string' && v === 'null') {
         v = this.NULL;
-      } else if (Array.isArray(o[k])) {
-        v = v.split(/,\s*/g);
+      } else if (k + '_0' in o) { // If array
+        v.split(/,\s*/g).forEach((el, i) => {
+          this.writeProperty(o, `${k}_${i}`, el);
+        });
+        return;
       }
     }
     o[k] = v;
@@ -91,21 +94,21 @@ export class ConfigLoader {
     while (keys.length && sub[keys[0]]) {
       sub = sub[keys.shift()!];
     }
-    console.log(obj, key, sub);
     ObjectUtil.merge(obj, sub);
   }
 
   /*
     Order of specificity (least to most)
-      - Local configs -> located in the source folder
-      - External config file -> loaded from env/json
+      - Module configs -> located in the node_modules/@encore/config folder
+      - Local configs -> located in the config folder
+      - External config file -> loaded from env
       - Environment vars -> Overrides everything
   */
   static async initialize(...envs: string[]) {
     console.log(`Initializing: ${envs.join(',')}`);
 
     // Load all namespaces from core
-    let files = await bulkRead('node_modules/@encore/**/config/*.yaml');
+    let files = await bulkRead('node_modules/@encore/*/config/*.yaml');
 
     // Load all configs, exclude env configs
     files = files.concat(await bulkRead('config/*.yaml'));
