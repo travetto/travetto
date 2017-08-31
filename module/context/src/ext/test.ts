@@ -1,11 +1,11 @@
-import { Context } from '../lib/context';
+import { Context } from '../context';
 import { beforeTest, afterTest } from '@encore/test';
 
 let store: { [key: string]: any } = {};
 
 let storage = {
-  run: () => {},
-  bindEmitter(e:any) {},
+  run: () => { },
+  bindEmitter(e: any) { },
   get: (key: string) => store[key],
   set: (key: string, val: any) => store[key] = val
 };
