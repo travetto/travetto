@@ -6,6 +6,7 @@ import * as glob from 'glob';
 import * as chokidar from 'chokidar';
 import { AppInfo } from './app-info';
 import { RetargettingHandler } from './proxy';
+import { bulkRequire } from "./bulk-require";
 
 const Module = require('module');
 const originalLoader = Module._load;
@@ -45,22 +46,21 @@ export class Compiler {
   }
 
   static resolveTransformers() {
-    const transformers: { [key: string]: any } = {}
+    const transformers: { [key: string]: any } = {};
+
     // Load transformers
     for (const phase of ['before', 'after']) {
-      for (const f of glob.sync(`${this.cwd}/**/transformer-${phase}*.ts`)) {
-        const res = require(path.resolve(f));
-        if (res) {
-          if (!transformers[phase]) {
-            transformers[phase] = [];
-          }
-          for (const k of Object.keys(res)) {
-            transformers[phase].push(res[k]);
-          }
+      if (!transformers[phase]) {
+        transformers[phase] = [];
+      }
+
+      for (let res of bulkRequire(`**/transformer-${phase}*.ts`)) {
+        for (const k of Object.keys(res)) {
+          transformers[phase].push(res[k]);
         }
       }
+      return transformers;
     }
-    return transformers;
   }
 
   static moduleLoadHandler(request: string, parent: string) {
