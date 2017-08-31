@@ -1,6 +1,6 @@
 export class Util {
   static somethingImport() {
-    console.log("I'm importantszd!");
+    console.log('I\'m importantszd!');
   }
 
   static hi() {

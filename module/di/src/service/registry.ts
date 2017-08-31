@@ -89,7 +89,7 @@ export class Registry {
     let aliasMap = this.aliases.get(targetId);
 
     if (!aliasMap || !aliasMap.has(name)) {
-      throw new Error(`Dependency not found: ${target.name}#${name} @ ${targetId}`);
+      throw new Error(`Dependency not found: ${targetId}/${name}`);
     }
 
     let clz = aliasMap.get(name)!;
