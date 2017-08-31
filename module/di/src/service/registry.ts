@@ -59,7 +59,13 @@ export class Registry {
   }
 
   static async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
-    let clz = this.aliases.get(target.__id!)!.get(name)!;
+    let aliasMap = this.aliases.get(target.__id!);
+
+    if (!aliasMap || !aliasMap.has(name)) {
+      throw new Error(`Dependency not found: ${target.name}#${name} @ ${target.__id}`);
+    }
+
+    let clz = aliasMap.get(name)!;
     let managed = this.injectables.get(clz)!;
 
     const fieldKeys = Object.keys(managed.dependencies.fields!);
