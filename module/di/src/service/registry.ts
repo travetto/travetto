@@ -2,6 +2,7 @@ import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
 import { AppInfo, RetargettingHandler, bulkRequire } from '@encore/base';
 import * as path from 'path';
 import { InjectionError } from './error';
+import { externalPromise } from '@encore/util';
 
 export const DEFAULT_INSTANCE = '__default';
 
@@ -30,14 +31,6 @@ function getId<T>(cls: Class<T> | ClassTarget<T>): string {
   return target.__id;
 }
 
-function externalizedPromise() {
-  let p: Promise<any> & { resolve?: Function, reject?: Function } = new Promise((resolve, reject) => {
-    p.resolve = resolve;
-    p.reject = reject;
-  });
-  return p as (Promise<any> & { resolve: Function, reject: Function });
-}
-
 export class Registry {
   static injectables = new Map<string, InjectableConfig<any>>();
   static instances = new Map<string, Map<string, any>>();
@@ -47,7 +40,7 @@ export class Registry {
   static byAnnotation = new Map<Function, Set<string>>();
 
   private static _waitingForInit = false;
-  static initalized = externalizedPromise();
+  static initalized = externalPromise();
 
   static register<T>(pconfig: Partial<InjectableConfig<T>>) {
     pconfig.name = pconfig.name || DEFAULT_INSTANCE;
