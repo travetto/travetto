@@ -61,11 +61,9 @@ export class Compiler {
 
   static moduleLoadHandler(request: string, parent: string) {
     let p = Module._resolveFilename(request, parent);
-    if (!this.modules.has(p)) {
-      this.modules.set(p, {});
-    }
+
     let ret = originalLoader.apply(this, arguments);
-    if (AppInfo.DEV_MODE) {
+    if (AppInfo.WATCH_MODE) {
       if (!this.modules.has(p)) {
         let handler = new RetargettingHandler(ret);
         ret = new Proxy({}, handler);
@@ -76,6 +74,7 @@ export class Compiler {
         ret = myModule.proxy!;
       }
     }
+
     return ret;
   }
 
@@ -92,7 +91,7 @@ export class Compiler {
 
   static prepareSourceMaps() {
     sourcemap.install({
-      emptyCacheBetweenOperations: AppInfo.DEV_MODE
+      emptyCacheBetweenOperations: AppInfo.WATCH_MODE
     });
 
     const compilerLoc = require.resolve('./compiler').split('@encore')[1];
@@ -211,7 +210,7 @@ export class Compiler {
 
     require.extensions['.ts'] = this.requireHandler.bind(this);
 
-    if (AppInfo.DEV_MODE) {
+    if (AppInfo.WATCH_MODE) {
       Module._load = this.moduleLoadHandler.bind(this);
     }
 
@@ -234,7 +233,7 @@ export class Compiler {
     this.services = ts.createLanguageService(this.servicesHost, this.registry);
 
     // Now let's watch the files
-    if (AppInfo.DEV_MODE) {
+    if (AppInfo.WATCH_MODE) {
       this.watchFiles(rootFileNames);
     }
   }
