@@ -1,4 +1,4 @@
-import { Class, Dependency, InjectableConfig } from '../types';
+import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
 import { AppInfo, RetargettingHandler } from '@encore/base';
 
 export const DEFAULT_INSTANCE = '__default';
@@ -58,7 +58,7 @@ export class Registry {
     }
   }
 
-  static async construct<T>(target: Class<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
+  static async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
     let clz = this.aliases.get(target.__id!)!.get(name)!;
     let managed = this.injectables.get(clz)!;
 
@@ -67,7 +67,7 @@ export class Registry {
     const promises =
       managed.dependencies.cons
         .concat(fieldKeys.map(x => managed.dependencies.fields[x]))
-        .map(x => this.getInstance(x.class, x.name));
+        .map(x => this.getInstance(x.target, x.name));
 
     const allDeps = await Promise.all(promises);
 
@@ -86,7 +86,7 @@ export class Registry {
     return inst;
   }
 
-  private static async createInstance<T>(target: Class<T>, name: string = DEFAULT_INSTANCE) {
+  private static async createInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE) {
     let instance = await this.construct(target, name);
 
     if (!this.instances.has(target.__id!)) {
@@ -113,7 +113,7 @@ export class Registry {
     this.instances.get(target.__id!)!.set(name, out);
   }
 
-  static async getInstance<T>(target: Class<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
+  static async getInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
     if (!this.instances.has(target.__id!) || !this.instances.get(target.__id!)!.has(name)) {
       await this.createInstance(target, name);
     }

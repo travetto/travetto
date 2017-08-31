@@ -33,12 +33,12 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
     });
 
     return TransformUtils.fromLiteral({
-      class: ts.createPropertyAccess(importName, ident),
+      target: ts.createPropertyAccess(importName, ident),
       name: name ? (name.expression as ts.CallExpression).arguments[0] : undefined
     });
   } else {
     return TransformUtils.fromLiteral({
-      class: (decl as any).name
+      target: (decl as any).name
     });
   }
 }

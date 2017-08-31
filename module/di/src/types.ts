@@ -1,3 +1,4 @@
+export type ClassTarget<T> = Class<T> | (Function & { __id?: string });
 
 export interface Class<T> {
   new(...args: any[]): T;
@@ -5,7 +6,7 @@ export interface Class<T> {
 }
 
 export interface InjectableConfig<T> extends Dependency<T> {
-  target: Class<T>;
+  class: Class<T>;
   dependencies: {
     cons: Dependency<any>[],
     fields: { [key: string]: Dependency<any> }
@@ -14,6 +15,6 @@ export interface InjectableConfig<T> extends Dependency<T> {
 }
 
 export interface Dependency<T> {
-  class: Class<T>;
+  target: ClassTarget<T>;
   name: string;
 }
