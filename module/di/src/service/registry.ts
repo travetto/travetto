@@ -1,6 +1,7 @@
 import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
 import { AppInfo, RetargettingHandler } from '@encore/base';
 import * as path from 'path';
+import { InjectionError } from './error';
 
 export const DEFAULT_INSTANCE = '__default';
 
@@ -89,7 +90,7 @@ export class Registry {
     let aliasMap = this.aliases.get(targetId);
 
     if (!aliasMap || !aliasMap.has(name)) {
-      throw new Error(`Dependency not found: ${targetId}[${name}]`);
+      throw new InjectionError(`Dependency not found: ${targetId}[${name}]`);
     }
 
     let clz = aliasMap.get(name)!;
@@ -100,7 +101,17 @@ export class Registry {
     const promises =
       managed.dependencies.cons
         .concat(fieldKeys.map(x => managed.dependencies.fields[x]))
-        .map(x => this.getInstance(x.target, x.name));
+        .map(async x => {
+          try {
+            return this.getInstance(x.target, x.name);
+          } catch (e) {
+            if (x.optional && e instanceof InjectionError) {
+              return undefined;
+            } else {
+              throw e;
+            }
+          }
+        });
 
     const allDeps = await Promise.all(promises);
 
