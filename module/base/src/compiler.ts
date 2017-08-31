@@ -6,7 +6,7 @@ import * as glob from 'glob';
 import * as chokidar from 'chokidar';
 import { AppInfo } from './app-info';
 import { RetargettingHandler } from './proxy';
-import { bulkRequire } from "./bulk-require";
+import { bulkRequire } from './bulk-find';
 
 const Module = require('module');
 const originalLoader = Module._load;
@@ -59,8 +59,9 @@ export class Compiler {
           transformers[phase].push(res[k]);
         }
       }
-      return transformers;
     }
+
+    return transformers;
   }
 
   static moduleLoadHandler(request: string, parent: string) {
