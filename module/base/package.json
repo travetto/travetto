@@ -1,20 +1,20 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@types/chokidar": "^1.7.2",
-    "@types/glob": "^5.0.31",
-    "@types/node": "^8.0.24",
-    "@types/source-map-support": "^0.4.0",
-    "chokidar": "^1.7.0",
-    "glob": "^7.1.2",
-    "source-map-support": "^0.4.16",
-    "tslint": "^5.7.0",
+    "@types/chokidar": "^1.7.2", 
+    "@types/glob": "^5.0.31", 
+    "@types/node": "^8.0.24", 
+    "@types/source-map-support": "^0.4.0", 
+    "chokidar": "^1.7.0", 
+    "glob": "^7.1.2", 
+    "source-map-support": "^0.4.16", 
+    "tslint": "^5.7.0", 
     "typescript": "^2.5.1"
-  },
-  "description": "",
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@encore/base",
-  "scripts": {},
-  "version": "2.0.12"
+  }, 
+  "description": "", 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@encore/base", 
+  "scripts": {}, 
+  "version": "2.0.13"
 }
