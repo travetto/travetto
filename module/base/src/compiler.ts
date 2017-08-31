@@ -21,7 +21,11 @@ export class Compiler {
   static options: ts.CompilerOptions;
   static transformers: ts.CustomTransformers;
   static registry: ts.DocumentRegistry;
-  static modules = new Map<string, { proxy?: any, handler?: RetargettingHandler<any> }>();
+  static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
+
+  static get rootFolders() {
+    return AppInfo.DEV_MODE ? '{src,test}' : 'src';
+  }
 
   static resolveOptions(name = this.configFile) {
     let out = ts.parseJsonSourceFileConfigFileContent(
@@ -63,15 +67,17 @@ export class Compiler {
     let p = Module._resolveFilename(request, parent);
 
     let ret = originalLoader.apply(this, arguments);
-    if (AppInfo.WATCH_MODE) {
+    if (AppInfo.WATCH_MODE && p.indexOf(process.cwd()) >= 0 && p.indexOf('node_modules') < 0) {
       if (!this.modules.has(p)) {
+        console.log('Loading Module', p);
         let handler = new RetargettingHandler(ret);
-        ret = new Proxy({}, handler);
-        this.modules.set(p, { proxy: ret, handler });
+        ret.exports = new Proxy({}, handler);
+        this.modules.set(p, { module: ret, handler });
       } else {
-        const myModule = this.modules.get(p)!;
-        myModule.handler!.target = ret;
-        ret = myModule.proxy!;
+        console.log('Reloading Module', p);
+        const conf = this.modules.get(p)!;
+        conf.handler!.target = ret;
+        ret = conf.module!;
       }
     }
 
@@ -148,7 +154,7 @@ export class Compiler {
       this.emitFile(fileName);
     }
 
-    let watcher = chokidar.watch(`${this.cwd}/src/**/*.ts`, {
+    let watcher = chokidar.watch(`${this.cwd}/${this.rootFolders}/**/*.ts`, {
       ignored: [/.*\/transformer-.*\.ts$/],
       persistent: true,
       interval: 250,
