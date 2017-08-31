@@ -19,7 +19,7 @@ export const Transformer =
     };
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-  let name = TransformUtils.getDecorator(param, require.resolve('./injectable'), 'Inject');
+  let name = TransformUtils.getDecorator(param, require.resolve('../decorator/injectable'), 'Inject');
   let type = TransformUtils.getTypeChecker().getTypeAtLocation(param);
   let decl = type!.symbol!.valueDeclaration!;
   let path = (decl as any).parent.fileName;
@@ -45,7 +45,7 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
   if (ts.isClassDeclaration(node)) {
-    let foundDec = TransformUtils.getDecorator(node, require.resolve('./injectable'), 'Injectable');
+    let foundDec = TransformUtils.getDecorator(node, require.resolve('../decorator/injectable'), 'Injectable');
     let classId = ts.createProperty(
       undefined,
       [ts.createToken(ts.SyntaxKind.StaticKeyword)],
@@ -76,7 +76,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     let fields = node.members
       .filter(x => ts.isPropertyDeclaration(x))
-      .filter(x => !!TransformUtils.getDecorator(x, require.resolve('./injectable'), 'Inject'));
+      .filter(x => !!TransformUtils.getDecorator(x, require.resolve('../decorator/injectable'), 'Inject'));
 
     let ret = ts.visitEachChild(node, c => visitNode(context, c, state), context);
 
