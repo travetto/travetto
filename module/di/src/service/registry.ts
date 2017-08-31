@@ -50,7 +50,7 @@ export class Registry {
     }
 
     // Live RELOAD
-    if (AppInfo.DEV_MODE &&
+    if (AppInfo.WATCH_MODE &&
       this.proxyHandlers.has(config.target.__id!) &&
       this.proxyHandlers.get(config.target.__id!)!.has(config.name)
     ) {
@@ -96,7 +96,7 @@ export class Registry {
 
     let out: any = instance;
 
-    if (AppInfo.DEV_MODE) {
+    if (AppInfo.WATCH_MODE) {
       if (!this.instances.has(target.__id!) || !this.instances.get(target.__id!)!.has(name)) {
         console.log('Registering proxy', target.name, name);
         let handler = new RetargettingHandler(out);

@@ -1,4 +1,5 @@
 import { Injectable } from "../src/decorator";
+import { Util } from "./util";
 
 @Injectable({ name: 'a' })
 export class DbConfig {
@@ -6,5 +7,8 @@ export class DbConfig {
     console.log("Creating dbconfig");
   }
 
-  getUrl() { return 'mongodb://ssdtz'; }
+  getUrl() {
+    Util.work2();
+    return 'mongodb://ssdtz';
+  }
 }
