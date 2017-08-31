@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 
 let pkg = JSON.parse(fs.readFileSync(process.cwd() + '/package.json').toString());
+const dev = !!(process.env.DEV || !process.env.PROD);
 
 export const AppInfo = {
   VERSION: pkg.version,
@@ -9,5 +10,6 @@ export const AppInfo = {
   LICENSE: pkg.license,
   AUTHOR: pkg.author,
   DESCRIPTION: pkg.description,
-  DEV_MODE: !!(process.env.DEV || !process.env.PROD)
+  DEV_MODE: dev,
+  WATCH_MODE: dev
 };
