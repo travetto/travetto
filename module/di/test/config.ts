@@ -1,4 +1,4 @@
-import { Injectable } from "../lib/decorator";
+import { Injectable } from "../src/decorator";
 
 @Injectable({ name: 'a' })
 export class DbConfig {

@@ -1,6 +1,6 @@
-import { Injectable, Inject } from '../lib/decorator/injectable';
+import { Injectable, Inject } from '../src/decorator/injectable';
 import { DbConfig } from './config';
-import { Registry } from '../lib/service';
+import { Registry } from '../src/service';
 
 @Injectable()
 class Database {
