@@ -97,7 +97,7 @@ export class Registry {
     let out: any = instance;
 
     if (AppInfo.DEV_MODE) {
-      if (!this.instances.has(target.__id!)) {
+      if (!this.instances.has(target.__id!) || !this.instances.get(target.__id!)!.has(name)) {
         console.log('Registering proxy', target.name, name);
         let handler = new RetargettingHandler(out);
         out = new Proxy({}, handler);
@@ -115,7 +115,7 @@ export class Registry {
 
   static async getInstance<T>(target: Class<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
     if (!this.instances.has(target.__id!) || !this.instances.get(target.__id!)!.has(name)) {
-      this.createInstance(target, name);
+      await this.createInstance(target, name);
     }
     return this.instances.get(target.__id!)!.get(name)!;
   }
