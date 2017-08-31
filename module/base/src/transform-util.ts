@@ -117,7 +117,7 @@ export class TransformUtil {
   }
 
   static getTypeInfoForNode(node: ts.Node) {
-    let type = TransformUtil.getTypeChecker().getTypeAtLocation(node);
+    let type = this.getTypeChecker().getTypeAtLocation(node);
     let decl = type!.symbol!.valueDeclaration!;
     let path = (decl as any).parent.fileName;
     let ident = (decl as any).name;
