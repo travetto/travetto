@@ -1,3 +1,5 @@
+import { init } from '@encore/bootstrap';
+
 export type Promisable = Promise<any> | (() => Promise<any>);
 
 let _beforeTest: ActionFunction[] = [];
@@ -5,7 +7,7 @@ let _beforeSuite: ActionFunction[] = [];
 let _afterTest: ActionFunction[] = [];
 let _afterSuite: ActionFunction[] = [];
 let _beforeAll: Promisable[] = [];
-let _afterAll: Promisable[] = [];
+let _afterAll: Promisable[] = [init];
 
 export let INIT_TIMEOUT = 10000;
 export let CLEANUP_TIMEOUT = 10000;
