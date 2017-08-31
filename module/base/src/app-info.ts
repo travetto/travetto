@@ -1,8 +1,17 @@
 import * as fs from 'fs';
 
 let pkg = JSON.parse(fs.readFileSync(process.cwd() + '/package.json').toString());
-let env = (process.env.env || 'dev').toLowerCase();
-const dev = env === 'dev' || env === 'test';
+const ENV_MAP =
+  (['ENV', 'env', 'DEFAULT_ENV']
+    .map(x => process.env[x])
+    .find(x => !!x) || 'dev')
+    .toLowerCase()
+    .split(/[, ]+/)
+    .reduce(
+    (acc, e) => (acc[e] = true) && acc,
+    { application: true } as { [key: string]: boolean })
+
+const dev = ENV_MAP.dev || ENV_MAP.test;
 
 export const AppInfo = {
   VERSION: pkg.version,
@@ -11,6 +20,6 @@ export const AppInfo = {
   LICENSE: pkg.license,
   AUTHOR: pkg.author,
   DESCRIPTION: pkg.description,
-  ENV: env,
-  WATCH_MODE: env === 'dev' && !process.env.NO_WATCH
+  ENV: ENV_MAP,
+  WATCH_MODE: ENV_MAP.dev && !process.env.NO_WATCH
 };
