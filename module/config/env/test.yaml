@@ -3,6 +3,6 @@ db:
     name: Oscar
     connection: mysql://
     hosts:
-      - a
+      - a 
       - b
       - c
