@@ -71,7 +71,7 @@ export class TransformUtil {
     } else if (Array.isArray(val)) {
       val = ts.createArrayLiteral(val.map(v => this.fromLiteral(v)));
     } else if (val === undefined) {
-      val = ts.createLiteral('undefined');
+      val = ts.createIdentifier('undefined');
     } else if (val === null) {
       val = ts.createNull();
     } else if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
