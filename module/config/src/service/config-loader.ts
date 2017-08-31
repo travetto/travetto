@@ -1,5 +1,5 @@
 import { ObjectUtil } from '@encore/util';
-import { bulkRead } from '@encore/base';
+import { bulkRead, AppInfo } from '@encore/base';
 import * as flatten from 'flat';
 import * as yaml from 'js-yaml';
 
@@ -104,7 +104,8 @@ export class ConfigLoader {
       - External config file -> loaded from env
       - Environment vars -> Overrides everything
   */
-  static async initialize(...envs: string[]) {
+  static async initialize() {
+    let envs = AppInfo.ENV;
     console.log(`Initializing: ${envs.join(',')}`);
 
     // Load all namespaces from core
