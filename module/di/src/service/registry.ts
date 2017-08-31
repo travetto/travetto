@@ -1,5 +1,5 @@
 import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
-import { AppInfo, RetargettingHandler } from '@encore/base';
+import { AppInfo, RetargettingHandler, bulkRequire } from '@encore/base';
 import * as path from 'path';
 import { InjectionError } from './error';
 
@@ -30,6 +30,14 @@ function getId<T>(cls: Class<T> | ClassTarget<T>): string {
   return target.__id;
 }
 
+function externalizedPromise() {
+  let p: Promise<any> & { resolve?: Function, reject?: Function } = new Promise((resolve, reject) => {
+    p.resolve = resolve;
+    p.reject = reject;
+  });
+  return p as (Promise<any> & { resolve: Function, reject: Function });
+}
+
 export class Registry {
   static injectables = new Map<string, InjectableConfig<any>>();
   static instances = new Map<string, Map<string, any>>();
@@ -37,6 +45,9 @@ export class Registry {
 
   static aliases = new Map<string, Map<string, string>>();
   static byAnnotation = new Map<Function, Set<string>>();
+
+  private static _waitingForInit = false;
+  static initalized = externalizedPromise();
 
   static register<T>(pconfig: Partial<InjectableConfig<T>>) {
     pconfig.name = pconfig.name || DEFAULT_INSTANCE;
@@ -164,5 +175,18 @@ export class Registry {
       await this.createInstance(target, name);
     }
     return this.instances.get(targetId)!.get(name)!;
+  }
+
+  static async initialize() {
+    if (this._waitingForInit) {
+      return await this.initalized;
+    } else {
+      this._waitingForInit = true;
+      let globs = (process.env.SCAN_GLOBS || 'src/**/*.ts').split(/\s+/);
+      for (let glob of globs) {
+        bulkRequire(glob);
+      }
+      this.initalized.resolve(true);
+    }
   }
 }
