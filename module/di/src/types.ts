@@ -1,8 +1,8 @@
-export type ClassTarget<T> = Class<T> | (Function & { __id?: string });
+export type ClassTarget<T> = Class<T> | (Function & { __filename?: string });
 
 export interface Class<T> {
   new(...args: any[]): T;
-  __id?: string;
+  __filename?: string;
 }
 
 export interface InjectableConfig<T> extends Dependency<T> {

@@ -48,15 +48,19 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
   }
 }
 
+function getIdent() {
+  return ts.createProperty(
+    undefined,
+    [ts.createToken(ts.SyntaxKind.StaticKeyword)],
+    '__filename', undefined, undefined,
+    ts.createIdentifier('__filename')
+  );
+
+}
+
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
   if (ts.isClassDeclaration(node)) {
     let foundDec = TransformUtil.getDecorator(node, require.resolve('../decorator/injectable'), 'Injectable');
-    let classId = ts.createProperty(
-      undefined,
-      [ts.createToken(ts.SyntaxKind.StaticKeyword)],
-      '__id', undefined, undefined,
-      ts.createBinary(ts.createIdentifier('__filename'), ts.SyntaxKind.PlusToken, ts.createLiteral('/' + node.name!.getText()))
-    );
 
     if (!foundDec) {
       return ts.updateClassDeclaration(node,
@@ -66,7 +70,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         node.typeParameters,
         ts.createNodeArray(node.heritageClauses),
         ts.createNodeArray([
-          classId,
+          getIdent(),
           ...node.members
         ])) as any;
     }
@@ -120,7 +124,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         ret.typeParameters,
         ts.createNodeArray(ret.heritageClauses),
         ts.createNodeArray([
-          classId,
+          getIdent(),
           ...ret.members
         ])) as any;
     }
