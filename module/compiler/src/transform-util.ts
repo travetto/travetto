@@ -94,4 +94,33 @@ export class TransformUtils {
     let extra = this.fromLiteral(addTo).properties;
     return ts.updateObjectLiteral(lit, [...props, ...extra]);
   }
+
+  static getPrimaryArgument<T>(node: ts.CallExpression | ts.Decorator | undefined): T | undefined {
+    if (node && ts.isDecorator(node)) {
+      node = node.expression as any as ts.CallExpression;
+    }
+    if (node && node!.arguments && node!.arguments.length) {
+      return node.arguments[0] as any as T;
+    }
+    return;
+  }
+
+  static getObjectValue(node: ts.ObjectLiteralExpression | undefined, key: string) {
+    if (node) {
+      for (let prop of node.properties) {
+        if (prop.name!.getText() === key) {
+          return prop;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  static getTypeInfoForNode(node: ts.Node) {
+    let type = TransformUtils.getTypeChecker().getTypeAtLocation(node);
+    let decl = type!.symbol!.valueDeclaration!;
+    let path = (decl as any).parent.fileName;
+    let ident = (decl as any).name;
+    return { path, ident, name: ident.text };
+  }
 }
