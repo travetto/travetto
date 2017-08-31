@@ -16,7 +16,7 @@ const PATH_RE = new RegExp(RE_SEP, 'g');
 function getId<T>(cls: Class<T> | ClassTarget<T>): string {
   let target = cls as any;
 
-  if (target.__id) {
+  if (!target.__id) {
     let rootName = cls.__filename!
       .split(process.cwd())[1]
       .replace(SRC_RE, SEP)

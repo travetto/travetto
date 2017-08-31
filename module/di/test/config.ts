@@ -1,10 +1,10 @@
-import { Injectable } from "../src/decorator";
-import { Util } from "./util";
+import { Injectable } from '../src/decorator';
+import { Util } from './util';
 
 @Injectable({ name: 'a' })
 export class DbConfig {
   constructor() {
-    console.log("Creating dbconfig");
+    console.log('Creating dbconfig');
   }
 
   getUrl() {

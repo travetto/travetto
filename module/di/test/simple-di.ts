@@ -7,18 +7,18 @@ class Database {
   @Inject({ name: 'a' }) dbConfig: DbConfig;
 
   postConstruct() {
-    console.log("Creating database", this.dbConfig.getUrl());
+    console.log('Creating database', this.dbConfig.getUrl());
   }
 
   query() {
-    console.log("Getting stuff", this.dbConfig.getUrl());
+    console.log('Getting stuff', this.dbConfig.getUrl());
   }
 }
 
 @Injectable()
 class Service {
   constructor(private db: Database) {
-    console.log("Creating service", db);
+    console.log('Creating service', db);
   }
 
   doWork() {
