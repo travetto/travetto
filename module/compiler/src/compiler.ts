@@ -73,7 +73,7 @@ export class Compiler {
       if (!this.modules.has(p)) {
         let handler = new RetargettingHandler(mod);
         out = new Proxy({}, handler);
-        this.modules.set(p, { module: mod, handler });
+        this.modules.set(p, { module: out, handler });
       } else {
         const conf = this.modules.get(p)!;
         conf.handler!.target = mod;
