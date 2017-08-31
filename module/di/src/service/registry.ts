@@ -21,7 +21,8 @@ function getId<T>(cls: Class<T> | ClassTarget<T>): string {
       .split(process.cwd())[1]
       .replace(SRC_RE, SEP)
       .replace(PATH_RE, '.')
-      .replace(/^\./, '');
+      .replace(/^\./, '')
+      .replace(/\.(t|j)s$/, '');
 
     target.__id = `${rootName}#${cls.name}`;
   }
