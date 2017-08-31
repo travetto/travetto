@@ -1,4 +1,6 @@
 import { Class, Dependency, InjectableConfig } from '../types';
+import { AppInfo } from "@encore/base";
+import { DefinableHandler } from "./proxy";
 
 export const DEFAULT_INSTANCE = '__default';
 
@@ -7,18 +9,12 @@ export interface ManagedExtra {
 }
 
 export class Registry {
-  static injectables = new Map<Class<any>, InjectableConfig<any>>();
-  static instances = new Map<Class<any>, Map<string, any>>();
+  static injectables = new Map<string, InjectableConfig<any>>();
+  static instances = new Map<string, Map<string, any>>();
+  static proxies = new Map<string, Map<string, any>>();
 
-  static aliases = new Map<Class<any>, Map<string, Class<any>>>();
-  static byAnnotation = new Map<Function, Set<Class<any>>>();
-
-  private static registerInstance<T>(cls: Class<T>, instance: T, name: string = DEFAULT_INSTANCE) {
-    if (!this.instances.has(cls)) {
-      this.instances.set(cls, new Map());
-    }
-    this.instances.get(cls)!.set(name, instance);
-  }
+  static aliases = new Map<string, Map<string, string>>();
+  static byAnnotation = new Map<Function, Set<string>>();
 
   static register<T>(pconfig: Partial<InjectableConfig<T>>) {
     pconfig.name = pconfig.name || DEFAULT_INSTANCE;
@@ -39,37 +35,44 @@ export class Registry {
       obj.name = obj.name || DEFAULT_INSTANCE;
     }
 
-    this.injectables.set(config.class, config);
+    this.injectables.set(config.class.__id!, config);
 
-    if (!this.aliases.has(config.target)) {
-      this.aliases.set(config.target, new Map());
+    if (!this.aliases.has(config.target.__id!)) {
+      this.aliases.set(config.target.__id!, new Map());
     }
 
-    this.aliases.get(config.target)!.set(config.name, config.class);
+    this.aliases.get(config.target.__id!)!.set(config.name, config.class.__id!);
 
     for (let anno of config.annotations) {
       if (!this.byAnnotation.has(anno)) {
         this.byAnnotation.set(anno, new Set());
       }
-      this.byAnnotation.get(anno)!.add(config.class);
+      this.byAnnotation.get(anno)!.add(config.class.__id!);
+    }
+
+    // Live RELOAD
+    if (AppInfo.DEV_MODE &&
+      this.proxies.has(config.target.__id!) &&
+      this.proxies.get(config.target.__id!)!.has(config.name)
+    ) {
+      console.log('Updating target');
+      let proxy: any = this.proxies.get(config.target.__id!)!.has(config.name);
+      this.construct(config.target, config.name).then(res => proxy.target = res);
     }
   }
 
   static async construct<T>(target: Class<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
-    let clz = this.aliases.get(target)!.get(name)!;
+    let clz = this.aliases.get(target.__id!)!.get(name)!;
     let managed = this.injectables.get(clz)!;
 
-    console.log("Getting", target, clz, name, managed);
-
-    const consPromises = managed.dependencies.cons
-      .map(x => this.getInstance(x.class, x.name));
-
     const fieldKeys = Object.keys(managed.dependencies.fields!);
-    const fieldPromises = fieldKeys
-      .map(x => managed.dependencies.fields[x])
-      .map(x => this.getInstance(x.class, x.name));
 
-    const allDeps = await Promise.all(consPromises.concat(fieldPromises));
+    const promises =
+      managed.dependencies.cons
+        .concat(fieldKeys.map(x => managed.dependencies.fields[x]))
+        .map(x => this.getInstance(x.class, x.name));
+
+    const allDeps = await Promise.all(promises);
 
     const consValues = allDeps.slice(0, managed.dependencies.cons.length);
     const fieldValues = allDeps.slice(managed.dependencies.cons.length);
@@ -86,14 +89,29 @@ export class Registry {
     return inst;
   }
 
+  private static registerInstance<T>(target: Class<T>, instance: T, name: string = DEFAULT_INSTANCE) {
+    if (!this.instances.has(target.__id!)) {
+      this.instances.set(target.__id!, new Map());
+      this.proxies.set(target.__id!, new Map());
+    }
+
+    let out: any = instance;
+
+    if (AppInfo.DEV_MODE) {
+      console.log('Registering proxy', target.name, name);
+      let handler = new DefinableHandler(out);
+      out = new Proxy({}, handler);
+      this.proxies.get(target.__id!)!.set(name, handler);
+    }
+
+    this.instances.get(target.__id!)!.set(name, out);
+  }
+
   static async getInstance<T>(target: Class<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
-    if (!this.instances.has(target)) {
-      this.instances.set(target, new Map());
-    }
-    if (!this.instances.get(target)!.has(name)) {
+    if (!this.instances.has(target.__id!) || !this.instances.get(target.__id!)!.has(name)) {
       let res = await this.construct(target, name);
-      this.instances.get(target)!.set(name, res);
+      this.registerInstance(target, res, name);
     }
-    return this.instances.get(target)!.get(name)!;
+    return this.instances.get(target.__id!)!.get(name)!;
   }
 }

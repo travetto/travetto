@@ -6,5 +6,5 @@ export class DbConfig {
     console.log("Creating dbconfig");
   }
 
-  getUrl() { return 'mongodb://'; }
+  getUrl() { return 'mongodb://ssdt'; }
 }

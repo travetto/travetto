@@ -1,6 +1,7 @@
 
 export interface Class<T> {
   new(...args: any[]): T;
+  __id?: string;
 }
 
 export interface InjectableConfig<T> extends Dependency<T> {

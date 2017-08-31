@@ -46,6 +46,26 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
   if (ts.isClassDeclaration(node)) {
     let foundDec = TransformUtils.getDecorator(node, require.resolve('./injectable'), 'Injectable');
+    let classId = ts.createProperty(
+      undefined,
+      [ts.createToken(ts.SyntaxKind.StaticKeyword)],
+      '__id', undefined, undefined,
+      ts.createBinary(ts.createIdentifier('__filename'), ts.SyntaxKind.PlusToken, ts.createLiteral('/' + node.name!.getText()))
+    );
+
+    if (!foundDec) {
+      return ts.updateClassDeclaration(node,
+        node.decorators,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        ts.createNodeArray(node.heritageClauses),
+        ts.createNodeArray([
+          classId,
+          ...node.members
+        ])) as any;
+    }
+
     let cons;
     for (let member of node.members) {
       if (ts.isConstructorDeclaration(member)) {
@@ -62,7 +82,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     if (cons || fields.length) {
       let dec = foundDec!;
-      let expr = (dec.expression as ts.CallExpression).arguments[0] as ts.ObjectLiteralExpression;
+      let decConfig = (dec.expression as ts.CallExpression).arguments[0] as ts.ObjectLiteralExpression;
       let deps: any = {};
       if (cons) {
         deps.cons = (cons.parameters! || [])
@@ -77,9 +97,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           }, {} as any);
       }
       let conf = TransformUtils.extendObjectLiteral({
-        annotations: (node.decorators! || []).map(x => TransformUtils.getDecoratorIdent(x)),
+        annotations: (node.decorators! || []).map(x => TransformUtils.getDecoratorIdent(x)).filter(x => !!x),
         dependencies: deps
-      });
+      }, decConfig);
 
       dec = ts.updateDecorator(dec, ts.updateCall(
         (dec.expression as ts.CallExpression),
@@ -92,8 +112,11 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         [dec, ...(ret.decorators! || []).filter(x => x !== foundDec)],
         ret.modifiers, ret.name,
         ret.typeParameters,
-        ret.heritageClauses as any,
-        ret.members) as any;
+        ts.createNodeArray(ret.heritageClauses),
+        ts.createNodeArray([
+          classId,
+          ...ret.members
+        ])) as any;
     }
 
     return ret;

@@ -11,7 +11,7 @@ class Database {
   }
 
   query() {
-    console.log("Getting stuff");
+    console.log("Getting stuff", this.dbConfig.getUrl());
   }
 }
 
@@ -32,4 +32,4 @@ async function run() {
   inst.doWork();
 }
 
-run();
+setInterval(() => run(), 1000);
