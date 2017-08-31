@@ -97,8 +97,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       if (fields) {
         deps.fields = fields
           .map(x => [x.name!.getText(), processDeclaration(state, x as ts.PropertyDeclaration)] as [string, ts.Node])
-          .reduce((acc, [name, node]) => {
-            acc[name] = node;
+          .reduce((acc, [name, decNode]) => {
+            acc[name] = decNode;
             return acc;
           }, {} as any);
       }
