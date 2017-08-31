@@ -146,9 +146,9 @@ export class ConfigLoader {
 
     // Drop out nulls
     this.dropNulls(this.data);
-  }
 
-  static log() {
-    console.log('Configured', this.data);
+    if (!process.env.QUIET_CONFIG) {
+      console.log('Configured', this.data);
+    }
   }
 }
