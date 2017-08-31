@@ -4,6 +4,7 @@ export class BaseError<T = any> {
   stack: any;
 
   constructor(public message: string, public payload?: T) {
+    this.name = this.constructor.name;
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, this.constructor);
     } else {
