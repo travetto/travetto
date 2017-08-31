@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as glob from 'glob';
 import * as chokidar from 'chokidar';
 import { AppInfo } from './app-info';
+import { RetargettingHandler } from './proxy';
 
 const Module = require('module');
 const originalLoader = Module._load;
@@ -20,7 +21,7 @@ export class Compiler {
   static options: ts.CompilerOptions;
   static transformers: ts.CustomTransformers;
   static registry: ts.DocumentRegistry;
-  static required = new Map<string, { module?: NodeModule, exports?: any }>();
+  static modules = new Map<string, { proxy?: any, handler?: RetargettingHandler<any> }>();
 
   static resolveOptions(name = this.configFile) {
     let out = ts.parseJsonSourceFileConfigFileContent(
@@ -60,12 +61,22 @@ export class Compiler {
 
   static moduleLoadHandler(request: string, parent: string) {
     let p = Module._resolveFilename(request, parent);
-    if (!this.required.has(p)) {
-      this.required.set(p, {});
+    if (!this.modules.has(p)) {
+      this.modules.set(p, {});
     }
-    const req = this.required.get(p)!;
-
-    return originalLoader.apply(this, arguments);
+    let ret = originalLoader.apply(this, arguments);
+    if (AppInfo.DEV_MODE) {
+      if (!this.modules.has(p)) {
+        let handler = new RetargettingHandler(ret);
+        ret = new Proxy({}, handler);
+        this.modules.set(p, { proxy: ret, handler });
+      } else {
+        const myModule = this.modules.get(p)!;
+        myModule.handler!.target = ret;
+        ret = myModule.proxy!;
+      }
+    }
+    return ret;
   }
 
   static requireHandler(m: NodeModule, tsf: string) {
@@ -76,7 +87,6 @@ export class Compiler {
     } else {
       content = this.contents.get(jsf)!;
     }
-    this.required.set(tsf, m);
     return (m as any)._compile(content, jsf);
   }
 
