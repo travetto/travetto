@@ -42,8 +42,10 @@ export function promiseToNode<T, U>(ctx: Object | null, fn: (o: T, ...args: any[
 
 export function externalPromise() {
   let p: Promise<any> & { resolve?: Function, reject?: Function } = new Promise((resolve, reject) => {
-    p.resolve = resolve;
-    p.reject = reject;
+    process.nextTick(() => {
+      p.resolve = resolve;
+      p.reject = reject;
+    });
   });
   return p as (Promise<any> & { resolve: Function, reject: Function });
 }
