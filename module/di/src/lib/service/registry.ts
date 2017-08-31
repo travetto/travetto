@@ -11,7 +11,7 @@ export interface ManagedExtra {
 export class Registry {
   static injectables = new Map<string, InjectableConfig<any>>();
   static instances = new Map<string, Map<string, any>>();
-  static proxies = new Map<string, Map<string, any>>();
+  static proxyHandlers = new Map<string, Map<string, any>>();
 
   static aliases = new Map<string, Map<string, string>>();
   static byAnnotation = new Map<Function, Set<string>>();
@@ -52,11 +52,11 @@ export class Registry {
 
     // Live RELOAD
     if (AppInfo.DEV_MODE &&
-      this.proxies.has(config.target.__id!) &&
-      this.proxies.get(config.target.__id!)!.has(config.name)
+      this.proxyHandlers.has(config.target.__id!) &&
+      this.proxyHandlers.get(config.target.__id!)!.has(config.name)
     ) {
       console.log('Updating target');
-      let proxy: any = this.proxies.get(config.target.__id!)!.has(config.name);
+      let proxy: any = this.proxyHandlers.get(config.target.__id!)!.get(config.name);
       this.construct(config.target, config.name).then(res => proxy.target = res);
     }
   }
@@ -92,7 +92,7 @@ export class Registry {
   private static registerInstance<T>(target: Class<T>, instance: T, name: string = DEFAULT_INSTANCE) {
     if (!this.instances.has(target.__id!)) {
       this.instances.set(target.__id!, new Map());
-      this.proxies.set(target.__id!, new Map());
+      this.proxyHandlers.set(target.__id!, new Map());
     }
 
     let out: any = instance;
@@ -101,7 +101,7 @@ export class Registry {
       console.log('Registering proxy', target.name, name);
       let handler = new DefinableHandler(out);
       out = new Proxy({}, handler);
-      this.proxies.get(target.__id!)!.set(name, handler);
+      this.proxyHandlers.get(target.__id!)!.set(name, handler);
     }
 
     this.instances.get(target.__id!)!.set(name, out);
