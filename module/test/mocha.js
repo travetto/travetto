@@ -12,14 +12,14 @@ if (process.env.TIMEOUT) {
 }
 
 try {
-  if (!!fs.statSync(`${root}/src/test/setup.ts`)) {
-    setup = ['--require', `src/test/setup.ts`];
+  if (!!fs.statSync(`${root}/test/setup.ts`)) {
+    setup = ['--require', `test/setup.ts`];
   }
 } catch (e) { }
 
 try {
-  if (!!fs.statSync(`${root}/src/test/user-interface.ts`)) {
-    ui = `${root}/src/test/user-interface`;
+  if (!!fs.statSync(`${root}/test/user-interface.ts`)) {
+    ui = `${root}/test/user-interface`;
   }
 } catch (e) { }
 
@@ -34,6 +34,6 @@ process.argv = [
   ...process.argv.slice(2)
 ].filter(x => !!x);
 
-process.env.DEFAULT_ENV = 'test';
+process.env.env = 'test';
 
 require(`${root}/node_modules/mocha/bin/_mocha`);

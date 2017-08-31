@@ -1,4 +1,4 @@
-import { beforeAll, afterAll, afterSuite, beforeSuite, afterTest, beforeTest } from '../lib/util';
+import { beforeAll, afterAll, afterSuite, beforeSuite, afterTest, beforeTest } from '../src/util';
 
 for (let [name, [b, a]] of [['All', [beforeAll, afterAll]], ['Test', [beforeTest, afterTest]], ['Suite', [beforeSuite, afterSuite]]]) {
   (b as any)(async () => {
