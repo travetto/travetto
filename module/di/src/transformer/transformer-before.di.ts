@@ -20,26 +20,32 @@ export const Transformer =
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
   let name = TransformUtils.getDecorator(param, require.resolve('../decorator/injectable'), 'Inject');
-  let type = TransformUtils.getTypeChecker().getTypeAtLocation(param);
-  let decl = type!.symbol!.valueDeclaration!;
-  let path = (decl as any).parent.fileName;
-  let ident = ts.createIdentifier(`${(decl as any).name.text}`);
-  let importName = ts.createUniqueName(`import_${(decl as any).name.text}`);
 
-  if (require.resolve(path) !== state.path) {
-    state.imports.push({
-      ident: importName,
-      path
-    });
+  if (name) {
+    let type = TransformUtils.getTypeChecker().getTypeAtLocation(param);
+    let decl = type!.symbol!.valueDeclaration!;
+    let path = (decl as any).parent.fileName;
+    let ident = ts.createIdentifier(`${(decl as any).name.text}`);
+    let importName = ts.createUniqueName(`import_${(decl as any).name.text}`);
 
+    let finalTarget = (decl as any).name;
+
+    if (require.resolve(path) !== state.path) {
+      state.imports.push({
+        ident: importName,
+        path
+      });
+
+      finalTarget = ts.createPropertyAccess(importName, ident);
+
+    }
     return TransformUtils.fromLiteral({
-      target: ts.createPropertyAccess(importName, ident),
+      target: finalTarget,
       name: name ? (name.expression as ts.CallExpression).arguments[0] : undefined
     });
+
   } else {
-    return TransformUtils.fromLiteral({
-      target: (decl as any).name
-    });
+    return param;
   }
 }
 
@@ -124,4 +130,3 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     return ts.visitEachChild(node, c => visitNode(context, c, state), context);
   }
 }
-
