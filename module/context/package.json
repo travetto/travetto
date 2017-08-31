@@ -7,10 +7,10 @@
   },
   "description": "",
   "license": "ISC",
-  "main": "src/lib/",
+  "main": "index.ts",
   "name": "@encore/context",
   "optionalDependencies": {
-    //    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v2.x.x"
+    "@encore/expxress": "git+ssh://git@git.eaiti.com/encore/express.git#v2.x.x"
   },
   "scripts": {},
   "version": "2.0.0"
