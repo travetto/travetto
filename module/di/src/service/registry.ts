@@ -1,5 +1,6 @@
 import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
 import { AppInfo, RetargettingHandler } from '@encore/base';
+import * as path from 'path';
 
 export const DEFAULT_INSTANCE = '__default';
 
@@ -7,8 +8,24 @@ export interface ManagedExtra {
   postConstruct?: () => any
 }
 
+const SEP = path.sep;
+const RE_SEP = SEP === '/' ? '\\/' : SEP;
+const SRC_RE = new RegExp(`${RE_SEP}src${RE_SEP}`, 'g');
+const PATH_RE = new RegExp(RE_SEP, 'g');
+
 function getId<T>(cls: Class<T> | ClassTarget<T>): string {
-  return `${cls.__filename}#${cls.name}`;
+  let target = cls as any;
+
+  if (target.__id) {
+    let rootName = cls.__filename!
+      .split(process.cwd())[1]
+      .replace(SRC_RE, SEP)
+      .replace(PATH_RE, '.')
+      .replace(/^\./, '');
+
+    target.__id = `${rootName}#${cls.name}`;
+  }
+  return target.__id;
 }
 
 export class Registry {
