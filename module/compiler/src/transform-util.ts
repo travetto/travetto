@@ -4,7 +4,7 @@ import * as ts from 'typescript';
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
 
-export class TransformUtils {
+export class TransformUtil {
   static getTypeChecker() {
     return Compiler.services.getProgram().getTypeChecker();
   }
