@@ -10,6 +10,8 @@ import { bulkRequire } from './bulk-find';
 
 const Module = require('module');
 const originalLoader = Module._load;
+const dataUriRe = /data:application\/json[^,]+base64,/;
+
 export class Compiler {
 
   static configFile = 'tsconfig.json';
@@ -90,6 +92,8 @@ export class Compiler {
     let content: string;
     if (!this.contents.has(jsf)) {
       content = this.transpile(fs.readFileSync(tsf).toString(), tsf);
+      const map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
+      this.sourceMaps.set(jsf, { content, url: tsf, map });
     } else {
       content = this.contents.get(jsf)!;
     }
@@ -100,7 +104,8 @@ export class Compiler {
 
   static prepareSourceMaps() {
     sourcemap.install({
-      emptyCacheBetweenOperations: AppInfo.WATCH_MODE
+      retrieveFile: (p: string) => this.contents.get(p)!,
+      retrieveSourceMap: (source: string) => this.sourceMaps.get(source)!
     });
 
     const compilerLoc = require.resolve('./compiler').split('@encore')[1];
@@ -211,6 +216,8 @@ export class Compiler {
   }
 
   static init(cwd: string) {
+    this.prepareSourceMaps();
+
     this.cwd = cwd;
     let out = this.resolveOptions();
 
