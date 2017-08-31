@@ -17,4 +17,5 @@ export interface InjectableConfig<T> extends Dependency<T> {
 export interface Dependency<T> {
   target: ClassTarget<T>;
   name: string;
+  optional?: boolean;
 }

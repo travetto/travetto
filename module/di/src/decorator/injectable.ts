@@ -9,6 +9,6 @@ export function Injectable(config: Partial<InjectableConfig<any>> = {}) {
   };
 }
 
-export function Inject(name?: string) {
+export function Inject(config: { name?: string, optiona?: boolean }) {
   return (...args: any[]) => { };
 }

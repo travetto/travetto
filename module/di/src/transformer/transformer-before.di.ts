@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { TransformUtils, Import } from '@encore/base';
+import { TransformUtil, Import } from '@encore/base';
 
 interface State {
   imports: Import[],
@@ -13,22 +13,20 @@ export const Transformer =
       let ret = visitNode(context, file, state);
 
       if (state.imports.length) {
-        TransformUtils.addImport(ret, state.imports);
+        TransformUtil.addImport(ret, state.imports);
       }
       return ret;
     };
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-  let name = TransformUtils.getDecorator(param, require.resolve('../decorator/injectable'), 'Inject');
+  let injection = TransformUtil.getDecorator(param, require.resolve('../decorator/injectable'), 'Inject');
 
-  if (name) {
-    let type = TransformUtils.getTypeChecker().getTypeAtLocation(param);
-    let decl = type!.symbol!.valueDeclaration!;
-    let path = (decl as any).parent.fileName;
-    let ident = ts.createIdentifier(`${(decl as any).name.text}`);
-    let importName = ts.createUniqueName(`import_${(decl as any).name.text}`);
+  if (injection || ts.isParameter(param)) {
+    let { path, name: declName, ident: decl } = TransformUtil.getTypeInfoForNode(param);
+    let ident = ts.createIdentifier(declName);
+    let importName = ts.createUniqueName(`import_${declName}`);
 
-    let finalTarget = (decl as any).name;
+    let finalTarget: ts.Expression = ident;
 
     if (require.resolve(path) !== state.path) {
       state.imports.push({
@@ -37,21 +35,22 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
       });
 
       finalTarget = ts.createPropertyAccess(importName, ident);
-
     }
-    return TransformUtils.fromLiteral({
+
+    let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
+
+    return TransformUtil.fromLiteral({
       target: finalTarget,
-      name: name ? (name.expression as ts.CallExpression).arguments[0] : undefined
+      optional: TransformUtil.getObjectValue(injectConfig, 'optional'),
+      name: TransformUtil.getObjectValue(injectConfig, 'name')
     });
 
-  } else {
-    return param;
   }
 }
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
   if (ts.isClassDeclaration(node)) {
-    let foundDec = TransformUtils.getDecorator(node, require.resolve('../decorator/injectable'), 'Injectable');
+    let foundDec = TransformUtil.getDecorator(node, require.resolve('../decorator/injectable'), 'Injectable');
     let classId = ts.createProperty(
       undefined,
       [ts.createToken(ts.SyntaxKind.StaticKeyword)],
@@ -82,7 +81,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     let fields = node.members
       .filter(x => ts.isPropertyDeclaration(x))
-      .filter(x => !!TransformUtils.getDecorator(x, require.resolve('../decorator/injectable'), 'Inject'));
+      .filter(x => !!TransformUtil.getDecorator(x, require.resolve('../decorator/injectable'), 'Inject'));
 
     let ret = ts.visitEachChild(node, c => visitNode(context, c, state), context);
 
@@ -97,13 +96,14 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       if (fields) {
         deps.fields = fields
           .map(x => [x.name!.getText(), processDeclaration(state, x as ts.PropertyDeclaration)] as [string, ts.Node])
+          .filter(x => !!x)
           .reduce((acc, [name, decNode]) => {
             acc[name] = decNode;
             return acc;
           }, {} as any);
       }
-      let conf = TransformUtils.extendObjectLiteral({
-        annotations: (node.decorators! || []).map(x => TransformUtils.getDecoratorIdent(x)).filter(x => !!x),
+      let conf = TransformUtil.extendObjectLiteral({
+        annotations: (node.decorators! || []).map(x => TransformUtil.getDecoratorIdent(x)).filter(x => !!x),
         dependencies: deps
       }, decConfig);
 
