@@ -1,4 +1,4 @@
-import { Context } from '../context';
+/* import { Context } from '../service';
 import { beforeTest, afterTest } from '@encore/test';
 
 let store: { [key: string]: any } = {};
@@ -22,3 +22,5 @@ afterTest(() => Context.clear());
 export function setDefault(obj: any) {
   Object.assign(ctx, obj);
 }
+*/
+export const _ = '';

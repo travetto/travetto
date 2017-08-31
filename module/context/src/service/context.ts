@@ -3,7 +3,7 @@ import { Injectable } from '@encore/di';
 import { ContextConfig } from './config';
 import { enableLongStacktrace } from './stack';
 
-let cls = require('continuation-local-storage');
+const cls = require('continuation-local-storage');
 
 export const KEY = 'ctx';
 

@@ -1,5 +1,3 @@
-import Config from './config';
-
 type StackType = any;
 
 export class Stack {
