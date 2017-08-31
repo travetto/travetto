@@ -106,7 +106,7 @@ export class TransformUtil {
   }
 
   static getObjectValue(node: ts.ObjectLiteralExpression | undefined, key: string) {
-    if (node) {
+    if (node && node.properties) {
       for (let prop of node.properties) {
         if (prop.name!.getText() === key) {
           return prop;
