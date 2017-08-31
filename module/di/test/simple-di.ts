@@ -1,10 +1,11 @@
 import { Injectable, Inject } from '../src/decorator/injectable';
-import { DbConfig } from './config';
+import { DbConfig, AltConfig } from './config';
 import { Registry } from '../src/service';
 
 @Injectable()
 class Database {
   @Inject({ name: 'a' }) dbConfig: DbConfig;
+  @Inject({ optional: true }) altConfig: AltConfig;
 
   postConstruct() {
     console.log('Creating database', this.dbConfig.getUrl());

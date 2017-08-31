@@ -103,7 +103,7 @@ export class Registry {
         .concat(fieldKeys.map(x => managed.dependencies.fields[x]))
         .map(async x => {
           try {
-            return this.getInstance(x.target, x.name);
+            return await this.getInstance(x.target, x.name);
           } catch (e) {
             if (x.optional && e instanceof InjectionError) {
               return undefined;

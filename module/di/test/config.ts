@@ -12,3 +12,7 @@ export class DbConfig {
     return 'mongodb://ssdtz';
   }
 }
+
+export class AltConfig {
+
+}
