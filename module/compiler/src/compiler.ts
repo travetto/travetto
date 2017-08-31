@@ -69,12 +69,10 @@ export class Compiler {
     let ret = originalLoader.apply(this, arguments);
     if (AppInfo.WATCH_MODE && p.indexOf(process.cwd()) >= 0 && p.indexOf('node_modules') < 0) {
       if (!this.modules.has(p)) {
-        console.log('Loading Module', p);
         let handler = new RetargettingHandler(ret);
         ret.exports = new Proxy({}, handler);
         this.modules.set(p, { module: ret, handler });
       } else {
-        console.log('Reloading Module', p);
         const conf = this.modules.get(p)!;
         conf.handler!.target = ret;
         ret = conf.module!;
@@ -123,7 +121,7 @@ export class Compiler {
     }
     for (let fileName of files) {
       if (fileName in require.cache) {
-        console.log(this.files.get(fileName)!.version ? 'Reloading' : 'Loading', fileName);
+        console.log(this.files.get(fileName)!.version ? 'Reloading' : 'Loading', 'Module', fileName);
         delete require.cache[fileName];
         require(fileName);
       }
