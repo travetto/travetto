@@ -66,20 +66,22 @@ export class Compiler {
   static moduleLoadHandler(request: string, parent: string) {
     let p = Module._resolveFilename(request, parent);
 
-    let ret = originalLoader.apply(this, arguments);
+    let mod = originalLoader.apply(this, arguments);
+    let out = mod;
+
     if (AppInfo.WATCH_MODE && p.indexOf(process.cwd()) >= 0 && p.indexOf('node_modules') < 0) {
       if (!this.modules.has(p)) {
-        let handler = new RetargettingHandler(ret);
-        ret.exports = new Proxy({}, handler);
-        this.modules.set(p, { module: ret, handler });
+        let handler = new RetargettingHandler(mod);
+        out = new Proxy({}, handler);
+        this.modules.set(p, { module: mod, handler });
       } else {
         const conf = this.modules.get(p)!;
-        conf.handler!.target = ret;
-        ret = conf.module!;
+        conf.handler!.target = mod;
+        out = conf.module!;
       }
     }
 
-    return ret;
+    return out;
   }
 
   static requireHandler(m: NodeModule, tsf: string) {
@@ -90,7 +92,9 @@ export class Compiler {
     } else {
       content = this.contents.get(jsf)!;
     }
-    return (m as any)._compile(content, jsf);
+
+    let ret = (m as any)._compile(content, jsf);
+    return ret;
   }
 
   static prepareSourceMaps() {
