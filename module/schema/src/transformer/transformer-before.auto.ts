@@ -120,7 +120,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   if (ts.isClassDeclaration(node)) {
     let schema = TransformUtil.getDecorator(node, require.resolve('../decorator/schema'), 'Schema');
     let arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
-    let auto = !arg || arg.kind !== ts.SyntaxKind.FalseKeyword;
+    let auto = !!schema && (!arg || arg.kind !== ts.SyntaxKind.FalseKeyword);
     if (auto) {
       let ret = ts.visitEachChild(node, c => visitNode(context, c, { ...state, inAuto: auto }), context);
       for (let member of ret.members || []) {

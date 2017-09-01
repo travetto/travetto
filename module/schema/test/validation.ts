@@ -1,50 +1,28 @@
+import 'mocha';
 import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema } from '../src';
 import { expect } from 'chai';
-
-enum PandaState {
-  TIRED,
-  AMOROUS,
-  HUNGRY
-};
 
 @Schema()
 class Response extends SchemaBound {
 
-  @Field(String)
-  @Required()
   questionId: string;
-
-  @Field(Object)
   answer?: any;
-
-  @Field(Boolean)
   valid?: boolean;
-
-  @Field(Number)
   validationCount?: number = 0;
-
   @Url()
-  @Field(String)
   url?: string;
-
-  @Enum(PandaState)
-  @Field(String)
-  pandaState: string;
+  pandaState: 'TIRED' | 'AMOROUS' | 'HUNGRY';
 }
 
 @Schema()
 class Parent extends SchemaBound {
 
-  @Field(Response)
   @Required()
   response: Response;
-
-  @Field([Response])
   responses: Response[];
 }
 
-
-@Schema(true)
+@Schema()
 class MinTest extends SchemaBound {
   @MinLength(10)
   value: string;
