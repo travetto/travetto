@@ -133,12 +133,12 @@ export class TransformUtil {
   }
 
   static importingVisitor<T extends State>(
-    init: () => T,
+    init: () => Partial<T>,
     visitor: <Z extends ts.Node>(context: ts.TransformationContext, node: Z, state: T) => Z
   ) {
     return (context: ts.TransformationContext) =>
       (file: ts.SourceFile) => {
-        let state = init();
+        let state = init() as T;
         state.path = require.resolve(file.fileName);
 
         let ret = visitor(context, file, state);
