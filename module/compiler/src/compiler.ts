@@ -93,6 +93,11 @@ export class Compiler {
     const jsf = tsf.replace(/\.ts$/, '.js');
     let content: string;
     if (!this.contents.has(jsf)) {
+      // Picking up missed files
+      this.rootFiles.push(tsf);
+      this.files.set(tsf, { version: 0 });
+      this.emitFile(tsf);
+
       content = this.transpile(fs.readFileSync(tsf).toString(), tsf);
       const map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
       this.sourceMaps.set(jsf, { content, url: tsf, map });
