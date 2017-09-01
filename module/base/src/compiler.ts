@@ -147,9 +147,6 @@ export class Compiler {
 
     for (let o of output.outputFiles) {
       this.contents.set(o.name, o.text);
-      if (o.name.includes('/test/')) {
-        console.log(o.name, o.text);
-      }
     }
 
     if (this.files.get(fileName)!.version > 0) {
