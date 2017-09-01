@@ -1,41 +1,23 @@
-import { OnShutdown } from '@encore/lifecycle';
 import { CacheConfig } from './config';
 import { Injectable } from '@encore/di';
+import { Shutdown } from '@encore/lifecycle';
 import * as LRU from 'lru-cache';
 
-@Injectable()
-export class CacheService {
-  private caches: { [key: string]: LRU.Cache<any> } = {};
-  private defaultConfig = {
+export class Cache<T> {
+  protected data: LRU.Cache<string, T>;
+  protected defaultConfig = {
     max: 1000
   };
 
-  constructor(private config: CacheConfig) { }
+  constructor(private shutdown: Shutdown, private config: CacheConfig = {}) {
+    shutdown.onShutdown('cache', () => this.cleanup());
 
-  getCache<T>(config: string | LRU.Options<T> & { name: string }) {
-    let name: string;
-    if (typeof config === 'string') {
-      name = config;
-    } else {
-      name = config.name;
-    }
-    if (!this.caches.hasOwnProperty(name)) {
-      if (typeof config === 'string') {
-        config = Object.assign({},
-          this.defaultConfig,
-          (this.config as any)['default'] || {},
-          (this.config as any)[name] || {}
-        ) as LRU.Options<T> & { name: string };
-      }
-      this.caches[name] = LRU(config);
-    }
-    return this.caches[name] as LRU.Cache<T>;
+    config = Object.assign({}, this.defaultConfig, config || {}) as LRU.Options<T>;
+
+    this.data = LRU(config);
   }
 
-  @OnShutdown()
-  clear() {
-    for (let k of Object.keys(this.caches)) {
-      this.caches[k].reset();
-    }
+  cleanup() {
+    this.data.reset();
   }
 }
