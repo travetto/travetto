@@ -85,7 +85,9 @@ export class Logger {
       .reduce((acc, name) => {
         acc[name] = (this.config.categories as any)[name];
         if (typeof acc[name].appenders === 'string') {
-          acc[name].appenders = (acc[name].appenders as any as string).split(',').map(x => x.trim())
+          acc[name].appenders = (acc[name].appenders as any as string).split(',')
+            .map(x => x.trim())
+            .filter(x => this.config.appenders.hasOwnProperty(x) && (this.config.appenders as any)[x].enabled)
         }
         return acc;
       }, {} as { [key: string]: log4js.Category })

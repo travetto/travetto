@@ -3,4 +3,5 @@ build/**
 rpm_build/**
 .vscode/
 npm-debug.log
-logs/**package-lock.json
+logs/**
+package-lock.json
