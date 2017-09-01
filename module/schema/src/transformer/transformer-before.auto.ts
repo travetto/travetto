@@ -1,47 +1,20 @@
 import * as ts from 'typescript';
 import { Schema, Ignore, Field } from '../decorate';
 import { Messages } from '../util';
-import { TransformUtil, Import } from '@encore/base';
+import { TransformUtil, Import, State } from '@encore/base';
 
 type DecList = ts.NodeArray<ts.Decorator>;
 type SchemaList = (ts.Expression | undefined)[];
 
-interface State {
-  imports: Import[],
-  path: string,
+interface AutoState extends State {
   inAuto: boolean,
   addField: ts.Node | undefined
 }
 
-export const Transformer =
-  (context: ts.TransformationContext) =>
-    (file: ts.SourceFile) => {
-      let state: State = { imports: [], path: require.resolve(file.fileName), inAuto: false, addField: undefined };
-      let ret = visitNode(context, file, state);
-
-      if (state.imports.length) {
-        TransformUtil.addImport(ret, state.imports);
-      }
-      return ret;
-    };
-
-function importIfExternal(node: ts.Node, state: State) {
-  let { path, name: declName, ident: decl } = TransformUtil.getTypeInfoForNode(node);
-  let ident = ts.createIdentifier(declName);
-  let importName = ts.createUniqueName(`import_${declName}`);
-
-  let finalTarget: ts.Expression = ident;
-
-  if (require.resolve(path) !== state.path) {
-    state.imports.push({
-      ident: importName,
-      path
-    });
-
-    finalTarget = ts.createPropertyAccess(importName, ident);
-  }
-  return finalTarget;
-}
+export const Transformer = TransformUtil.importingVisitor<AutoState>(() => ({
+  inAuto: false,
+  addField: undefined
+}), visitNode);
 
 function resolveType(type: ts.Node, state: State): ts.Expression {
   let expr: ts.Expression | undefined;
@@ -50,7 +23,7 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
   switch (kind) {
     case ts.SyntaxKind.TypeReference:
       expr = ((type as ts.TypeReferenceNode).typeName) as ts.Expression;
-      expr = importIfExternal(expr, state);
+      expr = TransformUtil.importIfExternal(expr, state);
       break;
     case ts.SyntaxKind.LiteralType: expr = resolveType((type as any as ts.LiteralTypeNode).literal, state); break;
     case ts.SyntaxKind.StringLiteral:
@@ -95,7 +68,7 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
   return expr || ts.createIdentifier('Object');
 }
 
-function computeProperty(node: ts.PropertyDeclaration, state: State) {
+function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
   let ignore = TransformUtil.getDecorator(node, require.resolve('../decorators'), 'Ignore');
 
   if (!ignore && state.inAuto) {
@@ -147,7 +120,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
   }
 }
 
-function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
+function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AutoState): T {
   if (ts.isClassDeclaration(node)) {
     let schema = TransformUtil.getDecorator(node, require.resolve('../decorator/schema'), 'Schema');
     let arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
