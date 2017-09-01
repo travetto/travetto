@@ -1,7 +1,7 @@
 import * as log4js from 'log4js';
 import * as mkdirp from 'mkdirp';
 import { addLayout } from 'log4js/lib/layouts';
-import { Injectable, Registry } from '@encore/di';
+import { Injectable } from '@encore/di';
 import { LoggerConfig } from './config';
 import { Layouts } from './layout';
 import { isFileAppender } from './types';
