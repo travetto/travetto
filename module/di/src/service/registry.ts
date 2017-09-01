@@ -97,7 +97,7 @@ export class Registry {
       this.proxyHandlers.get(targetId)!.has(config.name)
     ) {
       this.createInstance(config.target, config.name);
-    } else if (config.autoCreate && typeof config.autoCreate !== 'boolean') {
+    } else if (config.autoCreate && typeof config.autoCreate !== 'boolean' && config.autoCreate.create) {
       this.autoCreate.push({
         target: config.target,
         name: config.name,
