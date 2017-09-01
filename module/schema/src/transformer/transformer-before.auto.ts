@@ -75,8 +75,9 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
   if (!node.questionToken) {
     properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral([true, Messages.REQUIRED])));
   }
+
   // If we have a union type
-  if (node.type!.kind === ts.SyntaxKind.UnionType && ['Number', 'String'].indexOf((typeExpr as any).text) > 0) {
+  if (node.type && node.type!.kind === ts.SyntaxKind.UnionType && ['Number', 'String'].includes((typeExpr as any).text)) {
 
     let types = (node.type! as ts.UnionTypeNode).types
     let literals = types.map(x => (x as ts.LiteralTypeNode).literal);
