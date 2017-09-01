@@ -5,7 +5,7 @@ let fs = require('fs');
 let setup = [];
 let extra = [];
 let root = process.cwd();
-let ui = '@encore/test/src/lib/user-interface';
+let ui = '@encore/test/src/user-interface';
 
 if (process.env.TIMEOUT) {
   extra.push('--timeout', process.env.TIMEOUT);
