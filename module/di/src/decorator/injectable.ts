@@ -1,7 +1,7 @@
 import { Class, InjectableConfig, Dependency } from '../types';
 import { DependencyRegistry, DEFAULT_INSTANCE } from '../service';
 
-export function Injectable(config: Partial<InjectableConfig<any> & { autoCreate?: boolean }> = {}): ClassDecorator {
+export function Injectable(config: Partial<InjectableConfig<any>> = {}): ClassDecorator {
   return (target: Class | any) => {
     config.class = target;
     if (typeof config.autoCreate === 'boolean') {
