@@ -44,6 +44,7 @@ export class Compiler {
         outDir: `${this.cwd}`
       }, `${this.cwd}/${this.configFile}`
     );
+    out.options.moduleResolution = ts.ModuleResolutionKind.NodeJs;
     return out;
   }
 
@@ -157,17 +158,12 @@ export class Compiler {
   }
 
   static watchFiles(fileNames: string[]) {
-    for (let fileName of fileNames) {
-      this.files.set(fileName, { version: 0 });
-      this.emitFile(fileName);
-    }
-
     let watcher = chokidar.watch(`${this.cwd}/${this.rootFolders}/**/*.ts`, {
       ignored: [/.*\/transformer-.*\.ts$/],
       persistent: true,
       interval: 250,
       ignoreInitial: false
-    })
+    });
 
     watcher.on('ready', () => {
       watcher
@@ -232,6 +228,8 @@ export class Compiler {
 
     let rootFileNames = out.fileNames.slice(0);
 
+    console.log(rootFileNames);
+
     this.servicesHost = {
       getScriptFileNames: () => rootFileNames,
       getScriptVersion: (fileName) => this.files.has(fileName) ? this.files.get(fileName)!.version.toString() : '',
@@ -247,6 +245,12 @@ export class Compiler {
 
     // Create the language service files
     this.services = ts.createLanguageService(this.servicesHost, this.registry);
+
+    // Prime for type checker
+    for (let fileName of rootFileNames) {
+      this.files.set(fileName, { version: 0 });
+      this.emitFile(fileName);
+    }
 
     // Now let's watch the files
     if (AppInfo.WATCH_MODE) {
