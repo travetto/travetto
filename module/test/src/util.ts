@@ -1,3 +1,4 @@
+import 'mocha';
 const { init } = require('@encore/bootstrap');
 
 export type Promisable = Promise<any> | (() => Promise<any>);
