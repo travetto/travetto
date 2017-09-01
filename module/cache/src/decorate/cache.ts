@@ -10,19 +10,19 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
       }
     }
 
-    let orig = (target as any)[propertyKey];
+    let orig = descriptor.value;
 
-    (target as any)[propertyKey] = (...args: any[]) => {
-      if (!target.cache) {
+    descriptor.value = function (...args: any[]) {
+      if (!(this as any).cache) {
         throw new Error('Cache not defined');
       }
 
-      let cache = target.cache.get(config as (string | LRU.Options<string, any> & { name: string }));
+      let cache = (this as any).cache.get(config as (string | LRU.Options<string, any> & { name: string }));
 
       let key = keyFn ? keyFn(args) : JSON.stringify(args || []);
       key = `${targetName}||${key}`;
       if (!cache.has(key)) {
-        let res = orig.apply(target, args || []);
+        let res = orig.apply(this, args || []);
         if (res && res.catch && res.then) { // If a promise, clear on error
           res.catch((e: any) => cache.del(key));
         }

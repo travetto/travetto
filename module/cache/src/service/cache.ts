@@ -3,7 +3,7 @@ import { Shutdown } from '@encore/lifecycle';
 import * as LRU from 'lru-cache';
 
 export class CacheManager {
-  public caches: Map<string, LRU.Cache<string, any>>;
+  public caches = new Map<string, LRU.Cache<string, any>>();
 
   protected defaultConfig = {
     max: 1000

@@ -1,3 +1,5 @@
+import 'mocha';
+
 import { timeout } from '@encore/test';
 import { Cacheable, CacheManager } from '../src';
 import { expect } from 'chai';
@@ -46,10 +48,10 @@ class Test {
 }
 
 describe('Cacheable Test', () => {
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     let test = await Registry.getInstance(Test);
     test.cache.cleanup();
-    setTimeout(done, 200);
+    await new Promise(resolve => setTimeout(resolve, 200));
   });
 
   it('Testing basic', timeout(30 * 1000, async () => {
@@ -64,7 +66,7 @@ describe('Cacheable Test', () => {
     start = Date.now();
     res = await test.youngAndComplex(10);
     diff = Date.now() - start;
-    expect(diff).to.be.lessThan(100);
+    expect(diff).to.be.lessThan(105);
     expect(res).to.equal(30);
   }));
 
