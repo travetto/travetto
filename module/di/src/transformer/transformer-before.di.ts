@@ -88,6 +88,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       .filter(x => !!TransformUtil.getDecorator(x, require.resolve('../decorator/injectable'), 'Inject'));
 
     let ret = ts.visitEachChild(node, c => visitNode(context, c, state), context);
+    let decs: ts.NodeArray<ts.Decorator> = ret.decorators!;
 
     if (cons || fields.length) {
       let dec = foundDec!;
@@ -116,18 +117,20 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         (dec.expression as ts.CallExpression).expression,
         undefined,
         [conf]
-      ))
+      ));
 
-      ret = ts.updateClassDeclaration(ret,
-        [dec, ...(ret.decorators! || []).slice(0).filter(x => x !== foundDec)],
-        ret.modifiers, ret.name,
-        ret.typeParameters,
-        ts.createNodeArray(ret.heritageClauses),
-        ts.createNodeArray([
-          getIdent(),
-          ...ret.members
-        ])) as any;
+      decs = ts.createNodeArray([dec, ...(ret.decorators! || []).slice(0).filter(x => x !== foundDec)]);
     }
+
+    ret = ts.updateClassDeclaration(ret,
+      decs,
+      ret.modifiers, ret.name,
+      ret.typeParameters,
+      ts.createNodeArray(ret.heritageClauses),
+      ts.createNodeArray([
+        getIdent(),
+        ...ret.members
+      ])) as any;
 
     return ret;
   } else {
