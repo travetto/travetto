@@ -1,5 +1,5 @@
 import * as mg from 'mongoose';
-import { Cls } from './types';
+import { Class } from './types';
 import { SchemaRegistry } from './registry';
 import { ObjectUtil } from '@encore/util';
 
@@ -8,9 +8,9 @@ mongoose.Document = require('mongoose/lib/browserDocument.js');
 
 export class SchemaValidator {
 
-  static schemas: Map<Cls<any>, Map<string, mg.Schema>> = new Map();
+  static schemas: Map<Class, Map<string, mg.Schema>> = new Map();
 
-  static getSchema<T>(cls: Cls<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
+  static getSchema<T>(cls: Class<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
     if (!SchemaValidator.schemas.has(cls)) {
       SchemaValidator.schemas.set(cls, new Map());
     }
@@ -49,7 +49,7 @@ export class SchemaValidator {
   }
 
   static async validate<T>(o: T, view?: string): Promise<T> {
-    return await SchemaValidator.validateRaw(o, SchemaValidator.getSchema(SchemaRegistry.getCls(o), view));
+    return await SchemaValidator.validateRaw(o, SchemaValidator.getSchema(SchemaRegistry.getClass(o), view));
   }
 
   static async validateAll<T>(obj: T[], view: string = SchemaRegistry.DEFAULT_VIEW): Promise<T[]> {

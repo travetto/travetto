@@ -1,10 +1,11 @@
-export interface Cls<T> {
-  new (...args: any[]): T;
-  from?: <T>(data: any) => T;
+import { Class as Cls } from '@encore/di';
+
+export interface Class<T = any> extends Cls<T> {
+  from?: <Z>(data: any) => Z;
   name: string;
 }
 
-export type ClsList = Cls<any> | [Cls<any>];
+export type ClassList = Class | [Class];
 
 export interface ViewConfig {
   schema: { [key: string]: FieldConfig };
@@ -21,5 +22,5 @@ export interface FieldConfig {
   type: any;
   name: string;
   aliases?: string[];
-  declared: { type: Cls<any>, array: boolean };
+  declared: { type: Class<any>, array: boolean };
 }

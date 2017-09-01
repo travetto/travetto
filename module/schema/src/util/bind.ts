@@ -1,10 +1,10 @@
-import { Cls, SchemaRegistry } from '../service';
+import { Class, SchemaRegistry } from '../service';
 
 export class BindUtil {
 
-  static coerceType<T>(type: Cls<T>, val: any): T {
+  static coerceType<T>(type: Class<T>, val: any): T {
     if (val.constructor !== type) {
-      let atype = type as Cls<any>;
+      let atype = type as Class;
       if (atype === Boolean) {
         if (typeof val === 'string') {
           val = val === 'true';
@@ -20,7 +20,7 @@ export class BindUtil {
     return val as T;
   }
 
-  static bindSchema<T>(cons: Cls<any>, obj: T, data?: any, view: string = SchemaRegistry.DEFAULT_VIEW): T {
+  static bindSchema<T>(cons: Class, obj: T, data?: any, view: string = SchemaRegistry.DEFAULT_VIEW): T {
     if (!!data) {
       let conf = SchemaRegistry.schemas.get(cons);
 

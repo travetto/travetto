@@ -1,5 +1,5 @@
 import { ObjectUtil } from '@encore/util';
-import { SchemaRegistry, ClsList } from '../service';
+import { SchemaRegistry, ClassList } from '../service';
 import { Re } from '../util';
 import { Messages } from '../util';
 
@@ -16,7 +16,7 @@ function enumKeys(c: any): string[] {
     return ObjectUtil.values(c).filter((x: any) => typeof x === 'string') as string[];
   }
 }
-export function Field(type: ClsList, config?: { [key: string]: any }) {
+export function Field(type: ClassList, config?: { [key: string]: any }) {
   return (f: any, p: string) => {
     SchemaRegistry.registerFieldConfig(f, p, type);
     if (config) {

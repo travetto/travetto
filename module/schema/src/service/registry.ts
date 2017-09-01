@@ -1,16 +1,16 @@
-import { Cls, ClsList, FieldConfig, ClassConfig, ViewConfig } from './types';
+import { Class, ClassList, FieldConfig, ClassConfig, ViewConfig } from './types';
 
 export class SchemaRegistry {
 
-  static schemas: Map<Cls<any>, ClassConfig> = new Map();
+  static schemas: Map<Class, ClassConfig> = new Map();
   static DEFAULT_VIEW = 'all';
 
-  static getParent(cls: Cls<any>): Cls<any> | null {
-    let parent = Object.getPrototypeOf(cls) as Cls<any>;
+  static getParent(cls: Class): Class | null {
+    let parent = Object.getPrototypeOf(cls) as Class;
     return parent.name && parent !== Object ? parent : null;
   }
 
-  static getViewConfig<T>(target: Cls<T>, view: string) {
+  static getViewConfig<T>(target: Class<T>, view: string) {
     let conf = SchemaRegistry.getClassConfig(target);
     let viewConf = conf.views[view];
     if (!viewConf) {
@@ -22,12 +22,12 @@ export class SchemaRegistry {
     return viewConf;
   }
 
-  static getViewSchema<T>(cls: Cls<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
+  static getViewSchema<T>(cls: Class<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
     let conf = SchemaRegistry.schemas.get(cls);
     return conf && conf.views[view].schema;
   }
 
-  static getClassConfig<T>(cls: Cls<T>) {
+  static getClassConfig<T>(cls: Class<T>) {
     if (!SchemaRegistry.schemas.has(cls)) {
 
       // Project super types to sub types on access
@@ -61,13 +61,13 @@ export class SchemaRegistry {
     return SchemaRegistry.schemas.get(cls) as ClassConfig;
   }
 
-  static registerClassMetadata<T, U>(cls: Cls<T>, key: string, data: U) {
+  static registerClassMetadata<T, U>(cls: Class<T>, key: string, data: U) {
     let conf = SchemaRegistry.getClassConfig(cls);
     conf.metadata[key] = Object.assign({}, conf.metadata[key] || {}, data);
     return cls;
   }
 
-  static getClassMetadata<T, U>(cls: Cls<T>, key: string): U {
+  static getClassMetadata<T, U>(cls: Class<T>, key: string): U {
     let metadata = SchemaRegistry.getClassConfig(cls).metadata;
     if (!metadata[key]) {
       metadata[key] = {};
@@ -75,12 +75,12 @@ export class SchemaRegistry {
     return metadata[key] as U;
   }
 
-  static getCls<T>(o: T): Cls<T> {
+  static getClass<T>(o: T): Class<T> {
     return o.constructor as any;
   }
 
   static registerFieldFacet(target: any, prop: string, config: any, view: string = SchemaRegistry.DEFAULT_VIEW) {
-    let cons = SchemaRegistry.getCls(target);
+    let cons = SchemaRegistry.getClass(target);
     let defViewConf = SchemaRegistry.getViewConfig(cons, SchemaRegistry.DEFAULT_VIEW);
 
     if (!defViewConf.schema[prop]) {
@@ -101,7 +101,7 @@ export class SchemaRegistry {
     return target;
   }
 
-  static registerFieldConfig(target: any, prop: string, type: ClsList) {
+  static registerFieldConfig(target: any, prop: string, type: ClassList) {
     const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
       type,
@@ -121,7 +121,7 @@ export class SchemaRegistry {
     return SchemaRegistry.registerFieldFacet(target, prop, fieldConf);
   }
 
-  static registerClassFacet<T>(cls: Cls<T>, config: any) {
+  static registerClassFacet<T>(cls: Class<T>, config: any) {
     let conf = SchemaRegistry.getClassConfig(cls);
     if (config && config['metadata']) {
       config['metadata'] = Object.assign({}, conf.metadata, config['metadata']);
