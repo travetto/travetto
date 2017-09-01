@@ -172,10 +172,15 @@ export class Registry {
 
   static async initialize() {
     if (!this._waitingForInit) {
-      this._waitingForInit = true;
-      let globs = (process.env.SCAN_GLOBS || 'node_modules/@encore/*/src/**/*.ts src/**/*.ts').split(/\s+/);
-      for (let glob of globs) {
-        bulkRequire(glob, undefined, p => p.indexOf('/ext/') < 0);
+      try {
+        this._waitingForInit = true;
+        let globs = (process.env.SCAN_GLOBS || 'node_modules/@encore/*/src/**/*.ts src/**/*.ts').split(/\s+/);
+        for (let glob of globs) {
+          bulkRequire(glob, undefined, p => p.indexOf('/ext/') < 0 && !p.endsWith('.d.ts'));
+        }
+      } catch (e) {
+        console.log(e);
+        throw e;
       }
       this.initalized.resolve(true);
     }
