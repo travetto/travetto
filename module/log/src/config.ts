@@ -1,7 +1,9 @@
-import { Configure } from '@encore/config';
+import { Config } from '@encore/config';
 
-export default Configure.registerNamespace('logging', {
-  appenders: {
+@Config('logging')
+export class LoggerConfig {
+
+  appenders = {
     console: {
       type: 'console',
       enabled: true,
@@ -31,11 +33,13 @@ export default Configure.registerNamespace('logging', {
       layout: { type: 'json' },
       level: 'error'
     }
-  },
-  categories: {
+  };
+
+  categories = {
     default: {
       appenders: 'console,log,error',
       level: 'trace'
     }
-  }
-});
+  };
+
+}

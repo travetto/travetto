@@ -1,8 +1,11 @@
+import 'mocha';
+
 import * as process from 'process';
 import { expect } from 'chai';
 import * as fs from 'fs';
-import { Logger } from '../lib';
+import { Logger } from '../src';
 import { nodeToPromise } from '@encore/util';
+import { Registry } from '@encore/di';
 
 let name = process.cwd() + '/logs/encore_logging-out.log';
 
@@ -17,8 +20,10 @@ describe('Logging', () => {
   });
 
   it('Should log', async () => {
-    Logger.info('Hello world');
+    let logger = (await Registry.getInstance(Logger)).getLogger();
+
+    logger.info('Hello world');
     let contents = await nodeToPromise(fs, fs.readFile, name);
     expect(contents.toString()).to.contain('Hello world');
   });
-}) 
+});
