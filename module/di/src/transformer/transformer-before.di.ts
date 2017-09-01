@@ -107,7 +107,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           }, {} as any);
       }
       let conf = TransformUtil.extendObjectLiteral({
-        annotations: (node.decorators! || []).map(x => TransformUtil.getDecoratorIdent(x)).filter(x => !!x),
+        annotations: (node.decorators! || []).slice(0).map(x => TransformUtil.getDecoratorIdent(x)).filter(x => !!x),
         dependencies: deps
       }, decConfig);
 
@@ -119,7 +119,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       ))
 
       ret = ts.updateClassDeclaration(ret,
-        [dec, ...(ret.decorators! || []).filter(x => x !== foundDec)],
+        [dec, ...(ret.decorators! || []).slice(0).filter(x => x !== foundDec)],
         ret.modifiers, ret.name,
         ret.typeParameters,
         ts.createNodeArray(ret.heritageClauses),
