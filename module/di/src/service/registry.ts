@@ -31,80 +31,17 @@ function getId<T>(cls: Class<T> | ClassTarget<T>): string {
   return target.__id;
 }
 
-export class Registry {
+export class DependencyRegistry {
+  static pendingInjectables = new Map<string, InjectableConfig<any>>();
   static injectables = new Map<string, InjectableConfig<any>>();
   static instances = new Map<string, Map<string, any>>();
   static proxyHandlers = new Map<string, Map<string, any>>();
 
   static aliases = new Map<string, Map<string, string>>();
-  static byAnnotation = new Map<Function, Set<string>>();
-
   static autoCreate: (Dependency<any> & { priority: number })[] = [];
 
   private static _waitingForInit = false;
   static initalized = externalPromise();
-
-  static register<T>(pconfig: Partial<InjectableConfig<T>>) {
-    pconfig.name = pconfig.name || DEFAULT_INSTANCE;
-    pconfig.dependencies = pconfig.dependencies || {} as any;
-    pconfig.target = pconfig.target || pconfig.class;
-    pconfig.annotations = pconfig.annotations || [];
-
-    if (pconfig.autoCreate === undefined) {
-      pconfig.autoCreate = { create: false };
-    } else if (typeof pconfig.autoCreate === 'boolean') {
-      pconfig.autoCreate = { create: pconfig.autoCreate };
-    }
-
-    if (pconfig.autoCreate.priority === undefined) {
-      pconfig.autoCreate.priority = 1000;
-    }
-
-    const config = pconfig as InjectableConfig<T>;
-    config.dependencies.cons = config.dependencies.cons || [];
-    config.dependencies.fields = config.dependencies.fields || {};
-
-    for (let dep of config.dependencies.cons) {
-      dep.name = dep.name || DEFAULT_INSTANCE;
-    }
-
-    for (let key of Object.keys(config.dependencies.fields)) {
-      let obj = config.dependencies.fields[key];
-      obj.name = obj.name || DEFAULT_INSTANCE;
-    }
-
-    let classId = getId(config.class);
-    let targetId = getId(config.target);
-
-    this.injectables.set(classId, config);
-
-    if (!this.aliases.has(targetId)) {
-      this.aliases.set(targetId, new Map());
-    }
-
-    this.aliases.get(targetId)!.set(config.name, classId);
-
-    for (let anno of config.annotations) {
-      if (!this.byAnnotation.has(anno)) {
-        this.byAnnotation.set(anno, new Set());
-      }
-      this.byAnnotation.get(anno)!.add(classId);
-    }
-
-    // Live RELOAD
-    if (AppInfo.WATCH_MODE &&
-      this.proxyHandlers.has(targetId) &&
-      this.proxyHandlers.get(targetId)!.has(config.name)
-    ) {
-      this.createInstance(config.target, config.name);
-    } else if (config.autoCreate && typeof config.autoCreate !== 'boolean' && config.autoCreate.create) {
-      this.autoCreate.push({
-        target: config.target,
-        name: config.name,
-        priority: config.autoCreate.priority!
-      })
-    }
-  }
 
   static async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
     let targetId = getId(target);
@@ -212,4 +149,81 @@ export class Registry {
     }
     return await this.initalized;
   }
+
+  static getOrCreatePendingConfig<T>(cls: Class<T>) {
+    let id = getId(cls);
+    if (!this.pendingInjectables.has(id)) {
+      this.pendingInjectables.set(id, {
+        name: DEFAULT_INSTANCE,
+        class: cls,
+        target: cls,
+        dependencies: {
+          fields: {},
+          cons: []
+        },
+        autoCreate: {
+          create: false,
+          priority: 1000
+        }
+      } as any as InjectableConfig<T>);
+    }
+    return this.pendingInjectables.get(id)!;
+  }
+
+  static registerConstructor<T>(cls: Class<T>, dependencies: Dependency<any>[]) {
+    let conf = this.getOrCreatePendingConfig(cls);
+    conf.dependencies.cons = dependencies;
+    for (let dependency of dependencies) {
+      dependency.name = dependency.name || DEFAULT_INSTANCE;
+    }
+  }
+
+  static registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency<any>) {
+    let conf = this.getOrCreatePendingConfig(cls);
+    conf.dependencies.fields[field] = dependency;
+    dependency.name = dependency.name || DEFAULT_INSTANCE;
+  }
+
+  static finalizeClass<T>(pconfig: Partial<InjectableConfig<T>>) {
+    let classId = getId(pconfig.class!);
+    let config = this.pendingInjectables.get(classId)!;
+
+    if (pconfig.name) {
+      config.name = pconfig.name;
+    }
+    if (pconfig.target) {
+      config.target = pconfig.target;
+    }
+    if (pconfig.autoCreate) {
+      config.autoCreate.create = pconfig.autoCreate.create;
+      if (pconfig.autoCreate.priority !== undefined) {
+        config.autoCreate.priority = pconfig.autoCreate.priority;
+      }
+    }
+
+    let targetId = getId(config.target);
+    this.injectables.set(classId, config);
+    this.pendingInjectables.delete(classId);
+
+    if (!this.aliases.has(targetId)) {
+      this.aliases.set(targetId, new Map());
+    }
+
+    this.aliases.get(targetId)!.set(config.name, classId);
+
+    // Live RELOAD
+    if (AppInfo.WATCH_MODE &&
+      this.proxyHandlers.has(targetId) &&
+      this.proxyHandlers.get(targetId)!.has(config.name)
+    ) {
+      this.createInstance(config.target, config.name);
+    } else if (config.autoCreate.create) {
+      this.autoCreate.push({
+        target: config.target,
+        name: config.name,
+        priority: config.autoCreate.priority!
+      })
+    }
+  }
+
 }

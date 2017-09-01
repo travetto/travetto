@@ -1,6 +1,6 @@
 export type ClassTarget<T> = Class<T> | (Function & { __filename?: string });
 
-export interface Class<T> {
+export interface Class<T = any> {
   new(...args: any[]): T;
   __filename?: string;
 }
@@ -11,11 +11,10 @@ export interface InjectableConfig<T> extends Dependency<T> {
     cons: Dependency<any>[],
     fields: { [key: string]: Dependency<any> }
   };
-  annotations: Function[];
-  autoCreate: boolean | { priority?: number, create: boolean }
+  autoCreate: { priority?: number, create: boolean }
 }
 
-export interface Dependency<T> {
+export interface Dependency<T = any> {
   target: ClassTarget<T>;
   name: string;
   optional?: boolean;
