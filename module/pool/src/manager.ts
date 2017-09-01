@@ -1,5 +1,4 @@
 import { createPool, Pool, Options, Factory } from 'generic-pool';
-import { Shutdown } from '@encore/lifecycle';
 
 export interface BaseResource {
   evict?: boolean;
@@ -15,9 +14,7 @@ export class PoolManager<T extends BaseResource> {
 
   pool: Pool<T>;
 
-  constructor(private name: string, private factory: () => Factory<T>) {
-    Shutdown.onShutdown(`pool-${name}`, () => this.shutdown());
-  }
+  constructor(private name: string, private factory: () => Factory<T>) { }
 
   async shutdown() {
     await this.pool.drain();
