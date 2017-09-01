@@ -60,7 +60,6 @@ export class Compiler {
         }
       }
     }
-
     return transformers;
   }
 
@@ -93,15 +92,8 @@ export class Compiler {
       this.rootFiles.push(tsf);
       this.files.set(tsf, { version: 0 });
       this.emitFile(tsf);
-
-      content = this.transpile(fs.readFileSync(tsf).toString(), tsf);
-      const map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
-      this.sourceMaps.set(jsf, { content, url: tsf, map });
-      this.contents.set(jsf, content);
-    } else {
-      content = this.contents.get(jsf)!;
     }
-
+    content = this.contents.get(jsf)!;
     let ret = (m as any)._compile(content, jsf);
     return ret;
   }
@@ -155,6 +147,9 @@ export class Compiler {
 
     for (let o of output.outputFiles) {
       this.contents.set(o.name, o.text);
+      if (o.name.includes('/test/')) {
+        console.log(o.name, o.text);
+      }
     }
 
     if (this.files.get(fileName)!.version > 0) {

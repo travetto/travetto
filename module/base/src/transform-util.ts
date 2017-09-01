@@ -140,6 +140,7 @@ export class TransformUtil {
       (file: ts.SourceFile) => {
         let state = init() as T;
         state.path = require.resolve(file.fileName);
+        state.imports = [];
 
         let ret = visitor(context, file, state);
 
@@ -151,7 +152,7 @@ export class TransformUtil {
   }
 
   static importIfExternal<T extends State>(node: ts.Node, state: State) {
-    let { path, name: declName, ident: decl } = TransformUtil.getTypeInfoForNode(node);
+    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
     let ident = ts.createIdentifier(declName);
     let importName = ts.createUniqueName(`import_${declName}`);
 
