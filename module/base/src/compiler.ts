@@ -6,7 +6,7 @@ import * as glob from 'glob';
 import * as chokidar from 'chokidar';
 import { AppInfo } from './app-info';
 import { RetargettingHandler } from './proxy';
-import { bulkRequire } from './bulk-find';
+import { bulkRequire, bulkFindSync } from './bulk-find';
 
 const Module = require('module');
 const originalLoader = Module._load;
@@ -26,10 +26,6 @@ export class Compiler {
   static registry: ts.DocumentRegistry;
   static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
   static rootFiles: string[] = [];
-
-  static get rootFolders() {
-    return AppInfo.ENV.includes('test') ? '{src,test,node_modules/@encore/*/src}' : '{src,node_modules/@encore/*/src}';
-  }
 
   static resolveOptions(name = this.configFile) {
     let out = ts.parseJsonSourceFileConfigFileContent(
@@ -167,8 +163,8 @@ export class Compiler {
   }
 
   static watchFiles(fileNames: string[]) {
-    let watcher = chokidar.watch(`${this.cwd}/${this.rootFolders}/**/*.ts`, {
-      ignored: [/.*\/transformer-.*\.ts$/],
+    let watcher = chokidar.watch(`${this.cwd}/src/**/*.ts`, {
+      ignored: [/.*\/transformer-.*\.ts$/, /\/ext\//],
       persistent: true,
       interval: 250,
       ignoreInitial: false
@@ -235,7 +231,11 @@ export class Compiler {
       Module._load = this.moduleLoadHandler.bind(this);
     }
 
-    this.rootFiles = out.fileNames.slice(0);
+    this.rootFiles = [
+      ...bulkFindSync('src/**/*.ts'),
+      ...bulkFindSync('node_modules/@encore/*/src/**/*.ts'),
+      ...(AppInfo.ENV.includes('test') ? bulkFindSync('test/**/*.ts') : [])
+    ];
 
     this.servicesHost = {
       getScriptFileNames: () => this.rootFiles,
