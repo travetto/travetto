@@ -3,6 +3,10 @@ import * as ts from 'typescript';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
+export interface State {
+  imports: Import[],
+  path: string
+}
 
 export class TransformUtil {
   static getTypeChecker() {
@@ -126,5 +130,41 @@ export class TransformUtil {
     let path = (decl as any).parent.fileName;
     let ident = (decl as any).name;
     return { path, ident, name: ident.text };
+  }
+
+  static importingVisitor<T extends State>(
+    init: () => T,
+    visitor: <Z extends ts.Node>(context: ts.TransformationContext, node: Z, state: T) => Z
+  ) {
+    return (context: ts.TransformationContext) =>
+      (file: ts.SourceFile) => {
+        let state = init();
+        state.path = require.resolve(file.fileName);
+
+        let ret = visitor(context, file, state);
+
+        if (state.imports.length) {
+          this.addImport(ret, state.imports);
+        }
+        return ret;
+      };
+  }
+
+  static importIfExternal<T extends State>(node: ts.Node, state: State) {
+    let { path, name: declName, ident: decl } = TransformUtil.getTypeInfoForNode(node);
+    let ident = ts.createIdentifier(declName);
+    let importName = ts.createUniqueName(`import_${declName}`);
+
+    let finalTarget: ts.Expression = ident;
+
+    if (require.resolve(path) !== state.path) {
+      state.imports.push({
+        ident: importName,
+        path
+      });
+
+      finalTarget = ts.createPropertyAccess(importName, ident);
+    }
+    return finalTarget;
   }
 }
