@@ -1,23 +1,23 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
-    "@types/mongoose": "~4.7.20",
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x", 
+    "@types/mongoose": "~4.7.20", 
     "mongoose": "4.11.8"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v2.x.x"
-  },
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@encore/schema",
+  }, 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@encore/schema", 
   "optionalDependencies": {
-    "@types/flat": "0.0.28",
+    "@types/flat": "0.0.28", 
     "flat": "^2.0.0"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
-  },
-  "version": "2.0.0"
+  }, 
+  "version": "2.0.1"
 }
