@@ -26,6 +26,9 @@ export class AppService {
     this.app.use(bodyParser.raw({ type: 'image/*' }));
     this.app.use(session(this.config.session)); // session secret
 
+    //    import { requestContext } from '@encore/context/ext/express';
+    //    .use(requestContext)
+
     // Enable proxy for cookies
     if (this.config.session.cookie.secure) {
       this.app.enable('trust proxy');
@@ -38,6 +41,8 @@ export class AppService {
 
     // Listen for updates
     RouteRegistry.events.on('reload', this.registerController.bind(this));
+
+    this.app.use(RouteRegistry.errorHandler);
 
     if (this.config.serve && this.config.port > 0) {
       console.log(`Listening on ${this.config.port}`);
@@ -53,11 +58,6 @@ export class AppService {
 
   get() {
     return this.app;
-  }
-
-  errorHandler(handler: (err: any, req: express.Request, res: express.Response, next: express.NextFunction) => void) {
-    this.app.use(handler);
-    return this;
   }
 
   private register(method: Method, pattern: PathType, filters: FilterPromise[], handler: FilterPromise) {
