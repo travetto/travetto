@@ -228,8 +228,6 @@ export class Compiler {
 
     let rootFileNames = out.fileNames.slice(0);
 
-    console.log(rootFileNames);
-
     this.servicesHost = {
       getScriptFileNames: () => rootFileNames,
       getScriptVersion: (fileName) => this.files.has(fileName) ? this.files.get(fileName)!.version.toString() : '',
