@@ -39,6 +39,8 @@ export class Registry {
   static aliases = new Map<string, Map<string, string>>();
   static byAnnotation = new Map<Function, Set<string>>();
 
+  static autoCreate: (Dependency<any> & { priority: number })[] = [];
+
   private static _waitingForInit = false;
   static initalized = externalPromise();
 
@@ -47,6 +49,16 @@ export class Registry {
     pconfig.dependencies = pconfig.dependencies || {} as any;
     pconfig.target = pconfig.target || pconfig.class;
     pconfig.annotations = pconfig.annotations || [];
+
+    if (pconfig.autoCreate === undefined) {
+      pconfig.autoCreate = { create: false };
+    } else if (typeof pconfig.autoCreate === 'boolean') {
+      pconfig.autoCreate = { create: pconfig.autoCreate };
+    }
+
+    if (pconfig.autoCreate.priority === undefined) {
+      pconfig.autoCreate.priority = 1000;
+    }
 
     const config = pconfig as InjectableConfig<T>;
     config.dependencies.cons = config.dependencies.cons || [];
@@ -85,6 +97,12 @@ export class Registry {
       this.proxyHandlers.get(targetId)!.has(config.name)
     ) {
       this.createInstance(config.target, config.name);
+    } else if (config.autoCreate && typeof config.autoCreate !== 'boolean') {
+      this.autoCreate.push({
+        target: config.target,
+        name: config.name,
+        priority: config.autoCreate.priority!
+      })
     }
   }
 
@@ -177,6 +195,14 @@ export class Registry {
         let globs = (process.env.SCAN_GLOBS || 'node_modules/@encore/*/src/**/*.ts src/**/*.ts').split(/\s+/);
         for (let glob of globs) {
           bulkRequire(glob, undefined, p => p.indexOf('/ext/') < 0 && !p.endsWith('.d.ts'));
+        }
+
+        if (this.autoCreate.length) {
+          console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
+          let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
+          for (let i of items) {
+            await this.getInstance(i.target, i.name);
+          }
         }
       } catch (e) {
         console.log(e);

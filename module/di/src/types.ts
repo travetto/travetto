@@ -12,6 +12,7 @@ export interface InjectableConfig<T> extends Dependency<T> {
     fields: { [key: string]: Dependency<any> }
   };
   annotations: Function[];
+  autoCreate: boolean | { priority?: number, create: boolean }
 }
 
 export interface Dependency<T> {
