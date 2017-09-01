@@ -1,9 +1,14 @@
-import { EmailService } from '../lib';
+import 'mocha';
+
+import { EmailService } from '../src';
 import { expect } from 'chai';
+import { Registry } from '@encore/di';
 
 describe('Emails', () => {
   it('Should template properly', async () => {
-    let out = await EmailService.template(`<row>
+    let instance = await Registry.getInstance(EmailService);
+
+    let out = await instance.template(`<row>
       <columns large="{{left}}">Bob</columns>
       <columns large="{{right}}"></columns>
     </row>`, { left: 6, right: 6 });
@@ -12,7 +17,9 @@ describe('Emails', () => {
   });
 
   it('Send email', async () => {
-    await EmailService.sendEmail({
+    let instance = await Registry.getInstance(EmailService);
+
+    await instance.sendEmail({
       to: 'tim@eaiti.com',
       subject: 'Simple Test',
       body: `<row>
