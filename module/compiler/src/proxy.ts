@@ -14,18 +14,18 @@ export class RetargettingHandler<T extends any> implements ProxyHandler<T> {
     }
   }
 
-  preventExtensions?(target: T): boolean {
+  preventExtensions(target: T): boolean {
     return !!Object.preventExtensions(this.target);
   }
 
-  apply?(target: T, thisArg: any, argArray?: any): any {
+  apply(target: T, thisArg: any, argArray?: any): any {
     return this.target.apply(thisArg, argArray);
   }
-  construct?(target: T, argArray: any, newTarget?: any) {
+  construct(target: T, argArray: any, newTarget?: any) {
     return new this.target(...argArray);
   }
 
-  setPrototypeOf?(target: T, v: any): boolean {
+  setPrototypeOf(target: T, v: any): boolean {
     return Object.setPrototypeOf(this.target, v);
   }
 
@@ -45,7 +45,7 @@ export class RetargettingHandler<T extends any> implements ProxyHandler<T> {
     return this.target[prop] = value;
   }
 
-  ownKeys?(target: T): PropertyKey[] {
+  ownKeys(target: T): PropertyKey[] {
     let keys = ([] as PropertyKey[])
       .concat(Object.getOwnPropertyNames(this.target))
       .concat(Object.getOwnPropertySymbols(this.target));
