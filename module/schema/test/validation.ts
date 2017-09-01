@@ -1,4 +1,4 @@
-import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum } from '../src';
+import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema } from '../src';
 import { expect } from 'chai';
 
 enum PandaState {
@@ -7,6 +7,7 @@ enum PandaState {
   HUNGRY
 };
 
+@Schema()
 class Response extends SchemaBound {
 
   @Field(String)
@@ -31,6 +32,7 @@ class Response extends SchemaBound {
   pandaState: string;
 }
 
+@Schema()
 class Parent extends SchemaBound {
 
   @Field(Response)
@@ -41,8 +43,9 @@ class Parent extends SchemaBound {
   responses: Response[];
 }
 
+
+@Schema(true)
 class MinTest extends SchemaBound {
-  @Field(String)
   @MinLength(10)
   value: string;
 }
