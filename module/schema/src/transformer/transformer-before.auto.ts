@@ -121,15 +121,30 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     let schema = TransformUtil.getDecorator(node, require.resolve('../decorator/schema'), 'Schema');
     let arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
     let auto = !!schema && (!arg || arg.kind !== ts.SyntaxKind.FalseKeyword);
+
     if (auto) {
       let ret = ts.visitEachChild(node, c => visitNode(context, c, { ...state, inAuto: auto }), context);
       for (let member of ret.members || []) {
         member.parent = ret;
       }
-      return ret;
-    } else {
-      return node;
+      node = ret;
     }
+
+    if (!!schema) {
+      let ret = node as any as ts.ClassDeclaration;
+      let decls = ret.decorators!.filter(x => x !== schema);
+
+      node = ts.updateClassDeclaration(
+        ret,
+        ts.createNodeArray([schema, ...decls]),
+        ret.modifiers,
+        ret.name,
+        ret.typeParameters,
+        ts.createNodeArray(ret.heritageClauses),
+        ret.members
+      ) as any
+    }
+    return node;
   } else if (ts.isPropertyDeclaration(node)) {
     if (state.inAuto) {
       let ignore = TransformUtil.getDecorator(node, require.resolve('../decorator'), 'Ignore');
