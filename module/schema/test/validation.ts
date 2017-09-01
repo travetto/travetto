@@ -1,4 +1,4 @@
-import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum } from '../lib';
+import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum } from '../src';
 import { expect } from 'chai';
 
 enum PandaState {
@@ -6,7 +6,6 @@ enum PandaState {
   AMOROUS,
   HUNGRY
 };
-
 
 class Response extends SchemaBound {
 

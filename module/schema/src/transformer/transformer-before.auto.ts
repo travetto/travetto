@@ -1,43 +1,46 @@
 import * as ts from 'typescript';
-import { AutoSchema, Ignore } from './auto';
-import { Field } from './field';
+import { Schema, Ignore, Field } from '../decorate';
 import { Messages } from '../util';
+import { TransformUtil, Import } from '@encore/base';
 
 type DecList = ts.NodeArray<ts.Decorator>;
 type SchemaList = (ts.Expression | undefined)[];
 
 interface State {
-  inSchema?: ts.Expression;
-  declared: ts.Identifier[]
+  imports: Import[],
+  path: string,
+  inAuto: boolean,
+  addField: ts.Node | undefined
 }
 
 export const Transformer =
   (context: ts.TransformationContext) =>
     (file: ts.SourceFile) => {
-      let state: State = { declared: [] };
+      let state: State = { imports: [], path: require.resolve(file.fileName), inAuto: false, addField: undefined };
       let ret = visitNode(context, file, state);
+
+      if (state.imports.length) {
+        TransformUtil.addImport(ret, state.imports);
+      }
       return ret;
     };
 
-function getDecoratorIdent(d: ts.Decorator): ts.Identifier {
-  if (ts.isCallExpression(d.expression)) {
-    return d.expression.expression as ts.Identifier;
-  } else if (ts.isIdentifier(d.expression)) {
-    return d.expression;
-  } else {
-    throw new Error('No Identifier');
-  }
-}
+function importIfExternal(node: ts.Node, state: State) {
+  let { path, name: declName, ident: decl } = TransformUtil.getTypeInfoForNode(node);
+  let ident = ts.createIdentifier(declName);
+  let importName = ts.createUniqueName(`import_${declName}`);
 
-function computeClass(node: ts.ClassDeclaration) {
-  let decs = (node.decorators || [] as any as DecList).filter(d => !!d.expression);
-  if (decs && decs.length) {
-    let auto = decs
-      .map(d => getDecoratorIdent(d))
-      .find(d => d.getText() === AutoSchema.name);
+  let finalTarget: ts.Expression = ident;
 
-    return auto;
+  if (require.resolve(path) !== state.path) {
+    state.imports.push({
+      ident: importName,
+      path
+    });
+
+    finalTarget = ts.createPropertyAccess(importName, ident);
   }
+  return finalTarget;
 }
 
 function resolveType(type: ts.Node, state: State): ts.Expression {
@@ -47,7 +50,7 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
   switch (kind) {
     case ts.SyntaxKind.TypeReference:
       expr = ((type as ts.TypeReferenceNode).typeName) as ts.Expression;
-      state.declared.push(expr as ts.Identifier);
+      expr = importIfExternal(expr, state);
       break;
     case ts.SyntaxKind.LiteralType: expr = resolveType((type as any as ts.LiteralTypeNode).literal, state); break;
     case ts.SyntaxKind.StringLiteral:
@@ -73,10 +76,10 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
       break;
     case ts.SyntaxKind.UnionType: {
       let types = (type as ts.UnionTypeNode).types;
-      expr = types.slice(1).reduce((fType, type) => {
+      expr = types.slice(1).reduce((fType, stype) => {
         let fTypeStr = (fType as any).text;
         if (fTypeStr !== 'Object') {
-          let resolved = resolveType(type, state);
+          let resolved = resolveType(stype, state);
           if ((resolved as any).text !== fTypeStr) {
             fType = ts.createIdentifier('Object');
           }
@@ -93,23 +96,13 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
 }
 
 function computeProperty(node: ts.PropertyDeclaration, state: State) {
-  let ignore = (node.decorators || [] as any as DecList).find(x => {
-    let ident = getDecoratorIdent(x);
-    if (ident) {
-      let name = ident.text;
-      return name === Ignore.name || name === Field.name;
-    } else {
-      return false;
-    }
-  });
+  let ignore = TransformUtil.getDecorator(node, require.resolve('../decorators'), 'Ignore');
 
-  if (!ignore && state.inSchema) {
+  if (!ignore && state.inAuto) {
     let typeExpr = resolveType(node.type!, state);
     let properties = [];
     if (!node.questionToken) {
-      properties.push(ts.createPropertyAssignment('required', ts.createArrayLiteral([
-        ts.createTrue(), ts.createLiteral(Messages.REQUIRED)
-      ])));
+      properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral([true, Messages.REQUIRED])));
     }
 
     // If we have a union type
@@ -119,10 +112,10 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
       let literals = types.map(x => (x as ts.LiteralTypeNode).literal);
       let values = literals.map(x => x.getText());
 
-      properties.push(ts.createPropertyAssignment('enum', ts.createObjectLiteral([
-        ts.createPropertyAssignment('values', ts.createArrayLiteral(literals)),
-        ts.createPropertyAssignment('message', ts.createLiteral(`{PATH} is only allowed to be "${values.join('" or "')}"`))
-      ])));
+      properties.push(ts.createPropertyAssignment('enum', TransformUtil.fromLiteral({
+        values: literals,
+        message: `{PATH} is only allowed to be "${values.join('" or "')}"`
+      })));
     }
 
     let params = [typeExpr];
@@ -130,9 +123,18 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
       params.push(ts.createObjectLiteral(properties));
     }
 
-    let dec = ts.createDecorator(ts.createCall(state.inSchema, undefined, params));
-    let res = ts.createProperty(
-      (node.decorators! || []).concat([dec]),
+    if (!state.addField) {
+      let ident = ts.createUniqueName('import_Field');
+      state.imports.push({
+        path: require.resolve('../decorate'),
+        ident
+      });
+      state.addField = ts.createPropertyAccess(ident, 'Field');
+    }
+
+    let dec = ts.createDecorator(ts.createCall(state.addField as any, undefined, params));
+    let res = ts.updateProperty(node,
+      ts.createNodeArray([...(node.decorators! || []), dec]),
       node.modifiers,
       node.name,
       node.questionToken,
@@ -147,10 +149,12 @@ function computeProperty(node: ts.PropertyDeclaration, state: State) {
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
   if (ts.isClassDeclaration(node)) {
-    let res = computeClass(node);
-    let ret = ts.visitEachChild(node, c => visitNode(context, c, { ...state, inSchema: res }), context);
+    let schema = TransformUtil.getDecorator(node, require.resolve('../decorator/schema'), 'Schema');
+    let arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
+    let auto = (arg && arg.text === 'true') || false;
+    let ret = ts.visitEachChild(node, c => visitNode(context, c, { ...state, inAuto: auto }), context);
     return ret;
-  } else if (ts.isPropertyDeclaration(node) && !!state.inSchema) {
+  } else if (ts.isPropertyDeclaration(node) && !!state.inAuto) {
     return computeProperty(node, state) as any as T;
   } else {
     return ts.visitEachChild(node, c => visitNode(context, c, state), context);

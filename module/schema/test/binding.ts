@@ -1,4 +1,4 @@
-import { Field, Url, SchemaBound, View, Required, Alias, BindUtil } from '../lib';
+import { Field, Url, SchemaBound, View, Required, Alias, BindUtil } from '../src';
 import { expect } from 'chai';
 
 class Address extends SchemaBound {
