@@ -25,9 +25,10 @@ export class Compiler {
   static transformers: ts.CustomTransformers;
   static registry: ts.DocumentRegistry;
   static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
+  static rootFiles: string[] = [];
 
   static get rootFolders() {
-    return AppInfo.ENV.includes('test') ? '{src,test}' : 'src';
+    return AppInfo.ENV.includes('test') ? '{src,test,node_modules/@encore/*/src}' : '{src,node_modules/@encore/*/src}';
   }
 
   static resolveOptions(name = this.configFile) {
@@ -95,6 +96,7 @@ export class Compiler {
       content = this.transpile(fs.readFileSync(tsf).toString(), tsf);
       const map = new Buffer(content.split(dataUriRe)[1], 'base64').toString()
       this.sourceMaps.set(jsf, { content, url: tsf, map });
+      this.contents.set(jsf, content);
     } else {
       content = this.contents.get(jsf)!;
     }
@@ -154,7 +156,9 @@ export class Compiler {
       this.contents.set(o.name, o.text);
     }
 
-    this.reload(fileName);
+    if (this.files.get(fileName)!.version > 0) {
+      this.reload(fileName);
+    }
   }
 
   static watchFiles(fileNames: string[]) {
@@ -226,10 +230,10 @@ export class Compiler {
       Module._load = this.moduleLoadHandler.bind(this);
     }
 
-    let rootFileNames = out.fileNames.slice(0);
+    this.rootFiles = out.fileNames.slice(0);
 
     this.servicesHost = {
-      getScriptFileNames: () => rootFileNames,
+      getScriptFileNames: () => this.rootFiles,
       getScriptVersion: (fileName) => this.files.has(fileName) ? this.files.get(fileName)!.version.toString() : '',
       getScriptSnapshot: (fileName) => fs.existsSync(fileName) ? ts.ScriptSnapshot.fromString(fs.readFileSync(fileName).toString()) : undefined,
       getCurrentDirectory: () => process.cwd(),
@@ -245,14 +249,14 @@ export class Compiler {
     this.services = ts.createLanguageService(this.servicesHost, this.registry);
 
     // Prime for type checker
-    for (let fileName of rootFileNames) {
+    for (let fileName of this.rootFiles) {
       this.files.set(fileName, { version: 0 });
       this.emitFile(fileName);
     }
 
     // Now let's watch the files
     if (AppInfo.WATCH_MODE) {
-      this.watchFiles(rootFileNames);
+      this.watchFiles(this.rootFiles);
     }
   }
 }
