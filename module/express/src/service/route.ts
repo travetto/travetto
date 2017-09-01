@@ -96,8 +96,18 @@ export class RouteRegistry {
     }
   }
 
+  static getControllerFilters(target: Object) {
+    return ((target as any).filters || []) as Filter[];
+  }
+
+  static registerControllerFilter(target: Object, fn: Filter) {
+    (target as any).filters = ((target as any).filters || []);
+    (target as any).filters.push(fn);
+  }
+
+
   static finalizeClass(config: Partial<ControllerConfig> & { class: Class, path: string }) {
-    let clsFilters = config.filters || [];
+    let clsFilters = this.getControllerFilters(config.class);
     let finalHandlers: RequestHandler[] = [];
 
     // Merge handler with class's base handler
@@ -105,6 +115,7 @@ export class RouteRegistry {
       let finalHandler = {
         filters: [...clsFilters, ...(handler.filters || [])]
           .map(toPromise).map(f => this.asyncHandler(f as FilterPromise)),
+
         path: this.buildPath(config.path, handler.path),
         handler: this.asyncHandler(
           toPromise(handler.handler!),
@@ -154,11 +165,15 @@ export class RouteRegistry {
     };
   }
 
-  static filterAdder(fn: any) {
-    return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-      let rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
-      rh.filters!.unshift(fn);
-      return descriptor;
+  static filterAdder(fn: Filter) {
+    return (target: Object, propertyKey?: string, descriptor?: TypedPropertyDescriptor<any>) => {
+      if (propertyKey && descriptor) {
+        let rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
+        rh.filters!.unshift(fn);
+        return descriptor;
+      } else { // Class filters
+        this.registerControllerFilter(target, fn);
+      }
     };
   }
 }

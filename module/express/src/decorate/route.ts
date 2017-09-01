@@ -7,7 +7,7 @@ export function Controller(path = '') {
   return (target: Class) => {
     RouteRegistry.finalizeClass({
       path,
-      class: target
+      class: target,
     });
   };
 }
