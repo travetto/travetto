@@ -1,23 +1,23 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
-    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x",
-    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v2.x.x",
-    "@types/log4js": "0.0.32",
-    "@types/mkdirp": "^0.5.0",
-    "log4js": "^2.3.3",
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x", 
+    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x", 
+    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v2.x.x", 
+    "@types/log4js": "0.0.32", 
+    "@types/mkdirp": "^0.5.0", 
+    "log4js": "^2.3.3", 
     "mkdirp": "^0.5.1"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v2.x.x"
-  },
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@encore/log",
+  }, 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@encore/log", 
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
-  },
-  "version": "2.0.0"
+  }, 
+  "version": "2.0.1"
 }
