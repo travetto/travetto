@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 export class SchemaRegistry {
 
   static schemas: Map<Class, ClassConfig> = new Map();
-  static pending: Map<Class, ClassConfig> = new Map();
+  private static pending: Map<Class, ClassConfig> = new Map();
   static DEFAULT_VIEW = 'all';
   static events = new EventEmitter();
 
@@ -13,8 +13,20 @@ export class SchemaRegistry {
     return parent.name && parent !== Object ? parent : null;
   }
 
-  static getPendingViewConfig<T>(target: Class<T>, view: string) {
-    let conf = this.getClassConfig(target);
+  static getClass<T>(o: T): Class<T> {
+    return o.constructor as Class<T>;
+  }
+
+  static getPendingViewSchema<T>(cls: Class<T>, view: string = this.DEFAULT_VIEW) {
+    let conf = this.pending.get(cls);
+    return conf && conf.views[view].schema;
+  }
+
+  static getOrCreatePendingViewConfig<T>(target: Class<T>, view: string) {
+    if (!this.pending.has(target)) {
+      this.pending.set(target, { views: {} });
+    }
+    let conf = this.pending.get(target)!;
     let viewConf = conf.views[view];
     if (!viewConf) {
       viewConf = conf.views[view] = {
@@ -25,23 +37,9 @@ export class SchemaRegistry {
     return viewConf;
   }
 
-  static getPendingViewSchema<T>(cls: Class<T>, view: string = this.DEFAULT_VIEW) {
-    let conf = this.pending.get(cls);
-    return conf && conf.views[view].schema;
-  }
-
-  static getClassConfig<T>(cls: Class<T>) {
-
-    return this.schemas.get(cls) as ClassConfig;
-  }
-
-  static getClass<T>(o: T): Class<T> {
-    return o.constructor as any;
-  }
-
   static registerPendingFieldFacet(target: any, prop: string, config: any, view: string = this.DEFAULT_VIEW) {
     let cons = this.getClass(target);
-    let defViewConf = this.getPendingViewConfig(cons, this.DEFAULT_VIEW);
+    let defViewConf = this.getOrCreatePendingViewConfig(cons, this.DEFAULT_VIEW);
 
     if (!defViewConf.schema[prop]) {
       defViewConf.fields.push(prop);
@@ -49,7 +47,7 @@ export class SchemaRegistry {
     }
 
     if (view !== this.DEFAULT_VIEW) {
-      let viewConf = this.getPendingViewConfig(cons, view);
+      let viewConf = this.getOrCreatePendingViewConfig(cons, view);
       if (!viewConf.schema[prop]) {
         viewConf.schema[prop] = defViewConf.schema[prop];
         viewConf.fields.push(prop);
@@ -81,31 +79,45 @@ export class SchemaRegistry {
     return this.registerPendingFieldFacet(target, prop, fieldConf);
   }
 
-  static finalizeClass<T>(cls: Class<T>) {
-    // Project super types to sub types on access
-    let views: { [key: string]: ViewConfig } = {
-      [this.DEFAULT_VIEW]: {
-        schema: {},
-        fields: []
+  static mergeConfigs(dest: ClassConfig, src: ClassConfig) {
+    for (let v of Object.keys(src.views)) {
+      let view = src.views[v];
+      if (v in dest.views) {
+        dest.views[v] = {
+          schema: Object.assign({}, dest.views[v].schema, view.schema),
+          fields: (dest.views[v].fields).concat(view.fields)
+        }
+      } else {
+        dest.views[v] = {
+          schema: Object.assign({}, view.schema || {}),
+          fields: view.fields.slice(0)
+        }
       }
-    };
+    }
+    return dest;
+  }
 
+  static finalizeClass<T>(cls: Class<T>) {
+    let config: ClassConfig = { views: {} };
+
+    // Merge parent
     let parent = this.getParent(cls);
     if (parent) {
-      let parentConfig = this.getClassConfig(parent);
-
-      for (let v of Object.keys(parentConfig.views)) {
-        let view = parentConfig.views[v];
-        views[v] = {
-          schema: Object.assign({}, view.schema),
-          fields: view.fields.slice(0)
-        };
+      let parentConfig = this.schemas.get(parent);
+      if (parentConfig) {
+        config = this.mergeConfigs(config, parentConfig);
       }
     }
 
-    // Emit schema registered
-    this.schemas.set(cls, { views });
+    // Merge pending
+    let pending = this.pending.get(cls);
+    if (pending) {
+      config = this.mergeConfigs(config, pending);
+      this.pending.delete(cls);
+    }
 
+    // Emit schema registered
+    this.schemas.set(cls, config);
     this.events.emit('registered', cls);
   }
 }
