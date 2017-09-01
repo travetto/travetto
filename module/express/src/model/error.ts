@@ -10,7 +10,7 @@ export class AppError extends BaseError<Status> implements Renderable {
   }
 
   render(res: Response) {
-    res.status(this.payload.status);
-    res.json({ message: this.message, status: this.payload.status });
+    res.status(this.payload!.status);
+    res.json({ message: this.message, status: this.payload!.status });
   }
 }

@@ -20,7 +20,7 @@ export function RequiredParam(name: string) {
 export function Accepts(contentTypes: string[]) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     let contentType = req.header('content-type');
-    if (contentTypes.indexOf(contentType) < 0) {
+    if (contentType && contentTypes.indexOf(contentType) < 0) {
       throw new AppError(`Content type ${contentType}`, 400);
     }
   });

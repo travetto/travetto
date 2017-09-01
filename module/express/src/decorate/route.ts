@@ -1,17 +1,23 @@
 import * as moment from 'moment';
 import { PathType } from '../model';
 import { RouteRegistry } from '../service';
+import { Class } from '@encore/di';
 
 export function Controller(path = '') {
-  return RouteRegistry.registerRequestHandlers.bind(null, path);
+  return (target: Class) => {
+    RouteRegistry.finalizeClass({
+      path,
+      class: target
+    });
+  };
 }
 
 export function All(path: PathType) {
-  return RouteRegistry.createRequestHandlerDecorator({ method: 'all', path });
+  return RouteRegistry.registerPendingRequestHandlder({ method: 'all', path });
 }
 
 export function Get(path: PathType) {
-  return RouteRegistry.createRequestHandlerDecorator({
+  return RouteRegistry.registerPendingRequestHandlder({
     method: 'get',
     path,
     headers: {
@@ -22,19 +28,19 @@ export function Get(path: PathType) {
 }
 
 export function Put(path: PathType) {
-  return RouteRegistry.createRequestHandlerDecorator({ method: 'put', path });
+  return RouteRegistry.registerPendingRequestHandlder({ method: 'put', path });
 }
 
 export function Delete(path: PathType) {
-  return RouteRegistry.createRequestHandlerDecorator({ method: 'delete', path });
+  return RouteRegistry.registerPendingRequestHandlder({ method: 'delete', path });
 }
 
 export function Post(path: PathType) {
-  return RouteRegistry.createRequestHandlerDecorator({ method: 'post', path });
+  return RouteRegistry.registerPendingRequestHandlder({ method: 'post', path });
 }
 
 export function Header(headers: { [key: string]: (string | (() => string)) }) {
-  return RouteRegistry.createRequestHandlerDecorator({ headers });
+  return RouteRegistry.registerPendingRequestHandlder({ headers });
 }
 
 export function Cache(value: number, unit = 'second') {
