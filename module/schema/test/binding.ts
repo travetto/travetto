@@ -1,6 +1,9 @@
-import { Field, Url, SchemaBound, View, Required, Alias, BindUtil } from '../src';
+import 'mocha';
+
+import { Field, Url, SchemaBound, View, Required, Alias, BindUtil, Schema } from '../src';
 import { expect } from 'chai';
 
+@Schema()
 class Address extends SchemaBound {
 
   @Field(String)
@@ -12,11 +15,13 @@ class Address extends SchemaBound {
   street2: string;
 }
 
+@Schema()
 class SuperAddress extends Address {
   @Field(String)
   unit: string;
 }
 
+@Schema()
 class Count extends SchemaBound {
 
   @Field(String)
@@ -27,6 +32,7 @@ class Count extends SchemaBound {
   value: number;
 }
 
+@Schema()
 class Person extends SchemaBound {
 
   @Field(String)
@@ -41,24 +47,18 @@ class Person extends SchemaBound {
   counts: Count[];
 }
 
+@Schema(true)
 export class Response extends SchemaBound {
 
-  @Field(String)
-  @Required()
   questionId: string;
-
-  @Field(Object)
   answer?: any;
 
-  @Field(Boolean)
   @Alias('correct', 'is_valid')
   valid?: boolean;
 
-  @Field(Number)
   validationCount?: number = 0;
 
   @Url()
-  @Field(String)
   url?: string;
 }
 

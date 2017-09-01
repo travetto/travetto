@@ -3,7 +3,8 @@ import { Class } from './types';
 import { SchemaRegistry } from './registry';
 import { ObjectUtil } from '@encore/util';
 
-let mongoose = require('mongoose/lib/browser');
+let mongoose = require('mongoose');
+mongoose = require('mongoose/lib/browser');
 mongoose.Document = require('mongoose/lib/browserDocument.js');
 
 export class SchemaValidator {

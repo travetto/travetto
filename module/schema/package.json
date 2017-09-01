@@ -3,7 +3,7 @@
   "dependencies": {
     "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
     "@types/mongoose": "~4.7.20",
-    "mongoose": "~4.11.7"
+    "mongoose": "~4.11.9"
   },
   "description": "",
   "devDependencies": {
