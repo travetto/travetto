@@ -43,6 +43,8 @@ export class DependencyRegistry {
   private static _waitingForInit = false;
   static initalized = externalPromise();
 
+  static getId = getId;
+
   static async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
     let targetId = getId(target);
 
