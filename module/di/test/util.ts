@@ -12,7 +12,11 @@ export class Util {
   }
 
   static work2() {
-    console.log('Work2!');
+    console.log('Work10!');
+  }
+
+  static work3() {
+    console.log('Wors');
   }
 
 }

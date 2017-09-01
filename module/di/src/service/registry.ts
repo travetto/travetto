@@ -186,7 +186,7 @@ export class DependencyRegistry {
 
   static finalizeClass<T>(pconfig: Partial<InjectableConfig<T>>) {
     let classId = getId(pconfig.class!);
-    let config = this.pendingInjectables.get(classId)!;
+    let config = this.getOrCreatePendingConfig(pconfig.class!);
 
     if (pconfig.name) {
       config.name = pconfig.name;
@@ -200,9 +200,6 @@ export class DependencyRegistry {
         config.autoCreate.priority = pconfig.autoCreate.priority;
       }
     }
-
-
-    console.log('Finalizing', classId, config);
 
     let targetId = getId(config.target);
     this.injectables.set(classId, config);

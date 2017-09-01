@@ -12,7 +12,7 @@ class Database {
   }
 
   query() {
-    console.log('Getting stuff', this.dbConfig.getUrl());
+    console.log('Getting stuffztz', this.dbConfig.getUrl());
   }
 }
 

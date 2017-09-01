@@ -22,6 +22,6 @@ export function InjectArgs(configs: InjectConfig[]): ClassDecorator {
 
 export function Inject(config?: InjectConfig): PropertyDecorator {
   return (target: any, propertyKey: string) => {
-    DependencyRegistry.registerProperty(target, propertyKey, config as any as Dependency);
+    DependencyRegistry.registerProperty(target.constructor, propertyKey, config as any as Dependency);
   };
 }
