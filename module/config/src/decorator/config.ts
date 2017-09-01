@@ -1,11 +1,11 @@
 import { ConfigLoader } from '../service/config-loader';
-import { Registry, Class, DEFAULT_INSTANCE } from '@encore/di';
+import { DependencyRegistry, Class, DEFAULT_INSTANCE } from '@encore/di';
 
 export function Config(ns: string, depTarget?: Class<any>, name: string = DEFAULT_INSTANCE) {
   return (target: Class<any & { postConstruct?: () => any }>) => {
     let og = target.prototype.postConstruct;
 
-    Registry.register({
+    DependencyRegistry.register({
       name,
       class: target,
       target: depTarget || target
@@ -21,5 +21,3 @@ export function Config(ns: string, depTarget?: Class<any>, name: string = DEFAUL
     return target;
   };
 }
-
-(Config as any).__id = `${__filename}/Config`;
