@@ -27,6 +27,8 @@ export class Compiler {
   static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
   static rootFiles: string[] = [];
 
+  static workingSet = AppInfo.ENV.includes('dev') ? '{src,test}/**/*.ts' : 'src/**/*.ts';
+
   static resolveOptions(name = this.configFile) {
     let out = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(`${this.cwd}/${this.configFile}`, x => ts.sys.readFile(x)), {
@@ -155,9 +157,10 @@ export class Compiler {
   }
 
   static watchFiles(fileNames: string[]) {
-    let watcher = chokidar.watch(`${this.cwd}/src/**/*.ts`, {
+    let watcher = chokidar.watch(this.workingSet, {
       ignored: [/.*\/transformer-.*\.ts$/, /\/ext\//],
       persistent: true,
+      cwd: process.cwd(),
       interval: 250,
       ignoreInitial: false
     });
@@ -165,11 +168,13 @@ export class Compiler {
     watcher.on('ready', () => {
       watcher
         .on('add', fileName => {
+          fileName = `${process.cwd()}/${fileName}`;
           fileNames.push(fileName);
           this.files.set(fileName, { version: 0 });
           this.emitFile(fileName);
         })
         .on('change', fileName => {
+          fileName = `${process.cwd()}/${fileName}`;
           this.files.get(fileName)!.version++;
           this.emitFile(fileName)
         });
@@ -224,9 +229,8 @@ export class Compiler {
     }
 
     this.rootFiles = [
-      ...bulkFindSync('src/**/*.ts'),
-      ...bulkFindSync('node_modules/@encore/*/src/**/*.ts'),
-      ...(AppInfo.ENV.includes('test') ? bulkFindSync('test/**/*.ts') : [])
+      ...bulkFindSync(this.workingSet),
+      ...bulkFindSync('node_modules/@encore/*/src/**/*.ts')
     ];
 
     this.servicesHost = {
