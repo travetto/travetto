@@ -1,6 +1,7 @@
-import { init } from '@encore/bootstrap';
+const init = require('@encore/bootstrap');
 
 export type Promisable = Promise<any> | (() => Promise<any>);
+type ActionFunction = (done?: any) => any;
 
 let _beforeTest: ActionFunction[] = [];
 let _beforeSuite: ActionFunction[] = [];
@@ -21,7 +22,7 @@ function resolveAll(arr: Promisable[]) {
 }
 
 export function declareSuite(fn: Function) {
-  return function () {
+  return function (this: any) {
     for (let f of _beforeSuite) { before(f); }
     for (let f of _beforeTest) { beforeEach(f); }
     for (let f of _afterTest) { afterEach(f); }
@@ -33,12 +34,12 @@ export function declareSuite(fn: Function) {
 export function timeout<T>(delay: number, fn: (...args: any[]) => T) {
   let cb = fn.toString().indexOf('(done)') >= 0;
   if (cb) {
-    return function (done?: Function) {
+    return function (this: any, done?: Function) {
       this.timeout(delay);
       return fn.call(this, done) as T;
     };
   } else {
-    return function () {
+    return function (this: any) {
       this.timeout(delay);
       return fn.call(this) as T;
     };
