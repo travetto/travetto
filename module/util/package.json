@@ -1,13 +1,14 @@
 {
-  "author": "", 
+  "author": "",
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x", 
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
+    "@types/lodash": "^4.14.74",
     "lodash": "^4.17.4"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@encore/util", 
-  "scripts": {}, 
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@encore/util",
+  "scripts": {},
   "version": "2.0.3"
 }
