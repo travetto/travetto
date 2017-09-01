@@ -10,7 +10,8 @@
   "main": "index.ts",
   "name": "@encore/context",
   "optionalDependencies": {
-    "@encore/expxress": "git+ssh://git@git.eaiti.com/encore/express.git#v2.x.x"
+    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v2.x.x",
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v2.x.x"
   },
   "scripts": {},
   "version": "2.0.1"
