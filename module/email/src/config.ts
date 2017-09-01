@@ -9,4 +9,8 @@ export class MailConfig {
     replyTo: 'Encore Mailer <mailer@encore.org>',
   };
   inky = {};
+
+  postConstruct() {
+    console.log(this);
+  }
 }
