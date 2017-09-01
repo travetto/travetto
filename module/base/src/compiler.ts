@@ -27,7 +27,7 @@ export class Compiler {
   static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
 
   static get rootFolders() {
-    return AppInfo.DEV_MODE ? '{src,test}' : 'src';
+    return AppInfo.ENV.includes('test') ? '{src,test}' : 'src';
   }
 
   static resolveOptions(name = this.configFile) {
