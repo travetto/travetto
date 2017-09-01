@@ -4,8 +4,8 @@ import { Re } from '../util';
 import { Messages } from '../util';
 
 function prop(obj: { [key: string]: any }) {
-  return (f: any, prop: string) => {
-    SchemaRegistry.registerFieldFacet(f, prop, obj);
+  return (f: any, p: string) => {
+    SchemaRegistry.registerFieldFacet(f, p, obj);
   };
 }
 
@@ -17,10 +17,10 @@ function enumKeys(c: any): string[] {
   }
 }
 export function Field(type: ClsList, config?: { [key: string]: any }) {
-  return (f: any, prop: string) => {
-    SchemaRegistry.registerFieldConfig(f, prop, type);
+  return (f: any, p: string) => {
+    SchemaRegistry.registerFieldConfig(f, p, type);
     if (config) {
-      SchemaRegistry.registerFieldFacet(f, prop, config);
+      SchemaRegistry.registerFieldFacet(f, p, config);
     }
   };
 };
@@ -42,9 +42,9 @@ export const Telephone = (message?: string) => Match(Re.TELEPHONE, message);
 export const Url = (message?: string) => Match(Re.URL, message);
 
 export function View(...names: string[]) {
-  return (f: any, prop: string) => {
+  return (f: any, p: string) => {
     for (let name of names) {
-      SchemaRegistry.registerFieldFacet(f, prop, {}, name);
+      SchemaRegistry.registerFieldFacet(f, p, {}, name);
     }
   };
 }
