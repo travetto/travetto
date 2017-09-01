@@ -2,19 +2,36 @@ import { Injectable } from '@encore/di';
 import { Shutdown } from '@encore/lifecycle';
 import * as LRU from 'lru-cache';
 
-export class Cache<T> {
-  protected data: LRU.Cache<string, T>;
+export class CacheManager {
+  public caches: Map<string, LRU.Cache<string, any>>;
+
   protected defaultConfig = {
     max: 1000
   };
 
-  constructor(private shutdown: Shutdown, private config: LRU.Options = {}) {
+  constructor(private shutdown: Shutdown) {
     shutdown.onShutdown('cache', () => this.cleanup());
-    config = Object.assign({}, this.defaultConfig, config || {});
-    this.data = LRU(config);
+  }
+
+  get<T>(config: string | LRU.Options<string, T> & { name: string }) {
+    if (typeof config === 'string') {
+      config = { name: config };
+    }
+    let name = config.name;
+    if (!this.caches.hasOwnProperty(name)) {
+      config = Object.assign({},
+        this.defaultConfig,
+        (config as any) || {}
+      ) as LRU.Options<string, T> & { name: string };
+      let cache = LRU<string, T>(config);
+      this.caches.set(name, cache);
+    }
+    return this.caches.get(name) as LRU.Cache<string, T>;
   }
 
   cleanup() {
-    this.data.reset();
+    for (let k of this.caches.keys()) {
+      this.caches.get(k)!.reset();
+    }
   }
 }

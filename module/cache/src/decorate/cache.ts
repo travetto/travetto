@@ -1,3 +1,4 @@
+import { Cache } from '../service';
 import * as LRU from 'lru-cache';
 
 export function Cacheable(config: string | LRU.Options<any> & { name?: string }, keyFn?: (...args: any[]) => string) {
@@ -9,9 +10,9 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
       }
     }
 
-    let orig = target[propertyKey];
+    let orig = (target as any)[propertyKey];
 
-    target[propertyKey] = (...args: any[]) => {
+    (target as any)[propertyKey] = (...args: any[]) => {
       if (!target.cache) {
         throw new Error('Cache not defined');
       }
