@@ -1,42 +1,13 @@
 import * as ts from 'typescript';
-import { TransformUtil, Import } from '@encore/base';
+import { TransformUtil, Import, State } from '@encore/base';
 
-interface State {
-  imports: Import[],
-  path: string
-}
-
-export const Transformer =
-  (context: ts.TransformationContext) =>
-    (file: ts.SourceFile) => {
-      let state: State = { imports: [], path: require.resolve(file.fileName) };
-      let ret = visitNode(context, file, state);
-
-      if (state.imports.length) {
-        TransformUtil.addImport(ret, state.imports);
-      }
-      return ret;
-    };
+export const Transformer = TransformUtil.importingVisitor(() => ({}), visitNode);
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
   let injection = TransformUtil.getDecorator(param, require.resolve('../decorator/injectable'), 'Inject');
 
   if (injection || ts.isParameter(param)) {
-    let { path, name: declName, ident: decl } = TransformUtil.getTypeInfoForNode(param);
-    let ident = ts.createIdentifier(declName);
-    let importName = ts.createUniqueName(`import_${declName}`);
-
-    let finalTarget: ts.Expression = ident;
-
-    if (require.resolve(path) !== state.path) {
-      state.imports.push({
-        ident: importName,
-        path
-      });
-
-      finalTarget = ts.createPropertyAccess(importName, ident);
-    }
-
+    let finalTarget = TransformUtil.importIfExternal(param, state);
     let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
 
     return TransformUtil.fromLiteral({
@@ -44,7 +15,6 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
       optional: TransformUtil.getObjectValue(injectConfig, 'optional'),
       name: TransformUtil.getObjectValue(injectConfig, 'name')
     });
-
   }
 }
 
@@ -55,7 +25,6 @@ function getIdent() {
     '__filename', undefined, undefined,
     ts.createIdentifier('__filename')
   );
-
 }
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: State): T {
