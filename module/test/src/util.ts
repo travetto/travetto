@@ -7,8 +7,8 @@ let _beforeTest: ActionFunction[] = [];
 let _beforeSuite: ActionFunction[] = [];
 let _afterTest: ActionFunction[] = [];
 let _afterSuite: ActionFunction[] = [];
-let _beforeAll: Promisable[] = [];
-let _afterAll: Promisable[] = [init];
+let _beforeAll: Promisable[] = [init];
+let _afterAll: Promisable[] = [];
 
 export let INIT_TIMEOUT = 10000;
 export let CLEANUP_TIMEOUT = 10000;
