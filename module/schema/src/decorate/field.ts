@@ -5,7 +5,7 @@ import { Messages } from '../util';
 
 function prop(obj: { [key: string]: any }) {
   return (f: any, p: string) => {
-    SchemaRegistry.registerFieldFacet(f, p, obj);
+    SchemaRegistry.registerPendingFieldFacet(f, p, obj);
   };
 }
 
@@ -18,9 +18,9 @@ function enumKeys(c: any): string[] {
 }
 export function Field(type: ClassList, config?: { [key: string]: any }) {
   return (f: any, p: string) => {
-    SchemaRegistry.registerFieldConfig(f, p, type);
+    SchemaRegistry.registerPendingFieldConfig(f, p, type);
     if (config) {
-      SchemaRegistry.registerFieldFacet(f, p, config);
+      SchemaRegistry.registerPendingFieldFacet(f, p, config);
     }
   };
 };
@@ -44,7 +44,12 @@ export const Url = (message?: string) => Match(Re.URL, message);
 export function View(...names: string[]) {
   return (f: any, p: string) => {
     for (let name of names) {
-      SchemaRegistry.registerFieldFacet(f, p, {}, name);
+      SchemaRegistry.registerPendingFieldFacet(f, p, {}, name);
     }
   };
+}
+
+// For Auto schemas
+export function Ignore(): PropertyDecorator {
+  return (target: any, property: string) => { }
 }

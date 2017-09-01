@@ -57,3 +57,7 @@ export class SchemaValidator {
       .map((o, i) => SchemaValidator.validate(o, view)));
   }
 }
+
+SchemaRegistry.events.on('register', cls => {
+  SchemaValidator.schemas.delete(cls); // Clear cache on new register
+});

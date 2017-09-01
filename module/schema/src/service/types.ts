@@ -13,8 +13,6 @@ export interface ViewConfig {
 }
 
 export interface ClassConfig {
-  finalized: boolean;
-  metadata: { [key: string]: any };
   views: { [key: string]: ViewConfig };
 }
 
