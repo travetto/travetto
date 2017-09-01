@@ -14,14 +14,14 @@ export function Injectable(config: Partial<InjectableConfig<any> & { autoCreate?
 
 export type InjectConfig = { name?: string, optional?: boolean };
 
-export function Inject(configs: InjectConfig[]): MethodDecorator;
-export function Inject(config?: InjectConfig): PropertyDecorator;
-export function Inject(config: (InjectConfig | undefined) | InjectConfig[]): MethodDecorator | PropertyDecorator {
-  return (target: any, propertyKey: string, descriptor?: TypedPropertyDescriptor<any>) => {
-    if (!descriptor) {
-      DependencyRegistry.registerProperty(target, propertyKey, config as any as Dependency);
-    } else if (propertyKey === 'constructor') {
-      DependencyRegistry.registerConstructor(target, config as any as Dependency[]);
-    }
+export function InjectArgs(configs: InjectConfig[]): ClassDecorator {
+  return (target: any) => {
+    DependencyRegistry.registerConstructor(target, configs as any as Dependency[]);
+  };
+}
+
+export function Inject(config?: InjectConfig): PropertyDecorator {
+  return (target: any, propertyKey: string) => {
+    DependencyRegistry.registerProperty(target, propertyKey, config as any as Dependency);
   };
 }

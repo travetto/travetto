@@ -201,6 +201,9 @@ export class DependencyRegistry {
       }
     }
 
+
+    console.log('Finalizing', classId, config);
+
     let targetId = getId(config.target);
     this.injectables.set(classId, config);
     this.pendingInjectables.delete(classId);

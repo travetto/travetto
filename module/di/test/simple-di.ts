@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '../src/decorator/injectable';
 import { DbConfig, AltConfig } from './config';
-import { Registry } from '../src/service';
+import { DependencyRegistry } from '../src/service';
 
 @Injectable()
 class Database {
@@ -18,6 +18,7 @@ class Database {
 
 @Injectable()
 class Service {
+
   constructor(private db: Database) {
     console.log('Creating service', db);
   }
@@ -29,7 +30,7 @@ class Service {
 
 
 async function run() {
-  let inst = await Registry.getInstance(Service);
+  let inst = await DependencyRegistry.getInstance(Service);
   inst.doWork();
 }
 
