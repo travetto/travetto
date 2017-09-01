@@ -111,9 +111,6 @@ export class ConfigLoader {
     // Load all namespaces from core
     let files = await bulkRead('node_modules/@encore/*/config/*.yaml');
 
-    // Load all configs, exclude env configs
-    files = files.concat(await bulkRead('config/*.yaml'));
-
     for (let file of files) {
       let ns = file.name.split('/').pop()!.split('.yaml')[0];
       yaml.safeLoadAll(file.data, doc => {
@@ -122,9 +119,10 @@ export class ConfigLoader {
       });
     }
 
+    // Load all envs
     if (envs.length) {
       let loaded: string[] = [];
-      let envFiles = await bulkRead(`env/*.yaml`, undefined, x => {
+      let envFiles = await bulkRead(`config/*.yaml`, undefined, x => {
         let tested = x.split('/').pop()!.split('.yaml')[0];
         let found = envs.indexOf(tested) >= 0;
         if (found) {
