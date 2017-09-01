@@ -18,7 +18,7 @@ export class CacheManager {
       config = { name: config };
     }
     let name = config.name;
-    if (!this.caches.hasOwnProperty(name)) {
+    if (!this.caches.has(name)) {
       config = Object.assign({},
         this.defaultConfig,
         (config as any) || {}

@@ -1,11 +1,11 @@
 import { timeout } from '@encore/test';
-import { Cacheable, Cache } from '../src';
+import { Cacheable, CacheManager } from '../src';
 import { expect } from 'chai';
 import { Shutdown } from '@encore/lifecycle';
 import { Injectable, Registry } from '@encore/di';
 
 @Injectable()
-class TestCache extends Cache {
+class TestCache extends CacheManager {
   constructor(shutdown: Shutdown) {
     super(shutdown);
   }

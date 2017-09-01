@@ -1,4 +1,4 @@
-import { Cache } from '../service';
+import { CacheManager } from '../service';
 import * as LRU from 'lru-cache';
 
 export function Cacheable(config: string | LRU.Options<any> & { name?: string }, keyFn?: (...args: any[]) => string) {
@@ -17,7 +17,7 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
         throw new Error('Cache not defined');
       }
 
-      let cache = target.cache.data;
+      let cache = target.cache.get(config as (string | LRU.Options<string, any> & { name: string }));
 
       let key = keyFn ? keyFn(args) : JSON.stringify(args || []);
       key = `${targetName}||${key}`;
