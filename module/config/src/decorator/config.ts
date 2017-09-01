@@ -5,7 +5,7 @@ export function Config(ns: string, depTarget?: Class<any>, name: string = DEFAUL
   return (target: Class<any & { postConstruct?: () => any }>) => {
     let og = target.prototype.postConstruct;
 
-    DependencyRegistry.register({
+    DependencyRegistry.finalizeClass({
       name,
       class: target,
       target: depTarget || target
