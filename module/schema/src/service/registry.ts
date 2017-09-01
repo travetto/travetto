@@ -116,8 +116,6 @@ export class SchemaRegistry {
       this.pending.delete(cls);
     }
 
-    console.log('Finalized', cls.name, config.views.all);
-
     // Emit schema registered
     this.schemas.set(cls, config);
     this.events.emit('registered', cls);

@@ -20,5 +20,7 @@ export interface FieldConfig {
   type: any;
   name: string;
   aliases?: string[];
+  validator?: (o: any) => string[] | undefined;
   declared: { type: Class<any>, array: boolean };
 }
+

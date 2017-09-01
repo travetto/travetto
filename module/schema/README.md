@@ -1,10 +1,12 @@
 encore: Schema
 ===
 
-This module provides more constrained access to Mongo DB.  This is achieved using the following:
+This module provide validation for schemas.  This is achieved using the following:
 
+  - Class level
+     - `@Schema` defines a class to be a validated, will auto detect schema from typescript annotations
   - Decorator based definition of Mongoose validators as well as general metadata
-     - `@Field` defines a field that will be serialized
+     - `@Field` defines a field that will be serialized (if not using auto `@Schema()`)
      - `@Require` defines a required field
      - `@Enum` defines a field with only enumerated values
      - `@Trimmed` whitespace trims the field
@@ -16,6 +18,7 @@ This module provides more constrained access to Mongo DB.  This is achieved usin
      - `@Email` ensures string field matches basic email regex
      - `@Telephone` ensures string field matches basic telephone regex
      - `@Url` ensures string field matches basic url regex
+     - `@Ignore` exclude from auto schema registration
 
 export function View(     
   - `Express` based support (optional).  This will not be exported via the barrel import, but
