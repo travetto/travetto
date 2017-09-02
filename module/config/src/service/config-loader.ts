@@ -95,6 +95,7 @@ export class ConfigLoader {
       sub = sub[keys.shift()!];
     }
     ObjectUtil.merge(obj, sub);
+    return obj;
   }
 
   /*
