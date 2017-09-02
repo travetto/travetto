@@ -35,7 +35,9 @@ export class RouteRegistry {
       console.log('Reloading controller', config.class.name, config.path);
     }
     this.controllers.set(config.path, final);
-    this.events.emit('reload', config)
+    process.nextTick(() => {
+      this.events.emit('reload', config)
+    });
   }
 
   static getOrCreateRequestHandlerConfig(cls: Class, handler: Filter) {
