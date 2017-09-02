@@ -6,6 +6,7 @@ import { ControllerConfig } from '../model';
 import { Injectable, DependencyRegistry } from '@encore/di';
 import { RouteRegistry } from './registry';
 import { toPromise } from '@encore/util';
+import { ExpressOperator } from './operator';
 
 let compression = require('compression');
 let cookieParser = require('cookie-parser');
@@ -13,7 +14,7 @@ let bodyParser = require('body-parser');
 let session = require('express-session');
 
 @Injectable({ autoCreate: { create: true, priority: 1 } })
-export class AppService {
+export class ExpressApp {
 
   private app: express.Application;
   private controllers = new Map<string, ControllerConfig>();
@@ -30,12 +31,19 @@ export class AppService {
     this.app.use(bodyParser.raw({ type: 'image/*' }));
     this.app.use(session(this.config.session)); // session secret
 
-    //    import { requestContext } from '@encore/context/ext/express';
-    //    .use(requestContext)
-
     // Enable proxy for cookies
     if (this.config.session.cookie.secure) {
       this.app.enable('trust proxy');
+    }
+
+    let operators = DependencyRegistry.getCandidateTypes(ExpressOperator);
+    for (let op of operators) {
+      try {
+        let inst = await DependencyRegistry.getInstance(ExpressOperator, op.name);
+        inst.operate(this);
+      } catch (e) {
+        console.log(`Unable to load operator ${op.class.name}#${op.name}`);
+      }
     }
 
     // Register all active

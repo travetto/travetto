@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
 import { Renderable, Method, ControllerConfig } from '../model';
 import { ObjectUtil, toPromise } from '@encore/util';
-import { AppService } from './app';
+import { ExpressApp } from './app';
 import { Class, DependencyRegistry } from '@encore/di';
 import { EventEmitter } from 'events';
 
