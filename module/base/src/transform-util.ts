@@ -23,21 +23,15 @@ export class TransformUtil {
     }
   }
 
-  static getDecorator(node: ts.Node, file: string, className: string | { name: string }): ts.Decorator | undefined {
-    let decs = (node.decorators || [] as any as DecList).filter(d => !!d.expression);
-    if (decs && decs.length) {
-      let inject: ts.Decorator = decs
-        .filter(d => {
-          let type = this.getTypeChecker().getTypeAtLocation(this.getDecoratorIdent(d));
-          if (type.symbol) {
-            let name = this.getTypeChecker().getFullyQualifiedName(type.symbol!);
-            return name === `"${file.replace(/\.ts$/, '')}".${typeof className === 'string' ? className : className.name}`;
-          } else {
-            return false;
-          }
-        })[0];
-
-      return inject;
+  static findAnyDecorator(node: ts.Node, patterns: { [key: string]: string }): ts.Decorator | undefined {
+    for (let dec of (node.decorators || []) as any as DecList) {
+      let ident = this.getDecoratorIdent(dec);
+      if (ident && ident.text in patterns) {
+        let { path } = this.getTypeInfoForNode(ident);
+        if (path === patterns[ident.text]) {
+          return dec;
+        }
+      }
     }
   }
 
