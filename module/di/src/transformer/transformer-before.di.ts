@@ -14,7 +14,9 @@ let INJECTABLES = (function () {
     if (!(v in out)) {
       out[v] = new Set();
     }
-    k = k.replace(/@encore/, `${process.cwd()}/node_modules/@encore`);
+    k = k
+      .replace(/@encore/, `${process.cwd()}/node_modules/@encore`)
+      .replace('./', `${process.cwd()}/`);
     out[v].add(k);
   }
   return out;
