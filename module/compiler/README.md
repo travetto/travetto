@@ -1,4 +1,4 @@
-encore: Base
+encore: Compiler
 ===
 
-This is a module to provide a standard config for the modules.
+This is a module enhances and standardizes how the typescript compiler works, plus additional tools for AST work
