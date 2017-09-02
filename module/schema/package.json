@@ -1,26 +1,26 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
-    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x",
-    "@types/mongoose": "~4.7.20",
-    "force-dedupe-git-modules": "^0.3.0",
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x", 
+    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x", 
+    "@types/mongoose": "~4.7.20", 
+    "force-dedupe-git-modules": "^0.3.0", 
     "mongoose": "4.11.8"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v2.x.x"
-  },
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@encore/schema",
+  }, 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@encore/schema", 
   "peerDependencies": {
-    "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x",
-    "@types/flat": "0.0.28",
+    "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x", 
+    "@types/flat": "0.0.28", 
     "flat": "^2.0.0"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
-  },
-  "version": "2.0.6"
+  }, 
+  "version": "2.0.7"
 }
