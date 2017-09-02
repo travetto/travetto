@@ -127,6 +127,13 @@ export class DependencyRegistry {
     return this.instances.get(targetId)!.get(name)!;
   }
 
+  static getCandidateTypes<T>(target: Class<T>) {
+    let targetId = getId(target);
+    let aliasMap = this.aliases.get(targetId)!;
+    let aliasedIds = aliasMap ? Array.from(aliasMap.keys()) : [];
+    return aliasedIds.map(id => this.injectables.get(id)!)
+  }
+
   static async initialize() {
     if (!this._waitingForInit) {
       try {
