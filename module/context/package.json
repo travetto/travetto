@@ -9,7 +9,7 @@
   "license": "ISC", 
   "main": "index.ts", 
   "name": "@encore/context", 
-  "optionalDependencies": {
+  "peerDependencies": {
     "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v2.x.x", 
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v2.x.x"
   }, 
