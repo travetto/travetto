@@ -15,7 +15,7 @@ export function Config(ns: string, depTarget?: Class<any>, name: string = DEFAUL
       // Apply config
       ConfigLoader.bindTo(this, ns);
       if (og) {
-        og.apply(this, arguments);
+        return og.apply(this, arguments);
       }
     }
     return target;
