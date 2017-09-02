@@ -161,3 +161,7 @@ export class ConfigLoader {
     }
   }
 }
+
+
+// Initializing
+ConfigLoader.initialize();
