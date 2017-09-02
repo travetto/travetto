@@ -31,7 +31,7 @@ export class Compiler {
   static rootFiles: string[] = [];
 
   static workingSet = AppInfo.ENV.includes('dev') ? '{src,test}/**/*.ts' : 'src/**/*.ts';
-  static optionalRequire = /\/ext\/[^/]+.ts/;
+  static optionalRequire = /\/opt\/[^/]+.ts/;
   static emptyRequire = 'module.exports = {}';
   static libraryPath = 'node_modules/';
   static frameworkSet = `${Compiler.libraryPath}/@encore/*/src/**/*.ts`;
@@ -161,7 +161,7 @@ export class Compiler {
     if (this.logErrors(fileName)) {
       console.log(`Emitting ${fileName} failed`);
       if (this.optionalRequire.test(fileName)) { // If attempting to load an optional require
-        console.error(`Unable to import extension, ${fileName}, stubbing out`);
+        console.error(`Unable to import optional require, ${fileName}, stubbing out`);
         output.outputFiles.splice(0, output.outputFiles.length);
         output.outputFiles.push({
           name: toJsName(fileName),
