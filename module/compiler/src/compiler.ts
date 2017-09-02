@@ -11,6 +11,10 @@ const Module = require('module');
 const originalLoader = Module._load;
 const dataUriRe = /data:application\/json[^,]+base64,/;
 
+function toJsName(name: string) {
+  return name.replace(/\.ts$/, '.js');
+}
+
 export class Compiler {
 
   static configFile = 'tsconfig.json';
@@ -27,6 +31,10 @@ export class Compiler {
   static rootFiles: string[] = [];
 
   static workingSet = AppInfo.ENV.includes('dev') ? '{src,test}/**/*.ts' : 'src/**/*.ts';
+  static optionalRequire = /\/ext\/[^/]+.ts/;
+  static emptyRequire = 'module.exports = {}';
+  static libraryPath = 'node_modules/';
+  static frameworkSet = `${Compiler.libraryPath}/@encore/*/src/**/*.ts`;
 
   static resolveOptions(name = this.configFile) {
     let out = ts.parseJsonSourceFileConfigFileContent(
@@ -70,7 +78,7 @@ export class Compiler {
     let mod = originalLoader.apply(this, arguments);
     let out = mod;
 
-    if (AppInfo.WATCH_MODE && p.indexOf(process.cwd()) >= 0 && p.indexOf('node_modules') < 0) {
+    if (AppInfo.WATCH_MODE && p.indexOf(process.cwd()) >= 0 && p.indexOf(this.libraryPath) < 0) {
       if (!this.modules.has(p)) {
         let handler = new RetargettingHandler(mod);
         out = new Proxy({}, handler);
@@ -86,7 +94,7 @@ export class Compiler {
   }
 
   static requireHandler(m: NodeModule, tsf: string) {
-    const jsf = tsf.replace(/\.ts$/, '.js');
+    const jsf = toJsName(tsf);
 
     let content: string;
     if (!this.contents.has(jsf)) {
@@ -94,15 +102,17 @@ export class Compiler {
       this.rootFiles.push(tsf);
       this.files.set(tsf, { version: 0 });
       this.emitFile(tsf);
+
     }
     content = this.contents.get(jsf)!;
+
     try {
       let ret = (m as any)._compile(content, jsf);
       return ret;
     } catch (e) {
-      if (tsf.includes('/ext/')) { // If attempting to load an extension
-        console.error(`Unable to import extension, ${tsf}, stubbing out`);
-        this.contents.set(jsf, content = 'module.exports = {}');
+      if (this.optionalRequire.test(tsf)) { // If attempting to load an optional require
+        console.error(`Unable to import optional require, ${tsf}, stubbing out`);
+        this.contents.set(jsf, content = this.emptyRequire);
         (m as any)._compile(content, jsf);
       } else {
         throw e;
@@ -116,7 +126,6 @@ export class Compiler {
       retrieveSourceMap: (source: string) => this.sourceMaps.get(source)!
     });
 
-    const compilerLoc = require.resolve('./compiler').split('@encore')[1];
     // Wrap sourcemap tool
     const prep = (Error as any).prepareStackTrace;
     (Error as any).prepareStackTrace = (a: any, stack: any) => {
@@ -124,10 +133,10 @@ export class Compiler {
       const parts = res.split('\n');
       return [parts[0], ...parts.slice(1)
         .filter(l =>
-          l.indexOf(compilerLoc) < 0 &&
+          l.indexOf(__filename) < 0 &&
           l.indexOf('module.js') < 0 &&
           l.indexOf('source-map-support.js') < 0 &&
-          (l.indexOf('node_modules') > 0 ||
+          (l.indexOf(this.libraryPath) > 0 ||
             (l.indexOf('(native)') < 0 && (l.indexOf(this.cwd) < 0 || l.indexOf('.js') < 0))))
       ].join('\n');
     }
@@ -151,12 +160,12 @@ export class Compiler {
 
     if (this.logErrors(fileName)) {
       console.log(`Emitting ${fileName} failed`);
-      if (fileName.includes('/ext/')) { // If attempting to load an extension
+      if (this.optionalRequire.test(fileName)) { // If attempting to load an optional require
         console.error(`Unable to import extension, ${fileName}, stubbing out`);
         output.outputFiles.splice(0, output.outputFiles.length);
         output.outputFiles.push({
-          name: fileName.replace(/\.ts$/, '.js'),
-          text: 'module.exports = {}'
+          name: toJsName(fileName),
+          text: this.emptyRequire
         } as any);
       }
     }
@@ -176,7 +185,7 @@ export class Compiler {
 
   static watchFiles(fileNames: string[]) {
     let watcher = chokidar.watch(this.workingSet, {
-      ignored: [/.*\/transformer-.*\.ts$/, /\/ext\//],
+      ignored: [/.*\/transformer-.*\.ts$/, this.optionalRequire],
       persistent: true,
       cwd: process.cwd(),
       interval: 250,
@@ -253,7 +262,7 @@ export class Compiler {
 
     this.rootFiles = [
       ...bulkFindSync(this.workingSet),
-      ...bulkFindSync('node_modules/@encore/*/src/**/*.ts')
+      ...bulkFindSync(this.frameworkSet)
     ];
 
     this.servicesHost = {
