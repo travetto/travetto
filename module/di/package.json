@@ -2,6 +2,7 @@
   "author": "",
   "dependencies": {
     "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
+    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x",
     "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v2.x.x"
   },
   "description": "",

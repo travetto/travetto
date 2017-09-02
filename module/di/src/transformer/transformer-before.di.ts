@@ -1,9 +1,8 @@
 import * as ts from 'typescript';
 import { TransformUtil, Import, State } from '@encore/base';
+import { ConfigLoader } from '@encore/config';
 
-export const Injectables = {
-  Inject: require.resolve('../decorator/injectable')
-};
+let INJECTABLES: { [key: string]: Set<string> };
 
 interface DiState extends State {
   inInjectable: boolean;
@@ -11,10 +10,33 @@ interface DiState extends State {
   import?: ts.Identifier
 }
 
-export const Transformer = TransformUtil.importingVisitor<DiState>(() => ({
-  inInjectable: false,
-  decorators: {}
-}), visitNode);
+export const Transformer = TransformUtil.importingVisitor<DiState>(() => {
+
+  if (!INJECTABLES) {
+    INJECTABLES = {};
+    let injs = ConfigLoader.bindTo({}, 'di.injectables') as any;
+    injs[require.resolve('../decorator/injectable')] = 'Injectable';
+
+    for (let k of Object.keys(injs)) {
+      let v = injs[k];
+      if (!(v in INJECTABLES)) {
+        INJECTABLES[v] = new Set();
+      }
+      k = k.replace(/@encore/, `${process.cwd()}/node_modules/@encore`);
+      INJECTABLES[v].add(k);
+    }
+    console.log(INJECTABLES);
+  }
+
+  let injectables = {
+    Injectable: require.resolve('../decorator/injectable')
+  };
+
+  return {
+    inInjectable: false,
+    decorators: {}
+  }
+}, visitNode);
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
   let injection = TransformUtil.findAnyDecorator(param, { Inject: require.resolve('../decorator/injectable') });
@@ -69,7 +91,7 @@ function createInjectDecorator(state: DiState, name: string, contents: ts.Expres
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: DiState): T {
   if (ts.isClassDeclaration(node)) {
-    let foundDec = TransformUtil.findAnyDecorator(node, { Injectable: require.resolve('../decorator/injectable') });
+    let foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES);
     let decls = node.decorators;
     if (foundDec) {
 
