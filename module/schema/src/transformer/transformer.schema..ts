@@ -11,11 +11,6 @@ interface AutoState extends State {
   addField: ts.Node | undefined
 }
 
-export const Transformer = TransformUtil.importingVisitor<AutoState>(() => ({
-  inAuto: false,
-  addField: undefined
-}), visitNode);
-
 function resolveType(type: ts.Node, state: State): ts.Expression {
   let expr: ts.Expression | undefined;
   let kind = type && type!.kind;
@@ -158,3 +153,10 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   }
 }
 
+export const SchemaTransformer = {
+  transformer: TransformUtil.importingVisitor<AutoState>(() => ({
+    inAuto: false,
+    addField: undefined
+  }), visitNode),
+  phase: 'before'
+};
