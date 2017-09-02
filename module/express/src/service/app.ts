@@ -1,11 +1,11 @@
 import { ExpressConfig } from '../config';
 
 import * as express from 'express';
-import { Logger } from '@encore/log';
-import { Filter, FilterPromise, PathType, Method, ControllerConfig, RouteStack } from '../model';
+import { RouteUtil } from '../util';
+import { ControllerConfig } from '../model';
 import { Injectable, DependencyRegistry } from '@encore/di';
 import { RouteRegistry } from './registry';
-import { removeAllRoutes } from '../util';
+import { toPromise } from '@encore/util';
 
 let compression = require('compression');
 let cookieParser = require('cookie-parser');
@@ -14,6 +14,7 @@ let session = require('express-session');
 
 @Injectable({ autoCreate: { create: true, priority: 1 } })
 export class AppService {
+
   private app: express.Application;
   private controllers = new Map<string, ControllerConfig>();
 
@@ -44,7 +45,7 @@ export class AppService {
     // Listen for updates
     RouteRegistry.events.on('reload', this.registerController.bind(this));
 
-    this.app.use(RouteRegistry.errorHandler);
+    this.app.use(RouteUtil.errorHandler);
 
     if (this.config.serve && this.config.port > 0) {
       console.log(`Listening on ${this.config.port}`);
@@ -58,9 +59,17 @@ export class AppService {
 
     console.log('Controller Instance', config.class.name, instance);
 
+    for (let handler of config.handlers) {
+      handler.filters = [...config.filters!, ...handler.filters!].map(toPromise).map(x => RouteUtil.asyncHandler(x));
+      handler.path = RouteUtil.buildPath(config.path, handler.path);
+      handler.handler = RouteUtil.asyncHandler(
+        toPromise(handler.handler.bind(instance)),
+        RouteUtil.outputHandler.bind(null, handler))
+    }
+
     if (this.controllers.has(config.path)) {
       console.log('Unregistering', config.path);
-      this.app._router.stack = removeAllRoutes(this.app._router.stack, config);
+      this.app._router.stack = RouteUtil.removeAllRoutes(this.app._router.stack, config);
     }
     console.log('Registering', config.path, config.handlers.length);
     for (let hconf of config.handlers) {

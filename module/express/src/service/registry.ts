@@ -13,89 +13,6 @@ export class RouteRegistry {
   public static controllers = new Map<string, ControllerConfig>();
   public static events = new EventEmitter();
 
-  static async render(res: Response, out: any) {
-    if (out && out.render) {
-      out = (out as Renderable).render(res);
-      if (out && out.then) {
-        await out;
-      }
-    } else if (typeof out === 'string') {
-      res.send(out);
-    } else {
-      res.json(out);
-    }
-  }
-
-  static async outputHandler(handler: RequestHandler, req: Request, res: Response, out: any) {
-    if (!res.headersSent && out) {
-      if (handler.headers) {
-        for (let [h, v] of ObjectUtil.toPairs(handler.headers)) {
-          if (typeof v === 'string') {
-            res.setHeader(h, v);
-          } else {
-            res.setHeader(h, (v as () => string)());
-          }
-        }
-      }
-
-      await RouteRegistry.render(res, out);
-    }
-
-    console.info(`Request`, {
-      method: req.method,
-      path: req.path,
-      query: req.query,
-      params: req.params,
-      statusCode: res.statusCode
-    });
-
-    res.end();
-  }
-
-  static async errorHandler(error: any, req: Request, res: Response, next?: NextFunction) {
-
-    let status = error.status || error.statusCode || 500;
-
-    console.error(`Request`, {
-      method: req.method,
-      path: req.path,
-      query: req.query,
-      params: req.params,
-      statusCode: status
-    });
-
-    console.debug(error);
-
-    // Generally send the error directly to the output
-    if (!res.headersSent) {
-      res.status(status);
-      await this.render(res, error);
-    }
-
-    res.end();
-  }
-
-  static asyncHandler(filter: FilterPromise, handler?: Filter): FilterPromise {
-    return async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        let out = await filter(req, res);
-        handler ? handler(req, res, out) : next();
-      } catch (error) {
-        await this.errorHandler(error, req, res);
-      }
-    };
-  }
-
-  static buildPath(base: string, path: PathType | undefined): PathType {
-    if (typeof path === 'string') {
-      return (base + path).replace(/\/+/, '/').replace(/(.)\/$/, '$1');
-    } else if (!!path) {
-      return new RegExp('^' + base.replace(/\//g, '\\/') + path.source + '$', path.flags);
-    } else {
-      return base;
-    }
-  }
-
   static getControllerFilters(target: Object) {
     return ((target as any).filters || []) as Filter[];
   }
@@ -107,35 +24,9 @@ export class RouteRegistry {
 
 
   static finalizeClass(config: Partial<ControllerConfig> & { class: Class, path: string }) {
-
-    let clsFilters = this.getControllerFilters(config.class);
-    let finalHandlers: RequestHandler[] = [];
-
-    // Merge handler with class's base handler
-    for (let handler of this.pendingHandlers.get(DependencyRegistry.getId(config.class))!) {
-      let finalHandler: Partial<RequestHandler> = {
-        filters: [...clsFilters, ...(handler.filters || [])]
-          .map(toPromise).map(f => this.asyncHandler(f as FilterPromise)),
-
-        path: this.buildPath(config.path, handler.path),
-        method: handler.method,
-        class: handler.class,
-        handler: handler.handler,
-        headers: handler.headers,
-        instance: null
-      }
-
-      finalHandler.handler = this.asyncHandler(
-        toPromise(handler.handler!),
-        this.outputHandler.bind(null, handler),
-        finalHandler
-      );
-
-      finalHandlers.push(finalHandler as RequestHandler);
-    }
-    config.handlers = finalHandlers;
-
     let final = config as ControllerConfig;
+    final.filters = this.getControllerFilters(config.class);
+    final.handlers = this.pendingHandlers.get(DependencyRegistry.getId(config.class))! as RequestHandler[];
 
     let id = DependencyRegistry.getId(config.class);
     this.pendingHandlers.delete(id);
