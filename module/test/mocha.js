@@ -27,7 +27,7 @@ process.argv = [
   process.argv[0],
   'mocha',
   ...(process.env.NODE_FLAGS || '').split(' '),
-  '--require', `node_modules/@encore/bootstrap/init`,
+  '--require', `node_modules/@encore/config/bootstrap`,
   '--ui', ui,
   ...setup,
   ...extra,
