@@ -75,10 +75,10 @@ export class RouteRegistry {
     res.end();
   }
 
-  static asyncHandler(filter: FilterPromise, handler?: Filter, context?: { instance?: any }): FilterPromise {
+  static asyncHandler(filter: FilterPromise, handler?: Filter): FilterPromise {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let out = await filter.call(context && context.instance, req, res);
+        let out = await filter(req, res);
         handler ? handler(req, res, out) : next();
       } catch (error) {
         await this.errorHandler(error, req, res);
@@ -120,6 +120,7 @@ export class RouteRegistry {
         path: this.buildPath(config.path, handler.path),
         method: handler.method,
         class: handler.class,
+        handler: handler.handler,
         headers: handler.headers,
         instance: null
       }
