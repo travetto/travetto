@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
 import { AppInfo, bulkRequire } from '@encore/base';
-import { RetargettingHandler } from '@encore/compiler';
+import { RetargettingHandler, Compiler } from '@encore/compiler';
 import { InjectionError } from './error';
 import { externalPromise } from '@encore/util';
 
@@ -140,9 +140,10 @@ export class DependencyRegistry {
     if (!this._waitingForInit) {
       try {
         this._waitingForInit = true;
-        let globs = (process.env.SCAN_GLOBS || 'node_modules/@encore/*/src/**/*.ts src/**/*.ts').split(/\s+/);
+        // Do not include dev files for feare of triggering tests
+        let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
         for (let glob of globs) {
-          bulkRequire(glob, undefined, p => p.indexOf('/ext/') < 0 && !p.endsWith('.d.ts'));
+          bulkRequire(glob, undefined, p => !Compiler.optionalFiles.test(p) && !Compiler.definitionFiles.test(p));
         }
 
         if (this.autoCreate.length) {
