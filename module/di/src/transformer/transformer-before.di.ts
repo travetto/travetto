@@ -1,6 +1,10 @@
 import * as ts from 'typescript';
 import { TransformUtil, Import, State } from '@encore/base';
 
+export const Injectables = {
+  Inject: require.resolve('../decorator/injectable')
+};
+
 interface DiState extends State {
   inInjectable: boolean;
   decorators: { [key: string]: ts.Expression };
@@ -13,7 +17,7 @@ export const Transformer = TransformUtil.importingVisitor<DiState>(() => ({
 }), visitNode);
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-  let injection = TransformUtil.getDecorator(param, require.resolve('../decorator/injectable'), 'Inject');
+  let injection = TransformUtil.findAnyDecorator(param, { Inject: require.resolve('../decorator/injectable') });
 
   if (injection || ts.isParameter(param)) {
     let finalTarget = TransformUtil.importIfExternal(param, state);
@@ -65,7 +69,7 @@ function createInjectDecorator(state: DiState, name: string, contents: ts.Expres
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: DiState): T {
   if (ts.isClassDeclaration(node)) {
-    let foundDec = TransformUtil.getDecorator(node, require.resolve('../decorator/injectable'), 'Injectable');
+    let foundDec = TransformUtil.findAnyDecorator(node, { Injectable: require.resolve('../decorator/injectable') });
     let decls = node.decorators;
     if (foundDec) {
 
