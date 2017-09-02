@@ -9,8 +9,10 @@ export class CacheManager {
     max: 1000
   };
 
-  constructor(private shutdown: Shutdown) {
-    shutdown.onShutdown('cache', () => this.cleanup());
+  constructor(private shutdown?: Shutdown) {
+    if (shutdown) {
+      shutdown.onShutdown('cache', () => this.cleanup());
+    }
   }
 
   get<T>(config: string | LRU.Options<string, T> & { name: string }) {
