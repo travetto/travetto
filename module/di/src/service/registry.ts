@@ -130,7 +130,7 @@ export class DependencyRegistry {
   static getCandidateTypes<T>(target: Class<T>) {
     let targetId = getId(target);
     let aliasMap = this.aliases.get(targetId)!;
-    let aliasedIds = aliasMap ? Array.from(aliasMap.keys()) : [];
+    let aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
     return aliasedIds.map(id => this.injectables.get(id)!)
   }
 
