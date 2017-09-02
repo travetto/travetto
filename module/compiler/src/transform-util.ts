@@ -139,18 +139,13 @@ export class TransformUtil {
         let state = init() as T;
         state.path = require.resolve(file.fileName);
         state.imports = [];
-        try {
-          let ret = visitor(context, file, state);
 
-          if (state.imports.length) {
-            this.addImport(ret, state.imports);
-          }
-          return ret;
-        } catch (e) {
-          console.log(file.fileName);
-          console.log(e);
-          throw e;
+        let ret = visitor(context, file, state);
+
+        if (state.imports.length) {
+          this.addImport(ret, state.imports);
         }
+        return ret;
       };
   }
 

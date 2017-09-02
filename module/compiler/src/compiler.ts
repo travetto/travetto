@@ -68,7 +68,15 @@ export class Compiler {
   static moduleLoadHandler(request: string, parent: string) {
     let p = Module._resolveFilename(request, parent);
 
-    let mod = originalLoader.apply(this, arguments);
+    let mod;
+    try {
+      mod = originalLoader.apply(this, arguments);
+    } catch (e) {
+      if (p.includes('/ext/')) { // If attempting to load an extension
+        console.error(`Unable to import extension, ${p}, stubbing out`);
+        mod = {};
+      }
+    }
     let out = mod;
 
     if (AppInfo.WATCH_MODE && p.indexOf(process.cwd()) >= 0 && p.indexOf('node_modules') < 0) {
@@ -170,7 +178,7 @@ export class Compiler {
         .on('add', fileName => {
           fileName = `${process.cwd()}/${fileName}`;
           fileNames.push(fileName);
-          this.files.set(fileName, { version: 0 });
+          this.files.set(fileName, { version: 1 });
           this.emitFile(fileName);
         })
         .on('change', fileName => {
@@ -178,8 +186,8 @@ export class Compiler {
           if (this.files.has(fileName)) {
             this.files.get(fileName)!.version++;
           } else {
-            fileNames.push(fileName);
             this.files.set(fileName, { version: 1 });
+            fileNames.push(fileName);
           }
           this.emitFile(fileName)
         });
