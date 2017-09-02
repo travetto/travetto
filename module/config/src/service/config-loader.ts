@@ -117,13 +117,13 @@ export class ConfigLoader {
     console.log(`Initializing: ${envs.join(',')}`);
 
     // Load all namespaces from core
-    let files = bulkReadSync('node_modules/@encore/*/config/*.yaml');
+    let files = bulkReadSync('node_modules/@encore/*/config/*.yml');
 
     // Load all configs, exclude env configs
-    files = files.concat(bulkReadSync('config/*.yaml'));
+    files = files.concat(bulkReadSync('config/*.yml'));
 
     for (let file of files) {
-      let ns = file.name.split('/').pop()!.split('.yaml')[0];
+      let ns = file.name.split('/').pop()!.split('.yml')[0];
       yaml.safeLoadAll(file.data, doc => {
         this.data[ns] = this.data[ns] || {};
         this.merge(this.data, { [ns]: doc });
@@ -132,8 +132,8 @@ export class ConfigLoader {
 
     if (envs.length) {
       let loaded: string[] = [];
-      let envFiles = bulkReadSync(`env/*.yaml`, undefined, x => {
-        let tested = x.split('/').pop()!.split('.yaml')[0];
+      let envFiles = bulkReadSync(`env/*.yml`, undefined, x => {
+        let tested = x.split('/').pop()!.split('.yml')[0];
         let found = envs.indexOf(tested) >= 0;
         if (found) {
           loaded.push(tested);
