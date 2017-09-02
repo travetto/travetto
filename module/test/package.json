@@ -12,7 +12,7 @@
   "license": "ISC", 
   "main": "src/lib/", 
   "name": "@encore/test", 
-  "optionalDependencies": {
+  "peerDependencies": {
     "mocha-bamboo-reporter": "^1.1.0"
   }, 
   "scripts": {
