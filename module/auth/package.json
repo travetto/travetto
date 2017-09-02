@@ -12,9 +12,9 @@
   "license": "ISC", 
   "main": "src/lib/", 
   "name": "@encore/auth", 
-  "optionalDependencies": {
+  "peerDependencies": {
     "@encore/model": "git+ssh://git@git.eaiti.com/encore/model.git#v1.x.x"
   }, 
   "scripts": {}, 
-  "version": "1.1.38"
+  "version": "2.0.0"
 }
