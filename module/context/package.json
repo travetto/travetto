@@ -15,5 +15,5 @@
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v2.x.x"
   }, 
   "scripts": {}, 
-  "version": "2.0.4"
+  "version": "2.0.5"
 }
