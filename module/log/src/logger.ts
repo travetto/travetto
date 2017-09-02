@@ -5,7 +5,7 @@ import { Injectable } from '@encore/di';
 import { LoggerConfig } from './config';
 import { Layouts } from './layout';
 import { isFileAppender } from './types';
-import { AppInfo } from '@encore/base';
+import { AppInfo } from '@encore/compiler';
 import { nodeToPromise } from '@encore/util';
 
 @Injectable({
