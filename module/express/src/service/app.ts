@@ -54,6 +54,9 @@ export class AppService {
 
   async registerController(config: ControllerConfig) {
     let instance = await DependencyRegistry.getInstance(config.class);
+    console.log(instance);
+
+    console.log('Controller Instance', config.class.name, instance);
 
     if (this.controllers.has(config.path)) {
       console.log('Unregistering', config.path);
