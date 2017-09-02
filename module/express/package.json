@@ -1,9 +1,6 @@
 {
   "author": "",
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
-    "@encore/bootstrap": "git+ssh://git@git.eaiti.com/encore/bootstrap.git#v2.x.x",
-    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x",
     "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x",
     "@encore/log": "git+ssh://git@git.eaiti.com/encore/log.git#v2.x.x",
     "@types/express": "^4.0.36",
