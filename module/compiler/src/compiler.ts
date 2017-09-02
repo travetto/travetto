@@ -30,11 +30,15 @@ export class Compiler {
   static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
   static rootFiles: string[] = [];
 
-  static workingSet = AppInfo.ENV.includes('dev') ? '{src,test}/**/*.ts' : 'src/**/*.ts';
-  static optionalRequire = /\/opt\/[^/]+.ts/;
-  static emptyRequire = 'module.exports = {}';
   static libraryPath = 'node_modules/';
-  static frameworkSet = `${Compiler.libraryPath}/@encore/*/src/**/*.ts`;
+  static frameworkWorkingSet = `${Compiler.libraryPath}/@encore/*/src/**/*.ts`;
+  static prodWorkingSet = 'src/**/*.ts';
+  static devWorkingSet = '{src,test}/**/*.ts';
+  static workingSet = AppInfo.ENV.includes('dev') ? Compiler.devWorkingSet : Compiler.prodWorkingSet;
+  static optionalFiles = /\/opt\/[^/]+.ts/;
+  static definitionFiles = /\.d\.ts$/g;
+  static transformerFiles = '**/transformer.*.ts';
+  static emptyRequire = 'module.exports = {}';
 
   static resolveOptions(name = this.configFile) {
     let out = ts.parseJsonSourceFileConfigFileContent(
@@ -57,16 +61,16 @@ export class Compiler {
   static resolveTransformers() {
     const transformers: { [key: string]: any } = {};
 
-    // Load transformers
-    for (const phase of ['before', 'after']) {
-      if (!transformers[phase]) {
-        transformers[phase] = [];
-      }
-
-      for (let res of bulkRequire(`**/transformer-${phase}*.ts`)) {
-        for (const k of Object.keys(res)) {
-          transformers[phase].push(res[k]);
+    for (let trns of bulkRequire(this.transformerFiles)) {
+      for (let phase of Object.keys(trns)) {
+        if (!transformers[phase]) {
+          transformers[phase] = [];
         }
+        let fns = trns[phase];
+        if (!Array.isArray(fns)) {
+          fns = [fns];
+        }
+        transformers[phase].push(...fns);
       }
     }
     return transformers;
@@ -110,7 +114,7 @@ export class Compiler {
       let ret = (m as any)._compile(content, jsf);
       return ret;
     } catch (e) {
-      if (this.optionalRequire.test(tsf)) { // If attempting to load an optional require
+      if (this.optionalFiles.test(tsf)) { // If attempting to load an optional require
         console.error(`Unable to import optional require, ${tsf}, stubbing out`);
         this.contents.set(jsf, content = this.emptyRequire);
         (m as any)._compile(content, jsf);
@@ -160,7 +164,7 @@ export class Compiler {
 
     if (this.logErrors(fileName)) {
       console.log(`Emitting ${fileName} failed`);
-      if (this.optionalRequire.test(fileName)) { // If attempting to load an optional require
+      if (this.optionalFiles.test(fileName)) { // If attempting to load an optional require
         console.error(`Unable to import optional require, ${fileName}, stubbing out`);
         output.outputFiles.splice(0, output.outputFiles.length);
         output.outputFiles.push({
@@ -185,7 +189,7 @@ export class Compiler {
 
   static watchFiles(fileNames: string[]) {
     let watcher = chokidar.watch(this.workingSet, {
-      ignored: [/.*\/transformer-.*\.ts$/, this.optionalRequire],
+      ignored: [this.transformerFiles, this.optionalFiles],
       persistent: true,
       cwd: process.cwd(),
       interval: 250,
@@ -262,7 +266,7 @@ export class Compiler {
 
     this.rootFiles = [
       ...bulkFindSync(this.workingSet),
-      ...bulkFindSync(this.frameworkSet)
+      ...bulkFindSync(this.frameworkWorkingSet)
     ];
 
     this.servicesHost = {
