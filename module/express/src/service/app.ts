@@ -37,6 +37,8 @@ export class ExpressApp {
     }
 
     let operators = DependencyRegistry.getCandidateTypes(ExpressOperator);
+    console.log('Custom operators', operators);
+
     for (let op of operators) {
       try {
         let inst = await DependencyRegistry.getInstance(ExpressOperator, op.name);

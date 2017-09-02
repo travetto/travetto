@@ -5,7 +5,8 @@ import { Injectable } from '@encore/di';
 import { ExpressApp } from '../index';
 
 @Injectable({
-  target: ExpressOperator
+  target: ExpressOperator,
+  name: '@encore/context'
 })
 export class ContextMantainer extends ExpressOperator {
 
@@ -14,6 +15,7 @@ export class ContextMantainer extends ExpressOperator {
   }
 
   operate(app: ExpressApp) {
+    console.log('Filtering');
     app.get().use((req, res, next) => {
       this.context.storage.bindEmitter(req);
       this.context.storage.bindEmitter(res);
