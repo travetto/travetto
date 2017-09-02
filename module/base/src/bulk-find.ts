@@ -61,3 +61,8 @@ export async function bulkRead(pattern: string, base?: string, exclude?: (name: 
   });
   return await Promise.all(promises);
 }
+
+export function bulkReadSync(pattern: string, base?: string, exclude?: (name: string) => boolean) {
+  let files = bulkFindSync(pattern, base, exclude);
+  return files.map(x => ({ name: x, data: fs.readFileSync(x).toString() }));
+}
