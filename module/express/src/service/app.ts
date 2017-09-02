@@ -4,12 +4,44 @@ import * as express from 'express';
 import { Logger } from '@encore/log';
 import { Filter, FilterPromise, PathType, Method, ControllerConfig } from '../model';
 import { Injectable } from '@encore/di';
-import { RouteRegistry } from './route';
+import { RouteRegistry } from './registry';
 
 let compression = require('compression');
 let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
 let session = require('express-session');
+
+type RouteStack = {
+  name: string,
+  keys: string[],
+  regexp: {
+    fast_star: boolean,
+    fast_slash: boolean
+  },
+  route: {
+    path: string,
+    methods: { [key: string]: number },
+    stack: RouteStack[]
+  }
+};
+
+function removeRoutes(stack: RouteStack[], toRemove: Map<PathType, Set<string>>): RouteStack[] {
+  return stack.slice(0).map(x => {
+    if (x.route) {
+      if (x.route.stack) {
+        x.route.stack = removeRoutes(x.route.stack, toRemove);
+      }
+      if (toRemove.has(x.route.path)) {
+        let method = x.route.methods && Object.keys(x.route.methods)[0];
+        if (toRemove.get(x.route.path)!.has(method)) {
+          console.log(`Dropping ${method}/${x.route.path}`);
+          return null;
+        }
+      }
+    }
+    return x;
+  }).filter(x => !!x) as RouteStack[];
+}
 
 @Injectable({ autoCreate: { create: true, priority: 1 } })
 export class AppService {
@@ -62,29 +94,7 @@ export class AppService {
       controllerRoutes.get(path!)!.add(method!);
     }
 
-    let stack = this.app._router.stack;
-
-    console.log('Keys', Array.from(controllerRoutes.keys()));
-    console.log('Values', Array.from(controllerRoutes.values()));
-
-    stack.forEach(removeMiddlewares);
-    function removeMiddlewares(route: any, i: number, stackRoutes: any[]) {
-      if (route.route) {
-        route.route.stack.forEach(removeMiddlewares);
-      }
-      if (route.path) {
-        console.log('Looking at', route.path);
-      }
-      if (route.path && controllerRoutes.has(route.path)) {
-        let methods = controllerRoutes.get(route.path)!;
-        let method = route.methods && Object.keys(route.methods)[0] as any;
-        console.log('Comparing', methods, route.methods, route.path);
-        if (methods.has(method)) {
-          console.log(`Dropping ${method}/${route.path}`);
-          stackRoutes.splice(i, 1);
-        }
-      }
-    }
+    this.app._router.stack = removeRoutes(this.app._router.stack, controllerRoutes);
   }
 
   registerController(config: ControllerConfig) {

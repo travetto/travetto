@@ -6,10 +6,15 @@ export class Simple {
 
   @Get('/name')
   async doIt() {
-    console.log('Go its!');
+    console.log('');
     return {
       first: 'A',
       last: 'B'
     };
+  }
+
+  @Get('/age')
+  async age() {
+    console.log(20);
   }
 }
