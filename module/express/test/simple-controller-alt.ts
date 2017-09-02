@@ -3,8 +3,8 @@ import { MockService } from './mock';
 import { Injectable, DependencyRegistry } from '@encore/di';
 
 
-@Controller('/simple')
-export class Simple {
+@Controller('/simple-alt')
+export class Simple2 {
 
   constructor(private service: MockService) {
   }
@@ -16,11 +16,11 @@ export class Simple {
 
   @Get('/age')
   async age() {
-    console.log(55);
+    return 20;
   }
 
   @Get('/age2')
   async age2() {
-    return this.service.fetch().middle.toLowerCase();;
+    return 22;
   }
 }
