@@ -2,7 +2,9 @@
   "author": "",
   "dependencies": {
     "@encore/base": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x",
+    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x",
     "@types/mongoose": "~4.7.20",
+    "force-dedupe-git-modules": "^0.3.0",
     "mongoose": "4.11.8"
   },
   "description": "",
