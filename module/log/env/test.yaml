@@ -1,5 +1,0 @@
----
-logging:
-  appenders:
-    console:
-      enabled: false
