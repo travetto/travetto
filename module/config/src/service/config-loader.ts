@@ -1,4 +1,4 @@
-import { ObjectUtil } from '@encore/util';
+import { ObjectUtil, externalPromise } from '@encore/util';
 import { bulkRead, AppInfo } from '@encore/base';
 import * as flatten from 'flat';
 import * as yaml from 'js-yaml';
@@ -11,6 +11,8 @@ export class ConfigLoader {
 
   private static NULL = 'NULL' + (Math.random() * 1000) + (new Date().getTime());
   private static data: ConfigMap = {};
+  private static onInit = externalPromise();
+  private static _waitingForInit: boolean = false;
 
   private static writeProperty(o: any, k: string, v: any) {
     if (typeof v === 'string') {
@@ -106,6 +108,10 @@ export class ConfigLoader {
       - Environment vars -> Overrides everything
   */
   static async initialize() {
+    if (this._waitingForInit) {
+      return await this.onInit;
+    }
+
     let envs = AppInfo.ENV;
     console.log(`Initializing: ${envs.join(',')}`);
 
@@ -152,5 +158,8 @@ export class ConfigLoader {
     if (!process.env.QUIET_CONFIG) {
       console.log('Configured', this.data);
     }
+
+    this.onInit.resolve(true);
+    return true;
   }
 }
