@@ -1,5 +1,5 @@
 /// <reference path="./typings.d.ts" />
 export * from './model';
-export * from './decorate';
+export * from './decorator';
 export * from './util';
 export * from './service';

@@ -1,0 +1,4 @@
+---
+di:
+  injectables:
+    './src/decorator/route.ts': Controller
