@@ -133,6 +133,9 @@ export class RouteRegistry {
     let id = DependencyRegistry.getId(config.class);
     this.pendingHandlers.delete(id);
     this.pendingHandlerMap.delete(id);
+    if (this.controllers.has(config.path)) {
+      console.log('Reloading controller', config.class.name, config.path);
+    }
     this.controllers.set(config.path, final);
     this.events.emit('reload', config)
   }

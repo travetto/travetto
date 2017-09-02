@@ -11,11 +11,12 @@ let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
 let session = require('express-session');
 
-@Injectable({ autoCreate: { create: true, priority: 1 } } as any)
+@Injectable({ autoCreate: { create: true, priority: 1 } })
 export class AppService {
   private app: express.Application;
 
-  constructor(private config: ExpressConfig) { }
+  constructor(private config: ExpressConfig) {
+  }
 
   postConstruct() {
     this.app = express();

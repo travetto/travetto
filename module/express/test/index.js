@@ -1,0 +1,1 @@
+require('@encore/bootstrap').init();
