@@ -14,6 +14,7 @@ let session = require('express-session');
 @Injectable({ autoCreate: { create: true, priority: 1 } })
 export class AppService {
   private app: express.Application;
+  private controllers = new Map<string, ControllerConfig>();
 
   constructor(private config: ExpressConfig) {
   }
@@ -51,10 +52,51 @@ export class AppService {
     }
   }
 
+  unregisterController(config: ControllerConfig) {
+    // Un-register
+    let controllerRoutes = new Map<PathType, Set<Method>>();
+    for (let { method, path } of this.controllers.get(config.path)!.handlers) {
+      if (!controllerRoutes.has(path!)) {
+        controllerRoutes.set(path!, new Set());
+      }
+      controllerRoutes.get(path!)!.add(method!);
+    }
+
+    let stack = this.app._router.stack;
+
+    console.log('Keys', Array.from(controllerRoutes.keys()));
+    console.log('Values', Array.from(controllerRoutes.values()));
+
+    stack.forEach(removeMiddlewares);
+    function removeMiddlewares(route: any, i: number, stackRoutes: any[]) {
+      if (route.route) {
+        route.route.stack.forEach(removeMiddlewares);
+      }
+      if (route.path) {
+        console.log('Looking at', route.path);
+      }
+      if (route.path && controllerRoutes.has(route.path)) {
+        let methods = controllerRoutes.get(route.path)!;
+        let method = route.methods && Object.keys(route.methods)[0] as any;
+        console.log('Comparing', methods, route.methods, route.path);
+        if (methods.has(method)) {
+          console.log(`Dropping ${method}/${route.path}`);
+          stackRoutes.splice(i, 1);
+        }
+      }
+    }
+  }
+
   registerController(config: ControllerConfig) {
+    if (this.controllers.has(config.path)) {
+      console.log('Unregistering', config.path);
+      this.unregisterController(config);
+    }
+    console.log('Registering', config.path, config.handlers.length);
     for (let { method, path, filters, handler } of config.handlers) {
       this.register(method!, path!, filters!, handler);
     }
+    this.controllers.set(config.path, config);
   }
 
   get() {

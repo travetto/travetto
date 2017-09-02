@@ -107,6 +107,7 @@ export class RouteRegistry {
 
 
   static finalizeClass(config: Partial<ControllerConfig> & { class: Class, path: string }) {
+
     let clsFilters = this.getControllerFilters(config.class);
     let finalHandlers: RequestHandler[] = [];
 
@@ -125,6 +126,7 @@ export class RouteRegistry {
         class: handler.class,
         headers: handler.headers
       }
+      finalHandlers.push(finalHandler as RequestHandler);
     }
     config.handlers = finalHandlers;
 
@@ -140,24 +142,24 @@ export class RouteRegistry {
     this.events.emit('reload', config)
   }
 
-  static getOrCreateRequestHandlerConfig(cls: Class, fn: Filter) {
+  static getOrCreateRequestHandlerConfig(cls: Class, handler: Filter) {
     let id = DependencyRegistry.getId(cls);
 
     if (!this.pendingHandlers.has(id)) {
       this.pendingHandlers.set(id, []);
       this.pendingHandlerMap.set(id, new Map());
     }
-    if (!this.pendingHandlerMap.get(id)!.has(fn)) {
+    if (!this.pendingHandlerMap.get(id)!.has(handler)) {
       let rh = {
         filters: [],
         class: cls,
-        function: fn,
+        handler: handler,
         headers: {}
       };
-      this.pendingHandlerMap.get(id)!.set(fn, rh);
+      this.pendingHandlerMap.get(id)!.set(handler, rh);
       this.pendingHandlers.get(id)!.push(rh);
     }
-    return this.pendingHandlerMap.get(id)!.get(fn)!;
+    return this.pendingHandlerMap.get(id)!.get(handler)!;
   }
 
   static registerPendingRequestHandlder(config: Partial<RequestHandler>) {
