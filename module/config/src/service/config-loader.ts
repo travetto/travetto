@@ -112,6 +112,8 @@ export class ConfigLoader {
       return await this.onInit;
     }
 
+    this._waitingForInit = true;
+
     let envs = AppInfo.ENV;
     console.log(`Initializing: ${envs.join(',')}`);
 
