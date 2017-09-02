@@ -38,7 +38,7 @@ export class RouteRegistry {
         }
       }
 
-      await this.render(res, out);
+      await RouteRegistry.render(res, out);
     }
 
     console.info(`Request`, {

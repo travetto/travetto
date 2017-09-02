@@ -6,10 +6,10 @@ export class Simple {
 
   @Get('/name')
   async doIt() {
-    console.log('');
     return {
       first: 'A',
-      last: 'B'
+      last: 'B',
+      middle: 'D'
     };
   }
 
