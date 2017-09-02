@@ -14,7 +14,6 @@ const dataUriRe = /data:application\/json[^,]+base64,/;
 function toJsName(name: string) {
   return name.replace(/\.ts$/, '.js');
 }
-
 export class Compiler {
 
   static configFile = 'tsconfig.json';
@@ -62,15 +61,11 @@ export class Compiler {
     const transformers: { [key: string]: any } = {};
 
     for (let trns of bulkRequire(this.transformerFiles)) {
-      for (let phase of Object.keys(trns)) {
+      for (let { phase, transformer } of Object.values(trns)) {
         if (!transformers[phase]) {
           transformers[phase] = [];
         }
-        let fns = trns[phase];
-        if (!Array.isArray(fns)) {
-          fns = [fns];
-        }
-        transformers[phase].push(...fns);
+        transformers[phase].push(transformer);
       }
     }
     return transformers;
