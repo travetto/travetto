@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import { Registry } from '@encore/di';
+import { DependencyRegistry } from '@encore/di';
 import { Test } from '../src/sample';
 
-xdescribe('suite1', () => {
+describe('suite1', () => {
   it('Test1a', () => {
     expect(2).to.equal(2);
   });
@@ -11,7 +11,7 @@ xdescribe('suite1', () => {
   });
 });
 
-xdescribe('suite2', () => {
+describe('suite2', () => {
   it('Test2a', () => {
     expect(2).to.equal(2);
   });
@@ -23,7 +23,7 @@ xdescribe('suite2', () => {
 
 describe('suite3', () => {
   it('Test2a', async () => {
-    let inst = await Registry.getInstance(Test);
+    let inst = await DependencyRegistry.getInstance(Test);
     console.log(inst);
   });
 });
