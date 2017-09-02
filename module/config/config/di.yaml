@@ -1,3 +1,3 @@
 ---
 injectables:
-   Config: '@encore/config/src/decorator/config'
+   @encore/config/src/decorator/config: Config
