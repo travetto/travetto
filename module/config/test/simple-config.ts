@@ -1,5 +1,4 @@
 import { Config, ConfigLoader } from '../src';
-import { Inject, Injectable } from '@encore/di';
 
 class DbConfig {
   name: string;
