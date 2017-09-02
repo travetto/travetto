@@ -131,8 +131,8 @@ export class Compiler {
       if (fileName in require.cache) {
         console.log(this.files.get(fileName)!.version ? 'Reloading' : 'Loading', 'Module', fileName);
         delete require.cache[fileName];
-        require(fileName);
       }
+      require(fileName);
     }
   }
 
@@ -175,7 +175,12 @@ export class Compiler {
         })
         .on('change', fileName => {
           fileName = `${process.cwd()}/${fileName}`;
-          this.files.get(fileName)!.version++;
+          if (this.files.has(fileName)) {
+            this.files.get(fileName)!.version++;
+          } else {
+            fileNames.push(fileName);
+            this.files.set(fileName, { version: 1 });
+          }
           this.emitFile(fileName)
         });
     });
