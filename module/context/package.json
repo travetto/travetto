@@ -2,7 +2,9 @@
   "author": "",
   "dependencies": {
     "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
+    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x",
     "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x",
+    "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x",
     "continuation-local-storage": "^3.2.0"
   },
   "description": "",
