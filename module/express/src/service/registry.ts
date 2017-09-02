@@ -78,7 +78,6 @@ export class RouteRegistry {
   static asyncHandler(filter: FilterPromise, handler?: Filter, context?: { instance?: any }): FilterPromise {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
-        console.log(context && context.instance);
         let out = await filter.call(context && context.instance, req, res);
         handler ? handler(req, res, out) : next();
       } catch (error) {

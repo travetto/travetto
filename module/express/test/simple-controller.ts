@@ -4,7 +4,6 @@ import { Injectable } from '@encore/di';
 
 
 @Controller('/simple')
-@Injectable()
 export class Simple {
 
   constructor(private service: MockService) { }
