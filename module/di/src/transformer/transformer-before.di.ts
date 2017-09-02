@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { TransformUtil, Import, State } from '@encore/base';
+import { TransformUtil, Import, State } from '@encore/compiler';
 import { ConfigLoader } from '@encore/config';
 
 let INJECTABLES = (function () {
