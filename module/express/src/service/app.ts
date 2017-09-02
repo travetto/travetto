@@ -2,46 +2,15 @@ import { ExpressConfig } from '../config';
 
 import * as express from 'express';
 import { Logger } from '@encore/log';
-import { Filter, FilterPromise, PathType, Method, ControllerConfig } from '../model';
+import { Filter, FilterPromise, PathType, Method, ControllerConfig, RouteStack } from '../model';
 import { Injectable } from '@encore/di';
 import { RouteRegistry } from './registry';
+import { removeRoutes } from '../util';
 
 let compression = require('compression');
 let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
 let session = require('express-session');
-
-type RouteStack = {
-  name: string,
-  keys: string[],
-  regexp: {
-    fast_star: boolean,
-    fast_slash: boolean
-  },
-  route: {
-    path: string,
-    methods: { [key: string]: number },
-    stack: RouteStack[]
-  }
-};
-
-function removeRoutes(stack: RouteStack[], toRemove: Map<PathType, Set<string>>): RouteStack[] {
-  return stack.slice(0).map(x => {
-    if (x.route) {
-      if (x.route.stack) {
-        x.route.stack = removeRoutes(x.route.stack, toRemove);
-      }
-      if (toRemove.has(x.route.path)) {
-        let method = x.route.methods && Object.keys(x.route.methods)[0];
-        if (toRemove.get(x.route.path)!.has(method)) {
-          console.log(`Dropping ${method}/${x.route.path}`);
-          return null;
-        }
-      }
-    }
-    return x;
-  }).filter(x => !!x) as RouteStack[];
-}
 
 @Injectable({ autoCreate: { create: true, priority: 1 } })
 export class AppService {

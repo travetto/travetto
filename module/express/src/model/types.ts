@@ -27,3 +27,16 @@ export interface FilterSync {
 }
 export type Filter = FilterPromise | FilterSync;
 
+export class RouteStack {
+  name: string;
+  keys: string[];
+  regexp: {
+    fast_star: boolean,
+    fast_slash: boolean
+  };
+  route: {
+    path: string,
+    methods: { [key: string]: number },
+    stack: RouteStack[]
+  }
+}
