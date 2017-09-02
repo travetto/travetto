@@ -7,8 +7,8 @@ export class MockService {
   fetch() {
     return {
       first: 'A',
-      last: 'B',
-      middle: 'E'
+      last: 'Z',
+      middle: 'EzBake Oven'
     };
   }
 }

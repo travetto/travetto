@@ -18,4 +18,9 @@ export class Simple {
   async age() {
     console.log(55);
   }
+
+  @Get('/age2')
+  async age2() {
+    return this.service.fetch().middle.toLowerCase();;
+  }
 }
