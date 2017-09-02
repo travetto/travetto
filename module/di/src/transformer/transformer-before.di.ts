@@ -17,7 +17,6 @@ let INJECTABLES = (function () {
     k = k.replace(/@encore/, `${process.cwd()}/node_modules/@encore`);
     out[v].add(k);
   }
-  console.log('HI', out);
   return out;
 })();
 
