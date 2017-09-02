@@ -67,15 +67,7 @@ export class Compiler {
   static moduleLoadHandler(request: string, parent: string) {
     let p = Module._resolveFilename(request, parent);
 
-    let mod;
-    try {
-      mod = originalLoader.apply(this, arguments);
-    } catch (e) {
-      if (p.includes('/ext/')) { // If attempting to load an extension
-        console.error(`Unable to import extension, ${p}, stubbing out`);
-        mod = {};
-      }
-    }
+    let mod = originalLoader.apply(this, arguments);
     let out = mod;
 
     if (AppInfo.WATCH_MODE && p.indexOf(process.cwd()) >= 0 && p.indexOf('node_modules') < 0) {
@@ -95,6 +87,7 @@ export class Compiler {
 
   static requireHandler(m: NodeModule, tsf: string) {
     const jsf = tsf.replace(/\.ts$/, '.js');
+
     let content: string;
     if (!this.contents.has(jsf)) {
       // Picking up missed files
@@ -103,8 +96,18 @@ export class Compiler {
       this.emitFile(tsf);
     }
     content = this.contents.get(jsf)!;
-    let ret = (m as any)._compile(content, jsf);
-    return ret;
+    try {
+      let ret = (m as any)._compile(content, jsf);
+      return ret;
+    } catch (e) {
+      if (tsf.includes('/ext/')) { // If attempting to load an extension
+        console.error(`Unable to import extension, ${tsf}, stubbing out`);
+        this.contents.set(jsf, content = 'module.exports = {}');
+        (m as any)._compile(content, jsf);
+      } else {
+        throw e;
+      }
+    }
   }
 
   static prepareSourceMaps() {
@@ -148,6 +151,14 @@ export class Compiler {
 
     if (this.logErrors(fileName)) {
       console.log(`Emitting ${fileName} failed`);
+      if (fileName.includes('/ext/')) { // If attempting to load an extension
+        console.error(`Unable to import extension, ${fileName}, stubbing out`);
+        output.outputFiles.splice(0, output.outputFiles.length);
+        output.outputFiles.push({
+          name: fileName.replace(/\.ts$/, '.js'),
+          text: 'module.exports = {}'
+        } as any);
+      }
     }
 
     if (!output.outputFiles.length) {
