@@ -5,7 +5,7 @@ import { Logger } from '@encore/log';
 import { Filter, FilterPromise, PathType, Method, ControllerConfig, RouteStack } from '../model';
 import { Injectable } from '@encore/di';
 import { RouteRegistry } from './registry';
-import { removeRoutes } from '../util';
+import { removeAllRoutes } from '../util';
 
 let compression = require('compression');
 let cookieParser = require('cookie-parser');
@@ -53,23 +53,10 @@ export class AppService {
     }
   }
 
-  unregisterController(config: ControllerConfig) {
-    // Un-register
-    let controllerRoutes = new Map<PathType, Set<Method>>();
-    for (let { method, path } of this.controllers.get(config.path)!.handlers) {
-      if (!controllerRoutes.has(path!)) {
-        controllerRoutes.set(path!, new Set());
-      }
-      controllerRoutes.get(path!)!.add(method!);
-    }
-
-    this.app._router.stack = removeRoutes(this.app._router.stack, controllerRoutes);
-  }
-
   registerController(config: ControllerConfig) {
     if (this.controllers.has(config.path)) {
       console.log('Unregistering', config.path);
-      this.unregisterController(config);
+      this.app._router.stack = removeAllRoutes(this.app._router.stack, config);
     }
     console.log('Registering', config.path, config.handlers.length);
     for (let { method, path, filters, handler } of config.handlers) {
