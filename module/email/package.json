@@ -1,31 +1,31 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
-    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x",
-    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x",
-    "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x",
-    "@types/cheerio": "^0.22.2",
-    "@types/marked": "0.3.0",
-    "@types/mustache": "^0.8.29",
-    "@types/nodemailer": "^3.1.1",
-    "inky": "^1.3.7",
-    "juice": "^4.1.0",
-    "mustache": "^2.3.0",
-    "nodemailer": "^4.0.1",
-    "nodemailer-markdown": "^1.0.1",
-    "nodemailer-mock-transport": "^1.3.0",
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x", 
+    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x", 
+    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x", 
+    "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x", 
+    "@types/cheerio": "^0.22.2", 
+    "@types/marked": "0.3.0", 
+    "@types/mustache": "^0.8.29", 
+    "@types/nodemailer": "^3.1.1", 
+    "inky": "^1.3.7", 
+    "juice": "^4.1.0", 
+    "mustache": "^2.3.0", 
+    "nodemailer": "^4.0.1", 
+    "nodemailer-markdown": "^1.0.1", 
+    "nodemailer-mock-transport": "^1.3.0", 
     "nodemailer-sendmail-transport": "^1.0.2"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v2.x.x"
-  },
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@encore/email",
+  }, 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@encore/email", 
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
-  },
-  "version": "2.0.3"
+  }, 
+  "version": "2.0.4"
 }
