@@ -2,23 +2,24 @@ import * as ts from 'typescript';
 import { TransformUtil, Import, State } from '@encore/base';
 import { ConfigLoader } from '@encore/config';
 
-let INJECTABLES: { [key: string]: Set<string> } = {
-  Injectable: new Set([require.resolve('../decorator/injectable')])
-};
+let INJECTABLES = (function () {
+  let out: { [key: string]: Set<string> } = {
+    Injectable: new Set([require.resolve('../decorator/injectable')])
+  };
 
-ConfigLoader.initialize().then(x => {
   let injs = ConfigLoader.bindTo({}, 'di.injectables') as any;
 
   for (let k of Object.keys(injs)) {
     let v = injs[k];
-    if (!(v in INJECTABLES)) {
-      INJECTABLES[v] = new Set();
+    if (!(v in out)) {
+      out[v] = new Set();
     }
     k = k.replace(/@encore/, `${process.cwd()}/node_modules/@encore`);
-    INJECTABLES[v].add(k);
+    out[v].add(k);
   }
-  console.log('HI', INJECTABLES);
-});
+  console.log('HI', out);
+  return out;
+})();
 
 interface DiState extends State {
   inInjectable: boolean;
