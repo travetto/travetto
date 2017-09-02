@@ -1,6 +1,7 @@
 require('@encore/config/bootstrap');
+require('@encore/compiler/bootstrap');
 
-let { DependencyRegistry } = require('@encore/di');
+let { DependencyRegistry } = require('src/service/registry');
 let { externalPromise } = require('@encore/util');
 
 let _waitingForInit = false;
