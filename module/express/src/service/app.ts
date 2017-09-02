@@ -60,24 +60,12 @@ export class AppService {
     }
     console.log('Registering', config.path, config.handlers.length);
     for (let { method, path, filters, handler } of config.handlers) {
-      this.register(method!, path!, filters!, handler);
+      this.app[method!](path!, ...filters!, handler);
     }
     this.controllers.set(config.path, config);
   }
 
   get() {
     return this.app;
-  }
-
-  private register(method: Method, pattern: PathType, filters: FilterPromise[], handler: FilterPromise) {
-    let final = [...filters, handler];
-    switch (method) {
-      case 'get': this.app.get(pattern, ...final); break;
-      case 'put': this.app.put(pattern, ...final); break;
-      case 'post': this.app.post(pattern, ...final); break;
-      case 'delete': this.app.delete(pattern, ...final); break;
-      case 'patch': this.app.patch(pattern, ...final); break;
-      case 'options': this.app.options(pattern, ...final); break;
-    }
   }
 }
