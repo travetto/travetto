@@ -23,12 +23,12 @@ export class TransformUtil {
     }
   }
 
-  static findAnyDecorator(node: ts.Node, patterns: { [key: string]: string }): ts.Decorator | undefined {
+  static findAnyDecorator(node: ts.Node, patterns: { [key: string]: Set<string> }): ts.Decorator | undefined {
     for (let dec of (node.decorators || []) as any as DecList) {
       let ident = this.getDecoratorIdent(dec);
       if (ident && ident.text in patterns) {
         let { path } = this.getTypeInfoForNode(ident);
-        if (path === patterns[ident.text]) {
+        if (patterns[ident.text].has(path)) {
           return dec;
         }
       }
