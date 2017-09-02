@@ -120,10 +120,14 @@ export class TransformUtil {
 
   static getTypeInfoForNode(node: ts.Node) {
     let type = this.getTypeChecker().getTypeAtLocation(node);
-    let decl = type!.symbol!.valueDeclaration!;
-    let path = (decl as any).parent.fileName;
-    let ident = (decl as any).name;
-    return { path, ident, name: ident.text };
+    if (type.symbol) {
+      let decl = type!.symbol!.valueDeclaration!;
+      let path = (decl as any).parent.fileName;
+      let ident = (decl as any).name;
+      return { path, ident, name: ident.text };
+    } else {
+      throw new Error('Type information not found');
+    }
   }
 
   static importingVisitor<T extends State>(
@@ -135,13 +139,18 @@ export class TransformUtil {
         let state = init() as T;
         state.path = require.resolve(file.fileName);
         state.imports = [];
+        try {
+          let ret = visitor(context, file, state);
 
-        let ret = visitor(context, file, state);
-
-        if (state.imports.length) {
-          this.addImport(ret, state.imports);
+          if (state.imports.length) {
+            this.addImport(ret, state.imports);
+          }
+          return ret;
+        } catch (e) {
+          console.log(file.fileName);
+          console.log(e);
+          throw e;
         }
-        return ret;
       };
   }
 
