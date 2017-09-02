@@ -12,7 +12,7 @@ export class LoggerConfig {
       layout: {
         type: 'standard',
         timestamp: true,
-        colorize: false,
+        colorize: true,
         align: true,
         prettyPrint: true
       },
@@ -38,6 +38,10 @@ export class LoggerConfig {
   categories = {
     default: {
       appenders: 'console,log,error',
+      level: 'trace'
+    },
+    console: {
+      appenders: 'console',
       level: 'trace'
     }
   };
