@@ -2,7 +2,23 @@ import * as ts from 'typescript';
 import { TransformUtil, Import, State } from '@encore/base';
 import { ConfigLoader } from '@encore/config';
 
-let INJECTABLES: { [key: string]: Set<string> };
+let INJECTABLES: { [key: string]: Set<string> } = {
+  Injectable: new Set([require.resolve('../decorator/injectable')])
+};
+ConfigLoader.onInit.then(x => {
+  console.log('OnInit')
+  let injs = ConfigLoader.bindTo({}, 'di.injectables') as any;
+
+  for (let k of Object.keys(injs)) {
+    let v = injs[k];
+    if (!(v in INJECTABLES)) {
+      INJECTABLES[v] = new Set();
+    }
+    k = k.replace(/@encore/, `${process.cwd()}/node_modules/@encore`);
+    INJECTABLES[v].add(k);
+  }
+  console.log('HI', INJECTABLES);
+});
 
 interface DiState extends State {
   inInjectable: boolean;
@@ -10,36 +26,13 @@ interface DiState extends State {
   import?: ts.Identifier
 }
 
-export const Transformer = TransformUtil.importingVisitor<DiState>(() => {
-
-  if (!INJECTABLES) {
-    INJECTABLES = {};
-    let injs = ConfigLoader.bindTo({}, 'di.injectables') as any;
-    injs[require.resolve('../decorator/injectable')] = 'Injectable';
-
-    for (let k of Object.keys(injs)) {
-      let v = injs[k];
-      if (!(v in INJECTABLES)) {
-        INJECTABLES[v] = new Set();
-      }
-      k = k.replace(/@encore/, `${process.cwd()}/node_modules/@encore`);
-      INJECTABLES[v].add(k);
-    }
-    console.log(INJECTABLES);
-  }
-
-  let injectables = {
-    Injectable: require.resolve('../decorator/injectable')
-  };
-
-  return {
-    inInjectable: false,
-    decorators: {}
-  }
-}, visitNode);
+export const Transformer = TransformUtil.importingVisitor<DiState>(() => ({
+  inInjectable: false,
+  decorators: {}
+}), visitNode);
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-  let injection = TransformUtil.findAnyDecorator(param, { Inject: require.resolve('../decorator/injectable') });
+  let injection = TransformUtil.findAnyDecorator(param, { Inject: new Set([require.resolve('../decorator/injectable')]) });
 
   if (injection || ts.isParameter(param)) {
     let finalTarget = TransformUtil.importIfExternal(param, state);

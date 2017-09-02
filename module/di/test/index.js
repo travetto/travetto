@@ -1,2 +1,3 @@
 require('@encore/base/bootstrap');
-require('./simple-di');
+require('@encore/config').ConfigLoader.initialize()
+  .then(x => require('./simple-di'));
