@@ -1,24 +1,24 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
-    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x",
-    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x",
-    "@types/chai": "^4.0.3",
-    "@types/mocha": "^2.2.41",
-    "chai": "^4.1.1",
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x", 
+    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x", 
+    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x", 
+    "@types/chai": "^4.0.3", 
+    "@types/mocha": "^2.2.41", 
+    "chai": "^4.1.1", 
     "mocha": "^3.5.0"
-  },
-  "description": "",
-  "license": "ISC",
-  "main": "src/lib/",
-  "name": "@encore/test",
+  }, 
+  "description": "", 
+  "license": "ISC", 
+  "main": "src/lib/", 
+  "name": "@encore/test", 
   "peerDependencies": {
-    "mocha-bamboo-reporter": "^1.1.0",
-    "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x"
-  },
+    "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x", 
+    "mocha-bamboo-reporter": "^1.1.0"
+  }, 
   "scripts": {
     "test": "./mocha.js"
-  },
-  "version": "2.0.18"
+  }, 
+  "version": "2.0.19"
 }
