@@ -1,5 +1,4 @@
 import 'mocha';
-const { init } = require('@encore/di/bootstrap');
 
 export type Promisable = Promise<any> | (() => Promise<any>);
 type ActionFunction = (done?: any) => any;
@@ -8,7 +7,7 @@ let _beforeTest: ActionFunction[] = [];
 let _beforeSuite: ActionFunction[] = [];
 let _afterTest: ActionFunction[] = [];
 let _afterSuite: ActionFunction[] = [];
-let _beforeAll: Promisable[] = [init];
+let _beforeAll: Promisable[] = [];
 let _afterAll: Promisable[] = [];
 
 export let INIT_TIMEOUT = 10000;
@@ -65,3 +64,6 @@ export const beforeTest = adder(_beforeTest);
 export const afterSuite = adder(_afterSuite);
 export const afterTest = adder(_afterTest);
 export const afterAll = adder(_afterAll);
+
+// Support di if loaded
+require('../ext/di');
