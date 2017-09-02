@@ -4,7 +4,7 @@ import { DependencyRegistry } from '../src/service';
 
 @Injectable()
 class Database {
-  @Inject({ name: 'a' }) dbConfig: DbConfig;
+  @Inject() dbConfig: DbConfig;
   @Inject({ optional: true }) altConfig: AltConfig;
 
   postConstruct() {

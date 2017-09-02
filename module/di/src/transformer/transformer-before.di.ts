@@ -5,8 +5,8 @@ import { ConfigLoader } from '@encore/config';
 let INJECTABLES: { [key: string]: Set<string> } = {
   Injectable: new Set([require.resolve('../decorator/injectable')])
 };
-ConfigLoader.onInit.then(x => {
-  console.log('OnInit')
+
+ConfigLoader.initialize().then(x => {
   let injs = ConfigLoader.bindTo({}, 'di.injectables') as any;
 
   for (let k of Object.keys(injs)) {
@@ -61,7 +61,7 @@ function getIdent() {
   );
 }
 
-function createInjectDecorator(state: DiState, name: string, contents: ts.Expression) {
+function createInjectDecorator(state: DiState, name: string, contents?: ts.Expression) {
   if (!state.decorators[name]) {
     if (!state.import) {
       state.import = ts.createIdentifier(`import_Injectable`);
@@ -77,7 +77,7 @@ function createInjectDecorator(state: DiState, name: string, contents: ts.Expres
     ts.createCall(
       state.decorators[name],
       undefined,
-      [contents]
+      contents ? [contents] : []
     )
   );
 }
@@ -97,6 +97,10 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         declTemp.push(createInjectDecorator(state, 'InjectArgs', expr));
       }
 
+      // Add injectable to top if not there
+      if (TransformUtil.getDecoratorIdent(foundDec).text !== 'Injectable') {
+        declTemp.unshift(createInjectDecorator(state, 'Injectable'))
+      }
       decls = ts.createNodeArray(declTemp);
     }
 
