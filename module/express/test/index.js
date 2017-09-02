@@ -1,2 +1,2 @@
-require('@encore/bootstrap').init();
+require('@encore/bootstrap').init()
 require('./simple-controller');

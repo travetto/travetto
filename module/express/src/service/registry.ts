@@ -75,10 +75,11 @@ export class RouteRegistry {
     res.end();
   }
 
-  static asyncHandler(filter: FilterPromise, handler?: Filter): FilterPromise {
+  static asyncHandler(filter: FilterPromise, handler?: Filter, context?: { instance?: any }): FilterPromise {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let out = await filter(req, res);
+        console.log(context && context.instance);
+        let out = await filter.call(context && context.instance, req, res);
         handler ? handler(req, res, out) : next();
       } catch (error) {
         await this.errorHandler(error, req, res);
@@ -113,19 +114,23 @@ export class RouteRegistry {
 
     // Merge handler with class's base handler
     for (let handler of this.pendingHandlers.get(DependencyRegistry.getId(config.class))!) {
-      let finalHandler = {
+      let finalHandler: Partial<RequestHandler> = {
         filters: [...clsFilters, ...(handler.filters || [])]
           .map(toPromise).map(f => this.asyncHandler(f as FilterPromise)),
 
         path: this.buildPath(config.path, handler.path),
-        handler: this.asyncHandler(
-          toPromise(handler.handler!),
-          this.outputHandler.bind(null, handler)
-        ),
         method: handler.method,
         class: handler.class,
-        headers: handler.headers
+        headers: handler.headers,
+        instance: null
       }
+
+      finalHandler.handler = this.asyncHandler(
+        toPromise(handler.handler!),
+        this.outputHandler.bind(null, handler),
+        finalHandler
+      );
+
       finalHandlers.push(finalHandler as RequestHandler);
     }
     config.handlers = finalHandlers;

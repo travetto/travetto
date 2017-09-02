@@ -11,6 +11,7 @@ export interface RequestHandler {
 
   class: Class;
   handler: Filter;
+  instance?: any;
 }
 
 export interface ControllerConfig {

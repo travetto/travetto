@@ -3,7 +3,7 @@ import { ExpressConfig } from '../config';
 import * as express from 'express';
 import { Logger } from '@encore/log';
 import { Filter, FilterPromise, PathType, Method, ControllerConfig, RouteStack } from '../model';
-import { Injectable } from '@encore/di';
+import { Injectable, DependencyRegistry } from '@encore/di';
 import { RouteRegistry } from './registry';
 import { removeAllRoutes } from '../util';
 
@@ -20,7 +20,7 @@ export class AppService {
   constructor(private config: ExpressConfig) {
   }
 
-  postConstruct() {
+  async postConstruct() {
     this.app = express();
     this.app.use(compression());
     this.app.use(cookieParser());
@@ -38,9 +38,8 @@ export class AppService {
     }
 
     // Register all active
-    for (let config of RouteRegistry.controllers.values()) {
-      this.registerController(config);
-    }
+    await Promise.all(Array.from(RouteRegistry.controllers.values())
+      .map(c => this.registerController(c)));
 
     // Listen for updates
     RouteRegistry.events.on('reload', this.registerController.bind(this));
@@ -53,14 +52,17 @@ export class AppService {
     }
   }
 
-  registerController(config: ControllerConfig) {
+  async registerController(config: ControllerConfig) {
+    let instance = await DependencyRegistry.getInstance(config.class);
+
     if (this.controllers.has(config.path)) {
       console.log('Unregistering', config.path);
       this.app._router.stack = removeAllRoutes(this.app._router.stack, config);
     }
     console.log('Registering', config.path, config.handlers.length);
-    for (let { method, path, filters, handler } of config.handlers) {
-      this.app[method!](path!, ...filters!, handler);
+    for (let hconf of config.handlers) {
+      hconf.instance = instance;
+      this.app[hconf.method!](hconf.path!, ...hconf.filters!, hconf.handler);
     }
     this.controllers.set(config.path, config);
   }

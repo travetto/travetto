@@ -1,20 +1,22 @@
 import { Controller, Get } from '../src';
+import { MockService } from './mock';
+import { Injectable } from '@encore/di';
 
 
 @Controller('/simple')
+@Injectable()
 export class Simple {
+
+  constructor(private service: MockService) { }
 
   @Get('/name')
   async doIt() {
-    return {
-      first: 'A',
-      last: 'B',
-      middle: 'D'
-    };
+    console.log(this.service);
+    return this.service.fetch();
   }
 
   @Get('/age')
   async age() {
-    console.log(20);
+    console.log(55);
   }
 }
