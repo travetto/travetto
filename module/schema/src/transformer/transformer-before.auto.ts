@@ -118,7 +118,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AutoState): T {
   if (ts.isClassDeclaration(node)) {
-    let schema = TransformUtil.getDecorator(node, require.resolve('../decorator/schema'), 'Schema');
+    let schema = TransformUtil.findAnyDecorator(node, { 'Schema': new Set([require.resolve('../decorator/schema')]) });
     let arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
     let auto = !!schema && (!arg || arg.kind !== ts.SyntaxKind.FalseKeyword);
 
@@ -147,7 +147,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     return node;
   } else if (ts.isPropertyDeclaration(node)) {
     if (state.inAuto) {
-      let ignore = TransformUtil.getDecorator(node, require.resolve('../decorator'), 'Ignore');
+      let ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set([require.resolve('../decorator')]) });
       if (!ignore) {
         return computeProperty(node, state) as any as T;
       }
