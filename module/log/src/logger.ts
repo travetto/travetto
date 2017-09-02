@@ -27,16 +27,24 @@ export class Logger {
       addLayout(layout, Layouts[layout]);
     }
 
-    if (this.config.appenders.console) {
-      this.bindToConsole();
-    }
+    let [appenders, categories] = await Promise.all([
+      this.buildAppenders(),
+      this.buildCategories()
+    ]);
+
+    console.log(categories);
 
     log4js.configure({
-      appenders: await this.buildAppenders(),
-      categories: await this.buildCategories()
+      appenders,
+      categories
     });
 
     this.logger = log4js.getLogger();
+
+
+    if (this.config.appenders.console) {
+      this.bindToConsole();
+    }
   }
 
   private async buildAppenders() {
@@ -80,33 +88,36 @@ export class Logger {
   }
 
   private async buildCategories() {
-    let categories = Object
-      .keys(this.config.categories)
-      .reduce((acc, name) => {
-        acc[name] = (this.config.categories as any)[name];
-        if (typeof acc[name].appenders === 'string') {
-          acc[name].appenders = (acc[name].appenders as any as string).split(',')
-            .map(x => x.trim())
-            .filter(x => this.config.appenders.hasOwnProperty(x) && (this.config.appenders as any)[x].enabled)
-        }
-        return acc;
-      }, {} as { [key: string]: log4js.Category })
+    let out: { [key: string]: log4js.Category } = {};
+    for (let name of Object.keys(this.config.categories)) {
+      let cat = (this.config.categories as any)[name] as log4js.Category;
+      if (typeof cat.appenders === 'string') {
+        cat.appenders = (cat.appenders as string).split(',');
+      }
+      cat.appenders = cat.appenders
+        .filter(x => this.config.appenders.hasOwnProperty(x) && (this.config.appenders as any)[x].enabled);
+      if (cat.appenders.length) {
+        out[name] = cat;
+      }
+    }
 
-    return categories;
+    return out;
   }
 
   private bindToConsole() {
     let override: boolean | null = this.config.appenders.console.replaceConsole;
 
+    const logger = log4js.getLogger('console');
     if (override === null ? process.env.env !== 'test' : !!override) {
-      const logger = log4js.getLogger('console');
-      for (let key of ['info', 'warn', 'error', 'debug']) {
-        if (key in console && key in logger) {
-          (console as any)[key] = (logger as any)[key].bind(logger);
+      if (logger) {
+        for (let key of ['info', 'warn', 'error', 'debug']) {
+          if (key in console && key in logger) {
+            (console as any)[key] = (logger as any)[key].bind(logger);
 
+          }
         }
+        console.log = logger.info.bind(logger);
       }
-      console.log = logger.info.bind(logger);
     }
   }
 }
