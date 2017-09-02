@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { SchemaRegistry, Cls, BindUtil, SchemaValidator } from '../src';
+import { SchemaRegistry, Class, BindUtil, SchemaValidator } from '../src';
 import { ObjectUtil } from '@encore/util';
 
 import { RouteRegistry, AppError } from '@encore/express';
 
 import * as flat from 'flat';
 
-function getBound<T>(cls: Cls<T>, obj: any, view?: string) {
+function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
     return BindUtil.bindSchema(cls, new cls(), obj, view);
   } catch (e) {
@@ -14,7 +14,7 @@ function getBound<T>(cls: Cls<T>, obj: any, view?: string) {
   }
 }
 
-export function SchemaBody<T>(cls: Cls<T>, view?: string) {
+export function SchemaBody<T>(cls: Class<T>, view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     if (ObjectUtil.isPlainObject(req.body)) {
       let o = getBound(cls, req.body, view);
@@ -29,12 +29,13 @@ export function SchemaBody<T>(cls: Cls<T>, view?: string) {
   });
 }
 
-export function SchemaQuery<T>(cls: Cls<T>, view?: string) {
+export function SchemaQuery<T>(cls: Class<T>, view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     let o = getBound(cls, flat.unflatten(req.query), view);
     if (SchemaRegistry.schemas.has(cls)) {
       req.query = await SchemaValidator.validate(o, view);
     } else {
       req.query = o;
-    });
+    }
+  });
 }
