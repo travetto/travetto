@@ -1,6 +1,6 @@
-import { Class as Cls } from '@encore/di';
 
-export interface Class<T = any> extends Cls<T> {
+export interface Class<T = any> {
+  new(...args: any[]): T;
   from?: <Z>(data: any) => Z;
   name: string;
 }
