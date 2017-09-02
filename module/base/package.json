@@ -14,7 +14,7 @@
   "description": "", 
   "license": "ISC", 
   "main": "index.ts", 
-  "name": "@encore/base", 
+  "name": "@encore/compiler", 
   "scripts": {}, 
-  "version": "2.0.54"
+  "version": "2.0.55"
 }
