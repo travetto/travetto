@@ -1,7 +1,8 @@
 import { ObjectUtil, externalPromise } from '@encore/util';
-import { bulkRead, AppInfo } from '@encore/base';
+import { bulkRead, AppInfo, bulkReadSync } from '@encore/base';
 import * as flatten from 'flat';
 import * as yaml from 'js-yaml';
+import { EventEmitter } from 'events';
 
 let unflatten = flatten.unflatten;
 
@@ -11,8 +12,7 @@ export class ConfigLoader {
 
   private static NULL = 'NULL' + (Math.random() * 1000) + (new Date().getTime());
   private static data: ConfigMap = {};
-  private static onInit = externalPromise();
-  private static _waitingForInit: boolean = false;
+  private static _initialized: boolean = false;
 
   private static writeProperty(o: any, k: string, v: any) {
     if (typeof v === 'string') {
@@ -107,21 +107,20 @@ export class ConfigLoader {
       - External config file -> loaded from env
       - Environment vars -> Overrides everything
   */
-  static async initialize() {
-    if (this._waitingForInit) {
-      return await this.onInit;
+  static initialize() {
+    if (this._initialized) {
+      return;
     }
-
-    this._waitingForInit = true;
+    this._initialized = true;
 
     let envs = AppInfo.ENV;
     console.log(`Initializing: ${envs.join(',')}`);
 
     // Load all namespaces from core
-    let files = await bulkRead('node_modules/@encore/*/config/*.yaml');
+    let files = bulkReadSync('node_modules/@encore/*/config/*.yaml');
 
     // Load all configs, exclude env configs
-    files = files.concat(await bulkRead('config/*.yaml'));
+    files = files.concat(bulkReadSync('config/*.yaml'));
 
     for (let file of files) {
       let ns = file.name.split('/').pop()!.split('.yaml')[0];
@@ -133,7 +132,7 @@ export class ConfigLoader {
 
     if (envs.length) {
       let loaded: string[] = [];
-      let envFiles = await bulkRead(`env/*.yaml`, undefined, x => {
+      let envFiles = bulkReadSync(`env/*.yaml`, undefined, x => {
         let tested = x.split('/').pop()!.split('.yaml')[0];
         let found = envs.indexOf(tested) >= 0;
         if (found) {
@@ -160,8 +159,5 @@ export class ConfigLoader {
     if (!process.env.QUIET_CONFIG) {
       console.log('Configured', this.data);
     }
-
-    this.onInit.resolve(true);
-    return true;
   }
 }
