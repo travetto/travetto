@@ -1,5 +1,5 @@
 import 'mocha';
-const { init } = require('@encore/bootstrap');
+const { init } = require('@encore/di/bootstrap');
 
 export type Promisable = Promise<any> | (() => Promise<any>);
 type ActionFunction = (done?: any) => any;
