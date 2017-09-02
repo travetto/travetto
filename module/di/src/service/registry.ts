@@ -1,6 +1,8 @@
-import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
-import { AppInfo, RetargettingHandler, bulkRequire } from '@encore/base';
 import * as path from 'path';
+
+import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
+import { AppInfo, bulkRequire } from '@encore/base';
+import { RetargettingHandler } from '@encore/compiler';
 import { InjectionError } from './error';
 import { externalPromise } from '@encore/util';
 
