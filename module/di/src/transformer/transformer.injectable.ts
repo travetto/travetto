@@ -28,11 +28,6 @@ interface DiState extends State {
   import?: ts.Identifier
 }
 
-export const Transformer = TransformUtil.importingVisitor<DiState>(() => ({
-  inInjectable: false,
-  decorators: {}
-}), visitNode);
-
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
   let injection = TransformUtil.findAnyDecorator(param, { Inject: new Set([require.resolve('../decorator/injectable')]) });
 
@@ -144,4 +139,13 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
   }
   return ts.visitEachChild(node, c => visitNode(context, c, state), context);
+}
+
+
+export const InjectableTransformer = {
+  transformer: TransformUtil.importingVisitor<DiState>(() => ({
+    inInjectable: false,
+    decorators: {}
+  }), visitNode),
+  phase: 'before'
 }

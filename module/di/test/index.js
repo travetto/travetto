@@ -1,2 +1,2 @@
-require('@encore/config/bootstrap');
+require('../bootstrap');
 require('./simple-di');
