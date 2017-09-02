@@ -1,21 +1,21 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x",
-    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x",
-    "@encore/lifecycle": "git+ssh://git@git.eaiti.com/encore/lifecycle.git#v2.x.x",
-    "@types/lru-cache": "^4.0.0",
+    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x", 
+    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x", 
+    "@encore/lifecycle": "git+ssh://git@git.eaiti.com/encore/lifecycle.git#v2.x.x", 
+    "@types/lru-cache": "^4.0.0", 
     "lru-cache": "^4.1.1"
-  },
-  "description": "",
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@encore/cache",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v2.x.x"
-  },
+  }, 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@encore/cache", 
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
-  },
-  "version": "2.0.2"
+  }, 
+  "version": "2.0.3"
 }
