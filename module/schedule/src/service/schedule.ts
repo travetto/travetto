@@ -1,5 +1,4 @@
 import * as cron from 'cron';
-import { Injectable } from '@encore/di';
 import { Shutdown } from './shutdown';
 
 type Callback = (...args: any[]) => any;
