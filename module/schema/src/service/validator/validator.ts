@@ -118,7 +118,7 @@ export class SchemaValidator {
       let sub: SchemaConfig | undefined;
       if (SchemaRegistry.schemas.has(type)) {
         sub = SchemaRegistry.schemas.get(type)!.views[view].schema;
-      } else if (ObjectUtil.isPlainObject(type)) {
+      } else if (type === Object) {
         sub = type as any as SchemaConfig;
       }
 

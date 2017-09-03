@@ -1,9 +1,9 @@
 export const Messages = new Map<any, string>(Object.entries({
   required: '{path} is required',
-  minlength: '{path} is not long enough ({minlength})',
-  maxlength: '{path} is too long ({maxlength})',
-  min: '{path} is not greater than ({min})',
-  max: '{path} is bigger than ({max})',
+  minlength: '{path} is not long enough ({n})',
+  maxlength: '{path} is too long ({n})',
+  min: '{path} is not greater than ({n})',
+  max: '{path} is bigger than ({n})',
   telephone: '{path} is not a valid phone number',
   url: '{path} is not a valid url',
   simple_name: '{path} is not a proper name',

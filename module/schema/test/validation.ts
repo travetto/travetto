@@ -50,17 +50,14 @@ describe('Validation', () => {
         url: 'a.b',
         pandaState: 'orange'
       },
-      responses: [{
-        pandaState: 'blue'
-      }]
+      responses: []
     });
     try {
       await SchemaValidator.validate(res);
       expect(true).to.equal(false);
     } catch (e) {
-      console.log(e);
       findError(e.errors, 'responses', 'required');
-      findError(e.errors, 'response.panda', 'orange');
+      findError(e.errors, 'response.pandaState', 'TIRED');
       findError(e.errors, 'response.url', 'not a valid url');
     }
   });
