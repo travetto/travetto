@@ -1,6 +1,5 @@
 import * as ts from 'typescript';
 import { Schema, Ignore, Field } from '../decorator';
-import { Messages } from '../util';
 import { TransformUtil, Import, State } from '@encore/compiler';
 
 type DecList = ts.NodeArray<ts.Decorator>;
@@ -68,7 +67,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
   let typeExpr = resolveType(node.type!, state);
   let properties = [];
   if (!node.questionToken) {
-    properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral([true, Messages.REQUIRED])));
+    properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral({})));
   }
 
   // If we have a union type

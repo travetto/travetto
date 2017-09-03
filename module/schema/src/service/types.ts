@@ -7,11 +7,11 @@ export interface Class<T = any> {
 
 export type ClassList = Class | [Class];
 
-export interface Schema {
+export interface SchemaConfig {
   [key: string]: FieldConfig;
 }
 export interface ViewConfig {
-  schema: Schema;
+  schema: SchemaConfig;
   fields: string[];
 }
 
