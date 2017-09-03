@@ -11,40 +11,42 @@ export interface CronOptions {
   onComplete?: Callback;
 }
 
-@Injectable()
-export class Schedule {
-  private jobs: cron.CronJob[] = [];
+export class Scheduler {
+  private static jobId = 0;
+  private static jobs = new Map<number, cron.CronJob>();
 
-  constructor(shutdown: Shutdown) {
-    shutdown.onShutdown('scheule.kill', () => this.kill());
+  static perDay(onTick: Callback) {
+    return this.schedule('0 0 0 * * *', { onTick });
   }
 
-  perDay(onTick: Callback) {
-    this.schedule('0 0 0 * * *', { onTick });
+  static perHour(onTick: Callback) {
+    return this.schedule('0 0 * * * *', { onTick });
   }
 
-  perHour(onTick: Callback) {
-    this.schedule('0 0 * * * *', { onTick });
+  static perMinute(onTick: Callback) {
+    return this.schedule('0 * * * * *', { onTick });
   }
 
-  perMinute(onTick: Callback) {
-    this.schedule('0 * * * * *', { onTick });
+  static perSecond(onTick: Callback) {
+    return this.schedule('* * * * * *', { onTick });
   }
 
-  perSecond(onTick: Callback) {
-    this.schedule('* * * * * *', { onTick });
-  }
-
-  schedule(expression: string, options: CronOptions) {
+  static schedule(expression: string, options: CronOptions) {
     // Validate expression
     new cron.CronTime(expression)
 
     let job = new cron.CronJob(Object.assign({ cronTime: expression }, options));
     job.start();
-    this.jobs.push(job);
+    let id = this.jobId++;
+    this.jobs.set(id, job);
+    return id;
   }
 
-  private kill() {
-    this.jobs.map(j => j.stop());
+  static kill() {
+    for (let job of this.jobs.values()) {
+      job.stop();
+    }
   }
 }
+
+Shutdown.onShutdown('scheule.kill', () => Scheduler.kill());

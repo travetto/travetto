@@ -1,20 +1,15 @@
-import { EventEmitter } from 'events';
-import { Injectable } from '@encore/di';
+import { externalPromise } from '@encore/util';
 
-@Injectable()
 export class Shutdown {
   private static listeners: { name: string, handler: Function }[] = [];
-  private static shutdownEvent = new EventEmitter();
   private static shutdownCode = -1;
-  private static shutdownPromise = new Promise((resolve) => {
-    Shutdown.shutdownEvent.on('shutdown', resolve);
-  });
+  private static shutdownPromise = externalPromise();
 
-  onShutdownPromise() {
+  static onShutdownPromise() {
     return Shutdown.shutdownPromise;
   }
 
-  onShutdown(name: string, handler: Function) {
+  static onShutdown(name: string, handler: Function) {
     Shutdown.listeners.push({ name, handler });
   }
 
@@ -65,7 +60,7 @@ export class Shutdown {
       console.error('Error on shutting down', e);
     }
 
-    this.shutdownEvent.emit('shutdown');
+    this.shutdownPromise.resolve(true);
 
     if (this.shutdownCode >= 0) {
       process.nextTick(() => process.exit(this.shutdownCode));
