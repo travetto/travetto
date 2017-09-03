@@ -1,7 +1,5 @@
 import { ObjectUtil } from '@encore/util';
-import { SchemaRegistry, ClassList } from '../service';
-import { Re } from '../util';
-import { Messages } from '../util';
+import { CommonRegExp, SchemaRegistry, ClassList } from '../service';
 
 function prop(obj: { [key: string]: any }) {
   return (f: any, p: string) => {
@@ -37,9 +35,9 @@ export const MinLength = (n: number, message?: string) => prop({ minlength: { n,
 export const MaxLength = (n: number, message?: string) => prop({ maxlength: { n, message } });
 export const Min = (n: number | Date, message?: string) => prop({ min: { n, message } });
 export const Max = (n: number | Date, message?: string) => prop({ max: { n, message } });
-export const Email = (message?: string) => Match(Re.email, message);
-export const Telephone = (message?: string) => Match(Re.telphone, message);
-export const Url = (message?: string) => Match(Re.url, message);
+export const Email = (message?: string) => Match(CommonRegExp.email, message);
+export const Telephone = (message?: string) => Match(CommonRegExp.telphone, message);
+export const Url = (message?: string) => Match(CommonRegExp.url, message);
 
 export function View(...names: string[]) {
   return (f: any, p: string) => {

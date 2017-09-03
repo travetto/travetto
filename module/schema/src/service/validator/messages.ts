@@ -1,5 +1,3 @@
-import { FieldConfig } from '../service';
-
 export const Messages = new Map<any, string>(Object.entries({
   required: '{PATH} is required',
   minlength: '{PATH} is not long enough ({MINLENGTH})',
