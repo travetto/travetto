@@ -1,3 +1,3 @@
 export * from './messages';
-export * from './re';
+export * from './regexp';
 export * from './validator';
