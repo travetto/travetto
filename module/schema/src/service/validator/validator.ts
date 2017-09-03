@@ -4,26 +4,9 @@ import { Messages } from './messages';
 
 import { ObjectUtil } from '@encore/util';
 
-type ValidationError = { message: string, path: string };
+export type ValidationError = { message: string, path: string, kind: string };
 
 export class SchemaValidator {
-
-  /*
-   static getSchemaRaw(schema: any, view: string = SchemaRegistry.DEFAULT_VIEW): Schema {
-     for (let key of Object.keys(schema)) {
-       let isArray = Array.isArray(schema[key].type);
-       let type = isArray ? schema[key].type[0] : schema[key].type;
-       if (SchemaRegistry.schemas.has(type)) {
-         schema[key].type = this.getSchema(type, view);
-       }
-       if (ObjectUtil.isPlainObject(type)) {
-         let sub = this.getSchemaRaw(type, view);
-         schema[key].type = isArray ? [sub] : sub;
-       }
-     }
-     return schema;
-   }
- */
 
   static validateField(field: FieldConfig, value: any) {
     let criteria: string[] = [];

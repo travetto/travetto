@@ -1,5 +1,5 @@
 import 'mocha';
-import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema } from '../src';
+import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema, ValidationError } from '../src';
 import { expect } from 'chai';
 
 @Schema()
@@ -28,6 +28,10 @@ class MinTest extends SchemaBound {
   value: string;
 }
 
+function findError(errors: ValidationError[], path: string, message: string) {
+  expect(errors.find(x => x.path === path && x.message === message)).is.not.null;
+}
+
 describe('Validation', () => {
   it('Url and message', async () => {
     let r = Response.from({
@@ -37,7 +41,8 @@ describe('Validation', () => {
       await SchemaValidator.validate(r);
       expect(true).to.equal(false);
     } catch (e) {
-      expect(e.errors.url.message).to.include('not a valid url');
+      console.log(e);
+      findError(e.errors, 'url', 'not a valid url');
     }
   });
 
@@ -53,8 +58,7 @@ describe('Validation', () => {
       await SchemaValidator.validate(res);
       expect(true).to.equal(false);
     } catch (e) {
-      console.log(e);
-      expect(e.errors['response.url'].message).to.include('not a valid url');
+      findError(e.errors, 'response.url', 'not a valid url');
     }
   });
 
@@ -65,7 +69,7 @@ describe('Validation', () => {
       await SchemaValidator.validate(o);
       expect(true).to.equal(false);
     } catch (e) {
-      expect(e.errors['value'].message).to.include('value is not long enough (10)');
+      findError(e.errors, 'value', 'value is not long enough (10)');
     }
   });
 });
