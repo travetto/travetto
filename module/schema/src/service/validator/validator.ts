@@ -18,6 +18,7 @@ export class SchemaValidator {
       (field.type === Boolean && typeof value !== 'boolean')
     ) {
       criteria.push('type');
+      return [{ kind: 'type', type: field.type }]
     }
 
     if (field.match && !field.match.re.test(`${value}`)) {
@@ -30,6 +31,10 @@ export class SchemaValidator {
 
     if (field.maxlength && `${value}`.length > field.maxlength.n) {
       criteria.push('maxlength');
+    }
+
+    if (field.enum && !field.enum.values.includes(value)) {
+      criteria.push('enum');
     }
 
     if (field.min) {
@@ -72,19 +77,17 @@ export class SchemaValidator {
 
     let errors: ValidationError[] = [];
     for (let key of criteria) {
-      let block = key === 'type' ? { type: field.type } : (field as any)[key];
-      block.kind = key;
-      errors.push(block);
+      let block = (field as any)[key];
+      errors.push({ ...block, kind: key, value });
     }
     return errors;
   }
 
-  static prepareErrors(path: string, value: any, errs: any[]) {
+  static prepareErrors(path: string, errs: any[]) {
     let out = [];
     for (let err of errs) {
       let message = err.message || (err.kind === 'match' ? Messages.get(err.re) : Messages.get(err.kind))
       if (message) {
-        err.value = value;
         err.path = path;
         err.message = message.replace(/\{([^}]+)\}/g, (a: string, k: string) => err[k]);
         out.push(err);
@@ -105,7 +108,7 @@ export class SchemaValidator {
 
       if (!hasValue) {
         if (fieldSchema.required) {
-          errors.push(...this.prepareErrors(path, val, [{ kind: 'required' }]));
+          errors.push(...this.prepareErrors(path, [{ kind: 'required' }]));
         }
         continue;
       }
@@ -121,7 +124,7 @@ export class SchemaValidator {
 
       if (array) {
         if (!Array.isArray(val)) {
-          errors = errors.concat(this.prepareErrors(path, val, [{ kind: 'type', type: Array }]));
+          errors = errors.concat(this.prepareErrors(path, [{ kind: 'type', type: Array, value: val }]));
           continue;
         }
         if (sub) {
@@ -132,16 +135,16 @@ export class SchemaValidator {
         } else {
           for (let i = 0; i < val.length; i++) {
             let subErrors = this.validateField(fieldSchema, val[i]);
-            errors.push(...this.prepareErrors(`${path}[${i}]`, val[i], subErrors));
+            errors.push(...this.prepareErrors(`${path}[${i}]`, subErrors));
           }
         }
       } else if (sub) {
         let subErrors = this.validateSchema(sub, val, view, path);
-        errors = errors.concat(subErrors);
+        errors.push(...subErrors);
+      } else {
+        let fieldErrors = this.validateField(fieldSchema, val);
+        errors.push(...this.prepareErrors(path, fieldErrors));
       }
-
-      let fieldErrors = this.validateField(fieldSchema, val);
-      errors.push(...this.prepareErrors(path, val, fieldErrors));
     }
 
     return errors;

@@ -79,7 +79,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
 
     properties.push(ts.createPropertyAssignment('enum', TransformUtil.fromLiteral({
       values: literals,
-      message: `{PATH} is only allowed to be "${values.join('" or "')}"`
+      message: `{path} is only allowed to be "${values.join('" or "')}"`
     })));
   }
 

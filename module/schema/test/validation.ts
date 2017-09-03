@@ -17,7 +17,6 @@ class Response extends SchemaBound {
 @Schema()
 class Parent extends SchemaBound {
 
-  @Required()
   response: Response;
   responses: Response[];
 }
@@ -29,7 +28,7 @@ class MinTest extends SchemaBound {
 }
 
 function findError(errors: ValidationError[], path: string, message: string) {
-  expect(errors.find(x => x.path === path && x.message === message)).is.not.null;
+  expect(errors.find(x => x.path === path && x.message.includes(message)), `Expecting ${path} to have error ${message}`).is.not.undefined
 }
 
 describe('Validation', () => {
@@ -41,7 +40,6 @@ describe('Validation', () => {
       await SchemaValidator.validate(r);
       expect(true).to.equal(false);
     } catch (e) {
-      console.log(e);
       findError(e.errors, 'url', 'not a valid url');
     }
   });
@@ -52,12 +50,17 @@ describe('Validation', () => {
         url: 'a.b',
         pandaState: 'orange'
       },
-      responses: [{}]
+      responses: [{
+        pandaState: 'blue'
+      }]
     });
     try {
       await SchemaValidator.validate(res);
       expect(true).to.equal(false);
     } catch (e) {
+      console.log(e);
+      findError(e.errors, 'responses', 'required');
+      findError(e.errors, 'response.panda', 'orange');
       findError(e.errors, 'response.url', 'not a valid url');
     }
   });

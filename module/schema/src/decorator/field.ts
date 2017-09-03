@@ -26,7 +26,7 @@ export const Alias = (...aliases: string[]) => prop({ aliases });
 export const Required = (message?: string) => prop({ required: { message } });
 export const Enum = (vals: string[] | any, message?: string) => {
   let values = enumKeys(vals);
-  message = message || `{PATH} is only allowed to be "${values.join('" or "')}"`;
+  message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
   return prop({ enum: { values, message } });
 };
 export const Trimmed = () => prop({ trim: true });
