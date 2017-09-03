@@ -28,6 +28,7 @@ export class Compiler {
   static registry: ts.DocumentRegistry;
   static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
   static rootFiles: string[] = [];
+  static fileWatcher: fs.FSWatcher;
 
   static libraryPath = 'node_modules/';
   static frameworkWorkingSet = `${Compiler.libraryPath}/@encore/*/src/**/*.ts`;
@@ -208,8 +209,13 @@ export class Compiler {
             fileNames.push(fileName);
           }
           this.emitFile(fileName)
+        })
+        .on('unlink', filename => {
+          // On delete
         });
     });
+
+    return watcher;
   }
 
   static logErrors(fileName: string) {
@@ -288,7 +294,7 @@ export class Compiler {
 
     // Now let's watch the files
     if (AppInfo.WATCH_MODE) {
-      this.watchFiles(this.rootFiles);
+      this.fileWatcher = this.watchFiles(this.rootFiles);
     }
   }
 }
