@@ -1,8 +1,8 @@
-import { ObjectUtil, externalPromise } from '@encore/util';
 import { bulkRead, AppInfo, bulkReadSync } from '@encore/base';
 import * as flatten from 'flat';
 import * as yaml from 'js-yaml';
 import { EventEmitter } from 'events';
+import * as _ from 'lodash';
 
 let unflatten = flatten.unflatten;
 
@@ -72,11 +72,11 @@ export class ConfigLoader {
     for (let k of Object.keys(lowerFlat)) {
       out[keyMap[k]] = lowerFlat[k];
     }
-    ObjectUtil.merge(target, unflatten(out, { delimiter: '_' }));
+    _.merge(target, unflatten(out, { delimiter: '_' }));
   }
 
   private static dropNulls(o: any) {
-    if (ObjectUtil.isPlainObject(o)) {
+    if (_.isPlainObject(o)) {
       for (let k of Object.keys(o)) {
         if (o[k] === this.NULL) {
           delete o[k];
@@ -96,8 +96,12 @@ export class ConfigLoader {
     while (keys.length && sub[keys[0]]) {
       sub = sub[keys.shift()!];
     }
-    ObjectUtil.merge(obj, sub);
+    _.merge(obj, sub);
     return obj;
+  }
+
+  static get(key: string) {
+    return this.bindTo({}, key);
   }
 
   /*
