@@ -6,7 +6,7 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
     let targetName = `${target.name}-${propertyKey}`;
     if (typeof config !== 'string') {
       if (!config['name']) {
-        config['name'] = targetName;
+        config['name'] = `${(target.__id || target.name)}.${propertyKey}`;
       }
     }
 
