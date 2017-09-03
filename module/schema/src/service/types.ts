@@ -7,8 +7,11 @@ export interface Class<T = any> {
 
 export type ClassList = Class | [Class];
 
+export interface Schema {
+  [key: string]: FieldConfig;
+}
 export interface ViewConfig {
-  schema: { [key: string]: FieldConfig };
+  schema: Schema;
   fields: string[];
 }
 
@@ -20,7 +23,12 @@ export interface FieldConfig {
   type: any;
   name: string;
   aliases?: string[];
-  validator?: (o: any) => string[] | undefined;
   declared: { type: Class<any>, array: boolean };
+  required?: { message?: string };
+  match?: { re: RegExp, message?: string };
+  min?: { n: number | Date, message?: string };
+  max?: { n: number | Date, message?: string };
+  minlength?: { n: number, message?: string };
+  maxlength?: { n: number, message?: string };
+  enum?: { values: any[], message: string };
 }
-

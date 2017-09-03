@@ -1,3 +1,3 @@
 export * from './bind';
 export * from './re';
-export * from './messages';
+export * from './validation';

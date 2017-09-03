@@ -25,21 +25,21 @@ export function Field(type: ClassList, config?: { [key: string]: any }) {
   };
 };
 export const Alias = (...aliases: string[]) => prop({ aliases });
-export const Required = (message?: string) => prop({ required: [true, message || Messages.REQUIRED] });
+export const Required = (message?: string) => prop({ required: { message } });
 export const Enum = (vals: string[] | any, message?: string) => {
   let values = enumKeys(vals);
   message = message || `{PATH} is only allowed to be "${values.join('" or "')}"`;
   return prop({ enum: { values, message } });
 };
 export const Trimmed = () => prop({ trim: true });
-export const Match = (re: RegExp, message?: string) => prop({ match: [re, message || (re as any).message] });
-export const MinLength = (n: number, message?: string) => prop({ minlength: [n, message || Messages.MINLENGTH] });
-export const MaxLength = (n: number, message?: string) => prop({ maxlength: [n, message || Messages.MAXLENGTH] });
-export const Min = (n: number | Date, message?: string) => prop({ min: [n, message || Messages.MIN] });
-export const Max = (n: number | Date, message?: string) => prop({ max: [n, message || Messages.MAX] });
-export const Email = (message?: string) => Match(Re.EMAIL, message);
-export const Telephone = (message?: string) => Match(Re.TELEPHONE, message);
-export const Url = (message?: string) => Match(Re.URL, message);
+export const Match = (re: RegExp, message?: string) => prop({ match: { re, message } });
+export const MinLength = (n: number, message?: string) => prop({ minlength: { n, message } });
+export const MaxLength = (n: number, message?: string) => prop({ maxlength: { n, message } });
+export const Min = (n: number | Date, message?: string) => prop({ min: { n, message } });
+export const Max = (n: number | Date, message?: string) => prop({ max: { n, message } });
+export const Email = (message?: string) => Match(Re.email, message);
+export const Telephone = (message?: string) => Match(Re.telphone, message);
+export const Url = (message?: string) => Match(Re.url, message);
 
 export function View(...names: string[]) {
   return (f: any, p: string) => {
