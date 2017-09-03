@@ -108,10 +108,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       cNode.name,
       cNode.typeParameters,
       ts.createNodeArray(cNode.heritageClauses),
-      ts.createNodeArray([
-        getIdent(),
-        ...cNode.members
-      ])) as any;
+      cNode.members
+    ) as any;
 
     return out;
   } if (ts.isPropertyDeclaration(node)) {
