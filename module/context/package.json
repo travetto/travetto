@@ -1,19 +1,20 @@
 {
-  "author": "", 
+  "author": "",
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x", 
-    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x", 
-    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x", 
-    "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x", 
-    "continuation-local-storage": "^3.2.0"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@encore/context", 
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
+    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x",
+    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x",
+    "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x",
+    "@types/continuation-local-storage": "^3.2.1",
+    "cls-hooked": "^3.2.0"
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@encore/context",
   "peerDependencies": {
     "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v2.x.x"
-  }, 
-  "scripts": {}, 
+  },
+  "scripts": {},
   "version": "2.0.5"
 }

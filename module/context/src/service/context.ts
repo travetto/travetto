@@ -3,11 +3,11 @@ import { Injectable } from '@encore/di';
 import { ContextConfig } from './config';
 import { enableLongStacktrace } from './stack';
 
-const cls = require('continuation-local-storage');
+const cls = require('cls-hooked');
 
 export const KEY = 'ctx';
 
-export interface IStorage {
+export interface Namespace {
   bindEmitter(item: EventEmitter): any;
   run(fn: () => any): any;
   set(key: string, value: any): void;
@@ -16,25 +16,22 @@ export interface IStorage {
 
 @Injectable()
 export class Context {
-  storage: IStorage;
+  namespace: Namespace;
 
   constructor(config: ContextConfig) {
-    this.storage = cls.createNamespace(config.namespace);
-    if (config.longStackTraces) {
-      enableLongStacktrace();
-    }
+    this.namespace = cls.createNamespace(config.namespace);
   }
 
   clear() {
-    this.storage.set(KEY, null);
+    this.namespace.set(KEY, null);
   }
 
   set(c: any) {
-    this.storage.set(KEY, c);
+    this.namespace.set(KEY, c);
   }
 
   get(): any {
-    let res = this.storage.get(KEY) as any;
+    let res = this.namespace.get(KEY) as any;
     if (res === null || res === undefined) {
       this.set(res = {});
     }
