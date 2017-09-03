@@ -12,27 +12,6 @@ export interface ManagedExtra {
   postConstruct?: () => any
 }
 
-const SEP = path.sep;
-const RE_SEP = SEP === '/' ? '\\/' : SEP;
-const SRC_RE = new RegExp(`${RE_SEP}src${RE_SEP}`, 'g');
-const PATH_RE = new RegExp(RE_SEP, 'g');
-
-function getId<T>(cls: Class<T> | ClassTarget<T>): string {
-  let target = cls as any;
-
-  if (!target.__id) {
-    let rootName = cls.__filename!
-      .split(process.cwd())[1]
-      .replace(SRC_RE, SEP)
-      .replace(PATH_RE, '.')
-      .replace(/^\./, '')
-      .replace(/\.(t|j)s$/, '');
-
-    target.__id = `${rootName}#${cls.name}`;
-  }
-  return target.__id;
-}
-
 export class DependencyRegistry {
   static pendingInjectables = new Map<string, InjectableConfig<any>>();
   static injectables = new Map<string, InjectableConfig<any>>();
@@ -45,10 +24,8 @@ export class DependencyRegistry {
   private static _waitingForInit = false;
   static initalized = externalPromise();
 
-  static getId = getId;
-
   static async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
-    let targetId = getId(target);
+    let targetId = target.__id!;
 
     let aliasMap = this.aliases.get(targetId);
 
@@ -95,7 +72,7 @@ export class DependencyRegistry {
 
   private static async createInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE) {
     let instance = await this.construct(target, name);
-    let targetId = getId(target);
+    let targetId = target.__id!;
 
     if (!this.instances.has(targetId)) {
       this.instances.set(targetId, new Map());
@@ -122,7 +99,7 @@ export class DependencyRegistry {
   }
 
   static async getInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
-    let targetId = getId(target);
+    let targetId = target.__id!;
     if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(name)) {
       await this.createInstance(target, name);
     }
@@ -130,7 +107,7 @@ export class DependencyRegistry {
   }
 
   static getCandidateTypes<T>(target: Class<T>) {
-    let targetId = getId(target);
+    let targetId = target.__id!;
     let aliasMap = this.aliases.get(targetId)!;
     let aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
     return aliasedIds.map(id => this.injectables.get(id)!)
@@ -163,7 +140,7 @@ export class DependencyRegistry {
   }
 
   static getOrCreatePendingConfig<T>(cls: Class<T>) {
-    let id = getId(cls);
+    let id = cls.__id!;
     if (!this.pendingInjectables.has(id)) {
       this.pendingInjectables.set(id, {
         name: DEFAULT_INSTANCE,
@@ -197,7 +174,7 @@ export class DependencyRegistry {
   }
 
   static finalizeClass<T>(pconfig: Partial<InjectableConfig<T>>) {
-    let classId = getId(pconfig.class!);
+    let classId = pconfig.class!.__id!;
     let config = this.getOrCreatePendingConfig(pconfig.class!);
 
     if (pconfig.name) {
@@ -213,7 +190,7 @@ export class DependencyRegistry {
       }
     }
 
-    let targetId = getId(config.target);
+    let targetId = config.target.__id!;
     this.injectables.set(classId, config);
     this.pendingInjectables.delete(classId);
 

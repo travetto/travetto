@@ -49,15 +49,6 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
   }
 }
 
-function getIdent() {
-  return ts.createProperty(
-    undefined,
-    [ts.createToken(ts.SyntaxKind.StaticKeyword)],
-    '__filename', undefined, undefined,
-    ts.createIdentifier('__filename')
-  );
-}
-
 function createInjectDecorator(state: DiState, name: string, contents?: ts.Expression) {
   if (!state.decorators[name]) {
     if (!state.import) {
