@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 import { Injectable } from '@encore/di';
 import { ContextConfig } from './config';
-import { enableLongStacktrace } from './stack';
 
 const cls = require('cls-hooked');
 
