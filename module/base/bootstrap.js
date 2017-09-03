@@ -5,3 +5,5 @@ const ts = require('typescript');
 require.extensions['.ts'] = function load(m, tsf) {
   return m._compile(ts.transpile(fs.readFileSync(tsf, 'utf-8')), tsf.replace(/\.ts$/, '.js'));
 };
+
+require('./src/env'); //Setup env properly
