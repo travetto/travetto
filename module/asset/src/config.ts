@@ -1,4 +1,5 @@
-import { Configure } from '@encore/config';
+import { Config } from '@encore/config';
+
 
 export default Configure.registerNamespace('asset', {
   maxSize: 10 * 1024 * 1024,
