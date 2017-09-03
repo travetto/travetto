@@ -40,6 +40,19 @@ export class Compiler {
   static transformerFiles = '**/transformer.*.ts';
   static emptyRequire = 'module.exports = {}';
 
+  static handleLoadError(p: string, e?: any): boolean {
+    if (this.optionalFiles.test(p)) { // If attempting to load an optional require
+      console.error(`Unable to import optional require, ${p}, stubbing out`);
+      return true;
+    } else {
+      if (e) {
+        throw e;
+      } else {
+        return false;
+      }
+    }
+  }
+
   static resolveOptions(name = this.configFile) {
     let out = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(`${this.cwd}/${this.configFile}`, x => ts.sys.readFile(x)), {
@@ -75,7 +88,13 @@ export class Compiler {
   static moduleLoadHandler(request: string, parent: string) {
     let p = Module._resolveFilename(request, parent);
 
-    let mod = originalLoader.apply(this, arguments);
+    let mod;
+    try {
+      mod = originalLoader.apply(this, arguments);
+    } catch (e) {
+      this.handleLoadError(p, e);
+      mod = {};
+    }
     let out = mod;
 
     if (AppInfo.WATCH_MODE && p.indexOf(process.cwd()) >= 0 && p.indexOf(this.libraryPath) < 0) {
@@ -110,13 +129,9 @@ export class Compiler {
       let ret = (m as any)._compile(content, jsf);
       return ret;
     } catch (e) {
-      if (this.optionalFiles.test(tsf)) { // If attempting to load an optional require
-        console.error(`Unable to import optional require, ${tsf}, stubbing out`);
-        this.contents.set(jsf, content = this.emptyRequire);
-        (m as any)._compile(content, jsf);
-      } else {
-        throw e;
-      }
+      this.handleLoadError(tsf, e);
+      this.contents.set(jsf, content = this.emptyRequire);
+      (m as any)._compile(content, jsf);
     }
   }
 
@@ -160,8 +175,7 @@ export class Compiler {
 
     if (this.logErrors(fileName)) {
       console.log(`Emitting ${fileName} failed`);
-      if (this.optionalFiles.test(fileName)) { // If attempting to load an optional require
-        console.error(`Unable to import optional require, ${fileName}, stubbing out`);
+      if (this.handleLoadError(fileName)) {
         output.outputFiles.splice(0, output.outputFiles.length);
         output.outputFiles.push({
           name: toJsName(fileName),
