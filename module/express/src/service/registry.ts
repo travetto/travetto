@@ -26,9 +26,9 @@ export class RouteRegistry {
   static finalizeClass(config: Partial<ControllerConfig> & { class: Class, path: string }) {
     let final = config as ControllerConfig;
     final.filters = this.getControllerFilters(config.class);
-    final.handlers = this.pendingHandlers.get(DependencyRegistry.getId(config.class))! as RequestHandler[];
+    final.handlers = this.pendingHandlers.get(config.class.__id!)! as RequestHandler[];
 
-    let id = DependencyRegistry.getId(config.class);
+    let id = config.class.__id!;
     this.pendingHandlers.delete(id);
     this.pendingHandlerMap.delete(id);
     if (this.controllers.has(config.path)) {
@@ -41,7 +41,7 @@ export class RouteRegistry {
   }
 
   static getOrCreateRequestHandlerConfig(cls: Class, handler: Filter) {
-    let id = DependencyRegistry.getId(cls);
+    let id = cls.__id!;
 
     if (!this.pendingHandlers.has(id)) {
       this.pendingHandlers.set(id, []);
