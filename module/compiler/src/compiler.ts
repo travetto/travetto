@@ -140,21 +140,6 @@ export class Compiler {
       retrieveFile: (p: string) => this.contents.get(p)!,
       retrieveSourceMap: (source: string) => this.sourceMaps.get(source)!
     });
-
-    // Wrap sourcemap tool
-    const prep = (Error as any).prepareStackTrace;
-    (Error as any).prepareStackTrace = (a: any, stack: any) => {
-      const res: string = prep(a, stack);
-      const parts = res.split('\n');
-      return [parts[0], ...parts.slice(1)
-        .filter(l =>
-          l.indexOf(__filename) < 0 &&
-          l.indexOf('module.js') < 0 &&
-          l.indexOf('source-map-support.js') < 0 &&
-          (l.indexOf(this.libraryPath) > 0 ||
-            (l.indexOf('(native)') < 0 && (l.indexOf(this.cwd) < 0 || l.indexOf('.js') < 0))))
-      ].join('\n');
-    }
   }
 
   static reload(files: string[] | string) {
