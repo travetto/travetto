@@ -12,6 +12,6 @@ const test = is('test') || is('testing');
 const dev = !prod && !test;
 const watch = dev && !('NO_WATCH' in e);
 
-export const Env = { prod, dev, test, is, watch };
+export const AppEnv = { prod, dev, test, is, watch };
 
 process.env.NODE_ENV = prod ? 'production' : 'development';

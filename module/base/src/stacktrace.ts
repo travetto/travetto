@@ -1,5 +1,5 @@
 import * as async_hooks from 'async_hooks';
-import { Env } from './env';
+import { AppEnv } from './env';
 
 const cwd = process.cwd();
 
@@ -58,6 +58,6 @@ class AsyncListener {
   }
 }
 
-if (!Env.prod) {
+if (!AppEnv.prod) {
   async_hooks.createHook(new AsyncListener()).enable();
 }
