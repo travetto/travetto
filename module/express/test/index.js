@@ -1,3 +1,3 @@
 require('@encore/di/bootstrap').init()
-require('../ext/context');
+require('../opt/context');
 require('./simple-controller');
