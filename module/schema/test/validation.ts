@@ -53,6 +53,7 @@ describe('Validation', () => {
       await SchemaValidator.validate(res);
       expect(true).to.equal(false);
     } catch (e) {
+      console.log(e);
       expect(e.errors['response.url'].message).to.include('not a valid url');
     }
   });

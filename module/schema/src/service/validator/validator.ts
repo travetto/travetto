@@ -1,4 +1,4 @@
-import { Class, FieldConfig, Schema } from '../types';
+import { Class, FieldConfig, SchemaConfig } from '../types';
 import { SchemaRegistry } from '../registry';
 import { Messages } from './messages';
 
@@ -99,18 +99,18 @@ export class SchemaValidator {
   static prepareErrors(path: string, value: any, errs: any[]) {
     let out = [];
     for (let err of errs) {
-      let message = err.message || (err.type === 'match' ? Messages.get(err.re) : Messages.get(err.kind))
-
-      out.push({
-        path,
-        value,
-        message: message.replace(/\{[^}]\}/g, (key: string) => key === 'value' ? value : err[key])
-      });
+      let message = err.message || (err.kind === 'match' ? Messages.get(err.re) : Messages.get(err.kind))
+      if (message) {
+        err.value = value;
+        err.path = path;
+        err.message = message.replace(/\{([^}]+)\}/g, (a: string, k: string) => err[k]);
+        out.push(err);
+      }
     }
     return out;
   }
 
-  private static validateSchema<T>(schema: Schema, o: T, view: string, relative: string) {
+  private static validateSchema<T>(schema: SchemaConfig, o: T, view: string, relative: string) {
     let errors: ValidationError[] = [];
 
     for (let field of Object.keys(schema)) {
@@ -122,18 +122,18 @@ export class SchemaValidator {
 
       if (!hasValue) {
         if (fieldSchema.required) {
-          errors.push(...this.prepareErrors(path, val, [{ type: 'required' }]));
+          errors.push(...this.prepareErrors(path, val, [{ kind: 'required' }]));
         }
         continue;
       }
 
       let { type, array } = fieldSchema.declared;
 
-      let sub: Schema | undefined;
+      let sub: SchemaConfig | undefined;
       if (SchemaRegistry.schemas.has(type)) {
-        sub = SchemaRegistry.schemas.get(fieldSchema.type)!.views[view].schema;
+        sub = SchemaRegistry.schemas.get(type)!.views[view].schema;
       } else if (ObjectUtil.isPlainObject(type)) {
-        sub = type as any as Schema;
+        sub = type as any as SchemaConfig;
       }
 
       if (array) {
