@@ -11,14 +11,9 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
     }
 
     let orig = descriptor.value;
+    let cache = CacheManager.get<any>(config as any);
 
     descriptor.value = function (...args: any[]) {
-      if (!(this as any).cache) {
-        throw new Error('Cache not defined');
-      }
-
-      let cache = (this as any).cache.get(config as (string | LRU.Options<string, any> & { name: string }));
-
       let key = keyFn ? keyFn(args) : JSON.stringify(args || []);
       key = `${targetName}||${key}`;
       if (!cache.has(key)) {

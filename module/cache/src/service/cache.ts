@@ -1,21 +1,14 @@
-import { Injectable } from '@encore/di';
 import { Shutdown } from '@encore/lifecycle';
 import * as LRU from 'lru-cache';
 
 export class CacheManager {
-  public caches = new Map<string, LRU.Cache<string, any>>();
+  public static caches = new Map<string, LRU.Cache<string, any>>();
 
-  protected defaultConfig = {
+  protected static defaultConfig = {
     max: 1000
   };
 
-  constructor(private shutdown?: Shutdown) {
-    if (shutdown) {
-      shutdown.onShutdown('cache', () => this.cleanup());
-    }
-  }
-
-  get<T>(config: string | LRU.Options<string, T> & { name: string }) {
+  static get<T>(config: string | LRU.Options<string, T> & { name: string }) {
     if (typeof config === 'string') {
       config = { name: config };
     }
@@ -28,12 +21,14 @@ export class CacheManager {
       let cache = LRU<string, T>(config);
       this.caches.set(name, cache);
     }
-    return this.caches.get(name) as LRU.Cache<string, T>;
+    return this.caches.get(name)!;
   }
 
-  cleanup() {
+  static cleanup() {
     for (let k of this.caches.keys()) {
       this.caches.get(k)!.reset();
     }
   }
 }
+
+Shutdown.onShutdown('Cache Manager', CacheManager.cleanup.bind(CacheManager));

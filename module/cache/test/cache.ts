@@ -4,19 +4,8 @@ import { timeout } from '@encore/test';
 import { Cacheable, CacheManager } from '../src';
 import { expect } from 'chai';
 import { Shutdown } from '@encore/lifecycle';
-import { Injectable, Registry } from '@encore/di';
 
-@Injectable()
-class TestCache extends CacheManager {
-  constructor(shutdown: Shutdown) {
-    super(shutdown);
-  }
-}
-
-@Injectable()
 class Test {
-
-  constructor(public cache: TestCache) { }
 
   @Cacheable({
     max: 5
@@ -49,13 +38,12 @@ class Test {
 
 describe('Cacheable Test', () => {
   beforeEach(async () => {
-    let test = await Registry.getInstance(Test);
-    test.cache.cleanup();
+    CacheManager.cleanup();
     await new Promise(resolve => setTimeout(resolve, 200));
   });
 
   it('Testing basic', timeout(30 * 1000, async () => {
-    let test = await Registry.getInstance(Test);
+    let test = new Test();
 
     let start = Date.now();
     let res = await test.youngAndComplex(10);
@@ -71,7 +59,7 @@ describe('Cacheable Test', () => {
   }));
 
   it('Testing age', timeout(30 * 1000, async () => {
-    let test = await Registry.getInstance(Test);
+    let test = new Test();
 
     let start = Date.now();
     let res = await test.youngAndComplex(10);
@@ -89,7 +77,7 @@ describe('Cacheable Test', () => {
   }));
 
   it('Testing size', timeout(30 * 1000, async () => {
-    let test = await Registry.getInstance(Test);
+    let test = new Test();
 
 
     for (let y of [1, 2]) {
@@ -104,7 +92,7 @@ describe('Cacheable Test', () => {
   }));
 
   it('Testing complex', timeout(30 * 1000, async () => {
-    let test = await Registry.getInstance(Test);
+    let test = new Test();
 
     let val = test.complexInput({ a: 5, b: 20 }, 20);
     let val2 = test.complexInput({ a: 5, b: 20 }, 20);
