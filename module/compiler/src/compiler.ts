@@ -4,7 +4,7 @@ import * as sourcemap from 'source-map-support';
 import * as path from 'path';
 import * as glob from 'glob';
 import * as chokidar from 'chokidar';
-import { AppInfo, bulkRequire, bulkFindSync } from '@encore/base';
+import { AppInfo, bulkRequire, bulkFindSync, AppEnv } from '@encore/base';
 import { RetargettingHandler } from './proxy';
 
 const Module = require('module');
@@ -34,7 +34,7 @@ export class Compiler {
   static frameworkWorkingSet = `${Compiler.libraryPath}/@encore/*/src/**/*.ts`;
   static prodWorkingSet = 'src/**/*.ts';
   static devWorkingSet = '{src,test}/**/*.ts';
-  static workingSet = AppInfo.ENV.includes('dev') ? Compiler.devWorkingSet : Compiler.prodWorkingSet;
+  static workingSet = !AppEnv.prod ? Compiler.devWorkingSet : Compiler.prodWorkingSet;
   static optionalFiles = /\/opt\/[^/]+.ts/;
   static definitionFiles = /\.d\.ts$/g;
   static transformerFiles = '**/transformer.*.ts';
@@ -97,7 +97,7 @@ export class Compiler {
     }
     let out = mod;
 
-    if (AppInfo.WATCH_MODE && p.indexOf(process.cwd()) >= 0 && p.indexOf(this.libraryPath) < 0) {
+    if (AppEnv.watch && p.indexOf(process.cwd()) >= 0 && p.indexOf(this.libraryPath) < 0) {
       if (!this.modules.has(p)) {
         let handler = new RetargettingHandler(mod);
         out = new Proxy({}, handler);
@@ -260,7 +260,7 @@ export class Compiler {
 
     require.extensions['.ts'] = this.requireHandler.bind(this);
 
-    if (AppInfo.WATCH_MODE) {
+    if (AppEnv.watch) {
       Module._load = this.moduleLoadHandler.bind(this);
     }
 
@@ -292,7 +292,7 @@ export class Compiler {
     }
 
     // Now let's watch the files
-    if (AppInfo.WATCH_MODE) {
+    if (AppEnv.watch) {
       this.fileWatcher = this.watchFiles(this.rootFiles);
     }
   }
