@@ -264,10 +264,10 @@ export class Compiler {
       Module._load = this.moduleLoadHandler.bind(this);
     }
 
-    this.rootFiles = [
+    this.rootFiles = AppEnv.prod ? [
       ...bulkFindSync(this.workingSet),
       ...bulkFindSync(this.frameworkWorkingSet)
-    ];
+    ] : []; // Don't check all at startup during dev, slightly faster
 
     this.servicesHost = {
       getScriptFileNames: () => this.rootFiles,
