@@ -1,15 +1,16 @@
 import * as fs from 'fs';
 import * as mime from 'mime';
 import * as path from 'path';
-import * as osTmpdir from 'os-tmpdir';
 import * as fileType from 'file-type';
 
+import { nodeToPromise, request } from '@encore/util';
+import { Asset, AssetFile } from './model';
+
+const osTmpdir = require('os-tmpdir');
 const crypto = require('crypto');
 
-import { nodeToPromise, request } from '@encore/util';
-import { Asset } from './model';
-
 let tmpDir = path.resolve(osTmpdir());
+
 
 export class AssetUtil {
 
@@ -29,7 +30,7 @@ export class AssetUtil {
 
     let size = (await nodeToPromise<fs.Stats>(fs, fs.stat, path)).size;
 
-    let upload = AssetUtil.uploadToAsset({
+    let upload = this.fileToAsset({
       name: path,
       hash: hash.read(),
       size: size,
@@ -43,7 +44,7 @@ export class AssetUtil {
     return upload;
   }
 
-  static uploadToAsset(upload: Express.MultipartyUpload, prefix?: string): Asset {
+  static fileToAsset(upload: AssetFile, prefix?: string): Asset {
     let name = upload.name;
     let type = upload.type as string;
     if (!type || type === 'application/octet-stream') {
@@ -96,18 +97,19 @@ export class AssetUtil {
   }
 
   static async detectFileType(filePath: string) {
-    let buffer = await AssetUtil.readChunk(filePath, 262);
+    let buffer = await this.readChunk(filePath, 262);
     return fileType(buffer) as { ext: string, mime: string };
   }
 
   static async downloadUrl(url: string) {
-    let filePath = AssetUtil.generateTempFile(url.split('/').pop() as string);
+    let filePath = this.generateTempFile(url.split('/').pop() as string);
     let file = fs.createWriteStream(filePath);
     let filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
     let res = await request({ url, pipeTo: file });
-    let responseExt = mime.extension(res.headers['content-type'] || '');
+    let responseExt = mime.extension((res.headers['content-type'] as string) || '');
+
     if (!responseExt) {
-      let detectedType = await AssetUtil.detectFileType(filePath);
+      let detectedType = await this.detectFileType(filePath);
       if (detectedType) {
         responseExt = detectedType.ext;
       }

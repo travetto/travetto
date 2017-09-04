@@ -6,15 +6,19 @@ import { Asset } from '../model';
 import { nodeToPromise } from '@encore/util';
 import { AssetUtil } from '../util';
 import { Cacheable } from '@encore/cache';
+import { Injectable } from '@encore/di';
 
+@Injectable()
 export class ImageService {
+
+  constructor(private assetService: AssetService) { }
 
   @Cacheable({
     max: 1000,
-    dispose: (key: string, n: string) => nodeToPromise(fs, fs.unlink, n)
+    dispose: (key: string, n: string) => nodeToPromise(fs, fs.unlink, n).catch(e => null)
   })
-  static async generateAndStoreImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<string | undefined> {
-    let info = await AssetService.get(filename, filter);
+  async generateAndStoreImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<string | undefined> {
+    let info = await this.assetService.get(filename, filter);
     if (!info.stream) {
       throw new Error('Stream not found');
     }
@@ -28,9 +32,9 @@ export class ImageService {
     }
   }
 
-  static async getImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<Asset> {
-    let file = await ImageService.generateAndStoreImage(filename, options, filter);
-    let info = await AssetService.get(filename, filter);
+  async getImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<Asset> {
+    let file = await this.generateAndStoreImage(filename, options, filter);
+    let info = await this.assetService.get(filename, filter);
     if (file) {
       info.stream = fs.createReadStream(file);
       delete info.length;

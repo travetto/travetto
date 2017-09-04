@@ -1,9 +1,14 @@
-import { Response } from 'express';
-import { Renderable } from '@encore/express';
 import { nodeToPromise } from '@encore/util';
 import * as fs from 'fs';
 
-export class Asset implements Renderable {
+export interface AssetFile {
+  name: string;
+  type?: string;
+  size: number;
+  path: string;
+  hash: string;
+}
+export class Asset {
 
   static fields = ['filename', 'length', 'contentType', 'path', 'metadata', 'stream'];
 
@@ -21,39 +26,23 @@ export class Asset implements Renderable {
     tags?: string[]
   };
 
-  constructor(conf: any = null) {
+  constructor(conf?: Partial<Asset>) {
     if (conf) {
-      Asset.fields.forEach(k => {
-        if (conf[k]) {
-          (this as any)[k] = conf[k];
+      for (let k of Asset.fields) {
+        if ((conf as any)[k]) {
+          if (k === 'metadata') {
+            (this as any)[k] = { ... (conf as any)[k] };
+          } else {
+            (this as any)[k] = (conf as any)[k];
+          }
         }
-      });
-    }
-  }
-
-  render(res: Response) {
-    res.setHeader('Content-Type', this.contentType);
-    if (this.filename) {
-      res.setHeader('Content-Disposition', `attachment; filename='${this.filename}'`);
-    }
-    if (this.length) {
-      res.setHeader('Content-Length', `${this.length}`);
-    }
-    if (this.stream) {
-      this.stream.pipe(res);
-    }
-
-    return new Promise<any>((resolve, reject) => {
-      if (this.stream) {
-        this.stream.on('end', resolve);
-        this.stream.on('error', reject);
       }
-    });
+    }
   }
 
   async read() {
     let res = (await nodeToPromise<Buffer>(fs, fs.readFile, this.path)).toString();
-    fs.unlink(this.path);
+    nodeToPromise(fs, fs.unlink, this.path);
     return res;
   }
 }
