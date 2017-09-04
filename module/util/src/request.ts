@@ -111,14 +111,18 @@ export async function request(opts: http.RequestOptions & { url: string, pipeTo?
   return await new Promise<string | http.IncomingMessage>((resolve, reject) => {
     let req = client.request(opts, (msg: http.IncomingMessage) => {
       let body = '';
-      msg.setEncoding('utf8');
+      if (!opts.pipeTo) {
+        msg.setEncoding('utf8');
+      }
+
       msg.on('data', (chunk: string) => {
-        if ((msg.statusCode && msg.statusCode > 299) || !opts.pipeTo) {
-          body += chunk
+        if ((msg.statusCode || 200) > 299 || !opts.pipeTo) {
+          body += chunk;
         }
       });
+
       msg.on('end', () => {
-        if (msg.statusCode && msg.statusCode > 299) {
+        if ((msg.statusCode || 200) > 299) {
           reject({ message: body, status: msg.statusCode });
         } else {
           resolve(opts.pipeTo ? msg : body);
@@ -128,6 +132,9 @@ export async function request(opts: http.RequestOptions & { url: string, pipeTo?
         msg.pipe(opts.pipeTo);
         if (opts.pipeTo.on) {
           opts.pipeTo.on('error', reject);
+          if (opts.pipeTo.close) {
+            opts.pipeTo.on('finish', () => opts.pipeTo.close())
+          }
         }
       }
     });
