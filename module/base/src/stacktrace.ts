@@ -58,7 +58,6 @@ class StackTraceListener {
     if (!installed) {
       installed = true;
       ogPrep = (Error as any).prepareStackTrace;
-      console.log('ogprep', ogPrep);
       (Error as any).prepareStackTrace = (err: any, stck: any) => this.prepareStackTrace(ogPrep ? ogPrep(err, stck) : err, stck);
 
     }
