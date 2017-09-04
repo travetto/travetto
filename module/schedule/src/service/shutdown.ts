@@ -1,4 +1,4 @@
-import { externalPromise } from '@encore/util';
+import { externalPromise } from '@encore/base';
 
 export class Shutdown {
   private static listeners: { name: string, handler: Function }[] = [];

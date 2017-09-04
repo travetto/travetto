@@ -2,7 +2,6 @@
   "author": "", 
   "dependencies": {
     "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x", 
-    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v2.x.x", 
     "@types/cron": "^1.2.1", 
     "cron": "^1.2.1"
   }, 
