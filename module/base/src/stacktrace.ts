@@ -4,7 +4,7 @@ import { AppEnv } from './env';
 
 class StackTraceListener {
   currentId: number = -1;
-  stackSeparator = 'From previous event:';
+  stackSeparator = 'Continued from';
   stackMap = new Map<number, string>();
 
   constructor() {
@@ -42,9 +42,10 @@ class StackTraceListener {
 
   init(id: number, type: string, triggerAsyncId: number, resource: any) {
     let stack: any = {};
+    let prep = (Error as any).prepareStackTrace;
     (Error as any).prepareStackTrace = null;
     Error.captureStackTrace(stack);
-    (Error as any).prepareStackTrace = (err: any, stck: any) => this.prepareStackTrace(err, stck);
+    (Error as any).prepareStackTrace = prep;
 
     let parentId = triggerAsyncId || this.currentId;
 
@@ -52,7 +53,7 @@ class StackTraceListener {
 
     this.stackMap.set(id,
       this.filterErrorStack(stack.stack) +
-      (parent ? `\nContinued from\n${parent}` : '')
+      (parent ? `\n${this.stackSeparator}\n${parent}` : '')
     );
   }
 
