@@ -4,7 +4,7 @@ import * as sourcemap from 'source-map-support';
 import * as path from 'path';
 import * as glob from 'glob';
 import * as chokidar from 'chokidar';
-import { AppInfo, bulkRequire, bulkFindSync, AppEnv } from '@encore/base';
+import { bulkRequire, bulkFindSync, AppEnv } from '@encore/base';
 import { RetargettingHandler } from './proxy';
 
 const Module = require('module');
