@@ -1,4 +1,5 @@
 import * as log4js from 'log4js';
+import * as util from 'util';
 
 import { LogContext, StandardLayout, JsonLayout } from './types';
 
@@ -30,7 +31,7 @@ const LOG_STYLES: { [key: string]: string[] } = {
 };
 
 
-function processEvent(ev: log4js.LogEvent) {
+function processEvent(ev: log4js.LogEvent, opts: JsonLayout | StandardLayout) {
   let out: LogContext = {
     timestamp: new Date(ev.startTime).toISOString().split('.')[0],
     level: ev.level.toString().toUpperCase(),
@@ -38,13 +39,22 @@ function processEvent(ev: log4js.LogEvent) {
   };
 
   let args = (ev.data || []).slice(0);
+  let last = args[args.length - 1];
 
-  if (args && typeof args[0] === 'string') {
-    out.message = args.shift();
+  if (last) {
+    if (last.__meta) {
+      out.meta = args.pop();
+    } else if (last.stack) {
+      args[args.length - 1] = last.stack;
+    }
   }
 
-  if (args && args.length) {
-    out.meta = args.length === 1 ? args[0] : args;
+  if (args.length) {
+    if (opts.type === 'standard') {
+      out.message = args.map((x: any) => typeof x === 'string' ? x : util.inspect(x, false, 2, opts.colorize)).join(' ');
+    } else {
+      out.message = util.format.apply(util, args);
+    }
   }
 
   return out;
@@ -66,16 +76,8 @@ function stylize(text: string, ...styles: string[]) {
 export const Layouts: { [key: string]: (opts: any) => log4js.Layout } = {
   standard: (opts: StandardLayout): log4js.Layout => {
     return function (ev: log4js.LogEvent) {
-      let ctx = processEvent(ev);
+      let ctx = processEvent(ev, opts);
       // Return string will be passed to logger.
-
-      if (ctx.meta) {
-        if (ctx.meta.stack) {
-          ctx.meta = ctx.meta.stack;
-        } else if (Object.keys(ctx.meta).length) {
-          ctx.meta = JSON.stringify(ctx.meta, undefined, opts['prettyPrint'] ? 2 : undefined);
-        }
-      }
 
       let out = '';
       if (opts.timestamp === undefined || !!opts.timestamp) {
@@ -110,7 +112,7 @@ export const Layouts: { [key: string]: (opts: any) => log4js.Layout } = {
 
   json: (opts: JsonLayout): log4js.Layout => {
     return function (ev: log4js.LogEvent) {
-      return JSON.stringify(processEvent(ev));
+      return JSON.stringify(processEvent(ev, opts));
     };
   }
 };
