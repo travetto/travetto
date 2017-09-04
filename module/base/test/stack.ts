@@ -1,5 +1,3 @@
-require('../src/stacktrace');
-
 function test() {
   setTimeout(function inner1() {
     setTimeout(function inner2() {
