@@ -7,7 +7,7 @@ const envs = [
 
 const envSet = new Set(envs);
 
-const is = envSet.has.bind(envs);
+const is = envSet.has.bind(envSet);
 
 const prod = is('prod') || is('production');
 const test = is('test') || is('testing');
