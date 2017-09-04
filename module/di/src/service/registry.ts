@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
-import { AppInfo, bulkRequire } from '@encore/base';
+import { bulkRequire, AppEnv } from '@encore/base';
 import { RetargettingHandler, Compiler } from '@encore/compiler';
 import { InjectionError } from './error';
 import { externalPromise } from '@encore/util';
@@ -81,7 +81,7 @@ export class DependencyRegistry {
 
     let out: any = instance;
 
-    if (AppInfo.WATCH_MODE) {
+    if (AppEnv.watch) {
       if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(name)) {
         console.log('Registering proxy', target.name, name);
         let handler = new RetargettingHandler(out);
@@ -201,7 +201,7 @@ export class DependencyRegistry {
     this.aliases.get(targetId)!.set(config.name, classId);
 
     // Live RELOAD
-    if (AppInfo.WATCH_MODE &&
+    if (AppEnv.watch &&
       this.proxyHandlers.has(targetId) &&
       this.proxyHandlers.get(targetId)!.has(config.name)
     ) {
