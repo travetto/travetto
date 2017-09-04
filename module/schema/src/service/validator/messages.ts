@@ -1,4 +1,5 @@
 export const Messages = new Map<any, string>(Object.entries({
+  type: '{path} is not a valid {type}',
   required: '{path} is required',
   minlength: '{path} is not long enough ({n})',
   maxlength: '{path} is too long ({n})',
