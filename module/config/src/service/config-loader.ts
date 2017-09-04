@@ -1,4 +1,4 @@
-import { bulkRead, AppInfo, bulkReadSync } from '@encore/base';
+import { bulkRead, bulkReadSync, AppEnv } from '@encore/base';
 import * as flatten from 'flat';
 import * as yaml from 'js-yaml';
 import { EventEmitter } from 'events';
@@ -117,8 +117,7 @@ export class ConfigLoader {
     }
     this._initialized = true;
 
-    let envs = AppInfo.ENV;
-    console.log(`Initializing: ${envs.join(',')}`);
+    console.log(`Initializing: ${AppEnv.all.join(',')}`);
 
     // Load all namespaces from core
     let files = bulkReadSync('node_modules/@encore/*/config/*.yml');
@@ -134,11 +133,11 @@ export class ConfigLoader {
       });
     }
 
-    if (envs.length) {
+    if (AppEnv.all.length) {
       let loaded: string[] = [];
       let envFiles = bulkReadSync(`env/*.yml`, undefined, x => {
         let tested = x.split('/').pop()!.split('.yml')[0];
-        let found = envs.indexOf(tested) >= 0;
+        let found = AppEnv.is(tested)
         if (found) {
           loaded.push(tested);
         }
@@ -161,7 +160,7 @@ export class ConfigLoader {
     this.dropNulls(this.data);
 
     if (!process.env.QUIET_CONFIG) {
-      console.log('Configured', this.data);
+      console.log('Configured', JSON.stringify(this.data, null, 2));
     }
   }
 }
