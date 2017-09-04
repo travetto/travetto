@@ -39,7 +39,7 @@ class MockAssetSource extends AssetSource {
   }
 }
 
-describe('Assect Service', () => {
+describe('Asset Service', () => {
   it('downloads an file from a url', async () => {
     let service = await DependencyRegistry.getInstance(AssetService);
 
