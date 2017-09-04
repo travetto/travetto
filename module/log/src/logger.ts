@@ -31,8 +31,6 @@ export class Logger {
       this.buildCategories()
     ]);
 
-    console.log(categories);
-
     log4js.configure({
       appenders,
       categories
