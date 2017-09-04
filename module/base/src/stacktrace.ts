@@ -1,56 +1,67 @@
 import * as async_hooks from 'async_hooks';
+import * as fs from 'fs';
 import { AppEnv } from './env';
 
-const cwd = process.cwd();
-
-/**
- * AsyncListener object
- */
-class AsyncListener {
+class StackTraceListener {
+  currentId: number = -1;
   stackSeparator = 'From previous event:';
-  stackMap = new Map<number, [string, number]>();
+  stackMap = new Map<number, string>();
 
   constructor() {
-    // Wrap sourcemap tool
-    const prep = (Error as any).prepareStackTrace;
-    (Error as any).prepareStackTrace = this.prepareStackTrace.bind(this, prep);
-    this.filterErrorStack = this.filterErrorStack.bind(this);
+    (Error as any).prepareStackTrace = (err: any, stack: any) => this.prepareStackTrace(err, stack);
+    this.init = this.init.bind(this);
+    this.destroy = this.destroy.bind(this);
   }
 
-  prepareStackTrace(ogPrepare: (err: any, stack: any) => string, err: any, stack: any) {
-    const errs: string[] = [ogPrepare(err, stack)];
-    let parentId = async_hooks.triggerAsyncId();
-    while (this.stackMap.has(parentId)) {
-      [stack, parentId] = this.stackMap.get(parentId)!;
-      errs.push(stack);
-    }
-
-    return errs.map(this.filterErrorStack).join(`\n${this.stackSeparator}`);
+  log(msg: string) {
+    fs.writeSync(1, msg + '\n');
   }
 
   filterErrorStack(err: string) {
-    const [head, ...rest] = err.split('\n');
-    return [head, ...rest
+    const [head, ...rest] = (err || '').split('\n');
+    return rest
       .filter(l =>
         l.indexOf(__filename) < 0 &&
+        l.indexOf('(timers.js') < 0 &&
+        l.indexOf('async_hooks') < 0 &&
         l.indexOf('module.js') < 0 &&
-        l.indexOf('source-map-support.js') < 0 &&
-        (l.indexOf('node_modules') > 0 ||
-          (l.indexOf('(native)') < 0 && (l.indexOf(cwd) < 0 || l.indexOf('.js') < 0))))
-    ].join('\n');
+        l.indexOf('(native)') < 0 &&
+        l.indexOf('source-map-support.js')
+      ).join('\n');
+  }
+
+  prepareStackTrace(err: any, stack: any) {
+    let parentId = async_hooks.executionAsyncId() || this.currentId;
+
+    if (this.stackMap.has(parentId)) {
+      err = (err || '') + '\n' + this.stackMap.get(parentId)!;
+    }
+
+    return err;
   }
 
   init(id: number, type: string, triggerAsyncId: number, resource: any) {
-    // This always gets called in between before/after
-    let trace: any = {};
-    Error.captureStackTrace(trace, this.constructor);
-    this.stackMap.set(id, [trace.stack, triggerAsyncId]);
+    let stack: any = {};
+    (Error as any).prepareStackTrace = null;
+    Error.captureStackTrace(stack);
+    (Error as any).prepareStackTrace = (err: any, stck: any) => this.prepareStackTrace(err, stck);
+
+    let parentId = triggerAsyncId || this.currentId;
+
+    let parent = this.stackMap.get(parentId)!;
+
+    this.stackMap.set(id,
+      this.filterErrorStack(stack.stack) +
+      (parent ? `\nContinued from\n${parent}` : '')
+    );
   }
 
   before(id: number) {
+    this.currentId = id;
   }
 
   after(id: number) {
+    this.currentId = -1;
   }
 
   destroy(id: number) {
@@ -59,5 +70,5 @@ class AsyncListener {
 }
 
 if (!AppEnv.prod) {
-  async_hooks.createHook(new AsyncListener()).enable();
+  async_hooks.createHook(new StackTraceListener()).enable();
 }
