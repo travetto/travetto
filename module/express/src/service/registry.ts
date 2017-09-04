@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
 import { Renderable, Method, ControllerConfig } from '../model';
-import { ObjectUtil, toPromise } from '@encore/util';
+import { toPromise } from '@encore/base';
 import { ExpressApp } from './app';
 import { Class, DependencyRegistry } from '@encore/di';
 import { EventEmitter } from 'events';
@@ -63,7 +63,9 @@ export class RouteRegistry {
   static registerPendingRequestHandlder(config: Partial<RequestHandler>) {
     return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
       let rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
-      ObjectUtil.merge(rh, config);
+      rh.method = config.method;
+      rh.path = config.path;
+      rh.headers = Object.assign(rh.headers, config.headers || {});
       return descriptor;
     };
   }

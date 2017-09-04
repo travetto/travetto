@@ -5,7 +5,7 @@ import { RouteUtil } from '../util';
 import { ControllerConfig } from '../model';
 import { Injectable, DependencyRegistry } from '@encore/di';
 import { RouteRegistry } from './registry';
-import { toPromise } from '@encore/util';
+import { toPromise } from '@encore/base';
 import { ExpressOperator } from './operator';
 
 let compression = require('compression');

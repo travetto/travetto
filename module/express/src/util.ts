@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { RouteStack, PathType, ControllerConfig, Method, Renderable, RequestHandler, FilterPromise, Filter } from './model';
-import { ObjectUtil } from '@encore/util';
 
 export class RouteUtil {
 
@@ -64,7 +63,7 @@ export class RouteUtil {
   static async outputHandler(handler: RequestHandler, req: Request, res: Response, out: any) {
     if (!res.headersSent && out) {
       if (handler.headers) {
-        for (let [h, v] of ObjectUtil.toPairs(handler.headers)) {
+        for (let [h, v] of Object.entries(handler.headers)) {
           if (typeof v === 'string') {
             res.setHeader(h, v);
           } else {

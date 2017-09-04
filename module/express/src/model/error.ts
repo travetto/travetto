@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { BaseError } from '@encore/util';
+import { BaseError } from '@encore/base';
 import { Renderable } from './renderable';
 
 type Status = { status: number };
