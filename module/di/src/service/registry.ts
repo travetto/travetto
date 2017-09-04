@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
-import { bulkRequire, AppEnv. externalPromise } from '@encore/base';
+import { bulkRequire, AppEnv, externalPromise } from '@encore/base';
 import { RetargettingHandler, Compiler } from '@encore/compiler';
 import { InjectionError } from './error';
 
