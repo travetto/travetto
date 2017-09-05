@@ -7,8 +7,6 @@ import { AssetExpressConfig } from '../config';
 const match = require('mime-match');
 const multiparty = require('connect-multiparty');
 
-type UploadConfig = { allowedTypes?: string[] | string, excludeTypes?: string[] | string, maxSize?: number };
-
 function readTypeArr(arr?: string[] | string) {
   return (Array.isArray(arr) ? arr : (arr || '').split(',')).filter(x => !!x);
 }
@@ -21,12 +19,11 @@ function matchType(types: string[], type: string, invert: boolean = false) {
   return false;
 }
 
-export function Upload(config: UploadConfig = {}) {
+export function Upload(config: Partial<AssetExpressConfig> = {}) {
   let conf = new AssetExpressConfig();
+  (conf as any).postConstruct(); // Load config manually, bypassing dep-inj
 
   config = Object.assign({}, conf, config);
-
-  (conf as any).postConstruct(); // Load config manually, bypassing dep-inj
 
   let multipart = multiparty({
     hash: 'sha256',
