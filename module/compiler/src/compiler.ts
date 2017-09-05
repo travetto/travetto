@@ -259,15 +259,12 @@ export class Compiler {
     this.transformers = this.resolveTransformers();
 
     require.extensions['.ts'] = this.requireHandler.bind(this);
+    Module._load = this.moduleLoadHandler.bind(this);
 
-    if (AppEnv.watch) {
-      Module._load = this.moduleLoadHandler.bind(this);
-    }
-
-    this.rootFiles = AppEnv.prod ? [
+    this.rootFiles = [
       ...bulkFindSync(this.workingSet),
       ...bulkFindSync(this.frameworkWorkingSet)
-    ] : []; // Don't check all at startup during dev, slightly faster
+    ];
 
     this.servicesHost = {
       getScriptFileNames: () => this.rootFiles,
