@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import * as gm from 'gm';
 
-import { AssetService } from './asset';
-import { Asset } from '../model';
-import { nodeToPromise } from '@encore/util';
-import { AssetUtil } from '../util';
+import { nodeToPromise } from '@encore/base';
 import { Cacheable } from '@encore/cache';
 import { Injectable } from '@encore/di';
+
+import { AssetService } from './asset';
+import { Asset } from '../model';
+import { AssetUtil } from '../util';
 
 @Injectable()
 export class ImageService {
