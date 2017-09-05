@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import * as fs from 'fs';
 import { Logger } from '../src';
 import { nodeToPromise } from '@encore/util';
-import { Registry } from '@encore/di';
+import { DependencyRegistry } from '@encore/di';
 
 let name = `${process.cwd()}/logs/encore_log-out.log`;
 console.log(name);
@@ -21,7 +21,7 @@ describe('Logging', () => {
   });
 
   it('Should log', async () => {
-    let logger = (await Registry.getInstance(Logger)).getLogger();
+    let logger = (await DependencyRegistry.getInstance(Logger)).getLogger();
     logger.info('Hello world!');
 
     let contents = await nodeToPromise(fs, fs.readFile, name);
