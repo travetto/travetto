@@ -11,13 +11,17 @@ export interface ManagedExtra {
   postConstruct?: () => any
 }
 
-export class DependencyRegistry {
-  static pendingInjectables = new Map<string, InjectableConfig<any>>();
-  static injectables = new Map<string, InjectableConfig<any>>();
-  static instances = new Map<string, Map<string, any>>();
-  static proxyHandlers = new Map<string, Map<string, any>>();
+type TargetId = string;
+type ClassId = string;
 
-  static aliases = new Map<string, Map<string, string>>();
+export class DependencyRegistry {
+  static pendingInjectables = new Map<ClassId, InjectableConfig<any>>();
+  static injectables = new Map<ClassId, InjectableConfig<any>>();
+
+  static instances = new Map<TargetId, Map<string, any>>();
+  static proxyHandlers = new Map<TargetId, Map<string, any>>();
+  static aliases = new Map<TargetId, Map<string, string>>();
+
   static autoCreate: (Dependency<any> & { priority: number })[] = [];
 
   private static _waitingForInit = false;
