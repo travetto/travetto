@@ -2,21 +2,19 @@ import * as async_hooks from 'async_hooks';
 import * as fs from 'fs';
 import { AppEnv } from './env';
 
-let installed = false;
 let ogPrep: any;
-
 let ogName = __filename.replace(/\.js$/, '');
 
 class StackTraceListener {
   currentId: number = -1;
   stackSeparator = 'Continued from';
-  stackMap = new Map<number, string>();
-  ogPrep: any;
-
+  stackMap = new Map<number, string[]>();
+  customPrep: any;
 
   constructor() {
     this.init = this.init.bind(this);
     this.destroy = this.destroy.bind(this);
+    this.customPrep = (err: any, stck: any) => this.prepareStackTrace(ogPrep ? ogPrep(err, stck) : err, stck);
   }
 
   log(msg: string) {
@@ -27,13 +25,17 @@ class StackTraceListener {
     const [head, ...rest] = (err || '').split('\n');
     return (removeHead ? '' : `${head}\n`) + (rest
       .filter(l =>
-        l.indexOf(ogName) < 0 &&
-        l.indexOf('timers.js') < 0 &&
-        l.indexOf('async_hooks') < 0 &&
-        l.indexOf('module.js') < 0 &&
-        l.indexOf('(native)') < 0 &&
-        l.indexOf('source-map-support.js')
-      ).join('\n'));
+        !l.includes(ogName) &&
+        !l.includes('timers.js') &&
+        !l.includes('async_hooks') &&
+        !l.includes('module.js') &&
+        !l.includes('(native)') &&
+        !l.includes('<anonymous>') &&
+        !l.includes('@encore/base/src/promise') &&
+        !l.includes('source-map-support.js')
+      )
+      .map(x => x.replace(/ (Function|Proxy)\./, ' <Proxied>.'))
+      .join('\n'));
   }
 
   prepareStackTrace(err: any, stack: any) {
@@ -42,7 +44,8 @@ class StackTraceListener {
     errMsg = this.filterErrorStack(errMsg, false);
 
     if (this.stackMap.has(parentId)) {
-      errMsg += '\n' + this.stackMap.get(parentId)!;
+      errMsg = [errMsg, ...this.stackMap.get(parentId)!.slice(0, 5)]
+        .join('\n' + this.stackSeparator + '\n');
     }
 
     if (typeof err === 'string') {
@@ -55,12 +58,11 @@ class StackTraceListener {
   }
 
   init(id: number, type: string, triggerAsyncId: number, resource: any) {
-    if (!installed) {
-      installed = true;
+    if ((Error as any).prepareStackTrace !== this.customPrep) {
       ogPrep = (Error as any).prepareStackTrace;
-      (Error as any).prepareStackTrace = (err: any, stck: any) => this.prepareStackTrace(ogPrep ? ogPrep(err, stck) : err, stck);
-
+      (Error as any).prepareStackTrace = this.customPrep;
     }
+
     let stack: any = {};
     let prep: any = (Error as any).prepareStackTrace;
     (Error as any).prepareStackTrace = ogPrep;
@@ -68,12 +70,10 @@ class StackTraceListener {
     (Error as any).prepareStackTrace = prep;
 
     let parentId = triggerAsyncId || this.currentId;
-    let parent = this.stackMap.get(parentId)!;
+    let parent = this.stackMap.get(parentId)! || [];
+    let frame = this.filterErrorStack(stack.stack, true);
 
-    this.stackMap.set(id,
-      this.filterErrorStack(stack.stack, true) +
-      (parent ? `\n${this.stackSeparator}\n${parent}` : '')
-    );
+    this.stackMap.set(id, parent[0] === frame ? parent : [frame, ...parent]);
   }
 
   before(id: number) {
