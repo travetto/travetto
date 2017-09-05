@@ -20,21 +20,21 @@ export class AssetUtil {
     return path.join(tmpDir, name);
   }
 
-  static async localFileToAsset(path: string, prefix?: string, tags?: string[]) {
+  static async localFileToAsset(pth: string, prefix?: string, tags?: string[]) {
     let hash = crypto.createHash('sha256');
     hash.setEncoding('hex');
 
-    let str = fs.createReadStream(path);
+    let str = fs.createReadStream(pth);
     str.pipe(hash);
     await nodeToPromise(str, str.on, 'end');
 
-    let size = (await nodeToPromise<fs.Stats>(fs, fs.stat, path)).size;
+    let size = (await nodeToPromise<fs.Stats>(fs, fs.stat, pth)).size;
 
     let upload = this.fileToAsset({
-      name: path,
+      name: pth,
       hash: hash.read(),
       size: size,
-      path: path,
+      path: pth,
     }, prefix);
 
     if (tags) {
