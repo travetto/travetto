@@ -6,6 +6,8 @@ let Common = require('mocha/lib/interfaces/common');
 module.exports = function (suite: any) {
   let suites = [suite];
   suite.on('pre-require', function (ctx: any, file: any, mocha: any) {
+    mocha.fullTrace(true);
+
     let cmn = Common(suites, ctx, mocha);
 
     ctx.before = cmn.before;
