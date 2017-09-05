@@ -7,7 +7,7 @@ let ogName = __filename.replace(/\.js$/, '');
 
 class StackTraceListener {
   currentId: number = -1;
-  stackSeparator = '[Continued]';
+  stackSeparator = '[Continued]\n';
   stackMap = new Map<number, string[]>();
   customPrep: any;
 
