@@ -44,7 +44,7 @@ class StackTraceListener {
     errMsg = this.filterErrorStack(errMsg, false);
 
     if (this.stackMap.has(parentId)) {
-      errMsg = [errMsg, ...this.stackMap.get(parentId)!]
+      errMsg = [errMsg, ...this.stackMap.get(parentId)!.slice(0, 5)]
         .join('\n' + this.stackSeparator);
     }
 
