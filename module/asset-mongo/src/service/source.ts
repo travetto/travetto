@@ -31,7 +31,19 @@ export class MongoSource extends AssetSource {
       stream.on('error', reject);
     });
 
-    return this.info(file.filename);
+
+    let count = 0;
+
+    while (count++ < 5) {
+      try {
+        return await this.info(file.filename);
+      } catch (e) {
+        // Wait for load
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+
+    throw new Error('Unable to find written file');
   }
 
   async update(file: Asset): Promise<Asset> {
