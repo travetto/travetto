@@ -189,6 +189,13 @@ export class DependencyRegistry {
       }
     }
 
+    let parentConfig = this.injectables.get(pconfig.class!.prototype.constructor);
+    if (parentConfig) {
+      config.dependencies.fields = Object.assign({},
+        pconfig.dependencies!.fields,
+        config.dependencies.fields);
+    }
+
     let targetId = config.target.__id!;
     this.injectables.set(classId, config);
     this.pendingInjectables.delete(classId);
@@ -198,6 +205,10 @@ export class DependencyRegistry {
     }
 
     this.aliases.get(targetId)!.set(config.name, classId);
+    if (parentConfig && config.name !== DEFAULT_INSTANCE) {
+      let parentId = parentConfig.class.__id!;
+      this.aliases.get(parentId)!.set(config.name, classId);
+    }
 
     // Live RELOAD
     if (AppEnv.watch &&
