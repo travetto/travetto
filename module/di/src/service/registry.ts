@@ -193,7 +193,8 @@ export class DependencyRegistry {
       }
     }
 
-    let parentConfig = this.injectables.get(pconfig.class!.prototype.constructor);
+    let parentClass = pconfig.class!.prototype.constructor;
+    let parentConfig = this.injectables.get(parentClass);
     if (parentConfig) {
       config.dependencies.fields = Object.assign({},
         pconfig.dependencies!.fields,
@@ -210,9 +211,9 @@ export class DependencyRegistry {
 
     this.aliases.get(targetId)!.set(config.name, classId);
 
-    // TODO: Need to fully define and understand this pattern, if it exists
-    if (parentConfig && config.name !== DEFAULT_INSTANCE) {
-      let parentId = parentConfig.class.__id!;
+    // TODO: Auto alias parent class if framework managed
+    if (parentClass.__id && config.name !== DEFAULT_INSTANCE) {
+      let parentId = parentClass.__id;
       this.aliases.get(parentId)!.set(config.name, classId);
     }
 
