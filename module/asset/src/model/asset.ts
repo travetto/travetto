@@ -1,4 +1,4 @@
-import { nodeToPromise } from '@encore/util';
+import { nodeToPromise } from '@encore/base';
 import * as fs from 'fs';
 
 export interface AssetFile {
