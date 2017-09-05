@@ -1,27 +1,20 @@
+import { SchemaRegistry, SchemaBound, Schema } from '@encore/schema';
+
 import { ModelCore } from './model';
-import { SchemaRegistry, Cls, Field, SchemaBound } from '@encore/schema';
 import { ModelOptions } from '../service';
 
+@Schema()
 export abstract class BaseModel extends SchemaBound implements ModelCore {
 
-  @Field(String)
   _id: string;
-
-  @Field(String)
   _version: string;
-
-  @Field(String)
-  _type: string | undefined;
-
-  @Field(Date)
+  _type?: string;
   createdDate: Date;
-
-  @Field(Date)
   updatedDate: Date;
 
   constructor() {
     super();
-    let cons: Cls<any> = SchemaRegistry.getCls(this);
+    let cons = SchemaRegistry.getClass(this);
     this._type = SchemaRegistry.getClassMetadata<any, ModelOptions>(cons, 'model').discriminator;
   }
 
