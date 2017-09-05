@@ -1,4 +1,7 @@
 import { declareSuite, initialize } from './util';
+import { addStackFilters } from '@encore/base';
+
+addStackFilters('mocha/lib/run');
 
 let Test = require('mocha/lib/test');
 let Common = require('mocha/lib/interfaces/common');
