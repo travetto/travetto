@@ -20,7 +20,7 @@ function matchType(types: string[], type: string, invert: boolean = false) {
   return false;
 }
 
-export function Upload(config: Partial<AssetExpressConfig> = {}) {
+export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
   let conf = new AssetExpressConfig();
   (conf as any).postConstruct(); // Load config manually, bypassing dep-inj
 
