@@ -1,30 +1,7 @@
-declare module Express {
-	export interface MultipartyUpload {
-		name: string;
-		size?: number;
-		type?: string;
-		path: string;
-		hash: string;
-	}
+import { Asset } from '@encore/asset';
 
-	export interface Asset {
-		_id?: string;
-		stream?: NodeJS.ReadableStream;
-		length: number;
-		filename: string;
-		contentType: string;
-		path: string;
-		metadata: {
-			name: string,
-			title: string,
-			hash: string,
-			createdDate: Date,
-			tags?: string[]
-		},
-		read(): Promise<string>
-	}
-
+declare module 'express' {
 	export interface Request {
-		files: { [key: string]: Asset }
+		files: { [key: string]: Asset };
 	}
 }
