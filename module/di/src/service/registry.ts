@@ -205,6 +205,8 @@ export class DependencyRegistry {
     }
 
     this.aliases.get(targetId)!.set(config.name, classId);
+
+    // TODO: Need to fully define and understand this pattern, if it exists
     if (parentConfig && config.name !== DEFAULT_INSTANCE) {
       let parentId = parentConfig.class.__id!;
       this.aliases.get(parentId)!.set(config.name, classId);
