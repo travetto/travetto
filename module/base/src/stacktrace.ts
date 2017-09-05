@@ -7,7 +7,7 @@ let ogName = __filename.replace(/\.js$/, '');
 
 class StackTraceListener {
   currentId: number = -1;
-  stackSeparator = 'Continued from';
+  stackSeparator = '[Continued]';
   stackMap = new Map<number, string[]>();
   customPrep: any;
 
@@ -44,8 +44,8 @@ class StackTraceListener {
     errMsg = this.filterErrorStack(errMsg, false);
 
     if (this.stackMap.has(parentId)) {
-      errMsg = [errMsg, ...this.stackMap.get(parentId)!.slice(0, 5)]
-        .join('\n' + this.stackSeparator + '\n');
+      errMsg = [errMsg, ...this.stackMap.get(parentId)!]
+        .join('\n' + this.stackSeparator);
     }
 
     if (typeof err === 'string') {
