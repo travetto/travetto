@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { RouteStack, PathType, ControllerConfig, Method, Renderable, RequestHandler, FilterPromise, Filter } from './model';
+import {
+  RouteStack, PathType, ControllerConfig, Method,
+  Renderable, RequestHandler, FilterPromise, Filter
+} from './model';
 
 export class RouteUtil {
 
@@ -76,29 +79,33 @@ export class RouteUtil {
     }
 
     console.info(`Request`, {
-      method: req.method,
-      path: req.path,
-      query: req.query,
-      params: req.params,
-      statusCode: res.statusCode
+      meta: {
+        method: req.method,
+        path: req.path,
+        query: req.query,
+        params: req.params,
+        statusCode: res.statusCode
+      }
     });
 
     res.end();
   }
 
-  static async  errorHandler(error: any, req: Request, res: Response, next?: NextFunction) {
+  static async errorHandler(error: any, req: Request, res: Response, next?: NextFunction) {
 
     let status = error.status || error.statusCode || 500;
 
     console.error(`Request`, {
-      method: req.method,
-      path: req.path,
-      query: req.query,
-      params: req.params,
-      statusCode: status
+      meta: {
+        method: req.method,
+        path: req.path,
+        query: req.query,
+        params: req.params,
+        statusCode: status
+      }
     });
 
-    console.debug(error);
+    console.info(error);
 
     // Generally send the error directly to the output
     if (!res.headersSent) {

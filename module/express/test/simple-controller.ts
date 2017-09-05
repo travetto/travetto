@@ -21,7 +21,7 @@ export class Simple {
 
   @Get('/age2')
   async age2() {
-    return this.service.fetch().middle.toUpperCase();
+    return (this.service.fetch().middle! as any).toUpperCase();
   }
 
   @Get('/age3')
