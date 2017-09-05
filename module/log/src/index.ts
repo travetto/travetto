@@ -1,3 +1,3 @@
 /// <reference path="./log4js.d.ts" />
 
-export * from './logger';
+export * from './service';

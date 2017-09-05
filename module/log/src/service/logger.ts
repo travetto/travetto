@@ -4,7 +4,7 @@ import { addLayout } from 'log4js/lib/layouts';
 import { Injectable } from '@encore/di';
 import { LoggerConfig } from './config';
 import { Layouts } from './layout';
-import { isFileAppender } from './types';
+import { isFileAppender } from '../types';
 import { AppInfo, nodeToPromise } from '@encore/base';
 
 @Injectable({

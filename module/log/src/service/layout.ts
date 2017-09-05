@@ -1,7 +1,7 @@
 import * as log4js from 'log4js';
 import * as util from 'util';
-
-import { LogContext, StandardLayout, JsonLayout } from './types';
+import { AppEnv } from '@encore/base';
+import { LogContext, StandardLayout, JsonLayout } from '../types';
 
 const STYLES: { [key: string]: [number, number] } = {
   // styles
@@ -42,8 +42,8 @@ function processEvent(ev: log4js.LogEvent, opts: JsonLayout | StandardLayout) {
   let last = args[args.length - 1];
 
   if (last) {
-    if (last.__meta) {
-      out.meta = args.pop();
+    if (Object.keys(last).length === 1 && last.meta) {
+      out.meta = args.pop().meta;
     } else if (last.stack) {
       args[args.length - 1] = last.stack;
     }
@@ -51,7 +51,11 @@ function processEvent(ev: log4js.LogEvent, opts: JsonLayout | StandardLayout) {
 
   if (args.length) {
     if (opts.type === 'standard') {
-      out.message = args.map((x: any) => typeof x === 'string' ? x : util.inspect(x, false, 2, opts.colorize)).join(' ');
+      if (out.meta) {
+        args.push(out.meta);
+        delete out.meta;
+      }
+      out.message = args.map((x: any) => typeof x === 'string' ? x : util.inspect(x, AppEnv.dev, AppEnv.dev ? 4 : 2, opts.colorize)).join(' ');
     } else {
       out.message = util.format.apply(util, args);
     }
@@ -102,9 +106,6 @@ export const Layouts: { [key: string]: (opts: any) => log4js.Layout } = {
       }
       if (ctx.message) {
         out += ctx.message + ' ';
-      }
-      if (ctx.meta) {
-        out += ctx.meta + ' ';
       }
       return out.substring(0, out.length - 1);
     }
