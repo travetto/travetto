@@ -1,14 +1,19 @@
 import { Class } from '@encore/schema';
 
+export interface SortOptions {
+  fields: [string, boolean][];
+}
+
 export interface IndexConfig {
   fields: string[] | { [key: string]: number };
-  //options: mongo.IndexOptions;
+  extra?: object;
 }
 
 export interface ModelOptions {
-  //defaultSort?: SortOptions;
+  defaultSort?: SortOptions;
   indicies: IndexConfig[];
   primaryUnique?: string[];
   discriminator?: string;
   subtypes?: { [key: string]: Class };
+  extra?: object;
 }

@@ -1,9 +1,8 @@
 import { ObjectUtil } from '@encore/util';
-import { MongoService } from '@encore/mongo';
-import { SchemaRegistry, Cls } from '@encore/schema';
+import { SchemaRegistry, Class } from '@encore/schema';
 import { ModelOptions, IndexConfig } from '../service';
 
-function createIndex<T extends Cls<any>>(target: T, config: IndexConfig) {
+function createIndex<T extends Class>(target: T, config: IndexConfig) {
   let mconf = SchemaRegistry.getClassMetadata<any, ModelOptions>(target, 'model');
   if (!mconf.indicies) {
     mconf.indicies = [];
@@ -31,13 +30,13 @@ function createIndex<T extends Cls<any>>(target: T, config: IndexConfig) {
 }
 
 export function Index(config: IndexConfig) {
-  return function <T extends Cls<any>>(target: T) {
+  return function <T extends Class>(target: T) {
     return createIndex(target, config);
   };
 }
 
 export function Unique(...fields: string[]) {
-  return function <T extends Cls<any>>(target: T) {
+  return function <T extends Class>(target: T) {
     return createIndex(target, { fields, options: { unique: true } });
   };
 }

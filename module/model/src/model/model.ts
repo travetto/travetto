@@ -1,6 +1,4 @@
-import { Base } from '@encore/mongo';
-
-export interface ModelCore extends Base {
+export interface ModelCore {
   preSave?: () => this;
   postLoad?: () => this;
 }
