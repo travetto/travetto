@@ -1,26 +1,11 @@
 {
   "author": "",
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x",
-    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x",
-    "@encore/cache": "git+ssh://git@git.eaiti.com/encore/cache.git#v2.x.x",
-    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x",
-    "@encore/lifecycle": "git+ssh://git@git.eaiti.com/encore/lifecycle.git#v2.x.x",
-    "@types/file-type": "^5.2.0",
-    "@types/gm": "^1.17.29",
-    "@types/os-tmpdir": "^1.0.0",
-    "file-type": "^3.9.0",
-    "gm": "^1.21.1",
-    "mime": "^1.3.4",
-    "mime-match": "^1.0.2",
-    "os-tmpdir": "^1.0.1",
-    "connect-multiparty": "^1.2.5",
-    "express-fileupload": "0.0.4",
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v2.x.x",
-    "multiparty": "^4.1.2",
-    "gridfs-stream": "^1.1.1",
+    "@encore/asset": "git+ssh://git@git.eaiti.com/encore/asset.git#v2.x.x",
+    "@types/mongodb": "^2.2.10",
     "@types/gridfs-stream": "^0.5.28",
-    "@encore/mongo": "git+ssh://git@git.eaiti.com/encore/mongo.git#v2.x.x"
+    "mongodb": "^2.2.31",
+    "gridfs-stream": "^1.1.1"
   },
   "description": "",
   "devDependencies": {
@@ -28,7 +13,7 @@
   },
   "license": "ISC",
   "main": "index.ts",
-  "name": "@encore/asset",
+  "name": "@encore/asset-mongo",
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
   },

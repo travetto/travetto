@@ -1,9 +1,4 @@
-encore: Asset
+encore: Asset-Mongo
 ===
 
-This module provides functionality for handling file uploads via `@Upload` annotations and
-file storage/retrieval using Mongo DB's GridFS.
-
-It also provides image management functionality using GraphicsMagick under the covers.  This 
-allows you to retrieve images and provide different sizes, transformations, etc. when
-serving up them up.
+This provides a mongo implementation for the AssetSource so you can provide an mongodb backend for asset management.
