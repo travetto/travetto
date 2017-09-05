@@ -1,8 +1,8 @@
 import * as fs from 'fs';
-import { Asset } from '../model';
-import { nodeToPromise } from '@encore/util';
-import { AssetSource } from './source';
+import { nodeToPromise } from '@encore/base';
 import { Injectable } from '@encore/di';
+import { Asset } from '../model';
+import { AssetSource } from './source';
 
 @Injectable()
 export class AssetService {
