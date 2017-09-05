@@ -10,11 +10,25 @@ class StackTraceListener {
   stackSeparator = '[Continued]\n';
   stackMap = new Map<number, string[]>();
   customPrep: any;
+  filters = [
+    ogName,
+    'timers.js',
+    'async_hooks',
+    'module.js',
+    '(native)',
+    '<anonymous>',
+    '@encore/base/src/promise',
+    'source-map-support.js'
+  ];
 
   constructor() {
     this.init = this.init.bind(this);
     this.destroy = this.destroy.bind(this);
     this.customPrep = (err: any, stck: any) => this.prepareStackTrace(ogPrep ? ogPrep(err, stck) : err, stck);
+  }
+
+  addFilters(filters: string[]) {
+    this.filters.push(...filters);
   }
 
   log(msg: string) {
@@ -24,16 +38,7 @@ class StackTraceListener {
   filterErrorStack(err: string, removeHead: boolean) {
     const [head, ...rest] = (err || '').split('\n');
     return (removeHead ? '' : `${head}\n`) + (rest
-      .filter(l =>
-        !l.includes(ogName) &&
-        !l.includes('timers.js') &&
-        !l.includes('async_hooks') &&
-        !l.includes('module.js') &&
-        !l.includes('(native)') &&
-        !l.includes('<anonymous>') &&
-        !l.includes('@encore/base/src/promise') &&
-        !l.includes('source-map-support.js')
-      )
+      .filter(l => !this.filters.find(f => l.includes(f)))
       .map(x => x.replace(/ (Function|Proxy)\./, ' <Proxied>.'))
       .join('\n'));
   }
@@ -44,7 +49,7 @@ class StackTraceListener {
     errMsg = this.filterErrorStack(errMsg, false);
 
     if (this.stackMap.has(parentId)) {
-      errMsg = [errMsg, ...this.stackMap.get(parentId)!.slice(0, 5)]
+      errMsg = [errMsg, ...this.stackMap.get(parentId)!].filter(x => !!x.trim()).slice(0, 6)
         .join('\n' + this.stackSeparator);
     }
 
@@ -89,6 +94,14 @@ class StackTraceListener {
   }
 }
 
+let listener: StackTraceListener;
+
 if (!AppEnv.prod) {
-  async_hooks.createHook(new StackTraceListener()).enable();
+  async_hooks.createHook(listener = new StackTraceListener()).enable();
+}
+
+export function addStackFilters(...names: string[]) {
+  if (listener) {
+    listener.addFilters(names);
+  }
 }
