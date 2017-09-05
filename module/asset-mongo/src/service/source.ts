@@ -10,13 +10,14 @@ import { MongoAssetConfig } from './config';
 export class MongoSource extends AssetSource {
 
   private client: Grid.Grid;
+  private mongoClient: mongo.Db;
 
   @Inject()
   private config: MongoAssetConfig;
 
   async postConstruct() {
-    let mongoClient = await mongo.MongoClient.connect(this.config.url);
-    this.client = await Grid(mongoClient, mongo);
+    this.mongoClient = await mongo.MongoClient.connect(this.config.url);
+    this.client = await Grid(this.mongoClient, mongo);
   }
 
   async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
