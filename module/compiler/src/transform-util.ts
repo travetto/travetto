@@ -93,7 +93,7 @@ export class TransformUtil {
     return ts.updateObjectLiteral(lit, [...props, ...extra]);
   }
 
-  static getPrimaryArgument<T>(node: ts.CallExpression | ts.Decorator | undefined): T | undefined {
+  static getPrimaryArgument<T = ts.Node>(node: ts.CallExpression | ts.Decorator | undefined): T | undefined {
     if (node && ts.isDecorator(node)) {
       node = node.expression as any as ts.CallExpression;
     }
