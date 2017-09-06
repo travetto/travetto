@@ -1,10 +1,12 @@
 import { BindUtil, Class, SchemaRegistry, SchemaValidator } from '@encore/schema';
+import { Injectable } from '@encore/di';
 import { ModelOptions } from './types';
 import { ModelCore, Query, QueryOptions, BulkState, ModelId } from '../model';
 import { ModelSource } from './source';
 import { ModelRegistry } from './registry';
 import * as _ from 'lodash';
 
+@Injectable()
 export class ModelService {
 
   constructor(private source: ModelSource) { }
@@ -81,7 +83,7 @@ export class ModelService {
     return this.postLoad(cls, res);
   }
 
-  async deleteById<T>(cls: Class<T>, id: ModelId): Promise<void> {
+  async deleteById<T>(cls: Class<T>, id: ModelId): Promise<number> {
     return await this.source.deleteById(cls, id);
   }
 
@@ -92,28 +94,28 @@ export class ModelService {
   async save<T>(o: T): Promise<T> {
     let cls = SchemaRegistry.getClass(o);
     o = await this.prePersist(o);
-    let res = await this.source.save<T>(o);
+    let res = await this.source.save<T>(cls, o);
     return this.postLoad(cls, res);
   }
 
   async saveAll<T>(objs: T[]): Promise<T[]> {
     let cls = SchemaRegistry.getClass(objs[0]);
     objs = await Promise.all(objs.map(o => this.prePersist(o)));
-    let res = await this.source.saveAll<T>(objs);
+    let res = await this.source.saveAll<T>(cls, objs);
     return res.map(x => this.postLoad(cls, x));
   }
 
   async update<T>(o: T): Promise<T> {
     let cls = SchemaRegistry.getClass(o);
     o = await this.prePersist(o);
-    let res = await this.source.update(o);
+    let res = await this.source.update(cls, o);
     return this.postLoad(cls, res);
   }
 
   async updateAll<T>(objs: T[]): Promise<T[]> {
     let cls = SchemaRegistry.getClass(objs[0]);
     objs = await Promise.all(objs.map(o => this.prePersist(o)));
-    let res = await this.source.updateAll<T>(objs);
+    let res = await this.source.updateAll<T>(cls, objs);
     return res.map(x => this.postLoad(cls, x));
   }
 
@@ -121,8 +123,16 @@ export class ModelService {
     let cls = SchemaRegistry.getClass(o) as Class<T>;
     o = await this.prePersist(o, view);
     let partial = BindUtil.bindSchema(cls, {}, o, view);
-    let res = await this.source.updatePartial<T>(partial);
+    let res = await this.source.updatePartial<T>(cls, partial);
     return this.postLoad(cls, res);
+  }
+
+  async updatePartialByQuery<T>(o: Partial<T>, view: string, query: Query<T>): Promise<number> {
+    let cls = SchemaRegistry.getClass(o) as Class<T>;
+    o = await this.prePersist(o, view);
+    let partial = BindUtil.bindSchema(cls, {}, o, view);
+    let res = await this.source.updatePartialByQuery(cls, partial, query);
+    return res;
   }
 
   async bulkProcess<T>(named: Class<T>, state: BulkState<T>) {
