@@ -53,7 +53,7 @@ export class ExpressApp {
       .map(c => this.registerController(c)));
 
     // Listen for updates
-    RouteRegistry.events.on('reload', this.registerController.bind(this));
+    RouteRegistry.on('reload', this.registerController.bind(this));
 
     this.app.use(RouteUtil.errorHandler);
 
