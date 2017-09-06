@@ -1,4 +1,5 @@
-import { Configure } from '@encore/config';
+import { Config } from '@encore/config';
+
 export default Configure.registerNamespace('mongo', {
   hosts: 'localhost',
   schema: 'app',
