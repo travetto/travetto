@@ -2,7 +2,9 @@
   "author": "",
   "dependencies": {
     "@encore/model": "git+ssh://git@git.eaiti.com/encore/model.git#v2.x.x",
+    "@types/flat": "0.0.28",
     "@types/mongodb": "^2.2.10",
+    "flat": "^4.0.0",
     "mongodb": "^2.2.31"
   },
   "description": "",

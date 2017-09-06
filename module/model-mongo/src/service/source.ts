@@ -1,29 +1,72 @@
 import * as mongo from 'mongodb';
-import Config from '../config';
-import {
-  Named, Base, IndexConfig,
-  BulkState, BulkResponse, QueryOptions
-} from '../model';
-import { ObjectUtil } from '@encore/util';
-
 import * as flat from 'flat';
+import * as _ from 'lodash';
 
-interface Cls<T> extends Named {
-  new(...args: any[]): T;
-}
+import { ModelSource, IndexConfig, Query, QueryOptions, BulkState, BulkResponse } from '@encore/model';
+import { Injectable } from '@encore/di';
+import { ModelMongoConfig } from './config';
+import { Class } from '@encore/schema';
 
-export class MongoService {
+@Injectable()
+export class MongoService extends ModelSource {
 
-  private static clientPromise: Promise<mongo.Db>;
-  private static indices: { [key: string]: IndexConfig[] } = {};
+  private client: mongo.Db;
+  private indices: { [key: string]: IndexConfig[] } = {};
 
-  static isActive() { return !!MongoService.clientPromise; }
+  constructor(private config: ModelMongoConfig) {
+    super();
+  }
 
-  static translateQueryIds(query: Object & { _id?: any }) {
+  getIdField() {
+    return '_id';
+  }
+
+  getTypeField() {
+    return '_type';
+  }
+
+  postLoad(o: any) {
+    if (o._id) {
+      o._id = o._id.toHexString();
+    }
+    return o;
+  }
+
+  prePersist(o: any) {
+    if (o._id) {
+      o._id = new mongo.ObjectId(o._id);
+    }
+    return o;
+  }
+
+  async postConstruct() {
+    await this.init();
+  }
+
+  async init() {
+    this.client = await mongo.MongoClient.connect(this.config.url);
+    await this.establishIndices();
+  }
+
+  async establishIndices() {
+    let promises = [];
+
+    for (let colName of Object.keys(this.indices)) {
+      let col = await this.client.collection(colName);
+
+      for (let [fields, config] of this.indices[colName]) {
+        promises.push(col.createIndex(fields, config));
+      }
+    }
+
+    return Promise.all(promises);
+  }
+
+  translateQueryIds<T>(query: Query<T>) {
     if (query._id) {
       if (typeof query._id === 'string') {
         query._id = new mongo.ObjectID(query._id);
-      } else if (ObjectUtil.isPlainObject(query._id)) {
+      } else if (_.isPlainObject(query._id)) {
         if (query._id['$in']) {
           query._id['$in'] = query._id['$in'].map((x: any) => typeof x === 'string' ? new mongo.ObjectID(x) : x);
         }
@@ -32,76 +75,39 @@ export class MongoService {
     return query;
   }
 
-  static getUrl(schema: string = Config.schema, options: any = Config.options) {
-    let hosts = Config.hosts.split(',').map(h => `${h}:${Config.port}`).join(',');
-    let opts = Object.keys(options).map(k => `${k}=${options[k]}`).join('&');
-    return `mongodb://${hosts}/${schema}?${opts}`;
-  }
-
-  static getSchema() {
-    return Config.schema;
-  }
-
-  static getClient(): Promise<mongo.Db> {
-    if (!MongoService.clientPromise) {
-      MongoService.clientPromise =
-        mongo.MongoClient.connect(MongoService.getUrl())
-          .then(client =>
-            MongoService.establishIndices(client)
-              .then(() => client));
-    }
-    return MongoService.clientPromise;
-  }
-
-  static getCollectionName(named: Named): string {
+  getCollectionName(named: Class): string {
     return named.collection || named.name;
   }
 
-  static async getCollection(named: Named): Promise<mongo.Collection> {
-    let db = await MongoService.getClient();
-    return db.collection(MongoService.getCollectionName(named));
+  async getCollection(named: Class): Promise<mongo.Collection> {
+    return this.client.collection(this.getCollectionName(named));
   }
 
-  static async resetDatabase() {
-    let client = await MongoService.getClient();
-    await client.dropDatabase();
-    delete MongoService.clientPromise;
+  async resetDatabase() {
+    await this.client.dropDatabase();
+    await this.init();
   }
 
-  static registerIndex(named: Named, fields: { [key: string]: number }, config: mongo.IndexOptions) {
-    let col = MongoService.getCollectionName(named);
-    MongoService.indices[col] = MongoService.indices[col] || [];
-    MongoService.indices[col].push([fields, config]);
+  registerIndex(named: Class, fields: { [key: string]: number }, config: mongo.IndexOptions) {
+    let col = this.getCollectionName(named);
+    this.indices[col] = this.indices[col] || [];
+    this.indices[col].push([fields, config]);
   }
 
-  static async establishIndices(client: mongo.Db) {
-    let promises = [];
-
-    for (let colName of Object.keys(MongoService.indices)) {
-      let col = await client.collection(colName);
-
-      for (let [fields, config] of MongoService.indices[colName]) {
-        promises.push(col.createIndex(fields, config));
-      }
-    }
-
-    return Promise.all(promises);
+  getIndices(named: Class) {
+    return this.indices[this.getCollectionName(named)];
   }
 
-  static getIndices(named: Named) {
-    return MongoService.indices[MongoService.getCollectionName(named)];
-  }
-
-  static async getIdsByQuery(named: Named, query: Object) {
-    let col = await MongoService.getCollection(named);
+  async getIdsByQuery(named: Class, query: Object) {
+    let col = await this.getCollection(named);
     let objs = await col.find(query, { _id: true }).toArray();
-    return objs.map(x => x._id.toHexString());
+    return objs.map(x => this.postLoad(x));
   }
 
-  static async getByQuery<T extends Base>(named: Named | Cls<T>, query: Object & { _id?: any } = {}, options: QueryOptions = {}): Promise<T[]> {
-    query = MongoService.translateQueryIds(query);
+  async getAllByQuery<T>(named: Class<T>, query: Query<T> = {}, options: QueryOptions = {}): Promise<T[]> {
+    query = this.translateQueryIds(query);
 
-    let col = await MongoService.getCollection(named);
+    let col = await this.getCollection(named);
     let cursor = col.find(query);
     if (options.sort) {
       cursor = cursor.sort(options.sort);
@@ -113,49 +119,51 @@ export class MongoService {
       cursor = cursor.skip(Math.trunc(options.offset) || 0);
     }
     let res = await cursor.toArray();
-    res.forEach((r: any) => r._id = (r._id as any).toHexString());
+    res.forEach(r => this.postLoad(r));
     return res;
   }
 
-  static async getCountByQuery(named: Named, query: Object & { _id?: any } = {}, options: QueryOptions = {}): Promise<{ count: number }> {
-    query = MongoService.translateQueryIds(query);
+  async getCountByQuery<T>(named: Class<T>, query: Query<T> = {}, options: QueryOptions = {}): Promise<number> {
+    query = this.translateQueryIds(query);
 
-    let col = await MongoService.getCollection(named);
+    let col = await this.getCollection(named);
     let cursor = col.count(query);
 
     let res = await cursor;
-    return { count: res };
+    return res;
   }
 
-  static async findOne<T extends Base>(named: Named | Cls<T>, query: Object, options: QueryOptions = {}, failOnMany = true): Promise<T> {
-    let res = await MongoService.getByQuery<T>(named, query, options);
+  async getByQuery<T>(named: Class<T>, query: Query<T> = {}, options: QueryOptions = {}, failOnMany = true): Promise<T> {
+    if (!options.limit) {
+      options.limit = 2;
+    }
+    let res = await this.getAllByQuery<T>(named, query, options);
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
       throw new Error(`Invalid number of results for find by id: ${res ? res.length : res}`);
     }
     return res[0] as T;
   }
 
-  static async getById<T extends Base>(named: Named, id: string): Promise<T>;
-  static async getById<T extends Base>(named: Named | Cls<T>, id: string): Promise<T> {
-    return await MongoService.findOne<T>(named, { _id: new mongo.ObjectID(id) });
+  async getById<T>(named: Class<T>, id: string): Promise<T> {
+    return await this.getByQuery<T>(named, { _id: new mongo.ObjectID(id) });
   }
 
-  static async deleteById(named: Named, id: string): Promise<number> {
-    let col = await MongoService.getCollection(named);
+  async deleteById(named: Class, id: string): Promise<number> {
+    let col = await this.getCollection(named);
     let res = await col.deleteOne({ _id: new mongo.ObjectID(id) });
 
     return res.deletedCount || 0;
   }
 
-  static async deleteByQuery(named: Named, query: Object & { _id?: any } = {}): Promise<number> {
-    query = MongoService.translateQueryIds(query);
-    let col = await MongoService.getCollection(named);
+  async deleteByQuery<T>(named: Class<T>, query: Query<T> = {}): Promise<number> {
+    query = this.translateQueryIds(query);
+    let col = await this.getCollection(named);
     let res = await col.deleteMany(query);
     return res.deletedCount || 0;
   }
 
-  static async save<T extends Base>(named: Named, o: T, removeId: boolean = true): Promise<T> {
-    let col = await MongoService.getCollection(named);
+  async save<T>(named: Class<T>, o: T, removeId: boolean = true): Promise<T> {
+    let col = await this.getCollection(named);
     if (removeId) {
       delete o._id;
     }
@@ -164,8 +172,8 @@ export class MongoService {
     return o;
   }
 
-  static async saveAll<T extends Base>(named: Named, objs: T[]): Promise<T[]> {
-    let col = await MongoService.getCollection(named);
+  async saveAll<T>(named: Class<T>, objs: T[]): Promise<T[]> {
+    let col = await this.getCollection(named);
     let res = await col.insertMany(objs);
     for (let i = 0; i < objs.length; i++) {
       objs[i]._id = res.insertedIds[i].toHexString();
@@ -173,21 +181,21 @@ export class MongoService {
     return objs;
   }
 
-  static async update<T extends Base>(named: Named, o: T): Promise<T> {
-    let col = await MongoService.getCollection(named);
-    o._id = (new mongo.ObjectID(o._id) as any);
+  async update<T>(named: Class<T>, o: T): Promise<T> {
+    let col = await this.getCollection(named);
+    this.prePersist(o);
     await col.replaceOne({ _id: o._id }, o);
-    o._id = (o._id as any).toHexString();
+    this.postLoad(o);
     return o;
   }
 
-  static async partialUpdate<T extends Base>(named: Named, id: string, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
-    return await MongoService.partialUpdateByQuery<T>(named, { _id: id }, data, opts);
+  async updatePartial<T>(named: Class<T>, id: string, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
+    return await this.updatePartialByQuery<T>(named, { _id: id }, data, opts);
   }
 
-  static async partialUpdateByQuery<T extends Base>(named: Named, query: any, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
-    let col = await MongoService.getCollection(named);
-    query = MongoService.translateQueryIds(query);
+  async updatePartialByQuery<T>(named: Class<T>, query: Query<T> = {}, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
+    let col = await this.getCollection(named);
+    query = this.translateQueryIds(query);
 
     if (Object.keys(data)[0].charAt(0) !== '$') {
       data = { $set: flat(data) };
@@ -198,24 +206,24 @@ export class MongoService {
       throw new Error('Object not found for updating');
     }
     let ret: T = res.value as T;
-    ret._id = (ret._id as any).toHexString();
+    this.postLoad(ret);
     return ret;
   }
 
-  static async updateMany<T extends Base>(named: Named, query: any, data: any, options?: { upsert?: boolean; w?: any; wtimeout?: number; j?: boolean; }) {
-    let col = await MongoService.getCollection(named);
-    query = MongoService.translateQueryIds(query);
+  async updateAll<T>(named: Class<T>, query: Query<T> = {}, data: Partial<T>) {
+    let col = await this.getCollection(named);
+    query = this.translateQueryIds(query);
 
     if (Object.keys(data)[0].charAt(0) !== '$') {
       data = { $set: flat(data) };
     }
 
-    let res = await col.updateMany(query, data, options);
+    let res = await col.updateMany(query, data);
     return res.matchedCount;
   }
 
-  static async bulkProcess<T extends Base>(named: Named, state: BulkState<T>) {
-    let col = await MongoService.getCollection(named);
+  async bulkProcess<T>(named: Class<T>, state: BulkState<T>) {
+    let col = await this.getCollection(named);
     let bulk = col.initializeUnorderedBulkOp({});
     let count = 0;
 
