@@ -1,6 +1,5 @@
 import { Class, ClassList, FieldConfig, ClassConfig, ViewConfig } from './types';
 import { EventEmitter } from 'events';
-import { nodeToPromise } from '@encore/base';
 
 export class SchemaRegistry {
 
