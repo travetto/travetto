@@ -8,7 +8,7 @@ export abstract class ModelSource {
   abstract getIdField(): string;
   abstract getTypeField(): string;
 
-  abstract prePersist<T>(model: T): Promise<T>;
+  abstract prePersist<T>(model: T): T;
   abstract postLoad<T>(model: T): T;
 
   abstract save<T>(cls: Class<T>, model: T): Promise<T>;
