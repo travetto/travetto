@@ -34,7 +34,7 @@ export class ModelRegistry {
   static finalizeClass<T>(cls: Class<T>) {
     this.options.set(cls, this.pendingOptions.get(cls)!);
     this.pendingOptions.delete(cls);
-    this.events.emit('registered', cls);
+    process.nextTick(() => this.events.emit('registered', cls));
   }
 
   static on(key: 'registered', callback: (item: Class) => any): void;
@@ -42,5 +42,3 @@ export class ModelRegistry {
     this.events.on(key, callback);
   }
 }
-
-SchemaRegistry.on('registered', ModelRegistry.finalizeClass.bind(ModelRegistry));

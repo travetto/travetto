@@ -1,7 +1,7 @@
 export interface BulkState<T> {
   upsert?: T[];
   delete?: T[];
-  getId: (t: T) => Object;
+  getId: (t: T) => Partial<T>;
 }
 
 export interface BulkResponse {

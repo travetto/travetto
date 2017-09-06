@@ -5,15 +5,15 @@ import { ModelOptions, ModelRegistry } from '../service';
 @Schema()
 export abstract class BaseModel extends SchemaBound implements ModelCore {
 
-  _id: string;
-  _version: string;
-  _type?: string;
+  id: string;
+  version: string;
+  type?: string;
   createdDate: Date;
   updatedDate: Date;
 
   constructor() {
     super();
-    this._type = ModelRegistry.getOptions(this.constructor as Class).discriminator;
+    this.type = ModelRegistry.getOptions(this.constructor as Class).discriminator;
   }
 
   preSave(): this {
