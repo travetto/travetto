@@ -1,20 +1,21 @@
 {
-  "author": "", 
+  "author": "",
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v1.x.x", 
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v1.x.x", 
-    "@types/passport": "^0.3.3", 
-    "@types/passport-local": "^1.0.30", 
-    "passport": "^0.4.0", 
+    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v2.x.x",
+    "@encore/context": "git+ssh://git@git.eaiti.com/encore/context.git#v2.x.x",
+    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v2.x.x",
+    "@types/passport": "^0.3.3",
+    "@types/passport-local": "^1.0.30",
+    "passport": "^0.4.0",
     "passport-local": "^1.0.0"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "src/lib/", 
-  "name": "@encore/auth", 
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@encore/auth",
   "peerDependencies": {
-    "@encore/model": "git+ssh://git@git.eaiti.com/encore/model.git#v1.x.x"
-  }, 
-  "scripts": {}, 
+    "@encore/model": "git+ssh://git@git.eaiti.com/encore/model.git#v2.x.x"
+  },
+  "scripts": {},
   "version": "2.0.1"
 }
