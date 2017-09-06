@@ -3,6 +3,7 @@ import { ModelOptions } from './types';
 import { ModelCore, Query, QueryOptions, BulkState, ModelId } from '../model';
 import { ModelSource } from './source';
 import { ModelRegistry } from './registry';
+import * as _ from 'lodash';
 
 export class ModelService {
 
@@ -61,11 +62,10 @@ export class ModelService {
     return res;
   }
 
-
   async saveOrUpdate<T extends ModelCore>(o: T, query: Query<T>): Promise<T> {
     let res = await this.getAllByQuery(SchemaRegistry.getClass(o), query, { limit: 2 });
     if (res.length === 1) {
-      o = ObjectUtil.merge(res[0], o);
+      o = _.merge(res[0], o);
       return await this.update(o);
     } else if (res.length === 0) {
       return await this.save(o);
