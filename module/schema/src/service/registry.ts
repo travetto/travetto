@@ -1,12 +1,13 @@
 import { Class, ClassList, FieldConfig, ClassConfig, ViewConfig } from './types';
 import { EventEmitter } from 'events';
+import { nodeToPromise } from '@encore/base';
 
 export class SchemaRegistry {
 
   static schemas: Map<Class, ClassConfig> = new Map();
   private static pending: Map<Class, ClassConfig> = new Map();
-  static DEFAULT_VIEW = 'all';
-  static events = new EventEmitter();
+  static DEFAULT_VIEW = '__all';
+  private static events = new EventEmitter();
 
   static getParent(cls: Class): Class | null {
     let parent = Object.getPrototypeOf(cls) as Class;
@@ -119,5 +120,10 @@ export class SchemaRegistry {
     // Emit schema registered
     this.schemas.set(cls, config);
     this.events.emit('registered', cls);
+  }
+
+  static async on(event: 'registered'): Promise<Class>;
+  static async on<T>(event: string): Promise<T> {
+    return nodeToPromise<T>(this.events, this.events.on, event);
   }
 }
