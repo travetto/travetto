@@ -86,9 +86,27 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       }
 
       // Add injectable to top if not there
-      if (TransformUtil.getDecoratorIdent(foundDec).text !== 'Injectable') {
-        declTemp.unshift(createInjectDecorator(state, 'Injectable'))
+      let injectable = TransformUtil.findAnyDecorator(node, { Injectable: new Set([require.resolve('../decorator/injectable')]) });
+      if (!injectable) {
+        injectable = createInjectDecorator(state, 'Injectable');
+        declTemp.push(injectable);
       }
+
+      // Ensure injectable is last decorator to run
+      if (declTemp[0] !== injectable) {
+        declTemp.unshift(...declTemp.splice(declTemp.indexOf(injectable), 1))
+      }
+
+      if (!cons) {
+        let contents = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(declTemp[0])
+          || TransformUtil.fromLiteral({});
+        declTemp[0] = createInjectDecorator(state, 'Injectable',
+          TransformUtil.extendObjectLiteral(contents, TransformUtil.fromLiteral({
+            constructor: !!cons
+          }))
+        );
+      }
+
       decls = ts.createNodeArray(declTemp);
     }
 
