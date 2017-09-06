@@ -11,7 +11,7 @@ export class RouteRegistry {
   private static pendingHandlers = new Map<string, Partial<RequestHandler>[]>();
   private static pendingHandlerMap = new Map<string, Map<Function, Partial<RequestHandler>>>();
   public static controllers = new Map<string, ControllerConfig>();
-  public static events = new EventEmitter();
+  private static events = new EventEmitter();
 
   static getControllerFilters(target: Object) {
     return ((target as any).filters || []) as Filter[];
@@ -80,5 +80,11 @@ export class RouteRegistry {
         this.registerControllerFilter(target, fn);
       }
     };
+  }
+
+
+  static on(event: 'reload', callback: (result: ControllerConfig) => any): void;
+  static on<T>(event: string, callback: (result: T) => any): void {
+    this.events.on(event, callback);
   }
 }
