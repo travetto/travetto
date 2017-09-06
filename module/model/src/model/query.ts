@@ -1,20 +1,26 @@
 export type SortOptions = { [key: string]: number } | string | string[];
 
-export type Query<T> = {
-  [p in keyof T]?: T[p]
-  | { $lt: T[p] }
-  | { $lte: T[p] }
-  | { $gt: T[p] }
-  | { $gte: T[p] }
-  | { $eq: T[p] }
-  | { $ne: T[p] }
-  | { $in: T[p][] }
-  | { $nin: T[p][] }
-  | { $exists: boolean }
-  | RegExp;
-}
-  & { $and?: Query<T>[] }
-  & { $or?: Query<T>[] };
+export type FieldComparableType = Date | number;
+export type FieldType = string | number | boolean | Date | object;
+export type FieldArrayType = FieldType[];
+
+export type Query = {
+  [key: string]: (
+    {
+      $lt: FieldComparableType;
+      $lte?: FieldComparableType;
+      $gt?: FieldComparableType;
+      $gte?: FieldComparableType;
+      $eq?: FieldType;
+      $ne?: FieldType;
+      $in?: FieldArrayType;
+      $nin?: FieldArrayType;
+      $exists?: boolean;
+    } | RegExp | FieldType
+  );
+} | { $and: Query[] }
+  | { $or: Query[] };
+
 
 export interface QueryOptions {
   sort?: SortOptions;
