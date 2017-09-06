@@ -124,6 +124,6 @@ export class SchemaRegistry {
 
   static async on(event: 'registered'): Promise<Class>;
   static async on<T>(event: string): Promise<T> {
-    return nodeToPromise<T>(this.events, this.events.on, event);
+    return new Promise<T>(resolve => this.events.on(event, resolve));
   }
 }
