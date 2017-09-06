@@ -1,5 +1,5 @@
 import { ExpressApp } from './app';
 
-export class ExpressOperator {
-  operate(app: ExpressApp) { }
+export abstract class ExpressOperator {
+  abstract operate(app: ExpressApp): void;
 }
