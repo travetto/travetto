@@ -3,7 +3,7 @@ import * as path from 'path';
 
 const SEP = path.sep;
 const RE_SEP = SEP === '/' ? '\\/' : SEP;
-const SRC_RE = new RegExp(`${RE_SEP}src${RE_SEP}`, 'g');
+const SRC_RE = new RegExp(`([^/]+)${RE_SEP}src${RE_SEP}`, 'g');
 const PATH_RE = new RegExp(RE_SEP, 'g');
 
 function createStaticField(name: string, val: ts.Expression) {
@@ -36,12 +36,22 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 export const ClassIdTransformer = {
   transformer: (context: ts.TransformationContext) =>
     (file: ts.SourceFile) => {
-      let fileRoot = file.fileName.split(process.cwd())[1]
-        .replace(SRC_RE, SEP)
+      let fileRoot = file.fileName.split(process.cwd() + SEP)[1];
+      let ns = '@app';
+      if (fileRoot.startsWith('node_modules')) {
+        fileRoot = fileRoot.split(`node_modules${SEP}`).pop();
+        if (fileRoot.startsWith('@')) {
+          let [ns1, ns2, ...rest] = fileRoot.split(SEP);
+          ns = `${ns1}.${ns2}`;
+          fileRoot = rest.join(SEP);
+        }
+      }
+
+      fileRoot = fileRoot
         .replace(PATH_RE, '.')
         .replace(/^\./, '')
         .replace(/\.(t|j)s$/, '');
-      return visitNode(context, file, { file: fileRoot })
+      return visitNode(context, file, { file: `${ns}:${fileRoot}` })
     },
   phase: 'before'
 }
