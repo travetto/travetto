@@ -122,8 +122,8 @@ export class SchemaRegistry {
     this.events.emit('registered', cls);
   }
 
-  static async on(event: 'registered'): Promise<Class>;
-  static async on<T>(event: string): Promise<T> {
-    return new Promise<T>(resolve => this.events.on(event, resolve));
+  static on(event: 'registered', callback: (result: Class) => any): void;
+  static on<T>(event: string, callback: (result: T) => any): void {
+    this.events.on(event, callback);
   }
 }
