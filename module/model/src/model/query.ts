@@ -10,6 +10,7 @@ export type Query<T> = {
   | { $ne: T[p] }
   | { $in: T[p][] }
   | { $nin: T[p][] }
+  | { $exists: boolean }
   | RegExp;
 }
   & { $and?: Query<T>[] }
