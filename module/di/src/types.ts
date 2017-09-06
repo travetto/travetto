@@ -9,7 +9,7 @@ export interface Class<T = any> {
 export interface InjectableConfig<T> extends Dependency<T> {
   class: Class<T>;
   dependencies: {
-    cons: Dependency<any>[],
+    cons?: Dependency<any>[],
     fields: { [key: string]: Dependency<any> }
   };
   autoCreate: { priority?: number, create: boolean }

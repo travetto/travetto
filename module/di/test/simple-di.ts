@@ -19,7 +19,7 @@ class Database {
 @Injectable()
 class Service {
 
-  constructor(private db: Database) {
+  constructor(protected db: Database) {
     console.log('Creating service', db);
   }
 
@@ -28,9 +28,16 @@ class Service {
   }
 }
 
+@Injectable()
+class ServiceInherit extends Service {
+  doWork() {
+    this.db.query();
+  }
+}
+
 
 async function run() {
-  let inst = await DependencyRegistry.getInstance(Service);
+  let inst = await DependencyRegistry.getInstance(ServiceInherit);
   inst.doWork();
 }
 

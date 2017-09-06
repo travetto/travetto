@@ -41,8 +41,10 @@ export class DependencyRegistry {
 
     const fieldKeys = Object.keys(managed.dependencies.fields!);
 
+    let consDeps = managed.dependencies.cons || [];
+
     const promises =
-      managed.dependencies.cons
+      consDeps
         .concat(fieldKeys.map(x => managed.dependencies.fields[x]))
         .map(async x => {
           try {
@@ -58,8 +60,8 @@ export class DependencyRegistry {
 
     const allDeps = await Promise.all(promises);
 
-    const consValues = allDeps.slice(0, managed.dependencies.cons.length);
-    const fieldValues = allDeps.slice(managed.dependencies.cons.length);
+    const consValues = allDeps.slice(0, consDeps.length);
+    const fieldValues = allDeps.slice(consDeps.length);
 
     const inst = new managed.class(...consValues);
 
@@ -162,11 +164,14 @@ export class DependencyRegistry {
     return this.pendingInjectables.get(id)!;
   }
 
-  static registerConstructor<T>(cls: Class<T>, dependencies: Dependency<any>[]) {
+  // Undefined indicates no constructor
+  static registerConstructor<T>(cls: Class<T>, dependencies?: Dependency<any>[]) {
     let conf = this.getOrCreatePendingConfig(cls);
     conf.dependencies.cons = dependencies;
-    for (let dependency of dependencies) {
-      dependency.name = dependency.name || DEFAULT_INSTANCE;
+    if (dependencies) {
+      for (let dependency of dependencies) {
+        dependency.name = dependency.name || DEFAULT_INSTANCE;
+      }
     }
   }
 
@@ -193,12 +198,18 @@ export class DependencyRegistry {
       }
     }
 
-    let parentClass = pconfig.class!.prototype.constructor;
-    let parentConfig = this.injectables.get(parentClass);
+    let parentClass = Object.getPrototypeOf(pconfig.class!);
+    let parentConfig = this.injectables.get(parentClass.__id);
+
     if (parentConfig) {
       config.dependencies.fields = Object.assign({},
-        pconfig.dependencies!.fields,
+        parentConfig.dependencies!.fields,
         config.dependencies.fields);
+
+      // Inherit cons deps if no constructor defined
+      if (config.dependencies.cons === undefined) {
+        config.dependencies.cons = parentConfig.dependencies.cons;
+      }
     }
 
     let targetId = config.target.__id!;

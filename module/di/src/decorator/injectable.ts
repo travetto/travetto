@@ -14,7 +14,7 @@ export function Injectable(config: Partial<InjectableConfig<any>> = {}): ClassDe
 
 export type InjectConfig = { name?: string, optional?: boolean };
 
-export function InjectArgs(configs: InjectConfig[]): ClassDecorator {
+export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
   return (target: any) => {
     DependencyRegistry.registerConstructor(target, configs as any as Dependency[]);
   };
