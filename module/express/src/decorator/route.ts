@@ -1,11 +1,11 @@
 import * as moment from 'moment';
 import { PathType } from '../model';
-import { RouteRegistry } from '../service';
+import { ControllerRegistry } from '../service';
 import { Class, DependencyRegistry } from '@encore/di';
 
 export function Controller(path = '') {
   return (target: Class) => {
-    RouteRegistry.finalizeClass({
+    ControllerRegistry.finalizeClass({
       path,
       class: target,
     });
@@ -13,11 +13,11 @@ export function Controller(path = '') {
 }
 
 export function All(path: PathType) {
-  return RouteRegistry.registerPendingRequestHandlder({ method: 'all', path });
+  return ControllerRegistry.registerPendingRequestHandlder({ method: 'all', path });
 }
 
 export function Get(path: PathType) {
-  return RouteRegistry.registerPendingRequestHandlder({
+  return ControllerRegistry.registerPendingRequestHandlder({
     method: 'get',
     path,
     headers: {
@@ -28,19 +28,19 @@ export function Get(path: PathType) {
 }
 
 export function Put(path: PathType) {
-  return RouteRegistry.registerPendingRequestHandlder({ method: 'put', path });
+  return ControllerRegistry.registerPendingRequestHandlder({ method: 'put', path });
 }
 
 export function Delete(path: PathType) {
-  return RouteRegistry.registerPendingRequestHandlder({ method: 'delete', path });
+  return ControllerRegistry.registerPendingRequestHandlder({ method: 'delete', path });
 }
 
 export function Post(path: PathType) {
-  return RouteRegistry.registerPendingRequestHandlder({ method: 'post', path });
+  return ControllerRegistry.registerPendingRequestHandlder({ method: 'post', path });
 }
 
 export function Header(headers: { [key: string]: (string | (() => string)) }) {
-  return RouteRegistry.registerPendingRequestHandlder({ headers });
+  return ControllerRegistry.registerPendingRequestHandlder({ headers });
 }
 
 export function Cache(value: number, unit = 'second') {

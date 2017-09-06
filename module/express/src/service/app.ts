@@ -4,7 +4,7 @@ import * as express from 'express';
 import { RouteUtil } from '../util';
 import { ControllerConfig } from '../model';
 import { Injectable, DependencyRegistry } from '@encore/di';
-import { RouteRegistry } from './registry';
+import { ControllerRegistry } from './registry';
 import { toPromise } from '@encore/base';
 import { ExpressOperator } from './operator';
 
@@ -49,11 +49,11 @@ export class ExpressApp {
     }
 
     // Register all active
-    await Promise.all(Array.from(RouteRegistry.controllers.values())
+    await Promise.all(Array.from(ControllerRegistry.controllers.values())
       .map(c => this.registerController(c)));
 
     // Listen for updates
-    RouteRegistry.on('reload', this.registerController.bind(this));
+    ControllerRegistry.on('reload', this.registerController.bind(this));
 
     this.app.use(RouteUtil.errorHandler);
 

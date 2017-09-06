@@ -6,7 +6,7 @@ import { ExpressApp } from './app';
 import { Class, DependencyRegistry } from '@encore/di';
 import { EventEmitter } from 'events';
 
-export class RouteRegistry {
+export class ControllerRegistry {
 
   private static pendingHandlers = new Map<string, Partial<RequestHandler>[]>();
   private static pendingHandlerMap = new Map<string, Map<Function, Partial<RequestHandler>>>();
