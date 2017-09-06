@@ -20,3 +20,5 @@ export interface QueryOptions {
   limit?: number;
   offset?: number;
 }
+
+export type ModelId = string | number;

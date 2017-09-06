@@ -1,10 +1,8 @@
 import { BindUtil, Class, SchemaRegistry, SchemaValidator } from '@encore/schema';
 import { ModelOptions } from './types';
-import { ModelCore, Query, QueryOptions, BulkState } from '../model';
+import { ModelCore, Query, QueryOptions, BulkState, ModelId } from '../model';
 import { ModelSource } from './source';
 import { ModelRegistry } from './registry';
-
-type Id = number | string;
 
 export class ModelService {
 
@@ -58,6 +56,12 @@ export class ModelService {
     return this.postLoad(cls, res);
   }
 
+  async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T>, options: QueryOptions = {}): Promise<ModelId> {
+    let res = await this.source.getIdsByQuery<T>(cls, query, options);
+    return res;
+  }
+
+
   async saveOrUpdate<T extends ModelCore>(o: T, query: Query<T>): Promise<T> {
     let res = await this.getAllByQuery(SchemaRegistry.getClass(o), query, { limit: 2 });
     if (res.length === 1) {
@@ -69,12 +73,12 @@ export class ModelService {
     throw new Error(`Too many already exist: ${res.length}`);
   }
 
-  async getById<T extends ModelCore>(cls: Class<T>, id: Id): Promise<T> {
+  async getById<T extends ModelCore>(cls: Class<T>, id: ModelId): Promise<T> {
     let res = await this.source.getById<T>(cls, id);
     return this.postLoad(cls, res);
   }
 
-  async deleteById<T extends ModelCore>(cls: Class<T>, id: Id): Promise<void> {
+  async deleteById<T extends ModelCore>(cls: Class<T>, id: ModelId): Promise<void> {
     return await this.source.deleteById(cls, id);
   }
 

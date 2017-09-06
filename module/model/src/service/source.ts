@@ -1,9 +1,8 @@
-import { ModelCore, QueryOptions } from '../model';
+import { ModelCore, QueryOptions, ModelId } from '../model';
 import { Class } from '@encore/schema';
 import { BulkState, BulkResponse } from '../model/bulk';
 import { Query } from '../model/query';
 
-type Id = string | number;
 
 export abstract class ModelSource {
   abstract getIdField(): string;
@@ -19,9 +18,9 @@ export abstract class ModelSource {
   abstract updatePartial<T>(model: Partial<T>): Promise<T>;
 
   abstract bulkProcess<T>(cls: Class<T>, state: BulkState<T>): Promise<BulkResponse>;
-  abstract getById<T>(cls: Class<T>, id: Id): Promise<T>;
-  abstract deleteById<T>(cls: Class<T>, id: Id): Promise<void>;
-  abstract getIdsByQuery<T>(cls: Class<T>, query: Query<T>): Promise<Id>;
+  abstract getById<T>(cls: Class<T>, id: ModelId): Promise<T>;
+  abstract deleteById<T>(cls: Class<T>, id: ModelId): Promise<void>;
+  abstract getIdsByQuery<T>(cls: Class<T>, query: Query<T>, options?: QueryOptions): Promise<ModelId>;
   abstract getAllByQuery<T>(cls: Class<T>, query: Query<T>, options?: QueryOptions): Promise<T[]>;
   abstract getCountByQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
   abstract getByQuery<T>(cls: Class<T>, query: Query<T>, options?: QueryOptions, failOnMany?: boolean): Promise<T>;
