@@ -38,8 +38,8 @@ export const ClassIdTransformer = {
     (file: ts.SourceFile) => {
       let fileRoot = file.fileName.split(process.cwd() + SEP)[1];
       let ns = '@app';
-      if (fileRoot.startsWith('node_modules')) {
-        fileRoot = fileRoot.split(`node_modules${SEP}`).pop();
+      if (fileRoot.startsWith(`node_modules${SEP}`)) {
+        fileRoot = fileRoot.split(`node_modules${SEP}`).pop()!;
         if (fileRoot.startsWith('@')) {
           let [ns1, ns2, ...rest] = fileRoot.split(SEP);
           ns = `${ns1}.${ns2}`;
