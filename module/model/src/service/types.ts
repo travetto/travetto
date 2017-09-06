@@ -1,18 +1,18 @@
 import { Class } from '@encore/schema';
+import { SortOptions } from '../model';
 
-export interface SortOptions {
-  fields: [string, boolean][];
-}
 
 export interface IndexConfig {
   fields: string[] | { [key: string]: number };
-  extra?: object;
+  options: {
+    unique?: boolean;
+  }
 }
 
 export interface ModelOptions {
+  collection?: string;
   defaultSort?: SortOptions;
-  indicies: IndexConfig[];
-  primaryUnique?: string[];
+  indicies?: IndexConfig[];
   discriminator?: string;
   subtypes?: { [key: string]: Class };
   extra?: object;

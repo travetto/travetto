@@ -15,7 +15,7 @@ export abstract class ModelSource {
   abstract saveAll<T>(models: T[]): Promise<T[]>;
   abstract update<T>(model: T): Promise<T>;
   abstract updateAll<T>(model: T[]): Promise<T[]>;
-  abstract partialUpdate<T>(model: T): Promise<T>;
+  abstract partialUpdate<T>(model: Partial<T>): Promise<T>;
   abstract bulkProcess<T>(cls: Class<T>, state: BulkState<T>): Promise<BulkResponse>;
 
   abstract getIdsByQuery<T>(cls: Class<T>, query: Query<T>): Promise<Id>;

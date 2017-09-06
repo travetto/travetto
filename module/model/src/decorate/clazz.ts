@@ -1,36 +1,38 @@
-import { SchemaRegistry, Cls } from '@encore/schema';
-import { SortOptions } from '@encore/mongo';
-import { ModelOptions } from '../service';
+import { Class } from '@encore/schema';
+import { ModelRegistry, ModelOptions, SortOptions } from '../service';
 
 export function DefaultSort(sort: SortOptions) {
-  return function <T extends Cls<any>>(target: T) {
-    return SchemaRegistry.registerClassMetadata(target, 'model', {
+  return function <T extends Class>(target: T) {
+    return ModelRegistry.registerOptions(target, {
       defaultSort: sort
     });
   };
 }
 
 export function Subtype(key: string) {
-  return function <T extends Cls<any>>(target: T) {
-    const parent = SchemaRegistry.getParent(target) as Cls<any>;
-    (target as any).collection = (parent as any).collection || (parent as any).name;
+  return function <T extends Class>(target: T) {
+    const parent = Object.getPrototypeOf(target) as Class;
 
-    SchemaRegistry.registerClassMetadata(target, 'model', {
+    const parentConfig = ModelRegistry.getOptions(parent);
+
+    ModelRegistry.registerOptions(target, {
+      collection: parentConfig.collection || parent.name,
       discriminator: key
     });
 
-    // Register parent
-    let parentConf = SchemaRegistry.getClassMetadata<any, ModelOptions>(parent, 'model');
-    parentConf.subtypes = parentConf.subtypes || {};
-    parentConf.subtypes[key] = target;
+    ModelRegistry.registerOptions(parent, {
+      subtypes: {
+        key: target
+      }
+    });
 
     return target;
   };
 }
 
 export function Collection(collection: string) {
-  return function <T extends Cls<any>>(target: T) {
-    (target as any).collection = collection;
+  return function <T extends Class>(target: T) {
+    ModelRegistry.registerOptions(target, { collection });
     return target;
   };
 }

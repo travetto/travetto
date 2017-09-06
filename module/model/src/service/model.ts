@@ -1,38 +1,36 @@
 import { BindUtil, Class, SchemaRegistry, SchemaValidator } from '@encore/schema';
 import { ModelOptions } from './types';
-import { ModelCore } from '../model';
-import { MongoService, QueryOptions } from '@encore/mongo';
-import * as mongo from 'mongodb';
-
-async function prePersist<T extends ModelCore>(o: T, view: string = SchemaRegistry.DEFAULT_VIEW) {
-  return await SchemaValidator.validate(o.preSave ? o.preSave() : o, view);
-}
-
-function onRetrieve<T extends ModelCore>(cls: Class<T>, o: T): T {
-  o = convert(cls, o);
-  return o.postLoad ? o.postLoad() : o;
-}
-
-function convert<T>(cls: Class<T>, o: T): T {
-  let config = this.getConfig(cls);
-
-  let cons = cls;
-
-  if (config && config.subtypes && !!(o as any)['_type']) {
-    cons = config.subtypes[(o as any)['_type']];
-  }
-
-  return BindUtil.bindSchema(cons, new cons(), o);
-}
+import { ModelCore, Query, QueryOptions } from '../model';
+import { ModelSource } from './source';
+import { ModelRegistry } from './registry';
 
 export class ModelService {
 
+  constructor(private source: ModelSource) { }
+
   getConfig<T>(cls: Class<T>) {
-    return SchemaRegistry.getClassMetadata<any, ModelOptions>(cls, 'model');
+    return ModelRegistry.getOptions(cls);
   }
 
-  async collection<T extends ModelCore>(cls: Class<T>) {
-    return await MongoService.getCollection(cls);
+  convert<T>(cls: Class<T>, o: T): T {
+    let config = this.getConfig(cls);
+
+    let cons = cls;
+
+    if (config && config.subtypes && !!(o as any)['_type']) {
+      cons = config.subtypes[(o as any)['_type']];
+    }
+
+    return BindUtil.bindSchema(cons, new cons(), o);
+  }
+
+  async prePersist<T extends ModelCore>(o: T, view: string = SchemaRegistry.DEFAULT_VIEW) {
+    return await SchemaValidator.validate(o.preSave ? o.preSave() : o, view);
+  }
+
+  onRetrieve<T extends ModelCore>(cls: Class<T>, o: T): T {
+    o = this.convert(cls, o);
+    return o.postLoad ? o.postLoad() : o;
   }
 
   rewriteError<T extends ModelCore>(cls: Class<T>, e: any) {
@@ -43,23 +41,23 @@ export class ModelService {
     return e;
   }
 
-  async getByQuery<T extends ModelCore>(cls: Class<T>, query: Object = {}, options: QueryOptions = {}): Promise<T[]> {
+  async getByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}, options: QueryOptions = {}): Promise<T[]> {
     const config = this.getConfig(cls);
     if (!options.sort && config.defaultSort) {
       options.sort = config.defaultSort;
     }
-    let res = await MongoService.getByQuery<T>(cls, query, options);
+    let res = await this.source.getByQuery<T>(cls, query, options);
     return res.map(o => onRetrieve(cls, o));
   }
 
   async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: Object = {}, options: QueryOptions = {}): Promise<{ count: number }> {
-    let res = await MongoService.getCountByQuery(cls, query, options);
+    let res = await this.source.getCountByQuery(cls, query, options);
     return res;
   }
 
   async findOne<T extends ModelCore>(cls: Class<T>, query: Object, options: QueryOptions = {}, failOnMany: boolean = true): Promise<T> {
-    let res = await MongoService.findOne<T>(cls, query, options, failOnMany);
-    return onRetrieve(cls, res);
+    let res = await this.source.findOne<T>(cls, query, options, failOnMany);
+    return this.onRetrieve(cls, res);
   }
 
   async createOrUpdate<T extends ModelCore>(o: T, query: Object): Promise<T> {
@@ -74,13 +72,13 @@ export class ModelService {
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
-    let res = await MongoService.getById<T>(cls, id);
-    return onRetrieve(cls, res);
+    let res = await this.source.getById<T>(cls, id);
+    return this.onRetrieve(cls, res);
   }
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
     try {
-      return await MongoService.deleteById(cls, id);
+      return await this.source.deleteById(cls, id);
     } catch (e) {
       throw this.rewriteError(cls, e);
     }
@@ -91,15 +89,15 @@ export class ModelService {
   }
 
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: Object & { _id?: any } = {}): Promise<number> {
-    return await MongoService.deleteByQuery(cls, query);
+    return await this.source.deleteByQuery(cls, query);
   }
 
   async save<T extends ModelCore>(o: T): Promise<T> {
     let cls = SchemaRegistry.getClass(o);
     try {
-      o = await prePersist(o);
-      let res = await MongoService.save<T>(cls, o);
-      return onRetrieve(cls, res);
+      o = await this.prePersist(o);
+      let res = await this.source.save<T>(cls, o);
+      return this.onRetrieve(cls, res);
     } catch (e) {
       throw this.rewriteError(cls, e);
     }
@@ -109,7 +107,7 @@ export class ModelService {
     let cls = SchemaRegistry.getClass(objs[0]);
     try {
       objs = await SchemaValidator.validateAll(objs.map(o => o.preSave ? o.preSave() : o));
-      let res = await MongoService.saveAll<T>(cls, objs);
+      let res = await this.source.saveAll<T>(cls, objs);
       return res.map(x => onRetrieve(cls, x));
     } catch (e) {
       throw this.rewriteError(cls, e);
@@ -119,21 +117,21 @@ export class ModelService {
   async update<T extends ModelCore>(o: T): Promise<T> {
     let cls = SchemaRegistry.getClass(o);
     try {
-      o = await prePersist(o);
-      let res = await MongoService.update<T>(cls, o);
-      return onRetrieve(cls, res);
+      o = await this.prePersist(o);
+      let res = await this.source.update(cls, o);
+      return this.onRetrieve(cls, res);
     } catch (e) {
       throw this.rewriteError(cls, e);
     }
   }
 
-  async updateView<T extends ModelCore>(o: T, view: string): Promise<T> {
+  async updateView<T extends ModelCore>(o: Partial<T>, view: string): Promise<T> {
     let cls = SchemaRegistry.getClass(o);
     try {
-      o = await prePersist(o, view);
+      o = await this.prePersist(o, view);
       let partial = BindUtil.bindSchema(cls, {}, o, view);
-      let res = await MongoService.partialUpdate<T>(cls, o._id, partial);
-      return onRetrieve(cls, res);
+      let res = await this.source.partialUpdate<T>(partial);
+      return this.onRetrieve(cls, res);
     } catch (e) {
       throw this.rewriteError(cls, e);
     }
@@ -143,7 +141,7 @@ export class ModelService {
     let keys = this.getConfig(named).primaryUnique || ['_id'];
 
     try {
-      return await MongoService.bulkProcess(named, {
+      return await this.source.bulkProcess(named, {
         upsert: state.upsert,
         delete: state.delete,
         getId: (p: any) => new Map(keys.map(x => [x, x === '_id' ? new mongo.ObjectID(p[x]) : p[x]] as [string, any]))
