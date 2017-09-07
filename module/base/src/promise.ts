@@ -40,14 +40,33 @@ export function promiseToNode<T, U>(ctx: Object | null, fn: (o: T, ...args: any[
   }
 }
 
+export type ExternalPromise<T> = Promise<T> & {
+  resolve: (v: T) => void;
+  reject: (err: any) => void;
+  rejected?: any;
+  resolved?: T;
+  done: boolean;
+}
+
 export function externalPromise<T>() {
-  let p: Promise<T> & { resolve?: (v: T) => void, reject?: Function, resolved?: T, rejected?: any } = new Promise<T>((resolve, reject) => {
-    process.nextTick(() => {
-      p.resolve = resolve;
-      p.reject = reject;
-      p.then(v => p.resolved = v);
-      p.catch(e => p.rejected = e);
-    });
-  });
-  return p as (Promise<T> & { resolve: Function, reject: Function });
+  let state: { [key: string]: any } = {};
+  let p: ExternalPromise<T> = new Promise<T>((resolve, reject) => {
+    state.resolve = resolve;
+    state.reject = reject;
+  })
+    .then(v => {
+      p.resolved = v;
+      p.done = true;
+      return v;
+    })
+    .catch(e => {
+      p.done = true;
+      p.rejected = e;
+      throw e;
+    }) as ExternalPromise<T>;
+
+  p.resolve = state.resolve;
+  p.reject = state.reject;
+
+  return p;
 }
