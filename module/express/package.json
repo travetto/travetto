@@ -20,5 +20,5 @@
     "@encore2/context": "git+ssh://git@git.eaiti.com/encore2/context.git#v2.x.x"
   },
   "scripts": {},
-  "version": "2.0.15"
+  "version": "2.0.0"
 }

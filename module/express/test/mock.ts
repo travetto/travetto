@@ -1,4 +1,4 @@
-import { Injectable } from '@encore/di';
+import { Injectable } from '@encore2/di';
 
 
 @Injectable()
