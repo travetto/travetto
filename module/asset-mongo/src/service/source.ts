@@ -31,7 +31,6 @@ export class MongoSource extends AssetSource {
       stream.on('error', reject);
     });
 
-
     let count = 0;
 
     while (count++ < 5) {
