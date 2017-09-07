@@ -236,22 +236,19 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.aliases.get(parentId)!.set(config.name, classId);
     }
 
-    // If already initialized, do this
-    if (this.initialized.resolved) {
-      // If already loaded, reload
-      if (AppEnv.watch &&
-        this.proxyHandlers.has(targetId) &&
-        this.proxyHandlers.get(targetId)!.has(config.name)
-      ) {
-        let p = this.createInstance(config.target, config.name);
-      } else if (config.autoCreate.create) {
-        // If not loaded, and autocreate
-        this.autoCreate.push({
-          target: config.target,
-          name: config.name,
-          priority: config.autoCreate.priority!
-        })
-      }
+    // If already loaded, reload
+    if (AppEnv.watch &&
+      this.proxyHandlers.has(targetId) &&
+      this.proxyHandlers.get(targetId)!.has(config.name)
+    ) {
+      let p = this.createInstance(config.target, config.name);
+    } else if (config.autoCreate.create) {
+      // If not loaded, and autocreate
+      this.autoCreate.push({
+        target: config.target,
+        name: config.name,
+        priority: config.autoCreate.priority!
+      })
     }
 
     return config;
