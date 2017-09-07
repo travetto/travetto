@@ -4,7 +4,7 @@ import * as sourcemap from 'source-map-support';
 import * as path from 'path';
 import * as glob from 'glob';
 import * as chokidar from 'chokidar';
-import { bulkRequire, bulkFindSync, AppEnv } from '@encore/base';
+import { bulkRequire, bulkFindSync, AppEnv } from '@encore2/base';
 import { RetargettingHandler } from './proxy';
 
 const Module = require('module');
@@ -31,7 +31,7 @@ export class Compiler {
   static fileWatcher: fs.FSWatcher;
 
   static libraryPath = 'node_modules/';
-  static frameworkWorkingSet = `${Compiler.libraryPath}/@encore/*/src/**/*.ts`;
+  static frameworkWorkingSet = `${Compiler.libraryPath}/@encore2/*/src/**/*.ts`;
   static prodWorkingSet = 'src/**/*.ts';
   static devWorkingSet = '{src,test}/**/*.ts';
   static workingSet = !AppEnv.prod ? Compiler.devWorkingSet : Compiler.prodWorkingSet;
