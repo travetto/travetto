@@ -10,7 +10,7 @@
   "description": "", 
   "license": "ISC", 
   "main": "index.ts", 
-  "name": "@encore/base", 
+  "name": "@encore2/base", 
   "scripts": {}, 
   "version": "2.0.79"
 }

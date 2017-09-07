@@ -17,7 +17,7 @@ class StackTraceListener {
     'module.js',
     '(native)',
     '<anonymous>',
-    '@encore/base/src/promise',
+    '@encore2/base/src/promise',
     'source-map-support.js'
   ];
 
