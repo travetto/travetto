@@ -1,7 +1,7 @@
 {
   "author": "",
   "dependencies": {
-    "@encore2/model": "git+ssh://git@git.eaiti.com/encore2/model.git#v2.x.x",
+    "@encore2/model": "git+ssh://git@git.eaiti.com/encore2/model.git#v1.x.x",
     "@types/flat": "0.0.28",
     "@types/mongodb": "^2.2.10",
     "flat": "^4.0.0",
@@ -12,5 +12,5 @@
   "main": "index.ts",
   "name": "@encore2/model-mongo",
   "scripts": {},
-  "version": "2.0.0"
+  "version": "1.0.0"
 }
