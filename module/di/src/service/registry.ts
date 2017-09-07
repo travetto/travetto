@@ -33,10 +33,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     let finalizing = this.pendingFinalize;
     this.pendingFinalize = [];
-    console.log(finalizing);
 
     for (let cls of finalizing) {
-      this.onRegister(cls);
+      this.install(cls);
     }
 
     // this.initalized.resolve(true);
@@ -51,7 +50,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   onNewClassConfig(cls: Class) {
-    this.pendingFinalize.push(cls);
+    if (!this.initialized.resolved) {
+      this.pendingFinalize.push(cls);
+    }
+
+    console.log('Registering', cls.__id);
 
     return {
       name: DEFAULT_INSTANCE,
@@ -69,7 +72,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
-    let targetId = target.__id!;
+    let targetId = target.__id;
 
     let aliasMap = this.aliases.get(targetId);
 
@@ -118,7 +121,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   private async createInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE) {
     let instance = await this.construct(target, name);
-    let targetId = target.__id!;
+    let targetId = target.__id;
 
     if (!this.instances.has(targetId)) {
       this.instances.set(targetId, new Map());
@@ -127,6 +130,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     let out: any = instance;
 
+    // if in watch mode, create proxies
     if (AppEnv.watch) {
       if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(name)) {
         console.log('Registering proxy', target.name, name);
@@ -145,7 +149,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   async getInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
-    let targetId = target.__id!;
+    let targetId = target.__id;
     if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(name)) {
       await this.createInstance(target, name);
     }
@@ -153,7 +157,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   getCandidateTypes<T>(target: Class<T>) {
-    let targetId = target.__id!;
+    let targetId = target.__id;
     let aliasMap = this.aliases.get(targetId)!;
     let aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
     return aliasedIds.map(id => this.finalClasses.get(id)!)
@@ -177,7 +181,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
-    let classId = pconfig.class!.__id!;
+    let classId = pconfig.class!.__id;
     let config = this.getOrCreateClassConfig(pconfig.class!);
 
     if (pconfig.name) {
@@ -194,10 +198,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
   }
 
-  onFinalize<T>(cls: Class<T>) {
-    let classId = cls!.__id!;
-    let config = this.getOrCreateClassConfig(cls) as InjectableConfig<T>;
+  onInstallFinalize<T>(cls: Class<T>) {
+    let classId = cls!.__id;
 
+    let config = this.getOrCreateClassConfig(cls) as InjectableConfig<T>;
 
     let parentClass = Object.getPrototypeOf(cls);
     let parentConfig = this.finalClasses.get(parentClass.__id);
@@ -213,7 +217,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
-    let targetId = config.target.__id!;
+    let targetId = config.target.__id;
 
     if (!this.aliases.has(targetId)) {
       this.aliases.set(targetId, new Map());
@@ -227,17 +231,22 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.aliases.get(parentId)!.set(config.name, classId);
     }
 
-    if (AppEnv.watch &&
-      this.proxyHandlers.has(targetId) &&
-      this.proxyHandlers.get(targetId)!.has(config.name)
-    ) {
-      let p = this.createInstance(config.target, config.name);
-    } else if (config.autoCreate.create) {
-      this.autoCreate.push({
-        target: config.target,
-        name: config.name,
-        priority: config.autoCreate.priority!
-      })
+    // If already initialized, do this
+    if (this.initialized.resolved) {
+      // If already loaded, reload
+      if (AppEnv.watch &&
+        this.proxyHandlers.has(targetId) &&
+        this.proxyHandlers.get(targetId)!.has(config.name)
+      ) {
+        let p = this.createInstance(config.target, config.name);
+      } else if (config.autoCreate.create) {
+        // If not loaded, and autocreate
+        this.autoCreate.push({
+          target: config.target,
+          name: config.name,
+          priority: config.autoCreate.priority!
+        })
+      }
     }
 
     return config;
