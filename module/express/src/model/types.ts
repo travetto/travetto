@@ -15,7 +15,7 @@ export interface RequestHandler {
 }
 
 export interface ControllerConfig {
-  filters?: Filter[];
+  filters: Filter[];
   path: string;
   class: Class;
   handlers: RequestHandler[];

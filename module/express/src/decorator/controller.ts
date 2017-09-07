@@ -5,7 +5,7 @@ import { Class, DependencyRegistry } from '@encore/di';
 
 export function Controller(path = '') {
   return (target: Class) => {
-    ControllerRegistry.finalizeClass({
+    ControllerRegistry.registerClass({
       path,
       class: target,
     });

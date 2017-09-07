@@ -8,43 +8,16 @@ import { EventEmitter } from 'events';
 
 export class ControllerRegistry {
 
-  private static pendingHandlers = new Map<string, Partial<RequestHandler>[]>();
+  private static pendingControllers = new Map<string, Partial<ControllerConfig>>();
   private static pendingHandlerMap = new Map<string, Map<Function, Partial<RequestHandler>>>();
   public static controllers = new Map<string, ControllerConfig>();
   private static events = new EventEmitter();
 
-  static getControllerFilters(target: Object) {
-    return ((target as any).filters || []) as Filter[];
-  }
-
-  static registerControllerFilter(target: Object, fn: Filter) {
-    (target as any).filters = ((target as any).filters || []);
-    (target as any).filters.push(fn);
-  }
-
-
-  static finalizeClass(config: Partial<ControllerConfig> & { class: Class, path: string }) {
-    let final = config as ControllerConfig;
-    final.filters = this.getControllerFilters(config.class);
-    final.handlers = this.pendingHandlers.get(config.class.__id!)! as RequestHandler[];
-
-    let id = config.class.__id!;
-    this.pendingHandlers.delete(id);
-    this.pendingHandlerMap.delete(id);
-    if (this.controllers.has(config.path)) {
-      console.log('Reloading controller', config.class.name, config.path);
-    }
-    this.controllers.set(config.path, final);
-    process.nextTick(() => {
-      this.events.emit('reload', config)
-    });
-  }
-
   static getOrCreateRequestHandlerConfig(cls: Class, handler: Filter) {
     let id = cls.__id!;
+    let controllerConf = this.pendingControllers.get(id)!;
 
-    if (!this.pendingHandlers.has(id)) {
-      this.pendingHandlers.set(id, []);
+    if (!this.pendingHandlerMap.has(id)) {
       this.pendingHandlerMap.set(id, new Map());
     }
     if (!this.pendingHandlerMap.get(id)!.has(handler)) {
@@ -55,13 +28,39 @@ export class ControllerRegistry {
         headers: {}
       };
       this.pendingHandlerMap.get(id)!.set(handler, rh);
-      this.pendingHandlers.get(id)!.push(rh);
+      controllerConf.handlers!.push(rh);
     }
     return this.pendingHandlerMap.get(id)!.get(handler)!;
   }
 
+  static getOrCreateControllerConfig(cls: Class) {
+    let id = cls.__id!;
+
+    if (!this.pendingControllers.has(id)) {
+      this.pendingControllers.set(id, {
+        filters: [],
+        path: '',
+        class: cls,
+        handlers: []
+
+      });
+    }
+    return this.pendingControllers.get(id)!;
+  }
+
+
+  static registerControllerFilter(target: Class, fn: Filter) {
+    let config = this.getOrCreateControllerConfig(target);
+    config.filters!.push(fn);
+  }
+
+  static registerRequestHandlerFilter(target: Class, handler: Filter, fn: Filter) {
+    let rh = this.getOrCreateRequestHandlerConfig(target, handler);
+    rh.filters!.unshift(fn);
+  }
+
   static registerPendingRequestHandlder(config: Partial<RequestHandler>) {
-    return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
+    return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
       let rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
       rh.method = config.method;
       rh.path = config.path;
@@ -71,10 +70,9 @@ export class ControllerRegistry {
   }
 
   static filterAdder(fn: Filter) {
-    return (target: Object, propertyKey?: string, descriptor?: TypedPropertyDescriptor<any>) => {
+    return (target: any, propertyKey?: string, descriptor?: TypedPropertyDescriptor<any>) => {
       if (propertyKey && descriptor) {
-        let rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
-        rh.filters!.unshift(fn);
+        this.registerRequestHandlerFilter(target.constructor as Class, descriptor.value, fn);
         return descriptor;
       } else { // Class filters
         this.registerControllerFilter(target, fn);
@@ -82,6 +80,31 @@ export class ControllerRegistry {
     };
   }
 
+  static registerClass(config: { class: Class, path: string }) {
+    let conf = this.getOrCreateControllerConfig(config.class);
+    conf.path = config.path;
+
+    // Process controller after class finishes
+    process.nextTick(this.finalizeClass.bind(this), config.class)
+  }
+
+  static finalizeClass(cls: Class) {
+    let id = cls.__id!;
+
+    let final = this.pendingControllers.get(id)! as ControllerConfig;
+    this.pendingHandlerMap.delete(id);
+    this.pendingControllers.delete(id);
+
+    if (this.controllers.has(final.path)) {
+      console.log('Reloading controller', cls.name, final.path);
+    }
+
+    this.controllers.set(final.path, final);
+
+    process.nextTick(() => {
+      this.events.emit('reload', final)
+    });
+  }
 
   static on(event: 'reload', callback: (result: ControllerConfig) => any): void;
   static on<T>(event: string, callback: (result: T) => any): void {
