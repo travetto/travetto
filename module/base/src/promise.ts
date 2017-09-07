@@ -45,7 +45,7 @@ export type ExternalPromise<T> = Promise<T> & {
   reject: (err: any) => void;
   rejected?: any;
   resolved?: T;
-  done: boolean;
+  running?: boolean;
 }
 
 export function externalPromise<T>() {
@@ -56,11 +56,11 @@ export function externalPromise<T>() {
   })
     .then(v => {
       p.resolved = v;
-      p.done = true;
+      p.running = false;
       return v;
     })
     .catch(e => {
-      p.done = true;
+      p.running = false;
       p.rejected = e;
       throw e;
     }) as ExternalPromise<T>;
