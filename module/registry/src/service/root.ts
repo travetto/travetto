@@ -8,7 +8,7 @@ import { Registry } from './registry';
 
 export class RootRegistry extends Registry {
 
-  async _init() {
+  static async _init() {
 
     // Do not include test files
     let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
@@ -34,13 +34,20 @@ export class RootRegistry extends Registry {
     }
 
     // Will only fire in watch mode
-    Compiler.on('changed', p => this.watchChanged(p, this.getClasses(p)));
-    Compiler.on('removed', p => this.watchChanged(p, []));
-    Compiler.on('added', p => this.watchChanged(p, this.getClasses(p)));
+    Compiler.on('changed', p => this.doWatch.bind(this));
+    Compiler.on('removed', p => this.doWatch.bind(this));
+    Compiler.on('added', p => this.doWatch.bind(this));
   }
 
+  protected static doWatch(file: string) {
+    if (file.endsWith('index.ts')) {
+      return;
+    }
+    let classes = this.getClasses(file);
+    return super.watchChanged(file, classes);
+  }
 
-  private getClasses(file: string) {
+  private static getClasses(file: string) {
     let out = require(file);
     let classes: Class[] = Object.values(out || {}).filter(x => !!x.__filename);
     return classes;

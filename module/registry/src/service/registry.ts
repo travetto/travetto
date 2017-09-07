@@ -5,16 +5,16 @@ import { bulkRequire, AppEnv, externalPromise, bulkFind } from '@encore2/base';
 import { RetargettingHandler, Compiler } from '@encore2/compiler';
 import { Class } from '../model/types';
 
-export abstract class Registry {
+export class Registry {
 
-  classes = new Map<string, Map<string, Class>>();
-  events = new EventEmitter();
-  initialized = externalPromise();
-  dependents: Registry[] = [];
+  static classes = new Map<string, Map<string, Class>>();
+  static events = new EventEmitter();
+  static initialized = externalPromise();
+  static dependents: Registry[] = [];
 
-  abstract _init(): Promise<any>;
+  static async _init() { }
 
-  async initialize() {
+  static async initialize() {
 
     if (this.initialized.run()) {
       return await this.initialized;
@@ -30,7 +30,7 @@ export abstract class Registry {
     }
   }
 
-  protected unregister(classes: Class | Class[]) {
+  protected static unregister(classes: Class | Class[]) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -41,7 +41,7 @@ export abstract class Registry {
     }
   }
 
-  protected register(classes: Class | Class[]) {
+  protected static register(classes: Class | Class[]) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -54,7 +54,7 @@ export abstract class Registry {
     }
   }
 
-  protected async watchChanged(file: string, classes: Class[]) {
+  protected static async watchChanged(file: string, classes: Class[]) {
     let prev = new Map();
     if (this.classes.has(file)) {
       prev = new Map(this.classes.get(file)!.entries());
@@ -78,15 +78,15 @@ export abstract class Registry {
     }
   }
 
-  protected emit(event: string, data: Class | Class[]) {
+  protected static emit(event: string, data: Class | Class[]) {
     console.log('Emit', event, data);
     this.events.emit(event, data);
   }
 
-  on(event: 'changed', callback: (result: [Class, Class]) => any): void;
-  on(event: 'removed', callback: (result: Class) => any): void;
-  on(event: 'added', callback: (result: Class) => any): void;
-  on<T>(event: string, callback: (result: T) => any): void {
+  static on(event: 'changed', callback: (result: [Class, Class]) => any): void;
+  static on(event: 'removed', callback: (result: Class) => any): void;
+  static on(event: 'added', callback: (result: Class) => any): void;
+  static on<T>(event: string, callback: (result: T) => any): void {
     this.events.on(event, callback);
   }
 }
