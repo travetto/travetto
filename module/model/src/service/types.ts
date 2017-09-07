@@ -1,4 +1,4 @@
-import { Class } from '@encore/schema';
+import { Class } from '@encore2/schema';
 import { SortOptions } from '../model';
 
 

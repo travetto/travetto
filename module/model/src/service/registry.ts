@@ -1,4 +1,4 @@
-import { Class, SchemaRegistry } from '@encore/schema';
+import { Class, SchemaRegistry } from '@encore2/schema';
 import { ModelOptions } from './types';
 import { EventEmitter } from 'events';
 

@@ -1,4 +1,4 @@
-import { SchemaBound, Schema, Class } from '@encore/schema';
+import { SchemaBound, Schema, Class } from '@encore2/schema';
 import { ModelCore } from './model';
 import { ModelOptions, ModelRegistry } from '../service';
 

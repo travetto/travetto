@@ -1,5 +1,5 @@
 import { ModelCore, QueryOptions, ModelId } from '../model';
-import { Class } from '@encore/schema';
+import { Class } from '@encore2/schema';
 import { BulkState, BulkResponse } from '../model/bulk';
 import { Query } from '../model/query';
 

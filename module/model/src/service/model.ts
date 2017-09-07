@@ -1,5 +1,5 @@
-import { BindUtil, Class, SchemaRegistry, SchemaValidator } from '@encore/schema';
-import { Injectable } from '@encore/di';
+import { BindUtil, Class, SchemaRegistry, SchemaValidator } from '@encore2/schema';
+import { Injectable } from '@encore2/di';
 import { ModelOptions } from './types';
 import { ModelCore, Query, QueryOptions, BulkState, ModelId } from '../model';
 import { ModelSource } from './source';
