@@ -3,7 +3,7 @@ import { ExpressConfig } from '../config';
 import * as express from 'express';
 import { RouteUtil } from '../util';
 import { ControllerConfig } from '../model';
-import { Injectable, DependencyRegistry } from '@encore/di';
+import { Injectable, DependencyRegistry, Class } from '@encore/di';
 import { ControllerRegistry } from './registry';
 import { toPromise } from '@encore/base';
 import { ExpressOperator } from './operator';
@@ -36,16 +36,22 @@ export class ExpressApp {
       this.app.enable('trust proxy');
     }
 
-    let operators = DependencyRegistry.getCandidateTypes(ExpressOperator);
+    let operators = DependencyRegistry.getCandidateTypes(ExpressOperator as Class);
     console.log('Custom operators', operators);
 
-    for (let op of operators) {
-      try {
-        let inst = await DependencyRegistry.getInstance(ExpressOperator, op.name);
-        inst.operate(this);
-      } catch (e) {
-        console.log(`Unable to load operator ${op.class.name}#${op.name}`);
-      }
+    let instances = await Promise.all(operators.map(op =>
+      DependencyRegistry.getInstance(ExpressOperator, op.name)
+        .catch(err => {
+          console.log(`Unable to load operator ${op.class.name}#${op.name}`);
+        })
+    ));
+
+    let sorted = (instances
+      .filter(x => !!x) as ExpressOperator[])
+      .sort((a, b) => a.priority - b.priority);
+
+    for (let inst of sorted) {
+      inst.operate(this);
     }
 
     // Register all active
