@@ -1,4 +1,4 @@
-import '@encore/base/src/stacktrace';
+import '@encore2/base/src/stacktrace';
 
 function test() {
   setTimeout(function inner1() {
