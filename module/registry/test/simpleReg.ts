@@ -1,7 +1,7 @@
 import { Registry } from '../index';
 
 class Simple extends Registry {
-  async _init() {
+  async init() {
     return;
   }
 }

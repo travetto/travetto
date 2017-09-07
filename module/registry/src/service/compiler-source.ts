@@ -3,6 +3,7 @@ import { Class } from '../model/types';
 import { bulkFind } from '@encore2/base';
 import { EventEmitter } from 'events';
 import { ClassSource, ChangedEvent } from './class-source';
+import { PendingRegister } from '../decorator/register';
 
 export class CompilerClassSource implements ClassSource {
 
@@ -19,7 +20,7 @@ export class CompilerClassSource implements ClassSource {
 
       for (let file of files) {
         this.classes.set(file, new Map());
-        for (let cls of this.getClasses(file)) {
+        for (let cls of this.computeClasses(file)) {
           this.classes.get(file)!.set(cls.__id, cls);
           this.events.emit('change', { type: 'init', curr: cls });
         }
@@ -42,7 +43,7 @@ export class CompilerClassSource implements ClassSource {
       return;
     }
 
-    let next = new Map(this.getClasses(file).map(x => [x.__id, x] as [string, Class]));
+    let next = new Map(this.computeClasses(file).map(x => [x.__id, x] as [string, Class]));
     let prev = new Map();
     if (this.classes.has(file)) {
       prev = new Map(this.classes.get(file)!.entries());
@@ -66,11 +67,14 @@ export class CompilerClassSource implements ClassSource {
     }
   }
 
-  private getClasses(file: string) {
+  private computeClasses(file: string) {
     try {
       let out = require(file);
-      let classes: Class[] = Object.values(out || {}).filter(x => !!x.__filename);
-      return classes;
+      // Get and clear after computed
+      let classes: Class[] = PendingRegister.get(file)!;
+      console.log('Computed', classes);
+      PendingRegister.delete(file);
+      return classes || [];
     } catch (e) {
       return [];
     }
