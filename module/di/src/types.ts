@@ -1,12 +1,8 @@
+import { Class } from '@encore2/registry';
+
 export type ClassTarget<T> = Class<T> | (Function & { __filename?: string, __id?: string });
 
-export interface Class<T = any> {
-  new(...args: any[]): T;
-  __filename?: string;
-  __id?: string;
-}
-
-export interface InjectableConfig<T> extends Dependency<T> {
+export interface InjectableConfig<T = any> extends Dependency<T> {
   class: Class<T>;
   dependencies: {
     cons?: Dependency<any>[],
