@@ -1,2 +1,3 @@
-require('../bootstrap');
-require('./simple-di');
+require('../bootstrap').init().then(x => {
+  require('./simple-di');
+});
