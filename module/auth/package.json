@@ -1,9 +1,9 @@
 {
   "author": "",
   "dependencies": {
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore/express.git#v2.x.x",
-    "@encore/context": "git+ssh://git@git.eaiti.com/encore/context.git#v2.x.x",
-    "@encore/util": "git+ssh://git@git.eaiti.com/encore/util.git#v2.x.x",
+    "@encore2/express": "git+ssh://git@git.eaiti.com/encore2/express.git#v2.x.x",
+    "@encore2/context": "git+ssh://git@git.eaiti.com/encore2/context.git#v2.x.x",
+    "@encore2/util": "git+ssh://git@git.eaiti.com/encore2/util.git#v2.x.x",
     "@types/passport": "^0.3.3",
     "@types/passport-local": "^1.0.30",
     "passport": "^0.4.0",
@@ -12,9 +12,9 @@
   "description": "",
   "license": "ISC",
   "main": "index.ts",
-  "name": "@encore/auth",
+  "name": "@encore2/auth",
   "peerDependencies": {
-    "@encore/model": "git+ssh://git@git.eaiti.com/encore/model.git#v2.x.x"
+    "@encore2/model": "git+ssh://git@git.eaiti.com/encore2/model.git#v2.x.x"
   },
   "scripts": {},
   "version": "2.0.1"

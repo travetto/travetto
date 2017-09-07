@@ -1,16 +1,16 @@
 import * as passport from 'passport';
 import { Request, Response } from 'express';
 
-import { Context } from '@encore/context';
-import { Injectable } from '@encore/di';
-import { ExpressApp, ExpressOperator } from '@encore/express';
-import { nodeToPromise } from '@encore/base';
+import { Context } from '@encore2/context';
+import { Injectable } from '@encore2/di';
+import { ExpressApp, ExpressOperator } from '@encore2/express';
+import { nodeToPromise } from '@encore2/base';
 
 import { AuthConfig } from './config';
 
 @Injectable({
   target: ExpressOperator,
-  name: '@encore/auth'
+  name: '@encore2/auth'
 })
 export class ExpressAuthOperator extends ExpressOperator {
   constructor(private config: AuthConfig, private context: Context) {

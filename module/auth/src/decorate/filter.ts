@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { nodeToPromise } from '@encore/base';
-import { ControllerRegistry, AppError } from '@encore/express';
+import { nodeToPromise } from '@encore2/base';
+import { ControllerRegistry, AppError } from '@encore2/express';
 import * as passport from 'passport';
 
 export function Authenticate(provider: string, failTo?: string) {
   let passportOptions = { failureRedirect: failTo };
   let handler = passport.authenticate(provider, passportOptions);
-  let fn = (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  let fn = function (req: Request, res: Response, next: NextFunction): Promise<any> {
     req.passportOptions = passportOptions;
     return nodeToPromise(null, handler, req, res);
   };
@@ -45,7 +45,7 @@ export function Authenticated(key?: string, include: string[] = [], exclude: str
 }
 
 export function Unauthenticated() {
-  return ControllerRegistry.filterAdder((req: Express.Request) => {
+  return ControllerRegistry.filterAdder(function (req: Express.Request) {
     if (!req.isUnauthenticated()) {
       throw new AppError('User cannot be authenticated', 401);
     }
