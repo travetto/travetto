@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
 import { Renderable, Method, ControllerConfig } from '../model';
-import { toPromise, externalPromise } from '@encore/base';
+import { toPromise, externalPromise } from '@encore2/base';
 import { ExpressApp } from './app';
-import { Class, DependencyRegistry } from '@encore/di';
+import { Class, DependencyRegistry } from '@encore2/di';
 import { EventEmitter } from 'events';
 
 export class ControllerRegistry {
@@ -83,11 +83,14 @@ export class ControllerRegistry {
   static registerClass(config: { class: Class, path: string }) {
     let conf = this.getOrCreateControllerConfig(config.class);
     conf.path = config.path;
+    if (this.initalized.run()) {
+      console.log('Live reload', config.class.__id)
+      this.finalizeClass(config.class);
+    }
   }
 
   static finalizeClass(cls: Class) {
     let id = cls.__id!;
-
     let final = this.pendingControllers.get(id)! as ControllerConfig;
     this.pendingHandlerMap.delete(id);
     this.pendingControllers.delete(id);
@@ -98,7 +101,7 @@ export class ControllerRegistry {
 
     this.controllers.set(final.path, final);
 
-    if (!this.initalized.running !== false) {
+    if (this.initalized.running !== false) {
       process.nextTick(() => {
         this.events.emit('reload', final)
       });
@@ -106,15 +109,17 @@ export class ControllerRegistry {
   }
 
   static async initialize() {
-
+    console.log(this.initalized);
     await DependencyRegistry.initialize();
+
 
     if (this.initalized.run()) {
       return await this.initalized;
     }
 
-    for (let { class: cls } of this.controllers.values()) {
-      this.finalizeClass(cls);
+
+    for (let { class: cls } of this.pendingControllers.values()) {
+      this.finalizeClass(cls!);
     }
 
     this.initalized.resolve(true);
