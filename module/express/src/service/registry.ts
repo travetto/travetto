@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
 import { Renderable, Method, ControllerConfig } from '../model';
-import { toPromise } from '@encore/base';
+import { toPromise, externalPromise } from '@encore/base';
 import { ExpressApp } from './app';
 import { Class, DependencyRegistry } from '@encore/di';
 import { EventEmitter } from 'events';
@@ -12,6 +12,7 @@ export class ControllerRegistry {
   private static pendingHandlerMap = new Map<string, Map<Function, Partial<RequestHandler>>>();
   public static controllers = new Map<string, ControllerConfig>();
   private static events = new EventEmitter();
+  private static initalized = externalPromise();
 
   static getOrCreateControllerConfig(cls: Class) {
     let id = cls.__id!;
@@ -82,9 +83,6 @@ export class ControllerRegistry {
   static registerClass(config: { class: Class, path: string }) {
     let conf = this.getOrCreateControllerConfig(config.class);
     conf.path = config.path;
-
-    // Process controller after class finishes
-    process.nextTick(this.finalizeClass.bind(this), config.class)
   }
 
   static finalizeClass(cls: Class) {
@@ -100,9 +98,26 @@ export class ControllerRegistry {
 
     this.controllers.set(final.path, final);
 
-    process.nextTick(() => {
-      this.events.emit('reload', final)
-    });
+    if (!this.initalized.running !== false) {
+      process.nextTick(() => {
+        this.events.emit('reload', final)
+      });
+    }
+  }
+
+  static async initialize() {
+
+    await DependencyRegistry.initialize();
+
+    if (this.initalized.run()) {
+      return await this.initalized;
+    }
+
+    for (let { class: cls } of this.controllers.values()) {
+      this.finalizeClass(cls);
+    }
+
+    this.initalized.resolve(true);
   }
 
   static on(event: 'reload', callback: (result: ControllerConfig) => any): void;

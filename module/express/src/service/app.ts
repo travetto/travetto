@@ -23,6 +23,8 @@ export class ExpressApp {
   }
 
   async postConstruct() {
+    await ControllerRegistry.initialize();
+
     this.app = express();
     this.app.use(compression());
     this.app.use(cookieParser());
