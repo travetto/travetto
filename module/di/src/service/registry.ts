@@ -16,6 +16,7 @@ type ClassId = string;
 
 export class DependencyRegistry {
   static pendingInjectables = new Map<ClassId, InjectableConfig<any>>();
+  static pendingFinalize: Class[] = [];
   static injectables = new Map<ClassId, InjectableConfig<any>>();
 
   static instances = new Map<TargetId, Map<string, any>>();
@@ -25,7 +26,8 @@ export class DependencyRegistry {
   static autoCreate: (Dependency<any> & { priority: number })[] = [];
 
   private static _waitingForInit = false;
-  static initalized = externalPromise();
+  private static _initialized = false;
+  private static initalized = externalPromise();
 
   static async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
     let targetId = target.__id!;
@@ -118,35 +120,6 @@ export class DependencyRegistry {
     return aliasedIds.map(id => this.injectables.get(id)!)
   }
 
-  static async initialize() {
-    if (!this._waitingForInit) {
-      try {
-        this._waitingForInit = true;
-        // Do not include dev files for feare of triggering tests
-        let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
-        for (let glob of globs) {
-          bulkRequire(glob, undefined, p => !Compiler.optionalFiles.test(p) && !Compiler.definitionFiles.test(p));
-        }
-
-        // Wait for all items to be processed via the nextTick queue first
-        process.nextTick(async () => {
-          if (this.autoCreate.length) {
-            console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
-            let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
-            for (let i of items) {
-              await this.getInstance(i.target, i.name);
-            }
-          }
-          this.initalized.resolve(true);
-        });
-      } catch (e) {
-        console.log(e);
-        throw e;
-      }
-    }
-    return await this.initalized;
-  }
-
   static getOrCreatePendingConfig<T>(cls: Class<T>) {
     let id = cls.__id!;
     if (!this.pendingInjectables.has(id)) {
@@ -201,9 +174,11 @@ export class DependencyRegistry {
       }
     }
 
-    // Finalize after everything is configured, do not rely on decorator order,
-    //  relies on the next tick queue to honor the order
-    process.nextTick(this.finalizeClass.bind(this, pconfig.class!));
+    if (!this._initialized) {
+      this.pendingFinalize.push(pconfig.class!);
+    } else {
+      process.nextTick(this.finalizeClass.bind(this), pconfig.class!);
+    }
   }
 
   static finalizeClass<T>(cls: Class<T>) {
@@ -254,5 +229,33 @@ export class DependencyRegistry {
         priority: config.autoCreate.priority!
       })
     }
+  }
+
+  static async initialize() {
+    if (this._waitingForInit) {
+      return await this.initalized;
+    }
+    this._waitingForInit = true;
+    // Do not include dev files for feare of triggering tests
+    let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
+    for (let glob of globs) {
+      bulkRequire(glob, undefined, p => !Compiler.optionalFiles.test(p) && !Compiler.definitionFiles.test(p));
+    }
+
+    let finalizing = this.pendingFinalize;
+    this.pendingFinalize = [];
+    for (let cls of finalizing) {
+      this.finalizeClass(cls);
+    }
+
+    if (this.autoCreate.length) {
+      console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
+      let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
+      for (let i of items) {
+        await this.getInstance(i.target, i.name);
+      }
+    }
+
+    this.initalized.resolve(true);
   }
 }
