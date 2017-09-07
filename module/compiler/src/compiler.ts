@@ -4,6 +4,8 @@ import * as sourcemap from 'source-map-support';
 import * as path from 'path';
 import * as glob from 'glob';
 import * as chokidar from 'chokidar';
+import { EventEmitter } from 'events';
+
 import { bulkRequire, bulkFindSync, AppEnv } from '@encore2/base';
 import { RetargettingHandler } from './proxy';
 
@@ -29,6 +31,7 @@ export class Compiler {
   static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
   static rootFiles: string[] = [];
   static fileWatcher: fs.FSWatcher;
+  static events = new EventEmitter();
 
   static libraryPath = 'node_modules/';
   static frameworkWorkingSet = `${Compiler.libraryPath}/@encore2/*/src/**/*.ts`;
@@ -147,11 +150,17 @@ export class Compiler {
       files = [files];
     }
     for (let fileName of files) {
-      if (fileName in require.cache) {
-        console.log(this.files.get(fileName)!.version ? 'Reloading' : 'Loading', 'Module', fileName);
-        delete require.cache[fileName];
-      }
-      require(fileName);
+      this.unload(fileName);
+      // Do not automatically reload
+    }
+  }
+
+  static unload(fileName: string) {
+    if (fileName in require.cache) {
+      delete require.cache[fileName];
+    }
+    if (this.modules.has(fileName)) {
+      this.modules.get(fileName)!.handler!.target = null;
     }
   }
 
@@ -198,16 +207,24 @@ export class Compiler {
           fileNames.push(fileName);
           this.files.set(fileName, { version: 1 });
           this.emitFile(fileName);
+          this.events.emit('added', fileName);
         })
         .on('change', fileName => {
           fileName = `${process.cwd()}/${fileName}`;
-          if (this.files.has(fileName)) {
+          let changed = this.files.has(fileName);
+          if (changed) {
             this.files.get(fileName)!.version++;
           } else {
             this.files.set(fileName, { version: 1 });
             fileNames.push(fileName);
           }
           this.emitFile(fileName)
+          this.events.emit(changed ? 'changed' : 'added', fileName);
+        })
+        .on('unlink', fileName => {
+          fileName = `${process.cwd()}/${fileName}`;
+          this.unload(fileName);
+          this.events.emit('removed', fileName);
         });
     });
 
@@ -289,5 +306,12 @@ export class Compiler {
     if (AppEnv.watch) {
       this.fileWatcher = this.watchFiles(this.rootFiles);
     }
+  }
+
+  static on(event: 'added', callback: (filename: string) => any): void;
+  static on(event: 'changed', callback: (filename: string) => any): void;
+  static on(event: 'removed', callback: (filename: string) => any): void;
+  static on<T>(event: string, callback: (result: T) => any): void {
+    this.events.on(event, callback);
   }
 }
