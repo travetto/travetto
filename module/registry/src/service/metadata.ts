@@ -46,7 +46,7 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
     _.merge(conf, pconfig);
   }
 
-  finalizeClass(cls: Class) {
+  async onRegister(cls: Class) {
     let result = this.onFinalize(cls);
     this.pendingMethods.delete(cls.__id);
     this.pendingClasses.delete(cls.__id);

@@ -4,9 +4,10 @@ import { bulkFind } from '@encore2/base';
 import { EventEmitter } from 'events';
 import { ClassSource, ChangedEvent } from './class-source';
 
-export class CompilerClassSource extends ClassSource {
+export class CompilerClassSource implements ClassSource {
 
   private classes = new Map<string, Map<string, Class>>();
+  private events = new EventEmitter();
 
   async init() {
     let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
@@ -20,7 +21,7 @@ export class CompilerClassSource extends ClassSource {
         this.classes.set(file, new Map());
         for (let cls of this.getClasses(file)) {
           this.classes.get(file)!.set(cls.__id, cls);
-          this.emit({ type: 'init', curr: cls });
+          this.events.emit('change', { type: 'init', curr: cls });
         }
       }
     }
@@ -30,6 +31,10 @@ export class CompilerClassSource extends ClassSource {
     Compiler.on('changed', this.watch.bind(this));
     Compiler.on('removed', this.watch.bind(this));
     Compiler.on('added', this.watch.bind(this));
+  }
+
+  on<T>(callback: (e: ChangedEvent) => void, filter?: (e: ChangedEvent) => boolean): void {
+    this.events.on('change', filter ? e => filter(e) && callback(e) : callback);
   }
 
   protected async watch(file: string) {
@@ -51,12 +56,12 @@ export class CompilerClassSource extends ClassSource {
       }
       if (!next.has(k)) {
         this.classes.get(file)!.delete(k);
-        this.emit({ type: 'removed', prev: prev.get(k)! });
+        this.events.emit('change', { type: 'removed', prev: prev.get(k)! });
       } else if (!prev.has(k)) {
         this.classes.get(file)!.set(k, next.get(k)!);
-        this.emit({ type: 'added', curr: next.get(k) });
+        this.events.emit('change', { type: 'added', curr: next.get(k) });
       } else {
-        this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k)! });
+        this.events.emit('change', { type: 'changed', curr: next.get(k)!, prev: prev.get(k)! });
       }
     }
   }

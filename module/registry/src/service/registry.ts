@@ -1,23 +1,21 @@
 import { externalPromise } from '@encore2/base';
 import { Class } from '../model/types';
 import { ClassSource, ChangedEvent } from './class-source';
+import { EventEmitter } from 'events';
 
-export abstract class Registry extends ClassSource {
+export abstract class Registry implements ClassSource {
 
   classes = new Map<string, Map<string, Class>>();
   initialized = externalPromise();
+  events = new EventEmitter();
 
-  constructor(private parent?: Registry) {
-    super();
-    if (parent) {
-      this.listen(parent);
+  constructor(protected source?: ClassSource, private filter?: (e: ChangedEvent) => boolean) {
+    if (source) {
+      this.listen(source, filter);
     }
   }
 
-  abstract _init(): Promise<void>;
-
-  onRegister<T>(cls: Class<T>) { }
-  onUnregister<T>(cls: Class<T>) { }
+  abstract init(): Promise<void>;
 
   async initialize() {
 
@@ -26,7 +24,7 @@ export abstract class Registry extends ClassSource {
     }
 
     try {
-      await this._init();
+      await this.init();
       this.initialized.resolve(true);
     } catch (e) {
       console.log(e);
@@ -34,19 +32,27 @@ export abstract class Registry extends ClassSource {
     }
   }
 
-  unregister(classes: Class | Class[]) {
+  async onRegister(cls: Class): Promise<void> {
+
+  }
+
+  async onUnregister(cls: Class): Promise<void> {
+
+  }
+
+  async unregister(classes: Class | Class[]) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
     for (let cls of classes) {
       if (this.classes.has(cls.__filename) && this.classes.get(cls.__filename)!.has(cls.__id)) {
-        this.onUnregister(cls);
+        await this.onUnregister(cls);
         this.classes.get(cls.__filename)!.delete(cls.__id);
       }
     }
   }
 
-  register(classes: Class | Class[]) {
+  async register(classes: Class | Class[]) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -55,7 +61,7 @@ export abstract class Registry extends ClassSource {
         this.classes.set(cls.__filename, new Map());
       }
       this.classes.get(cls.__filename)!.set(cls.__id, cls);
-      this.onRegister(cls);
+      await this.onRegister(cls);
     }
   }
 
@@ -70,20 +76,24 @@ export abstract class Registry extends ClassSource {
 
     switch (event.type) {
       case 'removed':
-        this.unregister(event.prev!);
+        await this.unregister(event.prev!);
         break;
       case 'added':
-        this.register(event.curr!);
+        await this.register(event.curr!);
         break;
       case 'changed':
-        this.unregister(event.prev!);
-        this.register(event.curr!);
+        await this.unregister(event.prev!);
+        await this.register(event.curr!);
         break;
       default:
         return;
     }
 
-    this.emit(event);
+    this.events.emit('change', event);
+  }
+
+  on<T>(callback: (e: ChangedEvent) => any, filter?: (e: ChangedEvent) => boolean): void {
+    this.events.on('change', filter ? e => filter(e) && callback(e) : callback);
   }
 
   listen(source: ClassSource, filter?: (e: ChangedEvent) => boolean) {

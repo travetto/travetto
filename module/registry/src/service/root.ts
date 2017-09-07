@@ -4,10 +4,12 @@ import { ChangedEvent } from './class-source';
 
 class $RootRegistry extends Registry {
 
-  async _init() {
-    let source = new CompilerClassSource();
-    this.listen(source);
-    await source.init();
+  constructor() {
+    super(new CompilerClassSource());
+  }
+
+  async init() {
+    await this.source!.init();
   }
 
   onEvent(e: ChangedEvent) {
