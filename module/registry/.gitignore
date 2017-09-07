@@ -1,0 +1,6 @@
+node_modules/**
+build/**
+rpm_build/**
+.vscode/
+npm-debug.log
+package-lock.json
