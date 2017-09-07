@@ -14,5 +14,5 @@
   "main": "index.ts", 
   "name": "@encore2/config", 
   "scripts": {}, 
-  "version": "2.0.27"
+  "version": "2.0.0"
 }
