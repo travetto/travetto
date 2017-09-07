@@ -1,7 +1,7 @@
 {
   "author": "", 
   "dependencies": {
-    "@encore2/asset": "git+ssh://git@git.eaiti.com/encore2/asset.git#v2.x.x", 
+    "@encore2/asset": "git+ssh://git@git.eaiti.com/encore2/asset.git#v1.x.x", 
     "@types/gridfs-stream": "^0.5.28", 
     "@types/mongodb": "^2.2.10", 
     "@types/node": "^8.0.26", 
@@ -10,7 +10,7 @@
   }, 
   "description": "", 
   "devDependencies": {
-    "@encore2/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v2.x.x"
+    "@encore2/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v1.x.x"
   }, 
   "license": "ISC", 
   "main": "index.ts", 
@@ -18,5 +18,5 @@
   "scripts": {
     "test": "./node_modules/@encore2/test/mocha.js"
   }, 
-  "version": "2.0.0"
+  "version": "1.0.0"
 }
