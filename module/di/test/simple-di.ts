@@ -12,7 +12,7 @@ class Database {
   }
 
   query() {
-    console.log('Getting 300', this.dbConfig.getUrl());
+    console.log('Getting 350', this.dbConfig.getUrl());
   }
 }
 
@@ -43,4 +43,4 @@ async function run() {
   inst.doWork();
 }
 
-setTimeout(() => run(), 1000);
+setInterval(() => run(), 1000);

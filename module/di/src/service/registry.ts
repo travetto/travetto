@@ -224,6 +224,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.aliases.set(targetId, new Map());
     }
 
+    // Timing matters
+    this.finalClasses.set(classId, config);
+
     this.aliases.get(targetId)!.set(config.name, classId);
 
     // TODO: Auto alias parent class if framework managed
