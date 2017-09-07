@@ -4,31 +4,35 @@ import { ChangedEvent } from './class-source';
 import { Class } from '../model';
 import * as _ from 'lodash';
 
-export abstract class MetadataRegistry<C, M> extends Registry {
+export abstract class MetadataRegistry<C, M = any> extends Registry {
 
   private pendingClasses = new Map<string, Partial<C>>();
   private pendingMethods = new Map<string, Map<string, Partial<M>>>();
   private finalClasses = new Map<string, C>();
 
-  abstract onNewClassConfig(): Partial<C>;
-  abstract onNewMethodConfig(): Partial<M>;
-  abstract onFinalize(cls: Class, clsConfig: Partial<C>, methodConfigs: Map<string, Partial<M>>): C;
+  abstract onFinalize(cls: Class, clsConfig: Partial<C>, methodConfigs?: Map<string, Partial<M>>): C;
+
+  abstract onNewClassConfig(cls: Class): Partial<C>;
+
+  onNewMethodConfig(cls: Class, method: Function): Partial<M> {
+    return {}
+  }
 
   getOrCreateClassConfig(cls: Class): Partial<C> {
     if (!this.pendingClasses.has(cls.__id)) {
-      this.pendingClasses.set(cls.__id, this.onNewClassConfig());
+      this.pendingClasses.set(cls.__id, this.onNewClassConfig(cls));
       this.pendingMethods.set(cls.__id, new Map());
     }
     return this.pendingClasses.get(cls.__id)!;
   }
 
-  getOrCreateMethodConfig(cls: Class, fn: Function): Partial<M> {
+  getOrCreateMethodConfig(cls: Class, method: Function): Partial<M> {
     this.getOrCreateClassConfig(cls);
 
-    if (!this.pendingMethods.get(cls.__id)!.has(fn.name)) {
-      this.pendingMethods.get(cls.__id)!.set(fn.name, this.onNewMethodConfig());
+    if (!this.pendingMethods.get(cls.__id)!.has(method.name)) {
+      this.pendingMethods.get(cls.__id)!.set(method.name, this.onNewMethodConfig(cls, method));
     }
-    return this.pendingMethods.get(cls.__id)!.get(fn.name)!;
+    return this.pendingMethods.get(cls.__id)!.get(method.name)!;
   }
 
 
@@ -37,8 +41,8 @@ export abstract class MetadataRegistry<C, M> extends Registry {
     _.merge(conf, pconfig);
   }
 
-  registerMethod(cls: Class, fn: Function, pconfig: Partial<M>) {
-    let conf = this.getOrCreateMethodConfig(cls, fn);
+  registerMethod(cls: Class, method: Function, pconfig: Partial<M>) {
+    let conf = this.getOrCreateMethodConfig(cls, method);
     _.merge(conf, pconfig);
   }
 
