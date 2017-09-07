@@ -1,9 +1,9 @@
 import * as mongo from 'mongodb';
 import * as Grid from 'gridfs-stream';
 
-import { Injectable, Inject } from '@encore/di';
-import { AssetSource, Asset } from '@encore/asset';
-import { nodeToPromise } from '@encore/base';
+import { Injectable, Inject } from '@encore2/di';
+import { AssetSource, Asset } from '@encore2/asset';
+import { nodeToPromise } from '@encore2/base';
 import { MongoAssetConfig } from './config';
 
 @Injectable({ target: AssetSource })
