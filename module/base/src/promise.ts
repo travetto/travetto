@@ -45,6 +45,7 @@ export type ExternalPromise<T> = Promise<T> & {
   reject: (err: any) => void;
   rejected?: any;
   resolved?: T;
+  run: () => boolean;
   running?: boolean;
 }
 
@@ -67,6 +68,13 @@ export function externalPromise<T>() {
 
   p.resolve = state.resolve;
   p.reject = state.reject;
+  p.run = () => {
+    if (p.running !== undefined) {
+      return true;
+    }
+    p.running = true;
+    return false;
+  }
 
   return p;
 }
