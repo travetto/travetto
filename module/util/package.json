@@ -1,12 +1,12 @@
 {
   "author": "", 
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore2/base.git#v2.x.x"
+    "@encore2/base": "git+ssh://git@git.eaiti.com/encore2/base.git#v2.x.x"
   }, 
   "description": "", 
   "license": "ISC", 
   "main": "index.ts", 
-  "name": "@encore/util", 
+  "name": "@encore2/util", 
   "scripts": {}, 
   "version": "2.0.10"
 }
