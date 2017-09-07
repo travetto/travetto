@@ -1,9 +1,9 @@
 import 'mocha';
 
-import { timeout } from '@encore/test';
+import { timeout } from '@encore2/test';
 import { Cacheable, CacheManager } from '../src';
 import { expect } from 'chai';
-import { Shutdown } from '@encore/lifecycle';
+import { Shutdown } from '@encore2/lifecycle';
 
 class Test {
 
