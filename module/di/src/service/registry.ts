@@ -1,10 +1,10 @@
 import * as path from 'path';
 
-import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
-import { bulkRequire, AppEnv, externalPromise } from '@encore2/base';
-import { RetargettingHandler, Compiler } from '@encore2/compiler';
+import { Dependency, InjectableConfig, ClassTarget } from '../types';
 import { InjectionError } from './error';
-import { EventEmitter } from 'events';
+import { MetadataRegistry, Class, RootRegistry } from '@encore2/registry';
+import { AppEnv } from '@encore2/base';
+import { RetargettingHandler } from '@encore2/compiler';
 
 export const DEFAULT_INSTANCE = '__default';
 
@@ -15,20 +15,58 @@ export interface ManagedExtra {
 type TargetId = string;
 type ClassId = string;
 
-export class DependencyRegistry {
-  private static pendingInjectables = new Map<ClassId, InjectableConfig<any>>();
-  private static pendingFinalize: Class[] = [];
-  private static injectables = new Map<ClassId, InjectableConfig<any>>();
+export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
+  private pendingFinalize: Class[] = [];
 
-  private static instances = new Map<TargetId, Map<string, any>>();
-  private static proxyHandlers = new Map<TargetId, Map<string, any>>();
-  private static aliases = new Map<TargetId, Map<string, string>>();
+  private instances = new Map<TargetId, Map<string, any>>();
+  private proxyHandlers = new Map<TargetId, Map<string, any>>();
+  private aliases = new Map<TargetId, Map<string, string>>();
 
-  private static autoCreate: (Dependency<any> & { priority: number })[] = [];
-  private static events = new EventEmitter();
-  private static initalized = externalPromise();
+  private autoCreate: (Dependency<any> & { priority: number })[] = [];
 
-  static async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
+  constructor() {
+    super(RootRegistry);
+  }
+
+  async init() {
+    await RootRegistry.initialize();
+
+    let finalizing = this.pendingFinalize;
+    this.pendingFinalize = [];
+    for (let cls of finalizing) {
+      this.onRegister(cls);
+    }
+
+    // this.initalized.resolve(true);
+
+    if (this.autoCreate.length) {
+      console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
+      let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
+      for (let i of items) {
+        await this.getInstance(i.target, i.name);
+      }
+    }
+  }
+
+  onNewClassConfig(cls: Class) {
+    this.pendingFinalize.push(cls);
+
+    return {
+      name: DEFAULT_INSTANCE,
+      class: cls,
+      target: cls,
+      dependencies: {
+        fields: {},
+        cons: []
+      },
+      autoCreate: {
+        create: false,
+        priority: 1000
+      }
+    };
+  }
+
+  async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
     let targetId = target.__id!;
 
     let aliasMap = this.aliases.get(targetId);
@@ -38,7 +76,7 @@ export class DependencyRegistry {
     }
 
     let clz = aliasMap.get(name)!;
-    let managed = this.injectables.get(clz)!;
+    let managed = this.finalClasses.get(clz)!;
 
     const fieldKeys = Object.keys(managed.dependencies.fields!);
 
@@ -76,7 +114,7 @@ export class DependencyRegistry {
     return inst;
   }
 
-  private static async createInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE) {
+  private async createInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE) {
     let instance = await this.construct(target, name);
     let targetId = target.__id!;
 
@@ -104,7 +142,7 @@ export class DependencyRegistry {
     this.instances.get(targetId)!.set(name, out);
   }
 
-  static async getInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
+  async getInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
     let targetId = target.__id!;
     if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(name)) {
       await this.createInstance(target, name);
@@ -112,37 +150,17 @@ export class DependencyRegistry {
     return this.instances.get(targetId)!.get(name)!;
   }
 
-  static getCandidateTypes<T>(target: Class<T>) {
+  getCandidateTypes<T>(target: Class<T>) {
     let targetId = target.__id!;
     let aliasMap = this.aliases.get(targetId)!;
     let aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
-    return aliasedIds.map(id => this.injectables.get(id)!)
-  }
-
-  static getOrCreatePendingConfig<T>(cls: Class<T>) {
-    let id = cls.__id!;
-    if (!this.pendingInjectables.has(id)) {
-      this.pendingInjectables.set(id, {
-        name: DEFAULT_INSTANCE,
-        class: cls,
-        target: cls,
-        dependencies: {
-          fields: {},
-          cons: []
-        },
-        autoCreate: {
-          create: false,
-          priority: 1000
-        }
-      } as any as InjectableConfig<T>);
-    }
-    return this.pendingInjectables.get(id)!;
+    return aliasedIds.map(id => this.finalClasses.get(id)!)
   }
 
   // Undefined indicates no constructor
-  static registerConstructor<T>(cls: Class<T>, dependencies?: Dependency<any>[]) {
-    let conf = this.getOrCreatePendingConfig(cls);
-    conf.dependencies.cons = dependencies;
+  registerConstructor<T>(cls: Class<T>, dependencies?: Dependency<any>[]) {
+    let conf = this.getOrCreateClassConfig(cls);
+    conf.dependencies!.cons = dependencies;
     if (dependencies) {
       for (let dependency of dependencies) {
         dependency.name = dependency.name || DEFAULT_INSTANCE;
@@ -150,15 +168,15 @@ export class DependencyRegistry {
     }
   }
 
-  static registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency<any>) {
-    let conf = this.getOrCreatePendingConfig(cls);
-    conf.dependencies.fields[field] = dependency;
+  registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency<any>) {
+    let conf = this.getOrCreateClassConfig(cls);
+    conf.dependencies!.fields[field] = dependency;
     dependency.name = dependency.name || DEFAULT_INSTANCE;
   }
 
-  static registerClass<T>(pconfig: Partial<InjectableConfig<T>>) {
+  registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
     let classId = pconfig.class!.__id!;
-    let config = this.getOrCreatePendingConfig(pconfig.class!);
+    let config = this.getOrCreateClassConfig(pconfig.class!);
 
     if (pconfig.name) {
       config.name = pconfig.name;
@@ -167,26 +185,20 @@ export class DependencyRegistry {
       config.target = pconfig.target;
     }
     if (pconfig.autoCreate) {
-      config.autoCreate.create = pconfig.autoCreate.create;
+      config.autoCreate!.create = pconfig.autoCreate.create;
       if (pconfig.autoCreate.priority !== undefined) {
-        config.autoCreate.priority = pconfig.autoCreate.priority;
+        config.autoCreate!.priority = pconfig.autoCreate.priority;
       }
-    }
-
-    if (this.initalized.running !== false) {
-      this.pendingFinalize.push(pconfig.class!);
-    } else {
-      process.nextTick(this.finalizeClass.bind(this), pconfig.class!, true);
     }
   }
 
-  static finalizeClass<T>(cls: Class<T>, emit = false) {
+  onFinalize<T>(cls: Class<T>) {
     let classId = cls!.__id!;
-    let config = this.getOrCreatePendingConfig(cls);
+    let config = this.getOrCreateClassConfig(cls) as InjectableConfig<T>;
 
 
     let parentClass = Object.getPrototypeOf(cls);
-    let parentConfig = this.injectables.get(parentClass.__id);
+    let parentConfig = this.finalClasses.get(parentClass.__id);
 
     if (parentConfig) {
       config.dependencies.fields = Object.assign({},
@@ -200,8 +212,6 @@ export class DependencyRegistry {
     }
 
     let targetId = config.target.__id!;
-    this.injectables.set(classId, config);
-    this.pendingInjectables.delete(classId);
 
     if (!this.aliases.has(targetId)) {
       this.aliases.set(targetId, new Map());
@@ -215,15 +225,11 @@ export class DependencyRegistry {
       this.aliases.get(parentId)!.set(config.name, classId);
     }
 
-    // Live RELOAD
     if (AppEnv.watch &&
       this.proxyHandlers.has(targetId) &&
       this.proxyHandlers.get(targetId)!.has(config.name)
     ) {
       let p = this.createInstance(config.target, config.name);
-      if (emit) {
-        p.then(x => this.events.emit('reload', config.class))
-      }
     } else if (config.autoCreate.create) {
       this.autoCreate.push({
         target: config.target,
@@ -231,45 +237,9 @@ export class DependencyRegistry {
         priority: config.autoCreate.priority!
       })
     }
-  }
 
-  static async initialize() {
-
-    if (this.initalized.run()) {
-      return await this.initalized;
-    }
-
-    try {
-
-      // Do not include dev files for feare of triggering tests
-      let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
-      for (let glob of globs) {
-        bulkRequire(glob, undefined, (p: string) => !Compiler.optionalFiles.test(p) && !Compiler.definitionFiles.test(p));
-      }
-
-      let finalizing = this.pendingFinalize;
-      this.pendingFinalize = [];
-      for (let cls of finalizing) {
-        this.finalizeClass(cls);
-      }
-
-      this.initalized.resolve(true);
-
-      if (this.autoCreate.length) {
-        console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
-        let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
-        for (let i of items) {
-          await this.getInstance(i.target, i.name);
-        }
-      }
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
-  }
-
-  static on(event: 'reload', callback: (result: Class) => any): void;
-  static on<T>(event: string, callback: (result: T) => any): void {
-    this.events.on(event, callback);
+    return config;
   }
 }
+
+export const DependencyRegistry = new $DependencyRegistry();

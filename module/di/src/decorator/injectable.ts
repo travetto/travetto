@@ -1,5 +1,6 @@
-import { Class, InjectableConfig, Dependency } from '../types';
+import { InjectableConfig, Dependency } from '../types';
 import { DependencyRegistry, DEFAULT_INSTANCE } from '../service';
+import { Class } from '@encore2/registry';
 
 export function Injectable(config: Partial<InjectableConfig<any>> = {}): ClassDecorator {
   return (target: Class | any) => {
@@ -7,7 +8,7 @@ export function Injectable(config: Partial<InjectableConfig<any>> = {}): ClassDe
     if (typeof config.autoCreate === 'boolean') {
       config.autoCreate = { create: config.autoCreate } as any;
     }
-    DependencyRegistry.registerClass(config as any as InjectableConfig<any>);
+    DependencyRegistry.registerClass(target, config as any as InjectableConfig<any>);
     return target;
   };
 }
