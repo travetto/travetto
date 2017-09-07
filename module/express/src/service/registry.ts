@@ -3,63 +3,56 @@ import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
 import { Renderable, Method, ControllerConfig } from '../model';
 import { toPromise, externalPromise } from '@encore2/base';
 import { ExpressApp } from './app';
-import { Class, DependencyRegistry } from '@encore2/di';
+import { DependencyRegistry } from '@encore2/di';
 import { EventEmitter } from 'events';
+import { MetadataRegistry, Class } from '@encore2/registry';
 
-export class ControllerRegistry {
+export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHandler> {
 
-  private static pendingControllers = new Map<string, Partial<ControllerConfig>>();
-  private static pendingHandlerMap = new Map<string, Map<Function, Partial<RequestHandler>>>();
-  public static controllers = new Map<string, ControllerConfig>();
-  private static events = new EventEmitter();
-  private static initalized = externalPromise();
-
-  static getOrCreateControllerConfig(cls: Class) {
-    let id = cls.__id!;
-
-    if (!this.pendingControllers.has(id)) {
-      this.pendingControllers.set(id, {
-        filters: [],
-        path: '',
-        class: cls,
-        handlers: []
-
-      });
-    }
-    return this.pendingControllers.get(id)!;
+  constructor() {
+    super(DependencyRegistry);
   }
 
-  static getOrCreateRequestHandlerConfig(cls: Class, handler: Filter) {
-    let id = cls.__id!;
-    let controllerConf = this.getOrCreateControllerConfig(cls);
+  onNewClassConfig(cls: Class) {
+    return {
+      filters: [],
+      path: '',
+      class: cls,
+      handlers: []
+    };
+  }
 
-    if (!this.pendingHandlerMap.has(id)) {
-      this.pendingHandlerMap.set(id, new Map());
+  getOrCreateRequestHandlerConfig(cls: Class, handler: Filter) {
+    let id = cls.__id!;
+    let controllerConf = this.getOrCreateClassConfig(cls);
+
+    if (!this.pendingMethods.has(id)) {
+      this.pendingMethods.set(id, new Map());
     }
-    if (!this.pendingHandlerMap.get(id)!.has(handler)) {
+    if (!this.pendingMethods.get(id)!.has(handler)) {
       let rh = {
         filters: [],
         class: cls,
         handler: handler,
         headers: {}
       };
-      this.pendingHandlerMap.get(id)!.set(handler, rh);
+      this.pendingMethods.get(id)!.set(handler, rh);
       controllerConf.handlers!.push(rh);
     }
-    return this.pendingHandlerMap.get(id)!.get(handler)!;
+    return this.pendingMethods.get(id)!.get(handler)!;
   }
 
-  static registerControllerFilter(target: Class, fn: Filter) {
-    let config = this.getOrCreateControllerConfig(target);
+  registerControllerFilter(target: Class, fn: Filter) {
+    let config = this.getOrCreateClassConfig(target);
     config.filters!.push(fn);
   }
 
-  static registerRequestHandlerFilter(target: Class, handler: Filter, fn: Filter) {
+  registerRequestHandlerFilter(target: Class, handler: Filter, fn: Filter) {
     let rh = this.getOrCreateRequestHandlerConfig(target, handler);
     rh.filters!.unshift(fn);
   }
 
-  static registerPendingRequestHandlder(config: Partial<RequestHandler>) {
+  registerPendingRequestHandlder(config: Partial<RequestHandler>) {
     return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
       let rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
       rh.method = config.method;
@@ -69,7 +62,7 @@ export class ControllerRegistry {
     };
   }
 
-  static filterAdder(fn: Filter) {
+  filterAdder(fn: Filter) {
     return (target: any, propertyKey?: string, descriptor?: TypedPropertyDescriptor<any>) => {
       if (propertyKey && descriptor) {
         this.registerRequestHandlerFilter(target.constructor as Class, descriptor.value, fn);
@@ -80,53 +73,33 @@ export class ControllerRegistry {
     };
   }
 
-  static registerClass(config: { class: Class, path: string }) {
-    let conf = this.getOrCreateControllerConfig(config.class);
+  registerClass(cls: Class, config: { class: Class, path: string }) {
+    let conf = this.getOrCreateClassConfig(config.class);
     conf.path = config.path;
-    if (this.initalized.run()) {
+
+    if (this.initialized.resolved) {
       console.log('Live reload', config.class.__id)
-      this.finalizeClass(config.class);
+      this.install(config.class);
     }
   }
 
-  static finalizeClass(cls: Class) {
+  onInstallFinalize(cls: Class) {
     let id = cls.__id!;
-    let final = this.pendingControllers.get(id)! as ControllerConfig;
-    this.pendingHandlerMap.delete(id);
-    this.pendingControllers.delete(id);
+    let final = this.pendingClasses.get(id)! as ControllerConfig;
 
-    if (this.controllers.has(final.path)) {
+    if (this.classes.has(final.path)) {
       console.log('Reloading controller', cls.name, final.path);
     }
 
-    this.controllers.set(final.path, final);
-
-    if (this.initalized.running !== false) {
-      process.nextTick(() => {
-        this.events.emit('reload', final)
-      });
-    }
+    return final;
   }
 
-  static async initialize() {
-    console.log(this.initalized);
+  async init() {
     await DependencyRegistry.initialize();
-
-
-    if (this.initalized.run()) {
-      return await this.initalized;
+    for (let { class: cls } of this.pendingClasses.values()) {
+      this.install(cls!);
     }
-
-
-    for (let { class: cls } of this.pendingControllers.values()) {
-      this.finalizeClass(cls!);
-    }
-
-    this.initalized.resolve(true);
-  }
-
-  static on(event: 'reload', callback: (result: ControllerConfig) => any): void;
-  static on<T>(event: string, callback: (result: T) => any): void {
-    this.events.on(event, callback);
   }
 }
+
+export const ControllerRegistry = new $ControllerRegistry();

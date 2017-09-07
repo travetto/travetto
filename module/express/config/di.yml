@@ -1,3 +1,3 @@
 ---
 injectables:
-   '@encore/express/src/decorator/route.ts': Controller
+   '@encore2/express/src/decorator/route.ts': Controller

@@ -1,11 +1,12 @@
 import * as moment from 'moment';
 import { PathType } from '../model';
 import { ControllerRegistry } from '../service';
-import { Class, DependencyRegistry } from '@encore2/di';
+import { DependencyRegistry } from '@encore2/di';
+import { Class } from '@encore2/registry';
 
 export function Controller(path = '') {
   return (target: Class) => {
-    ControllerRegistry.registerClass({
+    ControllerRegistry.registerClass(target, {
       path,
       class: target,
     });

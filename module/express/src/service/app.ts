@@ -3,10 +3,11 @@ import { ExpressConfig } from '../config';
 import * as express from 'express';
 import { RouteUtil } from '../util';
 import { ControllerConfig } from '../model';
-import { Injectable, DependencyRegistry, Class } from '@encore2/di';
+import { Injectable, DependencyRegistry } from '@encore2/di';
 import { ControllerRegistry } from './registry';
 import { toPromise } from '@encore2/base';
 import { ExpressOperator } from './operator';
+import { Class } from '@encore2/registry';
 
 let compression = require('compression');
 let cookieParser = require('cookie-parser');
@@ -57,7 +58,7 @@ export class ExpressApp {
     }
 
     // Register all active
-    await Promise.all(Array.from(ControllerRegistry.controllers.values())
+    await Promise.all(Array.from(ControllerRegistry.finalClasses.values())
       .map(c => this.registerController(c)));
 
     // Listen for updates
