@@ -241,7 +241,7 @@ export class DependencyRegistry {
     // Do not include dev files for feare of triggering tests
     let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
     for (let glob of globs) {
-      bulkRequire(glob, undefined, p => !Compiler.optionalFiles.test(p) && !Compiler.definitionFiles.test(p));
+      bulkRequire(glob, undefined, (p: string) => !Compiler.optionalFiles.test(p) && !Compiler.definitionFiles.test(p));
     }
 
     let finalizing = this.pendingFinalize;
