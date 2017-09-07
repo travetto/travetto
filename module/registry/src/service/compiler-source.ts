@@ -10,6 +10,10 @@ export class CompilerClassSource implements ClassSource {
   private classes = new Map<string, Map<string, Class>>();
   private events = new EventEmitter();
 
+  emit(e: ChangedEvent) {
+    this.events.emit('change', e);
+  }
+
   async init() {
     let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
     for (let glob of globs) {
@@ -22,12 +26,10 @@ export class CompilerClassSource implements ClassSource {
         this.classes.set(file, new Map());
         for (let cls of this.computeClasses(file)) {
           this.classes.get(file)!.set(cls.__id, cls);
-          this.events.emit('change', { type: 'init', curr: cls });
+          this.emit({ type: 'init', curr: cls });
         }
       }
     }
-
-    console.log('Listening');
 
     Compiler.on('changed', this.watch.bind(this));
     Compiler.on('removed', this.watch.bind(this));
@@ -57,12 +59,12 @@ export class CompilerClassSource implements ClassSource {
       }
       if (!next.has(k)) {
         this.classes.get(file)!.delete(k);
-        this.events.emit('change', { type: 'removed', prev: prev.get(k)! });
+        this.emit({ type: 'removed', prev: prev.get(k)! });
       } else if (!prev.has(k)) {
         this.classes.get(file)!.set(k, next.get(k)!);
-        this.events.emit('change', { type: 'added', curr: next.get(k) });
+        this.emit({ type: 'added', curr: next.get(k) });
       } else {
-        this.events.emit('change', { type: 'changed', curr: next.get(k)!, prev: prev.get(k)! });
+        this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k)! });
       }
     }
   }

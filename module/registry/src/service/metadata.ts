@@ -55,6 +55,10 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
     }
   }
 
+  async onUninstall(cls: Class) {
+    this.finalClasses.delete(cls.__id);
+  }
+
   onEvent(e: ChangedEvent) {
     let ret = super.onEvent(e);
     return ret;
