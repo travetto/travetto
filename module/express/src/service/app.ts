@@ -24,8 +24,6 @@ export class ExpressApp {
   }
 
   async postConstruct() {
-
-    console.log('Operating');
     await ControllerRegistry.initialize();
 
     this.app = express();

@@ -91,7 +91,10 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
       console.log('Reloading controller', cls.name, final.path);
     }
 
-    this.events.emit('change', { type: 'changed', curr: cls });
+    // Delay 
+    process.nextTick(() => {
+      this.events.emit('change', { type: 'changed', curr: cls });
+    });
 
     return final;
   }
