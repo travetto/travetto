@@ -51,7 +51,7 @@ describe('Validation', () => {
         pandaState: 'orange'
       },
       responses: []
-    });
+    } as any); // To allow for validating
     try {
       await SchemaValidator.validate(res);
       expect(true).to.equal(false);
