@@ -1,6 +1,6 @@
 import * as log4js from 'log4js';
 import * as util from 'util';
-import { AppEnv } from '@encore/base';
+import { AppEnv } from '@encore2/base';
 import { LogContext, StandardLayout, JsonLayout } from '../types';
 
 const STYLES: { [key: string]: [number, number] } = {
