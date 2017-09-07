@@ -1,8 +1,8 @@
 {
   "author": "", 
   "dependencies": {
-    "@encore2/compiler": "git+ssh://git@git.eaiti.com/encore2/compiler.git#v2.x.x", 
-    "@encore2/config": "git+ssh://git@git.eaiti.com/encore2/config.git#v2.x.x", 
+    "@encore2/compiler": "git+ssh://git@git.eaiti.com/encore2/compiler.git#v1.x.x", 
+    "@encore2/config": "git+ssh://git@git.eaiti.com/encore2/config.git#v1.x.x", 
     "@types/chai": "^4.0.3", 
     "@types/mocha": "^2.2.41", 
     "chai": "^4.1.1", 
@@ -13,12 +13,12 @@
   "main": "src/lib/", 
   "name": "@encore2/test", 
   "peerDependencies": {
-    "@encore2/di": "git+ssh://git@git.eaiti.com/encore2/di.git#v2.x.x", 
+    "@encore2/di": "git+ssh://git@git.eaiti.com/encore2/di.git#v1.x.x", 
     "mocha-bamboo-reporter": "^1.1.0"
   }, 
   "scripts": {
     "postinstall": "chmod +x ./mocha.js", 
     "test": "./mocha.js"
   }, 
-  "version": "2.0.0"
+  "version": "1.0.0"
 }
