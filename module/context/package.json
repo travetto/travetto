@@ -1,7 +1,7 @@
 {
   "author": "", 
   "dependencies": {
-    "@encore2/di": "git+ssh://git@git.eaiti.com/encore2/di.git#v2.x.x", 
+    "@encore2/di": "git+ssh://git@git.eaiti.com/encore2/di.git#v1.x.x", 
     "@types/continuation-local-storage": "^3.2.1", 
     "cls-hooked": "^4.2.2"
   }, 
@@ -10,8 +10,8 @@
   "main": "index.ts", 
   "name": "@encore2/context", 
   "peerDependencies": {
-    "@encore2/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v2.x.x"
+    "@encore2/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v1.x.x"
   }, 
   "scripts": {}, 
-  "version": "2.0.0"
+  "version": "1.0.0"
 }
