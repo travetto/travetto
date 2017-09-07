@@ -19,7 +19,7 @@ export class CompilerClassSource extends ClassSource {
       for (let file of files) {
         this.classes.set(file, new Map());
         for (let cls of this.getClasses(file)) {
-          this.classes.get(file)!.set(cls.__id!, cls);
+          this.classes.get(file)!.set(cls.__id, cls);
           this.emit({ type: 'init', curr: cls });
         }
       }
@@ -37,7 +37,7 @@ export class CompilerClassSource extends ClassSource {
       return;
     }
 
-    let next = new Map(this.getClasses(file).map(x => [x.__id!, x] as [string, Class]));
+    let next = new Map(this.getClasses(file).map(x => [x.__id, x] as [string, Class]));
     let prev = new Map();
     if (this.classes.has(file)) {
       prev = new Map(this.classes.get(file)!.entries());
