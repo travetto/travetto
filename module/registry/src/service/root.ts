@@ -19,13 +19,9 @@ export class RootRegistry extends Registry {
         !p.endsWith('index.ts'));
 
       for (let file of files) {
-        if (!this.files.has(file)) {
+        if (!this.classes.has(file)) {
           let res = this.getClasses(file);
-          if (AppEnv.watch) {
-            await this.registerFile(file, res);
-          } else {
-            this.registerFile(file, res);
-          }
+          this.register(res);
         }
       }
     }
@@ -39,8 +35,8 @@ export class RootRegistry extends Registry {
 
     // Will only fire in watch mode
     Compiler.on('changed', p => this.watchChanged(p, this.getClasses(p)));
-    Compiler.on('removed', this.watchRemoved.bind(this));
-    Compiler.on('added', p => this.watchAdded(p, this.getClasses(p)));
+    Compiler.on('removed', p => this.watchChanged(p, []));
+    Compiler.on('added', p => this.watchChanged(p, this.getClasses(p)));
   }
 
 

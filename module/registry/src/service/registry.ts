@@ -7,7 +7,7 @@ import { Class } from '../model/types';
 
 export abstract class Registry {
 
-  files = new Map<string, Map<string, Class>>();
+  classes = new Map<string, Map<string, Class>>();
   events = new EventEmitter();
   initialized = externalPromise();
   dependents: Registry[] = [];
@@ -30,27 +30,40 @@ export abstract class Registry {
     }
   }
 
-  protected async unregisterFile(file: string) {
-    if (this.files.has(file)) {
-      this.files.delete(file);
+  protected unregister(classes: Class | Class[]) {
+    if (!Array.isArray(classes)) {
+      classes = [classes];
+    }
+    for (let cls of classes) {
+      if (this.classes.has(cls.__filename!) && this.classes.get(cls.__filename!)!.has(cls.__id!)) {
+        this.classes.get(cls.__filename!)!.delete(cls.__id!);
+      }
     }
   }
 
-  protected async registerFile(file: string, classes: Class[]) {
-    for (let top of classes) {
-      if (!this.files.has(top.__filename!)) {
-        this.files.set(top.__filename!, new Map());
+  protected register(classes: Class | Class[]) {
+    if (!Array.isArray(classes)) {
+      classes = [classes];
+    }
+    for (let cls of classes) {
+      if (!this.classes.has(cls.__filename!)) {
+        this.classes.set(cls.__filename!, new Map());
       }
-      let changed = this.files.get(top.__filename!)!.has(top.__id!);
-      this.files.get(top.__filename!)!.set(top.__id!, top);
+      let changed = this.classes.get(cls.__filename!)!.has(cls.__id!);
+      this.classes.get(cls.__filename!)!.set(cls.__id!, cls);
     }
   }
 
   protected async watchChanged(file: string, classes: Class[]) {
-    let prev = this.files.get(file) || new Map();
-    await this.unregisterFile(file);
-    await this.registerFile(file, classes);
-    let next = this.files.get(file) || new Map();
+    let prev = new Map();
+    if (this.classes.has(file)) {
+      prev = new Map(this.classes.get(file)!.entries());
+    }
+
+    await this.unregister(Array.from(prev.values()));
+    await this.register(classes);
+
+    let next = this.classes.get(file) || new Map();
 
     let keys = new Set([...prev.keys(), ...next.keys()]);
 
@@ -65,25 +78,8 @@ export abstract class Registry {
     }
   }
 
-  protected async watchRemoved(file: string) {
-    console.debug('Removed', file);
-    if (this.files.has(file)) {
-      for (let cls of this.files.get(file)!.values()) {
-        this.emit('removed', cls);
-      }
-    }
-    this.unregisterFile(file);
-  }
-
-  protected async watchAdded(file: string, classes: Class[]) {
-    console.debug('Added', file);
-    this.registerFile(file, classes);
-    for (let cls of classes) {
-      this.emit('added', cls);
-    }
-  }
-
   protected emit(event: string, data: Class | Class[]) {
+    console.log('Emit', event, data);
     this.events.emit(event, data);
   }
 
