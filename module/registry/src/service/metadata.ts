@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 export abstract class MetadataRegistry<C, M = any> extends Registry {
 
   pendingClasses = new Map<string, Partial<C>>();
-  pendingMethods = new Map<string, Map<string, Partial<M>>>();
+  pendingMethods = new Map<string, Map<Function, Partial<M>>>();
   finalClasses = new Map<string, C>();
 
   abstract onInstallFinalize<T>(cls: Class<T>): C;
@@ -29,10 +29,10 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
   getOrCreateMethodConfig(cls: Class, method: Function): Partial<M> {
     this.getOrCreateClassConfig(cls);
 
-    if (!this.pendingMethods.get(cls.__id)!.has(method.name)) {
-      this.pendingMethods.get(cls.__id)!.set(method.name, this.onNewMethodConfig(cls, method));
+    if (!this.pendingMethods.get(cls.__id)!.has(method)) {
+      this.pendingMethods.get(cls.__id)!.set(method, this.onNewMethodConfig(cls, method));
     }
-    return this.pendingMethods.get(cls.__id)!.get(method.name)!;
+    return this.pendingMethods.get(cls.__id)!.get(method)!;
   }
 
 
