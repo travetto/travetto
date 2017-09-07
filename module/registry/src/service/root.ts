@@ -2,7 +2,7 @@ import { Registry } from './registry';
 import { CompilerClassSource } from './compiler-source';
 import { ChangedEvent } from './class-source';
 
-class Root extends Registry {
+class $RootRegistry extends Registry {
 
   async _init() {
     let source = new CompilerClassSource();
@@ -16,4 +16,4 @@ class Root extends Registry {
   }
 }
 
-export const RootRegistry = new Root();
+export const RootRegistry = new $RootRegistry();

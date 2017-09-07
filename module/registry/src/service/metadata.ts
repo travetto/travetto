@@ -54,7 +54,7 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
   }
 
   onEvent(e: ChangedEvent) {
-    console.log(e);
-    return super.onEvent(e);
+    let ret = super.onEvent(e);
+    return ret;
   }
 }
