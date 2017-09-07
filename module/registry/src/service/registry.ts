@@ -46,9 +46,10 @@ export class Registry {
       throw e;
     }
 
-    if (AppEnv.watch) {
-      this.watch();
-    }
+    // Will only fire in watch mode
+    Compiler.on('changed', this.watchChanged.bind(this));
+    Compiler.on('removed', this.watchRemoved.bind(this));
+    Compiler.on('added', this.watchAdded.bind(this));
   }
 
   private static async unloadFile(file: string) {
@@ -110,14 +111,7 @@ export class Registry {
     }
   }
 
-  private static watch() {
-    Compiler.on('changed', this.watchChanged.bind(this));
-    Compiler.on('removed', this.watchRemoved.bind(this));
-    Compiler.on('added', this.watchAdded.bind(this));
-  }
-
   private static emit(event: string, data: Class | Class[]) {
-    console.log(event, data);
     this.events.emit(event, data);
   }
 
