@@ -62,7 +62,6 @@ export class Registry {
 
     for (let top of Object.values(out)) {
       if (top.__id) {
-        console.log(top.__filename, top.__id, top.name);
         if (!this.files.has(top.__filename)) {
           this.files.set(top.__filename, new Map());
         }
@@ -73,31 +72,23 @@ export class Registry {
   }
 
   private static async watchChanged(file: string) {
-    console.log('Changed', file);
+    console.debug('Changed', file);
 
-    let prev = this.files.get(file)! || new Map();
+    let prev = this.files.get(file) || new Map();
     await this.unloadFile(file);
     await this.loadFile(file);
-    let next = this.files.get(file)! || new Map();
-
-    console.log(Array.from(prev.keys()), Array.from(next.keys()));
+    let next = this.files.get(file) || new Map();
 
     let keys = new Set([...prev.keys(), ...next.keys()]);
 
-    for (let k of prev.keys()) {
-      if (!next.has(k)) {
-        this.events.emit('removed', prev.get(k)!);
-        keys.delete(k);
-      }
-    }
-    for (let k of next.keys()) {
-      if (!prev.has(k)) {
-        this.events.emit('added', next.get(k));
-        keys.delete(k);
-      }
-    }
     for (let k of keys) {
-      this.emit('changed', [next.get(k)!, prev.get(k)!]);
+      if (!next.has(k)) {
+        this.emit('removed', prev.get(k)!);
+      } else if (!prev.has(k)) {
+        this.emit('added', next.get(k));
+      } else {
+        this.emit('changed', [next.get(k)!, prev.get(k)!]);
+      }
     }
   }
 
@@ -126,7 +117,7 @@ export class Registry {
   }
 
   private static emit(event: string, data: Class | Class[]) {
-    console.debug(event, data);
+    console.log(event, data);
     this.events.emit(event, data);
   }
 
