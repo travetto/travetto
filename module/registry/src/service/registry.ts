@@ -32,27 +32,27 @@ export abstract class Registry implements ClassSource {
     }
   }
 
-  async onRegister(cls: Class): Promise<void> {
+  async onInstall(cls: Class): Promise<void> {
 
   }
 
-  async onUnregister(cls: Class): Promise<void> {
+  async onUninstall(cls: Class): Promise<void> {
 
   }
 
-  async unregister(classes: Class | Class[]) {
+  async uninstall(classes: Class | Class[]) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
     for (let cls of classes) {
       if (this.classes.has(cls.__filename) && this.classes.get(cls.__filename)!.has(cls.__id)) {
-        await this.onUnregister(cls);
+        await this.onUninstall(cls);
         this.classes.get(cls.__filename)!.delete(cls.__id);
       }
     }
   }
 
-  async register(classes: Class | Class[]) {
+  async install(classes: Class | Class[]) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -61,7 +61,7 @@ export abstract class Registry implements ClassSource {
         this.classes.set(cls.__filename, new Map());
       }
       this.classes.get(cls.__filename)!.set(cls.__id, cls);
-      await this.onRegister(cls);
+      await this.onInstall(cls);
     }
   }
 
@@ -76,14 +76,14 @@ export abstract class Registry implements ClassSource {
 
     switch (event.type) {
       case 'removed':
-        await this.unregister(event.prev!);
+        await this.uninstall(event.prev!);
         break;
       case 'added':
-        await this.register(event.curr!);
+        await this.install(event.curr!);
         break;
       case 'changed':
-        await this.unregister(event.prev!);
-        await this.register(event.curr!);
+        await this.uninstall(event.prev!);
+        await this.install(event.curr!);
         break;
       default:
         return;

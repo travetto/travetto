@@ -10,7 +10,7 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
   pendingMethods = new Map<string, Map<string, Partial<M>>>();
   finalClasses = new Map<string, C>();
 
-  abstract onFinalize<T>(cls: Class<T>): C;
+  abstract onInstallFinalize<T>(cls: Class<T>): C;
 
   abstract onNewClassConfig(cls: Class): Partial<C>;
 
@@ -46,11 +46,13 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
     _.merge(conf, pconfig);
   }
 
-  async onRegister(cls: Class) {
-    let result = this.onFinalize(cls);
-    this.pendingMethods.delete(cls.__id);
-    this.pendingClasses.delete(cls.__id);
-    this.finalClasses.set(cls.__id, result);
+  async onInstall(cls: Class) {
+    if (this.pendingClasses.has(cls.__id) || this.pendingMethods.has(cls.__id)) {
+      let result = this.onInstallFinalize(cls);
+      this.pendingMethods.delete(cls.__id);
+      this.pendingClasses.delete(cls.__id);
+      this.finalClasses.set(cls.__id, result);
+    }
   }
 
   onEvent(e: ChangedEvent) {
