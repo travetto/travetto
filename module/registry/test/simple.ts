@@ -2,4 +2,4 @@ export class Test {
 
 }
 
-export class Test3 { }
+export class Test4 { }
