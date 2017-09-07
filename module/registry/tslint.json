@@ -1,0 +1,3 @@
+{
+  "extends": "@encore2/base/tslint.json"
+}
