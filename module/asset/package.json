@@ -20,7 +20,7 @@
   }, 
   "license": "ISC", 
   "main": "index.ts", 
-  "name": "@encore/asset", 
+  "name": "@encore2/asset", 
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
   }, 
