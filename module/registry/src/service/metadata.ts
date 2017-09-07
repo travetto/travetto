@@ -10,7 +10,7 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
   pendingMethods = new Map<string, Map<string, Partial<M>>>();
   finalClasses = new Map<string, C>();
 
-  abstract onFinalize(cls: Class): C;
+  abstract onFinalize<T>(cls: Class<T>): C;
 
   abstract onNewClassConfig(cls: Class): Partial<C>;
 

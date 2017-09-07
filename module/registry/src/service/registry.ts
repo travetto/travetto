@@ -16,6 +16,9 @@ export abstract class Registry extends ClassSource {
 
   abstract _init(): Promise<void>;
 
+  onRegister<T>(cls: Class<T>) { }
+  onUnregister<T>(cls: Class<T>) { }
+
   async initialize() {
 
     if (this.initialized.run()) {
@@ -37,6 +40,7 @@ export abstract class Registry extends ClassSource {
     }
     for (let cls of classes) {
       if (this.classes.has(cls.__filename) && this.classes.get(cls.__filename)!.has(cls.__id)) {
+        this.onUnregister(cls);
         this.classes.get(cls.__filename)!.delete(cls.__id);
       }
     }
@@ -51,6 +55,7 @@ export abstract class Registry extends ClassSource {
         this.classes.set(cls.__filename, new Map());
       }
       this.classes.get(cls.__filename)!.set(cls.__id, cls);
+      this.onRegister(cls);
     }
   }
 
