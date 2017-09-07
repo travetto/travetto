@@ -30,9 +30,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         path: require.resolve('../decorator/register')
       });
     }
-
     return ts.updateClassDeclaration(node,
-      ts.createNodeArray([ts.createDecorator(ts.createCall(state.imported, undefined, [])), ...(node.decorators || [])]),
+      ts.createNodeArray([ts.createDecorator(ts.createCall(ts.createPropertyAccess(state.imported, ts.createIdentifier('Register')), undefined, [])), ...(node.decorators || [])]),
       node.modifiers,
       node.name,
       node.typeParameters,
@@ -40,7 +39,6 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       ts.createNodeArray([
         createStaticField('__filename', ts.createLiteral(state.fullFile)),
         createStaticField('__id', ts.createLiteral(state.file + '#' + node.name!.getText())),
-
         ...node.members
       ])
     ) as any;
@@ -49,7 +47,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 }
 
 export const ClassIdTransformer = {
-  transform: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
+  transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
     let fileRoot = file.fileName.split(process.cwd() + SEP)[1];
     let ns = '@app';
     if (fileRoot.startsWith(`node_modules${SEP}`)) {
