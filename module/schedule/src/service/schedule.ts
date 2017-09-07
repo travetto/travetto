@@ -1,5 +1,5 @@
 import * as cron from 'cron';
-import { Shutdown } from './shutdown';
+import { Shutdown } from '@encore/base';
 
 type Callback = (...args: any[]) => any;
 
