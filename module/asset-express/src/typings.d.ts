@@ -1,4 +1,4 @@
-import { Asset } from '@encore/asset';
+import { Asset } from '@encore2/asset';
 
 declare module 'express' {
 	export interface Request {

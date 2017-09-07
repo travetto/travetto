@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { AssetUtil, AssetFile } from '@encore/asset';
-import { RouteRegistry } from '@encore/express';
-import { nodeToPromise } from '@encore/base';
+import { AssetUtil, AssetFile } from '@encore2/asset';
+import { RouteRegistry } from '@encore2/express';
+import { nodeToPromise } from '@encore2/base';
 import { AssetExpressConfig } from '../config';
-import { Class } from '@encore/di';
+import { Class } from '@encore2/di';
 
 const match = require('mime-match');
 const multiparty = require('connect-multiparty');
