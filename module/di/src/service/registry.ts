@@ -38,7 +38,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.install(cls);
     }
 
-    // this.initalized.resolve(true);
+    // Unblock auto created
+    this.initialized.resolve(true);
 
     if (this.autoCreate.length) {
       console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
