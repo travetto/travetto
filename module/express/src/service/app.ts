@@ -62,7 +62,13 @@ export class ExpressApp {
       .map(c => this.registerController(c)));
 
     // Listen for updates
-    ControllerRegistry.on('reload', this.registerController.bind(this));
+    ControllerRegistry.on(e => {
+      if (e.curr) {
+        this.registerController(ControllerRegistry.finalClasses.get(e.curr.__id)!);
+      } else if (e.prev) {
+        // TODO: uninstall
+      }
+    });
 
     this.app.use(RouteUtil.errorHandler);
 

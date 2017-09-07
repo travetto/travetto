@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Class } from '@encore2/di';
+import { Class } from '@encore2/registry';
 
 export type Method = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 export type PathType = string | RegExp;

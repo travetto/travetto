@@ -19,7 +19,7 @@ export function RequiredParam(name: string) {
 
 export function Accepts(contentTypes: string[]) {
   return ControllerRegistry.filterAdder(async (req: Request, res: Response) => {
-    let contentType = req.header('content-type');
+    let contentType = req.header('content-type') as string;
     if (contentType && contentTypes.indexOf(contentType) < 0) {
       throw new AppError(`Content type ${contentType}`, 400);
     }
