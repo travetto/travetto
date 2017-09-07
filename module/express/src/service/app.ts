@@ -24,6 +24,8 @@ export class ExpressApp {
   }
 
   async postConstruct() {
+
+    console.log('Operating');
     await ControllerRegistry.initialize();
 
     this.app = express();
@@ -63,6 +65,7 @@ export class ExpressApp {
 
     // Listen for updates
     ControllerRegistry.on(e => {
+      console.log('Registry added', e);
       if (e.curr) {
         this.registerController(ControllerRegistry.finalClasses.get(e.curr.__id)!);
       } else if (e.prev) {
