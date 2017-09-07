@@ -17,18 +17,24 @@ export class CompilerClassSource extends ClassSource {
         !p.endsWith('index.ts'));
 
       for (let file of files) {
+        this.classes.set(file, new Map());
         for (let cls of this.getClasses(file)) {
+          this.classes.get(file)!.set(cls.__id!, cls);
           this.emit({ type: 'init', curr: cls });
         }
       }
     }
 
-    Compiler.on('changed', p => this.doWatch.bind(this));
-    Compiler.on('removed', p => this.doWatch.bind(this));
-    Compiler.on('added', p => this.doWatch.bind(this));
+    console.log('Listening');
+
+    Compiler.on('changed', this.watch.bind(this));
+    Compiler.on('removed', this.watch.bind(this));
+    Compiler.on('added', this.watch.bind(this));
   }
 
-  protected async doWatch(file: string) {
+  protected async watch(file: string) {
+    console.log(file);
+
     if (file.endsWith('index.ts')) {
       return;
     }

@@ -6,11 +6,12 @@ class Root extends Registry {
 
   async _init() {
     let source = new CompilerClassSource();
-    await source.init();
     this.listen(source);
+    await source.init();
   }
 
   onEvent(e: ChangedEvent) {
+    console.log(e);
     return super.onEvent(e);
   }
 }

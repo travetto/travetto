@@ -1,7 +1,9 @@
-import { Registry } from "../index";
+import { Registry } from '../index';
 
-export class SimpleReg extends Registry {
+class Simple extends Registry {
   async _init() {
-    return 5;
+    return;
   }
 }
+
+export const SimpleRegistry = new Simple();

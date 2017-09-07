@@ -25,7 +25,7 @@ export abstract class Registry extends ClassSource {
     }
   }
 
-  protected unregister(classes: Class | Class[]) {
+  unregister(classes: Class | Class[]) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -36,7 +36,7 @@ export abstract class Registry extends ClassSource {
     }
   }
 
-  protected register(classes: Class | Class[]) {
+  register(classes: Class | Class[]) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -49,7 +49,7 @@ export abstract class Registry extends ClassSource {
   }
 
 
-  protected async onEvent(event: ChangedEvent) {
+  async onEvent(event: ChangedEvent) {
     let file = (event.curr || event.prev)!.__filename!;
 
     let prev = new Map();
@@ -76,6 +76,6 @@ export abstract class Registry extends ClassSource {
   }
 
   listen(source: ClassSource, filter?: (e: ChangedEvent) => boolean) {
-    source.on(e => this.onEvent(e), filter);
+    source.on(this.onEvent.bind(this), filter);
   }
 }
