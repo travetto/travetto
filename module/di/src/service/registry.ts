@@ -4,6 +4,7 @@ import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
 import { bulkRequire, AppEnv, externalPromise } from '@encore/base';
 import { RetargettingHandler, Compiler } from '@encore/compiler';
 import { InjectionError } from './error';
+import { EventEmitter } from 'events';
 
 export const DEFAULT_INSTANCE = '__default';
 
@@ -15,18 +16,16 @@ type TargetId = string;
 type ClassId = string;
 
 export class DependencyRegistry {
-  static pendingInjectables = new Map<ClassId, InjectableConfig<any>>();
-  static pendingFinalize: Class[] = [];
-  static injectables = new Map<ClassId, InjectableConfig<any>>();
+  private static pendingInjectables = new Map<ClassId, InjectableConfig<any>>();
+  private static pendingFinalize: Class[] = [];
+  private static injectables = new Map<ClassId, InjectableConfig<any>>();
 
-  static instances = new Map<TargetId, Map<string, any>>();
-  static proxyHandlers = new Map<TargetId, Map<string, any>>();
-  static aliases = new Map<TargetId, Map<string, string>>();
+  private static instances = new Map<TargetId, Map<string, any>>();
+  private static proxyHandlers = new Map<TargetId, Map<string, any>>();
+  private static aliases = new Map<TargetId, Map<string, string>>();
 
-  static autoCreate: (Dependency<any> & { priority: number })[] = [];
-
-  private static _waitingForInit = false;
-  private static _initialized = false;
+  private static autoCreate: (Dependency<any> & { priority: number })[] = [];
+  private static events = new EventEmitter();
   private static initalized = externalPromise();
 
   static async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
@@ -174,14 +173,14 @@ export class DependencyRegistry {
       }
     }
 
-    if (!this._initialized) {
+    if (this.initalized.running !== false) {
       this.pendingFinalize.push(pconfig.class!);
     } else {
-      process.nextTick(this.finalizeClass.bind(this), pconfig.class!);
+      process.nextTick(this.finalizeClass.bind(this), pconfig.class!, true);
     }
   }
 
-  static finalizeClass<T>(cls: Class<T>) {
+  static finalizeClass<T>(cls: Class<T>, emit = false) {
     let classId = cls!.__id!;
     let config = this.getOrCreatePendingConfig(cls);
 
@@ -221,7 +220,10 @@ export class DependencyRegistry {
       this.proxyHandlers.has(targetId) &&
       this.proxyHandlers.get(targetId)!.has(config.name)
     ) {
-      this.createInstance(config.target, config.name);
+      let p = this.createInstance(config.target, config.name);
+      if (emit) {
+        p.then(x => this.events.emit('reload', config.class))
+      }
     } else if (config.autoCreate.create) {
       this.autoCreate.push({
         target: config.target,
@@ -232,10 +234,10 @@ export class DependencyRegistry {
   }
 
   static async initialize() {
-    if (this._waitingForInit) {
+    if (this.initalized.run()) {
       return await this.initalized;
     }
-    this._waitingForInit = true;
+
     // Do not include dev files for feare of triggering tests
     let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
     for (let glob of globs) {
@@ -257,5 +259,10 @@ export class DependencyRegistry {
     }
 
     this.initalized.resolve(true);
+  }
+
+  static on(event: 'reload', callback: (result: Class) => any): void;
+  static on<T>(event: string, callback: (result: T) => any): void {
+    this.events.on(event, callback);
   }
 }
