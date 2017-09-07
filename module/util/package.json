@@ -1,7 +1,7 @@
 {
   "author": "", 
   "dependencies": {
-    "@encore/base": "git+ssh://git@git.eaiti.com/encore/base.git#v2.x.x"
+    "@encore/base": "git+ssh://git@git.eaiti.com/encore2/base.git#v2.x.x"
   }, 
   "description": "", 
   "license": "ISC", 
