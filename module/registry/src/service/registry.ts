@@ -22,9 +22,14 @@ export class Registry {
       // Do not include dev files for feare of triggering tests
       let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
       for (let glob of globs) {
-        let files = await bulkFind(glob, undefined, (p: string) => !Compiler.optionalFiles.test(p) && !Compiler.definitionFiles.test(p));
+        let files = await bulkFind(glob, undefined, (p: string) =>
+          !Compiler.optionalFiles.test(p) &&
+          !Compiler.definitionFiles.test(p) &&
+          !p.endsWith('index.ts'));
         for (let file of files) {
-          this.loadFile(file);
+          if (!this.files.has(file)) {
+            this.loadFile(file);
+          }
         }
       }
 
@@ -56,21 +61,26 @@ export class Registry {
     let out = require(file);
 
     for (let top of Object.values(out)) {
-      if (top.__file) {
-        if (!this.files.has(top.__file)) {
-          this.files.set(top.__file, new Map());
+      if (top.__id) {
+        console.log(top.__filename, top.__id, top.name);
+        if (!this.files.has(top.__filename)) {
+          this.files.set(top.__filename, new Map());
         }
-        let changed = this.files.get(top.__file)!.has(top.__id);
-        this.files.get(top.__file)!.set(top.__id, top);
+        let changed = this.files.get(top.__filename)!.has(top.__id);
+        this.files.get(top.__filename)!.set(top.__id, top);
       }
     }
   }
 
   private static async watchChanged(file: string) {
-    let prev = this.files.get(file)!;
+    console.log('Changed', file);
+
+    let prev = this.files.get(file)! || new Map();
     await this.unloadFile(file);
     await this.loadFile(file);
-    let next = this.files.get(file)!;
+    let next = this.files.get(file)! || new Map();
+
+    console.log(Array.from(prev.keys()), Array.from(next.keys()));
 
     let keys = new Set([...prev.keys(), ...next.keys()]);
 
@@ -87,23 +97,25 @@ export class Registry {
       }
     }
     for (let k of keys) {
-      this.events.emit('changed', [next.get(k)!, prev.get(k)!]);
+      this.emit('changed', [next.get(k)!, prev.get(k)!]);
     }
   }
 
   private static async watchRemoved(file: string) {
+    console.debug('Removed', file);
     if (this.files.has(file)) {
       for (let cls of this.files.get(file)!.values()) {
-        this.events.emit('removed', cls);
+        this.emit('removed', cls);
       }
     }
     this.unloadFile(file);
   }
 
   private static async watchAdded(file: string) {
+    console.debug('Added', file);
     this.loadFile(file);
     for (let cls of this.files.get(file)!.values()) {
-      this.events.emit('added', top);
+      this.emit('added', cls);
     }
   }
 
@@ -111,6 +123,11 @@ export class Registry {
     Compiler.on('changed', this.watchChanged.bind(this));
     Compiler.on('removed', this.watchRemoved.bind(this));
     Compiler.on('added', this.watchAdded.bind(this));
+  }
+
+  private static emit(event: string, data: Class | Class[]) {
+    console.debug(event, data);
+    this.events.emit(event, data);
   }
 
   static on(event: 'changed', callback: (result: [Class, Class]) => any): void;
