@@ -234,31 +234,38 @@ export class DependencyRegistry {
   }
 
   static async initialize() {
+
     if (this.initalized.run()) {
       return await this.initalized;
     }
 
-    // Do not include dev files for feare of triggering tests
-    let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
-    for (let glob of globs) {
-      bulkRequire(glob, undefined, (p: string) => !Compiler.optionalFiles.test(p) && !Compiler.definitionFiles.test(p));
-    }
+    try {
 
-    let finalizing = this.pendingFinalize;
-    this.pendingFinalize = [];
-    for (let cls of finalizing) {
-      this.finalizeClass(cls);
-    }
-
-    if (this.autoCreate.length) {
-      console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
-      let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
-      for (let i of items) {
-        await this.getInstance(i.target, i.name);
+      // Do not include dev files for feare of triggering tests
+      let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
+      for (let glob of globs) {
+        bulkRequire(glob, undefined, (p: string) => !Compiler.optionalFiles.test(p) && !Compiler.definitionFiles.test(p));
       }
-    }
 
-    this.initalized.resolve(true);
+      let finalizing = this.pendingFinalize;
+      this.pendingFinalize = [];
+      for (let cls of finalizing) {
+        this.finalizeClass(cls);
+      }
+
+      this.initalized.resolve(true);
+
+      if (this.autoCreate.length) {
+        console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
+        let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
+        for (let i of items) {
+          await this.getInstance(i.target, i.name);
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
   }
 
   static on(event: 'reload', callback: (result: Class) => any): void;
