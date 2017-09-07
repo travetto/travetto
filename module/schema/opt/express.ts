@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { SchemaRegistry, Class, BindUtil, SchemaValidator } from '../src';
-import { ObjectUtil } from '@encore/util';
+import { ObjectUtil } from '@encore2/util';
 
-import { RouteRegistry, AppError } from '@encore/express';
+import { RouteRegistry, AppError } from '@encore2/express';
 
 import * as flat from 'flat';
 

@@ -1,4 +1,4 @@
-import { ObjectUtil } from '@encore/util';
+import { ObjectUtil } from '@encore2/util';
 import { CommonRegExp, SchemaRegistry, ClassList } from '../service';
 
 function prop(obj: { [key: string]: any }) {

@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import { Schema, Ignore, Field } from '../decorator';
-import { TransformUtil, Import, State } from '@encore/compiler';
+import { TransformUtil, Import, State } from '@encore2/compiler';
 
 type DecList = ts.NodeArray<ts.Decorator>;
 type SchemaList = (ts.Expression | undefined)[];
