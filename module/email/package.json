@@ -1,7 +1,7 @@
 {
   "author": "", 
   "dependencies": {
-    "@encore/di": "git+ssh://git@git.eaiti.com/encore/di.git#v2.x.x", 
+    "@encore2/di": "git+ssh://git@git.eaiti.com/encore2/di.git#v2.x.x", 
     "@types/cheerio": "^0.22.2", 
     "@types/marked": "0.3.0", 
     "@types/mustache": "^0.8.29", 
@@ -16,13 +16,13 @@
   }, 
   "description": "", 
   "devDependencies": {
-    "@encore/test": "git+ssh://git@git.eaiti.com/encore/test.git#v2.x.x"
+    "@encore2/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v2.x.x"
   }, 
   "license": "ISC", 
   "main": "index.ts", 
-  "name": "@encore/email", 
+  "name": "@encore2/email", 
   "scripts": {
-    "test": "./node_modules/@encore/test/mocha.js"
+    "test": "./node_modules/@encore2/test/mocha.js"
   }, 
   "version": "2.0.5"
 }

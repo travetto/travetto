@@ -1,9 +1,9 @@
 import * as nodemailer from 'nodemailer';
 import * as Mustache from 'mustache';
 import * as fs from 'fs';
-import { nodeToPromise } from '@encore/util';
+import { nodeToPromise } from '@encore2/util';
 import { TemplateMailOptions, TemplateContext } from './types';
-import { Injectable } from '@encore/di';
+import { Injectable } from '@encore2/di';
 import { MailConfig } from './config';
 
 const juice = require('juice');
