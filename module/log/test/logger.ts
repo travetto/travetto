@@ -4,8 +4,8 @@ import * as process from 'process';
 import { expect } from 'chai';
 import * as fs from 'fs';
 import { Logger } from '../src';
-import { nodeToPromise } from '@encore/util';
-import { DependencyRegistry } from '@encore/di';
+import { nodeToPromise } from '@encore2/util';
+import { DependencyRegistry } from '@encore2/di';
 
 let name = `${process.cwd()}/logs/encore_log-out.log`;
 console.log(name);
