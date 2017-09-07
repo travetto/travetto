@@ -22,7 +22,7 @@
   "main": "index.ts", 
   "name": "@encore2/asset", 
   "scripts": {
-    "test": "./node_modules/@encore/test/mocha.js"
+    "test": "./node_modules/@encore2/test/mocha.js"
   }, 
-  "version": "0.0.0"
+  "version": "2.0.0"
 }
