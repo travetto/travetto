@@ -4,7 +4,7 @@ import { ChangedEvent } from './class-source';
 import { Class } from '../model';
 import * as _ from 'lodash';
 
-abstract class MetadataRegistry<C, M> extends Registry {
+export abstract class MetadataRegistry<C, M> extends Registry {
 
   private pendingClasses = new Map<string, Partial<C>>();
   private pendingMethods = new Map<string, Map<string, Partial<M>>>();
