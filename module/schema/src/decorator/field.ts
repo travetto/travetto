@@ -1,4 +1,3 @@
-import { ObjectUtil } from '@encore2/util';
 import { CommonRegExp, SchemaRegistry, ClassList } from '../service';
 
 function prop(obj: { [key: string]: any }) {
@@ -11,7 +10,7 @@ function enumKeys(c: any): string[] {
   if (Array.isArray(c) && typeof c[0] === 'string') {
     return c;
   } else {
-    return ObjectUtil.values(c).filter((x: any) => typeof x === 'string') as string[];
+    return Object.values(c).filter((x: any) => typeof x === 'string') as string[];
   }
 }
 export function Field(type: ClassList, config?: { [key: string]: any }) {

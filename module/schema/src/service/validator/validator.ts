@@ -2,8 +2,6 @@ import { Class, FieldConfig, SchemaConfig } from '../types';
 import { SchemaRegistry } from '../registry';
 import { Messages } from './messages';
 
-import { ObjectUtil } from '@encore2/util';
-
 export type ValidationError = { message: string, path: string, kind: string };
 
 export class SchemaValidator {

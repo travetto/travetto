@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { SchemaRegistry, Class, BindUtil, SchemaValidator } from '../src';
-import { ObjectUtil } from '@encore2/util';
 
 import { RouteRegistry, AppError } from '@encore2/express';
 
 import * as flat from 'flat';
+import * as _ from 'lodash';
 
 function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
@@ -16,7 +16,7 @@ function getBound<T>(cls: Class<T>, obj: any, view?: string) {
 
 export function SchemaBody<T>(cls: Class<T>, view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
-    if (ObjectUtil.isPlainObject(req.body)) {
+    if (_.isPlainObject(req.body)) {
       let o = getBound(cls, req.body, view);
       if (SchemaRegistry.schemas.has(cls)) {
         req.body = await SchemaValidator.validate(o, view);
