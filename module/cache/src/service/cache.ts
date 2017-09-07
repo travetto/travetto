@@ -1,4 +1,4 @@
-import { Shutdown } from '@encore/base';
+import { Shutdown } from '@encore2/base';
 import * as LRU from 'lru-cache';
 
 export class CacheManager {
