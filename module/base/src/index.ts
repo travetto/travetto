@@ -4,4 +4,5 @@ export * from './app-info';
 export * from './bulk-find';
 export * from './stacktrace';
 export * from './error';
+export * from './shutdown';
 export * from './promise';
