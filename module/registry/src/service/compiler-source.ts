@@ -72,7 +72,6 @@ export class CompilerClassSource implements ClassSource {
       let out = require(file);
       // Get and clear after computed
       let classes: Class[] = PendingRegister.get(file)!;
-      console.log('Computed', classes);
       PendingRegister.delete(file);
       return classes || [];
     } catch (e) {
