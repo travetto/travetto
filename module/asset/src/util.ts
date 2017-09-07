@@ -3,8 +3,8 @@ import * as mime from 'mime';
 import * as path from 'path';
 import * as fileType from 'file-type';
 
-import { nodeToPromise } from '@encore/base';
-import { request } from '@encore/util';
+import { nodeToPromise } from '@encore2/base';
+import { request } from '@encore2/util';
 import { Asset, AssetFile } from './model';
 
 const osTmpdir = require('os-tmpdir');

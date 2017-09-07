@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import { nodeToPromise } from '@encore/base';
-import { Injectable } from '@encore/di';
+import { nodeToPromise } from '@encore2/base';
+import { Injectable } from '@encore2/di';
 import { Asset } from '../model';
 import { AssetSource } from './source';
 

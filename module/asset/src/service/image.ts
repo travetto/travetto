@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as gm from 'gm';
 
-import { nodeToPromise } from '@encore/base';
-import { Cacheable } from '@encore/cache';
-import { Injectable } from '@encore/di';
+import { nodeToPromise } from '@encore2/base';
+import { Cacheable } from '@encore2/cache';
+import { Injectable } from '@encore2/di';
 
 import { AssetService } from './asset';
 import { Asset } from '../model';

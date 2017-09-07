@@ -24,5 +24,5 @@
   "scripts": {
     "test": "./node_modules/@encore/test/mocha.js"
   }, 
-  "version": "2.0.9"
+  "version": "0.0.0"
 }
