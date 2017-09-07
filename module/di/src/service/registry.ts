@@ -1,8 +1,8 @@
 import * as path from 'path';
 
 import { Class, Dependency, InjectableConfig, ClassTarget } from '../types';
-import { bulkRequire, AppEnv, externalPromise } from '@encore/base';
-import { RetargettingHandler, Compiler } from '@encore/compiler';
+import { bulkRequire, AppEnv, externalPromise } from '@encore2/base';
+import { RetargettingHandler, Compiler } from '@encore2/compiler';
 import { InjectionError } from './error';
 import { EventEmitter } from 'events';
 

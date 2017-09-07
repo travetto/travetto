@@ -1,13 +1,13 @@
 {
   "author": "", 
   "dependencies": {
-    "@encore/compiler": "git+ssh://git@git.eaiti.com/encore/compiler.git#v2.x.x", 
-    "@encore/config": "git+ssh://git@git.eaiti.com/encore/config.git#v2.x.x"
+    "@encore2/compiler": "git+ssh://git@git.eaiti.com/encore2/compiler.git#v2.x.x", 
+    "@encore2/config": "git+ssh://git@git.eaiti.com/encore2/config.git#v2.x.x"
   }, 
   "description": "", 
   "license": "ISC", 
   "main": "index.ts", 
-  "name": "@encore/di", 
+  "name": "@encore2/di", 
   "scripts": {}, 
   "version": "2.0.58"
 }

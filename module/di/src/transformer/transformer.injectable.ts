@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
-import { TransformUtil, Import, State } from '@encore/compiler';
-import { ConfigLoader } from '@encore/config';
+import { TransformUtil, Import, State } from '@encore2/compiler';
+import { ConfigLoader } from '@encore2/config';
 
 let INJECTABLES = (function () {
   let out: { [key: string]: Set<string> } = {
@@ -15,7 +15,7 @@ let INJECTABLES = (function () {
       out[v] = new Set();
     }
     k = k
-      .replace(/@encore/, `${process.cwd()}/node_modules/@encore`)
+      .replace(/@encore2/, `${process.cwd()}/node_modules/@encore`)
       .replace('./', `${process.cwd()}/`);
     out[v].add(k);
   }
