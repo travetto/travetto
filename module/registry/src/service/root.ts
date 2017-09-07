@@ -13,7 +13,6 @@ class $RootRegistry extends Registry {
   }
 
   onEvent(e: ChangedEvent) {
-    console.log(e);
     return super.onEvent(e);
   }
 }
