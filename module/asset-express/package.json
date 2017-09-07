@@ -1,8 +1,8 @@
 {
   "author": "", 
   "dependencies": {
-    "@encore/asset": "git+ssh://git@git.eaiti.com/encore2/asset.git#v2.x.x", 
-    "@encore/express": "git+ssh://git@git.eaiti.com/encore2/express.git#v2.x.x", 
+    "@encore2/asset": "git+ssh://git@git.eaiti.com/encore2/asset.git#v2.x.x", 
+    "@encore2/express": "git+ssh://git@git.eaiti.com/encore2/express.git#v2.x.x", 
     "connect-multiparty": "^1.2.5", 
     "express-fileupload": "0.0.4", 
     "mime-match": "^1.0.2", 
@@ -10,7 +10,7 @@
   }, 
   "description": "", 
   "devDependencies": {
-    "@encore/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v2.x.x"
+    "@encore2/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v2.x.x"
   }, 
   "license": "ISC", 
   "main": "index.ts", 
