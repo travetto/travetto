@@ -208,9 +208,6 @@ export class Compiler {
             fileNames.push(fileName);
           }
           this.emitFile(fileName)
-        })
-        .on('unlink', filename => {
-          // On delete
         });
     });
 
