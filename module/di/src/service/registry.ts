@@ -33,6 +33,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     let finalizing = this.pendingFinalize;
     this.pendingFinalize = [];
+    console.log(finalizing);
+
     for (let cls of finalizing) {
       this.onRegister(cls);
     }
