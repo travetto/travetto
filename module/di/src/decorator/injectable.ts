@@ -7,7 +7,7 @@ export function Injectable(config: Partial<InjectableConfig<any>> = {}): ClassDe
     if (typeof config.autoCreate === 'boolean') {
       config.autoCreate = { create: config.autoCreate } as any;
     }
-    DependencyRegistry.finalizeClass(config as any as InjectableConfig<any>);
+    DependencyRegistry.registerClass(config as any as InjectableConfig<any>);
     return target;
   };
 }

@@ -128,18 +128,21 @@ export class DependencyRegistry {
           bulkRequire(glob, undefined, p => !Compiler.optionalFiles.test(p) && !Compiler.definitionFiles.test(p));
         }
 
-        if (this.autoCreate.length) {
-          console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
-          let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
-          for (let i of items) {
-            await this.getInstance(i.target, i.name);
+        // Wait for all items to be processed via the nextTick queue first
+        process.nextTick(async () => {
+          if (this.autoCreate.length) {
+            console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
+            let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
+            for (let i of items) {
+              await this.getInstance(i.target, i.name);
+            }
           }
-        }
+          this.initalized.resolve(true);
+        });
       } catch (e) {
         console.log(e);
         throw e;
       }
-      this.initalized.resolve(true);
     }
     return await this.initalized;
   }
@@ -181,7 +184,7 @@ export class DependencyRegistry {
     dependency.name = dependency.name || DEFAULT_INSTANCE;
   }
 
-  static finalizeClass<T>(pconfig: Partial<InjectableConfig<T>>) {
+  static registerClass<T>(pconfig: Partial<InjectableConfig<T>>) {
     let classId = pconfig.class!.__id!;
     let config = this.getOrCreatePendingConfig(pconfig.class!);
 
@@ -198,7 +201,17 @@ export class DependencyRegistry {
       }
     }
 
-    let parentClass = Object.getPrototypeOf(pconfig.class!);
+    // Finalize after everything is configured, do not rely on decorator order,
+    //  relies on the next tick queue to honor the order
+    process.nextTick(this.finalizeClass.bind(this, pconfig.class!));
+  }
+
+  static finalizeClass<T>(cls: Class<T>) {
+    let classId = cls!.__id!;
+    let config = this.getOrCreatePendingConfig(cls);
+
+
+    let parentClass = Object.getPrototypeOf(cls);
     let parentConfig = this.injectables.get(parentClass.__id);
 
     if (parentConfig) {
@@ -242,5 +255,4 @@ export class DependencyRegistry {
       })
     }
   }
-
 }

@@ -94,11 +94,6 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         declTemp.push(injectable);
       }
 
-      // Force injectable to top
-      if (declTemp[0] !== injectable) {
-        declTemp.unshift(...declTemp.splice(declTemp.indexOf(injectable), 1))
-      }
-
       decls = ts.createNodeArray(declTemp);
     }
 
