@@ -54,8 +54,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.pendingFinalize.push(cls);
     }
 
-    console.log('Registering', cls.__id);
-
     return {
       name: DEFAULT_INSTANCE,
       class: cls,
@@ -138,7 +136,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         out = new Proxy({}, handler);
         this.proxyHandlers.get(targetId)!.set(name, handler);
       } else {
-        console.log('Updating target');
+        console.log('Updating target', out);
         this.proxyHandlers.get(targetId)!.get(name)!.target = out;
         // Don't re-set instance
         return;
@@ -151,6 +149,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   async getInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
     let targetId = target.__id;
     if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(name)) {
+      console.log('Getting Intance', targetId, name);
       await this.createInstance(target, name);
     }
     return this.instances.get(targetId)!.get(name)!;
@@ -199,7 +198,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
-    let classId = cls!.__id;
+    let classId = cls.__id;
+
+    console.log('Finalized', classId);
 
     let config = this.getOrCreateClassConfig(cls) as InjectableConfig<T>;
 
@@ -250,6 +251,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     return config;
+  }
+
+  async onUninstall(cls: Class) {
+    //    await super.onUninstall(cls);
+    // do nothing
   }
 }
 

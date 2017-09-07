@@ -3,7 +3,7 @@ import { DbConfig, AltConfig } from './config';
 import { DependencyRegistry } from '../src/service';
 
 @Injectable()
-export class Database {
+class Database {
   @Inject() dbConfig: DbConfig;
   @Inject({ optional: true }) altConfig: AltConfig;
 
@@ -12,12 +12,12 @@ export class Database {
   }
 
   query() {
-    console.log('Getting stuffztz', this.dbConfig.getUrl());
+    console.log('Getting 300', this.dbConfig.getUrl());
   }
 }
 
 @Injectable()
-export class Service {
+class Service {
 
   constructor(protected db: Database) {
     console.log('Creating service', db);
@@ -29,7 +29,9 @@ export class Service {
 }
 
 @Injectable()
-export class ServiceInherit extends Service {
+class ServiceInherit extends Service {
+  name = 'bob';
+  age = 30;
   doWork() {
     this.db.query();
   }
@@ -41,4 +43,4 @@ async function run() {
   inst.doWork();
 }
 
-setInterval(() => run(), 1000);
+setTimeout(() => run(), 1000);
