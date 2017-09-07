@@ -1,20 +1,16 @@
-import * as path from 'path';
-import { EventEmitter } from 'events';
-
-import { bulkRequire, AppEnv, externalPromise, bulkFind } from '@encore2/base';
-import { RetargettingHandler, Compiler } from '@encore2/compiler';
+import { externalPromise } from '@encore2/base';
 import { Class } from '../model/types';
+import { ClassSource, ChangedEvent } from './class-source';
 
-export class Registry {
+export abstract class Registry extends ClassSource {
 
-  static classes = new Map<string, Map<string, Class>>();
-  static events = new EventEmitter();
-  static initialized = externalPromise();
-  static dependents: Registry[] = [];
+  classes = new Map<string, Map<string, Class>>();
+  initialized = externalPromise();
+  dependents: Registry[] = [];
 
-  static async _init() { }
+  abstract _init(): Promise<void>;
 
-  static async initialize() {
+  async initialize() {
 
     if (this.initialized.run()) {
       return await this.initialized;
@@ -22,7 +18,6 @@ export class Registry {
 
     try {
       await this._init();
-
       this.initialized.resolve(true);
     } catch (e) {
       console.log(e);
@@ -30,7 +25,7 @@ export class Registry {
     }
   }
 
-  protected static unregister(classes: Class | Class[]) {
+  protected unregister(classes: Class | Class[]) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -41,7 +36,7 @@ export class Registry {
     }
   }
 
-  protected static register(classes: Class | Class[]) {
+  protected register(classes: Class | Class[]) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -49,44 +44,38 @@ export class Registry {
       if (!this.classes.has(cls.__filename!)) {
         this.classes.set(cls.__filename!, new Map());
       }
-      let changed = this.classes.get(cls.__filename!)!.has(cls.__id!);
       this.classes.get(cls.__filename!)!.set(cls.__id!, cls);
     }
   }
 
-  protected static async watchChanged(file: string, classes: Class[]) {
+
+  protected async onEvent(event: ChangedEvent) {
+    let file = (event.curr || event.prev)!.__filename!;
+
     let prev = new Map();
     if (this.classes.has(file)) {
       prev = new Map(this.classes.get(file)!.entries());
     }
 
-    await this.unregister(Array.from(prev.values()));
-    await this.register(classes);
-
-    let next = this.classes.get(file) || new Map();
-
-    let keys = new Set([...prev.keys(), ...next.keys()]);
-
-    for (let k of keys) {
-      if (!next.has(k)) {
-        this.emit('removed', prev.get(k)!);
-      } else if (!prev.has(k)) {
-        this.emit('added', next.get(k));
-      } else {
-        this.emit('changed', [next.get(k)!, prev.get(k)!]);
-      }
+    switch (event.type) {
+      case 'removed':
+        this.unregister(event.prev!);
+        break;
+      case 'added':
+        this.register(event.curr!);
+        break;
+      case 'changed':
+        this.unregister(event.prev!);
+        this.register(event.curr!);
+        break;
+      default:
+        return;
     }
+
+    this.emit(event);
   }
 
-  protected static emit(event: string, data: Class | Class[]) {
-    console.log('Emit', event, data);
-    this.events.emit(event, data);
-  }
-
-  static on(event: 'changed', callback: (result: [Class, Class]) => any): void;
-  static on(event: 'removed', callback: (result: Class) => any): void;
-  static on(event: 'added', callback: (result: Class) => any): void;
-  static on<T>(event: string, callback: (result: T) => any): void {
-    this.events.on(event, callback);
+  listen(source: ClassSource, filter?: (e: ChangedEvent) => boolean) {
+    source.on(e => this.onEvent(e), filter);
   }
 }
