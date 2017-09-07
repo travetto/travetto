@@ -2,10 +2,10 @@ import * as mongo from 'mongodb';
 import * as flat from 'flat';
 import * as _ from 'lodash';
 
-import { ModelSource, IndexConfig, Query, QueryOptions, BulkState, BulkResponse, ModelRegistry } from '@encore/model';
-import { Injectable } from '@encore/di';
+import { ModelSource, IndexConfig, Query, QueryOptions, BulkState, BulkResponse, ModelRegistry } from '@encore2/model';
+import { Injectable } from '@encore2/di';
 import { ModelMongoConfig } from './config';
-import { Class } from '@encore/schema';
+import { Class } from '@encore2/schema';
 export interface Base {
   _id: string;
 }
@@ -151,7 +151,9 @@ export class MongoService extends ModelSource {
   }
 
   async getById<T extends Base>(named: Class<T>, id: string): Promise<T> {
-    return await this.getByQuery<T>(named, { _id: id });
+    return await this.getByQuery<T>(named, {
+      $and: [{ _id: undefined }]
+    });
   }
 
   async deleteById(named: Class, id: string): Promise<number> {
