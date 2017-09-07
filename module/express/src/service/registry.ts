@@ -13,9 +13,24 @@ export class ControllerRegistry {
   public static controllers = new Map<string, ControllerConfig>();
   private static events = new EventEmitter();
 
+  static getOrCreateControllerConfig(cls: Class) {
+    let id = cls.__id!;
+
+    if (!this.pendingControllers.has(id)) {
+      this.pendingControllers.set(id, {
+        filters: [],
+        path: '',
+        class: cls,
+        handlers: []
+
+      });
+    }
+    return this.pendingControllers.get(id)!;
+  }
+
   static getOrCreateRequestHandlerConfig(cls: Class, handler: Filter) {
     let id = cls.__id!;
-    let controllerConf = this.pendingControllers.get(id)!;
+    let controllerConf = this.getOrCreateControllerConfig(cls);
 
     if (!this.pendingHandlerMap.has(id)) {
       this.pendingHandlerMap.set(id, new Map());
@@ -32,22 +47,6 @@ export class ControllerRegistry {
     }
     return this.pendingHandlerMap.get(id)!.get(handler)!;
   }
-
-  static getOrCreateControllerConfig(cls: Class) {
-    let id = cls.__id!;
-
-    if (!this.pendingControllers.has(id)) {
-      this.pendingControllers.set(id, {
-        filters: [],
-        path: '',
-        class: cls,
-        handlers: []
-
-      });
-    }
-    return this.pendingControllers.get(id)!;
-  }
-
 
   static registerControllerFilter(target: Class, fn: Filter) {
     let config = this.getOrCreateControllerConfig(target);
