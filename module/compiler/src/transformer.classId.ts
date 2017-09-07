@@ -14,7 +14,7 @@ function createStaticField(name: string, val: ts.Expression) {
   );
 }
 
-function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: { file: string }): T {
+function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: { file: string, fullFile: string }): T {
   if (ts.isClassDeclaration(node)) {
     return ts.updateClassDeclaration(node,
       node.decorators,
@@ -23,7 +23,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       node.typeParameters,
       ts.createNodeArray(node.heritageClauses),
       ts.createNodeArray([
-        createStaticField('__filename', ts.createIdentifier('__filename')),
+        createStaticField('__filename', ts.createLiteral(state.fullFile)),
         createStaticField('__id', ts.createLiteral(state.file + '#' + node.name!.getText())),
 
         ...node.members
@@ -51,7 +51,7 @@ export const ClassIdTransformer = {
         .replace(PATH_RE, '.')
         .replace(/^\./, '')
         .replace(/\.(t|j)s$/, '');
-      return visitNode(context, file, { file: `${ns}:${fileRoot}` })
+      return visitNode(context, file, { file: `${ns}:${fileRoot}`, fullFile: file.fileName })
     },
   phase: 'before'
 }
