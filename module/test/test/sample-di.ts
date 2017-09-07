@@ -1,4 +1,4 @@
-import { Injectable, DependencyRegistry } from '@encore/di';
+import { Injectable, DependencyRegistry } from '@encore2/di';
 import { expect } from 'chai';
 
 @Injectable()

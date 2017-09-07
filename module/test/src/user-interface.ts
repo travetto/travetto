@@ -1,5 +1,5 @@
 import { declareSuite, initialize } from './util';
-import { addStackFilters } from '@encore/base';
+import { addStackFilters } from '@encore2/base';
 
 addStackFilters('mocha/lib/run');
 
