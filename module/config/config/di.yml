@@ -1,3 +1,0 @@
----
-injectables:
-   '@encore/config/src/decorator/config.ts': Config
