@@ -105,6 +105,7 @@ export class Compiler {
         let handler = new RetargettingHandler(mod);
         out = new Proxy({}, handler);
         this.modules.set(p, { module: out, handler });
+        this.events.emit('added', p);
       } else {
         const conf = this.modules.get(p)!;
         conf.handler!.target = mod;
@@ -124,7 +125,6 @@ export class Compiler {
       this.rootFiles.push(tsf);
       this.files.set(tsf, { version: 0 });
       this.emitFile(tsf);
-
     }
     content = this.contents.get(jsf)!;
 
