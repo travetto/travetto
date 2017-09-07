@@ -6,11 +6,11 @@ import * as _ from 'lodash';
 
 export abstract class MetadataRegistry<C, M = any> extends Registry {
 
-  private pendingClasses = new Map<string, Partial<C>>();
-  private pendingMethods = new Map<string, Map<string, Partial<M>>>();
-  private finalClasses = new Map<string, C>();
+  pendingClasses = new Map<string, Partial<C>>();
+  pendingMethods = new Map<string, Map<string, Partial<M>>>();
+  finalClasses = new Map<string, C>();
 
-  abstract onFinalize(cls: Class, clsConfig: Partial<C>, methodConfigs?: Map<string, Partial<M>>): C;
+  abstract onFinalize(cls: Class): C;
 
   abstract onNewClassConfig(cls: Class): Partial<C>;
 
@@ -47,7 +47,7 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
   }
 
   finalizeClass(cls: Class) {
-    let result = this.onFinalize(cls, this.getOrCreateClassConfig(cls), this.pendingMethods.get(cls.__id)!);
+    let result = this.onFinalize(cls);
     this.pendingMethods.delete(cls.__id);
     this.pendingClasses.delete(cls.__id);
     this.finalClasses.set(cls.__id, result);

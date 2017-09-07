@@ -6,7 +6,13 @@ export abstract class Registry extends ClassSource {
 
   classes = new Map<string, Map<string, Class>>();
   initialized = externalPromise();
-  dependents: Registry[] = [];
+
+  constructor(private parent?: Registry) {
+    super();
+    if (parent) {
+      this.listen(parent);
+    }
+  }
 
   abstract _init(): Promise<void>;
 
