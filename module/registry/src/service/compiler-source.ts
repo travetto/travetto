@@ -33,8 +33,6 @@ export class CompilerClassSource extends ClassSource {
   }
 
   protected async watch(file: string) {
-    console.log(file);
-
     if (file.endsWith('index.ts')) {
       return;
     }
