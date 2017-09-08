@@ -15,9 +15,11 @@ export abstract class Registry implements ClassSource {
     }
   }
 
-  abstract init(): Promise<void>;
+  async initialInstall(): Promise<Class[] | undefined> {
+    return;
+  }
 
-  async initialize() {
+  async init() {
 
     if (this.initialized.run()) {
       return await this.initialized;
@@ -28,7 +30,10 @@ export abstract class Registry implements ClassSource {
         await this.source.init();
       }
 
-      await this.init();
+      let classes = await this.initialInstall();
+      if (classes) {
+        this.install(classes);
+      }
       this.initialized.resolve(true);
     } catch (e) {
       console.log(e);
