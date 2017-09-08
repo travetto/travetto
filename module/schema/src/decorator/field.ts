@@ -2,7 +2,7 @@ import { CommonRegExp, SchemaRegistry, ClassList } from '../service';
 
 function prop(obj: { [key: string]: any }) {
   return (f: any, p: string) => {
-    SchemaRegistry.registerPendingFieldFacet(f, p, obj);
+    SchemaRegistry.registerPendingFieldFacet(f.constructor, p, obj);
   };
 }
 
@@ -15,9 +15,9 @@ function enumKeys(c: any): string[] {
 }
 export function Field(type: ClassList, config?: { [key: string]: any }) {
   return (f: any, p: string) => {
-    SchemaRegistry.registerPendingFieldConfig(f, p, type);
+    SchemaRegistry.registerPendingFieldConfig(f.constructor, p, type);
     if (config) {
-      SchemaRegistry.registerPendingFieldFacet(f, p, config);
+      SchemaRegistry.registerPendingFieldFacet(f.constructor, p, config);
     }
   };
 };
@@ -41,7 +41,7 @@ export const Url = (message?: string) => Match(CommonRegExp.url, message);
 export function View(...names: string[]) {
   return (f: any, p: string) => {
     for (let name of names) {
-      SchemaRegistry.registerPendingFieldFacet(f, p, {}, name);
+      SchemaRegistry.registerPendingFieldFacet(f.constructor, p, {}, name);
     }
   };
 }

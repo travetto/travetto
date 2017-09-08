@@ -32,10 +32,12 @@ export class BindUtil {
           (obj as any)[k] = data[k];
         }
       } else {
+
         let viewConf = conf && conf.views[view];
         if (!viewConf) {
           throw new Error(`View not found: ${view}`);
         }
+
         for (let schemaFieldName of viewConf.fields) {
           let inboundField: string | undefined = undefined;
 

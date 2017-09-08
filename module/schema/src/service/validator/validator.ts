@@ -149,7 +149,7 @@ export class SchemaValidator {
   }
 
   static async validate<T>(o: T, view?: string): Promise<T> {
-    let cls = SchemaRegistry.getClass(o);
+    let cls = o.constructor as Class;
     let config = SchemaRegistry.getViewSchema(cls, view);
 
     let errors = this.validateSchema(config.schema, o, view, '');

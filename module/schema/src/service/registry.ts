@@ -33,10 +33,6 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     return parent.name && (parent as any) !== Object ? parent : null;
   }
 
-  getClass<T>(o: T): Class<T> {
-    return o.constructor as Class<T>;
-  }
-
   getPendingViewSchema<T>(cls: Class<T>, view?: string) {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
@@ -67,11 +63,10 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     return viewConf;
   }
 
-  registerPendingFieldFacet(target: any, prop: string, config: any, view?: string) {
+  registerPendingFieldFacet(target: Class, prop: string, config: any, view?: string) {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
-    let cons = this.getClass(target);
-    let defViewConf = this.getOrCreatePendingViewConfig(cons);
+    let defViewConf = this.getOrCreatePendingViewConfig(target);
 
     if (!defViewConf.schema[prop]) {
       defViewConf.fields.push(prop);
@@ -79,7 +74,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     }
 
     if (view !== $SchemaRegistry.DEFAULT_VIEW) {
-      let viewConf = this.getOrCreatePendingViewConfig(cons, view);
+      let viewConf = this.getOrCreatePendingViewConfig(target, view);
       if (!viewConf.schema[prop]) {
         viewConf.schema[prop] = defViewConf.schema[prop];
         viewConf.fields.push(prop);
@@ -91,8 +86,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     return target;
   }
 
-  registerPendingFieldConfig(target: any, prop: string, type: ClassList) {
-    let cons = this.getClass(target);
+  registerPendingFieldConfig(target: Class, prop: string, type: ClassList) {
     const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
       type,
@@ -102,16 +96,14 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
       }
     };
 
-    console.log('Registering field config', cons.__id, prop, type);
-
     // Get schema if exists
-    const schema = this.getPendingViewSchema(cons);
+    const schema = this.getPendingViewSchema(target);
 
     if (schema) {
       fieldConf.type = isArray ? [schema] : schema;
     }
 
-    return this.registerPendingFieldFacet(cons, prop, fieldConf);
+    return this.registerPendingFieldFacet(target, prop, fieldConf);
   }
 
   mergeConfigs(dest: ClassConfig, src: ClassConfig) {
@@ -134,7 +126,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
 
   onInstallFinalize(cls: Class) {
 
-    let config: ClassConfig = {} as ClassConfig;
+    let config: ClassConfig = this.onNewClassConfig(cls) as ClassConfig;
 
     // Merge parent
     let parent = this.getParent(cls) as Class;
