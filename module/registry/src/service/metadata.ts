@@ -46,17 +46,23 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
     _.merge(conf, pconfig);
   }
 
-  async onInstall(cls: Class) {
+  async onInstall(cls: Class, e: ChangedEvent) {
     if (this.pendingClasses.has(cls.__id) || this.pendingMethods.has(cls.__id)) {
       let result = this.onInstallFinalize(cls);
       this.pendingMethods.delete(cls.__id);
       this.pendingClasses.delete(cls.__id);
       this.finalClasses.set(cls.__id, result);
+      this.emit(e);
     }
   }
 
-  async onUninstall(cls: Class) {
-    this.finalClasses.delete(cls.__id);
+  async onUninstall(cls: Class, e: ChangedEvent) {
+    if (this.finalClasses.has(cls.__id)) {
+      this.finalClasses.delete(cls.__id);
+      if (e.type === 'removed') {
+        this.emit(e);
+      }
+    }
   }
 
   onEvent(e: ChangedEvent) {
