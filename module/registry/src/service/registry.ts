@@ -75,7 +75,7 @@ export abstract class Registry implements ClassSource {
 
 
   async onEvent(event: ChangeEvent) {
-    let file = (event.curr || event.prev)!.__filename;
+    console.log('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
 
     switch (event.type) {
       case 'removing':
