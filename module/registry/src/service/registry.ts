@@ -24,6 +24,10 @@ export abstract class Registry implements ClassSource {
     }
 
     try {
+      if (this.source) {
+        await this.source.init();
+      }
+
       await this.init();
       this.initialized.resolve(true);
     } catch (e) {
