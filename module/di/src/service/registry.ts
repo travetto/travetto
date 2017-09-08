@@ -247,11 +247,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     return config;
   }
-
-  async onUninstall(cls: Class, e: ChangeEvent) {
-    //    await super.onUninstall(cls);
-    // do nothing
-  }
 }
 
 export const DependencyRegistry = new $DependencyRegistry();
