@@ -35,12 +35,12 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     return this.pendingClasses.has(cls);
   }
 
-  getClasses() {
+  getRawClasses() {
     return Array.from(this.classes.values()).map(x => x.class);
   }
 
   initialInstall(): any {
-    return this.getClasses();
+    return this.getRawClasses();
   }
 
   onNewMethodConfig(cls: Class, method: Function): Partial<M> {
