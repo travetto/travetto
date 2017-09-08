@@ -1,6 +1,6 @@
 import { Registry } from './registry';
 import { CompilerClassSource } from './compiler-source';
-import { ChangedEvent } from './class-source';
+import { ChangeEvent } from './class-source';
 import { Class } from '../model';
 import * as _ from 'lodash';
 
@@ -8,7 +8,7 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
 
   pendingClasses = new Map<string, Partial<C>>();
   pendingMethods = new Map<string, Map<Function, Partial<M>>>();
-  finalClasses = new Map<string, C>();
+  classes = new Map<string, C>();
 
   abstract onInstallFinalize<T>(cls: Class<T>): C;
 
@@ -46,27 +46,22 @@ export abstract class MetadataRegistry<C, M = any> extends Registry {
     _.merge(conf, pconfig);
   }
 
-  async onInstall(cls: Class, e: ChangedEvent) {
+  async onInstall(cls: Class, e: ChangeEvent) {
     if (this.pendingClasses.has(cls.__id) || this.pendingMethods.has(cls.__id)) {
       let result = this.onInstallFinalize(cls);
       this.pendingMethods.delete(cls.__id);
       this.pendingClasses.delete(cls.__id);
-      this.finalClasses.set(cls.__id, result);
+      this.classes.set(cls.__id, result);
       this.emit(e);
     }
   }
 
-  async onUninstall(cls: Class, e: ChangedEvent) {
-    if (this.finalClasses.has(cls.__id)) {
-      this.finalClasses.delete(cls.__id);
-      if (e.type === 'removed') {
+  async onUninstall(cls: Class, e: ChangeEvent) {
+    if (this.classes.has(cls.__id)) {
+      if (e.type === 'removing') {
         this.emit(e);
       }
+      this.classes.delete(cls.__id);
     }
-  }
-
-  onEvent(e: ChangedEvent) {
-    let ret = super.onEvent(e);
-    return ret;
   }
 }

@@ -2,7 +2,7 @@ import { Compiler } from '@encore2/compiler';
 import { Class } from '../model/types';
 import { bulkFind } from '@encore2/base';
 import { EventEmitter } from 'events';
-import { ClassSource, ChangedEvent } from './class-source';
+import { ClassSource, ChangeEvent } from './class-source';
 import { PendingRegister } from '../decorator/register';
 
 export class CompilerClassSource implements ClassSource {
@@ -10,7 +10,7 @@ export class CompilerClassSource implements ClassSource {
   private classes = new Map<string, Map<string, Class>>();
   private events = new EventEmitter();
 
-  emit(e: ChangedEvent) {
+  emit(e: ChangeEvent) {
     this.events.emit('change', e);
   }
 
@@ -36,7 +36,7 @@ export class CompilerClassSource implements ClassSource {
     Compiler.on('added', this.watch.bind(this));
   }
 
-  on<T>(callback: (e: ChangedEvent) => void): void {
+  on<T>(callback: (e: ChangeEvent) => void): void {
     this.events.on('change', callback);
   }
 
@@ -59,8 +59,8 @@ export class CompilerClassSource implements ClassSource {
 
     for (let k of keys) {
       if (!next.has(k)) {
+        this.emit({ type: 'removing', prev: prev.get(k)! });
         this.classes.get(file)!.delete(k);
-        this.emit({ type: 'removed', prev: prev.get(k)! });
       } else {
         this.classes.get(file)!.set(k, next.get(k)!);
         this.emit({ type: !prev.has(k) ? 'added' : 'changed', curr: next.get(k)!, prev: prev.get(k) });

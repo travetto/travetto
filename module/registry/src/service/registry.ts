@@ -1,11 +1,10 @@
 import { externalPromise } from '@encore2/base';
 import { Class } from '../model/types';
-import { ClassSource, ChangedEvent } from './class-source';
+import { ClassSource, ChangeEvent } from './class-source';
 import { EventEmitter } from 'events';
 
 export abstract class Registry implements ClassSource {
 
-  protected classes = new Map<string, Map<string, Class>>();
   protected initialized = externalPromise();
   protected events = new EventEmitter();
   protected descendents: Registry[] = [];
@@ -48,45 +47,38 @@ export abstract class Registry implements ClassSource {
     }
   }
 
-  async onInstall(cls: Class, e: ChangedEvent): Promise<void> {
+  async onInstall(cls: Class, e: ChangeEvent): Promise<void> {
 
   }
 
-  async onUninstall(cls: Class, e: ChangedEvent): Promise<void> {
+  async onUninstall(cls: Class, e: ChangeEvent): Promise<void> {
 
   }
 
-  async uninstall(classes: Class | Class[], e: ChangedEvent) {
+  async uninstall(classes: Class | Class[], e: ChangeEvent) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
     for (let cls of classes) {
-      if (this.classes.has(cls.__filename) && this.classes.get(cls.__filename)!.has(cls.__id)) {
-        await this.onUninstall(cls, e);
-        this.classes.get(cls.__filename)!.delete(cls.__id);
-      }
+      await this.onUninstall(cls, e);
     }
   }
 
-  async install(classes: Class | Class[], e: ChangedEvent) {
+  async install(classes: Class | Class[], e: ChangeEvent) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
     for (let cls of classes) {
-      if (!this.classes.has(cls.__filename)) {
-        this.classes.set(cls.__filename, new Map());
-      }
-      this.classes.get(cls.__filename)!.set(cls.__id, cls);
       await this.onInstall(cls, e);
     }
   }
 
 
-  async onEvent(event: ChangedEvent) {
+  async onEvent(event: ChangeEvent) {
     let file = (event.curr || event.prev)!.__filename;
 
     switch (event.type) {
-      case 'removed':
+      case 'removing':
         await this.uninstall(event.prev!, event);
         break;
       case 'added':
@@ -103,11 +95,11 @@ export abstract class Registry implements ClassSource {
     this.events.emit('change', event);
   }
 
-  emit(e: ChangedEvent) {
+  emit(e: ChangeEvent) {
     this.events.emit('change', e);
   }
 
-  on<T>(callback: (e: ChangedEvent) => any): void {
+  on<T>(callback: (e: ChangeEvent) => any): void {
     this.events.on('change', callback);
   }
 
