@@ -32,7 +32,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     return Array.from(this.classes.values()).map(x => x.class);
   }
 
-  initialInstall() {
+  initialInstall(): any {
     return this.getClasses();
   }
 
