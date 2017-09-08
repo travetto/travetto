@@ -23,9 +23,14 @@ export class ExpressApp {
   constructor(private config: ExpressConfig) {
   }
 
-  async postConstruct() {
-    await ControllerRegistry.init();
+  postConstruct() {
+    // Wait for, need to wait for controller registry to be active,
+    //  but can hold up di creation
+    ControllerRegistry.init()
+      .then(() => this.init());
+  }
 
+  async init() {
     this.app = express();
     this.app.use(compression());
     this.app.use(cookieParser());
@@ -67,6 +72,7 @@ export class ExpressApp {
       if (e.curr) {
         this.registerController(ControllerRegistry.finalClasses.get(e.curr.__id)!);
       } else if (e.prev) {
+        this.unregisterController(ControllerRegistry.finalClasses.get(e.prev.__id)!);
         // TODO: uninstall
       }
     });
@@ -79,9 +85,13 @@ export class ExpressApp {
     }
   }
 
+  async unregisterController(config: ControllerConfig) {
+    console.log('Unregistering', config.class.__id, config.path);
+    this.app._router.stack = RouteUtil.removeAllRoutes(this.app._router.stack, config);
+  }
+
   async registerController(config: ControllerConfig) {
     let instance = await DependencyRegistry.getInstance(config.class);
-    console.log(instance);
 
     console.log('Controller Instance', config.class.name, instance);
 
@@ -93,10 +103,13 @@ export class ExpressApp {
         RouteUtil.outputHandler.bind(null, handler))
     }
 
+    this.unregisterController(config);
+
     if (this.controllers.has(config.path)) {
       console.log('Unregistering', config.path);
       this.app._router.stack = RouteUtil.removeAllRoutes(this.app._router.stack, config);
     }
+
     console.log('Registering', config.path, config.handlers.length);
     for (let hconf of config.handlers) {
       hconf.instance = instance;
