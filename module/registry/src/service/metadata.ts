@@ -47,7 +47,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     return {}
   }
 
-  getPendingOrCreateClass(cls: Class): Partial<C> {
+  getOrCreatePendingClass(cls: Class): Partial<C> {
     if (!this.pendingClasses.has(cls.__id)) {
       this.pendingClasses.set(cls.__id, this.onNewClassConfig(cls));
       this.pendingMethods.set(cls.__id, new Map());
@@ -55,8 +55,8 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     return this.pendingClasses.get(cls.__id)!;
   }
 
-  getPendingOrCreateMethod(cls: Class, method: Function): Partial<M> {
-    this.getPendingOrCreateClass(cls);
+  getOrCreatePendingMethod(cls: Class, method: Function): Partial<M> {
+    this.getOrCreatePendingClass(cls);
 
     if (!this.pendingMethods.get(cls.__id)!.has(method)) {
       this.pendingMethods.get(cls.__id)!.set(method, this.onNewMethodConfig(cls, method));
@@ -66,12 +66,12 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
 
 
   registerClass(cls: Class, pconfig: Partial<C>) {
-    let conf = this.getPendingOrCreateClass(cls);
+    let conf = this.getOrCreatePendingClass(cls);
     _.merge(conf, pconfig);
   }
 
   registerMethod(cls: Class, method: Function, pconfig: Partial<M>) {
-    let conf = this.getPendingOrCreateMethod(cls, method);
+    let conf = this.getOrCreatePendingMethod(cls, method);
     _.merge(conf, pconfig);
   }
 
