@@ -9,11 +9,6 @@ import { toPromise } from '@encore2/base';
 import { ExpressOperator } from './operator';
 import { Class } from '@encore2/registry';
 
-let compression = require('compression');
-let cookieParser = require('cookie-parser');
-let bodyParser = require('body-parser');
-let session = require('express-session');
-
 @Injectable({ autoCreate: { create: true, priority: 1 } })
 export class ExpressApp {
 
@@ -31,6 +26,11 @@ export class ExpressApp {
   }
 
   async init() {
+    let compression = require('compression');
+    let cookieParser = require('cookie-parser');
+    let bodyParser = require('body-parser');
+    let session = require('express-session');
+
     this.app = express();
     this.app.use(compression());
     this.app.use(cookieParser());
@@ -63,16 +63,16 @@ export class ExpressApp {
     }
 
     // Register all active
-    await Promise.all(Array.from(ControllerRegistry.finalClasses.values())
+    await Promise.all(Array.from(ControllerRegistry.classes.values())
       .map(c => this.registerController(c)));
 
     // Listen for updates
     ControllerRegistry.on(e => {
       console.log('Registry added', e);
       if (e.curr) {
-        this.registerController(ControllerRegistry.finalClasses.get(e.curr.__id)!);
+        this.registerController(ControllerRegistry.classes.get(e.curr.__id)!);
       } else if (e.prev) {
-        this.unregisterController(ControllerRegistry.finalClasses.get(e.prev.__id)!);
+        this.unregisterController(ControllerRegistry.classes.get(e.prev.__id)!);
         // TODO: uninstall
       }
     });

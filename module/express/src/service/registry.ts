@@ -76,11 +76,6 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
   registerClass(cls: Class, config: { class: Class, path: string }) {
     let conf = this.getOrCreateClassConfig(config.class);
     conf.path = config.path;
-
-    if (this.initialized.resolved) {
-      console.log('Live reload', config.class.__id)
-      this.install(config.class);
-    }
   }
 
   onInstallFinalize(cls: Class) {
@@ -95,10 +90,7 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
   }
 
   async initialInstall() {
-    console.log(Array.from(this.pendingClasses.keys()));
-    for (let { class: cls } of this.pendingClasses.values()) {
-      this.install(cls!);
-    }
+    return Array.from(this.pendingClasses.values()).map(x => x.class!);
   }
 }
 
