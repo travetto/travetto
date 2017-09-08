@@ -159,7 +159,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   // Undefined indicates no constructor
   registerConstructor<T>(cls: Class<T>, dependencies?: Dependency<any>[]) {
-    let conf = this.getOrCreateClassConfig(cls);
+    let conf = this.getOrCreatePendingClass(cls);
     conf.dependencies!.cons = dependencies;
     if (dependencies) {
       for (let dependency of dependencies) {
@@ -169,14 +169,14 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency<any>) {
-    let conf = this.getOrCreateClassConfig(cls);
+    let conf = this.getOrCreatePendingClass(cls);
     conf.dependencies!.fields[field] = dependency;
     dependency.name = dependency.name || DEFAULT_INSTANCE;
   }
 
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
     let classId = pconfig.class!.__id;
-    let config = this.getOrCreateClassConfig(pconfig.class!);
+    let config = this.getOrCreatePendingClass(pconfig.class!);
 
     if (pconfig.name) {
       config.name = pconfig.name;
@@ -197,7 +197,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     console.log('Finalized', classId);
 
-    let config = this.getPendingOrCreateClass(cls) as InjectableConfig<T>;
+    let config = this.getOrCreatePendingClass(cls) as InjectableConfig<T>;
 
     let parentClass = Object.getPrototypeOf(cls);
     let parentConfig = this.getClass(parentClass.__id);
