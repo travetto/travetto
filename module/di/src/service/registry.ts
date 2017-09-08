@@ -38,13 +38,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // Unblock auto created
     if (this.autoCreate.length) {
-      process.nextTick(async () => {
-        console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
-        let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
-        for (let i of items) {
-          await this.getInstance(i.target, i.name);
-        }
-      });
+      console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
+      let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
+      for (let i of items) {
+        await this.getInstance(i.target, i.name);
+      }
     }
   }
 
