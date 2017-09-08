@@ -1,8 +1,8 @@
+import { Class } from '@encore2/registry';
 
-export interface Class<T = any> {
-  new(...args: any[]): T;
+
+export interface SchemaClass<T = any> {
   from?: <Z>(data: any) => Z;
-  name: string;
 }
 
 export type ClassList = Class | [Class];

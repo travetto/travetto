@@ -1,5 +1,5 @@
-import { Class, ClassList, FieldConfig, ClassConfig, ViewConfig } from './types';
-import { MetadataRegistry, RootRegistry } from '@encore2/registry';
+import { ClassList, FieldConfig, ClassConfig, ViewConfig } from './types';
+import { MetadataRegistry, RootRegistry, Class } from '@encore2/registry';
 
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
 
