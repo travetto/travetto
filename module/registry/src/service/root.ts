@@ -8,8 +8,6 @@ class $RootRegistry extends Registry {
     super(new CompilerClassSource());
   }
 
-  async init() { }
-
   onEvent(e: ChangedEvent) {
     return super.onEvent(e);
   }
