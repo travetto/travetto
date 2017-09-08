@@ -53,18 +53,17 @@ export class CompilerClassSource implements ClassSource {
 
     let keys = new Set([...prev.keys(), ...next.keys()]);
 
+    if (!this.classes.has(file)) {
+      this.classes.set(file, new Map());
+    }
+
     for (let k of keys) {
-      if (!this.classes.has(file)) {
-        this.classes.set(file, new Map());
-      }
       if (!next.has(k)) {
         this.classes.get(file)!.delete(k);
         this.emit({ type: 'removed', prev: prev.get(k)! });
-      } else if (!prev.has(k)) {
-        this.classes.get(file)!.set(k, next.get(k)!);
-        this.emit({ type: 'added', curr: next.get(k) });
       } else {
-        this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k)! });
+        this.classes.get(file)!.set(k, next.get(k)!);
+        this.emit({ type: !prev.has(k) ? 'added' : 'changed', curr: next.get(k)!, prev: prev.get(k) });
       }
     }
   }
