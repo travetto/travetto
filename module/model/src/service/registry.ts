@@ -17,7 +17,7 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions> {
   }
 
   registerClass(cls: Class, options: Partial<ModelOptions>) {
-    let pending = this.getOrCreateClassConfig(cls);
+    let pending = this.getOrCreatePendingClass(cls);
 
     if (options.defaultSort) {
       pending.defaultSort = options.defaultSort;

@@ -1,5 +1,5 @@
-import { Class } from '@encore2/schema';
 import { SortOptions } from '../model';
+import { Class } from '@encore2/registry';
 
 
 export interface IndexConfig {

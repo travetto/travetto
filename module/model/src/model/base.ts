@@ -1,6 +1,7 @@
-import { SchemaBound, Schema, Class } from '@encore2/schema';
+import { SchemaBound, Schema } from '@encore2/schema';
 import { ModelCore } from './model';
 import { ModelOptions, ModelRegistry } from '../service';
+import { Class } from '@encore2/registry';
 
 @Schema()
 export abstract class BaseModel extends SchemaBound implements ModelCore {
@@ -13,7 +14,7 @@ export abstract class BaseModel extends SchemaBound implements ModelCore {
 
   constructor() {
     super();
-    this.type = ModelRegistry.getOptions(this.constructor as Class).discriminator;
+    this.type = ModelRegistry.getClass(this.constructor as Class).discriminator;
   }
 
   preSave(): this {

@@ -18,7 +18,7 @@ export class ModelService {
   constructor(private source: ModelSource) { }
 
   getConfig<T>(cls: Class<T>) {
-    return ModelRegistry.getByClass(cls);
+    return ModelRegistry.getClass(cls);
   }
 
   convert<T>(cls: Class<T>, o: T): T {
