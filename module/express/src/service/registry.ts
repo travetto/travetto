@@ -99,8 +99,7 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
     return final;
   }
 
-  async init() {
-    await DependencyRegistry.initialize();
+  async initialInstall() {
     console.log(Array.from(this.pendingClasses.keys()));
     for (let { class: cls } of this.pendingClasses.values()) {
       this.install(cls!);

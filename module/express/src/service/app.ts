@@ -24,7 +24,7 @@ export class ExpressApp {
   }
 
   async postConstruct() {
-    await ControllerRegistry.initialize();
+    await ControllerRegistry.init();
 
     this.app = express();
     this.app.use(compression());
