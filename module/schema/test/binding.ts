@@ -1,6 +1,6 @@
 import 'mocha';
 
-import { Field, Url, SchemaBound, View, Required, Alias, BindUtil, Schema } from '../src';
+import { Field, Url, SchemaBound, View, Required, Alias, BindUtil, Schema, SchemaRegistry } from '../src';
 import { expect } from 'chai';
 
 @Schema()
