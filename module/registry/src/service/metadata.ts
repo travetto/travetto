@@ -22,7 +22,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
   }
 
   getClass(cls: string | Class): C {
-    if (typeof cls !== 'string') {
+    if (cls && typeof cls !== 'string') {
       cls = cls.__id;
     }
     return this.classes.get(cls)!;
