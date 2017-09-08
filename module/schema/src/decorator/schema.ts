@@ -3,6 +3,6 @@ import { ClassList, SchemaRegistry } from '../service';
 
 export function Schema(auto: boolean = true): ClassDecorator {
   return (target: any) => {
-    SchemaRegistry.finalizeClass(target);
+    SchemaRegistry.registerClass(target, {});
   };
 }

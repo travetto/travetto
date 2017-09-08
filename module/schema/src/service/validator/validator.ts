@@ -94,7 +94,7 @@ export class SchemaValidator {
     return out;
   }
 
-  private static validateSchema<T>(schema: SchemaConfig, o: T, view: string, relative: string) {
+  private static validateSchema<T>(schema: SchemaConfig, o: T, view: string | undefined, relative: string) {
     let errors: ValidationError[] = [];
 
     for (let field of Object.keys(schema)) {
@@ -114,8 +114,8 @@ export class SchemaValidator {
       let { type, array } = fieldSchema.declared;
 
       let sub: SchemaConfig | undefined;
-      if (SchemaRegistry.schemas.has(type)) {
-        sub = SchemaRegistry.schemas.get(type)!.views[view].schema;
+      if (SchemaRegistry.finalClasses.has(type.__id)) {
+        sub = SchemaRegistry.getViewSchema(type, view).schema;
       } else if (type === Object) {
         sub = type as any as SchemaConfig;
       }
@@ -148,9 +148,9 @@ export class SchemaValidator {
     return errors;
   }
 
-  static async validate<T>(o: T, view: string = SchemaRegistry.DEFAULT_VIEW): Promise<T> {
+  static async validate<T>(o: T, view?: string): Promise<T> {
     let cls = SchemaRegistry.getClass(o);
-    let config = SchemaRegistry.schemas.get(cls)!.views[view];
+    let config = SchemaRegistry.getViewSchema(cls, view);
 
     let errors = this.validateSchema(config.schema, o, view, '');
 
@@ -161,7 +161,7 @@ export class SchemaValidator {
     return o;
   }
 
-  static async validateAll<T>(obj: T[], view: string = SchemaRegistry.DEFAULT_VIEW): Promise<T[]> {
+  static async validateAll<T>(obj: T[], view?: string): Promise<T[]> {
     return await Promise.all<T>((obj || [])
       .map((o, i) => this.validate(o, view)));
   }
