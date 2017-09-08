@@ -43,7 +43,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   }
 
   getViewSchema<T>(cls: Class<T>, view?: string) {
-    return this.finalClasses.get(cls.__id)!.views[view || SchemaRegistry.DEFAULT_VIEW];
+    return this.classes.get(cls.__id)!.views[view || SchemaRegistry.DEFAULT_VIEW];
   }
 
   getOrCreatePendingViewConfig<T>(target: Class<T>, view?: string) {
