@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { Dependency, InjectableConfig, ClassTarget } from '../types';
 import { InjectionError } from './error';
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@encore2/registry';
@@ -76,7 +74,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     let clz = aliasMap.get(name)!;
-    let managed = this.classes.get(clz)!;
+    let managed = this.getClass(clz)!;
 
     const fieldKeys = Object.keys(managed.dependencies.fields!);
 
@@ -156,7 +154,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     let targetId = target.__id;
     let aliasMap = this.aliases.get(targetId)!;
     let aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
-    return aliasedIds.map(id => this.classes.get(id)!)
+    return aliasedIds.map(id => this.getClass(id)!)
   }
 
   // Undefined indicates no constructor
@@ -199,10 +197,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     console.log('Finalized', classId);
 
-    let config = this.getOrCreateClassConfig(cls) as InjectableConfig<T>;
+    let config = this.getPendingOrCreateClass(cls) as InjectableConfig<T>;
 
     let parentClass = Object.getPrototypeOf(cls);
-    let parentConfig = this.classes.get(parentClass.__id);
+    let parentConfig = this.getClass(parentClass.__id);
 
     if (parentConfig) {
       config.dependencies.fields = Object.assign({},
