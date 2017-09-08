@@ -1,32 +1,46 @@
 import { Class, ClassList, FieldConfig, ClassConfig, ViewConfig } from './types';
-import { EventEmitter } from 'events';
+import { MetadataRegistry, RootRegistry } from '@encore2/registry';
 
-export class SchemaRegistry {
+export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
 
-  static schemas: Map<Class, ClassConfig> = new Map();
-  private static pending: Map<Class, ClassConfig> = new Map();
   static DEFAULT_VIEW = '__all';
-  private static events = new EventEmitter();
 
-  static getParent(cls: Class): Class | null {
-    let parent = Object.getPrototypeOf(cls) as Class;
-    return parent.name && parent !== Object ? parent : null;
+  constructor() {
+    super(RootRegistry);
   }
 
-  static getClass<T>(o: T): Class<T> {
+  onNewClassConfig(cls: Class) {
+    return {
+      views: {
+        [$SchemaRegistry.DEFAULT_VIEW]: {
+          schema: {},
+          fields: []
+        }
+      }
+    };
+  }
+
+  getParent(cls: Class): Class | null {
+    let parent = Object.getPrototypeOf(cls) as Class;
+    return parent.name && (parent as any) !== Object ? parent : null;
+  }
+
+  getClass<T>(o: T): Class<T> {
     return o.constructor as Class<T>;
   }
 
-  static getPendingViewSchema<T>(cls: Class<T>, view: string = this.DEFAULT_VIEW) {
-    let conf = this.pending.get(cls);
+  getPendingViewSchema<T>(cls: Class<T>, view: string = undefined) {
+    view = view || $SchemaRegistry.DEFAULT_VIEW;
+
+    let conf = this.getOrCreateClassConfig(cls);
     return conf && conf.views[view].schema;
   }
 
-  static getOrCreatePendingViewConfig<T>(target: Class<T>, view: string) {
-    if (!this.pending.has(target)) {
-      this.pending.set(target, { views: {} });
-    }
-    let conf = this.pending.get(target)!;
+  getOrCreatePendingViewConfig<T>(target: Class<T>, view: string = undefined) {
+    view = view || $SchemaRegistry.DEFAULT_VIEW;
+
+    let conf = this.getOrCreateClassConfig(target);
+
     let viewConf = conf.views[view];
     if (!viewConf) {
       viewConf = conf.views[view] = {
@@ -37,16 +51,18 @@ export class SchemaRegistry {
     return viewConf;
   }
 
-  static registerPendingFieldFacet(target: any, prop: string, config: any, view: string = this.DEFAULT_VIEW) {
+  registerPendingFieldFacet(target: any, prop: string, config: any, view: string = undefined) {
+    view = view || $SchemaRegistry.DEFAULT_VIEW;
+
     let cons = this.getClass(target);
-    let defViewConf = this.getOrCreatePendingViewConfig(cons, this.DEFAULT_VIEW);
+    let defViewConf = this.getOrCreatePendingViewConfig(cons);
 
     if (!defViewConf.schema[prop]) {
       defViewConf.fields.push(prop);
       defViewConf.schema[prop] = {} as any;
     }
 
-    if (view !== this.DEFAULT_VIEW) {
+    if (view !== $SchemaRegistry.DEFAULT_VIEW) {
       let viewConf = this.getOrCreatePendingViewConfig(cons, view);
       if (!viewConf.schema[prop]) {
         viewConf.schema[prop] = defViewConf.schema[prop];
@@ -59,7 +75,7 @@ export class SchemaRegistry {
     return target;
   }
 
-  static registerPendingFieldConfig(target: any, prop: string, type: ClassList) {
+  registerPendingFieldConfig(target: any, prop: string, type: ClassList) {
     const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
       type,
@@ -79,7 +95,7 @@ export class SchemaRegistry {
     return this.registerPendingFieldFacet(target, prop, fieldConf);
   }
 
-  static mergeConfigs(dest: ClassConfig, src: ClassConfig) {
+  mergeConfigs(dest: ClassConfig, src: ClassConfig) {
     for (let v of Object.keys(src.views)) {
       let view = src.views[v];
       if (v in dest.views) {
@@ -97,32 +113,26 @@ export class SchemaRegistry {
     return dest;
   }
 
-  static finalizeClass<T>(cls: Class<T>) {
+  onInstallFinalize(cls: Class) {
     let config: ClassConfig = { views: {} };
 
     // Merge parent
     let parent = this.getParent(cls);
     if (parent) {
-      let parentConfig = this.schemas.get(parent);
+      let parentConfig = this.finalClasses.get(parent);
       if (parentConfig) {
         config = this.mergeConfigs(config, parentConfig);
       }
     }
 
     // Merge pending
-    let pending = this.pending.get(cls);
+    let pending = this.getOrCreateClassConfig(cls);
     if (pending) {
-      config = this.mergeConfigs(config, pending);
-      this.pending.delete(cls);
+      config = this.mergeConfigs(config, pending as ClassConfig);
     }
 
-    // Emit schema registered
-    this.schemas.set(cls, config);
-    this.events.emit('registered', cls);
-  }
-
-  static on(event: 'registered', callback: (result: Class) => any): void;
-  static on<T>(event: string, callback: (result: T) => any): void {
-    this.events.on(event, callback);
+    return config;
   }
 }
+
+export const SchemaRegistry = $SchemaRegistry;
