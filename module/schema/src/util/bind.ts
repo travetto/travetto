@@ -1,4 +1,5 @@
-import { Class, SchemaRegistry } from '../service';
+import { SchemaRegistry } from '../service';
+import { Class } from '@encore2/registry';
 
 export class BindUtil {
 
