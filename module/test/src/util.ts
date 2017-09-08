@@ -66,4 +66,4 @@ export const afterTest = adder(_afterTest);
 export const afterAll = adder(_afterAll);
 
 // Support di if loaded
-require('../opt/di');
+require('../opt/registry');
