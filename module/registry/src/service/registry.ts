@@ -91,8 +91,6 @@ export abstract class Registry implements ClassSource {
       default:
         return;
     }
-
-    this.events.emit('change', event);
   }
 
   emit(e: ChangeEvent) {
