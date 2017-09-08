@@ -75,8 +75,6 @@ export abstract class Registry implements ClassSource {
 
 
   async onEvent(event: ChangeEvent) {
-    console.log('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
-
     switch (event.type) {
       case 'removing':
         await this.uninstall(event.prev!, event);
