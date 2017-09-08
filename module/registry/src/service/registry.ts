@@ -18,7 +18,7 @@ export abstract class Registry implements ClassSource {
     }
   }
 
-  async initialInstall(): Promise<Class[] | void> {
+  initialInstall(): Promise<Class[] | void> | Class[] | void {
     return;
   }
 

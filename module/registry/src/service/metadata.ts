@@ -4,15 +4,37 @@ import { ChangeEvent } from './class-source';
 import { Class } from '../model';
 import * as _ from 'lodash';
 
-export abstract class MetadataRegistry<C, M = any> extends Registry {
+export abstract class MetadataRegistry<C extends { class: Class }, M = any> extends Registry {
 
   pendingClasses = new Map<string, Partial<C>>();
   pendingMethods = new Map<string, Map<Function, Partial<M>>>();
-  classes = new Map<string, C>();
+  private classes = new Map<string, C>();
 
   abstract onInstallFinalize<T>(cls: Class<T>): C;
 
   abstract onNewClassConfig(cls: Class): Partial<C>;
+
+  has(cls: string | Class) {
+    if (typeof cls !== 'string') {
+      cls = cls.__id;
+    }
+    return this.classes.has(cls);
+  }
+
+  get(cls: string | Class): C {
+    if (typeof cls !== 'string') {
+      cls = cls.__id;
+    }
+    return this.classes.get(cls)!;
+  }
+
+  getClasses() {
+    return Array.from(this.classes.values()).map(x => x.class);
+  }
+
+  initialInstall() {
+    return this.getClasses();
+  }
 
   onNewMethodConfig(cls: Class, method: Function): Partial<M> {
     return {}
