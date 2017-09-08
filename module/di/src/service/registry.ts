@@ -28,9 +28,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     super(RootRegistry);
   }
 
-  async init() {
-    await RootRegistry.init();
-
+  async initialInstall() {
     let finalizing = this.pendingFinalize;
     this.pendingFinalize = [];
 
