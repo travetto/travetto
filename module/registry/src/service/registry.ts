@@ -78,11 +78,6 @@ export abstract class Registry implements ClassSource {
   async onEvent(event: ChangedEvent) {
     let file = (event.curr || event.prev)!.__filename;
 
-    let prev = new Map();
-    if (this.classes.has(file)) {
-      prev = new Map(this.classes.get(file)!.entries());
-    }
-
     switch (event.type) {
       case 'removed':
         await this.uninstall(event.prev!);
