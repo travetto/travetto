@@ -6,9 +6,9 @@ import * as _ from 'lodash';
 
 export abstract class MetadataRegistry<C extends { class: Class }, M = any> extends Registry {
 
-  private pendingClasses = new Map<string, Partial<C>>();
-  private pendingMethods = new Map<string, Map<Function, Partial<M>>>();
-  private classes = new Map<string, C>();
+  protected pendingClasses = new Map<string, Partial<C>>();
+  protected pendingMethods = new Map<string, Map<Function, Partial<M>>>();
+  protected classes = new Map<string, C>();
 
   abstract onInstallFinalize<T>(cls: Class<T>): C;
 
