@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import { Dependency, InjectableConfig, ClassTarget } from '../types';
 import { InjectionError } from './error';
-import { MetadataRegistry, Class, RootRegistry, ChangedEvent } from '@encore2/registry';
+import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@encore2/registry';
 import { AppEnv } from '@encore2/base';
 import { RetargettingHandler } from '@encore2/compiler';
 
@@ -78,7 +78,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     let clz = aliasMap.get(name)!;
-    let managed = this.finalClasses.get(clz)!;
+    let managed = this.classes.get(clz)!;
 
     const fieldKeys = Object.keys(managed.dependencies.fields!);
 
@@ -158,7 +158,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     let targetId = target.__id;
     let aliasMap = this.aliases.get(targetId)!;
     let aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
-    return aliasedIds.map(id => this.finalClasses.get(id)!)
+    return aliasedIds.map(id => this.classes.get(id)!)
   }
 
   // Undefined indicates no constructor
@@ -204,7 +204,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     let config = this.getOrCreateClassConfig(cls) as InjectableConfig<T>;
 
     let parentClass = Object.getPrototypeOf(cls);
-    let parentConfig = this.finalClasses.get(parentClass.__id);
+    let parentConfig = this.classes.get(parentClass.__id);
 
     if (parentConfig) {
       config.dependencies.fields = Object.assign({},
@@ -250,7 +250,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return config;
   }
 
-  async onUninstall(cls: Class, e: ChangedEvent) {
+  async onUninstall(cls: Class, e: ChangeEvent) {
     //    await super.onUninstall(cls);
     // do nothing
   }
