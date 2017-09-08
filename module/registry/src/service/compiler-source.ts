@@ -36,8 +36,8 @@ export class CompilerClassSource implements ClassSource {
     Compiler.on('added', this.watch.bind(this));
   }
 
-  on<T>(callback: (e: ChangedEvent) => void, filter?: (e: ChangedEvent) => boolean): void {
-    this.events.on('change', filter ? e => filter(e) && callback(e) : callback);
+  on<T>(callback: (e: ChangedEvent) => void): void {
+    this.events.on('change', callback);
   }
 
   protected async watch(file: string) {

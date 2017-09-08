@@ -5,5 +5,5 @@ export type ChangedEvent = { type: 'changed' | 'added' | 'removed' | 'init', pre
 
 export interface ClassSource {
   init(): Promise<any>;
-  on<T>(callback: (e: ChangedEvent) => any, filter?: (e: ChangedEvent) => boolean): void;
+  on<T>(callback: (e: ChangedEvent) => any): void;
 }

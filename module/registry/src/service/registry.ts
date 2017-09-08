@@ -9,13 +9,13 @@ export abstract class Registry implements ClassSource {
   initialized = externalPromise();
   events = new EventEmitter();
 
-  constructor(protected source?: ClassSource, private filter?: (e: ChangedEvent) => boolean) {
+  constructor(protected source?: ClassSource) {
     if (source) {
-      this.listen(source, filter);
+      this.listen(source);
     }
   }
 
-  async initialInstall(): Promise<Class[] | undefined> {
+  async initialInstall(): Promise<void> {
     return;
   }
 
@@ -101,11 +101,11 @@ export abstract class Registry implements ClassSource {
     this.events.emit('change', event);
   }
 
-  on<T>(callback: (e: ChangedEvent) => any, filter?: (e: ChangedEvent) => boolean): void {
-    this.events.on('change', filter ? e => filter(e) && callback(e) : callback);
+  on<T>(callback: (e: ChangedEvent) => any): void {
+    this.events.on('change', callback);
   }
 
-  listen(source: ClassSource, filter?: (e: ChangedEvent) => boolean) {
-    source.on(this.onEvent.bind(this), filter);
+  listen(source: ClassSource) {
+    source.on(this.onEvent.bind(this));
   }
 }
