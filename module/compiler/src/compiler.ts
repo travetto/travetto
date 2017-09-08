@@ -100,6 +100,7 @@ export class Compiler {
     }
     let out = mod;
 
+    // Proxy modules, if in watch mode for non node_modules paths
     if (AppEnv.watch && p.indexOf(process.cwd()) >= 0 && p.indexOf(this.libraryPath) < 0) {
       if (!this.modules.has(p)) {
         let handler = new RetargettingHandler(mod);
@@ -145,7 +146,7 @@ export class Compiler {
     });
   }
 
-  static reload(files: string[] | string) {
+  static markForReload(files: string[] | string) {
     if (!Array.isArray(files)) {
       files = [files];
     }
@@ -186,8 +187,9 @@ export class Compiler {
       this.contents.set(o.name, o.text);
     }
 
+    // If file is already loaded, mark for reload
     if (this.files.get(fileName)!.version > 0) {
-      this.reload(fileName);
+      this.markForReload(fileName);
     }
   }
 
