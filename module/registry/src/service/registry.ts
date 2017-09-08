@@ -5,9 +5,9 @@ import { EventEmitter } from 'events';
 
 export abstract class Registry implements ClassSource {
 
-  classes = new Map<string, Map<string, Class>>();
-  initialized = externalPromise();
-  events = new EventEmitter();
+  protected classes = new Map<string, Map<string, Class>>();
+  protected initialized = externalPromise();
+  protected events = new EventEmitter();
 
   constructor(protected source?: ClassSource) {
     if (source) {
@@ -19,7 +19,7 @@ export abstract class Registry implements ClassSource {
     return;
   }
 
-  async init() {
+  async init(): Promise<any> {
 
     if (this.initialized.run()) {
       return await this.initialized;
