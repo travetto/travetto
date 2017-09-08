@@ -24,7 +24,7 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
 
   getOrCreateRequestHandlerConfig(cls: Class, handler: Filter) {
     let id = cls.__id!;
-    let controllerConf = this.getOrCreateClassConfig(cls);
+    let controllerConf = this.getOrCreatePendingClass(cls);
 
     if (!this.pendingMethods.has(id)) {
       this.pendingMethods.set(id, new Map());
@@ -43,7 +43,7 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
   }
 
   registerControllerFilter(target: Class, fn: Filter) {
-    let config = this.getOrCreateClassConfig(target);
+    let config = this.getOrCreatePendingClass(target);
     config.filters!.push(fn);
   }
 
@@ -74,7 +74,7 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
   }
 
   registerClass(cls: Class, config: { class: Class, path: string }) {
-    let conf = this.getOrCreateClassConfig(config.class);
+    let conf = this.getOrCreatePendingClass(config.class);
     conf.path = config.path;
   }
 
@@ -87,10 +87,6 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
     }
 
     return final;
-  }
-
-  async initialInstall() {
-    return Array.from(this.pendingClasses.values()).map(x => x.class!);
   }
 }
 

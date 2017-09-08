@@ -63,16 +63,16 @@ export class ExpressApp {
     }
 
     // Register all active
-    await Promise.all(Array.from(ControllerRegistry.classes.values())
-      .map(c => this.registerController(c)));
+    await Promise.all(Array.from(ControllerRegistry.getRawClasses())
+      .map(c => this.registerController(ControllerRegistry.getClass(c))));
 
     // Listen for updates
     ControllerRegistry.on(e => {
       console.log('Registry added', e);
       if (e.curr) {
-        this.registerController(ControllerRegistry.classes.get(e.curr.__id)!);
+        this.registerController(ControllerRegistry.getClass(e.curr)!);
       } else if (e.prev) {
-        this.unregisterController(ControllerRegistry.classes.get(e.prev.__id)!);
+        this.unregisterController(ControllerRegistry.getClass(e.prev)!);
         // TODO: uninstall
       }
     });
