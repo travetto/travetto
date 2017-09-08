@@ -12,7 +12,7 @@ class Database {
   }
 
   query() {
-    console.log('Getting 300', this.dbConfig.getUrl());
+    console.log('Getting 350', this.dbConfig.getUrl());
   }
 }
 
