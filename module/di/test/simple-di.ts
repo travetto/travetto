@@ -12,7 +12,7 @@ class Database {
   }
 
   query() {
-    console.log('Getting 350', this.dbConfig.getUrl());
+    console.log('Getting 100', this.dbConfig.getUrl());
   }
 }
 
@@ -39,6 +39,7 @@ class ServiceInherit extends Service {
 
 
 async function run() {
+  await DependencyRegistry.init();
   let inst = await DependencyRegistry.getInstance(ServiceInherit);
   inst.doWork();
 }

@@ -29,7 +29,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   async init() {
-    await RootRegistry.initialize();
+    await RootRegistry.init();
 
     let finalizing = this.pendingFinalize;
     this.pendingFinalize = [];
@@ -39,14 +39,14 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Unblock auto created
-    this.initialized.resolve(true);
-
     if (this.autoCreate.length) {
-      console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
-      let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
-      for (let i of items) {
-        await this.getInstance(i.target, i.name);
-      }
+      process.nextTick(async () => {
+        console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
+        let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
+        for (let i of items) {
+          await this.getInstance(i.target, i.name);
+        }
+      });
     }
   }
 
@@ -225,9 +225,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.aliases.set(targetId, new Map());
     }
 
-    // Timing matters
-    this.finalClasses.set(classId, config);
-
     this.aliases.get(targetId)!.set(config.name, classId);
 
     // TODO: Auto alias parent class if framework managed
@@ -241,7 +238,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.proxyHandlers.has(targetId) &&
       this.proxyHandlers.get(targetId)!.has(config.name)
     ) {
-      let p = this.createInstance(config.target, config.name);
+      // Timing matters b/c of create instance
+      process.nextTick(() => this.createInstance(config.target, config.name));
     } else if (config.autoCreate.create) {
       // If not loaded, and autocreate
       this.autoCreate.push({
@@ -261,3 +259,4 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 }
 
 export const DependencyRegistry = new $DependencyRegistry();
+DependencyRegistry.init();
