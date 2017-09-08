@@ -259,4 +259,3 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 }
 
 export const DependencyRegistry = new $DependencyRegistry();
-DependencyRegistry.init();
