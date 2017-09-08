@@ -16,7 +16,7 @@ export class Simple {
 
   @Get('/age')
   async age() {
-    console.log(22);
+    return Math.random();
   }
 
   @Get('/age2')
