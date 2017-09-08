@@ -18,7 +18,7 @@ export abstract class Registry implements ClassSource {
     }
   }
 
-  async initialInstall(): Promise<void> {
+  async initialInstall(): Promise<Class[] | void> {
     return;
   }
 
@@ -35,7 +35,9 @@ export abstract class Registry implements ClassSource {
 
       let classes = await this.initialInstall();
       if (classes) {
-        this.install(classes, { type: 'init', curr: classes });
+        for (let cls of classes) {
+          this.install(cls, { type: 'init', curr: cls });
+        }
       }
 
       await Promise.all(this.descendents.map(x => x.init()));
@@ -75,6 +77,8 @@ export abstract class Registry implements ClassSource {
 
 
   async onEvent(event: ChangeEvent) {
+    console.log('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
+
     switch (event.type) {
       case 'removing':
         await this.uninstall(event.prev!, event);
