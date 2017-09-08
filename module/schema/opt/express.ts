@@ -1,10 +1,12 @@
-import { Request, Response } from 'express';
-import { SchemaRegistry, Class, BindUtil, SchemaValidator } from '../src';
-
-import { RouteRegistry, AppError } from '@encore2/express';
-
 import * as flat from 'flat';
 import * as _ from 'lodash';
+import { Request, Response } from 'express';
+
+import { RouteRegistry, AppError } from '@encore2/express';
+import { Class } from '@encore2/registry';
+
+import { SchemaRegistry, BindUtil, SchemaValidator } from '../src';
+
 
 function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
@@ -18,7 +20,7 @@ export function SchemaBody<T>(cls: Class<T>, view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     if (_.isPlainObject(req.body)) {
       let o = getBound(cls, req.body, view);
-      if (SchemaRegistry.schemas.has(cls)) {
+      if (SchemaRegistry.hasClass(cls)) {
         req.body = await SchemaValidator.validate(o, view);
       } else {
         req.body = o;
@@ -32,7 +34,7 @@ export function SchemaBody<T>(cls: Class<T>, view?: string) {
 export function SchemaQuery<T>(cls: Class<T>, view?: string) {
   return RouteRegistry.filterAdder(async (req: Request, res: Response) => {
     let o = getBound(cls, flat.unflatten(req.query), view);
-    if (SchemaRegistry.schemas.has(cls)) {
+    if (SchemaRegistry.hasClass(cls)) {
       req.query = await SchemaValidator.validate(o, view);
     } else {
       req.query = o;

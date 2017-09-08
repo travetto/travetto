@@ -35,7 +35,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
     if (cls.__id) {
-      let conf = this.getOrCreateClassConfig(cls);
+      let conf = this.getOrCreatePendingClass(cls);
       return conf.views![view].schema;
     } else {
       return;
@@ -49,7 +49,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   getOrCreatePendingViewConfig<T>(target: Class<T>, view?: string) {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
-    let conf = this.getOrCreateClassConfig(target);
+    let conf = this.getOrCreatePendingClass(target);
 
     let viewConf = conf.views![view];
     if (!viewConf) {
@@ -136,7 +136,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     }
 
     // Merge pending
-    let pending = this.getOrCreateClassConfig(cls);
+    let pending = this.getOrCreatePendingClass(cls);
     if (pending) {
       config = this.mergeConfigs(config, pending as ClassConfig);
     }

@@ -8,6 +8,6 @@ type DeepPartial<T> = {
 
 export class SchemaBound {
   static from<T>(this: Class<T>, data: DeepPartial<T & { [key: string]: any }>, view?: string): T {
-    return BindUtil.bindSchema(this as any, new this(), data, view);
+    return BindUtil.bindSchema(this, new this(), data, view);
   }
 }
