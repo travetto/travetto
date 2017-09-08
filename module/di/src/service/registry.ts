@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import { Dependency, InjectableConfig, ClassTarget } from '../types';
 import { InjectionError } from './error';
-import { MetadataRegistry, Class, RootRegistry } from '@encore2/registry';
+import { MetadataRegistry, Class, RootRegistry, ChangedEvent } from '@encore2/registry';
 import { AppEnv } from '@encore2/base';
 import { RetargettingHandler } from '@encore2/compiler';
 
@@ -33,7 +33,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.pendingFinalize = [];
 
     for (let cls of finalizing) {
-      this.install(cls);
+      this.install(cls, { type: 'init', curr: cls });
     }
 
     // Unblock auto created
@@ -250,7 +250,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return config;
   }
 
-  async onUninstall(cls: Class) {
+  async onUninstall(cls: Class, e: ChangedEvent) {
     //    await super.onUninstall(cls);
     // do nothing
   }
