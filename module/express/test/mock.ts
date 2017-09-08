@@ -8,7 +8,7 @@ export class MockService {
     return {
       first: 'A',
       last: 'Z',
-      middle: 'EzBake Ovenz'
+      middle: 'EzBake Ovenz2'
     };
   }
 }
