@@ -139,7 +139,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       ) as any
     }
     return node;
-  } else if (ts.isPropertyDeclaration(node)) {
+    // tslint:disable-next-line:no-bitwise
+  } else if (ts.isPropertyDeclaration(node) && !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static)) {
     if (state.inAuto) {
       let ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set([require.resolve('../decorator')]) });
       if (!ignore) {

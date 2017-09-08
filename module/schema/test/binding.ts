@@ -123,6 +123,7 @@ describe('Data Binding', () => {
     let res = Response.from({
       correct: true
     });
+
     expect(res.valid).to.equal(true);
   });
 });

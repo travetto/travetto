@@ -16,6 +16,7 @@ export interface ViewConfig {
 }
 
 export interface ClassConfig {
+  class: Class;
   views: { [key: string]: ViewConfig };
 }
 

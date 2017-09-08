@@ -10,8 +10,15 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     super(RootRegistry);
   }
 
+  async initialInstall() {
+    let configs = Array.from(this.pendingClasses.values());
+    this.install(configs.map(x => x.class!));
+    return;
+  }
+
   onNewClassConfig(cls: Class) {
     return {
+      class: cls,
       views: {
         [$SchemaRegistry.DEFAULT_VIEW]: {
           schema: {},
@@ -33,8 +40,12 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   getPendingViewSchema<T>(cls: Class<T>, view?: string) {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
-    let conf = this.getOrCreateClassConfig(cls);
-    return conf && conf.views![view].schema;
+    if (cls.__id) {
+      let conf = this.getOrCreateClassConfig(cls);
+      return conf.views![view].schema;
+    } else {
+      return;
+    }
   }
 
   getViewSchema<T>(cls: Class<T>, view?: string) {
@@ -81,6 +92,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   }
 
   registerPendingFieldConfig(target: any, prop: string, type: ClassList) {
+    let cons = this.getClass(target);
     const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
       type,
@@ -90,14 +102,16 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
       }
     };
 
+    console.log('Registering field config', cons.__id, prop, type);
+
     // Get schema if exists
-    const schema = this.getPendingViewSchema(fieldConf.declared.type);
+    const schema = this.getPendingViewSchema(cons);
 
     if (schema) {
       fieldConf.type = isArray ? [schema] : schema;
     }
 
-    return this.registerPendingFieldFacet(target, prop, fieldConf);
+    return this.registerPendingFieldFacet(cons, prop, fieldConf);
   }
 
   mergeConfigs(dest: ClassConfig, src: ClassConfig) {
@@ -119,7 +133,8 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   }
 
   onInstallFinalize(cls: Class) {
-    let config: ClassConfig = { views: {} };
+
+    let config: ClassConfig = {} as ClassConfig;
 
     // Merge parent
     let parent = this.getParent(cls) as Class;
@@ -141,3 +156,4 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
 }
 
 export const SchemaRegistry = new $SchemaRegistry();
+SchemaRegistry.init();
