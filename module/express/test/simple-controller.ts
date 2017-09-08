@@ -9,14 +9,14 @@ export class Simple {
   constructor(private service: MockService) {
   }
 
-  @Get('/name')
+  @Get('/names')
   async doIt() {
     return this.service.fetch();
   }
 
   @Get('/age')
   async age() {
-    console.log(55);
+    console.log(22);
   }
 
   @Get('/age2')
