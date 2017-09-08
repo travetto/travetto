@@ -11,9 +11,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   }
 
   async initialInstall() {
-    let configs = Array.from(this.pendingClasses.values());
-    this.install(configs.map(x => x.class!));
-    return;
+    return Array.from(this.pendingClasses.values()).map(x => x.class!);
   }
 
   onNewClassConfig(cls: Class) {
@@ -131,7 +129,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     // Merge parent
     let parent = this.getParent(cls) as Class;
     if (parent) {
-      let parentConfig = this.finalClasses.get(parent.__id);
+      let parentConfig = this.classes.get(parent.__id);
       if (parentConfig) {
         config = this.mergeConfigs(config, parentConfig);
       }
@@ -148,4 +146,3 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
 }
 
 export const SchemaRegistry = new $SchemaRegistry();
-SchemaRegistry.init();

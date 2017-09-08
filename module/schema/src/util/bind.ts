@@ -24,7 +24,7 @@ export class BindUtil {
     view = view || SchemaRegistry.DEFAULT_VIEW;
 
     if (!!data) {
-      let conf = SchemaRegistry.finalClasses.get(cons.__id);
+      let conf = SchemaRegistry.classes.get(cons.__id);
 
       // If no configuration
       if (!conf) {
@@ -65,7 +65,7 @@ export class BindUtil {
               v = [v];
             }
 
-            if (SchemaRegistry.finalClasses.has(declared.type.__id)) {
+            if (SchemaRegistry.classes.has(declared.type.__id)) {
               if (declared.array) {
                 v = v.map((x: any) => BindUtil.bindSchema(declared.type, new declared.type(), x, view));
               } else {
