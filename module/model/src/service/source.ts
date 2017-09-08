@@ -1,5 +1,6 @@
+import { Class } from '@encore2/registry';
+
 import { ModelCore, QueryOptions, ModelId } from '../model';
-import { Class } from '@encore2/schema';
 import { BulkState, BulkResponse } from '../model/bulk';
 import { Query } from '../model/query';
 
@@ -16,16 +17,16 @@ export abstract class ModelSource {
   abstract update<T>(cls: Class<T>, model: T): Promise<T>;
   abstract updateAll<T>(cls: Class<T>, model: T[]): Promise<number>;
   abstract updatePartial<T>(cls: Class<T>, model: Partial<T>): Promise<T>;
-  abstract updatePartialByQuery<T>(cls: Class<T>, body: Partial<T>, query: Query<T>): Promise<number>;
+  abstract updatePartialByQuery<T>(cls: Class<T>, body: Partial<T>, query: Query): Promise<number>;
 
   abstract bulkProcess<T>(cls: Class<T>, state: BulkState<T>): Promise<BulkResponse>;
   abstract getById<T>(cls: Class<T>, id: ModelId): Promise<T>;
-  abstract getByQuery<T>(cls: Class<T>, query: Query<T>, options?: QueryOptions, failOnMany?: boolean): Promise<T>;
-  abstract getAllByQuery<T>(cls: Class<T>, query: Query<T>, options?: QueryOptions): Promise<T[]>;
-  abstract getCountByQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
-  abstract getIdsByQuery<T>(cls: Class<T>, query: Query<T>, options?: QueryOptions): Promise<ModelId>;
+  abstract getByQuery<T>(cls: Class<T>, query: Query, options?: QueryOptions, failOnMany?: boolean): Promise<T>;
+  abstract getAllByQuery<T>(cls: Class<T>, query: Query, options?: QueryOptions): Promise<T[]>;
+  abstract getCountByQuery<T>(cls: Class<T>, query: Query): Promise<number>;
+  abstract getIdsByQuery<T>(cls: Class<T>, query: Query, options?: QueryOptions): Promise<ModelId>;
   abstract deleteById<T>(cls: Class<T>, id: ModelId): Promise<number>;
-  abstract deleteByQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
+  abstract deleteByQuery<T>(cls: Class<T>, query: Query): Promise<number>;
 
   //  - registerModel(model)
   //  - model setup (e.g.indices)

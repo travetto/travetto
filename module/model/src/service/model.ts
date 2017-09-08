@@ -118,11 +118,11 @@ export class ModelService {
     return this.postLoad(cls, res);
   }
 
-  async updateAll<T>(objs: T[]): Promise<T[]> {
+  async updateAll<T>(objs: T[]): Promise<number> {
     let cls = getClass(objs[0]);
     objs = await Promise.all(objs.map(o => this.prePersist(o)));
     let res = await this.source.updateAll<T>(cls, objs);
-    return res.map(x => this.postLoad(cls, x));
+    return res;
   }
 
   async updatePartial<T>(o: Partial<T>, view: string): Promise<T> {
