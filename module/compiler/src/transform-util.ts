@@ -28,7 +28,6 @@ export class TransformUtil {
       let ident = this.getDecoratorIdent(dec);
       if (ident && ident.text in patterns) {
         let { path } = this.getTypeInfoForNode(ident);
-        console.log((node as any).name.text, ident.text, path, patterns[ident.text].has(path));
         if (patterns[ident.text].has(path)) {
           return dec;
         }
