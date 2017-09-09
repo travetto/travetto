@@ -9,7 +9,7 @@ export class Simple {
   constructor(private service: MockService) {
   }
 
-  @Get('/name')
+  @Get('/names')
   async doIt() {
     return this.service.fetch();
   }

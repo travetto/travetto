@@ -68,12 +68,12 @@ export class ExpressApp {
 
     // Listen for updates
     ControllerRegistry.on(e => {
-      console.log('Registry added', e);
+      console.log('Registry', e.type, ControllerRegistry.hasExpired(e.prev!));
+      if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
+        this.unregisterController(ControllerRegistry.getExpired(e.prev)!);
+      }
       if (e.curr) {
         this.registerController(ControllerRegistry.get(e.curr)!);
-      } else if (e.prev) {
-        this.unregisterController(ControllerRegistry.get(e.prev)!);
-        // TODO: uninstall
       }
     });
 
@@ -101,13 +101,6 @@ export class ExpressApp {
       handler.handler = RouteUtil.asyncHandler(
         toPromise(handler.handler.bind(instance)),
         RouteUtil.outputHandler.bind(null, handler))
-    }
-
-    this.unregisterController(config);
-
-    if (this.controllers.has(config.path)) {
-      console.log('Unregistering', config.path);
-      this.app._router.stack = RouteUtil.removeAllRoutes(this.app._router.stack, config);
     }
 
     console.log('Registering', config.path, config.handlers.length);

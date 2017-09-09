@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
+import { EventEmitter } from 'events';
+
 import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
 import { Renderable, Method, ControllerConfig } from '../model';
 import { toPromise, externalPromise } from '@encore2/base';
 import { ExpressApp } from './app';
 import { DependencyRegistry } from '@encore2/di';
-import { EventEmitter } from 'events';
 import { MetadataRegistry, Class } from '@encore2/registry';
 
 export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHandler> {
@@ -80,9 +81,9 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
 
   onInstallFinalize(cls: Class) {
     let id = cls.__id!;
-    let final = this.pendingClasses.get(id)! as ControllerConfig;
+    let final = this.getOrCreatePending(cls) as ControllerConfig;
 
-    if (this.classes.has(final.path)) {
+    if (this.has(final.path)) {
       console.log('Reloading controller', cls.name, final.path);
     }
 
