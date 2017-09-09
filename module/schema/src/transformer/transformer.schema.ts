@@ -128,16 +128,16 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       ])
     });
 
-    let arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
-    let auto = !!anySchema && (!schema || (!arg || arg.kind !== ts.SyntaxKind.FalseKeyword));
+    let auto = !!anySchema;
 
+    if (!!schema) {
+      let arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
+      auto = (!arg || arg.kind !== ts.SyntaxKind.FalseKeyword);
+    }
 
     if (auto) {
-      let ret = ts.visitEachChild(node, c => visitNode(context, c, { ...state, inAuto: auto }), context);
-      for (let member of ret.members || []) {
-        member.parent = ret;
-      }
-      node = ret;
+      let ret = ts.visitEachChild(node, c => visitNode(context, c, { ...state, inAuto: auto }), context) as ts.ClassDeclaration;
+      node = ret as any as T;
     }
 
     if (!!anySchema) {
@@ -154,8 +154,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         }
 
         decls = ts.createNodeArray([
-          ts.createDecorator(ts.createCall(state.addSchema, undefined, [])),
-          ...decls!
+          ts.createDecorator(ts.createCall(state.addSchema, undefined, ts.createNodeArray([]))),
+          ...(decls || [])
         ])
       }
 
@@ -169,6 +169,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         ret.members
       ) as any
     }
+
     return node;
     // tslint:disable-next-line:no-bitwise
   } else if (ts.isPropertyDeclaration(node) && !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static)) {
