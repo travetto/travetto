@@ -4,7 +4,7 @@ import { ModelOptions, ModelRegistry } from '../service';
 import { Class } from '@encore2/registry';
 
 @Schema()
-export abstract class BaseModel extends SchemaBound implements ModelCore {
+export abstract class BaseModel extends SchemaBound implements ModelCore<BaseModel> {
 
   id: string;
   version: string;

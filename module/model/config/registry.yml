@@ -1,0 +1,3 @@
+---
+schema:
+  '@encore2/model/src/decorator/model.ts': Model

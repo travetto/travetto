@@ -35,13 +35,13 @@ export class ModelService<T, ID = string> {
 
   async prePersist(o: Partial<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
     let mc = o as ModelCore<T>;
-    let res = await SchemaValidator.validate<T>(mc.preSave ? mc.preSave() : o, view);
+    let res = await SchemaValidator.validate(mc.preSave ? mc.preSave() : o, view);
     res = await this.source.prePersist(res);
     return res as T;
   }
 
   postLoad(cls: Class<T>, o: T): T {
-    o = this.source.postLoad(o);
+    o = this.source.postLoad(o) as T;
     o = this.convert(cls, o);
 
     let mc = o as ModelCore<T>;
