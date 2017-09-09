@@ -10,6 +10,7 @@ export interface IndexConfig {
 }
 
 export class ModelOptions {
+  class: Class;
   collection: string;
   defaultSort?: SortOptions;
   indicies: IndexConfig[] = [];

@@ -8,34 +8,12 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions> {
     super(SchemaRegistry);
   }
 
-  onNewClassConfig() {
+  createPending() {
     return {};
   }
 
-  getByClass(cls: Class): ModelOptions {
-    return this.classes.get(cls.__id) || {};
-  }
-
-  registerClass(cls: Class, options: Partial<ModelOptions>) {
-    let pending = this.getOrCreatePendingClass(cls);
-
-    if (options.defaultSort) {
-      pending.defaultSort = options.defaultSort;
-    }
-    if (options.discriminator) {
-      pending.discriminator = options.discriminator;
-    }
-    if (options.extra) {
-      pending.extra = Object.assign({}, pending.extra || {}, options.extra);
-    }
-    if (options.subtypes) {
-      pending.subtypes = Object.assign({}, pending.subtypes || {}, options.subtypes);
-    }
-    if (options.defaultSort) { }
-  }
-
   onInstallFinalize<T>(cls: Class<T>) {
-    return this.pendingClasses.get(cls.__id)! as ModelOptions;
+    return this.pending.get(cls.__id)! as ModelOptions;
   }
 }
 

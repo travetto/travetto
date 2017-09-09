@@ -9,7 +9,10 @@ export abstract class ModelSource<T, ID = string> {
   abstract getIdField(): string;
   abstract getTypeField(): string;
 
+  abstract prePersist(model: Partial<T>): Partial<T>;
   abstract prePersist(model: T): T;
+
+  abstract postLoad(model: Partial<T>): Partial<T>;
   abstract postLoad(model: T): T;
 
   abstract save(cls: Class<T>, model: T): Promise<T>;

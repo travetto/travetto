@@ -2,7 +2,7 @@ import { Class } from '@encore2/registry';
 import { ModelRegistry, ModelOptions } from '../service';
 import { SortOptions } from '../model';
 
-export function Model(conf: ModelOptions) {
+export function Model(conf: Partial<ModelOptions> = {}) {
   return function <T extends Class>(target: T) {
     if (conf.discriminator) {
       const parent = Object.getPrototypeOf(target) as Class;
