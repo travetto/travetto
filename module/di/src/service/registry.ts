@@ -44,7 +44,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
   }
 
-  onNewClassConfig(cls: Class) {
+  createPending(cls: Class) {
     if (!this.initialized.resolved) {
       this.pendingFinalize.push(cls);
     }
@@ -74,7 +74,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     let clz = aliasMap.get(name)!;
-    let managed = this.getClass(clz)!;
+    let managed = this.get(clz)!;
 
     const fieldKeys = Object.keys(managed.dependencies.fields!);
 
@@ -154,12 +154,12 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     let targetId = target.__id;
     let aliasMap = this.aliases.get(targetId)!;
     let aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
-    return aliasedIds.map(id => this.getClass(id)!)
+    return aliasedIds.map(id => this.get(id)!)
   }
 
   // Undefined indicates no constructor
   registerConstructor<T>(cls: Class<T>, dependencies?: Dependency<any>[]) {
-    let conf = this.getOrCreatePendingClass(cls);
+    let conf = this.getOrCreatePending(cls);
     conf.dependencies!.cons = dependencies;
     if (dependencies) {
       for (let dependency of dependencies) {
@@ -169,14 +169,14 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency<any>) {
-    let conf = this.getOrCreatePendingClass(cls);
+    let conf = this.getOrCreatePending(cls);
     conf.dependencies!.fields[field] = dependency;
     dependency.name = dependency.name || DEFAULT_INSTANCE;
   }
 
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
     let classId = pconfig.class!.__id;
-    let config = this.getOrCreatePendingClass(pconfig.class!);
+    let config = this.getOrCreatePending(pconfig.class!);
 
     if (pconfig.name) {
       config.name = pconfig.name;
@@ -197,10 +197,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     console.log('Finalized', classId);
 
-    let config = this.getOrCreatePendingClass(cls) as InjectableConfig<T>;
+    let config = this.getOrCreatePending(cls) as InjectableConfig<T>;
 
     let parentClass = Object.getPrototypeOf(cls);
-    let parentConfig = this.getClass(parentClass.__id);
+    let parentConfig = this.get(parentClass.__id);
 
     if (parentConfig) {
       config.dependencies.fields = Object.assign({},
