@@ -57,9 +57,6 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
       this.pending.set(cid, this.createPending(cls));
       this.pendingMethods.set(cid, new Map());
     }
-    if (this.expired.has(cid)) {
-      this.expired.delete(cid);
-    }
     return this.pending.get(cid)!;
   }
 
@@ -89,10 +86,6 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
       this.pendingMethods.delete(cls.__id);
       this.pending.delete(cls.__id);
 
-      // Store expired
-      if (this.entries.has(cls.__id)) {
-        this.expired.set(cls.__id, this.entries.get(cls.__id)!);
-      }
       this.entries.set(cls.__id, result);
       this.emit(e);
     }
@@ -100,10 +93,12 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
 
   async onUninstall(cls: Class, e: ChangeEvent) {
     if (this.entries.has(cls.__id)) {
+      this.expired.set(cls.__id, this.entries.get(cls.__id)!);
+      this.entries.delete(cls.__id);
       if (e.type === 'removing') {
         this.emit(e);
       }
-      this.entries.delete(cls.__id);
+      process.nextTick(() => this.expired.delete(cls.__id));
     }
   }
 }
