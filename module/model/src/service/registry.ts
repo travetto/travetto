@@ -8,8 +8,8 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions> {
     super(SchemaRegistry);
   }
 
-  createPending() {
-    return {};
+  createPending(cls: Class) {
+    return { class: cls };
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
