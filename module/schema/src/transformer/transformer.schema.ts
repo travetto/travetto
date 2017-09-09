@@ -71,7 +71,6 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
 }
 
 function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
-
   let typeExpr = resolveType(node.type!, state);
   let properties = [];
   if (!node.questionToken) {
@@ -106,15 +105,18 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
   }
 
   let dec = ts.createDecorator(ts.createCall(state.addField as any, undefined, ts.createNodeArray(params)));
-  let decls = ts.createNodeArray((node.decorators! || []).slice(0).concat([dec]));
+  let decls = ts.createNodeArray([
+    dec, ...(node.decorators || [])
+  ]);
   let res = ts.updateProperty(node,
     decls,
-    (node.modifiers || []),
+    node.modifiers,
     node.name,
     node.questionToken,
     node.type,
     node.initializer
   );
+
   return res;
 }
 
@@ -137,10 +139,17 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     if (auto) {
       let ret = ts.visitEachChild(node, c => visitNode(context, c, { ...state, inAuto: auto }), context) as ts.ClassDeclaration;
+      for (let member of ret.members || []) {
+        if (!member.parent) {
+          member.parent = ret;
+        }
+      }
       node = ret as any as T;
     }
 
     if (!!anySchema) {
+      console.log('Schema', (node as any).name.text, TransformUtil.getDecoratorIdent(anySchema).text);
+
       let ret = node as any as ts.ClassDeclaration;
       let decls = node.decorators;
       if (!schema) {
