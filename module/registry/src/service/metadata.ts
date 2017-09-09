@@ -51,10 +51,10 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     return {}
   }
 
-  getOrCreatePending(cls: Class | string): Partial<C> {
+  getOrCreatePending(cls: Class): Partial<C> {
     let cid = id(cls);
     if (!this.pending.has(cid)) {
-      this.pending.set(cid, this.createPending(cid));
+      this.pending.set(cid, this.createPending(cls));
       this.pendingMethods.set(cid, new Map());
     }
     if (this.expired.has(cid)) {
