@@ -4,39 +4,43 @@ import { ChangeEvent } from './class-source';
 import { Class } from '../model';
 import * as _ from 'lodash';
 
+function id(cls: string | Class) {
+  return typeof cls !== 'string' ? cls.__id : cls;
+}
+
 export abstract class MetadataRegistry<C extends { class: Class }, M = any> extends Registry {
 
-  protected pendingClasses = new Map<string, Partial<C>>();
+  protected expired = new Map<string, C>();
+  protected pending = new Map<string, Partial<C>>();
   protected pendingMethods = new Map<string, Map<Function, Partial<M>>>();
-  protected classes = new Map<string, C>();
+  protected entries = new Map<string, C>();
 
   abstract onInstallFinalize<T>(cls: Class<T>): C;
 
   abstract createPending(cls: Class): Partial<C>;
 
   has(cls: string | Class) {
-    if (typeof cls !== 'string') {
-      cls = cls.__id;
-    }
-    return this.classes.has(cls);
+    return this.entries.has(id(cls));
   }
 
   get(cls: string | Class): C {
-    if (cls && typeof cls !== 'string') {
-      cls = cls.__id;
-    }
-    return this.classes.get(cls)!;
+    return this.entries.get(id(cls))!;
+  }
+
+  getExpired(cls: string | Class): C {
+    return this.expired.get(id(cls))!;
+  }
+
+  hasExpired(cls: string | Class) {
+    return this.expired.has(id(cls));
   }
 
   hasPending(cls: string | Class) {
-    if (typeof cls !== 'string') {
-      cls = cls.__id;
-    }
-    return this.pendingClasses.has(cls);
+    return this.pending.has(id(cls));
   }
 
   getClasses() {
-    return Array.from(this.classes.values()).map(x => x.class);
+    return Array.from(this.entries.values()).map(x => x.class);
   }
 
   initialInstall(): any {
@@ -48,11 +52,14 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
   }
 
   getOrCreatePending(cls: Class): Partial<C> {
-    if (!this.pendingClasses.has(cls.__id)) {
-      this.pendingClasses.set(cls.__id, this.createPending(cls));
+    if (!this.pending.has(cls.__id)) {
+      this.pending.set(cls.__id, this.createPending(cls));
       this.pendingMethods.set(cls.__id, new Map());
     }
-    return this.pendingClasses.get(cls.__id)!;
+    if (this.expired.has(cls.__id)) {
+      this.expired.delete(cls.__id);
+    }
+    return this.pending.get(cls.__id)!;
   }
 
   getOrCreatePendingMethod(cls: Class, method: Function): Partial<M> {
@@ -76,21 +83,26 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
   }
 
   async onInstall(cls: Class, e: ChangeEvent) {
-    if (this.pendingClasses.has(cls.__id) || this.pendingMethods.has(cls.__id)) {
+    if (this.pending.has(cls.__id) || this.pendingMethods.has(cls.__id)) {
       let result = this.onInstallFinalize(cls);
       this.pendingMethods.delete(cls.__id);
-      this.pendingClasses.delete(cls.__id);
-      this.classes.set(cls.__id, result);
+      this.pending.delete(cls.__id);
+
+      // Store expired
+      if (this.entries.has(cls.__id)) {
+        this.expired.set(cls.__id, this.entries.get(cls.__id)!);
+      }
+      this.entries.set(cls.__id, result);
       this.emit(e);
     }
   }
 
   async onUninstall(cls: Class, e: ChangeEvent) {
-    if (this.classes.has(cls.__id)) {
+    if (this.entries.has(cls.__id)) {
       if (e.type === 'removing') {
         this.emit(e);
       }
-      this.classes.delete(cls.__id);
+      this.entries.delete(cls.__id);
     }
   }
 }
