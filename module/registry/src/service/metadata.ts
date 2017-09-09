@@ -5,7 +5,7 @@ import { Class } from '../model';
 import * as _ from 'lodash';
 
 function id(cls: string | Class) {
-  return typeof cls !== 'string' ? cls.__id : cls;
+  return cls && typeof cls !== 'string' ? cls.__id : cls;
 }
 
 export abstract class MetadataRegistry<C extends { class: Class }, M = any> extends Registry {
@@ -51,15 +51,16 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     return {}
   }
 
-  getOrCreatePending(cls: Class): Partial<C> {
-    if (!this.pending.has(cls.__id)) {
-      this.pending.set(cls.__id, this.createPending(cls));
-      this.pendingMethods.set(cls.__id, new Map());
+  getOrCreatePending(cls: Class | string): Partial<C> {
+    let cid = id(cls);
+    if (!this.pending.has(cid)) {
+      this.pending.set(cid, this.createPending(cid));
+      this.pendingMethods.set(cid, new Map());
     }
-    if (this.expired.has(cls.__id)) {
-      this.expired.delete(cls.__id);
+    if (this.expired.has(cid)) {
+      this.expired.delete(cid);
     }
-    return this.pending.get(cls.__id)!;
+    return this.pending.get(cid)!;
   }
 
   getOrCreatePendingMethod(cls: Class, method: Function): Partial<M> {
