@@ -115,7 +115,7 @@ export class SchemaValidator {
       let { type, array } = fieldSchema.declared;
 
       let sub: SchemaConfig | undefined;
-      if (SchemaRegistry.hasClass(type)) {
+      if (SchemaRegistry.has(type)) {
         sub = SchemaRegistry.getViewSchema(type, view).schema;
       } else if (type === Object) {
         sub = type as any as SchemaConfig;

@@ -14,7 +14,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     return Array.from(this.pendingClasses.values()).map(x => x.class!);
   }
 
-  onNewClassConfig(cls: Class) {
+  createPending(cls: Class) {
     return {
       class: cls,
       views: {
@@ -35,7 +35,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
     if (cls.__id) {
-      let conf = this.getOrCreatePendingClass(cls);
+      let conf = this.getOrCreatePending(cls);
       return conf.views![view].schema;
     } else {
       return;
@@ -49,7 +49,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   getOrCreatePendingViewConfig<T>(target: Class<T>, view?: string) {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
-    let conf = this.getOrCreatePendingClass(target);
+    let conf = this.getOrCreatePending(target);
 
     let viewConf = conf.views![view];
     if (!viewConf) {
@@ -124,7 +124,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
 
   onInstallFinalize(cls: Class) {
 
-    let config: ClassConfig = this.onNewClassConfig(cls) as ClassConfig;
+    let config: ClassConfig = this.createPending(cls) as ClassConfig;
 
     // Merge parent
     let parent = this.getParent(cls) as Class;
@@ -136,7 +136,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     }
 
     // Merge pending
-    let pending = this.getOrCreatePendingClass(cls);
+    let pending = this.getOrCreatePending(cls);
     if (pending) {
       config = this.mergeConfigs(config, pending as ClassConfig);
     }
