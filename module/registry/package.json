@@ -9,5 +9,5 @@
   "main": "index.ts", 
   "name": "@encore2/registry", 
   "scripts": {}, 
-  "version": "1.0.32"
+  "version": "1.0.33"
 }
