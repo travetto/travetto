@@ -28,6 +28,7 @@ export class TransformUtil {
       let ident = this.getDecoratorIdent(dec);
       if (ident && ident.text in patterns) {
         let { path } = this.getTypeInfoForNode(ident);
+        console.log((node as any).name.text, ident.text, path, patterns[ident.text].has(path));
         if (patterns[ident.text].has(path)) {
           return dec;
         }
@@ -151,12 +152,13 @@ export class TransformUtil {
 
   static importIfExternal<T extends State>(node: ts.Node, state: State) {
     let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
-    let ident = ts.createIdentifier(declName);
-    let importName = ts.createUniqueName(`import_${declName}`);
 
+    let ident = ts.createIdentifier(declName);
     let finalTarget: ts.Expression = ident;
 
-    if (require.resolve(path) !== state.path) {
+    if (path && require.resolve(path) !== state.path) {
+      let importName = ts.createUniqueName(`import_${declName}`);
+
       state.imports.push({
         ident: importName,
         path
@@ -181,7 +183,7 @@ export class TransformUtil {
 
       out[v].add(k);
     }
-    console.log('Aliases', out);
+
     return out;
   }
 }
