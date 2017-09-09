@@ -100,6 +100,11 @@ if (!AppEnv.prod) {
   async_hooks.createHook(listener = new StackTraceListener()).enable();
 }
 
+// Log unhandled rejections
+process.on('unhandledRejection', (reason, p) => {
+  console.log(reason);
+});
+
 export function addStackFilters(...names: string[]) {
   if (listener) {
     listener.addFilters(names);
