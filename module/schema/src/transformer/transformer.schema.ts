@@ -14,7 +14,8 @@ type SchemaList = (ts.Expression | undefined)[];
 
 interface AutoState extends State {
   inAuto: boolean,
-  addField: ts.Node | undefined
+  addField: ts.Expression | undefined,
+  addSchema: ts.Expression | undefined
 }
 
 function resolveType(type: ts.Node, state: State): ts.Expression {
@@ -119,9 +120,17 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AutoState): T {
   if (ts.isClassDeclaration(node)) {
-    let schema = TransformUtil.findAnyDecorator(node, SCHEMAS);
+    let anySchema = TransformUtil.findAnyDecorator(node, SCHEMAS);
+
+    let schema = TransformUtil.findAnyDecorator(node, {
+      'Schema': new Set([
+        require.resolve('../decorator/schema')
+      ])
+    });
+
     let arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
-    let auto = !!schema && (!arg || arg.kind !== ts.SyntaxKind.FalseKeyword);
+    let auto = !!anySchema && (!schema || (!arg || arg.kind !== ts.SyntaxKind.FalseKeyword));
+
 
     if (auto) {
       let ret = ts.visitEachChild(node, c => visitNode(context, c, { ...state, inAuto: auto }), context);
@@ -131,13 +140,28 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       node = ret;
     }
 
-    if (!!schema) {
+    if (!!anySchema) {
       let ret = node as any as ts.ClassDeclaration;
-      let decls = ret.decorators!.filter(x => x !== schema);
+      let decls = node.decorators;
+      if (!schema) {
+        if (!state.addSchema) {
+          let ident = ts.createUniqueName('import_Schema');
+          state.imports.push({
+            path: require.resolve('../decorator/schema'),
+            ident
+          });
+          state.addSchema = ts.createPropertyAccess(ident, 'Schema');
+        }
+
+        decls = ts.createNodeArray([
+          ts.createDecorator(ts.createCall(state.addSchema, undefined, [])),
+          ...decls!
+        ])
+      }
 
       node = ts.updateClassDeclaration(
         ret,
-        ts.createNodeArray([schema, ...decls]),
+        decls,
         ret.modifiers,
         ret.name,
         ret.typeParameters,
