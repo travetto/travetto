@@ -2,25 +2,10 @@ import * as ts from 'typescript';
 import { TransformUtil, Import, State } from '@encore2/compiler';
 import { ConfigLoader } from '@encore2/config';
 
-let INJECTABLES = (function () {
-  let out: { [key: string]: Set<string> } = {
-    Injectable: new Set([require.resolve('../decorator/injectable')])
-  };
-
-  let injs = ConfigLoader.bindTo({}, 'di.injectables') as any;
-
-  for (let k of Object.keys(injs)) {
-    let v = injs[k];
-    if (!(v in out)) {
-      out[v] = new Set();
-    }
-    k = k
-      .replace(/@encore2/, `${process.cwd()}/node_modules/@encore2`)
-      .replace('./', `${process.cwd()}/`);
-    out[v].add(k);
-  }
-  return out;
-})();
+let INJECTABLES = TransformUtil.buildImportAliasMap({
+  ...ConfigLoader.get('registry.injectable'),
+  [require('../decorator/injectable')]: 'Injectable'
+});
 
 interface DiState extends State {
   inInjectable: boolean;

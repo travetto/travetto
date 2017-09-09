@@ -1,14 +1,14 @@
 {
-  "author": "", 
+  "author": "",
   "dependencies": {
-    "@encore2/compiler": "git+ssh://git@git.eaiti.com/encore2/compiler.git#v1.x.x", 
-    "@encore2/config": "git+ssh://git@git.eaiti.com/encore2/config.git#v1.x.x", 
+    "@encore2/compiler": "git+ssh://git@git.eaiti.com/encore2/compiler.git#v1.x.x",
+    "@encore2/config": "git+ssh://git@git.eaiti.com/encore2/config.git#v1.x.x",
     "@encore2/registry": "git+ssh://git@git.eaiti.com/encore2/registry.git#v1.x.x"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@encore2/di", 
-  "scripts": {}, 
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@encore2/di",
+  "scripts": {},
   "version": "1.0.16"
 }
