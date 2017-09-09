@@ -166,4 +166,24 @@ export class TransformUtil {
     }
     return finalTarget;
   }
+
+  static buildImportAliasMap(key: string, initial: { [key: string]: string | string[] }, pathToType: { [key: string]: string } = {}) {
+    let out: { [key: string]: Set<string> } = {};
+    for (let [k, v] of Object.entries(initial)) {
+      out[k] = new Set(typeof v === 'string' ? [v] : v);
+    }
+
+    for (let [k, v] of Object.entries(pathToType)) {
+      if (!(v in out)) {
+        out[v] = new Set();
+      }
+
+      k = k
+        .replace(/@encore2/, `${process.cwd()}/node_modules/@encore2`)
+        .replace('./', `${process.cwd()}/`);
+
+      out[v].add(k);
+    }
+    return out;
+  }
 }
