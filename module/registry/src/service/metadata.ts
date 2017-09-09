@@ -12,61 +12,61 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
 
   abstract onInstallFinalize<T>(cls: Class<T>): C;
 
-  abstract onNewClassConfig(cls: Class): Partial<C>;
+  abstract createPending(cls: Class): Partial<C>;
 
-  hasClass(cls: string | Class) {
+  has(cls: string | Class) {
     if (typeof cls !== 'string') {
       cls = cls.__id;
     }
     return this.classes.has(cls);
   }
 
-  getClass(cls: string | Class): C {
+  get(cls: string | Class): C {
     if (cls && typeof cls !== 'string') {
       cls = cls.__id;
     }
     return this.classes.get(cls)!;
   }
 
-  hasPendingClass(cls: string | Class) {
+  hasPending(cls: string | Class) {
     if (typeof cls !== 'string') {
       cls = cls.__id;
     }
     return this.pendingClasses.has(cls);
   }
 
-  getRawClasses() {
+  getClasses() {
     return Array.from(this.classes.values()).map(x => x.class);
   }
 
   initialInstall(): any {
-    return this.getRawClasses();
+    return this.getClasses();
   }
 
-  onNewMethodConfig(cls: Class, method: Function): Partial<M> {
+  createPendingMethod(cls: Class, method: Function): Partial<M> {
     return {}
   }
 
-  getOrCreatePendingClass(cls: Class): Partial<C> {
+  getOrCreatePending(cls: Class): Partial<C> {
     if (!this.pendingClasses.has(cls.__id)) {
-      this.pendingClasses.set(cls.__id, this.onNewClassConfig(cls));
+      this.pendingClasses.set(cls.__id, this.createPending(cls));
       this.pendingMethods.set(cls.__id, new Map());
     }
     return this.pendingClasses.get(cls.__id)!;
   }
 
   getOrCreatePendingMethod(cls: Class, method: Function): Partial<M> {
-    this.getOrCreatePendingClass(cls);
+    this.getOrCreatePending(cls);
 
     if (!this.pendingMethods.get(cls.__id)!.has(method)) {
-      this.pendingMethods.get(cls.__id)!.set(method, this.onNewMethodConfig(cls, method));
+      this.pendingMethods.get(cls.__id)!.set(method, this.createPendingMethod(cls, method));
     }
     return this.pendingMethods.get(cls.__id)!.get(method)!;
   }
 
 
-  registerClass(cls: Class, pconfig: Partial<C>) {
-    let conf = this.getOrCreatePendingClass(cls);
+  register(cls: Class, pconfig: Partial<C>) {
+    let conf = this.getOrCreatePending(cls);
     _.merge(conf, pconfig);
   }
 
