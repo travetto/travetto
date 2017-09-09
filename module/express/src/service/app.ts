@@ -63,7 +63,7 @@ export class ExpressApp {
     }
 
     // Register all active
-    await Promise.all(Array.from(ControllerRegistry.getClasses())
+    await Promise.all(ControllerRegistry.getClasses()
       .map(c => this.registerController(ControllerRegistry.get(c))));
 
     // Listen for updates

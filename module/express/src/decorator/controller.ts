@@ -6,7 +6,7 @@ import { Class } from '@encore2/registry';
 
 export function Controller(path = '') {
   return (target: Class) => {
-    ControllerRegistry.registerClass(target, {
+    ControllerRegistry.register(target, {
       path,
       class: target,
     });

@@ -2,14 +2,13 @@ import { Controller, Get } from '../src';
 import { MockService } from './mock';
 import { Injectable, DependencyRegistry } from '@encore2/di';
 
-
 @Controller('/simple')
 export class Simple {
 
   constructor(private service: MockService) {
   }
 
-  @Get('/names')
+  @Get('/name')
   async doIt() {
     return this.service.fetch();
   }

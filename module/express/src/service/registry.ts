@@ -74,10 +74,6 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
     };
   }
 
-  registerClass(cls: Class, config: { class: Class, path: string }) {
-    let conf = this.getOrCreatePending(config.class);
-    conf.path = config.path;
-  }
 
   onInstallFinalize(cls: Class) {
     let id = cls.__id!;

@@ -1,3 +1,3 @@
 ---
-injectables:
+injectable:
    '@encore2/express/src/decorator/controller.ts': Controller
