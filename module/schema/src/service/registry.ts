@@ -10,10 +10,6 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     super(RootRegistry);
   }
 
-  async initialInstall() {
-    return Array.from(this.pendingClasses.values()).map(x => x.class!);
-  }
-
   createPending(cls: Class) {
     return {
       class: cls,
@@ -43,7 +39,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   }
 
   getViewSchema<T>(cls: Class<T>, view?: string) {
-    return this.classes.get(cls.__id)!.views[view || SchemaRegistry.DEFAULT_VIEW];
+    return this.get(cls)!.views[view || SchemaRegistry.DEFAULT_VIEW];
   }
 
   getOrCreatePendingViewConfig<T>(target: Class<T>, view?: string) {
@@ -129,7 +125,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     // Merge parent
     let parent = this.getParent(cls) as Class;
     if (parent) {
-      let parentConfig = this.classes.get(parent.__id);
+      let parentConfig = this.get(parent);
       if (parentConfig) {
         config = this.mergeConfigs(config, parentConfig);
       }
