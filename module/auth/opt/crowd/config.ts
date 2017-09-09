@@ -1,4 +1,4 @@
-import { Config } from '@encore/config';
+import { Config } from '@encore2/config';
 
 @Config('auth.crowd')
 export class CrowdStrategyConfig {

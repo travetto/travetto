@@ -1,59 +1,63 @@
 import * as passport from 'passport';
 import * as moment from 'moment';
+import { Request } from 'express';
 
-import { MongoStrategyUtil } from './util';
+import { StrategyUtil } from '../../src/util';
 import { MongoStrategyConfig } from './types';
-import { AppError } from '@encore/express';
-import { Cls } from '@encore/schema';
-import { ModelService, BaseModel } from '@encore/model';
-import { Strategy as LocalStrategy } from 'passport-local';
-import { Context } from '@encore/context';
+import { AppError } from '@encore2/express';
+import { ModelService, BaseModel } from '@encore2/model';
+import { BaseStrategy } from '../../src/service/strategy';
+import { Injectable } from '@encore2/di';
 
-export function MongoStrategy<T extends BaseModel>(cls: Cls<T>, config: MongoStrategyConfig) {
+@Injectable()
+export class MongoStrategy<T extends BaseModel> extends BaseStrategy<T, MongoStrategyConfig> {
 
-  async function login(username: string, password: string) {
+  constructor(config: MongoStrategyConfig) {
+    super(config)
+  }
+
+  async getUser(username: string) {
     let query: any = {
-      [config.usernameField]: username
+      [this.config.usernameField]: username
+    };
+    let user = await ModelService.findOne(cls, query);
+    return user;
+  }
+
+  async doLogin(username: string, password: string) {
+    let query: any = {
+      [this.config.usernameField]: username
     };
 
-    try {
-      let user = await ModelService.findOne(cls, query);
-      let hash = await MongoStrategyUtil.generateHash(password, (user as any)[config.saltField]);
-      if (hash !== (user as any)[config.hashField]) {
-        throw new AppError('Invalid password');
-      } else {
-        try {
-          Context.get().user = user;
-        } catch (e) {
-          // Do nothing
-        }
-        return user;
-      }
-    } catch (e) {
-      throw new AppError('User and/or password combination is invalid');
+    let user = await this.getUser(username);
+    let hash = await StrategyUtil.generateHash(password, (user as any)[this.config.saltField]);
+    if (hash !== (user as any)[this.config.hashField]) {
+      throw new AppError('Invalid password');
+    } else {
+      return user;
     }
   }
 
-  async function register(user: T, password: string) {
+  async register(user: T, password: string) {
     let query: any = {
-      [config.usernameField]: (user as any)[config.usernameField]
+      [this.config.usernameField]: (user as any)[this.config.usernameField]
     };
 
     let existingUsers = await ModelService.getByQuery(cls, query);
     if (existingUsers.length) {
       throw new AppError('That email is already taken.');
     } else {
-      let fields = await MongoStrategyUtil.generatePassword(password);
+      let fields = await StrategyUtil.generatePassword(password);
       Object.assign(user as any, {
-        [config.hashField]: fields.hash,
-        [config.saltField]: fields.salt
+        [this.config.hashField]: fields.hash,
+        [this.config.saltField]: fields.salt
       });
 
-      delete (user as any)[config.passwordField];
+      delete (user as any)[this.config.passwordField];
 
       let res = await ModelService.save(user);
       try {
-        Context.get().user = user;
+        this.context.get().user = user;
       } catch (e) {
         // Do nothing
       }
@@ -61,89 +65,42 @@ export function MongoStrategy<T extends BaseModel>(cls: Cls<T>, config: MongoStr
     }
   }
 
-  async function changePassword(username: string, password: string, oldPassword?: string) {
-    let query: any = {
-      [config.usernameField]: username
-    };
-
-    let user = await ModelService.findOne(cls, query);
+  async changePassword(username: string, password: string, oldPassword?: string) {
+    let user = await this.getUser(username);
     if (oldPassword !== undefined) {
-      if (oldPassword === (user as any)[config.resetTokenField]) {
-        if (moment((user as any)[config.resetExpiresField]).isBefore(new Date())) {
+      if (oldPassword === (user as any)[this.config.resetTokenField]) {
+        if (moment((user as any)[this.config.resetExpiresField]).isBefore(new Date())) {
           throw new AppError('Reset token has expired');
         }
       } else {
-        let pw = await MongoStrategyUtil.generateHash(oldPassword, (user as any)[config.saltField]);
-        if (pw !== (user as any)[config.hashField]) {
+        let pw = await StrategyUtil.generateHash(oldPassword, (user as any)[this.config.saltField]);
+        if (pw !== (user as any)[this.config.hashField]) {
           throw new AppError('Old password is required to change');
         }
       }
     }
 
-    let fields = await MongoStrategyUtil.generatePassword(password);
+    let fields = await StrategyUtil.generatePassword(password);
 
     Object.assign(user as any, {
-      [config.hashField]: fields.hash,
-      [config.saltField]: fields.salt
+      [this.config.hashField]: fields.hash,
+      [this.config.saltField]: fields.salt
     });
 
     return await ModelService.update(user);
   }
 
-  async function generateResetToken(username: string) {
-    let query: any = {
-      [config.usernameField]: username
-    };
-
-    let user = await ModelService.findOne(cls, query);
-    let salt = await MongoStrategyUtil.generateSalt();
-    let password = await MongoStrategyUtil.generateHash('' + (new Date().getTime()), salt, 25000, 32);
+  async generateResetToken(username: string) {
+    let user = await this.getUser(username);
+    let salt = await StrategyUtil.generateSalt();
+    let password = await StrategyUtil.generateHash('' + (new Date().getTime()), salt, 25000, 32);
 
     Object.assign(user as any, {
-      [config.resetTokenField]: password,
-      [config.resetExpiresField]: moment().add(1, 'hour').toDate()
+      [this.config.resetTokenField]: password,
+      [this.config.resetExpiresField]: moment().add(1, 'hour').toDate()
     });
 
     await ModelService.update(user);
     return user;
   }
-
-  // used to serialize the user for the session
-  passport.serializeUser((user: T, done: Function) => done(null, user._id));
-
-  // used to deserialize the user
-  passport.deserializeUser(async (id: string, done: (err: any, user?: T) => void) => {
-    ModelService.getById(cls, id).then(
-      (u: T) => done(null, u),
-      (err: any) => done(err));
-  });
-
-  passport.use('local', new LocalStrategy({
-    // by default, local strategy uses username and password, we will override with email
-    usernameField: config.usernameField,
-    passwordField: config.passwordField,
-    passReqToCallback: true // allows us to pass back the entire request to the callback
-  }, async function (req, email, password, done) {
-    try {
-      let res = await login(email, password);
-      if (req.passportOptions.successRedirect) {
-        this.success(res);
-      } else {
-        done(null, res);
-      }
-    } catch (e) {
-      if (req.passportOptions.failureRedirect) {
-        this.fail(e);
-      } else {
-        done(e);
-      }
-    }
-  }));
-
-  return {
-    login,
-    register,
-    changePassword,
-    generateResetToken
-  };
 }
