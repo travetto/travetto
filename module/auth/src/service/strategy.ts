@@ -25,13 +25,6 @@ export abstract class BaseStrategy<U, T extends Options> extends Strategy {
     }) as OptionsWithRequest, (req: Request, email: string, pw: string, done: Callback<U>) => this.filterAuth(req, email, pw, done));
   }
 
-  postConstruct() {
-    // Self register
-    passport.serializeUser(this.serialize.bind(this));
-    passport.deserializeUser(this.deserialize.bind(this));
-    passport.use('local', this);
-  }
-
   abstract getUser(id: string): Promise<U>;
 
   async login(email: string, password: string): Promise<U> {
