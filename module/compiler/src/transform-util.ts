@@ -167,7 +167,7 @@ export class TransformUtil {
     return finalTarget;
   }
 
-  static buildImportAliasMap(key: string, initial: { [key: string]: string | string[] }, pathToType: { [key: string]: string } = {}) {
+  static buildImportAliasMap(initial: { [key: string]: string | string[] }, pathToType: { [key: string]: string } = {}) {
     let out: { [key: string]: Set<string> } = {};
     for (let [k, v] of Object.entries(initial)) {
       out[k] = new Set(typeof v === 'string' ? [v] : v);
