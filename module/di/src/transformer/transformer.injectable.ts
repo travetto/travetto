@@ -4,7 +4,7 @@ import { ConfigLoader } from '@encore2/config';
 
 let INJECTABLES = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.injectable'),
-  [require('../decorator/injectable')]: 'Injectable'
+  [require.resolve('../decorator/injectable')]: 'Injectable'
 });
 
 interface DiState extends State {
