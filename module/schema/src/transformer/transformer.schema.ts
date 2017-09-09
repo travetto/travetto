@@ -1,6 +1,13 @@
 import * as ts from 'typescript';
 import { Schema, Ignore, Field } from '../decorator';
 import { TransformUtil, Import, State } from '@encore2/compiler';
+import { ConfigLoader } from '@encore2/config';
+
+
+let SCHEMAS = TransformUtil.buildImportAliasMap({
+  ...ConfigLoader.get('registry.schema'),
+  [require.resolve('../decorator/schema')]: 'Schema'
+});
 
 type DecList = ts.NodeArray<ts.Decorator>;
 type SchemaList = (ts.Expression | undefined)[];
@@ -112,7 +119,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AutoState): T {
   if (ts.isClassDeclaration(node)) {
-    let schema = TransformUtil.findAnyDecorator(node, { 'Schema': new Set([require.resolve('../decorator/schema')]) });
+    let schema = TransformUtil.findAnyDecorator(node, SCHEMAS);
     let arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
     let auto = !!schema && (!arg || arg.kind !== ts.SyntaxKind.FalseKeyword);
 
