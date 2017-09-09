@@ -148,8 +148,6 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
 
     if (!!anySchema) {
-      console.log('Schema', (node as any).name.text, TransformUtil.getDecoratorIdent(anySchema).text);
-
       let ret = node as any as ts.ClassDeclaration;
       let decls = node.decorators;
       if (!schema) {
