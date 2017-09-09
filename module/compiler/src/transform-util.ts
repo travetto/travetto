@@ -177,7 +177,7 @@ export class TransformUtil {
 
       k = k
         .replace(/^@encore2/, `${process.cwd()}/node_modules/@encore2`)
-        .replace(/^\./, `${process.cwd()}/`);
+        .replace(/^\.\//, `${process.cwd()}/`);
 
       out[v].add(k);
     }
