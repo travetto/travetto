@@ -14,7 +14,7 @@ export abstract class BaseModel extends SchemaBound implements ModelCore {
 
   constructor() {
     super();
-    this.type = ModelRegistry.getClass(this.constructor as Class).discriminator;
+    this.type = ModelRegistry.get(this.constructor as Class).discriminator;
   }
 
   preSave(): this {

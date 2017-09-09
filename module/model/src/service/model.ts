@@ -13,15 +13,15 @@ function getClass<T>(o: T) {
 }
 
 @Injectable()
-export class ModelService {
+export class ModelService<T, ID = string> {
 
-  constructor(private source: ModelSource) { }
+  constructor(private source: ModelSource<T, ID>) { }
 
-  getConfig<T>(cls: Class<T>) {
-    return ModelRegistry.getClass(cls);
+  getConfig(cls: Class<T>) {
+    return ModelRegistry.get(cls);
   }
 
-  convert<T>(cls: Class<T>, o: T): T {
+  convert(cls: Class<T>, o: T): T {
     let config = this.getConfig(cls);
 
     let cons = cls;
@@ -33,23 +33,23 @@ export class ModelService {
     return BindUtil.bindSchema(cons, new cons(), o);
   }
 
-  async prePersist<T>(o: T, view: string = SchemaRegistry.DEFAULT_VIEW) {
-    let mc = o as ModelCore;
-    let res = await SchemaValidator.validate(mc.preSave ? mc.preSave() : o, view);
+  async prePersist(o: Partial<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
+    let mc = o as ModelCore<T>;
+    let res = await SchemaValidator.validate<T>(mc.preSave ? mc.preSave() : o, view);
     res = await this.source.prePersist(res);
     return res as T;
   }
 
-  postLoad<T>(cls: Class<T>, o: T): T {
+  postLoad(cls: Class<T>, o: T): T {
     o = this.source.postLoad(o);
     o = this.convert(cls, o);
 
-    let mc = o as ModelCore;
-    o = mc.postLoad ? mc.postLoad() as T : o;
+    let mc = o as ModelCore<T>;
+    o = mc.postLoad ? mc.postLoad() : o;
     return o;
   }
 
-  async getAllByQuery<T>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<T[]> {
+  async getAllByQuery(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<T[]> {
     const config = this.getConfig(cls);
     if (!options.sort && config.defaultSort) {
       options.sort = config.defaultSort;
@@ -58,22 +58,22 @@ export class ModelService {
     return res.map(o => this.postLoad(cls, o));
   }
 
-  async getCountByQuery<T>(cls: Class<T>, query: Query = {}): Promise<number> {
+  async getCountByQuery(cls: Class<T>, query: Query = {}): Promise<number> {
     let res = await this.source.getCountByQuery(cls, query);
     return res;
   }
 
-  async getByQuery<T>(cls: Class<T>, query: Query, options: QueryOptions = {}, failOnMany: boolean = true): Promise<T> {
-    let res = await this.source.getByQuery<T>(cls, query, options, failOnMany);
+  async getByQuery(cls: Class<T>, query: Query, options: QueryOptions = {}, failOnMany: boolean = true): Promise<T> {
+    let res = await this.source.getByQuery(cls, query, options, failOnMany);
     return this.postLoad(cls, res);
   }
 
-  async getIdsByQuery<T>(cls: Class<T>, query: Query, options: QueryOptions = {}): Promise<ModelId> {
-    let res = await this.source.getIdsByQuery<T>(cls, query, options);
+  async getIdsByQuery(cls: Class<T>, query: Query, options: QueryOptions = {}): Promise<ID[]> {
+    let res = await this.source.getIdsByQuery(cls, query, options);
     return res;
   }
 
-  async saveOrUpdate<T>(o: T, query: Query): Promise<T> {
+  async saveOrUpdate(o: T, query: Query): Promise<T> {
     let res = await this.getAllByQuery(getClass(o), query, { limit: 2 });
     if (res.length === 1) {
       o = _.merge(res[0], o);
@@ -84,56 +84,56 @@ export class ModelService {
     throw new Error(`Too many already exist: ${res.length}`);
   }
 
-  async getById<T>(cls: Class<T>, id: ModelId): Promise<T> {
-    let res = await this.source.getById<T>(cls, id);
+  async getById(cls: Class<T>, id: ID): Promise<T> {
+    let res = await this.source.getById(cls, id);
     return this.postLoad(cls, res);
   }
 
-  async deleteById<T>(cls: Class<T>, id: ModelId): Promise<number> {
+  async deleteById(cls: Class<T>, id: ID): Promise<number> {
     return await this.source.deleteById(cls, id);
   }
 
-  async deleteByQuery<T>(cls: Class<T>, query: Query = {}): Promise<number> {
+  async deleteByQuery(cls: Class<T>, query: Query = {}): Promise<number> {
     return await this.source.deleteByQuery(cls, query);
   }
 
-  async save<T>(o: T): Promise<T> {
+  async save(o: T): Promise<T> {
     let cls = getClass(o);
     o = await this.prePersist(o);
-    let res = await this.source.save<T>(cls, o);
+    let res = await this.source.save(cls, o);
     return this.postLoad(cls, res);
   }
 
-  async saveAll<T>(objs: T[]): Promise<T[]> {
+  async saveAll(objs: T[]): Promise<T[]> {
     let cls = getClass(objs[0]);
     objs = await Promise.all(objs.map(o => this.prePersist(o)));
-    let res = await this.source.saveAll<T>(cls, objs);
+    let res = await this.source.saveAll(cls, objs);
     return res.map(x => this.postLoad(cls, x));
   }
 
-  async update<T>(o: T): Promise<T> {
+  async update(o: T): Promise<T> {
     let cls = getClass(o);
     o = await this.prePersist(o);
     let res = await this.source.update(cls, o);
     return this.postLoad(cls, res);
   }
 
-  async updateAll<T>(objs: T[]): Promise<number> {
+  async updateAll(objs: T[]): Promise<number> {
     let cls = getClass(objs[0]);
     objs = await Promise.all(objs.map(o => this.prePersist(o)));
-    let res = await this.source.updateAll<T>(cls, objs);
+    let res = await this.source.updateAll(cls, objs);
     return res;
   }
 
-  async updatePartial<T>(o: Partial<T>, view: string): Promise<T> {
+  async updatePartial(o: Partial<T>, view: string): Promise<T> {
     let cls = getClass(o) as Class<T>;
     o = await this.prePersist(o, view);
     let partial = BindUtil.bindSchema(cls, {}, o, view);
-    let res = await this.source.updatePartial<T>(cls, partial);
+    let res = await this.source.updatePartial(cls, partial);
     return this.postLoad(cls, res);
   }
 
-  async updatePartialByQuery<T>(o: Partial<T>, view: string, query: Query): Promise<number> {
+  async updatePartialByQuery(o: Partial<T>, view: string, query: Query): Promise<number> {
     let cls = getClass(o) as Class<T>;
     o = await this.prePersist(o, view);
     let partial = BindUtil.bindSchema(cls, {}, o, view);
@@ -141,7 +141,7 @@ export class ModelService {
     return res;
   }
 
-  async bulkProcess<T>(named: Class<T>, state: BulkState<T>) {
+  async bulkProcess(named: Class<T>, state: BulkState<T>) {
     return this.source.bulkProcess(named, state);
   }
 }

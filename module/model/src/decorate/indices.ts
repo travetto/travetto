@@ -1,8 +1,8 @@
-import { Class } from '@encore2/schema';
+import { Class } from '@encore2/registry';
 import { ModelRegistry, IndexConfig } from '../service';
 
 function createIndex<T extends Class>(target: T, config: IndexConfig) {
-  ModelRegistry.registerOptions(target, { indicies: [config] });
+  ModelRegistry.register(target, { indicies: [config] });
   return target;
 }
 

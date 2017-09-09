@@ -9,10 +9,10 @@ export interface IndexConfig {
   }
 }
 
-export interface ModelOptions {
-  collection?: string;
+export class ModelOptions {
+  collection: string;
   defaultSort?: SortOptions;
-  indicies?: IndexConfig[];
+  indicies: IndexConfig[] = [];
   discriminator?: string;
   subtypes?: { [key: string]: Class };
   extra?: object;

@@ -1,2 +1,2 @@
-export * from './clazz';
+export * from './model';
 export * from './indices';

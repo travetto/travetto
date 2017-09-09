@@ -1,4 +1,4 @@
-export interface ModelCore {
-  preSave?: () => this;
-  postLoad?: () => this;
+export interface ModelCore<T> {
+  preSave?(): T;
+  postLoad?(): T;
 }
