@@ -53,7 +53,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
 
   getOrCreatePending(cls: Class): Partial<C> {
     let cid = id(cls);
-    if (!this.pending.has(cid)) {
+    if (!this.hasPending(cid)) {
       this.pending.set(cid, this.createPending(cls));
       this.pendingMethods.set(cid, new Map());
     }
@@ -81,7 +81,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
   }
 
   async onInstall(cls: Class, e: ChangeEvent) {
-    if (this.pending.has(cls.__id) || this.pendingMethods.has(cls.__id)) {
+    if (this.hasPending(cls) || this.pendingMethods.has(cls.__id)) {
       let result = this.onInstallFinalize(cls);
       this.pendingMethods.delete(cls.__id);
       this.pending.delete(cls.__id);
@@ -92,8 +92,8 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
   }
 
   async onUninstall(cls: Class, e: ChangeEvent) {
-    if (this.entries.has(cls.__id)) {
-      this.expired.set(cls.__id, this.entries.get(cls.__id)!);
+    if (this.has(cls)) {
+      this.expired.set(cls.__id, this.get(cls)!);
       this.entries.delete(cls.__id);
       if (e.type === 'removing') {
         this.emit(e);
