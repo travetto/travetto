@@ -41,7 +41,11 @@ export class ModelService extends ModelSource {
       cons = config.subtypes[o.type];
     }
 
-    return BindUtil.bindSchema(cons, new cons(), o);
+    if (o instanceof cons) {
+      return o;
+    } else {
+      return BindUtil.bindSchema(cons, new cons(), o);
+    }
   }
 
   async prePersist<T extends ModelCore>(o: T): Promise<T>;
