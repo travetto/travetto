@@ -6,11 +6,11 @@ import { Class } from '@encore2/registry';
 @Schema()
 export abstract class BaseModel extends SchemaBound implements ModelCore {
 
-  id: string;
-  version: string;
+  id?: string;
+  version?: string;
   type?: string;
-  createdDate: Date;
-  updatedDate: Date;
+  createdDate?: Date;
+  updatedDate?: Date;
 
   constructor() {
     super();

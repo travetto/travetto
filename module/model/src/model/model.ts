@@ -1,5 +1,5 @@
 export interface ModelCore {
-  id: string;
+  id?: string;
   type?: string;
   prePersist?(): this;
   postLoad?(): this;
