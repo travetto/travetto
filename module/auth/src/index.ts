@@ -1,3 +1,4 @@
 /// <reference path="./typings.d.ts" />
-export * from './initialize';
+export * from './service';
 export * from './decorate';
+export * from './util';

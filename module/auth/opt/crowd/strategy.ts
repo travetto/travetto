@@ -4,7 +4,7 @@ import { requestJSON } from '@encore2/util';
 import { Injectable } from '@encore2/di';
 
 import { CrowdStrategyConfig } from './config';
-import { BaseStrategy } from '../../src/service/strategy';
+import { BaseStrategy } from '../../index';
 
 @Injectable()
 export class CrowdStrategy<T> extends BaseStrategy<T, CrowdStrategyConfig> {

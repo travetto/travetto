@@ -2,13 +2,13 @@ import * as passport from 'passport';
 import * as moment from 'moment';
 import { Request } from 'express';
 
-import { StrategyUtil } from '../../src/util';
 import { AppError } from '@encore2/express';
 import { ModelService, BaseModel, ModelRegistry } from '@encore2/model';
-import { BaseStrategy } from '../../src/service/strategy';
-import { Injectable } from '@encore2/di';
-import { ModelStrategyConfig } from './config';
 import { Class } from '@encore2/registry';
+import { Injectable } from '@encore2/di';
+
+import { StrategyUtil, BaseStrategy } from '../../index';
+import { ModelStrategyConfig } from './config';
 
 @Injectable()
 export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStrategyConfig> {
