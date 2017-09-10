@@ -19,11 +19,12 @@ export class MongoService extends ModelSource {
     super();
   }
 
-  postLoad<T extends ModelCore>(o: T) {
+  postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
     if ((o as any)._id) {
       o.id = ((o as any)._id as any as mongo.ObjectId).toHexString();
       delete (o as any)._id;
     }
+    console.log('Post load', o);
     return o;
   }
 
@@ -170,6 +171,7 @@ export class MongoService extends ModelSource {
     }
     let res = await col.insertOne(o);
     o.id = res.insertedId.toHexString();
+    console.log(o);
     return o;
   }
 
