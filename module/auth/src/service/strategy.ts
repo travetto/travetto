@@ -44,8 +44,13 @@ export abstract class BaseStrategy<U, T extends Options> extends Strategy {
     done(null, (user as any)[this.config.usernameField!]);
   }
 
-  deserialize(username: string, done: Callback<U>) {
-    this.getUser(username).then(v => done(undefined, v)).catch(done);
+  async deserialize(username: string, done: Callback<U>) {
+    try {
+      let u = await this.getUser(username);
+      done(undefined, u);
+    } catch (e) {
+      done(e);
+    }
   }
 
   async filterAuth(req: Request, email: string, password: string, done: Callback<U>) {

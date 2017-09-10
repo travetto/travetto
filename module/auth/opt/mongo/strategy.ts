@@ -3,24 +3,35 @@ import * as moment from 'moment';
 import { Request } from 'express';
 
 import { StrategyUtil } from '../../src/util';
-import { MongoStrategyConfig } from './types';
 import { AppError } from '@encore2/express';
-import { ModelService, BaseModel } from '@encore2/model';
+import { ModelService, BaseModel, ModelRegistry } from '@encore2/model';
 import { BaseStrategy } from '../../src/service/strategy';
 import { Injectable } from '@encore2/di';
+import { ModelStrategyConfig } from './config';
+import { Class } from '@encore2/registry';
 
 @Injectable()
-export class MongoStrategy<T extends BaseModel> extends BaseStrategy<T, MongoStrategyConfig> {
+export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStrategyConfig> {
 
-  constructor(config: MongoStrategyConfig) {
+  private modelClass: Class<T>;
+
+  constructor(config: ModelStrategyConfig, private modelService: ModelService) {
     super(config)
   }
+
+  postConstruct() {
+    if (!ModelRegistry.has(this.config.modelClass)) {
+      throw new Error(`Auth model class ${this.config.modelClass} does not exist`);
+    }
+    this.modelClass = ModelRegistry.get(this.config.modelClass).class;
+  }
+
 
   async getUser(username: string) {
     let query: any = {
       [this.config.usernameField]: username
     };
-    let user = await ModelService.findOne(cls, query);
+    let user = await this.modelService.getByQuery(this.modelClass, query);
     return user;
   }
 
@@ -43,7 +54,7 @@ export class MongoStrategy<T extends BaseModel> extends BaseStrategy<T, MongoStr
       [this.config.usernameField]: (user as any)[this.config.usernameField]
     };
 
-    let existingUsers = await ModelService.getByQuery(cls, query);
+    let existingUsers = await this.modelService.getAllByQuery(this.modelClass, query);
     if (existingUsers.length) {
       throw new AppError('That email is already taken.');
     } else {
@@ -55,7 +66,7 @@ export class MongoStrategy<T extends BaseModel> extends BaseStrategy<T, MongoStr
 
       delete (user as any)[this.config.passwordField];
 
-      let res = await ModelService.save(user);
+      let res = await this.modelService.save(user);
       try {
         this.context.get().user = user;
       } catch (e) {
@@ -87,7 +98,7 @@ export class MongoStrategy<T extends BaseModel> extends BaseStrategy<T, MongoStr
       [this.config.saltField]: fields.salt
     });
 
-    return await ModelService.update(user);
+    return await this.modelService.update(user);
   }
 
   async generateResetToken(username: string) {
@@ -100,7 +111,7 @@ export class MongoStrategy<T extends BaseModel> extends BaseStrategy<T, MongoStr
       [this.config.resetExpiresField]: moment().add(1, 'hour').toDate()
     });
 
-    await ModelService.update(user);
+    await this.modelService.update(user);
     return user;
   }
 }
