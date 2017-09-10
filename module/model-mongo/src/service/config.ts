@@ -1,6 +1,6 @@
 import { Config } from '@encore2/config';
 
-@Config('mongo')
+@Config('model.mongo')
 export class ModelMongoConfig {
   hosts = 'localhost';
   schema = 'app';

@@ -1,16 +1,16 @@
 {
-  "author": "", 
+  "author": "",
   "dependencies": {
-    "@encore2/model": "git+ssh://git@git.eaiti.com/encore2/model.git#v1.x.x", 
-    "@types/flat": "0.0.28", 
-    "@types/mongodb": "^2.2.10", 
-    "flat": "^4.0.0", 
+    "@encore2/model": "git+ssh://git@git.eaiti.com/encore2/model.git#v1.x.x",
+    "@types/flat": "0.0.28",
+    "@types/mongodb": "^2.2.10",
+    "flat": "^4.0.0",
     "mongodb": "^2.2.31"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@encore2/model-mongo", 
-  "scripts": {}, 
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@encore2/model-mongo",
+  "scripts": {},
   "version": "1.0.3"
 }
