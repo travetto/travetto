@@ -69,4 +69,7 @@ export abstract class BaseStrategy<U, T extends Options> extends Strategy {
       }
     }
   }
+
+  register?(user: U, password: string): Promise<U>;
+  changePassword?(username: string, password: string, oldPassword?: string): Promise<U>;
 }

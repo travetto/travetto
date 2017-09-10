@@ -66,7 +66,7 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
 
       delete (user as any)[this.config.passwordField];
 
-      let res = await this.modelService.save(this.modelClass, user);
+      let res: T = await this.modelService.save(this.modelClass, user);
       try {
         this.context.get().user = user;
       } catch (e) {
