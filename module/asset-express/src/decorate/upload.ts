@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { AssetUtil, AssetFile } from '@encore2/asset';
-import { RouteRegistry } from '@encore2/express';
+import { ControllerRegistry } from '@encore2/express';
 import { nodeToPromise } from '@encore2/base';
 import { AssetExpressConfig } from '../config';
-import { Class } from '@encore2/di';
+import { Class } from '@encore2/registry';
 
 const match = require('mime-match');
 const multiparty = require('connect-multiparty');
@@ -35,7 +35,7 @@ export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
   let excludeTypes = readTypeArr(config.excludeTypes);
 
   return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-    let rh = RouteRegistry.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
+    let rh = ControllerRegistry.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
     const filt = async function (this: any, req: Request, res: Response) {
       await nodeToPromise<void>(null, multipart, req, res);
 
