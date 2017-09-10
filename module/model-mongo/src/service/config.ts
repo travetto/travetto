@@ -12,4 +12,8 @@ export class ModelMongoConfig {
     let opts = Object.entries(this.options).map(([k, v]) => `${k}=${v}`).join('&');
     return `mongodb://${hosts}/${this.schema}?${opts}`;
   }
+
+  postConstruct() {
+    console.log(this.url);
+  }
 }

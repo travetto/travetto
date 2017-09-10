@@ -9,7 +9,7 @@ import { Class } from '@encore2/registry';
 
 // TODO: Handle id to _id translations
 
-@Injectable()
+@Injectable({ target: ModelSource })
 export class MongoService extends ModelSource {
 
   private client: mongo.Db;
@@ -20,15 +20,17 @@ export class MongoService extends ModelSource {
   }
 
   postLoad<T extends ModelCore>(o: T) {
-    if (o.id) {
-      o.id = (o.id as any as mongo.ObjectId).toHexString();
+    if ((o as any)._id) {
+      o.id = ((o as any)._id as any as mongo.ObjectId).toHexString();
+      delete (o as any)._id;
     }
     return o;
   }
 
   prePersist<T extends ModelCore>(o: T) {
     if (o.id) {
-      o.id = new mongo.ObjectId(o.id) as any;
+      (o as any)._id = new mongo.ObjectId(o.id) as any;
+      delete o.id;
     }
     return o;
   }
@@ -173,6 +175,9 @@ export class MongoService extends ModelSource {
 
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]): Promise<T[]> {
     let col = await this.getCollection(cls);
+    for (let x of objs) {
+      delete x.id;
+    }
     let res = await col.insertMany(objs);
     for (let i = 0; i < objs.length; i++) {
       objs[i].id = res.insertedIds[i].toHexString();
@@ -236,7 +241,7 @@ export class MongoService extends ModelSource {
       if (id.id === undefined || id.id !== p.id) {
         delete p.id;
       } else {
-        id.id = (p as any).id = new mongo.ObjectID(p.id);
+        id._id = (p as any)._id = new mongo.ObjectID(p.id);
       }
 
       bulk.find(id).upsert().updateOne({
