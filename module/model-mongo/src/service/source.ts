@@ -2,13 +2,12 @@ import * as mongo from 'mongodb';
 import * as flat from 'flat';
 import * as _ from 'lodash';
 
-import { ModelSource, IndexConfig, Query, QueryOptions, BulkState, BulkResponse, ModelRegistry, ModelCore } from '@encore2/model';
+import { ModelSource, IndexConfig, Query, QueryOptions, BulkState, BulkResponse, ModelRegistry, ModelCore, isSubQuery } from '@encore2/model';
 import { Injectable } from '@encore2/di';
 import { ModelMongoConfig } from './config';
 import { Class } from '@encore2/registry';
-export interface Base {
-  _id: string;
-}
+
+// TODO: Handle id to _id translations
 
 @Injectable()
 export class MongoService extends ModelSource {
@@ -49,8 +48,8 @@ export class MongoService extends ModelSource {
     for (let colName of Object.keys(this.indices)) {
       let col = await this.client.collection(colName);
 
-      for (let [fields, config] of this.indices[colName]) {
-        promises.push(col.createIndex(fields, config));
+      for (let { fields, options } of this.indices[colName]) {
+        promises.push(col.createIndex(fields, options));
       }
     }
 
@@ -58,12 +57,13 @@ export class MongoService extends ModelSource {
   }
 
   translateQueryIds<T extends ModelCore>(query: Query) {
-    if (query['_id']) {
-      if (typeof query.id === 'string') {
-        query.id = new mongo.ObjectID(query.id) as any;
-      } else if (_.isPlainObject(query.id)) {
-        if (query.id['$in']) {
-          query.id['$in'] = query.id['$in'].map((x: any) => typeof x === 'string' ? new mongo.ObjectID(x) : x);
+    let val = query.id;
+    if (val) {
+      if (typeof val === 'string') {
+        query.id = new mongo.ObjectID(val) as any;
+      } else if (isSubQuery(val)) {
+        if (val.$in) {
+          val.$in = val.$in.map((x: any) => typeof x === 'string' ? new mongo.ObjectID(x) : x);
         }
       }
     }
@@ -83,10 +83,12 @@ export class MongoService extends ModelSource {
     await this.init();
   }
 
-  registerIndex(cls: Class, fields: { [key: string]: number }, config: mongo.IndexOptions) {
+  registerIndex(cls: Class, fields: { [key: string]: number }, options: mongo.IndexOptions) {
     let col = this.getCollectionName(cls);
     this.indices[col] = this.indices[col] || [];
-    this.indices[col].push([fields, config]);
+
+    // TODO: Cleanup
+    this.indices[col].push({ fields, options });
   }
 
   getIndices(cls: Class) {
@@ -186,19 +188,21 @@ export class MongoService extends ModelSource {
     return o;
   }
 
-  async updatePartial<T extends ModelCore>(cls: Class<T>, id: string, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
-    return await this.updatePartialByQuery(cls, { _id: id }, data, opts);
+  async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
+    return await this.updatePartialByQuery(cls, { _id: data.id }, data);
   }
 
-  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, data: any, opts: mongo.FindOneAndReplaceOption = {}): Promise<T> {
+  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: Query, data: Partial<T>): Promise<T> {
     let col = await this.getCollection(cls);
     query = this.translateQueryIds(query);
 
+    let final: any = data;
+
     if (Object.keys(data)[0].charAt(0) !== '$') {
-      data = { $set: flat(data) };
+      final = { $set: flat(final) };
     }
 
-    let res = await col.findOneAndUpdate(query, data, Object.assign({ returnOriginal: false }, opts));
+    let res = await col.findOneAndUpdate(query, final, Object.assign({ returnOriginal: false }, {}));
     if (!res.value) {
       throw new Error('Object not found for updating');
     }
