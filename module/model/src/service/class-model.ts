@@ -56,12 +56,12 @@ export abstract class ClassModelService<T extends ModelCore> {
     return this.service.updateAllByQuery(this.class, query, data);
   }
 
-  updatePartial(o: Partial<T>, view: string) {
+  updatePartial(o: Partial<T>) {
     return this.service.updatePartial(this.class, o);
   }
 
-  updatePartialByQuery(o: Partial<T>, view: string, query: Query) {
-    return this.service.updatePartialByQuery(this.class, o, query);
+  updatePartialByQuery(query: Query, o: Partial<T>) {
+    return this.service.updatePartialByQuery(this.class, query, o);
   }
 
   updatePartialView(o: Partial<T>, view: string) {

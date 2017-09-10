@@ -134,8 +134,8 @@ export class ModelService extends ModelSource {
     return this.source.updatePartial(cls, model);
   }
 
-  updatePartialByQuery<T extends ModelCore>(cls: Class<T>, body: Partial<T>, query: Query) {
-    return this.source.updatePartialByQuery(cls, body, query);
+  updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: Query, body: Partial<T>) {
+    return this.source.updatePartialByQuery(cls, query, body);
   }
 
   async updatePartialView<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string) {
@@ -148,7 +148,7 @@ export class ModelService extends ModelSource {
   async updatePartialViewByQuery<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string, query: Query) {
     o = await this.prePersist(o, view);
     let partial = BindUtil.bindSchema(cls, {}, o, view);
-    let res = await this.updatePartialByQuery(cls, partial, query);
+    let res = await this.updatePartialByQuery(cls, query, partial);
     return res;
   }
 
