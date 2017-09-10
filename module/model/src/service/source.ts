@@ -1,13 +1,14 @@
-import { Class } from '@encore2/registry';
+import { Class, ChangeEvent } from '@encore2/registry';
 
 import { ModelCore, QueryOptions } from '../model';
 import { BulkState, BulkResponse } from '../model/bulk';
 import { Query } from '../model/query';
 
 
-export abstract class ModelSource<T extends { _id: ID }, ID = T['_id']> {
-  abstract getIdField(): string;
-  abstract getTypeField(): string;
+export abstract class ModelSource<T extends { id: ID }, ID = T['id']> {
+  abstract onChange(e: ChangeEvent): void;
+
+  abstract getTypeField(): keyof T;
 
   abstract prePersist(model: Partial<T>): Partial<T>;
   abstract prePersist(model: T): T;

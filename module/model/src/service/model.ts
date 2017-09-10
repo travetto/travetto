@@ -13,21 +13,30 @@ function getClass<T>(o: T) {
 }
 
 @Injectable()
-export class ModelService<T extends { _id: ID }, ID = T['_id']> {
+export class ModelService<T extends { id: ID }, ID = T['id']> {
 
-  constructor(private source: ModelSource<T, ID>) { }
+  constructor(private source: ModelSource<T>) { }
 
-  getConfig(cls: Class<T>) {
-    return ModelRegistry.get(cls);
+  postConstruct() {
+    // Cannot block on registry since this is an injectable (circular dep)
+    //   Call but ignore return
+    this.init();
+  }
+
+  async init() {
+    await ModelRegistry.init();
+    ModelRegistry.on(this.source.onChange.bind(this.source));
   }
 
   convert(cls: Class<T>, o: T): T {
-    let config = this.getConfig(cls);
+    let config = ModelRegistry.get(cls);
 
     let cons = cls;
 
-    if (config && config.subtypes && !!(o as any)[this.source.getTypeField()]) {
-      cons = config.subtypes[(o as any)[this.source.getTypeField()]];
+    let type: keyof T = this.source.getTypeField();
+
+    if (config && config.subtypes && !!o[type]) {
+      cons = config.subtypes[o[type]];
     }
 
     return BindUtil.bindSchema(cons, new cons(), o);
@@ -50,7 +59,7 @@ export class ModelService<T extends { _id: ID }, ID = T['_id']> {
   }
 
   async getAllByQuery(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<T[]> {
-    const config = this.getConfig(cls);
+    const config = ModelRegistry.get(cls);
     if (!options.sort && config.defaultSort) {
       options.sort = config.defaultSort;
     }

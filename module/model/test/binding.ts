@@ -2,8 +2,7 @@ import 'mocha';
 
 import { SchemaBound, View } from '@encore2/schema';
 import { expect } from 'chai';
-import { Model, ModelService, ModelSource, Query, BulkState, BulkResponse, QueryOptions } from '../index';
-import { Class } from '@encore2/registry';
+import { Model } from '../index';
 
 @Model()
 class Address extends SchemaBound {
