@@ -2,22 +2,10 @@ import 'mocha';
 
 import { SchemaBound, View } from '@encore2/schema';
 import { expect } from 'chai';
-import { Model } from '../index';
+import { Model, ModelService } from '../index';
+import { TestSource } from './registry';
+import { Person, Address } from './models';
 
-@Model()
-class Address extends SchemaBound {
-
-  @View('test')
-  street1: string;
-
-  street2: string;
-}
-
-@Model()
-class Person extends SchemaBound {
-  name: string;
-  address: Address;
-}
 
 describe('Data Binding', () => {
   it('Validate bind', () => {
