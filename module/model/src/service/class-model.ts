@@ -2,7 +2,7 @@ import { Class } from '@encore2/registry';
 import { ModelCore, Query, QueryOptions, BulkState } from '../model';
 import { ModelService } from './model';
 
-export abstract class ClassModelService<T extends { id: ID }, ID = T['id']> {
+export abstract class ClassModelService<T extends ModelCore<ID>, ID = T['id']> {
 
   constructor(private service: ModelService) { }
 
