@@ -17,7 +17,7 @@ export abstract class BaseModel extends SchemaBound implements ModelCore {
     this.type = ModelRegistry.get(this.constructor as Class).discriminator;
   }
 
-  preSave(): this {
+  prePersist(): this {
     if (!this.createdDate) {
       this.createdDate = new Date();
     }
