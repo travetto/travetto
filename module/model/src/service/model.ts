@@ -13,9 +13,9 @@ function getClass<T>(o: T) {
 }
 
 @Injectable()
-export class ModelService<T extends { id: ID }, ID = T['id']> {
+export class ModelService {
 
-  constructor(private source: ModelSource<T>) { }
+  constructor(private source: ModelSource) { }
 
   postConstruct() {
     // Cannot block on registry since this is an injectable (circular dep)
@@ -28,28 +28,30 @@ export class ModelService<T extends { id: ID }, ID = T['id']> {
     ModelRegistry.on(this.source.onChange.bind(this.source));
   }
 
-  convert(cls: Class<T>, o: T): T {
+  convert<T extends { type?: string }>(cls: Class<T>, o: T): T {
     let config = ModelRegistry.get(cls);
 
     let cons = cls;
 
-    let type: keyof T = this.source.getTypeField();
-
-    if (config && config.subtypes && !!o[type]) {
-      cons = config.subtypes[o[type]];
+    if (config && config.subtypes && !!o.type) {
+      cons = config.subtypes[o.type];
     }
 
     return BindUtil.bindSchema(cons, new cons(), o);
   }
 
-  async prePersist(o: Partial<T>, view: string = SchemaRegistry.DEFAULT_VIEW) {
+  async prePersist<T>(o: T): Promise<T>;
+  async prePersist<T>(o: Partial<T>, view: string): Promise<Partial<T>>;
+  async prePersist<T>(o: Partial<T> | T, view: string = SchemaRegistry.DEFAULT_VIEW) {
     let mc = o as ModelCore<T>;
     let res = await SchemaValidator.validate(mc.preSave ? mc.preSave() : o, view);
     res = await this.source.prePersist(res);
     return res as T;
   }
 
-  postLoad(cls: Class<T>, o: T): T {
+  postLoad<T>(cls: Class<T>, o: T): T;
+  postLoad<T>(cls: Class<T>, o: Partial<T>, view: string): Partial<T>;
+  postLoad<T>(cls: Class<T>, o: T): T | Partial<T> {
     o = this.source.postLoad(o) as T;
     o = this.convert(cls, o);
 
@@ -58,7 +60,7 @@ export class ModelService<T extends { id: ID }, ID = T['id']> {
     return o;
   }
 
-  async getAllByQuery(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<T[]> {
+  async getAllByQuery<T>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<T[]> {
     const config = ModelRegistry.get(cls);
     if (!options.sort && config.defaultSort) {
       options.sort = config.defaultSort;
@@ -67,22 +69,22 @@ export class ModelService<T extends { id: ID }, ID = T['id']> {
     return res.map(o => this.postLoad(cls, o));
   }
 
-  async getCountByQuery(cls: Class<T>, query: Query = {}): Promise<number> {
+  async getCountByQuery<T>(cls: Class<T>, query: Query = {}): Promise<number> {
     let res = await this.source.getCountByQuery(cls, query);
     return res;
   }
 
-  async getByQuery(cls: Class<T>, query: Query, options: QueryOptions = {}, failOnMany: boolean = true): Promise<T> {
+  async getByQuery<T>(cls: Class<T>, query: Query, options: QueryOptions = {}, failOnMany: boolean = true): Promise<T> {
     let res = await this.source.getByQuery(cls, query, options, failOnMany);
     return this.postLoad(cls, res);
   }
 
-  async getIdsByQuery(cls: Class<T>, query: Query, options: QueryOptions = {}): Promise<ID[]> {
+  async getIdsByQuery<T extends { id: ID }, ID = T['id']>(cls: Class<T>, query: Query, options: QueryOptions = {}): Promise<ID[]> {
     let res = await this.source.getIdsByQuery(cls, query, options);
     return res;
   }
 
-  async saveOrUpdate(o: T, query: Query): Promise<T> {
+  async saveOrUpdate<T>(o: T, query: Query): Promise<T> {
     let res = await this.getAllByQuery(getClass(o), query, { limit: 2 });
     if (res.length === 1) {
       o = _.merge(res[0], o);
@@ -93,48 +95,48 @@ export class ModelService<T extends { id: ID }, ID = T['id']> {
     throw new Error(`Too many already exist: ${res.length}`);
   }
 
-  async getById(cls: Class<T>, id: ID): Promise<T> {
+  async getById<T extends { id: ID }, ID = T['id']>(cls: Class<T>, id: ID): Promise<T> {
     let res = await this.source.getById(cls, id);
     return this.postLoad(cls, res);
   }
 
-  async deleteById(cls: Class<T>, id: ID): Promise<number> {
+  async deleteById<T extends { id: ID }, ID = T['id']>(cls: Class<T>, id: ID): Promise<number> {
     return await this.source.deleteById(cls, id);
   }
 
-  async deleteByQuery(cls: Class<T>, query: Query = {}): Promise<number> {
+  async deleteByQuery<T>(cls: Class<T>, query: Query = {}): Promise<number> {
     return await this.source.deleteByQuery(cls, query);
   }
 
-  async save(o: T): Promise<T> {
+  async save<T>(o: T): Promise<T> {
     let cls = getClass(o);
     o = await this.prePersist(o);
     let res = await this.source.save(cls, o);
     return this.postLoad(cls, res);
   }
 
-  async saveAll(objs: T[]): Promise<T[]> {
+  async saveAll<T>(objs: T[]): Promise<T[]> {
     let cls = getClass(objs[0]);
     objs = await Promise.all(objs.map(o => this.prePersist(o)));
     let res = await this.source.saveAll(cls, objs);
     return res.map(x => this.postLoad(cls, x));
   }
 
-  async update(o: T): Promise<T> {
+  async update<T>(o: T): Promise<T> {
     let cls = getClass(o);
     o = await this.prePersist(o);
     let res = await this.source.update(cls, o);
     return this.postLoad(cls, res);
   }
 
-  async updateAll(objs: T[]): Promise<number> {
+  async updateAll<T>(objs: T[]): Promise<number> {
     let cls = getClass(objs[0]);
     objs = await Promise.all(objs.map(o => this.prePersist(o)));
     let res = await this.source.updateAll(cls, objs);
     return res;
   }
 
-  async updatePartial(o: Partial<T>, view: string): Promise<T> {
+  async updatePartial<T>(o: Partial<T>, view: string): Promise<T> {
     let cls = getClass(o) as Class<T>;
     o = await this.prePersist(o, view);
     let partial = BindUtil.bindSchema(cls, {}, o, view);
@@ -142,7 +144,7 @@ export class ModelService<T extends { id: ID }, ID = T['id']> {
     return this.postLoad(cls, res);
   }
 
-  async updatePartialByQuery(o: Partial<T>, view: string, query: Query): Promise<number> {
+  async updatePartialByQuery<T>(o: Partial<T>, view: string, query: Query): Promise<number> {
     let cls = getClass(o) as Class<T>;
     o = await this.prePersist(o, view);
     let partial = BindUtil.bindSchema(cls, {}, o, view);
@@ -150,7 +152,7 @@ export class ModelService<T extends { id: ID }, ID = T['id']> {
     return res;
   }
 
-  async bulkProcess(named: Class<T>, state: BulkState<T>) {
+  async bulkProcess<T>(named: Class<T>, state: BulkState<T>) {
     return this.source.bulkProcess(named, state);
   }
 }
