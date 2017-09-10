@@ -1,8 +1,9 @@
 import 'mocha';
 
-import { Field, Url, SchemaBound, View, Required, Alias, BindUtil, Schema, SchemaRegistry } from '@encore2/schema';
+import { SchemaBound, View } from '@encore2/schema';
 import { expect } from 'chai';
-import { Model } from '../index';
+import { Model, ModelService, ModelSource, Query, BulkState, BulkResponse, QueryOptions } from '../index';
+import { Class } from '@encore2/registry';
 
 @Model()
 class Address extends SchemaBound {

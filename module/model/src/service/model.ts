@@ -13,7 +13,7 @@ function getClass<T>(o: T) {
 }
 
 @Injectable()
-export class ModelService<T, ID = string> {
+export class ModelService<T extends { _id: ID }, ID = T['_id']> {
 
   constructor(private source: ModelSource<T, ID>) { }
 

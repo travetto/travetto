@@ -5,7 +5,7 @@ import { BulkState, BulkResponse } from '../model/bulk';
 import { Query } from '../model/query';
 
 
-export abstract class ModelSource<T, ID = string> {
+export abstract class ModelSource<T extends { _id: ID }, ID = T['_id']> {
   abstract getIdField(): string;
   abstract getTypeField(): string;
 
