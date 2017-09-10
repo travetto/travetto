@@ -66,7 +66,7 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
 
       delete (user as any)[this.config.passwordField];
 
-      let res = await this.modelService.save(user);
+      let res = await this.modelService.save(this.modelClass, user);
       try {
         this.context.get().user = user;
       } catch (e) {
@@ -98,7 +98,7 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
       [this.config.saltField]: fields.salt
     });
 
-    return await this.modelService.update(user);
+    return await this.modelService.update(this.modelClass, user);
   }
 
   async generateResetToken(username: string) {
@@ -111,7 +111,7 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
       [this.config.resetExpiresField]: moment().add(1, 'hour').toDate()
     });
 
-    await this.modelService.update(user);
+    await this.modelService.update(this.modelClass, user);
     return user;
   }
 }
