@@ -2,7 +2,7 @@ import { Class } from '@encore2/registry';
 import { ModelCore, Query, QueryOptions, BulkState } from '../model';
 import { ModelService } from './model';
 
-export abstract class ClassModelService<T extends ModelCore<ID>, ID = T['id']> {
+export abstract class ClassModelService<T extends ModelCore> {
 
   constructor(private service: ModelService) { }
 
@@ -25,14 +25,14 @@ export abstract class ClassModelService<T extends ModelCore<ID>, ID = T['id']> {
   }
 
   saveOrUpdate(o: T, query: Query) {
-    return this.service.saveOrUpdate(o, query);
+    return this.service.saveOrUpdate(this.class, o, query);
   }
 
-  getById(id: ID) {
+  getById(id: string) {
     return this.service.getById(this.class, id);
   }
 
-  deleteById(id: ID) {
+  deleteById(id: string) {
     return this.service.deleteById(this.class, id);
   }
 
@@ -41,27 +41,35 @@ export abstract class ClassModelService<T extends ModelCore<ID>, ID = T['id']> {
   }
 
   save(o: T) {
-    return this.service.save(o);
+    return this.service.save(this.class, o);
   }
 
   saveAll(objs: T[]) {
-    return this.service.saveAll(objs);
+    return this.service.saveAll(this.class, objs);
   }
 
   update(o: T) {
-    return this.service.update(o);
+    return this.service.update(this.class, o);
   }
 
   updateAll(objs: T[]) {
-    return this.service.updateAll(objs);
+    return this.service.updateAll(this.class, objs);
   }
 
   updatePartial(o: Partial<T>, view: string) {
-    return this.service.updatePartial(o, view);
+    return this.service.updatePartial(this.class, o);
   }
 
   updatePartialByQuery(o: Partial<T>, view: string, query: Query) {
-    return this.service.updatePartialByQuery(o, view, query);
+    return this.service.updatePartialByQuery(this.class, o, query);
+  }
+
+  updatePartialView(o: Partial<T>, view: string) {
+    return this.service.updatePartialView(this.class, o, view);
+  }
+
+  updatePartialViewByQuery(o: Partial<T>, view: string, query: Query) {
+    return this.service.updatePartialViewByQuery(this.class, o, view, query);
   }
 
   bulkProcess(state: BulkState<T>) {

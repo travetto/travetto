@@ -12,7 +12,7 @@ function getClass<T>(o: T) {
   return o.constructor as Class<T>;
 }
 
-@Injectable()
+@Injectable({ target: ModelService })
 export class ModelService extends ModelSource {
 
   constructor(private source: ModelSource) {
