@@ -52,8 +52,8 @@ export abstract class ClassModelService<T extends ModelCore> {
     return this.service.update(this.class, o);
   }
 
-  updateAll(objs: T[]) {
-    return this.service.updateAll(this.class, objs);
+  updateAllByQuery(query: Query, data: Partial<T>) {
+    return this.service.updateAllByQuery(this.class, query, data);
   }
 
   updatePartial(o: Partial<T>, view: string) {
