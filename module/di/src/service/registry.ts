@@ -119,6 +119,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     if (!this.instances.has(targetId)) {
       this.instances.set(targetId, new Map());
+    }
+
+    if (!this.proxyHandlers.has(targetId)) {
       this.proxyHandlers.set(targetId, new Map());
     }
 
@@ -126,7 +129,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // if in watch mode, create proxies
     if (AppEnv.watch) {
-      if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(name)) {
+      if (!this.proxyHandlers.has(targetId) || !this.proxyHandlers.get(targetId)!.has(name)) {
         console.log('Registering proxy', target.name, name);
         let handler = new RetargettingHandler(out);
         out = new Proxy({}, handler);
@@ -134,8 +137,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       } else {
         console.log('Updating target', out);
         this.proxyHandlers.get(targetId)!.get(name)!.target = out;
-        // Don't re-set instance
-        return;
       }
     }
 
@@ -260,12 +261,16 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // Remove current instance
     for (let [config, targetId] of this.targets.get(cls.__id)!.entries()) {
-      if (this.instances.has(targetId) && this.instances.get(targetId)!.get(config) === cls.__id) {
+      if (this.instances.has(targetId) &&
+        this.instances.get(targetId)!.has(config) &&
+        this.instances.get(targetId)!.get(config).constructor.__id === cls.__id
+      ) {
         this.instances.get(targetId)!.delete(config);
         let handler = this.proxyHandlers.get(targetId)!.get(config)
         if (handler) {
-          delete handler.target;
+          handler.target = null;
         }
+        console.log('On uninstall', cls.__id, config, targetId, handler);
         this.targets.get(cls.__id)!.delete(config);
       }
     }
