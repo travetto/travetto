@@ -7,10 +7,8 @@ import { Injectable } from '@encore2/di';
 import { ModelMongoConfig } from './config';
 import { Class } from '@encore2/registry';
 
-// TODO: Handle id to _id translations
-
 @Injectable({ target: ModelSource })
-export class MongoService extends ModelSource {
+export class MongoModelSource extends ModelSource {
 
   private client: mongo.Db;
   private indices: { [key: string]: IndexConfig[] } = {};
@@ -24,7 +22,6 @@ export class MongoService extends ModelSource {
       o.id = ((o as any)._id as any as mongo.ObjectId).toHexString();
       delete (o as any)._id;
     }
-    console.log('Post load', o);
     return o;
   }
 
