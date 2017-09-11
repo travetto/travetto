@@ -17,8 +17,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private pendingFinalize: Class[] = [];
 
   private instances = new Map<TargetId, Map<string, any>>();
-  private proxyHandlers = new Map<TargetId, Map<string, any>>();
+  private proxyHandlers = new Map<TargetId, Map<string, RetargettingHandler<any>>>();
   private aliases = new Map<TargetId, Map<string, string>>();
+  private targets = new Map<ClassId, Map<string, TargetId>>();
 
   private autoCreate: (Dependency<any> & { priority: number })[] = [];
 
@@ -213,6 +214,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
+    if (!this.targets.has(classId)) {
+      this.targets.set(classId, new Map());
+    }
+
     let targetId = config.target.__id;
 
     if (!this.aliases.has(targetId)) {
@@ -220,11 +225,13 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     this.aliases.get(targetId)!.set(config.name, classId);
+    this.targets.get(classId)!.set(config.name, targetId);
 
     // TODO: Auto alias parent class if framework managed
     if (parentClass.__id && config.name !== DEFAULT_INSTANCE) {
       let parentId = parentClass.__id;
       this.aliases.get(parentId)!.set(config.name, classId);
+      this.targets.get(classId)!.set(config.name, parentId);
     }
 
     // If already loaded, reload
@@ -244,6 +251,24 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     return config;
+  }
+
+  onUninstallFinalize(cls: Class) {
+    if (!this.targets.has(cls.__id)) {
+      return;
+    }
+
+    // Remove current instance
+    for (let [config, targetId] of this.targets.get(cls.__id)!.entries()) {
+      if (this.instances.has(targetId) && this.instances.get(targetId)!.get(config) === cls.__id) {
+        this.instances.get(targetId)!.delete(config);
+        let handler = this.proxyHandlers.get(targetId)!.get(config)
+        if (handler) {
+          delete handler.target;
+        }
+        this.targets.get(cls.__id)!.delete(config);
+      }
+    }
   }
 }
 
