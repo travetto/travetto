@@ -32,6 +32,7 @@ export class Compiler {
   static rootFiles: string[] = [];
   static fileWatcher: fs.FSWatcher;
   static events = new EventEmitter();
+  static snaphost = new Map<string, ts.IScriptSnapshot | undefined>()
 
   static libraryPath = 'node_modules/';
   static frameworkWorkingSet = `${Compiler.libraryPath}/@encore2/*/src/**/*.ts`;
@@ -166,6 +167,7 @@ export class Compiler {
   }
 
   static emitFile(fileName: string) {
+    let start = Date.now();
     let output = this.services.getEmitOutput(fileName);
 
     if (this.logErrors(fileName)) {
@@ -191,6 +193,7 @@ export class Compiler {
     if (this.files.get(fileName)!.version > 0) {
       this.markForReload(fileName);
     }
+    // console.log(fileName, Date.now() - start);
   }
 
   static watchFiles(fileNames: string[]) {
@@ -285,7 +288,13 @@ export class Compiler {
     this.servicesHost = {
       getScriptFileNames: () => this.rootFiles,
       getScriptVersion: (fileName) => this.files.has(fileName) ? this.files.get(fileName)!.version.toString() : '',
-      getScriptSnapshot: (fileName) => fs.existsSync(fileName) ? ts.ScriptSnapshot.fromString(fs.readFileSync(fileName).toString()) : undefined,
+      getScriptSnapshot: (fileName) => {
+        if (!this.snaphost.has(fileName)) {
+          let snap = fs.existsSync(fileName) ? ts.ScriptSnapshot.fromString(ts.sys.readFile(fileName)!) : undefined
+          this.snaphost.set(fileName, snap);
+        }
+        return this.snaphost.get(fileName);
+      },
       getCurrentDirectory: () => process.cwd(),
       getCompilationSettings: () => this.options,
       getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
@@ -294,6 +303,8 @@ export class Compiler {
       readDirectory: ts.sys.readDirectory,
       getCustomTransformers: () => this.transformers
     };
+
+    let start = Date.now();
 
     // Create the language service files
     this.services = ts.createLanguageService(this.servicesHost, this.registry);
@@ -308,6 +319,8 @@ export class Compiler {
     if (AppEnv.watch) {
       this.fileWatcher = this.watchFiles(this.rootFiles);
     }
+
+    console.log('Initialized', (Date.now() - start) / 1000);
   }
 
   static on(event: 'added', callback: (filename: string) => any): void;
