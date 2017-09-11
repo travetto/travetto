@@ -193,7 +193,7 @@ export class Compiler {
     if (this.files.get(fileName)!.version > 0) {
       this.markForReload(fileName);
     }
-    // console.log(fileName, Date.now() - start);
+    //console.log(fileName, Date.now() - start);
   }
 
   static watchFiles(fileNames: string[]) {
@@ -269,6 +269,8 @@ export class Compiler {
   }
 
   static init(cwd: string) {
+    let start = Date.now();
+
     this.prepareSourceMaps();
 
     this.cwd = cwd;
@@ -280,9 +282,11 @@ export class Compiler {
     require.extensions['.ts'] = this.requireHandler.bind(this);
     Module._load = this.moduleLoadHandler.bind(this);
 
+
+
     this.rootFiles = [
-      ...bulkFindSync(this.workingSet),
-      ...bulkFindSync(this.frameworkWorkingSet)
+      ...bulkFindSync(this.workingSet, undefined, e => e.endsWith('/index.ts')),
+      ...bulkFindSync(this.frameworkWorkingSet, undefined, e => e.endsWith('/index.ts'))
     ];
 
     this.servicesHost = {
@@ -304,7 +308,6 @@ export class Compiler {
       getCustomTransformers: () => this.transformers
     };
 
-    let start = Date.now();
 
     // Create the language service files
     this.services = ts.createLanguageService(this.servicesHost, this.registry);
