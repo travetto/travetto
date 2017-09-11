@@ -10,3 +10,6 @@ export class Test6 {
     return 5;
   }
 }
+
+
+console.log(Test6.__id)
