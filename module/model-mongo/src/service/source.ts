@@ -98,7 +98,7 @@ export class MongoModelSource extends ModelSource {
   async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: Query) {
     let col = await this.getCollection(cls);
     let objs = await col.find(query, { _id: true }).toArray();
-    return objs.map(x => this.postLoad(x));
+    return objs.map(x => this.postLoad(cls, x));
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<T[]> {
@@ -116,7 +116,7 @@ export class MongoModelSource extends ModelSource {
       cursor = cursor.skip(Math.trunc(options.offset) || 0);
     }
     let res = await cursor.toArray();
-    res.forEach(r => this.postLoad(r));
+    res.forEach(r => this.postLoad(cls, r));
     return res;
   }
 
@@ -188,7 +188,7 @@ export class MongoModelSource extends ModelSource {
     let col = await this.getCollection(cls);
     this.prePersist(o);
     await col.replaceOne({ _id: o.id }, o);
-    this.postLoad(o);
+    this.postLoad(cls, o);
     return o;
   }
 
@@ -211,7 +211,7 @@ export class MongoModelSource extends ModelSource {
       throw new Error('Object not found for updating');
     }
     let ret: T = res.value as T;
-    this.postLoad(ret);
+    this.postLoad(cls, ret);
     return ret;
   }
 
