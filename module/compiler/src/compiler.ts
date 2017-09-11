@@ -158,6 +158,9 @@ export class Compiler {
   }
 
   static unload(fileName: string) {
+    if (this.snaphost.has(fileName)) {
+      this.snaphost.delete(fileName);
+    }
     if (fileName in require.cache) {
       delete require.cache[fileName];
     }
@@ -193,7 +196,7 @@ export class Compiler {
     if (this.files.get(fileName)!.version > 0) {
       this.markForReload(fileName);
     }
-    //console.log(fileName, Date.now() - start);
+    // console.log(fileName, Date.now() - start);
   }
 
   static watchFiles(fileNames: string[]) {
@@ -285,8 +288,8 @@ export class Compiler {
 
 
     this.rootFiles = [
-      ...bulkFindSync(this.workingSet, undefined, e => e.endsWith('/index.ts')),
-      ...bulkFindSync(this.frameworkWorkingSet, undefined, e => e.endsWith('/index.ts'))
+      ...bulkFindSync(this.workingSet, undefined, p => p.endsWith('/index.ts')),
+      ...bulkFindSync(this.frameworkWorkingSet, undefined, p => p.endsWith('/index.ts'))
     ];
 
     this.servicesHost = {
