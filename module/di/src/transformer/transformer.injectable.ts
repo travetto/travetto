@@ -65,12 +65,20 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
       let declTemp = (node.decorators || []).slice(0);
       let cons = (node as any as ts.ClassDeclaration).members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
+      let injectArgs = undefined;
+
       if (cons) {
-        let expr = TransformUtil.fromLiteral(cons.parameters.map(x => processDeclaration(state, x)));
-        declTemp.push(createInjectDecorator(state, 'InjectArgs', expr));
-      } else {
-        declTemp.push(createInjectDecorator(state, 'InjectArgs'));
+        try {
+          injectArgs = TransformUtil.fromLiteral(cons.parameters.map(x => processDeclaration(state, x)));
+        } catch (e) {
+          // If error, skip
+          if (e.message !== 'Type information not found') {
+            throw e;
+          }
+        }
       }
+
+      declTemp.push(createInjectDecorator(state, 'InjectArgs', injectArgs));
 
       // Add injectable to if not there
       let injectable = TransformUtil.findAnyDecorator(node, { Injectable: new Set([require.resolve('../decorator/injectable')]) });
