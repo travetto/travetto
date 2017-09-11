@@ -271,6 +271,14 @@ export class Compiler {
     return output.outputText;
   }
 
+  static getSnapshot(fileName: string) {
+    if (!this.snaphost.has(fileName)) {
+      let snap = fs.existsSync(fileName) ? ts.ScriptSnapshot.fromString(ts.sys.readFile(fileName)!) : undefined
+      this.snaphost.set(fileName, snap);
+    }
+    return this.snaphost.get(fileName);
+  }
+
   static init(cwd: string) {
     let start = Date.now();
 
@@ -295,13 +303,7 @@ export class Compiler {
     this.servicesHost = {
       getScriptFileNames: () => this.rootFiles,
       getScriptVersion: (fileName) => this.files.has(fileName) ? this.files.get(fileName)!.version.toString() : '',
-      getScriptSnapshot: (fileName) => {
-        if (!this.snaphost.has(fileName)) {
-          let snap = fs.existsSync(fileName) ? ts.ScriptSnapshot.fromString(ts.sys.readFile(fileName)!) : undefined
-          this.snaphost.set(fileName, snap);
-        }
-        return this.snaphost.get(fileName);
-      },
+      getScriptSnapshot: (fileName) => this.getSnapshot(fileName),
       getCurrentDirectory: () => process.cwd(),
       getCompilationSettings: () => this.options,
       getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
