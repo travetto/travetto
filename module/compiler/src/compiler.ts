@@ -10,7 +10,8 @@ import { bulkRequire, bulkFindSync, AppEnv } from '@encore2/base';
 import { RetargettingHandler } from './proxy';
 
 const Module = require('module');
-const originalLoader = Module._load;
+const originalLoader = Module._load.bind(Module);
+
 const dataUriRe = /data:application\/json[^,]+base64,/;
 
 function toJsName(name: string) {
@@ -97,7 +98,7 @@ export class Compiler {
 
     let mod;
     try {
-      mod = originalLoader.apply(this, arguments);
+      mod = originalLoader.apply(null, arguments);
     } catch (e) {
       let p = Module._resolveFilename(request, parent);
       this.handleLoadError(p, e);
@@ -128,7 +129,6 @@ export class Compiler {
 
   static requireHandler(m: NodeModule, tsf: string) {
     const jsf = toJsName(tsf);
-    console.log('Requiring', jsf);
 
     let content: string;
     if (!this.contents.has(jsf)) {
@@ -139,6 +139,8 @@ export class Compiler {
     }
 
     content = this.contents.get(jsf)!;
+
+    //console.log('Requiring', jsf);
 
     try {
       let ret = (m as any)._compile(content, jsf);
@@ -202,9 +204,11 @@ export class Compiler {
       this.contents.set(o.name, o.text);
     }
 
-    // If file is already loaded, mark for reload
-    if (this.files.get(fileName)!.version > 0) {
-      this.markForReload(fileName);
+    if (AppEnv.watch) {
+      // If file is already loaded, mark for reload
+      if (this.files.get(fileName)!.version > 0) {
+        this.markForReload(fileName);
+      }
     }
   }
 
@@ -303,12 +307,12 @@ export class Compiler {
     require.extensions['.ts'] = this.requireHandler.bind(this);
     Module._load = this.moduleLoadHandler.bind(this);
 
-
-
     this.rootFiles = [
-      ...bulkFindSync(this.workingSet, undefined, p => p.endsWith('/index.ts')),
-      ...bulkFindSync(this.frameworkWorkingSet, undefined, p => p.endsWith('/index.ts'))
+      ...bulkFindSync(this.workingSet),
+      ...bulkFindSync(this.frameworkWorkingSet)
     ];
+
+    console.log('Files', this.rootFiles.length);
 
     this.servicesHost = {
       getScriptFileNames: () => this.rootFiles,
