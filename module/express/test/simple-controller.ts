@@ -2,6 +2,10 @@ import { Controller, Get } from '../src';
 import { MockService } from './mock';
 import { Injectable, DependencyRegistry } from '@encore2/di';
 
+// const papaparse = require('papaparse');
+// import * as papaparse from 'papaparse';
+
+
 @Controller('/simple')
 export class Simple {
 
@@ -10,12 +14,13 @@ export class Simple {
 
   @Get('/name')
   async doIt() {
-    return this.service.fetch();
+    return this.service.fetch().first;
   }
 
-  @Get('/age')
-  async age() {
-    return Math.random() + 'bob';
+  @Get('/ages')
+  async ages() {
+    return 'woah';
+    //    throw new Error('aah');
   }
 
   @Get('/age2')

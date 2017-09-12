@@ -21,7 +21,7 @@ export class Weir {
 
   @Get('/age2')
   async age2() {
-    return this.service.fetch().middle.toUpperCase() + 's';
+    return this.service.fetch().middle!.toUpperCase() + 's';
   }
 
   @Get('/age3')

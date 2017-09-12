@@ -1,14 +1,14 @@
 import { Injectable } from '@encore2/di';
 
 
+class User {
+  constructor(public first: string, public last: string, public middle?: string) { }
+}
+
 @Injectable()
 export class MockService {
 
   fetch() {
-    return {
-      first: 'A',
-      last: 'Z',
-      middle: 'EzBake Ovenz2'
-    };
+    return new User('Abcdf', 'Zd', 'EzBake Ovenz2');
   }
 }
