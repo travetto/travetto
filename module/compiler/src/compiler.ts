@@ -72,7 +72,10 @@ export class Compiler {
         outDir: `${this.cwd}`
       }, `${this.cwd}/${this.configFile}`
     );
+    out.options.importHelpers = true;
+    out.options.noEmitOnError = AppEnv.prod;
     out.options.moduleResolution = ts.ModuleResolutionKind.NodeJs;
+
     return out;
   }
 
@@ -91,28 +94,32 @@ export class Compiler {
   }
 
   static moduleLoadHandler(request: string, parent: string) {
-    let p = Module._resolveFilename(request, parent);
 
     let mod;
     try {
       mod = originalLoader.apply(this, arguments);
     } catch (e) {
+      let p = Module._resolveFilename(request, parent);
       this.handleLoadError(p, e);
       mod = {};
     }
+
     let out = mod;
 
     // Proxy modules, if in watch mode for non node_modules paths
-    if (AppEnv.watch && p.indexOf(process.cwd()) >= 0 && p.indexOf(this.libraryPath) < 0) {
-      if (!this.modules.has(p)) {
-        let handler = new RetargettingHandler(mod);
-        out = new Proxy({}, handler);
-        this.modules.set(p, { module: out, handler });
-        this.events.emit('added', p);
-      } else {
-        const conf = this.modules.get(p)!;
-        conf.handler!.target = mod;
-        out = conf.module!;
+    if (AppEnv.watch) {
+      let p = Module._resolveFilename(request, parent);
+      if (p.indexOf(process.cwd()) >= 0 && p.indexOf(this.libraryPath) < 0) {
+        if (!this.modules.has(p)) {
+          let handler = new RetargettingHandler(mod);
+          out = new Proxy({}, handler);
+          this.modules.set(p, { module: out, handler });
+          this.events.emit('added', p);
+        } else {
+          const conf = this.modules.get(p)!;
+          conf.handler!.target = mod;
+          out = conf.module!;
+        }
       }
     }
 
@@ -121,6 +128,7 @@ export class Compiler {
 
   static requireHandler(m: NodeModule, tsf: string) {
     const jsf = toJsName(tsf);
+    console.log('Requiring', jsf);
 
     let content: string;
     if (!this.contents.has(jsf)) {
@@ -129,6 +137,7 @@ export class Compiler {
       this.files.set(tsf, { version: 0 });
       this.emitFile(tsf);
     }
+
     content = this.contents.get(jsf)!;
 
     try {
@@ -172,7 +181,6 @@ export class Compiler {
   }
 
   static emitFile(fileName: string) {
-    let start = Date.now();
     let output = this.services.getEmitOutput(fileName);
 
     if (this.logErrors(fileName)) {
@@ -198,7 +206,6 @@ export class Compiler {
     if (this.files.get(fileName)!.version > 0) {
       this.markForReload(fileName);
     }
-    // console.log(fileName, Date.now() - start);
   }
 
   static watchFiles(fileNames: string[]) {
