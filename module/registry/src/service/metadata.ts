@@ -84,7 +84,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     _.merge(conf, pconfig);
   }
 
-  async onInstall(cls: Class, e: ChangeEvent) {
+  onInstall(cls: Class, e: ChangeEvent) {
     if (this.pending.has(cls.__id) || this.pendingMethods.has(cls.__id)) {
       let result = this.onInstallFinalize(cls);
       this.pendingMethods.delete(cls.__id);
@@ -95,11 +95,11 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     }
   }
 
-  async onUninstall(cls: Class, e: ChangeEvent) {
+  onUninstall(cls: Class, e: ChangeEvent) {
     if (this.entries.has(cls.__id)) {
       this.expired.set(cls.__id, this.entries.get(cls.__id)!);
       this.entries.delete(cls.__id);
-      await this.onUninstallFinalize(cls);
+      this.onUninstallFinalize(cls);
       if (e.type === 'removing') {
         this.emit(e);
       }

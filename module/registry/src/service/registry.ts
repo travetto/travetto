@@ -43,52 +43,53 @@ export abstract class Registry implements ClassSource {
       await Promise.all(this.descendents.map(x => x.init()));
 
       this.initialized.resolve(true);
+      console.log('Initialized', this.constructor.__id);
     } catch (e) {
       console.log(e);
       throw e;
     }
   }
 
-  async onInstall(cls: Class, e: ChangeEvent): Promise<void> {
+  onInstall(cls: Class, e: ChangeEvent): void {
 
   }
 
-  async onUninstall(cls: Class, e: ChangeEvent): Promise<void> {
+  onUninstall(cls: Class, e: ChangeEvent): void {
 
   }
 
-  async uninstall(classes: Class | Class[], e: ChangeEvent) {
+  uninstall(classes: Class | Class[], e: ChangeEvent) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
     for (let cls of classes) {
-      await this.onUninstall(cls, e);
+      this.onUninstall(cls, e);
     }
   }
 
-  async install(classes: Class | Class[], e: ChangeEvent) {
+  install(classes: Class | Class[], e: ChangeEvent) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
     for (let cls of classes) {
-      await this.onInstall(cls, e);
+      this.onInstall(cls, e);
     }
   }
 
 
-  async onEvent(event: ChangeEvent) {
-    console.log('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
+  onEvent(event: ChangeEvent) {
+    console.debug('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
 
     switch (event.type) {
       case 'removing':
-        await this.uninstall(event.prev!, event);
+        this.uninstall(event.prev!, event);
         break;
       case 'added':
-        await this.install(event.curr!, event);
+        this.install(event.curr!, event);
         break;
       case 'changed':
-        await this.uninstall(event.prev!, event);
-        await this.install(event.curr!, event);
+        this.uninstall(event.prev!, event);
+        this.install(event.curr!, event);
         break;
       default:
         return;
