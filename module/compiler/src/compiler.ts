@@ -159,6 +159,7 @@ export class Compiler {
   }
 
   static unload(fileName: string) {
+    console.log('Unloading', fileName);
     if (this.snaphost.has(fileName)) {
       this.snaphost.delete(fileName);
     }
@@ -175,7 +176,7 @@ export class Compiler {
     let output = this.services.getEmitOutput(fileName);
 
     if (this.logErrors(fileName)) {
-      console.log(`Emitting ${fileName} failed`);
+      console.log(`Compiling ${fileName} failed`);
       if (this.handleLoadError(fileName) && this.optionalFiles.test(fileName)) {
         output.outputFiles.splice(0, output.outputFiles.length);
         output.outputFiles.push({
@@ -222,6 +223,7 @@ export class Compiler {
           fileName = `${process.cwd()}/${fileName}`;
           let changed = this.files.has(fileName);
           if (changed) {
+            this.snaphost.delete(fileName);
             this.files.get(fileName)!.version++;
           } else {
             this.files.set(fileName, { version: 1 });
