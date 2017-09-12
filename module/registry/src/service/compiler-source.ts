@@ -19,8 +19,7 @@ export class CompilerClassSource implements ClassSource {
     for (let glob of globs) {
       let files = await bulkFind(glob, undefined, (p: string) =>
         !Compiler.optionalFiles.test(p) &&
-        !Compiler.definitionFiles.test(p) &&
-        !p.endsWith('index.ts'));
+        !Compiler.definitionFiles.test(p));
 
       for (let file of files) {
         this.classes.set(file, new Map());
@@ -41,10 +40,6 @@ export class CompilerClassSource implements ClassSource {
   }
 
   protected async watch(file: string) {
-    if (file.endsWith('index.ts')) {
-      return;
-    }
-
     let next = new Map(this.computeClasses(file).map(x => [x.__id, x] as [string, Class]));
     let prev = new Map();
     if (this.classes.has(file)) {
