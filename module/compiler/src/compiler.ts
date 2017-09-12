@@ -45,8 +45,9 @@ export class Compiler {
   static emptyRequire = 'module.exports = {}';
 
   static handleLoadError(p: string, e?: any): boolean {
-    if (this.optionalFiles.test(p)) { // If attempting to load an optional require
-      console.error(`Unable to import optional require, ${p}, stubbing out`);
+    if (!AppEnv.prod || this.optionalFiles.test(p)) { // If attempting to load an optional require
+      let extra = this.optionalFiles.test(p) ? 'optional ' : '';
+      console.error(`Unable to import ${extra}require, ${p}, stubbing out`);
       return true;
     } else {
       if (e) {
@@ -175,7 +176,7 @@ export class Compiler {
 
     if (this.logErrors(fileName)) {
       console.log(`Emitting ${fileName} failed`);
-      if (this.handleLoadError(fileName)) {
+      if (this.handleLoadError(fileName) && this.optionalFiles.test(fileName)) {
         output.outputFiles.splice(0, output.outputFiles.length);
         output.outputFiles.push({
           name: toJsName(fileName),
