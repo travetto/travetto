@@ -14,10 +14,10 @@ interface DiState extends State {
 }
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-  let injection = TransformUtil.findAnyDecorator(param, { Inject: new Set([require.resolve('../decorator/injectable')]) });
+  let injection = TransformUtil.findAnyDecorator(param, { Inject: new Set([require.resolve('../decorator/injectable')]) }, state);
 
   if (injection || ts.isParameter(param)) {
-    let finalTarget = TransformUtil.importIfExternal(param, state);
+    let finalTarget = TransformUtil.importIfExternal(param.type!.getText(), state);
     let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
 
     let optional = TransformUtil.getObjectValue(injectConfig, 'optional');
@@ -38,7 +38,7 @@ function createInjectDecorator(state: DiState, name: string, contents?: ts.Expre
   if (!state.decorators[name]) {
     if (!state.import) {
       state.import = ts.createIdentifier(`import_Injectable`);
-      state.imports.push({
+      state.newImports.push({
         ident: state.import,
         path: require.resolve('../decorator/injectable')
       });
@@ -57,8 +57,9 @@ function createInjectDecorator(state: DiState, name: string, contents?: ts.Expre
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: DiState): T {
   if (ts.isClassDeclaration(node)) {
-    let foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES);
+    let foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES, state);
     let decls = node.decorators;
+
     if (foundDec) {
 
       node = ts.visitEachChild(node, c => visitNode(context, c, state), context);
@@ -81,7 +82,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       declTemp.push(createInjectDecorator(state, 'InjectArgs', injectArgs));
 
       // Add injectable to if not there
-      let injectable = TransformUtil.findAnyDecorator(node, { Injectable: new Set([require.resolve('../decorator/injectable')]) });
+      let injectable = TransformUtil.findAnyDecorator(node, { Injectable: new Set([require.resolve('../decorator/injectable')]) }, state);
       if (!injectable) {
         injectable = createInjectDecorator(state, 'Injectable');
         declTemp.push(injectable);
