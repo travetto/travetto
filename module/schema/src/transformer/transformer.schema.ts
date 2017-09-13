@@ -24,7 +24,7 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
 
   switch (kind) {
     case ts.SyntaxKind.TypeReference:
-      expr = TransformUtil.importIfExternal((type as ts.TypeReferenceNode).typeName.getText(), state);
+      expr = TransformUtil.importIfExternal(type as ts.TypeReferenceNode, state);
       break;
     case ts.SyntaxKind.LiteralType: expr = resolveType((type as any as ts.LiteralTypeNode).literal, state); break;
     case ts.SyntaxKind.StringLiteral:
