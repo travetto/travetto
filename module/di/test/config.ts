@@ -3,7 +3,7 @@ import { Util } from './util';
 import { Config } from '@encore2/config';
 
 @Config('a')
-export class DbConfig {
+export class DbConfig<A, B> {
   constructor() {
     console.log('Creating dbconfigs');
   }
