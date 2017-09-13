@@ -183,21 +183,35 @@ export class TransformUtil {
 
   static importIfExternal<T extends State>(nodeName: string, state: State) {
     //    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
-    let ident = ts.createIdentifier(nodeName);
-    let finalTarget: ts.Expression = ident;
 
-    // External
-    if (state.imports.has(nodeName)) {
-      let importName = ts.createUniqueName(`import_${nodeName}`);
+    if (nodeName.indexOf('.') > 0) {
+      let [importName, ident] = nodeName.split('.');
+      if (state.imports.has(importName)) {
+        let importIdent = ts.createUniqueName(`import_${importName}`);
 
-      state.newImports.push({
-        ident: importName,
-        path: state.imports.get(nodeName)!.path
-      });
+        state.newImports.push({
+          ident: importIdent,
+          path: state.imports.get(importName)!.path
+        });
 
-      finalTarget = ts.createPropertyAccess(importName, ident);
+        return ts.createPropertyAccess(importIdent, ident);
+      }
+      return ts.createPropertyAccess(ts.createIdentifier(importName), ident);
+    } else {
+      let ident = nodeName;
+      // External
+      if (state.imports.has(nodeName)) {
+        let importName = ts.createUniqueName(`import_${nodeName}`);
+
+        state.newImports.push({
+          ident: importName,
+          path: state.imports.get(nodeName)!.path
+        });
+
+        return ts.createPropertyAccess(importName, ident);
+      }
+      return ts.createIdentifier(nodeName);
     }
-    return finalTarget;
   }
 
   static buildImportAliasMap(pathToType: { [key: string]: string } = {}) {
