@@ -12,7 +12,7 @@ const is: (key: string) => boolean = envSet.has.bind(envSet);
 const prod = is('prod') || is('production');
 const test = is('test') || is('testing');
 const dev = !prod && !test;
-const watch = dev && !('NO_WATCH' in e);
+const watch = (dev && !('NO_WATCH' in e)) || 'WATCH' in e;
 
 export const AppEnv = { prod, dev, test, is, watch, all: envs };
 
