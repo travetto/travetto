@@ -2,26 +2,15 @@ import 'mocha';
 
 import { Field, Url, SchemaBound, View, Required, Alias, BindUtil, Schema, SchemaRegistry } from '../src';
 import { expect } from 'chai';
-
-@Schema()
-class Address extends SchemaBound {
-
-  @Field(String)
-  @View('test')
-  @Required()
-  street1: string;
-
-  @Field(String)
-  street2: string;
-}
-
-@Schema()
+import { Address } from './address';
+console.log('Hello')
+@Schema(false)
 class SuperAddress extends Address {
   @Field(String)
   unit: string;
 }
 
-@Schema()
+@Schema(false)
 class Count extends SchemaBound {
 
   @Field(String)
@@ -32,13 +21,11 @@ class Count extends SchemaBound {
   value: number;
 }
 
-@Schema()
+@Schema(true)
 class Person extends SchemaBound {
 
-  @Field(String)
   name: string;
 
-  @Field(Address)
   @View('test')
   address: Address;
 

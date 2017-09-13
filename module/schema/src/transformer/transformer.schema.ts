@@ -24,8 +24,7 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
 
   switch (kind) {
     case ts.SyntaxKind.TypeReference:
-      expr = ((type as ts.TypeReferenceNode).typeName) as ts.Expression;
-      expr = TransformUtil.importIfExternal(expr, state);
+      expr = TransformUtil.importIfExternal((type as ts.TypeReferenceNode).typeName.getText(), state);
       break;
     case ts.SyntaxKind.LiteralType: expr = resolveType((type as any as ts.LiteralTypeNode).literal, state); break;
     case ts.SyntaxKind.StringLiteral:
@@ -97,11 +96,11 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
 
   if (!state.addField) {
     let ident = ts.createUniqueName('import_Field');
-    state.imports.push({
+    state.addField = ts.createPropertyAccess(ident, 'Field');
+    state.newImports.push({
       path: require.resolve('../decorator/field'),
       ident
     });
-    state.addField = ts.createPropertyAccess(ident, 'Field');
   }
 
   let dec = ts.createDecorator(ts.createCall(state.addField as any, undefined, ts.createNodeArray(params)));
@@ -122,13 +121,13 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AutoState): T {
   if (ts.isClassDeclaration(node)) {
-    let anySchema = TransformUtil.findAnyDecorator(node, SCHEMAS);
+    let anySchema = TransformUtil.findAnyDecorator(node, SCHEMAS, state);
 
     let schema = TransformUtil.findAnyDecorator(node, {
       'Schema': new Set([
         require.resolve('../decorator/schema')
       ])
-    });
+    }, state);
 
     let auto = !!anySchema;
 
@@ -138,7 +137,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
 
     if (auto) {
-      let ret = ts.visitEachChild(node, c => visitNode(context, c, { ...state, inAuto: auto }), context) as ts.ClassDeclaration;
+      state.inAuto = true;
+      let ret = ts.visitEachChild(node, c => visitNode(context, c, state), context) as ts.ClassDeclaration;
+      state.inAuto = false;
       for (let member of ret.members || []) {
         if (!member.parent) {
           member.parent = ret;
@@ -153,7 +154,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       if (!schema) {
         if (!state.addSchema) {
           let ident = ts.createUniqueName('import_Schema');
-          state.imports.push({
+          state.newImports.push({
             path: require.resolve('../decorator/schema'),
             ident
           });
@@ -181,7 +182,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     // tslint:disable-next-line:no-bitwise
   } else if (ts.isPropertyDeclaration(node) && !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static)) {
     if (state.inAuto) {
-      let ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set([require.resolve('../decorator')]) });
+      let ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set([require.resolve('../decorator')]) }, state);
       if (!ignore) {
         return computeProperty(node, state) as any as T;
       }
