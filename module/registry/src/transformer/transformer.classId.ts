@@ -25,7 +25,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   if (ts.isClassDeclaration(node)) {
     if (!state.imported) {
       state.imported = ts.createIdentifier(`import_Register`);
-      state.imports.push({
+      state.newImports.push({
         ident: state.imported,
         path: require.resolve('../decorator/register')
       });
@@ -48,6 +48,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 export const ClassIdTransformer = {
   transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
+
     let fileRoot = file.fileName.split(process.cwd() + SEP)[1];
     let ns = '@app';
     if (fileRoot.startsWith(`node_modules${SEP}`)) {
@@ -64,7 +65,7 @@ export const ClassIdTransformer = {
       .replace(/^\./, '')
       .replace(/\.(t|j)s$/, '');
 
-    return { file: `${ns}:${fileRoot}`, fullFile: file.fileName, imports: [] };
+    return { file: `${ns}:${fileRoot}`, fullFile: file.fileName, newImports: [], imports: new Map() };
   }, visitNode),
   phase: 'before'
 }
