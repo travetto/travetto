@@ -48,7 +48,7 @@ export class Compiler {
   static handleLoadError(p: string, e?: any): boolean {
     if (!AppEnv.prod || this.optionalFiles.test(p)) { // If attempting to load an optional require
       let extra = this.optionalFiles.test(p) ? 'optional ' : '';
-      console.error(`Unable to import ${extra}require, ${p}, stubbing out`);
+      console.error(`Unable to import ${extra}require, ${p}, stubbing out`, e);
       return true;
     } else {
       if (e) {
@@ -184,10 +184,14 @@ export class Compiler {
 
   static emitFile(fileName: string) {
     //    let output = this.langaugeService.getEmitOutput(fileName);
-    let { outputText: output, diagnostics } = this.transpile(ts.sys.readFile(fileName)!, fileName);
+    let res = this.transpile(ts.sys.readFile(fileName)!, fileName);
+    let output = res.outputText;
+    if (fileName.match(/\/test\//)) {
+      // console.log(fileName, output);
+    }
     let outFileName = toJsName(fileName);
 
-    if (this.logErrors(fileName, diagnostics)) {
+    if (this.logErrors(fileName, res.diagnostics)) {
       console.log(`Compiling ${fileName} failed`);
       if (this.handleLoadError(fileName) && this.optionalFiles.test(fileName)) {
         output = this.emptyRequire;
@@ -270,7 +274,7 @@ export class Compiler {
     const output = ts.transpileModule(input, {
       compilerOptions: this.options,
       fileName,
-      reportDiagnostics: false,
+      reportDiagnostics: true,
       transformers: this.transformers
     });
     return output;
