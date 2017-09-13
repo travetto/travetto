@@ -1,4 +1,4 @@
-import { Context } from '../service';
+import { Context } from '../src';
 import { beforeTest, afterTest } from '@encore2/test';
 
 let store: { [key: string]: any } = {};
