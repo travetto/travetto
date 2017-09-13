@@ -48,7 +48,7 @@ export class TransformUtil {
       }
       if (ident && ident.escapedText in patterns) {
         let { path } = state.imports.get(ident.escapedText! as string)!;
-        if (patterns[ident.text].has(path) || path.includes('@encore2')) {
+        if (patterns[ident.text].has(path) || path.includes('@encore2') || path.includes(process.cwd() + '/src')) {
           return dec;
         }
       }
