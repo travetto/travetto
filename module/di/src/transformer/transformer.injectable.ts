@@ -17,7 +17,7 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
   let injection = TransformUtil.findAnyDecorator(param, { Inject: new Set([require.resolve('../decorator/injectable')]) }, state);
 
   if (injection || ts.isParameter(param)) {
-    let finalTarget = TransformUtil.importIfExternal((param.type! as any).typeName!.getText(), state);
+    let finalTarget = TransformUtil.importIfExternal(param.type!, state);
     let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
 
     let optional = TransformUtil.getObjectValue(injectConfig, 'optional');
