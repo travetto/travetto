@@ -9,6 +9,6 @@ class User {
 export class MockService {
 
   fetch() {
-    return new User('Abcdf', 'Zd', 'EzBake Ovenz2');
+    return new User('Bob', 'Zd', 'EzBake Ovenz2');
   }
 }
