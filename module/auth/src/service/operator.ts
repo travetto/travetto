@@ -1,3 +1,5 @@
+import '@encore2/express/opt/context';
+
 import * as passport from 'passport';
 import { Request, Response } from 'express';
 
