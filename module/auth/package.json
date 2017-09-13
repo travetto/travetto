@@ -17,5 +17,5 @@
     "@encore2/model": "git+ssh://git@git.eaiti.com/encore2/model.git#v1.x.x"
   }, 
   "scripts": {}, 
-  "version": "1.0.8"
+  "version": "1.0.9"
 }
