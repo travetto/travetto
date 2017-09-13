@@ -303,7 +303,7 @@ export class Compiler {
     Module._load = this.moduleLoadHandler.bind(this);
 
     this.rootFiles = [
-      ...bulkFindSync(this.workingSet, undefined, p => !p.endsWith('.d.ts')),
+      ...bulkFindSync(this.prodWorkingSet, undefined, p => !p.endsWith('.d.ts')),
       ...bulkFindSync(this.frameworkWorkingSet, undefined, p => !p.endsWith('.d.ts'))
     ];
 
