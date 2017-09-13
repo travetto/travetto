@@ -32,7 +32,7 @@ export class Context {
   get(): any {
     let res = this.namespace.get(KEY) as any;
     if (res === null || res === undefined) {
-      this.set(res = {});
+      this.namespace.set(KEY, res = {});
     }
     return res;
   }
