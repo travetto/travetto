@@ -15,7 +15,7 @@ export class CompilerClassSource implements ClassSource {
   }
 
   async init() {
-    let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.workingSet}`).split(/\s+/);
+    let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.prodWorkingSet}`).split(/\s+/);
     for (let glob of globs) {
       let files = await bulkFind(glob, undefined, (p: string) =>
         !Compiler.optionalFiles.test(p) &&
