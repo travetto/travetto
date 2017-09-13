@@ -31,15 +31,13 @@ export class Compiler {
   static registry: ts.DocumentRegistry;
   static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
   static rootFiles: string[] = [];
-  static fileWatcher: fs.FSWatcher;
+  static fileWatcher: chokidar.FSWatcher;
   static events = new EventEmitter();
   static snaphost = new Map<string, ts.IScriptSnapshot | undefined>()
 
   static libraryPath = 'node_modules/';
   static frameworkWorkingSet = `${Compiler.libraryPath}/@encore2/*/src/**/*.ts`;
-  static prodWorkingSet = 'src/**/*.ts';
-  static devWorkingSet = '{src,test}/**/*.ts';
-  static workingSet = !AppEnv.prod ? Compiler.devWorkingSet : Compiler.prodWorkingSet;
+  static appWorkingSet = 'src/**/*.ts';
   static optionalFiles = /\/opt\/[^/]+.ts/;
   static definitionFiles = /\.d\.ts$/g;
   static transformerFiles = '**/transformer.*.ts';
@@ -134,6 +132,9 @@ export class Compiler {
 
     let content: string;
     if (!this.contents.has(jsf)) {
+      if (AppEnv.watch) {
+        this.fileWatcher.add(tsf);
+      }
       // Picking up missed files
       this.rootFiles.push(tsf);
       this.files.set(tsf, { version: 0 });
@@ -208,7 +209,7 @@ export class Compiler {
   }
 
   static watchFiles(fileNames: string[]) {
-    let watcher = chokidar.watch(this.workingSet, {
+    let watcher = chokidar.watch(this.appWorkingSet, {
       ignored: [this.transformerFiles, this.optionalFiles],
       persistent: true,
       cwd: process.cwd(),
@@ -303,7 +304,7 @@ export class Compiler {
     Module._load = this.moduleLoadHandler.bind(this);
 
     this.rootFiles = [
-      ...bulkFindSync(this.prodWorkingSet, undefined, p => !p.endsWith('.d.ts')),
+      ...bulkFindSync(this.appWorkingSet, undefined, p => !p.endsWith('.d.ts')),
       ...bulkFindSync(this.frameworkWorkingSet, undefined, p => !p.endsWith('.d.ts'))
     ];
 
