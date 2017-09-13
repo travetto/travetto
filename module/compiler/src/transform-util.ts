@@ -1,6 +1,6 @@
 import { Compiler } from './compiler';
 import * as ts from 'typescript';
-import { relative } from 'path';
+import { dirname } from 'path';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
@@ -43,9 +43,12 @@ export class TransformUtil {
   static findAnyDecorator(node: ts.Node, patterns: { [key: string]: Set<string> }, state: State): ts.Decorator | undefined {
     for (let dec of (node.decorators || []) as any as DecList) {
       let ident = this.getDecoratorIdent(dec);
-      if (ident && ident.text in patterns) {
-        let { path } = state.imports.get(ident.text)!;
-        if (patterns[ident.text].has(path)) {
+      if (!ts.isIdentifier(ident)) {
+        continue;
+      }
+      if (ident && ident.escapedText in patterns) {
+        let { path } = state.imports.get(ident.escapedText! as string)!;
+        if (patterns[ident.text].has(path) || path.includes('@encore2')) {
           return dec;
         }
       }
@@ -150,11 +153,10 @@ export class TransformUtil {
           if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
             let path = '';
             stmt.importClause!;
-            path = relative(stmt.moduleSpecifier.text, state.path);
+            path = require.resolve(stmt.moduleSpecifier.text
+              .replace(/^\.\./, dirname(dirname(state.path)))
+              .replace(/^\.\//, dirname(state.path) + '/'));
             if (stmt.importClause) {
-              if (stmt.importClause.name) {
-                state.imports.set(stmt.importClause.name.text!, { path, ident: stmt.importClause.name });
-              }
               if (stmt.importClause.namedBindings) {
                 let bindings = stmt.importClause.namedBindings;
                 if (ts.isNamespaceImport(bindings)) {
@@ -178,8 +180,7 @@ export class TransformUtil {
       };
   }
 
-  static importIfExternal<T extends State>(node: ts.Node, state: State) {
-    let nodeName = node.getText();
+  static importIfExternal<T extends State>(nodeName: string, state: State) {
     //    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
     let ident = ts.createIdentifier(nodeName);
     let finalTarget: ts.Expression = ident;
