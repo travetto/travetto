@@ -23,8 +23,8 @@ export class Compiler {
   static sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   static files = new Map<string, { version: number }>();
   static contents = new Map<string, string>();
-  static servicesHost: ts.LanguageServiceHost;
-  static services: ts.LanguageService;
+  // static servicesHost: ts.LanguageServiceHost;
+  // static langaugeService: ts.LanguageService;
   static cwd: string;
   static options: ts.CompilerOptions;
   static transformers: ts.CustomTransformers;
@@ -127,6 +127,8 @@ export class Compiler {
     return out;
   }
 
+  static time = 0;
+
   static requireHandler(m: NodeModule, tsf: string) {
     const jsf = toJsName(tsf);
 
@@ -139,8 +141,6 @@ export class Compiler {
     }
 
     content = this.contents.get(jsf)!;
-
-    //console.log('Requiring', jsf);
 
     try {
       let ret = (m as any)._compile(content, jsf);
@@ -183,26 +183,17 @@ export class Compiler {
   }
 
   static emitFile(fileName: string) {
-    let output = this.services.getEmitOutput(fileName);
+    //    let output = this.langaugeService.getEmitOutput(fileName);
+    let { outputText: output, diagnostics } = this.transpile(ts.sys.readFile(fileName)!, fileName);
+    let outFileName = toJsName(fileName);
 
-    if (this.logErrors(fileName)) {
+    if (this.logErrors(fileName, diagnostics)) {
       console.log(`Compiling ${fileName} failed`);
       if (this.handleLoadError(fileName) && this.optionalFiles.test(fileName)) {
-        output.outputFiles.splice(0, output.outputFiles.length);
-        output.outputFiles.push({
-          name: toJsName(fileName),
-          text: this.emptyRequire
-        } as any);
+        output = this.emptyRequire;
       }
     }
-
-    if (!output.outputFiles.length) {
-      return;
-    }
-
-    for (let o of output.outputFiles) {
-      this.contents.set(o.name, o.text);
-    }
+    this.contents.set(outFileName, output);
 
     if (AppEnv.watch) {
       // If file is already loaded, mark for reload
@@ -253,16 +244,16 @@ export class Compiler {
     return watcher;
   }
 
-  static logErrors(fileName: string) {
-    let allDiagnostics = this.services.getCompilerOptionsDiagnostics()
-      .concat(this.services.getSyntacticDiagnostics(fileName))
-      .concat(this.services.getSemanticDiagnostics(fileName));
+  static logErrors(fileName: string, diagnostics?: ts.Diagnostic[]) {
+    // let allDiagnostics = this.langaugeService.getCompilerOptionsDiagnostics()
+    //   .concat(this.langaugeService.getSyntacticDiagnostics(fileName))
+    //   .concat(this.langaugeService.getSemanticDiagnostics(fileName));
 
-    if (!allDiagnostics.length) {
+    if (!diagnostics || !diagnostics.length) {
       return false;
     }
 
-    for (let diagnostic of allDiagnostics) {
+    for (let diagnostic of diagnostics) {
       let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
       if (diagnostic.file) {
         let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start as number);
@@ -272,7 +263,7 @@ export class Compiler {
       }
     }
 
-    return allDiagnostics.length !== 0;
+    return diagnostics.length !== 0;
   }
 
   static transpile(input: string, fileName: string) {
@@ -282,7 +273,7 @@ export class Compiler {
       reportDiagnostics: false,
       transformers: this.transformers
     });
-    return output.outputText;
+    return output;
   }
 
   static getSnapshot(fileName: string) {
@@ -308,12 +299,13 @@ export class Compiler {
     Module._load = this.moduleLoadHandler.bind(this);
 
     this.rootFiles = [
-      ...bulkFindSync(this.workingSet),
-      ...bulkFindSync(this.frameworkWorkingSet)
+      ...bulkFindSync(this.workingSet, undefined, p => !p.endsWith('.d.ts')),
+      ...bulkFindSync(this.frameworkWorkingSet, undefined, p => !p.endsWith('.d.ts'))
     ];
 
     console.log('Files', this.rootFiles.length);
 
+    /*
     this.servicesHost = {
       getScriptFileNames: () => this.rootFiles,
       getScriptVersion: (fileName) => this.files.has(fileName) ? this.files.get(fileName)!.version.toString() : '',
@@ -323,13 +315,15 @@ export class Compiler {
       getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
       fileExists: ts.sys.fileExists,
       readFile: ts.sys.readFile,
+      directoryExists: ts.sys.directoryExists,
       readDirectory: ts.sys.readDirectory,
+      getDirectories: ts.sys.getDirectories,
       getCustomTransformers: () => this.transformers
     };
-
+    */
 
     // Create the language service files
-    this.services = ts.createLanguageService(this.servicesHost, this.registry);
+    // this.langaugeService = ts.createLanguageService(this.servicesHost, this.registry);
 
     // Prime for type checker
     for (let fileName of this.rootFiles) {

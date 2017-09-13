@@ -1,17 +1,34 @@
 import { Compiler } from './compiler';
 import * as ts from 'typescript';
+import { relative } from 'path';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
 export interface State {
-  imports: Import[],
-  path: string
+  newImports: Import[];
+  path: string;
+  imports: Map<string, Import>;
 }
 
 export class TransformUtil {
+  /*
   static getTypeChecker() {
-    return Compiler.services.getProgram().getTypeChecker();
+    return Compiler.langaugeService.getProgram().getTypeChecker();
   }
+
+  static getTypeInfoForNode(node: ts.Node) {
+    let type = this.getTypeChecker().getTypeAtLocation(node);
+    if (type.symbol && type.symbol.valueDeclaration) {
+      let decl = type!.symbol!.valueDeclaration!;
+      let path = (decl as any).parent.fileName;
+      let ident = (decl as any).name;
+      return { path, ident, name: ident.text };
+    } else {
+      throw new Error('Type information not found');
+    }
+  }
+  */
+
 
   static getDecoratorIdent(d: ts.Decorator): ts.Identifier {
     if (ts.isCallExpression(d.expression)) {
@@ -23,11 +40,11 @@ export class TransformUtil {
     }
   }
 
-  static findAnyDecorator(node: ts.Node, patterns: { [key: string]: Set<string> }): ts.Decorator | undefined {
+  static findAnyDecorator(node: ts.Node, patterns: { [key: string]: Set<string> }, state: State): ts.Decorator | undefined {
     for (let dec of (node.decorators || []) as any as DecList) {
       let ident = this.getDecoratorIdent(dec);
       if (ident && ident.text in patterns) {
-        let { path } = this.getTypeInfoForNode(ident);
+        let { path } = state.imports.get(ident.text)!;
         if (patterns[ident.text].has(path)) {
           return dec;
         }
@@ -35,7 +52,7 @@ export class TransformUtil {
     }
   }
 
-  static addImport(file: ts.SourceFile, imports: { path: string, ident: ts.Identifier }[]) {
+  static addImport(file: ts.SourceFile, imports: Import[]) {
     let importStmts = imports
       .map(({ path, ident }) => {
         let imptStmt = ts.createImportDeclaration(
@@ -118,18 +135,6 @@ export class TransformUtil {
     return undefined;
   }
 
-  static getTypeInfoForNode(node: ts.Node) {
-    let type = this.getTypeChecker().getTypeAtLocation(node);
-    if (type.symbol && type.symbol.valueDeclaration) {
-      let decl = type!.symbol!.valueDeclaration!;
-      let path = (decl as any).parent.fileName;
-      let ident = (decl as any).name;
-      return { path, ident, name: ident.text };
-    } else {
-      throw new Error('Type information not found');
-    }
-  }
-
   static importingVisitor<T extends State>(
     init: (file?: ts.SourceFile, context?: ts.TransformationContext) => Partial<T>,
     visitor: <Z extends ts.Node>(context: ts.TransformationContext, node: Z, state: T) => Z
@@ -138,29 +143,54 @@ export class TransformUtil {
       (file: ts.SourceFile) => {
         let state = init(file, context) as T;
         state.path = require.resolve(file.fileName);
-        state.imports = [];
+        state.newImports = [];
+        state.imports = new Map();
+
+        for (let stmt of file.statements) {
+          if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
+            let path = '';
+            stmt.importClause!;
+            path = relative(stmt.moduleSpecifier.text, state.path);
+            if (stmt.importClause) {
+              if (stmt.importClause.name) {
+                state.imports.set(stmt.importClause.name.text!, { path, ident: stmt.importClause.name });
+              }
+              if (stmt.importClause.namedBindings) {
+                let bindings = stmt.importClause.namedBindings;
+                if (ts.isNamespaceImport(bindings)) {
+                  state.imports.set(bindings.name.text, { path, ident: bindings.name })
+                } else if (ts.isNamedImports(bindings)) {
+                  for (let n of bindings.elements) {
+                    state.imports.set(n.name.text, { path, ident: n.name })
+                  }
+                }
+              }
+            }
+          }
+        }
 
         let ret = visitor(context, file, state);
 
-        if (state.imports.length) {
-          this.addImport(ret, state.imports);
+        if (state.newImports.length) {
+          this.addImport(ret, state.newImports);
         }
         return ret;
       };
   }
 
   static importIfExternal<T extends State>(node: ts.Node, state: State) {
-    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
-
-    let ident = ts.createIdentifier(declName);
+    let nodeName = node.getText();
+    //    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
+    let ident = ts.createIdentifier(nodeName);
     let finalTarget: ts.Expression = ident;
 
-    if (path && require.resolve(path) !== state.path) {
-      let importName = ts.createUniqueName(`import_${declName}`);
+    // External
+    if (state.imports.has(nodeName)) {
+      let importName = ts.createUniqueName(`import_${nodeName}`);
 
-      state.imports.push({
+      state.newImports.push({
         ident: importName,
-        path
+        path: state.imports.get(nodeName)!.path
       });
 
       finalTarget = ts.createPropertyAccess(importName, ident);
