@@ -181,8 +181,13 @@ export class TransformUtil {
       };
   }
 
-  static importIfExternal<T extends State>(nodeName: string, state: State) {
+  static importIfExternal<T extends State>(typeNode: ts.TypeNode, state: State) {
     //    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
+
+    let nodeName = (typeNode as any).typeName!.getText();
+    if (nodeName.match(/^[A-Z]{1,3}$/)) {
+      throw new Error('Type information not found');
+    }
 
     if (nodeName.indexOf('.') > 0) {
       let [importName, ident] = nodeName.split('.');
