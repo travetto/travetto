@@ -22,7 +22,6 @@ export abstract class Registry implements ClassSource {
   }
 
   async init(): Promise<any> {
-
     if (!this.initialized) {
       this.initialized = this._init();
     }
@@ -30,7 +29,6 @@ export abstract class Registry implements ClassSource {
   }
 
   protected async _init(): Promise<any> {
-
     try {
       if (this.parent && !(this.parent instanceof Registry)) {
         await this.parent.init();
