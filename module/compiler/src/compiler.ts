@@ -12,8 +12,6 @@ import { RetargettingHandler } from './proxy';
 const Module = require('module');
 const originalLoader = Module._load.bind(Module);
 
-const dataUriRe = /data:application\/json[^,]+base64,/;
-
 function toJsName(name: string) {
   return name.replace(/\.ts$/, '.js');
 }
@@ -304,8 +302,8 @@ export class Compiler {
     Module._load = this.moduleLoadHandler.bind(this);
 
     this.rootFiles = [
-      ...bulkFindSync(this.appWorkingSet, undefined, p => !p.endsWith('.d.ts')),
-      ...bulkFindSync(this.frameworkWorkingSet, undefined, p => !p.endsWith('.d.ts'))
+      ...bulkFindSync(this.appWorkingSet, undefined, p => this.definitionFiles.test(p)),
+      ...bulkFindSync(this.frameworkWorkingSet, undefined, p => this.definitionFiles.test(p))
     ];
 
     console.log('Files', this.rootFiles.length);
