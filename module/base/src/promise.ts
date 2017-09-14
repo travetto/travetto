@@ -1,24 +1,11 @@
+import { promisify } from 'util';
+
 export function nodeToPromise<T>(ctx: any | null, fn: Function, ...args: any[]): Promise<T> {
-  let handler = (resolve: (args?: T) => void, reject: (err?: any) => void): void => {
-    args.push((err: any, res: T) => {
-      if (err !== undefined && err !== null) {
-        reject(err);
-      } else {
-        resolve(res);
-      }
-    });
-    try {
-      fn.apply(ctx, args);
-    } catch (e) {
-      reject(e);
-    }
-  };
-  return new Promise<T>(handler);
+  return promisify(fn).apply(ctx, args) as Promise<T>;
 }
 
-
 export function toPromise<T>(fn: (...args: any[]) => (T | Promise<T>)): (...args: any[]) => Promise<T> {
-  if ((fn.constructor as any).name !== 'GeneratorFunction') { // If std function
+  if (fn.constructor.name !== 'GeneratorFunction') { // If std function
     return (...args: any[]) => new Promise<T>((resolve, reject) => {
       try {
         resolve(fn.apply(null, args));
@@ -38,43 +25,4 @@ export function promiseToNode<T, U>(ctx: Object | null, fn: (o: T, ...args: any[
       .then((v: any) => { done(null, v); return v; })
       .catch((err: any) => done(err));
   }
-}
-
-export type ExternalPromise<T> = Promise<T> & {
-  resolve: (v: T) => void;
-  reject: (err: any) => void;
-  rejected?: any;
-  resolved?: T;
-  run: () => boolean;
-  running?: boolean;
-}
-
-export function externalPromise<T>() {
-  let state: { [key: string]: any } = {};
-  let p: ExternalPromise<T> = new Promise<T>((resolve, reject) => {
-    state.resolve = resolve;
-    state.reject = reject;
-  })
-    .then(v => {
-      p.resolved = v;
-      p.running = false;
-      return v;
-    })
-    .catch(e => {
-      p.running = false;
-      p.rejected = e;
-      throw e;
-    }) as ExternalPromise<T>;
-
-  p.resolve = state.resolve;
-  p.reject = state.reject;
-  p.run = () => {
-    if (p.running !== undefined) {
-      return true;
-    }
-    p.running = true;
-    return false;
-  }
-
-  return p;
 }
