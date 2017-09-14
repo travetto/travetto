@@ -13,7 +13,7 @@ function findHandler(base?: string, exclude?: (name: string) => boolean) {
     match: (matches: string[]) => {
       let out = matches.map(f => path.resolve(f));
       if (exclude) {
-        out = out.filter(exclude);
+        out = out.filter(x => !exclude(x));
       }
       // out.map((x: string) => { console.log(x); return x; })
       return out;
