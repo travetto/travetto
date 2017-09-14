@@ -1,11 +1,10 @@
-import { externalPromise } from '@encore2/base';
 import { Class } from '../model/types';
 import { ClassSource, ChangeEvent } from './class-source';
 import { EventEmitter } from 'events';
 
 export abstract class Registry implements ClassSource {
 
-  protected initialized = externalPromise();
+  protected initialized: Promise<any>;
   protected events = new EventEmitter();
   protected descendents: Registry[] = [];
 
@@ -24,9 +23,13 @@ export abstract class Registry implements ClassSource {
 
   async init(): Promise<any> {
 
-    if (this.initialized.run()) {
-      return await this.initialized;
+    if (!this.initialized) {
+      this.initialized = this._init();
     }
+    return this.initialized;
+  }
+
+  protected async _init(): Promise<any> {
 
     try {
       if (this.parent && !(this.parent instanceof Registry)) {
@@ -42,7 +45,6 @@ export abstract class Registry implements ClassSource {
 
       await Promise.all(this.descendents.map(x => x.init()));
 
-      this.initialized.resolve(true);
       console.log('Initialized', this.constructor.__id);
     } catch (e) {
       console.log(e);
