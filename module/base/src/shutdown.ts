@@ -1,9 +1,12 @@
-import { externalPromise } from './promise';
+import { EventEmitter } from 'events';
 
 export class Shutdown {
   private static listeners: { name: string, handler: Function }[] = [];
   private static shutdownCode = -1;
-  private static shutdownPromise = externalPromise();
+  private static shutdownEmitter = new EventEmitter();
+  private static shutdownPromise = new Promise(resolve => {
+    Shutdown.shutdownEmitter.on('shutdown', resolve);
+  });
 
   static onShutdownPromise() {
     return Shutdown.shutdownPromise;
@@ -60,7 +63,7 @@ export class Shutdown {
       console.error('Error on shutting down', e);
     }
 
-    this.shutdownPromise.resolve(true);
+    this.shutdownEmitter.emit('shutdown');
 
     if (this.shutdownCode >= 0) {
       process.nextTick(() => process.exit(this.shutdownCode));
