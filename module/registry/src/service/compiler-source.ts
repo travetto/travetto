@@ -18,8 +18,8 @@ export class CompilerClassSource implements ClassSource {
     let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.appWorkingSet}`).split(/\s+/);
     for (let glob of globs) {
       let files = await bulkFind(glob, undefined, (p: string) =>
-        !Compiler.optionalFiles.test(p) &&
-        !Compiler.definitionFiles.test(p));
+        Compiler.optionalFiles.test(p) ||
+        Compiler.definitionFiles.test(p));
 
       for (let file of files) {
         this.classes.set(file, new Map());
