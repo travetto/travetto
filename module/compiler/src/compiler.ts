@@ -6,7 +6,7 @@ import * as glob from 'glob';
 import * as chokidar from 'chokidar';
 import { EventEmitter } from 'events';
 
-import { bulkRequire, bulkFindSync, AppEnv } from '@encore2/base';
+import { bulkRequire, bulkFindSync, AppEnv, AppInfo } from '@encore2/base';
 import { RetargettingHandler } from './proxy';
 
 const Module = require('module');
@@ -38,8 +38,27 @@ export class Compiler {
   static appWorkingSet = 'src/**/*.ts';
   static optionalFiles = /\/opt\/[^/]+.ts/;
   static definitionFiles = /\.d\.ts$/g;
+  static devDependencyFiles = AppInfo.DEV_PACKAGES
+    .map(x => new RegExp(`node_modules/${x}/`));
+
+  static workingSets = [Compiler.frameworkWorkingSet, Compiler.appWorkingSet];
+  static invalidWorkingSetFiles = [
+    Compiler.optionalFiles,
+    Compiler.definitionFiles,
+    ...Compiler.devDependencyFiles
+  ];
+
   static transformerFiles = '**/transformer.*.ts';
   static emptyRequire = 'module.exports = {}';
+
+  static invalidWorkingSetFile(name: string) {
+    for (let re of this.invalidWorkingSetFiles) {
+      if (re.test(name)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   static handleLoadError(p: string, e?: any): boolean {
     if (!AppEnv.prod || this.optionalFiles.test(p)) { // If attempting to load an optional require
@@ -301,10 +320,7 @@ export class Compiler {
     require.extensions['.ts'] = this.requireHandler.bind(this);
     Module._load = this.moduleLoadHandler.bind(this);
 
-    this.rootFiles = [
-      ...bulkFindSync(this.appWorkingSet, undefined, p => this.definitionFiles.test(p)),
-      ...bulkFindSync(this.frameworkWorkingSet, undefined, p => this.definitionFiles.test(p))
-    ];
+    this.rootFiles = bulkFindSync(this.workingSets, undefined, this.invalidWorkingSetFile);
 
     console.log('Files', this.rootFiles.length);
 
