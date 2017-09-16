@@ -50,7 +50,6 @@ export class TransformUtil {
       if (ident && ident.escapedText in patterns) {
         let { path } = state.imports.get(ident.escapedText! as string)!;
         let packages = patterns[ident.escapedText as string];
-        console.log(packages, path);
         if (path.includes('@encore2') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@encore2')) {
           let pkg = '';
           if (!path.includes('node_modules')) {
