@@ -55,7 +55,7 @@ export class TransformUtil {
           if (!path.includes('node_modules')) {
             pkg = AppInfo.NAME;
           } else {
-            pkg = '@encore2/' + path.split(/@encore2/)[1].split('/')[0];
+            pkg = '@encore2/' + path.split(/@encore2\//)[1].split('/')[0];
           }
           if (packages.has(pkg)) {
             return dec;
