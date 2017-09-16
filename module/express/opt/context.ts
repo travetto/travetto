@@ -15,12 +15,13 @@ export class ContextMantainer extends ExpressOperator {
     super();
   }
 
+  priority = 0;
+
   operate(app: ExpressApp) {
-    console.log('Filtering');
     app.get().use((req, res, next) => {
-      this.context.get().storage.bindEmitter(req);
-      this.context.get().storage.bindEmitter(res);
-      this.context.get().storage.run(() => {
+      this.context.namespace.bindEmitter(req);
+      this.context.namespace.bindEmitter(res);
+      this.context.namespace.run(() => {
         this.context.set({ req, res });
         if (next) {
           next();
