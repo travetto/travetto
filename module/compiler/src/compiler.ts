@@ -328,11 +328,10 @@ export class Compiler {
     require.extensions['.ts'] = this.requireHandler.bind(this);
     Module._load = this.moduleLoadHandler.bind(this);
 
-    console.log(this.workingSets);
-
     this.rootFiles = bulkFindSync(this.workingSets, undefined, this.invalidWorkingSetFile);
 
     console.log('Files', this.rootFiles.length);
+    console.log(this.workingSets);
 
     /*
     this.servicesHost = {
