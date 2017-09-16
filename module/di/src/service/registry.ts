@@ -46,7 +46,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   createPending(cls: Class) {
-    if (!this.initialized.resolved) {
+    if (!this.resolved) {
       this.pendingFinalize.push(cls);
     }
 
