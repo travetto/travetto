@@ -33,6 +33,8 @@ export class Compiler {
   static events = new EventEmitter();
   static snaphost = new Map<string, ts.IScriptSnapshot | undefined>()
 
+  static emptyRequire = 'module.exports = {}';
+
   static libraryPath = 'node_modules/';
   static frameworkWorkingSet = `${Compiler.libraryPath}/@encore2/*/src/**/*.ts`;
   static appWorkingSet = 'src/**/*.ts';
@@ -40,7 +42,6 @@ export class Compiler {
 
   static optionalFiles = /\/opt\/[^/]+.ts/;
   static definitionFiles = /\.d\.ts$/g;
-
 
   static devDependencyFiles = AppInfo.DEV_PACKAGES
     .map(x => new RegExp(`node_modules/${x}/`));
@@ -52,8 +53,6 @@ export class Compiler {
     /transformer\.[^/]+.ts/,
     ...Compiler.devDependencyFiles
   ];
-
-  static emptyRequire = 'module.exports = {}';
 
   static invalidWorkingSetFile(name: string) {
     for (let re of this.invalidWorkingSetFiles) {
@@ -129,7 +128,7 @@ export class Compiler {
     // Proxy modules, if in watch mode for non node_modules paths
     if (AppEnv.watch) {
       let p = Module._resolveFilename(request, parent);
-      if (p.indexOf(process.cwd()) >= 0 && p.indexOf(this.libraryPath) < 0) {
+      if (p.includes(process.cwd()) && !p.includes(this.libraryPath)) {
         if (!this.modules.has(p)) {
           let handler = new RetargettingHandler(mod);
           out = new Proxy({}, handler);
@@ -152,6 +151,7 @@ export class Compiler {
     const jsf = toJsName(tsf);
 
     let content: string;
+
     if (!this.contents.has(jsf)) {
       if (AppEnv.watch) {
         this.fileWatcher.add(tsf);
@@ -160,6 +160,7 @@ export class Compiler {
       this.rootFiles.push(tsf);
       this.files.set(tsf, { version: 0 });
       this.emitFile(tsf);
+      this.events.emit('required-after', tsf);
     }
 
     content = this.contents.get(jsf)!;
