@@ -83,12 +83,13 @@ export abstract class Registry implements ClassSource {
 
 
   onEvent(event: ChangeEvent) {
-    console.debug('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
+    console.log('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
 
     switch (event.type) {
       case 'removing':
         this.uninstall(event.prev!, event);
         break;
+      case 'init':
       case 'added':
         this.install(event.curr!, event);
         break;
