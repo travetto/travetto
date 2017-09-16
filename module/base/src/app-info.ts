@@ -9,5 +9,6 @@ export const AppInfo = {
   PACKAGE: pkg.name.split('/')[0],
   LICENSE: pkg.license,
   AUTHOR: pkg.author,
-  DESCRIPTION: pkg.description
+  DESCRIPTION: pkg.description,
+  DEV_PACKAGES: Object.keys(pkg.devDependencies || {})
 };
