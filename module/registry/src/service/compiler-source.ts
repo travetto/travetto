@@ -36,12 +36,17 @@ export class CompilerClassSource implements ClassSource {
 
     Compiler.off('required', requireListen);
 
+
     Compiler.on('changed', this.watch.bind(this));
     Compiler.on('removed', this.watch.bind(this));
     Compiler.on('added', this.watch.bind(this));
+    Compiler.on('required', f => this.processClasses(f, PendingRegister.get(f)!));
   }
 
-  protected processClasses(file: string, classes: Class[]) {
+  protected processClasses(file: string, classes?: Class[]) {
+    if (!classes || !classes.length) {
+      return;
+    }
     this.classes.set(file, new Map());
     for (let cls of classes) {
       this.classes.get(file)!.set(cls.__id, cls);
@@ -54,6 +59,7 @@ export class CompilerClassSource implements ClassSource {
   }
 
   protected async watch(file: string) {
+    console.log('Got file', file);
     let next = new Map(this.computeClasses(file).map(x => [x.__id, x] as [string, Class]));
     let prev = new Map();
     if (this.classes.has(file)) {
