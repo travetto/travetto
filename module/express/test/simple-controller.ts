@@ -14,7 +14,12 @@ export class Simple {
 
   @Get('/name')
   async doIt() {
-    return this.service.fetch().first;
+    return this.service.fetch().first.repeat(1);
+  }
+
+  @Get('/names')
+  async doIts() {
+    return [this.service.fetch().first.repeat(1), 'roger', 'sam'];
   }
 
   @Get('/ages')
