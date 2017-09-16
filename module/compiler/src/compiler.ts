@@ -31,7 +31,7 @@ export class Compiler {
   static transformers: ts.CustomTransformers;
   static registry: ts.DocumentRegistry;
   static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
-  static rootFiles: string[] = [];
+  static rootFiles: string[];
   static fileWatcher: chokidar.FSWatcher;
   static events = new EventEmitter();
   static snaphost = new Map<string, ts.IScriptSnapshot | undefined>()
@@ -136,7 +136,6 @@ export class Compiler {
           let handler = new RetargettingHandler(mod);
           out = new Proxy({}, handler);
           this.modules.set(p, { module: out, handler });
-          this.events.emit('added', p);
         } else {
           const conf = this.modules.get(p)!;
           conf.handler!.target = mod;
@@ -163,7 +162,7 @@ export class Compiler {
       this.rootFiles.push(tsf);
       this.files.set(tsf, { version: 0 });
       this.emitFile(tsf);
-      this.events.emit('required', tsf);
+      this.events.emit('added', tsf);
     }
 
     content = this.contents.get(jsf)!;
@@ -315,6 +314,9 @@ export class Compiler {
   }
 
   static init(cwd: string) {
+    if (this.rootFiles) {
+      return Promise.resolve();
+    }
     let start = Date.now();
 
     this.prepareSourceMaps();
