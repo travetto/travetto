@@ -160,7 +160,7 @@ export class Compiler {
       this.rootFiles.push(tsf);
       this.files.set(tsf, { version: 0 });
       this.emitFile(tsf);
-      this.events.emit('required-after', tsf);
+      this.events.emit('required', tsf);
     }
 
     content = this.contents.get(jsf)!;
@@ -363,6 +363,7 @@ export class Compiler {
     console.log('Initialized', (Date.now() - start) / 1000);
   }
 
+  static on(event: 'required', callback: (filename: string) => any): void;
   static on(event: 'added', callback: (filename: string) => any): void;
   static on(event: 'changed', callback: (filename: string) => any): void;
   static on(event: 'removed', callback: (filename: string) => any): void;
