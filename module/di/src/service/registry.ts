@@ -275,6 +275,16 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
   }
+
+  onEmpty() {
+    super.onEmpty();
+    this.pendingFinalize = [];
+    this.instances.clear();
+    this.proxyHandlers.clear();
+    this.aliases.clear();
+    this.targets.clear();
+    this.autoCreate = [];
+  }
 }
 
 export const DependencyRegistry = new $DependencyRegistry();
