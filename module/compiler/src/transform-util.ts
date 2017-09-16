@@ -49,8 +49,17 @@ export class TransformUtil {
       }
       if (ident && ident.escapedText in patterns) {
         let { path } = state.imports.get(ident.escapedText! as string)!;
-        if (patterns[ident.text].has(path) || path.includes('@encore2') || AppInfo.PACKAGE === '@encore2') {
-          return dec;
+        let packages = patterns[ident.escapedText as string];
+        if (path.includes('@encore2') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@encore2')) {
+          let pkg = '';
+          if (!path.includes('node_modules')) {
+            pkg = AppInfo.NAME;
+          } else {
+            pkg = '@encore2/' + path.split(/@encore2/)[1].split('/')[0];
+          }
+          if (packages.has(pkg)) {
+            return dec;
+          }
         }
       }
     }
