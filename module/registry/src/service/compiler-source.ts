@@ -50,7 +50,7 @@ export class CompilerClassSource implements ClassSource {
     this.classes.set(file, new Map());
     for (let cls of classes) {
       this.classes.get(file)!.set(cls.__id, cls);
-      this.emit({ type: 'init', curr: cls });
+      this.emit({ type: 'added', curr: cls });
     }
   }
 

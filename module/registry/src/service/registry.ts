@@ -89,7 +89,6 @@ export abstract class Registry implements ClassSource {
       case 'removing':
         this.uninstall(event.prev!, event);
         break;
-      case 'init':
       case 'added':
         this.install(event.curr!, event);
         break;
