@@ -155,6 +155,8 @@ export class Compiler {
 
     let content: string;
 
+    let isNew = !this.contents.has(jsf);
+
     if (!this.contents.has(jsf)) {
       if (AppEnv.watch) {
         this.fileWatcher.add(tsf);
@@ -163,13 +165,15 @@ export class Compiler {
       this.rootFiles.push(tsf);
       this.files.set(tsf, { version: 0 });
       this.emitFile(tsf);
-      this.events.emit('required', tsf);
     }
 
     content = this.contents.get(jsf)!;
 
     try {
       let ret = (m as any)._compile(content, jsf);
+      if (isNew) {
+        this.events.emit('required', tsf);
+      }
       return ret;
     } catch (e) {
       this.handleLoadError(tsf, e);
