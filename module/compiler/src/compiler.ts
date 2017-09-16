@@ -38,9 +38,9 @@ export class Compiler {
 
   static emptyRequire = 'module.exports = {}';
 
-  static libraryPath = 'node_modules/';
+  static libraryPath = 'node_modules';
   static frameworkWorkingSet = `${Compiler.libraryPath}/@encore2/*/src/**/*.ts`;
-  static appWorkingSet = `${process.cwd()}/src/**/*.ts`;
+  static appWorkingSet = `src/**/*.ts`;
   static transformerSet = '**/transformer.*.ts';
 
   static optionalFiles = /\/opt\/[^/]+.ts/;
@@ -327,6 +327,8 @@ export class Compiler {
 
     require.extensions['.ts'] = this.requireHandler.bind(this);
     Module._load = this.moduleLoadHandler.bind(this);
+
+    console.log(this.workingSets);
 
     this.rootFiles = bulkFindSync(this.workingSets, undefined, this.invalidWorkingSetFile);
 
