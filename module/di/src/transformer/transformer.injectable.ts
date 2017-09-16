@@ -4,7 +4,7 @@ import { ConfigLoader } from '@encore2/config';
 
 let INJECTABLES = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.injectable'),
-  '@encore/di': 'Injectable'
+  '@encore2/di': 'Injectable'
 });
 
 interface DiState extends State {
@@ -14,7 +14,7 @@ interface DiState extends State {
 }
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-  let injection = TransformUtil.findAnyDecorator(param, { Inject: new Set(['@encore/di']) }, state);
+  let injection = TransformUtil.findAnyDecorator(param, { Inject: new Set(['@encore2/di']) }, state);
 
   if (injection || ts.isParameter(param)) {
     let finalTarget = TransformUtil.importIfExternal(param.type!, state);
@@ -82,7 +82,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       declTemp.push(createInjectDecorator(state, 'InjectArgs', injectArgs));
 
       // Add injectable to if not there
-      let injectable = TransformUtil.findAnyDecorator(node, { Injectable: new Set(['@encore/di']) }, state);
+      let injectable = TransformUtil.findAnyDecorator(node, { Injectable: new Set(['@encore2/di']) }, state);
       if (!injectable) {
         injectable = createInjectDecorator(state, 'Injectable');
         declTemp.push(injectable);
