@@ -150,6 +150,7 @@ export class Compiler {
   static time = 0;
 
   static requireHandler(m: NodeModule, tsf: string) {
+
     const jsf = toJsName(tsf);
 
     let content: string;
@@ -162,7 +163,7 @@ export class Compiler {
       this.rootFiles.push(tsf);
       this.files.set(tsf, { version: 0 });
       this.emitFile(tsf);
-      this.events.emit('added', tsf);
+      this.events.emit('required', tsf);
     }
 
     content = this.contents.get(jsf)!;
@@ -315,7 +316,7 @@ export class Compiler {
 
   static init(cwd: string) {
     if (this.rootFiles) {
-      return Promise.resolve();
+      return;
     }
     let start = Date.now();
 
