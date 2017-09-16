@@ -130,12 +130,12 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // if in watch mode, create proxies
     if (AppEnv.watch) {
       if (!this.proxyHandlers.has(targetId) || !this.proxyHandlers.get(targetId)!.has(name)) {
-        console.log('Registering proxy', target.name, name);
+        console.log('Registering proxy', target.__id, name);
         let handler = new RetargettingHandler(out);
         out = new Proxy({}, handler);
         this.proxyHandlers.get(targetId)!.set(name, handler);
       } else {
-        console.log('Updating target', out);
+        console.log('Updating target', target.__id);
         this.proxyHandlers.get(targetId)!.get(name)!.target = out;
       }
     }
