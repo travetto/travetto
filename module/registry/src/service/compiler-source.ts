@@ -17,17 +17,36 @@ export class CompilerClassSource implements ClassSource {
   async init() {
     let files = await bulkFind(Compiler.workingSets, undefined, Compiler.invalidWorkingSetFile);
 
+    const extra: string[] = [];
+
+    const requireListen = (file: string) => extra.push(file);
+
+    Compiler.on('required', requireListen);
+
     for (let file of files) {
-      this.classes.set(file, new Map());
-      for (let cls of this.computeClasses(file)) {
-        this.classes.get(file)!.set(cls.__id, cls);
-        this.emit({ type: 'init', curr: cls });
+      this.processClasses(file, this.computeClasses(file));
+    }
+
+    for (let file of extra) {
+      if (PendingRegister.has(file)) {
+        this.processClasses(file, PendingRegister.get(file)!);
+        PendingRegister.delete(file);
       }
     }
+
+    Compiler.off('required', requireListen);
 
     Compiler.on('changed', this.watch.bind(this));
     Compiler.on('removed', this.watch.bind(this));
     Compiler.on('added', this.watch.bind(this));
+  }
+
+  protected processClasses(file: string, classes: Class[]) {
+    this.classes.set(file, new Map());
+    for (let cls of classes) {
+      this.classes.get(file)!.set(cls.__id, cls);
+      this.emit({ type: 'init', curr: cls });
+    }
   }
 
   on<T>(callback: (e: ChangeEvent) => void): void {
