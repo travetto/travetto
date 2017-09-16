@@ -10,7 +10,7 @@ export class DbConfig<A, B> {
 
   getUrl() {
     Util.work3();
-    return 'mongodb://eorangedeee';
+    return 'mongodb://oscar';
   }
 }
 
