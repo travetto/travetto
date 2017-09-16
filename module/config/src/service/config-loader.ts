@@ -141,7 +141,7 @@ export class ConfigLoader {
         if (found) {
           loaded.push(tested);
         }
-        return found;
+        return !found;
       });
 
       console.log('Found configurations for', loaded);
