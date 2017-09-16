@@ -50,6 +50,7 @@ export class TransformUtil {
       if (ident && ident.escapedText in patterns) {
         let { path } = state.imports.get(ident.escapedText! as string)!;
         let packages = patterns[ident.escapedText as string];
+        console.log(packages, path);
         if (path.includes('@encore2') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@encore2')) {
           let pkg = '';
           if (!path.includes('node_modules')) {
@@ -235,11 +236,6 @@ export class TransformUtil {
       if (!(v in out)) {
         out[v] = new Set();
       }
-
-      k = k
-        .replace(/^@encore2/, `${process.cwd()}/node_modules/@encore2`)
-        .replace(/^\.\//, `${process.cwd()}/`);
-
       out[v].add(k);
     }
 
