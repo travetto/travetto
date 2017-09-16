@@ -6,7 +6,7 @@ import { ConfigLoader } from '@encore2/config';
 
 let SCHEMAS = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.schema'),
-  [require.resolve('../decorator/schema')]: 'Schema'
+  '@encore2/schema': 'Schema'
 });
 
 type DecList = ts.NodeArray<ts.Decorator>;
@@ -124,9 +124,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     let anySchema = TransformUtil.findAnyDecorator(node, SCHEMAS, state);
 
     let schema = TransformUtil.findAnyDecorator(node, {
-      'Schema': new Set([
-        require.resolve('../decorator/schema')
-      ])
+      'Schema': new Set(['@encore2/schema'])
     }, state);
 
     let auto = !!anySchema;
@@ -182,7 +180,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     // tslint:disable-next-line:no-bitwise
   } else if (ts.isPropertyDeclaration(node) && !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static)) {
     if (state.inAuto) {
-      let ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set([require.resolve('../decorator')]) }, state);
+      let ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set(['@encore2/schema']) }, state);
       if (!ignore) {
         return computeProperty(node, state) as any as T;
       }
