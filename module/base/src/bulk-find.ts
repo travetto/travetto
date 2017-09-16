@@ -21,33 +21,44 @@ function findHandler(base?: string, exclude?: (name: string) => boolean) {
   }
 }
 
-export function bulkFindSync(pattern: string, base?: string, exclude?: (name: string) => boolean) {
+export function bulkFindSync(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
   let handler = findHandler(base, exclude);
-  return handler.match(glob.sync(pattern, handler.config));
+  if (!Array.isArray(globs)) {
+    globs = [globs];
+  }
+  return globs
+    .map(pattern => handler.match(glob.sync(pattern, handler.config)))
+    .reduce((acc, v) => acc.concat(v), []);
 }
 
-export function bulkFind(pattern: string, base?: string, exclude?: (name: string) => boolean) {
+export async function bulkFind(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
   let handler = findHandler(base, exclude);
-
-  return new Promise<string[]>((resolve, reject) => {
-    glob(pattern, handler.config, (err, matches) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(handler.match(matches))
-      }
-    });
-  });
+  if (!Array.isArray(globs)) {
+    globs = [globs];
+  }
+  let promises = globs.map(pattern =>
+    new Promise<string[]>((resolve, reject) => {
+      glob(pattern, handler.config, (err, matches) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(handler.match(matches))
+        }
+      });
+    })
+  );
+  let all = await Promise.all(promises);
+  return all.reduce((acc, v) => acc.concat(v), []);
 }
 
-export function bulkRequire(pattern: string, base?: string, exclude?: (name: string) => boolean) {
-  return bulkFindSync(pattern, base, exclude)
+export function bulkRequire(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
+  return bulkFindSync(globs, base, exclude)
     .map(require)
     .filter(x => !!x); // Return non-empty values
 }
 
-export async function bulkRead(pattern: string, base?: string, exclude?: (name: string) => boolean) {
-  let files = await bulkFind(pattern, base, exclude);
+export async function bulkRead(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
+  let files = await bulkFind(globs, base, exclude);
   let promises = files.map(f => {
     return new Promise<{ name: string, data: string }>((resolve, reject) => {
       return fs.readFile(f, (err, data) => {
