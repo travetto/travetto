@@ -1,4 +1,0 @@
----
-registry:
-  injectable:
-    './src/decorator/controller.ts': Controller
