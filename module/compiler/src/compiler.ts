@@ -40,7 +40,7 @@ export class Compiler {
 
   static libraryPath = 'node_modules/';
   static frameworkWorkingSet = `${Compiler.libraryPath}/@encore2/*/src/**/*.ts`;
-  static appWorkingSet = 'src/**/*.ts';
+  static appWorkingSet = `${process.cwd()}/src/**/*.ts`;
   static transformerSet = '**/transformer.*.ts';
 
   static optionalFiles = /\/opt\/[^/]+.ts/;
@@ -374,3 +374,6 @@ export class Compiler {
     this.events.removeListener(event, callback);
   }
 }
+
+// Handle passing of method
+Compiler.invalidWorkingSetFile = Compiler.invalidWorkingSetFile.bind(Compiler);
