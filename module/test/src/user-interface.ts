@@ -1,17 +1,29 @@
 import { declareSuite, initialize } from './util';
 import { addStackFilters } from '@encore2/base';
+import { RootRegistry } from '@encore2/registry';
 
 addStackFilters('mocha/lib/run');
 
 let Test = require('mocha/lib/test');
 let Common = require('mocha/lib/interfaces/common');
 
+let requireBaseline: Set<string>;
+
 module.exports = function (suite: any) {
   let suites = [suite];
   suite.on('pre-require', function (ctx: any, file: any, mocha: any) {
     mocha.fullTrace(true);
 
-    console.log('Requiring');
+    if (!requireBaseline) {
+      requireBaseline = new Set(Object.keys(require.cache));
+    } else {
+      console.log('Resetting require cache');
+      for (let k of Object.keys(require.cache)) {
+        if (!requireBaseline.has(k)) {
+          delete require.cache[k];
+        }
+      }
+    }
 
     let cmn = Common(suites, ctx, mocha);
 
@@ -21,6 +33,9 @@ module.exports = function (suite: any) {
     ctx.afterEach = cmn.afterEach;
 
     initialize();
+
+    // Clear out before each test
+    RootRegistry.empty();
 
     cmn.runWithSuite(suite);
 
