@@ -56,8 +56,8 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
   registerPendingRequestHandlder(config: Partial<RequestHandler>) {
     return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
       let rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
-      rh.method = config.method;
-      rh.path = config.path;
+      rh.method = config.method || rh.method;
+      rh.path = config.path || rh.path;
       rh.headers = Object.assign(rh.headers, config.headers || {});
       return descriptor;
     };
