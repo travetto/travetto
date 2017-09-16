@@ -4,6 +4,7 @@ import { EventEmitter } from 'events';
 
 export abstract class Registry implements ClassSource {
 
+  protected resolved: boolean;;
   protected initialized: Promise<any>;
   protected events = new EventEmitter();
   protected descendents: Registry[] = [];
@@ -30,6 +31,8 @@ export abstract class Registry implements ClassSource {
 
   protected async _init(): Promise<any> {
     try {
+      this.resolved = false;
+
       if (this.parent && !(this.parent instanceof Registry)) {
         await this.parent.init();
       }
@@ -47,6 +50,8 @@ export abstract class Registry implements ClassSource {
     } catch (e) {
       console.log(e);
       throw e;
+    } finally {
+      this.resolved = true;
     }
   }
 
