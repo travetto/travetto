@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 
 export abstract class Registry implements ClassSource {
 
-  protected resolved: boolean;;
+  protected resolved: boolean;
   protected initialized: Promise<any>;
   protected events = new EventEmitter();
   protected descendents: Registry[] = [];
