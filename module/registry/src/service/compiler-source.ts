@@ -15,18 +15,13 @@ export class CompilerClassSource implements ClassSource {
   }
 
   async init() {
-    let globs = (process.env.SCAN_GLOBS || `${Compiler.frameworkWorkingSet} ${Compiler.appWorkingSet}`).split(/\s+/);
-    for (let glob of globs) {
-      let files = await bulkFind(glob, undefined, (p: string) =>
-        Compiler.optionalFiles.test(p) ||
-        Compiler.definitionFiles.test(p));
+    let files = await bulkFind(Compiler.workingSets, undefined, Compiler.invalidWorkingSetFile);
 
-      for (let file of files) {
-        this.classes.set(file, new Map());
-        for (let cls of this.computeClasses(file)) {
-          this.classes.get(file)!.set(cls.__id, cls);
-          this.emit({ type: 'init', curr: cls });
-        }
+    for (let file of files) {
+      this.classes.set(file, new Map());
+      for (let cls of this.computeClasses(file)) {
+        this.classes.get(file)!.set(cls.__id, cls);
+        this.emit({ type: 'init', curr: cls });
       }
     }
 
