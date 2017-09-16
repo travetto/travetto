@@ -36,8 +36,12 @@ export class Compiler {
   static libraryPath = 'node_modules/';
   static frameworkWorkingSet = `${Compiler.libraryPath}/@encore2/*/src/**/*.ts`;
   static appWorkingSet = 'src/**/*.ts';
+  static transformerSet = '**/transformer.*.ts';
+
   static optionalFiles = /\/opt\/[^/]+.ts/;
   static definitionFiles = /\.d\.ts$/g;
+
+
   static devDependencyFiles = AppInfo.DEV_PACKAGES
     .map(x => new RegExp(`node_modules/${x}/`));
 
@@ -45,10 +49,10 @@ export class Compiler {
   static invalidWorkingSetFiles = [
     Compiler.optionalFiles,
     Compiler.definitionFiles,
+    /transformer\.[^/]+.ts/,
     ...Compiler.devDependencyFiles
   ];
 
-  static transformerFiles = '**/transformer.*.ts';
   static emptyRequire = 'module.exports = {}';
 
   static invalidWorkingSetFile(name: string) {
@@ -98,7 +102,7 @@ export class Compiler {
   static resolveTransformers() {
     const transformers: { [key: string]: any } = {};
 
-    for (let trns of bulkRequire(this.transformerFiles)) {
+    for (let trns of bulkRequire(this.transformerSet)) {
       for (let { phase, transformer } of Object.values(trns)) {
         if (!transformers[phase]) {
           transformers[phase] = [];
@@ -227,7 +231,7 @@ export class Compiler {
 
   static watchFiles(fileNames: string[]) {
     let watcher = chokidar.watch(this.appWorkingSet, {
-      ignored: [this.transformerFiles, this.optionalFiles],
+      ignored: this.invalidWorkingSetFile,
       persistent: true,
       cwd: process.cwd(),
       interval: 250,
