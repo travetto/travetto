@@ -106,4 +106,11 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
       process.nextTick(() => this.expired.delete(cls.__id));
     }
   }
+
+  onEmpty() {
+    this.entries.clear();
+    this.pending.clear();
+    this.pendingMethods.clear();
+    this.expired.clear();
+  }
 }

@@ -40,7 +40,7 @@ export abstract class Registry implements ClassSource {
       let classes = await this.initialInstall();
       if (classes) {
         for (let cls of classes) {
-          this.install(cls, { type: 'init', curr: cls });
+          this.install(cls, { type: 'added', curr: cls });
         }
       }
 
@@ -111,5 +111,14 @@ export abstract class Registry implements ClassSource {
 
   listen(source: ClassSource) {
     source.on(this.onEvent.bind(this));
+  }
+
+  onEmpty() { }
+
+  empty() {
+    this.onEmpty();
+    for (let des of this.descendents) {
+      des.empty();
+    }
   }
 }
