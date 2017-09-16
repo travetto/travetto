@@ -27,7 +27,7 @@ process.argv = [
   process.argv[0],
   'mocha',
   ...(process.env.NODE_FLAGS || '').split(' '),
-  '--require', `${__dirname}/bootstrap`,
+  //  '--require', `${__dirname}/bootstrap`,
   '--ui', ui,
   ...setup,
   ...extra,
@@ -36,4 +36,4 @@ process.argv = [
 
 process.env.env = 'test';
 
-require(`${root}/node_modules/mocha/bin/_mocha`);
+require('./bootstrap');

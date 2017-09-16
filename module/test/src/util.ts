@@ -64,6 +64,3 @@ export const beforeTest = adder(_beforeTest);
 export const afterSuite = adder(_afterSuite);
 export const afterTest = adder(_afterTest);
 export const afterAll = adder(_afterAll);
-
-// Support di if loaded
-require('../opt/registry');
