@@ -15,6 +15,9 @@ const originalLoader = Module._load.bind(Module);
 function toJsName(name: string) {
   return name.replace(/\.ts$/, '.js');
 }
+
+type WatchEvent = 'required' | 'added' | 'changed' | 'removed';
+
 export class Compiler {
 
   static configFile = 'tsconfig.json';
@@ -363,11 +366,11 @@ export class Compiler {
     console.log('Initialized', (Date.now() - start) / 1000);
   }
 
-  static on(event: 'required', callback: (filename: string) => any): void;
-  static on(event: 'added', callback: (filename: string) => any): void;
-  static on(event: 'changed', callback: (filename: string) => any): void;
-  static on(event: 'removed', callback: (filename: string) => any): void;
-  static on<T>(event: string, callback: (result: T) => any): void {
-    this.events.on(event, callback);
+  static on(event: WatchEvent, callback: (filename: string) => any) {
+    this.events.addListener(event, callback);
+  }
+
+  static off(event: WatchEvent, callback: (filename: string) => any) {
+    this.events.removeListener(event, callback);
   }
 }
