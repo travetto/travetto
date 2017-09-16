@@ -1,18 +1,18 @@
 {
-  "author": "",
+  "author": "", 
   "dependencies": {
-    "@encore2/base": "git+ssh://git@git.eaiti.com/encore2/base.git#v1.x.x",
-    "@types/flat": "0.0.28",
-    "@types/js-yaml": "^3.9.1",
-    "@types/lodash": "^4.14.74",
-    "flat": "^4.0.0",
-    "js-yaml": "^3.9.1",
+    "@encore2/base": "git+ssh://git@git.eaiti.com/encore2/base.git#v1.x.x", 
+    "@types/flat": "0.0.28", 
+    "@types/js-yaml": "^3.9.1", 
+    "@types/lodash": "^4.14.74", 
+    "flat": "^4.0.0", 
+    "js-yaml": "^3.9.1", 
     "lodash": "^4.17.4"
-  },
-  "description": "",
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@encore2/config",
-  "scripts": {},
-  "version": "1.0.6"
+  }, 
+  "description": "", 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@encore2/config", 
+  "scripts": {}, 
+  "version": "1.0.7"
 }
