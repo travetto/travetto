@@ -6,6 +6,8 @@ import { Injectable, Inject } from '@encore2/di';
 import { AssetSource, Asset } from '@encore2/asset';
 import { MongoAssetConfig } from './config';
 
+const setTimeoutAsync = util.promisify(setTimeout);
+
 @Injectable({ target: AssetSource })
 export class MongoSource extends AssetSource {
 
@@ -38,7 +40,7 @@ export class MongoSource extends AssetSource {
         return await this.info(file.filename);
       } catch (e) {
         // Wait for load
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await setTimeoutAsync(100);
       }
     }
 
