@@ -1,8 +1,11 @@
 import * as fs from 'fs';
-import { nodeToPromise } from '@encore2/base';
+import * as util from 'util';
+
 import { Injectable } from '@encore2/di';
 import { Asset } from '../model';
 import { AssetSource } from './source';
+
+const fsUnlinkAsync = util.promisify(fs.unlink);
 
 @Injectable()
 export class AssetService {
@@ -40,7 +43,7 @@ export class AssetService {
     } finally {
       if (removeOnComplete) {
         try {
-          await nodeToPromise(fs, fs.unlink, asset.path);
+          await fsUnlinkAsync(asset.path);
         } catch (e) {
           // Do nothings
         }

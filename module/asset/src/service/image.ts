@@ -1,13 +1,15 @@
 import * as fs from 'fs';
 import * as gm from 'gm';
+import * as util from 'util';
 
-import { nodeToPromise } from '@encore2/base';
 import { Cacheable } from '@encore2/cache';
 import { Injectable } from '@encore2/di';
 
 import { AssetService } from './asset';
 import { Asset } from '../model';
 import { AssetUtil } from '../util';
+
+const fsUnlinkAsync = util.promisify(fs.unlink);
 
 @Injectable()
 export class ImageService {
@@ -16,7 +18,7 @@ export class ImageService {
 
   @Cacheable({
     max: 1000,
-    dispose: (key: string, n: string) => nodeToPromise(fs, fs.unlink, n).catch(e => null)
+    dispose: (key: string, n: string) => fsUnlinkAsync(n).catch(e => null)
   })
   async generateAndStoreImage(filename: string, options: { w: number, h: number }, filter?: any): Promise<string | undefined> {
     let info = await this.assetService.get(filename, filter);
@@ -28,7 +30,7 @@ export class ImageService {
       let op = gm(info.stream, info.filename)
         .resize(options.w, options.h)
         .autoOrient();
-      await nodeToPromise<void>(op, op.write, filePath);
+      await util.promisify(op.write).call(op, filePath);
       return filePath;
     }
   }

@@ -1,5 +1,8 @@
-import { nodeToPromise } from '@encore2/base';
 import * as fs from 'fs';
+import * as util from 'util';
+
+const fsReadFileAsync = util.promisify(fs.readFile);
+const fsUnlinkAsync = util.promisify(fs.unlink);
 
 export interface AssetFile {
   name: string;
@@ -41,8 +44,8 @@ export class Asset {
   }
 
   async read() {
-    let res = (await nodeToPromise<Buffer>(fs, fs.readFile, this.path)).toString();
-    nodeToPromise(fs, fs.unlink, this.path);
+    let res = (await fsReadFileAsync(this.path)).toString();
+    await fsUnlinkAsync(this.path);
     return res;
   }
 }

@@ -2,13 +2,15 @@ import * as fs from 'fs';
 import * as mime from 'mime';
 import * as path from 'path';
 import * as fileType from 'file-type';
+import * as util from 'util';
 
-import { nodeToPromise } from '@encore2/base';
 import { request } from '@encore2/util';
 import { Asset, AssetFile } from './model';
 
 const osTmpdir = require('os-tmpdir');
 const crypto = require('crypto');
+const fsStatAsync = util.promisify(fs.stat);
+const fsRenameAsync = util.promisify(fs.rename);
 
 let tmpDir = path.resolve(osTmpdir());
 
@@ -27,9 +29,9 @@ export class AssetUtil {
 
     let str = fs.createReadStream(pth);
     str.pipe(hash);
-    await nodeToPromise(str, str.on, 'end');
+    await util.promisify(str.on).call(str, 'end');
 
-    let size = (await nodeToPromise<fs.Stats>(fs, fs.stat, pth)).size;
+    let size = (await fsStatAsync(pth)).size;
 
     let upload = this.fileToAsset({
       name: pth,
@@ -122,7 +124,7 @@ export class AssetUtil {
       } else {
         newFilePath += '.' + responseExt;
       }
-      await nodeToPromise(fs, fs.rename, filePath, newFilePath);
+      await fsRenameAsync(filePath, newFilePath);
       filePath = newFilePath;
     }
     return filePath;
