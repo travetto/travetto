@@ -8,5 +8,5 @@
   "main": "index.ts", 
   "name": "@encore2/util", 
   "scripts": {}, 
-  "version": "1.0.3"
+  "version": "1.0.4"
 }
