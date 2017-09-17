@@ -11,6 +11,8 @@ const osTmpdir = require('os-tmpdir');
 const crypto = require('crypto');
 const fsStatAsync = util.promisify(fs.stat);
 const fsRenameAsync = util.promisify(fs.rename);
+const fsReadyAync = util.promisify(fs.read);
+const fsOpenAsync = util.promisify(fs.open);
 
 let tmpDir = path.resolve(osTmpdir());
 
@@ -81,22 +83,11 @@ export class AssetUtil {
     return uploadFile;
   }
 
-  static readChunk(filePath: string, bytes: number) {
-    return new Promise<Buffer>((resolve, reject) => {
-      fs.open(filePath, 'r', function (status, fd) {
-        if (status) {
-          return reject(status);
-        }
-        let buffer = new Buffer(bytes);
-        fs.read(fd, buffer, 0, bytes, 0, function (err, num) {
-          if (err) {
-            return reject(err);
-          } else {
-            resolve(buffer);
-          }
-        });
-      });
-    });
+  static async readChunk(filePath: string, bytes: number) {
+    let fd = await fsOpenAsync(filePath, 'r');
+    let buffer = new Buffer(bytes);
+    let num = await fsReadyAync(fd, buffer, 0, bytes, 0);
+    return buffer;
   }
 
   static async detectFileType(filePath: string) {
