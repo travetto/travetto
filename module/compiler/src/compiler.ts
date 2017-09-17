@@ -157,7 +157,7 @@ export class Compiler {
 
     let isNew = !this.contents.has(jsf);
 
-    if (!this.contents.has(jsf)) {
+    if (isNew) {
       if (AppEnv.watch) {
         this.fileWatcher.add(tsf);
       }
@@ -243,7 +243,8 @@ export class Compiler {
       persistent: true,
       cwd: process.cwd(),
       interval: 250,
-      ignoreInitial: false
+      ignoreInitial: false,
+      awaitWriteFinish: { stabilityThreshold: 10 }
     });
 
     watcher.on('ready', () => {
