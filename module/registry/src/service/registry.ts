@@ -46,9 +46,9 @@ export abstract class Registry implements ClassSource {
 
       await Promise.all(this.descendents.map(x => x.init()));
 
-      console.log('Initialized', this.constructor.__id);
+      console.debug('Initialized', this.constructor.__id);
     } catch (e) {
-      console.log(e);
+      console.debug(e);
       throw e;
     } finally {
       this.resolved = true;

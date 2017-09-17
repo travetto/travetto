@@ -63,7 +63,7 @@ export class CompilerClassSource implements ClassSource {
   }
 
   protected async watch(file: string) {
-    console.log('Got file', file);
+    console.debug('Got file', file);
     let next = new Map(this.computeClasses(file).map(x => [x.__id, x] as [string, Class]));
     let prev = new Map();
     if (this.classes.has(file)) {
