@@ -1,9 +1,3 @@
-import { promisify } from 'util';
-
-export function nodeToPromise<T>(ctx: any | null, fn: Function, ...args: any[]): Promise<T> {
-  return promisify(fn).apply(ctx, args) as Promise<T>;
-}
-
 export function toPromise<T>(fn: (...args: any[]) => (T | Promise<T>)): (...args: any[]) => Promise<T> {
   if (fn.constructor.name !== 'GeneratorFunction') { // If std function
     return (...args: any[]) => new Promise<T>((resolve, reject) => {
