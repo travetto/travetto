@@ -203,7 +203,7 @@ export class Compiler {
   }
 
   static unload(fileName: string) {
-    console.log('Unloading', fileName);
+    console.debug('Unloading', fileName);
     if (this.snaphost.has(fileName)) {
       this.snaphost.delete(fileName);
     }
@@ -223,7 +223,7 @@ export class Compiler {
       // Let's see if they are really different
       let hash = farmhash.hash32(content);
       if (hash === this.hashes.get(fileName)) {
-        console.log('File contents unchanged');
+        console.debug('File contents unchanged');
         return false;
       }
     }
@@ -231,12 +231,12 @@ export class Compiler {
     let res = this.transpile(content, fileName);
     let output = res.outputText;
     if (fileName.match(/\/test\//)) {
-      // console.log(fileName, output);
+      // console.debug(fileName, output);
     }
     let outFileName = toJsName(fileName);
 
     if (this.logErrors(fileName, res.diagnostics)) {
-      console.log(`Compiling ${fileName} failed`);
+      console.debug(`Compiling ${fileName} failed`);
       if (this.handleLoadError(fileName) && this.optionalFiles.test(fileName)) {
         output = this.emptyRequire;
       }
@@ -311,9 +311,9 @@ export class Compiler {
       let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
       if (diagnostic.file) {
         let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start as number);
-        console.log(`  Error ${diagnostic.file.fileName}(${line + 1}, ${character + 1}): ${message}`);
+        console.error(`  Error ${diagnostic.file.fileName}(${line + 1}, ${character + 1}): ${message}`);
       } else {
-        console.log(`  Error: ${message}`);
+        console.error(`  Error: ${message}`);
       }
     }
 
@@ -357,8 +357,8 @@ export class Compiler {
 
     this.rootFiles = bulkFindSync(this.workingSets, undefined, this.invalidWorkingSetFile);
 
-    console.log('Files', this.rootFiles.length);
-    console.log(this.workingSets);
+    console.debug('Files', this.rootFiles.length);
+    console.debug(this.workingSets);
 
     /*
     this.servicesHost = {
@@ -391,7 +391,7 @@ export class Compiler {
       this.fileWatcher = this.watchFiles(this.rootFiles);
     }
 
-    console.log('Initialized', (Date.now() - start) / 1000);
+    console.debug('Initialized', (Date.now() - start) / 1000);
   }
 
   static on(event: WatchEvent, callback: (filename: string) => any) {
