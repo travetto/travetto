@@ -1,11 +1,12 @@
 import * as log4js from 'log4js';
 import * as mkdirp from 'mkdirp';
+import * as util from 'util';
 import { addLayout } from 'log4js/lib/layouts';
 import { Injectable } from '@encore2/di';
 import { LoggerConfig } from './config';
 import { Layouts } from './layout';
 import { isFileAppender } from '../types';
-import { AppInfo, nodeToPromise } from '@encore2/base';
+import { AppInfo } from '@encore2/base';
 
 @Injectable({
   autoCreate: { create: true, priority: 0 }
@@ -64,7 +65,7 @@ export class Logger {
           }
 
           // Setup folder for logging
-          await nodeToPromise(null, mkdirp, conf.filename!.substring(0, conf.filename!.lastIndexOf('/')));
+          let res = await util.promisify(mkdirp)(conf.filename!.substring(0, conf.filename!.lastIndexOf('/')));
         }
 
         if (conf.level) {
