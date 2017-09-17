@@ -25,7 +25,7 @@ export class CompilerClassSource implements ClassSource {
 
     const requireListen = (file: string) => extra.push(file);
 
-    Compiler.on('required', requireListen);
+    Compiler.on('required-after', requireListen);
 
     for (let file of files) {
       this.processClasses(file, this.computeClasses(file));
@@ -38,13 +38,13 @@ export class CompilerClassSource implements ClassSource {
       }
     }
 
-    Compiler.off('required', requireListen);
+    Compiler.off('required-after', requireListen);
 
 
     Compiler.on('changed', this.watch.bind(this));
     Compiler.on('removed', this.watch.bind(this));
     Compiler.on('added', this.watch.bind(this));
-    Compiler.on('required', f => this.processClasses(f, PendingRegister.get(f)!));
+    Compiler.on('required-after', f => this.processClasses(f, PendingRegister.get(f)!));
   }
 
   protected processClasses(file: string, classes?: Class[]) {
