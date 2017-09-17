@@ -16,7 +16,7 @@ function toJsName(name: string) {
   return name.replace(/\.ts$/, '.js');
 }
 
-type WatchEvent = 'required' | 'added' | 'changed' | 'removed';
+type WatchEvent = 'required-after' | 'added' | 'changed' | 'removed';
 
 export class Compiler {
 
