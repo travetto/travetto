@@ -117,7 +117,9 @@ export class ConfigLoader {
     }
     this._initialized = true;
 
-    console.log(`Initializing: ${AppEnv.all.join(',')}`);
+    if (!AppEnv.test) {
+      console.log(`Initializing: ${AppEnv.all.join(',')}`);
+    }
 
     // Load all namespaces from core
     let files = bulkReadSync('node_modules/@encore2/*/config/*.yml');
@@ -144,7 +146,7 @@ export class ConfigLoader {
         return !found;
       });
 
-      console.log('Found configurations for', loaded);
+      console.debug('Found configurations for', loaded);
 
       for (let file of envFiles) {
         yaml.safeLoadAll(file.data, doc => {
@@ -159,7 +161,7 @@ export class ConfigLoader {
     // Drop out nulls
     this.dropNulls(this.data);
 
-    if (!process.env.QUIET_CONFIG) {
+    if (!process.env.QUIET_CONFIG && !AppEnv.test) {
       console.log('Configured', JSON.stringify(this.data, null, 2));
     }
   }
