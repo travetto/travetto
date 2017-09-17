@@ -32,7 +32,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.pendingFinalize = [];
 
     for (let cls of finalizing) {
-      this.install(cls, { type: 'init', curr: cls });
+      this.install(cls, { type: 'added', curr: cls });
     }
 
     // Unblock auto created
@@ -276,8 +276,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
   }
 
-  onEmpty() {
-    super.onEmpty();
+  onReset() {
+    super.onReset();
     this.pendingFinalize = [];
     this.instances.clear();
     this.proxyHandlers.clear();
