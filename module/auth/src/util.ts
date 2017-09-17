@@ -1,14 +1,28 @@
 import * as crypto from 'crypto';
-import { nodeToPromise } from '@encore2/base';
 import { AppError } from '@encore2/express';
 
 export class StrategyUtil {
   static async generateHash(password: string, salt: string, iterations = 25000, keylen = 512, digest = 'sha512') {
-    return (await nodeToPromise<Buffer>(crypto, crypto.pbkdf2, password, salt, iterations, keylen, digest)).toString('hex');
+    return new Promise<string>((res, rej) =>
+      crypto.pbkdf2(password, salt, iterations, keylen, digest, (err, val) => {
+        if (err) {
+          rej(err);
+        } else {
+          res(val.toString('hex'));
+        }
+      })
+    );
   }
 
   static async generateSalt(saltlen = 32) {
-    return (await nodeToPromise<NodeBuffer>(crypto, crypto.randomBytes, saltlen)).toString('hex');
+    return await new Promise<string>((res, rej) =>
+      crypto.randomBytes(saltlen, (err, val) => {
+        if (err) {
+          rej(err);
+        } else {
+          res(val.toString('hex'))
+        }
+      }));
   }
 
   static async generatePassword(password: string, saltlen = 32, validator?: (password: string) => Promise<boolean>) {

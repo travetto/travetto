@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
-import { nodeToPromise } from '@encore2/base';
 import { ControllerRegistry, AppError } from '@encore2/express';
 import * as passport from 'passport';
+import * as util from 'util';
 
 export function Authenticate(provider: string = 'app', failTo?: string) {
   let passportOptions = { failureRedirect: failTo };
   let handler = passport.authenticate(provider, passportOptions);
   let fn = function (req: Request, res: Response, next: NextFunction): Promise<any> {
     req.passportOptions = passportOptions;
-    return nodeToPromise(null, handler, req, res);
+    return util.promisify(handler)(req, res, undefined!);
   };
   return ControllerRegistry.filterAdder(fn);
 }

@@ -1,12 +1,13 @@
 import '@encore2/express/opt/context';
 
 import * as passport from 'passport';
+import * as util from 'util';
+
 import { Request, Response } from 'express';
 
 import { Context } from '@encore2/context';
 import { Injectable } from '@encore2/di';
 import { ExpressApp, ExpressOperator } from '@encore2/express';
-import { nodeToPromise } from '@encore2/base';
 
 import { AuthConfig } from './config';
 import { BaseStrategy } from './strategy';
@@ -44,7 +45,7 @@ export class ExpressAuthOperator extends ExpressOperator {
   }
 
   async logout(req: Request, res: Response) {
-    await nodeToPromise(req.session, req.session.destroy);
+    await util.promisify(req.session.destroy).call(req.session);
     res.clearCookie('connect.sid', { path: '/' });
   }
 }
