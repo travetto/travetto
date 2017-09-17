@@ -1,13 +1,16 @@
 import * as nodemailer from 'nodemailer';
 import * as Mustache from 'mustache';
 import * as fs from 'fs';
-import { nodeToPromise } from '@encore2/base';
+import * as util from 'util';
+
 import { TemplateMailOptions, TemplateContext } from './types';
 import { Injectable } from '@encore2/di';
 import { MailConfig } from './config';
 
 const juice = require('juice');
 const Inky = require('inky').Inky;
+
+const readFilePromise = util.promisify(fs.readFile);
 
 @Injectable()
 export class EmailService {
@@ -44,7 +47,7 @@ export class EmailService {
     if (!name) {
       name = path.split('/').pop() as string;
     }
-    let contents = await nodeToPromise<Buffer>(fs, fs.readFile, path);
+    let contents = await readFilePromise(path);
     this.registerPartial(name, contents.toString());
   }
 
@@ -56,7 +59,7 @@ export class EmailService {
     if (!name) {
       name = path.split('/').pop() as string;
     }
-    let contents = await nodeToPromise<Buffer>(fs, fs.readFile, path);
+    let contents = await readFilePromise(path);
     this.registerWrapper(name, contents.toString());
   }
 
@@ -130,6 +133,6 @@ export class EmailService {
   async sendEmailRaw(options: nodemailer.SendMailOptions) {
     options = Object.assign({}, this.config.defaults, options);
     let tp = this.transporter;
-    return nodeToPromise<nodemailer.SentMessageInfo>(tp, tp.sendMail, options);
+    return (await util.promisify(tp.sendMail).call(tp, nodemailer.SentMessageInfooptions)) as nodemailer.SentMessageInfo;
   }
 }
