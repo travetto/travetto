@@ -12,6 +12,10 @@ class $RootRegistry extends Registry {
     await super.onEvent(e);
     this.emit(e);
   }
+
+  onReset() {
+    this.parent!.reset()
+  }
 }
 
 export const RootRegistry = new $RootRegistry();

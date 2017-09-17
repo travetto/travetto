@@ -113,12 +113,12 @@ export abstract class Registry implements ClassSource {
     source.on(this.onEvent.bind(this));
   }
 
-  onEmpty() { }
+  onReset() { }
 
-  empty() {
-    this.onEmpty();
+  reset() {
+    this.onReset();
     for (let des of this.descendents) {
-      des.empty();
+      des.reset();
     }
   }
 }

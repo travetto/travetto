@@ -6,4 +6,5 @@ export type ChangeEvent = { type: 'changed' | 'added' | 'removing', prev?: Class
 export interface ClassSource {
   init(): Promise<any>;
   on<T>(callback: (e: ChangeEvent) => any): void;
+  reset(): void;
 }

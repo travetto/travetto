@@ -14,6 +14,10 @@ export class CompilerClassSource implements ClassSource {
     this.events.emit('change', e);
   }
 
+  reset() {
+    this.classes.clear();
+  }
+
   async init() {
     let files = await bulkFind(Compiler.workingSets, undefined, Compiler.invalidWorkingSetFile);
 
