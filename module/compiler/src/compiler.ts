@@ -224,7 +224,7 @@ export class Compiler {
       let hash = farmhash.hash32(content);
       if (hash === this.hashes.get(fileName)) {
         console.log('File contents unchanged');
-        return;
+        return false;
       }
     }
 
@@ -250,6 +250,8 @@ export class Compiler {
         this.markForReload(fileName);
       }
     }
+
+    return true;
   }
 
   static watchFiles(fileNames: string[]) {
@@ -268,8 +270,9 @@ export class Compiler {
           fileName = `${process.cwd()}/${fileName}`;
           fileNames.push(fileName);
           this.files.set(fileName, { version: 1 });
-          this.emitFile(fileName);
-          this.events.emit('added', fileName);
+          if (this.emitFile(fileName)) {
+            this.events.emit('added', fileName);
+          }
         })
         .on('change', fileName => {
           fileName = `${process.cwd()}/${fileName}`;
@@ -281,8 +284,9 @@ export class Compiler {
             this.files.set(fileName, { version: 1 });
             fileNames.push(fileName);
           }
-          this.emitFile(fileName)
-          this.events.emit(changed ? 'changed' : 'added', fileName);
+          if (this.emitFile(fileName)) {
+            this.events.emit(changed ? 'changed' : 'added', fileName);
+          }
         })
         .on('unlink', fileName => {
           fileName = `${process.cwd()}/${fileName}`;
