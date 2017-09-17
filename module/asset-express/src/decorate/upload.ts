@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { AssetUtil, AssetFile } from '@encore2/asset';
 import { ControllerRegistry } from '@encore2/express';
-import { nodeToPromise } from '@encore2/base';
 import { AssetExpressConfig } from '../config';
 import { Class } from '@encore2/registry';
+import * as util from 'util';
 
 const match = require('mime-match');
 const multiparty = require('connect-multiparty');
@@ -31,13 +31,15 @@ export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
     maxFilesSize: config.maxSize
   });
 
+  const multipartAsync = util.promisify(multipart);
+
   let allowedTypes = readTypeArr(config.allowedTypes);
   let excludeTypes = readTypeArr(config.excludeTypes);
 
   return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
     let rh = ControllerRegistry.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
     const filt = async function (this: any, req: Request, res: Response) {
-      await nodeToPromise<void>(null, multipart, req, res);
+      await multipartAsync(req, res);
 
       for (let f of Object.keys(req.files)) {
         let contentType = (await AssetUtil.detectFileType(req.files[f].path)).mime;
