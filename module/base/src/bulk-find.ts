@@ -1,6 +1,13 @@
 import * as path from 'path';
 import * as glob from 'glob';
 import * as fs from 'fs';
+import * as util from 'util';
+
+const globAsync = util.promisify(
+  glob as (name: string, options: glob.IOptions, callback: (err: any, res: string[]) => void) => void
+) as (name: string, options: glob.IOptions) => Promise<string[]>;
+
+const fsReadFileAsync = util.promisify(fs.readFile);
 
 function findHandler(base?: string, exclude?: (name: string) => boolean) {
   base = base || process.cwd();
@@ -36,17 +43,7 @@ export async function bulkFind(globs: string | string[], base?: string, exclude?
   if (!Array.isArray(globs)) {
     globs = [globs];
   }
-  let promises = globs.map(pattern =>
-    new Promise<string[]>((resolve, reject) => {
-      glob(pattern, handler.config, (err, matches) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(handler.match(matches))
-        }
-      });
-    })
-  );
+  let promises = globs.map(pattern => globAsync(pattern, handler.config).then(handler.match));
   let all = await Promise.all(promises);
   return all.reduce((acc, v) => acc.concat(v), []);
 }
@@ -59,17 +56,7 @@ export function bulkRequire(globs: string | string[], base?: string, exclude?: (
 
 export async function bulkRead(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
   let files = await bulkFind(globs, base, exclude);
-  let promises = files.map(f => {
-    return new Promise<{ name: string, data: string }>((resolve, reject) => {
-      return fs.readFile(f, (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({ name: f, data: data.toString() });
-        }
-      })
-    })
-  });
+  let promises = files.map((f: string) => fsReadFileAsync(f).then(x => ({ name: f, data: x.toString() })));
   return await Promise.all(promises);
 }
 
