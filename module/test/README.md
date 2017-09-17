@@ -1,8 +1,7 @@
 encore: Test
 ===
 
-This module provides general integration with `mocha`.  We wrap the `mocha` binary using our own `mocha.js`.
-This `mocha.js` should behave identical to the `mocha` binary, with a few additions/changes:
+This module provides general integration with `ava`:
 
    - Will auto execute the `bootstrap` to provide typescript.
    - Auto-initialize of the application using the `test` environment. 

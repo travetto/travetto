@@ -2,21 +2,16 @@
   "author": "",
   "dependencies": {
     "@encore2/registry": "git+ssh://git@git.eaiti.com/encore2/registry.git#v1.x.x",
-    "@types/chai": "^4.0.3",
-    "@types/mocha": "^2.2.41",
-    "chai": "^4.1.1",
-    "mocha": "^3.5.0"
+    "@encore2/util": "git+ssh://git@git.eaiti.com/encore2/util.git#v1.x.x",
+    "@types/tape": "^4.2.30",
+    "tape": "^4.8.0"
   },
   "description": "",
   "license": "ISC",
   "main": "src/lib/",
   "name": "@encore2/test",
-  "peerDependencies": {
-    "mocha-bamboo-reporter": "^1.1.0"
-  },
-  "scripts": {
-    "postinstall": "chmod +x ./mocha.js",
-    "test": "./mocha.js"
+  "bin": {
+    "encore-test": ""
   },
   "version": "1.0.6"
 }

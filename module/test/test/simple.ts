@@ -1,19 +1,16 @@
-import { expect } from 'chai';
+import * as test from 'tape';
 
-describe('suite1', () => {
-  it('Test1a', () => {
-    expect(2).to.equal(2);
-  });
-  it('Test1b', () => {
-    expect(2).to.equal(2);
-  });
+test('Test1a', async t => {
+  t.is(2, 2);
+});
+test('Test1b', async t => {
+  t.is(2, 2);
 });
 
-describe('suite2', () => {
-  it('Test2a', () => {
-    expect(2).to.equal(2);
-  });
-  it('Test2b', () => {
-    expect(2).to.equal(2);
-  });
+test('Test2a', async t => {
+  t.is(2, 2);
+});
+
+test('Test2b', async t => {
+  t.is(2, 2);
 });

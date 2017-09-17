@@ -1,5 +1,5 @@
 import { Injectable, DependencyRegistry } from '@encore2/di';
-import { expect } from 'chai';
+import * as test from 'tape';
 
 @Injectable()
 export class Test {
@@ -13,9 +13,8 @@ export class Test {
   }
 }
 
-describe('Test Somethin', () => {
-  it('Test loading', async () => {
-    let item = await DependencyRegistry.getInstance(Test);
-    expect(item.getName()).to.equal('Howdy');
-  });
+test('Test loading', async t => {
+  await DependencyRegistry.init();
+  let item = await DependencyRegistry.getInstance(Test);
+  t.is(item.getName(), 'Howdy');
 });
