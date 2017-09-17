@@ -12,5 +12,5 @@
   "main": "index.ts", 
   "name": "@encore2/base", 
   "scripts": {}, 
-  "version": "1.0.13"
+  "version": "1.0.14"
 }
