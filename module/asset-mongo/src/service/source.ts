@@ -1,9 +1,9 @@
 import * as mongo from 'mongodb';
 import * as Grid from 'gridfs-stream';
+import * as util from 'util';
 
 import { Injectable, Inject } from '@encore2/di';
 import { AssetSource, Asset } from '@encore2/asset';
-import { nodeToPromise } from '@encore2/base';
 import { MongoAssetConfig } from './config';
 
 @Injectable({ target: AssetSource })
@@ -89,7 +89,7 @@ export class MongoSource extends AssetSource {
   }
 
   async remove(filename: string): Promise<void> {
-    await nodeToPromise(this.client, this.client.remove, { filename });
+    await util.promisify(this.client.remove).call(this.client, { filename });
     return;
   }
 }
