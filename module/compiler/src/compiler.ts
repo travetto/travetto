@@ -244,7 +244,7 @@ export class Compiler {
     this.contents.set(outFileName, output);
 
     if (AppEnv.watch) {
-      this.hashes.set(fileName, farmhash.has32(content));
+      this.hashes.set(fileName, farmhash.hash32(content));
       // If file is already loaded, mark for reload
       if (this.files.get(fileName)!.version > 0) {
         this.markForReload(fileName);
