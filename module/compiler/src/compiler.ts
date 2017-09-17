@@ -172,7 +172,7 @@ export class Compiler {
     try {
       let ret = (m as any)._compile(content, jsf);
       if (isNew) {
-        this.events.emit('required', tsf);
+        this.events.emit('required-after', tsf);
       }
       return ret;
     } catch (e) {
