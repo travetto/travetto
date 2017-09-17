@@ -14,12 +14,12 @@ export class Simple {
 
   @Get('/name')
   async doIt() {
-    return this.service.fetch().first.repeat(1);
+    return this.service.fetch();
   }
 
   @Get('/names')
   async doIts() {
-    return [this.service.fetch().first.repeat(1), 'roger', 'sam'];
+    return [this.service.fetch().first.repeat(1), 'roger', 'sam', 'oscar  '];
   }
 
   @Get('/ages')

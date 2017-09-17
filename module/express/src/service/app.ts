@@ -5,7 +5,7 @@ import { RouteUtil } from '../util';
 import { ControllerConfig } from '../model';
 import { Injectable, DependencyRegistry } from '@encore2/di';
 import { ControllerRegistry } from './registry';
-import { toPromise } from '@encore2/base';
+import { toPromise } from '@encore2/util';
 import { ExpressOperator } from './operator';
 import { Class } from '@encore2/registry';
 

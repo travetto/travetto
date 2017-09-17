@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 
 import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
 import { Renderable, Method, ControllerConfig } from '../model';
-import { toPromise } from '@encore2/base';
+import { toPromise } from '@encore2/util';
 import { ExpressApp } from './app';
 import { DependencyRegistry } from '@encore2/di';
 import { MetadataRegistry, Class } from '@encore2/registry';
