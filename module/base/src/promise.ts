@@ -11,12 +11,3 @@ export function toPromise<T>(fn: (...args: any[]) => (T | Promise<T>)): (...args
     return fn as (...args: any[]) => Promise<T>;
   }
 }
-
-export function promiseToNode<T, U>(ctx: Object | null, fn: (o: T, ...args: any[]) => Promise<U>): (arg: T, ...args: any[]) => Promise<U> {
-  return (arg: T, ...args: any[]) => {
-    let done: (err: any, res?: any) => void = args.pop();
-    return fn.apply(ctx, [arg, ...args])
-      .then((v: any) => { done(null, v); return v; })
-      .catch((err: any) => done(err));
-  }
-}
