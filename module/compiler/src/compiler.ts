@@ -10,6 +10,8 @@ import { bulkRequire, bulkFindSync, AppEnv, AppInfo } from '@encore2/base';
 import { RetargettingHandler } from './proxy';
 
 const Module = require('module');
+const farmhash = require('farmhash');
+
 const originalLoader = Module._load.bind(Module);
 
 function toJsName(name: string) {
@@ -35,6 +37,7 @@ export class Compiler {
   static fileWatcher: chokidar.FSWatcher;
   static events = new EventEmitter();
   static snaphost = new Map<string, ts.IScriptSnapshot | undefined>()
+  static hashes = new Map<string, number>();
 
   static emptyRequire = 'module.exports = {}';
 
@@ -214,7 +217,18 @@ export class Compiler {
 
   static emitFile(fileName: string) {
     //    let output = this.langaugeService.getEmitOutput(fileName);
-    let res = this.transpile(ts.sys.readFile(fileName)!, fileName);
+    let content = ts.sys.readFile(fileName)!;
+
+    if (AppEnv.watch && this.hashes.has(fileName)) {
+      // Let's see if they are really different
+      let hash = farmhash.hash32(content);
+      if (hash === this.hashes.get(fileName)) {
+        console.log('File contents unchanged');
+        return;
+      }
+    }
+
+    let res = this.transpile(content, fileName);
     let output = res.outputText;
     if (fileName.match(/\/test\//)) {
       // console.log(fileName, output);
@@ -230,6 +244,7 @@ export class Compiler {
     this.contents.set(outFileName, output);
 
     if (AppEnv.watch) {
+      this.hashes.set(fileName, farmhash.has32(content));
       // If file is already loaded, mark for reload
       if (this.files.get(fileName)!.version > 0) {
         this.markForReload(fileName);
