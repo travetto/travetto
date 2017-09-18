@@ -65,6 +65,8 @@ export function exec(cmd: string, options: ExecOptions = {}): Promise<ExecResult
       }
       finish({ code: 1, stderr, stdout, message: `Execution timed out after: ${timeout} ms`, valid: false });
     }, timeout);
+
+    timer.unref();
   });
   if (options.exposeProcess) {
     return [prom, p];
