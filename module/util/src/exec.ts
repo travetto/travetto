@@ -1,6 +1,10 @@
 import * as child_process from 'child_process';
 
-export type ExecOptions = child_process.SpawnOptions & { timeout?: number };
+export type ExecOptions = child_process.SpawnOptions & {
+  timeout?: number;
+  exposeProcess?: boolean;
+  kill?: (proc: child_process.ChildProcess) => Promise<void>;
+};
 export interface ExecResult {
   code: number;
   stdout: string;
@@ -8,7 +12,10 @@ export interface ExecResult {
   message?: string;
   valid: boolean;
 }
-export async function exec(cmd: string, options: ExecOptions = {}, kill?: (proc: child_process.ChildProcess) => Promise<void>): Promise<ExecResult> {
+
+export function exec(cmd: string, options: ExecOptions & { exposeProcess: true }): [Promise<ExecResult>, child_process.ChildProcess];
+export function exec(cmd: string, options?: ExecOptions): Promise<ExecResult>;
+export function exec(cmd: string, options: ExecOptions = {}): Promise<ExecResult> | [Promise<ExecResult>, child_process.ChildProcess] {
   let args: string[] = [];
 
   let timeout = options.timeout || 15000;
@@ -19,8 +26,9 @@ export async function exec(cmd: string, options: ExecOptions = {}, kill?: (proc:
 
   console.debug('exec:', [cmd, ...args].join(' '));
 
+  let p = child_process.spawn(cmd, args, options);
+
   let prom = new Promise<ExecResult>((resolve, reject) => {
-    let p = child_process.spawn(cmd, args, options);
     let stdout = '';
     let stderr = '';
     let timer: any;
@@ -50,13 +58,17 @@ export async function exec(cmd: string, options: ExecOptions = {}, kill?: (proc:
       finish({ code, stdout, stderr, valid: code === 0 })
     );
     timer = setTimeout(async x => {
-      if (kill) {
-        await kill(p);
+      if (options.kill) {
+        await options.kill(p);
       } else {
         p.kill('SIGKILL');
       }
       finish({ code: 1, stderr, stdout, message: `Execution timed out after: ${timeout} ms`, valid: false });
     }, timeout);
   });
-  return prom;
+  if (options.exposeProcess) {
+    return [prom, p];
+  } else {
+    return prom;
+  }
 }
