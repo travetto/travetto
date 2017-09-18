@@ -61,7 +61,7 @@ export class Executor {
     };
 
     try {
-      let timeout = new Promise((_, reject) => setTimeout(reject, this.timeout));
+      let timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
       let res = await Promise.race([suite.instance[test.method](), timeout]);
       result.passed = true;
     } catch (err) {
@@ -119,9 +119,11 @@ export class Executor {
   }
 
   static async spawnFile(id: number, file: string) {
+
     let [spawned, sub] = exec(`${COMMAND} ${file}`, {
       env: {
-        ...process.env
+        ...process.env,
+        FORMATTER: 'noop'
       },
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       exposeProcess: true
@@ -132,9 +134,6 @@ export class Executor {
     sub.on('message', res => suites = res);
 
     let results = await spawned;
-
-    console.log(results.stdout);
-    console.log(results.stderr);
 
     if (results.valid) {
       return { id, results: suites! };
@@ -156,13 +155,9 @@ export class Executor {
   }
 
   static async exec(globs: string[]) {
-    console.log('Globs', globs);
-
     let files = await this.getTests(globs);
 
     files = files.map(x => x.split(process.cwd() + '/')[1]);
-
-    console.log('Files', files);
 
     if (files.length === 1) {
       let single = await this.executeFile(files[0]);
@@ -175,7 +170,6 @@ export class Executor {
         ...BASE_COUNT,
         suites: []
       };
-
 
       let position = 0;
       while (position < files.length) {
