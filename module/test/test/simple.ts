@@ -1,16 +1,26 @@
-import * as test from 'tape';
+import { Suite, Test } from '../';
+import * as assert from 'assert';
 
-test('Test1a', async t => {
-  t.is(2, 2);
-});
-test('Test1b', async t => {
-  t.is(2, 2);
-});
+@Suite('Simple Suite')
+class Simple {
 
-test('Test2a', async t => {
-  t.is(2, 2);
-});
+  @Test()
+  test1a() {
+    assert(1 === 1);
+  }
 
-test('Test2b', async t => {
-  t.is(2, 2);
-});
+  @Test()
+  test1b() {
+    assert(1 === 1);
+  }
+
+  @Test()
+  test1c() {
+    assert(1 === 1);
+  }
+
+  @Test()
+  test1d() {
+    assert(1 === 1);
+  }
+}

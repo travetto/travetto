@@ -2,6 +2,7 @@ import * as readline from 'readline';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { Readable } from 'stream';
 
 import { exec } from '@encore2/util';
 import { bulkFind } from '@encore2/base';
@@ -26,7 +27,7 @@ export class Executor {
 
   static timeout = 5000;
   static executors = os.cpus().length - 1;
-  static pending: Map<number, Promise<SpawnFile>>;
+  static pending = new Map<number, Promise<SpawnFile>>();
 
   static isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
@@ -34,10 +35,12 @@ export class Executor {
         input: fs.createReadStream(file)
       }).on('line', line => {
         if (line.includes('@Suite')) {
-          reader.close();
           resolve(true);
+          reader.close();
         }
       }).on('end', () => {
+        resolve(false);
+      }).on('close', () => {
         resolve(false);
       });
     });
@@ -58,7 +61,7 @@ export class Executor {
     };
 
     try {
-      let timeout = new Promise(resolve => setTimeout(resolve, this.timeout));
+      let timeout = new Promise((_, reject) => setTimeout(reject, this.timeout));
       let res = await Promise.race([suite.instance[test.method](), timeout]);
       result.passed = true;
     } catch (err) {
@@ -95,45 +98,84 @@ export class Executor {
   }
 
   static async executeFile(file: string) {
+    require(`${process.cwd()}/${file}`);
+
     await TestRegistry.init();
+
     let classes = TestRegistry.getClasses();
-    let suiteResults = [];
+
+    let suiteResults: SuitesResult = {
+      ...BASE_COUNT,
+      suites: []
+    };
+
     for (let cls of classes) {
       let suite = TestRegistry.get(cls);
       let result = await this.executeSuite(suite);
-      suiteResults.push(result);
+      this.merge(suiteResults, result);
     }
+
     return suiteResults;
   }
 
   static async spawnFile(id: number, file: string) {
-    let results = await exec(`${COMMAND} ${file}`, {
+    let [spawned, sub] = exec(`${COMMAND} ${file}`, {
       env: {
-        ...process.env,
-        FORMATTER: 'json'
-      }
+        ...process.env
+      },
+      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+      exposeProcess: true
     });
+
+    let suites: SuitesResult;
+
+    sub.on('message', res => suites = res);
+
+    let results = await spawned;
+
+    console.log(results.stdout);
+    console.log(results.stderr);
+
     if (results.valid) {
-      const suites = JSON.parse(results.stdout) as SuitesResult;
-      return { id, results: suites };
+      return { id, results: suites! };
     } else {
       throw new Error(results.stderr);
     }
   }
 
+  static merge(dest: SuitesResult, src: SuitesResult | SuiteResult) {
+    if ('suites' in src) {
+      dest.suites.push(...(src as SuitesResult).suites);
+    } else {
+      dest.suites.push(src as SuiteResult);
+    }
+    dest.failed += src.failed;
+    dest.passed += src.passed;
+    dest.skipped += src.skipped;
+    dest.total += src.total;
+  }
+
   static async exec(globs: string[]) {
-    console.debug('Globs', globs);
+    console.log('Globs', globs);
+
     let files = await this.getTests(globs);
 
-    console.debug('Files', files);
+    files = files.map(x => x.split(process.cwd() + '/')[1]);
+
+    console.log('Files', files);
 
     if (files.length === 1) {
-      return this.executeFile(files[0]);
+      let single = await this.executeFile(files[0]);
+      if (process.send) {
+        process.send(single);
+      }
+      return single;
     } else {
       let results: SuitesResult = {
         ...BASE_COUNT,
         suites: []
       };
+
 
       let position = 0;
       while (position < files.length) {
@@ -142,13 +184,14 @@ export class Executor {
           this.pending.set(next, this.spawnFile(next, files[next]));
         } else {
           let done = await Promise.race(this.pending.values());
-          results.suites.push(...done.results.suites);
-          results.failed += done.results.failed;
-          results.passed += done.results.passed;
-          results.skipped += done.results.skipped;
-          results.total += done.results.total;
+          this.merge(results, done.results);
           this.pending.delete(done.id);
         }
+      }
+
+      let final = await Promise.all(this.pending.values());
+      for (let done of final) {
+        this.merge(results, done.results);
       }
 
       return results;

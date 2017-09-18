@@ -1,8 +1,9 @@
 import { Injectable, DependencyRegistry } from '@encore2/di';
-import * as test from 'tape';
+import { Suite, Test } from '../';
+import * as assert from 'assert';
 
 @Injectable()
-export class Test {
+export class TestItem {
   name: string;
 
   postConstruct() {
@@ -13,8 +14,13 @@ export class Test {
   }
 }
 
-test('Test loading', async t => {
-  await DependencyRegistry.init();
-  let item = await DependencyRegistry.getInstance(Test);
-  t.is(item.getName(), 'Howdy');
-});
+@Suite()
+class DITest {
+
+  @Test('Test Loading')
+  async loading() {
+    await DependencyRegistry.init();
+    let item = await DependencyRegistry.getInstance(TestItem);
+    assert(item.getName() === 'Howdy');
+  }
+}
