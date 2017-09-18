@@ -2,6 +2,7 @@ import { Class } from '@encore2/registry';
 
 export interface TestConfig {
   class: Class<any>;
+  className: string;
   description: string;
   method: string;
 }

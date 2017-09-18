@@ -14,6 +14,28 @@ interface SpawnFile {
   results: SuitesResult;
 }
 
+type ExecEvent = {
+  type: 'test',
+  phase: 'before',
+  test: TestConfig
+} | {
+    type: 'test',
+    phase: 'after',
+    test: TestResult
+  } | {
+    type: 'suite',
+    phase: 'before',
+    suite: SuiteConfig
+  } | {
+    type: 'suite',
+    phase: 'after',
+    suite: SuiteResult
+  } | {
+    type: 'suites',
+    phase: 'after',
+    suites: SuitesResult
+  }
+
 const COMMAND = path.dirname(path.dirname(__dirname)) + '/runner.js';
 
 const BASE_COUNT: Counts = {
@@ -31,18 +53,16 @@ export class Executor {
 
   static isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
-      let reader = readline.createInterface({
-        input: fs.createReadStream(file)
-      }).on('line', line => {
-        if (line.includes('@Suite')) {
-          resolve(true);
-          reader.close();
-        }
-      }).on('end', () => {
-        resolve(false);
-      }).on('close', () => {
-        resolve(false);
-      });
+      let input = fs.createReadStream(file);
+      let reader = readline.createInterface({ input })
+        .on('line', line => {
+          if (line.includes('@Suite')) {
+            resolve(true);
+            reader.close();
+          }
+        })
+        .on('end', resolve.bind(null, false))
+        .on('close', resolve.bind(null, false));
     });
   }
 
@@ -81,7 +101,12 @@ export class Executor {
     };
 
     for (let test of suite.tests) {
+      if (process.send) {
+        process.send({ type: 'test', phase: 'before', test });
+      }
+
       let ret = await this.executeTest(test);
+
       switch (ret.status) {
         case 'passed':
           result.passed++;
@@ -95,6 +120,10 @@ export class Executor {
           result.skipped++;
       }
       result.tests.push(ret);
+
+      if (process.send) {
+        process.send({ type: 'test', phase: 'after', test: ret });
+      }
     }
 
     return result as SuiteResult;
@@ -114,8 +143,22 @@ export class Executor {
 
     for (let cls of classes) {
       let suite = TestRegistry.get(cls);
+
+      if (process.send) {
+        process.send({ phase: 'before', type: 'suite', suite });
+      }
+
       let result = await this.executeSuite(suite);
+
       this.merge(suiteResults, result);
+
+      if (process.send) {
+        process.send({ phase: 'after', type: 'suite', suite: result });
+      }
+    }
+
+    if (process.send) {
+      process.send({ phase: 'after', type: 'suites', suites: suiteResults });
     }
 
     return suiteResults;
@@ -132,14 +175,26 @@ export class Executor {
       exposeProcess: true
     });
 
-    let suites: SuitesResult;
+    let tests: TestResult[] = [];
+    let suites: SuiteResult[] = [];
+    let allSuites: SuitesResult;
 
-    sub.on('message', res => suites = res);
+    sub.on('message', (e: ExecEvent) => {
+      if (e.phase === 'after') {
+        switch (e.type) {
+          case 'suite': suites.push(e.suite); break;
+          case 'test': tests.push(e.test); break;
+          case 'suites': allSuites = e.suites; break;
+        }
+      } else {
+        console.log('Running', e.type, e.type === 'test' ? e.test.method : e.suite.className);
+      }
+    });
 
     let results = await spawned;
 
     if (results.valid) {
-      return { id, results: suites! };
+      return { id, results: allSuites! };
     } else {
       throw new Error(results.stderr);
     }
@@ -165,9 +220,9 @@ export class Executor {
     if (files.length === 1) {
       let single = await this.executeFile(files[0]);
       if (process.send) {
-        process.send(single);
+        process.exit(0);
       }
-      process.exit(0);
+      return single;
     } else {
       let results: SuitesResult = {
         ...BASE_COUNT,
