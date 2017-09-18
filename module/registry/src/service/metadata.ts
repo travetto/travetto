@@ -48,7 +48,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
   }
 
   initialInstall(): any {
-    return this.getClasses();
+    return Array.from(this.pending.values()).map(x => x.class);
   }
 
   createPendingMethod(cls: Class, method: Function): Partial<M> {
