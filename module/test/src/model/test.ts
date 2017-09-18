@@ -7,8 +7,8 @@ export interface TestConfig {
 }
 
 export interface TestResult {
-  passed: boolean;
-  skipped: boolean;
-  failed: boolean;
+  status: 'passed' | 'skipped' | 'failed';
   error?: Error;
+  method: string;
+  description: string;
 }

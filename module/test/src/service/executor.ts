@@ -54,18 +54,17 @@ export class Executor {
 
   static async executeTest(test: TestConfig) {
     let suite = TestRegistry.get(test.class);
-    let result: TestResult = {
-      passed: false,
-      skipped: false,
-      failed: false
+    let result: Partial<TestResult> = {
+      method: test.method,
+      description: test.description
     };
 
     try {
       let timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
       let res = await Promise.race([suite.instance[test.method](), timeout]);
-      result.passed = true;
+      result.status = 'passed';
     } catch (err) {
-      result.failed = true;
+      result.status = 'failed';
       result.error = err;
     }
 
@@ -77,19 +76,23 @@ export class Executor {
       ...BASE_COUNT,
       file: suite.class.__filename,
       class: suite.class.name,
+      description: suite.description,
       tests: []
     };
 
     for (let test of suite.tests) {
       let ret = await this.executeTest(test);
-      if (ret.passed) {
-        result.passed++;
-        result.total++;
-      } else if (ret.skipped) {
-        result.skipped++;
-      } else {
-        result.total++;
-        result.failed++;
+      switch (ret.status) {
+        case 'passed':
+          result.passed++;
+          result.total++;
+          break;
+        case 'failed':
+          result.total++;
+          result.failed++;
+          break;
+        case 'skipped':
+          result.skipped++;
       }
       result.tests.push(ret);
     }
@@ -164,7 +167,7 @@ export class Executor {
       if (process.send) {
         process.send(single);
       }
-      return single;
+      process.exit(0);
     } else {
       let results: SuitesResult = {
         ...BASE_COUNT,
