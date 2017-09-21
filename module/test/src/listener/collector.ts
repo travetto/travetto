@@ -1,14 +1,12 @@
 import { AllSuitesResult, TestResult, SuiteResult } from '../model';
-import { Listener } from '../service';
+import { Listener, ListenEvent } from '../service';
 
-const BASE_COUNT = {
-
+export interface CollectionComplete extends Listener {
+  onComplete(collector: Collector): void;
 }
 
-export default class Collector extends Listener {
+export class Collector implements Listener {
 
-  tests: TestResult[] = [];
-  suites: SuiteResult[] = [];
   allSuites: AllSuitesResult = {
     passed: 0,
     failed: 0,
@@ -17,16 +15,13 @@ export default class Collector extends Listener {
     suites: []
   };
 
-  onSuiteComplete(suite: SuiteResult) {
-    this.suites.push(suite);
-    this.merge(suite);
+  onEvent(e: ListenEvent) {
+    if (e.phase === 'after' && e.type === 'suite') {
+      this.merge(e.suite);
+    }
   }
 
-  onTestComplete(test: TestResult) {
-    this.tests.push(test);
-  }
-
-  merge(src: SuiteResult) {
+  private merge(src: SuiteResult) {
     this.allSuites.suites.push(src);
     this.allSuites.failed += src.failed;
     this.allSuites.passed += src.passed;

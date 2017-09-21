@@ -22,7 +22,8 @@ class Simple {
   }
 
   @Test()
-  test1d() {
+  async test1d() {
+    await new Promise(resolve => setTimeout(resolve, 1000));
     assert.equal(1, a);
   }
 }

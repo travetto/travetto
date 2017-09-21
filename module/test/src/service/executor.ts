@@ -10,7 +10,7 @@ import { bulkFind } from '@encore2/base';
 import { TestRegistry } from './registry';
 import { SuiteConfig, TestConfig, TestResult, SuiteResult, AllSuitesResult, Counts } from '../model';
 import { Listener, ListenEvent } from './listener';
-import Collector from '../listener/collector';
+import { Collector, CollectionComplete } from '../listener';
 
 const COMMAND = path.dirname(path.dirname(__dirname)) + '/runner.js';
 
@@ -69,11 +69,12 @@ export class Executor {
     let result: Partial<TestResult> = {
       method: test.method,
       description: test.description,
+      suiteName: test.suiteName,
       status: 'skipped'
     };
 
     if (test.skip) {
-      return result;
+      return result as TestResult;
     }
 
     try {
@@ -101,7 +102,7 @@ export class Executor {
       total: 0,
       file: suite.class.__filename,
       class: suite.class.name,
-      description: suite.description,
+      name: suite.name,
       tests: []
     };
 
@@ -209,6 +210,12 @@ export class Executor {
       }
 
       await Promise.all(this.pending.values());
+
+      for (let listener of listeners) {
+        if ((listener as any).onComplete) {
+          (listener as CollectionComplete).onComplete(collector);
+        }
+      }
 
       return collector.allSuites;
     }

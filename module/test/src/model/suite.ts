@@ -3,9 +3,8 @@ import { Class } from '@encore2/registry';
 
 export interface SuiteConfig {
   class: Class;
-  className: string;
   instance: any;
-  description: string;
+  name: string;
   tests: TestConfig[];
 }
 
@@ -20,7 +19,7 @@ export interface SuiteResult extends Counts {
   file: string;
   class: string;
   tests: TestResult[];
-  description: string;
+  name: string;
 }
 
 export interface AllSuitesResult extends Counts {

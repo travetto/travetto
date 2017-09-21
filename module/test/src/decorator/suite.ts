@@ -1,9 +1,9 @@
 import { Class } from '@encore2/registry';
 import { TestRegistry } from '../service';
 
-export function Suite(description?: string) {
+export function Suite(name?: string) {
   return (target: Class<any>) => {
-    TestRegistry.register(target, { description });
+    TestRegistry.register(target, { name });
     return target;
   }
 }
