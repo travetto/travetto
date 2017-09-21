@@ -3,7 +3,9 @@
   "dependencies": {
     "@encore2/registry": "git+ssh://git@git.eaiti.com/encore2/registry.git#v1.x.x",
     "@encore2/util": "git+ssh://git@git.eaiti.com/encore2/util.git#v1.x.x",
+    "@types/minimist": "^1.2.0",
     "@types/tape": "^4.2.30",
+    "minimist": "^1.2.0",
     "tape": "^4.8.0"
   },
   "description": "",
