@@ -23,6 +23,6 @@ export interface SuiteResult extends Counts {
   description: string;
 }
 
-export interface SuitesResult extends Counts {
+export interface AllSuitesResult extends Counts {
   suites: SuiteResult[];
 }

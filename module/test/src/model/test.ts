@@ -5,6 +5,8 @@ export interface TestConfig {
   className: string;
   description: string;
   method: string;
+  shouldError: string | RegExp | Function;
+  skip: boolean;
 }
 
 export interface TestResult {
