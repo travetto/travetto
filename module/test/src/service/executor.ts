@@ -1,26 +1,23 @@
 import * as readline from 'readline';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
 import * as assert from 'assert';
 import { Readable } from 'stream';
 
-import { exec } from '@encore2/util';
 import { bulkFind } from '@encore2/base';
 import { TestRegistry } from './registry';
 import { SuiteConfig, TestConfig, TestResult, SuiteResult, AllSuitesResult, Counts } from '../model';
 import { Listener, ListenEvent } from './listener';
-import { Collector, CollectionComplete } from '../listener';
+import { AgentPool, Agent } from './agent';
 
-const COMMAND = path.dirname(path.dirname(__dirname)) + '/runner.js';
-
+const COMMAND = path.dirname(path.dirname(__dirname)) + '/bootstrap-worker.js';
 export class Executor {
 
-  static timeout = 5000;
-  static executors = os.cpus().length - 1;
-  static pending = new Map<number, Promise<number>>();
+  timeout = 5000;
+  pending = new Map<number, Promise<{ jobId: number, agent: Agent }>>();
+  agentPool = new AgentPool(COMMAND);
 
-  static isTest(file: string) {
+  isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
       let input = fs.createReadStream(file);
       let reader = readline.createInterface({ input })
@@ -35,13 +32,13 @@ export class Executor {
     });
   }
 
-  static async getTests(globs: string[]) {
+  async getTests(globs: string[]) {
     let files = await bulkFind(globs);
     let all = await Promise.all(files.map(async (f) => [f, await this.isTest(f)] as [string, boolean]));
     return all.filter(x => x[1]).map(x => x[0]);
   }
 
-  static checkError(test: TestConfig, err: Error | string) {
+  checkError(test: TestConfig, err: Error | string) {
     if (test.shouldError) {
       if (typeof test.shouldError === 'string') {
         if (err.constructor.name === test.shouldError) {
@@ -64,7 +61,7 @@ export class Executor {
     return err;
   }
 
-  static async executeTest(test: TestConfig) {
+  async executeTest(test: TestConfig) {
     let suite = TestRegistry.get(test.class);
     let result: Partial<TestResult> = {
       method: test.method,
@@ -94,7 +91,7 @@ export class Executor {
     return result as TestResult;
   }
 
-  static async executeSuite(suite: SuiteConfig) {
+  async executeSuite(suite: SuiteConfig) {
     let result: SuiteResult = {
       passed: 0,
       failed: 0,
@@ -135,7 +132,7 @@ export class Executor {
     return result as SuiteResult;
   }
 
-  static async executeFile(file: string) {
+  async executeFile(file: string) {
     require(`${process.cwd()}/${file}`);
 
     await TestRegistry.init();
@@ -157,67 +154,47 @@ export class Executor {
     }
   }
 
-  static async spawnFile(id: number, file: string, listeners: Listener[]) {
+  executeRunner(jobId: number, agent: Agent, file: string, listeners: Listener[]) {
+    return new Promise<{ jobId: number, agent: Agent }>(async (resolve, reject) => {
 
-    let [spawned, sub] = exec(`${COMMAND} ${file}`, {
-      env: {
-        ...process.env,
-      },
-      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-      exposeProcess: true
+      for (let l of listeners) {
+        agent.listen(l.onEvent.bind(l));
+      }
+
+      agent.listen('runComplete', e => {
+        for (let l of listeners) {
+          agent.removeListener(l.onEvent);
+        }
+        if (e.success) {
+          resolve({ jobId, agent });
+        } else {
+          console.error('Error', e.error);
+          reject(new Error(e.error));
+        }
+      });
+
+      agent.send('run', { file, jobId });
     });
-
-    for (let l of listeners) {
-      sub.on('message', l.onEvent.bind(l));
-    }
-
-    let results = await spawned;
-
-    for (let l of listeners) {
-      sub.removeAllListeners('message');
-    }
-
-    if (results.valid) {
-      return id;
-    } else {
-      throw new Error(results.stderr);
-    }
   }
 
-
-
-  static async exec(globs: string[], listeners: Listener[] = []) {
-    let collector = new Collector();
-    listeners.unshift(collector);
-
+  async execute(globs: string[], listeners: Listener[] = []) {
     let files = await this.getTests(globs);
 
     files = files.map(x => x.split(process.cwd() + '/')[1]);
 
-    if (files.length === 1 && process.send) {
-      await this.executeFile(files[0]);
-      process.exit(0);
-    } else {
-      let position = 0;
-      while (position < files.length) {
-        if (this.pending.size < this.executors) {
-          let next = position++;
-          this.pending.set(next, this.spawnFile(next, files[next], listeners));
-        } else {
-          let done = await Promise.race(this.pending.values());
-          this.pending.delete(done);
-        }
+    let position = 0;
+    while (position < files.length) {
+      if (this.pending.size < this.agentPool.availableSize) {
+        let next = position++;
+        let agent = await this.agentPool.getNextAgent();
+        this.pending.set(next, this.executeRunner(next, agent!, files[next], listeners));
+      } else {
+        let { jobId, agent } = await Promise.race(this.pending.values());
+        this.pending.delete(jobId);
+        this.agentPool.returnAgent(agent);
       }
-
-      await Promise.all(this.pending.values());
-
-      for (let listener of listeners) {
-        if ((listener as any).onComplete) {
-          (listener as CollectionComplete).onComplete(collector);
-        }
-      }
-
-      return collector.allSuites;
     }
+
+    await Promise.all(this.pending.values());
   }
 }
