@@ -410,12 +410,6 @@ export class Compiler {
     this.snaphost.clear();
     delete this.rootFiles;
 
-    for (let k of Object.keys(require.cache)) {
-      if (k.endsWith('.ts')) {
-        console.log(k);
-      }
-    }
-
     this.initFiles();
   }
 
