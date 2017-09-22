@@ -1,5 +1,5 @@
-import { AllSuitesResult, TestResult } from '../model';
-import { Listener, ListenEvent } from '../service';
+import { AllSuitesResult, TestResult } from '../../model';
+import { Listener, ListenEvent } from './listener';
 import { Collector, CollectionComplete } from './collector';
 
 export class TapListener implements CollectionComplete {

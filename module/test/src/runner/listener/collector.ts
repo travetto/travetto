@@ -1,5 +1,5 @@
-import { AllSuitesResult, TestResult, SuiteResult } from '../model';
-import { Listener, ListenEvent } from '../service';
+import { AllSuitesResult, TestResult, SuiteResult } from '../../model';
+import { Listener, ListenEvent } from './listener';
 
 export interface CollectionComplete extends Listener {
   onComplete(collector: Collector): void;

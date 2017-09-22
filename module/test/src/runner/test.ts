@@ -3,7 +3,7 @@ import * as readline from 'readline';
 import { bulkFind } from '@encore2/base';
 
 import { TestConfig, TestResult, SuiteConfig, SuiteResult } from '../model';
-import { TestRegistry } from './registry';
+import { TestRegistry } from '../service/registry';
 import { ListenEvent } from './listener';
 
 export interface TestEmitter {

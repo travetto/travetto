@@ -1,8 +1,8 @@
-import { Agent } from './service';
-import { TapListener, CollectionComplete, Collector } from './listener';
 import * as minimist from 'minimist';
-import { TestUtil } from './service/test';
-import { AgentPool } from './service/agent/pool';
+
+import { Agent, AgentPool } from './agent';
+import { TapListener, CollectionComplete, Collector } from './listener';
+import { TestUtil } from './test';
 
 interface State {
   format: string;
@@ -57,7 +57,7 @@ export class Runner {
       const globs = this.state._.slice(2); // strip off node and worker name
 
       let files = await TestUtil.getTests(globs);
-      let agentPool = new AgentPool(require.resolve('../bootstrap-worker.js'));
+      let agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
 
       for (let l of listeners) {
         l.onEvent = l.onEvent.bind(l);

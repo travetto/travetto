@@ -2,5 +2,5 @@
 
 process.env.ENV = 'test';
 require('@encore2/base/bootstrap');
-const { Runner } = require('./src/runner');
-new Runner().run();
+const { Runner } = require('../src/runner/runner');
+new Runner(process.argv).run();

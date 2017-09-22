@@ -1,4 +1,4 @@
-import { AllSuitesResult, SuiteResult, SuiteConfig, TestResult, TestConfig } from '../index';
+import { AllSuitesResult, SuiteResult, SuiteConfig, TestResult, TestConfig } from '../../model';
 
 
 export type ListenEvent =
