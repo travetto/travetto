@@ -15,5 +15,5 @@
   "main": "index.ts", 
   "name": "@encore2/compiler", 
   "scripts": {}, 
-  "version": "1.0.56"
+  "version": "1.0.57"
 }
