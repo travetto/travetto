@@ -22,8 +22,6 @@ const RunnerOptions = {
   string: ['format', 'tapOutput'],
 };
 
-const COMMAND = require.resolve('../bootstrap-worker.js');
-
 export class Runner {
   private state: State;
 
@@ -56,10 +54,10 @@ export class Runner {
         new TapListener()
       ];
 
-      const globs = this.state._.slice(2);
+      const globs = this.state._.slice(2); // strip off node and worker name
 
       let files = await TestUtil.getTests(globs);
-      let agentPool = new AgentPool(COMMAND);
+      let agentPool = new AgentPool(require.resolve('../bootstrap-worker.js'));
 
       for (let l of listeners) {
         l.onEvent = l.onEvent.bind(l);
@@ -82,12 +80,19 @@ export class Runner {
         }
       }
 
-      let output = Object.values(formatter)[0](collector.allSuites);
+      let output: string | undefined;
+
+      if (formatter && formatter !== 'noop') {
+        let fn = require('./formatter/' + formatter)
+        output = Object.values(fn)[0](collector.allSuites);
+      }
       if (output) {
         console.log(output);
       }
+      process.exit(0);
     } catch (e) {
       console.error(e);
+      process.exit(1);
     }
   }
 }

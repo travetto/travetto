@@ -6,7 +6,7 @@ export class Agent {
   completion: Promise<any>;
   _init: Promise<any>;
 
-  constructor(private id: number, private command: string) {
+  constructor(public id: number, public command: string) {
   }
 
   async init() {
@@ -23,9 +23,10 @@ export class Agent {
       exposeProcess: true
     });
 
-    sub.stdout.pipe(process.stdout);
-    sub.stderr.pipe(process.stderr);
-
+    if (process.env.DEBUG) {
+      sub.stdout.pipe(process.stdout);
+      sub.stderr.pipe(process.stderr);
+    }
     this.process = sub;
 
     this.listenOnce('ready', e => this.send('init'));

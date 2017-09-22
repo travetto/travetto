@@ -7,10 +7,8 @@ export class AgentPool {
   private pendingAgents = new Set<Agent>();
   private initialized: Promise<any>;
 
-  constructor(private command: string, count?: number) {
-    if (!count) {
-      this.agentCount = os.cpus().length - 1;
-    }
+  constructor(private command: string, count: number = 0) {
+    this.agentCount = count || os.cpus().length - 1;
   }
 
   init() {

@@ -15,6 +15,17 @@ agent((done) => {
   done();
 }, (data, done) => {
   console.log('Run');
+
+  // Clear require cache
+  for (let k of Object.keys(require.cache)) {
+    if (k.endsWith('.ts') &&
+      !/@encore2\/(base|config|compiler)/.test(k) &&
+      !/transformer\..*\.ts/.test(k) &&
+      !Compiler.definitionFiles.test(k)) {
+      delete require.cache[k];
+    }
+  }
+
   Compiler.workingSets = [data.file];
   Compiler.resetFiles();
   const { Runner } = require('./src/runner');
