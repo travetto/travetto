@@ -62,7 +62,7 @@ export class Runner {
       let agentPool = new AgentPool(COMMAND);
 
       for (let l of listeners) {
-        l = l.onEvent.bind(l);
+        l.onEvent = l.onEvent.bind(l);
       }
 
       files = files.map(x => x.split(process.cwd() + '/')[1]);

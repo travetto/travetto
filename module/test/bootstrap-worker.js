@@ -7,13 +7,16 @@ process.env.NO_WATCH = true;
 let Compiler;
 
 agent((done) => {
+  console.log('Init');
+  require('@encore2/base/bootstrap');
   Compiler = require('@encore2/compiler').Compiler;
   Compiler.workingSets = ['!'];
   Compiler.init(process.cwd());
   done();
-}, (done) => {
+}, (data, done) => {
+  console.log('Run');
   Compiler.workingSets = [data.file];
   Compiler.resetFiles();
-  const { Runner } = reqiure('./src/runner');
+  const { Runner } = require('./src/runner');
   new Runner().runWorker(data, done);
 });

@@ -18,16 +18,20 @@ export class Agent {
       env: {
         ...process.env,
       },
+      quiet: true,
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       exposeProcess: true
     });
+
+    sub.stdout.pipe(process.stdout);
+    sub.stderr.pipe(process.stderr);
 
     this.process = sub;
 
     this.listenOnce('ready', e => this.send('init'));
 
     spawned.catch(async err => {
-      console.log('Runner died, error ', err, '.  Reinitializing');
+      console.error('Runner died, error ', err, '.  Reinitializing');
       delete this._init;
     });
 

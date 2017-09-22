@@ -1,22 +1,11 @@
 module.exports = {
   agent(init, run) {
-    process.env.ENV = 'test';
-    process.env.NO_WATCH = true;
-
-    let Compiler;
-
     process.on('message', async function(data) {
-      console.log('on message', arguments);
+      console.log('on message', data);
       if (data.type === 'init') {
-        require('@encore2/base/bootstrap');
-        init(() =>
-          process.send({ type: 'initComplete' }));
+        init(_ => process.send({ type: 'initComplete' }));
       } else if (data.type === 'run') {
-        Compiler.workingSets = [data.file];
-        Compiler.resetFiles();
-        run((e) => {
-          process.send({ type: 'runComplete', error: e });
-        });
+        run(data, e => process.send({ type: 'runComplete', error: e }));
       }
     });
 
