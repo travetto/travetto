@@ -3,7 +3,7 @@ import * as assert from 'assert';
 
 let a = 0;
 
-@Suite('Simple Suite')
+@Suite()
 class Simple {
 
   @Test()
