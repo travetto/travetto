@@ -37,7 +37,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // Unblock auto created
     if (this.autoCreate.length) {
-      console.log('Auto-creating', this.autoCreate.map(x => x.target.name));
+      console.debug('Auto-creating', this.autoCreate.map(x => x.target.name));
       let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
       for (let i of items) {
         await this.getInstance(i.target, i.name);
@@ -130,12 +130,12 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // if in watch mode, create proxies
     if (AppEnv.watch) {
       if (!this.proxyHandlers.has(targetId) || !this.proxyHandlers.get(targetId)!.has(name)) {
-        console.log('Registering proxy', target.__id, name);
+        console.debug('Registering proxy', target.__id, name);
         let handler = new RetargettingHandler(out);
         out = new Proxy({}, handler);
         this.proxyHandlers.get(targetId)!.set(name, handler);
       } else {
-        console.log('Updating target', target.__id);
+        console.debug('Updating target', target.__id);
         this.proxyHandlers.get(targetId)!.get(name)!.target = out;
       }
     }
@@ -146,7 +146,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   async getInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
     let targetId = target.__id;
     if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(name)) {
-      console.log('Getting Intance', targetId, name);
+      console.debug('Getting Intance', targetId, name);
       await this.createInstance(target, name);
     }
     return this.instances.get(targetId)!.get(name)!;
@@ -197,7 +197,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   onInstallFinalize<T>(cls: Class<T>) {
     let classId = cls.__id;
 
-    console.log('Finalized', classId);
+    console.debug('Finalized', classId);
 
     let config = this.getOrCreatePending(cls) as InjectableConfig<T>;
 
@@ -270,7 +270,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         if (handler) {
           handler.target = null;
         }
-        console.log('On uninstall', cls.__id, config, targetId, handler);
+        console.debug('On uninstall', cls.__id, config, targetId, handler);
         this.targets.get(cls.__id)!.delete(config);
       }
     }
