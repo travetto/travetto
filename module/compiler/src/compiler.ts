@@ -339,21 +339,26 @@ export class Compiler {
   }
 
   static init(cwd: string) {
+    if (!this.options) {
+      this.cwd = cwd;
+      this.prepareSourceMaps();
+      let out = this.resolveOptions();
+      this.options = out.options;
+
+      this.transformers = this.resolveTransformers();
+      require.extensions['.ts'] = this.requireHandler.bind(this);
+      Module._load = this.moduleLoadHandler.bind(this);
+    }
+
+    this.initFiles();
+  }
+
+  static initFiles() {
     if (this.rootFiles) {
       return;
     }
     let start = Date.now();
 
-    this.prepareSourceMaps();
-
-    this.cwd = cwd;
-    let out = this.resolveOptions();
-
-    this.options = out.options;
-    this.transformers = this.resolveTransformers();
-
-    require.extensions['.ts'] = this.requireHandler.bind(this);
-    Module._load = this.moduleLoadHandler.bind(this);
 
     this.rootFiles = bulkFindSync(this.workingSets, undefined, this.invalidWorkingSetFile);
 
@@ -392,6 +397,26 @@ export class Compiler {
     }
 
     console.debug('Initialized', (Date.now() - start) / 1000);
+  }
+
+  static reset() {
+    if (AppEnv.watch) {
+      this.fileWatcher.close();
+    }
+    this.contents.clear();
+    this.modules.clear();
+    this.files.clear();
+    this.sourceMaps.clear();
+    this.snaphost.clear();
+    delete this.rootFiles;
+
+    for (let k of Object.keys(require.cache)) {
+      if (k.endsWith('.ts')) {
+        console.log(k);
+      }
+    }
+
+    this.initFiles();
   }
 
   static on(event: WatchEvent, callback: (filename: string) => any) {
