@@ -1,23 +1,20 @@
-import * as readline from 'readline';
 import * as fs from 'fs';
-import * as path from 'path';
-import * as assert from 'assert';
-import { Readable } from 'stream';
-
+import * as readline from 'readline';
 import { bulkFind } from '@encore2/base';
+
+import { TestConfig, TestResult, SuiteConfig, SuiteResult } from '../model';
 import { TestRegistry } from './registry';
-import { SuiteConfig, TestConfig, TestResult, SuiteResult, AllSuitesResult, Counts } from '../model';
-import { Listener, ListenEvent } from './listener';
-import { AgentPool, Agent } from './agent';
+import { ListenEvent } from './listener';
 
-const COMMAND = path.dirname(path.dirname(__dirname)) + '/bootstrap-worker.js';
-export class Executor {
+export interface TestEmitter {
+  emit(event: ListenEvent): void;
+}
 
-  timeout = 5000;
-  pending = new Map<number, Promise<{ jobId: number, agent: Agent }>>();
-  agentPool = new AgentPool(COMMAND);
+export class TestUtil {
 
-  isTest(file: string) {
+  static timeout = 5000;
+
+  static isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
       let input = fs.createReadStream(file);
       let reader = readline.createInterface({ input })
@@ -32,13 +29,14 @@ export class Executor {
     });
   }
 
-  async getTests(globs: string[]) {
+  static async getTests(globs: string[]) {
     let files = await bulkFind(globs);
     let all = await Promise.all(files.map(async (f) => [f, await this.isTest(f)] as [string, boolean]));
     return all.filter(x => x[1]).map(x => x[0]);
   }
 
-  checkError(test: TestConfig, err: Error | string) {
+
+  static checkError(test: TestConfig, err: Error | string) {
     if (test.shouldError) {
       if (typeof test.shouldError === 'string') {
         if (err.constructor.name === test.shouldError) {
@@ -61,7 +59,7 @@ export class Executor {
     return err;
   }
 
-  async executeTest(test: TestConfig) {
+  static async executeTest(test: TestConfig) {
     let suite = TestRegistry.get(test.class);
     let result: Partial<TestResult> = {
       method: test.method,
@@ -91,7 +89,7 @@ export class Executor {
     return result as TestResult;
   }
 
-  async executeSuite(suite: SuiteConfig) {
+  static async executeSuite(suite: SuiteConfig, emitter?: TestEmitter) {
     let result: SuiteResult = {
       passed: 0,
       failed: 0,
@@ -104,8 +102,8 @@ export class Executor {
     };
 
     for (let test of suite.tests) {
-      if (process.send) {
-        process.send({ type: 'test', phase: 'before', test });
+      if (emitter) {
+        emitter.emit({ type: 'test', phase: 'before', test });
       }
 
       let ret = await this.executeTest(test);
@@ -124,15 +122,15 @@ export class Executor {
       }
       result.tests.push(ret);
 
-      if (process.send) {
-        process.send({ type: 'test', phase: 'after', test: ret });
+      if (emitter) {
+        emitter.emit({ type: 'test', phase: 'after', test: ret });
       }
     }
 
     return result as SuiteResult;
   }
 
-  async executeFile(file: string) {
+  static async executeFile(file: string, emitter?: TestEmitter) {
     require(`${process.cwd()}/${file}`);
 
     await TestRegistry.init();
@@ -142,59 +140,15 @@ export class Executor {
     for (let cls of classes) {
       let suite = TestRegistry.get(cls);
 
-      if (process.send) {
-        process.send({ phase: 'before', type: 'suite', suite });
+      if (emitter) {
+        emitter.emit({ phase: 'before', type: 'suite', suite });
       }
 
-      let result = await this.executeSuite(suite);
+      let result = await this.executeSuite(suite, emitter);
 
-      if (process.send) {
-        process.send({ phase: 'after', type: 'suite', suite: result });
-      }
-    }
-  }
-
-  executeRunner(jobId: number, agent: Agent, file: string, listeners: Listener[]) {
-    return new Promise<{ jobId: number, agent: Agent }>(async (resolve, reject) => {
-
-      for (let l of listeners) {
-        agent.listen(l.onEvent.bind(l));
-      }
-
-      agent.listen('runComplete', e => {
-        for (let l of listeners) {
-          agent.removeListener(l.onEvent);
-        }
-        if (e.success) {
-          resolve({ jobId, agent });
-        } else {
-          console.error('Error', e.error);
-          reject(new Error(e.error));
-        }
-      });
-
-      agent.send('run', { file, jobId });
-    });
-  }
-
-  async execute(globs: string[], listeners: Listener[] = []) {
-    let files = await this.getTests(globs);
-
-    files = files.map(x => x.split(process.cwd() + '/')[1]);
-
-    let position = 0;
-    while (position < files.length) {
-      if (this.pending.size < this.agentPool.availableSize) {
-        let next = position++;
-        let agent = await this.agentPool.getNextAgent();
-        this.pending.set(next, this.executeRunner(next, agent!, files[next], listeners));
-      } else {
-        let { jobId, agent } = await Promise.race(this.pending.values());
-        this.pending.delete(jobId);
-        this.agentPool.returnAgent(agent);
+      if (emitter) {
+        emitter.emit({ phase: 'after', type: 'suite', suite: result });
       }
     }
-
-    await Promise.all(this.pending.values());
   }
 }

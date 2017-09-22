@@ -3,6 +3,7 @@ import { exec } from '@encore2/util';
 
 export class Agent {
   process: child_process.ChildProcess;
+  completion: Promise<any>;
 
   constructor(private id: number, private command: string, private onDie?: (err: any) => any) {
   }
@@ -65,5 +66,10 @@ export class Agent {
 
   removeListener(listener: (...args: any[]) => void) {
     this.process.removeListener('message', listener);
+  }
+
+  clean() {
+    this.process.removeAllListeners('message');
+    delete this.completion;
   }
 }

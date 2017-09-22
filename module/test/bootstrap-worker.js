@@ -1,29 +1,16 @@
 #!/usr/bin/env node
 
-process.env.ENV = 'test';
-process.env.NO_WATCH = true;
-require('@encore2/base/bootstrap');
+const { agent } = require('./src/service/agent/agent-wrapper.js');
 
-const { Compiler } = require('@encore2/compiler');
-
-process.on('message', async function({ jobId, file, type }) {
-  console.log('on message', arguments)
-  if (type === 'init') {
-    Compiler.init(process.cwd());
-    process.send({ type: 'initComplete' });
-  } else if (type === 'run') {
-    Compiler.workingSets = [file];
-    Compiler.resetFiles();
-    try {
-      await require('./src/service/executor').Executor.executeFile(file);
-      process.send({ jobId, type: 'runComplete', success: true });
-    } catch (e) {
-      process.send({ jobId, type: 'runComplete', success: false, error: e.message });
-    }
-  }
+agent((done) => {
+  process.env.ENV = 'test';
+  process.env.NO_WATCH = true;
+  Compiler = require('@encore2/compiler').Compiler;
+  Compiler.init(process.cwd());
+  done();
+}, (done) => {
+  Compiler.workingSets = [data.file];
+  Compiler.resetFiles();
+  const { Runner } = reqiure('./src/runner');
+  new Runner().runWorker(data, done);
 });
-
-if (process.send) {
-  process.send({ type: 'ready' });
-  setTimeout(_ => {}, Number.MAX_SAFE_INTEGER);
-}
