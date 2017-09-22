@@ -399,7 +399,7 @@ export class Compiler {
     console.debug('Initialized', (Date.now() - start) / 1000);
   }
 
-  static reset() {
+  static resetFiles() {
     if (AppEnv.watch) {
       this.fileWatcher.close();
     }
