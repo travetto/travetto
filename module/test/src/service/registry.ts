@@ -1,6 +1,5 @@
 import { MetadataRegistry, Class } from '@encore2/registry';
 import { SuiteConfig, TestConfig } from '../model';
-import { DependencyRegistry } from '@encore2/di';
 
 class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
 
