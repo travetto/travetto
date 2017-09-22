@@ -59,7 +59,7 @@ export class Runner {
       const globs = this.state._.slice(2);
 
       let files = await TestUtil.getTests(globs);
-      let agentPool = new AgentPool(`COMMAND`);
+      let agentPool = new AgentPool(COMMAND);
 
       for (let l of listeners) {
         l = l.onEvent.bind(l);

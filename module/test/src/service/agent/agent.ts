@@ -4,11 +4,16 @@ import { exec } from '@encore2/util';
 export class Agent {
   process: child_process.ChildProcess;
   completion: Promise<any>;
+  _init: Promise<any>;
 
-  constructor(private id: number, private command: string, private onDie?: (err: any) => any) {
+  constructor(private id: number, private command: string) {
   }
 
-  init() {
+  async init() {
+    if (this._init) {
+      return this._init;
+    }
+
     let [spawned, sub] = exec(this.command, {
       env: {
         ...process.env,
@@ -23,14 +28,14 @@ export class Agent {
 
     spawned.catch(async err => {
       console.log('Runner died, error ', err, '.  Reinitializing');
-      if (this.onDie) {
-        this.onDie(err);
-      }
+      delete this._init;
     });
 
-    return new Promise((resolve, reject) => {
+    this._init = new Promise((resolve, reject) => {
       this.listenOnce('initComplete', () => resolve(true));
     });
+
+    return this._init;
   }
 
   send(type: string, args: object = {}) {
