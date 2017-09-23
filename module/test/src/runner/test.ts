@@ -16,11 +16,6 @@ export class TestUtil {
 
   static timeout = 5000;
 
-  static assert(method: string, ...args: any[]) {
-    assert[method].call(assert, args);
-  }
-
-
   static isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
       let input = fs.createReadStream(file);
