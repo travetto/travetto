@@ -15,4 +15,7 @@ export interface TestResult {
   method: string;
   suiteName: string;
   description: string;
+  output: {
+    [key: string]: string;
+  }
 }

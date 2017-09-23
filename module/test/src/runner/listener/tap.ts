@@ -16,22 +16,30 @@ export class TapListener implements CollectionComplete {
   onEvent(e: ListenEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       let { test } = e;
-      let message = `ok ${++this.count} - ${test.suiteName} - ${test.method}`;
+      let message = `ok ${++this.count} ${test.suiteName} - ${test.method}`;
       if (test.description) {
         message += `: ${test.description}`;
       }
       if (test.status === 'skipped') {
-        message += ' # SKIPPED ';
+        message += ' # SKIP';
       } else if (test.status === 'failed') {
         message = 'not ' + message;
       }
       this.log(message);
       if (test.status === 'failed') {
-        this.log(`
-  ---
+        this.log(`---
   message: ${test.error}
-  ...
-  `)
+...`)
+      }
+      if (test.output) {
+        for (let key of ['log', 'info', 'error', 'debug', 'warn']) {
+          if (test.output[key]) {
+            this.log(`---
+  ${key}:
+    ${test.output[key]}
+...`)
+          }
+        }
       }
     }
   }

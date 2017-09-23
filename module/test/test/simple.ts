@@ -8,22 +8,23 @@ class Simple {
 
   @Test()
   test1a() {
-    assert.equal(1, 1);
+    console.log('howdy');
+    assert(1 === 1);
   }
 
   @Test()
   test1b() {
-    assert.equal(1, 1);
+    assert(1 === 1);
   }
 
   @Test()
   test1c() {
-    assert.equal(1, 1);
+    assert(1 === 1);
   }
 
   @Test()
   async test1d() {
     await new Promise(resolve => setTimeout(resolve, 1000));
-    assert.equal(1, a);
+    assert(1 === a);
   }
 }

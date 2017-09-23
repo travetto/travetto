@@ -1,10 +1,12 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
+import * as assert from 'assert';
 import { bulkFind } from '@encore2/base';
 
 import { TestConfig, TestResult, SuiteConfig, SuiteResult } from '../model';
 import { TestRegistry } from '../service/registry';
 import { ListenEvent } from './listener';
+import { ConsoleCapture } from './console';
 
 export interface TestEmitter {
   emit(event: ListenEvent): void;
@@ -13,6 +15,11 @@ export interface TestEmitter {
 export class TestUtil {
 
   static timeout = 5000;
+
+  static assert(method: string, ...args: any[]) {
+    assert[method].call(assert, args);
+  }
+
 
   static isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
@@ -72,7 +79,10 @@ export class TestUtil {
       return result as TestResult;
     }
 
+
     try {
+      ConsoleCapture.start();
+
       let timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
       let res = await Promise.race([suite.instance[test.method](), timeout]);
       result.status = 'passed';
@@ -84,6 +94,8 @@ export class TestUtil {
         result.status = 'failed';
         result.error = err;
       }
+    } finally {
+      result.output = ConsoleCapture.end();
     }
 
     return result as TestResult;

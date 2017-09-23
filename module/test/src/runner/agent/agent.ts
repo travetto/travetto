@@ -6,6 +6,9 @@ export class Agent {
   completion: Promise<any>;
   _init: Promise<any>;
 
+  stdout: string = '';
+  stderr: string = '';
+
   constructor(public id: number, public command: string) {
   }
 
@@ -23,11 +26,12 @@ export class Agent {
       exposeProcess: true
     });
 
-    if (process.env.DEBUG) {
-      sub.stdout.pipe(process.stdout);
-      sub.stderr.pipe(process.stderr);
-    }
     this.process = sub;
+
+    if (process.env.DEBUG) {
+      this.process.stdout.pipe(process.stdout);
+      this.process.stderr.pipe(process.stderr);
+    }
 
     this.listenOnce('ready', e => this.send('init'));
 
@@ -80,6 +84,8 @@ export class Agent {
 
   clean() {
     this.process.removeAllListeners('message');
+    this.stdout = '';
+    this.stderr = '';
     delete this.completion;
   }
 }
