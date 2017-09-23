@@ -172,6 +172,10 @@ export class Compiler {
 
     content = this.contents.get(jsf)!;
 
+    if (process.env.DEBUG && jsf.includes('/test/') && !jsf.includes('/src/')) {
+      console.log(jsf, content);
+    }
+
     try {
       let ret = (m as any)._compile(content, jsf);
       if (isNew) {
