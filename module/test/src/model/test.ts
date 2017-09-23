@@ -9,12 +9,24 @@ export interface TestConfig {
   skip: boolean;
 }
 
+export interface Assertion {
+  actual?: any;
+  expected?: any;
+  operator: string;
+  message?: string;
+  file: string;
+  line: number;
+  text: string;
+  error?: any;
+}
+
 export interface TestResult {
   status: 'passed' | 'skipped' | 'failed';
   error?: Error;
   method: string;
   suiteName: string;
   description: string;
+  assertions: Assertion[],
   output: {
     [key: string]: string;
   }

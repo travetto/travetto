@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { agent } = require('../src/runner/agent/agent-wrapper.js');
+const { agent } = require('../src/exec/agent/agent-wrapper.js');
 
 process.env.ENV = 'test';
 process.env.NO_WATCH = true;
@@ -27,6 +27,6 @@ agent((done) => {
 
   Compiler.workingSets = [data.file];
   Compiler.resetFiles();
-  const { Runner } = require('../src/runner/runner');
+  const { Runner } = require('../src/exec/runner');
   new Runner().runWorker(data, done);
 });

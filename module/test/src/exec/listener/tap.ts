@@ -1,3 +1,5 @@
+import * as yaml from 'js-yaml';
+
 import { AllSuitesResult, TestResult } from '../../model';
 import { Listener, ListenEvent } from './listener';
 import { Collector, CollectionComplete } from './collector';
@@ -13,6 +15,12 @@ export class TapListener implements CollectionComplete {
     this.stream.write(message + '\n')
   }
 
+  logMeta(obj: any) {
+    let body = yaml.safeDump(obj, { indent: 2 });
+    body = body.split('\n').map(x => `  ${x}`).join('\n');
+    this.log(`---\n${body}\n...`);
+  }
+
   onEvent(e: ListenEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       let { test } = e;
@@ -26,18 +34,13 @@ export class TapListener implements CollectionComplete {
         message = 'not ' + message;
       }
       this.log(message);
-      if (test.status === 'failed') {
-        this.log(`---
-  message: ${test.error}
-...`)
+      if (test.status === 'failed' && test.error) {
+        this.logMeta({ error: test.error });
       }
       if (test.output) {
         for (let key of ['log', 'info', 'error', 'debug', 'warn']) {
           if (test.output[key]) {
-            this.log(`---
-  ${key}:
-    ${test.output[key]}
-...`)
+            this.logMeta({ [key]: test.output[key] });
           }
         }
       }

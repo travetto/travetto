@@ -2,6 +2,17 @@ import * as ts from 'typescript';
 import * as assert from 'assert';
 import { TransformUtil, State } from '@encore2/compiler';
 
+const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
+  [ts.SyntaxKind.EqualsEqualsToken]: 'equal',
+  [ts.SyntaxKind.ExclamationEqualsToken]: 'notEqual',
+  [ts.SyntaxKind.EqualsEqualsEqualsToken]: 'strictEqual',
+  [ts.SyntaxKind.ExclamationEqualsEqualsToken]: 'notStrictEqual',
+  [ts.SyntaxKind.GreaterThanEqualsToken]: 'greaterThanEqual',
+  [ts.SyntaxKind.GreaterThanToken]: 'greaterThan',
+  [ts.SyntaxKind.LessThanEqualsToken]: 'lessThanEqual',
+  [ts.SyntaxKind.LessThanToken]: 'lessThan'
+}
+
 interface AssertState extends State {
   assert: ts.Identifier;
   assertUtil: ts.PropertyAccessExpression;
@@ -23,11 +34,16 @@ function isDeepLiteral(node: ts.Expression) {
     ts.isObjectLiteralExpression(node);
 }
 
-function doAssert<T extends ts.Node>(state: AssertState, node: T, name: string, args: ts.Expression[]): T {
+function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, name: string, args: ts.Expression[]): T {
   prepAssert(state);
 
   args = args.filter(x => x !== undefined && x !== null);
-  let ret = ts.createCall(state.assertUtil, undefined, ts.createNodeArray([ts.createLiteral(name), ...args]));
+  let ret = ts.createCall(state.assertUtil, undefined, ts.createNodeArray([
+    ts.createLiteral(TransformUtil.getPrimaryArgument(node)!.getText()),
+    ts.createLiteral(name),
+    ...args
+  ]));
+
   for (let arg of args) {
     arg.parent = ret;
   }
@@ -40,7 +56,7 @@ function prepAssert(state: AssertState) {
     state.assert = ts.createIdentifier(`import_AssertUtil`);
     state.newImports.push({
       ident: state.assert,
-      path: require.resolve('../runner/assert')
+      path: require.resolve('../exec/assert')
     });
     state.assertUtil = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, 'AssertUtil'), 'check');
   }
@@ -55,32 +71,17 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       const message = node.arguments.length === 2 ? node.arguments[1] : undefined;
 
       if (ts.isBinaryExpression(comp)) {
-        let op = comp.operatorToken.kind;
-        let newOp: string | undefined;
+        let opFn = OPTOKEN_ASSERT_FN[comp.operatorToken.kind];
 
-        if (op === ts.SyntaxKind.EqualsEqualsToken) {
-          newOp = 'equal'; // a == b
-        } else if (op === ts.SyntaxKind.ExclamationEqualsToken) {
-          newOp = 'notEqual'; // a != b
-        } else if (op === ts.SyntaxKind.EqualsEqualsEqualsToken) {
-          newOp = 'strictEqual'; // a === b
-        } else if (op === ts.SyntaxKind.ExclamationEqualsEqualsToken) {
-          newOp = 'notStrictEqual'; // a !== b
-        } else if (op === ts.SyntaxKind.GreaterThanEqualsToken) {
-          // a >= b
-        } else if (op === ts.SyntaxKind.GreaterThanToken) {
-          // a > b
-        } else if (op === ts.SyntaxKind.LessThanEqualsToken) {
-          // a <= b
-        } else if (op === ts.SyntaxKind.LessThanToken) {
-          // a < b
-        }
-        if (newOp) {
+        if (opFn) {
           let literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
-          if (newOp.includes('qual') && literal) {
-            newOp = newOp.replace(/(e|E)qual/, a => `${a[0] === 'e' ? 'd' : 'D'}eep${a}`);
+          if (opFn.includes('qual') && literal) {
+            opFn = opFn.replace(/(e|E)qual/, a => `${a[0] === 'e' ? 'd' : 'D'}eep${a}`);
           }
-          node = doAssert(state, node, newOp, [comp.left, comp.right, message!]);
+
+          node = doAssert(state, node, opFn, [comp.left, comp.right, message!]);
+        } else {
+          node = doAssert(state, node, 'assert', [...node.arguments]);
         }
 
       } else if (ts.isPrefixUnaryExpression(comp) && comp.operator === ts.SyntaxKind.ExclamationToken) {
