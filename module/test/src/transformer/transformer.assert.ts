@@ -18,15 +18,20 @@ interface AssertState extends State {
     }
 */
 
-function isLiteral(node: ts.Expression) {
-  return ts.isStringLiteral(node) ||
-    ts.isNumericLiteral(node) ||
-    ts.isArrayLiteralExpression(node) ||
+function isDeepLiteral(node: ts.Expression) {
+  return ts.isArrayLiteralExpression(node) ||
     ts.isObjectLiteralExpression(node);
 }
 
-function doAssert(state: AssertState, name: string, args: ts.Expression[]) {
-  return ts.createCall(ts.createPropertyAccess(state.assertUtil, 'check'), undefined, [ts.createLiteral(name) as ts.Expression].concat(args));
+function doAssert<T extends ts.Node>(state: AssertState, node: T, name: string, args: ts.Expression[]): T {
+  args = args.filter(x => x !== undefined);
+  let ret = ts.createCall(ts.createPropertyAccess(state.assertUtil, 'check'), undefined,
+    ts.createNodeArray([ts.createLiteral(name), ...args]));
+  for (let arg of args) {
+    arg.parent = ret;
+  }
+  ret.parent = node.parent;
+  return ret as any as T;
 }
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AssertState): T {
@@ -47,7 +52,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 
       const comp = node.arguments[0]!;
-      const message = node.arguments.length === 2 ? node.arguments[1] : null;
+      const message = node.arguments.length === 2 ? node.arguments[1] : undefined;
 
       if (ts.isBinaryExpression(comp)) {
         let op = comp.operatorToken.kind;
@@ -71,24 +76,27 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           // a < b
         }
         if (newOp) {
-          let literal = isLiteral(comp.left) ? comp.left : isLiteral(comp.right) ? comp.right : undefined;
-          if (newOp.includes('Equal')) {
+          let literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
+          if (newOp.includes('Equal') && literal) {
             newOp = newOp.replace(/(e|E)qual/, a => `${a[0] === 'e' ? 'd' : 'D'}eep${a}`);
           }
-          node = doAssert(state, newOp, [comp.left, comp.right, message!]) as typeof node;
+          node = doAssert(state, node, newOp, [comp.left, comp.right, message!]);
         }
 
       } else if (ts.isPrefixUnaryExpression(comp) && comp.operator === ts.SyntaxKind.ExclamationToken) {
         if (ts.isPrefixUnaryExpression(comp.operand)) {
           let inner = comp.operand.operand;
-          node = doAssert(state, 'ok', [inner, message!]) as typeof node; // !!v
+          node = doAssert(state, node, 'ok', [inner, message!]); // !!v
         } else {
-          node = doAssert(state, 'ok', [comp.operand, message!]) as typeof node; // !v
+          node = doAssert(state, node, 'ok', [comp.operand, message!]); // !v
         }
       }
-    } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression) && exp.expression.getText() === 'assert') {
-      node = doAssert(state, exp.name.getText(), [...node.arguments]) as typeof node;
-      // Already in near, final form, just rewrite to intermmediate
+    } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) {
+      let ident = exp.expression;
+      if (ident.escapedText === 'assert') {
+        node = doAssert(state, node, exp.name.escapedText as string, [...node.arguments]);
+        // Already in near, final form, just rewrite to intermmediate
+      }
     }
   }
 
