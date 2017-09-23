@@ -8,7 +8,6 @@ const OG_CONSOLE = {
   warn: console.warn
 }
 
-
 export class ConsoleCapture {
 
   static out: { [key: string]: string };
