@@ -24,9 +24,10 @@ function isDeepLiteral(node: ts.Expression) {
 }
 
 function doAssert<T extends ts.Node>(state: AssertState, node: T, name: string, args: ts.Expression[]): T {
-  args = args.filter(x => x !== undefined);
-  let ret = ts.createCall(ts.createPropertyAccess(state.assertUtil, 'check'), undefined,
-    ts.createNodeArray([ts.createLiteral(name), ...args]));
+  prepAssert(state);
+
+  args = args.filter(x => x !== undefined && x !== null);
+  let ret = ts.createCall(state.assertUtil, undefined, ts.createNodeArray([ts.createLiteral(name), ...args]));
   for (let arg of args) {
     arg.parent = ret;
   }
@@ -34,22 +35,21 @@ function doAssert<T extends ts.Node>(state: AssertState, node: T, name: string, 
   return ret as any as T;
 }
 
-function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AssertState): T {
-  node = ts.visitEachChild(node, c => visitNode(context, c, state), context);
+function prepAssert(state: AssertState) {
+  if (!state.assert) {
+    state.assert = ts.createIdentifier(`import_AssertUtil`);
+    state.newImports.push({
+      ident: state.assert,
+      path: require.resolve('../runner/assert')
+    });
+    state.assertUtil = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, 'AssertUtil'), 'check');
+  }
+}
 
+function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AssertState): T {
   if (ts.isCallExpression(node)) {
     let exp: ts.Expression = node.expression;
     if (ts.isIdentifier(exp) && exp.getText() === 'assert') {
-
-      if (!state.assert) {
-        state.assert = ts.createIdentifier(`import_AssertUtil`);
-        state.newImports.push({
-          ident: state.assert,
-          path: require.resolve('../runner/assert')
-        });
-        state.assertUtil = ts.createPropertyAccess(state.assert, 'AssertUtil');
-      }
-
 
       const comp = node.arguments[0]!;
       const message = node.arguments.length === 2 ? node.arguments[1] : undefined;
@@ -77,7 +77,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         }
         if (newOp) {
           let literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
-          if (newOp.includes('Equal') && literal) {
+          if (newOp.includes('qual') && literal) {
             newOp = newOp.replace(/(e|E)qual/, a => `${a[0] === 'e' ? 'd' : 'D'}eep${a}`);
           }
           node = doAssert(state, node, newOp, [comp.left, comp.right, message!]);
@@ -96,6 +96,16 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       if (ident.escapedText === 'assert') {
         node = doAssert(state, node, exp.name.escapedText as string, [...node.arguments]);
         // Already in near, final form, just rewrite to intermmediate
+      }
+    }
+  }
+
+  node = ts.visitEachChild(node, c => visitNode(context, c, state), context);
+
+  if (ts.isClassDeclaration(node)) {
+    for (let el of node.members) {
+      if (!el.parent) {
+        el.parent = node;
       }
     }
   }
