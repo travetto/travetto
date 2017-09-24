@@ -6,6 +6,7 @@ export interface SuiteConfig {
   instance: any;
   name: string;
   line: number;
+  lineEnd: number;
   tests: TestConfig[];
 }
 
@@ -19,6 +20,7 @@ export interface Counts {
 export interface SuiteResult extends Counts {
   file: string;
   line: number;
+  lineEnd: number;
   class: string;
   tests: TestResult[];
   name: string;

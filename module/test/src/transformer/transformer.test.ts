@@ -70,14 +70,16 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       'Suite': new Set(['@encore2/test'])
     }, state);
     if (dec) {
-      let info = ts.getLineAndCharacterOfPosition(state.source, node.getFullStart());
       if (ts.isCallExpression(dec.expression)) {
         let args = [...(dec.expression.arguments || [])];
         if (args.length === 0) {
           args = [ts.createLiteral('')];
         }
+        let start = ts.getLineAndCharacterOfPosition(state.source, node.getFullStart());
+        let end = ts.getLineAndCharacterOfPosition(state.source, node.getEnd());
         dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
-          line: info.line
+          line: start.line,
+          lineEnd: end.line
         })]);
       }
     }

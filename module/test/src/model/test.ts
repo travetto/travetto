@@ -5,6 +5,7 @@ export interface TestConfig {
   suiteName: string;
   description: string;
   line: number;
+  lineEnd: number;
   file: string;
   method: string;
   shouldError: string | RegExp | Function;
@@ -26,6 +27,7 @@ export interface TestResult {
   status: 'passed' | 'skipped' | 'failed';
   error?: Error;
   line: number;
+  lineEnd: number;
   file: string;
   method: string;
   suiteName: string;
