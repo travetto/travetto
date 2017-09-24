@@ -48,9 +48,17 @@ class DiTest {
     await DependencyRegistry.init();
     let inst = await DependencyRegistry.getInstance(ServiceInherit);
     inst.doWork();
-    assert(inst.age === 30);
     assert.ok(inst.db);
-    assert(inst.db.dbConfig.getUrl() === 'mongodb://oscar');
+    assert(inst.age === 30);
+
+
     assert.equal(inst.db.altConfig, undefined);
+    assert(inst.db.dbConfig.getUrl() === 'mongodb://oscar');
+  }
+
+  @Test('runner')
+  async runner() {
+    assert(1 === 1);
+    assert(2 + 2 === 4);
   }
 }
