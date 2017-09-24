@@ -67,5 +67,6 @@ export const ClassIdTransformer = {
 
     return { file: `${ns}:${fileRoot}`, fullFile: file.fileName, newImports: [], imports: new Map() };
   }, visitNode),
-  phase: 'before'
+  phase: 'before',
+  priority: 1
 }
