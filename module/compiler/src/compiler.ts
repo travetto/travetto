@@ -106,14 +106,16 @@ export class Compiler {
 
   static resolveTransformers() {
     const transformers: { [key: string]: any } = {};
-    let i = 0;
+    let i = 2;
 
     for (let trns of bulkRequire(this.transformerSet)) {
-      for (let item of Object.values(trns)) {
+      for (let key of Object.keys(trns)) {
+        let item = trns[key];
         if (!transformers[item.phase]) {
           transformers[item.phase] = [];
         }
-        item.priority = item.priority || ++i;
+        item.priority = item.priority === undefined ? ++i : item.priority;
+        item.name = item.name || key;
         transformers[item.phase].push(item);
       }
     }
