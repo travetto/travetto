@@ -17,6 +17,7 @@ export interface Counts {
 
 export interface SuiteResult extends Counts {
   file: string;
+  line: number;
   class: string;
   tests: TestResult[];
   name: string;

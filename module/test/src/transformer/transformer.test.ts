@@ -16,6 +16,7 @@ const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
 interface AssertState extends State {
   assert: ts.Identifier;
   assertUtil: ts.PropertyAccessExpression;
+  source: ts.SourceFile
 }
 /*
   namespace internal {
@@ -111,10 +112,29 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
   }
 
+  if (ts.isMethodDeclaration(node) || ts.isClassDeclaration(node)) {
+    let dec = TransformUtil.findAnyDecorator(node, {
+      'Test': new Set(['@encore2/test']),
+      'Suite': new Set(['@encore2/suite'])
+    }, state);
+    if (dec) {
+      let info = ts.getLineAndCharacterOfPosition(state.source, node.pos);
+      if (ts.isCallExpression(dec.expression)) {
+        let args = [...(dec.expression.arguments || [])];
+        if (args.length === 0) {
+          args = [ts.createLiteral('')];
+        }
+        dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
+          line: info.line
+        })]);
+      }
+    }
+  }
+
   return node;
 }
 
-const TRANSFORMER = TransformUtil.importingVisitor<AssertState>(() => ({}), visitNode);
+const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({ source }), visitNode);
 
 export const AssertTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {

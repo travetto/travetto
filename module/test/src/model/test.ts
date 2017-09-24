@@ -23,6 +23,8 @@ export interface Assertion {
 export interface TestResult {
   status: 'passed' | 'skipped' | 'failed';
   error?: Error;
+  line: number;
+  file: string;
   method: string;
   suiteName: string;
   description: string;
