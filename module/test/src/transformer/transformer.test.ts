@@ -64,6 +64,26 @@ function prepAssert(state: AssertState) {
 }
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AssertState): T {
+  if (ts.isMethodDeclaration(node) || ts.isClassDeclaration(node)) {
+    let dec = TransformUtil.findAnyDecorator(node, {
+      'Test': new Set(['@encore2/test']),
+      'Suite': new Set(['@encore2/test'])
+    }, state);
+    if (dec) {
+      let info = ts.getLineAndCharacterOfPosition(state.source, node.pos);
+      if (ts.isCallExpression(dec.expression)) {
+        let args = [...(dec.expression.arguments || [])];
+        if (args.length === 0) {
+          args = [ts.createLiteral('')];
+        }
+        dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
+          line: info.line
+        })]);
+      }
+    }
+  }
+
+
   if (ts.isCallExpression(node)) {
     let exp: ts.Expression = node.expression;
     if (ts.isIdentifier(exp) && exp.getText() === 'assert') {
@@ -112,31 +132,12 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
   }
 
-  if (ts.isMethodDeclaration(node) || ts.isClassDeclaration(node)) {
-    let dec = TransformUtil.findAnyDecorator(node, {
-      'Test': new Set(['@encore2/test']),
-      'Suite': new Set(['@encore2/suite'])
-    }, state);
-    if (dec) {
-      let info = ts.getLineAndCharacterOfPosition(state.source, node.pos);
-      if (ts.isCallExpression(dec.expression)) {
-        let args = [...(dec.expression.arguments || [])];
-        if (args.length === 0) {
-          args = [ts.createLiteral('')];
-        }
-        dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
-          line: info.line
-        })]);
-      }
-    }
-  }
-
   return node;
 }
 
 const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({ source }), visitNode);
 
-export const AssertTransformer = {
+export const TestTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
     // Only apply to test files
     if (process.env.ENV === 'test' && source.fileName.includes('/test/') && !source.fileName.includes('/src/')) {
