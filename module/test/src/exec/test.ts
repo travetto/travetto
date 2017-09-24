@@ -70,7 +70,7 @@ export class TestUtil {
       line: test.line,
       lineEnd: test.lineEnd,
       file: test.file,
-      status: 'skipped'
+      status: 'skip'
     };
 
     if (test.skip) {
@@ -84,13 +84,13 @@ export class TestUtil {
 
       let timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
       let res = await Promise.race([suite.instance[test.method](), timeout]);
-      result.status = 'passed';
+      result.status = 'success';
     } catch (err) {
       err = this.checkError(test, err);
       if (!err) {
-        result.status = 'passed';
+        result.status = 'success';
       } else {
-        result.status = 'failed';
+        result.status = 'fail';
         result.error = JSON.parse(JSON.stringify(err));
       }
     } finally {
@@ -103,9 +103,9 @@ export class TestUtil {
 
   static async executeSuite(suite: SuiteConfig, emitter?: TestEmitter) {
     let result: SuiteResult = {
-      passed: 0,
-      failed: 0,
-      skipped: 0,
+      success: 0,
+      fail: 0,
+      skip: 0,
       total: 0,
       line: suite.line,
       lineEnd: suite.lineEnd,
@@ -123,16 +123,16 @@ export class TestUtil {
       let ret = await this.executeTest(test);
 
       switch (ret.status) {
-        case 'passed':
-          result.passed++;
+        case 'success':
+          result.success++;
           result.total++;
           break;
-        case 'failed':
+        case 'fail':
           result.total++;
-          result.failed++;
+          result.fail++;
           break;
-        case 'skipped':
-          result.skipped++;
+        case 'skip':
+          result.skip++;
       }
       result.tests.push(ret);
 

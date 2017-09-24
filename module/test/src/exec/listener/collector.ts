@@ -8,9 +8,9 @@ export interface CollectionComplete extends Listener {
 export class Collector implements Listener {
 
   allSuites: AllSuitesResult = {
-    passed: 0,
-    failed: 0,
-    skipped: 0,
+    success: 0,
+    fail: 0,
+    skip: 0,
     total: 0,
     suites: []
   };
@@ -23,9 +23,9 @@ export class Collector implements Listener {
 
   private merge(src: SuiteResult) {
     this.allSuites.suites.push(src);
-    this.allSuites.failed += src.failed;
-    this.allSuites.passed += src.passed;
-    this.allSuites.skipped += src.skipped;
+    this.allSuites.fail += src.fail;
+    this.allSuites.success += src.success;
+    this.allSuites.skip += src.skip;
     this.allSuites.total += src.total;
   }
 }

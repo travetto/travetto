@@ -24,7 +24,7 @@ export interface Assertion {
 }
 
 export interface TestResult {
-  status: 'passed' | 'skipped' | 'failed';
+  status: 'success' | 'skip' | 'fail';
   error?: Error;
   line: number;
   lineEnd: number;

@@ -44,16 +44,16 @@ export class TapListener implements CollectionComplete {
       }
 
       let status = `ok ${++this.count} `;
-      if (test.status === 'skipped') {
+      if (test.status === 'skip') {
         status += ' # SKIP';
-      } else if (test.status === 'failed') {
+      } else if (test.status === 'fail') {
         status = 'not ' + status;
       }
       status += header;
 
       this.log(status);
 
-      if (test.status === 'failed' && test.error) {
+      if (test.status === 'fail' && test.error) {
         this.logMeta({ error: test.error });
       }
       if (test.output) {
