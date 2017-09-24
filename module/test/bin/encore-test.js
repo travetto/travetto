@@ -3,4 +3,9 @@
 process.env.ENV = 'test';
 require('@encore2/base/bootstrap');
 const { Runner } = require('../src/exec/runner');
-new Runner(process.argv).run();
+try {
+  new Runner(process.argv).run();
+  process.exit(0);
+} catch (e) {
+  process.exit(1);
+}

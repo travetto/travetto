@@ -27,7 +27,7 @@ export class ConsoleCapture {
   static end() {
     let ret = this.out;
     this.out = {};
-    for (let [level] of Object.keys(OG_CONSOLE)) {
+    for (let level of Object.keys(OG_CONSOLE)) {
       (console as any)[level] = (OG_CONSOLE as any)[level];
     }
     return ret;

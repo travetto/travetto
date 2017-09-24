@@ -1,7 +1,7 @@
 import * as minimist from 'minimist';
 
 import { Agent, AgentPool } from './agent';
-import { TapListener, CollectionComplete, Collector } from './listener';
+import { TapListener, CollectionComplete, Collector, Listener } from './listener';
 import { TestUtil } from './test';
 
 interface State {
@@ -49,10 +49,13 @@ export class Runner {
       let formatter = this.state.format;
 
       const collector = new Collector();
-      const listeners = [
-        collector,
-        new TapListener()
+      const listeners: Listener[] = [
+        collector
       ];
+
+      if (this.state.tap) {
+        listeners.push(new TapListener());
+      }
 
       const globs = this.state._.slice(2); // strip off node and worker name
 
@@ -89,10 +92,10 @@ export class Runner {
       if (output) {
         console.log(output);
       }
-      process.exit(0);
+
+      return collector.allSuites;
     } catch (e) {
       console.error(e);
-      process.exit(1);
     }
   }
 }
