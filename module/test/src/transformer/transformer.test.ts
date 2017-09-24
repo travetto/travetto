@@ -145,5 +145,6 @@ export const AssertTransformer = {
       return source;
     }
   },
-  phase: 'before'
+  phase: 'before',
+  priority: 0
 }
