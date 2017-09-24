@@ -191,6 +191,7 @@ export class Compiler {
 
   static prepareSourceMaps() {
     sourcemap.install({
+      emptyCacheBetweenOperations: AppEnv.test || AppEnv.debug,
       retrieveFile: (p: string) => this.contents.get(p)!,
       retrieveSourceMap: (source: string) => this.sourceMaps.get(source)!
     });
