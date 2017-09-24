@@ -70,7 +70,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       'Suite': new Set(['@encore2/test'])
     }, state);
     if (dec) {
-      let info = ts.getLineAndCharacterOfPosition(state.source, node.pos);
+      let info = ts.getLineAndCharacterOfPosition(state.source, node.getFullStart());
       if (ts.isCallExpression(dec.expression)) {
         let args = [...(dec.expression.arguments || [])];
         if (args.length === 0) {
