@@ -118,7 +118,7 @@ export class Compiler {
       }
     }
     for (let key of Object.keys(transformers)) {
-      transformers[key] = (transformers[key] as any[]).sort((a, b) => a.priority - b.priority).map(x => x.tranformer);
+      transformers[key] = (transformers[key] as any[]).sort((a, b) => a.priority - b.priority).map(x => x.transformer);
     }
     return transformers;
   }
