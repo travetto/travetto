@@ -5,6 +5,7 @@ export interface SuiteConfig {
   class: Class;
   instance: any;
   name: string;
+  line: number;
   tests: TestConfig[];
 }
 

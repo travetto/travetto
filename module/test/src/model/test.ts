@@ -4,6 +4,8 @@ export interface TestConfig {
   class: Class<any>;
   suiteName: string;
   description: string;
+  line: number;
+  file: string;
   method: string;
   shouldError: string | RegExp | Function;
   skip: boolean;

@@ -67,6 +67,8 @@ export class TestUtil {
       method: test.method,
       description: test.description,
       suiteName: test.suiteName,
+      line: test.line,
+      file: test.file,
       status: 'skipped'
     };
 
@@ -104,6 +106,7 @@ export class TestUtil {
       failed: 0,
       skipped: 0,
       total: 0,
+      line: suite.line,
       file: suite.class.__filename,
       class: suite.class.name,
       name: suite.name,
