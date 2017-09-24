@@ -172,8 +172,8 @@ export class Compiler {
 
     content = this.contents.get(jsf)!;
 
-    if (process.env.DEBUG && jsf.includes('/test/') && !jsf.includes('/src/')) {
-      console.log(jsf, content);
+    if (/\/test\//.test(tsf) && !tsf.includes('@encore2')) {
+      console.debug(content);
     }
 
     try {
