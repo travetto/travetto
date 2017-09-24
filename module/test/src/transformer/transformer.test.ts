@@ -15,6 +15,7 @@ const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
 
 interface AssertState extends State {
   assert: ts.Identifier;
+  hasAssertCall: boolean;
   assertUtil: ts.PropertyAccessExpression;
   source: ts.SourceFile
 }
@@ -75,11 +76,16 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         if (args.length === 0) {
           args = [ts.createLiteral('')];
         }
-        let start = ts.getLineAndCharacterOfPosition(state.source, node.getFullStart());
-        let end = ts.getLineAndCharacterOfPosition(state.source, node.getEnd());
+
+        const offset = state.hasAssertCall ? 3 : 2;
+        const n = (node as any)['original'] || node;
+        const src = ts.createSourceFile(state.source.fileName, state.source.text, state.source.languageVersion);
+        const start = ts.getLineAndCharacterOfPosition(src, n.getFullStart());
+        const end = ts.getLineAndCharacterOfPosition(src, n.getEnd());
+
         dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
-          line: start.line,
-          lineEnd: end.line
+          line: start.line + offset,
+          lineEnd: end.line + offset
         })]);
       }
     }
@@ -137,7 +143,10 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   return node;
 }
 
-const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({ source }), visitNode);
+const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({
+  source,
+  hasAssertCall: /\s+assert(.[^(]+)\(/.test(source!.text)
+}), visitNode);
 
 export const TestTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
