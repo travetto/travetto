@@ -1,4 +1,4 @@
-import { Class } from '@encore2/registry';
+import { Class } from '@encore2/registry/src/model/types';
 
 export interface TestConfig {
   class: Class<any>;
