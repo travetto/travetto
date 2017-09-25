@@ -129,19 +129,7 @@ export class TestUtil {
       }
 
       let ret = await this.executeTest(test);
-
-      switch (ret.status) {
-        case 'success':
-          result.success++;
-          result.total++;
-          break;
-        case 'fail':
-          result.total++;
-          result.fail++;
-          break;
-        case 'skip':
-          result.skip++;
-      }
+      result[ret.status]++;
       result.tests.push(ret);
 
       if (emitter) {
@@ -157,6 +145,7 @@ export class TestUtil {
       await suite.instance.call(after);
     }
 
+    result.total = result.success + result.fail;
 
     return result as SuiteResult;
   }
