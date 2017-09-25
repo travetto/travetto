@@ -16,7 +16,7 @@ function listener(phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach') 
   }
 }
 
-export const BeforeAll = listener('beforeAll');
-export const BeforeEach = listener('beforeEach');
-export const AfterAll = listener('afterAll');
-export const AfterEach = listener('afterEach');
+export const BeforeAll = listener.bind(null, 'beforeAll');
+export const BeforeEach = listener.bind(null, 'beforeEach');
+export const AfterAll = listener.bind(null, 'afterAll');
+export const AfterEach = listener.bind(null, 'afterEach');

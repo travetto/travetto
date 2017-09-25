@@ -116,7 +116,7 @@ export class TestUtil {
     };
 
     for (let before of suite.beforeAll) {
-      await suite.instance.call(before);
+      await before.call(suite.instance);
     }
 
     for (let test of suite.tests) {
@@ -125,7 +125,7 @@ export class TestUtil {
       }
 
       for (let before of suite.beforeEach) {
-        await suite.instance.call(before);
+        await before.call(suite.instance);
       }
 
       let ret = await this.executeTest(test);
@@ -137,12 +137,12 @@ export class TestUtil {
       }
 
       for (let after of suite.afterEach) {
-        await suite.instance.call(after);
+        await after.call(suite.instance);
       }
     }
 
     for (let after of suite.afterAll) {
-      await suite.instance.call(after);
+      await after.call(suite.instance);
     }
 
     result.total = result.success + result.fail;

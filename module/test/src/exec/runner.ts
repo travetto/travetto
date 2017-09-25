@@ -46,6 +46,8 @@ export class Runner {
 
   async run() {
     try {
+      console.debug('Runner Args', this.state);
+
       let formatter = this.state.format;
 
       const collector = new Collector();

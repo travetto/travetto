@@ -1,10 +1,30 @@
-import { Suite, Test } from '../';
+import { Suite, Test, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../';
 import * as assert from 'assert';
 
 let a = 0;
 
 @Suite()
 class Simple {
+
+  @BeforeAll()
+  initAll() {
+    console.debug('b4-all');
+  }
+
+  @BeforeEach()
+  initEach() {
+    console.debug('b4-each');
+  }
+
+  @AfterAll()
+  deinitAll() {
+    console.debug('aft-all');
+  }
+
+  @AfterEach()
+  deinitEach() {
+    console.debug('aft-each');
+  }
 
   @Test()
   test1a() {
