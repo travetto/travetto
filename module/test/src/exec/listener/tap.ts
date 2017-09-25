@@ -28,7 +28,7 @@ export class TapListener implements CollectionComplete {
       if (test.description) {
         header += `: ${test.description}`;
       }
-      this.log(`$ ${header}`);
+      this.log(`# ${header}`);
       let message = '';
       if (test.assertions.length) {
         let subCount = 0;
