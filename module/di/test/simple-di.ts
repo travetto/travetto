@@ -39,12 +39,14 @@ class ServiceInherit extends Service {
   }
 }
 
+const FOUR = 4;
+
 @Suite('di')
 class DiTest {
 
   @Test('run')
   async run() {
-    console.log('starting')
+    console.log('starting');
     await DependencyRegistry.init();
     let inst = await DependencyRegistry.getInstance(ServiceInherit);
     inst.doWork();
@@ -59,6 +61,30 @@ class DiTest {
   @Test('runner')
   async runner() {
     assert(1 === 1);
-    assert(2 + 2 === 4);
+    assert(2 + 2 === FOUR);
+  }
+}
+
+@Suite('di2')
+class DiTest2 {
+
+  @Test('run')
+  async run() {
+    console.log('starting');
+    await DependencyRegistry.init();
+    let inst = await DependencyRegistry.getInstance(ServiceInherit);
+    inst.doWork();
+    assert.ok(inst.db);
+    assert(inst.age === 30);
+
+
+    assert.equal(inst.db.altConfig, undefined);
+    assert(inst.db.dbConfig.getUrl() === 'mongodb://oscar');
+  }
+
+  @Test('runner')
+  async runner() {
+    assert(1 === 1);
+    assert(2 + 2 === FOUR);
   }
 }
