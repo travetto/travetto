@@ -77,7 +77,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           args = [ts.createLiteral('')];
         }
 
-        const offset = state.hasAssertCall ? 3 : 2;
+        const offset = state.hasAssertCall ? 4 : 3;
         const n = (node as any)['original'] || node;
         const src = ts.createSourceFile(state.source.fileName, state.source.text, state.source.languageVersion);
         const start = ts.getLineAndCharacterOfPosition(src, n.getFullStart());
