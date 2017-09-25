@@ -19,17 +19,6 @@ interface AssertState extends State {
   assertUtil: ts.PropertyAccessExpression;
   source: ts.SourceFile
 }
-/*
-  namespace internal {
-    export class AssertionError implements Error {
-      name: string;
-      message: string;
-      actual: any;
-      expected: any;
-      operator: string;
-      generatedMessage: boolean;
-    }
-*/
 
 function isDeepLiteral(node: ts.Expression) {
   return ts.isArrayLiteralExpression(node) ||

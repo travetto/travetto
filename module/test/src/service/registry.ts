@@ -6,7 +6,11 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPending(cls: Class): Partial<SuiteConfig> {
     return {
       class: cls,
-      tests: []
+      tests: [],
+      beforeAll: [],
+      beforeEach: [],
+      afterAll: [],
+      afterEach: []
     };
   }
 
@@ -15,6 +19,11 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       class: cls,
       method: fn.name
     }
+  }
+
+  registerPendingListener<T>(cls: Class<T>, listener: Function, phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach', ) {
+    let suiteConfig = this.getOrCreatePending(cls)! as SuiteConfig;
+    suiteConfig[phase].push(listener);
   }
 
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {

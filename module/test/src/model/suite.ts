@@ -8,6 +8,10 @@ export interface SuiteConfig {
   line: number;
   lineEnd: number;
   tests: TestConfig[];
+  beforeAll: Function[];
+  beforeEach: Function[];
+  afterEach: Function[];
+  afterAll: Function[]
 }
 
 export interface Counts {

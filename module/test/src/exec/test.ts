@@ -115,9 +115,17 @@ export class TestUtil {
       tests: []
     };
 
+    for (let before of suite.beforeAll) {
+      await suite.instance.call(before);
+    }
+
     for (let test of suite.tests) {
       if (emitter) {
         emitter.emit({ type: 'test', phase: 'before', test });
+      }
+
+      for (let before of suite.beforeEach) {
+        await suite.instance.call(before);
       }
 
       let ret = await this.executeTest(test);
@@ -139,7 +147,16 @@ export class TestUtil {
       if (emitter) {
         emitter.emit({ type: 'test', phase: 'after', test: ret });
       }
+
+      for (let after of suite.afterEach) {
+        await suite.instance.call(after);
+      }
     }
+
+    for (let after of suite.afterAll) {
+      await suite.instance.call(after);
+    }
+
 
     return result as SuiteResult;
   }
