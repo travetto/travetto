@@ -1,22 +1,22 @@
 {
-  "author": "", 
+  "author": "",
   "dependencies": {
     "@encore2/registry": "git+ssh://git@git.eaiti.com/encore2/registry.git#v1.x.x"
-  }, 
-  "description": "", 
+  },
+  "description": "",
   "devDependencies": {
     "@encore2/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v1.x.x"
-  }, 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@encore2/schema", 
+  },
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@encore2/schema",
   "peerDependencies": {
-    "@encore2/di": "git+ssh://git@git.eaiti.com/encore2/di.git#v1.x.x", 
-    "@types/flat": "0.0.28", 
+    "@encore2/di": "git+ssh://git@git.eaiti.com/encore2/di.git#v1.x.x",
+    "@types/flat": "0.0.28",
     "flat": "^2.0.0"
-  }, 
+  },
   "scripts": {
     "test": "./node_modules/@encore2/test/mocha.js"
-  }, 
+  },
   "version": "1.0.20"
 }

@@ -1,6 +1,6 @@
-import 'mocha';
-import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema, ValidationError } from '../src';
-import { expect } from 'chai';
+import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema, ValidationError, SchemaRegistry } from '../src';
+import { Suite, Test, BeforeAll } from '@encore2/test';
+import * as assert from 'assert';
 
 @Schema()
 class Response extends SchemaBound {
@@ -28,23 +28,33 @@ class MinTest extends SchemaBound {
 }
 
 function findError(errors: ValidationError[], path: string, message: string) {
-  expect(errors.find(x => x.path === path && x.message.includes(message)), `Expecting ${path} to have error ${message}`).is.not.undefined
+  return errors.find(x => x.path === path && x.message.includes(message));
 }
 
-describe('Validation', () => {
-  it('Url and message', async () => {
+@Suite()
+class Validation {
+
+  @BeforeAll()
+  async init() {
+    await SchemaRegistry.init();
+  }
+
+  @Test('Url and message')
+  async urlAndMessage() {
     let r = Response.from({
       url: 'htt://google'
     });
     try {
       await SchemaValidator.validate(r);
-      expect(true).to.equal(false);
+      assert.fail('Validation should have failed');
     } catch (e) {
-      findError(e.errors, 'url', 'not a valid url');
+      console.log(e);
+      assert.ok(findError(e.errors, 'url', 'not a valid url'));
     }
-  });
+  }
 
-  it('Should validate nested', async () => {
+  @Test('Should validate nested')
+  async nested() {
     let res = Parent.from({
       response: {
         url: 'a.b',
@@ -54,22 +64,23 @@ describe('Validation', () => {
     } as any); // To allow for validating
     try {
       await SchemaValidator.validate(res);
-      expect(true).to.equal(false);
+      assert.fail('Validation should have failed');
     } catch (e) {
-      findError(e.errors, 'responses', 'required');
-      findError(e.errors, 'response.pandaState', 'TIRED');
-      findError(e.errors, 'response.url', 'not a valid url');
+      assert.ok(findError(e.errors, 'responses', 'required'));
+      assert.ok(findError(e.errors, 'response.pandaState', 'TIRED'));
+      assert.ok(findError(e.errors, 'response.url', 'not a valid url'));
     }
-  });
+  }
 
-  it('Should ensure message for min', async () => {
+  @Test('Should ensure message for min')
+  async minMessage() {
     let o = MinTest.from({ value: 'hello' });
 
     try {
       await SchemaValidator.validate(o);
-      expect(true).to.equal(false);
+      assert.fail('Validation should have failed');
     } catch (e) {
-      findError(e.errors, 'value', 'value is not long enough (10)');
+      assert(findError(e.errors, 'value', 'value is not long enough (10)'));
     }
-  });
-});
+  }
+}

@@ -1,8 +1,8 @@
-import 'mocha';
-
 import { Field, Url, SchemaBound, View, Required, Alias, BindUtil, Schema, SchemaRegistry } from '../src';
-import { expect } from 'chai';
 import { Address } from './address';
+import * as assert from 'assert';
+import { Test, Suite, BeforeAll } from '@encore2/test';
+
 console.log('Hello')
 @Schema(false)
 class SuperAddress extends Address {
@@ -47,10 +47,20 @@ export class Response extends SchemaBound {
 
   @Url()
   url?: string;
+
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
-describe('Data Binding', () => {
-  it('Validate bind', () => {
+@Suite('Data Binding')
+class DataBinding {
+
+  @BeforeAll()
+  async init() {
+    await SchemaRegistry.init();
+  }
+
+  @Test('Validate bind')
+  validateBind() {
     let person = Person.from({
       name: 'Test',
       address: {
@@ -62,10 +72,10 @@ describe('Data Binding', () => {
         { area: 'B', value: 30 }
       ]
     });
-    expect(person.address).instanceof(Address);
-    expect(person.address.street1).to.equal('1234 Fun');
-    expect(person.counts.length).to.equal(2);
-    expect(person.counts[0]).instanceof(Count);
+    assert(person.address instanceof Address);
+    assert(person.address.street1 === '1234 Fun');
+    assert(person.counts.length === 2);
+    assert(person.counts[0] instanceof Count);
 
     let viewPerson = BindUtil.bindSchema(Person, new Person(), {
       name: 'Test',
@@ -79,38 +89,44 @@ describe('Data Binding', () => {
       ]
     }, 'test');
 
-    expect(viewPerson.address).instanceof(Address);
-    expect(viewPerson.address.street1).to.equal('1234 Fun');
-    expect(viewPerson.address.street2).to.equal(undefined);
-    expect(viewPerson.counts.length).to.equal(2);
-    expect(viewPerson.counts[0]).instanceof(Count);
-    expect(viewPerson.counts[0].value).to.equal(undefined);
-  });
+    assert(viewPerson.address instanceof Address);
+    assert(viewPerson.address.street1 === '1234 Fun');
+    assert(viewPerson.address.street2 === undefined);
+    assert(viewPerson.counts.length === 2);
+    assert(viewPerson.counts[0] instanceof Count);
+    assert(viewPerson.counts[0].value === undefined);
+  }
 
-  it('Validate Object', () => {
+  @Test('Validate Object')
+  validateObject() {
     let res = Response.from({
       questionId: '20',
       answer: ['a', 'd']
     });
-    expect(res.questionId).to.equal('20');
-    expect(res.answer).to.not.equal(undefined);
-    expect(res.answer).to.deep.equal(['a', 'd']);
-  });
+    assert(res.questionId === '20');
+    assert(!!res.answer);
+    assert(res.answer == ['a', 'd']);
+  }
 
-  it('Should handle inheritance', () => {
+  @Test('Should handle inheritance')
+  validateInheritance() {
     let res = SuperAddress.from({
       street1: 'a',
       street2: 'b',
       unit: '20'
     });
-    expect(res.unit).to.equal('20');
-  });
+    assert(res.unit === '20');
+  }
 
-  it('Should handle aliases', () => {
+  @Test('Should handle aliases')
+  validateAliases() {
     let res = Response.from({
-      correct: true
-    });
+      correct: true,
+      status: 'orange'
+    } as any);
 
-    expect(res.valid).to.equal(true);
-  });
-});
+    console.log(res);
+
+    assert(res.valid === true);
+  }
+}
