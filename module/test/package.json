@@ -16,5 +16,5 @@
   "scripts": {
     "test": "./bin/encore-test.js"
   }, 
-  "version": "1.0.22"
+  "version": "1.0.23"
 }
