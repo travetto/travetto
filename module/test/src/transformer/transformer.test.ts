@@ -109,6 +109,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         } else {
           node = doAssert(state, node, 'ok', [comp.operand, message!]); // !v
         }
+      } else {
+        node = doAssert(state, node, 'assert', [...node.arguments]);
       }
     } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) {
       let ident = exp.expression;
