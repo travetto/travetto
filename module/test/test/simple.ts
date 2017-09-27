@@ -1,7 +1,7 @@
 import { Suite, Test, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../';
 import * as assert from 'assert';
 
-let a = 0;
+let a: any = 0;
 
 @Suite()
 class Simple {
@@ -45,6 +45,6 @@ class Simple {
   @Test()
   async test1d() {
     await new Promise(resolve => setTimeout(resolve, 1000));
-    assert(1 === a);
+    assert(1 === a.range.top);
   }
 }

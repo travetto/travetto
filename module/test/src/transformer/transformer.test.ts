@@ -17,7 +17,8 @@ const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
 interface AssertState extends State {
   assert: ts.Identifier;
   hasAssertCall: boolean;
-  assertUtil: ts.PropertyAccessExpression;
+  assertCheck: ts.PropertyAccessExpression;
+  assertInvoke: ts.PropertyAccessExpression;
   source: ts.SourceFile
 }
 
@@ -30,16 +31,23 @@ function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, name
   prepAssert(state);
 
   args = args.filter(x => x !== undefined && x !== null);
-  let ret = ts.createCall(state.assertUtil, undefined, ts.createNodeArray([
+  let check = ts.createCall(state.assertCheck, undefined, ts.createNodeArray([
     ts.createLiteral(TransformUtil.getPrimaryArgument(node)!.getText()),
     ts.createLiteral(name),
     ...args
   ]));
-
   for (let arg of args) {
-    arg.parent = ret;
+    arg.parent = check;
   }
+
+  let ret = ts.createCall(state.assertInvoke, undefined, ts.createNodeArray([
+    ts.createArrowFunction(undefined, undefined, [],
+      undefined, ts.createToken(ts.SyntaxKind.EqualsGreaterThanToken), check)
+  ]));
+
   ret.parent = node.parent;
+  check.parent = ret;
+
   return ret as any as T;
 }
 
@@ -50,7 +58,8 @@ function prepAssert(state: AssertState) {
       ident: state.assert,
       path: require.resolve('../exec/assert')
     });
-    state.assertUtil = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, 'AssertUtil'), 'check');
+    state.assertCheck = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, 'AssertUtil'), 'check');
+    state.assertInvoke = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, 'AssertUtil'), 'invoke');
   }
 }
 
@@ -81,10 +90,12 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
   }
 
+  let replaced = false;
 
   if (ts.isCallExpression(node)) {
     let exp: ts.Expression = node.expression;
     if (ts.isIdentifier(exp) && exp.getText() === 'assert') {
+      replaced = true;
 
       const comp = node.arguments[0]!;
       const message = node.arguments.length === 2 ? node.arguments[1] : undefined;
@@ -116,13 +127,17 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) {
       let ident = exp.expression;
       if (ident.escapedText === 'assert') {
+        replaced = true;
+
         node = doAssert(state, node, exp.name.escapedText as string, [...node.arguments]);
         // Already in near, final form, just rewrite to intermmediate
       }
     }
   }
 
-  node = ts.visitEachChild(node, c => visitNode(context, c, state), context);
+  if (!replaced) {
+    node = ts.visitEachChild(node, c => visitNode(context, c, state), context);
+  }
 
   if (ts.isClassDeclaration(node)) {
     for (let el of node.members) {

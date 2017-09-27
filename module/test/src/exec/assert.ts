@@ -21,6 +21,25 @@ export class AssertUtil {
     this.asserts = [];
   }
 
+  static invoke(fn: Function) {
+    try {
+      fn();
+    } catch (e) {
+      if (e instanceof assert.AssertionError) {
+        throw e;
+      } else {
+        let [file, line] = new Error().stack!.split('\n')[2].split(/[()]/g).slice(-2, -1)[0].split(':');
+        file = file.split(process.cwd() + '/')[1];
+
+        const assertion: Assertion = { file, line: parseInt(line, 10), operator: 'throws', text: '' };
+        assertion.error = e;
+        assertion.message = e.message;
+        this.asserts.push(assertion);
+        throw assertion;
+      }
+    }
+  }
+
   static check(text: string, name: string, ...args: any[]) {
     let [file, line] = new Error().stack!.split('\n')[2].split(/[()]/g).slice(-2, -1)[0].split(':');
     file = file.split(process.cwd() + '/')[1];
