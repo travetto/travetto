@@ -38,6 +38,7 @@ export class AssertUtil {
         assertion.message = args[0];
       }
     } else if (name.includes('hrow')) {
+      assertion.operator = 'throw';
       if (typeof args[1] !== 'string') {
         assertion.expected = args[1];
         assertion.message = args[2];
@@ -73,7 +74,12 @@ export class AssertUtil {
       }
     } catch (e) {
       if (!assertion.message) {
-        assertion.message = `${assertion.actual} should be ${assertion.operator} ${assertion.expected}`;
+        let op = name.includes('hrow') ?
+          `should ${assertion.operator}` :
+          assertion.operator ?
+            `should be ${assertion.operator}` :
+            'should be';
+        assertion.message = `${assertion.actual} ${op} ${assertion.expected}`;
       }
       assertion.error = e;
       throw e;
