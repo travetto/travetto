@@ -102,9 +102,8 @@ export class TestUtil {
     if (result.status === 'fail' && result.error) {
       let err = result.error;
       if (!(err instanceof assert.AssertionError)) {
-        let [file, line] = err.stack!.split('\n')[2].split(/[()]/g).slice(-2, -1)[0].split(':');
-        file = file.split(process.cwd() + '/')[1];
-        const assertion: Assertion = { file, line: parseInt(line, 10), operator: 'throws', text: '', error: err, message: `Error thrown: ${err.message}` };
+        let { file, line } = AssertUtil.readFilePosition(err);
+        const assertion: Assertion = { file, line, operator: 'throws', text: '', error: err, message: `Error thrown: ${err.message}` };
         result.assertions.push(assertion);
       }
     }

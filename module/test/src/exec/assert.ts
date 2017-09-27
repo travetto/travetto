@@ -17,15 +17,20 @@ export class AssertUtil {
 
   static asserts: Assertion[] = [];
 
+  static readFilePosition(err: Error) {
+    let [file, line] = err.stack!.split('\n')[2].split(/[()]/g).slice(-2, -1)[0].split(':');
+    file = file.split(process.cwd() + '/')[1];
+    return { file, line: parseInt(line, 10) };
+  }
+
   static start() {
     this.asserts = [];
   }
 
   static check(text: string, name: string, ...args: any[]) {
-    let [file, line] = new Error().stack!.split('\n')[2].split(/[()]/g).slice(-2, -1)[0].split(':');
-    file = file.split(process.cwd() + '/')[1];
+    let { file, line } = this.readFilePosition(new Error());
 
-    let assertion: Assertion = { file, line: parseInt(line, 10), text, operator: ASSERT_FN_OPERATOR[name] };
+    let assertion: Assertion = { file, line, text, operator: ASSERT_FN_OPERATOR[name] };
     if (name === 'fail') {
       if (args.length > 1) {
         assertion.actual = args[0];
