@@ -2,8 +2,6 @@ import { AppEnv } from '@encore2/base';
 import * as assert from 'assert';
 import { Assertion } from '../model';
 
-
-
 const ASSERT_FN_OPERATOR: { [key: string]: string } = {
   equal: '==',
   notEqual: '!=',
@@ -48,9 +46,7 @@ export class AssertUtil {
     } else if (name === 'ok' || name === 'assert') {
       assertion.actual = args[0];
       assertion.message = args[1];
-      if (name === 'ok') {
-        assertion.expected = true;
-      }
+      assertion.expected = true;
       assertion.operator = '';
     } else {
       assertion.message = args[2];
@@ -73,13 +69,19 @@ export class AssertUtil {
           (assert as any)[name].apply(null, args);
       }
     } catch (e) {
-      if (!assertion.message) {
-        let op = name.includes('hrow') ?
-          `should ${assertion.operator}` :
-          assertion.operator ?
-            `should be ${assertion.operator}` :
-            'should be';
-        assertion.message = `${assertion.actual} ${op} ${assertion.expected}`;
+      if (!(e instanceof assert.AssertionError)) {
+        assertion.message = e.message;
+      } else {
+        if (!assertion.message) {
+          if (assertion.operator) {
+            let op = name.includes('hrow') ?
+              `should ${assertion.operator}` :
+              `should be ${assertion.operator}`;
+            assertion.message = `${assertion.actual} ${op} ${assertion.expected}`;
+          } else {
+            assertion.message = `should be ${assertion.expected}`;
+          }
+        }
       }
       assertion.error = e;
       throw e;
