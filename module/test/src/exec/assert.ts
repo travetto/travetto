@@ -18,7 +18,8 @@ export class AssertUtil {
   static asserts: Assertion[] = [];
 
   static readFilePosition(err: Error) {
-    let [file, line] = err.stack!.split('\n')[2].split(/[()]/g).slice(-2, -1)[0].split(':');
+    let lines = err.stack!.split('[Continued From]')[0].split('\n').filter(x => /\/test\//.test(x));
+    let [file, line] = lines.pop()!.split(/[()]/g).slice(-2, -1)[0].split(':');
     file = file.split(process.cwd() + '/')[1];
     return { file, line: parseInt(line, 10) };
   }
