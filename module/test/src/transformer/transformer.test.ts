@@ -10,7 +10,8 @@ const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
   [ts.SyntaxKind.GreaterThanEqualsToken]: 'greaterThanEqual',
   [ts.SyntaxKind.GreaterThanToken]: 'greaterThan',
   [ts.SyntaxKind.LessThanEqualsToken]: 'lessThanEqual',
-  [ts.SyntaxKind.LessThanToken]: 'lessThan'
+  [ts.SyntaxKind.LessThanToken]: 'lessThan',
+  [ts.SyntaxKind.InstanceOfKeyword]: 'instanceOf'
 }
 
 interface AssertState extends State {

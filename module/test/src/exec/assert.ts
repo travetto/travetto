@@ -50,16 +50,19 @@ export class AssertUtil {
       if (name === 'ok') {
         assertion.expected = true;
       }
+      assertion.operator = '';
     } else {
       assertion.message = args[2];
       assertion.expected = args[1];
       assertion.actual = args[0];
+      assertion.operator = name;
     }
 
     this.asserts.push(assertion);
 
     try {
       switch (name) {
+        case 'instanceOf': assert(args[0] instanceof args[1], args[2]); break;
         case 'lessThan': assert(args[0] < args[1], args[2]); break;
         case 'lessThanEqual': assert(args[0] <= args[1], args[2]); break;
         case 'greaterThan': assert(args[0] > args[1], args[2]); break;
@@ -69,6 +72,9 @@ export class AssertUtil {
           (assert as any)[name].apply(null, args);
       }
     } catch (e) {
+      if (!assertion.message) {
+        assertion.message = `${assertion.actual} should be ${assertion.operator} ${assertion.expected}`;
+      }
       assertion.error = e;
       throw e;
     }
