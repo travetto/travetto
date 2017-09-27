@@ -72,13 +72,6 @@ export class AssertUtil {
       assertion.operator = name;
     }
 
-    if (name === 'instanceOf') {
-      assertion.actual = assertion.actual ? assertion.actual.name : undefined;
-      assertion.expected = assertion.expected ? assertion.expected.name : undefined;
-    }
-
-    this.asserts.push(assertion);
-
     try {
       switch (name) {
         case 'instanceOf': assert(args[0] instanceof args[1], args[2]); break;
@@ -91,9 +84,7 @@ export class AssertUtil {
           (assert as any)[name].apply(null, args);
       }
     } catch (e) {
-      if (!(e instanceof assert.AssertionError)) {
-        assertion.message = e.message;
-      } else {
+      if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
           if (assertion.operator) {
             let op = name.includes('hrow') ?
@@ -104,8 +95,9 @@ export class AssertUtil {
             assertion.message = `should be ${assertion.expected}`;
           }
         }
+        assertion.error = e;
+        this.asserts.push(assertion);
       }
-      assertion.error = e;
       throw e;
     }
   }

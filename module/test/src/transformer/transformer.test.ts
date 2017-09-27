@@ -105,8 +105,11 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
         if (opFn) {
           let literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
-          if (opFn.includes('qual') && literal) {
-            opFn = opFn.replace(/(e|E)(qual)/, (a, f, r) => `${f === 'e' ? 'd' : 'D'}eepE${r}`);
+          if (/equal/i.test(opFn) && literal) {
+            opFn = {
+              strictEqual: 'deepStrictEqual', equal: 'deepEqual',
+              notStrictEqual: 'notDeepStrictEqual', notEqual: 'notDeepEqual'
+            }[opFn] || opFn;
           }
 
           node = doAssert(state, node, opFn, [comp.left, comp.right, message!]);
