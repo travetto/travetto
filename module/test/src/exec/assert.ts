@@ -83,6 +83,8 @@ export class AssertUtil {
         default:
           (assert as any)[name].apply(null, args);
       }
+      // Pushing on not error
+      this.asserts.push(assertion);
     } catch (e) {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
