@@ -36,19 +36,14 @@ function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, name
     ts.createLiteral(name),
     ...args
   ]));
+
   for (let arg of args) {
     arg.parent = check;
   }
 
-  let ret = ts.createCall(state.assertInvoke, undefined, ts.createNodeArray([
-    ts.createArrowFunction(undefined, undefined, [],
-      undefined, ts.createToken(ts.SyntaxKind.EqualsGreaterThanToken), check)
-  ]));
+  check.parent = node.parent;
 
-  ret.parent = node.parent;
-  check.parent = ret;
-
-  return ret as any as T;
+  return check as any as T;
 }
 
 function prepAssert(state: AssertState) {

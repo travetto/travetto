@@ -1,8 +1,9 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
+import * as assert from 'assert';
 import { bulkFind } from '@encore2/base';
 
-import { TestConfig, TestResult, SuiteConfig, SuiteResult } from '../model';
+import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../model';
 import { TestRegistry } from '../service';
 import { ListenEvent } from './listener';
 import { ConsoleCapture } from './console';
@@ -91,11 +92,21 @@ export class TestUtil {
         result.status = 'success';
       } else {
         result.status = 'fail';
-        result.error = JSON.parse(JSON.stringify(err));
+        result.error = err;
       }
     } finally {
       result.output = ConsoleCapture.end();
       result.assertions = AssertUtil.end();
+    }
+
+    if (result.status === 'fail' && result.error) {
+      let err = result.error;
+      if (!(err instanceof assert.AssertionError)) {
+        let [file, line] = err.stack!.split('\n')[2].split(/[()]/g).slice(-2, -1)[0].split(':');
+        file = file.split(process.cwd() + '/')[1];
+        const assertion: Assertion = { file, line: parseInt(line, 10), operator: 'throws', text: '', error: err, message: `Error thrown: ${err.message}` };
+        result.assertions.push(assertion);
+      }
     }
 
     return result as TestResult;
