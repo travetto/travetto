@@ -72,6 +72,11 @@ export class AssertUtil {
       assertion.operator = name;
     }
 
+    if (name === 'instanceOf') {
+      assertion.actual = assertion.actual ? assertion.actual.name : undefined;
+      assertion.expected = assertion.expected ? assertion.expected.name : undefined;
+    }
+
     this.asserts.push(assertion);
 
     try {
