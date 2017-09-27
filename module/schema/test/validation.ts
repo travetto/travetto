@@ -28,6 +28,9 @@ class MinTest extends SchemaBound {
 }
 
 function findError(errors: ValidationError[], path: string, message: string) {
+  if (Math.random() > 0) {
+    //throw new Error('Ruh roh raggy');
+  }
   return errors.find(x => x.path === path && x.message.includes(message));
 }
 
@@ -49,7 +52,7 @@ class Validation {
       assert.fail('Validation should have failed');
     } catch (e) {
       console.log(e);
-      assert.ok(findError(e.errors, 'url', 'not a valid url'));
+      assert(findError(e.errors, 'url', 'not a valid url'));
     }
   }
 
@@ -66,9 +69,9 @@ class Validation {
       await SchemaValidator.validate(res);
       assert.fail('Validation should have failed');
     } catch (e) {
-      assert.ok(findError(e.errors, 'responses', 'required'));
-      assert.ok(findError(e.errors, 'response.pandaState', 'TIRED'));
-      assert.ok(findError(e.errors, 'response.url', 'not a valid url'));
+      assert(findError(e.errors, 'responses', 'required'));
+      assert(findError(e.errors, 'response.pandaState', 'TIRED'));
+      assert(findError(e.errors, 'response.url', 'not a valid url'));
     }
   }
 

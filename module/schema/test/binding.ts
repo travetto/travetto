@@ -105,7 +105,7 @@ class DataBinding {
     });
     assert(res.questionId === '20');
     assert(!!res.answer);
-    assert(res.answer == ['a', 'd']);
+    assert(res.answer === ['a', 'd']);
   }
 
   @Test('Should handle inheritance')
