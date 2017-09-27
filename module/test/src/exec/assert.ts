@@ -31,9 +31,7 @@ export class AssertUtil {
         let [file, line] = new Error().stack!.split('\n')[2].split(/[()]/g).slice(-2, -1)[0].split(':');
         file = file.split(process.cwd() + '/')[1];
 
-        const assertion: Assertion = { file, line: parseInt(line, 10), operator: 'throws', text: '' };
-        assertion.error = e;
-        assertion.message = e.message;
+        const assertion: Assertion = { file, line: parseInt(line, 10), operator: 'throws', text: '', error: e, message: `Error thrown: ${e.message}` };
         this.asserts.push(assertion);
         throw assertion;
       }
