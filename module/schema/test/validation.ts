@@ -28,9 +28,6 @@ class MinTest extends SchemaBound {
 }
 
 function findError(errors: ValidationError[], path: string, message: string) {
-  if (Math.random() > 0) {
-    //throw new Error('Ruh roh raggy');
-  }
   return errors.find(x => x.path === path && x.message.includes(message));
 }
 
