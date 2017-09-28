@@ -17,9 +17,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private pendingFinalize: Class[] = [];
 
   private instances = new Map<TargetId, Map<string, any>>();
-  private proxyHandlers = new Map<TargetId, Map<string, RetargettingHandler<any>>>();
   private aliases = new Map<TargetId, Map<string, string>>();
   private targets = new Map<ClassId, Map<string, TargetId>>();
+
+  private proxies = new Map<TargetId, Map<string, Proxy<RetargettingHandler<any>>>>();
+  private proxyHandlers = new Map<TargetId, Map<string, RetargettingHandler<any>>>();
 
   private autoCreate: (Dependency<any> & { priority: number })[] = [];
 
@@ -120,8 +122,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.instances.set(targetId, new Map());
     }
 
-    if (!this.proxyHandlers.has(targetId)) {
-      this.proxyHandlers.set(targetId, new Map());
+    if (AppEnv.watch) {
+      if (!this.proxies.has(targetId)) {
+        this.proxies.set(targetId, new Map());
+        this.proxyHandlers.set(targetId, new Map());
+      }
     }
 
     let out: any = instance;
@@ -130,16 +135,18 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // if in watch mode, create proxies
     if (AppEnv.watch) {
-      if (!this.proxyHandlers.has(targetId) || !this.proxyHandlers.get(targetId)!.has(name)) {
+      if (!this.proxies.get(targetId)!.has(name)) {
         let handler = new RetargettingHandler(out);
-        out = new Proxy({}, handler);
+        let proxy = new Proxy({}, handler);
         this.proxyHandlers.get(targetId)!.set(name, handler);
+        this.proxies.get(targetId)!.set(name, proxy);
+        out = proxy;
         console.debug('Registering proxy', target.__id, name);
       } else {
         let handler = this.proxyHandlers.get(targetId)!.get(name)!;
         console.debug('Updating target', target.__id, name, out);
         handler.target = out;
-        out = handler;
+        out = this.proxies.get(targetId)!.get(name);
       }
     }
 
@@ -240,8 +247,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // If already loaded, reload
     if (AppEnv.watch &&
-      this.proxyHandlers.has(targetId) &&
-      this.proxyHandlers.get(targetId)!.has(config.name)
+      this.proxies.has(targetId) &&
+      this.proxies.get(targetId)!.has(config.name)
     ) {
       console.debug('Reloading on next tick');
       // Timing matters b/c of create instance
@@ -269,11 +276,12 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         this.instances.get(targetId)!.has(config) &&
         this.instances.get(targetId)!.get(config).constructor.__id === cls.__id
       ) {
-        this.instances.get(targetId)!.delete(config);
         let handler = this.proxyHandlers.get(targetId)!.get(config)
         if (handler) {
           handler.target = null;
         }
+
+        this.instances.get(targetId)!.delete(config);
         console.debug('On uninstall', cls.__id, config, targetId, handler);
         this.targets.get(cls.__id)!.delete(config);
       }
@@ -284,6 +292,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     super.onReset();
     this.pendingFinalize = [];
     this.instances.clear();
+    this.proxies.clear();
     this.proxyHandlers.clear();
     this.aliases.clear();
     this.targets.clear();
