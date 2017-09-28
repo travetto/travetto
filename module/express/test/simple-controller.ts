@@ -5,21 +5,28 @@ import { Injectable, DependencyRegistry } from '@encore2/di';
 // const papaparse = require('papaparse');
 // import * as papaparse from 'papaparse';
 
-
 @Controller('/simple')
 export class Simple {
 
   constructor(private service: MockService) {
   }
 
-  @Get('/name')
-  async doIt() {
-    return this.service.fetch();
+  @Get('/nameAngry')
+  async doItAngry() {
+    let user = await this.service.fetch();
+    return user.first.toUpperCase();
   }
 
   @Get('/names')
-  async doIts() {
-    return [this.service.fetch().first.repeat(1), 'roger', 'sam', 'oscar  '];
+  async doIt() {
+    let user = await this.service.fetch();
+    return user.first;
+  }
+
+  @Get('/name2')
+  async doIt2() {
+    let user = await this.service.fetch2();
+    return user.last;
   }
 
   @Get('/ages')

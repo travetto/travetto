@@ -73,7 +73,7 @@ export class ExpressApp {
         this.unregisterController(ControllerRegistry.getExpired(e.prev)!);
       }
       if (e.curr) {
-        this.registerController(ControllerRegistry.get(e.curr)!);
+        this.registerController(ControllerRegistry.get(e.curr!)!);
       }
     });
 

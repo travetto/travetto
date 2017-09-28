@@ -11,7 +11,7 @@ export class Simple {
 
   @Get('/name')
   async doIt() {
-    return 'bob';
+    return 'bobs';
   }
 
   @Get('/age')
