@@ -134,12 +134,12 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         let handler = new RetargettingHandler(out);
         out = new Proxy({}, handler);
         this.proxyHandlers.get(targetId)!.set(name, handler);
-        console.debug('Registering proxy', out.__id, target.__id, name);
+        console.debug('Registering proxy', target.__id, name);
       } else {
-        console.debug('Updating target', this.proxyHandlers.get(targetId)!.get(name)!.__id, target.__id, name, out);
-        this.proxyHandlers.get(targetId)!.get(name)!.target = out;
-        // Don't overwrite, duh
-        return;
+        let handler = this.proxyHandlers.get(targetId)!.get(name)!;
+        console.debug('Updating target', target.__id, name, out);
+        handler.target = out;
+        out = handler;
       }
     }
 
