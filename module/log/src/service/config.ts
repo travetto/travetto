@@ -1,4 +1,5 @@
 import { Config } from '@encore2/config';
+import { AppEnv } from '@encore2/base';
 
 @Config('logging')
 export class LoggerConfig {
@@ -8,7 +9,7 @@ export class LoggerConfig {
       type: 'console',
       enabled: true,
       replaceConsole: null,
-      level: 'info',
+      level: AppEnv.debug ? 'debug' : 'info',
       layout: {
         type: 'standard',
         timestamp: true,
