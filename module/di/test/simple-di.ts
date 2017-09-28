@@ -53,7 +53,6 @@ class DiTest {
     assert.ok(inst.db);
     assert(inst.age === 30);
 
-
     assert.equal(inst.db.altConfig, undefined);
     assert(inst.db.dbConfig.getUrl() === 'mongodb://oscar');
   }
@@ -74,6 +73,7 @@ class DiTest2 {
     await DependencyRegistry.init();
     let inst = await DependencyRegistry.getInstance(ServiceInherit);
     inst.doWork();
+
     assert.ok(inst.db);
     assert(inst.age === 30);
 

@@ -80,26 +80,25 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const fieldKeys = Object.keys(managed.dependencies.fields!);
 
     let consDeps = managed.dependencies.cons || [];
+    let allDeps = consDeps.concat(fieldKeys.map(x => managed.dependencies.fields[x]))
 
-    const promises =
-      consDeps
-        .concat(fieldKeys.map(x => managed.dependencies.fields[x]))
-        .map(async x => {
-          try {
-            return await this.getInstance(x.target, x.name);
-          } catch (e) {
-            if (x.optional && e instanceof InjectionError) {
-              return undefined;
-            } else {
-              throw e;
-            }
+    const promises = allDeps
+      .map(async x => {
+        try {
+          return await this.getInstance(x.target, x.name);
+        } catch (e) {
+          if (x.optional && e instanceof InjectionError) {
+            return undefined;
+          } else {
+            throw e;
           }
-        });
+        }
+      });
 
-    const allDeps = await Promise.all(promises);
+    const all = await Promise.all(promises);
 
-    const consValues = allDeps.slice(0, consDeps.length);
-    const fieldValues = allDeps.slice(consDeps.length);
+    const consValues = all.slice(0, consDeps.length);
+    const fieldValues = all.slice(consDeps.length);
 
     const inst = new managed.class(...consValues);
 
@@ -127,16 +126,20 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     let out: any = instance;
 
+    console.debug('Creating Instance', targetId, AppEnv.watch, !this.proxyHandlers.has(targetId), this.proxyHandlers.has(targetId) && !this.proxyHandlers.get(targetId)!.has(name))
+
     // if in watch mode, create proxies
     if (AppEnv.watch) {
       if (!this.proxyHandlers.has(targetId) || !this.proxyHandlers.get(targetId)!.has(name)) {
-        console.debug('Registering proxy', target.__id, name);
         let handler = new RetargettingHandler(out);
         out = new Proxy({}, handler);
         this.proxyHandlers.get(targetId)!.set(name, handler);
+        console.debug('Registering proxy', out.__id, target.__id, name);
       } else {
-        console.debug('Updating target', target.__id);
+        console.debug('Updating target', this.proxyHandlers.get(targetId)!.get(name)!.__id, target.__id, name, out);
         this.proxyHandlers.get(targetId)!.get(name)!.target = out;
+        // Don't overwrite, duh
+        return;
       }
     }
 
@@ -240,6 +243,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.proxyHandlers.has(targetId) &&
       this.proxyHandlers.get(targetId)!.has(config.name)
     ) {
+      console.debug('Reloading on next tick');
       // Timing matters b/c of create instance
       process.nextTick(() => this.createInstance(config.target, config.name));
     } else if (config.autoCreate.create) {
