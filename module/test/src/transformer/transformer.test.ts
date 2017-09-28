@@ -14,6 +14,13 @@ const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
   [ts.SyntaxKind.InstanceOfKeyword]: 'instanceOf'
 }
 
+const EQUALS_MAPPING: { [key: string]: string } = {
+  strictEqual: 'deepStrictEqual',
+  equal: 'deepEqual',
+  notStrictEqual: 'notDeepStrictEqual',
+  notEqual: 'notDeepEqual'
+}
+
 interface AssertState extends State {
   assert: ts.Identifier;
   hasAssertCall: boolean;
@@ -101,10 +108,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         if (opFn) {
           let literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
           if (/equal/i.test(opFn) && literal) {
-            opFn = {
-              strictEqual: 'deepStrictEqual', equal: 'deepEqual',
-              notStrictEqual: 'notDeepStrictEqual', notEqual: 'notDeepEqual'
-            }[opFn] || opFn;
+            opFn = EQUALS_MAPPING[opFn] || opFn;
           }
 
           node = doAssert(state, node, opFn, [comp.left, comp.right, message!]);
