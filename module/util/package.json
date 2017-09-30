@@ -1,12 +1,18 @@
 {
-  "author": "", 
+  "author": {
+    "name": "Timothy Soehnlin",
+    "email": "timothy.soehnlin@gmail.com"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/util.git"
+  },
   "dependencies": {
-    "@travetto/base": "git+ssh://git@git.eaiti.com/encore2/base.git#v1.x.x"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@travetto/util", 
-  "scripts": {}, 
-  "version": "1.0.8"
+    "@travetto/base": "^0.0.1"
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/util",
+  "scripts": {},
+  "version": "0.0.1"
 }
