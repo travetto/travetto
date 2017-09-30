@@ -1,5 +1,8 @@
 {
-  "author": "", 
+  "author": {
+    "name" : "Timothy Soehnlin",
+    "email": "timothy.soehnlin@gmail.com"
+  }, 
   "dependencies": {
     "@types/glob": "^5.0.31", 
     "@types/node": "^8.0.24", 
@@ -10,7 +13,8 @@
   "description": "", 
   "license": "ISC", 
   "main": "index.ts", 
-  "name": "@encore/base", 
+  "name": "@travetto/base", 
   "scripts": {}, 
-  "version": "0.0.19"
+  "version": "0.0.19",
+  "repository" : "git@github.com:travetto/base.git"
 }
