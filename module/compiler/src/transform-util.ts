@@ -1,7 +1,7 @@
 import { Compiler } from './compiler';
 import * as ts from 'typescript';
 import { dirname } from 'path';
-import { AppEnv, AppInfo } from '@encore2/base';
+import { AppEnv, AppInfo } from '@travetto/base';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
@@ -50,12 +50,12 @@ export class TransformUtil {
       if (ident && ident.escapedText in patterns) {
         let { path } = state.imports.get(ident.escapedText! as string)!;
         let packages = patterns[ident.escapedText as string];
-        if (path.includes('@encore2') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@encore2')) {
+        if (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto2')) {
           let pkg = '';
           if (!path.includes('node_modules')) {
             pkg = AppInfo.NAME;
           } else {
-            pkg = '@encore2/' + path.split(/@encore2\//)[1].split('/')[0];
+            pkg = '@travetto/' + path.split(/@travetto2\//)[1].split('/')[0];
           }
           if (packages.has(pkg)) {
             return dec;

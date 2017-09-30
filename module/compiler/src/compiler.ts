@@ -6,7 +6,7 @@ import * as glob from 'glob';
 import * as chokidar from 'chokidar';
 import { EventEmitter } from 'events';
 
-import { bulkRequire, bulkFindSync, AppEnv, AppInfo } from '@encore2/base';
+import { bulkRequire, bulkFindSync, AppEnv, AppInfo } from '@travetto/base';
 import { RetargettingHandler } from './proxy';
 
 const Module = require('module');
@@ -42,7 +42,7 @@ export class Compiler {
   static emptyRequire = 'module.exports = {}';
 
   static libraryPath = 'node_modules';
-  static frameworkWorkingSet = `${Compiler.libraryPath}/@encore2/*/src/**/*.ts`;
+  static frameworkWorkingSet = `${Compiler.libraryPath}/@travetto/*/src/**/*.ts`;
   static appWorkingSet = `src/**/*.ts`;
   static transformerSet = '**/transformer.*.ts';
 
@@ -179,7 +179,7 @@ export class Compiler {
 
     content = this.contents.get(jsf)!;
 
-    if (/\/test\//.test(tsf) && !tsf.includes('@encore2')) {
+    if (/\/test\//.test(tsf) && !tsf.includes('@travetto')) {
       console.debug(content);
     }
 

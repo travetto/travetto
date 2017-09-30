@@ -1,19 +1,25 @@
 {
-  "author": "", 
+  "author": {
+    "name": "Timothy Soehnlin",
+    "email": "timothy.soehnlin@gmail.com"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/compiler.git"
+  },
   "dependencies": {
-    "@encore2/base": "git+ssh://git@git.eaiti.com/encore2/base.git#v1.x.x", 
-    "@types/chokidar": "^1.7.2", 
-    "@types/node": "^8.0.24", 
-    "@types/source-map-support": "^0.4.0", 
-    "chokidar": "^1.7.0", 
-    "farmhash": "^2.0.3", 
-    "source-map-support": "^0.4.16", 
+    "@travetto/base": "^0.0.1",
+    "@types/chokidar": "^1.7.2",
+    "@types/node": "^8.0.24",
+    "@types/source-map-support": "^0.4.0",
+    "chokidar": "^1.7.0",
+    "farmhash": "^2.0.3",
+    "source-map-support": "^0.4.16",
     "tslib": "^1.7.1"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@encore2/compiler", 
-  "scripts": {}, 
-  "version": "1.0.62"
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/compiler",
+  "scripts": {},
+  "version": "0.0.1"
 }
