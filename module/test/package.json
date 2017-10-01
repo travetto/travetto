@@ -22,5 +22,5 @@
   "scripts": {
     "test": "./bin/travetto-test.js"
   }, 
-  "version": "0.0.2"
+  "version": "0.0.3"
 }
