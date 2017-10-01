@@ -1,12 +1,12 @@
-import { Config } from '@encore2/config';
+import { Config } from '@travetto/config';
 
 @Config('mail')
 export class MailConfig {
   transport = 'sendmail';
   defaults = {
     title: 'Email Title',
-    from: 'Encore Mailer <mailer@encore.org>',
-    replyTo: 'Encore Mailer <mailer@encore.org>',
+    from: 'Travetto Mailer <mailer@travetto.org>',
+    replyTo: 'Travetto Mailer <mailer@travetto.org>',
   };
   inky = {};
 

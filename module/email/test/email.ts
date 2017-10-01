@@ -2,7 +2,7 @@ import 'mocha';
 
 import { EmailService } from '../src';
 import { expect } from 'chai';
-import { Registry } from '@encore2/di';
+import { Registry } from '@travetto/di';
 
 describe('Emails', () => {
   it('Should template properly', async () => {

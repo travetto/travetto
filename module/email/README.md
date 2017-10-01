@@ -1,4 +1,4 @@
-encore: Email
+travetto: Email
 ===
 
 This module provides email support using `nodemailer`.  This also supports templating using 

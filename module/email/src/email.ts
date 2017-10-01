@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { TemplateMailOptions, TemplateContext } from './types';
-import { Injectable } from '@encore2/di';
+import { Injectable } from '@travetto/di';
 import { MailConfig } from './config';
 
 const juice = require('juice');
