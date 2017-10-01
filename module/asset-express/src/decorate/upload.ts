@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { AssetUtil, AssetFile } from '@encore2/asset';
-import { ControllerRegistry } from '@encore2/express';
+import { AssetUtil, AssetFile } from '@travetto/asset';
+import { ControllerRegistry } from '@travetto/express';
 import { AssetExpressConfig } from '../config';
-import { Class } from '@encore2/registry';
+import { Class } from '@travetto/registry';
 import * as util from 'util';
 
 const match = require('mime-match');

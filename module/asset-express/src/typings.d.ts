@@ -1,4 +1,4 @@
-import { Asset } from '@encore2/asset';
+import { Asset } from '@travetto/asset';
 
 declare module 'express' {
 	export interface Request {

@@ -1,4 +1,4 @@
-import { Config } from '@encore2/config';
+import { Config } from '@travetto/config';
 
 @Config('upload')
 export class AssetExpressConfig {
