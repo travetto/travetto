@@ -1,25 +1,25 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
-  "repository": {
-    "url": "https://github.com/travetto/cache.git"
-  },
+  }, 
   "dependencies": {
-    "@travetto/compiler": "0.x.x",
-    "@types/lru-cache": "^4.0.0",
+    "@travetto/compiler": "0.x.x", 
+    "@types/lru-cache": "^4.0.0", 
     "lru-cache": "^4.1.1"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@travetto/cache",
+  }, 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@travetto/cache", 
+  "repository": {
+    "url": "https://github.com/travetto/cache.git"
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test.js"
-  },
-  "version": "0.0.1"
+  }, 
+  "version": "0.0.2"
 }
