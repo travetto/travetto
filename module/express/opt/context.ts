@@ -1,13 +1,13 @@
-import { Context } from '@encore2/context';
+import { Context } from '@travetto/context';
 
 import { Request, Response } from 'express';
 import { ExpressOperator } from '../src/service/operator';
-import { Injectable } from '@encore2/di';
+import { Injectable } from '@travetto/di';
 import { ExpressApp } from '../index';
 
 @Injectable({
   target: ExpressOperator,
-  name: '@encore2/context'
+  name: '@travetto/context'
 })
 export class ContextMantainer extends ExpressOperator {
 

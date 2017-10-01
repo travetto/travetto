@@ -1,4 +1,4 @@
-encore: Express
+travetto: Express
 ===
 
 This module provides three main areas of functionality:

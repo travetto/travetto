@@ -1,4 +1,4 @@
-import { Injectable } from '@encore2/di';
+import { Injectable } from '@travetto/di';
 
 
 class User {

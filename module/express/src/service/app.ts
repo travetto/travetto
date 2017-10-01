@@ -3,11 +3,11 @@ import { ExpressConfig } from '../config';
 import * as express from 'express';
 import { RouteUtil } from '../util';
 import { ControllerConfig } from '../model';
-import { Injectable, DependencyRegistry } from '@encore2/di';
+import { Injectable, DependencyRegistry } from '@travetto/di';
 import { ControllerRegistry } from './registry';
-import { toPromise } from '@encore2/util';
+import { toPromise } from '@travetto/util';
 import { ExpressOperator } from './operator';
-import { Class } from '@encore2/registry';
+import { Class } from '@travetto/registry';
 
 @Injectable({ autoCreate: { create: true, priority: 1 } })
 export class ExpressApp {

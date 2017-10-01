@@ -1,6 +1,6 @@
 import { Controller, Get } from '../src';
 import { MockService } from './mock';
-import { Injectable, DependencyRegistry } from '@encore2/di';
+import { Injectable, DependencyRegistry } from '@travetto/di';
 
 
 @Controller('/weird')

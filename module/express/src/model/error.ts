@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { BaseError } from '@encore2/base';
+import { BaseError } from '@travetto/base';
 import { Renderable } from './renderable';
 
 type Status = { status: number };

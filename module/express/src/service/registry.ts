@@ -3,10 +3,10 @@ import { EventEmitter } from 'events';
 
 import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
 import { Renderable, Method, ControllerConfig } from '../model';
-import { toPromise } from '@encore2/util';
+import { toPromise } from '@travetto/util';
 import { ExpressApp } from './app';
-import { DependencyRegistry } from '@encore2/di';
-import { MetadataRegistry, Class } from '@encore2/registry';
+import { DependencyRegistry } from '@travetto/di';
+import { MetadataRegistry, Class } from '@travetto/registry';
 
 export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHandler> {
 

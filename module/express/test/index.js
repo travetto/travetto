@@ -1,4 +1,4 @@
-let run = require('@encore2/registry/bootstrap').init()
+let run = require('@travetto/registry/bootstrap').init()
   .then(x => {
     require('./simple-controller');
   }); 

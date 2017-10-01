@@ -1,8 +1,8 @@
 import * as moment from 'moment';
 import { PathType } from '../model';
 import { ControllerRegistry } from '../service';
-import { DependencyRegistry } from '@encore2/di';
-import { Class } from '@encore2/registry';
+import { DependencyRegistry } from '@travetto/di';
+import { Class } from '@travetto/registry';
 
 export function Controller(path = '') {
   return (target: Class) => {

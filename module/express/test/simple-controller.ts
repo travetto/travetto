@@ -1,6 +1,6 @@
 import { Controller, Get } from '../src';
 import { MockService } from './mock';
-import { Injectable, DependencyRegistry } from '@encore2/di';
+import { Injectable, DependencyRegistry } from '@travetto/di';
 
 // const papaparse = require('papaparse');
 // import * as papaparse from 'papaparse';
@@ -11,16 +11,16 @@ export class Simple {
   constructor(private service: MockService) {
   }
 
-  @Get('/nameAngry')
-  async doItAngry() {
+  @Get('/name')
+  async doIt() {
     let user = await this.service.fetch();
     return user.first.toUpperCase();
   }
 
-  @Get('/names')
-  async doIt() {
+  @Get('/nameAngry')
+  async doItAngry() {
     let user = await this.service.fetch();
-    return user.first;
+    return user.first.toUpperCase();
   }
 
   @Get('/name2')
