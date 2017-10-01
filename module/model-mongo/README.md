@@ -1,4 +1,4 @@
-encore: Mongo
+travetto: Mongo
 ===
 
 This module provides access to Mongo DB, and provides easy access to a mongodb instance.  It also 

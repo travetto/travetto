@@ -1,3 +1,3 @@
-require('@encore2/registry/bootstrap').init().then(() => {
+require('@travetto/registry/bootstrap').init().then(() => {
   require('./simple')
 });

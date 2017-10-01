@@ -1,16 +1,22 @@
 {
-  "author": "", 
+  "author": {
+    "email": "timothy.soehnlin@gmail.com",
+    "name": "Timothy Soehnlin"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/model-mongo.git"
+  },
   "dependencies": {
-    "@encore2/model": "git+ssh://git@git.eaiti.com/encore2/model.git#v1.x.x", 
-    "@types/flat": "0.0.28", 
-    "@types/mongodb": "^2.2.10", 
-    "flat": "^4.0.0", 
+    "@travetto/model": "0.x.x",
+    "@types/flat": "0.0.28",
+    "@types/mongodb": "^2.2.10",
+    "flat": "^4.0.0",
     "mongodb": "^2.2.31"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@encore2/model-mongo", 
-  "scripts": {}, 
-  "version": "1.0.7"
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/model-mongo",
+  "scripts": {},
+  "version": "0.0.1"
 }

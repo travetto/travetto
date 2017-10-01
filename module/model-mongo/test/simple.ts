@@ -1,5 +1,5 @@
-import { Model, ModelService, BaseModel } from '@encore2/model';
-import { DependencyRegistry } from '@encore2/di';
+import { Model, ModelService, BaseModel } from '@travetto/model';
+import { DependencyRegistry } from '@travetto/di';
 
 @Model()
 class Person extends BaseModel {

@@ -2,10 +2,10 @@ import * as mongo from 'mongodb';
 import * as flat from 'flat';
 import * as _ from 'lodash';
 
-import { ModelSource, IndexConfig, Query, QueryOptions, BulkState, BulkResponse, ModelRegistry, ModelCore, isSubQuery } from '@encore2/model';
-import { Injectable } from '@encore2/di';
+import { ModelSource, IndexConfig, Query, QueryOptions, BulkState, BulkResponse, ModelRegistry, ModelCore, isSubQuery } from '@travetto/model';
+import { Injectable } from '@travetto/di';
 import { ModelMongoConfig } from './config';
-import { Class } from '@encore2/registry';
+import { Class } from '@travetto/registry';
 
 @Injectable({ target: ModelSource })
 export class MongoModelSource extends ModelSource {
