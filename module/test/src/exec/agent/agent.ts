@@ -1,5 +1,5 @@
 import * as child_process from 'child_process';
-import { exec } from '@encore2/util';
+import { exec } from '@travetto/util';
 
 export class Agent {
   process: child_process.ChildProcess;

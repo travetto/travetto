@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import * as assert from 'assert';
-import { TransformUtil, State } from '@encore2/compiler';
+import { TransformUtil, State } from '@travetto/compiler';
 
 const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
   [ts.SyntaxKind.EqualsEqualsToken]: 'equal',
@@ -68,8 +68,8 @@ function prepAssert(state: AssertState) {
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AssertState): T {
   if (ts.isMethodDeclaration(node) || ts.isClassDeclaration(node)) {
     let dec = TransformUtil.findAnyDecorator(node, {
-      'Test': new Set(['@encore2/test']),
-      'Suite': new Set(['@encore2/test'])
+      'Test': new Set(['@travetto/test']),
+      'Suite': new Set(['@travetto/test'])
     }, state);
     if (dec) {
       if (ts.isCallExpression(dec.expression)) {

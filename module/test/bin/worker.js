@@ -11,8 +11,8 @@ if (!!process.env.DEBUG) {
 
 agent((done) => {
   console.debug('Init');
-  require('@encore2/base/bootstrap');
-  Compiler = require('@encore2/compiler').Compiler;
+  require('@travetto/base/bootstrap');
+  Compiler = require('@travetto/compiler').Compiler;
   Compiler.workingSets = ['!'];
   Compiler.init(process.cwd());
   done();
@@ -22,11 +22,11 @@ agent((done) => {
   // Clear require cache
   console.debug('Resetting', Object.keys(require.cache).length)
   for (let k of Object.keys(require.cache)) {
-    if (/node_modules/.test(k) && !/@encore/.test(k)) {
+    if (/node_modules/.test(k) && !/@travetto/.test(k)) {
       continue;
     }
     if (k.endsWith('.ts') &&
-      !/@encore2\/(base|config|compiler)/.test(k) &&
+      !/@travetto\/(base|config|compiler)/.test(k) &&
       !/transformer\..*\.ts/.test(k))
     {
       console.debug('Reset', k)

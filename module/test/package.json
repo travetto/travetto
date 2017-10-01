@@ -1,20 +1,26 @@
 {
-  "author": "", 
+  "author": {
+    "email": "timothy.soehnlin@gmail.com",
+    "name": "Timothy Soehnlin"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/test.git"
+  },
   "bin": {
-    "encore-test": "bin/encore-test.js"
-  }, 
+    "travetto-test": "bin/encore-test.js"
+  },
   "dependencies": {
-    "@encore2/registry": "git+ssh://git@git.eaiti.com/encore2/registry.git#v1.x.x", 
-    "@encore2/util": "git+ssh://git@git.eaiti.com/encore2/util.git#v1.x.x", 
-    "@types/minimist": "^1.2.0", 
+    "@travetto/registry": "0.x.x",
+    "@travetto/util": "0.x.x",
+    "@types/minimist": "^1.2.0",
     "minimist": "^1.2.0"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "src/lib/", 
-  "name": "@encore2/test", 
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "src/lib/",
+  "name": "@travetto/test",
   "scripts": {
-    "test": "./bin/encore-test.js"
-  }, 
-  "version": "1.0.35"
+    "test": "./bin/travetto-test.js"
+  },
+  "version": "0.0.1"
 }

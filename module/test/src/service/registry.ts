@@ -1,4 +1,4 @@
-import { MetadataRegistry, Class } from '@encore2/registry';
+import { MetadataRegistry, Class } from '@travetto/registry';
 import { SuiteConfig, TestConfig } from '../model';
 
 class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {

@@ -1,4 +1,4 @@
-import { Injectable, DependencyRegistry } from '@encore2/di';
+import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '../';
 import * as assert from 'assert';
 

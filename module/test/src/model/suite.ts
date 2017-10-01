@@ -1,5 +1,5 @@
 import { TestConfig, TestResult } from './test';
-import { Class } from '@encore2/registry/src/model/types';
+import { Class } from '@travetto/registry/src/model/types';
 
 export interface SuiteConfig {
   class: Class;

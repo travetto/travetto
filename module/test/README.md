@@ -1,4 +1,4 @@
-encore: Test
+travetto: Test
 ===
 
 This module provides general integration with `ava`:

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 import * as assert from 'assert';
-import { bulkFind } from '@encore2/base';
+import { bulkFind } from '@travetto/base';
 
 import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../model';
 import { TestRegistry } from '../service';

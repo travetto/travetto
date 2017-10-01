@@ -1,4 +1,4 @@
-import { AppEnv } from '@encore2/base';
+import { AppEnv } from '@travetto/base';
 import * as assert from 'assert';
 import { Assertion } from '../model';
 
