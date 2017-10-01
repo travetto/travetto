@@ -1,7 +1,7 @@
-import { AssetService, AssetUtil, Asset } from '@encore2/asset';
-import { timeout } from '@encore2/test';
+import { AssetService, AssetUtil, Asset } from '@travetto/asset';
+import { timeout } from '@travetto/test';
 import { expect } from 'chai';
-import { DependencyRegistry, Injectable } from '@encore2/di';
+import { DependencyRegistry, Injectable } from '@travetto/di';
 import * as fs from 'fs';
 import * as mongo from 'mongodb';
 

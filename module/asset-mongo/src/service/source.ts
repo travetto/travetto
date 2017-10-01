@@ -2,8 +2,8 @@ import * as mongo from 'mongodb';
 import * as Grid from 'gridfs-stream';
 import * as util from 'util';
 
-import { Injectable, Inject } from '@encore2/di';
-import { AssetSource, Asset } from '@encore2/asset';
+import { Injectable, Inject } from '@travetto/di';
+import { AssetSource, Asset } from '@travetto/asset';
 import { MongoAssetConfig } from './config';
 
 const setTimeoutAsync = util.promisify(setTimeout);
