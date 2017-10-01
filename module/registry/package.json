@@ -1,13 +1,19 @@
 {
-  "author": "", 
+  "author": {
+    "email": "timothy.soehnlin@gmail.com", 
+    "name": "Timothy Soehnlin"
+  }, 
   "dependencies": {
-    "@encore2/compiler": "git+ssh://git@git.eaiti.com/encore2/compiler.git#v1.x.x", 
-    "@encore2/config": "git+ssh://git@git.eaiti.com/encore2/config.git#v1.x.x"
+    "@travetto/compiler": "0.x.x", 
+    "@travetto/config": "0.x.x"
   }, 
   "description": "", 
   "license": "ISC", 
   "main": "index.ts", 
-  "name": "@encore2/registry", 
+  "name": "@travetto/registry", 
+  "repository": {
+    "url": "https://github.com/travetto/registry.git"
+  }, 
   "scripts": {}, 
-  "version": "1.0.65"
+  "version": "0.0.2"
 }
