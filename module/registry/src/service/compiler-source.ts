@@ -1,6 +1,6 @@
-import { Compiler } from '@encore2/compiler';
+import { Compiler } from '@travetto/compiler';
 import { Class } from '../model/types';
-import { bulkFind } from '@encore2/base';
+import { bulkFind } from '@travetto/base';
 import { EventEmitter } from 'events';
 import { ClassSource, ChangeEvent } from './class-source';
 import { PendingRegister } from '../decorator/register';

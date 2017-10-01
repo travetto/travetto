@@ -1,5 +1,5 @@
-require('@encore2/config/bootstrap');
-require('@encore2/compiler/bootstrap');
+require('@travetto/config/bootstrap');
+require('@travetto/compiler/bootstrap');
 
 module.exports = require('./src/service/root').RootRegistry;
 

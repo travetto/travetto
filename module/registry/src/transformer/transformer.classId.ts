@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import * as path from 'path';
-import { TransformUtil, Import, State } from '@encore2/compiler';
+import { TransformUtil, Import, State } from '@travetto/compiler';
 
 const SEP = path.sep;
 const RE_SEP = SEP === '/' ? '\\/' : SEP;
