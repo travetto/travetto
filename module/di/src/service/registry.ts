@@ -1,8 +1,8 @@
 import { Dependency, InjectableConfig, ClassTarget } from '../types';
 import { InjectionError } from './error';
-import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@encore2/registry';
-import { AppEnv } from '@encore2/base';
-import { RetargettingHandler } from '@encore2/compiler';
+import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
+import { AppEnv } from '@travetto/base';
+import { RetargettingHandler } from '@travetto/compiler';
 
 export const DEFAULT_INSTANCE = '__default';
 

@@ -1,6 +1,6 @@
 import { InjectableConfig, Dependency } from '../types';
 import { DependencyRegistry, DEFAULT_INSTANCE } from '../service';
-import { Class } from '@encore2/registry';
+import { Class } from '@travetto/registry';
 
 export function Injectable(config: Partial<InjectableConfig<any>> = {}): ClassDecorator {
   return (target: Class | any) => {

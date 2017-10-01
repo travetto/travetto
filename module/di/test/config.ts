@@ -1,6 +1,6 @@
 import { Injectable } from '../src/decorator';
 import { Util } from './util';
-import { Config } from '@encore2/config';
+import { Config } from '@travetto/config';
 
 @Config('a')
 export class DbConfig<A, B> {

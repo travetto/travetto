@@ -1,3 +1,3 @@
-import { BaseError } from '@encore2/base';
+import { BaseError } from '@travetto/base';
 
 export class InjectionError extends BaseError { }

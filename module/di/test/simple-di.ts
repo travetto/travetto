@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '../src/decorator/injectable';
 import { DbConfig, AltConfig } from './config';
 import { DependencyRegistry } from '../src/service';
-import { Suite, Test } from '@encore2/test'
+import { Suite, Test } from '@travetto/test';
 import * as assert from 'assert';
 
 @Injectable()
@@ -41,6 +41,10 @@ class ServiceInherit extends Service {
 
 const FOUR = 4;
 
+function doWork() {
+  throw new Error('ahhh');
+}
+
 @Suite('di')
 class DiTest {
 
@@ -61,6 +65,8 @@ class DiTest {
   async runner() {
     assert(1 === 1);
     assert(2 + 2 === FOUR);
+
+    doWork();
   }
 }
 
