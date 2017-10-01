@@ -1,19 +1,25 @@
 {
-  "author": "", 
+  "author": {
+    "email": "timothy.soehnlin@gmail.com",
+    "name": "Timothy Soehnlin"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/schedule.git"
+  },
   "dependencies": {
-    "@encore2/base": "git+ssh://git@git.eaiti.com/encore2/base.git#v1.x.x", 
-    "@types/cron": "^1.2.1", 
+    "@travetto/base": "0.x.x",
+    "@types/cron": "^1.2.1",
     "cron": "^1.2.1"
-  }, 
-  "description": "", 
+  },
+  "description": "",
   "devDependencies": {
-    "@encore2/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v1.x.x"
-  }, 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@encore2/schedule", 
+    "@travetto/test": "0.x.x"
+  },
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/schedule",
   "scripts": {
-    "test": "./node_modules/@encore2/test/mocha.js"
-  }, 
-  "version": "1.0.3"
+    "test": "./node_modules/.bin/travetto-test.js"
+  },
+  "version": "0.0.1"
 }

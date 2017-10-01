@@ -1,4 +1,4 @@
-import { timeout } from '@encore2/test';
+import { timeout } from '@travetto/test';
 import { Scheduler } from '../src';
 import { expect } from 'chai';
 
