@@ -1,4 +1,4 @@
-encore: Config 
+travetto: Config 
 ===
 
 This module provides common infrastructure for application based initialization.  There is a common

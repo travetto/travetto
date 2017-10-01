@@ -1,2 +1,2 @@
-require('@encore2/base/bootstrap')
+require('@travetto/base/bootstrap')
 require('./src/service/config-loader');

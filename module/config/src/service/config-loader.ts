@@ -1,4 +1,4 @@
-import { bulkRead, bulkReadSync, AppEnv } from '@encore2/base';
+import { bulkRead, bulkReadSync, AppEnv } from '@travetto/base';
 import * as flatten from 'flat';
 import * as yaml from 'js-yaml';
 import { EventEmitter } from 'events';
@@ -106,7 +106,7 @@ export class ConfigLoader {
 
   /*
     Order of specificity (least to most)
-      - Module configs -> located in the node_modules/@encore2/config folder
+      - Module configs -> located in the node_modules/@travetto/config folder
       - Local configs -> located in the config folder
       - External config file -> loaded from env
       - Environment vars -> Overrides everything
@@ -122,7 +122,7 @@ export class ConfigLoader {
     }
 
     // Load all namespaces from core
-    let files = bulkReadSync('node_modules/@encore2/*/config/*.yml');
+    let files = bulkReadSync('node_modules/@travetto/*/config/*.yml');
 
     // Load all configs, exclude env configs
     files = files.concat(bulkReadSync('config/*.yml'));
