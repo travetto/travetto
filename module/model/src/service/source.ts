@@ -1,4 +1,4 @@
-import { Class, ChangeEvent } from '@encore2/registry';
+import { Class, ChangeEvent } from '@travetto/registry';
 
 import { ModelCore, QueryOptions } from '../model';
 import { BulkState, BulkResponse } from '../model/bulk';

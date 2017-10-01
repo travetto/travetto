@@ -1,4 +1,4 @@
-encore: Model
+travetto: Model
 ===
 
 This module provides more constrained access to Mongo DB.  This is achieved using the following:

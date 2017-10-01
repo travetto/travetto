@@ -1,6 +1,6 @@
 import 'mocha';
 
-import { SchemaBound, View } from '@encore2/schema';
+import { SchemaBound, View } from '@travetto/schema';
 import { expect } from 'chai';
 import { Model, ModelService } from '../index';
 import { TestSource } from './registry';

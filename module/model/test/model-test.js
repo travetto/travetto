@@ -1,4 +1,4 @@
-require('@encore2/registry/bootstrap')
+require('@travetto/registry/bootstrap')
   .init().then(x => {
     require('./models');
   })

@@ -1,4 +1,4 @@
-import { Class } from '@encore2/registry';
+import { Class } from '@travetto/registry';
 import { ModelRegistry, ModelOptions } from '../service';
 import { SortOptions } from '../model';
 

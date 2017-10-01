@@ -1,4 +1,4 @@
-import { Class } from '@encore2/registry';
+import { Class } from '@travetto/registry';
 import { ModelCore, Query, QueryOptions, BulkState } from '../model';
 import { ModelService } from './model';
 

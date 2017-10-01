@@ -1,6 +1,6 @@
-import { Class } from '@encore2/registry';
-import { BindUtil, SchemaRegistry, SchemaValidator } from '@encore2/schema';
-import { Injectable } from '@encore2/di';
+import { Class } from '@travetto/registry';
+import { BindUtil, SchemaRegistry, SchemaValidator } from '@travetto/schema';
+import { Injectable } from '@travetto/di';
 import { ModelOptions } from './types';
 import { ModelCore, Query, QueryOptions, BulkState, ModelId } from '../model';
 import { ModelSource } from './source';

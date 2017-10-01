@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 ROOT='src/app';
-CORE=node_modules/@encore
+CORE=node_modules/@travetto
 MOD=src/lib/model
 
 rm -rf build/
@@ -23,7 +23,7 @@ COMPILE="tsc
 
 $COMPILE | grep -v 'Cannot find module'
 
-DECLS=`find build/ -name '*.d.ts' | grep 'model' | grep -v '@encore2/model/src/lib/model/types' | grep -v 'util' `
+DECLS=`find build/ -name '*.d.ts' | grep 'model' | grep -v '@travetto/model/src/lib/model/types' | grep -v 'util' `
 
 cat $DECLS |\
   grep -v import |\

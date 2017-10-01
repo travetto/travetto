@@ -1,7 +1,7 @@
-import { SchemaBound, Schema } from '@encore2/schema';
+import { SchemaBound, Schema } from '@travetto/schema';
 import { ModelCore } from './model';
 import { ModelOptions, ModelRegistry } from '../service';
-import { Class } from '@encore2/registry';
+import { Class } from '@travetto/registry';
 
 @Schema()
 export abstract class BaseModel extends SchemaBound implements ModelCore {

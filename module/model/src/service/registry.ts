@@ -1,7 +1,7 @@
-import { SchemaRegistry } from '@encore2/schema';
+import { SchemaRegistry } from '@travetto/schema';
 import { ModelOptions } from './types';
 import { EventEmitter } from 'events';
-import { MetadataRegistry, Class } from '@encore2/registry';
+import { MetadataRegistry, Class } from '@travetto/registry';
 
 export class $ModelRegistry extends MetadataRegistry<ModelOptions> {
   constructor() {

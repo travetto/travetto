@@ -1,5 +1,5 @@
 import { ModelSource, Query, BulkResponse, BulkState, QueryOptions, ModelService } from '../index';
-import { Class, ChangeEvent } from '@encore2/registry';
+import { Class, ChangeEvent } from '@travetto/registry';
 import { Person } from './models';
 
 
