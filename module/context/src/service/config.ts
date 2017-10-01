@@ -1,6 +1,6 @@
-import { Config } from '@encore2/config';
+import { Config } from '@travetto/config';
 
 @Config('context')
 export class ContextConfig {
-  namespace = 'encore';
+  namespace = 'travetto';
 }

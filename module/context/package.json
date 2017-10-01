@@ -1,17 +1,25 @@
 {
-  "author": "", 
+  "author": {
+    "email": "timothy.soehnlin@gmail.com",
+    "name": "Timothy Soehnlin"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/context.git"
+  },
   "dependencies": {
-    "@encore2/di": "git+ssh://git@git.eaiti.com/encore2/di.git#v1.x.x", 
-    "@types/continuation-local-storage": "^3.2.1", 
+    "@travetto/di": "0.x.x",
+    "@types/continuation-local-storage": "^3.2.1",
     "cls-hooked": "^4.2.2"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@encore2/context", 
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/context",
   "peerDependencies": {
-    "@encore2/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v1.x.x"
-  }, 
-  "scripts": {}, 
-  "version": "1.0.5"
+    "@travetto/test": "0.x.x"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test.js"
+  },
+  "version": "0.0.1"
 }

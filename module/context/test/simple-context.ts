@@ -1,6 +1,6 @@
-import { Inject, Registry, Injectable } from '@encore2/di';
+import { Inject, Registry, Injectable } from '@travetto/di';
 import { Context } from '../index';
-import { bulkRequire } from '@encore2/base';
+import { bulkRequire } from '@travetto/base';
 
 bulkRequire('src/**/*.ts');
 

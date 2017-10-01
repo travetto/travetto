@@ -1,5 +1,5 @@
 import { Context } from '../src';
-import { beforeTest, afterTest } from '@encore2/test';
+import { beforeTest, afterTest } from '@travetto/test';
 
 let store: { [key: string]: any } = {};
 

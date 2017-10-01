@@ -1,4 +1,4 @@
-encore: Context
+travetto: Context
 ===
 
 Provides a simple wrapper around `continuation-local-storage` to provide async context.  This

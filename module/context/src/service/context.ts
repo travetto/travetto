@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Injectable } from '@encore2/di';
+import { Injectable } from '@travetto/di';
 import { ContextConfig } from './config';
 
 const cls = require('cls-hooked');
