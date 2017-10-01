@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as fileType from 'file-type';
 import * as util from 'util';
 
-import { request } from '@encore2/util';
+import { request } from '@travetto/util';
 import { Asset, AssetFile } from './model';
 
 const osTmpdir = require('os-tmpdir');

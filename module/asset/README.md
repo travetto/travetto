@@ -1,4 +1,4 @@
-encore: Asset
+travetto: Asset
 ===
 
 This module provides the framework for storing/retrieving assets. It also provides image management functionality using GraphicsMagick under the covers.  This allows you to retrieve images and provide different sizes, transformations, etc. when serving up them up. 

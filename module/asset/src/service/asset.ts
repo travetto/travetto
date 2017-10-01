@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { Injectable } from '@encore2/di';
+import { Injectable } from '@travetto/di';
 import { Asset } from '../model';
 import { AssetSource } from './source';
 

@@ -1,28 +1,34 @@
 {
-  "author": "", 
+  "author": {
+    "email": "timothy.soehnlin@gmail.com",
+    "name": "Timothy Soehnlin"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/asset.git"
+  },
   "dependencies": {
-    "@encore2/cache": "git+ssh://git@git.eaiti.com/encore2/cache.git#v1.x.x", 
-    "@encore2/di": "git+ssh://git@git.eaiti.com/encore2/di.git#v1.x.x", 
-    "@encore2/util": "git+ssh://git@git.eaiti.com/encore2/util.git#v1.x.x", 
-    "@types/file-type": "^5.2.0", 
-    "@types/gm": "^1.17.29", 
-    "@types/mime": "^1.3.1", 
-    "@types/os-tmpdir": "^1.0.0", 
-    "file-type": "^3.9.0", 
-    "gm": "^1.21.1", 
-    "mime": "^1.3.4", 
-    "mime-match": "^1.0.2", 
+    "@travetto/cache": "0.x.x",
+    "@travetto/di": "0.x.x",
+    "@travetto/util": "0.x.x",
+    "@types/file-type": "^5.2.0",
+    "@types/gm": "^1.17.29",
+    "@types/mime": "^1.3.1",
+    "@types/os-tmpdir": "^1.0.0",
+    "file-type": "^3.9.0",
+    "gm": "^1.21.1",
+    "mime": "^1.3.4",
+    "mime-match": "^1.0.2",
     "os-tmpdir": "^1.0.1"
-  }, 
-  "description": "", 
+  },
+  "description": "",
   "devDependencies": {
-    "@encore2/test": "git+ssh://git@git.eaiti.com/encore2/test.git#v1.x.x"
-  }, 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@encore2/asset", 
+    "@travetto/test": "0.x.x"
+  },
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/asset",
   "scripts": {
-    "test": "./node_modules/@encore2/test/mocha.js"
-  }, 
-  "version": "1.0.5"
+    "test": "./node_modules/.bin/travetto-test.js"
+  },
+  "version": "0.0.1"
 }

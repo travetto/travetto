@@ -1,7 +1,7 @@
 import { AssetService, ImageService, AssetUtil, AssetSource, Asset } from '../../src';
-import { timeout } from '@encore2/test';
+import { timeout } from '@travetto/test';
 import { expect } from 'chai';
-import { DependencyRegistry, Injectable } from '@encore2/di';
+import { DependencyRegistry, Injectable } from '@travetto/di';
 import * as fs from 'fs';
 
 @Injectable({ target: AssetSource })

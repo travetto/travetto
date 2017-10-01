@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as gm from 'gm';
 import * as util from 'util';
 
-import { Cacheable } from '@encore2/cache';
-import { Injectable } from '@encore2/di';
+import { Cacheable } from '@travetto/cache';
+import { Injectable } from '@travetto/di';
 
 import { AssetService } from './asset';
 import { Asset } from '../model';
