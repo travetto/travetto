@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { AppError } from '@encore2/express';
+import { AppError } from '@travetto/express';
 
 export class StrategyUtil {
   static async generateHash(password: string, salt: string, iterations = 25000, keylen = 512, digest = 'sha512') {

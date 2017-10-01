@@ -2,10 +2,10 @@ import * as passport from 'passport';
 import * as moment from 'moment';
 import { Request } from 'express';
 
-import { AppError } from '@encore2/express';
-import { ModelService, BaseModel, ModelRegistry } from '@encore2/model';
-import { Class } from '@encore2/registry';
-import { Injectable } from '@encore2/di';
+import { AppError } from '@travetto/express';
+import { ModelService, BaseModel, ModelRegistry } from '@travetto/model';
+import { Class } from '@travetto/registry';
+import { Injectable } from '@travetto/di';
 
 import { StrategyUtil, BaseStrategy } from '../../index';
 import { ModelStrategyConfig } from './config';

@@ -1,4 +1,4 @@
-import { Config } from '@encore2/config';
+import { Config } from '@travetto/config';
 
 @Config('auth.model')
 export class ModelStrategyConfig {

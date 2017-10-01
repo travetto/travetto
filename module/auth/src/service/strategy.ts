@@ -2,14 +2,14 @@ import * as passport from 'passport';
 import * as moment from 'moment';
 import { Request } from 'express';
 
-import { AppError } from '@encore2/express';
+import { AppError } from '@travetto/express';
 import {
   Strategy,
   IStrategyOptions as Options,
   IStrategyOptionsWithRequest as OptionsWithRequest
 } from 'passport-local';
-import { Injectable, Inject } from '@encore2/di';
-import { Context } from '@encore2/context';
+import { Injectable, Inject } from '@travetto/di';
+import { Context } from '@travetto/context';
 
 export type Callback<T> = (err?: any, res?: T) => void
 

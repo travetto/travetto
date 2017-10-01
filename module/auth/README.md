@@ -1,4 +1,4 @@
-encore: Auth
+travetto: Auth
 ===
 
 This module provides basic passport integration, as well some key decorators for 

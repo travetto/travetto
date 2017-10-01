@@ -1,7 +1,7 @@
 import * as http from 'http';
 
-import { requestJSON } from '@encore2/util';
-import { Injectable } from '@encore2/di';
+import { requestJSON } from '@travetto/util';
+import { Injectable } from '@travetto/di';
 
 import { CrowdStrategyConfig } from './config';
 import { BaseStrategy } from '../../index';

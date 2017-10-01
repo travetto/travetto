@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ControllerRegistry, AppError } from '@encore2/express';
+import { ControllerRegistry, AppError } from '@travetto/express';
 import * as passport from 'passport';
 import * as util from 'util';
 
