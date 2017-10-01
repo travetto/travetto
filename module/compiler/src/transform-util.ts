@@ -50,12 +50,12 @@ export class TransformUtil {
       if (ident && ident.escapedText in patterns) {
         let { path } = state.imports.get(ident.escapedText! as string)!;
         let packages = patterns[ident.escapedText as string];
-        if (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto2')) {
+        if (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto')) {
           let pkg = '';
           if (!path.includes('node_modules')) {
             pkg = AppInfo.NAME;
           } else {
-            pkg = '@travetto/' + path.split(/@travetto2\//)[1].split('/')[0];
+            pkg = '@travetto/' + path.split(/@travetto\//)[1].split('/')[0];
           }
           if (packages.has(pkg)) {
             return dec;
