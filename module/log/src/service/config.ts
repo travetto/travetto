@@ -1,5 +1,5 @@
-import { Config } from '@encore2/config';
-import { AppEnv } from '@encore2/base';
+import { Config } from '@travetto/config';
+import { AppEnv } from '@travetto/base';
 
 @Config('logging')
 export class LoggerConfig {

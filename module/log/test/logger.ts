@@ -4,10 +4,10 @@ import * as process from 'process';
 import { expect } from 'chai';
 import * as fs from 'fs';
 import { Logger } from '../src';
-import { nodeToPromise } from '@encore2/util';
-import { DependencyRegistry } from '@encore2/di';
+import { nodeToPromise } from '@travetto/util';
+import { DependencyRegistry } from '@travetto/di';
 
-let name = `${process.cwd()}/logs/encore_log-out.log`;
+let name = `${process.cwd()}/logs/travetto_log-out.log`;
 console.log(name);
 
 describe('Logging', () => {

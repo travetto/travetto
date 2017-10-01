@@ -2,11 +2,11 @@ import * as log4js from 'log4js';
 import * as mkdirp from 'mkdirp';
 import * as util from 'util';
 import { addLayout } from 'log4js/lib/layouts';
-import { Injectable } from '@encore2/di';
+import { Injectable } from '@travetto/di';
 import { LoggerConfig } from './config';
 import { Layouts } from './layout';
 import { isFileAppender } from '../types';
-import { AppInfo } from '@encore2/base';
+import { AppInfo } from '@travetto/base';
 
 @Injectable({
   autoCreate: { create: true, priority: 0 }

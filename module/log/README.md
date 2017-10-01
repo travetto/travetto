@@ -1,4 +1,4 @@
-encore: Log
+travetto: Log
 ===
 
 This module provides logging utilities using log4js.  Should support standard appenders, but 
