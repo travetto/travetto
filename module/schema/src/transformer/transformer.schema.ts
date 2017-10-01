@@ -1,12 +1,12 @@
 import * as ts from 'typescript';
 import { Schema, Ignore, Field } from '../decorator';
-import { TransformUtil, Import, State } from '@encore2/compiler';
-import { ConfigLoader } from '@encore2/config';
+import { TransformUtil, Import, State } from '@travetto/compiler';
+import { ConfigLoader } from '@travetto/config';
 
 
 let SCHEMAS = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.schema'),
-  '@encore2/schema': 'Schema'
+  '@travetto/schema': 'Schema'
 });
 
 type DecList = ts.NodeArray<ts.Decorator>;
@@ -124,7 +124,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     let anySchema = TransformUtil.findAnyDecorator(node, SCHEMAS, state);
 
     let schema = TransformUtil.findAnyDecorator(node, {
-      'Schema': new Set(['@encore2/schema'])
+      'Schema': new Set(['@travetto/schema'])
     }, state);
 
     let auto = !!anySchema;
@@ -180,7 +180,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     // tslint:disable-next-line:no-bitwise
   } else if (ts.isPropertyDeclaration(node) && !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static)) {
     if (state.inAuto) {
-      let ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set(['@encore2/schema']) }, state);
+      let ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set(['@travetto/schema']) }, state);
       if (!ignore) {
         return computeProperty(node, state) as any as T;
       }

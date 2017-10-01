@@ -1,6 +1,6 @@
 import { BindUtil } from '../util';
 import { SchemaRegistry } from '../service';
-import { Class } from '@encore2/registry';
+import { Class } from '@travetto/registry';
 
 type DeepPartial<T> = {
   [p in keyof T]?: DeepPartial<T[p]>

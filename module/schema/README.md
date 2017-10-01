@@ -1,4 +1,4 @@
-encore: Schema
+travetto: Schema
 ===
 
 This module provide validation for schemas.  This is achieved using the following:

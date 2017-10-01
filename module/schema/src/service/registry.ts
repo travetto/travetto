@@ -1,5 +1,5 @@
 import { ClassList, FieldConfig, ClassConfig, ViewConfig } from './types';
-import { MetadataRegistry, RootRegistry, Class } from '@encore2/registry';
+import { MetadataRegistry, RootRegistry, Class } from '@travetto/registry';
 
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
 

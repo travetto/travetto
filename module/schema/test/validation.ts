@@ -1,5 +1,5 @@
 import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema, ValidationError, SchemaRegistry } from '../src';
-import { Suite, Test, BeforeAll } from '@encore2/test';
+import { Suite, Test, BeforeAll } from '@travetto/test';
 import * as assert from 'assert';
 
 @Schema()

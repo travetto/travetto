@@ -2,8 +2,8 @@ import * as flat from 'flat';
 import * as _ from 'lodash';
 import { Request, Response } from 'express';
 
-import { RouteRegistry, AppError } from '@encore2/express';
-import { Class } from '@encore2/registry';
+import { RouteRegistry, AppError } from '@travetto/express';
+import { Class } from '@travetto/registry';
 
 import { SchemaRegistry, BindUtil, SchemaValidator } from '../src';
 

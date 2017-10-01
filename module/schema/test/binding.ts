@@ -1,7 +1,7 @@
 import { Field, Url, SchemaBound, View, Required, Alias, BindUtil, Schema, SchemaRegistry } from '../src';
 import { Address } from './address';
 import * as assert from 'assert';
-import { Test, Suite, BeforeAll } from '@encore2/test';
+import { Test, Suite, BeforeAll } from '@travetto/test';
 
 console.log('Hello')
 @Schema(false)
