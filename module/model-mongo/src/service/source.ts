@@ -25,7 +25,7 @@ export class MongoModelSource extends ModelSource {
     return o;
   }
 
-  prePersist<T extends ModelCore>(o: T) {
+  prePersist<T extends ModelCore>(cls: Class<T>, o: T) {
     if (o.id) {
       (o as any)._id = new mongo.ObjectId(o.id) as any;
       delete o.id;
@@ -52,7 +52,6 @@ export class MongoModelSource extends ModelSource {
         promises.push(col.createIndex(fields, options));
       }
     }
-
     return Promise.all(promises);
   }
 
@@ -163,12 +162,8 @@ export class MongoModelSource extends ModelSource {
 
   async save<T extends ModelCore>(cls: Class<T>, o: T, removeId: boolean = true): Promise<T> {
     let col = await this.getCollection(cls);
-    if (removeId) {
-      delete o.id;
-    }
     let res = await col.insertOne(o);
     o.id = res.insertedId.toHexString();
-    console.log(o);
     return o;
   }
 
