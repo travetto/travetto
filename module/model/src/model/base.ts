@@ -20,15 +20,13 @@ export abstract class BaseModel extends SchemaBound implements ModelCore {
     }
   }
 
-  prePersist(): this {
+  prePersist() {
     if (!this.createdDate) {
       this.createdDate = new Date();
     }
     this.updatedDate = new Date();
-    return this;
   }
 
-  postLoad(): this {
-    return this;
+  postLoad() {
   }
 }
