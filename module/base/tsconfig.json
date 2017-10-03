@@ -1,12 +1,13 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "es2017",
-        "strict": true,
-        "sourceMap": true,
-        "preserveConstEnums": true,
-        "experimentalDecorators": true,
-        "rootDir": "src/",
-        "outDir": "build/"
-    }
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2017",
+    "strict": true,
+    "noStrictGenericChecks": true,
+    "sourceMap": true,
+    "preserveConstEnums": true,
+    "experimentalDecorators": true,
+    "rootDir": "src/",
+    "outDir": "build/"
+  }
 }
