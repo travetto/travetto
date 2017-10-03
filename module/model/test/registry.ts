@@ -3,7 +3,7 @@ import { Class, ChangeEvent } from '@travetto/registry';
 import { Person } from './models';
 
 
-export class TestSource extends ModelSource<Person> {
+export class TestSource extends ModelSource {
   onChange(e: ChangeEvent) {
     console.log('Changed model', e);
   }
@@ -17,9 +17,9 @@ export class TestSource extends ModelSource<Person> {
     throw new Error('Method not implemented.');
   }
 
-  postLoad(model: Partial<Person>): Partial<Person>;
-  postLoad(model: Person): Person;
-  postLoad(model: Partial<Person> | Person): Partial<Person> | Person {
+  postLoad(cls: Class<Person>, model: Partial<Person>): Partial<Person>;
+  postLoad(cls: Class<Person>, model: Person): Person;
+  postLoad(cls: Class<Person>, model: Partial<Person> | Person): Partial<Person> | Person {
     throw new Error('Method not implemented.');
   }
   save(cls: Class<Person>, model: Person): Promise<Person> {

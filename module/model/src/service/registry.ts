@@ -2,10 +2,11 @@ import { SchemaRegistry } from '@travetto/schema';
 import { ModelOptions } from './types';
 import { EventEmitter } from 'events';
 import { MetadataRegistry, Class } from '@travetto/registry';
+import { DependencyRegistry } from '@travetto/di';
 
 export class $ModelRegistry extends MetadataRegistry<ModelOptions> {
   constructor() {
-    super(SchemaRegistry);
+    super(SchemaRegistry, DependencyRegistry);
   }
 
   createPending(cls: Class) {

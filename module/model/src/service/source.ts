@@ -6,7 +6,7 @@ import { Query } from '../model/query';
 
 
 export abstract class ModelSource {
-  onChange?: (e: ChangeEvent) => void;
+  onChange?(e: ChangeEvent): void;
 
   abstract prePersist<T extends ModelCore>(model: Partial<T>): Partial<T>;
   abstract prePersist<T extends ModelCore>(model: T): T;
