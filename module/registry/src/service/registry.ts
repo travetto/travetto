@@ -8,12 +8,17 @@ export abstract class Registry implements ClassSource {
   protected initialized: Promise<any>;
   protected events = new EventEmitter();
   protected descendents: Registry[] = [];
+  protected parents: ClassSource[] = [];
 
-  constructor(protected parent?: ClassSource) {
-    if (parent) {
-      this.listen(parent);
-      if (parent instanceof Registry) {
-        parent.descendents.push(this);
+  constructor(...parents: ClassSource[]) {
+    this.parents = parents;
+
+    if (this.parents.length) {
+      for (let parent of this.parents) {
+        this.listen(parent);
+        if (parent instanceof Registry) {
+          parent.descendents.push(this);
+        }
       }
     }
   }
@@ -33,9 +38,8 @@ export abstract class Registry implements ClassSource {
     try {
       this.resolved = false;
 
-      if (this.parent && !(this.parent instanceof Registry)) {
-        await this.parent.init();
-      }
+      let waitFor = this.parents.filter(x => !(x instanceof Registry));
+      await Promise.all(waitFor);
 
       let classes = await this.initialInstall();
       if (classes) {
