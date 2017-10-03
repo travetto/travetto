@@ -19,7 +19,14 @@ export class AssertUtil {
 
   static readFilePosition(err: Error) {
     let base = process.cwd() + '/test/';
-    let lines = err.stack!.split('[Continued From]').find(x => x.includes(base)).split('\n').filter(x => x.includes(base));
+    let subParts = err.stack!.split('[Continued From]');
+    let sub: string = subParts.find(x => x.includes(base));
+    let lines: string[];
+    if (!sub) {
+      lines = subParts[0].split('\n').slice(1, 2);
+    } else {
+      lines = sub.split('\n').filter(x => x.includes(base));
+    }
     let [file, line] = lines.pop()!.split(/[()]/g).slice(-2, -1)[0].split(':');
     file = file.split(process.cwd() + '/')[1];
     return { file, line: parseInt(line, 10) };

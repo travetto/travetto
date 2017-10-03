@@ -111,6 +111,29 @@ export class TestUtil {
     return result as TestResult;
   }
 
+  static async affixProcess(suite: SuiteConfig, result: SuiteResult, phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
+    try {
+      for (let after of suite[phase]) {
+        await after.call(suite.instance);
+      }
+    } catch (error) {
+      let { line, file } = AssertUtil.readFilePosition(error);
+      result.tests.push({
+        status: 'fail',
+        suiteName: suite.name,
+        method: phase,
+        description: phase,
+        line,
+        lineEnd: line,
+        file,
+        error,
+        assertions: [],
+        output: {}
+      } as TestResult);
+      throw new Error('breakout');
+    }
+  }
+
   static async executeSuite(suite: SuiteConfig, emitter?: TestEmitter) {
     let result: SuiteResult = {
       success: 0,
@@ -125,34 +148,34 @@ export class TestUtil {
       tests: []
     };
 
-    for (let before of suite.beforeAll) {
-      await before.call(suite.instance);
-    }
+    try {
+      await this.affixProcess(suite, result, 'beforeAll');
 
-    for (let test of suite.tests) {
-      if (emitter) {
-        emitter.emit({ type: 'test', phase: 'before', test });
+      for (let test of suite.tests) {
+        if (emitter) {
+          emitter.emit({ type: 'test', phase: 'before', test });
+        }
+
+        await this.affixProcess(suite, result, 'beforeEach');
+
+        let ret = await this.executeTest(test);
+        result[ret.status]++;
+        result.tests.push(ret);
+
+        if (emitter) {
+          emitter.emit({ type: 'test', phase: 'after', test: ret });
+        }
+
+        await this.affixProcess(suite, result, 'afterEach');
       }
 
-      for (let before of suite.beforeEach) {
-        await before.call(suite.instance);
+      await this.affixProcess(suite, result, 'afterAll');
+    } catch (e) {
+      if (e.message === 'breakout') {
+        // Done
+      } else {
+        throw e;
       }
-
-      let ret = await this.executeTest(test);
-      result[ret.status]++;
-      result.tests.push(ret);
-
-      if (emitter) {
-        emitter.emit({ type: 'test', phase: 'after', test: ret });
-      }
-
-      for (let after of suite.afterEach) {
-        await after.call(suite.instance);
-      }
-    }
-
-    for (let after of suite.afterAll) {
-      await after.call(suite.instance);
     }
 
     result.total = result.success + result.fail;
