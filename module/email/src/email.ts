@@ -133,6 +133,6 @@ export class EmailService {
   async sendEmailRaw(options: nodemailer.SendMailOptions) {
     options = Object.assign({}, this.config.defaults, options);
     let tp = this.transporter;
-    return (await util.promisify(tp.sendMail).call(tp, nodemailer.SentMessageInfooptions)) as nodemailer.SentMessageInfo;
+    return (await util.promisify(tp.sendMail).call(tp, options)) as nodemailer.SentMessageInfo;
   }
 }
