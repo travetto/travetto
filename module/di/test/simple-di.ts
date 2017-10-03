@@ -42,7 +42,7 @@ class ServiceInherit extends Service {
 const FOUR = 4;
 
 function doWork() {
-  throw new Error('ahhh');
+  //throw new Error('ahhh');
 }
 
 @Suite('di')

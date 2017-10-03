@@ -17,6 +17,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private pendingFinalize: Class[] = [];
 
   private instances = new Map<TargetId, Map<string, any>>();
+  private instancePromises = new Map<TargetId, Map<string, Promise<any>>>();
+
   private aliases = new Map<TargetId, Map<string, string>>();
   private targets = new Map<ClassId, Map<string, TargetId>>();
 
@@ -115,12 +117,21 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   private async createInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE) {
-    let instance = await this.construct(target, name);
     let targetId = target.__id;
 
     if (!this.instances.has(targetId)) {
       this.instances.set(targetId, new Map());
+      this.instancePromises.set(targetId, new Map());
     }
+
+    if (this.instancePromises.get(targetId)!.has(name)) {
+      return this.instancePromises.get(targetId)!.get(name);
+    }
+
+    let instancePromise = this.construct(target, name);
+    this.instancePromises.get(targetId)!.set(name, instancePromise);
+
+    let instance = await instancePromise;
 
     if (AppEnv.watch) {
       if (!this.proxies.has(targetId)) {
@@ -282,6 +293,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         }
 
         this.instances.get(targetId)!.delete(config);
+        this.instancePromises.get(targetId)!.delete(config);
         console.debug('On uninstall', cls.__id, config, targetId, handler);
         this.targets.get(cls.__id)!.delete(config);
       }
@@ -292,6 +304,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     super.onReset();
     this.pendingFinalize = [];
     this.instances.clear();
+    this.instancePromises.clear();
     this.proxies.clear();
     this.proxyHandlers.clear();
     this.aliases.clear();
