@@ -51,7 +51,10 @@ export class ModelService extends ModelSource {
   async prePersist<T extends ModelCore>(cls: Class<T>, o: T): Promise<T>;
   async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string): Promise<Partial<T>>;
   async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T> | T, view: string = SchemaRegistry.DEFAULT_VIEW) {
-    let res = await SchemaValidator.validate(o.prePersist ? o.prePersist() as T : o, view);
+    if (o.prePersist) {
+      o.prePersist();
+    }
+    let res = await SchemaValidator.validate(o, view);
     res = await this.source.prePersist(cls, res);
     return res as T;
   }
@@ -62,7 +65,9 @@ export class ModelService extends ModelSource {
     o = this.source.postLoad(cls, o) as T;
     o = this.convert(cls, o);
 
-    o = o.postLoad ? o.postLoad() : o;
+    if (o.postLoad) {
+      o.postLoad();
+    }
     return o;
   }
 
