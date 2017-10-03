@@ -8,8 +8,8 @@ import { Query } from '../model/query';
 export abstract class ModelSource {
   onChange?(e: ChangeEvent): void;
 
-  abstract prePersist<T extends ModelCore>(model: Partial<T>): Partial<T>;
-  abstract prePersist<T extends ModelCore>(model: T): T;
+  abstract prePersist<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Partial<T>;
+  abstract prePersist<T extends ModelCore>(cls: Class<T>, model: T): T;
 
   abstract postLoad<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Partial<T>;
   abstract postLoad<T extends ModelCore>(cls: Class<T>, model: T): T;

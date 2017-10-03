@@ -14,7 +14,10 @@ export abstract class BaseModel extends SchemaBound implements ModelCore {
 
   constructor() {
     super();
-    this.type = ModelRegistry.get(this.constructor as Class).discriminator;
+    let type = ModelRegistry.get(this.constructor as Class).discriminator;
+    if (type) {
+      this.type = type;
+    }
   }
 
   prePersist(): this {

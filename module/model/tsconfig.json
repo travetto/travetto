@@ -1,3 +1,6 @@
 {
-    "extends" : "./node_modules/@travetto/base/tsconfig.json"
+  "extends": "./node_modules/@travetto/base/tsconfig.json",
+  "compilerOptions": {
+    "noStrictGenericChecks": true
+  }
 }

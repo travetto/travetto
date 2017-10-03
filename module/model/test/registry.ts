@@ -1,9 +1,10 @@
 import { ModelSource, Query, BulkResponse, BulkState, QueryOptions, ModelService } from '../index';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Person } from './models';
+import { Injectable } from '@travetto/di';
 
-
-export class TestSource extends ModelSource {
+@Injectable({ target: ModelSource })
+export class TestSource implements ModelSource {
   onChange(e: ChangeEvent) {
     console.log('Changed model', e);
   }
@@ -11,9 +12,9 @@ export class TestSource extends ModelSource {
   getTypeField(): keyof Person {
     return 'type';
   }
-  prePersist(model: Partial<Person>): Partial<Person>;
-  prePersist(model: Person): Person;
-  prePersist(model: Partial<Person> | Person): Partial<Person> | Person {
+  prePersist(cls: Class<Person>, model: Partial<Person>): Partial<Person>;
+  prePersist(cls: Class<Person>, model: Person): Person;
+  prePersist(cls: Class<Person>, model: Partial<Person> | Person): Partial<Person> | Person {
     throw new Error('Method not implemented.');
   }
 
@@ -22,10 +23,10 @@ export class TestSource extends ModelSource {
   postLoad(cls: Class<Person>, model: Partial<Person> | Person): Partial<Person> | Person {
     throw new Error('Method not implemented.');
   }
-  save(cls: Class<Person>, model: Person): Promise<Person> {
+  saveAll(cls: Class<Person>, models: Person[]): Promise<Person[]> {
     throw new Error('Method not implemented.');
   }
-  saveAll(cls: Class<Person>, models: Person[]): Promise<Person[]> {
+  save(cls: Class<Person>, model: Person): Promise<Person> {
     throw new Error('Method not implemented.');
   }
   update(cls: Class<Person>, model: Person): Promise<Person> {
@@ -37,7 +38,10 @@ export class TestSource extends ModelSource {
   updatePartial(cls: Class<Person>, model: Partial<Person>): Promise<Person> {
     throw new Error('Method not implemented.');
   }
-  updatePartialByQuery(cls: Class<Person>, body: Partial<Person>, query: Query): Promise<number> {
+  updatePartialByQuery(cls: Class<Person>, query: Query, body: Partial<Person>): Promise<number> {
+    throw new Error('Method not implemented.');
+  }
+  updateAllByQuery(cls: Class<Person>, query: Query, body: Partial<Person>): Promise<number> {
     throw new Error('Method not implemented.');
   }
   bulkProcess(cls: Class<Person>, state: BulkState<Person>): Promise<BulkResponse> {
@@ -66,5 +70,3 @@ export class TestSource extends ModelSource {
   }
 
 }
-
-new ModelService(new TestSource()).postConstruct();

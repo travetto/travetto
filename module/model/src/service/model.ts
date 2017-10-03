@@ -48,11 +48,11 @@ export class ModelService extends ModelSource {
     }
   }
 
-  async prePersist<T extends ModelCore>(o: T): Promise<T>;
-  async prePersist<T extends ModelCore>(o: Partial<T>, view: string): Promise<Partial<T>>;
-  async prePersist<T extends ModelCore>(o: Partial<T> | T, view: string = SchemaRegistry.DEFAULT_VIEW) {
+  async prePersist<T extends ModelCore>(cls: Class<T>, o: T): Promise<T>;
+  async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string): Promise<Partial<T>>;
+  async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T> | T, view: string = SchemaRegistry.DEFAULT_VIEW) {
     let res = await SchemaValidator.validate(o.prePersist ? o.prePersist() as T : o, view);
-    res = await this.source.prePersist(res);
+    res = await this.source.prePersist(cls, res);
     return res as T;
   }
 
@@ -113,19 +113,19 @@ export class ModelService extends ModelSource {
   }
 
   async save<T extends ModelCore>(cls: Class<T>, o: T) {
-    o = await this.prePersist(o);
+    o = await this.prePersist(cls, o);
     let res = await this.source.save(cls, o);
     return this.postLoad(cls, res);
   }
 
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]) {
-    objs = await Promise.all(objs.map(o => this.prePersist(o)));
+    objs = await Promise.all(objs.map(o => this.prePersist(cls, o)));
     let res = await this.source.saveAll(cls, objs);
     return res.map(x => this.postLoad(cls, x));
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T) {
-    o = await this.prePersist(o);
+    o = await this.prePersist(cls, o);
     let res = await this.source.update(cls, o);
     return this.postLoad(cls, res);
   }
@@ -143,14 +143,14 @@ export class ModelService extends ModelSource {
   }
 
   async updatePartialView<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string) {
-    o = await this.prePersist(o, view);
+    o = await this.prePersist(cls, o, view);
     let partial = BindUtil.bindSchema(cls, {}, o, view);
     let res = await this.updatePartial(cls, partial);
     return this.postLoad(cls, res);
   }
 
   async updatePartialViewByQuery<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string, query: Query) {
-    o = await this.prePersist(o, view);
+    o = await this.prePersist(cls, o, view);
     let partial = BindUtil.bindSchema(cls, {}, o, view);
     let res = await this.updatePartialByQuery(cls, query, partial);
     return res;
