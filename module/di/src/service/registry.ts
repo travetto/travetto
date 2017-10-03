@@ -38,7 +38,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Unblock auto created
-    if (this.autoCreate.length) {
+    if (this.autoCreate.length && !AppEnv.test) {
       console.debug('Auto-creating', this.autoCreate.map(x => x.target.name));
       let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
       for (let i of items) {
