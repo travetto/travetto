@@ -1,0 +1,3 @@
+model:
+  mongo: 
+    schema: "sample-test"
