@@ -45,6 +45,8 @@ export class Runner {
   }
 
   async run() {
+    let agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
+
     try {
       console.debug('Runner Args', this.state);
 
@@ -62,7 +64,6 @@ export class Runner {
       const globs = this.state._.slice(2); // strip off node and worker name
 
       let files = await TestUtil.getTests(globs);
-      let agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
 
       for (let l of listeners) {
         l.onEvent = l.onEvent.bind(l);
@@ -98,6 +99,8 @@ export class Runner {
       return collector.allSuites;
     } catch (e) {
       console.error(e);
+    } finally {
+      agentPool.shutdown();
     }
   }
 }
