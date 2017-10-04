@@ -1,5 +1,9 @@
-import { Model, ModelService, BaseModel } from '@travetto/model';
-import { DependencyRegistry } from '@travetto/di';
+import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
+import { DependencyRegistry, Injectable } from '@travetto/di';
+import { Suite, Test, BeforeAll } from '@travetto/test';
+import { ModelMongoSource } from '../index';
+import * as assert from 'assert';
+import { RootRegistry } from '@travetto/registry';
 
 @Model()
 class Person extends BaseModel {
@@ -7,16 +11,28 @@ class Person extends BaseModel {
   age: number;
 }
 
-async function run() {
-  let service = await DependencyRegistry.getInstance(ModelService);
-  let res = await service.save(Person, Person.from({
-    name: 'Bob',
-    age: 20
-  }));
+@Injectable()
+class Source extends ModelMongoSource {
 
-  console.log(res.age);
 }
 
-console.log('Running')
+@Suite('Simple Save')
+class TestSave {
 
-run();
+  @BeforeAll()
+  async init() {
+    await RootRegistry.init();
+    let source = await DependencyRegistry.getInstance(ModelSource);
+    (source as ModelMongoSource).resetDatabase();
+  }
+
+  @Test('save it')
+  async save() {
+    let service = await DependencyRegistry.getInstance(ModelService);
+    let res = await service.save(Person, Person.from({
+      name: 'Bob',
+      age: 20
+    }));
+    assert(res.id);
+  }
+}

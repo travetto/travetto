@@ -8,7 +8,7 @@ import { ModelMongoConfig } from './config';
 import { Class } from '@travetto/registry';
 
 @Injectable({ target: ModelSource })
-export class MongoModelSource extends ModelSource {
+export class ModelMongoSource extends ModelSource {
 
   private client: mongo.Db;
   private indices: { [key: string]: IndexConfig[] } = {};
