@@ -4,13 +4,14 @@ export function WithContext<T extends { context: Context }>(data?: any) {
   return function (target: T, prop: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) {
     let og = descriptor.value!;
     descriptor.value = function (...args: any[]) {
+      let self = this as T;
       return new Promise((resolve, reject) => {
-        target.context.namespace.run(() => {
+        self.context.namespace.run(() => {
           try {
             if (data) {
-              target.context.set(JSON.parse(JSON.stringify(data))); // Clone data
+              self.context.set(JSON.parse(JSON.stringify(data))); // Clone data
             }
-            resolve(og.apply(this, args));
+            resolve(og.apply(self, args));
           } catch (e) {
             reject(e);
           }
