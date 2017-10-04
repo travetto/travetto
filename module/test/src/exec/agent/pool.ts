@@ -1,5 +1,6 @@
 import * as os from 'os';
 import { Agent } from './agent';
+import { Shutdown } from '@travetto/base';
 
 export class AgentPool {
   agentCount: number;
@@ -16,6 +17,7 @@ export class AgentPool {
       let agent = new Agent(i, this.command);
       this.availableAgents.add(agent);
     }
+    Shutdown.onShutdown(this.constructor.__id, () => this.shutdown());
   }
 
   get availableSize() {
@@ -61,20 +63,28 @@ export class AgentPool {
 
         this.pendingAgents.add(agent);
       } else {
-        let agent = await Promise.race(Array.from(this.pendingAgents.values()).map(x => x.completion));
+        let agent = await Promise.race(Array.from(this.pendingAgents).map(x => x.completion));
         this.returnAgent(agent);
       }
     }
 
-    await Promise.all(Array.from(this.pendingAgents.values()).map(x => x.completion));
+    await Promise.all(Array.from(this.pendingAgents).map(x => x.completion));
   }
 
   shutdown() {
-    for (let agent of this.pendingAgents) {
+    for (let agent of Array.from(this.pendingAgents)) {
       this.returnAgent(agent);
     }
-    for (let agent of this.availableAgents) {
-      agent.process.kill('SIGKILL');
+
+    for (let agent of Array.from(this.availableAgents)) {
+      if (agent.process) {
+        try {
+          console.debug('Killing Process', agent.id)
+          agent.process.kill('SIGKILL');
+        } catch (e) {
+          console.error('Error', agent.id, e);
+        }
+      }
     }
   }
 }

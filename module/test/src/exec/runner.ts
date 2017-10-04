@@ -45,8 +45,6 @@ export class Runner {
   }
 
   async run() {
-    let agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
-
     try {
       console.debug('Runner Args', this.state);
 
@@ -70,6 +68,8 @@ export class Runner {
       }
 
       files = files.map(x => x.split(process.cwd() + '/')[1]);
+
+      let agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
 
       await agentPool.process(files, async (file, run, agent) => {
         if (agent) {
@@ -99,8 +99,6 @@ export class Runner {
       return collector.allSuites;
     } catch (e) {
       console.error(e);
-    } finally {
-      agentPool.shutdown();
     }
   }
 }
