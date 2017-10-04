@@ -1,5 +1,5 @@
 import * as child_process from 'child_process';
-import { exec } from '@travetto/util';
+import { fork } from '@travetto/util';
 
 export class Agent {
   process: child_process.ChildProcess;
@@ -17,13 +17,12 @@ export class Agent {
       return this._init;
     }
 
-    let [spawned, sub] = exec(this.command, {
+    let [sub, forked] = fork(this.command, {
       env: {
         ...process.env,
       },
       quiet: true,
-      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-      exposeProcess: true
+      stdio: ['pipe', 'pipe', 'pipe', 'ipc']
     });
 
     this.process = sub;
@@ -35,7 +34,7 @@ export class Agent {
 
     this.listenOnce('ready', e => this.send('init'));
 
-    spawned.catch(async err => {
+    forked.catch(async err => {
       console.error('Runner died, error ', err, '.  Reinitializing');
       delete this._init;
     });

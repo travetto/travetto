@@ -68,4 +68,13 @@ export class AgentPool {
 
     await Promise.all(Array.from(this.pendingAgents.values()).map(x => x.completion));
   }
+
+  shutdown() {
+    for (let agent of this.pendingAgents) {
+      this.returnAgent(agent);
+    }
+    for (let agent of this.availableAgents) {
+      agent.process.kill('SIGKILL');
+    }
+  }
 }
