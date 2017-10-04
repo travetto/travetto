@@ -25,6 +25,9 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
       }
       return cache.get(key);
     };
+
+    Object.defineProperty(descriptor.value, 'name', { value: (orig as any).name });
+
     return descriptor;
   };
 }
