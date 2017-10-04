@@ -113,8 +113,8 @@ export class TestUtil {
 
   static async affixProcess(suite: SuiteConfig, result: SuiteResult, phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
     try {
-      for (let after of suite[phase]) {
-        await after.call(suite.instance);
+      for (let fn of suite[phase]) {
+        await fn.call(suite.instance);
       }
     } catch (error) {
       let { line, file } = AssertUtil.readFilePosition(error);
@@ -152,11 +152,11 @@ export class TestUtil {
       await this.affixProcess(suite, result, 'beforeAll');
 
       for (let test of suite.tests) {
+        await this.affixProcess(suite, result, 'beforeEach');
+
         if (emitter) {
           emitter.emit({ type: 'test', phase: 'before', test });
         }
-
-        await this.affixProcess(suite, result, 'beforeEach');
 
         let ret = await this.executeTest(test);
         result[ret.status]++;

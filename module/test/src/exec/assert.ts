@@ -20,7 +20,7 @@ export class AssertUtil {
   static readFilePosition(err: Error) {
     let base = process.cwd() + '/test/';
     let subParts = err.stack!.split('[Continued From]');
-    let sub: string = subParts.find(x => x.includes(base));
+    let sub: string = subParts.find(x => x.includes(base))!;
     let lines: string[];
     if (!sub) {
       lines = subParts[0].split('\n').slice(1, 2);
