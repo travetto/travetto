@@ -1,10 +1,9 @@
 import * as child_process from 'child_process';
 
-export type ExecOptions = child_process.SpawnOptions & {
+export type ExecOptions = {
   timeout?: number;
-  exposeProcess?: boolean;
   quiet?: boolean;
-  kill?: (proc: child_process.ChildProcess) => Promise<void>;
+  timeoutKill?: (proc: child_process.ChildProcess) => Promise<void>;
 };
 export interface ExecResult {
   code: number;
@@ -14,20 +13,8 @@ export interface ExecResult {
   valid: boolean;
 }
 
-export function exec(cmd: string, options: ExecOptions & { exposeProcess: true }): [Promise<ExecResult>, child_process.ChildProcess];
-export function exec(cmd: string, options?: ExecOptions): Promise<ExecResult>;
-export function exec(cmd: string, options: ExecOptions = {}): Promise<ExecResult> | [Promise<ExecResult>, child_process.ChildProcess] {
-  let args: string[] = [];
-
+export function enhanceProcess(p: child_process.ChildProcess, options: ExecOptions) {
   let timeout = options.timeout || 15000;
-
-  if (cmd.indexOf(' ') > 0) {
-    [cmd, ...args] = cmd.split(' ');
-  }
-
-  console.debug('exec:', [cmd, ...args].join(' '));
-
-  let p = child_process.spawn(cmd, args, options);
 
   let prom = new Promise<ExecResult>((resolve, reject) => {
     let stdout = '';
@@ -61,17 +48,43 @@ export function exec(cmd: string, options: ExecOptions = {}): Promise<ExecResult
       finish({ code, stdout, stderr, valid: code === 0 })
     );
     timer = setTimeout(async x => {
-      if (options.kill) {
-        await options.kill(p);
+      if (options.timeoutKill) {
+        await options.timeoutKill(p);
       } else {
         p.kill('SIGKILL');
       }
       finish({ code: 1, stderr, stdout, message: `Execution timed out after: ${timeout} ms`, valid: false });
     }, timeout);
   });
-  if (options.exposeProcess) {
-    return [prom, p];
-  } else {
-    return prom;
+
+  return prom;
+}
+
+function getArgs(cmd: string) {
+  let args: string[] = [];
+
+  if (cmd.indexOf(' ') > 0) {
+    [cmd, ...args] = cmd.split(' ');
   }
+
+  console.debug('exec:', [cmd, ...args].join(' '));
+  return { cmd, args };
+}
+
+
+export function spawn(cmdStr: string, options: child_process.SpawnOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
+  let { cmd, args } = getArgs(cmdStr);
+  let p = child_process.spawn(cmd, args, options);
+  return [p, enhanceProcess(p, options)];
+}
+
+export function fork(cmdStr: string, options: child_process.ForkOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
+  let { cmd, args } = getArgs(cmdStr);
+  let p = child_process.fork(cmd, args, options);
+  return [p, enhanceProcess(p, options)];
+}
+
+export function exec(cmd: string, options: child_process.ExecOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
+  let p = child_process.exec(cmd, options);
+  return [p, enhanceProcess(p, options)];
 }
