@@ -56,10 +56,10 @@ export class ModelMongoSource extends ModelSource {
   }
 
   translateQueryIds<T extends ModelCore>(query: Query) {
-    let val = query.id;
+    let val = query._id;
     if (val) {
       if (typeof val === 'string') {
-        query.id = new mongo.ObjectID(val) as any;
+        query._id = new mongo.ObjectID(val) as any;
       } else if (isSubQuery(val)) {
         if (val.$in) {
           val.$in = val.$in.map((x: any) => typeof x === 'string' ? new mongo.ObjectID(x) : x);
@@ -138,9 +138,7 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
-    return await this.getByQuery(cls, {
-      $and: [{ _id: id }]
-    });
+    return await this.getByQuery(cls, { _id: id });
   }
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
