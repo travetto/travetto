@@ -119,7 +119,7 @@ export class ModelMongoSource extends ModelSource {
     return res;
   }
 
-  async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<number> {
+  async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}): Promise<number> {
     query = this.translateQueryIds(query);
 
     let col = await this.getCollection(cls);
@@ -130,10 +130,7 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}, failOnMany = true): Promise<T> {
-    if (!options.limit) {
-      options.limit = 2;
-    }
-    let res = await this.getAllByQuery(cls, query, options);
+    let res = await this.getAllByQuery(cls, query, { limit: 200, ...options });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
       throw new Error(`Invalid number of results for find by id: ${res ? res.length : res}`);
     }
@@ -181,7 +178,7 @@ export class ModelMongoSource extends ModelSource {
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
     let col = await this.getCollection(cls);
-    this.prePersist(o);
+    this.prePersist(cls, o);
     await col.replaceOne({ _id: o.id }, o);
     this.postLoad(cls, o);
     return o;
