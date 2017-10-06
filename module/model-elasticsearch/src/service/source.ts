@@ -1,6 +1,7 @@
 import * as es from 'elasticsearch';
 import * as flat from 'flat';
 import * as _ from 'lodash';
+import * as uuid from 'uuid';
 
 import { ModelSource, IndexConfig, Query, QueryOptions, BulkState, BulkResponse, ModelRegistry, ModelCore, isSubQuery } from '@travetto/model';
 import { Injectable } from '@travetto/di';
@@ -21,6 +22,11 @@ export class ModelElasticsearchSource extends ModelSource {
     if ((o as any)._id) {
       o.id = (o as any)._id;
       delete (o as any)._id;
+
+      if ('_type' in o) {
+        o.type = (o as any)['_type'];
+        delete (o as any)['_type'];
+      }
     }
     return o;
   }
@@ -29,6 +35,10 @@ export class ModelElasticsearchSource extends ModelSource {
     if (o.id) {
       (o as any)._id = o.id;
       delete o.id;
+      if (o.type) {
+        (o as any)._type = o.type;
+        delete o.type;
+      }
     }
     return o;
   }
@@ -39,28 +49,15 @@ export class ModelElasticsearchSource extends ModelSource {
 
   async init() {
     this.client = await new es.Client(this.config);
-    await this.establishIndices();
   }
 
-  async establishIndices() {
-    let promises: Promise<any>[] = [];
-
-    for (let colName of Object.keys(this.indices)) {
-      //      let col = await this.client.collection(colName);
-
-      for (let { fields, options } of this.indices[colName]) {
-        //      promises.push(col.createIndex(fields, options));
-      }
-    }
-    return Promise.all(promises);
-  }
-
-  getCollectionName<T extends ModelCore>(cls: Class<T>): string {
-    return ModelRegistry.get(cls).collection || cls.name;
-  }
-
-  async getCollection<T extends ModelCore>(cls: Class<T>): Promise<mongo.Collection> {
-    return this.client.collection(this.getCollectionName(cls));
+  getIdentity<T extends ModelCore>(cls: Class<T>): { type: string, index: string } {
+    let conf = ModelRegistry.get(cls);
+    let ret: { [key: string]: string } = {
+      index: conf.collection || cls.name,
+    };
+    ret.type = conf.discriminator || ret.index;
+    return ret as { type: string, index: string };
   }
 
   async resetDatabase() {
@@ -70,58 +67,72 @@ export class ModelElasticsearchSource extends ModelSource {
     await this.init();
   }
 
-  registerIndex(cls: Class, fields: { [key: string]: number }, options: mongo.IndexOptions) {
-    let col = this.getCollectionName(cls);
-    this.indices[col] = this.indices[col] || [];
 
-    // TODO: Cleanup
-    this.indices[col].push({ fields, options });
+  transformQuery<T>(cls: Class<T>, query: Query) {
+    let conf = ModelRegistry.get(cls);
+    let res = {
+      ...this.getIdentity(cls),
+      body: {}
+    }
+    return res;
   }
 
-  getIndices(cls: Class) {
-    return this.indices[this.getCollectionName(cls)];
+  transformSearchQuery<T>(cls: Class<T>, query: Query, options: QueryOptions = {}) {
+    let conf = ModelRegistry.get(cls);
+    let res: es.SearchParams = this.transformQuery(cls, query);
+
+    let sort = options.sort || conf.defaultSort;
+
+    if (sort) {
+      if (Array.isArray(sort) || typeof sort === 'string') {
+        res.sort = sort;
+      } else {
+        res.sort = Object.entries(sort).map(x =>
+          `${x[0]}:${x[1] > 0 ? 'asc' : 'desc'}`
+        );
+      }
+    }
+
+    if (options.offset) {
+      res.from = options.offset;
+    }
+
+    if (options.limit) {
+      res.size = options.limit;
+    }
+
+    return res;
   }
 
   async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: Query) {
-    let col = await this.getCollection(cls);
-    let objs = await col.find(query, { _id: true }).toArray();
-    return objs.map(x => this.postLoad(cls, x));
+    let objs = await this.client.search<T>({
+      _sourceInclude: ['_id'],
+      ...this.transformSearchQuery(cls, query)
+    })
+    return objs.hits.hits.map(x => this.postLoad(cls, x._source));
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<T[]> {
-    query = this.translateQueryIds(query);
-
-    let col = await this.getCollection(cls);
-    let cursor = col.find(query);
-    if (options.sort) {
-      cursor = cursor.sort(options.sort);
-    }
-
-    cursor = cursor.limit(Math.trunc(options.limit || 200) || 200);
-
-    if (options.offset) {
-      cursor = cursor.skip(Math.trunc(options.offset) || 0);
-    }
-    let res = await cursor.toArray();
-    res.forEach(r => this.postLoad(cls, r));
+    let results = await this.client.search<T>(
+      this.transformSearchQuery(cls, query, options),
+    )
+    let res = results.hits.hits.map(r => this.postLoad(cls, r._source));
     return res;
   }
 
-  async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<number> {
-    query = this.translateQueryIds(query);
-
-    let col = await this.getCollection(cls);
-    let cursor = col.count(query);
-
-    let res = await cursor;
-    return res;
+  async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}): Promise<number> {
+    let results = await this.client.search({
+      ...this.transformSearchQuery(cls, query),
+      size: 0
+    })
+    return results.hits.total;
   }
 
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}, failOnMany = true): Promise<T> {
-    if (!options.limit) {
-      options.limit = 2;
-    }
-    let res = await this.getAllByQuery(cls, query, options);
+    let res = await this.getAllByQuery(cls, query, {
+      limit: 200,
+      ...options
+    });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
       throw new Error(`Invalid number of results for find by id: ${res ? res.length : res}`);
     }
@@ -130,58 +141,77 @@ export class ModelElasticsearchSource extends ModelSource {
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
     return await this.getByQuery(cls, {
-      $and: [{ _id: id }]
+      _id: id
     });
   }
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
-    let col = await this.getCollection(cls);
-    let res = await col.deleteOne({ _id: new mongo.ObjectID(id) });
-
-    return res.deletedCount || 0;
+    let res = await this.client.delete({
+      ...this.getIdentity(cls),
+      id
+    })
+    return res.found ? 1 : 0;
   }
 
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}): Promise<number> {
-    query = this.translateQueryIds(query);
-    let col = await this.getCollection(cls);
-    let res = await col.deleteMany(query);
-    return res.deletedCount || 0;
+    let res = await this.client.deleteByQuery({
+      ...this.transformQuery(cls, query)
+    })
+    return res.deleted || 0;
   }
 
   async save<T extends ModelCore>(cls: Class<T>, o: T, removeId: boolean = true): Promise<T> {
-    let col = await this.getCollection(cls);
-    let res = await col.insertOne(o);
-    o.id = res.insertedId.toHexString();
+    delete o.id;
+
+    let id = uuid.v4();
+    let res = await this.client.create({
+      ...this.getIdentity(cls),
+      id,
+      body: o
+    })
+    o.id = id;
     return o;
   }
 
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]): Promise<T[]> {
-    let col = await this.getCollection(cls);
     for (let x of objs) {
+      (x as any)._id = uuid.v4();
       delete x.id;
     }
-    let res = await col.insertMany(objs);
-    for (let i = 0; i < objs.length; i++) {
-      objs[i].id = res.insertedIds[i].toHexString();
-    }
+
+    let res = await this.client.bulk({
+      index: this.getIdentity(cls).index,
+      body: objs.map(x => [
+        { _type: this.getIdentity(x.constructor as Class<T>).type, _id: (x as any)._id },
+        x
+      ]),
+    });
+
     return objs;
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
-    let col = await this.getCollection(cls);
-    this.prePersist(o);
-    await col.replaceOne({ _id: o.id }, o);
+    this.prePersist(cls, o);
+    await this.client.update({
+      ...this.getIdentity(cls),
+      id: o.id!,
+      body: o
+    });
     this.postLoad(cls, o);
     return o;
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
-    return await this.updatePartialByQuery(cls, { _id: data.id }, data);
+    let update = this.client.update({
+      method: '',
+      ...this.getIdentity(cls),
+      id: data.id,
+      body: { doc: data }
+    });
+    return this.getById(cls, data.id);
   }
 
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: Query, data: Partial<T>): Promise<T> {
-    let col = await this.getCollection(cls);
-    query = this.translateQueryIds(query);
 
     let final: any = data;
 
@@ -199,21 +229,29 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, data: Partial<T>) {
-    let col = await this.getCollection(cls);
-    query = this.translateQueryIds(query);
-
     let finalData: any = data;
 
     if (Object.keys(data)[0].charAt(0) !== '$') {
       finalData = { $set: flat(data) };
     }
 
-    let res = await col.updateMany(query, data);
-    return res.matchedCount;
+    let script = '';
+
+    let res = await this.client.updateByQuery({
+      ...this.getIdentity(cls),
+      body: {
+        query: this.transformSearchQuery(cls, query),
+        script: {
+          lang: 'painless',
+          inline: script
+        }
+      }
+    })
+
+    return res.updated;
   }
 
   async bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
-    let col = await this.getCollection(cls);
     let bulk = col.initializeUnorderedBulkOp({});
     let count = 0;
 
