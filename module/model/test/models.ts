@@ -1,4 +1,5 @@
 import { Model, BaseModel } from '../index';
+import { isQuery } from '../src/model/query/where';
 
 @Model()
 export class Address extends BaseModel {
