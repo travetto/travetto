@@ -40,9 +40,9 @@ export type GroupingQuery<T> =
   { or: (GroupingQuery<T> | MatchQuery<T>)[]; } |
   { not: (GroupingQuery<T> | MatchQuery<T>); };
 
-export type WhereQuery<T> = GroupingQuery<T> | MatchQuery<T>;
+export type WhereClause<T> = GroupingQuery<T> | MatchQuery<T>;
 
-export function isWhereQuery<T>(o: WhereQuery<T>): o is GroupingQuery<T> {
+export function isWhereQuery<T>(o: WhereClause<T>): o is GroupingQuery<T> {
   return 'and' in o || 'or' in o || 'not' in o;
 }
 
