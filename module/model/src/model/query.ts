@@ -1,32 +1,34 @@
 export type SortOptions = { [key: string]: number } | string | string[];
 
 export type FieldComparableType = Date | number;
-export type FieldType = string | number | boolean | Date | object;
+export type FieldType = FieldComparableType | string | boolean;
 export type FieldArrayType = FieldType[];
 
-export function isSubQuery(o: any): o is SubQuery {
-  return o.$lt || o.$lte || o.$gt || o.$gte || o.$eq || o.$ne || o.$in || o.$nin || o.$exists;
+export function isFieldQuery(o: any): o is FieldQuery {
+  return o.lt || o.lte || o.gt || o.gte || o.eq || o.ne || o.in || o.nin || o.exists;
 }
 
-export type SubQuery = {
-  $lt: FieldComparableType;
-  $lte?: FieldComparableType;
-  $gt?: FieldComparableType;
-  $gte?: FieldComparableType;
-  $eq?: FieldType;
-  $ne?: FieldType;
-  $in?: FieldArrayType;
-  $nin?: FieldArrayType;
-  $exists?: boolean;
-}
+export type FieldQuery =
+  { lt: FieldComparableType; } |
+  { lte: FieldComparableType; } |
+  { gt: FieldComparableType; } |
+  { gte: FieldComparableType; } |
+  { eq: FieldType; } |
+  { ne: FieldType; } |
+  { in: FieldArrayType; } |
+  { nin: FieldArrayType; } |
+  { all: FieldArrayType; } |
+  { exists: boolean; } |
+  { regex: RegExp; } |
+  { geoWithin: [number, number][] } |
+  { geoIntersects: [number, number][] } |
+  FieldType;
 
-export type Query = {
-  [key: string]: FieldType | RegExp | SubQuery;
-} & {
-    $and?: Query[],
-    $or?: Query[]
-  };
-
+export type Query =
+  { and: Query[]; } |
+  { or: Query[]; } |
+  { not: Query; } |
+  { [key: string]: FieldQuery; };
 
 export interface QueryOptions {
   sort?: SortOptions;
@@ -34,4 +36,6 @@ export interface QueryOptions {
   offset?: number;
 }
 
-export type ModelId = string | number;
+let q: Query = {
+  'name.first': 'orange'
+}
