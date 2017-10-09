@@ -1,11 +1,10 @@
 import { Class } from '@travetto/registry';
 import { SelectClause } from './select';
 import { WhereClause } from './where';
-
-type GroupByClause<T> = T;
+import { GroupByClause } from './groupBy';
 
 export interface Query<T> {
   select: SelectClause<T>;
-  where: WhereClause<T>;
-  groupBy: GroupByClause<T>;
+  where?: WhereClause<T>;
+  groupBy?: GroupByClause<T>;
 }
