@@ -71,6 +71,10 @@ export class ModelService extends ModelSource {
     return o;
   }
 
+  query<U, T extends ModelCore = U>(cls: Class<T>, query: Query<T>) {
+    return this.source.query<T, U>(cls, query);
+  }
+
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}) {
     const config = ModelRegistry.get(cls);
     if (!query.sort && config.defaultSort) {

@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { ModelCore, Query, QueryOptions, BulkState } from '../model';
+import { ModelCore, Query, QueryOptions, BulkState, PageableModelQuery, ModelQuery } from '../model';
 import { ModelService } from './model';
 
 export abstract class ClassModelService<T extends ModelCore> {
@@ -8,23 +8,23 @@ export abstract class ClassModelService<T extends ModelCore> {
 
   abstract get class(): Class<T>;
 
-  getAllByQuery(query: Query = {}, options: QueryOptions = {}) {
-    return this.service.getAllByQuery(this.class, query, options);
+  query(query: Query<T>) {
+    return this.service.query(this.class, query);
   }
 
-  getCountByQuery(query: Query = {}) {
+  getAllByQuery(query: PageableModelQuery<T> = {}) {
+    return this.service.getAllByQuery(this.class, query);
+  }
+
+  getCountByQuery(query: ModelQuery<T> = {}) {
     return this.service.getCountByQuery(this.class, query);
   }
 
-  getByQuery(query: Query, options: QueryOptions = {}, failOnMany: boolean = true) {
-    return this.service.getByQuery(this.class, query, options, failOnMany);
+  getByQuery(query: PageableModelQuery<T>, failOnMany: boolean = true) {
+    return this.service.getByQuery(this.class, query, failOnMany);
   }
 
-  getIdsByQuery(query: Query, options: QueryOptions = {}) {
-    return this.service.getIdsByQuery(this.class, query, options);
-  }
-
-  saveOrUpdate(o: T, query: Query) {
+  saveOrUpdate(o: T, query: ModelQuery<T>) {
     return this.service.saveOrUpdate(this.class, o, query);
   }
 
@@ -36,7 +36,7 @@ export abstract class ClassModelService<T extends ModelCore> {
     return this.service.deleteById(this.class, id);
   }
 
-  deleteByQuery(query: Query = {}) {
+  deleteByQuery(query: ModelQuery<T> = {}) {
     return this.service.deleteByQuery(this.class, query);
   }
 
@@ -52,7 +52,7 @@ export abstract class ClassModelService<T extends ModelCore> {
     return this.service.update(this.class, o);
   }
 
-  updateAllByQuery(query: Query, data: Partial<T>) {
+  updateAllByQuery(query: ModelQuery<T>, data: Partial<T>) {
     return this.service.updateAllByQuery(this.class, query, data);
   }
 
@@ -60,7 +60,7 @@ export abstract class ClassModelService<T extends ModelCore> {
     return this.service.updatePartial(this.class, o);
   }
 
-  updatePartialByQuery(query: Query, o: Partial<T>) {
+  updatePartialByQuery(query: ModelQuery<T>, o: Partial<T>) {
     return this.service.updatePartialByQuery(this.class, query, o);
   }
 
@@ -68,7 +68,7 @@ export abstract class ClassModelService<T extends ModelCore> {
     return this.service.updatePartialView(this.class, o, view);
   }
 
-  updatePartialViewByQuery(o: Partial<T>, view: string, query: Query) {
+  updatePartialViewByQuery(o: Partial<T>, view: string, query: ModelQuery<T>) {
     return this.service.updatePartialViewByQuery(this.class, o, view, query);
   }
 
