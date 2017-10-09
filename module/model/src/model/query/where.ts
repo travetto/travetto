@@ -1,10 +1,8 @@
-export type SortOptions = { [key: string]: number } | string | string[];
+type FieldComparableType = Date | number;
+type FieldType = FieldComparableType | string | boolean;
+type FieldArrayType = FieldType[];
 
-export type FieldComparableType = Date | number;
-export type FieldType = FieldComparableType | string | boolean;
-export type FieldArrayType = FieldType[];
-
-export type Point = [number, number];
+type Point = [number, number];
 
 type GeneralFieldQuery =
   { $eq: FieldType; } |
@@ -31,28 +29,23 @@ type GeoFieldQuery =
 
 type FieldQuery = GeneralFieldQuery | ComparableFieldQuery | ArrayFieldQuery | StringFieldQuery | GeoFieldQuery;
 
-export type MatchQuery<T> = {
+type MatchQuery<T> = {
   [P in keyof T]?: FieldQuery | T[P] | MatchQuery<T[P]>;
 };
 
-export type GroupingQuery<T> =
-  { and: (GroupingQuery<T> | MatchQuery<T>)[]; } |
-  { or: (GroupingQuery<T> | MatchQuery<T>)[]; } |
-  { not: (GroupingQuery<T> | MatchQuery<T>); };
+type Grouping<T> =
+  { and: (Grouping<T> | MatchQuery<T>)[]; } |
+  { or: (Grouping<T> | MatchQuery<T>)[]; } |
+  { not: (Grouping<T> | MatchQuery<T>); } |
+  MatchQuery<T>;
 
-export type WhereClause<T> = GroupingQuery<T> | MatchQuery<T>;
+export type WhereClause<T> = Grouping<T> | MatchQuery<T>;
 
-export function isWhereQuery<T>(o: WhereClause<T>): o is GroupingQuery<T> {
+export function isGrouping<T>(o: WhereClause<T>): o is Grouping<T> {
   return 'and' in o || 'or' in o || 'not' in o;
 }
 
 export function isFieldType(o: any): o is FieldType {
   let type = typeof o;
   return o === 'number' || o === 'string' || o === 'boolean' || o instanceof Date;
-}
-
-export interface QueryOptions {
-  sort?: SortOptions;
-  limit?: number;
-  offset?: number;
 }
