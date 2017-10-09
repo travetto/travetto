@@ -4,9 +4,7 @@ export type FieldComparableType = Date | number;
 export type FieldType = FieldComparableType | string | boolean;
 export type FieldArrayType = FieldType[];
 
-export function isFieldQuery(o: any): o is FieldQuery {
-  return o.lt || o.lte || o.gt || o.gte || o.eq || o.ne || o.in || o.nin || o.exists;
-}
+export type Point = [number, number];
 
 export type FieldQuery =
   { lt: FieldComparableType; } |
@@ -20,8 +18,8 @@ export type FieldQuery =
   { all: FieldArrayType; } |
   { exists: boolean; } |
   { regex: RegExp; } |
-  { geoWithin: [number, number][] } |
-  { geoIntersects: [number, number][] } |
+  { geoWithin: Point[] } |
+  { geoIntersects: Point[] } |
   FieldType;
 
 export type Query =
