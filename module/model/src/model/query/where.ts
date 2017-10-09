@@ -29,8 +29,15 @@ type GeoFieldQuery =
 
 type FieldQuery = GeneralFieldQuery | ComparableFieldQuery | ArrayFieldQuery | StringFieldQuery | GeoFieldQuery;
 
+// Recursive breaks tsc
 type MatchQuery<T> = {
-  [P in keyof T]?: FieldQuery | T[P] | MatchQuery<T[P]>;
+  [P in keyof T]?: FieldQuery | T[P] | {
+    [Q in keyof T[P]]?: FieldQuery | T[P][Q] | {
+      [R in keyof T[P][Q]]?: FieldQuery | T[P][Q][R] | {
+        [S in keyof T[P][Q][R]]?: FieldQuery | T[P][Q][R][S]
+      }
+    }
+  }
 };
 
 type Grouping<T> =
