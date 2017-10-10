@@ -41,15 +41,14 @@ type MatchQuery<T> = {
 };
 
 type Grouping<T> =
-  { and: (Grouping<T> | MatchQuery<T>)[]; } |
-  { or: (Grouping<T> | MatchQuery<T>)[]; } |
-  { not: (Grouping<T> | MatchQuery<T>); } |
-  MatchQuery<T>;
+  { $and: (Grouping<T> | MatchQuery<T>)[]; } |
+  { $or: (Grouping<T> | MatchQuery<T>)[]; } |
+  { $not: (Grouping<T> | MatchQuery<T>); };
 
 export type WhereClause<T> = Grouping<T> | MatchQuery<T>;
 
 export function isGrouping<T>(o: WhereClause<T>): o is Grouping<T> {
-  return 'and' in o || 'or' in o || 'not' in o;
+  return '$and' in o || '$or' in o || '$not' in o;
 }
 
 export function isFieldType(o: any): o is FieldType {

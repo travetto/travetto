@@ -1,10 +1,16 @@
-import { SchemaBound, Schema } from '@travetto/schema';
+import { SchemaBound, Schema, BindUtil } from '@travetto/schema';
 import { ModelCore } from './model';
 import { ModelOptions, ModelRegistry } from '../service';
 import { Class } from '@travetto/registry';
 
+type DeepPartial<T> = {
+  [p in keyof T]?: T[p] | DeepPartial<T[p]>;
+}
+
 @Schema()
-export abstract class BaseModel extends SchemaBound implements ModelCore {
+export abstract class BaseModel implements ModelCore {
+
+  static from = SchemaBound.from;
 
   id?: string;
   version?: string;
@@ -13,7 +19,6 @@ export abstract class BaseModel extends SchemaBound implements ModelCore {
   updatedDate?: Date;
 
   constructor() {
-    super();
     let type = ModelRegistry.get(this.constructor as Class).discriminator;
     if (type) {
       this.type = type;
@@ -30,3 +35,4 @@ export abstract class BaseModel extends SchemaBound implements ModelCore {
   postLoad() {
   }
 }
+

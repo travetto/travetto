@@ -1,8 +1,7 @@
 import { Class } from '@travetto/registry';
 import { ModelRegistry, ModelOptions } from '../service';
-import { SortOptions } from '../model';
 
-export function Model(conf: Partial<ModelOptions> = {}) {
+export function Model(conf: Partial<ModelOptions<any>> = {}) {
   return function <T extends Class>(target: T) {
     if (conf.discriminator) {
       const parent = Object.getPrototypeOf(target) as Class;

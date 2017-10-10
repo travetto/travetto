@@ -11,7 +11,7 @@ type GroupClause<T> = {
   [P in keyof T]: 1 | true | GroupClause<T[P]>
 };
 
-type SortClause<T> = {
+export type SortClause<T> = {
   [P in keyof T]: boolean | 1 | -1 | SortClause<T[P]>;
 }
 

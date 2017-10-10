@@ -1,4 +1,4 @@
-import { ModelSource, Query, BulkResponse, BulkState, QueryOptions, ModelService } from '../index';
+import { ModelSource, Query, BulkResponse, BulkState, QueryOptions, ModelService, ModelCore, ModelQuery, PageableModelQuery } from '../index';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Person } from './models';
 import { Injectable } from '@travetto/di';
@@ -9,63 +9,56 @@ export class TestSource implements ModelSource {
     console.log('Changed model', e);
   }
 
-  getTypeField(): keyof Person {
-    return 'type';
-  }
-  prePersist(cls: Class<Person>, model: Partial<Person>): Partial<Person>;
-  prePersist(cls: Class<Person>, model: Person): Person;
-  prePersist(cls: Class<Person>, model: Partial<Person> | Person): Partial<Person> | Person {
+  prePersist<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Partial<T>;
+  prePersist<T extends ModelCore>(cls: Class<T>, model: T): T;
+  prePersist(cls: any, model: any) {
     throw new Error('Method not implemented.');
   }
-
-  postLoad(cls: Class<Person>, model: Partial<Person>): Partial<Person>;
-  postLoad(cls: Class<Person>, model: Person): Person;
-  postLoad(cls: Class<Person>, model: Partial<Person> | Person): Partial<Person> | Person {
+  postLoad<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Partial<T>;
+  postLoad<T extends ModelCore>(cls: Class<T>, model: T): T;
+  postLoad(cls: any, model: any) {
     throw new Error('Method not implemented.');
   }
-  saveAll(cls: Class<Person>, models: Person[]): Promise<Person[]> {
+  save<T extends ModelCore>(cls: Class<T>, model: T): Promise<T> {
     throw new Error('Method not implemented.');
   }
-  save(cls: Class<Person>, model: Person): Promise<Person> {
+  saveAll<T extends ModelCore>(cls: Class<T>, models: T[]): Promise<T[]> {
     throw new Error('Method not implemented.');
   }
-  update(cls: Class<Person>, model: Person): Promise<Person> {
+  update<T extends ModelCore>(cls: Class<T>, model: T): Promise<T> {
     throw new Error('Method not implemented.');
   }
-  updateAll(cls: Class<Person>, model: Person[]): Promise<number> {
+  updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     throw new Error('Method not implemented.');
   }
-  updatePartial(cls: Class<Person>, model: Partial<Person>): Promise<Person> {
+  updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T> {
     throw new Error('Method not implemented.');
   }
-  updatePartialByQuery(cls: Class<Person>, query: Query, body: Partial<Person>): Promise<number> {
+  updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>): Promise<T> {
     throw new Error('Method not implemented.');
   }
-  updateAllByQuery(cls: Class<Person>, query: Query, body: Partial<Person>): Promise<number> {
+  query<T extends ModelCore, U>(cls: Class<T>, builder: Query<T>): U[] {
     throw new Error('Method not implemented.');
   }
-  bulkProcess(cls: Class<Person>, state: BulkState<Person>): Promise<BulkResponse> {
+  bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>): Promise<BulkResponse> {
     throw new Error('Method not implemented.');
   }
-  getById(cls: Class<Person>, id: string): Promise<Person> {
+  getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
     throw new Error('Method not implemented.');
   }
-  getByQuery(cls: Class<Person>, query: Query, options?: QueryOptions | undefined, failOnMany?: boolean | undefined): Promise<Person> {
+  getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean | undefined): Promise<T> {
     throw new Error('Method not implemented.');
   }
-  getAllByQuery(cls: Class<Person>, query: Query, options?: QueryOptions | undefined): Promise<Person[]> {
+  getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     throw new Error('Method not implemented.');
   }
-  getCountByQuery(cls: Class<Person>, query: Query): Promise<number> {
+  getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     throw new Error('Method not implemented.');
   }
-  getIdsByQuery(cls: Class<Person>, query: Query, options?: QueryOptions | undefined): Promise<string[]> {
+  deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
     throw new Error('Method not implemented.');
   }
-  deleteById(cls: Class<Person>, id: string): Promise<number> {
-    throw new Error('Method not implemented.');
-  }
-  deleteByQuery(cls: Class<Person>, query: Query): Promise<number> {
+  deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     throw new Error('Method not implemented.');
   }
 

@@ -1,9 +1,9 @@
-import { SortOptions } from '../model';
+import { SortClause } from '../model';
 import { Class } from '@travetto/registry';
 
 
-export interface IndexConfig {
-  fields: string[] | { [key: string]: number };
+export interface IndexConfig<T> {
+  fields: SortClause<T>;
   options: {
     unique?: boolean;
   }
@@ -12,8 +12,8 @@ export interface IndexConfig {
 export class ModelOptions {
   class: Class;
   collection: string;
-  defaultSort?: SortOptions;
-  indicies: IndexConfig[] = [];
+  defaultSort?: SortClause<any>;
+  indicies: IndexConfig<any>[] = [];
   discriminator?: string;
   subtypes?: { [key: string]: Class };
   extra?: object;
