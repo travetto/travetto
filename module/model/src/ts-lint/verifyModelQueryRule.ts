@@ -16,7 +16,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
   public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
     return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) => {
-      return new QueryHandler(ctx, tc).walk();
+      return new QueryHandler(ctx, tc).visitNode(ctx.sourceFile);
     }, undefined, program.getTypeChecker());
   }
 }
@@ -27,7 +27,7 @@ class QueryHandler {
     'Query', 'ModelQuery', 'PageableModelQuery'
   ].reduce((acc, v) => { acc[v] = true; return acc; }, {} as { [key: string]: boolean });
 
-  cache: { [key: string]: { [key: string]: ts.Symbol } } = {};
+  cache = new Map<any, Map<string, ts.Symbol>>();
 
   constructor(private ctx: Lint.WalkContext<void>, private tc: ts.TypeChecker) {
     this.visitNode = this.visitNode.bind(this);
@@ -35,18 +35,14 @@ class QueryHandler {
 
 
   getMembersByType(type: ts.Type) {
-    let key = type.aliasSymbol!.escapedName.toString();
-    if (!(key in this.cache)) {
-      let members = this.tc.getPropertiesOfType(type).reduce((acc, v) => {
-        acc[v.escapedName.toString()] = v; return acc;
-      }, {} as { [key: string]: ts.Symbol });
-      this.cache[key] = members;
+    if (!this.cache.has(type)) {
+      let members = new Map<string, ts.Symbol>();
+      for (let symbol of this.tc.getPropertiesOfType(type)) {
+        members.set(`${symbol.escapedName}`, symbol);
+      }
+      this.cache.set(type, members);
     }
-    return this.cache[key];
-  }
-
-  walk() {
-    this.visitNode(this.ctx.sourceFile);
+    return this.cache.get(type)!;
   }
 
   visitNode(node: ts.Node): void {
@@ -69,19 +65,67 @@ class QueryHandler {
   }
 
 
-  processSelectClause(model: ts.Type, member: ts.Symbol) {
+  processSelectClause(node: ts.Node, model: ts.Type, member: ts.Type) {
+    console.log('Select', model, member);
+  }
+
+  processWhereClause(node: ts.Node, model: ts.Type, passed: ts.Type) {
+    if (passed === null) {
+      //for (let m of member) {
+      //        this.processWhereClause(model, m);
+      //      }
+    } else {
+      let passedMembers: Map<string, ts.Symbol> = this.getMembersByType(passed);
+      let modelMembers: Map<string, ts.Symbol> = this.getMembersByType(model);
+
+      for (let [passedMemberKey, passedMemberSymbol] of passedMembers.entries()) {
+
+        let passedMemberTypeNode = (passedMemberSymbol as any).type;
+        let passedMemberType = this.tc.getTypeFromTypeNode(passedMemberTypeNode);
+
+        if (passedMemberKey.charAt(0) === '$') {
+          if (passedMembers.size > 1) {
+            // Error
+          }
+          if (passedMemberKey === '$and' || passedMemberKey === '$or') {
+            //For loop
+            this.processWhereClause(node, model, passedMemberType);
+          } else if (passedMemberKey === '$not') {
+            // Not loop
+            this.processWhereClause(node, model, passedMemberType);
+          } else {
+            // Error
+          }
+        } else {
+          let modelMemberSymbol = modelMembers.get(passedMemberKey);
+          if (!modelMemberSymbol) {
+            this.ctx.addFailureAtNode(node, `Unknown member ${passedMemberKey}`);
+          } else {
+            let modelMemberTypeNode = (modelMemberSymbol.valueDeclaration! as any).type;
+            let modelMemberType: ts.Type = this.tc.getTypeFromTypeNode(modelMemberTypeNode);
+            let modelMemberKind: ts.SyntaxKind = modelMemberTypeNode.kind;
+            console.log('hi', modelMemberKind);
+            if (modelMemberKind === ts.SyntaxKind.StringKeyword) {
+              console.log('string', '='.repeat(20), '\n', modelMemberTypeNode, '='.repeat(20), '\n', passedMemberTypeNode, '='.repeat(20), '\n')
+            } else if (modelMemberKind === ts.SyntaxKind.NumberKeyword) {
+
+            } else if (modelMemberKind === ts.SyntaxKind.BooleanKeyword) {
+            } else if (modelMemberKind === ts.SyntaxKind.ArrayType) {
+
+            } else if (modelMemberKind === ts.SyntaxKind.TypeReference) {
+              this.processWhereClause(node, modelMemberType, passedMemberType);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  processGroupByClause(node: ts.Node, model: ts.Type, member: ts.Type) {
 
   }
 
-  processWhereClause(model: ts.Type, member: ts.Symbol) {
-
-  }
-
-  processGroupByClause(model: ts.Type, member: ts.Symbol) {
-
-  }
-
-  processSortClause(model: ts.Type, member: ts.Symbol) {
+  processSortClause(node: ts.Node, model: ts.Type, member: ts.Type) {
 
   }
 
@@ -92,28 +136,18 @@ class QueryHandler {
       if (QueryHandler.QUERY_TYPES[queryName] && queryType.aliasTypeArguments && queryType.aliasTypeArguments.length) {
         let modelType = queryType.aliasTypeArguments[0];
 
-        console.log(queryName, this.tc.typeToString(modelType));
         let members = this.getMembersByType(queryType)
-        if (members) {
-          let passedType = this.tc.getTypeAtLocation(passedNode);
 
-          if ('select' in members) {
-            this.processSelectClause(modelType, (passedType as any).members.get('select'))
-          }
-          if ('where' in members) {
-            this.processWhereClause(modelType, (passedType as any).members.get('where'))
-          }
-          if ('groupBy' in members) {
-            this.processGroupByClause(modelType, (passedType as any).members.get('groupBy'))
-          }
-          if ('sort' in members) {
-            this.processSortClause(modelType, (passedType as any).members.get('sort'))
+        if (members && members.size) {
+          let passedType = this.tc.getTypeAtLocation(passedNode);
+          let passedMembers = this.getMembersByType(passedType);
+          for (let k of ['select', 'where', 'groupBy', 'sort']) {
+            if (members.has(k) && passedMembers.has(k)) {
+              (this as any)[`process${k.charAt(0).toUpperCase()}${k.substring(1)}Clause`](passedNode, modelType, (passedMembers.get(k)! as any).type);
+            }
           }
         }
       }
     }
   }
-
 }
-
-

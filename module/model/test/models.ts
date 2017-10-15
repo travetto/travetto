@@ -10,6 +10,7 @@ export class Address extends BaseModel {
 @Model()
 export class Person extends BaseModel {
   name: string;
+  names: string[];
   age: number;
   address: Address;
 }

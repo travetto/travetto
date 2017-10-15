@@ -46,6 +46,8 @@ class DataBinding {
 
     let res = await model.getByQuery(Person, {
       where: {
+        name: 'orange',
+        names: ['1', '2'],
         address: {
           street2: 5
         }
