@@ -1,5 +1,5 @@
 import { SchemaBound, View } from '@travetto/schema';
-import { Model, ModelService, BaseModel, ModelCore } from '../index';
+import { Model, ModelService, WhereClause, PageableModelQuery, ModelQuery } from '../index';
 import { TestSource } from './registry';
 import { Person, Address } from './models';
 import { Test, Suite, BeforeAll } from '@travetto/test';
@@ -7,6 +7,14 @@ import { Test, Suite, BeforeAll } from '@travetto/test';
 import * as assert from 'assert';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry, Class } from '@travetto/registry';
+
+const decl: ModelQuery<Person> = {
+  where: {
+    address: {
+      street2: 5
+    }
+  }
+}
 
 @Suite()
 class DataBinding {
@@ -32,11 +40,15 @@ class DataBinding {
 
   @Test()
   async getModel() {
+
     let model = await DependencyRegistry.getInstance(ModelService);
     assert(model['source'] instanceof TestSource);
 
     let res = await model.getByQuery(Person, {
       where: {
+        address: {
+          street2: 5
+        }
       }
     });
   }

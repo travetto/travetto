@@ -3,10 +3,6 @@ import { ModelCore } from './model';
 import { ModelOptions, ModelRegistry } from '../service';
 import { Class } from '@travetto/registry';
 
-type DeepPartial<T> = {
-  [p in keyof T]?: T[p] | DeepPartial<T[p]>;
-}
-
 @Schema()
 export abstract class BaseModel implements ModelCore {
 

@@ -1,5 +1,7 @@
 type FieldComparableType = Date | number;
 type FieldType = FieldComparableType | string | boolean;
+
+/*
 type FieldArrayType = FieldType[];
 
 type Point = [number, number];
@@ -30,20 +32,19 @@ type GeoFieldQuery =
 type FieldQuery = GeneralFieldQuery | ComparableFieldQuery | ArrayFieldQuery | StringFieldQuery | GeoFieldQuery;
 
 // Recursive breaks tsc
-type MatchQuery<T> = {
-  [P in keyof T]?: FieldQuery | T[P] | {
-    [Q in keyof T[P]]?: FieldQuery | T[P][Q] | {
-      [R in keyof T[P][Q]]?: FieldQuery | T[P][Q][R] | {
-        [S in keyof T[P][Q][R]]?: FieldQuery | T[P][Q][R][S]
-      }
-    }
-  }
-};
 
-type Grouping<T> =
-  { $and: (Grouping<T> | MatchQuery<T>)[]; } |
-  { $or: (Grouping<T> | MatchQuery<T>)[]; } |
-  { $not: (Grouping<T> | MatchQuery<T>); };
+type SubMatchQuery<T> = T | FieldQuery | MatchQuery<T>;
+*/
+
+export type MatchQuery<T> = /*{
+  [P in keyof T]?: SubMatchQuery<T[P]>;
+}*/ any;
+
+type Grouping<T> = /*
+  { $and: Grouping<T>[] | MatchQuery<T>[][]; } |
+  { $or: Grouping<T>[] | MatchQuery<T>[]; } |
+  { $not: Grouping<T>; };
+  */ any;
 
 export type WhereClause<T> = Grouping<T> | MatchQuery<T>;
 
