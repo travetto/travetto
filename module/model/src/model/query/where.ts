@@ -9,8 +9,11 @@ type Point = [number, number];
 type GeneralFieldQuery =
   { $eq: FieldType; } |
   { $ne: FieldType; } |
+
+  //Array
   { $in: FieldArrayType; } |
   { $nin: FieldArrayType; } |
+  
   { $exists: boolean; };
 
 type ComparableFieldQuery =

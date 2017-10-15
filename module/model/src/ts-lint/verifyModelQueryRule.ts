@@ -78,10 +78,13 @@ class QueryHandler {
       let passedMembers: Map<string, ts.Symbol> = this.getMembersByType(passed);
       let modelMembers: Map<string, ts.Symbol> = this.getMembersByType(model);
 
+      console.log(modelMembers.keys(), passedMembers.keys())
+
       for (let [passedMemberKey, passedMemberSymbol] of passedMembers.entries()) {
 
-        let passedMemberTypeNode = (passedMemberSymbol as any).type;
-        let passedMemberType = this.tc.getTypeFromTypeNode(passedMemberTypeNode);
+        let passedMemberType = (passedMemberSymbol as any).type as ts.Type;
+        //let passedMemberTypeNode = this.tc.getTypeFromTypeNode(passedMemberTypeNode);
+        //passedMemberTypeNode = this.tc.typeToTypeNode(passedMemberType);
 
         if (passedMemberKey.charAt(0) === '$') {
           if (passedMembers.size > 1) {
@@ -104,12 +107,16 @@ class QueryHandler {
             let modelMemberTypeNode = (modelMemberSymbol.valueDeclaration! as any).type;
             let modelMemberType: ts.Type = this.tc.getTypeFromTypeNode(modelMemberTypeNode);
             let modelMemberKind: ts.SyntaxKind = modelMemberTypeNode.kind;
-            console.log('hi', modelMemberKind);
-            if (modelMemberKind === ts.SyntaxKind.StringKeyword) {
-              console.log('string', '='.repeat(20), '\n', modelMemberTypeNode, '='.repeat(20), '\n', passedMemberTypeNode, '='.repeat(20), '\n')
-            } else if (modelMemberKind === ts.SyntaxKind.NumberKeyword) {
 
+
+
+            if (modelMemberKind === ts.SyntaxKind.StringKeyword) {
+              this.checkOperatorClause(node, passedMemberType, ts.TypeFlags.String, { $ne: 'string', $eq: 'string', $exists: 'string' });
+            } else if (modelMemberKind === ts.SyntaxKind.NumberKeyword) {
+              this.checkOperatorClause(node, passedMemberType, ts.TypeFlags.Number,
+                { $ne: 'number', $eq: 'number', $exists: 'number', $lt: 'number', $gt: 'number', $lte: 'number', $gte: 'number' });
             } else if (modelMemberKind === ts.SyntaxKind.BooleanKeyword) {
+              this.checkOperatorClause(node, passedMemberType, ts.TypeFlags.Boolean, { $ne: 'boolean', $eq: 'boolean', $exists: 'boolean' });
             } else if (modelMemberKind === ts.SyntaxKind.ArrayType) {
 
             } else if (modelMemberKind === ts.SyntaxKind.TypeReference) {
@@ -117,6 +124,31 @@ class QueryHandler {
             }
           }
         }
+      }
+    }
+  }
+
+  checkOperatorClause(node: ts.Node, type: ts.Type, primitiveType: ts.TypeFlags, allowed: { [key: string]: string }) {
+    if ((type.flags & ts.TypeFlags.Object) === 0) {
+      if ((type.flags & primitiveType) === 0) {
+        this.ctx.addFailureAtNode(node, `Operator clause only supports types of ${ts.TypeFlags[primitiveType].toLowerCase()}, not ${this.tc.typeToString(type)}`);
+      }
+      return;
+    }
+
+    let members = this.getMembersByType(type);
+    if (members.size !== 1) {
+      this.ctx.addFailureAtNode(node, `One and only one operation may be specified in an operator clause`);
+    }
+    let [key, value] = members.entries().next().value;
+    let passedType = (value as any).type as ts.Type;
+
+    if (!(key in allowed)) {
+      this.ctx.addFailureAtNode(node, `Operation ${key}, not allowed for field of type ${this.tc.typeToString(passedType)}`);
+    } else {
+      let passedTypeName = this.tc.typeToString(passedType);
+      if (passedTypeName !== allowed[key]) {
+        this.ctx.addFailureAtNode(node, `Passed in value ${passedTypeName} mismatches with expected type ${allowed[key]}`);
       }
     }
   }
