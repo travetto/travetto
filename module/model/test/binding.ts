@@ -46,15 +46,18 @@ class DataBinding {
 
     let res = await model.getByQuery(Person, {
       where: {
-        $and: [{
+        $not: {
           name: 'orange',
           names: ['1', '2'],
+          dob: {
+            $in: new Date(),
+          },
           address: {
             street2: {
               $eq: 5
             }
           }
-        }]
+        }
       }
     });
   }
