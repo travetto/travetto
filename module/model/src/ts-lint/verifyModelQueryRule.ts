@@ -27,6 +27,49 @@ class QueryHandler {
     'Query', 'ModelQuery', 'PageableModelQuery'
   ].reduce((acc, v) => { acc[v] = true; return acc; }, {} as { [key: string]: boolean });
 
+  static OPERATORS: { [key: string]: { type: string | number, ops: { [key: string]: Set<string> } } } = {
+    string: {
+      type: ts.TypeFlags.String,
+      ops: {
+        $ne: new Set(['string']), $eq: new Set(['string']),
+        $exists: new Set(['boolean']), $in: new Set(['string[]']),
+        $nin: new Set(['string[]']), $regex: new Set(['string', 'RegEx'])
+      }
+    },
+    number: {
+      type: ts.TypeFlags.Number,
+      ops: {
+        $ne: new Set(['number']), $eq: new Set(['number']),
+        $exists: new Set(['boolean']), $in: new Set(['number[]']), $nin: new Set(['number[]']),
+        $lt: new Set(['number']), $gt: new Set(['number']), $lte: new Set(['number']), $gte: new Set(['number'])
+      }
+    },
+    boolean: {
+      type: ts.TypeFlags.Boolean,
+      ops: {
+        $ne: new Set(['boolean']), $eq: new Set(['boolean']), $exists: new Set(['boolean']),
+        $in: new Set(['boolean[]']), $nin: new Set(['boolean[]'])
+      }
+    },
+    date: {
+      type: 'Date',
+      ops: {
+        $ne: new Set(['Date']), $eq: new Set(['Date']), $exists: new Set(['boolean']),
+        $in: new Set(['Date[]']), $nin: new Set(['Date[]']),
+        $lt: new Set(['Date']), $gt: new Set(['Date']),
+        $lte: new Set(['Date']), $gte: new Set(['Date'])
+      }
+    },
+    geo: {
+      type: 'GeoPoint',
+      ops: {
+        $ne: new Set(['GeoPoint']), $eq: new Set(['GeoPoint']), $exists: new Set(['boolean']),
+        $in: new Set(['GeoPoint[]']), $nin: new Set(['GeoPoint[]']),
+        $geoWithin: new Set('GeoPoint[]'), $geoIntersects: new Set(['GeoPoint[]'])
+      }
+    }
+  }
+
   cache = new Map<any, Map<string, ts.Symbol>>();
 
   constructor(private ctx: Lint.WalkContext<void>, private tc: ts.TypeChecker) {
@@ -81,7 +124,8 @@ class QueryHandler {
 
       if (passedMemberKey.charAt(0) === '$') {
         if (passedMembers.size > 1) {
-          // Error
+          this.ctx.addFailureAtNode(node, `You can only have one $and, $or, or $not in a single object`);
+          return;
         }
         let n: ts.Node = (passedMemberSymbol.valueDeclaration! as any).initializer;
 
@@ -112,6 +156,7 @@ class QueryHandler {
             this.ctx.addFailureAtNode(n, `${passedMemberKey} requires the value to be an object`);
           }
         } else {
+          this.ctx.addFailureAtNode(node, `Unknown high level operator ${passedMemberKey}`);
           // Error
         }
       } else {
@@ -119,27 +164,41 @@ class QueryHandler {
         if (!modelMemberSymbol) {
           this.ctx.addFailureAtNode(node, `Unknown member ${passedMemberKey}`);
         } else {
+
           let modelMemberTypeNode: ts.TypeNode = (modelMemberSymbol.valueDeclaration! as any).type;
           let modelMemberType: ts.Type = this.tc.getTypeFromTypeNode(modelMemberTypeNode);
           let modelMemberKind: ts.SyntaxKind = modelMemberTypeNode.kind;
 
-          if (modelMemberKind === ts.SyntaxKind.StringKeyword) {
-            this.checkOperatorClause(passedMemberTypeNode, passedMemberType, ts.TypeFlags.String, { $ne: 'string', $eq: 'string', $exists: 'string' });
-          } else if (modelMemberKind === ts.SyntaxKind.NumberKeyword) {
-            this.checkOperatorClause(passedMemberTypeNode, passedMemberType, ts.TypeFlags.Number,
-              { $ne: 'number', $eq: 'number', $exists: 'number', $lt: 'number', $gt: 'number', $lte: 'number', $gte: 'number' });
-          } else if (modelMemberKind === ts.SyntaxKind.BooleanKeyword) {
-            this.checkOperatorClause(passedMemberTypeNode, passedMemberType, ts.TypeFlags.Boolean, { $ne: 'boolean', $eq: 'boolean', $exists: 'boolean' });
-          } else if (modelMemberKind === ts.SyntaxKind.ArrayType) {
-            //if ()
-          } else if (modelMemberKind === ts.SyntaxKind.TypeReference) {
-            if (modelMemberType.symbol!.escapedName === 'Date') {
-              console.log('Got a date!');
-              this.checkOperatorClause(passedMemberTypeNode, passedMemberType, 'Date',
-                { $ne: 'Date', $eq: 'Date', $exists: 'Date', $lt: 'Date', $gt: 'Date', $lte: 'Date', $gte: 'Date' });
-            } else {
-              this.processWhereClause(passedMemberTypeNode, modelMemberType, passedMemberType);
+          let op: string | undefined;
+
+          switch (modelMemberKind === ts.SyntaxKind.TypeReference ? modelMemberType.symbol!.escapedName : modelMemberKind) {
+            case ts.SyntaxKind.StringKeyword: op = 'string'; break;
+            case ts.SyntaxKind.NumberKeyword: op = 'number'; break;
+            case ts.SyntaxKind.BooleanKeyword: op = 'boolean'; break;
+            case 'Date': op = 'date'; break;
+            case 'GeoPoint': op = 'geo'; break;
+            case ts.SyntaxKind.ArrayType: {
+              if (passedMemberKey === '$subMatch') { //
+
+              }
+
+              let target = (modelMemberType as any).typeArguments[0];
+              // Got an array 
+              let typeStr = this.tc.typeToString(modelMemberType);
+              if ((target.flags & (ts.TypeFlags.String | ts.TypeFlags.Boolean | ts.TypeFlags.Number)) > 0) {
+                typeStr = typeStr.toLowerCase();
+              }
+
+              this.checkOperatorClause(passedMemberTypeNode, passedMemberType, typeStr, { $all: new Set([typeStr]) });
+              continue;
             }
+          }
+
+          if (op) {
+            let conf = QueryHandler.OPERATORS[op];
+            this.checkOperatorClause(passedMemberTypeNode, passedMemberType, conf.type, conf.ops);
+          } else {
+            this.processWhereClause(passedMemberTypeNode, modelMemberType, passedMemberType);
           }
         }
       }
@@ -157,8 +216,8 @@ class QueryHandler {
   }
 
 
-  checkOperatorClause(target: ts.Node, type: ts.Type, primitiveType: ts.TypeFlags | string, allowed: { [key: string]: string }) {
-    if ((type.flags & ts.TypeFlags.Object) === 0) {
+  checkOperatorClause(target: ts.Node, type: ts.Type, primitiveType: ts.TypeFlags | string, allowed: { [key: string]: Set<string> }) {
+    if ((type.flags & ts.TypeFlags.Object) === 0 || type.symbol!.escapedName === 'Array') {
       if (typeof primitiveType === 'number') {
         if ((type.flags & primitiveType) === 0) {
           this.ctx.addFailureAtNode(target, `Operator clause only supports types of ${ts.TypeFlags[primitiveType].toLowerCase()}, not ${this.tc.typeToString(type)}`);
@@ -183,7 +242,7 @@ class QueryHandler {
       this.ctx.addFailureAtNode(target, `Operation ${key}, not allowed for field of type ${this.tc.typeToString(passedType)}`);
     } else {
       let passedTypeName = this.tc.typeToString(passedType);
-      if (passedTypeName !== allowed[key]) {
+      if (!allowed[key].has(passedTypeName)) {
         this.ctx.addFailureAtNode(target, `Passed in value ${passedTypeName} mismatches with expected type ${allowed[key]}`);
       }
     }

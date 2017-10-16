@@ -8,14 +8,6 @@ import * as assert from 'assert';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry, Class } from '@travetto/registry';
 
-const decl: ModelQuery<Person> = {
-  where: {
-    address: {
-      street2: 5
-    }
-  }
-}
-
 @Suite()
 class DataBinding {
 
@@ -46,16 +38,16 @@ class DataBinding {
 
     let res = await model.getByQuery(Person, {
       where: {
-        $not: {
-          name: 'orange',
-          names: ['1', '2'],
-          dob: {
-            $in: new Date(),
-          },
-          address: {
-            street2: {
-              $eq: 5
-            }
+        name: 'orange',
+        names: ['1', '2'],
+        dob: {
+          $in: [
+            new Date(), 5
+          ],
+        },
+        address: {
+          street2: {
+            $eq: 5
           }
         }
       }

@@ -14,4 +14,5 @@ export class Person extends BaseModel {
   age: number;
   dob: Date;
   address: Address;
+  extra: Address[];
 }
