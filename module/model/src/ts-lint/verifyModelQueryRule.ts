@@ -223,7 +223,7 @@ class QueryHandler {
       }
 
       if (op) {
-        handler.onSimpleType(state, op, (state.passedMemberTypeNode as any).initializer as ts.Node);
+        handler.onSimpleType(state, op, (state.passedMemberSymbol.valueDeclaration as any).initializer as ts.Node);
       } else {
         if (handler.onComplexType && handler.onComplexType(state)) {
           continue;
@@ -301,19 +301,27 @@ class QueryHandler {
 
   }
 
+  isLiteral(node: ts.Node) {
+    return true;
+  }
+
+  getLiteralText(node: ts.Node) {
+    return node.getText();
+  }
+
   processSortClause(node: ts.Node, model: ts.Type, member: ts.Type) {
     return this.processGenericClause(node, model, member, {
       onSimpleType: (state, type, value) => {
         if (this.hasFlags(state.passedMemberType.flags, ts.TypeFlags.Number, ts.TypeFlags.Boolean)) {
-          if (ts.isLiteralTypeNode(value)) {
-            if (['1', '-1', 'true', 'false'].includes(value.getText())) {
+          if (this.isLiteral(value)) {
+            if (['1', '-1', 'true', 'false'].includes(this.getLiteralText(value))) {
               return;
             }
           } else {
             return;
           }
         }
-        this.ctx.addFailureAtNode(state.passedMemberTypeNode, `Only true, false -1, and 1 are allowed for sorting`);
+        this.ctx.addFailureAtNode(state.passedMemberTypeNode, `Only true, false -1, and 1 are allowed for sorting, not ${this.getLiteralText(value)}`);
       }
     });
   }
@@ -322,10 +330,10 @@ class QueryHandler {
     return this.processGenericClause(node, model, member, {
       onSimpleType: (state, type, value) => {
         if (this.hasFlags(state.passedMemberType.flags, ts.TypeFlags.Number, ts.TypeFlags.Boolean)) {
-          console.log('Number node', ts.isLiteralTypeNode(value), state.passedMemberTypeNode);
+          console.log('Number node', this.isLiteral(value));
 
-          if (ts.isLiteralTypeNode(value)) {
-            if (['1', '0', 'true', 'false'].includes(value.literal.getText())) {
+          if (this.isLiteral(value)) {
+            if (['1', '0', 'true', 'false'].includes(this.getLiteralText(value))) {
               return;
             }
             this.ctx.addFailureAtNode(value, `Only true, false 0, and 1 are allowed for including/excluding fields`);
@@ -333,7 +341,7 @@ class QueryHandler {
             return;
           }
         } else if (this.hasFlags(state.passedMemberType.flags, ts.TypeFlags.String)) {
-          if (ts.isLiteralTypeNode(value) && !/[A-Za-z_$0-9]/.test(value.literal.getText())) {
+          if (this.isLiteral(value) && !/[A-Za-z_$0-9]/.test(this.getLiteralText(value))) {
             this.ctx.addFailureAtNode(value, `Only A-Z, a-z, 0-9, '$' and '_' are allowed in aliases for selecting fields`);
             return;
           }
@@ -343,13 +351,13 @@ class QueryHandler {
           let subMembers = this.getMembersByType(sub);
 
           if (!subMembers.has('alias')) {
-            this.ctx.addFailureAtNode(state.passedMemberTypeNode, `Alias is a required field for sorting`);
+            this.ctx.addFailureAtNode(state.passedMemberTypeNode, `Alias is a required field for selecting`);
             return;
           } else {
             console.log('Yay');
           }
         }
-        this.ctx.addFailureAtNode(state.passedMemberTypeNode, `Only true, false -1, and 1 or { alias: string, calc?: string } are allowed for sorting`);
+        this.ctx.addFailureAtNode(state.passedMemberTypeNode, `Only true, false -1, and 1 or { alias: string, calc?: string } are allowed for selecting fields`);
       }
     });
   }
