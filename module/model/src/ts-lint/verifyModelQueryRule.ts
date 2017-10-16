@@ -1,6 +1,26 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
 
+interface ProcessingState {
+  passedMemberKey: string;
+  passedMembers: Map<string, ts.Symbol>;
+  passedMemberType: ts.Type;
+  passedMemberSymbol: ts.Symbol;
+  passedMemberTypeNode: ts.TypeNode;
+  modelMembers: Map<string, ts.Symbol>;
+  modelMemberSymbol: ts.Symbol;
+  modelMemberTypeNode: ts.TypeNode;
+  modelMemberType: ts.Type;
+  modelMemberKind: ts.SyntaxKind;
+}
+
+interface ProcessingHandler {
+  preMember?(state: ProcessingState): boolean;
+  onSimpleType(state: ProcessingState, type: string): void;
+  onArrayType?(state: ProcessingState, target: ts.Type): void;
+  onComplexType?(state: ProcessingState): void;
+}
+
 export class Rule extends Lint.Rules.TypedRule {
 
   public static metadata: Lint.IRuleMetadata = {
@@ -112,97 +132,121 @@ class QueryHandler {
     console.log('Select', model, member);
   }
 
-
-  processWhereClause(node: ts.Node, model: ts.Type, passed: ts.Type) {
+  processGenericClause(node: ts.Node, model: ts.Type, passed: ts.Type, handler: ProcessingHandler) {
     let passedMembers: Map<string, ts.Symbol> = this.getMembersByType(passed);
     let modelMembers: Map<string, ts.Symbol> = this.getMembersByType(model);
 
     for (let [passedMemberKey, passedMemberSymbol] of passedMembers.entries()) {
+      let state: ProcessingState = {
+        passedMemberKey,
+        passedMembers,
+        passedMemberSymbol,
+        passedMemberType: (passedMemberSymbol as any).type as ts.Type,
+        passedMemberTypeNode: passedMemberSymbol.valueDeclaration!,
+        modelMembers,
+        modelMemberSymbol: modelMembers.get(passedMemberKey),
+      } as any;
+      state.modelMemberTypeNode = state.modelMemberSymbol ? (state.modelMemberSymbol!.valueDeclaration! as any).type : null;
+      state.modelMemberType = this.tc.getTypeFromTypeNode(state.modelMemberTypeNode);
+      state.modelMemberKind = state.modelMemberTypeNode.kind;
 
-      let passedMemberType = (passedMemberSymbol as any).type as ts.Type;
-      let passedMemberTypeNode = passedMemberSymbol.valueDeclaration!;
+      if (handler.preMember && handler.preMember(state)) {
+        continue;
+      }
 
-      if (passedMemberKey.charAt(0) === '$') {
-        if (passedMembers.size > 1) {
-          this.ctx.addFailureAtNode(node, `You can only have one $and, $or, or $not in a single object`);
-          return;
-        }
-        let n: ts.Node = (passedMemberSymbol.valueDeclaration! as any).initializer;
+      if (!state.modelMembers.has(passedMemberKey)) {
+        this.ctx.addFailureAtNode(node, `Unknown member ${state.passedMemberKey}`);
+      }
 
-        if (passedMemberKey === '$and' || passedMemberKey === '$or') {
-          if (this.checkIfArrayType(n)) {
-            if (ts.isTypeReferenceNode(n)) {
-              // bail on deep dive on variables
-              continue;
-            }
-            // Iterate
-            let arr = n as ts.ArrayLiteralExpression;
-            for (let el of arr.elements) {
-              this.processWhereClause(el, model, passedMemberType);
-            }
-          } else {
-            this.ctx.addFailureAtNode(n, `${passedMemberKey} requires the value to be an array`);
-          }
-        } else if (passedMemberKey === '$not') {
-          // Not loop
-          if (this.checkIfObjectType(n)) {
-            if (ts.isTypeReferenceNode(n)) {
-              // bail on deep dive on variables
-              continue;
-            }
+      let op: string | undefined;
 
-            this.processWhereClause(node, model, passedMemberType);
-          } else {
-            this.ctx.addFailureAtNode(n, `${passedMemberKey} requires the value to be an object`);
-          }
-        } else {
-          this.ctx.addFailureAtNode(node, `Unknown high level operator ${passedMemberKey}`);
-          // Error
-        }
-      } else {
-        let modelMemberSymbol = modelMembers.get(passedMemberKey);
-        if (!modelMemberSymbol) {
-          this.ctx.addFailureAtNode(node, `Unknown member ${passedMemberKey}`);
-        } else {
-
-          let modelMemberTypeNode: ts.TypeNode = (modelMemberSymbol.valueDeclaration! as any).type;
-          let modelMemberType: ts.Type = this.tc.getTypeFromTypeNode(modelMemberTypeNode);
-          let modelMemberKind: ts.SyntaxKind = modelMemberTypeNode.kind;
-
-          let op: string | undefined;
-
-          switch (modelMemberKind === ts.SyntaxKind.TypeReference ? modelMemberType.symbol!.escapedName : modelMemberKind) {
-            case ts.SyntaxKind.StringKeyword: op = 'string'; break;
-            case ts.SyntaxKind.NumberKeyword: op = 'number'; break;
-            case ts.SyntaxKind.BooleanKeyword: op = 'boolean'; break;
-            case 'Date': op = 'date'; break;
-            case 'GeoPoint': op = 'geo'; break;
-            case ts.SyntaxKind.ArrayType: {
-              if (passedMemberKey === '$subMatch') { //
-
-              }
-
-              let target = (modelMemberType as any).typeArguments[0];
-              // Got an array 
-              let typeStr = this.tc.typeToString(modelMemberType);
-              if ((target.flags & (ts.TypeFlags.String | ts.TypeFlags.Boolean | ts.TypeFlags.Number)) > 0) {
-                typeStr = typeStr.toLowerCase();
-              }
-
-              this.checkOperatorClause(passedMemberTypeNode, passedMemberType, typeStr, { $all: new Set([typeStr]) });
-              continue;
-            }
-          }
-
-          if (op) {
-            let conf = QueryHandler.OPERATORS[op];
-            this.checkOperatorClause(passedMemberTypeNode, passedMemberType, conf.type, conf.ops);
-          } else {
-            this.processWhereClause(passedMemberTypeNode, modelMemberType, passedMemberType);
+      switch (state.modelMemberKind === ts.SyntaxKind.TypeReference ? state.modelMemberType.symbol!.escapedName : state.modelMemberKind) {
+        case ts.SyntaxKind.StringKeyword: op = 'string'; break;
+        case ts.SyntaxKind.NumberKeyword: op = 'number'; break;
+        case ts.SyntaxKind.BooleanKeyword: op = 'boolean'; break;
+        case 'Date': op = 'date'; break;
+        case 'GeoPoint': op = 'geo'; break;
+        case ts.SyntaxKind.ArrayType: {
+          if (handler.onArrayType) {
+            handler.onArrayType(state, (state.modelMemberType as any).typeArguments[0]);
+            continue;
           }
         }
       }
+
+      if (op) {
+        handler.onSimpleType(state, op);
+      } else if (handler.onComplexType) {
+        handler.onComplexType(state);
+      } else {
+        this.processGenericClause(node, state.modelMemberType, state.passedMemberType, handler);
+      }
     }
+  }
+
+  processWhereClause(node: ts.Node, model: ts.Type, passed: ts.Type) {
+    return this.processGenericClause(node, model, passed, {
+      preMember: (state: ProcessingState) => {
+        if (state.passedMemberKey.charAt(0) === '$') {
+          if (state.passedMembers.size > 1) {
+            this.ctx.addFailureAtNode(node, `You can only have one $and, $or, or $not in a single object`);
+            return true;
+          }
+
+          let n: ts.Node = (state.passedMemberSymbol.valueDeclaration! as any).initializer;
+
+          if (state.passedMemberKey === '$and' || state.passedMemberKey === '$or') {
+            if (this.checkIfArrayType(n)) {
+              if (ts.isTypeReferenceNode(n)) {
+                // bail on deep dive on variables
+                return true;
+              }
+              // Iterate
+              let arr = n as ts.ArrayLiteralExpression;
+              for (let el of arr.elements) {
+                this.processWhereClause(el, model, state.passedMemberType);
+              }
+            } else {
+              this.ctx.addFailureAtNode(n, `${state.passedMemberKey} requires the value to be an array`);
+            }
+          } else if (state.passedMemberKey === '$not') {
+            // Not loop
+            if (this.checkIfObjectType(n)) {
+              if (ts.isTypeReferenceNode(n)) {
+                // bail on deep dive on variables
+              }
+
+              this.processWhereClause(node, model, state.passedMemberType);
+            } else {
+              this.ctx.addFailureAtNode(n, `${state.passedMemberKey} requires the value to be an object`);
+            }
+          } else {
+            this.ctx.addFailureAtNode(node, `Unknown high level operator ${state.passedMemberKey}`);
+            // Error
+          }
+          return true;
+        }
+        return false;
+      },
+
+      onSimpleType: (state: ProcessingState, type: string) => {
+        let conf = QueryHandler.OPERATORS[type];
+        this.checkOperatorClause(state.passedMemberTypeNode, state.passedMemberType, conf.type, conf.ops);
+      },
+
+      onArrayType: (state: ProcessingState, target: ts.Type) => {
+        if (state.passedMemberKey === '$subMatch') { //
+
+        }
+
+        let typeStr = this.tc.typeToString(state.modelMemberType);
+        if ((target.flags & (ts.TypeFlags.String | ts.TypeFlags.Boolean | ts.TypeFlags.Number)) > 0) {
+          typeStr = typeStr.toLowerCase();
+        }
+
+        this.checkOperatorClause(state.passedMemberTypeNode, state.passedMemberType, typeStr, { $all: new Set([typeStr]) });
+      }
+    });
   }
 
   checkIfArrayType(n: ts.Node) {
@@ -243,7 +287,7 @@ class QueryHandler {
     } else {
       let passedTypeName = this.tc.typeToString(passedType);
       if (!allowed[key].has(passedTypeName)) {
-        this.ctx.addFailureAtNode(target, `Passed in value ${passedTypeName} mismatches with expected type ${allowed[key]}`);
+        this.ctx.addFailureAtNode(target, `Passed in value ${passedTypeName} mismatches with expected type(s) ${Array.from(allowed[key])}`);
       }
     }
   }
