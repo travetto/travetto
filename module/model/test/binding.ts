@@ -1,5 +1,5 @@
 import { SchemaBound, View } from '@travetto/schema';
-import { Model, ModelService, WhereClause, PageableModelQuery, ModelQuery } from '../index';
+import { Model, ModelService, WhereClause, PageableModelQuery, ModelQuery, Query } from '../index';
 import { TestSource } from './registry';
 import { Person, Address } from './models';
 import { Test, Suite, BeforeAll } from '@travetto/test';
@@ -7,6 +7,34 @@ import { Test, Suite, BeforeAll } from '@travetto/test';
 import * as assert from 'assert';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry, Class } from '@travetto/registry';
+
+
+let query: Query<Person> = {
+  select: {
+    address: {
+      street1: -5
+    }
+  },
+  sort: {
+    address: {
+      street1: 1
+    }
+  },
+  where: {
+    name: 'orange',
+    names: ['1', '2'],
+    dob: {
+      $in: [
+        new Date(), 5
+      ],
+    },
+    address: {
+      street2: {
+        $eq: 5
+      }
+    }
+  }
+}
 
 @Suite()
 class DataBinding {

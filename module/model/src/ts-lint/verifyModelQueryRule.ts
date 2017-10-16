@@ -15,10 +15,10 @@ interface ProcessingState {
 }
 
 interface ProcessingHandler {
-  preMember?(state: ProcessingState): boolean;
-  onSimpleType(state: ProcessingState, type: string): void;
+  preMember?(state: ProcessingState): boolean | undefined;
+  onSimpleType(state: ProcessingState, type: string, value: ts.Node): void;
   onArrayType?(state: ProcessingState, target: ts.Type): void;
-  onComplexType?(state: ProcessingState): void;
+  onComplexType?(state: ProcessingState): boolean | undefined;
 }
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -127,9 +127,54 @@ class QueryHandler {
     return ts.forEachChild(node, this.visitNode);
   }
 
+  checkIfArrayType(n: ts.Node) {
+    let type = this.tc.getTypeAtLocation(n);
+    return ts.isArrayLiteralExpression(n) || ts.isArrayTypeNode(n) || type.symbol!.escapedName === 'Array';
+  }
 
-  processSelectClause(node: ts.Node, model: ts.Type, member: ts.Type) {
-    console.log('Select', model, member);
+  hasFlags<T extends number>(type: T, ...flags: T[]) {
+    let out = 0;
+    for (let f of flags) {
+      out = out | f;
+    }
+    return (out & type) > 0;
+  }
+
+  checkIfObjectType(n: ts.Node) {
+    let type = this.tc.getTypeAtLocation(n);
+    return ts.isObjectLiteralExpression(n) || this.hasFlags(type.flags, ts.TypeFlags.Object) && type.symbol!.escapedName !== 'Array';
+  }
+
+  checkOperatorClause(target: ts.Node, type: ts.Type, primitiveType: ts.TypeFlags | string, allowed: { [key: string]: Set<string> }) {
+    if (!this.hasFlags(type.flags, ts.TypeFlags.Object) || type.symbol!.escapedName === 'Array') {
+      if (typeof primitiveType === 'number') {
+        if (!this.hasFlags(type.flags, primitiveType)) {
+          this.ctx.addFailureAtNode(target, `Operator clause only supports types of ${ts.TypeFlags[primitiveType].toLowerCase()}, not ${this.tc.typeToString(type)}`);
+        }
+      } else {
+        let primitiveString = this.tc.typeToString(type);
+        if (primitiveType !== primitiveString) {
+          this.ctx.addFailureAtNode(target, `Operator clause only supports types of ${primitiveType}, not ${primitiveString}`);
+        }
+      }
+      return;
+    }
+
+    let members = this.getMembersByType(type);
+    if (members.size !== 1) {
+      this.ctx.addFailureAtNode(target, `One and only one operation may be specified in an operator clause`);
+    }
+    let [key, value] = members.entries().next().value;
+    let passedType = (value as any).type as ts.Type;
+
+    if (!(key in allowed)) {
+      this.ctx.addFailureAtNode(target, `Operation ${key}, not allowed for field of type ${this.tc.typeToString(passedType)}`);
+    } else {
+      let passedTypeName = this.tc.typeToString(passedType);
+      if (!allowed[key].has(passedTypeName)) {
+        this.ctx.addFailureAtNode(target, `Passed in value ${passedTypeName} mismatches with expected type(s) ${Array.from(allowed[key])}`);
+      }
+    }
   }
 
   processGenericClause(node: ts.Node, model: ts.Type, passed: ts.Type, handler: ProcessingHandler) {
@@ -146,9 +191,11 @@ class QueryHandler {
         modelMembers,
         modelMemberSymbol: modelMembers.get(passedMemberKey),
       } as any;
-      state.modelMemberTypeNode = state.modelMemberSymbol ? (state.modelMemberSymbol!.valueDeclaration! as any).type : null;
-      state.modelMemberType = this.tc.getTypeFromTypeNode(state.modelMemberTypeNode);
-      state.modelMemberKind = state.modelMemberTypeNode.kind;
+      if (state.modelMemberSymbol) {
+        state.modelMemberTypeNode = (state.modelMemberSymbol!.valueDeclaration! as any).type;
+        state.modelMemberType = this.tc.getTypeFromTypeNode(state.modelMemberTypeNode);
+        state.modelMemberKind = state.modelMemberTypeNode.kind;
+      }
 
       if (handler.preMember && handler.preMember(state)) {
         continue;
@@ -156,6 +203,7 @@ class QueryHandler {
 
       if (!state.modelMembers.has(passedMemberKey)) {
         this.ctx.addFailureAtNode(node, `Unknown member ${state.passedMemberKey}`);
+        continue;
       }
 
       let op: string | undefined;
@@ -175,10 +223,11 @@ class QueryHandler {
       }
 
       if (op) {
-        handler.onSimpleType(state, op);
-      } else if (handler.onComplexType) {
-        handler.onComplexType(state);
+        handler.onSimpleType(state, op, (state.passedMemberTypeNode as any).initializer as ts.Node);
       } else {
+        if (handler.onComplexType && handler.onComplexType(state)) {
+          continue;
+        }
         this.processGenericClause(node, state.modelMemberType, state.passedMemberType, handler);
       }
     }
@@ -189,7 +238,7 @@ class QueryHandler {
       preMember: (state: ProcessingState) => {
         if (state.passedMemberKey.charAt(0) === '$') {
           if (state.passedMembers.size > 1) {
-            this.ctx.addFailureAtNode(node, `You can only have one $and, $or, or $not in a single object`);
+            this.ctx.addFailureAtNode(state.passedMemberTypeNode, `You can only have one $and, $or, or $not in a single object`);
             return true;
           }
 
@@ -221,12 +270,11 @@ class QueryHandler {
               this.ctx.addFailureAtNode(n, `${state.passedMemberKey} requires the value to be an object`);
             }
           } else {
-            this.ctx.addFailureAtNode(node, `Unknown high level operator ${state.passedMemberKey}`);
+            this.ctx.addFailureAtNode(state.passedMemberTypeNode, `Unknown high level operator ${state.passedMemberKey}`);
             // Error
           }
           return true;
         }
-        return false;
       },
 
       onSimpleType: (state: ProcessingState, type: string) => {
@@ -240,7 +288,7 @@ class QueryHandler {
         }
 
         let typeStr = this.tc.typeToString(state.modelMemberType);
-        if ((target.flags & (ts.TypeFlags.String | ts.TypeFlags.Boolean | ts.TypeFlags.Number)) > 0) {
+        if (this.hasFlags(target.flags, ts.TypeFlags.String, ts.TypeFlags.Boolean, ts.TypeFlags.Number)) {
           typeStr = typeStr.toLowerCase();
         }
 
@@ -249,55 +297,61 @@ class QueryHandler {
     });
   }
 
-  checkIfArrayType(n: ts.Node) {
-    let type = this.tc.getTypeAtLocation(n);
-    return ts.isArrayLiteralExpression(n) || ts.isArrayTypeNode(n) || type.symbol!.escapedName === 'Array';
-  }
-
-  checkIfObjectType(n: ts.Node) {
-    let type = this.tc.getTypeAtLocation(n);
-    return ts.isObjectLiteralExpression(n) || (type.flags & ts.TypeFlags.Object) > 0 && type.symbol!.escapedName !== 'Array';
-  }
-
-
-  checkOperatorClause(target: ts.Node, type: ts.Type, primitiveType: ts.TypeFlags | string, allowed: { [key: string]: Set<string> }) {
-    if ((type.flags & ts.TypeFlags.Object) === 0 || type.symbol!.escapedName === 'Array') {
-      if (typeof primitiveType === 'number') {
-        if ((type.flags & primitiveType) === 0) {
-          this.ctx.addFailureAtNode(target, `Operator clause only supports types of ${ts.TypeFlags[primitiveType].toLowerCase()}, not ${this.tc.typeToString(type)}`);
-        }
-      } else {
-        let primitiveString = this.tc.typeToString(type);
-        if (primitiveType !== primitiveString) {
-          this.ctx.addFailureAtNode(target, `Operator clause only supports types of ${primitiveType}, not ${primitiveString}`);
-        }
-      }
-      return;
-    }
-
-    let members = this.getMembersByType(type);
-    if (members.size !== 1) {
-      this.ctx.addFailureAtNode(target, `One and only one operation may be specified in an operator clause`);
-    }
-    let [key, value] = members.entries().next().value;
-    let passedType = (value as any).type as ts.Type;
-
-    if (!(key in allowed)) {
-      this.ctx.addFailureAtNode(target, `Operation ${key}, not allowed for field of type ${this.tc.typeToString(passedType)}`);
-    } else {
-      let passedTypeName = this.tc.typeToString(passedType);
-      if (!allowed[key].has(passedTypeName)) {
-        this.ctx.addFailureAtNode(target, `Passed in value ${passedTypeName} mismatches with expected type(s) ${Array.from(allowed[key])}`);
-      }
-    }
-  }
-
   processGroupByClause(node: ts.Node, model: ts.Type, member: ts.Type) {
 
   }
 
   processSortClause(node: ts.Node, model: ts.Type, member: ts.Type) {
+    return this.processGenericClause(node, model, member, {
+      onSimpleType: (state, type, value) => {
+        if (this.hasFlags(state.passedMemberType.flags, ts.TypeFlags.Number, ts.TypeFlags.Boolean)) {
+          if (ts.isLiteralTypeNode(value)) {
+            if (['1', '-1', 'true', 'false'].includes(value.getText())) {
+              return;
+            }
+          } else {
+            return;
+          }
+        }
+        this.ctx.addFailureAtNode(state.passedMemberTypeNode, `Only true, false -1, and 1 are allowed for sorting`);
+      }
+    });
+  }
 
+  processSelectClause(node: ts.Node, model: ts.Type, member: ts.Type) {
+    return this.processGenericClause(node, model, member, {
+      onSimpleType: (state, type, value) => {
+        if (this.hasFlags(state.passedMemberType.flags, ts.TypeFlags.Number, ts.TypeFlags.Boolean)) {
+          console.log('Number node', ts.isLiteralTypeNode(value), state.passedMemberTypeNode);
+
+          if (ts.isLiteralTypeNode(value)) {
+            if (['1', '0', 'true', 'false'].includes(value.literal.getText())) {
+              return;
+            }
+            this.ctx.addFailureAtNode(value, `Only true, false 0, and 1 are allowed for including/excluding fields`);
+          } else {
+            return;
+          }
+        } else if (this.hasFlags(state.passedMemberType.flags, ts.TypeFlags.String)) {
+          if (ts.isLiteralTypeNode(value) && !/[A-Za-z_$0-9]/.test(value.literal.getText())) {
+            this.ctx.addFailureAtNode(value, `Only A-Z, a-z, 0-9, '$' and '_' are allowed in aliases for selecting fields`);
+            return;
+          }
+          return;
+        } else if (this.checkIfObjectType(state.passedMemberTypeNode) && !ts.isTypeReferenceNode(state.passedMemberTypeNode)) {
+          let sub = state.passedMemberType;
+          let subMembers = this.getMembersByType(sub);
+
+          if (!subMembers.has('alias')) {
+            this.ctx.addFailureAtNode(state.passedMemberTypeNode, `Alias is a required field for sorting`);
+            return;
+          } else {
+            console.log('Yay');
+          }
+        }
+        this.ctx.addFailureAtNode(state.passedMemberTypeNode, `Only true, false -1, and 1 or { alias: string, calc?: string } are allowed for sorting`);
+      }
+    });
   }
 
   processQuery(queryType: ts.Type, passedNode: ts.Node) {

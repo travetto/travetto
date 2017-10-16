@@ -4,15 +4,15 @@ import { WhereClause } from './where';
 type SelectFieldFn = 'max' | 'min' | 'avg' | 'sum' | 'count';
 
 type SelectClause<T> = {
-  [P in keyof T]: string | 1 | true | ({ alias: string, calc: SelectFieldFn }) | object
+  [P in keyof T]?: string | 1 | true | ({ alias: string, calc: SelectFieldFn }) | object
 };
 
 type GroupClause<T> = {
-  [P in keyof T]: 1 | true | object
+  [P in keyof T]?: 1 | true | object
 };
 
 export type SortClause<T> = {
-  [P in keyof T]: boolean | 1 | -1 | object;
+  [P in keyof T]?: boolean | 1 | -1 | object;
 }
 
 export interface QueryOptions<T> {
