@@ -1,5 +1,6 @@
 import { Class } from '@travetto/registry';
 import { BindUtil, SchemaRegistry, SchemaValidator } from '@travetto/schema';
+import { QueryVerifierService } from './query';
 import { Injectable } from '@travetto/di';
 import { ModelOptions } from './types';
 import { ModelCore, Query, QueryOptions, BulkState, ModelQuery, PageableModelQuery } from '../model';
@@ -15,7 +16,7 @@ function getClass<T>(o: T) {
 @Injectable({ target: ModelService })
 export class ModelService extends ModelSource {
 
-  constructor(private source: ModelSource) {
+  constructor(private source: ModelSource, private queryService: QueryVerifierService) {
     super();
   }
 
@@ -72,10 +73,13 @@ export class ModelService extends ModelSource {
   }
 
   query<U, T extends ModelCore = U>(cls: Class<T>, query: Query<T>) {
+    this.queryService.verify(cls, query);
     return this.source.query<T, U>(cls, query);
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}) {
+    this.queryService.verify(cls, query);
+
     const config = ModelRegistry.get(cls);
     if (!query.sort && config.defaultSort) {
       query.sort = config.defaultSort;
@@ -85,15 +89,21 @@ export class ModelService extends ModelSource {
   }
 
   getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}) {
+    this.queryService.verify(cls, query);
+
     return this.source.getCountByQuery(cls, query);
   }
 
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}, failOnMany: boolean = true) {
+    this.queryService.verify(cls, query);
+
     let res = await this.source.getByQuery(cls, query, failOnMany);
     return this.postLoad(cls, res);
   }
 
   async saveOrUpdate<T extends ModelCore>(cls: Class<T>, o: T, query: ModelQuery<T>) {
+    this.queryService.verify(cls, query);
+
     let res = await this.getAllByQuery(getClass(o), { ...query, limit: 2 });
     if (res.length === 1) {
       o = _.merge(res[0], o);
@@ -114,6 +124,8 @@ export class ModelService extends ModelSource {
   }
 
   deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}) {
+    this.queryService.verify(cls, query);
+
     return this.source.deleteByQuery(cls, query);
   }
 
@@ -136,6 +148,8 @@ export class ModelService extends ModelSource {
   }
 
   updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>) {
+    this.queryService.verify(cls, query);
+
     return this.source.updateAllByQuery(cls, query, data);
   }
 
@@ -144,6 +158,8 @@ export class ModelService extends ModelSource {
   }
 
   updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>) {
+    this.queryService.verify(cls, query);
+
     return this.source.updatePartialByQuery(cls, query, body);
   }
 
@@ -155,6 +171,8 @@ export class ModelService extends ModelSource {
   }
 
   async updatePartialViewByQuery<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string, query: ModelQuery<T>) {
+    this.queryService.verify(cls, query);
+
     o = await this.prePersist(cls, o, view);
     let partial = BindUtil.bindSchema(cls, {}, o, view);
     let res = await this.updatePartialByQuery(cls, query, partial);

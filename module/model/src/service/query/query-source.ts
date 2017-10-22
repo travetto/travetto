@@ -1,6 +1,12 @@
 import * as ts from 'typescript';
-import { OPERATORS, QUERY_TYPES, ProcessingHandler, SimpleType, ErrorCollector } from './types';
+import { OPERATORS, QUERY_TYPES, SimpleType, ErrorCollector } from './types';
 
+export interface ProcessingHandler {
+  preMember?(state: ProcessingState): boolean | undefined;
+  onSimpleType(state: ProcessingState, type: SimpleType, value: ts.Node): void;
+  onArrayType?(state: ProcessingState, target: ts.Type): void;
+  onComplexType?(state: ProcessingState): boolean | undefined;
+}
 
 interface ProcessingState {
   passedMemberKey: string;
@@ -103,7 +109,7 @@ export class QuerySourceVerifier {
     }
   }
 
-  processGenericClause(node: ts.Node, model: ts.Type, passed: ts.Type, handler: ProcessingHandler<ProcessingState, ts.Node>) {
+  processGenericClause(node: ts.Node, model: ts.Type, passed: ts.Type, handler: ProcessingHandler) {
     let passedMembers: Map<string, ts.Symbol> = this.getMembersByType(passed);
     let modelMembers: Map<string, ts.Symbol> = this.getMembersByType(model);
 

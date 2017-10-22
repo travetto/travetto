@@ -75,7 +75,7 @@ class DataBinding {
         },
         address: {
           street2: {
-            $eq: 'a'
+            $eq: 5
           }
         }
       }

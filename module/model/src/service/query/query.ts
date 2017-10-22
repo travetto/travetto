@@ -1,7 +1,8 @@
 import { ModelQuery, Query, PageableModelQuery } from '../../model';
 import { Class } from '@travetto/registry';
-import { ProcessingHandler, SimpleType, ErrorCollector } from './types';
+import { SimpleType, ErrorCollector } from './types';
 import { SchemaRegistry, SchemaConfig, ViewConfig } from '@travetto/schema';
+import { Injectable } from '@travetto/di';
 
 interface State<T> {
   cls: Class<T>;
@@ -10,9 +11,17 @@ interface State<T> {
   path: string;
 }
 
-export class QuerySourceVerifier {
+interface ProcessingHandler {
+  preMember?(state: State<any>): boolean;
+  onSimpleType(state: State<any>, type: SimpleType, value: any): void;
+  onArrayType(state: State<any>, type: SimpleType, value: any): void;
+  onComplexType?(state: State<any>): boolean | undefined;
+}
 
-  processGenericClause<T>(state: State<T>, val: object, handler: ProcessingHandler<State<any>>) {
+@Injectable()
+export class QueryVerifierService {
+
+  processGenericClause<T>(state: State<T>, val: object, handler: ProcessingHandler) {
     for (let key of Object.keys(val)) {
       if (handler.preMember && handler.preMember(state)) {
         continue;
@@ -58,25 +67,22 @@ export class QuerySourceVerifier {
 
   processWhereClause<T>(st: State<T>, passed: object) {
     return this.processGenericClause(st, passed, {
-      preMember(state: State<any>) {
-      },
-
       onSimpleType(state: State<any>, type: SimpleType, value: any) {
         //let conf = QuerySourceVerifier.OPERATORS[type];
         //this.checkOperatorClause(state.passedMemberTypeNode, state.passedMemberType, conf.type, conf.ops);
       },
 
-      onArrayType(state: State<any>, value: any[]) {
-        if (state.passedMemberKey === '$subMatch') { //
+      onArrayType(state: State<any>, type: SimpleType, value: any) {
+        // if (state.passedMemberKey === '$subMatch') { //
 
-        }
+        // }
 
-        let typeStr = this.tc.typeToString(state.modelMemberType);
-        if (this.hasFlags(target.flags, ts.TypeFlags.String, ts.TypeFlags.Boolean, ts.TypeFlags.Number)) {
-          typeStr = typeStr.toLowerCase();
-        }
+        // let typeStr = this.tc.typeToString(state.modelMemberType);
+        // if (this.hasFlags(target.flags, ts.TypeFlags.String, ts.TypeFlags.Boolean, ts.TypeFlags.Number)) {
+        //   typeStr = typeStr.toLowerCase();
+        // }
 
-        this.checkOperatorClause(state.passedMemberTypeNode, state.passedMemberType, typeStr, { $all: new Set([typeStr]) });
+        // this.checkOperatorClause(state.passedMemberTypeNode, state.passedMemberType, typeStr, { $all: new Set([typeStr]) });
       }
     });
   }
@@ -140,20 +146,21 @@ export class QuerySourceVerifier {
     */
   }
 
-  processQuery<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>) {
+  verify<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>) {
     let schema = SchemaRegistry.getViewSchema(cls);
+    let errors: any[] = [];
     let state = {
       schema,
       cls,
-      errors: [] as any[],
       collector(type: { path: string }, message: string) {
-        this.errors.push({ path: type.path, message })
+        errors.push({ path: type.path, message })
       }
     }
 
-    for (let x of ['select', 'where', 'sortBy', 'groupBy']) {
-      const fn: keyof this = `process${x.charAt(0).toUpperCase}${x.substring(1)}Clasuse` as any;
+    for (let x of ['select', 'where', 'sort', 'groupBy']) {
+      const fn: keyof this = `process${x.charAt(0).toUpperCase}${x.substring(1)}Clause` as any;
       const val = (query as any)[x];
+      console.log(fn);
       if (Array.isArray(val)) {
         for (let el of val) {
           this[fn](state, el);
@@ -161,6 +168,10 @@ export class QuerySourceVerifier {
       } else {
         this[fn](state, val);
       }
+    }
+
+    if (errors.length) {
+      throw { errors };
     }
   }
 }

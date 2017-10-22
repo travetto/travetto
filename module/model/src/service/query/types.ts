@@ -1,13 +1,6 @@
 
 export type SimpleType = 'string' | 'number' | 'boolean' | 'Date' | 'GeoPoint';
 
-export interface ProcessingHandler<S, V = any> {
-  preMember?(state: S): boolean | undefined;
-  onSimpleType(state: S, type: SimpleType, value: V): void;
-  onArrayType?(state: S, target: any): void;
-  onComplexType?(state: S): boolean | undefined;
-}
-
 export interface ErrorCollector<T> {
   collect(element: T, message: string): void;
 }
@@ -40,7 +33,7 @@ export const OPERATORS: { [key: string]: { type: SimpleType, ops: { [key: string
       $in: new Set(['boolean[]']), $nin: new Set(['boolean[]'])
     }
   },
-  date: {
+  Date: {
     type: 'Date',
     ops: {
       $ne: new Set(['Date']), $eq: new Set(['Date']), $exists: new Set(['boolean']),
@@ -49,7 +42,7 @@ export const OPERATORS: { [key: string]: { type: SimpleType, ops: { [key: string
       $lte: new Set(['Date']), $gte: new Set(['Date'])
     }
   },
-  geo: {
+  GeoPoint: {
     type: 'GeoPoint',
     ops: {
       $ne: new Set(['GeoPoint']), $eq: new Set(['GeoPoint']), $exists: new Set(['boolean']),
