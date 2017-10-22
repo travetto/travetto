@@ -12,20 +12,20 @@ import { RootRegistry, Class } from '@travetto/registry';
 let query: Query<Person> = {
   select: {
     address: {
-      street1: -5
-    }
-  },
-  sort: {
-    address: {
       street1: 1
     }
   },
+  sort: [{
+    address: {
+      street1: -5
+    }
+  }],
   where: {
     name: 'orange',
     names: ['1', '2'],
     dob: {
       $in: [
-        new Date(), 5
+        new Date(), new Date()
       ],
     },
     address: {
@@ -70,7 +70,7 @@ class DataBinding {
         names: ['1', '2'],
         dob: {
           $in: [
-            new Date(), 5
+            new Date(), new Date()
           ],
         },
         address: {

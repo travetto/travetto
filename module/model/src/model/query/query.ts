@@ -16,7 +16,7 @@ export type SortClause<T> = {
 }
 
 export interface QueryOptions<T> {
-  sort?: SortClause<T>;
+  sort?: SortClause<T>[];
   limit?: number;
   offset?: number;
 }

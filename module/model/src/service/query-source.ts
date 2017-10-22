@@ -285,7 +285,7 @@ export class QuerySourceVerifier {
   }
 
   isLiteral(node: ts.Node) {
-    return true;
+    return node.kind === ts.SyntaxKind.PrefixUnaryExpression || node.kind === ts.SyntaxKind.LiteralType;
   }
 
   getLiteralText(node: ts.Node) {
@@ -313,8 +313,6 @@ export class QuerySourceVerifier {
     return this.processGenericClause(node, model, member, {
       onSimpleType: (state, type, value) => {
         if (this.hasFlags(state.passedMemberType.flags, ts.TypeFlags.Number, ts.TypeFlags.Boolean)) {
-          console.log('Number node', this.isLiteral(value));
-
           if (this.isLiteral(value)) {
             if (['1', '0', 'true', 'false'].includes(this.getLiteralText(value))) {
               return;
@@ -359,7 +357,17 @@ export class QuerySourceVerifier {
           let passedMembers = this.getMembersByType(passedType);
           for (let k of ['select', 'where', 'groupBy', 'sort']) {
             if (members.has(k) && passedMembers.has(k)) {
-              (this as any)[`process${k.charAt(0).toUpperCase()}${k.substring(1)}Clause`](passedNode, modelType, (passedMembers.get(k)! as any).type);
+              const fn: keyof this = `process${k.charAt(0).toUpperCase()}${k.substring(1)}Clause` as any;
+              const type = (passedMembers.get(k)! as any).type;
+              const node = ((passedMembers.get(k)!.valueDeclaration!) as any).initializer;
+
+              if (ts.isArrayLiteralExpression(node)) {
+                for (let child of node.elements) {
+                  this[fn](child, modelType, this.tc.getTypeAtLocation(child));
+                }
+              } else {
+                this[fn](passedNode, modelType, type);
+              }
             }
           }
         }
