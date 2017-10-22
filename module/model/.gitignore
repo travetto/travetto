@@ -4,3 +4,5 @@ rpm_build/**
 .vscode/
 npm-debug.log
 package-lock.json
+src/service/*.js
+src/ts-lint/*.js

@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import * as Lint from 'tslint';
-import { QuerySourceVerifier } from '../service/query';
+import { QuerySourceVerifier } from '../service/query-source';
 
 export class Rule extends Lint.Rules.TypedRule {
 
@@ -25,4 +25,3 @@ export class Rule extends Lint.Rules.TypedRule {
     }, undefined, program.getTypeChecker());
   }
 }
-

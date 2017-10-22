@@ -30,7 +30,7 @@ let query: Query<Person> = {
     },
     address: {
       street2: {
-        $eq: 5
+        $eq: 'a'
       }
     }
   }
@@ -75,7 +75,7 @@ class DataBinding {
         },
         address: {
           street2: {
-            $eq: 5
+            $eq: 'a'
           }
         }
       }
