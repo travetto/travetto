@@ -60,7 +60,6 @@ class DataBinding {
 
   @Test()
   async getModel() {
-
     let model = await DependencyRegistry.getInstance(ModelService);
     assert(model['source'] instanceof TestSource);
 

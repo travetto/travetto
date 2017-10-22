@@ -1,81 +1,159 @@
 import { ModelQuery, Query, PageableModelQuery } from '../../model';
 import { Class } from '@travetto/registry';
-import { SimpleType, ErrorCollector } from './types';
-import { SchemaRegistry, SchemaConfig, ViewConfig } from '@travetto/schema';
+import { SimpleType, ErrorCollector, OPERATORS } from './types';
+import { SchemaRegistry, SchemaConfig, ViewConfig, FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
+import * as _ from 'lodash';
 
-interface State<T> {
-  cls: Class<T>;
-  schema: ViewConfig;
-  collector: ErrorCollector<{ path: string }>;
+interface State extends ErrorCollector<string> {
   path: string;
+  extend(path: string): State;
+  log(err: string): void;
 }
 
 interface ProcessingHandler {
-  preMember?(state: State<any>): boolean;
-  onSimpleType(state: State<any>, type: SimpleType, value: any): void;
-  onArrayType(state: State<any>, type: SimpleType, value: any): void;
-  onComplexType?(state: State<any>): boolean | undefined;
+  preMember?(state: State, value: any): boolean;
+  onSimpleType(state: State, type: SimpleType, value: any): void;
+  onArrayType?(state: State, type: SimpleType, value: any): void;
+  onComplexType?(state: State, cls: Class<any>, value: any): boolean | undefined;
 }
 
 @Injectable()
 export class QueryVerifierService {
 
-  processGenericClause<T>(state: State<T>, val: object, handler: ProcessingHandler) {
+  getDeclaredType(f: FieldConfig) {
+    let type = f.declared.type;
+    if (type === String) {
+      return 'string';
+    } else if (type === Number) {
+      return 'number';
+    } else if (type === Boolean) {
+      return 'boolean';
+    } else if (type === Date) {
+      return 'Date';
+    } else if (f.declared.array && type === Number) {
+      return 'GeoPoint';
+    }
+    throw new Error(`Unknown type: ${f.type.name}`);
+  }
+
+  getActualType(v: any) {
+    if (v instanceof String) {
+      return 'string';
+    } else if (v instanceof Number) {
+      return 'number';
+    } else if (v instanceof Boolean) {
+      return 'boolean';
+    } else if (v instanceof Date) {
+      return 'Date';
+    } else if (Array.isArray(v) && v.length === 2 && typeof v[0] === typeof v[1] && typeof v[0] === 'number') {
+      return 'GeoPoint';
+    }
+  }
+
+  processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler) {
+
+    let view = SchemaRegistry.getViewSchema(cls);
+
     for (let key of Object.keys(val)) {
+
       if (handler.preMember && handler.preMember(state)) {
         continue;
       }
 
-      if (!(key in state.schema)) {
-        state.collector.collect({ path: key }, `Unknown member ${key} of ${state.cls.name}`);
+      if (!(key in view.schema)) {
+        state.log(`Unknown member ${key} of ${cls.name}`);
         continue;
       }
 
-      let op: SimpleType | undefined;
+      let field = view.schema[key];
+      let value = (val as any)[key];
+      let op: SimpleType | undefined = this.getDeclaredType(field);
 
-      let field = state.schema.schema[key];
-
-      console.log(field);
-
-      /*
-          switch (state.modelMemberKind === ts.SyntaxKind.TypeReference ? state.modelMemberType.symbol!.escapedName : state.modelMemberKind) {
-            case ts.SyntaxKind.StringKeyword: op = 'string'; break;
-            case ts.SyntaxKind.NumberKeyword: op = 'number'; break;
-            case ts.SyntaxKind.BooleanKeyword: op = 'boolean'; break;
-            case 'Date': op = 'date'; break;
-            case 'GeoPoint': op = 'geo'; break;
-            case ts.SyntaxKind.ArrayType: {
-              if (handler.onArrayType) {
-                handler.onArrayType(state, (state.modelMemberType as any).typeArguments[0]);
-                continue;
-              }
-            }
-          }
-  
-        if (op) {
-          handler.onSimpleType(state, op, (state.passedMemberSymbol.valueDeclaration as any).initializer as ts.Node);
-        } else {
-          if (handler.onComplexType && handler.onComplexType(state)) {
-            continue;
-          }
-          this.processGenericClause(node, state.modelMemberType, state.passedMemberType, handler);
+      if (op) {
+        handler.onSimpleType(state, op, value);
+      } else {
+        let subCls = field.declared.type;
+        let subVal = value;
+        if (handler.onComplexType && handler.onComplexType(state, subCls, subVal)) {
+          continue;
         }
-      }*/
+        this.processGenericClause(state.extend(key), subCls, subVal, handler);
+      }
     }
   }
 
-  processWhereClause<T>(st: State<T>, passed: object) {
-    return this.processGenericClause(st, passed, {
-      onSimpleType(state: State<any>, type: SimpleType, value: any) {
-        //let conf = QuerySourceVerifier.OPERATORS[type];
-        //this.checkOperatorClause(state.passedMemberTypeNode, state.passedMemberType, conf.type, conf.ops);
+  checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: { [key: string]: Set<string> }) {
+    if (!_.isPlainObject(value)) {
+      let actualType = this.getActualType(value);
+      if (declaredType !== actualType) {
+        state.log(`Operator clause only supports types of ${declaredType}, not ${actualType}`);
+      }
+      return;
+    } else if (Object.keys(value).length !== 1) {
+      state.log(`One and only one operation may be specified in an operator clause`);
+    }
+
+    for (let [k, v] of Object.entries(value)) {
+      if (!(k in allowed)) {
+        state.log(`Operation ${k}, not allowed for field of type ${declaredType}`);
+      } else {
+        let actualSubType = this.getActualType(v)!;
+        if (!allowed[k].has(actualSubType)) {
+          state.log(`Passed in value ${actualSubType} mismatches with expected type(s) ${Array.from(allowed[k])}`);
+        }
+      }
+    }
+  }
+
+  processWhereClause<T>(st: State, cls: Class<T>, passed: object) {
+    return this.processGenericClause(st, cls, passed, {
+      preMember: (state: State, value: any) => {
+        let keys = Object.keys(value);
+        let firstKey = keys[0];
+
+        if (!firstKey) {
+          return false;
+        }
+
+        if (_.isPlainObject(value)) {
+          if (firstKey.charAt(0) === '$') {
+            if (keys.length !== 1 || ['$and', '$or', '$not'].includes(firstKey)) {
+              state.log(`${firstKey} is not supported as a top level opeartor`);
+              return false;
+            }
+          }
+        }
+
+        if (firstKey === '$and' || firstKey === '$or') {
+          if (!Array.isArray(value[firstKey])) {
+            state.log(`${firstKey} requires the value to be an array`);
+            return false;
+          }
+          // Iterate
+          for (let el of value[firstKey]) {
+            this.processWhereClause(state, cls, el);
+          }
+        } else if (firstKey === '$not') {
+          if (_.isPlainObject(value[firstKey])) {
+            this.processWhereClause(st, cls, value[firstKey]);
+          } else {
+            state.log(`${firstKey} requires the value to be an object`);
+            return false;
+          }
+        }
+
+        return true;
+      },
+      onSimpleType: (state: State, type: SimpleType, value: any) => {
+        let conf = OPERATORS[type];
+        this.checkOperatorClause(state, value, conf.type, conf.ops);
       },
 
-      onArrayType(state: State<any>, type: SimpleType, value: any) {
-        // if (state.passedMemberKey === '$subMatch') { //
+      onArrayType: (state: State, type: SimpleType, value: any) => {
+        //if (firstKey === '$subMatch') { //
 
-        // }
+        //}
 
         // let typeStr = this.tc.typeToString(state.modelMemberType);
         // if (this.hasFlags(target.flags, ts.TypeFlags.String, ts.TypeFlags.Boolean, ts.TypeFlags.Number)) {
@@ -87,86 +165,78 @@ export class QueryVerifierService {
     });
   }
 
-  processGroupByClause<T>(state: State<T>, vlue: object) {
+  processGroupByClause(state: State, vlue: object) {
 
   }
 
-  processSortClause<T>(state: State<T>, passed: object) {
-    /*
-    return this.processGenericClause(node, model, member, {
+  processSortClause<T>(st: State, cls: Class<T>, passed: object) {
+    return this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
-        if (this.hasFlags(state.passedMemberType.flags, ts.TypeFlags.Number, ts.TypeFlags.Boolean)) {
-          if (this.isLiteral(value)) {
-            if (['1', '-1', 'true', 'false'].includes(this.getLiteralText(value))) {
-              return;
-            }
-          } else {
-            return;
-          }
+        if (value === 1 || value === -1 || value === false || value === true) {
+          return;
         }
-        this.collector.collect(state.passedMemberTypeNode, `Only true, false -1, and 1 are allowed for sorting, not ${this.getLiteralText(value)}`);
+        state.log(`Only true, false -1, and 1 are allowed for sorting, not ${JSON.stringify(value)}`);
       }
     });
-    */
   }
 
-  processSelectClause<T>(state: State<T>, passed: object) {
-    /*
-    return this.processGenericClause(node, model, member, {
+  processSelectClause<T>(st: State, cls: Class<T>, passed: object) {
+    return this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
-        if (this.hasFlags(state.passedMemberType.flags, ts.TypeFlags.Number, ts.TypeFlags.Boolean)) {
-          if (this.isLiteral(value)) {
-            if (['1', '0', 'true', 'false'].includes(this.getLiteralText(value))) {
-              return;
-            }
-            this.collector.collect(value, `Only true, false 0, and 1 are allowed for including/excluding fields`);
-          } else {
+        let actual = this.getActualType(value);
+        if (actual === 'number' || actual === 'boolean') {
+          if (value === 1 || value === 0 || value === true || value === false) {
             return;
           }
-        } else if (this.hasFlags(state.passedMemberType.flags, ts.TypeFlags.String)) {
-          if (this.isLiteral(value) && !/[A-Za-z_$0-9]/.test(this.getLiteralText(value))) {
-            this.collector.collect(value, `Only A-Z, a-z, 0-9, '$' and '_' are allowed in aliases for selecting fields`);
+          state.log(`Only true, false 0, and 1 are allowed for including/excluding fields`);
+        } else if (actual === 'string') {
+          if (!/[A-Za-z_$0-9]/.test(value)) {
+            state.log(`Only A-Z, a-z, 0-9, '$' and '_' are allowed in aliases for selecting fields`);
             return;
           }
           return;
-        } else if (this.checkIfObjectType(state.passedMemberTypeNode) && !ts.isTypeReferenceNode(state.passedMemberTypeNode)) {
-          let sub = state.passedMemberType;
-          let subMembers = this.getMembersByType(sub);
-  
-          if (!subMembers.has('alias')) {
-            this.collector.collect(state.passedMemberTypeNode, `Alias is a required field for selecting`);
+        } else if (_.isPlainObject(value)) {
+          if (!('alias' in value)) {
+            state.log(`Alias is a required field for selecting`);
             return;
           } else {
             console.log('Yay');
           }
         }
-        this.collector.collect(state.passedMemberTypeNode, `Only true, false -1, and 1 or { alias: string, calc?: string } are allowed for selecting fields`);
+        state.log(`Only true, false -1, and 1 or { alias: string, calc?: string } are allowed for selecting fields`);
       }
     });
-    */
   }
 
   verify<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>) {
-    let schema = SchemaRegistry.getViewSchema(cls);
     let errors: any[] = [];
+
     let state = {
-      schema,
-      cls,
-      collector(type: { path: string }, message: string) {
-        errors.push({ path: type.path, message })
+      path: '',
+      collect(path: string, message: string) {
+        errors.push({ message: `${path}: ${message}` })
+      },
+      log(err: string) {
+        this.collect(this.path, err);
+      },
+      extend(sub: string) {
+        return { ...this, path: !this.path ? sub : `${this.path}.${sub}` };
       }
     }
-
     for (let x of ['select', 'where', 'sort', 'groupBy']) {
-      const fn: keyof this = `process${x.charAt(0).toUpperCase}${x.substring(1)}Clause` as any;
+      if (!(x in query)) {
+        continue;
+      }
+
+      const fn: keyof this = `process${x.charAt(0).toUpperCase()}${x.substring(1)}Clause` as any;
       const val = (query as any)[x];
-      console.log(fn);
-      if (Array.isArray(val)) {
+
+      if (Array.isArray(val) && x === 'sort') {
         for (let el of val) {
-          this[fn](state, el);
+          this[fn](state, cls, el);
         }
       } else {
-        this[fn](state, val);
+        this[fn](state, cls, val);
       }
     }
 
