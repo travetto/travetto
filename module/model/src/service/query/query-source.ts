@@ -1,8 +1,6 @@
 import * as ts from 'typescript';
+import { OPERATORS, QUERY_TYPES, ProcessingHandler, SimpleType, ErrorCollector } from './types';
 
-export interface ErrorCollector {
-  collect(node: ts.Node, message: string): void;
-}
 
 interface ProcessingState {
   passedMemberKey: string;
@@ -17,68 +15,13 @@ interface ProcessingState {
   modelMemberKind: ts.SyntaxKind;
 }
 
-interface ProcessingHandler {
-  preMember?(state: ProcessingState): boolean | undefined;
-  onSimpleType(state: ProcessingState, type: string, value: ts.Node): void;
-  onArrayType?(state: ProcessingState, target: ts.Type): void;
-  onComplexType?(state: ProcessingState): boolean | undefined;
-}
-
 export class QuerySourceVerifier {
-
-  static QUERY_TYPES = [
-    'Query', 'ModelQuery', 'PageableModelQuery'
-  ].reduce((acc, v) => { acc[v] = true; return acc; }, {} as { [key: string]: boolean });
-
-  static OPERATORS: { [key: string]: { type: string | number, ops: { [key: string]: Set<string> } } } = {
-    string: {
-      type: ts.TypeFlags.String,
-      ops: {
-        $ne: new Set(['string']), $eq: new Set(['string']),
-        $exists: new Set(['boolean']), $in: new Set(['string[]']),
-        $nin: new Set(['string[]']), $regex: new Set(['string', 'RegEx'])
-      }
-    },
-    number: {
-      type: ts.TypeFlags.Number,
-      ops: {
-        $ne: new Set(['number']), $eq: new Set(['number']),
-        $exists: new Set(['boolean']), $in: new Set(['number[]']), $nin: new Set(['number[]']),
-        $lt: new Set(['number']), $gt: new Set(['number']), $lte: new Set(['number']), $gte: new Set(['number'])
-      }
-    },
-    boolean: {
-      type: ts.TypeFlags.Boolean,
-      ops: {
-        $ne: new Set(['boolean']), $eq: new Set(['boolean']), $exists: new Set(['boolean']),
-        $in: new Set(['boolean[]']), $nin: new Set(['boolean[]'])
-      }
-    },
-    date: {
-      type: 'Date',
-      ops: {
-        $ne: new Set(['Date']), $eq: new Set(['Date']), $exists: new Set(['boolean']),
-        $in: new Set(['Date[]']), $nin: new Set(['Date[]']),
-        $lt: new Set(['Date']), $gt: new Set(['Date']),
-        $lte: new Set(['Date']), $gte: new Set(['Date'])
-      }
-    },
-    geo: {
-      type: 'GeoPoint',
-      ops: {
-        $ne: new Set(['GeoPoint']), $eq: new Set(['GeoPoint']), $exists: new Set(['boolean']),
-        $in: new Set(['GeoPoint[]']), $nin: new Set(['GeoPoint[]']),
-        $geoWithin: new Set('GeoPoint[]'), $geoIntersects: new Set(['GeoPoint[]'])
-      }
-    }
-  }
 
   cache = new Map<any, Map<string, ts.Symbol>>();
 
-  constructor(private collector: ErrorCollector, private tc: ts.TypeChecker) {
+  constructor(private collector: ErrorCollector<ts.Node>, private tc: ts.TypeChecker) {
     this.visitNode = this.visitNode.bind(this);
   }
-
 
   getMembersByType(type: ts.Type) {
     if (!this.cache.has(type)) {
@@ -160,7 +103,7 @@ export class QuerySourceVerifier {
     }
   }
 
-  processGenericClause(node: ts.Node, model: ts.Type, passed: ts.Type, handler: ProcessingHandler) {
+  processGenericClause(node: ts.Node, model: ts.Type, passed: ts.Type, handler: ProcessingHandler<ProcessingState, ts.Node>) {
     let passedMembers: Map<string, ts.Symbol> = this.getMembersByType(passed);
     let modelMembers: Map<string, ts.Symbol> = this.getMembersByType(model);
 
@@ -189,14 +132,14 @@ export class QuerySourceVerifier {
         continue;
       }
 
-      let op: string | undefined;
+      let op: SimpleType | undefined;
 
       switch (state.modelMemberKind === ts.SyntaxKind.TypeReference ? state.modelMemberType.symbol!.escapedName : state.modelMemberKind) {
         case ts.SyntaxKind.StringKeyword: op = 'string'; break;
         case ts.SyntaxKind.NumberKeyword: op = 'number'; break;
         case ts.SyntaxKind.BooleanKeyword: op = 'boolean'; break;
-        case 'Date': op = 'date'; break;
-        case 'GeoPoint': op = 'geo'; break;
+        case 'Date': op = 'Date'; break;
+        case 'GeoPoint': op = 'GeoPoint'; break;
         case ts.SyntaxKind.ArrayType: {
           if (handler.onArrayType) {
             handler.onArrayType(state, (state.modelMemberType as any).typeArguments[0]);
@@ -261,7 +204,7 @@ export class QuerySourceVerifier {
       },
 
       onSimpleType: (state: ProcessingState, type: string) => {
-        let conf = QuerySourceVerifier.OPERATORS[type];
+        let conf = OPERATORS[type];
         this.checkOperatorClause(state.passedMemberTypeNode, state.passedMemberType, conf.type, conf.ops);
       },
 
@@ -347,7 +290,7 @@ export class QuerySourceVerifier {
     if (queryType && queryType.aliasSymbol) {
       let queryName = `${queryType.aliasSymbol.escapedName}`;
 
-      if (QuerySourceVerifier.QUERY_TYPES[queryName] && queryType.aliasTypeArguments && queryType.aliasTypeArguments.length) {
+      if (QUERY_TYPES[queryName] && queryType.aliasTypeArguments && queryType.aliasTypeArguments.length) {
         let modelType = queryType.aliasTypeArguments[0];
 
         let members = this.getMembersByType(queryType)
