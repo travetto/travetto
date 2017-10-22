@@ -33,6 +33,5 @@ class TestSave {
       name: 'Bob',
       age: 20
     }));
-    assert(res.id);
   }
 }

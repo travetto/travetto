@@ -2,7 +2,12 @@ import * as mongo from 'mongodb';
 import * as flat from 'flat';
 import * as _ from 'lodash';
 
-import { ModelSource, IndexConfig, Query, QueryOptions, BulkState, BulkResponse, ModelRegistry, ModelCore, isSubQuery } from '@travetto/model';
+import {
+  ModelSource, IndexConfig, Query,
+  QueryOptions, BulkState, BulkResponse,
+  ModelRegistry, ModelCore, FieldQuery,
+  MatchQuery, isQuery, isFieldType
+} from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { ModelMongoConfig } from './config';
 import { Class } from '@travetto/registry';
@@ -56,13 +61,13 @@ export class ModelMongoSource extends ModelSource {
   }
 
   translateQueryIds<T extends ModelCore>(query: Query) {
-    let val = query._id;
-    if (val) {
-      if (typeof val === 'string') {
-        query._id = new mongo.ObjectID(val) as any;
-      } else if (isSubQuery(val)) {
-        if (val.$in) {
-          val.$in = val.$in.map((x: any) => typeof x === 'string' ? new mongo.ObjectID(x) : x);
+    if (!isQuery(query)) {
+      let val = query._id;
+      if (val) {
+        if (!isFieldType(val) && val.in) {
+          val.in = val.in.map((x: any) => typeof x === 'string' ? new mongo.ObjectID(x) : x);
+        } else if (typeof val === 'string') {
+          query._id = new mongo.ObjectID(val) as any;
         }
       }
     }
@@ -224,23 +229,24 @@ export class ModelMongoSource extends ModelSource {
     let bulk = col.initializeUnorderedBulkOp({});
     let count = 0;
 
-    (state.upsert || []).forEach(p => {
+    (state.insert || []).forEach(p => {
       count++;
-      let id: any = state.getId(p);
-      if (id.id === undefined || id.id !== p.id) {
-        delete p.id;
-      } else {
-        id._id = (p as any)._id = new mongo.ObjectID(p.id);
-      }
-
-      bulk.find(id).upsert().updateOne({
+      bulk.insert({
         $set: p
       });
     });
 
+    (state.update || []).forEach(p => {
+      count++;
+      bulk.find({ _id: new mongo.ObjectId(p.id) }).update({
+        $set: p
+      });
+    });
+
+
     (state.delete || []).forEach(p => {
       count++;
-      bulk.find(state.getId(p)).removeOne();
+      bulk.find({ _id: new mongo.ObjectID(p.id) }).removeOne();
     });
 
     let out: BulkResponse = {
@@ -253,12 +259,11 @@ export class ModelMongoSource extends ModelSource {
 
     if (count > 0) {
       let res = await bulk.execute({});
-      let updatedCount = 0;
 
       if (out.count) {
         out.count.delete = res.nRemoved;
-        out.count.update = updatedCount;
-        out.count.update -= (out.count.insert || 0);
+        out.count.update = res.nUpdated;
+        out.count.insert = res.nInserted;
       }
 
       if (res.hasWriteErrors()) {
