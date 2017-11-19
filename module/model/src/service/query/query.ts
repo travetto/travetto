@@ -1,6 +1,6 @@
-import { ModelQuery, Query, PageableModelQuery } from '../../model';
+import { ModelQuery, Query, PageableModelQuery, GeoPoint } from '../../model';
 import { Class } from '@travetto/registry';
-import { SimpleType, ErrorCollector, OPERATORS } from './types';
+import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from './types';
 import { SchemaRegistry, SchemaConfig, ViewConfig, FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import * as _ from 'lodash';
@@ -13,51 +13,31 @@ interface State extends ErrorCollector<string> {
 
 interface ProcessingHandler {
   preMember?(state: State, value: any): boolean;
-  onSimpleType(state: State, type: SimpleType, value: any): void;
-  onArrayType?(state: State, type: SimpleType, value: any): void;
-  onComplexType?(state: State, cls: Class<any>, value: any): boolean | undefined;
+  onSimpleType(state: State, type: SimpleType, value: any, isArray: boolean): void;
+  onComplexType?(state: State, cls: Class<any>, value: any, isArray: boolean): boolean | undefined;
 }
+
+const $AND = '$and';
+const $OR = '$or';
+const $NOT = '$not';
+const $ALL = '$all';
+const $ELEM_MATCH = '$elemMatch';
+
+const SELECT = 'select';
+const WHERE = 'where';
+const SORT = 'sort';
+const GROUP_BY = 'groupBy';
 
 @Injectable()
 export class QueryVerifierService {
-
-  getDeclaredType(f: FieldConfig) {
-    let type = f.declared.type;
-    if (type === String) {
-      return 'string';
-    } else if (type === Number) {
-      return 'number';
-    } else if (type === Boolean) {
-      return 'boolean';
-    } else if (type === Date) {
-      return 'Date';
-    } else if (f.declared.array && type === Number) {
-      return 'GeoPoint';
-    }
-    throw new Error(`Unknown type: ${f.type.name}`);
-  }
-
-  getActualType(v: any) {
-    if (v instanceof String) {
-      return 'string';
-    } else if (v instanceof Number) {
-      return 'number';
-    } else if (v instanceof Boolean) {
-      return 'boolean';
-    } else if (v instanceof Date) {
-      return 'Date';
-    } else if (Array.isArray(v) && v.length === 2 && typeof v[0] === typeof v[1] && typeof v[0] === 'number') {
-      return 'GeoPoint';
-    }
-  }
 
   processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler) {
 
     let view = SchemaRegistry.getViewSchema(cls);
 
-    for (let key of Object.keys(val)) {
+    for (let [key, value] of Object.entries(val)) {
 
-      if (handler.preMember && handler.preMember(state)) {
+      if (handler.preMember && handler.preMember(state, value)) {
         continue;
       }
 
@@ -67,15 +47,14 @@ export class QueryVerifierService {
       }
 
       let field = view.schema[key];
-      let value = (val as any)[key];
-      let op: SimpleType | undefined = this.getDeclaredType(field);
+      let op = TypeUtil.getDeclaredType(field);
 
       if (op) {
-        handler.onSimpleType(state, op, value);
+        handler.onSimpleType(state, op, value, field.declared.array);
       } else {
         let subCls = field.declared.type;
         let subVal = value;
-        if (handler.onComplexType && handler.onComplexType(state, subCls, subVal)) {
+        if (handler.onComplexType && handler.onComplexType(state, subCls, subVal, field.declared.array)) {
           continue;
         }
         this.processGenericClause(state.extend(key), subCls, subVal, handler);
@@ -83,22 +62,56 @@ export class QueryVerifierService {
     }
   }
 
-  checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: { [key: string]: Set<string> }) {
+  typesMatch(declared: string, actual: string | undefined) {
+    return declared === actual;
+  }
+
+  checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: { [key: string]: Set<string> }, isArray: boolean) {
+    if (isArray) {
+      if (Array.isArray(value)) {
+        // Handle array literal
+        for (let el of value) {
+          this.checkOperatorClause(state, declaredType, el, allowed, false);
+        }
+        return;
+      }
+    }
+
     if (!_.isPlainObject(value)) {
-      let actualType = this.getActualType(value);
-      if (declaredType !== actualType) {
+      // Handle literal
+      let actualType = TypeUtil.getActualType(value);
+      if (!this.typesMatch(declaredType, actualType)) {
         state.log(`Operator clause only supports types of ${declaredType}, not ${actualType}`);
       }
       return;
     } else if (Object.keys(value).length !== 1) {
       state.log(`One and only one operation may be specified in an operator clause`);
+      return;
     }
 
+    // Should only be one?
     for (let [k, v] of Object.entries(value)) {
-      if (!(k in allowed)) {
+
+      if (isArray && (k === $ALL || k === $ELEM_MATCH)) {
+        if (k === $ALL) {
+          if (!Array.isArray(v)) {
+            state.log(`$all operator requires comparison to be an array, not ${typeof v}`);
+            return;
+          } else {
+            for (let el of v) {
+              let elAct = TypeUtil.getActualType(el);
+              if (!this.typesMatch(declaredType, elAct)) {
+                state.log(`$all operator requires all values to be ${declaredType}, but ${elAct} was found`);
+                return;
+              }
+            }
+          }
+        }
+      } else if (!(k in allowed)) {
         state.log(`Operation ${k}, not allowed for field of type ${declaredType}`);
       } else {
-        let actualSubType = this.getActualType(v)!;
+        let actualSubType = TypeUtil.getActualType(v)!;
+
         if (!allowed[k].has(actualSubType)) {
           state.log(`Passed in value ${actualSubType} mismatches with expected type(s) ${Array.from(allowed[k])}`);
         }
@@ -116,51 +129,44 @@ export class QueryVerifierService {
           return false;
         }
 
+        let sub = value[firstKey];
+
         if (_.isPlainObject(value)) {
           if (firstKey.charAt(0) === '$') {
-            if (keys.length !== 1 || ['$and', '$or', '$not'].includes(firstKey)) {
+            if (keys.length !== 1 || [$AND, $OR, $NOT].includes(firstKey)) {
               state.log(`${firstKey} is not supported as a top level opeartor`);
-              return false;
+              return true;
             }
           }
         }
 
-        if (firstKey === '$and' || firstKey === '$or') {
-          if (!Array.isArray(value[firstKey])) {
+        if (firstKey === $AND || firstKey === $OR) {
+          if (!Array.isArray(sub)) {
             state.log(`${firstKey} requires the value to be an array`);
-            return false;
+          } else {
+            // Iterate
+            for (let el of sub) {
+              this.processWhereClause(state, cls, el);
+            }
+            return true;
           }
-          // Iterate
-          for (let el of value[firstKey]) {
-            this.processWhereClause(state, cls, el);
-          }
-        } else if (firstKey === '$not') {
-          if (_.isPlainObject(value[firstKey])) {
-            this.processWhereClause(st, cls, value[firstKey]);
+        } else if (firstKey === $NOT) {
+          if (_.isPlainObject(sub)) {
+            this.processWhereClause(st, cls, sub);
+            return true;
           } else {
             state.log(`${firstKey} requires the value to be an object`);
-            return false;
           }
         }
-
-        return true;
+        return false;
       },
-      onSimpleType: (state: State, type: SimpleType, value: any) => {
+      onSimpleType: (state: State, type: SimpleType, value: any, isArray: boolean) => {
         let conf = OPERATORS[type];
-        this.checkOperatorClause(state, value, conf.type, conf.ops);
+        this.checkOperatorClause(state, value, conf.type, conf.ops, isArray);
       },
+      onComplexType: (state: State, subCls: Class<T>, subVal: T, isArray: boolean): boolean => {
 
-      onArrayType: (state: State, type: SimpleType, value: any) => {
-        //if (firstKey === '$subMatch') { //
-
-        //}
-
-        // let typeStr = this.tc.typeToString(state.modelMemberType);
-        // if (this.hasFlags(target.flags, ts.TypeFlags.String, ts.TypeFlags.Boolean, ts.TypeFlags.Number)) {
-        //   typeStr = typeStr.toLowerCase();
-        // }
-
-        // this.checkOperatorClause(state.passedMemberTypeNode, state.passedMemberType, typeStr, { $all: new Set([typeStr]) });
+        return false;
       }
     });
   }
@@ -183,7 +189,7 @@ export class QueryVerifierService {
   processSelectClause<T>(st: State, cls: Class<T>, passed: object) {
     return this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
-        let actual = this.getActualType(value);
+        let actual = TypeUtil.getActualType(value);
         if (actual === 'number' || actual === 'boolean') {
           if (value === 1 || value === 0 || value === true || value === false) {
             return;
@@ -200,7 +206,7 @@ export class QueryVerifierService {
             state.log(`Alias is a required field for selecting`);
             return;
           } else {
-            console.log('Yay');
+            // console.log('Yay');
           }
         }
         state.log(`Only true, false -1, and 1 or { alias: string, calc?: string } are allowed for selecting fields`);
@@ -214,7 +220,7 @@ export class QueryVerifierService {
     let state = {
       path: '',
       collect(path: string, message: string) {
-        errors.push({ message: `${path}: ${message}` })
+        errors.push({ message: `${path}: ${message}` });
       },
       log(err: string) {
         this.collect(this.path, err);
@@ -223,7 +229,7 @@ export class QueryVerifierService {
         return { ...this, path: !this.path ? sub : `${this.path}.${sub}` };
       }
     }
-    for (let x of ['select', 'where', 'sort', 'groupBy']) {
+    for (let x of [SELECT, WHERE, SORT, GROUP_BY]) {
       if (!(x in query)) {
         continue;
       }
@@ -231,7 +237,7 @@ export class QueryVerifierService {
       const fn: keyof this = `process${x.charAt(0).toUpperCase()}${x.substring(1)}Clause` as any;
       const val = (query as any)[x];
 
-      if (Array.isArray(val) && x === 'sort') {
+      if (Array.isArray(val) && x === SORT) {
         for (let el of val) {
           this[fn](state, cls, el);
         }

@@ -3,7 +3,7 @@ import { BindUtil, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 import { QueryVerifierService } from './query';
 import { Injectable } from '@travetto/di';
 import { ModelOptions } from './types';
-import { ModelCore, Query, QueryOptions, BulkState, ModelQuery, PageableModelQuery } from '../model';
+import { ModelCore, Query, QueryOptions, BulkState, ModelQuery, PageableModelQuery, SortClause } from '../model';
 import { ModelSource } from './source';
 import { ModelRegistry } from './registry';
 
@@ -74,6 +74,7 @@ export class ModelService extends ModelSource {
 
   query<U, T extends ModelCore = U>(cls: Class<T>, query: Query<T>) {
     this.queryService.verify(cls, query);
+
     return this.source.query<T, U>(cls, query);
   }
 
@@ -82,7 +83,7 @@ export class ModelService extends ModelSource {
 
     const config = ModelRegistry.get(cls);
     if (!query.sort && config.defaultSort) {
-      query.sort = config.defaultSort;
+      query.sort = [config.defaultSort as SortClause<T>];
     }
     let res = await this.source.getAllByQuery(cls, query);
     return res.map(o => this.postLoad(cls, o));

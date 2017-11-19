@@ -1,6 +1,11 @@
 import { Class } from '@travetto/registry';
 import { WhereClause } from './where';
 
+export class GeoPoint {
+  lat: number;
+  lon: number;
+}
+
 type SelectFieldFn = 'max' | 'min' | 'avg' | 'sum' | 'count';
 
 type SelectClause<T> = {

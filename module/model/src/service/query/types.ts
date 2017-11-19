@@ -1,3 +1,6 @@
+import { GeoPoint } from '../../model';
+import { FieldConfig } from '@travetto/schema';
+
 
 export type SimpleType = 'string' | 'number' | 'boolean' | 'Date' | 'GeoPoint';
 
@@ -52,3 +55,36 @@ export const OPERATORS: { [key: string]: { type: SimpleType, ops: { [key: string
   }
 }
 
+export class TypeUtil {
+
+  static getDeclaredType(f: FieldConfig) {
+    let type = f.declared.type;
+    let op: SimpleType | undefined;
+    if (type === String) {
+      op = 'string';
+    } else if (type === Number) {
+      op = 'number';
+    } else if (type === Boolean) {
+      op = 'boolean';
+    } else if (type === Date) {
+      op = 'Date';
+    } else if (type === GeoPoint) {
+      op = 'GeoPoint';
+    }
+    return op;
+  }
+
+  static getActualType(v: any) {
+    if (v instanceof String) {
+      return 'string';
+    } else if (v instanceof Number) {
+      return 'number';
+    } else if (v instanceof Boolean) {
+      return 'boolean';
+    } else if (v instanceof Date) {
+      return 'Date';
+    } else if (v instanceof GeoPoint) {
+      return 'GeoPoint';
+    }
+  }
+}
