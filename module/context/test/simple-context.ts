@@ -1,22 +1,28 @@
-import { Inject, Registry, Injectable } from '@travetto/di';
+import { Inject, Injectable, DependencyRegistry } from '@travetto/di';
+import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Context } from '../index';
-import { bulkRequire } from '@travetto/base';
-
-bulkRequire('src/**/*.ts');
+import { assert } from 'console';
 
 @Injectable()
 class TestService {
-  @Inject() context: Context;
+  @Inject() context!: Context;
 
   postConstruct() {
     console.log('Context Found', this.context);
   }
 }
 
-Registry.getInstance(TestService)
-  .then(ins => {
-    console.log('Instance', ins);
-  })
-  .catch(err => {
-    console.error(err);
-  });
+@Suite()
+class VerifyContext {
+
+  @BeforeAll()
+  async init() {
+    await DependencyRegistry.init()
+  }
+
+  @Test()
+  async loadContext() {
+    const svc = await DependencyRegistry.getInstance(TestService)
+    assert(svc.context !== null);
+  }
+}
