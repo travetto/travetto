@@ -6,8 +6,8 @@ import * as assert from 'assert';
 
 @Injectable()
 class Database {
-  @Inject() dbConfig: DbConfig<any, any>;
-  @Inject({ optional: true }) altConfig: AltConfig;
+  @Inject() dbConfig!: DbConfig<any, any>;
+  @Inject({ optional: true }) altConfig!: AltConfig;
 
   postConstruct() {
     console.log('Creating database', this.dbConfig.getUrl());
