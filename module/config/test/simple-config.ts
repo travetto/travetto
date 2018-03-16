@@ -6,7 +6,14 @@ class DbConfig {
   hosts: string[];
 }
 
-@Config('db.mysql', DbConfig, 'db')
 class TestConfig extends DbConfig {
 
+}
+
+let conf = new TestConfig();
+
+ConfigLoader.bindTo(conf, 'db.mysql');
+
+if (conf.name !== 'Oscar') {
+  throw new Error('Should match!');
 }
