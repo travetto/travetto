@@ -1,11 +1,9 @@
-import 'mocha';
-
-import { timeout } from '@travetto/test';
 import { Cacheable, CacheManager } from '../src';
-import { expect } from 'chai';
-import { Shutdown } from '@travetto/lifecycle';
+import { Shutdown } from '@travetto/base';
+import { Suite, Test, BeforeEach } from '@travetto/test';
+import { assert } from 'console';
 
-class Test {
+class CachingService {
 
   @Cacheable({
     max: 5
@@ -36,48 +34,54 @@ class Test {
   }
 }
 
-describe('Cacheable Test', () => {
-  beforeEach(async () => {
+@Suite()
+class TestSuite {
+
+  @BeforeEach()
+  async cleanup() {
     CacheManager.cleanup();
     await new Promise(resolve => setTimeout(resolve, 200));
-  });
+  }
 
-  it('Testing basic', timeout(30 * 1000, async () => {
-    let test = new Test();
+  @Test()
+  async basic() {
+    let test = new CachingService();
 
     let start = Date.now();
     let res = await test.youngAndComplex(10);
     let diff = Date.now() - start;
-    expect(diff).to.be.greaterThan(100);
-    expect(res).to.equal(30);
+    assert(diff > 100);
+    assert(res === 30);
 
     start = Date.now();
     res = await test.youngAndComplex(10);
     diff = Date.now() - start;
-    expect(diff).to.be.lessThan(105);
-    expect(res).to.equal(30);
-  }));
+    assert(diff < 105);
+    assert(res === 30);
+  }
 
-  it('Testing age', timeout(30 * 1000, async () => {
-    let test = new Test();
+  @Test()
+  async age() {
+    let test = new CachingService();
 
     let start = Date.now();
     let res = await test.youngAndComplex(10);
     let diff = Date.now() - start;
-    expect(diff).to.be.greaterThan(100);
-    expect(res).to.equal(30);
+    assert(diff > 100);
+    assert(res === 30);
 
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     start = Date.now();
     res = await test.youngAndComplex(10);
     diff = Date.now() - start;
-    expect(diff).to.be.greaterThan(100);
-    expect(res).to.equal(30);
-  }));
+    assert(diff > 100);
+    assert(res === 30);
+  }
 
-  it('Testing size', timeout(30 * 1000, async () => {
-    let test = new Test();
+  @Test()
+  async size() {
+    let test = new CachingService();
 
 
     for (let y of [1, 2]) {
@@ -85,23 +89,24 @@ describe('Cacheable Test', () => {
         let start = Date.now();
         let res = await test.smallAndComplex(x);
         let diff = Date.now() - start;
-        expect(diff).to.be.greaterThan(100);
-        expect(res).to.equal(x * 2);
+        assert(diff > 100);
+        assert(res === x * 2);
       }
     }
-  }));
+  }
 
-  it('Testing complex', timeout(30 * 1000, async () => {
-    let test = new Test();
+  @Test()
+  async complex() {
+    let test = new CachingService();
 
     let val = test.complexInput({ a: 5, b: 20 }, 20);
     let val2 = test.complexInput({ a: 5, b: 20 }, 20);
     let val3 = test.complexInput({ b: 5, a: 20 }, 20);
-    expect(val === val2).to.be.true;
-    expect(val === val3).to.be.false;
+    assert(val === val2);
+    assert(val !== val3);
 
     let val4 = test.complexInputWithCustomKey({ a: 5, b: 20 }, 20);
     let val5 = test.complexInputWithCustomKey({ b: 5, a: 20 }, 30);
-    expect(val4 === val5).to.be.true;
-  }));
-});
+    assert(val4 === val5);
+  }
+}
