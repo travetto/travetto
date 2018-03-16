@@ -100,7 +100,7 @@ export class AssetUtil {
     let file = fs.createWriteStream(filePath);
     let filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
     let res = await request({ url, pipeTo: file });
-    let responseExt = mime.extension((res.headers['content-type'] as string) || '');
+    let responseExt = mime.getExtension((res.headers['content-type'] as string) || '');
 
     if (!responseExt) {
       let detectedType = await this.detectFileType(filePath);
