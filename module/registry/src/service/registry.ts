@@ -39,7 +39,7 @@ export abstract class Registry implements ClassSource {
       this.resolved = false;
 
       let waitFor = this.parents.filter(x => !(x instanceof Registry));
-      await Promise.all(waitFor);
+      await Promise.all(waitFor.map(x => x.init()));
 
       let classes = await this.initialInstall();
       if (classes) {
