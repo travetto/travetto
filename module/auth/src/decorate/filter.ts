@@ -6,7 +6,7 @@ import * as util from 'util';
 export function Authenticate(provider: string = 'app', failTo?: string) {
   let passportOptions = { failureRedirect: failTo };
   let handler = passport.authenticate(provider, passportOptions);
-  let fn = function (req: Request, res: Response, next: NextFunction): Promise<any> {
+  let fn = function (req: Request, res: Response, next?: NextFunction): Promise<any> {
     req.passportOptions = passportOptions;
     return util.promisify(handler)(req, res, undefined!);
   };

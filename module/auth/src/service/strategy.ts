@@ -17,7 +17,7 @@ export type Callback<T> = (err?: any, res?: T) => void
 export abstract class BaseStrategy<U, T extends Options> extends Strategy {
 
   @Inject()
-  protected context: Context;
+  protected context!: Context;
 
   constructor(protected config: T) {
     super(Object.assign({}, config, {
