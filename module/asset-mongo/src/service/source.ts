@@ -11,11 +11,11 @@ const setTimeoutAsync = util.promisify(setTimeout);
 @Injectable({ target: AssetSource })
 export class MongoSource extends AssetSource {
 
-  private client: Grid.Grid;
-  private mongoClient: mongo.Db;
+  private client!: Grid.Grid;
+  private mongoClient!: mongo.Db;
 
   @Inject()
-  private config: MongoAssetConfig;
+  private config!: MongoAssetConfig;
 
   async postConstruct() {
     this.mongoClient = await mongo.MongoClient.connect(this.config.url);

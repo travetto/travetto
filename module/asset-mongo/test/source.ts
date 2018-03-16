@@ -1,33 +1,61 @@
-import { AssetService, AssetUtil, Asset } from '@travetto/asset';
-import { timeout } from '@travetto/test';
-import { expect } from 'chai';
-import { DependencyRegistry, Injectable } from '@travetto/di';
 import * as fs from 'fs';
 import * as mongo from 'mongodb';
+import * as util from 'util';
 
-describe('Asset Service', () => {
-  before(async () => {
+import { AssetService, AssetUtil, Asset } from '@travetto/asset';
+import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
+import { DependencyRegistry, Injectable } from '@travetto/di';
+import { assert } from 'console';
+import { MongoSource } from '../src/service/source';
+import { MongoAssetConfig } from '../src/service/config';
+
+const fsStat = util.promisify(fs.stat);
+
+@Injectable({ target: MongoAssetConfig })
+class Conf extends MongoAssetConfig {
+
+}
+
+
+@Injectable()
+class Source extends MongoSource {
+
+}
+
+@Suite()
+class TestAssetService {
+
+  @BeforeAll()
+  async init() {
+    await DependencyRegistry.init();
+  }
+
+  @BeforeEach()
+  async resetDb() {
     let service = await DependencyRegistry.getInstance(AssetService);
     let db = (service as any).source.mongoClient as mongo.Db;
     await db.dropDatabase();
-  });
+  }
 
-  it('downloads an file from a url', timeout(20000, async () => {
+  @Test('downloads an file from a url')
+  async download() {
     let service = await DependencyRegistry.getInstance(AssetService);
 
     let filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
-    expect(filePath).to.not.be.undefined;
-    expect(filePath.split('.').pop()).equals('png');
+    assert(filePath !== undefined);
+    assert(filePath.split('.').pop() === 'png');
 
     let file = await AssetUtil.localFileToAsset(filePath);
     file = await service.save(file);
 
-    expect(file.contentType).equals('image/png');
-    expect(file.length).is.greaterThan(0);
+    assert(file.contentType === 'image/png');
+    assert(file.length > 0);
 
-    fs.stat(filePath, (err, stats) => {
-      expect(err).to.be.instanceof(Error);
-      expect(stats).to.be.undefined;
-    });
-  }));
-});
+    try {
+      await fsStat(filePath);
+      assert(false);
+    } catch {
+      assert(true);
+    }
+  }
+}
