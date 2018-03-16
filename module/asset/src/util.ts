@@ -53,7 +53,7 @@ export class AssetUtil {
     let name = upload.name;
     let type = upload.type as string;
     if (!type || type === 'application/octet-stream') {
-      type = mime.lookup(name) || type;
+      type = mime.getType(name) || type;
     }
 
     let uploadFile = new Asset({
@@ -72,7 +72,7 @@ export class AssetUtil {
     let ext = '';
 
     if (uploadFile.contentType) {
-      ext = mime.extension(uploadFile.contentType);
+      ext = mime.getExtension(uploadFile.contentType)!;
     } else if (uploadFile.filename.indexOf('.') > 0) {
       ext = uploadFile.filename.split('.').pop() as string;
     }
