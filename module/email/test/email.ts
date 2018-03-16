@@ -37,6 +37,6 @@ class EmailSuite {
           </row>`,
       context: { name: 'Tim', price: '100' }
     });
-
+    assert(true);
   }
 }
