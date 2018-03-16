@@ -1,30 +1,37 @@
-import 'mocha';
-
 import * as process from 'process';
-import { expect } from 'chai';
 import * as fs from 'fs';
-import { Logger } from '../src';
-import { nodeToPromise } from '@travetto/util';
+import * as util from 'util';
+import { assert } from 'console';
+
+import { Suite, Test, BeforeEach, BeforeAll } from '@travetto/test';
+import { toPromise } from '@travetto/util';
 import { DependencyRegistry } from '@travetto/di';
 
+import { Logger } from '../src';
+
 let name = `${process.cwd()}/logs/travetto_log-out.log`;
-console.log(name);
+let fsTrunc = util.promisify(fs.truncate);
+let fsRead = util.promisify(fs.readFile);
 
-describe('Logging', () => {
+@Suite('Suite')
+class LoggerTest {
 
-  before(async () => {
-    try {
-      return await nodeToPromise<void>(fs, fs.truncate, name);
-    } catch (e) {
-      // Do nothing
-    }
-  });
+  @BeforeAll()
+  async init() {
+    await DependencyRegistry.init();
+  }
 
-  it('Should log', async () => {
+  @BeforeEach()
+  async truncate() {
+    return await fsTrunc(name);
+  }
+
+  @Test('Should Log')
+  async shouldLog() {
     let logger = (await DependencyRegistry.getInstance(Logger)).getLogger();
     logger.info('Hello world!');
 
-    let contents = await nodeToPromise(fs, fs.readFile, name);
-    expect(contents.toString()).to.contain('Hello world');
-  });
-});
+    let contents = await fsRead(name);
+    assert(contents.toString().includes('Hello world'));
+  }
+}
