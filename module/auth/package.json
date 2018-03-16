@@ -1,27 +1,27 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "dependencies": {
-    "@travetto/context": "0.x.x",
-    "@travetto/express": "0.x.x",
-    "@travetto/util": "0.x.x",
-    "@types/passport": "^0.4.3",
-    "@types/passport-local": "^1.0.32",
-    "passport": "^0.4.0",
+    "@travetto/context": "0.x.x", 
+    "@travetto/express": "0.x.x", 
+    "@travetto/util": "0.x.x", 
+    "@types/passport": "^0.4.3", 
+    "@types/passport-local": "^1.0.32", 
+    "passport": "^0.4.0", 
     "passport-local": "^1.0.0"
-  },
-  "description": "",
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@travetto/auth",
+  }, 
+  "description": "", 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@travetto/auth", 
   "peerDependencies": {
     "@travetto/model": "0.x.x"
-  },
+  }, 
   "repository": {
     "url": "https://github.com/travetto/auth.git"
-  },
-  "scripts": {},
-  "version": "0.0.4"
+  }, 
+  "scripts": {}, 
+  "version": "0.0.5"
 }
