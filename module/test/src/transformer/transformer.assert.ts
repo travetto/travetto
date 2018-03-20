@@ -21,6 +21,10 @@ const EQUALS_MAPPING: { [key: string]: string } = {
   notEqual: 'notDeepEqual'
 }
 
+const ASSERT_CMD = 'assert';
+const TEST_IMPORT = '@travetto/test';
+const ASSERT_UTIL = 'AssertUtil';
+
 interface AssertState extends State {
   assert: ts.Identifier;
   hasAssertCall: boolean;
@@ -55,48 +59,22 @@ function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, name
 
 function prepAssert(state: AssertState) {
   if (!state.assert) {
-    state.assert = ts.createIdentifier(`import_AssertUtil`);
+    state.assert = ts.createIdentifier(`import_${ASSERT_UTIL}`);
     state.newImports.push({
       ident: state.assert,
       path: require.resolve('../exec/assert')
     });
-    state.assertCheck = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, 'AssertUtil'), 'check');
-    state.assertInvoke = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, 'AssertUtil'), 'invoke');
+    state.assertCheck = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'check');
+    state.assertInvoke = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'invoke');
   }
 }
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AssertState): T {
-  if (ts.isMethodDeclaration(node) || ts.isClassDeclaration(node)) {
-    let dec = TransformUtil.findAnyDecorator(node, {
-      'Test': new Set(['@travetto/test']),
-      'Suite': new Set(['@travetto/test'])
-    }, state);
-    if (dec) {
-      if (ts.isCallExpression(dec.expression)) {
-        let args = [...(dec.expression.arguments || [])];
-        if (args.length === 0) {
-          args = [ts.createLiteral('')];
-        }
-
-        const offset = state.hasAssertCall ? 4 : 3;
-        const n = (node as any)['original'] || node;
-        const src = ts.createSourceFile(state.source.fileName, state.source.text, state.source.languageVersion);
-        const start = ts.getLineAndCharacterOfPosition(src, n.getFullStart());
-        const end = ts.getLineAndCharacterOfPosition(src, n.getEnd());
-
-        dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
-          line: start.line + offset,
-          lineEnd: end.line + offset
-        })]);
-      }
-    }
-  }
-
   let replaced = false;
 
   if (ts.isCallExpression(node)) {
     let exp: ts.Expression = node.expression;
-    if (ts.isIdentifier(exp) && exp.getText() === 'assert') {
+    if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) {
       replaced = true;
 
       const comp = node.arguments[0]!;
@@ -113,7 +91,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
           node = doAssert(state, node, opFn, [comp.left, comp.right, message!]);
         } else {
-          node = doAssert(state, node, 'assert', [...node.arguments]);
+          node = doAssert(state, node, ASSERT_CMD, [...node.arguments]);
         }
 
       } else if (ts.isPrefixUnaryExpression(comp) && comp.operator === ts.SyntaxKind.ExclamationToken) {
@@ -124,11 +102,11 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           node = doAssert(state, node, 'ok', [comp.operand, message!]); // !v
         }
       } else {
-        node = doAssert(state, node, 'assert', [...node.arguments]);
+        node = doAssert(state, node, ASSERT_CMD, [...node.arguments]);
       }
     } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) {
       let ident = exp.expression;
-      if (ident.escapedText === 'assert') {
+      if (ident.escapedText === ASSERT_CMD) {
         replaced = true;
 
         node = doAssert(state, node, exp.name.escapedText as string, [...node.arguments]);

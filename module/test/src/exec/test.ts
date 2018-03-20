@@ -184,7 +184,16 @@ export class TestUtil {
   }
 
   static async executeFile(file: string, emitter?: TestEmitter) {
-    require(`${process.cwd()}/${file}`);
+    try {
+      require(`${process.cwd()}/${file}`);
+    } catch (e) {
+      if (emitter) {
+        emitter.emit({
+          phase: 'before', type: 'suite', suite: {} as SuiteConfig
+        });
+      }
+      return;
+    }
 
     await TestRegistry.init();
 

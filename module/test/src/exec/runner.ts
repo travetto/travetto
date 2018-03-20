@@ -14,7 +14,7 @@ interface State {
 const RunnerOptions = {
   '--': true,
   default: {
-    tap: false,
+    tap: true,
     format: 'noop'
   },
   alias: { t: 'tap', f: 'format' },
