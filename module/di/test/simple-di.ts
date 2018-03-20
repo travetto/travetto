@@ -24,7 +24,7 @@ class DiTest {
     inst = await DependencyRegistry.getInstance(ServiceInherit, SERVICE_INHERIT_2);
     inst.doWork();
     assert.ok(inst.db);
-    assert(inst.age === 30);
+    assert(inst.age === 31);
 
     assert.equal(inst.db.altConfig, undefined);
     assert(inst.db.dbConfig.getUrl() === 'mongodb://oscar');

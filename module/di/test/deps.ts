@@ -40,5 +40,5 @@ export const SERVICE_INHERIT_2 = Symbol()
 
 @Injectable({ qualifier: SERVICE_INHERIT_2 })
 export class ServiceInherit2 extends ServiceInherit {
-
+  age = 31;
 }
