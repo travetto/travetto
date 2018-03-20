@@ -138,12 +138,13 @@ const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({
 export const TestTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
     // Only apply to test files
-    if (process.env.ENV === 'test' && source.fileName.includes('/test/') && !source.fileName.includes('/src/')) {
+    if (process.env.ENV === 'test' && source.fileName.includes('/test/') && !source.fileName.includes('/src/') && !source.fileName.includes('/node_modules/')) {
+      // Assert
       return TRANSFORMER(context)(source);
     } else {
       return source;
     }
   },
   phase: 'before',
-  priority: 0
+  priority: 1
 }
