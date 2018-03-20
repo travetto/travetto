@@ -13,7 +13,7 @@ export function Injectable(config: Partial<InjectableConfig<any>> = {}): ClassDe
   };
 }
 
-export type InjectConfig = { qualifier?: string, optional?: boolean };
+export type InjectConfig = { qualifier?: symbol, optional?: boolean };
 
 export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
   return (target: any) => {
@@ -22,7 +22,10 @@ export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
 }
 
 export function Inject(config?: InjectConfig): PropertyDecorator {
-  return (target: any, propertyKey: string) => {
-    DependencyRegistry.registerProperty(target.constructor, propertyKey, config as any as Dependency);
+  return (target: any, propertyKey: string | symbol) => {
+    DependencyRegistry.registerProperty(
+      target.constructor,
+      propertyKey as string,
+      config as any as Dependency);
   };
 }

@@ -13,6 +13,6 @@ export interface InjectableConfig<T = any> extends Dependency<T> {
 
 export interface Dependency<T = any> {
   target: ClassTarget<T>;
-  qualifier: Symbol;
+  qualifier: symbol;
   optional?: boolean;
 }

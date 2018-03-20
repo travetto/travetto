@@ -13,7 +13,7 @@ export interface ManagedExtra {
 type TargetId = string;
 type ClassId = string;
 
-function getName(symbol: Symbol) {
+function getName(symbol: symbol) {
   return symbol.toString().split(/[()]/g)[1];
 }
 
@@ -73,7 +73,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     };
   }
 
-  async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: Symbol = DEFAULT_INSTANCE): Promise<T> {
+  async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
     let targetId = target.__id;
 
     let aliasMap = this.aliases.get(targetId);
@@ -120,7 +120,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return inst;
   }
 
-  private async createInstance<T>(target: ClassTarget<T>, qualifier: Symbol = DEFAULT_INSTANCE) {
+  private async createInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE) {
     let targetId = target.__id;
 
     if (!this.instances.has(targetId)) {
@@ -170,7 +170,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.instances.get(targetId)!.set(qualifier, out);
   }
 
-  async getInstance<T>(target: ClassTarget<T>, qualifier: Symbol = DEFAULT_INSTANCE): Promise<T> {
+  async getInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
     let targetId = target.__id;
     if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(qualifier)) {
       console.debug('Getting Intance', targetId, getName(qualifier));
