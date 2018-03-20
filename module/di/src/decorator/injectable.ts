@@ -13,7 +13,7 @@ export function Injectable(config: Partial<InjectableConfig<any>> = {}): ClassDe
   };
 }
 
-export type InjectConfig = { name?: string, optional?: boolean };
+export type InjectConfig = { qualifier?: string, optional?: boolean };
 
 export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
   return (target: any) => {

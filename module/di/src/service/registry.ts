@@ -4,7 +4,7 @@ import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/re
 import { AppEnv } from '@travetto/base';
 import { RetargettingHandler } from '@travetto/compiler';
 
-export const DEFAULT_INSTANCE = '__default';
+export const DEFAULT_INSTANCE = Symbol('__default');
 
 export interface ManagedExtra {
   postConstruct?: () => any
@@ -13,17 +13,21 @@ export interface ManagedExtra {
 type TargetId = string;
 type ClassId = string;
 
+function getName(symbol: Symbol) {
+  return symbol.toString().split(/[()]/g)[1];
+}
+
 export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private pendingFinalize: Class[] = [];
 
-  private instances = new Map<TargetId, Map<string, any>>();
-  private instancePromises = new Map<TargetId, Map<string, Promise<any>>>();
+  private instances = new Map<TargetId, Map<Symbol, any>>();
+  private instancePromises = new Map<TargetId, Map<Symbol, Promise<any>>>();
 
-  private aliases = new Map<TargetId, Map<string, string>>();
-  private targets = new Map<ClassId, Map<string, TargetId>>();
+  private aliases = new Map<TargetId, Map<Symbol, string>>();
+  private targets = new Map<ClassId, Map<Symbol, TargetId>>();
 
-  private proxies = new Map<TargetId, Map<string, Proxy<RetargettingHandler<any>>>>();
-  private proxyHandlers = new Map<TargetId, Map<string, RetargettingHandler<any>>>();
+  private proxies = new Map<TargetId, Map<Symbol, Proxy<RetargettingHandler<any>>>>();
+  private proxyHandlers = new Map<TargetId, Map<Symbol, RetargettingHandler<any>>>();
 
   private autoCreate: (Dependency<any> & { priority: number })[] = [];
 
@@ -44,7 +48,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       console.debug('Auto-creating', this.autoCreate.map(x => x.target.name));
       let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
       for (let i of items) {
-        await this.getInstance(i.target, i.name);
+        await this.getInstance(i.target, i.qualifier);
       }
     }
   }
@@ -55,7 +59,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     return {
-      name: DEFAULT_INSTANCE,
+      qualifier: DEFAULT_INSTANCE,
       class: cls,
       target: cls,
       dependencies: {
@@ -69,16 +73,16 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     };
   }
 
-  async construct<T>(target: ClassTarget<T & ManagedExtra>, name: string = DEFAULT_INSTANCE): Promise<T> {
+  async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: Symbol = DEFAULT_INSTANCE): Promise<T> {
     let targetId = target.__id;
 
     let aliasMap = this.aliases.get(targetId);
 
-    if (!aliasMap || !aliasMap.has(name)) {
-      throw new InjectionError(`Dependency not found: ${targetId}[${name}]`);
+    if (!aliasMap || !aliasMap.has(qualifier)) {
+      throw new InjectionError(`Dependency not found: ${targetId}[${getName(qualifier)}]`);
     }
 
-    let clz = aliasMap.get(name)!;
+    let clz = aliasMap.get(qualifier)!;
     let managed = this.get(clz)!;
 
     const fieldKeys = Object.keys(managed.dependencies.fields!);
@@ -89,7 +93,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const promises = allDeps
       .map(async x => {
         try {
-          return await this.getInstance(x.target, x.name);
+          return await this.getInstance(x.target, x.qualifier);
         } catch (e) {
           if (x.optional && e instanceof InjectionError) {
             return undefined;
@@ -116,7 +120,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return inst;
   }
 
-  private async createInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE) {
+  private async createInstance<T>(target: ClassTarget<T>, qualifier: Symbol = DEFAULT_INSTANCE) {
     let targetId = target.__id;
 
     if (!this.instances.has(targetId)) {
@@ -124,12 +128,12 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.instancePromises.set(targetId, new Map());
     }
 
-    if (this.instancePromises.get(targetId)!.has(name)) {
-      return this.instancePromises.get(targetId)!.get(name);
+    if (this.instancePromises.get(targetId)!.has(qualifier)) {
+      return this.instancePromises.get(targetId)!.get(qualifier);
     }
 
-    let instancePromise = this.construct(target, name);
-    this.instancePromises.get(targetId)!.set(name, instancePromise);
+    let instancePromise = this.construct(target, qualifier);
+    this.instancePromises.get(targetId)!.set(qualifier, instancePromise);
 
     let instance = await instancePromise;
 
@@ -142,35 +146,37 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     let out: any = instance;
 
-    console.debug('Creating Instance', targetId, AppEnv.watch, !this.proxyHandlers.has(targetId), this.proxyHandlers.has(targetId) && !this.proxyHandlers.get(targetId)!.has(name))
+    console.debug('Creating Instance', targetId, AppEnv.watch,
+      !this.proxyHandlers.has(targetId),
+      this.proxyHandlers.has(targetId) && !this.proxyHandlers.get(targetId)!.has(qualifier))
 
     // if in watch mode, create proxies
     if (AppEnv.watch) {
-      if (!this.proxies.get(targetId)!.has(name)) {
+      if (!this.proxies.get(targetId)!.has(qualifier)) {
         let handler = new RetargettingHandler(out);
         let proxy = new Proxy({}, handler);
-        this.proxyHandlers.get(targetId)!.set(name, handler);
-        this.proxies.get(targetId)!.set(name, proxy);
+        this.proxyHandlers.get(targetId)!.set(qualifier, handler);
+        this.proxies.get(targetId)!.set(qualifier, proxy);
         out = proxy;
-        console.debug('Registering proxy', target.__id, name);
+        console.debug('Registering proxy', target.__id, qualifier);
       } else {
-        let handler = this.proxyHandlers.get(targetId)!.get(name)!;
-        console.debug('Updating target', target.__id, name, out);
+        let handler = this.proxyHandlers.get(targetId)!.get(qualifier)!;
+        console.debug('Updating target', target.__id, qualifier, out);
         handler.target = out;
-        out = this.proxies.get(targetId)!.get(name);
+        out = this.proxies.get(targetId)!.get(qualifier);
       }
     }
 
-    this.instances.get(targetId)!.set(name, out);
+    this.instances.get(targetId)!.set(qualifier, out);
   }
 
-  async getInstance<T>(target: ClassTarget<T>, name: string = DEFAULT_INSTANCE): Promise<T> {
+  async getInstance<T>(target: ClassTarget<T>, qualifier: Symbol = DEFAULT_INSTANCE): Promise<T> {
     let targetId = target.__id;
-    if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(name)) {
-      console.debug('Getting Intance', targetId, name);
-      await this.createInstance(target, name);
+    if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(qualifier)) {
+      console.debug('Getting Intance', targetId, getName(qualifier));
+      await this.createInstance(target, qualifier);
     }
-    return this.instances.get(targetId)!.get(name)!;
+    return this.instances.get(targetId)!.get(qualifier)!;
   }
 
   getCandidateTypes<T>(target: Class<T>) {
@@ -186,7 +192,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     conf.dependencies!.cons = dependencies;
     if (dependencies) {
       for (let dependency of dependencies) {
-        dependency.name = dependency.name || DEFAULT_INSTANCE;
+        dependency.qualifier = dependency.qualifier || DEFAULT_INSTANCE;
       }
     }
   }
@@ -194,15 +200,15 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency<any>) {
     let conf = this.getOrCreatePending(cls);
     conf.dependencies!.fields[field] = dependency;
-    dependency.name = dependency.name || DEFAULT_INSTANCE;
+    dependency.qualifier = dependency.qualifier || DEFAULT_INSTANCE;
   }
 
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
     let classId = pconfig.class!.__id;
     let config = this.getOrCreatePending(pconfig.class!);
 
-    if (pconfig.name) {
-      config.name = pconfig.name;
+    if (pconfig.qualifier) {
+      config.qualifier = pconfig.qualifier;
     }
     if (pconfig.target) {
       config.target = pconfig.target;
@@ -246,29 +252,29 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.aliases.set(targetId, new Map());
     }
 
-    this.aliases.get(targetId)!.set(config.name, classId);
-    this.targets.get(classId)!.set(config.name, targetId);
+    this.aliases.get(targetId)!.set(config.qualifier, classId);
+    this.targets.get(classId)!.set(config.qualifier, targetId);
 
     // TODO: Auto alias parent class if framework managed
-    if (parentClass.__id && config.name !== DEFAULT_INSTANCE) {
+    if (parentClass.__id && config.qualifier !== DEFAULT_INSTANCE) {
       let parentId = parentClass.__id;
-      this.aliases.get(parentId)!.set(config.name, classId);
-      this.targets.get(classId)!.set(config.name, parentId);
+      this.aliases.get(parentId)!.set(config.qualifier, classId);
+      this.targets.get(classId)!.set(config.qualifier, parentId);
     }
 
     // If already loaded, reload
     if (AppEnv.watch &&
       this.proxies.has(targetId) &&
-      this.proxies.get(targetId)!.has(config.name)
+      this.proxies.get(targetId)!.has(config.qualifier)
     ) {
       console.debug('Reloading on next tick');
       // Timing matters b/c of create instance
-      process.nextTick(() => this.createInstance(config.target, config.name));
+      process.nextTick(() => this.createInstance(config.target, config.qualifier));
     } else if (config.autoCreate.create) {
       // If not loaded, and autocreate
       this.autoCreate.push({
         target: config.target,
-        name: config.name,
+        qualifier: config.qualifier,
         priority: config.autoCreate.priority!
       })
     }
