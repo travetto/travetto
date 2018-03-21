@@ -46,8 +46,8 @@ export function Header(headers: { [key: string]: (string | (() => string)) }) {
 
 export function Cache(value: number, unit = 'second') {
   function getTime() {
-    let end = moment().add(value as any, unit as any).toDate().getTime();
-    let start = new Date().getTime();
+    const end = moment().add(value as any, unit as any).toDate().getTime();
+    const start = new Date().getTime();
     return end - start;
   }
   return Header({

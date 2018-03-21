@@ -4,8 +4,8 @@ import { AppError } from '../model';
 
 export function RequiredParam(name: string) {
   return ControllerRegistry.filterAdder(async (req: Request, res: Response) => {
-    let param = req.query[name] || req.params[name] || (req.body || {})[name];
-    let paramTypes = [
+    const param = req.query[name] || req.params[name] || (req.body || {})[name];
+    const paramTypes = [
       'string',
       'number',
       'object'
@@ -19,7 +19,7 @@ export function RequiredParam(name: string) {
 
 export function Accepts(contentTypes: string[]) {
   return ControllerRegistry.filterAdder(async (req: Request, res: Response) => {
-    let contentType = req.header('content-type') as string;
+    const contentType = req.header('content-type') as string;
     if (contentType && contentTypes.indexOf(contentType) < 0) {
       throw new AppError(`Content type ${contentType}`, 400);
     }

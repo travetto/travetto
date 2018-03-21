@@ -11,7 +11,7 @@ export class StringResponse implements Renderable {
   }
 
   toStream(): NodeJS.ReadableStream {
-    let out = new stream.Readable();
+    const out = new stream.Readable();
     (out as any)._read = function noop() { }; // redundant? see update below
     out.push(this.content);
     out.push(null);

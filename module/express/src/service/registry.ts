@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { EventEmitter } from 'events';
 
-import { RequestHandler, Filter, FilterPromise, PathType } from '../model';
-import { Renderable, Method, ControllerConfig } from '../model';
+import {
+  RequestHandler, Filter, FilterPromise,
+  PathType, Renderable, Method,
+  ControllerConfig
+} from '../model';
 import { toPromise } from '@travetto/util';
 import { ExpressApp } from './app';
 import { DependencyRegistry } from '@travetto/di';
@@ -24,17 +27,17 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
   }
 
   getOrCreateRequestHandlerConfig(cls: Class, handler: Filter) {
-    let id = cls.__id!;
-    let controllerConf = this.getOrCreatePending(cls);
+    const id = cls.__id!;
+    const controllerConf = this.getOrCreatePending(cls);
 
     if (!this.pendingMethods.has(id)) {
       this.pendingMethods.set(id, new Map());
     }
     if (!this.pendingMethods.get(id)!.has(handler)) {
-      let rh = {
+      const rh = {
         filters: [],
         class: cls,
-        handler: handler,
+        handler,
         headers: {}
       };
       this.pendingMethods.get(id)!.set(handler, rh);
@@ -44,18 +47,18 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
   }
 
   registerControllerFilter(target: Class, fn: Filter) {
-    let config = this.getOrCreatePending(target);
+    const config = this.getOrCreatePending(target);
     config.filters!.push(fn);
   }
 
   registerRequestHandlerFilter(target: Class, handler: Filter, fn: Filter) {
-    let rh = this.getOrCreateRequestHandlerConfig(target, handler);
+    const rh = this.getOrCreateRequestHandlerConfig(target, handler);
     rh.filters!.unshift(fn);
   }
 
   registerPendingRequestHandlder(config: Partial<RequestHandler>) {
     return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-      let rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
+      const rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
       rh.method = config.method || rh.method;
       rh.path = config.path || rh.path;
       rh.headers = Object.assign(rh.headers, config.headers || {});
@@ -74,10 +77,9 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
     };
   }
 
-
   onInstallFinalize(cls: Class) {
-    let id = cls.__id!;
-    let final = this.getOrCreatePending(cls) as ControllerConfig;
+    const id = cls.__id!;
+    const final = this.getOrCreatePending(cls) as ControllerConfig;
 
     if (this.has(final.path)) {
       console.log('Reloading controller', cls.name, final.path);

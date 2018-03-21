@@ -17,7 +17,7 @@ export class RouteUtil {
           x.route.stack = RouteUtil.removeRoutes(x.route.stack, toRemove);
         }
         if (toRemove.has(x.route.path)) {
-          let method = x.route.methods && Object.keys(x.route.methods)[0];
+          const method = x.route.methods && Object.keys(x.route.methods)[0];
           if (toRemove.get(x.route.path)!.has(method)) {
             console.debug(`Dropping ${method}/${x.route.path}`);
             return null;
@@ -30,8 +30,8 @@ export class RouteUtil {
 
   static removeAllRoutes(stack: RouteStack[], config: ControllerConfig) {
     // Un-register
-    let controllerRoutes = new Map<PathType, Set<Method>>();
-    for (let { method, path } of config.handlers) {
+    const controllerRoutes = new Map<PathType, Set<Method>>();
+    for (const { method, path } of config.handlers) {
       if (!controllerRoutes.has(path!)) {
         controllerRoutes.set(path!, new Set());
       }
@@ -66,7 +66,7 @@ export class RouteUtil {
   static async outputHandler(handler: RequestHandler, req: Request, res: Response, out: any) {
     if (!res.headersSent && out) {
       if (handler.headers) {
-        for (let [h, v] of Object.entries(handler.headers)) {
+        for (const [h, v] of Object.entries(handler.headers)) {
           if (typeof v === 'string') {
             res.setHeader(h, v);
           } else {
@@ -93,7 +93,7 @@ export class RouteUtil {
 
   static async errorHandler(error: any, req: Request, res: Response, next?: NextFunction) {
 
-    let status = error.status || error.statusCode || 500;
+    const status = error.status || error.statusCode || 500;
 
     console.error(`Request`, {
       meta: {
@@ -119,7 +119,7 @@ export class RouteUtil {
   static asyncHandler(filter: FilterPromise, handler?: Filter): FilterPromise {
     return async (req: Request, res: Response, next?: NextFunction) => {
       try {
-        let out = await filter(req, res);
+        const out = await filter(req, res);
         handler ? handler(req, res, out) : (next && next());
       } catch (error) {
         await RouteUtil.errorHandler(error, req, res);

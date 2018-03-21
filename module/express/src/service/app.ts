@@ -26,10 +26,10 @@ export class ExpressApp {
   }
 
   async init() {
-    let compression = require('compression');
-    let cookieParser = require('cookie-parser');
-    let bodyParser = require('body-parser');
-    let session = require('express-session');
+    const compression = require('compression');
+    const cookieParser = require('cookie-parser');
+    const bodyParser = require('body-parser');
+    const session = require('express-session');
 
     this.app = express();
     this.app.use(compression());
@@ -44,21 +44,21 @@ export class ExpressApp {
       this.app.enable('trust proxy');
     }
 
-    let operators = DependencyRegistry.getCandidateTypes(ExpressOperator as Class);
+    const operators = DependencyRegistry.getCandidateTypes(ExpressOperator as Class);
     console.log('Custom operators', operators);
 
-    let instances = await Promise.all(operators.map(op =>
+    const instances = await Promise.all(operators.map(op =>
       DependencyRegistry.getInstance(ExpressOperator, op.name)
         .catch(err => {
           console.log(`Unable to load operator ${op.class.name}#${op.name}`);
         })
     ));
 
-    let sorted = (instances
+    const sorted = (instances
       .filter(x => !!x) as ExpressOperator[])
       .sort((a, b) => a.priority - b.priority);
 
-    for (let inst of sorted) {
+    for (const inst of sorted) {
       inst.operate(this);
     }
 
@@ -91,11 +91,11 @@ export class ExpressApp {
   }
 
   async registerController(config: ControllerConfig) {
-    let instance = await DependencyRegistry.getInstance(config.class);
+    const instance = await DependencyRegistry.getInstance(config.class);
 
     console.log('Controller Instance', config.class.name, instance);
 
-    for (let handler of config.handlers) {
+    for (const handler of config.handlers) {
       handler.filters = [...config.filters!, ...handler.filters!].map(toPromise).map(x => RouteUtil.asyncHandler(x));
       handler.path = RouteUtil.buildPath(config.path, handler.path);
       handler.handler = RouteUtil.asyncHandler(
@@ -104,7 +104,7 @@ export class ExpressApp {
     }
 
     console.log('Registering', config.path, config.handlers.length);
-    for (let hconf of config.handlers) {
+    for (const hconf of config.handlers) {
       hconf.instance = instance;
       this.app[hconf.method!](hconf.path!, ...hconf.filters!, hconf.handler);
     }

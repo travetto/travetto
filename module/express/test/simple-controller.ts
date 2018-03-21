@@ -13,19 +13,19 @@ export class Simple {
 
   @Get('/name')
   async doIt() {
-    let user = await this.service.fetch();
+    const user = await this.service.fetch();
     return user.first.toUpperCase();
   }
 
   @Get('/nameAngry')
   async doItAngry() {
-    let user = await this.service.fetch();
+    const user = await this.service.fetch();
     return user.first.toUpperCase();
   }
 
   @Get('/name2')
   async doIt2() {
-    let user = await this.service.fetch2();
+    const user = await this.service.fetch2();
     return user.last;
   }
 
