@@ -61,7 +61,7 @@ export class Compiler {
   ];
 
   static invalidWorkingSetFile(name: string) {
-    for (let re of this.invalidWorkingSetFiles) {
+    for (const re of this.invalidWorkingSetFiles) {
       if (re.test(name)) {
         return true;
       }
@@ -71,7 +71,7 @@ export class Compiler {
 
   static handleLoadError(p: string, e?: any): boolean {
     if (!AppEnv.prod || this.optionalFiles.test(p)) { // If attempting to load an optional require
-      let extra = this.optionalFiles.test(p) ? 'optional ' : '';
+      const extra = this.optionalFiles.test(p) ? 'optional ' : '';
       console.error(`Unable to import ${extra}require, ${p}, stubbing out`, e);
       return true;
     } else {
@@ -84,7 +84,7 @@ export class Compiler {
   }
 
   static resolveOptions(name = this.configFile) {
-    let out = ts.parseJsonSourceFileConfigFileContent(
+    const out = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(`${this.cwd}/${this.configFile}`, x => ts.sys.readFile(x)), {
         useCaseSensitiveFileNames: true,
         fileExists: ts.sys.fileExists,
@@ -108,9 +108,9 @@ export class Compiler {
     const transformers: { [key: string]: any } = {};
     let i = 2;
 
-    for (let trns of bulkRequire(this.transformerSet)) {
-      for (let key of Object.keys(trns)) {
-        let item = trns[key];
+    for (const trns of bulkRequire(this.transformerSet)) {
+      for (const key of Object.keys(trns)) {
+        const item = trns[key];
         if (!transformers[item.phase]) {
           transformers[item.phase] = [];
         }
@@ -119,7 +119,7 @@ export class Compiler {
         transformers[item.phase].push(item);
       }
     }
-    for (let key of Object.keys(transformers)) {
+    for (const key of Object.keys(transformers)) {
       transformers[key] = (transformers[key] as any[]).sort((a, b) => a.priority - b.priority).map(x => x.transformer);
     }
     return transformers;
@@ -131,7 +131,7 @@ export class Compiler {
     try {
       mod = originalLoader.apply(null, arguments);
     } catch (e) {
-      let p = Module._resolveFilename(request, parent);
+      const p = Module._resolveFilename(request, parent);
       this.handleLoadError(p, e);
       mod = {};
     }
@@ -140,10 +140,10 @@ export class Compiler {
 
     // Proxy modules, if in watch mode for non node_modules paths
     if (AppEnv.watch) {
-      let p = Module._resolveFilename(request, parent);
+      const p = Module._resolveFilename(request, parent);
       if (p.includes(process.cwd()) && !p.includes(this.libraryPath)) {
         if (!this.modules.has(p)) {
-          let handler = new RetargettingHandler(mod);
+          const handler = new RetargettingHandler(mod);
           out = new Proxy({}, handler);
           this.modules.set(p, { module: out, handler });
         } else {
@@ -165,7 +165,7 @@ export class Compiler {
 
     let content: string;
 
-    let isNew = !this.contents.has(jsf);
+    const isNew = !this.contents.has(jsf);
 
     if (isNew) {
       if (AppEnv.watch) {
@@ -184,7 +184,7 @@ export class Compiler {
     }
 
     try {
-      let ret = (m as any)._compile(content, jsf);
+      const ret = (m as any)._compile(content, jsf);
       if (isNew) {
         this.events.emit('required-after', tsf);
       }
@@ -208,7 +208,7 @@ export class Compiler {
     if (!Array.isArray(files)) {
       files = [files];
     }
-    for (let fileName of files) {
+    for (const fileName of files) {
       this.unload(fileName);
       // Do not automatically reload
     }
@@ -229,23 +229,23 @@ export class Compiler {
 
   static emitFile(fileName: string) {
     //    let output = this.langaugeService.getEmitOutput(fileName);
-    let content = ts.sys.readFile(fileName)!;
+    const content = ts.sys.readFile(fileName)!;
 
     if (AppEnv.watch && this.hashes.has(fileName)) {
       // Let's see if they are really different
-      let hash = farmhash.hash32(content);
+      const hash = farmhash.hash32(content);
       if (hash === this.hashes.get(fileName)) {
         console.debug('File contents unchanged');
         return false;
       }
     }
 
-    let res = this.transpile(content, fileName);
+    const res = this.transpile(content, fileName);
     let output = res.outputText;
     if (fileName.match(/\/test\//)) {
       // console.debug(fileName, output);
     }
-    let outFileName = toJsName(fileName);
+    const outFileName = toJsName(fileName);
 
     if (this.logErrors(fileName, res.diagnostics)) {
       console.debug(`Compiling ${fileName} failed`);
@@ -267,7 +267,7 @@ export class Compiler {
   }
 
   static watchFiles(fileNames: string[]) {
-    let watcher = chokidar.watch(this.appWorkingSet, {
+    const watcher = chokidar.watch(this.appWorkingSet, {
       ignored: this.invalidWorkingSetFile,
       persistent: true,
       cwd: process.cwd(),
@@ -288,7 +288,7 @@ export class Compiler {
         })
         .on('change', fileName => {
           fileName = `${process.cwd()}/${fileName}`;
-          let changed = this.files.has(fileName);
+          const changed = this.files.has(fileName);
           if (changed) {
             this.snaphost.delete(fileName);
             this.files.get(fileName)!.version++;
@@ -319,10 +319,10 @@ export class Compiler {
       return false;
     }
 
-    for (let diagnostic of diagnostics) {
-      let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+    for (const diagnostic of diagnostics) {
+      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
       if (diagnostic.file) {
-        let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start as number);
+        const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start as number);
         console.error(`  Error ${diagnostic.file.fileName}(${line + 1}, ${character + 1}): ${message}`);
       } else {
         console.error(`  Error: ${message}`);
@@ -344,7 +344,7 @@ export class Compiler {
 
   static getSnapshot(fileName: string) {
     if (!this.snaphost.has(fileName)) {
-      let snap = fs.existsSync(fileName) ? ts.ScriptSnapshot.fromString(ts.sys.readFile(fileName)!) : undefined
+      const snap = fs.existsSync(fileName) ? ts.ScriptSnapshot.fromString(ts.sys.readFile(fileName)!) : undefined
       this.snaphost.set(fileName, snap);
     }
     return this.snaphost.get(fileName);
@@ -354,7 +354,7 @@ export class Compiler {
     if (!this.options) {
       this.cwd = cwd;
       this.prepareSourceMaps();
-      let out = this.resolveOptions();
+      const out = this.resolveOptions();
       this.options = out.options;
 
       this.transformers = this.resolveTransformers();
@@ -369,7 +369,7 @@ export class Compiler {
     if (this.rootFiles) {
       return;
     }
-    let start = Date.now();
+    const start = Date.now();
 
 
     this.rootFiles = bulkFindSync(this.workingSets, undefined, this.invalidWorkingSetFile);
@@ -398,7 +398,7 @@ export class Compiler {
     // this.langaugeService = ts.createLanguageService(this.servicesHost, this.registry);
 
     // Prime for type checker
-    for (let fileName of this.rootFiles) {
+    for (const fileName of this.rootFiles) {
       this.files.set(fileName, { version: 0 });
       this.emitFile(fileName);
     }

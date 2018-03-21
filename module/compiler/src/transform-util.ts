@@ -42,14 +42,14 @@ export class TransformUtil {
   }
 
   static findAnyDecorator(node: ts.Node, patterns: { [key: string]: Set<string> }, state: State): ts.Decorator | undefined {
-    for (let dec of (node.decorators || []) as any as DecList) {
-      let ident = this.getDecoratorIdent(dec);
+    for (const dec of (node.decorators || []) as any as DecList) {
+      const ident = this.getDecoratorIdent(dec);
       if (!ts.isIdentifier(ident)) {
         continue;
       }
       if (ident && ident.escapedText in patterns) {
-        let { path } = state.imports.get(ident.escapedText! as string)!;
-        let packages = patterns[ident.escapedText as string];
+        const { path } = state.imports.get(ident.escapedText! as string)!;
+        const packages = patterns[ident.escapedText as string];
         if (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto')) {
           let pkg = '';
           if (!path.includes('node_modules')) {
@@ -66,9 +66,9 @@ export class TransformUtil {
   }
 
   static addImport(file: ts.SourceFile, imports: Import[]) {
-    let importStmts = imports
+    const importStmts = imports
       .map(({ path, ident }) => {
-        let imptStmt = ts.createImportDeclaration(
+        const imptStmt = ts.createImportDeclaration(
           undefined, undefined,
           ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
           ts.createLiteral(require.resolve(path))
@@ -105,8 +105,8 @@ export class TransformUtil {
     } else if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
       val = ts.createLiteral(val);
     } else {
-      let pairs: ts.PropertyAssignment[] = [];
-      for (let k of Object.keys(val)) {
+      const pairs: ts.PropertyAssignment[] = [];
+      for (const k of Object.keys(val)) {
         pairs.push(
           ts.createPropertyAssignment(k, this.fromLiteral(val[k]))
         );
@@ -118,8 +118,8 @@ export class TransformUtil {
 
   static extendObjectLiteral(addTo: object, lit?: ts.ObjectLiteralExpression) {
     lit = lit || this.fromLiteral({});
-    let props = lit.properties;
-    let extra = this.fromLiteral(addTo).properties;
+    const props = lit.properties;
+    const extra = this.fromLiteral(addTo).properties;
     return ts.updateObjectLiteral(lit, [...props, ...extra]);
   }
 
@@ -154,12 +154,12 @@ export class TransformUtil {
   ) {
     return (context: ts.TransformationContext) =>
       (file: ts.SourceFile) => {
-        let state = init(file, context) as T;
+        const state = init(file, context) as T;
         state.path = require.resolve(file.fileName);
         state.newImports = [];
         state.imports = new Map();
 
-        for (let stmt of file.statements) {
+        for (const stmt of file.statements) {
           if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
             let path = '';
             stmt.importClause!;
@@ -168,11 +168,11 @@ export class TransformUtil {
               .replace(/^\.\//, dirname(state.path) + '/'));
             if (stmt.importClause) {
               if (stmt.importClause.namedBindings) {
-                let bindings = stmt.importClause.namedBindings;
+                const bindings = stmt.importClause.namedBindings;
                 if (ts.isNamespaceImport(bindings)) {
                   state.imports.set(bindings.name.text, { path, ident: bindings.name })
                 } else if (ts.isNamedImports(bindings)) {
-                  for (let n of bindings.elements) {
+                  for (const n of bindings.elements) {
                     state.imports.set(n.name.text, { path, ident: n.name })
                   }
                 }
@@ -181,7 +181,7 @@ export class TransformUtil {
           }
         }
 
-        let ret = visitor(context, file, state);
+        const ret = visitor(context, file, state);
 
         if (state.newImports.length) {
           this.addImport(ret, state.newImports);
@@ -193,15 +193,15 @@ export class TransformUtil {
   static importIfExternal<T extends State>(typeNode: ts.TypeNode, state: State) {
     //    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
 
-    let nodeName = (typeNode as any).typeName!.getText();
+    const nodeName = (typeNode as any).typeName!.getText();
     if (nodeName.match(/^[A-Z]{1,3}$/)) {
       throw new Error('Type information not found');
     }
 
     if (nodeName.indexOf('.') > 0) {
-      let [importName, ident] = nodeName.split('.');
+      const [importName, ident] = nodeName.split('.');
       if (state.imports.has(importName)) {
-        let importIdent = ts.createUniqueName(`import_${importName}`);
+        const importIdent = ts.createUniqueName(`import_${importName}`);
 
         state.newImports.push({
           ident: importIdent,
@@ -212,10 +212,10 @@ export class TransformUtil {
       }
       return ts.createPropertyAccess(ts.createIdentifier(importName), ident);
     } else {
-      let ident = nodeName;
+      const ident = nodeName;
       // External
       if (state.imports.has(nodeName)) {
-        let importName = ts.createUniqueName(`import_${nodeName}`);
+        const importName = ts.createUniqueName(`import_${nodeName}`);
 
         state.newImports.push({
           ident: importName,
@@ -229,9 +229,9 @@ export class TransformUtil {
   }
 
   static buildImportAliasMap(pathToType: { [key: string]: string } = {}) {
-    let out: { [key: string]: Set<string> } = {};
+    const out: { [key: string]: Set<string> } = {};
 
-    for (let [k, v] of Object.entries(pathToType)) {
+    for (const [k, v] of Object.entries(pathToType)) {
       if (!(v in out)) {
         out[v] = new Set();
       }

@@ -46,7 +46,7 @@ export class RetargettingHandler<T extends any> implements ProxyHandler<T> {
   }
 
   ownKeys(target: T): PropertyKey[] {
-    let keys = ([] as PropertyKey[])
+    const keys = ([] as PropertyKey[])
       .concat(Object.getOwnPropertyNames(this.target))
       .concat(Object.getOwnPropertySymbols(this.target));
     return keys;
