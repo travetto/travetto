@@ -1,4 +1,3 @@
-import { GeoPoint } from '../../model';
 import { FieldConfig } from '@travetto/schema';
 
 
@@ -62,14 +61,14 @@ export class TypeUtil {
     let op: SimpleType | undefined;
     if (type === String) {
       op = 'string';
+    } else if (f.declared.array && type === Number) {
+      op = 'GeoPoint';
     } else if (type === Number) {
       op = 'number';
     } else if (type === Boolean) {
       op = 'boolean';
     } else if (type === Date) {
       op = 'Date';
-    } else if (type === GeoPoint) {
-      op = 'GeoPoint';
     }
     return op;
   }
@@ -83,7 +82,7 @@ export class TypeUtil {
       return 'boolean';
     } else if (v instanceof Date) {
       return 'Date';
-    } else if (v instanceof GeoPoint) {
+    } else if (v instanceof Array && v.length === 2 && v[0] instanceof Number) {
       return 'GeoPoint';
     }
   }

@@ -239,10 +239,10 @@ export class QueryVerifierService {
 
       if (Array.isArray(val) && x === SORT) {
         for (let el of val) {
-          this[fn](state, cls, el);
+          (this[fn] as any)(state, cls, el);
         }
       } else {
-        this[fn](state, cls, val);
+        (this[fn] as any)(state, cls, val);
       }
     }
 

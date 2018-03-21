@@ -1,41 +1,43 @@
 import { Class } from '@travetto/registry';
 import { WhereClause } from './where';
-
-export class GeoPoint {
-  lat: number;
-  lon: number;
-}
+import { RetainFields } from './common';
 
 type SelectFieldFn = 'max' | 'min' | 'avg' | 'sum' | 'count';
 
-type SelectClause<T> = {
-  [P in keyof T]?: string | 1 | true | ({ alias: string, calc: SelectFieldFn }) | object
+type _SelectClause<T> = {
+  [P in keyof T]?: T[P] extends object ? _SelectClause<T[P]> : (1 | true | ({ alias: string, calc: SelectFieldFn }));
 };
 
-type GroupClause<T> = {
-  [P in keyof T]?: 1 | true | object
+type _GroupClause<T> = {
+  [P in keyof T]?: T[P] extends object ? _GroupClause<T[P]> : (1 | true)
 };
 
-export type SortClause<T> = {
-  [P in keyof T]?: boolean | 1 | -1 | object;
+type _SortClause<T> = {
+  [P in keyof T]?: T[P] extends object ? _SortClause<T[P]> : (boolean | 1 | -1);
 }
 
-export interface QueryOptions<T> {
-  sort?: SortClause<T>[];
+interface _QueryOptions<T> {
+  sort?: _SortClause<T>[];
   limit?: number;
   offset?: number;
 }
 
-type QueryMain<T> =
+type _QueryMain<T> =
   {
-    select: SelectClause<T>;
+    select: _SelectClause<T>;
     where?: WhereClause<T>;
-    group: GroupClause<T>;
+    group: _GroupClause<T>;
   } | {
-    select?: SelectClause<T>;
+    select?: _SelectClause<T>;
     where: WhereClause<T>;
   }
 
-export type Query<T> = QueryMain<T> & QueryOptions<T>;
-export type ModelQuery<T> = { where?: WhereClause<T> };
-export type PageableModelQuery<T> = ModelQuery<T> & QueryOptions<T>
+type _Query<T> = _QueryMain<T> & _QueryOptions<T>;
+type _PageableModelQuery<T> = { where?: WhereClause<T> } & _QueryOptions<T>
+
+export type Query<T> = _Query<RetainFields<T>>;
+export type PageableModelQuery<T> = _PageableModelQuery<RetainFields<T>>;
+export type QueryOptions<T> = _QueryOptions<RetainFields<T>>;
+export type SelectClause<T> = _SelectClause<RetainFields<T>>;
+export type SortClause<T> = _SortClause<RetainFields<T>>;
+export type GroupClause<T> = _GroupClause<RetainFields<T>>;

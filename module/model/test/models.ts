@@ -1,4 +1,4 @@
-import { Model, BaseModel, WhereClause } from '../index';
+import { Model, BaseModel, WhereClause, ModelService } from '../index';
 
 @Model()
 export class Address extends BaseModel {
@@ -16,5 +16,3 @@ export class Person extends BaseModel {
   address: Address;
   extra: Address[];
 }
-
-const G: WhereClause<Person> = {}

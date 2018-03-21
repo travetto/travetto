@@ -1,6 +1,4 @@
-type Point = [number, number];
-
-type FieldType = string | number | Date | Point;
+import { RetainFields, Point, FieldType } from './common';
 
 type GeneralFieldQuery<T> =
   T |
@@ -41,8 +39,6 @@ type FieldQuery<T> =
         (T extends Point ? GeoFieldQuery :
           GeneralFieldQuery<T>))));
 
-// Recursive breaks tsc
-
 type _MatchQuery<T> = {
   [P in keyof T]?: T[P] extends (FieldType | any[]) ? FieldQuery<T[P]> : MatchQuery<T[P]>;
 };
@@ -53,9 +49,5 @@ type _WhereClause<T> =
   { $not: _WhereClause<T>; } |
   _MatchQuery<T>;
 
-export type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
-
-export type RemoveBad<T> = Pick<T, NonFunctionPropertyNames<T>>;
-
-export type MatchQuery<T> = _MatchQuery<RemoveBad<T>>;
-export type WhereClause<T> = _WhereClause<RemoveBad<T>>;
+export type MatchQuery<T> = _MatchQuery<RetainFields<T>>;
+export type WhereClause<T> = _WhereClause<RetainFields<T>>;
