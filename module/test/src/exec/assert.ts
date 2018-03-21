@@ -17,18 +17,13 @@ export class AssertUtil {
 
   static asserts: Assertion[] = [];
 
-  static readFilePosition(err: Error, filename?: string) {
+  static readFilePosition(err: Error, filename: string) {
     let base = process.cwd();
-    let best = '';
-
-    let lines = err.stack.split('\n').filter(x => !x.includes('/node_modules/') && x.includes(base));
-
-    if (filename) {
-      best = lines.filter(x => x.includes(filename)).pop();
-    }
+    let lines = err.stack!.split('\n').filter(x => !x.includes('/node_modules/') && x.includes(base));
+    let best = lines.filter(x => x.includes(filename))[0];
 
     if (!best) {
-      best = lines.filter(x => x.includes(`${base}/test`)).pop();
+      best = lines.filter(x => x.includes(`${base}/test`))[0];
     }
 
     if (!best) {

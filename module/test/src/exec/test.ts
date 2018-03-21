@@ -102,7 +102,7 @@ export class TestUtil {
     if (result.status === 'fail' && result.error) {
       let err = result.error;
       if (!(err instanceof assert.AssertionError)) {
-        let { file, line } = AssertUtil.readFilePosition(err);
+        let { file, line } = AssertUtil.readFilePosition(err, test.file);
         const assertion: Assertion = { file, line, operator: 'throws', text: '', error: err, message: `Error thrown: ${err.message}` };
         result.assertions.push(assertion);
       }
@@ -117,7 +117,7 @@ export class TestUtil {
         await fn.call(suite.instance);
       }
     } catch (error) {
-      let { line, file } = AssertUtil.readFilePosition(error);
+      let { line, file } = AssertUtil.readFilePosition(error, suite.class.__filename);
       result.tests.push({
         status: 'fail',
         suiteName: suite.name,
