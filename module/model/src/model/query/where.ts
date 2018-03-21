@@ -1,61 +1,61 @@
-type FieldComparableType = Date | number;
-type FieldType = FieldComparableType | string | boolean;
-
-/*
-type FieldArrayType = FieldType[];
-
 type Point = [number, number];
 
-type GeneralFieldQuery =
-  { $eq: FieldType; } |
-  { $ne: FieldType; } |
+type FieldType = string | number | Date | Point;
 
-  //Array
-  { $in: FieldArrayType; } |
-  { $nin: FieldArrayType; } |
-  
+type GeneralFieldQuery<T> =
+  T |
+  { $eq: T; } |
+  { $ne: T; } |
   { $exists: boolean; };
 
-type ComparableFieldQuery =
-  { $lt: FieldComparableType; } |
-  { $lte: FieldComparableType; } |
-  { $gt: FieldComparableType; } |
-  { $gte: FieldComparableType; };
+type GeneralScalarFieldQuery<T> =
+  GeneralFieldQuery<T> |
+  // Array
+  { $in: T[]; } |
+  { $nin: T[]; };
 
-type ArrayFieldQuery =
-  { $all: FieldArrayType; };
+type ComparableFieldQuery<T> =
+  GeneralScalarFieldQuery<T> |
+  { $lt: T; } |
+  { $lte: T; } |
+  { $gt: T; } |
+  { $gte: T; };
+
+type ArrayFieldQuery<T> =
+  GeneralFieldQuery<T> |
+  { $all: T; };
 
 type StringFieldQuery =
+  GeneralScalarFieldQuery<string> |
   { $regex: RegExp; };
 
 type GeoFieldQuery =
+  GeneralScalarFieldQuery<Point> |
   { $geoWithin: Point[]; } |
-  { $geoIntersects: Point[] };
+  { $geoIntersects?: Point[]; };
 
-type FieldQuery = GeneralFieldQuery | ComparableFieldQuery | ArrayFieldQuery | StringFieldQuery | GeoFieldQuery;
+type FieldQuery<T> =
+  (T extends string ? StringFieldQuery :
+    (T extends (number | Date) ? ComparableFieldQuery<T> :
+      (T extends (infer U)[] ? ArrayFieldQuery<U> :
+        (T extends Point ? GeoFieldQuery :
+          GeneralFieldQuery<T>))));
 
 // Recursive breaks tsc
 
-type SubMatchQuery<T> = T | FieldQuery | MatchQuery<T>;
-*/
+type _MatchQuery<T> = {
+  [P in keyof T]?: T[P] extends (FieldType | any[]) ? FieldQuery<T[P]> : MatchQuery<T[P]>;
+};
 
-export type MatchQuery<T> = /*{
-  [P in keyof T]?: SubMatchQuery<T[P]>;
-}*/ any;
+type _WhereClause<T> =
+  { $and: (_WhereClause<T> | _MatchQuery<T>)[]; } |
+  { $or: (_WhereClause<T> | _MatchQuery<T>)[]; } |
+  { $not: _WhereClause<T>; } |
+  _MatchQuery<T>;
 
-type Grouping<T> = /*
-  { $and: Grouping<T>[] | MatchQuery<T>[][]; } |
-  { $or: Grouping<T>[] | MatchQuery<T>[]; } |
-  { $not: Grouping<T>; };
-  */ any;
+export type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
 
-export type WhereClause<T> = Grouping<T> | MatchQuery<T>;
+export type RemoveBad<T> = Pick<T, NonFunctionPropertyNames<T>>;
 
-export function isGrouping<T>(o: WhereClause<T>): o is Grouping<T> {
-  return '$and' in o || '$or' in o || '$not' in o;
-}
-
-export function isFieldType(o: any): o is FieldType {
-  let type = typeof o;
-  return o === 'number' || o === 'string' || o === 'boolean' || o instanceof Date;
-}
+export type MatchQuery<T> = _MatchQuery<RemoveBad<T>>;
+export type WhereClause<T> = _WhereClause<RemoveBad<T>>;
