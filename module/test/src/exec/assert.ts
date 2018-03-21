@@ -17,18 +17,22 @@ export class AssertUtil {
 
   static asserts: Assertion[] = [];
 
-  static readFilePosition(filename?: string) {
-    let err = new Error();
-    let sub: string = err.stack!;
+  static readFilePosition(err: Error, filename?: string) {
+    let base = process.cwd();
     let best = '';
 
+    let lines = err.stack.split('\n').filter(x => !x.includes('/node_modules/') && x.includes(base));
+
     if (filename) {
-      let lines = sub.split('\n').filter(x => x.includes(filename));
-      best = lines.pop()!;
-    } else {
-      let base = process.cwd() + '/test/';
-      let lines = sub.split('\n').filter(x => x.includes(base));
-      best = lines[0];
+      best = lines.filter(x => x.includes(filename)).pop();
+    }
+
+    if (!best) {
+      best = lines.filter(x => x.includes(`${base}/test`)).pop();
+    }
+
+    if (!best) {
+      return { file: 'unknown', line: 0 };
     }
 
     let [fn, path] = best.trim().split(/\s+/g).slice(1);
@@ -37,7 +41,7 @@ export class AssertUtil {
     file = file.split(process.cwd() + '/')[1];
 
     let res = { file, line: parseInt(lineNo, 10) };
-    console.debug(res);
+
     return res;
   }
 
@@ -46,7 +50,7 @@ export class AssertUtil {
   }
 
   static check(filename: string, text: string, name: string, ...args: any[]) {
-    let { file, line } = this.readFilePosition(filename.replace(/[.][tj]s$/, ''));
+    let { file, line } = this.readFilePosition(new Error(), filename.replace(/[.][tj]s$/, ''));
 
     let assertion: Assertion = { file, line, text, operator: ASSERT_FN_OPERATOR[name] };
     if (name === 'fail') {
