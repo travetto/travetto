@@ -12,7 +12,7 @@ export class IndexedPoolManager<T extends BaseResource, U> {
       this.pools.set(index, this.factory(index));
     }
 
-    let pool = this.pools.get(index) as PoolManager<T>;
+    const pool = this.pools.get(index) as PoolManager<T>;
     return await pool.acquire(opts);
   }
 }

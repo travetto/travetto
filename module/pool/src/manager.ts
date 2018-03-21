@@ -27,8 +27,8 @@ export class PoolManager<T extends BaseResource> {
         this.factory(),
         Object.assign({}, PoolManager.POOL_OPTIONS, opts || {}));
     }
-    let resource = await this.pool.acquire();
-    let release = async () => {
+    const resource = await this.pool.acquire();
+    const release = async () => {
       if (resource.evict) {
         await this.pool.destroy(resource);
       } else {
