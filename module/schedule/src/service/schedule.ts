@@ -34,15 +34,15 @@ export class Scheduler {
     // Validate expression
     new cron.CronTime(expression)
 
-    let job = new cron.CronJob(Object.assign({ cronTime: expression }, options));
+    const job = new cron.CronJob(Object.assign({ cronTime: expression }, options));
     job.start();
-    let id = this.jobId++;
+    const id = this.jobId++;
     this.jobs.set(id, job);
     return id;
   }
 
   static kill() {
-    for (let job of this.jobs.values()) {
+    for (const job of this.jobs.values()) {
       job.stop();
     }
   }
