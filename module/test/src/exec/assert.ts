@@ -19,7 +19,7 @@ export class AssertUtil {
 
   static readFilePosition(err: Error, filename: string) {
     let base = process.cwd();
-    let lines = err.stack!.split('\n').filter(x => !x.includes('/node_modules/') && x.includes(base));
+    let lines = (err.stack || new Error().stack).split('\n').filter(x => !x.includes('/node_modules/') && x.includes(base));
     let best = lines.filter(x => x.includes(filename))[0];
 
     if (!best) {
@@ -27,7 +27,7 @@ export class AssertUtil {
     }
 
     if (!best) {
-      return { file: 'unknown', line: 0 };
+      return { file: filename, line: 1 };
     }
 
     let [fn, path] = best.trim().split(/\s+/g).slice(1);
