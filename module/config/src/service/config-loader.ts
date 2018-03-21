@@ -4,7 +4,7 @@ import * as yaml from 'js-yaml';
 import { EventEmitter } from 'events';
 import * as _ from 'lodash';
 
-let unflatten = flatten.unflatten;
+const unflatten = flatten.unflatten;
 
 type ConfigMap = { [key: string]: string | number | boolean | null | ConfigMap };
 
@@ -33,21 +33,21 @@ export class ConfigLoader {
   }
 
   private static merge(target: ConfigMap, source: ConfigMap, gentle = false) {
-    let targetFlat = flatten(target, { delimiter: '_' }) as any;
-    let sourceFlat = flatten(source, { delimiter: '_' }) as any;
+    const targetFlat = flatten(target, { delimiter: '_' }) as any;
+    const sourceFlat = flatten(source, { delimiter: '_' }) as any;
 
     // Flatten to lower case
-    let keyMap: { [key: string]: string } = {};
-    let lowerFlat: ConfigMap = {};
+    const keyMap: { [key: string]: string } = {};
+    const lowerFlat: ConfigMap = {};
 
-    for (let k of Object.keys(targetFlat)) {
-      let lk = k.toLowerCase();
+    for (const k of Object.keys(targetFlat)) {
+      const lk = k.toLowerCase();
       lowerFlat[lk] = targetFlat[k];
 
       // handle keys, and all substrings
       let end = k.length;
       while (end > 0) {
-        let finalKey = lk.substring(0, end);
+        const finalKey = lk.substring(0, end);
         if (keyMap[finalKey]) {
           break;
         } else {
@@ -57,9 +57,9 @@ export class ConfigLoader {
       }
     }
 
-    for (let k of Object.keys(sourceFlat)) {
-      let lk = k.toLowerCase();
-      let ns = lk.split('_', 2)[0];
+    for (const k of Object.keys(sourceFlat)) {
+      const lk = k.toLowerCase();
+      const ns = lk.split('_', 2)[0];
 
       if (!gentle || ns in target) {
         if (!keyMap[lk]) { keyMap[lk] = k; }
@@ -68,8 +68,8 @@ export class ConfigLoader {
     }
 
     // Return original case
-    let out: ConfigMap = {};
-    for (let k of Object.keys(lowerFlat)) {
+    const out: ConfigMap = {};
+    for (const k of Object.keys(lowerFlat)) {
       out[keyMap[k]] = lowerFlat[k];
     }
     _.merge(target, unflatten(out, { delimiter: '_' }));
@@ -77,7 +77,7 @@ export class ConfigLoader {
 
   private static dropNulls(o: any) {
     if (_.isPlainObject(o)) {
-      for (let k of Object.keys(o)) {
+      for (const k of Object.keys(o)) {
         if (o[k] === this.NULL) {
           delete o[k];
         } else {
@@ -91,7 +91,7 @@ export class ConfigLoader {
   }
 
   static bindTo(obj: any, key: string) {
-    let keys = key.split('.');
+    const keys = key.split('.');
     let sub: any = this.data;
     while (keys.length && sub[keys[0]]) {
       sub = sub[keys.shift()!];
@@ -127,8 +127,8 @@ export class ConfigLoader {
     // Load all configs, exclude env configs
     files = files.concat(bulkReadSync('config/*.yml'));
 
-    for (let file of files) {
-      let ns = file.name.split('/').pop()!.split('.yml')[0];
+    for (const file of files) {
+      const ns = file.name.split('/').pop()!.split('.yml')[0];
       yaml.safeLoadAll(file.data, doc => {
         this.data[ns] = this.data[ns] || {};
         this.merge(this.data, { [ns]: doc });
@@ -136,10 +136,10 @@ export class ConfigLoader {
     }
 
     if (AppEnv.all.length) {
-      let loaded: string[] = [];
-      let envFiles = bulkReadSync(`env/*.yml`, undefined, x => {
-        let tested = x.split('/').pop()!.split('.yml')[0];
-        let found = AppEnv.is(tested)
+      const loaded: string[] = [];
+      const envFiles = bulkReadSync(`env/*.yml`, undefined, x => {
+        const tested = x.split('/').pop()!.split('.yml')[0];
+        const found = AppEnv.is(tested)
         if (found) {
           loaded.push(tested);
         }
@@ -148,7 +148,7 @@ export class ConfigLoader {
 
       console.debug('Found configurations for', loaded);
 
-      for (let file of envFiles) {
+      for (const file of envFiles) {
         yaml.safeLoadAll(file.data, doc => {
           this.merge(this.data, doc);
         });

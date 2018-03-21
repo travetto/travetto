@@ -10,7 +10,7 @@ class TestConfig extends DbConfig {
 
 }
 
-let conf = new TestConfig();
+const conf = new TestConfig();
 
 ConfigLoader.bindTo(conf, 'db.mysql');
 
