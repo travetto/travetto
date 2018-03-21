@@ -19,7 +19,7 @@ export class CompilerClassSource implements ClassSource {
   }
 
   async init() {
-    let files = await bulkFind(Compiler.workingSets, undefined, Compiler.invalidWorkingSetFile);
+    const files = await bulkFind(Compiler.workingSets, undefined, Compiler.invalidWorkingSetFile);
 
     const extra: string[] = [];
 
@@ -27,11 +27,11 @@ export class CompilerClassSource implements ClassSource {
 
     Compiler.on('required-after', requireListen);
 
-    for (let file of files) {
+    for (const file of files) {
       this.processClasses(file, this.computeClasses(file));
     }
 
-    for (let file of extra) {
+    for (const file of extra) {
       if (PendingRegister.has(file)) {
         this.processClasses(file, PendingRegister.get(file)!);
         PendingRegister.delete(file);
@@ -52,7 +52,7 @@ export class CompilerClassSource implements ClassSource {
       return;
     }
     this.classes.set(file, new Map());
-    for (let cls of classes) {
+    for (const cls of classes) {
       this.classes.get(file)!.set(cls.__id, cls);
       this.emit({ type: 'added', curr: cls });
     }
@@ -64,19 +64,19 @@ export class CompilerClassSource implements ClassSource {
 
   protected async watch(file: string) {
     console.debug('Got file', file);
-    let next = new Map(this.computeClasses(file).map(x => [x.__id, x] as [string, Class]));
+    const next = new Map(this.computeClasses(file).map(x => [x.__id, x] as [string, Class]));
     let prev = new Map();
     if (this.classes.has(file)) {
       prev = new Map(this.classes.get(file)!.entries());
     }
 
-    let keys = new Set([...prev.keys(), ...next.keys()]);
+    const keys = new Set([...prev.keys(), ...next.keys()]);
 
     if (!this.classes.has(file)) {
       this.classes.set(file, new Map());
     }
 
-    for (let k of keys) {
+    for (const k of keys) {
       if (!next.has(k)) {
         this.emit({ type: 'removing', prev: prev.get(k)! });
         this.classes.get(file)!.delete(k);
@@ -89,9 +89,9 @@ export class CompilerClassSource implements ClassSource {
 
   private computeClasses(file: string) {
     try {
-      let out = require(file);
+      const out = require(file);
       // Get and clear after computed
-      let classes: Class[] = PendingRegister.get(file)!;
+      const classes: Class[] = PendingRegister.get(file)!;
       PendingRegister.delete(file);
       return classes || [];
     } catch (e) {

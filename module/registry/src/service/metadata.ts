@@ -56,7 +56,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
   }
 
   getOrCreatePending(cls: Class): Partial<C> {
-    let cid = id(cls);
+    const cid = id(cls);
     if (!this.pending.has(cid)) {
       this.pending.set(cid, this.createPending(cls));
       this.pendingMethods.set(cid, new Map());
@@ -75,18 +75,18 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
 
 
   register(cls: Class, pconfig: Partial<C>) {
-    let conf = this.getOrCreatePending(cls);
+    const conf = this.getOrCreatePending(cls);
     _.merge(conf, pconfig);
   }
 
   registerMethod(cls: Class, method: Function, pconfig: Partial<M>) {
-    let conf = this.getOrCreatePendingMethod(cls, method);
+    const conf = this.getOrCreatePendingMethod(cls, method);
     _.merge(conf, pconfig);
   }
 
   onInstall(cls: Class, e: ChangeEvent) {
     if (this.pending.has(cls.__id) || this.pendingMethods.has(cls.__id)) {
-      let result = this.onInstallFinalize(cls);
+      const result = this.onInstallFinalize(cls);
       this.pendingMethods.delete(cls.__id);
       this.pending.delete(cls.__id);
 

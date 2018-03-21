@@ -14,7 +14,7 @@ class $RootRegistry extends Registry {
   }
 
   onReset() {
-    for (let parent of this.parents) {
+    for (const parent of this.parents) {
       parent!.reset()
     }
   }

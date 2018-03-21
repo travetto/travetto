@@ -31,7 +31,10 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       });
     }
     return ts.updateClassDeclaration(node,
-      ts.createNodeArray([ts.createDecorator(ts.createCall(ts.createPropertyAccess(state.imported, ts.createIdentifier('Register')), undefined, [])), ...(node.decorators || [])]),
+      ts.createNodeArray(
+        [ts.createDecorator(
+          ts.createCall(ts.createPropertyAccess(state.imported, ts.createIdentifier('Register')), undefined, [])
+        ), ...(node.decorators || [])]),
       node.modifiers,
       node.name,
       node.typeParameters,
@@ -54,7 +57,7 @@ export const ClassIdTransformer = {
     if (fileRoot.startsWith(`node_modules${SEP}`)) {
       fileRoot = fileRoot.split(`node_modules${SEP}`).pop()!;
       if (fileRoot.startsWith('@')) {
-        let [ns1, ns2, ...rest] = fileRoot.split(SEP);
+        const [ns1, ns2, ...rest] = fileRoot.split(SEP);
         ns = `${ns1}.${ns2}`;
         fileRoot = rest.join(SEP);
       }

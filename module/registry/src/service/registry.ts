@@ -14,7 +14,7 @@ export abstract class Registry implements ClassSource {
     this.parents = parents;
 
     if (this.parents.length) {
-      for (let parent of this.parents) {
+      for (const parent of this.parents) {
         this.listen(parent);
         if (parent instanceof Registry) {
           parent.descendents.push(this);
@@ -38,12 +38,12 @@ export abstract class Registry implements ClassSource {
     try {
       this.resolved = false;
 
-      let waitFor = this.parents.filter(x => !(x instanceof Registry));
+      const waitFor = this.parents.filter(x => !(x instanceof Registry));
       await Promise.all(waitFor.map(x => x.init()));
 
-      let classes = await this.initialInstall();
+      const classes = await this.initialInstall();
       if (classes) {
-        for (let cls of classes) {
+        for (const cls of classes) {
           this.install(cls, { type: 'added', curr: cls });
         }
       }
@@ -71,7 +71,7 @@ export abstract class Registry implements ClassSource {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
-    for (let cls of classes) {
+    for (const cls of classes) {
       this.onUninstall(cls, e);
     }
   }
@@ -80,7 +80,7 @@ export abstract class Registry implements ClassSource {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
-    for (let cls of classes) {
+    for (const cls of classes) {
       this.onInstall(cls, e);
     }
   }
@@ -121,7 +121,7 @@ export abstract class Registry implements ClassSource {
 
   reset() {
     this.onReset();
-    for (let des of this.descendents) {
+    for (const des of this.descendents) {
       des.reset();
     }
   }
