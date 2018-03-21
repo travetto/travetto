@@ -17,25 +17,36 @@ export class AssertUtil {
 
   static asserts: Assertion[] = [];
 
-  static readFilePosition(err: Error) {
-    let base = process.cwd() + '/test/';
+  static readFilePosition(filename?: string) {
+    let err = new Error();
     let sub: string = err.stack!;
-    let lines = sub.split('\n').filter(x => x.includes(base));
+    let best = '';
 
-    let [fn, path] = lines[0].trim().split(/\s+/g).slice(1);
+    if (filename) {
+      let lines = sub.split('\n').filter(x => x.includes(filename));
+      best = lines.pop()!;
+    } else {
+      let base = process.cwd() + '/test/';
+      let lines = sub.split('\n').filter(x => x.includes(base));
+      best = lines[0];
+    }
+
+    let [fn, path] = best.trim().split(/\s+/g).slice(1);
     let [file, lineNo, col] = path.replace(/[()]/g, '').split(':')
 
     file = file.split(process.cwd() + '/')[1];
 
-    return { file, line: parseInt(lineNo, 10) };
+    let res = { file, line: parseInt(lineNo, 10) };
+    console.debug(res);
+    return res;
   }
 
   static start() {
     this.asserts = [];
   }
 
-  static check(text: string, name: string, ...args: any[]) {
-    let { file, line } = this.readFilePosition(new Error());
+  static check(filename: string, text: string, name: string, ...args: any[]) {
+    let { file, line } = this.readFilePosition(filename.replace(/[.][tj]s$/, ''));
 
     let assertion: Assertion = { file, line, text, operator: ASSERT_FN_OPERATOR[name] };
     if (name === 'fail') {

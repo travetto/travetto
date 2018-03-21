@@ -7,6 +7,8 @@ export interface CollectionComplete extends Listener {
 
 export class Collector implements Listener {
 
+  errors: Error[] = [];
+
   allSuites: AllSuitesResult = {
     success: 0,
     fail: 0,

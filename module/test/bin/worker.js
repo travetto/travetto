@@ -37,5 +37,5 @@ agent((done) => {
   Compiler.workingSets = [data.file];
   Compiler.resetFiles();
   const { Runner } = require('../src/exec/runner');
-  new Runner().runWorker(data, done);
+  new Runner().runWorker(data).then(done, done);
 });

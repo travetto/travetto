@@ -29,19 +29,14 @@ export class Runner {
     this.state = minimist(args, RunnerOptions) as any as State;
   }
 
-  async runWorker(data: { file: string }, done: (err?: any) => void) {
+  async runWorker(data: { file: string }) {
     if (!process.send) {
       return;
     }
 
-    try {
-      await TestUtil.executeFile(data.file, {
-        emit: process.send.bind(process)
-      });
-      done();
-    } catch (e) {
-      done(e);
-    }
+    await TestUtil.executeFile(data.file, {
+      emit: process.send.bind(process)
+    });
   }
 
   async run() {
@@ -71,7 +66,7 @@ export class Runner {
 
       let agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
 
-      await agentPool.process(files, async (file, run, agent) => {
+      collector.errors = await agentPool.process(files, async (file, run, agent) => {
         if (agent) {
           for (let l of listeners) {
             agent.listen(l.onEvent);

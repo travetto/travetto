@@ -45,6 +45,7 @@ export class AgentPool {
     await this.init();
 
     let position = 0;
+    let errors: Error[] = [];
 
     while (position < inputs.length) {
       if (this.pendingAgents.size < this.availableSize) {
@@ -52,8 +53,19 @@ export class AgentPool {
         let agent = (await this.getNextAgent())!;
 
         agent.completion = new Promise<Agent>((resolve, reject) => {
-          agent.listenOnce('runComplete', (e: any) => {
-            !e.error ? resolve(agent) : reject(e.error);
+          agent.listenOnce('runComplete', ({ error: e }) => {
+            if (e) {
+              let err: any = new Error();
+              for (let k of Object.keys(e)) {
+                err[k] = e[k];
+              }
+              err.message = e.message;
+              err.stack = e.stack;
+              err.name = e.name;
+              errors.push(err);
+            }
+
+            resolve(agent);
           });
         });
 
@@ -69,6 +81,8 @@ export class AgentPool {
     }
 
     await Promise.all(Array.from(this.pendingAgents).map(x => x.completion));
+
+    return errors;
   }
 
   shutdown() {

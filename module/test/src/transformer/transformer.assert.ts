@@ -43,6 +43,7 @@ function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, name
 
   args = args.filter(x => x !== undefined && x !== null);
   let check = ts.createCall(state.assertCheck, undefined, ts.createNodeArray([
+    ts.createLiteral('__filename'),
     ts.createLiteral(TransformUtil.getPrimaryArgument(node)!.getText()),
     ts.createLiteral(name),
     ...args

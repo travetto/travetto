@@ -134,6 +134,43 @@ export class TestUtil {
     }
   }
 
+  static async stubSuiteFailure(suite: SuiteConfig, e: Error, emitter?: TestEmitter) {
+    if (!emitter) {
+      return;
+    }
+
+    let test = {
+      line: suite.line,
+      lineEnd: suite.lineEnd,
+      suiteName: suite.name,
+      status: 'fail',
+      method: 'all',
+      error: e,
+      output: { error: e.stack },
+      assertions: [{
+        error: e,
+        line: suite.line,
+        message: e.message,
+        file: suite.class.__filename,
+        operator: 'throws',
+        text: '(init)'
+      }],
+      class: suite.class.name,
+      description: '',
+      file: suite.class.__filename
+    } as TestResult;
+
+    emitter.emit({ phase: 'after', type: 'test', test });
+    emitter.emit({
+      phase: 'after', type: 'suite', suite: {
+        success: 0,
+        fail: 1,
+        skip: 0,
+        total: 1
+      } as SuiteResult
+    });
+  }
+
   static async executeSuite(suite: SuiteConfig, emitter?: TestEmitter) {
     let result: SuiteResult = {
       success: 0,
@@ -184,17 +221,7 @@ export class TestUtil {
   }
 
   static async executeFile(file: string, emitter?: TestEmitter) {
-    try {
-      require(`${process.cwd()}/${file}`);
-    } catch (e) {
-      if (emitter) {
-        emitter.emit({
-          phase: 'before', type: 'suite', suite: {} as SuiteConfig
-        });
-      }
-      return;
-    }
-
+    require(`${process.cwd()}/${file}`);
     await TestRegistry.init();
 
     let classes = TestRegistry.getClasses();
@@ -202,14 +229,22 @@ export class TestUtil {
     for (let cls of classes) {
       let suite = TestRegistry.get(cls);
 
-      if (emitter) {
-        emitter.emit({ phase: 'before', type: 'suite', suite });
-      }
+      try {
+        if (emitter) {
+          emitter.emit({ phase: 'before', type: 'suite', suite });
+        }
 
-      let result = await this.executeSuite(suite, emitter);
+        let result = await this.executeSuite(suite, emitter);
 
-      if (emitter) {
-        emitter.emit({ phase: 'after', type: 'suite', suite: result });
+        if (emitter) {
+          emitter.emit({ phase: 'after', type: 'suite', suite: result });
+        }
+      } catch (e) {
+        if (emitter) {
+          this.stubSuiteFailure(suite, e, emitter);
+        } else {
+          throw e;
+        }
       }
     }
   }

@@ -68,5 +68,11 @@ export class TapListener implements CollectionComplete {
 
   onComplete(collector: Collector) {
     this.log(`1..${collector.allSuites.total}`);
+    if (collector.errors.length) {
+      this.log('---\n');
+      for (let err of collector.errors) {
+        this.log(err.toString());
+      }
+    }
   }
 }
