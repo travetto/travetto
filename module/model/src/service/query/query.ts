@@ -1,4 +1,4 @@
-import { ModelQuery, Query, PageableModelQuery, GeoPoint } from '../../model';
+import { ModelQuery, Query, PageableModelQuery } from '../../model';
 import { Class } from '@travetto/registry';
 import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from './types';
 import { SchemaRegistry, SchemaConfig, ViewConfig, FieldConfig } from '@travetto/schema';

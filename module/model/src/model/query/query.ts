@@ -33,7 +33,8 @@ type _QueryMain<T> =
   }
 
 type _Query<T> = _QueryMain<T> & _QueryOptions<T>;
-type _PageableModelQuery<T> = { where?: WhereClause<T> } & _QueryOptions<T>
+type _ModelQuery<T> = { where?: WhereClause<T> }
+type _PageableModelQuery<T> = _ModelQuery<T> & _QueryOptions<T>
 
 export type Query<T> = _Query<RetainFields<T>>;
 export type PageableModelQuery<T> = _PageableModelQuery<RetainFields<T>>;
@@ -41,3 +42,4 @@ export type QueryOptions<T> = _QueryOptions<RetainFields<T>>;
 export type SelectClause<T> = _SelectClause<RetainFields<T>>;
 export type SortClause<T> = _SortClause<RetainFields<T>>;
 export type GroupClause<T> = _GroupClause<RetainFields<T>>;
+export type ModelQuery<T> = _ModelQuery<RetainFields<T>>;
