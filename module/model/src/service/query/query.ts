@@ -4,6 +4,7 @@ import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from './types';
 import { SchemaRegistry, SchemaConfig, ViewConfig, FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import * as _ from 'lodash';
+import { BaseError } from '@travetto/base';
 
 interface State extends ErrorCollector<string> {
   path: string;
@@ -27,6 +28,12 @@ const SELECT = 'select';
 const WHERE = 'where';
 const SORT = 'sort';
 const GROUP_BY = 'groupBy';
+
+class ValidationError extends BaseError {
+  constructor(public errors: any[]) {
+    super('Validation Error');
+  }
+}
 
 @Injectable()
 export class QueryVerifierService {
@@ -247,7 +254,9 @@ export class QueryVerifierService {
     }
 
     if (errors.length) {
-      throw { errors };
+      let ret = new Error('Validation errors');
+      (ret as any).errors = errors;
+      throw new ValidationError(errors);
     }
   }
 }
