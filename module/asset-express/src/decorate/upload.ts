@@ -14,35 +14,35 @@ function readTypeArr(arr?: string[] | string) {
 
 function matchType(types: string[], type: string, invert: boolean = false) {
   if (types.length) {
-    let matches = types.filter(match(type));
+    const matches = types.filter(match(type));
     return invert ? matches.length === 0 : matches.length > 0;
   }
   return false;
 }
 
 export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
-  let conf = new AssetExpressConfig();
+  const conf = new AssetExpressConfig();
   (conf as any).postConstruct(); // Load config manually, bypassing dep-inj
 
   config = Object.assign({}, conf, config);
 
-  let multipart = multiparty({
+  const multipart = multiparty({
     hash: 'sha256',
     maxFilesSize: config.maxSize
   });
 
   const multipartAsync = util.promisify(multipart);
 
-  let allowedTypes = readTypeArr(config.allowedTypes);
-  let excludeTypes = readTypeArr(config.excludeTypes);
+  const allowedTypes = readTypeArr(config.allowedTypes);
+  const excludeTypes = readTypeArr(config.excludeTypes);
 
   return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-    let rh = ControllerRegistry.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
+    const rh = ControllerRegistry.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
     const filt = async function (this: any, req: Request, res: Response) {
       await multipartAsync(req, res);
 
-      for (let f of Object.keys(req.files)) {
-        let contentType = (await AssetUtil.detectFileType(req.files[f].path)).mime;
+      for (const f of Object.keys(req.files)) {
+        const contentType = (await AssetUtil.detectFileType(req.files[f].path)).mime;
 
         if (matchType(allowedTypes, contentType, true) || matchType(excludeTypes, contentType)) {
           throw { message: `Content type not allowed: ${contentType}`, status: 403 };
