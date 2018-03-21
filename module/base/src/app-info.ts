@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-let pkg = JSON.parse(fs.readFileSync(process.cwd() + '/package.json').toString());
+const pkg = JSON.parse(fs.readFileSync(process.cwd() + '/package.json').toString());
 
 export const AppInfo = {
   VERSION: pkg.version,

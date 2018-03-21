@@ -16,8 +16,8 @@ if (!AppEnv.prod) {
   chain.filter.attach(function (error: Error, frames: any[]) {
     // Filter out traces related to this file
     const rewrite = frames.filter(function (callSite) {
-      let name: string = callSite.getFileName() || '';
-      for (let f of FILTERS) {
+      const name: string = callSite.getFileName() || '';
+      for (const f of FILTERS) {
         if (name.includes(f)) {
           return false;
         }

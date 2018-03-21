@@ -24,7 +24,7 @@ export class Shutdown {
 
     this.shutdownCode = exitCode;
 
-    let listeners = this.listeners.slice(0);
+    const listeners = this.listeners.slice(0);
     this.listeners = [];
 
     try {
@@ -37,14 +37,14 @@ export class Shutdown {
         console.log('');
       }
 
-      let promises: Promise<any>[] = [];
+      const promises: Promise<any>[] = [];
 
-      for (let listener of listeners) {
-        let { name, handler } = listener;
+      for (const listener of listeners) {
+        const { name, handler } = listener;
 
         try {
           console.debug(`Shutting down ${name}`);
-          let res = handler();
+          const res = handler();
           if (res && res.then) {
             promises.push(res as Promise<any>);
             res

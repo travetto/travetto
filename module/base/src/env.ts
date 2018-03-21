@@ -1,4 +1,4 @@
-let e = process.env;
+const e = process.env;
 
 const envs = [
   'application', ...(e.ENV || e.env || e.NODE_ENV || 'dev')

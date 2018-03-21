@@ -29,7 +29,7 @@ function findHandler(base?: string, exclude?: (name: string) => boolean) {
 }
 
 export function bulkFindSync(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
-  let handler = findHandler(base, exclude);
+  const handler = findHandler(base, exclude);
   if (!Array.isArray(globs)) {
     globs = [globs];
   }
@@ -39,12 +39,12 @@ export function bulkFindSync(globs: string | string[], base?: string, exclude?: 
 }
 
 export async function bulkFind(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
-  let handler = findHandler(base, exclude);
+  const handler = findHandler(base, exclude);
   if (!Array.isArray(globs)) {
     globs = [globs];
   }
-  let promises = globs.map(pattern => globAsync(pattern, handler.config).then(handler.match));
-  let all = await Promise.all(promises);
+  const promises = globs.map(pattern => globAsync(pattern, handler.config).then(handler.match));
+  const all = await Promise.all(promises);
   return all.reduce((acc, v) => acc.concat(v), []);
 }
 
@@ -55,12 +55,12 @@ export function bulkRequire(globs: string | string[], base?: string, exclude?: (
 }
 
 export async function bulkRead(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
-  let files = await bulkFind(globs, base, exclude);
-  let promises = files.map((f: string) => fsReadFileAsync(f).then(x => ({ name: f, data: x.toString() })));
+  const files = await bulkFind(globs, base, exclude);
+  const promises = files.map((f: string) => fsReadFileAsync(f).then(x => ({ name: f, data: x.toString() })));
   return await Promise.all(promises);
 }
 
 export function bulkReadSync(pattern: string, base?: string, exclude?: (name: string) => boolean) {
-  let files = bulkFindSync(pattern, base, exclude);
+  const files = bulkFindSync(pattern, base, exclude);
   return files.map(x => ({ name: x, data: fs.readFileSync(x).toString() }));
 }
