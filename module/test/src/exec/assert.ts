@@ -14,7 +14,7 @@ const ASSERT_FN_OPERATOR: { [key: string]: string } = {
 }
 
 function clean(val: any) {
-  if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean' || _.isPlainObject(val)) {
+  if (val === null || val === undefined || typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean' || _.isPlainObject(val)) {
     return val;
   } else {
     return `${val}`;
