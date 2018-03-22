@@ -14,14 +14,14 @@ export interface ExecResult {
 }
 
 export function enhanceProcess(p: child_process.ChildProcess, options: ExecOptions) {
-  let timeout = options.timeout || 15000;
+  const timeout = options.timeout || 15000;
 
-  let prom = new Promise<ExecResult>((resolve, reject) => {
+  const prom = new Promise<ExecResult>((resolve, reject) => {
     let stdout = '';
     let stderr = '';
     let timer: any;
     let done = false;
-    let finish = async function (result: ExecResult) {
+    const finish = async function (result: ExecResult) {
       if (done) {
         return;
       }
@@ -73,18 +73,18 @@ function getArgs(cmd: string) {
 
 
 export function spawn(cmdStr: string, options: child_process.SpawnOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
-  let { cmd, args } = getArgs(cmdStr);
-  let p = child_process.spawn(cmd, args, options);
+  const { cmd, args } = getArgs(cmdStr);
+  const p = child_process.spawn(cmd, args, options);
   return [p, enhanceProcess(p, options)];
 }
 
 export function fork(cmdStr: string, options: child_process.ForkOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
-  let { cmd, args } = getArgs(cmdStr);
-  let p = child_process.fork(cmd, args, options);
+  const { cmd, args } = getArgs(cmdStr);
+  const p = child_process.fork(cmd, args, options);
   return [p, enhanceProcess(p, options)];
 }
 
 export function exec(cmd: string, options: child_process.ExecOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
-  let p = child_process.exec(cmd, options);
+  const p = child_process.exec(cmd, options);
   return [p, enhanceProcess(p, options)];
 }

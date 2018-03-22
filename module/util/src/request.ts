@@ -7,20 +7,22 @@ export function parseQuery(query: string) {
   }
   return query.split('&')
     .map(x => {
-      let [l, r] = x.split('=');
+      const [l, r] = x.split('=');
       if (l) {
-        let out = [decodeURIComponent(l)];
+        const out = [decodeURIComponent(l)];
         if (r) {
           out.push(decodeURIComponent(r));
         }
-        return out;
+        return out as [string, string];
+      } else {
+        return undefined as any as [string, string];
       }
     })
     .filter(x => !!x)
-    .reduce((acc: { [key: string]: string }, pair: [string, string]) => {
+    .reduce((acc, pair) => {
       acc[pair[0]] = pair[1];
       return acc;
-    }, {});
+    }, {} as { [key: string]: string });
 }
 
 export function formatQuery(query: any) {
@@ -30,7 +32,7 @@ export function formatQuery(query: any) {
   return Object.keys(query)
     .map(x => {
       let res = encodeURIComponent(x);
-      let val = (query as any)[x];
+      const val = (query as any)[x];
       if (val !== undefined && val !== null) {
         res = `${res}=${val}`;
       }
@@ -59,7 +61,7 @@ export function parseUrl(url: string) {
   [hostname, port] = hostRaw.split(':', 2);
   port = port || (protocol === 'http:' ? '80' : '443');
 
-  let res: { [key: string]: any } = {
+  const res: { [key: string]: any } = {
     hostname,
     protocol,
     port,
@@ -84,15 +86,15 @@ export function parseUrl(url: string) {
 export async function request(opts: http.RequestOptions & { url: string }, data?: any): Promise<string>;
 export async function request(opts: http.RequestOptions & { url: string, pipeTo: any }, data?: any): Promise<http.IncomingMessage>;
 export async function request(opts: http.RequestOptions & { url: string, pipeTo?: any }, data?: any): Promise<string | http.IncomingMessage> {
-  let { url } = opts;
+  const { url } = opts;
   delete opts.url;
 
   opts = Object.assign({ method: 'GET', headers: {} }, opts, parseUrl(url));
 
-  let client = ((opts.protocol === 'https:' ? https : http) as any);
+  const client = ((opts.protocol === 'https:' ? https : http) as any);
   delete opts.protocol;
 
-  let hasBody = (opts.method === 'POST' || opts.method === 'PUT');
+  const hasBody = (opts.method === 'POST' || opts.method === 'PUT');
   let bodyStr: string;
 
   if (data) {
@@ -109,7 +111,7 @@ export async function request(opts: http.RequestOptions & { url: string, pipeTo?
   }
 
   return await new Promise<string | http.IncomingMessage>((resolve, reject) => {
-    let req = client.request(opts, (msg: http.IncomingMessage) => {
+    const req = client.request(opts, (msg: http.IncomingMessage) => {
       let body = '';
       if (!opts.pipeTo) {
         msg.setEncoding('utf8');
@@ -150,13 +152,13 @@ export async function requestJSON<T, U>(opts: http.RequestOptions & { url: strin
   if (!opts.headers) {
     opts.headers = {};
   }
-  for (let k of ['Content-Type', 'Accept']) {
+  for (const k of ['Content-Type', 'Accept']) {
     if (!opts.headers[k]) {
       opts.headers[k] = 'application/json';
     }
   }
   try {
-    let res = await request(opts, data && JSON.stringify(data));
+    const res = await request(opts, data && JSON.stringify(data));
     return JSON.parse(res) as T;
   } catch (e) {
     if (typeof e === 'string') {
