@@ -36,8 +36,8 @@ export class StrategyUtil {
       }
     }
 
-    let salt = await this.generateSalt(saltlen);
-    let hash = await this.generateHash(password, salt);
+    const salt = await this.generateSalt(saltlen);
+    const hash = await this.generateHash(password, salt);
 
     return { salt, hash };
   }

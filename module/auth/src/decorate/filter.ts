@@ -4,11 +4,11 @@ import * as passport from 'passport';
 import * as util from 'util';
 
 export function Authenticate(provider: string = 'app', failTo?: string) {
-  let passportOptions = { failureRedirect: failTo };
-  let handler = passport.authenticate(provider, passportOptions);
-  let fn = function (req: Request, res: Response, next?: NextFunction): Promise<any> {
+  const passportOptions = { failureRedirect: failTo };
+  const handler = passport.authenticate(provider, passportOptions);
+  const fn = function (req: Request, res: Response, next?: NextFunction): Promise<any> {
     req.passportOptions = passportOptions;
-    return util.promisify(handler)(req, res, undefined!);
+    return util.promisify(handler)(req, res, undefined);
   };
   return ControllerRegistry.filterAdder(fn);
 }
@@ -17,13 +17,13 @@ export async function requireAuth(config: { key?: string, include: string[], exc
   if (req.isUnauthenticated()) {
     throw new AppError('User is required', 401);
   }
-  let { key, include, exclude } = config;
+  const { key, include, exclude } = config;
 
   if (key) {
     let groupSet = req.principal.groupSet;
     if (!groupSet) {
-      let prop = (req.principal as any)[key] as string | string[];
-      let groups = Array.isArray(prop) ? prop : [prop];
+      const prop = (req.principal as any)[key] as string | string[];
+      const groups = Array.isArray(prop) ? prop : [prop];
       groupSet = req.principal.groupSet = new Set(groups);
     }
 

@@ -28,20 +28,20 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
 
 
   async getUser(username: string) {
-    let query: any = {
+    const query: any = {
       [this.config.usernameField]: username
     };
-    let user = await this.modelService.getByQuery(this.modelClass, query);
+    const user = await this.modelService.getByQuery(this.modelClass, query);
     return user;
   }
 
   async doLogin(username: string, password: string) {
-    let query: any = {
+    const query: any = {
       [this.config.usernameField]: username
     };
 
-    let user = await this.getUser(username);
-    let hash = await StrategyUtil.generateHash(password, (user as any)[this.config.saltField]);
+    const user = await this.getUser(username);
+    const hash = await StrategyUtil.generateHash(password, (user as any)[this.config.saltField]);
     if (hash !== (user as any)[this.config.hashField]) {
       throw new AppError('Invalid password');
     } else {
@@ -50,15 +50,15 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
   }
 
   async register(user: T, password: string) {
-    let query: any = {
+    const query: any = {
       [this.config.usernameField]: (user as any)[this.config.usernameField]
     };
 
-    let existingUsers = await this.modelService.getAllByQuery(this.modelClass, query);
+    const existingUsers = await this.modelService.getAllByQuery(this.modelClass, query);
     if (existingUsers.length) {
       throw new AppError('That email is already taken.');
     } else {
-      let fields = await StrategyUtil.generatePassword(password);
+      const fields = await StrategyUtil.generatePassword(password);
       Object.assign(user as any, {
         [this.config.hashField]: fields.hash,
         [this.config.saltField]: fields.salt
@@ -66,7 +66,7 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
 
       delete (user as any)[this.config.passwordField];
 
-      let res: T = await this.modelService.save(this.modelClass, user);
+      const res: T = await this.modelService.save(this.modelClass, user);
       try {
         this.context.get().user = user;
       } catch (e) {
@@ -77,21 +77,21 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
   }
 
   async changePassword(username: string, password: string, oldPassword?: string) {
-    let user = await this.getUser(username);
+    const user = await this.getUser(username);
     if (oldPassword !== undefined) {
       if (oldPassword === (user as any)[this.config.resetTokenField]) {
         if (moment((user as any)[this.config.resetExpiresField]).isBefore(new Date())) {
           throw new AppError('Reset token has expired');
         }
       } else {
-        let pw = await StrategyUtil.generateHash(oldPassword, (user as any)[this.config.saltField]);
+        const pw = await StrategyUtil.generateHash(oldPassword, (user as any)[this.config.saltField]);
         if (pw !== (user as any)[this.config.hashField]) {
           throw new AppError('Old password is required to change');
         }
       }
     }
 
-    let fields = await StrategyUtil.generatePassword(password);
+    const fields = await StrategyUtil.generatePassword(password);
 
     Object.assign(user as any, {
       [this.config.hashField]: fields.hash,
@@ -102,9 +102,9 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
   }
 
   async generateResetToken(username: string) {
-    let user = await this.getUser(username);
-    let salt = await StrategyUtil.generateSalt();
-    let password = await StrategyUtil.generateHash('' + (new Date().getTime()), salt, 25000, 32);
+    const user = await this.getUser(username);
+    const salt = await StrategyUtil.generateSalt();
+    const password = await StrategyUtil.generateHash('' + (new Date().getTime()), salt, 25000, 32);
 
     Object.assign(user as any, {
       [this.config.resetTokenField]: password,

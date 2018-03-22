@@ -29,7 +29,7 @@ export abstract class BaseStrategy<U, T extends Options> extends Strategy {
 
   async login(email: string, password: string): Promise<U> {
     try {
-      let user = await this.doLogin(email, password);
+      const user = await this.doLogin(email, password);
       this.context.get().user = user;
       return user;
     } catch (err) {
@@ -46,26 +46,26 @@ export abstract class BaseStrategy<U, T extends Options> extends Strategy {
 
   async deserialize(username: string, done: Callback<U>) {
     try {
-      let u = await this.getUser(username);
-      done(undefined, u);
-    } catch (e) {
-      done(e);
+      const user = await this.getUser(username);
+      done(undefined, user);
+    } catch (err) {
+      done(err);
     }
   }
 
   async filterAuth(req: Request, email: string, password: string, done: Callback<U>) {
     try {
-      let res = await this.login(email, password);
+      const res = await this.login(email, password);
       if (req.passportOptions.successRedirect) {
         this.success(res, undefined);
       } else {
         done(null, res);
       }
-    } catch (e) {
+    } catch (err) {
       if (req.passportOptions.failureRedirect) {
-        this.fail(e);
+        this.fail(err);
       } else {
-        done(e, undefined);
+        done(err, undefined);
       }
     }
   }
