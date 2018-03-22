@@ -1,30 +1,30 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "dependencies": {
-    "@travetto/asset": "0.x.x",
-    "@travetto/express": "0.x.x",
-    "@types/express-fileupload": "^0.1.1",
-    "@types/multiparty": "0.0.31",
-    "connect-multiparty": "^2.1.0",
-    "express-fileupload": "0.4.0",
-    "mime-match": "^1.0.2",
+    "@travetto/asset": "0.x.x", 
+    "@travetto/express": "0.x.x", 
+    "@types/express-fileupload": "^0.1.1", 
+    "@types/multiparty": "0.0.31", 
+    "connect-multiparty": "^2.1.0", 
+    "express-fileupload": "0.4.0", 
+    "mime-match": "^1.0.2", 
     "multiparty": "^4.1.3"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@travetto/asset-express",
+  }, 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@travetto/asset-express", 
   "repository": {
     "url": "https://github.com/travetto/asset-express.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.4"
+  }, 
+  "version": "0.0.5"
 }
