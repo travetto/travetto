@@ -11,20 +11,20 @@ const setTimeoutAsync = util.promisify(setTimeout);
 @Injectable({ target: AssetSource })
 export class MongoSource extends AssetSource {
 
-  private client!: Grid.Grid;
-  private mongoClient!: mongo.Db;
+  private client: Grid.Grid;
+  private mongoClient: mongo.MongoClient;
 
   @Inject()
   private config!: MongoAssetConfig;
 
   async postConstruct() {
     this.mongoClient = await mongo.MongoClient.connect(this.config.url);
-    this.client = await Grid(this.mongoClient, mongo);
+    this.client = await Grid(this.mongoClient.db(), mongo);
   }
 
   async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
-    let conf = Object.assign({ mode: 'w' }, file);
-    let writeStream = this.client.createWriteStream(conf);
+    const conf = Object.assign({ mode: 'w' }, file);
+    const writeStream = this.client.createWriteStream(conf);
     writeStream.options.content_type = conf.contentType;
     stream.pipe(writeStream);
 
@@ -48,7 +48,7 @@ export class MongoSource extends AssetSource {
   }
 
   async update(file: Asset): Promise<Asset> {
-    let update = await this.client.files.findOneAndUpdate({ _id: new mongo.ObjectID(file._id) }, {
+    const update = await this.client.files.findOneAndUpdate({ _id: new mongo.ObjectID(file._id) }, {
       $addToSet: { 'metadata.tags': { $each: file.metadata.tags } }
     }, {
         returnOriginal: false
@@ -61,27 +61,27 @@ export class MongoSource extends AssetSource {
   }
 
   async info(filename: string, filter?: Partial<Asset>): Promise<Asset> {
-    let query = { filename };
+    const query = { filename };
 
     if (!!filter) {
       Object.assign(query, filter);
     }
 
-    let files = await this.client.files.find(query).toArray();
+    const files = await this.client.files.find(query).toArray();
 
     if (!files || !files.length) {
       throw new Error('Unable to find file');
     }
 
-    let f = files[0];
-    let out = new Asset(f);
+    const f = files[0];
+    const out: Asset = new Asset(f);
     // Take out of mongo
-    out._id = f._id.toHexString();
+    out._id = (f as any as { _id: mongo.ObjectId })._id.toHexString();
     return out;
   }
 
   async find(filter: Asset): Promise<Asset[]> {
-    let files = await this.client.files.find(filter).toArray();
+    const files = await this.client.files.find(filter).toArray();
 
     if (!files || !files.length) {
       throw new Error('Unable to find file');

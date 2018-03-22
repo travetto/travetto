@@ -32,16 +32,19 @@ class TestAssetService {
 
   @BeforeEach()
   async resetDb() {
-    let service = await DependencyRegistry.getInstance(AssetService);
-    let db = (service as any).source.mongoClient as mongo.Db;
-    await db.dropDatabase();
+    const service = await DependencyRegistry.getInstance(AssetService);
+    const client = (service as any).source.mongoClient as mongo.MongoClient;
+
+    await client.db().dropDatabase();
   }
 
   @Test('downloads an file from a url')
   async download() {
-    let service = await DependencyRegistry.getInstance(AssetService);
+    const service = await DependencyRegistry.getInstance(AssetService);
+    assert(service);
+    assert((service as any).source);
 
-    let filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
+    const filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
     assert(filePath !== undefined);
     assert(filePath.split('.').pop() === 'png');
 
