@@ -23,7 +23,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   }
 
   getParent(cls: Class): Class | null {
-    let parent = Object.getPrototypeOf(cls) as Class;
+    const parent = Object.getPrototypeOf(cls) as Class;
     return parent.name && (parent as any) !== Object ? parent : null;
   }
 
@@ -31,7 +31,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
     if (cls.__id) {
-      let conf = this.getOrCreatePending(cls);
+      const conf = this.getOrCreatePending(cls);
       return conf.views![view].schema;
     } else {
       return;
@@ -45,7 +45,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   getOrCreatePendingViewConfig<T>(target: Class<T>, view?: string) {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
-    let conf = this.getOrCreatePending(target);
+    const conf = this.getOrCreatePending(target);
 
     let viewConf = conf.views![view];
     if (!viewConf) {
@@ -60,7 +60,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   registerPendingFieldFacet(target: Class, prop: string, config: any, view?: string) {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
-    let defViewConf = this.getOrCreatePendingViewConfig(target);
+    const defViewConf = this.getOrCreatePendingViewConfig(target);
 
     if (!defViewConf.schema[prop]) {
       defViewConf.fields.push(prop);
@@ -68,7 +68,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     }
 
     if (view !== $SchemaRegistry.DEFAULT_VIEW) {
-      let viewConf = this.getOrCreatePendingViewConfig(target, view);
+      const viewConf = this.getOrCreatePendingViewConfig(target, view);
       if (!viewConf.schema[prop]) {
         viewConf.schema[prop] = defViewConf.schema[prop];
         viewConf.fields.push(prop);
@@ -101,8 +101,8 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   }
 
   mergeConfigs(dest: ClassConfig, src: ClassConfig) {
-    for (let v of Object.keys(src.views)) {
-      let view = src.views[v];
+    for (const v of Object.keys(src.views)) {
+      const view = src.views[v];
       if (v in dest.views) {
         dest.views[v] = {
           schema: Object.assign({}, dest.views[v].schema, view.schema),
@@ -123,16 +123,16 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     let config: ClassConfig = this.createPending(cls) as ClassConfig;
 
     // Merge parent
-    let parent = this.getParent(cls) as Class;
+    const parent = this.getParent(cls) as Class;
     if (parent) {
-      let parentConfig = this.get(parent);
+      const parentConfig = this.get(parent);
       if (parentConfig) {
         config = this.mergeConfigs(config, parentConfig);
       }
     }
 
     // Merge pending
-    let pending = this.getOrCreatePending(cls);
+    const pending = this.getOrCreatePending(cls);
     if (pending) {
       config = this.mergeConfigs(config, pending as ClassConfig);
     }

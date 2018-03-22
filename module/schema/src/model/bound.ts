@@ -3,7 +3,7 @@ import { SchemaRegistry } from '../service';
 import { Class } from '@travetto/registry';
 
 type DeepPartial<T> = {
-  [p in keyof T]?: DeepPartial<T[p]>
+  [P in keyof T]?: DeepPartial<T[P]>
 }
 
 export class SchemaBound {

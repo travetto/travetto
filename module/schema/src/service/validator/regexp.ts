@@ -9,6 +9,6 @@ export const CommonRegExp = {
 }
 
 // Rebind regexes
-for (let k of Object.keys(CommonRegExp)) {
+for (const k of Object.keys(CommonRegExp)) {
   Messages.set((CommonRegExp as any)[k], Messages.get(k)!);
 }

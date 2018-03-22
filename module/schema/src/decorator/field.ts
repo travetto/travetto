@@ -24,7 +24,7 @@ export function Field(type: ClassList, config?: { [key: string]: any }) {
 export const Alias = (...aliases: string[]) => prop({ aliases });
 export const Required = (message?: string) => prop({ required: { message } });
 export const Enum = (vals: string[] | any, message?: string) => {
-  let values = enumKeys(vals);
+  const values = enumKeys(vals);
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
   return prop({ enum: { values, message } });
 };
@@ -40,7 +40,7 @@ export const Url = (message?: string) => Match(CommonRegExp.url, message);
 
 export function View(...names: string[]) {
   return (f: any, p: string) => {
-    for (let name of names) {
+    for (const name of names) {
       SchemaRegistry.registerPendingFieldFacet(f.constructor, p, {}, name);
     }
   };
@@ -48,5 +48,5 @@ export function View(...names: string[]) {
 
 // For Auto schemas
 export function Ignore(): PropertyDecorator {
-  return (target: any, property: string) => { }
+  return (target: any, property: string | symbol) => { }
 }
