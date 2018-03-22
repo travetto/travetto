@@ -50,9 +50,9 @@ class AssetTest {
 
   @Test('downloads an file from a url')
   async download() {
-    let service = await DependencyRegistry.getInstance(AssetService);
+    const service = await DependencyRegistry.getInstance(AssetService);
 
-    let filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
+    const filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
     assert(filePath !== undefined);
     assert(filePath.split('.').pop() === 'png');
 
@@ -71,25 +71,25 @@ class AssetTest {
 
   @Test('Test caching')
   async cache() {
-    let service = await DependencyRegistry.getInstance(AssetService);
-    let imageService = await DependencyRegistry.getInstance(ImageService);
+    const service = await DependencyRegistry.getInstance(AssetService);
+    const imageService = await DependencyRegistry.getInstance(ImageService);
 
-    let filePath = await AssetUtil.downloadUrl('https://image.freepik.com/free-icon/apple-logo_318-40184.jpg');
+    const filePath = await AssetUtil.downloadUrl('https://image.freepik.com/free-icon/apple-logo_318-40184.jpg');
     assert(filePath !== undefined);
     assert(filePath.split('.').pop() === 'jpeg');
     let file = await AssetUtil.localFileToAsset(filePath);
     file = await service.save(file, false, false);
 
-    let asset = await service.get(file.filename);
+    const asset = await service.get(file.filename);
     assert.ok(asset);
 
     let start = Date.now();
     let resized = await imageService.getImage(file.filename, { w: 10, h: 10 });
-    let diff = Date.now() - start;
+    const diff = Date.now() - start;
 
     start = Date.now();
     resized = await imageService.getImage(file.filename, { w: 10, h: 10 });
-    let diff2 = Date.now() - start;
+    const diff2 = Date.now() - start;
 
     assert(diff2 < diff);
   }

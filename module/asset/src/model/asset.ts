@@ -31,7 +31,7 @@ export class Asset {
 
   constructor(conf?: Partial<Asset>) {
     if (conf) {
-      for (let k of Asset.fields) {
+      for (const k of Asset.fields) {
         if ((conf as any)[k]) {
           if (k === 'metadata') {
             (this as any)[k] = { ... (conf as any)[k] };
@@ -44,7 +44,7 @@ export class Asset {
   }
 
   async read() {
-    let res = (await fsReadFileAsync(this.path)).toString();
+    const res = (await fsReadFileAsync(this.path)).toString();
     await fsUnlinkAsync(this.path);
     return res;
   }

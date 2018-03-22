@@ -14,31 +14,31 @@ const fsRenameAsync = util.promisify(fs.rename);
 const fsReadyAync = util.promisify(fs.read);
 const fsOpenAsync = util.promisify(fs.open);
 
-let tmpDir = path.resolve(osTmpdir());
+const tmpDir = path.resolve(osTmpdir());
 
 
 export class AssetUtil {
 
   static generateTempFile(ext: string): string {
-    let now = new Date();
-    let name = `image-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${process.pid}-${(Math.random() * 100000000 + 1).toString(36)}.${ext}`;
+    const now = new Date();
+    const name = `image-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${process.pid}-${(Math.random() * 100000000 + 1).toString(36)}.${ext}`;
     return path.join(tmpDir, name);
   }
 
   static async localFileToAsset(pth: string, prefix?: string, tags?: string[]) {
-    let hash = crypto.createHash('sha256');
+    const hash = crypto.createHash('sha256');
     hash.setEncoding('hex');
 
-    let str = fs.createReadStream(pth);
+    const str = fs.createReadStream(pth);
     str.pipe(hash);
     await util.promisify(str.on).call(str, 'end');
 
-    let size = (await fsStatAsync(pth)).size;
+    const size = (await fsStatAsync(pth)).size;
 
-    let upload = this.fileToAsset({
+    const upload = this.fileToAsset({
       name: pth,
       hash: hash.read(),
-      size: size,
+      size,
       path: pth,
     }, prefix);
 
@@ -50,19 +50,19 @@ export class AssetUtil {
   }
 
   static fileToAsset(upload: AssetFile, prefix?: string): Asset {
-    let name = upload.name;
+    const name = upload.name;
     let type = upload.type as string;
     if (!type || type === 'application/octet-stream') {
       type = mime.getType(name) || type;
     }
 
-    let uploadFile = new Asset({
+    const uploadFile = new Asset({
       filename: name,
       length: upload.size,
       contentType: type,
       path: upload.path,
       metadata: {
-        name: name,
+        name,
         title: name.replace(/-_/g, ' '),
         hash: upload.hash,
         createdDate: new Date()
@@ -84,26 +84,26 @@ export class AssetUtil {
   }
 
   static async readChunk(filePath: string, bytes: number) {
-    let fd = await fsOpenAsync(filePath, 'r');
-    let buffer = new Buffer(bytes);
-    let num = await fsReadyAync(fd, buffer, 0, bytes, 0);
+    const fd = await fsOpenAsync(filePath, 'r');
+    const buffer = new Buffer(bytes);
+    const num = await fsReadyAync(fd, buffer, 0, bytes, 0);
     return buffer;
   }
 
   static async detectFileType(filePath: string) {
-    let buffer = await this.readChunk(filePath, 262);
+    const buffer = await this.readChunk(filePath, 262);
     return fileType(buffer) as { ext: string, mime: string };
   }
 
   static async downloadUrl(url: string) {
     let filePath = this.generateTempFile(url.split('/').pop() as string);
-    let file = fs.createWriteStream(filePath);
-    let filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
-    let res = await request({ url, pipeTo: file });
+    const file = fs.createWriteStream(filePath);
+    const filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
+    const res = await request({ url, pipeTo: file });
     let responseExt = mime.getExtension((res.headers['content-type'] as string) || '');
 
     if (!responseExt) {
-      let detectedType = await this.detectFileType(filePath);
+      const detectedType = await this.detectFileType(filePath);
       if (detectedType) {
         responseExt = detectedType.ext;
       }

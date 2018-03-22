@@ -56,7 +56,7 @@ export class AssetService {
   }
 
   async get(filename: string, filter?: Asset): Promise<Asset> {
-    let info = await this.source.info(filename, filter);
+    const info = await this.source.info(filename, filter);
     if (info.metadata.title) {
       info.filename = info.metadata.title;
     }
