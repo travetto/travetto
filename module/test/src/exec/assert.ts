@@ -13,6 +13,14 @@ const ASSERT_FN_OPERATOR: { [key: string]: string } = {
   lessThan: '<'
 }
 
+function clean(val: any) {
+  if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean' || _.isPlainObject(val)) {
+    return val;
+  } else {
+    return `${val}`;
+  }
+}
+
 export class AssertUtil {
 
   static asserts: Assertion[] = [];
@@ -87,6 +95,15 @@ export class AssertUtil {
         default:
           (assert as any)[name].apply(null, args);
       }
+
+      if (assertion.actual) {
+        assertion.actual = clean(assertion.actual);
+      }
+
+      if (assertion.expected) {
+        assertion.expected = clean(assertion.expected);
+      }
+
       // Pushing on not error
       this.asserts.push(assertion);
     } catch (e) {
@@ -98,7 +115,7 @@ export class AssertUtil {
               `should be ${assertion.operator}`;
             assertion.message = `${assertion.actual} ${op} ${assertion.expected}`;
           } else {
-            assertion.message = `should be ${assertion.expected}`;
+            assertion.message = `should be ${clean(assertion.expected)}`;
           }
         }
         assertion.error = e;
