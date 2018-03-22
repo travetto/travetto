@@ -45,7 +45,7 @@ class TestSuite {
 
   @Test()
   async basic() {
-    let test = new CachingService();
+    const test = new CachingService();
 
     let start = Date.now();
     let res = await test.youngAndComplex(10);
@@ -62,7 +62,7 @@ class TestSuite {
 
   @Test()
   async age() {
-    let test = new CachingService();
+    const test = new CachingService();
 
     let start = Date.now();
     let res = await test.youngAndComplex(10);
@@ -81,14 +81,14 @@ class TestSuite {
 
   @Test()
   async size() {
-    let test = new CachingService();
+    const test = new CachingService();
 
 
-    for (let y of [1, 2]) {
-      for (let x of [1, 2, 3, 4, 5, 6]) {
-        let start = Date.now();
-        let res = await test.smallAndComplex(x);
-        let diff = Date.now() - start;
+    for (const y of [1, 2]) {
+      for (const x of [1, 2, 3, 4, 5, 6]) {
+        const start = Date.now();
+        const res = await test.smallAndComplex(x);
+        const diff = Date.now() - start;
         assert(diff > 100);
         assert(res === x * 2);
       }
@@ -97,16 +97,16 @@ class TestSuite {
 
   @Test()
   async complex() {
-    let test = new CachingService();
+    const test = new CachingService();
 
-    let val = test.complexInput({ a: 5, b: 20 }, 20);
-    let val2 = test.complexInput({ a: 5, b: 20 }, 20);
-    let val3 = test.complexInput({ b: 5, a: 20 }, 20);
+    const val = test.complexInput({ a: 5, b: 20 }, 20);
+    const val2 = test.complexInput({ a: 5, b: 20 }, 20);
+    const val3 = test.complexInput({ b: 5, a: 20 }, 20);
     assert(val === val2);
     assert(val !== val3);
 
-    let val4 = test.complexInputWithCustomKey({ a: 5, b: 20 }, 20);
-    let val5 = test.complexInputWithCustomKey({ b: 5, a: 20 }, 30);
+    const val4 = test.complexInputWithCustomKey({ a: 5, b: 20 }, 20);
+    const val5 = test.complexInputWithCustomKey({ b: 5, a: 20 }, 30);
     assert(val4 === val5);
   }
 }

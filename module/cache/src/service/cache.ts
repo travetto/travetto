@@ -12,20 +12,20 @@ export class CacheManager {
     if (typeof config === 'string') {
       config = { name: config };
     }
-    let name = config.name;
+    const name = config.name;
     if (!this.caches.has(name)) {
       config = Object.assign({},
         this.defaultConfig,
         (config as any) || {}
       ) as LRU.Options<string, T> & { name: string };
-      let cache = LRU<string, T>(config);
+      const cache = LRU<string, T>(config);
       this.caches.set(name, cache);
     }
     return this.caches.get(name)!;
   }
 
   static cleanup() {
-    for (let k of this.caches.keys()) {
+    for (const k of this.caches.keys()) {
       this.caches.get(k)!.reset();
     }
   }
