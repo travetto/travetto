@@ -9,8 +9,13 @@
     "forin": true,
     "indent": [
       true,
-      "spaces"
+      "spaces",
+      2
     ],
+    "arrow-return-shorthand": true,
+    "import-spacing": true,
+    "new-parens": true,
+    "prefer-template": true,
     "label-position": true,
     "max-line-length": [
       true,
@@ -56,7 +61,13 @@
     "no-exec-script": true,
     "no-string-throw": true,
     "no-shadowed-variable": true,
+    "no-irregular-whitespace": true,
+    "no-invalid-this": true,
+    "no-consecutive-blank-lines": true,
+    "prefer-object-spread": true,
+    "no-invalid-template-strings": true,
     "no-single-line-block-comment": true,
+    "typeof-compare": true,
     "no-sparse-arrays": true,
     "no-stateless-class": false,
     "no-reserved-keywords": true,
