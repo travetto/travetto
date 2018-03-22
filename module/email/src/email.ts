@@ -110,9 +110,9 @@ export class EmailService {
     const arr = Array.isArray(contexts) ? contexts : [contexts];
     const promises = arr.map((ctx) => {
       if (base) {
-        ctx = Object.assign({}, base, ctx);
+        ctx = { ...base, ...ctx };
         if (base.context) {
-          ctx.context = Object.assign({}, base.context, ctx.context);
+          ctx.context = { ...base.context, ...ctx.context };
         }
       }
 
@@ -131,7 +131,7 @@ export class EmailService {
   }
 
   async sendEmailRaw(options: nodemailer.SendMailOptions) {
-    options = Object.assign({}, this.config.defaults, options);
+    options = { ...this.config.defaults, ...options } as nodemailer.SendMailOptions;
     const tp = this.transporter;
     return (await util.promisify(tp.sendMail).call(tp, options)) as nodemailer.SentMessageInfo;
   }
