@@ -3,7 +3,8 @@ import { SchemaRegistry } from '../service';
 import { Class } from '@travetto/registry';
 
 type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>
+  // TS 2.8: [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+  [P in keyof T]?: DeepPartial<T[P]>;
 }
 
 export class SchemaBound {
