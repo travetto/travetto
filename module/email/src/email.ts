@@ -27,13 +27,13 @@ export class EmailService {
   async postConstruct() {
     let transport: nodemailer.Transport;
     if (!this.config.transport) {
-      let mockTransport = require('nodemailer-mock-transport');
+      const mockTransport = require('nodemailer-mock-transport');
       transport = mockTransport();
     } else if (this.config.transport === 'sendmail') {
-      let sendmailTransport = require('nodemailer-sendmail-transport');
+      const sendmailTransport = require('nodemailer-sendmail-transport');
       transport = sendmailTransport({ path: '/usr/sbin/sendmail' });
     } else {
-      let smtpTransport = require('nodemailer-smtp-transport');
+      const smtpTransport = require('nodemailer-smtp-transport');
       transport = smtpTransport(this.config.transport);
     }
 
@@ -47,7 +47,7 @@ export class EmailService {
     if (!name) {
       name = path.split('/').pop() as string;
     }
-    let contents = await readFilePromise(path);
+    const contents = await readFilePromise(path);
     this.registerPartial(name, contents.toString());
   }
 
@@ -59,7 +59,7 @@ export class EmailService {
     if (!name) {
       name = path.split('/').pop() as string;
     }
-    let contents = await readFilePromise(path);
+    const contents = await readFilePromise(path);
     this.registerWrapper(name, contents.toString());
   }
 
@@ -76,7 +76,7 @@ export class EmailService {
 
   template(template: string, context: TemplateContext = {}) {
 
-    let wrapperKey = context.wrapperName || 'base';
+    const wrapperKey = context.wrapperName || 'base';
 
     if (!this.cache[wrapperKey][template]) {
       let html = this.wrappers[wrapperKey].replace('<!-- TEMPLATE -->', template);
@@ -91,7 +91,7 @@ export class EmailService {
       html = juice(html, { preserveImportant: true });
 
       // Collect remaining styles (should be media queries)
-      let styles: string[] = [];
+      const styles: string[] = [];
       html = html.replace(/<style[^>]*>[\s|\S]+<\/style>/g, function (style: string) {
         styles.push(style);
         return '';
@@ -107,8 +107,8 @@ export class EmailService {
   }
 
   async sendEmail(contexts: TemplateMailOptions | TemplateMailOptions[], base?: TemplateMailOptions) {
-    let arr = Array.isArray(contexts) ? contexts : [contexts];
-    let promises = arr.map((ctx) => {
+    const arr = Array.isArray(contexts) ? contexts : [contexts];
+    const promises = arr.map((ctx) => {
       if (base) {
         ctx = Object.assign({}, base, ctx);
         if (base.context) {
@@ -132,7 +132,7 @@ export class EmailService {
 
   async sendEmailRaw(options: nodemailer.SendMailOptions) {
     options = Object.assign({}, this.config.defaults, options);
-    let tp = this.transporter;
+    const tp = this.transporter;
     return (await util.promisify(tp.sendMail).call(tp, options)) as nodemailer.SentMessageInfo;
   }
 }

@@ -15,9 +15,9 @@ class EmailSuite {
 
   @Test('Should template properly')
   async templating() {
-    let instance = await DependencyRegistry.getInstance(EmailService);
+    const instance = await DependencyRegistry.getInstance(EmailService);
 
-    let out = await instance.template(`<row>
+    const out = await instance.template(`<row>
           <columns large="{{left}}">Bob</columns>
           <columns large="{{right}}"></columns>
         </row>`, { left: 6, right: 6 });
@@ -26,7 +26,7 @@ class EmailSuite {
 
   @Test('Send email')
   async sendEmail() {
-    let instance = await DependencyRegistry.getInstance(EmailService);
+    const instance = await DependencyRegistry.getInstance(EmailService);
 
     await instance.sendEmail({
       to: 'tim@eaiti.com',
