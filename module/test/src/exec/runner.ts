@@ -3,6 +3,7 @@ import * as minimist from 'minimist';
 import { Agent, AgentPool } from './agent';
 import { TapListener, CollectionComplete, Collector, Listener } from './listener';
 import { TestUtil } from './test';
+import { AllSuitesResult } from '../model/suite';
 
 interface State {
   format: string;
@@ -43,7 +44,7 @@ export class Runner {
     try {
       console.debug('Runner Args', this.state);
 
-      let formatter = this.state.format;
+      const formatter = this.state.format;
 
       const collector = new Collector();
       const listeners: Listener[] = [
@@ -58,24 +59,24 @@ export class Runner {
 
       let files = await TestUtil.getTests(globs);
 
-      for (let l of listeners) {
+      for (const l of listeners) {
         l.onEvent = l.onEvent.bind(l);
       }
 
       files = files.map(x => x.split(process.cwd() + '/')[1]);
 
-      let agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
+      const agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
 
       collector.errors = await agentPool.process(files, async (file, run, agent) => {
         if (agent) {
-          for (let l of listeners) {
+          for (const l of listeners) {
             agent.listen(l.onEvent);
           }
         }
         run({ file });
       });
 
-      for (let listener of listeners) {
+      for (const listener of listeners) {
         if ((listener as any).onComplete) {
           (listener as CollectionComplete).onComplete(collector);
         }
@@ -84,7 +85,7 @@ export class Runner {
       let output: string | undefined;
 
       if (formatter && formatter !== 'noop') {
-        let fn = require('./formatter/' + formatter)
+        const fn = require('./formatter/' + formatter) as { [key: string]: (all: AllSuitesResult) => string | undefined };
         output = Object.values(fn)[0](collector.allSuites);
       }
       if (output) {

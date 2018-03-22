@@ -20,7 +20,7 @@ class DITest {
   @Test('Test Loading')
   async loading() {
     await DependencyRegistry.init();
-    let item = await DependencyRegistry.getInstance(TestItem);
+    const item = await DependencyRegistry.getInstance(TestItem);
     assert.strictEqual(item.getName(), 'Howdy');
   }
 }

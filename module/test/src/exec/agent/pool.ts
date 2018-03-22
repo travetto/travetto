@@ -14,7 +14,7 @@ export class AgentPool {
 
   init() {
     for (let i = 0; i < this.agentCount; i++) {
-      let agent = new Agent(i, this.command);
+      const agent = new Agent(i, this.command);
       this.availableAgents.add(agent);
     }
     Shutdown.onShutdown(this.constructor.__id, () => this.shutdown());
@@ -28,7 +28,7 @@ export class AgentPool {
     if (this.availableAgents.size === 0) {
       return undefined;
     } else {
-      let agent = this.availableAgents.values().next().value;
+      const agent = this.availableAgents.values().next().value;
       this.availableAgents.delete(agent);
       await agent.init();
       return agent;
@@ -45,18 +45,18 @@ export class AgentPool {
     await this.init();
 
     let position = 0;
-    let errors: Error[] = [];
+    const errors: Error[] = [];
 
     while (position < inputs.length) {
       if (this.pendingAgents.size < this.availableSize) {
-        let next = position++;
-        let agent = (await this.getNextAgent())!;
+        const next = position++;
+        const agent = (await this.getNextAgent())!;
 
         agent.completion = new Promise<Agent>((resolve, reject) => {
           agent.listenOnce('runComplete', ({ error: e }) => {
             if (e) {
-              let err: any = new Error();
-              for (let k of Object.keys(e)) {
+              const err: any = new Error();
+              for (const k of Object.keys(e)) {
                 err[k] = e[k];
               }
               err.message = e.message;
@@ -75,7 +75,7 @@ export class AgentPool {
 
         this.pendingAgents.add(agent);
       } else {
-        let agent = await Promise.race(Array.from(this.pendingAgents).map(x => x.completion));
+        const agent = await Promise.race(Array.from(this.pendingAgents).map(x => x.completion));
         this.returnAgent(agent);
       }
     }
@@ -86,11 +86,11 @@ export class AgentPool {
   }
 
   shutdown() {
-    for (let agent of Array.from(this.pendingAgents)) {
+    for (const agent of Array.from(this.pendingAgents)) {
       this.returnAgent(agent);
     }
 
-    for (let agent of Array.from(this.availableAgents)) {
+    for (const agent of Array.from(this.availableAgents)) {
       if (agent.process) {
         try {
           console.debug('Killing Process', agent.id)

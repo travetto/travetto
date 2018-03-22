@@ -22,19 +22,19 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   }
 
   registerPendingListener<T>(cls: Class<T>, listener: Function, phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach', ) {
-    let suiteConfig = this.getOrCreatePending(cls)! as SuiteConfig;
+    const suiteConfig = this.getOrCreatePending(cls)! as SuiteConfig;
     suiteConfig[phase].push(listener);
   }
 
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
-    let config = this.getOrCreatePending(cls) as SuiteConfig;
-    let tests = this.pendingMethods.get(cls.__id)!.values();
+    const config = this.getOrCreatePending(cls) as SuiteConfig;
+    const tests = this.pendingMethods.get(cls.__id)!.values();
     config.instance = new config.class();
     config.tests = Array.from(tests) as TestConfig[];
     if (!config.name) {
       config.name = cls.__id.split(':test.')[1].replace('#', '.');
     }
-    for (let t of config.tests) {
+    for (const t of config.tests) {
       t.suiteName = config.name;
     }
     return config;

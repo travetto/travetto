@@ -23,17 +23,17 @@ export class TapListener implements CollectionComplete {
 
   onEvent(e: ListenEvent) {
     if (e.type === 'test' && e.phase === 'after') {
-      let { test } = e;
+      const { test } = e;
       let header = `${test.suiteName} - ${test.method}`;
       if (test.description) {
         header += `: ${test.description}`;
       }
       this.log(`# ${header}`);
-      let message = '';
+
       if (test.assertions.length) {
         let subCount = 0;
-        let count = test.assertions.length;
-        for (let a of test.assertions) {
+        const count = test.assertions.length;
+        for (const a of test.assertions) {
           let subMessage = `ok ${++subCount} - ${a.text} ${a.file}:${a.line}`;
           if (a.error) {
             subMessage = `not ${subMessage}`;
@@ -57,7 +57,7 @@ export class TapListener implements CollectionComplete {
         this.logMeta({ error: test.error });
       }
       if (test.output) {
-        for (let key of ['log', 'info', 'error', 'debug', 'warn']) {
+        for (const key of ['log', 'info', 'error', 'debug', 'warn']) {
           if (test.output[key]) {
             this.logMeta({ [key]: test.output[key] });
           }
@@ -70,7 +70,7 @@ export class TapListener implements CollectionComplete {
     this.log(`1..${collector.allSuites.total}`);
     if (collector.errors.length) {
       this.log('---\n');
-      for (let err of collector.errors) {
+      for (const err of collector.errors) {
         this.log(err.toString());
       }
     }

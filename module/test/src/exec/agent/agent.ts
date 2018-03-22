@@ -17,7 +17,7 @@ export class Agent {
       return this._init;
     }
 
-    let [sub, forked] = fork(this.command, {
+    const [sub, forked] = fork(this.command, {
       env: {
         ...process.env,
       },
@@ -68,7 +68,7 @@ export class Agent {
   }
 
   listenOnce(type: string, callback: (data: any) => void) {
-    let fn = (e: any) => {
+    const fn = (e: any) => {
       if (e.type === type) {
         this.process.removeListener('message', fn);
         callback(e);

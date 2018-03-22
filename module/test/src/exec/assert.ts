@@ -18,8 +18,8 @@ export class AssertUtil {
   static asserts: Assertion[] = [];
 
   static readFilePosition(err: Error, filename: string) {
-    let base = process.cwd();
-    let lines = (err.stack || new Error().stack!).split('\n').filter(x => !x.includes('/node_modules/') && x.includes(base));
+    const base = process.cwd();
+    const lines = (err.stack || new Error().stack!).split('\n').filter(x => !x.includes('/node_modules/') && x.includes(base));
     let best = lines.filter(x => x.includes(filename))[0];
 
     if (!best) {
@@ -30,12 +30,12 @@ export class AssertUtil {
       return { file: filename, line: 1 };
     }
 
-    let [fn, path] = best.trim().split(/\s+/g).slice(1);
-    let [file, lineNo, col] = path.replace(/[()]/g, '').split(':')
+    const [fn, path] = best.trim().split(/\s+/g).slice(1);
+    const [file, lineNo, col] = path.replace(/[()]/g, '').split(':')
 
-    file = file.split(process.cwd() + '/')[1];
+    const outFile = file.split(process.cwd() + '/')[1];
 
-    let res = { file, line: parseInt(lineNo, 10) };
+    const res = { file: outFile, line: parseInt(lineNo, 10) };
 
     return res;
   }
@@ -45,9 +45,9 @@ export class AssertUtil {
   }
 
   static check(filename: string, text: string, name: string, ...args: any[]) {
-    let { file, line } = this.readFilePosition(new Error(), filename.replace(/[.][tj]s$/, ''));
+    const { file, line } = this.readFilePosition(new Error(), filename.replace(/[.][tj]s$/, ''));
 
-    let assertion: Assertion = { file, line, text, operator: ASSERT_FN_OPERATOR[name] };
+    const assertion: Assertion = { file, line, text, operator: ASSERT_FN_OPERATOR[name] };
     if (name === 'fail') {
       if (args.length > 1) {
         assertion.actual = args[0];
@@ -93,7 +93,7 @@ export class AssertUtil {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
           if (assertion.operator) {
-            let op = name.includes('hrow') ?
+            const op = name.includes('hrow') ?
               `should ${assertion.operator}` :
               `should be ${assertion.operator}`;
             assertion.message = `${assertion.actual} ${op} ${assertion.expected}`;
@@ -109,7 +109,7 @@ export class AssertUtil {
   }
 
   static end() {
-    let ret = this.asserts;
+    const ret = this.asserts;
     this.asserts = [];
     return ret;
   }

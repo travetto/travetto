@@ -6,9 +6,9 @@ const TEST_IMPORT = '@travetto/test';
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: any): T {
   if (ts.isMethodDeclaration(node) || ts.isClassDeclaration(node)) {
-    let dec = TransformUtil.findAnyDecorator(node, {
-      'Test': new Set([TEST_IMPORT]),
-      'Suite': new Set([TEST_IMPORT])
+    const dec = TransformUtil.findAnyDecorator(node, {
+      Test: new Set([TEST_IMPORT]),
+      Suite: new Set([TEST_IMPORT])
     }, state);
 
     if (dec && ts.isCallExpression(dec.expression)) {
@@ -30,7 +30,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   }
 
   if (ts.isClassDeclaration(node)) {
-    for (let el of node.members) {
+    for (const el of node.members) {
       if (!el.parent) {
         el.parent = node;
       }
@@ -47,7 +47,11 @@ const TRANSFORMER = TransformUtil.importingVisitor<any>((source) => {
 export const TestTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
     // Only apply to test files
-    if (process.env.ENV === 'test' && source.fileName.includes('/test/') && !source.fileName.includes('/src/') && !source.fileName.includes('/node_modules/')) {
+    if (process.env.ENV === 'test' &&
+      source.fileName.includes('/test/') &&
+      !source.fileName.includes('/src/') &&
+      !source.fileName.includes('/node_modules/')
+    ) {
       // Annotate
       return TRANSFORMER(context)(source);
     } else {

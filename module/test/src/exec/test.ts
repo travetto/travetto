@@ -19,8 +19,8 @@ export class TestUtil {
 
   static isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
-      let input = fs.createReadStream(file);
-      let reader = readline.createInterface({ input })
+      const input = fs.createReadStream(file);
+      const reader = readline.createInterface({ input })
         .on('line', line => {
           if (line.includes('@Suite')) {
             resolve(true);
@@ -33,8 +33,8 @@ export class TestUtil {
   }
 
   static async getTests(globs: string[]) {
-    let files = await bulkFind(globs);
-    let all = await Promise.all(files.map(async (f) => [f, await this.isTest(f)] as [string, boolean]));
+    const files = await bulkFind(globs);
+    const all = await Promise.all(files.map(async (f) => [f, await this.isTest(f)] as [string, boolean]));
     return all.filter(x => x[1]).map(x => x[0]);
   }
 
@@ -63,8 +63,8 @@ export class TestUtil {
   }
 
   static async executeTest(test: TestConfig) {
-    let suite = TestRegistry.get(test.class);
-    let result: Partial<TestResult> = {
+    const suite = TestRegistry.get(test.class);
+    const result: Partial<TestResult> = {
       method: test.method,
       description: test.description,
       suiteName: test.suiteName,
@@ -83,8 +83,8 @@ export class TestUtil {
       ConsoleCapture.start();
       AssertUtil.start();
 
-      let timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
-      let res = await Promise.race([suite.instance[test.method](), timeout]);
+      const timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
+      const res = await Promise.race([suite.instance[test.method](), timeout]);
       result.status = 'success';
     } catch (err) {
       err = this.checkError(test, err);
@@ -100,9 +100,9 @@ export class TestUtil {
     }
 
     if (result.status === 'fail' && result.error) {
-      let err = result.error;
+      const err = result.error;
       if (!(err instanceof assert.AssertionError)) {
-        let { file, line } = AssertUtil.readFilePosition(err, test.file);
+        const { file, line } = AssertUtil.readFilePosition(err, test.file);
         const assertion: Assertion = { file, line, operator: 'throws', text: '', error: err, message: `Error thrown: ${err.message}` };
         result.assertions.push(assertion);
       }
@@ -113,11 +113,11 @@ export class TestUtil {
 
   static async affixProcess(suite: SuiteConfig, result: SuiteResult, phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
     try {
-      for (let fn of suite[phase]) {
+      for (const fn of suite[phase]) {
         await fn.call(suite.instance);
       }
     } catch (error) {
-      let { line, file } = AssertUtil.readFilePosition(error, suite.class.__filename);
+      const { line, file } = AssertUtil.readFilePosition(error, suite.class.__filename);
       result.tests.push({
         status: 'fail',
         suiteName: suite.name,
@@ -139,7 +139,7 @@ export class TestUtil {
       return;
     }
 
-    let test = {
+    const test = {
       line: suite.line,
       lineEnd: suite.lineEnd,
       suiteName: suite.name,
@@ -172,7 +172,7 @@ export class TestUtil {
   }
 
   static async executeSuite(suite: SuiteConfig, emitter?: TestEmitter) {
-    let result: SuiteResult = {
+    const result: SuiteResult = {
       success: 0,
       fail: 0,
       skip: 0,
@@ -188,14 +188,14 @@ export class TestUtil {
     try {
       await this.affixProcess(suite, result, 'beforeAll');
 
-      for (let test of suite.tests) {
+      for (const test of suite.tests) {
         await this.affixProcess(suite, result, 'beforeEach');
 
         if (emitter) {
           emitter.emit({ type: 'test', phase: 'before', test });
         }
 
-        let ret = await this.executeTest(test);
+        const ret = await this.executeTest(test);
         result[ret.status]++;
         result.tests.push(ret);
 
@@ -224,17 +224,17 @@ export class TestUtil {
     require(`${process.cwd()}/${file}`);
     await TestRegistry.init();
 
-    let classes = TestRegistry.getClasses();
+    const classes = TestRegistry.getClasses();
 
-    for (let cls of classes) {
-      let suite = TestRegistry.get(cls);
+    for (const cls of classes) {
+      const suite = TestRegistry.get(cls);
 
       try {
         if (emitter) {
           emitter.emit({ phase: 'before', type: 'suite', suite });
         }
 
-        let result = await this.executeSuite(suite, emitter);
+        const result = await this.executeSuite(suite, emitter);
 
         if (emitter) {
           emitter.emit({ phase: 'after', type: 'suite', suite: result });

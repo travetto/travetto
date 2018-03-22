@@ -42,14 +42,14 @@ function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, name
   prepAssert(state);
 
   args = args.filter(x => x !== undefined && x !== null);
-  let check = ts.createCall(state.assertCheck, undefined, ts.createNodeArray([
+  const check = ts.createCall(state.assertCheck, undefined, ts.createNodeArray([
     ts.createLiteral('__filename'),
     ts.createLiteral(TransformUtil.getPrimaryArgument(node)!.getText()),
     ts.createLiteral(name),
     ...args
   ]));
 
-  for (let arg of args) {
+  for (const arg of args) {
     arg.parent = check;
   }
 
@@ -74,7 +74,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   let replaced = false;
 
   if (ts.isCallExpression(node)) {
-    let exp: ts.Expression = node.expression;
+    const exp: ts.Expression = node.expression;
     if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) {
       replaced = true;
 
@@ -85,7 +85,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         let opFn = OPTOKEN_ASSERT_FN[comp.operatorToken.kind];
 
         if (opFn) {
-          let literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
+          const literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
           if (/equal/i.test(opFn) && literal) {
             opFn = EQUALS_MAPPING[opFn] || opFn;
           }
@@ -97,7 +97,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
       } else if (ts.isPrefixUnaryExpression(comp) && comp.operator === ts.SyntaxKind.ExclamationToken) {
         if (ts.isPrefixUnaryExpression(comp.operand)) {
-          let inner = comp.operand.operand;
+          const inner = comp.operand.operand;
           node = doAssert(state, node, 'ok', [inner, message!]); // !!v
         } else {
           node = doAssert(state, node, 'ok', [comp.operand, message!]); // !v
@@ -106,7 +106,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         node = doAssert(state, node, ASSERT_CMD, [...node.arguments]);
       }
     } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) {
-      let ident = exp.expression;
+      const ident = exp.expression;
       if (ident.escapedText === ASSERT_CMD) {
         replaced = true;
 
@@ -121,7 +121,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   }
 
   if (ts.isClassDeclaration(node)) {
-    for (let el of node.members) {
+    for (const el of node.members) {
       if (!el.parent) {
         el.parent = node;
       }
@@ -139,7 +139,11 @@ const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({
 export const TestTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
     // Only apply to test files
-    if (process.env.ENV === 'test' && source.fileName.includes('/test/') && !source.fileName.includes('/src/') && !source.fileName.includes('/node_modules/')) {
+    if (process.env.ENV === 'test' &&
+      source.fileName.includes('/test/') &&
+      !source.fileName.includes('/src/') &&
+      !source.fileName.includes('/node_modules/')
+    ) {
       // Assert
       return TRANSFORMER(context)(source);
     } else {

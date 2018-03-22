@@ -13,21 +13,21 @@ export class ConsoleCapture {
   static out: { [key: string]: string };
 
   static log(level: string, ...args: any[]) {
-    let msg = args.map((x: any) => typeof x === 'string' ? x : util.inspect(x, false, 4)).join(' ');
+    const msg = args.map((x: any) => typeof x === 'string' ? x : util.inspect(x, false, 4)).join(' ');
     this.out[level] = (this.out[level] || '') + msg + '\n';
   }
 
   static start() {
     this.out = {};
-    for (let level of Object.keys(OG_CONSOLE)) {
+    for (const level of Object.keys(OG_CONSOLE)) {
       (console as any)[level] = this.log.bind(this, level);
     }
   }
 
   static end() {
-    let ret = this.out;
+    const ret = this.out;
     this.out = {};
-    for (let level of Object.keys(OG_CONSOLE)) {
+    for (const level of Object.keys(OG_CONSOLE)) {
       (console as any)[level] = (OG_CONSOLE as any)[level];
     }
     return ret;
