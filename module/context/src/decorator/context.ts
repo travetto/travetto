@@ -2,9 +2,9 @@ import { Context } from '../service';
 
 export function WithContext<T extends { context: Context }>(data?: any) {
   return function (target: T, prop: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) {
-    let og = descriptor.value!;
+    const og = descriptor.value!;
     descriptor.value = function (...args: any[]) {
-      let self = this as T;
+      const self = this as T;
       return new Promise((resolve, reject) => {
         self.context.namespace.run(() => {
           try {
