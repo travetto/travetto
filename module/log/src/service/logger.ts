@@ -23,11 +23,11 @@ export class Logger {
 
   async postConstruct() {
 
-    for (let layout of Object.keys(Layouts)) {
+    for (const layout of Object.keys(Layouts)) {
       addLayout(layout, Layouts[layout]);
     }
 
-    let [appenders, categories] = await Promise.all([
+    const [appenders, categories] = await Promise.all([
       this.buildAppenders(),
       this.buildCategories()
     ]);
@@ -46,9 +46,9 @@ export class Logger {
   }
 
   private async buildAppenders() {
-    let appenders = {} as { [key: string]: log4js.Appender };
+    const appenders = {} as { [key: string]: log4js.Appender };
 
-    for (let name of Object.keys(this.config.appenders)) {
+    for (const name of Object.keys(this.config.appenders)) {
       let conf = (this.config.appenders as any)[name];
       if (!conf.hasOwnProperty('enabled') || conf.enabled) {
         if (isFileAppender(conf)) {
@@ -65,7 +65,7 @@ export class Logger {
           }
 
           // Setup folder for logging
-          let res = await util.promisify(mkdirp)(conf.filename!.substring(0, conf.filename!.lastIndexOf('/')));
+          const res = await util.promisify(mkdirp)(conf.filename!.substring(0, conf.filename!.lastIndexOf('/')));
         }
 
         if (conf.level) {
@@ -86,9 +86,9 @@ export class Logger {
   }
 
   private async buildCategories() {
-    let out: { [key: string]: log4js.Category } = {};
-    for (let name of Object.keys(this.config.categories)) {
-      let cat = (this.config.categories as any)[name] as log4js.Category;
+    const out: { [key: string]: log4js.Category } = {};
+    for (const name of Object.keys(this.config.categories)) {
+      const cat = (this.config.categories as any)[name] as log4js.Category;
       if (typeof cat.appenders === 'string') {
         cat.appenders = (cat.appenders as string).split(',');
       }
@@ -103,12 +103,12 @@ export class Logger {
   }
 
   private bindToConsole() {
-    let override: boolean | null = this.config.appenders.console.replaceConsole;
+    const override: boolean | null = this.config.appenders.console.replaceConsole;
 
     const logger = log4js.getLogger('console');
     if (override === null ? process.env.env !== 'test' : !!override) {
       if (logger) {
-        for (let key of ['info', 'warn', 'error', 'debug']) {
+        for (const key of ['info', 'warn', 'error', 'debug']) {
           if (key in console && key in logger) {
             (console as any)[key] = (logger as any)[key].bind(logger);
 

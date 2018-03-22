@@ -32,14 +32,14 @@ const LOG_STYLES: { [key: string]: string[] } = {
 
 
 function processEvent(ev: log4js.LogEvent, opts: JsonLayout | StandardLayout) {
-  let out: LogContext = {
+  const out: LogContext = {
     timestamp: new Date(ev.startTime).toISOString().split('.')[0],
     level: ev.level.toString().toUpperCase(),
     category: ev.categoryName.replace(/[\[\]]/g, ''),
   };
 
-  let args = (ev.data || []).slice(0);
-  let last = args[args.length - 1];
+  const args = (ev.data || []).slice(0);
+  const last = args[args.length - 1];
 
   if (last) {
     if (Object.keys(last).length === 1 && last.meta) {
@@ -68,8 +68,8 @@ function processEvent(ev: log4js.LogEvent, opts: JsonLayout | StandardLayout) {
  * Taken from masylum's fork (https://github.com/masylum/log4js-node)
  */
 function stylize(text: string, ...styles: string[]) {
-  for (let style of styles) {
-    let res = STYLES[style];
+  for (const style of styles) {
+    const res = STYLES[style];
     if (res) {
       text = `\x1B[${res[0]}m${text}\x1B[${res[1]}m`;
     }
@@ -80,7 +80,7 @@ function stylize(text: string, ...styles: string[]) {
 export const Layouts: { [key: string]: (opts: any) => log4js.Layout } = {
   standard: (opts: StandardLayout): log4js.Layout => {
     return function (ev: log4js.LogEvent) {
-      let ctx = processEvent(ev, opts);
+      const ctx = processEvent(ev, opts);
       // Return string will be passed to logger.
 
       let out = '';

@@ -28,10 +28,10 @@ class LoggerTest {
 
   @Test('Should Log')
   async shouldLog() {
-    let logger = (await DependencyRegistry.getInstance(Logger)).getLogger();
+    const logger = (await DependencyRegistry.getInstance(Logger)).getLogger();
     logger.info('Hello world!');
 
-    let contents = await fsRead(name);
+    const contents = await fsRead(name);
     assert(contents.toString().includes('Hello world'));
   }
 }
