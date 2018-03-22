@@ -36,18 +36,18 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   async initialInstall() {
-    let finalizing = this.pendingFinalize;
+    const finalizing = this.pendingFinalize;
     this.pendingFinalize = [];
 
-    for (let cls of finalizing) {
+    for (const cls of finalizing) {
       this.install(cls, { type: 'added', curr: cls });
     }
 
     // Unblock auto created
     if (this.autoCreate.length && !AppEnv.test) {
       console.debug('Auto-creating', this.autoCreate.map(x => x.target.name));
-      let items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
-      for (let i of items) {
+      const items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
+      for (const i of items) {
         await this.getInstance(i.target, i.qualifier);
       }
     }
@@ -74,21 +74,21 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
-    let targetId = target.__id;
+    const targetId = target.__id;
 
-    let aliasMap = this.aliases.get(targetId);
+    const aliasMap = this.aliases.get(targetId);
 
     if (!aliasMap || !aliasMap.has(qualifier)) {
       throw new InjectionError(`Dependency not found: ${targetId}[${getName(qualifier)}]`);
     }
 
-    let clz = aliasMap.get(qualifier)!;
-    let managed = this.get(clz)!;
+    const clz = aliasMap.get(qualifier)!;
+    const managed = this.get(clz)!;
 
     const fieldKeys = Object.keys(managed.dependencies.fields!);
 
-    let consDeps = managed.dependencies.cons || [];
-    let allDeps = consDeps.concat(fieldKeys.map(x => managed.dependencies.fields[x]))
+    const consDeps = managed.dependencies.cons || [];
+    const allDeps = consDeps.concat(fieldKeys.map(x => managed.dependencies.fields[x]))
 
     const promises = allDeps
       .map(async x => {
@@ -121,7 +121,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   private async createInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE) {
-    let targetId = target.__id;
+    const targetId = target.__id;
 
     if (!this.instances.has(targetId)) {
       this.instances.set(targetId, new Map());
@@ -132,10 +132,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       return this.instancePromises.get(targetId)!.get(qualifier);
     }
 
-    let instancePromise = this.construct(target, qualifier);
+    const instancePromise = this.construct(target, qualifier);
     this.instancePromises.get(targetId)!.set(qualifier, instancePromise);
 
-    let instance = await instancePromise;
+    const instance = await instancePromise;
 
     if (AppEnv.watch) {
       if (!this.proxies.has(targetId)) {
@@ -153,14 +153,14 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // if in watch mode, create proxies
     if (AppEnv.watch) {
       if (!this.proxies.get(targetId)!.has(qualifier)) {
-        let handler = new RetargettingHandler(out);
-        let proxy = new Proxy({}, handler);
+        const handler = new RetargettingHandler(out);
+        const proxy = new Proxy({}, handler);
         this.proxyHandlers.get(targetId)!.set(qualifier, handler);
         this.proxies.get(targetId)!.set(qualifier, proxy);
         out = proxy;
         console.debug('Registering proxy', target.__id, qualifier);
       } else {
-        let handler = this.proxyHandlers.get(targetId)!.get(qualifier)!;
+        const handler = this.proxyHandlers.get(targetId)!.get(qualifier)!;
         console.debug('Updating target', target.__id, qualifier, out);
         handler.target = out;
         out = this.proxies.get(targetId)!.get(qualifier);
@@ -171,7 +171,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   async getInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
-    let targetId = target.__id;
+    const targetId = target.__id;
     if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(qualifier)) {
       console.debug('Getting Intance', targetId, getName(qualifier));
       await this.createInstance(target, qualifier);
@@ -180,32 +180,32 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   getCandidateTypes<T>(target: Class<T>) {
-    let targetId = target.__id;
-    let aliasMap = this.aliases.get(targetId)!;
-    let aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
+    const targetId = target.__id;
+    const aliasMap = this.aliases.get(targetId)!;
+    const aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
     return aliasedIds.map(id => this.get(id)!)
   }
 
   // Undefined indicates no constructor
   registerConstructor<T>(cls: Class<T>, dependencies?: Dependency<any>[]) {
-    let conf = this.getOrCreatePending(cls);
+    const conf = this.getOrCreatePending(cls);
     conf.dependencies!.cons = dependencies;
     if (dependencies) {
-      for (let dependency of dependencies) {
+      for (const dependency of dependencies) {
         dependency.qualifier = dependency.qualifier || DEFAULT_INSTANCE;
       }
     }
   }
 
   registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency<any>) {
-    let conf = this.getOrCreatePending(cls);
+    const conf = this.getOrCreatePending(cls);
     conf.dependencies!.fields[field] = dependency;
     dependency.qualifier = dependency.qualifier || DEFAULT_INSTANCE;
   }
 
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
-    let classId = pconfig.class!.__id;
-    let config = this.getOrCreatePending(pconfig.class!);
+    const classId = pconfig.class!.__id;
+    const config = this.getOrCreatePending(pconfig.class!);
 
     if (pconfig.qualifier) {
       config.qualifier = pconfig.qualifier;
@@ -222,14 +222,14 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
-    let classId = cls.__id;
+    const classId = cls.__id;
 
     console.debug('Finalized', classId);
 
-    let config = this.getOrCreatePending(cls) as InjectableConfig<T>;
+    const config = this.getOrCreatePending(cls) as InjectableConfig<T>;
 
-    let parentClass = Object.getPrototypeOf(cls);
-    let parentConfig = this.get(parentClass.__id);
+    const parentClass = Object.getPrototypeOf(cls);
+    const parentConfig = this.get(parentClass.__id);
 
     if (parentConfig) {
       config.dependencies.fields = Object.assign({},
@@ -246,7 +246,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.targets.set(classId, new Map());
     }
 
-    let targetId = config.target.__id;
+    const targetId = config.target.__id;
 
     if (!this.aliases.has(targetId)) {
       this.aliases.set(targetId, new Map());
@@ -257,7 +257,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // TODO: Auto alias parent class if framework managed
     if (parentClass.__id && config.qualifier !== DEFAULT_INSTANCE) {
-      let parentId = parentClass.__id;
+      const parentId = parentClass.__id;
       this.aliases.get(parentId)!.set(config.qualifier, classId);
       this.targets.get(classId)!.set(config.qualifier, parentId);
     }
@@ -288,12 +288,12 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Remove current instance
-    for (let [config, targetId] of this.targets.get(cls.__id)!.entries()) {
+    for (const [config, targetId] of this.targets.get(cls.__id)!.entries()) {
       if (this.instances.has(targetId) &&
         this.instances.get(targetId)!.has(config) &&
         this.instances.get(targetId)!.get(config).constructor.__id === cls.__id
       ) {
-        let handler = this.proxyHandlers.get(targetId)!.get(config)
+        const handler = this.proxyHandlers.get(targetId)!.get(config)
         if (handler) {
           handler.target = null;
         }

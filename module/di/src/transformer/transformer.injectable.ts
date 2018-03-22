@@ -14,11 +14,11 @@ interface DiState extends State {
 }
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-  let injection = TransformUtil.findAnyDecorator(param, { Inject: new Set(['@travetto/di']) }, state);
+  const injection = TransformUtil.findAnyDecorator(param, { Inject: new Set(['@travetto/di']) }, state);
 
   if (injection || ts.isParameter(param)) {
-    let finalTarget = TransformUtil.importIfExternal(param.type!, state);
-    let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
+    const finalTarget = TransformUtil.importIfExternal(param.type!, state);
+    const injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
 
     let optional = TransformUtil.getObjectValue(injectConfig, 'optional');
 
@@ -43,7 +43,7 @@ function createInjectDecorator(state: DiState, name: string, contents?: ts.Expre
         path: require.resolve('../decorator/injectable')
       });
     }
-    let ident = ts.createIdentifier(name);
+    const ident = ts.createIdentifier(name);
     state.decorators[name] = ts.createPropertyAccess(state.import, ident);
   }
   return ts.createDecorator(
@@ -57,15 +57,15 @@ function createInjectDecorator(state: DiState, name: string, contents?: ts.Expre
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: DiState): T {
   if (ts.isClassDeclaration(node)) {
-    let foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES, state);
+    const foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES, state);
     let decls = node.decorators;
 
     if (foundDec) {
 
       node = ts.visitEachChild(node, c => visitNode(context, c, state), context);
 
-      let declTemp = (node.decorators || []).slice(0);
-      let cons = (node as any as ts.ClassDeclaration).members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
+      const declTemp = (node.decorators || []).slice(0);
+      const cons = (node as any as ts.ClassDeclaration).members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
       let injectArgs = undefined;
 
       if (cons) {
@@ -91,8 +91,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       decls = ts.createNodeArray(declTemp);
     }
 
-    let cNode = node as any as ts.ClassDeclaration;
-    let out = ts.updateClassDeclaration(cNode,
+    const cNode = node as any as ts.ClassDeclaration;
+    const out = ts.updateClassDeclaration(cNode,
       decls,
       cNode.modifiers,
       cNode.name,
@@ -103,15 +103,15 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     return out;
   } if (ts.isPropertyDeclaration(node)) {
-    let expr = processDeclaration(state, node);
+    const expr = processDeclaration(state, node);
 
     if (expr) {
-      let final = createInjectDecorator(state, 'Inject', expr);
-      let finalDecs = ((node.decorators as any as ts.Decorator[]) || [])
+      const final = createInjectDecorator(state, 'Inject', expr);
+      const finalDecs = ((node.decorators as any as ts.Decorator[]) || [])
         .filter(x => TransformUtil.getDecoratorIdent(x).text !== 'Inject');
 
       // Doing decls
-      let ret = ts.updateProperty(
+      const ret = ts.updateProperty(
         node,
         ts.createNodeArray([final, ...finalDecs]),
         node.modifiers,

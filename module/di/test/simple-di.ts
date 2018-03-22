@@ -50,7 +50,7 @@ class DiTest2 {
     await DependencyRegistry.init();
     assert(30 === 30);
 
-    let inst = await DependencyRegistry.getInstance(ServiceInherit);
+    const inst = await DependencyRegistry.getInstance(ServiceInherit);
     inst.doWork();
 
     assert.ok(inst.db);
