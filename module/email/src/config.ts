@@ -1,4 +1,5 @@
 import { Config } from '@travetto/config';
+import * as path from 'path';
 
 @Config('mail')
 export class MailConfig {
@@ -12,5 +13,15 @@ export class MailConfig {
 
   postConstruct() {
     console.log(this);
+  }
+}
+
+@Config('mail.template')
+export class MailTemplateConfig {
+  assetRoot = `${__dirname}/../assets`;
+
+  scssRoot = `${this.assetRoot}/scss`;
+
+  async postConstruct() {
   }
 }

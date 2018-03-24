@@ -4,6 +4,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
 import * as assert from 'assert';
+import { TemplateEngine } from '../src/template';
 
 @Suite('Emails')
 class EmailSuite {
@@ -15,13 +16,13 @@ class EmailSuite {
 
   @Test('Should template properly')
   async templating() {
-    const instance = await DependencyRegistry.getInstance(EmailService);
+    const instance = await DependencyRegistry.getInstance(TemplateEngine);
 
     const out = await instance.template(`<row>
           <columns large="{{left}}">Bob</columns>
           <columns large="{{right}}"></columns>
         </row>`, { left: 6, right: 6 });
-    assert(out.includes('>Bob</th>'))
+    assert(out.html.includes('>Bob</th>'));
   }
 
   @Test('Send email')
@@ -31,7 +32,7 @@ class EmailSuite {
     await instance.sendEmail({
       to: 'tim@eaiti.com',
       subject: 'Simple Test',
-      body: `<row>
+      template: `<row>
             <columns large="6">{{name}}</columns>
             <columns large="6">{{price}}</columns>
           </row>`,

@@ -11,6 +11,6 @@ if [[ ! -e 'node_modules' ]]; then
     npm i
 fi
 
-npm run $1 $TARGET
+STAND_ALONE=1 npm run $1 $TARGET
 
 popd 1>&2 2> /dev/null
