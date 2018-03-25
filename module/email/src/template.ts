@@ -33,13 +33,17 @@ export class TemplateEngine {
   // TODO: figure out paths for html, images, and partials
   constructor(public config: MailTemplateConfig) {
 
-    this.wrapper = readFile(`${this.config.assetRoot}/html/wrapper.html`).then(x => x.toString());
+    this.wrapper = this.config.findFirst('/html/wrapper.html')
+      .then(f => readFile(f))
+      .then(x => x.toString());
 
-    this.css = new Promise<string>((resolve, reject) => {
+    this.css = new Promise<string>(async (resolve, reject) => {
+      const file = await this.config.findFirst('/scss/app.scss');
+
       sass.render({
-        file: `${this.config.scssRoot}/app.scss`,
+        file,
         sourceMap: false,
-        includePaths: [this.config.scssRoot, `${process.cwd()}/node_modules/foundation-emails/scss`]
+        includePaths: this.config.scssRoots
       }, (err, res) => err ? reject(err) : resolve(res.css.toString()));
     });
   }
@@ -137,16 +141,17 @@ export class TemplateEngine {
   }
 
   async inlineImageSource(html: string) {
-    // Extract images
-    const pendingImages: Promise<{ ext: string, data: string, src: string }>[] = [];
+    const srcs: string[] = [];
 
-    html.replace(/(<img[^>]src=")([^"]+)/g, (a: string, pre: string, src: string) => { // Inline base64 images
+    html.replace(/(<img[^>]src=")([^"]+)/g, (a: string, pre: string, src: string) => { srcs.push(src); return '' });
+
+    const pendingImages = srcs.map(async src => {
       // TODO: fix this up?
-      const newSrc = src.startsWith('assets/images') ? `${__dirname}/${src}` : `${this.config.assetRoot}/${src}`;
+      const newSrc = await this.config.findFirst(src);
       const ext = path.extname(newSrc).split('.')[1];
       const bufs: Buffer[] = [];
 
-      pendingImages.push(new Promise((resolve, reject) => {
+      return await new Promise<{ ext: string, data: string, src: string }>((resolve, reject) => {
         const stream = fs.createReadStream(newSrc).pipe(new PngQuant([128]));
         stream.on('data', (d: Buffer) => bufs.push(d));
         stream.on('end', (err: Error) => {
@@ -156,13 +161,12 @@ export class TemplateEngine {
             resolve({ ext, data: Buffer.concat(bufs).toString('base64'), src });
           }
         });
-      }));
-      return '';
+      });
     });
 
     const images = await Promise.all(pendingImages);
-    const imageMap: { [key: string]: { ext: string, data: string } } = {};
-    images.forEach(x => imageMap[x.src] = x)
+    const imageMap = images.reduce((acc, v) => { acc[v.src] = v; return acc; },
+      {} as { [key: string]: { ext: string, data: string } });
 
     html = html.replace(/(<img[^>]src=")([^"]+)/g, (a, pre, src) => { // Inline base64 images
       const { ext, data } = imageMap[src];

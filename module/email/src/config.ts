@@ -1,5 +1,9 @@
 import { Config } from '@travetto/config';
 import * as path from 'path';
+import * as fs from 'fs';
+import * as util from 'util';
+
+const exists = util.promisify(fs.exists);
 
 @Config('mail')
 export class MailConfig {
@@ -18,10 +22,20 @@ export class MailConfig {
 
 @Config('mail.template')
 export class MailTemplateConfig {
-  assetRoot = `${__dirname}/../assets`;
-
-  scssRoot = `${this.assetRoot}/scss`;
+  assetRoots: string[];
+  scssRoots: string[];
 
   async postConstruct() {
+    this.assetRoots.push(`${__dirname}/../assets`);
+    this.scssRoots = [...this.assetRoots.map(x => `${x}/scss`), `${process.cwd()}/node_modules/foundation-emails/scss`];
+  }
+
+  async findFirst(pth: string) {
+    for (const f of this.assetRoots.map(x => `${x}/${pth}`)) {
+      if (await exists(f)) {
+        return f;
+      }
+    }
+    throw new Error('Not found');
   }
 }
