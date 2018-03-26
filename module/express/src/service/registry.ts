@@ -61,7 +61,7 @@ export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, Requ
       const rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
       rh.method = config.method || rh.method;
       rh.path = config.path || rh.path;
-      rh.headers = Object.assign(rh.headers, config.headers || {});
+      rh.headers = { ...rh.headers, ...(config.headers || {}) };
       return descriptor;
     };
   }

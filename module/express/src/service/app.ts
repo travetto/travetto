@@ -48,9 +48,9 @@ export class ExpressApp {
     console.log('Custom operators', operators);
 
     const instances = await Promise.all(operators.map(op =>
-      DependencyRegistry.getInstance(ExpressOperator, op.name)
+      DependencyRegistry.getInstance(ExpressOperator, op.qualifier)
         .catch(err => {
-          console.log(`Unable to load operator ${op.class.name}#${op.name}`);
+          console.log(`Unable to load operator ${op.class.name}#${op.qualifier}`);
         })
     ));
 

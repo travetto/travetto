@@ -7,7 +7,7 @@ import { ExpressApp } from '../index';
 
 @Injectable({
   target: ExpressOperator,
-  name: '@travetto/context'
+  qualifier: Symbol('@travetto/context')
 })
 export class ContextMantainer extends ExpressOperator {
 

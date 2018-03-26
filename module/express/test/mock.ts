@@ -1,6 +1,5 @@
 import { Injectable } from '@travetto/di';
 
-
 class User {
   constructor(public first: string, public last: string, public middle?: string) { }
 }
@@ -14,5 +13,4 @@ export class MockService {
   fetch() {
     return new User('Egorp', 'zrde', 'EzBake Ovesnz3');
   }
-
 }

@@ -44,7 +44,7 @@ export class RouteUtil {
     if (typeof path === 'string') {
       return (base + path).replace(/\/+/, '/').replace(/(.)\/$/, '$1');
     } else if (!!path) {
-      return new RegExp('^' + base.replace(/\//g, '\\/') + path.source + '$', path.flags);
+      return new RegExp(`^${base.replace(/\//g, '\\/')}${path.source}$`, path.flags);
     } else {
       return base;
     }
