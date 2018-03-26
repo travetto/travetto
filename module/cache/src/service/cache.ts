@@ -1,4 +1,3 @@
-import { Shutdown } from '@travetto/base';
 import * as LRU from 'lru-cache';
 
 export class CacheManager {
