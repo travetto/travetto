@@ -1,5 +1,4 @@
 import * as cron from 'cron';
-import { Shutdown } from '@travetto/base';
 
 type Callback = (...args: any[]) => any;
 
@@ -34,7 +33,7 @@ export class Scheduler {
     // Validate expression
     new cron.CronTime(expression)
 
-    const job = new cron.CronJob(Object.assign({ cronTime: expression }, options));
+    const job = new cron.CronJob({ cronTime: expression, ...options });
     job.start();
     const id = this.jobId++;
     this.jobs.set(id, job);
@@ -47,5 +46,3 @@ export class Scheduler {
     }
   }
 }
-
-Shutdown.onShutdown('scheule.kill', () => Scheduler.kill());
