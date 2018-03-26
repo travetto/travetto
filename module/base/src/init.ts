@@ -1,5 +1,6 @@
 import { AppEnv } from './env';
 import { initStackHandler } from './stacktrace';
+import { Shutdown } from './shutdown';
 
 export function init() {
 
@@ -17,4 +18,6 @@ export function init() {
   process.on('unhandledRejection', (reason, p) => {
     console.log(reason);
   });
+
+  Shutdown.register();
 }

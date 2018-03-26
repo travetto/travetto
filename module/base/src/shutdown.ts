@@ -8,6 +8,12 @@ export class Shutdown {
     Shutdown.shutdownEmitter.on('shutdown', resolve);
   });
 
+  static register() {
+    process.on('exit', Shutdown.shutdown.bind(Shutdown, 0));
+    process.on('SIGINT', Shutdown.shutdown.bind(Shutdown, 130));
+    process.on('uncaughtException', Shutdown.shutdown.bind(Shutdown, 1));
+  }
+
   static onShutdownPromise() {
     return Shutdown.shutdownPromise;
   }
@@ -72,7 +78,3 @@ export class Shutdown {
     return this.shutdownPromise;
   }
 }
-
-process.on('exit', Shutdown.shutdown.bind(Shutdown, 0));
-process.on('SIGINT', Shutdown.shutdown.bind(Shutdown, 130));
-process.on('uncaughtException', Shutdown.shutdown.bind(Shutdown, 1));
