@@ -69,7 +69,7 @@ export class CompilerClassSource implements ClassSource {
       prev = new Map(this.classes.get(file)!.entries());
     }
 
-    const keys = new Set([...prev.keys(), ...next.keys()]);
+    const keys = new Set([...Array.from(prev.keys()), ...Array.from(next.keys())]);
 
     if (!this.classes.has(file)) {
       this.classes.set(file, new Map());

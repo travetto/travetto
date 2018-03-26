@@ -8,6 +8,6 @@ export class Test6 {
   age() {
     return 6;
   }
-}
 
+}
 console.log(Test6.__id)
