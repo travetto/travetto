@@ -4,6 +4,8 @@ const { agent } = require('../src/exec/agent/agent-wrapper.js');
 
 process.env.ENV = 'test';
 process.env.NO_WATCH = true;
+process.env.DELAYED_INIT = true;
+
 let Compiler;
 if (!!process.env.DEBUG) {
   console.debug = console.log;
@@ -12,10 +14,17 @@ if (!!process.env.DEBUG) {
 agent((done) => {
   console.debug('Init');
   require('@travetto/base/bootstrap');
+  const { init, initializers } = require('@travetto/base/src/startup');
+
+  // Remove all trailing initializers as tests will be on the hook for those manually
+  initializers.splice(initializers.findIndex(x => x.priority === 1) + 1, 100);
+
+  // Init Compiler
   Compiler = require('@travetto/compiler').Compiler;
   Compiler.workingSets = ['!'];
-  Compiler.init(process.cwd());
-  done();
+
+  // Initialize
+  initializers.then(x => done());
 }, (data, done) => {
   console.debug('Run');
 
