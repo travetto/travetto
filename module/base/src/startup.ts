@@ -3,6 +3,15 @@ import { initStackHandler } from './stacktrace';
 import { Shutdown } from './shutdown';
 import { bulkRequire } from './bulk-find';
 
+const initializers =
+  bulkRequire<{ init: Function, priority?: number }>(
+    '*/src/startup.ts',
+    `${process.cwd()}/node_modules/@travetto`,
+    x => x.includes('/base/')
+  )
+    .map(x => ({ priority: 100, ...x }))
+    .sort((a, b) => a.priority - b.priority);
+
 export function init() {
 
   process.env.NODE_ENV = AppEnv.prod ? 'production' : 'development';
@@ -22,7 +31,7 @@ export function init() {
 
   Shutdown.register();
 
-  for (const startup of bulkRequire('*/src/startup.ts', `${process.cwd()}/node_modules/@travetto`, x => x.includes('/base/'))) {
+  for (const startup of initializers) {
     startup.init();
   }
 }

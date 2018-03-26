@@ -48,7 +48,7 @@ export async function bulkFind(globs: string | string[], base?: string, exclude?
   return all.reduce((acc, v) => acc.concat(v), []);
 }
 
-export function bulkRequire(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
+export function bulkRequire<T = any>(globs: string | string[], base?: string, exclude?: (name: string) => boolean): T[] {
   return bulkFindSync(globs, base, exclude)
     .map(require)
     .filter(x => !!x); // Return non-empty values
