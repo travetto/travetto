@@ -3,8 +3,7 @@ import { Schema, Ignore, Field } from '../decorator';
 import { TransformUtil, Import, State } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
 
-
-let SCHEMAS = TransformUtil.buildImportAliasMap({
+const SCHEMAS = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.schema'),
   '@travetto/schema': 'Schema'
 });
@@ -20,7 +19,7 @@ interface AutoState extends State {
 
 function resolveType(type: ts.Node, state: State): ts.Expression {
   let expr: ts.Expression | undefined;
-  let kind = type && type!.kind;
+  const kind = type && type!.kind;
 
   switch (kind) {
     case ts.SyntaxKind.TypeReference:
@@ -38,8 +37,8 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
       expr = ts.createArrayLiteral([resolveType((type as ts.ArrayTypeNode).elementType, state)]);
       break;
     case ts.SyntaxKind.TypeLiteral:
-      let properties: ts.PropertyAssignment[] = [];
-      for (let member of (type as ts.TypeLiteralNode).members) {
+      const properties: ts.PropertyAssignment[] = [];
+      for (const member of (type as ts.TypeLiteralNode).members) {
         let subMember: ts.TypeNode = (member as any).type;
         if ((subMember as any).literal) {
           subMember = (subMember as any).literal;
@@ -49,11 +48,11 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
       expr = ts.createObjectLiteral(properties);
       break;
     case ts.SyntaxKind.UnionType: {
-      let types = (type as ts.UnionTypeNode).types;
+      const types = (type as ts.UnionTypeNode).types;
       expr = types.slice(1).reduce((fType, stype) => {
-        let fTypeStr = (fType as any).text;
+        const fTypeStr = (fType as any).text;
         if (fTypeStr !== 'Object') {
-          let resolved = resolveType(stype, state);
+          const resolved = resolveType(stype, state);
           if ((resolved as any).text !== fTypeStr) {
             fType = ts.createIdentifier('Object');
           }
@@ -70,8 +69,8 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
 }
 
 function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
-  let typeExpr = resolveType(node.type!, state);
-  let properties = [];
+  const typeExpr = resolveType(node.type!, state);
+  const properties = [];
   if (!node.questionToken) {
     properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral({})));
   }
@@ -79,9 +78,9 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
   // If we have a union type
   if (node.type && node.type!.kind === ts.SyntaxKind.UnionType && ['Number', 'String'].includes((typeExpr as any).text)) {
 
-    let types = (node.type! as ts.UnionTypeNode).types
-    let literals = types.map(x => (x as ts.LiteralTypeNode).literal);
-    let values = literals.map(x => x.getText());
+    const types = (node.type! as ts.UnionTypeNode).types
+    const literals = types.map(x => (x as ts.LiteralTypeNode).literal);
+    const values = literals.map(x => x.getText());
 
     properties.push(ts.createPropertyAssignment('enum', TransformUtil.fromLiteral({
       values: literals,
@@ -89,13 +88,13 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
     })));
   }
 
-  let params = [typeExpr];
+  const params = [typeExpr];
   if (properties.length) {
     params.push(ts.createObjectLiteral(properties));
   }
 
   if (!state.addField) {
-    let ident = ts.createUniqueName('import_Field');
+    const ident = ts.createUniqueName('import_Field');
     state.addField = ts.createPropertyAccess(ident, 'Field');
     state.newImports.push({
       path: require.resolve('../decorator/field'),
@@ -103,11 +102,11 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
     });
   }
 
-  let dec = ts.createDecorator(ts.createCall(state.addField as any, undefined, ts.createNodeArray(params)));
-  let decls = ts.createNodeArray([
+  const dec = ts.createDecorator(ts.createCall(state.addField as any, undefined, ts.createNodeArray(params)));
+  const decls = ts.createNodeArray([
     dec, ...(node.decorators || [])
   ]);
-  let res = ts.updateProperty(node,
+  const res = ts.updateProperty(node,
     decls,
     node.modifiers,
     node.name,
@@ -121,24 +120,24 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AutoState): T {
   if (ts.isClassDeclaration(node)) {
-    let anySchema = TransformUtil.findAnyDecorator(node, SCHEMAS, state);
+    const anySchema = TransformUtil.findAnyDecorator(node, SCHEMAS, state);
 
-    let schema = TransformUtil.findAnyDecorator(node, {
-      'Schema': new Set(['@travetto/schema'])
+    const schema = TransformUtil.findAnyDecorator(node, {
+      Schema: new Set(['@travetto/schema'])
     }, state);
 
     let auto = !!anySchema;
 
     if (!!schema) {
-      let arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
+      const arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
       auto = (!arg || arg.kind !== ts.SyntaxKind.FalseKeyword);
     }
 
     if (auto) {
       state.inAuto = true;
-      let ret = ts.visitEachChild(node, c => visitNode(context, c, state), context) as ts.ClassDeclaration;
+      const ret = ts.visitEachChild(node, c => visitNode(context, c, state), context) as ts.ClassDeclaration;
       state.inAuto = false;
-      for (let member of ret.members || []) {
+      for (const member of ret.members || []) {
         if (!member.parent) {
           member.parent = ret;
         }
@@ -147,11 +146,11 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
 
     if (!!anySchema) {
-      let ret = node as any as ts.ClassDeclaration;
+      const ret = node as any as ts.ClassDeclaration;
       let decls = node.decorators;
       if (!schema) {
         if (!state.addSchema) {
-          let ident = ts.createUniqueName('import_Schema');
+          const ident = ts.createUniqueName('import_Schema');
           state.newImports.push({
             path: require.resolve('../decorator/schema'),
             ident
@@ -180,7 +179,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     // tslint:disable-next-line:no-bitwise
   } else if (ts.isPropertyDeclaration(node) && !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static)) {
     if (state.inAuto) {
-      let ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set(['@travetto/schema']) }, state);
+      const ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set(['@travetto/schema']) }, state);
       if (!ignore) {
         return computeProperty(node, state) as any as T;
       }

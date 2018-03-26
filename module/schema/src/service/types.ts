@@ -1,6 +1,5 @@
 import { Class } from '@travetto/registry';
 
-
 export interface SchemaClass<T = any> {
   from?: <Z>(data: any) => Z;
 }

@@ -5,7 +5,7 @@ export class BindUtil {
 
   static coerceType<T>(type: Class<T>, val: any): T {
     if (val.constructor !== type) {
-      let atype = type as Class;
+      const atype = type as Class;
       if (atype === Boolean) {
         if (typeof val === 'string') {
           val = val === 'true';
@@ -25,27 +25,27 @@ export class BindUtil {
     view = view || SchemaRegistry.DEFAULT_VIEW;
 
     if (!!data) {
-      let conf = SchemaRegistry.get(cons);
+      const conf = SchemaRegistry.get(cons);
 
       // If no configuration
       if (!conf) {
-        for (let k of Object.keys(data)) {
+        for (const k of Object.keys(data)) {
           (obj as any)[k] = data[k];
         }
       } else {
 
-        let viewConf = conf && conf.views[view];
+        const viewConf = conf && conf.views[view];
         if (!viewConf) {
           throw new Error(`View not found: ${view}`);
         }
 
-        for (let schemaFieldName of viewConf.fields) {
+        for (const schemaFieldName of viewConf.fields) {
           let inboundField: string | undefined = undefined;
 
           if (schemaFieldName in data) {
             inboundField = schemaFieldName;
           } else if (viewConf.schema[schemaFieldName].aliases) {
-            for (let aliasedField of (viewConf.schema[schemaFieldName].aliases || [])) {
+            for (const aliasedField of (viewConf.schema[schemaFieldName].aliases || [])) {
               if (aliasedField in data) {
                 inboundField = aliasedField;
                 break;
@@ -60,7 +60,7 @@ export class BindUtil {
           let v = data[inboundField];
 
           if (v !== undefined && v !== null) {
-            let declared = viewConf.schema[schemaFieldName].declared;
+            const declared = viewConf.schema[schemaFieldName].declared;
             // Ensure its an array
             if (!Array.isArray(v) && declared.array) {
               v = [v];

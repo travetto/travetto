@@ -27,7 +27,6 @@ class MinTest extends SchemaBound {
   value: string;
 }
 
-
 function findError(errors: ValidationError[], path: string, message: string) {
   return errors.find(x => x.path === path && x.message.includes(message));
 }
@@ -42,9 +41,9 @@ class Validation {
 
   @Test('Url and message')
   async urlAndMessage() {
-    let r = Response.from({
+    const r = Response.from({
       url: 'htt://google'
-    });
+    } as any);
     try {
       await SchemaValidator.validate(r);
       assert.fail('Validation should have failed');
@@ -56,7 +55,7 @@ class Validation {
 
   @Test('Should validate nested')
   async nested() {
-    let res = Parent.from({
+    const res = Parent.from({
       response: {
         url: 'a.b',
         pandaState: 'orange'
@@ -75,7 +74,7 @@ class Validation {
 
   @Test('Should ensure message for min')
   async minMessage() {
-    let o = MinTest.from({ value: 'hello' });
+    const o = MinTest.from({ value: 'hello' } as any);
 
     try {
       await SchemaValidator.validate(o);

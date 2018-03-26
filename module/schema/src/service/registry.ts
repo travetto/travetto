@@ -105,12 +105,12 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
       const view = src.views[v];
       if (v in dest.views) {
         dest.views[v] = {
-          schema: Object.assign({}, dest.views[v].schema, view.schema),
+          schema: { ...dest.views[v].schema, ...view.schema },
           fields: (dest.views[v].fields).concat(view.fields)
         }
       } else {
         dest.views[v] = {
-          schema: Object.assign({}, view.schema || {}),
+          schema: { ...(view.schema || {}) },
           fields: view.fields.slice(0)
         }
       }

@@ -61,7 +61,7 @@ class DataBinding {
 
   @Test('Validate bind')
   validateBind() {
-    let person = Person.from({
+    const person = Person.from({
       name: 'Test',
       address: {
         street1: '1234 Fun',
@@ -71,13 +71,13 @@ class DataBinding {
         { area: 'A', value: 20 },
         { area: 'B', value: 30 }
       ]
-    });
+    } as any);
     assert(person.address instanceof Address);
     assert(person.address.street1 === '1234 Fun');
     assert(person.counts.length === 2);
     assert(person.counts[0] instanceof Count);
 
-    let viewPerson = BindUtil.bindSchema(Person, new Person(), {
+    const viewPerson = BindUtil.bindSchema(Person, new Person(), {
       name: 'Test',
       address: {
         street1: '1234 Fun',
@@ -99,10 +99,10 @@ class DataBinding {
 
   @Test('Validate Object')
   validateObject() {
-    let res = Response.from({
+    const res = Response.from({
       questionId: '20',
       answer: ['a', 'd']
-    });
+    } as any);
     assert(res.questionId === '20');
     assert(!!res.answer);
     assert(res.answer === ['a', 'd']);
@@ -110,23 +110,23 @@ class DataBinding {
 
   @Test('Should handle inheritance')
   validateInheritance() {
-    let res = SuperAddress.from({
+    const res = SuperAddress.from({
       street1: 'a',
       street2: 'b',
       unit: '20'
-    });
+    } as any);
     assert(res.unit === '20');
   }
 
   @Test('Should handle aliases')
   validateAliases() {
-    let res = Response.from({
+    const res = Response.from({
       correct: true,
       status: 'orange'
     } as any);
 
     console.log(res);
 
-    assert(res.valid === true);
+    assert(res.valid);
   }
 }
