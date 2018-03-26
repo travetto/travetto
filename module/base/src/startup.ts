@@ -5,9 +5,7 @@ import { bulkRequire } from './bulk-find';
 
 const initializers =
   bulkRequire<{ init: { action: Function, priority?: number } }>(
-    '*/src/startup.ts',
-    `${process.cwd()}/node_modules/@travetto`,
-    x => x.includes('/base/')
+    ['node_modules/@travetto/*/bootstrap.ts', 'bootstrap.ts']
   )
     .map(x => x.init)
     .map(x => ({ priority: 100, ...x }))
