@@ -1,4 +1,5 @@
-require('../bootstrap').init().then(x => {
-  require('./simpleReg');
-  require('./simple');
-})
+require('@travetto/base/bootstrap')
+  .then(x => {
+    require('./simpleReg');
+    require('./simple');
+  });
