@@ -30,5 +30,3 @@ export class CacheManager {
     }
   }
 }
-
-Shutdown.onShutdown('Cache Manager', CacheManager.cleanup.bind(CacheManager));
