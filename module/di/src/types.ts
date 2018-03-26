@@ -17,3 +17,10 @@ export interface Dependency<T = any> {
   qualifier: symbol;
   optional?: boolean;
 }
+
+export interface InjectableFactoryConfig<T> {
+  class: Class<T>;
+  qualifier?: symbol;
+  dependencies?: Dependency<any>[]
+  autoCreate?: boolean
+}

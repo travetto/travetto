@@ -1,6 +1,7 @@
 import { InjectableConfig, Dependency } from '../types';
 import { DependencyRegistry, DEFAULT_INSTANCE } from '../service';
 import { Class } from '@travetto/registry';
+import { InjectableFactoryConfig } from '..';
 
 export function Injectable(config: Partial<InjectableConfig<any>> = {}): ClassDecorator {
   return (target: Class | any) => {
@@ -32,29 +33,8 @@ export function Inject(config?: InjectConfig) {
   };
 }
 
-export function InjectableFactory(config: { class: Class<any>, qualifier: symbol, autoCreate?: boolean, dependencies?: Dependency[] }): MethodDecorator {
+export function InjectableFactory(config: InjectableFactoryConfig<any>): MethodDecorator {
   return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
-    console.log('Injecting', target, config);
-
-    const finalConfig: InjectableConfig<any> = {} as any;
-    if (typeof config.autoCreate === 'boolean') {
-      finalConfig.autoCreate = { create: config.autoCreate } as any;
-    }
-    finalConfig.factory = descriptor.value!;
-    finalConfig.target = config.class;
-    finalConfig.qualifier = config.qualifier;
-
-    if (config.dependencies) {
-      finalConfig.dependencies = {
-        cons: config.dependencies,
-        fields: {}
-      }
-    }
-
-    // Create mock cls for DI purposes
-    const cls = { __id: `${target.__id}#${property}` } as any;
-
-    finalConfig.class = cls;
-    DependencyRegistry.registerClass(cls, finalConfig);
+    DependencyRegistry.registerFactory({ ...config, fn: descriptor.value, id: `${target.__id}#${property}` });
   };
 }

@@ -1,4 +1,4 @@
-import { Dependency, InjectableConfig, ClassTarget } from '../types';
+import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from '../types';
 import { InjectionError } from './error';
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
 import { AppEnv } from '@travetto/base';
@@ -227,6 +227,33 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     if (pconfig.dependencies) {
       config.dependencies = { fields: {}, ...pconfig.dependencies };
     }
+  }
+
+  registerFactory(config: InjectableFactoryConfig<any> & { fn: (...args: any[]) => any, id?: string }) {
+    const finalConfig: InjectableConfig<any> = {} as any;
+    if (typeof config.autoCreate === 'boolean') {
+      finalConfig.autoCreate = { create: config.autoCreate } as any;
+    }
+    finalConfig.factory = config.fn;
+    finalConfig.target = config.class;
+
+    if (config.qualifier) {
+      finalConfig.qualifier = config.qualifier;
+    }
+
+    if (config.dependencies) {
+      finalConfig.dependencies = {
+        cons: config.dependencies,
+        fields: {}
+      }
+    }
+
+    // Create mock cls for DI purposes
+    const cls = { __id: config.id || `${config.class.__id}#${config.fn.name}` } as any;
+
+    finalConfig.class = cls;
+
+    this.registerClass(cls, finalConfig);
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
