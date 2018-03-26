@@ -14,7 +14,7 @@ if (!!process.env.DEBUG) {
 agent((done) => {
   console.debug('Init');
   require('@travetto/base/bootstrap');
-  const { init, initializers } = require('@travetto/base/src/startup');
+  const { initializers, bootstrap } = require('@travetto/base/src/startup');
 
   // Remove all trailing initializers as tests will be on the hook for those manually
   initializers.splice(initializers.findIndex(x => x.priority === 1) + 1, 100);
@@ -24,7 +24,8 @@ agent((done) => {
   Compiler.workingSets = ['!'];
 
   // Initialize
-  initializers.then(x => done());
+  bootstrap().then(x => done());
+
 }, (data, done) => {
   console.debug('Run');
 
