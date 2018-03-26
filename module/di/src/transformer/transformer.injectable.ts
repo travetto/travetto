@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import { TransformUtil, Import, State } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
 
-let INJECTABLES = TransformUtil.buildImportAliasMap({
+const INJECTABLES = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.injectable'),
   '@travetto/di': 'Injectable'
 });
@@ -60,7 +60,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     const foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES, state);
     let decls = node.decorators;
 
-    if (foundDec) {
+    if (foundDec) { // Constructor
 
       node = ts.visitEachChild(node, c => visitNode(context, c, state), context);
 
@@ -102,7 +102,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     ) as any;
 
     return out;
-  } if (ts.isPropertyDeclaration(node)) {
+  } else if (ts.isPropertyDeclaration(node)) { // Property
     const expr = processDeclaration(state, node);
 
     if (expr) {
@@ -125,10 +125,17 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     } else {
       return node;
     }
+  } else if (ts.isMethodDeclaration(node) && (ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static) > 0) { // tslint:disable-line no-bitwise
+    // Factory for static methods
+    const foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES, state);
+    // let decls = node.decorators;
+
+    // if (foundDec) { // Constructor
+
+    // }
   }
   return ts.visitEachChild(node, c => visitNode(context, c, state), context);
 }
-
 
 export const InjectableTransformer = {
   transformer: TransformUtil.importingVisitor<DiState>(() => ({

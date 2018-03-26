@@ -108,7 +108,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const consValues = all.slice(0, consDeps.length);
     const fieldValues = all.slice(consDeps.length);
 
-    const inst = new managed.class(...consValues);
+    const inst = managed.factory ?
+      managed.factory(...consValues) :
+      new managed.class(...consValues);
 
     for (let i = 0; i < fieldKeys.length; i++) {
       (inst as any)[fieldKeys[i]] = fieldValues[i];
@@ -207,6 +209,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const classId = pconfig.class!.__id;
     const config = this.getOrCreatePending(pconfig.class!);
 
+    if (pconfig.factory) {
+      config.factory = pconfig.factory;
+    }
     if (pconfig.qualifier) {
       config.qualifier = pconfig.qualifier;
     }
@@ -232,9 +237,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const parentConfig = this.get(parentClass.__id);
 
     if (parentConfig) {
-      config.dependencies.fields = Object.assign({},
-        parentConfig.dependencies!.fields,
-        config.dependencies.fields);
+      config.dependencies.fields = {
+        ...parentConfig.dependencies!.fields,
+        ...config.dependencies.fields
+      };
 
       // Inherit cons deps if no constructor defined
       if (config.dependencies.cons === undefined) {

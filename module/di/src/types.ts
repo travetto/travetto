@@ -4,6 +4,7 @@ export type ClassTarget<T> = Class<T> | Function;
 
 export interface InjectableConfig<T = any> extends Dependency<T> {
   class: Class<T>;
+  factory: (...args: any[]) => T;
   dependencies: {
     cons?: Dependency<any>[],
     fields: { [key: string]: Dependency<any> }

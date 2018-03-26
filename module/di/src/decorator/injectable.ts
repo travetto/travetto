@@ -29,3 +29,13 @@ export function Inject(config?: InjectConfig): PropertyDecorator {
       config as any as Dependency);
   };
 }
+
+export function InjectableFactory(config: Partial<InjectableConfig<any>> & { class: Class<any>, qualifier: Symbol }): MethodDecorator {
+  return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
+    if (typeof config.autoCreate === 'boolean') {
+      config.autoCreate = { create: config.autoCreate } as any;
+    }
+    config.factory = descriptor.value!;
+    DependencyRegistry.registerClass(config.class, config);
+  };
+}
