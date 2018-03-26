@@ -8,11 +8,21 @@ const FILTERS = [
   '(native)',
   '<anonymous>',
   'source-map-support.js'
-]
+];
 
-if (!AppEnv.prod) {
+let registered = false;
+
+export function initStackHandler() {
+
+  if (registered) {
+    return;
+  } else {
+    registered = true;
+  }
+
   require('trace');
   const chain = require('stack-chain');
+
   chain.filter.attach(function (error: Error, frames: any[]) {
     // Filter out traces related to this file
     const rewrite = frames.filter(function (callSite) {
@@ -28,11 +38,6 @@ if (!AppEnv.prod) {
     return rewrite;
   });
 }
-
-// Log unhandled rejections
-process.on('unhandledRejection', (reason, p) => {
-  console.log(reason);
-});
 
 export function addStackFilters(...names: string[]) {
   if (FILTERS) {
