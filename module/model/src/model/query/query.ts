@@ -16,7 +16,7 @@ type _SortClause<T> = {
   [P in keyof T]?: T[P] extends object ? _SortClause<T[P]> : (boolean | 1 | -1);
 }
 
-interface _QueryOptions<T> {
+type _QueryOptions<T> = {
   sort?: _SortClause<T>[];
   limit?: number;
   offset?: number;

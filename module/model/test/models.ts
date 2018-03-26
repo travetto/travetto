@@ -3,7 +3,6 @@ import { Model, BaseModel, WhereClause, ModelService } from '../index';
 @Model()
 export class Address extends BaseModel {
   street1: string;
-
   street2: string;
 }
 

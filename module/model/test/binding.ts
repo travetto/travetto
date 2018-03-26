@@ -8,8 +8,7 @@ import * as assert from 'assert';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry, Class } from '@travetto/registry';
 
-
-let query: Query<Person> = {
+const query: Query<Person> = {
   select: {
     address: {
       street1: 1
@@ -46,25 +45,25 @@ class DataBinding {
 
   @Test()
   validateBind() {
-    let person = Person.from({
+    const person = Person.from({
       name: 'Test',
       address: {
         street1: '1234 Fun',
         street2: 'Unit 20'
       }
     });
+
     assert(person.address instanceof Address);
     assert(person.address.street1 === '1234 Fun');
-
   }
 
   @Test()
   async getModel() {
-    let model = await DependencyRegistry.getInstance(ModelService);
+    const model = await DependencyRegistry.getInstance(ModelService);
 
     assert(model['source'] instanceof TestSource);
 
-    let res = await model.getByQuery(Person, {
+    const res = await model.getByQuery(Person, {
       where: {
         name: 'orange',
         names: ['1', '2'],

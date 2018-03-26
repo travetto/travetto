@@ -15,7 +15,7 @@ export abstract class BaseModel implements ModelCore {
   updatedDate?: Date;
 
   constructor() {
-    let type = ModelRegistry.get(this.constructor as Class).discriminator;
+    const type = ModelRegistry.get(this.constructor as Class).discriminator;
     if (type) {
       this.type = type;
     }
@@ -31,4 +31,3 @@ export abstract class BaseModel implements ModelCore {
   postLoad() {
   }
 }
-

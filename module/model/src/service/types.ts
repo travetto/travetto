@@ -1,7 +1,6 @@
 import { SortClause } from '../model';
 import { Class } from '@travetto/registry';
 
-
 export interface IndexConfig<T> {
   fields: SortClause<T>;
   options: {

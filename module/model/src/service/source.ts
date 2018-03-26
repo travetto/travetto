@@ -4,7 +4,6 @@ import { ModelCore, QueryOptions, Query, PageableModelQuery } from '../model';
 import { BulkState, BulkResponse } from '../model/bulk';
 import { ModelQuery } from '../model/query';
 
-
 export abstract class ModelSource {
   onChange?(e: ChangeEvent): void;
 

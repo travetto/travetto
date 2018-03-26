@@ -1,7 +1,3 @@
 {
-  "extends": "@travetto/base/tslint.json",
-  "rulesDirectory": "src/ts-lint/",
-  "rules": {
-    "verify-model-query": true
-  }
+  "extends": "@travetto/base/tslint.json"
 }

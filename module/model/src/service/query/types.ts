@@ -1,6 +1,5 @@
 import { FieldConfig } from '@travetto/schema';
 
-
 export type SimpleType = 'string' | 'number' | 'boolean' | 'Date' | 'GeoPoint';
 
 export interface ErrorCollector<T> {
@@ -57,7 +56,7 @@ export const OPERATORS: { [key: string]: { type: SimpleType, ops: { [key: string
 export class TypeUtil {
 
   static getDeclaredType(f: FieldConfig) {
-    let type = f.declared.type;
+    const type = f.declared.type;
     let op: SimpleType | undefined;
     if (type === String) {
       op = 'string';

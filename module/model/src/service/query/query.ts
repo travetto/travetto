@@ -1,4 +1,4 @@
-import { ModelQuery, Query, PageableModelQuery } from '../../model';
+import { ModelQuery, Query, PageableModelQuery, GroupClause, WhereClause } from '../../model';
 import { Class } from '@travetto/registry';
 import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from './types';
 import { SchemaRegistry, SchemaConfig, ViewConfig, FieldConfig } from '@travetto/schema';
@@ -38,11 +38,21 @@ class ValidationError extends BaseError {
 @Injectable()
 export class QueryVerifierService {
 
+  private mapping = [
+    [SELECT, this.processSelectClause.bind(this)],
+    [WHERE, this.processWhereClause.bind(this)],
+    [SORT, this.processSortClause.bind(this)],
+    [GROUP_BY, this.processGroupByClause.bind(this)]
+  ] as [
+    keyof Query<any>,
+    (state: State, cls: Class, val: any) => any
+  ][];
+
   processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler) {
 
-    let view = SchemaRegistry.getViewSchema(cls);
+    const view = SchemaRegistry.getViewSchema(cls);
 
-    for (let [key, value] of Object.entries(val)) {
+    for (const [key, value] of Object.entries(val)) {
 
       if (handler.preMember && handler.preMember(state, value)) {
         continue;
@@ -53,14 +63,14 @@ export class QueryVerifierService {
         continue;
       }
 
-      let field = view.schema[key];
-      let op = TypeUtil.getDeclaredType(field);
+      const field = view.schema[key];
+      const op = TypeUtil.getDeclaredType(field);
 
       if (op) {
         handler.onSimpleType(state, op, value, field.declared.array);
       } else {
-        let subCls = field.declared.type;
-        let subVal = value;
+        const subCls = field.declared.type;
+        const subVal = value;
         if (handler.onComplexType && handler.onComplexType(state, subCls, subVal, field.declared.array)) {
           continue;
         }
@@ -77,7 +87,7 @@ export class QueryVerifierService {
     if (isArray) {
       if (Array.isArray(value)) {
         // Handle array literal
-        for (let el of value) {
+        for (const el of value) {
           this.checkOperatorClause(state, declaredType, el, allowed, false);
         }
         return;
@@ -86,7 +96,7 @@ export class QueryVerifierService {
 
     if (!_.isPlainObject(value)) {
       // Handle literal
-      let actualType = TypeUtil.getActualType(value);
+      const actualType = TypeUtil.getActualType(value);
       if (!this.typesMatch(declaredType, actualType)) {
         state.log(`Operator clause only supports types of ${declaredType}, not ${actualType}`);
       }
@@ -97,7 +107,7 @@ export class QueryVerifierService {
     }
 
     // Should only be one?
-    for (let [k, v] of Object.entries(value)) {
+    for (const [k, v] of Object.entries(value)) {
 
       if (isArray && (k === $ALL || k === $ELEM_MATCH)) {
         if (k === $ALL) {
@@ -105,8 +115,8 @@ export class QueryVerifierService {
             state.log(`$all operator requires comparison to be an array, not ${typeof v}`);
             return;
           } else {
-            for (let el of v) {
-              let elAct = TypeUtil.getActualType(el);
+            for (const el of v) {
+              const elAct = TypeUtil.getActualType(el);
               if (!this.typesMatch(declaredType, elAct)) {
                 state.log(`$all operator requires all values to be ${declaredType}, but ${elAct} was found`);
                 return;
@@ -117,7 +127,7 @@ export class QueryVerifierService {
       } else if (!(k in allowed)) {
         state.log(`Operation ${k}, not allowed for field of type ${declaredType}`);
       } else {
-        let actualSubType = TypeUtil.getActualType(v)!;
+        const actualSubType = TypeUtil.getActualType(v)!;
 
         if (!allowed[k].has(actualSubType)) {
           state.log(`Passed in value ${actualSubType} mismatches with expected type(s) ${Array.from(allowed[k])}`);
@@ -129,14 +139,14 @@ export class QueryVerifierService {
   processWhereClause<T>(st: State, cls: Class<T>, passed: object) {
     return this.processGenericClause(st, cls, passed, {
       preMember: (state: State, value: any) => {
-        let keys = Object.keys(value);
-        let firstKey = keys[0];
+        const keys = Object.keys(value);
+        const firstKey = keys[0];
 
         if (!firstKey) {
           return false;
         }
 
-        let sub = value[firstKey];
+        const sub = value[firstKey];
 
         if (_.isPlainObject(value)) {
           if (firstKey.charAt(0) === '$') {
@@ -152,7 +162,7 @@ export class QueryVerifierService {
             state.log(`${firstKey} requires the value to be an array`);
           } else {
             // Iterate
-            for (let el of sub) {
+            for (const el of sub) {
               this.processWhereClause(state, cls, el);
             }
             return true;
@@ -168,7 +178,7 @@ export class QueryVerifierService {
         return false;
       },
       onSimpleType: (state: State, type: SimpleType, value: any, isArray: boolean) => {
-        let conf = OPERATORS[type];
+        const conf = OPERATORS[type];
         this.checkOperatorClause(state, value, conf.type, conf.ops, isArray);
       },
       onComplexType: (state: State, subCls: Class<T>, subVal: T, isArray: boolean): boolean => {
@@ -196,7 +206,7 @@ export class QueryVerifierService {
   processSelectClause<T>(st: State, cls: Class<T>, passed: object) {
     return this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
-        let actual = TypeUtil.getActualType(value);
+        const actual = TypeUtil.getActualType(value);
         if (actual === 'number' || actual === 'boolean') {
           if (value === 1 || value === 0 || value === true || value === false) {
             return;
@@ -222,9 +232,9 @@ export class QueryVerifierService {
   }
 
   verify<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>) {
-    let errors: any[] = [];
+    const errors: any[] = [];
 
-    let state = {
+    const state = {
       path: '',
       collect(path: string, message: string) {
         errors.push({ message: `${path}: ${message}` });
@@ -236,25 +246,24 @@ export class QueryVerifierService {
         return { ...this, path: !this.path ? sub : `${this.path}.${sub}` };
       }
     }
-    for (let x of [SELECT, WHERE, SORT, GROUP_BY]) {
-      if (!(x in query)) {
+    for (const [key, fn] of this.mapping) {
+      if (!(key in query)) {
         continue;
       }
 
-      const fn: keyof this = `process${x.charAt(0).toUpperCase()}${x.substring(1)}Clause` as any;
-      const val = (query as any)[x];
+      const val = (query as Query<any>)[key];
 
-      if (Array.isArray(val) && x === SORT) {
-        for (let el of val) {
-          (this[fn] as any)(state, cls, el);
+      if (Array.isArray(val) && key === SORT) {
+        for (const el of val) {
+          fn(state, cls, el);
         }
       } else {
-        (this[fn] as any)(state, cls, val);
+        fn(state, cls, val);
       }
     }
 
     if (errors.length) {
-      let ret = new Error('Validation errors');
+      const ret = new Error('Validation errors');
       (ret as any).errors = errors;
       throw new ValidationError(errors);
     }

@@ -34,7 +34,7 @@ export class ModelService extends ModelSource {
   }
 
   convert<T extends ModelCore>(cls: Class<T>, o: T) {
-    let config = ModelRegistry.get(cls);
+    const config = ModelRegistry.get(cls);
 
     let cons = cls;
 
@@ -85,7 +85,7 @@ export class ModelService extends ModelSource {
     if (!query.sort && config.defaultSort) {
       query.sort = [config.defaultSort as SortClause<T>];
     }
-    let res = await this.source.getAllByQuery(cls, query);
+    const res = await this.source.getAllByQuery(cls, query);
     return res.map(o => this.postLoad(cls, o));
   }
 
@@ -98,14 +98,14 @@ export class ModelService extends ModelSource {
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}, failOnMany: boolean = true) {
     this.queryService.verify(cls, query);
 
-    let res = await this.source.getByQuery(cls, query, failOnMany);
+    const res = await this.source.getByQuery(cls, query, failOnMany);
     return this.postLoad(cls, res);
   }
 
   async saveOrUpdate<T extends ModelCore>(cls: Class<T>, o: T, query: ModelQuery<T>) {
     this.queryService.verify(cls, query);
 
-    let res = await this.getAllByQuery(getClass(o), { ...query, limit: 2 });
+    const res = await this.getAllByQuery(getClass(o), { ...query, limit: 2 });
     if (res.length === 1) {
       o = _.merge(res[0], o);
       return await this.update(cls, o);
@@ -116,7 +116,7 @@ export class ModelService extends ModelSource {
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string) {
-    let res = await this.source.getById(cls, id);
+    const res = await this.source.getById(cls, id);
     return this.postLoad(cls, res);
   }
 
@@ -132,19 +132,19 @@ export class ModelService extends ModelSource {
 
   async save<T extends ModelCore>(cls: Class<T>, o: T) {
     o = await this.prePersist(cls, o);
-    let res = await this.source.save(cls, o);
+    const res = await this.source.save(cls, o);
     return this.postLoad(cls, res);
   }
 
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]) {
     objs = await Promise.all(objs.map(o => this.prePersist(cls, o)));
-    let res = await this.source.saveAll(cls, objs);
+    const res = await this.source.saveAll(cls, objs);
     return res.map(x => this.postLoad(cls, x));
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T) {
     o = await this.prePersist(cls, o);
-    let res = await this.source.update(cls, o);
+    const res = await this.source.update(cls, o);
     return this.postLoad(cls, res);
   }
 
@@ -166,8 +166,8 @@ export class ModelService extends ModelSource {
 
   async updatePartialView<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string) {
     o = await this.prePersist(cls, o, view);
-    let partial = BindUtil.bindSchema(cls, {}, o, view);
-    let res = await this.updatePartial(cls, partial);
+    const partial = BindUtil.bindSchema(cls, {}, o, view);
+    const res = await this.updatePartial(cls, partial);
     return this.postLoad(cls, res);
   }
 
@@ -175,8 +175,8 @@ export class ModelService extends ModelSource {
     this.queryService.verify(cls, query);
 
     o = await this.prePersist(cls, o, view);
-    let partial = BindUtil.bindSchema(cls, {}, o, view);
-    let res = await this.updatePartialByQuery(cls, query, partial);
+    const partial = BindUtil.bindSchema(cls, {}, o, view);
+    const res = await this.updatePartialByQuery(cls, query, partial);
     return res;
   }
 
