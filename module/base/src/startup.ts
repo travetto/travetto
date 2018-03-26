@@ -1,6 +1,7 @@
 import { AppEnv } from './env';
 import { initStackHandler } from './stacktrace';
 import { Shutdown } from './shutdown';
+import { bulkRequire } from './bulk-find';
 
 export function init() {
 
@@ -20,4 +21,8 @@ export function init() {
   });
 
   Shutdown.register();
+
+  for (const startup of bulkRequire('*/src/startup.ts', `${process.cwd()}/node_modules/@travetto`, x => x.includes('/base/'))) {
+    startup.init();
+  }
 }

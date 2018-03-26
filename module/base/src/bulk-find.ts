@@ -14,8 +14,8 @@ function findHandler(base?: string, exclude?: (name: string) => boolean) {
 
   return {
     config: {
-      cwd: base!,
-      root: base!,
+      cwd: base,
+      root: base,
     },
     match: (matches: string[]) => {
       let out = matches.map(f => path.resolve(f));
