@@ -16,7 +16,6 @@ const fsOpenAsync = util.promisify(fs.open);
 
 const tmpDir = path.resolve(osTmpdir());
 
-
 export class AssetUtil {
 
   static generateTempFile(ext: string): string {
@@ -78,7 +77,7 @@ export class AssetUtil {
     }
 
     uploadFile.filename = uploadFile.metadata.hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (all, ...others) =>
-      (prefix || '') + others.slice(0, 5).join('/') + (ext ? '.' + ext.toLowerCase() : ''));
+      (prefix || '') + others.slice(0, 5).join('/') + (ext ? `.${ext.toLowerCase()}` : ''));
 
     return uploadFile;
   }
@@ -111,9 +110,9 @@ export class AssetUtil {
     if (filePathExt !== responseExt && responseExt) {
       let newFilePath = filePath;
       if (filePathExt) {
-        newFilePath = newFilePath.replace('.' + filePathExt, '.' + responseExt);
+        newFilePath = newFilePath.replace(`.${filePathExt}`, `.${responseExt}`);
       } else {
-        newFilePath += '.' + responseExt;
+        newFilePath += `.${responseExt}`;
       }
       await fsRenameAsync(filePath, newFilePath);
       filePath = newFilePath;
@@ -121,4 +120,3 @@ export class AssetUtil {
     return filePath;
   }
 }
-

@@ -40,7 +40,6 @@ class MockAssetSource extends AssetSource {
   }
 }
 
-
 @Suite('Asset Service')
 class AssetTest {
   @BeforeAll()
