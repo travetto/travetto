@@ -3,7 +3,7 @@ import { initStackHandler } from './stacktrace';
 import { Shutdown } from './shutdown';
 import { bulkRequire } from './bulk-find';
 
-const initializers =
+export const initializers =
   bulkRequire<{ init: { action: Function, priority?: number } }>(
     ['node_modules/@travetto/*/bootstrap.ts', 'bootstrap.ts']
   )
@@ -30,7 +30,13 @@ export async function init() {
 
   Shutdown.register();
 
-  for (const startup of initializers) {
-    await startup.action();
+  if (!process.env.DELAYED_INIT) {
+    return await bootstrap();
+  }
+}
+
+export async function bootstrap() {
+  for (const i of initializers) {
+    await i.action();
   }
 }
