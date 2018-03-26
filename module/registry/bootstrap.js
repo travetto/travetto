@@ -1,4 +1,3 @@
-require('@travetto/config/bootstrap');
 require('@travetto/compiler/bootstrap');
 
 module.exports = require('./src/service/root').RootRegistry;
