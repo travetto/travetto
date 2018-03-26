@@ -10,7 +10,7 @@ type ConfigMap = { [key: string]: string | number | boolean | null | ConfigMap }
 
 export class ConfigLoader {
 
-  private static NULL = 'NULL' + (Math.random() * 1000) + (new Date().getTime());
+  private static NULL = Symbol('NULL');
   private static data: ConfigMap = {};
   private static _initialized: boolean = false;
 
@@ -22,7 +22,7 @@ export class ConfigLoader {
         v = v.indexOf('.') >= 0 ? parseFloat(v) : parseInt(v, 10);
       } else if (typeof o[k] !== 'string' && v === 'null') {
         v = this.NULL;
-      } else if (k + '_0' in o) { // If array
+      } else if (`${k}_0` in o) { // If array
         v.split(/,\s*/g).forEach((el, i) => {
           this.writeProperty(o, `${k}_${i}`, el);
         });
@@ -166,7 +166,6 @@ export class ConfigLoader {
     }
   }
 }
-
 
 // Initializing
 ConfigLoader.initialize();
