@@ -1,2 +1,2 @@
-require('@travetto/base/bootstrap');
-require('./simple-config');
+require('@travetto/base/bootstrap')
+  .then(x => require('./simple-config'));
