@@ -1,2 +1,2 @@
-require('../bootstrap');
-require('./stack');
+require('@travetto/base/bootstrap')
+  .then(x => require('./stack'));
