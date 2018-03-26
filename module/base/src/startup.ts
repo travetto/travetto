@@ -4,11 +4,12 @@ import { Shutdown } from './shutdown';
 import { bulkRequire } from './bulk-find';
 
 const initializers =
-  bulkRequire<{ init: Function, priority?: number }>(
+  bulkRequire<{ init: { action: Function, priority?: number } }>(
     '*/src/startup.ts',
     `${process.cwd()}/node_modules/@travetto`,
     x => x.includes('/base/')
   )
+    .map(x => x.init)
     .map(x => ({ priority: 100, ...x }))
     .sort((a, b) => a.priority - b.priority);
 
@@ -32,6 +33,6 @@ export function init() {
   Shutdown.register();
 
   for (const startup of initializers) {
-    startup.init();
+    startup.action();
   }
 }
