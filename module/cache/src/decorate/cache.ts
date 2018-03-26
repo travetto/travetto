@@ -17,7 +17,7 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
       let key = keyFn ? keyFn(args) : JSON.stringify(args || []);
       key = `${targetName}||${key}`;
       if (!cache.has(key)) {
-        const res = orig.apply(this, args || []);
+        const res = orig.apply(this, args || []); // tslint:disable-line no-invalid-this
         if (res && res.catch && res.then) { // If a promise, clear on error
           res.catch((e: any) => cache.del(key));
         }

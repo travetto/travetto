@@ -83,7 +83,6 @@ class TestSuite {
   async size() {
     const test = new CachingService();
 
-
     for (const y of [1, 2]) {
       for (const x of [1, 2, 3, 4, 5, 6]) {
         const start = Date.now();

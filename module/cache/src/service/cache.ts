@@ -14,10 +14,10 @@ export class CacheManager {
     }
     const name = config.name;
     if (!this.caches.has(name)) {
-      config = Object.assign({},
-        this.defaultConfig,
-        (config as any) || {}
-      ) as LRU.Options<string, T> & { name: string };
+      config = {
+        ...this.defaultConfig,
+        ...(config as any) || {}
+      } as LRU.Options<string, T> & { name: string };
       const cache = LRU<string, T>(config);
       this.caches.set(name, cache);
     }
