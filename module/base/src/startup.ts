@@ -15,9 +15,7 @@ export async function init() {
 
   process.env.NODE_ENV = AppEnv.prod ? 'production' : 'development';
 
-  if (AppEnv.debug) {
-    console.debug = console.log;
-  }
+  console.debug = AppEnv.debug ? console.log : () => { };
 
   if (!AppEnv.prod) {
     initStackHandler();
