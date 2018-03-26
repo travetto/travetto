@@ -1,6 +1,7 @@
 import { AppEnv } from '@travetto/base';
 import * as assert from 'assert';
 import { Assertion } from '../model';
+import * as _ from 'lodash';
 
 const ASSERT_FN_OPERATOR: { [key: string]: string } = {
   equal: '==',
@@ -41,7 +42,7 @@ export class AssertUtil {
     const [fn, path] = best.trim().split(/\s+/g).slice(1);
     const [file, lineNo, col] = path.replace(/[()]/g, '').split(':')
 
-    const outFile = file.split(process.cwd() + '/')[1];
+    const outFile = file.split(`${process.cwd()}/`)[1];
 
     const res = { file: outFile, line: parseInt(lineNo, 10) };
 

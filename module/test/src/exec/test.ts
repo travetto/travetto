@@ -38,7 +38,6 @@ export class TestUtil {
     return all.filter(x => x[1]).map(x => x[0]);
   }
 
-
   static checkError(test: TestConfig, err: Error | string) {
     if (test.shouldError) {
       if (typeof test.shouldError === 'string') {
@@ -77,7 +76,6 @@ export class TestUtil {
     if (test.skip) {
       return result as TestResult;
     }
-
 
     try {
       ConsoleCapture.start();

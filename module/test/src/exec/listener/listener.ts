@@ -1,6 +1,5 @@
 import { AllSuitesResult, SuiteResult, SuiteConfig, TestResult, TestConfig } from '../../model';
 
-
 export type ListenEvent =
   { type: 'test', phase: 'before', test: TestConfig } |
   { type: 'test', phase: 'after', test: TestResult } |

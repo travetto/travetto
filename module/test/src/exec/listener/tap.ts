@@ -12,7 +12,7 @@ export class TapListener implements CollectionComplete {
   }
 
   private log(message: string) {
-    this.stream.write(message + '\n')
+    this.stream.write(`${message}\n`)
   }
 
   logMeta(obj: any) {
@@ -47,7 +47,7 @@ export class TapListener implements CollectionComplete {
       if (test.status === 'skip') {
         status += ' # SKIP';
       } else if (test.status === 'fail') {
-        status = 'not ' + status;
+        status = `not ${status}`;
       }
       status += header;
 

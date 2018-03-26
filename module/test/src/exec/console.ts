@@ -14,7 +14,7 @@ export class ConsoleCapture {
 
   static log(level: string, ...args: any[]) {
     const msg = args.map((x: any) => typeof x === 'string' ? x : util.inspect(x, false, 4)).join(' ');
-    this.out[level] = (this.out[level] || '') + msg + '\n';
+    this.out[level] = `${this.out[level] || ''}${msg}\n`;
   }
 
   static start() {

@@ -63,7 +63,7 @@ export class Runner {
         l.onEvent = l.onEvent.bind(l);
       }
 
-      files = files.map(x => x.split(process.cwd() + '/')[1]);
+      files = files.map(x => x.split(`${process.cwd()}/`)[1]);
 
       const agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
 
@@ -85,7 +85,7 @@ export class Runner {
       let output: string | undefined;
 
       if (formatter && formatter !== 'noop') {
-        const fn = require('./formatter/' + formatter) as { [key: string]: (all: AllSuitesResult) => string | undefined };
+        const fn = require(`./formatter/${formatter}`) as { [key: string]: (all: AllSuitesResult) => string | undefined };
         output = Object.values(fn)[0](collector.allSuites);
       }
       if (output) {
