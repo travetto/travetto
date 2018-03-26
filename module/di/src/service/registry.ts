@@ -224,6 +224,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         config.autoCreate!.priority = pconfig.autoCreate.priority;
       }
     }
+    if (pconfig.dependencies) {
+      config.dependencies = { fields: {}, ...pconfig.dependencies };
+    }
   }
 
   onInstallFinalize<T>(cls: Class<T>) {

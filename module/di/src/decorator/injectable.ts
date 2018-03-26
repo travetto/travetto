@@ -21,21 +21,40 @@ export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
   };
 }
 
-export function Inject(config?: InjectConfig): PropertyDecorator {
-  return (target: any, propertyKey: string | symbol) => {
-    DependencyRegistry.registerProperty(
-      target.constructor,
-      propertyKey as string,
-      config as any as Dependency);
+export function Inject(config?: InjectConfig) {
+  return (target: any, propertyKey: string | symbol, idx?: number) => {
+    if (typeof idx !== 'number') { // Only register if on property
+      DependencyRegistry.registerProperty(
+        target.constructor,
+        propertyKey as string,
+        config as any as Dependency);
+    }
   };
 }
 
-export function InjectableFactory(config: Partial<InjectableConfig<any>> & { class: Class<any>, qualifier: Symbol }): MethodDecorator {
+export function InjectableFactory(config: { class: Class<any>, qualifier: symbol, autoCreate?: boolean, dependencies?: Dependency[] }): MethodDecorator {
   return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
+    console.log('Injecting', target, config);
+
+    const finalConfig: InjectableConfig<any> = {} as any;
     if (typeof config.autoCreate === 'boolean') {
-      config.autoCreate = { create: config.autoCreate } as any;
+      finalConfig.autoCreate = { create: config.autoCreate } as any;
     }
-    config.factory = descriptor.value!;
-    DependencyRegistry.registerClass(config.class, config);
+    finalConfig.factory = descriptor.value!;
+    finalConfig.target = config.class;
+    finalConfig.qualifier = config.qualifier;
+
+    if (config.dependencies) {
+      finalConfig.dependencies = {
+        cons: config.dependencies,
+        fields: {}
+      }
+    }
+
+    // Create mock cls for DI purposes
+    const cls = { __id: `${target.__id}#${property}` } as any;
+
+    finalConfig.class = cls;
+    DependencyRegistry.registerClass(cls, finalConfig);
   };
 }

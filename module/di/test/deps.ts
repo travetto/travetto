@@ -1,10 +1,10 @@
-import { Injectable, Inject } from '../src';
+import { Injectable, Inject, InjectableFactory } from '../src';
 import { DbConfig, AltConfig } from './config';
 
 @Injectable()
 export class Database {
-  @Inject() dbConfig!: DbConfig<any, any>;
-  @Inject({ optional: true }) altConfig!: AltConfig;
+  @Inject() dbConfig: DbConfig<any, any>;
+  @Inject({ optional: true }) altConfig: AltConfig;
 
   postConstruct() {
     console.log('Creating database', this.dbConfig.getUrl());
@@ -41,4 +41,13 @@ export const SERVICE_INHERIT_2 = Symbol()
 @Injectable({ qualifier: SERVICE_INHERIT_2 })
 export class ServiceInherit2 extends ServiceInherit {
   age = 31;
+}
+
+export const CUSTOM_SERVICE_INHERIT = Symbol('Custom');
+
+class TestConfig {
+  @InjectableFactory({ class: ServiceInherit, qualifier: CUSTOM_SERVICE_INHERIT })
+  static getObject(@Inject({ qualifier: SERVICE_INHERIT_2 }) svc: ServiceInherit) {
+    return new ServiceInherit2(svc.db);
+  }
 }

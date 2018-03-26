@@ -2,6 +2,8 @@ import * as ts from 'typescript';
 import { TransformUtil, Import, State } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
 
+ConfigLoader.initialize(); // Initialize config as we need it here
+
 const INJECTABLES = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.injectable'),
   '@travetto/di': 'Injectable'
@@ -29,7 +31,7 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
     return TransformUtil.fromLiteral({
       target: finalTarget,
       optional,
-      name: TransformUtil.getObjectValue(injectConfig, 'name')
+      qualifier: TransformUtil.getObjectValue(injectConfig, 'qualifier')
     });
   }
 }
@@ -58,9 +60,9 @@ function createInjectDecorator(state: DiState, name: string, contents?: ts.Expre
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: DiState): T {
   if (ts.isClassDeclaration(node)) {
     const foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES, state);
-    let decls = node.decorators;
 
     if (foundDec) { // Constructor
+      let decls = node.decorators;
 
       node = ts.visitEachChild(node, c => visitNode(context, c, state), context);
 
@@ -81,7 +83,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
       declTemp.push(createInjectDecorator(state, 'InjectArgs', injectArgs));
 
-      // Add injectable to if not there
+      // Add injectable decorator if not there (for aliased decorators)
       let injectable = TransformUtil.findAnyDecorator(node, { Injectable: new Set(['@travetto/di']) }, state);
       if (!injectable) {
         injectable = createInjectDecorator(state, 'Injectable');
@@ -89,19 +91,18 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       }
 
       decls = ts.createNodeArray(declTemp);
+      const cNode = node as any as ts.ClassDeclaration;
+      const ret = ts.updateClassDeclaration(cNode,
+        decls,
+        cNode.modifiers,
+        cNode.name,
+        cNode.typeParameters,
+        ts.createNodeArray(cNode.heritageClauses),
+        cNode.members
+      ) as any;
+
+      return ret;
     }
-
-    const cNode = node as any as ts.ClassDeclaration;
-    const out = ts.updateClassDeclaration(cNode,
-      decls,
-      cNode.modifiers,
-      cNode.name,
-      cNode.typeParameters,
-      ts.createNodeArray(cNode.heritageClauses),
-      cNode.members
-    ) as any;
-
-    return out;
   } else if (ts.isPropertyDeclaration(node)) { // Property
     const expr = processDeclaration(state, node);
 
@@ -127,12 +128,55 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
   } else if (ts.isMethodDeclaration(node) && (ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static) > 0) { // tslint:disable-line no-bitwise
     // Factory for static methods
-    const foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES, state);
-    // let decls = node.decorators;
+    const foundDec = TransformUtil.findAnyDecorator(node, { InjectableFactory: new Set(['@travetto/di']) }, state);
+    const decls = node.decorators;
 
-    // if (foundDec) { // Constructor
+    if (foundDec) { // Constructor
+      const declTemp = (node.decorators || []).slice(0);
 
-    // }
+      let injectArgs: object[] = [];
+
+      try {
+        injectArgs = node.parameters.map(x => processDeclaration(state, x)!);
+      } catch (e) {
+        // If error, skip
+        if (e.message !== 'Type information not found') {
+          throw e;
+        }
+      }
+
+      if (injectArgs.length) {
+        const foundExpr = (foundDec.expression as ts.CallExpression);
+
+        const args = TransformUtil.extendObjectLiteral({
+          dependencies: injectArgs
+        }, foundExpr.arguments[0] as ts.ObjectLiteralExpression);
+
+        node = ts.createMethod(
+          decls!.filter(x => x !== foundDec).concat([
+            ts.createDecorator(
+              ts.createCall(
+                foundExpr.expression,
+                foundExpr.typeArguments,
+                ts.createNodeArray([args])
+              )
+            )
+          ]),
+          node.modifiers,
+          node.asteriskToken,
+          node.name,
+          node.questionToken,
+          node.typeParameters,
+          node.parameters,
+          node.type,
+          node.body
+        ) as any;
+      }
+
+      return node;
+    } else {
+      return node;
+    }
   }
   return ts.visitEachChild(node, c => visitNode(context, c, state), context);
 }

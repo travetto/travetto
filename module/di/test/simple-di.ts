@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '../src/service';
-import { ServiceInherit, SERVICE_INHERIT_2 } from './deps';
+import { ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT } from './deps';
 import { Suite, Test } from '@travetto/test';
 import * as assert from 'assert';
 
@@ -43,7 +43,6 @@ class DiTest {
 @Suite('di2')
 class DiTest2 {
 
-
   @Test('run')
   async run() {
     console.log('starting');
@@ -67,5 +66,14 @@ class DiTest2 {
     console.log('hi')
 
     assert(2 + 2 === FOUR);
+  }
+
+  @Test('factory')
+  async factory() {
+    await DependencyRegistry.init();
+
+    const inst = await DependencyRegistry.getInstance(ServiceInherit, CUSTOM_SERVICE_INHERIT);
+
+    assert(inst);
   }
 }
