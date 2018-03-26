@@ -1,4 +1,6 @@
-import '@travetto/base/src/stacktrace';
+import { initStackHandler } from '@travetto/base/src/stacktrace';
+
+initStackHandler();
 
 function test() {
   setTimeout(function inner1() {

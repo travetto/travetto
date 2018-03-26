@@ -1,25 +1,25 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
+    "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
-  }, 
+  },
   "dependencies": {
-    "@travetto/base": "0.x.x", 
-    "@types/chokidar": "^1.7.5", 
-    "@types/node": "^9.4.7", 
-    "@types/source-map-support": "^0.4.0", 
-    "chokidar": "^2.0.2", 
-    "farmhash": "^2.0.5", 
-    "source-map-support": "^0.5.4", 
+    "@travetto/base": "0.x.x",
+    "@types/chokidar": "^1.7.5",
+    "@types/node": "^9.4.7",
+    "@types/source-map-support": "^0.4.0",
+    "chokidar": "^2.0.2",
+    "farmhash": "^2.0.5",
+    "source-map-support": "^0.5.4",
     "tslib": "^1.9.0"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@travetto/compiler", 
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/compiler",
   "repository": {
     "url": "https://github.com/travetto/compiler.git"
-  }, 
-  "scripts": {}, 
+  },
+  "scripts": {},
   "version": "0.0.10"
 }

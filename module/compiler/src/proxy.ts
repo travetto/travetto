@@ -1,7 +1,6 @@
 export class RetargettingHandler<T extends any> implements ProxyHandler<T> {
   constructor(public target: T) { }
 
-
   isExtensible?(target: T): boolean {
     return Object.isFrozen(this.target);
   }

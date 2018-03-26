@@ -30,7 +30,6 @@ export class TransformUtil {
   }
   */
 
-
   static getDecoratorIdent(d: ts.Decorator): ts.Identifier {
     if (ts.isCallExpression(d.expression)) {
       return d.expression.expression as ts.Identifier;
@@ -55,7 +54,7 @@ export class TransformUtil {
           if (!path.includes('node_modules')) {
             pkg = AppInfo.NAME;
           } else {
-            pkg = '@travetto/' + path.split(/@travetto\//)[1].split('/')[0];
+            pkg = `@travetto/${path.split(/@travetto\//)[1].split('/')[0]}`;
           }
           if (packages.has(pkg)) {
             return dec;
@@ -85,7 +84,6 @@ export class TransformUtil {
 
     return file;
   }
-
 
   static fromLiteral<T extends ts.Node>(val: T): T;
   static fromLiteral(val: undefined): ts.Identifier;
@@ -135,7 +133,7 @@ export class TransformUtil {
 
   static getObjectValue(node: ts.ObjectLiteralExpression | undefined, key: string) {
     if (node && node.properties) {
-      for (let prop of node.properties) {
+      for (const prop of node.properties) {
         if (prop.name!.getText() === key) {
           if (ts.isPropertyAssignment(prop)) {
             return prop.initializer;
@@ -149,7 +147,7 @@ export class TransformUtil {
   }
 
   static importingVisitor<T extends State>(
-    init: (file?: ts.SourceFile, context?: ts.TransformationContext) => Partial<T>,
+    init: (file: ts.SourceFile, context?: ts.TransformationContext) => Partial<T>,
     visitor: <Z extends ts.Node>(context: ts.TransformationContext, node: Z, state: T) => Z
   ) {
     return (context: ts.TransformationContext) =>
@@ -165,7 +163,7 @@ export class TransformUtil {
             stmt.importClause!;
             path = require.resolve(stmt.moduleSpecifier.text
               .replace(/^\.\./, dirname(dirname(state.path)))
-              .replace(/^\.\//, dirname(state.path) + '/'));
+              .replace(/^\.\//, `${dirname(state.path)}/`));
             if (stmt.importClause) {
               if (stmt.importClause.namedBindings) {
                 const bindings = stmt.importClause.namedBindings;

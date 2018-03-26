@@ -371,7 +371,6 @@ export class Compiler {
     }
     const start = Date.now();
 
-
     this.rootFiles = bulkFindSync(this.workingSets, undefined, this.invalidWorkingSetFile);
 
     console.debug('Files', this.rootFiles.length);
