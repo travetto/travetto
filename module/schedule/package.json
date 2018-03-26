@@ -1,25 +1,25 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "dependencies": {
-    "@travetto/base": "0.x.x",
-    "@types/cron": "^1.2.1",
+    "@travetto/base": "0.x.x", 
+    "@types/cron": "^1.2.1", 
     "cron": "^1.3.0"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@travetto/schedule",
+  }, 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@travetto/schedule", 
   "repository": {
     "url": "https://github.com/travetto/schedule.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.6"
+  }, 
+  "version": "0.0.7"
 }
