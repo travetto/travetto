@@ -13,16 +13,18 @@ import { Context } from '@travetto/context';
 
 export type Callback<T> = (err?: any, res?: T) => void
 
-@Injectable()
 export abstract class BaseStrategy<U, T extends Options> extends Strategy {
 
   @Inject()
-  protected context!: Context;
+  protected context: Context;
 
   constructor(protected config: T) {
-    super(Object.assign({}, config, {
-      passReqToCallback: true // allows us to pass back the entire request to the callback
-    }) as OptionsWithRequest, (req: Request, email: string, pw: string, done: Callback<U>) => this.filterAuth(req, email, pw, done));
+    super({
+      ...(config as any),
+      ...{
+        passReqToCallback: true // allows us to pass back the entire request to the callback
+      }
+    } as OptionsWithRequest, (req: Request, email: string, pw: string, done: Callback<U>) => this.filterAuth(req, email, pw, done));
   }
 
   abstract getUser(id: string): Promise<U>;

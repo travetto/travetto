@@ -6,7 +6,6 @@ import { Injectable } from '@travetto/di';
 import { CrowdStrategyConfig } from './config';
 import { BaseStrategy } from '../../index';
 
-@Injectable()
 export class CrowdStrategy<T> extends BaseStrategy<T, CrowdStrategyConfig> {
   constructor(config: CrowdStrategyConfig) {
     super(config);

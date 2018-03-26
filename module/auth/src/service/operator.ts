@@ -12,9 +12,11 @@ import { ExpressApp, ExpressOperator } from '@travetto/express';
 import { AuthConfig } from './config';
 import { BaseStrategy } from './strategy';
 
+export const AUTH = Symbol('@travetto/auth');
+
 @Injectable({
   target: ExpressOperator,
-  name: '@travetto/auth'
+  qualifier: AUTH
 })
 export class ExpressAuthOperator extends ExpressOperator {
   constructor(

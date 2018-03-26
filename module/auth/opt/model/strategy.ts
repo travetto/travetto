@@ -10,7 +10,6 @@ import { Injectable } from '@travetto/di';
 import { StrategyUtil, BaseStrategy } from '../../index';
 import { ModelStrategyConfig } from './config';
 
-@Injectable()
 export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStrategyConfig> {
 
   private modelClass: Class<T>;
@@ -25,7 +24,6 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
     }
     this.modelClass = ModelRegistry.get(this.config.modelClass).class;
   }
-
 
   async getUser(username: string) {
     const query: any = {
@@ -104,7 +102,7 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
   async generateResetToken(username: string) {
     const user = await this.getUser(username);
     const salt = await StrategyUtil.generateSalt();
-    const password = await StrategyUtil.generateHash('' + (new Date().getTime()), salt, 25000, 32);
+    const password = await StrategyUtil.generateHash(`${new Date().getTime()}`, salt, 25000, 32);
 
     Object.assign(user as any, {
       [this.config.resetTokenField]: password,
