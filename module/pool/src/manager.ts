@@ -25,7 +25,7 @@ export class PoolManager<T extends BaseResource> {
     if (!this.pool) {
       this.pool = createPool(
         this.factory(),
-        Object.assign({}, PoolManager.POOL_OPTIONS, opts || {}));
+        { ...PoolManager.POOL_OPTIONS, ...(opts || {}) });
     }
     const resource = await this.pool.acquire();
     const release = async () => {
