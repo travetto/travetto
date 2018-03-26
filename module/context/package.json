@@ -1,25 +1,25 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
+    "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
-  }, 
+  },
   "dependencies": {
-    "@travetto/di": "0.x.x", 
-    "@types/continuation-local-storage": "^3.2.1", 
+    "@travetto/di": "0.x.x",
+    "@types/continuation-local-storage": "^3.2.1",
     "cls-hooked": "^4.2.2"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@travetto/context", 
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/context",
   "peerDependencies": {
     "@travetto/test": "0.x.x"
-  }, 
+  },
   "repository": {
     "url": "https://github.com/travetto/context.git"
-  }, 
+  },
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  }, 
+  },
   "version": "0.0.10"
 }

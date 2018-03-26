@@ -5,7 +5,7 @@ import { assert } from 'console';
 
 @Injectable()
 class TestService {
-  @Inject() context!: Context;
+  @Inject() context: Context;
 
   postConstruct() {
     console.log('Context Found', this.context);
