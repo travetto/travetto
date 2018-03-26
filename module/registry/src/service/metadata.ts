@@ -13,6 +13,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
   protected expired = new Map<string, C>();
   protected pending = new Map<string, Partial<C>>();
   protected pendingMethods = new Map<string, Map<Function, Partial<M>>>();
+
   protected entries = new Map<string, C>();
 
   abstract onInstallFinalize<T>(cls: Class<T>): C;
@@ -72,7 +73,6 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     }
     return this.pendingMethods.get(cls.__id)!.get(method)!;
   }
-
 
   register(cls: Class, pconfig: Partial<C>) {
     const conf = this.getOrCreatePending(cls);

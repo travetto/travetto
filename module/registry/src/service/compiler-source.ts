@@ -40,7 +40,6 @@ export class CompilerClassSource implements ClassSource {
 
     Compiler.off('required-after', requireListen);
 
-
     Compiler.on('changed', this.watch.bind(this));
     Compiler.on('removed', this.watch.bind(this));
     Compiler.on('added', this.watch.bind(this));

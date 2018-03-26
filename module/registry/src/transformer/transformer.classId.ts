@@ -41,7 +41,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       ts.createNodeArray(node.heritageClauses),
       ts.createNodeArray([
         createStaticField('__filename', ts.createLiteral(state.fullFile)),
-        createStaticField('__id', ts.createLiteral(state.file + '#' + node.name!.getText())),
+        createStaticField('__id', ts.createLiteral(`${state.file}#${node.name!.getText()}`)),
         ...node.members
       ])
     ) as any;
