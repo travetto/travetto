@@ -16,7 +16,6 @@ class Conf extends MongoAssetConfig {
 
 }
 
-
 @Injectable()
 class Source extends MongoSource {
 

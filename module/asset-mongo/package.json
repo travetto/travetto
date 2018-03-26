@@ -1,27 +1,27 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
+    "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
-  }, 
+  },
   "dependencies": {
-    "@travetto/asset": "0.x.x", 
-    "@types/gridfs-stream": "^0.5.30", 
-    "@types/mongodb": "^3.0.8", 
-    "gridfs-stream": "^1.1.1", 
+    "@travetto/asset": "0.x.x",
+    "@types/gridfs-stream": "^0.5.30",
+    "@types/mongodb": "^3.0.8",
+    "gridfs-stream": "^1.1.1",
     "mongodb": "^3.0.4"
-  }, 
-  "description": "", 
+  },
+  "description": "",
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  }, 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@travetto/asset-mongo", 
+  },
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/asset-mongo",
   "repository": {
     "url": "https://github.com/travetto/asset-mongo.git"
-  }, 
+  },
   "script": {
     "test": "./node_modules/.bin/travetto-test"
-  }, 
+  },
   "version": "0.0.6"
 }

@@ -23,7 +23,7 @@ export class MongoSource extends AssetSource {
   }
 
   async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
-    const conf = Object.assign({ mode: 'w' }, file);
+    const conf = { mode: 'w', ...file };
     const writeStream = this.client.createWriteStream(conf);
     writeStream.options.content_type = conf.contentType;
     stream.pipe(writeStream);
