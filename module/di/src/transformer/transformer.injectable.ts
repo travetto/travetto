@@ -2,8 +2,6 @@ import * as ts from 'typescript';
 import { TransformUtil, Import, State } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
 
-ConfigLoader.initialize(); // Initialize config as we need it here
-
 const INJECTABLES = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.injectable'),
   '@travetto/di': 'Injectable'
