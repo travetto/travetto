@@ -89,7 +89,7 @@ export async function request(opts: http.RequestOptions & { url: string, pipeTo?
   const { url } = opts;
   delete opts.url;
 
-  opts = Object.assign({ method: 'GET', headers: {} }, opts, parseUrl(url));
+  opts = { method: 'GET', headers: {}, ...opts, ...parseUrl(url) };
 
   const client = ((opts.protocol === 'https:' ? https : http) as any);
   delete opts.protocol;
@@ -102,7 +102,7 @@ export async function request(opts: http.RequestOptions & { url: string, pipeTo?
       bodyStr = data.toString();
       (opts.headers as any)['Content-Length'] = Buffer.byteLength(bodyStr);
     } else {
-      (opts as any)['query'] = Object.assign({}, (opts as any)['query'], parseQuery(data));
+      (opts as any)['query'] = { ...(opts as any)['query'], ...parseQuery(data) };
     }
   }
 
@@ -167,4 +167,3 @@ export async function requestJSON<T, U>(opts: http.RequestOptions & { url: strin
     throw e;
   }
 }
-

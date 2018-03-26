@@ -38,8 +38,8 @@ export function enhanceProcess(p: child_process.ChildProcess, options: ExecOptio
     };
 
     if (!options.quiet) {
-      p.stdout.on('data', (d: string) => stdout += d + '\n');
-      p.stderr.on('data', (d: string) => stderr += d + '\n');
+      p.stdout.on('data', (d: string) => stdout += `${d}\n`);
+      p.stderr.on('data', (d: string) => stderr += `${d}\n`);
     }
     p.on('error', (err: Error) =>
       finish({ code: 1, stdout, stderr, message: err.message, valid: false })
@@ -70,7 +70,6 @@ function getArgs(cmd: string) {
   console.debug('exec:', [cmd, ...args].join(' '));
   return { cmd, args };
 }
-
 
 export function spawn(cmdStr: string, options: child_process.SpawnOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
   const { cmd, args } = getArgs(cmdStr);
