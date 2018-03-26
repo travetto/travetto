@@ -1,6 +1,4 @@
-import { Compiler } from './src/compiler';
-
 export const init = {
-  action: () => Compiler.init(process.cwd()),
+  action: () => require('./src/compiler').init(process.cwd()),
   priority: 1
 };
