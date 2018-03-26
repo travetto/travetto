@@ -11,7 +11,7 @@ const initializers =
     .map(x => ({ priority: 100, ...x }))
     .sort((a, b) => a.priority - b.priority);
 
-export function init() {
+export async function init() {
 
   process.env.NODE_ENV = AppEnv.prod ? 'production' : 'development';
 
@@ -31,6 +31,6 @@ export function init() {
   Shutdown.register();
 
   for (const startup of initializers) {
-    startup.action();
+    await startup.action();
   }
 }
