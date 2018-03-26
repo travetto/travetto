@@ -24,7 +24,7 @@ export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
   const conf = new AssetExpressConfig();
   (conf as any).postConstruct(); // Load config manually, bypassing dep-inj
 
-  config = Object.assign({}, conf, config);
+  config = { ...conf, ...config };
 
   const multipart = multiparty({
     hash: 'sha256',
@@ -48,7 +48,7 @@ export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
           throw { message: `Content type not allowed: ${contentType}`, status: 403 };
         }
 
-        req.files[f] = AssetUtil.fileToAsset(req.files[f] as any as AssetFile, (target.constructor as any).basePath + '/');
+        req.files[f] = AssetUtil.fileToAsset(req.files[f] as any as AssetFile, `${(target.constructor as any).basePath}/`);
       }
     }
     rh.filters!.unshift(filt);
