@@ -74,7 +74,7 @@ class Validation {
 
   @Test('Should ensure message for min')
   async minMessage() {
-    const o = MinTest.from({ value: 'hello' } as any);
+    const o = MinTest.from({ value: 'hello' });
 
     try {
       await SchemaValidator.validate(o);

@@ -71,7 +71,7 @@ class DataBinding {
         { area: 'A', value: 20 },
         { area: 'B', value: 30 }
       ]
-    } as any);
+    });
     assert(person.address instanceof Address);
     assert(person.address.street1 === '1234 Fun');
     assert(person.counts.length === 2);
@@ -102,7 +102,7 @@ class DataBinding {
     const res = Response.from({
       questionId: '20',
       answer: ['a', 'd']
-    } as any);
+    });
     assert(res.questionId === '20');
     assert(!!res.answer);
     assert(res.answer === ['a', 'd']);
