@@ -2,22 +2,22 @@ import { RetainFields, Point, FieldType } from './common';
 
 type GeneralFieldQuery<T> =
   T |
-  { $eq: T; } |
-  { $ne: T; } |
-  { $exists: boolean; };
+  { $eq: T; $ne?: never; $exists?: never } |
+  { $ne: T; $eq?: never; $exists?: never } |
+  { $exists: boolean; $ne?: never; $eq?: never };
 
 type GeneralScalarFieldQuery<T> =
   GeneralFieldQuery<T> |
   // Array
-  { $in: T[]; } |
-  { $nin: T[]; };
+  { $in: T[]; $nin?: never } |
+  { $nin: T[]; $in?: never };
 
 type ComparableFieldQuery<T> =
   GeneralScalarFieldQuery<T> |
-  { $lt: T; } |
-  { $lte: T; } |
-  { $gt: T; } |
-  { $gte: T; };
+  { $lt: T; $lte?: never } |
+  { $lte: T; $lt?: never } |
+  { $gt: T; $gte?: never } |
+  { $gte: T; $gt?: never };
 
 type ArrayFieldQuery<T> =
   GeneralFieldQuery<T> |
@@ -29,25 +29,28 @@ type StringFieldQuery =
 
 type GeoFieldQuery =
   GeneralScalarFieldQuery<Point> |
-  { $geoWithin: Point[]; } |
-  { $geoIntersects?: Point[]; };
+  {
+    $geoWithin?: Point[];
+    $geoIntersects: Point[];
+  };
 
 type FieldQuery<T> =
-  (T extends string ? StringFieldQuery :
-    (T extends (number | Date) ? ComparableFieldQuery<T> :
+  (T extends (number | Date) ? ComparableFieldQuery<T> :
+    (T extends string ? StringFieldQuery :
       (T extends (infer U)[] ? ArrayFieldQuery<U> :
         (T extends Point ? GeoFieldQuery :
-          GeneralFieldQuery<T>))));
+          (T extends Function ? never :
+            GeneralFieldQuery<T>)))));
 
 type _MatchQuery<T> = {
-  [P in keyof T]?: T[P] extends (FieldType | any[]) ? FieldQuery<T[P]> : MatchQuery<T[P]>;
-};
+  [P in keyof T]?: T[P] extends (Date | number | string | any[] | Point | Function) ? FieldQuery<T[P]> : _MatchQuery<T[P]>
+} & { $and?: never, $or?: never, $not?: never };
 
 type _WhereClause<T> =
-  { $and: (_WhereClause<T> | _MatchQuery<T>)[]; } |
-  { $or: (_WhereClause<T> | _MatchQuery<T>)[]; } |
-  { $not: _WhereClause<T>; } |
-  _MatchQuery<T>;
+  ({ $and: (_MatchQuery<T> | _WhereClause<T>)[]; } |
+    { $or: (_MatchQuery<T> | _WhereClause<T>)[]; } |
+    { $not: (_MatchQuery<T> | _WhereClause<T>); }) &
+  { [P in keyof T]?: never };
 
-export type MatchQuery<T> = _MatchQuery<RetainFields<T>>;
-export type WhereClause<T> = _WhereClause<RetainFields<T>>;
+export type MatchQuery<T> = _MatchQuery<T>;
+export type WhereClause<T> = _WhereClause<T> | _MatchQuery<T>;

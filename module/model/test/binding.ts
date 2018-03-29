@@ -1,5 +1,5 @@
 import { SchemaBound, View } from '@travetto/schema';
-import { Model, ModelService, WhereClause, PageableModelQuery, Query } from '../index';
+import { Model, ModelService, WhereClause, PageableModelQuery, Query, MatchQuery } from '../index';
 import { TestSource } from './registry';
 import { Person, Address } from './models';
 import { Test, Suite, BeforeAll } from '@travetto/test';
@@ -9,7 +9,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry, Class } from '@travetto/registry';
 
 const query: Query<Person> = {
-  select: {
+  /*select: {
     address: {
       street1: 1
     }
@@ -18,18 +18,16 @@ const query: Query<Person> = {
     address: {
       street1: -1
     }
-  }],
+  }],*/
   where: {
-    name: 'orange',
+    name: '5',
     names: ['1', '2'],
     dob: {
-      $in: [
-        new Date(), new Date()
-      ],
+      $in: [new Date()]
     },
     address: {
       street2: {
-        $eq: 'a'
+        $eq: '5'
       }
     }
   }
@@ -65,18 +63,20 @@ class DataBinding {
 
     const res = await model.getByQuery(Person, {
       where: {
-        name: 'orange',
-        names: ['1', '2'],
-        dob: {
-          $in: [
-            new Date(), new Date()
-          ],
-        },
-        address: {
-          street2: {
-            $eq: 5
+        $and: [{
+          name: '5',
+          address: {
+            street1: {
+              $nin: ['5']
+            }
           }
-        }
+        }, {
+          $or: [{
+            age: {
+              $in: [5]
+            }
+          }],
+        }]
       }
     });
   }

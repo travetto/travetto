@@ -5,8 +5,7 @@
   },
   "dependencies": {
     "@travetto/di": "0.x.x",
-    "@travetto/schema": "0.x.x",
-    "typescript": "rc"
+    "@travetto/schema": "0.x.x"
   },
   "description": "",
   "devDependencies": {

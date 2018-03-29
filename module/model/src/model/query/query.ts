@@ -5,11 +5,11 @@ import { RetainFields } from './common';
 type SelectFieldFn = 'max' | 'min' | 'avg' | 'sum' | 'count';
 
 type _SelectClause<T> = {
-  [P in keyof T]?: T[P] extends object ? _SelectClause<T[P]> : (1 | true | ({ alias: string, calc: SelectFieldFn }));
+  [P in keyof T]?: T[P] extends { alias: string, calc: SelectFieldFn } | 1 | 0 | boolean ? T[P] : _SelectClause<T[P]>;
 };
 
 type _GroupClause<T> = {
-  [P in keyof T]?: T[P] extends object ? _GroupClause<T[P]> : (1 | true)
+  [P in keyof T]?: T[P] extends object ? _GroupClause<T[P]> : (1 | 0 | boolean)
 };
 
 type _SortClause<T> = {
@@ -22,15 +22,11 @@ type _QueryOptions<T> = {
   offset?: number;
 }
 
-type _QueryMain<T> =
-  {
-    select: _SelectClause<T>;
-    where?: WhereClause<T>;
-    group: _GroupClause<T>;
-  } | {
-    select?: _SelectClause<T>;
-    where: WhereClause<T>;
-  }
+type _QueryMain<T> = {
+  select?: _SelectClause<T>;
+  where?: WhereClause<T>;
+  group?: _GroupClause<T>;
+}
 
 type _Query<T> = _QueryMain<T> & _QueryOptions<T>;
 type _ModelQuery<T> = { where?: WhereClause<T> }
