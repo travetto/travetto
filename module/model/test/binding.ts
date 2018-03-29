@@ -71,7 +71,7 @@ class DataBinding {
           name: '5',
           address: {
             street1: {
-              $nin: ['5']
+              $nin: ['10']
             }
           }
         }, {

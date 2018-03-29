@@ -24,6 +24,8 @@ const $NOT = '$not';
 const $ALL = '$all';
 const $ELEM_MATCH = '$elemMatch';
 
+const TOP_LEVEL_OPS = new Set([$AND, $OR, $NOT]);
+
 const SELECT = 'select';
 const WHERE = 'where';
 const SORT = 'sort';
@@ -50,7 +52,13 @@ export class QueryVerifierService {
 
   processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler) {
 
+    console.log("Process Generic", cls.__id, val);
+
     const view = SchemaRegistry.getViewSchema(cls);
+
+    if (handler.preMember && handler.preMember(state, val)) {
+      return;
+    }
 
     for (const [key, value] of Object.entries(val)) {
 
@@ -67,7 +75,8 @@ export class QueryVerifierService {
       const op = TypeUtil.getDeclaredType(field);
 
       if (op) {
-        handler.onSimpleType(state, op, value, field.declared.array);
+        console.log("On Simple Type", key, value);
+        handler.onSimpleType(state.extend(key), op, value, field.declared.array);
       } else {
         const subCls = field.declared.type;
         const subVal = value;
@@ -84,6 +93,8 @@ export class QueryVerifierService {
   }
 
   checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: { [key: string]: Set<string> }, isArray: boolean) {
+    console.log("Check Operator", declaredType, value, allowed, _.isPlainObject(value));
+
     if (isArray) {
       if (Array.isArray(value)) {
         // Handle array literal
@@ -95,7 +106,7 @@ export class QueryVerifierService {
     }
 
     if (!_.isPlainObject(value)) {
-      // Handle literal
+      // Ha ndle literal
       const actualType = TypeUtil.getActualType(value);
       if (!this.typesMatch(declaredType, actualType)) {
         state.log(`Operator clause only supports types of ${declaredType}, not ${actualType}`);
@@ -137,6 +148,8 @@ export class QueryVerifierService {
   }
 
   processWhereClause<T>(st: State, cls: Class<T>, passed: object) {
+    console.log("Process Where", cls.__id, passed);
+
     return this.processGenericClause(st, cls, passed, {
       preMember: (state: State, value: any) => {
         const keys = Object.keys(value);
@@ -147,15 +160,6 @@ export class QueryVerifierService {
         }
 
         const sub = value[firstKey];
-
-        if (_.isPlainObject(value)) {
-          if (firstKey.charAt(0) === '$') {
-            if (keys.length !== 1 || [$AND, $OR, $NOT].includes(firstKey)) {
-              state.log(`${firstKey} is not supported as a top level opeartor`);
-              return true;
-            }
-          }
-        }
 
         if (firstKey === $AND || firstKey === $OR) {
           if (!Array.isArray(sub)) {
@@ -169,7 +173,7 @@ export class QueryVerifierService {
           }
         } else if (firstKey === $NOT) {
           if (_.isPlainObject(sub)) {
-            this.processWhereClause(st, cls, sub);
+            this.processWhereClause(state, cls, sub);
             return true;
           } else {
             state.log(`${firstKey} requires the value to be an object`);
@@ -178,11 +182,9 @@ export class QueryVerifierService {
         return false;
       },
       onSimpleType: (state: State, type: SimpleType, value: any, isArray: boolean) => {
-        const conf = OPERATORS[type];
-        this.checkOperatorClause(state, value, conf.type, conf.ops, isArray);
+        this.checkOperatorClause(state, type, value, OPERATORS[type], isArray);
       },
       onComplexType: (state: State, subCls: Class<T>, subVal: T, isArray: boolean): boolean => {
-
         return false;
       }
     });
@@ -195,7 +197,7 @@ export class QueryVerifierService {
   processSortClause<T>(st: State, cls: Class<T>, passed: object) {
     return this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
-        if (value === 1 || value === -1 || value === false || value === true) {
+        if (value === 1 || value === -1 || typeof value === 'boolean') {
           return;
         }
         state.log(`Only true, false -1, and 1 are allowed for sorting, not ${JSON.stringify(value)}`);
@@ -208,7 +210,7 @@ export class QueryVerifierService {
       onSimpleType: (state, type, value) => {
         const actual = TypeUtil.getActualType(value);
         if (actual === 'number' || actual === 'boolean') {
-          if (value === 1 || value === 0 || value === true || value === false) {
+          if (value === 1 || value === 0 || actual === 'boolean') {
             return;
           }
           state.log(`Only true, false 0, and 1 are allowed for including/excluding fields`);

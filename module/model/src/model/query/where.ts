@@ -1,12 +1,10 @@
 import { RetainFields, Point, FieldType } from './common';
 
-type GeneralFieldQuery<T> =
-  T |
-  {
-    $eq?: T;
-    $ne?: T;
-    $exists?: boolean
-  };
+type GeneralFieldQuery<T> = {
+  $eq?: T;
+  $ne?: T;
+  $exists?: boolean
+};
 
 type GeneralScalarFieldQuery<T> =
   GeneralFieldQuery<T> &
@@ -43,10 +41,10 @@ type GeoFieldQuery =
 type FieldQuery<T> =
   (T extends (number | Date) ? ComparableFieldQuery<T> :
     (T extends string ? StringFieldQuery :
-      (T extends (infer U)[] ? ArrayFieldQuery<U> :
-        (T extends Point ? GeoFieldQuery :
+      (T extends Point ? GeoFieldQuery :
+        (T extends (infer U)[] ? ArrayFieldQuery<U> :
           (T extends Function ? never :
-            GeneralFieldQuery<T>)))));
+            GeneralFieldQuery<T>))))) | T;
 
 type _MatchQuery<T> = {
   [P in keyof T]?: T[P] extends (Date | number | string | any[] | Point | Function) ? FieldQuery<T[P]> : _MatchQuery<T[P]>
