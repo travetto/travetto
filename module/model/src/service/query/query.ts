@@ -52,8 +52,6 @@ export class QueryVerifierService {
 
   processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler) {
 
-    console.log("Process Generic", cls.__id, val);
-
     const view = SchemaRegistry.getViewSchema(cls);
 
     if (handler.preMember && handler.preMember(state, val)) {
@@ -75,7 +73,6 @@ export class QueryVerifierService {
       const op = TypeUtil.getDeclaredType(field);
 
       if (op) {
-        console.log("On Simple Type", key, value);
         handler.onSimpleType(state.extend(key), op, value, field.declared.array);
       } else {
         const subCls = field.declared.type;
@@ -93,7 +90,6 @@ export class QueryVerifierService {
   }
 
   checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: { [key: string]: Set<string> }, isArray: boolean) {
-    console.log("Check Operator", declaredType, value, allowed, _.isPlainObject(value));
 
     if (isArray) {
       if (Array.isArray(value)) {
@@ -148,8 +144,6 @@ export class QueryVerifierService {
   }
 
   processWhereClause<T>(st: State, cls: Class<T>, passed: object) {
-    console.log("Process Where", cls.__id, passed);
-
     return this.processGenericClause(st, cls, passed, {
       preMember: (state: State, value: any) => {
         const keys = Object.keys(value);
