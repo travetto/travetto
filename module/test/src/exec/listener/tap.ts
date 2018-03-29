@@ -36,7 +36,8 @@ export class TapListener implements CollectionComplete {
         let subCount = 0;
         const count = test.assertions.length;
         for (const a of test.assertions) {
-          let subMessage = `ok ${++subCount} - ${a.text} ${a.file}:${a.line}`;
+          const text = a.message ? `${a.text} (${a.message})` : a.text;
+          let subMessage = `ok ${++subCount} - ${text} ${a.file}:${a.line}`;
           if (a.error) {
             subMessage = `not ${subMessage}`;
           }
@@ -75,7 +76,7 @@ export class TapListener implements CollectionComplete {
     if (collector.errors.length) {
       this.log('---\n');
       for (const err of collector.errors) {
-        this.log(err.stack || err.toString());
+        this.log(err.stack || `${err}`);
       }
     }
   }
