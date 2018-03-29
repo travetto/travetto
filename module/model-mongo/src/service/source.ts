@@ -14,6 +14,7 @@ import { Injectable } from '@travetto/di';
 import { ModelMongoConfig } from './config';
 import { Class } from '@travetto/registry';
 import { FieldType } from '@travetto/model/src/model/query/common';
+import { BaseError } from '@travetto/base';
 
 function isFieldType(o: any): o is FieldType {
   const type = typeof o;
@@ -22,7 +23,6 @@ function isFieldType(o: any): o is FieldType {
     || o === 'boolean' || o instanceof Date;
 }
 
-@Injectable({ target: ModelSource })
 export class ModelMongoSource extends ModelSource {
 
   private client: mongo.MongoClient;
@@ -131,8 +131,10 @@ export class ModelMongoSource extends ModelSource {
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}, options: QueryOptions<T> = {}): Promise<T[]> {
     query = this.translateQueryIds(query);
 
+    console.log(cls.__id, query.where);
+
     const col = await this.getCollection(cls);
-    let cursor = col.find(query);
+    let cursor = col.find(query.where);
     if (options.sort) {
       cursor = cursor.sort(options.sort);
     }
@@ -151,7 +153,7 @@ export class ModelMongoSource extends ModelSource {
     query = this.translateQueryIds(query);
 
     const col = await this.getCollection(cls);
-    const cursor = col.count(query);
+    const cursor = col.count(query.where!);
 
     const res = await cursor;
     return res;
@@ -160,7 +162,7 @@ export class ModelMongoSource extends ModelSource {
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}, failOnMany = true): Promise<T> {
     const res = await this.getAllByQuery(cls, { limit: 200, ...query });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
-      throw new Error(`Invalid number of results for find by id: ${res ? res.length : res}`);
+      throw new BaseError(`Invalid number of results for find by id: ${res ? res.length : res}`);
     }
     return res[0] as T;
   }
@@ -226,7 +228,7 @@ export class ModelMongoSource extends ModelSource {
 
     const res = await col.findOneAndUpdate(query, final, { returnOriginal: false });
     if (!res.value) {
-      throw new Error('Object not found for updating');
+      throw new BaseError('Object not found for updating');
     }
     const ret: T = res.value as T;
     this.postLoad(cls, ret);
