@@ -20,7 +20,7 @@ export interface Assertion {
   file: string;
   line: number;
   text: string;
-  error?: any;
+  error?: Error;
 }
 
 export interface TestResult {
