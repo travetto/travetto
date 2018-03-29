@@ -41,9 +41,6 @@ export class TapListener implements CollectionComplete {
             subMessage = `not ${subMessage}`;
           }
           this.log(`    ${subMessage}`);
-          if (a.error) {
-            // this.logMeta({ error: deserialize(a.error).stack });
-          }
         }
         this.log(`    1..${subCount}`);
       }
@@ -59,7 +56,7 @@ export class TapListener implements CollectionComplete {
       this.log(status);
 
       if (test.status === 'fail') {
-        if (test.error) {
+        if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
           this.logMeta({ error: deserialize(test.error).stack });
         }
       }
