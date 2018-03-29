@@ -5,21 +5,36 @@ import * as _ from 'lodash';
 import {
   ModelSource, IndexConfig, Query,
   QueryOptions, BulkState, BulkResponse,
-  ModelRegistry, ModelCore, FieldQuery,
-  MatchQuery, isQuery, isFieldType
+  ModelRegistry, ModelCore,
+  MatchQuery,
+  PageableModelQuery,
+  WhereClause
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { ModelMongoConfig } from './config';
 import { Class } from '@travetto/registry';
+import { FieldType } from '@travetto/model/src/model/query/common';
+
+function isFieldType(o: any): o is FieldType {
+  const type = typeof o;
+  return (Array.isArray(o) && o.length === 2 && typeof o[0] === 'number')
+    || o === 'number' || o === 'string'
+    || o === 'boolean' || o instanceof Date;
+}
 
 @Injectable({ target: ModelSource })
 export class ModelMongoSource extends ModelSource {
 
-  private client: mongo.Db;
-  private indices: { [key: string]: IndexConfig[] } = {};
+  private client: mongo.MongoClient;
+  private db: mongo.Db;
+  private indices: { [key: string]: IndexConfig<any>[] } = {};
 
   constructor(private config: ModelMongoConfig) {
     super();
+  }
+
+  query<T extends ModelCore, U>(cls: Class<T>, o: T): U[] {
+    return null as any;
   }
 
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
@@ -44,31 +59,39 @@ export class ModelMongoSource extends ModelSource {
 
   async init() {
     this.client = await mongo.MongoClient.connect(this.config.url);
+    this.db = this.client.db();
     await this.establishIndices();
   }
 
   async establishIndices() {
-    let promises = [];
+    const promises = [];
 
-    for (let colName of Object.keys(this.indices)) {
-      let col = await this.client.collection(colName);
+    for (const colName of Object.keys(this.indices)) {
+      const col = await this.db.collection(colName);
 
-      for (let { fields, options } of this.indices[colName]) {
+      for (const { fields, options } of this.indices[colName]) {
         promises.push(col.createIndex(fields, options));
       }
     }
     return Promise.all(promises);
   }
 
-  translateQueryIds<T extends ModelCore>(query: Query) {
-    if (!isQuery(query)) {
-      let val = query._id;
-      if (val) {
-        if (!isFieldType(val) && val.in) {
-          val.in = val.in.map((x: any) => typeof x === 'string' ? new mongo.ObjectID(x) : x);
-        } else if (typeof val === 'string') {
-          query._id = new mongo.ObjectID(val) as any;
+  translateQueryIds<T extends ModelCore>(query: Query<T>) {
+    const where = (query.where || {}) as WhereClause<T & { _id: any }>;
+    const val: any = where.id;
+    if (val) {
+      if (Array.isArray(val) || typeof val === 'string') {
+        let res: (any[] | string | mongo.ObjectID) = val;
+        if (typeof val === 'string') {
+          res = new mongo.ObjectID(val);
+        } else {
+          res = val.map(x => typeof x === 'string' ? new mongo.ObjectID(x) : x);
         }
+        delete where.id;
+        (where as any)._id = res;
+      } else if (Array.isArray(val.$in)) {
+        const res: { $in: (string | mongo.ObjectID)[] } = val;
+        val.$in = res.$in.map(x => typeof x === 'string' ? new mongo.ObjectID(x) : x);
       }
     }
     return query;
@@ -79,36 +102,36 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async getCollection<T extends ModelCore>(cls: Class<T>): Promise<mongo.Collection> {
-    return this.client.collection(this.getCollectionName(cls));
+    return this.db.collection(this.getCollectionName(cls));
   }
 
   async resetDatabase() {
-    await this.client.dropDatabase();
+    await this.db.dropDatabase();
     await this.init();
   }
 
   registerIndex(cls: Class, fields: { [key: string]: number }, options: mongo.IndexOptions) {
-    let col = this.getCollectionName(cls);
+    const col = this.getCollectionName(cls);
     this.indices[col] = this.indices[col] || [];
 
     // TODO: Cleanup
-    this.indices[col].push({ fields, options });
+    this.indices[col].push({ fields, options } as any);
   }
 
   getIndices(cls: Class) {
     return this.indices[this.getCollectionName(cls)];
   }
 
-  async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: Query) {
-    let col = await this.getCollection(cls);
-    let objs = await col.find(query, { _id: true }).toArray();
+  async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T>) {
+    const col = await this.getCollection(cls);
+    const objs = await col.find(query as mongo.FilterQuery<T>, { fields: { _id: 1 } } as any).toArray() as T[];
     return objs.map(x => this.postLoad(cls, x));
   }
 
-  async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<T[]> {
+  async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}, options: QueryOptions<T> = {}): Promise<T[]> {
     query = this.translateQueryIds(query);
 
-    let col = await this.getCollection(cls);
+    const col = await this.getCollection(cls);
     let cursor = col.find(query);
     if (options.sort) {
       cursor = cursor.sort(options.sort);
@@ -119,23 +142,23 @@ export class ModelMongoSource extends ModelSource {
     if (options.offset) {
       cursor = cursor.skip(Math.trunc(options.offset) || 0);
     }
-    let res = await cursor.toArray();
+    const res = await cursor.toArray() as any as T[];
     res.forEach(r => this.postLoad(cls, r));
     return res;
   }
 
-  async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}): Promise<number> {
+  async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}): Promise<number> {
     query = this.translateQueryIds(query);
 
-    let col = await this.getCollection(cls);
-    let cursor = col.count(query);
+    const col = await this.getCollection(cls);
+    const cursor = col.count(query);
 
-    let res = await cursor;
+    const res = await cursor;
     return res;
   }
 
-  async getByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}, failOnMany = true): Promise<T> {
-    let res = await this.getAllByQuery(cls, query, { limit: 200, ...options });
+  async getByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}, failOnMany = true): Promise<T> {
+    const res = await this.getAllByQuery(cls, { limit: 200, ...query });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
       throw new Error(`Invalid number of results for find by id: ${res ? res.length : res}`);
     }
@@ -143,36 +166,36 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
-    return await this.getByQuery(cls, { _id: id });
+    return await this.getByQuery(cls, { _id: id } as any);
   }
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
-    let col = await this.getCollection(cls);
-    let res = await col.deleteOne({ _id: new mongo.ObjectID(id) });
+    const col = await this.getCollection(cls);
+    const res = await col.deleteOne({ _id: new mongo.ObjectID(id) });
 
     return res.deletedCount || 0;
   }
 
-  async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}): Promise<number> {
+  async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}): Promise<number> {
     query = this.translateQueryIds(query);
-    let col = await this.getCollection(cls);
-    let res = await col.deleteMany(query);
+    const col = await this.getCollection(cls);
+    const res = await col.deleteMany(query);
     return res.deletedCount || 0;
   }
 
   async save<T extends ModelCore>(cls: Class<T>, o: T, removeId: boolean = true): Promise<T> {
-    let col = await this.getCollection(cls);
-    let res = await col.insertOne(o);
+    const col = await this.getCollection(cls);
+    const res = await col.insertOne(o);
     o.id = res.insertedId.toHexString();
     return o;
   }
 
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]): Promise<T[]> {
-    let col = await this.getCollection(cls);
-    for (let x of objs) {
+    const col = await this.getCollection(cls);
+    for (const x of objs) {
       delete x.id;
     }
-    let res = await col.insertMany(objs);
+    const res = await col.insertMany(objs);
     for (let i = 0; i < objs.length; i++) {
       objs[i].id = res.insertedIds[i].toHexString();
     }
@@ -180,7 +203,7 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
-    let col = await this.getCollection(cls);
+    const col = await this.getCollection(cls);
     this.prePersist(cls, o);
     await col.replaceOne({ _id: o.id }, o);
     this.postLoad(cls, o);
@@ -188,11 +211,11 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
-    return await this.updatePartialByQuery(cls, { _id: data.id }, data);
+    return await this.updatePartialByQuery(cls, { _id: data.id } as any, data);
   }
 
-  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: Query, data: Partial<T>): Promise<T> {
-    let col = await this.getCollection(cls);
+  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T>, data: Partial<T>): Promise<T> {
+    const col = await this.getCollection(cls);
     query = this.translateQueryIds(query);
 
     let final: any = data;
@@ -201,17 +224,17 @@ export class ModelMongoSource extends ModelSource {
       final = { $set: flat(final) };
     }
 
-    let res = await col.findOneAndUpdate(query, final, Object.assign({ returnOriginal: false }, {}));
+    const res = await col.findOneAndUpdate(query, final, { returnOriginal: false });
     if (!res.value) {
       throw new Error('Object not found for updating');
     }
-    let ret: T = res.value as T;
+    const ret: T = res.value as T;
     this.postLoad(cls, ret);
     return ret;
   }
 
-  async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, data: Partial<T>) {
-    let col = await this.getCollection(cls);
+  async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}, data: Partial<T>) {
+    const col = await this.getCollection(cls);
     query = this.translateQueryIds(query);
 
     let finalData: any = data;
@@ -220,13 +243,13 @@ export class ModelMongoSource extends ModelSource {
       finalData = { $set: flat(data) };
     }
 
-    let res = await col.updateMany(query, data);
+    const res = await col.updateMany(query, data);
     return res.matchedCount;
   }
 
   async bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
-    let col = await this.getCollection(cls);
-    let bulk = col.initializeUnorderedBulkOp({});
+    const col = await this.getCollection(cls);
+    const bulk = col.initializeUnorderedBulkOp({});
     let count = 0;
 
     (state.insert || []).forEach(p => {
@@ -243,13 +266,12 @@ export class ModelMongoSource extends ModelSource {
       });
     });
 
-
     (state.delete || []).forEach(p => {
       count++;
       bulk.find({ _id: new mongo.ObjectID(p.id) }).removeOne();
     });
 
-    let out: BulkResponse = {
+    const out: BulkResponse = {
       count: {
         delete: 0,
         update: 0,
@@ -258,7 +280,7 @@ export class ModelMongoSource extends ModelSource {
     };
 
     if (count > 0) {
-      let res = await bulk.execute({});
+      const res = await bulk.execute({});
 
       if (out.count) {
         out.count.delete = res.nRemoved;
