@@ -4,6 +4,8 @@ import { AllSuitesResult, TestResult } from '../../model';
 import { Listener, ListenEvent } from './listener';
 import { Collector, CollectionComplete } from './collector';
 
+const { deserialize } = require('../agent/error');
+
 export class TapListener implements CollectionComplete {
   private count = 0;
 
@@ -39,6 +41,9 @@ export class TapListener implements CollectionComplete {
             subMessage = `not ${subMessage}`;
           }
           this.log(`    ${subMessage}`);
+          if (a.error) {
+            // this.logMeta({ error: deserialize(a.error).stack });
+          }
         }
         this.log(`    1..${subCount}`);
       }
@@ -53,8 +58,10 @@ export class TapListener implements CollectionComplete {
 
       this.log(status);
 
-      if (test.status === 'fail' && test.error) {
-        this.logMeta({ error: test.error });
+      if (test.status === 'fail') {
+        if (test.error) {
+          this.logMeta({ error: deserialize(test.error).stack });
+        }
       }
       if (test.output) {
         for (const key of ['log', 'info', 'error', 'debug', 'warn']) {
@@ -71,7 +78,7 @@ export class TapListener implements CollectionComplete {
     if (collector.errors.length) {
       this.log('---\n');
       for (const err of collector.errors) {
-        this.log(err.toString());
+        this.log(err.stack || err.toString());
       }
     }
   }

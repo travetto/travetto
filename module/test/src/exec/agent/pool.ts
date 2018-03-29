@@ -2,6 +2,8 @@ import * as os from 'os';
 import { Agent } from './agent';
 import { Shutdown } from '@travetto/base';
 
+const { deserialize } = require('./error');
+
 export class AgentPool {
   agentCount: number;
   private availableAgents = new Set<Agent>();
@@ -53,16 +55,10 @@ export class AgentPool {
         const agent = (await this.getNextAgent())!;
 
         agent.completion = new Promise<Agent>((resolve, reject) => {
-          agent.listenOnce('runComplete', ({ error: e }) => {
-            if (e) {
-              const err: any = new Error();
-              for (const k of Object.keys(e)) {
-                err[k] = e[k];
-              }
-              err.message = e.message;
-              err.stack = e.stack;
-              err.name = e.name;
-              errors.push(err);
+          agent.listenOnce('runComplete', ({ error }) => {
+
+            if (error) {
+              errors.push(deserialize(error));
             }
 
             resolve(agent);

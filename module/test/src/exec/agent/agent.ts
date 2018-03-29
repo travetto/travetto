@@ -34,7 +34,7 @@ export class Agent {
 
     this.listenOnce('ready', e => this.send('init'));
 
-    forked.catch(async err => {
+    forked.catch(async (err: Error) => {
       console.error('Runner died, error ', err, '.  Reinitializing');
       delete this._init;
     });
@@ -55,23 +55,27 @@ export class Agent {
 
   listen(callback: (data: any) => void): void;
   listen(type: string, callback: (data: any) => void): void;
-  listen(a: ((data: any) => void) | string, b?: (data: any) => void): void {
-    if (typeof a === 'string' && b) {
-      this.process.on('message', e => {
-        if (e.type === a) {
-          b(e);
+  listen(first: ((data: any) => void) | string, second?: (data: any) => void): void {
+    if (typeof first === 'string' && second) {
+      const eventType = first;
+      const callback = second;
+
+      this.process.on('message', event => {
+        if (event.type === eventType) {
+          callback(event);
         }
       });
-    } else if (typeof a !== 'string') {
-      this.process.on('message', a);
+    } else if (typeof first !== 'string') {
+      const callback = first;
+      this.process.on('message', callback);
     }
   }
 
-  listenOnce(type: string, callback: (data: any) => void) {
-    const fn = (e: any) => {
-      if (e.type === type) {
+  listenOnce(eventType: string, callback: (data: any) => void) {
+    const fn = (event: any) => {
+      if (event.type === eventType) {
         this.process.removeListener('message', fn);
-        callback(e);
+        callback(event);
       }
     };
     this.process.on('message', fn);

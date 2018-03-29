@@ -9,10 +9,6 @@ import { ListenEvent } from './listener';
 import { ConsoleCapture } from './console';
 import { AssertUtil } from './assert';
 
-export interface TestEmitter {
-  emit(event: ListenEvent): void;
-}
-
 export class TestUtil {
 
   static timeout = 5000;
@@ -101,7 +97,9 @@ export class TestUtil {
       const err = result.error;
       if (!(err instanceof assert.AssertionError)) {
         const { file, line } = AssertUtil.readFilePosition(err, test.file);
-        const assertion: Assertion = { file, line, operator: 'throws', text: '', error: err, message: `Error thrown: ${err.message}` };
+        const assertion: Assertion = { file, line, operator: 'throws', text: '(uncaught)', error: err, message: err.message };
+        // result.output = result.output || {};
+        // result.output['error'] = `${(result.output['error'] || '')}\n${err.stack}`;
         result.assertions.push(assertion);
       }
     }

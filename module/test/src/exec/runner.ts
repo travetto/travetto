@@ -1,8 +1,9 @@
 import * as minimist from 'minimist';
 
 import { Agent, AgentPool } from './agent';
-import { TapListener, CollectionComplete, Collector, Listener } from './listener';
+import { TapListener, CollectionComplete, Collector, Listener, ListenEvent } from './listener';
 import { TestUtil } from './test';
+import { WorkerEmitter } from './emitter';
 import { AllSuitesResult } from '../model/suite';
 
 interface State {
@@ -35,9 +36,7 @@ export class Runner {
       return;
     }
 
-    await TestUtil.executeFile(data.file, {
-      emit: process.send.bind(process)
-    });
+    await TestUtil.executeFile(data.file, new WorkerEmitter());
   }
 
   async run() {

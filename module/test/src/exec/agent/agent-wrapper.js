@@ -1,3 +1,5 @@
+const { serialize } = require('./error');
+
 module.exports = {
   agent(init, run) {
     process.on('message', async function(data) {
@@ -6,17 +8,7 @@ module.exports = {
         init(_ => process.send({ type: 'initComplete' }));
       } else if (data.type === 'run') {
         run(data, e => {
-          let error = undefined;
-          if (e) {
-            error = {};
-            for (let k of Object.keys(e)) {
-              error[k] = e[k];
-            }
-            error.message = e.message;
-            error.stack = e.stack;
-            error.name = e.name;
-          }
-          process.send({ type: 'runComplete', error });
+          process.send({ type: 'runComplete', error: serialize(e) });
         });
       }
     });
