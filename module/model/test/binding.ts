@@ -9,7 +9,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry, Class } from '@travetto/registry';
 
 const query: Query<Person> = {
-  /*select: {
+  select: {
     address: {
       street1: 1
     }
@@ -18,12 +18,12 @@ const query: Query<Person> = {
     address: {
       street1: -1
     }
-  }],*/
+  }],
   where: {
     name: '5',
     names: ['1', '2'],
     dob: {
-      $in: [new Date()]
+      $gte: new Date()
     },
     address: {
       street2: {
@@ -63,6 +63,10 @@ class DataBinding {
 
     const res = await model.getByQuery(Person, {
       where: {
+        /*name: '5',
+        dob: {
+          $eq: new Date()
+        }*/
         $and: [{
           name: '5',
           address: {

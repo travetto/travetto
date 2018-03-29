@@ -5,7 +5,7 @@ import { RetainFields } from './common';
 type SelectFieldFn = 'max' | 'min' | 'avg' | 'sum' | 'count';
 
 type _SelectClause<T> = {
-  [P in keyof T]?: T[P] extends { alias: string, calc: SelectFieldFn } | 1 | 0 | boolean ? T[P] : _SelectClause<T[P]>;
+  [P in keyof T]?: T[P] extends object ? _SelectClause<T[P]> : { alias: string, calc: SelectFieldFn } | 1 | 0 | boolean;
 };
 
 type _GroupClause<T> = {
@@ -25,7 +25,8 @@ type _QueryOptions<T> = {
 type _QueryMain<T> = {
   select?: _SelectClause<T>;
   where?: WhereClause<T>;
-  group?: _GroupClause<T>;
+  // TODO: Add grouping in later
+  // group?: _GroupClause<T>;
 }
 
 type _Query<T> = _QueryMain<T> & _QueryOptions<T>;
