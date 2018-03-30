@@ -22,12 +22,14 @@ export class MailConfig {
 
 @Config('mail.template')
 export class MailTemplateConfig {
-  assetRoots: string[];
+  assetRoots: string[] = [];
   scssRoots: string[];
 
   async postConstruct() {
-    this.assetRoots = [`${__dirname}/../assets`];
-    this.scssRoots = [...this.assetRoots.map(x => `${x}/scss`), `${process.cwd()}/node_modules/foundation-emails/scss`];
+    this.assetRoots.push(...[process.cwd(), `${__dirname}/..`].map(x => `${x}/assets/email`));
+    this.scssRoots = [
+      ...this.assetRoots.map(x => `${x}/scss`),
+      `${process.cwd()}/node_modules/foundation-emails/scss`];
   }
 
   async findFirst(pth: string) {

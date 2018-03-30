@@ -5,6 +5,7 @@ import { RootRegistry } from '@travetto/registry';
 
 import * as assert from 'assert';
 import { TemplateEngine } from '../src/template';
+import * as fs from 'fs';
 
 @Suite('Emails')
 class EmailSuite {
@@ -23,13 +24,25 @@ class EmailSuite {
           <columns large="{{right}}"></columns>
         </row>`, { left: 6, right: 6 });
     assert(out.html.includes('>Bob</th>'));
+    assert(out.html.includes('<meta name="viewport" content="width=device-width"'));
+  }
+
+  @Test('Should template images')
+  async templatingImages() {
+    const instance = await DependencyRegistry.getInstance(TemplateEngine);
+
+    const out = await instance.template(`<img src="image/test.png">`, { left: 6, right: 6 });
+    const img = await instance.getAssetBuffer('image/test.png');
+    assert(img !== null);
+    assert(img.length > 1000);
+    assert(out.html.includes(img.toString('base64')));
   }
 
   @Test('Send email')
   async sendEmail() {
     const instance = await DependencyRegistry.getInstance(EmailService);
 
-    await instance.sendEmail({
+    const opts = await instance.sendEmail({
       to: 'tim@eaiti.com',
       subject: 'Simple Test',
       template: `<row>
@@ -38,6 +51,6 @@ class EmailSuite {
           </row>`,
       context: { name: 'Tim', price: '100' }
     });
-    assert(true);
+    assert((opts[0].html as string).includes('>100<'));
   }
 }

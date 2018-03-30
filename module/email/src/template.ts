@@ -140,6 +140,23 @@ export class TemplateEngine {
     });
   }
 
+  async getAssetBuffer(rel: string) {
+    const pth = await this.config.findFirst(rel);
+    const bufs: Buffer[] = [];
+
+    return new Promise<Buffer>((resolve, reject) => {
+      const stream = fs.createReadStream(pth).pipe(new PngQuant([128]));
+      stream.on('data', (d: Buffer) => bufs.push(d));
+      stream.on('end', (err: Error) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(Buffer.concat(bufs));
+        }
+      });
+    });
+  }
+
   async inlineImageSource(html: string) {
     const srcs: string[] = [];
 
@@ -147,21 +164,10 @@ export class TemplateEngine {
 
     const pendingImages = srcs.map(async src => {
       // TODO: fix this up?
-      const newSrc = await this.config.findFirst(src);
-      const ext = path.extname(newSrc).split('.')[1];
-      const bufs: Buffer[] = [];
+      const ext = path.extname(src).split('.')[1];
+      const data = (await this.getAssetBuffer(src)).toString('base64');
 
-      return await new Promise<{ ext: string, data: string, src: string }>((resolve, reject) => {
-        const stream = fs.createReadStream(newSrc).pipe(new PngQuant([128]));
-        stream.on('data', (d: Buffer) => bufs.push(d));
-        stream.on('end', (err: Error) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve({ ext, data: Buffer.concat(bufs).toString('base64'), src });
-          }
-        });
-      });
+      return { data, ext, src }
     });
 
     const images = await Promise.all(pendingImages);
