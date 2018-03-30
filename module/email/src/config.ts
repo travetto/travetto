@@ -26,7 +26,7 @@ export class MailTemplateConfig {
   scssRoots: string[];
 
   async postConstruct() {
-    this.assetRoots.push(`${__dirname}/../assets`);
+    this.assetRoots = [`${__dirname}/../assets`];
     this.scssRoots = [...this.assetRoots.map(x => `${x}/scss`), `${process.cwd()}/node_modules/foundation-emails/scss`];
   }
 

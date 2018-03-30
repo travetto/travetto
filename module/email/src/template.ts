@@ -69,7 +69,7 @@ export class TemplateEngine {
       const attrs: { [key: string]: string } = {};
       for (let i = 0; i < node.attributes.length; i++) {
         const attr = node.attributes.item(i);
-        attrs[attr.localName!] = attr.value;
+        attrs[attr!.localName!] = attr!.value;
       }
       return attrs;
     }

@@ -10,11 +10,10 @@ import { MailTemplateConfig } from './config';
 const writeFile = util.promisify(fs.writeFile);
 const mkdir = util.promisify(fs.mkdir);
 
-const browserSync = create();
-
-const tplEngine = new TemplateEngine(new MailTemplateConfig());
-
 const DIST = `${__dirname}/../dist`;
+
+declare var tplEngine: any;
+declare var browserSync: any;
 
 async function run() {
 
@@ -55,5 +54,3 @@ async function run() {
 
   watcher.on('add', reload).on('change', reload);
 }
-
-run();
