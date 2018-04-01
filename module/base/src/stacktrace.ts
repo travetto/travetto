@@ -33,11 +33,11 @@ export function initStackHandler() {
 
   const BASE = process.cwd();
 
-  chain.filter.attach(function (error: Error, frames: any[]) {
+  chain.filter.attach(function (error: Error, frames: NodeJS.CallSite[]) {
     // Filter out traces related to this file
     const rewrite = frames.filter(function (callSite) {
-      return callSite.getFileName() &&
-        callSite.getFileName().indexOf(BASE) >= 0 &&
+      return (callSite.getFileName() &&
+        callSite.getFileName()!.indexOf(BASE) >= 0) &&
         !callSite.isNative() &&
         !callSite.isToplevel() &&
         !callSite.isEval() &&
