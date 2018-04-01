@@ -22,18 +22,41 @@ export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
   };
 }
 
-export function Inject(config?: InjectConfig) {
+function extractSymbolOrConfig<T extends { qualifier?: Symbol }>(args: any[]) {
+  const out = {} as T;
+  if (args) {
+    let extra = args[0];
+    if (typeof extra === 'symbol') {
+      out.qualifier = extra;
+      extra = args[1];
+    }
+    Object.assign(out, extra);
+  }
+  return out;
+}
+
+export function Inject(symbol: symbol, config?: InjectConfig): ParameterDecorator & PropertyDecorator;
+export function Inject(config?: InjectConfig): ParameterDecorator & PropertyDecorator;
+export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
+
+  const config: InjectConfig = extractSymbolOrConfig(args);
+
   return (target: any, propertyKey: string | symbol, idx?: number) => {
     if (typeof idx !== 'number') { // Only register if on property
       DependencyRegistry.registerProperty(
         target.constructor,
         propertyKey as string,
-        config as any as Dependency);
+        (typeof config === 'symbol' ? { qualifier: config } : config) as any as Dependency);
     }
   };
 }
 
-export function InjectableFactory(config: InjectableFactoryConfig<any>): MethodDecorator {
+export function InjectableFactory(config: InjectableFactoryConfig<any>): MethodDecorator;
+export function InjectableFactory(symbol: symbol, config?: InjectableFactoryConfig<any>): MethodDecorator;
+export function InjectableFactory(...args: any[]): MethodDecorator {
+
+  const config: InjectableFactoryConfig<any> = extractSymbolOrConfig(args);
+
   return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
     DependencyRegistry.registerFactory({ ...config, fn: descriptor.value, id: `${target.__id}#${property}` });
   };
