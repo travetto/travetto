@@ -15,22 +15,26 @@ const ASSERT_FN_OPERATOR: { [key: string]: string } = {
 }
 
 const OP_MAPPING: { [key: string]: string } = {
-  includes: '$1 should include $0',
-  test: '$1 should match $0',
-  throws: '$0 should throw $1',
-  equal: '$0 should equal $1',
-  notEqual: '$0 should not equal $1',
-  strictEqual: '$0 should strictly equal $1',
-  notStrictEqual: '$0 should strictly not equal $1',
-  greaterThanEqual: '$0 should be greater than or equal to $1',
-  greaterThan: '$0 should be greater than $1',
-  lessThanEqual: '$0 should be less than or equal to $1',
-  lessThan: '$0 should be less than $1'
+  includes: '{expected} should include {actual}',
+  test: '{expected} should match {actual}',
+  throws: '{actual} should throw {expected}',
+  equal: '{actual} should equal {expected}',
+  notEqual: '{actual} should not equal {expected}',
+  strictEqual: '{actual} should strictly equal {expected}',
+  notStrictEqual: '{actual} should strictly not equal {expected}',
+  greaterThanEqual: '{actual} should be greater than or equal to {expected}',
+  greaterThan: '{actual} should be greater than {expected}',
+  lessThanEqual: '{actual} should be less than or equal to {expected}',
+  lessThan: '{actual} should be less than {expected}'
 }
 
 function clean(val: any) {
-  if (val === null || val === undefined || typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean' || _.isPlainObject(val)) {
-    return val;
+  if (val === null || val === undefined ||
+    typeof val === 'string' || typeof val === 'number' ||
+    typeof val === 'boolean' ||
+    _.isPlainObject(val) || Array.isArray(val)
+  ) {
+    return JSON.stringify(val);
   } else {
     return `${val}`;
   }
@@ -101,6 +105,14 @@ export class AssertUtil {
     }
 
     try {
+      if (assertion.actual) {
+        assertion.actual = clean(assertion.actual);
+      }
+
+      if (assertion.expected) {
+        assertion.expected = clean(assertion.expected);
+      }
+
       switch (name) {
         case 'instanceOf': assert(args[0] instanceof args[1], args[2]); break;
         case 'lessThan': assert(args[0] < args[1], args[2]); break;
@@ -116,25 +128,14 @@ export class AssertUtil {
           }
       }
 
-      if (assertion.actual) {
-        assertion.actual = clean(assertion.actual);
-      }
-
-      if (assertion.expected) {
-        assertion.expected = clean(assertion.expected);
-      }
-
       // Pushing on not error
       this.asserts.push(assertion);
     } catch (e) {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
-          if (assertion.operator) {
-            assertion.message = OP_MAPPING[name].replace(/\$([0-9]+)/g, (a, n) => JSON.stringify(args[n]));
-          } else {
-            assertion.message = `should be ${clean(assertion.expected)}`;
-          }
+          assertion.message = (OP_MAPPING[name] || `should be {expected}`);
         }
+        assertion.message = assertion.message.replace(/[{]([A-Za-z]+)[}]/g, (a, k) => (assertion as any)[k]);
         assertion.error = e;
         this.asserts.push(assertion);
       }
