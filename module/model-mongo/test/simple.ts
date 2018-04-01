@@ -14,15 +14,9 @@ class Person extends BaseModel {
 }
 
 class Init {
-  @InjectableFactory({ class: ModelMongoSource })
+  @InjectableFactory({ class: ModelSource as any })
   static getModelSource(conf: ModelMongoConfig) {
     return new ModelMongoSource(conf);
-  }
-
-  @InjectableFactory({ class: ModelService })
-  static getModelService(src: ModelMongoSource, query: QueryVerifierService) {
-    const out = new ModelService(src, query);
-    return out;
   }
 }
 
@@ -32,24 +26,26 @@ class TestSave {
   @BeforeAll()
   async init() {
     await RootRegistry.init();
-    const source = await DependencyRegistry.getInstance(ModelMongoSource);
+    const source = (await DependencyRegistry.getInstance(ModelSource)) as ModelMongoSource;
     await source.resetDatabase();
   }
 
   @Test('save it')
   async save() {
     const service = await DependencyRegistry.getInstance(ModelService);
-    const source = await DependencyRegistry.getInstance(ModelMongoSource);
+    const source = (await DependencyRegistry.getInstance(ModelSource)) as ModelMongoSource;
 
     assert.ok(source);
 
-    const res = await service.save(Person, Person.from({
-      name: 'Bob',
-      age: 20,
-      gender: 'm'
-    }));
+    for (const x of [1, 2]) {
+      const res = await service.save(Person, Person.from({
+        name: 'Bob',
+        age: 20,
+        gender: 'm'
+      }));
 
-    assert.ok(res);
+      assert.ok(res);
+    }
 
     const match = await service.getAllByQuery(Person, {
       where: {
@@ -57,14 +53,14 @@ class TestSave {
       }
     });
 
-    assert.ok(match.length === 1);
+    assert(match.length === 2);
 
-    const match2 = await service.getByQuery(Person, {
+    const match2 = await service.getAllByQuery(Person, {
       where: {
         name: 'Bob'
       }
     });
 
-    assert.ok(match2);
+    assert(match2.length === 2);
   }
 }
