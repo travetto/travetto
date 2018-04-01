@@ -17,9 +17,12 @@ const ASSERT_FN_OPERATOR: { [key: string]: string } = {
 const OP_MAPPING: { [key: string]: string } = {
   includes: '{expected} should include {actual}',
   test: '{expected} should match {actual}',
-  throws: '{actual} should throw {expected}',
+  throws: 'should throw {expected}',
+  doesNotThrow: 'should not throw {expected}',
   equal: '{actual} should equal {expected}',
   notEqual: '{actual} should not equal {expected}',
+  deepEqual: '{actual} should deep equal {expected}',
+  notDeepEqual: '{actual} should not deep equal {expected}',
   strictEqual: '{actual} should strictly equal {expected}',
   notStrictEqual: '{actual} should strictly not equal {expected}',
   greaterThanEqual: '{actual} should be greater than or equal to {expected}',
@@ -36,7 +39,11 @@ function clean(val: any) {
   ) {
     return JSON.stringify(val);
   } else {
-    return `${val}`;
+    if (!val.constructor || !val.constructor.__id && _.isFunction(val)) {
+      return val.name;
+    } else {
+      return `${val}`;
+    }
   }
 }
 
@@ -119,18 +126,13 @@ export class AssertUtil {
         case 'lessThanEqual': assert(args[0] <= args[1], args[2]); break;
         case 'greaterThan': assert(args[0] > args[1], args[2]); break;
         case 'greaterThanEqual': assert(args[0] >= args[1], args[2]); break;
-        case 'assert': assert.apply(assert, args); break;
-        case 'ok':
-        case 'fail':
-        case 'doesNotThrow':
-        case 'ifError':
-          (assert as any)[name].apply(null, args);
-          break;
         default:
-          if (name && args[1][name]) {
+          if (name && (assert as any)[name]) { // Assert call
+            (assert as any)[name].apply(null, args);
+          } else if (name && args[1][name]) { // Method call
             assert(args[1][name](args[0]));
           } else {
-            assert.apply(assert, args);
+            assert.apply(assert, args); // Do normal
           }
       }
 
