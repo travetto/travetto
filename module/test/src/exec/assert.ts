@@ -14,6 +14,20 @@ const ASSERT_FN_OPERATOR: { [key: string]: string } = {
   lessThan: '<'
 }
 
+const OP_MAPPING: { [key: string]: string } = {
+  includes: '$1 should include $0',
+  test: '$1 should match $0',
+  throws: '$0 should throw $1',
+  equal: '$0 should equal $1',
+  notEqual: '$0 should not equal $1',
+  strictEqual: '$0 should strictly equal $1',
+  notStrictEqual: '$0 should strictly not equal $1',
+  greaterThanEqual: '$0 should be greater than or equal to $1',
+  greaterThan: '$0 should be greater than $1',
+  lessThanEqual: '$0 should be less than or equal to $1',
+  lessThan: '$0 should be less than $1'
+}
+
 function clean(val: any) {
   if (val === null || val === undefined || typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean' || _.isPlainObject(val)) {
     return val;
@@ -74,17 +88,13 @@ export class AssertUtil {
       } else {
         assertion.message = args[1];
       }
-    } else if (/match|include/i.test(name)) {
-      assertion.operator = name;
-      assertion.actual = args[0];
-      assertion.expected = args[1];
-      assertion.message = args[2];
     } else if (name === 'ok' || name === 'assert') {
       assertion.actual = args[0];
       assertion.message = args[1];
       assertion.expected = true;
       assertion.operator = '';
     } else {
+      assertion.operator = name || '';
       assertion.message = args[2];
       assertion.expected = args[1];
       assertion.actual = args[0];
@@ -92,8 +102,6 @@ export class AssertUtil {
 
     try {
       switch (name) {
-        case 'match': assert(args[0].test(args[1])); break;
-        case 'include': assert(args[0].includes(args[1])); break;
         case 'instanceOf': assert(args[0] instanceof args[1], args[2]); break;
         case 'lessThan': assert(args[0] < args[1], args[2]); break;
         case 'lessThanEqual': assert(args[0] <= args[1], args[2]); break;
@@ -101,7 +109,11 @@ export class AssertUtil {
         case 'greaterThanEqual': assert(args[0] >= args[1], args[2]); break;
         case 'assert': assert.apply(assert, args); break;
         default:
-          (assert as any)[name].apply(null, args);
+          if (args[1][name]) {
+            assert(args[1][name](args[0]));
+          } else {
+            (assert as any)[name].apply(null, args);
+          }
       }
 
       if (assertion.actual) {
@@ -118,10 +130,7 @@ export class AssertUtil {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
           if (assertion.operator) {
-            const op = /throw|include|match/i.test(name) ?
-              `should ${assertion.operator}` :
-              `should be ${assertion.operator}`;
-            assertion.message = `${assertion.actual} ${op} ${assertion.expected}`;
+            assertion.message = OP_MAPPING[name].replace(/\$([0-9]+)/g, (a, n) => args[n]);
           } else {
             assertion.message = `should be ${clean(assertion.expected)}`;
           }

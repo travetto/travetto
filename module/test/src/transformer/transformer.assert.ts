@@ -26,8 +26,8 @@ const TEST_IMPORT = '@travetto/test';
 const ASSERT_UTIL = 'AssertUtil';
 
 const METHODS: { [key: string]: string } = {
-  includes: 'include',
-  test: 'match'
+  includes: 'includes',
+  test: 'test'
 };
 
 const METHOD_REGEX = new RegExp(`[.](${Object.keys(METHODS).join('|')})[(]`);
@@ -55,7 +55,7 @@ function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, name
   if (METHOD_REGEX.test(firstText)) {
     if (first && ts.isCallExpression(first) && ts.isPropertyAccessExpression(first.expression)) {
       name = METHODS[first.expression.name.text!];
-      args = [first.expression.expression, first.arguments[0]];
+      args = [first.arguments[0], first.expression.expression];
     }
   }
 
