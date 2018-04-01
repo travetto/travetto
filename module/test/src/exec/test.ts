@@ -8,6 +8,7 @@ import { TestRegistry } from '../service';
 import { ListenEvent } from './listener';
 import { ConsoleCapture } from './console';
 import { AssertUtil } from './assert';
+import { TestEmitter } from './emitter';
 
 export class TestUtil {
 
