@@ -1,2 +1,3 @@
-require('../bootstrap');
-require('./stack');
+require('../bootstrap').then(x => {
+  require('./stack');
+});
