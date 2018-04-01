@@ -120,11 +120,17 @@ export class AssertUtil {
         case 'greaterThan': assert(args[0] > args[1], args[2]); break;
         case 'greaterThanEqual': assert(args[0] >= args[1], args[2]); break;
         case 'assert': assert.apply(assert, args); break;
+        case 'ok':
+        case 'fail':
+        case 'doesNotThrow':
+        case 'ifError':
+          (assert as any)[name].apply(null, args);
+          break;
         default:
-          if (args[1][name]) {
+          if (name && args[1][name]) {
             assert(args[1][name](args[0]));
           } else {
-            (assert as any)[name].apply(null, args);
+            assert.apply(assert, args);
           }
       }
 
