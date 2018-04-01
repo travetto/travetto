@@ -3,10 +3,6 @@
     "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
   },
-  "bin": {
-    "travetto": "./bin/travetto.sh"
-  },
-
   "dependencies": {
     "@types/glob": "^5.0.35",
     "@types/node": "^9.4.7",
