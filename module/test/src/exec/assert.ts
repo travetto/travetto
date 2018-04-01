@@ -129,10 +129,10 @@ export class AssertUtil {
         default:
           if (name && (assert as any)[name]) { // Assert call
             (assert as any)[name].apply(null, args);
-          } else if (name && args[1][name]) { // Method call
+          } else if (args[1] && name && args[1][name]) { // Method call
             assert(args[1][name](args[0]));
           } else {
-            assert.apply(assert, args); // Do normal
+            assert.apply(null, args); // Do normal
           }
       }
 
