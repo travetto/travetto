@@ -130,7 +130,7 @@ export class AssertUtil {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
           if (assertion.operator) {
-            assertion.message = OP_MAPPING[name].replace(/\$([0-9]+)/g, (a, n) => args[n]);
+            assertion.message = OP_MAPPING[name].replace(/\$([0-9]+)/g, (a, n) => JSON.stringify(args[n]));
           } else {
             assertion.message = `should be ${clean(assertion.expected)}`;
           }
