@@ -7,6 +7,7 @@ export class BaseError<T = any> {
     this.name = this.constructor.name;
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, this.constructor);
+      this.stack = this.stack; // Force stack analysis
     } else {
       this.stack = (new Error(message)).stack;
     }
