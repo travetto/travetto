@@ -73,18 +73,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     };
   }
 
-  async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
-    const targetId = target.__id;
-
-    const aliasMap = this.aliases.get(targetId);
-
-    if (!aliasMap || !aliasMap.has(qualifier)) {
-      throw new InjectionError(`Dependency not found: ${targetId}[${getName(qualifier)}]`);
-    }
-
-    const clz = aliasMap.get(qualifier)!;
-    const managed = this.get(clz)!;
-
+  async computeDependencies(managed: InjectableConfig<any>) {
     const fieldKeys = Object.keys(managed.dependencies.fields!);
 
     const consDeps = managed.dependencies.cons || [];
@@ -108,17 +97,44 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const consValues = all.slice(0, consDeps.length);
     const fieldValues = all.slice(consDeps.length);
 
+    const fields = new Map<string, any>();
+    for (let i = 0; i < fieldKeys.length; i++) {
+      fields.set(fieldKeys[i], fieldValues[i]);
+    }
+
+    return { consValues, fields }
+  }
+
+  applyFieldDependencies(inst: any, fields: Map<string, any>) {
+    for (const [key, value] of fields.entries()) {
+      inst[key] = value;
+    }
+  }
+
+  async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
+    const targetId = target.__id;
+
+    const aliasMap = this.aliases.get(targetId);
+
+    if (!aliasMap || !aliasMap.has(qualifier)) {
+      throw new InjectionError(`Dependency not found: ${targetId}[${getName(qualifier)}]`);
+    }
+
+    const clz = aliasMap.get(qualifier)!;
+    const managed = this.get(clz)!;
+
+    const { consValues, fields } = await this.computeDependencies(managed);
+
     const inst = managed.factory ?
       managed.factory(...consValues) :
       new managed.class(...consValues);
 
-    for (let i = 0; i < fieldKeys.length; i++) {
-      (inst as any)[fieldKeys[i]] = fieldValues[i];
-    }
+    this.applyFieldDependencies(inst, fields);
 
     if (inst.postConstruct) {
       await inst.postConstruct();
     }
+
     return inst;
   }
 
@@ -231,9 +247,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   registerFactory(config: InjectableFactoryConfig<any> & { fn: (...args: any[]) => any, id?: string }) {
     const finalConfig: InjectableConfig<any> = {} as any;
+
     if (typeof config.autoCreate === 'boolean') {
       finalConfig.autoCreate = { create: config.autoCreate } as any;
     }
+
     finalConfig.factory = config.fn;
     finalConfig.target = config.class;
 
@@ -241,10 +259,20 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       finalConfig.qualifier = config.qualifier;
     }
 
+    finalConfig.dependencies = { fields: {} };
+
     if (config.dependencies) {
-      finalConfig.dependencies = {
-        cons: config.dependencies,
-        fields: {}
+      finalConfig.dependencies.cons = config.dependencies;
+    }
+
+    // Mirror target's field dependencies
+    if (config.class) {
+      const targetConfig = this.get(config.class);
+      if (targetConfig && targetConfig.dependencies) {
+        finalConfig.dependencies.fields = {};
+        for (const k of Object.keys(targetConfig.dependencies.fields)) {
+          finalConfig.dependencies.fields[k] = targetConfig.dependencies.fields[k];
+        }
       }
     }
 
@@ -263,6 +291,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     const config = this.getOrCreatePending(cls) as InjectableConfig<T>;
 
+    // Allow for the factory to fulfill the target
     const parentClass = Object.getPrototypeOf(cls);
     const parentConfig = this.get(parentClass.__id);
 

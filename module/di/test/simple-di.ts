@@ -1,12 +1,12 @@
 import { DependencyRegistry } from '../src/service';
-import { ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT } from './deps';
-import { Suite, Test } from '@travetto/test';
+import { ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT, CUSTOM_DATABSE, Database } from './deps';
+import { Suite, Test, BeforeEach } from '@travetto/test';
 import * as assert from 'assert';
 
 const FOUR = 4;
 
 function doWork() {
-  // throw new Error('ahhh');
+  throw new Error('ahhh');
 }
 
 @Suite('di')
@@ -34,19 +34,24 @@ class DiTest {
   async runner() {
 
     assert(1 === 1);
+
     assert(2 + 2 === FOUR);
 
-    doWork();
+    assert.throws(doWork, Error);
   }
 }
 
 @Suite('di2')
 class DiTest2 {
 
+  @BeforeEach()
+  async each() {
+    await DependencyRegistry.init();
+  }
+
   @Test('run')
   async run() {
     console.log('starting');
-    await DependencyRegistry.init();
     assert(30 === 30);
 
     const inst = await DependencyRegistry.getInstance(ServiceInherit);
@@ -70,10 +75,31 @@ class DiTest2 {
 
   @Test('factory')
   async factory() {
-    await DependencyRegistry.init();
-
+    assert(true);
     const inst = await DependencyRegistry.getInstance(ServiceInherit, CUSTOM_SERVICE_INHERIT);
 
     assert(inst);
+
+    assert(inst.db.dbConfig);
+    assert.ok(!inst.db.dbConfig.temp);
+
+    assert(inst.db.dbConfig.empty.age === 10);
+  }
+
+  @Test('factory with autowire after')
+  async factory2() {
+    assert(true);
+
+    const inst = await DependencyRegistry.getInstance(Database, CUSTOM_DATABSE);
+
+    assert(inst);
+
+    assert(inst.altConfig === undefined);
+
+    assert.ok(inst.dbConfig);
+
+    assert(inst.dbConfig.temp === 'any');
+
+    assert(inst.dbConfig.empty.age === 20);
   }
 }
