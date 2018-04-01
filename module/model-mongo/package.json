@@ -1,27 +1,27 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "dependencies": {
-    "@travetto/model": "0.x.x",
-    "@types/flat": "0.0.28",
-    "@types/mongodb": "^3.0.9",
-    "flat": "^4.0.0",
+    "@travetto/model": "0.x.x", 
+    "@types/flat": "0.0.28", 
+    "@types/mongodb": "^3.0.9", 
+    "flat": "^4.0.0", 
     "mongodb": "^3.0.5"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@travetto/model-mongo",
+  }, 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@travetto/model-mongo", 
   "repository": {
     "url": "https://github.com/travetto/model-mongo.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.7"
+  }, 
+  "version": "0.0.8"
 }
