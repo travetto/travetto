@@ -25,6 +25,13 @@ const ASSERT_CMD = 'assert';
 const TEST_IMPORT = '@travetto/test';
 const ASSERT_UTIL = 'AssertUtil';
 
+const METHODS: { [key: string]: string } = {
+  includes: 'include',
+  test: 'match'
+};
+
+const METHOD_REGEX = new RegExp(`[.](${Object.keys(METHODS).join('|')})[(]`);
+
 interface AssertState extends State {
   assert: ts.Identifier;
   hasAssertCall: boolean;
@@ -41,10 +48,21 @@ function isDeepLiteral(node: ts.Expression) {
 function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, name: string, args: ts.Expression[]): T {
   prepAssert(state);
 
+  const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);
+  const firstText = first!.getText();
+
+  // Handle METHOD
+  if (METHOD_REGEX.test(firstText)) {
+    if (first && ts.isCallExpression(first) && ts.isPropertyAccessExpression(first.expression)) {
+      name = METHODS[first.expression.name.text!];
+      args = [first.expression.expression, first.arguments[0]];
+    }
+  }
+
   args = args.filter(x => x !== undefined && x !== null);
   const check = ts.createCall(state.assertCheck, undefined, ts.createNodeArray([
     ts.createLiteral('__filename'),
-    ts.createLiteral(TransformUtil.getPrimaryArgument(node)!.getText()),
+    ts.createLiteral(firstText),
     ts.createLiteral(name),
     ...args
   ]));
@@ -111,7 +129,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         replaced = true;
 
         node = doAssert(state, node, exp.name.escapedText as string, [...node.arguments]);
-        // Already in near, final form, just rewrite to intermmediate
+        // Already in near, final form, just rewrite to intermediate
       }
     }
   }

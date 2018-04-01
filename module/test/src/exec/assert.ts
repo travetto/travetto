@@ -66,7 +66,7 @@ export class AssertUtil {
       } else {
         assertion.message = args[0];
       }
-    } else if (name.includes('hrow')) {
+    } else if (/throw/i.test(name)) {
       assertion.operator = 'throw';
       if (typeof args[1] !== 'string') {
         assertion.expected = args[1];
@@ -74,6 +74,11 @@ export class AssertUtil {
       } else {
         assertion.message = args[1];
       }
+    } else if (/match|include/i.test(name)) {
+      assertion.operator = name;
+      assertion.actual = args[0];
+      assertion.expected = args[1];
+      assertion.message = args[2];
     } else if (name === 'ok' || name === 'assert') {
       assertion.actual = args[0];
       assertion.message = args[1];
@@ -87,6 +92,8 @@ export class AssertUtil {
 
     try {
       switch (name) {
+        case 'match': assert(args[0].test(args[1])); break;
+        case 'include': assert(args[0].includes(args[1])); break;
         case 'instanceOf': assert(args[0] instanceof args[1], args[2]); break;
         case 'lessThan': assert(args[0] < args[1], args[2]); break;
         case 'lessThanEqual': assert(args[0] <= args[1], args[2]); break;
@@ -111,7 +118,7 @@ export class AssertUtil {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
           if (assertion.operator) {
-            const op = name.includes('hrow') ?
+            const op = /throw|include|match/i.test(name) ?
               `should ${assertion.operator}` :
               `should be ${assertion.operator}`;
             assertion.message = `${assertion.actual} ${op} ${assertion.expected}`;
