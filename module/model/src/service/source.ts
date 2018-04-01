@@ -1,6 +1,6 @@
 import { Class, ChangeEvent } from '@travetto/registry';
 
-import { ModelCore, QueryOptions, Query, PageableModelQuery } from '../model';
+import { ModelCore, Query, PageableModelQuery } from '../model';
 import { BulkState, BulkResponse } from '../model/bulk';
 import { ModelQuery } from '../model/query';
 

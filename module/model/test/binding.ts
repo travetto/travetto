@@ -61,27 +61,32 @@ class DataBinding {
 
     assert(model['source'] instanceof TestSource);
 
-    const res = await model.getByQuery(Person, {
-      where: {
-        /*name: '5',
-        dob: {
-          $eq: new Date()
-        }*/
-        $and: [{
-          name: '5',
-          address: {
-            street1: {
-              $nin: ['10']
+    try {
+      const res = await model.getByQuery(Person, {
+        where: {
+          /*name: '5',
+          dob: {
+            $eq: new Date()
+          }*/
+          $and: [{
+            name: '5',
+            address: {
+              street1: {
+                $nin: ['10']
+              }
             }
-          }
-        }, {
-          $or: [{
-            age: {
-              $in: [5]
-            }
-          }],
-        }]
-      }
-    });
+          }, {
+            $or: [{
+              age: {
+                $in: [5]
+              }
+            }],
+          }]
+        }
+      });
+    } catch (e) {
+      assert(e instanceof Error);
+      assert(e.message === 'Method not implemented.');
+    }
   }
 }
