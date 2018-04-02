@@ -37,6 +37,7 @@ export class ServiceInherit extends Service {
 }
 
 export const SERVICE_INHERIT_2 = Symbol()
+export const SERVICE_INHERIT_3 = Symbol()
 
 @Injectable(SERVICE_INHERIT_2)
 export class ServiceInherit2 extends ServiceInherit {
@@ -57,8 +58,8 @@ class TestConfig {
   }
 
   @InjectableFactory(CUSTOM_SERVICE_INHERIT)
-  static getObject(@Inject(SERVICE_INHERIT_2) svc: ServiceInherit): ServiceInherit {
-    const out = new ServiceInherit2(svc.db);
+  static getObject(@Inject(SERVICE_INHERIT_2) svc?: ServiceInherit): ServiceInherit {
+    const out = new ServiceInherit2(svc ? svc.db : new Database());
     out.age = 11;
     return out;
   }

@@ -42,7 +42,7 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
     let optional = TransformUtil.getObjectValue(injectConfig, 'optional');
 
     if (optional === undefined && !!param.questionToken) {
-      optional = ts.createFalse();
+      optional = ts.createTrue();
     }
 
     return TransformUtil.fromLiteral({
