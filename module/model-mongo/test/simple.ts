@@ -1,5 +1,5 @@
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
-import { DependencyRegistry, Injectable, InjectableFactory } from '@travetto/di';
+import { DependencyRegistry, Injectable, InjectableFactory, DEFAULT_INSTANCE } from '@travetto/di';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { ModelMongoSource, ModelMongoConfig } from '../index';
 import * as assert from 'assert';
@@ -13,9 +13,11 @@ class Person extends BaseModel {
   gender: 'm' | 'f';
 }
 
+const SYMBOL = Symbol();
+
 class Init {
-  @InjectableFactory({ class: ModelSource as any })
-  static getModelSource(conf: ModelMongoConfig) {
+  @InjectableFactory()
+  static getModelSource(conf: ModelMongoConfig): ModelSource {
     return new ModelMongoSource(conf);
   }
 }
