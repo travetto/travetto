@@ -168,9 +168,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
       const callExpr = (foundDec && foundDec.expression as any as ts.CallExpression);
       if (callExpr) {
-        const args = callExpr.arguments!;
+        const args = callExpr.arguments! || [];
         // Handle special case
-        if (args.length && ts.isIdentifier(args[0])) {
+        if (args[0] && ts.isIdentifier(args[0])) {
           original = args[0];
           injectConfig = args[1] as any;
         }
@@ -185,34 +185,31 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       if (node.type && target === undefined) {  // TODO: infer from typings, not just text?
         target = TransformUtil.importIfExternal(node.type!, state);
       }
+      const args = TransformUtil.extendObjectLiteral({
+        dependencies: injectArgs,
+        class: target,
+        original
+      }, injectConfig);
 
-      if (injectArgs.length) {
-        const args = TransformUtil.extendObjectLiteral({
-          dependencies: injectArgs,
-          class: target,
-          original
-        }, injectConfig);
-
-        node = ts.createMethod(
-          decls!.filter(x => x !== foundDec).concat([
-            ts.createDecorator(
-              ts.createCall(
-                callExpr.expression,
-                callExpr.typeArguments,
-                ts.createNodeArray([args])
-              )
+      node = ts.createMethod(
+        decls!.filter(x => x !== foundDec).concat([
+          ts.createDecorator(
+            ts.createCall(
+              callExpr.expression,
+              callExpr.typeArguments,
+              ts.createNodeArray([args])
             )
-          ]),
-          node.modifiers,
-          node.asteriskToken,
-          node.name,
-          node.questionToken,
-          node.typeParameters,
-          node.parameters,
-          node.type,
-          node.body
-        ) as any;
-      }
+          )
+        ]),
+        node.modifiers,
+        node.asteriskToken,
+        node.name,
+        node.questionToken,
+        node.typeParameters,
+        node.parameters,
+        node.type,
+        node.body
+      ) as any;
 
       return node;
     } else {
