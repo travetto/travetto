@@ -55,8 +55,8 @@ export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
   };
 }
 
-export function InjectableFactory(config?: InjectableFactoryConfig<any>): MethodDecorator;
 export function InjectableFactory(symbol: symbol, config?: InjectableFactoryConfig<any>): MethodDecorator;
+export function InjectableFactory(config?: InjectableFactoryConfig<any>): MethodDecorator;
 export function InjectableFactory(...args: any[]): MethodDecorator {
 
   return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
