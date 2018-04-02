@@ -80,6 +80,8 @@ class DiTest2 {
 
     assert(inst);
 
+    assert(inst.age === 11);
+
     assert(inst.db.dbConfig);
     assert.ok(!inst.db.dbConfig.temp);
 

@@ -3,8 +3,25 @@ import { DependencyRegistry, DEFAULT_INSTANCE } from '../service';
 import { Class } from '@travetto/registry';
 import { InjectableFactoryConfig } from '..';
 
-export function Injectable(config: Partial<InjectableConfig<any>> = {}): ClassDecorator {
+function extractSymbolOrConfig<T extends { qualifier?: Symbol }>(args: any[]) {
+  const out = {} as T;
+  if (args) {
+    let extra = args[0];
+    if (typeof extra === 'symbol') {
+      out.qualifier = extra;
+      extra = args[1];
+    }
+    Object.assign(out, extra);
+  }
+  return out;
+}
+
+export function Injectable(qualifier: symbol, config?: Partial<InjectableConfig<any>>): ClassDecorator;
+export function Injectable(config?: Partial<InjectableConfig<any>>): ClassDecorator;
+export function Injectable(...args: any[]): ClassDecorator {
   return (target: Class | any) => {
+    const config = extractSymbolOrConfig(args) as Partial<InjectableConfig<any>>;
+
     config.class = target;
     if (typeof config.autoCreate === 'boolean') {
       config.autoCreate = { create: config.autoCreate } as any;
@@ -20,19 +37,6 @@ export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
   return (target: any) => {
     DependencyRegistry.registerConstructor(target, configs as any as Dependency[]);
   };
-}
-
-function extractSymbolOrConfig<T extends { qualifier?: Symbol }>(args: any[]) {
-  const out = {} as T;
-  if (args) {
-    let extra = args[0];
-    if (typeof extra === 'symbol') {
-      out.qualifier = extra;
-      extra = args[1];
-    }
-    Object.assign(out, extra);
-  }
-  return out;
 }
 
 export function Inject(symbol: symbol, config?: InjectConfig): ParameterDecorator & PropertyDecorator;

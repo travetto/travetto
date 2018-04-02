@@ -76,7 +76,7 @@ function createInjectDecorator(state: DiState, name: string, contents?: ts.Expre
 }
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: DiState): T {
-  if (ts.isClassDeclaration(node)) {
+  if (ts.isClassDeclaration(node)) { // Class declaration
     const foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES, state);
 
     if (foundDec) { // Constructor
@@ -106,6 +106,24 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       if (!injectable) {
         injectable = createInjectDecorator(state, 'Injectable');
         declTemp.push(injectable);
+      } else {
+        let original = undefined;
+        const callExpr = (injectable && injectable.expression as any as ts.CallExpression);
+        let injectConfig = undefined;
+
+        if (callExpr) {
+          const args = callExpr.arguments! || [];
+          injectConfig = args[0] as any;
+          // Handle special case
+          if (args[0] && ts.isIdentifier(args[0])) {
+            original = args[0];
+            injectConfig = args[1] as any;
+          }
+          if (injectConfig === undefined) {
+            injectConfig = TransformUtil.fromLiteral({});
+          }
+          ts.updateCall(callExpr, callExpr.expression, callExpr.typeArguments, ts.createNodeArray([injectConfig]));
+        }
       }
 
       decls = ts.createNodeArray(declTemp);
