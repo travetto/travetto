@@ -286,17 +286,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       finalConfig.dependencies.cons = config.dependencies;
     }
 
-    // Mirror target's field dependencies
-    if (config.class) {
-      const targetConfig = this.get(config.class);
-      if (targetConfig && targetConfig.dependencies) {
-        finalConfig.dependencies.fields = {};
-        for (const k of Object.keys(targetConfig.dependencies.fields)) {
-          finalConfig.dependencies.fields[k] = targetConfig.dependencies.fields[k];
-        }
-      }
-    }
-
     // Create mock cls for DI purposes
     const cls = { __id: config.id || `${config.class.__id}#${config.fn.name}` } as any;
 
@@ -308,12 +297,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   onInstallFinalize<T>(cls: Class<T>) {
     const classId = cls.__id;
 
-    console.debug('Finalized', classId);
-
     const config = this.getOrCreatePending(cls) as InjectableConfig<T>;
 
     // Allow for the factory to fulfill the target
-    const parentClass = Object.getPrototypeOf(cls);
+    const parentClass = config.factory ? config.target : Object.getPrototypeOf(cls);
     const parentConfig = this.get(parentClass.__id);
 
     if (parentConfig) {

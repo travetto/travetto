@@ -1,7 +1,8 @@
 import { DependencyRegistry } from '../src/service';
-import { ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT, CUSTOM_DATABSE, Database } from './deps';
+import { ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT, CUSTOM_DATABSE, Database, CUSTOM_EMPTY } from './deps';
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import * as assert from 'assert';
+import { DbConfig } from './config';
 
 const FOUR = 4;
 
@@ -105,5 +106,29 @@ class DiTest2 {
     assert(inst.dbConfig.temp === 'any');
 
     assert(inst.dbConfig.empty.age === 20);
+  }
+
+  @Test('factory with autowire after')
+  async factory3() {
+    assert(true);
+
+    const inst = await DependencyRegistry.getInstance(Database);
+
+    assert(inst);
+
+    assert(inst.altConfig === undefined);
+
+    assert.ok(inst.dbConfig);
+  }
+
+  @Test('factory with autowire after')
+  async factory4() {
+    assert(true);
+
+    const inst = await DependencyRegistry.getInstance(DbConfig, CUSTOM_EMPTY);
+
+    assert(inst);
+
+    assert(inst.empty);
   }
 }

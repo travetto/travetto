@@ -17,7 +17,8 @@ function extractSymbolOrConfig<T extends { qualifier?: Symbol }>(args: any[]) {
 }
 
 export function Injectable(qualifier: symbol, config?: Partial<InjectableConfig<any>>): ClassDecorator;
-export function Injectable(config?: Partial<InjectableConfig<any>>): ClassDecorator;
+export function Injectable(config: Partial<InjectableConfig<any>>): ClassDecorator;
+export function Injectable(): ClassDecorator;
 export function Injectable(...args: any[]): ClassDecorator {
   return (target: Class | any) => {
     const config = extractSymbolOrConfig(args) as Partial<InjectableConfig<any>>;
@@ -40,7 +41,8 @@ export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
 }
 
 export function Inject(symbol: symbol, config?: InjectConfig): ParameterDecorator & PropertyDecorator;
-export function Inject(config?: InjectConfig): ParameterDecorator & PropertyDecorator;
+export function Inject(config: InjectConfig): ParameterDecorator & PropertyDecorator;
+export function Inject(): ParameterDecorator & PropertyDecorator;
 export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
 
   return (target: any, propertyKey: string | symbol, idx?: number) => {
@@ -56,7 +58,8 @@ export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
 }
 
 export function InjectableFactory(symbol: symbol, config?: InjectableFactoryConfig<any>): MethodDecorator;
-export function InjectableFactory(config?: InjectableFactoryConfig<any>): MethodDecorator;
+export function InjectableFactory(config: InjectableFactoryConfig<any>): MethodDecorator;
+export function InjectableFactory(): MethodDecorator;
 export function InjectableFactory(...args: any[]): MethodDecorator {
 
   return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {

@@ -49,6 +49,12 @@ export const CUSTOM_DATABSE = Symbol('CUSTOM DB');
 export const CUSTOM_EMPTY = Symbol('Custom EMPTY');
 
 class TestConfig {
+  @InjectableFactory({ qualifier: CUSTOM_EMPTY, class: DbConfig })
+  static getNewDb(): DbConfig<any, any> {
+    const out = new DbConfig();
+    return out;
+  }
+
   @InjectableFactory(CUSTOM_EMPTY)
   static getNewEmpty(): Empty {
     const out = new Empty();
