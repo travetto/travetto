@@ -39,10 +39,10 @@ export function Inject(symbol: symbol, config?: InjectConfig): ParameterDecorato
 export function Inject(config?: InjectConfig): ParameterDecorator & PropertyDecorator;
 export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
 
-  const config: InjectConfig = extractSymbolOrConfig(args);
-
   return (target: any, propertyKey: string | symbol, idx?: number) => {
     if (typeof idx !== 'number') { // Only register if on property
+      const config: InjectConfig = extractSymbolOrConfig(args);
+
       DependencyRegistry.registerProperty(
         target.constructor,
         propertyKey as string,
@@ -55,9 +55,8 @@ export function InjectableFactory(config: InjectableFactoryConfig<any>): MethodD
 export function InjectableFactory(symbol: symbol, config?: InjectableFactoryConfig<any>): MethodDecorator;
 export function InjectableFactory(...args: any[]): MethodDecorator {
 
-  const config: InjectableFactoryConfig<any> = extractSymbolOrConfig(args);
-
   return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
+    const config: InjectableFactoryConfig<any> = extractSymbolOrConfig(args);
     DependencyRegistry.registerFactory({ ...config, fn: descriptor.value, id: `${target.__id}#${property}` });
   };
 }

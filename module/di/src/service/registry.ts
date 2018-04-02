@@ -4,6 +4,8 @@ import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/re
 import { AppEnv } from '@travetto/base';
 import { RetargettingHandler } from '@travetto/compiler';
 
+import * as _ from 'lodash';
+
 export const DEFAULT_INSTANCE = Symbol('__default');
 
 export interface ManagedExtra {
@@ -15,6 +17,18 @@ type ClassId = string;
 
 function getName(symbol: symbol) {
   return symbol.toString().split(/[()]/g)[1];
+}
+
+function mergeWithOptional<T extends { original?: symbol | object, qualifier?: symbol }>(o: T) {
+  if (o.original) {
+    if (typeof o.original === 'symbol') {
+      o.qualifier = o.original;
+    } else if (_.isPlainObject(o.original)) {
+      _.merge(o, o.original)
+    }
+    o.original = undefined;
+  }
+  return o;
 }
 
 export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
@@ -78,6 +92,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     const consDeps = managed.dependencies.cons || [];
     const allDeps = consDeps.concat(fieldKeys.map(x => managed.dependencies.fields[x]))
+
+    for (const dep of allDeps) {
+      mergeWithOptional(dep);
+    }
 
     const promises = allDeps
       .map(async x => {
@@ -217,6 +235,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency<any>) {
     const conf = this.getOrCreatePending(cls);
+
     conf.dependencies!.fields[field] = dependency;
     dependency.qualifier = dependency.qualifier || DEFAULT_INSTANCE;
   }
@@ -247,6 +266,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   registerFactory(config: InjectableFactoryConfig<any> & { fn: (...args: any[]) => any, id?: string }) {
     const finalConfig: InjectableConfig<any> = {} as any;
+
+    mergeWithOptional(config);
 
     if (typeof config.autoCreate === 'boolean') {
       finalConfig.autoCreate = { create: config.autoCreate } as any;

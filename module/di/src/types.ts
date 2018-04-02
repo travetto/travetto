@@ -16,6 +16,7 @@ export interface Dependency<T = any> {
   target: ClassTarget<T>;
   qualifier: symbol;
   optional?: boolean;
+  original?: Symbol | object;
 }
 
 export interface InjectableFactoryConfig<T> {
@@ -23,4 +24,5 @@ export interface InjectableFactoryConfig<T> {
   qualifier?: symbol;
   dependencies?: Dependency<any>[]
   autoCreate?: boolean
+  original?: Symbol | object;
 }

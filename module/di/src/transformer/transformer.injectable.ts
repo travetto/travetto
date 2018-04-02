@@ -18,7 +18,26 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
 
   if (injection || ts.isParameter(param)) {
     const finalTarget = TransformUtil.importIfExternal(param.type!, state);
-    const injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
+
+    let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
+
+
+    let original = undefined;
+
+    const callExpr = (injection && injection.expression as any as ts.CallExpression);
+    if (callExpr) {
+      const args = callExpr.arguments! || [];
+
+      // Handle special case
+      if (args.length && ts.isIdentifier(args[0])) {
+        original = args[0];
+        injectConfig = args[1] as any;
+      }
+    }
+
+    if (injectConfig === undefined) {
+      injectConfig = TransformUtil.fromLiteral({});
+    }
 
     let optional = TransformUtil.getObjectValue(injectConfig, 'optional');
 
@@ -27,6 +46,7 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
     }
 
     return TransformUtil.fromLiteral({
+      original,
       target: finalTarget,
       optional,
       qualifier: TransformUtil.getObjectValue(injectConfig, 'qualifier')
@@ -133,6 +153,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       const declTemp = (node.decorators || []).slice(0);
 
       let injectArgs: object[] = [];
+      let original: any;
 
       try {
         injectArgs = node.parameters.map(x => processDeclaration(state, x)!);
@@ -143,19 +164,41 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         }
       }
 
-      if (injectArgs.length) {
-        const foundExpr = (foundDec.expression as ts.CallExpression);
+      let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(foundDec);
 
+      const callExpr = (foundDec && foundDec.expression as any as ts.CallExpression);
+      if (callExpr) {
+        const args = callExpr.arguments!;
+        // Handle special case
+        if (args.length && ts.isIdentifier(args[0])) {
+          original = args[0];
+          injectConfig = args[1] as any;
+        }
+      }
+
+      if (injectConfig === undefined) {
+        injectConfig = TransformUtil.fromLiteral({});
+      }
+
+      // Handle when
+      let target = TransformUtil.getObjectValue(injectConfig, 'target');
+      if (node.type && target === undefined) {  // TODO: infer from typings, not just text?
+        target = TransformUtil.importIfExternal(node.type!, state);
+      }
+
+      if (injectArgs.length) {
         const args = TransformUtil.extendObjectLiteral({
-          dependencies: injectArgs
-        }, foundExpr.arguments[0] as ts.ObjectLiteralExpression);
+          dependencies: injectArgs,
+          class: target,
+          original
+        }, injectConfig);
 
         node = ts.createMethod(
           decls!.filter(x => x !== foundDec).concat([
             ts.createDecorator(
               ts.createCall(
-                foundExpr.expression,
-                foundExpr.typeArguments,
+                callExpr.expression,
+                callExpr.typeArguments,
                 ts.createNodeArray([args])
               )
             )
