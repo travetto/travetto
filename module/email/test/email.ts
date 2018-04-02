@@ -42,15 +42,20 @@ class EmailSuite {
   async sendEmail() {
     const instance = await DependencyRegistry.getInstance(EmailService);
 
-    const opts = await instance.sendEmail({
+    const [opts] = await instance.sendEmail({
       to: 'tim@eaiti.com',
       subject: 'Simple Test',
       template: `<row>
-            <columns large="6">{{name}}</columns>
+            <columns large="6">
+              {{name}}
+              <img src="image/test.png">
+           </columns>
             <columns large="6">{{price}}</columns>
           </row>`,
       context: { name: 'Tim', price: '100' }
     });
-    assert((opts[0].html as string).includes('>100<'));
+    assert((opts.html as string).includes('>100<'));
+    assert((opts.html as string).includes(`cid`));
+    assert(!(opts.html as string).includes('base64'));
   }
 }
