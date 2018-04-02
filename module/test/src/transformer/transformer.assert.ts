@@ -118,7 +118,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           const inner = comp.operand.operand;
           node = doAssert(state, node, 'ok', [inner, message!]); // !!v
         } else {
-          node = doAssert(state, node, 'ok', [comp.operand, message!]); // !v
+          node = doAssert(state, node, ASSERT_CMD, [comp, message!]); // !v
         }
       } else {
         node = doAssert(state, node, ASSERT_CMD, [...node.arguments]);
