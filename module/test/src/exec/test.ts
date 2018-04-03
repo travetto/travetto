@@ -78,7 +78,7 @@ export class TestUtil {
       ConsoleCapture.start();
 
       AssertUtil.start(emitter ? (a) => {
-        emitter.emit({ type: 'assert', phase: 'after', assert: a })
+        emitter.emit({ type: 'assertion', phase: 'after', assertion: a })
       } : undefined);
 
       const timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
