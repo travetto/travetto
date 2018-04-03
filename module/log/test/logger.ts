@@ -4,14 +4,13 @@ import * as util from 'util';
 import { assert } from 'console';
 
 import { Suite, Test, BeforeEach, BeforeAll } from '@travetto/test';
-import { toPromise } from '@travetto/util';
 import { DependencyRegistry } from '@travetto/di';
 
 import { Logger } from '../src';
 
-let name = `${process.cwd()}/logs/travetto_log-out.log`;
-let fsTrunc = util.promisify(fs.truncate);
-let fsRead = util.promisify(fs.readFile);
+const name = `${process.cwd()}/logs/travetto_log-out.log`;
+const fsTrunc = util.promisify(fs.truncate);
+const fsRead = util.promisify(fs.readFile);
 
 @Suite('Suite')
 class LoggerTest {
