@@ -1,6 +1,6 @@
-import { Worker } from './worker';
+import { Executor } from './executor';
 
-export class LocalWorker<U = any> extends Worker<U, NodeJS.Process> {
+export class LocalExecutor<U = any> extends Executor<U, NodeJS.Process> {
   constructor() {
     super(new Promise(resolve => resolve(process)));
   }

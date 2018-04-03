@@ -1,16 +1,16 @@
 import * as child_process from 'child_process';
-import * as exec from './util';;
+import * as exec from './util';
 import { CommonProcess } from './types';
-import { Worker } from './worker';
+import { Executor } from './executor';
 
-export class ChildWorker<U = any> extends Worker<U, child_process.ChildProcess> {
+export class ChildExecutor<U = any> extends Executor<U, child_process.ChildProcess> {
   constructor(public command: string, fork = false) {
     super(new Promise((resolve) => {
       const op: typeof exec.fork = (fork ? exec.fork : exec.spawn);
       const [sub, complete] = op(this.command, {
         env: {
           ...process.env,
-          WORKER: true
+          EXECUTOR: true
         },
         quiet: true,
         stdio: ['pipe', 'pipe', 'pipe', 'ipc']
