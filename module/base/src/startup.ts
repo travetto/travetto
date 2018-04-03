@@ -11,7 +11,7 @@ export const initializers =
     .map(x => ({ priority: 100, ...x }))
     .sort((a, b) => a.priority - b.priority);
 
-export async function init() {
+export function init() {
 
   process.env.NODE_ENV = AppEnv.prod ? 'production' : 'development';
 
@@ -27,10 +27,6 @@ export async function init() {
   });
 
   Shutdown.register();
-
-  if (!process.env.DELAYED_INIT) {
-    return await bootstrap();
-  }
 }
 
 export async function bootstrap() {

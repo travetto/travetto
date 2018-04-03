@@ -7,4 +7,7 @@ require.extensions['.ts'] = function load(m, tsf) {
   return m._compile(content, tsf.replace(/\.ts$/, '.js'));
 };
 
-module.exports = require('./src/startup').init(); //Init system
+const startup = require('./src/startup');
+startup.init();
+
+module.exports = startup.bootstrap.bind(startup);
