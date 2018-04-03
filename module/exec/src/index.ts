@@ -1,5 +1,5 @@
 export * from './worker';
 export * from './local';
-export * from './forked';
-export * from './spawned';
+export * from './child';
 export * from './pool';
+export * from './util';
