@@ -16,27 +16,27 @@ export class Worker<U extends { type: string }, T extends CommonProcess> {
     return true;
   }
 
-  sendEvent(e: U) {
+  send(e: U) {
     if (this._proc.send) {
       this._proc.send(e);
     }
   }
 
-  once(eventType: string, callback: (e: U & { type?: string }) => any) {
+  listenOnce(eventType: string, callback: (e: U & { type?: string }) => any) {
     const fn = (event: U) => {
       if (event.type === eventType) {
         this.removeListener(fn);
         callback(event);
       }
     };
-    this.onEvent(fn);
+    this.listen(fn);
   }
 
   removeListener(fn: (e: U) => any) {
     this._proc.removeListener('message', fn);
   }
 
-  async onEvent(handler: (e: U) => Promise<boolean | undefined | void> | boolean | undefined | void) {
+  async listen(handler: (e: U) => Promise<boolean | undefined | void> | boolean | undefined | void) {
     return new Promise((resolve, reject) => {
       const kill = () => {
         this.removeListener(fn);

@@ -55,7 +55,7 @@ export class AgentPool {
         const agent = (await this.getNextAgent())!;
 
         agent.completion = new Promise<Agent>((resolve, reject) => {
-          agent.once('runComplete', ({ error }) => {
+          agent.listenOnce('runComplete', ({ error }) => {
 
             if (error) {
               errors.push(deserialize(error));
@@ -66,7 +66,7 @@ export class AgentPool {
         });
 
         handler(inputs[next], (data) => {
-          agent.sendEvent({ type: 'run', ...data });
+          agent.send({ type: 'run', ...data });
         }, agent);
 
         this.pendingAgents.add(agent);

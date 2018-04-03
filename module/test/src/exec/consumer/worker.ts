@@ -2,8 +2,9 @@ import { TestEvent } from '../../model';
 import { Consumer } from './types';
 
 import { serialize } from '../../agent/error';
+import { LocalWorker } from '../../worker';
 
-export class WorkerEmitter implements Consumer {
+export class WorkerEmitter extends LocalWorker<TestEvent> implements Consumer {
   onEvent(event: TestEvent) {
     if (event.phase === 'after') {
       if (event.type === 'test') {
@@ -16,8 +17,7 @@ export class WorkerEmitter implements Consumer {
         }
       }
     }
-    if (process.send) {
-      process.send(event);
-    }
+
+    this.send(event);
   }
 }

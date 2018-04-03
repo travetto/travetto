@@ -1,4 +1,4 @@
 export * from './worker';
-export * from './parent';
+export * from './local';
 export * from './forked';
 export * from './spawned';

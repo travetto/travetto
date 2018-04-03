@@ -17,10 +17,10 @@ export class Agent extends ForkedWorker<{ type: string } & any> {
     const res = super.init();
 
     if (res) {
-      this.once('ready', e => this.sendEvent({ type: 'init' }));
+      this.listenOnce('ready', e => this.send({ type: 'init' }));
 
       return new Promise<boolean>((resolve, reject) => {
-        this.once('initComplete', () => resolve(true));
+        this.listenOnce('initComplete', () => resolve(true));
       });
     }
 

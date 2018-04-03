@@ -1,7 +1,7 @@
 import { AllSuitesResult, TestResult, SuiteResult, TestEvent } from '../../model';
 import { Consumer } from './types';
 
-export class Collector implements Consumer {
+export class AllResultsCollector implements Consumer {
 
   public summary: AllSuitesResult = {
     success: 0,

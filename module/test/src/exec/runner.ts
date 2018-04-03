@@ -2,7 +2,7 @@ import * as minimist from 'minimist';
 
 import { AgentPool } from '../agent';
 import { TestUtil } from './test';
-import { WorkerEmitter, Consumer, Collector, TapEmitter, JSONEmitter } from './consumer';
+import { WorkerEmitter, Consumer, AllResultsCollector, TapEmitter, JSONEmitter } from './consumer';
 import { AllSuitesResult } from '../model/suite';
 
 interface State {
@@ -38,7 +38,7 @@ export class Runner {
     try {
       console.debug('Runner Args', this.state);
 
-      const collector = new Collector();
+      const collector = new AllResultsCollector();
       const consumers: Consumer[] = [collector];
 
       switch (this.state.format) {
