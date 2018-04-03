@@ -10,4 +10,8 @@ require.extensions['.ts'] = function load(m, tsf) {
 const startup = require('./src/startup');
 startup.init();
 
-module.exports = startup.bootstrap.bind(startup);
+if (require.main === module) {
+  startup.run();
+} else {
+  module.exports = startup.bootstrap.bind(startup);
+}
