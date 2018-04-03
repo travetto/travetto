@@ -6,7 +6,6 @@ import {
   PathType, Renderable, Method,
   ControllerConfig
 } from '../model';
-import { toPromise } from '@travetto/util';
 import { ExpressApp } from './app';
 import { DependencyRegistry } from '@travetto/di';
 import { MetadataRegistry, Class } from '@travetto/registry';
