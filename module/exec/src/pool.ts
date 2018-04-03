@@ -4,7 +4,7 @@ import { Shutdown } from '@travetto/base';
 
 let id = 0;
 
-export class ExecPool<T extends Executor<U> & { id?: number, completion?: Promise<any> }, U = any> {
+export class ExecutorPool<T extends Executor<U> & { id?: number, completion?: Promise<any> }, U = any> {
   executorCount: number;
   private availableExecutors = new Set<T>();
   private pendingExecutors = new Set<T>();
