@@ -50,7 +50,7 @@ function clean(val: any) {
 export class AssertUtil {
 
   static asserts: Assertion[] = [];
-  static listener: (a: Assertion) => void;
+  static listener?: (a: Assertion) => void;
 
   static readFilePosition(err: Error, filename: string) {
     const base = process.cwd();
@@ -163,6 +163,7 @@ export class AssertUtil {
   static end() {
     const ret = this.asserts;
     this.asserts = [];
+    this.listener = undefined;
     return ret;
   }
 }

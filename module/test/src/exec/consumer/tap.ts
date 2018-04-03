@@ -1,12 +1,10 @@
 import * as yaml from 'js-yaml';
-
-import { AllSuitesResult, TestResult } from '../../model';
-import { Listener, ListenEvent } from './listener';
-import { Collector, CollectionComplete } from './collector';
+import { TestEvent, SuiteResult, AllSuitesResult } from '../../model';
+import { Consumer } from './types';
 
 const { deserialize } = require('../agent/error');
 
-export class TapListener implements CollectionComplete {
+export class TapEmitter implements Consumer {
   private count = 0;
 
   constructor(private stream: NodeJS.WriteStream = process.stdout) {
@@ -23,7 +21,7 @@ export class TapListener implements CollectionComplete {
     this.log(`---\n${body}\n...`);
   }
 
-  onEvent(e: ListenEvent) {
+  onEvent(e: TestEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
       let header = `${test.suiteName} - ${test.method}`;
@@ -71,13 +69,16 @@ export class TapListener implements CollectionComplete {
     }
   }
 
-  onComplete(collector: Collector) {
-    this.log(`1..${collector.allSuites.total}`);
-    if (collector.errors.length) {
+  onSummary(summary: AllSuitesResult) {
+    this.log(`1..${summary.total}`);
+
+    if (summary.errors.length) {
       this.log('---\n');
-      for (const err of collector.errors) {
+      for (const err of summary.errors) {
         this.log(err.stack || `${err}`);
       }
     }
+
+    this.log(`Results ${summary.success}/${summary.total}, failed ${summary.fail}, skipped ${summary.skip}`);
   }
 }

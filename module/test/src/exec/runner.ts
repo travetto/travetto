@@ -1,27 +1,22 @@
 import * as minimist from 'minimist';
 
 import { Agent, AgentPool } from './agent';
-import { TapListener, CollectionComplete, Collector, Listener, ListenEvent } from './listener';
 import { TestUtil } from './test';
-import { WorkerEmitter } from './emitter';
+import { WorkerEmitter, Consumer, Collector, TapEmitter, JSONEmitter } from './consumer';
 import { AllSuitesResult } from '../model/suite';
 
 interface State {
-  format: string;
-  tap: boolean;
-  tapOutput?: string;
+  format: 'tap' | 'json' | 'noop';
   _: string[];
 }
 
 const RunnerOptions = {
   '--': true,
   default: {
-    tap: true,
-    format: 'noop'
+    format: 'tap'
   },
-  alias: { t: 'tap', f: 'format' },
-  boolean: ['tap'],
-  string: ['format', 'tapOutput'],
+  alias: { f: 'format' },
+  string: ['format'],
 };
 
 export class Runner {
@@ -43,22 +38,23 @@ export class Runner {
     try {
       console.debug('Runner Args', this.state);
 
-      const formatter = this.state.format;
-
       const collector = new Collector();
-      const listeners: Listener[] = [
-        collector
-      ];
+      const consumers: Consumer[] = [collector];
 
-      if (this.state.tap) {
-        listeners.push(new TapListener());
+      switch (this.state.format) {
+        case 'tap':
+          consumers.push(new TapEmitter());
+          break;
+        case 'json':
+          consumers.push(new JSONEmitter());
+          break;
       }
 
       const globs = this.state._.slice(2); // strip off node and worker name
 
       let files = await TestUtil.getTests(globs);
 
-      for (const l of listeners) {
+      for (const l of consumers) {
         l.onEvent = l.onEvent.bind(l);
       }
 
@@ -66,32 +62,22 @@ export class Runner {
 
       const agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
 
-      collector.errors = await agentPool.process(files, async (file, run, agent) => {
+      collector.summary.errors = await agentPool.process(files, async (file, run, agent) => {
         if (agent) {
-          for (const l of listeners) {
+          for (const l of consumers) {
             agent.listen(l.onEvent);
           }
         }
         run({ file });
       });
 
-      for (const listener of listeners) {
-        if ((listener as any).onComplete) {
-          (listener as CollectionComplete).onComplete(collector);
+      for (const handler of consumers) {
+        if (handler.onSummary) {
+          handler.onSummary(collector.summary);
         }
       }
 
-      let output: string | undefined;
-
-      if (formatter && formatter !== 'noop') {
-        const fn = require(`./formatter/${formatter}`) as { [key: string]: (all: AllSuitesResult) => string | undefined };
-        output = Object.values(fn)[0](collector.allSuites);
-      }
-      if (output) {
-        console.log(output);
-      }
-
-      return collector.allSuites;
+      return collector.summary;
     } catch (e) {
       console.error(e);
     }

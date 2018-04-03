@@ -1,10 +1,10 @@
-import { ListenEvent } from '../listener';
-import { TestEmitter } from './types';
+import { TestEvent } from '../../model';
+import { Consumer } from './types';
 
 const { serialize } = require('../agent/error');
 
-export class WorkerEmitter implements TestEmitter {
-  emit(event: ListenEvent) {
+export class WorkerEmitter implements Consumer {
+  onEvent(event: TestEvent) {
     if (event.phase === 'after') {
       if (event.type === 'test') {
         if (event.test.error) {

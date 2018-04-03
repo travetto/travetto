@@ -5,10 +5,9 @@ import { bulkFind } from '@travetto/base';
 
 import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../model';
 import { TestRegistry } from '../service';
-import { ListenEvent } from './listener';
 import { ConsoleCapture } from './console';
 import { AssertUtil } from './assert';
-import { TestEmitter } from './emitter';
+import { Consumer } from './consumer';
 
 export class TestUtil {
 
@@ -58,7 +57,7 @@ export class TestUtil {
     return err;
   }
 
-  static async executeTest(test: TestConfig, emitter?: TestEmitter) {
+  static async executeTest(test: TestConfig, consumer?: Consumer) {
     const suite = TestRegistry.get(test.class);
     const result: Partial<TestResult> = {
       method: test.method,
@@ -77,9 +76,7 @@ export class TestUtil {
     try {
       ConsoleCapture.start();
 
-      AssertUtil.start(emitter ? (a) => {
-        emitter.emit({ type: 'assertion', phase: 'after', assertion: a })
-      } : undefined);
+      AssertUtil.start(consumer ? (a) => consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }) : undefined);
 
       const timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
       const res = await Promise.race([suite.instance[test.method](), timeout]);
@@ -134,8 +131,8 @@ export class TestUtil {
     }
   }
 
-  static async stubSuiteFailure(suite: SuiteConfig, e: Error, emitter?: TestEmitter) {
-    if (!emitter) {
+  static async stubSuiteFailure(suite: SuiteConfig, e: Error, consumer?: Consumer) {
+    if (!consumer) {
       return;
     }
 
@@ -160,8 +157,8 @@ export class TestUtil {
       file: suite.class.__filename
     } as TestResult;
 
-    emitter.emit({ phase: 'after', type: 'test', test });
-    emitter.emit({
+    consumer.onEvent({ phase: 'after', type: 'test', test });
+    consumer.onEvent({
       phase: 'after', type: 'suite', suite: {
         success: 0,
         fail: 1,
@@ -171,7 +168,7 @@ export class TestUtil {
     });
   }
 
-  static async executeSuite(suite: SuiteConfig, emitter?: TestEmitter) {
+  static async executeSuite(suite: SuiteConfig, consumer?: Consumer) {
     const result: SuiteResult = {
       success: 0,
       fail: 0,
@@ -191,16 +188,16 @@ export class TestUtil {
       for (const test of suite.tests) {
         await this.affixProcess(suite, result, 'beforeEach');
 
-        if (emitter) {
-          emitter.emit({ type: 'test', phase: 'before', test });
+        if (consumer) {
+          consumer.onEvent({ type: 'test', phase: 'before', test });
         }
 
-        const ret = await this.executeTest(test, emitter);
+        const ret = await this.executeTest(test, consumer);
         result[ret.status]++;
         result.tests.push(ret);
 
-        if (emitter) {
-          emitter.emit({ type: 'test', phase: 'after', test: ret });
+        if (consumer) {
+          consumer.onEvent({ type: 'test', phase: 'after', test: ret });
         }
 
         await this.affixProcess(suite, result, 'afterEach');
@@ -220,7 +217,7 @@ export class TestUtil {
     return result as SuiteResult;
   }
 
-  static async executeFile(file: string, emitter?: TestEmitter) {
+  static async executeFile(file: string, consumer?: Consumer) {
     require(`${process.cwd()}/${file}`);
     await TestRegistry.init();
 
@@ -230,18 +227,18 @@ export class TestUtil {
       const suite = TestRegistry.get(cls);
 
       try {
-        if (emitter) {
-          emitter.emit({ phase: 'before', type: 'suite', suite });
+        if (consumer) {
+          consumer.onEvent({ phase: 'before', type: 'suite', suite });
         }
 
-        const result = await this.executeSuite(suite, emitter);
+        const result = await this.executeSuite(suite, consumer);
 
-        if (emitter) {
-          emitter.emit({ phase: 'after', type: 'suite', suite: result });
+        if (consumer) {
+          consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
         }
       } catch (e) {
-        if (emitter) {
-          this.stubSuiteFailure(suite, e, emitter);
+        if (consumer) {
+          this.stubSuiteFailure(suite, e, consumer);
         } else {
           throw e;
         }

@@ -32,4 +32,5 @@ export interface SuiteResult extends Counts {
 
 export interface AllSuitesResult extends Counts {
   suites: SuiteResult[];
+  errors: Error[];
 }
