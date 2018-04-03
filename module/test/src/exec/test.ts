@@ -58,7 +58,7 @@ export class TestUtil {
     return err;
   }
 
-  static async executeTest(test: TestConfig) {
+  static async executeTest(test: TestConfig, emitter?: TestEmitter) {
     const suite = TestRegistry.get(test.class);
     const result: Partial<TestResult> = {
       method: test.method,
@@ -76,7 +76,10 @@ export class TestUtil {
 
     try {
       ConsoleCapture.start();
-      AssertUtil.start();
+
+      AssertUtil.start(emitter ? (a) => {
+        emitter.emit({ type: 'assert', phase: 'after', assert: a })
+      } : undefined);
 
       const timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
       const res = await Promise.race([suite.instance[test.method](), timeout]);
@@ -192,7 +195,7 @@ export class TestUtil {
           emitter.emit({ type: 'test', phase: 'before', test });
         }
 
-        const ret = await this.executeTest(test);
+        const ret = await this.executeTest(test, emitter);
         result[ret.status]++;
         result.tests.push(ret);
 

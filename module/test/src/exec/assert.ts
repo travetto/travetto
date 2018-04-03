@@ -50,6 +50,7 @@ function clean(val: any) {
 export class AssertUtil {
 
   static asserts: Assertion[] = [];
+  static listener: (a: Assertion) => void;
 
   static readFilePosition(err: Error, filename: string) {
     const base = process.cwd();
@@ -74,7 +75,8 @@ export class AssertUtil {
     return res;
   }
 
-  static start() {
+  static start(listener?: (a: Assertion) => void) {
+    this.listener = listener;
     this.asserts = [];
   }
 
@@ -137,7 +139,7 @@ export class AssertUtil {
       }
 
       // Pushing on not error
-      this.asserts.push(assertion);
+      this.add(assertion);
     } catch (e) {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
@@ -145,9 +147,16 @@ export class AssertUtil {
         }
         assertion.message = assertion.message.replace(/[{]([A-Za-z]+)[}]/g, (a, k) => (assertion as any)[k]);
         assertion.error = e;
-        this.asserts.push(assertion);
+        this.add(assertion);
       }
       throw e;
+    }
+  }
+
+  static add(a: Assertion) {
+    this.asserts.push(a);
+    if (this.listener) {
+      this.listener(a);
     }
   }
 
