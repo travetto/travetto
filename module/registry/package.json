@@ -1,18 +1,20 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
+    "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
-  }, 
+  },
   "dependencies": {
-    "@travetto/compiler": "0.x.x"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@travetto/registry", 
+    "@travetto/compiler": "0.x.x",
+    "@types/lodash": "^4.14.106",
+    "lodash": "^4.17.5"
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/registry",
   "repository": {
     "url": "https://github.com/travetto/registry.git"
-  }, 
-  "scripts": {}, 
+  },
+  "scripts": {},
   "version": "0.0.16"
 }
