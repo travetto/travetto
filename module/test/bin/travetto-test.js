@@ -4,9 +4,9 @@ process.env.ENV = 'test';
 
 const startup = require('@travetto/base/bootstrap');
 
-if (process.env.WORKER) {
+if (process.env.EXECUTOR) {
   process.env.NO_WATCH = true;
-  require('../src/exec/test-worker').server();
+  require('../src/exec/executor').server();
 } else {
   startup.run().then(x => {
     const { Runner } = require('../src/exec/runner');

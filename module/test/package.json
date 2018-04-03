@@ -8,12 +8,10 @@
   },
   "dependencies": {
     "@travetto/registry": "0.x.x",
-    "@travetto/util": "0.x.x",
-    "@types/cross-spawn": "^6.0.0",
+    "@travetto/exec": "0.x.x",
     "@types/js-yaml": "^3.11.1",
     "@types/lodash": "^4.14.106",
     "@types/minimist": "^1.2.0",
-    "cross-spawn": "^6.0.5",
     "lodash": "^4.17.5",
     "minimist": "^1.2.0"
   },

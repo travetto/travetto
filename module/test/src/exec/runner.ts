@@ -1,10 +1,10 @@
 import * as minimist from 'minimist';
 
-import { WorkerPool, ForkedWorker } from '../worker';
+import { ExecutorPool, ChildExecutor } from '@travetto/exec';
 import { TestUtil } from './test';
-import { WorkerEmitter, Consumer, AllResultsCollector, TapEmitter, JSONEmitter } from './consumer';
+import { ExecutorEmitter, Consumer, AllResultsCollector, TapEmitter, JSONEmitter } from './consumer';
 import { AllSuitesResult } from '../model/suite';
-import { client, Events } from './test-worker';
+import { client, Events } from './executor';
 
 interface State {
   format: 'tap' | 'json' | 'noop';
@@ -27,8 +27,8 @@ export class Runner {
     this.state = minimist(args, RunnerOptions) as any as State;
   }
 
-  async runWorker(data: { file: string }) {
-    await TestUtil.executeFile(data.file, new WorkerEmitter());
+  async runExecutor(data: { file: string }) {
+    await TestUtil.executeFile(data.file, new ExecutorEmitter());
   }
 
   async run() {
@@ -57,7 +57,7 @@ export class Runner {
 
       files = files.map(x => x.split(`${process.cwd()}/`)[1]);
 
-      const pool = new WorkerPool<ForkedWorker>();
+      const pool = new ExecutorPool<ChildExecutor>();
       const errors: Error[] = [];
 
       await pool.process(files, client(consumers, err => {

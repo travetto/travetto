@@ -1,5 +1,5 @@
-import { LocalWorker, ForkedWorker } from '../worker';
-import { serialize, deserialize } from '../worker/error';
+import { LocalExecutor, ChildExecutor } from '@travetto/exec';
+import { serialize, deserialize } from '@travetto/exec/src/error';
 import * as startup from '@travetto/base/src/startup';
 import { Consumer } from './consumer';
 
@@ -51,7 +51,7 @@ export async function server() {
   }
   type Event = { type: string, error?: any, file?: string };
 
-  const worker = new LocalWorker<Event>();
+  const worker = new LocalExecutor<Event>();
 
   worker.listen(async (data: Event) => {
     console.log('on message', data);
@@ -93,7 +93,7 @@ export async function server() {
       const { Runner } = require('./runner');
 
       try {
-        await new Runner().runWorker(data);
+        await new Runner().runExecutor(data);
         worker.send({ type: Events.RUN_COMPLETE });
       } catch (e) {
         worker.send({ type: Events.RUN_COMPLETE, error: serialize(e) });
@@ -110,14 +110,14 @@ export async function server() {
 export function client<X>(consumers: Consumer[], onError?: (err: Error) => any) {
   return {
     async init() {
-      const worker = new ForkedWorker(require.resolve('../../bin/travetto-test.js'));
+      const worker = new ChildExecutor(require.resolve('../../bin/travetto-test.js'), true);
       await worker.init();
       await worker.listenOnce(Events.READY);
       await worker.send({ type: Events.INIT });
       await worker.listenOnce(Events.INIT_COMPLETE);
       return worker;
     },
-    async exec(file: X, worker?: ForkedWorker) {
+    async exec(file: X, worker?: ChildExecutor) {
       if (worker) {
         for (const l of consumers) {
           worker.listen(l.onEvent);

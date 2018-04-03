@@ -1,10 +1,10 @@
 import { TestEvent, EventPhase, EventEntity } from '../../model';
 import { Consumer } from './types';
 
-import { serialize } from '../../worker/error';
-import { LocalWorker } from '../../worker';
+import { serialize } from '@travetto/exec/src/error';
+import { LocalExecutor } from '@travetto/exec';
 
-export class WorkerEmitter extends LocalWorker<TestEvent> implements Consumer {
+export class ExecutorEmitter extends LocalExecutor<TestEvent> implements Consumer {
   onEvent(event: TestEvent) {
     if (event.phase === 'after') {
       if (event.type === 'test') {
