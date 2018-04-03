@@ -1,21 +1,21 @@
 import * as os from 'os';
-import { Executor } from './executor';
+import { Execution } from './execution';
 import { Shutdown } from '@travetto/base';
 
 let id = 0;
 
-export class ExecutorPool<T extends Executor<U> & { id?: number, completion?: Promise<any> }, U = any> {
-  executorCount: number;
-  private availableExecutors = new Set<T>();
-  private pendingExecutors = new Set<T>();
+export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: Promise<any> }, U = any> {
+  executionCount: number;
+  private availableExecutions = new Set<T>();
+  private pendingExecutions = new Set<T>();
   private initialized: Promise<any>;
 
   constructor(count: number = 0) {
-    this.executorCount = count || os.cpus().length - 1;
+    this.executionCount = count || os.cpus().length - 1;
   }
 
   async init(create: () => Promise<T>) {
-    while (this.availableSize < this.executorCount) {
+    while (this.availableSize < this.executionCount) {
       const w = await create();
       w.id = id++;
       await w.init();
@@ -23,59 +23,59 @@ export class ExecutorPool<T extends Executor<U> & { id?: number, completion?: Pr
   }
 
   get availableSize() {
-    return this.availableExecutors.size;
+    return this.availableExecutions.size;
   }
 
-  async getNextexecutor() {
-    if (this.availableExecutors.size === 0) {
+  async getNextExecution() {
+    if (this.availableExecutions.size === 0) {
       return undefined;
     } else {
-      const agent = this.availableExecutors.values().next().value;
-      this.availableExecutors.delete(agent);
+      const agent = this.availableExecutions.values().next().value;
+      this.availableExecutions.delete(agent);
       await agent.init();
       return agent;
     }
   }
 
-  returnexecutor(executor: T) {
-    this.pendingExecutors.delete(executor);
-    this.availableExecutors.add(executor);
-    executor.clean();
+  returnExecution(execution: T) {
+    this.pendingExecutions.delete(execution);
+    this.availableExecutions.add(execution);
+    execution.clean();
   }
 
-  async process<X>(inputs: X[], handler: { init: () => Promise<T>, exec: (inp: X, executor?: T) => Promise<any> }) {
+  async process<X>(inputs: X[], handler: { init: () => Promise<T>, exec: (inp: X, execution?: T) => Promise<any> }) {
     await this.init(handler.init);
 
     let position = 0;
 
     while (position < inputs.length) {
-      if (this.pendingExecutors.size < this.availableSize) {
+      if (this.pendingExecutions.size < this.availableSize) {
         const next = position++;
-        const executor = (await this.getNextexecutor())!;
+        const execution = (await this.getNextExecution())!;
 
-        executor.completion = handler.exec(inputs[next], executor).then(x => executor, e => executor);
+        execution.completion = handler.exec(inputs[next], execution).then(x => execution, e => execution);
 
-        this.pendingExecutors.add(executor);
+        this.pendingExecutions.add(execution);
       } else {
-        const executor = await Promise.race(Array.from(this.pendingExecutors).map(x => x.completion));
-        this.returnexecutor(executor);
+        const execution = await Promise.race(Array.from(this.pendingExecutions).map(x => x.completion));
+        this.returnExecution(execution);
       }
     }
 
-    await Promise.all(Array.from(this.pendingExecutors).map(x => x.completion));
+    await Promise.all(Array.from(this.pendingExecutions).map(x => x.completion));
   }
 
   shutdown() {
-    for (const executor of Array.from(this.pendingExecutors)) {
-      this.returnexecutor(executor);
+    for (const execution of Array.from(this.pendingExecutions)) {
+      this.returnExecution(execution);
     }
 
-    for (const executor of Array.from(this.availableExecutors)) {
+    for (const execution of Array.from(this.availableExecutions)) {
       try {
-        console.debug('Killing Process', executor.id)
-        executor.kill();
+        console.debug('Killing Process', execution.id)
+        execution.kill();
       } catch (e) {
-        console.error('Error', executor.id, e);
+        console.error('Error', execution.id, e);
       }
     }
   }

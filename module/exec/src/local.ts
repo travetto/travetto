@@ -1,6 +1,6 @@
-import { Executor } from './executor';
+import { Execution } from './execution';
 
-export class LocalExecutor<U = any> extends Executor<U, NodeJS.Process> {
+export class LocalExecution<U = any> extends Execution<U, NodeJS.Process> {
   constructor() {
     super(new Promise(resolve => resolve(process)));
   }

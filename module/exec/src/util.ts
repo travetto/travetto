@@ -15,7 +15,7 @@ export interface ExecResult {
 }
 
 export function enhanceProcess(p: child_process.ChildProcess, options: ExecOptions) {
-  const timeout = options.timeout || 15000;
+  const timeout = options.timeout;
 
   const prom = new Promise<ExecResult>((resolve, reject) => {
     let stdout = '';
@@ -42,20 +42,23 @@ export function enhanceProcess(p: child_process.ChildProcess, options: ExecOptio
       p.stdout.on('data', (d: string) => stdout += `${d}\n`);
       p.stderr.on('data', (d: string) => stderr += `${d}\n`);
     }
+
     p.on('error', (err: Error) =>
-      finish({ code: 1, stdout, stderr, message: err.message, valid: false })
-    );
+      finish({ code: 1, stdout, stderr, message: err.message, valid: false }));
+
     p.on('close', (code: number) =>
-      finish({ code, stdout, stderr, valid: code === 0 })
-    );
-    timer = setTimeout(async x => {
-      if (options.timeoutKill) {
-        await options.timeoutKill(p);
-      } else {
-        p.kill('SIGKILL');
-      }
-      finish({ code: 1, stderr, stdout, message: `Execution timed out after: ${timeout} ms`, valid: false });
-    }, timeout);
+      finish({ code, stdout, stderr, valid: code === 0 }));
+
+    if (timeout) {
+      timer = setTimeout(async x => {
+        if (options.timeoutKill) {
+          await options.timeoutKill(p);
+        } else {
+          p.kill('SIGKILL');
+        }
+        finish({ code: 1, stderr, stdout, message: `Execution timed out after: ${timeout} ms`, valid: false });
+      }, timeout);
+    }
   });
 
   return prom;
@@ -87,4 +90,36 @@ export function fork(cmdStr: string, options: child_process.ForkOptions & ExecOp
 export function exec(cmd: string, options: child_process.ExecOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
   const p = child_process.exec(cmd, options);
   return [p, enhanceProcess(p, options)];
+}
+
+export function serializeError(e: Error | any) {
+  let error: any = undefined;
+
+  if (e) {
+    error = {};
+    for (const k of Object.keys(e)) {
+      error[k] = e[k];
+    }
+    error.$ = true;
+    error.message = e.message;
+    error.stack = e.stack;
+    error.name = e.name;
+  }
+
+  return error;
+}
+
+export function deserializeError(e: any) {
+  if (e && e.$) {
+    const err = new Error();
+    for (const k of Object.keys(e)) {
+      (err as any)[k] = e[k];
+    }
+    err.message = e.message;
+    err.stack = e.stack;
+    err.name = e.name;
+    return err;
+  } else if (e) {
+    return e;
+  }
 }

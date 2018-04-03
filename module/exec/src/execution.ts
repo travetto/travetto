@@ -1,6 +1,6 @@
 import { CommonProcess } from './types';
 
-export class Executor<U = any, T extends CommonProcess = CommonProcess> {
+export class Execution<U = any, T extends CommonProcess = CommonProcess> {
 
   _proc: T;
 
