@@ -1,6 +1,6 @@
 import * as minimist from 'minimist';
 
-import { Agent, AgentPool } from './agent';
+import { AgentPool } from '../agent';
 import { TestUtil } from './test';
 import { WorkerEmitter, Consumer, Collector, TapEmitter, JSONEmitter } from './consumer';
 import { AllSuitesResult } from '../model/suite';
@@ -60,7 +60,7 @@ export class Runner {
 
       files = files.map(x => x.split(`${process.cwd()}/`)[1]);
 
-      const agentPool = new AgentPool(require.resolve('../../bin/worker.js'));
+      const agentPool = new AgentPool(require.resolve('./worker.js'));
 
       collector.summary.errors = await agentPool.process(files, async (file, run, agent) => {
         if (agent) {
@@ -71,9 +71,9 @@ export class Runner {
         run({ file });
       });
 
-      for (const handler of consumers) {
-        if (handler.onSummary) {
-          handler.onSummary(collector.summary);
+      for (const cons of consumers) {
+        if (cons.onSummary) {
+          cons.onSummary(collector.summary);
         }
       }
 

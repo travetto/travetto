@@ -1,9 +1,9 @@
-function serialize(e) {
-  let error = undefined;
+export function serialize(e: Error | any) {
+  let error: any = undefined;
 
   if (e) {
     error = {};
-    for (let k of Object.keys(e)) {
+    for (const k of Object.keys(e)) {
       error[k] = e[k];
     }
     error.$ = true;
@@ -15,11 +15,11 @@ function serialize(e) {
   return error;
 }
 
-function deserialize(e) {
+export function deserialize(e: any) {
   if (e && e.$) {
     const err = new Error();
     for (const k of Object.keys(e)) {
-      err[k] = e[k];
+      (err as any)[k] = e[k];
     }
     err.message = e.message;
     err.stack = e.stack;
@@ -28,9 +28,4 @@ function deserialize(e) {
   } else if (e) {
     return e;
   }
-}
-
-module.exports = {
-  serialize,
-  deserialize
 }

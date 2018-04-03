@@ -1,7 +1,7 @@
 import { TestEvent } from '../../model';
 import { Consumer } from './types';
 
-const { serialize } = require('../agent/error');
+import { serialize } from '../../agent/error';
 
 export class WorkerEmitter implements Consumer {
   onEvent(event: TestEvent) {
@@ -16,6 +16,8 @@ export class WorkerEmitter implements Consumer {
         }
       }
     }
-    process.send(event);
+    if (process.send) {
+      process.send(event);
+    }
   }
 }
