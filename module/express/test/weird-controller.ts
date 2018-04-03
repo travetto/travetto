@@ -10,7 +10,7 @@ export class Weir {
 
   @Get('/name')
   async doIt() {
-    return 'bobs';
+    return 'bobs-kdvd';
   }
 
   @Get('/age')

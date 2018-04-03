@@ -1,2 +1,5 @@
-require('@travetto/base/bootstrap')
-  .then(x => require('./simple-controller'));
+require('@travetto/base/bootstrap').run()
+  .then(x => {
+    require('./simple-controller');
+    require('./weird-controller')
+  });
