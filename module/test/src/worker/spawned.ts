@@ -2,13 +2,13 @@ import * as child_process from 'child_process';
 import * as spawn from 'cross-spawn';
 import { Worker } from '.';
 
-export class SpawnedWorker<U extends { type: string }> extends Worker<U, child_process.ChildProcess> {
+export class SpawnedWorker<U = any> extends Worker<U, child_process.ChildProcess> {
   constructor(private script: string, private args?: any[], private env?: object, private cwd?: string) {
     super(new Promise((resolve, reject) => {
       const sub = spawn(`${cwd}/${script}`, args || [], {
         stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
         cwd: cwd || process.cwd(),
-        env: env || {}
+        env: { ...(env || {}), WORKER: true }
       });
 
       sub.stdout.on('data', d => console.log(d.toString()));
@@ -27,5 +27,11 @@ export class SpawnedWorker<U extends { type: string }> extends Worker<U, child_p
       });
     }
     return res;
+  }
+
+  kill() {
+    if (this._proc) {
+      this._proc.kill('SIGKILL');
+    }
   }
 }

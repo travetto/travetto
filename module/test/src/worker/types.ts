@@ -3,4 +3,5 @@ export interface CommonProcess {
   removeListener(name: string, f: Function): void;
   on(name: string, f: Function): void;
   removeAllListeners(name: string): void;
+  kill(...args: any[]): void;
 }

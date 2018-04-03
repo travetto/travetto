@@ -1,7 +1,7 @@
-import { TestEvent } from '../../model';
+import { TestEvent, EventPhase, EventEntity } from '../../model';
 import { Consumer } from './types';
 
-import { serialize } from '../../agent/error';
+import { serialize } from '../../worker/error';
 import { LocalWorker } from '../../worker';
 
 export class WorkerEmitter extends LocalWorker<TestEvent> implements Consumer {

@@ -1,9 +1,10 @@
 import * as minimist from 'minimist';
 
-import { AgentPool } from '../agent';
+import { WorkerPool, ForkedWorker } from '../worker';
 import { TestUtil } from './test';
 import { WorkerEmitter, Consumer, AllResultsCollector, TapEmitter, JSONEmitter } from './consumer';
 import { AllSuitesResult } from '../model/suite';
+import { client, Events } from './test-worker';
 
 interface State {
   format: 'tap' | 'json' | 'noop';
@@ -27,10 +28,6 @@ export class Runner {
   }
 
   async runWorker(data: { file: string }) {
-    if (!process.send) {
-      return;
-    }
-
     await TestUtil.executeFile(data.file, new WorkerEmitter());
   }
 
@@ -60,16 +57,12 @@ export class Runner {
 
       files = files.map(x => x.split(`${process.cwd()}/`)[1]);
 
-      const agentPool = new AgentPool(require.resolve('./worker.js'));
+      const pool = new WorkerPool<ForkedWorker>();
+      const errors: Error[] = [];
 
-      collector.summary.errors = await agentPool.process(files, async (file, run, agent) => {
-        if (agent) {
-          for (const l of consumers) {
-            agent.listen(l.onEvent);
-          }
-        }
-        run({ file });
-      });
+      await pool.process(files, client(consumers, err => {
+        errors.push(err);
+      }));
 
       for (const cons of consumers) {
         if (cons.onSummary) {

@@ -1,6 +1,6 @@
 import { CommonProcess } from './types';
 
-export class Worker<U extends { type: string }, T extends CommonProcess> {
+export class Worker<U = any, T extends CommonProcess = CommonProcess> {
 
   _proc: T;
 
@@ -22,14 +22,28 @@ export class Worker<U extends { type: string }, T extends CommonProcess> {
     }
   }
 
-  listenOnce(eventType: string, callback: (e: U & { type?: string }) => any) {
-    const fn = (event: U) => {
-      if (event.type === eventType) {
-        this.removeListener(fn);
-        callback(event);
-      }
-    };
-    this.listen(fn);
+  listenOnce(eventType: string): Promise<U & { type?: string }>;
+  listenOnce(eventType: string, callback: (e: U & { type?: string }) => any): void;
+  listenOnce(eventType: string, callback?: (e: U & { type?: string }) => any) {
+    if (callback) {
+      const fn = (event: U & { type?: string }) => {
+        if (event.type === eventType) {
+          this.removeListener(fn);
+          callback(event);
+        }
+      };
+      this.listen(fn);
+    } else {
+      return new Promise(resolve => {
+        const fn = (event: U & { type?: string }) => {
+          if (event.type === eventType) {
+            this.removeListener(fn);
+            resolve(event);
+          }
+        };
+        this.listen(fn);
+      });
+    }
   }
 
   removeListener(fn: (e: U) => any) {
@@ -65,6 +79,9 @@ export class Worker<U extends { type: string }, T extends CommonProcess> {
       };
       this._proc.on('message', fn);
     });
+  }
+
+  kill() {
   }
 
   clean() {

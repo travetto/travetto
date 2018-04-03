@@ -1,5 +1,5 @@
 import * as yaml from 'js-yaml';
-import { TestEvent, SuiteResult, AllSuitesResult } from '../../model';
+import { TestEvent, SuiteResult, AllSuitesResult, EventEntity, EventPhase } from '../../model';
 import { Consumer } from './types';
 
 const { deserialize } = require('../agent/error');

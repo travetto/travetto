@@ -1,8 +1,49 @@
-import { ParentWorker } from '../worker';
-import { serialize } from '../agent/error';
+import { LocalWorker, ForkedWorker } from '../worker';
+import { serialize, deserialize } from '../worker/error';
 import * as startup from '@travetto/base/src/startup';
+import { Consumer } from './consumer';
 
-export function run() {
+/***
+  Flow of events
+
+  client
+    spawns server
+
+  server
+    calls 'ready' event
+
+  client
+    listens for ready
+    triggers init
+
+  server
+    listens for init
+    initializes workspace for testing
+    triggers initComplete
+
+  client
+    listens for initComplete
+    triggers run with a specific file to run
+
+  server
+    listens for run
+    Executes tests in specified file
+      Communicates results back over process messaging
+    triggers runComplete
+
+  client
+    Marks tests as done
+ */
+
+export const Events = {
+  RUN: 'run',
+  RUN_COMPLETE: 'runComplete',
+  INIT: 'init',
+  INIT_COMPLETE: 'initComplete',
+  READY: 'ready'
+};
+
+export async function server() {
 
   let Compiler: any;
   if (!!process.env.DEBUG) {
@@ -10,11 +51,11 @@ export function run() {
   }
   type Event = { type: string, error?: any, file?: string };
 
-  const worker = new ParentWorker<Event>();
+  const worker = new LocalWorker<Event>();
 
-  worker.onEvent(async (data: Event) => {
+  worker.listen(async (data: Event) => {
     console.log('on message', data);
-    if (data.type === 'init') {
+    if (data.type === Events.INIT) {
       console.debug('Init');
 
       // Remove all trailing initializers as tests will be on the hook for those manually
@@ -26,13 +67,13 @@ export function run() {
 
       // Initialize
       await startup.run();
-      worker.sendEvent({ type: 'initComplete' });
+      worker.send({ type: Events.INIT_COMPLETE });
 
-    } else if (data.type === 'run') {
+    } else if (data.type === Events.RUN) {
 
       console.debug('Run');
 
-      // Clear require cache
+      // Clear require cache of all data loaded minus base framework pieces
       console.debug('Resetting', Object.keys(require.cache).length)
       for (const k of Object.keys(require.cache)) {
         if (/node_modules/.test(k) && !/@travetto/.test(k)) {
@@ -46,21 +87,49 @@ export function run() {
         }
       }
 
+      // Relaod runner
       Compiler.workingSets = [data.file!];
       Compiler.resetFiles();
-      const { Runner } = require('../src/exec/runner');
+      const { Runner } = require('./runner');
 
       try {
         await new Runner().runWorker(data);
-        worker.sendEvent({ type: 'runComplete' });
+        worker.send({ type: Events.RUN_COMPLETE });
       } catch (e) {
-        worker.sendEvent({ type: 'runComplete', error: serialize(e) });
+        worker.send({ type: Events.RUN_COMPLETE, error: serialize(e) });
       }
     }
 
     return false;
   });
 
-  worker.sendEvent({ type: 'ready ' });
+  worker.send({ type: Events.READY });
   setTimeout(_ => { }, Number.MAX_SAFE_INTEGER);
+}
+
+export function client<X>(consumers: Consumer[], onError?: (err: Error) => any) {
+  return {
+    async init() {
+      const worker = new ForkedWorker(require.resolve('../../bin/travetto-test.js'));
+      await worker.init();
+      await worker.listenOnce(Events.READY);
+      await worker.send({ type: Events.INIT });
+      await worker.listenOnce(Events.INIT_COMPLETE);
+      return worker;
+    },
+    async exec(file: X, worker?: ForkedWorker) {
+      if (worker) {
+        for (const l of consumers) {
+          worker.listen(l.onEvent);
+        }
+        const complete = worker.listenOnce(Events.RUN_COMPLETE);
+        worker.send({ type: Events.RUN, file });
+        const { error } = await complete;
+
+        if (error && onError) {
+          onError(deserialize(error));
+        }
+      }
+    }
+  };
 }
