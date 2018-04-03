@@ -29,7 +29,7 @@ export function init() {
   Shutdown.register();
 }
 
-export async function bootstrap() {
+export async function run() {
   for (const i of initializers) {
     await i.action();
   }

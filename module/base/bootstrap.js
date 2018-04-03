@@ -13,5 +13,5 @@ startup.init();
 if (require.main === module) {
   startup.run();
 } else {
-  module.exports = startup.bootstrap.bind(startup);
+  module.exports = startup.run.bind(startup);
 }
