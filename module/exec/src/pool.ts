@@ -44,13 +44,11 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
     } else {
       const execution = this.availableExecutions.values().next().value;
       this.availableExecutions.delete(execution);
-      console.debug(process.pid, 'GETTING', execution.id);
       return execution;
     }
   }
 
   returnExecution(execution: T) {
-    console.debug(process.pid, 'RETURNING', execution.id);
     this.pendingExecutions.delete(execution);
     this.availableExecutions.add(execution);
     execution.clean();
@@ -62,8 +60,6 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
     let position = 0;
 
     while (position < inputs.length) {
-      console.debug(process.pid, 'INPUTS', position, inputs[position], this.availableSize, this.pendingExecutions.size);
-
       if (this.pendingExecutions.size < this.availableSize) {
         const next = position++;
         const exe = (await this.getNextExecution())!;
@@ -73,7 +69,6 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
         this.pendingExecutions.add(exe);
       } else {
         const execution = await Promise.race(Array.from(this.pendingExecutions).map(x => x.completion));
-        console.debug(process.pid, 'COMPLETED', execution.id);
         this.returnExecution(execution);
       }
     }
@@ -88,7 +83,6 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
 
     for (const execution of Array.from(this.availableExecutions)) {
       try {
-        console.debug('Killing Process', execution.id)
         execution.kill();
       } catch (e) {
         console.error('Error', execution.id, e);

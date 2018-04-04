@@ -35,7 +35,7 @@ export function enhanceProcess(p: cp.ChildProcess, options: ExecutionOptions) {
       finish({ code: 1, stdout, stderr, message: err.message, valid: false }));
 
     p.on('close', (code: number) =>
-      finish({ code, stdout, stderr, valid: code === 0 }));
+      finish({ code, stdout, stderr, valid: code === null || code === 0 }));
 
     if (timeout) {
       timer = setTimeout(async x => {

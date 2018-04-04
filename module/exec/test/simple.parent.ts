@@ -1,7 +1,7 @@
 import { ChildExecution, ExecutionPool } from '../src';
 
 const pool = new ExecutionPool<ChildExecution>({
-  count: 2,
+  count: 1,
   create() {
     const child = new ChildExecution(`${__dirname}/index.js`, true, {
       env: { SRC: './simple.child' }
@@ -25,4 +25,5 @@ const pool = new ExecutionPool<ChildExecution>({
 
 pool.process(['a', 'b', 'c', 'd', 'e', 'f', 'g']).then(() => {
   console.log('DONE!');
+  pool.shutdown();
 });

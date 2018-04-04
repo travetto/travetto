@@ -60,18 +60,17 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
     this._proc.removeListener('message', fn);
   }
 
-  listenFor(eventType: string, callback: (e: U, complete?: Function) => any) {
-    let kill: Function;
-    const fn = (event: U) => {
+  listenFor(eventType: string, callback: (e: U, complete: Function) => any) {
+    const fn = (event: U, kill: Function) => {
       if (event.type === eventType) {
         callback(event, kill);
       }
     };
-    kill = this.listen(fn);
+    this.listen(fn);
   }
 
-  listen(handler: (e: U, complete?: Function) => any) {
-    const kill = () => {
+  listen(handler: (e: U, complete: Function) => any) {
+    const kill = (e?: any) => {
       this.removeListener(fn);
     };
     const fn = (e: U) => {
@@ -82,11 +81,11 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
       let res;
       try {
         res = handler(e, kill);
-        if (res.catch) {
+        if (res && res.catch) {
           res.catch(kill);
         }
       } catch (e) {
-        kill();
+        kill(e);
       }
     };
 
