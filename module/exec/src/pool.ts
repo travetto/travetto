@@ -6,6 +6,7 @@ import { ExecutionEvent } from './types';
 let id = 0;
 
 export interface PoolHandler<T extends Execution<U> & { id?: number, completion?: Promise<any> }, U extends ExecutionEvent = ExecutionEvent> {
+  count?: number;
   create(): T;
   init(item: T): Promise<T>;
   exec<X>(inp: X, execution: T): Promise<any>
@@ -17,18 +18,18 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
   private pendingExecutions = new Set<T>();
   private initialized: Promise<any>;
 
-  constructor(count: number = 0) {
-    this.executionCount = count || os.cpus().length - 1;
+  constructor(private handler: PoolHandler<T>) {
+    this.executionCount = handler.count || os.cpus().length - 1;
   }
 
-  async primePool(handler: PoolHandler<T>) {
+  async primePool() {
     const inits: Promise<any>[] = [];
 
     while (this.availableSize < this.executionCount) {
-      const w = handler.create();
+      const w = this.handler.create();
       w.id = id++;
       this.availableExecutions.add(w);
-      inits.push(handler.init(w));
+      inits.push(this.handler.init(w));
     }
     await Promise.all(inits);
   }
@@ -55,8 +56,8 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
     execution.clean();
   }
 
-  async process<X>(inputs: X[], handler: PoolHandler<T>) {
-    await this.primePool(handler);
+  async process<X>(inputs: X[]) {
+    await this.primePool();
 
     let position = 0;
 
@@ -67,11 +68,12 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
         const next = position++;
         const exe = (await this.getNextExecution())!;
 
-        exe.completion = handler.exec(inputs[next], exe).then(x => exe, e => exe);
+        exe.completion = this.handler.exec(inputs[next], exe).then(x => exe, e => exe);
 
         this.pendingExecutions.add(exe);
       } else {
         const execution = await Promise.race(Array.from(this.pendingExecutions).map(x => x.completion));
+        console.debug(process.pid, 'COMPLETED', execution.id);
         this.returnExecution(execution);
       }
     }
