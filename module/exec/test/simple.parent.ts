@@ -1,6 +1,6 @@
 import { ChildExecution, ExecutionPool } from '../src';
 
-const pool = new ExecutionPool<ChildExecution>(2);
+const pool = new ExecutionPool<ChildExecution>(1);
 
 pool.process(['a', 'b', 'c', 'd', 'e', 'f', 'g'], {
   create() {
@@ -22,6 +22,6 @@ pool.process(['a', 'b', 'c', 'd', 'e', 'f', 'g'], {
     const res = await wait;
     console.log('Sent', inp, 'Received', res);
   }
+}).then(() => {
+  console.log('DONE!');
 });
-
-setTimeout(() => { }, 100000000);

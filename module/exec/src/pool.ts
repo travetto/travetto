@@ -39,16 +39,17 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
 
   async getNextExecution() {
     if (this.availableExecutions.size === 0) {
-      return undefined;
+      throw new Error('Buffer underflow');
     } else {
-      const agent = this.availableExecutions.values().next().value;
-      this.availableExecutions.delete(agent);
-      await agent.init();
-      return agent;
+      const execution = this.availableExecutions.values().next().value;
+      this.availableExecutions.delete(execution);
+      console.debug(process.pid, 'GETTING', execution.id);
+      return execution;
     }
   }
 
   returnExecution(execution: T) {
+    console.debug(process.pid, 'RETURNING', execution.id);
     this.pendingExecutions.delete(execution);
     this.availableExecutions.add(execution);
     execution.clean();
@@ -60,13 +61,15 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
     let position = 0;
 
     while (position < inputs.length) {
+      console.debug(process.pid, 'INPUTS', position, inputs[position], this.availableSize, this.pendingExecutions.size);
+
       if (this.pendingExecutions.size < this.availableSize) {
         const next = position++;
-        const execution = (await this.getNextExecution())!;
+        const exe = (await this.getNextExecution())!;
 
-        execution.completion = handler.exec(inputs[next], execution).then(x => execution, e => execution);
+        exe.completion = handler.exec(inputs[next], exe).then(x => exe, e => exe);
 
-        this.pendingExecutions.add(execution);
+        this.pendingExecutions.add(exe);
       } else {
         const execution = await Promise.race(Array.from(this.pendingExecutions).map(x => x.completion));
         this.returnExecution(execution);

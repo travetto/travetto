@@ -33,6 +33,8 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
     }
     if (this._proc.send) {
       this._proc.send({ type: eventType, ...(data || {}) });
+    } else {
+      throw new Error('this._proc.send was not defined');
     }
   }
 
@@ -59,16 +61,16 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
   }
 
   listenFor(eventType: string, callback: (e: U, complete?: Function) => any) {
-    const kill = () => this.removeListener(fn);
+    let kill: Function;
     const fn = (event: U) => {
       if (event.type === eventType) {
         callback(event, kill);
       }
     };
-    this.listen(fn);
+    kill = this.listen(fn);
   }
 
-  async listen(handler: (e: U, complete?: Function) => any) {
+  listen(handler: (e: U, complete?: Function) => any) {
     const kill = () => {
       this.removeListener(fn);
     };
@@ -97,6 +99,8 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
   }
 
   clean() {
-    this._proc.removeAllListeners('message');
+    if (this._proc) {
+      this._proc.removeAllListeners('message');
+    }
   }
 }
