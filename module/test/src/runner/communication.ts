@@ -91,8 +91,10 @@ export async function server() {
       Compiler.resetFiles();
       const { Runner } = require('./runner');
 
+      console.log('*Running*', data.file);
+
       try {
-        await new Runner().run(data);
+        await new Runner(['-f', 'exec', '-m', 'single', '--', data.file]).run();
         worker.send(Events.RUN_COMPLETE);
       } catch (e) {
         worker.send(Events.RUN_COMPLETE, { error: serializeError(e) });
@@ -109,7 +111,7 @@ export async function server() {
 export function client<X>(consumer: Consumer, onError?: (err: Error) => any) {
   return {
     create() {
-      const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), false);
+      const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
       worker.init();
       (worker as any)['ready'] = worker.listenOnce(Events.READY)
       return worker;

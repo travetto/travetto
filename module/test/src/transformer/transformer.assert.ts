@@ -81,7 +81,7 @@ function prepAssert(state: AssertState) {
     state.assert = ts.createIdentifier(`import_${ASSERT_UTIL}`);
     state.newImports.push({
       ident: state.assert,
-      path: require.resolve('../exec/assert')
+      path: require.resolve('../runner/assert')
     });
     state.assertCheck = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'check');
     state.assertInvoke = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'invoke');

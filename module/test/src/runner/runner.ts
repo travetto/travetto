@@ -12,6 +12,7 @@ interface State {
   format: 'tap' | 'json' | 'noop' | 'exec';
   mode: 'single' | 'all' | 'watch' | 'singleTest';
   _: string[];
+  '--': string[];
 }
 
 const RunnerOptions = {
@@ -35,10 +36,6 @@ export class Runner {
 
   constructor(args: string[] = process.argv) {
     this.state = minimist(args, RunnerOptions) as any as State;
-    if (process.env.EXECUTION) {
-      this.state.format = 'exec';
-      this.state.mode = 'single';
-    }
   }
 
   getConsumer(): Consumer & { summarize?: () => any } {
@@ -87,10 +84,11 @@ export class Runner {
   }
 
   async getFiles() {
-    const globs = this.state._.slice(2); // strip off node and worker name
+    const globs = this.state['--'].length ? this.state['--'] : this.state._.slice(2); // strip off node and worker name
     let files = await ExecuteUtil.getTests(globs);
 
     files = files.map(x => x.split(`${process.cwd()}/`)[1]);
+
     return files;
   }
 
@@ -114,14 +112,14 @@ export class Runner {
     const consumer = this.getConsumer();
     const files = await this.getFiles();
     const file = files[0];
-    ExecuteUtil.executeFile(file, consumer);
+    await ExecuteUtil.executeFile(file, consumer);
   }
 
   async runSingleTest() {
     const consumer = this.getConsumer();
     const files = await this.getFiles();
     const file = files[0];
-    ExecuteUtil.executeFile(file, consumer);
+    await ExecuteUtil.executeFile(file, consumer);
   }
 
   async watch() {
@@ -130,11 +128,12 @@ export class Runner {
 
   async run() {
     try {
-      console.debug('Runner Args', this.state);
+      console.log('Runner Args', this.state);
 
       switch (this.state.mode) {
         case 'all': return await this.runAll();
         case 'single': return await this.runSingle();
+        case 'singleTest': return await this.runSingleTest();
         case 'watch': return await this.watch();
       }
 
