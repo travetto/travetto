@@ -1,10 +1,10 @@
 import * as minimist from 'minimist';
 
-import { ExecutorPool, ChildExecutor } from '@travetto/exec';
+import { ExecutionPool, ChildExecution } from '@travetto/exec';
 import { TestUtil } from './test';
 import { ExecutorEmitter, Consumer, AllResultsCollector, TapEmitter, JSONEmitter } from './consumer';
 import { AllSuitesResult } from '../model/suite';
-import { client, Events } from './executor';
+import { client } from './communication';
 
 interface State {
   format: 'tap' | 'json' | 'noop';
@@ -57,12 +57,13 @@ export class Runner {
 
       files = files.map(x => x.split(`${process.cwd()}/`)[1]);
 
-      const pool = new ExecutorPool<ChildExecutor>();
       const errors: Error[] = [];
 
-      await pool.process(files, client(consumers, err => {
-        errors.push(err);
-      }));
+      const pool = new ExecutionPool<ChildExecution>(
+        client(consumers, err => errors.push(err))
+      );
+
+      await pool.process(files);
 
       for (const cons of consumers) {
         if (cons.onSummary) {

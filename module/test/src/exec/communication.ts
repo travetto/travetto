@@ -1,5 +1,4 @@
-import { LocalExecutor, ChildExecutor } from '@travetto/exec';
-import { serialize, deserialize } from '@travetto/exec/src/error';
+import { LocalExecution, ChildExecution, serializeError, deserializeError } from '@travetto/exec';
 import * as startup from '@travetto/base/src/startup';
 import { Consumer } from './consumer';
 
@@ -51,7 +50,7 @@ export async function server() {
   }
   type Event = { type: string, error?: any, file?: string };
 
-  const worker = new LocalExecutor<Event>();
+  const worker = new LocalExecution<Event>();
 
   worker.listen(async (data: Event) => {
     console.log('on message', data);
@@ -67,7 +66,7 @@ export async function server() {
 
       // Initialize
       await startup.run();
-      worker.send({ type: Events.INIT_COMPLETE });
+      worker.send(Events.INIT_COMPLETE);
 
     } else if (data.type === Events.RUN) {
 
@@ -94,41 +93,42 @@ export async function server() {
 
       try {
         await new Runner().runExecutor(data);
-        worker.send({ type: Events.RUN_COMPLETE });
+        worker.send(Events.RUN_COMPLETE);
       } catch (e) {
-        worker.send({ type: Events.RUN_COMPLETE, error: serialize(e) });
+        worker.send(Events.RUN_COMPLETE, { error: serializeError(e) });
       }
     }
 
     return false;
   });
 
-  worker.send({ type: Events.READY });
+  worker.send(Events.READY);
   setTimeout(_ => { }, Number.MAX_SAFE_INTEGER);
 }
 
 export function client<X>(consumers: Consumer[], onError?: (err: Error) => any) {
   return {
-    async init() {
-      const worker = new ChildExecutor(require.resolve('../../bin/travetto-test.js'), true);
-      await worker.init();
-      await worker.listenOnce(Events.READY);
-      await worker.send({ type: Events.INIT });
+    create() {
+      const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
+      (worker as any)['ready'] = worker.listenOnce(Events.READY)
+      return worker;
+    },
+    async init(worker: ChildExecution) {
+      await (worker as any)['ready'];
+      await worker.send(Events.INIT);
       await worker.listenOnce(Events.INIT_COMPLETE);
       return worker;
     },
-    async exec(file: X, worker?: ChildExecutor) {
-      if (worker) {
-        for (const l of consumers) {
-          worker.listen(l.onEvent);
-        }
-        const complete = worker.listenOnce(Events.RUN_COMPLETE);
-        worker.send({ type: Events.RUN, file });
-        const { error } = await complete;
+    async exec(file: X, exe: ChildExecution) {
+      for (const l of consumers) {
+        exe.listen(l.onEvent as any);
+      }
+      const complete = exe.listenOnce(Events.RUN_COMPLETE);
+      exe.send(Events.RUN, { file });
+      const { error } = await complete;
 
-        if (error && onError) {
-          onError(deserialize(error));
-        }
+      if (error && onError) {
+        onError(deserializeError(error));
       }
     }
   };
