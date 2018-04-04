@@ -1,7 +1,7 @@
 import * as yaml from 'js-yaml';
 import { TestEvent, SuiteResult, AllSuitesResult, EventEntity, EventPhase } from '../../model';
 import { Consumer } from './types';
-import { deserialize } from '@travetto/exec/src/error';
+import { deserializeError } from '@travetto/exec';
 
 export class TapEmitter implements Consumer {
   private count = 0;
@@ -55,7 +55,7 @@ export class TapEmitter implements Consumer {
 
       if (test.status === 'fail') {
         if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
-          this.logMeta({ error: deserialize(test.error).stack });
+          this.logMeta({ error: deserializeError(test.error).stack });
         }
       }
       if (test.output) {

@@ -110,6 +110,7 @@ export function client<X>(consumers: Consumer[], onError?: (err: Error) => any) 
   return {
     create() {
       const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
+      worker.init();
       (worker as any)['ready'] = worker.listenOnce(Events.READY)
       return worker;
     },
