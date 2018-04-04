@@ -1,6 +1,6 @@
 import { LocalExecution, ChildExecution, serializeError, deserializeError } from '@travetto/exec';
 import * as startup from '@travetto/base/src/startup';
-import { Consumer } from './consumer';
+import { Consumer } from '../consumer';
 
 /***
   Flow of events
@@ -79,7 +79,7 @@ export async function server() {
           continue;
         }
         if (k.endsWith('.ts') &&
-          !/@travetto\/(base|config|compiler)/.test(k) &&
+          !/@travetto\/(base|config|compiler|test)/.test(k) &&
           !/transformer\..*\.ts/.test(k)) {
           console.debug('Reset', k)
           delete require.cache[k];
@@ -92,7 +92,7 @@ export async function server() {
       const { Runner } = require('./runner');
 
       try {
-        await new Runner().runExecutor(data);
+        await new Runner().run(data);
         worker.send(Events.RUN_COMPLETE);
       } catch (e) {
         worker.send(Events.RUN_COMPLETE, { error: serializeError(e) });
@@ -106,10 +106,10 @@ export async function server() {
   setTimeout(_ => { }, Number.MAX_SAFE_INTEGER);
 }
 
-export function client<X>(consumers: Consumer[], onError?: (err: Error) => any) {
+export function client<X>(consumer: Consumer, onError?: (err: Error) => any) {
   return {
     create() {
-      const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
+      const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), false);
       worker.init();
       (worker as any)['ready'] = worker.listenOnce(Events.READY)
       return worker;
@@ -121,9 +121,7 @@ export function client<X>(consumers: Consumer[], onError?: (err: Error) => any) 
       return worker;
     },
     async exec(file: X, exe: ChildExecution) {
-      for (const l of consumers) {
-        exe.listen(l.onEvent as any);
-      }
+      exe.listen(consumer.onEvent as any);
       const complete = exe.listenOnce(Events.RUN_COMPLETE);
       exe.send(Events.RUN, { file });
       const { error } = await complete;

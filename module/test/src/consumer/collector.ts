@@ -1,4 +1,4 @@
-import { AllSuitesResult, TestResult, SuiteResult, TestEvent } from '../../model';
+import { AllSuitesResult, TestResult, SuiteResult, TestEvent } from '../model';
 import { Consumer } from './types';
 
 export class AllResultsCollector implements Consumer {

@@ -7,106 +7,11 @@ import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../
 import { TestRegistry } from '../service';
 import { ConsoleCapture } from './console';
 import { AssertUtil } from './assert';
-import { Consumer } from './consumer';
+import { Consumer } from '../consumer';
 
-export class TestUtil {
+export class ExecuteUtil {
 
   static timeout = 5000;
-
-  static isTest(file: string) {
-    return new Promise<boolean>((resolve, reject) => {
-      const input = fs.createReadStream(file);
-      const reader = readline.createInterface({ input })
-        .on('line', line => {
-          if (line.includes('@Suite')) {
-            resolve(true);
-            reader.close();
-          }
-        })
-        .on('end', resolve.bind(null, false))
-        .on('close', resolve.bind(null, false));
-    });
-  }
-
-  static async getTests(globs: string[]) {
-    const files = await bulkFind(globs);
-    const all = await Promise.all(files.map(async (f) => [f, await this.isTest(f)] as [string, boolean]));
-    return all.filter(x => x[1]).map(x => x[0]);
-  }
-
-  static checkError(test: TestConfig, err: Error | string) {
-    if (test.shouldError) {
-      if (typeof test.shouldError === 'string') {
-        if (err.constructor.name === test.shouldError) {
-          return;
-        } else {
-          return new Error(`Expected error to be of type ${test.shouldError}`);
-        }
-      } else if (test.shouldError instanceof RegExp) {
-        if (test.shouldError.test(typeof err === 'string' ? err : err.message)) {
-          return;
-        } else {
-          return new Error(`Expected error to match ${test.shouldError.source}`);
-        }
-      } else {
-        if (test.shouldError(err)) {
-          return;
-        }
-      }
-    }
-    return err;
-  }
-
-  static async executeTest(test: TestConfig, consumer?: Consumer) {
-    const suite = TestRegistry.get(test.class);
-    const result: Partial<TestResult> = {
-      method: test.method,
-      description: test.description,
-      suiteName: test.suiteName,
-      line: test.line,
-      lineEnd: test.lineEnd,
-      file: test.file,
-      status: 'skip'
-    };
-
-    if (test.skip) {
-      return result as TestResult;
-    }
-
-    try {
-      ConsoleCapture.start();
-
-      AssertUtil.start(consumer ? (a) => consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }) : undefined);
-
-      const timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
-      const res = await Promise.race([suite.instance[test.method](), timeout]);
-      result.status = 'success';
-    } catch (err) {
-      err = this.checkError(test, err);
-      if (!err) {
-        result.status = 'success';
-      } else {
-        result.status = 'fail';
-        result.error = err;
-      }
-    } finally {
-      result.output = ConsoleCapture.end();
-      result.assertions = AssertUtil.end();
-    }
-
-    if (result.status === 'fail' && result.error) {
-      const err = result.error;
-      if (!(err instanceof assert.AssertionError)) {
-        const { file, line } = AssertUtil.readFilePosition(err, test.file);
-        const assertion: Assertion = { file, line, operator: 'throws', text: '(uncaught)', error: err, message: err.message };
-        // result.output = result.output || {};
-        // result.output['error'] = `${(result.output['error'] || '')}\n${err.stack}`;
-        result.assertions.push(assertion);
-      }
-    }
-
-    return result as TestResult;
-  }
 
   static async affixProcess(suite: SuiteConfig, result: SuiteResult, phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
     try {
@@ -168,7 +73,102 @@ export class TestUtil {
     });
   }
 
-  static async executeSuite(suite: SuiteConfig, consumer?: Consumer) {
+  static isTest(file: string) {
+    return new Promise<boolean>((resolve, reject) => {
+      const input = fs.createReadStream(file);
+      const reader = readline.createInterface({ input })
+        .on('line', line => {
+          if (line.includes('@Suite')) {
+            resolve(true);
+            reader.close();
+          }
+        })
+        .on('end', resolve.bind(null, false))
+        .on('close', resolve.bind(null, false));
+    });
+  }
+
+  static async getTests(globs: string[]) {
+    const files = await bulkFind(globs);
+    const all = await Promise.all(files.map(async (f) => [f, await this.isTest(f)] as [string, boolean]));
+    return all.filter(x => x[1]).map(x => x[0]);
+  }
+
+  static checkError(test: TestConfig, err: Error | string) {
+    if (test.shouldError) {
+      if (typeof test.shouldError === 'string') {
+        if (err.constructor.name === test.shouldError) {
+          return;
+        } else {
+          return new Error(`Expected error to be of type ${test.shouldError}`);
+        }
+      } else if (test.shouldError instanceof RegExp) {
+        if (test.shouldError.test(typeof err === 'string' ? err : err.message)) {
+          return;
+        } else {
+          return new Error(`Expected error to match ${test.shouldError.source}`);
+        }
+      } else {
+        if (test.shouldError(err)) {
+          return;
+        }
+      }
+    }
+    return err;
+  }
+
+  static async executeTest(test: TestConfig, consumer: Consumer) {
+    const suite = TestRegistry.get(test.class);
+    const result: Partial<TestResult> = {
+      method: test.method,
+      description: test.description,
+      suiteName: test.suiteName,
+      line: test.line,
+      lineEnd: test.lineEnd,
+      file: test.file,
+      status: 'skip'
+    };
+
+    if (test.skip) {
+      return result as TestResult;
+    }
+
+    try {
+      ConsoleCapture.start();
+
+      AssertUtil.start((a) => consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
+
+      const timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
+      const res = await Promise.race([suite.instance[test.method](), timeout]);
+      result.status = 'success';
+    } catch (err) {
+      err = this.checkError(test, err);
+      if (!err) {
+        result.status = 'success';
+      } else {
+        result.status = 'fail';
+        result.error = err;
+      }
+    } finally {
+      result.output = ConsoleCapture.end();
+      result.assertions = AssertUtil.end();
+    }
+
+    if (result.status === 'fail' && result.error) {
+      const err = result.error;
+      if (!(err instanceof assert.AssertionError)) {
+        const { file, line } = AssertUtil.readFilePosition(err, test.file);
+        const assertion: Assertion = { file, line, operator: 'throws', text: '(uncaught)', error: err, message: err.message };
+        // result.output = result.output || {};
+        // result.output['error'] = `${(result.output['error'] || '')}\n${err.stack}`;
+        result.assertions.push(assertion);
+      }
+    }
+
+    return result as TestResult;
+  }
+
+  static async executeSuite(suite: SuiteConfig, consumer: Consumer) {
     const result: SuiteResult = {
       success: 0,
       fail: 0,
@@ -188,17 +188,13 @@ export class TestUtil {
       for (const test of suite.tests) {
         await this.affixProcess(suite, result, 'beforeEach');
 
-        if (consumer) {
-          consumer.onEvent({ type: 'test', phase: 'before', test });
-        }
+        consumer.onEvent({ type: 'test', phase: 'before', test });
 
         const ret = await this.executeTest(test, consumer);
         result[ret.status]++;
         result.tests.push(ret);
 
-        if (consumer) {
-          consumer.onEvent({ type: 'test', phase: 'after', test: ret });
-        }
+        consumer.onEvent({ type: 'test', phase: 'after', test: ret });
 
         await this.affixProcess(suite, result, 'afterEach');
       }
@@ -217,7 +213,17 @@ export class TestUtil {
     return result as SuiteResult;
   }
 
-  static async executeFile(file: string, consumer?: Consumer) {
+  static async executeFileTest(file: string, clsName: string, method: string, consumer: Consumer) {
+    require(`${process.cwd()}/${file}`);
+    await TestRegistry.init();
+
+    const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
+    const config = TestRegistry.get(cls).tests.find(x => x.method === method)!;
+
+    this.executeTest(config, consumer);
+  }
+
+  static async executeFile(file: string, consumer: Consumer) {
     require(`${process.cwd()}/${file}`);
     await TestRegistry.init();
 
@@ -227,15 +233,12 @@ export class TestUtil {
       const suite = TestRegistry.get(cls);
 
       try {
-        if (consumer) {
-          consumer.onEvent({ phase: 'before', type: 'suite', suite });
-        }
+        consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
         const result = await this.executeSuite(suite, consumer);
 
-        if (consumer) {
-          consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
-        }
+        consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
+
       } catch (e) {
         if (consumer) {
           this.stubSuiteFailure(suite, e, consumer);

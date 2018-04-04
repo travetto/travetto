@@ -1,9 +1,9 @@
-import { TestEvent, EventPhase, EventEntity } from '../../model';
+import { TestEvent, EventPhase, EventEntity } from '../model';
 import { Consumer } from './types';
 
 import { serializeError, LocalExecution } from '@travetto/exec';
 
-export class ExecutorEmitter extends LocalExecution<TestEvent> implements Consumer {
+export class ExecutionEmitter extends LocalExecution<TestEvent> implements Consumer {
   onEvent(event: TestEvent) {
     if (event.phase === 'after') {
       if (event.type === 'test') {
