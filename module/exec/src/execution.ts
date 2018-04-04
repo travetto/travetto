@@ -1,47 +1,55 @@
-import { CommonProcess } from './types';
+import { CommonProcess, ExecutionEvent } from './types';
 
-export class Execution<U = any, T extends CommonProcess = CommonProcess> {
+export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends CommonProcess = CommonProcess> {
 
-  _proc: T;
+  public _proc: T;
 
-  constructor(private proc: Promise<T>) { }
+  constructor(proc?: T) {
+    if (proc) {
+      this._proc = proc;
+    }
+  }
 
-  async init() {
+  _init(): T {
+    if (!this._proc) {
+      throw new Error('Process not defined');
+    }
+    return this._proc;
+  }
+
+  init() {
     if (this._proc) {
       return false;
     }
 
-    this._proc = await this.proc;
+    this._proc = this._init();
 
     return true;
   }
 
-  send(e: U) {
+  send(eventType: string, data?: any) {
+    if (process.env.DEBUG) {
+      console.log(process.pid, 'SENDING', eventType, data);
+    }
     if (this._proc.send) {
-      this._proc.send(e);
+      this._proc.send({ type: eventType, ...(data || {}) });
     }
   }
 
-  listenOnce(eventType: string): Promise<U & { type?: string }>;
-  listenOnce(eventType: string, callback: (e: U & { type?: string }) => any): void;
-  listenOnce(eventType: string, callback?: (e: U & { type?: string }) => any) {
+  listenOnce(eventType: string): Promise<U>;
+  listenOnce(eventType: string, callback: (e: U) => any): void;
+  listenOnce(eventType: string, callback?: (e: U) => any) {
     if (callback) {
-      const fn = (event: U & { type?: string }) => {
-        if (event.type === eventType) {
-          this.removeListener(fn);
-          callback(event);
-        }
-      };
-      this.listen(fn);
+      return this.listenFor(eventType, (d, kill) => {
+        kill!();
+        callback(d);
+      });
     } else {
       return new Promise(resolve => {
-        const fn = (event: U & { type?: string }) => {
-          if (event.type === eventType) {
-            this.removeListener(fn);
-            resolve(event);
-          }
-        };
-        this.listen(fn);
+        this.listenFor(eventType, (d, kill) => {
+          kill!();
+          resolve(d);
+        })
       });
     }
   }
@@ -50,35 +58,39 @@ export class Execution<U = any, T extends CommonProcess = CommonProcess> {
     this._proc.removeListener('message', fn);
   }
 
-  async listen(handler: (e: U) => Promise<boolean | undefined | void> | boolean | undefined | void) {
-    return new Promise((resolve, reject) => {
-      const kill = () => {
-        this.removeListener(fn);
-      };
-      const fn = (e: U) => {
-        try {
-          const res = handler(e);
-          if (res === true) {
-            kill();
-            resolve();
-          } else if (res && res.then) {
-            res.then((v) => {
-              if (v) {
-                kill();
-                resolve();
-              }
-            }, err => {
-              kill();
-              reject(err);
-            })
-          }
-        } catch (e) {
-          kill();
-          reject(e);
+  listenFor(eventType: string, callback: (e: U, complete?: Function) => any) {
+    const kill = () => this.removeListener(fn);
+    const fn = (event: U) => {
+      if (event.type === eventType) {
+        callback(event, kill);
+      }
+    };
+    this.listen(fn);
+  }
+
+  async listen(handler: (e: U, complete?: Function) => any) {
+    const kill = () => {
+      this.removeListener(fn);
+    };
+    const fn = (e: U) => {
+      if (process.env.DEBUG) {
+        console.log(process.pid, 'RECEIVING', e.type, e);
+      }
+
+      let res;
+      try {
+        res = handler(e, kill);
+        if (res.catch) {
+          res.catch(kill);
         }
-      };
-      this._proc.on('message', fn);
-    });
+      } catch (e) {
+        kill();
+      }
+    };
+
+    this._proc.on('message', fn);
+
+    return kill;
   }
 
   kill() {

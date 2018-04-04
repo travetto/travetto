@@ -1,10 +1,17 @@
 import * as os from 'os';
 import { Execution } from './execution';
 import { Shutdown } from '@travetto/base';
+import { ExecutionEvent } from './types';
 
 let id = 0;
 
-export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: Promise<any> }, U = any> {
+export interface PoolHandler<T extends Execution<U> & { id?: number, completion?: Promise<any> }, U extends ExecutionEvent = ExecutionEvent> {
+  create(): T;
+  init(item: T): Promise<T>;
+  exec<X>(inp: X, execution: T): Promise<any>
+}
+
+export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: Promise<any> }, U extends ExecutionEvent = ExecutionEvent> {
   executionCount: number;
   private availableExecutions = new Set<T>();
   private pendingExecutions = new Set<T>();
@@ -14,12 +21,16 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
     this.executionCount = count || os.cpus().length - 1;
   }
 
-  async init(create: () => Promise<T>) {
+  async primePool(handler: PoolHandler<T>) {
+    const inits: Promise<any>[] = [];
+
     while (this.availableSize < this.executionCount) {
-      const w = await create();
+      const w = handler.create();
       w.id = id++;
-      await w.init();
+      this.availableExecutions.add(w);
+      inits.push(handler.init(w));
     }
+    await Promise.all(inits);
   }
 
   get availableSize() {
@@ -43,8 +54,8 @@ export class ExecutionPool<T extends Execution<U> & { id?: number, completion?: 
     execution.clean();
   }
 
-  async process<X>(inputs: X[], handler: { init: () => Promise<T>, exec: (inp: X, execution?: T) => Promise<any> }) {
-    await this.init(handler.init);
+  async process<X>(inputs: X[], handler: PoolHandler<T>) {
+    await this.primePool(handler);
 
     let position = 0;
 

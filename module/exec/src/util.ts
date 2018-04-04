@@ -1,28 +1,16 @@
-import * as child_process from 'child_process';
+import * as cp from 'child_process';
 import * as crossSpawn from 'cross-spawn';
+import { ExecutionOptions, ExecutionResult } from './types';
 
-export type ExecOptions = {
-  timeout?: number;
-  quiet?: boolean;
-  timeoutKill?: (proc: child_process.ChildProcess) => Promise<void>;
-};
-export interface ExecResult {
-  code: number;
-  stdout: string;
-  stderr: string;
-  message?: string;
-  valid: boolean;
-}
-
-export function enhanceProcess(p: child_process.ChildProcess, options: ExecOptions) {
+export function enhanceProcess(p: cp.ChildProcess, options: ExecutionOptions) {
   const timeout = options.timeout;
 
-  const prom = new Promise<ExecResult>((resolve, reject) => {
+  const prom = new Promise<ExecutionResult>((resolve, reject) => {
     let stdout = '';
     let stderr = '';
     let timer: any;
     let done = false;
-    const finish = async function (result: ExecResult) {
+    const finish = async function (result: ExecutionResult) {
       if (done) {
         return;
       }
@@ -75,20 +63,22 @@ function getArgs(cmd: string) {
   return { cmd, args };
 }
 
-export function spawn(cmdStr: string, options: child_process.SpawnOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
+type WithOpts<T> = T & ExecutionOptions;
+
+export function spawn(cmdStr: string, options: WithOpts<cp.SpawnOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
   const { cmd, args } = getArgs(cmdStr);
   const p = crossSpawn(cmd, args, options);
   return [p, enhanceProcess(p, options)];
 }
 
-export function fork(cmdStr: string, options: child_process.ForkOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
+export function fork(cmdStr: string, options: WithOpts<cp.ForkOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
   const { cmd, args } = getArgs(cmdStr);
-  const p = child_process.fork(cmd, args, options);
+  const p = cp.fork(cmd, args, options);
   return [p, enhanceProcess(p, options)];
 }
 
-export function exec(cmd: string, options: child_process.ExecOptions & ExecOptions = {}): [child_process.ChildProcess, Promise<ExecResult>] {
-  const p = child_process.exec(cmd, options);
+export function exec(cmd: string, options: WithOpts<cp.ExecOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
+  const p = cp.exec(cmd, options);
   return [p, enhanceProcess(p, options)];
 }
 

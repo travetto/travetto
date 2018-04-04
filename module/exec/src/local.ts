@@ -1,7 +1,8 @@
 import { Execution } from './execution';
+import { ExecutionEvent } from './types';
 
-export class LocalExecution<U = any> extends Execution<U, NodeJS.Process> {
+export class LocalExecution<U extends ExecutionEvent = ExecutionEvent> extends Execution<U, NodeJS.Process> {
   constructor() {
-    super(new Promise(resolve => resolve(process)));
+    super(process);
   }
 }
