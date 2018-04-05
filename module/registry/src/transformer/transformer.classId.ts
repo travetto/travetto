@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import { TransformUtil, Import, State } from '@travetto/compiler';
+const farmhash = require('farmhash');
 
 const SEP = path.sep;
 const RE_SEP = SEP === '/' ? '\\/' : SEP;
@@ -42,6 +43,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       ts.createNodeArray([
         createStaticField('__filename', ts.createLiteral(state.fullFile)),
         createStaticField('__id', ts.createLiteral(`${state.file}#${node.name!.getText()}`)),
+        createStaticField('__hash', ts.createLiteral(farmhash.hash32(node.getText()))),
         ...node.members
       ])
     ) as any;

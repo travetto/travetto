@@ -64,7 +64,7 @@ export class CompilerClassSource implements ClassSource {
   protected async watch(file: string) {
     console.debug('Got file', file);
     const next = new Map(this.computeClasses(file).map(x => [x.__id, x] as [string, Class]));
-    let prev = new Map();
+    let prev = new Map<string, Class>();
     if (this.classes.has(file)) {
       prev = new Map(this.classes.get(file)!.entries());
     }
@@ -81,7 +81,11 @@ export class CompilerClassSource implements ClassSource {
         this.classes.get(file)!.delete(k);
       } else {
         this.classes.get(file)!.set(k, next.get(k)!);
-        this.emit({ type: !prev.has(k) ? 'added' : 'changed', curr: next.get(k)!, prev: prev.get(k) });
+        if (!prev.has(k)) {
+          this.emit({ type: 'added', curr: next.get(k)! });
+        } else if (prev.get(k)!.__hash !== next.get(k)!.__hash) {
+          this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
+        }
       }
     }
   }

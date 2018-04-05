@@ -10,4 +10,5 @@ export class Test6 {
   }
 
 }
-console.log(Test6.__id)
+
+console.log(Test6.__id);
