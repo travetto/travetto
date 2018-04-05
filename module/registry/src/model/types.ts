@@ -3,6 +3,7 @@ declare global {
     __id: string;
     __filename: string;
     __hash: string;
+    __methodHashes?: { [key: string]: any };
   }
 }
 

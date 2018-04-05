@@ -10,6 +10,10 @@ export class CompilerClassSource implements ChangeSource<Class> {
   private classes = new Map<string, Map<string, Class>>();
   private events = new EventEmitter();
 
+  constructor() {
+    this.watch = this.watch.bind(this);
+  }
+
   emit(e: ChangeEvent<Class>) {
     this.events.emit('change', e);
   }
@@ -40,9 +44,9 @@ export class CompilerClassSource implements ChangeSource<Class> {
 
     Compiler.off('required-after', requireListen);
 
-    Compiler.on('changed', this.watch.bind(this));
-    Compiler.on('removed', this.watch.bind(this));
-    Compiler.on('added', this.watch.bind(this));
+    Compiler.on('changed', this.watch);
+    Compiler.on('removed', this.watch);
+    Compiler.on('added', this.watch);
     Compiler.on('required-after', f => this.processClasses(f, PendingRegister.get(f)!));
   }
 

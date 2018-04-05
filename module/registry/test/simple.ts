@@ -6,9 +6,8 @@ export class Test6 {
   static height = 20;
   name = 'bob';
   age() {
-    return 5;
+    return 6;
   }
-
 }
 
 console.log(Test6.__id);
