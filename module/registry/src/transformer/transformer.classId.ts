@@ -14,7 +14,6 @@ interface IState extends State {
   file: string;
   fullFile: string;
   imported?: ts.Identifier;
-  methodHashes: { [key: string]: MethodHashes };
 }
 
 function createStaticField(name: string, val: ts.Expression | string | number) {
@@ -26,7 +25,7 @@ function createStaticField(name: string, val: ts.Expression | string | number) {
 }
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: IState): T {
-  if (ts.isClassDeclaration(node) && node.name) {
+  if (ts.isClassDeclaration(node) && node.name && node.parent && ts.isSourceFile(node.parent)) {
     if (!state.imported) {
       state.imported = ts.createIdentifier(`import_Register`);
       state.newImports.push({
@@ -35,18 +34,14 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       });
     }
 
-    const hashes: MethodHashes = {};
+    const hashes: any = {};
 
     for (const child of node.members) {
       if (ts.isMethodDeclaration(child)) {
         const hash = farmhash.hash32(child.getText());
-        hashes[child.name.getText()] = {
-          hash, clsId: node.name
-        };
+        hashes[child.name.getText()] = ts.createLiteral(hash);
       }
     }
-
-    state.methodHashes[node.name.getText()] = hashes;
 
     node = ts.updateClassDeclaration(node,
       ts.createNodeArray(
@@ -61,6 +56,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         createStaticField('__filename', state.fullFile),
         createStaticField('__id', `${state.file}#${node.name!.getText()}`),
         createStaticField('__hash', farmhash.hash32(node.getText())),
+        createStaticField('__methodHashes', TransformUtil.extendObjectLiteral(hashes)),
         ...node.members
       ])
     ) as any;
@@ -71,56 +67,25 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 }
 
 export const ClassIdTransformer = {
-  transformer: (context: ts.TransformationContext) => {
-    return (sfile: ts.SourceFile) => {
-      const methodHashes: { [key: string]: MethodHashes } = {};
-
-      const res = TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
-        let fileRoot = file.fileName.split(process.cwd() + SEP)[1];
-        let ns = '@app';
-        if (fileRoot.startsWith(`node_modules${SEP}`)) {
-          fileRoot = fileRoot.split(`node_modules${SEP}`).pop()!;
-          if (fileRoot.startsWith('@')) {
-            const [ns1, ns2, ...rest] = fileRoot.split(SEP);
-            ns = `${ns1}.${ns2}`;
-            fileRoot = rest.join(SEP);
-          }
-        }
-
-        fileRoot = fileRoot
-          .replace(PATH_RE, '.')
-          .replace(/^\./, '')
-          .replace(/\.(t|j)s$/, '');
-
-        return { file: `${ns}:${fileRoot}`, fullFile: file.fileName, newImports: [], imports: new Map(), methodHashes };
-      }, visitNode)(context)(sfile);
-
-      const hashDecls: any = [];
-
-      for (const cls of Object.keys(methodHashes)) {
-        for (const meth of Object.keys(methodHashes[cls])) {
-          const { hash, clsId } = methodHashes[cls][meth];
-          hashDecls.push(ts.createAssignment(
-            ts.createPropertyAccess(
-              ts.createPropertyAccess(
-                ts.createPropertyAccess(clsId, 'prototype'),
-                meth
-              ),
-              '__hash'
-            ),
-            ts.createLiteral(hash)
-          ));
-        }
+  transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
+    let fileRoot = file.fileName.split(process.cwd() + SEP)[1];
+    let ns = '@app';
+    if (fileRoot.startsWith(`node_modules${SEP}`)) {
+      fileRoot = fileRoot.split(`node_modules${SEP}`).pop()!;
+      if (fileRoot.startsWith('@')) {
+        const [ns1, ns2, ...rest] = fileRoot.split(SEP);
+        ns = `${ns1}.${ns2}`;
+        fileRoot = rest.join(SEP);
       }
-
-      res.statements = ts.createNodeArray([
-        ...res.statements,
-        hashDecls
-      ]);
-
-      return res;
     }
-  },
+
+    fileRoot = fileRoot
+      .replace(PATH_RE, '.')
+      .replace(/^\./, '')
+      .replace(/\.(t|j)s$/, '');
+
+    return { file: `${ns}:${fileRoot}`, fullFile: file.fileName, newImports: [], imports: new Map() };
+  }, visitNode),
   phase: 'before',
   priority: 1
 }
