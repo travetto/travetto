@@ -1,5 +1,5 @@
 import { Class } from '../model/types';
-import { ChangeSource, ChangeEvent } from './change-source';
+import { ChangeSource, ChangeEvent } from '../source';
 import { EventEmitter } from 'events';
 
 export abstract class Registry implements ChangeSource<Class> {

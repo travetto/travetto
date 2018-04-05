@@ -2,7 +2,7 @@ import { Compiler } from '@travetto/compiler';
 import { Class } from '../model/types';
 import { bulkFind } from '@travetto/base';
 import { EventEmitter } from 'events';
-import { ChangeSource, ChangeEvent } from './change-source';
+import { ChangeSource, ChangeEvent } from './types';
 import { PendingRegister } from '../decorator/register';
 
 export class CompilerClassSource implements ChangeSource<Class> {
