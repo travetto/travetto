@@ -1,6 +1,6 @@
 import { Registry } from './registry';
 import { CompilerClassSource } from './compiler-source';
-import { ChangeEvent } from './class-source';
+import { ChangeEvent } from './change-source';
 import { Class } from '../model';
 import * as _ from 'lodash';
 
@@ -84,7 +84,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     _.merge(conf, pconfig);
   }
 
-  onInstall(cls: Class, e: ChangeEvent) {
+  onInstall(cls: Class, e: ChangeEvent<Class>) {
     if (this.pending.has(cls.__id) || this.pendingMethods.has(cls.__id)) {
       const result = this.onInstallFinalize(cls);
       this.pendingMethods.delete(cls.__id);
@@ -95,7 +95,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     }
   }
 
-  onUninstall(cls: Class, e: ChangeEvent) {
+  onUninstall(cls: Class, e: ChangeEvent<Class>) {
     if (this.entries.has(cls.__id)) {
       this.expired.set(cls.__id, this.entries.get(cls.__id)!);
       this.entries.delete(cls.__id);

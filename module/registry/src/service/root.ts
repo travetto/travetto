@@ -1,6 +1,7 @@
 import { Registry } from './registry';
 import { CompilerClassSource } from './compiler-source';
-import { ChangeEvent } from './class-source';
+import { ChangeEvent } from './change-source';
+import { Class } from '../model';
 
 class $RootRegistry extends Registry {
   constructor() {
@@ -8,7 +9,7 @@ class $RootRegistry extends Registry {
   }
 
   // Auto propagate
-  async onEvent(e: ChangeEvent) {
+  async onEvent(e: ChangeEvent<Class>) {
     await super.onEvent(e);
     this.emit(e);
   }

@@ -1,16 +1,16 @@
 import { Class } from '../model/types';
-import { ClassSource, ChangeEvent } from './class-source';
+import { ChangeSource, ChangeEvent } from './change-source';
 import { EventEmitter } from 'events';
 
-export abstract class Registry implements ClassSource {
+export abstract class Registry implements ChangeSource<Class> {
 
   protected resolved: boolean;
   protected initialized: Promise<any>;
   protected events = new EventEmitter();
   protected descendents: Registry[] = [];
-  protected parents: ClassSource[] = [];
+  protected parents: ChangeSource<Class>[] = [];
 
-  constructor(...parents: ClassSource[]) {
+  constructor(...parents: ChangeSource<Class>[]) {
     this.parents = parents;
 
     if (this.parents.length) {
@@ -59,15 +59,15 @@ export abstract class Registry implements ClassSource {
     }
   }
 
-  onInstall(cls: Class, e: ChangeEvent): void {
+  onInstall(cls: Class, e: ChangeEvent<Class>): void {
 
   }
 
-  onUninstall(cls: Class, e: ChangeEvent): void {
+  onUninstall(cls: Class, e: ChangeEvent<Class>): void {
 
   }
 
-  uninstall(classes: Class | Class[], e: ChangeEvent) {
+  uninstall(classes: Class | Class[], e: ChangeEvent<Class>) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -76,7 +76,7 @@ export abstract class Registry implements ClassSource {
     }
   }
 
-  install(classes: Class | Class[], e: ChangeEvent) {
+  install(classes: Class | Class[], e: ChangeEvent<Class>) {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -85,7 +85,7 @@ export abstract class Registry implements ClassSource {
     }
   }
 
-  onEvent(event: ChangeEvent) {
+  onEvent(event: ChangeEvent<Class>) {
     console.debug('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
 
     switch (event.type) {
@@ -104,15 +104,15 @@ export abstract class Registry implements ClassSource {
     }
   }
 
-  emit(e: ChangeEvent) {
+  emit(e: ChangeEvent<Class>) {
     this.events.emit('change', e);
   }
 
-  on<T>(callback: (e: ChangeEvent) => any): void {
+  on<T>(callback: (e: ChangeEvent<Class>) => any): void {
     this.events.on('change', callback);
   }
 
-  listen(source: ClassSource) {
+  listen(source: ChangeSource<Class>) {
     source.on(this.onEvent.bind(this));
   }
 

@@ -2,15 +2,15 @@ import { Compiler } from '@travetto/compiler';
 import { Class } from '../model/types';
 import { bulkFind } from '@travetto/base';
 import { EventEmitter } from 'events';
-import { ClassSource, ChangeEvent } from './class-source';
+import { ChangeSource, ChangeEvent } from './change-source';
 import { PendingRegister } from '../decorator/register';
 
-export class CompilerClassSource implements ClassSource {
+export class CompilerClassSource implements ChangeSource<Class> {
 
   private classes = new Map<string, Map<string, Class>>();
   private events = new EventEmitter();
 
-  emit(e: ChangeEvent) {
+  emit(e: ChangeEvent<Class>) {
     this.events.emit('change', e);
   }
 
@@ -57,7 +57,7 @@ export class CompilerClassSource implements ClassSource {
     }
   }
 
-  on<T>(callback: (e: ChangeEvent) => void): void {
+  on(callback: (e: ChangeEvent<Class>) => void): void {
     this.events.on('change', callback);
   }
 
