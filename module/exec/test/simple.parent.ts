@@ -1,29 +1,24 @@
-import { ChildExecution, ExecutionPool } from '../src';
+import { ChildExecution, ExecutionPool, ArrayDataSource } from '../src';
 
-const pool = new ExecutionPool<ChildExecution>({
-  count: 1,
-  create() {
-    const child = new ChildExecution(`${__dirname}/index.js`, true, {
-      env: { SRC: './simple.child' }
-    });
-    child.init();
-    (child as any)['ready'] = child.listenOnce('ready');
-    return child;
+const pool = new ExecutionPool<ChildExecution>(async () => {
+  const child = new ChildExecution(`${__dirname}/index.js`, true, {
+    env: { SRC: './simple.child' }
+  });
+  child.init();
+  await child.listenOnce('ready');
+  return child;
 
-  },
-  async init(child: ChildExecution) {
-    await (child as any)['ready'];
-    return child;
-  },
-  async exec(inp: string, child: ChildExecution) {
-    const wait = child.listenOnce('response');
-    child.send('request', { data: inp });
-    const res = await wait;
-    console.log('Sent', inp, 'Received', res);
+}, { max: 2 });
+
+pool.process(
+  new ArrayDataSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+  async (i: string, exe: ChildExecution) => {
+    exe.send('request', { data: i });
+    const { data } = await exe.listenOnce('resposne');
+    console.log('Sent', i, 'Received', data);
+    await new Promise(r => setTimeout(r, 1000));
   }
-});
-
-pool.process(['a', 'b', 'c', 'd', 'e', 'f', 'g']).then(() => {
+).then(() => {
   console.log('DONE!');
   pool.shutdown();
 });

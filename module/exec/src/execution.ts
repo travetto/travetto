@@ -95,6 +95,8 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
   }
 
   kill() {
+    this.clean();
+    delete this._proc;
   }
 
   clean() {
