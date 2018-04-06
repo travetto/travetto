@@ -224,16 +224,6 @@ export class ExecuteUtil {
     await this.executeTest(config, consumer);
   }
 
-  static async executeFileLine(file: string, clsName: string, line: number, consumer: Consumer) {
-    require(`${process.cwd()}/${file}`);
-    await TestRegistry.init();
-
-    const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
-    const config = TestRegistry.get(cls).tests.find(x => line >= x.line && line <= x.lineEnd)!;
-
-    await this.executeTest(config, consumer);
-  }
-
   static async executeFile(file: string, consumer: Consumer) {
     require(`${process.cwd()}/${file}`);
     await TestRegistry.init();

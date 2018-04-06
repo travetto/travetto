@@ -95,10 +95,14 @@ export async function server() {
       console.log('*Running*', data.file);
 
       try {
-        if (data.type === Events.RUN) {
-          await new Runner(['-f', 'exec', '-m', 'single', '--', data.file]).run();
-        } else {
-          await new Runner(['-f', 'exec', '-m', 'singleTest', '--', data.file, data.class, data.method]).run();
+        switch (data.type) {
+          case Events.RUN:
+            await new Runner(['-f', 'exec', '-m', 'single', '--', data.file]).run();
+            break;
+          case Events.RUN_TEST:
+            await new Runner(['-f', 'exec', '-m', 'singleTest', '--', data.file, data.class, data.method]).run();
+            break;
+
         }
         worker.send(Events.RUN_COMPLETE);
       } catch (e) {
@@ -121,5 +125,8 @@ export function client() {
     await worker.send(Events.INIT);
     await worker.listenOnce(Events.INIT_COMPLETE);
     return worker;
-  });
+  }, {
+      max: 1,
+      idleTimeoutMillis: 10000
+    });
 }
