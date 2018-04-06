@@ -45,6 +45,6 @@ class Simple {
   @Test()
   async test1d() {
     await new Promise(resolve => setTimeout(resolve, 1000));
-    assert(1 === a.range.top);
+    assert(1 === a);
   }
 }

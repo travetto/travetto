@@ -1,16 +1,23 @@
 import * as minimist from 'minimist';
+import * as fs from 'fs';
+import * as util from 'util';
 
-import { ExecutionPool, ChildExecution } from '@travetto/exec';
+import { ExecutionPool, ChildExecution, ArrayDataSource, deserializeError, QueueDataSource } from '@travetto/exec';
 import { ExecuteUtil } from './execute';
 import { ExecutionEmitter, Consumer, AllResultsCollector, TapEmitter, JSONEmitter } from '../consumer';
 import { AllSuitesResult } from '../model/suite';
-import { client } from './communication';
-import { Class } from '@travetto/registry';
+import { client, Events } from './communication';
+import { Class, ChangeEvent, MethodSource, RootRegistry } from '@travetto/registry';
 import { getCiphers } from 'crypto';
+import { TestRegistry, TestConfig } from '..';
+import { bulkRequire } from '@travetto/base';
+import * as _ from 'lodash';
+
+const farmhash = require('farmhash');
 
 interface State {
   format: 'tap' | 'json' | 'noop' | 'exec';
-  mode: 'single' | 'all' | 'watch' | 'singleTest';
+  mode: 'single' | 'all' | 'watch' | 'singleTest' | 'singleLine';
   _: string[];
   '--': string[];
 }
@@ -97,11 +104,20 @@ export class Runner {
 
     const files = await this.getFiles();
     const errors: Error[] = [];
-    const pool = new ExecutionPool<ChildExecution>(
-      client(consumer, err => errors.push(err))
-    );
 
-    await pool.process(files);
+    await client().process(
+      new ArrayDataSource(files),
+      async (file: string, exe: ChildExecution) => {
+
+        exe.listen(consumer.onEvent as any);
+
+        const complete = exe.listenOnce(Events.RUN_COMPLETE);
+        exe.send(Events.RUN, { file });
+        const { error } = await complete;
+
+        errors.push((deserializeError(error)));
+      }
+    );
 
     if (consumer.summarize) {
       return consumer.summarize();
@@ -117,13 +133,73 @@ export class Runner {
 
   async runSingleTest() {
     const consumer = this.getConsumer();
-    const files = await this.getFiles();
-    const file = files[0];
-    await ExecuteUtil.executeFile(file, consumer);
+    const [file, cls, method] = this.state['--'];
+    await ExecuteUtil.executeFileTest(file, cls, method, consumer);
+  }
+
+  async runSingleLine() {
+    const consumer = this.getConsumer();
+    const [file, cls, line] = this.state['--'];
+    const lineNo = parseInt(line, 10);
+    await ExecuteUtil.executeFileLine(file, cls, lineNo, consumer);
   }
 
   async watch() {
+    console.log('Listening for changes');
+    TestRegistry.listen(RootRegistry);
+    const methods = new MethodSource(TestRegistry);
+    await TestRegistry.init();
 
+    const queue: TestConfig[] = [];
+
+    const consumer = {
+      onEvent(e) {
+        if (e.type === 'assertion' && e.phase === 'after') {
+          fs.writeSync(1, util.inspect(e));
+        }
+      }
+    } as Consumer;
+
+    methods.on((e: ChangeEvent<[Class, Function]>) => {
+      if (e.curr && (e.type === 'added' || e.type === 'changed')) {
+        const [cls, method] = e.curr;
+        if (TestRegistry.has(cls)) {
+          const conf = TestRegistry.get(cls).tests.find(x => x.method === method.name);
+          if (conf) {
+            console.log('Method Changed', cls.__id, method.name);
+            queue.push(conf);
+          }
+        }
+      } else if (e.type === 'removing' && e.prev) {
+        const [cls, method] = e.prev;
+        if (TestRegistry.has(cls)) {
+          const conf = TestRegistry.get(cls).tests.find(x => x.method === method.name);
+          if (conf) {
+            console.log('Method Removed', cls.__id, method.name);
+          }
+        }
+      }
+    });
+
+    const all = client().process(
+      new QueueDataSource(queue),
+      async (conf, exe: ChildExecution) => {
+        exe.listen(consumer.onEvent.bind(consumer));
+        const complete = exe.listenOnce(Events.RUN_COMPLETE);
+        exe.send(Events.RUN_TEST, {
+          file: conf.file,
+          class: conf.class.__id,
+          method: conf.method
+        });
+        const { error } = await complete;
+      }
+    );
+
+    bulkRequire('test/**/*.ts');
+
+    console.log('Waiting');
+
+    await all;
   }
 
   async run() {
@@ -134,6 +210,7 @@ export class Runner {
         case 'all': return await this.runAll();
         case 'single': return await this.runSingle();
         case 'singleTest': return await this.runSingleTest();
+        case 'singleLine': return await this.runSingleLine();
         case 'watch': return await this.watch();
       }
 

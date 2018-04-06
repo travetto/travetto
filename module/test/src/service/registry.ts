@@ -1,4 +1,4 @@
-import { MetadataRegistry, Class } from '@travetto/registry';
+import { MetadataRegistry, Class, ChangeEvent } from '@travetto/registry';
 import { SuiteConfig, TestConfig } from '../model';
 
 class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {

@@ -118,6 +118,9 @@ export class ExecuteUtil {
   }
 
   static async executeTest(test: TestConfig, consumer: Consumer) {
+
+    consumer.onEvent({ type: 'test', phase: 'before', test });
+
     const suite = TestRegistry.get(test.class);
     const result: Partial<TestResult> = {
       method: test.method,
@@ -165,6 +168,8 @@ export class ExecuteUtil {
       }
     }
 
+    consumer.onEvent({ type: 'test', phase: 'after', test: result as TestResult });
+
     return result as TestResult;
   }
 
@@ -188,13 +193,9 @@ export class ExecuteUtil {
       for (const test of suite.tests) {
         await this.affixProcess(suite, result, 'beforeEach');
 
-        consumer.onEvent({ type: 'test', phase: 'before', test });
-
         const ret = await this.executeTest(test, consumer);
         result[ret.status]++;
         result.tests.push(ret);
-
-        consumer.onEvent({ type: 'test', phase: 'after', test: ret });
 
         await this.affixProcess(suite, result, 'afterEach');
       }
@@ -220,7 +221,17 @@ export class ExecuteUtil {
     const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
     const config = TestRegistry.get(cls).tests.find(x => x.method === method)!;
 
-    this.executeTest(config, consumer);
+    await this.executeTest(config, consumer);
+  }
+
+  static async executeFileLine(file: string, clsName: string, line: number, consumer: Consumer) {
+    require(`${process.cwd()}/${file}`);
+    await TestRegistry.init();
+
+    const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
+    const config = TestRegistry.get(cls).tests.find(x => line >= x.line && line <= x.lineEnd)!;
+
+    await this.executeTest(config, consumer);
   }
 
   static async executeFile(file: string, consumer: Consumer) {

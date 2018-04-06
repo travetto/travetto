@@ -1,4 +1,4 @@
-import { LocalExecution, ChildExecution, serializeError, deserializeError } from '@travetto/exec';
+import { LocalExecution, ChildExecution, serializeError, deserializeError, ExecutionPool } from '@travetto/exec';
 import * as startup from '@travetto/base/src/startup';
 import { Consumer } from '../consumer';
 
@@ -36,6 +36,7 @@ import { Consumer } from '../consumer';
 
 export const Events = {
   RUN: 'run',
+  RUN_TEST: 'runTest',
   RUN_COMPLETE: 'runComplete',
   INIT: 'init',
   INIT_COMPLETE: 'initComplete',
@@ -48,7 +49,7 @@ export async function server() {
   if (!!process.env.DEBUG) {
     console.debug = console.log;
   }
-  type Event = { type: string, error?: any, file?: string };
+  type Event = { type: string, error?: any, file?: string, class?: string, method?: string };
 
   const worker = new LocalExecution<Event>();
 
@@ -68,7 +69,7 @@ export async function server() {
       await startup.run();
       worker.send(Events.INIT_COMPLETE);
 
-    } else if (data.type === Events.RUN) {
+    } else if (data.type === Events.RUN || data.type === Events.RUN_TEST) {
 
       console.debug('Run');
 
@@ -94,7 +95,11 @@ export async function server() {
       console.log('*Running*', data.file);
 
       try {
-        await new Runner(['-f', 'exec', '-m', 'single', '--', data.file]).run();
+        if (data.type === Events.RUN) {
+          await new Runner(['-f', 'exec', '-m', 'single', '--', data.file]).run();
+        } else {
+          await new Runner(['-f', 'exec', '-m', 'singleTest', '--', data.file, data.class, data.method]).run();
+        }
         worker.send(Events.RUN_COMPLETE);
       } catch (e) {
         worker.send(Events.RUN_COMPLETE, { error: serializeError(e) });
@@ -108,29 +113,13 @@ export async function server() {
   setTimeout(_ => { }, Number.MAX_SAFE_INTEGER);
 }
 
-export function client<X>(consumer: Consumer, onError?: (err: Error) => any) {
-  return {
-    create() {
-      const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
-      worker.init();
-      (worker as any)['ready'] = worker.listenOnce(Events.READY)
-      return worker;
-    },
-    async init(worker: ChildExecution) {
-      await (worker as any)['ready'];
-      await worker.send(Events.INIT);
-      await worker.listenOnce(Events.INIT_COMPLETE);
-      return worker;
-    },
-    async exec(file: X, exe: ChildExecution) {
-      exe.listen(consumer.onEvent as any);
-      const complete = exe.listenOnce(Events.RUN_COMPLETE);
-      exe.send(Events.RUN, { file });
-      const { error } = await complete;
-
-      if (error && onError) {
-        onError(deserializeError(error));
-      }
-    }
-  };
+export function client() {
+  return new ExecutionPool(async () => {
+    const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
+    worker.init();
+    await worker.listenOnce(Events.READY)
+    await worker.send(Events.INIT);
+    await worker.listenOnce(Events.INIT_COMPLETE);
+    return worker;
+  });
 }
