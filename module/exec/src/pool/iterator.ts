@@ -8,6 +8,7 @@ export class IteratorDataSource<T> implements DataSource<T> {
 
   done = false;
   private src: Iterator<T>
+  private ondeck: T;
 
   constructor(src: (() => Iterator<T>) | Iterator<T>) {
     if (isIterator(src)) {
@@ -17,15 +18,24 @@ export class IteratorDataSource<T> implements DataSource<T> {
     }
   }
 
+  private primeNext() {
+    const res = this.src.next();
+    this.done = res.done;
+    this.ondeck = res.value;
+  }
+
   hasNext() {
+    if (this.ondeck === undefined) {
+      this.primeNext();
+    }
     return !this.done;
   }
 
   next() {
-    const res = this.src.next();
-    if (res.done) {
-      this.done = res.done;
-    }
-    return res.value;
+    this.hasNext();
+
+    const out = this.ondeck;
+    delete this.ondeck;
+    return out;
   }
 }
