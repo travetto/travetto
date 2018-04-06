@@ -2,7 +2,7 @@ import { ChangeSource, ChangeEvent } from './types';
 import { Class } from '../model';
 import { EventEmitter } from 'events';
 
-export class CompilerMethodSource implements ChangeSource<[Class, Function]> {
+export class MethodSource implements ChangeSource<[Class, Function]> {
 
   private events = new EventEmitter();
 
@@ -26,7 +26,7 @@ export class CompilerMethodSource implements ChangeSource<[Class, Function]> {
       } else if (next[k] !== prev[k]) {
         this.emit({ type: 'changed', curr: [e.curr!, e.curr!.prototype[k]], prev: [e.prev!, e.prev!.prototype[k]] });
       } else {
-        console.log('Method unchanged');
+        // Method Unchanged
       }
     }
 
