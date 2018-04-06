@@ -222,6 +222,9 @@ export class Compiler {
     if (fileName in require.cache) {
       delete require.cache[fileName];
     }
+    if (this.hashes.has(fileName)) {
+      this.hashes.delete(fileName);
+    }
     if (this.modules.has(fileName)) {
       this.modules.get(fileName)!.handler!.target = null;
     }
@@ -417,6 +420,7 @@ export class Compiler {
     this.contents.clear();
     this.modules.clear();
     this.files.clear();
+    this.hashes.clear();
     this.sourceMaps.clear();
     this.snaphost.clear();
     delete this.rootFiles;
