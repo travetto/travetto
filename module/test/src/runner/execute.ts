@@ -174,95 +174,75 @@ export class ExecuteUtil {
   }
 
   static async executeSuite(suite: SuiteConfig, consumer: Consumer) {
-    const result: SuiteResult = {
-      success: 0,
-      fail: 0,
-      skip: 0,
-      total: 0,
-      line: suite.line,
-      lineEnd: suite.lineEnd,
-      file: suite.class.__filename,
-      class: suite.class.name,
-      name: suite.name,
-      tests: []
-    };
-
     try {
-      await this.affixProcess(suite, result, 'beforeAll');
+      const result: SuiteResult = {
+        success: 0,
+        fail: 0,
+        skip: 0,
+        total: 0,
+        line: suite.line,
+        lineEnd: suite.lineEnd,
+        file: suite.class.__filename,
+        class: suite.class.name,
+        name: suite.name,
+        tests: []
+      };
 
-      for (const test of suite.tests) {
-        await this.affixProcess(suite, result, 'beforeEach');
+      consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
-        const ret = await this.executeTest(test, consumer);
-        result[ret.status]++;
-        result.tests.push(ret);
+      try {
+        await this.affixProcess(suite, result, 'beforeAll');
 
-        await this.affixProcess(suite, result, 'afterEach');
+        for (const test of suite.tests) {
+          await this.affixProcess(suite, result, 'beforeEach');
+
+          const ret = await this.executeTest(test, consumer);
+          result[ret.status]++;
+          result.tests.push(ret);
+
+          await this.affixProcess(suite, result, 'afterEach');
+        }
+
+        await this.affixProcess(suite, result, 'afterAll');
+      } catch (e) {
+        if (e.message === 'breakout') {
+          // Done
+        } else {
+          throw e;
+        }
       }
 
-      await this.affixProcess(suite, result, 'afterAll');
+      consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
+
+      result.total = result.success + result.fail;
+
+      return result as SuiteResult;
     } catch (e) {
-      if (e.message === 'breakout') {
-        // Done
-      } else {
-        throw e;
-      }
+      this.stubSuiteFailure(suite, e, consumer);
     }
-
-    result.total = result.success + result.fail;
-
-    return result as SuiteResult;
   }
 
   static require(file: string) {
     require(file.indexOf(process.cwd()) === 0 ? file : `${process.cwd()}/${file}`);
   }
 
-  static async executeFileTest(file: string, clsName: string, method: string, consumer: Consumer) {
+  static async execute(consumer: Consumer, file: string, clsName?: string, method?: string) {
     this.require(file);
-
     await TestRegistry.init();
 
-    const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
-    const config = TestRegistry.get(cls).tests.find(x => x.method === method)!;
-
-    await this.executeTest(config, consumer);
-  }
-
-  static async executeFileSuite(file: string, clsName: string, consumer: Consumer) {
-    this.require(file);
-
-    await TestRegistry.init();
-
-    const suiteCls = TestRegistry.getClasses().find(x => x.name === clsName)!;
-
-    await this.executeSuite(TestRegistry.get(suiteCls), consumer);
-  }
-
-
-  static async executeFile(file: string, consumer: Consumer) {
-    this.require(file);
-
-    await TestRegistry.init();
-
-    const classes = TestRegistry.getClasses();
-
-    for (const cls of classes) {
-      const suite = TestRegistry.get(cls);
-
-      try {
-        consumer.onEvent({ phase: 'before', type: 'suite', suite });
-
-        const result = await this.executeSuite(suite, consumer);
-
-        consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
-
-      } catch (e) {
-        if (consumer) {
-          this.stubSuiteFailure(suite, e, consumer);
-        } else {
-          throw e;
-        }
+    if (method) {
+      const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
+      const config = TestRegistry.get(cls).tests.find(x => x.method === method)!;
+      await this.executeTest(config, consumer);
+    } else if (clsName) {
+      const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
+      const conf = TestRegistry.get(cls);
+      await this.executeSuite(conf, consumer);
+    } else {
+      const classes = TestRegistry.getClasses();
+      for (const cls of classes) {
+        const suite = TestRegistry.get(cls);
+        await this.executeSuite(suite, consumer);
       }
     }
   }

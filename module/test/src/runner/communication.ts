@@ -37,8 +37,6 @@ import { AppInfo } from '@travetto/base';
 
 export const Events = {
   RUN: 'run',
-  RUN_TEST: 'runTest',
-  RUN_SUITE: 'runSuite',
   RUN_COMPLETE: 'runComplete',
   INIT: 'init',
   INIT_COMPLETE: 'initComplete',
@@ -71,7 +69,7 @@ export async function server() {
       await startup.run();
       worker.send(Events.INIT_COMPLETE);
 
-    } else if (data.type.startsWith('run')) {
+    } else if (data.type === Events.RUN) {
 
       console.debug('Run');
 
@@ -96,17 +94,7 @@ export async function server() {
       console.log('*Running*', data.file);
 
       try {
-        switch (data.type) {
-          case Events.RUN:
-            await new Runner(['-f', 'exec', '-m', 'single', '--', data.file]).run();
-            break;
-          case Events.RUN_SUITE:
-            await new Runner(['-f', 'exec', '-m', 'singleSuite', '--', data.file, data.class]).run();
-            break;
-          case Events.RUN_TEST:
-            await new Runner(['-f', 'exec', '-m', 'singleTest', '--', data.file, data.class, data.method]).run();
-            break;
-        }
+        await new Runner(['-f', 'exec', '-m', 'single', '--', data.file, data.class, data.method]).run();
         worker.send(Events.RUN_COMPLETE);
       } catch (e) {
         worker.send(Events.RUN_COMPLETE, { error: serializeError(e) });

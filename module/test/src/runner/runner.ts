@@ -17,7 +17,7 @@ const farmhash = require('farmhash');
 
 interface State {
   format: 'tap' | 'json' | 'noop' | 'exec';
-  mode: 'single' | 'all' | 'watch' | 'singleSuite' | 'singleTest';
+  mode: 'single' | 'watch' | 'all';
   _: string[];
   '--': string[];
 }
@@ -99,7 +99,7 @@ export class Runner {
     return files;
   }
 
-  async runAll() {
+  async runFiles() {
     const consumer = this.getConsumer();
 
     const files = await this.getFiles();
@@ -124,23 +124,10 @@ export class Runner {
     }
   }
 
-  async runSingle() {
+  async runSome() {
     const consumer = this.getConsumer();
-    const files = await this.getFiles();
-    const file = files[0];
-    await ExecuteUtil.executeFile(file, consumer);
-  }
-
-  async runSingleTest() {
-    const consumer = this.getConsumer();
-    const [file, cls, method] = this.state['--'];
-    await ExecuteUtil.executeFileTest(file, cls, method, consumer);
-  }
-
-  async runSingleSuite() {
-    const consumer = this.getConsumer();
-    const [file, cls] = this.state['--'];
-    await ExecuteUtil.executeFileSuite(file, cls, consumer);
+    const args: string[] = this.state['--'];
+    return await ExecuteUtil.execute(consumer, args[0], args[1], args[2]);
   }
 
   async run() {
@@ -148,11 +135,9 @@ export class Runner {
       console.log('Runner Args', this.state);
 
       switch (this.state.mode) {
-        case 'all': return await this.runAll();
-        case 'single': return await this.runSingle();
-        case 'singleTest': return await this.runSingleTest();
-        case 'singleSuite': return await this.runSingleSuite();
+        case 'single': return await this.runSome();
         case 'watch': return await watch();
+        default: return await this.runFiles();
       }
 
     } catch (e) {

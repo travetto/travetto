@@ -91,13 +91,13 @@ export async function watch() {
       let event: any;
       if (isSuite(conf)) {
         event = {
-          type: Events.RUN_SUITE,
+          type: Events.RUN,
           file: conf.class.__filename,
           class: conf.class.name
         };
       } else {
         event = {
-          type: Events.RUN_TEST,
+          type: Events.RUN,
           file: conf.file,
           class: conf.class.name,
           method: conf.method
