@@ -17,7 +17,7 @@ const farmhash = require('farmhash');
 
 interface State {
   format: 'tap' | 'json' | 'noop' | 'exec';
-  mode: 'single' | 'all' | 'watch' | 'singleTest' | 'singleLine';
+  mode: 'single' | 'all' | 'watch' | 'singleSuite' | 'singleTest';
   _: string[];
   '--': string[];
 }
@@ -137,6 +137,12 @@ export class Runner {
     await ExecuteUtil.executeFileTest(file, cls, method, consumer);
   }
 
+  async runSingleSuite() {
+    const consumer = this.getConsumer();
+    const [file, cls] = this.state['--'];
+    await ExecuteUtil.executeFileSuite(file, cls, consumer);
+  }
+
   async run() {
     try {
       console.log('Runner Args', this.state);
@@ -145,6 +151,7 @@ export class Runner {
         case 'all': return await this.runAll();
         case 'single': return await this.runSingle();
         case 'singleTest': return await this.runSingleTest();
+        case 'singleSuite': return await this.runSingleSuite();
         case 'watch': return await watch();
       }
 

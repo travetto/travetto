@@ -214,8 +214,13 @@ export class ExecuteUtil {
     return result as SuiteResult;
   }
 
+  static require(file: string) {
+    require(file.indexOf(process.cwd()) === 0 ? file : `${process.cwd()}/${file}`);
+  }
+
   static async executeFileTest(file: string, clsName: string, method: string, consumer: Consumer) {
-    require(`${process.cwd()}/${file}`);
+    this.require(file);
+
     await TestRegistry.init();
 
     const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
@@ -224,8 +229,20 @@ export class ExecuteUtil {
     await this.executeTest(config, consumer);
   }
 
+  static async executeFileSuite(file: string, clsName: string, consumer: Consumer) {
+    this.require(file);
+
+    await TestRegistry.init();
+
+    const suiteCls = TestRegistry.getClasses().find(x => x.name === clsName)!;
+
+    await this.executeSuite(TestRegistry.get(suiteCls), consumer);
+  }
+
+
   static async executeFile(file: string, consumer: Consumer) {
-    require(`${process.cwd()}/${file}`);
+    this.require(file);
+
     await TestRegistry.init();
 
     const classes = TestRegistry.getClasses();

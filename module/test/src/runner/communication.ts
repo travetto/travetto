@@ -1,6 +1,7 @@
 import { LocalExecution, ChildExecution, serializeError, deserializeError, ExecutionPool } from '@travetto/exec';
 import * as startup from '@travetto/base/src/startup';
 import { Consumer } from '../consumer';
+import { AppInfo } from '@travetto/base';
 
 /***
   Flow of events
@@ -37,6 +38,7 @@ import { Consumer } from '../consumer';
 export const Events = {
   RUN: 'run',
   RUN_TEST: 'runTest',
+  RUN_SUITE: 'runSuite',
   RUN_COMPLETE: 'runComplete',
   INIT: 'init',
   INIT_COMPLETE: 'initComplete',
@@ -69,7 +71,7 @@ export async function server() {
       await startup.run();
       worker.send(Events.INIT_COMPLETE);
 
-    } else if (data.type === Events.RUN || data.type === Events.RUN_TEST) {
+    } else if (data.type.startsWith('run')) {
 
       console.debug('Run');
 
@@ -80,17 +82,16 @@ export async function server() {
           continue;
         }
         if (k.endsWith('.ts') &&
-          !/@travetto\/(base|config|compiler|test)/.test(k) &&
+          !/@travetto\/(base|config|compiler|exec|pool)/.test(k) &&
           !/transformer\..*\.ts/.test(k)) {
-          console.debug('Reset', k)
-          delete require.cache[k];
+          Compiler.unload(k);
         }
       }
 
       // Relaod runner
       Compiler.workingSets = [data.file!];
       Compiler.resetFiles();
-      const { Runner } = require('./runner');
+      const { Runner } = require('./');
 
       console.log('*Running*', data.file);
 
@@ -99,10 +100,12 @@ export async function server() {
           case Events.RUN:
             await new Runner(['-f', 'exec', '-m', 'single', '--', data.file]).run();
             break;
+          case Events.RUN_SUITE:
+            await new Runner(['-f', 'exec', '-m', 'singleSuite', '--', data.file, data.class]).run();
+            break;
           case Events.RUN_TEST:
             await new Runner(['-f', 'exec', '-m', 'singleTest', '--', data.file, data.class, data.method]).run();
             break;
-
         }
         worker.send(Events.RUN_COMPLETE);
       } catch (e) {
@@ -114,7 +117,7 @@ export async function server() {
   });
 
   worker.send(Events.READY);
-  setTimeout(_ => { }, Number.MAX_SAFE_INTEGER);
+  setTimeout(_ => { }, Number.MAX_SAFE_INTEGER / 10000000);
 }
 
 export function client() {
@@ -126,7 +129,6 @@ export function client() {
     await worker.listenOnce(Events.INIT_COMPLETE);
     return worker;
   }, {
-      max: 1,
       idleTimeoutMillis: 10000
     });
 }
