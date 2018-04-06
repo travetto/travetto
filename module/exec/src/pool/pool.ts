@@ -52,6 +52,8 @@ export class ExecutionPool<T extends Execution<U>, U extends ExecutionEvent = Ex
       const next = await src.next();
       const release = this.returnExecution.bind(this, exe);
 
+      console.log('Processing', next, exe.pid);
+
       const completion = exec(next, exe)
         .then(release, release);
 

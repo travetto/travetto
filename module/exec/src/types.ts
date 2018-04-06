@@ -15,6 +15,7 @@ export interface ExecutionResult {
 }
 
 export interface CommonProcess {
+  pid: number;
   send?(message: any, sendHandle?: any): void;
   removeListener(name: string, f: Function): void;
   on(name: string, f: Function): void;

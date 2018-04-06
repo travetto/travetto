@@ -99,6 +99,10 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
     delete this._proc;
   }
 
+  get pid() {
+    return this._proc && this._proc.pid;
+  }
+
   clean() {
     if (this._proc) {
       this._proc.removeAllListeners('message');

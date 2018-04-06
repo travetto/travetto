@@ -1,24 +1,33 @@
-import { ChildExecution, ExecutionPool, ArrayDataSource } from '../src';
+import { ChildExecution, ExecutionPool, ArrayDataSource, IteratorDataSource } from '../src';
 
 const pool = new ExecutionPool<ChildExecution>(async () => {
+  console.log('Initializing child');
   const child = new ChildExecution(`${__dirname}/index.js`, true, {
     env: { SRC: './simple.child' }
   });
   child.init();
   await child.listenOnce('ready');
+  console.log('Child ready');
   return child;
 
-}, { max: 2 });
+}, { max: 1 });
 
 pool.process(
-  new ArrayDataSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+  //  new ArrayDataSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+  new IteratorDataSource(function* () {
+    for (let i = 0; i < 10; i++) {
+      yield `${i}-`;
+    }
+  }),
   async (i: string, exe: ChildExecution) => {
+    const res = exe.listenOnce('response');
     exe.send('request', { data: i });
-    const { data } = await exe.listenOnce('resposne');
+    const { data } = await res;
     console.log('Sent', i, 'Received', data);
     await new Promise(r => setTimeout(r, 1000));
   }
-).then(() => {
+).then(async () => {
   console.log('DONE!');
-  pool.shutdown();
+  await pool.shutdown();
+  process.exit(0);
 });

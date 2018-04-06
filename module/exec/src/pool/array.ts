@@ -9,7 +9,7 @@ export class ArrayDataSource<T> implements DataSource<T> {
     return this.position < this.items.length;
   }
 
-  async next() {
+  next() {
     const ret = this.items[this.position];
     this.position++;
     return ret;
