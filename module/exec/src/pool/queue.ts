@@ -3,7 +3,9 @@ import { DataSource } from './types';
 export class QueueDataSource<T> implements DataSource<T> {
   private items: T[] = [];
 
-  constructor(private tick: number = 500) { }
+  constructor(data?: T[], private tick: number = 500) {
+    this.items = data || [];
+  }
 
   enqueue(item: T) {
     this.items.push(item);
