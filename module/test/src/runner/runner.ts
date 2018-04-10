@@ -1,17 +1,20 @@
 import * as minimist from 'minimist';
 import * as fs from 'fs';
 import * as util from 'util';
+import * as _ from 'lodash';
 
 import { ArrayDataSource, deserializeError } from '@travetto/exec';
+import { Class } from '@travetto/registry';
+import { bulkRequire } from '@travetto/base';
+
+import { watch } from './watcher';
+import { TestRegistry } from '../service';
+
 import { ExecuteUtil } from './execute';
 import { ExecutionEmitter, Consumer, AllResultsCollector, TapEmitter, JSONEmitter } from '../consumer';
-import { AllSuitesResult } from '../model/suite';
+import { AllSuitesResult, SuiteConfig } from '../model/suite';
 import { client, Events } from './communication';
-import { Class } from '@travetto/registry';
-import { getCiphers } from 'crypto';
-import { bulkRequire } from '@travetto/base';
-import * as _ from 'lodash';
-import { watch } from './watcher';
+import { TestConfig } from '..';
 
 const farmhash = require('farmhash');
 
@@ -127,7 +130,7 @@ export class Runner {
   async runSome() {
     const consumer = this.getConsumer();
     const args: string[] = this.state['--'];
-    return await ExecuteUtil.execute(consumer, args[0], args[1], args[2]);
+    return await ExecuteUtil.execute(consumer, args);
   }
 
   async run() {

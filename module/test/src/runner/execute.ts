@@ -222,28 +222,64 @@ export class ExecuteUtil {
     }
   }
 
-  static require(file: string) {
-    require(file.indexOf(process.cwd()) === 0 ? file : `${process.cwd()}/${file}`);
+  static getRunParams(file: string, clsName?: string, method?: string): [SuiteConfig] | [SuiteConfig, TestConfig] | [SuiteConfig[]] {
+    let res = undefined;
+    if (clsName && /^\d+$/.test(clsName)) {
+      const line = parseInt(clsName, 10);
+      const clses = TestRegistry.getClasses().filter(f => f.__filename === file).map(x => TestRegistry.get(x));
+      const cls = clses.find(x => line >= x.line && line <= x.lineEnd);
+      if (cls) {
+        const meth = cls.tests.find(x => line >= x.line && line <= x.lineEnd);
+        if (meth) {
+          res = [cls, meth];
+        } else {
+          res = [cls];
+        }
+      } else {
+        res = [clses];
+      }
+    } else {
+      if (method) {
+        const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
+        const clsConf = TestRegistry.get(cls);
+        const meth = clsConf.tests.find(x => x.method === method)!;
+        res = [clsConf, meth];
+      } else if (clsName) {
+        const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
+        const clsConf = TestRegistry.get(cls);
+        res = [clsConf];
+      } else {
+        const clses = TestRegistry.getClasses().map(x => TestRegistry.get(x))
+        res = [clses];
+
+      }
+    }
+
+    return res as any;
   }
 
-  static async execute(consumer: Consumer, file: string, clsName?: string, method?: string) {
-    this.require(file);
+  static async execute(consumer: Consumer, [file, ...args]: string[]) {
+    if (!file.startsWith(process.cwd())) {
+      file = `${process.cwd()}/${file}`;
+    }
+
+    require(file);
+
     await TestRegistry.init();
 
-    if (method) {
-      const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
-      const config = TestRegistry.get(cls).tests.find(x => x.method === method)!;
-      await this.executeTest(config, consumer);
-    } else if (clsName) {
-      const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
-      const conf = TestRegistry.get(cls);
-      await this.executeSuite(conf, consumer);
-    } else {
-      const classes = TestRegistry.getClasses();
-      for (const cls of classes) {
-        const suite = TestRegistry.get(cls);
+    const params = this.getRunParams(file, args[0], args[1]);
+
+    const suites = params[0];
+    const test = params[1];
+
+    if (Array.isArray(suites)) {
+      for (const suite of (suites as SuiteConfig[])) {
         await this.executeSuite(suite, consumer);
       }
+    } else if (test) {
+      await this.executeTest(test as TestConfig, consumer);
+    } else {
+      await this.executeSuite(suites as SuiteConfig, consumer);
     }
   }
 }

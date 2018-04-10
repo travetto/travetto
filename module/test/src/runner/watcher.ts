@@ -23,7 +23,7 @@ function send(e: string, data: { file: string } & { [key: string]: any }) {
   if (process.send) {
     process.send({ type: e, ...data });
   } else {
-    //console.log('SENDING', JSON.stringify({ type: e, ...data }));
+    // console.log('SENDING', JSON.stringify({ type: e, ...data }));
   }
 }
 
@@ -82,7 +82,7 @@ export async function watch() {
         });
       }
     });
-  }, 1000);
+  }, 1);
 
   const all = client().process(
     new QueueDataSource(queue),
