@@ -117,7 +117,7 @@ export class ExecuteUtil {
     return err;
   }
 
-  static async executeTest(test: TestConfig, consumer: Consumer) {
+  static async executeTest(consumer: Consumer, test: TestConfig) {
 
     consumer.onEvent({ type: 'test', phase: 'before', test });
 
@@ -173,7 +173,7 @@ export class ExecuteUtil {
     return result as TestResult;
   }
 
-  static async executeSuite(suite: SuiteConfig, consumer: Consumer) {
+  static async executeSuite(consumer: Consumer, suite: SuiteConfig, test?: TestConfig) {
     try {
       const result: SuiteResult = {
         success: 0,
@@ -192,11 +192,12 @@ export class ExecuteUtil {
 
       try {
         await this.affixProcess(suite, result, 'beforeAll');
+        const tests = test ? [test] : suite.tests;
 
-        for (const test of suite.tests) {
+        for (const testConfig of tests) {
           await this.affixProcess(suite, result, 'beforeEach');
 
-          const ret = await this.executeTest(test, consumer);
+          const ret = await this.executeTest(consumer, testConfig);
           result[ret.status]++;
           result.tests.push(ret);
 
@@ -269,17 +270,15 @@ export class ExecuteUtil {
 
     const params = this.getRunParams(file, args[0], args[1]);
 
-    const suites = params[0];
-    const test = params[1];
+    const suites: SuiteConfig | SuiteConfig[] = params[0];
+    const test = params[1] as TestConfig;
 
     if (Array.isArray(suites)) {
-      for (const suite of (suites as SuiteConfig[])) {
-        await this.executeSuite(suite, consumer);
+      for (const suite of suites) {
+        await this.executeSuite(consumer, suite);
       }
-    } else if (test) {
-      await this.executeTest(test as TestConfig, consumer);
     } else {
-      await this.executeSuite(suites as SuiteConfig, consumer);
+      await this.executeSuite(consumer, suites, test);
     }
   }
 }
