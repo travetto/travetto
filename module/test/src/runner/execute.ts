@@ -173,7 +173,40 @@ export class ExecuteUtil {
     return result as TestResult;
   }
 
-  static async executeSuite(consumer: Consumer, suite: SuiteConfig, test?: TestConfig) {
+  static async executeSuiteTest(consumer: Consumer, suite: SuiteConfig, test: TestConfig) {
+    try {
+      const result: SuiteResult = {
+        success: 0,
+        fail: 0,
+        skip: 0,
+        total: 0,
+        line: suite.line,
+        lineEnd: suite.lineEnd,
+        file: suite.class.__filename,
+        class: suite.class.name,
+        name: suite.name,
+        tests: []
+      };
+
+      try {
+        await this.affixProcess(suite, result, 'beforeAll');
+        await this.affixProcess(suite, result, 'beforeEach');
+        await this.executeTest(consumer, test);
+        await this.affixProcess(suite, result, 'afterEach');
+        await this.affixProcess(suite, result, 'afterAll');
+      } catch (e) {
+        if (e.message === 'breakout') {
+          // Done
+        } else {
+          throw e;
+        }
+      }
+    } catch (e) {
+      this.stubSuiteFailure(suite, e, consumer);
+    }
+  }
+
+  static async executeSuite(consumer: Consumer, suite: SuiteConfig) {
     try {
       const result: SuiteResult = {
         success: 0,
@@ -192,9 +225,8 @@ export class ExecuteUtil {
 
       try {
         await this.affixProcess(suite, result, 'beforeAll');
-        const tests = test ? [test] : suite.tests;
 
-        for (const testConfig of tests) {
+        for (const testConfig of suite.tests) {
           await this.affixProcess(suite, result, 'beforeEach');
 
           const ret = await this.executeTest(consumer, testConfig);
@@ -278,7 +310,11 @@ export class ExecuteUtil {
         await this.executeSuite(consumer, suite);
       }
     } else {
-      await this.executeSuite(consumer, suites, test);
+      if (test) {
+        await this.executeSuiteTest(consumer, suites, test);
+      } else {
+        await this.executeSuite(consumer, suites);
+      }
     }
   }
 }
