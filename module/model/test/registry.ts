@@ -5,7 +5,7 @@ import { Injectable } from '@travetto/di';
 
 @Injectable({ target: ModelSource })
 export class TestSource implements ModelSource {
-  onChange(e: ChangeEvent) {
+  onChange(e: ChangeEvent<Class<any>>) {
     console.log('Changed model', e);
   }
 

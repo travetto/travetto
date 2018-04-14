@@ -33,7 +33,9 @@ const query: Query<Person> = {
   }
 }
 
-@Suite()
+const street1 = '1234 Fun';
+
+@Suite('Binding Test')
 class DataBinding {
 
   @BeforeAll()
@@ -41,12 +43,12 @@ class DataBinding {
     await RootRegistry.init();
   }
 
-  @Test()
+  @Test('Binding Test One')
   validateBind() {
     const person = Person.from({
       name: 'Test',
       address: {
-        street1: '1234 Fun',
+        street1,
         street2: 'Unit 20'
       }
     });
