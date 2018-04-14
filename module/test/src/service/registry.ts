@@ -31,7 +31,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     const tests = this.pendingMethods.get(cls.__id)!.values();
     config.instance = new config.class();
     config.tests = Array.from(tests) as TestConfig[];
-    config.name = cls.__id.split(':test.')[1].replace('#', '.');
+    config.name = cls.__id.split(':')[1].replace(/^test[.]/, '').replace('#', '.');
     if (!config.description) {
       config.description = config.name;
     }
