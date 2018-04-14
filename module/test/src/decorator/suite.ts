@@ -2,9 +2,9 @@ import { Class } from '@travetto/registry';
 import { TestRegistry } from '../service';
 import { SuiteConfig } from '../model';
 
-export function Suite(name?: string, extra?: Partial<SuiteConfig>) {
+export function Suite(description?: string, extra?: Partial<SuiteConfig>) {
   return (target: Class<any>) => {
-    TestRegistry.register(target, { name, ...(extra || {}) });
+    TestRegistry.register(target, { description, ...(extra || {}) });
     return target;
   }
 }
