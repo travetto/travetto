@@ -7,8 +7,9 @@ export interface TestConfig {
   file: string;
   lines: { start: number, end: number };
   methodName: string;
-  shouldError: string | RegExp | Function;
+  shouldError?: string | RegExp | Function;
   skip: boolean;
+  timeout?: number;
 }
 
 export interface Assertion {

@@ -11,19 +11,28 @@ import { Consumer } from '../consumer';
 import { SuitePhase } from '..';
 
 export const BREAKOUT = Symbol('breakout');
+export const TIMEOUT = Symbol('timeout');
 
 export class ExecuteUtil {
 
-  static timeout = 5000;
+  static timeout = parseInt(process.env.DEFAULT_TIMEOUT || '5000', 10);
 
-  static async affixProcess(suite: SuiteConfig, result: SuiteResult, phase: SuitePhase) {
+  static async affixProcess(consumer: Consumer, phase: SuitePhase, suite: SuiteConfig, result: SuiteResult) {
     try {
       for (const fn of suite[phase]) {
         await fn.call(suite.instance);
       }
     } catch (error) {
       const { line, file } = AssertUtil.readFilePosition(error, suite.file);
-      result.tests.push({
+      const badAssert: Assertion = {
+        line,
+        file,
+        error,
+        expected: 'Not to throw error',
+        text: 'unknown',
+        operator: 'throws'
+      };
+      const badTest: TestResult = {
         status: 'fail',
         className: suite.className,
         methodName: phase,
@@ -31,9 +40,26 @@ export class ExecuteUtil {
         lines: { start: line, end: line },
         file,
         error,
-        assertions: [],
+        assertions: [badAssert],
         output: {}
-      } as TestResult);
+      };
+
+      result.tests.push(badTest);
+
+      const badTestConfig: TestConfig = {
+        class: suite.class,
+        className: badTest.className,
+        file: badTest.file,
+        lines: badTest.lines,
+        methodName: badTest.methodName,
+        description: badTest.description,
+        skip: false
+      };
+
+      consumer.onEvent({ type: 'test', phase: 'before', test: badTestConfig });
+      consumer.onEvent({ type: 'assertion', phase: 'after', assertion: badAssert });
+      consumer.onEvent({ type: 'test', phase: 'after', test: badTest });
+
       throw BREAKOUT;
     }
   }
@@ -141,11 +167,15 @@ export class ExecuteUtil {
 
       AssertUtil.start((a) => consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
 
-      const timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(TIMEOUT), test.timeout || this.timeout).unref());
       const res = await Promise.race([suite.instance[test.methodName](), timeout]);
       result.status = 'success';
     } catch (err) {
-      err = this.checkError(test, err);
+      if (err === TIMEOUT) {
+        err = new Error('Operation timed out');
+      } else {
+        err = this.checkError(test, err);
+      }
       if (!err) {
         result.status = 'success';
       } else {
@@ -187,13 +217,13 @@ export class ExecuteUtil {
       };
 
       try {
-        await this.affixProcess(suite, result, 'beforeAll');
-        await this.affixProcess(suite, result, 'beforeEach');
+        await this.affixProcess(consumer, 'beforeAll', suite, result);
+        await this.affixProcess(consumer, 'beforeEach', suite, result);
         await this.executeTest(consumer, test);
-        await this.affixProcess(suite, result, 'afterEach');
-        await this.affixProcess(suite, result, 'afterAll');
+        await this.affixProcess(consumer, 'afterEach', suite, result);
+        await this.affixProcess(consumer, 'afterAll', suite, result);
       } catch (e) {
-        if (e.message === 'breakout') {
+        if (e === BREAKOUT) {
           // Done
         } else {
           throw e;
@@ -220,21 +250,21 @@ export class ExecuteUtil {
       consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
       try {
-        await this.affixProcess(suite, result, 'beforeAll');
+        await this.affixProcess(consumer, 'beforeAll', suite, result);
 
         for (const testConfig of suite.tests) {
-          await this.affixProcess(suite, result, 'beforeEach');
+          await this.affixProcess(consumer, 'beforeEach', suite, result);
 
           const ret = await this.executeTest(consumer, testConfig);
           result[ret.status]++;
           result.tests.push(ret);
 
-          await this.affixProcess(suite, result, 'afterEach');
+          await this.affixProcess(consumer, 'afterEach', suite, result);
         }
 
-        await this.affixProcess(suite, result, 'afterAll');
+        await this.affixProcess(consumer, 'afterAll', suite, result);
       } catch (e) {
-        if (e.message === 'breakout') {
+        if (e === BREAKOUT) {
           // Done
         } else {
           throw e;
