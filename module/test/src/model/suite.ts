@@ -3,11 +3,12 @@ import { Class } from '@travetto/registry/src/model/types';
 
 export interface SuiteConfig {
   class: Class;
+  className: string;
+  file: string;
+  lines: { start: number, end: number };
+
   instance: any;
-  name: string;
   description: string;
-  line: number;
-  lineEnd: number;
   tests: TestConfig[];
   beforeAll: Function[];
   beforeEach: Function[];
@@ -23,12 +24,10 @@ export interface Counts {
 }
 
 export interface SuiteResult extends Counts {
+  className: string;
   file: string;
-  line: number;
-  lineEnd: number;
-  class: string;
+  lines: { start: number, end: number };
   tests: TestResult[];
-  name: string;
 }
 
 export interface AllSuitesResult extends Counts {

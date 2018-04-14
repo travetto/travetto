@@ -8,31 +8,33 @@ import { TestRegistry } from '../service';
 import { ConsoleCapture } from './console';
 import { AssertUtil } from './assert';
 import { Consumer } from '../consumer';
+import { SuitePhase } from '..';
+
+export const BREAKOUT = Symbol('breakout');
 
 export class ExecuteUtil {
 
   static timeout = 5000;
 
-  static async affixProcess(suite: SuiteConfig, result: SuiteResult, phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
+  static async affixProcess(suite: SuiteConfig, result: SuiteResult, phase: SuitePhase) {
     try {
       for (const fn of suite[phase]) {
         await fn.call(suite.instance);
       }
     } catch (error) {
-      const { line, file } = AssertUtil.readFilePosition(error, suite.class.__filename);
+      const { line, file } = AssertUtil.readFilePosition(error, suite.file);
       result.tests.push({
         status: 'fail',
-        suiteName: suite.name,
-        method: phase,
+        className: suite.className,
+        methodName: phase,
         description: phase,
-        line,
-        lineEnd: line,
+        lines: { start: line, end: line },
         file,
         error,
         assertions: [],
         output: {}
       } as TestResult);
-      throw new Error('breakout');
+      throw BREAKOUT;
     }
   }
 
@@ -42,24 +44,23 @@ export class ExecuteUtil {
     }
 
     const test = {
-      line: suite.line,
-      lineEnd: suite.lineEnd,
-      suiteName: suite.name,
+      className: suite.className,
+      lines: { ...suite.lines },
       status: 'fail',
-      method: 'all',
+      methodName: 'all',
       error: e,
       output: { error: e.stack },
       assertions: [{
+        file: suite.file,
+        line: suite.lines.start,
+        text: '(init)',
         error: e,
-        line: suite.line,
         message: e.message,
-        file: suite.class.__filename,
-        operator: 'throws',
-        text: '(init)'
+        operator: 'throws'
       }],
       class: suite.class.name,
       description: '',
-      file: suite.class.__filename
+      file: suite.file
     } as TestResult;
 
     consumer.onEvent({ phase: 'after', type: 'test', test });
@@ -123,11 +124,10 @@ export class ExecuteUtil {
 
     const suite = TestRegistry.get(test.class);
     const result: Partial<TestResult> = {
-      method: test.method,
+      methodName: test.methodName,
       description: test.description,
-      suiteName: test.suiteName,
-      line: test.line,
-      lineEnd: test.lineEnd,
+      className: test.className,
+      lines: { ...test.lines },
       file: test.file,
       status: 'skip'
     };
@@ -142,7 +142,7 @@ export class ExecuteUtil {
       AssertUtil.start((a) => consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
 
       const timeout = new Promise((_, reject) => setTimeout(reject, this.timeout).unref());
-      const res = await Promise.race([suite.instance[test.method](), timeout]);
+      const res = await Promise.race([suite.instance[test.methodName](), timeout]);
       result.status = 'success';
     } catch (err) {
       err = this.checkError(test, err);
@@ -180,11 +180,9 @@ export class ExecuteUtil {
         fail: 0,
         skip: 0,
         total: 0,
-        line: suite.line,
-        lineEnd: suite.lineEnd,
-        file: suite.class.__filename,
-        class: suite.class.name,
-        name: suite.name,
+        lines: { ...suite.lines },
+        file: suite.file,
+        className: suite.className,
         tests: []
       };
 
@@ -213,11 +211,9 @@ export class ExecuteUtil {
         fail: 0,
         skip: 0,
         total: 0,
-        line: suite.line,
-        lineEnd: suite.lineEnd,
-        file: suite.class.__filename,
-        class: suite.class.name,
-        name: suite.name,
+        lines: { ...suite.lines },
+        file: suite.file,
+        className: suite.className,
         tests: []
       };
 
@@ -260,9 +256,9 @@ export class ExecuteUtil {
     if (clsName && /^\d+$/.test(clsName)) {
       const line = parseInt(clsName, 10);
       const clses = TestRegistry.getClasses().filter(f => f.__filename === file).map(x => TestRegistry.get(x));
-      const cls = clses.find(x => line >= x.line && line <= x.lineEnd);
+      const cls = clses.find(x => line >= x.lines.start && line <= x.lines.end);
       if (cls) {
-        const meth = cls.tests.find(x => line >= x.line && line <= x.lineEnd);
+        const meth = cls.tests.find(x => line >= x.lines.start && line <= x.lines.end);
         if (meth) {
           res = [cls, meth];
         } else {
@@ -275,7 +271,7 @@ export class ExecuteUtil {
       if (method) {
         const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
         const clsConf = TestRegistry.get(cls);
-        const meth = clsConf.tests.find(x => x.method === method)!;
+        const meth = clsConf.tests.find(x => x.methodName === method)!;
         res = [clsConf, meth];
       } else if (clsName) {
         const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;

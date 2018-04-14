@@ -135,7 +135,7 @@ export class Runner {
 
   async run() {
     try {
-      console.log('Runner Args', this.state);
+      console.debug('Runner Args', this.state);
 
       switch (this.state.mode) {
         case 'single': return await this.runSome();

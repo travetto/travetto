@@ -23,8 +23,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       const end = ts.getLineAndCharacterOfPosition(src, n.getEnd());
 
       dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
-        line: start.line + 1,
-        lineEnd: end.line + 1
+        lines: TransformUtil.fromLiteral({ start: start.line + 1, end: end.line + 1 })
       })]);
     }
   }

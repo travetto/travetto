@@ -23,7 +23,7 @@ export class TapEmitter implements Consumer {
   onEvent(e: TestEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
-      let header = `${test.suiteName} - ${test.method}`;
+      let header = `${test.className} - ${test.methodName}`;
       if (test.description) {
         header += `: ${test.description}`;
       }

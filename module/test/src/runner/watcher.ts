@@ -13,7 +13,7 @@ function getConf(o?: [Class, Function]) {
   if (o) {
     const [cls, method] = o;
     if (TestRegistry.has(cls)) {
-      const conf = TestRegistry.get(cls).tests.find(x => x.method === method.name);
+      const conf = TestRegistry.get(cls).tests.find(x => x.methodName === method.name);
       return conf;
     }
   }
@@ -69,14 +69,14 @@ export async function watch() {
 
       if (e.type === 'added' || e.type === 'changed') {
         send('test-changed', {
-          method: conf.method,
+          method: conf.methodName,
           file: conf.file,
           class: conf.class.__id
         });
         queue.push(conf);
       } else if (e.type === 'removing') {
         send('test-removed', {
-          method: conf.method,
+          method: conf.methodName,
           file: conf.file,
           class: conf.class.__id
         });
@@ -100,7 +100,7 @@ export async function watch() {
           type: Events.RUN,
           file: conf.file,
           class: conf.class.name,
-          method: conf.method
+          method: conf.methodName
         };
       }
       const complete = exe.listenOnce(Events.RUN_COMPLETE);

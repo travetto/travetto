@@ -2,6 +2,8 @@ import { Class } from '@travetto/registry';
 import { TestRegistry } from '../service';
 import { SuiteConfig } from '../model';
 
+export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
+
 export function Suite(description?: string, extra?: Partial<SuiteConfig>) {
   return (target: Class<any>) => {
     TestRegistry.register(target, { description, ...(extra || {}) });
@@ -9,7 +11,7 @@ export function Suite(description?: string, extra?: Partial<SuiteConfig>) {
   }
 }
 
-function listener(phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach') {
+function listener(phase: SuitePhase) {
   return (inst: any, prop: string, descriptor: PropertyDescriptor) => {
     TestRegistry.registerPendingListener(inst.constructor, descriptor.value, phase);
     return descriptor;
