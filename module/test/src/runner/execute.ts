@@ -17,87 +17,55 @@ export class ExecuteUtil {
 
   static timeout = parseInt(process.env.DEFAULT_TIMEOUT || '5000', 10);
 
+  static async generateSuiteError(consumer: Consumer, suite: SuiteConfig, description: string, error: Error) {
+    const { line, file } = AssertUtil.readFilePosition(error, suite.file);
+    const badAssert: Assertion = {
+      line,
+      file,
+      error,
+      message: error.message,
+      text: '(outer)',
+      operator: 'throws'
+    };
+    const badTest: TestResult = {
+      status: 'fail',
+      className: suite.className,
+      methodName: description,
+      description,
+      lines: { start: line, end: line },
+      file,
+      error,
+      assertions: [badAssert],
+      output: {}
+    };
+
+    const badTestConfig: TestConfig = {
+      class: suite.class,
+      className: badTest.className,
+      file: badTest.file,
+      lines: badTest.lines,
+      methodName: badTest.methodName,
+      description: badTest.description,
+      skip: false
+    };
+
+    consumer.onEvent({ type: 'test', phase: 'before', test: badTestConfig });
+    consumer.onEvent({ type: 'assertion', phase: 'after', assertion: badAssert });
+    consumer.onEvent({ type: 'test', phase: 'after', test: badTest });
+
+    return badTest;
+  }
+
   static async affixProcess(consumer: Consumer, phase: SuitePhase, suite: SuiteConfig, result: SuiteResult) {
     try {
       for (const fn of suite[phase]) {
         await fn.call(suite.instance);
       }
     } catch (error) {
-      const { line, file } = AssertUtil.readFilePosition(error, suite.file);
-      const badAssert: Assertion = {
-        line,
-        file,
-        error,
-        expected: 'Not to throw error',
-        text: 'unknown',
-        operator: 'throws'
-      };
-      const badTest: TestResult = {
-        status: 'fail',
-        className: suite.className,
-        methodName: phase,
-        description: phase,
-        lines: { start: line, end: line },
-        file,
-        error,
-        assertions: [badAssert],
-        output: {}
-      };
-
-      result.tests.push(badTest);
-
-      const badTestConfig: TestConfig = {
-        class: suite.class,
-        className: badTest.className,
-        file: badTest.file,
-        lines: badTest.lines,
-        methodName: badTest.methodName,
-        description: badTest.description,
-        skip: false
-      };
-
-      consumer.onEvent({ type: 'test', phase: 'before', test: badTestConfig });
-      consumer.onEvent({ type: 'assertion', phase: 'after', assertion: badAssert });
-      consumer.onEvent({ type: 'test', phase: 'after', test: badTest });
-
+      const res = await this.generateSuiteError(consumer, suite, phase, error);
+      result.tests.push(res);
       throw BREAKOUT;
     }
-  }
-
-  static async stubSuiteFailure(suite: SuiteConfig, e: Error, consumer?: Consumer) {
-    if (!consumer) {
-      return;
-    }
-
-    const test = {
-      className: suite.className,
-      lines: { ...suite.lines },
-      status: 'fail',
-      methodName: 'all',
-      error: e,
-      output: { error: e.stack },
-      assertions: [{
-        file: suite.file,
-        line: suite.lines.start,
-        text: '(init)',
-        error: e,
-        message: e.message,
-        operator: 'throws'
-      }],
-      class: suite.class.name,
-      description: '',
-      file: suite.file
-    } as TestResult;
-
-    consumer.onEvent({ phase: 'after', type: 'test', test });
-    consumer.onEvent({
-      phase: 'after', type: 'suite', suite: {
-        success: 0,
-        fail: 1,
-        skip: 0,
-        total: 1
-      } as SuiteResult
-    });
   }
 
   static isTest(file: string) {
@@ -204,81 +172,75 @@ export class ExecuteUtil {
   }
 
   static async executeSuiteTest(consumer: Consumer, suite: SuiteConfig, test: TestConfig) {
-    try {
-      const result: SuiteResult = {
-        success: 0,
-        fail: 0,
-        skip: 0,
-        total: 0,
-        lines: { ...suite.lines },
-        file: suite.file,
-        className: suite.className,
-        tests: []
-      };
+    const result: SuiteResult = {
+      success: 0,
+      fail: 0,
+      skip: 0,
+      total: 0,
+      lines: { ...suite.lines },
+      file: suite.file,
+      className: suite.className,
+      tests: []
+    };
 
-      try {
-        await this.affixProcess(consumer, 'beforeAll', suite, result);
-        await this.affixProcess(consumer, 'beforeEach', suite, result);
-        await this.executeTest(consumer, test);
-        await this.affixProcess(consumer, 'afterEach', suite, result);
-        await this.affixProcess(consumer, 'afterAll', suite, result);
-      } catch (e) {
-        if (e === BREAKOUT) {
-          // Done
-        } else {
-          throw e;
-        }
-      }
+    try {
+      await this.affixProcess(consumer, 'beforeAll', suite, result);
+      await this.affixProcess(consumer, 'beforeEach', suite, result);
+      await this.executeTest(consumer, test);
+      await this.affixProcess(consumer, 'afterEach', suite, result);
+      await this.affixProcess(consumer, 'afterAll', suite, result);
     } catch (e) {
-      this.stubSuiteFailure(suite, e, consumer);
+      if (e === BREAKOUT) {
+        // Done
+      } else {
+        const res = await this.generateSuiteError(consumer, suite, 'all', e);
+        result.tests.push(res);
+      }
     }
   }
 
   static async executeSuite(consumer: Consumer, suite: SuiteConfig) {
+    const result: SuiteResult = {
+      success: 0,
+      fail: 0,
+      skip: 0,
+      total: 0,
+      lines: { ...suite.lines },
+      file: suite.file,
+      className: suite.className,
+      tests: []
+    };
+
+    consumer.onEvent({ phase: 'before', type: 'suite', suite });
+
     try {
-      const result: SuiteResult = {
-        success: 0,
-        fail: 0,
-        skip: 0,
-        total: 0,
-        lines: { ...suite.lines },
-        file: suite.file,
-        className: suite.className,
-        tests: []
-      };
+      await this.affixProcess(consumer, 'beforeAll', suite, result);
 
-      consumer.onEvent({ phase: 'before', type: 'suite', suite });
+      for (const testConfig of suite.tests) {
+        await this.affixProcess(consumer, 'beforeEach', suite, result);
 
-      try {
-        await this.affixProcess(consumer, 'beforeAll', suite, result);
+        const ret = await this.executeTest(consumer, testConfig);
+        result[ret.status]++;
+        result.tests.push(ret);
 
-        for (const testConfig of suite.tests) {
-          await this.affixProcess(consumer, 'beforeEach', suite, result);
-
-          const ret = await this.executeTest(consumer, testConfig);
-          result[ret.status]++;
-          result.tests.push(ret);
-
-          await this.affixProcess(consumer, 'afterEach', suite, result);
-        }
-
-        await this.affixProcess(consumer, 'afterAll', suite, result);
-      } catch (e) {
-        if (e === BREAKOUT) {
-          // Done
-        } else {
-          throw e;
-        }
+        await this.affixProcess(consumer, 'afterEach', suite, result);
       }
 
-      consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
-
-      result.total = result.success + result.fail;
-
-      return result as SuiteResult;
+      await this.affixProcess(consumer, 'afterAll', suite, result);
     } catch (e) {
-      this.stubSuiteFailure(suite, e, consumer);
+      if (e === BREAKOUT) {
+        // Done
+      } else {
+        const res = await this.generateSuiteError(consumer, suite, 'all', e);
+        result.tests.push(res);
+      }
     }
+
+    consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
+
+    result.total = result.success + result.fail;
+
+    return result as SuiteResult;
   }
 
   static getRunParams(file: string, clsName?: string, method?: string): [SuiteConfig] | [SuiteConfig, TestConfig] | [SuiteConfig[]] {
