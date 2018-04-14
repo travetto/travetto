@@ -17,7 +17,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPendingMethod(cls: Class, fn: Function) {
     return {
       class: cls,
-      method: fn.name
+      methodName: fn.name
     }
   }
 
