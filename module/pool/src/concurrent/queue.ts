@@ -12,7 +12,7 @@ export class QueueDataSource<T> implements DataSource<T> {
   }
 
   hasNext() {
-    return true;
+    return true; // Allows for adding to queue at runtime, cannot automatically kill
   }
 
   async next() {
