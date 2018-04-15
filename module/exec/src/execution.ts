@@ -27,6 +27,10 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
     return true;
   }
 
+  get active() {
+    return !!this._proc;
+  }
+
   send(eventType: string, data?: any) {
     if (process.env.DEBUG) {
       console.log(process.pid, 'SENDING', eventType, data);
@@ -95,7 +99,8 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
   }
 
   kill() {
-    this.clean();
+    this.release();
+    this._proc.kill('SIGKILL');
     delete this._proc;
   }
 
@@ -103,7 +108,7 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
     return this._proc && this._proc.pid;
   }
 
-  clean() {
+  release() {
     if (this._proc) {
       this._proc.removeAllListeners('message');
     }

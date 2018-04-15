@@ -1,6 +1,7 @@
-import { ChildExecution, ExecutionPool, ArrayDataSource, IteratorDataSource } from '../src';
+import { ChildExecution } from '../src';
+import { ConcurrentPool, ArrayDataSource, IteratorDataSource } from '@travetto/pool';
 
-const pool = new ExecutionPool<ChildExecution>(async () => {
+const pool = new ConcurrentPool<ChildExecution>(async () => {
   console.log('Initializing child');
   const child = new ChildExecution(`${__dirname}/index.js`, true, {
     env: { SRC: './simple.child' }
