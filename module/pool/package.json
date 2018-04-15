@@ -1,25 +1,25 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "dependencies": {
-    "@travetto/base": "0.x.x",
-    "@types/generic-pool": "^3.1.2",
+    "@travetto/base": "0.x.x", 
+    "@types/generic-pool": "^3.1.2", 
     "generic-pool": "^3.4.2"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@travetto/pool",
+  }, 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@travetto/pool", 
   "repository": {
     "url": "https://github.com/travetto/pool.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.7"
+  }, 
+  "version": "0.0.8"
 }
