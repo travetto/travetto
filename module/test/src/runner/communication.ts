@@ -1,4 +1,5 @@
-import { LocalExecution, ChildExecution, serializeError, deserializeError, ExecutionPool } from '@travetto/exec';
+import { LocalExecution, ChildExecution, serializeError, deserializeError } from '@travetto/exec';
+import { ConcurrentPool, IdleManager } from '@travetto/pool';
 import * as startup from '@travetto/base/src/startup';
 import { Consumer } from '../consumer';
 import { AppInfo } from '@travetto/base';
@@ -53,8 +54,14 @@ export async function server() {
 
   const worker = new LocalExecution<Event>();
 
+  // Die if no communication within 120 seconds
+  const idle = new IdleManager(parseInt(process.env.IDLE_TIMEOUT || '120000', 10));
+  idle.extend();
+
   worker.listen(async (data: Event) => {
     console.log('on message', data);
+    idle.extend(); // Extend
+
     if (data.type === Events.INIT) {
       console.debug('Init');
 
@@ -109,7 +116,7 @@ export async function server() {
 }
 
 export function client() {
-  return new ExecutionPool(async () => {
+  return new ConcurrentPool(async () => {
     const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
     worker.init();
     await worker.listenOnce(Events.READY)

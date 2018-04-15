@@ -17,6 +17,10 @@ export class ExecuteUtil {
 
   static timeout = parseInt(process.env.DEFAULT_TIMEOUT || '5000', 10);
 
+  static asyncTimeout(duration?: number) {
+    return new Promise((_, reject) => setTimeout(() => reject(TIMEOUT), duration || this.timeout).unref());
+  }
+
   static async generateSuiteError(consumer: Consumer, suite: SuiteConfig, description: string, error: Error) {
     const { line, file } = AssertUtil.readFilePosition(error, suite.file);
     const badAssert: Assertion = {
@@ -59,9 +63,12 @@ export class ExecuteUtil {
   static async affixProcess(consumer: Consumer, phase: SuitePhase, suite: SuiteConfig, result: SuiteResult) {
     try {
       for (const fn of suite[phase]) {
-        await fn.call(suite.instance);
+        await Promise.race([this.asyncTimeout(), fn.call(suite.instance)]);
       }
     } catch (error) {
+      if (error === TIMEOUT) {
+        error = new Error(`${suite.className}: ${phase} timed out`);;
+      }
       const res = await this.generateSuiteError(consumer, suite, phase, error);
       result.tests.push(res);
       throw BREAKOUT;
@@ -135,7 +142,7 @@ export class ExecuteUtil {
 
       AssertUtil.start((a) => consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
 
-      const timeout = new Promise((_, reject) => setTimeout(() => reject(TIMEOUT), test.timeout || this.timeout).unref());
+      const timeout = this.asyncTimeout(test.timeout);
       const res = await Promise.race([suite.instance[test.methodName](), timeout]);
       result.status = 'success';
     } catch (err) {

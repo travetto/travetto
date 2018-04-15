@@ -23,6 +23,6 @@ export class AllResultsCollector implements Consumer {
     this.summary.fail += src.fail;
     this.summary.success += src.success;
     this.summary.skip += src.skip;
-    this.summary.total += src.total;
+    this.summary.total += (src.fail + src.success + src.skip);
   }
 }

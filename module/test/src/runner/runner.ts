@@ -3,7 +3,8 @@ import * as fs from 'fs';
 import * as util from 'util';
 import * as _ from 'lodash';
 
-import { ArrayDataSource, deserializeError } from '@travetto/exec';
+import { ArrayDataSource } from '@travetto/pool';
+import { deserializeError } from '@travetto/exec';
 import { Class } from '@travetto/registry';
 import { bulkRequire } from '@travetto/base';
 
