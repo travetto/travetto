@@ -100,7 +100,6 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
 
   kill() {
     this.release();
-    this._proc.kill('SIGKILL');
     delete this._proc;
   }
 
