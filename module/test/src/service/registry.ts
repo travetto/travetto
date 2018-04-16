@@ -6,6 +6,8 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPending(cls: Class): Partial<SuiteConfig> {
     return {
       class: cls,
+      className: cls.__id.split(':')[1].replace(/^test[.]/, '').replace('#', '.'),
+      file: cls.__filename,
       tests: [],
       beforeAll: [],
       beforeEach: [],
@@ -17,6 +19,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPendingMethod(cls: Class, fn: Function) {
     return {
       class: cls,
+      file: cls.__filename,
       methodName: fn.name
     }
   }
@@ -31,7 +34,6 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     const tests = this.pendingMethods.get(cls.__id)!.values();
     config.instance = new config.class();
     config.tests = Array.from(tests) as TestConfig[];
-    config.className = cls.__id.split(':')[1].replace(/^test[.]/, '').replace('#', '.');
     if (!config.description) {
       config.description = config.className;
     }
