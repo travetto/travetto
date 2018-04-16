@@ -33,9 +33,17 @@ export class ConcurrentPool<T extends ConcurrentOp> {
       if (execution.release) {
         execution.release();
       }
-      this.pool.release(execution);
+      try {
+        this.pool.release(execution);
+      } catch (e) {
+        // Ignore if not owned
+      }
     } else {
-      this.pool.destroy(execution);
+      try {
+        this.pool.destroy(execution);
+      } catch (e) {
+        // Ignore if not owned
+      }
     }
   }
 
