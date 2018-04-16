@@ -17,8 +17,13 @@ export class ExecuteUtil {
 
   static timeout = parseInt(process.env.DEFAULT_TIMEOUT || '5000', 10);
 
-  static asyncTimeout(duration?: number) {
-    return new Promise((_, reject) => setTimeout(() => reject(TIMEOUT), duration || this.timeout).unref());
+  static asyncTimeout(duration?: number): [Promise<any>, Function] {
+    let id: NodeJS.Timer;
+    const prom = new Promise((_, reject) => {
+      id = setTimeout(() => reject(TIMEOUT), duration || this.timeout);
+      id.unref()
+    });
+    return [prom, () => clearTimeout(id)];
   }
 
   static async generateSuiteError(consumer: Consumer, suite: SuiteConfig, methodName: string, error: Error) {
@@ -65,13 +70,15 @@ export class ExecuteUtil {
   static async affixProcess(consumer: Consumer, phase: SuitePhase, suite: SuiteConfig, result: SuiteResult) {
     try {
       for (const fn of suite[phase]) {
-        await Promise.race([this.asyncTimeout(), fn.call(suite.instance)]);
+        const [timeout, clear] = this.asyncTimeout();
+        await Promise.race([timeout, fn.call(suite.instance)]);
+        clear();
       }
     } catch (error) {
       if (error === TIMEOUT) {
         error = new Error(`${suite.className}: ${phase} timed out`);
       }
-      const res = await this.generateSuiteError(consumer, suite, phase, error);
+      const res = await this.generateSuiteError(consumer, suite, `[[${phase}]]`, error);
       result.tests.push(res);
       result.fail++;
       throw BREAKOUT;
@@ -147,9 +154,10 @@ export class ExecuteUtil {
         consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a });
       });
 
-      const timeout = this.asyncTimeout(test.timeout);
+      const [timeout, clear] = this.asyncTimeout(test.timeout);
       const res = await Promise.race([suite.instance[test.methodName](), timeout]);
       result.status = 'success';
+      clear();
     } catch (err) {
       if (err === TIMEOUT) {
         err = new Error('Operation timed out');
