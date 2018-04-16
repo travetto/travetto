@@ -27,7 +27,11 @@ export class ExecuteUtil {
   }
 
   static async generateSuiteError(consumer: Consumer, suite: SuiteConfig, methodName: string, error: Error) {
-    const { line, file } = AssertUtil.readFilePosition(error, suite.file);
+    // tslint:disable:prefer-const
+    let { line, file } = AssertUtil.readFilePosition(error, suite.file);
+    if (line === 1) {
+      line = suite.lines.start;
+    }
     const badAssert: Assertion = {
       line,
       file,
