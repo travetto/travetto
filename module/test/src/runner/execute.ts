@@ -21,21 +21,23 @@ export class ExecuteUtil {
     return new Promise((_, reject) => setTimeout(() => reject(TIMEOUT), duration || this.timeout).unref());
   }
 
-  static async generateSuiteError(consumer: Consumer, suite: SuiteConfig, description: string, error: Error) {
+  static async generateSuiteError(consumer: Consumer, suite: SuiteConfig, methodName: string, error: Error) {
     const { line, file } = AssertUtil.readFilePosition(error, suite.file);
     const badAssert: Assertion = {
       line,
       file,
       error,
+      className: suite.className,
+      methodName,
       message: error.message,
-      text: '(outer)',
+      text: methodName,
       operator: 'throws'
     };
     const badTest: TestResult = {
       status: 'fail',
       className: suite.className,
-      methodName: description,
-      description,
+      methodName,
+      description: methodName,
       lines: { start: line, end: line },
       file,
       error,
@@ -45,8 +47,8 @@ export class ExecuteUtil {
 
     const badTestConfig: TestConfig = {
       class: suite.class,
-      className: badTest.className,
-      file: badTest.file,
+      className: suite.className,
+      file: suite.file,
       lines: badTest.lines,
       methodName: badTest.methodName,
       description: badTest.description,
@@ -67,10 +69,11 @@ export class ExecuteUtil {
       }
     } catch (error) {
       if (error === TIMEOUT) {
-        error = new Error(`${suite.className}: ${phase} timed out`);;
+        error = new Error(`${suite.className}: ${phase} timed out`);
       }
       const res = await this.generateSuiteError(consumer, suite, phase, error);
       result.tests.push(res);
+      result.fail++;
       throw BREAKOUT;
     }
   }
@@ -140,7 +143,9 @@ export class ExecuteUtil {
     try {
       ConsoleCapture.start();
 
-      AssertUtil.start((a) => consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
+      AssertUtil.start(test, (a) => {
+        consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a });
+      });
 
       const timeout = this.asyncTimeout(test.timeout);
       const res = await Promise.race([suite.instance[test.methodName](), timeout]);
@@ -166,9 +171,13 @@ export class ExecuteUtil {
       const err = result.error;
       if (!(err instanceof assert.AssertionError)) {
         const { file, line } = AssertUtil.readFilePosition(err, test.file);
-        const assertion: Assertion = { file, line, operator: 'throws', text: '(uncaught)', error: err, message: err.message };
-        // result.output = result.output || {};
-        // result.output['error'] = `${(result.output['error'] || '')}\n${err.stack}`;
+        const assertion: Assertion = {
+          className: test.className,
+          methodName: test.methodName,
+          file, line,
+          operator: 'throws', text: '(uncaught)',
+          error: err, message: err.message
+        };
         result.assertions.push(assertion);
       }
     }
@@ -197,11 +206,10 @@ export class ExecuteUtil {
       await this.affixProcess(consumer, 'afterEach', suite, result);
       await this.affixProcess(consumer, 'afterAll', suite, result);
     } catch (e) {
-      if (e === BREAKOUT) {
-        // Done
-      } else {
+      if (e !== BREAKOUT) {
         const res = await this.generateSuiteError(consumer, suite, 'all', e);
         result.tests.push(res);
+        result.fail++;
       }
     }
   }
@@ -235,11 +243,10 @@ export class ExecuteUtil {
 
       await this.affixProcess(consumer, 'afterAll', suite, result);
     } catch (e) {
-      if (e === BREAKOUT) {
-        // Done
-      } else {
+      if (e !== BREAKOUT) {
         const res = await this.generateSuiteError(consumer, suite, 'all', e);
         result.tests.push(res);
+        result.fail++;
       }
     }
 

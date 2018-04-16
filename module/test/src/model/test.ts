@@ -13,6 +13,8 @@ export interface TestConfig {
 }
 
 export interface Assertion {
+  className: string;
+  methodName: string;
   actual?: any;
   expected?: any;
   operator: string;

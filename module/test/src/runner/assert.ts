@@ -1,6 +1,6 @@
 import { AppEnv } from '@travetto/base';
 import * as assert from 'assert';
-import { Assertion } from '../model';
+import { Assertion, TestConfig } from '../model';
 import * as _ from 'lodash';
 
 const ASSERT_FN_OPERATOR: { [key: string]: string } = {
@@ -51,6 +51,7 @@ export class AssertUtil {
 
   static asserts: Assertion[] = [];
   static listener?: (a: Assertion) => void;
+  static test: TestConfig;
 
   static readFilePosition(err: Error, filename: string) {
     const base = process.cwd();
@@ -75,7 +76,8 @@ export class AssertUtil {
     return res;
   }
 
-  static start(listener?: (a: Assertion) => void) {
+  static start(test: TestConfig, listener?: (a: Assertion) => void) {
+    this.test = test;
     this.listener = listener;
     this.asserts = [];
   }
@@ -83,7 +85,12 @@ export class AssertUtil {
   static check(filename: string, text: string, name: string, ...args: any[]) {
     const { file, line } = this.readFilePosition(new Error(), filename.replace(/[.][tj]s$/, ''));
 
-    const assertion: Assertion = { file, line, text, operator: ASSERT_FN_OPERATOR[name] };
+    const assertion: Assertion = {
+      className: this.test.className,
+      methodName: this.test.methodName,
+      file, line, text,
+      operator: ASSERT_FN_OPERATOR[name]
+    };
     if (name === 'fail') {
       if (args.length > 1) {
         assertion.actual = args[0];
@@ -163,7 +170,7 @@ export class AssertUtil {
   static end() {
     const ret = this.asserts;
     this.asserts = [];
-    this.listener = undefined;
+    delete this.listener, this.test;
     return ret;
   }
 }
