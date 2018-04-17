@@ -49,7 +49,7 @@ function clean(val: any) {
 
 export class AssertUtil {
 
-  static asserts: Assertion[] = [];
+  static assertions: Assertion[] = [];
   static listener?: (a: Assertion) => void;
   static test: TestConfig;
 
@@ -79,7 +79,7 @@ export class AssertUtil {
   static start(test: TestConfig, listener?: (a: Assertion) => void) {
     this.test = test;
     this.listener = listener;
-    this.asserts = [];
+    this.assertions = [];
   }
 
   static check(filename: string, text: string, name: string, ...args: any[]) {
@@ -161,15 +161,15 @@ export class AssertUtil {
   }
 
   static add(a: Assertion) {
-    this.asserts.push(a);
+    this.assertions.push(a);
     if (this.listener) {
       this.listener(a);
     }
   }
 
   static end() {
-    const ret = this.asserts;
-    this.asserts = [];
+    const ret = this.assertions;
+    this.assertions = [];
     delete this.listener, this.test;
     return ret;
   }

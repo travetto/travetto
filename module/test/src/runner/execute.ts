@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 import * as assert from 'assert';
-import { bulkFind } from '@travetto/base';
+import { bulkFind, BaseError } from '@travetto/base';
 
 import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../model';
 import { TestRegistry } from '../service';
@@ -164,7 +164,7 @@ export class ExecuteUtil {
       clear();
     } catch (err) {
       if (err === TIMEOUT) {
-        err = new Error('Operation timed out');
+        err = new BaseError('Operation timed out');
       } else {
         err = this.checkError(test, err);
       }
@@ -173,6 +173,20 @@ export class ExecuteUtil {
       } else {
         result.status = 'fail';
         result.error = err;
+
+        if (!(err instanceof assert.AssertionError)) {
+          const assrt = {
+            className: test.className,
+            error: err,
+            methodName: test.methodName,
+            operator: 'throws',
+            message: err.message,
+            file: test.file,
+            text: '(unknown)',
+            line: AssertUtil.readFilePosition(err, test.file).line
+          }
+          AssertUtil.add(assrt);
+        }
       }
     } finally {
       result.output = ConsoleCapture.end();
