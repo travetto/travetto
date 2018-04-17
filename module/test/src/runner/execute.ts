@@ -120,7 +120,7 @@ export class ExecuteUtil {
         }
         return;
       } else if (typeof test.shouldError === 'string') {
-        if (err === undefined || (err instanceof Error ? err.message : err).includes(test.shouldError)) {
+        if (err === undefined || !(err instanceof Error ? err.message : err).includes(test.shouldError)) {
           return new Error(`Expected error containing text ${test.shouldError}`);
         } else {
           return;
