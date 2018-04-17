@@ -4,9 +4,23 @@ import { SuiteConfig } from '../model';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 
-export function Suite(description?: string, extra?: Partial<SuiteConfig>) {
+export function Suite(): ClassDecorator;
+export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
+export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;
+export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Partial<SuiteConfig>[]): ClassDecorator {
+  const extra: Partial<SuiteConfig> = {};
+
+  if (description && typeof description !== 'string') {
+    Object.assign(extra, description);
+    description = extra.description;
+  }
+
+  for (const r of rest) {
+    Object.assign(extra, r);
+  }
+
   return (target: Class<any>) => {
-    TestRegistry.register(target, { description, ...(extra || {}) });
+    TestRegistry.register(target, { description: (description as string), ...extra });
     return target;
   }
 }
