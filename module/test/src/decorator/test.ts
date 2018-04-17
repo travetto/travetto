@@ -16,7 +16,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
   }
   return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
     TestRegistry.registerMethod(inst.constructor, descriptor.value, {
-      ...(extra || {}),
+      ...extra,
       file: inst.constructor.__filename,
       description: description as string
     });

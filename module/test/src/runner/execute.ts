@@ -124,16 +124,14 @@ export class ExecuteUtil {
         } else {
           return new Error(`Expected error to match ${test.shouldError.source}`);
         }
-      } else {
-        if (Object.getPrototypeOf(test.shouldError).constructor !== Function) { // if not simple function, treat as class
-          if (!(err instanceof test.shouldError)) {
-            return new Error(`Expected error to be of type ${test.shouldError.name}`);
-          } else {
-            return;
-          }
-        } else if (test.shouldError(err)) {
+      } else if (test.shouldError === Error || Object.getPrototypeOf(test.shouldError).constructor !== Function) { // if not simple function, treat as class
+        if (!err || !(err instanceof test.shouldError)) {
+          return new Error(`Expected error to be of type ${test.shouldError.name}`);
+        } else {
           return;
         }
+      } else if (test.shouldError(err)) {
+        return;
       }
     }
     return err;
