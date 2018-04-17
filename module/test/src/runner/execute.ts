@@ -119,17 +119,18 @@ export class ExecuteUtil {
       } else if (!err && st) {
         throw new Error('Expected an error to be thrown');
       }
-    } else if (typeof st === 'string') {
-      if (!err || !(err instanceof Error ? err.message : err).includes(st)) {
-        return new Error(`Expected error containing text ${st}`);
+    } else if (typeof st === 'string' || st instanceof RegExp) {
+      const actual = `${err instanceof Error ? `'${err.message}'` : (err ? `'${err}'` : 'nothing')}`;
+
+      if (typeof st === 'string' && (!err || !(err instanceof Error ? err.message : err).includes(st))) {
+        return new Error(`Expected error containing text '${st}', but got ${actual}`);
       }
-    } else if (st instanceof RegExp) {
-      if (!err || !st.test(typeof err === 'string' ? err : err.message)) {
-        return new Error(`Expected error with message matching ${st.source}`);
+      if (st instanceof RegExp && (!err || !st.test(typeof err === 'string' ? err : err.message))) {
+        return new Error(`Expected error with message matching '${st.source}', but got ${actual}`);
       }
-    } else if (st === Error || st === BaseError || Object.getPrototypeOf(st).constructor !== Function) { // if not simple function, treat as class
+    } else if (st === Error || st === BaseError || Object.getPrototypeOf(st) !== Object.getPrototypeOf(Function)) { // if not simple function, treat as class
       if (!err || !(err instanceof st)) {
-        return new Error(`Expected to throw ${st.name}`);
+        return new Error(`Expected to throw ${st.name}, but got ${err || 'nothing'}`);
       }
     } else {
       return st(err);
