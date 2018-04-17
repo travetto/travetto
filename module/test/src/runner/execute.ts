@@ -110,17 +110,16 @@ export class ExecuteUtil {
     return all.filter(x => x[1]).map(x => x[0]);
   }
 
-  static checkError(test: TestConfig, err: Error | string) {
+  static checkError(test: TestConfig, err: Error | string | undefined) {
     if (test.shouldError) {
       if (typeof test.shouldError === 'string') {
-        const text = err instanceof Error ? err.message : err;
-        if (!text.includes(test.shouldError)) {
+        if (err === undefined || (err instanceof Error ? err.message : err).includes(test.shouldError)) {
           return new Error(`Expected error to contain text ${test.shouldError}`);
         } else {
           return;
         }
       } else if (test.shouldError instanceof RegExp) {
-        if (test.shouldError.test(typeof err === 'string' ? err : err.message)) {
+        if (err !== undefined && test.shouldError.test(typeof err === 'string' ? err : err.message)) {
           return;
         } else {
           return new Error(`Expected error to match ${test.shouldError.source}`);
@@ -158,6 +157,8 @@ export class ExecuteUtil {
       return result as TestResult;
     }
 
+    const [timeout, clear] = this.asyncTimeout(test.timeout);
+
     try {
       ConsoleCapture.start();
 
@@ -165,16 +166,19 @@ export class ExecuteUtil {
         consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a });
       });
 
-      const [timeout, clear] = this.asyncTimeout(test.timeout);
       const res = await Promise.race([suite.instance[test.methodName](), timeout]);
-      result.status = 'success';
-      clear();
+
+      // Ensure nothing was meant to be caught
+      throw undefined;
+
     } catch (err) {
       if (err === TIMEOUT) {
         err = new Error('Operation timed out');
       } else {
         err = this.checkError(test, err);
       }
+
+      // If error isn't defined, we are good
       if (!err) {
         result.status = 'success';
       } else {
@@ -189,30 +193,16 @@ export class ExecuteUtil {
             operator: 'throws',
             message: err.message,
             file: test.file,
-            text: '(unknown)',
+            text: '(uncaught)',
             line: AssertUtil.readFilePosition(err, test.file).line
           }
           AssertUtil.add(assrt);
         }
       }
     } finally {
+      clear();
       result.output = ConsoleCapture.end();
       result.assertions = AssertUtil.end();
-    }
-
-    if (result.status === 'fail' && result.error) {
-      const err = result.error;
-      if (!(err instanceof assert.AssertionError)) {
-        const { file, line } = AssertUtil.readFilePosition(err, test.file);
-        const assertion: Assertion = {
-          className: test.className,
-          methodName: test.methodName,
-          file, line,
-          operator: 'throws', text: '(uncaught)',
-          error: err, message: err.message
-        };
-        result.assertions.push(assertion);
-      }
     }
 
     consumer.onEvent({ type: 'test', phase: 'after', test: result as TestResult });
