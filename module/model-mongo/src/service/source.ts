@@ -23,6 +23,32 @@ function isFieldType(o: any): o is FieldType {
     || o === 'boolean' || o instanceof Date;
 }
 
+export function projectQuery(o: any, path: string = ''): any {
+  let out: any = {};
+
+  if (Array.isArray(o)) {
+    return o.map(x => projectQuery(x));
+  } else if (_.isPlainObject(o)) {
+    for (const k of Object.keys(o)) {
+      const sub = `${path}${k}`;
+      if (k.startsWith('$')) {
+        if (path) {
+          out = { ...out, [path.replace(/[.]$/, '')]: { [k]: projectQuery(o[k]) } };
+        } else {
+          out = { ...out, [k]: projectQuery(o[k]) };
+        }
+      } else if (_.isPlainObject(o[k])) {
+        out = { ...out, ...projectQuery(o[k], `${sub}.`) };
+      } else {
+        out[sub] = projectQuery(o[k]);
+      }
+    }
+    return out;
+  } else {
+    return o;
+  }
+}
+
 export class ModelMongoSource extends ModelSource {
 
   private client: mongo.MongoClient;
@@ -35,6 +61,20 @@ export class ModelMongoSource extends ModelSource {
 
   query<T extends ModelCore, U>(cls: Class<T>, o: T): U[] {
     return null as any;
+  }
+
+  buildQuery<T extends ModelCore>(query: Query<T>) {
+    const out = {};
+    if (query.where) {
+
+    }
+    if (query.select) {
+
+    }
+    if (query.sort) {
+
+    }
+    return out;
   }
 
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
