@@ -33,6 +33,13 @@ export function initStackHandler() {
 
   const BASE = process.cwd();
 
+  const ogc = Error.captureStackTrace;
+  Error.captureStackTrace = function (a: any, b) {
+    ogc.call(Error, a, b);
+    // Force stack analysis
+    a.stack = a.stack;
+  };
+
   chain.filter.attach(function (error: Error, frames: NodeJS.CallSite[]) {
     // Filter out traces related to this file
     const rewrite = frames.filter(function (callSite) {
