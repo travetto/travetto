@@ -111,37 +111,29 @@ export class ExecuteUtil {
   }
 
   static checkError(test: TestConfig, err: Error | string | undefined) {
-    if (test.shouldError && test.shouldError) {
-      if (typeof test.shouldError === 'boolean') {
-        if (err && !test.shouldError) {
-          throw new Error('Expected an error to not be thrown');
-        } else if (!err && test.shouldError) {
-          throw new Error('Expected an error to be thrown');
-        }
-        return;
-      } else if (typeof test.shouldError === 'string') {
-        if (err === undefined || !(err instanceof Error ? err.message : err).includes(test.shouldError)) {
-          return new Error(`Expected error containing text ${test.shouldError}`);
-        } else {
-          return;
-        }
-      } else if (test.shouldError instanceof RegExp) {
-        if (err !== undefined && test.shouldError.test(typeof err === 'string' ? err : err.message)) {
-          return;
-        } else {
-          return new Error(`Expected error with message matching ${test.shouldError.source}`);
-        }
-      } else if (test.shouldError === Error || Object.getPrototypeOf(test.shouldError).constructor !== Function) { // if not simple function, treat as class
-        if (!err || !(err instanceof test.shouldError)) {
-          return new Error(`Expected to throw ${test.shouldError.name}`);
-        } else {
-          return;
-        }
-      } else if (test.shouldError(err)) {
-        return;
+    const st = test.shouldThrow!;
+
+    if (typeof st === 'boolean') {
+      if (err && !st) {
+        throw new Error('Expected an error to not be thrown');
+      } else if (!err && st) {
+        throw new Error('Expected an error to be thrown');
       }
+    } else if (typeof st === 'string') {
+      if (!err || !(err instanceof Error ? err.message : err).includes(st)) {
+        return new Error(`Expected error containing text ${st}`);
+      }
+    } else if (st instanceof RegExp) {
+      if (!err || !st.test(typeof err === 'string' ? err : err.message)) {
+        return new Error(`Expected error with message matching ${st.source}`);
+      }
+    } else if (st === Error || st === BaseError || Object.getPrototypeOf(st).constructor !== Function) { // if not simple function, treat as class
+      if (!err || !(err instanceof st)) {
+        return new Error(`Expected to throw ${st.name}`);
+      }
+    } else {
+      return st(err);
     }
-    return err;
   }
 
   static async executeTest(consumer: Consumer, test: TestConfig) {
@@ -179,7 +171,7 @@ export class ExecuteUtil {
     } catch (err) {
       if (err === TIMEOUT) {
         err = new Error('Operation timed out');
-      } else {
+      } else if (test.shouldThrow) {
         err = this.checkError(test, err);
       }
 
@@ -196,17 +188,16 @@ export class ExecuteUtil {
             line = test.lines.start;
           }
 
-          const assrt = {
+          AssertUtil.add({
             className: test.className,
-            error: err,
             methodName: test.methodName,
-            operator: 'throws',
-            message: err.message,
             file: test.file,
-            text: '(uncaught)',
-            line
-          }
-          AssertUtil.add(assrt);
+            line,
+            operator: 'throws',
+            error: err,
+            message: err.message,
+            text: '(uncaught)'
+          });
         }
       }
     } finally {
