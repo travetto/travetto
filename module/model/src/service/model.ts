@@ -8,6 +8,7 @@ import { ModelSource } from './source';
 import { ModelRegistry } from './registry';
 
 import * as _ from 'lodash';
+import { AppInfo, AppEnv } from '@travetto/base';
 
 function getClass<T>(o: T) {
   return o.constructor as Class<T>;
@@ -28,7 +29,7 @@ export class ModelService extends ModelSource {
 
   async init() {
     await ModelRegistry.init();
-    if (this.source.onChange) {
+    if (AppEnv.watch && this.source.onChange) {
       ModelRegistry.on(this.source.onChange.bind(this.source));
     }
   }

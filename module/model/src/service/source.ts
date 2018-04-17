@@ -5,7 +5,7 @@ import { BulkState, BulkResponse } from '../model/bulk';
 import { ModelQuery } from '../model/query';
 
 export abstract class ModelSource {
-  onChange?(e: ChangeEvent): void;
+  onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
 
   abstract prePersist<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Partial<T>;
   abstract prePersist<T extends ModelCore>(cls: Class<T>, model: T): T;
