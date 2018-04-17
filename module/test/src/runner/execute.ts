@@ -111,10 +111,17 @@ export class ExecuteUtil {
   }
 
   static checkError(test: TestConfig, err: Error | string | undefined) {
-    if (test.shouldError) {
-      if (typeof test.shouldError === 'string') {
+    if (test.shouldError && test.shouldError) {
+      if (typeof test.shouldError === 'boolean') {
+        if (err && !test.shouldError) {
+          throw new Error('Expected an error to not be thrown');
+        } else if (!err && test.shouldError) {
+          throw new Error('Expected an error to be thrown');
+        }
+        return;
+      } else if (typeof test.shouldError === 'string') {
         if (err === undefined || (err instanceof Error ? err.message : err).includes(test.shouldError)) {
-          return new Error(`Expected error to contain text ${test.shouldError}`);
+          return new Error(`Expected error containing text ${test.shouldError}`);
         } else {
           return;
         }
@@ -122,11 +129,11 @@ export class ExecuteUtil {
         if (err !== undefined && test.shouldError.test(typeof err === 'string' ? err : err.message)) {
           return;
         } else {
-          return new Error(`Expected error to match ${test.shouldError.source}`);
+          return new Error(`Expected error with message matching ${test.shouldError.source}`);
         }
       } else if (test.shouldError === Error || Object.getPrototypeOf(test.shouldError).constructor !== Function) { // if not simple function, treat as class
         if (!err || !(err instanceof test.shouldError)) {
-          return new Error(`Expected error to be of type ${test.shouldError.name}`);
+          return new Error(`Expected to throw ${test.shouldError.name}`);
         } else {
           return;
         }
@@ -184,6 +191,11 @@ export class ExecuteUtil {
         result.error = err;
 
         if (!(err instanceof assert.AssertionError)) {
+          let line = AssertUtil.readFilePosition(err, test.file).line;
+          if (line === 1) {
+            line = test.lines.start;
+          }
+
           const assrt = {
             className: test.className,
             error: err,
@@ -192,7 +204,7 @@ export class ExecuteUtil {
             message: err.message,
             file: test.file,
             text: '(uncaught)',
-            line: AssertUtil.readFilePosition(err, test.file).line
+            line
           }
           AssertUtil.add(assrt);
         }
