@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 import * as assert from 'assert';
-import { bulkFind } from '@travetto/base';
+import { bulkFind, BaseError } from '@travetto/base';
 
 import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../model';
 import { TestRegistry } from '../service';
@@ -113,10 +113,11 @@ export class ExecuteUtil {
   static checkError(test: TestConfig, err: Error | string) {
     if (test.shouldError) {
       if (typeof test.shouldError === 'string') {
-        if (err.constructor.name === test.shouldError) {
-          return;
+        const text = err instanceof Error ? err.message : err;
+        if (!text.includes(test.shouldError)) {
+          return new Error(`Expected error to contain text ${test.shouldError}`);
         } else {
-          return new Error(`Expected error to be of type ${test.shouldError}`);
+          return;
         }
       } else if (test.shouldError instanceof RegExp) {
         if (test.shouldError.test(typeof err === 'string' ? err : err.message)) {
@@ -125,7 +126,13 @@ export class ExecuteUtil {
           return new Error(`Expected error to match ${test.shouldError.source}`);
         }
       } else {
-        if (test.shouldError(err)) {
+        if (Object.getPrototypeOf(test.shouldError).constructor !== Function) { // if not simple function, treat as class
+          if (!(err instanceof test.shouldError)) {
+            return new Error(`Expected error to be of type ${test.shouldError.name}`);
+          } else {
+            return;
+          }
+        } else if (test.shouldError(err)) {
           return;
         }
       }

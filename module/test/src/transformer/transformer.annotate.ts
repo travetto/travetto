@@ -12,11 +12,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }, state);
 
     if (dec && ts.isCallExpression(dec.expression)) {
-      let args = [...(dec.expression.arguments || [])];
-      if (args.length === 0) {
-        args = [ts.createLiteral('')];
-      }
-
+      const args = [...(dec.expression.arguments || [])];
       const n = ((node as any)['original'] || node) as ts.Node;
       const src = ts.createSourceFile(state.source.fileName, state.source.text, state.source.languageVersion);
       const start = ts.getLineAndCharacterOfPosition(src, n.getStart());
