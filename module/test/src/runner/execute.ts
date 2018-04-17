@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 import * as assert from 'assert';
-import { bulkFind, BaseError } from '@travetto/base';
+import { bulkFind } from '@travetto/base';
 
 import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../model';
 import { TestRegistry } from '../service';
@@ -164,7 +164,7 @@ export class ExecuteUtil {
       clear();
     } catch (err) {
       if (err === TIMEOUT) {
-        err = new BaseError('Operation timed out');
+        err = new Error('Operation timed out');
       } else {
         err = this.checkError(test, err);
       }
