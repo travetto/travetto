@@ -1,7 +1,7 @@
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry, Injectable, InjectableFactory, DEFAULT_INSTANCE } from '@travetto/di';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { ModelMongoSource, ModelMongoConfig } from '../index';
+import { ModelMongoSource, ModelMongoConfig, projectQuery } from '../index';
 import * as assert from 'assert';
 import { RootRegistry } from '@travetto/registry';
 import { QueryVerifierService } from '@travetto/model/src/service/query';
@@ -11,6 +11,10 @@ class Person extends BaseModel {
   name: string;
   age: number;
   gender: 'm' | 'f';
+  address: {
+    street1: string;
+    street2: string;
+  }
 }
 
 const SYMBOL = Symbol();
@@ -43,7 +47,11 @@ class TestSave {
       const res = await service.save(Person, Person.from({
         name: 'Bob',
         age: 20,
-        gender: 'm'
+        gender: 'm',
+        address: {
+          street1: 'a',
+          street2: 'b'
+        }
       }));
 
       assert.ok(res);
@@ -59,7 +67,9 @@ class TestSave {
 
     const match2 = await service.getAllByQuery(Person, {
       where: {
-        name: 'Bob'
+        address: {
+          street1: 'a'
+        }
       }
     });
 

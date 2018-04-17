@@ -64,15 +64,15 @@ export class ModelMongoSource extends ModelSource {
   }
 
   buildQuery<T extends ModelCore>(query: Query<T>) {
-    const out = {};
+    const out: any = {};
     if (query.where) {
-
+      out.where = projectQuery(query.where);
     }
     if (query.select) {
-
+      out.select = projectQuery(query.select);
     }
     if (query.sort) {
-
+      out.sort = projectQuery(query.sort);
     }
     return out;
   }
@@ -171,12 +171,14 @@ export class ModelMongoSource extends ModelSource {
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}, options: QueryOptions<T> = {}): Promise<T[]> {
     query = this.translateQueryIds(query);
 
-    console.log(cls.__id, query.where);
+    const projected = projectQuery(query);
+
+    console.log(cls.__id, projected.where);
 
     const col = await this.getCollection(cls);
-    let cursor = col.find(query.where);
+    let cursor = col.find(projected.where);
     if (options.sort) {
-      cursor = cursor.sort(options.sort);
+      cursor = cursor.sort(projectQuery(options).sort);
     }
 
     cursor = cursor.limit(Math.trunc(options.limit || 200) || 200);
