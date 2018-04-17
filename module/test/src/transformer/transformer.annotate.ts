@@ -36,7 +36,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
   }
 
-  return ts.visitEachChild(node, c => visitNode(context, c, state), context);
+  const out = ts.visitEachChild(node, c => visitNode(context, c, state), context);
+  out.parent = node.parent;
+  return out;
 }
 
 const TRANSFORMER = TransformUtil.importingVisitor<any>((source) => {
