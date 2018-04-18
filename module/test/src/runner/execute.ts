@@ -325,6 +325,10 @@ export class ExecuteUtil {
 
     require(file);
 
+    if (process.env.DEBUGGER) {
+      await new Promise(t => setTimeout(t, 100));
+    }
+
     await TestRegistry.init();
 
     const params = this.getRunParams(file, args[0], args[1]);
