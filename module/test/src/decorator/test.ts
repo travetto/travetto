@@ -23,3 +23,17 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
     return descriptor;
   }
 }
+
+export function ShouldThrow(state: TestConfig['shouldThrow']): MethodDecorator {
+  return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
+    TestRegistry.registerMethod(inst.constructor, descriptor.value, { shouldThrow: state });
+    return descriptor;
+  };
+}
+
+export function Timeout(ms: number): MethodDecorator {
+  return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
+    TestRegistry.registerMethod(inst.constructor, descriptor.value, { timeout: ms });
+    return descriptor;
+  };
+}
