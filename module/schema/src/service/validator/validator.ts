@@ -2,8 +2,15 @@ import { FieldConfig, SchemaConfig } from '../types';
 import { SchemaRegistry } from '../registry';
 import { Messages } from './messages';
 import { Class } from '@travetto/registry';
+import { BaseError } from '@travetto/base';
 
 export type ValidationError = { message: string, path: string, kind: string };
+
+export class ValidationErrors extends BaseError {
+  constructor(public errors: ValidationError[]) {
+    super('Errors have occurred');
+  }
+}
 
 export class SchemaValidator {
 
@@ -156,7 +163,7 @@ export class SchemaValidator {
     const errors = this.validateSchema(config.schema, o, view, '');
 
     if (errors.length) {
-      throw { errors };
+      throw new ValidationErrors(errors);
     }
 
     return o;

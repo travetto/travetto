@@ -1,5 +1,5 @@
-import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema, ValidationError, SchemaRegistry } from '../src';
-import { Suite, Test, BeforeAll } from '@travetto/test';
+import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema, ValidationError, SchemaRegistry, ValidationErrors } from '../src';
+import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 import * as assert from 'assert';
 
 @Schema()
@@ -25,6 +25,19 @@ class Parent extends SchemaBound {
 class MinTest extends SchemaBound {
   @MinLength(10)
   value: string;
+}
+
+@Schema()
+class Address {
+  street1: string;
+  city: string;
+  zip: 200 | 500;
+}
+
+@Schema()
+class Nested extends SchemaBound {
+  name: string;
+  address: Address;
 }
 
 function findError(errors: ValidationError[], path: string, message: string) {
@@ -73,14 +86,40 @@ class Validation {
   }
 
   @Test('Should ensure message for min')
+  @ShouldThrow(ValidationErrors)
   async minMessage() {
     const o = MinTest.from({ value: 'hello' });
 
-    try {
-      await SchemaValidator.validate(o);
-      assert.fail('Validation should have failed');
-    } catch (e) {
-      assert(findError(e.errors, 'value', 'value is not long enough (10)'));
-    }
+    await SchemaValidator.validate(o);
+  }
+
+  @Test('Nested validations should be fine')
+  async nestedObject() {
+    const obj = Nested.from({
+      name: 'bob',
+      address: {
+        street1: 'abc',
+        city: 'city',
+        zip: 200
+      }
+    });
+
+    const o = await SchemaValidator.validate(obj);
+    assert(o !== undefined);
+  }
+
+  @Test('Nested validations should be fine')
+  @ShouldThrow(ValidationErrors)
+  async nestedObjectErrors() {
+    const obj = Nested.from({
+      name: 5,
+      address: {
+        street1: 'abc',
+        city: 'city',
+        zip: 400
+      }
+    } as any);
+
+    await SchemaValidator.validate(obj);
   }
 }
