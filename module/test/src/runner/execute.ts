@@ -155,7 +155,7 @@ export class ExecuteUtil {
       return result as TestResult;
     }
 
-    const [timeout, clear] = this.asyncTimeout(test.timeout ? (process.env.DEBUGGER ? 60000 : 0) + test.timeout : test.timeout);
+    const [timeout, clear] = this.asyncTimeout(process.env.DEBUGGER ? 240000 : test.timeout);
 
     try {
       ConsoleCapture.start();
