@@ -10,7 +10,7 @@ import { bulkRequire, bulkFindSync, AppEnv, AppInfo } from '@travetto/base';
 import { RetargettingHandler } from './proxy';
 
 const Module = require('module');
-const farmhash = require('farmhash');
+const stringHash = require('string-hash');
 
 const originalLoader = Module._load.bind(Module);
 
@@ -236,7 +236,7 @@ export class Compiler {
 
     if (AppEnv.watch && this.hashes.has(fileName)) {
       // Let's see if they are really different
-      const hash = farmhash.hash32(content);
+      const hash = stringHash(content);
       if (hash === this.hashes.get(fileName)) {
         console.debug('File contents unchanged');
         return false;
@@ -259,7 +259,7 @@ export class Compiler {
     this.contents.set(outFileName, output);
 
     if (AppEnv.watch) {
-      this.hashes.set(fileName, farmhash.hash32(content));
+      this.hashes.set(fileName, stringHash(content));
       // If file is already loaded, mark for reload
       if (this.files.get(fileName)!.version > 0) {
         this.markForReload(fileName);
@@ -270,6 +270,7 @@ export class Compiler {
   }
 
   static watchFiles(fileNames: string[]) {
+    // TODO: Replace with something that has fewer dependencies, to decrease overall footprint and load time
     const watcher = chokidar.watch(this.appWorkingSet, {
       ignored: this.invalidWorkingSetFile,
       persistent: true,

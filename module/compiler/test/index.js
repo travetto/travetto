@@ -1,2 +1,7 @@
 require('@travetto/base/bootstrap').run()
-  .then(x => require('./stack'));
+  .then(x => {
+    const Compiler = require('../src/compiler').Compiler;
+    Compiler.on('added', require);
+    Compiler.on('changed', require);
+    require('./stack');
+  });
