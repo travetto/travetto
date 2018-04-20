@@ -19,6 +19,9 @@ export class ExecuteUtil {
 
   static asyncTimeout(duration?: number): [Promise<any>, Function] {
     let id: NodeJS.Timer;
+    if (process.env.DEBUGGER) {
+      duration = 600000; // 10 minutes
+    }
     const prom = new Promise((_, reject) => {
       id = setTimeout(() => reject(TIMEOUT), duration || this.timeout);
       id.unref()
@@ -155,7 +158,7 @@ export class ExecuteUtil {
       return result as TestResult;
     }
 
-    const [timeout, clear] = this.asyncTimeout(process.env.DEBUGGER ? 240000 : test.timeout);
+    const [timeout, clear] = this.asyncTimeout(test.timeout);
 
     try {
       ConsoleCapture.start();
