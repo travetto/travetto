@@ -1,7 +1,6 @@
 import * as minimist from 'minimist';
 import * as fs from 'fs';
 import * as util from 'util';
-import * as _ from 'lodash';
 
 import { ArrayDataSource } from '@travetto/pool';
 import { deserializeError } from '@travetto/exec';

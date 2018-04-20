@@ -1,7 +1,6 @@
-import { AppEnv } from '@travetto/base';
+import { AppEnv, isPlainObject, isFunction, isPrimitive } from '@travetto/base';
 import * as assert from 'assert';
 import { Assertion, TestConfig } from '../model';
-import * as _ from 'lodash';
 
 const ASSERT_FN_OPERATOR: { [key: string]: string } = {
   equal: '==',
@@ -32,14 +31,10 @@ const OP_MAPPING: { [key: string]: string } = {
 }
 
 function clean(val: any) {
-  if (val === null || val === undefined ||
-    typeof val === 'string' || typeof val === 'number' ||
-    typeof val === 'boolean' ||
-    _.isPlainObject(val) || Array.isArray(val)
-  ) {
+  if (val === null || val === undefined || (!(val instanceof RegExp) && isPrimitive(val)) || isPlainObject(val) || Array.isArray(val)) {
     return JSON.stringify(val);
   } else {
-    if (!val.constructor || !val.constructor.__id && _.isFunction(val)) {
+    if (!val.constructor || (!val.constructor.__id && isFunction(val))) {
       return val.name;
     } else {
       return `${val}`;
