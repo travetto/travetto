@@ -1,5 +1,6 @@
 import { deepMerge, isPrimitive } from '../src/util';
 import * as assert from 'assert';
+import { isFunction } from 'util';
 
 class Test { }
 
@@ -11,6 +12,8 @@ function testPrimitive() {
   for (const v of [[], {}, () => { }, new Test(), null, undefined]) {
     assert(!isPrimitive(v));
   }
+
+  assert(isFunction(Test));
 }
 
 function testMerge() {
@@ -32,6 +35,8 @@ function testMerge() {
   assert.deepEqual(merged.lines, { start: 15, end: 21 });
   assert(merged.methodName === 'test1a');
   assert(merged.file === left.file);
+
+  assert.strictEqual(deepMerge({ a: {} }, { a: { b: Test } }).a.b, Test);
 }
 
 // setTimeout(() => {
