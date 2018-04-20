@@ -1,13 +1,17 @@
-export function isPrimitive(el: any) {
+export function isPrimitive(el: any): el is (string | boolean | number | RegExp) {
   const type = typeof el;
   return (type === 'string' || type === 'boolean' || type === 'number' || el instanceof RegExp);
 }
 
-export function isPlainObject(obj: any) {
+export function isPlainObject(obj: any): obj is object {
   return typeof obj === 'object' // separate from primitives
     && obj !== null         // is obvious
     && obj.constructor === Object // separate instances (Array, DOM, ...)
     && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
+}
+
+export function isFunction(o: any): o is Function {
+  return Object.getPrototypeOf(o) === Function.prototype;
 }
 
 export function deepMerge<T extends any, U extends any>(a: T, b: U): T & U {
@@ -19,7 +23,7 @@ export function deepMerge<T extends any, U extends any>(a: T, b: U): T & U {
   if (!isEmptyB) {
     if (isPrimitive(b)) {
       if (isEmptyA || isPrimitive(a)) {
-        return b as (T & U);
+        return b as any as (T & U);
       } else {
         throw new Error(`Cannot merge primitive ${b} with ${a}`);
       }
