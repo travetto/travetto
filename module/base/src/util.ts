@@ -15,6 +15,14 @@ export function isFunction(o: any): o is Function {
   return o && Object.getPrototypeOf(o) === Function.prototype;
 }
 
+export function isClass(o: any) {
+  return o && o.prototype && o.prototype.constructor !== Object.getPrototypeOf(Function);
+}
+
+export function isSimple(a: any) {
+  return isPrimitive(a) || isFunction(a) || isClass(a);
+}
+
 function _deepMerge(a: any, b: any, level = 0) {
   const isEmptyA = a === undefined || a === null;
   const isEmptyB = b === undefined || b === null;
@@ -25,13 +33,13 @@ function _deepMerge(a: any, b: any, level = 0) {
     return a;
   }
 
-  if (isPrimitive(b) || isFunction(b)) {
-    if (isEmptyA || isPrimitive(a) || isFunction(a)) {
+  if (isSimple(b)) { // Scalars
+    if (isEmptyA || isSimple(a)) {
       a = b;
     } else {
       throw new Error(`Cannot merge primitive ${b} with ${a}`);
     }
-  } else if (isArrB) {
+  } else if (isArrB) { // Arrays
     const bArr = b;
     if (a === undefined) {
       return bArr.slice(0);
@@ -44,7 +52,7 @@ function _deepMerge(a: any, b: any, level = 0) {
     } else if (b !== undefined) {
       throw new Error(`Cannot merge ${b} with ${a}`);
     }
-  } else {
+  } else { // Object
     if (isEmptyA || isArrA || isPrimitive(a)) {
       if (level === 0) {
         throw new Error(`Cannot merge ${b} onto ${a}`);
