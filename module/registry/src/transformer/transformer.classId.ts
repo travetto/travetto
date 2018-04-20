@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import { TransformUtil, Import, State } from '@travetto/compiler';
-const farmhash = require('farmhash');
+const stringHash = require('string-hash');
 
 const SEP = path.sep;
 const RE_SEP = SEP === '/' ? '\\/' : SEP;
@@ -38,7 +38,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     for (const child of node.members) {
       if (ts.isMethodDeclaration(child)) {
-        const hash = farmhash.hash32(child.getText());
+        const hash = stringHash(child.getText());
         hashes[child.name.getText()] = ts.createLiteral(hash);
       }
     }
@@ -55,7 +55,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       ts.createNodeArray([
         createStaticField('__filename', state.fullFile),
         createStaticField('__id', `${state.file}#${node.name!.getText()}`),
-        createStaticField('__hash', farmhash.hash32(node.getText())),
+        createStaticField('__hash', stringHash(node.getText())),
         createStaticField('__methodHashes', TransformUtil.extendObjectLiteral(hashes)),
         ...node.members
       ])
