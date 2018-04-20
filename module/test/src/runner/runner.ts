@@ -17,8 +17,6 @@ import { AllSuitesResult, SuiteConfig } from '../model/suite';
 import { client, Events } from './communication';
 import { TestConfig } from '..';
 
-const farmhash = require('farmhash');
-
 interface State {
   format: 'tap' | 'json' | 'noop' | 'exec';
   mode: 'single' | 'watch' | 'all';
