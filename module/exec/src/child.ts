@@ -4,6 +4,7 @@ import { CommonProcess, ChildOptions, ExecutionEvent } from './types';
 import { Execution } from './execution';
 
 export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends Execution<U, child_process.ChildProcess> {
+
   constructor(public command: string, public fork = false, public opts: ChildOptions = {}) {
     super();
   }
@@ -33,6 +34,21 @@ export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends E
     });
 
     return sub;
+  }
+
+  async waitForComplete() {
+    await this._init();
+    return new Promise((resolve, reject) => {
+      this._proc.on('close', () => {
+        resolve();
+      });
+      this._proc.on('exit', () => {
+        resolve();
+      });
+      this._proc.on('error', (err) => {
+        reject(err);
+      });
+    });
   }
 
   kill() {

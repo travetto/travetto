@@ -44,7 +44,7 @@ export function enhanceProcess(p: cp.ChildProcess, options: ExecutionOptions) {
         } else {
           p.kill('SIGKILL');
         }
-        finish({ code: 1, stderr, stdout, message: `Execution timed out after: ${timeout} ms`, valid: false });
+        finish({ code: 1, stderr, stdout, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
       }, timeout);
     }
   });
@@ -63,7 +63,7 @@ function getArgs(cmd: string) {
   return { cmd, args };
 }
 
-type WithOpts<T> = T & ExecutionOptions;
+export type WithOpts<T> = T & ExecutionOptions;
 
 export function spawn(cmdStr: string, options: WithOpts<cp.SpawnOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
   const { cmd, args } = getArgs(cmdStr);

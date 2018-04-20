@@ -1,20 +1,22 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
+    "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
-  }, 
+  },
   "dependencies": {
-    "@travetto/base": "0.x.x", 
-    "@travetto/pool": "0.x.x", 
-    "@types/cross-spawn": "^6.0.0", 
-    "cross-spawn": "^6.0.5"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "src/lib/", 
-  "name": "@travetto/exec", 
+    "@travetto/base": "0.x.x",
+    "@travetto/pool": "0.x.x",
+    "@types/cross-spawn": "^6.0.0",
+    "@types/rimraf": "^2.0.2",
+    "cross-spawn": "^6.0.5",
+    "rimraf": "^2.6.2"
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "src/lib/",
+  "name": "@travetto/exec",
   "repository": {
     "url": "https://github.com/travetto/exec.git"
-  }, 
+  },
   "version": "0.0.10"
 }

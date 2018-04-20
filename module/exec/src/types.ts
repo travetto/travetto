@@ -12,6 +12,7 @@ export interface ExecutionResult {
   stderr: string;
   message?: string;
   valid: boolean;
+  killed?: boolean;
 }
 
 export interface CommonProcess {
