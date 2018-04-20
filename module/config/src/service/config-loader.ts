@@ -1,8 +1,7 @@
-import { bulkRead, bulkReadSync, AppEnv } from '@travetto/base';
+import { bulkRead, bulkReadSync, AppEnv, deepMerge, isPlainObject } from '@travetto/base';
 import * as flatten from 'flat';
 import * as yaml from 'js-yaml';
 import { EventEmitter } from 'events';
-import * as _ from 'lodash';
 
 const unflatten = flatten.unflatten;
 
@@ -72,11 +71,11 @@ export class ConfigLoader {
     for (const k of Object.keys(lowerFlat)) {
       out[keyMap[k]] = lowerFlat[k];
     }
-    _.merge(target, unflatten(out, { delimiter: '_' }));
+    deepMerge(target, unflatten(out, { delimiter: '_' }));
   }
 
   private static dropNulls(o: any) {
-    if (_.isPlainObject(o)) {
+    if (isPlainObject(o)) {
       for (const k of Object.keys(o)) {
         if (o[k] === this.NULL) {
           delete o[k];
@@ -96,7 +95,7 @@ export class ConfigLoader {
     while (keys.length && sub[keys[0]]) {
       sub = sub[keys.shift()!];
     }
-    _.merge(obj, sub);
+    deepMerge(obj, sub);
     return obj;
   }
 
