@@ -1,3 +1,4 @@
-require('../bootstrap').then(x => {
-  require('./stack');
+require('../bootstrap').run().then(x => {
+  //  require('./stack');
+  require('./merge');
 });

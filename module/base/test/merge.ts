@@ -17,9 +17,24 @@ function testMerge() {
   assert(deepMerge({ a: 1, b: 2 }, { a: 5 }).a === 5);
   assert(typeof deepMerge({ a: 1, b: () => { } }, { a: 5, c: 10 }).b !== 'number');
   assert.deepEqual(deepMerge({ a: 1, b: () => { }, d: [1, 2, 3] }, { a: 5, c: 10, d: [1, 5, 6, 7] }).d, [1, 5, 6, 7]);
+
+  const right = {
+    lines: { start: 15, end: 21 },
+    file: '/home/tim/Code/travetto/test/test/simple.1.ts',
+    description: undefined
+  };
+  const left = {
+    file: '/home/tim/Code/travetto/test/test/simple.1.ts',
+    methodName: 'test1a'
+  };
+
+  const merged = deepMerge(left, right);
+  assert.deepEqual(merged.lines, { start: 15, end: 21 });
+  assert(merged.methodName === 'test1a');
+  assert(merged.file === left.file);
 }
 
-setTimeout(() => {
-  testPrimitive();
-  testMerge();
-}, 1);
+// setTimeout(() => {
+testPrimitive();
+testMerge();
+// }, 1);

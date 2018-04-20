@@ -14,7 +14,7 @@ export function isFunction(o: any): o is Function {
   return Object.getPrototypeOf(o) === Function.prototype;
 }
 
-export function deepMerge<T extends any, U extends any>(a: T, b: U): T & U {
+function _deepMerge(a: any, b: any, level = 0) {
   const isEmptyA = a === undefined || a === null;
   const isEmptyB = b === undefined || b === null;
   const isArrA = Array.isArray(a);
@@ -23,32 +23,39 @@ export function deepMerge<T extends any, U extends any>(a: T, b: U): T & U {
   if (!isEmptyB) {
     if (isPrimitive(b)) {
       if (isEmptyA || isPrimitive(a)) {
-        return b as any as (T & U);
+        return b;
       } else {
         throw new Error(`Cannot merge primitive ${b} with ${a}`);
       }
     } else if (isArrB) {
-      const bArr = b as any as any[];
+      const bArr = b;
       if (a === undefined) {
-        return bArr.slice(0) as any as T & U;
+        return bArr.slice(0);
       } else if (isArrA) {
         const aArr = (a as any as any[]).slice(0);
         for (let i = 0; i < bArr.length; i++) {
-          aArr[i] = deepMerge(aArr[i], bArr[i]);
+          aArr[i] = _deepMerge(aArr[i], bArr[i], level + 1);
         }
-        return aArr as any as T & U;
-      } else {
-        throw new Error(`Cannot merge ${a} with ${b}`);
+        a = aArr;
+      } else if (b !== undefined) {
+        throw new Error(`Cannot merge ${b} with ${a}`);
       }
     } else {
       if (isEmptyA || isArrA || isPrimitive(a)) {
-        throw new Error(`Cannot merge ${b} onto ${a}`);
+        if (level === 0) {
+          throw new Error(`Cannot merge ${b} onto ${a}`);
+        } else {
+          a = {};
+        }
       }
       for (const key of Object.keys(b)) {
-        a[key] = deepMerge(a[key], b[key]);
+        a[key] = _deepMerge(a[key], b[key], level + 1);
       }
-      return a as (T & U);
     }
   }
-  return a as (T & U);
+  return a;
+}
+
+export function deepMerge<T extends any, U extends any>(a: T, b: U): T & U {
+  return _deepMerge(a, b, 0) as T & U;
 }
