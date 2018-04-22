@@ -15,7 +15,7 @@ export interface Entry {
 export interface Handler {
   root: string;
   returnDir?: boolean;
-  include?: (stat: Entry) => boolean;
+  include: (stat: Entry) => boolean;
 }
 
 export function Handler(include: (stat: Entry) => boolean, root?: string, dirs = false): Handler {
@@ -39,7 +39,7 @@ export function scanDir(handler: Handler, relativeBase = '', fullBase = handler.
         if (stats.isDirectory()) {
           out = out.concat(await scanDir(handler, relative, full));
         }
-        if ((!stats.isDirectory() || handler.returnDir) && (!handler.include || handler.include(entry))) {
+        if ((!stats.isDirectory() || handler.returnDir) && handler.include(entry)) {
           out.push(entry);
         }
       }
@@ -61,7 +61,7 @@ export function scanDirSync(handler: Handler, relativeBase = '', fullBase = hand
     if (stats.isDirectory()) {
       out = out.concat(scanDirSync(handler, relative, full));
     }
-    if ((!stats.isDirectory() || handler.returnDir) && (!handler.include || handler.include(entry))) {
+    if ((!stats.isDirectory() || handler.returnDir) && handler.include(entry)) {
       out.push(entry);
     }
   }
