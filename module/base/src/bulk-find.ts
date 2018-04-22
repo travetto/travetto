@@ -26,6 +26,15 @@ export function Handler(include: (stat: Entry) => boolean, root?: string, dirs =
   }
 }
 
+export function buildEntryFromFile(file: string, root: string) {
+  const relative = file.replace(`${root}${path.sep}`, '');
+  const full = `${root}${path.sep}${relative}`;
+  return {
+    relative,
+    full,
+    stats: fs.statSync(file)
+  }
+}
 export function scanDir(handler: Handler, relativeBase = '', fullBase = handler.root) {
   return new Promise<Entry[]>(async (resolve, reject) => {
     try {
