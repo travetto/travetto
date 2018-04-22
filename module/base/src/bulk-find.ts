@@ -12,19 +12,7 @@ export interface Entry {
   stats: fs.Stats;
 }
 
-export interface Handler {
-  root: string;
-  returnDir?: boolean;
-  include: (stat: Entry) => boolean;
-}
-
-export function Handler(include: ((stat: Entry) => boolean) | RegExp, root?: string, dirs = false): Handler {
-  return {
-    root: root || process.cwd(),
-    include: include instanceof RegExp ? (e) => include.test(e.relative) : include,
-    returnDir: dirs
-  }
-}
+export type Handler = ((stat: Entry) => boolean) | RegExp;
 
 export function buildEntryFromFile(file: string, root: string) {
   const relative = file.replace(`${root}${path.sep}`, '');
@@ -36,8 +24,8 @@ export function buildEntryFromFile(file: string, root: string) {
   }
 }
 
-export async function bulkFind(handlers: Handler[]) {
-  const res = await Promise.all(handlers.map(x => scanDir(x)));
+export async function bulkFind(handlers: Handler[], base?: string) {
+  const res = await Promise.all(handlers.map(x => scanDir(x, base)));
   const names = new Set<string>();
   const out = [];
   for (const ls of res) {
@@ -51,10 +39,14 @@ export async function bulkFind(handlers: Handler[]) {
   return out;
 }
 
-export function scanDir(handler: Handler, relativeBase = '', fullBase = handler.root) {
+export function scanDir(handler: Handler, fullBase?: string, relativeBase = '') {
   return new Promise<Entry[]>(async (resolve, reject) => {
     try {
       const out: Entry[] = [];
+
+      if (!fullBase) {
+        fullBase = process.cwd();
+      }
 
       for (const file of (await fsReaddir(fullBase))) {
         const relative = relativeBase ? `${relativeBase}${path.sep}${file}` : file;
@@ -63,10 +55,8 @@ export function scanDir(handler: Handler, relativeBase = '', fullBase = handler.
         const entry: Entry = { stats, full, relative };
 
         if (stats.isDirectory()) {
-          out.push(...await scanDir(handler, relative, full));
-        }
-
-        if (handler.include(entry)) {
+          out.push(...await scanDir(handler, full, relative));
+        } else if (handler instanceof RegExp ? handler.test(entry.full) : handler(entry)) {
           out.push(entry);
         }
         resolve(out);
@@ -77,11 +67,11 @@ export function scanDir(handler: Handler, relativeBase = '', fullBase = handler.
   });
 }
 
-export function bulkFindSync(handlers: Handler[]) {
+export function bulkFindSync(handlers: Handler[], base?: string) {
   const names = new Set<string>();
   const out = [];
   for (const h of handlers) {
-    for (const e of scanDirSync(h)) {
+    for (const e of scanDirSync(h, base)) {
       if (!names.has(e.full)) {
         names.add(e.full);
         out.push(e);
@@ -91,8 +81,12 @@ export function bulkFindSync(handlers: Handler[]) {
   return out;
 }
 
-export function scanDirSync(handler: Handler, relativeBase = '', fullBase = handler.root) {
+export function scanDirSync(handler: Handler, fullBase?: string, relativeBase = '') {
   let out: Entry[] = [];
+  if (!fullBase) {
+    fullBase = process.cwd();
+  }
+
   for (const file of fs.readdirSync(fullBase)) {
     const relative = relativeBase ? `${relativeBase}${path.sep}${file}` : file;
     const full = `${fullBase}/${path.sep}/${file}`;
@@ -100,9 +94,8 @@ export function scanDirSync(handler: Handler, relativeBase = '', fullBase = hand
     const entry = { stats, full, relative };
 
     if (stats.isDirectory()) {
-      out = out.concat(scanDirSync(handler, relative, full));
-    }
-    if ((!stats.isDirectory() || handler.returnDir) && handler.include(entry)) {
+      out = out.concat(scanDirSync(handler, full, relative));
+    } else if (handler instanceof RegExp ? handler.test(entry.full) : handler(entry)) {
       out.push(entry);
     }
   }
