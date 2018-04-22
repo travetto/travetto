@@ -1,12 +1,13 @@
 import { AppEnv } from './env';
 import { initStackHandler } from './stacktrace';
 import { Shutdown } from './shutdown';
-import { bulkRequire } from './bulk-find';
+import { bulkRequire, Handler } from './bulk-find';
 
 export const initializers =
-  bulkRequire<{ init: { action: Function, priority?: number } }>(
-    ['node_modules/@travetto/*/bootstrap.ts', 'bootstrap.ts']
-  )
+  bulkRequire<{ init: { action: Function, priority?: number } }>([
+    Handler(x => x.relative.startsWith('node_modules/@travetto') && x.relative.endsWith('bootstrap.ts')),
+    Handler(x => x.relative === 'bootstrap.ts')
+  ])
     .map(x => x.init)
     .map(x => ({ priority: 100, ...x }))
     .sort((a, b) => a.priority - b.priority);

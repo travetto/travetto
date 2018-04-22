@@ -1,66 +1,98 @@
 import * as path from 'path';
-import * as glob from 'glob';
 import * as fs from 'fs';
 import * as util from 'util';
 
-const globAsync = util.promisify(
-  glob as (name: string, options: glob.IOptions, callback: (err: any, res: string[]) => void) => void
-) as (name: string, options: glob.IOptions) => Promise<string[]>;
-
 const fsReadFileAsync = util.promisify(fs.readFile);
+const fsStat = util.promisify(fs.lstat);
+const fsReaddir = util.promisify(fs.readdir);
 
-function findHandler(base?: string, exclude?: (name: string) => boolean) {
-  base = base || process.cwd();
+export interface Entry {
+  full: string;
+  relative: string;
+  stats: fs.Stats;
+}
 
+export interface Handler {
+  root: string;
+  returnDir?: boolean;
+  include?: (stat: Entry) => boolean;
+}
+
+export function Handler(include: (stat: Entry) => boolean, root?: string, dirs = false): Handler {
   return {
-    config: {
-      cwd: base,
-      root: base,
-    },
-    match: (matches: string[]) => {
-      let out = matches.map(f => path.resolve(f));
-      if (exclude) {
-        out = out.filter(x => !exclude(x));
+    root: root || process.cwd(),
+    include,
+    returnDir: dirs
+  }
+}
+
+export function scanDir(handler: Handler, relativeBase = '', fullBase = handler.root) {
+  return new Promise<Entry[]>(async (resolve, reject) => {
+    try {
+      let out: Entry[] = [];
+      for (const file of (await fsReaddir(fullBase))) {
+        const relative = relativeBase ? `${relativeBase}${path.sep}${file}` : file;
+        const full = `${fullBase}/${path.sep}/${file}`;
+        const stats = await fsStat(full);
+        const entry = { stats, full, relative };
+
+        if (stats.isDirectory()) {
+          out = out.concat(await scanDir(handler, relative, full));
+        }
+        if ((!stats.isDirectory() || handler.returnDir) && (!handler.include || handler.include(entry))) {
+          out.push(entry);
+        }
       }
-      // out.map((x: string) => { console.log(x); return x; })
-      return out;
+      resolve(out);
+    } catch (e) {
+      reject(e);
+    }
+  })
+}
+
+export function scanDirSync(handler: Handler, relativeBase = '', fullBase = handler.root) {
+  let out: Entry[] = [];
+  for (const file of fs.readdirSync(fullBase)) {
+    const relative = relativeBase ? `${relativeBase}${path.sep}${file}` : file;
+    const full = `${fullBase}/${path.sep}/${file}`;
+    const stats = fs.lstatSync(full);
+    const entry = { stats, full, relative };
+
+    if (stats.isDirectory()) {
+      out = out.concat(scanDirSync(handler, relative, full));
+    }
+    if ((!stats.isDirectory() || handler.returnDir) && (!handler.include || handler.include(entry))) {
+      out.push(entry);
     }
   }
+  return out;
 }
 
-export function bulkFindSync(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
-  const handler = findHandler(base, exclude);
-  if (!Array.isArray(globs)) {
-    globs = [globs];
-  }
-  return globs
-    .map(pattern => handler.match(glob.sync(pattern, handler.config)))
-    .reduce((acc, v) => acc.concat(v), []);
+export function bulkFindSync(handlers: Handler[]) {
+  return handlers.map(x => scanDirSync(x))
+    .reduce((acc, v) => acc.concat(v), [])
+    .map(y => y.full);
 }
 
-export async function bulkFind(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
-  const handler = findHandler(base, exclude);
-  if (!Array.isArray(globs)) {
-    globs = [globs];
-  }
-  const promises = globs.map(pattern => globAsync(pattern, handler.config).then(handler.match));
+export async function bulkFind(handlers: Handler[]) {
+  const promises = handlers.map(x => scanDir(x));
   const all = await Promise.all(promises);
-  return all.reduce((acc, v) => acc.concat(v), []);
+  return all.reduce((acc, v) => acc.concat(v), []).map(x => x.full);
 }
 
-export function bulkRequire<T = any>(globs: string | string[], base?: string, exclude?: (name: string) => boolean): T[] {
-  return bulkFindSync(globs, base, exclude)
+export function bulkRequire<T = any>(handlers: Handler[]): T[] {
+  return bulkFindSync(handlers)
     .map(require)
     .filter(x => !!x); // Return non-empty values
 }
 
-export async function bulkRead(globs: string | string[], base?: string, exclude?: (name: string) => boolean) {
-  const files = await bulkFind(globs, base, exclude);
+export async function bulkRead(handlers: Handler[]) {
+  const files = await bulkFind(handlers);
   const promises = files.map((f: string) => fsReadFileAsync(f).then(x => ({ name: f, data: x.toString() })));
   return await Promise.all(promises);
 }
 
-export function bulkReadSync(pattern: string, base?: string, exclude?: (name: string) => boolean) {
-  const files = bulkFindSync(pattern, base, exclude);
+export function bulkReadSync(handlers: Handler[]) {
+  const files = bulkFindSync(handlers);
   return files.map(x => ({ name: x, data: fs.readFileSync(x).toString() }));
 }
