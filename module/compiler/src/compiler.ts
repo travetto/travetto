@@ -152,8 +152,10 @@ export class Compiler {
 
     if (isNew) {
       if (AppEnv.watch) {
-        const topLevel = tsf.split(this.cwd)[1].split('/')[0];
-        this.fileWatchers[topLevel].add([tsf]);
+        const topLevel = tsf.split(`${this.cwd}/`)[1].split('/')[0];
+        if (this.fileWatchers[topLevel]) {
+          this.fileWatchers[topLevel].add([tsf]);
+        }
       }
       // Picking up missed files
       this.rootFiles.push(tsf);
@@ -215,22 +217,21 @@ export class Compiler {
   }
 
   static emitFile(fileName: string) {
+    console.debug('Emitting', fileName);
     const content = ts.sys.readFile(fileName)!;
 
     if (AppEnv.watch && this.hashes.has(fileName)) {
       // Let's see if they are really different
       const hash = stringHash(content);
       if (hash === this.hashes.get(fileName)) {
-        console.debug('File contents unchanged');
+        console.debug(`Contents Unchanged: ${fileName}`);
         return false;
       }
     }
 
     const res = this.transpile(content, fileName);
     let output = res.outputText;
-    if (fileName.match(/\/test\//)) {
-      console.debug(fileName, output);
-    }
+
     const outFileName = toJsName(fileName);
 
     if (this.logErrors(fileName, res.diagnostics)) {
@@ -315,7 +316,7 @@ export class Compiler {
   }
 
   static transpile(input: string, fileName: string) {
-    console.debug('Transpiling', fileName);
+    // console.debug('Transpiling', fileName);
     const output = ts.transpileModule(input, {
       compilerOptions: this.options,
       fileName,
@@ -359,7 +360,7 @@ export class Compiler {
       .filter(x => !x.stats.isDirectory() && !this.invalidWorkingSetFile(x.file))
       .map(x => x.file);
 
-    console.debug('Files', this.rootFiles);
+    console.debug('Files', this.rootFiles.length);
 
     // Prime for type checker
     for (const fileName of this.rootFiles) {
