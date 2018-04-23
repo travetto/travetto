@@ -253,42 +253,47 @@ export class Compiler {
     return true;
   }
 
+  private static watcherListener({ event, entry }: { event: string, entry: Entry }) {
+    if (this.invalidWorkingSetFile(entry.file)) {
+      return;
+    }
+
+    console.log('Watch', event, entry.file);
+
+    if (event === 'added') {
+      this.rootFiles.push(entry.file);
+      this.files.set(entry.file, { version: 1 });
+      if (this.emitFile(entry.file)) {
+        this.events.emit(event, entry.file);
+      }
+    } else if (event === 'changed') {
+      const changed = this.files.has(entry.file);
+      if (changed) {
+        this.snaphost.delete(entry.file);
+        this.files.get(entry.file)!.version++;
+      } else {
+        this.files.set(entry.file, { version: 1 });
+        this.rootFiles.push(entry.file);
+      }
+      if (this.emitFile(entry.file)) {
+        this.events.emit(changed ? 'changed' : 'added', entry.file);
+      }
+    } else if (event === 'removed') {
+      this.unload(entry.file);
+      this.events.emit(event, entry.file);
+    }
+  }
+
   static buildWatcher(tld: string) {
     const watcher = new Watcher({
       interval: 250,
       cwd: `${this.cwd}/${tld}`
     });
 
-    watcher.on('all', ({ event, entry }: { event: string, entry: Entry }) => {
-      if (this.invalidWorkingSetFile(entry.file)) {
-        return;
-      }
-
-      if (event === 'added') {
-        this.rootFiles.push(entry.file);
-        this.files.set(entry.file, { version: 1 });
-        if (this.emitFile(entry.file)) {
-          this.events.emit(event, entry.file);
-        }
-      } else if (event === 'changed') {
-        const changed = this.files.has(entry.file);
-        if (changed) {
-          this.snaphost.delete(entry.file);
-          this.files.get(entry.file)!.version++;
-        } else {
-          this.files.set(entry.file, { version: 1 });
-          this.rootFiles.push(entry.file);
-        }
-        if (this.emitFile(entry.file)) {
-          this.events.emit(changed ? 'changed' : 'added', entry.file);
-        }
-      } else if (event === 'removed') {
-        this.unload(entry.file);
-        this.events.emit(event, entry.file);
-      }
-    });
+    watcher.on('all', this.watcherListener.bind(this))
 
     watcher.add([/.*[.]ts$/]); // Watch ts files
+    watcher.run(false);
     return watcher;
   }
 

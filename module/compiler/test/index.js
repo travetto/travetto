@@ -3,5 +3,5 @@ require('@travetto/base/bootstrap').run()
     const Compiler = require('../src/compiler').Compiler;
     Compiler.on('added', require);
     Compiler.on('changed', require);
-    require('./stack');
+    require('./watch');
   });
