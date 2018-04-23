@@ -2,11 +2,9 @@ import * as fs from 'fs';
 import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
 import * as path from 'path';
-import * as glob from 'glob';
-import * as chokidar from 'chokidar';
 import { EventEmitter } from 'events';
 
-import { bulkRequire, bulkFindSync, AppEnv, AppInfo } from '@travetto/base';
+import { bulkRequire, bulkFindSync, AppEnv, AppInfo, Watcher, Entry } from '@travetto/base';
 import { RetargettingHandler } from './proxy';
 
 const Module = require('module');
@@ -26,15 +24,13 @@ export class Compiler {
   static sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   static files = new Map<string, { version: number }>();
   static contents = new Map<string, string>();
-  // static servicesHost: ts.LanguageServiceHost;
-  // static langaugeService: ts.LanguageService;
   static cwd: string;
   static options: ts.CompilerOptions;
   static transformers: ts.CustomTransformers;
   static registry: ts.DocumentRegistry;
   static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
   static rootFiles: string[];
-  static fileWatcher: chokidar.FSWatcher;
+  static fileWatchers: { [key: string]: Watcher } = {};
   static events = new EventEmitter();
   static snaphost = new Map<string, ts.IScriptSnapshot | undefined>()
   static hashes = new Map<string, number>();
@@ -42,21 +38,14 @@ export class Compiler {
   static emptyRequire = 'module.exports = {}';
 
   static libraryPath = 'node_modules';
-  static frameworkWorkingSet = `${Compiler.libraryPath}/@travetto/*/src/**/*.ts`;
-  static appWorkingSet = `src/**/*.ts`;
-  static transformerSet = '**/transformer.*.ts';
+  static transformerPattern = /^.*\/transformer.*[.]ts$/;
 
-  static optionalFiles = /\/opt\/[^/]+.ts/;
-  static definitionFiles = /\.d\.ts$/g;
+  static devDependencyFiles = AppInfo.DEV_PACKAGES && AppInfo.DEV_PACKAGES.length ?
+    [new RegExp(`${Compiler.libraryPath}/(${AppInfo.DEV_PACKAGES.join('|')})/`)] : [];
 
-  static devDependencyFiles = AppInfo.DEV_PACKAGES
-    .map(x => new RegExp(`node_modules/${x}/`));
-
-  static workingSets = [Compiler.frameworkWorkingSet, Compiler.appWorkingSet];
   static invalidWorkingSetFiles = [
-    Compiler.optionalFiles,
-    Compiler.definitionFiles,
-    /transformer\.[^/]+.ts/,
+    /\.d\.ts$/g, // Definition files
+    Compiler.transformerPattern,
     ...Compiler.devDependencyFiles
   ];
 
@@ -70,9 +59,8 @@ export class Compiler {
   }
 
   static handleLoadError(p: string, e?: any): boolean {
-    if (!AppEnv.prod || this.optionalFiles.test(p)) { // If attempting to load an optional require
-      const extra = this.optionalFiles.test(p) ? 'optional ' : '';
-      console.error(`Unable to import ${extra}require, ${p}, stubbing out`, e);
+    if (!AppEnv.prod) { // If attempting to load an optional require
+      console.error(`Unable to import ${p}, stubbing out`, e);
       return true;
     } else {
       if (e) {
@@ -85,12 +73,7 @@ export class Compiler {
 
   static resolveOptions(name = this.configFile) {
     const out = ts.parseJsonSourceFileConfigFileContent(
-      ts.readJsonConfigFile(`${this.cwd}/${this.configFile}`, x => ts.sys.readFile(x)), {
-        useCaseSensitiveFileNames: true,
-        fileExists: ts.sys.fileExists,
-        readFile: ts.sys.readFile,
-        readDirectory: ts.sys.readDirectory
-      }, this.cwd, {
+      ts.readJsonConfigFile(`${this.cwd}/${this.configFile}`, ts.sys.readFile), ts.sys, this.cwd, {
         rootDir: `${this.cwd}`,
         sourceMap: false,
         inlineSourceMap: true,
@@ -108,7 +91,7 @@ export class Compiler {
     const transformers: { [key: string]: any } = {};
     let i = 2;
 
-    for (const trns of bulkRequire(this.transformerSet)) {
+    for (const trns of bulkRequire([this.transformerPattern], this.cwd)) {
       for (const key of Object.keys(trns)) {
         const item = trns[key];
         if (!transformers[item.phase]) {
@@ -141,7 +124,7 @@ export class Compiler {
     // Proxy modules, if in watch mode for non node_modules paths
     if (AppEnv.watch) {
       const p = Module._resolveFilename(request, parent);
-      if (p.includes(process.cwd()) && !p.includes(this.libraryPath)) {
+      if (p.includes(this.cwd) && !p.includes(this.libraryPath)) {
         if (!this.modules.has(p)) {
           const handler = new RetargettingHandler(mod);
           out = new Proxy({}, handler);
@@ -169,7 +152,8 @@ export class Compiler {
 
     if (isNew) {
       if (AppEnv.watch) {
-        this.fileWatcher.add(tsf);
+        const topLevel = tsf.split(this.cwd)[1].split('/')[0];
+        this.fileWatchers[topLevel].add([tsf]);
       }
       // Picking up missed files
       this.rootFiles.push(tsf);
@@ -231,7 +215,6 @@ export class Compiler {
   }
 
   static emitFile(fileName: string) {
-    //    let output = this.langaugeService.getEmitOutput(fileName);
     const content = ts.sys.readFile(fileName)!;
 
     if (AppEnv.watch && this.hashes.has(fileName)) {
@@ -246,13 +229,13 @@ export class Compiler {
     const res = this.transpile(content, fileName);
     let output = res.outputText;
     if (fileName.match(/\/test\//)) {
-      // console.debug(fileName, output);
+      console.debug(fileName, output);
     }
     const outFileName = toJsName(fileName);
 
     if (this.logErrors(fileName, res.diagnostics)) {
       console.debug(`Compiling ${fileName} failed`);
-      if (this.handleLoadError(fileName) && this.optionalFiles.test(fileName)) {
+      if (this.handleLoadError(fileName)) {
         output = this.emptyRequire;
       }
     }
@@ -269,56 +252,51 @@ export class Compiler {
     return true;
   }
 
-  static watchFiles(fileNames: string[]) {
-    // TODO: Replace with something that has fewer dependencies, to decrease overall footprint and load time
-    const watcher = chokidar.watch(this.appWorkingSet, {
-      ignored: this.invalidWorkingSetFile,
-      persistent: true,
-      cwd: process.cwd(),
+  static buildWatcher(tld: string) {
+    const watcher = new Watcher({
       interval: 250,
-      ignoreInitial: false,
-      awaitWriteFinish: { stabilityThreshold: 10 }
+      cwd: `${this.cwd}/${tld}`
     });
 
-    watcher.on('ready', () => {
-      watcher
-        .on('add', fileName => {
-          fileName = `${process.cwd()}/${fileName}`;
-          fileNames.push(fileName);
-          this.files.set(fileName, { version: 1 });
-          if (this.emitFile(fileName)) {
-            this.events.emit('added', fileName);
-          }
-        })
-        .on('change', fileName => {
-          fileName = `${process.cwd()}/${fileName}`;
-          const changed = this.files.has(fileName);
-          if (changed) {
-            this.snaphost.delete(fileName);
-            this.files.get(fileName)!.version++;
-          } else {
-            this.files.set(fileName, { version: 1 });
-            fileNames.push(fileName);
-          }
-          if (this.emitFile(fileName)) {
-            this.events.emit(changed ? 'changed' : 'added', fileName);
-          }
-        })
-        .on('unlink', fileName => {
-          fileName = `${process.cwd()}/${fileName}`;
-          this.unload(fileName);
-          this.events.emit('removed', fileName);
-        });
+    watcher.on('all', ({ event, entry }: { event: string, entry: Entry }) => {
+      if (this.invalidWorkingSetFile(entry.file)) {
+        return;
+      }
+
+      if (event === 'added') {
+        this.rootFiles.push(entry.file);
+        this.files.set(entry.file, { version: 1 });
+        if (this.emitFile(entry.file)) {
+          this.events.emit(event, entry.file);
+        }
+      } else if (event === 'changed') {
+        const changed = this.files.has(entry.file);
+        if (changed) {
+          this.snaphost.delete(entry.file);
+          this.files.get(entry.file)!.version++;
+        } else {
+          this.files.set(entry.file, { version: 1 });
+          this.rootFiles.push(entry.file);
+        }
+        if (this.emitFile(entry.file)) {
+          this.events.emit(changed ? 'changed' : 'added', entry.file);
+        }
+      } else if (event === 'removed') {
+        this.unload(entry.file);
+        this.events.emit(event, entry.file);
+      }
     });
 
+    watcher.add([/.*[.]ts$/]); // Watch ts files
     return watcher;
   }
 
-  static logErrors(fileName: string, diagnostics?: ts.Diagnostic[]) {
-    // let allDiagnostics = this.langaugeService.getCompilerOptionsDiagnostics()
-    //   .concat(this.langaugeService.getSyntacticDiagnostics(fileName))
-    //   .concat(this.langaugeService.getSemanticDiagnostics(fileName));
+  static watchFiles() {
+    const ret = { src: this.buildWatcher('src') };
+    return ret;
+  }
 
+  static logErrors(fileName: string, diagnostics?: ts.Diagnostic[]) {
     if (!diagnostics || !diagnostics.length) {
       return false;
     }
@@ -337,6 +315,7 @@ export class Compiler {
   }
 
   static transpile(input: string, fileName: string) {
+    console.debug('Transpiling', fileName);
     const output = ts.transpileModule(input, {
       compilerOptions: this.options,
       fileName,
@@ -375,30 +354,12 @@ export class Compiler {
     }
     const start = Date.now();
 
-    this.rootFiles = bulkFindSync(this.workingSets, undefined, this.invalidWorkingSetFile);
+    this.rootFiles = bulkFindSync([/[^\/]+\/src\/.*[.]ts$/], `${this.cwd}/${Compiler.libraryPath}/@travetto`)
+      .concat(bulkFindSync([/.ts/], `${this.cwd}/src`))
+      .filter(x => !x.stats.isDirectory() && !this.invalidWorkingSetFile(x.file))
+      .map(x => x.file);
 
-    console.debug('Files', this.rootFiles.length);
-    console.debug(this.workingSets);
-
-    /*
-    this.servicesHost = {
-      getScriptFileNames: () => this.rootFiles,
-      getScriptVersion: (fileName) => this.files.has(fileName) ? this.files.get(fileName)!.version.toString() : '',
-      getScriptSnapshot: (fileName) => this.getSnapshot(fileName),
-      getCurrentDirectory: () => process.cwd(),
-      getCompilationSettings: () => this.options,
-      getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
-      fileExists: ts.sys.fileExists,
-      readFile: ts.sys.readFile,
-      directoryExists: ts.sys.directoryExists,
-      readDirectory: ts.sys.readDirectory,
-      getDirectories: ts.sys.getDirectories,
-      getCustomTransformers: () => this.transformers
-    };
-    */
-
-    // Create the language service files
-    // this.langaugeService = ts.createLanguageService(this.servicesHost, this.registry);
+    console.debug('Files', this.rootFiles);
 
     // Prime for type checker
     for (const fileName of this.rootFiles) {
@@ -408,7 +369,7 @@ export class Compiler {
 
     // Now let's watch the files
     if (AppEnv.watch) {
-      this.fileWatcher = this.watchFiles(this.rootFiles);
+      this.fileWatchers = this.watchFiles();
     }
 
     console.debug('Initialized', (Date.now() - start) / 1000);
@@ -416,7 +377,8 @@ export class Compiler {
 
   static resetFiles() {
     if (AppEnv.watch) {
-      this.fileWatcher.close();
+      Object.values(this.fileWatchers).map(x => x.close());
+      this.fileWatchers = {};
     }
     this.contents.clear();
     this.modules.clear();
