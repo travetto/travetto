@@ -1,7 +1,8 @@
-import { bulkRead, bulkReadSync, AppEnv, deepMerge, isPlainObject } from '@travetto/base';
+import { bulkRead, bulkReadSync, AppEnv, deepMerge, isPlainObject, bulkFindSync } from '@travetto/base';
 import * as flatten from 'flat';
 import * as yaml from 'js-yaml';
 import { EventEmitter } from 'events';
+import { readdirSync } from 'fs';
 
 const unflatten = flatten.unflatten;
 
@@ -121,10 +122,10 @@ export class ConfigLoader {
     }
 
     // Load all namespaces from core
-    let files = bulkReadSync('node_modules/@travetto/*/config/*.yml');
+    let files = bulkReadSync([/^node_modules\/@travetto\/.*\/config\/.*[.]yml$/]);
 
     // Load all configs, exclude env configs
-    files = files.concat(bulkReadSync('config/*.yml'));
+    files = files.concat(bulkReadSync([/^config\/.*[.]yml$/]));
 
     for (const file of files) {
       const ns = file.name.split('/').pop()!.split('.yml')[0];
@@ -136,19 +137,20 @@ export class ConfigLoader {
 
     if (AppEnv.all.length) {
       const loaded: string[] = [];
-      const envFiles = bulkReadSync(`env/*.yml`, undefined, x => {
-        const tested = x.split('/').pop()!.split('.yml')[0];
-        const found = AppEnv.is(tested)
+      const envFiles = bulkReadSync([/^env\/.*[.]yml$/]).reduce((acc, x) => {
+        const tested = x.name.split('/').pop()!.split('.yml')[0];
+        const found = AppEnv.is(tested);
         if (found) {
+          acc.push(x.data);
           loaded.push(tested);
         }
-        return !found;
-      });
+        return acc;
+      }, [] as string[]);
 
       console.debug('Found configurations for', loaded);
 
       for (const file of envFiles) {
-        yaml.safeLoadAll(file.data, doc => {
+        yaml.safeLoadAll(file, doc => {
           this.merge(this.data, doc);
         });
       }

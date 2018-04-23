@@ -1,22 +1,22 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
+    "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
-  }, 
+  },
   "dependencies": {
-    "@travetto/base": "0.x.x", 
-    "@types/flat": "0.0.28", 
-    "@types/js-yaml": "^3.10.1", 
-    "flat": "^4.0.0", 
+    "@travetto/base": "0.x.x",
+    "@types/flat": "0.0.28",
+    "@types/js-yaml": "^3.10.1",
+    "flat": "^4.0.0",
     "js-yaml": "^3.11.0"
-  }, 
-  "description": "", 
-  "license": "ISC", 
-  "main": "index.ts", 
-  "name": "@travetto/config", 
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "name": "@travetto/config",
   "repository": {
     "url": "https://github.com/travetto/config.git"
-  }, 
-  "scripts": {}, 
+  },
+  "scripts": {},
   "version": "0.0.13"
 }
