@@ -38,9 +38,13 @@ export function scanDir(handler: Handler, base?: string, curBase?: string) {
       curBase = curBase || base;
 
       for (const file of (await fsReaddir(base))) {
+        if (file.startsWith('.')) {
+          continue;
+        }
+
         const full = `${curBase}${path.sep}${file}`;
         const stats = await fsStat(full);
-        const entry: Entry = { stats, file };
+        const entry: Entry = { stats, file: full };
 
         if (stats.isDirectory()) {
           entry.children = await scanDir(handler, base, full);
@@ -48,7 +52,7 @@ export function scanDir(handler: Handler, base?: string, curBase?: string) {
           if (entry.children.length) {
             out.push(...entry.children);
           }
-        } else if (handler.test(entry.file.replace(base, ''), entry)) {
+        } else if (handler.test(entry.file.replace(base + path.sep, ''), entry)) {
           out.push(entry);
         }
         resolve(out);
@@ -80,9 +84,13 @@ export function scanDirSync(handler: Handler, base?: string, relBase?: string) {
   relBase = relBase || base;
 
   for (const file of fs.readdirSync(relBase)) {
+    if (file.startsWith('.')) {
+      continue;
+    }
+
     const full = `${relBase}${path.sep}${file}`;
     const stats = fs.lstatSync(full);
-    const entry: Entry = { stats, file };
+    const entry: Entry = { stats, file: full };
 
     if (stats.isDirectory()) {
       entry.children = scanDirSync(handler, base, full);
@@ -90,7 +98,7 @@ export function scanDirSync(handler: Handler, base?: string, relBase?: string) {
       if (entry.children.length) {
         out.push(...entry.children);
       }
-    } else if (handler.test(entry.file.replace(base, ''))) {
+    } else if (handler.test(entry.file.replace(base + path.sep, ''))) {
       out.push(entry);
     }
   }
