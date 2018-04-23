@@ -91,6 +91,10 @@ export class Watcher extends EventEmitter {
   }
 
   watch(entry: Entry) {
+    if (this.watched.has(entry.full)) {
+      return;
+    }
+
     this.watched.set(entry.full, entry);
 
     if (entry.stats.isDirectory()) { // Watch Directory
@@ -105,10 +109,11 @@ export class Watcher extends EventEmitter {
 
     fs.readdir(dir.full, (err, current) => {
       if (err) {
-        return this.emit('error', err);
-      }
-      if (!current) {
-        return;
+        if (err.code === 'ENOENT') {
+          current = [];
+        } else {
+          return this.emit('error', err);
+        }
       }
 
       // Convert to full paths
@@ -120,23 +125,25 @@ export class Watcher extends EventEmitter {
       // If file was deleted
       for (const child of previous) {
         if (current.indexOf(child.full) < 0) {
+
+          // Remove from watching
+          this.unwatch(child.full);
+          dir.children!.splice(dir.children!.indexOf(child));
+
           if (!child.stats.isDirectory()) {
-            if (dir) {
-              dir.children!.splice(dir.children!.indexOf(child));
-            }
-            this.unwatch(child.full);
-            this.emit('removed', child);
-            this.emit('all', { event: 'removed', entry: child })
+            this.emit('deleted', child);
+            this.emit('all', { event: 'deleted', entry: child })
           }
         }
       }
 
       // If file was added
       for (const next of current) {
-        if (!previous.find(p => p.full === next) && this.findHandlers.find(x => x.test(next))) {
+        const nextRel = next.replace(`${this.options.cwd}${path.sep}`, '');
+        if (!previous.find(p => p.full === next) && this.findHandlers.find(x => x.test(nextRel))) {
           const sub: Entry = {
             full: next,
-            relative: next.replace(`${this.options.cwd}${path.sep}`, ''),
+            relative: nextRel,
             stats: fs.lstatSync(next)
           }
           this.watch(sub);
@@ -155,24 +162,20 @@ export class Watcher extends EventEmitter {
     if (!entry.stats.isDirectory()) {
       throw new Error(`Not a directory: ${entry.full}`);
     }
-    let timeoutId: NodeJS.Timer;
+
     try {
-      const watcher = fs.watch(entry.full, (event) => {
-        // race condition. Let's give the fs a little time to settle down. so we
-        // don't fire events on non existent files.
-        clearTimeout(timeoutId);
-
-        timeoutId = setTimeout(() => {
-          // race condition. Ensure that this directory is still being watched
-          // before continuing.
-          if (!this.watchers.has(entry.full) || !fs.existsSync(entry.full)) {
-            return;
-          }
-
-          this.processDirectoryChange(entry);
-
-        }, delay + 100);
+      console.log('Watching', entry.full);
+      const watcher = fs.watch(entry.full, (event, f) => {
+        this.processDirectoryChange(entry);
       });
+
+      // Load any sub folders
+      for (const dir of bulkFindSync(this.findHandlers, entry.full)) {
+        if (dir.stats.isDirectory()) {
+          this.watch(dir);
+        }
+      }
+
 
       watcher.on('error', (err) => {
         this.handleError(err);
@@ -215,6 +218,8 @@ export class Watcher extends EventEmitter {
   }
 
   private unwatchDirectory(entry: Entry) {
+    console.log('Unwatching', entry.full);
+
     if (this.watchers.has(entry.full)) {
       for (const child of (entry.children || [])) {
         this.unwatch(child.full);
