@@ -105,8 +105,8 @@ export function scanDirSync(handler: Handler, base?: string, relBase?: string) {
   return out;
 }
 
-export function bulkRequire<T = any>(handlers: Handler[]): T[] {
-  return bulkFindSync(handlers)
+export function bulkRequire<T = any>(handlers: Handler[], cwd?: string): T[] {
+  return bulkFindSync(handlers, cwd)
     .filter(x => !x.stats.isDirectory()) // Skip folders
     .map(x => require(x.file))
     .filter(x => !!x); // Return non-empty values

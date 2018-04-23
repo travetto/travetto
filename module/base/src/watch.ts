@@ -19,6 +19,9 @@ export class Watcher extends EventEmitter {
   private pollers = new Map<string, (curr: fs.Stats, prev: fs.Stats) => void>();
   private findHandlers: Handler[] = [];
   private cached = new Map<string, (string | symbol)[]>();
+  private pendingWatched: Entry[] = [];
+  private pending = true;
+  private suppress = false;
 
   private options: Options;
 
@@ -38,19 +41,17 @@ export class Watcher extends EventEmitter {
       super.setMaxListeners(this.options.maxListeners);
     }
 
-    setImmediate(() => {
-      this.watch({
-        file: this.options.cwd,
-        stats: fs.lstatSync(this.options.cwd)
-      });
+    this.pendingWatched.push({
+      file: this.options.cwd,
+      stats: fs.lstatSync(this.options.cwd)
     });
   }
 
   handleError(err: Error & { code?: string }) {
     if (err.code === 'EMFILE') {
-      this.emit('error', new Error('EMFILE: Too many opened files.'));
+      this._emit('error', new Error('EMFILE: Too many opened files.'));
     }
-    this.emit('error', err);
+    this._emit('error', err);
   }
 
   close() {
@@ -66,7 +67,7 @@ export class Watcher extends EventEmitter {
     this.watched = new Map();
 
     setImmediate(() => {
-      this.emit('end');
+      this._emit('end');
       this.removeAllListeners();
     });
   };
@@ -78,8 +79,22 @@ export class Watcher extends EventEmitter {
 
     for (const entry of bulkFindSync(this.findHandlers, this.options.cwd)) {
       if (!this.watched.has(entry.file)) {
-        this.watch(entry);
+        if (this.pending) {
+          this.pendingWatched.push(entry);
+        } else {
+          this.watch(entry);
+        }
       }
+    }
+  }
+
+  run(listenInitial = true) {
+    this.pending = false
+    if (this.pendingWatched.length) {
+      this.suppress = !listenInitial;
+      this.pendingWatched.map(x => this.watch(x));
+      this.pendingWatched = [];
+      setImmediate(() => this.suppress = false);
     }
   }
 
@@ -105,7 +120,7 @@ export class Watcher extends EventEmitter {
         if (err.code === 'ENOENT') {
           current = [];
         } else {
-          return this.emit('error', err);
+          return this._emit('error', err);
         }
       }
 
@@ -124,8 +139,8 @@ export class Watcher extends EventEmitter {
           dir.children!.splice(dir.children!.indexOf(child), 1);
 
           if (!child.stats.isDirectory()) {
-            this.emit('removed', child);
-            this.emit('all', { event: 'removed', entry: child })
+            this._emit('removed', child);
+            this._emit('all', { event: 'removed', entry: child })
           }
         }
       }
@@ -146,12 +161,18 @@ export class Watcher extends EventEmitter {
           dir.children!.push(sub);
 
           if (!sub.stats.isDirectory()) {
-            this.emit('added', sub);
-            this.emit('all', { event: 'added', entry: sub })
+            this._emit('added', sub);
+            this._emit('all', { event: 'added', entry: sub })
           }
         }
       }
     });
+  }
+
+  private _emit(type: string, payload?: any) {
+    if (!this.suppress) {
+      this.emit(type, payload);
+    }
   }
 
   private watchDirectory(entry: Entry) {
@@ -191,8 +212,8 @@ export class Watcher extends EventEmitter {
       // Only emit changed if the file still exists
       // Prevents changed/deleted duplicate events
       if (fs.existsSync(entry.file)) {
-        this.emit('changed', entry);
-        this.emit('all', { event: 'changed', entry })
+        this._emit('changed', entry);
+        this._emit('all', { event: 'changed', entry })
       }
     });
 
