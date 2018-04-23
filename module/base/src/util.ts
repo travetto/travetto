@@ -3,7 +3,7 @@ export function isPrimitive(el: any): el is (string | boolean | number | RegExp)
   return el !== null && el !== undefined && (type === 'string' || type === 'boolean' || type === 'number' || el instanceof RegExp);
 }
 
-export function isPlainObject(obj: any): obj is object {
+export function isPlainObject(obj: any): obj is { [key: string]: any } {
   return typeof obj === 'object' // separate from primitives
     && obj !== undefined
     && obj !== null         // is obvious
