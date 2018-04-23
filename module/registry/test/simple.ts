@@ -8,4 +8,7 @@ export class Test6 {
   age() {
     return 5;
   }
+  weight() {
+    return 33;
+  }
 }

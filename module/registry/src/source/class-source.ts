@@ -23,7 +23,10 @@ export class CompilerClassSource implements ChangeSource<Class> {
   }
 
   async init() {
-    const files = await bulkFind(Compiler.workingSets, undefined, Compiler.invalidWorkingSetFile);
+    const entries = await bulkFind([/.*[.]ts$/], `${Compiler.cwd}/src`);
+    const files = entries
+      .filter(x => !x.stats.isDirectory() && !Compiler.invalidWorkingSetFile(x.file))
+      .map(x => x.file)
 
     const extra: string[] = [];
 
