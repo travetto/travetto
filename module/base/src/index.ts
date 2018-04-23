@@ -6,3 +6,4 @@ export * from './stacktrace';
 export * from './error';
 export * from './shutdown';
 export * from './util';
+export * from './watch';
