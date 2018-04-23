@@ -29,20 +29,20 @@ export async function bulkFind(handlers: Handler[], base?: string) {
   return out;
 }
 
-export function scanDir(handler: Handler, base?: string, curBase?: string) {
+export function scanDir(handler: Handler, base?: string, relBase?: string) {
   return new Promise<Entry[]>(async (resolve, reject) => {
     try {
       const out: Entry[] = [];
 
       base = base || process.cwd();
-      curBase = curBase || base;
+      relBase = relBase || base;
 
-      for (const file of (await fsReaddir(base))) {
+      for (const file of (await fsReaddir(relBase))) {
         if (file.startsWith('.')) {
           continue;
         }
 
-        const full = `${curBase}${path.sep}${file}`;
+        const full = `${relBase}${path.sep}${file}`;
         const stats = await fsStat(full);
         const entry: Entry = { stats, file: full };
 
