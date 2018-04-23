@@ -114,11 +114,14 @@ export function bulkRequire<T = any>(handlers: Handler[]): T[] {
 
 export async function bulkRead(handlers: Handler[]) {
   const files = await bulkFind(handlers);
-  const promises = files.map(x => fsReadFileAsync(x.file).then(d => ({ name: x.file, data: d.toString() })));
+  const promises = files
+    .filter(x => !x.stats.isDirectory())
+    .map(x => fsReadFileAsync(x.file).then(d => ({ name: x.file, data: d.toString() })));
   return await Promise.all(promises);
 }
 
 export function bulkReadSync(handlers: Handler[]) {
-  const files = bulkFindSync(handlers);
-  return files.map(x => ({ name: x.file, data: fs.readFileSync(x.file).toString() }));
+  return bulkFindSync(handlers)
+    .filter(x => !x.stats.isDirectory())
+    .map(x => ({ name: x.file, data: fs.readFileSync(x.file).toString() }));
 }
