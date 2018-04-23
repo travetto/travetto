@@ -71,3 +71,22 @@ function _deepMerge(a: any, b: any, level = 0) {
 export function deepMerge<T extends any, U extends any>(a: T, b: U): T & U {
   return _deepMerge(a, b, 0) as T & U;
 }
+
+export function throttle(fn: (...args: any[]) => any, threshhold = 250) {
+  let last = 0;
+  let deferTimer: NodeJS.Timer;
+  return function (...args: any[]) {
+    const now = Date.now();
+    if (last && now < last + threshhold) {
+      // hold on to it
+      clearTimeout(deferTimer);
+      deferTimer = setTimeout(function () {
+        last = now;
+        fn.apply(null, args);
+      }, threshhold);
+    } else {
+      last = now;
+      fn.apply(null, args);
+    }
+  };
+}

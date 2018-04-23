@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Entry, Handler, bulkFindSync } from './bulk-find';
+import { throttle } from '.';
 
 interface Options {
   maxListeners?: number;
@@ -26,8 +27,8 @@ export class Watcher extends EventEmitter {
 
     this.options = {
       maxListeners: opts.maxListeners,
-      interval: opts.interval || 100,
-      debounceDelay: opts.debounceDelay || 500,
+      interval: opts.interval || 250,
+      debounceDelay: opts.debounceDelay || 250,
       cwd: opts.cwd || process.cwd()
     };
 
@@ -43,8 +44,6 @@ export class Watcher extends EventEmitter {
         stats: fs.lstatSync(this.options.cwd)
       });
     });
-
-    debugger;
   }
 
   handleError(err: Error & { code?: string }) {
@@ -122,7 +121,7 @@ export class Watcher extends EventEmitter {
 
           // Remove from watching
           this.unwatch(child.file);
-          dir.children!.splice(dir.children!.indexOf(child));
+          dir.children!.splice(dir.children!.indexOf(child), 1);
 
           if (!child.stats.isDirectory()) {
             this.emit('removed', child);
@@ -131,12 +130,17 @@ export class Watcher extends EventEmitter {
         }
       }
 
+      const prevSet = new Set(previous.map(x => x.file));
+
       // If file was added
       for (const next of current) {
-        if (!previous.find(p => p.file === next) && this.findHandlers.find(x => x.test(next.replace(this.options.cwd, '')))) {
+        const nextRel = next.replace(this.options.cwd, '');
+        const nextStats = fs.lstatSync(next);
+
+        if (!prevSet.has(next) && (nextStats.isDirectory() || this.findHandlers.find(x => x.test(nextRel)))) {
           const sub: Entry = {
             file: next,
-            stats: fs.lstatSync(next)
+            stats: nextStats
           }
           this.watch(sub);
           dir.children!.push(sub);
@@ -156,10 +160,10 @@ export class Watcher extends EventEmitter {
     }
 
     try {
-      console.log('Watching', entry.file);
-      const watcher = fs.watch(entry.file, (event, f) => {
+      console.debug('Watching Directory', entry.file);
+      const watcher = fs.watch(entry.file, throttle((event, f) => {
         this.processDirectoryChange(entry);
-      });
+      }, this.options.debounceDelay));
 
       watcher.on('error', (err) => {
         this.handleError(err);
@@ -178,6 +182,8 @@ export class Watcher extends EventEmitter {
     if (entry.stats.isDirectory()) {
       throw new Error(`Not a file: ${entry.file}`);
     }
+
+    console.debug('Watching File', entry.file);
 
     const opts = { persistent: true, interval: this.options.interval };
 
@@ -199,15 +205,17 @@ export class Watcher extends EventEmitter {
 
   private unwatchFile(entry: Entry) {
     if (this.pollers.has(entry.file)) {
+      console.debug('Unwatching File', entry.file);
+
       fs.unwatchFile(entry.file, this.pollers.get(entry.file)!);
       this.pollers.delete(entry.file);
     }
   }
 
   private unwatchDirectory(entry: Entry) {
-    console.log('Unwatching', entry.file);
-
     if (this.watchers.has(entry.file)) {
+      console.debug('Unwatching Directory', entry.file);
+
       for (const child of (entry.children || [])) {
         this.unwatch(child.file);
       }
