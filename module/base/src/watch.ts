@@ -45,10 +45,12 @@ export class Watcher extends EventEmitter {
     setImmediate(() => {
       this.watch({
         full: this.options.cwd,
-        relative: this.options.cwd,
+        relative: '',
         stats: fs.lstatSync(this.options.cwd)
       });
     });
+
+    debugger;
   }
 
   handleError(err: Error & { code?: string }) {
@@ -99,6 +101,8 @@ export class Watcher extends EventEmitter {
   }
 
   private processDirectoryChange(dir: Entry) {
+    dir.children = dir.children || [];
+
     fs.readdir(dir.full, (err, current) => {
       if (err) {
         return this.emit('error', err);
@@ -117,14 +121,12 @@ export class Watcher extends EventEmitter {
       for (const child of previous) {
         if (current.indexOf(child.full) < 0) {
           if (!child.stats.isDirectory()) {
-            const parent = path.dirname(dir.full);
-            const parentEntry = this.watched.get(parent);
-            if (parentEntry) {
-              parentEntry.children!.splice(parentEntry.children!.indexOf(child));
+            if (dir) {
+              dir.children!.splice(dir.children!.indexOf(child));
             }
             this.unwatch(child.full);
-            this.emit('deleted', child);
-            this.emit('all', { event: 'deleted', entry: child })
+            this.emit('removed', child);
+            this.emit('all', { event: 'removed', entry: child })
           }
         }
       }
@@ -138,14 +140,12 @@ export class Watcher extends EventEmitter {
             stats: fs.lstatSync(next)
           }
           this.watch(sub);
-          const parent = path.dirname(dir.full);
-          const parentEntry = this.watched.get(parent);
-          if (parentEntry) {
-            parentEntry.children = parentEntry.children || [];
-            parentEntry.children.push(sub);
+          dir.children!.push(sub);
+
+          if (!sub.stats.isDirectory()) {
+            this.emit('added', sub);
+            this.emit('all', { event: 'added', entry: sub })
           }
-          this.emit('added', sub);
-          this.emit('all', { event: 'added', entry: sub })
         }
       }
     });
