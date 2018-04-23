@@ -170,12 +170,21 @@ export class Watcher extends EventEmitter {
       });
 
       // Load any sub folders
-      for (const dir of bulkFindSync(this.findHandlers, entry.full)) {
-        if (dir.stats.isDirectory()) {
-          this.watch(dir);
+      for (const child of fs.readdirSync(entry.full)) {
+        const full = `${entry.full}${path.sep}${child}`;
+        const stats = fs.lstatSync(full);
+        if (stats.isDirectory()) {
+          const sub = {
+            full,
+            relative: `${entry.relative}${path.sep}${child}`,
+            stats,
+            children: []
+          };
+          entry.children = entry.children || [];
+          entry.children.push(sub);
+          this.watch(sub);
         }
       }
-
 
       watcher.on('error', (err) => {
         this.handleError(err);
@@ -236,6 +245,8 @@ export class Watcher extends EventEmitter {
       return;
     }
     const entry = this.watched.get(file)!;
+    this.watched.delete(file);
+
     if (entry.stats.isDirectory()) {
       this.unwatchDirectory(entry);
     } else {
