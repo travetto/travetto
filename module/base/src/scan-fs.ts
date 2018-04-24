@@ -5,6 +5,7 @@ import * as util from 'util';
 const fsReadFileAsync = util.promisify(fs.readFile);
 const fsStat = util.promisify(fs.lstat);
 const fsReaddir = util.promisify(fs.readdir);
+const fsUnlink = util.promisify(fs.unlink);
 
 export interface Entry {
   file: string;
@@ -124,4 +125,19 @@ export function bulkReadSync(handlers: Handler[]) {
   return bulkFindSync(handlers)
     .filter(x => !x.stats.isDirectory())
     .map(x => ({ name: x.file, data: fs.readFileSync(x.file).toString() }));
+}
+
+async function rimraf(pth: string) {
+  const files = await scanDir(/.*/, pth);
+  for (const filter of [
+    (x: Entry) => !x.stats.isDirectory(),
+    (x: Entry) => x.stats.isDirectory()
+  ]) {
+    await Promise.all(
+      files
+        .filter(filter)
+        .map(x => fsUnlink(x.file)
+          .catch(e => { console.error(`Unable to delete ${e.file}`) }))
+    );
+  }
 }

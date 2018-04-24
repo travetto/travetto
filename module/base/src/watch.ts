@@ -2,7 +2,7 @@ import * as util from 'util';
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Entry, Handler, bulkFindSync } from './bulk-find';
+import { Entry, Handler, bulkFindSync } from './scan-fs';
 import { throttle } from '.';
 
 interface Options {

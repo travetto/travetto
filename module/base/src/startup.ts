@@ -1,7 +1,7 @@
 import { AppEnv } from './env';
 import { initStackHandler } from './stacktrace';
 import { Shutdown } from './shutdown';
-import { bulkRequire, Handler } from './bulk-find';
+import { bulkRequire, Handler } from './scan-fs';
 
 export const initializers =
   bulkRequire<{ init: { action: Function, priority?: number } }>([
