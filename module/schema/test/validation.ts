@@ -30,7 +30,7 @@ class MinTest extends SchemaBound {
 @Schema()
 class Address {
   street1: string;
-  city: string;
+  city?: string;
   zip: 200 | 500;
 }
 
