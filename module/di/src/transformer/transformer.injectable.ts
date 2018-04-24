@@ -21,7 +21,6 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
 
     let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
 
-
     let original = undefined;
 
     const callExpr = (injection && injection.expression as any as ts.CallExpression);
@@ -186,11 +185,11 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
       const callExpr = (foundDec && foundDec.expression as any as ts.CallExpression);
       if (callExpr) {
-        const args = callExpr.arguments! || [];
+        const callArgs = callExpr.arguments! || [];
         // Handle special case
-        if (args[0] && ts.isIdentifier(args[0])) {
-          original = args[0];
-          injectConfig = args[1] as any;
+        if (callArgs[0] && ts.isIdentifier(callArgs[0])) {
+          original = callArgs[0];
+          injectConfig = callArgs[1] as any;
         }
       }
 
