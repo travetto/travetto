@@ -1,7 +1,5 @@
 travetto: Util
 ===
 
-This module provides some common utilities.  They can be broken into:
+Common utilities for executing HTTP requests and any other future catch alls. 
 
-   - Process execution
-   - Net request
