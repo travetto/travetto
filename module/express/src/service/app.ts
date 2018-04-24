@@ -5,7 +5,6 @@ import { RouteUtil } from '../util';
 import { ControllerConfig } from '../model';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { ControllerRegistry } from './registry';
-import { toPromise } from '@travetto/util';
 import { ExpressOperator } from './operator';
 import { Class } from '@travetto/registry';
 
@@ -96,10 +95,10 @@ export class ExpressApp {
     console.log('Controller Instance', config.class.name, instance);
 
     for (const handler of config.handlers) {
-      handler.filters = [...config.filters!, ...handler.filters!].map(toPromise).map(x => RouteUtil.asyncHandler(x));
+      handler.filters = [...config.filters!, ...handler.filters!].map(RouteUtil.toPromise).map(x => RouteUtil.asyncHandler(x));
       handler.path = RouteUtil.buildPath(config.path, handler.path);
       handler.handler = RouteUtil.asyncHandler(
-        toPromise(handler.handler.bind(instance)),
+        RouteUtil.toPromise(handler.handler.bind(instance)),
         RouteUtil.outputHandler.bind(null, handler))
     }
 

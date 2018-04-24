@@ -10,7 +10,7 @@ import { ExpressApp } from './app';
 import { DependencyRegistry } from '@travetto/di';
 import { MetadataRegistry, Class } from '@travetto/registry';
 
-export class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHandler> {
+class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHandler> {
 
   constructor() {
     super(DependencyRegistry);
