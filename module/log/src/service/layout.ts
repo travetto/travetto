@@ -30,7 +30,6 @@ const LOG_STYLES: { [key: string]: string[] } = {
   FATAL: ['cyan', 'inverse']
 };
 
-
 function processEvent(ev: log4js.LogEvent, opts: JsonLayout | StandardLayout) {
   const out: LogContext = {
     timestamp: new Date(ev.startTime).toISOString().split('.')[0],
@@ -89,7 +88,7 @@ export const Layouts: { [key: string]: (opts: any) => log4js.Layout } = {
         if (opts.colorize) {
           timestamp = stylize(timestamp, 'white', 'bold');
         }
-        out += timestamp + ' ';
+        out = `${out}${timestamp} `;
       }
       if (opts.level === undefined || !!opts.level) {
         let level = ctx.level;
@@ -99,13 +98,13 @@ export const Layouts: { [key: string]: (opts: any) => log4js.Layout } = {
         if (opts.align) {
           level += ' '.repeat(8 - ctx.level.length);
         }
-        out += level + ' ';
+        out = `${out}${level} `;
       }
       if (ctx.category) {
-        out += '[' + ctx.category + '] ';
+        out = `${out}[${ctx.category}] `;
       }
       if (ctx.message) {
-        out += ctx.message + ' ';
+        out = `${out}${ctx.message} `;
       }
       return out.substring(0, out.length - 1);
     }

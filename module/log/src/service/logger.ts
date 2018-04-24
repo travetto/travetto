@@ -39,7 +39,6 @@ export class Logger {
 
     this.logger = log4js.getLogger();
 
-
     if (this.config.appenders.console) {
       this.bindToConsole();
     }
