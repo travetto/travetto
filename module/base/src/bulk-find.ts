@@ -55,8 +55,8 @@ export function scanDir(handler: Handler, base?: string, relBase?: string) {
         } else if (handler.test(entry.file.replace(base + path.sep, ''), entry)) {
           out.push(entry);
         }
-        resolve(out);
       }
+      resolve(out);
     } catch (e) {
       reject(e);
     }
