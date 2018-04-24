@@ -1,18 +1,41 @@
 travetto: Config 
 ===
 
-This module provides common infrastructure for application based initialization.  There is a common
-infrastructure pattern used:
-  - Configuration
-    - A scan for all `src/app/**/config.ts`.  
-    - Each `config.ts` file must call `registerNamespace` to define a new configuration 
-      namespace.  
-    - Every configuration property can be overridden via environment variables (case-insensitive).
-       - Object navigation is separated by underscores
-       - e.g. `MAIL_TRANSPORT_HOST` would override `mail.transport.host` and specifically `transport.host`
-         in the `mail` namespace.
-    - All configuration variables should be loaded before any modules use it. 
-    - `config.ts` should not require any code from your modules to ensure the order of loading 
-  - Bootstrap
-    - Supports initializing the application, and then requiring classes using a glob pattern 
-      to handle the common initialization process.
+Common functionality for reading configuration from yaml files, and allowing overriding at execution time
+  - Process all config information:
+    - `node_modules/@travetto/*/config/*.yml`
+    - `config/*.yml`
+    - `env/<env>.yml`
+    - `process.env` (override only)
+  - Depending on which environments are specified, will selectively load `env/<env>.yml` files
+  - Every configuration property can be overridden via environment variables (case-insensitive).
+     - Object navigation is separated by underscores
+     - e.g. `MAIL_TRANSPORT_HOST` would override `mail.transport.host` and specifically `transport.host`
+       in the `mail` namespace.
+
+Provides a decorator, `@Config("namespace")` that allows for classes to automatically bind config information
+on post construct. The decorator will install a `postConstruct` method if not already defined.  This is a hook
+that is used by other modules.
+
+```typescript config.ts
+@Config('sample')
+class SampleConfig {
+  private host: string;
+  private port: number;
+  private creds = {
+    user: '',
+    password: ''
+  };
+}
+```
+
+And the corresponding config file
+
+```yaml app.yml
+- sample
+  host: google.com
+  port: 80
+  creds:
+    user: bob
+    password: bobspw
+```
