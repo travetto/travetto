@@ -127,7 +127,7 @@ export function bulkReadSync(handlers: Handler[]) {
     .map(x => ({ name: x.file, data: fs.readFileSync(x.file).toString() }));
 }
 
-async function rimraf(pth: string) {
+export async function rimraf(pth: string) {
   const files = await scanDir(/.*/, pth);
   for (const filter of [
     (x: Entry) => !x.stats.isDirectory(),
