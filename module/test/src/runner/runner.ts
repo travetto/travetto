@@ -93,7 +93,7 @@ export class Runner {
 
   async getFiles() {
     const globs = this.state['--'].length ? this.state['--'] : this.state._.slice(2); // strip off node and worker name
-    let files = await ExecuteUtil.getTests(globs);
+    let files = await ExecuteUtil.getTests(globs.map(x => new RegExp(x)));
 
     files = files.map(x => x.split(`${process.cwd()}/`)[1]);
 

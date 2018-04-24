@@ -107,10 +107,14 @@ export class ExecuteUtil {
     });
   }
 
-  static async getTests(globs: string[]) {
-    const files = await bulkFind(globs);
-    const all = await Promise.all(files.map(async (f) => [f, await this.isTest(f)] as [string, boolean]));
-    return all.filter(x => x[1]).map(x => x[0]);
+  static async getTests(globs: RegExp[]) {
+    const files = (await bulkFind(globs))
+      .filter(x => !x.stats.isDirectory())
+      .map(f => this.isTest(f.file).then(valid => ({ file: f.file, valid })));
+
+    return (await Promise.all(files))
+      .filter(x => x.valid)
+      .map(x => x.file);
   }
 
   static checkError(test: TestConfig, err: Error | string | undefined) {
