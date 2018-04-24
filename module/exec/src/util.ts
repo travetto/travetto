@@ -1,6 +1,7 @@
 import * as cp from 'child_process';
 import * as crossSpawn from 'cross-spawn';
 import { ExecutionOptions, ExecutionResult } from './types';
+import { scanDir, Entry } from '@travetto/base';
 
 export function enhanceProcess(p: cp.ChildProcess, options: ExecutionOptions) {
   const timeout = options.timeout;

@@ -1,15 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as rimraf from 'rimraf';
 import * as util from 'util';
 import * as child_process from 'child_process';
 
 import { CommonProcess, ChildOptions, ExecutionResult } from './types';
 import { spawn, WithOpts } from './util';
+import { scanDir, Entry, rimraf } from '@travetto/base';
 
 const mkdir = util.promisify(fs.mkdir);
 const writeFile = util.promisify(fs.writeFile);
-const rimrafProm = util.promisify(rimraf);
 
 function exec(command: string, opts?: WithOpts<child_process.SpawnOptions>) {
   return spawn(command, opts)[1];
@@ -97,7 +96,7 @@ export class DockerContainer {
 
   async cleanup() {
     try {
-      await rimrafProm(`${this.workspace}/*`);
+      await rimraf(`${this.workspace}/*`);
     } catch (e) { /* ignore */ }
   }
 
