@@ -1,13 +1,31 @@
 travetto: Test
 ===
 
-This module provides general integration with `ava`:
+This is a custom framework for testing, that produces `TAP` output, it also directly integrates with the `test-plugin` to provide
+realtime feedback durring development.  It is a declarative framework, relying on decorators to define tests and suites.
 
-   - Will auto execute the `bootstrap` to provide typescript.
-   - Auto-initialize of the application using the `test` environment. 
-   - We provide user interface (`mocha` parlance for test suite interface) that extends from `bdd` 
-     but allows for a few key niceties: 
-       - The ability to globally define `beforeEach`, `afterEach`, `before`, and `after`. 
-       - The ability to register methods that must be run before the testing can start.
-   - Will look for `src/test/setup.ts` as a file to initialize the tests.
-   - All tests will be looked for in `src/test/`
+Test suites are generally defined by the `@Suite` annotation, and tests are defined as methods on the class, using the `@Test` annotation.
+
+```typescript test.ts
+@Suite()
+class SimpleTest {
+
+  @Test()
+  async test1() {
+    let val = await doLongOp();s
+    assert(val === 5);
+  }
+
+  @Test()
+  test2() {
+    assert(/abc/.test(text));
+  }
+
+}
+```
+
+Additionaly, the code utilizes AST transformations to:
+- Record line number data finding tests by line number
+- Translate `assert` calls into a richer format to provide better feedback, and to allow for emitting `assert` for recording results.
+
+All tests are required to be in `test/` given how the code searching operates.
