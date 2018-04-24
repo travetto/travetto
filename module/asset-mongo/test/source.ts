@@ -5,7 +5,7 @@ import * as util from 'util';
 import { AssetService, AssetUtil, Asset } from '@travetto/asset';
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
 import { DependencyRegistry, Injectable } from '@travetto/di';
-import { assert } from 'console';
+import * as assert from 'assert';
 import { MongoSource } from '../src/service/source';
 import { MongoAssetConfig } from '../src/service/config';
 
