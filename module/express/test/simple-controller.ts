@@ -2,9 +2,6 @@ import { Controller, Get } from '../src';
 import { MockService } from './mock';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 
-// const papaparse = require('papaparse');
-// import * as papaparse from 'papaparse';
-
 @Controller('/simple')
 export class Simple {
 
