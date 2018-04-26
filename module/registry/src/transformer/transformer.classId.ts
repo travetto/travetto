@@ -68,14 +68,18 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 export const ClassIdTransformer = {
   transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
-    let fileRoot = file.fileName.split(process.cwd() + SEP)[1];
-    let ns = '@app';
-    if (fileRoot.startsWith(`node_modules${SEP}`)) {
-      fileRoot = fileRoot.split(`node_modules${SEP}`).pop()!;
-      if (fileRoot.startsWith('@')) {
-        const [ns1, ns2, ...rest] = fileRoot.split(SEP);
-        ns = `${ns1}.${ns2}`;
-        fileRoot = rest.join(SEP);
+    let fileRoot = file.fileName;
+
+    if (fileRoot.includes(process.cwd())) {
+      fileRoot = file.fileName.split(process.cwd() + SEP)[1];
+      let ns = '@app';
+      if (fileRoot.startsWith(`node_modules${SEP}`)) {
+        fileRoot = fileRoot.split(`node_modules${SEP}`).pop()!;
+        if (fileRoot.startsWith('@')) {
+          const [ns1, ns2, ...rest] = fileRoot.split(SEP);
+          ns = `${ns1}.${ns2}`;
+          fileRoot = rest.join(SEP);
+        }
       }
     }
 
