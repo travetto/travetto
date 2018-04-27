@@ -70,9 +70,11 @@ export const ClassIdTransformer = {
   transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
     let fileRoot = file.fileName;
 
+    let ns = '@sys';
+
     if (fileRoot.includes(process.cwd())) {
       fileRoot = file.fileName.split(process.cwd() + SEP)[1];
-      let ns = '@app';
+      ns = '@app';
       if (fileRoot.startsWith(`node_modules${SEP}`)) {
         fileRoot = fileRoot.split(`node_modules${SEP}`).pop()!;
         if (fileRoot.startsWith('@')) {
