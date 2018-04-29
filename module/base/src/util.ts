@@ -23,56 +23,57 @@ export function isSimple(a: any) {
   return isPrimitive(a) || isFunction(a) || isClass(a);
 }
 
+function shallowClone(a: any) {
+  return Array.isArray(a) ? a.slice(0) : (isSimple(a) ? a : { ...a });
+}
+
 function _deepMerge(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose') {
   const isEmptyA = a === undefined || a === null;
   const isEmptyB = b === undefined || b === null;
   const isArrA = Array.isArray(a);
   const isArrB = Array.isArray(b);
+  const isSimpA = !isEmptyA && isSimple(a);
+  const isSimpB = !isEmptyB && isSimple(b);
 
-  if (isArrB) { // Arrays
-    const bArr = b;
-    if (a && !isArrA) {
-      throw new Error(`Cannot merge non-array ${a} with array ${b}`);
-    } else if (!a) {
-      return bArr.slice(0);
-    } else {
-      const aArr = (a as any as any[]).slice(0);
-      for (let i = 0; i < bArr.length; i++) {
-        aArr[i] = _deepMerge(aArr[i], bArr[i], mode);
-      }
-      a = aArr;
+  let ret: any;
+
+  if (isEmptyA || isEmptyB) { // If no `a`, `b` always wins
+    ret = b === null ? b : shallowClone(b || a);
+  } else {
+    if (isArrA !== isArrB || isSimpA !== isSimpB) {
+      throw new Error(`Cannot merge differing types ${a} and ${b}`);
     }
-  } else if (b === null || isSimple(b)) { // Scalars
-    if (!isEmptyA) {
-      if (!isSimple(a)) {
-        throw new Error(`Cannot merge primitive ${b} with ${a}`);
-      } else {
-        const match = typeof a === typeof b;
-        if (!match) {
-          if (mode === 'strict') {
-            throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
-          } else if (mode === 'coerce') {
-            switch (typeof a) {
-              case 'string': b = `${b}`; break;
-              case 'number': b = `${b}`.indexOf('.') >= 0 ? parseFloat(`${b}`) : parseInt(`${b}`, 10); break;
-              case 'boolean': b = !!b; break;
-            }
+    if (isArrB) { // Arrays
+      ret = a.slice(0);
+      for (let i = 0; i < b.length; i++) {
+        ret[i] = _deepMerge(ret[i], b[i], mode);
+      }
+    } else if (isSimpB) { // Scalars
+      const match = typeof a === typeof b;
+      ret = b;
+
+      if (!match) { // If types do not match
+        if (mode === 'strict') { // Bail on strict
+          throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
+        } else if (mode === 'coerce') { // Force on coerce
+          switch (typeof a) {
+            case 'string': ret = `${b}`; break;
+            case 'number': ret = `${b}`.indexOf('.') >= 0 ? parseFloat(`${b}`) : parseInt(`${b}`, 10); break;
+            case 'boolean': ret = !!b; break;
+            default:
+              throw new Error(`Unknown type ${typeof a}`);
           }
         }
       }
-    }
-    a = b;
-  } else if (!isEmptyB) { // Object merge
-    if (isEmptyA) {
-      a = {};
-    }
+    } else { // Object merge
+      ret = { ...a };
 
-    for (const key of Object.keys(b)) {
-      a[key] = _deepMerge(a[key], b[key], mode);
+      for (const key of Object.keys(b)) {
+        ret[key] = _deepMerge(ret[key], b[key], mode);
+      }
     }
   }
-
-  return a;
+  return ret;
 }
 
 export function deepMerge<T extends any, U extends any>(a: T, b: U, mode: 'loose' | 'strict' | 'coerce' = 'loose'): T & U {

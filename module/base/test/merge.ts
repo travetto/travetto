@@ -1,6 +1,5 @@
-import { deepMerge, isPrimitive } from '../src/util';
+import { deepMerge, isPrimitive, isFunction } from '../src/util';
 import * as assert from 'assert';
-import { isFunction } from 'util';
 
 class Test { }
 
@@ -37,6 +36,10 @@ function testMerge() {
   assert(merged.file === left.file);
 
   assert.strictEqual(deepMerge({ a: {} }, { a: { b: Test } }).a.b, Test);
+
+  assert(deepMerge({ a: { b: 5 } }, { a: null }).a === null);
+  assert.deepEqual(deepMerge({ a: { b: 5 } }, { a: undefined }).a, { b: 5 });
+
 }
 
 function testStrict() {
@@ -49,7 +52,8 @@ function testCoerce() {
   assert(deepMerge({ a: 1 }, { a: '5' }, 'coerce').a === 5);
   assert(deepMerge({ a: '1' }, { a: 5 }, 'coerce').a === '5');
   assert(isNaN(deepMerge({ a: 1 }, { a: true }, 'coerce').a));
-  assert(deepMerge({ a: true }, { a: null }, 'coerce').a === false);
+  assert(deepMerge({ a: true }, { a: null }, 'coerce').a === null);
+  assert(deepMerge({ a: true }, { a: null }, 'coerce').a === null);
 }
 
 testPrimitive();
