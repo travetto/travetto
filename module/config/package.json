@@ -5,9 +5,7 @@
   }, 
   "dependencies": {
     "@travetto/base": "0.x.x", 
-    "@types/flat": "0.0.28", 
     "@types/js-yaml": "^3.10.1", 
-    "flat": "^4.0.0", 
     "js-yaml": "^3.11.0"
   }, 
   "description": "", 
@@ -18,5 +16,5 @@
     "url": "https://github.com/travetto/config.git"
   }, 
   "scripts": {}, 
-  "version": "0.0.14"
+  "version": "0.0.15"
 }
