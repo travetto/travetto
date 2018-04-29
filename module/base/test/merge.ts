@@ -39,7 +39,20 @@ function testMerge() {
   assert.strictEqual(deepMerge({ a: {} }, { a: { b: Test } }).a.b, Test);
 }
 
-// setTimeout(() => {
+function testStrict() {
+  assert.throws(() =>
+    deepMerge({ a: 1 }, { a: '5' }, 'strict')
+  );
+}
+
+function testCoerce() {
+  assert(deepMerge({ a: 1 }, { a: '5' }, 'coerce').a === 5);
+  assert(deepMerge({ a: '1' }, { a: 5 }, 'coerce').a === '5');
+  assert(isNaN(deepMerge({ a: 1 }, { a: true }, 'coerce').a));
+  assert(deepMerge({ a: true }, { a: null }, 'coerce').a === false);
+}
+
 testPrimitive();
 testMerge();
-// }, 1);
+testStrict();
+testCoerce();

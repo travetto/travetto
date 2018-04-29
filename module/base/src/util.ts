@@ -23,53 +23,63 @@ export function isSimple(a: any) {
   return isPrimitive(a) || isFunction(a) || isClass(a);
 }
 
-function _deepMerge(a: any, b: any, level = 0) {
+function _deepMerge(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose') {
   const isEmptyA = a === undefined || a === null;
   const isEmptyB = b === undefined || b === null;
   const isArrA = Array.isArray(a);
   const isArrB = Array.isArray(b);
 
-  if (isEmptyB) {
-    return a;
-  }
-
-  if (isSimple(b)) { // Scalars
-    if (isEmptyA || isSimple(a)) {
-      a = b;
-    } else {
-      throw new Error(`Cannot merge primitive ${b} with ${a}`);
-    }
-  } else if (isArrB) { // Arrays
+  if (isArrB) { // Arrays
     const bArr = b;
-    if (a === undefined) {
+    if (a && !isArrA) {
+      throw new Error(`Cannot merge non-array ${a} with array ${b}`);
+    } else if (!a) {
       return bArr.slice(0);
-    } else if (isArrA) {
+    } else {
       const aArr = (a as any as any[]).slice(0);
       for (let i = 0; i < bArr.length; i++) {
-        aArr[i] = _deepMerge(aArr[i], bArr[i], level + 1);
+        aArr[i] = _deepMerge(aArr[i], bArr[i], mode);
       }
       a = aArr;
-    } else if (b !== undefined) {
-      throw new Error(`Cannot merge ${b} with ${a}`);
     }
-  } else { // Object
-    if (isEmptyA || isArrA || isPrimitive(a)) {
-      if (level === 0) {
-        throw new Error(`Cannot merge ${b} onto ${a}`);
+  } else if (b === null || isSimple(b)) { // Scalars
+    if (!isEmptyA) {
+      if (!isSimple(a)) {
+        throw new Error(`Cannot merge primitive ${b} with ${a}`);
       } else {
-        a = {};
+        const match = typeof a === typeof b;
+        if (!match) {
+          if (mode === 'strict') {
+            throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
+          } else if (mode === 'coerce') {
+            switch (typeof a) {
+              case 'string': b = `${b}`; break;
+              case 'number': b = `${b}`.indexOf('.') >= 0 ? parseFloat(`${b}`) : parseInt(`${b}`, 10); break;
+              case 'boolean': b = !!b; break;
+            }
+          }
+        }
       }
     }
+    a = b;
+  } else if (!isEmptyB) { // Object merge
+    if (isEmptyA) {
+      a = {};
+    }
+
     for (const key of Object.keys(b)) {
-      a[key] = _deepMerge(a[key], b[key], level + 1);
+      a[key] = _deepMerge(a[key], b[key], mode);
     }
   }
 
   return a;
 }
 
-export function deepMerge<T extends any, U extends any>(a: T, b: U): T & U {
-  return _deepMerge(a, b, 0) as T & U;
+export function deepMerge<T extends any, U extends any>(a: T, b: U, mode: 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
+  if (!a || isPrimitive(a)) {
+    throw new Error(`Cannot merge onto a primitive value, ${a}`);
+  }
+  return _deepMerge(a, b, mode) as T & U;
 }
 
 export function throttle(fn: (...args: any[]) => any, threshhold = 250) {
