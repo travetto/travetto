@@ -27,7 +27,7 @@ function shallowClone(a: any) {
   return Array.isArray(a) ? a.slice(0) : (isSimple(a) ? a : { ...a });
 }
 
-function _deepMerge(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose') {
+function _deepAssign(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose') {
   const isEmptyA = a === undefined || a === null;
   const isEmptyB = b === undefined || b === null;
   const isArrA = Array.isArray(a);
@@ -44,9 +44,9 @@ function _deepMerge(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose
       throw new Error(`Cannot merge differing types ${a} and ${b}`);
     }
     if (isArrB) { // Arrays
-      ret = a.slice(0);
+      ret = a; // Write onto A
       for (let i = 0; i < b.length; i++) {
-        ret[i] = _deepMerge(ret[i], b[i], mode);
+        ret[i] = _deepAssign(ret[i], b[i], mode);
       }
     } else if (isSimpB) { // Scalars
       const match = typeof a === typeof b;
@@ -66,21 +66,21 @@ function _deepMerge(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose
         }
       }
     } else { // Object merge
-      ret = { ...a };
+      ret = a;
 
       for (const key of Object.keys(b)) {
-        ret[key] = _deepMerge(ret[key], b[key], mode);
+        ret[key] = _deepAssign(ret[key], b[key], mode);
       }
     }
   }
   return ret;
 }
 
-export function deepMerge<T extends any, U extends any>(a: T, b: U, mode: 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
-  if (!a || isPrimitive(a)) {
-    throw new Error(`Cannot merge onto a primitive value, ${a}`);
+export function deepAssign<T extends any, U extends any>(a: T, b: U, mode: 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
+  if (!a || isSimple(a)) {
+    throw new Error(`Cannot merge onto a simple value, ${a}`);
   }
-  return _deepMerge(a, b, mode) as T & U;
+  return _deepAssign(a, b, mode) as T & U;
 }
 
 export function throttle(fn: (...args: any[]) => any, threshhold = 250) {
