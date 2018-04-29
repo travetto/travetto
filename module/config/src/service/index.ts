@@ -1,1 +1,2 @@
-export * from './config-loader';
+export * from './loader';
+export * from './map';

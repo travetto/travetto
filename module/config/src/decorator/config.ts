@@ -1,4 +1,4 @@
-import { ConfigLoader } from '../service/config-loader';
+import { ConfigLoader } from '../service/loader';
 
 export function Config(ns: string, depTarget?: new (...args: any[]) => any, name: string = '') {
 
