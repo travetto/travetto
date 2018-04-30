@@ -4,6 +4,8 @@ import * as yaml from 'js-yaml';
 import { readdirSync } from 'fs';
 import { ConfigMap } from './map';
 
+const ENV_SEP = '_';
+
 export class ConfigLoader {
 
   private static _initialized: boolean = false;
@@ -64,7 +66,11 @@ export class ConfigLoader {
     }
 
     // Handle process.env
-    this.map.putAllFlattened(process.env as { [key: string]: any });
+    for (const k of Object.keys(process.env)) {
+      if (k.includes(ENV_SEP)) { // Require at least one level
+        this.map.putFlattened(k.split(ENV_SEP), process.env[k] as string);
+      }
+    }
 
     if (!process.env.QUIET_CONFIG && !AppEnv.test) {
       console.log('Configured', this.map.toJSON());

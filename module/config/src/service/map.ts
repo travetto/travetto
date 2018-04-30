@@ -1,4 +1,4 @@
-import { deepMerge, isPlainObject, isSimple } from '@travetto/base';
+import { deepAssign, isPlainObject, isSimple } from '@travetto/base';
 
 type Prim = number | string | boolean | null;
 
@@ -34,19 +34,18 @@ export class ConfigMap {
   private storage: Nested = {};
 
   putAll(data: Nested) {
-    deepMerge(this.storage, data, 'coerce');
+    deepAssign(this.storage, data, 'coerce');
   }
 
-  putAllFlattened(data: { [key: string]: Prim }) {
-    for (const path of Object.keys(data)) {
-      this.putFlattened(path, data[path]);
-    }
-  }
+  putFlattened(parts: string[], value: Prim) {
+    parts = parts.map(x => x.trim());
 
-  putFlattened(path: string, value: Prim) {
-    const parts = path.split('_');
-    const key = parts.pop()!;
+    const key = parts.pop()!.trim();
     let data = this.storage;
+
+    if (!key) {
+      return false;
+    }
 
     while (parts.length) {
       const part = parts.shift()!;
@@ -74,8 +73,7 @@ export class ConfigMap {
     while (keys.length && sub[keys[0]]) {
       sub = sub[keys.shift()!];
     }
-    deepMerge(obj, sub);
-    return obj;
+    return deepAssign(obj, sub);
   }
 
   get(key: string) {

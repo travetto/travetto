@@ -1,4 +1,5 @@
 import { Config, ConfigLoader } from '../src';
+import * as assert from 'assert';
 
 class DbConfig {
   name: string;
@@ -14,6 +15,13 @@ const conf = new TestConfig();
 
 ConfigLoader.bindTo(conf, 'db.mysql');
 
-if (conf.name !== 'Oscar') {
-  throw new Error('Should match!');
-}
+assert(conf.name === 'Oscar');
+
+process.env.DB_MYSQL_NAME = 'Roger';
+
+delete (ConfigLoader as any)['_initialize'];
+ConfigLoader.initialize();
+
+ConfigLoader.bindTo(conf, 'db.mysql');
+
+assert(conf.name === 'Roger');
