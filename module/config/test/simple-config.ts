@@ -19,7 +19,7 @@ assert(conf.name === 'Oscar');
 
 process.env.DB_MYSQL_NAME = 'Roger';
 
-delete (ConfigLoader as any)['_initialize'];
+delete (ConfigLoader as any)['_initialized'];
 ConfigLoader.initialize();
 
 ConfigLoader.bindTo(conf, 'db.mysql');

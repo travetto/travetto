@@ -37,10 +37,17 @@ export class ConfigMap {
     deepAssign(this.storage, data, 'coerce');
   }
 
-  putFlattened(parts: string[], value: Prim) {
-    parts = parts.map(x => x.trim());
+  static getKeyName(key: string, data: { [key: string]: any }) {
+    key = key.trim();
+    const match = new RegExp(key, 'i');
+    const next = Object.keys(data).find(x => match.test(x));
+    return next;
+  }
 
-    const key = parts.pop()!.trim();
+  putFlattened(parts: string[], value: Prim) {
+    parts = parts.slice(0);
+
+    let key = parts.pop()!;
     let data = this.storage;
 
     if (!key) {
@@ -49,8 +56,7 @@ export class ConfigMap {
 
     while (parts.length) {
       const part = parts.shift()!;
-      const match = new RegExp(part, 'i');
-      const next = Object.keys(data).find(x => match.test(x));
+      const next = ConfigMap.getKeyName(part, data);
       if (!next) {
         return false;
       } else {
@@ -62,6 +68,7 @@ export class ConfigMap {
       return false;
     }
 
+    key = ConfigMap.getKeyName(key, data) || key;
     data[key] = coerce(value, data[key]);
 
     return true;
