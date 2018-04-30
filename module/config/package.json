@@ -1,20 +1,20 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "dependencies": {
-    "@travetto/base": "0.x.x",
-    "@types/js-yaml": "^3.10.1",
+    "@travetto/base": "0.x.x", 
+    "@types/js-yaml": "^3.10.1", 
     "js-yaml": "https://github.com/arciisine/js-yaml.git#3.11.0-slim"
-  },
-  "description": "",
-  "license": "ISC",
-  "main": "index.ts",
-  "name": "@travetto/config",
+  }, 
+  "description": "", 
+  "license": "ISC", 
+  "main": "index.ts", 
+  "name": "@travetto/config", 
   "repository": {
     "url": "https://github.com/travetto/config.git"
-  },
-  "scripts": {},
-  "version": "0.0.18"
+  }, 
+  "scripts": {}, 
+  "version": "0.0.19"
 }
