@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as util from 'util';
-import { assert } from 'console';
+import * as assert from 'assert';
 
 import { Suite, Test, BeforeEach, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
