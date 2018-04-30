@@ -1,20 +1,13 @@
 import * as minimist from 'minimist';
-import * as fs from 'fs';
-import * as util from 'util';
 
 import { ArrayDataSource } from '@travetto/pool';
 import { deserializeError } from '@travetto/exec';
 import { Class } from '@travetto/registry';
-import { bulkRequire } from '@travetto/base';
-
-import { watch } from './watcher';
-import { TestRegistry } from '../service';
 
 import { ExecuteUtil } from './execute';
 import { ExecutionEmitter, Consumer, AllResultsCollector, TapEmitter, JSONEmitter } from '../consumer';
-import { AllSuitesResult, SuiteConfig } from '../model/suite';
 import { client, Events } from './communication';
-import { TestConfig } from '..';
+import { watch } from './watcher';
 
 interface State {
   format: 'tap' | 'json' | 'noop' | 'exec';
