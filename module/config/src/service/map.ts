@@ -44,7 +44,7 @@ export class ConfigMap {
     return next;
   }
 
-  putFlattened(parts: string[], value: Prim) {
+  putCaseInsensitivePath(parts: string[], value: Prim) {
     parts = parts.slice(0);
 
     let key = parts.pop()!;
