@@ -70,13 +70,15 @@ export class Logger {
 
           // Setup folder for logging
           const finalPth = path.dirname(path.resolve(conf.filename!));
-          let start = finalPth.indexOf(path.sep, 3);
-          while (start > 0) {
-            const pth = finalPth.substring(0, start);
-            if (!(await exists(pth))) {
-              await mkdir(pth);
+          if (!(await exists(finalPth))) {
+            let start = finalPth.indexOf(path.sep, 3);
+            while (start > 0) {
+              const pth = finalPth.substring(0, start);
+              if (!(await exists(pth))) {
+                await mkdir(pth);
+              }
+              start = finalPth.indexOf(path.sep, start) + 1;
             }
-            start = finalPth.indexOf(path.sep, start);
           }
         }
 

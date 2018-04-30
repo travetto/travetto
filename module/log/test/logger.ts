@@ -10,6 +10,7 @@ import { Logger } from '../src';
 const name = `${process.cwd()}/logs/travetto_log-out.log`;
 const fsTrunc = util.promisify(fs.truncate);
 const fsRead = util.promisify(fs.readFile);
+const fsExists = util.promisify(fs.exists);
 
 @Suite('Suite')
 class LoggerTest {
@@ -21,7 +22,10 @@ class LoggerTest {
 
   @BeforeEach()
   async truncate() {
-    return await fsTrunc(name);
+    if (await fsExists(name)) {
+      await fsTrunc(name);
+    }
+    return;
   }
 
   @Test('Should Log')
