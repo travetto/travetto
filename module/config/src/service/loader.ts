@@ -68,7 +68,7 @@ export class ConfigLoader {
     // Handle process.env
     for (const k of Object.keys(process.env)) {
       if (k.includes(ENV_SEP)) { // Require at least one level
-        this.map.putFlattened(k.split(ENV_SEP), process.env[k] as string);
+        this.map.putCaseInsensitivePath(k.split(ENV_SEP), process.env[k] as string);
       }
     }
 
