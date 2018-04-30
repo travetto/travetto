@@ -1,12 +1,17 @@
 import * as log4js from 'log4js';
-import * as mkdirp from 'mkdirp';
+import * as path from 'path';
+import * as fs from 'fs';
 import * as util from 'util';
+
 import { addLayout } from 'log4js/lib/layouts';
 import { Injectable } from '@travetto/di';
 import { LoggerConfig } from './config';
 import { Layouts } from './layout';
 import { isFileAppender } from '../types';
 import { AppInfo } from '@travetto/base';
+
+const exists = util.promisify(fs.exists);
+const mkdir = util.promisify(fs.mkdir);
 
 @Injectable({
   autoCreate: { create: true, priority: 0 }
@@ -64,14 +69,22 @@ export class Logger {
           }
 
           // Setup folder for logging
-          const res = await util.promisify(mkdirp)(conf.filename!.substring(0, conf.filename!.lastIndexOf('/')));
+          const finalPth = path.dirname(path.resolve(conf.filename!));
+          let start = finalPth.indexOf(path.sep, 3);
+          while (start > 0) {
+            const pth = finalPth.substring(0, start);
+            if (!(await exists(pth))) {
+              await mkdir(pth);
+            }
+            start = finalPth.indexOf(path.sep, start);
+          }
         }
 
         if (conf.level) {
-          appenders[`_${name}`] = conf;
+          appenders[`_${name} `] = conf;
           conf = {
             type: 'logLevelFilter',
-            appender: `_${name}`,
+            appender: `_${name} `,
             level: conf.level,
             maxLevel: conf.maxLevel || 'fatal'
           }
