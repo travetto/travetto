@@ -93,5 +93,5 @@ export const ClassIdTransformer = {
     return { file: `${ns}:${fileRoot}`, fullFile: file.fileName, newImports: [], imports: new Map() };
   }, visitNode),
   phase: 'before',
-  priority: 1
+  priority: 0
 }
