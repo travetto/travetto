@@ -1,26 +1,60 @@
 import * as util from 'util';
 
-import { Injectable } from '@travetto/di';
-import { AppInfo } from '@travetto/base';
 import { LogEvent, LogListener, LogLevel, LogLevels } from '../types';
+import { AppEnv } from '@travetto/base';
+import { consoleOutput } from '../output';
+import { lineFormatter } from '../formatter';
 
-export class Logger {
+class $Logger {
 
-  private static listeners: LogListener[] = [];
+  private listeners: LogListener[] = [];
 
-  private static _level: number = LogLevels.info;
+  private _level: number = LogLevels.info;
 
-  static listen(listener: LogListener) {
+  _init() {
+    const override = process.env.LOG_CONSOLE === '1';
+    const quiet = !!process.env.QUIET || process.env.LOG_CONSOLE === '0';
+    const show = AppEnv.test ? override : !quiet;
+
+    // Base logger, for free
+    if (show) {
+      const formatter = lineFormatter({});
+      const output = consoleOutput({});
+
+      this.listen(e => output(formatter(e)));
+    }
+  }
+
+  removeAll() {
+    this.listeners = [];
+  }
+
+  listen(listener: LogListener) {
     this.listeners.push(listener);
     return () => {
       this.listeners.splice(this.listeners.indexOf(listener), 1);
     }
   }
 
-  // constructor(private config: LoggerConfig) { }
+  log(level: LogLevel, message: string, ...args: any[]): void;
+  log(event: Partial<LogEvent>): void;
+  log(event: LogLevel | Partial<LogEvent>, ...rest: any[]): void {
+    if (typeof event === 'string') {
+      const message = rest.length && typeof rest[0] === 'string' ? rest.shift() : undefined;
+      this.log({
+        level: event,
+        message,
+        args: rest
+      });
+      return;
+    }
 
-  static log(event: Partial<LogEvent>): void {
     event.level = (event.level! in LogLevels) ? event.level : 'info';
+
+    if (LogLevels[event.level!] < this._level) {
+      return;
+    }
+
     event.timestamp = Date.now();
 
     const args = (event.args || []).slice(0);
@@ -39,7 +73,9 @@ export class Logger {
     }
   }
 
-  static enabled(level: LogLevel): boolean {
-    return LogLevels[level] <= this._level;
+  enabled(level: LogLevel): boolean {
+    return LogLevels[level] >= this._level;
   }
 }
+
+export const Logger = new $Logger();

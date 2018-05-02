@@ -2,7 +2,15 @@ import * as util from 'util';
 import { LogEvent } from '../types';
 import { stylize, LEVEL_STYLES } from './styles';
 
-export function consoleLayout(opts: { timestamp?: boolean, colorize?: boolean, align?: boolean, level?: boolean, simple?: boolean }) {
+export interface LineFormatterOpts {
+  timestamp?: boolean;
+  colorize?: boolean;
+  align?: boolean;
+  level?: boolean;
+  simple?: boolean;
+}
+
+export function lineFormatter(opts: LineFormatterOpts) {
   return (ev: LogEvent) => {
     let out = '';
 

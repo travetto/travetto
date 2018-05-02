@@ -9,7 +9,7 @@ export const LogLevels = {
 
 export type LogLevel = keyof (typeof LogLevels);
 
-export type LogListener = (e: LogEvent) => any;
+export type LogListener = (e: LogEvent) => void;
 
 export interface LogContext {
   file?: string;
