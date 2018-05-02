@@ -11,7 +11,6 @@ export interface LineFormatterOpts {
   colorize?: boolean;
   align?: boolean;
   level?: boolean;
-  simple?: boolean;
   location?: boolean;
 }
 
@@ -67,15 +66,11 @@ export function lineFormatter(opts: LineFormatterOpts) {
         args.unshift(message);
       }
 
-      if (opts.simple) {
-        if (ev.meta) {
-          args.push(ev.meta);
-        }
-        message = args.map((x: any) => typeof x === 'string' ? x :
-          util.inspect(x, ev.level === 'debug', ev.level === 'debug' ? 4 : 2, opts.colorize !== false)).join(' ');
-      } else {
-        message = util.format.apply(util, args);
+      if (ev.meta) {
+        args.push(ev.meta);
       }
+      message = args.map((x: any) => typeof x === 'string' ? x :
+        util.inspect(x, ev.level === 'debug', ev.level === 'debug' ? 4 : 2, opts.colorize !== false)).join(' ');
     }
 
     if (message) {
