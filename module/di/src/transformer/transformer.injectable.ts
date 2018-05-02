@@ -241,5 +241,6 @@ export const InjectableTransformer = {
     inInjectable: false,
     decorators: {}
   }), visitNode),
+  priority: 11,
   phase: 'before'
 }

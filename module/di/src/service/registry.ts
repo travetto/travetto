@@ -1,7 +1,7 @@
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from '../types';
 import { InjectionError } from './error';
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
-import { AppEnv, isPlainObject, deepMerge } from '@travetto/base';
+import { AppEnv, isPlainObject, deepAssign } from '@travetto/base';
 import { RetargettingHandler } from '@travetto/compiler';
 
 export const DEFAULT_INSTANCE = Symbol('__default');
@@ -22,7 +22,7 @@ function mergeWithOptional<T extends { original?: symbol | object, qualifier?: s
     if (typeof o.original === 'symbol') {
       o.qualifier = o.original;
     } else if (isPlainObject(o.original)) {
-      deepMerge(o, o.original)
+      deepAssign(o, o.original)
     }
     o.original = undefined;
   }
