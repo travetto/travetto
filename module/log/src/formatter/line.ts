@@ -33,6 +33,10 @@ export function lineFormatter(opts: LineFormatterOpts) {
       out = `${out}${level} `;
     }
 
+    if (!ev.category && ev.file) {
+      ev.category = ev.line ? `${ev.file}:${ev.line}` : ev.file;
+    }
+
     if (ev.category) {
       out = `${out}[${ev.category}] `;
     }

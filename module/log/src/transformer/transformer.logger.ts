@@ -3,8 +3,10 @@ import * as path from 'path';
 import { TransformUtil, Import, State } from '@travetto/compiler';
 import { Transform } from 'stream';
 import { LogLevels } from '../types';
+import { AppEnv } from '@travetto/base';
 
 const VALID_METHODS = new Set(['log', ...Object.keys(LogLevels)]);
+const VALID_PROD_METHODS = new Set(['log', 'info', 'warn', 'error', 'fatal']);
 
 interface IState extends State {
   source: ts.SourceFile;
@@ -19,6 +21,11 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     node.expression.expression.text === 'console' &&
     VALID_METHODS.has(node.expression.name.text)
   ) {
+    const level = node.expression.name.text;
+
+    if (AppEnv.prod && !VALID_PROD_METHODS.has(level)) {
+      return ts.createEmptyStatement() as any as T; // Lose the logging if in prod
+    }
 
     if (!state.imported) {
       state.imported = ts.createIdentifier(`import_Logger`);
@@ -32,8 +39,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     let payload = TransformUtil.fromLiteral({
       file: state.file,
-      line: loc.line,
-      level: node.expression.name.text
+      line: loc.line + 1,
+      level
     });
 
     const args = node.arguments.slice(0);
@@ -74,5 +81,5 @@ export const LoggerTransformer = {
     return { file: `${fileRoot}`, source: file };
   }, visitNode),
   phase: 'before',
-  priority: 0
+  priority: 1
 }
