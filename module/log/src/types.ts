@@ -1,58 +1,26 @@
-export interface BaseConfig {
-  type: string;
-  enabled: boolean;
-  level?: string;
+export const LogLevels = {
+  trace: 0,
+  debug: 1,
+  info: 2,
+  warn: 3,
+  error: 4,
+  fatal: 5
 }
 
-export interface StandardLayout {
-  type: 'standard';
-  timestamp?: boolean;
-  level?: boolean;
-  colorize?: boolean;
-  align?: boolean;
-  prettyPrint?: boolean;
-}
+export type LogLevel = keyof (typeof LogLevels);
 
-export interface JsonLayout {
-  type: 'json';
-}
-
-export interface ConsoleConfig extends BaseConfig {
-  type: 'console',
-  layout?: StandardLayout,
-  replaceConsole: boolean | null;
-}
-
-export interface FileConfig extends BaseConfig {
-  type: 'file';
-  name?: string;
-  filename?: string;
-  absolute?: boolean;
-  maxLogSize?: string;
-  backups?: number;
-  layout?: JsonLayout;
-}
-
-export interface HttpConfig extends BaseConfig {
-  type: 'http';
-}
-
-export function isFileAppender(conf: any): conf is FileConfig {
-  return conf.type === 'file';
-}
-
-export function isConsoleAppender(conf: any): conf is ConsoleConfig {
-  return conf.type === 'console';
-}
-
-export function isHttpAppender(conf: any): conf is HttpConfig {
-  return conf.type === 'http';
-}
+export type LogListener = (e: LogEvent) => any;
 
 export interface LogContext {
-  timestamp: string;
-  level: string;
-  category: string;
+  file?: string;
+  line?: number;
+  timestamp: number;
+  level: LogLevel;
+  category?: string;
+}
+
+export interface LogEvent extends LogContext {
   message?: string;
+  args?: any[];
   meta?: any;
 }
