@@ -18,11 +18,12 @@ export const STYLES: { [key: string]: [number, number] } = {
 };
 
 export const LEVEL_STYLES: { [key: string]: string[] } = {
-  INFO: ['white'],
-  ERROR: ['red'],
-  DEBUG: ['grey'],
-  WARN: ['magenta'],
-  FATAL: ['cyan', 'inverse']
+  info: ['white'],
+  error: ['red'],
+  debug: ['grey'],
+  warn: ['magenta'],
+  fatal: ['cyan', 'inverse'],
+  trace: ['yellow']
 };
 
 /**
@@ -36,4 +37,8 @@ export function stylize(text: string, ...styles: string[]) {
     }
   }
   return text;
+}
+
+export function makeLink(text: string, link: string) {
+  return `${link}`;
 }

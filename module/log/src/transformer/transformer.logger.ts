@@ -10,7 +10,6 @@ const VALID_PROD_METHODS = new Set(['log', 'info', 'warn', 'error', 'fatal']);
 
 interface IState extends State {
   source: ts.SourceFile;
-  file: string;
   imported?: ts.Identifier;
 }
 
@@ -35,10 +34,10 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       });
     }
 
-    const loc = ts.getLineAndCharacterOfPosition(state.source, node.pos);
+    const loc = ts.getLineAndCharacterOfPosition(state.source, node.expression.name.pos);
 
     let payload = TransformUtil.fromLiteral({
-      file: state.file,
+      file: state.source.fileName,
       line: loc.line + 1,
       level
     });
@@ -64,21 +63,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   }
 }
 
-const RE_SEP = path.sep === '/' ? '\\/' : path.sep;
-const PATH_RE = new RegExp(RE_SEP, 'g');
-
 export const LoggerTransformer = {
   transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
-    let fileRoot = file.fileName;
-
-    fileRoot = fileRoot
-      .replace(process.cwd(), '')
-      .replace(/^.*node_modules/, '')
-      .replace(PATH_RE, '.')
-      .replace(/^[.]/, '')
-      .replace(/[.](t|j)s$/, '');
-
-    return { file: `${fileRoot}`, source: file };
+    return { source: file };
   }, visitNode),
   phase: 'before',
   priority: 1
