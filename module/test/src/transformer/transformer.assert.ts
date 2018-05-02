@@ -169,5 +169,5 @@ export const TestTransformer = {
     }
   },
   phase: 'before',
-  priority: 1
+  priority: 10
 }
