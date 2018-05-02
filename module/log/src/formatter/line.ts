@@ -15,7 +15,7 @@ export interface LineFormatterOpts {
 }
 
 export function lineFormatter(opts: LineFormatterOpts) {
-  opts = { colorize: true, timestamp: true, align: true, level: true, simple: false, location: true, ...opts };
+  opts = { colorize: true, timestamp: true, align: true, level: true, location: true, ...opts };
 
   return (ev: LogEvent) => {
     let out = '';
