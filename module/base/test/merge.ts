@@ -40,6 +40,7 @@ function testMerge() {
   assert(deepAssign({ a: { b: 5 } }, { a: null }).a === null);
   assert.deepEqual(deepAssign({ a: { b: 5 } }, { a: undefined }).a, { b: 5 });
 
+  assert(deepAssign({ line: 20, file: 30 }, { description: undefined }).description === undefined);
 }
 
 function testStrict() {

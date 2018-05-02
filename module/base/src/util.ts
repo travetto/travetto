@@ -38,7 +38,13 @@ function _deepAssign(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loos
   let ret: any;
 
   if (isEmptyA || isEmptyB) { // If no `a`, `b` always wins
-    ret = b === null ? b : shallowClone(b || a);
+    if (b === null || !isEmptyB) {
+      ret = isEmptyB ? b : shallowClone(b);
+    } else if (!isEmptyA) {
+      ret = shallowClone(a);
+    } else {
+      ret = undefined;
+    }
   } else {
     if (isArrA !== isArrB || isSimpA !== isSimpB) {
       throw new Error(`Cannot merge differing types ${a} and ${b}`);
