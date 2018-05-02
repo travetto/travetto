@@ -1,5 +1,6 @@
 import { AppEnv, isPlainObject, isFunction, isPrimitive } from '@travetto/base';
 import * as assert from 'assert';
+import * as util from 'util';
 import { Assertion, TestConfig } from '../model';
 
 const ASSERT_FN_OPERATOR: { [key: string]: string } = {
@@ -37,7 +38,7 @@ function clean(val: any) {
     if (!val.constructor || (!val.constructor.__id && isFunction(val))) {
       return val.name;
     } else {
-      return `${val}`;
+      return util.inspect(val, false, 1).replace(/\n/g, ' ');
     }
   }
 }
