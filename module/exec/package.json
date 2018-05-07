@@ -8,7 +8,7 @@
     "@travetto/pool": "0.x.x"
   }, 
   "description": "", 
-  "license": "ISC", 
+  "license": "MIT", 
   "main": "src/lib/", 
   "name": "@travetto/exec", 
   "repository": {
