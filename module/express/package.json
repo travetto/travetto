@@ -16,7 +16,7 @@
     "moment": "^2.21.0"
   },
   "description": "",
-  "license": "ISC",
+  "license": "MIT",
   "main": "index.ts",
   "name": "@travetto/express",
   "peerDependencies": {
