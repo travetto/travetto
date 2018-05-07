@@ -165,7 +165,7 @@ export class Compiler {
 
     content = this.contents.get(jsf)!;
 
-    if (/\/test\//.test(tsf) && !tsf.includes('node_modules')) {
+    if (/\/test\//.test(tsf) && !tsf.includes(Compiler.libraryPath)) {
       console.debug(content);
     }
 
