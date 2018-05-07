@@ -7,14 +7,17 @@ import { RootRegistry } from '@travetto/registry';
 import { QueryVerifierService } from '@travetto/model/src/service/query';
 
 @Model()
+class Address extends BaseModel {
+  street1: string;
+  street2?: string;
+}
+
+@Model()
 class Person extends BaseModel {
   name: string;
   age: number;
   gender: 'm' | 'f';
-  address: {
-    street1: string;
-    street2: string;
-  }
+  address: Address
 }
 
 const SYMBOL = Symbol();
