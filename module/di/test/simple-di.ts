@@ -81,9 +81,9 @@ class DiTest2 {
 
     assert(inst);
 
-    assert(inst.age === 11)
+    assert(inst.age === 12);
 
-    //assert(inst.db.dbConfig === undefined);
+    assert(inst.db.dbConfig === undefined);
 
     assert(inst.db.dbConfig);
     assert.ok(!inst.db.dbConfig.temp);
