@@ -92,6 +92,8 @@ export class AssertUtil {
       state: positive ? 'should' : 'should not'
     };
 
+    const asrt = positive ? assert : (x: any, msg?: string) => assert(!x, msg);
+
     if (fn === 'fail') {
       if (args.length > 1) {
         assertion.actual = args[0];
@@ -131,18 +133,18 @@ export class AssertUtil {
       }
 
       switch (fn) {
-        case 'instanceOf': assert(args[0] instanceof args[1], args[2]); break;
-        case 'lessThan': assert(args[0] < args[1], args[2]); break;
-        case 'lessThanEqual': assert(args[0] <= args[1], args[2]); break;
-        case 'greaterThan': assert(args[0] > args[1], args[2]); break;
-        case 'greaterThanEqual': assert(args[0] >= args[1], args[2]); break;
+        case 'instanceOf': asrt(args[0] instanceof args[1], args[2]); break;
+        case 'lessThan': asrt(args[0] < args[1], args[2]); break;
+        case 'lessThanEqual': asrt(args[0] <= args[1], args[2]); break;
+        case 'greaterThan': asrt(args[0] > args[1], args[2]); break;
+        case 'greaterThanEqual': asrt(args[0] >= args[1], args[2]); break;
         default:
           if (fn && (assert as any)[fn]) { // Assert call
             (assert as any)[fn].apply(null, args);
           } else if (args[1] && fn && args[1][fn]) { // Method call
-            assert(args[1][fn](args[0]));
+            asrt(args[1][fn](args[0]));
           } else {
-            assert.apply(null, args); // Do normal
+            asrt.apply(null, args); // Do normal
           }
       }
 
