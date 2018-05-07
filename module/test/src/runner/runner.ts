@@ -118,7 +118,7 @@ export class Runner {
 
   async runSome() {
     const consumer = this.getConsumer();
-    const args: string[] = this.state['--'];
+    const args: string[] = this.state._;
     return await ExecuteUtil.execute(consumer, args);
   }
 
