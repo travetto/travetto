@@ -12,6 +12,7 @@
   },
   "description": "",
   "devDependencies": {
+    "@travetto/exec": "0.0.13",
     "@travetto/test": "0.x.x"
   },
   "license": "MIT",

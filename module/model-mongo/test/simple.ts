@@ -1,10 +1,11 @@
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
-import { DependencyRegistry, Injectable, InjectableFactory, DEFAULT_INSTANCE } from '@travetto/di';
-import { Suite, Test, BeforeAll } from '@travetto/test';
+import { DependencyRegistry } from '@travetto/di';
+import { Suite, Test } from '@travetto/test';
 import { ModelMongoSource, ModelMongoConfig, projectQuery } from '../index';
-import * as assert from 'assert';
-import { RootRegistry } from '@travetto/registry';
 import { QueryVerifierService } from '@travetto/model/src/service/query';
+
+import * as assert from 'assert';
+import { BaseMongoTest } from './base';
 
 @Model()
 class Address extends BaseModel {
@@ -20,31 +21,19 @@ class Person extends BaseModel {
   address: Address
 }
 
-const SYMBOL = Symbol();
-
-class Init {
-  @InjectableFactory()
-  static getModelSource(conf: ModelMongoConfig): ModelSource {
-    return new ModelMongoSource(conf);
-  }
-}
-
 @Suite('Simple Save')
-class TestSave {
+class TestSave extends BaseMongoTest {
 
-  @BeforeAll()
-  async init() {
-    await RootRegistry.init();
-    const source = (await DependencyRegistry.getInstance(ModelSource)) as ModelMongoSource;
-    await source.resetDatabase();
+  @Test()
+  async verifySource() {
+    const source = await DependencyRegistry.getInstance(ModelSource);
+    assert.ok(source);
+    assert(source instanceof ModelMongoSource);
   }
 
   @Test('save it')
   async save() {
     const service = await DependencyRegistry.getInstance(ModelService);
-    const source = (await DependencyRegistry.getInstance(ModelSource)) as ModelMongoSource;
-
-    assert.ok(source);
 
     for (const x of [1, 2]) {
       const res = await service.save(Person, Person.from({
@@ -62,7 +51,7 @@ class TestSave {
 
     const match = await service.getAllByQuery(Person, {
       where: {
-        name: 'Bob'
+        name: 'Bobs'
       }
     });
 

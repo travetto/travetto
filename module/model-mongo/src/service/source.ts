@@ -1,6 +1,5 @@
 import * as mongo from 'mongodb';
 import * as flat from 'flat';
-import * as _ from 'lodash';
 
 import {
   ModelSource, IndexConfig, Query,
@@ -14,7 +13,7 @@ import { Injectable } from '@travetto/di';
 import { ModelMongoConfig } from './config';
 import { Class } from '@travetto/registry';
 import { FieldType } from '@travetto/model/src/model/query/common';
-import { BaseError } from '@travetto/base';
+import { BaseError, isPlainObject } from '@travetto/base';
 
 function isFieldType(o: any): o is FieldType {
   const type = typeof o;
@@ -28,7 +27,7 @@ export function projectQuery(o: any, path: string = ''): any {
 
   if (Array.isArray(o)) {
     return o.map(x => projectQuery(x));
-  } else if (_.isPlainObject(o)) {
+  } else if (isPlainObject(o)) {
     for (const k of Object.keys(o)) {
       const sub = `${path}${k}`;
       if (k.startsWith('$')) {
@@ -37,7 +36,7 @@ export function projectQuery(o: any, path: string = ''): any {
         } else {
           out = { ...out, [k]: projectQuery(o[k]) };
         }
-      } else if (_.isPlainObject(o[k])) {
+      } else if (isPlainObject(o[k])) {
         out = { ...out, ...projectQuery(o[k], `${sub}.`) };
       } else {
         out[sub] = projectQuery(o[k]);
