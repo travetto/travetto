@@ -165,7 +165,7 @@ export class Compiler {
 
     content = this.contents.get(jsf)!;
 
-    if (/\/test\//.test(tsf) && !tsf.includes('@travetto')) {
+    if (/\/test\//.test(tsf) && !tsf.includes('node_modules')) {
       console.debug(content);
     }
 
