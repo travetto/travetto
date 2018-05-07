@@ -67,7 +67,7 @@ export type WithOpts<T> = T & ExecutionOptions;
 
 export function spawn(cmdStr: string, options: WithOpts<cp.SpawnOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
   const { cmd, args } = getArgs(cmdStr);
-  const p = cp.spawn(cmd, args, { ...(options as cp.SpawnOptions), shell: true });
+  const p = cp.spawn(cmd, args, { shell: true, ...(options as cp.SpawnOptions) });
   return [p, enhanceProcess(p, options)];
 }
 
