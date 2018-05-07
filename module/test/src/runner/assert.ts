@@ -15,20 +15,20 @@ const ASSERT_FN_OPERATOR: { [key: string]: string } = {
 }
 
 const OP_MAPPING: { [key: string]: string } = {
-  includes: '{expected} should include {actual}',
-  test: '{expected} should match {actual}',
-  throws: 'should throw {expected}',
-  doesNotThrow: 'should not throw {expected}',
-  equal: '{actual} should equal {expected}',
-  notEqual: '{actual} should not equal {expected}',
-  deepEqual: '{actual} should deep equal {expected}',
-  notDeepEqual: '{actual} should not deep equal {expected}',
-  strictEqual: '{actual} should strictly equal {expected}',
-  notStrictEqual: '{actual} should strictly not equal {expected}',
-  greaterThanEqual: '{actual} should be greater than or equal to {expected}',
-  greaterThan: '{actual} should be greater than {expected}',
-  lessThanEqual: '{actual} should be less than or equal to {expected}',
-  lessThan: '{actual} should be less than {expected}'
+  includes: '{expected} {state} include {actual}',
+  test: '{expected} {state} match {actual}',
+  throws: '{state} throw {expected}',
+  doesNotThrow: '{state} not throw {expected}',
+  equal: '{actual} {state} equal {expected}',
+  notEqual: '{actual} {state} not equal {expected}',
+  deepEqual: '{actual} {state} deep equal {expected}',
+  notDeepEqual: '{actual} {state} not deep equal {expected}',
+  strictEqual: '{actual} {state} strictly equal {expected}',
+  notStrictEqual: '{actual} {state} strictly not equal {expected}',
+  greaterThanEqual: '{actual} {state} be greater than or equal to {expected}',
+  greaterThan: '{actual} {state} be greater than {expected}',
+  lessThanEqual: '{actual} {state} be less than or equal to {expected}',
+  lessThan: '{actual} {state} be less than {expected}'
 }
 
 function clean(val: any) {
@@ -78,16 +78,21 @@ export class AssertUtil {
     this.assertions = [];
   }
 
-  static check(filename: string, text: string, name: string, ...args: any[]) {
+  static check(filename: string, text: string, fn: string, positive: boolean, ...args: any[]) {
     const { file, line } = this.readFilePosition(new Error(), filename.replace(/[.][tj]s$/, ''));
 
     const assertion: Assertion = {
       className: this.test.className,
       methodName: this.test.methodName,
       file, line, text,
-      operator: ASSERT_FN_OPERATOR[name]
+      operator: ASSERT_FN_OPERATOR[fn],
     };
-    if (name === 'fail') {
+
+    const common: { [key: string]: string } = {
+      state: positive ? 'should' : 'should not'
+    };
+
+    if (fn === 'fail') {
       if (args.length > 1) {
         assertion.actual = args[0];
         assertion.expected = args[1];
@@ -96,7 +101,7 @@ export class AssertUtil {
       } else {
         assertion.message = args[0];
       }
-    } else if (/throw/i.test(name)) {
+    } else if (/throw/i.test(fn)) {
       assertion.operator = 'throw';
       if (typeof args[1] !== 'string') {
         assertion.expected = args[1];
@@ -104,13 +109,13 @@ export class AssertUtil {
       } else {
         assertion.message = args[1];
       }
-    } else if (name === 'ok' || name === 'assert') {
+    } else if (fn === 'ok' || fn === 'assert') {
       assertion.actual = args[0];
       assertion.message = args[1];
       assertion.expected = true;
       assertion.operator = '';
     } else {
-      assertion.operator = name || '';
+      assertion.operator = fn || '';
       assertion.message = args[2];
       assertion.expected = args[1];
       assertion.actual = args[0];
@@ -125,17 +130,17 @@ export class AssertUtil {
         assertion.expected = clean(assertion.expected);
       }
 
-      switch (name) {
+      switch (fn) {
         case 'instanceOf': assert(args[0] instanceof args[1], args[2]); break;
         case 'lessThan': assert(args[0] < args[1], args[2]); break;
         case 'lessThanEqual': assert(args[0] <= args[1], args[2]); break;
         case 'greaterThan': assert(args[0] > args[1], args[2]); break;
         case 'greaterThanEqual': assert(args[0] >= args[1], args[2]); break;
         default:
-          if (name && (assert as any)[name]) { // Assert call
-            (assert as any)[name].apply(null, args);
-          } else if (args[1] && name && args[1][name]) { // Method call
-            assert(args[1][name](args[0]));
+          if (fn && (assert as any)[fn]) { // Assert call
+            (assert as any)[fn].apply(null, args);
+          } else if (args[1] && fn && args[1][fn]) { // Method call
+            assert(args[1][fn](args[0]));
           } else {
             assert.apply(null, args); // Do normal
           }
@@ -146,9 +151,11 @@ export class AssertUtil {
     } catch (e) {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
-          assertion.message = (OP_MAPPING[name] || `should be {expected}`);
+          assertion.message = (OP_MAPPING[fn] || `{state} be {expected}`);
         }
-        assertion.message = assertion.message.replace(/[{]([A-Za-z]+)[}]/g, (a, k) => (assertion as any)[k]);
+        assertion.message = assertion.message
+          .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || (assertion as any)[k])
+          .replace(/not not/g, 'not'); // Handle double negatives
         assertion.error = e;
         this.add(assertion);
       }

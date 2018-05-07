@@ -40,12 +40,18 @@ interface AssertState extends State {
   source: ts.SourceFile
 }
 
+interface Command {
+  fn: string;
+  args: ts.Expression[];
+  negate?: boolean;
+}
+
 function isDeepLiteral(node: ts.Expression) {
   return ts.isArrayLiteralExpression(node) ||
     ts.isObjectLiteralExpression(node);
 }
 
-function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, name: string, args: ts.Expression[]): T {
+function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, cmd: Command): T {
   prepAssert(state);
 
   const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);
@@ -54,20 +60,21 @@ function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, name
   // Handle METHOD
   if (METHOD_REGEX.test(firstText)) {
     if (first && ts.isCallExpression(first) && ts.isPropertyAccessExpression(first.expression)) {
-      name = METHODS[first.expression.name.text!];
-      args = [first.arguments[0], first.expression.expression];
+      cmd.fn = METHODS[first.expression.name.text!];
+      cmd.args = [first.arguments[0], first.expression.expression];
     }
   }
 
-  args = args.filter(x => x !== undefined && x !== null);
+  cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
   const check = ts.createCall(state.assertCheck, undefined, ts.createNodeArray([
     ts.createLiteral('__filename'),
     ts.createLiteral(firstText),
-    ts.createLiteral(name),
-    ...args
+    ts.createLiteral(cmd.fn),
+    ts.createLiteral(!cmd.negate),
+    ...cmd.args
   ]));
 
-  for (const arg of args) {
+  for (const arg of cmd.args) {
     arg.parent = check;
   }
 
@@ -88,54 +95,55 @@ function prepAssert(state: AssertState) {
   }
 }
 
-function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AssertState): T {
-  let replaced = false;
-
-  if (ts.isCallExpression(node)) {
-    const exp: ts.Expression = node.expression;
-    if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) {
-      replaced = true;
-
-      const comp = node.arguments[0]!;
-      const message = node.arguments.length === 2 ? node.arguments[1] : undefined;
-
-      if (ts.isBinaryExpression(comp)) {
-        let opFn = OPTOKEN_ASSERT_FN[comp.operatorToken.kind];
-
-        if (opFn) {
-          const literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
-          if (/equal/i.test(opFn) && literal) {
-            opFn = EQUALS_MAPPING[opFn] || opFn;
-          }
-
-          node = doAssert(state, node, opFn, [comp.left, comp.right, message!]);
-        } else {
-          node = doAssert(state, node, ASSERT_CMD, [...node.arguments]);
-        }
-
-      } else if (ts.isPrefixUnaryExpression(comp) && comp.operator === ts.SyntaxKind.ExclamationToken) {
-        if (ts.isPrefixUnaryExpression(comp.operand)) {
-          const inner = comp.operand.operand;
-          node = doAssert(state, node, 'ok', [inner, message!]); // !!v
-        } else {
-          node = doAssert(state, node, ASSERT_CMD, [comp, message!]); // !v
-        }
-      } else {
-        node = doAssert(state, node, ASSERT_CMD, [...node.arguments]);
-      }
-    } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) {
-      const ident = exp.expression;
-      if (ident.escapedText === ASSERT_CMD) {
-        replaced = true;
-
-        node = doAssert(state, node, exp.name.escapedText as string, [...node.arguments]);
-        // Already in near, final form, just rewrite to intermediate
-      }
-    }
+function getCommand(node: ts.Node): Command | undefined {
+  if (!ts.isCallExpression(node)) {
+    return;
   }
 
-  if (!replaced) {
+  const exp: ts.Expression = node.expression;
+  if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) {
+    const comp = node.arguments[0]!;
+    const message = node.arguments.length === 2 ? node.arguments[1] : undefined;
+
+    if (ts.isBinaryExpression(comp)) {
+      let opFn = OPTOKEN_ASSERT_FN[comp.operatorToken.kind];
+
+      if (opFn) {
+        const literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
+        if (/equal/i.test(opFn) && literal) {
+          opFn = EQUALS_MAPPING[opFn] || opFn;
+        }
+        return { fn: opFn, args: [comp.left, comp.right, message!] };
+      } else {
+        return { fn: ASSERT_CMD, args: [...node.arguments] };
+      }
+
+    } else if (ts.isPrefixUnaryExpression(comp) && comp.operator === ts.SyntaxKind.ExclamationToken) {
+      if (ts.isPrefixUnaryExpression(comp.operand)) {
+        const inner = comp.operand.operand;
+        return { fn: 'ok', args: [inner, message!] };
+      } else {
+        const inner = comp.operand;
+        return { ...getCommand(inner)!, negate: true };
+      }
+    } else {
+      return { fn: ASSERT_CMD, args: [...node.arguments] };
+    }
+  } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) {
+    const ident = exp.expression;
+    if (ident.escapedText === ASSERT_CMD) {
+      return { fn: exp.name.escapedText as string, args: [...node.arguments] };
+    }
+  }
+}
+
+function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AssertState): T {
+
+  const cmd = getCommand(node);
+  if (!cmd) {
     node = ts.visitEachChild(node, c => visitNode(context, c, state), context);
+  } else if (ts.isCallExpression(node)) {
+    node = doAssert(state, node, cmd);
   }
 
   if (ts.isClassDeclaration(node)) {
