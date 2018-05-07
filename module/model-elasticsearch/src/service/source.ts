@@ -8,6 +8,10 @@ import { Injectable } from '@travetto/di';
 import { ModelElasticsearchConfig } from './config';
 import { Class } from '@travetto/registry';
 
+function flatten<T>(input: T[][]): T[] {
+  return input.reduce((acc, arr) => acc.concat(arr), []);
+}
+
 @Injectable({ target: ModelSource })
 export class ModelElasticsearchSource extends ModelSource {
 
@@ -202,30 +206,23 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
+    let id = data.id;
+    delete data.id;
     let update = this.client.update({
-      method: '',
+      method: 'update',
       ...this.getIdentity(cls),
-      id: data.id,
+      id,
       body: { doc: data }
     });
     return this.getById(cls, data.id);
   }
 
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: Query, data: Partial<T>): Promise<T> {
-
-    let final: any = data;
-
-    if (Object.keys(data)[0].charAt(0) !== '$') {
-      final = { $set: flat(final) };
+    if (!data.id) {
+      let item = await this.getByQuery(cls, query);
+      data.id = item.id;
     }
-
-    let res = await col.findOneAndUpdate(query, final, Object.assign({ returnOriginal: false }, {}));
-    if (!res.value) {
-      throw new Error('Object not found for updating');
-    }
-    let ret: T = res.value as T;
-    this.postLoad(cls, ret);
-    return ret;
+    return await this.updatePartial(cls, data as any);
   }
 
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, data: Partial<T>) {
@@ -252,27 +249,23 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
-    let bulk = col.initializeUnorderedBulkOp({});
-    let count = 0;
-
-    (state.upsert || []).forEach(p => {
-      count++;
-      let id: any = state.getId(p);
-      if (id.id === undefined || id.id !== p.id) {
-        delete p.id;
-      } else {
-        id._id = (p as any)._id = new mongo.ObjectID(p.id);
-      }
-
-      bulk.find(id).upsert().updateOne({
-        $set: p
-      });
+    let res = await this.client.bulk({
+      body: flatten<object>([
+        (state.delete || []).map(x => {
+          return [
+            { delete: this.getIdentity(cls), _id: x.id }
+          ]
+        }),
+        (state.upsert || []).map(x => {
+          return [
+            { index: this.getIdentity(cls), _id: x.id },
+            x
+          ]
+        })
+      ])
     });
 
-    (state.delete || []).forEach(p => {
-      count++;
-      bulk.find(state.getId(p)).removeOne();
-    });
+    let count = (state.delete || []).length + (state.upsert || []).length;
 
     let out: BulkResponse = {
       count: {
