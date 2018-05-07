@@ -7,8 +7,7 @@ import { ModelCore, Query, QueryOptions, BulkState, ModelQuery, PageableModelQue
 import { ModelSource } from './source';
 import { ModelRegistry } from './registry';
 
-import * as _ from 'lodash';
-import { AppInfo, AppEnv } from '@travetto/base';
+import { AppInfo, AppEnv, deepAssign } from '@travetto/base';
 
 function getClass<T>(o: T) {
   return o.constructor as Class<T>;
@@ -108,7 +107,7 @@ export class ModelService extends ModelSource {
 
     const res = await this.getAllByQuery(getClass(o), { ...query, limit: 2 });
     if (res.length === 1) {
-      o = _.merge(res[0], o);
+      o = deepAssign(res[0], o);
       return await this.update(cls, o);
     } else if (res.length === 0) {
       return await this.save(cls, o);

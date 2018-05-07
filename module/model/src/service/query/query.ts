@@ -3,8 +3,7 @@ import { Class } from '@travetto/registry';
 import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from './types';
 import { SchemaRegistry, SchemaConfig, ViewConfig, FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-import * as _ from 'lodash';
-import { BaseError } from '@travetto/base';
+import { BaseError, isPlainObject } from '@travetto/base';
 
 interface State extends ErrorCollector<string> {
   path: string;
@@ -51,7 +50,6 @@ export class QueryVerifierService {
   ][];
 
   processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler) {
-
     const view = SchemaRegistry.getViewSchema(cls);
 
     if (handler.preMember && handler.preMember(state, val)) {
@@ -101,7 +99,7 @@ export class QueryVerifierService {
       }
     }
 
-    if (!_.isPlainObject(value)) {
+    if (!isPlainObject(value)) {
       // Ha ndle literal
       const actualType = TypeUtil.getActualType(value);
       if (!this.typesMatch(declaredType, actualType)) {
@@ -166,7 +164,7 @@ export class QueryVerifierService {
             return true;
           }
         } else if (firstKey === $NOT) {
-          if (_.isPlainObject(sub)) {
+          if (isPlainObject(sub)) {
             this.processWhereClause(state, cls, sub);
             return true;
           } else {
@@ -214,7 +212,7 @@ export class QueryVerifierService {
             return;
           }
           return;
-        } else if (_.isPlainObject(value)) {
+        } else if (isPlainObject(value)) {
           if (!('alias' in value)) {
             state.log(`Alias is a required field for selecting`);
             return;
