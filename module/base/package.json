@@ -9,7 +9,7 @@
     "typescript": "^2.8.1"
   }, 
   "description": "", 
-  "license": "ISC", 
+  "license": "MIT", 
   "main": "index.ts", 
   "name": "@travetto/base", 
   "repository": {
