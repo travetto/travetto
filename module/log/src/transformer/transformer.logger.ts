@@ -6,7 +6,7 @@ import { LogLevels } from '../types';
 import { AppEnv } from '@travetto/base';
 
 const VALID_METHODS = new Set(['log', ...Object.keys(LogLevels)]);
-const VALID_PROD_METHODS = new Set(['log', 'info', 'warn', 'error', 'fatal']);
+const VALID_PROD_METHODS = new Set(['info', 'warn', 'error', 'fatal']);
 
 interface IState extends State {
   source: ts.SourceFile;

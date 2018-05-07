@@ -9,7 +9,7 @@ class $Logger {
 
   private listeners: LogListener[] = [];
 
-  private _level: number = LogLevels.info;
+  private _level: number = AppEnv.dev ? LogLevels.debug : LogLevels.info;
 
   _init() {
     const override = process.env.LOG_CONSOLE === '1';

@@ -14,6 +14,8 @@ console.log('Woah!', { a: { b: { c: { d: 10 } } } });
 
 
 
-console.log('Woah!');
+console.info('Woah!');
+
+console.debug('Test');
 
 console.fatal('hi')
