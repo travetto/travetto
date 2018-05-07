@@ -1,5 +1,4 @@
 import * as cp from 'child_process';
-import * as crossSpawn from 'cross-spawn';
 import { ExecutionOptions, ExecutionResult } from './types';
 import { scanDir, Entry } from '@travetto/base';
 
@@ -68,7 +67,7 @@ export type WithOpts<T> = T & ExecutionOptions;
 
 export function spawn(cmdStr: string, options: WithOpts<cp.SpawnOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
   const { cmd, args } = getArgs(cmdStr);
-  const p = crossSpawn(cmd, args, options);
+  const p = cp.spawn(cmd, args, { ...(options as cp.SpawnOptions), shell: true });
   return [p, enhanceProcess(p, options)];
 }
 
