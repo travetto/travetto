@@ -22,11 +22,6 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     };
   }
 
-  getParent(cls: Class): Class | null {
-    const parent = Object.getPrototypeOf(cls) as Class;
-    return parent.name && (parent as any) !== Object ? parent : null;
-  }
-
   getPendingViewSchema<T>(cls: Class<T>, view?: string) {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
@@ -127,7 +122,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
     let config: ClassConfig = this.createPending(cls) as ClassConfig;
 
     // Merge parent
-    const parent = this.getParent(cls) as Class;
+    const parent = this.getParentClass(cls);
     if (parent) {
       const parentConfig = this.get(parent);
       if (parentConfig) {
