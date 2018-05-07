@@ -35,7 +35,7 @@
     "@travetto/test": "0.x.x", 
     "browser-sync": "^2.23.6"
   }, 
-  "license": "ISC", 
+  "license": "MIT", 
   "main": "index.ts", 
   "name": "@travetto/email", 
   "repository": {

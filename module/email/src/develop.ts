@@ -1,5 +1,4 @@
 import * as chokidar from 'chokidar';
-import { create } from 'browser-sync';
 import * as path from 'path';
 import * as util from 'util';
 import * as fs from 'fs';
