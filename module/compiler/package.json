@@ -12,7 +12,7 @@
     "tslib": "^1.9.0"
   }, 
   "description": "", 
-  "license": "ISC", 
+  "license": "MIT", 
   "main": "index.ts", 
   "name": "@travetto/compiler", 
   "repository": {
