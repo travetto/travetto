@@ -56,6 +56,11 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     return {}
   }
 
+  getParentClass(cls: Class): Class | null {
+    const parent = Object.getPrototypeOf(cls) as Class;
+    return parent.name && (parent as any) !== Object ? parent : null;
+  }
+
   getOrCreatePending(cls: Class): Partial<C> {
     const cid = id(cls);
     if (!this.pending.has(cid)) {
