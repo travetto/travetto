@@ -7,7 +7,7 @@
     "@travetto/base": "0.x.x"
   },
   "description": "",
-  "license": "ISC",
+  "license": "MIT",
   "main": "index.ts",
   "name": "@travetto/util",
   "repository": {
