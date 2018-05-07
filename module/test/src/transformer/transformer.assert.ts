@@ -111,15 +111,15 @@ function getCommand(args: ts.Expression[] | ts.NodeArray<ts.Expression>): Comman
       return { fn: 'ok', args: [inner, message!] };
     } else {
       const inner = comp.operand;
-      return { ...getCommand([inner])!, negate: true };
+      return { ...getCommand([inner, ...args.slice(1)])!, negate: true };
     }
   } else {
     // Handle METHOD
     const firstText = comp.getText();
-    if (METHOD_REGEX.test(firstText) && ts.isCallExpression(comp) && ts.isPropertyAccessExpression(comp.expression)) {
+    if (METHOD_REGEX.test(`.${firstText}`) && ts.isCallExpression(comp) && ts.isPropertyAccessExpression(comp.expression)) {
       return {
         fn: METHODS[comp.expression.name.text!],
-        args: [comp.arguments[0], comp.expression.expression]
+        args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)]
       };
     } else {
       return { fn: ASSERT_CMD, args: [...args] };
