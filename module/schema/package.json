@@ -11,7 +11,7 @@
   "devDependencies": {
     "@travetto/test": "0.x.x"
   },
-  "license": "ISC",
+  "license": "MIT",
   "main": "index.ts",
   "name": "@travetto/schema",
   "peerDependencies": {
