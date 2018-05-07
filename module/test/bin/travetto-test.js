@@ -10,6 +10,6 @@ if (process.env.EXECUTION) {
 } else {
   startup.run().then(x => {
     const { Runner } = require('../src/runner');
-    new Runner(process.argv).run().then(x => process.exit(0), e => process.exit(1));
+    new Runner(process.argv.slice(2)).run().then(x => process.exit(0), e => process.exit(1));
   });
 }

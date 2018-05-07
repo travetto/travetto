@@ -101,7 +101,7 @@ export async function server() {
       console.log('*Running*', data.file);
 
       try {
-        await new Runner(['-f', 'exec', '-m', 'single', '--', data.file, data.class, data.method]).run();
+        await new Runner(['-f', 'exec', '-m', 'single', data.file, data.class, data.method]).run();
         worker.send(Events.RUN_COMPLETE);
       } catch (e) {
         worker.send(Events.RUN_COMPLETE, { error: serializeError(e) });

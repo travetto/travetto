@@ -13,11 +13,9 @@ interface State {
   format: 'tap' | 'json' | 'noop' | 'exec';
   mode: 'single' | 'watch' | 'all';
   _: string[];
-  '--': string[];
 }
 
-const RunnerOptions = {
-  '--': true,
+const RUNNER_OPTIONS = {
   default: {
     format: 'tap',
     mode: 'all',
@@ -36,7 +34,7 @@ export class Runner {
   private state: State;
 
   constructor(args: string[] = process.argv) {
-    this.state = minimist(args, RunnerOptions) as any as State;
+    this.state = minimist(args, RUNNER_OPTIONS) as any as State;
   }
 
   getConsumer(): Consumer & { summarize?: () => any } {
@@ -85,7 +83,7 @@ export class Runner {
   }
 
   async getFiles() {
-    const globs = this.state['--'].length ? this.state['--'] : this.state._.slice(2); // strip off node and worker name
+    const globs = this.state._; // strip off node and worker name
     let files = await ExecuteUtil.getTests(globs.map(x => new RegExp(x)));
 
     files = files.map(x => x.split(`${process.cwd()}/`)[1]);
