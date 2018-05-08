@@ -21,6 +21,7 @@ export interface Dependency<T = any> {
 
 export interface InjectableFactoryConfig<T> {
   class: Class<T>;
+  src: Class<T>;
   qualifier?: symbol;
   dependencies?: Dependency<any>[]
   autoCreate?: boolean

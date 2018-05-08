@@ -35,6 +35,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private instances = new Map<TargetId, Map<Symbol, any>>();
   private instancePromises = new Map<TargetId, Map<Symbol, Promise<any>>>();
 
+  private factories = new Map<TargetId, Map<Class, InjectableConfig>>();
+
   private aliases = new Map<TargetId, Map<Symbol, string>>();
   private targets = new Map<ClassId, Map<Symbol, TargetId>>();
 
@@ -285,11 +287,28 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Create mock cls for DI purposes
-    const cls = { __id: config.id || `${config.class.__id}#${config.fn.name}` } as any;
+    const cls = { __id: config.id || `${config.class.__id}#${config.fn.name}` } as Class<any>;
 
     finalConfig.class = cls;
 
     this.registerClass(cls, finalConfig);
+
+    if (!this.factories.has(config.src.__id)) {
+      this.factories.set(config.src.__id, new Map());
+    }
+
+    this.factories.get(config.src.__id)!.set(cls, finalConfig);
+  }
+
+  onInstall(cls: Class<InjectableConfig>, e: ChangeEvent<Class<any>>) {
+    super.onInstall(cls, e);
+
+    // Install factories separate from classes
+    if (this.factories.has(cls.__id)) {
+      for (const fact of this.factories.get(cls.__id)!.keys()) {
+        this.onInstall(fact, e);
+      }
+    }
   }
 
   onInstallFinalize<T>(cls: Class<T>) {

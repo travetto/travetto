@@ -204,6 +204,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       }
       const args = TransformUtil.extendObjectLiteral({
         dependencies: injectArgs,
+        src: (node.parent as ts.ClassDeclaration).name,
         class: target,
         original
       }, injectConfig);
