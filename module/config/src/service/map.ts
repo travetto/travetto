@@ -47,7 +47,6 @@ export class ConfigMap {
   }
 
   static putCaseInsensitivePath(data: Nested, parts: string[], value: Prim) {
-    console.log('Setting', parts, value);
     parts = parts.slice(0);
 
     let key = parts.pop()!;
