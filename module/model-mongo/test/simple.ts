@@ -45,13 +45,11 @@ class TestSave extends BaseMongoTest {
           street2: 'b'
         }
       }));
-
-      assert.ok(res);
     }
 
     const match = await service.getAllByQuery(Person, {
       where: {
-        name: 'Bobs'
+        name: 'Bob'
       }
     });
 
@@ -59,8 +57,10 @@ class TestSave extends BaseMongoTest {
 
     const match2 = await service.getAllByQuery(Person, {
       where: {
-        address: {
-          street1: 'a'
+        $not: {
+          address: {
+            street1: 'b'
+          }
         }
       }
     });

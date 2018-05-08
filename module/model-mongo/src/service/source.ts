@@ -170,12 +170,12 @@ export class ModelMongoSource extends ModelSource {
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}, options: QueryOptions<T> = {}): Promise<T[]> {
     query = this.translateQueryIds(query);
 
-    const projected = projectQuery(query);
+    const projected = projectQuery(query.where);
 
-    console.log(cls.__id, projected.where);
+    console.log(cls.__id, projected);
 
     const col = await this.getCollection(cls);
-    let cursor = col.find(projected.where);
+    let cursor = col.find(projected);
     if (options.sort) {
       cursor = cursor.sort(projectQuery(options).sort);
     }
