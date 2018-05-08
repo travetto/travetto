@@ -4,8 +4,6 @@ import * as yaml from 'js-yaml';
 import { readdirSync } from 'fs';
 import { ConfigMap } from './map';
 
-const ENV_SEP = '_';
-
 export class ConfigLoader {
 
   private static _initialized: boolean = false;
@@ -24,7 +22,7 @@ export class ConfigLoader {
       - Module configs -> located in the node_modules/@travetto/config folder
       - Local configs -> located in the config folder
       - External config file -> loaded from env
-      - Environment vars -> Overrides everything
+      - Environment vars -> Overrides everything (happens at bind time)
   */
   static initialize() {
     if (this._initialized) {
@@ -62,13 +60,6 @@ export class ConfigLoader {
 
       for (const file of envFiles) {
         yaml.safeLoadAll(file.data, doc => this.map.putAll(doc));
-      }
-    }
-
-    // Handle process.env
-    for (const k of Object.keys(process.env)) {
-      if (k.includes(ENV_SEP)) { // Require at least one level
-        this.map.putCaseInsensitivePath(k.split(ENV_SEP), process.env[k] as string);
       }
     }
 

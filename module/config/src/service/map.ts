@@ -28,6 +28,8 @@ function coerce(a: any, val: any): any {
   }
 }
 
+const ENV_SEP = '_';
+
 export class ConfigMap {
 
   // Lowered, and flattened
@@ -44,11 +46,11 @@ export class ConfigMap {
     return next;
   }
 
-  putCaseInsensitivePath(parts: string[], value: Prim) {
+  static putCaseInsensitivePath(data: Nested, parts: string[], value: Prim) {
+    console.log('Setting', parts, value);
     parts = parts.slice(0);
 
     let key = parts.pop()!;
-    let data = this.storage;
 
     if (!key) {
       return false;
@@ -56,7 +58,7 @@ export class ConfigMap {
 
     while (parts.length) {
       const part = parts.shift()!;
-      const next = ConfigMap.getKeyName(part, data);
+      const next = this.getKeyName(part, data);
       if (!next) {
         return false;
       } else {
@@ -68,7 +70,7 @@ export class ConfigMap {
       return false;
     }
 
-    key = ConfigMap.getKeyName(key, data) || key;
+    key = this.getKeyName(key, data) || key;
     data[key] = coerce(value, data[key]);
 
     return true;
@@ -80,7 +82,19 @@ export class ConfigMap {
     while (keys.length && sub[keys[0]]) {
       sub = sub[keys.shift()!];
     }
-    return deepAssign(obj, sub);
+
+    const conf = deepAssign(obj, sub);
+
+    // Handle process.env on bind as the structure we need may not
+    // fully exist until the config has been created
+    const matcher = new RegExp(`^${key.replace(/[.]/g, '_')}`, 'i');
+    for (const k of Object.keys(process.env)) {
+      if (k.includes(ENV_SEP) && matcher.test(k)) { // Require at least one level
+        ConfigMap.putCaseInsensitivePath(conf, k.substring(key.length + 1).split(ENV_SEP), process.env[k] as string);
+      }
+    }
+
+    return conf;
   }
 
   get(key: string) {
