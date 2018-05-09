@@ -7,7 +7,9 @@ import {
   ModelRegistry, ModelCore,
   MatchQuery,
   PageableModelQuery,
-  WhereClause
+  WhereClause,
+  SelectClause,
+  SortClause
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { ModelMongoConfig } from './config';
@@ -22,30 +24,31 @@ function isFieldType(o: any): o is FieldType {
     || o === 'boolean' || o instanceof Date;
 }
 
-export function projectQuery(o: any, path: string = ''): any {
-  let out: any = {};
-
-  if (Array.isArray(o)) {
-    return o.map(x => projectQuery(x));
-  } else if (isPlainObject(o)) {
-    for (const k of Object.keys(o)) {
-      const sub = `${path}${k}`;
-      if (k.startsWith('$')) {
-        if (path) {
-          out = { ...out, [path.replace(/[.]$/, '')]: { [k]: projectQuery(o[k]) } };
-        } else {
-          out = { ...out, [k]: projectQuery(o[k]) };
-        }
-      } else if (isPlainObject(o[k])) {
-        out = { ...out, ...projectQuery(o[k], `${sub}.`) };
-      } else {
-        out[sub] = projectQuery(o[k]);
-      }
-    }
-    return out;
+export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
+  if (o.$and) {
+    return { $and: o.$and.map(x => extractWhereClause<T>(x)) };
+  } else if (o.$or) {
+    return { $or: o.$or.map(x => extractWhereClause<T>(x)) };
+  } else if (o.$not) {
+    return { $nor: [extractWhereClause<T>(o.$not)] };
   } else {
-    return o;
+    return extractSimple(o);
   }
+}
+
+export function extractSimple<T>(o: SelectClause<T> | SortClause<T>, path: string = ''): { [key: string]: any } {
+  const out: { [key: string]: any } = {};
+  const sub = o as { [key: string]: any };
+  const keys = Object.keys(sub);
+  for (const key of keys) {
+    const subpath = `${path}${key}`;
+    if (isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
+      Object.assign(out, extractSimple(sub[key], `${subpath}.`));
+    } else {
+      out[subpath] = sub[key];
+    }
+  }
+  return out;
 }
 
 export class ModelMongoSource extends ModelSource {
@@ -65,13 +68,13 @@ export class ModelMongoSource extends ModelSource {
   buildQuery<T extends ModelCore>(query: Query<T>) {
     const out: any = {};
     if (query.where) {
-      out.where = projectQuery(query.where);
+      out.where = extractWhereClause(query.where);
     }
     if (query.select) {
-      out.select = projectQuery(query.select);
+      out.select = extractSimple(query.select);
     }
     if (query.sort) {
-      out.sort = projectQuery(query.sort);
+      out.sort = extractSimple(query.sort);
     }
     return out;
   }
@@ -170,14 +173,12 @@ export class ModelMongoSource extends ModelSource {
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}, options: QueryOptions<T> = {}): Promise<T[]> {
     query = this.translateQueryIds(query);
 
-    const projected = projectQuery(query.where);
-
-    console.log(cls.__id, projected);
+    const projected = extractWhereClause(query.where || {});
 
     const col = await this.getCollection(cls);
     let cursor = col.find(projected);
     if (options.sort) {
-      cursor = cursor.sort(projectQuery(options).sort);
+      cursor = cursor.sort(extractSimple(options).sort);
     }
 
     cursor = cursor.limit(Math.trunc(options.limit || 200) || 200);

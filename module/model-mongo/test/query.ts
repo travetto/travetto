@@ -1,5 +1,5 @@
 import { Suite, Test } from '@travetto/test';
-import { projectQuery } from '..';
+import { extractSimple, extractWhereClause } from '..';
 import * as assert from 'assert';
 
 @Suite()
@@ -7,10 +7,10 @@ export class QueryTest {
 
   @Test()
   async validateQuery() {
-    let out = projectQuery({ a: { b: { c: 5 } } }, '');
+    let out = extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
-    out = projectQuery({
+    out = extractWhereClause<{ a: { d: number, b: { c: number } }, d: { e: boolean }, g: { z: string[] }, name: number, age: number }>({
       $and: [
         { a: { b: { c: 5 } } },
         { d: { e: true } },
@@ -20,7 +20,7 @@ export class QueryTest {
         { g: { z: ['a', 'b', 'c'] } },
         { a: { d: { $gt: 20 } } }
       ]
-    }, '');
+    });
 
     assert(out.$and[0]['a.b.c'] === 5);
 

@@ -1,7 +1,7 @@
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
-import { ModelMongoSource, ModelMongoConfig, projectQuery } from '../index';
+import { ModelMongoSource, ModelMongoConfig } from '../index';
 import { QueryVerifierService } from '@travetto/model/src/service/query';
 
 import * as assert from 'assert';
@@ -57,11 +57,15 @@ class TestSave extends BaseMongoTest {
 
     const match2 = await service.getAllByQuery(Person, {
       where: {
-        $not: {
-          address: {
-            street1: 'b'
+        $and: [
+          {
+            address: {
+              street1: {
+                $ne: 'b'
+              }
+            }
           }
-        }
+        ]
       }
     });
 
