@@ -5,18 +5,19 @@ import { serializeError, LocalExecution } from '@travetto/exec';
 
 export class ExecutionEmitter extends LocalExecution<TestEvent> implements Consumer {
   onEvent(event: TestEvent) {
-    if (event.phase === 'after') {
-      if (event.type === 'test') {
-        if (event.test.error) {
-          event.test.error = serializeError(event.test.error);
+    const out = { ...event };
+    if (out.phase === 'after') {
+      if (out.type === 'test') {
+        if (out.test.error) {
+          out.test.error = serializeError(out.test.error);
         }
-      } else if (event.type === 'assertion') {
-        if (event.assertion.error) {
-          event.assertion.error = serializeError(event.assertion.error);
+      } else if (out.type === 'assertion') {
+        if (out.assertion.error) {
+          out.assertion.error = serializeError(out.assertion.error);
         }
       }
     }
 
-    this.send(event.type, event);
+    this.send(event.type, out);
   }
 }
