@@ -5,6 +5,11 @@ import { SchemaRegistry, SchemaConfig, ViewConfig, FieldConfig } from '@travetto
 import { Injectable } from '@travetto/di';
 import { BaseError, isPlainObject } from '@travetto/base';
 
+interface ValidationError {
+  message: string;
+  path: string;
+}
+
 interface State extends ErrorCollector<string> {
   path: string;
   extend(path: string): State;
@@ -30,9 +35,13 @@ const WHERE = 'where';
 const SORT = 'sort';
 const GROUP_BY = 'groupBy';
 
-class ValidationError extends BaseError {
-  constructor(public errors: any[]) {
-    super('Validation Error');
+class ValidationErrors extends BaseError<ValidationError[]> {
+  constructor(errors: ValidationError[]) {
+    super(`Validation Errors`, errors);
+  }
+
+  toString() {
+    return `${this.message}:\n  ${this.payload!.map(x => x.message).join('\n  ')}`;
   }
 }
 
@@ -226,12 +235,12 @@ export class QueryVerifierService {
   }
 
   verify<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>) {
-    const errors: any[] = [];
+    const errors: { message: string, path: string }[] = [];
 
     const state = {
       path: '',
       collect(path: string, message: string) {
-        errors.push({ message: `${path}: ${message}` });
+        errors.push({ message: `${path}: ${message}`, path });
       },
       log(err: string) {
         this.collect(this.path, err);
@@ -246,20 +255,19 @@ export class QueryVerifierService {
       }
 
       const val = (query as Query<any>)[key];
+      const subState = state.extend(key);
 
       if (Array.isArray(val) && key === SORT) {
         for (const el of val) {
-          fn(state, cls, el);
+          fn(subState, cls, el);
         }
       } else {
-        fn(state, cls, val);
+        fn(subState, cls, val);
       }
     }
 
     if (errors.length) {
-      const ret = new Error('Validation errors');
-      (ret as any).errors = errors;
-      throw new ValidationError(errors);
+      throw new ValidationErrors(errors);
     }
   }
 }
