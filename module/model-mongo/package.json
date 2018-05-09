@@ -5,9 +5,7 @@
   },
   "dependencies": {
     "@travetto/model": "0.x.x",
-    "@types/flat": "0.0.28",
     "@types/mongodb": "^3.0.9",
-    "flat": "^4.0.0",
     "mongodb": "^3.0.5"
   },
   "description": "",

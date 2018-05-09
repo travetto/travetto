@@ -1,5 +1,4 @@
 import * as mongo from 'mongodb';
-import * as flat from 'flat';
 
 import {
   ModelSource, IndexConfig, Query,
@@ -9,7 +8,8 @@ import {
   PageableModelQuery,
   WhereClause,
   SelectClause,
-  SortClause
+  SortClause,
+  ModelQuery
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { ModelMongoConfig } from './config';
@@ -61,22 +61,27 @@ export class ModelMongoSource extends ModelSource {
     super();
   }
 
-  query<T extends ModelCore, U>(cls: Class<T>, o: T): U[] {
-    return null as any;
-  }
+  async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
+    const col = await this.getCollection(cls);
 
-  buildQuery<T extends ModelCore>(query: Query<T>) {
-    const out: any = {};
-    if (query.where) {
-      out.where = extractWhereClause(query.where);
-    }
+    const projected = extractWhereClause(query.where || {});
+
+    let cursor = col.find(projected);
     if (query.select) {
-      out.select = extractSimple(query.select);
+      cursor.project(Object.keys(query.select)[0].startsWith('$') ? query.select : extractSimple(query.select));
     }
+
     if (query.sort) {
-      out.sort = extractSimple(query.sort);
+      cursor = cursor.sort(extractSimple(query.sort));
     }
-    return out;
+
+    cursor = cursor.limit(Math.trunc(query.limit || 200) || 200);
+
+    if (query.offset) {
+      cursor = cursor.skip(Math.trunc(query.offset) || 0);
+    }
+    const res = await cursor.toArray() as any as U[];
+    return res;
   }
 
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
@@ -170,23 +175,9 @@ export class ModelMongoSource extends ModelSource {
     return objs.map(x => this.postLoad(cls, x));
   }
 
-  async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}, options: QueryOptions<T> = {}): Promise<T[]> {
+  async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}): Promise<T[]> {
     query = this.translateQueryIds(query);
-
-    const projected = extractWhereClause(query.where || {});
-
-    const col = await this.getCollection(cls);
-    let cursor = col.find(projected);
-    if (options.sort) {
-      cursor = cursor.sort(extractSimple(options).sort);
-    }
-
-    cursor = cursor.limit(Math.trunc(options.limit || 200) || 200);
-
-    if (options.offset) {
-      cursor = cursor.skip(Math.trunc(options.offset) || 0);
-    }
-    const res = await cursor.toArray() as any as T[];
+    const res = await this.query(cls, query);
     res.forEach(r => this.postLoad(cls, r));
     return res;
   }
@@ -195,7 +186,7 @@ export class ModelMongoSource extends ModelSource {
     query = this.translateQueryIds(query);
 
     const col = await this.getCollection(cls);
-    const cursor = col.count(query.where!);
+    const cursor = col.count(query.where || {});
 
     const res = await cursor;
     return res;
@@ -220,10 +211,10 @@ export class ModelMongoSource extends ModelSource {
     return res.deletedCount || 0;
   }
 
-  async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}): Promise<number> {
+  async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     query = this.translateQueryIds(query);
     const col = await this.getCollection(cls);
-    const res = await col.deleteMany(query);
+    const res = await col.deleteMany(extractWhereClause(query.where || {}));
     return res.deletedCount || 0;
   }
 
@@ -258,17 +249,17 @@ export class ModelMongoSource extends ModelSource {
     return await this.updatePartialByQuery(cls, { _id: data.id } as any, data);
   }
 
-  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T>, data: Partial<T>): Promise<T> {
+  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<T> {
     const col = await this.getCollection(cls);
     query = this.translateQueryIds(query);
 
     let final: any = data;
 
     if (Object.keys(data)[0].charAt(0) !== '$') {
-      final = { $set: flat(final) };
+      final = { $set: extractSimple(final) };
     }
 
-    const res = await col.findOneAndUpdate(query, final, { returnOriginal: false });
+    const res = await col.findOneAndUpdate(extractWhereClause(query.where || {}), final, { returnOriginal: false });
     if (!res.value) {
       throw new BaseError('Object not found for updating');
     }
@@ -277,17 +268,17 @@ export class ModelMongoSource extends ModelSource {
     return ret;
   }
 
-  async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}, data: Partial<T>) {
+  async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, data: Partial<T>) {
     const col = await this.getCollection(cls);
     query = this.translateQueryIds(query);
 
     let finalData: any = data;
 
     if (Object.keys(data)[0].charAt(0) !== '$') {
-      finalData = { $set: flat(data) };
+      finalData = { $set: extractSimple(data) };
     }
 
-    const res = await col.updateMany(query, data);
+    const res = await col.updateMany(extractWhereClause(query.where || {}), data);
     return res.matchedCount;
   }
 

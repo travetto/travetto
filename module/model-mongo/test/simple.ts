@@ -35,7 +35,7 @@ class TestSave extends BaseMongoTest {
   async save() {
     const service = await DependencyRegistry.getInstance(ModelService);
 
-    for (const x of [1, 2, 3, 4]) {
+    for (const x of [1, 2, 3, 8]) {
       const res = await service.save(Person, Person.from({
         name: 'Bob',
         age: 20 + x,
@@ -81,5 +81,19 @@ class TestSave extends BaseMongoTest {
     });
 
     assert(match2.length === 4);
+
+    const match3 = await service.query(Person, {
+      select: {
+        _id: 0,
+        address: {
+          street1: 1
+        }
+      },
+      limit: 1
+    });
+
+    assert(match3.length === 1);
+    assert(Object.keys(match3[0]).includes('address'));
+    assert(Object.keys(match3[0]['address']) === ['street1']);
   }
 }
