@@ -346,7 +346,9 @@ export class ExecuteUtil {
 
     if (Array.isArray(suites)) {
       for (const suite of suites) {
-        await this.executeSuite(consumer, suite);
+        if (suite.tests.length) {
+          await this.executeSuite(consumer, suite);
+        }
       }
     } else {
       if (test) {
