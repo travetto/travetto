@@ -25,6 +25,8 @@ const OP_MAPPING: { [key: string]: string } = {
   notDeepEqual: '{actual} {state} not deep equal {expected}',
   strictEqual: '{actual} {state} strictly equal {expected}',
   notStrictEqual: '{actual} {state} strictly not equal {expected}',
+  deepStrictEqual: '{actual} {state} strictly deep equal {expected}',
+  notStrictDeepEqual: '{actual} {state} strictly not deep equal {expected}',
   greaterThanEqual: '{actual} {state} be greater than or equal to {expected}',
   greaterThan: '{actual} {state} be greater than {expected}',
   lessThanEqual: '{actual} {state} be less than or equal to {expected}',

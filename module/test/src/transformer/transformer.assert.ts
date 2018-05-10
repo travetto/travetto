@@ -14,11 +14,11 @@ const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
   [ts.SyntaxKind.InstanceOfKeyword]: 'instanceOf'
 }
 
-const EQUALS_MAPPING: { [key: string]: string } = {
-  strictEqual: 'deepStrictEqual',
+const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
   equal: 'deepEqual',
-  notStrictEqual: 'notDeepStrictEqual',
-  notEqual: 'notDeepEqual'
+  notEqual: 'notDeepEqual',
+  strictEqual: 'deepStrictEqual',
+  notStrictEqual: 'notDeepStrictEqual'
 }
 
 const ASSERT_CMD = 'assert';
@@ -98,7 +98,7 @@ function getCommand(args: ts.Expression[] | ts.NodeArray<ts.Expression>): Comman
     if (opFn) {
       const literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
       if (/equal/i.test(opFn) && literal) {
-        opFn = EQUALS_MAPPING[opFn] || opFn;
+        opFn = DEEP_EQUALS_MAPPING[opFn] || opFn;
       }
       return { fn: opFn, args: [comp.left, comp.right, message!] };
     } else {
