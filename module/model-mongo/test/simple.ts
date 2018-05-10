@@ -80,7 +80,7 @@ class TestSave extends BaseMongoTest {
       }
     });
 
-    assert(match2.length === 4);
+    assert(match2.length > 3);
 
     const match3 = await service.query(Person, {
       select: {
