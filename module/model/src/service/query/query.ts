@@ -36,12 +36,12 @@ const SORT = 'sort';
 const GROUP_BY = 'groupBy';
 
 class ValidationErrors extends BaseError<ValidationError[]> {
-  constructor(errors: ValidationError[]) {
-    super(`Validation Errors`, errors);
+  constructor(public errors: ValidationError[]) {
+    super(`Validation Errors`);
   }
 
   toString() {
-    return `${this.message}:\n  ${this.payload!.map(x => x.message).join('\n  ')}`;
+    return this.message + (this.errors && this.errors.length ? `:\n  ${this.errors!.map(x => x.message).join('\n  ')}` : '');
   }
 }
 
