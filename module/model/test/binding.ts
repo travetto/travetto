@@ -15,21 +15,22 @@ const query: Query<Person> = {
     }
   },
   sort: [{
-    address: {
-      street1: -1
-    }
+    age: 1,
+
   }],
   where: {
-    name: '5',
-    names: ['1', '2'],
-    dob: {
-      $gte: new Date()
-    },
-    address: {
-      street2: {
-        $eq: '5'
+    $and: [{
+      name: '5',
+      names: ['1', '2'],
+      dob: {
+        $gte: new Date()
+      },
+      address: {
+        street2: {
+          $eq: '5'
+        }
       }
-    }
+    }]
   }
 }
 
@@ -66,12 +67,13 @@ class DataBinding {
     try {
       const res = await model.getByQuery(Person, {
         where: {
-          /*name: '5',
-          dob: {
-            $eq: new Date()
-          }*/
           $and: [{
-            name: '6',
+            name: '5',
+            dob: {
+              $eq: new Date()
+            }
+          }, {
+            name: '8',
             address: {
               street1: {
                 $nin: ['10']

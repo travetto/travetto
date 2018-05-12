@@ -1,19 +1,28 @@
 import { Class } from '@travetto/registry';
 import { WhereClause } from './where';
-import { RetainFields } from './common';
+import { RetainFields, Point, PrimitiveArray, Primitive } from './common';
 
 type SelectFieldFn = 'max' | 'min' | 'avg' | 'sum' | 'count';
 
 type _SelectClause<T> = {
-  [P in keyof T]?: T[P] extends object ? _SelectClause<T[P]> : { alias: string, calc: SelectFieldFn } | 1 | 0 | boolean;
+  [P in keyof T]?:
+  T[P] extends (Primitive | PrimitiveArray) ?
+  { alias: string, calc: SelectFieldFn } | 1 | 0 | boolean :
+  (T[P] extends object ? _SelectClause<T[P]> : never);
 };
 
 type _GroupClause<T> = {
-  [P in keyof T]?: T[P] extends object ? _GroupClause<T[P]> : (1 | 0 | boolean)
+  [P in keyof T]?:
+  T[P] extends Primitive ?
+  (1 | 0 | boolean) :
+  (T[P] extends object ? _GroupClause<T[P]> : never);
 };
 
 type _SortClause<T> = {
-  [P in keyof T]?: T[P] extends object ? _SortClause<T[P]> : (boolean | 1 | -1);
+  [P in keyof T]?:
+  T[P] extends Primitive ? (
+    boolean | 1 | -1) :
+  (T[P] extends object ? _SortClause<T[P]> : never);
 }
 
 type _QueryOptions<T> = {

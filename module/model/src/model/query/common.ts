@@ -1,10 +1,14 @@
 import { ModelCore } from '../model';
+import { Class } from '@travetto/registry';
 
 export type Point = [number, number];
 
-export type FieldType = string | number | Date | Point | boolean | ModelCore;
+export type Primitive = number | boolean | string | Date | Point;
+export type PrimitiveArray = Primitive[];
 
-export type ValidFieldNames<T> = { [K in keyof T]: T[K] extends FieldType ? K : never }[keyof T];
+export type FieldType = Primitive | object;
+
+export type ValidFieldNames<T> = { [K in keyof T]: T[K] extends Function ? never : (T[K] extends FieldType ? K : never) }[keyof T];
 
 const HIDDEN = Symbol('hidden')
 
