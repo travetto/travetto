@@ -1,6 +1,3 @@
-import { ModelCore } from '../model';
-import { Class } from '@travetto/registry';
-
 export type Point = [number, number];
 
 export type Primitive = number | boolean | string | Date | Point;
