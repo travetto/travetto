@@ -41,7 +41,7 @@ type GeoFieldQuery =
   } |
   Point;
 
-type _PropWhereClause<T> = {
+export type PropWhereClause<T> = {
   [P in keyof T]?:
   (T[P] extends (number | undefined) ? ComparableFieldQuery<number> | number :
     (T[P] extends (string | undefined) ? StringFieldQuery :
@@ -49,13 +49,13 @@ type _PropWhereClause<T> = {
         (T[P] extends (Date | undefined) ? ComparableFieldQuery<Date> | RetainFields<Date> :
           (T[P] extends (Point | undefined) ? GeoFieldQuery :
             (T[P] extends ((infer U)[] | undefined) ? ArrayFieldQuery<U> :
-              (T[P] extends (object | undefined) ? _PropWhereClause<RetainFields<T[P]>> : never)))))));
+              (T[P] extends (object | undefined) ? PropWhereClause<RetainFields<T[P]>> : never)))))));
 }
 
 export type _WhereClause<T> =
   ({ $and: _WhereClause<T>[]; } & { [P in keyof T]?: never }) |
   ({ $or: _WhereClause<T>[]; } & { [P in keyof T]?: never }) |
   ({ $not: _WhereClause<T>; } & { [P in keyof T]?: never }) |
-  (_PropWhereClause<T> & { $and?: never; $or?: never; $not?: never });
+  (PropWhereClause<T> & { $and?: never; $or?: never; $not?: never });
 
 export type WhereClause<T> = _WhereClause<RetainFields<T>>;

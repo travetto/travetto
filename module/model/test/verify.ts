@@ -1,9 +1,10 @@
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Model, ModelQuery } from '..';
+import { Model, ModelQuery, ModelCore, WhereClause, BaseModel, PropWhereClause } from '..';
 import { Schema, SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 import { QueryVerifierService } from '../src/service/query';
 import { RetainFields } from '../src/model/query/common';
+import { Class } from '@travetto/registry';
 
 @Schema()
 class Preferences {
@@ -18,6 +19,11 @@ class User {
   prefs: Preferences;
 }
 
+@Model()
+class ModelUser extends BaseModel {
+
+}
+
 @Suite()
 export class VerifyTest {
 
@@ -25,6 +31,26 @@ export class VerifyTest {
   async init() {
     await DependencyRegistry.init();
     await SchemaRegistry.init();
+  }
+
+  @Test()
+  async verifyModelCore() {
+    const verifier = await DependencyRegistry.getInstance(QueryVerifierService);
+
+    const t2: PropWhereClause<RetainFields<ModelCore>> = {
+
+    }
+
+    const test = <T extends ModelCore>(cls: Class<T>) => {
+      const t: WhereClause<ModelCore> = {
+        id: {
+          $eq: '5'
+        },
+
+      };
+      verifier.verify(User, t);
+    }
+    test(ModelUser);
   }
 
   @Test()

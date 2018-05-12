@@ -37,7 +37,7 @@ export class TestSource implements ModelSource {
   updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>): Promise<T> {
     throw new Error('Method not implemented.');
   }
-  query<T extends ModelCore, U>(cls: Class<T>, builder: Query<T>): U[] {
+  query<T extends ModelCore, U>(cls: Class<T>, builder: Query<T>): Promise<U[]> {
     throw new Error('Method not implemented.');
   }
   bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>): Promise<BulkResponse> {

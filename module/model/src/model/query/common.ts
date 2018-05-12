@@ -6,7 +6,7 @@ export type PrimitiveArray = Primitive[];
 export type ValidFieldNames<T> = {
   [K in keyof T]:
   (T[K] extends (Primitive | undefined) ? K :
-    (T[K] extends (...args: any[]) => any ? never :
+    (T[K] extends (Function | undefined) ? never :
       K))
 }[keyof T];
 
