@@ -1,4 +1,4 @@
-import { RetainFields, Point, FieldType } from './common';
+import { RetainFields, Point } from './common';
 
 type GeneralFieldQuery<T> = {
   $eq?: T;
@@ -7,7 +7,7 @@ type GeneralFieldQuery<T> = {
 };
 
 type GeneralScalarFieldQuery<T> =
-  GeneralFieldQuery<T> &
+  GeneralFieldQuery<T> |
   // Array
   {
     $in?: T[];
@@ -15,48 +15,49 @@ type GeneralScalarFieldQuery<T> =
   };
 
 type ComparableFieldQuery<T> =
-  GeneralScalarFieldQuery<T> &
+  GeneralScalarFieldQuery<T> |
   {
     $lt?: T;
     $lte?: T;
     $gt?: T;
     $gte?: T;
-  };
+  } |
+  T;
 
 type ArrayFieldQuery<T> =
-  GeneralFieldQuery<T> &
-  { $all?: T; };
+  GeneralFieldQuery<T> |
+  { $all?: T[]; } |
+  T[];
 
 type StringFieldQuery =
-  GeneralScalarFieldQuery<string> &
-  { $regex?: RegExp; };
+  GeneralScalarFieldQuery<string> |
+  { $regex?: RegExp; } |
+  string;
 
 type GeoFieldQuery =
-  GeneralScalarFieldQuery<Point> &
+  GeneralScalarFieldQuery<Point> |
   {
     $geoWithin?: Point[];
     $geoIntersects?: Point[];
+  } |
+  Point;
+
+type _PropWhereClause<T> = {
+  [P in keyof T]?:
+  (T[P] extends (Date | number | undefined) ? ComparableFieldQuery<T[P]> :
+    (T[P] extends Point | undefined ? GeoFieldQuery :
+      (T[P] extends string | undefined ? StringFieldQuery :
+        (T[P] extends (infer U)[] | undefined ? ArrayFieldQuery<U> :
+          (T[P] extends boolean | undefined ? (GeneralFieldQuery<T[P]> | boolean) :
+            (T[P] extends object | undefined ? _PropWhereClause<RetainFields<T[P]>> : never))))));
+}
+
+export type _WhereClause<T> =
+  _PropWhereClause<T> &
+  {
+    $and?: _WhereClause<T>[]
+    $or?: _WhereClause<T>[];
+    $not?: _WhereClause<T>;
   };
 
-type FieldQuery<T> =
-  (T extends (number | Date) ? ComparableFieldQuery<T> :
-    (T extends string ? StringFieldQuery :
-      (T extends Point ? GeoFieldQuery :
-        (T extends (infer U)[] ? ArrayFieldQuery<U> :
-          (T extends Function ? never :
-            GeneralFieldQuery<T>))))) | T;
-
-type _MatchQuery<T> = {
-  [P in keyof T]?: T[P] extends object ? _MatchQuery<RetainFields<T[P]>> : FieldQuery<T[P]>;
-} & { $and?: never, $or?: never, $not?: never };
-
-type _WhereClause<T> =
-  ({
-    $and?: (_MatchQuery<T> | _WhereClause<T>)[];
-    $or?: (_MatchQuery<T> | _WhereClause<T>)[];
-    $not?: (_MatchQuery<T> | _WhereClause<T>);
-  }) &
-  { [P in keyof T]?: never };
-
-export type MatchQuery<T> = _MatchQuery<RetainFields<T>>;
-export type WhereClause<T> = _WhereClause<RetainFields<T>> | _MatchQuery<RetainFields<T>>;
+export type WhereClause<T> = _WhereClause<RetainFields<T>>;

@@ -1,5 +1,5 @@
 import { SchemaBound, View } from '@travetto/schema';
-import { Model, ModelService, WhereClause, PageableModelQuery, Query, MatchQuery } from '../index';
+import { Model, ModelService, WhereClause, PageableModelQuery, Query } from '../index';
 import { TestSource } from './registry';
 import { Person, Address } from './models';
 import { Test, Suite, BeforeAll } from '@travetto/test';
@@ -7,6 +7,7 @@ import { Test, Suite, BeforeAll } from '@travetto/test';
 import * as assert from 'assert';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry, Class } from '@travetto/registry';
+import { RetainFields } from '../src/model/query/common';
 
 const street1 = '1234 Fun';
 
@@ -44,19 +45,24 @@ class DataBinding {
           $and: [{
             name: '5',
             dob: {
-              $eq: new Date()
+              $exists: true
             }
           }, {
             name: '8',
             address: {
               street1: {
-                $nin: ['10']
+                $nin: ['a']
               }
             }
           }, {
             $or: [{
               age: {
                 $in: [5]
+              },
+              address: {
+                street2: {
+                  $exists: true
+                }
               }
             }],
           }]

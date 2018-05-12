@@ -1,8 +1,9 @@
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Model } from '..';
+import { Model, ModelQuery } from '..';
 import { Schema, SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 import { QueryVerifierService } from '../src/service/query';
+import { RetainFields } from '../src/model/query/common';
 
 @Schema()
 class Preferences {
@@ -30,16 +31,20 @@ export class VerifyTest {
   async verifyNested() {
     const verifier = await DependencyRegistry.getInstance(QueryVerifierService);
 
-    verifier.verify(User, {
+    const t: RetainFields<User['prefs']> = null as any;
+
+    const query: ModelQuery<User> = {
       where: {
         id: 5,
         prefs: {
           language: {
-            $exists: true
+            $eq: 'en'
           }
         }
       }
-    })
+    };
+
+    verifier.verify(User, query)
   }
 
 }
