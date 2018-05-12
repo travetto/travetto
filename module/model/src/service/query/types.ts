@@ -8,7 +8,7 @@ export interface ErrorCollector<T> {
 
 const st = (t: string, arr: boolean = false) => new Set([arr ? `${t}[]` : t]);
 
-const basic = (type: string) => ({ $ne: st(type), $eq: st(type), $exists: st(type) });
+const basic = (type: string) => ({ $ne: st(type), $eq: st(type), $exists: st('boolean') });
 const scalar = (type: string) => ({ $in: st(type, true), $nin: st(type, true) });
 const str = (type: string) => ({ $regex: st('RegExp') });
 const comp = (type: string) => ({ $lt: st(type), $lte: st(type), $gt: st(type), $gte: st(type) });

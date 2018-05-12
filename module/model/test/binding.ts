@@ -8,32 +8,6 @@ import * as assert from 'assert';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry, Class } from '@travetto/registry';
 
-const query: Query<Person> = {
-  select: {
-    address: {
-      street1: 1
-    }
-  },
-  sort: [{
-    age: 1,
-
-  }],
-  where: {
-    $and: [{
-      name: '5',
-      names: ['1', '2'],
-      dob: {
-        $gte: new Date()
-      },
-      address: {
-        street2: {
-          $eq: '5'
-        }
-      }
-    }]
-  }
-}
-
 const street1 = '1234 Fun';
 
 @Suite('Binding Test')

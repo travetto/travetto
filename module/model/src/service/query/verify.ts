@@ -4,11 +4,7 @@ import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from './types';
 import { SchemaRegistry, SchemaConfig, ViewConfig, FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { BaseError, isPlainObject } from '@travetto/base';
-
-interface ValidationError {
-  message: string;
-  path: string;
-}
+import { ValidationErrors } from './error';
 
 interface State extends ErrorCollector<string> {
   path: string;
@@ -34,16 +30,6 @@ const SELECT = 'select';
 const WHERE = 'where';
 const SORT = 'sort';
 const GROUP_BY = 'groupBy';
-
-class ValidationErrors extends BaseError<ValidationError[]> {
-  constructor(public errors: ValidationError[]) {
-    super(`Validation Errors`);
-  }
-
-  toString() {
-    return this.message + (this.errors && this.errors.length ? `:\n  ${this.errors!.map(x => x.message).join('\n  ')}` : '');
-  }
-}
 
 @Injectable()
 export class QueryVerifierService {
