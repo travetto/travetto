@@ -38,7 +38,7 @@ export class VerifyTest {
         id: 5,
         prefs: {
           language: {
-            $eq: 'en'
+            $eq: 'a'
           }
         }
       }

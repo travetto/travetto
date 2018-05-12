@@ -42,30 +42,15 @@ class DataBinding {
     try {
       const res = await model.getByQuery(Person, {
         where: {
-          $and: [{
-            name: '5',
-            dob: {
-              $exists: true
-            }
-          }, {
-            name: '8',
-            address: {
-              street1: {
-                $nin: ['a']
-              }
-            }
-          }, {
-            $or: [{
-              age: {
-                $in: [5]
-              },
+          $and: [
+            {
               address: {
-                street2: {
-                  $exists: true
+                street1: {
+                  $eq: '5'
                 }
               }
-            }],
-          }]
+            }
+          ]
         }
       });
     } catch (e) {
