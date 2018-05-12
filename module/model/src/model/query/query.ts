@@ -8,21 +8,21 @@ type _SelectClause<T> = {
   [P in keyof T]?:
   T[P] extends (Primitive | PrimitiveArray) ?
   { alias: string, calc: SelectFieldFn } | 1 | 0 | boolean :
-  (T[P] extends object ? _SelectClause<T[P]> : never);
+  (T[P] extends object ? _SelectClause<RetainFields<T[P]>> : never);
 };
 
 type _GroupClause<T> = {
   [P in keyof T]?:
   T[P] extends Primitive ?
   (1 | 0 | boolean) :
-  (T[P] extends object ? _GroupClause<T[P]> : never);
+  (T[P] extends object ? _GroupClause<RetainFields<T[P]>> : never);
 };
 
 type _SortClause<T> = {
   [P in keyof T]?:
   T[P] extends Primitive ? (
     boolean | 1 | -1) :
-  (T[P] extends object ? _SortClause<T[P]> : never);
+  (T[P] extends object ? _SortClause<RetainFields<T[P]>> : never);
 }
 
 type _QueryOptions<T> = {
@@ -39,7 +39,7 @@ type _QueryMain<T> = {
 }
 
 type _Query<T> = _QueryMain<T> & _QueryOptions<T>;
-type _ModelQuery<T> = { where?: WhereClause<T> }
+type _ModelQuery<T> = { where: WhereClause<T> }
 type _PageableModelQuery<T> = _ModelQuery<T> & _QueryOptions<T>
 
 export type Query<T> = _Query<RetainFields<T>>;

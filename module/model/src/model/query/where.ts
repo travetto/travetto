@@ -47,7 +47,7 @@ type FieldQuery<T> =
             GeneralFieldQuery<T>))))) | T;
 
 type _MatchQuery<T> = {
-  [P in keyof T]?: T[P] extends object ? _MatchQuery<T[P]> : FieldQuery<T[P]>;
+  [P in keyof T]?: T[P] extends object ? _MatchQuery<RetainFields<T[P]>> : FieldQuery<T[P]>;
 } & { $and?: never, $or?: never, $not?: never };
 
 type _WhereClause<T> =
