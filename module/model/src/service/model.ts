@@ -72,7 +72,7 @@ export class ModelService extends ModelSource {
     return o;
   }
 
-  query<U, T extends ModelCore = U>(cls: Class<T>, query: Query<T>) {
+  query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>) {
     this.queryService.verify(cls, query);
 
     return this.source.query<T, U>(cls, query);
