@@ -4,7 +4,6 @@ import {
   ModelSource, IndexConfig, Query,
   QueryOptions, BulkState, BulkResponse,
   ModelRegistry, ModelCore,
-  MatchQuery,
   PageableModelQuery,
   WhereClause,
   SelectClause,
@@ -14,29 +13,41 @@ import {
 import { Injectable } from '@travetto/di';
 import { ModelMongoConfig } from './config';
 import { Class } from '@travetto/registry';
-import { FieldType } from '@travetto/model/src/model/query/common';
 import { BaseError, isPlainObject } from '@travetto/base';
 
-function isFieldType(o: any): o is FieldType {
-  const type = typeof o;
-  return (Array.isArray(o) && o.length === 2 && typeof o[0] === 'number')
-    || o === 'number' || o === 'string'
-    || o === 'boolean' || o instanceof Date;
+function has$And(o: any): o is ({ $and: WhereClause<any>[]; }) {
+  return '$and' in o;
+}
+
+function has$Or(o: any): o is ({ $or: WhereClause<any>[]; }) {
+  return '$or' in o;
+}
+
+function has$Not(o: any): o is ({ $not: WhereClause<any>; }) {
+  return '$not' in o;
+}
+
+function hasId<T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) {
+  return 'id' in o;
+}
+
+function has$In(o: any): o is { $in: any[] } {
+  return '$in' in o && Array.isArray(o.$in);
 }
 
 export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
-  if (o.$and) {
+  if (has$And(o)) {
     return { $and: o.$and.map(x => extractWhereClause<T>(x)) };
-  } else if (o.$or) {
+  } else if (has$Or(o)) {
     return { $or: o.$or.map(x => extractWhereClause<T>(x)) };
-  } else if (o.$not) {
+  } else if (has$Not(o)) {
     return { $nor: [extractWhereClause<T>(o.$not)] };
   } else {
     return extractSimple(o);
   }
 }
 
-export function extractSimple<T>(o: SelectClause<T> | SortClause<T>, path: string = ''): { [key: string]: any } {
+export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
   const out: { [key: string]: any } = {};
   const sub = o as { [key: string]: any };
   const keys = Object.keys(sub);
@@ -72,7 +83,7 @@ export class ModelMongoSource extends ModelSource {
     }
 
     if (query.sort) {
-      cursor = cursor.sort(extractSimple(query.sort));
+      cursor = cursor.sort(query.sort.map(x => extractSimple(x)));
     }
 
     cursor = cursor.limit(Math.trunc(query.limit || 200) || 200);
@@ -81,6 +92,9 @@ export class ModelMongoSource extends ModelSource {
       cursor = cursor.skip(Math.trunc(query.offset) || 0);
     }
     const res = await cursor.toArray() as any as U[];
+    for (const r of res) {
+      this.postLoad(undefined as any, r as any);
+    }
     return res;
   }
 
@@ -123,12 +137,12 @@ export class ModelMongoSource extends ModelSource {
     return Promise.all(promises);
   }
 
-  translateQueryIds<T extends ModelCore>(query: Query<T>) {
-    const where = (query.where || {}) as WhereClause<T & { _id: any }>;
-    const val: any = where.id;
-    if (val) {
+  translateQueryIds<T extends ModelCore, U extends Query<T>>(query: U) {
+    const where = (query.where || {});
+    if (hasId(where)) {
+      const val = where.id;
       if (Array.isArray(val) || typeof val === 'string') {
-        let res: (any[] | string | mongo.ObjectID) = val;
+        let res: (mongo.ObjectID | mongo.ObjectID[]);
         if (typeof val === 'string') {
           res = new mongo.ObjectID(val);
         } else {
@@ -136,9 +150,9 @@ export class ModelMongoSource extends ModelSource {
         }
         delete where.id;
         (where as any)._id = res;
-      } else if (Array.isArray(val.$in)) {
+      } else if (has$In(val)) {
         const res: { $in: (string | mongo.ObjectID)[] } = val;
-        val.$in = res.$in.map(x => typeof x === 'string' ? new mongo.ObjectID(x) : x);
+        (where as any)._id = { $in: res.$in.map(x => typeof x === 'string' ? new mongo.ObjectID(x) : x) };
       }
     }
     return query;

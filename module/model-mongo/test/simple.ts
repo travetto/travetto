@@ -1,14 +1,15 @@
-import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
+import { Model, ModelService, BaseModel, ModelSource, WhereClause } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
+import { Schema } from '@travetto/schema';
 import { ModelMongoSource, ModelMongoConfig } from '../index';
 import { QueryVerifierService } from '@travetto/model/src/service/query';
 
 import * as assert from 'assert';
 import { BaseMongoTest } from './base';
 
-@Model()
-class Address extends BaseModel {
+@Schema()
+class Address {
   street1: string;
   street2?: string;
 }
@@ -18,7 +19,7 @@ class Person extends BaseModel {
   name: string;
   age: number;
   gender: 'm' | 'f';
-  address: Address
+  address: Address;
 }
 
 @Suite('Simple Save')
@@ -42,7 +43,7 @@ class TestSave extends BaseMongoTest {
         gender: 'm',
         address: {
           street1: 'a',
-          street2: 'b'
+          ...(x === 1 ? { street2: 'b' } : {})
         }
       }));
     }
@@ -56,7 +57,7 @@ class TestSave extends BaseMongoTest {
           {
             $not: {
               age: {
-                $gt: 23
+                $gte: 24
               }
             }
           }
@@ -72,7 +73,7 @@ class TestSave extends BaseMongoTest {
           {
             address: {
               street1: {
-                $ne: 'b'
+                $ne: 'b',
               }
             }
           }
@@ -84,16 +85,25 @@ class TestSave extends BaseMongoTest {
 
     const match3 = await service.query(Person, {
       select: {
-        _id: 0,
+        id: 1,
         address: {
           street1: 1
         }
       },
-      limit: 1
+      where: {
+        address: {
+          street2: {
+            $exists: true
+          }
+        }
+      }
     });
 
     assert(match3.length === 1);
     assert(Object.keys(match3[0]).includes('address'));
-    assert(Object.keys(match3[0]['address']) === ['street1']);
+    assert(!Object.keys(match3[0]).includes('age'));
+    assert(Object.keys(match3[0]).includes('id'));
+    assert(!Object.keys(match3[0].address).includes('street2'));
+    assert(Object.keys(match3[0].address) === ['street1']);
   }
 }
