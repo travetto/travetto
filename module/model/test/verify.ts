@@ -7,7 +7,7 @@ import { QueryVerifierService } from '../src/service/query';
 @Schema()
 class Preferences {
   size: number;
-  language: string;
+  language?: string;
 }
 
 @Model()
@@ -32,6 +32,7 @@ export class VerifyTest {
 
     verifier.verify(User, {
       where: {
+        id: 5,
         prefs: {
           language: {
             $exists: true
