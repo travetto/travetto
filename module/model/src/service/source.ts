@@ -20,7 +20,7 @@ export abstract class ModelSource {
   abstract updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T>;
   abstract updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>): Promise<T>;
 
-  abstract query<T extends ModelCore, U = any>(cls: Class<T>, builder: Query<T>): Promise<U[]>;
+  abstract query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): U[];
 
   abstract bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>): Promise<BulkResponse>;
   abstract getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T>;

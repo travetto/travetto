@@ -47,7 +47,7 @@ type FieldQuery<T> =
             GeneralFieldQuery<T>))))) | T;
 
 type _MatchQuery<T> = {
-  [P in keyof T]?: T[P] extends (Date | number | string | any[] | Point | Function) ? FieldQuery<T[P]> : _MatchQuery<T[P]>
+  [P in keyof T]?: T[P] extends (Date | number | string | (infer U)[] | Point | Function) ? FieldQuery<T[P]> : _MatchQuery<T[P]>
 } & { $and?: never, $or?: never, $not?: never };
 
 type _WhereClause<T> =

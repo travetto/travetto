@@ -1,7 +1,8 @@
 import { Model, BaseModel, WhereClause, ModelService } from '../index';
+import { Schema } from '@travetto/schema';
 
-@Model()
-export class Address extends BaseModel {
+@Schema()
+export class Address {
   street1: string;
   street2: string;
 }
