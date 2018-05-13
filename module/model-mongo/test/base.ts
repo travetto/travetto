@@ -1,11 +1,6 @@
-import * as assert from 'assert';
-import * as fs from 'fs';
-import * as util from 'util';
-import * as net from 'net';
-
 import { BeforeAll, AfterAll, BeforeEach } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { ModelMongoSource, ModelMongoConfig } from '..';
+import { ModelMongoSource, ModelMongoConfig } from '../src/service';
 import { ModelSource } from '@travetto/model';
 import { ConfigLoader } from '@travetto/config';
 import { RootRegistry } from '@travetto/registry';
