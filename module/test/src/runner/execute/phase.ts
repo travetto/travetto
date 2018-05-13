@@ -6,6 +6,7 @@ export const BREAKOUT = Symbol('breakout');
 export const TIMEOUT = Symbol('timeout');
 
 const DEFAULT_TIMEOUT = parseInt(process.env.DEFAULT_TIMEOUT || '5000', 10);
+const DEFAULT_PHASE_TIMEOUT = parseInt(process.env.DEFAULT_PHASE_TIMEOUT || '15000', 10);
 
 export function asyncTimeout(duration: number = DEFAULT_TIMEOUT): [Promise<any>, Function] {
   let id: NodeJS.Timer;
@@ -72,7 +73,7 @@ export class PhaseManager {
   async runPhase(phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
     try {
       for (const fn of this.suite[phase]) {
-        const [timeout, clear] = asyncTimeout();
+        const [timeout, clear] = asyncTimeout(DEFAULT_PHASE_TIMEOUT);
         await Promise.race([timeout, fn.call(this.suite.instance)]);
         clear();
       }
