@@ -3,94 +3,14 @@ import * as readline from 'readline';
 import * as assert from 'assert';
 import { bulkFind, BaseError } from '@travetto/base';
 
-import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../model';
-import { TestRegistry } from '../service';
-import { ConsoleCapture } from './console';
-import { AssertUtil } from './assert';
-import { Consumer } from '../consumer';
-import { SuitePhase } from '..';
-
-export const BREAKOUT = Symbol('breakout');
-export const TIMEOUT = Symbol('timeout');
+import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../../model';
+import { TestRegistry } from '../../service';
+import { ConsoleCapture } from '../console';
+import { AssertUtil } from './../assert';
+import { Consumer } from '../../consumer';
+import { asyncTimeout, TIMEOUT, PhaseManager } from './phase';
 
 export class ExecuteUtil {
-
-  static timeout = parseInt(process.env.DEFAULT_TIMEOUT || '5000', 10);
-
-  static asyncTimeout(duration?: number): [Promise<any>, Function] {
-    let id: NodeJS.Timer;
-    if (process.env.DEBUGGER) {
-      duration = 600000; // 10 minutes
-    }
-    const prom = new Promise((_, reject) => {
-      id = setTimeout(() => reject(TIMEOUT), duration || this.timeout);
-      id.unref()
-    });
-    return [prom, () => clearTimeout(id)];
-  }
-
-  static async generateSuiteError(consumer: Consumer, suite: SuiteConfig, methodName: string, error: Error) {
-    // tslint:disable:prefer-const
-    let { line, file } = AssertUtil.readFilePosition(error, suite.file);
-    if (line === 1) {
-      line = suite.lines.start;
-    }
-    const badAssert: Assertion = {
-      line,
-      file,
-      error,
-      className: suite.className,
-      methodName,
-      message: error.message,
-      text: methodName,
-      operator: 'throws'
-    };
-    const badTest: TestResult = {
-      status: 'fail',
-      className: suite.className,
-      methodName,
-      description: methodName,
-      lines: { start: line, end: line },
-      file,
-      error,
-      assertions: [badAssert],
-      output: {}
-    };
-
-    const badTestConfig: TestConfig = {
-      class: suite.class,
-      className: suite.className,
-      file: suite.file,
-      lines: badTest.lines,
-      methodName: badTest.methodName,
-      description: badTest.description,
-      skip: false
-    };
-
-    consumer.onEvent({ type: 'test', phase: 'before', test: badTestConfig });
-    consumer.onEvent({ type: 'assertion', phase: 'after', assertion: badAssert });
-    consumer.onEvent({ type: 'test', phase: 'after', test: badTest });
-
-    return badTest;
-  }
-
-  static async affixProcess(consumer: Consumer, phase: SuitePhase, suite: SuiteConfig, result: SuiteResult) {
-    try {
-      for (const fn of suite[phase]) {
-        const [timeout, clear] = this.asyncTimeout();
-        await Promise.race([timeout, fn.call(suite.instance)]);
-        clear();
-      }
-    } catch (error) {
-      if (error === TIMEOUT) {
-        error = new Error(`${suite.className}: ${phase} timed out`);
-      }
-      const res = await this.generateSuiteError(consumer, suite, `[[${phase}]]`, error);
-      result.tests.push(res);
-      result.fail++;
-      throw BREAKOUT;
-    }
-  }
 
   static isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
@@ -163,7 +83,7 @@ export class ExecuteUtil {
       return result as TestResult;
     }
 
-    const [timeout, clear] = this.asyncTimeout(test.timeout);
+    const [timeout, clear] = asyncTimeout(test.timeout);
 
     try {
       ConsoleCapture.start();
@@ -232,18 +152,16 @@ export class ExecuteUtil {
       tests: []
     };
 
+    const mgr = new PhaseManager(consumer, suite, result);
+
     try {
-      await this.affixProcess(consumer, 'beforeAll', suite, result);
-      await this.affixProcess(consumer, 'beforeEach', suite, result);
+      await mgr.startPhase('all');
+      await mgr.startPhase('each');
       await this.executeTest(consumer, test);
-      await this.affixProcess(consumer, 'afterEach', suite, result);
-      await this.affixProcess(consumer, 'afterAll', suite, result);
+      await mgr.endPhase('each');
+      await mgr.endPhase('all')
     } catch (e) {
-      if (e !== BREAKOUT) {
-        const res = await this.generateSuiteError(consumer, suite, 'all', e);
-        result.tests.push(res);
-        result.fail++;
-      }
+      await mgr.onError(e);
     }
   }
 
@@ -261,26 +179,23 @@ export class ExecuteUtil {
 
     consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
+    const mgr = new PhaseManager(consumer, suite, result);
+
     try {
-      await this.affixProcess(consumer, 'beforeAll', suite, result);
+      await mgr.startPhase('all');
 
       for (const testConfig of suite.tests) {
-        await this.affixProcess(consumer, 'beforeEach', suite, result);
+        await mgr.startPhase('each');
 
         const ret = await this.executeTest(consumer, testConfig);
         result[ret.status]++;
         result.tests.push(ret);
 
-        await this.affixProcess(consumer, 'afterEach', suite, result);
+        await mgr.endPhase('each');
       }
-
-      await this.affixProcess(consumer, 'afterAll', suite, result);
+      await mgr.endPhase('all');
     } catch (e) {
-      if (e !== BREAKOUT) {
-        const res = await this.generateSuiteError(consumer, suite, 'all', e);
-        result.tests.push(res);
-        result.fail++;
-      }
+      await mgr.onError(e);
     }
 
     consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
