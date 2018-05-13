@@ -87,18 +87,18 @@ export class ConfigMap {
       sub = sub[keys.shift()!];
     }
 
-    const conf = deepAssign({}, sub);
+    if (sub) {
+      deepAssign(obj, sub);
+    }
 
     // Handle process.env on bind as the structure we need may not
     // fully exist until the config has been created
     const matcher = new RegExp(`^${key.replace(/[.]/g, '_')}`, 'i');
     for (const k of Object.keys(process.env)) {
       if (k.includes(ENV_SEP) && matcher.test(k)) { // Require at least one level
-        ConfigMap.putCaseInsensitivePath(conf, k.substring(key.length + 1).split(ENV_SEP), process.env[k] as string);
+        ConfigMap.putCaseInsensitivePath(obj, k.substring(key.length + 1).split(ENV_SEP), process.env[k] as string);
       }
     }
-
-    deepAssign(obj, conf);
 
     return obj;
   }
