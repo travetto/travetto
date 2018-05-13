@@ -99,8 +99,12 @@ export class PhaseManager {
 
   async onError(err: any) {
     for (const ph of this.progress) {
-      await this.endPhase(ph).catch(e => { });
+      try {
+        await this.runPhase(ph === 'all' ? 'afterAll' : 'afterEach');
+      } catch (e) { /* Do nothing */ }
     }
+
+    this.progress = [];
 
     if (err !== BREAKOUT) {
       const res = await this.generateSuiteError('all', err);
