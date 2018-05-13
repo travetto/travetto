@@ -66,7 +66,7 @@ export class DockerContainer {
     return this;
   }
 
-  addVolume(local: string; container: string) {
+  addVolume(local: string, container: string) {
     this.volumes[local] = container;
     return this;
   }
