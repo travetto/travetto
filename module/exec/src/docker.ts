@@ -1,57 +1,86 @@
+import * as child_process from 'child_process';
+import * as util from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as util from 'util';
-import * as child_process from 'child_process';
 
-import { CommonProcess, ChildOptions, ExecutionResult } from './types';
+import { CommonProcess, ChildOptions } from './types';
 import { spawn, WithOpts } from './util';
-import { scanDir, Entry, rimraf } from '@travetto/base';
+import { rimraf } from '@travetto/base';
 
-const mkdir = util.promisify(fs.mkdir);
 const writeFile = util.promisify(fs.writeFile);
+const mkTempDir = util.promisify(fs.mkdtemp);
+const mkdir = util.promisify(fs.mkdir);
 
 function exec(command: string, opts?: WithOpts<child_process.SpawnOptions>) {
-  return spawn(command, opts)[1];
+  return spawn(command, { shell: false, ...opts })[1];
 }
 
 export class DockerContainer {
 
-  private tempDir: string = '/tmp';
-  private volume: string = '/var/workspace';
   private cmd: string = 'docker';
   private _proc: CommonProcess;
 
-  private workspace: string;
   private container: string;
 
   public runAway: boolean = false;
   public evict: boolean = false;
 
+  public volumes: { [key: string]: string } = {};
+  private tempVolumes: { [key: string]: string } = {}
+  public workingDir: string;
+
   constructor(private image: string, container?: string) {
     this.container = container || `${image}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
-    this.workspace = `${this.tempDir}/${this.container}`;
+  }
+
+  async createTempVolume(volume: string) {
+    const p = await mkTempDir(`/tmp/${this.image.replace(/[^A-Za-z0-9]/g, '_')}`);
+    this.tempVolumes[p] = volume;
+    return p;
+  }
+
+  mapVolume(local: string, volume: string) {
+    this.volumes[local] = volume;
   }
 
   get pid() {
     return this._proc !== undefined ? this._proc.pid : -1;
   }
 
-  async create() {
+  async run(...args: string[]) {
     // Kill existing
     await this.destroy();
     await this.removeDanglingVolumes();
 
-    try {
-      await mkdir(this.workspace);
-    } catch (e) { /* ignore */ }
+    // Make temp dirs
+    const mkdirAll = Object.keys(this.tempVolumes).map(x => mkdir(x).catch(e => { }));
+    await Promise.all(mkdirAll);
+
+    let prom;
 
     try {
-      await exec(`${this.cmd} create --name=${this.container} -it -v ${this.workspace}:${this.volume} -w ${this.volume} ${this.image}`);
-      await exec(`${this.cmd} start ${this.container}`);
+      const finalArgs = [this.cmd, 'run', `--name=${this.container}`];
+      if (this.workingDir) {
+        finalArgs.push('-w', this.workingDir);
+      }
+      for (const k of Object.keys(this.volumes)) {
+        finalArgs.push('-v', `${k}:${this.volumes[k]}`)
+      }
+      for (const k of Object.keys(this.tempVolumes)) {
+        finalArgs.push('-v', `${k}:${this.tempVolumes[k]}`);
+      }
+
+      console.debug('Running', [...finalArgs, this.image, ...args]);
+
+      [this._proc, prom] = spawn([...finalArgs, this.image, ...args].join(' '), { shell: false });
     } catch (e) {
+      if (e.killed) {
+        this.evict = true;
+      }
       throw e;
     }
-    return this;
+
+    return prom;
   }
 
   async validate() {
@@ -68,26 +97,15 @@ export class DockerContainer {
     try {
       await exec(`${this.cmd} rm -fv ${this.container}`);
     } catch (e) { /* ignore */ }
+
     await this.cleanup();
   }
 
-  async exec(cmd: string, options: ChildOptions = {}) {
-    try {
-      const [proc, prom] = spawn(`${this.cmd} exec ${this.container} ${cmd}`, options)
-      this._proc = proc;
-      await prom;
-    } catch (e) {
-      if (e.killed) {
-        this.evict = true;
-      }
-    }
-  }
-
-  async initRun(files?: { name: string, content: string }[]) {
+  async writeFiles(dir: string, files?: { name: string, content: string }[]) {
     await this.cleanup();
     if (files) {
       for (const { name, content } of files) {
-        const f = [this.workspace, name].join(path.sep);
+        const f = [dir, name].join(path.sep);
         await writeFile(f, content, { mode: '755' });
       }
     }
@@ -95,9 +113,8 @@ export class DockerContainer {
   }
 
   async cleanup() {
-    try {
-      await rimraf(`${this.workspace}/*`);
-    } catch (e) { /* ignore */ }
+    const temps = Object.keys(this.tempVolumes).map(x => rimraf(x).catch(e => { }));
+    await Promise.all(temps);
   }
 
   async removeDanglingVolumes() {

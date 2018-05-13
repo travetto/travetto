@@ -30,5 +30,4 @@ pool.process(
 ).then(async () => {
   console.log('DONE!');
   await pool.shutdown();
-  process.exit(0);
 });
