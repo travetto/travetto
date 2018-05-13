@@ -1,15 +1,15 @@
-import { spawn, Execution } from '@travetto/exec';
-import { ChildProcess } from 'child_process';
-
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as util from 'util';
+import * as net from 'net';
+
 import { BeforeAll, AfterAll, BeforeEach } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { ModelMongoSource, ModelMongoConfig } from '..';
 import { ModelSource } from '@travetto/model';
 import { ConfigLoader } from '@travetto/config';
 import { RootRegistry } from '@travetto/registry';
+import { DockerContainer } from '@travetto/exec';
 
 export class Init {
   @InjectableFactory()
@@ -20,19 +20,19 @@ export class Init {
 
 export class BaseMongoTest {
 
-  private proc: ChildProcess;
+  private container: DockerContainer;
 
   @BeforeAll()
   async before() {
     const port = 50000 + Math.trunc(Math.random() * 10000);
     process.env.MODEL_MONGO_PORT = `${port}`;
 
-    const temp = await util.promisify(fs.mkdtemp)(`/tmp/test`);
+    this.container = new DockerContainer('mongo:latest')
+      .forceDestroyOnShutdown()
+      .exposePort(port)
 
-    const [cp, exec] = await spawn(`mongod --storageEngine ephemeralForTest --dbpath ${temp} --port ${port}`, { shell: false });
-    this.proc = cp;
-
-    await new Promise(x => setTimeout(x, 100));
+    this.container.run('--storageEngine', 'ephemeralForTest', '--port', `${port}`)
+    await this.container.waitForPort(port, 2000);
 
     ConfigLoader['_initialized'] = false;
     ConfigLoader.initialize();
@@ -48,6 +48,7 @@ export class BaseMongoTest {
 
   @AfterAll()
   async destroy() {
-    this.proc.kill('SIGKILL');
+    console.log('Destroying');
+    this.container.destroy();
   }
 }
