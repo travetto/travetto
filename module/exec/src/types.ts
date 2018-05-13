@@ -22,6 +22,7 @@ export interface CommonProcess {
   on(name: string, f: Function): void;
   removeAllListeners(name: string): void;
   kill(...args: any[]): void;
+  unref(): void;
 }
 
 export interface ChildOptions extends ExecutionOptions {

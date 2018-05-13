@@ -1,14 +1,24 @@
 import { DockerContainer } from '../src/docker';
 
 async function test() {
-  const container = new DockerContainer('mongo:latest');
-  const temp = await container.createTempVolume('/var/workspace');
-  container.workingDir = '/var/workspace';
-  const prom = container.run('--storageEngine', 'ephemeralForTest', '--port', '10000');
+  const port = 10000;
+  const container = new DockerContainer('mongo:latest')
+    .createTempVolume('/var/workspace')
+    .exposePort(port)
+    .setWorkingDir('/var/workspace')
+    .forceDestroyOnShutdown();
 
-  setTimeout(() => container.destroy(), 2000);
+  const prom = container.run('--storageEngine', 'ephemeralForTest', '--port', port);
 
-  return prom;
+  await container.waitForPort(port);
+
+  return;
 }
 
-test().then(() => console.log('Done', (e: any) => console.log('Err', e)));
+test().then(() => {
+  console.log('Done');
+  process.exit(0);
+}, (e: any) => {
+  console.log('Err', e);
+  process.exit(1);
+});
