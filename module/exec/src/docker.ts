@@ -25,9 +25,12 @@ export class DockerContainer {
   public runAway: boolean = false;
   public evict: boolean = false;
 
+  public ports: { [key: string]: number } = {};
   public volumes: { [key: string]: string } = {};
-  private tempVolumes: { [key: string]: string } = {}
   public workingDir: string;
+
+  private tempVolumes: { [key: string]: string } = {}
+
 
   constructor(private image: string, container?: string) {
     this.container = container || `${image}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
@@ -68,6 +71,9 @@ export class DockerContainer {
       }
       for (const k of Object.keys(this.tempVolumes)) {
         finalArgs.push('-v', `${k}:${this.tempVolumes[k]}`);
+      }
+      for (const k of Object.keys(this.ports)) {
+        finalArgs.push('-p', `${k}:${this.ports[k]}`);
       }
 
       console.debug('Running', [...finalArgs, this.image, ...args]);
