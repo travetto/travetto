@@ -86,7 +86,7 @@ export class DockerContainer {
               if (err) {
                 rej(err);
               } else {
-                sock.end();
+                sock.destroy();
                 res(succ);
               }
             });
