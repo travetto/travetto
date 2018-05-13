@@ -32,6 +32,7 @@ export class DockerContainer {
   public runAway: boolean = false;
   public evict: boolean = false;
 
+  private env: { [key: string]: string } = {};
   private ports: { [key: string]: number } = {};
   public volumes: { [key: string]: string } = {};
   public workingDir: string;
@@ -63,6 +64,11 @@ export class DockerContainer {
 
   exposePort(port: number, internalPort = port) {
     this.ports[port] = internalPort;
+    return this;
+  }
+
+  addEnvVar(key: string, value: string) {
+    this.env[key] = value;
     return this;
   }
 
@@ -127,6 +133,9 @@ export class DockerContainer {
       }
       for (const k of Object.keys(this.ports)) {
         finalArgs.push('-p', `${k}:${this.ports[k]}`);
+      }
+      for (const k of Object.keys(this.env)) {
+        finalArgs.push('-e', `"${k}=${this.env[k]}"`);
       }
 
       console.debug('Running', [...finalArgs, this.image, ...args]);
