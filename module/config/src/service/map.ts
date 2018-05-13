@@ -80,7 +80,7 @@ export class ConfigMap {
   }
 
   bindTo(obj: any, key: string) {
-    const keys = key.split('.');
+    const keys = key ? key.split('.') : [];
     let sub: any = this.storage;
 
     while (keys.length && sub) {
@@ -99,6 +99,8 @@ export class ConfigMap {
     }
 
     deepAssign(obj, conf);
+
+    return obj;
   }
 
   get(key: string) {
