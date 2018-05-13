@@ -78,11 +78,11 @@ export class ConfigMap {
   bindTo(obj: any, key: string) {
     const keys = key.split('.');
     let sub: any = this.storage;
-    while (keys.length && sub[keys[0]]) {
+    while (keys.length && sub) {
       sub = sub[keys.shift()!];
     }
 
-    const conf = deepAssign(obj, sub);
+    const conf = deepAssign(obj, sub || {});
 
     // Handle process.env on bind as the structure we need may not
     // fully exist until the config has been created
