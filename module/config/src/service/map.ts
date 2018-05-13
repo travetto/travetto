@@ -35,6 +35,10 @@ export class ConfigMap {
   // Lowered, and flattened
   private storage: Nested = {};
 
+  reset() {
+    this.storage = {};
+  }
+
   putAll(data: Nested) {
     deepAssign(this.storage, data, 'coerce');
   }
@@ -78,11 +82,12 @@ export class ConfigMap {
   bindTo(obj: any, key: string) {
     const keys = key.split('.');
     let sub: any = this.storage;
+
     while (keys.length && sub) {
       sub = sub[keys.shift()!];
     }
 
-    const conf = deepAssign(obj, sub || {});
+    const conf = deepAssign({}, sub);
 
     // Handle process.env on bind as the structure we need may not
     // fully exist until the config has been created
@@ -93,7 +98,7 @@ export class ConfigMap {
       }
     }
 
-    return conf;
+    deepAssign(obj, conf);
   }
 
   get(key: string) {

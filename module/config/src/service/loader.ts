@@ -14,7 +14,7 @@ export class ConfigLoader {
   }
 
   static bindTo(obj: any, key: string) {
-    return this.map.bindTo(obj, key);
+    this.map.bindTo(obj, key);
   }
 
   /*
@@ -28,6 +28,7 @@ export class ConfigLoader {
     if (this._initialized) {
       return;
     }
+    this.map.reset();
     this._initialized = true;
 
     if (!AppEnv.test) {
