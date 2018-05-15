@@ -1,3 +1,3 @@
-require('@travetto/base/bootstrap').run().then(x => {
+require('@travetto/base/main').run().then(x => {
   require('./simple');
 });
