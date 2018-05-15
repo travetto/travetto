@@ -7,3 +7,4 @@ export * from './error';
 export * from './shutdown';
 export * from './util';
 export * from './watch';
+export * from './phase';
