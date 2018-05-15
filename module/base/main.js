@@ -10,11 +10,12 @@ require.extensions['.ts'] = function load(m, tsf) {
   return m._compile(content, tsf.replace(/\.ts$/, '.js'));
 };
 
-const startup = require('./src/startup');
-startup.init();
+const { PhaseManager } = require('./src/phase');
+const mgr = new PhaseManager('bootstrap');
+mgr.load();
 
 if (require.main === module) {
-  startup.run();
+  mgr.run();
 } else {
-  module.exports = startup;
+  module.exports = mgr;
 }
