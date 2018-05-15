@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-require('@travetto/base/main').run()
+require('@travetto/base/bin/travetto').run()
   .then(x =>
     require(process.env.SRC || './docker.ts')
   );
