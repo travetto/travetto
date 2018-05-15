@@ -4,7 +4,7 @@ const fs = require('fs');
 const ts = require('typescript');
 
 //Simple bootstrap to load compiler
-const json = ts.readJsonConfigFile(`../tsconfig.json`, ts.sys.readFile);
+const json = ts.readJsonConfigFile(`${process.cwd()}/tsconfig.json`, ts.sys.readFile);
 const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, process.cwd()).options;
 
 require.extensions['.ts'] = function load(m, tsf) {
