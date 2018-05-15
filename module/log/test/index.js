@@ -1,3 +1,3 @@
-require('@travetto/base/main').run().then(x => {
+require('@travetto/base/bin/travetto').run().then(x => {
   require('./simple');
 });
