@@ -41,7 +41,7 @@ const TRANSFORMER = TransformUtil.importingVisitor<any>((source) => {
   return { source };
 }, visitNode);
 
-export const TestTransformer = {
+export const TestLineNumberTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
     // Only apply to test files
     if (process.env.ENV === 'test' &&

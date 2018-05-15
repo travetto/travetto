@@ -168,7 +168,7 @@ const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({
   hasAssertCall: /\s+assert(.[^(]+)\(/.test(source!.text)
 }), visitNode);
 
-export const TestTransformer = {
+export const TestAssertTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
     // Only apply to test files
     if (process.env.ENV === 'test' &&
