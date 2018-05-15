@@ -1,8 +1,7 @@
 import { LocalExecution, ChildExecution, serializeError, deserializeError } from '@travetto/exec';
 import { ConcurrentPool, IdleManager } from '@travetto/pool';
-import * as startup from '@travetto/base/src/startup';
+import { PhaseManager, AppInfo } from '@travetto/base';
 import { Consumer } from '../consumer';
-import { AppInfo } from '@travetto/base';
 
 /***
   Flow of events
@@ -65,15 +64,15 @@ export async function server() {
     if (data.type === Events.INIT) {
       console.debug('Init');
 
-      // Remove all trailing initializers as tests will be on the hook for those manually
-      startup.initializers.splice(startup.initializers.findIndex(x => x.priority === 1) + 1, 100);
+      const mgr = new PhaseManager('bootstrap');
+      mgr.load(1 /* Load only managed initializers*/);
 
       // Init Compiler
       Compiler = require('@travetto/compiler').Compiler;
       Compiler.workingSets = ['!'];
 
       // Initialize
-      await startup.run();
+      await mgr.run();
       worker.send(Events.INIT_COMPLETE);
 
     } else if (data.type === Events.RUN) {

@@ -2,7 +2,7 @@
 
 process.env.ENV = 'test';
 
-const startup = require('@travetto/base/bootstrap');
+const startup = require('@travetto/base/bin/travetto');
 
 if (process.env.EXECUTION) {
   process.env.NO_WATCH = true;
