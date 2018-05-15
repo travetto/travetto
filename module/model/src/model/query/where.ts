@@ -26,7 +26,7 @@ type ComparableFieldQuery<T> =
 type ArrayFieldQuery<T> =
   GeneralFieldQuery<T> |
   { $all?: T[]; } |
-  T[];
+  T;
 
 type StringFieldQuery =
   GeneralScalarFieldQuery<string> |
