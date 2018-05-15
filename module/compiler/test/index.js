@@ -1,4 +1,4 @@
-require('@travetto/base/bootstrap').run()
+require('@travetto/base/main').run()
   .then(x => {
     const Compiler = require('../src/compiler').Compiler;
     Compiler.on('added', require);
