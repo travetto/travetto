@@ -30,7 +30,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       state.imported = ts.createIdentifier(`import_Register`);
       state.newImports.push({
         ident: state.imported,
-        path: require.resolve('../decorator/register')
+        path: require.resolve('../src/decorator/register')
       });
     }
 
