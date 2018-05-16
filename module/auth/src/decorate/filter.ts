@@ -8,7 +8,7 @@ export function Authenticate(provider: string = 'app', failTo?: string) {
   const handler = passport.authenticate(provider, passportOptions);
   const fn = function (req: Request, res: Response, next?: NextFunction): Promise<any> {
     req.passportOptions = passportOptions;
-    return util.promisify(handler)(req, res, undefined);
+    return util.promisify(handler)(req, res, next);
   };
   return ControllerRegistry.filterAdder(fn);
 }

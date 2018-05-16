@@ -2,12 +2,13 @@ import * as passport from 'passport';
 import * as moment from 'moment';
 import { Request } from 'express';
 
-import { AppError } from '@travetto/express';
 import {
   Strategy,
   IStrategyOptions as Options,
   IStrategyOptionsWithRequest as OptionsWithRequest
 } from 'passport-local';
+
+import { AppError } from '@travetto/express';
 import { Injectable, Inject } from '@travetto/di';
 import { Context } from '@travetto/context';
 import { AuthSource } from '../source';
@@ -26,7 +27,9 @@ export class AuthStrategy<U = any> extends Strategy {
       ...{
         passReqToCallback: true // allows us to pass back the entire request to the callback
       }
-    } as OptionsWithRequest, (req: Request, email: string, pw: string, done: Callback<U>) => this.filterAuth(req, email, pw, done));
+    } as OptionsWithRequest,
+      (req: Request, email: string, pw: string, done: Callback<U>) =>
+        this.filterAuth(req, email, pw, done));
 
     if (source.register) {
       this.register = async (user: U, password: string) => {
