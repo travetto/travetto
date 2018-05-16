@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '../src/service';
-import { ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT, CUSTOM_DATABSE, Database, CUSTOM_EMPTY } from './deps';
+import { ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT, CUSTOM_DATABASE, Database, CUSTOM_EMPTY } from './deps';
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import * as assert from 'assert';
 import { DbConfig } from './config';
@@ -81,9 +81,9 @@ class DiTest2 {
 
     assert(inst);
 
-    assert(inst.age === 12);
+    assert(inst.age === 11);
 
-    assert(inst.db.dbConfig === undefined);
+    // assert(inst.db.dbConfig === undefined);
 
     assert(inst.db.dbConfig);
     assert.ok(!inst.db.dbConfig.temp);
@@ -95,7 +95,7 @@ class DiTest2 {
   async factory2() {
     assert(true);
 
-    const inst = await DependencyRegistry.getInstance(Database, CUSTOM_DATABSE);
+    const inst = await DependencyRegistry.getInstance(Database, CUSTOM_DATABASE);
 
     assert(inst);
 

@@ -45,11 +45,11 @@ export class ServiceInherit2 extends ServiceInherit {
 }
 
 export const CUSTOM_SERVICE_INHERIT = Symbol('Custom');
-export const CUSTOM_DATABSE = Symbol('CUSTOM DB');
+export const CUSTOM_DATABASE = Symbol('CUSTOM DB');
 export const CUSTOM_EMPTY = Symbol('Custom EMPTY');
 
 class TestConfig {
-  @InjectableFactory({ qualifier: CUSTOM_EMPTY, class: DbConfig })
+  @InjectableFactory(CUSTOM_EMPTY)
   static getNewDb(): DbConfig<any, any> {
     const out = new DbConfig();
     return out;
@@ -70,7 +70,7 @@ class TestConfig {
     return out;
   }
 
-  @InjectableFactory(CUSTOM_DATABSE)
+  @InjectableFactory(CUSTOM_DATABASE)
   static getCustomDB(config: DbConfig<any, any>, @Inject(CUSTOM_EMPTY) empty: Empty): Database {
     console.log('Custom EMPTY 2', empty);
     const ret = new Database();
