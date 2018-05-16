@@ -55,7 +55,6 @@ export class AuthStrategy<U = any> extends Strategy {
       this.context.get().user = user;
       return user;
     } catch (err) {
-      console.error(err);
       throw new AppError('Unable to authenticate, username/password combination are invalid');
     }
   }
