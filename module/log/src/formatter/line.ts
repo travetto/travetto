@@ -1,8 +1,8 @@
 import * as util from 'util';
 import * as path from 'path';
 import { LogEvent } from '../types';
-import { stylize, LEVEL_STYLES, makeLink, beautifyError } from './styles';
-import { AppEnv } from '@travetto/base';
+import { stylize, LEVEL_STYLES, makeLink } from './styles';
+import { AppEnv, simplifyStack } from '@travetto/base';
 
 const RE_SEP = path.sep === '/' ? '\\/' : path.sep;
 const PATH_RE = new RegExp(RE_SEP, 'g');
@@ -72,7 +72,7 @@ export function lineFormatter(opts: LineFormatterOpts) {
       }
       message = args.map((x: any) =>
         typeof x === 'string' ? x :
-          (x instanceof Error ? (AppEnv.prod ? x.stack : beautifyError(x)) :
+          (x instanceof Error ? (AppEnv.prod ? x.stack : simplifyStack(x)) :
             util.inspect(x,
               ev.level === 'debug',
               ev.level === 'debug' ? 4 : 2,
