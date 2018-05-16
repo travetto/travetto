@@ -30,9 +30,7 @@
   },
   "description": "",
   "devDependencies": {
-    "@types/browser-sync": "0.0.38",
-    "@travetto/test": "0.x.x",
-    "browser-sync": "^2.23.6"
+    "@travetto/test": "0.x.x"
   },
   "license": "MIT",
   "main": "index.ts",

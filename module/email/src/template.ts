@@ -19,6 +19,7 @@ const pngcrushPath = require('pngcrush-installer').getBinPath();
 
 const readFile = util.promisify(fs.readFile);
 const unlink = util.promisify(fs.unlink);
+const exists = util.promisify(fs.exists);
 
 const Inky = inky.Inky;
 
@@ -141,13 +142,16 @@ export class TemplateEngine {
 
   async getAssetBuffer(rel: string) {
     const pth = await this.config.findFirst(rel);
-    const out = `${pth}.${Date.now()}.${Math.random()}`;
+    const out = `${pth}.compressed`;
 
-    await exec(`${pngcrushPath} -reduce -brute ${pth} ${out}`);
+    if (!(await exists(out))) {
+      const [proc, exe] = exec(`${pngcrushPath} -rem alla -nofilecheck -reduce -m 7 ${pth} ${out}`);
+      await exe;
+    }
 
     const buffer = await readFile(out);
 
-    await unlink(out);
+    // await unlink(out);
 
     return buffer;
   }
