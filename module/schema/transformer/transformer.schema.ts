@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
-import { Schema, Ignore, Field } from '../decorator';
 import { TransformUtil, Import, State } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
+import { Schema, Ignore, Field } from '../src/decorator';
 
 const SCHEMAS = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.schema'),
@@ -97,7 +97,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
     const ident = ts.createUniqueName('import_Field');
     state.addField = ts.createPropertyAccess(ident, 'Field');
     state.newImports.push({
-      path: require.resolve('../decorator/field'),
+      path: require.resolve('../src/decorator/field'),
       ident
     });
   }
@@ -152,7 +152,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         if (!state.addSchema) {
           const ident = ts.createUniqueName('import_Schema');
           state.newImports.push({
-            path: require.resolve('../decorator/schema'),
+            path: require.resolve('../src/decorator/schema'),
             ident
           });
           state.addSchema = ts.createPropertyAccess(ident, 'Schema');
