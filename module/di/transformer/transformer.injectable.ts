@@ -94,6 +94,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           // If error, skip
           if (e.message !== 'Type information not found') {
             throw e;
+          } else {
+            console.error(`Cannot get @InjectArgs for ${(node as any as ts.ClassDeclaration).name!.text}`);
           }
         }
       }
