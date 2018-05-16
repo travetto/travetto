@@ -65,4 +65,6 @@ export function beautifyError(err: Error) {
       return `\t${functionName + args} ${fileName + lineNumber} `;
     })
     .join('  \n');
+
+  return body;
 }
