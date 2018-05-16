@@ -8,7 +8,7 @@ import { Injectable } from '@travetto/di';
 import { ExpressApp, ExpressOperator } from '@travetto/express';
 
 import { AuthConfig } from './config';
-import { BaseStrategy } from './strategy';
+import { AuthStrategy } from './strategy';
 
 export const AUTH = Symbol('@travetto/auth');
 
@@ -20,7 +20,7 @@ export class ExpressAuthOperator extends ExpressOperator {
   constructor(
     private config: AuthConfig,
     private context: Context,
-    private strategy: BaseStrategy<any, any>
+    private strategy: AuthStrategy<any, any>
   ) {
     super();
   }
