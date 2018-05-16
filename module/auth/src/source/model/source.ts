@@ -5,17 +5,17 @@ import { Request } from 'express';
 import { AppError } from '@travetto/express';
 import { ModelService, BaseModel, ModelRegistry } from '@travetto/model';
 import { Class } from '@travetto/registry';
-import { Injectable } from '@travetto/di';
 
-import { StrategyUtil, BaseStrategy } from '../../index';
-import { ModelStrategyConfig } from './config';
+import { StrategyUtil } from '../../util';
+import { AuthModelConfig } from './config';
+import { AuthSource } from '../source';
 
-export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStrategyConfig> {
+export class AuthModelSource<T extends BaseModel> extends AuthSource<T, AuthModelConfig> {
 
   private modelClass: Class<T>;
 
-  constructor(config: ModelStrategyConfig, private modelService: ModelService) {
-    super(config)
+  constructor(private config: AuthModelConfig, private modelService: ModelService) {
+    super()
   }
 
   postConstruct() {
@@ -65,11 +65,6 @@ export class ModelStrategy<T extends BaseModel> extends BaseStrategy<T, ModelStr
       delete (user as any)[this.config.passwordField];
 
       const res: T = await this.modelService.save(this.modelClass, user);
-      try {
-        this.context.get().user = user;
-      } catch (e) {
-        // Do nothing
-      }
       return res;
     }
   }

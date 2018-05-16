@@ -10,24 +10,40 @@ import {
 } from 'passport-local';
 import { Injectable, Inject } from '@travetto/di';
 import { Context } from '@travetto/context';
+import { AuthSource } from '../source';
 
 export type Callback<T> = (err?: any, res?: T) => void
 
-export abstract class BaseStrategy<U, T extends Options> extends Strategy {
+export class AuthStrategy<U = any, V extends Options = Options> extends Strategy {
 
   @Inject()
   protected context: Context;
 
-  constructor(protected config: T) {
+  constructor(protected source: AuthSource<U, V>, protected config: V) {
     super({
       ...(config as any),
       ...{
         passReqToCallback: true // allows us to pass back the entire request to the callback
       }
     } as OptionsWithRequest, (req: Request, email: string, pw: string, done: Callback<U>) => this.filterAuth(req, email, pw, done));
-  }
 
-  abstract getUser(id: string): Promise<U>;
+    if (source.register) {
+      this.register = async (user: U, password: string) => {
+        const res = await this.source.register!(user, password);
+
+        try {
+          this.context.get().user = res;
+        } catch (e) {
+          // Do nothing
+        }
+
+        return res;
+      };
+    }
+    if (source.changePassword) {
+      this.changePassword = source.changePassword.bind(source);
+    }
+  }
 
   async login(email: string, password: string): Promise<U> {
     try {
@@ -40,7 +56,13 @@ export abstract class BaseStrategy<U, T extends Options> extends Strategy {
     }
   }
 
-  abstract doLogin(email: string, password: string): Promise<U>;
+  getUser(id: string): Promise<U> {
+    return this.source.getUser(id);
+  }
+
+  doLogin(email: string, password: string): Promise<U> {
+    return this.source.doLogin(email, password);
+  }
 
   serialize(user: T, done: Callback<string>) {
     done(null, (user as any)[this.config.usernameField!]);
@@ -73,5 +95,6 @@ export abstract class BaseStrategy<U, T extends Options> extends Strategy {
   }
 
   register?(user: U, password: string): Promise<U>;
+
   changePassword?(username: string, password: string, oldPassword?: string): Promise<U>;
 }

@@ -1,7 +1,7 @@
 import { Config } from '@travetto/config';
 
 @Config('auth.model')
-export class ModelStrategyConfig {
+export class AuthModelConfig {
   usernameField: string = '';
   passwordField: string = '';
   hashField: string = '';
