@@ -23,5 +23,5 @@
   "script": {
     "test": "./node_modules/.bin/travetto-test"
   }, 
-  "version": "0.0.7"
+  "version": "0.0.8"
 }
