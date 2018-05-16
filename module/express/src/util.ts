@@ -119,10 +119,10 @@ export class RouteUtil {
   static asyncHandler(filter: FilterPromise, handler?: Filter): FilterPromise {
     return async (req: Request, res: Response, next?: NextFunction) => {
       try {
-        const out = await filter(req, res);
+        const out = await filter(req, res, next);
         handler ? handler(req, res, out) : (next && next());
       } catch (error) {
-        await RouteUtil.errorHandler(error, req, res);
+        await RouteUtil.errorHandler(error, req, res, next);
       }
     };
   }
