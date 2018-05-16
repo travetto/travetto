@@ -14,6 +14,7 @@ import { AuthSource } from '../source';
 
 export type Callback<T> = (err?: any, res?: T) => void
 
+@Injectable()
 export class AuthStrategy<U = any, V extends Options = Options> extends Strategy {
 
   @Inject()
@@ -64,7 +65,7 @@ export class AuthStrategy<U = any, V extends Options = Options> extends Strategy
     return this.source.doLogin(email, password);
   }
 
-  serialize(user: T, done: Callback<string>) {
+  serialize(user: U, done: Callback<string>) {
     done(null, (user as any)[this.config.usernameField!]);
   }
 
