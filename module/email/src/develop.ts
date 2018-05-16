@@ -1,7 +1,7 @@
-import * as chokidar from 'chokidar';
 import * as path from 'path';
 import * as util from 'util';
 import * as fs from 'fs';
+import { Watcher } from '@travetto/base';
 
 import { TemplateEngine } from './template';
 import { MailTemplateConfig } from './config';
@@ -33,10 +33,8 @@ async function run() {
     await writeFile(`${DIST}/index.txt`, text);
   }
 
-  const watcher = chokidar.watch([tplEngine.config.assetRoot, src], {
-    ignoreInitial: true,
-    awaitWriteFinish: true
-  });
+  const watcher = new Watcher();
+  watcher.add([tplEngine.config.assetRoot, src]);
 
   await reload();
 
@@ -51,5 +49,5 @@ async function run() {
     }
   } as any);
 
-  watcher.on('add', reload).on('change', reload);
+  watcher.on('added', reload).on('changed', reload);
 }

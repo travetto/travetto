@@ -4,22 +4,37 @@ import * as inlineCss from 'inline-css';
 import * as inky from 'inky';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as child_process from 'child_process';
 import * as htmlEntities from 'html-entities';
-import * as toMarkdown from 'to-markdown';
-import * as sass from 'node-sass';
+import * as marked from 'marked';
 import * as util from 'util';
 import * as Mustache from 'mustache';
+import { exec } from '@travetto/exec';
 import { TemplateContext } from '.';
 import { Injectable } from '@travetto/di';
 import { MailTemplateConfig } from './config';
 
-const PngQuant = require('pngquant');
+const sass = require('sass');
+
+const pngcrushPath = require('pngcrush-installer').getBinPath();
 
 const readFile = util.promisify(fs.readFile);
+const unlink = util.promisify(fs.unlink);
+
 const Inky = inky.Inky;
 
 const allEntities = new htmlEntities.AllHtmlEntities();
+
+class Renderer extends marked.Renderer {
+  strong(text: string) {
+    return `*${text}*`;
+  }
+  hr() {
+    return `\n\n-------------------\n\n`;
+  }
+  link(href: string, title: string, text: string): string {
+    return `[${title}]( ${href} )`
+  }
+}
 
 @Injectable()
 export class TemplateEngine {
@@ -44,7 +59,7 @@ export class TemplateEngine {
         file,
         sourceMap: false,
         includePaths: this.config.scssRoots
-      }, (err, res) => err ? reject(err) : resolve(res.css.toString()));
+      }, (err: any, res: { css: any }) => err ? reject(err) : resolve(res.css.toString()));
     });
   }
 
@@ -88,28 +103,12 @@ export class TemplateEngine {
     // Decode all encoded pieces
     simple = allEntities.decode(simple);
 
-    const text = toMarkdown(simple, {
+    const finalText = marked(simple, {
       gfm: true,
-      converters: [
-        {
-          filter: 'small',
-          replacement: v => `*${v}*`
-        },
-        {
-          filter: 'hr',
-          replacement: x => `\n\n-------------------\n\n`
-        },
-        {
-          filter: 'a',
-          replacement: (x, node) => {
-            const attrs = getAttrs(node);
-            const href = attrs['href'];
-            return `[${x}]( ${href} )`
-          }
-        }]
+      renderer: new Renderer()
     });
 
-    return text;
+    return finalText;
   }
 
   async wrapTemplate(tpl: string) {
@@ -142,19 +141,15 @@ export class TemplateEngine {
 
   async getAssetBuffer(rel: string) {
     const pth = await this.config.findFirst(rel);
-    const bufs: Buffer[] = [];
+    const out = `${pth}.${Date.now()}.${Math.random()}`;
 
-    return new Promise<Buffer>((resolve, reject) => {
-      const stream = fs.createReadStream(pth).pipe(new PngQuant([128]));
-      stream.on('data', (d: Buffer) => bufs.push(d));
-      stream.on('end', (err: Error) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(Buffer.concat(bufs));
-        }
-      });
-    });
+    await exec(`${pngcrushPath} -reduce -brute ${pth} ${out}`);
+
+    const buffer = await readFile(out);
+
+    await unlink(out);
+
+    return buffer;
   }
 
   async inlineImageSource(html: string) {
