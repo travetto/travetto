@@ -8,14 +8,14 @@ import { AssetMongoConfig } from './config';
 
 const setTimeoutAsync = util.promisify(setTimeout);
 
-@Injectable({ target: AssetSource })
 export class AssetMongoSource extends AssetSource {
 
   private client: Grid.Grid;
   private mongoClient: mongo.MongoClient;
 
-  @Inject()
-  private config!: AssetMongoConfig;
+  constructor(private config: AssetMongoConfig) {
+    super();
+  }
 
   async postConstruct() {
     this.mongoClient = await mongo.MongoClient.connect(this.config.url);
