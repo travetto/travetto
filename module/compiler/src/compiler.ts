@@ -6,6 +6,7 @@ import { EventEmitter } from 'events';
 
 import { bulkRequire, bulkFindSync, AppEnv, AppInfo, Watcher, Entry } from '@travetto/base';
 import { RetargettingHandler } from './proxy';
+import { FileCache } from './cache';
 
 const Module = require('module');
 const stringHash = require('string-hash');
@@ -17,6 +18,8 @@ function toJsName(name: string) {
 }
 
 type WatchEvent = 'required-after' | 'added' | 'changed' | 'removed';
+
+
 
 export class Compiler {
 
@@ -34,6 +37,7 @@ export class Compiler {
   static events = new EventEmitter();
   static snaphost = new Map<string, ts.IScriptSnapshot | undefined>()
   static hashes = new Map<string, number>();
+  static transpileCache = new FileCache();
 
   static emptyRequire = 'module.exports = {}';
 
@@ -202,6 +206,11 @@ export class Compiler {
 
   static unload(fileName: string) {
     console.debug('Unloading', fileName);
+
+    if (this.transpileCache.has(fileName)) {
+      this.transpileCache.remove(fileName);
+    }
+
     if (this.snaphost.has(fileName)) {
       this.snaphost.delete(fileName);
     }
@@ -217,29 +226,41 @@ export class Compiler {
   }
 
   static emitFile(fileName: string) {
-    console.debug('Emitting', fileName);
+
+    let output: string;
     const content = ts.sys.readFile(fileName)!;
 
-    if (AppEnv.watch && this.hashes.has(fileName)) {
-      // Let's see if they are really different
-      const hash = stringHash(content);
-      if (hash === this.hashes.get(fileName)) {
-        console.debug(`Contents Unchanged: ${fileName}`);
-        return false;
-      }
-    }
+    if (!this.transpileCache.has(fileName)) {
 
-    const res = this.transpile(content, fileName);
-    let output = res.outputText;
+      console.debug('Emitting', fileName);
+
+      if (AppEnv.watch && this.hashes.has(fileName)) {
+        // Let's see if they are really different
+        const hash = stringHash(content);
+        if (hash === this.hashes.get(fileName)) {
+          console.debug(`Contents Unchanged: ${fileName}`);
+          return false;
+        }
+      }
+
+      const res = this.transpile(content, fileName);
+      output = res.outputText;
+
+      if (this.logErrors(fileName, res.diagnostics)) {
+        console.debug(`Compiling ${fileName} failed`);
+        if (this.handleLoadError(fileName)) {
+          output = this.emptyRequire;
+        }
+      }
+
+      this.transpileCache.set(fileName, output);
+
+    } else {
+      output = this.transpileCache.get(fileName);
+    }
 
     const outFileName = toJsName(fileName);
 
-    if (this.logErrors(fileName, res.diagnostics)) {
-      console.debug(`Compiling ${fileName} failed`);
-      if (this.handleLoadError(fileName)) {
-        output = this.emptyRequire;
-      }
-    }
     this.contents.set(outFileName, output);
 
     if (AppEnv.watch) {
@@ -269,6 +290,9 @@ export class Compiler {
     } else if (event === 'changed') {
       const changed = this.files.has(entry.file);
       if (changed) {
+        if (this.transpileCache.has(entry.file)) {
+          this.transpileCache.remove(entry.file);
+        }
         this.snaphost.delete(entry.file);
         this.files.get(entry.file)!.version++;
       } else {
