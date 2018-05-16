@@ -1,5 +1,3 @@
-import * as ctx from '@travetto/express/opt/context';
-
 import * as passport from 'passport';
 import * as util from 'util';
 
