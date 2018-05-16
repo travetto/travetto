@@ -1,13 +1,13 @@
 import { SchemaRegistry, BindUtil, SchemaValidator } from '@travetto/schema';
-
-import { Request, Response } from 'express';
-import * as flat from 'flat';
-
 import { isPlainObject } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
+import { Request, Response } from 'express';
+
 import { ControllerRegistry } from '../service/registry';
 import { AppError } from '../model/error';
+
+import * as qs from 'querystring';
 
 function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
@@ -34,7 +34,8 @@ export function SchemaBody<T>(cls: Class<T>, view?: string) {
 
 export function SchemaQuery<T>(cls: Class<T>, view?: string) {
   return ControllerRegistry.filterAdder(async (req: Request, res: Response) => {
-    const o = getBound(cls, flat.unflatten(req.query), view);
+
+    const o = getBound(cls, BindUtil.expandPaths(qs.parse(req.query)), view);
     if (SchemaRegistry.has(cls)) {
       req.query = await SchemaValidator.validate(o, view);
     } else {
