@@ -14,7 +14,7 @@ export class AuthModelSource<T extends BaseModel> extends AuthSource<T, AuthMode
 
   private modelClass: Class<T>;
 
-  constructor(private config: AuthModelConfig, private modelService: ModelService) {
+  constructor(public config: AuthModelConfig, private modelService: ModelService) {
     super()
   }
 

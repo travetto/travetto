@@ -15,14 +15,14 @@ import { AuthSource } from '../source';
 export type Callback<T> = (err?: any, res?: T) => void
 
 @Injectable()
-export class AuthStrategy<U = any, V extends Options = Options> extends Strategy {
+export class AuthStrategy<U = any> extends Strategy {
 
   @Inject()
   protected context: Context;
 
-  constructor(protected source: AuthSource<U, V>, protected config: V) {
+  constructor(protected source: AuthSource<U>) {
     super({
-      ...(config as any),
+      ...(source.config as any),
       ...{
         passReqToCallback: true // allows us to pass back the entire request to the callback
       }
@@ -66,7 +66,7 @@ export class AuthStrategy<U = any, V extends Options = Options> extends Strategy
   }
 
   serialize(user: U, done: Callback<string>) {
-    done(null, (user as any)[this.config.usernameField!]);
+    done(null, (user as any)[this.source.config.usernameField!]);
   }
 
   async deserialize(username: string, done: Callback<U>) {

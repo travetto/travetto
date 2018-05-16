@@ -6,7 +6,7 @@ import { AuthCrowdConfig } from './config';
 import { AuthSource } from '../source';
 
 export class AuthCrowdSource<U> extends AuthSource<U, AuthCrowdConfig> {
-  constructor(private config: AuthCrowdConfig) {
+  constructor(public config: AuthCrowdConfig) {
     super();
   }
 
