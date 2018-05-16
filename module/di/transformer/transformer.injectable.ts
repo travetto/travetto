@@ -59,7 +59,7 @@ function createInjectDecorator(state: DiState, name: string, contents?: ts.Expre
       state.import = ts.createIdentifier(`import_Injectable`);
       state.newImports.push({
         ident: state.import,
-        path: require.resolve('../decorator/injectable')
+        path: require.resolve('../src/decorator/injectable')
       });
     }
     const ident = ts.createIdentifier(name);
