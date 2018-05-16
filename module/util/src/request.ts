@@ -1,95 +1,17 @@
 import * as http from 'http';
 import * as https from 'https';
-
-export function parseQuery(query: string) {
-  if (typeof query !== 'string') {
-    return query;
-  }
-  return query.split('&')
-    .map(x => {
-      const [l, r] = x.split('=');
-      if (l) {
-        const out = [decodeURIComponent(l)];
-        if (r) {
-          out.push(decodeURIComponent(r));
-        }
-        return out as [string, string];
-      } else {
-        return undefined as any as [string, string];
-      }
-    })
-    .filter(x => !!x)
-    .reduce((acc, pair) => {
-      acc[pair[0]] = pair[1];
-      return acc;
-    }, {} as { [key: string]: string });
-}
-
-export function formatQuery(query: any) {
-  if (typeof query === 'string') {
-    return query;
-  }
-  return Object.keys(query)
-    .map(x => {
-      let res = encodeURIComponent(x);
-      const val = (query as any)[x];
-      if (val !== undefined && val !== null) {
-        res = `${res}=${val}`;
-      }
-      return res;
-    })
-    .join('&');
-}
-
-export function parseUrl(url: string) {
-  let protocol = '',
-    hostname = '',
-    hostRaw = '',
-    query = {},
-    path: string[] = [],
-    auth = '',
-    port = '';
-
-  [protocol, hostRaw] = url.split('//', 2);
-  [hostRaw, query] = hostRaw.split('?');
-  [hostRaw, ...path] = hostRaw.split('/');
-
-  if (hostRaw.indexOf('@') > 0) {
-    [auth, hostRaw] = hostRaw.split('@', 2);
-  }
-
-  [hostname, port] = hostRaw.split(':', 2);
-  port = port || (protocol === 'http:' ? '80' : '443');
-
-  const res: { [key: string]: any } = {
-    hostname,
-    protocol,
-    port,
-  };
-
-  if (query) {
-    if (typeof query === 'string') {
-      res['query'] = parseQuery(query);
-    }
-  }
-
-  if (path.length) {
-    res['path'] = `/${path.join('/')}`;
-  }
-
-  if (auth) {
-    res['auth'] = auth;
-  }
-  return res;
-}
+import * as qs from 'querystring';
+import * as url from 'url';
 
 export async function request(opts: http.RequestOptions & { url: string }, data?: any): Promise<string>;
 export async function request(opts: http.RequestOptions & { url: string, pipeTo: any }, data?: any): Promise<http.IncomingMessage>;
 export async function request(opts: http.RequestOptions & { url: string, pipeTo?: any }, data?: any): Promise<string | http.IncomingMessage> {
-  const { url } = opts;
+  const { url: requestUrl } = opts;
   delete opts.url;
 
-  opts = { method: 'GET', headers: {}, ...opts, ...parseUrl(url) };
+  const { query, hash, href, pathname, search, slashes, ...parsed } = url.parse(requestUrl);
+
+  opts = { method: 'GET', headers: {}, ...opts, ...parsed };
 
   const client = ((opts.protocol === 'https:' ? https : http) as any);
   delete opts.protocol;
@@ -102,12 +24,12 @@ export async function request(opts: http.RequestOptions & { url: string, pipeTo?
       bodyStr = data.toString();
       (opts.headers as any)['Content-Length'] = Buffer.byteLength(bodyStr);
     } else {
-      (opts as any)['query'] = { ...(opts as any)['query'], ...parseQuery(data) };
+      (opts as any)['query'] = { ...(opts as any)['query'], ...qs.parse(data) };
     }
   }
 
   if ((opts as any)['query']) {
-    opts.path = `${opts.path || ''}?${formatQuery((opts as any)['query'])}`;
+    opts.path = `${opts.path || ''}?${qs.stringify((opts as any)['query'])}`;
   }
 
   return await new Promise<string | http.IncomingMessage>((resolve, reject) => {
