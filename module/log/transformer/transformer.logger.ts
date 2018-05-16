@@ -1,9 +1,10 @@
 import * as ts from 'typescript';
 import * as path from 'path';
-import { TransformUtil, Import, State } from '@travetto/compiler';
-import { Transform } from 'stream';
-import { LogLevels } from '../types';
+
 import { AppEnv } from '@travetto/base';
+import { TransformUtil, Import, State } from '@travetto/compiler';
+
+import { LogLevels } from '../src/types';
 
 const VALID_METHODS = new Set(['log', ...Object.keys(LogLevels)]);
 const VALID_PROD_METHODS = new Set(['info', 'warn', 'error', 'fatal']);
@@ -30,7 +31,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       state.imported = ts.createIdentifier(`import_Logger`);
       state.newImports.push({
         ident: state.imported,
-        path: require.resolve('../service/logger')
+        path: require.resolve('../src/service/logger')
       });
     }
 
