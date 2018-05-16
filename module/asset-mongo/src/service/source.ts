@@ -4,18 +4,18 @@ import * as util from 'util';
 
 import { Injectable, Inject } from '@travetto/di';
 import { AssetSource, Asset } from '@travetto/asset';
-import { MongoAssetConfig } from './config';
+import { AssetMongoConfig } from './config';
 
 const setTimeoutAsync = util.promisify(setTimeout);
 
 @Injectable({ target: AssetSource })
-export class MongoSource extends AssetSource {
+export class AssetMongoSource extends AssetSource {
 
   private client: Grid.Grid;
   private mongoClient: mongo.MongoClient;
 
   @Inject()
-  private config!: MongoAssetConfig;
+  private config!: AssetMongoConfig;
 
   async postConstruct() {
     this.mongoClient = await mongo.MongoClient.connect(this.config.url);

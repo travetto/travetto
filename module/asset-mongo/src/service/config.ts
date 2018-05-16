@@ -1,7 +1,7 @@
 import { Config } from '@travetto/config';
 
 @Config('asset.mongo')
-export class MongoAssetConfig {
+export class AssetMongoConfig {
   hosts = 'localhost';
   schema = 'app';
   port = 27017;

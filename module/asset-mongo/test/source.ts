@@ -1,23 +1,23 @@
 import * as fs from 'fs';
 import * as mongo from 'mongodb';
 import * as util from 'util';
+import * as assert from 'assert';
 
 import { AssetService, AssetUtil, Asset } from '@travetto/asset';
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
 import { DependencyRegistry, Injectable } from '@travetto/di';
-import * as assert from 'assert';
-import { MongoSource } from '../src/service/source';
-import { MongoAssetConfig } from '../src/service/config';
+import { AssetMongoSource } from '../src/service/source';
+import { AssetMongoConfig } from '../src/service/config';
 
 const fsStat = util.promisify(fs.stat);
 
-@Injectable({ target: MongoAssetConfig })
-class Conf extends MongoAssetConfig {
+@Injectable({ target: AssetMongoConfig })
+class Conf extends AssetMongoConfig {
 
 }
 
 @Injectable()
-class Source extends MongoSource {
+class Source extends AssetMongoSource {
 
 }
 
