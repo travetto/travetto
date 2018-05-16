@@ -14,8 +14,8 @@ export class PhaseManager {
 
   load(priority?: number) {
     this.initializers = bulkRequire<{ init: Initializer }>([
-      new RegExp(`^node_modules\/@travetto\/.*\/${this.scope}[.]ts$`),
-      new RegExp(`^${this.scope}[.]ts$`)
+      new RegExp(`^node_modules\/@travetto\/.*\/phase[.]${this.scope}[.]ts$`),
+      new RegExp(`^phase[.]${this.scope}[.]ts$`)
     ])
       .map(x => x.init)
       .map(x => ({ priority: PhaseManager.DEFAULT_PRIORITY, ...x }))

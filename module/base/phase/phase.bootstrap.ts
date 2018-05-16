@@ -1,6 +1,6 @@
-import { AppEnv } from './src/env';
-import { Shutdown } from './src/shutdown';
-import { initStackHandler } from './src/stacktrace';
+import { AppEnv } from '../src/env';
+import { Shutdown } from '../src/shutdown';
+import { initStackHandler } from '../src/stacktrace';
 
 export const init = {
   priority: -100000,
