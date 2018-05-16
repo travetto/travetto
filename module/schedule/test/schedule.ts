@@ -20,5 +20,4 @@ class Scheduling {
 
     assert(val === 3);
   }
-
 }
