@@ -3,6 +3,53 @@ import { Class } from '@travetto/registry';
 
 export class BindUtil {
 
+  static expandPaths(obj: { [key: string]: any }) {
+    const out: { [key: string]: any } = {};
+    for (const k of Object.keys(obj)) {
+      const val = obj[k];
+      const parts = k.split('.');
+      const last = parts.pop()!;
+      let sub = out;
+      while (parts.length > 0) {
+        const part = parts.shift()!;
+        const arr = part.indexOf('[') > 0;
+        const name = part.split(/[^A-Za-z_0-9]/)[0];
+        const idx = arr ? part.split(/[\[\]]/)[1] : '';
+        const key = arr ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
+
+        if (!(name in sub)) {
+          sub[name] = typeof key === 'number' ? [] : {};
+        }
+        sub = sub[name];
+
+        if (idx && key !== undefined) {
+          if (sub[key] === undefined) {
+            sub[key] = {};
+          }
+          sub = sub[key];
+        }
+      }
+
+      if (last.indexOf('[') < 0) {
+        sub[last] = val;
+      } else {
+        const arr = last.indexOf('[') > 0;
+        const name = last.split(/[^A-Za-z_0-9]/)[0];
+        const idx = arr ? last.split(/[\[\]]/)[1] : '';
+        let key = arr ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
+        if (sub[name] === undefined) {
+          sub[name] = (typeof key === 'string') ? {} : [];
+          sub = sub[name];
+          if (key === undefined) {
+            key = sub.length;
+          }
+          sub[key!] = val;
+        }
+      }
+    }
+    return out;
+  }
+
   static coerceType<T>(type: Class<T>, val: any): T {
     if (val.constructor !== type) {
       const atype = type as Class;

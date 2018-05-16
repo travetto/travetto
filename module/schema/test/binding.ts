@@ -128,4 +128,10 @@ class DataBinding {
 
     assert(res.valid);
   }
+
+  @Test('Should handle aliases')
+  validateExpand() {
+    assert(BindUtil.expandPaths({ 'a.b.c[]': 20 }) === { a: { b: { c: [20] } } });
+    assert(BindUtil.expandPaths({ 'a.d[0].c': 20 }) === { a: { d: [{ c: 20 }] } });
+  }
 }
