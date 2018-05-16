@@ -5,7 +5,8 @@ import { TestRegistry } from '../service';
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
 import { TestConfig, SuiteConfig } from '../model';
 import { ExecutionEmitter, Consumer } from '../consumer';
-import { QueueDataSource, ChildExecution } from '@travetto/exec';
+import { ChildExecution } from '@travetto/exec';
+import { QueueDataSource } from '@travetto/pool';
 import { client, Events } from './communication';
 import { bulkRequire } from '@travetto/base';
 
