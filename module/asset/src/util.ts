@@ -3,18 +3,18 @@ import * as mime from 'mime';
 import * as path from 'path';
 import * as fileType from 'file-type';
 import * as util from 'util';
+import * as os from 'os';
 
 import { request } from '@travetto/util';
 import { Asset, AssetFile } from './model';
 
-const osTmpdir = require('os-tmpdir');
 const crypto = require('crypto');
 const fsStatAsync = util.promisify(fs.stat);
 const fsRenameAsync = util.promisify(fs.rename);
 const fsReadyAync = util.promisify(fs.read);
 const fsOpenAsync = util.promisify(fs.open);
 
-const tmpDir = path.resolve(osTmpdir());
+const tmpDir = path.resolve(os.tmpdir());
 
 export class AssetUtil {
 
