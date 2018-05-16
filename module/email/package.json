@@ -20,13 +20,13 @@
     "html-entities": "^1.2.1",
     "inky": "https://github.com/arciisine/inky.git#develop",
     "inline-css": "^2.3.1",
+    "marked": "^0.3.19",
     "mustache": "^2.3.0",
     "nodemailer": "^4.6.3",
     "nodemailer-mock-transport": "^1.3.0",
     "nodemailer-sendmail-transport": "^1.0.2",
     "pngcrush-installer": "^1.8.10",
-    "sass": "^1.3.2",
-    "to-markdown": "^3.1.1"
+    "sass": "^1.3.2"
   },
   "description": "",
   "devDependencies": {
