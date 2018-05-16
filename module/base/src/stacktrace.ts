@@ -61,3 +61,36 @@ export function addStackFilters(...names: string[]) {
     filterRegex = new RegExp(`(${names.map(x => x.replace(/[().\[\]|?]/g, z => `\\${z}`)).join('|')})`);
   }
 }
+
+export function simplifyStack(err: Error, cwd = process.cwd()) {
+  const getName = (x: string) => {
+    const l = x.split(cwd)[1];
+    if (l) {
+      return l.split(/[.][tj]s/)[0];
+    }
+    return undefined;
+  }
+
+  let lastName: string = '';
+  const body = err.stack!.split('\n')
+    .filter(x => !/\/@travetto\/(test|base|compile|registry|exec|pool)/.test(x)) // Exclude framework boilerplate
+    .reduce((acc, l) => {
+      const name = getName(l);
+      if (name === lastName) {
+        // Do nothing
+      } else {
+        if (name) {
+          lastName = name;
+        }
+        acc.push(l);
+      }
+      return acc;
+    }, [] as string[])
+    .map(x => x.replace(`${process.cwd()}/`, '')
+      .replace('node_modules', 'n_m')
+      .replace(/n_m\/@travetto\/([^/]+)\/src/g, (a, p) => `@trv/${p}`)
+    )
+    .join('  \n');
+
+  return body;
+}
