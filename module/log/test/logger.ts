@@ -5,7 +5,6 @@ import * as assert from 'assert';
 import { Suite, Test, BeforeEach, BeforeAll } from '@travetto/test';
 
 import { Logger } from '../src';
-import { ConfigLoader, Config } from '@travetto/config';
 import { LogEvent } from '../src/types';
 
 @Suite('Suite')

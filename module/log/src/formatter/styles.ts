@@ -1,3 +1,5 @@
+import * as esp from 'error-stack-parser';
+
 export const STYLES: { [key: string]: [number, number] } = {
   // styles
   bold: [1, 22],
@@ -41,4 +43,26 @@ export function stylize(text: string, ...styles: string[]) {
 
 export function makeLink(text: string, link: string) {
   return `${link}`;
+}
+
+export function beautifyError(err: Error) {
+  const body = esp.parse(err)
+    .filter(x => !/@travetto\/(test|base|compile|registry|exec)/.test(x.fileName!)) // Exclude framework boilerplate
+    .reduce(
+      (acc, x) => {
+        x.fileName = x.fileName!.replace(`${process.cwd()}/`, '').replace('node_modules', 'n_m');
+        x.fileName = x.fileName.replace(/n_m\/@travetto\/([^/]+)\/src/g, (a, p) => `@trv/${p}`)
+        if (!acc.length || acc[acc.length - 1].fileName !== x.fileName) {
+          acc.push(x);
+        }
+        return acc;
+      }, [] as esp.StackFrame[])
+    .map(x => {
+      const functionName = x.getFunctionName() || '(anonymous)';
+      const args = `(${(x.getArgs() || []).join(', ')})`;
+      const fileName = x.getFileName() ? (`at ${x.getFileName()}`) : '';
+      const lineNumber = x.getLineNumber() !== undefined ? (`:${x.getLineNumber()}`) : '';
+      return `\t${functionName + args} ${fileName + lineNumber} `;
+    })
+    .join('  \n');
 }

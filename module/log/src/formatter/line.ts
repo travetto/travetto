@@ -1,7 +1,7 @@
 import * as util from 'util';
 import * as path from 'path';
 import { LogEvent } from '../types';
-import { stylize, LEVEL_STYLES, makeLink } from './styles';
+import { stylize, LEVEL_STYLES, makeLink, beautifyError } from './styles';
 
 const RE_SEP = path.sep === '/' ? '\\/' : path.sep;
 const PATH_RE = new RegExp(RE_SEP, 'g');
@@ -69,8 +69,15 @@ export function lineFormatter(opts: LineFormatterOpts) {
       if (ev.meta) {
         args.push(ev.meta);
       }
-      message = args.map((x: any) => typeof x === 'string' ? x :
-        util.inspect(x, ev.level === 'debug', ev.level === 'debug' ? 4 : 2, opts.colorize !== false)).join(' ');
+      message = args.map((x: any) =>
+        typeof x === 'string' ? x :
+          (x instanceof Error ? beautifyError(x) :
+            util.inspect(x,
+              ev.level === 'debug',
+              ev.level === 'debug' ? 4 : 2,
+              opts.colorize !== false
+            )
+          )).join(' ');
     }
 
     if (message) {
