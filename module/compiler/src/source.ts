@@ -12,7 +12,7 @@ export class SourceManager {
   private hashes = new Map<string, number>();
 
   constructor(private config: { cache?: boolean, cacheDir?: string } = {}) {
-    Object.assign(config, { ... { cache: true, cacheDir: `${process.cwd()}/dist` }, config });
+    Object.assign(config, { ... { cache: true, cacheDir: `${process.cwd()}/build` }, config });
 
     try {
       fs.mkdirSync(this.config.cacheDir!);
