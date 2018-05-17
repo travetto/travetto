@@ -13,14 +13,19 @@ export class PhaseManager {
   constructor(public scope: string) { }
 
   load(priority?: number) {
-    this.initializers = bulkRequire<{ init: Initializer }>([
-      new RegExp(`^node_modules\/@travetto\/.*\/phase[.]${this.scope}[.]ts$`),
-      new RegExp(`^phase[.]${this.scope}[.]ts$`)
-    ])
-      .map(x => x.init)
-      .map(x => ({ priority: PhaseManager.DEFAULT_PRIORITY, ...x }))
-      .filter(x => priority === undefined || x.priority <= priority)
-      .sort((a, b) => a.priority - b.priority);
+    this.initializers =
+      bulkRequire<{ init: Initializer }>([
+        new RegExp(`phase[.]${this.scope}[.]ts$`)],
+        `${process.cwd()}/node_modules/@travetto`
+      ).concat(
+        bulkRequire<{ init: Initializer }>([
+          new RegExp(`phase[.]${this.scope}[.]ts$`)
+        ], `${process.cwd()}/phase`)
+      )
+        .map(x => x.init)
+        .map(x => ({ priority: PhaseManager.DEFAULT_PRIORITY, ...x }))
+        .filter(x => priority === undefined || x.priority <= priority)
+        .sort((a, b) => a.priority - b.priority);
   }
 
   async run() {
