@@ -1,4 +1,4 @@
-import { Registry, MethodSource, CompilerClassSource, RootRegistry } from '../index';
+import { Registry, MethodSource, CompilerClassSource, RootRegistry } from '../src';
 
 class Simple extends Registry {
 }

@@ -1,7 +1,9 @@
-import { Compiler } from '@travetto/compiler';
-import { Class } from '../model/types';
-import { findAppFilesByExt } from '@travetto/base';
 import { EventEmitter } from 'events';
+
+import { Compiler } from '@travetto/compiler';
+import { findAppFilesByExt } from '@travetto/base';
+
+import { Class } from '../model/types';
 import { ChangeSource, ChangeEvent } from './types';
 import { PendingRegister } from '../decorator/register';
 
@@ -23,14 +25,16 @@ export class CompilerClassSource implements ChangeSource<Class> {
   }
 
   async init() {
-    const entries = await findAppFilesByExt('.ts');
+    const entries = await findAppFilesByExt('.ts')
+      .filter(x => (
+        x.file.startsWith(`${process.cwd()}/src/`) ||
+        (x.file.includes('@travetto/') && x.file.includes('/src/'))
+      ));
 
     console.log(entries.map(x => x.file));
 
-    const files = entries
-      .filter(x => !x.file.includes('node_modules') &&
-        Compiler.presenceManager.validFile(x.file) &&
-        !x.file.endsWith('.d.ts'))
+    const files = findAppFilesByExt('.ts')
+      .filter(x => Compiler.presenceManager.validFile(x.file))
       .map(x => x.file)
 
     const extra: string[] = [];
