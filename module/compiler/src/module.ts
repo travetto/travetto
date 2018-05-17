@@ -1,6 +1,7 @@
 import { RetargettingHandler } from './proxy';
 import { AppEnv } from '@travetto/base';
 import { CompilerUtil } from './util';
+import { Compiler } from '.';
 
 const Module = require('module');
 
@@ -54,19 +55,16 @@ export class ModuleManager {
   }
 
   compile(m: NodeModule, name: string, content: string) {
-    const isNew = !this.modules.has(name);
     const jsf = name.replace(/[.]ts$/, '.js');
 
     try {
-      const ret = (m as any)._compile(content, jsf);
-      return ret;
+      (m as any)._compile(content, jsf);
+      return true;
     } catch (e) {
       if (!AppEnv.prod) { // If attempting to load an optional require
         console.error(`Unable to import ${name}, stubbing out`, e);
-
         (m as any)._compile(CompilerUtil.EMPTY_MODULE, jsf);
-
-        return CompilerUtil.EMPTY_MODULE;
+        return false;
       } else {
         throw e;
       }

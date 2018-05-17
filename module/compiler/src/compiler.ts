@@ -62,7 +62,7 @@ class $Compiler {
       return;
     }
     this.active = true;
-
+    this.sourceManager.registerSourceMaps();
     const start = Date.now();
     this.presenceManager.init();
     console.debug('Initialized', (Date.now() - start) / 1000);
@@ -95,7 +95,7 @@ class $Compiler {
     }
 
     const ret = this.moduleManager.compile(m, jsf, content);
-    if (ret !== CompilerUtil.EMPTY_MODULE) {
+    if (ret) {
       if (isNew) {
         this.events.emit('required-after', tsf);
       }

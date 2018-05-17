@@ -19,7 +19,7 @@ export class FilePresenceManager {
 
   init() {
     const rootFiles = findAppFilesByExt('.ts')
-      .filter(x => !x.file.includes(`${this.cwd}/test`) && this.validFile(x.file) && !x.file.endsWith('.d.ts'))
+      .filter(x => x.file.includes('/src/') && this.validFile(x.file))
       .map(x => x.file);
 
     console.debug('Files', rootFiles.length);
@@ -30,7 +30,7 @@ export class FilePresenceManager {
     }
 
     if (this.watch) {
-      this.buildWatcher(`${this.cwd}/src`, [{ testFile: x => /.*[.]ts$/.test(x) }]);
+      this.buildWatcher(`${this.cwd}/src`, [{ testFile: x => this.validFile(x) && /.*[.]ts$/.test(x) }]);
     }
   }
 
