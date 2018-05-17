@@ -1,6 +1,7 @@
-import { Watcher, Entry, AppEnv, bulkFindSync } from '@travetto/base';
+import { Watcher, Entry, AppEnv, Handler } from '@travetto/base';
 import { CompilerUtil } from './util';
 import * as path from 'path';
+import { findAppFilesByExt } from '@travetto/base/src/scan-app';
 
 const EMPTY = (...args: any[]): any => { }
 
@@ -18,9 +19,9 @@ export class FilePresenceManager {
   }
 
   init() {
-    const rootFiles = bulkFindSync([/[^\/]+\/src\/.*[.]ts$/], `${this.cwd}/${CompilerUtil.LIBRARY_PATH}/@travetto`)
-      .concat(bulkFindSync([/[.]ts$/], `${this.cwd}/src`))
-      .filter(x => !x.stats.isDirectory() && this.validFile(x.file))
+    const rootFiles = findAppFilesByExt('.ts')
+      .filter(x => !x.file.includes(`${this.cwd}/test`))
+      .filter(x => this.validFile(x.file))
       .map(x => x.file);
 
     console.debug('Files', rootFiles.length);
@@ -31,7 +32,7 @@ export class FilePresenceManager {
     }
 
     if (this.watch) {
-      this.buildWatcher(`${this.cwd}/src`, [/.*[.]ts$/]);
+      this.buildWatcher(`${this.cwd}/src`, [{ testFile: x => /.*[.]ts$/.test(x) }]);
     }
   }
 
@@ -55,7 +56,7 @@ export class FilePresenceManager {
       if (this.fileWatchers[topLevel]) {
         this.fileWatchers[topLevel].add([name]);
       } else {
-        this.buildWatcher(path.dirname(name), [path.basename(name)]);
+        this.buildWatcher(path.dirname(name), [{ testFile: x => x === path.basename(name) }]);
       }
     }
     this.files.set(name, { version: 0 });
@@ -86,7 +87,7 @@ export class FilePresenceManager {
     }
   }
 
-  private buildWatcher(cwd: string, patterns: (string | RegExp)[]) {
+  private buildWatcher(cwd: string, handlers: Handler[]) {
     const watcher = new Watcher({
       interval: 250,
       cwd
@@ -94,7 +95,7 @@ export class FilePresenceManager {
 
     watcher.on('all', this.watcherListener.bind(this))
 
-    watcher.add(patterns); // Watch ts files
+    watcher.add(handlers); // Watch ts files
     watcher.run(false);
     return watcher;
   }

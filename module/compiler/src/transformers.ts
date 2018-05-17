@@ -1,8 +1,8 @@
 import { bulkRequire } from '@travetto/base';
 import { CustomTransformers } from 'typescript';
+import { requireAppFiles, findAppFiles } from '@travetto/base/src/scan-app';
 
 export class TransformerManager {
-  pattern = /transformer[.].*[.]ts$/;
 
   transformers: CustomTransformers = {};
 
@@ -10,10 +10,7 @@ export class TransformerManager {
     const transformers: { [key: string]: any } = {};
     let i = 2;
 
-    const fns = bulkRequire([this.pattern], `${this.cwd}/transformer`)
-      .concat(bulkRequire([this.pattern], `${this.cwd}/node_modules/@travetto`))
-
-    for (const trns of fns) {
+    for (const trns of requireAppFiles('.ts', /transformer[.].*[.]ts$/)) {
       for (const key of Object.keys(trns)) {
         const item = trns[key];
         if (!transformers[item.phase]) {
