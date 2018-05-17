@@ -54,7 +54,7 @@ export class FilePresenceManager {
       if (this.fileWatchers[topLevel]) {
         this.fileWatchers[topLevel].add([name]);
       } else {
-        this.buildWatcher(path.dirname(name), [{ testFile: x => x === path.basename(name) }]);
+        this.buildWatcher(`${this.cwd}/src`, [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
       }
     }
     this.files.set(name, { version: 0 });
@@ -81,6 +81,7 @@ export class FilePresenceManager {
         this.listener.added(entry.file);
       }
     } else if (event === 'removed') {
+      this.files.delete(entry.file);
       this.listener.removed(entry.file);
     }
   }
