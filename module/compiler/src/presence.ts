@@ -1,5 +1,6 @@
 import { Watcher, Entry, AppEnv, bulkFindSync } from '@travetto/base';
 import { CompilerUtil } from './util';
+import * as path from 'path';
 
 const EMPTY = (...args: any[]): any => { }
 
@@ -18,7 +19,7 @@ export class FilePresenceManager {
 
   init() {
     const rootFiles = bulkFindSync([/[^\/]+\/src\/.*[.]ts$/], `${this.cwd}/${CompilerUtil.LIBRARY_PATH}/@travetto`)
-      .concat(bulkFindSync([/.ts/], `${this.cwd}/src`))
+      .concat(bulkFindSync([/[.]ts$/], `${this.cwd}/src`))
       .filter(x => !x.stats.isDirectory() && this.validFile(x.file))
       .map(x => x.file);
 
@@ -30,7 +31,7 @@ export class FilePresenceManager {
     }
 
     if (this.watch) {
-      this.buildWatcher('src');
+      this.buildWatcher(`${this.cwd}/src`, [/.*[.]ts$/]);
     }
   }
 
@@ -50,8 +51,11 @@ export class FilePresenceManager {
   addNewFile(name: string) {
     if (this.watch) {
       const topLevel = name.split(`${this.cwd}/`)[1].split('/')[0];
+
       if (this.fileWatchers[topLevel]) {
         this.fileWatchers[topLevel].add([name]);
+      } else {
+        this.buildWatcher(path.dirname(name), [path.basename(name)]);
       }
     }
     this.files.set(name, { version: 0 });
@@ -63,7 +67,7 @@ export class FilePresenceManager {
       return;
     }
 
-    console.log('Watch', event, entry.file);
+    console.debug('Watch', event, entry.file);
 
     if (event === 'added') {
       this.files.set(entry.file, { version: 1 });
@@ -74,23 +78,23 @@ export class FilePresenceManager {
         this.listener.changed(entry.file);
         this.files.get(entry.file)!.version++;
       } else {
-        this.listener.added(entry.file);
         this.files.set(entry.file, { version: 1 });
+        this.listener.added(entry.file);
       }
     } else if (event === 'removed') {
       this.listener.removed(entry.file);
     }
   }
 
-  private buildWatcher(tld: string) {
+  private buildWatcher(cwd: string, patterns: (string | RegExp)[]) {
     const watcher = new Watcher({
       interval: 250,
-      cwd: `${this.cwd}/${tld}`
+      cwd
     });
 
     watcher.on('all', this.watcherListener.bind(this))
 
-    watcher.add([/.*[.]ts$/]); // Watch ts files
+    watcher.add(patterns); // Watch ts files
     watcher.run(false);
     return watcher;
   }
@@ -105,6 +109,6 @@ export class FilePresenceManager {
   }
 
   isWatchedFileLoaded(name: string) {
-    return this.watch && this.files.get(name)!.version > 0;
+    return this.watch && this.files.get(name.replace('.js', '.ts'))!.version > 0;
   }
 }

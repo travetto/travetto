@@ -43,6 +43,7 @@ class $Compiler {
         }
       },
       changed: (name: string) => {
+        this.unload(name);
         if (this.transpile(name)) {
           this.events.emit('changed', name);
         }
@@ -78,7 +79,6 @@ class $Compiler {
   }
 
   requireHandler(m: NodeModule, tsf: string) {
-
     const jsf = tsf.replace(/\.ts$/, '.js');
 
     const isNew = !this.sourceManager.has(tsf);
