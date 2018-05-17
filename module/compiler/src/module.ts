@@ -58,7 +58,7 @@ export class ModuleManager {
       (m as any)._compile(content, jsf);
       return true;
     } catch (e) {
-      if (!AppEnv.prod) { // If attempting to load an optional require
+      if (AppEnv.watch) { // If attempting to load an optional require
         console.error(`Unable to import ${name}, stubbing out`, e);
         (m as any)._compile(CompilerUtil.EMPTY_MODULE, jsf);
         return false;
