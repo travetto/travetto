@@ -26,14 +26,11 @@ export class CompilerClassSource implements ChangeSource<Class> {
 
   async init() {
     const entries = await findAppFilesByExt('.ts')
-      .filter(x => (
-        x.file.startsWith(`${process.cwd()}/src/`) ||
-        (x.file.includes('@travetto/') && x.file.includes('/src/'))
-      ));
+      .filter(x => x.file.includes(`/src/`));
 
     console.log(entries.map(x => x.file));
 
-    const files = findAppFilesByExt('.ts')
+    const files = entries
       .filter(x => Compiler.presenceManager.validFile(x.file))
       .map(x => x.file)
 
