@@ -74,7 +74,7 @@ export class Watcher extends EventEmitter {
 
   add(handlers: (string | Handler)[]) {
     this.findHandlers = this.findHandlers.concat(handlers.map(x => {
-      return typeof x === 'string' ? { test: (rel: string) => rel === x } : x;
+      return typeof x === 'string' ? { testFile: (rel: string) => rel === x } : x;
     }));
 
     for (const entry of bulkFindSync(this.findHandlers, this.options.cwd)) {
@@ -152,7 +152,8 @@ export class Watcher extends EventEmitter {
         const nextRel = next.replace(this.options.cwd, '');
         const nextStats = fs.lstatSync(next);
 
-        if (!prevSet.has(next) && (nextStats.isDirectory() || this.findHandlers.find(x => x.test(nextRel)))) {
+        if (!prevSet.has(next) && (nextStats.isDirectory() ||
+          this.findHandlers.find(x => x.testFile ? x.testFile(nextRel) : false))) {
           const sub: Entry = {
             file: next,
             stats: nextStats

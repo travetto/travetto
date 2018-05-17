@@ -13,7 +13,10 @@ export interface Entry {
   children?: Entry[]
 }
 
-export type Handler = { test: (relative: string, entry?: Entry) => boolean };
+export type Handler = {
+  testFile?: (relative: string, entry?: Entry) => boolean,
+  testDir?: (relative: string, entry?: Entry) => boolean
+};
 
 export async function bulkFind(handlers: Handler[], base?: string) {
   const res = await Promise.all(handlers.map(x => scanDir(x, base)));
@@ -32,6 +35,7 @@ export async function bulkFind(handlers: Handler[], base?: string) {
 
 export function scanDir(handler: Handler, base?: string, relBase?: string) {
   return new Promise<Entry[]>(async (resolve, reject) => {
+
     try {
       const out: Entry[] = [];
 
@@ -48,12 +52,14 @@ export function scanDir(handler: Handler, base?: string, relBase?: string) {
         const entry: Entry = { stats, file: full };
 
         if (stats.isDirectory()) {
-          entry.children = await scanDir(handler, base, full);
-          out.push(entry);
-          if (entry.children.length) {
-            out.push(...entry.children);
+          if (!handler.testDir || handler.testDir(entry.file.replace(base + path.sep, ''), entry)) {
+            entry.children = await scanDir(handler, base, full);
+            out.push(entry);
+            if (entry.children.length) {
+              out.push(...entry.children);
+            }
           }
-        } else if (handler.test(entry.file.replace(base + path.sep, ''), entry)) {
+        } else if (!handler.testFile || handler.testFile(entry.file.replace(base + path.sep, ''), entry)) {
           out.push(entry);
         }
       }
@@ -94,12 +100,14 @@ export function scanDirSync(handler: Handler, base?: string, relBase?: string) {
     const entry: Entry = { stats, file: full };
 
     if (stats.isDirectory()) {
-      entry.children = scanDirSync(handler, base, full);
-      out.push(entry);
-      if (entry.children.length) {
-        out.push(...entry.children);
+      if (!handler.testDir || handler.testDir(entry.file.replace(base + path.sep, ''), entry)) {
+        entry.children = scanDirSync(handler, base, full);
+        out.push(entry);
+        if (entry.children.length) {
+          out.push(...entry.children);
+        }
       }
-    } else if (handler.test(entry.file.replace(base + path.sep, ''))) {
+    } else if (!handler.testFile || handler.testFile(entry.file.replace(base + path.sep, ''))) {
       out.push(entry);
     }
   }
@@ -128,7 +136,7 @@ export function bulkReadSync(handlers: Handler[]) {
 }
 
 export async function rimraf(pth: string) {
-  const files = await scanDir(/.*/, pth);
+  const files = await scanDir({}, pth);
   for (const filter of [
     (x: Entry) => !x.stats.isDirectory(),
     (x: Entry) => x.stats.isDirectory()
