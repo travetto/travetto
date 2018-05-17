@@ -20,7 +20,7 @@ export class SourceManager {
   }
 
   private resolveCacheName(fileName: string) {
-    return `${this.config.cacheDir}/${fileName.replace(/[\/\\.]/g, '_').replace('.js', '.ts')}`;
+    return `${this.config.cacheDir}/${fileName.replace(/[\/\\]/g, '_').replace('.ts', '.js')}`;
   }
 
   registerSourceMaps() {

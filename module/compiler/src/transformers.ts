@@ -1,6 +1,5 @@
-import { bulkRequire } from '@travetto/base';
 import { CustomTransformers } from 'typescript';
-import { requireAppFiles, findAppFiles } from '@travetto/base/src/scan-app';
+import { requireAppFiles, findAppFiles } from '@travetto/base';
 
 export class TransformerManager {
 

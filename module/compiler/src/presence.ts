@@ -1,7 +1,6 @@
-import { Watcher, Entry, AppEnv, Handler } from '@travetto/base';
+import { Watcher, Entry, AppEnv, Handler, findAppFilesByExt } from '@travetto/base';
 import { CompilerUtil } from './util';
 import * as path from 'path';
-import { findAppFilesByExt } from '@travetto/base/src/scan-app';
 
 const EMPTY = (...args: any[]): any => { }
 
@@ -20,8 +19,7 @@ export class FilePresenceManager {
 
   init() {
     const rootFiles = findAppFilesByExt('.ts')
-      .filter(x => !x.file.includes(`${this.cwd}/test`))
-      .filter(x => this.validFile(x.file))
+      .filter(x => !x.file.includes(`${this.cwd}/test`) && this.validFile(x.file) && !x.file.endsWith('.d.ts'))
       .map(x => x.file);
 
     console.debug('Files', rootFiles.length);
