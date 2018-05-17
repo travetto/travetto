@@ -11,9 +11,11 @@ export class SourceManager {
   private contents = new Map<string, string>();
   private hashes = new Map<string, number>();
 
-  constructor(private config: { cache: boolean, cacheDir: string } = { cache: true, cacheDir: `${process.cwd}/dist` }) {
+  constructor(private config: { cache?: boolean, cacheDir?: string } = {}) {
+    Object.assign(config, { ... { cache: true, cacheDir: `${process.cwd()}/dist` }, config });
+
     try {
-      fs.mkdirSync(this.config.cacheDir);
+      fs.mkdirSync(this.config.cacheDir!);
     } catch (e) { }
   }
 
@@ -29,7 +31,7 @@ export class SourceManager {
     });
   }
 
-  compile(fileName: string, options: ts.TranspileOptions) {
+  transpile(fileName: string, options: ts.TranspileOptions) {
     if (!this.hasCached(fileName)) {
       console.debug('Emitting', fileName);
 

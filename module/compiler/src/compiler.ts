@@ -26,7 +26,7 @@ class $Compiler {
   // Event manager
   events = new EventEmitter();
 
-  constructor(private cwd: string = process.cwd()) {
+  constructor(public cwd: string = process.cwd()) {
 
     const invalidWorkingSetFiles = [
       /\.d\.ts$/g, // Definition files
@@ -141,7 +141,7 @@ class $Compiler {
   }
 
   emitFile(fileName: string) {
-    const changed = this.sourceManager.compile(fileName, {
+    const changed = this.sourceManager.transpile(fileName, {
       compilerOptions: this.options,
       fileName,
       reportDiagnostics: true,
@@ -165,4 +165,4 @@ class $Compiler {
   }
 }
 
-const Compiler = new $Compiler();
+export const Compiler = new $Compiler();
