@@ -8,3 +8,4 @@ export * from './shutdown';
 export * from './util';
 export * from './watch';
 export * from './phase';
+export * from './scan-app';
