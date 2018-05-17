@@ -20,14 +20,14 @@ export class SourceManager {
   }
 
   private resolveCacheName(fileName: string) {
-    return `${this.config.cacheDir}/${fileName.replace(/[\/\\.]/g, '_').replace(/[.][tj]s$/, '')}`;
+    return `${this.config.cacheDir}/${fileName.replace(/[\/\\.]/g, '_').replace('.js', '.ts')}`;
   }
 
   registerSourceMaps() {
     sourcemap.install({
       emptyCacheBetweenOperations: AppEnv.test || AppEnv.debug,
-      retrieveFile: (p: string) => this.contents.get(p)!,
-      retrieveSourceMap: (source: string) => this.sourceMaps.get(source)!
+      retrieveFile: (p: string) => this.contents.get(p.replace('.js', '.ts'))!,
+      retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
     });
   }
 
@@ -70,7 +70,8 @@ export class SourceManager {
 
       return true;
     } else {
-      this.contents.set(fileName, this.getCached(fileName));
+      const cached = this.getCached(fileName);
+      this.contents.set(fileName, cached);
       return true;
     }
   }

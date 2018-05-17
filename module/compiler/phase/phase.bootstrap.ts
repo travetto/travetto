@@ -1,4 +1,6 @@
 export const init = {
-  action: () => require('../src/compiler').Compiler.init(process.cwd()),
+  action: () => {
+    return require('../src/compiler').Compiler.init();
+  },
   priority: 1
 };

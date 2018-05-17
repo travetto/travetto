@@ -16,6 +16,24 @@ export class FilePresenceManager {
   constructor(private cwd: string, private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = AppEnv.watch) {
   }
 
+  init() {
+    const rootFiles = bulkFindSync([/[^\/]+\/src\/.*[.]ts$/], `${this.cwd}/${CompilerUtil.LIBRARY_PATH}/@travetto`)
+      .concat(bulkFindSync([/.ts/], `${this.cwd}/src`))
+      .filter(x => !x.stats.isDirectory() && this.validFile(x.file))
+      .map(x => x.file);
+
+    console.debug('Files', rootFiles.length);
+
+    for (const fileName of rootFiles) {
+      this.files.set(fileName, { version: 0 });
+      this.listener.added(fileName);
+    }
+
+    if (this.watch) {
+      this.buildWatcher('src');
+    }
+  }
+
   has(name: string) {
     return this.files.has(name);
   }
@@ -37,6 +55,7 @@ export class FilePresenceManager {
       }
     }
     this.files.set(name, { version: 0 });
+    this.listener.added(name);
   }
 
   private watcherListener({ event, entry }: { event: string, entry: Entry }) {
@@ -74,24 +93,6 @@ export class FilePresenceManager {
     watcher.add([/.*[.]ts$/]); // Watch ts files
     watcher.run(false);
     return watcher;
-  }
-
-  init() {
-    const rootFiles = bulkFindSync([/[^\/]+\/src\/.*[.]ts$/], `${this.cwd}/${CompilerUtil.LIBRARY_PATH}/@travetto`)
-      .concat(bulkFindSync([/.ts/], `${this.cwd}/src`))
-      .filter(x => !x.stats.isDirectory() && this.validFile(x.file))
-      .map(x => x.file);
-
-    console.debug('Files', rootFiles.length);
-
-    for (const fileName of rootFiles) {
-      this.files.set(fileName, { version: 0 });
-      this.listener.added(fileName);
-    }
-
-    if (this.watch) {
-      this.buildWatcher('src');
-    }
   }
 
   reset() {

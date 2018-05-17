@@ -6,7 +6,7 @@ export class CompilerUtil {
 
   static EMPTY_MODULE = 'module.exports = {}';
 
-  static resolveOptions(dir: string, name: string) {
+  static resolveOptions(dir: string, name: string = 'tsconfig.json') {
     const out = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(`${dir}/${name}`, ts.sys.readFile), ts.sys, dir, {
         rootDir: `${dir}`,

@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { EventEmitter } from 'events';
 
-import { bulkFindSync, AppEnv, AppInfo } from '@travetto/base';
+import { AppInfo } from '@travetto/base';
 import { TransformerManager } from './transformers';
 import { CompilerUtil } from './util';
 import { SourceManager } from './source';
@@ -12,15 +12,12 @@ type WatchEvent = 'required-after' | 'added' | 'changed' | 'removed';
 
 class $Compiler {
 
-  // Caches
   moduleManager: ModuleManager;
   sourceManager: SourceManager;
   presenceManager: FilePresenceManager;
 
-  // Transpile settings
-  configFile = 'tsconfig.json';
   options: ts.CompilerOptions;
-  tranformerManager: TransformerManager;
+  transformerManager: TransformerManager;
   active = false;
 
   // Event manager
@@ -28,27 +25,25 @@ class $Compiler {
 
   constructor(public cwd: string = process.cwd()) {
 
-    const invalidWorkingSetFiles = [
-      /\.d\.ts$/g, // Definition files
-    ];
+    const exclude = [/\.d\.ts$/g]; // Definition files
 
     // Get Files proper like
     if (AppInfo.DEV_PACKAGES && AppInfo.DEV_PACKAGES.length) {
-      invalidWorkingSetFiles.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}/(${AppInfo.DEV_PACKAGES.join('|')})/`));
+      exclude.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}/(${AppInfo.DEV_PACKAGES.join('|')})/`));
     }
 
-    this.options = CompilerUtil.resolveOptions(this.cwd, this.configFile);
-    this.tranformerManager = new TransformerManager(this.cwd);
+    this.options = CompilerUtil.resolveOptions(this.cwd);
+    this.transformerManager = new TransformerManager(this.cwd);
     this.moduleManager = new ModuleManager(this.cwd);
     this.sourceManager = new SourceManager();
     this.presenceManager = new FilePresenceManager(this.cwd, {
       added: (name: string) => {
-        if (this.emitFile(name)) {
+        if (this.transpile(name)) {
           this.events.emit('added', name);
         }
       },
       changed: (name: string) => {
-        if (this.emitFile(name)) {
+        if (this.transpile(name)) {
           this.events.emit('changed', name);
         }
       },
@@ -56,7 +51,7 @@ class $Compiler {
         this.unload(name);
         this.events.emit('removed', name);
       }
-    }, invalidWorkingSetFiles);
+    }, exclude);
 
     require.extensions['.ts'] = this.requireHandler.bind(this);
   }
@@ -68,9 +63,7 @@ class $Compiler {
     this.active = true;
 
     const start = Date.now();
-    // Now manage presence
     this.presenceManager.init();
-
     console.debug('Initialized', (Date.now() - start) / 1000);
   }
 
@@ -88,18 +81,14 @@ class $Compiler {
 
     const jsf = tsf.replace(/\.ts$/, '.js');
 
-    let content: string;
-
-    const isNew = !this.sourceManager.has(jsf);
+    const isNew = !this.sourceManager.has(tsf);
 
     if (isNew) {
       this.presenceManager.addNewFile(tsf);
-      // Picking up missed files, transpile now
-      this.emitFile(tsf);
     }
 
     // Log transpiled content as needed
-    content = this.sourceManager.get(jsf)!;
+    const content = this.sourceManager.get(tsf)!;
 
     if (/\/test\//.test(tsf) && !tsf.includes(CompilerUtil.LIBRARY_PATH)) {
       console.debug(content);
@@ -111,7 +100,7 @@ class $Compiler {
         this.events.emit('required-after', tsf);
       }
     } else {
-      this.sourceManager.set(jsf, CompilerUtil.EMPTY_MODULE);
+      this.sourceManager.set(tsf, CompilerUtil.EMPTY_MODULE);
     }
     return ret;
   }
@@ -140,12 +129,12 @@ class $Compiler {
     this.moduleManager.unload(fileName);
   }
 
-  emitFile(fileName: string) {
+  transpile(fileName: string) {
     const changed = this.sourceManager.transpile(fileName, {
       compilerOptions: this.options,
       fileName,
       reportDiagnostics: true,
-      transformers: this.tranformerManager.transformers
+      transformers: this.transformerManager.transformers
     });
 
     if (this.presenceManager.isWatchedFileLoaded(fileName)) {
