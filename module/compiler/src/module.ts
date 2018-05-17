@@ -20,14 +20,11 @@ export class ModuleManager {
     try {
       mod = originalLoader.apply(null, arguments);
     } catch (e) {
-      const p = Module._resolveFilename(request, parent);
-
       if (!AppEnv.prod) { // If attempting to load an optional require
+        const p = Module._resolveFilename(request, parent);
         console.error(`Unable to import ${p}, stubbing out`, e);
-      } else {
-        if (e) {
-          throw e;
-        }
+      } else if (e) {
+        throw e;
       }
 
       mod = {};
