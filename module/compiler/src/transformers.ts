@@ -5,7 +5,9 @@ export class TransformerManager {
 
   transformers: CustomTransformers = {};
 
-  constructor(private cwd: string) {
+  constructor(private cwd: string) { }
+
+  init() {
     const transformers: { [key: string]: any } = {};
     let i = 2;
 

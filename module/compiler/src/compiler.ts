@@ -61,6 +61,7 @@ class $Compiler {
     }
     this.active = true;
     this.sourceManager.registerSourceMaps();
+    this.transformerManager.init();
     require.extensions['.ts'] = this.requireHandler.bind(this);
     this.moduleManager.init();
 
@@ -135,7 +136,7 @@ class $Compiler {
       compilerOptions: this.options,
       fileName,
       reportDiagnostics: true,
-      transformers: this.transformerManager.transformers
+      transformers: this.transformerManager.transformers || {}
     });
 
     if (changed && this.presenceManager.isWatchedFileLoaded(fileName)) {
@@ -156,5 +157,3 @@ class $Compiler {
 }
 
 export const Compiler = new $Compiler();
-
-export const Name = 20;
