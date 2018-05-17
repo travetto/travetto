@@ -20,6 +20,7 @@ export class FilePresenceManager {
   init() {
     const rootFiles = findAppFilesByExt('.ts')
       .filter(x => x.file.includes('/src/') && this.validFile(x.file))
+      .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable
       .map(x => x.file);
 
     console.debug('Files', rootFiles.length);

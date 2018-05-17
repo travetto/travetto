@@ -53,8 +53,6 @@ class $Compiler {
         this.events.emit('removed', name);
       }
     }, exclude);
-
-    require.extensions['.ts'] = this.requireHandler.bind(this);
   }
 
   init() {
@@ -63,6 +61,9 @@ class $Compiler {
     }
     this.active = true;
     this.sourceManager.registerSourceMaps();
+    require.extensions['.ts'] = this.requireHandler.bind(this);
+    this.moduleManager.init();
+
     const start = Date.now();
     this.presenceManager.init();
     console.debug('Initialized', (Date.now() - start) / 1000);
@@ -155,3 +156,5 @@ class $Compiler {
 }
 
 export const Compiler = new $Compiler();
+
+export const Name = 20;

@@ -1,7 +1,6 @@
 import { RetargettingHandler } from './proxy';
 import { AppEnv } from '@travetto/base';
 import { CompilerUtil } from './util';
-import { Compiler } from '.';
 
 const Module = require('module');
 
@@ -10,7 +9,9 @@ const originalLoader = Module._load.bind(Module);
 export class ModuleManager {
   private modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
 
-  constructor(private cwd: string) {
+  constructor(private cwd: string) { }
+
+  init() {
     Module._load = this.load.bind(this);
   }
 
