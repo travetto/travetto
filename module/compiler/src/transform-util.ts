@@ -1,4 +1,3 @@
-import { Compiler } from './compiler';
 import * as ts from 'typescript';
 import { dirname } from 'path';
 import { AppEnv, AppInfo } from '@travetto/base';

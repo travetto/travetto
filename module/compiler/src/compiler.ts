@@ -1,200 +1,122 @@
-import * as fs from 'fs';
 import * as ts from 'typescript';
-import * as sourcemap from 'source-map-support';
-import * as path from 'path';
 import { EventEmitter } from 'events';
 
-import { bulkRequire, bulkFindSync, AppEnv, AppInfo, Watcher, Entry } from '@travetto/base';
-import { RetargettingHandler } from './proxy';
-import { FileCache } from './cache';
-
-const Module = require('module');
-const stringHash = require('string-hash');
-
-const originalLoader = Module._load.bind(Module);
-
-function toJsName(name: string) {
-  return name.replace(/\.ts$/, '.js');
-}
+import { bulkFindSync, AppEnv, AppInfo } from '@travetto/base';
+import { TransformerManager } from './transformers';
+import { CompilerUtil } from './util';
+import { SourceManager } from './source';
+import { ModuleManager } from './module';
+import { FilePresenceManager } from './presence';
 
 type WatchEvent = 'required-after' | 'added' | 'changed' | 'removed';
 
+class $Compiler {
 
+  // Caches
+  moduleManager: ModuleManager;
+  sourceManager: SourceManager;
+  presenceManager: FilePresenceManager;
 
-export class Compiler {
+  // Transpile settings
+  configFile = 'tsconfig.json';
+  options: ts.CompilerOptions;
+  tranformerManager: TransformerManager;
+  active = false;
 
-  static configFile = 'tsconfig.json';
-  static sourceMaps = new Map<string, { url: string, map: string, content: string }>();
-  static files = new Map<string, { version: number }>();
-  static contents = new Map<string, string>();
-  static cwd: string;
-  static options: ts.CompilerOptions;
-  static transformers: ts.CustomTransformers;
-  static registry: ts.DocumentRegistry;
-  static modules = new Map<string, { module?: any, proxy?: any, handler?: RetargettingHandler<any> }>();
-  static rootFiles: string[];
-  static fileWatchers: { [key: string]: Watcher } = {};
-  static events = new EventEmitter();
-  static snaphost = new Map<string, ts.IScriptSnapshot | undefined>()
-  static hashes = new Map<string, number>();
-  static transpileCache = new FileCache();
+  // Event manager
+  events = new EventEmitter();
 
-  static emptyRequire = 'module.exports = {}';
+  constructor(private cwd: string = process.cwd()) {
 
-  static libraryPath = 'node_modules';
-  static transformerPattern = /^.*\/transformer.*[.]ts$/;
+    const invalidWorkingSetFiles = [
+      /\.d\.ts$/g, // Definition files
+    ];
 
-  static devDependencyFiles = AppInfo.DEV_PACKAGES && AppInfo.DEV_PACKAGES.length ?
-    [new RegExp(`${Compiler.libraryPath}/(${AppInfo.DEV_PACKAGES.join('|')})/`)] : [];
-
-  static invalidWorkingSetFiles = [
-    /\.d\.ts$/g, // Definition files
-    Compiler.transformerPattern,
-    ...Compiler.devDependencyFiles
-  ];
-
-  static invalidWorkingSetFile(name: string) {
-    for (const re of this.invalidWorkingSetFiles) {
-      if (re.test(name)) {
-        return true;
-      }
+    // Get Files proper like
+    if (AppInfo.DEV_PACKAGES && AppInfo.DEV_PACKAGES.length) {
+      invalidWorkingSetFiles.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}/(${AppInfo.DEV_PACKAGES.join('|')})/`));
     }
-    return false;
-  }
 
-  static handleLoadError(p: string, e?: any): boolean {
-    if (!AppEnv.prod) { // If attempting to load an optional require
-      console.error(`Unable to import ${p}, stubbing out`, e);
-      return true;
-    } else {
-      if (e) {
-        throw e;
-      } else {
-        return false;
-      }
-    }
-  }
-
-  static resolveOptions(name = this.configFile) {
-    const out = ts.parseJsonSourceFileConfigFileContent(
-      ts.readJsonConfigFile(`${this.cwd}/${this.configFile}`, ts.sys.readFile), ts.sys, this.cwd, {
-        rootDir: `${this.cwd}`,
-        sourceMap: false,
-        inlineSourceMap: true,
-        outDir: `${this.cwd}`
-      }, `${this.cwd}/${this.configFile}`
-    );
-    out.options.importHelpers = true;
-    out.options.noEmitOnError = AppEnv.prod;
-    out.options.moduleResolution = ts.ModuleResolutionKind.NodeJs;
-
-    return out;
-  }
-
-  static resolveTransformers() {
-    const transformers: { [key: string]: any } = {};
-    let i = 2;
-
-    for (const trns of bulkRequire([this.transformerPattern], this.cwd)) {
-      for (const key of Object.keys(trns)) {
-        const item = trns[key];
-        if (!transformers[item.phase]) {
-          transformers[item.phase] = [];
+    this.options = CompilerUtil.resolveOptions(this.cwd, this.configFile);
+    this.tranformerManager = new TransformerManager(this.cwd);
+    this.moduleManager = new ModuleManager(this.cwd);
+    this.sourceManager = new SourceManager();
+    this.presenceManager = new FilePresenceManager(this.cwd, {
+      added: (name: string) => {
+        if (this.emitFile(name)) {
+          this.events.emit('added', name);
         }
-        item.priority = item.priority === undefined ? ++i : item.priority;
-        item.name = item.name || key;
-        transformers[item.phase].push(item);
-      }
-    }
-    for (const key of Object.keys(transformers)) {
-      transformers[key] = (transformers[key] as any[]).sort((a, b) => a.priority - b.priority).map(x => x.transformer);
-    }
-    return transformers;
-  }
-
-  static moduleLoadHandler(request: string, parent: string) {
-
-    let mod;
-    try {
-      mod = originalLoader.apply(null, arguments);
-    } catch (e) {
-      const p = Module._resolveFilename(request, parent);
-      this.handleLoadError(p, e);
-      mod = {};
-    }
-
-    let out = mod;
-
-    // Proxy modules, if in watch mode for non node_modules paths
-    if (AppEnv.watch) {
-      const p = Module._resolveFilename(request, parent);
-      if (p.includes(this.cwd) && !p.includes(this.libraryPath)) {
-        if (!this.modules.has(p)) {
-          const handler = new RetargettingHandler(mod);
-          out = new Proxy({}, handler);
-          this.modules.set(p, { module: out, handler });
-        } else {
-          const conf = this.modules.get(p)!;
-          conf.handler!.target = mod;
-          out = conf.module!;
+      },
+      changed: (name: string) => {
+        if (this.emitFile(name)) {
+          this.events.emit('changed', name);
         }
+      },
+      removed: (name: string) => {
+        this.unload(name);
+        this.events.emit('removed', name);
       }
-    }
+    }, invalidWorkingSetFiles);
 
-    return out;
+    require.extensions['.ts'] = this.requireHandler.bind(this);
   }
 
-  static time = 0;
+  init() {
+    if (this.active) {
+      return;
+    }
+    this.active = true;
 
-  static requireHandler(m: NodeModule, tsf: string) {
+    const start = Date.now();
+    // Now manage presence
+    this.presenceManager.init();
 
-    const jsf = toJsName(tsf);
+    console.debug('Initialized', (Date.now() - start) / 1000);
+  }
+
+  reset() {
+    this.sourceManager.clear();
+    this.moduleManager.clear();
+    this.presenceManager.reset();
+
+    this.active = false;
+
+    this.init();
+  }
+
+  requireHandler(m: NodeModule, tsf: string) {
+
+    const jsf = tsf.replace(/\.ts$/, '.js');
 
     let content: string;
 
-    const isNew = !this.contents.has(jsf);
+    const isNew = !this.sourceManager.has(jsf);
 
     if (isNew) {
-      if (AppEnv.watch) {
-        const topLevel = tsf.split(`${this.cwd}/`)[1].split('/')[0];
-        if (this.fileWatchers[topLevel]) {
-          this.fileWatchers[topLevel].add([tsf]);
-        }
-      }
-      // Picking up missed files
-      this.rootFiles.push(tsf);
-      this.files.set(tsf, { version: 0 });
+      this.presenceManager.addNewFile(tsf);
+      // Picking up missed files, transpile now
       this.emitFile(tsf);
     }
 
-    content = this.contents.get(jsf)!;
+    // Log transpiled content as needed
+    content = this.sourceManager.get(jsf)!;
 
-    if (/\/test\//.test(tsf) && !tsf.includes(Compiler.libraryPath)) {
+    if (/\/test\//.test(tsf) && !tsf.includes(CompilerUtil.LIBRARY_PATH)) {
       console.debug(content);
     }
 
-    try {
-      const ret = (m as any)._compile(content, jsf);
+    const ret = this.moduleManager.compile(m, jsf, content);
+    if (ret !== CompilerUtil.EMPTY_MODULE) {
       if (isNew) {
         this.events.emit('required-after', tsf);
       }
-      return ret;
-    } catch (e) {
-      this.handleLoadError(tsf, e);
-      this.contents.set(jsf, content = this.emptyRequire);
-      (m as any)._compile(content, jsf);
+    } else {
+      this.sourceManager.set(jsf, CompilerUtil.EMPTY_MODULE);
     }
+    return ret;
   }
 
-  static prepareSourceMaps() {
-    sourcemap.install({
-      emptyCacheBetweenOperations: AppEnv.test || AppEnv.debug,
-      retrieveFile: (p: string) => this.contents.get(p)!,
-      retrieveSourceMap: (source: string) => this.sourceMaps.get(source)!
-    });
-  }
-
-  static markForReload(files: string[] | string) {
+  markForReload(files: string[] | string) {
     if (!Array.isArray(files)) {
       files = [files];
     }
@@ -204,231 +126,43 @@ export class Compiler {
     }
   }
 
-  static unload(fileName: string) {
+  unload(fileName: string) {
     console.debug('Unloading', fileName);
 
-    if (this.transpileCache.has(fileName)) {
-      this.transpileCache.remove(fileName);
+    if (this.sourceManager.has(fileName)) {
+      this.sourceManager.unload(fileName);
     }
 
-    if (this.snaphost.has(fileName)) {
-      this.snaphost.delete(fileName);
-    }
     if (fileName in require.cache) {
       delete require.cache[fileName];
     }
-    if (this.hashes.has(fileName)) {
-      this.hashes.delete(fileName);
-    }
-    if (this.modules.has(fileName)) {
-      this.modules.get(fileName)!.handler!.target = null;
-    }
+
+    this.moduleManager.unload(fileName);
   }
 
-  static emitFile(fileName: string) {
-
-    let output: string;
-    const content = ts.sys.readFile(fileName)!;
-
-    if (!this.transpileCache.has(fileName)) {
-
-      console.debug('Emitting', fileName);
-
-      if (AppEnv.watch && this.hashes.has(fileName)) {
-        // Let's see if they are really different
-        const hash = stringHash(content);
-        if (hash === this.hashes.get(fileName)) {
-          console.debug(`Contents Unchanged: ${fileName}`);
-          return false;
-        }
-      }
-
-      const res = this.transpile(content, fileName);
-      output = res.outputText;
-
-      if (this.logErrors(fileName, res.diagnostics)) {
-        console.debug(`Compiling ${fileName} failed`);
-        if (this.handleLoadError(fileName)) {
-          output = this.emptyRequire;
-        }
-      }
-
-      this.transpileCache.set(fileName, output);
-
-    } else {
-      output = this.transpileCache.get(fileName);
-    }
-
-    const outFileName = toJsName(fileName);
-
-    this.contents.set(outFileName, output);
-
-    if (AppEnv.watch) {
-      this.hashes.set(fileName, stringHash(content));
-      // If file is already loaded, mark for reload
-      if (this.files.get(fileName)!.version > 0) {
-        this.markForReload(fileName);
-      }
-    }
-
-    return true;
-  }
-
-  private static watcherListener({ event, entry }: { event: string, entry: Entry }) {
-    if (this.invalidWorkingSetFile(entry.file)) {
-      return;
-    }
-
-    console.log('Watch', event, entry.file);
-
-    if (event === 'added') {
-      this.rootFiles.push(entry.file);
-      this.files.set(entry.file, { version: 1 });
-      if (this.emitFile(entry.file)) {
-        this.events.emit(event, entry.file);
-      }
-    } else if (event === 'changed') {
-      const changed = this.files.has(entry.file);
-      if (changed) {
-        if (this.transpileCache.has(entry.file)) {
-          this.transpileCache.remove(entry.file);
-        }
-        this.snaphost.delete(entry.file);
-        this.files.get(entry.file)!.version++;
-      } else {
-        this.files.set(entry.file, { version: 1 });
-        this.rootFiles.push(entry.file);
-      }
-      if (this.emitFile(entry.file)) {
-        this.events.emit(changed ? 'changed' : 'added', entry.file);
-      }
-    } else if (event === 'removed') {
-      this.unload(entry.file);
-      this.events.emit(event, entry.file);
-    }
-  }
-
-  static buildWatcher(tld: string) {
-    const watcher = new Watcher({
-      interval: 250,
-      cwd: `${this.cwd}/${tld}`
-    });
-
-    watcher.on('all', this.watcherListener.bind(this))
-
-    watcher.add([/.*[.]ts$/]); // Watch ts files
-    watcher.run(false);
-    return watcher;
-  }
-
-  static watchFiles() {
-    const ret = { src: this.buildWatcher('src') };
-    return ret;
-  }
-
-  static logErrors(fileName: string, diagnostics?: ts.Diagnostic[]) {
-    if (!diagnostics || !diagnostics.length) {
-      return false;
-    }
-
-    for (const diagnostic of diagnostics) {
-      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-      if (diagnostic.file) {
-        const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start as number);
-        console.error(`  Error ${diagnostic.file.fileName}(${line + 1}, ${character + 1}): ${message}`);
-      } else {
-        console.error(`  Error: ${message}`);
-      }
-    }
-
-    return diagnostics.length !== 0;
-  }
-
-  static transpile(input: string, fileName: string) {
-    // console.debug('Transpiling', fileName);
-    const output = ts.transpileModule(input, {
+  emitFile(fileName: string) {
+    const changed = this.sourceManager.compile(fileName, {
       compilerOptions: this.options,
       fileName,
       reportDiagnostics: true,
-      transformers: this.transformers
+      transformers: this.tranformerManager.transformers
     });
-    return output;
+
+    if (this.presenceManager.isWatchedFileLoaded(fileName)) {
+      // If file is already loaded, mark for reload
+      this.markForReload(fileName);
+    }
+
+    return changed;
   }
 
-  static getSnapshot(fileName: string) {
-    if (!this.snaphost.has(fileName)) {
-      const snap = fs.existsSync(fileName) ? ts.ScriptSnapshot.fromString(ts.sys.readFile(fileName)!) : undefined
-      this.snaphost.set(fileName, snap);
-    }
-    return this.snaphost.get(fileName);
-  }
-
-  static init(cwd: string) {
-    if (!this.options) {
-      this.cwd = cwd;
-      this.prepareSourceMaps();
-      const out = this.resolveOptions();
-      this.options = out.options;
-
-      this.transformers = this.resolveTransformers();
-      require.extensions['.ts'] = this.requireHandler.bind(this);
-      Module._load = this.moduleLoadHandler.bind(this);
-    }
-
-    this.initFiles();
-  }
-
-  static initFiles() {
-    if (this.rootFiles) {
-      return;
-    }
-    const start = Date.now();
-
-    this.rootFiles = bulkFindSync([/[^\/]+\/src\/.*[.]ts$/], `${this.cwd}/${Compiler.libraryPath}/@travetto`)
-      .concat(bulkFindSync([/.ts/], `${this.cwd}/src`))
-      .filter(x => !x.stats.isDirectory() && !this.invalidWorkingSetFile(x.file))
-      .map(x => x.file);
-
-    console.debug('Files', this.rootFiles.length);
-
-    // Prime for type checker
-    for (const fileName of this.rootFiles) {
-      this.files.set(fileName, { version: 0 });
-      this.emitFile(fileName);
-    }
-
-    // Now let's watch the files
-    if (AppEnv.watch) {
-      this.fileWatchers = this.watchFiles();
-    }
-
-    console.debug('Initialized', (Date.now() - start) / 1000);
-  }
-
-  static resetFiles() {
-    if (AppEnv.watch) {
-      Object.values(this.fileWatchers).map(x => x.close());
-      this.fileWatchers = {};
-    }
-    this.contents.clear();
-    this.modules.clear();
-    this.files.clear();
-    this.hashes.clear();
-    this.sourceMaps.clear();
-    this.snaphost.clear();
-    delete this.rootFiles;
-
-    this.initFiles();
-  }
-
-  static on(event: WatchEvent, callback: (filename: string) => any) {
+  on(event: WatchEvent, callback: (filename: string) => any) {
     this.events.addListener(event, callback);
   }
 
-  static off(event: WatchEvent, callback: (filename: string) => any) {
+  off(event: WatchEvent, callback: (filename: string) => any) {
     this.events.removeListener(event, callback);
   }
 }
 
-// Handle passing of method
-Compiler.invalidWorkingSetFile = Compiler.invalidWorkingSetFile.bind(Compiler);
+const Compiler = new $Compiler();
