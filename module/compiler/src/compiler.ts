@@ -43,8 +43,7 @@ class $Compiler {
         }
       },
       changed: (name: string) => {
-        this.unload(name);
-        if (this.transpile(name)) {
+        if (this.transpile(name, true)) {
           this.events.emit('changed', name);
         }
       },
@@ -131,13 +130,13 @@ class $Compiler {
     this.moduleManager.unload(fileName);
   }
 
-  transpile(fileName: string) {
+  transpile(fileName: string, force = false) {
     const changed = this.sourceManager.transpile(fileName, {
       compilerOptions: this.options,
       fileName,
       reportDiagnostics: true,
       transformers: this.transformerManager.transformers || {}
-    });
+    }, force);
 
     if (changed && this.presenceManager.isWatchedFileLoaded(fileName)) {
       // If file is already loaded, mark for reload

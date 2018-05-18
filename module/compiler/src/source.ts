@@ -34,8 +34,8 @@ export class SourceManager {
     });
   }
 
-  transpile(fileName: string, options: ts.TranspileOptions) {
-    if (!this.hasCached(fileName)) {
+  transpile(fileName: string, options: ts.TranspileOptions, force = false) {
+    if (force || !this.hasCached(fileName)) {
       console.debug('Emitting', fileName);
 
       const content = fs.readFileSync(fileName).toString();
