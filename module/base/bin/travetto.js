@@ -12,10 +12,14 @@ const CACHE_SEP = (process.env.TS_CACHE_SEP = process.env.TS_CACHE_SEP || `~`);
 const CACHE_SEP_RE = new RegExp(CACHE_SEP, 'g');
 
 // Delete old cached files
+const LOADED = {};
 for (const f of fs.readdirSync(CACHE_DIR)) {
   const full = f.replace(CACHE_SEP_RE, '/');
-  if (fs.statSync(`${CACHE_DIR}/${f}`).ctimeMs < fs.statSync(full).ctimeMs) {
-    fs.unlinkSync(`${CACHE_DIR}/${f}`);
+  const rel = `${CACHE_DIR}/${f}`;
+  const stat = LOADED[rel] = fs.statSync(rel);
+  if (stat.ctimeMs < fs.statSync(full).ctimeMs) {
+    fs.unlinkSync(rel);
+    delete LOADED[rel];
   }
 }
 
@@ -23,7 +27,7 @@ for (const f of fs.readdirSync(CACHE_DIR)) {
 require.extensions['.ts'] = function load(m, tsf) {
   const name = `${CACHE_DIR}/${tsf.replace(/[\/\\]/g, CACHE_SEP)}`;
   let content;
-  if (!fs.existsSync(name)) {
+  if (!LOADED[name]) {
     content = ts.transpile(fs.readFileSync(tsf, 'utf-8'), opts);
     fs.writeFileSync(name, content);
   } else {
