@@ -24,13 +24,19 @@ function createStaticField(name: string, val: ts.Expression | string | number) {
   );
 }
 
+const registerPath = require.resolve('../src/decorator/register')
+
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: IState): T {
+  if (state.path === registerPath) { // Cannot process self
+    return node;
+  }
+
   if (ts.isClassDeclaration(node) && node.name && node.parent && ts.isSourceFile(node.parent)) {
     if (!state.imported) {
       state.imported = ts.createIdentifier(`import_Register`);
       state.newImports.push({
         ident: state.imported,
-        path: require.resolve('../src/decorator/register')
+        path: registerPath
       });
     }
 
