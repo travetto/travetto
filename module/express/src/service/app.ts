@@ -44,12 +44,11 @@ export class ExpressApp {
     }
 
     const operators = DependencyRegistry.getCandidateTypes(ExpressOperator as Class);
-    console.log('Custom operators', operators);
 
     const instances = await Promise.all(operators.map(op =>
       DependencyRegistry.getInstance(ExpressOperator, op.qualifier)
         .catch(err => {
-          console.log(`Unable to load operator ${op.class.name}#${op.qualifier}`);
+          console.log(`Unable to load operator ${op.class.name}#${op.qualifier.toString()}`);
         })
     ));
 
@@ -67,7 +66,6 @@ export class ExpressApp {
 
     // Listen for updates
     ControllerRegistry.on(e => {
-      console.log('Registry', e.type, ControllerRegistry.hasExpired(e.prev!));
       if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
         this.unregisterController(ControllerRegistry.getExpired(e.prev)!);
       }
@@ -92,7 +90,7 @@ export class ExpressApp {
   async registerController(config: ControllerConfig) {
     const instance = await DependencyRegistry.getInstance(config.class);
 
-    console.log('Controller Instance', config.class.name, instance);
+    console.log('Registering Controller Instance', config.class.__id, config.path, config.handlers.length);
 
     for (const handler of config.handlers) {
       handler.filters = [...config.filters!, ...handler.filters!].map(RouteUtil.toPromise).map(x => RouteUtil.asyncHandler(x));
@@ -102,7 +100,6 @@ export class ExpressApp {
         RouteUtil.outputHandler.bind(null, handler))
     }
 
-    console.log('Registering', config.path, config.handlers.length);
     for (const hconf of config.handlers) {
       hconf.instance = instance;
       this.app[hconf.method!](hconf.path!, ...hconf.filters!, hconf.handler);

@@ -1,9 +1,10 @@
-import { Context } from '@travetto/context';
-
 import { Request, Response } from 'express';
-import { ExpressOperator } from '../src/service/operator';
+
+import { Context } from '@travetto/context';
 import { Injectable } from '@travetto/di';
-import { ExpressApp } from '../index';
+
+import { ExpressOperator } from '../src/service/operator';
+import { ExpressApp } from '../src/service/app';
 
 @Injectable({
   target: ExpressOperator,

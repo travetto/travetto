@@ -1,8 +1,8 @@
+import { Request, Response } from 'express';
+
 import { SchemaRegistry, BindUtil, SchemaValidator } from '@travetto/schema';
 import { isPlainObject } from '@travetto/base';
 import { Class } from '@travetto/registry';
-
-import { Request, Response } from 'express';
 
 import { ControllerRegistry } from '../src/service/registry';
 import { AppError } from '../src/model/error';
