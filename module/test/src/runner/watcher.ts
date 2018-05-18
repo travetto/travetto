@@ -112,7 +112,7 @@ export async function watch() {
     }
   );
 
-  bulkRequire('test/**/*.ts');
+  // bulkRequire('test/**/*.ts');
 
   console.log('Waiting');
 

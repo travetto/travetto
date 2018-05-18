@@ -88,6 +88,7 @@ export async function server() {
         if (k.endsWith('.ts') &&
           !/@travetto\/(base|config|compiler|exec|pool)/.test(k) &&
           !(k.startsWith(__filename.replace(/.[tj]s$/, ''))) &&
+          !/\/(phase|transformer)\//.test(k) &&
           !/transformer\..*\.ts/.test(k)) {
           Compiler.unload(k);
         }
@@ -95,7 +96,7 @@ export async function server() {
 
       // Relaod runner
       Compiler.workingSets = [data.file!];
-      Compiler.resetFiles();
+      Compiler.reset();
       const { Runner } = require('./');
 
       console.log('*Running*', data.file);

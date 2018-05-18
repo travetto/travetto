@@ -28,7 +28,7 @@ export class ExecuteUtil {
   }
 
   static async getTests(globs: RegExp[]) {
-    const files = (await bulkFind(globs))
+    const files = (await bulkFind(globs.map(x => ({ testFile: (y: string) => x.test(y) }))))
       .filter(x => !x.stats.isDirectory())
       .filter(x => !x.file.includes('node_modules'))
       .map(f => this.isTest(f.file).then(valid => ({ file: f.file, valid })));

@@ -84,10 +84,7 @@ export class Runner {
 
   async getFiles() {
     const globs = this.state._; // strip off node and worker name
-    let files = await ExecuteUtil.getTests(globs.map(x => new RegExp(x)));
-
-    files = files.map(x => x.split(`${process.cwd()}/`)[1]);
-
+    const files = await ExecuteUtil.getTests(globs.map(x => new RegExp(x)));
     return files;
   }
 
@@ -100,11 +97,11 @@ export class Runner {
     await client().process(
       new ArrayDataSource(files),
       async (file, exe) => {
-
         exe.listen(consumer.onEvent as any);
 
         const complete = exe.listenOnce(Events.RUN_COMPLETE);
         exe.send(Events.RUN, { file });
+
         const { error } = await complete;
 
         errors.push((deserializeError(error)));
