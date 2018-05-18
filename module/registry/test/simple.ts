@@ -11,4 +11,7 @@ export class Test6 {
   weight() {
     return 33;
   }
+  nameze() {
+    return 'hi';
+  }
 }
