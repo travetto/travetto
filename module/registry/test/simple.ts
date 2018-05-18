@@ -1,3 +1,5 @@
+console.log('Loading');
+
 export class Test {
 
 }
@@ -11,7 +13,7 @@ export class Test6 {
   weight() {
     return 33;
   }
-  nameze() {
+  namered() {
     return 'hi';
   }
 }

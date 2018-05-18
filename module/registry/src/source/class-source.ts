@@ -61,13 +61,8 @@ export class CompilerClassSource implements ChangeSource<Class> {
     this.events.on('change', callback);
   }
 
-  protected async watch(file: string) {
-    console.debug('Got file', file);
-    require(file);
-
-    const next = new Map(PendingRegister.flush()
-      .filter(x => x[0] === file)[0][1]
-      .map(cls => [cls.__id, cls] as [string, Class]));
+  protected async handleFileChanges(file: string, classes: Class<any>[]) {
+    const next = new Map(classes.map(cls => [cls.__id, cls] as [string, Class]));
 
     let prev = new Map<string, Class>();
     if (this.classes.has(file)) {
@@ -92,6 +87,13 @@ export class CompilerClassSource implements ChangeSource<Class> {
           this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
         }
       }
+    }
+  }
+
+  protected async watch(rfile: string) {
+    require(rfile);
+    for (const [file, classes] of PendingRegister.flush()) {
+      this.handleFileChanges(file, classes);
     }
   }
 }
