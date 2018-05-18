@@ -55,7 +55,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHand
     rh.filters!.unshift(fn);
   }
 
-  registerPendingRequestHandlder(config: Partial<RequestHandler>) {
+  registerPendingRequestHandler(config: Partial<RequestHandler>) {
     return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
       const rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
       rh.method = config.method || rh.method;

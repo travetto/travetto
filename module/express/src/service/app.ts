@@ -66,6 +66,7 @@ export class ExpressApp {
 
     // Listen for updates
     ControllerRegistry.on(e => {
+      console.log('Registry event', e);
       if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
         this.unregisterController(ControllerRegistry.getExpired(e.prev)!);
       }

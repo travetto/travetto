@@ -14,11 +14,11 @@ export function Controller(path = '') {
 }
 
 export function All(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandlder({ method: 'all', path });
+  return ControllerRegistry.registerPendingRequestHandler({ method: 'all', path });
 }
 
 export function Get(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandlder({
+  return ControllerRegistry.registerPendingRequestHandler({
     method: 'get',
     path,
     headers: {
@@ -29,19 +29,19 @@ export function Get(path: PathType) {
 }
 
 export function Put(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandlder({ method: 'put', path });
+  return ControllerRegistry.registerPendingRequestHandler({ method: 'put', path });
 }
 
 export function Delete(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandlder({ method: 'delete', path });
+  return ControllerRegistry.registerPendingRequestHandler({ method: 'delete', path });
 }
 
 export function Post(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandlder({ method: 'post', path });
+  return ControllerRegistry.registerPendingRequestHandler({ method: 'post', path });
 }
 
 export function Header(headers: { [key: string]: (string | (() => string)) }) {
-  return ControllerRegistry.registerPendingRequestHandlder({ headers });
+  return ControllerRegistry.registerPendingRequestHandler({ headers });
 }
 
 export function Cache(value: number, unit = 'second') {
