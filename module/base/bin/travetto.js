@@ -9,7 +9,7 @@ const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, process.cwd()
 
 if (!process.env.TS_CACHE_DIR) {
   process.env.TS_CACHE_NAME = 'build'
-  process.env.TS_CACHE_DIR = `${process.cwd()}/${TS_CACHE_NAME}`;
+  process.env.TS_CACHE_DIR = `${process.cwd()}/${process.env.TS_CACHE_NAME}`;
 }
 
 const CACHE_DIR = process.env.TS_CACHE_DIR;
