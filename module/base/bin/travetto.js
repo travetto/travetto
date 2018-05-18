@@ -22,7 +22,7 @@ if (!fs.existsSync(CACHE_DIR)) {
   fs.mkdirSync(CACHE_DIR);
 }
 for (const f of fs.readdirSync(CACHE_DIR)) {
-  const full = f.replace(CACHE_SEP_RE, '/');
+  const full = f.replace(CACHE_SEP_RE, '/').replace('@', '.');
   const rel = `${CACHE_DIR}/${f}`;
   const stat = LOADED[rel] = fs.statSync(rel);
   if (stat.ctimeMs < fs.statSync(full).ctimeMs) {
@@ -33,7 +33,7 @@ for (const f of fs.readdirSync(CACHE_DIR)) {
 
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {
-  const name = `${CACHE_DIR}/${tsf.replace(/[\/\\]/g, CACHE_SEP)}`;
+  const name = `${CACHE_DIR}/${tsf.replace(/[\/\\]/g, CACHE_SEP).replace(/.ts$/, '@ts')}`;
   let content;
   if (!LOADED[name]) {
     content = ts.transpile(fs.readFileSync(tsf, 'utf-8'), opts);
