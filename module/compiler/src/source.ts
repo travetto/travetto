@@ -23,7 +23,7 @@ export class SourceManager {
   }
 
   private resolveCacheName(fileName: string) {
-    return `${CACHE_DIR}/${fileName.replace(/[\/\\]/g, CACHE_SEP)}`;
+    return `${CACHE_DIR}/${fileName.replace(/[\/\\]/g, CACHE_SEP).replace(/.ts$/, '@ts')}`;
   }
 
   registerSourceMaps() {
