@@ -6,13 +6,16 @@ import { CompilerUtil } from './util';
 
 const stringHash = require('string-hash');
 
+const CACHE_DIR = process.env.TS_CACHE_DIR!;
+const CACHE_SEP = process.env.TS_CACHE_SEP!;
+
 export class SourceManager {
   private sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   private contents = new Map<string, string>();
   private hashes = new Map<string, number>();
 
   constructor(private config: { cache?: boolean, cacheDir?: string } = {}) {
-    Object.assign(config, { ... { cache: true, cacheDir: `${process.cwd()}/build` }, config });
+    Object.assign(config, { ... { cache: true }, config });
 
     try {
       fs.mkdirSync(this.config.cacheDir!);
@@ -20,7 +23,7 @@ export class SourceManager {
   }
 
   private resolveCacheName(fileName: string) {
-    return `${this.config.cacheDir}/${fileName.replace(/[\/\\]/g, '_').replace('.ts', '.js')}`;
+    return `${CACHE_DIR}/${fileName.replace(/[\/\\]/g, CACHE_SEP)}`;
   }
 
   registerSourceMaps() {
