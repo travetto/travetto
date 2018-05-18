@@ -55,8 +55,6 @@ export class FilePresenceManager {
     }
     this.seen.add(name);
 
-    console.log('Adding New File', name);
-
     if (this.watch) {
       const topLevel = path.dirname(name);
 
