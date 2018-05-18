@@ -13,6 +13,9 @@ const CACHE_SEP_RE = new RegExp(CACHE_SEP, 'g');
 
 // Delete old cached files
 const LOADED = {};
+if (!fs.existsSync(CACHE_DIR)) {
+  fs.mkdirSync(CACHE_DIR);
+}
 for (const f of fs.readdirSync(CACHE_DIR)) {
   const full = f.replace(CACHE_SEP_RE, '/');
   const rel = `${CACHE_DIR}/${f}`;
