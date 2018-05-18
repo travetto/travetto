@@ -36,7 +36,7 @@ export type InjectConfig = { qualifier?: symbol, optional?: boolean };
 
 export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
   return (target: any) => {
-    DependencyRegistry.registerConstructor(target, (configs || []) as any as Dependency[]);
+    DependencyRegistry.registerConstructor(target, configs as any as Dependency[]);
   };
 }
 
