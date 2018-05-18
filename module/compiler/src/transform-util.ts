@@ -29,9 +29,10 @@ export class TransformUtil {
         continue;
       }
       if (ident && ident.escapedText in patterns) {
-        const { path } = state.imports.get(ident.escapedText! as string)!;
+        const res = state.imports.get(ident.escapedText! as string)!;
+        const path = res && res.path;
         const packages = patterns[ident.escapedText as string];
-        if (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto')) {
+        if (path && (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto'))) {
           let pkg = '';
           if (!path.includes('node_modules')) {
             pkg = AppInfo.NAME;
