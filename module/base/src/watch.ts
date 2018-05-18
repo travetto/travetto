@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Entry, Handler, bulkFindSync } from './scan-fs';
-import { throttle } from '.';
+import { throttle } from './util';
 
 interface Options {
   maxListeners?: number;
