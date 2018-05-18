@@ -1,4 +1,4 @@
-import { Controller } from '..';
+import { Controller, Get } from '..';
 import { ModelController } from '../support/extension.model';
 import { Model, BaseModel, ClassModelService, ModelSource, ModelService, ModelCore, ModelQuery, Query, BulkState, BulkResponse, PageableModelQuery } from '@travetto/model';
 import { QueryVerifierService } from '@travetto/model/src/service/query';
@@ -92,7 +92,13 @@ class Config {
 
 @ModelController('/model', Simple)
 export class SimpleModelController {
-  constructor(public source: ModelService) {
+  constructor(public source: ModelService) { }
+
+  @Get('/')
+  getById(req: Request) {
+    return {
+      message: 'Custom get all by'
+    }
   }
 
 }
