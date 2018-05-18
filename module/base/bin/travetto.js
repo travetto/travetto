@@ -7,7 +7,12 @@ const ts = require('typescript');
 const json = ts.readJsonConfigFile(`${process.cwd()}/tsconfig.json`, ts.sys.readFile);
 const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, process.cwd()).options;
 
-const CACHE_DIR = (process.env.TS_CACHE_DIR = process.env.TS_CACHE_DIR || `${process.cwd()}/build`);
+if (!process.env.TS_CACHE_DIR) {
+  process.env.TS_CACHE_NAME = 'build'
+  process.env.TS_CACHE_DIR = `${process.cwd()}/${TS_CACHE_NAME}`;
+}
+
+const CACHE_DIR = process.env.TS_CACHE_DIR;
 const CACHE_SEP = (process.env.TS_CACHE_SEP = process.env.TS_CACHE_SEP || `~`);
 const CACHE_SEP_RE = new RegExp(CACHE_SEP, 'g');
 
