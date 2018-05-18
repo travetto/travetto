@@ -173,7 +173,7 @@ export class Watcher extends EventEmitter {
 
   private _emit(type: string, payload?: any) {
     if (!this.suppress) {
-      console.log('Watch Event', type, payload)
+      console.debug('Watch Event', type, payload)
       this.emit(type, payload);
     }
   }
