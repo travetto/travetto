@@ -7,20 +7,21 @@ const ts = require('typescript');
 const json = ts.readJsonConfigFile(`${process.cwd()}/tsconfig.json`, ts.sys.readFile);
 const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, process.cwd()).options;
 
-const CACHE_DIR = `${process.cwd()}/build`;
+const CACHE_DIR = (process.env.TS_CACHE_DIR = process.env.TS_CACHE_DIR || `${process.cwd()}/build`);
+const CACHE_SEP = (process.env.TS_CACHE_SEP = process.env.TS_CACHE_SEP || `~`);
+const CACHE_SEP_RE = new RegExp(CACHE_SEP, 'g');
 
 // Delete old cached files
 for (const f of fs.readdirSync(CACHE_DIR)) {
-  const full = f.replace(/~/g, '/');
+  const full = f.replace(CACHE_SEP_RE, '/');
   if (fs.statSync(`${CACHE_DIR}/${f}`).ctimeMs < fs.statSync(full).ctimeMs) {
-    console.debug('Removing stale cached file', full);
     fs.unlinkSync(`${CACHE_DIR}/${f}`);
   }
 }
 
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {
-  const name = `${CACHE_DIR}/${tsf.replace(/[\/\\]/g, '~')}`;
+  const name = `${CACHE_DIR}/${tsf.replace(/[\/\\]/g, CACHE_SEP)}`;
   let content;
   if (!fs.existsSync(name)) {
     content = ts.transpile(fs.readFileSync(tsf, 'utf-8'), opts);
