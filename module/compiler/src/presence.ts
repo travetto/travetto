@@ -13,6 +13,7 @@ export interface Listener {
 export class FilePresenceManager {
   fileWatchers: { [key: string]: Watcher } = {};
   files = new Map<string, { version: number }>();
+  seen = new Set();
 
   constructor(private cwd: string, private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = AppEnv.watch) {
   }
@@ -31,7 +32,7 @@ export class FilePresenceManager {
     }
 
     if (this.watch) {
-      this.buildWatcher(`${this.cwd}/src`, [{ testFile: x => this.validFile(x) && /.*[.]ts$/.test(x) }]);
+      this.buildWatcher(`${this.cwd}/src`, [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
     }
   }
 
@@ -49,14 +50,20 @@ export class FilePresenceManager {
   }
 
   addNewFile(name: string) {
-    if (this.watch) {
-      const topLevel = name.split(`${this.cwd}/`)[1].split('/')[0];
+    if (this.seen.has(name)) {
+      return;
+    }
+    this.seen.add(name);
 
-      if (this.fileWatchers[topLevel]) {
-        this.fileWatchers[topLevel].add([name]);
-      } else {
-        this.buildWatcher(`${this.cwd}/src`, [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+    console.log('Adding New File', name);
+
+    if (this.watch) {
+      const topLevel = path.dirname(name);
+
+      if (!this.fileWatchers[topLevel]) {
+        this.fileWatchers[topLevel] = this.buildWatcher(topLevel, []);
       }
+      this.fileWatchers[topLevel].add([name.replace(`${topLevel}/`, '')]);
     }
     this.files.set(name, { version: 0 });
     this.listener.added(name);
@@ -105,7 +112,7 @@ export class FilePresenceManager {
       Object.values(this.fileWatchers).map(x => x.close());
       this.fileWatchers = {};
     }
-
+    this.seen.clear();
     this.files.clear();
   }
 
