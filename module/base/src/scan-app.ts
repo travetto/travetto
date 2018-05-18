@@ -8,10 +8,11 @@ export function findAppFilesByExt(ext: string) {
     cache[ext] = scanDirSync({
       testFile: x => x.endsWith(ext),
       testDir: x => {
-        return !x.includes('node_modules') || (
-          x.endsWith('node_modules') ||
-          x.includes('@travetto')
-        )
+        return x !== 'build' &&
+          (!x.includes('node_modules') || (
+            x.endsWith('node_modules') ||
+            x.includes('@travetto'))
+          )
       }
     }, process.cwd())
       .filter(x => !x.stats.isDirectory())
