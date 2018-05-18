@@ -80,7 +80,7 @@ export class TestSource implements ModelSource {
 
 @Model()
 class Simple extends BaseModel {
-
+  name: string;
 }
 
 class Config {
