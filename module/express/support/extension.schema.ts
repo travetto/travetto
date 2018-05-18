@@ -17,18 +17,22 @@ function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   }
 }
 
+export async function getSchemaBody<T>(req: Request, cls: Class<T>, view?: string) {
+  if (isPlainObject(req.body)) {
+    const o = getBound(cls, req.body, view);
+    if (SchemaRegistry.has(cls)) {
+      return await SchemaValidator.validate(o, view);
+    } else {
+      return o;
+    }
+  } else {
+    throw new AppError(`Body is missing or wrong type: ${req.body}`, 503);
+  }
+}
+
 export function SchemaBody<T>(cls: Class<T>, view?: string) {
   return ControllerRegistry.filterAdder(async (req: Request, res: Response) => {
-    if (isPlainObject(req.body)) {
-      const o = getBound(cls, req.body, view);
-      if (SchemaRegistry.has(cls)) {
-        req.body = await SchemaValidator.validate(o, view);
-      } else {
-        req.body = o;
-      }
-    } else {
-      throw new AppError(`Body is missing or wrong type: ${req.body}`, 503);
-    }
+    req.body = await getSchemaBody(req, cls, view);
   });
 }
 
