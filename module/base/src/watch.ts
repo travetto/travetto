@@ -73,11 +73,12 @@ export class Watcher extends EventEmitter {
   };
 
   add(handlers: (string | Handler)[]) {
-    this.findHandlers = this.findHandlers.concat(handlers.map(x => {
+    const finalHandlers = handlers.map(x => {
       return typeof x === 'string' ? { testFile: (rel: string) => rel === x } : x;
-    }));
+    });
+    this.findHandlers = this.findHandlers.concat(finalHandlers);
 
-    for (const entry of bulkFindSync(this.findHandlers, this.options.cwd)) {
+    for (const entry of bulkFindSync(finalHandlers, this.options.cwd)) {
       if (!this.watched.has(entry.file)) {
         if (this.pending) {
           this.pendingWatched.push(entry);
@@ -172,6 +173,7 @@ export class Watcher extends EventEmitter {
 
   private _emit(type: string, payload?: any) {
     if (!this.suppress) {
+      console.log('Watch Event', type, payload)
       this.emit(type, payload);
     }
   }
