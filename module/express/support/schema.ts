@@ -4,8 +4,8 @@ import { Class } from '@travetto/registry';
 
 import { Request, Response } from 'express';
 
-import { ControllerRegistry } from '../service/registry';
-import { AppError } from '../model/error';
+import { ControllerRegistry } from '../src/service/registry';
+import { AppError } from '../src/model/error';
 
 import * as qs from 'querystring';
 

@@ -11,6 +11,6 @@ export class MockService {
   }
 
   fetch() {
-    return new User('jasmine-bob', 'zrde', 'EzBake Ovesnz3');
+    return new User('jasmine-brob', 'zrde', 'EzBake Ovesnz3');
   }
 }

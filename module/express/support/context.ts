@@ -1,7 +1,7 @@
 import { Context } from '@travetto/context';
 
 import { Request, Response } from 'express';
-import { ExpressOperator } from '../service/operator';
+import { ExpressOperator } from '../src/service/operator';
 import { Injectable } from '@travetto/di';
 import { ExpressApp } from '../index';
 
