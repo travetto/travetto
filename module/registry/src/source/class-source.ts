@@ -32,39 +32,28 @@ export class CompilerClassSource implements ChangeSource<Class> {
       .filter(x => Compiler.presenceManager.validFile(x.file))
       .map(x => x.file)
 
-    const extra: string[] = [];
-
-    const requireListen = (file: string) => extra.push(file);
-
-    Compiler.on('required-after', requireListen);
-
-    for (const file of files) {
-      this.processClasses(file, this.computeClasses(file));
+    for (const f of files) { // Load all files, class scanning
+      require(f);
     }
 
-    for (const file of extra) {
-      if (PendingRegister.has(file)) {
-        this.processClasses(file, PendingRegister.get(file)!);
-        PendingRegister.delete(file);
-      }
-    }
-
-    Compiler.off('required-after', requireListen);
+    this.flush();
 
     Compiler.on('changed', this.watch);
     Compiler.on('removed', this.watch);
     Compiler.on('added', this.watch);
-    Compiler.on('required-after', f => this.processClasses(f, PendingRegister.get(f)!));
+    Compiler.on('required-after', f => this.flush());
   }
 
-  protected processClasses(file: string, classes?: Class[]) {
-    if (!classes || !classes.length) {
-      return;
-    }
-    this.classes.set(file, new Map());
-    for (const cls of classes) {
-      this.classes.get(file)!.set(cls.__id, cls);
-      this.emit({ type: 'added', curr: cls });
+  private flush() {
+    for (const [file, classes] of PendingRegister.flush()) {
+      if (!classes || !classes.length) {
+        continue;
+      }
+      this.classes.set(file, new Map());
+      for (const cls of classes) {
+        this.classes.get(cls.__filename)!.set(cls.__id, cls);
+        this.emit({ type: 'added', curr: cls });
+      }
     }
   }
 
@@ -74,7 +63,12 @@ export class CompilerClassSource implements ChangeSource<Class> {
 
   protected async watch(file: string) {
     console.debug('Got file', file);
-    const next = new Map(this.computeClasses(file).map(x => [x.__id, x] as [string, Class]));
+    require(file);
+
+    const next = new Map(PendingRegister.flush()
+      .filter(x => x[0] === file)[0][1]
+      .map(cls => [cls.__id, cls] as [string, Class]));
+
     let prev = new Map<string, Class>();
     if (this.classes.has(file)) {
       prev = new Map(this.classes.get(file)!.entries());
@@ -98,18 +92,6 @@ export class CompilerClassSource implements ChangeSource<Class> {
           this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
         }
       }
-    }
-  }
-
-  private computeClasses(file: string) {
-    try {
-      const out = require(file);
-      // Get and clear after computed
-      const classes: Class[] = PendingRegister.get(file)!;
-      PendingRegister.delete(file);
-      return classes || [];
-    } catch (e) {
-      return [];
     }
   }
 }
