@@ -138,7 +138,7 @@ class $Compiler {
       transformers: this.transformerManager.transformers || {}
     }, force);
 
-    if (changed && this.presenceManager.isWatchedFileLoaded(fileName)) {
+    if (changed && (force || this.presenceManager.isWatchedFileLoaded(fileName))) {
       // If file is already loaded, mark for reload
       this.markForReload(fileName);
     }
