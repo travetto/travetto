@@ -19,6 +19,7 @@ export class PhaseManager {
       .map(x => ({ priority: PhaseManager.DEFAULT_PRIORITY, ...x }))
       .filter(x => priority === undefined || x.priority <= priority)
       .sort((a, b) => a.priority - b.priority);
+    return this;
   }
 
   async run() {
