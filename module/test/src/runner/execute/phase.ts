@@ -20,7 +20,7 @@ export function asyncTimeout(duration: number = DEFAULT_TIMEOUT): [Promise<any>,
   return [prom, () => clearTimeout(id)];
 }
 
-export class PhaseManager {
+export class ExecutionPhaseManager {
   private progress: ('all' | 'each')[] = [];
 
   constructor(private consumer: Consumer, private suite: SuiteConfig, private result: SuiteResult) { }

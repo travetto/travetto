@@ -8,7 +8,7 @@ import { TestRegistry } from '../../service';
 import { ConsoleCapture } from '../console';
 import { AssertUtil } from './../assert';
 import { Consumer } from '../../consumer';
-import { asyncTimeout, TIMEOUT, PhaseManager } from './phase';
+import { asyncTimeout, TIMEOUT, ExecutionPhaseManager } from './phase';
 
 export class ExecuteUtil {
 
@@ -152,7 +152,7 @@ export class ExecuteUtil {
       tests: []
     };
 
-    const mgr = new PhaseManager(consumer, suite, result);
+    const mgr = new ExecutionPhaseManager(consumer, suite, result);
 
     try {
       await mgr.startPhase('all');
@@ -179,7 +179,7 @@ export class ExecuteUtil {
 
     consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
-    const mgr = new PhaseManager(consumer, suite, result);
+    const mgr = new ExecutionPhaseManager(consumer, suite, result);
 
     try {
       await mgr.startPhase('all');

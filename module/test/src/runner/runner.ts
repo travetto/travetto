@@ -1,5 +1,6 @@
 import * as minimist from 'minimist';
 
+import { PhaseManager } from '@travetto/base';
 import { ArrayDataSource } from '@travetto/pool';
 import { deserializeError } from '@travetto/exec';
 import { Class } from '@travetto/registry';
@@ -93,6 +94,8 @@ export class Runner {
 
     const files = await this.getFiles();
     const errors: Error[] = [];
+
+    await new PhaseManager('test').load().run();
 
     await client().process(
       new ArrayDataSource(files),
