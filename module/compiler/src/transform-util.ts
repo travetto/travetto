@@ -29,10 +29,9 @@ export class TransformUtil {
         continue;
       }
       if (ident && ident.escapedText in patterns) {
-        const res = state.imports.get(ident.escapedText! as string)!;
-        const path = res && res.path;
+        const { path } = state.imports.get(ident.escapedText! as string)!;
         const packages = patterns[ident.escapedText as string];
-        if (path && (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto'))) {
+        if (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto')) {
           let pkg = '';
           if (!path.includes('node_modules')) {
             pkg = AppInfo.NAME;
@@ -209,14 +208,17 @@ export class TransformUtil {
     }
   }
 
-  static buildImportAliasMap(pathToType: { [key: string]: string } = {}) {
+  static buildImportAliasMap(pathToType: { [key: string]: string | string[] } = {}) {
     const out: { [key: string]: Set<string> } = {};
 
     for (const [k, v] of Object.entries(pathToType)) {
-      if (!(v in out)) {
-        out[v] = new Set();
+      const ls = Array.isArray(v) ? v : [v];
+      for (const lsi of ls) {
+        if (!(lsi in out)) {
+          out[lsi] = new Set();
+        }
+        out[lsi].add(k);
       }
-      out[v].add(k);
     }
 
     return out;
