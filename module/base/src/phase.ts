@@ -1,7 +1,7 @@
 import { requireAppFiles } from './scan-app';
 
 interface Initializer {
-  action: Function;
+  action: () => Promise<number[]> | number[] | undefined;
   priority?: number;
 }
 
@@ -24,7 +24,8 @@ export class PhaseManager {
   async run() {
     const pids = [];
     for (const i of this.initializers) {
-      pids.push(...await i.action());
+      const res = await i.action();
+      pids.push(...(res ? res : []));
     }
     return pids;
   }
