@@ -22,8 +22,10 @@ export class PhaseManager {
   }
 
   async run() {
+    const pids = [];
     for (const i of this.initializers) {
-      await i.action();
+      pids.push(...await i.action());
     }
+    return pids;
   }
 }
