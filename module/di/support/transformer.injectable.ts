@@ -4,7 +4,7 @@ import { ConfigLoader } from '@travetto/config';
 
 const INJECTABLES = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.injectable'),
-  '@travetto/di': 'Injectable'
+  '@travetto/di': ['Injectable']
 });
 
 interface DiState extends State {
