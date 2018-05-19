@@ -40,7 +40,7 @@ export class DockerContainer {
   private tempVolumes: { [key: string]: string } = {}
 
   constructor(private image: string, container?: string) {
-    this.container = container || `${image}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
+    this.container = container || `${process.env.DOCKER_NS || image}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
   }
 
   forceDestroyOnShutdown() {
