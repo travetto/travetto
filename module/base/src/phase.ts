@@ -1,4 +1,3 @@
-import { bulkRequire } from './scan-fs';
 import { requireAppFiles } from './scan-app';
 
 interface Initializer {
