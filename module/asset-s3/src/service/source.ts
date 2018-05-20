@@ -2,16 +2,16 @@ import * as aws from 'aws-sdk';
 import * as fs from 'fs';
 
 import { Injectable, Inject } from '@travetto/di';
-import { AssetSource, Asset } from '@travetto/asset';
+import { AssetSource, Asset, AssetMetadata } from '@travetto/asset';
 import { AssetS3Config } from './config';
 import { TagSet } from 'aws-sdk/clients/s3';
 
-function toTagSet(metadata: { [key: string]: any }): TagSet {
+function toTagSet(metadata: AssetMetadata): TagSet {
   return ['name', 'title', 'hash', 'createdDate', 'tags']
     .filter(x => x in metadata)
     .map(x => ({
       Key: x,
-      Value: JSON.stringify(metadata[x])
+      Value: JSON.stringify((metadata as any)[x])
     }));
 }
 
@@ -21,9 +21,9 @@ function fromTagSet(tags: TagSet) {
     .filter(x => allowed.has(x.Key))
     .map(x => [x.Key, JSON.parse(x.Value)] as [string, string])
     .reduce((acc, pair) => {
-      acc[pair[0]] = pair[1];
+      (acc as any)[pair[0]] = pair[1];
       return acc;
-    }, {} as { [key: string]: any });
+    }, {} as AssetMetadata);
 
   return map;
 }
@@ -36,57 +36,39 @@ export class AssetS3Source extends AssetSource {
     super();
   }
 
+  private q<U extends object>(filename: string, extra: U = {} as U) {
+    return { Key: filename, Bucket: this.config.bucket, ...(extra as any) } as (U & { Key: string, Bucket: string });
+  }
+
   async postConstruct() {
     this.client = new aws.S3(this.config.config);
     await this.client.createBucket({ Bucket: this.config.bucket }).promise();
   }
 
   async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
-    const conf = { mode: 'w', ...file };
-    const upload = this.client.upload({
-      Bucket: this.config.bucket,
-      Key: file.filename,
-      Body: fs.createReadStream(file.path),
-    }).promise();
+    const upload = this.client.upload(this.q(file.filename, {
+      Body: fs.createReadStream(file.path)
+    })).promise();
 
     await upload;
 
-    await this.client.putObjectTagging({
-      Bucket: this.config.bucket,
-      Key: file.filename,
+    await this.client.putObjectTagging(this.q(file.filename, {
       Tagging: { TagSet: toTagSet(file.metadata) }
-    }).promise()
+    })).promise();
 
-    let count = 0;
-
-    while (count++ < 5) {
-      try {
-        return await this.info(file.filename);
-      } catch (e) {
-        // Wait for load
-        await new Promise(res => setTimeout(res, 100));
-      }
-    }
-
-    throw new Error('Unable to find written file');
+    return this.info(file.filename);
   }
 
   async update(file: Asset): Promise<Asset> {
-    const inTags = await this.client.getObjectTagging({
-      Bucket: this.config.bucket,
-      Key: file.filename
-    }).promise();
-
+    const inTags = await this.client.getObjectTagging(this.q(file.filename)).promise();
     const inTagSet = fromTagSet(inTags.TagSet);
+
     Object.assign(inTagSet, file.metadata);
 
     const outTags = toTagSet(inTagSet);
-
-    const updateTags = await this.client.putObjectTagging({
-      Bucket: this.config.bucket,
-      Key: file.filename,
+    const updateTags = await this.client.putObjectTagging(this.q(file.filename, {
       Tagging: { TagSet: outTags }
-    }).promise();
+    })).promise();
 
     return file;
   }
@@ -96,39 +78,18 @@ export class AssetS3Source extends AssetSource {
     return res.Body! as NodeJS.ReadableStream;
   }
 
-  async info(filename: string, filter?: Partial<AssetMetadata>): Promise<Asset> {
-    const query = { filename };
-
-    if (!!filter) {
-      Object.assign(query, filter);
-    }
-
-    const filesReq = await this.client.listObjects({
-      Bucket: this.config.bucket,
-
-    }).promise();
-
-    //.find(query).toArray();
-
-    if (!files || !files.length) {
-      throw new Error('Unable to find file');
-    }
-
-    const f = files[0];
-    const out: Asset = new Asset(f);
-    // Take out of mongo
-    out._id = (f as any as { _id: mongo.ObjectId })._id.toHexString();
-    return out;
-  }
-
-  async find(filter: Partial<AssetMetadata>): Promise<Asset[]> {
-    const files = await this.client.files.find(filter).toArray();
-
-    if (!files || !files.length) {
-      throw new Error('Unable to find file');
-    }
-
-    return files.map((t: any) => new Asset(t));
+  async info(filename: string): Promise<Asset> {
+    const query = this.q(filename);
+    const [obj, tags] = await Promise.all([
+      this.client.getObject(query).promise(),
+      this.client.getObjectTagging(query).promise()
+    ]);
+    return new Asset({
+      contentType: obj.ContentType,
+      filename,
+      length: obj.ContentLength,
+      metadata: fromTagSet(tags.TagSet)
+    });
   }
 
   async remove(filename: string): Promise<void> {
