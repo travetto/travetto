@@ -11,6 +11,15 @@ export interface AssetFile {
   path: string;
   hash: string;
 }
+
+export interface AssetMetadata {
+  name: string,
+  title: string,
+  hash: string,
+  createdDate: Date,
+  tags?: string[]
+}
+
 export class Asset {
 
   static fields = ['filename', 'length', 'contentType', 'path', 'metadata', 'stream'];
@@ -21,13 +30,7 @@ export class Asset {
   filename: string;
   contentType: string;
   path: string;
-  metadata: {
-    name: string,
-    title: string,
-    hash: string,
-    createdDate: Date,
-    tags?: string[]
-  };
+  metadata: AssetMetadata;
 
   constructor(conf?: Partial<Asset>) {
     if (conf) {

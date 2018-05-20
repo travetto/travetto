@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { Injectable } from '@travetto/di';
-import { Asset } from '../model';
+import { Asset, AssetMetadata } from '../model';
 import { AssetSource } from './source';
 
 const fsUnlinkAsync = util.promisify(fs.unlink);
@@ -16,7 +16,7 @@ export class AssetService {
     return await this.source.remove(path);
   }
 
-  async find(filter: Asset) {
+  async find(filter: AssetMetadata) {
     return await this.source.find(filter);
   }
 
@@ -55,7 +55,7 @@ export class AssetService {
     return await Promise.all(uploads.map(u => this.save(u)));
   }
 
-  async get(filename: string, filter?: Asset): Promise<Asset> {
+  async get(filename: string, filter?: AssetMetadata): Promise<Asset> {
     const info = await this.source.info(filename, filter);
     if (info.metadata.title) {
       info.filename = info.metadata.title;
