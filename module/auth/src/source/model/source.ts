@@ -48,8 +48,10 @@ export class AuthModelSource<T extends BaseModel> extends AuthSource<T, AuthMode
   }
 
   async register(user: T, password: string) {
-    const query: any = {
-      [this.config.usernameField]: (user as any)[this.config.usernameField]
+    const query = {
+      where: {
+        [this.config.usernameField]: (user as any)[this.config.usernameField]
+      }
     };
 
     const existingUsers = await this.modelService.getAllByQuery(this.modelClass, query);

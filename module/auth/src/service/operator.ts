@@ -24,8 +24,8 @@ export class ExpressAuthOperator extends ExpressOperator {
   }
 
   operate(app: ExpressApp) {
-    passport.serializeUser(this.strategy.serialize.bind(this));
-    passport.deserializeUser(this.strategy.deserialize.bind(this));
+    passport.serializeUser(this.strategy.serialize.bind(this.strategy));
+    passport.deserializeUser(this.strategy.deserialize.bind(this.strategy));
     passport.use('app', this.strategy);
 
     app.get()
