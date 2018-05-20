@@ -4,9 +4,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as net from 'net';
 
-import { CommonProcess, ChildOptions } from './types';
+import { CommonProcess, ChildOptions, ExecutionResult } from './types';
 import { spawn, WithOpts } from './util';
-import { Shutdown, rimraf } from '@travetto/base';
+import { Shutdown, rimraf, isPlainObject } from '@travetto/base';
 import { CpuInfo } from 'os';
 
 const writeFile = util.promisify(fs.writeFile);
@@ -31,6 +31,7 @@ export class DockerContainer {
 
   public runAway: boolean = false;
   public evict: boolean = false;
+  public interactive: boolean = false;
 
   private env: { [key: string]: string } = {};
   private ports: { [key: string]: number } = {};
@@ -82,6 +83,11 @@ export class DockerContainer {
     return this;
   }
 
+  setInteractive(on: boolean) {
+    this.interactive = on;
+    return this;
+  }
+
   async waitForPort(port: number, ms = 5000) {
     const start = Date.now()
     while ((Date.now() - start) < ms) {
@@ -109,7 +115,12 @@ export class DockerContainer {
     throw new Error('Could not acquire port');
   }
 
-  async run(...args: any[]) {
+  async run(...args: any[]): Promise<ExecutionResult>
+  async run(options: { args?: any[], flags?: string[], stdin?: string | NodeJS.ReadableStream | Buffer }) {
+    if (!isPlainObject(options)) {
+      options = { args: options }
+    }
+
     // Kill existing
     await this.destroy();
     await this.removeDanglingVolumes();
@@ -125,6 +136,9 @@ export class DockerContainer {
       if (this.workingDir) {
         finalArgs.push('-w', this.workingDir);
       }
+      if (this.interactive) {
+        finalArgs.push('-it');
+      }
       for (const k of Object.keys(this.volumes)) {
         finalArgs.push('-v', `${k}:${this.volumes[k]}`)
       }
@@ -138,9 +152,24 @@ export class DockerContainer {
         finalArgs.push('-e', `"${k}=${this.env[k]}"`);
       }
 
-      console.debug('Running', [...finalArgs, this.image, ...args]);
+      if (options.flags) {
+        finalArgs.push(...options.flags);
+      }
 
-      [this._proc, prom] = spawn([...finalArgs, this.image, ...args.map(z => `${z}`)].join(' '), { shell: false });
+      console.debug('Running', [...finalArgs, this.image, ...(options.args || [])]);
+
+      [this._proc, prom] = spawn([...finalArgs, this.image, ...(options.args || []).map(z => `${z}`)].join(' '), {
+        shell: false,
+      });
+
+      if (options.stdin) {
+        const stdin = this._proc.stdin;
+        if (typeof options.stdin === 'string' || options.stdin instanceof Buffer) {
+          stdin.write(options.stdin);
+        } else {
+          options.stdin.pipe(stdin);
+        }
+      }
       this._proc.unref();
     } catch (e) {
       if (e.killed) {

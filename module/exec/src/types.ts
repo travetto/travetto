@@ -3,6 +3,7 @@ import * as child_process from 'child_process';
 export type ExecutionOptions = {
   timeout?: number;
   quiet?: boolean;
+  stdin?: string | Buffer | NodeJS.ReadableStream;
   timeoutKill?: (proc: child_process.ChildProcess) => Promise<void>;
 };
 
@@ -17,6 +18,7 @@ export interface ExecutionResult {
 
 export interface CommonProcess {
   pid: number;
+  stdin: NodeJS.WritableStream;
   send?(message: any, sendHandle?: any): void;
   removeListener(name: string, f: Function): void;
   on(name: string, f: Function): void;
