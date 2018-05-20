@@ -68,7 +68,9 @@ class TestAssetService {
     assert(filePath.split('.').pop() === 'png');
 
     const file = await AssetUtil.localFileToAsset(filePath);
-    await assetService.save(file);
+    const done = await assetService.save(file, true);
+
+    assert.ok(done);
 
     const resized = await service.getImage(file.filename, { w: 40, h: 40 });
 
