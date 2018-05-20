@@ -161,43 +161,32 @@ export class DockerContainer {
     return flags;
   }
 
-  private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', flags: string[] = [], args: any[] = []) {
-    return spawn(([
+  private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
+    const cmd = ([
       this.cmd,
       op,
-      ...flags,
-      ...args.map((x: any) => `${x}`)
-    ]).join(' '), {
-        shell: false
-      });
+      ...(args || []).map((x: any) => `${x}`)
+    ]).join(' ');
+    return spawn(cmd, { shell: false });
   }
 
-  async create(options: { flags?: string[], args?: any[] }) {
-    return this._cmd('create',
-      ['--name', this.container].concat(options.flags || []),
-      [this.image].concat((options.args || []))
-    );
+  async create(flags?: string[], args?: string[]) {
+    const [proc, prom] = this._cmd('create', '--name', this.container, ...(flags || []), this.image, ...(args || []));
+    return prom;
   }
 
-  async start(options: { flags?: string[], args?: any[] }) {
-    return this._cmd('start',
-      (options.flags || []),
-      [this.container].concat((options.args || []))
-    );
+  async start(flags?: string[], args?: string[]) {
+    const [proc, prom] = this._cmd('start', ...(flags || []), this.container, ...(args || []));
+    return prom;
   }
 
-  async stop(options: { flags?: string[], args?: any[] }) {
-    return this._cmd('stop',
-      (options.flags || []),
-      [this.container].concat((options.args || []))
-    );
+  async stop(flags?: string[], args?: string[]) {
+    const [proc, prom] = this._cmd('stop', ...(flags || []), this.container, ...(args || []));
+    return prom;
   }
 
-  async exec(options: { flags?: string[], args?: any[] }) {
-    return this._cmd('exec',
-      (options.flags || []),
-      [this.container].concat((options.args || []))
-    );
+  async exec(flags?: string[], args?: string[]) {
+    return this._cmd('exec', ...(flags || []), this.container, ...(args || []));
   }
 
   async run(...args: any[]): Promise<ExecutionResult> {
@@ -221,9 +210,7 @@ export class DockerContainer {
     try {
       const flags = this.getFlags(options.flags);
 
-      console.debug('Running', [...flags, this.image, ...(options.args || [])]);
-
-      [this._proc, prom] = this._cmd('run', flags, [this.image].concat(options.args || []));
+      [this._proc, prom] = this._cmd('run', flags, [this.image].concat(args));
 
       this._proc.unref();
     } catch (e) {

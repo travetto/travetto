@@ -5,15 +5,16 @@ import * as os from 'os';
 
 async function test() {
   const container = new DockerContainer('rafakato/alpine-graphicsmagick')
-    .setInteractive(true)
-    .setDeleteOnFinish(true);
+    .forceDestroyOnShutdown()
+    .setInteractive(true);
 
   console.log('Hello');
 
   try {
-    const [proc, prom] = await container.run({
-      args: ['gm', 'convert', '-resize 100x50 - -']
-    });
+    await container.create(['-i'], ['/bin/sh']);
+    await container.start();
+
+    const [proc, prom] = await container.exec(['-i'], ['gm', 'convert', '-resize 100x50', '-', '-']);
 
     createReadStream(path.resolve(`${os.homedir}/Documents/download.jpeg`)).pipe(proc.stdin);
 
