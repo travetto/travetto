@@ -129,7 +129,7 @@ export class DockerContainer {
   }
 
   getFlags(extra?: string[]) {
-    const flags = [this.cmd, 'run', `--name=${this.container}`];
+    const flags = [];
     if (this.workingDir) {
       flags.push('-w', this.workingDir);
     }
@@ -202,7 +202,7 @@ export class DockerContainer {
     }).then(v => {
       delete this._proc;
     });
-    return [proc, prom];
+    return [proc, prom] as [CommonProcess, Promise<ExecutionResult>];
   }
 
   async run(...args: any[]): Promise<ExecutionResult> {
@@ -218,7 +218,7 @@ export class DockerContainer {
     try {
       const flags = this.getFlags();
 
-      const { proc, prom } = this._cmd('run', flags, [this.image].concat(args));
+      const { proc, prom } = this._cmd('run', `--name=${this.container}`, flags, [this.image].concat(args));
       proc.unref();
       this._proc = proc;
       return prom;

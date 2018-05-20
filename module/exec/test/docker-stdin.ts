@@ -12,7 +12,7 @@ async function test() {
 
   try {
     await container.create(['-i'], ['/bin/sh']);
-    await container.start();
+    await container.start([);
 
     const [proc, prom] = await container.exec(['-i'], ['gm', 'convert', '-resize 100x50', '-', '-']);
 
