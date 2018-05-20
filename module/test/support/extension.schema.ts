@@ -1,4 +1,4 @@
-import { SchemaRegistry, CommonRegExp, FieldConfig } from '@travetto/schema';
+import { SchemaRegistry, CommonRegExp, FieldConfig, SchemaClass, BindUtil } from '@travetto/schema';
 import { Class } from '@travetto/registry';
 
 import * as faker from 'faker';
@@ -26,7 +26,7 @@ export class GenerateSchemaData {
       [/^url$/, faker.internet.url],
       [/^email(addr(ress)?)?$/, faker.internet.email],
       [/^(tele)?phone(num|number)?$/, faker.phone.phoneNumber],
-      [/^((postal|zip)code)|zip)$/, faker.address.zipCode],
+      [/^((postal|zip)code)|zip$/, faker.address.zipCode],
       [/f(irst)?name/, faker.name.firstName],
       [/l(ast)?name/, faker.name.lastName],
       [/^ip(add(ress)?)?$/, faker.internet.ip],
@@ -147,7 +147,7 @@ export class GenerateSchemaData {
     }
   }
 
-  static async generate<T>(cls: Class<T>, view?: string) {
+  static generate<T>(cls: Class<T>, view?: string) {
     const cfg = SchemaRegistry.getViewSchema(cls, view);
     const out: { [key: string]: any } = {};
 
@@ -158,6 +158,7 @@ export class GenerateSchemaData {
       }
       out[f] = this.getValue(fieldConfig);
     }
-    return out;
+
+    return BindUtil.bindSchema(cls, new cls(), out, view);
   }
 }
