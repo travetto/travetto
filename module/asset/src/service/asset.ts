@@ -28,8 +28,6 @@ export class AssetService {
       if (res) {
         if (!upsert) {
           throw new Error(`File already exists: ${asset.filename}`);
-        } else {
-          res = await this.source.update(asset);
         }
         return res;
       } else {
