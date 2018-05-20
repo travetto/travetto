@@ -183,20 +183,20 @@ export class ModelMongoSource extends ModelSource {
     return this.indices[this.getCollectionName(cls)];
   }
 
-  async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T>) {
+  async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>) {
     const col = await this.getCollection(cls);
     const objs = await col.find(query as mongo.FilterQuery<T>, { fields: { _id: 1 } } as any).toArray() as T[];
     return objs.map(x => this.postLoad(cls, x));
   }
 
-  async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}): Promise<T[]> {
+  async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {
     query = this.translateQueryIds(query);
     const res = await this.query(cls, query);
     res.forEach(r => this.postLoad(cls, r));
     return res;
   }
 
-  async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T> = {}): Promise<number> {
+  async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     query = this.translateQueryIds(query);
 
     const col = await this.getCollection(cls);
@@ -206,7 +206,7 @@ export class ModelMongoSource extends ModelSource {
     return res;
   }
 
-  async getByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}, failOnMany = true): Promise<T> {
+  async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
     const res = await this.getAllByQuery(cls, { limit: 200, ...query });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
       throw new BaseError(`Invalid number of results for find by id: ${res ? res.length : res}`);
