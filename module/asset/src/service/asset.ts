@@ -25,11 +25,8 @@ export class AssetService {
         // Not found
       }
 
-      if (res) {
-        if (!upsert) {
-          throw new Error(`File already exists: ${asset.filename}`);
-        }
-        return res;
+      if (res && !upsert) {
+        throw new Error(`File already exists: ${asset.filename}`);
       } else {
         return await this.source.write(asset, fs.createReadStream(asset.path));
       }
