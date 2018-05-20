@@ -2,3 +2,5 @@
 asset:
   s3:
     bucket: test-bucket
+    accessKeyId: ''
+    secretAccessKey: ''
