@@ -48,7 +48,7 @@ export class AssetMongoSource extends AssetSource {
   }
 
   async update(file: Asset): Promise<Asset> {
-    const update = await this.client.files.findOneAndUpdate({ _id: new mongo.ObjectID(file._id) }, {
+    const update = await this.client.files.findOneAndUpdate({ filename: file.filename }, {
       $addToSet: { 'metadata.tags': { $each: file.metadata.tags } }
     }, {
         returnOriginal: false
@@ -75,19 +75,8 @@ export class AssetMongoSource extends AssetSource {
 
     const f = files[0];
     const out: Asset = new Asset(f);
-    // Take out of mongo
-    out._id = (f as any as { _id: mongo.ObjectId })._id.toHexString();
+    delete f['_id'];
     return out;
-  }
-
-  async find(filter: Asset): Promise<Asset[]> {
-    const files = await this.client.files.find(filter).toArray();
-
-    if (!files || !files.length) {
-      throw new Error('Unable to find file');
-    }
-
-    return files.map((t: any) => new Asset(t));
   }
 
   async remove(filename: string): Promise<void> {

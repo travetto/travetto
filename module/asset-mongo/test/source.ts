@@ -3,22 +3,23 @@ import * as mongo from 'mongodb';
 import * as util from 'util';
 import * as assert from 'assert';
 
-import { AssetService, AssetUtil, Asset } from '@travetto/asset';
+import { AssetService, AssetUtil, Asset, AssetSource, ImageService } from '@travetto/asset';
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
-import { DependencyRegistry, Injectable } from '@travetto/di';
+import { DependencyRegistry, Injectable, InjectableFactory } from '@travetto/di';
 import { AssetMongoSource } from '../src/service/source';
 import { AssetMongoConfig } from '../src/service/config';
 
 const fsStat = util.promisify(fs.stat);
 
-@Injectable({ target: AssetMongoConfig })
-class Conf extends AssetMongoConfig {
-
-}
-
-@Injectable()
-class Source extends AssetMongoSource {
-
+class Config extends AssetMongoConfig {
+  @InjectableFactory()
+  static getConf(): AssetMongoConfig {
+    return new AssetMongoConfig();
+  }
+  @InjectableFactory()
+  static getSource(cfg: AssetMongoConfig): AssetSource {
+    return new AssetMongoSource(cfg);
+  }
 }
 
 @Suite()
@@ -59,5 +60,23 @@ class TestAssetService {
     } catch {
       assert(true);
     }
+  }
+
+  @Test('downloads an file from a url')
+  async downloadAndResize() {
+    const service = await DependencyRegistry.getInstance(ImageService);
+    const assetService = await DependencyRegistry.getInstance(AssetService);
+
+    const filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
+    assert(filePath !== undefined);
+    assert(filePath.split('.').pop() === 'png');
+
+    const file = await AssetUtil.localFileToAsset(filePath);
+    await assetService.save(file);
+
+    const resized = await service.getImage(file.filename, { w: 40, h: 40 });
+
+    assert(resized.contentType === 'image/png');
+    assert.ok(resized.stream);
   }
 }
