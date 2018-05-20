@@ -1,8 +1,8 @@
 import { CacheManager } from '../service';
 import * as LRU from 'lru-cache';
 
-export function Cacheable(config: string | LRU.Options<any> & { name?: string }, keyFn?: (...args: any[]) => string) {
-  return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
+export function Cacheable<U>(config: string | LRU.Options<string, U> & { name?: string }, keyFn?: (...args: any[]) => string) {
+  return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => U>) => {
     const targetName = `${target.name}-${propertyKey}`;
     if (typeof config !== 'string') {
       if (!config['name']) {
@@ -10,10 +10,10 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
       }
     }
 
-    const orig = descriptor.value;
+    const orig = descriptor.value! as any as (...args: any[]) => U;
     const cache = CacheManager.get<any>(config as any);
 
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (this: any, ...args: any[]): U {
       let key = keyFn ? keyFn(args) : JSON.stringify(args || []);
       key = `${targetName}||${key}`;
       if (!cache.has(key)) {
@@ -24,7 +24,7 @@ export function Cacheable(config: string | LRU.Options<any> & { name?: string },
         cache.set(key, res);
       }
       return cache.get(key);
-    };
+    } as any;
 
     Object.defineProperty(descriptor.value, 'name', { value: (orig as any).name });
 
