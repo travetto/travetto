@@ -128,6 +128,39 @@ export class DockerContainer {
     throw new Error('Could not acquire port');
   }
 
+  getFlags(extra?: string[]) {
+    const flags = [this.cmd, 'run', `--name=${this.container}`];
+    if (this.workingDir) {
+      flags.push('-w', this.workingDir);
+    }
+    if (this.deleteOnFinish) {
+      flags.push('--rm');
+    }
+    if (this.interactive) {
+      flags.push('-i');
+    }
+    if (this.tty) {
+      flags.push('-t');
+    }
+    for (const k of Object.keys(this.volumes)) {
+      flags.push('-v', `${k}:${this.volumes[k]}`)
+    }
+    for (const k of Object.keys(this.tempVolumes)) {
+      flags.push('-v', `${this.tempVolumes[k]}:${k}`);
+    }
+    for (const k of Object.keys(this.ports)) {
+      flags.push('-p', `${k}:${this.ports[k]}`);
+    }
+    for (const k of Object.keys(this.env)) {
+      flags.push('-e', `"${k}=${this.env[k]}"`);
+    }
+
+    if (extra) {
+      flags.push(...extra);
+    }
+    return flags;
+  }
+
   run(first: string, ...args: any[]): Promise<ExecutionResult>
   run(options: { args?: any[], flags?: string[] }): Promise<[CommonProcess, Promise<ExecutionResult>]>
   async run(...args: any[]): Promise<ExecutionResult | [CommonProcess, Promise<ExecutionResult>]> {
@@ -135,9 +168,11 @@ export class DockerContainer {
       args
     };
 
-    // Kill existing
-    await this.destroy();
-    await this.removeDanglingVolumes();
+    if (!this.deleteOnFinish) {
+      // Kill existing
+      await this.destroy();
+      await this.removeDanglingVolumes();
+    }
 
     // Make temp dirs
     const mkdirAll = Object.keys(this.tempVolumes).map(x => mkdir(x).catch(e => { }));
@@ -146,39 +181,11 @@ export class DockerContainer {
     let prom;
 
     try {
-      const finalArgs = [this.cmd, 'run', `--name=${this.container}`];
-      if (this.workingDir) {
-        finalArgs.push('-w', this.workingDir);
-      }
-      if (this.deleteOnFinish) {
-        finalArgs.push('--rm');
-      }
-      if (this.interactive) {
-        finalArgs.push('-i');
-      }
-      if (this.tty) {
-        finalArgs.push('-t');
-      }
-      for (const k of Object.keys(this.volumes)) {
-        finalArgs.push('-v', `${k}:${this.volumes[k]}`)
-      }
-      for (const k of Object.keys(this.tempVolumes)) {
-        finalArgs.push('-v', `${this.tempVolumes[k]}:${k}`);
-      }
-      for (const k of Object.keys(this.ports)) {
-        finalArgs.push('-p', `${k}:${this.ports[k]}`);
-      }
-      for (const k of Object.keys(this.env)) {
-        finalArgs.push('-e', `"${k}=${this.env[k]}"`);
-      }
+      const flags = this.getFlags(options.flags);
 
-      if (options.flags) {
-        finalArgs.push(...options.flags);
-      }
+      console.debug('Running', [...flags, this.image, ...(options.args || [])]);
 
-      console.debug('Running', [...finalArgs, this.image, ...(options.args || [])]);
-
-      [this._proc, prom] = spawn([...finalArgs, this.image, ...(options.args || []).map((z: any) => `${z}`)].join(' '), {
+      [this._proc, prom] = spawn([...flags, this.image, ...(options.args || []).map((z: any) => `${z}`)].join(' '), {
         shell: false,
       });
 
