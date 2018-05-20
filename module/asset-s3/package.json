@@ -1,0 +1,24 @@
+{
+  "author": {
+    "email": "timothy.soehnlin@gmail.com",
+    "name": "Timothy Soehnlin"
+  },
+  "dependencies": {
+    "@travetto/asset": "0.x.x",
+    "aws-sdk": "^2.243.1"
+  },
+  "description": "",
+  "devDependencies": {
+    "@travetto/test": "0.x.x"
+  },
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/asset-s3",
+  "repository": {
+    "url": "https://github.com/travetto/asset-s3.git"
+  },
+  "script": {
+    "test": "./node_modules/.bin/travetto-test"
+  },
+  "version": "0.0.0"
+}
