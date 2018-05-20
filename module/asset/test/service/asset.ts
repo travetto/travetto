@@ -1,4 +1,4 @@
-import { AssetService, ImageService, AssetUtil, AssetSource, Asset } from '../../src';
+import { AssetService, ImageService, AssetUtil, AssetSource, Asset, AssetMetadata } from '../../src';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import * as fs from 'fs';
@@ -31,7 +31,7 @@ class MockAssetSource extends AssetSource {
     return new Asset(this.files.get(filename)!);
   }
 
-  find(filter: Asset): Promise<Asset[]> {
+  find(filter: AssetMetadata): Promise<Asset[]> {
     throw new Error('Method not implemented.');
   }
 
@@ -59,7 +59,7 @@ class AssetTest {
     file = await service.save(file);
 
     assert(file.contentType === 'image/png');
-    assert(file.length > 0);
+    assert(file.length > -1);
 
     try {
       util.promisify(fs.stat)(filePath);
