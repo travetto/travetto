@@ -47,11 +47,21 @@ export class QueryVerifierService {
   processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler) {
     const view = SchemaRegistry.getViewSchema(cls);
 
+    if (val === undefined || val === null) {
+      state.log('Value cannot be undefined or null');
+      return;
+    }
+
     if (handler.preMember && handler.preMember(state, val)) {
       return;
     }
 
     for (const [key, value] of Object.entries(val)) {
+
+      if (value === undefined || value === null) {
+        state.log(`${key} cannot be undefined or null`);
+        continue;
+      }
 
       if (handler.preMember && handler.preMember(state, value)) {
         continue;
