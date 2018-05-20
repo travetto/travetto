@@ -11,7 +11,7 @@ export interface IndexConfig<T> {
 export class ModelOptions {
   class: Class;
   collection: string;
-  defaultSort?: SortClause<any>;
+  defaultSort?: SortClause<any>[];
   indicies: IndexConfig<any>[] = [];
   discriminator?: string;
   subtypes?: { [key: string]: Class };
