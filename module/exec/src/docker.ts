@@ -161,9 +161,47 @@ export class DockerContainer {
     return flags;
   }
 
-  run(first: string, ...args: any[]): Promise<ExecutionResult>
-  run(options: { args?: any[], flags?: string[] }): Promise<[CommonProcess, Promise<ExecutionResult>]>
-  async run(...args: any[]): Promise<ExecutionResult | [CommonProcess, Promise<ExecutionResult>]> {
+  private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', flags: string[] = [], args: any[] = []) {
+    return spawn(([
+      this.cmd,
+      op,
+      ...flags,
+      ...args.map((x: any) => `${x}`)
+    ]).join(' '), {
+        shell: false
+      });
+  }
+
+  async create(options: { flags?: string[], args?: any[] }) {
+    return this._cmd('create',
+      ['--name', this.container].concat(options.flags || []),
+      [this.image].concat((options.args || []))
+    );
+  }
+
+  async start(options: { flags?: string[], args?: any[] }) {
+    return this._cmd('start',
+      (options.flags || []),
+      [this.container].concat((options.args || []))
+    );
+  }
+
+  async stop(options: { flags?: string[], args?: any[] }) {
+    return this._cmd('stop',
+      (options.flags || []),
+      [this.container].concat((options.args || []))
+    );
+  }
+
+  async exec(options: { flags?: string[], args?: any[] }) {
+    return this._cmd('exec',
+      (options.flags || []),
+      [this.container].concat((options.args || []))
+    );
+  }
+
+  async run(...args: any[]): Promise<ExecutionResult> {
+
     const options = isPlainObject(args[0]) ? args[0] : {
       args
     };
@@ -185,9 +223,7 @@ export class DockerContainer {
 
       console.debug('Running', [...flags, this.image, ...(options.args || [])]);
 
-      [this._proc, prom] = spawn([...flags, this.image, ...(options.args || []).map((z: any) => `${z}`)].join(' '), {
-        shell: false,
-      });
+      [this._proc, prom] = this._cmd('run', flags, [this.image].concat(options.args || []));
 
       this._proc.unref();
     } catch (e) {
@@ -197,11 +233,7 @@ export class DockerContainer {
       throw e;
     }
 
-    if (isPlainObject(args[0])) {
-      return [this._proc, prom];
-    } else {
-      return prom;
-    }
+    return prom;
   }
 
   async validate() {
