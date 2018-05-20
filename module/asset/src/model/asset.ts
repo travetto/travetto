@@ -24,7 +24,6 @@ export class Asset {
 
   static fields = ['filename', 'length', 'contentType', 'path', 'metadata', 'stream'];
 
-  _id?: string;
   stream?: NodeJS.ReadableStream;
   length: number;
   filename: string;
