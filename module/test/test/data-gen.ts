@@ -6,6 +6,13 @@ import { Schema, SchemaRegistry } from '@travetto/schema';
 import * as assert from 'assert';
 
 @Schema()
+class Tag {
+  id: string;
+  name: string;
+  createdDate: Date;
+}
+
+@Schema()
 class Address {
   street1: string;
   street2?: string;
@@ -21,6 +28,8 @@ class User {
   email: string;
   phone: string;
   dob?: Date;
+
+  tags: Tag[];
 
   address: Address;
 }
