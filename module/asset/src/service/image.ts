@@ -31,7 +31,9 @@ export class ImageService {
 
   @Cacheable({
     max: 1000,
-    dispose: (key: string, n: string) => fsUnlinkAsync(n).catch(e => null)
+    dispose: (key: string, n: Promise<string | undefined>) => {
+      n.then(v => v ? fsUnlinkAsync(v) : undefined).catch(err => { });
+    }
   })
   async generateAndStoreImage(filename: string, options: { w: number, h: number }, hasTags?: string[]): Promise<string | undefined> {
     const info = await this.assetService.get(filename, hasTags);
