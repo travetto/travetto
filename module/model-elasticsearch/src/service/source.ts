@@ -37,11 +37,11 @@ function has$In(o: any): o is { $in: any[] } {
 
 export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
   if (has$And(o)) {
-    return { $and: o.$and.map(x => extractWhereClause<T>(x)) };
+    return { bool: { must: o.$and.map(x => extractWhereClause<T>(x)) } };
   } else if (has$Or(o)) {
-    return { $or: o.$or.map(x => extractWhereClause<T>(x)) };
+    return { bool: { should: o.$or.map(x => extractWhereClause<T>(x)), minimum_should_match: 1 } };
   } else if (has$Not(o)) {
-    return { $nor: [extractWhereClause<T>(o.$not)] };
+    return { bool: { must_not: extractWhereClause<T>(o.$not) } };
   } else {
     return extractSimple(o);
   }
@@ -81,18 +81,23 @@ export class ModelElasticsearchSource extends ModelSource {
 
   transformSearchQuery<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
     const conf = ModelRegistry.get(cls);
-    const res: es.SearchParams = this.transformQuery(cls, query);
+    const res: es.SearchParams = {
+      body: this.transformQuery(cls, query)
+    }
 
     const sort = options.sort || conf.defaultSort;
 
     if (sort) {
-      if (Array.isArray(sort) || typeof sort === 'string') {
-        res.sort = sort;
-      } else {
-        res.sort = Object.entries(sort).map(x =>
-          `${x[0]}:${x[1] > 0 ? 'asc' : 'desc'}`
-        );
-      }
+      res.sort = sort.map(x => {
+        const o = extractSimple(x);
+        const k = Object.keys(o)[0];
+        const v = o[k] as (boolean | -1 | 1);
+        if (v === 1 || v === true) {
+          return k;
+        } else {
+          return `-${k}`;
+        }
+      });
     }
 
     if (options.offset) {
@@ -115,8 +120,6 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
-    const col = await this.getCollection(cls);
-
     const projected = extractWhereClause(query.where || {});
 
     let cursor = col.find(projected);
@@ -133,11 +136,15 @@ export class ModelElasticsearchSource extends ModelSource {
     if (query.offset) {
       cursor = cursor.skip(Math.trunc(query.offset) || 0);
     }
-    const res = await cursor.toArray() as any as U[];
-    for (const r of res) {
-      this.postLoad(undefined as any, r as any);
+
+    const col = await this.client.search(projected);
+
+    const out: U[] = [];
+    for (const r of col.hits.hits) {
+      const rd = this.postLoad<U>(undefined as any, r._source as any);
+      out.push(rd);
     }
-    return res;
+    return out;
   }
 
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
@@ -163,33 +170,29 @@ export class ModelElasticsearchSource extends ModelSource {
   async init() {
     this.client = new es.Client(deepAssign({}, this.config));
     await this.client.cluster.health({});
+
+    // PreCreate indexes
   }
 
   translateQueryIds<T extends ModelCore, U extends Query<T>>(query: U) {
     const where = (query.where || {});
     if (hasId(where)) {
       const val = where.id;
+      delete where.id;
       if (Array.isArray(val) || typeof val === 'string') {
-        let res: (mongo.ObjectID | mongo.ObjectID[]);
-        if (typeof val === 'string') {
-          res = new mongo.ObjectID(val);
-        } else {
-          res = val.map(x => typeof x === 'string' ? new mongo.ObjectID(x) : x);
-        }
-        delete where.id;
-        (where as any)._id = res;
+        (where as any)._id = val;
       } else if (has$In(val)) {
-        const res: { $in: (string | mongo.ObjectID)[] } = val;
-        (where as any)._id = { $in: res.$in.map(x => typeof x === 'string' ? new mongo.ObjectID(x) : x) };
+        const res: { $in: string[] } = val;
+        (where as any)._id = { $in: res.$in };
       }
     }
     return query;
   }
 
   async resetDatabase() {
-    //await this.client.indices.delete({
-    //  index: ''
-    //});
+    await this.client.indices.delete({
+      index: `${this.config.namespace}_*`
+    });
     await this.init();
   }
 

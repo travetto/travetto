@@ -3,9 +3,9 @@ import { Config } from '@travetto/config';
 @Config('model.elasticsearch')
 export class ModelElasticsearchConfig {
   hosts = ['127.0.0.1'];
-  cluster = 'app';
   port = 9200;
   options = {};
+  namespace = 'app';
 
   postConstruct() {
     console.log('Constructed', this);
