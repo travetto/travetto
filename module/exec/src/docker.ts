@@ -128,11 +128,12 @@ export class DockerContainer {
     throw new Error('Could not acquire port');
   }
 
-  async run(...args: any[]): Promise<ExecutionResult>
-  async run(options: { args?: any[], flags?: string[], stdin?: string | NodeJS.ReadableStream | Buffer }) {
-    if (!isPlainObject(options)) {
-      options = { args: options }
-    }
+  run(first: string, ...args: any[]): Promise<ExecutionResult>
+  run(options: { args?: any[], flags?: string[] }): Promise<[CommonProcess, Promise<ExecutionResult>]>
+  async run(...args: any[]): Promise<ExecutionResult | [CommonProcess, Promise<ExecutionResult>]> {
+    const options = isPlainObject(args[0]) ? args[0] : {
+      args
+    };
 
     // Kill existing
     await this.destroy();
@@ -177,18 +178,10 @@ export class DockerContainer {
 
       console.debug('Running', [...finalArgs, this.image, ...(options.args || [])]);
 
-      [this._proc, prom] = spawn([...finalArgs, this.image, ...(options.args || []).map(z => `${z}`)].join(' '), {
+      [this._proc, prom] = spawn([...finalArgs, this.image, ...(options.args || []).map((z: any) => `${z}`)].join(' '), {
         shell: false,
       });
 
-      if (options.stdin) {
-        const stdin = this._proc.stdin;
-        if (typeof options.stdin === 'string' || options.stdin instanceof Buffer) {
-          stdin.write(options.stdin);
-        } else {
-          options.stdin.pipe(stdin);
-        }
-      }
       this._proc.unref();
     } catch (e) {
       if (e.killed) {
@@ -197,7 +190,11 @@ export class DockerContainer {
       throw e;
     }
 
-    return prom;
+    if (isPlainObject(args[0])) {
+      return [this._proc, prom];
+    } else {
+      return prom;
+    }
   }
 
   async validate() {

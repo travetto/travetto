@@ -11,12 +11,15 @@ async function test() {
   console.log('Hello');
 
   try {
-    const prom = await container.run({
-      args: ['gm', 'convert', '-resize 100x50 - -'],
-      stdin: createReadStream(path.resolve(`${os.homedir}/Documents/download.jpeg`))
+    const [proc, prom] = await container.run({
+      args: ['gm', 'convert', '-resize 100x50 - -']
     });
 
-    console.log(prom.stdout);
+    createReadStream(path.resolve(`${os.homedir}/Documents/download.jpeg`)).pipe(proc.stdin);
+
+    proc.stdout.pipe(process.stdout);
+
+    await prom;
   } catch (e) {
     console.log('Error', e);
   }
