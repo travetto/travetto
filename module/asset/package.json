@@ -1,31 +1,31 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "dependencies": {
-    "@travetto/cache": "0.x.x",
-    "@travetto/di": "0.x.x",
-    "@travetto/exec": "0.x.x",
-    "@travetto/util": "0.x.x",
-    "@types/file-type": "^5.2.1",
-    "@types/mime": "^2.0.0",
-    "@types/os-tmpdir": "^1.0.0",
-    "file-type": "^7.6.0",
+    "@travetto/cache": "0.x.x", 
+    "@travetto/di": "0.x.x", 
+    "@travetto/exec": "0.x.x", 
+    "@travetto/util": "0.x.x", 
+    "@types/file-type": "^5.2.1", 
+    "@types/mime": "^2.0.0", 
+    "@types/os-tmpdir": "^1.0.0", 
+    "file-type": "^7.6.0", 
     "mime": "^2.2.0"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/asset",
+  }, 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/asset", 
   "repository": {
     "url": "https://github.com/travetto/asset.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.13"
+  }, 
+  "version": "0.0.14"
 }
