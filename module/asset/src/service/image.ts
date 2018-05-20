@@ -20,7 +20,7 @@ export class ImageService {
     max: 1000,
     dispose: (key: string, n: string) => fsUnlinkAsync(n).catch(e => null)
   })
-  async generateAndStoreImage(filename: string, options: { w: number, h: number }, filter?: AssetMetadata): Promise<string | undefined> {
+  async generateAndStoreImage(filename: string, options: { w: number, h: number }, filter?: Partial<AssetMetadata>): Promise<string | undefined> {
     const info = await this.assetService.get(filename, filter);
     if (!info.stream) {
       throw new Error('Stream not found');
@@ -35,7 +35,7 @@ export class ImageService {
     }
   }
 
-  async getImage(filename: string, options: { w: number, h: number }, filter?: AssetMetadata): Promise<Asset> {
+  async getImage(filename: string, options: { w: number, h: number }, filter?: Partial<AssetMetadata>): Promise<Asset> {
     const file = await this.generateAndStoreImage(filename, options, filter);
     const info = await this.assetService.get(filename, filter);
     if (file) {

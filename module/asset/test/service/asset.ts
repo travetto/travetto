@@ -24,14 +24,14 @@ class MockAssetSource extends AssetSource {
     return fs.createReadStream(this.streams.get(filename)!);
   }
 
-  async info(filename: string, filter?: any): Promise<Asset> {
+  async info(filename: string, filter?: Partial<AssetMetadata>): Promise<Asset> {
     if (!this.files.has(filename)) {
       throw new Error('Not found');
     }
     return new Asset(this.files.get(filename)!);
   }
 
-  find(filter: AssetMetadata): Promise<Asset[]> {
+  find(filter: Partial<AssetMetadata>): Promise<Asset[]> {
     throw new Error('Method not implemented.');
   }
 

@@ -16,7 +16,7 @@ export class AssetService {
     return await this.source.remove(path);
   }
 
-  async find(filter: AssetMetadata) {
+  async find(filter: Partial<AssetMetadata>) {
     return await this.source.find(filter);
   }
 
@@ -55,7 +55,7 @@ export class AssetService {
     return await Promise.all(uploads.map(u => this.save(u)));
   }
 
-  async get(filename: string, filter?: AssetMetadata): Promise<Asset> {
+  async get(filename: string, filter?: Partial<AssetMetadata>): Promise<Asset> {
     const info = await this.source.info(filename, filter);
     if (info.metadata.title) {
       info.filename = info.metadata.title;
