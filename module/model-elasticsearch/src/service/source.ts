@@ -1,91 +1,89 @@
 import * as es from 'elasticsearch';
-import * as flat from 'flat';
-import * as _ from 'lodash';
-import * as uuid from 'uuid';
 
-import { ModelSource, IndexConfig, Query, QueryOptions, BulkState, BulkResponse, ModelRegistry, ModelCore, isSubQuery } from '@travetto/model';
+import {
+  ModelSource, IndexConfig, Query,
+  QueryOptions, BulkState, BulkResponse,
+  ModelRegistry, ModelCore,
+  PageableModelQuery,
+  WhereClause,
+  SelectClause,
+  SortClause,
+  ModelQuery
+} from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { ModelElasticsearchConfig } from './config';
 import { Class } from '@travetto/registry';
+import { BaseError, isPlainObject, deepAssign } from '@travetto/base';
 
-function flatten<T>(input: T[][]): T[] {
-  return input.reduce((acc, arr) => acc.concat(arr), []);
+function has$And(o: any): o is ({ $and: WhereClause<any>[]; }) {
+  return '$and' in o;
 }
 
-@Injectable({ target: ModelSource })
+function has$Or(o: any): o is ({ $or: WhereClause<any>[]; }) {
+  return '$or' in o;
+}
+
+function has$Not(o: any): o is ({ $not: WhereClause<any>; }) {
+  return '$not' in o;
+}
+
+function hasId<T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) {
+  return 'id' in o;
+}
+
+function has$In(o: any): o is { $in: any[] } {
+  return '$in' in o && Array.isArray(o.$in);
+}
+
+export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
+  if (has$And(o)) {
+    return { $and: o.$and.map(x => extractWhereClause<T>(x)) };
+  } else if (has$Or(o)) {
+    return { $or: o.$or.map(x => extractWhereClause<T>(x)) };
+  } else if (has$Not(o)) {
+    return { $nor: [extractWhereClause<T>(o.$not)] };
+  } else {
+    return extractSimple(o);
+  }
+}
+
+export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
+  const out: { [key: string]: any } = {};
+  const sub = o as { [key: string]: any };
+  const keys = Object.keys(sub);
+  for (const key of keys) {
+    const subpath = `${path}${key}`;
+    if (isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
+      Object.assign(out, extractSimple(sub[key], `${subpath}.`));
+    } else {
+      out[subpath] = sub[key];
+    }
+  }
+  return out;
+}
+
 export class ModelElasticsearchSource extends ModelSource {
 
   private client: es.Client;
-  private indices: { [key: string]: IndexConfig[] } = {};
+  private indices: { [key: string]: IndexConfig<any>[] } = {};
 
   constructor(private config: ModelElasticsearchConfig) {
     super();
   }
 
-  postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
-    if ((o as any)._id) {
-      o.id = (o as any)._id;
-      delete (o as any)._id;
-
-      if ('_type' in o) {
-        o.type = (o as any)['_type'];
-        delete (o as any)['_type'];
-      }
-    }
-    return o;
-  }
-
-  prePersist<T extends ModelCore>(cls: Class<T>, o: T) {
-    if (o.id) {
-      (o as any)._id = o.id;
-      delete o.id;
-      if (o.type) {
-        (o as any)._type = o.type;
-        delete o.type;
-      }
-    }
-    return o;
-  }
-
-  async postConstruct() {
-    await this.init();
-  }
-
-  async init() {
-    this.client = await new es.Client(this.config);
-  }
-
-  getIdentity<T extends ModelCore>(cls: Class<T>): { type: string, index: string } {
-    let conf = ModelRegistry.get(cls);
-    let ret: { [key: string]: string } = {
-      index: conf.collection || cls.name,
-    };
-    ret.type = conf.discriminator || ret.index;
-    return ret as { type: string, index: string };
-  }
-
-  async resetDatabase() {
-    await this.client.indices.delete({
-      index: ''
-    });
-    await this.init();
-  }
-
-
-  transformQuery<T>(cls: Class<T>, query: Query) {
-    let conf = ModelRegistry.get(cls);
-    let res = {
+  transformQuery<T>(cls: Class<T>, query: Query<T>) {
+    const conf = ModelRegistry.get(cls);
+    return {
       ...this.getIdentity(cls),
       body: {}
-    }
-    return res;
+    };
   }
 
-  transformSearchQuery<T>(cls: Class<T>, query: Query, options: QueryOptions = {}) {
-    let conf = ModelRegistry.get(cls);
-    let res: es.SearchParams = this.transformQuery(cls, query);
+  transformSearchQuery<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
+    const conf = ModelRegistry.get(cls);
+    const res: es.SearchParams = this.transformQuery(cls, query);
 
-    let sort = options.sort || conf.defaultSort;
+    const sort = options.sort || conf.defaultSort;
 
     if (sort) {
       if (Array.isArray(sort) || typeof sort === 'string') {
@@ -108,35 +106,118 @@ export class ModelElasticsearchSource extends ModelSource {
     return res;
   }
 
-  async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: Query) {
-    let objs = await this.client.search<T>({
+  getIdentity<T extends ModelCore>(cls: Class<T>): { type: string, index: string } {
+    const conf = ModelRegistry.get(cls);
+    return {
+      index: conf.collection || cls.name,
+      type: conf.discriminator || conf.collection || cls.name
+    };
+  }
+
+  async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
+    const col = await this.getCollection(cls);
+
+    const projected = extractWhereClause(query.where || {});
+
+    let cursor = col.find(projected);
+    if (query.select) {
+      cursor.project(Object.keys(query.select)[0].startsWith('$') ? query.select : extractSimple(query.select));
+    }
+
+    if (query.sort) {
+      cursor = cursor.sort(query.sort.map(x => extractSimple(x)));
+    }
+
+    cursor = cursor.limit(Math.trunc(query.limit || 200) || 200);
+
+    if (query.offset) {
+      cursor = cursor.skip(Math.trunc(query.offset) || 0);
+    }
+    const res = await cursor.toArray() as any as U[];
+    for (const r of res) {
+      this.postLoad(undefined as any, r as any);
+    }
+    return res;
+  }
+
+  postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
+    if ((o as any)._id) {
+      o.id = (o as any)._id as string;
+      delete (o as any)._id;
+    }
+    return o;
+  }
+
+  prePersist<T extends ModelCore>(cls: Class<T>, o: T) {
+    if (o.id) {
+      (o as any)._id = o.id as string;
+      delete o.id;
+    }
+    return o;
+  }
+
+  async postConstruct() {
+    await this.init();
+  }
+
+  async init() {
+    this.client = new es.Client(deepAssign({}, this.config));
+    await this.client.cluster.health({});
+  }
+
+  translateQueryIds<T extends ModelCore, U extends Query<T>>(query: U) {
+    const where = (query.where || {});
+    if (hasId(where)) {
+      const val = where.id;
+      if (Array.isArray(val) || typeof val === 'string') {
+        let res: (mongo.ObjectID | mongo.ObjectID[]);
+        if (typeof val === 'string') {
+          res = new mongo.ObjectID(val);
+        } else {
+          res = val.map(x => typeof x === 'string' ? new mongo.ObjectID(x) : x);
+        }
+        delete where.id;
+        (where as any)._id = res;
+      } else if (has$In(val)) {
+        const res: { $in: (string | mongo.ObjectID)[] } = val;
+        (where as any)._id = { $in: res.$in.map(x => typeof x === 'string' ? new mongo.ObjectID(x) : x) };
+      }
+    }
+    return query;
+  }
+
+  async resetDatabase() {
+    //await this.client.indices.delete({
+    //  index: ''
+    //});
+    await this.init();
+  }
+
+  async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T>) {
+    const objs = await this.client.search<T>({
       _sourceInclude: ['_id'],
       ...this.transformSearchQuery(cls, query)
     })
     return objs.hits.hits.map(x => this.postLoad(cls, x._source));
   }
 
-  async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}): Promise<T[]> {
-    let results = await this.client.search<T>(
-      this.transformSearchQuery(cls, query, options),
+  async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {
+    const results = await this.client.search<T>(
+      this.transformSearchQuery(cls, query),
     )
-    let res = results.hits.hits.map(r => this.postLoad(cls, r._source));
+    const res = results.hits.hits.map(r => this.postLoad(cls, r._source));
     return res;
   }
 
-  async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}): Promise<number> {
-    let results = await this.client.search({
+  async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
+    const results = await this.client.search({
       ...this.transformSearchQuery(cls, query),
       size: 0
     })
     return results.hits.total;
   }
-
-  async getByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, options: QueryOptions = {}, failOnMany = true): Promise<T> {
-    let res = await this.getAllByQuery(cls, query, {
-      limit: 200,
-      ...options
-    });
+  async getByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}, failOnMany = true): Promise<T> {
+    const res = await this.getAllByQuery(cls, { limit: 200, ...query });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
       throw new Error(`Invalid number of results for find by id: ${res ? res.length : res}`);
     }
@@ -144,21 +225,24 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
-    return await this.getByQuery(cls, {
-      _id: id
-    });
+    const query: PageableModelQuery<ModelCore> = {
+      where: {
+        id
+      }
+    }
+    return await this.getByQuery<T>(cls, query as PageableModelQuery<T>);
   }
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
-    let res = await this.client.delete({
+    const res = await this.client.delete({
       ...this.getIdentity(cls),
       id
     })
     return res.found ? 1 : 0;
   }
 
-  async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}): Promise<number> {
-    let res = await this.client.deleteByQuery({
+  async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
+    const res = await this.client.deleteByQuery({
       ...this.transformQuery(cls, query)
     })
     return res.deleted || 0;
@@ -167,26 +251,23 @@ export class ModelElasticsearchSource extends ModelSource {
   async save<T extends ModelCore>(cls: Class<T>, o: T, removeId: boolean = true): Promise<T> {
     delete o.id;
 
-    let id = uuid.v4();
-    let res = await this.client.create({
+    const res = await this.client.create({
       ...this.getIdentity(cls),
-      id,
       body: o
     })
-    o.id = id;
+    o.id = res._id;
     return o;
   }
 
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]): Promise<T[]> {
-    for (let x of objs) {
-      (x as any)._id = uuid.v4();
+    for (const x of objs) {
       delete x.id;
     }
 
-    let res = await this.client.bulk({
+    const res = await this.client.bulk({
       index: this.getIdentity(cls).index,
       body: objs.map(x => [
-        { _type: this.getIdentity(x.constructor as Class<T>).type, _id: (x as any)._id },
+        { _type: this.getIdentity(x.constructor as Class<T>).type, _id: (x as any)._id }, // TODO: Figure out?
         x
       ]),
     });
@@ -206,9 +287,9 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
-    let id = data.id;
+    const id = data.id;
     delete data.id;
-    let update = this.client.update({
+    const update = this.client.update({
       method: 'update',
       ...this.getIdentity(cls),
       id,
@@ -217,24 +298,25 @@ export class ModelElasticsearchSource extends ModelSource {
     return this.getById(cls, data.id);
   }
 
-  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: Query, data: Partial<T>): Promise<T> {
+  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<T> {
     if (!data.id) {
-      let item = await this.getByQuery(cls, query);
+      const item = await this.getByQuery(cls, query);
       data.id = item.id;
     }
     return await this.updatePartial(cls, data as any);
   }
 
-  async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: Query = {}, data: Partial<T>) {
+  async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, data: Partial<T>) {
+    // TODO: finish
     let finalData: any = data;
 
     if (Object.keys(data)[0].charAt(0) !== '$') {
-      finalData = { $set: flat(data) };
+      finalData = { $set: extractSimple(data) };
     }
 
-    let script = '';
+    const script = '';
 
-    let res = await this.client.updateByQuery({
+    const res = await this.client.updateByQuery({
       ...this.getIdentity(cls),
       body: {
         query: this.transformSearchQuery(cls, query),
@@ -249,7 +331,7 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
-    let res = await this.client.bulk({
+    /*const res = await this.client.bulk({
       body: flatten<object>([
         (state.delete || []).map(x => {
           return [
@@ -265,9 +347,9 @@ export class ModelElasticsearchSource extends ModelSource {
       ])
     });
 
-    let count = (state.delete || []).length + (state.upsert || []).length;
+    const count = (state.delete || []).length + (state.upsert || []).length;
 
-    let out: BulkResponse = {
+    const out: BulkResponse = {
       count: {
         delete: 0,
         update: 0,
@@ -276,8 +358,8 @@ export class ModelElasticsearchSource extends ModelSource {
     };
 
     if (count > 0) {
-      let res = await bulk.execute({});
-      let updatedCount = 0;
+      const res = await bulk.execute({});
+      const updatedCount = 0;
 
       if (out.count) {
         out.count.delete = res.nRemoved;
@@ -291,5 +373,7 @@ export class ModelElasticsearchSource extends ModelSource {
     }
 
     return out;
+    */
+    return null as any;
   }
 }

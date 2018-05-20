@@ -5,15 +5,12 @@
   },
   "dependencies": {
     "@travetto/model": "0.x.x",
-    "@types/elasticsearch": "^5.0.17",
-    "@types/flat": "0.0.28",
-    "@types/uuid": "^3.4.2",
-    "elasticsearch": "^13.3.1",
-    "flat": "^4.0.0",
-    "uuid": "^3.1.0"
+    "@types/elasticsearch": "^5.0.23",
+    "elasticsearch": "^14.2.2"
   },
   "description": "",
   "devDependencies": {
+    "@travetto/util": "0.x.x",
     "@travetto/test": "0.x.x"
   },
   "license": "MIT",
@@ -22,6 +19,8 @@
   "repository": {
     "url": "https://github.com/travetto/model-elasticsearch.git"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test"
+  },
   "version": "0.0.1"
 }
