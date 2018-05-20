@@ -216,9 +216,7 @@ export class DockerContainer {
     await this.initTemp();
 
     try {
-      const flags = this.getFlags();
-
-      const { proc, prom } = this._cmd('run', `--name=${this.container}`, flags, [this.image].concat(args));
+      const { proc, prom } = this._cmd('run', `--name=${this.container}`, ...this.getFlags(), this.image, ...(args || []));
       proc.unref();
       this._proc = proc;
       return prom;
