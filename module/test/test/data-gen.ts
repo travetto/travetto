@@ -47,5 +47,11 @@ class DataGenerationSuite {
     const user = GenerateSchemaData.generate(User);
 
     assert.ok(user);
+
+    assert(user instanceof User);
+
+    assert.ok(user.address);
+
+    assert(user.address instanceof Address);
   }
 }
