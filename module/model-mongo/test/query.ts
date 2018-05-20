@@ -17,7 +17,7 @@ export class QueryTest {
         {
           $or: [{ name: 5 }, { age: 10 }]
         },
-        { g: { z: ['a', 'b', 'c'] } },
+        { g: { z: 'a' } },
         { a: { d: { $gt: 20 } } }
       ]
     });
@@ -32,6 +32,6 @@ export class QueryTest {
 
     assert(out.$and[4]['a.d'].$gt === 20);
 
-    assert(out.$and[3]['g.z'].length === 3)
+    assert(out.$and[3]['g.z'] === 'a')
   }
 }
