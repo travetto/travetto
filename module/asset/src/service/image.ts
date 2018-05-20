@@ -18,7 +18,15 @@ export class ImageService {
   private gm: DockerContainer;
 
   constructor(private assetService: AssetService) {
-    this.gm = new DockerContainer('rafakato/alpine-graphicsmagick');
+  }
+
+  async postConstruct() {
+    this.gm = new DockerContainer('rafakato/alpine-graphicsmagick')
+      .forceDestroyOnShutdown()
+      .setInteractive(true);
+
+    await this.gm.create([], ['/bin/sh']);
+    await this.gm.start();
   }
 
   @Cacheable({
@@ -32,9 +40,10 @@ export class ImageService {
     }
     if (options && (options.w || options.h)) {
       const filePath = AssetUtil.generateTempFile(info.filename.split('.').pop() as string);
-      const [proc, prom] = await this.gm.run({
-        args: ['gm', 'convert', '-resize', `${options.w}x${options.h}`, '-auto-orient']
-      });
+      const [proc, prom] = await this.gm.exec(['-i'], [
+        'gm', 'convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-'
+      ]);
+      info.stream.pipe(proc.stdin);
       proc.stdout.pipe(fs.createWriteStream(filePath));
       await prom;
       return filePath;
