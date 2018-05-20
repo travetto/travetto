@@ -32,6 +32,7 @@ export class DockerContainer {
   public runAway: boolean = false;
   public evict: boolean = false;
   public interactive: boolean = false;
+  public tty: boolean = false;
 
   private env: { [key: string]: string } = {};
   private ports: { [key: string]: number } = {};
@@ -40,12 +41,19 @@ export class DockerContainer {
 
   private tempVolumes: { [key: string]: string } = {}
 
+  private deleteOnFinish = false;
+
   constructor(private image: string, container?: string) {
     this.container = container || `${process.env.DOCKER_NS || image}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
   }
 
   forceDestroyOnShutdown() {
     Shutdown.onShutdown(this.container, () => this.forceDestroy());
+    return this;
+  }
+
+  setDeleteOnFinish(yes: boolean) {
+    this.deleteOnFinish = yes;
     return this;
   }
 
@@ -85,6 +93,11 @@ export class DockerContainer {
 
   setInteractive(on: boolean) {
     this.interactive = on;
+    return this;
+  }
+
+  setTTY(on: boolean) {
+    this.tty = on;
     return this;
   }
 
@@ -136,8 +149,14 @@ export class DockerContainer {
       if (this.workingDir) {
         finalArgs.push('-w', this.workingDir);
       }
+      if (this.deleteOnFinish) {
+        finalArgs.push('--rm');
+      }
       if (this.interactive) {
-        finalArgs.push('-it');
+        finalArgs.push('-i');
+      }
+      if (this.tty) {
+        finalArgs.push('-t');
       }
       for (const k of Object.keys(this.volumes)) {
         finalArgs.push('-v', `${k}:${this.volumes[k]}`)
