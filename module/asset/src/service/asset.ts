@@ -16,10 +16,6 @@ export class AssetService {
     return await this.source.remove(path);
   }
 
-  async find(filter: Partial<AssetMetadata>) {
-    return await this.source.find(filter);
-  }
-
   async save(asset: Asset, upsert = true, removeOnComplete = true) {
     try {
       let res: Asset | undefined;
@@ -55,8 +51,16 @@ export class AssetService {
     return await Promise.all(uploads.map(u => this.save(u)));
   }
 
-  async get(filename: string, filter?: Partial<AssetMetadata>): Promise<Asset> {
-    const info = await this.source.info(filename, filter);
+  async get(filename: string, haveTags?: string[]): Promise<Asset> {
+    const info = await this.source.info(filename);
+    if (haveTags) {
+      const fin = new Set(info.metadata.tags)
+      for (const t of haveTags) {
+        if (!fin.has(t)) {
+          throw new Error();
+        }
+      }
+    }
     if (info.metadata.title) {
       info.filename = info.metadata.title;
     }

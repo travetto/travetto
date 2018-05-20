@@ -13,11 +13,11 @@ export interface AssetFile {
 }
 
 export interface AssetMetadata {
-  name: string,
-  title: string,
-  hash: string,
-  createdDate: Date,
-  tags?: string[]
+  name: string;
+  title: string;
+  hash: string;
+  createdDate: Date;
+  tags?: string[];
 }
 
 export class Asset {
