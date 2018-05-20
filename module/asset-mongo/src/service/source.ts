@@ -47,15 +47,6 @@ export class AssetMongoSource extends AssetSource {
     throw new Error('Unable to find written file');
   }
 
-  async update(file: Asset): Promise<Asset> {
-    const update = await this.client.files.findOneAndUpdate({ filename: file.filename }, {
-      $addToSet: { 'metadata.tags': { $each: file.metadata.tags } }
-    }, {
-        returnOriginal: false
-      });
-    return new Asset(update.value);
-  }
-
   async read(filename: string): Promise<NodeJS.ReadableStream> {
     return this.client.createReadStream({ filename });
   }
