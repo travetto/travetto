@@ -161,39 +161,51 @@ export class DockerContainer {
     return flags;
   }
 
+  async initTemp() {
+    // Make temp dirs
+    const mkdirAll = Object.keys(this.tempVolumes).map(x => mkdir(x).catch(e => { }));
+    await Promise.all(mkdirAll);
+  }
+
   private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
     const cmd = ([
       this.cmd,
       op,
       ...(args || []).map((x: any) => `${x}`)
     ]).join(' ');
-    return spawn(cmd, { shell: false });
+    const [proc, prom] = spawn(cmd, { shell: false });
+    if (op !== 'run' && op !== 'exec') {
+      prom.catch(e => { this.evict = true; });
+    }
+    return { proc, prom }
   }
 
   async create(flags?: string[], args?: string[]) {
-    const [proc, prom] = this._cmd('create', '--name', this.container, ...(flags || []), this.image, ...(args || []));
-    return prom;
+    const allFlags = this.getFlags(flags);
+    return this._cmd('create', '--name', this.container, ...allFlags, this.image, ...(args || [])).prom;
   }
 
   async start(flags?: string[], args?: string[]) {
-    const [proc, prom] = this._cmd('start', ...(flags || []), this.container, ...(args || []));
-    return prom;
+    await this.initTemp();
+    return this._cmd('start', ...(flags || []), this.container, ...(args || [])).prom;
   }
 
   async stop(flags?: string[], args?: string[]) {
-    const [proc, prom] = this._cmd('stop', ...(flags || []), this.container, ...(args || []));
-    return prom;
+    return this._cmd('stop', ...(flags || []), this.container, ...(args || [])).prom;
   }
 
   async exec(flags?: string[], args?: string[]) {
-    return this._cmd('exec', ...(flags || []), this.container, ...(args || []));
+    const { proc, prom } = this._cmd('exec', ...(flags || []), this.container, ...(args || []));
+    this._proc = proc;
+    prom.catch(e => {
+      delete this._proc;
+    }).then(v => {
+      delete this._proc;
+    });
+    return [proc, prom];
   }
 
   async run(...args: any[]): Promise<ExecutionResult> {
-
-    const options = isPlainObject(args[0]) ? args[0] : {
-      args
-    };
 
     if (!this.deleteOnFinish) {
       // Kill existing
@@ -201,26 +213,21 @@ export class DockerContainer {
       await this.removeDanglingVolumes();
     }
 
-    // Make temp dirs
-    const mkdirAll = Object.keys(this.tempVolumes).map(x => mkdir(x).catch(e => { }));
-    await Promise.all(mkdirAll);
-
-    let prom;
+    await this.initTemp();
 
     try {
-      const flags = this.getFlags(options.flags);
+      const flags = this.getFlags();
 
-      [this._proc, prom] = this._cmd('run', flags, [this.image].concat(args));
-
-      this._proc.unref();
+      const { proc, prom } = this._cmd('run', flags, [this.image].concat(args));
+      proc.unref();
+      this._proc = proc;
+      return prom;
     } catch (e) {
       if (e.killed) {
         this.evict = true;
       }
       throw e;
     }
-
-    return prom;
   }
 
   async validate() {
