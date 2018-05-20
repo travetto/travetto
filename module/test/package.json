@@ -1,36 +1,34 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
+    "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
-  }, 
+  },
   "bin": {
     "travetto-test": "bin/travetto-test.js"
-  }, 
+  },
   "dependencies": {
-    "@travetto/exec": "0.x.x", 
-    "@travetto/registry": "0.x.x", 
-    "@types/faker": "^4.1.2", 
-    "@types/js-yaml": "^3.11.1", 
-    "@types/minimist": "^1.2.0", 
-    "faker": "^4.1.0", 
-    "js-yaml": "https://github.com/arciisine/js-yaml.git#3.11.0-slim", 
+    "@travetto/exec": "0.x.x",
+    "@travetto/registry": "0.x.x",
+    "@types/js-yaml": "^3.11.1",
+    "@types/minimist": "^1.2.0",
+    "js-yaml": "https://github.com/arciisine/js-yaml.git#3.11.0-slim",
     "minimist": "^1.2.0"
-  }, 
-  "description": "", 
+  },
+  "description": "",
   "devDependencies": {
     "@travetto/test": "file://."
-  }, 
-  "license": "MIT", 
-  "main": "index.ts", 
-  "name": "@travetto/test", 
+  },
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/test",
   "peerDependencies": {
     "@travetto/schema": "0.x.x"
-  }, 
+  },
   "repository": {
     "url": "https://github.com/travetto/test.git"
-  }, 
+  },
   "scripts": {
     "test": "./bin/travetto-test.js"
-  }, 
+  },
   "version": "0.0.66"
 }
