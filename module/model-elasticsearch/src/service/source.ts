@@ -15,25 +15,30 @@ import { ModelElasticsearchConfig } from './config';
 import { Class } from '@travetto/registry';
 import { BaseError, isPlainObject, deepAssign } from '@travetto/base';
 
-function has$And(o: any): o is ({ $and: WhereClause<any>[]; }) {
-  return '$and' in o;
-}
+type ESBulkItemPayload = {
+  _id: string;
+  status: 201 | 400 | 409 | 404 | 200;
+  result: 'created' | 'updated' | 'deleted' | 'not_found';
+  error?: {
+    type: string;
+    reason: string;
+  }
+};
 
-function has$Or(o: any): o is ({ $or: WhereClause<any>[]; }) {
-  return '$or' in o;
-}
+type EsBulkResponse = {
+  errors: boolean;
+  items: {
+    index?: ESBulkItemPayload;
+    update?: ESBulkItemPayload;
+    delete?: ESBulkItemPayload;
+  }[]
+};
 
-function has$Not(o: any): o is ({ $not: WhereClause<any>; }) {
-  return '$not' in o;
-}
-
-function hasId<T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) {
-  return 'id' in o;
-}
-
-function has$In(o: any): o is { $in: any[] } {
-  return '$in' in o && Array.isArray(o.$in);
-}
+const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
+const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
+const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
+const hasId = <T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) => 'id' in o;
+const has$In = (o: any): o is { $in: any[] } => '$in' in o && Array.isArray(o.$in);
 
 export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
   if (has$And(o)) {
@@ -79,16 +84,34 @@ export class ModelElasticsearchSource extends ModelSource {
     };
   }
 
-  transformSearchQuery<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
+  getSearchObject<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
     const conf = ModelRegistry.get(cls);
-    const res: es.SearchParams = {
+
+    const search: es.SearchParams = {
       body: this.transformQuery(cls, query)
     }
 
-    const sort = options.sort || conf.defaultSort;
+    const sort = query.sort || conf.defaultSort;
+
+    if (query.select) {
+      const simp = extractSimple(query.select);
+      const include: string[] = [];
+      const exclude: string[] = [];
+      for (const k of Object.keys(simp)) {
+        const nk = k === '_id' ? 'id' : k;
+        const v: (1 | 0 | boolean) = simp[k];
+        if (v === 0 || v === false) {
+          exclude.push(k);
+        } else {
+          include.push(k);
+        }
+      }
+      search._sourceExclude = exclude;
+      search._sourceInclude = include;
+    }
 
     if (sort) {
-      res.sort = sort.map(x => {
+      search.sort = sort.map(x => {
         const o = extractSimple(x);
         const k = Object.keys(o)[0];
         const v = o[k] as (boolean | -1 | 1);
@@ -100,50 +123,32 @@ export class ModelElasticsearchSource extends ModelSource {
       });
     }
 
-    if (options.offset) {
-      res.from = options.offset;
+    if (query.offset) {
+      search.from = query.offset;
     }
 
-    if (options.limit) {
-      res.size = options.limit;
+    if (query.limit) {
+      search.size = query.limit;
     }
 
-    return res;
+    return search;
   }
 
   getIdentity<T extends ModelCore>(cls: Class<T>): { type: string, index: string } {
     const conf = ModelRegistry.get(cls);
-    return {
-      index: conf.collection || cls.name,
-      type: conf.discriminator || conf.collection || cls.name
-    };
+    const type = `${this.config.namespace}_${conf.discriminator || conf.collection || cls.name}`;
+    return { index: type, type };
   }
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
-    const projected = extractWhereClause(query.where || {});
-
-    let cursor = col.find(projected);
-    if (query.select) {
-      cursor.project(Object.keys(query.select)[0].startsWith('$') ? query.select : extractSimple(query.select));
-    }
-
-    if (query.sort) {
-      cursor = cursor.sort(query.sort.map(x => extractSimple(x)));
-    }
-
-    cursor = cursor.limit(Math.trunc(query.limit || 200) || 200);
-
-    if (query.offset) {
-      cursor = cursor.skip(Math.trunc(query.offset) || 0);
-    }
-
-    const col = await this.client.search(projected);
+    const results = await await this.client.search<U>(this.getSearchObject(cls, query));
 
     const out: U[] = [];
-    for (const r of col.hits.hits) {
+    for (const r of results.hits.hits) {
       const rd = this.postLoad<U>(undefined as any, r._source as any);
       out.push(rd);
     }
+
     return out;
   }
 
@@ -196,31 +201,29 @@ export class ModelElasticsearchSource extends ModelSource {
     await this.init();
   }
 
-  async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: Query<T>) {
-    const objs = await this.client.search<T>({
-      _sourceInclude: ['_id'],
-      ...this.transformSearchQuery(cls, query)
-    })
-    return objs.hits.hits.map(x => this.postLoad(cls, x._source));
+  async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>) {
+    const res = await this.client.search<ModelCore>(this.getSearchObject(cls, {
+      select: {
+        id: 1
+      } as SelectClause<ModelCore>,
+      ...query
+    }));
+    return res.hits.hits.map(x => x._source.id);
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {
-    const results = await this.client.search<T>(
-      this.transformSearchQuery(cls, query),
-    )
-    const res = results.hits.hits.map(r => this.postLoad(cls, r._source));
-    return res;
+    return this.query(cls, query);
   }
 
   async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
-    const results = await this.client.search({
-      ...this.transformSearchQuery(cls, query),
-      size: 0
-    })
+    const results = await this.client.search(this.getSearchObject(cls, {
+      ...query,
+      limit: 0
+    }));
     return results.hits.total;
   }
-  async getByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}, failOnMany = true): Promise<T> {
-    const res = await this.getAllByQuery(cls, { limit: 200, ...query });
+  async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
+    const res = await this.getAllByQuery(cls, { limit: 2, ...query });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
       throw new Error(`Invalid number of results for find by id: ${res ? res.length : res}`);
     }
@@ -229,9 +232,7 @@ export class ModelElasticsearchSource extends ModelSource {
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
     const query: PageableModelQuery<ModelCore> = {
-      where: {
-        id
-      }
+      where: { id }
     }
     return await this.getByQuery<T>(cls, query as PageableModelQuery<T>);
   }
@@ -245,19 +246,19 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
-    const res = await this.client.deleteByQuery({
-      ...this.transformQuery(cls, query)
-    })
+    const res = await this.client.deleteByQuery(this.getSearchObject(cls, query) as es.DeleteDocumentByQueryParams);
     return res.deleted || 0;
   }
 
   async save<T extends ModelCore>(cls: Class<T>, o: T, removeId: boolean = true): Promise<T> {
     delete o.id;
+    this.prePersist(cls, o);
 
     const res = await this.client.create({
       ...this.getIdentity(cls),
       body: o
-    })
+    });
+
     o.id = res._id;
     return o;
   }
@@ -265,16 +266,10 @@ export class ModelElasticsearchSource extends ModelSource {
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]): Promise<T[]> {
     for (const x of objs) {
       delete x.id;
+      this.prePersist(cls, x);
     }
 
-    const res = await this.client.bulk({
-      index: this.getIdentity(cls).index,
-      body: objs.map(x => [
-        { _type: this.getIdentity(x.constructor as Class<T>).type, _id: (x as any)._id }, // TODO: Figure out?
-        x
-      ]),
-    });
-
+    const res = await this.bulkProcess(cls, { insert: objs });
     return objs;
   }
 
@@ -311,72 +306,69 @@ export class ModelElasticsearchSource extends ModelSource {
 
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, data: Partial<T>) {
     // TODO: finish
-    let finalData: any = data;
-
-    if (Object.keys(data)[0].charAt(0) !== '$') {
-      finalData = { $set: extractSimple(data) };
-    }
-
-    const script = '';
+    const script = Object.keys(data).map(x => {
+      return `ctx._source.${x} = ${JSON.stringify((data as any)[x])}`;
+    }).join(';');
 
     const res = await this.client.updateByQuery({
       ...this.getIdentity(cls),
       body: {
-        query: this.transformSearchQuery(cls, query),
+        query: this.getSearchObject(cls, query).body,
         script: {
           lang: 'painless',
           inline: script
         }
       }
-    })
+    });
 
     return res.updated;
   }
 
   async bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
-    /*const res = await this.client.bulk({
-      body: flatten<object>([
-        (state.delete || []).map(x => {
-          return [
-            { delete: this.getIdentity(cls), _id: x.id }
-          ]
-        }),
-        (state.upsert || []).map(x => {
-          return [
-            { index: this.getIdentity(cls), _id: x.id },
-            x
-          ]
-        })
-      ])
+    const conf = this.getIdentity(cls);
+
+    const payload: es.BulkIndexDocumentsParams['body'] = [
+      ...(state.delete || []).reduce((acc, e) => {
+        acc.push({ ['delete']: { _id: e.id } });
+        return acc;
+      }, [] as any[]),
+      ...(state.insert || []).reduce((acc, e) => {
+        acc.push({ insert: {} }, e);
+        return acc;
+      }, [] as any),
+      ...(state.update || []).reduce((acc, e) => {
+        acc.push({ insert: { _id: e.id } }, { doc: e });
+        return acc;
+      }, [] as any)
+    ]
+
+    const res: EsBulkResponse = await this.client.bulk({
+      index: conf.index,
+      type: conf.type,
+      body: payload
     });
 
-    const count = (state.delete || []).length + (state.upsert || []).length;
-
-    const out: BulkResponse = {
+    const out = {
       count: {
         delete: 0,
+        insert: 0,
         update: 0,
-        insert: 0
-      }
+        error: 0
+      },
+      error: [] as any[]
     };
 
-    if (count > 0) {
-      const res = await bulk.execute({});
-      const updatedCount = 0;
-
-      if (out.count) {
-        out.count.delete = res.nRemoved;
-        out.count.update = updatedCount;
-        out.count.update -= (out.count.insert || 0);
-      }
-
-      if (res.hasWriteErrors()) {
-        out.error = res.getWriteErrors();
+    for (const item of res.items) {
+      const k = Object.keys(item)[0];
+      const v = (item as any)[k] as ESBulkItemPayload;
+      if (v.error) {
+        out.error.push(v.error);
+        out.count.error += 1;
+      } else {
+        (out.count as any)[k] += 1;
       }
     }
 
-    return out;
-    */
-    return null as any;
+    return out as BulkResponse;
   }
 }
