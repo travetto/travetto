@@ -24,7 +24,7 @@ export abstract class ModelSource {
 
   abstract bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>): Promise<BulkResponse>;
   abstract getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T>;
-  abstract getByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T>, failOnMany?: boolean): Promise<T>;
+  abstract getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T>;
   abstract getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]>;
   abstract getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>): Promise<number>;
   abstract deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number>;

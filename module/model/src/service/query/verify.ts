@@ -38,7 +38,7 @@ export class QueryVerifierService {
     [SELECT, this.processSelectClause.bind(this)],
     [WHERE, this.processWhereClause.bind(this)],
     [SORT, this.processSortClause.bind(this)],
-    [GROUP_BY, this.processGroupByClause.bind(this)]
+    // [GROUP_BY, this.processGroupByClause.bind(this)]
   ] as [
     keyof Query<any>,
     (state: State, cls: Class, val: any) => any
@@ -211,7 +211,8 @@ export class QueryVerifierService {
             return;
           }
           state.log(`Only true, false 0, and 1 are allowed for including/excluding fields`);
-        } else if (actual === 'string') {
+        } else {
+        /*if (actual === 'string') {
           if (!/[A-Za-z_$0-9]/.test(value)) {
             state.log(`Only A-Z, a-z, 0-9, '$' and '_' are allowed in aliases for selecting fields`);
             return;
@@ -222,10 +223,11 @@ export class QueryVerifierService {
             state.log(`Alias is a required field for selecting`);
             return;
           } else {
+            // or { alias: string, calc?: string }
             // console.log('Yay');
           }
-        }
-        state.log(`Only true, false -1, and 1 or { alias: string, calc?: string } are allowed for selecting fields`);
+        */}
+        state.log(`Only true, false, 0, and 1 are allowed for selecting fields`);
       }
     });
   }
