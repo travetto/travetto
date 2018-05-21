@@ -15,25 +15,11 @@ import { ModelMongoConfig } from './config';
 import { Class } from '@travetto/registry';
 import { BaseError, isPlainObject } from '@travetto/base';
 
-function has$And(o: any): o is ({ $and: WhereClause<any>[]; }) {
-  return '$and' in o;
-}
-
-function has$Or(o: any): o is ({ $or: WhereClause<any>[]; }) {
-  return '$or' in o;
-}
-
-function has$Not(o: any): o is ({ $not: WhereClause<any>; }) {
-  return '$not' in o;
-}
-
-function hasId<T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) {
-  return 'id' in o;
-}
-
-function has$In(o: any): o is { $in: any[] } {
-  return '$in' in o && Array.isArray(o.$in);
-}
+const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
+const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
+const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
+const hasId = <T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) => 'id' in o;
+const has$In = (o: any): o is { $in: any[] } => '$in' in o && Array.isArray(o.$in);
 
 export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
   if (has$And(o)) {
