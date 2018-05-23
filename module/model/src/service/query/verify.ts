@@ -59,7 +59,7 @@ export class QueryVerifierService {
     for (const [key, value] of Object.entries(val)) {
 
       if (value === undefined || value === null) {
-        state.log(`${key} cannot be undefined or null`);
+        // state.log(`${key} cannot be undefined or null`);
         continue;
       }
 
