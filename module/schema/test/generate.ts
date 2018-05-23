@@ -1,6 +1,7 @@
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
-import { Schema, SchemaRegistry, GenerateUtil } from '../src';
+import { Schema, SchemaRegistry } from '../src';
+import { GenerateUtil } from '../support/util.generate';
 
 import * as assert from 'assert';
 
