@@ -9,6 +9,7 @@ import { AssetService } from './asset';
 import { Asset, AssetMetadata } from '../model';
 import { AssetUtil } from '../util';
 import { CommonProcess, ExecutionResult } from '@travetto/exec/src/types';
+import { AppEnv } from '@travetto/base';
 
 const fsUnlinkAsync = util.promisify(fs.unlink);
 const fsWriteFile = util.promisify(fs.writeFile);
@@ -22,7 +23,7 @@ export class ImageService {
   }
 
   async postConstruct() {
-    if (!process.env.NO_DOCKER) {
+    if (AppEnv.docker) {
       this.gm = new DockerContainer('v4tech/imagemagick')
         .forceDestroyOnShutdown()
         .setInteractive(true);
