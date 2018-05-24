@@ -177,7 +177,7 @@ export class DockerContainer {
     if (op !== 'run' && op !== 'exec') {
       prom.catch(e => { this.evict = true; });
     }
-    return { proc, prom }
+    return { proc, prom };
   }
 
   async create(flags?: string[], args?: string[]) {
