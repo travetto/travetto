@@ -86,12 +86,6 @@ export class SchemaValidator {
       const block = (field as any)[key];
       errors.push({ ...block, kind: key, value });
     }
-    for (const fn of field.validators) {
-      const res = fn(value, parent);
-      if (res) {
-        errors.push(res);
-      }
-    }
 
     return errors;
   }

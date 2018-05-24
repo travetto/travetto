@@ -23,12 +23,6 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     };
   }
 
-  createPendingMethod<T>(cls: Class<T>, method: Function) {
-    return {
-      validators: []
-    };
-  }
-
   getPendingViewSchema<T>(cls: Class<T>, view?: string) {
     view = view || $SchemaRegistry.DEFAULT_VIEW;
 
@@ -121,6 +115,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
         }
       }
     }
+    dest.validators = [...src.validators, ...dest.validators];
     return dest;
   }
 

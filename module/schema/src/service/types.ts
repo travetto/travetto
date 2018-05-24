@@ -7,7 +7,7 @@ export interface SchemaClass<T = any> {
 
 export type ClassList = Class | [Class];
 
-export type ValidatorFn = (value: any, parent?: any) => ValidationError | undefined;
+export type ValidatorFn<T, U> = (value: T, parent?: U) => ValidationError | undefined;
 
 export interface SchemaConfig {
   [key: string]: FieldConfig;
@@ -20,7 +20,7 @@ export interface ViewConfig {
 export interface ClassConfig {
   class: Class;
   views: { [key: string]: ViewConfig };
-  validators: ValidatorFn[];
+  validators: ValidatorFn<any, any>[];
 }
 
 export interface FieldConfig {
@@ -35,5 +35,4 @@ export interface FieldConfig {
   minlength?: { n: number, message?: string };
   maxlength?: { n: number, message?: string };
   enum?: { values: any[], message: string };
-  validators: ValidatorFn[];
 }

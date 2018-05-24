@@ -1,4 +1,4 @@
-import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema, ValidationError, SchemaRegistry, ValidationErrors } from '../src';
+import { Field, MinLength, Url, SchemaBound, Required, SchemaValidator, Enum, Schema, ValidationError, SchemaRegistry, ValidationErrors, Validator } from '../src';
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 import * as assert from 'assert';
 
@@ -38,6 +38,23 @@ class Address {
 class Nested extends SchemaBound {
   name: string;
   address: Address;
+}
+
+@Schema()
+@Validator((o: any) => {
+  if ((o.age + o.age2) % 2 === 0) {
+    return {
+      kind: 'custom',
+      message: 'age1 + age2 cannot be even',
+      path: 'age1'
+    };
+  }
+})
+class CustomValidated extends SchemaBound {
+
+  age: number;
+
+  age2: number;
 }
 
 function findError(errors: ValidationError[], path: string, message: string) {
@@ -121,5 +138,22 @@ class Validation {
     } as any);
 
     await SchemaValidator.validate(obj);
+  }
+
+  @Test('Custom Validators')
+  async validateFields() {
+    const obj = CustomValidated.from({
+      age: 200,
+      age2: 10
+    });
+
+    try {
+      await SchemaValidator.validate(obj);
+      assert(false);
+    } catch (e) {
+      assert((e as ValidationErrors).errors[0].path === 'age1');
+      assert((e as ValidationErrors).errors[0].kind === 'custom');
+      assert((e as ValidationErrors).errors[0].message === 'age1 + age2 cannot be even');
+    }
   }
 }

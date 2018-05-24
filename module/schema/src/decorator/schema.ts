@@ -1,18 +1,15 @@
 import { Field } from './field';
 import { SchemaRegistry, ValidatorFn } from '../service';
+import { Class } from '@travetto/registry';
 
 export function Schema(auto: boolean = true): ClassDecorator {
-  return (target: any) => {
-    SchemaRegistry.register(target, {});
+  return (target: Class<any>) => {
+    SchemaRegistry.getOrCreatePending(target);
   };
 }
 
-export const Validator = (fn: ValidatorFn) => {
-  return (target: any, p?: any, desc?: any) => {
-    if (p) {
-      return SchemaRegistry.getOrCreatePendingMethod(target.constructor, desc.value).validators!.push(fn);
-    } else {
-      return SchemaRegistry.getOrCreatePending(target).validators!.push(fn);
-    }
+export function Validator<T>(fn: ValidatorFn<T, string>) {
+  return (target: Class<T>) => {
+    SchemaRegistry.getOrCreatePending(target).validators!.push(fn);
   };
-}
+};
