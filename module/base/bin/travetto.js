@@ -25,7 +25,8 @@ for (const f of fs.readdirSync(CACHE_DIR)) {
   const full = f.replace(CACHE_SEP_RE, '/').replace(/@ts$/, '.ts');
   const rel = `${CACHE_DIR}/${f}`;
   const stat = LOADED[rel] = fs.statSync(rel);
-  if (stat.ctimeMs < fs.statSync(full).ctimeMs) {
+  const fullStat = fs.statSync(full);
+  if (stat.ctimeMs < fullStat.ctimeMs || stat.mtimeMs < fullStat.mtimeMs || stat.atime < fullStat.mtime) {
     fs.unlinkSync(rel);
     delete LOADED[rel];
   }
