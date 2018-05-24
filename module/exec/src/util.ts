@@ -1,8 +1,8 @@
 import * as cp from 'child_process';
 import { ExecutionOptions, ExecutionResult } from './types';
-import { scanDir, Entry } from '@travetto/base';
+import { scanDir, Entry, BaseError } from '@travetto/base';
 
-export function enhanceProcess(p: cp.ChildProcess, options: ExecutionOptions) {
+export function enhanceProcess(p: cp.ChildProcess, options: ExecutionOptions, cmd: string) {
   const timeout = options.timeout;
 
   const prom = new Promise<ExecutionResult>((resolve, reject) => {
@@ -20,7 +20,7 @@ export function enhanceProcess(p: cp.ChildProcess, options: ExecutionOptions) {
       done = true;
 
       if (!result.valid) {
-        reject(result);
+        reject(new BaseError(`Error executing ${cmd}: ${result.message || 'failed'}`, result));
       } else {
         resolve(result);
       }
@@ -68,18 +68,18 @@ export type WithOpts<T> = T & ExecutionOptions;
 export function spawn(cmdStr: string, options: WithOpts<cp.SpawnOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
   const { cmd, args } = getArgs(cmdStr);
   const p = cp.spawn(cmd, args, { shell: true, ...(options as cp.SpawnOptions) });
-  return [p, enhanceProcess(p, options)];
+  return [p, enhanceProcess(p, options, cmdStr)];
 }
 
 export function fork(cmdStr: string, options: WithOpts<cp.ForkOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
   const { cmd, args } = getArgs(cmdStr);
   const p = cp.fork(cmd, args, options);
-  return [p, enhanceProcess(p, options)];
+  return [p, enhanceProcess(p, options, cmdStr)];
 }
 
 export function exec(cmd: string, options: WithOpts<cp.ExecOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
   const p = cp.exec(cmd, options);
-  return [p, enhanceProcess(p, options)];
+  return [p, enhanceProcess(p, options, cmd)];
 }
 
 export function serializeError(e: Error | any) {
