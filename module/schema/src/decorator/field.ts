@@ -1,4 +1,4 @@
-import { CommonRegExp, SchemaRegistry, ClassList } from '../service';
+import { CommonRegExp, SchemaRegistry, ClassList, ValidatorFn } from '../service';
 
 function prop(obj: { [key: string]: any }) {
   return (f: any, p: string) => {

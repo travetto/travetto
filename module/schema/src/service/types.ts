@@ -1,10 +1,13 @@
 import { Class } from '@travetto/registry';
+import { ValidationError } from '.';
 
 export interface SchemaClass<T = any> {
   from?: <Z>(data: any) => Z;
 }
 
 export type ClassList = Class | [Class];
+
+export type ValidatorFn = (value: any, parent?: any) => ValidationError | undefined;
 
 export interface SchemaConfig {
   [key: string]: FieldConfig;
@@ -17,6 +20,7 @@ export interface ViewConfig {
 export interface ClassConfig {
   class: Class;
   views: { [key: string]: ViewConfig };
+  validators: ValidatorFn[];
 }
 
 export interface FieldConfig {
@@ -31,4 +35,5 @@ export interface FieldConfig {
   minlength?: { n: number, message?: string };
   maxlength?: { n: number, message?: string };
   enum?: { values: any[], message: string };
+  validators: ValidatorFn[];
 }

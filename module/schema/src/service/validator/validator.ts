@@ -14,7 +14,7 @@ export class ValidationErrors extends BaseError {
 
 export class SchemaValidator {
 
-  static validateField(field: FieldConfig, value: any) {
+  static validateField(field: FieldConfig, value: any, parent: any) {
     const criteria: string[] = [];
 
     if (
@@ -86,6 +86,13 @@ export class SchemaValidator {
       const block = (field as any)[key];
       errors.push({ ...block, kind: key, value });
     }
+    for (const fn of field.validators) {
+      const res = fn(value, parent);
+      if (res) {
+        errors.push(res);
+      }
+    }
+
     return errors;
   }
 
@@ -140,7 +147,7 @@ export class SchemaValidator {
           }
         } else {
           for (let i = 0; i < val.length; i++) {
-            const subErrors = this.validateField(fieldSchema, val[i]);
+            const subErrors = this.validateField(fieldSchema, val[i], o);
             errors.push(...this.prepareErrors(`${path}[${i}]`, subErrors));
           }
         }
@@ -148,7 +155,7 @@ export class SchemaValidator {
         const subErrors = this.validateSchema(sub, val, view, path);
         errors.push(...subErrors);
       } else {
-        const fieldErrors = this.validateField(fieldSchema, val);
+        const fieldErrors = this.validateField(fieldSchema, val, o);
         errors.push(...this.prepareErrors(path, fieldErrors));
       }
     }
@@ -159,8 +166,16 @@ export class SchemaValidator {
   static async validate<T>(o: T, view?: string): Promise<T> {
     const cls = o.constructor as Class;
     const config = SchemaRegistry.getViewSchema(cls, view);
+    const validators = SchemaRegistry.get(cls).validators;
 
     const errors = this.validateSchema(config.schema, o, view, '');
+
+    for (const fn of validators) {
+      const res = fn(o, view);
+      if (res) {
+        errors.push(res);
+      }
+    }
 
     if (errors.length) {
       throw new ValidationErrors(errors);

@@ -1,7 +1,7 @@
 import { ClassList, FieldConfig, ClassConfig, ViewConfig } from './types';
 import { MetadataRegistry, RootRegistry, Class } from '@travetto/registry';
 
-export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
+export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
   static DEFAULT_VIEW = '__all';
   DEFAULT_VIEW = $SchemaRegistry.DEFAULT_VIEW;
@@ -13,12 +13,19 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig> {
   createPending(cls: Class) {
     return {
       class: cls,
+      validators: [],
       views: {
         [$SchemaRegistry.DEFAULT_VIEW]: {
           schema: {},
           fields: []
         }
       }
+    };
+  }
+
+  createPendingMethod<T>(cls: Class<T>, method: Function) {
+    return {
+      validators: []
     };
   }
 
