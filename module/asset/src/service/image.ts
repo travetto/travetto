@@ -1,13 +1,14 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { DockerContainer } from '@travetto/exec';
+import { DockerContainer, spawn } from '@travetto/exec';
 import { Cacheable } from '@travetto/cache';
 import { Injectable } from '@travetto/di';
 
 import { AssetService } from './asset';
 import { Asset, AssetMetadata } from '../model';
 import { AssetUtil } from '../util';
+import { CommonProcess, ExecutionResult } from '@travetto/exec/src/types';
 
 const fsUnlinkAsync = util.promisify(fs.unlink);
 const fsWriteFile = util.promisify(fs.writeFile);
@@ -21,18 +22,22 @@ export class ImageService {
   }
 
   async postConstruct() {
-    this.gm = new DockerContainer('rafakato/alpine-graphicsmagick')
-      .forceDestroyOnShutdown()
-      .setInteractive(true);
+    if (!process.env.NO_DOCKER) {
+      this.gm = new DockerContainer('v4tech/imagemagick')
+        .forceDestroyOnShutdown()
+        .setInteractive(true);
 
-    await this.gm.create([], ['/bin/sh']);
-    await this.gm.start();
+      await this.gm.create([], ['/bin/sh']);
+      await this.gm.start();
+    }
   }
 
   @Cacheable({
     max: 1000,
     dispose: (key: string, n: Promise<string | undefined>) => {
-      n.then(v => v ? fsUnlinkAsync(v) : undefined).catch(err => { });
+      n.then(v => v ? fsUnlinkAsync(v) : undefined).catch(err => {
+        console.log(err);
+      });
     }
   })
   async generateAndStoreImage(filename: string, options: { w: number, h: number }, hasTags?: string[]): Promise<string | undefined> {
@@ -42,9 +47,11 @@ export class ImageService {
     }
     if (options && (options.w || options.h)) {
       const filePath = AssetUtil.generateTempFile(info.filename.split('.').pop() as string);
-      const [proc, prom] = await this.gm.exec(['-i'], [
-        'gm', 'convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-'
-      ]);
+      const cmd = ['convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-'];
+
+      const converter = !this.gm ? spawn(cmd.join(' '), { quiet: true }) : this.gm.exec(['-i'], cmd);
+      const [proc, prom] = await converter;
+
       info.stream.pipe(proc.stdin);
       proc.stdout.pipe(fs.createWriteStream(filePath));
       await prom;

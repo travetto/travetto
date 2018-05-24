@@ -45,6 +45,7 @@ class AssetTest {
   @BeforeAll()
   async init() {
     await DependencyRegistry.init();
+    process.env.NO_DOCKER = 1;
   }
 
   @Test('downloads an file from a url')
