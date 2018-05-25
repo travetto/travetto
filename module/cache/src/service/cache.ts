@@ -1,11 +1,11 @@
 import * as LRU from 'lru-cache';
 
 export class CacheManager {
-  public static caches = new Map<string, LRU.Cache<string, any>>();
-
   protected static defaultConfig = {
     max: 1000
   };
+
+  public static caches = new Map<string, LRU.Cache<string, any>>();
 
   static get<T>(config: string | LRU.Options<string, T> & { name: string }) {
     if (typeof config === 'string') {

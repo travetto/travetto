@@ -5,4 +5,4 @@ export const init = {
     const { Shutdown } = require('@travetto/base');
     Shutdown.onShutdown('Cache Manager', CacheManager.cleanup.bind(CacheManager));
   }
-}
+};

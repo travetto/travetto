@@ -5,8 +5,13 @@ import { assert } from 'console';
 
 class CachingService {
 
+  constructor() { }
+
   @Cacheable({
-    max: 5
+    max: 5,
+    dispose: (k: string, v: Promise<number>) => {
+
+    }
   })
   async smallAndComplex(num: number) {
     await new Promise(resolve => setTimeout(resolve, 105));

@@ -1,8 +1,13 @@
 import { CacheManager } from '../service';
 import * as LRU from 'lru-cache';
+import { Class } from '@travetto/registry';
 
-export function Cacheable<U>(config: string | LRU.Options<string, U> & { name?: string }, keyFn?: (...args: any[]) => string) {
-  return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => U>) => {
+type TypedMethodDecorator<U> = (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => U>) => void;
+
+export function Cacheable<U>(config: LRU.Options<string, U> & { name?: string, dispose: (k: string, v: U) => any }, keyFn?: (...args: any[]) => string): TypedMethodDecorator<U>;
+export function Cacheable(config: string | LRU.Options<string, any> & { name?: string }, keyFn?: (...args: any[]) => string): TypedMethodDecorator<any>;
+export function Cacheable(config: string | LRU.Options<string, any> & { name?: string }, keyFn?: (...args: any[]) => string): TypedMethodDecorator<any> {
+  return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => any>) => {
     const targetName = `${target.name}-${propertyKey}`;
     if (typeof config !== 'string') {
       if (!config['name']) {
@@ -10,10 +15,10 @@ export function Cacheable<U>(config: string | LRU.Options<string, U> & { name?: 
       }
     }
 
-    const orig = descriptor.value! as any as (...args: any[]) => U;
+    const orig = descriptor.value! as any as (...args: any[]) => any;
     const cache = CacheManager.get<any>(config as any);
 
-    descriptor.value = function (this: any, ...args: any[]): U {
+    descriptor.value = function (this: any, ...args: any[]): any {
       let key = keyFn ? keyFn(args) : JSON.stringify(args || []);
       key = `${targetName}||${key}`;
       if (!cache.has(key)) {
