@@ -35,7 +35,8 @@ export function initStackHandler() {
 
   const ogc = Error.captureStackTrace;
   Error.captureStackTrace = function (a: any, b) {
-    ogc.call(Error, a, b);
+    // tslint:disable-next-line:no-invalid-this
+    ogc.call(this, a, b);
     // Force stack analysis
     a.stack = a.stack;
   };
