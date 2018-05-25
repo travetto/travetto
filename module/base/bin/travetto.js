@@ -5,11 +5,12 @@ const ts = require('typescript');
 const os = require('os');
 
 //Simple bootstrap to load compiler
-const json = ts.readJsonConfigFile(`${process.cwd()}/tsconfig.json`, ts.sys.readFile);
-const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, process.cwd()).options;
+const cwd = process.env.INIT_CWD || process.cwd();
+const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
+const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
 
 if (!process.env.TS_CACHE_DIR) {
-  process.env.TS_CACHE_NAME = process.cwd().replace(/[\/\\.]/g, '_');
+  process.env.TS_CACHE_NAME = cwd.replace(/[\/\\.]/g, '_');
   process.env.TS_CACHE_DIR = `${os.tmpdir}/${process.env.TS_CACHE_NAME}`;
 }
 
