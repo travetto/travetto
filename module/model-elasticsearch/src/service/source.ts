@@ -14,6 +14,7 @@ import { Injectable } from '@travetto/di';
 import { ModelElasticsearchConfig } from './config';
 import { Class } from '@travetto/registry';
 import { BaseError, isPlainObject, deepAssign } from '@travetto/base';
+import { FieldConfig, SchemaConfig, SchemaRegistry } from '@travetto/schema';
 
 type ESBulkItemPayload = {
   _id: string;
@@ -28,9 +29,9 @@ type ESBulkItemPayload = {
 type EsBulkResponse = {
   errors: boolean;
   items: {
-    index?: ESBulkItemPayload;
-    update?: ESBulkItemPayload;
-    delete?: ESBulkItemPayload;
+    index?: ESBulkItemPayload,
+    update?: ESBulkItemPayload,
+    delete?: ESBulkItemPayload
   }[]
 };
 
@@ -40,15 +41,131 @@ const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
 const hasId = <T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) => 'id' in o;
 const has$In = (o: any): o is { $in: any[] } => '$in' in o && Array.isArray(o.$in);
 
-export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
-  if (has$And(o)) {
-    return { bool: { must: o.$and.map(x => extractWhereClause<T>(x)) } };
-  } else if (has$Or(o)) {
-    return { bool: { should: o.$or.map(x => extractWhereClause<T>(x)), minimum_should_match: 1 } };
-  } else if (has$Not(o)) {
-    return { bool: { must_not: extractWhereClause<T>(o.$not) } };
+export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = ''): any {
+  const items = [];
+  const schema = SchemaRegistry.getViewSchema(cls).schema;
+  for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
+    const field = schema[key];
+    const v = o[key];
+    if (isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) {
+      if (field) {
+        items.push({
+          nested: {
+            path: `${path}${key}`,
+            query: extractWhereTermQuery(v, field.type as Class<any>, `${path}${key}.`)
+          }
+        });
+      } else if (key.startsWith('$')) {
+        switch (key) {
+          case '$all':
+            const arr = Array.isArray(v) ? o[key] : [o[key]];
+            items.push({
+              terms_set: {
+                [`${path}${key}`]: {
+                  terms: arr,
+                  minimum_should_match: arr.length
+                }
+              }
+            });
+            break;
+          case '$in':
+            items.push({ terms: { [`${path}${key}`]: Array.isArray(v) ? o[key] : [o[key]] } });
+            break;
+          case '$nin':
+            items.push({
+              must_not: [{ terms: { [`${path}${key}`]: Array.isArray(v) ? o[key] : [o[key]] } }]
+            });
+            break;
+          case '$eq':
+            items.push({ term: { [`${path}${key}`]: o[key] } });
+            break;
+          case '$ne':
+            items.push({
+              must_not: [{ term: { [`${path}${key}`]: o[key] } }]
+            });
+            break;
+          case '$exists':
+            const q = {
+              exists: {
+                field: `${path}${key}`
+              }
+            };
+            items.push(v ? q : {
+              bool: {
+                must_not: q
+              }
+            });
+            break;
+          case '$lt':
+          case '$gt':
+          case '$gte':
+          case '$lte':
+            const out: any = {};
+            for (const k of o) {
+              out[k.replace(/^$/, '')] = o[k];
+            }
+            items.push({
+              range: {
+                [`${path}${key}`]: out
+              }
+            });
+            break;
+          case '$regex':
+            items.push({
+              regexp: {
+                [`${path}${key}`]: typeof o[key] === 'string' ? o[key] : `${o[key].source}`
+              }
+            });
+            break;
+          case '$geoWithin':
+            items.push({
+              geo_polygon: {
+                [`${path}${key}`]: {
+                  points: v.map(([lat, lon]: [number, number]) => ({ lat, lon }))
+                }
+              }
+            });
+            break;
+          case '$geoIntersects':
+            items.push({
+              geo_shape: {
+                [`${path}${key}`]: {
+                  type: 'envelope',
+                  coordinates: v
+                },
+                relation: 'within'
+              }
+            });
+            break;
+        }
+      }
+      // Handle operations
+    } else {
+      items.push({
+        [Array.isArray(v) ? 'terms' : 'term']: {
+          [`${path}${key}`]: {
+            value: v
+          }
+        }
+      });
+    }
+  }
+  if (items.length === 0) {
+    return items[0];
   } else {
-    return extractSimple(o);
+    return { bool: { must: items } };
+  }
+}
+
+export function extractWhereQuery<T>(o: WhereClause<T>, cls: Class<T>): { [key: string]: any } {
+  if (has$And(o)) {
+    return { bool: { must: o.$and.map(x => extractWhereQuery<T>(x, cls)) } };
+  } else if (has$Or(o)) {
+    return { bool: { should: o.$or.map(x => extractWhereQuery<T>(x, cls)), minimum_should_match: 1 } };
+  } else if (has$Not(o)) {
+    return { bool: { must_not: extractWhereQuery<T>(o.$not, cls) } };
+  } else {
+    return extractWhereTermQuery(o, cls);
   }
 }
 
@@ -76,20 +193,13 @@ export class ModelElasticsearchSource extends ModelSource {
     super();
   }
 
-  transformQuery<T>(cls: Class<T>, query: Query<T>) {
-    const conf = ModelRegistry.get(cls);
-    return {
-      ...this.getIdentity(cls),
-      body: {}
-    };
-  }
-
   getSearchObject<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
     const conf = ModelRegistry.get(cls);
 
     const search: es.SearchParams = {
-      body: this.transformQuery(cls, query)
-    }
+      ...this.getIdentity(cls),
+      body: query.where ? { query: extractWhereQuery(query.where!, cls) } : {}
+    };
 
     const sort = query.sort || conf.defaultSort;
 
@@ -106,8 +216,13 @@ export class ModelElasticsearchSource extends ModelSource {
           include.push(k);
         }
       }
-      search._sourceExclude = exclude;
-      search._sourceInclude = include;
+      if (exclude.length) {
+        search._sourceExclude = exclude;
+      }
+
+      if (include.length) {
+        search._sourceInclude = include;
+      }
     }
 
     if (sort) {
@@ -233,7 +348,7 @@ export class ModelElasticsearchSource extends ModelSource {
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
     const query: PageableModelQuery<ModelCore> = {
       where: { id }
-    }
+    };
     return await this.getByQuery<T>(cls, query as PageableModelQuery<T>);
   }
 
@@ -241,7 +356,7 @@ export class ModelElasticsearchSource extends ModelSource {
     const res = await this.client.delete({
       ...this.getIdentity(cls),
       id
-    })
+    });
     return res.found ? 1 : 0;
   }
 
@@ -340,7 +455,7 @@ export class ModelElasticsearchSource extends ModelSource {
         acc.push({ insert: { _id: e.id } }, { doc: e });
         return acc;
       }, [] as any)
-    ]
+    ];
 
     const res: EsBulkResponse = await this.client.bulk({
       index: conf.index,
