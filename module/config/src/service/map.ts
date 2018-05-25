@@ -32,17 +32,6 @@ const ENV_SEP = '_';
 
 export class ConfigMap {
 
-  // Lowered, and flattened
-  private storage: Nested = {};
-
-  reset() {
-    this.storage = {};
-  }
-
-  putAll(data: Nested) {
-    deepAssign(this.storage, data, 'coerce');
-  }
-
   static getKeyName(key: string, data: { [key: string]: any }) {
     key = key.trim();
     const match = new RegExp(key, 'i');
@@ -77,6 +66,17 @@ export class ConfigMap {
     data[key] = coerce(value, data[key]);
 
     return true;
+  }
+
+  // Lowered, and flattened
+  private storage: Nested = {};
+
+  reset() {
+    this.storage = {};
+  }
+
+  putAll(data: Nested) {
+    deepAssign(this.storage, data, 'coerce');
   }
 
   bindTo(obj: any, key: string) {

@@ -11,7 +11,7 @@ export function Config(ns: string, depTarget?: new (...args: any[]) => any, name
       if (og) {
         return og.apply(this, arguments); // tslint:disable-line no-invalid-this
       }
-    }
+    };
     return target;
   };
 }
