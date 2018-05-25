@@ -31,7 +31,7 @@ async function run() {
     // Persist temp for serving
     await writeFile(`${DIST}/index.html`, html);
     await writeFile(`${DIST}/index.txt`, text);
-  }
+  };
 
   const watcher = new Watcher();
   watcher.add([tplEngine.config.assetRoot, src]);

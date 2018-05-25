@@ -33,7 +33,7 @@ class Renderer extends marked.Renderer {
     return `\n\n-------------------\n\n`;
   }
   link(href: string, title: string, text: string): string {
-    return `[${title}]( ${href} )`
+    return `[${title}]( ${href} )`;
   }
 }
 
@@ -119,7 +119,7 @@ export class TemplateEngine {
     tpl = tpl
       .replace(/<\/button>/g, (all) => `${all}<spacer size="16"></spacer>`) // Insert spacers
       .replace(/<hr[^>]*>/g, (a, e) => { // Turn <hr> to <div class="hr">
-        const classes = ['hr']
+        const classes = ['hr'];
         const woClasses = a.replace(/class="([^"]*)"/g, (b, c) => { classes.push(c); return ''; });
         return a
           .replace(/<hr/, `<div class="${classes.join(' ')}"`)
@@ -159,14 +159,14 @@ export class TemplateEngine {
   async inlineImageSource(html: string) {
     const srcs: string[] = [];
 
-    html.replace(/(<img[^>]src=")([^"]+)/g, (a: string, pre: string, src: string) => { srcs.push(src); return '' });
+    html.replace(/(<img[^>]src=")([^"]+)/g, (a: string, pre: string, src: string) => { srcs.push(src); return ''; });
 
     const pendingImages = srcs.map(async src => {
       // TODO: fix this up?
       const ext = path.extname(src).split('.')[1];
       const data = (await this.getAssetBuffer(src)).toString('base64');
 
-      return { data, ext, src }
+      return { data, ext, src };
     });
 
     const images = await Promise.all(pendingImages);
@@ -176,7 +176,7 @@ export class TemplateEngine {
     html = html.replace(/(<img[^>]src=")([^"]+)/g, (a, pre, src) => { // Inline base64 images
       const { ext, data } = imageMap[src];
       return `${pre}data:image/${ext};base64,${data}`;
-    })
+    });
 
     return html;
   }
@@ -207,7 +207,7 @@ export class TemplateEngine {
       .replace(/<([^>]+vertical-align:\s*(top|bottom|middle)[^>]+)>/g,
         (a, tag, valign) => tag.indexOf('valign') ? `<${tag}>` : `<${tag} valign="${valign}">`) // Vertically align if it has the style
       .replace(/<(table[^>]+expand[^>]+width:\s*)(100%\s+!important)([^>]+)>/g,
-        (a, left, size, right) => `<${left}100%${right}>`) // Drop important as a fix for outlook;
+        (a, left, size, right) => `<${left}100%${right}>`); // Drop important as a fix for outlook;
 
     // Inline Images
     html = await this.inlineImageSource(html);
