@@ -13,7 +13,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Context } from '@travetto/context';
 import { AuthSource } from '../source';
 
-export type Callback<T> = (err?: any, res?: T) => void
+export type Callback<T> = (err?: any, res?: T) => void;
 
 @Injectable()
 export class AuthStrategy<U = any> extends Strategy {

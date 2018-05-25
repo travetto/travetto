@@ -20,7 +20,7 @@ export class StrategyUtil {
         if (err) {
           rej(err);
         } else {
-          res(val.toString('hex'))
+          res(val.toString('hex'));
         }
       }));
   }
