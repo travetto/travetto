@@ -1,6 +1,6 @@
 ---
 asset:
   s3:
-    bucket: test-bucket
-    accessKeyId: ''
-    secretAccessKey: ''
+    bucket: travetto-test-bucket
+    accessKeyId: AKIAJNFEHIJPHLEC2QYA
+    secretAccessKey: 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

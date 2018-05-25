@@ -11,7 +11,7 @@ export class AssetS3Config {
 
   bucket = '';
 
-  config: aws.S3.ClientConfiguration
+  config: aws.S3.ClientConfiguration;
 
   postConstruct() {
     this.config = {
