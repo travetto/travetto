@@ -38,7 +38,7 @@ class TestSave extends BaseElasticsearchTest {
     @Test('save it')
     async save() {
       const service = await DependencyRegistry.getInstance(ModelService);
-  
+
       for (const x of [1, 2, 3, 8]) {
         const res = await service.save(Person, Person.from({
           name: 'Bob',
@@ -50,7 +50,7 @@ class TestSave extends BaseElasticsearchTest {
           }
         }));
       }
-  
+
       const match = await service.getAllByQuery(Person, {
         where: {
           $and: [
@@ -67,9 +67,9 @@ class TestSave extends BaseElasticsearchTest {
           ]
         }
       });
-  
+
       assert(match.length === 3);
-  
+
       const match2 = await service.getAllByQuery(Person, {
         where: {
           $and: [
@@ -83,9 +83,9 @@ class TestSave extends BaseElasticsearchTest {
           ]
         }
       });
-  
+
       assert(match2.length > 3);
-  
+
       const match3 = await service.query(Person, {
         select: {
           id: 1,
@@ -101,7 +101,7 @@ class TestSave extends BaseElasticsearchTest {
           }
         }
       });
-  
+
       assert(match3.length === 1);
       assert(Object.keys(match3[0]).includes('address'));
       assert(!Object.keys(match3[0]).includes('age'));
