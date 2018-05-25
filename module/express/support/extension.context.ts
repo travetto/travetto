@@ -12,11 +12,11 @@ import { ExpressApp } from '../src/service/app';
 })
 export class ContextMantainer extends ExpressOperator {
 
+  priority = 0;
+
   constructor(private context: Context) {
     super();
   }
-
-  priority = 0;
 
   operate(app: ExpressApp) {
     app.get().use((req, res, next) => {

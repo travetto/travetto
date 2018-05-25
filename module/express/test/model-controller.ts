@@ -98,7 +98,7 @@ export class SimpleModelController {
   getById(req: Request) {
     return {
       message: 'Custom get all by'
-    }
+    };
   }
 
 }

@@ -98,7 +98,7 @@ export class ExpressApp {
       handler.path = RouteUtil.buildPath(config.path, handler.path);
       handler.handler = RouteUtil.asyncHandler(
         RouteUtil.toPromise(handler.handler.bind(instance)),
-        RouteUtil.outputHandler.bind(null, handler))
+        RouteUtil.outputHandler.bind(null, handler));
     }
 
     for (const hconf of config.handlers) {

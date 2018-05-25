@@ -135,7 +135,7 @@ export class RouteUtil {
         } catch (e) {
           reject(e);
         }
-      })
+      });
     } else {
       return fn as (...args: any[]) => Promise<T>;
     }

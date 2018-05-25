@@ -69,5 +69,5 @@ export function ModelController<T extends BaseModel>(path: string, cls: Class<T>
       path,
       class: target,
     });
-  }
+  };
 }

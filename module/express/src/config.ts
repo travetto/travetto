@@ -10,5 +10,5 @@ export class ExpressConfig {
       secure: false,
       secureProxy: false
     }
-  }
+  };
 }

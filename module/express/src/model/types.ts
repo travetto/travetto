@@ -40,5 +40,5 @@ export class RouteStack {
     path: string,
     methods: { [key: string]: number },
     stack: RouteStack[]
-  }
+  };
 }
