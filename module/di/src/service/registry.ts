@@ -207,9 +207,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   async getInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
-    if (!this.resolved) {
-      throw new Error(`${$DependencyRegistry.name} has not been initialized, you probably need to call ${RootRegistry}.init()`);
-    }
+    this.verifyInitialized();
 
     const targetId = target.__id;
     if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(qualifier)) {
