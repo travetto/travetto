@@ -42,7 +42,7 @@ export function initStackHandler() {
   };
 
   chain.filter.attach(function (error: Error, frames: NodeJS.CallSite[]) {
-    // Filter out traces related to this file
+
     const rewrite = frames.filter(function (callSite) {
       return (callSite.getFileName() &&
         callSite.getFileName()!.indexOf(BASE) >= 0) &&
@@ -51,6 +51,17 @@ export function initStackHandler() {
         !callSite.isEval() &&
         !filterRegex.test(callSite.toString());
     });
+
+    if (!AppEnv.prod) {
+      // depd requires at least 3 frames
+      while (rewrite.length < 3) {
+        rewrite.push({
+          getFileName: () => 'unknown',
+          getLineNumber: () => 1,
+          getColumnNumber: () => 1
+        } as any);
+      }
+    }
 
     return rewrite;
   });
