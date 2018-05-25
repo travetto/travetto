@@ -50,7 +50,8 @@ export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
 
         req.files[f] = AssetUtil.fileToAsset(req.files[f] as any as AssetFile, `${(target.constructor as any).basePath}/`);
       }
-    }
+    };
+
     rh.filters!.unshift(filt);
     return descriptor;
   };
