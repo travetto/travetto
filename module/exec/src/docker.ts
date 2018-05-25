@@ -28,23 +28,34 @@ export class DockerContainer {
   private _proc: CommonProcess;
 
   private container: string;
+  private env: { [key: string]: string } = {};
+  private ports: { [key: string]: number } = {};
+  private tempVolumes: { [key: string]: string } = {};
+  private deleteOnFinish = false;
 
   public runAway: boolean = false;
   public evict: boolean = false;
   public interactive: boolean = false;
   public tty: boolean = false;
 
-  private env: { [key: string]: string } = {};
-  private ports: { [key: string]: number } = {};
   public volumes: { [key: string]: string } = {};
   public workingDir: string;
 
-  private tempVolumes: { [key: string]: string } = {}
-
-  private deleteOnFinish = false;
-
   constructor(private image: string, container?: string) {
     this.container = container || `${process.env.DOCKER_NS || image}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
+  }
+
+  private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
+    const cmd = ([
+      this.cmd,
+      op,
+      ...(args || []).map((x: any) => `${x}`)
+    ]).join(' ');
+    const [proc, prom] = spawn(cmd, { shell: false });
+    if (op !== 'run' && op !== 'exec') {
+      prom.catch(e => { this.evict = true; });
+    }
+    return { proc, prom };
   }
 
   forceDestroyOnShutdown() {
@@ -102,7 +113,7 @@ export class DockerContainer {
   }
 
   async waitForPort(port: number, ms = 5000) {
-    const start = Date.now()
+    const start = Date.now();
     while ((Date.now() - start) < ms) {
       try {
         await new Promise((res, rej) => {
@@ -143,7 +154,7 @@ export class DockerContainer {
       flags.push('-t');
     }
     for (const k of Object.keys(this.volumes)) {
-      flags.push('-v', `${k}:${this.volumes[k]}`)
+      flags.push('-v', `${k}:${this.volumes[k]}`);
     }
     for (const k of Object.keys(this.tempVolumes)) {
       flags.push('-v', `${this.tempVolumes[k]}:${k}`);
@@ -165,19 +176,6 @@ export class DockerContainer {
     // Make temp dirs
     const mkdirAll = Object.keys(this.tempVolumes).map(x => mkdir(x).catch(e => { }));
     await Promise.all(mkdirAll);
-  }
-
-  private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
-    const cmd = ([
-      this.cmd,
-      op,
-      ...(args || []).map((x: any) => `${x}`)
-    ]).join(' ');
-    const [proc, prom] = spawn(cmd, { shell: false });
-    if (op !== 'run' && op !== 'exec') {
-      prom.catch(e => { this.evict = true; });
-    }
-    return { proc, prom };
   }
 
   async create(flags?: string[], args?: string[]) {

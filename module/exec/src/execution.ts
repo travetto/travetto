@@ -55,7 +55,7 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
         this.listenFor(eventType, (d, kill) => {
           kill!();
           resolve(d);
-        })
+        });
       });
     }
   }
