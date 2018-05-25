@@ -246,7 +246,8 @@ export class QueryVerifierService {
       extend(sub: string) {
         return { ...this, path: !this.path ? sub : `${this.path}.${sub}` };
       }
-    }
+    };
+
     for (const [key, fn] of this.mapping) {
       if (!(key in query)) {
         continue;

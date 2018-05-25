@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 import { MetadataRegistry, Class } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 
-export class $ModelRegistry extends MetadataRegistry<ModelOptions> {
+export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   constructor() {
     super(SchemaRegistry, DependencyRegistry);
   }
@@ -14,7 +14,7 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions> {
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
-    return this.pending.get(cls.__id)! as ModelOptions;
+    return this.pending.get(cls.__id)! as ModelOptions<T>;
   }
 }
 

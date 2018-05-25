@@ -50,7 +50,7 @@ export type PropWhereClause<T> = {
           (T[P] extends (Point | undefined) ? GeoFieldQuery :
             (T[P] extends ((infer U)[] | undefined) ? ArrayFieldQuery<U> :
               (T[P] extends (object | undefined) ? PropWhereClause<RetainFields<T[P]>> : never)))))));
-}
+};
 
 export type _WhereClause<T> =
   ({ $and: _WhereClause<T>[]; } & { [P in keyof T]?: never }) |

@@ -20,7 +20,7 @@ export const OPERATORS: { [key: string]: { [key: string]: Set<string> } } = {
   boolean: { ...basic('boolean'), ...scalar('boolean') },
   Date: { ...basic('Date'), ...scalar('Date'), ...comp('Date') },
   Point: { ...basic('Point'), ...geo('Point') },
-}
+};
 
 export class TypeUtil {
 
@@ -53,6 +53,6 @@ export class TypeUtil {
         return ret;
       }
     }
-    throw new Error(`Unknown type for ${v}`)
+    throw new Error(`Unknown type for ${v}`);
   }
 }

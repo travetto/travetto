@@ -39,7 +39,7 @@ export class VerifyTest {
 
     const t2: PropWhereClause<RetainFields<ModelCore>> = {
 
-    }
+    };
 
     const test = <T extends ModelCore>(cls: Class<T>) => {
       const t: WhereClause<ModelCore> = {
@@ -49,7 +49,7 @@ export class VerifyTest {
 
       };
       verifier.verify(User, t);
-    }
+    };
     test(ModelUser);
   }
 
@@ -70,7 +70,7 @@ export class VerifyTest {
       }
     };
 
-    verifier.verify(User, query)
+    verifier.verify(User, query);
   }
 
 }

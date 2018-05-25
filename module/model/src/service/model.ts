@@ -81,9 +81,9 @@ export class ModelService extends ModelSource {
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}) {
     this.queryService.verify(cls, query);
 
-    const config = ModelRegistry.get(cls);
+    const config = ModelRegistry.get(cls) as ModelOptions<T>;
     if (!query.sort && config.defaultSort) {
-      query.sort = [config.defaultSort as SortClause<T>];
+      query.sort = config.defaultSort;
     }
     const res = await this.source.getAllByQuery(cls, query);
     return res.map(o => this.postLoad(cls, o));
