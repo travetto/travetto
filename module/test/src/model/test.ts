@@ -33,8 +33,8 @@ export interface TestResult {
   methodName: string;
   className: string;
   description: string;
-  assertions: Assertion[],
+  assertions: Assertion[];
   output: {
     [key: string]: string;
-  }
+  };
 }

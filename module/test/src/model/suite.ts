@@ -13,7 +13,7 @@ export interface SuiteConfig {
   beforeAll: Function[];
   beforeEach: Function[];
   afterEach: Function[];
-  afterAll: Function[]
+  afterAll: Function[];
 }
 
 export interface Counts {

@@ -21,7 +21,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
       description: description as string
     });
     return descriptor;
-  }
+  };
 }
 
 export function ShouldThrow(state: TestConfig['shouldThrow']): MethodDecorator {

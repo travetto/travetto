@@ -12,14 +12,14 @@ const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
   [ts.SyntaxKind.LessThanEqualsToken]: 'lessThanEqual',
   [ts.SyntaxKind.LessThanToken]: 'lessThan',
   [ts.SyntaxKind.InstanceOfKeyword]: 'instanceOf'
-}
+};
 
 const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
   equal: 'deepEqual',
   notEqual: 'notDeepEqual',
   strictEqual: 'deepStrictEqual',
   notStrictEqual: 'notDeepStrictEqual'
-}
+};
 
 const ASSERT_CMD = 'assert';
 const TEST_IMPORT = '@travetto/test';
@@ -37,7 +37,7 @@ interface AssertState extends State {
   hasAssertCall: boolean;
   assertCheck: ts.PropertyAccessExpression;
   assertInvoke: ts.PropertyAccessExpression;
-  source: ts.SourceFile
+  source: ts.SourceFile;
 }
 
 interface Command {
@@ -184,4 +184,4 @@ export const TestAssertTransformer = {
   },
   phase: 'before',
   priority: 10
-}
+};

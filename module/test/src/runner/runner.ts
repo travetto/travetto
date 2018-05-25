@@ -29,7 +29,7 @@ const FORMAT_MAPPING: { [key: string]: Class<Consumer> } = {
   json: JSONEmitter,
   tap: TapEmitter,
   exec: ExecutionEmitter
-}
+};
 
 export class Runner {
   private state: State;
@@ -63,7 +63,7 @@ export class Runner {
       const multi: Consumer & { summarize?: () => any } = {
         onEvent(e: any) {
           for (const c of consumers) {
-            c.onEvent(e)
+            c.onEvent(e);
           }
         }
       };
@@ -73,10 +73,10 @@ export class Runner {
         multi.summarize = () => {
           for (const c of consumers.slice(1)) {
             if (c.onSummary) {
-              c.onSummary(all.summary)
+              c.onSummary(all.summary);
             }
           }
-        }
+        };
       }
 
       return multi;

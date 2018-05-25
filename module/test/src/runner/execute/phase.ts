@@ -15,7 +15,7 @@ export function asyncTimeout(duration: number = DEFAULT_TIMEOUT): [Promise<any>,
   }
   const prom = new Promise((_, reject) => {
     id = setTimeout(() => reject(TIMEOUT), duration);
-    id.unref()
+    id.unref();
   });
   return [prom, () => clearTimeout(id)];
 }

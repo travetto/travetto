@@ -21,7 +21,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       class: cls,
       file: cls.__filename,
       methodName: fn.name
-    }
+    };
   }
 
   registerPendingListener<T>(cls: Class<T>, listener: Function, phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach', ) {

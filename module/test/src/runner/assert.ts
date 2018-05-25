@@ -12,7 +12,7 @@ const ASSERT_FN_OPERATOR: { [key: string]: string } = {
   greaterThan: '>',
   lessThanEqual: '<=',
   lessThan: '<'
-}
+};
 
 const OP_MAPPING: { [key: string]: string } = {
   includes: '{expected} {state} include {actual}',
@@ -31,7 +31,7 @@ const OP_MAPPING: { [key: string]: string } = {
   greaterThan: '{actual} {state} be greater than {expected}',
   lessThanEqual: '{actual} {state} be less than or equal to {expected}',
   lessThan: '{actual} {state} be less than {expected}'
-}
+};
 
 function clean(val: any) {
   if (val === null || val === undefined || (!(val instanceof RegExp) && isPrimitive(val)) || isPlainObject(val) || Array.isArray(val)) {
@@ -65,7 +65,7 @@ export class AssertUtil {
     }
 
     const [fn, path] = best.trim().split(/\s+/g).slice(1);
-    const [file, lineNo, col] = path.replace(/[()]/g, '').split(':')
+    const [file, lineNo, col] = path.replace(/[()]/g, '').split(':');
 
     const outFile = file.split(`${process.cwd()}/`)[1];
 
@@ -101,7 +101,7 @@ export class AssertUtil {
         assertion.actual = args[0];
         assertion.expected = args[1];
         assertion.message = args[2];
-        assertion.operator = args[3]
+        assertion.operator = args[3];
       } else {
         assertion.message = args[0];
       }

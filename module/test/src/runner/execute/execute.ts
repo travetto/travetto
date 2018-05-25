@@ -159,7 +159,7 @@ export class ExecuteUtil {
       await mgr.startPhase('each');
       await this.executeTest(consumer, test);
       await mgr.endPhase('each');
-      await mgr.endPhase('all')
+      await mgr.endPhase('all');
     } catch (e) {
       await mgr.onError(e);
     }
@@ -232,9 +232,8 @@ export class ExecuteUtil {
         const clsConf = TestRegistry.get(cls);
         res = [clsConf];
       } else {
-        const clses = TestRegistry.getClasses().map(x => TestRegistry.get(x))
+        const clses = TestRegistry.getClasses().map(x => TestRegistry.get(x));
         res = [clses];
-
       }
     }
 

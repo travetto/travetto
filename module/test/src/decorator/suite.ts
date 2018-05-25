@@ -22,14 +22,14 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
   return (target: Class<any>) => {
     TestRegistry.register(target, { description: (description as string), ...extra });
     return target;
-  }
+  };
 }
 
 function listener(phase: SuitePhase) {
   return (inst: any, prop: string, descriptor: PropertyDescriptor) => {
     TestRegistry.registerPendingListener(inst.constructor, descriptor.value, phase);
     return descriptor;
-  }
+  };
 }
 
 export const BeforeAll = listener.bind(null, 'beforeAll');

@@ -11,7 +11,7 @@ export class TapEmitter implements Consumer {
   }
 
   private log(message: string) {
-    this.stream.write(`${message}\n`)
+    this.stream.write(`${message}\n`);
   }
 
   logMeta(obj: any) {

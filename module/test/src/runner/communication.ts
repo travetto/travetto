@@ -80,7 +80,7 @@ export async function server() {
       console.debug('Run');
 
       // Clear require cache of all data loaded minus base framework pieces
-      console.debug('Resetting', Object.keys(require.cache).length)
+      console.debug('Resetting', Object.keys(require.cache).length);
       for (const k of Object.keys(require.cache)) {
         if (/node_modules/.test(k) && !/@travetto/.test(k)) {
           continue;
@@ -120,7 +120,7 @@ export function client() {
   return new ConcurrentPool(async () => {
     const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
     worker.init();
-    await worker.listenOnce(Events.READY)
+    await worker.listenOnce(Events.READY);
     await worker.send(Events.INIT);
     await worker.listenOnce(Events.INIT_COMPLETE);
     return worker;

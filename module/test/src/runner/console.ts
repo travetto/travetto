@@ -6,7 +6,7 @@ const OG_CONSOLE = {
   error: console.error,
   debug: console.debug,
   warn: console.warn
-}
+};
 
 export class ConsoleCapture {
 
