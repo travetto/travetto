@@ -52,6 +52,12 @@ export abstract class Registry implements ChangeSource<Class> {
     return;
   }
 
+  verifyInitialized() {
+    if (!this.resolved) {
+      throw new Error(`${this.constructor.name} has not been initialized, you probably need to call RootRegistry.init()`);
+    }
+  }
+
   async init(): Promise<any> {
     if (!this.initialized) {
       this.initialized = this._init();
