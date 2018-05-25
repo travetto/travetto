@@ -5,7 +5,7 @@ require('../bin/travetto').run().then(async () => {
 
   try {
     await rimraf(process.env.TS_CACHE_DIR);
-    console.log('Deleted build/');
+    console.log(`Deleted ${process.env.TS_CACHE_DIR}/`);
   } catch (e) {
     console.log('Failed in deleting');
   }
