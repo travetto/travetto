@@ -14,6 +14,60 @@ export class ValidationErrors extends BaseError {
 
 export class SchemaValidator {
 
+  private static validateSchema<T>(schema: SchemaConfig, o: T, view: string | undefined, relative: string) {
+    let errors: ValidationError[] = [];
+
+    for (const field of Object.keys(schema)) {
+      const fieldSchema = schema[field];
+      const val = (o as any)[field];
+      const path = `${relative}${relative && '.'}${field}`;
+
+      const hasValue = !(val === undefined || val === null || val === '' || (Array.isArray(val) && val.length === 0));
+
+      if (!hasValue) {
+        if (fieldSchema.required) {
+          errors.push(...this.prepareErrors(path, [{ kind: 'required' }]));
+        }
+        continue;
+      }
+
+      const { type, array } = fieldSchema.declared;
+
+      let sub: SchemaConfig | undefined;
+      if (SchemaRegistry.has(type)) {
+        sub = SchemaRegistry.getViewSchema(type, view).schema;
+      } else if (type === Object) {
+        sub = type as any as SchemaConfig;
+      }
+
+      if (array) {
+        if (!Array.isArray(val)) {
+          errors = errors.concat(this.prepareErrors(path, [{ kind: 'type', type: Array, value: val }]));
+          continue;
+        }
+        if (sub) {
+          for (let i = 0; i < val.length; i++) {
+            const subErrors = this.validateSchema(sub, val[i], view, `${path}[${i}]`);
+            errors = errors.concat(subErrors);
+          }
+        } else {
+          for (let i = 0; i < val.length; i++) {
+            const subErrors = this.validateField(fieldSchema, val[i], o);
+            errors.push(...this.prepareErrors(`${path}[${i}]`, subErrors));
+          }
+        }
+      } else if (sub) {
+        const subErrors = this.validateSchema(sub, val, view, path);
+        errors.push(...subErrors);
+      } else {
+        const fieldErrors = this.validateField(fieldSchema, val, o);
+        errors.push(...this.prepareErrors(path, fieldErrors));
+      }
+    }
+
+    return errors;
+  }
+
   static validateField(field: FieldConfig, value: any, parent: any) {
     const criteria: string[] = [];
 
@@ -24,7 +78,7 @@ export class SchemaValidator {
       (field.type === Boolean && typeof value !== 'boolean')
     ) {
       criteria.push('type');
-      return [{ kind: 'type', type: field.type }]
+      return [{ kind: 'type', type: field.type }];
     }
 
     if (field.match && !field.match.re.test(`${value}`)) {
@@ -93,7 +147,7 @@ export class SchemaValidator {
   static prepareErrors(path: string, errs: any[]) {
     const out = [];
     for (const err of errs) {
-      const message = err.message || (err.kind === 'match' ? Messages.get(err.re) : Messages.get(err.kind))
+      const message = err.message || (err.kind === 'match' ? Messages.get(err.re) : Messages.get(err.kind));
       if (message) {
         err.path = path;
         err.message = message.replace(/\{([^}]+)\}/g, (a: string, k: string) => err[k]);
@@ -101,60 +155,6 @@ export class SchemaValidator {
       }
     }
     return out;
-  }
-
-  private static validateSchema<T>(schema: SchemaConfig, o: T, view: string | undefined, relative: string) {
-    let errors: ValidationError[] = [];
-
-    for (const field of Object.keys(schema)) {
-      const fieldSchema = schema[field];
-      const val = (o as any)[field];
-      const path = `${relative}${relative && '.'}${field}`;
-
-      const hasValue = !(val === undefined || val === null || val === '' || (Array.isArray(val) && val.length === 0));
-
-      if (!hasValue) {
-        if (fieldSchema.required) {
-          errors.push(...this.prepareErrors(path, [{ kind: 'required' }]));
-        }
-        continue;
-      }
-
-      const { type, array } = fieldSchema.declared;
-
-      let sub: SchemaConfig | undefined;
-      if (SchemaRegistry.has(type)) {
-        sub = SchemaRegistry.getViewSchema(type, view).schema;
-      } else if (type === Object) {
-        sub = type as any as SchemaConfig;
-      }
-
-      if (array) {
-        if (!Array.isArray(val)) {
-          errors = errors.concat(this.prepareErrors(path, [{ kind: 'type', type: Array, value: val }]));
-          continue;
-        }
-        if (sub) {
-          for (let i = 0; i < val.length; i++) {
-            const subErrors = this.validateSchema(sub, val[i], view, `${path}[${i}]`);
-            errors = errors.concat(subErrors);
-          }
-        } else {
-          for (let i = 0; i < val.length; i++) {
-            const subErrors = this.validateField(fieldSchema, val[i], o);
-            errors.push(...this.prepareErrors(`${path}[${i}]`, subErrors));
-          }
-        }
-      } else if (sub) {
-        const subErrors = this.validateSchema(sub, val, view, path);
-        errors.push(...subErrors);
-      } else {
-        const fieldErrors = this.validateField(fieldSchema, val, o);
-        errors.push(...this.prepareErrors(path, fieldErrors));
-      }
-    }
-
-    return errors;
   }
 
   static async validate<T>(o: T, view?: string): Promise<T> {

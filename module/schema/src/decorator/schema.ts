@@ -12,4 +12,4 @@ export function Validator<T>(fn: ValidatorFn<T, string>) {
   return (target: Class<T>) => {
     SchemaRegistry.getOrCreatePending(target).validators!.push(fn);
   };
-};
+}

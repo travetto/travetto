@@ -12,7 +12,7 @@ const between = (fromDays: number, toDays: number) => {
     new Date(Date.now() + fromDays * DAY_IN_MS),
     new Date(Date.now() + toDays * DAY_IN_MS)
   );
-}
+};
 
 export class GenerateUtil {
   static STRING_RE_TO_TYPE: [RegExp, () => any][] = [
@@ -130,7 +130,7 @@ export class GenerateUtil {
     if (!subArray && cfg.declared.array) {
       return this.getArrayValue(cfg);
     } else if (cfg.enum) {
-      return faker.random.arrayElement(cfg.enum.values)
+      return faker.random.arrayElement(cfg.enum.values);
     } else {
 
       const typ = cfg.declared.type;

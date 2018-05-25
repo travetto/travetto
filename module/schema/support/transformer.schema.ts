@@ -12,9 +12,9 @@ type DecList = ts.NodeArray<ts.Decorator>;
 type SchemaList = (ts.Expression | undefined)[];
 
 interface AutoState extends State {
-  inAuto: boolean,
-  addField: ts.Expression | undefined,
-  addSchema: ts.Expression | undefined
+  inAuto: boolean;
+  addField: ts.Expression | undefined;
+  addSchema: ts.Expression | undefined;
 }
 
 function resolveType(type: ts.Node, state: State): ts.Expression {
@@ -43,7 +43,7 @@ function resolveType(type: ts.Node, state: State): ts.Expression {
         if ((subMember as any).literal) {
           subMember = (subMember as any).literal;
         }
-        properties.push(ts.createPropertyAssignment(member.name as ts.Identifier, resolveType(subMember, state)))
+        properties.push(ts.createPropertyAssignment(member.name as ts.Identifier, resolveType(subMember, state)));
       }
       expr = ts.createObjectLiteral(properties);
       break;
@@ -78,7 +78,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
   // If we have a union type
   if (node.type && node.type!.kind === ts.SyntaxKind.UnionType && ['Number', 'String'].includes((typeExpr as any).text)) {
 
-    const types = (node.type! as ts.UnionTypeNode).types
+    const types = (node.type! as ts.UnionTypeNode).types;
     const literals = types.map(x => (x as ts.LiteralTypeNode).literal);
     const values = literals.map(x => x.getText());
 
@@ -161,7 +161,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         decls = ts.createNodeArray([
           ts.createDecorator(ts.createCall(state.addSchema, undefined, ts.createNodeArray([]))),
           ...(decls || [])
-        ])
+        ]);
       }
 
       node = ts.updateClassDeclaration(
@@ -172,7 +172,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         ret.typeParameters,
         ts.createNodeArray(ret.heritageClauses),
         ret.members
-      ) as any
+      ) as any;
     }
 
     return node;

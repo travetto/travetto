@@ -107,12 +107,12 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
         dest.views[v] = {
           schema: { ...dest.views[v].schema, ...view.schema },
           fields: (dest.views[v].fields).concat(view.fields)
-        }
+        };
       } else {
         dest.views[v] = {
           schema: { ...(view.schema || {}) },
           fields: view.fields.slice(0)
-        }
+        };
       }
     }
     dest.validators = [...src.validators, ...dest.validators];

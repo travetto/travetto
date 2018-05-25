@@ -20,7 +20,7 @@ export function Field(type: ClassList, config?: { [key: string]: any }) {
       SchemaRegistry.registerPendingFieldFacet(f.constructor, p, config);
     }
   };
-};
+}
 export const Alias = (...aliases: string[]) => prop({ aliases });
 export const Required = (message?: string) => prop({ required: { message } });
 export const Enum = (vals: string[] | any, message?: string) => {
@@ -48,5 +48,5 @@ export function View(...names: string[]) {
 
 // For Auto schemas
 export function Ignore(): PropertyDecorator {
-  return (target: any, property: string | symbol) => { }
+  return (target: any, property: string | symbol) => { };
 }
