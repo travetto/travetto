@@ -15,12 +15,12 @@ export function WithContext<T extends { context: Context }>(data?: any) {
           } catch (e) {
             reject(e);
           }
-        })
+        });
       });
-    }
+    };
 
     Object.defineProperty(descriptor.value, 'name', { value: (og as any).name });
 
     return descriptor;
-  }
+  };
 }

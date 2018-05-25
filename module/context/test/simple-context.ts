@@ -19,8 +19,8 @@ class VerifyContext {
 
   @BeforeAll()
   async init() {
-    await DependencyRegistry.init()
-    const svc = await DependencyRegistry.getInstance(TestService)
+    await DependencyRegistry.init();
+    const svc = await DependencyRegistry.getInstance(TestService);
     this.context = svc.context;
   }
 
