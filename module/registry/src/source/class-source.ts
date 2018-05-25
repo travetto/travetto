@@ -16,34 +16,6 @@ export class CompilerClassSource implements ChangeSource<Class> {
     this.watch = this.watch.bind(this);
   }
 
-  emit(e: ChangeEvent<Class>) {
-    this.events.emit('change', e);
-  }
-
-  reset() {
-    this.classes.clear();
-  }
-
-  async init() {
-    const entries = await findAppFilesByExt('.ts')
-      .filter(x => x.file.includes(`/src/`));
-
-    const files = entries
-      .filter(x => Compiler.presenceManager.validFile(x.file))
-      .map(x => x.file)
-
-    for (const f of files) { // Load all files, class scanning
-      require(f);
-    }
-
-    this.flush();
-
-    Compiler.on('changed', this.watch);
-    Compiler.on('removed', this.watch);
-    Compiler.on('added', this.watch);
-    Compiler.on('required-after', f => this.flush());
-  }
-
   private flush() {
     for (const [file, classes] of PendingRegister.flush()) {
       if (!classes || !classes.length) {
@@ -55,10 +27,6 @@ export class CompilerClassSource implements ChangeSource<Class> {
         this.emit({ type: 'added', curr: cls });
       }
     }
-  }
-
-  on(callback: (e: ChangeEvent<Class>) => void): void {
-    this.events.on('change', callback);
   }
 
   protected async handleFileChanges(file: string, classes: Class<any>[]) {
@@ -95,5 +63,37 @@ export class CompilerClassSource implements ChangeSource<Class> {
     for (const [file, classes] of PendingRegister.flush()) {
       this.handleFileChanges(file, classes);
     }
+  }
+
+  emit(e: ChangeEvent<Class>) {
+    this.events.emit('change', e);
+  }
+
+  reset() {
+    this.classes.clear();
+  }
+
+  async init() {
+    const entries = await findAppFilesByExt('.ts')
+      .filter(x => x.file.includes(`/src/`));
+
+    const files = entries
+      .filter(x => Compiler.presenceManager.validFile(x.file))
+      .map(x => x.file);
+
+    for (const f of files) { // Load all files, class scanning
+      require(f);
+    }
+
+    this.flush();
+
+    Compiler.on('changed', this.watch);
+    Compiler.on('removed', this.watch);
+    Compiler.on('added', this.watch);
+    Compiler.on('required-after', f => this.flush());
+  }
+
+  on(callback: (e: ChangeEvent<Class>) => void): void {
+    this.events.on('change', callback);
   }
 }

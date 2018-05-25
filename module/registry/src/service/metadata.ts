@@ -53,7 +53,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
   }
 
   createPendingMethod(cls: Class, method: Function): Partial<M> {
-    return {}
+    return {};
   }
 
   getParentClass(cls: Class): Class | null {

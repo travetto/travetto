@@ -24,7 +24,7 @@ function createStaticField(name: string, val: ts.Expression | string | number) {
   );
 }
 
-const registerPath = require.resolve('../src/decorator/register')
+const registerPath = require.resolve('../src/decorator/register');
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: IState): T {
   if (state.path === registerPath) { // Cannot process self
@@ -100,4 +100,4 @@ export const ClassIdTransformer = {
   }, visitNode),
   phase: 'before',
   priority: 0
-}
+};

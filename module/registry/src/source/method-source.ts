@@ -13,7 +13,7 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
   async init() { }
 
   emit(ev: ChangeEvent<[Class, Function]>) {
-    this.events.emit('change', ev)
+    this.events.emit('change', ev);
   }
 
   onClassEvent(e: ChangeEvent<Class>) {

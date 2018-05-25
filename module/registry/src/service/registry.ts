@@ -23,17 +23,6 @@ export abstract class Registry implements ChangeSource<Class> {
     }
   }
 
-  initialInstall(): any {
-    return;
-  }
-
-  async init(): Promise<any> {
-    if (!this.initialized) {
-      this.initialized = this._init();
-    }
-    return this.initialized;
-  }
-
   protected async _init(): Promise<any> {
     try {
       this.resolved = false;
@@ -57,6 +46,17 @@ export abstract class Registry implements ChangeSource<Class> {
     } finally {
       this.resolved = true;
     }
+  }
+
+  initialInstall(): any {
+    return;
+  }
+
+  async init(): Promise<any> {
+    if (!this.initialized) {
+      this.initialized = this._init();
+    }
+    return this.initialized;
   }
 
   onInstall(cls: Class, e: ChangeEvent<Class>): void {
