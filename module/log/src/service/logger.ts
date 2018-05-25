@@ -33,7 +33,7 @@ class $Logger {
     this.listeners.push(listener);
     return () => {
       this.listeners.splice(this.listeners.indexOf(listener), 1);
-    }
+    };
   }
 
   log(level: LogLevel, message: string, ...args: any[]): void;

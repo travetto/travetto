@@ -53,7 +53,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         }, payload);
       }
 
-      payload = TransformUtil.extendObjectLiteral({ args }, payload)
+      payload = TransformUtil.extendObjectLiteral({ args }, payload);
     }
 
     return ts.createCall(ts.createPropertyAccess(ts.createPropertyAccess(state.imported, 'Logger'), 'log'), undefined,
@@ -70,4 +70,4 @@ export const LoggerTransformer = {
   }, visitNode),
   phase: 'before',
   priority: 1
-}
+};

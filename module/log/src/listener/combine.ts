@@ -20,5 +20,5 @@ export function combine<T, U>(
     const formatter = formatterFactory(opts.formatter);
     const output = outputFactory(opts.output);
     return (e: LogEvent) => output(formatter(e));
-  }
+  };
 }
