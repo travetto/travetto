@@ -109,11 +109,13 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // Unblock auto created
     if (this.autoCreate.length && !AppEnv.test) {
-      console.debug('Auto-creating', this.autoCreate.map(x => x.target.name));
-      const items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
-      for (const i of items) {
-        await this.getInstance(i.target, i.qualifier);
-      }
+      setTimeout(async () => { // Run after initialization finishes
+        console.debug('Auto-creating', this.autoCreate.map(x => x.target.name));
+        const items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
+        for (const i of items) {
+          await this.getInstance(i.target, i.qualifier);
+        }
+      }, 0);
     }
   }
 
