@@ -31,7 +31,7 @@ export class Scheduler {
 
   static schedule(expression: string, options: CronOptions) {
     // Validate expression
-    new cron.CronTime(expression)
+    new cron.CronTime(expression);
 
     const job = new cron.CronJob({ cronTime: expression, ...options });
     job.start();
