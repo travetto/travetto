@@ -20,4 +20,4 @@ export const init = {
 
     Shutdown.register();
   }
-}
+};

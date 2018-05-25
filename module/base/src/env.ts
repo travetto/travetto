@@ -20,7 +20,7 @@ let docker = !('NO_DOCKER' in e && !!e.NO_DOCKER);
 if (docker) { // Check for docker existance
   try {
     docker = execSync('docker ps') && true;
-  } catch { };
+  } catch { }
 }
 
 export const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker };

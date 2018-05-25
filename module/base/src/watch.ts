@@ -47,72 +47,6 @@ export class Watcher extends EventEmitter {
     });
   }
 
-  handleError(err: Error & { code?: string }) {
-    if (err.code === 'EMFILE') {
-      this._emit('error', new Error('EMFILE: Too many opened files.'));
-    }
-    this._emit('error', err);
-  }
-
-  close() {
-    for (const [k, watcher] of this.watchers) {
-      watcher.close();
-    }
-    this.watchers = new Map();
-
-    for (const dir of this.watched.keys()) {
-      this.unwatch(dir);
-    }
-
-    this.watched = new Map();
-
-    setImmediate(() => {
-      this._emit('end');
-      this.removeAllListeners();
-    });
-  };
-
-  add(handlers: (string | Handler)[]) {
-    const finalHandlers = handlers.map(x => {
-      return typeof x === 'string' ? { testFile: (rel: string) => rel === x } : x;
-    });
-    this.findHandlers = this.findHandlers.concat(finalHandlers);
-
-    for (const entry of bulkFindSync(finalHandlers, this.options.cwd)) {
-      if (!this.watched.has(entry.file)) {
-        if (this.pending) {
-          this.pendingWatched.push(entry);
-        } else {
-          this.watch(entry);
-        }
-      }
-    }
-  }
-
-  run(listenInitial = true) {
-    this.pending = false
-    if (this.pendingWatched.length) {
-      this.suppress = !listenInitial;
-      this.pendingWatched.map(x => this.watch(x));
-      this.pendingWatched = [];
-      setImmediate(() => this.suppress = false);
-    }
-  }
-
-  watch(entry: Entry) {
-    if (this.watched.has(entry.file)) {
-      return;
-    }
-
-    this.watched.set(entry.file, entry);
-
-    if (entry.stats.isDirectory()) { // Watch Directory
-      this.watchDirectory(entry);
-    } else { // Watch File
-      this.watchFile(entry);
-    }
-  }
-
   private processDirectoryChange(dir: Entry) {
     dir.children = dir.children || [];
 
@@ -141,7 +75,7 @@ export class Watcher extends EventEmitter {
 
           if (!child.stats.isDirectory()) {
             this._emit('removed', child);
-            this._emit('all', { event: 'removed', entry: child })
+            this._emit('all', { event: 'removed', entry: child });
           }
         }
       }
@@ -158,13 +92,13 @@ export class Watcher extends EventEmitter {
           const sub: Entry = {
             file: next,
             stats: nextStats
-          }
+          };
           this.watch(sub);
           dir.children!.push(sub);
 
           if (!sub.stats.isDirectory()) {
             this._emit('added', sub);
-            this._emit('all', { event: 'added', entry: sub })
+            this._emit('all', { event: 'added', entry: sub });
           }
         }
       }
@@ -173,7 +107,7 @@ export class Watcher extends EventEmitter {
 
   private _emit(type: string, payload?: any) {
     if (!this.suppress) {
-      console.debug('Watch Event', type, payload)
+      console.debug('Watch Event', type, payload);
       this.emit(type, payload);
     }
   }
@@ -216,7 +150,7 @@ export class Watcher extends EventEmitter {
       // Prevents changed/deleted duplicate events
       if (fs.existsSync(entry.file)) {
         this._emit('changed', entry);
-        this._emit('all', { event: 'changed', entry })
+        this._emit('all', { event: 'changed', entry });
       }
     });
 
@@ -247,6 +181,72 @@ export class Watcher extends EventEmitter {
       const watcher = this.watchers.get(entry.file)!;
       watcher.close();
       this.watchers.delete(entry.file);
+    }
+  }
+
+  handleError(err: Error & { code?: string }) {
+    if (err.code === 'EMFILE') {
+      this._emit('error', new Error('EMFILE: Too many opened files.'));
+    }
+    this._emit('error', err);
+  }
+
+  close() {
+    for (const [k, watcher] of this.watchers) {
+      watcher.close();
+    }
+    this.watchers = new Map();
+
+    for (const dir of this.watched.keys()) {
+      this.unwatch(dir);
+    }
+
+    this.watched = new Map();
+
+    setImmediate(() => {
+      this._emit('end');
+      this.removeAllListeners();
+    });
+  }
+
+  add(handlers: (string | Handler)[]) {
+    const finalHandlers = handlers.map(x => {
+      return typeof x === 'string' ? { testFile: (rel: string) => rel === x } : x;
+    });
+    this.findHandlers = this.findHandlers.concat(finalHandlers);
+
+    for (const entry of bulkFindSync(finalHandlers, this.options.cwd)) {
+      if (!this.watched.has(entry.file)) {
+        if (this.pending) {
+          this.pendingWatched.push(entry);
+        } else {
+          this.watch(entry);
+        }
+      }
+    }
+  }
+
+  run(listenInitial = true) {
+    this.pending = false;
+    if (this.pendingWatched.length) {
+      this.suppress = !listenInitial;
+      this.pendingWatched.map(x => this.watch(x));
+      this.pendingWatched = [];
+      setImmediate(() => this.suppress = false);
+    }
+  }
+
+  watch(entry: Entry) {
+    if (this.watched.has(entry.file)) {
+      return;
+    }
+
+    this.watched.set(entry.file, entry);
+
+    if (entry.stats.isDirectory()) { // Watch Directory
+      this.watchDirectory(entry);
+    } else { // Watch File
+      this.watchFile(entry);
     }
   }
 

@@ -7,8 +7,8 @@ w
     console.log(event, entry);
   });
 
-w.add([/.*/, __filename]);
+w.add([{ testFile: x => /.*/.test(x) }, __filename]);
 w.watch({
   file: __dirname,
   stats: fs.lstatSync(__dirname)
-})
+});

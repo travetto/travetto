@@ -69,7 +69,7 @@ export function simplifyStack(err: Error, cwd = process.cwd()) {
       return l.split(/[.][tj]s/)[0];
     }
     return undefined;
-  }
+  };
 
   let lastName: string = '';
   const body = err.stack!.split('\n')

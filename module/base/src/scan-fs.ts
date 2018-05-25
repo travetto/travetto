@@ -10,7 +10,7 @@ const fsUnlink = util.promisify(fs.unlink);
 export interface Entry {
   file: string;
   stats: fs.Stats;
-  children?: Entry[]
+  children?: Entry[];
 }
 
 export type Handler = {
@@ -145,7 +145,7 @@ export async function rimraf(pth: string) {
       files
         .filter(filter)
         .map(x => fsUnlink(x.file)
-          .catch(e => { console.error(`Unable to delete ${e.file}`) }))
+          .catch(e => { console.error(`Unable to delete ${e.file}`); }))
     );
   }
 }

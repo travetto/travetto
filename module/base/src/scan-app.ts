@@ -14,10 +14,10 @@ export function findAppFilesByExt(ext: string) {
           (!x.includes('node_modules') || (
             x.endsWith('node_modules') ||
             x.includes('@travetto'))
-          )
+          );
       }
     }, process.cwd())
-      .filter(x => !x.stats.isDirectory())
+      .filter(x => !x.stats.isDirectory());
   }
   return cache[ext].slice(0);
 }
