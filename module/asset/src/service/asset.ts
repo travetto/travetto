@@ -49,7 +49,7 @@ export class AssetService {
   async get(filename: string, haveTags?: string[]): Promise<Asset> {
     const info = await this.source.info(filename);
     if (haveTags) {
-      const fin = new Set(info.metadata.tags)
+      const fin = new Set(info.metadata.tags);
       for (const t of haveTags) {
         if (!fin.has(t)) {
           throw new Error();
