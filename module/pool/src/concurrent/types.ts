@@ -4,7 +4,7 @@ export interface DataSource<T> {
 }
 
 export interface ConcurrentOp {
-  kill(): any;
-  release?: () => any;
   active: boolean;
+  kill(): any;
+  release?(): any;
 }

@@ -6,9 +6,9 @@ function isIterator<T>(o: any): o is Iterator<T> {
 
 export class IteratorDataSource<T> implements DataSource<T> {
 
-  done = false;
-  private src: Iterator<T>
+  private src: Iterator<T>;
   private ondeck: T;
+  done = false;
 
   constructor(src: (() => Iterator<T>) | Iterator<T>) {
     if (isIterator(src)) {
