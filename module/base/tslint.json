@@ -82,7 +82,10 @@
       true,
       "as-needed"
     ],
-    "array-type": true,
+    "array-type": [
+      true,
+      "array"
+    ],
     "object-literal-sort-keys": false,
     "one-line": [
       true,
