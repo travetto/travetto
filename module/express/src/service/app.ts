@@ -17,11 +17,9 @@ export class ExpressApp {
   constructor(private config: ExpressConfig) {
   }
 
-  postConstruct() {
-    // Wait for, need to wait for controller registry to be active,
-    //  but can hold up di creation
-    ControllerRegistry.init()
-      .then(() => this.init());
+  async postConstruct() {
+    await ControllerRegistry.init();
+    return this.init();
   }
 
   async init() {
