@@ -150,10 +150,10 @@ export class TransformUtil {
               if (stmt.importClause.namedBindings) {
                 const bindings = stmt.importClause.namedBindings;
                 if (ts.isNamespaceImport(bindings)) {
-                  state.imports.set(bindings.name.text, { path, ident: bindings.name })
+                  state.imports.set(bindings.name.text, { path, ident: bindings.name });
                 } else if (ts.isNamedImports(bindings)) {
                   for (const n of bindings.elements) {
-                    state.imports.set(n.name.text, { path, ident: n.name })
+                    state.imports.set(n.name.text, { path, ident: n.name });
                   }
                 }
               }

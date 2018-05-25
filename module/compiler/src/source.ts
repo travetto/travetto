@@ -108,7 +108,7 @@ export class SourceManager {
   set(name: string, content: string) {
     this.contents.set(name, content);
     if (this.config.cache) {
-      fs.writeFileSync(this.resolveCacheName(name), content)
+      fs.writeFileSync(this.resolveCacheName(name), content);
     }
   }
 

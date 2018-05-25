@@ -2,7 +2,7 @@ import { Watcher, Entry, AppEnv, Handler, findAppFilesByExt } from '@travetto/ba
 import { CompilerUtil } from './util';
 import * as path from 'path';
 
-const EMPTY = (...args: any[]): any => { }
+const EMPTY = (...args: any[]): any => { };
 
 export interface Listener {
   added(name: string): any;
@@ -16,6 +16,44 @@ export class FilePresenceManager {
   seen = new Set();
 
   constructor(private cwd: string, private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = AppEnv.watch) {
+  }
+
+  private watcherListener({ event, entry }: { event: string, entry: Entry }) {
+    if (!this.validFile(entry.file)) {
+      return;
+    }
+
+    console.debug('Watch', event, entry.file);
+
+    if (event === 'added') {
+      this.files.set(entry.file, { version: 1 });
+      this.listener.added(entry.file);
+    } else if (event === 'changed') {
+      const changed = this.files.has(entry.file);
+      if (changed) {
+        this.listener.changed(entry.file);
+        this.files.get(entry.file)!.version++;
+      } else {
+        this.files.set(entry.file, { version: 1 });
+        this.listener.added(entry.file);
+      }
+    } else if (event === 'removed') {
+      this.files.delete(entry.file);
+      this.listener.removed(entry.file);
+    }
+  }
+
+  private buildWatcher(cwd: string, handlers: Handler[]) {
+    const watcher = new Watcher({
+      interval: 250,
+      cwd
+    });
+
+    watcher.on('all', this.watcherListener.bind(this));
+
+    watcher.add(handlers); // Watch ts files
+    watcher.run(false);
+    return watcher;
   }
 
   init() {
@@ -65,44 +103,6 @@ export class FilePresenceManager {
     }
     this.files.set(name, { version: 0 });
     this.listener.added(name);
-  }
-
-  private watcherListener({ event, entry }: { event: string, entry: Entry }) {
-    if (!this.validFile(entry.file)) {
-      return;
-    }
-
-    console.debug('Watch', event, entry.file);
-
-    if (event === 'added') {
-      this.files.set(entry.file, { version: 1 });
-      this.listener.added(entry.file);
-    } else if (event === 'changed') {
-      const changed = this.files.has(entry.file);
-      if (changed) {
-        this.listener.changed(entry.file);
-        this.files.get(entry.file)!.version++;
-      } else {
-        this.files.set(entry.file, { version: 1 });
-        this.listener.added(entry.file);
-      }
-    } else if (event === 'removed') {
-      this.files.delete(entry.file);
-      this.listener.removed(entry.file);
-    }
-  }
-
-  private buildWatcher(cwd: string, handlers: Handler[]) {
-    const watcher = new Watcher({
-      interval: 250,
-      cwd
-    });
-
-    watcher.on('all', this.watcherListener.bind(this))
-
-    watcher.add(handlers); // Watch ts files
-    watcher.run(false);
-    return watcher;
   }
 
   reset() {
