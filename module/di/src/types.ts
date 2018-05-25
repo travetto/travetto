@@ -9,7 +9,7 @@ export interface InjectableConfig<T = any> extends Dependency<T> {
     cons?: Dependency<any>[],
     fields: { [key: string]: Dependency<any> }
   };
-  autoCreate: { priority?: number, create: boolean }
+  autoCreate: { priority?: number, create: boolean };
 }
 
 export interface Dependency<T = any> {
@@ -23,7 +23,7 @@ export interface InjectableFactoryConfig<T> {
   class: Class<T>;
   src: Class<T>;
   qualifier?: symbol;
-  dependencies?: Dependency<any>[]
-  autoCreate?: boolean
+  dependencies?: Dependency<any>[];
+  autoCreate?: boolean;
   original?: Symbol | object;
 }

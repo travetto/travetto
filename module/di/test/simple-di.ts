@@ -69,7 +69,7 @@ class DiTest2 {
   @Test('runner')
   async runner() {
     assert(1 === 1);
-    console.log('hi')
+    console.log('hi');
 
     assert(2 + 2 === FOUR);
   }

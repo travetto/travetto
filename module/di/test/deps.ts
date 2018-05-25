@@ -36,8 +36,8 @@ export class ServiceInherit extends Service {
   }
 }
 
-export const SERVICE_INHERIT_2 = Symbol()
-export const SERVICE_INHERIT_3 = Symbol()
+export const SERVICE_INHERIT_2 = Symbol();
+export const SERVICE_INHERIT_3 = Symbol();
 
 @Injectable(SERVICE_INHERIT_2)
 export class ServiceInherit2 extends ServiceInherit {

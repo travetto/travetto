@@ -10,7 +10,7 @@ const INJECTABLES = TransformUtil.buildImportAliasMap({
 interface DiState extends State {
   inInjectable: boolean;
   decorators: { [key: string]: ts.Expression };
-  import?: ts.Identifier
+  import?: ts.Identifier;
 }
 
 function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
@@ -246,4 +246,4 @@ export const InjectableTransformer = {
   }), visitNode),
   priority: 11,
   phase: 'before'
-}
+};
