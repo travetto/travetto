@@ -9,6 +9,8 @@ const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\/\\]+$/, '');
 const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
 const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
 
+process.env.TS_CWD = cwd;
+
 if (!process.env.TS_CACHE_DIR) {
   process.env.TS_CACHE_NAME = cwd.replace(/[\/\\.]/g, '_');
   process.env.TS_CACHE_DIR = `${os.tmpdir()}/${process.env.TS_CACHE_NAME}`;
