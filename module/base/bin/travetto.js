@@ -5,13 +5,13 @@ const ts = require('typescript');
 const os = require('os');
 
 //Simple bootstrap to load compiler
-const cwd = process.env.INIT_CWD || process.cwd();
+const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\/\\]+$/, '');
 const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
 const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
 
 if (!process.env.TS_CACHE_DIR) {
   process.env.TS_CACHE_NAME = cwd.replace(/[\/\\.]/g, '_');
-  process.env.TS_CACHE_DIR = `${os.tmpdir}/${process.env.TS_CACHE_NAME}`;
+  process.env.TS_CACHE_DIR = `${os.tmpdir()}/${process.env.TS_CACHE_NAME}`;
 }
 
 const CACHE_DIR = process.env.TS_CACHE_DIR;
@@ -25,7 +25,7 @@ if (!fs.existsSync(CACHE_DIR)) {
 }
 
 for (const f of fs.readdirSync(CACHE_DIR)) {
-  const full = f.replace(CACHE_SEP_RE, '/').replace(/@ts$/, '.ts');
+  const full = cwd + f.replace(CACHE_SEP_RE, '/').replace(/@ts$/, '.ts');
   const rel = `${CACHE_DIR}/${f}`;
   const stat = LOADED[rel] = fs.statSync(rel);
   const fullStat = fs.statSync(full);
@@ -37,7 +37,7 @@ for (const f of fs.readdirSync(CACHE_DIR)) {
 
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {
-  const name = `${CACHE_DIR}/${tsf.replace(/[\/\\]/g, CACHE_SEP).replace(/.ts$/, '@ts')}`;
+  const name = `${CACHE_DIR}/${tsf.replace(cwd, '').replace(/[\/\\]/g, CACHE_SEP).replace(/.ts$/, '@ts')}`;
   let content;
   if (!LOADED[name]) {
     content = ts.transpile(fs.readFileSync(tsf, 'utf-8'), opts);

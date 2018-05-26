@@ -6,6 +6,10 @@
     "noStrictGenericChecks": true,
     "strictPropertyInitialization": false,
     "sourceMap": true,
+    "lib": [
+      "es2015.proxy",
+      "es2018"
+    ],
     "preserveConstEnums": true,
     "experimentalDecorators": true,
     "rootDir": "src/",
