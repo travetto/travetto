@@ -27,15 +27,17 @@ export class MailTemplateConfig {
   scssRoots: string[];
 
   async postConstruct() {
-    this.assetRoots.push(...[AppEnv.cwd, path.resolve(`${__dirname}/..`)].map(x => `${x}/assets/email`));
+    this.assetRoots.push(...[AppEnv.cwd, path.resolve(path.join(__dirname, '..'))]
+      .map(x => path.join(x, 'assets', 'email')));
     this.scssRoots = [
-      ...this.assetRoots.map(x => `${x}/scss`),
-      `${AppEnv.cwd}/node_modules/foundation-emails/scss`];
+      ...this.assetRoots.map(x => path.join(x, 'scss')),
+      path.join(AppEnv.cwd, 'node_modules', 'foundation-emails', 'scss')];
   }
 
   async findFirst(pth: string) {
-    for (const f of this.assetRoots.map(x => `${x}/${pth}`)) {
-      if (await exists(path.normalize(f))) {
+    pth = pth.replace(/[\/]+/g, path.sep);
+    for (const f of this.assetRoots.map(x => path.join(x, pth))) {
+      if (await exists(f)) {
         return f;
       }
     }

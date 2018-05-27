@@ -9,14 +9,14 @@ import { MailTemplateConfig } from './config';
 const writeFile = util.promisify(fs.writeFile);
 const mkdir = util.promisify(fs.mkdir);
 
-const DIST = `${__dirname}/../dist`;
+const DIST = path.resolve(path.join(__dirname, '..', 'dist'));
 
 declare var tplEngine: any;
 declare var browserSync: any;
 
 async function run() {
 
-  for (const dir of [DIST, `${DIST}/asset`]) {
+  for (const dir of [DIST, path.join(DIST, 'asset')]) {
     await mkdir(dir).catch(e => { });
   }
 
@@ -29,8 +29,8 @@ async function run() {
     const { text, html } = await tplEngine.template(src);
 
     // Persist temp for serving
-    await writeFile(path.normalize(`${DIST}/index.html`), html);
-    await writeFile(path.normalize(`${DIST}/index.txt`), text);
+    await writeFile(path.join(DIST, 'index.html'), html);
+    await writeFile(path.join(DIST, 'index.txt'), text);
   };
 
   const watcher = new Watcher();
@@ -39,7 +39,7 @@ async function run() {
   await reload();
 
   browserSync.init({
-    files: [`${DIST}/index.html`],
+    files: [path.join(DIST, 'index.html')],
     serveStatic: [{
       route: '/assets',
       dir: [tplEngine.config.assetRoot, path.dirname(src)],
