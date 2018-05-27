@@ -9,8 +9,8 @@ export class CommandService {
   constructor(private config: {
     image: string;
     imageStartCommand?: string;
-    imageCommand: (args: string[]) => string[];
-    processCommand: (args: string[]) => string[];
+    imageCommand?: (args: string[]) => string[];
+    processCommand?: (args: string[]) => string[];
     docker?: boolean;
   }) { }
 
@@ -28,10 +28,10 @@ export class CommandService {
   async exec(...args: string[]) {
     let exec;
     if (this.container) {
-      const cmd = this.config.imageCommand(args);
+      const cmd = this.config.imageCommand ? this.config.imageCommand(args) : args;
       exec = this.container.exec(['-i'], cmd);
     } else {
-      const cmd = this.config.processCommand(args);
+      const cmd = this.config.processCommand ? this.config.processCommand(args) : args;
       exec = spawn(cmd.join(' '), { quiet: true });
     }
     const [proc, prom] = await exec;
