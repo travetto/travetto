@@ -10,7 +10,6 @@ const envs = [
 ];
 
 const envSet = new Set(envs);
-
 const is = envSet.has.bind(envSet);
 
 const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\/\\]+$/, '').replace(/[\\]+/g, '/');
@@ -19,6 +18,7 @@ const test = is('test') || is('testing');
 const dev = !prod && !test;
 const watch = (dev && !('NO_WATCH' in e)) || 'WATCH' in e;
 const debug = 'DEBUG' in e && !!e.DEBUG;
+
 let docker = !('NO_DOCKER' in e && !!e.NO_DOCKER);
 if (docker) { // Check for docker existance
   try {
@@ -26,27 +26,44 @@ if (docker) { // Check for docker existance
   } catch (e) {}
 }
 
-const cache = {
-  dir: process.env.TS_CACHE_DIR,
-  dirN: '',
-  name: cwd.replace(/\//g, '_'),
-  sep: process.env.TS_CACHE_SEP || '~'
+let cacheDir = process.env.TS_CACHE_DIR;
+if (!cacheDir) {
+  const name = cwd.replace(/\//g, '_');
+  cacheDir = `${os.tmpdir().replace(/[\\]+/g, '/')}/${name}`;
+}
+
+const cacheDirN = path.normalize(cacheDir);
+const cacheSep = process.env.TS_CACHE_SEP || '~';
+const cacheSepRe = new RegExp(cacheSep, 'g');
+
+const cache = {};
+cache.fromEntryName = cached => path.normalize(`${cwd}/${cached.replace(cacheDir, '').replace(cacheSepRe, '/').replace(/@ts$/, '.ts')}`);
+cache.toEntryName = full => path.normalize(`${cacheDir}/${full.replace(cwd, '').replace(/\/+/g, cacheSep).replace(/.ts$/, '@ts')}`);
+cache.init = () => {
+  if (!fs.existsSync(cacheDirN)) {
+    fs.mkdirSync(cacheDirN);
+  }
+
+  const CACHE = {};
+
+  for (const f of fs.readdirSync(cacheDirN)) {
+    const full = cache.fromEntryName(f);
+    const rel = `${cacheDir}/${f}`;
+    const relN = path.normalize(rel);
+    try {
+      const stat = CACHE[relN] = fs.statSync(relN);
+      const fullStat = fs.statSync(full);
+      if (stat.ctimeMs < fullStat.ctimeMs || stat.mtimeMs < fullStat.mtimeMs || stat.atime < fullStat.mtime) {
+        fs.unlinkSync(relN);
+        delete CACHE[relN];
+      }
+    } catch (e) {
+      // Cannot remove missing file
+    }
+  }
+
+  return CACHE;
 };
-
-const sepRe = new RegExp(cache.sep, 'g');
-
-cache.fromEntryName = cached => `${cwd}/${cached.replace(cache.dir, '').replace(sepRe, '/').replace(/@ts$/, '.ts')}`;
-cache.toEntryName = full => `${cache.dir}/${full.replace(cwd, '').replace(/\/+/g, cache.sep).replace(/.ts$/, '@ts')}`;
-
-if (!cache.dir) {
-  cache.dir = `${os.tmpdir().replace(/[\\]+/g, '/')}/${cache.name}`;
-}
-
-cache.dirN = path.normalize(cache.dir);
-
-if (!fs.existsSync(cache.dirN)) {
-  fs.mkdirSync(cache.dirN);
-}
 
 const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd, cache };
 
