@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 import { Entry, scanDirSync } from './scan-fs';
 import { AppEnv } from './env';
 
@@ -18,9 +20,9 @@ export function findAppFilesByExt(ext: string) {
 }
 
 export function findAppFiles(ext: string, pattern: RegExp) {
-  return findAppFilesByExt(ext).filter(x => pattern.test(x.file));
+  return findAppFilesByExt(ext).filter(x => pattern.test(x.file.replace(/[\\]/g, '/')));
 }
 
 export function requireAppFiles(ext: string, pattern: RegExp) {
-  return findAppFiles(ext, pattern).map(x => require(x.file));
+  return findAppFiles(ext, pattern).map(x => require(x.file.replace(/[\\]/g, '/')));
 }

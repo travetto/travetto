@@ -12,7 +12,7 @@ const envs = [
 const envSet = new Set(envs);
 const is = envSet.has.bind(envSet);
 
-const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\/\\]+$/, '').replace(/[\\]+/g, '/');
+const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\/\\]+$/, '');
 const prod = is('prod') || is('production');
 const test = is('test') || is('testing');
 const dev = !prod && !test;
@@ -31,8 +31,8 @@ if (docker) { // Check for docker existance
 
 let cacheDir = process.env.TS_CACHE_DIR;
 if (!cacheDir) {
-  const name = cwd.replace(/\//g, '_');
-  cacheDir = `${os.tmpdir().replace(/[\\]+/g, '/')}/${name}`;
+  const name = cwd.replace(/[\/:\\]/g, '_');
+  cacheDir = `${os.tmpdir()}${path.sep}${name}`;
 }
 
 const cacheDirN = path.normalize(cacheDir);
@@ -40,8 +40,8 @@ const cacheSep = process.env.TS_CACHE_SEP || '~';
 const cacheSepRe = new RegExp(cacheSep, 'g');
 
 const cache = {};
-cache.fromEntryName = cached => path.normalize(`${cwd}/${cached.replace(cacheDir, '').replace(cacheSepRe, '/').replace(/@ts$/, '.ts')}`);
-cache.toEntryName = full => path.normalize(`${cacheDir}/${full.replace(cwd, '').replace(/\/+/g, cacheSep).replace(/.ts$/, '@ts')}`);
+cache.fromEntryName = cached => `${cwd}${path.sep}${cached.replace(cacheDir, '').replace(cacheSepRe, path.sep).replace(/@ts$/, '.ts')}`;
+cache.toEntryName = full => `${cacheDir}${path.sep}${full.replace(cwd, '').replace(/[\\\/]+/g, cacheSep).replace(/.ts$/, '@ts')}`;
 cache.init = () => {
   if (!fs.existsSync(cacheDirN)) {
     fs.mkdirSync(cacheDirN);
@@ -51,14 +51,13 @@ cache.init = () => {
 
   for (const f of fs.readdirSync(cacheDirN)) {
     const full = cache.fromEntryName(f);
-    const rel = `${cacheDir}/${f}`;
-    const relN = path.normalize(rel);
+    const rel = `${cacheDir}${path.sep}${f}`;
     try {
-      const stat = CACHE[relN] = fs.statSync(relN);
+      const stat = CACHE[rel] = fs.statSync(rel);
       const fullStat = fs.statSync(full);
       if (stat.ctimeMs < fullStat.ctimeMs || stat.mtimeMs < fullStat.mtimeMs || stat.atime < fullStat.mtime) {
-        fs.unlinkSync(relN);
-        delete CACHE[relN];
+        fs.unlinkSync(rel);
+        delete CACHE[rel];
       }
     } catch (e) {
       // Cannot remove missing file
