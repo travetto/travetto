@@ -4,6 +4,7 @@ import { DependencyRegistry, Injectable } from '@travetto/di';
 import * as fs from 'fs';
 import * as assert from 'assert';
 import * as util from 'util';
+import { RootRegistry } from '@travetto/registry';
 
 @Injectable({ target: AssetSource })
 class MockAssetSource extends AssetSource {
@@ -42,10 +43,10 @@ class MockAssetSource extends AssetSource {
 
 @Suite('Asset Service')
 class AssetTest {
+
   @BeforeAll()
   async init() {
-    await DependencyRegistry.init();
-    process.env.NO_DOCKER = '1';
+    await RootRegistry.init();
   }
 
   @Test('downloads an file from a url')
@@ -62,11 +63,7 @@ class AssetTest {
     assert(file.contentType === 'image/png');
     assert(file.length > -1);
 
-    try {
-      util.promisify(fs.stat)(filePath);
-    } catch (err) {
-      assert(err instanceof Error);
-    }
+    assert(await util.promisify(fs.exists)(filePath) === false);
   }
 
   @Test('Test caching')
