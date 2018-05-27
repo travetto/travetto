@@ -36,7 +36,7 @@ export class TransformUtil {
           if (!path.includes('node_modules')) {
             pkg = AppInfo.NAME;
           } else {
-            pkg = `@travetto/${path.split(/@travetto\//)[1].split('/')[0]}`;
+            pkg = `@travetto/${path.split(/@travetto[\/\\]/)[1].split(/[\\\/]/)[0]}`;
           }
           if (packages.has(pkg)) {
             return dec;
