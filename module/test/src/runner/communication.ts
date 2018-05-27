@@ -86,9 +86,9 @@ export async function server() {
           continue;
         }
         if (k.endsWith('.ts') &&
-          !/@travetto\/(base|config|compiler|exec|pool)/.test(k) &&
+          !/@travetto[\/\\](base|config|compiler|exec|pool)/.test(k) &&
           !(k.startsWith(__filename.replace(/.[tj]s$/, ''))) &&
-          !/\/(phase|transformer)\//.test(k) &&
+          !/[\/\\](phase|transformer)[\/\\]/.test(k) &&
           !/transformer\..*\.ts/.test(k)) {
           Compiler.unload(k);
         }
@@ -97,7 +97,7 @@ export async function server() {
       // Relaod runner
       Compiler.workingSets = [data.file!];
       Compiler.reset();
-      const { Runner } = require('./');
+      const { Runner } = require('./runner');
 
       console.log('*Running*', data.file);
 
@@ -118,7 +118,7 @@ export async function server() {
 
 export function client() {
   return new ConcurrentPool(async () => {
-    const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
+    const worker = new ChildExecution(`node ${require.resolve('../../bin/travetto-test.js')}`, true);
     worker.init();
     await worker.listenOnce(Events.READY);
     await worker.send(Events.INIT);
