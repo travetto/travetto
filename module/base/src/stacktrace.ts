@@ -100,7 +100,7 @@ export function simplifyStack(err: Error, cwd = AppEnv.cwd) {
     }, [] as string[])
     .map(x => x.replace(`${cwd}${sep}`, '')
       .replace('node_modules', 'n_m')
-      .replace(/n_m[\/\\]@travetto[\/\\]([^/\\]+)[\/\\]src/g, (a, p) => `@trv${sep}${p}`)
+      .replace(/n_m[\/\\]@travetto[\/\\]([^\/\\]+)[\/\\]src/g, (a, p) => `@trv${sep}${p}`)
     )
     .join('  \n');
 
