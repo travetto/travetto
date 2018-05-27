@@ -45,8 +45,7 @@ export class TemplateEngine {
   private cache: { [key: string]: { html: string, text: string } } = {};
 
   private converter = new CommandService({
-    image: 'olafnorge/optipng',
-    processCommand: (args: string[]) => ['optipng', ...args]
+    image: 'agregad/pngquant'
   });
 
   // TODO: figure out paths for html, images, and partials
@@ -65,6 +64,10 @@ export class TemplateEngine {
         includePaths: this.config.scssRoots
       }, (err: any, res: { css: any }) => err ? reject(err) : resolve(res.css.toString()));
     });
+  }
+
+  async postConstruct() {
+    await this.converter.init();
   }
 
   interpolate(text: string, data: any) {
@@ -148,7 +151,7 @@ export class TemplateEngine {
     const out = `${pth}.compressed`;
 
     if (!(await exists(out))) {
-      const [proc, prom] = this.converter.exec('-quiet', '-strip', 'all', '-f4', '-o7', '-preserve', '-', '-');
+      const [proc, prom] = this.converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
       fs.createReadStream(pth).pipe(proc.stdin);
       proc.stdout.pipe(fs.createWriteStream(out));
       await prom;
@@ -156,7 +159,7 @@ export class TemplateEngine {
 
     const buffer = await readFile(out);
 
-    // await unlink(out);
+    await unlink(out);
 
     return buffer;
   }
