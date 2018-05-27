@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
-import { findAppFilesByExt } from '@travetto/base';
+import { findAppFiles } from '@travetto/base';
 
 import { Class } from '../model/types';
 import { ChangeSource, ChangeEvent } from './types';
@@ -74,8 +74,7 @@ export class CompilerClassSource implements ChangeSource<Class> {
   }
 
   async init() {
-    const entries = await findAppFilesByExt('.ts')
-      .filter(x => x.file.includes(`/src/`));
+    const entries = await findAppFiles('.ts', f => f.includes('/src/'));
 
     const files = entries
       .filter(x => Compiler.presenceManager.validFile(x.file))

@@ -11,7 +11,7 @@ export class Test6 {
     return 5;
   }
   weight() {
-    return 33;
+    return 34;
   }
   namered() {
     return 'hi';
