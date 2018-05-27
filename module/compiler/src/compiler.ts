@@ -29,7 +29,7 @@ class $Compiler {
 
     // Get Files proper like
     if (AppInfo.DEV_PACKAGES && AppInfo.DEV_PACKAGES.length) {
-      exclude.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}/(${AppInfo.DEV_PACKAGES.join('|')})/`));
+      exclude.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}[\\\/](${AppInfo.DEV_PACKAGES.join('|')})[\\\/]`));
     }
 
     this.options = CompilerUtil.resolveOptions(this.cwd);
@@ -91,7 +91,7 @@ class $Compiler {
     // Log transpiled content as needed
     const content = this.sourceManager.get(tsf)!;
 
-    if (/\/test\//.test(tsf) && !tsf.includes(CompilerUtil.LIBRARY_PATH)) {
+    if (/[\/\\]test[\/\\]/.test(tsf) && !tsf.includes(CompilerUtil.LIBRARY_PATH)) {
       console.debug(content);
     }
 

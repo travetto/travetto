@@ -11,7 +11,7 @@ export class TransformerManager {
     const transformers: { [key: string]: any } = {};
     let i = 2;
 
-    for (const trns of requireAppFiles('.ts', /transformer[.].*[.]ts$/)) {
+    for (const trns of requireAppFiles('.ts', x => /transformer[.].*[.]ts$/.test(x))) {
       for (const key of Object.keys(trns)) {
         const item = trns[key];
         if (!transformers[item.phase]) {

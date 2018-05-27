@@ -1,4 +1,4 @@
-import { Watcher, Entry, AppEnv, Handler, findAppFilesByExt } from '@travetto/base';
+import { Watcher, Entry, AppEnv, Handler, findAppFiles } from '@travetto/base';
 import { CompilerUtil } from './util';
 import * as path from 'path';
 
@@ -57,8 +57,7 @@ export class FilePresenceManager {
   }
 
   init() {
-    const rootFiles = findAppFilesByExt('.ts')
-      .filter(x => x.file.includes('/src/') && this.validFile(x.file))
+    const rootFiles = findAppFiles('.ts', x => x.startsWith('src/') && this.validFile(x))
       .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable
       .map(x => x.file);
 
@@ -70,7 +69,7 @@ export class FilePresenceManager {
     }
 
     if (this.watch) {
-      this.buildWatcher(`${this.cwd}/src`, [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+      this.buildWatcher(`${this.cwd}${path.sep}src`, [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
     }
   }
 
@@ -99,7 +98,7 @@ export class FilePresenceManager {
       if (!this.fileWatchers[topLevel]) {
         this.fileWatchers[topLevel] = this.buildWatcher(topLevel, []);
       }
-      this.fileWatchers[topLevel].add([name.replace(`${topLevel}/`, '')]);
+      this.fileWatchers[topLevel].add([name.replace(`${topLevel}${path.sep}`, '')]);
     }
     this.files.set(name, { version: 0 });
     this.listener.added(name);
