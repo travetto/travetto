@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { readdirSync, readFileSync } from 'fs';
 
-import { bulkRead, bulkReadSync, AppEnv, bulkFindSync, findAppFilesByExt, findAppFiles } from '@travetto/base';
+import { AppEnv, findAppFiles } from '@travetto/base';
 import { ConfigMap } from './map';
 
 export class ConfigLoader {
@@ -37,8 +37,6 @@ export class ConfigLoader {
     }
 
     // Load all namespaces from core
-    const allYaml = findAppFilesByExt('.yml');
-
     const files = findAppFiles('.yml', x => x.includes('node_modules/@travetto') && x.includes('/config/'))
       .concat(findAppFiles('.yml', x => x.startsWith('config/')))
       .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }));
