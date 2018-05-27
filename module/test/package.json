@@ -25,7 +25,7 @@
     "url": "https://github.com/travetto/test.git"
   },
   "scripts": {
-    "test": "./bin/travetto-test.js"
+    "test": "node ./bin/travetto-test.js"
   },
   "version": "0.0.69"
 }
