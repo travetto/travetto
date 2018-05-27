@@ -1,6 +1,8 @@
 import { DockerContainer } from './docker';
 import { AppEnv } from '@travetto/base';
 import { spawn } from './util';
+import { ChildProcess } from 'child_process';
+import { ExecutionResult, CommonProcess } from './types';
 
 export class CommandService {
 
@@ -25,7 +27,7 @@ export class CommandService {
     }
   }
 
-  async exec(...args: string[]) {
+  exec(...args: string[]) {
     let exec;
     if (this.container) {
       const cmd = this.config.imageCommand ? this.config.imageCommand(args) : args;
@@ -34,7 +36,6 @@ export class CommandService {
       const cmd = this.config.processCommand ? this.config.processCommand(args) : args;
       exec = spawn(cmd.join(' '), { quiet: true });
     }
-    const [proc, prom] = await exec;
-    return [proc, prom];
+    return exec as [CommonProcess, Promise<ExecutionResult>];
   }
 }

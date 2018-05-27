@@ -192,7 +192,7 @@ export class DockerContainer {
     return this._cmd('stop', ...(flags || []), this.container, ...(args || [])).prom;
   }
 
-  async exec(flags?: string[], args?: string[]) {
+  exec(flags?: string[], args?: string[]) {
     const { proc, prom } = this._cmd('exec', ...(flags || []), this.container, ...(args || []));
     this._proc = proc;
     prom.catch(e => {
