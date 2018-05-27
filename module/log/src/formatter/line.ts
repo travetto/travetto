@@ -38,12 +38,23 @@ export function lineFormatter(opts: LineFormatterOpts) {
     }
 
     if (ev.file && opts.location) {
-      const ns = ev.file
+      let ns = ev.file
         .replace(AppEnv.cwd, '')
         .replace(/^.*node_modules/, '')
-        .replace(/\//g, '.')
+        .replace(/[\/\\]/g, '.')
         .replace(/^[.]/, '')
         .replace(/[.](t|j)s$/, '');
+
+      if (ns.length > 20) {
+        ns = ns.split(/[.]/g)
+          .map((x, i, arr) => {
+            if ((i + 1) === arr.length) {
+              return x;
+            } else {
+              return x.replace('@travetto', '@trv').substring(0, 4).replace(/[aeiou]/g, '');
+            }
+          }).join('.');
+      }
 
       const loc = ev.line ? `${ns}:${' '.repeat(2 - Math.trunc(Math.floor(Math.log10(ev.line)))) + ev.line}` : ns;
       if (opts.colorize) {

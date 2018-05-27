@@ -20,7 +20,7 @@ class LoggerTest {
     const events: LogEvent[] = [];
     Logger.listen((e) => {
       events.push(e);
-    })
+    });
     console.log('Hello', 1, 2, 3);
     assert(events.length === 1);
     assert(events[0].message === 'Hello');
