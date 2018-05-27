@@ -10,12 +10,9 @@ const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
 
 // Delete old cached files
 const CACHE = {};
-if (!fs.existsSync(cache.dir)) {
-  fs.mkdirSync(cache.dir);
-}
 
 for (const f of fs.readdirSync(cache.dir)) {
-  const full = cwd + f.replace(cache.sepRe, '/').replace(/@ts$/, '.ts');
+  const full = cache.fromEntryName(f);
   const rel = `${cache.dir}/${f}`;
   try {
     const stat = CACHE[rel] = fs.statSync(rel);
@@ -31,7 +28,8 @@ for (const f of fs.readdirSync(cache.dir)) {
 
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {
-  const name = `${cache.dir}/${tsf.replace(cwd, '').replace(/[\/\\]/g, cache.sep).replace(/.ts$/, '@ts')}`;
+  const name = cache.toEntryName(tsf);
+
   let content;
   if (!CACHE[name]) {
     content = ts.transpile(fs.readFileSync(tsf, 'utf-8'), opts);

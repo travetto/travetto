@@ -13,5 +13,7 @@ export declare const AppEnv: {
     sep: string;
     name: string;
     sepRe: RegExp;
+    fromEntryName: (full: string) => string;
+    toEntryName: (full: string) => string;
   }
 }

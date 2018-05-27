@@ -1,4 +1,6 @@
 const os = require('os');
+const path = require('path');
+const fs = require('fs');
 const { execSync } = require('child_process');
 
 const e = process.env;
@@ -24,16 +26,24 @@ if (docker) { // Check for docker existance
   } catch (e) {}
 }
 
+const pathRe = new RegExp(`${path.sep}+`, 'g');
 const cache = {
   dir: process.env.TS_CACHE_DIR,
-  name: cwd.replace(/[\/\\.]/g, '_'),
+  name: cwd.replace(pathRe, '_'),
   sep: process.env.TS_CACHE_SEP || '~'
 };
 
-cache.sepRe = new RegExp(cache.sep, 'g');
+const sepRe = new RegExp(cache.sep, 'g');
+
+cache.fromEntryName = cached => `${cwd}${path.sep}${cached.replace(cache.dir, '').replace(sepRe, path.sep).replace(/@ts$/, '.ts')}`;
+cache.toEntryName = full => `${cache.dir}${path.sep}${full.replace(cwd, '').replace(pathRe, cache.sep).replace(/.ts$/, '@ts')}`;
 
 if (!cache.dir) {
   cache.dir = `${os.tmpdir()}/${cache.name}`;
+}
+
+if (!fs.existsSync(cache.dir)) {
+  fs.mkdirSync(cache.dir);
 }
 
 const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd, cache };
