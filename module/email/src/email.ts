@@ -7,8 +7,6 @@ import { Injectable } from '@travetto/di';
 import { MailConfig } from './config';
 import { TemplateEngine } from './template';
 
-const readFilePromise = util.promisify(fs.readFile);
-
 @Injectable()
 export class EmailService {
 

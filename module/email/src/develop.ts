@@ -29,8 +29,8 @@ async function run() {
     const { text, html } = await tplEngine.template(src);
 
     // Persist temp for serving
-    await writeFile(`${DIST}/index.html`, html);
-    await writeFile(`${DIST}/index.txt`, text);
+    await writeFile(path.normalize(`${DIST}/index.html`), html);
+    await writeFile(path.normalize(`${DIST}/index.txt`), text);
   };
 
   const watcher = new Watcher();
