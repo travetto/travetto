@@ -4,10 +4,9 @@ import * as sourcemap from 'source-map-support';
 import { AppEnv } from '@travetto/base';
 import { CompilerUtil } from './util';
 
-const stringHash = require('string-hash');
+const { cwd, cache } = AppEnv;
 
-const CACHE_DIR = process.env.TS_CACHE_DIR!;
-const CACHE_SEP = process.env.TS_CACHE_SEP!;
+const stringHash = require('string-hash');
 
 export class SourceManager {
   private sourceMaps = new Map<string, { url: string, map: string, content: string }>();
@@ -23,7 +22,7 @@ export class SourceManager {
   }
 
   private resolveCacheName(fileName: string) {
-    return `${CACHE_DIR}/${fileName.replace(/[\/\\]/g, CACHE_SEP).replace(/.ts$/, '@ts')}`;
+    return `${cache.dir}/${fileName.replace(cwd, '').replace(/[\/\\]/g, cache.sep).replace(/.ts$/, '@ts')}`;
   }
 
   registerSourceMaps() {
