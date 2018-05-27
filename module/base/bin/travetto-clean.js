@@ -1,13 +1,18 @@
 #!/usr/bin/env node
 
-require('../bin/travetto').run().then(async () => {
-  const cache = require('../src/env').AppEnv.cache;
-  const { rimraf } = require('../src/scan-fs');
+const { execSync } = require('child_process');
+const os = require('os');
+const cache = require('../src/env').AppEnv.cache;
 
+if (cache.dir) {
   try {
-    await rimraf(cache.dir);
-    console.log(`Deleted ${cache.dir}/`);
+    if (os.platform().startsWith('win')) {
+      execSync(`rd /s /q ${cache.dir}`, { shell: true });
+    } else {
+      execSync(`rm -rf ${cache.dir}`, { shell: true });
+    }
+    console.log(`Deleted ${cache.dir}`);
   } catch (e) {
     console.log('Failed in deleting');
   }
-});
+}
