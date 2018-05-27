@@ -22,8 +22,11 @@ const debug = 'DEBUG' in e && !!e.DEBUG;
 let docker = !('NO_DOCKER' in e && !!e.NO_DOCKER);
 if (docker) { // Check for docker existance
   try {
-    docker = execSync('docker ps') && true;
-  } catch (e) {}
+    execSync('docker ps', { stdio: [undefined, undefined, undefined] });
+    docker = true;
+  } catch (e) {
+    docker = false;
+  }
 }
 
 let cacheDir = process.env.TS_CACHE_DIR;

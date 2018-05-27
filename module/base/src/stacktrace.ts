@@ -1,6 +1,5 @@
 import { AppEnv } from './env';
 import * as fs from 'fs';
-import { sep } from 'path';
 
 const FILTERS: string[] = [];
 
@@ -98,9 +97,9 @@ export function simplifyStack(err: Error, cwd = AppEnv.cwd) {
       }
       return acc;
     }, [] as string[])
-    .map(x => x.replace(`${cwd}${sep}`, '')
+    .map(x => x.replace(`${cwd}[\/\\]`, '')
       .replace('node_modules', 'n_m')
-      .replace(/n_m[\/\\]@travetto[\/\\]([^\/\\]+)[\/\\]src/g, (a, p) => `@trv${sep}${p}`)
+      .replace(/n_m[\/\\]@travetto[\/\\]([^/\\]+)[\/\\]src/g, (a, p) => `@trv/${p}`)
     )
     .join('  \n');
 
