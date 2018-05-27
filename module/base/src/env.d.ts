@@ -10,9 +10,7 @@ export declare const AppEnv: {
   is: (env: string) => boolean;
   cache: {
     dir: string;
-    sep: string;
-    name: string;
-    sepRe: RegExp;
+    dirN: string;
     fromEntryName: (full: string) => string;
     toEntryName: (full: string) => string;
   }

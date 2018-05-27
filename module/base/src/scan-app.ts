@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import { Entry, scanDirSync } from './scan-fs';
 import { AppEnv } from './env';
 

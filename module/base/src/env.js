@@ -28,6 +28,7 @@ if (docker) { // Check for docker existance
 
 const cache = {
   dir: process.env.TS_CACHE_DIR,
+  dirN: '',
   name: cwd.replace(/\//g, '_'),
   sep: process.env.TS_CACHE_SEP || '~'
 };
@@ -41,8 +42,10 @@ if (!cache.dir) {
   cache.dir = `${os.tmpdir().replace(/[\\]+/g, '/')}/${cache.name}`;
 }
 
-if (!fs.existsSync(cache.dir)) {
-  fs.mkdirSync(cache.dir);
+cache.dirN = path.normalize(cache.dir);
+
+if (!fs.existsSync(cache.dirN)) {
+  fs.mkdirSync(cache.dirN);
 }
 
 const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd, cache };
