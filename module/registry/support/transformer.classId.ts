@@ -1,12 +1,10 @@
 import * as ts from 'typescript';
 import * as path from 'path';
+import { AppEnv } from '@travetto/base';
 import { TransformUtil, Import, State } from '@travetto/compiler';
 const stringHash = require('string-hash');
 
 const SEP = path.sep;
-const RE_SEP = SEP === '/' ? '\\/' : SEP;
-const SRC_RE = new RegExp(`([^/]+)${RE_SEP}src${RE_SEP}`, 'g');
-const PATH_RE = new RegExp(RE_SEP, 'g');
 
 type MethodHashes = { [key: string]: { hash: number, clsId: ts.Identifier } };
 
@@ -74,25 +72,25 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 export const ClassIdTransformer = {
   transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
-    let fileRoot = file.fileName;
+    let fileRoot = file.fileName.replace(/[\\]/g, '/');
 
     let ns = '@sys';
 
-    if (fileRoot.includes(process.cwd())) {
-      fileRoot = file.fileName.split(process.cwd() + SEP)[1];
+    if (fileRoot.includes(AppEnv.cwd)) {
+      fileRoot = fileRoot.split(`${AppEnv.cwd}/`)[1];
       ns = '@app';
-      if (fileRoot.startsWith(`node_modules${SEP}`)) {
-        fileRoot = fileRoot.split(`node_modules${SEP}`).pop()!;
+      if (fileRoot.startsWith('node_modules/')) {
+        fileRoot = fileRoot.split('node_modules/').pop()!;
         if (fileRoot.startsWith('@')) {
-          const [ns1, ns2, ...rest] = fileRoot.split(SEP);
+          const [ns1, ns2, ...rest] = fileRoot.split('/');
           ns = `${ns1}.${ns2}`;
-          fileRoot = rest.join(SEP);
+          fileRoot = rest.join('/');
         }
       }
     }
 
     fileRoot = fileRoot
-      .replace(PATH_RE, '.')
+      .replace(/[\/]+/g, '.')
       .replace(/^\./, '')
       .replace(/\.(t|j)s$/, '');
 
