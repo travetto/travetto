@@ -1,4 +1,5 @@
-import { execSync } from 'child_process';
+const os = require('os');
+const { execSync } = require('child_process');
 
 const e = process.env;
 
@@ -35,4 +36,6 @@ if (!cache.dir) {
   cache.dir = `${os.tmpdir()}/${cache.name}`;
 }
 
-export const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd, cache };
+const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd, cache };
+
+module.exports = { AppEnv };

@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const ts = require('typescript');
-const os = require('os');
 
 //Simple bootstrap to load compiler
 const { AppEnv: { cwd, cache } } = require('../src/env');
@@ -18,11 +17,15 @@ if (!fs.existsSync(cache.dir)) {
 for (const f of fs.readdirSync(cache.dir)) {
   const full = cwd + f.replace(cache.sepRe, '/').replace(/@ts$/, '.ts');
   const rel = `${cache.dir}/${f}`;
-  const stat = CACHE[rel] = fs.statSync(rel);
-  const fullStat = fs.statSync(full);
-  if (stat.ctimeMs < fullStat.ctimeMs || stat.mtimeMs < fullStat.mtimeMs || stat.atime < fullStat.mtime) {
-    fs.unlinkSync(rel);
-    delete CACHE[rel];
+  try {
+    const stat = CACHE[rel] = fs.statSync(rel);
+    const fullStat = fs.statSync(full);
+    if (stat.ctimeMs < fullStat.ctimeMs || stat.mtimeMs < fullStat.mtimeMs || stat.atime < fullStat.mtime) {
+      fs.unlinkSync(rel);
+      delete CACHE[rel];
+    }
+  } catch (e) {
+    // Cannot remove missing file
   }
 }
 
