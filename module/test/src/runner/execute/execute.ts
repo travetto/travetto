@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 import * as assert from 'assert';
-import { bulkFind, BaseError } from '@travetto/base';
+import { bulkFind, BaseError, AppEnv } from '@travetto/base';
 
 import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../../model';
 import { TestRegistry } from '../../service';
@@ -241,8 +241,8 @@ export class ExecuteUtil {
   }
 
   static async execute(consumer: Consumer, [file, ...args]: string[]) {
-    if (!file.startsWith(process.cwd())) {
-      file = `${process.cwd()}/${file}`;
+    if (!file.startsWith(AppEnv.cwd)) {
+      file = `${AppEnv.cwd}/${file}`;
     }
 
     require(file);

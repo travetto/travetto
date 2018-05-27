@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import * as assert from 'assert';
 import { TransformUtil, State } from '@travetto/compiler';
+import { AppEnv } from '@travetto/base/src/env';
 
 const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
   [ts.SyntaxKind.EqualsEqualsToken]: 'equal',
@@ -170,11 +171,13 @@ const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({
 
 export const TestAssertTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
+    const name = source.fileName.replace(/[\\]+/g, '/');
+
     // Only apply to test files
-    if (process.env.ENV === 'test' &&
-      source.fileName.includes('/test/') &&
-      !source.fileName.includes('/src/') &&
-      !source.fileName.includes('/node_modules/')
+    if (AppEnv.test &&
+      name.includes('/test/') &&
+      !name.includes('/src/') &&
+      !name.includes('/node_modules/')
     ) {
       // Assert
       return TRANSFORMER(context)(source);

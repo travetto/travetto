@@ -52,7 +52,7 @@ export class AssertUtil {
   static test: TestConfig;
 
   static readFilePosition(err: Error, filename: string) {
-    const base = process.cwd();
+    const base = AppEnv.cwd;
     const lines = (err.stack || new Error().stack!).split('\n').filter(x => !x.includes('/node_modules/') && x.includes(base));
     let best = lines.filter(x => x.includes(filename))[0];
 
@@ -67,7 +67,7 @@ export class AssertUtil {
     const [fn, path] = best.trim().split(/\s+/g).slice(1);
     const [file, lineNo, col] = path.replace(/[()]/g, '').split(':');
 
-    const outFile = file.split(`${process.cwd()}/`)[1];
+    const outFile = file.split(`${AppEnv.cwd}/`)[1];
 
     const res = { file: outFile, line: parseInt(lineNo, 10) };
 

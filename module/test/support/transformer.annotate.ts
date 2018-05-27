@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import { TransformUtil, State } from '@travetto/compiler';
 import * as fs from 'fs';
+import { AppEnv } from '@travetto/base/src/env';
 
 const TEST_IMPORT = '@travetto/test';
 
@@ -43,11 +44,13 @@ const TRANSFORMER = TransformUtil.importingVisitor<any>((source) => {
 
 export const TestLineNumberTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
+    const name = source.fileName.replace(/[\\]+/g, '/');
+
     // Only apply to test files
-    if (process.env.ENV === 'test' &&
-      source.fileName.includes('/test/') &&
-      !source.fileName.includes('/src/') &&
-      !source.fileName.includes('/node_modules/')
+    if (AppEnv.test &&
+      name.includes('/test/') &&
+      !name.includes('/src/') &&
+      !name.includes('/node_modules/')
     ) {
       // Annotate
       return TRANSFORMER(context)(source);
