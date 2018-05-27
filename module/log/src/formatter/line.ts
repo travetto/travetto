@@ -4,9 +4,6 @@ import { LogEvent } from '../types';
 import { stylize, LEVEL_STYLES, makeLink } from './styles';
 import { AppEnv, simplifyStack } from '@travetto/base';
 
-const RE_SEP = path.sep === '/' ? '\\/' : path.sep;
-const PATH_RE = new RegExp(RE_SEP, 'g');
-
 export interface LineFormatterOpts {
   timestamp?: boolean;
   colorize?: boolean;
@@ -42,9 +39,9 @@ export function lineFormatter(opts: LineFormatterOpts) {
 
     if (ev.file && opts.location) {
       const ns = ev.file
-        .replace(process.cwd(), '')
+        .replace(AppEnv.cwd, '')
         .replace(/^.*node_modules/, '')
-        .replace(PATH_RE, '.')
+        .replace(/\//, '.')
         .replace(/^[.]/, '')
         .replace(/[.](t|j)s$/, '');
 
@@ -85,5 +82,5 @@ export function lineFormatter(opts: LineFormatterOpts) {
       out = `${out}${message} `;
     }
     return out.substring(0, out.length - 1);
-  }
-};
+  };
+}
