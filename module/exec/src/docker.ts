@@ -273,7 +273,7 @@ export class DockerContainer {
     await this.cleanup();
     if (files) {
       for (const { name, content } of files) {
-        const f = [dir, name].join(path.sep);
+        const f = path.join(dir, name);
         await writeFile(f, content, { mode: '755' });
       }
     }
