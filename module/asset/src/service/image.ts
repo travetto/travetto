@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { DockerContainer, spawn } from '@travetto/exec';
+import { CommandService } from '@travetto/exec';
 import { Cacheable } from '@travetto/cache';
 import { Injectable } from '@travetto/di';
 
@@ -17,20 +17,12 @@ const fsWriteFile = util.promisify(fs.writeFile);
 @Injectable()
 export class ImageService {
 
-  private gm: DockerContainer;
+  converter = new CommandService({ image: 'v4tech/imagemagick' });
 
-  constructor(private assetService: AssetService) {
-  }
+  constructor(private assetService: AssetService) { }
 
   async postConstruct() {
-    if (AppEnv.docker) {
-      this.gm = new DockerContainer('v4tech/imagemagick')
-        .forceDestroyOnShutdown()
-        .setInteractive(true);
-
-      await this.gm.create([], ['/bin/sh']);
-      await this.gm.start();
-    }
+    await this.converter.init();
   }
 
   @Cacheable({
@@ -48,10 +40,8 @@ export class ImageService {
     }
     if (options && (options.w || options.h)) {
       const filePath = AssetUtil.generateTempFile(info.filename.split('.').pop() as string);
-      const cmd = ['convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-'];
 
-      const converter = !this.gm ? spawn(cmd.join(' '), { quiet: true }) : this.gm.exec(['-i'], cmd);
-      const [proc, prom] = await converter;
+      const [proc, prom] = this.converter.exec('convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-');
 
       info.stream.pipe(proc.stdin);
       proc.stdout.pipe(fs.createWriteStream(filePath));
