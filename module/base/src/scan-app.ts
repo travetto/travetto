@@ -5,7 +5,7 @@ import { AppEnv } from './env';
 
 const cache: { [key: string]: Entry[] } = {};
 
-export function findAppFilesByExt(ext: string) {
+export function findAppFilesByExt(ext: string, filter?: (rel: string) => boolean) {
   if (!cache[ext]) {
     cache[ext] = scanDirSync({
       testFile: x => x.endsWith(ext),
@@ -16,13 +16,17 @@ export function findAppFilesByExt(ext: string) {
     }, AppEnv.cwd)
       .filter(x => !x.stats.isDirectory());
   }
-  return cache[ext].slice(0);
+  if (filter) {
+    return cache[ext].filter(x => x.file.replace(`${AppEnv.cwd}${path.sep}`, '').replace(/[\\]+/g, '/'));
+  } else {
+    return cache[ext].slice(0);
+  }
 }
 
-export function findAppFiles(ext: string, pattern: RegExp) {
-  return findAppFilesByExt(ext).filter(x => pattern.test(x.file.replace(/[\\]/g, '/')));
+export function findAppFiles(ext: string, filter: (rel: string) => boolean) {
+  return findAppFilesByExt(ext, filter);
 }
 
-export function requireAppFiles(ext: string, pattern: RegExp) {
-  return findAppFiles(ext, pattern).map(x => require(x.file.replace(/[\\]/g, '/')));
+export function requireAppFiles(ext: string, filter: (rel: string) => boolean) {
+  return findAppFiles(ext, filter).map(x => require(x.file.replace(/[\\]/g, '/')));
 }
