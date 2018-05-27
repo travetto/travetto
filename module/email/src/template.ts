@@ -8,14 +8,12 @@ import * as htmlEntities from 'html-entities';
 import * as marked from 'marked';
 import * as util from 'util';
 import * as Mustache from 'mustache';
-import { exec } from '@travetto/exec';
+import { CommandService } from '@travetto/exec';
 import { TemplateContext } from '.';
 import { Injectable } from '@travetto/di';
 import { MailTemplateConfig } from './config';
 
 const sass = require('sass');
-
-const pngcrushPath = require('pngcrush-installer').getBinPath();
 
 const readFile = util.promisify(fs.readFile);
 const unlink = util.promisify(fs.unlink);
@@ -45,6 +43,11 @@ export class TemplateEngine {
 
   private templates: { [key: string]: string } = {};
   private cache: { [key: string]: { html: string, text: string } } = {};
+
+  private converter = new CommandService({
+    image: 'olafnorge/optipng',
+    processCommand: (args: string[]) => ['optipng', ...args]
+  });
 
   // TODO: figure out paths for html, images, and partials
   constructor(public config: MailTemplateConfig) {
@@ -145,8 +148,10 @@ export class TemplateEngine {
     const out = `${pth}.compressed`;
 
     if (!(await exists(out))) {
-      const [proc, exe] = exec(`${pngcrushPath} -rem alla -nofilecheck -reduce -m 7 ${pth} ${out}`);
-      await exe;
+      const [proc, prom] = this.converter.exec('-quiet', '-strip', 'all', '-f4', '-o7', '-preserve', '-', '-');
+      fs.createReadStream(pth).pipe(proc.stdin);
+      proc.stdout.pipe(fs.createWriteStream(out));
+      await prom;
     }
 
     const buffer = await readFile(out);
