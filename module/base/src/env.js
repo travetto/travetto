@@ -13,7 +13,7 @@ const envSet = new Set(envs);
 
 const is = envSet.has.bind(envSet);
 
-const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\/\\]+$/, '');
+const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\/\\]+$/, '').replace(/[\\]+/g, '/');
 const prod = is('prod') || is('production');
 const test = is('test') || is('testing');
 const dev = !prod && !test;
@@ -26,20 +26,19 @@ if (docker) { // Check for docker existance
   } catch (e) {}
 }
 
-const pathRe = new RegExp(`${path.sep}+`, 'g');
 const cache = {
   dir: process.env.TS_CACHE_DIR,
-  name: cwd.replace(pathRe, '_'),
+  name: cwd.replace(/\//g, '_'),
   sep: process.env.TS_CACHE_SEP || '~'
 };
 
 const sepRe = new RegExp(cache.sep, 'g');
 
-cache.fromEntryName = cached => `${cwd}${path.sep}${cached.replace(cache.dir, '').replace(sepRe, path.sep).replace(/@ts$/, '.ts')}`;
-cache.toEntryName = full => `${cache.dir}${path.sep}${full.replace(cwd, '').replace(pathRe, cache.sep).replace(/.ts$/, '@ts')}`;
+cache.fromEntryName = cached => `${cwd}/${cached.replace(cache.dir, '').replace(sepRe, '/').replace(/@ts$/, '.ts')}`;
+cache.toEntryName = full => `${cache.dir}/${full.replace(cwd, '').replace(/\/+/g, cache.sep).replace(/.ts$/, '@ts')}`;
 
 if (!cache.dir) {
-  cache.dir = `${os.tmpdir()}/${cache.name}`;
+  cache.dir = `${os.tmpdir().replace(/[\\]+/g, '/')}/${cache.name}`;
 }
 
 if (!fs.existsSync(cache.dir)) {

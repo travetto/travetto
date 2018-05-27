@@ -42,16 +42,19 @@ export class Watcher extends EventEmitter {
       super.setMaxListeners(this.options.maxListeners);
     }
 
+    const nFile = path.normalize(this.options.cwd);
+
     this.pendingWatched.push({
       file: this.options.cwd,
-      stats: fs.lstatSync(this.options.cwd)
+      nFile,
+      stats: fs.lstatSync(nFile)
     });
   }
 
   private processDirectoryChange(dir: Entry) {
     dir.children = dir.children || [];
 
-    fs.readdir(dir.file, (err, current) => {
+    fs.readdir(dir.nFile, (err, current) => {
       if (err) {
         if (err.code === 'ENOENT') {
           current = [];
@@ -86,12 +89,15 @@ export class Watcher extends EventEmitter {
       // If file was added
       for (const next of current) {
         const nextRel = next.replace(this.options.cwd, '');
-        const nextStats = fs.lstatSync(next);
+        const nFile = path.normalize(next);
+        const nextStats = fs.lstatSync(nFile);
 
         if (!prevSet.has(next) && (nextStats.isDirectory() ||
-          this.findHandlers.find(x => x.testFile ? x.testFile(nextRel) : false))) {
+          this.findHandlers.find(x => x.testFile ? x.testFile(nextRel) : false))
+        ) {
           const sub: Entry = {
             file: next,
+            nFile,
             stats: nextStats
           };
           this.watch(sub);
@@ -119,8 +125,8 @@ export class Watcher extends EventEmitter {
     }
 
     try {
-      console.debug('Watching Directory', entry.file);
-      const watcher = fs.watch(entry.file, throttle((event, f) => {
+      console.debug('Watching Directory', entry.nFile);
+      const watcher = fs.watch(entry.nFile, throttle((event, f) => {
         this.processDirectoryChange(entry);
       }, this.options.debounceDelay));
 
@@ -149,14 +155,14 @@ export class Watcher extends EventEmitter {
     this.pollers.set(entry.file, (curr: fs.Stats, prev: fs.Stats) => {
       // Only emit changed if the file still exists
       // Prevents changed/deleted duplicate events
-      if (fs.existsSync(entry.file)) {
+      if (fs.existsSync(entry.nFile)) {
         this._emit('changed', entry);
         this._emit('all', { event: 'changed', entry });
       }
     });
 
     try {
-      fs.watchFile(entry.file, opts, this.pollers.get(entry.file)!);
+      fs.watchFile(entry.nFile, opts, this.pollers.get(entry.file)!);
     } catch (err) {
       return this.handleError(err);
     }
@@ -166,7 +172,7 @@ export class Watcher extends EventEmitter {
     if (this.pollers.has(entry.file)) {
       console.debug('Unwatching File', entry.file);
 
-      fs.unwatchFile(entry.file, this.pollers.get(entry.file)!);
+      fs.unwatchFile(entry.nFile, this.pollers.get(entry.file)!);
       this.pollers.delete(entry.file);
     }
   }
