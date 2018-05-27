@@ -1,7 +1,8 @@
-import { Watcher } from '../src';
+import { Watcher, AppEnv } from '../src';
 import * as fs from 'fs';
+import * as path from 'path';
 
-const w = new Watcher({ cwd: `${process.cwd()}/src` });
+const w = new Watcher({ cwd: path.join(AppEnv.cwd, 'src') });
 w
   .on('all', ({ event, entry }) => {
     console.log(event, entry);

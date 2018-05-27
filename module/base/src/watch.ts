@@ -61,7 +61,7 @@ export class Watcher extends EventEmitter {
       }
 
       // Convert to full paths
-      current = current.map(x => `${dir.file}${path.sep}${x}`);
+      current = current.map(x => path.join(dir.file, x));
 
       // Get watched files for this dir
       const previous = (dir.children || []).slice(0);
