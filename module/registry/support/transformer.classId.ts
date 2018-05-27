@@ -1,4 +1,5 @@
 import * as ts from 'typescript';
+import * as path from 'path';
 import { AppEnv } from '@travetto/base/src/env';
 import { TransformUtil, Import, State } from '@travetto/compiler';
 
@@ -70,7 +71,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 export const ClassIdTransformer = {
   transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
-    let fileRoot = file.fileName;
+    let fileRoot = file.fileName.replace(/[\\\/]/g, path.sep);
 
     let ns = '@sys';
 
