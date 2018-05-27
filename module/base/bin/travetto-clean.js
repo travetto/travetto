@@ -10,4 +10,6 @@ require('../bin/travetto').run().then(async () => {
   } catch (e) {
     console.log('Failed in deleting');
   }
+
+  process.exit(0);
 });
