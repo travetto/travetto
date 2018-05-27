@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { EventEmitter } from 'events';
 
-import { AppInfo } from '@travetto/base';
+import { AppInfo, AppEnv } from '@travetto/base';
 import { TransformerManager } from './transformers';
 import { CompilerUtil } from './util';
 import { SourceManager } from './source';
@@ -23,7 +23,7 @@ class $Compiler {
   // Event manager
   events = new EventEmitter();
 
-  constructor(public cwd: string = process.cwd()) {
+  constructor(public cwd: string = AppEnv.cwd) {
 
     const exclude = [/\.d\.ts$/g]; // Definition files
 

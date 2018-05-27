@@ -4,8 +4,6 @@ import * as sourcemap from 'source-map-support';
 import { AppEnv } from '@travetto/base';
 import { CompilerUtil } from './util';
 
-const { cwd, cache } = AppEnv;
-
 const stringHash = require('string-hash');
 
 export class SourceManager {
@@ -13,16 +11,8 @@ export class SourceManager {
   private contents = new Map<string, string>();
   private hashes = new Map<string, number>();
 
-  constructor(private config: { cache?: boolean, cacheDir?: string } = {}) {
+  constructor(private config: { cache?: boolean } = {}) {
     Object.assign(config, { ... { cache: true }, config });
-
-    try {
-      fs.mkdirSync(this.config.cacheDir!);
-    } catch (e) { }
-  }
-
-  private resolveCacheName(fileName: string) {
-    return `${cache.dir}/${fileName.replace(cwd, '').replace(/[\/\\]/g, cache.sep).replace(/.ts$/, '@ts')}`;
   }
 
   registerSourceMaps() {
@@ -107,7 +97,7 @@ export class SourceManager {
   set(name: string, content: string) {
     this.contents.set(name, content);
     if (this.config.cache) {
-      fs.writeFileSync(this.resolveCacheName(name), content);
+      fs.writeFileSync(AppEnv.cache.toEntryName(name), content);
     }
   }
 
@@ -118,15 +108,15 @@ export class SourceManager {
   }
 
   hasCached(file: string) {
-    return this.config.cache && fs.existsSync(this.resolveCacheName(file));
+    return this.config.cache && fs.existsSync(AppEnv.cache.toEntryName(file));
   }
 
   getCached(file: string) {
-    return fs.readFileSync(this.resolveCacheName(file)).toString();
+    return fs.readFileSync(AppEnv.cache.toEntryName(file)).toString();
   }
 
   deleteCached(file: string) {
-    fs.unlinkSync(this.resolveCacheName(file));
+    fs.unlinkSync(AppEnv.cache.toEntryName(file));
   }
 
   unload(name: string) {
