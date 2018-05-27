@@ -7,7 +7,7 @@ const cache = require('../src/env').AppEnv.cache;
 if (cache.dir) {
   try {
     if (os.platform().startsWith('win')) {
-      execSync(`rd /s /q ${cache.dir}`, { shell: true });
+      execSync(`del /S ${cache.dir}`, { shell: true });
     } else {
       execSync(`rm -rf ${cache.dir}`, { shell: true });
     }
