@@ -1,7 +1,8 @@
-import { bulkRead, bulkReadSync, AppEnv, bulkFindSync, findAppFilesByExt } from '@travetto/base';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { readdirSync, readFileSync } from 'fs';
+
+import { bulkRead, bulkReadSync, AppEnv, bulkFindSync, findAppFilesByExt } from '@travetto/base';
 import { ConfigMap } from './map';
 
 export class ConfigLoader {
@@ -39,10 +40,10 @@ export class ConfigLoader {
     const allYaml = findAppFilesByExt('.yml');
 
     const files = allYaml.filter(x =>
-      x.file.includes('node_modules/@travetto')
-      && x.file.includes('/config/'))
-      .concat(allYaml.filter(x => x.file.startsWith(`${process.cwd()}/config/`)))
-      .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }));
+      x.file.includes(`node_modules/@travetto`)
+      && x.file.includes(`/config/`))
+      .concat(allYaml.filter(x => x.file.startsWith(`${AppEnv.cwd}/config/`)))
+      .map(x => ({ name: x.nFile, data: readFileSync(x.nFile).toString() }));
 
     for (const file of files) {
       const ns = path.basename(file.name, '.yml');
@@ -52,8 +53,8 @@ export class ConfigLoader {
     // Handle environmental loads
     if (AppEnv.all.length) {
       const loaded: string[] = [];
-      const envFiles = allYaml.filter(x => x.file.startsWith(`${process.cwd()}/env/`))
-        .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }))
+      const envFiles = allYaml.filter(x => x.file.startsWith(`${AppEnv.cwd}/env/`))
+        .map(x => ({ name: x.nFile, data: readFileSync(x.nFile).toString() }))
         .map(x => {
           const tested = path.basename(x.name, '.yml');
           const found = AppEnv.is(tested);
