@@ -1,6 +1,7 @@
 import * as fs from 'fs';
+import { AppEnv } from './env';
 
-const pkg = JSON.parse(fs.readFileSync(`${process.cwd()}/package.json`).toString());
+const pkg = JSON.parse(fs.readFileSync(`${AppEnv.cwd}/package.json`).toString());
 
 export const AppInfo = {
   VERSION: pkg.version,

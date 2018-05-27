@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
+import { AppEnv } from './env';
 
 const fsReadFileAsync = util.promisify(fs.readFile);
 const fsStat = util.promisify(fs.lstat);
@@ -39,7 +40,7 @@ export function scanDir(handler: Handler, base?: string, relBase?: string) {
     try {
       const out: Entry[] = [];
 
-      base = base || process.cwd();
+      base = base || AppEnv.cwd;
       relBase = relBase || base;
 
       for (const file of (await fsReaddir(relBase))) {
@@ -87,7 +88,7 @@ export function bulkFindSync(handlers: Handler[], base?: string) {
 export function scanDirSync(handler: Handler, base?: string, relBase?: string) {
   const out: Entry[] = [];
 
-  base = base || process.cwd();
+  base = base || AppEnv.cwd;
   relBase = relBase || base;
 
   for (const file of fs.readdirSync(relBase)) {

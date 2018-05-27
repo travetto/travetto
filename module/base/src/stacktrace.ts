@@ -1,5 +1,4 @@
 import { AppEnv } from './env';
-
 import * as fs from 'fs';
 
 const FILTERS: string[] = [];
@@ -31,7 +30,7 @@ export function initStackHandler() {
     'source-map-support.js'
   );
 
-  const BASE = process.cwd();
+  const BASE = AppEnv.cwd;
 
   const ogc = Error.captureStackTrace;
   Error.captureStackTrace = function (a: any, b) {
@@ -74,7 +73,7 @@ export function addStackFilters(...names: string[]) {
   }
 }
 
-export function simplifyStack(err: Error, cwd = process.cwd()) {
+export function simplifyStack(err: Error, cwd = AppEnv.cwd) {
   const getName = (x: string) => {
     const l = x.split(cwd)[1];
     if (l) {
@@ -98,7 +97,7 @@ export function simplifyStack(err: Error, cwd = process.cwd()) {
       }
       return acc;
     }, [] as string[])
-    .map(x => x.replace(`${process.cwd()}/`, '')
+    .map(x => x.replace(`${cwd}/`, '')
       .replace('node_modules', 'n_m')
       .replace(/n_m\/@travetto\/([^/]+)\/src/g, (a, p) => `@trv/${p}`)
     )

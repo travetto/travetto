@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Entry, Handler, bulkFindSync } from './scan-fs';
 import { throttle } from './util';
+import { AppEnv } from './env';
 
 interface Options {
   maxListeners?: number;
@@ -32,7 +33,7 @@ export class Watcher extends EventEmitter {
       maxListeners: opts.maxListeners,
       interval: opts.interval || 250,
       debounceDelay: opts.debounceDelay || 250,
-      cwd: opts.cwd || process.cwd()
+      cwd: opts.cwd || AppEnv.cwd
     };
 
     // Set maxListeners

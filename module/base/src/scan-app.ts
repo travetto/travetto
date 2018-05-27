@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { Entry, scanDirSync } from './scan-fs';
+import { AppEnv } from './env';
 
 const cache: { [key: string]: Entry[] } = {};
 
@@ -11,7 +12,7 @@ export function findAppFilesByExt(ext: string) {
         !x.includes('node_modules') ||
         x.endsWith('node_modules') ||
         x.includes('@travetto')
-    }, process.cwd())
+    }, AppEnv.cwd)
       .filter(x => !x.stats.isDirectory());
   }
   return cache[ext].slice(0);
