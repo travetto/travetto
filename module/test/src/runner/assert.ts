@@ -1,6 +1,7 @@
 import { AppEnv, isPlainObject, isFunction, isPrimitive } from '@travetto/base';
 import * as assert from 'assert';
 import * as util from 'util';
+import * as path from 'path';
 import { Assertion, TestConfig } from '../model';
 
 const ASSERT_FN_OPERATOR: { [key: string]: string } = {
@@ -45,6 +46,8 @@ function clean(val: any) {
   }
 }
 
+const excludeNode = /[\\\/]node_modules[\\\/]/;
+
 export class AssertUtil {
 
   static assertions: Assertion[] = [];
@@ -53,21 +56,22 @@ export class AssertUtil {
 
   static readFilePosition(err: Error, filename: string) {
     const base = AppEnv.cwd;
-    const lines = (err.stack || new Error().stack!).split('\n').filter(x => !x.includes('/node_modules/') && x.includes(base));
+
+    const lines = (err.stack || new Error().stack!).split('\n').filter(x => !excludeNode.test(x) && x.includes(base));
     let best = lines.filter(x => x.includes(filename))[0];
 
     if (!best) {
-      best = lines.filter(x => x.includes(`${base}/test`))[0];
+      best = lines.filter(x => x.includes(path.join(base, 'test')))[0];
     }
 
     if (!best) {
       return { file: filename, line: 1 };
     }
 
-    const [fn, path] = best.trim().split(/\s+/g).slice(1);
-    const [file, lineNo, col] = path.replace(/[()]/g, '').split(':');
+    const [fn, pth] = best.trim().split(/\s+/g).slice(1);
+    const [file, lineNo, col] = pth.replace(/[()]/g, '').split(':');
 
-    const outFile = file.split(`${AppEnv.cwd}/`)[1];
+    const outFile = file.split(base)[1].replace(/^[\\\/]/, '')[1];
 
     const res = { file: outFile, line: parseInt(lineNo, 10) };
 
