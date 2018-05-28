@@ -52,7 +52,9 @@ export function initStackHandler() {
         !filterRegex.test(callSite.toString());
     });
 
-    if (!AppEnv.prod) {
+    // Handle broken depd
+    if (rewrite.length < 3) {
+      const depd = frames[0] && frames[0].getFileName() && frames[0].getFileName()!.includes(`${path.sep}depd${path.sep}`);
       // depd requires at least 3 frames
       while (rewrite.length < 3) {
         rewrite.push({

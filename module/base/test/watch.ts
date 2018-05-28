@@ -11,5 +11,6 @@ w
 w.add([{ testFile: x => /.*/.test(x) }, __filename]);
 w.watch({
   file: __dirname,
+  module: __dirname.replace(/[\\]/g, '/'),
   stats: fs.lstatSync(__dirname)
 });
