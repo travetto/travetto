@@ -25,7 +25,7 @@ class $Compiler {
 
   constructor(public cwd: string = AppEnv.cwd) {
 
-    const exclude = [/\.d\.ts$/g]; // Definition files
+    const exclude = [/\.d\.ts$/]; // Definition files
 
     // Get Files proper like
     if (AppInfo.DEV_PACKAGES && AppInfo.DEV_PACKAGES.length) {
