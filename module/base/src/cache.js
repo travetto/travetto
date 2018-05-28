@@ -23,14 +23,15 @@ class Cache {
 
     for (const f of fs.readdirSync(this.cacheDir)) {
       const full = this.fromEntryName(f);
-      const cacheFull = path.join(this.cacheDir, f);
       try {
-        const stat = this.statEntry(cacheFull);
+        const cacheStat = this.statEntry(full);
         const fullStat = fs.statSync(full);
-        if (stat.ctimeMs < fullStat.ctimeMs || stat.mtimeMs < fullStat.mtimeMs || stat.atime < fullStat.mtime) {
-          this.removeEntry(cacheFull);
+
+        if (cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs || cacheStat.atimeMs < fullStat.atimeMs) {
+          this.removeEntry(full);
         }
       } catch (e) {
+        console.log('Cannot read', e.message);
         // Cannot remove missing file
       }
     }
@@ -47,17 +48,19 @@ class Cache {
 
   removeEntry(full) {
     fs.unlinkSync(this.toEntryName(full));
-    delete cache[full];
+    delete this.cache[full];
   }
 
   hasEntry(full) {
-    return this.cache[full];
+    return !!this.cache[full] || fs.existsSync(this.toEntryName(full));
   }
 
   statEntry(full) {
-    const stat = fs.statSync(this.toEntryName(full));
-    this.cache[full] = stat;
-    return stat;
+    if (!this.cache[full]) {
+      const stat = fs.statSync(this.toEntryName(full));
+      this.cache[full] = stat;
+    }
+    return this.cache[full];
   }
 
   clear() {
