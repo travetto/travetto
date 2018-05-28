@@ -3,6 +3,7 @@ import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
 import { AppEnv } from '@travetto/base';
 import { CompilerUtil } from './util';
+import { Cache } from '@travetto/base/src/cache';
 
 const stringHash = require('string-hash');
 
@@ -10,6 +11,7 @@ export class SourceManager {
   private sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   private contents = new Map<string, string>();
   private hashes = new Map<string, number>();
+  private cache = new Cache(AppEnv.cwd);
 
   constructor(private config: { cache?: boolean } = {}) {
     Object.assign(config, { ... { cache: true }, config });
@@ -97,7 +99,7 @@ export class SourceManager {
   set(name: string, content: string) {
     this.contents.set(name, content);
     if (this.config.cache) {
-      fs.writeFileSync(AppEnv.cache.toEntryName(name), content);
+      this.cache.writeEntry(name, content);
     }
   }
 
@@ -105,18 +107,19 @@ export class SourceManager {
     this.contents.clear();
     this.sourceMaps.clear();
     this.hashes.clear();
+    this.cache.clear();
   }
 
   hasCached(file: string) {
-    return this.config.cache && fs.existsSync(AppEnv.cache.toEntryName(file));
+    return this.config.cache && this.cache.hasEntry(file);
   }
 
   getCached(file: string) {
-    return fs.readFileSync(AppEnv.cache.toEntryName(file)).toString();
+    return this.cache.readEntry(file);
   }
 
   deleteCached(file: string) {
-    fs.unlinkSync(AppEnv.cache.toEntryName(file));
+    this.cache.removeEntry(file);
   }
 
   unload(name: string) {

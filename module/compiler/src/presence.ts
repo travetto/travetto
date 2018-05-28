@@ -69,7 +69,7 @@ export class FilePresenceManager {
     }
 
     if (this.watch) {
-      this.buildWatcher(`${this.cwd}${path.sep}src`, [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+      this.buildWatcher(path.join(this.cwd, 'src'), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
     }
   }
 

@@ -1,12 +1,14 @@
 import * as ts from 'typescript';
-import { dirname } from 'path';
+import { dirname, sep } from 'path';
 import { AppEnv, AppInfo } from '@travetto/base';
+import { PassThrough } from 'stream';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
 export interface State {
   newImports: Import[];
   path: string;
+  modulePath: string;
   imports: Map<string, Import>;
 }
 
@@ -135,7 +137,9 @@ export class TransformUtil {
     return (context: ts.TransformationContext) =>
       (file: ts.SourceFile) => {
         const state = init(file, context) as T;
-        state.path = require.resolve(file.fileName);
+        const pth = require.resolve(file.fileName);
+        state.path = pth.replace(/[\\\/]/g, sep);
+        state.modulePath = pth.replace(/[\\\/]/g, '/');
         state.newImports = [];
         state.imports = new Map();
 
