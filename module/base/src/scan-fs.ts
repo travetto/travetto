@@ -35,34 +35,31 @@ export async function bulkFind(handlers: Handler[], base?: string) {
   return out;
 }
 
-export function scanDir(handler: Handler, base?: string, relBase?: string) {
+export function scanDir(handler: Handler, base?: string, entry?: Entry) {
   return new Promise<Entry[]>(async (resolve, reject) => {
 
     try {
       const out: Entry[] = [];
 
       base = base || AppEnv.cwd;
-      relBase = relBase || base;
+      entry = (entry || { file: base, children: [] }) as Entry;
 
-      for (const file of (await fsReaddir(relBase))) {
+      for (const file of (await fsReaddir(entry.file))) {
         if (file.startsWith('.')) {
           continue;
         }
 
-        const full = path.join(relBase, file);
+        const full = path.join(entry.file, file);
         const stats = await fsStat(full);
-        const entry: Entry = { stats, file: full, module: full.replace(`${AppEnv.cwd}${path.sep}`, '').replace(/[\\]+/g, '/') };
+        const subEntry: Entry = { stats, file: full, module: full.replace(`${AppEnv.cwd}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
         if (stats.isDirectory()) {
-          if (!handler.testDir || handler.testDir(entry.module, entry)) {
-            entry.children = await scanDir(handler, base, full);
-            out.push(entry);
-            if (entry.children.length) {
-              out.push(...entry.children);
-            }
+          if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
+            out.push(subEntry, ...await scanDir(handler, base, subEntry));
           }
-        } else if (!handler.testFile || handler.testFile(entry.module, entry)) {
-          out.push(entry);
+        } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
+          entry.children!.push(subEntry);
+          out.push(subEntry);
         }
       }
       resolve(out);
@@ -86,31 +83,28 @@ export function bulkFindSync(handlers: Handler[], base?: string) {
   return out;
 }
 
-export function scanDirSync(handler: Handler, base?: string, relBase?: string) {
+export function scanDirSync(handler: Handler, base?: string, entry?: Entry) {
   const out: Entry[] = [];
 
   base = base || AppEnv.cwd;
-  relBase = relBase || base;
+  entry = (entry || { file: base, children: [] }) as Entry;
 
-  for (const file of fs.readdirSync(relBase)) {
+  for (const file of fs.readdirSync(entry.file)) {
     if (file.startsWith('.')) {
       continue;
     }
 
-    const full = path.join(relBase, file);
+    const full = path.join(entry.file, file);
     const stats = fs.lstatSync(full);
-    const entry: Entry = { stats, file: full, module: full.replace(`${AppEnv.cwd}${path.sep}`, '').replace(/[\\]+/g, '/') };
+    const subEntry: Entry = { stats, file: full, module: full.replace(`${AppEnv.cwd}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
     if (stats.isDirectory()) {
-      if (!handler.testDir || handler.testDir(entry.module, entry)) {
-        entry.children = scanDirSync(handler, base, full);
-        out.push(entry);
-        if (entry.children.length) {
-          out.push(...entry.children);
-        }
+      if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
+        out.push(subEntry, ...scanDirSync(handler, base, subEntry));
       }
-    } else if (!handler.testFile || handler.testFile(entry.module, entry)) {
-      out.push(entry);
+    } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
+      entry.children!.push(subEntry);
+      out.push(subEntry);
     }
   }
   return out;
