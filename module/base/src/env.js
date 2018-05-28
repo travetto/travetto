@@ -30,6 +30,10 @@ if (!dev) {
   console.debug = () => {}; // Suppress debug statements
 }
 
-const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd };
+function error(...args) {
+  console.error(...args.map(x => x && x.stack ? x.stack : x));
+}
+
+const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd, error };
 
 module.exports = { AppEnv };

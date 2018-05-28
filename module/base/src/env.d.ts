@@ -7,5 +7,6 @@ export declare const AppEnv: {
   docker: boolean;
   debug: boolean;
   cwd: string;
+  error: (...args: any[]) => void;
   is: (env: string) => boolean;
 }

@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import { AppEnv } from '.';
 
 export class Shutdown {
   private static listeners: { name: string, handler: Function }[] = [];
@@ -35,12 +36,12 @@ export class Shutdown {
 
     try {
       if (err) {
-        console.log(err.stack || err);
+        AppEnv.error(err);
       }
 
       this.listeners = [];
       if (listeners.length) {
-        console.log('');
+        AppEnv.error();
       }
 
       const promises: Promise<any>[] = [];
@@ -55,18 +56,18 @@ export class Shutdown {
             promises.push(res as Promise<any>);
             res
               .then(() => console.debug(`Successfully shut down ${name}`))
-              .catch((e: any) => console.error(`Error shutting down ${name}`, e));
+              .catch((e: any) => AppEnv.error(`Error shutting down ${name}`, e));
           } else {
             console.debug(`Successfully shut down ${name}`);
           }
         } catch (e) {
-          console.error(`Error shutting down ${name}`, e);
+          AppEnv.error(`Error shutting down ${name}`, e);
         }
       }
 
       await Promise.all(promises);
     } catch (e) {
-      console.error('Error on shutting down', e);
+      AppEnv.error('Error on shutting down', e);
     }
 
     this.shutdownEmitter.emit('shutdown');
