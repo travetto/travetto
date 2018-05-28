@@ -10,6 +10,7 @@ const fsUnlink = util.promisify(fs.unlink);
 
 export interface Entry {
   file: string;
+  module: string;
   stats: fs.Stats;
   children?: Entry[];
 }
@@ -50,17 +51,17 @@ export function scanDir(handler: Handler, base?: string, relBase?: string) {
 
         const full = path.join(relBase, file);
         const stats = await fsStat(full);
-        const entry: Entry = { stats, file: full };
+        const entry: Entry = { stats, file: full, module: full.replace(`${AppEnv.cwd}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
         if (stats.isDirectory()) {
-          if (!handler.testDir || handler.testDir(entry.file.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/'), entry)) {
+          if (!handler.testDir || handler.testDir(entry.module, entry)) {
             entry.children = await scanDir(handler, base, full);
             out.push(entry);
             if (entry.children.length) {
               out.push(...entry.children);
             }
           }
-        } else if (!handler.testFile || handler.testFile(entry.file.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/'), entry)) {
+        } else if (!handler.testFile || handler.testFile(entry.module, entry)) {
           out.push(entry);
         }
       }
@@ -98,17 +99,17 @@ export function scanDirSync(handler: Handler, base?: string, relBase?: string) {
 
     const full = path.join(relBase, file);
     const stats = fs.lstatSync(full);
-    const entry: Entry = { stats, file: full };
+    const entry: Entry = { stats, file: full, module: full.replace(`${AppEnv.cwd}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
     if (stats.isDirectory()) {
-      if (!handler.testDir || handler.testDir(entry.file.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/'), entry)) {
+      if (!handler.testDir || handler.testDir(entry.module, entry)) {
         entry.children = scanDirSync(handler, base, full);
         out.push(entry);
         if (entry.children.length) {
           out.push(...entry.children);
         }
       }
-    } else if (!handler.testFile || handler.testFile(entry.file.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/'))) {
+    } else if (!handler.testFile || handler.testFile(entry.module, entry)) {
       out.push(entry);
     }
   }

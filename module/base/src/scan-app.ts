@@ -17,7 +17,7 @@ export function findAppFiles(ext: string, filter?: (rel: string) => boolean) {
       .filter(x => !x.stats.isDirectory());
   }
   if (filter) {
-    return cache[ext].filter(x => filter(x.file.replace(`${AppEnv.cwd}${path.sep}`, '').replace(/[\\]+/g, '/')));
+    return cache[ext].filter(x => filter(x.module));
   } else {
     return cache[ext].slice(0);
   }
