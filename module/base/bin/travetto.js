@@ -5,9 +5,13 @@ const path = require('path');
 const ts = require('typescript');
 
 //Simple bootstrap to load compiler
-const { AppEnv: { cwd, cache } } = require('../src/env');
+const { AppEnv: { cwd } } = require('../src/env');
+const { Cache } = require('../src/cache');
+
 const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
 const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
+const cache = new Cache(cwd);
+cache.init();
 
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {

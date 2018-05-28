@@ -1,5 +1,4 @@
 const { execSync } = require('child_process');
-const { Cache } = require('./cache');
 
 const e = process.env;
 
@@ -26,9 +25,6 @@ if (docker) { // Check for docker existance
   }
 }
 
-const cache = new Cache(cwd);
-cache.init();
-
-const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd, cache };
+const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd };
 
 module.exports = { AppEnv };
