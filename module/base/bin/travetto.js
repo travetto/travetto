@@ -9,19 +9,16 @@ const { AppEnv: { cwd, cache } } = require('../src/env');
 const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
 const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
 
-// Delete old cached files
-const CACHE = cache.init();
-
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {
-  const name = cache.toEntryName(tsf);
+  const name = tsf.replace(/\\+/g, '/');
 
   let content;
-  if (!CACHE[name]) {
+  if (!cache.hasEntry(name)) {
     content = ts.transpile(fs.readFileSync(tsf, 'utf-8'), opts);
-    fs.writeFileSync(name, content);
+    cache.writeEntry(name, content);
   } else {
-    content = fs.readFileSync(name).toString();
+    content = cache.readEntry(name);
   }
   return m._compile(content, tsf.replace(/\.ts$/, '.js'));
 };
