@@ -84,8 +84,8 @@ export function simplifyStack(err: Error, cwd = AppEnv.cwd) {
   };
 
   let lastName: string = '';
-  const body = err.stack!.split('\n')
-    .filter(x => !/[\/\\]@travetto[\/\\](test|base|compile|registry|exec|pool)/.test(x)) // Exclude framework boilerplate
+  const body = err.stack!.replace(/\\/g, '/').split('\n')
+    .filter(x => !/[\/]@travetto[\/](test|base|compile|registry|exec|pool)/.test(x)) // Exclude framework boilerplate
     .reduce((acc, l) => {
       const name = getName(l);
       if (name === lastName) {
@@ -98,9 +98,9 @@ export function simplifyStack(err: Error, cwd = AppEnv.cwd) {
       }
       return acc;
     }, [] as string[])
-    .map(x => x.replace(cwd, '').replace(/^[\/\\]+/, '')
+    .map(x => x.replace(cwd, '').replace(/^[\/]+/, '')
       .replace('node_modules', 'n_m')
-      .replace(/n_m[\/\\]@travetto[\/\\]([^/\\]+)[\/\\]src/g, (a, p) => `@trv${path.sep}${p}`)
+      .replace(/n_m[\/]@travetto[\/]([^\/]+)[\/]src/g, (a, p) => `@trv/${p}`)
     )
     .join('  \n');
 
