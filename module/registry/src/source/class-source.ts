@@ -74,11 +74,11 @@ export class CompilerClassSource implements ChangeSource<Class> {
   }
 
   async init() {
-    const entries = await findAppFiles('.ts', f => f.includes('/src/'));
+    const entries = await findAppFiles('.ts', f =>
+      f.startsWith('src/') &&
+      Compiler.presenceManager.validFile(f));
 
-    const files = entries
-      .filter(x => Compiler.presenceManager.validFile(x.file))
-      .map(x => x.file);
+    const files = entries.map(x => x.file);
 
     for (const f of files) { // Load all files, class scanning
       require(f);
