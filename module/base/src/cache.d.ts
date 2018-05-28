@@ -8,4 +8,5 @@ export declare class Cache {
   removeEntry(full: string): void;
   hasEntry(full: string): boolean;
   statEntry(full: string): Stats;
+  clear(): void;
 }

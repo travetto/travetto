@@ -1,6 +1,7 @@
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
+const { execSync } = require('child_process');
 
 class Cache {
   constructor(cwd, cacheDir = process.env.TS_CACHE_DIR) {
@@ -58,6 +59,21 @@ class Cache {
     const stat = fs.statSync(path.normalize(this.toEntryName(full)));
     this.cache[full] = stat;
     return stat;
+  }
+
+  clear() {
+    if (this.cacheDir) {
+      try {
+        if (os.platform().startsWith('win')) {
+          execSync(`del /S ${this.cacheDir}`, { shell: true });
+        } else {
+          execSync(`rm -rf ${this.cacheDir}`, { shell: true });
+        }
+        console.log(`Deleted ${this.cacheDir}`);
+      } catch (e) {
+        console.log('Failed in deleting');
+      }
+    }
   }
 
   fromEntryName(cached) {
