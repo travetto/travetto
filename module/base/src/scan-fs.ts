@@ -48,7 +48,7 @@ export function scanDir(handler: Handler, base?: string, relBase?: string) {
           continue;
         }
 
-        const full = `${relBase}${path.sep}${file}`;
+        const full = path.join(relBase, file);
         const stats = await fsStat(full);
         const entry: Entry = { stats, file: full };
 
@@ -96,7 +96,7 @@ export function scanDirSync(handler: Handler, base?: string, relBase?: string) {
       continue;
     }
 
-    const full = `${relBase}${path.sep}${file}`;
+    const full = path.join(relBase, file);
     const stats = fs.lstatSync(full);
     const entry: Entry = { stats, file: full };
 

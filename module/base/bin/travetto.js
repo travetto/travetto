@@ -15,7 +15,7 @@ cache.init();
 
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {
-  const name = tsf.replace(/\\+/g, '/');
+  const name = tsf.replace(/[\\\/]/g, path.sep);
 
   let content;
   if (!cache.hasEntry(name)) {

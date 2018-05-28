@@ -9,7 +9,7 @@ const envs = [
 const envSet = new Set(envs);
 const is = envSet.has.bind(envSet);
 
-const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\\]+/g, '/').replace(/[\/]+$/, '');
+const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
 const prod = is('prod') || is('production');
 const test = is('test') || is('testing');
 const dev = !prod && !test;

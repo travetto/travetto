@@ -1,5 +1,6 @@
 /// <reference path="./typings.d.ts" />
 export * from './env';
+export * from './cache';
 export * from './app-info';
 export * from './scan-fs';
 export * from './stacktrace';

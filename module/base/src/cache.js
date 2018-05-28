@@ -8,8 +8,8 @@ class Cache {
     this.cwd = cwd;
 
     if (!cacheDir) {
-      const name = cwd.replace(/[\/:]/g, '_');
-      cacheDir = `${os.tmpdir()}/${name}`;
+      const name = cwd.replace(/[\\\/:]/g, '_');
+      cacheDir = path.join(os.tmpdir(), name);
     }
 
     this.cacheDir = cacheDir;
@@ -17,19 +17,18 @@ class Cache {
   }
 
   init() {
-    const cacheDirN = path.normalize(this.cacheDir);
-    if (!fs.existsSync(cacheDirN)) {
-      fs.mkdirSync(cacheDirN);
+    if (!fs.existsSync(this.cacheDir)) {
+      fs.mkdirSync(this.cacheDir);
     }
 
-    for (const f of fs.readdirSync(cacheDirN)) {
+    for (const f of fs.readdirSync(this.cacheDir)) {
       const full = this.fromEntryName(f);
-      const rel = `${this.cacheDir}/${f}`;
+      const cacheFull = path.join(this.cacheDir, f);
       try {
-        const stat = this.statEntry(rel);
-        const fullStat = fs.statSync(path.normalize(full));
+        const stat = this.statEntry(cacheFull);
+        const fullStat = fs.statSync(full);
         if (stat.ctimeMs < fullStat.ctimeMs || stat.mtimeMs < fullStat.mtimeMs || stat.atime < fullStat.mtime) {
-          this.removeEntry(rel);
+          this.removeEntry(cacheFull);
         }
       } catch (e) {
         // Cannot remove missing file
@@ -38,16 +37,16 @@ class Cache {
   }
 
   writeEntry(full, contents) {
-    fs.writeFileSync(path.normalize(this.toEntryName(full)), contents);
+    fs.writeFileSync(this.toEntryName(full), contents);
     this.statEntry(full);
   }
 
   readEntry(full) {
-    return fs.readFileSync(path.normalize(this.toEntryName(full))).toString();
+    return fs.readFileSync(this.toEntryName(full)).toString();
   }
 
   removeEntry(full) {
-    fs.unlinkSync(path.normalize(this.toEntryName(full)));
+    fs.unlinkSync(this.toEntryName(full));
     delete cache[full];
   }
 
@@ -56,7 +55,7 @@ class Cache {
   }
 
   statEntry(full) {
-    const stat = fs.statSync(path.normalize(this.toEntryName(full)));
+    const stat = fs.statSync(this.toEntryName(full));
     this.cache[full] = stat;
     return stat;
   }
@@ -77,11 +76,11 @@ class Cache {
   }
 
   fromEntryName(cached) {
-    return `${this.cwd}/${cached.replace(this.cacheDir, '').replace(/~/g, '/').replace(/@ts$/, '.ts')}`;
+    return path.join(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, path.sep).replace(/@ts$/, '.ts'));
   }
 
   toEntryName(full) {
-    return `${this.cacheDir}/${full.replace(this.cwd, '').replace(/[\/]+/g, '~').replace(/.ts$/, '@ts')}`;
+    return path.join(this.cacheDir, full.replace(this.cwd, '').replace(/[\/\\]+/g, '~').replace(/.ts$/, '@ts'));
   }
 }
 
