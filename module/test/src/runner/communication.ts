@@ -118,7 +118,7 @@ export async function server() {
 
 export function client() {
   return new ConcurrentPool(async () => {
-    const worker = new ChildExecution(`node ${require.resolve('../../bin/travetto-test.js')}`, true);
+    const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
     worker.init();
     await worker.listenOnce(Events.READY);
     await worker.send(Events.INIT);
