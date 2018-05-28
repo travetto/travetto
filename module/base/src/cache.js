@@ -1,3 +1,7 @@
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
+
 class Cache {
   constructor(cwd, cacheDir = process.env.TS_CACHE_DIR) {
     this.cwd = cwd;

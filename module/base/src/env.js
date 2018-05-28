@@ -1,6 +1,3 @@
-const os = require('os');
-const path = require('path');
-const fs = require('fs');
 const { execSync } = require('child_process');
 const { Cache } = require('./cache');
 
@@ -24,7 +21,6 @@ let docker = !('NO_DOCKER' in e && !!e.NO_DOCKER);
 if (docker) { // Check for docker existance
   try {
     execSync('docker ps', { stdio: [undefined, undefined, undefined] });
-    docker = true;
   } catch (e) {
     docker = false;
   }
