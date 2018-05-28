@@ -57,7 +57,7 @@ export class FilePresenceManager {
   }
 
   init() {
-    const rootFiles = findAppFiles('.ts', x => (x.endsWith('index.ts') || /(^src\/)|\/src\//.test(x)) && this.validFile(x))
+    const rootFiles = findAppFiles('.ts', x => /(^src\/)|\/src\/|\/index.ts$/.test(x) && this.validFile(x))
       .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable
       .map(x => x.file);
 
