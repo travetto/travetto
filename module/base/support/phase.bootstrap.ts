@@ -15,7 +15,12 @@ export const init = {
 
     // Log unhandled rejections
     process.on('unhandledRejection', (reason, p) => {
-      console.log(reason);
+      try {
+        // Attempt to use logger if exists, this helps with not blowing the stack up
+        require('@travetto/log').Logger.log('error', reason);
+      } catch (e) {
+        console.log(reason);
+      }
     });
 
     Shutdown.register();
