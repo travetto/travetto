@@ -26,6 +26,10 @@ if (docker) { // Check for docker existance
   }
 }
 
+if (!dev) {
+  console.debug = () => {}; // Suppress debug statements
+}
+
 const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd };
 
 module.exports = { AppEnv };

@@ -44,6 +44,7 @@ export class Watcher extends EventEmitter {
 
     this.pendingWatched.push({
       file: this.options.cwd,
+      module: this.options.cwd.replace(/[\\]/g, '/'),
       stats: fs.lstatSync(this.options.cwd)
     });
   }
@@ -93,6 +94,7 @@ export class Watcher extends EventEmitter {
         ) {
           const sub: Entry = {
             file: next,
+            module: next.replace(/[\\]/g, '/'),
             stats: nextStats
           };
           this.watch(sub);
