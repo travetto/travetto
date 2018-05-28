@@ -107,7 +107,6 @@ export class SourceManager {
     this.contents.clear();
     this.sourceMaps.clear();
     this.hashes.clear();
-    this.cache.clear();
   }
 
   hasCached(file: string) {
