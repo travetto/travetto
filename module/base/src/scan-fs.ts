@@ -58,7 +58,7 @@ export function scanDir(handler: Handler, base?: string, entry?: Entry) {
             out.push(subEntry, ...await scanDir(handler, base, subEntry));
           }
         } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
-          entry.children!.push(subEntry);
+          (entry.children = entry.children || [])!.push(subEntry);
           out.push(subEntry);
         }
       }
@@ -103,7 +103,7 @@ export function scanDirSync(handler: Handler, base?: string, entry?: Entry) {
         out.push(subEntry, ...scanDirSync(handler, base, subEntry));
       }
     } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
-      entry.children!.push(subEntry);
+      (entry.children = entry.children || [])!.push(subEntry);
       out.push(subEntry);
     }
   }
