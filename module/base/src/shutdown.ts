@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { AppEnv } from '.';
+import { AppEnv } from './env';
 
 export class Shutdown {
   private static listeners: { name: string, handler: Function }[] = [];
