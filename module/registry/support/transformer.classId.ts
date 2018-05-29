@@ -56,7 +56,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       node.typeParameters,
       ts.createNodeArray(node.heritageClauses),
       ts.createNodeArray([
-        createStaticField('__filename', state.fullFile),
+        createStaticField('__filename', state.fullFile.replace(/[\\\/]/g, path.sep)),
         createStaticField('__id', `${state.file}#${node.name!.getText()}`),
         createStaticField('__hash', stringHash(node.getText())),
         createStaticField('__methodHashes', TransformUtil.extendObjectLiteral(hashes)),

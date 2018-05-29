@@ -1,7 +1,8 @@
 import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
-import { findAppFiles, AppEnv } from '@travetto/base';
+import { findAppFiles } from '@travetto/base';
+import { AppEnv } from '@travetto/base/src/env';
 
 import { Class } from '../model/types';
 import { ChangeSource, ChangeEvent } from './types';
