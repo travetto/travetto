@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import * as readline from 'readline';
 import * as assert from 'assert';
 import { bulkFind, BaseError, AppEnv } from '@travetto/base';
@@ -242,10 +243,10 @@ export class ExecuteUtil {
 
   static async execute(consumer: Consumer, [file, ...args]: string[]) {
     if (!file.startsWith(AppEnv.cwd)) {
-      file = `${AppEnv.cwd}/${file}`;
+      file = path.join(AppEnv.cwd, file);
     }
 
-    require(file);
+    require(file.replace(/[\\]/g, '/')); // Path to module
 
     if (process.env.DEBUGGER) {
       await new Promise(t => setTimeout(t, 100));
