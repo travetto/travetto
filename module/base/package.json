@@ -20,7 +20,7 @@
     "url": "https://github.com/travetto/base.git"
   },
   "scripts": {
-    "postinstall": "node_modules/.bin/travetto-clean"
+    "postinstall": "./node_modules/.bin/travetto-clean"
   },
   "version": "0.0.140"
 }
