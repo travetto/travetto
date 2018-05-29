@@ -77,8 +77,10 @@ export function addStackFilters(...names: string[]) {
 }
 
 export function simplifyStack(err: Error, cwd = AppEnv.cwd) {
+  cwd = cwd.replace(/[\\]/g, '/');
+
   const getName = (x: string) => {
-    const l = x.split(cwd)[1];
+    const l = x.split(cwd.replace(/[\\]/g, '/'))[1];
     if (l) {
       return l.split(/[.][tj]s/)[0];
     }
