@@ -1,16 +1,31 @@
-import { Suite, Test } from '@travetto/test';
-import { extractSimple, extractWhereQuery } from '..';
+import { Suite, Test, BeforeAll } from '@travetto/test';
+import { extractSimple, extractWhereQuery } from '../src/service';
 import * as assert from 'assert';
+import { Schema, SchemaRegistry } from '@travetto/schema';
+
+@Schema()
+class WhereType {
+  a: { d: number, b: { c: number } };
+  d: { e: boolean };
+  g: { z: string[] };
+  name: number;
+  age: number;
+}
 
 @Suite()
 export class QueryTest {
+
+  @BeforeAll()
+  async beforeAll() {
+    await SchemaRegistry.init();
+  }
 
   @Test()
   async validateQuery() {
     let out = extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
-    out = extractWhereQuery<{ a: { d: number, b: { c: number } }, d: { e: boolean }, g: { z: string[] }, name: number, age: number }>({
+    out = extractWhereQuery<WhereType>({
       $and: [
         { a: { b: { c: 5 } } },
         { d: { e: true } },
@@ -20,7 +35,7 @@ export class QueryTest {
         { g: { z: { $all: ['a', 'b', 'c'] } } },
         { a: { d: { $gt: 20 } } }
       ]
-    });
+    }, WhereType);
 
     assert(out.$and[0]['a.b.c'] === 5);
 

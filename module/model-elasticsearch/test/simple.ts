@@ -48,25 +48,8 @@ class TestSave extends BaseElasticsearchTest {
           ...(x === 1 ? { street2: 'b' } : {})
         }
       }));
-    }
-  }
 
-  /*
-    @Test('save it')
-    async save() {
-      const service = await DependencyRegistry.getInstance(ModelService);
-
-      for (const x of [1, 2, 3, 8]) {
-        const res = await service.save(Person, Person.from({
-          name: 'Bob',
-          age: 20 + x,
-          gender: 'm',
-          address: {
-            street1: 'a',
-            ...(x === 1 ? { street2: 'b' } : {})
-          }
-        }));
-      }
+      assert.ok(res.id);
 
       const match = await service.getAllByQuery(Person, {
         where: {
@@ -125,6 +108,8 @@ class TestSave extends BaseElasticsearchTest {
       assert(Object.keys(match3[0]).includes('id'));
       assert(!Object.keys(match3[0].address).includes('street2'));
       assert(Object.keys(match3[0].address) === ['street1']);
+
     }
-    */
+  }
+
 }

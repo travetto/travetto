@@ -251,7 +251,7 @@ export class ModelElasticsearchSource extends ModelSource {
 
   getIdentity<T extends ModelCore>(cls: Class<T>): { type: string, index: string } {
     const conf = ModelRegistry.get(cls);
-    const type = `${this.config.namespace}_${conf.discriminator || conf.collection || cls.name}`;
+    const type = `${this.config.namespace}_${(conf.discriminator || conf.collection || cls.name).toLowerCase()}`;
     return { index: type, type };
   }
 
