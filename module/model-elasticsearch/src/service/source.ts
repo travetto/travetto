@@ -52,7 +52,7 @@ export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = '
         items.push({
           nested: {
             path: `${path}${key}`,
-            query: extractWhereTermQuery(v, field.type as Class<any>, `${path}${key}.`)
+            query: extractWhereTermQuery(v, field.declared.type as Class<any>, `${path}${key}.`)
           }
         });
       } else if (key.startsWith('$')) {

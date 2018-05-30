@@ -4,10 +4,31 @@ import * as assert from 'assert';
 import { Schema, SchemaRegistry } from '@travetto/schema';
 
 @Schema()
+class WhereTypeAB {
+  c: number;
+}
+
+@Schema()
+class WhereTypeA {
+  d: number;
+  b: WhereTypeAB;
+}
+
+@Schema()
+class WhereTypeD {
+  e: boolean;
+}
+
+@Schema()
+class WhereTypeG {
+  z: string[];
+}
+
+@Schema()
 class WhereType {
-  a: { d: number, b: { c: number } };
-  d: { e: boolean };
-  g: { z: string[] };
+  a: WhereTypeA;
+  d: WhereTypeD;
+  g: WhereTypeG;
   name: number;
   age: number;
 }
@@ -25,7 +46,7 @@ export class QueryTest {
     let out = extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
-    out = extractWhereQuery<WhereType>({
+    out = extractWhereQuery({
       $and: [
         { a: { b: { c: 5 } } },
         { d: { e: true } },
@@ -47,6 +68,6 @@ export class QueryTest {
 
     assert(out.$and[4]['a.d'].$gt === 20);
 
-    assert(out.$and[3]['g.z'].length === 3)
+    assert(out.$and[3]['g.z'].length === 3);
   }
 }
