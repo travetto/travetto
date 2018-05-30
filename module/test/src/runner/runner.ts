@@ -86,7 +86,7 @@ export class Runner {
   async getFiles() {
     const globs = this.state._; // strip off node and worker name
     // Glob to module path
-    const files = await ExecuteUtil.getTests(globs.map(x => new RegExp(x.replace(/[\\\/]/g, '/'))));
+    const files = await ExecuteUtil.getTests(globs.map(x => new RegExp(`${x}`.replace(/[\\\/]/g, '/'))));
     return files;
   }
 

@@ -113,6 +113,8 @@ export class ExecuteUtil {
         result.error = err;
 
         if (!(err instanceof assert.AssertionError)) {
+          delete err.toJSON; // Do not allow the value to propagate as JSON
+
           let line = AssertUtil.readFilePosition(err, test.file).line;
           if (line === 1) {
             line = test.lines.start;
