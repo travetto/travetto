@@ -2,6 +2,7 @@ import { BeforeAll, BeforeEach } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { ModelSource } from '@travetto/model';
 import { RootRegistry } from '@travetto/registry';
+import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../src/service';
 
@@ -16,7 +17,8 @@ export class BaseElasticsearchTest {
 
   @BeforeAll()
   async before() {
-    await RootRegistry.init();
+    await DependencyRegistry.init();
+    await SchemaRegistry.init();
   }
 
   @BeforeEach()

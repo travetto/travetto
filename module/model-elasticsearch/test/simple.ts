@@ -6,7 +6,7 @@ import { QueryVerifierService } from '@travetto/model/src/service/query';
 
 import * as assert from 'assert';
 import { BaseElasticsearchTest } from './base';
-import { ModelElasticsearchSource } from '..';
+import { ModelElasticsearchSource } from '../src';
 
 @Schema()
 class Address {
@@ -32,6 +32,23 @@ class TestSave extends BaseElasticsearchTest {
     assert.ok(source);
     assert(source instanceof ModelElasticsearchSource);
 
+  }
+
+  @Test('save it')
+  async save() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+
+    for (const x of [1, 2, 3, 8]) {
+      const res = await service.save(Person, Person.from({
+        name: 'Bob',
+        age: 21 + x,
+        gender: 'm',
+        address: {
+          street1: 'a',
+          ...(x === 1 ? { street2: 'b' } : {})
+        }
+      }));
+    }
   }
 
   /*

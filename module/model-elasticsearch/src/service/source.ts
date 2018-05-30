@@ -369,7 +369,7 @@ export class ModelElasticsearchSource extends ModelSource {
     delete o.id;
     this.prePersist(cls, o);
 
-    const res = await this.client.create({
+    const res = await this.client.index({
       ...this.getIdentity(cls),
       body: o
     });
