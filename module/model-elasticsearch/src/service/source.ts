@@ -150,7 +150,7 @@ export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = '
       });
     }
   }
-  if (items.length === 0) {
+  if (items.length === 1) {
     return items[0];
   } else {
     return { bool: { must: items } };

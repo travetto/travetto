@@ -58,16 +58,21 @@ export class QueryTest {
       ]
     }, WhereType);
 
-    assert(out.$and[0]['a.b.c'] === 5);
+    assert.ok(out.bool);
 
-    assert(out.$and[1]['d.e'] === true);
+    assert.ok(out.bool.must[0]);
 
-    assert(out.$and[2].$or[0]['name'] === 5);
+    assert.ok(out.bool.must[0].nested);
 
-    assert(out.$and[2].$or[1]['age'] === 10);
+    assert(out.bool.must[0].nested.path === 'a');
 
-    assert(out.$and[4]['a.d'].$gt === 20);
+    assert(out.bool.must[0].nested.query.nested.path === 'a.b');
 
-    assert(out.$and[3]['g.z'].length === 3);
+    assert.ok(out.bool.must[0].nested.query.nested.query.term);
+
+    assert.ok(out.bool.must[0].nested.query.nested.query.term['a.b.c']);
+
+    assert(out.bool.must[0].nested.query.nested.query.term['a.b.c'].value === 5);
+
   }
 }
