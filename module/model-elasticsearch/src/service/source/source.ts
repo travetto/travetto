@@ -135,8 +135,7 @@ export class ModelElasticsearchSource extends ModelSource {
 
     const out: U[] = [];
     for (const r of results.hits.hits) {
-      const rd = this.postLoad<U>(undefined as any, r._source as any);
-      out.push(rd);
+      out.push(r._source);
     }
 
     return out;
@@ -282,13 +281,11 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
-    this.prePersist(cls, o);
     await this.client.update({
       ...this.getIdentity(cls),
       id: o.id!,
       body: o
     });
-    this.postLoad(cls, o);
     return o;
   }
 
