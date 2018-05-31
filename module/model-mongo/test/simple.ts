@@ -4,7 +4,7 @@ import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { ModelMongoSource, ModelMongoConfig } from '../index';
 import { QueryVerifierService } from '@travetto/model/src/service/query';
-import { GenerateSchemaData } from '@travetto/test/support/extension.schema';
+import { GenerateUtil } from '@travetto/schema/support/util.generate';
 
 import * as assert from 'assert';
 import { BaseMongoTest } from './base';
@@ -39,7 +39,9 @@ class TestSave extends BaseMongoTest {
     const service = await DependencyRegistry.getInstance(ModelService);
 
     for (const x of [1, 2, 3, 8]) {
-      const res = await service.save(Person, GenerateSchemaData.generate(Person));
+      const person = GenerateUtil.generate(Person);
+      delete person.id;
+      const res = await service.save(Person, person);
     }
 
     const match = await service.getAllByQuery(Person, {
