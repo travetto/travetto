@@ -78,7 +78,7 @@ export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = '
             break;
           case '$nin':
             items.push({
-              must_not: [{ terms: { [sPath]: Array.isArray(v) ? v : [v] } }]
+              bool: { must_not: [{ terms: { [sPath]: Array.isArray(v) ? v : [v] } }] }
             });
             break;
           case '$eq':
@@ -86,7 +86,7 @@ export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = '
             break;
           case '$ne':
             items.push({
-              must_not: [{ term: { [sPath]: v } }]
+              bool: { must_not: [{ term: { [sPath]: v } }] }
             });
             break;
           case '$exists':
@@ -147,10 +147,8 @@ export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = '
       // Handle operations
     } else {
       items.push({
-        [Array.isArray(top) ? 'terms' : 'term']: {
-          [`${path}${key}`]: {
-            value: top
-          }
+        [Array.isArray(top) ? 'terms' : 'match']: {
+          [`${path}${key}`]: top
         }
       });
     }

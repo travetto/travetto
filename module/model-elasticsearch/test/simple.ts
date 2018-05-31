@@ -41,75 +41,72 @@ class TestSave extends BaseElasticsearchTest {
     for (const x of [1, 2, 3, 8]) {
       const res = await service.save(Person, Person.from({
         name: 'Bob',
-        age: 21 + x,
+        age: 20 + x,
         gender: 'm',
         address: {
           street1: 'a',
           ...(x === 1 ? { street2: 'b' } : {})
         }
       }));
-
-      assert.ok(res.id);
-
-      const match = await service.getAllByQuery(Person, {
-        where: {
-          $and: [
-            {
-              name: 'Bob'
-            },
-            {
-              $not: {
-                age: {
-                  $gte: 24
-                }
-              }
-            }
-          ]
-        }
-      });
-
-      assert(match.length === 3);
-
-      const match2 = await service.getAllByQuery(Person, {
-        where: {
-          $and: [
-            {
-              address: {
-                street1: {
-                  $ne: 'b',
-                }
-              }
-            }
-          ]
-        }
-      });
-
-      assert(match2.length > 3);
-
-      const match3 = await service.query(Person, {
-        select: {
-          id: 1,
-          address: {
-            street1: 1
-          }
-        },
-        where: {
-          address: {
-            street2: {
-              $exists: true
-            }
-          }
-        }
-      });
-
-      assert(match3.length === 1);
-      assert(Object.keys(match3[0]).includes('address'));
-      assert(!Object.keys(match3[0]).includes('age'));
-      assert(Object.keys(match3[0]).includes('id'));
-      assert(!Object.keys(match3[0].address).includes('street2'));
-      assert(Object.keys(match3[0].address) === ['street1']);
-
     }
-  }
 
+    const match = await service.getAllByQuery(Person, {
+      where: {
+        $and: [
+          {
+            name: 'Bob'
+          },
+          {
+            $not: {
+              age: {
+                $gte: 24
+              }
+            }
+          }
+        ]
+      }
+    });
+
+    assert(match.length === 3);
+
+    const match2 = await service.getAllByQuery(Person, {
+      where: {
+        $and: [
+          {
+            address: {
+              street1: {
+                $ne: 'b',
+              }
+            }
+          }
+        ]
+      }
+    });
+
+    assert(match2.length > 3);
+
+    const match3 = await service.query(Person, {
+      select: {
+        id: 1,
+        address: {
+          street1: 1
+        }
+      },
+      where: {
+        address: {
+          street2: {
+            $exists: true
+          }
+        }
+      }
+    });
+
+    assert(match3.length === 1);
+    assert(Object.keys(match3[0]).includes('address'));
+    assert(!Object.keys(match3[0]).includes('age'));
+    assert(Object.keys(match3[0]).includes('id'));
+    assert(!Object.keys(match3[0].address).includes('street2'));
+    assert(Object.keys(match3[0].address) === ['street1']);
+
+  }
 }
