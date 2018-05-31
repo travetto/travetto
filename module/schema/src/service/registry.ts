@@ -80,13 +80,23 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     return target;
   }
 
-  registerPendingFieldConfig(target: Class, prop: string, type: ClassList) {
+  registerPendingFieldConfigSpecifierType(target: Class, prop: string, specifier: string) {
+    return this.registerPendingFieldFacet(target, prop, {
+      declared: {
+        specifier
+      }
+    });
+  }
+
+  registerPendingFieldConfig(target: Class, prop: string, type: ClassList, specifier?: string) {
     const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
       type,
       name: prop,
       declared: {
-        array: isArray, type: isArray ? (type as any)[0] : type
+        array: isArray,
+        type: isArray ? (type as any)[0] : type,
+        specifier
       }
     };
 

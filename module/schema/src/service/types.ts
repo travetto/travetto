@@ -1,10 +1,6 @@
 import { Class } from '@travetto/registry';
 import { ValidationError } from '.';
 
-export interface SchemaClass<T = any> {
-  from?: <Z>(data: any) => Z;
-}
-
 export type ClassList = Class | [Class];
 
 export type ValidatorFn<T, U> = (value: T, parent?: U) => ValidationError | undefined;
@@ -27,7 +23,7 @@ export interface FieldConfig {
   type: any;
   name: string;
   aliases?: string[];
-  declared: { type: Class<any>, array: boolean };
+  declared: { type: Class<any>, array: boolean, specifier?: string };
   required?: { message?: string };
   match?: { re: RegExp, message?: string };
   min?: { n: number | Date, message?: string };

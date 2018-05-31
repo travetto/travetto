@@ -37,6 +37,8 @@ export const Max = (n: number | Date, message?: string) => prop({ max: { n, mess
 export const Email = (message?: string) => Match(CommonRegExp.email, message);
 export const Telephone = (message?: string) => Match(CommonRegExp.telphone, message);
 export const Url = (message?: string) => Match(CommonRegExp.url, message);
+export const Integer = () => prop({ declared: { specifier: 'integer' } });
+export const Float = () => prop({ declared: { specifier: 'float' } });
 
 export function View(...names: string[]) {
   return (f: any, p: string) => {
