@@ -72,10 +72,11 @@ export class ModelService extends ModelSource {
     return o;
   }
 
-  query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>) {
+  async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>) {
     this.queryService.verify(cls, query);
 
-    return this.source.query<T, U>(cls, query);
+    const res = await this.source.query<T, U>(cls, query);
+    return res.map(o => this.postLoad(cls, o as any as T));
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}) {
