@@ -44,24 +44,29 @@ const has$In = (o: any): o is { $in: any[] } => '$in' in o && Array.isArray(o.$i
 export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = ''): any {
   const items = [];
   const schema = SchemaRegistry.getViewSchema(cls).schema;
+
   for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
-    const field = schema[key];
-    const v = o[key];
-    if (isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) {
-      if (field) {
+    const top = o[key];
+    const sPath = `${path}${key}`;
+
+    if (isPlainObject(top)) {
+      const subKey = Object.keys(top)[0];
+      if (!subKey.startsWith('$')) {
         items.push({
           nested: {
-            path: `${path}${key}`,
-            query: extractWhereTermQuery(v, field.declared.type as Class<any>, `${path}${key}.`)
+            path: sPath,
+            query: extractWhereTermQuery(top, schema[key].declared.type as Class<any>, `${sPath}.`)
           }
         });
-      } else if (key.startsWith('$')) {
-        switch (key) {
+      } else {
+        const v = top[subKey];
+
+        switch (subKey) {
           case '$all':
-            const arr = Array.isArray(v) ? o[key] : [o[key]];
+            const arr = Array.isArray(v) ? v : [v];
             items.push({
               terms_set: {
-                [`${path}${key}`]: {
+                [sPath]: {
                   terms: arr,
                   minimum_should_match: arr.length
                 }
@@ -69,25 +74,25 @@ export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = '
             });
             break;
           case '$in':
-            items.push({ terms: { [`${path}${key}`]: Array.isArray(v) ? o[key] : [o[key]] } });
+            items.push({ terms: { [sPath]: Array.isArray(v) ? v : [v] } });
             break;
           case '$nin':
             items.push({
-              must_not: [{ terms: { [`${path}${key}`]: Array.isArray(v) ? o[key] : [o[key]] } }]
+              must_not: [{ terms: { [sPath]: Array.isArray(v) ? v : [v] } }]
             });
             break;
           case '$eq':
-            items.push({ term: { [`${path}${key}`]: o[key] } });
+            items.push({ term: { [sPath]: v } });
             break;
           case '$ne':
             items.push({
-              must_not: [{ term: { [`${path}${key}`]: o[key] } }]
+              must_not: [{ term: { [sPath]: v } }]
             });
             break;
           case '$exists':
             const q = {
               exists: {
-                field: `${path}${key}`
+                field: path
               }
             };
             items.push(v ? q : {
@@ -101,26 +106,26 @@ export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = '
           case '$gte':
           case '$lte':
             const out: any = {};
-            for (const k of o) {
-              out[k.replace(/^$/, '')] = o[k];
+            for (const k of Object.keys(top)) {
+              out[k.replace(/^[$]/, '')] = top[k];
             }
             items.push({
               range: {
-                [`${path}${key}`]: out
+                [sPath]: out
               }
             });
             break;
           case '$regex':
             items.push({
               regexp: {
-                [`${path}${key}`]: typeof o[key] === 'string' ? o[key] : `${o[key].source}`
+                [sPath]: typeof v === 'string' ? v : `${v.source}`
               }
             });
             break;
           case '$geoWithin':
             items.push({
               geo_polygon: {
-                [`${path}${key}`]: {
+                [sPath]: {
                   points: v.map(([lat, lon]: [number, number]) => ({ lat, lon }))
                 }
               }
@@ -129,7 +134,7 @@ export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = '
           case '$geoIntersects':
             items.push({
               geo_shape: {
-                [`${path}${key}`]: {
+                [sPath]: {
                   type: 'envelope',
                   coordinates: v
                 },
@@ -142,9 +147,9 @@ export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = '
       // Handle operations
     } else {
       items.push({
-        [Array.isArray(v) ? 'terms' : 'term']: {
+        [Array.isArray(top) ? 'terms' : 'term']: {
           [`${path}${key}`]: {
-            value: v
+            value: top
           }
         }
       });
