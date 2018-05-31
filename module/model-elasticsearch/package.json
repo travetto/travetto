@@ -1,26 +1,26 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "dependencies": {
-    "@travetto/model": "0.x.x",
-    "@types/elasticsearch": "^5.0.23",
+    "@travetto/model": "0.x.x", 
+    "@types/elasticsearch": "^5.0.23", 
     "elasticsearch": "^14.2.2"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
-    "@travetto/test": "0.x.x",
+    "@travetto/test": "0.x.x", 
     "@travetto/util": "0.x.x"
-  },
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/model-elasticsearch",
+  }, 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/model-elasticsearch", 
   "repository": {
     "url": "https://github.com/travetto/model-elasticsearch.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.2"
+  }, 
+  "version": "0.0.3"
 }
