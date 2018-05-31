@@ -178,6 +178,8 @@ export class ModelElasticsearchSource extends ModelSource {
             [ident.type]: schema
           }
         }
+      }).then(e => {
+        console.log(`Index ${ident.index} created`);
       }).catch(e => {
         console.log(`Index ${ident.index} already created`);
       }));
@@ -263,6 +265,7 @@ export class ModelElasticsearchSource extends ModelSource {
 
     const res = await this.client.index({
       ...this.getIdentity(cls),
+      refresh: 'wait_for',
       body: o
     });
 
@@ -284,6 +287,7 @@ export class ModelElasticsearchSource extends ModelSource {
     await this.client.update({
       ...this.getIdentity(cls),
       id: o.id!,
+      refresh: 'wait_for',
       body: o
     });
     return o;
@@ -296,6 +300,7 @@ export class ModelElasticsearchSource extends ModelSource {
       method: 'update',
       ...this.getIdentity(cls),
       id,
+      refresh: 'wait_for',
       body: { doc: data }
     });
     return this.getById(cls, data.id);
@@ -317,6 +322,7 @@ export class ModelElasticsearchSource extends ModelSource {
 
     const res = await this.client.updateByQuery({
       ...this.getIdentity(cls),
+      refresh: true,
       body: {
         query: this.getSearchObject(cls, query).body,
         script: {
@@ -338,11 +344,11 @@ export class ModelElasticsearchSource extends ModelSource {
         return acc;
       }, [] as any[]),
       ...(state.insert || []).reduce((acc, e) => {
-        acc.push({ insert: {} }, e);
+        acc.push({ index: {} }, e);
         return acc;
       }, [] as any),
       ...(state.update || []).reduce((acc, e) => {
-        acc.push({ insert: { _id: e.id } }, { doc: e });
+        acc.push({ update: { _id: e.id } }, { doc: e });
         return acc;
       }, [] as any)
     ];
@@ -350,7 +356,8 @@ export class ModelElasticsearchSource extends ModelSource {
     const res: EsBulkResponse = await this.client.bulk({
       index: conf.index,
       type: conf.type,
-      body: payload
+      body: payload,
+      refresh: true
     });
 
     const out = {

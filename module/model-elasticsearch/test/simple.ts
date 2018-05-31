@@ -38,8 +38,8 @@ class TestSave extends BaseElasticsearchTest {
   async save() {
     const service = await DependencyRegistry.getInstance(ModelService);
 
-    for (const x of [1, 2, 3, 8]) {
-      const res = await service.save(Person, Person.from({
+    const res = await service.bulkProcess(Person, {
+      insert: [1, 2, 3, 8].map(x => Person.from({
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -47,8 +47,8 @@ class TestSave extends BaseElasticsearchTest {
           street1: 'a',
           ...(x === 1 ? { street2: 'b' } : {})
         }
-      }));
-    }
+      }))
+    });
 
     const match = await service.getAllByQuery(Person, {
       where: {
@@ -104,9 +104,8 @@ class TestSave extends BaseElasticsearchTest {
     assert(match3.length === 1);
     assert(Object.keys(match3[0]).includes('address'));
     assert(!Object.keys(match3[0]).includes('age'));
-    assert(Object.keys(match3[0]).includes('id'));
     assert(!Object.keys(match3[0].address).includes('street2'));
     assert(Object.keys(match3[0].address) === ['street1']);
-
+    assert(Object.keys(match3[0]).includes('id'));
   }
 }
