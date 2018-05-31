@@ -1,7 +1,8 @@
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { extractSimple, extractWhereQuery } from '../src/service';
+import { extractSimple } from '../src/service';
 import * as assert from 'assert';
 import { Schema, SchemaRegistry } from '@travetto/schema';
+import { extractWhereQuery } from '../src/service/source/query-builder';
 
 @Schema()
 class WhereTypeAB {
@@ -72,7 +73,7 @@ export class QueryTest {
 
     assert.ok(out.bool.must[0].nested.query.nested.query.term['a.b.c']);
 
-    assert(out.bool.must[0].nested.query.nested.query.term['a.b.c'].value === 5);
+    assert(out.bool.must[0].nested.query.nested.query.term['a.b.c'] === 5);
 
   }
 }

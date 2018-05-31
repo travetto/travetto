@@ -11,10 +11,12 @@ import {
   ModelQuery
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { ModelElasticsearchConfig } from './config';
-import { Class } from '@travetto/registry';
+import { ModelElasticsearchConfig } from '../config';
+import { Class, ChangeEvent } from '@travetto/registry';
 import { BaseError, isPlainObject, deepAssign } from '@travetto/base';
 import { FieldConfig, SchemaConfig, SchemaRegistry } from '@travetto/schema';
+import { extractWhereQuery } from './query-builder';
+import { generateSchema } from './schema';
 
 type ESBulkItemPayload = {
   _id: string;
@@ -35,142 +37,8 @@ type EsBulkResponse = {
   }[]
 };
 
-const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
-const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
-const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
 const hasId = <T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) => 'id' in o;
 const has$In = (o: any): o is { $in: any[] } => '$in' in o && Array.isArray(o.$in);
-
-export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = ''): any {
-  const items = [];
-  const schema = SchemaRegistry.getViewSchema(cls).schema;
-
-  for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
-    const top = o[key];
-    const sPath = `${path}${key}`;
-
-    if (isPlainObject(top)) {
-      const subKey = Object.keys(top)[0];
-      if (!subKey.startsWith('$')) {
-        items.push({
-          nested: {
-            path: sPath,
-            query: extractWhereTermQuery(top, schema[key].declared.type as Class<any>, `${sPath}.`)
-          }
-        });
-      } else {
-        const v = top[subKey];
-
-        switch (subKey) {
-          case '$all':
-            const arr = Array.isArray(v) ? v : [v];
-            items.push({
-              terms_set: {
-                [sPath]: {
-                  terms: arr,
-                  minimum_should_match: arr.length
-                }
-              }
-            });
-            break;
-          case '$in':
-            items.push({ terms: { [sPath]: Array.isArray(v) ? v : [v] } });
-            break;
-          case '$nin':
-            items.push({
-              bool: { must_not: [{ terms: { [sPath]: Array.isArray(v) ? v : [v] } }] }
-            });
-            break;
-          case '$eq':
-            items.push({ term: { [sPath]: v } });
-            break;
-          case '$ne':
-            items.push({
-              bool: { must_not: [{ term: { [sPath]: v } }] }
-            });
-            break;
-          case '$exists':
-            const q = {
-              exists: {
-                field: path
-              }
-            };
-            items.push(v ? q : {
-              bool: {
-                must_not: q
-              }
-            });
-            break;
-          case '$lt':
-          case '$gt':
-          case '$gte':
-          case '$lte':
-            const out: any = {};
-            for (const k of Object.keys(top)) {
-              out[k.replace(/^[$]/, '')] = top[k];
-            }
-            items.push({
-              range: {
-                [sPath]: out
-              }
-            });
-            break;
-          case '$regex':
-            items.push({
-              regexp: {
-                [sPath]: typeof v === 'string' ? v : `${v.source}`
-              }
-            });
-            break;
-          case '$geoWithin':
-            items.push({
-              geo_polygon: {
-                [sPath]: {
-                  points: v.map(([lat, lon]: [number, number]) => ({ lat, lon }))
-                }
-              }
-            });
-            break;
-          case '$geoIntersects':
-            items.push({
-              geo_shape: {
-                [sPath]: {
-                  type: 'envelope',
-                  coordinates: v
-                },
-                relation: 'within'
-              }
-            });
-            break;
-        }
-      }
-      // Handle operations
-    } else {
-      items.push({
-        [Array.isArray(top) ? 'terms' : 'match']: {
-          [`${path}${key}`]: top
-        }
-      });
-    }
-  }
-  if (items.length === 1) {
-    return items[0];
-  } else {
-    return { bool: { must: items } };
-  }
-}
-
-export function extractWhereQuery<T>(o: WhereClause<T>, cls: Class<T>): { [key: string]: any } {
-  if (has$And(o)) {
-    return { bool: { must: o.$and.map(x => extractWhereQuery<T>(x, cls)) } };
-  } else if (has$Or(o)) {
-    return { bool: { should: o.$or.map(x => extractWhereQuery<T>(x, cls)), minimum_should_match: 1 } };
-  } else if (has$Not(o)) {
-    return { bool: { must_not: extractWhereQuery<T>(o.$not, cls) } };
-  } else {
-    return extractWhereTermQuery(o, cls);
-  }
-}
 
 export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
   const out: { [key: string]: any } = {};
@@ -194,6 +62,10 @@ export class ModelElasticsearchSource extends ModelSource {
 
   constructor(private config: ModelElasticsearchConfig) {
     super();
+  }
+
+  onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>): void {
+    console.log('Model Changed', e);
   }
 
   getSearchObject<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
@@ -294,7 +166,25 @@ export class ModelElasticsearchSource extends ModelSource {
     this.client = new es.Client(deepAssign({}, this.config));
     await this.client.cluster.health({});
 
+    const create = [];
+
     // PreCreate indexes
+    for (const x of ModelRegistry.getClasses()) {
+      const schema = generateSchema(x);
+      const ident = this.getIdentity(x);
+      create.push(this.client.indices.create({
+        index: ident.index,
+        body: {
+          mappings: {
+            [ident.type]: schema
+          }
+        }
+      }).catch(e => {
+        console.log(`Index ${ident.index} already created`);
+      }));
+    }
+
+    await Promise.all(create);
   }
 
   translateQueryIds<T extends ModelCore, U extends Query<T>>(query: U) {
