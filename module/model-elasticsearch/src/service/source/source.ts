@@ -68,6 +68,22 @@ export class ModelElasticsearchSource extends ModelSource {
     console.log('Model Changed', e);
   }
 
+  getSelect<T>(clause: SelectClause<T>) {
+    const simp = extractSimple(clause);
+    const include: string[] = [];
+    const exclude: string[] = [];
+    for (const k of Object.keys(simp)) {
+      const nk = k === 'id' ? '_id' : k;
+      const v: (1 | 0 | boolean) = simp[k];
+      if (v === 0 || v === false) {
+        exclude.push(nk);
+      } else {
+        include.push(nk);
+      }
+    }
+    return [include, exclude];
+  }
+
   getSearchObject<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
     const conf = ModelRegistry.get(cls);
 
@@ -79,24 +95,12 @@ export class ModelElasticsearchSource extends ModelSource {
     const sort = query.sort || conf.defaultSort;
 
     if (query.select) {
-      const simp = extractSimple(query.select);
-      const include: string[] = [];
-      const exclude: string[] = [];
-      for (const k of Object.keys(simp)) {
-        const nk = k === '_id' ? 'id' : k;
-        const v: (1 | 0 | boolean) = simp[k];
-        if (v === 0 || v === false) {
-          exclude.push(k);
-        } else {
-          include.push(k);
-        }
+      const [inc, exc] = this.getSelect(query.select);
+      if (inc.length) {
+        search._sourceInclude = inc;
       }
-      if (exclude.length) {
-        search._sourceExclude = exclude;
-      }
-
-      if (include.length) {
-        search._sourceInclude = include;
+      if (exc.length) {
+        search._sourceExclude = exc;
       }
     }
 
@@ -131,11 +135,21 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
-    const results = await await this.client.search<U>(this.getSearchObject(cls, query));
+    const req = this.getSearchObject(cls, query);
+    const results = await await this.client.search<U>(req);
 
     const out: U[] = [];
+
+    // determine if id
+    const select = [req._sourceInclude as string[] || [], req._sourceExclude as string[] || []];
+    const includeId = select[0].includes('_id') || (select[0].length === 0 && !select[1].includes('_id'));
+
     for (const r of results.hits.hits) {
-      out.push(r._source);
+      const obj = r._source;
+      if (includeId) {
+        (obj as any)._id = r._id;
+      }
+      out.push(obj);
     }
 
     return out;

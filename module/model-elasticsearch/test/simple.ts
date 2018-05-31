@@ -107,5 +107,22 @@ class TestSave extends BaseElasticsearchTest {
     assert(!Object.keys(match3[0].address).includes('street2'));
     assert(Object.keys(match3[0].address) === ['street1']);
     assert(Object.keys(match3[0]).includes('id'));
+
+    const match4 = await service.query(Person, {
+      select: {
+        address: {
+          street1: 1
+        }
+      },
+      where: {
+        address: {
+          street2: {
+            $exists: true
+          }
+        }
+      }
+    });
+
+    assert(!Object.keys(match4[0]).includes('id'));
   }
 }
