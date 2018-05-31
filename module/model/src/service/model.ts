@@ -159,10 +159,14 @@ export class ModelService extends ModelSource {
     return this.source.updatePartial(cls, model);
   }
 
-  updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>) {
+  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>) {
     this.queryService.verify(cls, query);
 
-    return this.source.updatePartialByQuery(cls, query, body);
+    // Do not do pre-persist, because we don't know what we would be validating
+
+    const res = await this.source.updatePartialByQuery(cls, query, body);
+
+    return this.postLoad(cls, res);
   }
 
   async updatePartialView<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string) {
