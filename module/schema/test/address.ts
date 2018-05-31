@@ -1,7 +1,7 @@
-import { Schema, SchemaBound, Field, View, Required } from '../index';
+import { Schema, Field, View, Required } from '../index';
 
 @Schema()
-export class Address extends SchemaBound {
+export class Address {
 
   @Field(String)
   @View('test')

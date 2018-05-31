@@ -1,4 +1,7 @@
-import { Field, Url, SchemaBound, View, Required, Alias, BindUtil, Schema, SchemaRegistry } from '../src';
+import {
+  Field, Url, View, Required, Alias,
+  BindUtil, Schema, SchemaRegistry, ClassWithSchema
+} from '../src';
 import { Address } from './address';
 import * as assert from 'assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';
@@ -10,7 +13,7 @@ class SuperAddress extends Address {
 }
 
 @Schema(false)
-class Count extends SchemaBound {
+class Count {
 
   @Field(String)
   @View('test')
@@ -21,7 +24,7 @@ class Count extends SchemaBound {
 }
 
 @Schema(true)
-class Person extends SchemaBound {
+class Person {
 
   name: string;
 
@@ -34,7 +37,7 @@ class Person extends SchemaBound {
 }
 
 @Schema(true)
-export class Response extends SchemaBound {
+export class Response {
 
   questionId: string;
   answer?: any;
@@ -60,7 +63,7 @@ class DataBinding {
 
   @Test('Validate bind')
   validateBind() {
-    const person = Person.from({
+    const person = (Person as ClassWithSchema<Person>).from({
       name: 'Test',
       address: {
         street1: '1234 Fun',
@@ -98,7 +101,7 @@ class DataBinding {
 
   @Test('Validate Object')
   validateObject() {
-    const res = Response.from({
+    const res = (Response as ClassWithSchema<Response>).from({
       questionId: '20',
       answer: ['a', 'd']
     });
@@ -109,7 +112,7 @@ class DataBinding {
 
   @Test('Should handle inheritance')
   validateInheritance() {
-    const res = SuperAddress.from({
+    const res = (SuperAddress as ClassWithSchema<SuperAddress>).from({
       street1: 'a',
       street2: 'b',
       unit: '20'
@@ -119,7 +122,7 @@ class DataBinding {
 
   @Test('Should handle aliases')
   validateAliases() {
-    const res = Response.from({
+    const res = (Response as ClassWithSchema<Response>).from({
       correct: true,
       status: 'orange'
     } as any);
