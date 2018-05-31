@@ -1,4 +1,4 @@
-import { SchemaBound, View } from '@travetto/schema';
+import { View } from '@travetto/schema';
 import { Model, ModelService, WhereClause, PageableModelQuery, Query } from '../index';
 import { TestSource } from './registry';
 import { Person, Address } from './models';
