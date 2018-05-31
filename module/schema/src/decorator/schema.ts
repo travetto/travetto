@@ -12,7 +12,7 @@ export interface ClassWithSchema<T> {
   from(data: DeepPartial<T & { [key: string]: any }>, view?: string): T;
 }
 
-export function Schema(auto: boolean = true) {
+export function Schema(auto: boolean = true): ClassDecorator {
   return <T>(target: Class<T>): ClassWithSchema<T> => {
     const res: ClassWithSchema<T> = target as any;
     SchemaRegistry.getOrCreatePending(target);
