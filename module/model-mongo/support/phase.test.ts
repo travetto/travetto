@@ -7,7 +7,7 @@ export const init = {
     const container = new DockerContainer('mongo:latest')
       .forceDestroyOnShutdown()
       .exposePort(port);
-    container.run('--storageEngine', 'ephemeralForTest', '--port', `${port}`)
+    container.run('--storageEngine', 'ephemeralForTest', '--port', `${port}`);
     await container.waitForPort(port, 5000);
   }
-}
+};

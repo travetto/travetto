@@ -78,9 +78,6 @@ export class ModelMongoSource extends ModelSource {
       cursor = cursor.skip(Math.trunc(query.offset) || 0);
     }
     const res = await cursor.toArray() as any as U[];
-    for (const r of res) {
-      this.postLoad(undefined as any, r as any);
-    }
     return res;
   }
 
@@ -169,16 +166,9 @@ export class ModelMongoSource extends ModelSource {
     return this.indices[this.getCollectionName(cls)];
   }
 
-  async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>) {
-    const col = await this.getCollection(cls);
-    const objs = await col.find(query as mongo.FilterQuery<T>, { fields: { _id: 1 } } as any).toArray() as T[];
-    return objs.map(x => this.postLoad(cls, x));
-  }
-
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {
     query = this.translateQueryIds(query);
     const res = await this.query(cls, query);
-    res.forEach(r => this.postLoad(cls, r));
     return res;
   }
 
@@ -239,9 +229,7 @@ export class ModelMongoSource extends ModelSource {
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
     const col = await this.getCollection(cls);
-    this.prePersist(cls, o);
     await col.replaceOne({ _id: o.id }, o);
-    this.postLoad(cls, o);
     return o;
   }
 
@@ -263,8 +251,8 @@ export class ModelMongoSource extends ModelSource {
     if (!res.value) {
       throw new BaseError('Object not found for updating');
     }
+
     const ret: T = res.value as T;
-    this.postLoad(cls, ret);
     return ret;
   }
 
