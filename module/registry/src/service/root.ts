@@ -3,8 +3,8 @@ import { CompilerClassSource, ChangeEvent } from '../source';
 import { Class } from '../model';
 
 class $RootRegistry extends Registry {
-  constructor() {
-    super(new CompilerClassSource());
+  constructor(src = new CompilerClassSource()) {
+    super(src);
   }
 
   // Auto propagate
