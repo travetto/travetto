@@ -152,9 +152,19 @@ export class Watcher extends EventEmitter {
     this.pollers.set(entry.file, (curr: fs.Stats, prev: fs.Stats) => {
       // Only emit changed if the file still exists
       // Prevents changed/deleted duplicate events
-      if (fs.existsSync(entry.file)) {
+      try {
+        // Get stats on file
+        const stats = fs.lstatSync(entry.file);
+        entry.stats = stats;
+
         this._emit('changed', entry);
         this._emit('all', { event: 'changed', entry });
+
+      } catch (e) {
+        if (e.code === 'ENOENT') {
+          // Missing file, continue
+        }
+        throw e;
       }
     });
 

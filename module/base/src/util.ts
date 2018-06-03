@@ -89,7 +89,8 @@ export function deepAssign<T extends any, U extends any>(a: T, b: U, mode: 'loos
   return _deepAssign(a, b, mode) as T & U;
 }
 
-export function throttle(fn: (...args: any[]) => any, threshhold = 250) {
+export function throttle<T, U, V>(fn: (a: T, b: U) => V, threshhold?: number): (a: T, b: U) => V;
+export function throttle<T extends Function>(fn: T, threshhold = 250) {
   let last = 0;
   let deferTimer: NodeJS.Timer;
   return function (...args: any[]) {
@@ -105,5 +106,5 @@ export function throttle(fn: (...args: any[]) => any, threshhold = 250) {
       last = now;
       fn.apply(null, args);
     }
-  };
+  } as any as T;
 }
