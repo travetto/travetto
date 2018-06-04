@@ -51,7 +51,7 @@ export function scanDir(handler: Handler, base?: string, entry?: Entry) {
 
         const full = path.join(entry.file, file);
         const stats = await fsStat(full);
-        const subEntry: Entry = { stats, file: full, module: full.replace(`${AppEnv.cwd}${path.sep}`, '').replace(/[\\]+/g, '/') };
+        const subEntry: Entry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
         if (stats.isDirectory()) {
           if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
@@ -96,7 +96,7 @@ export function scanDirSync(handler: Handler, base?: string, entry?: Entry) {
 
     const full = path.join(entry.file, file);
     const stats = fs.lstatSync(full);
-    const subEntry: Entry = { stats, file: full, module: full.replace(`${AppEnv.cwd}${path.sep}`, '').replace(/[\\]+/g, '/') };
+    const subEntry: Entry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
     if (stats.isDirectory()) {
       if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
