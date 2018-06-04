@@ -64,8 +64,47 @@ export class ModelElasticsearchSource extends ModelSource {
     super();
   }
 
+  async createIndex(cls: Class<any>) {
+    const schema = generateSchema(cls);
+    const ident = this.getIdentity(cls);
+    const index = `${ident.index}_${(Math.random() * 1000000).toFixed(0)}`;
+    try {
+      await this.client.indices.create({
+        index,
+        body: {
+          mappings: {
+            [ident.type]: schema
+          }
+        }
+      });
+      await this.client.indices.putAlias({ index, name: ident.index });
+      console.log(`Index ${ident.index} created`);
+    } catch (e) {
+      console.log(`Index ${ident.index} already created`);
+    }
+  }
+
   onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>): void {
     console.log('Model Changed', e);
+    if (e.prev && !e.curr) {
+      this.client.indices.delete({
+        index: `${this.config.namespace}_${e.prev.__id.toLowerCase()}`
+      });
+    } else if (e.curr) {
+      const index = `${this.config.namespace}_${e.curr!.__id.toLowerCase()}`;
+      this.client.indices.getAlias({ index })
+        .then(async x => {
+          const src = Object.keys(x)[0];
+          await this.createIndex(e.curr!);
+          await this.client.reindex({
+            body: {
+              source: { index: src },
+              dest: { index }
+            }
+          });
+        });
+
+    }
   }
 
   getSelect<T>(clause: SelectClause<T>) {
@@ -179,26 +218,8 @@ export class ModelElasticsearchSource extends ModelSource {
     this.client = new es.Client(deepAssign({}, this.config));
     await this.client.cluster.health({});
 
-    const create = [];
-
     // PreCreate indexes
-    for (const x of ModelRegistry.getClasses()) {
-      const schema = generateSchema(x);
-      const ident = this.getIdentity(x);
-      create.push(this.client.indices.create({
-        index: ident.index,
-        body: {
-          mappings: {
-            [ident.type]: schema
-          }
-        }
-      }).then(e => {
-        console.log(`Index ${ident.index} created`);
-      }).catch(e => {
-        console.log(`Index ${ident.index} already created`);
-      }));
-    }
-
+    const create = ModelRegistry.getClasses().map(x => this.createIndex(x));
     await Promise.all(create);
   }
 

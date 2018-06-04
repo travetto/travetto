@@ -10,7 +10,7 @@ export function generateSchema<T>(cls: Class<T>) {
     const conf = schema.schema[field];
 
     if (conf.declared.type === Number) {
-      props[field] = { type: 'long' };
+      props[field] = { type: conf.precision ? 'float' : 'integer' };
     } else if (conf.declared.type === Date) {
       props[field] = { type: 'date' };
     } else if (conf.declared.type === Boolean) {
