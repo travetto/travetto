@@ -86,24 +86,22 @@ export class ExpressApp {
     this.app._router.stack = RouteUtil.removeAllRoutes(this.app._router.stack, config);
   }
 
-  async registerController(config: ControllerConfig) {
-    const instance = await DependencyRegistry.getInstance(config.class);
+  async registerController(cConfig: ControllerConfig) {
+    const instance = await DependencyRegistry.getInstance(cConfig.class);
 
-    console.log('Registering Controller Instance', config.class.__id, config.path, config.handlers.length);
+    console.log('Registering Controller Instance', cConfig.class.__id, cConfig.path, cConfig.handlers.length);
 
-    for (const handler of config.handlers) {
-      handler.filters = [...config.filters!, ...handler.filters!].map(RouteUtil.toPromise).map(x => RouteUtil.asyncHandler(x));
-      handler.path = RouteUtil.buildPath(config.path, handler.path);
-      handler.handler = RouteUtil.asyncHandler(
-        RouteUtil.toPromise(handler.handler.bind(instance)),
-        RouteUtil.outputHandler.bind(null, handler));
+    for (const hConfig of cConfig.handlers.reverse()) {
+      const filters = [...cConfig.filters!, ...hConfig.filters!].map(RouteUtil.toPromise).map(x => RouteUtil.asyncHandler(x));
+      hConfig.path = RouteUtil.buildPath(cConfig.path, hConfig.path);
+      hConfig.handler = RouteUtil.asyncHandler(
+        RouteUtil.toPromise(hConfig.handler.bind(instance)),
+        RouteUtil.outputHandler.bind(null, hConfig));
+
+      hConfig.instance = instance;
+      this.app[hConfig.method!](hConfig.path!, ...filters, hConfig.handler);
     }
-
-    for (const hconf of config.handlers) {
-      hconf.instance = instance;
-      this.app[hconf.method!](hconf.path!, ...hconf.filters!, hconf.handler);
-    }
-    this.controllers.set(config.path, config);
+    this.controllers.set(cConfig.path, cConfig);
   }
 
   get() {

@@ -17,10 +17,14 @@ export class RouteUtil {
           x.route.stack = RouteUtil.removeRoutes(x.route.stack, toRemove);
         }
         if (toRemove.has(x.route.path)) {
-          const method = x.route.methods && Object.keys(x.route.methods)[0];
-          if (toRemove.get(x.route.path)!.has(method)) {
-            console.debug(`Dropping ${method}/${x.route.path}`);
-            return null;
+          if (x.route.methods) {
+            const keys = Object.keys(x.route.methods);
+            for (const method of keys) {
+              if (toRemove.get(x.route.path)!.has(method)) {
+                console.debug(`Dropping ${method}#${x.route.path}`);
+                return;
+              }
+            }
           }
         }
       }
@@ -42,7 +46,7 @@ export class RouteUtil {
 
   static buildPath(base: string, path: PathType | undefined): PathType {
     if (typeof path === 'string') {
-      return (base + path).replace(/\/+/, '/').replace(/(.)\/$/, '$1');
+      return (base + path).replace(/\/+/, '/').replace(/\/$/, '');
     } else if (!!path) {
       return new RegExp(`^${base.replace(/\//g, '\\/')}${path.source}$`, path.flags);
     } else {
