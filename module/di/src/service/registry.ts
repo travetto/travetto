@@ -248,6 +248,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const classId = pconfig.class!.__id;
     const config = this.getOrCreatePending(pconfig.class!);
 
+    config.class = cls;
+
     if (pconfig.factory) {
       config.factory = pconfig.factory;
     }
