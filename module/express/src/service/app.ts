@@ -92,15 +92,19 @@ export class ExpressApp {
     console.log('Registering Controller Instance', cConfig.class.__id, cConfig.path, cConfig.handlers.length);
 
     for (const hConfig of cConfig.handlers.reverse()) {
-      const filters = [...cConfig.filters!, ...hConfig.filters!].map(RouteUtil.toPromise).map(x => RouteUtil.asyncHandler(x));
+      hConfig.instance = instance;
       hConfig.path = RouteUtil.buildPath(cConfig.path, hConfig.path);
       hConfig.handler = RouteUtil.asyncHandler(
         RouteUtil.toPromise(hConfig.handler.bind(instance)),
         RouteUtil.outputHandler.bind(null, hConfig));
 
-      hConfig.instance = instance;
+      const filters = [...cConfig.filters!, ...hConfig.filters!]
+        .map(RouteUtil.toPromise)
+        .map(x => RouteUtil.asyncHandler(x));
+
       this.app[hConfig.method!](hConfig.path!, ...filters, hConfig.handler);
     }
+
     this.controllers.set(cConfig.path, cConfig);
   }
 

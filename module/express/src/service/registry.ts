@@ -80,6 +80,14 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHand
     const id = cls.__id!;
     const final = this.getOrCreatePending(cls) as ControllerConfig;
 
+    // Handle duplicates, take latest
+    const found = new Map<string, RequestHandler>();
+    for (const h of final.handlers) {
+      const key = `${h.method}#${h.path === undefined ? '' : (typeof h.path === 'string' ? h.path : h.path.source)}`;
+      found.set(key, h);
+    }
+    final.handlers = Array.from(found.values());
+
     if (this.has(final.path)) {
       console.log('Reloading controller', cls.name, final.path);
     }
