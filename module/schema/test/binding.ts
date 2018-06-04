@@ -1,6 +1,6 @@
 import {
   Field, Url, View, Required, Alias,
-  BindUtil, Schema, SchemaRegistry, ClassWithSchema
+  BindUtil, Schema, SchemaRegistry, ClassWithSchema, Float, Integer
 } from '../src';
 import { Address } from './address';
 import * as assert from 'assert';
@@ -19,6 +19,7 @@ class Count {
   @View('test')
   area: string;
 
+  @Float()
   @Field(Number)
   value: number;
 }
@@ -27,6 +28,9 @@ class Count {
 class Person {
 
   name: string;
+
+  @Integer()
+  age: number;
 
   @View('test')
   address: Address;
@@ -65,19 +69,23 @@ class DataBinding {
   validateBind() {
     const person = (Person as ClassWithSchema<Person>).from({
       name: 'Test',
+      age: 19.999978,
       address: {
         street1: '1234 Fun',
         street2: 'Unit 20'
       },
       counts: [
-        { area: 'A', value: 20 },
+        { area: 'A', value: 20.55555 },
         { area: 'B', value: 30 }
       ]
     });
+    const a = 30;
+    assert(person.age === 19);
     assert(person.address instanceof Address);
     assert(person.address.street1 === '1234 Fun');
     assert(person.counts.length === 2);
     assert(person.counts[0] instanceof Count);
+    assert(person.counts[0].value === 20.55555);
 
     const viewPerson = BindUtil.bindSchema(Person, new Person(), {
       name: 'Test',

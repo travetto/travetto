@@ -53,24 +53,24 @@ export class BindUtil {
   static coerceType<T>(conf: FieldConfig, val: any): T {
     const type = conf.declared.type;
 
-    if (val.constructor !== type) {
-      const atype = type as Class;
-      if (atype === Boolean) {
+    if (type === Number) {
+      if (conf.precision) {
+        val = +parseFloat(`${val}`).toFixed(conf.precision);
+      } else {
+        val = parseInt(`${val}`, 10);
+      }
+    } else if (val.constructor !== type) {
+      if (type === Boolean) {
         if (typeof val === 'string') {
           val = val === 'true';
         } else {
           val = !!val;
         }
-      } else if (atype === Number) {
-        if (conf.precision) {
-          val = parseFloat(`${val}`).toFixed(conf.precision);
-        } else {
-          val = parseInt(`${val}`, 10);
-        }
-      } else if (atype === String) {
+      } else if (type === String) {
         val = `${val}`;
       }
     }
+
     return val as T;
   }
 
@@ -115,6 +115,7 @@ export class BindUtil {
           if (v !== undefined && v !== null) {
             const config = viewConf.schema[schemaFieldName];
             const declared = config.declared;
+
             // Ensure its an array
             if (!Array.isArray(v) && declared.array) {
               v = [v];
