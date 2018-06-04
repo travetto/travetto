@@ -26,6 +26,7 @@ export interface FieldConfig {
   declared: { type: Class<any>, array: boolean, specifier?: string };
   required?: { message?: string };
   match?: { re: RegExp, message?: string };
+  precision?: number;
   min?: { n: number | Date, message?: string };
   max?: { n: number | Date, message?: string };
   minlength?: { n: number, message?: string };

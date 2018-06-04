@@ -81,11 +81,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   registerPendingFieldConfigSpecifierType(target: Class, prop: string, specifier: string) {
-    return this.registerPendingFieldFacet(target, prop, {
-      declared: {
-        specifier
-      }
-    });
+    return this.registerPendingFieldFacet(target, prop, { declared: { specifier } });
   }
 
   registerPendingFieldConfig(target: Class, prop: string, type: ClassList, specifier?: string) {

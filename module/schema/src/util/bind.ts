@@ -1,4 +1,4 @@
-import { SchemaRegistry } from '../service';
+import { SchemaRegistry, FieldConfig } from '../service';
 import { Class } from '@travetto/registry';
 
 export class BindUtil {
@@ -50,7 +50,9 @@ export class BindUtil {
     return out;
   }
 
-  static coerceType<T>(type: Class<T>, val: any): T {
+  static coerceType<T>(conf: FieldConfig, val: any): T {
+    const type = conf.declared.type;
+
     if (val.constructor !== type) {
       const atype = type as Class;
       if (atype === Boolean) {
@@ -60,7 +62,11 @@ export class BindUtil {
           val = !!val;
         }
       } else if (atype === Number) {
-        val = parseInt(`${val}`, 10);
+        if (conf.precision) {
+          val = parseFloat(`${val}`).toFixed(conf.precision);
+        } else {
+          val = parseInt(`${val}`, 10);
+        }
       } else if (atype === String) {
         val = `${val}`;
       }
@@ -107,7 +113,8 @@ export class BindUtil {
           let v = data[inboundField];
 
           if (v !== undefined && v !== null) {
-            const declared = viewConf.schema[schemaFieldName].declared;
+            const config = viewConf.schema[schemaFieldName];
+            const declared = config.declared;
             // Ensure its an array
             if (!Array.isArray(v) && declared.array) {
               v = [v];
@@ -121,8 +128,8 @@ export class BindUtil {
               }
             } else {
               v = declared.array ?
-                v.map((e: any) => BindUtil.coerceType(declared.type, e)) :
-                BindUtil.coerceType(declared.type, v);
+                v.map((e: any) => BindUtil.coerceType(config, e)) :
+                BindUtil.coerceType(config, v);
             }
           }
 

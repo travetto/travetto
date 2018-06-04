@@ -6,7 +6,7 @@ export const CommonRegExp = {
   url: /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/,
   simple_name: /^([a-zA-Z\u0080-\u024F]*(?:. |-| |'))*[a-zA-Z\u0080-\u024F]+$/,
   postal_code: /^\d{5}(?:[-\s]\d{4})?$/
-}
+};
 
 // Rebind regexes
 for (const k of Object.keys(CommonRegExp)) {
