@@ -1,4 +1,5 @@
 import * as util from 'util';
+import { simplifyStack } from '@travetto/base';
 
 const OG_CONSOLE = {
   log: console.log,
@@ -13,7 +14,15 @@ export class ConsoleCapture {
   static out: { [key: string]: string };
 
   static log(level: string, ...args: any[]) {
-    const msg = args.map((x: any) => typeof x === 'string' ? x : util.inspect(x, false, 4)).join(' ');
+    const msg = args.map((x: any) => {
+      if (x instanceof Error) {
+        return simplifyStack(x);
+      } else if (typeof x === 'string') {
+        return x;
+      } else {
+        return util.inspect(x, false, 4);
+      }
+    }).join(' ');
     this.out[level] = `${this.out[level] || ''}${msg}\n`;
   }
 
