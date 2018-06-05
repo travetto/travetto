@@ -125,14 +125,6 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     return dest;
   }
 
-  onFieldChange<T>(callback: (e: ChangeEvent<FieldConfig>) => any): void {
-    this.events.on('field:change', callback);
-  }
-
-  emitFieldChange(ev: ChangeEvent<FieldConfig>) {
-    this.events.emit('field:change', ev);
-  }
-
   emitFieldDelta(cls: Class) {
     const prev = this.getExpired(cls);
     const curr = this.get(cls);
@@ -143,15 +135,17 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     const prevFields = new Set(prevView.fields);
     const currFields = new Set(currView.fields);
 
+    const changes: ChangeEvent<FieldConfig>[] = [];
+
     for (const c of currFields) {
       if (!prevFields.has(c)) {
-        this.emitFieldChange({ curr: currView.schema[c], type: 'added' });
+        changes.push({ curr: currView.schema[c], type: 'added' });
       }
     }
 
     for (const c of prevFields) {
       if (!currFields.has(c)) {
-        this.emitFieldChange({ prev: prevView.schema[c], type: 'removing' });
+        changes.push({ prev: prevView.schema[c], type: 'removing' });
       }
     }
 
@@ -160,10 +154,16 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
         const { type, ...prevSchema } = prevView.schema[c];
         const { type: type2, ...currSchema } = currView.schema[c];
         if (JSON.stringify(prevSchema) !== JSON.stringify(currSchema)) {
-          this.emitFieldChange({ prev: prevView.schema[c], curr: currView.schema[c], type: 'changed' });
+          changes.push({ prev: prevView.schema[c], curr: currView.schema[c], type: 'changed' });
         }
       }
     }
+
+    this.events.emit('field:change', { cls, changes });
+  }
+
+  onFieldChange<T>(callback: (e: { cls: Class, changes: ChangeEvent<FieldConfig>[] }) => any): void {
+    this.events.on('field:change', callback);
   }
 
   onInstallFinalize(cls: Class) {
