@@ -1,5 +1,5 @@
 import { ClassList, FieldConfig, ClassConfig, ViewConfig } from './types';
-import { MetadataRegistry, RootRegistry, Class } from '@travetto/registry';
+import { MetadataRegistry, RootRegistry, Class, ChangeEvent } from '@travetto/registry';
 
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
@@ -125,6 +125,47 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     return dest;
   }
 
+  onFieldChange<T>(callback: (e: ChangeEvent<FieldConfig>) => any): void {
+    this.events.on('field:change', callback);
+  }
+
+  emitFieldChange(ev: ChangeEvent<FieldConfig>) {
+    this.events.emit('field:change', ev);
+  }
+
+  computeFieldDelta(cls: Class) {
+    const previous = this.getExpired(cls);
+    const current = this.get(cls);
+    if (previous && current) {
+      const prevView = previous.views[this.DEFAULT_VIEW];
+      const currView = current.views[this.DEFAULT_VIEW];
+      const prevFields = new Set(prevView.fields);
+      const currFields = new Set(currView.fields);
+
+      for (const c of currFields) {
+        if (!prevFields.has(c)) {
+          this.emitFieldChange({ curr: currView.schema[c], type: 'added' });
+        }
+      }
+
+      for (const c of prevFields) {
+        if (!currFields.has(c)) {
+          this.emitFieldChange({ prev: prevView.schema[c], type: 'removing' });
+        }
+      }
+
+      for (const c of currFields) {
+        if (prevFields.has(c)) {
+          const { type, ...prevSchema } = prevView.schema[c];
+          const { type: type2, ...currSchema } = currView.schema[c];
+          if (JSON.stringify(prevSchema) !== JSON.stringify(currSchema)) {
+            this.emitFieldChange({ prev: prevView.schema[c], curr: currView.schema[c], type: 'changed' });
+          }
+        }
+      }
+    }
+  }
+
   onInstallFinalize(cls: Class) {
 
     let config: ClassConfig = this.createPending(cls) as ClassConfig;
@@ -143,6 +184,8 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     if (pending) {
       config = this.mergeConfigs(config, pending as ClassConfig);
     }
+
+    this.computeFieldDelta(cls);
 
     return config;
   }
