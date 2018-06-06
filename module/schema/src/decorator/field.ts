@@ -38,9 +38,9 @@ export const Email = (message?: string) => Match(CommonRegExp.email, message);
 export const Telephone = (message?: string) => Match(CommonRegExp.telphone, message);
 export const Url = (message?: string) => Match(CommonRegExp.url, message);
 export const Precision = (precision: number) => prop({ declared: { precision } });
-export const Integer = () => prop({ precision: 0 });
-export const Float = () => prop({ precision: 10 });
-export const Currency = () => prop({ precision: 2 });
+export const Integer = () => Precision(0);
+export const Float = () => Precision(10);
+export const Currency = () => Precision(2);
 
 export function View(...names: string[]) {
   return (f: any, p: string) => {
