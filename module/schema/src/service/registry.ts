@@ -16,7 +16,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   computeSchemaDependencies(cls: Class, curr: Class = cls, path: string[] = []) {
     const config = this.get(curr);
 
-    SchemaChangeListener.trackSchemaDependency(curr, cls, path, config);
+    SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.get(cls));
 
     // Read children
     const view = config.views[DEFAULT_VIEW];
