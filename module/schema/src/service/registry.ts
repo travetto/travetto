@@ -1,13 +1,30 @@
-import { ClassList, FieldConfig, ClassConfig, ViewConfig } from './types';
 import { MetadataRegistry, RootRegistry, Class, ChangeEvent } from '@travetto/registry';
+import { AppEnv } from '@travetto/base';
+import { ClassList, FieldConfig, ClassConfig, ViewConfig, DEFAULT_VIEW } from './types';
+import {
+  SchemaChangeListener,
+  SchemaChangeEvent, FieldChangeEvent,
+  SCHEMA_CHANGE_EVENT, FIELD_CHANGE_EVENT
+} from './changes';
 
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
-  static DEFAULT_VIEW = '__all';
-  DEFAULT_VIEW = $SchemaRegistry.DEFAULT_VIEW;
-
   constructor() {
     super(RootRegistry);
+  }
+
+  computeSchemaDependencies(cls: Class, curr: Class = cls, path: string[] = []) {
+    const config = SchemaRegistry.get(curr);
+
+    SchemaChangeListener.trackSchemaDependency(curr, cls, path, config);
+
+    // Read children
+    const view = config.views[DEFAULT_VIEW];
+    for (const k of view.fields) {
+      if (SchemaRegistry.has(view.schema[k].declared.type)) {
+        this.computeSchemaDependencies(cls, view.schema[k].declared.type, [...path, k]);
+      }
+    }
   }
 
   createPending(cls: Class) {
@@ -15,7 +32,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
       class: cls,
       validators: [],
       views: {
-        [$SchemaRegistry.DEFAULT_VIEW]: {
+        [DEFAULT_VIEW]: {
           schema: {},
           fields: []
         }
@@ -24,7 +41,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   getPendingViewSchema<T>(cls: Class<T>, view?: string) {
-    view = view || $SchemaRegistry.DEFAULT_VIEW;
+    view = view || DEFAULT_VIEW;
 
     if (cls.__id) {
       const conf = this.getOrCreatePending(cls);
@@ -35,15 +52,15 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   getViewSchema<T>(cls: Class<T>, view?: string) {
-    const res = this.get(cls)!.views[view || SchemaRegistry.DEFAULT_VIEW];
+    const res = this.get(cls)!.views[view || DEFAULT_VIEW];
     if (!res) {
-      throw new Error(`Unknown view ${view || SchemaRegistry.DEFAULT_VIEW} for ${cls.name}`);
+      throw new Error(`Unknown view ${view || DEFAULT_VIEW} for ${cls.name}`);
     }
     return res;
   }
 
   getOrCreatePendingViewConfig<T>(target: Class<T>, view?: string) {
-    view = view || $SchemaRegistry.DEFAULT_VIEW;
+    view = view || DEFAULT_VIEW;
 
     const conf = this.getOrCreatePending(target);
 
@@ -58,7 +75,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   registerPendingFieldFacet(target: Class, prop: string, config: any, view?: string) {
-    view = view || $SchemaRegistry.DEFAULT_VIEW;
+    view = view || DEFAULT_VIEW;
 
     const defViewConf = this.getOrCreatePendingViewConfig(target);
 
@@ -67,7 +84,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
       defViewConf.schema[prop] = {} as any;
     }
 
-    if (view !== $SchemaRegistry.DEFAULT_VIEW) {
+    if (view !== DEFAULT_VIEW) {
       const viewConf = this.getOrCreatePendingViewConfig(target, view);
       if (!viewConf.schema[prop]) {
         viewConf.schema[prop] = defViewConf.schema[prop];
@@ -125,47 +142,6 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     return dest;
   }
 
-  emitFieldDelta(cls: Class) {
-    const prev = this.getExpired(cls);
-    const curr = this.get(cls);
-
-    const prevView = prev.views[this.DEFAULT_VIEW];
-    const currView = curr.views[this.DEFAULT_VIEW];
-
-    const prevFields = new Set(prevView.fields);
-    const currFields = new Set(currView.fields);
-
-    const changes: ChangeEvent<FieldConfig>[] = [];
-
-    for (const c of currFields) {
-      if (!prevFields.has(c)) {
-        changes.push({ curr: currView.schema[c], type: 'added' });
-      }
-    }
-
-    for (const c of prevFields) {
-      if (!currFields.has(c)) {
-        changes.push({ prev: prevView.schema[c], type: 'removing' });
-      }
-    }
-
-    for (const c of currFields) {
-      if (prevFields.has(c)) {
-        const { type, ...prevSchema } = prevView.schema[c];
-        const { type: type2, ...currSchema } = currView.schema[c];
-        if (JSON.stringify(prevSchema) !== JSON.stringify(currSchema)) {
-          changes.push({ prev: prevView.schema[c], curr: currView.schema[c], type: 'changed' });
-        }
-      }
-    }
-
-    this.events.emit('field:change', { cls, changes });
-  }
-
-  onFieldChange<T>(callback: (e: { cls: Class, changes: ChangeEvent<FieldConfig>[] }) => any): void {
-    this.events.on('field:change', callback);
-  }
-
   onInstallFinalize(cls: Class) {
 
     let config: ClassConfig = this.createPending(cls) as ClassConfig;
@@ -185,15 +161,38 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
       config = this.mergeConfigs(config, pending as ClassConfig);
     }
 
+    if (AppEnv.watch) {
+      this.computeSchemaDependencies(cls);
+    }
+
     return config;
+  }
+
+  onUninstallFinalize<T>(cls: Class<T>) {
+    super.onUninstallFinalize(cls);
+
+    SchemaChangeListener.clearSchemaDependency(cls);
   }
 
   emit(ev: ChangeEvent<Class>) {
     super.emit(ev);
     if (ev.type === 'changed') {
-      this.emitFieldDelta(ev.curr!);
+      SchemaChangeListener.emitFieldChanges({
+        type: 'changed',
+        curr: this.get(ev.curr!),
+        prev: this.getExpired(ev.curr!)
+      });
     }
   }
+
+  onSchemaChange(cb: (ev: SchemaChangeEvent) => void) {
+    SchemaChangeListener.on(SCHEMA_CHANGE_EVENT, cb);
+  }
+
+  onFieldChange<T>(callback: (e: FieldChangeEvent) => any): void {
+    SchemaChangeListener.on(FIELD_CHANGE_EVENT, callback);
+  }
+
 }
 
 export const SchemaRegistry = new $SchemaRegistry();

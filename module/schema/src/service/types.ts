@@ -1,5 +1,7 @@
 import { Class } from '@travetto/registry';
-import { ValidationError } from '.';
+import { ValidationError } from './validator';
+
+export const DEFAULT_VIEW = '__all';
 
 export type ClassList = Class | [Class];
 
