@@ -1,6 +1,6 @@
 import {
   Field, Url, View, Required, Alias,
-  BindUtil, Schema, SchemaRegistry, ClassWithSchema, Float, Integer
+  BindUtil, Schema, SchemaRegistry, Float, Integer
 } from '../src';
 import { Address } from './address';
 import * as assert from 'assert';
