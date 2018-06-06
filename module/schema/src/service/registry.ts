@@ -161,16 +161,22 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
       config = this.mergeConfigs(config, pending as ClassConfig);
     }
 
-    if (AppEnv.watch) {
-      this.computeSchemaDependencies(cls);
-    }
-
     return config;
   }
 
-  onUninstallFinalize<T>(cls: Class<T>) {
-    super.onUninstallFinalize(cls);
-    SchemaChangeListener.clearSchemaDependency(cls);
+  onInstall(cls: Class, e: ChangeEvent<Class>) {
+    super.onInstall(cls, e);
+
+    if (AppEnv.watch && this.has(cls)) {
+      this.computeSchemaDependencies(cls);
+    }
+  }
+
+  onUninstall<T>(cls: Class<T>, e: ChangeEvent<Class>) {
+    super.onUninstall(cls, e);
+    if (e.type === 'removing' && this.hasExpired(cls)) {
+      SchemaChangeListener.clearSchemaDependency(cls);
+    }
   }
 
   emit(ev: ChangeEvent<Class>) {

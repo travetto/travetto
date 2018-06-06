@@ -45,24 +45,25 @@ export class $SchemaChangeListener extends EventEmitter {
   }
 
   trackSchemaDependency(src: Class, parent: Class, path: string[], config: ClassConfig) {
-    if (!this.mapping.has(id(src))) {
-      this.mapping.set(id(src), new Map());
+    const _id = id(src);
+    if (!this.mapping.has(_id)) {
+      this.mapping.set(_id, new Map());
     }
-    this.mapping.get(id(src))!.set(id(parent), { path, config });
-
+    this.mapping.get(_id)!.set(id(parent), { path, config });
   }
 
   emitSchemaChanges({ cls, changes }: FieldChangeEvent) {
     const updates = new Map<string, SchemaChange>();
+    const clsId = id(cls);
 
-    if (this.mapping.has(id(cls))) {
-      const deps = this.mapping.get(id(cls))!;
-      for (const clsId of deps.keys()) {
-        if (!updates.has(clsId)) {
-          updates.set(clsId, { config: deps.get(clsId)!.config, subs: [] });
+    if (this.mapping.has(clsId)) {
+      const deps = this.mapping.get(clsId)!;
+      for (const depClsId of deps.keys()) {
+        if (!updates.has(depClsId)) {
+          updates.set(depClsId, { config: deps.get(depClsId)!.config, subs: [] });
         }
-        const c = deps.get(clsId)!;
-        updates.get(clsId)!.subs.push({ path: c.path, fields: changes });
+        const c = deps.get(depClsId)!;
+        updates.get(depClsId)!.subs.push({ path: c.path, fields: changes });
       }
     }
 
@@ -106,9 +107,9 @@ export class $SchemaChangeListener extends EventEmitter {
       }
     }
 
+    // Send field changes
     this.emit(FIELD_CHANGE_EVENT, { cls: curr!.class, changes } as FieldChangeEvent);
 
-    // Emit Schema Changes
     this.emitSchemaChanges({ cls: curr!.class, changes });
   }
 }
