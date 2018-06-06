@@ -15,7 +15,7 @@ import { Injectable } from '@travetto/di';
 import { ModelElasticsearchConfig } from '../config';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { BaseError, isPlainObject, deepAssign } from '@travetto/base';
-import { FieldConfig, SchemaConfig, SchemaRegistry, Schema, SchemaChangeEvent } from '@travetto/schema';
+import { FieldConfig, SchemaConfig, SchemaRegistry, Schema, SchemaChangeEvent, FieldChangeEvent } from '@travetto/schema';
 import { extractWhereQuery } from './query-builder';
 import { generateSchema } from './schema';
 
@@ -85,30 +85,56 @@ export class ModelElasticsearchSource extends ModelSource {
     }
   }
 
-  onSchemaChange(e: SchemaChangeEvent): void {
-    console.log('SchemaChangeEvent', util.inspect(e, false, 10));
+  async onSchemaChange(e: SchemaChangeEvent) {
+    const removes = e.change.subs.reduce((acc, v) => {
+      acc.push(...v.fields
+        .filter(ev => ev.type === 'removing')
+        .map(ev => [...v.path, ev.prev!.name].join('.')));
+      return acc;
+    }, [] as string[]);
+
+    const index = `${this.config.namespace}_${e.cls!.__id.toLowerCase()}`;
+
+    if (removes.length) { // Removing and adding
+      const aliases = await this.client.indices.getAlias({ index });
+      const src = Object.keys(aliases)[0];
+      await this.createIndex(e.cls);
+
+      // Reindex
+      await this.client.reindex({
+        body: {
+          source: { index: src },
+          dest: { index },
+          script: {
+            lang: 'painless',
+            inline: removes.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
+          }
+        }
+      });
+    } else { // Only update
+      const schema = generateSchema(e.cls);
+      await this.client.indices.putMapping({
+        index,
+        type: index,
+        body: schema
+      });
+    }
   }
 
   onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>): void {
     console.log('Model Changed', e);
 
     // Handle ADD/REMOVE
-    if (e.prev && !e.curr) {
+    if (e.prev && !e.curr) { // Removing
       this.client.indices.delete({
         index: `${this.config.namespace}_${e.prev.__id.toLowerCase()}`
       });
-    } else if (e.curr && !e.prev) {
+    } else if (e.curr && !e.prev) { // Adding
       const index = `${this.config.namespace}_${e.curr!.__id.toLowerCase()}`;
       this.client.indices.getAlias({ index })
         .then(async x => {
           const src = Object.keys(x)[0];
           await this.createIndex(e.curr!);
-          await this.client.reindex({
-            body: {
-              source: { index: src },
-              dest: { index }
-            }
-          });
         });
     }
   }
