@@ -5,6 +5,7 @@ import {
 import { Address } from './address';
 import * as assert from 'assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';
+import { Class } from '@travetto/registry';
 
 @Schema(false)
 class SuperAddress extends Address {
@@ -87,7 +88,7 @@ class DataBinding {
     assert(person.counts[0] instanceof Count);
     assert(person.counts[0].value === 20.55555);
 
-    const viewPerson = BindUtil.bindSchema(Person, new Person(), {
+    const viewPerson = Person.from({
       name: 'Test',
       address: {
         street1: '1234 Fun',

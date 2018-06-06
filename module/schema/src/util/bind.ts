@@ -142,3 +142,10 @@ export class BindUtil {
     return obj;
   }
 }
+
+export function declareFrom() {
+  // Register global from
+  (Function as any)['__proto__'].from = function from<T>(this: Class<T>, data: Partial<T>, view?: string): T {
+    return BindUtil.bindSchema(this, new this(), data, view);
+  };
+}

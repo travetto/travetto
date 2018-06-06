@@ -5,9 +5,5 @@ type DeepPartial<T> = {
   };
 
 declare interface Function {
-  from<U>(
-    this: { new(...args: any[]): U },
-    data: DeepPartial<U>,
-    view?: string
-  ): U;
+  from<T>(this: { new(...args: any[]): T }, data: Partial<T>, view?: string): T;
 }

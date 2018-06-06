@@ -2,16 +2,14 @@ import { Class } from '@travetto/registry';
 import { SchemaRegistry, ValidatorFn } from '../service';
 import { BindUtil } from '../util';
 
+export interface ClassWithSchema<T> extends Class<T> {
+  from<U>(this: Class<U>, data: U, view?: string): U;
+}
+
 export function Schema(auto: boolean = true): ClassDecorator {
   return <T>(target: Class<T>): Class<T> => {
-    const res: Class<T> = target as any;
+    const res: ClassWithSchema<T> = target as any;
     SchemaRegistry.getOrCreatePending(target);
-    if (!res.from) {
-      res.from = function (data: any, view: any) {
-        // tslint:disable-next-line:no-invalid-this
-        return BindUtil.bindSchema(this, new this(), data, view);
-      };
-    }
     return res;
   };
 }
