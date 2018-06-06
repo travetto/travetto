@@ -30,7 +30,7 @@ export class ModelService extends ModelSource {
     await ModelRegistry.init();
     if (AppEnv.watch) {
       if (this.source.onSchemaChange) {
-        SchemaRegistry.onSchemaChange(this.source.onSchemaChange.bind(this.source));
+        ModelRegistry.onSchemaChange(this.source.onSchemaChange.bind(this.source));
       }
       if (this.source.onChange) {
         ModelRegistry.on(this.source.onChange.bind(this.source));

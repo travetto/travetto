@@ -1,4 +1,4 @@
-import { SchemaRegistry } from '@travetto/schema';
+import { SchemaRegistry, SchemaChangeEvent } from '@travetto/schema';
 import { MetadataRegistry, Class } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 
@@ -15,6 +15,14 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
 
   onInstallFinalize<T>(cls: Class<T>) {
     return this.pending.get(cls.__id)! as ModelOptions<T>;
+  }
+
+  onSchemaChange(cb: (x: SchemaChangeEvent) => void) {
+    SchemaRegistry.onSchemaChange((e) => {
+      if (this.has(e.cls)) {
+        cb(e);
+      }
+    });
   }
 }
 
