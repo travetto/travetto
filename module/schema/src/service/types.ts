@@ -25,10 +25,14 @@ export interface FieldConfig {
   type: any;
   name: string;
   aliases?: string[];
-  declared: { type: Class<any>, array: boolean, specifier?: string };
+  declared: {
+    type: Class<any>;
+    array: boolean;
+    specifier?: string;
+    precision?: number
+  };
   required?: { message?: string };
   match?: { re: RegExp, message?: string };
-  precision?: number;
   min?: { n: number | Date, message?: string };
   max?: { n: number | Date, message?: string };
   minlength?: { n: number, message?: string };
