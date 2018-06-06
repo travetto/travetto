@@ -1,9 +1,9 @@
 import { Class, ChangeEvent } from '@travetto/registry';
+import { SchemaChangeEvent } from '@travetto/schema';
 
 import { ModelCore, Query, PageableModelQuery } from '../model';
 import { BulkState, BulkResponse } from '../model/bulk';
 import { ModelQuery } from '../model/query';
-import { SchemaChangeEvent } from './registry';
 
 export abstract class ModelSource {
   onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
