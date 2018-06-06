@@ -67,7 +67,7 @@ class DataBinding {
 
   @Test('Validate bind')
   validateBind() {
-    const person = (Person as ClassWithSchema<Person>).from({
+    const person = Person.from({
       name: 'Test',
       age: 19.999978,
       address: {
@@ -109,7 +109,7 @@ class DataBinding {
 
   @Test('Validate Object')
   validateObject() {
-    const res = (Response as ClassWithSchema<Response>).from({
+    const res = Response.from({
       questionId: '20',
       answer: ['a', 'd']
     });
@@ -120,7 +120,7 @@ class DataBinding {
 
   @Test('Should handle inheritance')
   validateInheritance() {
-    const res = (SuperAddress as ClassWithSchema<SuperAddress>).from({
+    const res = SuperAddress.from({
       street1: 'a',
       street2: 'b',
       unit: '20'
@@ -130,7 +130,7 @@ class DataBinding {
 
   @Test('Should handle aliases')
   validateAliases() {
-    const res = (Response as ClassWithSchema<Response>).from({
+    const res = Response.from({
       correct: true,
       status: 'orange'
     } as any);

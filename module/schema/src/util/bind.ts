@@ -54,8 +54,8 @@ export class BindUtil {
     const type = conf.declared.type;
 
     if (type === Number) {
-      if (conf.precision) {
-        val = +parseFloat(`${val}`).toFixed(conf.precision);
+      if (conf.declared.precision) {
+        val = +parseFloat(`${val}`).toFixed(conf.declared.precision);
       } else {
         val = parseInt(`${val}`, 10);
       }

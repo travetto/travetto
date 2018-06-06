@@ -73,7 +73,7 @@ export class GenerateUtil {
     const min = cfg.min ? cfg.min.n as number : undefined;
     const max = cfg.max ? cfg.max.n as number : undefined;
     const name = cfg.name.toUpperCase();
-    const precision = cfg.precision;
+    const precision = cfg.declared.precision;
 
     if (min !== undefined || max !== undefined) {
       return faker.random.number({ min, max, precision });
