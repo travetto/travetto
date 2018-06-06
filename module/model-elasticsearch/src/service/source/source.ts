@@ -1,4 +1,5 @@
 import * as es from 'elasticsearch';
+import * as util from 'util';
 
 import {
   ModelSource, IndexConfig, Query,
@@ -14,7 +15,7 @@ import { Injectable } from '@travetto/di';
 import { ModelElasticsearchConfig } from '../config';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { BaseError, isPlainObject, deepAssign } from '@travetto/base';
-import { FieldConfig, SchemaConfig, SchemaRegistry } from '@travetto/schema';
+import { FieldConfig, SchemaConfig, SchemaRegistry, Schema, SchemaChangeEvent } from '@travetto/schema';
 import { extractWhereQuery } from './query-builder';
 import { generateSchema } from './schema';
 
@@ -84,13 +85,19 @@ export class ModelElasticsearchSource extends ModelSource {
     }
   }
 
+  onSchemaChange(e: SchemaChangeEvent): void {
+    console.log('SchemaChangeEvent', util.inspect(e, false, 10));
+  }
+
   onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>): void {
     console.log('Model Changed', e);
+
+    // Handle ADD/REMOVE
     if (e.prev && !e.curr) {
       this.client.indices.delete({
         index: `${this.config.namespace}_${e.prev.__id.toLowerCase()}`
       });
-    } else if (e.curr) {
+    } else if (e.curr && !e.prev) {
       const index = `${this.config.namespace}_${e.curr!.__id.toLowerCase()}`;
       this.client.indices.getAlias({ index })
         .then(async x => {
@@ -103,7 +110,6 @@ export class ModelElasticsearchSource extends ModelSource {
             }
           });
         });
-
     }
   }
 
