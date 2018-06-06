@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaRegistry, SchemaValidator } from '@travetto/schema';
+import { BindUtil, SchemaRegistry, SchemaValidator, DEFAULT_VIEW } from '@travetto/schema';
 import { QueryVerifierService } from './query';
 import { Injectable } from '@travetto/di';
 import { ModelOptions } from './types';
@@ -30,7 +30,7 @@ export class ModelService extends ModelSource {
     await ModelRegistry.init();
     if (AppEnv.watch) {
       if (this.source.onSchemaChange) {
-        ModelRegistry.onSchemaChange(this.source.onSchemaChange.bind(this.source));
+        SchemaRegistry.onSchemaChange(this.source.onSchemaChange.bind(this.source));
       }
       if (this.source.onChange) {
         ModelRegistry.on(this.source.onChange.bind(this.source));
@@ -56,7 +56,7 @@ export class ModelService extends ModelSource {
 
   async prePersist<T extends ModelCore>(cls: Class<T>, o: T): Promise<T>;
   async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string): Promise<Partial<T>>;
-  async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T> | T, view: string = SchemaRegistry.DEFAULT_VIEW) {
+  async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T> | T, view: string = DEFAULT_VIEW) {
     if (o.prePersist) {
       o.prePersist();
     }
