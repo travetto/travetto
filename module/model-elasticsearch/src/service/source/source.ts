@@ -65,7 +65,7 @@ export class ModelElasticsearchSource extends ModelSource {
     super();
   }
 
-  async createIndex(cls: Class<any>) {
+  async createIndex(cls: Class<any>, alias = true) {
     const schema = generateSchema(cls);
     const ident = this.getIdentity(cls);
     const index = `${ident.index}_${(Math.random() * 1000000).toFixed(0)}`;
@@ -78,11 +78,14 @@ export class ModelElasticsearchSource extends ModelSource {
           }
         }
       });
-      await this.client.indices.putAlias({ index, name: ident.index });
+      if (alias) {
+        await this.client.indices.putAlias({ index, name: ident.index });
+      }
       console.log(`Index ${ident.index} created`);
     } catch (e) {
       console.log(`Index ${ident.index} already created`);
     }
+    return index;
   }
 
   async onSchemaChange(e: SchemaChangeEvent) {
@@ -93,29 +96,42 @@ export class ModelElasticsearchSource extends ModelSource {
       return acc;
     }, [] as string[]);
 
-    const index = `${this.config.namespace}_${e.cls!.__id.toLowerCase()}`;
+    const typeChanges = e.change.subs.reduce((acc, v) => {
+      acc.push(...v.fields
+        .filter(ev => ev.type === 'changed')
+        .map(ev => [...v.path, ev.prev!.name].join('.')));
+      return acc;
+    }, [] as string[]);
 
-    if (removes.length) { // Removing and adding
+    const { index, type } = this.getIdentity(e.cls);
+
+    if (removes.length || typeChanges.length) { // Removing and adding
+      const next = await this.createIndex(e.cls, false);
+
       const aliases = await this.client.indices.getAlias({ index });
-      const src = Object.keys(aliases)[0];
-      await this.createIndex(e.cls);
+      const curr = Object.keys(aliases)[0];
 
       // Reindex
       await this.client.reindex({
         body: {
-          source: { index: src },
-          dest: { index },
+          source: { index: curr },
+          dest: { index: next },
           script: {
             lang: 'painless',
             inline: removes.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
           }
-        }
+        },
+        waitForCompletion: true
       });
+
+      await this.client.indices.delete({ index: curr });
+      await this.client.indices.putAlias({ index: next, name: index });
     } else { // Only update
       const schema = generateSchema(e.cls);
+
       await this.client.indices.putMapping({
         index,
-        type: index,
+        type,
         body: schema
       });
     }
