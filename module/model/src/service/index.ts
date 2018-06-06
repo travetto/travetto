@@ -1,4 +1,4 @@
-export * from './model'
+export * from './model';
 export * from './types';
 export * from './registry';
 export * from './source';

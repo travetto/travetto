@@ -7,7 +7,7 @@ import { ModelCore, Query, QueryOptions, BulkState, ModelQuery, PageableModelQue
 import { ModelSource } from './source';
 import { ModelRegistry } from './registry';
 
-import { AppInfo, AppEnv, deepAssign } from '@travetto/base';
+import { AppEnv, deepAssign } from '@travetto/base';
 
 function getClass<T>(o: T) {
   return o.constructor as Class<T>;
