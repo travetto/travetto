@@ -170,7 +170,6 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
 
   onUninstallFinalize<T>(cls: Class<T>) {
     super.onUninstallFinalize(cls);
-
     SchemaChangeListener.clearSchemaDependency(cls);
   }
 

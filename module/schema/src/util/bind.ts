@@ -1,4 +1,4 @@
-import { SchemaRegistry, FieldConfig } from '../service';
+import { SchemaRegistry, FieldConfig, DEFAULT_VIEW } from '../service';
 import { Class } from '@travetto/registry';
 
 export class BindUtil {
@@ -75,7 +75,7 @@ export class BindUtil {
   }
 
   static bindSchema<T>(cons: Class, obj: T, data?: any, view?: string): T {
-    view = view || SchemaRegistry.DEFAULT_VIEW;
+    view = view || DEFAULT_VIEW;
 
     if (!!data) {
       const conf = SchemaRegistry.get(cons);
