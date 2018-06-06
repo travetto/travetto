@@ -1,12 +1,10 @@
-import { Schema, BindUtil, ClassWithSchema, DeepPartial } from '@travetto/schema';
+import { Schema } from '@travetto/schema';
 import { ModelCore } from './model';
 import { ModelOptions, ModelRegistry } from '../service';
 import { Class } from '@travetto/registry';
 
 @Schema()
 export abstract class BaseModel implements ModelCore {
-
-  static from: ClassWithSchema<any>['from'];
 
   id?: string;
   version?: string;
