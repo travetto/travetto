@@ -107,6 +107,9 @@ export class $SchemaChangeListener extends EventEmitter {
     }
 
     this.emit(FIELD_CHANGE_EVENT, { cls: curr!.class, changes } as FieldChangeEvent);
+
+    // Emit Schema Changes
+    this.emitSchemaChanges({ cls: curr!.class, changes });
   }
 }
 

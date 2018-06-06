@@ -14,14 +14,14 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   computeSchemaDependencies(cls: Class, curr: Class = cls, path: string[] = []) {
-    const config = SchemaRegistry.get(curr);
+    const config = this.get(curr);
 
     SchemaChangeListener.trackSchemaDependency(curr, cls, path, config);
 
     // Read children
     const view = config.views[DEFAULT_VIEW];
     for (const k of view.fields) {
-      if (SchemaRegistry.has(view.schema[k].declared.type)) {
+      if (this.has(view.schema[k].declared.type)) {
         this.computeSchemaDependencies(cls, view.schema[k].declared.type, [...path, k]);
       }
     }
