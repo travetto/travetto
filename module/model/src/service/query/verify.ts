@@ -76,11 +76,11 @@ export class QueryVerifierService {
       const op = TypeUtil.getDeclaredType(field);
 
       if (op) {
-        handler.onSimpleType(state.extend(key), op, value, field.declared.array);
+        handler.onSimpleType(state.extend(key), op, value, field.array);
       } else {
-        const subCls = field.declared.type;
+        const subCls = field.type;
         const subVal = value;
-        if (handler.onComplexType && handler.onComplexType(state, subCls, subVal, field.declared.array)) {
+        if (handler.onComplexType && handler.onComplexType(state, subCls, subVal, field.array)) {
           continue;
         }
         this.processGenericClause(state.extend(key), subCls, subVal, handler);

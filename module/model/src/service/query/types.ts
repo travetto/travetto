@@ -25,10 +25,10 @@ export const OPERATORS: { [key: string]: { [key: string]: Set<string> } } = {
 export class TypeUtil {
 
   static getDeclaredType(f: FieldConfig) {
-    const type = f.declared.type;
+    const type = f.type;
     if (type === String) {
       return 'string';
-    } else if (f.declared.array && type === Number) {
+    } else if (f.array && type === Number) {
       return 'Point';
     } else if (type === Number) {
       return 'number';
