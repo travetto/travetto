@@ -133,7 +133,8 @@ class DataBinding {
   validateAliases() {
     const res = Response.from({
       correct: true,
-      status: 'orange'
+      status: 'orange',
+      valid: 'true'
     } as any);
 
     console.log(res);

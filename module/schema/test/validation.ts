@@ -75,7 +75,7 @@ class Validation {
 
   @Test('Url and message')
   async urlAndMessage() {
-    const r = (Response as ClassWithSchema<Response>).from({
+    const r = Response.from({
       url: 'htt://google'
     } as any);
     try {
@@ -89,7 +89,7 @@ class Validation {
 
   @Test('Should validate nested')
   async nested() {
-    const res = (Parent as ClassWithSchema<Parent>).from({
+    const res = Parent.from({
       response: {
         url: 'a.b',
         pandaState: 'orange'
@@ -109,14 +109,14 @@ class Validation {
   @Test('Should ensure message for min')
   @ShouldThrow(ValidationErrors)
   async minMessage() {
-    const o = (MinTest as ClassWithSchema<MinTest>).from({ value: 'hello' });
+    const o = MinTest.from({ value: 'hello' });
 
     await SchemaValidator.validate(o);
   }
 
   @Test('Nested validations should be fine')
   async nestedObject() {
-    const obj = (Nested as ClassWithSchema<Nested>).from({
+    const obj = Nested.from({
       name: 'bob',
       address: {
         street1: 'abc',
@@ -132,7 +132,7 @@ class Validation {
   @Test('Nested validations should be fine')
   @ShouldThrow(ValidationErrors)
   async nestedObjectErrors() {
-    const obj = (Nested as ClassWithSchema<Nested>).from({
+    const obj = Nested.from({
       name: 5,
       address: {
         street1: 'abc',
@@ -146,7 +146,7 @@ class Validation {
 
   @Test('Custom Validators')
   async validateFields() {
-    const obj = (CustomValidated as ClassWithSchema<CustomValidated>).from({
+    const obj = CustomValidated.from({
       age: 200,
       age2: 10
     });
