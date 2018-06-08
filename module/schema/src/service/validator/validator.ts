@@ -31,7 +31,7 @@ export class SchemaValidator {
         continue;
       }
 
-      const { type, array } = fieldSchema.declared;
+      const { type, array } = fieldSchema;
 
       let sub: SchemaConfig | undefined;
       if (SchemaRegistry.has(type)) {

@@ -99,9 +99,9 @@ export class $SchemaChangeListener extends EventEmitter {
 
     for (const c of currFields) {
       if (prevFields.has(c)) {
-        const { type, ...prevSchema } = prevView.schema[c];
-        const { type: type2, ...currSchema } = currView.schema[c];
-        if (JSON.stringify(prevSchema) !== JSON.stringify(currSchema) || prevSchema.declared.type !== currSchema.declared.type) {
+        const prevSchema = prevView.schema[c];
+        const currSchema = currView.schema[c];
+        if (JSON.stringify(prevSchema) !== JSON.stringify(currSchema) || prevSchema.type !== currSchema.type) {
           changes.push({ prev: prevView.schema[c], curr: currView.schema[c], type: 'changed' });
         }
       }

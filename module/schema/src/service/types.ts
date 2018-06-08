@@ -22,15 +22,13 @@ export interface ClassConfig {
 }
 
 export interface FieldConfig {
-  type: any;
+  owner: any;
   name: string;
   aliases?: string[];
-  declared: {
-    type: Class<any>;
-    array: boolean;
-    specifier?: string;
-    precision?: number
-  };
+  type: Class<any>;
+  array: boolean;
+  specifier?: string;
+  precision?: number;
   required?: { message?: string };
   match?: { re: RegExp, message?: string };
   min?: { n: number | Date, message?: string };

@@ -21,8 +21,8 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     // Read children
     const view = config.views[DEFAULT_VIEW];
     for (const k of view.fields) {
-      if (this.has(view.schema[k].declared.type)) {
-        this.computeSchemaDependencies(cls, view.schema[k].declared.type, [...path, k]);
+      if (this.has(view.schema[k].type)) {
+        this.computeSchemaDependencies(cls, view.schema[k].type, [...path, k]);
       }
     }
   }
@@ -100,21 +100,12 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   registerPendingFieldConfig(target: Class, prop: string, type: ClassList, specifier?: string) {
     const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
-      type,
+      owner: target,
       name: prop,
-      declared: {
-        array: isArray,
-        type: isArray ? (type as any)[0] : type,
-        specifier
-      }
+      array: isArray,
+      type: isArray ? (type as any)[0] : type,
+      specifier
     };
-
-    // Get schema if exists
-    const schema = this.getPendingViewSchema(target);
-
-    if (schema) {
-      fieldConf.type = isArray ? [schema] : schema;
-    }
 
     return this.registerPendingFieldFacet(target, prop, fieldConf);
   }
