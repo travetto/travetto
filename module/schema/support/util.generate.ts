@@ -73,7 +73,7 @@ export class GenerateUtil {
     const min = cfg.min ? cfg.min.n as number : undefined;
     const max = cfg.max ? cfg.max.n as number : undefined;
     const name = cfg.name.toUpperCase();
-    const precision = cfg.declared.precision;
+    const precision = cfg.precision;
 
     if (min !== undefined || max !== undefined) {
       return faker.random.number({ min, max, precision });
@@ -128,13 +128,13 @@ export class GenerateUtil {
   }
 
   static getValue(cfg: FieldConfig, subArray = false): any {
-    if (!subArray && cfg.declared.array) {
+    if (!subArray && cfg.array) {
       return this.getArrayValue(cfg);
     } else if (cfg.enum) {
       return faker.random.arrayElement(cfg.enum.values);
     } else {
 
-      const typ = cfg.declared.type;
+      const typ = cfg.type;
 
       if (typ === Number) {
         return this.getNumberValue(cfg);

@@ -51,11 +51,11 @@ export class BindUtil {
   }
 
   static coerceType<T>(conf: FieldConfig, val: any): T {
-    const type = conf.declared.type;
+    const type = conf.type;
 
     if (type === Number) {
-      if (conf.declared.precision) {
-        val = +parseFloat(`${val}`).toFixed(conf.declared.precision);
+      if (conf.precision) {
+        val = +parseFloat(`${val}`).toFixed(conf.precision);
       } else {
         val = parseInt(`${val}`, 10);
       }
@@ -114,21 +114,20 @@ export class BindUtil {
 
           if (v !== undefined && v !== null) {
             const config = viewConf.schema[schemaFieldName];
-            const declared = config.declared;
 
             // Ensure its an array
-            if (!Array.isArray(v) && declared.array) {
+            if (!Array.isArray(v) && config.array) {
               v = [v];
             }
 
-            if (SchemaRegistry.has(declared.type)) {
-              if (declared.array) {
-                v = v.map((x: any) => BindUtil.bindSchema(declared.type, new declared.type(), x, view));
+            if (SchemaRegistry.has(config.type)) {
+              if (config.array) {
+                v = v.map((x: any) => BindUtil.bindSchema(config.type, new config.type(), x, view));
               } else {
-                v = BindUtil.bindSchema(declared.type, new declared.type(), v, view);
+                v = BindUtil.bindSchema(config.type, new config.type(), v, view);
               }
             } else {
-              v = declared.array ?
+              v = config.array ?
                 v.map((e: any) => BindUtil.coerceType(config, e)) :
                 BindUtil.coerceType(config, v);
             }
