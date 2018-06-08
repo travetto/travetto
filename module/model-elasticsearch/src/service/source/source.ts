@@ -460,7 +460,7 @@ export class ModelElasticsearchSource extends ModelSource {
         out.error.push(v.error);
         out.count.error += 1;
       } else {
-        (out.count as any)[k] += 1;
+        (out.count as any)[k === 'index' ? 'insert' : k] += 1;
       }
     }
 

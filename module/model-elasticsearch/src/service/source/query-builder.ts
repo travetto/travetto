@@ -13,7 +13,7 @@ export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = '
 
   for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
     const top = o[key];
-    const declaredType = schema[key].declared.type;
+    const declaredType = schema[key].type;
     const sPath = declaredType === String ? `${path}${key}.raw` : `${path}${key}`;
 
     if (isPlainObject(top)) {

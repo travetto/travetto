@@ -9,13 +9,13 @@ export function generateSchema<T>(cls: Class<T>) {
   for (const field of schema.fields) {
     const conf = schema.schema[field];
 
-    if (conf.declared.type === Number) {
+    if (conf.type === Number) {
       props[field] = { type: conf.precision ? 'float' : 'integer' };
-    } else if (conf.declared.type === Date) {
+    } else if (conf.type === Date) {
       props[field] = { type: 'date' };
-    } else if (conf.declared.type === Boolean) {
+    } else if (conf.type === Boolean) {
       props[field] = { type: 'boolean' };
-    } else if (conf.declared.type === String) {
+    } else if (conf.type === String) {
       props[field] = {
         type: 'text',
         fields: {
@@ -24,10 +24,10 @@ export function generateSchema<T>(cls: Class<T>) {
           }
         }
       };
-    } else if (SchemaRegistry.has(conf.declared.type)) {
+    } else if (SchemaRegistry.has(conf.type)) {
       props[field] = {
         type: 'nested',
-        ...generateSchema(conf.declared.type)
+        ...generateSchema(conf.type)
       };
     }
   }
