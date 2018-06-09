@@ -16,6 +16,8 @@ export class Context {
       promiseResolve: this.leave.bind(this),
       destroy: this.leave.bind(this)
     });
+
+    this.run = this.run.bind(this);
   }
 
   enter(asyncId: number) {
