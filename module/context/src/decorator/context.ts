@@ -6,7 +6,7 @@ export function WithContext<T extends { context: Context }>(data?: any) {
     descriptor.value = function (...args: any[]) {
       const self = this as T; // tslint:disable-line no-invalid-this
       return new Promise((resolve, reject) => {
-        self.context.namespace.run(() => {
+        self.context.run(() => {
           try {
             if (data) {
               self.context.set(JSON.parse(JSON.stringify(data))); // Clone data

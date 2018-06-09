@@ -1,6 +1,6 @@
 import { Inject, Injectable, DependencyRegistry } from '@travetto/di';
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Context, WithContext } from '../index';
+import { Suite, Test, BeforeAll, AfterAll } from '@travetto/test';
+import { Context } from '../index';
 import { assert } from 'console';
 
 @Injectable()
@@ -22,14 +22,25 @@ class VerifyContext {
     await DependencyRegistry.init();
     const svc = await DependencyRegistry.getInstance(TestService);
     this.context = svc.context;
+    this.context.start();
+  }
+
+  @AfterAll()
+  async destroy() {
+    this.context.stop();
   }
 
   @Test()
-  @WithContext()
   async loadContext() {
     assert(this.context !== null);
-    this.context.set({ user: 'bob' });
+    this.context.set('user', 'bob');
     await new Promise(resolve => setTimeout(resolve, 1));
-    assert(this.context.get().user === 'bob');
+    assert(this.context.get('user') === 'bob');
+  }
+
+  @Test()
+  async nextContext() {
+    console.log(this.context.threads.size);
+    assert(this.context.get('user') === undefined);
   }
 }
