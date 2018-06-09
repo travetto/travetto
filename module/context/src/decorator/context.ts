@@ -5,18 +5,10 @@ export function WithContext<T extends { context: Context }>(data?: any) {
     const og = descriptor.value!;
     descriptor.value = function (...args: any[]) {
       const self = this as T; // tslint:disable-line no-invalid-this
-      return new Promise((resolve, reject) => {
-        self.context.run(() => {
-          try {
-            if (data) {
-              self.context.set(JSON.parse(JSON.stringify(data))); // Clone data
-            }
-            resolve(og.apply(self, args));
-          } catch (e) {
-            reject(e);
-          }
-        });
-      });
+
+      return self.context.run(
+        og.bind(self, args),
+        data ? JSON.parse(JSON.stringify(data)) : {});
     };
 
     Object.defineProperty(descriptor.value, 'name', { value: (og as any).name });

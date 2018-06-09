@@ -6,51 +6,32 @@ export class Context {
   threads = new Map<number, number>();
   storage = new Map<number, any>();
   hooks: async_hooks.AsyncHook;
+  active = 0;
 
   constructor() {
     this.hooks = async_hooks.createHook({
-      before: this.beforeHook.bind(this),
-      init: this.initHook.bind(this),
-      after: this.cleanup.bind(this),
-      promiseResolve: this.cleanup.bind(this, false),
-      destroy: this.cleanup.bind(this)
+      before: this.enter.bind(this),
+      init: this.enter.bind(this),
+      after: this.leave.bind(this),
+      promiseResolve: this.leave.bind(this),
+      destroy: this.leave.bind(this)
     });
   }
 
-  start() {
-    this.hooks.enable();
-  }
-
-  stop() {
-    this.hooks.disable();
-    this.threads.clear();
-    this.storage.clear();
-  }
-
-  beforeHook(asyncId: number, type: string, triggerAsyncId: number) {
-    // Top of stack
+  enter(asyncId: number) {
+    const exAsyncId = async_hooks.executionAsyncId();
     const triggerId = async_hooks.triggerAsyncId() || asyncId;
-    const exAid = async_hooks.executionAsyncId();
-    const prev = this.threads.get(triggerId)!;
-    if (prev) {
-      this.threads.set(asyncId, prev);
-    } else {
-      this.threads.set(asyncId, triggerId);
-      this.storage.set(triggerId, {});
+    const target = this.threads.get(triggerId)! || this.threads.get(exAsyncId)!;
+    if (target) {
+      this.threads.set(asyncId, target);
     }
   }
 
-  initHook(asyncId: number) {
+  leave(asyncId: number) {
     const exAsyncId = async_hooks.executionAsyncId();
-    const triggerId = async_hooks.triggerAsyncId();
-    const target = this.threads.get(triggerId)! || this.threads.get(exAsyncId)!;
-    this.threads.set(asyncId, target);
-  }
-
-  cleanup(asyncId: number, threads = true) {
-    this.storage.delete(asyncId);
-    if (threads) {
+    if (this.threads.has(asyncId) || this.threads.has(exAsyncId)) {
       this.threads.delete(asyncId);
+      this.threads.delete(exAsyncId);
     }
   }
 
@@ -75,5 +56,39 @@ export class Context {
 
   set(key: string, val: any) {
     this._storage()[key] = val;
+  }
+
+  async run(fn: () => Promise<any>, init: any = {}) {
+    if (!this.active) {
+      this.hooks.enable();
+    }
+
+    const runId = async_hooks.executionAsyncId();
+    let val;
+    let err;
+
+    this.active += 1;
+    this.storage.set(runId, init);
+    this.threads.set(runId, runId);
+
+    try {
+      val = await fn();
+    } catch (e) {
+      err = e;
+    }
+
+    this.active -= 1;
+    this.storage.delete(runId);
+    this.threads.delete(runId);
+
+    if (!this.active) {
+      this.hooks.disable();
+    }
+
+    if (err) {
+      throw err;
+    } else {
+      return val;
+    }
   }
 }
