@@ -59,10 +59,10 @@ export class TestSource implements ModelSource {
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
-    return { id } as T;
+    return { id } as any as T;
   }
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean | undefined): Promise<T> {
-    return { id: '20' } as T;
+    return { id: '20' } as any as T;
   }
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     return [];

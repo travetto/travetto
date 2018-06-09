@@ -1,4 +1,5 @@
-import { Injectable } from '@travetto/di';
+import { Injectable, Inject } from '@travetto/di';
+import { Context } from '@travetto/context';
 
 class User {
   constructor(public first: string, public last: string, public middle?: string) { }
@@ -6,11 +7,15 @@ class User {
 
 @Injectable()
 export class MockService {
+
+  @Inject()
+  private context: Context;
+
   fetch2() {
     return new User('Bob', 'zrdb', 'EzBake Ovesnz3');
   }
 
   fetch() {
-    return new User('jasmine-brob', 'zrde', 'EzBake Ovesnz3');
+    return new User('jasmine-brob', 'zrde', this.context.get().name || 'EzBake Ovesnz3');
   }
 }

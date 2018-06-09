@@ -20,14 +20,20 @@ export class ContextMantainer extends ExpressOperator {
 
   operate(app: ExpressApp) {
     app.get().use((req, res, next) => {
-      this.context.namespace.bindEmitter(req);
-      this.context.namespace.bindEmitter(res);
-      this.context.namespace.run(() => {
+      this.context.run(() => new Promise((resolve, reject) => {
         this.context.set({ req, res });
+
+        // Track request end as result
+        req.on('close', resolve);
+        req.on('end', resolve);
+        req.on('error', reject);
+        res.on('close', resolve);
+        res.on('finish', resolve);
+
         if (next) {
           next();
         }
-      });
+      }));
     });
   }
 }
