@@ -1,8 +1,10 @@
-import * as moment from 'moment';
 import { PathType } from '../model';
 import { ControllerRegistry } from '../service';
 import { DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
+
+const unitMapping = { s: 1000, ms: 1, m: 60 * 1000, h: 60 * 60 * 1000 };
+type Units = keyof (typeof unitMapping);
 
 export function Controller(path = '') {
   return (target: Class) => {
@@ -44,14 +46,10 @@ export function Header(headers: { [key: string]: (string | (() => string)) }) {
   return ControllerRegistry.registerPendingRequestHandler({ headers });
 }
 
-export function Cache(value: number, unit = 'second') {
-  function getTime() {
-    const end = moment().add(value as any, unit as any).toDate().getTime();
-    const start = new Date().getTime();
-    return end - start;
-  }
+export function Cache(value: number, unit: Units = 's') {
+  const delta = unitMapping[unit] * value;
   return Header({
-    Expires: () => `${new Date(Date.now() + getTime()).toUTCString()}`,
-    'Cache-Control': () => `max-age=${getTime()}`
+    Expires: () => `${new Date(Date.now() + delta).toUTCString()}`,
+    'Cache-Control': () => `max-age=${delta}`
   });
 }
