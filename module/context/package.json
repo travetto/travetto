@@ -1,23 +1,23 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "dependencies": {
     "@travetto/di": "0.x.x"
-  },
-  "description": "",
+  }, 
+  "description": "", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/context",
+  }, 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/context", 
   "repository": {
     "url": "https://github.com/travetto/context.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.13"
+  }, 
+  "version": "0.0.14"
 }
