@@ -4,7 +4,6 @@ import { Context, WithContext } from '../index';
 import * as assert from 'assert';
 import * as async_hooks from 'async_hooks';
 
-
 @Injectable()
 class TestService {
   @Inject() context: Context;
@@ -30,16 +29,16 @@ class VerifyContext {
   @WithContext({})
   async loadContext() {
     assert(this.context !== null);
-    this.context.set('user', 'bob');
+    this.context.set({ user: 'bob' });
     await new Promise(resolve => setTimeout(resolve, 1));
-    assert(this.context.get('user') === 'bob');
+    assert(this.context.get().user === 'bob');
   }
 
   @Test()
   @WithContext({})
   async nextContext() {
     console.log(this.context.threads.size);
-    assert(this.context.get('user') === undefined);
+    assert(this.context.get().name === undefined);
   }
 
   @Test()
@@ -47,11 +46,11 @@ class VerifyContext {
     const attempts = ' '.repeat(10).split('').map((_, i) => {
       return async () => {
         const start = async_hooks.executionAsyncId();
-        this.context.set('name', `test-${i}`);
+        this.context.set({ name: `test-${i}` });
         await new Promise(resolve => setTimeout(resolve, 1));
         const end = async_hooks.executionAsyncId();
 
-        if (this.context.get('name') !== `test-${i}`) {
+        if (this.context.get().name !== `test-${i}`) {
           throw new Error(`Didn\'t match: ${start} - ${end}`);
         }
       };
