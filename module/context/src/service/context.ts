@@ -35,11 +35,17 @@ export class Context {
     }
   }
 
-  _storage() {
+  _storage(val: string): void;
+  _storage(): any;
+  _storage(val?: string) {
     const currId = async_hooks.executionAsyncId();
     const key = this.threads.get(currId)!;
-    const obj = this.storage.get(key);
-    return obj;
+    if (val) {
+      this.storage.set(key, val);
+    } else {
+      const obj = this.storage.get(key);
+      return obj;
+    }
   }
 
   clear() {
@@ -50,20 +56,18 @@ export class Context {
     }
   }
 
-  get(key: string): any {
-    return this._storage()[key];
-  }
-
-  set(key: string, val: any) {
-    this._storage()[key] = val;
-  }
+  get = () => this._storage();
+  set = (val: any) => this._storage(val);
 
   async run(fn: () => Promise<any>, init: any = {}) {
     if (!this.active) {
       this.hooks.enable();
     }
 
-    const runId = async_hooks.executionAsyncId();
+    // Force new context
+    await new Promise(r => process.nextTick(r));
+
+    const runId = async_hooks.executionAsyncId() || async_hooks.triggerAsyncId();
     let val;
     let err;
 

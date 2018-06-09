@@ -1,7 +1,9 @@
 import { Inject, Injectable, DependencyRegistry } from '@travetto/di';
 import { Suite, Test, BeforeAll, AfterAll } from '@travetto/test';
 import { Context, WithContext } from '../index';
-import { assert } from 'console';
+import * as assert from 'assert';
+import * as async_hooks from 'async_hooks';
+
 
 @Injectable()
 class TestService {
@@ -38,5 +40,25 @@ class VerifyContext {
   async nextContext() {
     console.log(this.context.threads.size);
     assert(this.context.get('user') === undefined);
+  }
+
+  @Test()
+  async multipleContext() {
+    const attempts = ' '.repeat(10).split('').map((_, i) => {
+      return async () => {
+        const start = async_hooks.executionAsyncId();
+        this.context.set('name', `test-${i}`);
+        await new Promise(resolve => setTimeout(resolve, 1));
+        const end = async_hooks.executionAsyncId();
+
+        if (this.context.get('name') !== `test-${i}`) {
+          throw new Error(`Didn\'t match: ${start} - ${end}`);
+        }
+      };
+    });
+
+    assert(attempts.length === 10);
+
+    await Promise.all(attempts.map(x => this.context.run(x)));
   }
 }
