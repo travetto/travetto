@@ -1,7 +1,7 @@
 travetto: Context
 ===
 
-Provides a simple wrapper around `cls-hooked` to provide request context across async calls.  
+Provides a simple wrapper around `async_hooks` to provide request context across async calls.  
 
 The most common way of utilizing the context, is via the `@WithContext` decorator.
 The decorator will load the context on invocation, and will keep the context active during
