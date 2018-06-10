@@ -92,7 +92,7 @@ class $Compiler {
     const content = this.sourceManager.get(tsf)!;
 
     if (/[\/\\]test[\/\\]/.test(tsf) && !tsf.includes(CompilerUtil.LIBRARY_PATH)) {
-      console.debug(content);
+      console.trace(content);
     }
 
     const ret = this.moduleManager.compile(m, jsf, content);
@@ -117,7 +117,7 @@ class $Compiler {
   }
 
   unload(fileName: string) {
-    console.debug('Unloading', fileName);
+    console.trace('Unloading', fileName);
 
     if (this.sourceManager.has(fileName)) {
       this.sourceManager.unload(fileName);

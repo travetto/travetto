@@ -23,7 +23,7 @@ export class FilePresenceManager {
       return;
     }
 
-    console.debug('Watch', event, entry.file);
+    console.trace('Watch', event, entry.file);
 
     if (event === 'added') {
       this.files.set(entry.file, { version: 1 });
@@ -61,7 +61,7 @@ export class FilePresenceManager {
       .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable
       .map(x => x.file);
 
-    console.debug('Files', rootFiles.length);
+    console.debug('Watching files', rootFiles.length);
 
     for (const fileName of rootFiles) {
       this.files.set(fileName, { version: 0 });

@@ -27,7 +27,7 @@ export class SourceManager {
 
   transpile(fileName: string, options: ts.TranspileOptions, force = false) {
     if (force || !this.hasCached(fileName)) {
-      console.debug('Emitting', fileName);
+      console.trace('Emitting', fileName);
 
       const content = fs.readFileSync(fileName).toString();
 
@@ -37,7 +37,7 @@ export class SourceManager {
         // Let's see if they are really different
         hash = stringHash(content);
         if (hash === this.hashes.get(fileName)) {
-          console.debug(`Contents Unchanged: ${fileName}`);
+          console.trace(`Contents Unchanged: ${fileName}`);
           return false;
         }
       }
@@ -45,7 +45,7 @@ export class SourceManager {
       const res = ts.transpileModule(content, options);
 
       if (this.logErrors(fileName, res.diagnostics)) {
-        console.debug(`Compiling ${fileName} failed`);
+        console.error(`Compiling ${fileName} failed`);
 
         if (!AppEnv.prod) { // If attempting to load an optional require
           console.error(`Unable to import ${fileName}, stubbing out`);
