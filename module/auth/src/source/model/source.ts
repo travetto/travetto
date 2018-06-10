@@ -1,5 +1,4 @@
 import * as passport from 'passport';
-import * as moment from 'moment';
 import { Request } from 'express';
 
 import { AppError } from '@travetto/express';
@@ -75,7 +74,7 @@ export class AuthModelSource<T extends BaseModel> extends AuthSource<T, AuthMode
     const user = await this.getUser(username);
     if (oldPassword !== undefined) {
       if (oldPassword === (user as any)[this.config.resetTokenField]) {
-        if (moment((user as any)[this.config.resetExpiresField]).isBefore(new Date())) {
+        if (((user as any)[this.config.resetExpiresField] as Date).getTime() < Date.now()) {
           throw new AppError('Reset token has expired');
         }
       } else {
@@ -103,7 +102,7 @@ export class AuthModelSource<T extends BaseModel> extends AuthSource<T, AuthMode
 
     Object.assign(user as any, {
       [this.config.resetTokenField]: password,
-      [this.config.resetExpiresField]: moment().add(1, 'hour').toDate()
+      [this.config.resetExpiresField]: new Date(Date.now() + (60 * 60 * 1000 /* 1 hour */))
     });
 
     await this.modelService.update(this.modelClass, user);

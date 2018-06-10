@@ -1,5 +1,4 @@
 import * as passport from 'passport';
-import * as moment from 'moment';
 import { Request } from 'express';
 
 import {
