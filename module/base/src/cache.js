@@ -31,7 +31,7 @@ class Cache {
           this.removeEntry(full);
         }
       } catch (e) {
-        console.log('Cannot read', e.message);
+        console.debug('Cannot read', e.message);
         // Cannot remove missing file
       }
     }
@@ -71,9 +71,9 @@ class Cache {
         } else {
           execSync(`rm -rf ${this.cacheDir}`, { shell: true });
         }
-        console.log(`Deleted ${this.cacheDir}`);
+        console.debug(`Deleted ${this.cacheDir}`);
       } catch (e) {
-        console.log('Failed in deleting');
+        console.error('Failed in deleting');
       }
     }
   }
