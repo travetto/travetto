@@ -15,7 +15,8 @@ const prod = is('prod') || is('production');
 const test = is('test') || is('testing');
 const dev = !prod && !test;
 const watch = (dev && !('NO_WATCH' in e)) || 'WATCH' in e;
-const debug = 'DEBUG' in e && !!e.DEBUG;
+const debug = ('DEBUG' in e && !!e.DEBUG) || dev;
+const trace = ('TRACE' in e && !!e.TRACE);
 
 let docker = !('NO_DOCKER' in e && !!e.NO_DOCKER);
 if (docker) { // Check for docker existance
@@ -26,7 +27,17 @@ if (docker) { // Check for docker existance
   }
 }
 
-if (!dev) {
+if (!console.debug) {
+  console.debug = (...args) => console.log(...args);
+}
+
+console.trace = (...args) => console.log(...args);
+
+if (!trace) {
+  console.trace = (...args) => {};
+}
+
+if (!debug) {
   console.debug = () => {}; // Suppress debug statements
 }
 
@@ -34,6 +45,6 @@ function error(...args) {
   console.error(...args.map(x => x && x.stack ? x.stack : x));
 }
 
-const AppEnv = { prod, dev, test, is, watch, all: envs, debug, docker, cwd, error };
+const AppEnv = { prod, dev, test, is, watch, all: envs, debug, trace, docker, cwd, error };
 
 module.exports = { AppEnv };
