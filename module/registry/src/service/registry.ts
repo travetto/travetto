@@ -41,7 +41,7 @@ export abstract class Registry implements ChangeSource<Class> {
 
       console.debug('Initialized', this.constructor.__id);
     } catch (e) {
-      console.debug(e);
+      console.error(e);
       throw e;
     } finally {
       this.resolved = true;
@@ -92,7 +92,7 @@ export abstract class Registry implements ChangeSource<Class> {
   }
 
   onEvent(event: ChangeEvent<Class>) {
-    console.debug('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
+    console.trace('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
 
     switch (event.type) {
       case 'removing':
