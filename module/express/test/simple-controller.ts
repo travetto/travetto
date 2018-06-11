@@ -11,7 +11,7 @@ export class Simple {
   @Get('/name')
   async doIt() {
     const user = await this.service.fetch();
-    return user.first.toLowerCase();
+    return `/simple/name => ${user.first.toLowerCase()}`;
   }
 
   @Get('/nameAngry')

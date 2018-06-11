@@ -8,14 +8,20 @@ class User {
 @Injectable()
 export class MockService {
 
+  private count = 0;
+
   @Inject()
   private context: Context;
 
   fetch2() {
-    return new User('Bob', 'zrdb', 'EzBake Ovesnz3');
+    return new User('Goodbye', 'Cruel', 'World');
   }
 
   fetch() {
-    return new User('jasmine-brob', 'zrde', this.context.get().name || 'EzBake Ovesnz3');
+    return new User(
+      `Hello-${this.count++}`,
+      'World',
+      '!!!'
+    );
   }
 }

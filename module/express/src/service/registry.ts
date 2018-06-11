@@ -89,7 +89,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHand
     final.handlers = Array.from(found.values());
 
     if (this.has(final.path)) {
-      console.log('Reloading controller', cls.name, final.path);
+      console.debug('Reloading controller', cls.name, final.path);
     }
 
     return final;

@@ -46,7 +46,7 @@ export class ExpressApp {
     const instances = await Promise.all(operators.map(op =>
       DependencyRegistry.getInstance(ExpressOperator, op.qualifier)
         .catch(err => {
-          console.log(`Unable to load operator ${op.class.name}#${op.qualifier.toString()}`);
+          console.error(`Unable to load operator ${op.class.name}#${op.qualifier.toString()}`);
         })
     ));
 
@@ -64,7 +64,7 @@ export class ExpressApp {
 
     // Listen for updates
     ControllerRegistry.on(e => {
-      console.log('Registry event', e);
+      console.trace('Registry event', e);
       if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
         this.unregisterController(ControllerRegistry.getExpired(e.prev)!);
       }
@@ -76,20 +76,20 @@ export class ExpressApp {
     this.app.use(RouteUtil.errorHandler);
 
     if (this.config.serve && this.config.port > 0) {
-      console.log(`Listening on ${this.config.port}`);
+      console.info(`Listening on ${this.config.port}`);
       this.app.listen(this.config.port);
     }
   }
 
   async unregisterController(config: ControllerConfig) {
-    console.log('Unregistering', config.class.__id, config.path);
+    console.debug('Unregistering', config.class.__id, config.path);
     this.app._router.stack = RouteUtil.removeAllRoutes(this.app._router.stack, config);
   }
 
   async registerController(cConfig: ControllerConfig) {
     const instance = await DependencyRegistry.getInstance(cConfig.class);
 
-    console.log('Registering Controller Instance', cConfig.class.__id, cConfig.path, cConfig.handlers.length);
+    console.debug('Registering Controller Instance', cConfig.class.__id, cConfig.path, cConfig.handlers.length);
 
     for (const hConfig of cConfig.handlers.reverse()) {
       hConfig.instance = instance;
