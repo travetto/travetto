@@ -1,4 +1,5 @@
 import { CommonProcess, ExecutionEvent } from './types';
+import { AppEnv } from '@travetto/base';
 
 export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends CommonProcess = CommonProcess> {
 
@@ -32,8 +33,8 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
   }
 
   send(eventType: string, data?: any) {
-    if (process.env.DEBUG) {
-      console.log(process.pid, 'SENDING', eventType, data);
+    if (AppEnv.trace) {
+      console.trace(process.pid, 'SENDING', eventType, data);
     }
     if (this._proc.send) {
       this._proc.send({ type: eventType, ...(data || {}) });
@@ -78,8 +79,8 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
       this.removeListener(fn);
     };
     const fn = (e: U) => {
-      if (process.env.DEBUG) {
-        console.log(process.pid, 'RECEIVING', e.type, e);
+      if (AppEnv.trace) {
+        console.trace(process.pid, 'RECEIVING', e.type, e);
       }
 
       let res;
