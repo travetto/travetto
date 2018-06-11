@@ -138,7 +138,7 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>): void {
-    console.log('Model Changed', e);
+    console.debug('Model Changed', e);
 
     // Handle ADD/REMOVE
     if (e.prev && !e.curr) { // Removing
