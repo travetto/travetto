@@ -33,7 +33,7 @@ export class ConfigLoader {
     this._initialized = true;
 
     if (!AppEnv.test) {
-      console.log(`Initializing: ${AppEnv.all.join(',')}`);
+      console.info(`Initializing: ${AppEnv.all.join(',')}`);
     }
 
     // Load all namespaces from core
@@ -66,7 +66,7 @@ export class ConfigLoader {
     }
 
     if (!process.env.QUIET_CONFIG && !AppEnv.test) {
-      console.log('Configured', this.map.toJSON());
+      console.info('Configured', this.map.toJSON());
     }
   }
 }
