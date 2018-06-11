@@ -31,8 +31,9 @@ export class Context {
 
   leave(asyncId: number) {
     const exAsyncId = async_hooks.executionAsyncId();
-    if (this.threads.has(asyncId) || this.threads.has(exAsyncId)) {
+    if (this.threads.has(asyncId)) {
       this.threads.delete(asyncId);
+    } else if (this.threads.has(exAsyncId)) {
       this.threads.delete(exAsyncId);
     }
   }
@@ -80,6 +81,7 @@ export class Context {
     try {
       val = await fn();
     } catch (e) {
+      require('fs').writeSync(1, e.stack);
       err = e;
     }
 
