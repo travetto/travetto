@@ -111,7 +111,7 @@ export class Watcher extends EventEmitter {
 
   private _emit(type: string, payload?: any) {
     if (!this.suppress) {
-      console.debug('Watch Event', type, payload);
+      console.trace('Watch Event', type, payload);
       this.emit(type, payload);
     }
   }
@@ -122,7 +122,7 @@ export class Watcher extends EventEmitter {
     }
 
     try {
-      console.debug('Watching Directory', entry.file);
+      console.trace('Watching Directory', entry.file);
       const watcher = fs.watch(entry.file, throttle((event, f) => {
         this.processDirectoryChange(entry);
       }, this.options.debounceDelay));
@@ -145,7 +145,7 @@ export class Watcher extends EventEmitter {
       throw new Error(`Not a file: ${entry.file}`);
     }
 
-    console.debug('Watching File', entry.file);
+    console.trace('Watching File', entry.file);
 
     const opts = { persistent: true, interval: this.options.interval };
 
@@ -177,7 +177,7 @@ export class Watcher extends EventEmitter {
 
   private unwatchFile(entry: Entry) {
     if (this.pollers.has(entry.file)) {
-      console.debug('Unwatching File', entry.file);
+      console.trace('Unwatching File', entry.file);
 
       fs.unwatchFile(entry.file, this.pollers.get(entry.file)!);
       this.pollers.delete(entry.file);
@@ -186,7 +186,7 @@ export class Watcher extends EventEmitter {
 
   private unwatchDirectory(entry: Entry) {
     if (this.watchers.has(entry.file)) {
-      console.debug('Unwatching Directory', entry.file);
+      console.trace('Unwatching Directory', entry.file);
 
       for (const child of (entry.children || [])) {
         this.unwatch(child.file);
