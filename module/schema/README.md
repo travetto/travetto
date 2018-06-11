@@ -23,3 +23,5 @@ the following are available:
      - `@Telephone` ensures string field matches basic telephone regex
      - `@Url` ensures string field matches basic url regex
      - `@Ignore` exclude from auto schema registration
+     - `@Integer` ensures number passed in is only a whole number
+     - `@Float` ensures number passed in allows fractional values
