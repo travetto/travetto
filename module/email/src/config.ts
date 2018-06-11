@@ -17,7 +17,7 @@ export class MailConfig {
   inky = {};
 
   postConstruct() {
-    console.log(this);
+    console.debug(this);
   }
 }
 
