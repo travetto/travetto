@@ -27,10 +27,9 @@ if (docker) { // Check for docker existance
   }
 }
 
-if (!console.debug) {
-  console.debug = (...args) => console.log('DEBUG', ...args);
-}
-
+console.warn = (...args) => console.log('WARN', ...args);
+console.info = (...args) => console.log('INFO', ...args);
+console.debug = (...args) => console.log('DEBUG', ...args);
 console.trace = (...args) => console.log('TRACE', ...args);
 
 if (!trace) {
