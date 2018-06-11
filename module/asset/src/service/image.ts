@@ -29,7 +29,7 @@ export class ImageService {
     max: 1000,
     dispose: (key: string, n: Promise<string | undefined>) => {
       n.then(v => v ? fsUnlinkAsync(v) : undefined).catch(err => {
-        console.log(err);
+        console.error(err);
       });
     }
   })
