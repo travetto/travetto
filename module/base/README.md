@@ -11,8 +11,8 @@ The specific things it offers are:
 * Environment - Basic environment information, e.g. in prod/test/dev etc.
 * Shutdown - Event listener interface to run code on shutdown
 * Stacktrace - Integration with `trace.js` to provide proper asynchronous stack traces
-* Startup - Bootstrapping code for initializing applications
-  * Recursively finds all `bootstrap.ts` files under `node_modules/@travetto`, and in the root of your project
+* Phase management for initializing applications
+  * Recursively finds all `phase.<phase>.ts` files under `node_modules/@travetto`, and in the root of your project
   * The export format of each initializer is ```
    export const init = {
     priority: 1, // Lower is of more importance
