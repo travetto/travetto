@@ -25,18 +25,16 @@ export class AuthModelSource<T extends BaseModel> extends AuthSource<T, AuthMode
   }
 
   async getUser(username: string) {
-    const query: any = {
-      [this.config.usernameField]: username
+    const query = {
+      where: {
+        [this.config.usernameField]: username
+      }
     };
-    const user = await this.modelService.getByQuery(this.modelClass, query);
+    const user = await this.modelService.getByQuery(this.modelClass, query as any);
     return user;
   }
 
   async doLogin(username: string, password: string) {
-    const query: any = {
-      [this.config.usernameField]: username
-    };
-
     const user = await this.getUser(username);
     const hash = await StrategyUtil.generateHash(password, (user as any)[this.config.saltField]);
     if (hash !== (user as any)[this.config.hashField]) {
