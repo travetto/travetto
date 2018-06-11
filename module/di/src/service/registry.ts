@@ -75,7 +75,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     let out: any = instance;
 
-    console.debug('Creating Instance', targetId, AppEnv.watch,
+    console.trace('Creating Instance', targetId, AppEnv.watch,
       !this.proxyHandlers.has(targetId),
       this.proxyHandlers.has(targetId) && !this.proxyHandlers.get(targetId)!.has(qualifier));
 
@@ -87,10 +87,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         this.proxyHandlers.get(targetId)!.set(qualifier, handler);
         this.proxies.get(targetId)!.set(qualifier, proxy);
         out = proxy;
-        console.debug('Registering proxy', target.__id, qualifier);
+        console.trace('Registering proxy', target.__id, qualifier);
       } else {
         const handler = this.proxyHandlers.get(targetId)!.get(qualifier)!;
-        console.debug('Updating target', target.__id, qualifier, out);
+        console.trace('Updating target', target.__id, qualifier, out);
         handler.target = out;
         out = this.proxies.get(targetId)!.get(qualifier);
       }
@@ -213,7 +213,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     const targetId = target.__id;
     if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(qualifier)) {
-      console.debug('Getting Intance', targetId, getName(qualifier));
+      console.trace('Getting Intance', targetId, getName(qualifier));
       await this.createInstance(target, qualifier);
     }
     return this.instances.get(targetId)!.get(qualifier)!;
@@ -396,7 +396,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
         this.instances.get(targetId)!.delete(config);
         this.instancePromises.get(targetId)!.delete(config);
-        console.debug('On uninstall', cls.__id, config, targetId, handler);
+        console.trace('On uninstall', cls.__id, config, targetId, handler);
         this.targets.get(cls.__id)!.delete(config);
       }
     }
