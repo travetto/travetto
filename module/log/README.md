@@ -1,15 +1,7 @@
 travetto: Log
 ===
 
-This module provides logging utilities using log4js.  Should support standard appenders, but 
-will wrap everything in a filter to control the log levels available.
+This module provides basic stdout logging via AST transformations. The code is rewritten at compile time to transform
+`console.(log|info|trace|warn|error)` into proper logging commands.  In addition to the transformation, class name and line number are added to the log messages to provide additional context.
 
-We have two custom layouts that are provided:
-  - `json`: standard json layouts
-  - `standard`: console layouts
-
-The code also fills missing functionality for binding console.* to the appropriate log level
-  - DEBUG - `console.debug`
-  - INFO - `console.info`, `console.log`
-  - WARN - `console.warn`
-  - ERROR - `console.error`
+Note: In production, all `console.(debug|trace)` messages are compiled away for performance/security reasons.
