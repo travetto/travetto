@@ -81,9 +81,9 @@ export class ModelElasticsearchSource extends ModelSource {
       if (alias) {
         await this.client.indices.putAlias({ index, name: ident.index });
       }
-      console.log(`Index ${ident.index} created`);
+      console.debug(`Index ${ident.index} created`);
     } catch (e) {
-      console.log(`Index ${ident.index} already created`);
+      console.debug(`Index ${ident.index} already created`);
     }
     return index;
   }
