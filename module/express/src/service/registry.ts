@@ -1,14 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { EventEmitter } from 'events';
 
+import { DependencyRegistry } from '@travetto/di';
+import { MetadataRegistry, Class } from '@travetto/registry';
+
 import {
   RequestHandler, Filter, FilterPromise,
   PathType, Renderable, Method,
   ControllerConfig
 } from '../model';
 import { ExpressApp } from './app';
-import { DependencyRegistry } from '@travetto/di';
-import { MetadataRegistry, Class } from '@travetto/registry';
 
 class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHandler> {
 

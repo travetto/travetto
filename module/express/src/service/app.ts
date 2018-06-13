@@ -1,12 +1,12 @@
-import { ExpressConfig } from '../config';
-
 import * as express from 'express';
+import { Injectable, DependencyRegistry } from '@travetto/di';
+import { Class } from '@travetto/registry';
+
+import { ExpressConfig } from '../config';
 import { RouteUtil } from '../util';
 import { ControllerConfig } from '../model';
-import { Injectable, DependencyRegistry } from '@travetto/di';
 import { ControllerRegistry } from './registry';
 import { ExpressOperator } from './operator';
-import { Class } from '@travetto/registry';
 
 @Injectable({ autoCreate: { create: true, priority: 1 } })
 export class ExpressApp {
@@ -23,10 +23,10 @@ export class ExpressApp {
   }
 
   async init() {
-    const compression = require('compression');
-    const cookieParser = require('cookie-parser');
-    const bodyParser = require('body-parser');
-    const session = require('express-session');
+    const session = await import('express-session');
+    const cookieParser = await import('cookie-parser');
+    const bodyParser = await import('body-parser');
+    const compression = await import('compression');
 
     this.app = express();
     this.app.use(compression());

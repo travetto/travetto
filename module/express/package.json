@@ -1,31 +1,34 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
+    "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
-  }, 
+  },
   "dependencies": {
-    "@travetto/context": "0.0.14", 
-    "@travetto/di": "0.x.x", 
-    "@travetto/log": "0.x.x", 
-    "@travetto/util": "0.x.x", 
-    "@types/express": "^4.11.1", 
-    "compression": "^1.7.2", 
-    "cookie-parser": "^1.4.3", 
-    "express": "^4.16.3", 
-    "express-session": "^1.15.6", 
-    "mime": "^2.3.1"
-  }, 
-  "description": "", 
-  "license": "MIT", 
-  "main": "index.ts", 
-  "name": "@travetto/express", 
+    "@travetto/context": "0.0.14",
+    "@travetto/di": "0.x.x",
+    "@travetto/log": "0.x.x",
+    "@travetto/util": "0.x.x",
+    "@types/body-parser": "^1.17.0",
+    "@types/compression": "0.0.36",
+    "@types/cookie-parser": "^1.4.1",
+    "@types/express": "^4.11.1",
+    "@types/express-session": "^1.15.10",
+    "compression": "^1.7.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6"
+  },
+  "description": "",
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/express",
   "peerDependencies": {
-    "@travetto/context": "0.x.x", 
+    "@travetto/context": "0.x.x",
     "@travetto/schema": "0.x.x"
-  }, 
+  },
   "repository": {
     "url": "https://github.com/travetto/express.git"
-  }, 
-  "scripts": {}, 
+  },
+  "scripts": {},
   "version": "0.0.23"
 }

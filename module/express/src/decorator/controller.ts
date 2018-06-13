@@ -1,7 +1,8 @@
-import { PathType } from '../model';
-import { ControllerRegistry } from '../service';
 import { DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
+
+import { PathType } from '../model';
+import { ControllerRegistry } from '../service';
 
 const unitMapping = { s: 1000, ms: 1, m: 60 * 1000, h: 60 * 60 * 1000 };
 type Units = keyof (typeof unitMapping);

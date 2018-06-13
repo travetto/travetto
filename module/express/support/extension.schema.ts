@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import * as qs from 'querystring';
 
 import { SchemaRegistry, BindUtil, SchemaValidator } from '@travetto/schema';
 import { isPlainObject } from '@travetto/base';
@@ -7,7 +8,6 @@ import { Class } from '@travetto/registry';
 import { ControllerRegistry } from '../src/service/registry';
 import { AppError } from '../src/model/error';
 
-import * as qs from 'querystring';
 
 function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
