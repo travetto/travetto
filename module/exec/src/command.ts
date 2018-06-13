@@ -12,7 +12,7 @@ export class CommandService {
   constructor(private config: {
     image: string;
     imageStartCommand?: string;
-    checkLocal?: () => Promise<boolean>;
+    checkForLocal?: () => Promise<boolean>;
     imageCommand?: (args: string[]) => string[];
     processCommand?: (args: string[]) => string[];
     docker?: boolean;
@@ -20,7 +20,7 @@ export class CommandService {
 
   async _init() {
     const canUseDocker = AppEnv.docker && (this.config.docker === undefined || !!this.config.docker);
-    const useDocker = canUseDocker && (!this.config.checkLocal || (await this.config.checkLocal()));
+    const useDocker = canUseDocker && (!this.config.checkForLocal || !(await this.config.checkForLocal()));
 
     if (useDocker) {
       this.container = new DockerContainer(this.config.image)
