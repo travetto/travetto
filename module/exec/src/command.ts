@@ -1,23 +1,28 @@
 import { DockerContainer } from './docker';
 import { AppEnv } from '@travetto/base';
 import { spawn } from './util';
-import { ChildProcess } from 'child_process';
 import { ExecutionResult, CommonProcess } from './types';
 
 export class CommandService {
+
+  private _initPromise: Promise<any>;
 
   container: DockerContainer;
 
   constructor(private config: {
     image: string;
     imageStartCommand?: string;
+    checkLocal?: () => Promise<boolean>;
     imageCommand?: (args: string[]) => string[];
     processCommand?: (args: string[]) => string[];
     docker?: boolean;
   }) { }
 
-  async init() {
-    if (AppEnv.docker && (this.config.docker === undefined || !!this.config.docker)) {
+  async _init() {
+    const canUseDocker = AppEnv.docker && (this.config.docker === undefined || !!this.config.docker);
+    const useDocker = canUseDocker && (!this.config.checkLocal || (await this.config.checkLocal()));
+
+    if (useDocker) {
       this.container = new DockerContainer(this.config.image)
         .forceDestroyOnShutdown()
         .setInteractive(true);
@@ -27,7 +32,16 @@ export class CommandService {
     }
   }
 
-  exec(...args: string[]) {
+  async init() {
+    if (!this._initPromise) {
+      this._initPromise = this._init();
+    }
+    return await this._initPromise;
+  }
+
+  async exec(...args: string[]) {
+    await this.init();
+
     let exec;
     if (this.container) {
       const cmd = this.config.imageCommand ? this.config.imageCommand(args) : args;

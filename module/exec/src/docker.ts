@@ -4,13 +4,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as net from 'net';
 
-import { CommonProcess, ChildOptions, ExecutionResult } from './types';
+import { CommonProcess, ExecutionResult } from './types';
 import { spawn, WithOpts } from './util';
-import { Shutdown, rimraf, isPlainObject } from '@travetto/base';
-import { CpuInfo } from 'os';
+import { Shutdown, rimraf } from '@travetto/base';
 
 const writeFile = util.promisify(fs.writeFile);
-const mkTempDir = util.promisify(fs.mkdtemp);
 const mkdir = util.promisify(fs.mkdir);
 
 function exec(command: string, opts?: WithOpts<child_process.SpawnOptions>) {
