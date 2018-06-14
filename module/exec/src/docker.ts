@@ -22,6 +22,33 @@ function execSync(command: string) {
 
 export class DockerContainer {
 
+  static async waitForPort(port: number, ms = 5000) {
+    const start = Date.now();
+    while ((Date.now() - start) < ms) {
+      try {
+        await new Promise((res, rej) => {
+          try {
+            const sock = net.createConnection(port, 'localhost', (err: any, succ: any) => {
+              if (err) {
+                rej(err);
+              } else {
+                sock.destroy();
+                res(succ);
+              }
+            });
+            sock.on('error', rej);
+          } catch (e) {
+            rej(e);
+          }
+        });
+        return;
+      } catch (e) {
+        await new Promise(res => setTimeout(res, 50));
+      }
+    }
+    throw new Error('Could not acquire port');
+  }
+
   private cmd: string = 'docker';
   private _proc: CommonProcess;
 
@@ -108,33 +135,6 @@ export class DockerContainer {
   setTTY(on: boolean) {
     this.tty = on;
     return this;
-  }
-
-  async waitForPort(port: number, ms = 5000) {
-    const start = Date.now();
-    while ((Date.now() - start) < ms) {
-      try {
-        await new Promise((res, rej) => {
-          try {
-            const sock = net.createConnection(port, 'localhost', (err: any, succ: any) => {
-              if (err) {
-                rej(err);
-              } else {
-                sock.destroy();
-                res(succ);
-              }
-            });
-            sock.on('error', rej);
-          } catch (e) {
-            rej(e);
-          }
-        });
-        return;
-      } catch (e) {
-        await new Promise(res => setTimeout(res, 50));
-      }
-    }
-    throw new Error('Could not acquire port');
   }
 
   getFlags(extra?: string[]) {
