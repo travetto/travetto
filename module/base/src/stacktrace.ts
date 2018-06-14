@@ -33,14 +33,6 @@ export function initStackHandler() {
 
   const BASE = AppEnv.cwd;
 
-  const ogc = Error.captureStackTrace;
-  Error.captureStackTrace = function (a: any, b) {
-    // tslint:disable-next-line:no-invalid-this
-    ogc.call(this, a, b);
-    // Force stack analysis
-    a.stack = a.stack;
-  };
-
   chain.filter.attach(function (error: Error, frames: NodeJS.CallSite[]) {
 
     const rewrite = frames.filter(function (callSite) {
