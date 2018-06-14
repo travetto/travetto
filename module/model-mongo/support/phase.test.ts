@@ -6,7 +6,7 @@ export const init = {
     const defPort = process.env.MODEL_MONGO_PORT || 27017;
 
     try {
-      await DockerContainer.waitForPort(defPort);
+      await DockerContainer.waitForPort(defPort, 10);
       process.env.MODEL_MONGO_SCHEMA = `test_${Math.trunc(Math.random() * 10000)}`; // Randomize schema
     } catch (e) {
       const port = 50000 + Math.trunc(Math.random() * 10000);
