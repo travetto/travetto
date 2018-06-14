@@ -5,3 +5,4 @@ rpm_build/**
 npm-debug.log
 package-lock.json
 **/*.compressed
+**/*.compiled

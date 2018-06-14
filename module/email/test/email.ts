@@ -5,7 +5,6 @@ import { RootRegistry } from '@travetto/registry';
 
 import * as assert from 'assert';
 import { TemplateEngine } from '../src/template';
-import * as fs from 'fs';
 
 @Suite('Emails')
 class EmailSuite {
@@ -13,6 +12,7 @@ class EmailSuite {
   @BeforeAll()
   async init() {
     await RootRegistry.init();
+    await DependencyRegistry.init();
   }
 
   @Test('Should template properly')
@@ -23,6 +23,7 @@ class EmailSuite {
           <columns large="{{left}}">Bob</columns>
           <columns large="{{right}}"></columns>
         </row>`, { left: 6, right: 6 });
+
     assert(out.html.includes('>Bob</th>'));
     assert(out.html.includes('<meta name="viewport" content="width=device-width"'));
   }
@@ -34,7 +35,7 @@ class EmailSuite {
     const out = await instance.template(`<img src="image/test.png">`, { left: 6, right: 6 });
     const img = await instance.getAssetBuffer('image/test.png');
     assert(img !== null);
-    assert(img.length > 1000);
+    assert(img.length > 1001);
     assert(out.html.includes(img.toString('base64')));
   }
 
