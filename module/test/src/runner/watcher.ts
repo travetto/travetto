@@ -24,12 +24,12 @@ function send(e: string, data: { file: string } & { [key: string]: any }) {
   if (process.send) {
     process.send({ type: e, ...data });
   } else {
-    // console.log('SENDING', JSON.stringify({ type: e, ...data }));
+    // console.debug('SENDING', JSON.stringify({ type: e, ...data }));
   }
 }
 
 export async function watch() {
-  console.log('Listening for changes');
+  console.debug('Listening for changes');
   TestRegistry.listen(RootRegistry);
 
   const queue: (SuiteConfig | TestConfig)[] = [];
@@ -107,14 +107,14 @@ export async function watch() {
       const complete = exe.listenOnce(Events.RUN_COMPLETE);
       exe.send(event.type, event);
 
-      console.log('Running test', event);
+      console.debug('Running test', event);
       const { error } = await complete;
     }
   );
 
   // bulkRequire('test/**/*.ts');
 
-  console.log('Waiting');
+  console.debug('Waiting');
 
   await all;
 }

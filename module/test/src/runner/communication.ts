@@ -46,9 +46,7 @@ export const Events = {
 export async function server() {
 
   let Compiler: any;
-  if (!!process.env.DEBUG) {
-    console.debug = console.log;
-  }
+
   type Event = { type: string, error?: any, file?: string, class?: string, method?: string };
 
   const worker = new LocalExecution<Event>();
@@ -58,7 +56,7 @@ export async function server() {
   idle.extend();
 
   worker.listen(async (data: Event) => {
-    console.log('on message', data);
+    console.debug('on message', data);
     idle.extend(); // Extend
 
     if (data.type === Events.INIT) {
@@ -99,7 +97,7 @@ export async function server() {
       Compiler.reset();
       const { Runner } = require('./runner');
 
-      console.log('*Running*', data.file);
+      console.debug('*Running*', data.file);
 
       try {
         await new Runner(['-f', 'exec', '-m', 'single', data.file, data.class, data.method]).run();
