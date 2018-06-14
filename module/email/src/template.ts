@@ -62,7 +62,7 @@ export class TemplateEngine {
 
     this.css = new Promise<string>(async (resolve, reject) => {
       const partial = '/scss/app.scss';
-      const full = `${__dirname}/../assets/email/${partial}`;
+      const full = path.resolve(`${__dirname}/../assets/email/${partial}`);
       if (!AppCache.hasEntry(full)) {
         const file = await this.config.findFirst(partial);
 
