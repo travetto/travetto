@@ -69,11 +69,15 @@ class Cache {
   }
 
   toEntryName(full) {
-    return path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]/, '').replace(/[\/\\]+/g, '~').replace(/.ts$/, '@ts'));
+    return path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~').replace(/.ts$/, '@ts'));
   }
 }
 
 class $AppCache extends Cache {
+  constructor(cwd, cacheDir = process.env.TS_CACHE_DIR) {
+    super(cwd, cacheDir);
+  }
+
   init() {
     super.init();
 

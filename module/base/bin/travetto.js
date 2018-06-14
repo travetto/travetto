@@ -11,6 +11,8 @@ const { AppCache } = require('../src/cache');
 const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
 const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
 
+AppCache.init();
+
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {
   const name = tsf.replace(/[\\\/]/g, path.sep);
