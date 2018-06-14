@@ -152,7 +152,7 @@ export class TemplateEngine {
 
   async getAssetBuffer(rel: string) {
     const pth = await this.config.findFirst(rel);
-    const out = `${pth}.compressed`;
+    const out = AppCache.toEntryName(pth);
 
     if (!(await exists(out))) {
       const [proc, prom] = await this.converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
