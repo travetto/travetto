@@ -1,8 +1,7 @@
-import { Model, ModelService, BaseModel, ModelSource, WhereClause } from '@travetto/model';
+import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
-import { QueryVerifierService } from '@travetto/model/src/service/query';
 
 import * as assert from 'assert';
 import { BaseElasticsearchTest } from './base';

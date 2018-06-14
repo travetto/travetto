@@ -1,7 +1,6 @@
-import { BeforeAll, BeforeEach } from '@travetto/test';
+import { BeforeAll, AfterEach, BeforeEach } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { ModelSource, ModelRegistry } from '@travetto/model';
-import { RootRegistry } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../src/service';
@@ -22,8 +21,9 @@ export class BaseElasticsearchTest {
     await ModelRegistry.init();
   }
 
+  @AfterEach()
   @BeforeEach()
-  async beforeEach() {
+  async afterEach() {
     const mms = (await DependencyRegistry.getInstance(ModelSource)) as ModelElasticsearchSource;
     return await mms.resetDatabase();
   }

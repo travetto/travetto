@@ -74,6 +74,5 @@ export class QueryTest {
     assert.ok(out.bool.must[0].nested.query.nested.query.term['a.b.c']);
 
     assert(out.bool.must[0].nested.query.nested.query.term['a.b.c'] === 5);
-
   }
 }
