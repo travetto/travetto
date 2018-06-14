@@ -8,6 +8,8 @@ export declare class Cache {
   removeEntry(full: string): void;
   hasEntry(full: string): boolean;
   statEntry(full: string): Stats;
+  fromEntryName(cached: string): string;
+  toEntryName(full: string): string;
   clear(): void;
 }
 
