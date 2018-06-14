@@ -27,5 +27,5 @@
   "scripts": {
     "test": "node ./bin/travetto-test.js"
   }, 
-  "version": "0.0.76"
+  "version": "0.0.77"
 }
