@@ -10,3 +10,5 @@ export declare class Cache {
   statEntry(full: string): Stats;
   clear(): void;
 }
+
+export const AppCache: Cache;

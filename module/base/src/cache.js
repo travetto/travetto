@@ -2,6 +2,7 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const { execSync } = require('child_process');
+const { AppEnv } = require('./env');
 
 class Cache {
   constructor(cwd, cacheDir = process.env.TS_CACHE_DIR) {
@@ -19,21 +20,6 @@ class Cache {
   init() {
     if (!fs.existsSync(this.cacheDir)) {
       fs.mkdirSync(this.cacheDir);
-    }
-
-    for (const f of fs.readdirSync(this.cacheDir)) {
-      const full = this.fromEntryName(f);
-      try {
-        const cacheStat = this.statEntry(full);
-        const fullStat = fs.statSync(full);
-
-        if (cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs || cacheStat.atimeMs < fullStat.atimeMs) {
-          this.removeEntry(full);
-        }
-      } catch (e) {
-        console.debug('Cannot read', e.message);
-        // Cannot remove missing file
-      }
     }
   }
 
@@ -87,4 +73,27 @@ class Cache {
   }
 }
 
+class $AppCache extends Cache {
+  init() {
+    super.init();
+
+    for (const f of fs.readdirSync(this.cacheDir)) {
+      const full = this.fromEntryName(f);
+      try {
+        const cacheStat = this.statEntry(full);
+        const fullStat = fs.statSync(full);
+
+        if (cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs || cacheStat.atimeMs < fullStat.atimeMs) {
+          this.removeEntry(full);
+        }
+      } catch (e) {
+        console.debug('Cannot read', e.message);
+        // Cannot remove missing file
+      }
+    }
+  }
+}
+
 exports.Cache = Cache;
+
+exports.AppCache = new $AppCache(AppEnv.cwd);
