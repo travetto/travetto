@@ -1,15 +1,15 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { CommandService } from '@travetto/exec';
+import { CommandService, spawn } from '@travetto/exec';
 import { Cacheable } from '@travetto/cache';
 import { Injectable } from '@travetto/di';
+import { CommonProcess, ExecutionResult } from '@travetto/exec/src/types';
+import { AppEnv } from '@travetto/base';
 
 import { AssetService } from './asset';
 import { Asset, AssetMetadata } from '../model';
 import { AssetUtil } from '../util';
-import { CommonProcess, ExecutionResult } from '@travetto/exec/src/types';
-import { AppEnv } from '@travetto/base';
 
 const fsUnlinkAsync = util.promisify(fs.unlink);
 const fsWriteFile = util.promisify(fs.writeFile);
@@ -17,13 +17,14 @@ const fsWriteFile = util.promisify(fs.writeFile);
 @Injectable()
 export class ImageService {
 
-  converter = new CommandService({ image: 'v4tech/imagemagick' });
+  converter = new CommandService({
+    image: 'v4tech/imagemagick',
+    checkForLocal: async () => {
+      return (await spawn('convert --version')[1]).valid;
+    }
+  });
 
   constructor(private assetService: AssetService) { }
-
-  async postConstruct() {
-    await this.converter.init();
-  }
 
   @Cacheable({
     max: 1000,
@@ -41,7 +42,7 @@ export class ImageService {
     if (options && (options.w || options.h)) {
       const filePath = AssetUtil.generateTempFile(info.filename.split('.').pop() as string);
 
-      const [proc, prom] = this.converter.exec('convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-');
+      const [proc, prom] = await this.converter.exec('convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-');
 
       info.stream.pipe(proc.stdin);
       proc.stdout.pipe(fs.createWriteStream(filePath));
