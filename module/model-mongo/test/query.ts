@@ -10,7 +10,9 @@ export class QueryTest {
     let out = extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
-    out = extractWhereClause<{ a: { d: number, b: { c: number } }, d: { e: boolean }, g: { z: string[] }, name: number, age: number }>({
+    type Type = { a: { d: number, b: { c: number } }, d: { e: boolean }, g: { z: string[] }, name: number, age: number };
+
+    out = extractWhereClause<Type>({
       $and: [
         { a: { b: { c: 5 } } },
         { d: { e: true } },
@@ -32,6 +34,6 @@ export class QueryTest {
 
     assert(out.$and[4]['a.d'].$gt === 20);
 
-    assert(out.$and[3]['g.z'] === 'a')
+    assert(out.$and[3]['g.z'] === 'a');
   }
 }

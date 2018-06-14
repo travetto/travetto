@@ -3,7 +3,6 @@ import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { ModelMongoSource, ModelMongoConfig } from '../index';
-import { QueryVerifierService } from '@travetto/model/src/service/query';
 import { GenerateUtil } from '@travetto/schema/support/util.generate';
 
 import * as assert from 'assert';

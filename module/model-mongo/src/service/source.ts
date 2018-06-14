@@ -2,15 +2,12 @@ import * as mongo from 'mongodb';
 
 import {
   ModelSource, IndexConfig, Query,
-  QueryOptions, BulkState, BulkResponse,
+  BulkState, BulkResponse,
   ModelRegistry, ModelCore,
   PageableModelQuery,
   WhereClause,
-  SelectClause,
-  SortClause,
   ModelQuery
 } from '@travetto/model';
-import { Injectable } from '@travetto/di';
 import { ModelMongoConfig } from './config';
 import { Class } from '@travetto/registry';
 import { BaseError, isPlainObject } from '@travetto/base';
