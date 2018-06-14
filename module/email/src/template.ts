@@ -9,6 +9,7 @@ import * as marked from 'marked';
 import * as util from 'util';
 import * as Mustache from 'mustache';
 
+import { AppCache } from '@travetto/base/src/cache';
 import { CommandService, spawn } from '@travetto/exec';
 import { Injectable } from '@travetto/di';
 
@@ -18,7 +19,6 @@ import { MailTemplateConfig } from './config';
 const sass = require('sass');
 
 const readFile = util.promisify(fs.readFile);
-const unlink = util.promisify(fs.unlink);
 const exists = util.promisify(fs.exists);
 
 const Inky = inky.Inky;
@@ -57,14 +57,14 @@ export class TemplateEngine {
   constructor(public config: MailTemplateConfig) {
 
     this.wrapper = this.config.findFirst('/html/wrapper.html')
-      .then(f => readFile(f))
+      .then(f => fs.readFileSync(f))
       .then(x => x.toString());
 
     this.css = new Promise<string>(async (resolve, reject) => {
-      const f = '/scss/app.scss';
-      const fc = `${__dirname}/../assets/email/${f}.compiled`;
-      if (!(await exists(fc))) {
-        const file = await this.config.findFirst(f);
+      const partial = '/scss/app.scss';
+      const full = `${__dirname}/../assets/email/${partial}`;
+      if (!AppCache.hasEntry(full)) {
+        const file = await this.config.findFirst(partial);
 
         sass.render({
           file,
@@ -75,12 +75,12 @@ export class TemplateEngine {
             reject(err);
           } else {
             const css = res.css.toString();
-            fs.writeFileSync(fc, css);
+            AppCache.writeEntry(full, css);
             resolve(css);
           }
         });
       } else {
-        resolve(fs.readFileSync(fc).toString());
+        resolve(AppCache.readEntry(full));
       }
     });
   }
@@ -162,8 +162,6 @@ export class TemplateEngine {
     }
 
     const buffer = await readFile(out);
-
-    // await unlink(out);
 
     return buffer;
   }

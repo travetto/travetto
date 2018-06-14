@@ -1,9 +1,10 @@
+import * as assert from 'assert';
+
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { EmailService } from '../src';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
-import * as assert from 'assert';
 import { TemplateEngine } from '../src/template';
 
 @Suite('Emails')
