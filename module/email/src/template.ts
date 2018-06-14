@@ -8,9 +8,11 @@ import * as htmlEntities from 'html-entities';
 import * as marked from 'marked';
 import * as util from 'util';
 import * as Mustache from 'mustache';
-import { CommandService } from '@travetto/exec';
-import { TemplateContext } from '.';
+
+import { CommandService, spawn } from '@travetto/exec';
 import { Injectable } from '@travetto/di';
+
+import { TemplateContext } from './types';
 import { MailTemplateConfig } from './config';
 
 const sass = require('sass');
@@ -45,7 +47,10 @@ export class TemplateEngine {
   private cache: { [key: string]: { html: string, text: string } } = {};
 
   private converter = new CommandService({
-    image: 'agregad/pngquant'
+    image: 'agregad/pngquant',
+    checkForLocal: async () => {
+      return (await spawn('pngquant -h')[1]).valid;
+    }
   });
 
   // TODO: figure out paths for html, images, and partials
@@ -56,18 +61,28 @@ export class TemplateEngine {
       .then(x => x.toString());
 
     this.css = new Promise<string>(async (resolve, reject) => {
-      const file = await this.config.findFirst('/scss/app.scss');
+      const f = '/scss/app.scss';
+      const fc = `${__dirname}/../assets/email/${f}.compiled`;
+      if (!(await exists(fc))) {
+        const file = await this.config.findFirst(f);
 
-      sass.render({
-        file,
-        sourceMap: false,
-        includePaths: this.config.scssRoots
-      }, (err: any, res: { css: any }) => err ? reject(err) : resolve(res.css.toString()));
+        sass.render({
+          file,
+          sourceMap: false,
+          includePaths: this.config.scssRoots
+        }, (err: any, res: { css: any }) => {
+          if (err) {
+            reject(err);
+          } else {
+            const css = res.css.toString();
+            fs.writeFileSync(fc, css);
+            resolve(css);
+          }
+        });
+      } else {
+        resolve(fs.readFileSync(fc).toString());
+      }
     });
-  }
-
-  async postConstruct() {
-    await this.converter.init();
   }
 
   interpolate(text: string, data: any) {
@@ -87,15 +102,6 @@ export class TemplateEngine {
   }
 
   async htmlToMarkdown(html: string) {
-    function getAttrs(node: HTMLElement) {
-      const attrs: { [key: string]: string } = {};
-      for (let i = 0; i < node.attributes.length; i++) {
-        const attr = node.attributes.item(i);
-        attrs[attr!.localName!] = attr!.value;
-      }
-      return attrs;
-    }
-
     // Cleanup html from templating
     let simple = html
       .replace(/<table[^>]*spacer[^>]*>.*?<\/table>/g, x => { // Turn spacers into <br>
@@ -119,8 +125,6 @@ export class TemplateEngine {
   }
 
   async wrapTemplate(tpl: string) {
-    const css = await this.css;
-
     // Compile SASS
     tpl = tpl
       .replace(/<\/button>/g, (all) => `${all}<spacer size="16"></spacer>`) // Insert spacers
@@ -151,7 +155,7 @@ export class TemplateEngine {
     const out = `${pth}.compressed`;
 
     if (!(await exists(out))) {
-      const [proc, prom] = this.converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
+      const [proc, prom] = await this.converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
       fs.createReadStream(pth).pipe(proc.stdin);
       proc.stdout.pipe(fs.createWriteStream(out));
       await prom;
@@ -159,7 +163,7 @@ export class TemplateEngine {
 
     const buffer = await readFile(out);
 
-    await unlink(out);
+    // await unlink(out);
 
     return buffer;
   }
