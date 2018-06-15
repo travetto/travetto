@@ -7,7 +7,6 @@ import { AppError, ExpressOperator, ExpressApp } from '@travetto/express';
 import { Injectable, Inject } from '@travetto/di';
 import { Context } from '@travetto/context';
 import { AuthSource } from '../source';
-import { AuthContext } from '../source/types';
 
 export const AUTH = Symbol('@travetto/auth');
 
@@ -15,7 +14,7 @@ export const AUTH = Symbol('@travetto/auth');
   target: ExpressOperator,
   qualifier: AUTH
 })
-export class AuthOperator<U = { id: string }> extends ExpressOperator {
+export class AuthOperator<U = { id: string }> extends ExpressOperator implements Express.AuthOperator<U> {
 
   @Inject()
   protected _context: Context;
@@ -37,7 +36,7 @@ export class AuthOperator<U = { id: string }> extends ExpressOperator {
     return this._context.get().auth;
   }
 
-  set context(ctx: AuthContext<U>) {
+  set context(ctx: Express.AuthContext<U>) {
     this._context.get().auth = ctx;
   }
 
@@ -56,7 +55,7 @@ export class AuthOperator<U = { id: string }> extends ExpressOperator {
       const user = await this.source.login(userId, password);
       req.session.authToken = await this.source.serialize(user);
 
-      req.auth.context = req.session.authContext = this.source.getContext(user);
+      (req as any as { auth: AuthOperator }).auth.context = req.session.authContext = this.source.getContext(user);
 
       return user;
     } catch (err) {
@@ -75,7 +74,7 @@ export class AuthOperator<U = { id: string }> extends ExpressOperator {
   operate(app: ExpressApp) {
     app.get().use(async (req, res, next) => {
 
-      req.auth = this;
+      (req as any as { auth: AuthOperator<U> }).auth = this;
 
       if (req.session.authToken) {
         this.context = this.source.getContext(await this.source.deserialize(req.session.authToken));

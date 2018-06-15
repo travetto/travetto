@@ -1,3 +1,5 @@
+/// <reference path="../service/auth.ts" />
+
 import { Request, Response, NextFunction } from 'express';
 import { ControllerRegistry, AppError } from '@travetto/express';
 
@@ -11,12 +13,12 @@ export async function requireAuth(config: { include: string[], exclude: string[]
   }
   const { include, exclude } = config;
 
-  const permissions = req.auth.context.permissions;
+  const perms = req.auth.context.permissions;
 
-  if (exclude.length && exclude.find(x => permissions.has(x))) {
+  if (exclude.length && exclude.find(x => perms.has(x))) {
     throw new AppError('Access forbidden', 403);
   }
-  if (include.length && include.find(x => !permissions.has(x))) {
+  if (include.length && include.find(x => !perms.has(x))) {
     throw new AppError('Access forbidden', 403);
   }
 }
