@@ -1,4 +1,5 @@
 import { PrincipalProvider } from '../principal';
+import { AuthContext } from '../service';
 
 export abstract class AuthSource<U, T extends PrincipalProvider<U> = PrincipalProvider<U>> {
   principalProvider: T;
@@ -20,7 +21,7 @@ export abstract class AuthSource<U, T extends PrincipalProvider<U> = PrincipalPr
 
   changePassword?(userId: string, password: string, oldPassword?: string): Promise<U>;
 
-  getContext(obj: U): Express.AuthContext {
+  getContext(obj: U): AuthContext<U> {
     return {
       id: this.principalProvider.getId(obj),
       permissions: this.principalProvider.getPermissions(obj),

@@ -5,14 +5,7 @@ import { AppError, ExpressOperator, ExpressApp } from '@travetto/express';
 import { Injectable, Inject } from '@travetto/di';
 import { Context } from '@travetto/context';
 import { AuthSource } from '../source';
-
-export const AUTH = Symbol('@travetto/auth');
-
-export interface AuthContext<U> {
-  id: string;
-  permissions: Set<string>;
-  principal: U;
-}
+import { AUTH, AuthContext } from './types';
 
 @Injectable({
   target: ExpressOperator,
@@ -59,7 +52,7 @@ export class AuthOperator<U = { id: string }> extends ExpressOperator {
       const user = await this.source.login(userId, password);
       req.session.authToken = await this.source.serialize(user);
 
-      (req as any as { auth: AuthOperator }).auth.context = req.session.authContext = this.source.getContext(user);
+      req.auth.context = req.session.authContext = this.source.getContext(user);
 
       return user;
     } catch (err) {
@@ -78,7 +71,7 @@ export class AuthOperator<U = { id: string }> extends ExpressOperator {
   operate(app: ExpressApp) {
     app.get().use(async (req, res, next) => {
 
-      (req as any as { auth: AuthOperator<U> }).auth = this;
+      (req as Request).auth = this;
 
       if (req.session.authToken) {
         this.context = this.source.getContext(await this.source.deserialize(req.session.authToken));
