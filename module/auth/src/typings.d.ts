@@ -19,5 +19,4 @@ declare module Express {
 	export interface Request {
 		auth: AuthOperator<any>
 	}
-	export interface Response { }
 }

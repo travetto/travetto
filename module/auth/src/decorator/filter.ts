@@ -1,5 +1,3 @@
-/// <reference path="../service/auth.ts" />
-
 import { Request, Response, NextFunction } from 'express';
 import { ControllerRegistry, AppError } from '@travetto/express';
 
