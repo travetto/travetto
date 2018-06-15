@@ -1,5 +1,5 @@
 import { PrincipalProvider } from '../principal';
-import { SecurityContext } from './types';
+import { AuthContext } from './types';
 
 export abstract class AuthSource<U, T extends PrincipalProvider<U> = PrincipalProvider<U>> {
   principalProvider: T;
@@ -17,15 +17,15 @@ export abstract class AuthSource<U, T extends PrincipalProvider<U> = PrincipalPr
     return user;
   }
 
-  register?(user: U, password: string): Promise<U>;
+  register?(user: U): Promise<U>;
 
   changePassword?(userId: string, password: string, oldPassword?: string): Promise<U>;
 
-  getSecurityContext(obj: U): SecurityContext {
+  getContext(obj: U): AuthContext {
     return {
       id: this.principalProvider.getId(obj),
       permissions: this.principalProvider.getPermissions(obj),
-      full: obj
+      principal: obj
     };
   }
 }

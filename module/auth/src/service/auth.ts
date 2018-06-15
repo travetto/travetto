@@ -1,12 +1,13 @@
 /// <reference path="../typings.d.ts" />
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import * as util from 'util';
 
 import { AppError, ExpressOperator, ExpressApp } from '@travetto/express';
 import { Injectable, Inject } from '@travetto/di';
 import { Context } from '@travetto/context';
 import { AuthSource } from '../source';
+import { AuthContext } from '../source/types';
 
 export const AUTH = Symbol('@travetto/auth');
 
@@ -17,38 +18,49 @@ export const AUTH = Symbol('@travetto/auth');
 export class AuthOperator<U = { id: string }> extends ExpressOperator {
 
   @Inject()
-  protected context: Context;
+  protected _context: Context;
 
   constructor(protected source: AuthSource<U>) {
     super();
 
-    if (source.register) {
-      this.register = async (user: U, password: string) => {
-        const res = await this.source.register!(user, password);
-
-        try {
-          this.context.get().principal = res;
-        } catch (e) {
-          // Do nothing
-        }
-
-        return res;
-      };
-    }
     if (source.changePassword) {
-      this.changePassword = source.changePassword.bind(source);
+      this.changePassword =
+        (rq: Request, rs: Response, id: string, pw: string, oldpw?: string) => source.changePassword!(id, pw, oldpw);
+    }
+
+    if (source.register) {
+      this.register = (rq: Request, rs: Response, user: U) => source.register!(user);
     }
   }
 
-  async login(req: Request, res: Response, userId: string, password: string): Promise<U> {
+  get context() {
+    return this._context.get().auth;
+  }
+
+  set context(ctx: AuthContext<U>) {
+    this._context.get().auth = ctx;
+  }
+
+  get unauthenticated() {
+    return !this.context;
+  }
+
+  async login(req: Request, res: Response): Promise<U> {
+    const idField = this.source.principalProvider.idField;
+    const pwField = this.source.principalProvider.passwordField;
+
     try {
+      const userId = req.body ? req.body[idField] : req.query[idField];
+      const password = req.body ? req.body[pwField] : req.query[pwField];
+
       const user = await this.source.login(userId, password);
-      this.context.get().user = user;
-      req.session.principal = this.source;
+      req.session.authToken = await this.source.serialize(user);
+
+      req.auth.context = req.session.authContext = this.source.getContext(user);
 
       return user;
     } catch (err) {
-      throw new AppError('Unable to authenticate, userId/password combination are invalid');
+      throw new AppError(`Unable to authenticate, ${idField}/${pwField} combination are invalid`);
     }
   }
 
@@ -57,33 +69,21 @@ export class AuthOperator<U = { id: string }> extends ExpressOperator {
     res.clearCookie('connect.sid', { path: '/' });
   }
 
-  async filterAuth(req: Request, res: Response, next: NextFunction) {
-    try {
-      const idField = this.source.principalProvider.idField;
-      const pwField = this.source.principalProvider.passwordField;
-      const userId = req.body ? req.body[idField] : req.query[idField];
-      const password = req.body ? req.body[pwField] : req.query[pwField];
-
-      await this.login(req, res, userId, password);
-      next();
-    } catch (err) {
-      next(err);
-    }
-  }
+  register?(req: Request, res: Response, user: U): Promise<U>;
+  changePassword?(req: Request, res: Response, userId: string, password: string, oldpassword: string): Promise<U>;
 
   operate(app: ExpressApp) {
-    app.get().use((req, res, next) => {
-      this.context.get().principal = req.principal;
+    app.get().use(async (req, res, next) => {
 
-      req.logout = () => this.logout(req, res);
+      req.auth = this;
+
+      if (req.session.authToken) {
+        this.context = this.source.getContext(await this.source.deserialize(req.session.authToken));
+      }
 
       if (next) {
         next();
       }
     });
   }
-
-  register?(user: U, password: string): Promise<U>;
-
-  changePassword?(userId: string, password: string, oldPassword?: string): Promise<U>;
 }

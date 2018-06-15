@@ -31,7 +31,7 @@ export class AuthModelSource<T extends BaseModel> extends AuthSource<T, Register
     }
   }
 
-  async register(user: T, password: string) {
+  async register(user: T) {
     const query = {
       where: {
         [this.principalProvider.idField]: this.principalProvider.getId(user)
@@ -41,9 +41,11 @@ export class AuthModelSource<T extends BaseModel> extends AuthSource<T, Register
     const existingUsers = await this.modelService.getAllByQuery(this.principalProvider.type, query);
 
     if (existingUsers.length) {
-      throw new AppError('That email is already taken.');
+      throw new AppError(`That ${this.principalProvider.idField} is already taken.`);
     } else {
+      const password = this.principalProvider.getPassword(user);
       const fields = await AuthUtil.generatePassword(password);
+
       Object.assign(user as any, {
         [this.principalProvider.hashField]: fields.hash,
         [this.principalProvider.saltField]: fields.salt

@@ -1,5 +1,5 @@
-export interface SecurityContext<T = any> {
+export interface AuthContext<T = any> {
   id: string;
   permissions: Set<string>;
-  full: T;
+  principal: T;
 }
