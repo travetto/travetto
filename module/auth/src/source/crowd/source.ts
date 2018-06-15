@@ -4,8 +4,9 @@ import { requestJSON } from '@travetto/util';
 
 import { AuthCrowdConfig } from './config';
 import { AuthSource } from '../source';
+import { PrincipalProvider } from '../../principal';
 
-export class AuthCrowdSource<U> extends AuthSource<U, AuthCrowdConfig> {
+export class AuthCrowdSource<U> extends AuthSource<U, PrincipalProvider<U>> {
   constructor(public config: AuthCrowdConfig) {
     super();
   }
@@ -17,11 +18,11 @@ export class AuthCrowdSource<U> extends AuthSource<U, AuthCrowdConfig> {
     }, data);
   }
 
-  async getUser(username: string) {
+  async fetchPrincipal(username: string) {
     return await this.request<U, any>(`/user?username=${username}`);
   }
 
-  async doLogin(username: string, password: string) {
+  async login(username: string, password: string) {
     return await this.request<U, any>(`/authentication?username=${username}`, {
       method: 'POST',
     }, { value: password });

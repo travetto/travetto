@@ -1,7 +1,10 @@
 declare module Express {
 	export interface Request {
-		passportOptions: { failureRedirect?: string, successRedirect?: string };
-		principal: { _id: string, groupSet: Set<string> };
-		doLogout: () => Promise<void>
+		logout: () => Promise<void>;
+		principal: {
+			id: string;
+			permissions: Set<string>;
+			full: any;
+		};
 	}
 }

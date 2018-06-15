@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { AppError } from '@travetto/express';
 
-export class StrategyUtil {
+export class AuthUtil {
   static async generateHash(password: string, salt: string, iterations = 25000, keylen = 512, digest = 'sha512') {
     return new Promise<string>((res, rej) =>
       crypto.pbkdf2(password, salt, iterations, keylen, digest, (err, val) => {
