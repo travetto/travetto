@@ -98,7 +98,7 @@ export class ExpressApp {
         RouteUtil.toPromise(hConfig.handler.bind(instance)),
         RouteUtil.outputHandler.bind(null, hConfig));
 
-      const filters = [...cConfig.filters!, ...hConfig.filters!]
+      const filters = [...cConfig.filters!, ...(hConfig.filters!).map(x => x.bind(instance))]
         .map(RouteUtil.toPromise)
         .map(x => RouteUtil.asyncHandler(x));
 

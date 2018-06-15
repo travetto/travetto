@@ -1,15 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
-import { EventEmitter } from 'events';
-
 import { DependencyRegistry } from '@travetto/di';
 import { MetadataRegistry, Class } from '@travetto/registry';
 
 import {
-  RequestHandler, Filter, FilterPromise,
-  PathType, Renderable, Method,
+  RequestHandler, Filter,
   ControllerConfig
 } from '../model';
-import { ExpressApp } from './app';
 
 class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHandler> {
 
@@ -78,7 +73,6 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHand
   }
 
   onInstallFinalize(cls: Class) {
-    const id = cls.__id!;
     const final = this.getOrCreatePending(cls) as ControllerConfig;
 
     // Handle duplicates, take latest
