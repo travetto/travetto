@@ -103,14 +103,14 @@ class TestSuite {
   async complex() {
     const test = new CachingService();
 
-    const val = test.complexInput({ a: 5, b: 20 }, 20);
-    const val2 = test.complexInput({ a: 5, b: 20 }, 20);
-    const val3 = test.complexInput({ b: 5, a: 20 }, 20);
+    const val = await test.complexInput({ a: 5, b: 20 }, 20);
+    const val2 = await test.complexInput({ a: 5, b: 20 }, 20);
+    const val3 = await test.complexInput({ b: 5, a: 20 }, 20);
     assert(val === val2);
     assert(val !== val3);
 
-    const val4 = test.complexInputWithCustomKey({ a: 5, b: 20 }, 20);
-    const val5 = test.complexInputWithCustomKey({ b: 5, a: 20 }, 30);
+    const val4 = await test.complexInputWithCustomKey({ a: 5, b: 20 }, 20);
+    const val5 = await test.complexInputWithCustomKey({ b: 5, a: 20 }, 30);
     assert(val4 === val5);
   }
 }

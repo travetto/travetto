@@ -1,6 +1,6 @@
-import { CacheManager } from '../service';
 import * as LRU from 'lru-cache';
 import { Class } from '@travetto/registry';
+import { CacheManager } from '../service';
 
 type TypedMethodDecorator<U> = (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => U>) => void;
 
