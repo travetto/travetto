@@ -7,7 +7,7 @@ const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
 
-export function extractWhereTermQuery<T>(o: any, cls: Class<T>, path: string = ''): any {
+export function extractWhereTermQuery<T>(o: { [key: string]: any }, cls: Class<T>, path: string = ''): any {
   const items = [];
   const schema = SchemaRegistry.getViewSchema(cls).schema;
 
