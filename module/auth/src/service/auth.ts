@@ -52,7 +52,7 @@ export class AuthOperator<U = { id: string }> extends ExpressOperator {
       const user = await this.source.login(userId, password);
       req.session.authToken = await this.source.serialize(user);
 
-      req.auth.context = req.session.authContext = this.source.getContext(user);
+      req.auth.context = this.source.getContext(user);
 
       return user;
     } catch (err) {
