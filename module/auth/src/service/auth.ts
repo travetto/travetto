@@ -1,5 +1,3 @@
-/// <reference path="../typings.d.ts" />
-
 import { Request, Response } from 'express';
 import * as util from 'util';
 
@@ -10,11 +8,17 @@ import { AuthSource } from '../source';
 
 export const AUTH = Symbol('@travetto/auth');
 
+export interface AuthContext<U> {
+  id: string;
+  permissions: Set<string>;
+  principal: U;
+}
+
 @Injectable({
   target: ExpressOperator,
   qualifier: AUTH
 })
-export class AuthOperator<U = { id: string }> extends ExpressOperator implements Express.AuthOperator<U> {
+export class AuthOperator<U = { id: string }> extends ExpressOperator {
 
   @Inject()
   protected _context: Context;
@@ -36,7 +40,7 @@ export class AuthOperator<U = { id: string }> extends ExpressOperator implements
     return this._context.get().auth;
   }
 
-  set context(ctx: Express.AuthContext<U>) {
+  set context(ctx: AuthContext<U>) {
     this._context.get().auth = ctx;
   }
 

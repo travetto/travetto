@@ -29,7 +29,7 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
 }
 
 export function Unauthenticated() {
-  return ControllerRegistry.filterAdder(function (req: Express.Request) {
+  return ControllerRegistry.filterAdder(function (req: Request) {
     if (!req.auth.unauthenticated) {
       throw new AppError('User cannot be authenticated', 401);
     }
