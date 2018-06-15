@@ -1,8 +1,8 @@
-import { Config } from '@travetto/config';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
 import { AppEnv } from '@travetto/base';
+import { Config } from '@travetto/config';
 
 const exists = util.promisify(fs.exists);
 
