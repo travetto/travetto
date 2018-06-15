@@ -1,8 +1,7 @@
 import * as nodemailer from 'nodemailer';
-import * as fs from 'fs';
 import * as util from 'util';
 
-import { TemplateMailOptions, TemplateContext } from './types';
+import { TemplateMailOptions } from './types';
 import { Injectable } from '@travetto/di';
 import { MailConfig } from './config';
 import { TemplateEngine } from './template';

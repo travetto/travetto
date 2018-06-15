@@ -23,6 +23,8 @@ export class MailConfig {
 
 @Config('mail.template')
 export class MailTemplateConfig {
+  private _cache: { [key: string]: string } = {};
+
   assetRoots: string[] = [];
   scssRoots: string[];
 
@@ -36,11 +38,17 @@ export class MailTemplateConfig {
 
   async findFirst(pth: string) {
     pth = pth.replace(/[\/]+/g, path.sep);
+
+    if (pth in this._cache) {
+      return this._cache[pth];
+    }
+
     for (const f of this.assetRoots.map(x => path.join(x, pth))) {
       if (await exists(f)) {
-        return f;
+        return this._cache[pth] = f;
       }
     }
+
     throw new Error('Not found');
   }
 }
