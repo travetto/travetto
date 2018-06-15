@@ -257,13 +257,7 @@ export class ModelMongoSource extends ModelSource {
     const col = await this.getCollection(cls);
     query = this.translateQueryIds(query);
 
-    let finalData: any = data;
-
-    if (Object.keys(data)[0].charAt(0) !== '$') {
-      finalData = { $set: extractSimple(data) };
-    }
-
-    const res = await col.updateMany(extractWhereClause(query.where || {}), finalData);
+    const res = await col.updateMany(extractWhereClause(query.where || {}), data);
     return res.matchedCount;
   }
 
