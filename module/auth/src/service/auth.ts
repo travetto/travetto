@@ -1,24 +1,18 @@
 import { Request, Response } from 'express';
 import * as util from 'util';
 
-import { AppError, ExpressOperator, ExpressApp } from '@travetto/express';
-import { Injectable, Inject } from '@travetto/di';
+import { AppError } from '@travetto/express';
+import { Inject } from '@travetto/di';
 import { Context } from '@travetto/context';
 import { AuthSource } from '../source';
-import { AUTH, AuthContext } from './types';
+import { AuthContext } from './types';
 
-@Injectable({
-  target: ExpressOperator,
-  qualifier: AUTH
-})
-export class AuthOperator<U = { id: string }> extends ExpressOperator {
+export class AuthService<U = { id: string }> {
 
   @Inject()
   protected _context: Context;
 
   constructor(protected source: AuthSource<U>) {
-    super();
-
     if (source.changePassword) {
       this.changePassword =
         (rq: Request, rs: Response, id: string, pw: string, oldpw?: string) => source.changePassword!(id, pw, oldpw);
@@ -42,8 +36,8 @@ export class AuthOperator<U = { id: string }> extends ExpressOperator {
   }
 
   async login(req: Request, res: Response): Promise<U> {
-    const idField = this.source.principalProvider.idField;
-    const pwField = this.source.principalProvider.passwordField;
+    const idField = this.source.principal.idField;
+    const pwField = this.source.principal.passwordField;
 
     try {
       const userId = req.body ? req.body[idField] : req.query[idField];
@@ -66,20 +60,13 @@ export class AuthOperator<U = { id: string }> extends ExpressOperator {
   }
 
   register?(req: Request, res: Response, user: U): Promise<U>;
+
   changePassword?(req: Request, res: Response, userId: string, password: string, oldpassword: string): Promise<U>;
 
-  operate(app: ExpressApp) {
-    app.get().use(async (req, res, next) => {
-
-      (req as Request).auth = this;
-
-      if (req.session.authToken) {
-        this.context = this.source.getContext(await this.source.deserialize(req.session.authToken));
-      }
-
-      if (next) {
-        next();
-      }
-    });
+  async loadContext(req: Request) {
+    if (req.session.authToken) {
+      const user = await this.source.deserialize(req.session.authToken);
+      this.context = this.source.getContext(user);
+    }
   }
 }

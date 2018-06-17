@@ -1,14 +1,21 @@
 import * as http from 'http';
 
 import { requestJSON } from '@travetto/util';
+import { Config } from '@travetto/config';
 
-import { AuthCrowdConfig } from './config';
-import { AuthSource } from '../source';
-import { PrincipalProvider } from '../../principal';
+import { AuthSource } from '../src/source';
+import { PrincipalConfig } from '../src/principal';
 
-export class AuthCrowdSource<U> extends AuthSource<U, PrincipalProvider<U>> {
-  constructor(public config: AuthCrowdConfig) {
-    super();
+@Config('auth.crowd')
+export class AuthCrowdConfig {
+  baseUrl: string;
+  application: string;
+  password: string;
+}
+
+export class AuthCrowdSource<U> extends AuthSource<U, PrincipalConfig<U>> {
+  constructor(public config: AuthCrowdConfig, principalConfig: PrincipalConfig<U>) {
+    super(principalConfig);
   }
 
   private async request<Z, Y>(path: string, options: http.RequestOptions = {}, data?: Y) {

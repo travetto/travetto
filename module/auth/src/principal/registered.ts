@@ -1,6 +1,6 @@
-import { PrincipalProvider } from './base';
+import { PrincipalConfig } from './base';
 
-export abstract class RegisteredPrincipalProvider<T = any> extends PrincipalProvider<T> {
+export abstract class RegisteredPrincipalConfig<T = any> extends PrincipalConfig<T> {
   abstract get hashField(): string;
   abstract get saltField(): string;
   abstract get resetTokenField(): string;

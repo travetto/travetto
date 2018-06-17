@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
 
-export abstract class PrincipalProvider<T = any> {
+export abstract class PrincipalConfig<T = any> {
   abstract get idField(): string;
   abstract get passwordField(): string;
   abstract get type(): Class<T>;
