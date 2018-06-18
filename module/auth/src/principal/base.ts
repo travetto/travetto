@@ -1,19 +1,23 @@
 import { Class } from '@travetto/registry';
 
-export abstract class PrincipalConfig<T = any> {
-  abstract get idField(): keyof T;
-  abstract get passwordField(): keyof T;
-  abstract get type(): Class<T>;
-  abstract get permissionsField(): keyof T;
+export interface PrincipalConfigFields<T> {
+  id: keyof T;
+  password: keyof T;
+  permissions: keyof T;
+}
 
-  protected lookup<U = any>(obj: T, field: keyof T): U {
-    return obj[field] as any as U;
+export class PrincipalConfig<T, U extends PrincipalConfigFields<T> = PrincipalConfigFields<T>> {
+
+  constructor(protected type: Class<T>, protected fields: U) { }
+
+  protected lookup<V = any>(obj: T, field: keyof T): V {
+    return obj[field] as any as V;
   }
 
-  getId = (obj: T) => this.lookup<string>(obj, this.idField);
-  getPassword = (obj: T): string => this.lookup(obj, this.passwordField);
-  getPermissions(obj: T): Set<string> {
-    const val = this.lookup<string | string[] | Set<string>>(obj, this.permissionsField);
+  getId = (obj: T) => this.lookup<string>(obj, this.fields.id);
+  getPassword = (obj: T) => this.lookup<string>(obj, this.fields.password);
+  getPermissions(obj: T) {
+    const val = this.lookup<string | string[] | Set<string>>(obj, this.fields.permissions);
     return val instanceof Set ? val :
       (Array.isArray(val) ? new Set(val) :
         new Set(val.trim().split(/\s*,\s*/)));

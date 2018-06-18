@@ -1,13 +1,20 @@
-import { PrincipalConfig } from './base';
+import { PrincipalConfig, PrincipalConfigFields } from './base';
+import { Class } from '@travetto/registry';
 
-export abstract class RegisteredPrincipalConfig<T = any> extends PrincipalConfig<T> {
-  abstract get hashField(): keyof T;
-  abstract get saltField(): keyof T;
-  abstract get resetTokenField(): keyof T;
-  abstract get resetExpiresField(): keyof T;
+export interface RegisteredPrincipalConfigFields<T> extends PrincipalConfigFields<T> {
+  hash: keyof T;
+  salt: keyof T;
+  resetToken: keyof T;
+  resetExpires: keyof T;
+}
 
-  getHash = (o: T) => this.lookup(o, this.hashField);
-  getSalt = (o: T) => this.lookup(o, this.saltField);
-  getResetToken = (o: T) => this.lookup(o, this.resetTokenField);
-  getResetExpires = (o: T) => this.lookup(o, this.resetExpiresField);
+export class RegisteredPrincipalConfig<T = any> extends PrincipalConfig<T, RegisteredPrincipalConfigFields<T>> {
+  constructor(type: Class<T>, fields: RegisteredPrincipalConfigFields<T>) {
+    super(type, fields);
+  }
+
+  getHash = (o: T) => this.lookup(o, this.fields.hash);
+  getSalt = (o: T) => this.lookup(o, this.fields.salt);
+  getResetToken = (o: T) => this.lookup(o, this.fields.resetToken);
+  getResetExpires = (o: T) => this.lookup(o, this.fields.resetExpires);
 }
