@@ -1,5 +1,5 @@
 import { PrincipalConfig } from '../principal';
-import { AuthContext } from '../service';
+import { AuthContext } from '../types';
 
 export abstract class AuthSource<U, T extends PrincipalConfig<U> = PrincipalConfig<U>> {
 
