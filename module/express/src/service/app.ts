@@ -1,4 +1,9 @@
 import * as express from 'express';
+import * as session from 'express-session';
+import * as cookieParser from 'cookie-parser';
+import * as bodyParser from 'body-parser';
+import * as compression from 'compression';
+
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
 
@@ -23,11 +28,6 @@ export class ExpressApp {
   }
 
   async init() {
-    const session = await import('express-session');
-    const cookieParser = await import('cookie-parser');
-    const bodyParser = await import('body-parser');
-    const compression = await import('compression');
-
     this.app = express();
     this.app.use(compression());
     this.app.use(cookieParser());
