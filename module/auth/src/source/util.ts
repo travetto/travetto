@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { AppError } from '@travetto/express';
+import { ERR_MISSING_PASSWORD, ERR_INVALID_PASSWORD } from '../types';
 
 export class AuthUtil {
   static async generateHash(password: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256') {
@@ -27,12 +27,12 @@ export class AuthUtil {
 
   static async generatePassword(password: string, saltlen = 32, validator?: (password: string) => Promise<boolean>) {
     if (!password) {
-      throw new AppError('Missing password exception', 501);
+      throw new Error(ERR_MISSING_PASSWORD);
     }
 
     if (validator !== undefined) {
       if (!await validator(password)) {
-        throw new AppError('Invalid password', 503);
+        throw new Error(ERR_INVALID_PASSWORD);
       }
     }
 
