@@ -4,8 +4,9 @@ import { Request, Response } from 'express';
 import { ExpressOperator, ExpressApp } from '@travetto/express';
 import { Injectable } from '@travetto/di';
 
-import { AuthService } from './auth';
-import { AUTH } from './types';
+import { AuthService } from '../../src/service/auth';
+
+export const AUTH = Symbol('@travetto/auth');
 
 @Injectable({
   target: ExpressOperator,
@@ -28,7 +29,11 @@ export class AuthOperator extends ExpressOperator {
 
   }
 
-  async login(req: Request, res: Response) {
+  async login(userId: string, password: string) {
+    return await this.service.login(userId, password);
+  }
+
+  async loginFromPayload(req: Request, res: Response) {
     const { user, serial } = await this.service.loginFromPayload(req.body, req.query);
     req.session._auth = serial;
     return user;
@@ -44,6 +49,18 @@ export class AuthOperator extends ExpressOperator {
     if (req.session._auth) {
       this.service.loadContext(req.session._auth);
     }
+  }
+
+  get authenticated() {
+    return this.service.authenticated;
+  }
+
+  get unauthenticated() {
+    return this.service.unauthenticated;
+  }
+
+  checkPermissions(include: string[], exclude: string[]) {
+    return this.service.checkPermissions(include, exclude);
   }
 
   register?<U>(user: U): Promise<U>;

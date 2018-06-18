@@ -1,8 +1,7 @@
-import { AppError } from '@travetto/express';
 import { Inject } from '@travetto/di';
 import { Context } from '@travetto/context';
 import { AuthSource } from '../source';
-import { AuthContext } from './types';
+import { AuthContext, ERR_UNAUTHENTICATED, ERR_FORBIDDEN, ERR_INVALID_CREDS } from './types';
 
 export class AuthService<U = { id: string }> {
 
@@ -31,6 +30,10 @@ export class AuthService<U = { id: string }> {
     this._context.get().auth = ctx;
   }
 
+  get authenticated() {
+    return !!this.context;
+  }
+
   get unauthenticated() {
     return !this.context;
   }
@@ -50,7 +53,7 @@ export class AuthService<U = { id: string }> {
       this.context = this.source.getContext(user);
       return user;
     } catch (err) {
-      throw new AppError(`Unable to authenticate, ${p.idField}/${p.passwordField} combination are invalid`);
+      throw new Error(ERR_INVALID_CREDS);
     }
   }
 
@@ -61,5 +64,20 @@ export class AuthService<U = { id: string }> {
   async loadContext(id: string) {
     const user = await this.source.deserialize(id);
     this.context = this.source.getContext(user);
+  }
+
+  checkPermissions(include: string[], exclude: string[]) {
+    if (this.unauthenticated) {
+      throw new Error(ERR_UNAUTHENTICATED);
+    }
+
+    const perms = this.context!.permissions;
+
+    if (exclude.length && exclude.find(x => perms.has(x))) {
+      throw new Error(ERR_FORBIDDEN);
+    }
+    if (include.length && include.find(x => !perms.has(x))) {
+      throw new Error(ERR_FORBIDDEN);
+    }
   }
 }
