@@ -18,6 +18,12 @@
   "repository": {
     "url": "https://github.com/travetto/auth.git"
   },
-  "scripts": {},
-  "version": "0.0.18"
+  "scripts": {
+    "test:all": "npm test test/.*",
+    "test": "./node_modules/.bin/travetto-test"
+  },
+  "version": "0.0.18",
+  "devDependencies": {
+    "@travetto/test": "0.x.x"
+  }
 }
