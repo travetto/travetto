@@ -1,13 +1,13 @@
 import { Class } from '@travetto/registry';
 
 export abstract class PrincipalConfig<T = any> {
-  abstract get idField(): string;
-  abstract get passwordField(): string;
+  abstract get idField(): keyof T;
+  abstract get passwordField(): keyof T;
   abstract get type(): Class<T>;
-  abstract get permissionsField(): string;
+  abstract get permissionsField(): keyof T;
 
-  protected lookup<U = any>(obj: T, field: string): U {
-    return (obj as any)[field] as U;
+  protected lookup<U = any>(obj: T, field: keyof T): U {
+    return obj[field] as any as U;
   }
 
   getId = (obj: T) => this.lookup<string>(obj, this.idField);

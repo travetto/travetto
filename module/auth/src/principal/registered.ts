@@ -1,10 +1,10 @@
 import { PrincipalConfig } from './base';
 
 export abstract class RegisteredPrincipalConfig<T = any> extends PrincipalConfig<T> {
-  abstract get hashField(): string;
-  abstract get saltField(): string;
-  abstract get resetTokenField(): string;
-  abstract get resetExpiresField(): string;
+  abstract get hashField(): keyof T;
+  abstract get saltField(): keyof T;
+  abstract get resetTokenField(): keyof T;
+  abstract get resetExpiresField(): keyof T;
 
   getHash = (o: T) => this.lookup(o, this.hashField);
   getSalt = (o: T) => this.lookup(o, this.saltField);
