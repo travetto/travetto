@@ -1,6 +1,3 @@
-import { Request, Response } from 'express';
-import * as util from 'util';
-
 import { AppError } from '@travetto/express';
 import { Inject } from '@travetto/di';
 import { Context } from '@travetto/context';
@@ -12,22 +9,25 @@ export class AuthService<U = { id: string }> {
   @Inject()
   protected _context: Context;
 
-  constructor(protected source: AuthSource<U>) {
-    if (source.changePassword) {
-      this.changePassword =
-        (rq: Request, rs: Response, id: string, pw: string, oldpw?: string) => source.changePassword!(id, pw, oldpw);
-    }
+  constructor(public source: AuthSource<U>) { }
 
-    if (source.register) {
-      this.register = (rq: Request, rs: Response, user: U) => source.register!(user);
-    }
+  private extractLogin(...objs: { [key: string]: string }[]) {
+    const idField = this.source.principal.idField;
+    const pwField = this.source.principal.passwordField;
+
+    const valid = objs.find(x => idField in x) || {};
+
+    return {
+      userId: valid[idField],
+      password: valid[pwField]
+    };
   }
 
   get context() {
     return this._context.get().auth;
   }
 
-  set context(ctx: AuthContext<U>) {
+  set context(ctx: AuthContext<U> | undefined) {
     this._context.get().auth = ctx;
   }
 
@@ -35,38 +35,31 @@ export class AuthService<U = { id: string }> {
     return !this.context;
   }
 
-  async login(req: Request, res: Response): Promise<U> {
-    const idField = this.source.principal.idField;
-    const pwField = this.source.principal.passwordField;
+  async loginFromPayload(...objs: { [key: string]: string }[]) {
+    const { userId, password } = this.extractLogin(...objs);
+    const user = await this.login(userId, password);
+    const serial = await this.source.serialize(user);
+    return { user, serial };
+  }
+
+  async login(userId: string, password: string): Promise<U> {
+    const p = this.source.principal;
 
     try {
-      const userId = req.body ? req.body[idField] : req.query[idField];
-      const password = req.body ? req.body[pwField] : req.query[pwField];
-
       const user = await this.source.login(userId, password);
-      req.session.authToken = await this.source.serialize(user);
-
-      req.auth.context = this.source.getContext(user);
-
+      this.context = this.source.getContext(user);
       return user;
     } catch (err) {
-      throw new AppError(`Unable to authenticate, ${idField}/${pwField} combination are invalid`);
+      throw new AppError(`Unable to authenticate, ${p.idField}/${p.passwordField} combination are invalid`);
     }
   }
 
-  async logout(req: Request, res: Response) {
-    await util.promisify(req.session.destroy).call(req.session);
-    res.clearCookie('connect.sid', { path: '/' });
+  async logout() {
+    this.context = undefined;
   }
 
-  register?(req: Request, res: Response, user: U): Promise<U>;
-
-  changePassword?(req: Request, res: Response, userId: string, password: string, oldpassword: string): Promise<U>;
-
-  async loadContext(req: Request) {
-    if (req.session.authToken) {
-      const user = await this.source.deserialize(req.session.authToken);
-      this.context = this.source.getContext(user);
-    }
+  async loadContext(id: string) {
+    const user = await this.source.deserialize(id);
+    this.context = this.source.getContext(user);
   }
 }

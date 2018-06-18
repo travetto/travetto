@@ -1,7 +1,7 @@
-import { AuthService } from './auth';
+import { AuthOperator } from './operator';
 
 declare module "express" {
 	export interface Request {
-		auth: AuthService<any>
+		auth: AuthOperator
 	}
 }

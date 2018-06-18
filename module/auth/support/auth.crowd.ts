@@ -25,7 +25,7 @@ export class AuthCrowdSource<U> extends AuthSource<U, PrincipalConfig<U>> {
     }, data);
   }
 
-  async fetchPrincipal(username: string) {
+  async retrieve(username: string) {
     return await this.request<U, any>(`/user?username=${username}`);
   }
 
