@@ -1,10 +1,9 @@
 import { PrincipalConfig } from '../principal';
 import { AuthContext } from '../types';
 
-export abstract class AuthSource<U, T extends PrincipalConfig<U> = PrincipalConfig<U>> {
+export abstract class AuthProvider<U, T extends PrincipalConfig<U> = PrincipalConfig<U>> {
 
-  constructor(public principal: T) {
-  }
+  constructor(public principal: T) { }
 
   abstract retrieve(userId: string): Promise<U>;
 

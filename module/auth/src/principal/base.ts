@@ -1,14 +1,14 @@
 import { Class } from '@travetto/registry';
 
-export interface PrincipalConfigFields<T> {
+export type PrincipalFields<T> = {
   id: keyof T;
   password: keyof T;
   permissions: keyof T;
-}
+};
 
-export class PrincipalConfig<T, U extends PrincipalConfigFields<T> = PrincipalConfigFields<T>> {
+export class PrincipalConfig<T = any, U extends PrincipalFields<T> = PrincipalFields<T>> {
 
-  constructor(protected type: Class<T>, protected fields: U) { }
+  constructor(public readonly type: Class<T>, public readonly fields: U) { }
 
   protected lookup<V = any>(obj: T, field: keyof T): V {
     return obj[field] as any as V;

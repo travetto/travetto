@@ -3,7 +3,7 @@ import * as http from 'http';
 import { requestJSON } from '@travetto/util';
 import { Config } from '@travetto/config';
 
-import { AuthSource } from '../src/source';
+import { AuthProvider } from '../src/provider';
 import { PrincipalConfig } from '../src/principal';
 
 @Config('auth.crowd')
@@ -13,7 +13,7 @@ export class AuthCrowdConfig {
   password: string;
 }
 
-export class AuthCrowdSource<U> extends AuthSource<U, PrincipalConfig<U>> {
+export class AuthCrowdProvider<U> extends AuthProvider<U, PrincipalConfig<U>> {
   constructor(public config: AuthCrowdConfig, principalConfig: PrincipalConfig<U>) {
     super(principalConfig);
   }
