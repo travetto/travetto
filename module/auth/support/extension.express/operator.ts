@@ -17,7 +17,7 @@ export class AuthOperator extends ExpressOperator {
   constructor(private service: AuthService) {
     super();
 
-    const src = service.source;
+    const src = service.provider;
 
     if (src.changePassword) {
       this.changePassword = src.changePassword.bind(src);

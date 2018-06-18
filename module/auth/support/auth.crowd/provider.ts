@@ -1,17 +1,10 @@
 import * as http from 'http';
 
 import { requestJSON } from '@travetto/util';
-import { Config } from '@travetto/config';
 
-import { AuthProvider } from '../src/provider';
-import { PrincipalConfig } from '../src/principal';
-
-@Config('auth.crowd')
-export class AuthCrowdConfig {
-  baseUrl: string;
-  application: string;
-  password: string;
-}
+import { AuthProvider } from '../../src/provider';
+import { PrincipalConfig } from '../../src/principal';
+import { AuthCrowdConfig } from './config';
 
 export class AuthCrowdProvider<U> extends AuthProvider<U, PrincipalConfig<U>> {
   constructor(public config: AuthCrowdConfig, principalConfig: PrincipalConfig<U>) {
@@ -21,7 +14,8 @@ export class AuthCrowdProvider<U> extends AuthProvider<U, PrincipalConfig<U>> {
   private async request<Z, Y>(path: string, options: http.RequestOptions = {}, data?: Y) {
     return await requestJSON<Z, Y>({
       auth: `${this.config.application}:${this.config.password}`,
-      url: `${this.config.baseUrl}/rest/usermanagement/latest${path}`
+      url: `${this.config.baseUrl}/rest/usermanagement/latest${path}`,
+      ...options
     }, data);
   }
 
