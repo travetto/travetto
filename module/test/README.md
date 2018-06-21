@@ -6,7 +6,7 @@ realtime feedback durring development.  It is a declarative framework, relying o
 
 Test suites are generally defined by the `@Suite` annotation, and tests are defined as methods on the class, using the `@Test` annotation.
 
-```typescript test.ts
+```typescript
 @Suite()
 class SimpleTest {
 
@@ -20,7 +20,6 @@ class SimpleTest {
   test2() {
     assert(/abc/.test(text));
   }
-
 }
 ```
 
