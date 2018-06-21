@@ -12,7 +12,7 @@ class SimpleTest {
 
   @Test()
   async test1() {
-    let val = await doLongOp();s
+    let val = await doLongOp();
     assert(val === 5);
   }
 
