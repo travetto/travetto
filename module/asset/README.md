@@ -33,5 +33,5 @@ class AssetService {
 
 Primary implementations:
 
-- [`Asset-Mongo`](https://github.com/travetto/asset-mongo) provides the mongodb driver for file management
-- [`Asset-S3`](https://github.com/travetto/asset-s3) provides the S3 driver for file management
+- [`Asset-Mongo`](https://github.com/travetto/asset-mongo#readme) provides the mongodb driver for file management
+- [`Asset-S3`](https://github.com/travetto/asset-s3#readme) provides the S3 driver for file management
