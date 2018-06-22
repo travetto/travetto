@@ -8,10 +8,11 @@ This module provides the framework for storing/retrieving assets. It also provid
 The primary driver for the Asset framework is an `AssetSource` which needs to be implemented 
 to provide code on how to read and write files.  
 
-Initially you need to configure the `AssetSource` to provide a backend for the storage and retrieval.
+Initially you need to configure the `AssetSource` to provide a backend for the storage and retrieval. Below we are using the [`Asset-Mongo`](https://github.io/travetto/asset-mongo) as the
+backend, but there are others to choose from.
 
 ```typescript
-class Config extends AssetMongoConfig {
+class AppConfig {
   @InjectableFactory()
   static getConf(): AssetMongoConfig {
     return new AssetMongoConfig();
