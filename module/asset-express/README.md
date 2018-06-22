@@ -1,16 +1,31 @@
 travetto: Asset-Express
 ===
 
-Provides the ability to access file uploads via `express`, and have them registered as `Asset`s on the request (as `req.files`)
+Asset Express, provides a clean and direct mechansim for handling uploads via the `express` framework, as well as some best
+practices with respect to temporary file deletion.
 
-```typescript 
-@Controller('/user')
+Once the files are uploaded, they are exposed on `express`'s request object as `req.files`. The uploaded files are constructed as
+`Asset` instances, which allows for easy interoperability with the [`Asset`](https://github.io/travetto/asset) module for
+storage.
+
+```typescript
+@Controller('/avatar')
 class Controller {
 
+  constructor(assetService: AssetService, imageService: ImageService) {}
+
   @AssetUpload()
-  @Post('/avatar')
+  @Post('/')
   async setAvatar(req:Request, res:Response) {
-    assert(req.files[0]);
+    const stored = await this.assetService.store(req.files[0]);
+    return {
+      path: stored.path
+    };
+  }
+
+  @Get('/:path')
+  async getAvatar(req:Request) {
+    return await this.imageService.get(req.params.path, {w: req.query.w, h: req.query.h});
   }
 }
 ```
