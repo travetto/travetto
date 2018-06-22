@@ -5,7 +5,7 @@ Asset Express, provides a clean and direct mechansim for handling uploads via th
 practices with respect to temporary file deletion.
 
 Once the files are uploaded, they are exposed on `express`'s request object as `req.files`. The uploaded files are constructed as
-`Asset` instances, which allows for easy interoperability with the [`Asset`](https://github.io/travetto/asset) module for
+`Asset` instances, which allows for easy interoperability with the [`Asset`](https://github.com/travetto/asset) module for
 storage.
 
 ```typescript
