@@ -6,7 +6,7 @@ This provides a mongo implementation for the `AssetSource` that provides a `mong
 The primary utilization of this module, is to configure the `AssetSource` injectable, and provide whatever configuration you would like to use.  
 
 ```typescript
-class Config extends AssetMongoConfig {
+class AppConfig {
   @InjectableFactory()
   static getConf(): AssetMongoConfig {
     return new AssetMongoConfig();
