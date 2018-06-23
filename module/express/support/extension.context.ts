@@ -10,7 +10,7 @@ import { ExpressApp } from '../src/service/app';
   target: ExpressOperator,
   qualifier: Symbol('@travetto/context')
 })
-export class ContextMantainer extends ExpressOperator {
+export class ContextMaintainer extends ExpressOperator {
 
   priority = 0;
 
