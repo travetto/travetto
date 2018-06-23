@@ -1,7 +1,7 @@
 travetto: Asset-S3
 ===
 
-This provides an `s3` implementation of the `AssetSource` that which is a backend for the [`Asset`](https://github.io/travetto/asset) module.  
+This provides an [`s3`](https://aws.amazon.com/documentation/s3/) implementation of the `AssetSource` that which is a backend for the [`Asset`](https://github.io/travetto/asset) module.  
 
 The primary utilization of this module, is to configure the `AssetSource` injectable, and provide whatever configuration you would like to use.  
 
@@ -41,5 +41,5 @@ export class AssetS3Config {
 **NOTE** Do not commit your `accessKeyId` or `secretAccessKey` values to your source repository, especially if it is public facing.  Not only is 
 it a security risk, but Amazon will scan public repos, looking for keys, and if found will react swiftly.
 
-Additionally, you can see that the class is registered with the `Config` annotation, and so these values can be overridden using the standard
+Additionally, you can see that the class is registered with the `@Config` decorator, and so these values can be overridden using the standard
 [`Configuration`](https://github.com/travetto/config) resolution paths.
