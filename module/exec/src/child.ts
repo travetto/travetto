@@ -1,6 +1,6 @@
 import * as child_process from 'child_process';
 import * as exec from './util';
-import { CommonProcess, ChildOptions, ExecutionEvent } from './types';
+import { ChildOptions, ExecutionEvent } from './types';
 import { Execution } from './execution';
 
 export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends Execution<U, child_process.ChildProcess> {
