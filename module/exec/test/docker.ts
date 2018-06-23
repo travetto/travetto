@@ -8,9 +8,8 @@ async function test() {
     .setWorkingDir('/var/workspace')
     .forceDestroyOnShutdown();
 
-  const prom = container.run('--storageEngine', 'ephemeralForTest', '--port', port);
-
-  await container.waitForPort(port);
+  container.run('--storageEngine', 'ephemeralForTest', '--port', port);
+  await DockerContainer.waitForPort(port);
 
   return;
 }

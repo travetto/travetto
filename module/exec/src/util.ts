@@ -1,6 +1,6 @@
 import * as cp from 'child_process';
 import { ExecutionOptions, ExecutionResult } from './types';
-import { scanDir, Entry, BaseError } from '@travetto/base';
+import { BaseError } from '@travetto/base';
 
 export function enhanceProcess(p: cp.ChildProcess, options: ExecutionOptions, cmd: string) {
   const timeout = options.timeout;
