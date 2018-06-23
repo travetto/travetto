@@ -51,7 +51,7 @@ During development, `ModelSource` supports the ability to respond to model chang
 Additionally there is a class [`ClassModelService`](./src/service/class-model.ts) that provides a wrapper around `ModelService` that is tied to a specific `Model` class.  This can be useful if you want to constrain the model access or if you have a high volume of function calls for the same model.
 
 ## Querying
-One of the complexities of abstracting multiple storage mechanisms, is providing a consistent query language.  The query language the module uses is a derivation of `mongodb`'s query language, with some restrictions, additions, and caveats.
+One of the complexities of abstracting multiple storage mechanisms, is providing a consistent query language.  The query language the module uses is a derivation of `mongodb`'s query language, with some restrictions, additions, and caveats. Additionally, given the nature of typescript, all queries are statically typed, and will catch type errors at compile time.
 
 ### General Fields
 * ```field : { $eq : T }``` to determine if a field is equal to a value
