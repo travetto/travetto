@@ -1,11 +1,31 @@
-travetto: Mongo
+travetto: Model-Mongo
 ===
 
-This module provides access to Mongo DB, and provides easy access to a mongodb instance.  It also 
-supports saving/updating/deleting class instances, where the class instance is presumed to be the
-name of the collection you want to store/retrieve data from .
+This module provides an [`mongodb`](https://mongodb.com)-based implementation of `ModelSource` for the [`Model`](https://github.com/travetto/model) module.  This source allows the `Model` module to read, write and query against `elasticserch`. Given the dynamic nature of `mongodb`, during development when models are modified, nothing needs to be done to adapt to the latest schema.
 
-It also supports convenience methods for bulk update/delete.
+All that is needed to use the `ModelSource` is to register it with the [`Dependency Injection`](https://github.com/travetto/di) module.
 
-Another key feature is that it will automatically translate `_id` fields to and from `string` types to `ObjectId` 
-without the developer needing to think about the state. 
+```typescript
+export class Init {
+  @InjectableFactory()
+  static getModelSource(conf: ModelMongoConfig): ModelSource {
+    return new ModelMongoSource(conf);
+  }
+}
+```
+
+where the `ModelMongoConfig` is defined by:
+
+```typescript
+@Config('model.mongo')
+export class ModelMongoConfig {
+  hosts = 'localhost';
+  namespace = 'app';
+  port = 27017;
+  options = {};
+}
+```
+
+and can be overridden via environment variables or config files, as defined in [`Config`](https://github.com/travetto/config).
+
+**NOTE** During testing, the source will automatically spin up a `mongodb` server via a `docker` container if you are not already running the service.
