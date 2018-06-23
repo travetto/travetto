@@ -13,6 +13,8 @@ async/await is natively supported.  The HTTP methods that are supported via:
 * `@Delete`
 * `@Patch`
 
+A simple example is:
+
 ```typescript
 @Controller('/simple')
 export class Simple {
@@ -115,6 +117,54 @@ want to use them:
   }
  ...
  ```
+
+### Model
+[`Model`](https://github.com/travetto/model) supports `@ModelController` for exposing common RESTful patterns for routes.
+
+```typescript
+@ModelController('/user', User) 
+class UserController {
+  source: ModelService;
+}
+```
+is a shorthand that is equal to:
+
+```typescript
+@Controller('/user') 
+class UserController {
+  
+  source: ModelService;
+
+  @Get('')
+  async getAllUser(req:Request) {
+    return await this.source.getAllByQuery(User, JSON.parse(req.params.q));
+  }
+
+  @Get(':id')
+  async getUser(req:Request) {
+    return await this.source.getById(User, req.params.id);
+  }
+
+  @Delete(':id')
+  async deleteUser(req:Request) {
+    return await this.source.deleteById(User, req.params.id);
+  }
+
+  @Post('')
+  @SchemaBody(User)
+  async saveUser(req:TypedBody<User>) {
+    return await this.source.save(User, req.body);
+  }
+
+  @Put('')
+  @SchemaBody(User)
+  async updateUser(req:TypedBody<User>) {
+    return await this.source.update(User, req.body);
+  }
+}
+
+```
+
 ### Context
 [`Context`](https://github.com/travetto/context) provides support for automatically injecting an async context into every request. The context management is provided via an `Operator` and is transparent to the programmer.
 
