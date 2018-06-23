@@ -1,9 +1,9 @@
 travetto: Cache
 ===
 
-Provides a simple wrapper around `lru-cache` to provide standard caching constructs.  
+Provides a simple wrapper around [`lru-cache`](https://github.com/isaacs/node-lru-cache) to provide standard caching constructs.  
 
-`Cacheable` is a decorator that allows caching at class methods. The decorator will rewrite the method
+`@Cacheable` is a decorator that allows caching at class methods. The decorator will rewrite the method
 to cache on successful results. The decorator supports synchronous as well as asynchronous methods.
 
 ```typescript
@@ -17,7 +17,7 @@ to cache on successful results. The decorator supports synchronous as well as as
   }
 ```
 
-The `Cacheable` decorator supports certain configurations:
+The `@Cacheable` decorator supports certain configurations:
 * `name` the name of the cache space
 * `dispose` the function to invoke on cache eviction
 * `keyFn` the function used to determine the cache key, defaults to all params serialized to a string
