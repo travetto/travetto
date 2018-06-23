@@ -63,7 +63,7 @@ async function messageOnShutdown() {
 ```
 
 ## Stacktrace 
-Integration with `trace.js` to handle asynchronous call stacks, and provide higher quality stack traces.  The stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.
+Integration with [`trace.js`](https://trace.js.org/) to handle asynchronous call stacks, and provide higher quality stack traces.  The stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.
 
 From a test scenario:
 ```typescript
@@ -99,7 +99,7 @@ During the lifecycle of an application, there is a need to handle different phas
     2. The priority within the phase, a number in which lower is of higher importance
     3. The actual functionality to execute
 
-An example would be something like `phase.bootstrap.ts` in the [`config`](https://github.com/travetto/config) module.  
+An example would be something like `phase.bootstrap.ts` in the [`Config`](https://github.com/travetto/config) module.  
 
 ```typescript
 export const init = {
@@ -113,7 +113,7 @@ export const init = {
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
 
 ## Util 
-Simple functions for providing a minimal facisimile to `lodash`, but without all the weight. Currently `util` only includes:
+Simple functions for providing a minimal facsimile to [`lodash`](https://lodash.com), but without all the weight. Currently `util` only includes:
 
 * `isPrimitive(el: any)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
 * `isPlainObject(obj: any)` determines if the obj is a simple object
@@ -127,7 +127,7 @@ Simple functions for providing a minimal facisimile to `lodash`, but without all
 * `throttle(fn, threshhold?: number)` produces a function that will execute `fn`, at most once per `threshold`
 
 ## Watch
-A very simple file watching library, with a substantially smaller footprint than `gaze` or `chokidar`.  
+A very simple file watching library, with a substantially smaller footprint than [`gaze`](https://github.com/shama/gaze) or [`chokidar`](https://github.com/paulmillr/chokidar).  
 
 ```typescript
 const watcher = new Watcher({cwd: 'base/path/to/...'});
@@ -139,4 +139,3 @@ watcher.add([
 ]);
 watcher.run();
 ```
-
