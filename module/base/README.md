@@ -113,8 +113,31 @@ export const init = {
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
 
 ## Util 
-Simple functions for providing a minimal facisimile to `lodash`, but without all the weight.
+Simple functions for providing a minimal facisimile to `lodash`, but without all the weight. Currently `util` only includes:
+
+* `isPrimitive(el: any)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
+* `isPlainObject(obj: any)` determines if the obj is a simple object
+* `isFunction(o: any)` determines if `o` is a simple `Function`
+* `isClass(o: any)` determines if `o` is a class constructor
+* `isSimple(a: any)` determines if `a` is a simple value
+* `deepAssign(a: any, b: any, mode?)` which allows for deep assignment of `b` onto `a`, the `mode` determines how aggressive the assignment is, and how flexible it is.  `mode` can have any of the following values:
+  * `loose`, which is the default is the most lenient.  It will not error out, and overwrites will always happen
+  * `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out
+  * `strict`, will error out if the types do not match  
+* `throttle(fn, threshhold?: number)` produces a function that will execute `fn`, at most once per `threshold`
 
 ## Watch
 A very simple file watching library, with a substantially smaller footprint than `gaze` or `chokidar`.  
+
+```typescript
+
+const watcher = new Watcher({cwd: 'base/path/to/...'});
+watcher.add([
+  'local.config',
+  {
+    testFile: x => x.endsWith('.config') || x.endsWith('.config.json')
+  }
+]);
+watcher.run();
+```
 
