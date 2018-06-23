@@ -5,7 +5,7 @@ export const LogLevels = {
   warn: 3,
   error: 4,
   fatal: 5
-}
+};
 
 export type LogLevel = keyof (typeof LogLevels);
 
