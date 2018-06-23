@@ -1,7 +1,7 @@
 travetto: Compiler
 ===
 
-The framework, while using `typescript`, has need of some extended functionality. The additional functionality is
+The framework, while using [`typescript`](http://typescriptlang.org), has need of some extended functionality. The additional functionality is
 * Supports on-the-fly compilation, nothing needs to be compiled ahead of time
 * Enhanced AST transformations, and transformer registration
   * All AST transformations are single-file based, and runs without access to the `TypeChecker`
