@@ -8,8 +8,4 @@ function test() {
   }, 1);
 }
 
-try {
-  test();
-} catch (e) {
-  console.log(e);
-}
+test();
