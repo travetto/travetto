@@ -130,7 +130,6 @@ Simple functions for providing a minimal facisimile to `lodash`, but without all
 A very simple file watching library, with a substantially smaller footprint than `gaze` or `chokidar`.  
 
 ```typescript
-
 const watcher = new Watcher({cwd: 'base/path/to/...'});
 watcher.add([
   'local.config',
