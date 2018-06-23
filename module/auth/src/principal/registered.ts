@@ -1,15 +1,15 @@
 import { PrincipalConfig, PrincipalFields } from './base';
 import { Class } from '@travetto/registry';
 
-export interface RegisterdPrincipalFields<T> extends PrincipalFields<T> {
+export interface RegisteredPrincipalFields<T> extends PrincipalFields<T> {
   hash: keyof T;
   salt: keyof T;
   resetToken: keyof T;
   resetExpires: keyof T;
 }
 
-export class RegisteredPrincipalConfig<T = any> extends PrincipalConfig<T, RegisterdPrincipalFields<T>> {
-  constructor(type: Class<T>, fields: RegisterdPrincipalFields<T>) {
+export class RegisteredPrincipalConfig<T = any> extends PrincipalConfig<T, RegisteredPrincipalFields<T>> {
+  constructor(type: Class<T>, fields: RegisteredPrincipalFields<T>) {
     super(type, fields);
   }
 
