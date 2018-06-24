@@ -1,12 +1,9 @@
 travetto: Express
 ===
-The module provides a declarative API for creating an [`express`](https://expressjs.com) application.  Since the 
-framework is declarative, decorators are used to configure almost everything.
+The module provides a declarative API for creating an [`express`](https://expressjs.com) application.  Since the  framework is declarative, decorators are used to configure almost everything.
 
 ## Route management 
-To define a route, you must first declare a `@Controller` which is only allowed on classes. Once declared
-Each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so
-async/await is natively supported.  The HTTP methods that are supported via:
+To define a route, you must first declare a `@Controller` which is only allowed on classes. Once declared each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported.  The HTTP methods that are supported via:
 * `@Get`
 * `@Post`
 * `@Put`
@@ -35,8 +32,7 @@ export class Simple {
 }
 ```
 
-Additionally, the module is predicated upon [`Dependency Injection`](https://github.com/travetto/di), and so all standard di techniques work on 
-controllers.
+Additionally, the module is predicated upon [`Dependency Injection`](https://github.com/travetto/di), and so all standard di techniques work on controllers.
 
 **NOTE** in development mode the module supports hot reloading of `class`es.  Routes can be added/modified/removed at runtime.
 
@@ -48,7 +44,6 @@ The module provides standard structure for rendering content on the response.  T
 
 Additionally, there is support for typing requests and request bodies.  This can be utilized by other modules to handle special types of requests.
 
-
 ## Express initialization
 When working with express applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
 * ```compression()```
@@ -58,7 +53,7 @@ When working with express applications, the module provides what is assumed to b
 * ```bodyParser.raw({ type: 'image/*' })```
 * ```session(this.config.session)```
 
-Additionally it is sometimes necessary to register custom filters.  Additional filters can be registered with the [`Dependency Injection`](https://github.com/travetto/di) by extending the [`Operator`](./src/service/operator) class.  
+Additionally it is sometimes necessary to register custom filters.  Filters can be registered with the [`Dependency Injection`](https://github.com/travetto/di) by extending the [`Operator`](./src/service/operator) class.  
 
 ```typescript
 @Injectable({
@@ -80,14 +75,12 @@ export class LoggingOperator extends ExpressOperator {
 ```
 
 ## Extensions
-Integration with other modules can be supported by extensions.  The dependencies are `peerDependencies` and must be installed directly if you 
-want to use them:
+Integration with other modules can be supported by extensions.  The dependencies are `peerDependencies` and must be installed directly if you want to use them:
 
 ### Schema
 [`Schema`](https://github.com/travetto/schema) support for validating and typing request bodies
 
-`@SchemaBody` provides the ability to convert the inbound request body into a schema bound object, and provide
- validation before the controller even receives the request.
+`@SchemaBody` provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
  ```typescript
  class User {
    name: string;
@@ -102,8 +95,7 @@ want to use them:
   }
  ...
  ```
-`@SchemaQuery` provides the ability to convert the inbound request query into a schema bound object, and provide
- validation before the controller even receives the request. 
+`@SchemaQuery` provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request. 
 ```typescript
  class SearchParams {
    page: number = 0;
@@ -117,7 +109,7 @@ want to use them:
   }
  ...
  ```
-
+ 
 ### Model
 [`Model`](https://github.com/travetto/model) supports `@ModelController` for exposing common RESTful patterns for routes.
 
