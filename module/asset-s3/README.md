@@ -38,8 +38,6 @@ export class AssetS3Config {
 }
 ```
 
-**NOTE** Do not commit your `accessKeyId` or `secretAccessKey` values to your source repository, especially if it is public facing.  Not only is 
-it a security risk, but Amazon will scan public repos, looking for keys, and if found will react swiftly.
+**NOTE** Do not commit your `accessKeyId` or `secretAccessKey` values to your source repository, especially if it is public facing.  Not only is it a security risk, but Amazon will scan public repos, looking for keys, and if found will react swiftly.
 
-Additionally, you can see that the class is registered with the `@Config` decorator, and so these values can be overridden using the standard
-[`Configuration`](https://github.com/travetto/config) resolution paths.
+Additionally, you can see that the class is registered with the `@Config` decorator, and so these values can be overridden using the standard[`Configuration`](https://github.com/travetto/config) resolution paths.
