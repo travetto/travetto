@@ -6,8 +6,7 @@ This module provides a clean interface to data model persistence, modification a
 The module can be segmented into three main areas: Model declaration, access/storage, and querying
 
 ## Declaration
-Models are declared via the `@Model` decorator, which allows the system to know that this is a class that is compatible with the
-module.
+Models are declared via the `@Model` decorator, which allows the system to know that this is a class that is compatible with the module.
 
 ```typescript
 @Model()
@@ -73,7 +72,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 * ```field : { $all: T[]] }``` checks to see if the records value contains everything within `$all`
 
 ### String Fields
-* ```field : { $regex: RegExp; }``` checks the field against the regular expresesion
+* ```field : { $regex: RegExp; }``` checks the field against the regular expression
 
 ### Geo Point Fields
 * ```field : { $geoWithin: Point[] }``` determines if the value is within the bounding region of the points
