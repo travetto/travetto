@@ -1,8 +1,6 @@
 travetto: Dependency Injection  
 ===
-Dependency injection is provided as a best practice, and as a framework primitive. Dependency injection
-can be achieved in multiple ways to support different software patterns. Dependency injection only supports
-classes as the class is the lookup key.
+Dependency injection is provided as a best practice, and as a framework primitive. Dependency injection can be achieved in multiple ways to support different software patterns. Dependency injection only supports classes as the class is the lookup key.
 
 ## General Usage
 
@@ -59,8 +57,7 @@ Dependency injection revolves around the following paradigms:
 ```
 
 ## Manual Invocation
-Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level.
-To achieve that you will need to directly access the [`DependencyRegistry`](./src/service/registry.ts).
+Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the [`DependencyRegistry`](./src/service/registry.ts).
 
 The registry allows for requesting a dependency by class reference.
 
@@ -76,8 +73,7 @@ class ManualLookup {
 ```
 
 ## Advanced Usage
-In addition to the standard operations, you are able to create multiple versions of the same dependency by providing a qualifier at registration time and
-at injection time.  This allows you to have multiple database connections, or multiple email services.
+In addition to the standard operations, you are able to create multiple versions of the same dependency by providing a qualifier at registration time and at injection time.  This allows you to have multiple database connections, or multiple email services.
 
 ```typescript
 const USER_DB = Symbol('USER_DB');
