@@ -7,7 +7,13 @@
     "@travetto/context": "0.x.x",
     "@travetto/util": "0.x.x"
   },
-  "description": "",
+  "description": "Authentication and registration support for the travetto framework",
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "authentication",
+    "travetto",
+    "decorators"
+  ],
   "license": "MIT",
   "main": "index.ts",
   "name": "@travetto/auth",
