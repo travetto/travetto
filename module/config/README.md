@@ -26,9 +26,7 @@ env/<val2>.yml
 ```
 
 
-4. Read startup configuration from `process.env` to allow for overriding any values. Because we are overriding a[`yaml`](https://en.wikipedia.org/wiki/YAML) based configuration
-  we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as `UPPER_SNAKE_CASE`.
-  When reading from `process.env` we will map `UPPER_SNAKE_CASE` to `upper.snake.case`, and will attempt to match by case-insensitive name.
+4. Read startup configuration from `process.env` to allow for overriding any values. Because we are overriding a[`yaml`](https://en.wikipedia.org/wiki/YAML) based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as `UPPER_SNAKE_CASE`. When reading from `process.env` we will map `UPPER_SNAKE_CASE` to `upper.snake.case`, and will attempt to match by case-insensitive name.
 
 ## Example Resolution
 
@@ -72,9 +70,7 @@ database:
 
 ## Reading
 
-The module provides a decorator, `@Config` that allows for classes to automatically be bound with config information
-on post construction. The decorator will install a `postConstruct` method if not already defined, that allows actually performs
-the binding of configuration.  
+The module provides a decorator, `@Config` that allows for classes to automatically be bound with config information on post construction. The decorator will install a `postConstruct` method if not already defined, that allows actually performs the binding of configuration.  
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class
 
@@ -113,4 +109,3 @@ The instance of `DBConfig`  would be equivalent to:
   }
 }
 ```
-
