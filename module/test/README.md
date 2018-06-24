@@ -1,9 +1,7 @@
 travetto: Test
 ===
 
-This module provides unit testing functionality that integrates with the framework. 
-It is a declarative framework, using decorators to define tests and suites.
-The test produces results in the [`TAP 13`](https://testanything.org/tap-version-13-specification.html) format. 
+This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the [`TAP 13`](https://testanything.org/tap-version-13-specification.html) format. 
 
 The [`test-plugin`](https://github.com/travetto/test-plugin) directly integrates with the module to provide real-time feedback on unit tests. 
 
