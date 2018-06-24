@@ -1,24 +1,30 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
+    "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
-  }, 
+  },
   "dependencies": {
-    "@travetto/asset": "0.x.x", 
+    "@travetto/asset": "0.x.x",
     "aws-sdk": "^2.243.1"
-  }, 
-  "description": "", 
+  },
+  "description": "AWS S3 backend for the travetto asset module",
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  }, 
-  "license": "MIT", 
-  "main": "index.ts", 
-  "name": "@travetto/asset-s3", 
+  },
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "s3",
+    "typescript",
+    "travetto"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/asset-s3",
   "repository": {
     "url": "https://github.com/travetto/asset-s3.git"
-  }, 
+  },
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  }, 
+  },
   "version": "0.0.4"
 }
