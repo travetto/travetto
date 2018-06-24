@@ -1,8 +1,7 @@
 travetto: Base
 ===
 
-Base is the foundation of all `travetto` applications.  It is intended to be a minimal application bootstrap, as well as support
-for commonly shared functionality. The key areas that it offers
+Base is the foundation of all `travetto` applications.  It is intended to be a minimal application bootstrap, as well as support for commonly shared functionality. The key areas that it offers
 
 ## General App Info
 This is a programmatic interface to `package.json`, which provides key information on:
@@ -13,8 +12,7 @@ This is a programmatic interface to `package.json`, which provides key informati
 * ...more
 
 ## Bulk File System Operations
-The framework does a bit of file system scanning to auto load files, and to have knowledge of what files are
-available. The tools provide:
+The framework does a bit of file system scanning to auto load files, and to have knowledge of what files are available. The tools provide:
 * Very simple functionality for recursively finding files, and caching the results
 * Utilizes RegEx in lieu of glob for pattern matching on files (this is to minimize overall code complexity)
 
@@ -30,8 +28,7 @@ A simple example of finding all `.config` files in your codebase:
 ```
 
 ## Environmental Information
-The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used
-by the framework, but can prove useful to application developers as well. The information that is available is:
+The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers as well. The information that is available is:
 * `prod: boolean` - is the application in prod mode 
 * `dev: boolean` - is the application in development mode
 * `test: boolean` - is the application currently in test mode
