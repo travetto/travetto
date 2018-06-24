@@ -4,9 +4,7 @@ travetto: Schema
 This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
 
 ## Registration
-The registry's schema information is defined by `typescript` AST and only applies to classes registered as `@Schema`s.
-The module utilizes AST transformations to collect schema information, and facilitate the registration process without
-user intervention.
+The registry's schema information is defined by `typescript` AST and only applies to classes registered as `@Schema`s. The module utilizes AST transformations to collect schema information, and facilitate the registration process without user intervention.
 
 ```typescript
 @Schema()
@@ -36,8 +34,7 @@ User:
       allowedValues: ["pizza", "burrito", "salad" ]
 ```
 
-This provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or 
-some information that the programmer would like to override. Below are the supported field decorators:
+This provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
 
  * `@Field` defines a field that will be serialized, generally used in conjunction with ```@Schema(false)``` which disables the auto registration.
  * `@Require` defines a that field should be required
