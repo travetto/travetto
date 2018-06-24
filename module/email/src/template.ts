@@ -169,7 +169,12 @@ export class TemplateEngine {
   async inlineImageSource(html: string) {
     const srcs: string[] = [];
 
-    html.replace(/(<img[^>]src=")([^"]+)/g, (a: string, pre: string, src: string) => { srcs.push(src); return ''; });
+    html.replace(/(<img[^>]src=")([^"]+)/g, (a: string, pre: string, src: string) => {
+      if (!src.startsWith('http')) {
+        srcs.push(src);
+      }
+      return '';
+    });
 
     const pendingImages = srcs.map(async src => {
       // TODO: fix this up?
@@ -180,12 +185,15 @@ export class TemplateEngine {
     });
 
     const images = await Promise.all(pendingImages);
-    const imageMap = images.reduce((acc, v) => { acc[v.src] = v; return acc; },
-      {} as { [key: string]: { ext: string, data: string } });
+    const imageMap = new Map(images.map(x => [x.src, x] as [string, { ext: string, data: string }]));
 
-    html = html.replace(/(<img[^>]src=")([^"]+)/g, (a, pre, src) => { // Inline base64 images
-      const { ext, data } = imageMap[src];
-      return `${pre}data:image/${ext};base64,${data}`;
+    html = html.replace(/(<img[^>]src=")([^"]+)/g, (a, pre, src) => {
+      if (imageMap.has(src)) {
+        const { ext, data } = imageMap.get(src)!; // Inline local images
+        return `${pre}data:image/${ext};base64,${data}`;
+      } else {
+        return a;
+      }
     });
 
     return html;
