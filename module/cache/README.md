@@ -3,8 +3,7 @@ travetto: Cache
 
 Provides a simple wrapper around [`lru-cache`](https://github.com/isaacs/node-lru-cache) to provide standard caching constructs.  
 
-`@Cacheable` is a decorator that allows caching at class methods. The decorator will rewrite the method
-to cache on successful results. The decorator supports synchronous as well as asynchronous methods.
+`@Cacheable` is a decorator that allows caching at class methods. The decorator will rewrite the method to cache on successful results. The decorator supports synchronous as well as asynchronous methods.
 
 ```typescript
   class Worker {
