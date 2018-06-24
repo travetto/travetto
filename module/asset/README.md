@@ -5,11 +5,9 @@ This module provides the framework for storing/retrieving assets. It also provid
 
 [`GraphicsMagick`](http://www.graphicsmagick.org) is used under the covers for image transformation.  If the binary is not installed the framework will spin up a [`docker`](https://www.docker.com/community-edition) container to provide needed functionality.
 
-The primary driver for the Asset framework is an [`AssetSource`](./src/service/source.ts) which needs to be implemented 
-to provide code on how to read and write files.  
+The primary driver for the Asset framework is an [`AssetSource`](./src/service/source.ts) which needs to be implemented to provide code on how to read and write files.  
 
-Initially you need to configure the [`AssetSource`](./src/service/source.ts) to provide a backend for the storage and retrieval. Below we are using the [`Asset-Mongo`](https://github.com/travetto/asset-mongo) as the
-backend, but there are others to choose from.
+Initially you need to configure the [`AssetSource`](./src/service/source.ts) to provide a backend for the storage and retrieval. Below we are using the [`Asset-Mongo`](https://github.com/travetto/asset-mongo) as the backend, but there are others to choose from.
 
 ```typescript
 class AppConfig {
@@ -24,11 +22,8 @@ class AppConfig {
 }
 ```
 
-After that, both [`AssetService`](./src/service/asset.ts) and [`ImageService`](./src/service/image.ts) 
-will rely upon the [`AssetSource`](./src/service/source.ts) to do their work.  Below you can see an example of storing and retrieving a user's profile image.  
-Storing of all assets goes through the [`AssetService`](./src/service/asset.ts), but retrieval can either 
-be from [`AssetService`](./src/service/asset.ts) or [`ImageService`](./src/service/image.ts) depending on whether or not you want to perform
-image optimizations on retrieval.
+After that, both [`AssetService`](./src/service/asset.ts) and [`ImageService`](./src/service/image.ts) will rely upon the [`AssetSource`](./src/service/source.ts) to do their work.  Below you can see an example of storing and retrieving a user's profile image.  
+Storing of all assets goes through the [`AssetService`](./src/service/asset.ts), but retrieval can either be from [`AssetService`](./src/service/asset.ts) or [`ImageService`](./src/service/image.ts) depending on whether or not you want to perform image optimizations on retrieval.
 
 ```typescript
 @Injectable()
