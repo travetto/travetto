@@ -12,8 +12,7 @@ The supported operations are:
 * `console.trace` which logs at the `TRACE` level
 * `console.log` which logs at the `INFO` level
 
-**Note:** In production mode, all `console.debug` and `console.trace` invocations are compiled away for performance/security reasons. This means
-that the code is actually removed, and will not execute.
+**Note:** In production mode, all `console.debug` and `console.trace` invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.
 
 A sample of the transformation would be:
 ```typescript
