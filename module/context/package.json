@@ -1,23 +1,31 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
+    "email": "timothy.soehnlin@gmail.com",
     "name": "Timothy Soehnlin"
-  }, 
+  },
   "dependencies": {
     "@travetto/di": "0.x.x"
-  }, 
-  "description": "", 
+  },
+  "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  }, 
-  "license": "MIT", 
-  "main": "index.ts", 
-  "name": "@travetto/context", 
+  },
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "async-hooks",
+    "decorators",
+    "continuation-local-storage",
+    "travetto",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/context",
   "repository": {
     "url": "https://github.com/travetto/context.git"
-  }, 
+  },
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  }, 
+  },
   "version": "0.0.17"
 }
