@@ -1,8 +1,10 @@
 travetto: Auth
 ===
 
-This module provides general authentication/security handling, with support for 
-express via some key decorators for .  For example:
+**NOTE** WIP, auth is being rewritten from `passport` to a simpler set of code.
+
+This module provides general authentication/security handling. This handles standard patterns for
+login, registration, permission checking, 
   
   - `@Authenticated` for when a user is logged in
   - `@Unauthenticated` for when a user is logged out
