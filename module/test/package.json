@@ -1,40 +1,40 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "bin": {
     "travetto-test": "bin/travetto-test.js"
-  },
+  }, 
   "dependencies": {
-    "@travetto/exec": "0.x.x",
-    "@travetto/registry": "0.x.x",
-    "@types/js-yaml": "^3.11.1",
-    "@types/minimist": "^1.2.0",
-    "js-yaml": "https://github.com/arciisine/js-yaml.git#3.11.0-slim",
+    "@travetto/exec": "0.x.x", 
+    "@travetto/registry": "0.x.x", 
+    "@types/js-yaml": "^3.11.1", 
+    "@types/minimist": "^1.2.0", 
+    "js-yaml": "https://github.com/arciisine/js-yaml.git#3.11.0-slim", 
     "minimist": "^1.2.0"
-  },
-  "description": "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin",
+  }, 
+  "description": "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin", 
   "devDependencies": {
     "@travetto/test": "file://."
-  },
-  "homepage": "https://travetto.io",
+  }, 
+  "homepage": "https://travetto.io", 
   "keywords": [
-    "unit-testing",
-    "testing",
-    "travetto",
-    "typescript",
-    "decorators",
+    "unit-testing", 
+    "testing", 
+    "travetto", 
+    "typescript", 
+    "decorators", 
     "ast-transformations"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/test",
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/test", 
   "repository": {
     "url": "https://github.com/travetto/test.git"
-  },
+  }, 
   "scripts": {
     "test": "node ./bin/travetto-test.js"
-  },
-  "version": "0.0.79"
+  }, 
+  "version": "0.0.80"
 }
