@@ -1,33 +1,33 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com",
+    "email": "timothy.soehnlin@gmail.com", 
     "name": "Timothy Soehnlin"
-  },
+  }, 
   "dependencies": {
-    "@travetto/di": "0.x.x",
+    "@travetto/di": "0.x.x", 
     "@travetto/schema": "0.x.x"
-  },
-  "description": "Datastore abstraction for CRUD operations with advanced query support.",
+  }, 
+  "description": "Datastore abstraction for CRUD operations with advanced query support.", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "homepage": "https://travetto.io",
+  }, 
+  "homepage": "https://travetto.io", 
   "keywords": [
-    "datastore",
-    "decorators",
-    "schema",
-    "typescript",
-    "travetto",
+    "datastore", 
+    "decorators", 
+    "schema", 
+    "typescript", 
+    "travetto", 
     "query-language"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/model",
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/model", 
   "repository": {
     "url": "https://github.com/travetto/model.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.38"
+  }, 
+  "version": "0.0.39"
 }
