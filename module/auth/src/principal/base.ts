@@ -22,7 +22,7 @@ export class PrincipalConfig<T = any, U extends PrincipalFields<T> = PrincipalFi
         new Set(val.trim().split(/\s*,\s*/)));
   }
 
-  getContext(obj: T): AuthContext<T> {
+  toContext(obj: T): AuthContext<T> {
     return {
       id: this.getId(obj),
       permissions: this.getPermissions(obj),
