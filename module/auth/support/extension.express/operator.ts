@@ -36,10 +36,13 @@ export class AuthOperator extends ExpressOperator {
       const p = this.providers.get(provider.__id)!;
       try {
         const user = await p.login(req, res);
-        this.service.context = user;
+        const ctx = await p.toContext(user);
+
+        this.service.context = ctx;
         req.session!._authId = p.serialize(user);
         req.session!._authType = provider.__id;
-        return user;
+
+        return ctx;
       } catch (e) {
         errors.push(e);
       }
@@ -66,8 +69,10 @@ export class AuthOperator extends ExpressOperator {
     if (principal) {
       this.service.context = principal;
     } else if (id && type) {
-      const user = await this.providers.get(type)!.deserialize(id);
-      this.service.context = user;
+      const provider = this.providers.get(type)!;
+      const user = await provider.deserialize(id);
+      const ctx = await provider.toContext(user);
+      this.service.context = ctx;
     }
   }
 

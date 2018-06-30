@@ -1,12 +1,16 @@
 import { Request, Response } from 'express';
 import { AppError } from '@travetto/express';
-import { PrincipalConfig } from '../../src';
+import { AuthContext } from '../../src';
 
-export class AuthProvider<U, T extends PrincipalConfig<U> = PrincipalConfig<U>> {
-  constructor(protected principal: T) { }
+export class AuthProvider<U> {
+  constructor() { }
 
   async login(req: Request, res: Response): Promise<U> {
     throw new AppError('Unimplemented login');
+  }
+
+  async toContext(user: U): Promise<AuthContext<U>> {
+    throw new AppError('Unimplemented toContext');
   }
 
   async logout(req: Request, res: Response): Promise<void> {
@@ -14,7 +18,7 @@ export class AuthProvider<U, T extends PrincipalConfig<U> = PrincipalConfig<U>> 
   }
 
   serialize(user: U): string {
-    return this.principal.getId(user);
+    throw new AppError('Unimplemented serialize');
   }
 
   async deserialize(id: string): Promise<U> {

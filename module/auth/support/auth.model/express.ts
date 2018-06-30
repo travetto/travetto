@@ -6,31 +6,25 @@ import { BaseModel } from '@travetto/model';
 import { AuthProvider } from '../extension.express/provider';
 import { RegisteredPrincipalConfig } from './principal';
 import { AuthModelService } from './service';
-import { ERR_INVALID_PASSWORD } from '../../src';
+import { ERR_INVALID_PASSWORD, AuthContext } from '../../src';
 
-export class AuthModelProvider<U extends BaseModel> extends AuthProvider<U, RegisteredPrincipalConfig<U>> {
+export class AuthModelProvider<U extends BaseModel> extends AuthProvider<U> {
 
   constructor(
     private service: AuthModelService<U>,
-    principal: RegisteredPrincipalConfig<U>
+    private principal: RegisteredPrincipalConfig<U>
   ) {
-    super(principal);
+    super();
   }
 
-  private extractLogin(...objs: { [key: string]: string }[]) {
-    const idField = this.principal.fields.id;
-    const pwField = this.principal.fields.password;
-
-    const valid = (objs.find(x => idField in x) || {}) as any as U;
-
-    return {
-      userId: valid[idField] as any as string,
-      password: valid[pwField] as any as string
-    };
+  async toContext(user: U) {
+    return this.principal.toContext(user);
   }
 
-  async login(req: Request, res: Response) {
-    const { userId, password } = this.extractLogin(req.body, req.query);
+  async login(req: Request, res: Response): Promise<U> {
+    const userId = this.principal.getId(req.body);
+    const password = this.principal.getPassword(req.body);
+
     try {
       const user = await this.service.login(userId, password);
       return user;
@@ -45,6 +39,10 @@ export class AuthModelProvider<U extends BaseModel> extends AuthProvider<U, Regi
       out.stack = e.stack;
       throw out;
     }
+  }
+
+  serialize(user: U) {
+    return this.principal.getId(user);
   }
 
   async deserialize(id: string) {
