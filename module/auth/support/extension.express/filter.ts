@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
+import { Class } from '@travetto/registry';
 import { ControllerRegistry, AppError } from '@travetto/express';
 import { ERR_UNAUTHENTICATED, ERR_AUTHENTICATED, ERR_FORBIDDEN, ERR_INVALID_CREDS } from '../../src/types';
 
-export function Authenticate() {
-  return ControllerRegistry.filterAdder((req, res) => {
+export function Authenticate(provider: Class<any>, ...providers: Class<any>[]) {
+  const computed = [provider, ...providers];
+  return ControllerRegistry.filterAdder(async (req, res) => {
     try {
-      req.auth.loginFromPayload(req, res);
+      await req.doLogin(computed);
     } catch (e) {
       if (e.message === ERR_INVALID_CREDS) {
         const err = new AppError(e.message, 400);

@@ -1,8 +1,8 @@
 import { Class } from '@travetto/registry';
+import { AuthContext } from '../types';
 
 export type PrincipalFields<T> = {
   id: keyof T;
-  password: keyof T;
   permissions: keyof T;
 };
 
@@ -15,11 +15,18 @@ export class PrincipalConfig<T = any, U extends PrincipalFields<T> = PrincipalFi
   }
 
   getId = (obj: T) => this.lookup<string>(obj, this.fields.id);
-  getPassword = (obj: T) => this.lookup<string>(obj, this.fields.password);
   getPermissions(obj: T) {
     const val = this.lookup<string | string[] | Set<string>>(obj, this.fields.permissions);
     return val instanceof Set ? val :
       (Array.isArray(val) ? new Set(val) :
         new Set(val.trim().split(/\s*,\s*/)));
+  }
+
+  getContext(obj: T): AuthContext<T> {
+    return {
+      id: this.getId(obj),
+      permissions: this.getPermissions(obj),
+      principal: obj
+    };
   }
 }

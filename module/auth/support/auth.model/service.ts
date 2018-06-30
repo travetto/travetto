@@ -1,13 +1,15 @@
 import { ModelService, BaseModel, Query } from '@travetto/model';
 
-import { AuthProvider, AuthUtil } from '../src/provider';
-import { RegisteredPrincipalConfig } from '../src/principal';
+import { AuthUtil } from '../../src/util';
+import { RegisteredPrincipalConfig } from './principal';
+import { ERR_INVALID_PASSWORD } from '../../src';
 
-export class AuthModelProvider<T extends BaseModel> extends AuthProvider<T, RegisteredPrincipalConfig<T>> {
+export class AuthModelService<T extends BaseModel> {
 
-  constructor(private modelService: ModelService, principalConfig: RegisteredPrincipalConfig<T>) {
-    super(principalConfig);
-  }
+  constructor(
+    private modelService: ModelService,
+    private principal: RegisteredPrincipalConfig<T>
+  ) { }
 
   async retrieve(userId: string) {
     const query = {
@@ -23,7 +25,7 @@ export class AuthModelProvider<T extends BaseModel> extends AuthProvider<T, Regi
     const user = await this.retrieve(userId);
     const hash = await AuthUtil.generateHash(password, this.principal.getSalt(user));
     if (hash !== this.principal.getHash(user)) {
-      throw new Error('Invalid password');
+      throw new Error(ERR_INVALID_PASSWORD);
     } else {
       return user;
     }

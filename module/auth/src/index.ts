@@ -1,4 +1,4 @@
 export * from './service';
-export * from './provider';
+export * from './util';
 export * from './principal';
 export * from './types';
