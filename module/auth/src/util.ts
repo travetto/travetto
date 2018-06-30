@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { ERR_MISSING_PASSWORD, ERR_INVALID_PASSWORD } from '../types';
+import { ERR_MISSING_PASSWORD, ERR_INVALID_PASSWORD } from './types';
 
 export class AuthUtil {
   static async generateHash(password: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256') {
