@@ -4,8 +4,8 @@
     "name": "Timothy Soehnlin"
   },
   "dependencies": {
-    "@travetto/express": "0.x.x",
-    "@travetto/auth": "0.x.x"
+    "@travetto/auth": "0.x.x",
+    "@travetto/express": "0.x.x"
   },
   "description": "Express authentication integration support for the travetto framework",
   "homepage": "https://travetto.io",
@@ -13,7 +13,9 @@
     "authentication",
     "express",
     "travetto",
-    "decorators"
+    "decorators",
+    "passport",
+    "registration"
   ],
   "license": "MIT",
   "main": "index.ts",
@@ -29,7 +31,7 @@
     "test:all": "npm test test/.*",
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.0.18",
+  "version": "0.0.1",
   "devDependencies": {
     "@travetto/test": "0.x.x"
   }
