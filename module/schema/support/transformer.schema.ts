@@ -115,6 +115,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
 }
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AutoState): T {
+
   if (ts.isClassDeclaration(node)) {
     const anySchema = TransformUtil.findAnyDecorator(node, SCHEMAS, state);
 
@@ -171,6 +172,13 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       ) as any;
 
       out.parent = node.parent;
+
+      for (const el of out.members) {
+        if (!el.parent) {
+          el.parent = out;
+        }
+      }
+
       node = out;
     }
 
