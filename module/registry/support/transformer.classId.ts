@@ -46,7 +46,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       }
     }
 
-    node = ts.updateClassDeclaration(node,
+    const ret = ts.updateClassDeclaration(node,
       ts.createNodeArray(
         [ts.createDecorator(
           ts.createCall(ts.createPropertyAccess(state.imported, ts.createIdentifier('Register')), undefined, [])
@@ -64,7 +64,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       ])
     ) as any;
 
-    return node;
+    ret.parent = node.parent;
+
+    return ret;
   }
   return ts.visitEachChild(node, c => visitNode(context, c, state), context);
 }
