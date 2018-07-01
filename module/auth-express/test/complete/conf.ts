@@ -2,7 +2,7 @@ import { InjectableFactory } from '@travetto/di';
 import { PrincipalConfig } from '@travetto/auth';
 
 import { AuthProvider } from '../../src';
-import { AuthPassportProvider } from '../../support/extension.passport';
+import { AuthPassportProvider } from '../../support/auth.passport';
 
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 
@@ -25,7 +25,7 @@ export class AppConfig {
           profileFields: ['id', 'displayName', 'photos', 'email']
         },
         (accessToken, refreshToken, profile, cb) => {
-          return cb(undefined, FbUser.from(profile));
+          return cb(undefined, profile);
         }
       ),
       new PrincipalConfig(FbUser, {
