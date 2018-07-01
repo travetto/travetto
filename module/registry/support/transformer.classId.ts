@@ -1,11 +1,9 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import { AppEnv } from '@travetto/base/src/env';
-import { TransformUtil, Import, State } from '@travetto/compiler';
+import { TransformUtil, State } from '@travetto/compiler';
 
 const stringHash = require('string-hash');
-
-type MethodHashes = { [key: string]: { hash: number, clsId: ts.Identifier } };
 
 interface IState extends State {
   file: string;
@@ -65,6 +63,12 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     ) as any;
 
     ret.parent = node.parent;
+
+    for (const el of ret.members) {
+      if (!el.parent) {
+        el.parent = ret;
+      }
+    }
 
     return ret;
   }
