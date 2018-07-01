@@ -7,20 +7,15 @@
     "@travetto/context": "0.x.x",
     "@travetto/util": "0.x.x"
   },
-  "description": "Authentication and registration support for the travetto framework",
+  "description": "Authentication scaffolding for the travetto framework",
   "homepage": "https://travetto.io",
   "keywords": [
     "authentication",
-    "travetto",
-    "decorators"
+    "travetto"
   ],
   "license": "MIT",
   "main": "index.ts",
   "name": "@travetto/auth",
-  "peerDependencies": {
-    "@travetto/express": "0.x.x",
-    "@travetto/model": "0.x.x"
-  },
   "repository": {
     "url": "https://github.com/travetto/auth.git"
   },
