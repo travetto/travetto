@@ -49,7 +49,7 @@ export class Context {
       let obj = this.storage.get(key);
       if (!obj) {
         obj = {};
-        this._storage(obj = {});
+        this._storage(obj);
       }
       return obj;
     }
