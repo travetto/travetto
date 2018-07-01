@@ -1,8 +1,9 @@
-import { Inject } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 import { Context } from '@travetto/context';
 
 import { AuthContext, ERR_UNAUTHENTICATED, ERR_FORBIDDEN } from '../types';
 
+@Injectable()
 export class AuthService<U = { id: string }> {
 
   @Inject()

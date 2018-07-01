@@ -1,24 +1,20 @@
-import { Controller, Get } from '@travetto/express';
 import { InjectableFactory } from '@travetto/di';
-
-import { Request, Response } from 'express';
-
-import { Strategy as FacebookStrategy } from 'passport-facebook';
-import { Authenticate } from '../../support/extension.express';
 import { AuthPassportProvider } from '../../support/extension.passport/provider';
 import { PrincipalConfig } from '../../src';
 
-class FbUser {
+import { Strategy as FacebookStrategy } from 'passport-facebook';
+import { AuthProvider } from '../../support/extension.express/provider';
+
+export class FbUser {
   id: string;
   roles: string[];
 }
 
-const FB_AUTH = Symbol('facebook');
+export const FB_AUTH = Symbol('facebook');
 
-class AppConfig {
+export class AppConfig {
   @InjectableFactory(FB_AUTH)
-  static facebookPassport() {
-    console.log('Aloha');
+  static facebookPassport(): AuthProvider<any> {
     return new AuthPassportProvider('facebook',
       new FacebookStrategy(
         {
@@ -35,19 +31,5 @@ class AppConfig {
         permissions: 'roles'
       })
     );
-  }
-}
-
-@Controller('/auth')
-export class SampleAuth {
-  @Get('/facebook')
-  @Authenticate(FB_AUTH)
-  async fbLogin(req: Request, res: Response) {
-
-  }
-
-  @Get('/facebook/callback')
-  async fbLoginComplete(req: Request, res: Response) {
-    return req.auth.context!;
   }
 }
