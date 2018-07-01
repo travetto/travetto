@@ -1,4 +1,4 @@
-import { AppEnv, isPlainObject, isFunction, isPrimitive } from '@travetto/base';
+import { AppEnv, isPlainObject, isFunction, isPrimitive, simplifyStack } from '@travetto/base';
 import * as assert from 'assert';
 import * as util from 'util';
 import * as path from 'path';
@@ -165,6 +165,10 @@ export class AssertUtil {
           .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || (assertion as any)[k])
           .replace(/not not/g, 'not'); // Handle double negatives
         assertion.error = e;
+        e.message = assertion.message;
+        if (e instanceof Error) {
+          (e as Error).stack = simplifyStack(e as Error);
+        }
         this.add(assertion);
       }
       throw e;
