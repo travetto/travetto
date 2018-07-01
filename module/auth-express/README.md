@@ -82,7 +82,7 @@ The symbol ```FB_AUTH``` is what will be used to reference providers at runtime.
 ## Route Declaration
 Like the ```AuthService```, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
 
-* ```@Authenticated``` provides `express` middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
+`@Authenticate` provides `express` middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 ```typescript
 @Controller('/auth')
 export class Auth {
@@ -95,7 +95,8 @@ export class Auth {
 
 }
 ```
-* ```@Authenticated``` and ```@Unauthenticated``` will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed.
+
+`@Authenticated` and `@Unauthenticated` will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed.
 ```typescript
 @Controller('/auth')
 export class Auth {
