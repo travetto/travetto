@@ -38,15 +38,19 @@ export class Context {
     }
   }
 
-  _storage(val: string): void;
+  _storage(val: any): void;
   _storage(): any;
-  _storage(val?: string) {
+  _storage(val?: any) {
     const currId = async_hooks.executionAsyncId();
     const key = this.threads.get(currId)!;
     if (val) {
       this.storage.set(key, val);
     } else {
-      const obj = this.storage.get(key);
+      let obj = this.storage.get(key);
+      if (!obj) {
+        obj = {};
+        this._storage(obj = {});
+      }
       return obj;
     }
   }
