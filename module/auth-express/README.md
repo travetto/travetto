@@ -1,4 +1,4 @@
-travetto: Auth Express
+travetto: Auth-Express
 ===
 
 This is a primary integration for the [`Auth`](https://github.com/travetto/auth) module.  This is another level of scaffolding allowing for any [`express`](https://expressjs.com)-based authentication framework to integrate.  
@@ -13,8 +13,8 @@ The integration with the [`Express`](https://github.com/travetto/express) touche
 When working with framework's authentication, the user information is exposed via the `express` ```Request``` object.  The auth functionality is exposed on the request as the property `auth`.
 ```typescript
 declare module "express" {
-	export interface Request {
-		auth: {
+  export interface Request {
+    auth: {
       context: AuthContext<any>; 
       authenticated: boolean;
       unauthenticated: boolean;
