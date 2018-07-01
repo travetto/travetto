@@ -1,27 +1,28 @@
 import { Request, Response } from 'express';
-import { AppError } from '@travetto/express';
 import { AuthContext } from '../../src';
 
-export class AuthProvider<U> {
-  constructor() { }
-
-  async login(req: Request, res: Response): Promise<U> {
-    throw new AppError('Unimplemented login');
-  }
-
-  async toContext(user: U): Promise<AuthContext<U>> {
-    throw new AppError('Unimplemented toContext');
-  }
+export abstract class AuthProvider<U> {
 
   async logout(req: Request, res: Response): Promise<void> {
     // Do nothing
   }
 
-  serialize(user: U): string {
-    throw new AppError('Unimplemented serialize');
+  abstract async login(req: Request, res: Response): Promise<AuthContext<U>>;
+
+  serialize(ctx: AuthContext<U>) {
+    return JSON.stringify({
+      id: ctx.id,
+      permissions: Array.from(ctx.permissions),
+      principal: ctx.principal
+    });
   }
 
-  async deserialize(id: string): Promise<U> {
-    throw new AppError('Unimplemented deserialize');
+  async deserialize(serialized: string): Promise<AuthContext<U>> {
+    const ctx = JSON.parse(serialized);
+    return {
+      id: ctx.id,
+      permissions: new Set(ctx.permissions),
+      principal: ctx.principal
+    };
   }
 }

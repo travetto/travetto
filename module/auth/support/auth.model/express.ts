@@ -17,17 +17,13 @@ export class AuthModelProvider<U extends BaseModel> extends AuthProvider<U> {
     super();
   }
 
-  async toContext(user: U) {
-    return this.principal.toContext(user);
-  }
-
-  async login(req: Request, res: Response): Promise<U> {
+  async login(req: Request, res: Response): Promise<AuthContext<U>> {
     const userId = this.principal.getId(req.body);
     const password = this.principal.getPassword(req.body);
 
     try {
       const user = await this.service.login(userId, password);
-      return user;
+      return this.principal.toContext(user);
     } catch (e) {
       let status = 500;
       switch ((e as Error).message) {
@@ -39,13 +35,5 @@ export class AuthModelProvider<U extends BaseModel> extends AuthProvider<U> {
       out.stack = e.stack;
       throw out;
     }
-  }
-
-  serialize(user: U) {
-    return this.principal.getId(user);
-  }
-
-  async deserialize(id: string) {
-    return this.service.retrieve(id);
   }
 }

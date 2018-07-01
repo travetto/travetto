@@ -24,7 +24,7 @@ export class AuthOperator extends ExpressOperator {
   }
 
   async postConstruct() {
-    for (const provider of DependencyRegistry.getCandidateTypes(AuthProvider)) {
+    for (const provider of DependencyRegistry.getCandidateTypes(AuthProvider as Class)) {
       const dep = await DependencyRegistry.getInstance(provider.class);
       this.providers.set(provider.class.__id, dep);
     }
@@ -35,11 +35,9 @@ export class AuthOperator extends ExpressOperator {
     for (const provider of providers) {
       const p = this.providers.get(provider.__id)!;
       try {
-        const user = await p.login(req, res);
-        const ctx = await p.toContext(user);
-
+        const ctx = await p.login(req, res);
         this.service.context = ctx;
-        req.session!._authId = p.serialize(user);
+        req.session!._authStored = p.serialize(ctx);
         req.session!._authType = provider.__id;
 
         return ctx;
@@ -65,13 +63,12 @@ export class AuthOperator extends ExpressOperator {
   }
 
   async loadContext(req: Request, res: Response) {
-    const { _authId: id, _authType: type, _authPrincipal: principal } = req.session!;
+    const { _authStored: serialized, _authType: type, _authPrincipal: principal } = req.session!;
     if (principal) {
       this.service.context = principal;
-    } else if (id && type) {
+    } else if (serialized && type) {
       const provider = this.providers.get(type)!;
-      const user = await provider.deserialize(id);
-      const ctx = await provider.toContext(user);
+      const ctx = await provider.deserialize(serialized);
       this.service.context = ctx;
     }
   }
