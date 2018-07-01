@@ -31,5 +31,5 @@
     "test": "./node_modules/.bin/travetto-test", 
     "test:all": "npm test test/.*"
   }, 
-  "version": "0.0.2"
+  "version": "0.0.3"
 }
