@@ -169,6 +169,13 @@ export class TransformUtil {
         if (state.newImports.length) {
           this.addImport(ret, state.newImports);
         }
+
+        for (const el of ret.statements) {
+          if (!el.parent) {
+            el.parent = ret;
+          }
+        }
+
         return ret;
       };
   }
