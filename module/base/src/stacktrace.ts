@@ -48,7 +48,7 @@ export function initStackHandler() {
     if (rewrite.length < 3) {
       const depd = frames[0] && frames[0].getFileName() && frames[0].getFileName()!.includes(`${path.sep}depd${path.sep}`);
       // depd requires at least 3 frames
-      while (rewrite.length < 3) {
+      while (depd && rewrite.length < 3) {
         rewrite.push({
           isNative: () => undefined,
           isToplevel: () => undefined,
