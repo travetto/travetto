@@ -1,0 +1,36 @@
+{
+  "author": {
+    "email": "timothy.soehnlin@gmail.com",
+    "name": "Timothy Soehnlin"
+  },
+  "dependencies": {
+    "@travetto/express": "0.x.x",
+    "@travetto/auth": "0.x.x"
+  },
+  "description": "Express authentication integration support for the travetto framework",
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "authentication",
+    "express",
+    "travetto",
+    "decorators"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/auth-express",
+  "peerDependencies": {
+    "@travetto/model": "0.x.x",
+    "passport": "^0.4.0"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/auth-epxress.git"
+  },
+  "scripts": {
+    "test:all": "npm test test/.*",
+    "test": "./node_modules/.bin/travetto-test"
+  },
+  "version": "0.0.18",
+  "devDependencies": {
+    "@travetto/test": "0.x.x"
+  }
+}
