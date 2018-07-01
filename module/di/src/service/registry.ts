@@ -99,6 +99,21 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.instances.get(targetId)!.set(qualifier, out);
   }
 
+  processAutocreate() {
+    // Unblock auto created
+    if (this.autoCreate.length && !AppEnv.test) {
+      const items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
+      this.autoCreate = [];
+
+      setTimeout(async () => { // Run after initialization finishes
+        console.debug('Auto-creating', this.autoCreate.map(x => x.target.name));
+        for (const i of items) {
+          await this.getInstance(i.target, i.qualifier);
+        }
+      }, 0);
+    }
+  }
+
   async initialInstall() {
     const finalizing = this.pendingFinalize;
     this.pendingFinalize = [];
@@ -107,16 +122,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.install(cls, { type: 'added', curr: cls });
     }
 
-    // Unblock auto created
-    if (this.autoCreate.length && !AppEnv.test) {
-      setTimeout(async () => { // Run after initialization finishes
-        console.debug('Auto-creating', this.autoCreate.map(x => x.target.name));
-        const items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
-        for (const i of items) {
-          await this.getInstance(i.target, i.qualifier);
-        }
-      }, 0);
-    }
+    this.processAutocreate();
   }
 
   createPending(cls: Class) {
@@ -315,6 +321,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         this.onInstall(fact, e);
       }
     }
+
+    this.processAutocreate();
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
