@@ -5,24 +5,21 @@ import { BaseModel } from '@travetto/model';
 import { AuthProvider } from '@travetto/auth-express';
 import { ERR_INVALID_PASSWORD, AuthContext } from '@travetto/auth';
 
-import { RegisteredPrincipalConfig, AuthModelService } from '../src';
+import { AuthModelService } from '../src';
 
 export class AuthModelProvider<U extends BaseModel> extends AuthProvider<U> {
 
-  constructor(
-    private service: AuthModelService<U>,
-    private principal: RegisteredPrincipalConfig<U>
-  ) {
+  constructor(private service: AuthModelService<U>) {
     super();
   }
 
   async login(req: Request, res: Response): Promise<AuthContext<U>> {
-    const userId = this.principal.getId(req.body);
-    const password = this.principal.getPassword(req.body);
+    const userId = this.service.principal.getId(req.body);
+    const password = this.service.principal.getPassword(req.body);
 
     try {
       const user = await this.service.login(userId, password);
-      return this.principal.toContext(user);
+      return this.service.principal.toContext(user);
     } catch (e) {
       let status = 500;
       switch ((e as Error).message) {

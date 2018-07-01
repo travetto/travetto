@@ -7,7 +7,7 @@ export class AuthModelService<T extends BaseModel> {
 
   constructor(
     private modelService: ModelService,
-    private principal: RegisteredPrincipalConfig<T>
+    public principal: RegisteredPrincipalConfig<T>
   ) { }
 
   async retrieve(userId: string) {
