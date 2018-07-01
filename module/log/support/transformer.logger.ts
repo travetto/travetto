@@ -77,7 +77,15 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 export const LoggerTransformer = {
   transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
     return { source: file };
-  }, visitNode),
+  }, (ctx, node, state) => {
+    const name = node.getSourceFile().fileName.toString();
+    // Only apply to test files
+    if (name.includes('@travetto/test/src') || !name.includes('/test/')) { // Don't treat test logging as standard log messages
+      return visitNode(ctx, node, state);
+    } else {
+      return node;
+    }
+  }),
   phase: 'before',
   priority: 1
 };
