@@ -1,8 +1,7 @@
 import { Suite, Test } from '@travetto/test';
 import { AuthProvider } from '../src';
 import * as assert from 'assert';
-import { Request } from 'express';
-import { Response } from 'express-serve-static-core';
+import { Request, Response } from 'express';
 import { ERR_INVALID_CREDS } from '@travetto/auth';
 
 class DumbProvider extends AuthProvider<any> {
@@ -26,7 +25,7 @@ class DumbProvider extends AuthProvider<any> {
 export class ProviderTest {
   @Test()
   async validateProvider() {
-    const ctx = await new DumbProvider().login({ body: { username: 'test', password: 'test ' } } as any, undefined as any);
+    const ctx = await new DumbProvider().login({ body: { username: 'test', password: 'test' } } as any, undefined as any);
     assert(ctx.id === 'test');
   }
 }

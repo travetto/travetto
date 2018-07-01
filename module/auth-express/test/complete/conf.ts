@@ -19,8 +19,8 @@ export class AppConfig {
     return new AuthPassportProvider('facebook',
       new FacebookStrategy(
         {
-          clientID: '914464648748805',
-          clientSecret: '9740ebfa8b78f13042de7debf887b3e6',
+          clientID: '<clientId>',
+          clientSecret: '<clientSecret>',
           callbackURL: 'http://localhost:3000/auth/facebook/callback',
           profileFields: ['id', 'displayName', 'photos', 'email']
         },
