@@ -1,8 +1,7 @@
 import * as ts from 'typescript';
-import * as path from 'path';
 
 import { AppEnv } from '@travetto/base';
-import { TransformUtil, Import, State } from '@travetto/compiler';
+import { TransformUtil, State } from '@travetto/compiler';
 
 import { LogLevels } from '../src/types';
 
@@ -24,7 +23,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     const level = node.expression.name.text;
 
     if (AppEnv.prod && !VALID_PROD_METHODS.has(level)) {
-      return ts.createEmptyStatement() as any as T; // Lose the logging if in prod
+      const empty = ts.createEmptyStatement() as any as T; // Lose the logging if in prod
+      empty.parent = node.parent;
+      return empty;
     }
 
     if (!state.imported) {
@@ -58,12 +59,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 
     const argv = ts.createNodeArray([payload]);
-    const out = ts.createCall(ts.createPropertyAccess(ts.createPropertyAccess(state.imported, 'Logger'), 'log'), undefined, argv) as any as T;
-    if (!payload.parent) {
-      payload.parent = out;
-    }
+    const out = ts.updateCall(node, ts.createPropertyAccess(ts.createPropertyAccess(state.imported, 'Logger'), 'log'), undefined, argv) as any as T;
     out.parent = node.parent;
-    return out as T;
+    return out;
   } else {
     return ts.visitEachChild(node, c => visitNode(context, c, state), context);
   }
