@@ -68,6 +68,9 @@ class $Logger {
       }
     }
 
+    // Use sliced values
+    event.args = args;
+
     for (const l of this.listeners) {
       l(event as LogEvent);
     }
