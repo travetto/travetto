@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { TransformUtil, Import, State } from '@travetto/compiler';
+import { TransformUtil, State } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
 
 const SCHEMAS = TransformUtil.buildImportAliasMap({
