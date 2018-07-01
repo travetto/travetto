@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { TransformUtil, Import, State } from '@travetto/compiler';
+import { TransformUtil, State } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
 
 const INJECTABLES = TransformUtil.buildImportAliasMap({
@@ -108,7 +108,6 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         injectable = createInjectDecorator(state, 'Injectable');
         declTemp.push(injectable);
       } else {
-        let original = undefined;
         const callExpr = (injectable && injectable.expression as any as ts.CallExpression);
         let injectConfig = undefined;
 
@@ -117,7 +116,6 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           injectConfig = args[0] as any;
           // Handle special case
           if (args[0] && ts.isIdentifier(args[0])) {
-            original = args[0];
             injectConfig = args[1] as any;
           }
           if (injectConfig === undefined) {
@@ -137,6 +135,14 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         ts.createNodeArray(cNode.heritageClauses),
         cNode.members
       ) as any;
+
+      ret.parent = node.parent;
+
+      for (const el of ret.members) {
+        if (!el.parent) {
+          el.parent = node;
+        }
+      }
 
       return ret;
     }
@@ -169,8 +175,6 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     const decls = node.decorators;
 
     if (foundDec) { // Constructor
-      const declTemp = (node.decorators || []).slice(0);
-
       let injectArgs: object[] = [];
       let original: any;
 
@@ -211,7 +215,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         original
       }, injectConfig);
 
-      node = ts.createMethod(
+      const ret = ts.createMethod(
         decls!.filter(x => x !== foundDec).concat([
           ts.createDecorator(
             ts.createCall(
@@ -231,7 +235,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         node.body
       ) as any;
 
-      return node;
+      ret.parent = node.parent;
+
+      return ret;
     } else {
       return node;
     }
