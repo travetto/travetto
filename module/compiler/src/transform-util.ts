@@ -1,7 +1,6 @@
 import * as ts from 'typescript';
 import { dirname, sep } from 'path';
-import { AppEnv, AppInfo } from '@travetto/base';
-import { PassThrough } from 'stream';
+import { AppInfo } from '@travetto/base';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
