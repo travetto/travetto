@@ -24,12 +24,10 @@ export class AppConfig {
           profileFields: ['id', 'displayName', 'photos', 'email']
         },
         (accessToken, refreshToken, profile, cb) => {
-          console.log('Profile', FbUser.from(profile));
           return cb(undefined, FbUser.from(profile));
         }
       ),
       new PrincipalConfig(FbUser, {
-
         id: 'id',
         permissions: 'roles'
       })

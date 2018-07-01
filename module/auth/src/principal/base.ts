@@ -19,7 +19,7 @@ export class PrincipalConfig<T = any, U extends PrincipalFields<T> = PrincipalFi
     const val = this.lookup<string | string[] | Set<string>>(obj, this.fields.permissions);
     return val instanceof Set ? val :
       (Array.isArray(val) ? new Set(val) :
-        new Set(val.trim().split(/\s*,\s*/)));
+        new Set(`${val}`.trim().split(/\s*,\s*/)));
   }
 
   toContext(obj: T): AuthContext<T> {
