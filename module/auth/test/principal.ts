@@ -5,7 +5,6 @@ import { PrincipalConfig } from '../src/principal';
 
 class User {
   id: string;
-  pw: string;
   perms: Set<string>;
 }
 
@@ -16,10 +15,9 @@ export class PrincipalTest {
   async verifyTypings() {
     const config = new PrincipalConfig(User, {
       id: 'id',
-      password: 'pw',
       permissions: 'perms'
     });
 
-    assert(config.getId({ id: 'a', pw: '', perms: new Set() }) === 'a');
+    assert(config.getId({ id: 'a', perms: new Set() }) === 'a');
   }
 }

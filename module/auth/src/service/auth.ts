@@ -9,16 +9,16 @@ export class AuthService<U = { id: string }> {
   @Inject()
   protected _context: Context;
 
-  get context() {
+  get context(): AuthContext<U> {
     return this._context.get().auth;
   }
 
-  set context(ctx: AuthContext<U> | undefined) {
+  set context(ctx: AuthContext<U>) {
     this._context.get().auth = ctx;
   }
 
   clearContext() {
-    this.context = undefined;
+    this._context.get().auth = {};
   }
 
   get authenticated() {
