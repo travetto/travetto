@@ -6,7 +6,7 @@ export function Authenticate(provider: symbol, ...providers: symbol[]) {
   const computed = [provider, ...providers];
   return ControllerRegistry.filterAdder(async (req, res) => {
     try {
-      await req.doLogin(computed);
+      await req.auth.login(computed);
     } catch (e) {
       if (e.message === ERR_INVALID_CREDS) {
         const err = new AppError(e.message, 400);

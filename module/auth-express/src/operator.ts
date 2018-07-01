@@ -7,6 +7,7 @@ import { Class } from '@travetto/registry';
 import { AuthService, ERR_INVALID_AUTH } from '@travetto/auth';
 
 import { AuthProvider } from './provider';
+import { AuthServiceAdapter } from './service-adapter';
 
 export const AUTH = Symbol('@travetto/auth');
 
@@ -78,12 +79,9 @@ export class AuthOperator extends ExpressOperator {
   operate(app: ExpressApp) {
     app.get().use(async (req, res, next) => {
 
-      console.log('Operator');
-
       const r = req as Request;
 
-      r.auth = this.service;
-      r.doLogin = this.login.bind(this, req, res);
+      r.auth = new AuthServiceAdapter(this.service, this, r, res);
       await this.loadContext(r, res);
 
       if (next) {

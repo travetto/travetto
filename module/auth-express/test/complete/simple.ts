@@ -1,9 +1,10 @@
 import { Inject } from '@travetto/di';
-import { Controller, Get, Redirect } from '@travetto/express';
+import { Controller, Get, Redirect, Post } from '@travetto/express';
 import { AuthService } from '@travetto/auth';
 
-import { Authenticate, Authenticated } from '../../src';
+import { Authenticate, Authenticated, Unauthenticated } from '../../src';
 import { FB_AUTH } from './conf';
+import { Request, Response } from 'express';
 
 @Controller('/auth')
 export class SampleAuth {
@@ -27,5 +28,11 @@ export class SampleAuth {
   @Authenticate(FB_AUTH)
   async fbLoginComplete() {
     return new Redirect('/auth/self', 301);
+  }
+
+  @Post('/logout')
+  @Unauthenticated()
+  async logout(req: Request, res: Response) {
+    await req.auth.logout();
   }
 }
