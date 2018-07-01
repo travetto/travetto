@@ -1,11 +1,11 @@
 import * as ts from 'typescript';
 import { TransformUtil, State } from '@travetto/compiler';
-import * as fs from 'fs';
 import { AppEnv } from '@travetto/base/src/env';
 
 const TEST_IMPORT = '@travetto/test';
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: any): T {
+
   if (ts.isMethodDeclaration(node) || ts.isClassDeclaration(node)) {
     const dec = TransformUtil.findAnyDecorator(node, {
       Test: new Set([TEST_IMPORT]),
@@ -25,16 +25,17 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
   }
 
-  if (ts.isClassDeclaration(node)) {
-    for (const el of node.members) {
+  const out = ts.visitEachChild(node, c => visitNode(context, c, state), context);
+  out.parent = node.parent;
+
+  if (ts.isClassDeclaration(out)) {
+    for (const el of out.members) {
       if (!el.parent) {
-        el.parent = node;
+        el.parent = out;
       }
     }
   }
 
-  const out = ts.visitEachChild(node, c => visitNode(context, c, state), context);
-  out.parent = node.parent;
   return out;
 }
 
