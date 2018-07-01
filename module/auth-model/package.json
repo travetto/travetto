@@ -7,7 +7,7 @@
     "@travetto/auth": "0.x.x",
     "@travetto/model": "0.x.x"
   },
-  "description": "Model-based authentication integration support for the travetto framework",
+  "description": "Model-based authentication and registration support for the travetto framework",
   "devDependencies": {
     "@travetto/test": "0.x.x"
   },
