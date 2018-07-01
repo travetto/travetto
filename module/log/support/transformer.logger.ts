@@ -57,13 +57,20 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       payload = TransformUtil.extendObjectLiteral({ args }, payload);
     }
 
-
     const argv = ts.createNodeArray([payload]);
     const out = ts.createCall(ts.createPropertyAccess(ts.createPropertyAccess(state.imported, 'Logger'), 'log'), undefined, argv) as any as T;
     out.parent = node.parent;
     return out;
   } else {
-    return ts.visitEachChild(node, c => visitNode(context, c, state), context);
+    const ret = ts.visitEachChild(node, c => visitNode(context, c, state), context);
+    if (ts.isClassDeclaration(ret)) {
+      for (const el of ret.members) {
+        if (!el.parent) {
+          el.parent = ret;
+        }
+      }
+    }
+    return ret;
   }
 }
 
