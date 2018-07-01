@@ -50,6 +50,9 @@ export function initStackHandler() {
       // depd requires at least 3 frames
       while (rewrite.length < 3) {
         rewrite.push({
+          isNative: () => undefined,
+          isToplevel: () => undefined,
+          isEval: () => undefined,
           getFileName: () => 'unknown',
           getLineNumber: () => 1,
           getColumnNumber: () => 1
