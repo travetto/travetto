@@ -10,16 +10,25 @@ The integration with the [`Express`](https://github.com/travetto/express) touche
 * Passport integration
 
 ## Security information management
-When working with framework's authentication, the user information is exposed via the `express` ```Request``` object.  The entire ```AuthService``` is exposed on the request as the property `auth`.
-
+When working with framework's authentication, the user information is exposed via the `express` ```Request``` object.  The auth functionality is exposed on the request as the property `auth`.
 ```typescript
 declare module "express" {
 	export interface Request {
-		auth: AuthService
+		auth: {
+      context: AuthContext<any>; 
+      authenticated: boolean;
+      unauthenticated: boolean;
+      checkPermissions(include: string[], exclude: string[]): boolean;
+      login(providers: symbol[]): Promise<void>;
+      logout: Promise<void>;
+    }
 	}
 }
 ```
 This allows for any filters/middleware to access this information without deeper knowledge of the framework itself.  Also, for performance benefits, the auth context is stored in the user session as a means to minimize future lookups. Since we are storing the entire principal in the session, it is best to keep the principal as small as possible.
+
+## Patterns for Integration
+
 
 ## Route Declaration
 Like the ```AuthService```, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
@@ -52,7 +61,7 @@ export class Auth {
   @Post('/logout')
   @Unauthenticated()
   async logout(req: Request, res: Response) {
-    await req.auth.logout(req, res);
+    await req.auth.logout();
   }
 ```
 
