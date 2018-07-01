@@ -1,15 +1,11 @@
 import * as ts from 'typescript';
 import { TransformUtil, Import, State } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
-import { Schema, Ignore, Field } from '../src/decorator';
 
 const SCHEMAS = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.schema'),
   '@travetto/schema': 'Schema'
 });
-
-type DecList = ts.NodeArray<ts.Decorator>;
-type SchemaList = (ts.Expression | undefined)[];
 
 interface AutoState extends State {
   inAuto: boolean;
@@ -164,7 +160,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         ]);
       }
 
-      node = ts.updateClassDeclaration(
+      const out = ts.updateClassDeclaration(
         ret,
         decls,
         ret.modifiers,
@@ -173,6 +169,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         ts.createNodeArray(ret.heritageClauses),
         ret.members
       ) as any;
+
+      out.parent = node.parent;
+      node = out;
     }
 
     return node;
