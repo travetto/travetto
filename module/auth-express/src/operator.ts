@@ -4,10 +4,9 @@ import { Request, Response } from 'express';
 import { ExpressOperator, ExpressApp, AppError } from '@travetto/express';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
+import { AuthService, ERR_INVALID_AUTH } from '@travetto/auth';
 
-import { AuthService } from '@travetto/auth';
 import { AuthProvider } from './provider';
-import { ERR_INVALID_AUTH } from '../../src';
 
 export const AUTH = Symbol('@travetto/auth');
 

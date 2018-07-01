@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
 
-import { PrincipalConfig, PrincipalFields } from '@traveto/auth';
+import { PrincipalConfig, PrincipalFields } from '@travetto/auth';
 
 export interface RegisteredPrincipalFields<T> extends PrincipalFields<T> {
   hash: keyof T;
