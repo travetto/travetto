@@ -75,4 +75,3 @@ The functionality above is aimed at password generation/management, but the func
 The officially supported auth modules are:
   - [`Auth-Model`](https://github.com/travetto/auth-model) integration between this module and the [`Model`](https://github.com/travetto/model) module.
   - [`Auth-Express`](https://github.com/travetto/auth-express) integration between this module and the [`Express`](https://github.com/travetto/express) module.
-  - [`Auth-Passport`](https://github.com/travetto/auth-passport) integration between this module and [`passport`](http://passportjs.org);
