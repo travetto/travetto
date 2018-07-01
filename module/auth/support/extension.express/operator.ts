@@ -26,20 +26,22 @@ export class AuthOperator extends ExpressOperator {
   async postConstruct() {
     for (const provider of DependencyRegistry.getCandidateTypes(AuthProvider as Class)) {
       const dep = await DependencyRegistry.getInstance(provider.class);
-      this.providers.set(provider.class.__id, dep);
+      this.providers.set(provider.qualifier.toString(), dep);
     }
   }
 
-  async login(req: Request, res: Response, providers: Class[]) {
+  async login(req: Request, res: Response, providers: symbol[]) {
     const errors = [];
     for (const provider of providers) {
-      const p = this.providers.get(provider.__id)!;
+      const p = this.providers.get(provider.toString())!;
       try {
         const ctx = await p.login(req, res);
-        this.service.context = ctx;
-        req.session!._authStored = p.serialize(ctx);
-        req.session!._authType = provider.__id;
+        if (ctx) {
+          req.session!._authStored = p.serialize(ctx);
+          req.session!._authType = provider.toString();
 
+          this.service.context = ctx;
+        }
         return ctx;
       } catch (e) {
         errors.push(e);
