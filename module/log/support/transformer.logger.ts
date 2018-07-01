@@ -59,7 +59,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 
     const argv = ts.createNodeArray([payload]);
-    const out = ts.updateCall(node, ts.createPropertyAccess(ts.createPropertyAccess(state.imported, 'Logger'), 'log'), undefined, argv) as any as T;
+    const out = ts.createCall(ts.createPropertyAccess(ts.createPropertyAccess(state.imported, 'Logger'), 'log'), undefined, argv) as any as T;
     out.parent = node.parent;
     return out;
   } else {
