@@ -1,20 +1,25 @@
-import { Request, Response } from 'express';
+import { Inject } from '@travetto/di';
+import { Controller, Get, ControllerRegistry } from '@travetto/express';
 
-import { Controller, Get } from '@travetto/express';
 import { Authenticate } from '../../support/extension.express';
-import { FB_AUTH } from './config';
+import { FB_AUTH } from './conf';
+import { AuthService } from '../../src';
 
 @Controller('/auth')
 export class SampleAuth {
 
+  @Inject()
+  private service: AuthService;
+
   @Get('/facebook')
   @Authenticate(FB_AUTH)
-  async fbLogin(req: Request) {
+  async fbLogin() {
 
   }
 
   @Get('/facebook/callback')
-  async fbLoginComplete(req: Request) {
-    return req.auth.context!;
+  @Authenticate(FB_AUTH)
+  async fbLoginComplete() {
+    return this.service.context;
   }
 }

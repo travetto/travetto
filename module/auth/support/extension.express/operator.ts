@@ -21,11 +21,12 @@ export class AuthOperator extends ExpressOperator {
 
   constructor(private service: AuthService) {
     super();
+    this.priority = 100;
   }
 
   async postConstruct() {
     for (const provider of DependencyRegistry.getCandidateTypes(AuthProvider as Class)) {
-      const dep = await DependencyRegistry.getInstance(provider.class);
+      const dep = await DependencyRegistry.getInstance(AuthProvider, provider.qualifier);
       this.providers.set(provider.qualifier.toString(), dep);
     }
   }
@@ -77,6 +78,8 @@ export class AuthOperator extends ExpressOperator {
 
   operate(app: ExpressApp) {
     app.get().use(async (req, res, next) => {
+
+      console.log('Operator');
 
       const r = req as Request;
 

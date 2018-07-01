@@ -20,13 +20,16 @@ export class AppConfig {
         {
           clientID: '914464648748805',
           clientSecret: '9740ebfa8b78f13042de7debf887b3e6',
-          callbackURL: 'http://localhost:3000/auth/facebook/callback'
+          callbackURL: 'http://localhost:3000/auth/facebook/callback',
+          profileFields: ['id', 'displayName', 'photos', 'email']
         },
         (accessToken, refreshToken, profile, cb) => {
+          console.log('Profile', FbUser.from(profile));
           return cb(undefined, FbUser.from(profile));
         }
       ),
       new PrincipalConfig(FbUser, {
+
         id: 'id',
         permissions: 'roles'
       })

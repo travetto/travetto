@@ -12,7 +12,8 @@ export class AuthPassportProvider<U> extends AuthProvider<U> {
 
   async login(req: Request, res: Response) {
     return new Promise<AuthContext<U> | undefined>((resolve, reject) => {
-      passport.authenticate(this.strategyName, (err, user) => {
+      passport.authenticate(this.strategyName, (err, user, ...rest) => {
+        console.log('Successfully logged in', user, rest);
         if (err) {
           reject(err);
         } else {

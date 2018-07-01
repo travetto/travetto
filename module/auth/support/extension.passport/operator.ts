@@ -11,6 +11,11 @@ const PASSPORT = Symbol('@travetto/auth/passport');
 })
 export class AuthPassportOperator extends ExpressOperator {
 
+  constructor() {
+    super();
+    this.priority = 200;
+  }
+
   async operate(app: ExpressApp) {
     const e = app.get();
     e.use(passport.initialize());
