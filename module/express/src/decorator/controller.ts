@@ -1,10 +1,13 @@
-import { DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
 
 import { PathType } from '../model';
 import { ControllerRegistry } from '../service';
 
-const unitMapping = { s: 1000, ms: 1, m: 60 * 1000, h: 60 * 60 * 1000 };
+const MIN = 1000 * 60;
+const HOUR = MIN * 60;
+const DAY = HOUR * 24;
+
+const unitMapping = { s: 1000, ms: 1, m: MIN, h: HOUR, d: DAY, w: DAY * 7, y: DAY * 365 };
 type Units = keyof (typeof unitMapping);
 
 export function Controller(path = '') {
