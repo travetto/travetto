@@ -62,6 +62,13 @@ export class RouteUtil {
       }
     } else if (typeof out === 'string') {
       res.send(out);
+    } else if (out instanceof Error) {
+      const status = (out as any).status || (out as any).statusCode || 500;
+      res.status(status);
+      res.json({
+        message: out.message,
+        status
+      });
     } else {
       res.json(out);
     }
@@ -97,7 +104,10 @@ export class RouteUtil {
 
   static async errorHandler(error: any, req: Request, res: Response, next?: NextFunction) {
 
-    const status = error.status || error.statusCode || 500;
+    // Generally send the error directly to the output
+    if (!res.headersSent) {
+      await RouteUtil.render(res, error);
+    }
 
     console.error(`Request`, {
       meta: {
@@ -105,17 +115,9 @@ export class RouteUtil {
         path: req.path,
         query: req.query,
         params: req.params,
-        statusCode: status
+        statusCode: res.statusCode
       }
     });
-
-    console.info(error);
-
-    // Generally send the error directly to the output
-    if (!res.headersSent) {
-      res.status(status);
-      await RouteUtil.render(res, error);
-    }
 
     res.end();
   }

@@ -10,6 +10,7 @@ export class Redirect implements Renderable {
   }
 
   render(res: Response) {
-    res.status(this.status).location(this.location);
+    res.status(this.status);
+    res.location(this.location);
   }
 }
