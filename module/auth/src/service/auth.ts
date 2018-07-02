@@ -26,7 +26,7 @@ export class AuthService<U = { id: string }> {
   }
 
   get unauthenticated() {
-    return !this.context;
+    return !this.context.principal;
   }
 
   checkPermissions(include: string[], exclude: string[]) {
