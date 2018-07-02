@@ -60,12 +60,8 @@ class $Logger {
     const args = (event.args || []).slice(0);
     const last = args[args.length - 1];
 
-    if (last) {
-      if (Object.keys(last).length === 1 && last.meta) { // Handle meta
-        event.meta = args.pop().meta;
-      } else if (last.stack) { // Handle error
-        args[args.length - 1] = last.stack;
-      }
+    if (last && Object.keys(last).length === 1 && last.meta) { // Handle meta
+      event.meta = args.pop().meta;
     }
 
     // Use sliced values
