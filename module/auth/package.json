@@ -26,5 +26,5 @@
     "test": "./node_modules/.bin/travetto-test", 
     "test:all": "npm test test/.*"
   }, 
-  "version": "0.0.20"
+  "version": "0.0.21"
 }
