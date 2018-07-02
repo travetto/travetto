@@ -10,7 +10,7 @@ export class AuthService<U = { id: string }> {
   protected _context: Context;
 
   get context(): AuthContext<U> {
-    return this._context.get().auth;
+    return (this._context.get() || {}).auth || {};
   }
 
   set context(ctx: AuthContext<U>) {
