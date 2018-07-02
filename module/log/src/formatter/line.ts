@@ -1,7 +1,6 @@
 import * as util from 'util';
-import * as path from 'path';
 import { LogEvent } from '../types';
-import { stylize, LEVEL_STYLES, makeLink } from './styles';
+import { stylize, LEVEL_STYLES } from './styles';
 import { AppEnv, simplifyStack } from '@travetto/base';
 
 export interface LineFormatterOpts {
