@@ -15,11 +15,11 @@ export class AuthServiceAdapter {
   }
 
   get authenticated() {
-    return !this.unauthenticated;
+    return this.service.authenticated;
   }
 
   get unauthenticated() {
-    return !this.context.principal;
+    return this.service.unauthenticated;
   }
 
   checkPermissions(include: string[], exclude: string[]) {
