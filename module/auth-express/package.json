@@ -1,36 +1,36 @@
 {
   "author": {
-    "email": "travetto.framework@gmail.com",
+    "email": "travetto.framework@gmail.com", 
     "name": "Travetto Framework"
-  },
+  }, 
   "dependencies": {
-    "@travetto/auth": "0.x.x",
+    "@travetto/auth": "0.x.x", 
     "@travetto/express": "0.x.x"
-  },
-  "description": "Express authentication integration support for the travetto framework",
+  }, 
+  "description": "Express authentication integration support for the travetto framework", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "homepage": "https://travetto.io",
+  }, 
+  "homepage": "https://travetto.io", 
   "keywords": [
-    "authentication",
-    "express",
-    "travetto",
-    "decorators",
+    "authentication", 
+    "express", 
+    "travetto", 
+    "decorators", 
     "passport"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/auth-express",
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/auth-express", 
   "peerDependencies": {
     "passport": "^0.4.0"
-  },
+  }, 
   "repository": {
     "url": "https://github.com/travetto/auth-epxress.git"
-  },
+  }, 
   "scripts": {
-    "test": "./node_modules/.bin/travetto-test",
+    "test": "./node_modules/.bin/travetto-test", 
     "test:all": "npm test test/.*"
-  },
-  "version": "0.0.4"
+  }, 
+  "version": "0.0.5"
 }
