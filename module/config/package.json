@@ -1,29 +1,29 @@
 {
   "author": {
-    "email": "travetto.framework@gmail.com",
+    "email": "travetto.framework@gmail.com", 
     "name": "Travetto Framework"
-  },
+  }, 
   "dependencies": {
-    "@travetto/base": "0.x.x",
-    "@types/js-yaml": "^3.10.1",
+    "@travetto/base": "0.x.x", 
+    "@types/js-yaml": "^3.10.1", 
     "js-yaml": "https://github.com/arciisine/js-yaml.git#3.11.0-slim"
-  },
-  "description": "Environment-aware config management using yaml files",
-  "homepage": "https://travetto.io",
+  }, 
+  "description": "Environment-aware config management using yaml files", 
+  "homepage": "https://travetto.io", 
   "keywords": [
-    "yaml",
-    "decorators",
-    "configuration",
-    "environment-detection",
-    "travetto",
+    "yaml", 
+    "decorators", 
+    "configuration", 
+    "environment-detection", 
+    "travetto", 
     "typescript"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/config",
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/config", 
   "repository": {
     "url": "https://github.com/travetto/config.git"
-  },
-  "scripts": {},
-  "version": "0.0.38"
+  }, 
+  "scripts": {}, 
+  "version": "0.0.39"
 }
