@@ -1,32 +1,32 @@
 {
   "author": {
-    "email": "travetto.framework@gmail.com",
+    "email": "travetto.framework@gmail.com", 
     "name": "Travetto Framework"
-  },
+  }, 
   "dependencies": {
-    "@travetto/base": "0.x.x",
-    "@types/cron": "^1.2.1",
+    "@travetto/base": "0.x.x", 
+    "@types/cron": "^1.2.1", 
     "cron": "^1.3.0"
-  },
-  "description": "Managed registry for scheduling jobs using cron expressions.",
+  }, 
+  "description": "Managed registry for scheduling jobs using cron expressions.", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "homepage": "https://travetto.io",
+  }, 
+  "homepage": "https://travetto.io", 
   "keywords": [
-    "scheduling",
-    "cron",
-    "typescript",
+    "scheduling", 
+    "cron", 
+    "typescript", 
     "travetto"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/schedule",
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/schedule", 
   "repository": {
     "url": "https://github.com/travetto/schedule.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.12"
+  }, 
+  "version": "0.0.13"
 }
