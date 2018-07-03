@@ -1,39 +1,39 @@
 {
   "author": {
-    "email": "travetto.framework@gmail.com",
+    "email": "travetto.framework@gmail.com", 
     "name": "Travetto Framework"
-  },
+  }, 
   "dependencies": {
-    "@travetto/config": "0.x.x",
-    "@travetto/registry": "0.x.x",
-    "@types/faker": "^4.1.2",
+    "@travetto/config": "0.x.x", 
+    "@travetto/registry": "0.x.x", 
+    "@types/faker": "^4.1.2", 
     "faker": "^4.1.0"
-  },
-  "description": "Data type registry for runtime validation, reflection and binding. ",
+  }, 
+  "description": "Data type registry for runtime validation, reflection and binding. ", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "homepage": "https://travetto.io",
+  }, 
+  "homepage": "https://travetto.io", 
   "keywords": [
-    "schema",
-    "ast-transformations",
-    "validation",
-    "faker",
-    "typescript",
-    "travetto",
+    "schema", 
+    "ast-transformations", 
+    "validation", 
+    "faker", 
+    "typescript", 
+    "travetto", 
     "decorators"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/schema",
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/schema", 
   "peerDependencies": {
     "@travetto/di": "0.x.x"
-  },
+  }, 
   "repository": {
     "url": "https://github.com/travetto/schema.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.34"
+  }, 
+  "version": "0.0.35"
 }
