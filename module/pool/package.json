@@ -1,32 +1,32 @@
 {
   "author": {
-    "email": "travetto.framework@gmail.com",
+    "email": "travetto.framework@gmail.com", 
     "name": "Travetto Framework"
-  },
+  }, 
   "dependencies": {
-    "@travetto/base": "0.x.x",
-    "@types/generic-pool": "^3.1.2",
+    "@travetto/base": "0.x.x", 
+    "@types/generic-pool": "^3.1.2", 
     "generic-pool": "^3.4.2"
-  },
-  "description": "Worker pool logic with constructs for concurrency management",
+  }, 
+  "description": "Worker pool logic with constructs for concurrency management", 
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  },
-  "homepage": "https://travetto.io",
+  }, 
+  "homepage": "https://travetto.io", 
   "keywords": [
-    "pool",
-    "typescript",
-    "generic-pool",
+    "pool", 
+    "typescript", 
+    "generic-pool", 
     "travetto"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/pool",
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/pool", 
   "repository": {
     "url": "https://github.com/travetto/pool.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.14"
+  }, 
+  "version": "0.0.15"
 }
