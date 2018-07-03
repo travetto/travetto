@@ -12,7 +12,7 @@ if (process.env.EXECUTION) {
     const { Runner } = require('../src/runner');
     new Runner(process.argv.slice(2)).run().then(x => process.exit(0), e => process.exit(1));
   }).catch(err => {
-    console.log(err);
+    console.error(err);
     process.exit(1);
   });
 }
