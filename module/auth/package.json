@@ -1,30 +1,30 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
-    "name": "Timothy Soehnlin"
-  }, 
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "dependencies": {
-    "@travetto/context": "0.x.x", 
+    "@travetto/context": "0.x.x",
     "@travetto/util": "0.x.x"
-  }, 
-  "description": "Authentication scaffolding for the travetto framework", 
+  },
+  "description": "Authentication scaffolding for the travetto framework",
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  }, 
-  "homepage": "https://travetto.io", 
+  },
+  "homepage": "https://travetto.io",
   "keywords": [
-    "authentication", 
+    "authentication",
     "travetto"
-  ], 
-  "license": "MIT", 
-  "main": "index.ts", 
-  "name": "@travetto/auth", 
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/auth",
   "repository": {
     "url": "https://github.com/travetto/auth.git"
-  }, 
+  },
   "scripts": {
-    "test": "./node_modules/.bin/travetto-test", 
+    "test": "./node_modules/.bin/travetto-test",
     "test:all": "npm test test/.*"
-  }, 
+  },
   "version": "0.0.22"
 }
