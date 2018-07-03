@@ -1,27 +1,27 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
-    "name": "Timothy Soehnlin"
-  }, 
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "dependencies": {
-    "@travetto/base": "0.x.x", 
+    "@travetto/base": "0.x.x",
     "@travetto/pool": "0.x.x"
-  }, 
-  "description": "Common wrapper around process execution with high level docker support.", 
-  "homepage": "https://travetto.io", 
+  },
+  "description": "Common wrapper around process execution with high level docker support.",
+  "homepage": "https://travetto.io",
   "keywords": [
-    "exec", 
-    "docker", 
-    "child-process", 
-    "ipc", 
-    "travetto", 
+    "exec",
+    "docker",
+    "child-process",
+    "ipc",
+    "travetto",
     "typescript"
-  ], 
-  "license": "MIT", 
-  "main": "src/lib/", 
-  "name": "@travetto/exec", 
+  ],
+  "license": "MIT",
+  "main": "src/lib/",
+  "name": "@travetto/exec",
   "repository": {
     "url": "https://github.com/travetto/exec.git"
-  }, 
+  },
   "version": "0.0.37"
 }
