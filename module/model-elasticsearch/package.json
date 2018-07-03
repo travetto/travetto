@@ -1,37 +1,37 @@
 {
   "author": {
-    "email": "travetto.framework@gmail.com",
+    "email": "travetto.framework@gmail.com", 
     "name": "Travetto Framework"
-  },
+  }, 
   "dependencies": {
-    "@travetto/model": "0.x.x",
-    "@travetto/schema": "0.x.x",
-    "@types/elasticsearch": "^5.0.23",
+    "@travetto/model": "0.x.x", 
+    "@travetto/schema": "0.x.x", 
+    "@types/elasticsearch": "^5.0.23", 
     "elasticsearch": "^15.0.0"
-  },
-  "description": "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.",
+  }, 
+  "description": "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.", 
   "devDependencies": {
-    "@travetto/test": "0.x.x",
+    "@travetto/test": "0.x.x", 
     "@travetto/util": "0.x.x"
-  },
-  "homepage": "https://travetto.io",
+  }, 
+  "homepage": "https://travetto.io", 
   "keywords": [
-    "elasticsearch",
-    "data-modeling",
-    "real-time",
-    "docker",
-    "model",
-    "travetto",
+    "elasticsearch", 
+    "data-modeling", 
+    "real-time", 
+    "docker", 
+    "model", 
+    "travetto", 
     "typescript"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/model-elasticsearch",
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/model-elasticsearch", 
   "repository": {
     "url": "https://github.com/travetto/model-elasticsearch.git"
-  },
+  }, 
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  },
-  "version": "0.0.11"
+  }, 
+  "version": "0.0.12"
 }
