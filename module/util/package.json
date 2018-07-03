@@ -1,24 +1,24 @@
 {
   "author": {
-    "email": "timothy.soehnlin@gmail.com", 
-    "name": "Timothy Soehnlin"
-  }, 
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "dependencies": {
     "@travetto/base": "0.x.x"
-  }, 
-  "description": "Catch-all library for utilities of the travetto framework", 
-  "homepage": "https://travetto.io", 
+  },
+  "description": "Catch-all library for utilities of the travetto framework",
+  "homepage": "https://travetto.io",
   "keywords": [
-    "travetto", 
-    "typescript", 
+    "travetto",
+    "typescript",
     "http-request"
-  ], 
-  "license": "MIT", 
-  "main": "index.ts", 
-  "name": "@travetto/util", 
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/util",
   "repository": {
     "url": "https://github.com/travetto/util.git"
-  }, 
-  "scripts": {}, 
+  },
+  "scripts": {},
   "version": "0.0.13"
 }
