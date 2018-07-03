@@ -1,36 +1,36 @@
 {
   "author": {
-    "email": "travetto.framework@gmail.com",
+    "email": "travetto.framework@gmail.com", 
     "name": "Travetto Framework"
-  },
+  }, 
   "bin": {
-    "travetto": "bin/travetto.js",
+    "travetto": "bin/travetto.js", 
     "travetto-clean": "bin/travetto-clean.js"
-  },
+  }, 
   "dependencies": {
-    "@types/node": "^10.3.2",
-    "trace": "^3.1.0",
+    "@types/node": "^10.3.2", 
+    "trace": "^3.1.0", 
     "typescript": "2.9.x"
-  },
-  "description": "Bootstrapping, application phase management, environment config and common utilities for travetto applications.",
-  "homepage": "https://travetto.io",
+  }, 
+  "description": "Bootstrapping, application phase management, environment config and common utilities for travetto applications.", 
+  "homepage": "https://travetto.io", 
   "keywords": [
-    "bootstrapping",
-    "shutdown-helper",
-    "file-watcher",
-    "caching",
-    "filesystem-traversal",
-    "travetto",
+    "bootstrapping", 
+    "shutdown-helper", 
+    "file-watcher", 
+    "caching", 
+    "filesystem-traversal", 
+    "travetto", 
     "typescript"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "name": "@travetto/base",
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/base", 
   "repository": {
     "url": "https://github.com/travetto/base.git"
-  },
+  }, 
   "scripts": {
     "postinstall": "./node_modules/.bin/travetto-clean"
-  },
-  "version": "0.0.160"
+  }, 
+  "version": "0.0.161"
 }
