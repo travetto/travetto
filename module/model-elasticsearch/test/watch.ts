@@ -1,5 +1,5 @@
-import { Model, BaseModel, ModelRegistry, ModelSource, ModelService } from '@travetto/model';
-import { Schema, Integer, MaxLength, MinLength, Float } from '@travetto/schema';
+import { Model, BaseModel, ModelSource, ModelService } from '@travetto/model';
+import { Schema } from '@travetto/schema';
 import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../src';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 
