@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry, Schema } from '@travetto/schema';
+import { SchemaRegistry } from '@travetto/schema';
 
-export function generateSchema<T>(cls: Class<T>) {
+export function generateSourceSchema<T>(cls: Class<T>) {
   const schema = SchemaRegistry.getViewSchema(cls);
 
   const props: any = {};
@@ -27,7 +27,7 @@ export function generateSchema<T>(cls: Class<T>) {
     } else if (SchemaRegistry.has(conf.type)) {
       props[field] = {
         type: 'nested',
-        ...generateSchema(conf.type)
+        ...generateSourceSchema(conf.type)
       };
     }
   }

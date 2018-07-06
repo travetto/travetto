@@ -1,23 +1,19 @@
 import * as es from 'elasticsearch';
-import * as util from 'util';
 
 import {
   ModelSource, IndexConfig, Query,
   QueryOptions, BulkState, BulkResponse,
   ModelRegistry, ModelCore,
   PageableModelQuery,
-  WhereClause,
   SelectClause,
-  SortClause,
   ModelQuery
 } from '@travetto/model';
-import { Injectable } from '@travetto/di';
 import { ModelElasticsearchConfig } from '../config';
 import { Class, ChangeEvent } from '@travetto/registry';
-import { BaseError, isPlainObject, deepAssign } from '@travetto/base';
-import { FieldConfig, SchemaConfig, SchemaRegistry, Schema, SchemaChangeEvent, FieldChangeEvent } from '@travetto/schema';
+import { isPlainObject, deepAssign } from '@travetto/base';
+import { SchemaChangeEvent } from '@travetto/schema';
 import { extractWhereQuery } from './query-builder';
-import { generateSchema } from './schema';
+import { generateSourceSchema } from './schema';
 
 type ESBulkItemPayload = {
   _id: string;
@@ -66,7 +62,7 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async createIndex(cls: Class<any>, alias = true) {
-    const schema = generateSchema(cls);
+    const schema = generateSourceSchema(cls);
     const ident = this.getIdentity(cls);
     const index = `${ident.index}_${(Math.random() * 1000000).toFixed(0)}`;
     try {
@@ -127,7 +123,7 @@ export class ModelElasticsearchSource extends ModelSource {
       await this.client.indices.delete({ index: curr });
       await this.client.indices.putAlias({ index: next, name: index });
     } else { // Only update
-      const schema = generateSchema(e.cls);
+      const schema = generateSourceSchema(e.cls);
 
       await this.client.indices.putMapping({
         index,
