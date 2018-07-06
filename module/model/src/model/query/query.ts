@@ -1,6 +1,5 @@
-import { Class } from '@travetto/registry';
-import { WhereClause, _WhereClause } from './where';
-import { RetainFields, Point, PrimitiveArray, Primitive } from './common';
+import { _WhereClause } from './where';
+import { RetainFields } from './common';
 
 type _SelectClause<T> = {
   [P in keyof T]?:

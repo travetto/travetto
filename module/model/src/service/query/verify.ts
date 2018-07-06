@@ -1,9 +1,9 @@
-import { ModelQuery, Query, PageableModelQuery, GroupClause, WhereClause } from '../../model';
+import { ModelQuery, Query, PageableModelQuery } from '../../model';
 import { Class } from '@travetto/registry';
 import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from './types';
-import { SchemaRegistry, SchemaConfig, ViewConfig, FieldConfig } from '@travetto/schema';
+import { SchemaRegistry } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-import { BaseError, isPlainObject } from '@travetto/base';
+import { isPlainObject } from '@travetto/base';
 import { ValidationErrors } from './error';
 
 interface State extends ErrorCollector<string> {

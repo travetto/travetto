@@ -1,6 +1,5 @@
-import { ModelSource, Query, BulkResponse, BulkState, QueryOptions, ModelService, ModelCore, ModelQuery, PageableModelQuery } from '../index';
+import { ModelSource, Query, BulkResponse, BulkState, ModelCore, ModelQuery, PageableModelQuery } from '../index';
 import { Class, ChangeEvent } from '@travetto/registry';
-import { Person } from './models';
 import { Injectable } from '@travetto/di';
 
 @Injectable({ target: ModelSource })

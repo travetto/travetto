@@ -1,6 +1,6 @@
 import { Schema } from '@travetto/schema';
 import { ModelCore } from './model';
-import { ModelOptions, ModelRegistry } from '../service';
+import { ModelRegistry } from '../service';
 import { Class } from '@travetto/registry';
 
 @Schema()

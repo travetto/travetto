@@ -1,9 +1,9 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaRegistry, SchemaValidator, DEFAULT_VIEW } from '@travetto/schema';
+import { BindUtil, SchemaValidator, DEFAULT_VIEW } from '@travetto/schema';
 import { QueryVerifierService } from './query';
 import { Injectable } from '@travetto/di';
 import { ModelOptions } from './types';
-import { ModelCore, Query, QueryOptions, BulkState, ModelQuery, PageableModelQuery, SortClause } from '../model';
+import { ModelCore, Query, BulkState, ModelQuery, PageableModelQuery } from '../model';
 import { ModelSource } from './source';
 import { ModelRegistry } from './registry';
 

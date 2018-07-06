@@ -1,4 +1,4 @@
-import { Model, BaseModel, WhereClause, ModelService } from '../index';
+import { Model, BaseModel } from '../index';
 import { Schema } from '@travetto/schema';
 
 @Schema()
