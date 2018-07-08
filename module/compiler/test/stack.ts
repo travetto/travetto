@@ -1,0 +1,19 @@
+import { initStackHandler } from '@travetto/base/src/stacktrace';
+
+initStackHandler();
+
+function test() {
+  setTimeout(function inner1() {
+    setTimeout(function inner2() {
+      setTimeout(function inner3() {
+        throw new Error('Uh ohs');
+      }, 1);
+    }, 1);
+  }, 1);
+}
+
+try {
+  test();
+} catch (e) {
+  console.log(e);
+}
