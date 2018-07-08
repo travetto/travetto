@@ -1,0 +1,33 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com", 
+    "name": "Travetto Framework"
+  }, 
+  "dependencies": {
+    "@travetto/model": "0.x.x", 
+    "@types/mongodb": "^3.0.18", 
+    "mongodb": "^3.0.5"
+  }, 
+  "description": "Mongo backing for the travetto model module.", 
+  "devDependencies": {
+    "@travetto/exec": "0.x.x", 
+    "@travetto/test": "0.x.x"
+  }, 
+  "homepage": "https://travetto.io", 
+  "keywords": [
+    "mongo", 
+    "travetto", 
+    "database", 
+    "typescript"
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/model-mongo", 
+  "repository": {
+    "url": "https://github.com/travetto/model-mongo.git"
+  }, 
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test"
+  }, 
+  "version": "0.0.20"
+}
