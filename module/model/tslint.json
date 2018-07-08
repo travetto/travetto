@@ -1,0 +1,3 @@
+{
+  "extends": "@travetto/base/tslint.json"
+}
