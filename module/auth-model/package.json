@@ -1,0 +1,35 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com", 
+    "name": "Travetto Framework"
+  }, 
+  "dependencies": {
+    "@travetto/auth": "0.x.x", 
+    "@travetto/model": "0.x.x"
+  }, 
+  "description": "Model-based authentication and registration support for the travetto framework", 
+  "devDependencies": {
+    "@travetto/test": "0.x.x"
+  }, 
+  "homepage": "https://travetto.io", 
+  "keywords": [
+    "authentication", 
+    "model", 
+    "travetto", 
+    "registration"
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/auth-model", 
+  "peerDependencies": {
+    "@travetto/auth-express": "0.x.x"
+  }, 
+  "repository": {
+    "url": "https://github.com/travetto/auth-model.git"
+  }, 
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test", 
+    "test:all": "npm test test/.*"
+  }, 
+  "version": "0.0.4"
+}
