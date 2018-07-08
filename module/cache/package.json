@@ -1,0 +1,31 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com", 
+    "name": "Travetto Framework"
+  }, 
+  "dependencies": {
+    "@travetto/compiler": "0.x.x", 
+    "@types/lru-cache": "^4.1.0", 
+    "lru-cache": "^4.1.2"
+  }, 
+  "description": "Caching functionality with decorators for declarative use.", 
+  "devDependencies": {
+    "@travetto/test": "0.x.x"
+  }, 
+  "homepage": "https://travetto.io", 
+  "keywords": [
+    "typescript", 
+    "travetto", 
+    "cache"
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/cache", 
+  "repository": {
+    "url": "https://github.com/travetto/cache.git"
+  }, 
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test"
+  }, 
+  "version": "0.0.19"
+}
