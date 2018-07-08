@@ -1,0 +1,34 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com", 
+    "name": "Travetto Framework"
+  }, 
+  "dependencies": {
+    "@travetto/asset": "0.x.x", 
+    "@types/gridfs-stream": "^0.5.30", 
+    "@types/mongodb": "^3.0.8", 
+    "gridfs-stream": "^1.1.1", 
+    "mongodb": "^3.0.4"
+  }, 
+  "description": "Mongo/GridFS backend for the travetto asset module", 
+  "devDependencies": {
+    "@travetto/test": "0.x.x"
+  }, 
+  "homepage": "https://travetto.io", 
+  "keywords": [
+    "mongo", 
+    "gridfs-storage", 
+    "typescript", 
+    "travetto"
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/asset-mongo", 
+  "repository": {
+    "url": "https://github.com/travetto/asset-mongo.git"
+  }, 
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test"
+  }, 
+  "version": "0.0.16"
+}
