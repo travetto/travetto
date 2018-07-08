@@ -1,0 +1,8 @@
+db:
+  mysql:
+    name: Oscar
+    connection: mysql://
+    hosts:
+      - a 
+      - b
+      - c
