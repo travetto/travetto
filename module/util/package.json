@@ -1,0 +1,24 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com", 
+    "name": "Travetto Framework"
+  }, 
+  "dependencies": {
+    "@travetto/base": "0.x.x"
+  }, 
+  "description": "Catch-all library for utilities of the travetto framework", 
+  "homepage": "https://travetto.io", 
+  "keywords": [
+    "travetto", 
+    "typescript", 
+    "http-request"
+  ], 
+  "license": "MIT", 
+  "main": "index.ts", 
+  "name": "@travetto/util", 
+  "repository": {
+    "url": "https://github.com/travetto/util.git"
+  }, 
+  "scripts": {}, 
+  "version": "0.0.14"
+}
