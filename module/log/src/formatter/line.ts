@@ -1,0 +1,96 @@
+import * as util from 'util';
+import { LogEvent } from '../types';
+import { stylize, LEVEL_STYLES } from './styles';
+import { AppEnv, simplifyStack } from '@travetto/base';
+
+export interface LineFormatterOpts {
+  timestamp?: boolean;
+  colorize?: boolean;
+  align?: boolean;
+  level?: boolean;
+  location?: boolean;
+}
+
+export function lineFormatter(opts: LineFormatterOpts) {
+  opts = { colorize: true, timestamp: true, align: true, level: true, location: true, ...opts };
+
+  return (ev: LogEvent) => {
+    let out = '';
+
+    if (opts.timestamp) {
+      let timestamp = new Date(ev.timestamp).toISOString().split('.')[0];
+      if (opts.colorize) {
+        timestamp = stylize(timestamp, 'white', 'bold');
+      }
+      out = `${out}${timestamp} `;
+    }
+
+    if (opts.level) {
+      let level: string = ev.level;
+      if (opts.colorize) {
+        level = stylize(level, ...LEVEL_STYLES[level]);
+      }
+      if (opts.align) {
+        level += ' '.repeat(5 - ev.level.length);
+      }
+      out = `${out}${level} `;
+    }
+
+    if (ev.file && opts.location) {
+      let ns = ev.file
+        .replace(AppEnv.cwd, '')
+        .replace(/^.*node_modules/, '')
+        .replace(/[\/\\]/g, '.')
+        .replace(/^[.]/, '')
+        .replace(/[.](t|j)s$/, '');
+
+      if (ns.length > 20) {
+        ns = ns.split(/[.]/g)
+          .map((x, i, arr) => {
+            if ((i + 1) === arr.length) {
+              return x;
+            } else {
+              return x.replace('@travetto', '@trv').substring(0, 4).replace(/[aeiou]/g, '');
+            }
+          }).join('.');
+      }
+
+      const loc = ev.line ? `${ns}:${' '.repeat(2 - Math.trunc(Math.floor(Math.log10(ev.line)))) + ev.line}` : ns;
+      if (opts.colorize) {
+        // ev.category = makeLink(ev.category, `file://${ev.file}:${ev.line}`);
+      }
+      out = `${out}[${loc}] `;
+    }
+
+    if (ev.category) {
+      out = `${out}[${ev.category}] `;
+    }
+
+    let message = ev.message;
+
+    if (ev.args && ev.args.length) {
+      const args = ev.args.slice(0);
+      if (message) {
+        args.unshift(message);
+      }
+
+      if (ev.meta) {
+        args.push(ev.meta);
+      }
+      message = args.map((x: any) =>
+        typeof x === 'string' ? x :
+          (x instanceof Error ? (AppEnv.prod ? x.stack : simplifyStack(x)) :
+            util.inspect(x,
+              ev.level === 'debug',
+              ev.level === 'debug' ? 4 : 2,
+              opts.colorize !== false
+            )
+          )).join(' ');
+    }
+
+    if (message) {
+      out = `${out}${message} `;
+    }
+    return out.substring(0, out.length - 1);
+  };
+}
