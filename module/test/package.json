@@ -7,6 +7,8 @@
     "travetto-test": "bin/travetto-test.js"
   },
   "dependencies": {
+    "@travetto/base": "0.x.x",
+    "@travetto/pool": "0.x.x",
     "@travetto/exec": "0.x.x",
     "@travetto/registry": "0.x.x",
     "@types/js-yaml": "^3.11.1",

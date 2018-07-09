@@ -1,7 +1,6 @@
-import { LocalExecution, ChildExecution, serializeError, deserializeError } from '@travetto/exec';
+import { LocalExecution, ChildExecution, serializeError } from '@travetto/exec';
 import { ConcurrentPool, IdleManager } from '@travetto/pool';
-import { PhaseManager, AppInfo } from '@travetto/base';
-import { Consumer } from '../consumer';
+import { PhaseManager } from '@travetto/base';
 
 /***
   Flow of events
