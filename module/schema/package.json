@@ -4,14 +4,14 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/config": "0.x.x",
-    "@travetto/registry": "0.x.x",
+    "@travetto/config": "^0.0.40",
+    "@travetto/registry": "^0.0.50",
     "@types/faker": "^4.1.2",
     "faker": "^4.1.0"
   },
   "description": "Data type registry for runtime validation, reflection and binding. ",
   "devDependencies": {
-    "@travetto/test": "0.x.x"
+    "@travetto/test": "^0.0.83"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -35,5 +35,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.0.35"
+  "version": "0.0.36"
 }

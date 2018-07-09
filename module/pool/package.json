@@ -4,13 +4,13 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/base": "0.x.x",
+    "@travetto/base": "^0.0.162",
     "@types/generic-pool": "^3.1.2",
     "generic-pool": "^3.4.2"
   },
   "description": "Worker pool logic with constructs for concurrency management",
   "devDependencies": {
-    "@travetto/test": "0.x.x"
+    "@travetto/test": "^0.0.83"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -28,5 +28,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.0.15"
+  "version": "0.0.16"
 }

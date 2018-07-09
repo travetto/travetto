@@ -4,13 +4,13 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/compiler": "0.x.x",
-    "@travetto/config": "0.x.x",
-    "@travetto/registry": "0.x.x"
+    "@travetto/compiler": "^0.0.48",
+    "@travetto/config": "^0.0.40",
+    "@travetto/registry": "^0.0.50"
   },
   "description": "Dependency registration/management and injection support.",
   "devDependencies": {
-    "@travetto/test": "0.x.x"
+    "@travetto/test": "^0.0.83"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -30,5 +30,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.0.32"
+  "version": "0.0.33"
 }

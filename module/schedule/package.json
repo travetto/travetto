@@ -4,13 +4,13 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/base": "0.x.x",
+    "@travetto/base": "^0.0.162",
     "@types/cron": "^1.2.1",
     "cron": "^1.3.0"
   },
   "description": "Managed registry for scheduling jobs using cron expressions.",
   "devDependencies": {
-    "@travetto/test": "0.x.x"
+    "@travetto/test": "^0.0.83"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -28,5 +28,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.0.13"
+  "version": "0.0.14"
 }

@@ -4,12 +4,12 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/auth": "0.x.x",
-    "@travetto/express": "0.x.x"
+    "@travetto/auth": "^0.0.24",
+    "@travetto/express": "^0.0.31"
   },
   "description": "Express authentication integration support for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "0.x.x"
+    "@travetto/test": "^0.0.83"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -32,5 +32,5 @@
     "test": "./node_modules/.bin/travetto-test",
     "test:all": "npm test test/.*"
   },
-  "version": "0.0.5"
+  "version": "0.0.6"
 }

@@ -4,10 +4,10 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/cache": "0.x.x",
-    "@travetto/di": "0.x.x",
-    "@travetto/exec": "0.x.x",
-    "@travetto/util": "0.x.x",
+    "@travetto/cache": "^0.0.20",
+    "@travetto/di": "^0.0.33",
+    "@travetto/exec": "^0.0.39",
+    "@travetto/util": "^0.0.15",
     "@types/file-type": "^5.2.1",
     "@types/mime": "^2.0.0",
     "@types/os-tmpdir": "^1.0.0",
@@ -16,7 +16,7 @@
   },
   "description": "Modular library for storing and retrieving binary assets with additional support for image modification at runtime",
   "devDependencies": {
-    "@travetto/test": "0.x.x"
+    "@travetto/test": "^0.0.83"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -37,5 +37,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.0.28"
+  "version": "0.0.29"
 }
