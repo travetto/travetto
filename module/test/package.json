@@ -15,9 +15,6 @@
     "minimist": "^1.2.0"
   },
   "description": "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin",
-  "devDependencies": {
-    "@travetto/test": "file://."
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "unit-testing",
