@@ -64,6 +64,6 @@ export function InjectableFactory(...args: any[]): MethodDecorator {
 
   return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
     const config: InjectableFactoryConfig<any> = extractSymbolOrConfig(args);
-    DependencyRegistry.registerFactory({ ...config, fn: descriptor.value, id: `${target.__id}#${property}` });
+    DependencyRegistry.registerFactory({ ...config, fn: descriptor.value, id: `${target.__id}#${property.toString()}` });
   };
 }
