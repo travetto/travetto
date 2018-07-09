@@ -1,31 +1,31 @@
 {
   "author": {
-    "email": "travetto.framework@gmail.com", 
+    "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
-  }, 
+  },
   "dependencies": {
     "@travetto/compiler": "0.x.x"
-  }, 
-  "description": "Logging framework that integrates at the console.log level.", 
+  },
+  "description": "Logging framework that integrates at the console.log level.",
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  }, 
-  "homepage": "https://travetto.io", 
+  },
+  "homepage": "https://travetto.io",
   "keywords": [
-    "typescript", 
-    "travetto", 
-    "logging", 
-    "ast-transformation", 
+    "typescript",
+    "travetto",
+    "logging",
+    "ast-transformation",
     "console-log"
-  ], 
-  "license": "MIT", 
-  "main": "index.ts", 
-  "name": "@travetto/log", 
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/log",
   "repository": {
-    "url": "https://github.com/travetto/log.git"
-  }, 
+    "url": "https://github.com/travetto/travetto.git"
+  },
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  }, 
+  },
   "version": "0.0.32"
 }

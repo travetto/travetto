@@ -1,4 +1,4 @@
-travetto: Compiler
+Travetto Compiler
 ===
 
 The framework, while using [`typescript`](http://typescriptlang.org), has need of some extended functionality. The additional functionality is

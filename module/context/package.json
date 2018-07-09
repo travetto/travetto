@@ -1,31 +1,31 @@
 {
   "author": {
-    "email": "travetto.framework@gmail.com", 
+    "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
-  }, 
+  },
   "dependencies": {
     "@travetto/di": "0.x.x"
-  }, 
-  "description": "Async-aware state management, maintaining context across asynchronous calls.", 
+  },
+  "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "devDependencies": {
     "@travetto/test": "0.x.x"
-  }, 
-  "homepage": "https://travetto.io", 
+  },
+  "homepage": "https://travetto.io",
   "keywords": [
-    "async-hooks", 
-    "decorators", 
-    "continuation-local-storage", 
-    "travetto", 
+    "async-hooks",
+    "decorators",
+    "continuation-local-storage",
+    "travetto",
     "typescript"
-  ], 
-  "license": "MIT", 
-  "main": "index.ts", 
-  "name": "@travetto/context", 
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/context",
   "repository": {
-    "url": "https://github.com/travetto/context.git"
-  }, 
+    "url": "https://github.com/travetto/travetto.git"
+  },
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
-  }, 
+  },
   "version": "0.0.21"
 }

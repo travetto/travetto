@@ -24,7 +24,7 @@
   "main": "index.ts",
   "name": "@travetto/model",
   "repository": {
-    "url": "https://github.com/travetto/model.git"
+    "url": "https://github.com/travetto/travetto.git"
   },
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
