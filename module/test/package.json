@@ -7,7 +7,6 @@
     "travetto-test": "bin/travetto-test.js"
   },
   "dependencies": {
-    "@travetto/base": "^0.0.162",
     "@travetto/exec": "^0.0.39",
     "@travetto/pool": "^0.0.16",
     "@travetto/registry": "^0.0.50",

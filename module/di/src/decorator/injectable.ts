@@ -1,7 +1,7 @@
-import { InjectableConfig, Dependency } from '../types';
-import { DependencyRegistry, DEFAULT_INSTANCE } from '../service';
 import { Class } from '@travetto/registry';
-import { InjectableFactoryConfig } from '..';
+
+import { InjectableFactoryConfig, InjectableConfig, Dependency } from '../types';
+import { DependencyRegistry } from '../service';
 
 function extractSymbolOrConfig<T extends { qualifier?: Symbol }>(args: any[]) {
   const out = {} as T;

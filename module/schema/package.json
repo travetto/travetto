@@ -26,9 +26,6 @@
   "license": "MIT",
   "main": "index.ts",
   "name": "@travetto/schema",
-  "peerDependencies": {
-    "@travetto/di": "0.x.x"
-  },
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },

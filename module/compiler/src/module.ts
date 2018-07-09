@@ -16,10 +16,9 @@ export class ModuleManager {
   }
 
   load(request: string, parent: string) {
-
     let mod;
     try {
-      mod = originalLoader.apply(null, arguments);
+      mod = originalLoader.apply(null, [request, parent]);
     } catch (e) {
       if (!AppEnv.prod) { // If attempting to load an optional require
         const p = Module._resolveFilename(request, parent);

@@ -4,7 +4,7 @@ import * as readline from 'readline';
 import * as assert from 'assert';
 import { bulkFind, BaseError, AppEnv } from '@travetto/base';
 
-import { TestConfig, TestResult, SuiteConfig, SuiteResult, Assertion } from '../../model';
+import { TestConfig, TestResult, SuiteConfig, SuiteResult } from '../../model';
 import { TestRegistry } from '../../service';
 import { ConsoleCapture } from '../console';
 import { AssertUtil } from './../assert';

@@ -1,8 +1,5 @@
 import { Watcher, Entry, AppEnv, Handler, findAppFiles } from '@travetto/base';
-import { CompilerUtil } from './util';
 import * as path from 'path';
-
-const EMPTY = (...args: any[]): any => { };
 
 export interface Listener {
   added(name: string): any;

@@ -1,4 +1,4 @@
-import { Entry, scanDirSync } from './scan-fs';
+import { Entry, scanDirSync, isNotDir } from './scan-fs';
 import { AppEnv } from './env';
 
 const cache: { [key: string]: Entry[] } = {};
@@ -12,8 +12,22 @@ export function findAppFiles(ext: string, filter?: (rel: string) => boolean) {
         x.endsWith('node_modules') ||
         x.includes('@travetto')
     }, AppEnv.cwd)
-      .filter(x => !x.stats.isDirectory());
+      .filter(isNotDir)
+      .map(x => {
+        if (x.file.includes('node_modules/@travetto')) {
+          x.file = `${AppEnv.cwd}/node_modules/@travetto/${x.file.split('node_modules/@travetto/').pop()}`;
+        }
+        return x;
+      })
+      .sort((a, b) => a.file.localeCompare(b.file))
+      .reduce((acc, el) => {
+        if (!acc.length || acc[acc.length - 1].file !== el.file) {
+          acc.push(el);
+        }
+        return acc;
+      }, [] as Entry[]);
   }
+
   if (filter) {
     return cache[ext].filter(x => filter(x.module));
   } else {

@@ -4,7 +4,6 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/compiler": "^0.0.48",
     "@travetto/config": "^0.0.40",
     "@travetto/registry": "^0.0.50"
   },

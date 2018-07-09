@@ -35,6 +35,14 @@ export async function bulkFind(handlers: Handler[], base?: string) {
   return out;
 }
 
+export function isDir(x: Entry) {
+  return x.stats.isDirectory() || x.stats.isSymbolicLink();
+}
+
+export function isNotDir(x: Entry) {
+  return !x.stats.isDirectory() && !x.stats.isSymbolicLink();
+}
+
 export function scanDir(handler: Handler, base?: string, entry?: Entry) {
   return new Promise<Entry[]>(async (resolve, reject) => {
 
@@ -53,7 +61,7 @@ export function scanDir(handler: Handler, base?: string, entry?: Entry) {
         const stats = await fsStat(full);
         const subEntry: Entry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
-        if (stats.isDirectory()) {
+        if (isDir(subEntry)) {
           if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
             out.push(subEntry, ...await scanDir(handler, base, subEntry));
           }
@@ -98,7 +106,7 @@ export function scanDirSync(handler: Handler, base?: string, entry?: Entry) {
     const stats = fs.lstatSync(full);
     const subEntry: Entry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
-    if (stats.isDirectory()) {
+    if (isDir(subEntry)) {
       if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
         out.push(subEntry, ...scanDirSync(handler, base, subEntry));
       }
@@ -112,7 +120,7 @@ export function scanDirSync(handler: Handler, base?: string, entry?: Entry) {
 
 export function bulkRequire<T = any>(handlers: Handler[], cwd?: string): T[] {
   return bulkFindSync(handlers, cwd)
-    .filter(x => !x.stats.isDirectory()) // Skip folders
+    .filter(isNotDir) // Skip folders
     .map(x => require(x.file.replace(/[\\]+/g, '/')))
     .filter(x => !!x); // Return non-empty values
 }
@@ -120,21 +128,21 @@ export function bulkRequire<T = any>(handlers: Handler[], cwd?: string): T[] {
 export async function bulkRead(handlers: Handler[]) {
   const files = await bulkFind(handlers);
   const promises = files
-    .filter(x => !x.stats.isDirectory())
+    .filter(isNotDir)
     .map(x => fsReadFileAsync(x.file).then(d => ({ name: x.file, data: d.toString() })));
   return await Promise.all(promises);
 }
 
 export function bulkReadSync(handlers: Handler[]) {
   return bulkFindSync(handlers)
-    .filter(x => !x.stats.isDirectory())
+    .filter(isNotDir)
     .map(x => ({ name: x.file, data: fs.readFileSync(x.file).toString() }));
 }
 
 export async function rimraf(pth: string) {
   const files = await scanDir({}, pth);
   for (const filter of [
-    (x: Entry) => !x.stats.isDirectory(),
+    isNotDir,
     (x: Entry) => x.stats.isDirectory()
   ]) {
     await Promise.all(

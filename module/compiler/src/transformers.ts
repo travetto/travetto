@@ -1,5 +1,5 @@
 import { CustomTransformers } from 'typescript';
-import { requireAppFiles, findAppFiles } from '@travetto/base';
+import { requireAppFiles } from '@travetto/base';
 
 export class TransformerManager {
 

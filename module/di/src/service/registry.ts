@@ -1,8 +1,9 @@
-import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from '../types';
-import { InjectionError } from './error';
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
 import { AppEnv, isPlainObject, deepAssign } from '@travetto/base';
 import { RetargettingHandler } from '@travetto/compiler';
+
+import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from '../types';
+import { InjectionError } from './error';
 
 export const DEFAULT_INSTANCE = Symbol('__default');
 

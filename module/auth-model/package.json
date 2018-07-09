@@ -22,7 +22,7 @@
   "main": "index.ts",
   "name": "@travetto/auth-model",
   "peerDependencies": {
-    "@travetto/auth-express": "0.x.x"
+    "@travetto/auth-express": "^0.x.x"
   },
   "repository": {
     "url": "https://github.com/travetto/travetto.git"

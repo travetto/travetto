@@ -1,5 +1,4 @@
 import { AppEnv } from './env';
-import * as fs from 'fs';
 import * as path from 'path';
 
 const FILTERS: string[] = [];

@@ -14,7 +14,9 @@ export class PhaseManager {
 
   load(priority?: number) {
     const pattern = new RegExp(`phase[.]${this.scope}[.]ts$`);
-    this.initializers = requireAppFiles('.ts', x => pattern.test(x))
+    const initFiles = requireAppFiles('.ts', x => pattern.test(x));
+    console.debug('Initializing Phase', this.scope, initFiles);
+    this.initializers = initFiles
       .map(x => x.init)
       .map(x => ({ priority: PhaseManager.DEFAULT_PRIORITY, ...x }))
       .filter(x => priority === undefined || x.priority <= priority)

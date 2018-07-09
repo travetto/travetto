@@ -1,5 +1,3 @@
-import * as util from 'util';
-
 import { LogEvent, LogListener, LogLevel, LogLevels } from '../types';
 import { AppEnv } from '@travetto/base';
 import { consoleOutput } from '../output';

@@ -38,7 +38,7 @@ export class ConfigLoader {
 
     // Load all namespaces from core
     const files = findAppFiles('.yml',
-      x => /^(node_modules\/@travetto\/[^/]+\/)?config\/[^/]+.yml$/.test(x))
+      x => /config\/[^/]+.yml$/.test(x))
       .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }));
 
     for (const file of files) {
