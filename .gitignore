@@ -4,3 +4,6 @@ rpm_build/**
 .vscode/
 module/*/npm-debug.log
 module/*/package-lock.json
+node_modules/**
+package-lock.json
+**/*.lerna_backup
