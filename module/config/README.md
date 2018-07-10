@@ -15,14 +15,23 @@ node_modules/@travetto/<module>/config/*.yml
 config/*.yml
 ```
 
-3. Load environment specific configurations as defined by the values in `process.env.ENV`
+3. Load profile specific configurations as defined by the values in `process.env.PROFILE`, `process.env.ENV` or passed in as command line arguments.
+```properties
+process.env.PROFILE=<val1>,<val2>...
+```
+or
 ```properties
 process.env.ENV=<val1>,<val2>...
 ```
 would load
 ```bash
-env/<val1>.yml
-env/<val2>.yml
+profile/<val1>.yml
+profile/<val2>.yml
+```
+
+Additionally you can achieve the above state by invoking the app with parameters:
+```bash
+$ npm start <val1> <val2>
 ```
 
 
@@ -42,7 +51,7 @@ database:
     password: test
 ```
 
-`env/prod.yml`
+`profile/prod.yml`
 ```yaml
 database:
   host: prod-host-db
@@ -53,7 +62,7 @@ database:
 with environment variables
 
 ```properties
-ENV=prod
+PROFILEI=prod
 DATABASE_PORT=1234
 DATABASE_CREDS_PASSWORD=<secret>
 ```
