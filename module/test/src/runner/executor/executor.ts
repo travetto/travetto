@@ -2,16 +2,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
 import * as assert from 'assert';
-import { bulkFind, BaseError, AppEnv } from '@travetto/base';
+import { ScanFs, BaseError, Env } from '@travetto/base';
 
 import { TestConfig, TestResult, SuiteConfig, SuiteResult } from '../../model';
 import { TestRegistry } from '../../service';
 import { ConsoleCapture } from '../console';
-import { AssertUtil } from './../assert';
+import { AssertUtil } from '../assert';
 import { Consumer } from '../../consumer';
 import { asyncTimeout, TIMEOUT, ExecutionPhaseManager } from './phase';
 
-export class ExecuteUtil {
+export class TestExecutor {
 
   static isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
@@ -29,7 +29,7 @@ export class ExecuteUtil {
   }
 
   static async getTests(globs: RegExp[]) {
-    const files = (await bulkFind(globs.map(x => ({ testFile: (y: string) => x.test(y) }))))
+    const files = (await ScanFs.bulkFind(globs.map(x => ({ testFile: (y: string) => x.test(y) }))))
       .filter(x => !x.stats.isDirectory())
       .filter(x => !x.file.includes('node_modules'))
       .map(f => this.isTest(f.file).then(valid => ({ file: f.file, valid })));
@@ -244,8 +244,8 @@ export class ExecuteUtil {
   }
 
   static async execute(consumer: Consumer, [file, ...args]: string[]) {
-    if (!file.startsWith(AppEnv.cwd)) {
-      file = path.join(AppEnv.cwd, file);
+    if (!file.startsWith(Env.cwd)) {
+      file = path.join(Env.cwd, file);
     }
 
     require(file.replace(/[\\]/g, '/')); // Path to module

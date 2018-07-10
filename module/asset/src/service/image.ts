@@ -1,18 +1,15 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { CommandService, spawn } from '@travetto/exec';
+import { CommandService, ExecUtil } from '@travetto/exec';
 import { Cacheable } from '@travetto/cache';
 import { Injectable } from '@travetto/di';
-import { CommonProcess, ExecutionResult } from '@travetto/exec/src/types';
-import { AppEnv } from '@travetto/base';
 
 import { AssetService } from './asset';
-import { Asset, AssetMetadata } from '../model';
+import { Asset } from '../model';
 import { AssetUtil } from '../util';
 
 const fsUnlinkAsync = util.promisify(fs.unlink);
-const fsWriteFile = util.promisify(fs.writeFile);
 
 @Injectable()
 export class ImageService {
@@ -20,7 +17,7 @@ export class ImageService {
   converter = new CommandService({
     image: 'v4tech/imagemagick',
     checkForLocal: async () => {
-      return (await spawn('convert --version')[1]).valid;
+      return (await ExecUtil.spawn('convert --version')[1]).valid;
     }
   });
 

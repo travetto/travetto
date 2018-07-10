@@ -10,7 +10,7 @@ import * as util from 'util';
 import * as Mustache from 'mustache';
 
 import { AppCache } from '@travetto/base/src/cache';
-import { CommandService, spawn } from '@travetto/exec';
+import { CommandService, ExecUtil } from '@travetto/exec';
 import { Injectable } from '@travetto/di';
 
 import { TemplateContext } from './types';
@@ -49,7 +49,7 @@ export class TemplateEngine {
   private converter = new CommandService({
     image: 'agregad/pngquant',
     checkForLocal: async () => {
-      return (await spawn('pngquant -h')[1]).valid;
+      return (await ExecUtil.spawn('pngquant -h')[1]).valid;
     }
   });
 

@@ -1,4 +1,4 @@
-export declare const AppEnv: {
+export declare const Env: {
   prod: boolean;
   dev: boolean;
   test: boolean;
@@ -7,6 +7,7 @@ export declare const AppEnv: {
   debug: boolean;
   trace: boolean;
   cwd: string;
+  frameworkDev: boolean;
 
   error: (...args: any[]) => void;
 

@@ -1,7 +1,7 @@
-import { TestEvent, EventPhase, EventEntity } from '../model';
-import { Consumer } from './types';
+import { ExecUtil, LocalExecution } from '@travetto/exec';
 
-import { serializeError, LocalExecution } from '@travetto/exec';
+import { TestEvent } from '../model';
+import { Consumer } from './types';
 
 export class ExecutionEmitter extends LocalExecution<TestEvent> implements Consumer {
   onEvent(event: TestEvent) {
@@ -9,11 +9,11 @@ export class ExecutionEmitter extends LocalExecution<TestEvent> implements Consu
     if (out.phase === 'after') {
       if (out.type === 'test') {
         if (out.test.error) {
-          out.test.error = serializeError(out.test.error);
+          out.test.error = ExecUtil.serializeError(out.test.error);
         }
       } else if (out.type === 'assertion') {
         if (out.assertion.error) {
-          out.assertion.error = serializeError(out.assertion.error);
+          out.assertion.error = ExecUtil.serializeError(out.assertion.error);
         }
       }
     }

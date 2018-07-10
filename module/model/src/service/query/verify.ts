@@ -3,7 +3,7 @@ import { Class } from '@travetto/registry';
 import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from './types';
 import { SchemaRegistry } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-import { isPlainObject } from '@travetto/base';
+import { Util } from '@travetto/base';
 import { ValidationErrors } from './error';
 
 interface State extends ErrorCollector<string> {
@@ -104,7 +104,7 @@ export class QueryVerifierService {
       }
     }
 
-    if (!isPlainObject(value)) {
+    if (!Util.isPlainObject(value)) {
       // Ha ndle literal
       const actualType = TypeUtil.getActualType(value);
       if (!this.typesMatch(declaredType, actualType)) {
@@ -169,7 +169,7 @@ export class QueryVerifierService {
             return true;
           }
         } else if (firstKey === $NOT) {
-          if (isPlainObject(sub)) {
+          if (Util.isPlainObject(sub)) {
             this.processWhereClause(state, cls, sub);
             return true;
           } else {

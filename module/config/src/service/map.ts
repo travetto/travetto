@@ -1,4 +1,4 @@
-import { deepAssign, isPlainObject, isSimple } from '@travetto/base';
+import { Util } from '@travetto/base';
 
 type Prim = number | string | boolean | null;
 
@@ -13,7 +13,7 @@ function coerce(a: any, val: any): any {
     return a;
   }
 
-  if (isSimple(val)) {
+  if (Util.isSimple(val)) {
     switch (typeof val) {
       case 'string': return `${a}`;
       case 'number': return `${a}`.indexOf('.') >= 0 ? parseFloat(`${a}`) : parseInt(`${a}`, 10);
@@ -76,7 +76,7 @@ export class ConfigMap {
   }
 
   putAll(data: Nested) {
-    deepAssign(this.storage, data, 'coerce');
+    Util.deepAssign(this.storage, data, 'coerce');
   }
 
   bindTo(obj: any, key: string) {
@@ -88,7 +88,7 @@ export class ConfigMap {
     }
 
     if (sub) {
-      deepAssign(obj, sub);
+      Util.deepAssign(obj, sub);
     }
 
     // Handle process.env on bind as the structure we need may not

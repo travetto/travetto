@@ -2,7 +2,7 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const { execSync } = require('child_process');
-const { AppEnv } = require('./env');
+const { Env } = require('./env');
 
 class Cache {
   constructor(cwd, cacheDir = process.env.TS_CACHE_DIR) {
@@ -100,4 +100,4 @@ class $AppCache extends Cache {
 
 exports.Cache = Cache;
 
-exports.AppCache = new $AppCache(AppEnv.cwd);
+exports.AppCache = new $AppCache(Env.cwd);

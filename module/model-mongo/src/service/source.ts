@@ -10,7 +10,7 @@ import {
 } from '@travetto/model';
 import { ModelMongoConfig } from './config';
 import { Class } from '@travetto/registry';
-import { BaseError, isPlainObject } from '@travetto/base';
+import { BaseError, Util } from '@travetto/base';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -36,7 +36,7 @@ export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any 
   const keys = Object.keys(sub);
   for (const key of keys) {
     const subpath = `${path}${key}`;
-    if (isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
+    if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
       Object.assign(out, extractSimple(sub[key], `${subpath}.`));
     } else {
       out[subpath] = sub[key];

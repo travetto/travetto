@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import * as path from 'path';
-import { AppEnv } from '@travetto/base/src/env';
+import { Env } from '@travetto/base/src/env';
 import { TransformUtil, State } from '@travetto/compiler';
 
 const stringHash = require('string-hash');
@@ -81,8 +81,8 @@ export const ClassIdTransformer = {
 
     let ns = '@sys';
 
-    if (fileRoot.includes(AppEnv.cwd)) {
-      fileRoot = fileRoot.split(AppEnv.cwd)[1].replace(/^[\\\/]+/, '');
+    if (fileRoot.includes(Env.cwd)) {
+      fileRoot = fileRoot.split(Env.cwd)[1].replace(/^[\\\/]+/, '');
       ns = '@app';
       if (fileRoot.startsWith('node_modules')) {
         fileRoot = fileRoot.split('node_modules').pop()!.replace(/^[\\\/]+/, '');

@@ -20,7 +20,7 @@ A simple example of finding all `.config` files in your codebase:
 
 ```typescript
   function processServiceConfigs(svc: string) {
-    const svcConfigs = await findAppFiles('.config', file => path.basename(file).startsWith(`${svc}.`));
+    const svcConfigs = await ScanApp.findFiles('.config', file => path.basename(file).startsWith(`${svc}.`));
     for (const conf of svcConfigs) {
       ... do work
     }
@@ -33,7 +33,7 @@ The framework provides basic environment information, e.g. in prod/test/dev.  Th
 * `dev: boolean` - is the application in development mode
 * `test: boolean` - is the application currently in test mode
 * `watch: boolean` - is the application currently watching for file changes and reloads (normally only during development)
-* `all: string[]` - a list of all the environments that are passed in and configured
+* `profiles: string[]` - a list of all the profiles that are passed in and configured
 * `docker: boolean` - does the environment support docker, and should it use it if needed
 * `debug: boolean` - is the application currently in debug mode
 * `trace: boolean` - is the application currently in trace mode

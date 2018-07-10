@@ -2,10 +2,10 @@ import * as minimist from 'minimist';
 
 import { PhaseManager } from '@travetto/base';
 import { ArrayDataSource } from '@travetto/pool';
-import { deserializeError } from '@travetto/exec';
+import { ExecUtil } from '@travetto/exec';
 import { Class } from '@travetto/registry';
 
-import { ExecuteUtil } from './execute';
+import { TestExecutor } from './executor';
 import { ExecutionEmitter, Consumer, AllResultsCollector, TapEmitter, JSONEmitter } from '../consumer';
 import { client, Events } from './communication';
 import { watch } from './watcher';
@@ -86,7 +86,7 @@ export class Runner {
   async getFiles() {
     const globs = this.state._; // strip off node and worker name
     // Glob to module path
-    const files = await ExecuteUtil.getTests(globs.map(x => new RegExp(`${x}`.replace(/[\\\/]/g, '/'))));
+    const files = await TestExecutor.getTests(globs.map(x => new RegExp(`${x}`.replace(/[\\\/]/g, '/'))));
     return files;
   }
 
@@ -108,7 +108,7 @@ export class Runner {
 
         const { error } = await complete;
 
-        errors.push((deserializeError(error)));
+        errors.push((ExecUtil.deserializeError(error)));
       }
     );
 
@@ -120,7 +120,7 @@ export class Runner {
   async runSome() {
     const consumer = this.getConsumer();
     const args: string[] = this.state._;
-    return await ExecuteUtil.execute(consumer, args);
+    return await TestExecutor.execute(consumer, args);
   }
 
   async run() {

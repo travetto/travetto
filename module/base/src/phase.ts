@@ -1,4 +1,4 @@
-import { requireAppFiles } from './scan-app';
+import { ScanApp } from './scan-app';
 
 interface Initializer {
   action: Function;
@@ -14,7 +14,7 @@ export class PhaseManager {
 
   load(priority?: number) {
     const pattern = new RegExp(`phase[.]${this.scope}[.]ts$`);
-    const initFiles = requireAppFiles('.ts', x => pattern.test(x));
+    const initFiles = ScanApp.requireFiles('.ts', x => pattern.test(x));
     console.debug('Initializing Phase', this.scope, initFiles);
     this.initializers = initFiles
       .map(x => x.init)

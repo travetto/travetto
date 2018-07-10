@@ -1,20 +1,20 @@
-import { AppEnv } from '../src/env';
+import { Env } from '../src/env';
 import { Shutdown } from '../src/shutdown';
-import { initStackHandler } from '../src/stacktrace';
+import { Stacktrace } from '../src/stacktrace';
 
 export const init = {
   priority: -100000,
   action: () => {
-    process.env.NODE_ENV = AppEnv.prod ? 'production' : 'development';
+    process.env.NODE_ENV = Env.prod ? 'production' : 'development';
 
-    console.debug = AppEnv.debug ? console.log : () => { };
+    console.debug = Env.debug ? console.log : () => { };
 
-    if (!AppEnv.prod) {
-      initStackHandler();
+    if (!Env.prod) {
+      Stacktrace.initHandler();
     }
 
     // Log unhandled rejections
-    process.on('unhandledRejection', (reason, p) => AppEnv.error(reason));
+    process.on('unhandledRejection', (reason, p) => Env.error(reason));
 
     Shutdown.register();
   }

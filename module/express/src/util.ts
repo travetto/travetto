@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import {
   RouteStack, PathType, ControllerConfig, Method,
-  Renderable, RequestHandler, FilterPromise, Filter
+  Renderable, RequestHandler, Filter
 } from './model';
 
 export class RouteUtil {
@@ -122,7 +122,7 @@ export class RouteUtil {
     res.end();
   }
 
-  static asyncHandler(filter: FilterPromise, handler?: Filter): FilterPromise {
+  static asyncHandler(filter: Filter<Promise<any>>, handler?: Filter): Filter<Promise<any>> {
     return async (req: Request, res: Response, next?: NextFunction) => {
       try {
         const out = await filter(req, res, next);

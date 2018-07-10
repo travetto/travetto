@@ -1,5 +1,5 @@
 import { RetargettingHandler } from './proxy';
-import { AppEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CompilerUtil } from './util';
 
 const Module = require('module');
@@ -20,7 +20,7 @@ export class ModuleManager {
     try {
       mod = originalLoader.apply(null, [request, parent]);
     } catch (e) {
-      if (!AppEnv.prod) { // If attempting to load an optional require
+      if (!Env.prod) { // If attempting to load an optional require
         const p = Module._resolveFilename(request, parent);
         console.error(`Unable to import ${p}, stubbing out`, e);
       } else if (e) {
@@ -33,7 +33,7 @@ export class ModuleManager {
     let out = mod;
 
     // Proxy modules, if in watch mode for non node_modules paths
-    if (AppEnv.watch) {
+    if (Env.watch) {
       const p = Module._resolveFilename(request, parent);
       if (p.includes(this.cwd) && !p.includes(CompilerUtil.LIBRARY_PATH)) {
         if (!this.modules.has(p)) {
@@ -58,7 +58,7 @@ export class ModuleManager {
       (m as any)._compile(content, jsf);
       return true;
     } catch (e) {
-      if (AppEnv.watch) { // If attempting to load an optional require
+      if (Env.watch) { // If attempting to load an optional require
         console.error(`Unable to import ${name}, stubbing out`, e);
         (m as any)._compile(CompilerUtil.EMPTY_MODULE, jsf);
         return false;

@@ -1,7 +1,7 @@
 import * as util from 'util';
 import { LogEvent } from '../types';
 import { stylize, LEVEL_STYLES } from './styles';
-import { AppEnv, simplifyStack } from '@travetto/base';
+import { Env, Stacktrace } from '@travetto/base';
 
 export interface LineFormatterOpts {
   timestamp?: boolean;
@@ -38,7 +38,7 @@ export function lineFormatter(opts: LineFormatterOpts) {
 
     if (ev.file && opts.location) {
       let ns = ev.file
-        .replace(AppEnv.cwd, '')
+        .replace(Env.cwd, '')
         .replace(/^.*node_modules/, '')
         .replace(/[\/\\]/g, '.')
         .replace(/^[.]/, '')
@@ -79,7 +79,7 @@ export function lineFormatter(opts: LineFormatterOpts) {
       }
       message = args.map((x: any) =>
         typeof x === 'string' ? x :
-          (x instanceof Error ? (AppEnv.prod ? x.stack : simplifyStack(x)) :
+          (x instanceof Error ? (Env.prod ? x.stack : Stacktrace.simplifyStack(x)) :
             util.inspect(x,
               ev.level === 'debug',
               ev.level === 'debug' ? 4 : 2,

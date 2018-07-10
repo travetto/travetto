@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
-import { AppEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 const exists = util.promisify(fs.exists);
@@ -29,11 +29,11 @@ export class MailTemplateConfig {
   scssRoots: string[];
 
   async postConstruct() {
-    this.assetRoots.push(...[AppEnv.cwd, path.resolve(path.join(__dirname, '..'))]
+    this.assetRoots.push(...[Env.cwd, path.resolve(path.join(__dirname, '..'))]
       .map(x => path.join(x, 'assets', 'email')));
     this.scssRoots = [
       ...this.assetRoots.map(x => path.join(x, 'scss')),
-      path.join(AppEnv.cwd, 'node_modules', 'foundation-emails', 'scss')];
+      path.join(Env.cwd, 'node_modules', 'foundation-emails', 'scss')];
   }
 
   async findFirst(pth: string) {

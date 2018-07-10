@@ -1,4 +1,4 @@
-import { Watcher, Entry, AppEnv, Handler, findAppFiles } from '@travetto/base';
+import { Watcher, ScanEntry, Env, ScanHandler, ScanApp } from '@travetto/base';
 import * as path from 'path';
 
 export interface Listener {
@@ -12,10 +12,10 @@ export class FilePresenceManager {
   files = new Map<string, { version: number }>();
   seen = new Set();
 
-  constructor(private cwd: string, private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = AppEnv.watch) {
+  constructor(private cwd: string, private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = Env.watch) {
   }
 
-  private watcherListener({ event, entry }: { event: string, entry: Entry }) {
+  private watcherListener({ event, entry }: { event: string, entry: ScanEntry }) {
     if (!this.validFile(entry.file)) {
       return;
     }
@@ -40,7 +40,7 @@ export class FilePresenceManager {
     }
   }
 
-  private buildWatcher(cwd: string, handlers: Handler[]) {
+  private buildWatcher(cwd: string, handlers: ScanHandler[]) {
     const watcher = new Watcher({
       interval: 250,
       cwd
@@ -54,7 +54,7 @@ export class FilePresenceManager {
   }
 
   init() {
-    const rootFiles = findAppFiles('.ts', x => /(^src\/)|\/src\/|\/index.ts$/.test(x) && this.validFile(x))
+    const rootFiles = ScanApp.findFiles('.ts', x => /(^src\/)|\/src\/|\/index.ts$/.test(x) && this.validFile(x))
       .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable
       .map(x => x.file);
 

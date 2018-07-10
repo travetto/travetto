@@ -1,10 +1,9 @@
-import * as util from 'util';
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Entry, Handler, bulkFindSync } from './scan-fs';
-import { throttle } from './util';
-import { AppEnv } from './env';
+import { ScanEntry, ScanHandler, ScanFs } from './scan-fs';
+import { Util } from './util';
+import { Env } from './env';
 
 interface Options {
   maxListeners?: number;
@@ -15,12 +14,12 @@ interface Options {
 
 export class Watcher extends EventEmitter {
 
-  private watched = new Map<string, Entry>();
+  private watched = new Map<string, ScanEntry>();
   private watchers = new Map<string, fs.FSWatcher>();
   private pollers = new Map<string, (curr: fs.Stats, prev: fs.Stats) => void>();
-  private findHandlers: Handler[] = [];
+  private findHandlers: ScanHandler[] = [];
   private cached = new Map<string, (string | symbol)[]>();
-  private pendingWatched: Entry[] = [];
+  private pendingWatched: ScanEntry[] = [];
   private pending = true;
   private suppress = false;
 
@@ -33,7 +32,7 @@ export class Watcher extends EventEmitter {
       maxListeners: opts.maxListeners,
       interval: opts.interval || 250,
       debounceDelay: opts.debounceDelay || 250,
-      cwd: opts.cwd || AppEnv.cwd
+      cwd: opts.cwd || Env.cwd
     };
 
     // Set maxListeners
@@ -49,7 +48,7 @@ export class Watcher extends EventEmitter {
     });
   }
 
-  private processDirectoryChange(dir: Entry) {
+  private processDirectoryChange(dir: ScanEntry) {
     dir.children = dir.children || [];
 
     fs.readdir(dir.file, (err, current) => {
@@ -92,7 +91,7 @@ export class Watcher extends EventEmitter {
         if (!prevSet.has(next) && (nextStats.isDirectory() ||
           this.findHandlers.find(x => x.testFile ? x.testFile(nextRel) : false))
         ) {
-          const sub: Entry = {
+          const sub: ScanEntry = {
             file: next,
             module: next.replace(/[\\]/g, '/'),
             stats: nextStats
@@ -116,14 +115,14 @@ export class Watcher extends EventEmitter {
     }
   }
 
-  private watchDirectory(entry: Entry) {
+  private watchDirectory(entry: ScanEntry) {
     if (!entry.stats.isDirectory()) {
       throw new Error(`Not a directory: ${entry.file}`);
     }
 
     try {
       console.trace('Watching Directory', entry.file);
-      const watcher = fs.watch(entry.file, throttle((event, f) => {
+      const watcher = fs.watch(entry.file, Util.throttle((event, f) => {
         this.processDirectoryChange(entry);
       }, this.options.debounceDelay));
 
@@ -140,7 +139,7 @@ export class Watcher extends EventEmitter {
     }
   }
 
-  private watchFile(entry: Entry) {
+  private watchFile(entry: ScanEntry) {
     if (entry.stats.isDirectory()) {
       throw new Error(`Not a file: ${entry.file}`);
     }
@@ -175,7 +174,7 @@ export class Watcher extends EventEmitter {
     }
   }
 
-  private unwatchFile(entry: Entry) {
+  private unwatchFile(entry: ScanEntry) {
     if (this.pollers.has(entry.file)) {
       console.trace('Unwatching File', entry.file);
 
@@ -184,7 +183,7 @@ export class Watcher extends EventEmitter {
     }
   }
 
-  private unwatchDirectory(entry: Entry) {
+  private unwatchDirectory(entry: ScanEntry) {
     if (this.watchers.has(entry.file)) {
       console.trace('Unwatching Directory', entry.file);
 
@@ -223,13 +222,13 @@ export class Watcher extends EventEmitter {
     });
   }
 
-  add(handlers: (string | Handler)[]) {
+  add(handlers: (string | ScanHandler)[]) {
     const finalHandlers = handlers.map(x => {
       return typeof x === 'string' ? { testFile: (rel: string) => rel === x } : x;
     });
     this.findHandlers = this.findHandlers.concat(finalHandlers);
 
-    for (const entry of bulkFindSync(finalHandlers, this.options.cwd)) {
+    for (const entry of ScanFs.bulkFindSync(finalHandlers, this.options.cwd)) {
       if (!this.watched.has(entry.file)) {
         if (this.pending) {
           this.pendingWatched.push(entry);
@@ -250,7 +249,7 @@ export class Watcher extends EventEmitter {
     }
   }
 
-  watch(entry: Entry) {
+  watch(entry: ScanEntry) {
     if (this.watched.has(entry.file)) {
       return;
     }

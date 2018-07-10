@@ -1,14 +1,11 @@
-import * as util from 'util';
-import * as fs from 'fs';
-
-import { TestRegistry } from '../service';
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
-import { TestConfig, SuiteConfig } from '../model';
-import { ExecutionEmitter, Consumer } from '../consumer';
 import { ChildExecution } from '@travetto/exec';
 import { QueueDataSource } from '@travetto/pool';
 import { client, Events } from './communication';
-import { bulkRequire } from '@travetto/base';
+
+import { TestRegistry } from '../service';
+import { TestConfig, SuiteConfig } from '../model';
+import { Consumer } from '../consumer';
 
 function getConf(o?: [Class, Function]) {
   if (o) {
@@ -112,7 +109,7 @@ export async function watch() {
     }
   );
 
-  // bulkRequire('test/**/*.ts');
+  // ScanFs.bulkRequire('test/**/*.ts');
 
   console.debug('Waiting');
 

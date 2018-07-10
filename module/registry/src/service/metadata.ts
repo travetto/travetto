@@ -1,4 +1,4 @@
-import { deepAssign } from '@travetto/base';
+import { Util } from '@travetto/base';
 
 import { Registry } from './registry';
 import { ChangeEvent } from '../source';
@@ -81,12 +81,12 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
 
   register(cls: Class, pconfig: Partial<C>) {
     const conf = this.getOrCreatePending(cls);
-    deepAssign(conf, pconfig);
+    Util.deepAssign(conf, pconfig);
   }
 
   registerMethod(cls: Class, method: Function, pconfig: Partial<M>) {
     const conf = this.getOrCreatePendingMethod(cls, method);
-    deepAssign(conf, pconfig);
+    Util.deepAssign(conf, pconfig);
   }
 
   onInstall(cls: Class, e: ChangeEvent<Class>) {

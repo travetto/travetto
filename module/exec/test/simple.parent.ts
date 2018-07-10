@@ -1,5 +1,6 @@
-import { ChildExecution } from '../src';
 import { ConcurrentPool, ArrayDataSource, IteratorDataSource } from '@travetto/pool';
+
+import { ChildExecution } from '../src';
 
 const pool = new ConcurrentPool<ChildExecution>(async () => {
   console.log('Initializing child');

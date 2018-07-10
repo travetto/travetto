@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
-import { AppEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CompilerUtil } from './util';
 import { Cache } from '@travetto/base/src/cache';
 
@@ -11,7 +11,7 @@ export class SourceManager {
   private sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   private contents = new Map<string, string>();
   private hashes = new Map<string, number>();
-  private cache = new Cache(AppEnv.cwd);
+  private cache = new Cache(Env.cwd);
 
   constructor(private config: { cache?: boolean } = {}) {
     Object.assign(config, { ... { cache: true }, config });
@@ -19,7 +19,7 @@ export class SourceManager {
 
   registerSourceMaps() {
     sourcemap.install({
-      emptyCacheBetweenOperations: AppEnv.test || AppEnv.debug,
+      emptyCacheBetweenOperations: Env.test || Env.debug,
       retrieveFile: (p: string) => this.contents.get(p.replace('.js', '.ts'))!,
       retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
     });
@@ -33,7 +33,7 @@ export class SourceManager {
 
       let hash = 0;
 
-      if (AppEnv.watch && this.hashes.has(fileName)) {
+      if (Env.watch && this.hashes.has(fileName)) {
         // Let's see if they are really different
         hash = stringHash(content);
         if (hash === this.hashes.get(fileName)) {
@@ -47,7 +47,7 @@ export class SourceManager {
       if (this.logErrors(fileName, res.diagnostics)) {
         console.error(`Compiling ${fileName} failed`);
 
-        if (!AppEnv.prod) { // If attempting to load an optional require
+        if (!Env.prod) { // If attempting to load an optional require
           console.error(`Unable to import ${fileName}, stubbing out`);
           this.set(fileName, CompilerUtil.EMPTY_MODULE);
           return true;
@@ -56,7 +56,7 @@ export class SourceManager {
         }
       }
 
-      if (AppEnv.watch) {
+      if (Env.watch) {
         this.hashes.set(fileName, hash);
       }
 

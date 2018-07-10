@@ -7,13 +7,15 @@ const envs = (p_env.ENV || p_env.env || p_env.NODE_ENV || '').toLowerCase().spli
 const envSet = new Set(envs);
 const env = envSet.has.bind(envSet);
 
-const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
+const cwd = (p_env.INIT_CWD || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
 const prod = env('prod') || env('production');
 const test = env('test') || env('testing');
 const dev = !prod && !test;
 const watch = (dev && !('NO_WATCH' in p_env)) || 'WATCH' in p_env;
 const debug = ('DEBUG' in p_env && !!p_env.DEBUG) || ('debug' in p_env && !!p_env.debug) || dev;
 const trace = ('TRACE' in p_env && !!p_env.TRACE) || ('trace' in p_env && !!p_env.trace);
+
+const frameworkDev = 'TRAVETTO_DEV' in p_env;
 
 const profiles = [
   'application',
@@ -53,6 +55,6 @@ function error(...args) {
   console.error(...args.map(x => x && x.stack ? x.stack : x));
 }
 
-const AppEnv = { prod, dev, test, watch, debug, trace, docker, cwd, error, profiles, is: profile };
+const Env = { prod, dev, test, watch, debug, trace, docker, cwd, error, profiles, is: profile, frameworkDev };
 
-module.exports = { AppEnv };
+module.exports = { Env };

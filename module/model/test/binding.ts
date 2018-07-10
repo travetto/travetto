@@ -1,13 +1,12 @@
-import { View } from '@travetto/schema';
-import { Model, ModelService, WhereClause, PageableModelQuery, Query } from '../index';
-import { TestSource } from './registry';
-import { Person, Address } from './models';
+import * as assert from 'assert';
+
+import { DependencyRegistry } from '@travetto/di';
+import { RootRegistry } from '@travetto/registry';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 
-import * as assert from 'assert';
-import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry, Class } from '@travetto/registry';
-import { RetainFields } from '../src/model/query/common';
+import { ModelService } from '../index';
+import { TestSource } from './registry';
+import { Person, Address } from './models';
 
 const street1 = '1234 Fun';
 

@@ -1,3 +1,3 @@
 export * from './runner';
-export * from './execute';
+export * from './executor';
 export * from './console';

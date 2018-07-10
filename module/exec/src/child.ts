@@ -1,5 +1,5 @@
 import * as child_process from 'child_process';
-import * as exec from './util';
+import { ExecUtil } from './util';
 import { ChildOptions, ExecutionEvent } from './types';
 import { Execution } from './execution';
 
@@ -10,7 +10,7 @@ export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends E
   }
 
   _init() {
-    const op: typeof exec.fork = (this.fork ? exec.fork : exec.spawn);
+    const op: typeof ExecUtil.fork = (this.fork ? ExecUtil.fork : ExecUtil.spawn);
 
     const finalOpts: ChildOptions = {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],

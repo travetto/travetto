@@ -1,5 +1,5 @@
 import { MetadataRegistry, RootRegistry, Class, ChangeEvent } from '@travetto/registry';
-import { AppEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { ClassList, FieldConfig, ClassConfig, ViewConfig, DEFAULT_VIEW } from './types';
 import {
   SchemaChangeListener,
@@ -154,7 +154,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   onInstall(cls: Class, e: ChangeEvent<Class>) {
     super.onInstall(cls, e);
 
-    if (AppEnv.watch && this.has(cls)) {
+    if (Env.watch && this.has(cls)) {
       this.computeSchemaDependencies(cls);
     }
   }

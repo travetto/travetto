@@ -1,5 +1,5 @@
 import * as util from 'util';
-import { simplifyStack } from '@travetto/base';
+import { Stacktrace } from '@travetto/base';
 
 const OG_CONSOLE = {
   log: console.log,
@@ -16,7 +16,7 @@ export class ConsoleCapture {
   static log(level: string, ...args: any[]) {
     const msg = args.map((x: any) => {
       if (x instanceof Error) {
-        return simplifyStack(x);
+        return Stacktrace.simplifyStack(x);
       } else if (typeof x === 'string') {
         return x;
       } else {

@@ -1,7 +1,7 @@
 import * as path from 'path';
-import { AppEnv } from './env';
+import { Env } from './env';
 
-const pkg = require(path.join(AppEnv.cwd, 'package.json'));
+const pkg = require(path.join(Env.cwd, 'package.json'));
 
 export const AppInfo = {
   VERSION: pkg.version,

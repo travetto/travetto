@@ -1,4 +1,4 @@
-import { LocalExecution, ChildExecution, serializeError } from '@travetto/exec';
+import { LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
 import { ConcurrentPool, IdleManager } from '@travetto/pool';
 import { PhaseManager } from '@travetto/base';
 
@@ -102,7 +102,7 @@ export async function server() {
         await new Runner(['-f', 'exec', '-m', 'single', data.file, data.class, data.method]).run();
         worker.send(Events.RUN_COMPLETE);
       } catch (e) {
-        worker.send(Events.RUN_COMPLETE, { error: serializeError(e) });
+        worker.send(Events.RUN_COMPLETE, { error: ExecUtil.serializeError(e) });
       }
     }
 

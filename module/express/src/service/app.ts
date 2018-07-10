@@ -4,7 +4,7 @@ import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 
-import { AppEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
 
@@ -14,7 +14,7 @@ import { ControllerConfig } from '../model';
 import { ControllerRegistry } from './registry';
 import { ExpressOperator } from './operator';
 
-@Injectable({ autoCreate: { create: AppEnv.is('express'), priority: 1 } })
+@Injectable({ autoCreate: { create: Env.is('express'), priority: 1 } })
 export class ExpressApp {
 
   private app: express.Application;

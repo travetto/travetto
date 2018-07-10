@@ -10,7 +10,7 @@ import {
 } from '@travetto/model';
 import { ModelElasticsearchConfig } from '../config';
 import { Class, ChangeEvent } from '@travetto/registry';
-import { isPlainObject, deepAssign } from '@travetto/base';
+import { Util } from '@travetto/base';
 import { SchemaChangeEvent } from '@travetto/schema';
 import { extractWhereQuery } from './query-builder';
 import { generateSourceSchema } from './schema';
@@ -43,7 +43,7 @@ export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any 
   const keys = Object.keys(sub);
   for (const key of keys) {
     const subpath = `${path}${key}`;
-    if (isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
+    if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
       Object.assign(out, extractSimple(sub[key], `${subpath}.`));
     } else {
       out[subpath] = sub[key];
@@ -259,7 +259,7 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async init() {
-    this.client = new es.Client(deepAssign({}, this.config));
+    this.client = new es.Client(Util.deepAssign({}, this.config));
     await this.client.cluster.health({});
 
     // PreCreate indexes

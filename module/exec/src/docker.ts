@@ -4,15 +4,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as net from 'net';
 
+import { Shutdown, ScanFs } from '@travetto/base';
+
 import { CommonProcess, ExecutionResult } from './types';
-import { spawn, WithOpts } from './util';
-import { Shutdown, rimraf } from '@travetto/base';
+import { ExecUtil, WithOpts } from './util';
 
 const writeFile = util.promisify(fs.writeFile);
 const mkdir = util.promisify(fs.mkdir);
 
 function exec(command: string, opts?: WithOpts<child_process.SpawnOptions>) {
-  return spawn(command, { shell: false, ...opts })[1];
+  return ExecUtil.spawn(command, { shell: false, ...opts })[1];
 }
 
 function execSync(command: string) {
@@ -76,7 +77,7 @@ export class DockerContainer {
       op,
       ...(args || []).map((x: any) => `${x}`)
     ]).join(' ');
-    const [proc, prom] = spawn(cmd, { shell: false });
+    const [proc, prom] = ExecUtil.spawn(cmd, { shell: false });
     if (op !== 'run' && op !== 'exec') {
       prom.catch(e => { this.evict = true; });
     }
@@ -258,7 +259,7 @@ export class DockerContainer {
       execSync(`${this.cmd} rm -fv ${this.container}`);
     } catch (e) { /* ignore */ }
 
-    const temps = Object.keys(this.tempVolumes).map(x => rimraf(x).catch((e: any) => { }));
+    const temps = Object.keys(this.tempVolumes).map(x => ScanFs.rimraf(x).catch((e: any) => { }));
     Promise.all(temps);
 
     const ids = execSync(`${this.cmd} volume ls -qf dangling=true`);
@@ -280,7 +281,7 @@ export class DockerContainer {
 
   async cleanup() {
     console.debug('Cleaning', this.image, this.container);
-    const temps = Object.keys(this.tempVolumes).map(x => rimraf(x).catch((e: any) => { }));
+    const temps = Object.keys(this.tempVolumes).map(x => ScanFs.rimraf(x).catch((e: any) => { }));
     await Promise.all(temps);
   }
 

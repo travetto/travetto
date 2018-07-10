@@ -7,7 +7,7 @@ import { ModelCore, Query, BulkState, ModelQuery, PageableModelQuery } from '../
 import { ModelSource } from './source';
 import { ModelRegistry } from './registry';
 
-import { AppEnv, deepAssign } from '@travetto/base';
+import { Env, Util } from '@travetto/base';
 
 function getClass<T>(o: T) {
   return o.constructor as Class<T>;
@@ -28,7 +28,7 @@ export class ModelService extends ModelSource {
 
   async init() {
     await ModelRegistry.init();
-    if (AppEnv.watch) {
+    if (Env.watch) {
       if (this.source.onSchemaChange) {
         ModelRegistry.onSchemaChange(this.source.onSchemaChange.bind(this.source));
       }
@@ -113,7 +113,7 @@ export class ModelService extends ModelSource {
 
     const res = await this.getAllByQuery(getClass(o), { ...query, limit: 2 });
     if (res.length === 1) {
-      o = deepAssign(res[0], o);
+      o = Util.deepAssign(res[0], o);
       return await this.update(cls, o);
     } else if (res.length === 0) {
       return await this.save(cls, o);

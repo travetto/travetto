@@ -1,6 +1,6 @@
+import { Env } from '@travetto/base';
+import { ExecUtil } from './util';
 import { DockerContainer } from './docker';
-import { AppEnv } from '@travetto/base';
-import { spawn } from './util';
 import { ExecutionResult, CommonProcess } from './types';
 
 export class CommandService {
@@ -19,7 +19,7 @@ export class CommandService {
   }) { }
 
   async _init() {
-    const canUseDocker = AppEnv.docker && (this.config.docker === undefined || !!this.config.docker);
+    const canUseDocker = Env.docker && (this.config.docker === undefined || !!this.config.docker);
     const useDocker = canUseDocker && (!this.config.checkForLocal || !(await this.config.checkForLocal()));
 
     if (useDocker) {
@@ -48,7 +48,7 @@ export class CommandService {
       exec = this.container.exec(['-i'], cmd);
     } else {
       const cmd = this.config.processCommand ? this.config.processCommand(args) : args;
-      exec = spawn(cmd.join(' '), { quiet: true });
+      exec = ExecUtil.spawn(cmd.join(' '), { quiet: true });
     }
     return exec as [CommonProcess, Promise<ExecutionResult>];
   }

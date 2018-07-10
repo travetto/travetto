@@ -1,5 +1,5 @@
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
-import { AppEnv, isPlainObject, deepAssign } from '@travetto/base';
+import { Env, Util } from '@travetto/base';
 import { RetargettingHandler } from '@travetto/compiler';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from '../types';
@@ -22,8 +22,8 @@ function mergeWithOptional<T extends { original?: symbol | object, qualifier?: s
   if (o.original) {
     if (typeof o.original === 'symbol') {
       o.qualifier = o.original;
-    } else if (isPlainObject(o.original)) {
-      deepAssign(o, o.original);
+    } else if (Util.isPlainObject(o.original)) {
+      Util.deepAssign(o, o.original);
     }
     o.original = undefined;
   }
@@ -67,7 +67,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     const instance = await instancePromise;
 
-    if (AppEnv.watch) {
+    if (Env.watch) {
       if (!this.proxies.has(targetId)) {
         this.proxies.set(targetId, new Map());
         this.proxyHandlers.set(targetId, new Map());
@@ -76,12 +76,12 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     let out: any = instance;
 
-    console.trace('Creating Instance', targetId, AppEnv.watch,
+    console.trace('Creating Instance', targetId, Env.watch,
       !this.proxyHandlers.has(targetId),
       this.proxyHandlers.has(targetId) && !this.proxyHandlers.get(targetId)!.has(qualifier));
 
     // if in watch mode, create proxies
-    if (AppEnv.watch) {
+    if (Env.watch) {
       if (!this.proxies.get(targetId)!.has(qualifier)) {
         const handler = new RetargettingHandler(out);
         const proxy = new Proxy({}, handler);
@@ -102,7 +102,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   processAutocreate() {
     // Unblock auto created
-    if (this.autoCreate.length && !AppEnv.test) {
+    if (this.autoCreate.length && !Env.test) {
       const items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
       this.autoCreate = [];
 
@@ -368,7 +368,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // If already loaded, reload
-    if (AppEnv.watch &&
+    if (Env.watch &&
       this.proxies.has(targetId) &&
       this.proxies.get(targetId)!.has(config.qualifier)
     ) {

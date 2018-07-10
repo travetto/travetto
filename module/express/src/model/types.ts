@@ -21,13 +21,7 @@ export interface ControllerConfig {
   handlers: RequestHandler[];
 }
 
-export interface FilterPromise {
-  (req: Request, res: Response, next?: NextFunction): Promise<any>;
-}
-export interface FilterSync {
-  (req: Request, res: Response, next?: NextFunction): any;
-}
-export type Filter = FilterPromise | FilterSync;
+export type Filter<T = any> = (req: Request, res: Response, next?: NextFunction) => T;
 
 export class RouteStack {
   name: string;

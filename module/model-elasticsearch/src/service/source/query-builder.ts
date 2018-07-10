@@ -1,6 +1,6 @@
 import { WhereClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
-import { isPlainObject } from '@travetto/base';
+import { Util } from '@travetto/base';
 import { SchemaRegistry } from '@travetto/schema';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
@@ -16,7 +16,7 @@ export function extractWhereTermQuery<T>(o: { [key: string]: any }, cls: Class<T
     const declaredType = schema[key].type;
     const sPath = declaredType === String ? `${path}${key}.raw` : `${path}${key}`;
 
-    if (isPlainObject(top)) {
+    if (Util.isPlainObject(top)) {
       const subKey = Object.keys(top)[0];
       if (!subKey.startsWith('$')) {
         items.push({

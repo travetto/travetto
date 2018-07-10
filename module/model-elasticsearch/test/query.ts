@@ -1,7 +1,9 @@
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import { extractSimple } from '../src/service';
 import * as assert from 'assert';
+
 import { Schema, SchemaRegistry } from '@travetto/schema';
+import { Suite, Test, BeforeAll } from '@travetto/test';
+
+import { extractSimple } from '../src/service';
 import { extractWhereQuery } from '../src/service/source/query-builder';
 
 @Schema()

@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
-import { findAppFiles } from '@travetto/base';
-import { AppEnv } from '@travetto/base/src/env';
+import { ScanApp } from '@travetto/base';
+import { Env } from '@travetto/base/src/env';
 
 import { Class } from '../model/types';
 import { ChangeSource, ChangeEvent } from './types';
@@ -75,8 +75,8 @@ export class CompilerClassSource implements ChangeSource<Class> {
   }
 
   async init() {
-    if (!AppEnv.test) {
-      const entries = await findAppFiles('.ts', f =>
+    if (!Env.test) {
+      const entries = await ScanApp.findFiles('.ts', f =>
         f.startsWith('src/') &&
         Compiler.presenceManager.validFile(f));
 

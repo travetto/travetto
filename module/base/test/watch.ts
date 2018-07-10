@@ -1,8 +1,8 @@
-import { Watcher, AppEnv } from '../src';
+import { Watcher, Env } from '../src';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const w = new Watcher({ cwd: path.join(AppEnv.cwd, 'src') });
+const w = new Watcher({ cwd: path.join(Env.cwd, 'src') });
 w
   .on('all', ({ event, entry }) => {
     console.log(event, entry);

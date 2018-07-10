@@ -1,7 +1,8 @@
-import { AppEnv, isPlainObject, isFunction, isPrimitive, simplifyStack } from '@travetto/base';
 import * as assert from 'assert';
 import * as util from 'util';
 import * as path from 'path';
+
+import { Env, Util, Stacktrace } from '@travetto/base';
 import { Assertion, TestConfig } from '../model';
 
 const ASSERT_FN_OPERATOR: { [key: string]: string } = {
@@ -35,10 +36,10 @@ const OP_MAPPING: { [key: string]: string } = {
 };
 
 function clean(val: any) {
-  if (val === null || val === undefined || (!(val instanceof RegExp) && isPrimitive(val)) || isPlainObject(val) || Array.isArray(val)) {
+  if (val === null || val === undefined || (!(val instanceof RegExp) && Util.isPrimitive(val)) || Util.isPlainObject(val) || Array.isArray(val)) {
     return JSON.stringify(val);
   } else {
-    if (!val.constructor || (!val.constructor.__id && isFunction(val))) {
+    if (!val.constructor || (!val.constructor.__id && Util.isFunction(val))) {
       return val.name;
     } else {
       return util.inspect(val, false, 1).replace(/\n/g, ' ');
@@ -55,7 +56,7 @@ export class AssertUtil {
   static test: TestConfig;
 
   static readFilePosition(err: Error, filename: string) {
-    const base = AppEnv.cwd;
+    const base = Env.cwd;
 
     const lines = (err.stack || new Error().stack!).split('\n').filter(x => !excludeNode.test(x) && x.includes(base));
     let best = lines.filter(x => x.includes(filename))[0];
@@ -167,7 +168,7 @@ export class AssertUtil {
         assertion.error = e;
         e.message = assertion.message;
         if (e instanceof Error) {
-          (e as Error).stack = simplifyStack(e as Error);
+          (e as Error).stack = Stacktrace.simplifyStack(e as Error);
         }
         this.add(assertion);
       }

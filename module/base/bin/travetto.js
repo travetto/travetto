@@ -6,8 +6,9 @@ const ts = require('typescript');
 const Module = require('module');
 
 //Simple bootstrap to load compiler
-const { AppEnv: { cwd } } = require('../src/env');
+const { Env } = require('../src/env');
 const { AppCache } = require('../src/cache');
+const cwd = Env.cwd;
 
 const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
 const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
@@ -15,7 +16,7 @@ const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
 AppCache.init();
 
 //Rewrite Module for local development
-if (process.env.LOCAL_DEV) {
+if (Env.frameworkDev) {
   const og = Module._load.bind(Module);
   Module._load = (request, parent) => {
     if (request.startsWith('@travetto')) {

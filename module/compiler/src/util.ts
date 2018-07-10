@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { AppEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 
 export class CompilerUtil {
   static LIBRARY_PATH = 'node_modules';
@@ -16,7 +16,7 @@ export class CompilerUtil {
       }, `${dir}/${name}`
     );
     out.options.importHelpers = true;
-    out.options.noEmitOnError = AppEnv.prod;
+    out.options.noEmitOnError = Env.prod;
     out.options.moduleResolution = ts.ModuleResolutionKind.NodeJs;
 
     return out.options;

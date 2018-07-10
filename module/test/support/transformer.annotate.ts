@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import { TransformUtil, State } from '@travetto/compiler';
-import { AppEnv } from '@travetto/base/src/env';
+import { Env } from '@travetto/base/src/env';
 
 const TEST_IMPORT = '@travetto/test';
 
@@ -48,7 +48,7 @@ export const TestLineNumberTransformer = {
     const name = source.fileName.replace(/[\\]+/g, '/');
 
     // Only apply to test files
-    if (AppEnv.test &&
+    if (Env.test &&
       name.includes('/test/') &&
       !name.includes('/src/') &&
       !name.includes('/node_modules/')
