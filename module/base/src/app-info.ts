@@ -1,8 +1,7 @@
-import * as fs from 'fs';
 import * as path from 'path';
 import { AppEnv } from './env';
 
-const pkg = JSON.parse(fs.readFileSync(path.join(AppEnv.cwd, 'package.json')).toString());
+const pkg = require(path.join(AppEnv.cwd, 'package.json'));
 
 export const AppInfo = {
   VERSION: pkg.version,

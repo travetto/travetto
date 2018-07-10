@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as yaml from 'js-yaml';
-import { readdirSync, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 
 import { AppEnv, findAppFiles } from '@travetto/base';
 import { ConfigMap } from './map';
@@ -33,7 +33,7 @@ export class ConfigLoader {
     this._initialized = true;
 
     if (!AppEnv.test) {
-      console.info(`Initializing: ${AppEnv.all.join(',')}`);
+      console.info(`Initializing: ${AppEnv.profiles.join(',')}`);
     }
 
     // Load all namespaces from core
@@ -47,8 +47,7 @@ export class ConfigLoader {
     }
 
     // Handle environmental loads
-    if (AppEnv.all.length) {
-      const loaded: string[] = [];
+    if (AppEnv.profiles.length) {
       const envFiles = findAppFiles('.yml', x => x.startsWith('env/'))
         .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }))
         .map(x => {

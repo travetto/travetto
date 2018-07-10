@@ -1,24 +1,33 @@
 const path = require('path');
 const { execSync } = require('child_process');
 
-const e = process.env;
+const p_env = process.env;
 
-const envs = [
-  'application', ...(e.ENV || e.env || e.NODE_ENV || 'dev').toLowerCase().split(/[, ]+/)
-];
-
+const envs = (p_env.ENV || p_env.env || p_env.NODE_ENV || '').toLowerCase().split(/[, ]+/);
 const envSet = new Set(envs);
-const is = envSet.has.bind(envSet);
+const env = envSet.has.bind(envSet);
 
 const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
-const prod = is('prod') || is('production');
-const test = is('test') || is('testing');
+const prod = env('prod') || env('production');
+const test = env('test') || env('testing');
 const dev = !prod && !test;
-const watch = (dev && !('NO_WATCH' in e)) || 'WATCH' in e;
-const debug = ('DEBUG' in e && !!e.DEBUG) || dev;
-const trace = ('TRACE' in e && !!e.TRACE);
+const watch = (dev && !('NO_WATCH' in p_env)) || 'WATCH' in p_env;
+const debug = ('DEBUG' in p_env && !!p_env.DEBUG) || ('debug' in p_env && !!p_env.debug) || dev;
+const trace = ('TRACE' in p_env && !!p_env.TRACE) || ('trace' in p_env && !!p_env.trace);
 
-let docker = !('NO_DOCKER' in e && !!e.NO_DOCKER);
+const profiles = [
+  'application',
+  ...(p_env.profile || p_env.PROFILE || '').toLowerCase().split(/[, ]+/),
+  prod ? 'prod' : '',
+  test ? 'test' : '',
+  dev ? 'dev' : '',
+  ...envs,
+  ...(process.argv.slice(2) || []) // Pull in args
+].filter(x => !!x);
+const profileSet = new Set(profiles);
+const profile = profileSet.has.bind(profileSet);
+
+let docker = !('NO_DOCKER' in p_env && !!p_env.NO_DOCKER);
 if (docker) { // Check for docker existance
   try {
     execSync('docker ps', { stdio: [undefined, undefined, undefined] });
@@ -44,6 +53,6 @@ function error(...args) {
   console.error(...args.map(x => x && x.stack ? x.stack : x));
 }
 
-const AppEnv = { prod, dev, test, is, watch, all: envs, debug, trace, docker, cwd, error };
+const AppEnv = { prod, dev, test, watch, debug, trace, docker, cwd, error, profiles, is: profile };
 
 module.exports = { AppEnv };

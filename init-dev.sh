@@ -22,6 +22,10 @@ function init() {
 
   mkdir -p $ROOT/module/$NAME/node_modules/@travetto
 
+  for sub in typescript tslib; do
+    ln -sTf $ROOT/node_modules/$sub $ROOT/module/$NAME/node_modules/$sub
+  done  
+
   for DEP in `echo "$DEPS"`; do
     ln -sTf $ROOT/module/$DEP $ROOT/module/$NAME/node_modules/@travetto/$DEP
   done

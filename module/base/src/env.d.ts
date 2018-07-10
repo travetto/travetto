@@ -3,11 +3,13 @@ export declare const AppEnv: {
   dev: boolean;
   test: boolean;
   watch: boolean;
-  all: string[];
   docker: boolean;
   debug: boolean;
   trace: boolean;
   cwd: string;
+
   error: (...args: any[]) => void;
-  is: (env: string) => boolean;
+
+  is: (p: string) => boolean;
+  profiles: string[];
 }
