@@ -48,7 +48,7 @@ export class ConfigLoader {
 
     // Handle environmental loads
     if (AppEnv.profiles.length) {
-      const envFiles = findAppFiles('.yml', x => x.startsWith('env/'))
+      const envFiles = findAppFiles('.yml', x => x.startsWith('profile/'))
         .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }))
         .map(x => {
           const tested = path.basename(x.name, '.yml');
