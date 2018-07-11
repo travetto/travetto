@@ -9,15 +9,14 @@ export interface State {
   path: string;
   modulePath: string;
   imports: Map<string, Import>;
+  ids: Map<String, number>;
 }
 
 export class TransformUtil {
 
-  private static ids = new Map<string, number>();
-
-  static generateUniqueId(name: string) {
-    const val = (this.ids.get(name) || 0) + 1;
-    this.ids.set(name, val);
+  static generateUniqueId(name: string, state: State) {
+    const val = (state.ids.get(name) || 0) + 1;
+    state.ids.set(name, val);
     return ts.createIdentifier(`${name}_${val}`);
   }
 
@@ -143,11 +142,13 @@ export class TransformUtil {
   ) {
     return (context: ts.TransformationContext) =>
       (file: ts.SourceFile) => {
+
         const state = init(file, context) as T;
         const pth = require.resolve(file.fileName);
         state.path = pth.replace(/[\\\/]/g, sep);
         state.modulePath = pth.replace(/[\\\/]/g, '/');
         state.newImports = [];
+        state.ids = new Map();
         state.imports = new Map();
 
         for (const stmt of file.statements) {
@@ -197,7 +198,7 @@ export class TransformUtil {
     if (nodeName.indexOf('.') > 0) {
       const [importName, ident] = nodeName.split('.');
       if (state.imports.has(importName)) {
-        const importIdent = this.generateUniqueId(`import_${importName}`);
+        const importIdent = this.generateUniqueId(`import_${importName}`, state);
 
         state.newImports.push({
           ident: importIdent,
@@ -211,7 +212,7 @@ export class TransformUtil {
       const ident = nodeName;
       // External
       if (state.imports.has(nodeName)) {
-        const importName = this.generateUniqueId(`import_${nodeName}`);
+        const importName = this.generateUniqueId(`import_${nodeName}`, state);
 
         state.newImports.push({
           ident: importName,

@@ -90,7 +90,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
   }
 
   if (!state.addField) {
-    const ident = TransformUtil.generateUniqueId(`import_Field`);
+    const ident = TransformUtil.generateUniqueId(`import_Field`, state);
     state.addField = ts.createPropertyAccess(ident, 'Field');
     state.newImports.push({
       path: require.resolve('../src/decorator/field'),
@@ -147,7 +147,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       let decls = node.decorators;
       if (!schema) {
         if (!state.addSchema) {
-          const ident = TransformUtil.generateUniqueId(`import_Schema`);
+          const ident = TransformUtil.generateUniqueId(`import_Schema`, state);
           state.newImports.push({
             path: require.resolve('../src/decorator/schema'),
             ident

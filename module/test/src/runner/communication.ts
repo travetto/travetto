@@ -79,14 +79,14 @@ export async function server() {
       // Clear require cache of all data loaded minus base framework pieces
       console.debug('Resetting', Object.keys(require.cache).length);
       for (const k of Object.keys(require.cache)) {
-        if (/node_modules/.test(k) && !/@travetto/.test(k)) {
+        if (/node_modules/.test(k) && (!/@travetto/.test(k) || /@travetto\/[^/]+\/node_modules/.test(k))) {
           continue;
         }
         if (k.endsWith('.ts') &&
           !/@travetto[\/\\](base|config|compiler|exec|pool)/.test(k) &&
           !(k.startsWith(__filename.replace(/.[tj]s$/, ''))) &&
-          !/[\/\\](phase|transformer)[\/\\]/.test(k) &&
-          !/transformer\..*\.ts/.test(k)) {
+          !/(phase|transformer)[.]/.test(k)
+        ) {
           Compiler.unload(k);
         }
       }
