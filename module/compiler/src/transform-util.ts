@@ -13,6 +13,14 @@ export interface State {
 
 export class TransformUtil {
 
+  private static ids = new Map<string, number>();
+
+  static generateUniqueId(name: string) {
+    const val = (this.ids.get(name) || 0) + 1;
+    this.ids.set(name, val);
+    return ts.createIdentifier(`${name}_${val}`);
+  }
+
   static getDecoratorIdent(d: ts.Decorator): ts.Identifier {
     if (ts.isCallExpression(d.expression)) {
       return d.expression.expression as ts.Identifier;
@@ -189,7 +197,7 @@ export class TransformUtil {
     if (nodeName.indexOf('.') > 0) {
       const [importName, ident] = nodeName.split('.');
       if (state.imports.has(importName)) {
-        const importIdent = ts.createUniqueName(`import_${importName}`);
+        const importIdent = this.generateUniqueId(`import_${importName}`);
 
         state.newImports.push({
           ident: importIdent,
@@ -203,7 +211,7 @@ export class TransformUtil {
       const ident = nodeName;
       // External
       if (state.imports.has(nodeName)) {
-        const importName = ts.createUniqueName(`import_${nodeName}`);
+        const importName = this.generateUniqueId(`import_${nodeName}`);
 
         state.newImports.push({
           ident: importName,
