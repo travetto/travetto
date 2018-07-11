@@ -7,6 +7,8 @@ const SCHEMAS = TransformUtil.buildImportAliasMap({
   '@travetto/schema': 'Schema'
 });
 
+let id = 0;
+
 interface AutoState extends State {
   inAuto: boolean;
   addField: ts.Expression | undefined;
@@ -90,7 +92,7 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
   }
 
   if (!state.addField) {
-    const ident = ts.createUniqueName('import_Field');
+    const ident = ts.createIdentifier(`import_Field_${id++}`);
     state.addField = ts.createPropertyAccess(ident, 'Field');
     state.newImports.push({
       path: require.resolve('../src/decorator/field'),
@@ -147,7 +149,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       let decls = node.decorators;
       if (!schema) {
         if (!state.addSchema) {
-          const ident = ts.createUniqueName('import_Schema');
+          const ident = ts.createIdentifier(`import_Schema_${id++}`);
           state.newImports.push({
             path: require.resolve('../src/decorator/schema'),
             ident

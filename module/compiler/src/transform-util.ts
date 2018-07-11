@@ -55,17 +55,17 @@ export class TransformUtil {
           ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
           ts.createLiteral(require.resolve(path))
         );
-
-        imptStmt.parent = file;
         return imptStmt;
       });
 
-    file.statements = ts.createNodeArray([
+    const out = ts.updateSourceFileNode(file, ts.createNodeArray([
       ...importStmts,
       ...file.statements
-    ]);
+    ]),
+      file.isDeclarationFile, file.referencedFiles,
+      file.typeReferenceDirectives, file.hasNoDefaultLib);
 
-    return file;
+    return out;
   }
 
   static fromLiteral<T extends ts.Node>(val: T): T;
@@ -144,9 +144,7 @@ export class TransformUtil {
 
         for (const stmt of file.statements) {
           if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
-            let path = '';
-            stmt.importClause!;
-            path = require.resolve(stmt.moduleSpecifier.text
+            const path = require.resolve(stmt.moduleSpecifier.text
               .replace(/^\.\./, dirname(dirname(state.path)))
               .replace(/^\.\//, `${dirname(state.path)}/`));
             if (stmt.importClause) {
@@ -164,10 +162,10 @@ export class TransformUtil {
           }
         }
 
-        const ret = visitor(context, file, state);
+        let ret = visitor(context, file, state);
 
         if (state.newImports.length) {
-          this.addImport(ret, state.newImports);
+          ret = this.addImport(ret, state.newImports);
         }
 
         for (const el of ret.statements) {
