@@ -188,7 +188,7 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
-    return await this.getByQuery(cls, { _id: id } as any);
+    return await this.getByQuery(cls, { id } as any);
   }
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
@@ -226,12 +226,15 @@ export class ModelMongoSource extends ModelSource {
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
     const col = await this.getCollection(cls);
-    await col.replaceOne({ _id: o.id }, o);
+    const res = await col.replaceOne({ _id: new mongo.ObjectID(o.id) }, o);
+    if (res.matchedCount === 0) {
+      throw new Error(`Invalid update, no ${cls.name} found with id '${o.id}'`);
+    }
     return o;
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
-    return await this.updatePartialByQuery(cls, { _id: data.id } as any, data);
+    return await this.updatePartialByQuery(cls, { id: data.id } as any, data);
   }
 
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<T> {

@@ -9,9 +9,16 @@ export interface State {
   path: string;
   modulePath: string;
   imports: Map<string, Import>;
+  ids: Map<String, number>;
 }
 
 export class TransformUtil {
+
+  static generateUniqueId(name: string, state: State) {
+    const val = (state.ids.get(name) || 0) + 1;
+    state.ids.set(name, val);
+    return ts.createIdentifier(`${name}_${val}`);
+  }
 
   static getDecoratorIdent(d: ts.Decorator): ts.Identifier {
     if (ts.isCallExpression(d.expression)) {
@@ -55,17 +62,17 @@ export class TransformUtil {
           ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
           ts.createLiteral(require.resolve(path))
         );
-
-        imptStmt.parent = file;
         return imptStmt;
       });
 
-    file.statements = ts.createNodeArray([
+    const out = ts.updateSourceFileNode(file, ts.createNodeArray([
       ...importStmts,
       ...file.statements
-    ]);
+    ]),
+      file.isDeclarationFile, file.referencedFiles,
+      file.typeReferenceDirectives, file.hasNoDefaultLib);
 
-    return file;
+    return out;
   }
 
   static fromLiteral<T extends ts.Node>(val: T): T;
@@ -135,18 +142,18 @@ export class TransformUtil {
   ) {
     return (context: ts.TransformationContext) =>
       (file: ts.SourceFile) => {
+
         const state = init(file, context) as T;
         const pth = require.resolve(file.fileName);
         state.path = pth.replace(/[\\\/]/g, sep);
         state.modulePath = pth.replace(/[\\\/]/g, '/');
         state.newImports = [];
+        state.ids = new Map();
         state.imports = new Map();
 
         for (const stmt of file.statements) {
           if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
-            let path = '';
-            stmt.importClause!;
-            path = require.resolve(stmt.moduleSpecifier.text
+            const path = require.resolve(stmt.moduleSpecifier.text
               .replace(/^\.\./, dirname(dirname(state.path)))
               .replace(/^\.\//, `${dirname(state.path)}/`));
             if (stmt.importClause) {
@@ -164,10 +171,10 @@ export class TransformUtil {
           }
         }
 
-        const ret = visitor(context, file, state);
+        let ret = visitor(context, file, state);
 
         if (state.newImports.length) {
-          this.addImport(ret, state.newImports);
+          ret = this.addImport(ret, state.newImports);
         }
 
         for (const el of ret.statements) {
@@ -191,7 +198,7 @@ export class TransformUtil {
     if (nodeName.indexOf('.') > 0) {
       const [importName, ident] = nodeName.split('.');
       if (state.imports.has(importName)) {
-        const importIdent = ts.createUniqueName(`import_${importName}`);
+        const importIdent = this.generateUniqueId(`import_${importName}`, state);
 
         state.newImports.push({
           ident: importIdent,
@@ -205,7 +212,7 @@ export class TransformUtil {
       const ident = nodeName;
       // External
       if (state.imports.has(nodeName)) {
-        const importName = ts.createUniqueName(`import_${nodeName}`);
+        const importName = this.generateUniqueId(`import_${nodeName}`, state);
 
         state.newImports.push({
           ident: importName,

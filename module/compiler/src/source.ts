@@ -1,9 +1,11 @@
 import * as fs from 'fs';
 import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
+
 import { Env } from '@travetto/base';
-import { CompilerUtil } from './util';
 import { Cache } from '@travetto/base/src/cache';
+
+import { CompilerUtil } from './util';
 
 const stringHash = require('string-hash');
 
