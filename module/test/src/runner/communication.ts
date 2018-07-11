@@ -91,7 +91,7 @@ export async function server() {
         }
       }
 
-      // Relaod runner
+      // Reload runner
       Compiler.workingSets = [data.file!];
       Compiler.reset();
       const { Runner } = require('./runner');
