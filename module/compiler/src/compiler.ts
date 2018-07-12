@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { EventEmitter } from 'events';
 
-import { AppInfo, Env } from '@travetto/base';
+import { AppInfo, Env, AppCache } from '@travetto/base';
 import { TransformerManager } from './transformers';
 import { CompilerUtil } from './util';
 import { SourceManager } from './source';
@@ -116,10 +116,10 @@ class $Compiler {
     }
   }
 
-  unload(fileName: string) {
+  unload(fileName: string, unlink = true) {
     console.trace('Unloading', fileName);
 
-    if (this.sourceManager.has(fileName)) {
+    if (unlink && this.sourceManager.has(fileName)) {
       this.sourceManager.unload(fileName);
     }
 

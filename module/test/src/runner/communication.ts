@@ -87,7 +87,7 @@ export async function server() {
           !(k.startsWith(__filename.replace(/.[tj]s$/, ''))) &&
           !/(phase|transformer)[.]/.test(k)
         ) {
-          Compiler.unload(k);
+          Compiler.unload(k, false);
         }
       }
 
