@@ -1,8 +1,4 @@
 import * as express from 'express';
-import * as session from 'express-session';
-import * as cookieParser from 'cookie-parser';
-import * as bodyParser from 'body-parser';
-import * as compression from 'compression';
 
 import { Env } from '@travetto/base';
 import { Injectable, DependencyRegistry } from '@travetto/di';
@@ -30,22 +26,11 @@ export class ExpressApp {
 
   async init() {
     this.app = express();
-    this.app.use(compression());
-    this.app.use(cookieParser());
-    this.app.use(bodyParser.json());
-    this.app.use(bodyParser.urlencoded());
-    this.app.use(bodyParser.raw({ type: 'image/*' }));
-    this.app.use(session(this.config.session)); // session secret
-
-    // Enable proxy for cookies
-    if (this.config.session.cookie.secure) {
-      this.app.enable('trust proxy');
-    }
 
     const operators = DependencyRegistry.getCandidateTypes(ExpressOperator as Class);
 
     const instances = await Promise.all(operators.map(op =>
-      DependencyRegistry.getInstance(ExpressOperator, op.qualifier)
+      DependencyRegistry.getInstance(op.target, op.qualifier)
         .catch(err => {
           console.error(`Unable to load operator ${op.class.name}#${op.qualifier.toString()}`);
         })
@@ -54,6 +39,8 @@ export class ExpressApp {
     const sorted = (instances
       .filter(x => !!x) as ExpressOperator[])
       .sort((a, b) => a.priority - b.priority);
+
+    console.log('Sorting Operators', sorted.length);
 
     for (const inst of sorted) {
       inst.operate(this);

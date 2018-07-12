@@ -119,13 +119,13 @@ export class SourceManager {
     return this.cache.readEntry(file);
   }
 
-  deleteCached(file: string) {
+  deleteCached(file: string, unlink: boolean = true) {
     this.cache.removeEntry(file);
   }
 
-  unload(name: string) {
+  unload(name: string, unlink: boolean = true) {
     if (this.hasCached(name)) {
-      this.deleteCached(name);
+      this.deleteCached(name, unlink);
     }
 
     if (this.hashes.has(name)) {

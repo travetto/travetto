@@ -44,6 +44,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       }
     }
 
+    const isAbstract = (node.modifiers! || []).filter(x => x.kind === ts.SyntaxKind.AbstractKeyword).length > 0;
+
     const ret = ts.updateClassDeclaration(node,
       ts.createNodeArray(
         [ts.createDecorator(
@@ -58,6 +60,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         createStaticField('__id', `${state.file}#${node.name!.getText()}`),
         createStaticField('__hash', stringHash(node.getText())),
         createStaticField('__methodHashes', TransformUtil.extendObjectLiteral(hashes)),
+        createStaticField('__abstract', TransformUtil.fromLiteral(isAbstract)),
         ...node.members
       ])
     ) as any;

@@ -83,8 +83,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
       node = ts.visitEachChild(node, c => visitNode(context, c, state), context);
 
+      const clsNode = (node as any as ts.ClassDeclaration);
       const declTemp = (node.decorators || []).slice(0);
-      const cons = (node as any as ts.ClassDeclaration).members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
+      const cons = clsNode.members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
       let injectArgs = undefined;
 
       if (cons) {
@@ -95,7 +96,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           if (e.message !== 'Type information not found') {
             throw e;
           } else {
-            console.error(`Cannot get @InjectArgs for ${(node as any as ts.ClassDeclaration).name!.text}`);
+            console.error(`Cannot get @InjectArgs for ${clsNode.name!.text}`);
           }
         }
       }

@@ -1,6 +1,13 @@
 import { Injectable, Inject, InjectableFactory } from '../src';
 import { DbConfig, AltConfig, Empty } from './config';
 
+export abstract class BasePattern { }
+
+@Injectable()
+export class SpecificPattern extends BasePattern {
+
+}
+
 @Injectable()
 export class Database {
   @Inject() dbConfig: DbConfig<any, any>;

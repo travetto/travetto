@@ -1,8 +1,9 @@
 import { DependencyRegistry } from '../src/service';
-import { ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT, CUSTOM_DATABASE, Database, CUSTOM_EMPTY } from './deps';
+import { ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT, CUSTOM_DATABASE, Database, CUSTOM_EMPTY, BasePattern, SpecificPattern } from './deps';
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import * as assert from 'assert';
 import { DbConfig } from './config';
+import { Class } from '@travetto/registry';
 
 const FOUR = 4;
 
@@ -130,5 +131,20 @@ class DiTest2 {
     assert(inst);
 
     assert(inst.empty);
+  }
+
+  @Test('abstract inheritance')
+  async abstrct() {
+    const types = DependencyRegistry.getCandidateTypes(BasePattern as Class<any>);
+    assert(types.length > 0);
+
+    const spec = DependencyRegistry.getCandidateTypes(SpecificPattern);
+    assert(spec.length === 1);
+
+    assert(types[0] === spec[0]);
+
+    const specInst = await DependencyRegistry.getInstance(SpecificPattern);
+
+    assert(specInst instanceof SpecificPattern);
   }
 }

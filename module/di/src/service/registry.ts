@@ -220,7 +220,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     const targetId = target.__id;
     if (!this.instances.has(targetId) || !this.instances.get(targetId)!.has(qualifier)) {
-      console.trace('Getting Intance', targetId, getName(qualifier));
+      console.trace('Getting Instance', targetId, getName(qualifier));
       await this.createInstance(target, qualifier);
     }
     return this.instances.get(targetId)!.get(qualifier)!;
@@ -252,7 +252,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
-    const classId = pconfig.class!.__id;
     const config = this.getOrCreatePending(pconfig.class!);
 
     config.class = cls;
@@ -360,11 +359,17 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.aliases.get(targetId)!.set(config.qualifier, classId);
     this.targets.get(classId)!.set(config.qualifier, targetId);
 
-    // TODO: Auto alias parent class if framework managed
-    if (parentClass.__id && config.qualifier !== DEFAULT_INSTANCE) {
+    // If targetting self (default @Injectable behavior)
+    if (classId === targetId && (parentConfig || parentClass.__abstract)) {
       const parentId = parentClass.__id;
-      this.aliases.get(parentId)!.set(config.qualifier, classId);
-      this.targets.get(classId)!.set(config.qualifier, parentId);
+      const qualifier = config.qualifier === DEFAULT_INSTANCE ? Symbol(`Extends-${parentId}-${classId}`) : config.qualifier;
+
+      if (!this.aliases.has(parentId)) {
+        this.aliases.set(parentId, new Map());
+      }
+
+      this.aliases.get(parentId)!.set(qualifier, classId);
+      this.targets.get(classId)!.set(qualifier, parentId);
     }
 
     // If already loaded, reload
@@ -373,10 +378,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.proxies.get(targetId)!.has(config.qualifier)
     ) {
       console.debug('Reloading on next tick');
-      // Timing matters b/c of create instance
+      // Timing matters due to create instance being asynchronous
       process.nextTick(() => this.createInstance(config.target, config.qualifier));
     } else if (config.autoCreate.create) {
-      // If not loaded, and autocreate
+      // If not loaded, and auto-create
       this.autoCreate.push({
         target: config.target,
         qualifier: config.qualifier,

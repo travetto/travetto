@@ -119,8 +119,8 @@ class $Compiler {
   unload(fileName: string, unlink = true) {
     console.trace('Unloading', fileName);
 
-    if (unlink && this.sourceManager.has(fileName)) {
-      this.sourceManager.unload(fileName);
+    if (this.sourceManager.has(fileName)) {
+      this.sourceManager.unload(fileName, unlink);
     }
 
     if (fileName in require.cache) {

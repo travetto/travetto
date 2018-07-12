@@ -1,6 +1,6 @@
 import { LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
 import { ConcurrentPool, IdleManager } from '@travetto/pool';
-import { PhaseManager } from '@travetto/base';
+import { PhaseManager, Env } from '@travetto/base';
 
 /***
   Flow of events
@@ -115,7 +115,9 @@ export async function server() {
 
 export function client() {
   return new ConcurrentPool(async () => {
-    const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true);
+    const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true, {
+      cwd: Env.cwd
+    });
     worker.init();
     await worker.listenOnce(Events.READY);
     await worker.send(Events.INIT);

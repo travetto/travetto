@@ -32,8 +32,10 @@ class Cache {
     return fs.readFileSync(this.toEntryName(full)).toString();
   }
 
-  removeEntry(full) {
-    fs.unlinkSync(this.toEntryName(full));
+  removeEntry(full, unlink = true) {
+    if (unlink) {
+      fs.unlinkSync(this.toEntryName(full));
+    }
     delete this.cache[full];
   }
 
@@ -69,7 +71,8 @@ class Cache {
   }
 
   toEntryName(full) {
-    return path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~').replace(/.ts$/, '@ts'));
+    const out = path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~').replace(/.ts$/, '@ts'));
+    return out;
   }
 }
 

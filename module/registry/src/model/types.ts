@@ -4,6 +4,7 @@ declare global {
     __filename: string;
     __hash: string;
     __methodHashes?: { [key: string]: any };
+    __abstract: boolean;
   }
 }
 

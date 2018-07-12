@@ -11,10 +11,7 @@ import { AuthServiceAdapter } from './service-adapter';
 
 export const AUTH = Symbol('@travetto/auth');
 
-@Injectable({
-  target: ExpressOperator,
-  qualifier: AUTH
-})
+@Injectable()
 export class AuthOperator extends ExpressOperator {
 
   private providers = new Map<string, AuthProvider<any>>();
