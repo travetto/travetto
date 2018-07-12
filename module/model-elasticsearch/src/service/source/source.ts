@@ -8,10 +8,11 @@ import {
   SelectClause,
   ModelQuery
 } from '@travetto/model';
-import { ModelElasticsearchConfig } from '../config';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Util } from '@travetto/base';
 import { SchemaChangeEvent } from '@travetto/schema';
+
+import { ModelElasticsearchConfig } from '../config';
 import { extractWhereQuery } from './query-builder';
 import { generateSourceSchema } from './schema';
 

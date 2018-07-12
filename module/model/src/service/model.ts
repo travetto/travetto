@@ -38,6 +38,7 @@ export class ModelService extends ModelSource {
     }
   }
 
+  /** Handles subtyping on polymorphic endpoints */
   convert<T extends ModelCore>(cls: Class<T>, o: T) {
     const config = ModelRegistry.get(cls);
 
@@ -54,6 +55,7 @@ export class ModelService extends ModelSource {
     }
   }
 
+  /** Handles any pre-persistance activities needed */
   async prePersist<T extends ModelCore>(cls: Class<T>, o: T): Promise<T>;
   async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string): Promise<Partial<T>>;
   async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T> | T, view: string = DEFAULT_VIEW) {
@@ -65,6 +67,7 @@ export class ModelService extends ModelSource {
     return res as T;
   }
 
+  /** Handles any pre-retrieval activities needed */
   postLoad<T extends ModelCore>(cls: Class<T>, o: T): T;
   postLoad<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string): Partial<T>;
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
@@ -77,6 +80,7 @@ export class ModelService extends ModelSource {
     return o;
   }
 
+  /** Executes a raw query against the model space */
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>) {
     this.queryService.verify(cls, query);
 
@@ -84,6 +88,7 @@ export class ModelService extends ModelSource {
     return res.map(o => this.postLoad(cls, o as any as T));
   }
 
+  /** Retrieves all instances of cls that match query */
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}) {
     this.queryService.verify(cls, query);
 
@@ -95,12 +100,14 @@ export class ModelService extends ModelSource {
     return res.map(o => this.postLoad(cls, o));
   }
 
+  /** Find the count of matching documetns by query */
   getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}) {
     this.queryService.verify(cls, query);
 
     return this.source.getCountByQuery(cls, query);
   }
 
+  /** Find one by query, fail if not found */
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}, failOnMany: boolean = true) {
     this.queryService.verify(cls, query);
 
@@ -108,6 +115,7 @@ export class ModelService extends ModelSource {
     return this.postLoad(cls, res);
   }
 
+  /** Save or update, upsert, for a document */
   async saveOrUpdate<T extends ModelCore>(cls: Class<T>, o: T, query: ModelQuery<T>) {
     this.queryService.verify(cls, query);
 
@@ -121,49 +129,59 @@ export class ModelService extends ModelSource {
     throw new Error(`Too many already exist: ${res.length}`);
   }
 
+  /** Find one by id */
   async getById<T extends ModelCore>(cls: Class<T>, id: string) {
     const res = await this.source.getById(cls, id);
     return this.postLoad(cls, res);
   }
 
+  /** Delete one by id */
   deleteById<T extends ModelCore>(cls: Class<T>, id: string) {
     return this.source.deleteById(cls, id);
   }
 
+  /** Delete all by query */
   deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}) {
     this.queryService.verify(cls, query);
 
     return this.source.deleteByQuery(cls, query);
   }
 
+  /** Save a new instance */
   async save<T extends ModelCore>(cls: Class<T>, o: T) {
     o = await this.prePersist(cls, o);
     const res = await this.source.save(cls, o);
     return this.postLoad(cls, res);
   }
 
+  /** Save all as new instances */
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]) {
     objs = await Promise.all(objs.map(o => this.prePersist(cls, o)));
     const res = await this.source.saveAll(cls, objs);
     return res.map(x => this.postLoad(cls, x));
   }
 
+  /** Update/replace an existing record */
   async update<T extends ModelCore>(cls: Class<T>, o: T) {
     o = await this.prePersist(cls, o);
     const res = await this.source.update(cls, o);
     return this.postLoad(cls, res);
   }
 
+  /** Update/replace all with partial data, by query */
   updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>) {
     this.queryService.verify(cls, query);
 
     return this.source.updateAllByQuery(cls, query, data);
   }
 
-  updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>) {
-    return this.source.updatePartial(cls, model);
+  /** Partial update single record, by id */
+  async updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>) {
+    const res = await this.source.updatePartial(cls, model);
+    return this.postLoad(cls, res);
   }
 
+  /** Partial update, by query*/
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>) {
     this.queryService.verify(cls, query);
 
@@ -174,6 +192,7 @@ export class ModelService extends ModelSource {
     return this.postLoad(cls, res);
   }
 
+  /** Partial update single record, by view and by id */
   async updatePartialView<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string) {
     o = await this.prePersist(cls, o, view);
     const partial = BindUtil.bindSchema(cls, {}, o, view);
@@ -181,6 +200,7 @@ export class ModelService extends ModelSource {
     return this.postLoad(cls, res);
   }
 
+  /** Partial update by view and by query */
   async updatePartialViewByQuery<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string, query: ModelQuery<T>) {
     this.queryService.verify(cls, query);
 
@@ -190,6 +210,7 @@ export class ModelService extends ModelSource {
     return res;
   }
 
+  /** Bulk create/update/delete */
   bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
     return this.source.bulkProcess(cls, state);
   }

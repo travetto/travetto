@@ -122,17 +122,17 @@ export class ModelMongoSource extends ModelSource {
     if (hasId(where)) {
       const val = where.id;
       if (Array.isArray(val) || typeof val === 'string') {
-        let res: (mongo.ObjectID | mongo.ObjectID[]);
+        let res: (mongo.ObjectId | mongo.ObjectId[]);
         if (typeof val === 'string') {
-          res = new mongo.ObjectID(val);
+          res = new mongo.ObjectId(val);
         } else {
-          res = val.map(x => typeof x === 'string' ? new mongo.ObjectID(x) : x);
+          res = val.map(x => typeof x === 'string' ? new mongo.ObjectId(x) : x);
         }
         delete where.id;
         (where as any)._id = res;
       } else if (has$In(val)) {
-        const res: { $in: (string | mongo.ObjectID)[] } = val;
-        (where as any)._id = { $in: res.$in.map(x => typeof x === 'string' ? new mongo.ObjectID(x) : x) };
+        const res: { $in: (string | mongo.ObjectId)[] } = val;
+        (where as any)._id = { $in: res.$in.map(x => typeof x === 'string' ? new mongo.ObjectId(x) : x) };
       }
     }
     return query;
@@ -193,7 +193,7 @@ export class ModelMongoSource extends ModelSource {
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
     const col = await this.getCollection(cls);
-    const res = await col.deleteOne({ _id: new mongo.ObjectID(id) });
+    const res = await col.deleteOne({ _id: new mongo.ObjectId(id) });
 
     return res.deletedCount || 0;
   }
@@ -225,15 +225,16 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
+    o = this.prePersist(cls, o);
     const col = await this.getCollection(cls);
-    const res = await col.replaceOne({ _id: new mongo.ObjectID(o.id) }, o);
+    const res = await col.replaceOne({ _id: (o as any)._id }, o);
     if (res.matchedCount === 0) {
-      throw new Error(`Invalid update, no ${cls.name} found with id '${o.id}'`);
+      throw new BaseError(`Invalid update, no ${cls.name} found with id '${(o as any)._id}'`);
     }
     return o;
   }
 
-  async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
+  async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T>): Promise<T> {
     return await this.updatePartialByQuery(cls, { id: data.id } as any, data);
   }
 
@@ -285,7 +286,7 @@ export class ModelMongoSource extends ModelSource {
 
     (state.delete || []).forEach(p => {
       count++;
-      bulk.find({ _id: new mongo.ObjectID(p.id) }).removeOne();
+      bulk.find({ _id: new mongo.ObjectId(p.id) }).removeOne();
     });
 
     const out: BulkResponse = {
