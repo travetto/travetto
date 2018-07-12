@@ -226,7 +226,10 @@ export class ModelMongoSource extends ModelSource {
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
     const col = await this.getCollection(cls);
-    await col.replaceOne({ _id: o.id }, o);
+    const res = await col.replaceOne({ _id: new mongo.ObjectID(o.id) }, o);
+    if (res.matchedCount === 0) {
+      throw new Error(`Invalid update, no ${cls.name} found with id '${o.id}'`);
+    }
     return o;
   }
 
