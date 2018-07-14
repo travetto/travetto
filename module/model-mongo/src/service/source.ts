@@ -188,7 +188,8 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
-    return await this.getByQuery(cls, { id } as any);
+    const query = { where: { id } } as any as ModelQuery<T>;
+    return await this.getByQuery(cls, query);
   }
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
@@ -235,7 +236,7 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T>): Promise<T> {
-    return await this.updatePartialByQuery(cls, { id: data.id } as any, data);
+    return await this.updatePartialByQuery(cls, { where: { id: data.id } } as any as ModelQuery<T>, data);
   }
 
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<T> {
