@@ -61,16 +61,25 @@ export class RouteUtil {
         await out;
       }
     } else if (typeof out === 'string') {
+      res.type('text/plain');
       res.send(out);
     } else if (out instanceof Error) {
-      const status = (out as any).status || (out as any).statusCode || 500;
-      res.status(status);
-      res.json({
-        message: out.message,
-        status
-      });
+      const { stack, expose, status, statusCode, ...err } = (out as any);
+
+      const computedStatus = status || statusCode || 500;
+      res.status(computedStatus);
+
+      if ('toJSON' in out) {
+        res.type('json').send((out as any).toJSON());
+      } else {
+        res.json({ status: computedStatus, ...err });
+      }
     } else {
-      res.json(out);
+      if ('toJSON' in out) {
+        res.type('json').send((out as any).toJSON());
+      } else {
+        res.json(out);
+      }
     }
   }
 
