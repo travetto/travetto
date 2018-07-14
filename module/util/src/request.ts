@@ -19,6 +19,8 @@ export class Request {
     const auth = (username && password) ? `${username}:${password}` : undefined;
     const client = (protocol === 'https:' ? https : http) as HttpClient;
 
+    console.log(host, port, path, username, password, searchParams.toString(), protocol);
+
     const finalOpts = {
       host, port,
       auth, path,
@@ -44,7 +46,7 @@ export class Request {
       }
     }
 
-    if (searchParams.entries.length) {
+    if (Array.from(searchParams.values()).length) {
       finalOpts.path = `${finalOpts.path || ''}?${searchParams.toString()}`;
     }
 
