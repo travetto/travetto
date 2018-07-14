@@ -4,8 +4,8 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/base": "^0.0.162",
-    "@travetto/pool": "^0.0.16"
+    "@travetto/base": "^0.1.0",
+    "@travetto/pool": "^0.1.0"
   },
   "description": "Common wrapper around process execution with high level docker support.",
   "homepage": "https://travetto.io",
@@ -23,5 +23,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.0.39"
+  "version": "0.1.0"
 }

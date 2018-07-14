@@ -10,8 +10,8 @@
   "dependencies": {
     "@types/node": "^10.3.2",
     "trace": "^3.1.0",
-    "typescript": "^2.9.2",
-    "tslib": "^1.9.3"
+    "tslib": "^1.9.3",
+    "typescript": "^2.9.2"
   },
   "description": "Bootstrapping, application phase management, environment config and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
@@ -33,5 +33,5 @@
   "scripts": {
     "postinstall": "./bin/travetto-clean.js"
   },
-  "version": "0.0.162"
+  "version": "0.1.0"
 }
