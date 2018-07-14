@@ -3,89 +3,131 @@ import * as https from 'https';
 import * as qs from 'querystring';
 import * as url from 'url';
 
-export async function request(opts: http.RequestOptions & { url: string }, data?: any): Promise<string>;
-export async function request(opts: http.RequestOptions & { url: string, pipeTo: any }, data?: any): Promise<http.IncomingMessage>;
-export async function request(opts: http.RequestOptions & { url: string, pipeTo?: any }, data?: any): Promise<string | http.IncomingMessage> {
-  const { url: requestUrl } = opts;
-  delete opts.url;
-
-  const { query, hash, href, pathname, search, slashes, ...parsed } = url.parse(requestUrl);
-
-  opts = { method: 'GET', headers: {}, ...opts, ...parsed };
-
-  const client = ((opts.protocol === 'https:' ? https : http) as any);
-  delete opts.protocol;
-
-  const hasBody = (opts.method === 'POST' || opts.method === 'PUT');
-  let bodyStr: string;
-
-  if (data) {
-    if (hasBody) {
-      bodyStr = data.toString();
-      (opts.headers as any)['Content-Length'] = Buffer.byteLength(bodyStr);
-    } else {
-      (opts as any)['query'] = { ...(opts as any)['query'], ...qs.parse(data) };
-    }
-  }
-
-  if ((opts as any)['query']) {
-    opts.path = `${opts.path || ''}?${qs.stringify((opts as any)['query'])}`;
-  }
-
-  return await new Promise<string | http.IncomingMessage>((resolve, reject) => {
-    const req = client.request(opts, (msg: http.IncomingMessage) => {
-      let body = '';
-      if (!opts.pipeTo) {
-        msg.setEncoding('utf8');
-      }
-
-      msg.on('data', (chunk: string) => {
-        if ((msg.statusCode || 200) > 299 || !opts.pipeTo) {
-          body += chunk;
-        }
-      });
-
-      msg.on('end', () => {
-        if ((msg.statusCode || 200) > 299) {
-          reject({ message: body, status: msg.statusCode });
-        } else {
-          resolve(opts.pipeTo ? msg : body);
-        }
-      });
-      if (opts.pipeTo) {
-        msg.pipe(opts.pipeTo);
-        if (opts.pipeTo.on) {
-          opts.pipeTo.on('error', reject);
-          if (opts.pipeTo.close) {
-            opts.pipeTo.on('finish', () => opts.pipeTo.close())
-          }
-        }
-      }
-    });
-    req.on('error', reject);
-    if (hasBody && bodyStr) {
-      req.write(bodyStr);
-    }
-    req.end();
-  });
+interface HttpClient {
+  request(args: http.ClientRequestArgs, cb: (response: http.IncomingMessage) => void): {
+    on(type: 'error', cb: (err: any) => void): void;
+    end(): void;
+    write(text: string): void;
+  };
 }
 
-export async function requestJSON<T, U>(opts: http.RequestOptions & { url: string }, data?: U): Promise<T> {
-  if (!opts.headers) {
-    opts.headers = {};
-  }
-  for (const k of ['Content-Type', 'Accept']) {
-    if (!opts.headers[k]) {
-      opts.headers[k] = 'application/json';
+export class Request {
+  static args(opts: http.RequestOptions & { url: string }, data?: any) {
+    const { url: optsUrl, ...optsWithoutUrl } = opts;
+
+    const { hostname: host, port, pathname: path, username, password, searchParams, protocol } = new url.URL(optsUrl);
+    const auth = (username && password) ? `${username}:${password}` : undefined;
+    const client = (protocol === 'https:' ? https : http) as HttpClient;
+
+    const finalOpts = {
+      host, port,
+      auth, path,
+      method: 'GET',
+      headers: {},
+      payload: undefined as any,
+      pipeTo: undefined as any,
+      ...optsWithoutUrl
+    };
+
+    const hasBody = (finalOpts.method === 'POST' || finalOpts.method === 'PUT');
+    let payload: string | undefined = undefined;
+
+    if (data) {
+      if (hasBody) {
+        payload = data.toString();
+        finalOpts.headers['Content-Length'] = Buffer.byteLength(payload as string);
+      } else {
+        const passedData = typeof data === 'string' ? qs.parse(data) : data;
+        for (const key of Object.keys(passedData)) {
+          searchParams.set(key, passedData[key]);
+        }
+      }
     }
-  }
-  try {
-    const res = await request(opts, data && JSON.stringify(data));
-    return JSON.parse(res) as T;
-  } catch (e) {
-    if (typeof e === 'string') {
-      e = JSON.parse(e);
+
+    if (searchParams.entries.length) {
+      finalOpts.path = `${finalOpts.path || ''}?${searchParams.toString()}`;
     }
-    throw e;
+
+    return { opts: finalOpts, client, payload };
+  }
+
+  static jsonArgs(opts: http.RequestOptions & { url: string }, data?: any) {
+    if (!opts.headers) {
+      opts.headers = {};
+    }
+    for (const k of ['Content-Type', 'Accept']) {
+      if (!opts.headers[k]) {
+        opts.headers[k] = 'application/json';
+      }
+    }
+    const payload = data && (opts.method === 'POST' || opts.method === 'PUT') ?
+      JSON.stringify(data) : data;
+
+    return this.args(opts, payload);
+  }
+
+  static async exec(client: HttpClient, opts: http.ClientRequestArgs, payload?: any): Promise<string>;
+  static async exec(client: HttpClient, opts: http.ClientRequestArgs, payload: any, pipeTo: any): Promise<http.IncomingMessage>;
+  static async exec(client: HttpClient, opts: http.ClientRequestArgs, payload?: any, pipeTo?: any): Promise<string | http.IncomingMessage> {
+    return await new Promise<string | http.IncomingMessage>((resolve, reject) => {
+      const req = client.request(opts, (msg: http.IncomingMessage) => {
+        let body = '';
+        if (!pipeTo) {
+          msg.setEncoding('utf8');
+        }
+
+        msg.on('data', (chunk: string) => {
+          if ((msg.statusCode || 200) > 299 || !pipeTo) {
+            body += chunk;
+          }
+        });
+
+        msg.on('end', () => {
+          if ((msg.statusCode || 200) > 299) {
+            reject({ message: body, status: msg.statusCode });
+          } else {
+            resolve(pipeTo ? msg : body);
+          }
+        });
+        if (pipeTo) {
+          msg.pipe(pipeTo);
+          if (pipeTo.on) {
+            pipeTo.on('error', reject);
+            if (pipeTo.close) {
+              pipeTo.on('finish', () => pipeTo.close());
+            }
+          }
+        }
+      });
+      req.on('error', reject);
+      if ((opts.method === 'PUT' || opts.method === 'POST') && payload !== undefined) {
+        req.write(payload);
+      }
+      req.end();
+    });
+  }
+
+  static async request(opts: http.RequestOptions & { url: string }, data?: any): Promise<string>;
+  static async request(opts: http.RequestOptions & { url: string, pipeTo: any }, data?: any): Promise<http.IncomingMessage>;
+  static async request(opts: http.RequestOptions & { url: string, pipeTo?: any }, data?: any): Promise<string | http.IncomingMessage> {
+    const pipeTo = opts.pipeTo;
+    delete opts.pipeTo;
+
+    const { opts: finalOpts, client, payload } = this.args(opts, data);
+    return this.exec(client, finalOpts, payload, pipeTo);
+  }
+
+  static async requestJSON<T, U>(opts: http.RequestOptions & { url: string }, data?: U): Promise<T> {
+    const { opts: finalOpts, client, payload } = this.jsonArgs(opts, data);
+
+    try {
+      const res = await this.exec(client, finalOpts, payload);
+      return JSON.parse(res) as T;
+    } catch (e) {
+      if (typeof e === 'string') {
+        e = JSON.parse(e);
+      }
+      throw e;
+    }
   }
 }
