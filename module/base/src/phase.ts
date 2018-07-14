@@ -24,9 +24,12 @@ export class PhaseManager {
     return this;
   }
 
-  async run() {
+  async run(cb?: () => any) {
     for (const i of this.initializers) {
       await i.action();
+    }
+    if (cb) {
+      await cb();
     }
   }
 }
