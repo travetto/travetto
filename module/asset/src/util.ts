@@ -5,7 +5,7 @@ import * as fileType from 'file-type';
 import * as util from 'util';
 import * as os from 'os';
 
-import { request } from '@travetto/util';
+import { Request } from '@travetto/util';
 import { Asset, AssetFile } from './model';
 
 const crypto = require('crypto');
@@ -98,7 +98,7 @@ export class AssetUtil {
     let filePath = this.generateTempFile(url.split('/').pop() as string);
     const file = fs.createWriteStream(filePath);
     const filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
-    const res = await request({ url, pipeTo: file });
+    const res = await Request.request({ url, pipeTo: file });
     let responseExt = mime.getExtension((res.headers['content-type'] as string) || '');
 
     if (!responseExt) {
