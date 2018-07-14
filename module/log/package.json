@@ -4,11 +4,11 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/compiler": "^0.1.0"
+    "@travetto/compiler": "^0.1.1"
   },
   "description": "Logging framework that integrates at the console.log level.",
   "devDependencies": {
-    "@travetto/test": "^0.1.0"
+    "@travetto/test": "^0.1.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -27,5 +27,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.1.0"
+  "version": "0.1.1"
 }

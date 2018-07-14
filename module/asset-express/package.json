@@ -4,8 +4,8 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/asset": "^0.1.0",
-    "@travetto/express": "^0.1.0",
+    "@travetto/asset": "^0.1.1",
+    "@travetto/express": "^0.1.1",
     "@types/express-fileupload": "^0.1.1",
     "@types/multiparty": "0.0.31",
     "connect-multiparty": "^2.1.0",
@@ -15,7 +15,7 @@
   },
   "description": "Provides integration between the travetto asset and express module.",
   "devDependencies": {
-    "@travetto/test": "^0.1.0"
+    "@travetto/test": "^0.1.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -33,5 +33,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.1.0"
+  "version": "0.1.1"
 }

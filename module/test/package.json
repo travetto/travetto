@@ -7,9 +7,9 @@
     "travetto-test": "bin/travetto-test.js"
   },
   "dependencies": {
-    "@travetto/exec": "^0.1.0",
-    "@travetto/pool": "^0.1.0",
-    "@travetto/registry": "^0.1.0",
+    "@travetto/exec": "^0.1.1",
+    "@travetto/pool": "^0.1.1",
+    "@travetto/registry": "^0.1.1",
     "@types/js-yaml": "^3.11.1",
     "@types/minimist": "^1.2.0",
     "js-yaml": "https://github.com/arciisine/js-yaml.git#3.11.0-slim",
@@ -34,5 +34,5 @@
   "scripts": {
     "test": "node ./bin/travetto-test.js"
   },
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
