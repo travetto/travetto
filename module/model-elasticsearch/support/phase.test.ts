@@ -1,21 +1,21 @@
 export const init = {
   priority: 0,
   action: async () => {
-    const { DockerContainer } = require('@travetto/exec/src/docker');
+    const { DockerContainer } = await import('@travetto/exec/src/docker');
 
-    const defPort = process.env.MODEL_ELASTICSEARCH_PORT || 9200;
+    const defPort = parseInt(`${process.env.MODEL_ELASTICSEARCH_PORT || 9200}`, 10);
 
     try {
       await DockerContainer.waitForPort(defPort, 10);
       process.env.MODEL_ELASTICSEARCH_NAMESPACE = `test_${Math.trunc(Math.random() * 10000)}`; // Randomize schema
     } catch (e) {
-      const { Request } = require('@travetto/util');
+      const { Request } = await import('@travetto/util');
 
       async function waitForUrl(url: string, timeout: number) {
         const start = Date.now();
         while ((Date.now() - start) < timeout) {
           try {
-            await Request.request({ url });
+            await Request.exec({ url });
             return;
           } catch (e) {
             await new Promise(res => setTimeout(res, 100));

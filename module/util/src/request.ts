@@ -12,6 +12,47 @@ interface HttpClient {
 }
 
 export class Request {
+  private static async _exec(client: HttpClient, opts: http.ClientRequestArgs, payload?: any): Promise<string>;
+  private static async _exec(client: HttpClient, opts: http.ClientRequestArgs, payload: any, pipeTo: any): Promise<http.IncomingMessage>;
+  private static async _exec(client: HttpClient, opts: http.ClientRequestArgs, payload?: any, pipeTo?: any): Promise<string | http.IncomingMessage> {
+    return await new Promise<string | http.IncomingMessage>((resolve, reject) => {
+      const req = client.request(opts, (msg: http.IncomingMessage) => {
+        let body = '';
+        if (!pipeTo) {
+          msg.setEncoding('utf8');
+        }
+
+        msg.on('data', (chunk: string) => {
+          if ((msg.statusCode || 200) > 299 || !pipeTo) {
+            body += chunk;
+          }
+        });
+
+        msg.on('end', () => {
+          if ((msg.statusCode || 200) > 299) {
+            reject({ message: body, status: msg.statusCode });
+          } else {
+            resolve(pipeTo ? msg : body);
+          }
+        });
+        if (pipeTo) {
+          msg.pipe(pipeTo);
+          if (pipeTo.on) {
+            pipeTo.on('error', reject);
+            if (pipeTo.close) {
+              pipeTo.on('finish', () => pipeTo.close());
+            }
+          }
+        }
+      });
+      req.on('error', reject);
+      if ((opts.method === 'PUT' || opts.method === 'POST') && payload !== undefined) {
+        req.write(payload);
+      }
+      req.end();
+    });
+  }
+
   static args(opts: http.RequestOptions & { url: string }, data?: any) {
     const { url: optsUrl, ...optsWithoutUrl } = opts;
 
@@ -68,62 +109,21 @@ export class Request {
     return this.args(opts, payload);
   }
 
-  static async exec(client: HttpClient, opts: http.ClientRequestArgs, payload?: any): Promise<string>;
-  static async exec(client: HttpClient, opts: http.ClientRequestArgs, payload: any, pipeTo: any): Promise<http.IncomingMessage>;
-  static async exec(client: HttpClient, opts: http.ClientRequestArgs, payload?: any, pipeTo?: any): Promise<string | http.IncomingMessage> {
-    return await new Promise<string | http.IncomingMessage>((resolve, reject) => {
-      const req = client.request(opts, (msg: http.IncomingMessage) => {
-        let body = '';
-        if (!pipeTo) {
-          msg.setEncoding('utf8');
-        }
-
-        msg.on('data', (chunk: string) => {
-          if ((msg.statusCode || 200) > 299 || !pipeTo) {
-            body += chunk;
-          }
-        });
-
-        msg.on('end', () => {
-          if ((msg.statusCode || 200) > 299) {
-            reject({ message: body, status: msg.statusCode });
-          } else {
-            resolve(pipeTo ? msg : body);
-          }
-        });
-        if (pipeTo) {
-          msg.pipe(pipeTo);
-          if (pipeTo.on) {
-            pipeTo.on('error', reject);
-            if (pipeTo.close) {
-              pipeTo.on('finish', () => pipeTo.close());
-            }
-          }
-        }
-      });
-      req.on('error', reject);
-      if ((opts.method === 'PUT' || opts.method === 'POST') && payload !== undefined) {
-        req.write(payload);
-      }
-      req.end();
-    });
-  }
-
-  static async request(opts: http.RequestOptions & { url: string }, data?: any): Promise<string>;
-  static async request(opts: http.RequestOptions & { url: string, pipeTo: any }, data?: any): Promise<http.IncomingMessage>;
-  static async request(opts: http.RequestOptions & { url: string, pipeTo?: any }, data?: any): Promise<string | http.IncomingMessage> {
+  static async exec(opts: http.RequestOptions & { url: string }, data?: any): Promise<string>;
+  static async exec(opts: http.RequestOptions & { url: string, pipeTo: any }, data?: any): Promise<http.IncomingMessage>;
+  static async exec(opts: http.RequestOptions & { url: string, pipeTo?: any }, data?: any): Promise<string | http.IncomingMessage> {
     const pipeTo = opts.pipeTo;
     delete opts.pipeTo;
 
     const { opts: finalOpts, client, payload } = this.args(opts, data);
-    return this.exec(client, finalOpts, payload, pipeTo);
+    return this._exec(client, finalOpts, payload, pipeTo);
   }
 
-  static async requestJSON<T, U>(opts: http.RequestOptions & { url: string }, data?: U): Promise<T> {
+  static async execJSON<T, U>(opts: http.RequestOptions & { url: string }, data?: U): Promise<T> {
     const { opts: finalOpts, client, payload } = this.jsonArgs(opts, data);
 
     try {
-      const res = await this.exec(client, finalOpts, payload);
+      const res = await this._exec(client, finalOpts, payload);
       return JSON.parse(res) as T;
     } catch (e) {
       if (typeof e === 'string') {
