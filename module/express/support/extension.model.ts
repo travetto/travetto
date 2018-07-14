@@ -17,7 +17,7 @@ export function ModelController<T extends BaseModel>(path: string, cls: Class<T>
       Object.assign(
         ControllerRegistry.getOrCreateRequestHandlerConfig(
           target, async function (this: Svc, req: Request) {
-            return this.source.getAllByQuery(cls, JSON.parse(req.params.q));
+            return this.source.getAllByQuery(cls, JSON.parse(req.params.q || '{}'));
           }), {
           method: 'get', path: '/', headers: {
             Expires: '-1',
