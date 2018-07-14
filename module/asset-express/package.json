@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@travetto/asset": "^0.1.1",
-    "@travetto/express": "^0.1.1",
+    "@travetto/express": "^0.1.2",
     "@types/express-fileupload": "^0.1.1",
     "@types/multiparty": "0.0.31",
     "connect-multiparty": "^2.1.0",
@@ -33,5 +33,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.1.1"
+  "version": "0.1.2"
 }
