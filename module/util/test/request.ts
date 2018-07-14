@@ -1,8 +1,8 @@
 import * as https from 'https';
 import * as assert from 'assert';
-import { Request } from '../src/request';
+import { HttpRequest } from '../src/request';
 
-const args = Request.args({
+const args = HttpRequest.args({
   url: 'https://a:b@google.com:442?q=hello'
 }, {
     age: 20,
@@ -17,7 +17,7 @@ assert.strictEqual(args.client, https);
 assert.strictEqual(args.opts.path, '/?q=hello&age=20&height=5');
 
 const payload = 'age=20&height=5';
-const args2 = Request.jsonArgs({
+const args2 = HttpRequest.jsonArgs({
   url: 'https://google.com?q=hello'
 }, payload);
 
@@ -25,7 +25,7 @@ assert.strictEqual(args2.opts.path, '/?q=hello&age=20&height=5');
 assert.strictEqual(args2.opts.headers['Content-Type'], 'application/json');
 
 const payload3 = { age: 20, height: 5 };
-const args3 = Request.jsonArgs({
+const args3 = HttpRequest.jsonArgs({
   method: 'POST',
   url: 'https://google.com?q=hello'
 }, payload3);
