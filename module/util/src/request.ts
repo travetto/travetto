@@ -11,7 +11,7 @@ interface HttpClient {
   };
 }
 
-export class Request {
+export class HttpRequest {
   private static async _exec(client: HttpClient, opts: http.ClientRequestArgs, payload?: any): Promise<string>;
   private static async _exec(client: HttpClient, opts: http.ClientRequestArgs, payload: any, pipeTo: any): Promise<http.IncomingMessage>;
   private static async _exec(client: HttpClient, opts: http.ClientRequestArgs, payload?: any, pipeTo?: any): Promise<string | http.IncomingMessage> {

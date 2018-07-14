@@ -9,13 +9,13 @@ export const init = {
       await DockerContainer.waitForPort(defPort, 10);
       process.env.MODEL_ELASTICSEARCH_NAMESPACE = `test_${Math.trunc(Math.random() * 10000)}`; // Randomize schema
     } catch (e) {
-      const { Request } = await import('@travetto/util');
+      const { HttpRequest } = await import('@travetto/util');
 
       async function waitForUrl(url: string, timeout: number) {
         const start = Date.now();
         while ((Date.now() - start) < timeout) {
           try {
-            await Request.exec({ url });
+            await HttpRequest.exec({ url });
             return;
           } catch (e) {
             await new Promise(res => setTimeout(res, 100));
