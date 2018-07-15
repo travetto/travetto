@@ -15,7 +15,10 @@ const watch = (dev && !('NO_WATCH' in p_env)) || 'WATCH' in p_env;
 const debug = ('DEBUG' in p_env && !!p_env.DEBUG) || ('debug' in p_env && !!p_env.debug) || dev;
 const trace = ('TRACE' in p_env && !!p_env.TRACE) || ('trace' in p_env && !!p_env.trace);
 
-const frameworkDev = 'TRAVETTO_DEV' in p_env;
+let frameworkDev = false;
+try {
+  frameworkDev = require(`${cwd}/package.json`).name.startsWith('@travetto');
+} catch (e) {}
 
 const profiles = [
   'application',
