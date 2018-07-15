@@ -4,7 +4,6 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/base": "^0.1.1",
     "@travetto/pool": "^0.1.1"
   },
   "description": "Common wrapper around process execution with high level docker support.",

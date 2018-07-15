@@ -11,7 +11,7 @@ export class TransformerManager {
     const transformers: { [key: string]: any } = {};
     let i = 2;
 
-    for (const trns of ScanApp.requireFiles('.ts', x => /transformer[.].*[.]ts$/.test(x))) {
+    for (const trns of ScanApp.requireFiles('.ts', x => /transformer[.].*?[.]ts$/.test(x))) {
       for (const key of Object.keys(trns)) {
         const item = trns[key];
         if (!transformers[item.phase]) {
@@ -23,7 +23,9 @@ export class TransformerManager {
       }
     }
     for (const key of Object.keys(transformers)) {
-      transformers[key] = (transformers[key] as any[]).sort((a, b) => a.priority - b.priority).map(x => x.transformer);
+      transformers[key] = (transformers[key] as any[])
+        .sort((a, b) => a.priority - b.priority)
+        .map(x => x.transformer);
     }
     this.transformers = transformers;
   }

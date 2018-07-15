@@ -22,14 +22,7 @@ export class ScanApp {
               x.file = `${Env.cwd}/node_modules/@travetto/${x.file.split('node_modules/@travetto/').pop()}`;
             }
             return x;
-          })
-          .sort((a, b) => a.file.localeCompare(b.file))
-          .reduce((acc, el) => {
-            if (!acc.length || acc[acc.length - 1].file !== el.file) {
-              acc.push(el);
-            }
-            return acc;
-          }, [] as ScanEntry[]);
+          });
       }
     }
 

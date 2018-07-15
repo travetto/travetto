@@ -78,6 +78,7 @@ export async function server() {
 
       // Clear require cache of all data loaded minus base framework pieces
       console.debug('Resetting', Object.keys(require.cache).length);
+
       for (const k of Object.keys(require.cache)) {
         if (/node_modules/.test(k) && (!/@travetto/.test(k) || /@travetto\/[^/]+\/node_modules/.test(k))) {
           continue;

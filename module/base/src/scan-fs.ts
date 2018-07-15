@@ -7,6 +7,7 @@ const fsReadFileAsync = util.promisify(fs.readFile);
 const fsStat = util.promisify(fs.lstat);
 const fsReaddir = util.promisify(fs.readdir);
 const fsUnlink = util.promisify(fs.unlink);
+const fsRealpath = util.promisify(fs.realpath);
 
 export interface ScanEntry {
   file: string;
@@ -45,7 +46,7 @@ export class ScanFs {
     return !x.stats.isDirectory() && !x.stats.isSymbolicLink();
   }
 
-  static scanDir(handler: ScanHandler, base?: string, entry?: ScanEntry) {
+  static scanDir(handler: ScanHandler, base?: string, entry?: ScanEntry, visited = new Set()) {
     return new Promise<ScanEntry[]>(async (resolve, reject) => {
 
       try {
@@ -64,8 +65,17 @@ export class ScanFs {
           const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
           if (ScanFs.isDir(subEntry)) {
+            if (subEntry.stats.isSymbolicLink()) {
+              const p = await fsRealpath(full);
+              if (!visited.has(p)) {
+                visited.add(p);
+              } else {
+                continue;
+              }
+            }
+
             if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
-              out.push(subEntry, ...await ScanFs.scanDir(handler, base, subEntry));
+              out.push(subEntry, ...await ScanFs.scanDir(handler, base, subEntry, visited));
             }
           } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
             (entry.children = entry.children || [])!.push(subEntry);
@@ -93,7 +103,7 @@ export class ScanFs {
     return out;
   }
 
-  static scanDirSync(handler: ScanHandler, base?: string, entry?: ScanEntry) {
+  static scanDirSync(handler: ScanHandler, base?: string, entry?: ScanEntry, visited = new Set()) {
     const out: ScanEntry[] = [];
 
     base = base || Env.cwd;
@@ -109,8 +119,16 @@ export class ScanFs {
       const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
       if (ScanFs.isDir(subEntry)) {
+        if (subEntry.stats.isSymbolicLink()) {
+          const p = fs.realpathSync(full);
+          if (!visited.has(p)) {
+            visited.add(p);
+          } else {
+            continue;
+          }
+        }
         if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
-          out.push(subEntry, ...ScanFs.scanDirSync(handler, base, subEntry));
+          out.push(subEntry, ...ScanFs.scanDirSync(handler, base, subEntry, visited));
         }
       } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
         (entry.children = entry.children || [])!.push(subEntry);
