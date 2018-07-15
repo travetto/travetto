@@ -60,8 +60,6 @@ export class HttpRequest {
     const auth = (username && password) ? `${username}:${password}` : undefined;
     const client = (protocol === 'https:' ? https : http) as HttpClient;
 
-    console.log(host, port, path, username, password, searchParams.toString(), protocol);
-
     const finalOpts = {
       host, port,
       auth, path,

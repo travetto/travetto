@@ -38,8 +38,8 @@ export class TransformUtil {
       }
       if (ident && ident.escapedText in patterns) {
         const { path } = state.imports.get(ident.escapedText! as string)!;
-        console.log(path, ident.escapedText!);
         const packages = patterns[ident.escapedText as string];
+
         if (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto')) {
           let pkg = '';
           if (!path.includes('node_modules')) {
