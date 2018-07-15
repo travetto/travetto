@@ -4,12 +4,12 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/context": "^0.1.2",
-    "@travetto/util": "^0.1.2"
+    "@travetto/context": "^0.1.3",
+    "@travetto/util": "^0.1.3"
   },
   "description": "Authentication scaffolding for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.1.2"
+    "@travetto/test": "^0.1.3"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -26,5 +26,5 @@
     "test": "./node_modules/.bin/travetto-test",
     "test:all": "npm test test/.*"
   },
-  "version": "0.1.2"
+  "version": "0.1.3"
 }

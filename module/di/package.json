@@ -5,11 +5,11 @@
   },
   "dependencies": {
     "@travetto/config": "^0.1.2",
-    "@travetto/registry": "^0.1.2"
+    "@travetto/registry": "^0.1.3"
   },
   "description": "Dependency registration/management and injection support.",
   "devDependencies": {
-    "@travetto/test": "^0.1.2"
+    "@travetto/test": "^0.1.3"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -29,5 +29,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
