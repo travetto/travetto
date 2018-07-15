@@ -4,12 +4,12 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/asset": "^0.1.3",
+    "@travetto/asset": "^0.1.4",
     "aws-sdk": "^2.243.1"
   },
   "description": "AWS S3 backend for the travetto asset module",
   "devDependencies": {
-    "@travetto/test": "^0.1.3"
+    "@travetto/test": "^0.1.4"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -26,5 +26,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.1.3"
+  "version": "0.1.4"
 }

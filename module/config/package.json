@@ -4,7 +4,7 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/base": "^0.1.2",
+    "@travetto/base": "^0.1.3",
     "@types/js-yaml": "^3.11.1",
     "js-yaml": "https://github.com/arciisine/js-yaml.git#3.11.0-slim"
   },
@@ -25,5 +25,5 @@
     "url": "https://github.com/travetto/travetto.git"
   },
   "scripts": {},
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
