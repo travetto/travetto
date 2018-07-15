@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { TransformUtil, State } from '@travetto/compiler';
+import { TransformUtil, TransformerState } from '@travetto/compiler';
 import { Env } from '@travetto/base/src/env';
 
 const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
@@ -22,7 +22,6 @@ const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
 };
 
 const ASSERT_CMD = 'assert';
-const TEST_IMPORT = '@travetto/test';
 const ASSERT_UTIL = 'AssertUtil';
 
 const METHODS: { [key: string]: string } = {
@@ -32,7 +31,7 @@ const METHODS: { [key: string]: string } = {
 
 const METHOD_REGEX = new RegExp(`[.](${Object.keys(METHODS).join('|')})[(]`);
 
-interface AssertState extends State {
+interface AssertState extends TransformerState {
   assert: ts.Identifier;
   hasAssertCall: boolean;
   assertCheck: ts.PropertyAccessExpression;

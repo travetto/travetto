@@ -1,5 +1,4 @@
 export NODE_PRESERVE_SYMLINKS=1
-export TRAVETTO_DEV=1
 
 ROOT=`dirname ${BASH_SOURCE[@]}`
 ROOT=`realpath $ROOT`
