@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import { dirname, sep } from 'path';
-import { AppInfo, Env } from '@travetto/base';
+import { AppInfo, Env, resolveFrameworkFile } from '@travetto/base';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
@@ -158,8 +158,8 @@ export class TransformUtil {
               .replace(/^\.\./, dirname(dirname(state.path)))
               .replace(/^\.\//, `${dirname(state.path)}/`));
 
-            if (Env.frameworkDev && path.includes('@travetto')) {
-              path = `${Env.cwd}/node_modules/@travetto/${path.split('@travetto/').pop()}`;
+            if (Env.frameworkDev) {
+              path = resolveFrameworkFile(path);
             }
 
             if (stmt.importClause) {

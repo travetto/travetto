@@ -1,14 +1,25 @@
-import { Registry, MethodSource, CompilerClassSource, RootRegistry } from '../src';
+import * as assert from 'assert';
+import { Suite, Test } from '@travetto/test';
+
+import { Registry, MethodSource, RootRegistry } from '../src';
 
 class Simple extends Registry {
 }
 
-export const SimpleRegistry = new Simple();
+@Suite()
+export class RegistryTest {
 
-export const MethodListener = new MethodSource(RootRegistry);
+  @Test()
+  async reloadTest() {
+    const SimpleRegistry = new Simple();
 
-MethodListener.on(e => {
-  console.log('Method changed', e);
-});
+    const MethodListener = new MethodSource(RootRegistry);
 
-console.log('hi');
+    MethodListener.on(e => {
+      console.log('Method changed', e);
+    });
+
+    console.log('hi');
+
+  }
+}

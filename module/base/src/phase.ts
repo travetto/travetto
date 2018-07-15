@@ -15,7 +15,7 @@ export class PhaseManager {
   load(priority?: number) {
     const pattern = new RegExp(`phase[.]${this.scope}[.]ts$`);
     const initFiles = ScanApp.requireFiles('.ts', x => pattern.test(x));
-    console.debug('Initializing Phase', this.scope, initFiles);
+    console.debug('Initializing Phase', this.scope, ScanApp.findFiles('.ts', x => pattern.test(x)).map(x => x.file));
     this.initializers = initFiles
       .map(x => x.init)
       .map(x => ({ priority: PhaseManager.DEFAULT_PRIORITY, ...x }))

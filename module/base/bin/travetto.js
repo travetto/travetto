@@ -7,6 +7,7 @@ const Module = require('module');
 
 //Simple bootstrap to load compiler
 const { Env } = require('../src/env');
+const { resolveFrameworkFile } = require('../src/app-info');
 const { AppCache } = require('../src/cache');
 const cwd = Env.cwd;
 
@@ -17,14 +18,17 @@ AppCache.init();
 
 //Rewrite Module for local development
 if (Env.frameworkDev) {
+  const parDir = path.dirname(cwd);
   const og = Module._load.bind(Module);
   Module._load = (request, parent) => {
-    if (request.startsWith('@travetto')) {
+    const root = path.dirname(parent.filename);
+    if (request.startsWith('@travetto')) { // Handle import directly
       request = `${cwd}/node_modules/${request}`;
-    } else if (request.startsWith('.') && parent.filename.includes('travetto/module') && !parent.filename.startsWith(cwd)) {
-      const p = path.resolve(path.dirname(parent.filename), request);
-      request = `${cwd}/node_modules/@travetto/${p.split('travetto/module/').pop()}`;
+    } else if (request.startsWith('.') && root.startsWith(parDir) && !root.startsWith(cwd)) { // Handle relative and sub
+      const relativeRoot = root.split(parDir).pop();
+      request = path.resolve(`${cwd}/node_modules/@travetto/${relativeRoot}`, request);
     }
+    request = resolveFrameworkFile(request);
     return og.apply(null, [request, parent]);
   };
 }

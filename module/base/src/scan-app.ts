@@ -1,9 +1,11 @@
 import { ScanEntry, ScanFs } from './scan-fs';
 import { Env } from './env';
+import { resolveFrameworkFile } from './app-info';
 
 const cache: { [key: string]: ScanEntry[] } = {};
 
 export class ScanApp {
+
   static findFiles(ext: string, filter?: (rel: string) => boolean) {
     if (!cache[ext]) {
       cache[ext] = ScanFs.scanDirSync({
@@ -16,14 +18,21 @@ export class ScanApp {
         .filter(ScanFs.isNotDir);
 
       if (Env.frameworkDev) {
-        cache[ext] = cache[ext]
-          .map(x => {
-            if (x.file.includes('node_modules/@travetto')) {
-              x.file = `${Env.cwd}/node_modules/@travetto/${x.file.split('node_modules/@travetto/').pop()}`;
-            }
-            return x;
-          });
+        cache[ext] = cache[ext].map(x => {
+          x.file = resolveFrameworkFile(x.file);
+          return x;
+        });
       }
+
+      // De-deduplicate
+      cache[ext] = cache[ext]
+        .sort((a, b) => a.file.localeCompare(b.file))
+        .reduce((acc: ScanEntry[], x: ScanEntry) => {
+          if (!acc.length || x.file !== acc[acc.length - 1].file) {
+            acc.push(x);
+          }
+          return acc;
+        }, []);
     }
 
     if (filter) {
