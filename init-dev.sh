@@ -30,6 +30,8 @@ function init() {
     ln -sTf $ROOT/module/$DEP $ROOT/module/$NAME/node_modules/@travetto/$DEP
   done
 
+  ln -sTf $ROOT/module/$NAME $ROOT/module/$NAME/node_modules/@travetto/$NAME
+
   TEST_DEPS=`resolve_deps test | tr '~' '\n' | sort -u`
   ln -sTf $ROOT/module/test $ROOT/module/$NAME/node_modules/@travetto/test
   for DEP in `echo "$TEST_DEPS"`; do
