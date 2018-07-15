@@ -1,10 +1,10 @@
 import * as ts from 'typescript';
 import { dirname, sep } from 'path';
-import { AppInfo } from '@travetto/base';
+import { AppInfo, Env } from '@travetto/base';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
-export interface State {
+export interface TransformerState {
   newImports: Import[];
   path: string;
   modulePath: string;
@@ -14,7 +14,7 @@ export interface State {
 
 export class TransformUtil {
 
-  static generateUniqueId(name: string, state: State) {
+  static generateUniqueId(name: string, state: TransformerState) {
     const val = (state.ids.get(name) || 0) + 1;
     state.ids.set(name, val);
     return ts.createIdentifier(`${name}_${val}`);
@@ -30,7 +30,7 @@ export class TransformUtil {
     }
   }
 
-  static findAnyDecorator(node: ts.Node, patterns: { [key: string]: Set<string> }, state: State): ts.Decorator | undefined {
+  static findAnyDecorator(node: ts.Node, patterns: { [key: string]: Set<string> }, state: TransformerState): ts.Decorator | undefined {
     for (const dec of (node.decorators || []) as any as DecList) {
       const ident = this.getDecoratorIdent(dec);
       if (!ts.isIdentifier(ident)) {
@@ -38,6 +38,7 @@ export class TransformUtil {
       }
       if (ident && ident.escapedText in patterns) {
         const { path } = state.imports.get(ident.escapedText! as string)!;
+        console.log(path, ident.escapedText!);
         const packages = patterns[ident.escapedText as string];
         if (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto')) {
           let pkg = '';
@@ -136,7 +137,7 @@ export class TransformUtil {
     return undefined;
   }
 
-  static importingVisitor<T extends State>(
+  static importingVisitor<T extends TransformerState>(
     init: (file: ts.SourceFile, context?: ts.TransformationContext) => Partial<T>,
     visitor: <Z extends ts.Node>(context: ts.TransformationContext, node: Z, state: T) => Z
   ) {
@@ -153,9 +154,14 @@ export class TransformUtil {
 
         for (const stmt of file.statements) {
           if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
-            const path = require.resolve(stmt.moduleSpecifier.text
+            let path = require.resolve(stmt.moduleSpecifier.text
               .replace(/^\.\./, dirname(dirname(state.path)))
               .replace(/^\.\//, `${dirname(state.path)}/`));
+
+            if (Env.frameworkDev && path.includes('@travetto')) {
+              path = `${Env.cwd}/node_modules/@travetto/${path.split('@travetto/').pop()}`;
+            }
+
             if (stmt.importClause) {
               if (stmt.importClause.namedBindings) {
                 const bindings = stmt.importClause.namedBindings;
@@ -187,7 +193,7 @@ export class TransformUtil {
       };
   }
 
-  static importIfExternal<T extends State>(typeNode: ts.TypeNode, state: State) {
+  static importIfExternal<T extends TransformerState>(typeNode: ts.TypeNode, state: TransformerState) {
     //    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
 
     const nodeName = (typeNode as any).typeName!.getText();

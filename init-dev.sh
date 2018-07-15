@@ -29,6 +29,14 @@ function init() {
   for DEP in `echo "$DEPS"`; do
     ln -sTf $ROOT/module/$DEP $ROOT/module/$NAME/node_modules/@travetto/$DEP
   done
+
+  TEST_DEPS=`resolve_deps test | tr '~' '\n' | sort -u`
+  ln -sTf $ROOT/module/test $ROOT/module/$NAME/node_modules/@travetto/test
+  for DEP in `echo "$TEST_DEPS"`; do
+    if [ ! "$NAME" == "$DEP" ]; then
+      ln -sTf $ROOT/module/$DEP $ROOT/module/$NAME/node_modules/@travetto/$DEP
+    fi
+  done
 }
 
 for x in $ROOT/module/*; do

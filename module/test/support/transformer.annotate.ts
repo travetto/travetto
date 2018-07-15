@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { TransformUtil, State } from '@travetto/compiler';
+import { TransformUtil } from '@travetto/compiler';
 import { Env } from '@travetto/base/src/env';
 
 const TEST_IMPORT = '@travetto/test';
