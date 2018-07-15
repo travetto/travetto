@@ -1,5 +1,12 @@
+import { Suite, Test } from '@travetto/test';
 import * as compiler from '../src/compiler';
 
-setInterval(() => {
-  console.log(compiler.Compiler.cwd);
-}, 2000);
+@Suite()
+class WatchTest {
+  @Test()
+  async testWatch() {
+    setInterval(() => {
+      console.log(compiler.Compiler.cwd);
+    }, 2000);
+  }
+}
