@@ -1,35 +1,34 @@
-import { DockerContainer } from '../src/docker';
+import * as assert from 'assert';
 import { createReadStream } from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { Suite, Test } from '@travetto/test';
 
-async function test() {
-  const container = new DockerContainer('rafakato/alpine-graphicsmagick')
-    .forceDestroyOnShutdown()
-    .setInteractive(true);
+import { DockerContainer } from '../src/docker';
 
-  console.log('Hello');
+@Suite()
+class DockerIOTest {
+  @Test()
+  async test() {
+    const container = new DockerContainer('rafakato/alpine-graphicsmagick')
+      .forceDestroyOnShutdown()
+      .setInteractive(true);
 
-  try {
-    await container.create(['-i'], ['/bin/sh']);
-    await container.start();
+    console.log('Hello');
 
-    const [proc, prom] = await container.exec(['-i'], ['gm', 'convert', '-resize 100x50', '-', '-']);
+    try {
+      await container.create(['-i'], ['/bin/sh']);
+      await container.start();
 
-    createReadStream(path.resolve(`${os.homedir}/Documents/download.jpeg`)).pipe(proc.stdin);
+      const [proc, prom] = await container.exec(['-i'], ['gm', 'convert', '-resize 100x50', '-', '-']);
 
-    proc.stdout.pipe(process.stdout);
+      createReadStream(path.resolve(`${os.homedir}/Documents/download.jpeg`)).pipe(proc.stdin);
 
-    await prom;
-  } catch (e) {
-    console.log('Error', e);
+      proc.stdout.pipe(process.stdout);
+
+      await prom;
+    } catch (e) {
+      console.log('Error', e);
+    }
   }
 }
-
-test().then(() => {
-  console.log('Done');
-  process.exit(0);
-}, (e: any) => {
-  console.log('Err', e);
-  //  process.exit(1);
-});
