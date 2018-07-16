@@ -117,7 +117,7 @@ export class HttpRequest {
     return this._exec(client, finalOpts, payload, pipeTo);
   }
 
-  static async execJSON<T, U>(opts: http.RequestOptions & { url: string }, data?: U): Promise<T> {
+  static async execJSON<T, U = any>(opts: http.RequestOptions & { url: string }, data?: U): Promise<T> {
     const { opts: finalOpts, client, payload } = this.jsonArgs(opts, data);
 
     try {
