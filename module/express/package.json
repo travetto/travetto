@@ -4,8 +4,8 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/di": "^0.1.4",
-    "@travetto/log": "^0.1.4",
+    "@travetto/di": "^0.1.5",
+    "@travetto/log": "^0.1.5",
     "@types/body-parser": "^1.17.0",
     "@types/compression": "0.0.36",
     "@types/cookie-parser": "^1.4.1",
@@ -17,7 +17,7 @@
     "express-session": "^1.15.6"
   },
   "devDependencies": {
-    "@travetto/test": "^0.1.4"
+    "@travetto/test": "^0.1.5"
   },
   "description": "Declarative wrapper around express with support for the dependency injection module.",
   "homepage": "https://travetto.io",
@@ -40,5 +40,5 @@
     "url": "https://github.com/travetto/travetto.git"
   },
   "scripts": {},
-  "version": "0.1.6"
+  "version": "0.1.7"
 }
