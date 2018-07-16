@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 import { ScanEntry, ScanFs } from './scan-fs';
 import { Env } from './env';
 import { resolveFrameworkFile } from './app-info';
@@ -20,6 +22,7 @@ export class ScanApp {
       if (Env.frameworkDev) {
         cache[ext] = cache[ext].map(x => {
           x.file = resolveFrameworkFile(x.file);
+          x.module = x.file.replace(`${Env.cwd}${path.sep}`, '').replace(/[\\]+/g, '/');
           return x;
         });
       }

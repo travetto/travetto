@@ -25,7 +25,7 @@ export class PoolExecTest {
     await pool.process(
       //  new ArrayDataSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
       new IteratorDataSource(function* () {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 5; i++) {
           yield `${i}-`;
         }
       }),
@@ -34,7 +34,7 @@ export class PoolExecTest {
         exe.send('request', { data: i });
         const { data } = await res;
         console.log('Sent', i, 'Received', data);
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 100));
       }
     );
 

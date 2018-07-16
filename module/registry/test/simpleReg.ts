@@ -20,6 +20,5 @@ export class RegistryTest {
     });
 
     console.log('hi');
-
   }
 }
