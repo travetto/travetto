@@ -14,21 +14,15 @@ class DockerIOTest {
       .forceDestroyOnShutdown()
       .setInteractive(true);
 
-    console.log('Hello');
+    await container.create(['-i'], ['/bin/sh']);
+    await container.start();
 
-    try {
-      await container.create(['-i'], ['/bin/sh']);
-      await container.start();
+    const [proc, prom] = await container.exec(['-i'], ['gm', 'convert', '-resize 100x50', '-', '-']);
 
-      const [proc, prom] = await container.exec(['-i'], ['gm', 'convert', '-resize 100x50', '-', '-']);
+    createReadStream(path.resolve(`${os.homedir}/Documents/download.jpeg`)).pipe(proc.stdin);
 
-      createReadStream(path.resolve(`${os.homedir}/Documents/download.jpeg`)).pipe(proc.stdin);
+    proc.stdout.pipe(process.stdout);
 
-      proc.stdout.pipe(process.stdout);
-
-      await prom;
-    } catch (e) {
-      console.log('Error', e);
-    }
+    await prom;
   }
 }
