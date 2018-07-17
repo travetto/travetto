@@ -15,6 +15,12 @@ function resolve_deps() {
   echo $OUT
 }
 
+function mk_link() {
+  if [[ ! -e "$2" ]]; then
+    ln -s $1 $2
+  fi 
+}
+
 function init() {
   NAME=`echo $1 | awk -F '/' '{ print $NF }'`
   DEPS=`resolve_deps $NAME | tr '~' '\n' | sort -u`
@@ -22,20 +28,20 @@ function init() {
   mkdir -p $ROOT/module/$NAME/node_modules/@travetto
 
   for sub in typescript tslib; do
-    ln -sTf $ROOT/node_modules/$sub $ROOT/module/$NAME/node_modules/$sub
+    mk_link $ROOT/node_modules/$sub $ROOT/module/$NAME/node_modules/$sub
   done  
 
   for DEP in `echo "$DEPS"`; do
-    ln -sTf $ROOT/module/$DEP $ROOT/module/$NAME/node_modules/@travetto/$DEP
+    mk_link $ROOT/module/$DEP $ROOT/module/$NAME/node_modules/@travetto/$DEP
   done
 
-  ln -sTf $ROOT/module/$NAME $ROOT/module/$NAME/node_modules/@travetto/$NAME
+  mk_link $ROOT/module/$NAME $ROOT/module/$NAME/node_modules/@travetto/$NAME
 
   TEST_DEPS=`resolve_deps test | tr '~' '\n' | sort -u`
-  ln -sTf $ROOT/module/test $ROOT/module/$NAME/node_modules/@travetto/test
+  mk_link $ROOT/module/test $ROOT/module/$NAME/node_modules/@travetto/test
   for DEP in `echo "$TEST_DEPS"`; do
     if [ ! "$NAME" == "$DEP" ]; then
-      ln -sTf $ROOT/module/$DEP $ROOT/module/$NAME/node_modules/@travetto/$DEP
+      mk_link $ROOT/module/$DEP $ROOT/module/$NAME/node_modules/@travetto/$DEP
     fi
   done
 }

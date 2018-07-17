@@ -122,9 +122,9 @@ export class BindUtil {
 
             if (SchemaRegistry.has(config.type)) {
               if (config.array) {
-                v = v.map((x: any) => BindUtil.bindSchema(config.type, new config.type(), x, view));
+                v = v.map((x: any) => BindUtil.bindSchema(config.type, new config.type(), x));
               } else {
-                v = BindUtil.bindSchema(config.type, new config.type(), v, view);
+                v = BindUtil.bindSchema(config.type, new config.type(), v);
               }
             } else {
               v = config.array ?

@@ -35,7 +35,7 @@ export class SchemaValidator {
 
       let sub: SchemaConfig | undefined;
       if (SchemaRegistry.has(type)) {
-        sub = SchemaRegistry.getViewSchema(type, view).schema;
+        sub = SchemaRegistry.getViewSchema(type, undefined).schema;
       } else if (type === Object) {
         sub = type as any as SchemaConfig;
       }
@@ -47,7 +47,7 @@ export class SchemaValidator {
         }
         if (sub) {
           for (let i = 0; i < val.length; i++) {
-            const subErrors = this.validateSchema(sub, val[i], view, `${path}[${i}]`);
+            const subErrors = this.validateSchema(sub, val[i], undefined, `${path}[${i}]`);
             errors = errors.concat(subErrors);
           }
         } else {
@@ -57,7 +57,7 @@ export class SchemaValidator {
           }
         }
       } else if (sub) {
-        const subErrors = this.validateSchema(sub, val, view, path);
+        const subErrors = this.validateSchema(sub, val, undefined, path);
         errors.push(...subErrors);
       } else {
         const fieldErrors = this.validateField(fieldSchema, val, o);
