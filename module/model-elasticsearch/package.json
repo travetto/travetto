@@ -4,8 +4,8 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/model": "^0.1.6",
-    "@travetto/schema": "^0.1.6",
+    "@travetto/model": "^0.1.7",
+    "@travetto/schema": "^0.1.7",
     "@types/elasticsearch": "^5.0.23",
     "elasticsearch": "^15.0.0"
   },
@@ -33,5 +33,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.1.6"
+  "version": "0.1.7"
 }
