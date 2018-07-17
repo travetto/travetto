@@ -12,7 +12,7 @@ function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
     return BindUtil.bindSchema(cls, new cls(), obj, view);
   } catch (e) {
-    throw new AppError(`Supplied data is incompatible with ${cls.__id}`);
+    throw new AppError(`Supplied data is incompatible with ${cls.__id}: ${e.message}`);
   }
 }
 
