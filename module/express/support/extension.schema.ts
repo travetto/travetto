@@ -1,12 +1,19 @@
 import { Request, Response } from 'express';
 import * as qs from 'querystring';
 
-import { SchemaRegistry, BindUtil, SchemaValidator } from '@travetto/schema';
+import { SchemaRegistry, BindUtil, SchemaValidator, ValidationErrors } from '@travetto/schema';
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
 import { ControllerRegistry } from '../src/service/registry';
 import { AppError } from '../src/model/error';
+
+(ValidationErrors.prototype as any).render = function (res: Response) {
+  res.status(403).json({
+    message: this.message,    // tslint:disable-line:no-invalid-this
+    errors: this.errors     // tslint:disable-line:no-invalid-this
+  });
+};
 
 function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
