@@ -63,17 +63,6 @@ export class RouteUtil {
     } else if (typeof out === 'string') {
       res.type('text/plain');
       res.send(out);
-    } else if (out instanceof Error) {
-      const { stack, expose, status, statusCode, message, ...err } = (out as any);
-
-      const computedStatus = status || statusCode || 500;
-      res.status(computedStatus);
-
-      if ('toJSON' in out) {
-        res.type('json').send((out as any).toJSON());
-      } else {
-        res.json({ message, status: computedStatus, ...err });
-      }
     } else {
       if ('toJSON' in out) {
         res.type('json').send((out as any).toJSON());

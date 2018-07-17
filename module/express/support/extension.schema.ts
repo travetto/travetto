@@ -8,12 +8,16 @@ import { Class } from '@travetto/registry';
 import { ControllerRegistry } from '../src/service/registry';
 import { AppError } from '../src/model/error';
 
-(ValidationErrors.prototype as any).render = function (res: Response) {
+// tslint:disable:no-invalid-this
+(ValidationErrors as any as Class<Error>).prototype.render = function (res: Response) {
   res.status(403).json({
-    message: this.message,    // tslint:disable-line:no-invalid-this
-    errors: this.errors     // tslint:disable-line:no-invalid-this
+    message: this.message,
+    errors: this.errors,
+    status: 403,
+    type: this.name
   });
 };
+// tslint:enable:no-invalid-this
 
 function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
