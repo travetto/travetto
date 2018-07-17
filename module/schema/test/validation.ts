@@ -1,7 +1,7 @@
 import {
-  Field, MinLength, Url, Required,
-  SchemaValidator, Enum, Schema, ValidationError,
-  SchemaRegistry, ValidationErrors, Validator, ClassWithSchema
+  MinLength, Url,
+  SchemaValidator, Schema, ValidationError,
+  SchemaRegistry, ValidationErrors, Validator, View, Match, CommonRegExp
 } from '../src';
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 import * as assert from 'assert';
@@ -36,11 +36,25 @@ class Address {
   street1: string;
   city?: string;
   zip: 200 | 500;
+
+  @Match(CommonRegExp.postal_code)
+  postal: string;
 }
 
 @Schema()
 class Nested {
   name: string;
+  address: Address;
+}
+
+@Schema()
+class ViewSpecific {
+  id: string;
+
+  @View('profile')
+  name: string;
+
+  @View('profile')
   address: Address;
 }
 
@@ -121,7 +135,8 @@ class Validation {
       address: {
         street1: 'abc',
         city: 'city',
-        zip: 200
+        zip: 200,
+        postal: '55555'
       }
     });
 
@@ -159,5 +174,19 @@ class Validation {
       assert((e as ValidationErrors).errors[0].kind === 'custom');
       assert((e as ValidationErrors).errors[0].message === 'age1 + age2 cannot be even');
     }
+  }
+
+  @Test('Nested view')
+  async validateViewsNested() {
+    const obj = ViewSpecific.from({
+      name: 'bob',
+      address: {
+        street1: '5',
+        zip: 200,
+        postal: '55555'
+      }
+    }, 'profile');
+
+    await SchemaValidator.validate(obj, 'profile');
   }
 }

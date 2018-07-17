@@ -5,7 +5,6 @@ import {
 import { Address } from './address';
 import * as assert from 'assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';
-import { Class } from '@travetto/registry';
 
 @Schema(false)
 class SuperAddress extends Address {

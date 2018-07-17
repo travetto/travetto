@@ -35,7 +35,7 @@ export const MaxLength = (n: number, message?: string) => prop({ maxlength: { n,
 export const Min = (n: number | Date, message?: string) => prop({ min: { n, message } });
 export const Max = (n: number | Date, message?: string) => prop({ max: { n, message } });
 export const Email = (message?: string) => Match(CommonRegExp.email, message);
-export const Telephone = (message?: string) => Match(CommonRegExp.telphone, message);
+export const Telephone = (message?: string) => Match(CommonRegExp.telephone, message);
 export const Url = (message?: string) => Match(CommonRegExp.url, message);
 export const Precision = (precision: number) => prop({ precision });
 export const Integer = () => Precision(0);
