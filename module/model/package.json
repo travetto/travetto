@@ -4,12 +4,12 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/di": "^0.1.5",
-    "@travetto/schema": "^0.1.5"
+    "@travetto/di": "^0.1.6",
+    "@travetto/schema": "^0.1.6"
   },
   "description": "Datastore abstraction for CRUD operations with advanced query support.",
   "devDependencies": {
-    "@travetto/test": "^0.1.5"
+    "@travetto/test": "^0.1.6"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -29,5 +29,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.1.5"
+  "version": "0.1.6"
 }

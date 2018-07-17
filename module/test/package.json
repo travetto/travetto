@@ -7,7 +7,7 @@
     "travetto-test": "bin/travetto-test.js"
   },
   "dependencies": {
-    "@travetto/exec": "^0.1.4",
+    "@travetto/exec": "^0.1.5",
     "@travetto/pool": "^0.1.4",
     "@travetto/registry": "^0.1.5",
     "@types/js-yaml": "^3.11.1",
@@ -34,5 +34,5 @@
   "scripts": {
     "test": "node ./bin/travetto-test.js"
   },
-  "version": "0.1.5"
+  "version": "0.1.6"
 }
