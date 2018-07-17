@@ -8,7 +8,7 @@ lerna bootstrap --hoist
 
 function resolve_deps() {
   OUT=""
-  for dep in `jq -r '.dependencies,.devDependencies | to_entries | .[].key' $ROOT/module/$1/package.json 2>/dev/null | grep travetto | awk -F '/' '{ print $2 }' | grep .`; do
+  for dep in `jq -r '.dependencies,.devDependencies,.peerDependencies | to_entries | .[].key' $ROOT/module/$1/package.json 2>/dev/null | grep travetto | awk -F '/' '{ print $2 }' | grep .`; do
     SUBS=`resolve_deps $dep`
     OUT="$OUT~$dep~$SUBS"
   done
