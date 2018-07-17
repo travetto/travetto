@@ -64,7 +64,7 @@ export class RouteUtil {
       res.type('text/plain');
       res.send(out);
     } else if (out instanceof Error) {
-      const { stack, expose, status, statusCode, ...err } = (out as any);
+      const { stack, expose, status, statusCode, message, ...err } = (out as any);
 
       const computedStatus = status || statusCode || 500;
       res.status(computedStatus);
@@ -72,7 +72,7 @@ export class RouteUtil {
       if ('toJSON' in out) {
         res.type('json').send((out as any).toJSON());
       } else {
-        res.json({ status: computedStatus, ...err });
+        res.json({ message, status: computedStatus, ...err });
       }
     } else {
       if ('toJSON' in out) {
