@@ -1,8 +1,9 @@
+import { Class } from '@travetto/registry';
+import { BaseError } from '@travetto/base';
+
 import { FieldConfig, SchemaConfig } from '../types';
 import { SchemaRegistry } from '../registry';
 import { Messages } from './messages';
-import { Class } from '@travetto/registry';
-import { BaseError } from '@travetto/base';
 
 export type ValidationError = { message: string, path: string, kind: string };
 
