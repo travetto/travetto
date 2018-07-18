@@ -5,6 +5,12 @@ import { Request, Response } from 'express';
 import { ERR_INVALID_CREDS } from '@travetto/auth';
 
 class DumbProvider extends AuthProvider<any> {
+  toContext(user: { id: string, username: string }) {
+    return {
+      id: user.id,
+      principal: user
+    };
+  }
   async login(req: Request, res: Response) {
     const { username, password } = req.body;
     if (username === 'test' && password === 'test') {

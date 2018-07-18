@@ -23,7 +23,7 @@ export class AuthModelProvider<U extends BaseModel> extends AuthProvider<U> {
 
     try {
       const user = await this.service.login(userId, password);
-      return this.service.principalConfig.toContext(user);
+      return this.toContext(user);
     } catch (e) {
       let status = 500;
       switch ((e as Error).message) {

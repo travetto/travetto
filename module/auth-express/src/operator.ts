@@ -26,13 +26,11 @@ export class AuthOperator extends ExpressOperator {
     }
   }
 
-  persistContext(req: Request, context?: AuthContext<any>) {
+  updateSessionPrincipal(req: Request, principal: any) {
     if (req.session!._authType) {
       const provider = this.providers.get(req.session!._authType)!;
-      if (context) {
-        this.service.context = context;
-      }
-      req.session!._authStored = provider.serialize(this.service.context);
+      const context = provider.toContext(principal);
+      req.session!._authStored = provider.serialize(this.service.context = context);
     } else {
       throw new Error('Principal not loaded, unable to serialize');
     }
