@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { ExpressOperator, ExpressApp, AppError } from '@travetto/express';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
-import { AuthService, ERR_INVALID_AUTH } from '@travetto/auth';
+import { AuthService, AuthContext, ERR_INVALID_AUTH } from '@travetto/auth';
 
 import { AuthProvider } from './provider';
 import { AuthServiceAdapter } from './service-adapter';
@@ -26,11 +26,13 @@ export class AuthOperator extends ExpressOperator {
     }
   }
 
-  principalUpdated(req: Request, principal: any) {
+  persistContext(req: Request, context?: AuthContext<any>) {
     if (req.session!._authType) {
       const provider = this.providers.get(req.session!._authType)!;
-      const ctx = this.service.context = provider.toContext(principal);
-      req.session!._authStored = provider.serialize(ctx);
+      if (context) {
+        this.service.context = context;
+      }
+      req.session!._authStored = provider.serialize(this.service.context);
     } else {
       throw new Error('Principal not loaded, unable to serialize');
     }
