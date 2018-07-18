@@ -35,7 +35,7 @@ export class AuthServiceAdapter {
     return await this.operator.logout(this.req, this.res);
   }
 
-  persistContext(context?: AuthContext<any>) {
-    this.operator.persistContext(this.req, context);
+  updateSessionPrincipal(principal: any) {
+    this.operator.updateSessionPrincipal(this.req, principal);
   }
 }
