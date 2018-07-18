@@ -14,7 +14,7 @@ export abstract class AuthProvider<U> {
   serialize(ctx: AuthContext<U>) {
     return JSON.stringify({
       id: ctx.id,
-      permissions: Array.from(ctx.permissions),
+      permissions: Array.from(ctx.permissions || new Set()),
       principal: ctx.principal
     });
   }
@@ -23,7 +23,7 @@ export abstract class AuthProvider<U> {
     const ctx = JSON.parse(serialized);
     return {
       id: ctx.id,
-      permissions: new Set(ctx.permissions),
+      permissions: new Set(ctx.permissions || []),
       principal: ctx.principal
     };
   }

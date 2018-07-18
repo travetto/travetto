@@ -1,6 +1,6 @@
 export interface AuthContext<U> {
   id: string;
-  permissions: Set<string>;
+  permissions?: Set<string>;
   principal: U;
 }
 
