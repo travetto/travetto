@@ -9,6 +9,8 @@ export abstract class AuthProvider<U> {
 
   abstract async login(req: Request, res: Response): Promise<AuthContext<U> | undefined>;
 
+  abstract toContext(principal: U): AuthContext<U>;
+
   serialize(ctx: AuthContext<U>) {
     return JSON.stringify({
       id: ctx.id,

@@ -1,6 +1,7 @@
+import { Request, Response } from 'express';
+
 import { AuthService } from '@travetto/auth';
 import { AuthOperator } from './operator';
-import { Request, Response } from 'express';
 
 export class AuthServiceAdapter {
   constructor(
@@ -32,5 +33,9 @@ export class AuthServiceAdapter {
 
   async logout() {
     return await this.operator.logout(this.req, this.res);
+  }
+
+  principalUpdated(principal: any) {
+    this.operator.principalUpdated(this.req, principal);
   }
 }

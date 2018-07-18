@@ -13,13 +13,17 @@ export class AuthModelProvider<U extends BaseModel> extends AuthProvider<U> {
     super();
   }
 
+  toContext(principal: U) {
+    return this.service.principalConfig.toContext(principal);
+  }
+
   async login(req: Request, res: Response): Promise<AuthContext<U>> {
-    const userId = this.service.principal.getId(req.body);
-    const password = this.service.principal.getPassword(req.body);
+    const userId = this.service.principalConfig.getId(req.body);
+    const password = this.service.principalConfig.getPassword(req.body);
 
     try {
       const user = await this.service.login(userId, password);
-      return this.service.principal.toContext(user);
+      return this.service.principalConfig.toContext(user);
     } catch (e) {
       let status = 500;
       switch ((e as Error).message) {
