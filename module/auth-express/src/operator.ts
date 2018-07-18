@@ -9,8 +9,6 @@ import { AuthService, ERR_INVALID_AUTH } from '@travetto/auth';
 import { AuthProvider } from './provider';
 import { AuthServiceAdapter } from './service-adapter';
 
-export const AUTH = Symbol('@travetto/auth');
-
 @Injectable()
 export class AuthOperator extends ExpressOperator {
 
@@ -25,6 +23,16 @@ export class AuthOperator extends ExpressOperator {
     for (const provider of DependencyRegistry.getCandidateTypes(AuthProvider as Class)) {
       const dep = await DependencyRegistry.getInstance(AuthProvider, provider.qualifier);
       this.providers.set(provider.qualifier.toString(), dep);
+    }
+  }
+
+  principalUpdated(req: Request, principal: any) {
+    if (req.session!._authType) {
+      const provider = this.providers.get(req.session!._authType)!;
+      const ctx = this.service.context = provider.toContext(principal);
+      req.session!._authStored = provider.serialize(ctx);
+    } else {
+      throw new Error('Principal not loaded, unable to serialize');
     }
   }
 

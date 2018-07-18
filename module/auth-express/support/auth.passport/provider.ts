@@ -5,9 +5,13 @@ import { PrincipalConfig, AuthContext } from '@travetto/auth';
 import { AuthProvider } from '../../src';
 
 export class AuthPassportProvider<U> extends AuthProvider<U> {
-  constructor(private strategyName: string, private strategy: passport.Strategy, private principal: PrincipalConfig<U>) {
+  constructor(private strategyName: string, private strategy: passport.Strategy, private principalConfig: PrincipalConfig<U>) {
     super();
     passport.use(this.strategyName, this.strategy);
+  }
+
+  toContext(principal: U) {
+    return this.principalConfig.toContext(principal);
   }
 
   async login(req: Request, res: Response) {
@@ -21,7 +25,7 @@ export class AuthPassportProvider<U> extends AuthProvider<U> {
           delete user._raw;
           delete user.provider;
 
-          resolve(this.principal.toContext(user));
+          resolve(this.toContext(user));
         }
       })(req, res);
     });
