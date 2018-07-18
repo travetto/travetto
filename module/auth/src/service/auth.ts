@@ -34,7 +34,7 @@ export class AuthService<U = { id: string }> {
       throw new Error(ERR_UNAUTHENTICATED);
     }
 
-    const perms = this.context!.permissions;
+    const perms = this.context!.permissions || new Set();
 
     if (exclude.length && exclude.find(x => perms.has(x))) {
       throw new Error(ERR_FORBIDDEN);
