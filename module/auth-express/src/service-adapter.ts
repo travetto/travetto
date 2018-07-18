@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { AuthService } from '@travetto/auth';
+import { AuthService, AuthContext } from '@travetto/auth';
 import { AuthOperator } from './operator';
 
 export class AuthServiceAdapter {
@@ -35,7 +35,7 @@ export class AuthServiceAdapter {
     return await this.operator.logout(this.req, this.res);
   }
 
-  principalUpdated(principal: any) {
-    this.operator.principalUpdated(this.req, principal);
+  persistContext(context?: AuthContext<any>) {
+    this.operator.persistContext(this.req, context);
   }
 }
