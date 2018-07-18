@@ -1,9 +1,13 @@
-Framework Overview
-====
+<h1>   
+  <sub><img src="https://travetto.io/assets/logo.png" height="40"></sub>
+  Travetto
+</h1>
+
+## Framework Overview
 
 The goal of the framework is to provide a holistic application platform with the a focus on interactive development.
 
-## Philosophy
+### Philosophy
 The framework relies up five key principles:
 * **Typescript as a development platform.**  This means the framework is intimately tied to typescript and it's compiler.
 * **Code over configuration.**  This means that the framework prefers meta-programming via decorators over configuration.  Code is always the best place to define configuration.
@@ -12,7 +16,7 @@ The framework relies up five key principles:
 * **Development responsiveness is paramount.**  The framework should aim for instant feedback when possible to minimize the time between making a change and seeing it.
 
 
-## Modules
+### Modules
 Every module within the framework follows the overarching philosophy.  For the most part each module is as isolated as possible.  The modules are stacked vertically to generally indicate dependencies.  The only exception is for common libraries, which are unrelated.
 
 
