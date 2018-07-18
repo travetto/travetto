@@ -4,7 +4,7 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/auth": "^0.1.6",
+    "@travetto/auth": "^0.1.7",
     "@travetto/model": "^0.1.8"
   },
   "description": "Model-based authentication and registration support for the travetto framework",
@@ -31,5 +31,5 @@
     "test": "./node_modules/.bin/travetto-test",
     "test:all": "npm test test/.*"
   },
-  "version": "0.1.8"
+  "version": "0.1.9"
 }
