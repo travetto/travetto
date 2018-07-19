@@ -1,14 +1,14 @@
 import * as ts from 'typescript';
 
 import { Env } from '@travetto/base';
-import { TransformUtil, State } from '@travetto/compiler';
+import { TransformUtil, TransformerState } from '@travetto/compiler';
 
 import { LogLevels } from '../src/types';
 
 const VALID_METHODS = new Set(['log', ...Object.keys(LogLevels)]);
 const VALID_PROD_METHODS = new Set(['info', 'warn', 'error', 'fatal']);
 
-interface IState extends State {
+interface IState extends TransformerState {
   source: ts.SourceFile;
   imported?: ts.Identifier;
 }

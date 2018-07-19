@@ -32,9 +32,7 @@
   "main": "index.ts",
   "name": "@travetto/express",
   "peerDependencies": {
-    "@travetto/context": "^0.x.x",
-    "@travetto/model": "^0.x.x",
-    "@travetto/schema": "^0.x.x"
+    "@travetto/context": "^0.x.x"
   },
   "repository": {
     "url": "https://github.com/travetto/travetto.git"

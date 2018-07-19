@@ -20,7 +20,7 @@ export class ConfigLoader {
 
   /*
     Order of specificity (least to most)
-      - Module configs -> located in the node_modules/@travetto/config folder
+      - Module configs -> located in the node_modules/@travetto/<*>/config folder
       - Local configs -> located in the config folder
       - External config file -> loaded from env
       - Environment vars -> Overrides everything (happens at bind time)

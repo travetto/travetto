@@ -1,0 +1,31 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "dependencies": {
+    "@travetto/express": "^0.1.11"
+  },
+  "description": "Express swagger integration support for the travetto framework",
+  "devDependencies": {
+    "@travetto/test": "^0.1.6"
+  },
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "express",
+    "travetto",
+    "decorators",
+    "swagger"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/express-swagger",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test",
+    "test:all": "npm test test/.*"
+  },
+  "version": "0.1.0"
+}

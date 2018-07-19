@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { ExpressOperator, ExpressApp, AppError } from '@travetto/express';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
-import { AuthService, AuthContext, ERR_INVALID_AUTH } from '@travetto/auth';
+import { AuthService, ERR_INVALID_AUTH } from '@travetto/auth';
 
 import { AuthProvider } from './provider';
 import { AuthServiceAdapter } from './service-adapter';

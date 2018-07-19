@@ -1,5 +1,5 @@
 
-declare const AppInfo: {
+export declare const AppInfo: {
   VERSION: string,
   NAME: string,
   SIMPLE_NAME: string,
@@ -11,4 +11,4 @@ declare const AppInfo: {
   DEV_PACKAGES: string[]
 };
 
-declare function resolveFrameworkFile(pth: string): string;
+export declare function resolveFrameworkFile(pth: string): string;

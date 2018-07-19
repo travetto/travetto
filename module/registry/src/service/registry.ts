@@ -1,4 +1,4 @@
-import { Class } from '../model/types';
+import { Class } from '../model';
 import { ChangeSource, ChangeEvent } from '../source';
 import { EventEmitter } from 'events';
 

@@ -104,3 +104,53 @@ this.service.getAllByQuery(User, {
 ```
 
 This would find all users who are over 35 and that have the `contact` field specified. 
+
+## Extensions
+Integration with other modules can be supported by extensions.  The dependencies are `peerDependencies` and must be installed directly if you want to use them:
+
+### Express
+[`Express`](https://github.com/travetto/express) support with the `@ModelController` for exposing common RESTful patterns for routes.
+
+```typescript
+@ModelController('/user', User) 
+class UserController {
+  source: ModelService;
+}
+```
+is a shorthand that is equal to:
+
+```typescript
+@Controller('/user') 
+class UserController {
+  
+  source: ModelService;
+
+  @Get('')
+  async getAllUser(req:Request) {
+    return await this.source.getAllByQuery(User, JSON.parse(req.params.q));
+  }
+
+  @Get(':id')
+  async getUser(req:Request) {
+    return await this.source.getById(User, req.params.id);
+  }
+
+  @Delete(':id')
+  async deleteUser(req:Request) {
+    return await this.source.deleteById(User, req.params.id);
+  }
+
+  @Post('')
+  @SchemaBody(User)
+  async saveUser(req:TypedBody<User>) {
+    return await this.source.save(User, req.body);
+  }
+
+  @Put('')
+  @SchemaBody(User)
+  async updateUser(req:TypedBody<User>) {
+    return await this.source.update(User, req.body);
+  }
+}
+
+```

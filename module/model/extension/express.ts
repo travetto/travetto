@@ -1,9 +1,10 @@
-import { Request, Response } from 'express';
-import { Class } from '@travetto/registry';
-import { BaseModel, ModelService } from '@travetto/model';
+import { Request } from 'express';
 
-import { ControllerRegistry } from '../src/service/registry';
-import { getSchemaBody } from './extension.schema';
+import { ControllerRegistry } from '@travetto/express';
+import { getSchemaBody } from '@travetto/schema/extension/express';
+import { Class } from '@travetto/registry';
+
+import { BaseModel, ModelService } from '../src';
 
 type Svc = { source: ModelService };
 

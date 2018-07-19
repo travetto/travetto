@@ -21,7 +21,7 @@ export function Accepts(contentTypes: string[]) {
   return ControllerRegistry.filterAdder(async (req: Request, res: Response) => {
     const contentType = req.header('content-type') as string;
     if (contentType && contentTypes.indexOf(contentType) < 0) {
-      throw new AppError(`Content type ${contentType}`, 400);
+      throw new AppError(`Content type ${contentType} not one of ${contentTypes}`, 400);
     }
   });
 }
