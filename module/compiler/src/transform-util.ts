@@ -196,7 +196,7 @@ export class TransformUtil {
   static importIfExternal<T extends TransformerState>(typeNode: ts.TypeNode, state: TransformerState) {
     //    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
 
-    const nodeName = (typeNode as any).typeName!.getText();
+    const nodeName = (typeNode as ts.TypeReferenceNode).typeName.getText();
     if (nodeName.match(/^[A-Z]{1,3}$/)) {
       throw new Error('Type information not found');
     }

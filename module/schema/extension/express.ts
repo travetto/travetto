@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
 import * as qs from 'querystring';
 
-import { SchemaRegistry, BindUtil, SchemaValidator, ValidationErrors } from '@travetto/schema';
+import { ControllerRegistry, AppError } from '@travetto/express';
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
-import { ControllerRegistry } from '../src/service/registry';
-import { AppError } from '../src/model/error';
+import { SchemaRegistry, BindUtil, SchemaValidator, ValidationErrors } from '../src';
 
 // tslint:disable:no-invalid-this
 (ValidationErrors as any as Class<Error>).prototype.render = function (res: Response) {

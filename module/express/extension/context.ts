@@ -1,5 +1,3 @@
-import { Request, Response } from 'express';
-
 import { Context } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 

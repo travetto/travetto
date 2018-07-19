@@ -18,7 +18,7 @@ export class GenerateUtil {
   static STRING_RE_TO_TYPE: [RegExp, () => any][] = [
     [CommonRegExp.email, faker.internet.email],
     [CommonRegExp.url, faker.internet.url],
-    [CommonRegExp.telphone, faker.phone.phoneNumber],
+    [CommonRegExp.telephone, faker.phone.phoneNumber],
     [CommonRegExp.postal_code, faker.address.zipCode]
   ];
 

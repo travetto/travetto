@@ -46,6 +46,10 @@ export function Post(path: PathType) {
   return ControllerRegistry.registerPendingRequestHandler({ method: 'post', path });
 }
 
+export function Patch(path: PathType) {
+  return ControllerRegistry.registerPendingRequestHandler({ method: 'patch', path });
+}
+
 export function Header(headers: { [key: string]: (string | (() => string)) }) {
   return ControllerRegistry.registerPendingRequestHandler({ headers });
 }

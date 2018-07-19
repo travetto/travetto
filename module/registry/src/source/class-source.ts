@@ -1,10 +1,9 @@
 import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
-import { ScanApp } from '@travetto/base';
-import { Env } from '@travetto/base/src/env';
+import { ScanApp, Env } from '@travetto/base';
 
-import { Class } from '../model/types';
+import { Class } from '../model';
 import { ChangeSource, ChangeEvent } from './types';
 import { PendingRegister } from '../decorator/register';
 

@@ -1,11 +1,11 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import { Env } from '@travetto/base/src/env';
-import { TransformUtil, State } from '@travetto/compiler';
+import { TransformUtil, TransformerState } from '@travetto/compiler';
 
 const stringHash = require('string-hash');
 
-interface IState extends State {
+interface IState extends TransformerState {
   file: string;
   fullFile: string;
   imported?: ts.Identifier;
@@ -35,12 +35,17 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       });
     }
 
-    const hashes: any = {};
+    const methods: any = {};
 
     for (const child of node.members) {
       if (ts.isMethodDeclaration(child)) {
         const hash = stringHash(child.getText());
-        hashes[child.name.getText()] = ts.createLiteral(hash);
+
+        const conf: any = {
+          hash
+        };
+
+        methods[child.name.getText()] = conf;
       }
     }
 
@@ -59,7 +64,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         createStaticField('__filename', state.fullFile.replace(/[\\\/]/g, path.sep)),
         createStaticField('__id', `${state.file}#${node.name!.getText()}`),
         createStaticField('__hash', stringHash(node.getText())),
-        createStaticField('__methodHashes', TransformUtil.extendObjectLiteral(hashes)),
+        createStaticField('__methods', TransformUtil.extendObjectLiteral(methods)),
         createStaticField('__abstract', TransformUtil.fromLiteral(isAbstract)),
         ...node.members
       ])
@@ -78,7 +83,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   return ts.visitEachChild(node, c => visitNode(context, c, state), context);
 }
 
-export const ClassIdTransformer = {
+export const ClassMetadataTransformer = {
   transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
     let fileRoot = file.fileName.replace(/[\\\/]/g, path.sep);
 

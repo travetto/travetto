@@ -1,9 +1,10 @@
-import { Controller, Get } from '..';
-import { ModelController } from '../support/extension.model';
-import { Model, BaseModel, ClassModelService, ModelSource, ModelService, ModelCore, ModelQuery, Query, BulkState, BulkResponse, PageableModelQuery } from '@travetto/model';
-import { QueryVerifierService } from '@travetto/model/src/service/query';
+import { Get } from '@travetto/express';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { Injectable, InjectableFactory } from '@travetto/di';
+
+import { ModelController } from '../extension/express';
+import { Model, BaseModel, ModelSource, ModelService, ModelCore, ModelQuery, Query, BulkState, BulkResponse, PageableModelQuery } from '../src';
+import { QueryVerifierService } from '../src/service/query';
 
 @Injectable({ target: ModelSource })
 export class TestSource implements ModelSource {

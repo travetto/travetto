@@ -153,3 +153,41 @@ errors:
     kind: required
     message: address.street2 is a required field
 ```
+
+## Extensions
+Integration with other modules can be supported by extensions.  The dependencies are `peerDependencies` and must be installed directly if you want to use them:
+
+### Express
+The module provides high level access for [`Express`](https://github.com/travetto/express) support, via decorators, for validating and typing request bodies.  
+
+## Decorators
+`@SchemaBody` provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+ ```typescript
+ class User {
+   name: string;
+   age: number;
+ }
+ ...
+  @Post('/saveUser')
+  @SchemaBody(User)
+  async save(req: TypedBody<User>) {
+    const user = await this.service.update(req.body);
+    return { success : true };
+  }
+ ...
+ ```
+`@SchemaQuery` provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request. 
+```typescript
+ class SearchParams {
+   page: number = 0;
+   pageSize: number = 100;
+ }
+ ...
+  @Get('/search')
+  @SchemaQuery(SearchParams)
+  async search(req: TypedQuery<SearchParams>) {
+    return await this.service.search(req.query);
+  }
+ ...
+ ```
+

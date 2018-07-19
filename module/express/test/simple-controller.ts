@@ -1,5 +1,6 @@
 import { Controller, Get } from '../src';
 import { MockService } from './mock';
+import { Request, Response } from 'express';
 
 @Controller('/simple')
 export class Simple {
@@ -8,7 +9,7 @@ export class Simple {
   }
 
   @Get('/name')
-  async doIt() {
+  async doIt(req: Request, res: Response): Promise<string> {
     const user = await this.service.fetch();
     return `/simple/name => ${user.first.toLowerCase()}`;
   }
