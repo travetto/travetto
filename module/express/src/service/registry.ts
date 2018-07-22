@@ -1,12 +1,9 @@
 import { DependencyRegistry } from '@travetto/di';
 import { MetadataRegistry, Class } from '@travetto/registry';
 
-import {
-  RequestHandler, Filter,
-  ControllerConfig
-} from '../model';
+import { EndpointConfig, Filter, ControllerConfig, ParamConfig } from '../types';
 
-class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHandler> {
+class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointConfig> {
 
   constructor() {
     super(DependencyRegistry);
@@ -14,31 +11,37 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHand
 
   createPending(cls: Class) {
     return {
-      filters: [],
-      path: '',
       class: cls,
-      handlers: []
+      filters: [],
+      headers: {},
+      basePath: '',
+      endpoints: [],
     };
   }
 
-  getOrCreateRequestHandlerConfig(cls: Class, handler: Filter) {
-    const id = cls.__id!;
+  createPendingField(cls: Class, handler: Filter) {
     const controllerConf = this.getOrCreatePending(cls);
 
-    if (!this.pendingMethods.has(id)) {
-      this.pendingMethods.set(id, new Map());
-    }
-    if (!this.pendingMethods.get(id)!.has(handler)) {
-      const rh = {
-        filters: [],
-        class: cls,
-        handler,
-        headers: {}
-      };
-      this.pendingMethods.get(id)!.set(handler, rh);
-      controllerConf.handlers!.push(rh);
-    }
-    return this.pendingMethods.get(id)!.get(handler)!;
+    const fieldConf = {
+      id: '',
+      path: '/',
+      method: 'all',
+      class: cls,
+      filters: [],
+      headers: {},
+      params: [],
+      handlerName: handler.name,
+      handler
+    } as EndpointConfig;
+
+    controllerConf.endpoints!.push(fieldConf);
+
+    return fieldConf;
+  }
+
+  getOrCreateEndpointConfig(cls: Class, handler: Filter) {
+    const fieldConf = this.getOrCreatePendingField(cls, handler) as EndpointConfig;
+    return fieldConf;
   }
 
   registerControllerFilter(target: Class, fn: Filter) {
@@ -46,45 +49,62 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, RequestHand
     config.filters!.push(fn);
   }
 
-  registerRequestHandlerFilter(target: Class, handler: Filter, fn: Filter) {
-    const rh = this.getOrCreateRequestHandlerConfig(target, handler);
-    rh.filters!.unshift(fn);
+  registerEndpointFilter(target: Class, handler: Filter, fn: Filter) {
+    const config = this.getOrCreateEndpointConfig(target, handler);
+    config.filters!.unshift(fn);
   }
 
-  registerPendingRequestHandler(config: Partial<RequestHandler>) {
-    return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-      const rh = this.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
-      rh.method = config.method || rh.method;
-      rh.path = config.path || rh.path;
-      rh.headers = { ...rh.headers, ...(config.headers || {}) };
-      return descriptor;
-    };
+  mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>) {
+    dest.headers = { ...dest.headers!, ...(src.headers || {}) };
+    dest.filters = [...(dest.filters || []), ...(src.filters || [])];
+    dest.title = src.title || dest.title;
+    dest.description = src.description || dest.description;
   }
 
-  filterAdder(fn: Filter) {
-    return (target: any, propertyKey?: string, descriptor?: TypedPropertyDescriptor<any>) => {
-      if (propertyKey && descriptor) {
-        this.registerRequestHandlerFilter(target.constructor as Class, descriptor.value, fn);
-        return descriptor;
-      } else { // Class filters
-        this.registerControllerFilter(target, fn);
+  registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<any>, config: Partial<EndpointConfig>) {
+    const srcConf = this.getOrCreateEndpointConfig(target, descriptor.value);
+    srcConf.method = config.method || srcConf.method;
+    srcConf.path = config.path || srcConf.path;
+    srcConf.responseType = config.responseType || srcConf.responseType;
+    srcConf.requestType = config.requestType || srcConf.requestType;
+    const pMap: { [key: string]: ParamConfig } = {};
+    if (config.params) {
+      for (const p of srcConf.params) {
+        pMap[p.name] = p;
       }
-    };
+      for (const p of (config.params || [])) {
+        if (p.name in pMap) {
+          Object.assign(pMap[p.name], p);
+        } else {
+          pMap[p.name] = p;
+          srcConf.params.push(p);
+        }
+      }
+    }
+
+    this.mergeDescribable(config, srcConf);
+    return descriptor;
+  }
+
+  registerPending(target: Class, config: Partial<ControllerConfig>) {
+    const srcConf = this.getOrCreatePending(target);
+    srcConf.basePath = config.basePath || srcConf.basePath;
+    this.mergeDescribable(config, srcConf);
   }
 
   onInstallFinalize(cls: Class) {
     const final = this.getOrCreatePending(cls) as ControllerConfig;
 
     // Handle duplicates, take latest
-    const found = new Map<string, RequestHandler>();
-    for (const h of final.handlers) {
-      const key = `${h.method}#${h.path === undefined ? '' : (typeof h.path === 'string' ? h.path : h.path.source)}`;
-      found.set(key, h);
+    const found = new Map<string, EndpointConfig>();
+    for (const ep of final.endpoints) {
+      ep.id = `${ep.method}#${final.basePath}/${ep.path === undefined ? '' : (typeof ep.path === 'string' ? ep.path : ep.path.source)}`;
+      found.set(ep.id, ep);
     }
-    final.handlers = Array.from(found.values());
+    final.endpoints = Array.from(found.values());
 
-    if (this.has(final.path)) {
-      console.debug('Reloading controller', cls.name, final.path);
+    if (this.has(final.basePath)) {
+      console.debug('Reloading controller', cls.name, final.basePath);
     }
 
     return final;

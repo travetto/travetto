@@ -1,23 +1,23 @@
 import * as ts from 'typescript';
-import { TransformUtil, State } from '@travetto/compiler';
+import { TransformUtil, TransformerState } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
+
+const INJECTABLE_MOD = require.resolve('../src/decorator/injectable');
 
 const INJECTABLES = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.injectable'),
   '@travetto/di': ['Injectable']
 });
 
-interface DiState extends State {
+interface DiState extends TransformerState {
   inInjectable: boolean;
-  decorators: { [key: string]: ts.Expression };
-  import?: ts.Identifier;
 }
 
-function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-  const injection = TransformUtil.findAnyDecorator(param, { Inject: new Set(['@travetto/di']) }, state);
+function processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
+  const injection = TransformUtil.findAnyDecorator(state, param, { Inject: new Set(['@travetto/di']) });
 
   if (injection || ts.isParameter(param)) {
-    const finalTarget = TransformUtil.importIfExternal(param.type!, state);
+    const finalTarget = TransformUtil.importTypeIfExternal(state, param.type!);
 
     let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
 
@@ -53,30 +53,9 @@ function processDeclaration(state: State, param: ts.ParameterDeclaration | ts.Pr
   }
 }
 
-function createInjectDecorator(state: DiState, name: string, contents?: ts.Expression) {
-  if (!state.decorators[name]) {
-    if (!state.import) {
-      state.import = ts.createIdentifier(`import_Injectable`);
-      state.newImports.push({
-        ident: state.import,
-        path: require.resolve('../src/decorator/injectable')
-      });
-    }
-    const ident = ts.createIdentifier(name);
-    state.decorators[name] = ts.createPropertyAccess(state.import, ident);
-  }
-  return ts.createDecorator(
-    ts.createCall(
-      state.decorators[name],
-      undefined,
-      contents ? [contents] : []
-    )
-  );
-}
-
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: DiState): T {
   if (ts.isClassDeclaration(node)) { // Class declaration
-    const foundDec = TransformUtil.findAnyDecorator(node, INJECTABLES, state);
+    const foundDec = TransformUtil.findAnyDecorator(state, node, INJECTABLES);
 
     if (foundDec) { // Constructor
       let decls = node.decorators;
@@ -101,12 +80,12 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         }
       }
 
-      declTemp.push(createInjectDecorator(state, 'InjectArgs', injectArgs));
+      declTemp.push(TransformUtil.createDecorator(state, INJECTABLE_MOD, 'InjectArgs', injectArgs));
 
       // Add injectable decorator if not there (for aliased decorators)
-      let injectable = TransformUtil.findAnyDecorator(node, { Injectable: new Set(['@travetto/di']) }, state);
+      let injectable = TransformUtil.findAnyDecorator(state, node, { Injectable: new Set(['@travetto/di']) });
       if (!injectable) {
-        injectable = createInjectDecorator(state, 'Injectable');
+        injectable = TransformUtil.createDecorator(state, INJECTABLE_MOD, 'Injectable');
         declTemp.push(injectable);
       } else {
         const callExpr = (injectable && injectable.expression as any as ts.CallExpression);
@@ -151,7 +130,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     const expr = processDeclaration(state, node);
 
     if (expr) {
-      const final = createInjectDecorator(state, 'Inject', expr);
+      const final = TransformUtil.createDecorator(state, INJECTABLE_MOD, 'Inject', expr);
       const finalDecs = ((node.decorators as any as ts.Decorator[]) || [])
         .filter(x => TransformUtil.getDecoratorIdent(x).text !== 'Inject');
 
@@ -172,7 +151,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
   } else if (ts.isMethodDeclaration(node) && (ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static) > 0) { // tslint:disable-line no-bitwise
     // Factory for static methods
-    const foundDec = TransformUtil.findAnyDecorator(node, { InjectableFactory: new Set(['@travetto/di']) }, state);
+    const foundDec = TransformUtil.findAnyDecorator(state, node, { InjectableFactory: new Set(['@travetto/di']) });
     const decls = node.decorators;
 
     if (foundDec) { // Constructor
@@ -207,7 +186,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       // Handle when
       let target = TransformUtil.getObjectValue(injectConfig, 'target');
       if (node.type && target === undefined) {  // TODO: infer from typings, not just text?
-        target = TransformUtil.importIfExternal(node.type!, state);
+        target = TransformUtil.importTypeIfExternal(state, node.type!);
       }
       const args = TransformUtil.extendObjectLiteral({
         dependencies: injectArgs,
@@ -249,7 +228,6 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 export const InjectableTransformer = {
   transformer: TransformUtil.importingVisitor<DiState>(() => ({
     inInjectable: false,
-    decorators: {}
   }), visitNode),
   priority: 11,
   phase: 'before'

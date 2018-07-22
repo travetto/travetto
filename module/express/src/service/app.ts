@@ -6,7 +6,7 @@ import { Class } from '@travetto/registry';
 
 import { ExpressConfig } from '../config';
 import { RouteUtil } from '../util';
-import { ControllerConfig } from '../model';
+import { ControllerConfig } from '../service';
 import { ControllerRegistry } from './registry';
 import { ExpressOperator } from './operator';
 
@@ -29,15 +29,15 @@ export class ExpressApp {
 
     const operators = DependencyRegistry.getCandidateTypes(ExpressOperator as Class);
 
-    const instances = await Promise.all(operators.map(op =>
+    const instances = await Promise.all<ExpressOperator>(operators.map(op =>
       DependencyRegistry.getInstance(op.target, op.qualifier)
         .catch(err => {
           console.error(`Unable to load operator ${op.class.name}#${op.qualifier.toString()}`);
         })
     ));
 
-    const sorted = (instances
-      .filter(x => !!x) as ExpressOperator[])
+    const sorted = instances
+      .filter(x => !!x)
       .sort((a, b) => a.priority - b.priority);
 
     console.log('Sorting Operators', sorted.length);
@@ -70,30 +70,31 @@ export class ExpressApp {
   }
 
   async unregisterController(config: ControllerConfig) {
-    console.debug('Unregistering', config.class.__id, config.path);
+    console.debug('Unregistering', config.class.__id, config.basePath);
     this.app._router.stack = RouteUtil.removeAllRoutes(this.app._router.stack, config);
   }
 
   async registerController(cConfig: ControllerConfig) {
     const instance = await DependencyRegistry.getInstance(cConfig.class);
+    cConfig.instance = instance;
 
-    console.debug('Registering Controller Instance', cConfig.class.__id, cConfig.path, cConfig.handlers.length);
+    console.debug('Registering Controller Instance', cConfig.class.__id, cConfig.basePath, cConfig.endpoints.length);
 
-    for (const hConfig of cConfig.handlers.reverse()) {
-      hConfig.instance = instance;
-      hConfig.path = RouteUtil.buildPath(cConfig.path, hConfig.path);
-      hConfig.handler = RouteUtil.asyncHandler(
-        RouteUtil.toPromise(hConfig.handler.bind(instance)),
-        RouteUtil.outputHandler.bind(null, hConfig));
+    for (const endpoint of cConfig.endpoints.reverse()) {
+      endpoint.instance = instance;
+      endpoint.path = RouteUtil.buildPath(cConfig.basePath, endpoint.path);
+      endpoint.handler = RouteUtil.asyncHandler(
+        RouteUtil.toPromise(endpoint.handler.bind(instance)),
+        RouteUtil.outputHandler.bind(null, endpoint));
 
-      const filters = [...cConfig.filters!, ...(hConfig.filters!).map(x => x.bind(instance))]
+      const filters = [...cConfig.filters, ...(endpoint.filters).map(x => x.bind(instance))]
         .map(RouteUtil.toPromise)
         .map(x => RouteUtil.asyncHandler(x));
 
-      this.app[hConfig.method!](hConfig.path!, ...filters, hConfig.handler);
+      this.app[endpoint.method!](endpoint.path!, ...filters, endpoint.handler);
     }
 
-    this.controllers.set(cConfig.path, cConfig);
+    this.controllers.set(cConfig.basePath, cConfig);
   }
 
   get() {

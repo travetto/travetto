@@ -16,7 +16,6 @@ class SuperAddress extends Address {
 class Count {
 
   @Field(String)
-  @View('test')
   area: string;
 
   @Float()
@@ -101,10 +100,10 @@ class DataBinding {
 
     assert(viewPerson.address instanceof Address);
     assert(viewPerson.address.street1 === '1234 Fun');
-    assert(viewPerson.address.street2 === undefined);
+    assert(viewPerson.address.street2 === 'Unit 20');
     assert(viewPerson.counts.length === 2);
     assert(viewPerson.counts[0] instanceof Count);
-    assert(viewPerson.counts[0].value === undefined);
+    assert(viewPerson.counts[0].value === 20);
   }
 
   @Test('Validate Object')

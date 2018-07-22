@@ -51,7 +51,11 @@ function isDeepLiteral(node: ts.Expression) {
 }
 
 function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, cmd: Command): T {
-  prepAssert(state);
+  if (!state.assert) {
+    state.assert = TransformUtil.importFile(state, require.resolve('../src/runner/assert')).ident;
+    state.assertCheck = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'check');
+    state.assertInvoke = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'invoke');
+  }
 
   const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);
   const firstText = first!.getText();
@@ -72,18 +76,6 @@ function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, cmd:
   check.parent = node.parent;
 
   return check as any as T;
-}
-
-function prepAssert(state: AssertState) {
-  if (!state.assert) {
-    state.assert = ts.createIdentifier(`import_${ASSERT_UTIL}`);
-    state.newImports.push({
-      ident: state.assert,
-      path: require.resolve('../src/runner/assert')
-    });
-    state.assertCheck = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'check');
-    state.assertInvoke = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'invoke');
-  }
 }
 
 function getCommand(args: ts.Expression[] | ts.NodeArray<ts.Expression>): Command | undefined {

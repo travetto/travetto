@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry, ValidatorFn } from '../service';
-import { BindUtil } from '../util';
+import { SchemaRegistry } from '../service';
+import { ValidatorFn } from '../types';
 
 export interface ClassWithSchema<T> extends Class<T> {
   from<U>(this: Class<U>, data: U, view?: string): U;

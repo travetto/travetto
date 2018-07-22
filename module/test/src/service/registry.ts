@@ -1,4 +1,4 @@
-import { MetadataRegistry, Class, ChangeEvent } from '@travetto/registry';
+import { MetadataRegistry, Class } from '@travetto/registry';
 import { SuiteConfig, TestConfig } from '../model';
 
 class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
@@ -16,7 +16,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     };
   }
 
-  createPendingMethod(cls: Class, fn: Function) {
+  createPendingField(cls: Class, fn: Function) {
     return {
       class: cls,
       file: cls.__filename,
@@ -31,7 +31,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
 
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
     const config = this.getOrCreatePending(cls) as SuiteConfig;
-    const tests = this.pendingMethods.get(cls.__id)!.values();
+    const tests = this.pendingFields.get(cls.__id)!.values();
     const parent = this.getParentClass(cls);
     if (parent && this.has(parent)) {
       const pconf = this.get(parent);

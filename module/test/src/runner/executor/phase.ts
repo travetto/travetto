@@ -1,6 +1,6 @@
 import { AssertUtil } from '../assert';
 import { Consumer } from '../../consumer';
-import { SuiteConfig, SuiteResult, Assertion, TestResult, TestConfig } from '../..';
+import { SuiteConfig, SuiteResult, Assertion, TestResult, TestConfig } from '../../model';
 
 export const BREAKOUT = Symbol('breakout');
 export const TIMEOUT = Symbol('timeout');

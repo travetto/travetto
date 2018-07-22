@@ -2,7 +2,7 @@
 
 import { Response } from 'express';
 import { BaseError } from '@travetto/base';
-import { Renderable } from './renderable';
+import { Renderable } from './response';
 
 type Status = { status: number };
 

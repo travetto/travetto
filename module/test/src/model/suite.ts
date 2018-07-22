@@ -1,5 +1,6 @@
+import { Class } from '@travetto/registry/src/model';
+
 import { TestConfig, TestResult } from './test';
-import { Class } from '@travetto/registry/src/model/types';
 
 export interface SuiteConfig {
   class: Class;

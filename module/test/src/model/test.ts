@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry/src/model/types';
+import { Class } from '@travetto/registry/src/model';
 
 export interface TestConfig {
   class: Class<any>;

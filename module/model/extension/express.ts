@@ -12,7 +12,7 @@ export function ModelController<T extends BaseModel>(path: string, cls: Class<T>
   return (target: Class<Svc>) => {
 
     const parent = ControllerRegistry.getOrCreatePending(target);
-    const paths = new Set((parent.handlers || []).map(rh => `${rh.method}#${rh.path}`));
+    const paths = new Set((parent.endpoints || []).map(ep => `${ep.method}#${ep.path}`));
 
     if (!paths.has('get#/')) {
       Object.assign(

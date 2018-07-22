@@ -8,33 +8,16 @@ const stringHash = require('string-hash');
 interface IState extends TransformerState {
   file: string;
   fullFile: string;
-  imported?: ts.Identifier;
 }
 
-function createStaticField(name: string, val: ts.Expression | string | number) {
-  return ts.createProperty(
-    undefined,
-    [ts.createToken(ts.SyntaxKind.StaticKeyword)],
-    name, undefined, undefined, ['string', 'number'].includes(typeof val) ? ts.createLiteral(val as any) : val as ts.Expression
-  );
-}
-
-const registerPath = require.resolve('../src/decorator/register');
+const REGISTER_MOD = require.resolve('../src/decorator/register');
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: IState): T {
-  if (state.path === registerPath) { // Cannot process self
+  if (state.path === REGISTER_MOD) { // Cannot process self
     return node;
   }
 
   if (ts.isClassDeclaration(node) && node.name && node.parent && ts.isSourceFile(node.parent)) {
-    if (!state.imported) {
-      state.imported = ts.createIdentifier(`import_Register`);
-      state.newImports.push({
-        ident: state.imported,
-        path: registerPath
-      });
-    }
-
     const methods: any = {};
 
     for (const child of node.members) {
@@ -52,20 +35,19 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     const isAbstract = (node.modifiers! || []).filter(x => x.kind === ts.SyntaxKind.AbstractKeyword).length > 0;
 
     const ret = ts.updateClassDeclaration(node,
-      ts.createNodeArray(
-        [ts.createDecorator(
-          ts.createCall(ts.createPropertyAccess(state.imported, ts.createIdentifier('Register')), undefined, [])
-        ), ...(node.decorators || [])]),
+      ts.createNodeArray([
+        TransformUtil.createDecorator(state, REGISTER_MOD, 'Register')
+        , ...(node.decorators || [])]),
       node.modifiers,
       node.name,
       node.typeParameters,
       ts.createNodeArray(node.heritageClauses),
       ts.createNodeArray([
-        createStaticField('__filename', state.fullFile.replace(/[\\\/]/g, path.sep)),
-        createStaticField('__id', `${state.file}#${node.name!.getText()}`),
-        createStaticField('__hash', stringHash(node.getText())),
-        createStaticField('__methods', TransformUtil.extendObjectLiteral(methods)),
-        createStaticField('__abstract', TransformUtil.fromLiteral(isAbstract)),
+        TransformUtil.createStaticField('__filename', state.fullFile.replace(/[\\\/]/g, path.sep)),
+        TransformUtil.createStaticField('__id', `${state.file}#${node.name!.getText()}`),
+        TransformUtil.createStaticField('__hash', stringHash(node.getText())),
+        TransformUtil.createStaticField('__methods', TransformUtil.extendObjectLiteral(methods)),
+        TransformUtil.createStaticField('__abstract', TransformUtil.fromLiteral(isAbstract)),
         ...node.members
       ])
     ) as any;
@@ -107,7 +89,7 @@ export const ClassMetadataTransformer = {
       .replace(/^\./, '')
       .replace(/\.(t|j)s$/, '');
 
-    return { file: `${ns}:${fileRoot}`, fullFile: file.fileName, newImports: [], imports: new Map() };
+    return { file: `${ns}:${fileRoot}`, fullFile: file.fileName };
   }, visitNode),
   phase: 'before',
   priority: 0
