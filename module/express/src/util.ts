@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
+import { MimeType, Renderable } from './model';
 import {
   RouteStack, PathType, ControllerConfig, Method,
-  Renderable, RequestHandler, Filter
-} from './model';
+  EndpointConfig, Filter
+} from './types';
 
 export class RouteUtil {
 
@@ -35,7 +36,7 @@ export class RouteUtil {
   static removeAllRoutes(stack: RouteStack[], config: ControllerConfig) {
     // Un-register
     const controllerRoutes = new Map<PathType, Set<Method>>();
-    for (const { method, path } of config.handlers) {
+    for (const { method, path } of config.endpoints) {
       if (!controllerRoutes.has(path!)) {
         controllerRoutes.set(path!, new Set());
       }
@@ -61,7 +62,7 @@ export class RouteUtil {
         await out;
       }
     } else if (typeof out === 'string') {
-      res.type('text/plain');
+      res.type(MimeType.TEXT);
       res.send(out);
     } else {
       if ('toJSON' in out) {
@@ -72,7 +73,7 @@ export class RouteUtil {
     }
   }
 
-  static async outputHandler(handler: RequestHandler, req: Request, res: Response, out: any) {
+  static async outputHandler(handler: EndpointConfig, req: Request, res: Response, out: any) {
     if (!res.headersSent && out) {
       if (handler.headers) {
         for (const [h, v] of Object.entries(handler.headers)) {

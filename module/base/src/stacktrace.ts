@@ -25,6 +25,7 @@ export class Stacktrace {
     this.addStackFilters(
       __filename.replace(/\.js$/, ''),
       'timers.js',
+      'typescript.js',
       'async_hooks',
       'module.js',
       '(native)',
@@ -40,7 +41,7 @@ export class Stacktrace {
         return (callSite.getFileName() &&
           callSite.getFileName()!.indexOf(BASE) >= 0) &&
           !callSite.isNative() &&
-          !callSite.isToplevel() &&
+          // !callSite.isToplevel() &&
           !callSite.isEval() &&
           !Stacktrace.filterRegex.test(callSite.toString());
       });

@@ -1,8 +1,8 @@
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
 import { ChildExecution } from '@travetto/exec';
 import { QueueDataSource } from '@travetto/pool';
-import { client, Events } from './communication';
 
+import { client, Events } from './communication';
 import { TestRegistry } from '../service';
 import { TestConfig, SuiteConfig } from '../model';
 import { Consumer } from '../consumer';

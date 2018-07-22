@@ -7,10 +7,10 @@ const TEST_IMPORT = '@travetto/test';
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: any): T {
 
   if (ts.isMethodDeclaration(node) || ts.isClassDeclaration(node)) {
-    const dec = TransformUtil.findAnyDecorator(node, {
+    const dec = TransformUtil.findAnyDecorator(state, node, {
       Test: new Set([TEST_IMPORT]),
       Suite: new Set([TEST_IMPORT])
-    }, state);
+    });
 
     if (dec && ts.isCallExpression(dec.expression)) {
       const args = [...(dec.expression.arguments || [])];

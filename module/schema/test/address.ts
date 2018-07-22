@@ -4,7 +4,6 @@ import { Schema, Field, View, Required } from '../index';
 export class Address {
 
   @Field(String)
-  @View('test')
   @Required()
   street1: string;
 

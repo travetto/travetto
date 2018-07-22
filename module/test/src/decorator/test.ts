@@ -1,4 +1,3 @@
-import { Class } from '@travetto/registry';
 import { TestRegistry } from '../service';
 import { TestConfig } from '../model';
 
@@ -15,7 +14,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
     Object.assign(extra, r);
   }
   return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    TestRegistry.registerMethod(inst.constructor, descriptor.value, {
+    TestRegistry.registerField(inst.constructor, descriptor.value, {
       ...extra,
       file: inst.constructor.__filename,
       description: description as string
@@ -26,14 +25,14 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
 
 export function ShouldThrow(state: TestConfig['shouldThrow']): MethodDecorator {
   return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    TestRegistry.registerMethod(inst.constructor, descriptor.value, { shouldThrow: state });
+    TestRegistry.registerField(inst.constructor, descriptor.value, { shouldThrow: state });
     return descriptor;
   };
 }
 
 export function Timeout(ms: number): MethodDecorator {
   return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    TestRegistry.registerMethod(inst.constructor, descriptor.value, { timeout: ms });
+    TestRegistry.registerField(inst.constructor, descriptor.value, { timeout: ms });
     return descriptor;
   };
 }

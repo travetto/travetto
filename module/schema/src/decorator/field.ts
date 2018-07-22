@@ -1,4 +1,5 @@
-import { CommonRegExp, SchemaRegistry, ClassList, ValidatorFn } from '../service';
+import { CommonRegExp, SchemaRegistry } from '../service';
+import { ClassList, FieldConfig } from '../types';
 
 function prop(obj: { [key: string]: any }) {
   return (f: any, p: string) => {
@@ -13,7 +14,7 @@ function enumKeys(c: any): string[] {
     return Object.values(c).filter((x: any) => typeof x === 'string') as string[];
   }
 }
-export function Field(type: ClassList, config?: { [key: string]: any }) {
+export function Field(type: ClassList, config?: Partial<FieldConfig>) {
   return (f: any, p: string) => {
     SchemaRegistry.registerPendingFieldConfig(f.constructor, p, type);
     if (config) {
@@ -22,7 +23,7 @@ export function Field(type: ClassList, config?: { [key: string]: any }) {
   };
 }
 export const Alias = (...aliases: string[]) => prop({ aliases });
-export const Required = (message?: string) => prop({ required: { message } });
+export const Required = (message?: string) => prop({ required: { active: true, message } });
 export const Enum = (vals: string[] | any, message?: string) => {
   const values = enumKeys(vals);
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;

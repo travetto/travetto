@@ -65,4 +65,15 @@ class MergeTests {
     assert(Util.deepAssign({ a: true }, { a: null }, 'coerce').a === null);
     assert(Util.deepAssign({ a: true }, { a: null }, 'coerce').a === null);
   }
+
+  @Test()
+  verifyFunction() {
+    async function test() {
+      // Do nothing
+    }
+
+    assert(Util.isFunction(test));
+    assert(Util.isSimple(test));
+    assert(Util.shallowClone(test) === test);
+  }
 }

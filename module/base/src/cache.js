@@ -67,11 +67,11 @@ class Cache {
   }
 
   fromEntryName(cached) {
-    return path.join(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, path.sep).replace(/@ts$/, '.ts'));
+    return path.join(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, path.sep));
   }
 
   toEntryName(full) {
-    const out = path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~').replace(/.ts$/, '@ts'));
+    const out = path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~'));
     return out;
   }
 }

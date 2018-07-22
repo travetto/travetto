@@ -19,7 +19,7 @@ export class MockService {
 
   fetch() {
     return new User(
-      `Hello-${this.count--}`,
+      `Hello-${this.count++}`,
       'World',
       '!!!'
     );

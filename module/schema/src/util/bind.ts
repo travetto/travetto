@@ -1,5 +1,6 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry, FieldConfig, DEFAULT_VIEW } from '../service';
+import { SchemaRegistry } from '../service';
+import { FieldConfig, DEFAULT_VIEW } from '../types';
 
 export class BindUtil {
 

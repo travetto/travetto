@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
 import { CommonRegExp } from '../src/service/validator/regexp';
-import { FieldConfig } from '../src/service/types';
+import { FieldConfig } from '../src/types';
 import { SchemaRegistry } from '../src/service/registry';
 import { BindUtil } from '../src/util';
 import * as faker from 'faker';

@@ -1,2 +1,2 @@
 export * from './filter';
-export * from './controller';
+export * from './config';

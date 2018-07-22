@@ -8,11 +8,11 @@ function id(cls: string | Class) {
   return cls && typeof cls !== 'string' ? cls.__id : cls;
 }
 
-export abstract class MetadataRegistry<C extends { class: Class }, M = any> extends Registry {
+export abstract class MetadataRegistry<C extends { class: Class }, M = any, F = Function> extends Registry {
 
   protected expired = new Map<string, C>();
   protected pending = new Map<string, Partial<C>>();
-  protected pendingMethods = new Map<string, Map<Function, Partial<M>>>();
+  protected pendingFields = new Map<string, Map<F, Partial<M>>>();
 
   protected entries = new Map<string, C>();
 
@@ -52,7 +52,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     return Array.from(this.pending.values()).map(x => x.class);
   }
 
-  createPendingMethod(cls: Class, method: Function): Partial<M> {
+  createPendingField(cls: Class, field: F): Partial<M> {
     return {};
   }
 
@@ -65,18 +65,18 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     const cid = id(cls);
     if (!this.pending.has(cid)) {
       this.pending.set(cid, this.createPending(cls));
-      this.pendingMethods.set(cid, new Map());
+      this.pendingFields.set(cid, new Map());
     }
     return this.pending.get(cid)!;
   }
 
-  getOrCreatePendingMethod(cls: Class, method: Function): Partial<M> {
+  getOrCreatePendingField(cls: Class, field: F): Partial<M> {
     this.getOrCreatePending(cls);
 
-    if (!this.pendingMethods.get(cls.__id)!.has(method)) {
-      this.pendingMethods.get(cls.__id)!.set(method, this.createPendingMethod(cls, method));
+    if (!this.pendingFields.get(cls.__id)!.has(field)) {
+      this.pendingFields.get(cls.__id)!.set(field, this.createPendingField(cls, field));
     }
-    return this.pendingMethods.get(cls.__id)!.get(method)!;
+    return this.pendingFields.get(cls.__id)!.get(field)!;
   }
 
   register(cls: Class, pconfig: Partial<C>) {
@@ -84,15 +84,15 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
     Util.deepAssign(conf, pconfig);
   }
 
-  registerMethod(cls: Class, method: Function, pconfig: Partial<M>) {
-    const conf = this.getOrCreatePendingMethod(cls, method);
+  registerField(cls: Class, field: F, pconfig: Partial<M>) {
+    const conf = this.getOrCreatePendingField(cls, field);
     Util.deepAssign(conf, pconfig);
   }
 
   onInstall(cls: Class, e: ChangeEvent<Class>) {
-    if (this.pending.has(cls.__id) || this.pendingMethods.has(cls.__id)) {
+    if (this.pending.has(cls.__id) || this.pendingFields.has(cls.__id)) {
       const result = this.onInstallFinalize(cls);
-      this.pendingMethods.delete(cls.__id);
+      this.pendingFields.delete(cls.__id);
       this.pending.delete(cls.__id);
 
       this.entries.set(cls.__id, result);
@@ -115,7 +115,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any> exte
   onReset() {
     this.entries.clear();
     this.pending.clear();
-    this.pendingMethods.clear();
+    this.pendingFields.clear();
     this.expired.clear();
   }
 }

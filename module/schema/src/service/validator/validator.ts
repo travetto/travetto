@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
 import { BaseError } from '@travetto/base';
 
-import { FieldConfig, SchemaConfig } from '../types';
+import { FieldConfig, SchemaConfig } from '../../types';
 import { SchemaRegistry } from '../registry';
 import { Messages } from './messages';
 
@@ -26,8 +26,8 @@ export class SchemaValidator {
       const hasValue = !(val === undefined || val === null || val === '' || (Array.isArray(val) && val.length === 0));
 
       if (!hasValue) {
-        if (fieldSchema.required) {
-          errors.push(...this.prepareErrors(path, [{ kind: 'required' }]));
+        if (fieldSchema.required && fieldSchema.required.active) {
+          errors.push(...this.prepareErrors(path, [{ kind: 'required', ...fieldSchema.required }]));
         }
         continue;
       }

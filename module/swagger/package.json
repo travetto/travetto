@@ -4,9 +4,10 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/express": "^0.1.11"
+    "@travetto/express": "^0.1.11",
+    "@travetto/schema": "^0.1.8"
   },
-  "description": "Express swagger integration support for the travetto framework",
+  "description": "Swagger integration support for the travetto framework",
   "devDependencies": {
     "@travetto/test": "^0.1.6"
   },
@@ -15,11 +16,11 @@
     "express",
     "travetto",
     "decorators",
-    "swagger"
+    "schema"
   ],
   "license": "MIT",
   "main": "index.ts",
-  "name": "@travetto/express-swagger",
+  "name": "@travetto/swagger",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },

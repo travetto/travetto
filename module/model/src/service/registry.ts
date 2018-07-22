@@ -2,7 +2,7 @@ import { SchemaRegistry, SchemaChangeEvent } from '@travetto/schema';
 import { MetadataRegistry, Class } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 
-import { ModelOptions } from './types';
+import { ModelOptions } from '../types';
 
 export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   constructor() {

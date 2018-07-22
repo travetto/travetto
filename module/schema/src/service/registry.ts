@@ -1,6 +1,6 @@
 import { MetadataRegistry, RootRegistry, Class, ChangeEvent } from '@travetto/registry';
 import { Env } from '@travetto/base';
-import { ClassList, FieldConfig, ClassConfig, ViewConfig, DEFAULT_VIEW } from './types';
+import { ClassList, FieldConfig, ClassConfig, DEFAULT_VIEW } from '../types';
 import {
   SchemaChangeListener,
   SchemaChangeEvent, FieldChangeEvent,
@@ -125,6 +125,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
         };
       }
     }
+    dest.title = src.title || dest.title;
     dest.validators = [...src.validators, ...dest.validators];
     return dest;
   }

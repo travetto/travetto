@@ -1,11 +1,17 @@
 import { Class } from '@travetto/registry';
-import { ValidationError } from './validator';
+import { ValidationError } from '@travetto/schema/src/service/validator';
 
 export const DEFAULT_VIEW = '__all';
 
 export type ClassList = Class | [Class];
 
 export type ValidatorFn<T, U> = (value: T, parent?: U) => ValidationError | undefined;
+
+export interface DescriableConfig {
+  title?: string;
+  description?: string;
+  examples?: string[];
+}
 
 export interface SchemaConfig {
   [key: string]: FieldConfig;
@@ -15,13 +21,13 @@ export interface ViewConfig {
   fields: string[];
 }
 
-export interface ClassConfig {
+export interface ClassConfig extends DescriableConfig {
   class: Class;
   views: { [key: string]: ViewConfig };
   validators: ValidatorFn<any, any>[];
 }
 
-export interface FieldConfig {
+export interface FieldConfig extends DescriableConfig {
   owner: any;
   name: string;
   aliases?: string[];
@@ -29,7 +35,7 @@ export interface FieldConfig {
   array: boolean;
   specifier?: string;
   precision?: number;
-  required?: { message?: string };
+  required?: { active: boolean, message?: string };
   match?: { re: RegExp, message?: string };
   min?: { n: number | Date, message?: string };
   max?: { n: number | Date, message?: string };

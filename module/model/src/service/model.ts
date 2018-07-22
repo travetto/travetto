@@ -1,13 +1,13 @@
 import { Class } from '@travetto/registry';
 import { BindUtil, SchemaValidator, DEFAULT_VIEW } from '@travetto/schema';
-import { QueryVerifierService } from './query';
 import { Injectable } from '@travetto/di';
-import { ModelOptions } from './types';
+import { Env, Util } from '@travetto/base';
+
+import { QueryVerifierService } from './query';
+import { ModelOptions } from '../types';
 import { ModelCore, Query, BulkState, ModelQuery, PageableModelQuery } from '../model';
 import { ModelSource } from './source';
 import { ModelRegistry } from './registry';
-
-import { Env, Util } from '@travetto/base';
 
 function getClass<T>(o: T) {
   return o.constructor as Class<T>;

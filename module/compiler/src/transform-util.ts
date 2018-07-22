@@ -1,20 +1,22 @@
 import * as ts from 'typescript';
-import { dirname, sep } from 'path';
+import { dirname, sep, basename } from 'path';
 import { AppInfo, Env, resolveFrameworkFile } from '@travetto/base';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
 export interface TransformerState {
-  newImports: Import[];
+  source: ts.SourceFile;
+  newImports: Map<string, Import>;
   path: string;
   modulePath: string;
+  decorators: Map<string, ts.PropertyAccessExpression>;
   imports: Map<string, Import>;
   ids: Map<String, number>;
 }
 
 export class TransformUtil {
 
-  static generateUniqueId(name: string, state: TransformerState) {
+  static generateUniqueId(state: TransformerState, name: string) {
     const val = (state.ids.get(name) || 0) + 1;
     state.ids.set(name, val);
     return ts.createIdentifier(`${name}_${val}`);
@@ -30,7 +32,7 @@ export class TransformUtil {
     }
   }
 
-  static findAnyDecorator(node: ts.Node, patterns: { [key: string]: Set<string> }, state: TransformerState): ts.Decorator | undefined {
+  static findAnyDecorator(state: TransformerState, node: ts.Node, patterns: { [key: string]: Set<string> }): ts.Decorator | undefined {
     for (const dec of (node.decorators || []) as any as DecList) {
       const ident = this.getDecoratorIdent(dec);
       if (!ts.isIdentifier(ident)) {
@@ -144,13 +146,17 @@ export class TransformUtil {
     return (context: ts.TransformationContext) =>
       (file: ts.SourceFile) => {
 
-        const state = init(file, context) as T;
         const pth = require.resolve(file.fileName);
-        state.path = pth.replace(/[\\\/]/g, sep);
-        state.modulePath = pth.replace(/[\\\/]/g, '/');
-        state.newImports = [];
-        state.ids = new Map();
-        state.imports = new Map();
+        const state = {
+          ...init(file, context) as any,
+          path: pth.replace(/[\\\/]/g, sep),
+          modulePath: pth.replace(/[\\\/]/g, '/'),
+          newImports: new Map(),
+          source: file,
+          ids: new Map(),
+          imports: new Map(),
+          decorators: new Map()
+        } as T;
 
         for (const stmt of file.statements) {
           if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
@@ -179,8 +185,8 @@ export class TransformUtil {
 
         let ret = visitor(context, file, state);
 
-        if (state.newImports.length) {
-          ret = this.addImport(ret, state.newImports);
+        if (state.newImports.size) {
+          ret = this.addImport(ret, Array.from(state.newImports.values()));
         }
 
         for (const el of ret.statements) {
@@ -193,24 +199,23 @@ export class TransformUtil {
       };
   }
 
-  static importIfExternal<T extends TransformerState>(typeNode: ts.TypeNode, state: TransformerState) {
+  static importTypeIfExternal<T extends TransformerState>(state: TransformerState, typeNode: ts.TypeNode | ts.Identifier) {
     //    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
 
-    const nodeName = (typeNode as ts.TypeReferenceNode).typeName.getText();
-    if (nodeName.match(/^[A-Z]{1,3}$/)) {
+    const nodeName = ts.isTypeNode(typeNode) ?
+      (typeNode as ts.TypeReferenceNode).typeName.getText() :
+      ((typeNode as ts.Identifier).text || (typeNode as ts.Identifier).escapedText as string);
+
+    if (nodeName.match(/^[A-Z]{1,2}$/)) {
       throw new Error('Type information not found');
     }
 
     if (nodeName.indexOf('.') > 0) {
       const [importName, ident] = nodeName.split('.');
+
       if (state.imports.has(importName)) {
-        const importIdent = this.generateUniqueId(`import_${importName}`, state);
-
-        state.newImports.push({
-          ident: importIdent,
-          path: state.imports.get(importName)!.path
-        });
-
+        const pth = state.imports.get(importName)!.path;
+        const importIdent = this.importFile(state, pth).ident;
         return ts.createPropertyAccess(importIdent, ident);
       }
       return ts.createPropertyAccess(ts.createIdentifier(importName), ident);
@@ -218,16 +223,12 @@ export class TransformUtil {
       const ident = nodeName;
       // External
       if (state.imports.has(nodeName)) {
-        const importName = this.generateUniqueId(`import_${nodeName}`, state);
-
-        state.newImports.push({
-          ident: importName,
-          path: state.imports.get(nodeName)!.path
-        });
-
+        const pth = state.imports.get(nodeName)!.path;
+        const importName = this.importFile(state, pth).ident;
         return ts.createPropertyAccess(importName, ident);
+      } else {
+        return ts.createIdentifier(nodeName);
       }
-      return ts.createIdentifier(nodeName);
     }
   }
 
@@ -246,4 +247,140 @@ export class TransformUtil {
 
     return out;
   }
+
+  static importFile(state: TransformerState, pth: string) {
+    if (!state.newImports.has(pth)) {
+      const ident = ts.createIdentifier(`import_${basename(pth, '.ts')}`);
+      const imprt = {
+        path: pth,
+        ident
+      };
+      state.imports.set(ident.escapedText.toString(), imprt);
+      state.newImports.set(pth, imprt);
+    }
+    return state.newImports.get(pth)!;
+  }
+
+  static createDecorator(state: TransformerState, pth: string, name: string, ...contents: (ts.Expression | undefined)[]) {
+    if (!state.decorators.has(name)) {
+      const ref = this.importFile(state, pth);
+      const ident = ts.createIdentifier(name);
+      state.decorators.set(name, ts.createPropertyAccess(ref.ident, ident));
+    }
+
+    return ts.createDecorator(
+      ts.createCall(
+        state.decorators.get(name)!,
+        undefined,
+        contents.filter(x => !!x) as ts.Expression[]
+      )
+    );
+  }
+
+  static createStaticField(name: string, val: ts.Expression | string | number) {
+    return ts.createProperty(
+      undefined,
+      [ts.createToken(ts.SyntaxKind.StaticKeyword)],
+      name, undefined, undefined, ['string', 'number'].includes(typeof val) ? ts.createLiteral(val as any) : val as ts.Expression
+    );
+  }
+
+  static resolveType(state: TransformerState, type: ts.Node): ts.Expression {
+    let expr: ts.Expression | undefined;
+    const kind = type && type!.kind;
+
+    switch (kind) {
+      case ts.SyntaxKind.TypeReference:
+        expr = TransformUtil.importTypeIfExternal(state, type as ts.TypeReferenceNode);
+        break;
+      case ts.SyntaxKind.VoidKeyword: expr = ts.createIdentifier('undefined'); break;
+      case ts.SyntaxKind.LiteralType: expr = this.resolveType(state, (type as any as ts.LiteralTypeNode).literal); break;
+      case ts.SyntaxKind.StringLiteral:
+      case ts.SyntaxKind.StringKeyword: expr = ts.createIdentifier('String'); break;
+      case ts.SyntaxKind.NumericLiteral:
+      case ts.SyntaxKind.NumberKeyword: expr = ts.createIdentifier('Number'); break;
+      case ts.SyntaxKind.TrueKeyword:
+      case ts.SyntaxKind.FalseKeyword:
+      case ts.SyntaxKind.BooleanKeyword: expr = ts.createIdentifier('Boolean'); break;
+      case ts.SyntaxKind.ArrayType:
+        expr = ts.createArrayLiteral([this.resolveType(state, (type as ts.ArrayTypeNode).elementType)]);
+        break;
+      case ts.SyntaxKind.TypeLiteral:
+        const properties: ts.PropertyAssignment[] = [];
+        for (const member of (type as ts.TypeLiteralNode).members) {
+          let subMember: ts.TypeNode = (member as any).type;
+          if ((subMember as any).literal) {
+            subMember = (subMember as any).literal;
+          }
+          properties.push(ts.createPropertyAssignment(member.name as ts.Identifier, this.resolveType(state, subMember)));
+        }
+        expr = ts.createObjectLiteral(properties);
+        break;
+      case ts.SyntaxKind.UnionType: {
+        const types = (type as ts.UnionTypeNode).types;
+        expr = types.slice(1).reduce((fType, stype) => {
+          const fTypeStr = (fType as any).text;
+          if (fTypeStr !== 'Object') {
+            const resolved = this.resolveType(state, stype);
+            if ((resolved as any).text !== fTypeStr) {
+              fType = ts.createIdentifier('Object');
+            }
+          }
+          return fType;
+        }, this.resolveType(state, types[0]));
+        break;
+      }
+      case ts.SyntaxKind.ObjectKeyword:
+      default:
+        break;
+    }
+    return expr || ts.createIdentifier('Object');
+  }
+
+  static describeByComments(state: TransformerState, node: ts.Node) {
+    while ('original' in node) {
+      node = (node as any).original as ts.Node;
+    }
+    const tags = ts.getJSDocTags(node);
+    const docs = (node as any)['jsDoc'];
+
+    const out: Documentation = {
+      description: undefined,
+      return: undefined,
+      params: []
+    };
+
+    if (docs) {
+      const top = docs[docs.length - 1];
+      if (ts.isJSDoc(top)) {
+        out.description = top.comment;
+      }
+    }
+
+    if (tags && tags.length) {
+      for (const tag of tags) {
+        if (ts.isJSDocReturnTag(tag)) {
+          out.return = {
+            type: tag.typeExpression && this.resolveType(state, tag.typeExpression.type),
+            description: tag.comment
+          };
+        } else if (ts.isJSDocParameterTag(tag)) {
+          out.params!.push({
+            name: tag.name && tag.name.getText(),
+            description: tag.comment || '',
+            type: tag.typeExpression && this.resolveType(state, tag.typeExpression.type),
+            optional: tag.isBracketed
+          });
+        }
+      }
+    }
+
+    return out;
+  }
+}
+
+interface Documentation {
+  return?: { description?: string; type?: ts.Expression };
+  description?: string;
+  params?: { name: string, description: string, optional?: boolean, type?: ts.Expression }[];
 }

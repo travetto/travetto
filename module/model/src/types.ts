@@ -1,4 +1,4 @@
-import { SortClause } from '../model';
+import { SortClause } from '@travetto/model/src/model';
 import { Class } from '@travetto/registry';
 
 export interface IndexConfig<T> {

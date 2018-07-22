@@ -1,0 +1,178 @@
+import { ControllerRegistry, MimeType } from '@travetto/express';
+import { Class } from '@travetto/registry';
+import { SchemaRegistry, DEFAULT_VIEW } from '@travetto/schema';
+
+import { Spec, Parameter, Path, Response, Schema, Operation } from '../types';
+
+const DEFINITION = '#/definitions';
+
+export class SwaggerUtil {
+
+  static processSchema(type: string | Class | undefined, schemas: { [key: string]: Schema }) {
+    if (type === undefined || typeof type === 'string') {
+      return undefined;
+    } else {
+      const typeId = type.name;
+
+      if (!schemas[typeId]) {
+        const config = SchemaRegistry.get(type);
+        const properties: { [key: string]: Schema } = {};
+        const def = config.views[DEFAULT_VIEW];
+        const required = [];
+
+        for (const fieldName of def.fields) {
+          const field = def.schema[fieldName];
+          let prop: Schema = {};
+
+          // Handle nested types
+          if (SchemaRegistry.has(field.type)) {
+            prop.$ref = `${DEFINITION}/${this.processSchema(field.type, schemas)}`;
+            prop.type = 'object';
+          } else {
+            switch (field.type) {
+              case String: prop.type = 'string'; break;
+              case Number: prop.type = 'number'; break;
+              case Date:
+                prop.format = 'date-time';
+                prop.type = 'string';
+                break;
+              case Boolean: prop.type = 'boolean'; break;
+              default:
+                prop.type = 'object';
+                break;
+            }
+          }
+
+          if (field.examples) {
+            prop.example = field.examples;
+          }
+          prop.description = field.description;
+          if (field.match) {
+            prop.pattern = field.match.re!.source;
+          }
+          if (field.maxlength) {
+            prop.maxLength = field.maxlength.n;
+          }
+          if (field.minlength) {
+            prop.minLength = field.minlength.n;
+          }
+          if (field.min) {
+            prop.minimum = field.min.n as number;
+          }
+          if (field.max) {
+            prop.maximum = field.max.n as number;
+          }
+          if (field.enum) {
+            prop.enum = field.enum.values;
+          }
+          if (field.required) {
+            required.push(fieldName);
+          }
+
+          if (field.array) {
+            prop = {
+              type: 'array',
+              items: prop
+            };
+          }
+
+          properties[fieldName] = prop;
+        }
+
+        schemas[typeId] = {
+          title: config.title || config.description,
+          description: config.description || config.title,
+          example: config.examples,
+          properties,
+          required
+        };
+      }
+      return typeId;
+    }
+  }
+
+  static generate(): Partial<Spec> {
+    const paths: { [key: string]: Path } = {};
+    const definitions: { [key: string]: Schema } = {};
+    const tags: { name: string, description?: string }[] = [];
+
+    for (const cls of ControllerRegistry.getClasses()) {
+      const ctrl = ControllerRegistry.get(cls);
+      const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '');
+
+      tags.push({
+        name: tagName,
+        description: ctrl.description || ctrl.title
+      });
+
+      for (const ep of ctrl.endpoints) {
+
+        const epParams: Parameter[] = [];
+        const epProd = ep.responseType! || {};
+        const epCons = ep.requestType! || {};
+        const produces = [];
+        const consumes = [];
+
+        const epProduces = this.processSchema(epProd.type, definitions);
+        const epConsumes = this.processSchema(epCons.type, definitions);
+        const responses: { [key: string]: Response } = {};
+
+        if (epProduces) {
+          const ref: Schema = { $ref: `${DEFINITION}/${epProduces}` };
+          responses[200] = {
+            description: definitions[epProduces!].description || '',
+            schema: epProd!.wrapper !== Array ? ref : { type: 'array', items: ref }
+          };
+          produces.push(MimeType.JSON);
+        } else {
+          responses[201] = {
+            description: ''
+          };
+        }
+
+        if (epConsumes) {
+          const ref: Schema = { $ref: `${DEFINITION}/${epConsumes}` };
+          epParams.push({
+            in: 'body',
+            description: definitions[epConsumes!].description || '',
+            schema: epCons!.wrapper !== Array ? ref : { type: 'array', items: ref }
+          } as Parameter);
+          consumes.push(MimeType.JSON);
+        }
+
+        for (const param of (ep.params || [])) {
+          const epParam: Parameter = {
+            in: param.location,
+            name: param.name,
+            description: param.description,
+            required: param.required,
+            type: param.type,
+          };
+          epParams.push(epParam);
+        }
+
+        const epPath = !ep.path ? '/' : typeof ep.path === 'string' ? ep.path : ep.path.source;
+
+        paths[epPath] = {
+          ...paths[epPath] || {},
+          [ep.method!]: {
+            tags: [tagName],
+            produces,
+            consumes,
+            responses,
+            summary: ep.title,
+            description: ep.description || ep.title,
+            operationId: ep.handlerName,
+            parameters: epParams
+          } as Operation
+        };
+      }
+    }
+
+    return {
+      paths,
+      tags,
+      definitions
+    };
+  }
+}

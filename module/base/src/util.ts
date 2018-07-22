@@ -1,7 +1,4 @@
 export class Util {
-  private static shallowClone(a: any) {
-    return Array.isArray(a) ? a.slice(0) : (Util.isSimple(a) ? a : { ...a });
-  }
 
   private static _deepAssign(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
@@ -58,6 +55,10 @@ export class Util {
     return ret;
   }
 
+  static shallowClone(a: any) {
+    return Array.isArray(a) ? a.slice(0) : (Util.isSimple(a) ? a : { ...a });
+  }
+
   static isPrimitive(el: any): el is (string | boolean | number | RegExp) {
     const type = typeof el;
     return el !== null && el !== undefined && (type === 'string' || type === 'boolean' || type === 'number' || el instanceof RegExp);
@@ -72,7 +73,8 @@ export class Util {
   }
 
   static isFunction(o: any): o is Function {
-    return o && Object.getPrototypeOf(o) === Function.prototype;
+    const proto = o && Object.getPrototypeOf(o);
+    return proto && proto === Function.prototype || proto.constructor.name === 'AsyncFunction';
   }
 
   static isClass(o: any) {
@@ -90,7 +92,7 @@ export class Util {
     return Util._deepAssign(a, b, mode) as T & U;
   }
 
-  static throttle<T, U, V>(fn: (a: T, b: U) => V, threshhold?: number): (a: T, b: U) => V;
+  static throttle<T, U, V>(fn: (a: T, b: U) => V, threshold?: number): (a: T, b: U) => V;
   static throttle<T extends Function>(fn: T, threshhold = 250) {
     let last = 0;
     let deferTimer: NodeJS.Timer;

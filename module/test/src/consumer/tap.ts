@@ -1,7 +1,8 @@
 import * as yaml from 'js-yaml';
-import { TestEvent, SuiteResult, AllSuitesResult, EventEntity, EventPhase } from '../model';
-import { Consumer } from './types';
 import { ExecUtil } from '@travetto/exec';
+
+import { TestEvent, AllSuitesResult } from '../model';
+import { Consumer } from './types';
 
 export class TapEmitter implements Consumer {
   private count = 0;

@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { TransformUtil, State } from '@travetto/compiler';
+import { TransformUtil, TransformerState } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
 
 const SCHEMAS = TransformUtil.buildImportAliasMap({
@@ -7,68 +7,16 @@ const SCHEMAS = TransformUtil.buildImportAliasMap({
   '@travetto/schema': 'Schema'
 });
 
-interface AutoState extends State {
+interface AutoState extends TransformerState {
   inAuto: boolean;
-  addField: ts.Expression | undefined;
-  addSchema: ts.Expression | undefined;
 }
 
-function resolveType(type: ts.Node, state: State): ts.Expression {
-  let expr: ts.Expression | undefined;
-  const kind = type && type!.kind;
+function computeProperty(state: AutoState, node: ts.PropertyDeclaration) {
 
-  switch (kind) {
-    case ts.SyntaxKind.TypeReference:
-      expr = TransformUtil.importIfExternal(type as ts.TypeReferenceNode, state);
-      break;
-    case ts.SyntaxKind.LiteralType: expr = resolveType((type as any as ts.LiteralTypeNode).literal, state); break;
-    case ts.SyntaxKind.StringLiteral:
-    case ts.SyntaxKind.StringKeyword: expr = ts.createIdentifier('String'); break;
-    case ts.SyntaxKind.NumericLiteral:
-    case ts.SyntaxKind.NumberKeyword: expr = ts.createIdentifier('Number'); break;
-    case ts.SyntaxKind.TrueKeyword:
-    case ts.SyntaxKind.FalseKeyword:
-    case ts.SyntaxKind.BooleanKeyword: expr = ts.createIdentifier('Boolean'); break;
-    case ts.SyntaxKind.ArrayType:
-      expr = ts.createArrayLiteral([resolveType((type as ts.ArrayTypeNode).elementType, state)]);
-      break;
-    case ts.SyntaxKind.TypeLiteral:
-      const properties: ts.PropertyAssignment[] = [];
-      for (const member of (type as ts.TypeLiteralNode).members) {
-        let subMember: ts.TypeNode = (member as any).type;
-        if ((subMember as any).literal) {
-          subMember = (subMember as any).literal;
-        }
-        properties.push(ts.createPropertyAssignment(member.name as ts.Identifier, resolveType(subMember, state)));
-      }
-      expr = ts.createObjectLiteral(properties);
-      break;
-    case ts.SyntaxKind.UnionType: {
-      const types = (type as ts.UnionTypeNode).types;
-      expr = types.slice(1).reduce((fType, stype) => {
-        const fTypeStr = (fType as any).text;
-        if (fTypeStr !== 'Object') {
-          const resolved = resolveType(stype, state);
-          if ((resolved as any).text !== fTypeStr) {
-            fType = ts.createIdentifier('Object');
-          }
-        }
-        return fType;
-      }, resolveType(types[0], state));
-      break;
-    }
-    case ts.SyntaxKind.ObjectKeyword:
-    default:
-      break;
-  }
-  return expr || ts.createIdentifier('Object');
-}
-
-function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
-  const typeExpr = resolveType(node.type!, state);
+  const typeExpr = TransformUtil.resolveType(state, node.type!);
   const properties = [];
   if (!node.questionToken) {
-    properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral({})));
+    properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral({ active: true })));
   }
 
   // If we have a union type
@@ -89,21 +37,18 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
     params.push(ts.createObjectLiteral(properties));
   }
 
-  if (!state.addField) {
-    const ident = TransformUtil.generateUniqueId(`import_Field`, state);
-    state.addField = ts.createPropertyAccess(ident, 'Field');
-    state.newImports.push({
-      path: require.resolve('../src/decorator/field'),
-      ident
-    });
+  const dec = TransformUtil.createDecorator(state, require.resolve('../src/decorator/field'), 'Field', ...params);
+  const newDecs = [dec, ...(node.decorators || [])];
+
+  const comments = TransformUtil.describeByComments(state, node);
+  if (comments.description) {
+    newDecs.push(TransformUtil.createDecorator(state, require.resolve('../src/decorator/common'), 'Describe', TransformUtil.fromLiteral({
+      description: comments.description
+    })));
   }
 
-  const dec = ts.createDecorator(ts.createCall(state.addField as any, undefined, ts.createNodeArray(params)));
-  const decls = ts.createNodeArray([
-    dec, ...(node.decorators || [])
-  ]);
   const res = ts.updateProperty(node,
-    decls,
+    ts.createNodeArray(newDecs),
     node.modifiers,
     node.name,
     node.questionToken,
@@ -117,11 +62,11 @@ function computeProperty(node: ts.PropertyDeclaration, state: AutoState) {
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AutoState): T {
 
   if (ts.isClassDeclaration(node)) {
-    const anySchema = TransformUtil.findAnyDecorator(node, SCHEMAS, state);
+    const anySchema = TransformUtil.findAnyDecorator(state, node, SCHEMAS);
 
-    const schema = TransformUtil.findAnyDecorator(node, {
+    const schema = TransformUtil.findAnyDecorator(state, node, {
       Schema: new Set(['@travetto/schema'])
-    }, state);
+    });
 
     let auto = !!anySchema;
 
@@ -144,26 +89,23 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     if (!!anySchema) {
       const ret = node as any as ts.ClassDeclaration;
-      let decls = node.decorators;
-      if (!schema) {
-        if (!state.addSchema) {
-          const ident = TransformUtil.generateUniqueId(`import_Schema`, state);
-          state.newImports.push({
-            path: require.resolve('../src/decorator/schema'),
-            ident
-          });
-          state.addSchema = ts.createPropertyAccess(ident, 'Schema');
-        }
+      const decls = [...(node.decorators || [])];
 
-        decls = ts.createNodeArray([
-          ts.createDecorator(ts.createCall(state.addSchema, undefined, ts.createNodeArray([]))),
-          ...(decls || [])
-        ]);
+      const comments = TransformUtil.describeByComments(state, node);
+
+      if (!schema) {
+        decls.unshift(TransformUtil.createDecorator(state, require.resolve('../src/decorator/schema'), 'Schema'));
+      }
+
+      if (comments.description) {
+        decls.push(TransformUtil.createDecorator(state, require.resolve('../src/decorator/common'), 'Describe', TransformUtil.fromLiteral({
+          title: comments.description
+        })));
       }
 
       const out = ts.updateClassDeclaration(
         ret,
-        decls,
+        ts.createNodeArray(decls),
         ret.modifiers,
         ret.name,
         ret.typeParameters,
@@ -186,9 +128,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     // tslint:disable-next-line:no-bitwise
   } else if (ts.isPropertyDeclaration(node) && !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static)) {
     if (state.inAuto) {
-      const ignore = TransformUtil.findAnyDecorator(node, { Ignore: new Set(['@travetto/schema']) }, state);
+      const ignore = TransformUtil.findAnyDecorator(state, node, { Ignore: new Set(['@travetto/schema']) });
       if (!ignore) {
-        return computeProperty(node, state) as any as T;
+        return computeProperty(state, node) as any as T;
       }
     }
     return node;
@@ -199,8 +141,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 export const SchemaTransformer = {
   transformer: TransformUtil.importingVisitor<AutoState>(() => ({
-    inAuto: false,
-    addField: undefined
+    inAuto: false
   }), visitNode),
   phase: 'before'
 };
