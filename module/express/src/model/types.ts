@@ -1,13 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { Class } from '@travetto/registry';
 
-export type Method = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+export type HeaderMap = { [key: string]: (string | (() => string)) };
+
+export type Method = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head';
 export type PathType = string | RegExp;
 export interface RequestHandler {
   filters?: Filter[];
   method?: Method;
   path?: PathType;
-  headers?: { [key: string]: (string | (() => string)) };
+  headers?: HeaderMap;
 
   class: Class;
   handler: Filter;

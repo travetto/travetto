@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
 
-import { PathType } from '../model';
+import { PathType, Method, HeaderMap } from '../model';
 import { ControllerRegistry } from '../service';
 
 const MIN = 1000 * 60;
@@ -19,38 +19,24 @@ export function Controller(path = '') {
   };
 }
 
-export function All(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandler({ method: 'all', path });
+function Handler(method: Method, path: PathType) {
+  return ControllerRegistry.registerPendingRequestHandler({ method, path });
 }
 
-export function Get(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandler({
-    method: 'get',
-    path,
-    headers: {
-      Expires: '-1',
-      'Cache-Control': 'max-age=0, no-cache'
-    }
-  });
+function HandlerWithHeaders(method: Method, headers: HeaderMap, path: PathType) {
+  return ControllerRegistry.registerPendingRequestHandler({ method, headers, path });
 }
 
-export function Put(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandler({ method: 'put', path });
-}
+export const All = (path: PathType) => Handler('all', path);
+export const Get = (path: PathType) => HandlerWithHeaders('get', { Expires: '-1', 'Cache-Control': 'max-age=0, no-cache' }, path);
+export const Post = (path: PathType) => Handler('post', path);
+export const Put = (path: PathType) => Handler('put', path);
+export const Patch = (path: PathType) => Handler('patch', path);
+export const Delete = (path: PathType) => Handler('delete', path);
+export const Head = (path: PathType) => Handler('head', path);
+export const Options = (path: PathType) => Handler('options', path);
 
-export function Delete(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandler({ method: 'delete', path });
-}
-
-export function Post(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandler({ method: 'post', path });
-}
-
-export function Patch(path: PathType) {
-  return ControllerRegistry.registerPendingRequestHandler({ method: 'patch', path });
-}
-
-export function Header(headers: { [key: string]: (string | (() => string)) }) {
+export function Header(headers: HeaderMap) {
   return ControllerRegistry.registerPendingRequestHandler({ headers });
 }
 
