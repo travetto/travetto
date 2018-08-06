@@ -15,7 +15,9 @@ const CONTROLLER_DECORATORS = {
   Controller: new Set(['@travetto/express'])
 };
 
-const DECS = require.resolve('../src/decorator/config');
+const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
+const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
+const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 
 function defineType(state: TransformerState, type: ts.Expression) {
   const isArray = ts.isArrayLiteralExpression(type);
@@ -32,19 +34,23 @@ function defineType(state: TransformerState, type: ts.Expression) {
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: TransformerState): T {
   if (ts.isMethodDeclaration(node) && (ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static) === 0) { // tslint:disable-line no-bitwise
-    // Factory for static methods
     const foundDec = TransformUtil.findAnyDecorator(state, node, ENDPOINT_DECORATORS);
     const decls = node.decorators;
 
     const mNode = (node as ts.MethodDeclaration);
 
-    if (foundDec) { // We have an endpoint
+    // Endpoint exists
+    if (foundDec) {
       const newDecls = [];
+
+      // Process returnType
 
       const comments = TransformUtil.describeByComments(state, mNode);
 
+      // Get return type from jsdoc comments
       let retType = comments.return && comments.return.type;
 
+      // If comments empty, read from method node
       if (!retType && mNode.type) {
         let mType = mNode.type;
         if (ts.isTypeReferenceNode(mType) && mType.typeName.getText() === 'Promise') {
@@ -57,24 +63,28 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         }
       }
 
+      // IF we have a winner, declare response type
       if (retType) {
-        const produces = TransformUtil.createDecorator(state, DECS, 'ResponseType', TransformUtil.fromLiteral({
+        const produces = TransformUtil.createDecorator(state, ENDPOINT_DEC_FILE, 'ResponseType', TransformUtil.fromLiteral({
           ...defineType(state, retType),
           title: comments.return && comments.return.description
         }));
         newDecls.push(produces);
       }
 
+      // If there are parameters to process
       if (comments.params) {
         for (const p of comments.params) {
+          // Handle body/request special as they are the input
           if (p.name === 'req.body' || p.name === 'req.query') {
-            const dec = TransformUtil.createDecorator(state, DECS, 'RequestType', TransformUtil.fromLiteral({
+            const dec = TransformUtil.createDecorator(state, ENDPOINT_DEC_FILE, 'RequestType', TransformUtil.fromLiteral({
               ...defineType(state, p.type!),
               title: p.description
             }));
             newDecls.push(dec);
           } else {
-            const dec = TransformUtil.createDecorator(state, DECS, 'Param', TransformUtil.fromLiteral({
+            // Handle as standard input param
+            const dec = TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Param', TransformUtil.fromLiteral({
               description: p.description,
               name: p.name,
               required: !p.optional,
@@ -85,8 +95,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         }
       }
 
+      // Handle description/title/summary w/e
       if (comments.description) {
-        newDecls.push(TransformUtil.createDecorator(state, DECS, 'Describe', TransformUtil.fromLiteral({
+        newDecls.push(TransformUtil.createDecorator(state, COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
           title: comments.description,
         })));
       }
@@ -110,13 +121,16 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       }
     }
     return node;
+
+    // Document controller level information
   } else if (ts.isClassDeclaration(node)) {
     const foundDec = TransformUtil.findAnyDecorator(state, node, CONTROLLER_DECORATORS);
     if (foundDec) {
+      // Read title/description/summary from jsdoc on class
       const comments = TransformUtil.describeByComments(state, node);
       if (comments.description) {
         const decls = [...(node.decorators || [])];
-        decls.push(TransformUtil.createDecorator(state, DECS, 'Describe', TransformUtil.fromLiteral({
+        decls.push(TransformUtil.createDecorator(state, COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
           title: comments.description
         })));
         node = ts.updateClassDeclaration(
