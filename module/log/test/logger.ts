@@ -1,8 +1,6 @@
-import * as fs from 'fs';
-import * as util from 'util';
 import * as assert from 'assert';
 
-import { Suite, Test, BeforeEach, BeforeAll } from '@travetto/test';
+import { Suite, Test, BeforeAll } from '@travetto/test';
 
 import { Logger } from '../src';
 import { LogEvent } from '../src/types';

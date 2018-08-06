@@ -91,7 +91,7 @@ class $Compiler {
     // Log transpiled content as needed
     const content = this.sourceManager.get(tsf)!;
 
-    if (/[\/\\]test[\/\\]/.test(tsf) && !tsf.includes(CompilerUtil.LIBRARY_PATH)) {
+    if (/[\/\\](test|e2e)[\/\\]/.test(tsf) && !tsf.includes(CompilerUtil.LIBRARY_PATH)) {
       console.trace(content);
     }
 

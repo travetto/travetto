@@ -1,6 +1,5 @@
 import { Controller, Get } from '../src';
 import { MockService } from './mock';
-import { Injectable, DependencyRegistry } from '@travetto/di';
 import { WithContext, Context } from '@travetto/context';
 
 @Controller('/simple2')
