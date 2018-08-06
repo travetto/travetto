@@ -1,4 +1,4 @@
-import { Schema, Integer, MaxLength, MinLength, Float } from '../src';
+import { Schema } from '../src';
 
 @Schema()
 class Address {

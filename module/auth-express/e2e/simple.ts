@@ -2,7 +2,7 @@ import { Inject } from '@travetto/di';
 import { Controller, Get, Redirect, Post } from '@travetto/express';
 import { AuthService } from '@travetto/auth';
 
-import { Authenticate, Authenticated, Unauthenticated } from '../../src';
+import { Authenticate, Authenticated, Unauthenticated } from '../src';
 import { FB_AUTH } from './conf';
 import { Request, Response } from 'express';
 
