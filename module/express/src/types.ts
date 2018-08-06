@@ -16,7 +16,7 @@ export interface ParamConfig {
   description?: string;
   required?: boolean;
   location: 'path' | 'query' | 'body';
-  type: 'number' | 'int' | 'float' | 'string' | 'date' | 'boolean' | Class;
+  type?: Class;
 }
 
 interface CoreConfig {
@@ -39,7 +39,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   method: Method;
   handler: Filter;
   handlerName: string;
-  params: ParamConfig[];
+  params: { [key: string]: ParamConfig };
   responseType?: EndpointIOType;
   requestType?: EndpointIOType;
 }

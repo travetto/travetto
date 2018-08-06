@@ -1,7 +1,7 @@
 import { DependencyRegistry } from '@travetto/di';
 import { MetadataRegistry, Class } from '@travetto/registry';
 
-import { EndpointConfig, Filter, ControllerConfig, ParamConfig } from '../types';
+import { EndpointConfig, Filter, ControllerConfig } from '../types';
 
 class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointConfig> {
 
@@ -29,7 +29,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       class: cls,
       filters: [],
       headers: {},
-      params: [],
+      params: {},
       handlerName: handler.name,
       handler
     } as EndpointConfig;
@@ -67,18 +67,10 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     srcConf.path = config.path || srcConf.path;
     srcConf.responseType = config.responseType || srcConf.responseType;
     srcConf.requestType = config.requestType || srcConf.requestType;
-    const pMap: { [key: string]: ParamConfig } = {};
+
     if (config.params) {
-      for (const p of srcConf.params) {
-        pMap[p.name] = p;
-      }
-      for (const p of (config.params || [])) {
-        if (p.name in pMap) {
-          Object.assign(pMap[p.name], p);
-        } else {
-          pMap[p.name] = p;
-          srcConf.params.push(p);
-        }
+      for (const p of Object.values(config.params)) {
+        srcConf.params[p.name] = { ...(srcConf.params[p.name] || {}), ...p };
       }
     }
 
