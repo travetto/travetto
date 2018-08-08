@@ -16,7 +16,7 @@ export function ModelController<T extends BaseModel>(path: string, cls: Class<T>
 
     if (!paths.has('get#/')) {
       Object.assign(
-        ControllerRegistry.getOrCreateRequestHandlerConfig(
+        ControllerRegistry.getOrCreateEndpointConfig(
           target, async function (this: Svc, req: Request) {
             return this.source.getAllByQuery(cls, JSON.parse(req.params.q || '{}'));
           }), {
@@ -30,7 +30,7 @@ export function ModelController<T extends BaseModel>(path: string, cls: Class<T>
 
     if (!paths.has('get#/:id')) {
       Object.assign(
-        ControllerRegistry.getOrCreateRequestHandlerConfig(
+        ControllerRegistry.getOrCreateEndpointConfig(
           target, async function (this: Svc, req: Request) {
             return this.source.getById(cls, req.params.id);
           }), {
@@ -44,7 +44,7 @@ export function ModelController<T extends BaseModel>(path: string, cls: Class<T>
 
     if (!paths.has('put#/')) {
       Object.assign(
-        ControllerRegistry.getOrCreateRequestHandlerConfig(
+        ControllerRegistry.getOrCreateEndpointConfig(
           target, async function (this: Svc, req: Request) {
             return this.source.update(cls, await getSchemaBody(req, cls));
           }), { method: 'put', path: '/' });
@@ -52,7 +52,7 @@ export function ModelController<T extends BaseModel>(path: string, cls: Class<T>
 
     if (!paths.has('post#/')) {
       Object.assign(
-        ControllerRegistry.getOrCreateRequestHandlerConfig(
+        ControllerRegistry.getOrCreateEndpointConfig(
           target, async function (this: Svc, req: Request) {
             return this.source.save(cls, await getSchemaBody(req, cls));
           }), { method: 'post', path: '/' });
@@ -60,7 +60,7 @@ export function ModelController<T extends BaseModel>(path: string, cls: Class<T>
 
     if (!paths.has('delete#/:id')) {
       Object.assign(
-        ControllerRegistry.getOrCreateRequestHandlerConfig(
+        ControllerRegistry.getOrCreateEndpointConfig(
           target, async function (this: Svc, req: Request) {
             return this.source.deleteById(cls, req.params.id);
           }), { method: 'delete', path: '/:id' });

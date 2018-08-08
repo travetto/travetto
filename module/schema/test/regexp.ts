@@ -7,7 +7,7 @@ export class RegExpTest {
 
   @Test()
   telephone() {
-    assert(CommonRegExp.telephone.test('555-555-5555'));
+    assert(CommonRegExp.telephone.test('555-555-5545'));
     assert(CommonRegExp.telephone.test('5555555555'));
 
     assert(!CommonRegExp.telephone.test('555-535-522d4'), 'Should not be a valid telephone number');

@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
 
 import { Env } from '@travetto/base';
@@ -49,7 +48,7 @@ export class SourceManager {
       if (this.logErrors(fileName, res.diagnostics)) {
         console.error(`Compiling ${fileName} failed`);
 
-        if (!Env.prod) { // If attempting to load an optional require
+        if (Env.dev) { // If attempting to load an optional require
           console.error(`Unable to import ${fileName}, stubbing out`);
           this.set(fileName, CompilerUtil.EMPTY_MODULE);
           return true;

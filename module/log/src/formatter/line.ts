@@ -1,7 +1,9 @@
 import * as util from 'util';
+
+import { Env, Stacktrace } from '@travetto/base';
+
 import { LogEvent } from '../types';
 import { stylize, LEVEL_STYLES } from './styles';
-import { Env, Stacktrace } from '@travetto/base';
 
 export interface LineFormatterOpts {
   timestamp?: boolean;

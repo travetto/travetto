@@ -1,4 +1,3 @@
-import * as ts from 'typescript';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 import { Env } from '@travetto/base/src/env';
 

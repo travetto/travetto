@@ -1,7 +1,4 @@
-/// <reference path="./types.d.ts" />
-
 import * as inlineCss from 'inline-css';
-import * as inky from 'inky';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as htmlEntities from 'html-entities';
@@ -15,6 +12,14 @@ import { Injectable } from '@travetto/di';
 
 import { TemplateContext } from './types';
 import { MailTemplateConfig } from './config';
+
+const inky: {
+  Inky: {
+    new(): {
+      releaseTheKraken(template: string): string
+    }
+  }
+} = require('inky');
 
 const sass = require('sass');
 

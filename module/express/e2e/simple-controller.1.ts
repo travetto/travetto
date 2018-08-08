@@ -1,6 +1,7 @@
+import { WithContext, Context } from '@travetto/context';
+
 import { Controller, Get } from '../src';
 import { MockService } from './mock';
-import { WithContext, Context } from '@travetto/context';
 
 @Controller('/simple2')
 export class Simple {

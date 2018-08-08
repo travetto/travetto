@@ -1,6 +1,10 @@
-import * as ts from 'typescript';
-import { dirname, sep, basename } from 'path';
+/// <reference path="../node_modules/typescript/lib/typescriptServices.d.ts" />
+
+import { dirname, sep } from 'path';
+
 import { AppInfo, Env, resolveFrameworkFile } from '@travetto/base';
+
+const stringHash = require('string-hash');
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
@@ -250,7 +254,7 @@ export class TransformUtil {
 
   static importFile(state: TransformerState, pth: string) {
     if (!state.newImports.has(pth)) {
-      const ident = ts.createIdentifier(`import_${basename(pth, '.ts')}`);
+      const ident = ts.createIdentifier(`i_${stringHash(pth)}`);
       const imprt = {
         path: pth,
         ident

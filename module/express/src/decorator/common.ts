@@ -1,5 +1,5 @@
-import { HeaderMap, EndpointConfig, ControllerConfig, DescribableConfig } from '@travetto/express/src/types';
-import { ControllerRegistry } from '@travetto/express/src/service';
+import { HeaderMap, EndpointConfig, ControllerConfig, DescribableConfig } from '../types';
+import { ControllerRegistry } from '../service';
 
 const MIN = 1000 * 60;
 const HOUR = MIN * 60;

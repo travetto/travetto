@@ -1,5 +1,3 @@
-import * as ts from 'typescript';
-
 import { Env } from '@travetto/base';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 
@@ -76,7 +74,8 @@ export const LoggerTransformer = {
   }, (ctx, node, state) => {
     const name = node.getSourceFile().fileName.toString();
     // Only apply to test files
-    if (name.includes('@travetto/test/src') || !name.includes('/test/')) { // Don't treat test logging as standard log messages
+    // Don't treat test logging as standard log messages
+    if (name.includes('travetto/test/src') || !name.includes('/test/') || name.includes('module/log/test')) {
       return visitNode(ctx, node, state);
     } else {
       return node;

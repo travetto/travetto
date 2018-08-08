@@ -3,6 +3,6 @@ export const init = {
   action: () => {
     const { Shutdown } = require('@travetto/base');
     const { Scheduler } = require('../src/service/schedule');
-    Shutdown.onShutdown('scheule.kill', () => Scheduler.kill());
+    Shutdown.onShutdown('schedule.kill', () => Scheduler.kill());
   }
 };

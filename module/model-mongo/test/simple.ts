@@ -1,11 +1,12 @@
-import { Model, ModelService, BaseModel, ModelSource, WhereClause } from '@travetto/model';
+import * as assert from 'assert';
+
+import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
-import { ModelMongoSource, ModelMongoConfig } from '../index';
-import { GenerateUtil } from '@travetto/schema/support/util.generate';
+import { GenerateUtil } from '@travetto/schema/extension/faker';
 
-import * as assert from 'assert';
+import { ModelMongoSource } from '../index';
 import { BaseMongoTest } from './base';
 
 @Schema()

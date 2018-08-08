@@ -40,13 +40,13 @@ export async function getSchemaBody<T>(req: Request, cls: Class<T>, view?: strin
 }
 
 export function SchemaBody<T>(cls: Class<T>, view?: string) {
-  return ControllerRegistry.filterAdder(async (req: Request, res: Response) => {
+  return ControllerRegistry.createFilterDecorator(async (req: Request, res: Response) => {
     req.body = await getSchemaBody(req, cls, view);
   });
 }
 
 export function SchemaQuery<T>(cls: Class<T>, view?: string) {
-  return ControllerRegistry.filterAdder(async (req: Request, res: Response) => {
+  return ControllerRegistry.createFilterDecorator(async (req: Request, res: Response) => {
 
     const o = getBound(cls, BindUtil.expandPaths(qs.parse(req.query)), view);
     if (SchemaRegistry.has(cls)) {

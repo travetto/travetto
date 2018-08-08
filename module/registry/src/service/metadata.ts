@@ -1,8 +1,7 @@
 import { Util } from '@travetto/base';
 
 import { Registry } from './registry';
-import { ChangeEvent } from '../source';
-import { Class } from '../model';
+import { Class, ChangeEvent } from '../types';
 
 function id(cls: string | Class) {
   return cls && typeof cls !== 'string' ? cls.__id : cls;

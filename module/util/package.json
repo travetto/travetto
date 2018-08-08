@@ -19,6 +19,8 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test"
+  },
   "version": "0.1.6"
 }

@@ -11,6 +11,9 @@
   "devDependencies": {
     "@travetto/test": "^0.1.6"
   },
+  "optionalExtensionDependencies": {
+    "passport": "^0.4.0"
+  },
   "homepage": "https://travetto.io",
   "keywords": [
     "authentication",
@@ -22,15 +25,11 @@
   "license": "MIT",
   "main": "index.ts",
   "name": "@travetto/auth-express",
-  "peerDependencies": {
-    "passport": "^0.4.0"
-  },
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
   "scripts": {
-    "test": "./node_modules/.bin/travetto-test",
-    "test:all": "npm test test/.*"
+    "test": "./node_modules/.bin/travetto-test"
   },
   "version": "0.1.15"
 }

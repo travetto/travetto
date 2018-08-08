@@ -11,6 +11,9 @@
   "devDependencies": {
     "@travetto/test": "^0.1.6"
   },
+  "optionalExtensionDependencies": {
+    "@travetto/express": "^0.1.11"
+  },
   "homepage": "https://travetto.io",
   "keywords": [
     "datastore",

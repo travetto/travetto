@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
 import * as assert from 'assert';
+
 import { ScanFs, BaseError, Env } from '@travetto/base';
 
 import { TestConfig, TestResult, SuiteConfig, SuiteResult } from '../../model';
@@ -248,7 +249,12 @@ export class TestExecutor {
       file = path.join(Env.cwd, file);
     }
 
-    require(file.replace(/[\\]/g, '/')); // Path to module
+    try {
+      require(file.replace(/[\\]/g, '/')); // Path to module
+    } catch (err) {
+      err.FATAL = true;
+      throw err;
+    }
 
     if (process.env.DEBUGGER) {
       await new Promise(t => setTimeout(t, 100));

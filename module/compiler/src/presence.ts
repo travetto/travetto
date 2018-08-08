@@ -1,5 +1,6 @@
-import { Watcher, ScanEntry, Env, ScanHandler, ScanApp } from '@travetto/base';
 import * as path from 'path';
+
+import { Watcher, ScanEntry, Env, ScanHandler, ScanApp } from '@travetto/base';
 
 export interface Listener {
   added(name: string): any;

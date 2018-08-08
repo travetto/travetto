@@ -17,7 +17,7 @@ const ASSERT_FN_OPERATOR: { [key: string]: string } = {
 };
 
 const OP_MAPPING: { [key: string]: string } = {
-  includes: '{expected} {state} include {actual}',
+  includes: '{actual} {state} include {expected}',
   test: '{expected} {state} match {actual}',
   throws: '{state} throw {expected}',
   doesNotThrow: '{state} not throw {expected}',
@@ -123,6 +123,11 @@ export class AssertUtil {
       assertion.message = args[1];
       assertion.expected = true;
       assertion.operator = '';
+    } else if (fn === 'includes') {
+      assertion.operator = fn || '';
+      assertion.message = args[2];
+      assertion.expected = args[0];
+      assertion.actual = args[1];
     } else {
       assertion.operator = fn || '';
       assertion.message = args[2];
@@ -164,7 +169,7 @@ export class AssertUtil {
         }
         assertion.message = assertion.message
           .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || (assertion as any)[k])
-          .replace(/not not/g, 'not'); // Handle double negatives
+          .replace(/not not/g, ''); // Handle double negatives
         assertion.error = e;
         e.message = assertion.message;
         if (e instanceof Error) {

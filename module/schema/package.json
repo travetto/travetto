@@ -8,12 +8,13 @@
     "@travetto/registry": "^0.1.5"
   },
   "description": "Data type registry for runtime validation, reflection and binding. ",
-  "peerDependencies": {
-    "@types/faker": "^4.1.2",
-    "faker": "^4.1.0"
-  },
   "devDependencies": {
     "@travetto/test": "^0.1.6"
+  },
+  "optionalExtensionDependencies": {
+    "@travetto/express": "^0.1.11",
+    "@types/faker": "^4.1.2",
+    "faker": "^4.1.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [

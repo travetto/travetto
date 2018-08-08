@@ -1,4 +1,4 @@
-import { Class } from '../model';
+import { Class } from '../types';
 
 class $PendingRegister {
   map = new Map<string, Class<any>[]>();
