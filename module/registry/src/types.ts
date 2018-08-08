@@ -1,3 +1,6 @@
+export interface Class<T = any> {
+  new(...args: any[]): T;
+}
 
 export interface ChangeEvent<T> {
   type: 'changed' | 'added' | 'removing';

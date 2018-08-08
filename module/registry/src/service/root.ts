@@ -1,6 +1,6 @@
 import { Registry } from './registry';
-import { CompilerClassSource, ChangeEvent } from '../source';
-import { Class } from '../model';
+import { CompilerClassSource } from '../source';
+import { Class, ChangeEvent } from '../types';
 
 class $RootRegistry extends Registry {
   constructor() {

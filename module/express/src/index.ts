@@ -1,6 +1,6 @@
 export * from './model';
 export * from './decorator';
-export * from './util';
+export * from './route-util';
 export * from './service';
 export * from './operator';
 export * from './types';

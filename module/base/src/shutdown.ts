@@ -35,14 +35,11 @@ export class Shutdown {
     this.listeners = [];
 
     try {
-      if (err) {
+      if (err && typeof err !== 'number') {
         Env.error(err);
       }
 
       this.listeners = [];
-      if (listeners.length) {
-        Env.error();
-      }
 
       const promises: Promise<any>[] = [];
 

@@ -1,5 +1,6 @@
-import { LogEvent, LogListener, LogLevel, LogLevels } from '../types';
 import { Env } from '@travetto/base';
+
+import { LogEvent, LogListener, LogLevel, LogLevels } from '../types';
 import { consoleOutput } from '../output';
 import { lineFormatter } from '../formatter';
 
@@ -10,17 +11,11 @@ class $Logger {
   private _level: number = Env.dev ? LogLevels.debug : LogLevels.info;
 
   _init() {
-    const override = process.env.LOG_CONSOLE === '1';
-    const quiet = !!process.env.QUIET || process.env.LOG_CONSOLE === '0';
-    const show = Env.test ? override : !quiet;
-
     // Base logger, for free
-    if (show) {
-      const formatter = lineFormatter({});
-      const output = consoleOutput({});
+    const formatter = lineFormatter({});
+    const output = consoleOutput({});
 
-      this.listen(e => output(formatter(e)));
-    }
+    this.listen(e => output(formatter(e)));
   }
 
   removeAll() {

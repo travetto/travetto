@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
+import * as util from 'util';
+
 import { AssetUtil, AssetFile } from '@travetto/asset';
 import { ControllerRegistry } from '@travetto/express';
-import { AssetExpressConfig } from '../config';
 import { Class } from '@travetto/registry';
-import * as util from 'util';
+
+import { AssetExpressConfig } from '../config';
 
 const match = require('mime-match');
 const multiparty = require('connect-multiparty');
@@ -37,7 +39,7 @@ export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
   const excludeTypes = readTypeArr(config.excludeTypes);
 
   return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-    const rh = ControllerRegistry.getOrCreateRequestHandlerConfig(target.constructor as Class, descriptor.value);
+    const rh = ControllerRegistry.getOrCreateEndpointConfig(target.constructor as Class, descriptor.value);
     const filt = async function (this: any, req: Request, res: Response) {
       await multipartAsync(req, res);
 

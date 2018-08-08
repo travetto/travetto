@@ -20,7 +20,7 @@ export class AuthPassportProvider<U> extends AuthProvider<U> {
         if (err) {
           reject(err);
         } else {
-          // Remove proflie fields from passport
+          // Remove profile fields from passport
           delete user._json;
           delete user._raw;
           delete user.provider;

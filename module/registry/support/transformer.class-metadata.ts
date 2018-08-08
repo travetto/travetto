@@ -1,5 +1,5 @@
-import * as ts from 'typescript';
 import * as path from 'path';
+
 import { Env } from '@travetto/base/src/env';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 

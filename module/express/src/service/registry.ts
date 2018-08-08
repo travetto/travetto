@@ -54,6 +54,16 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     config.filters!.unshift(fn);
   }
 
+  createFilterDecorator(fn: Filter) {
+    return (target: any, prop: string, descriptor: PropertyDescriptor) => {
+      if (prop) {
+        this.registerEndpointFilter(target.constructor, descriptor.value, fn);
+      } else {
+        this.registerControllerFilter(target, fn);
+      }
+    };
+  }
+
   mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>) {
     dest.headers = { ...dest.headers!, ...(src.headers || {}) };
     dest.filters = [...(dest.filters || []), ...(src.filters || [])];

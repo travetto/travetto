@@ -1,5 +1,6 @@
 import { Class } from '@travetto/registry';
-import { ModelRegistry, ModelOptions } from '../service';
+import { ModelRegistry } from '../service';
+import { ModelOptions } from '../types';
 
 export function Model(conf: Partial<ModelOptions<any>> = {}) {
   return function <T extends Class>(target: T) {

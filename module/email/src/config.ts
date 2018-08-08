@@ -33,7 +33,8 @@ export class MailTemplateConfig {
       .map(x => path.join(x, 'assets', 'email')));
     this.scssRoots = [
       ...this.assetRoots.map(x => path.join(x, 'scss')),
-      path.join(Env.cwd, 'node_modules', 'foundation-emails', 'scss')];
+      // Never assume direct access to node_modules
+      require.resolve('foundation-emails/gulpfile.js').replace('gulpfile.js', 'scss')];
   }
 
   async findFirst(pth: string) {

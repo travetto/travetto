@@ -4,7 +4,7 @@ import { ERR_UNAUTHENTICATED, ERR_AUTHENTICATED, ERR_FORBIDDEN, ERR_INVALID_CRED
 
 export function Authenticate(provider: symbol, ...providers: symbol[]) {
   const computed = [provider, ...providers];
-  return ControllerRegistry.filterAdder(async (req, res) => {
+  return ControllerRegistry.createFilterDecorator(async (req, res) => {
     try {
       await req.auth.login(computed);
     } catch (e) {
@@ -36,14 +36,14 @@ export async function requireAuth(config: { include: string[], exclude: string[]
 }
 
 export function Authenticated(include: string[] = [], exclude: string[] = []) {
-  return ControllerRegistry.filterAdder(requireAuth.bind(null, {
+  return ControllerRegistry.createFilterDecorator(requireAuth.bind(null, {
     include: include.map(x => x.toLowerCase()),
     exclude: exclude.map(x => x.toLowerCase())
   }));
 }
 
 export function Unauthenticated() {
-  return ControllerRegistry.filterAdder(function (req: Request) {
+  return ControllerRegistry.createFilterDecorator((req: Request) => {
     if (!req.auth.unauthenticated) {
       throw new AppError(ERR_UNAUTHENTICATED, 401);
     }

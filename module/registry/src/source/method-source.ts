@@ -1,6 +1,6 @@
-import { ChangeSource, ChangeEvent } from './types';
-import { Class } from '../model';
 import { EventEmitter } from 'events';
+
+import { Class, ChangeSource, ChangeEvent } from '../types';
 
 export class MethodSource implements ChangeSource<[Class, Function]> {
 

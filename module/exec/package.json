@@ -16,6 +16,9 @@
     "travetto",
     "typescript"
   ],
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test"
+  },
   "license": "MIT",
   "main": "src/lib/",
   "name": "@travetto/exec",

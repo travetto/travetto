@@ -1,9 +1,8 @@
-import { CustomTransformers } from 'typescript';
 import { ScanApp } from '@travetto/base';
 
 export class TransformerManager {
 
-  transformers: CustomTransformers = {};
+  transformers: ts.CustomTransformers = {};
 
   constructor(private cwd: string) { }
 

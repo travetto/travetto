@@ -1,4 +1,3 @@
-import * as util from 'util';
 import { LogEvent } from '../types';
 
 export interface JSONFormatterOpts { }

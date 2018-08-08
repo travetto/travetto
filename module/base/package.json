@@ -31,7 +31,8 @@
     "url": "https://github.com/travetto/travetto.git"
   },
   "scripts": {
-    "postinstall": "./bin/travetto-clean.js"
+    "postinstall": "./bin/travetto-clean.js",
+    "test": "./node_modules/.bin/travetto-test"
   },
   "version": "0.1.4"
 }

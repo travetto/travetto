@@ -1,8 +1,9 @@
 export const init = {
   action: async () => {
     const compiler = require('../src/compiler').Compiler;
-    await new Promise(res => setTimeout(res, 0));
-    return compiler.init();
+    await new Promise(r => setTimeout(r, 0));
+    const res = compiler.init();
+    return res;
   },
   priority: 1
 };

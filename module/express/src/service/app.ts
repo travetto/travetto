@@ -5,8 +5,8 @@ import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
 
 import { ExpressConfig } from '../config';
-import { RouteUtil } from '../util';
-import { ControllerConfig } from '../service';
+import { RouteUtil } from '../route-util';
+import { ControllerConfig } from '../types';
 import { ControllerRegistry } from './registry';
 import { ExpressOperator } from './operator';
 

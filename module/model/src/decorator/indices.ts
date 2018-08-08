@@ -1,5 +1,6 @@
 import { Class } from '@travetto/registry';
-import { ModelRegistry, IndexConfig } from '../service';
+import { ModelRegistry } from '../service';
+import { IndexConfig } from '../types';
 
 function createIndex<T extends Class>(target: T, config: IndexConfig<T>) {
   ModelRegistry.register(target, { indicies: [config] });

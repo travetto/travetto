@@ -19,6 +19,9 @@
   "devDependencies": {
     "@travetto/test": "^0.1.6"
   },
+  "optionalExtensionDependencies": {
+    "@travetto/context": "^0.1.1"
+  },
   "description": "Declarative wrapper around express with support for the dependency injection module.",
   "homepage": "https://travetto.io",
   "keywords": [
@@ -31,12 +34,11 @@
   "license": "MIT",
   "main": "index.ts",
   "name": "@travetto/express",
-  "peerDependencies": {
-    "@travetto/context": "^0.x.x"
-  },
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test"
+  },
   "version": "0.1.11"
 }

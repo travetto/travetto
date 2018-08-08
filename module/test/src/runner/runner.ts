@@ -107,10 +107,16 @@ export class Runner {
         exe.send(Events.RUN, { file });
 
         const { error } = await complete;
-
-        errors.push((ExecUtil.deserializeError(error)));
+        const deserialized = ExecUtil.deserializeError(error);
+        errors.push(deserialized);
       }
     );
+
+    for (const err of errors) {
+      if (err && 'FATAL' in err) {
+        throw err;
+      }
+    }
 
     if (consumer.summarize) {
       return consumer.summarize();
@@ -130,9 +136,9 @@ export class Runner {
         case 'watch': return await watch();
         default: return await this.runFiles();
       }
-
     } catch (e) {
       console.error(e);
+      throw e;
     }
   }
 }

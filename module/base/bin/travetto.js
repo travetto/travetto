@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
+global.INIT_TIME = Date.now();
+
 const fs = require('fs');
 const path = require('path');
-const ts = require('typescript');
 const Module = require('module');
+const ts = global.ts = require('typescript');
 
 //Simple bootstrap to load compiler
 const { Env } = require('../src/env');
@@ -44,7 +46,9 @@ require.extensions['.ts'] = function load(m, tsf) {
   } else {
     content = AppCache.readEntry(name);
   }
-  return m._compile(content, tsf.replace(/\.ts$/, '.js'));
+
+  const r = m._compile(content, tsf.replace(/\.ts$/, '.js'));
+  return r;
 };
 
 const { PhaseManager } = require('../src/phase');

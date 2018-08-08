@@ -1,3 +1,5 @@
+import * as os from 'os';
+
 import { LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
 import { ConcurrentPool, IdleManager } from '@travetto/pool';
 import { PhaseManager, Env } from '@travetto/base';
@@ -66,7 +68,6 @@ export async function server() {
 
       // Init Compiler
       Compiler = require('@travetto/compiler').Compiler;
-      Compiler.workingSets = ['!'];
 
       // Initialize
       await mgr.run();
@@ -93,7 +94,6 @@ export async function server() {
       }
 
       // Reload runner
-      Compiler.workingSets = [data.file!];
       Compiler.reset();
       const { Runner } = require('./runner');
 
@@ -125,6 +125,7 @@ export function client() {
     await worker.listenOnce(Events.INIT_COMPLETE);
     return worker;
   }, {
-      idleTimeoutMillis: 10000
+      idleTimeoutMillis: 10000,
+      min: os.cpus().length / 2
     });
 }

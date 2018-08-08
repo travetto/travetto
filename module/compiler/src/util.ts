@@ -1,4 +1,3 @@
-import * as ts from 'typescript';
 import { Env } from '@travetto/base';
 
 export class CompilerUtil {
@@ -16,7 +15,7 @@ export class CompilerUtil {
       }, `${dir}/${name}`
     );
     out.options.importHelpers = true;
-    out.options.noEmitOnError = Env.prod;
+    out.options.noEmitOnError = !Env.dev;
     out.options.moduleResolution = ts.ModuleResolutionKind.NodeJs;
 
     return out.options;
