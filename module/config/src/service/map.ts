@@ -4,33 +4,56 @@ type Prim = number | string | boolean | null;
 
 type Nested = { [key: string]: Prim | Nested | Nested[] };
 
-function coerce(a: any, val: any): any {
-  if (a === 'null' && typeof val !== 'string') {
-    return null;
-  }
-
-  if (val === null || val === undefined) {
-    return a;
-  }
-
-  if (Util.isSimple(val)) {
-    switch (typeof val) {
-      case 'string': return `${a}`;
-      case 'number': return `${a}`.indexOf('.') >= 0 ? parseFloat(`${a}`) : parseInt(`${a}`, 10);
-      case 'boolean': return (typeof a === 'string' && a === 'true') || !!a;
-      default:
-        throw new Error(`Unknown type ${typeof val}`);
-    }
-  }
-
-  if (Array.isArray(val)) {
-    return `${a}`.split(',').map(x => x.trim()).map(x => coerce(x, val[0]));
-  }
-}
-
 const ENV_SEP = '_';
 
 export class ConfigMap {
+
+  static breakDownKeys(data: Nested) {
+    for (const key of Object.keys(data)) {
+      if (Util.isPlainObject(data[key])) {
+        this.breakDownKeys(data[key] as Nested);
+      }
+      if (key.includes('.')) {
+        const parts = key.split('.');
+        const top = parts[0];
+        const subTop = {};
+        let sub: any = subTop;
+
+        while (parts.length > 1) {
+          sub = (sub[parts.shift()!] = {});
+        }
+        sub[parts[0]] = data[key];
+        data[top] = data[top] || {};
+        delete data[key];
+        Util.deepAssign(data, subTop);
+      }
+    }
+    return data;
+  }
+
+  static coerce(a: any, val: any): any {
+    if (a === 'null' && typeof val !== 'string') {
+      return null;
+    }
+
+    if (val === null || val === undefined) {
+      return a;
+    }
+
+    if (Util.isSimple(val)) {
+      switch (typeof val) {
+        case 'string': return `${a}`;
+        case 'number': return `${a}`.indexOf('.') >= 0 ? parseFloat(`${a}`) : parseInt(`${a}`, 10);
+        case 'boolean': return (typeof a === 'string' && a === 'true') || !!a;
+        default:
+          throw new Error(`Unknown type ${typeof val}`);
+      }
+    }
+
+    if (Array.isArray(val)) {
+      return `${a}`.split(',').map(x => x.trim()).map(x => this.coerce(x, val[0]));
+    }
+  }
 
   static getKeyName(key: string, data: { [key: string]: any }) {
     key = key.trim();
@@ -63,7 +86,7 @@ export class ConfigMap {
     }
 
     key = this.getKeyName(key, data) || key;
-    data[key] = coerce(value, data[key]);
+    data[key] = ConfigMap.coerce(value, data[key]);
 
     return true;
   }
@@ -76,7 +99,7 @@ export class ConfigMap {
   }
 
   putAll(data: Nested) {
-    Util.deepAssign(this.storage, data, 'coerce');
+    Util.deepAssign(this.storage, ConfigMap.breakDownKeys(data), 'coerce');
   }
 
   bindTo(obj: any, key: string) {
@@ -84,7 +107,8 @@ export class ConfigMap {
     let sub: any = this.storage;
 
     while (keys.length && sub) {
-      sub = sub[keys.shift()!];
+      const next = keys.shift()!;
+      sub = sub[next];
     }
 
     if (sub) {

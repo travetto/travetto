@@ -36,22 +36,24 @@ export class ConfigLoader {
       console.info(`Initializing: ${Env.profiles.join(',')}`);
     }
 
+    const YAML_RE = /.ya?ml$/;
+
     // Load all namespaces from core
-    const files = ScanApp.findFiles('.yml',
+    const files = ScanApp.findFiles(YAML_RE,
       x => /config\/[^/]+.yml$/.test(x))
       .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }));
 
     for (const file of files) {
-      const ns = path.basename(file.name, '.yml');
+      const ns = path.basename(file.name).replace(YAML_RE, '');
       yaml.safeLoadAll(file.data, doc => this.map.putAll({ [ns]: doc }));
     }
 
     // Handle environmental loads
     if (Env.profiles.length) {
-      const envFiles = ScanApp.findFiles('.yml', x => x.startsWith('profile/'))
+      const envFiles = ScanApp.findFiles(YAML_RE, x => x.startsWith('profile/'))
         .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }))
         .map(x => {
-          const tested = path.basename(x.name, '.yml');
+          const tested = path.basename(x.name).replace(YAML_RE, '');
           const found = Env.is(tested);
           return { name: tested, found, data: x.data };
         })

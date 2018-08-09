@@ -50,7 +50,8 @@ export class ClientGenerate {
       '--remove-operation-id-prefix',
       '-l', this.config.format,
       '-o', this.config.output,
-      '-i', specFile
+      '-i', specFile,
+      ...(this.config.formatOptions ? ['--additional-properties', this.config.formatOptions] : [])
     ]);
 
     await prom;
