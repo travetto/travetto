@@ -59,6 +59,7 @@ export class DockerContainer {
   private tempVolumes: { [key: string]: string } = {};
   private deleteOnFinish = false;
 
+  private entryPoint: string;
   public runAway: boolean = false;
   public evict: boolean = false;
   public interactive: boolean = false;
@@ -138,6 +139,11 @@ export class DockerContainer {
     return this;
   }
 
+  setEntryPoint(point: string) {
+    this.entryPoint = point;
+    return this;
+  }
+
   getFlags(extra?: string[]) {
     const flags = [];
     if (this.workingDir) {
@@ -151,6 +157,9 @@ export class DockerContainer {
     }
     if (this.tty) {
       flags.push('-t');
+    }
+    if (this.entryPoint) {
+      flags.push('--entrypoint', this.entryPoint);
     }
     for (const k of Object.keys(this.volumes)) {
       flags.push('-v', `${k}:${this.volumes[k]}`);

@@ -4,7 +4,15 @@ travetto: Schema
 This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
 
 ## Registration
-The registry's schema information is defined by `typescript` AST and only applies to classes registered as `@Schema`s. The module utilizes AST transformations to collect schema information, and facilitate the registration process without user intervention.
+The registry's schema information is defined by `typescript` AST and only applies to classes registered with the `@Schema` decoration. 
+
+### Classes
+The module utilizes AST transformations to collect schema information, and facilitate the registration process without user intervention. The class can also be described using providing a:
+* `title` - definition of the schema
+* `description` - detailed description of the schema
+* `examples` - A set of examples as JSON or YAML
+
+The `title` will be picked up from the [`JSDoc`](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [`@Describe`](./src/decorator/common) decorator.
 
 ```typescript
 @Schema()
@@ -34,7 +42,8 @@ User:
       allowedValues: ["pizza", "burrito", "salad" ]
 ```
 
-This provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
+### Fields
+This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
 
  * `@Field` defines a field that will be serialized, generally used in conjunction with ```@Schema(false)``` which disables the auto registration.
  * `@Require` defines a that field should be required
@@ -53,6 +62,12 @@ This provides a powerful base for data binding and validation at runtime.  Addit
  * `@Float` ensures number passed in allows fractional values
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated.
+
+Just like the class, all fields can be defined with
+* `description` - detailed description of the schema
+* `examples` - A set of examples as JSON or YAML
+
+And similarly, the `description` will be picked up from the [`JSDoc`](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [`@Describe`](./src/decorator/common) decorator.
 
 ## Binding/Validation
 At runtime, once a schema is registered, a programmer can utilize this structure to perform specific operations. Specifically binding and validation. 

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { Controller, Get, Post, Put, Delete } from '@travetto/express';
-import { User } from '@travetto/swagger/test/model';
+import { User } from './model';
 
 /**
  * User oriented operations
@@ -11,7 +11,7 @@ export class UserController {
 
   /**
    * Get user by full name
-   * @param name {string} User name
+   * @param name {String} User name
    * @returns A user by name
    */
   @Get('/:name')
@@ -21,7 +21,7 @@ export class UserController {
 
   /**
  * Get user by age
- * @param name {Number} User age
+ * @param age {Number} User age
  * @returns Users by age
  */
   @Get('/age/:age')
@@ -48,7 +48,7 @@ export class UserController {
 
   /**
    * Update user by id
-   * @param id {number} User id
+   * @param id {Number} User id
    * @param req.body {User} User to update
    */
   @Put('/:id')
@@ -57,7 +57,7 @@ export class UserController {
   }
   /**
    * Delete user by id
-   * @param id {number} User id
+   * @param id {Number} User id
    */
   @Delete('/:id')
   async removeUser(req: Request, res: Response): Promise<void> {

@@ -8,6 +8,29 @@ const DEFINITION = '#/definitions';
 
 export class SwaggerUtil {
 
+  static getType(cls: Class, schemas: { [key: string]: Schema }) {
+    const out: { [key: string]: any } = {};
+    // Handle nested types
+    if (SchemaRegistry.has(cls)) {
+      out.$ref = `${DEFINITION}/${this.processSchema(cls, schemas)}`;
+      out.type = 'object';
+    } else {
+      switch (cls) {
+        case String: out.type = 'string'; break;
+        case Number: out.type = 'number'; break;
+        case Date:
+          out.format = 'date-time';
+          out.type = 'string';
+          break;
+        case Boolean: out.type = 'boolean'; break;
+        default:
+          out.type = 'object';
+          break;
+      }
+    }
+    return out;
+  }
+
   static processSchema(type: string | Class | undefined, schemas: { [key: string]: Schema }) {
     if (type === undefined || typeof type === 'string') {
       return undefined;
@@ -22,26 +45,7 @@ export class SwaggerUtil {
 
         for (const fieldName of def.fields) {
           const field = def.schema[fieldName];
-          let prop: Schema = {};
-
-          // Handle nested types
-          if (SchemaRegistry.has(field.type)) {
-            prop.$ref = `${DEFINITION}/${this.processSchema(field.type, schemas)}`;
-            prop.type = 'object';
-          } else {
-            switch (field.type) {
-              case String: prop.type = 'string'; break;
-              case Number: prop.type = 'number'; break;
-              case Date:
-                prop.format = 'date-time';
-                prop.type = 'string';
-                break;
-              case Boolean: prop.type = 'boolean'; break;
-              default:
-                prop.type = 'object';
-                break;
-            }
-          }
+          let prop: Schema = this.getType(field.type, schemas);
 
           if (field.examples) {
             prop.example = field.examples;
@@ -134,19 +138,20 @@ export class SwaggerUtil {
           const ref: Schema = { $ref: `${DEFINITION}/${epConsumes}` };
           epParams.push({
             in: 'body',
+            name: 'body',
             description: definitions[epConsumes!].description || '',
             schema: epCons!.wrapper !== Array ? ref : { type: 'array', items: ref }
           } as Parameter);
           consumes.push(MimeType.JSON);
         }
 
-        for (const param of (ep.params || [])) {
+        for (const param of Object.values(ep.params)) {
           const epParam: Parameter = {
             in: param.location,
             name: param.name,
             description: param.description,
             required: param.required,
-            type: param.type,
+            ...(param.type ? this.getType(param.type, definitions) : {}),
           };
           epParams.push(epParam);
         }
@@ -162,7 +167,7 @@ export class SwaggerUtil {
             responses,
             summary: ep.title,
             description: ep.description || ep.title,
-            operationId: ep.handlerName,
+            operationId: `${ep.class.name}.${ep.handlerName}`,
             parameters: epParams
           } as Operation
         };

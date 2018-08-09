@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "@travetto/express": "^0.1.11",
+    "@travetto/exec": "^0.1.5",
     "@travetto/schema": "^0.1.8"
   },
   "description": "Swagger integration support for the travetto framework",

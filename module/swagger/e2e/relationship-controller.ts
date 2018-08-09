@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { Controller, Get, Post, Put, Delete } from '@travetto/express';
-import { User } from '@travetto/swagger/test/model';
+import { User } from './model';
 
 /**
  * Relationships for the win
@@ -11,7 +11,7 @@ export class RelationshipController {
 
   /**
    * Get user by name
-   * @param name {string} User name
+   * @param name {String} User name
    * @returns A user by name
    */
   @Get('/:name')
@@ -38,7 +38,7 @@ export class RelationshipController {
 
   /**
    * Update user by id
-   * @param id {number} User id
+   * @param id {Number} User id
    * @param req.body {User} User to update
    */
   @Put('/:id')
@@ -47,7 +47,7 @@ export class RelationshipController {
   }
   /**
    * Delete user by id
-   * @param id {number} User id
+   * @param id {Number} User id
    */
   @Delete('/:id')
   async removeUser(req: Request, res: Response): Promise<void> {
