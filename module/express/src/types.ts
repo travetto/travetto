@@ -36,6 +36,7 @@ export interface EndpointIOType {
 export interface EndpointConfig extends CoreConfig, DescribableConfig {
   id: string;
   path: PathType;
+  priority: number;
   method: Method;
   handler: Filter;
   handlerName: string;

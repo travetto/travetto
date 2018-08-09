@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 import { Get } from '@travetto/express';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { Injectable, InjectableFactory } from '@travetto/di';
@@ -95,7 +97,7 @@ class Config {
 export class SimpleModelController {
   constructor(public source: ModelService) { }
 
-  @Get('/')
+  @Get('/fun')
   getById(req: Request) {
     return {
       message: 'Custom get all by'
