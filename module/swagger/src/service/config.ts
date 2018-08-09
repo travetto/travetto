@@ -26,7 +26,8 @@ export class ApiHostConfig {
 export class ApiClientConfig {
   codeGenImage: string = 'swaggerapi/swagger-codegen-cli';
   output: string = './api-client';
-  format: string = 'typescript-angular';
+  format?: string = '';
+  formatOptions?: string = '';
 
   postConstruct() {
     this.output = path.resolve(this.output);

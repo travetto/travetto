@@ -167,7 +167,7 @@ export class SwaggerUtil {
             responses,
             summary: ep.title,
             description: ep.description || ep.title,
-            operationId: `${ep.class.name}.${ep.handlerName}`,
+            operationId: `${ep.class.name}_${ep.handlerName}`,
             parameters: epParams
           } as Operation
         };
