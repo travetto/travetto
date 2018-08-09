@@ -18,4 +18,6 @@ export class User {
   dob: Date;
   height: number;
   aliases: string[];
+  weight: number;
+  networth: number;
 }

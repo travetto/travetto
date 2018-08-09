@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 import { Config } from '@travetto/config';
 import { AppInfo } from '@travetto/base';
 
@@ -16,6 +18,17 @@ export class ApiInfoConfig {
 @Config('api.host')
 export class ApiHostConfig {
   basePath: string = '/';
-  host?: string;
+  host?: string = 'localhost';
   swagger = '2.0';
+}
+
+@Config('api.client')
+export class ApiClientConfig {
+  codeGenImage: string = 'swaggerapi/swagger-codegen-cli';
+  output: string = './api-client';
+  format: string = 'typescript-angular';
+
+  postConstruct() {
+    this.output = path.resolve(this.output);
+  }
 }

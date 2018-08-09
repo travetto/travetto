@@ -6,7 +6,7 @@ function Endpoint(method: Method, path: PathType = '/') {
     const params: { [key: string]: ParamConfig } = {};
     if (typeof path === 'string' && path.includes(':')) {
       path.replace(/:([A-Za-z0-9_]+)/, (a, name) => {
-        params[name] = { name, location: 'path' };
+        params[name] = { name, location: 'path', required: true };
         return a;
       });
     }
