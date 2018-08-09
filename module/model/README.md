@@ -106,7 +106,7 @@ this.service.getAllByQuery(User, {
 This would find all users who are over 35 and that have the `contact` field specified. 
 
 ## Extensions
-Integration with other modules can be supported by extensions.  The dependencies are `peerDependencies` and must be installed directly if you want to use them:
+Integration with other modules can be supported by extensions.  The dependencies are `optionalExtensionDependencies` and must be installed directly if you want to use them:
 
 ### Express
 [`Express`](https://github.com/travetto/express) support with the `@ModelController` for exposing common RESTful patterns for routes.

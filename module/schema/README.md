@@ -155,7 +155,7 @@ errors:
 ```
 
 ## Extensions
-Integration with other modules can be supported by extensions.  The dependencies are `peerDependencies` and must be installed directly if you want to use them:
+Integration with other modules can be supported by extensions.  The dependencies are `optionalExtensionDependencies` and must be installed directly if you want to use them:
 
 ### Express
 The module provides high level access for [`Express`](https://github.com/travetto/express) support, via decorators, for validating and typing request bodies.  

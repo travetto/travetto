@@ -1,5 +1,4 @@
 ---
 injectable:
-   '@travetto/express': 
-    - Controller
-    - ModelController
+ '@travetto/express': 
+  - Controller

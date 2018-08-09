@@ -62,13 +62,13 @@ export const Param = (param: ParamConfig) => {
 };
 
 export const PathParam = (param: Partial<ParamConfig>) => {
-  return Param({ type: String, location: 'path', ...(param as ParamConfig) });
+  return Param({ type: String, location: 'path', required: true, ...(param as ParamConfig) });
 };
 
 export const QueryParam = (param: Partial<ParamConfig>) => {
-  return Param({ type: String, location: 'query', ...(param as ParamConfig) });
+  return Param({ type: String, location: 'query', required: false, ...(param as ParamConfig) });
 };
 
 export const BodyParam = (param: Partial<ParamConfig>) => {
-  return Param({ type: Object, location: 'body', ...(param as ParamConfig) });
+  return Param({ type: Object, location: 'body', required: true, ...(param as ParamConfig) });
 };

@@ -5,3 +5,7 @@ schema:
 registry:
   schema:
     './src/decorator/model.ts': Model
+
+injectable:
+  '@travetto/model': 
+    - ModelController

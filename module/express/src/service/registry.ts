@@ -28,6 +28,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       method: 'all',
       class: cls,
       filters: [],
+      priority: controllerConf.endpoints!.length, // Lowest is first
       headers: {},
       params: {},
       handlerName: handler.name,
@@ -103,7 +104,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       ep.id = `${ep.method}#${final.basePath}/${ep.path === undefined ? '' : (typeof ep.path === 'string' ? ep.path : ep.path.source)}`;
       found.set(ep.id, ep);
     }
-    final.endpoints = Array.from(found.values());
+    final.endpoints = Array.from(found.values()).sort((a, b) => b.priority - a.priority); // Run in reverse
 
     if (this.has(final.basePath)) {
       console.debug('Reloading controller', cls.name, final.basePath);
