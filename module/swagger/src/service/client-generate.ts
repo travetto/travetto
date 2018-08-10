@@ -33,10 +33,8 @@ export class ClientGenerate {
       await this.codeGenCli.create();
       await this.codeGenCli.start();
 
-      setImmediate(() => {
-        ControllerRegistry.on(() => setImmediate(() => this.generate(), 1));
-        SchemaRegistry.on(() => setImmediate(() => this.generate(), 1));
-      }, 1000);
+      ControllerRegistry.on(() => setImmediate(() => this.generate(), 1));
+      SchemaRegistry.on(() => setImmediate(() => this.generate(), 1));
     }
   }
 

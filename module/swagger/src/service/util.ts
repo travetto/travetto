@@ -150,13 +150,22 @@ export class SwaggerUtil {
             in: param.location,
             name: param.name,
             description: param.description,
-            required: param.required,
-            ...(param.type ? this.getType(param.type, definitions) : {}),
+            required: !!param.required,
           };
+          if (param.type) {
+            const type = this.getType(param.type!, definitions);
+            if (type.$ref) {
+              // Not supported yet
+              // epParam.schema = type;
+            } else {
+              Object.assign(epParam, type);
+            }
+          }
+
           epParams.push(epParam);
         }
 
-        const epPath = !ep.path ? '/' : typeof ep.path === 'string' ? ep.path : ep.path.source;
+        const epPath = !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source;
 
         paths[epPath] = {
           ...paths[epPath] || {},

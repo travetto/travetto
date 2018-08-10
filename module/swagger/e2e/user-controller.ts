@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 
 import { Controller, Get, Post, Put, Delete } from '@travetto/express';
-import { User } from './model';
+import { SchemaQuery, SchemaBody } from '@travetto/schema/extension/express';
+
+import { User, UserSearch } from './model';
 
 /**
- * User oriented operations
+ * User oriented operations.
  */
 @Controller('/user')
 export class UserController {
@@ -20,10 +22,10 @@ export class UserController {
   }
 
   /**
- * Get user by age
- * @param age {Number} User age
- * @returns Users by age
- */
+   * Get user by age
+   * @param age {Number} User age
+   * @returns Users by age
+   */
   @Get('/age/:age')
   async getByAge(req: Request, res: Response): Promise<User[]> {
     return undefined as any;
@@ -34,14 +36,13 @@ export class UserController {
    * @returns A list of users
    */
   @Get('/')
+  @SchemaQuery(UserSearch)
   async getAll(req: Request, res: Response): Promise<User[]> {
     return undefined as any;
   }
 
-  /**
-   * @param req.body {User}
-   */
   @Post('/')
+  @SchemaBody(User)
   async createUser(req: Request, res: Response): Promise<User> {
     return undefined as any;
   }
@@ -49,9 +50,9 @@ export class UserController {
   /**
    * Update user by id
    * @param id {Number} User id
-   * @param req.body {User} User to update
    */
   @Put('/:id')
+  @SchemaBody(User)
   async updateUser(req: Request, res: Response): Promise<void> {
 
   }

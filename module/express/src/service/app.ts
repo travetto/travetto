@@ -70,7 +70,7 @@ export class ExpressApp {
   }
 
   async unregisterController(config: ControllerConfig) {
-    console.debug('Unregistering', config.class.__id, config.basePath);
+    console.debug('Un-registering', config.class.__id, config.basePath);
     this.app._router.stack = RouteUtil.removeAllRoutes(this.app._router.stack, config);
   }
 

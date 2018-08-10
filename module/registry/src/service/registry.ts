@@ -7,7 +7,7 @@ export abstract class Registry implements ChangeSource<Class> {
   protected resolved: boolean;
   protected initialized: Promise<any>;
   protected events = new EventEmitter();
-  protected descendents: Registry[] = [];
+  protected descendants: Registry[] = [];
   protected parents: ChangeSource<Class>[] = [];
 
   constructor(...parents: ChangeSource<Class>[]) {
@@ -17,7 +17,7 @@ export abstract class Registry implements ChangeSource<Class> {
       for (const parent of this.parents) {
         this.listen(parent);
         if (parent instanceof Registry) {
-          parent.descendents.push(this);
+          parent.descendants.push(this);
         }
       }
     }
@@ -37,7 +37,7 @@ export abstract class Registry implements ChangeSource<Class> {
         }
       }
 
-      await Promise.all(this.descendents.map(x => x.init()));
+      await Promise.all(this.descendants.map(x => x.init()));
 
       console.debug('Initialized', this.constructor.__id);
     } catch (e) {
@@ -126,7 +126,7 @@ export abstract class Registry implements ChangeSource<Class> {
 
   reset() {
     this.onReset();
-    for (const des of this.descendents) {
+    for (const des of this.descendants) {
       des.reset();
     }
   }
