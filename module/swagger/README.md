@@ -1,10 +1,10 @@
 travetto: Swagger
 ===
-The module is provides a [`swagger`]() v2 representation of the API metadata provided via the [`Express`](https://github.com/travetto/express) and [`Schema`](https://github.com/travetto/schema) modules.
+The module is provides a [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) v2 representation of the API metadata provided via the [`Express`](https://github.com/travetto/express) and [`Schema`](https://github.com/travetto/schema) modules.
 
 
 ## Configuration
-By installing the dependency, the [`swagger`]() endpoint is automatically generated and exposed at the root of the application as `/swagger.json`.  
+By installing the dependency, the [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) endpoint is automatically generated and exposed at the root of the application as `/swagger.json`.  
 
 All of the high level configurations can be found in the following structure:
 
@@ -23,7 +23,12 @@ api:
     basePath: <basePath, defaults to '/'>
     host?: <host name>
     swagger: <swagger version, only 2.0 is supported>
+  client:
+    codeGenImage: swaggerapi/swagger-codegen-cli
+    output?: Codegen ouptut directory
+    format?: Codegen language format
+    formatOptions?: Options to pass to the codegen tool
 ```
 
 ## Client Generation
-In addition to the [`swagger`]() JSON file generation, the module also supports generating a client output as the schema changes.
+In addition to the [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) JSON file generation, the module also supports generating a client output as the schema changes.  
