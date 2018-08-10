@@ -19,5 +19,4 @@ export class User {
   height: number;
   aliases: string[];
   weight: number;
-  networth: number;
 }

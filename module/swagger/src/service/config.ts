@@ -25,7 +25,7 @@ export class ApiHostConfig {
 @Config('api.client')
 export class ApiClientConfig {
   codeGenImage: string = 'swaggerapi/swagger-codegen-cli';
-  output: string = './api-client';
+  output: string = '';
   format?: string = '';
   formatOptions?: string = '';
 

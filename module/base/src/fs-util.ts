@@ -13,7 +13,7 @@ export class FsUtil {
   static async mkdirp(pth: string) {
     if (!(await fsExists(pth))) {
       const parts = pth.split(path.sep);
-      for (let i = 1; i <= parts.length; i++) {
+      for (let i = 2; i <= parts.length; i++) {
         const subPath = parts.slice(0, i).join(path.sep);
         if (!(await fsExists(subPath))) {
           await fsMkdir(subPath);
