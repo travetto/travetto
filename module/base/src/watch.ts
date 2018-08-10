@@ -228,7 +228,7 @@ export class Watcher extends EventEmitter {
     });
     this.findHandlers = this.findHandlers.concat(finalHandlers);
 
-    for (const entry of ScanFs.bulkFindSync(finalHandlers, this.options.cwd)) {
+    for (const entry of ScanFs.bulkScanDirSync(finalHandlers, this.options.cwd)) {
       if (!this.watched.has(entry.file)) {
         if (this.pending) {
           this.pendingWatched.push(entry);

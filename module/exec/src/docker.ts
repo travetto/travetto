@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as net from 'net';
 
-import { Shutdown, ScanFs } from '@travetto/base';
+import { Shutdown, FsUtil } from '@travetto/base';
 
 import { CommonProcess, ExecutionResult } from './types';
 import { ExecUtil, WithOpts } from './util';
@@ -268,7 +268,7 @@ export class DockerContainer {
       execSync(`${this.cmd} rm -fv ${this.container}`);
     } catch (e) { /* ignore */ }
 
-    const temps = Object.keys(this.tempVolumes).map(x => ScanFs.rimraf(x).catch((e: any) => { }));
+    const temps = Object.keys(this.tempVolumes).map(x => FsUtil.rimraf(x).catch((e: any) => { }));
     Promise.all(temps);
 
     const ids = execSync(`${this.cmd} volume ls -qf dangling=true`);
@@ -290,7 +290,7 @@ export class DockerContainer {
 
   async cleanup() {
     console.debug('Cleaning', this.image, this.container);
-    const temps = Object.keys(this.tempVolumes).map(x => ScanFs.rimraf(x).catch((e: any) => { }));
+    const temps = Object.keys(this.tempVolumes).map(x => FsUtil.rimraf(x).catch((e: any) => { }));
     await Promise.all(temps);
   }
 
