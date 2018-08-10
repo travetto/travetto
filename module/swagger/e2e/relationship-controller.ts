@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 
 import { Controller, Get, Post, Put, Delete } from '@travetto/express';
-import { User } from './model';
+import { User, UserSearch } from './model';
+import { SchemaQuery, SchemaBody } from '@travetto/schema/extension/express';
 
 /**
  * Relationships for the win
@@ -10,7 +11,7 @@ import { User } from './model';
 export class RelationshipController {
 
   /**
-   * Get user by name
+   * Get user by name.
    * @param name {String} User name
    * @returns A user by name
    */
@@ -20,18 +21,17 @@ export class RelationshipController {
   }
 
   /**
-   * Get all users
+   * Get all users.
    * @returns A list of users
    */
   @Get('/')
+  @SchemaQuery(UserSearch)
   async getAll(req: Request, res: Response): Promise<User[]> {
     return undefined as any;
   }
 
-  /**
-   * @param req.body {User}
-   */
   @Post('/')
+  @SchemaBody(User)
   async createUser(req: Request, res: Response): Promise<User> {
     return undefined as any;
   }
@@ -39,9 +39,9 @@ export class RelationshipController {
   /**
    * Update user by id
    * @param id {Number} User id
-   * @param req.body {User} User to update
    */
   @Put('/:id')
+  @SchemaBody(User)
   async updateUser(req: Request, res: Response): Promise<void> {
 
   }

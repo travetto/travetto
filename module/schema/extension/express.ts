@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import * as qs from 'querystring';
 
-import { ControllerRegistry, AppError } from '@travetto/express';
+import { ControllerRegistry, AppError, ParamConfig } from '@travetto/express';
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
@@ -39,20 +39,60 @@ export async function getSchemaBody<T>(req: Request, cls: Class<T>, view?: strin
   }
 }
 
+function schemaToParams(cls: Class, view?: string, prefix: string = '') {
+  const viewConf = SchemaRegistry.has(cls) && SchemaRegistry.getViewSchema(cls, view);
+  const schemaConf = viewConf ? viewConf.schema : SchemaRegistry.getPendingViewSchema(cls, view)!;
+  const params = Object.keys(schemaConf).reduce((acc, x) => {
+    const field = schemaConf[x];
+    if (SchemaRegistry.has(field.type) || SchemaRegistry.hasPending(field.type)) {
+      acc = { ...acc, ...schemaToParams(field.type, undefined, prefix ? `${prefix}.${field.name}` : `${field.name}.`) };
+    } else {
+      acc[x] = {
+        name: `${prefix}${field.name}`,
+        description: field.description,
+        type: field.type,
+        required: field.required && field.required.active,
+        location: 'query'
+      };
+    }
+    return acc;
+  }, {} as { [key: string]: ParamConfig });
+  return params;
+}
+
 export function SchemaBody<T>(cls: Class<T>, view?: string) {
-  return ControllerRegistry.createFilterDecorator(async (req: Request, res: Response) => {
-    req.body = await getSchemaBody(req, cls, view);
-  });
+  return (target: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
+    ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, {
+      requestType: {
+        type: cls
+      },
+      filters: [
+        async (req: Request, res: Response) => {
+          req.body = await getSchemaBody(req, cls, view);
+        }
+      ]
+    });
+  };
 }
 
 export function SchemaQuery<T>(cls: Class<T>, view?: string) {
-  return ControllerRegistry.createFilterDecorator(async (req: Request, res: Response) => {
 
-    const o = getBound(cls, BindUtil.expandPaths(qs.parse(req.query)), view);
-    if (SchemaRegistry.has(cls)) {
-      req.query = await SchemaValidator.validate(o, view);
-    } else {
-      req.query = o;
-    }
-  });
+  return (target: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
+    const params = schemaToParams(cls, view);
+    console.log(params);
+
+    ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, {
+      params: { ...params },
+      filters: [
+        async (req: Request, res: Response) => {
+          const o = getBound(cls, BindUtil.expandPaths(qs.parse(req.query)), view);
+          if (SchemaRegistry.has(cls)) {
+            req.query = await SchemaValidator.validate(o, view);
+          } else {
+            req.query = o;
+          }
+        }
+      ]
+    });
+  };
 }

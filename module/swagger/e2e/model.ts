@@ -20,3 +20,20 @@ export class User {
   aliases: string[];
   weight: number;
 }
+
+@Schema()
+export class Paging {
+  start?: number;
+  size?: number;
+}
+
+@Schema()
+export class UserSearch {
+  age?: number;
+  /**
+   * DOB is fixed
+   */
+  deceased?: boolean;
+
+  page: Paging;
+}
