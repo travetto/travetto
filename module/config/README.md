@@ -62,7 +62,7 @@ database:
 with environment variables
 
 ```properties
-PROFILEI=prod
+PROFILE=prod
 DATABASE_PORT=1234
 DATABASE_CREDS_PASSWORD=<secret>
 ```
