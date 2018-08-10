@@ -1,0 +1,7 @@
+express:
+  serve: false
+model:
+  mongo: 
+    schema: "sample-test"
+mail: 
+  transport: null

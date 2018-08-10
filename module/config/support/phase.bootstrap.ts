@@ -1,4 +1,5 @@
 export const init = {
-  priority: 0,
+  key: 'config',
+  after: 'base',
   action: () => require('../src/service/loader').ConfigLoader.initialize()
 };

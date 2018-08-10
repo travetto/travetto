@@ -20,7 +20,7 @@ AppCache.init();
 
 //Rewrite Module for local development
 if (Env.frameworkDev) {
-  const parDir = path.dirname(cwd);
+  const parDir = path.resolve(path.dirname(path.dirname(cwd)), 'module');
   const og = Module._load.bind(Module);
   Module._load = (request, parent) => {
     const root = path.dirname(parent.filename);

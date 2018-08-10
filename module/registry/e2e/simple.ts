@@ -17,3 +17,5 @@ export class Test6 {
     return 'hi';
   }
 }
+
+console.log(Test6.__id, Test6.__hash);

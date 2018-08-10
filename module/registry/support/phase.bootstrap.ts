@@ -1,4 +1,5 @@
 export const init = {
-  priority: 2,
+  key: 'registry',
+  after: 'compiler',
   action: () => require('../src/service/root').RootRegistry.init()
 };

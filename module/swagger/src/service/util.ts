@@ -39,57 +39,61 @@ export class SwaggerUtil {
 
       if (!schemas[typeId]) {
         const config = SchemaRegistry.get(type);
-        const properties: { [key: string]: Schema } = {};
-        const def = config.views[DEFAULT_VIEW];
-        const required = [];
+        if (config) {
+          const properties: { [key: string]: Schema } = {};
+          const def = config.views[DEFAULT_VIEW];
+          const required = [];
 
-        for (const fieldName of def.fields) {
-          const field = def.schema[fieldName];
-          let prop: Schema = this.getType(field.type, schemas);
+          for (const fieldName of def.fields) {
+            const field = def.schema[fieldName];
+            let prop: Schema = this.getType(field.type, schemas);
 
-          if (field.examples) {
-            prop.example = field.examples;
-          }
-          prop.description = field.description;
-          if (field.match) {
-            prop.pattern = field.match.re!.source;
-          }
-          if (field.maxlength) {
-            prop.maxLength = field.maxlength.n;
-          }
-          if (field.minlength) {
-            prop.minLength = field.minlength.n;
-          }
-          if (field.min) {
-            prop.minimum = field.min.n as number;
-          }
-          if (field.max) {
-            prop.maximum = field.max.n as number;
-          }
-          if (field.enum) {
-            prop.enum = field.enum.values;
-          }
-          if (field.required) {
-            required.push(fieldName);
+            if (field.examples) {
+              prop.example = field.examples;
+            }
+            prop.description = field.description;
+            if (field.match) {
+              prop.pattern = field.match.re!.source;
+            }
+            if (field.maxlength) {
+              prop.maxLength = field.maxlength.n;
+            }
+            if (field.minlength) {
+              prop.minLength = field.minlength.n;
+            }
+            if (field.min) {
+              prop.minimum = field.min.n as number;
+            }
+            if (field.max) {
+              prop.maximum = field.max.n as number;
+            }
+            if (field.enum) {
+              prop.enum = field.enum.values;
+            }
+            if (field.required) {
+              required.push(fieldName);
+            }
+
+            if (field.array) {
+              prop = {
+                type: 'array',
+                items: prop
+              };
+            }
+
+            properties[fieldName] = prop;
           }
 
-          if (field.array) {
-            prop = {
-              type: 'array',
-              items: prop
-            };
-          }
-
-          properties[fieldName] = prop;
+          schemas[typeId] = {
+            title: config.title || config.description,
+            description: config.description || config.title,
+            example: config.examples,
+            properties,
+            required
+          };
+        } else {
+          schemas[typeId] = { title: typeId };
         }
-
-        schemas[typeId] = {
-          title: config.title || config.description,
-          description: config.description || config.title,
-          example: config.examples,
-          properties,
-          required
-        };
       }
       return typeId;
     }

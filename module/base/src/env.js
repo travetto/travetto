@@ -2,6 +2,7 @@ const path = require('path');
 
 const PROD_KEY = 'prod';
 const TEST_KEY = 'test';
+const E2E_KEY = 'e2e';
 const DEV_KEY = 'dev';
 
 const envVal = k => process.env[k] || process.env[k.toLowerCase()] || process.env[k.toUpperCase()];
@@ -36,13 +37,13 @@ function checkDocker() {
   return { docker };
 }
 
-function checkWatch(dev) {
-  const watch = (dev && !isEnvTrue('NO_WATCH')) || isEnvTrue('watch');
+function checkWatch(profile) {
+  const watch = ((profile.dev || profile.e2e) && !isEnvTrue('NO_WATCH')) || isEnvTrue('watch');
   return { watch };
 }
 
-function buildLogging(dev) {
-  const debug = isEnvTrue('debug') || dev;
+function buildLogging(profile) {
+  const debug = isEnvTrue('debug') || (profile.dev || profile.e2e);
   const trace = isEnvTrue('trace');
 
   console.warn = (...args) => console.log('WARN', ...args);
@@ -66,7 +67,7 @@ function buildLogging(dev) {
 }
 
 function buildProfile() {
-  const cli = (process.argv.slice(2) || [])
+  const cliArgs = (process.argv.slice(2) || [])
     .filter(x => /^-P[A-Za-z0-9_\-]+/.test(x))
     .map(x => x.replace(/^-P/g, ''));
 
@@ -76,12 +77,14 @@ function buildProfile() {
     development: DEV_KEY
   };
 
-  const ext = [...envListVal('node_env'), ...envListVal('env'), ...envListVal('profile'), ...cli]
+  const ext = [...envListVal('node_env'), ...envListVal('env'), ...envListVal('profile'), ...cliArgs]
     .map(x => mapping[x] || x);
 
   const primary =
     (ext.includes(PROD_KEY) && PROD_KEY) ||
-    (ext.includes(TEST_KEY) && TEST_KEY) || DEV_KEY;
+    (ext.includes(TEST_KEY) && TEST_KEY) ||
+    (ext.includes(E2E_KEY) && E2E_KEY) ||
+    DEV_KEY;
 
   const allSet = new Set();
 
@@ -98,8 +101,14 @@ function buildProfile() {
     is: allSet.has.bind(allSet),
     prod: primary === PROD_KEY,
     test: primary === TEST_KEY,
+    e2e: primary === E2E_KEY,
     dev: primary === DEV_KEY
   };
+}
+
+function buildAppMain() {
+  const appMain = envVal('TRV_APP') || process.argv.slice(2).pop();
+  return { appMain };
 }
 
 const profile = buildProfile();
@@ -107,8 +116,9 @@ const profile = buildProfile();
 const Env = [
   { cwd },
   profile,
-  buildLogging(profile.dev),
-  checkWatch(profile.dev),
+  buildAppMain(),
+  buildLogging(profile),
+  checkWatch(profile),
   checkFrameworkDev(),
   checkDocker()
 ].reduce((acc, el) =>

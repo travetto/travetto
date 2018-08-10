@@ -1,7 +1,8 @@
 import { Class } from '@travetto/registry';
 
-import { InjectableFactoryConfig, InjectableConfig, Dependency } from '../types';
+import { InjectableFactoryConfig, InjectableConfig, Dependency, Runnable } from '../types';
 import { DependencyRegistry } from '../service';
+import { Env } from '@travetto/base';
 
 function extractSymbolOrConfig<T extends { qualifier?: Symbol }>(args: any[]) {
   const out = {} as T;
@@ -24,10 +25,22 @@ export function Injectable(...args: any[]): ClassDecorator {
     const config = extractSymbolOrConfig(args) as Partial<InjectableConfig<any>>;
 
     config.class = target;
-    if (typeof config.autoCreate === 'boolean') {
-      config.autoCreate = { create: config.autoCreate } as any;
-    }
     DependencyRegistry.registerClass(target, config as any as InjectableConfig<any>);
+    return target;
+  };
+}
+
+export function Application(name: string): ClassDecorator {
+  return (target: Class | any) => {
+    if (Env.appMain === name) {
+      DependencyRegistry.init()
+        .then(() => DependencyRegistry.getInstance(target))
+        .then(ins => {
+          if ((ins as any).run) {
+            (ins as Runnable).run();
+          }
+        });
+    }
     return target;
   };
 }

@@ -10,8 +10,10 @@ import { SchemaRegistry } from '@travetto/schema';
 import { ApiClientConfig } from './config';
 import { SwaggerService } from './swagger';
 
-@Injectable({ autoCreate: { create: Env.watch } })
+@Injectable()
 export class ClientGenerate {
+
+  private running = false;
 
   codeGenCli: DockerContainer;
 
@@ -29,12 +31,20 @@ export class ClientGenerate {
         .addVolume(this.config.output, this.config.output)
         .setInteractive(true)
         .forceDestroyOnShutdown();
+    }
+  }
+
+  async run() {
+    if (this.config.output && this.config.format && Env.watch && !this.running) {
+      this.running = true;
 
       await this.codeGenCli.create();
       await this.codeGenCli.start();
 
       ControllerRegistry.on(() => setImmediate(() => this.generate(), 1));
       SchemaRegistry.on(() => setImmediate(() => this.generate(), 1));
+
+      this.generate();
     }
   }
 

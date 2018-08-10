@@ -5,7 +5,7 @@ const INJECTABLE_MOD = require.resolve('../src/decorator/injectable');
 
 const INJECTABLES = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.injectable'),
-  '@travetto/di': ['Injectable']
+  '@travetto/di': ['Injectable', 'Application']
 });
 
 interface DiState extends TransformerState {
@@ -228,6 +228,7 @@ export const InjectableTransformer = {
   transformer: TransformUtil.importingVisitor<DiState>(() => ({
     inInjectable: false,
   }), visitNode),
-  priority: 11,
+  key: 'di',
+  after: 'registry',
   phase: 'before'
 };

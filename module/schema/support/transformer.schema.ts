@@ -142,5 +142,7 @@ export const SchemaTransformer = {
   transformer: TransformUtil.importingVisitor<AutoState>(() => ({
     inAuto: false
   }), visitNode),
+  key: 'schema',
+  after: 'registry',
   phase: 'before'
 };

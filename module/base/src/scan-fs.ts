@@ -1,15 +1,12 @@
 import * as fs from 'fs';
 import * as util from 'util';
 import * as path from 'path';
-import { Env } from '@travetto/base/src/env';
+import { Env } from './env';
 
 const fsReadFileAsync = util.promisify(fs.readFile);
 const fsStat = util.promisify(fs.lstat);
 const fsReaddir = util.promisify(fs.readdir);
-const fsUnlink = util.promisify(fs.unlink);
 const fsRealpath = util.promisify(fs.realpath);
-const fsExists = util.promisify(fs.exists);
-const fsMkdir = util.promisify(fs.mkdir);
 
 export interface ScanEntry {
   file: string;

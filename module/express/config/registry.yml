@@ -2,3 +2,9 @@
 injectable:
  '@travetto/express': 
   - Controller
+
+express.operator:
+  '@travetto/express':
+    - CompressionOperator
+    - BodyOperator
+    - SessionOperator

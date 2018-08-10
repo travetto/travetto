@@ -92,5 +92,5 @@ export const ClassMetadataTransformer = {
     return { file: `${ns}:${fileRoot}`, fullFile: file.fileName };
   }, visitNode),
   phase: 'before',
-  priority: 0
+  key: 'registry',
 };

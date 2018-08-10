@@ -59,15 +59,16 @@ export class FilePresenceManager {
       .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable
       .map(x => x.file);
 
-    console.debug('Watching files', rootFiles.length);
-
     for (const fileName of rootFiles) {
       this.files.set(fileName, { version: 0 });
       this.listener.added(fileName);
     }
 
-    if (this.watch) {
-      this.buildWatcher(path.join(this.cwd, 'src'), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+    if (this.watch) { // Start watching after startup
+      setTimeout(() => {
+        console.debug('Watching files', rootFiles.length);
+        this.buildWatcher(path.join(this.cwd, 'src'), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+      }, 1000);
     }
   }
 

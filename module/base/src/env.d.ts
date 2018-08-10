@@ -2,12 +2,14 @@ export declare const Env: {
   prod: boolean;
   dev: boolean;
   test: boolean;
+  e2e: boolean;
   watch: boolean;
   docker: boolean;
   debug: boolean;
   trace: boolean;
   cwd: string;
   frameworkDev: boolean;
+  appMain: string;
 
   error: (...args: any[]) => void;
 

@@ -8,7 +8,7 @@ const cache: { [key: string]: ScanEntry[] } = {};
 
 export class ScanApp {
 
-  static findFiles(ext: string | RegExp, filter?: (rel: string) => boolean) {
+  static findFiles(ext: string | RegExp, filter?: RegExp | ((rel: string) => boolean)) {
     const key = typeof ext === 'string' ? ext : ext.source;
     const testFile = typeof ext === 'string' ? (x: string) => x.endsWith(ext) : (x: string) => ext.test(x);
 
@@ -42,13 +42,17 @@ export class ScanApp {
     }
 
     if (filter) {
-      return cache[key].filter(x => filter(x.module));
+      if (filter instanceof RegExp) {
+        return cache[key].filter(x => filter.test(x.module));
+      } else {
+        return cache[key].filter(x => filter(x.module));
+      }
     } else {
       return cache[key].slice(0);
     }
   }
 
-  static requireFiles(ext: string, filter: (rel: string) => boolean) {
+  static requireFiles(ext: string | RegExp, filter: RegExp | ((rel: string) => boolean)) {
     return ScanApp.findFiles(ext, filter).map(x => require(x.file.replace(/[\\]/g, '/')));
   }
 }

@@ -1,11 +1,13 @@
-
+import * as express from 'express';
+import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
 
-import { Injectable } from '@travetto/di';
+import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { ExpressOperator } from '../service/operator';
-import { ExpressApp } from '../service/app';
+import { ExpressOperator } from '../types';
+import { BodyOperator } from './body';
+import { CompressionOperator } from './compression';
 
 @Config('express.session')
 export class ExpressSessionConfig {
@@ -19,17 +21,18 @@ export class ExpressSessionConfig {
 @Injectable()
 export class SessionOperator extends ExpressOperator {
 
-  constructor(private config: ExpressSessionConfig) {
-    super();
-    this.priority = 20;
-  }
+  @Inject()
+  private config: ExpressSessionConfig;
 
-  operate(app: ExpressApp): void {
-    app.get().use(session(this.config)); // session secret
+  after = [BodyOperator, CompressionOperator];
+
+  operate(app: express.Application): void {
+    app.use(cookieParser());
+    app.use(session(this.config)); // session secret
 
     // Enable proxy for cookies
     if (this.config.cookie.secure) {
-      app.get().enable('trust proxy');
+      app.enable('trust proxy');
     }
   }
 }

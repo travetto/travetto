@@ -1,5 +1,5 @@
 export const init = {
-  priority: 0,
+  key: 'mongod',
   action: async () => {
     const { DockerContainer } = require('@travetto/exec/src/docker');
 

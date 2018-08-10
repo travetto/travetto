@@ -1,5 +1,6 @@
 export const init = {
-  priority: 100,
+  key: 'cache',
+  after: 'base',
   action: () => {
     const { CacheManager } = require('../src/service/cache');
     const { Shutdown } = require('@travetto/base');

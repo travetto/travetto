@@ -1,5 +1,7 @@
 export const init = {
-  priority: 0,
+  key: 'log',
+  after: 'base',
+  before: 'config',
   action: () => {
     const Logger = require('../src/service').Logger;
     Logger._init();

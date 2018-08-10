@@ -1,9 +1,8 @@
 import { ConfigLoader } from '@travetto/config';
 
 import { Method, PathType, ParamConfig, EndpointIOType, EndpointConfig } from '../types';
-import { ControllerRegistry } from '../service';
+import { ControllerRegistry, ExpressConfig } from '../service';
 import { NO_CACHE } from './common';
-import { ExpressConfig } from '@travetto/express/src/config';
 
 const expressCfg = new ExpressConfig();
 ConfigLoader.bindTo(expressCfg, 'express');

@@ -82,5 +82,6 @@ export const LoggerTransformer = {
     }
   }),
   phase: 'before',
-  priority: 1
+  key: 'log',
+  after: 'registry',
 };

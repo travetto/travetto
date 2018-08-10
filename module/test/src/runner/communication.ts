@@ -64,7 +64,7 @@ export async function server() {
       console.debug('Init');
 
       const mgr = new PhaseManager('bootstrap');
-      mgr.load(1 /* Load only managed initializers*/);
+      mgr.load('compiler');
 
       // Init Compiler
       Compiler = require('@travetto/compiler').Compiler;
