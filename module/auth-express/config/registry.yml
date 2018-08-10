@@ -1,0 +1,5 @@
+---
+express.operator:
+  '@travetto/auth-express':
+    - AuthOperator
+    - AuthPassportOperator

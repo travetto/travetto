@@ -1,7 +1,7 @@
 import * as util from 'util';
-import { Request, Response } from 'express';
+import { Request, Response, Application } from 'express';
 
-import { ExpressOperator, ExpressApp, AppError } from '@travetto/express';
+import { ExpressOperator, SessionOperator, AppError } from '@travetto/express';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
 import { AuthService, ERR_INVALID_AUTH } from '@travetto/auth';
@@ -14,9 +14,10 @@ export class AuthOperator extends ExpressOperator {
 
   private providers = new Map<string, AuthProvider<any>>();
 
+  after = SessionOperator;
+
   constructor(private service: AuthService) {
     super();
-    this.priority = 100;
   }
 
   async postConstruct() {
@@ -81,8 +82,8 @@ export class AuthOperator extends ExpressOperator {
     }
   }
 
-  operate(app: ExpressApp) {
-    app.get().use(async (req, res, next) => {
+  operate(app: Application) {
+    app.use(async (req, res, next) => {
 
       const r = req as Request;
 

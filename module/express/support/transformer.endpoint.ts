@@ -149,6 +149,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 export const InjectableTransformer = {
   transformer: TransformUtil.importingVisitor<TransformerState>(() => ({}), visitNode),
-  priority: 100,
+  key: 'express',
+  after: 'di',
   phase: 'before'
 };

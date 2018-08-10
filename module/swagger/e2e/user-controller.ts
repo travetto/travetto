@@ -38,7 +38,7 @@ export class UserController {
   @Get('/')
   @SchemaQuery(UserSearch)
   async getAll(req: Request, res: Response): Promise<User[]> {
-    return undefined as any;
+    return [];
   }
 
   @Post('/')

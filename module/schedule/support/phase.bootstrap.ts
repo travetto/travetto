@@ -1,5 +1,6 @@
 export const init = {
-  priority: 100,
+  after: 'base',
+  key: 'schedule',
   action: () => {
     const { Shutdown } = require('@travetto/base');
     const { Scheduler } = require('../src/service/schedule');

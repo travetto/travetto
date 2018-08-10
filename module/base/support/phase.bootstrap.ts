@@ -3,7 +3,7 @@ import { Shutdown } from '../src/shutdown';
 import { Stacktrace } from '../src/stacktrace';
 
 export const init = {
-  priority: -100000,
+  key: 'base',
   action: () => {
     process.env.NODE_ENV = Env.prod ? 'production' : 'development';
 

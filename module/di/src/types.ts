@@ -9,7 +9,6 @@ export interface InjectableConfig<T = any> extends Dependency<T> {
     cons?: Dependency<any>[],
     fields: { [key: string]: Dependency<any> }
   };
-  autoCreate: { priority?: number, create: boolean };
 }
 
 export interface Dependency<T = any> {
@@ -24,6 +23,9 @@ export interface InjectableFactoryConfig<T> {
   src: Class<T>;
   qualifier?: symbol;
   dependencies?: Dependency<any>[];
-  autoCreate?: boolean;
   original?: Symbol | object;
+}
+
+export interface Runnable {
+  run(): any;
 }

@@ -76,4 +76,43 @@ class MergeTests {
     assert(Util.isSimple(test));
     assert(Util.shallowClone(test) === test);
   }
+
+  @Test()
+  orderDependents() {
+    const items: any = [
+      {
+        key: 'first'
+      },
+      {
+        after: ['first', 'fourth'],
+        key: 'fifth'
+      },
+      {
+        after: 'first',
+        key: 'third'
+      },
+      {
+        after: ['first'],
+        key: 'second'
+      },
+      {
+        after: new Set(['first', 'second']),
+        key: 'fourth'
+      },
+      {
+        after: new Set(['fifth']),
+        key: 'sixth'
+      }
+    ];
+
+    const order = Util.computeOrdering(items);
+    const ordered = order.map(x => x.key);
+    assert(ordered === ['first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
+
+    items.unshift({ key: 'tenth', before: 'second' });
+
+    const order2 = Util.computeOrdering(items);
+    const ordered2 = order2.map(x => x.key);
+    assert(ordered2 === ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
+  }
 }

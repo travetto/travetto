@@ -174,6 +174,7 @@ export const TestAssertTransformer = {
       return source;
     }
   },
+  key: 'test:assert',
   phase: 'before',
-  priority: 10
+  after: 'registry'
 };

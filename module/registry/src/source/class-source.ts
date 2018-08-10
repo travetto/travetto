@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
-import { ScanApp, Env } from '@travetto/base';
+import { ScanApp, Env, AppInfo } from '@travetto/base';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator/register';
@@ -73,12 +73,18 @@ export class CompilerClassSource implements ChangeSource<Class> {
   }
 
   async init() {
-    if (!Env.test) {
-      const entries = await ScanApp.findFiles('.ts', f =>
-        f.startsWith('src/') &&
-        Compiler.presenceManager.validFile(f));
+    if (!Env.test || Env.e2e) {
+      const folder = Env.e2e ? 'e2e/' : 'src/';
+      const entries = await ScanApp.findFiles('.ts', (f: string) =>
+        Compiler.presenceManager.validFile(f)
+        && (f.startsWith(folder) || (
+          /^node_modules\/@travetto\/[^\/]+\/src\/.*/.test(f)
+          && !f.startsWith(`node_modules/${AppInfo.NAME}`)
+        )) // No more side effect code, load all files
+      );
 
       const files = entries.map(x => x.file);
+
       for (const f of files) { // Load all files, class scanning
         require(f);
       }

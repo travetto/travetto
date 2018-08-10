@@ -8,7 +8,7 @@ class $Logger {
 
   private listeners: LogListener[] = [];
 
-  private _level: number = Env.dev ? LogLevels.debug : LogLevels.info;
+  private _level: number = (Env.dev || Env.e2e) ? LogLevels.debug : LogLevels.info;
 
   _init() {
     // Base logger, for free

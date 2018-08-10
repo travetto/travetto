@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { ValidationError } from '@travetto/schema/src/service/validator';
+import { ValidationError } from './service/validator';
 
 export const DEFAULT_VIEW = '__all';
 

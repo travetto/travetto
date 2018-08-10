@@ -44,8 +44,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private proxies = new Map<TargetId, Map<Symbol, Proxy<RetargettingHandler<any>>>>();
   private proxyHandlers = new Map<TargetId, Map<Symbol, RetargettingHandler<any>>>();
 
-  private autoCreate: (Dependency<any> & { priority: number })[] = [];
-
   constructor() {
     super(RootRegistry);
   }
@@ -100,21 +98,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.instances.get(targetId)!.set(qualifier, out);
   }
 
-  processAutocreate() {
-    // Unblock auto created
-    if (this.autoCreate.length && !Env.test) {
-      const items = this.autoCreate.slice(0).sort((a, b) => a.priority - b.priority);
-      this.autoCreate = [];
-
-      setTimeout(async () => { // Run after initialization finishes
-        console.debug('Auto-creating', this.autoCreate.map(x => x.target.name));
-        for (const i of items) {
-          await this.getInstance(i.target, i.qualifier);
-        }
-      }, 0);
-    }
-  }
-
   async initialInstall() {
     const finalizing = this.pendingFinalize;
     this.pendingFinalize = [];
@@ -122,8 +105,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     for (const cls of finalizing) {
       this.install(cls, { type: 'added', curr: cls });
     }
-
-    this.processAutocreate();
   }
 
   createPending(cls: Class) {
@@ -138,10 +119,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       dependencies: {
         fields: {},
         cons: []
-      },
-      autoCreate: {
-        create: false,
-        priority: 1000
       }
     };
   }
@@ -265,12 +242,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     if (pconfig.target) {
       config.target = pconfig.target;
     }
-    if (pconfig.autoCreate) {
-      config.autoCreate!.create = pconfig.autoCreate.create;
-      if (pconfig.autoCreate.priority !== undefined) {
-        config.autoCreate!.priority = pconfig.autoCreate.priority;
-      }
-    }
     if (pconfig.dependencies) {
       config.dependencies = { fields: {}, ...pconfig.dependencies };
     }
@@ -280,10 +251,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const finalConfig: InjectableConfig<any> = {} as any;
 
     mergeWithOptional(config);
-
-    if (typeof config.autoCreate === 'boolean') {
-      finalConfig.autoCreate = { create: config.autoCreate } as any;
-    }
 
     finalConfig.factory = config.fn;
     finalConfig.target = config.class;
@@ -321,8 +288,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         this.onInstall(fact, e);
       }
     }
-
-    this.processAutocreate();
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
@@ -380,13 +345,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       console.debug('Reloading on next tick');
       // Timing matters due to create instance being asynchronous
       process.nextTick(() => this.createInstance(config.target, config.qualifier));
-    } else if (config.autoCreate.create) {
-      // If not loaded, and auto-create
-      this.autoCreate.push({
-        target: config.target,
-        qualifier: config.qualifier,
-        priority: config.autoCreate.priority!
-      });
     }
 
     return config;
@@ -425,7 +383,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.proxyHandlers.clear();
     this.aliases.clear();
     this.targets.clear();
-    this.autoCreate = [];
   }
 }
 

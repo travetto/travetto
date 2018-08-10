@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import * as qs from 'querystring';
 
 import { ControllerRegistry, AppError, ParamConfig } from '@travetto/express';
 import { Util } from '@travetto/base';
@@ -79,13 +78,12 @@ export function SchemaQuery<T>(cls: Class<T>, view?: string) {
 
   return (target: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
     const params = schemaToParams(cls, view);
-    console.log(params);
 
     ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, {
       params: { ...params },
       filters: [
         async (req: Request, res: Response) => {
-          const o = getBound(cls, BindUtil.expandPaths(qs.parse(req.query)), view);
+          const o = getBound(cls, BindUtil.expandPaths(req.query), view);
           if (SchemaRegistry.has(cls)) {
             req.query = await SchemaValidator.validate(o, view);
           } else {

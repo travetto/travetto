@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Application, Request, Response, NextFunction } from 'express';
 import { Class } from '@travetto/registry';
 
 export type HeaderMap = { [key: string]: (string | (() => string)) };
@@ -64,4 +64,19 @@ export class RouteStack {
     methods: { [key: string]: number },
     stack: RouteStack[]
   };
+}
+
+export abstract class ExpressOperator {
+
+  public after?: Class<ExpressOperator>[] | Set<Class<ExpressOperator>> | Class<ExpressOperator>;
+  public before?: Class<ExpressOperator>[] | Set<Class<ExpressOperator>> | Class<ExpressOperator>;
+
+  abstract operate(app: Application): void;
+}
+
+export class ExpressOperatorSet {
+  public operators: Set<Class<ExpressOperator>>;
+  constructor(...operators: Class<ExpressOperator>[]) {
+    this.operators = new Set(operators);
+  }
 }

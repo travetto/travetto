@@ -1,23 +1,21 @@
-import { Context } from '@travetto/context';
-import { Injectable } from '@travetto/di';
+import * as express from 'express';
 
-import { ExpressOperator } from '../src/service/operator';
-import { ExpressApp } from '../src/service/app';
+import { Context } from '@travetto/context';
+import { Injectable, Inject } from '@travetto/di';
+
+import { ExpressOperator } from '../src/types';
 
 @Injectable({
   target: ExpressOperator,
   qualifier: Symbol('@travetto/context')
 })
-export class ContextMaintainer extends ExpressOperator {
+export class ContextOperator extends ExpressOperator {
 
-  priority = 0;
+  @Inject()
+  private context: Context;
 
-  constructor(private context: Context) {
-    super();
-  }
-
-  operate(app: ExpressApp) {
-    app.get().use((req, res, next) => {
+  operate(app: express.Application) {
+    app.use((req, res, next) => {
       this.context.run(() => new Promise((resolve, reject) => {
         this.context.set({ req, res });
 

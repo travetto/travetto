@@ -1,0 +1,40 @@
+{
+  "name": "@travetto/starter",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Reference application for the travetto framework",
+  "homepage": "https://travetto.io",
+  "main": "./node_modules/.bin/travetto",
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test",
+    "test:all": "npm run test test/.*.ts",
+    "start": "./node_modules/.bin/travetto sample"
+  },
+  "keywords": [
+    "travetto",
+    "sample-project",
+    "express",
+    "web-app",
+    "authentication",
+    "typescript"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@travetto/asset": "0.x.x",
+    "@travetto/asset-express": "0.x.x",
+    "@travetto/asset-mongo": "0.x.x",
+    "@travetto/auth": "0.x.x",
+    "@travetto/auth-express": "0.x.x",
+    "@travetto/auth-model": "0.x.x",
+    "@travetto/context": "0.x.x",
+    "@travetto/email": "0.x.x",
+    "@travetto/express": "0.x.x",
+    "@travetto/log": "0.x.x",
+    "@travetto/model": "0.x.x",
+    "@travetto/model-mongo": "0.x.x",
+    "@travetto/swagger": "0.x.x"
+  },
+  "devDependencies": {
+    "@travetto/test": "0.x.x"
+  }
+}

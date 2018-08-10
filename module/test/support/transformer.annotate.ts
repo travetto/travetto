@@ -59,5 +59,6 @@ export const TestLineNumberTransformer = {
     }
   },
   phase: 'before',
-  priority: -1
+  key: 'test:line-numbers',
+  before: 'registry'
 };

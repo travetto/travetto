@@ -1,4 +1,4 @@
-import { ScanApp } from '@travetto/base';
+import { ScanApp, Util } from '@travetto/base';
 
 export class TransformerManager {
 
@@ -8,7 +8,6 @@ export class TransformerManager {
 
   init() {
     const transformers: { [key: string]: any } = {};
-    let i = 2;
 
     for (const trns of ScanApp.requireFiles('.ts', x => /transformer[.].*?[.]ts$/.test(x))) {
       for (const key of Object.keys(trns)) {
@@ -16,16 +15,20 @@ export class TransformerManager {
         if (!transformers[item.phase]) {
           transformers[item.phase] = [];
         }
-        item.priority = item.priority === undefined ? ++i : item.priority;
         item.name = item.name || key;
         transformers[item.phase].push(item);
       }
     }
     for (const key of Object.keys(transformers)) {
-      transformers[key] = (transformers[key] as any[])
-        .sort((a, b) => a.priority - b.priority)
-        .map(x => x.transformer);
+      transformers[key] = Util.computeOrdering(transformers[key] as {
+        transformer: any,
+        before: string | string[],
+        key: string
+      }[]);
+      console.debug('Configured Transformers', key, transformers[key].map((x: any) => x.key));
+      transformers[key] = transformers[key].map((x: any) => x.transformer);
     }
+
     this.transformers = transformers;
   }
 }

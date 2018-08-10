@@ -7,6 +7,7 @@ function from(this: any, data: any, view?: string) {
 }
 
 export const init = {
-  priority: -1, // Should be global
+  key: 'schema',
+  before: 'base', // Should be global
   action: () => proto.from = from  // Register global from
 };

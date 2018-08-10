@@ -4,6 +4,7 @@ const { Env } = require('./env');
 const pkg = require(path.join(Env.cwd, 'package.json'));
 
 const subName = pkg.name.split('/').pop();
+const args = process.argv.slice(2).pop();
 
 module.exports = {
   AppInfo: {
@@ -13,6 +14,7 @@ module.exports = {
     PACKAGE: pkg.name.split('/')[0],
     LICENSE: pkg.license,
     AUTHOR: pkg.author,
+    MAIN: pkg.main,
     DESCRIPTION: pkg.description,
     SUB_NAME: subName,
     DEV_PACKAGES: Object.keys(pkg.devDependencies || {})

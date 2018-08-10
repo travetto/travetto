@@ -1,5 +1,5 @@
 export const init = {
-  priority: 0,
+  key: 'elasticsearch',
   action: async () => {
     const { DockerContainer } = await import('@travetto/exec/src/docker');
 
