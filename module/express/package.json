@@ -4,8 +4,8 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/di": "^0.1.6",
-    "@travetto/log": "^0.1.6",
+    "@travetto/di": "^0.2.0",
+    "@travetto/log": "^0.2.0",
     "@types/body-parser": "^1.17.0",
     "@types/compression": "0.0.36",
     "@types/cookie-parser": "^1.4.1",
@@ -17,7 +17,7 @@
     "express-session": "^1.15.6"
   },
   "devDependencies": {
-    "@travetto/test": "^0.1.6"
+    "@travetto/test": "^0.2.0"
   },
   "optionalExtensionDependencies": {
     "@travetto/context": "^0.1.1"
@@ -40,5 +40,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.1.11"
+  "version": "0.2.0"
 }
