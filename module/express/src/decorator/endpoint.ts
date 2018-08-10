@@ -1,7 +1,14 @@
-import { Method, PathType, ParamConfig, EndpointIOType } from '../types';
-import { ControllerRegistry } from '../service';
+import { ConfigLoader } from '@travetto/config';
 
-function Endpoint(method: Method, path: PathType = '/') {
+import { Method, PathType, ParamConfig, EndpointIOType, EndpointConfig } from '../types';
+import { ControllerRegistry } from '../service';
+import { NO_CACHE } from './common';
+import { ExpressConfig } from '@travetto/express/src/config';
+
+const expressCfg = new ExpressConfig();
+ConfigLoader.bindTo(expressCfg, 'express');
+
+function Endpoint(method: Method, path: PathType = '/', extra: Partial<EndpointConfig> = {}) {
   return (target: any, prop: symbol | string, descriptor: TypedPropertyDescriptor<any>) => {
     const params: { [key: string]: ParamConfig } = {};
     if (typeof path === 'string' && path.includes(':')) {
@@ -10,7 +17,14 @@ function Endpoint(method: Method, path: PathType = '/') {
         return a;
       });
     }
-    const ret = ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { method, path, params });
+    const ret = ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { method, path, params, ...extra });
+    if (method === 'get' && expressCfg.disableGetCache) {
+      const ep = ControllerRegistry.getOrCreateEndpointConfig(target.constructor, descriptor.value);
+      // Override if not set
+      if (!('Expires' in ep.headers) && !('Cache-Control' in ep.headers)) {
+        Object.assign(ep.headers, NO_CACHE);
+      }
+    }
     return ret;
   };
 }
