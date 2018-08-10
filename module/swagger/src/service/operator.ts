@@ -1,8 +1,10 @@
 import { ExpressOperator, ExpressApp } from '@travetto/express';
-import { Inject } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 import { SwaggerService } from '@travetto/swagger/src/service/swagger';
 
+@Injectable()
 export class SwaggerOperator extends ExpressOperator {
+
   @Inject()
   service: SwaggerService;
 
