@@ -8,6 +8,11 @@ const DAY = HOUR * 24;
 const UNIT_MAPPING = { s: 1000, ms: 1, m: MIN, h: HOUR, d: DAY, w: DAY * 7, y: DAY * 365 };
 type Units = keyof (typeof UNIT_MAPPING);
 
+export const NO_CACHE = {
+  Expires: '-1',
+  'Cache-Control': 'max-age=0, no-cache'
+};
+
 function register(config: Partial<EndpointConfig | ControllerConfig>) {
   return (target: any, property?: string, descriptor?: PropertyDescriptor) => {
     if (descriptor) {
@@ -21,12 +26,7 @@ function register(config: Partial<EndpointConfig | ControllerConfig>) {
 export const Describe = (desc: DescribableConfig) => register(desc);
 
 export const Header = (headers: HeaderMap) => register({ headers });
-export const NoCache = () => register({
-  headers: {
-    Expires: '-1',
-    'Cache-Control': 'max-age=0, no-cache'
-  }
-});
+export const DisableCache = () => register({ headers: NO_CACHE });
 
 export function Cache(value: number, unit: Units = 's') {
   const delta = UNIT_MAPPING[unit] * value;

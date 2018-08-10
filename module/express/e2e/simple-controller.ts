@@ -1,4 +1,4 @@
-import { Controller, Get } from '../src';
+import { Controller, Get, Cache } from '../src';
 import { MockService } from './mock';
 import { Request, Response } from 'express';
 
@@ -14,6 +14,7 @@ export class Simple {
     return `/simple/name => ${user.first.toLowerCase()}`;
   }
 
+  @Cache(1, 'd')
   @Get('/nameAngry')
   async doItAngry() {
     const user = await this.service.fetch();
