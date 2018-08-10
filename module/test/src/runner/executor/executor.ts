@@ -30,7 +30,7 @@ export class TestExecutor {
   }
 
   static async getTests(globs: RegExp[]) {
-    const files = (await ScanFs.bulkFind(globs.map(x => ({ testFile: (y: string) => x.test(y) }))))
+    const files = (await ScanFs.bulkScanDir(globs.map(x => ({ testFile: (y: string) => x.test(y) }))))
       .filter(x => !x.stats.isDirectory())
       .filter(x => !x.file.includes('node_modules'))
       .map(f => this.isTest(f.file).then(valid => ({ file: f.file, valid })));

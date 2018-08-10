@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { DockerContainer } from '@travetto/exec';
 import { Injectable } from '@travetto/di';
-import { Env } from '@travetto/base';
+import { Env, FsUtil } from '@travetto/base';
 import { ControllerRegistry } from '@travetto/express';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -20,6 +20,8 @@ export class ClientGenerate {
   async postConstruct() {
     if (this.config.output && this.config.format && Env.watch) {
       console.info('Running code generator in watch mode', this.config.output);
+
+      await FsUtil.mkdirp(this.config.output);
 
       this.codeGenCli = new DockerContainer(this.config.codeGenImage)
         .setEntryPoint('/bin/sh')
@@ -39,6 +41,10 @@ export class ClientGenerate {
   }
 
   async generate() {
+    if (!this.config.format) {
+      throw new Error('Output format not set');
+    }
+
     const spec = this.service.getSpec();
     const specFile = path.join(this.config.output, 'spec.json');
     await new Promise((res, rej) => fs.writeFile(specFile, JSON.stringify(spec, undefined, 2), (err) => err ? rej(err) : res()));
@@ -48,7 +54,7 @@ export class ClientGenerate {
       '-jar', '/opt/swagger-codegen-cli/swagger-codegen-cli.jar',
       'generate',
       '--remove-operation-id-prefix',
-      '-l', this.config.format,
+      '-l', this.config.format!,
       '-o', this.config.output,
       '-i', specFile,
       ...(this.config.formatOptions ? ['--additional-properties', this.config.formatOptions] : [])

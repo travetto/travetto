@@ -1,13 +1,15 @@
 import * as fs from 'fs';
 import * as util from 'util';
 import * as path from 'path';
-import { Env } from './env';
+import { Env } from '@travetto/base/src/env';
 
 const fsReadFileAsync = util.promisify(fs.readFile);
 const fsStat = util.promisify(fs.lstat);
 const fsReaddir = util.promisify(fs.readdir);
 const fsUnlink = util.promisify(fs.unlink);
 const fsRealpath = util.promisify(fs.realpath);
+const fsExists = util.promisify(fs.exists);
+const fsMkdir = util.promisify(fs.mkdir);
 
 export interface ScanEntry {
   file: string;
@@ -22,21 +24,6 @@ export interface ScanHandler {
 }
 
 export class ScanFs {
-
-  static async bulkFind(handlers: ScanHandler[], base?: string) {
-    const res = await Promise.all(handlers.map(x => ScanFs.scanDir(x, base)));
-    const names = new Set<string>();
-    const out = [];
-    for (const ls of res) {
-      for (const e of ls) {
-        if (!names.has(e.file)) {
-          names.add(e.file);
-          out.push(e);
-        }
-      }
-    }
-    return out;
-  }
 
   static isDir(x: ScanEntry) {
     return x.stats.isDirectory() || x.stats.isSymbolicLink();
@@ -89,11 +76,12 @@ export class ScanFs {
     });
   }
 
-  static bulkFindSync(handlers: ScanHandler[], base?: string) {
+  static async bulkScanDir(handlers: ScanHandler[], base?: string) {
+    const res = await Promise.all(handlers.map(x => ScanFs.scanDir(x, base)));
     const names = new Set<string>();
     const out = [];
-    for (const h of handlers) {
-      for (const e of ScanFs.scanDirSync(h, base)) {
+    for (const ls of res) {
+      for (const e of ls) {
         if (!names.has(e.file)) {
           names.add(e.file);
           out.push(e);
@@ -138,15 +126,29 @@ export class ScanFs {
     return out;
   }
 
+  static bulkScanDirSync(handlers: ScanHandler[], base?: string) {
+    const names = new Set<string>();
+    const out = [];
+    for (const h of handlers) {
+      for (const e of ScanFs.scanDirSync(h, base)) {
+        if (!names.has(e.file)) {
+          names.add(e.file);
+          out.push(e);
+        }
+      }
+    }
+    return out;
+  }
+
   static bulkRequire<T = any>(handlers: ScanHandler[], cwd?: string): T[] {
-    return ScanFs.bulkFindSync(handlers, cwd)
+    return ScanFs.bulkScanDirSync(handlers, cwd)
       .filter(ScanFs.isNotDir) // Skip folders
       .map(x => require(x.file.replace(/[\\]+/g, '/')))
       .filter(x => !!x); // Return non-empty values
   }
 
   static async bulkRead(handlers: ScanHandler[]) {
-    const files = await ScanFs.bulkFind(handlers);
+    const files = await ScanFs.bulkScanDir(handlers);
     const promises = files
       .filter(ScanFs.isNotDir)
       .map(x => fsReadFileAsync(x.file).then(d => ({ name: x.file, data: d.toString() })));
@@ -154,23 +156,8 @@ export class ScanFs {
   }
 
   static bulkReadSync(handlers: ScanHandler[]) {
-    return ScanFs.bulkFindSync(handlers)
+    return ScanFs.bulkScanDirSync(handlers)
       .filter(ScanFs.isNotDir)
       .map(x => ({ name: x.file, data: fs.readFileSync(x.file).toString() }));
-  }
-
-  static async rimraf(pth: string) {
-    const files = await ScanFs.scanDir({}, pth);
-    for (const filter of [
-      ScanFs.isNotDir,
-      (x: ScanEntry) => x.stats.isDirectory()
-    ]) {
-      await Promise.all(
-        files
-          .filter(filter)
-          .map(x => fsUnlink(x.file)
-            .catch(e => { console.error(`Unable to delete ${e.file}`); }))
-      );
-    }
   }
 }
