@@ -162,7 +162,9 @@ export class Util {
     for (const item of all) {
       const before = toList(item.target.before);
       for (const bf of before) {
-        allMap.get(bf)!.after.add(item.key);
+        if (allMap.has(bf)) {
+          allMap.get(bf)!.after.add(item.key);
+        }
       }
       item.after = new Set(Array.from(item.after).filter(x => allMap.has(x)));
     }

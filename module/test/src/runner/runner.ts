@@ -38,7 +38,7 @@ export class Runner {
     this.state = minimist(args, RUNNER_OPTIONS) as any as State;
   }
 
-  getConsumer(): Consumer & { summarize?: () => any } {
+  getConsumer(): Consumer & { summarize?: () => AllResultsCollector } {
     const consumers: Consumer[] = [];
     const fmtClass = FORMAT_MAPPING[this.state.format];
 
@@ -76,6 +76,7 @@ export class Runner {
               c.onSummary(all.summary);
             }
           }
+          return all;
         };
       }
 
@@ -119,7 +120,8 @@ export class Runner {
     }
 
     if (consumer.summarize) {
-      return consumer.summarize();
+      const result = consumer.summarize();
+      return result.summary.fail <= 0;
     }
   }
 
