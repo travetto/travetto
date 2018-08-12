@@ -123,17 +123,16 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     };
   }
 
-  async computeDependencies(managed: InjectableConfig<any>) {
-    const fieldKeys = Object.keys(managed.dependencies.fields!);
+  async fetchDependencies(managed: InjectableConfig<any>, deps?: Dependency<any>[]) {
+    if (!deps || !deps.length) {
+      return [];
+    }
 
-    const consDeps = managed.dependencies.cons || [];
-    const allDeps = consDeps.concat(fieldKeys.map(x => managed.dependencies.fields[x]));
-
-    for (const dep of allDeps) {
+    for (const dep of deps) {
       mergeWithOptional(dep);
     }
 
-    const promises = allDeps
+    const promises = deps
       .map(async x => {
         try {
           return await this.getInstance(x.target, x.qualifier);
@@ -141,28 +140,13 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
           if (x.optional && e instanceof InjectionError) {
             return undefined;
           } else {
+            e.message = `${e.message} for ${managed.class.__id}`;
             throw e;
           }
         }
       });
 
-    const all = await Promise.all(promises);
-
-    const consValues = all.slice(0, consDeps.length);
-    const fieldValues = all.slice(consDeps.length);
-
-    const fields = new Map<string, any>();
-    for (let i = 0; i < fieldKeys.length; i++) {
-      fields.set(fieldKeys[i], fieldValues[i]);
-    }
-
-    return { consValues, fields };
-  }
-
-  applyFieldDependencies(inst: any, fields: Map<string, any>) {
-    for (const [key, value] of fields.entries()) {
-      inst[key] = value;
-    }
+    return await Promise.all(promises);
   }
 
   async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
@@ -177,14 +161,27 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const clz = aliasMap.get(qualifier)!;
     const managed = this.get(clz)!;
 
-    const { consValues, fields } = await this.computeDependencies(managed);
+    // Only fetch constructor values
+    const consValues = await this.fetchDependencies(managed, managed.dependencies.cons);
 
+    // Create instance
     const inst = managed.factory ?
       managed.factory(...consValues) :
       new managed.class(...consValues);
 
-    this.applyFieldDependencies(inst, fields);
+    // Compute fields to be auto-wired
+    const fieldKeys = Object.keys(managed.dependencies.fields!)
+      .filter(x => !managed.factory || !(x in inst)); // Only apply fields that were not set on the factory instance
 
+    // And auto-wire
+    if (fieldKeys.length) {
+      const fieldDeps = await this.fetchDependencies(managed, fieldKeys.map(x => managed.dependencies.fields[x]));
+      for (let i = 0; i < fieldKeys.length; i++) {
+        (inst as any)[fieldKeys[i]] = fieldDeps[i];
+      }
+    }
+
+    // Run post construct
     if (inst.postConstruct) {
       await inst.postConstruct();
     }
@@ -365,7 +362,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         if (handler) {
           handler.target = null;
         }
-
+        const activeInstance = this.instances.get(targetId)!.get(config);
+        if (activeInstance && activeInstance.preDestroy) {
+          activeInstance.preDestroy();
+        }
         this.instances.get(targetId)!.delete(config);
         this.instancePromises.get(targetId)!.delete(config);
         console.trace('On uninstall', cls.__id, config, targetId, handler);

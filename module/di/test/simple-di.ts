@@ -1,9 +1,16 @@
-import { DependencyRegistry } from '../src/service';
-import { ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT, CUSTOM_DATABASE, Database, CUSTOM_EMPTY, BasePattern, SpecificPattern } from './deps';
-import { Suite, Test, BeforeEach } from '@travetto/test';
 import * as assert from 'assert';
-import { DbConfig } from './config';
+
+import { DependencyRegistry } from '../src/service';
+import { Suite, Test, BeforeEach } from '@travetto/test';
 import { Class } from '@travetto/registry';
+
+import {
+  ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT,
+  CUSTOM_DATABASE, Database, CUSTOM_EMPTY, BasePattern,
+  SpecificPattern
+} from './deps';
+
+import { DbConfig } from './config';
 
 const FOUR = 4;
 

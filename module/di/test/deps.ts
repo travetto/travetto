@@ -78,12 +78,14 @@ class TestConfig {
   }
 
   @InjectableFactory(CUSTOM_DATABASE)
-  static getCustomDB(config: DbConfig<any, any>, @Inject(CUSTOM_EMPTY) empty: Empty): Database {
+  static getCustomDB(@Inject(CUSTOM_EMPTY) empty: Empty): Database {
     console.log('Custom EMPTY 2', empty);
-    const ret = new Database();
+    const config = new DbConfig();
     config.temp = 'any';
+    config.empty = empty;
+
+    const ret = new Database();
     ret.dbConfig = config;
-    ret.dbConfig.empty = empty;
     return ret;
   }
 }
