@@ -8,3 +8,4 @@ express.operator:
     - CompressionOperator
     - BodyOperator
     - SessionOperator
+    - ContextOperator

@@ -9,6 +9,7 @@ import { AssetMongoConfig, AssetMongoSource } from '@travetto/asset-mongo';
 import { AuthProvider } from '@travetto/auth-express';
 import { ExpressApp } from '@travetto/express';
 import { AuthPassportOperator } from '@travetto/auth-express/extension/passport';
+import { ContextOperator } from '@travetto/express/extension/context';
 
 import { AuthMongo, AUTH } from './config';
 import { User } from './model/user';
@@ -54,6 +55,9 @@ export class SampleApp {
 
   @Inject()
   private authPassport: AuthPassportOperator;
+
+  @Inject()
+  private contextOp: ContextOperator;
 
   @Inject()
   private express: ExpressApp;

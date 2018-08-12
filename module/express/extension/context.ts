@@ -4,15 +4,15 @@ import { Context } from '@travetto/context';
 import { Injectable, Inject } from '@travetto/di';
 
 import { ExpressOperator } from '../src/types';
+import { SessionOperator } from '@travetto/express/src';
 
-@Injectable({
-  target: ExpressOperator,
-  qualifier: Symbol('@travetto/context')
-})
+@Injectable()
 export class ContextOperator extends ExpressOperator {
 
   @Inject()
   private context: Context;
+
+  before = SessionOperator;
 
   operate(app: express.Application) {
     app.use((req, res, next) => {
