@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@types/node": "^10.3.2",
+    "minimist": "^1.2.0",
     "trace": "^3.1.0",
     "tslib": "^1.9.3",
     "typescript": "^3.0.0"

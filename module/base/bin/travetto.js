@@ -2,6 +2,10 @@
 
 global.INIT_TIME = Date.now();
 
+if (require.main === module) {
+  require('./args');
+}
+
 const fs = require('fs');
 const path = require('path');
 const Module = require('module');

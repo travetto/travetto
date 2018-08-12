@@ -6,9 +6,9 @@
   "homepage": "https://travetto.io",
   "main": "./node_modules/.bin/travetto",
   "scripts": {
-    "test": "./node_modules/.bin/travetto-test",
+    "test": "npx travetto-test",
     "test:all": "npm run test test/.*.ts",
-    "start": "./node_modules/.bin/travetto sample"
+    "start": "npx travetto sample"
   },
   "keywords": [
     "travetto",

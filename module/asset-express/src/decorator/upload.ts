@@ -39,7 +39,7 @@ export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
   const excludeTypes = readTypeArr(config.excludeTypes);
 
   return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-    const rh = ControllerRegistry.getOrCreateEndpointConfig(target.constructor as Class, descriptor.value);
+    const ep = ControllerRegistry.getOrCreateEndpointConfig(target.constructor as Class, descriptor.value);
     const filt = async function (this: any, req: Request, res: Response) {
       await multipartAsync(req, res);
 
@@ -54,7 +54,7 @@ export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
       }
     };
 
-    rh.filters!.unshift(filt);
+    ep.filters!.unshift(filt);
     return descriptor;
   };
 }
