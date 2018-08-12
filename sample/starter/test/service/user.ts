@@ -34,7 +34,7 @@ class UserServiceTest {
   @Test('Delete a user')
   async removeUser() {
     // TODO
-    const svc = await DependencyRegistry.getInstance(ModelService);
+    const svc = await DependencyRegistry.getInstance(ModelService, TEST);
 
     let user = User.from({
       email: 'user@test.com',
