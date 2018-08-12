@@ -54,9 +54,6 @@ export class SampleApp {
   }
 
   @Inject()
-  private authPassport: AuthPassportOperator;
-
-  @Inject()
   private contextOp: ContextOperator;
 
   @Inject()

@@ -67,9 +67,6 @@ function buildLogging(profile) {
 }
 
 function buildProfile() {
-  const cliArgs = (process.argv.slice(2) || [])
-    .filter(x => /^-P[A-Za-z0-9_\-]+/.test(x))
-    .map(x => x.replace(/^-P/g, ''));
 
   const mapping = {
     production: PROD_KEY,
@@ -77,7 +74,7 @@ function buildProfile() {
     development: DEV_KEY
   };
 
-  const ext = [...envListVal('node_env'), ...envListVal('env'), ...envListVal('profile'), ...cliArgs]
+  const ext = [...envListVal('node_env'), ...envListVal('env'), ...envListVal('profile')]
     .map(x => mapping[x] || x);
 
   const primary =
@@ -107,7 +104,7 @@ function buildProfile() {
 }
 
 function buildAppMain() {
-  const appMain = envVal('TRV_APP') || process.argv.slice(2).pop();
+  const appMain = envVal('TRV_APP');
   return { appMain };
 }
 
