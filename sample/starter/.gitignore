@@ -1,7 +1,0 @@
-node_modules/**
-build/**
-rpm_build/**
-src/**/*.d.ts
-.vscode/
-npm-debug.log
-logs/**
