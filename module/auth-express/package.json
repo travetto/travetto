@@ -4,12 +4,12 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/auth": "^0.2.0",
-    "@travetto/express": "^0.2.0"
+    "@travetto/auth": "^0.2.2",
+    "@travetto/express": "^0.2.2"
   },
   "description": "Express authentication integration support for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.2.0"
+    "@travetto/test": "^0.2.2"
   },
   "optionalExtensionDependencies": {
     "passport": "^0.4.0"
@@ -31,5 +31,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.0"
+  "version": "0.2.2"
 }

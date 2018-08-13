@@ -4,13 +4,13 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/compiler": "^0.2.0",
+    "@travetto/compiler": "^0.2.2",
     "@types/lru-cache": "^4.1.0",
     "lru-cache": "^4.1.2"
   },
   "description": "Caching functionality with decorators for declarative use.",
   "devDependencies": {
-    "@travetto/test": "^0.2.0"
+    "@travetto/test": "^0.2.2"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -27,5 +27,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.0"
+  "version": "0.2.2"
 }

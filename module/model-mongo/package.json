@@ -4,14 +4,14 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/model": "^0.2.0",
+    "@travetto/model": "^0.2.2",
     "@types/mongodb": "^3.1.1",
     "mongodb": "^3.1.1"
   },
   "description": "Mongo backing for the travetto model module.",
   "devDependencies": {
-    "@travetto/exec": "^0.2.0",
-    "@travetto/test": "^0.2.0"
+    "@travetto/exec": "^0.2.2",
+    "@travetto/test": "^0.2.2"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -29,5 +29,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.0"
+  "version": "0.2.2"
 }
