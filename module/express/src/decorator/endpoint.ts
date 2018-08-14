@@ -1,31 +1,18 @@
-import { ConfigLoader } from '@travetto/config';
-
-import { Method, PathType, ParamConfig, EndpointIOType, EndpointConfig } from '../types';
-import { ControllerRegistry, ExpressConfig } from '../service';
-import { NO_CACHE } from './common';
-
-const expressCfg = new ExpressConfig();
-ConfigLoader.bindTo(expressCfg, 'express');
+import { Method, PathType, ParamConfig, EndpointIOType, EndpointConfig, Filter, EndpointDecorator } from '../types';
+import { ControllerRegistry } from '../service';
 
 function Endpoint(method: Method, path: PathType = '/', extra: Partial<EndpointConfig> = {}) {
-  return (target: any, prop: symbol | string, descriptor: TypedPropertyDescriptor<any>) => {
+  return function (target: any, prop: symbol | string, descriptor: TypedPropertyDescriptor<Filter>) {
     const params: { [key: string]: ParamConfig } = {};
     if (typeof path === 'string' && path.includes(':')) {
       path.replace(/:([A-Za-z0-9_]+)/, (a, name) => {
-        params[name] = { name, location: 'path', required: true };
+        params[name] = { name, location: 'params', required: true };
         return a;
       });
     }
     const ret = ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { method, path, params, ...extra });
-    if (method === 'get' && expressCfg.disableGetCache) {
-      const ep = ControllerRegistry.getOrCreateEndpointConfig(target.constructor, descriptor.value);
-      // Override if not set
-      if (!('Expires' in ep.headers) && !('Cache-Control' in ep.headers)) {
-        Object.assign(ep.headers, NO_CACHE);
-      }
-    }
     return ret;
-  };
+  } as EndpointDecorator;
 }
 
 export const All = (path?: PathType) => Endpoint('all', path);
@@ -38,13 +25,13 @@ export const Head = (path?: PathType) => Endpoint('head', path);
 export const Options = (path?: PathType) => Endpoint('options', path);
 
 export const ResponseType = (responseType: EndpointIOType) => {
-  return (target: any, property: string, descriptor: TypedPropertyDescriptor<any>) => {
+  return function (target: any, property: string, descriptor: TypedPropertyDescriptor<Filter>) {
     return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { responseType });
-  };
+  } as EndpointDecorator;
 };
 
 export const RequestType = (requestType: EndpointIOType) => {
-  return (target: any, property: string, descriptor: TypedPropertyDescriptor<any>) => {
+  return function (target: any, property: string, descriptor: TypedPropertyDescriptor<Filter>) {
     return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { requestType });
-  };
+  } as EndpointDecorator;
 };

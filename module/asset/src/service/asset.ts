@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { Injectable } from '@travetto/di';
-import { Asset, AssetMetadata } from '../model';
+import { Asset } from '../model';
 import { AssetSource } from './source';
 
 const fsUnlinkAsync = util.promisify(fs.unlink);

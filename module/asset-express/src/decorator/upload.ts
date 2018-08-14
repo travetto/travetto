@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import * as util from 'util';
 
 import { AssetUtil, AssetFile } from '@travetto/asset';
-import { ControllerRegistry } from '@travetto/express';
+import { ControllerRegistry, Filter, EndpointDecorator } from '@travetto/express';
 import { Class } from '@travetto/registry';
 
 import { AssetExpressConfig } from '../config';
@@ -38,9 +38,9 @@ export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
   const allowedTypes = readTypeArr(config.allowedTypes);
   const excludeTypes = readTypeArr(config.excludeTypes);
 
-  return (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => {
-    const ep = ControllerRegistry.getOrCreateEndpointConfig(target.constructor as Class, descriptor.value);
-    const filt = async function (this: any, req: Request, res: Response) {
+  return function (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<Filter>) {
+    const ep = ControllerRegistry.getOrCreateEndpointConfig(target.constructor as Class, descriptor.value!);
+    const filter = async function (req: Request, res: Response) {
       await multipartAsync(req, res);
 
       for (const f of Object.keys(req.files)) {
@@ -54,7 +54,7 @@ export function AssetUpload(config: Partial<AssetExpressConfig> = {}) {
       }
     };
 
-    ep.filters!.unshift(filt);
+    ep.filters!.unshift(filter);
     return descriptor;
-  };
+  } as EndpointDecorator;
 }

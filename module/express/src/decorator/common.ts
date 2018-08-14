@@ -1,4 +1,4 @@
-import { HeaderMap, EndpointConfig, ControllerConfig, DescribableConfig } from '../types';
+import { HeaderMap, EndpointConfig, ControllerConfig, DescribableConfig, Filter, EndpointDecorator } from '../types';
 import { ControllerRegistry } from '../service';
 
 const MIN = 1000 * 60;
@@ -8,25 +8,25 @@ const DAY = HOUR * 24;
 const UNIT_MAPPING = { s: 1000, ms: 1, m: MIN, h: HOUR, d: DAY, w: DAY * 7, y: DAY * 365 };
 type Units = keyof (typeof UNIT_MAPPING);
 
-export const NO_CACHE = {
-  Expires: '-1',
-  'Cache-Control': 'max-age=0, no-cache'
-};
-
 function register(config: Partial<EndpointConfig | ControllerConfig>) {
-  return (target: any, property?: string, descriptor?: PropertyDescriptor) => {
+  return function (target: any, property?: string, descriptor?: TypedPropertyDescriptor<Filter>) {
     if (descriptor) {
       return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, config);
     } else {
       return ControllerRegistry.registerPending(target, config);
     }
-  };
+  } as (EndpointDecorator & ClassDecorator);
 }
 
 export const Describe = (desc: DescribableConfig) => register(desc);
 
 export const Header = (headers: HeaderMap) => register({ headers });
-export const DisableCache = () => register({ headers: NO_CACHE });
+export const DisableCache = () => register({
+  headers: {
+    Expires: '-1',
+    'Cache-Control': 'max-age=0, no-cache'
+  }
+});
 
 export function Cache(value: number, unit: Units = 's') {
   const delta = UNIT_MAPPING[unit] * value;
@@ -35,3 +35,9 @@ export function Cache(value: number, unit: Units = 's') {
     'Cache-Control': () => `max-age=${delta}`
   });
 }
+
+export const Cors = (methods: string = '*', domain: string = '*') =>
+  Header({
+    'Access-Control-Allow-Origin': domain,
+    'Access-Control-Allow-Methods': methods
+  });

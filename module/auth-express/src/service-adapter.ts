@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { AuthService, AuthContext } from '@travetto/auth';
+import { AuthService } from '@travetto/auth';
 import { AuthOperator } from './operator';
 
 export class AuthServiceAdapter {

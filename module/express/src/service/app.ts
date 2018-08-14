@@ -6,54 +6,49 @@ import { Util } from '@travetto/base';
 
 import { ExpressConfig } from './config';
 import { RouteUtil } from '../route-util';
-import { ControllerConfig, ExpressOperator, ExpressOperatorSet } from '../types';
+import { ControllerConfig, ExpressOperator, ExpressOperatorSet, RouteStack } from '../types';
 import { ControllerRegistry } from './registry';
 
 @Injectable()
 export class ExpressApp {
 
-  private instance: express.Application;
+  private app: express.Application;
   private controllers = new Map<string, ControllerConfig>();
 
   constructor(private config: ExpressConfig, private operatorSet: ExpressOperatorSet) {
   }
 
   private async unregisterController(config: ControllerConfig) {
-    console.debug('Un-registering', config.class.__id, config.basePath);
-    this.instance._router.stack = RouteUtil.removeAllRoutes(this.instance._router.stack, config);
+    this.app._router.stack = (this.app._router.stack as RouteStack[])
+      .filter(x => x.handle.key === config.class.__id);
   }
 
   private async registerController(cConfig: ControllerConfig) {
-    const instance = await DependencyRegistry.getInstance(cConfig.class);
-    cConfig.instance = instance;
+    const controller = await DependencyRegistry.getInstance(cConfig.class);
+    cConfig.instance = controller;
 
-    console.debug('Registering Controller Instance', cConfig.class.__id, cConfig.basePath, cConfig.endpoints.length);
+    const router = express.Router({ mergeParams: true });
+    (router as any).key = cConfig.class.__id;
 
     for (const endpoint of cConfig.endpoints.reverse()) {
-      endpoint.instance = instance;
-      endpoint.path = RouteUtil.buildPath(cConfig.basePath, endpoint.path);
-      endpoint.handler = RouteUtil.asyncHandler(
-        RouteUtil.toPromise(endpoint.handler.bind(instance)),
-        RouteUtil.outputHandler.bind(null, endpoint));
-
-      const filters = [...cConfig.filters, ...(endpoint.filters).map(x => x.bind(instance))]
-        .map(RouteUtil.toPromise)
-        .map(x => RouteUtil.asyncHandler(x));
-
-      this.instance[endpoint.method!](endpoint.path!, ...filters, endpoint.handler);
+      endpoint.instance = controller;
+      router[endpoint.method!](endpoint.path!, RouteUtil.createRouteHandler(cConfig, endpoint));
     }
+
+    console.debug('Registering Controller Instance', cConfig.class.__id, cConfig.basePath, cConfig.endpoints.length);
+    this.app.use(cConfig.basePath, router);
 
     this.controllers.set(cConfig.basePath, cConfig);
   }
 
   get() {
-    return this.instance;
+    return this.app;
   }
 
   async init() {
     await ControllerRegistry.init();
 
-    this.instance = express();
+    this.app = express();
 
     const operators = DependencyRegistry.getCandidateTypes(ExpressOperator as Class)
       .filter(x => this.operatorSet.operators.has(x.class));
@@ -75,7 +70,7 @@ export class ExpressApp {
     console.log('Sorting Operators', sorted.length, sorted.map(x => x.constructor.name));
 
     for (const inst of sorted) {
-      inst.operate(this.instance);
+      inst.operate(this.app);
     }
 
     // Register all active
@@ -92,13 +87,11 @@ export class ExpressApp {
         this.registerController(ControllerRegistry.get(e.curr!)!);
       }
     });
-
-    this.instance.use(RouteUtil.errorHandler);
   }
 
   async run() {
     await this.init();
     console.info(`Listening on ${this.config.port}`);
-    this.instance.listen(this.config.port);
+    this.app.listen(this.config.port);
   }
 }

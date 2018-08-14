@@ -2,7 +2,7 @@ import { Controller, Get } from '../src';
 import { MockService } from './mock';
 
 @Controller('/weird')
-export class Weir {
+export class Weird {
 
   constructor(private service: MockService) {
   }

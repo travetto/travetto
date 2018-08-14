@@ -6,7 +6,7 @@ type TypedMethodDecorator<U> = (target: any, propertyKey: string, descriptor: Ty
 export function Cacheable<U>(config: LRU.Options<string, U> & { name?: string, dispose: (k: string, v: U) => any }, keyFn?: (...args: any[]) => string): TypedMethodDecorator<U>;
 export function Cacheable(config: string | LRU.Options<string, any> & { name?: string }, keyFn?: (...args: any[]) => string): TypedMethodDecorator<any>;
 export function Cacheable(config: string | LRU.Options<string, any> & { name?: string }, keyFn?: (...args: any[]) => string): TypedMethodDecorator<any> {
-  return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => any>) => {
+  return function (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => any>) {
     const targetName = `${target.name}-${propertyKey}`;
     if (typeof config !== 'string') {
       if (!config['name']) {

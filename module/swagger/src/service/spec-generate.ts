@@ -2,11 +2,11 @@ import { ControllerRegistry, MimeType } from '@travetto/express';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, DEFAULT_VIEW } from '@travetto/schema';
 
-import { Spec, Parameter, Path, Response, Schema, Operation } from '../types';
+import { Spec, Parameter, Path, Response, Schema, Operation } from '@travetto/swagger/src/types';
 
 const DEFINITION = '#/definitions';
 
-export class SwaggerUtil {
+export class SpecGenerateUtil {
 
   static getType(cls: Class, schemas: { [key: string]: Schema }) {
     const out: { [key: string]: any } = {};
@@ -108,6 +108,10 @@ export class SwaggerUtil {
       const ctrl = ControllerRegistry.get(cls);
       const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '');
 
+      if (tagName === 'Swagger') {
+        continue;
+      }
+
       tags.push({
         name: tagName,
         description: ctrl.description || ctrl.title
@@ -171,7 +175,7 @@ export class SwaggerUtil {
 
         const epPath = !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source;
 
-        paths[epPath] = {
+        paths[`${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/')] = {
           ...paths[epPath] || {},
           [ep.method!]: {
             tags: [tagName],
