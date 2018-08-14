@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
-import { ControllerRegistry, AppError } from '@travetto/express';
+import { Request } from 'express';
+import { ControllerRegistry, AppError, EndpointDecorator } from '@travetto/express';
 import { ERR_UNAUTHENTICATED, ERR_AUTHENTICATED, ERR_FORBIDDEN, ERR_INVALID_CREDS } from '@travetto/auth';
 
 export function Authenticate(provider: symbol, ...providers: symbol[]) {
   const computed = [provider, ...providers];
-  return ControllerRegistry.createFilterDecorator(async (req, res) => {
+  return ControllerRegistry.createFilterDecorator(async (req) => {
     try {
       await req.auth.login(computed);
     } catch (e) {
@@ -16,10 +16,10 @@ export function Authenticate(provider: symbol, ...providers: symbol[]) {
         throw e;
       }
     }
-  });
+  }) as EndpointDecorator;
 }
 
-export async function requireAuth(config: { include: string[], exclude: string[] }, req: Request, res: Response) {
+export async function requireAuth(config: { include: string[], exclude: string[] }, req: Request) {
   try {
     req.auth.checkPermissions(config.include, config.exclude);
   } catch (e) {
@@ -43,7 +43,7 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
 }
 
 export function Unauthenticated() {
-  return ControllerRegistry.createFilterDecorator((req: Request) => {
+  return ControllerRegistry.createFilterDecorator(req => {
     if (!req.auth.unauthenticated) {
       throw new AppError(ERR_UNAUTHENTICATED, 401);
     }

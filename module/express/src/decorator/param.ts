@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { Class } from '@travetto/registry';
 
 import { AppError } from '../model';
 import { ControllerRegistry } from '../service';
-import { ParamConfig, EndpointConfig } from '../types';
+import { ParamConfig, EndpointConfig, Filter, EndpointDecorator } from '../types';
 
 export function parseParam(type: Class | undefined, name: string, param: any) {
   let typedParam: any = param;
@@ -37,9 +37,9 @@ export function parseParam(type: Class | undefined, name: string, param: any) {
   return typedParam;
 }
 
-async function paramHandler(config: EndpointConfig, req: Request, res: Response) {
+async function paramHandler(config: EndpointConfig, req: Request) {
   for (const { name, required, type, location } of Object.values(config.params)) {
-    const param = (req as any)[location][name];
+    const param = req[location][name];
 
     if (required && !param) {
       throw new AppError(`Missing field: ${name}`, 400);
@@ -50,19 +50,19 @@ async function paramHandler(config: EndpointConfig, req: Request, res: Response)
 }
 
 export const Param = (param: ParamConfig) => {
-  return (target: any, property: string, descriptor: PropertyDescriptor) => {
-    const existing = ControllerRegistry.getOrCreatePendingField(target.constructor as Class, descriptor.value);
+  return function (target: any, property: string, descriptor: TypedPropertyDescriptor<Filter>) {
+    const existing = ControllerRegistry.getOrCreatePendingField(target.constructor as Class, descriptor.value!);
     const config: Partial<EndpointConfig> = { params: { [param.name]: param } };
     if (Object.keys(existing.params!).length === 0) {
       config.filters = [paramHandler.bind(null, existing)];
     }
     ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor!, config);
     return descriptor;
-  };
+  } as EndpointDecorator;
 };
 
 export const PathParam = (param: Partial<ParamConfig>) => {
-  return Param({ type: String, location: 'path', required: true, ...(param as ParamConfig) });
+  return Param({ type: String, location: 'params', required: true, ...(param as ParamConfig) });
 };
 
 export const QueryParam = (param: Partial<ParamConfig>) => {

@@ -1,7 +1,7 @@
 import { DependencyRegistry } from '@travetto/di';
 import { MetadataRegistry, Class } from '@travetto/registry';
 
-import { EndpointConfig, Filter, ControllerConfig } from '../types';
+import { EndpointConfig, Filter, ControllerConfig, EndpointDecorator, ControllerDecorator } from '../types';
 
 class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointConfig> {
 
@@ -56,13 +56,13 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   createFilterDecorator(fn: Filter) {
-    return (target: any, prop: string, descriptor: PropertyDescriptor) => {
+    return function (target: any, prop: string, descriptor: TypedPropertyDescriptor<Filter>) {
       if (prop) {
-        this.registerEndpointFilter(target.constructor, descriptor.value, fn);
+        ControllerRegistry.registerEndpointFilter(target.constructor, descriptor.value!, fn);
       } else {
-        this.registerControllerFilter(target, fn);
+        ControllerRegistry.registerControllerFilter(target, fn);
       }
-    };
+    } as (ControllerDecorator & EndpointDecorator);
   }
 
   mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>) {
@@ -72,8 +72,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     dest.description = src.description || dest.description;
   }
 
-  registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<any>, config: Partial<EndpointConfig>) {
-    const srcConf = this.getOrCreateEndpointConfig(target, descriptor.value);
+  registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<Filter>, config: Partial<EndpointConfig>) {
+    const srcConf = this.getOrCreateEndpointConfig(target, descriptor.value!);
     srcConf.method = config.method || srcConf.method;
     srcConf.path = config.path || srcConf.path;
     srcConf.responseType = config.responseType || srcConf.responseType;

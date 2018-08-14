@@ -3,7 +3,6 @@
     "module": "commonjs",
     "target": "es2018",
     "strict": true,
-    "noStrictGenericChecks": true,
     "strictPropertyInitialization": false,
     "sourceMap": true,
     "lib": [

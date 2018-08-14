@@ -4,7 +4,7 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { ApiHostConfig, ApiInfoConfig } from './config';
 import { Spec } from '../types';
-import { SwaggerUtil } from './util';
+import { SpecGenerateUtil } from './spec-generate';
 
 @Injectable()
 export class SwaggerService {
@@ -27,7 +27,7 @@ export class SwaggerService {
       this.spec = {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
-        ...SwaggerUtil.generate(),
+        ...SpecGenerateUtil.generate(),
       } as Spec;
     }
     return this.spec;

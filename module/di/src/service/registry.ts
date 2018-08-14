@@ -358,13 +358,14 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         this.instances.get(targetId)!.has(config) &&
         this.instances.get(targetId)!.get(config).constructor.__id === cls.__id
       ) {
-        const handler = this.proxyHandlers.get(targetId)!.get(config);
-        if (handler) {
-          handler.target = null;
-        }
         const activeInstance = this.instances.get(targetId)!.get(config);
         if (activeInstance && activeInstance.preDestroy) {
           activeInstance.preDestroy();
+        }
+
+        const handler = this.proxyHandlers.get(targetId)!.get(config);
+        if (handler) {
+          handler.target = null;
         }
         this.instances.get(targetId)!.delete(config);
         this.instancePromises.get(targetId)!.delete(config);

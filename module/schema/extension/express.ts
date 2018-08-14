@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { ControllerRegistry, AppError, ParamConfig } from '@travetto/express';
+import { ControllerRegistry, AppError, ParamConfig, Filter, EndpointDecorator } from '@travetto/express';
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
@@ -60,29 +60,29 @@ function schemaToParams(cls: Class, view?: string, prefix: string = '') {
 }
 
 export function SchemaBody<T>(cls: Class<T>, view?: string) {
-  return (target: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
+  return function (target: any, prop: string | symbol, descriptor: TypedPropertyDescriptor<Filter>) {
     ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, {
       requestType: {
         type: cls
       },
       filters: [
-        async (req: Request, res: Response) => {
+        async function (req: Request) {
           req.body = await getSchemaBody(req, cls, view);
         }
       ]
     });
-  };
+  } as EndpointDecorator;
 }
 
 export function SchemaQuery<T>(cls: Class<T>, view?: string) {
 
-  return (target: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
+  return function (target: any, prop: string | symbol, descriptor: TypedPropertyDescriptor<Filter>) {
     const params = schemaToParams(cls, view);
 
     ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, {
       params: { ...params },
       filters: [
-        async (req: Request, res: Response) => {
+        async (req: Request) => {
           const o = getBound(cls, BindUtil.expandPaths(req.query), view);
           if (SchemaRegistry.has(cls)) {
             req.query = await SchemaValidator.validate(o, view);
@@ -92,5 +92,5 @@ export function SchemaQuery<T>(cls: Class<T>, view?: string) {
         }
       ]
     });
-  };
+  } as EndpointDecorator;
 }

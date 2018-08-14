@@ -1,4 +1,4 @@
-import { Application, Request, Response, NextFunction } from 'express';
+import { Application, Request, Response } from 'express';
 import { Class } from '@travetto/registry';
 
 export type HeaderMap = { [key: string]: (string | (() => string)) };
@@ -15,7 +15,7 @@ export interface ParamConfig {
   name: string;
   description?: string;
   required?: boolean;
-  location: 'path' | 'query' | 'body';
+  location: 'params' | 'query' | 'body';
   type?: Class;
 }
 
@@ -50,14 +50,30 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
   endpoints: EndpointConfig[];
 }
 
-export type Filter<T = any> = (req: Request, res: Response, next?: NextFunction) => T;
+export type Filter<T = any> = (req: Request, res: Response) => T;
+export type FilterReq<T = any> = (req: Request) => T;
+export type FilterNone<T = any> = () => T;
+
+export interface EndpointDecorator<T = any> {
+  (target: any, prop: string | symbol, descriptor: TypedPropertyDescriptor<FilterNone<T>>): TypedPropertyDescriptor<FilterNone<T>> | undefined;
+  (target: any, prop: string | symbol, descriptor: TypedPropertyDescriptor<FilterReq<T>>): TypedPropertyDescriptor<FilterReq<T>> | undefined;
+  (target: any, prop: string | symbol, descriptor: TypedPropertyDescriptor<Filter<T>>): TypedPropertyDescriptor<Filter<T>> | undefined;
+}
+
+export interface ControllerDecorator<T = any> {
+  (target: Class<T>): Class<T> | undefined;
+}
 
 export class RouteStack {
   name: string;
   keys: string[];
   regexp: {
+    source: string,
     fast_star: boolean,
     fast_slash: boolean
+  };
+  handle: {
+    key: string;
   };
   route: {
     path: string,
