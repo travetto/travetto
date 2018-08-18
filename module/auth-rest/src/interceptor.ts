@@ -65,7 +65,7 @@ export class AuthInterceptor extends RestInterceptor {
 
     this.service.clearContext();
     await util.promisify(req.session!.destroy).call(req.session);
-    res.clearCookie('connect.sid', { path: '/' });
+    res.cookie('connect.sid', undefined, { path: '/', expires: new Date(1) });
   }
 
   async loadContext(req: Request, res: Response) {

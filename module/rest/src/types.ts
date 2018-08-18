@@ -66,10 +66,6 @@ export interface ControllerDecorator<T = any> {
   (target: Class<T>): Class<T> | undefined;
 }
 
-export type QueryParams<T = any> = T;
-export type RequestBody<T = any> = T;
-export type PathParams<T = any> = T;
-
 export abstract class RestAppProvider<T = any> {
   abstract get _raw(): T;
   abstract init(): Promise<any>;

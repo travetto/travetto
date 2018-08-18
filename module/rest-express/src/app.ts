@@ -6,7 +6,7 @@ import * as compression from 'compression';
 
 import { ConfigLoader } from '@travetto/config';
 
-import { ControllerConfig, RestAppProvider, RestInterceptor } from '../../src';
+import { ControllerConfig, RestAppProvider, RestInterceptor } from '@travetto/rest';
 import { RouteStack } from './types';
 import { ExpressConfig } from './config';
 
@@ -55,7 +55,7 @@ export class ExpressAppProvider extends RestAppProvider<express.Application> {
     (router as any).key = cConfig.class.__id;
 
     for (const endpoint of cConfig.endpoints.reverse()) {
-      router[endpoint.method!](endpoint.path!, endpoint.handlerFinalized!);
+      router[endpoint.method!](endpoint.path!, endpoint.handlerFinalized! as any);
     }
 
     console.debug('Registering Controller Instance', cConfig.class.__id, cConfig.basePath, cConfig.endpoints.length);
@@ -63,7 +63,7 @@ export class ExpressAppProvider extends RestAppProvider<express.Application> {
   }
 
   registerInterceptor(op: RestInterceptor) {
-    this.app.use(op.intercept);
+    this.app.use(op.intercept as any);
   }
 
   listen(port: number) {

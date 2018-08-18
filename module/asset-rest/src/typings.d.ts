@@ -1,7 +1,9 @@
 import { Asset } from '@travetto/asset';
 
-declare module '@travetto/rest/io' {
-	export interface Request {
-		files: { [key: string]: Asset };
+declare global {
+	namespace Travetto {
+		interface Request {
+			files: { [key: string]: Asset };
+		}
 	}
 }
