@@ -1,4 +1,4 @@
-import { Controller, Options, Get, Cors } from '@travetto/express';
+import { Controller, Options, Get, Cors } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 
 import { SwaggerService } from '../service';
@@ -13,6 +13,10 @@ export class SwaggerController {
 
   @Inject()
   generator: ClientGenerate;
+
+  postConstruct() {
+    this.generator.run();
+  }
 
   @Options('/swagger.json')
   async getSpecOptions() { }

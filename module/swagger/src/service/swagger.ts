@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
-import { ControllerRegistry } from '@travetto/express';
+import { ControllerRegistry } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ApiHostConfig, ApiInfoConfig } from './config';

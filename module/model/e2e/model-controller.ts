@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-import { Get } from '@travetto/express';
+import { Get } from '@travetto/rest';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { Injectable, InjectableFactory } from '@travetto/di';
 

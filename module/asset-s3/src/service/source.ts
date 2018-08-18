@@ -1,7 +1,6 @@
 import * as aws from 'aws-sdk';
 import * as fs from 'fs';
 
-import { Injectable, Inject } from '@travetto/di';
 import { AssetSource, Asset, AssetMetadata } from '@travetto/asset';
 import { AssetS3Config } from './config';
 import { TagSet } from 'aws-sdk/clients/s3';

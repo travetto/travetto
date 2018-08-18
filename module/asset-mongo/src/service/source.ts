@@ -2,7 +2,6 @@ import * as mongo from 'mongodb';
 import * as Grid from 'gridfs-stream';
 import * as util from 'util';
 
-import { Injectable, Inject } from '@travetto/di';
 import { AssetSource, Asset } from '@travetto/asset';
 import { AssetMongoConfig } from './config';
 

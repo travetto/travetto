@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@travetto/exec": "^0.2.2",
-    "@travetto/express": "^0.2.2",
+    "@travetto/rest": "^0.2.2",
     "@travetto/schema": "^0.2.2"
   },
   "description": "Swagger integration support for the travetto framework",
@@ -14,7 +14,7 @@
   },
   "homepage": "https://travetto.io",
   "keywords": [
-    "express",
+    "rest",
     "travetto",
     "decorators",
     "schema"

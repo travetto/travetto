@@ -1,0 +1,8 @@
+---
+injectable:
+ '@travetto/rest': 
+  - Controller
+
+rest.interceptor:
+  '@travetto/rest':
+    - ContextInterceptor

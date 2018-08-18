@@ -4,11 +4,11 @@ import * as path from 'path';
 import * as fileType from 'file-type';
 import * as util from 'util';
 import * as os from 'os';
+import * as crypto from 'crypto';
 
 import { HttpRequest } from '@travetto/util';
 import { Asset, AssetFile } from './model';
 
-const crypto = require('crypto');
 const fsStatAsync = util.promisify(fs.stat);
 const fsRenameAsync = util.promisify(fs.rename);
 const fsReadyAync = util.promisify(fs.read);
@@ -36,7 +36,7 @@ export class AssetUtil {
 
     const upload = this.fileToAsset({
       name: pth,
-      hash: hash.read(),
+      hash: hash.read().toString(),
       size,
       path: pth,
     }, prefix);

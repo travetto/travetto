@@ -4,7 +4,7 @@ import * as path from 'path';
 import { DockerContainer } from '@travetto/exec';
 import { Injectable } from '@travetto/di';
 import { Env, FsUtil } from '@travetto/base';
-import { ControllerRegistry } from '@travetto/express';
+import { ControllerRegistry } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ApiClientConfig } from './config';

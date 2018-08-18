@@ -39,6 +39,10 @@ export function Application(name: string): ClassDecorator {
           if ((ins as any).run) {
             (ins as Runnable).run();
           }
+        })
+        .catch(err => {
+          console.error(err);
+          throw err;
         });
     }
     return target;

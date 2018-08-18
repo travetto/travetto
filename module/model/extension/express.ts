@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-import { ControllerRegistry } from '@travetto/express';
+import { ControllerRegistry } from '@travetto/rest';
 import { getSchemaBody } from '@travetto/schema/extension/express';
 import { Class } from '@travetto/registry';
 

@@ -1,12 +1,12 @@
 import { Application } from '@travetto/di';
-import { ExpressApp } from '@travetto/express';
+import { RestApp } from '@travetto/rest';
 
 import { ClientGenerate } from '../src';
 
 @Application('sample')
 export class SampleApp {
 
-  constructor(private app: ExpressApp, private cg: ClientGenerate) { }
+  constructor(private app: RestApp, private cg: ClientGenerate) { }
 
   run() {
     this.app.run();

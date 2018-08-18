@@ -1,0 +1,35 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "dependencies": {
+    "@travetto/auth": "^0.2.2",
+    "@travetto/rest": "^0.2.2"
+  },
+  "description": "Rest authentication integration support for the travetto framework",
+  "devDependencies": {
+    "@travetto/test": "^0.2.2"
+  },
+  "optionalExtensionDependencies": {
+    "passport": "^0.4.0"
+  },
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "authentication",
+    "rest",
+    "travetto",
+    "decorators",
+    "passport"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/auth-rest",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test"
+  },
+  "version": "0.2.2"
+}

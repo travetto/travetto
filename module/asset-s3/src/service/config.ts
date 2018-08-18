@@ -23,6 +23,6 @@ export class AssetS3Config {
       params: {
         Bucket: this.bucket
       }
-    }
+    };
   }
 }

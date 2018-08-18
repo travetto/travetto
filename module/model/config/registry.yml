@@ -2,9 +2,9 @@
 schema:
   '@travetto/model': Model
 
-registry:
-  schema:
-    './src/decorator/model.ts': Model
+# registry:
+#   schema:
+#     './src/decorator/model.ts': Model
 
 injectable:
   '@travetto/model': 
