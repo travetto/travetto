@@ -1,10 +1,11 @@
+import { Class } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Model, ModelQuery, ModelCore, WhereClause, BaseModel, PropWhereClause } from '..';
 import { Schema, SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
+
 import { QueryVerifierService } from '../src/service/query';
 import { RetainFields } from '../src/model/query/common';
-import { Class } from '@travetto/registry';
+import { Model, ModelQuery, ModelCore, WhereClause, BaseModel, PropWhereClause } from '../src';
 
 @Schema()
 class Preferences {

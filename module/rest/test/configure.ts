@@ -53,7 +53,7 @@ export class ConfigureTest {
     assert(ep.filters.length === 1);
 
     const testParams: any = {
-      path: {
+      params: {
         name: '55'
       }
     };
@@ -61,6 +61,6 @@ export class ConfigureTest {
     await ep.filters[0](testParams, null as any);
     // console.log(testParams);
 
-    assert(testParams.path.name === 55);
+    assert(testParams.params.name === 55);
   }
 }

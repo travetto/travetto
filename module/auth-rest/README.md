@@ -1,28 +1,26 @@
-travetto: Auth-Express
+travetto: Auth-Rest
 ===
 
-This is a primary integration for the [`Auth`](https://github.com/travetto/auth) module.  This is another level of scaffolding allowing for any [`express`](https://expressjs.com)-based authentication framework to integrate.  
+This is a primary integration for the [`Auth`](https://github.com/travetto/auth) module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  
 
-The integration with the [`Express`](https://github.com/travetto/express) touches multiple levels. Primarily:
+The integration with the [`Rest`](https://github.com/travetto/rest) module touches multiple levels. Primarily:
 * Security information management
 * Patterns for auth framework integrations
 * Route declaration
 * Passport integration
 
 ## Security information management
-When working with framework's authentication, the user information is exposed via the `express` ```Request``` object.  The auth functionality is exposed on the request as the property `auth`.
+When working with framework's authentication, the user information is exposed via the ```Request``` object.  The auth functionality is exposed on the request as the property `auth`.
 ```typescript
-declare module "express" {
-  export interface Request {
-    auth: {
-      context: AuthContext<any>; 
-      authenticated: boolean;
-      unauthenticated: boolean;
-      checkPermissions(include: string[], exclude: string[]): boolean;
-      login(providers: symbol[]): Promise<AuthContext<any>|undefined>;
-      logout: Promise<void>;
-    }
-	}
+export interface Request {
+  auth: {
+    context: AuthContext<any>; 
+    authenticated: boolean;
+    unauthenticated: boolean;
+    checkPermissions(include: string[], exclude: string[]): boolean;
+    login(providers: symbol[]): Promise<AuthContext<any>|undefined>;
+    logout: Promise<void>;
+  }
 }
 ```
 This allows for any filters/middleware to access this information without deeper knowledge of the framework itself.  Also, for performance benefits, the auth context is stored in the user session as a means to minimize future lookups. Since we are storing the entire principal in the session, it is best to keep the principal as small as possible.
@@ -37,9 +35,9 @@ export class AuthProvider<U> {
   async deserialize(serialized: string): Promise<AuthContext<U>>;
 }
 ```
-By default, logout does nothing, as the `express` session cleanup will generally suffice.  Additionally, the ```serialize```/```deserialize``` functionality default to ```JSON.stringify```/```JSON.parse``` respectively.  These can be overridden as needed, but sensible defaults help to minimize the friction between pieces.
+By default, logout does nothing, as the  session cleanup will generally suffice.  Additionally, the ```serialize```/```deserialize``` functionality default to ```JSON.stringify```/```JSON.parse``` respectively.  These can be overridden as needed, but sensible defaults help to minimize the friction between pieces.
 
-The only required method to be defined is the ```login``` method.  This takes in an `express` ```Request``` and ```Response```, and is responsible for:
+The only required method to be defined is the ```login``` method.  This takes in a ```Request``` and ```Response```, and is responsible for:
 * Returning an ```AuthContext``` if authentication was successful
 * Throwing an error if it failed
 * Returning undefined if the authentication is multi-staged and has not completed yet
@@ -82,7 +80,7 @@ The symbol ```FB_AUTH``` is what will be used to reference providers at runtime.
 ## Route Declaration
 Like the ```AuthService```, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
 
-`@Authenticate` provides `express` middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
+`@Authenticate` provides middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 ```typescript
 @Controller('/auth')
 export class Auth {
@@ -116,7 +114,7 @@ export class Auth {
 ```
 
 ## Passport
-Within the node ecosystem, the most prevalent `express`-baseed auth framework is [`passport`](http://passportjs.org).  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, the there is extension support for `passport` baked in, and registering and configuring a strategy is fairly straightforward.
+Within the node ecosystem, the most prevalent auth framework is [`passport`](http://passportjs.org).  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, the there is extension support for `passport` baked in, and registering and configuring a strategy is fairly straightforward.
 
 ```typescript
 export const FB_AUTH = Symbol('facebook');

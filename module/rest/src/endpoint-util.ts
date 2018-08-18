@@ -9,10 +9,6 @@ ConfigLoader.bindTo(restCfg, 'rest');
 
 export class EndpointUtil {
 
-  static canAccept(req: Request, mime: string) {
-    return (req.headers['accept'] || '').indexOf(mime) >= 0;
-  }
-
   static logRequest(req: Request, res: Response) {
     const reqLog = {
       meta: {
@@ -49,7 +45,8 @@ export class EndpointUtil {
           res.header('Content-Type', MimeType.JSON);
           res.send((output as any).toJSON());
         } else {
-          res.json(output);
+          res.header('Content-Type', MimeType.JSON);
+          res.send(output);
         }
       }
     }
@@ -89,6 +86,7 @@ export class EndpointUtil {
         const output = await handlerBound(req, res);
         await EndpointUtil.sendOutput(req, res, output, headers);
       } catch (error) {
+        console.log(error);
         await EndpointUtil.sendOutput(req, res, error);
       }
 
