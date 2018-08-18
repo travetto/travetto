@@ -12,7 +12,7 @@
     "@travetto/test": "^0.2.2"
   },
   "optionalExtensionDependencies": {
-    "@travetto/auth-express": "^0.1.11"
+    "@travetto/auth-rest": "^0.1.11"
   },
   "homepage": "https://travetto.io",
   "keywords": [

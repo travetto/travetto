@@ -8,6 +8,7 @@ import { Injectable } from '@travetto/di';
 import { AssetService } from './asset';
 import { Asset } from '../model';
 import { AssetUtil } from '../util';
+import { ImageOptions } from '../types';
 
 const fsUnlinkAsync = util.promisify(fs.unlink);
 
@@ -31,7 +32,7 @@ export class ImageService {
       });
     }
   })
-  async generateAndStoreImage(filename: string, options: { w: number, h: number }, hasTags?: string[]): Promise<string | undefined> {
+  async generateAndStoreImage(filename: string, options: ImageOptions, hasTags?: string[]): Promise<string | undefined> {
     const info = await this.assetService.get(filename, hasTags);
     if (!info.stream) {
       throw new Error('Stream not found');
@@ -48,7 +49,7 @@ export class ImageService {
     }
   }
 
-  async getImage(filename: string, options: { w: number, h: number }, hasTags?: string[]): Promise<Asset> {
+  async getImage(filename: string, options: ImageOptions, hasTags?: string[]): Promise<Asset> {
     const file = await this.generateAndStoreImage(filename, options, hasTags);
     const info = await this.assetService.get(filename, hasTags);
     if (file) {

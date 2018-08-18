@@ -1,0 +1,35 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "dependencies": {
+    "@travetto/asset": "^0.2.2",
+    "@travetto/rest": "^0.2.2",
+    "mime-match": "^1.0.2",
+    "multiparty": "^4.2.1",
+    "@types/multiparty": "^0.0.31",
+    "connect-multiparty": "^2.1.1"
+  },
+  "description": "Provides integration between the travetto asset and rest module.",
+  "devDependencies": {
+    "@travetto/test": "^0.2.2"
+  },
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "rest",
+    "travetto",
+    "typescript",
+    "upload"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/asset-rest",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test"
+  },
+  "version": "0.2.2"
+}

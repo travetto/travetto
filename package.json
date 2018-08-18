@@ -1,11 +1,21 @@
 {
   "devDependencies": {
-    "lerna": "^3.0.0",
+    "@types/body-parser": "^1.17.0",
+    "@types/compression": "0.0.36",
+    "@types/cookie-parser": "^1.4.1",
+    "@types/express": "^4.16.0",
+    "@types/express-session": "^1.15.10",
     "@types/faker": "^4.1.2",
-    "faker": "^4.1.0",
-    "passport": "^0.4.0",
     "@types/passport": "^0.4.6",
     "@types/passport-facebook": "^2.1.8",
+    "body-parser": "^1.18.3",
+    "compression": "^1.7.3",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "faker": "^4.1.0",
+    "lerna": "^3.0.0",
+    "passport": "^0.4.0",
     "passport-facebook": "^2.1.1"
   }
 }

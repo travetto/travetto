@@ -1,8 +1,6 @@
-import { Request, Response } from 'express';
-
-import { AppError } from '@travetto/express';
+import { AppError, Request, Response } from '@travetto/rest';
 import { BaseModel } from '@travetto/model';
-import { AuthProvider } from '@travetto/auth-express';
+import { AuthProvider } from '@travetto/auth-rest';
 import { ERR_INVALID_PASSWORD, AuthContext } from '@travetto/auth';
 
 import { AuthModelService } from '../src';

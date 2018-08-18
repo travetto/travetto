@@ -1,6 +1,4 @@
-import { Request, Response } from 'express';
-
-import { ControllerRegistry, AppError, ParamConfig, Filter, EndpointDecorator } from '@travetto/express';
+import { ControllerRegistry, AppError, ParamConfig, Filter, EndpointDecorator, Response, Request } from '@travetto/rest';
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
@@ -8,7 +6,8 @@ import { SchemaRegistry, BindUtil, SchemaValidator, ValidationErrors } from '../
 
 // tslint:disable:no-invalid-this
 (ValidationErrors as any as Class<Error>).prototype.render = function (res: Response) {
-  res.status(403).json({
+  res.status(403);
+  res.json({
     message: this.message,
     errors: this.errors,
     status: 403,

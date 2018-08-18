@@ -1,8 +1,8 @@
-import { ControllerRegistry, MimeType } from '@travetto/express';
+import { ControllerRegistry, MimeType } from '@travetto/rest';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, DEFAULT_VIEW } from '@travetto/schema';
 
-import { Spec, Parameter, Path, Response, Schema, Operation } from '@travetto/swagger/src/types';
+import { Spec, Parameter, Path, Response, Schema, Operation } from '../types';
 
 const DEFINITION = '#/definitions';
 
