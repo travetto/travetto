@@ -3,6 +3,9 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "travetto": "bin/travetto.js",
     "travetto-clean": "bin/travetto-clean.js"

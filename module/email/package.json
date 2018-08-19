@@ -3,6 +3,9 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "travetto-email": "./bin/travetto-email.sh"
   },
@@ -50,5 +53,6 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.4"
+  "version": "0.2.4",
+  "gitHead": "b341ad30d6dd66c933577b0b99de2d4a748715a5"
 }

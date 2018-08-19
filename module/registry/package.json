@@ -3,6 +3,9 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@travetto/compiler": "^0.2.2",
     "string-hash": "^1.1.3"
