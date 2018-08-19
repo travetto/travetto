@@ -3,6 +3,9 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@travetto/base": "^0.2.2",
     "@types/source-map-support": "^0.4.1",
