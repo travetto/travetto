@@ -1,9 +1,9 @@
 travetto: Auth-Rest
 ===
 
-This is a primary integration for the [`Auth`](https://github.com/travetto/auth) module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  
+This is a primary integration for the [`Auth`](https://github.com/travetto/travetto/tree/master/module/auth) module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  
 
-The integration with the [`Rest`](https://github.com/travetto/rest) module touches multiple levels. Primarily:
+The integration with the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) module touches multiple levels. Primarily:
 * Security information management
 * Patterns for auth framework integrations
 * Route declaration

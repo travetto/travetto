@@ -1,6 +1,6 @@
 travetto: Rest
 ===
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The underlying framework is [`express`](https://expressjs.com)-compatible, and should be able to handle anything that conforms to the `express` model (e.g. [`restify`](http://restify.com) and [`fastify`](https://www.fastify.io/))
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [`express`](https://expressjs.com) in the `Request` and `Response` objects).  Currently the platform supports  [`fastify`](https://www.fastify.io/) and [`express`](https://expressjs.com), with more being added in the future.
 
 ## Route management 
 
@@ -118,10 +118,10 @@ export class LoggingInterceptor extends ExpressInterceptor {
 ```
 
 ## Documentation
-As shown above, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. To generate a usable API doc, a separate module should be used. Currently [`Swagger`](https://github.com/travetto/swagger) is the only module that exists, but other implementations should be available in the future.
+As shown above, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. To generate a usable API doc, a separate module should be used. Currently [`Swagger`](https://github.com/travetto/travetto/tree/master/module/swagger) is the only module that exists, but other implementations should be available in the future.
 
 ## Creating and Running an App
-To run a REST server, you will need to construct an entry point using the `@Application` decorator, as well as define a valid [`RestAppProvider`](./src/types.ts) to provide initialization for the application.  This would look like:
+To run a REST server, you will need to construct an entry point using the `@Application` decorator, as well as define a valid [`RestAppProvider`](./src/types.ts) to provide initialization for the application.  This could look like:
 
 ```typescript
 @Application('sample')
@@ -145,22 +145,14 @@ export class SampleApp {
 
 And using the pattern established in the [`Dependency Injection`](https://github.com/travetto/di) module, you would run your program using `npx travetto sample`.
 
+## Custom Interceptors
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [`Dependency Injection`](https://github.com/travetto/di) by extending the [`RestInterceptor`](./src/interceptor) class.  The interceptors are tied to the defined `Request` and `Response` objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed.  Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module/asset-rest) is implemented in the fashion, as well as [`Auth-Rest`](https://github.com/travetto/travetto/tree/master/module/auth-rest).
+
 ## Extensions
 Integration with other modules can be supported by extensions.  The dependencies are in `optionalExtensionDependencies` and must be installed directly if you want to use them:
 
-### Express
-When working with [`express`](https://expressjs.com) applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
-* ```compression()```
-* ```cookieParser()```
-* ```bodyParser.json()```
-* ```bodyParser.urlencoded()```
-* ```bodyParser.raw({ type: 'image/*' })```
-* ```session(this.config.session)```
-
-Additionally it is sometimes necessary to register custom filters.  Filters can be registered with the [`Dependency Injection`](https://github.com/travetto/di) by extending the [`RestInterceptor`](./src/interceptor) class.  
-
 ### Context
-[`Context`](https://github.com/travetto/context) provides support for automatically injecting an async context into every request. The context management is provided via an `Interceptor` and is transparent to the programmer.
+[`Context`](https://github.com/travetto/travetto/tree/master/module/context) provides support for automatically injecting an async context into every request. The context management is provided via an `Interceptor` and is transparent to the programmer.
 
 ```typescript
  ...

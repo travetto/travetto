@@ -1,7 +1,7 @@
 travetto: Auth-Model
 ===
 
-This module provide sthe integration between the [`Auth`](https://github.com/travetto/auth) module and the [`Model`](https://github.com/travetto/model).
+This module provide sthe integration between the [`Auth`](https://github.com/travetto/travetto/tree/master/module/auth) module and the [`Model`](https://github.com/travetto/travetto/tree/master/module/model).
 
 The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for the authentication model requires the following structure:
 ```typescript

@@ -1,7 +1,7 @@
 travetto: Asset-Mongo
 ===
 
-This provides a [`mongodb`](https://mongodb.com) implementation of the `AssetSource` that which is a backend for the [`Asset`](https://github.com/travetto/asset) module.  
+This provides a [`mongodb`](https://mongodb.com) implementation of the `AssetSource` that which is a backend for the [`Asset`](https://github.com/travetto/travetto/tree/master/module/asset) module.  
 
 The primary utilization of this module, is to configure the `AssetSource` injectable, and provide whatever configuration you would like to use.  
 
@@ -33,4 +33,4 @@ export class AssetMongoConfig {
 }
 ```
 
-Additionally, you can see that the class is registered with the `@Config` annotation, and so these values can be overridden using the standard[`Configuration`](https://github.com/travetto/config) resolution paths. 
+Additionally, you can see that the class is registered with the `@Config` annotation, and so these values can be overridden using the standard[`Configuration`](https://github.com/travetto/travetto/tree/master/module/config) resolution paths. 

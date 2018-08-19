@@ -1,6 +1,6 @@
 travetto: Swagger
 ===
-The module is provides a [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) v2 representation of the API metadata provided via the [`Express`](https://github.com/travetto/express) and [`Schema`](https://github.com/travetto/schema) modules.
+The module is provides a [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) v2 representation of the API metadata provided via the [`Express`](https://github.com/travetto/travetto/tree/master/module/express) and [`Schema`](https://github.com/travetto/travetto/tree/master/module/schema) modules.
 
 
 ## Configuration

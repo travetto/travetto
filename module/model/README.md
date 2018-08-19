@@ -1,7 +1,7 @@
 travetto: Model
 ===
 
-This module provides a clean interface to data model persistence, modification and retrieval.  This module builds heavily upon the [`Schema`](https://github.com/travetto/schema), which is used for data model validation.
+This module provides a clean interface to data model persistence, modification and retrieval.  This module builds heavily upon the [`Schema`](https://github.com/travetto/travetto/tree/master/module/schema), which is used for data model validation.
 
 The module can be segmented into three main areas: Model declaration, access/storage, and querying
 
@@ -109,7 +109,7 @@ This would find all users who are over 35 and that have the `contact` field spec
 Integration with other modules can be supported by extensions.  The dependencies are `optionalExtensionDependencies` and must be installed directly if you want to use them:
 
 ### Express
-[`Express`](https://github.com/travetto/express) support with the `@ModelController` for exposing common RESTful patterns for routes.
+[`Express`](https://github.com/travetto/travetto/tree/master/module/express) support with the `@ModelController` for exposing common RESTful patterns for routes.
 
 ```typescript
 @ModelController('/user', User) 
