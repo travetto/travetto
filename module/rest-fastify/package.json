@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/rest": "^0.2.4",
+    "@travetto/rest": "^0.2.5",
     "fastify": "^1.9.0",
     "fastify-compress": "^0.6.0",
     "fastify-cookie": "^2.0.1",
@@ -15,7 +15,7 @@
     "fastify-session": "^1.1.0"
   },
   "devDependencies": {
-    "@travetto/test": "^0.2.2"
+    "@travetto/test": "^0.2.3"
   },
   "description": "Fastify provider for the travetto rest module.",
   "homepage": "https://travetto.io",
@@ -34,6 +34,6 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.4",
+  "version": "0.2.5",
   "gitHead": "b341ad30d6dd66c933577b0b99de2d4a748715a5"
 }

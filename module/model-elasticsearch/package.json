@@ -7,15 +7,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/model": "^0.2.4",
-    "@travetto/schema": "^0.2.4",
+    "@travetto/model": "^0.2.5",
+    "@travetto/schema": "^0.2.5",
     "@types/elasticsearch": "^5.0.23",
     "elasticsearch": "^15.0.0"
   },
   "description": "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.",
   "devDependencies": {
-    "@travetto/test": "^0.2.2",
-    "@travetto/util": "^0.2.2"
+    "@travetto/test": "^0.2.3",
+    "@travetto/util": "^0.2.3"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -36,6 +36,6 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.4",
+  "version": "0.2.5",
   "gitHead": "b341ad30d6dd66c933577b0b99de2d4a748715a5"
 }
