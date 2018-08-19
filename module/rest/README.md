@@ -1,6 +1,6 @@
 travetto: Rest
 ===
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [`express`](https://expressjs.com) in the `Request` and `Response` objects).  Currently the platform supports are [`express`](https://expressjs.com), [`fastify`](https://www.fastify.io/) and [`koa`](https://koajs.com/), with more being added in the future.
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [`express`](https://expressjs.com) in the `Request` and `Response` objects).  Currently the platform supports are [`Express`](https://github.com/travetto/travetto/tree/master/module/rest-express), [`Fastify`](https://github.com/travetto/travetto/tree/master/module/rest-fastify) and [`Koa`](https://github.com/travetto/travetto/tree/master/module/rest-koa), with more being added in the future.
 
 ## Route management 
 
