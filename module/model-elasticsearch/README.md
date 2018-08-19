@@ -3,7 +3,7 @@ travetto: Model-Elasticsearch
 
 This module provides an [`elasticsearch`](https://elastic.co)-based implementation of `ModelSource` for the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module.  This source allows the `Model` module to read, write and query against `elasticserch`. In development mode, the `ModelSource` will also modify the `elasticsearch` schema in real time to minimize impact to development.  
 
-All that is needed to use the `ModelSource` is to register it with the [`Dependency Injection`](https://github.com/travetto/di) module.
+All that is needed to use the `ModelSource` is to register it with the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) module.
 
 ```typescript
 export class Init {

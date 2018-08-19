@@ -22,4 +22,4 @@ constructor(private app: RestApp) { }
 }
 ```
 
-And using the pattern established in the [`Dependency Injection`](https://github.com/travetto/di) module, you would run your program using `npx travetto sample`.
+And using the pattern established in the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) module, you would run your program using `npx travetto sample`.

@@ -8,7 +8,7 @@ The [`test-plugin`](https://github.com/travetto/test-plugin) directly integrates
 ## Definition
 A test suite is a collection of individual tests.  All test suites are classes with the `@Suite` decorator. Tests are defined as methods on the suite class, using the `@Test` decorator.  All tests intrinsically support async/await.  
 
-Additionally, the the suite classes support [`Dependency Injection`](https://github.com/travetto/di).
+Additionally, the the suite classes support [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di).
 
 A simple example would be:
 ```typescript
