@@ -10,8 +10,8 @@
     "travetto-email": "./bin/travetto-email.sh"
   },
   "dependencies": {
-    "@travetto/di": "^0.2.7",
-    "@travetto/exec": "^0.2.5",
+    "@travetto/di": "^0.2.8",
+    "@travetto/exec": "^0.2.6",
     "@types/cheerio": "^0.22.7",
     "@types/html-entities": "^1.2.16",
     "@types/inline-css": "0.0.30",
@@ -32,7 +32,7 @@
   },
   "description": "Email templating and transmisison module.",
   "devDependencies": {
-    "@travetto/test": "^0.2.5"
+    "@travetto/test": "^0.2.6"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -53,5 +53,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.7"
+  "version": "0.2.8"
 }
