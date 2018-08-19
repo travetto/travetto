@@ -4,8 +4,8 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/asset": "^0.2.2",
-    "@travetto/rest": "^0.2.2",
+    "@travetto/asset": "^0.2.4",
+    "@travetto/rest": "^0.2.4",
     "@types/busboy": "^0.2.3",
     "@types/multiparty": "^0.0.31",
     "busboy": "^0.2.14",
@@ -33,5 +33,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.2"
+  "version": "0.2.4"
 }

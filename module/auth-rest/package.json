@@ -4,8 +4,8 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/auth": "^0.2.2",
-    "@travetto/rest": "^0.2.2"
+    "@travetto/auth": "^0.2.4",
+    "@travetto/rest": "^0.2.4"
   },
   "description": "Rest authentication integration support for the travetto framework",
   "devDependencies": {
@@ -31,5 +31,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.2"
+  "version": "0.2.4"
 }

@@ -7,7 +7,7 @@
     "travetto-email": "./bin/travetto-email.sh"
   },
   "dependencies": {
-    "@travetto/di": "^0.2.2",
+    "@travetto/di": "^0.2.4",
     "@travetto/exec": "^0.2.2",
     "@types/cheerio": "^0.22.7",
     "@types/html-entities": "^1.2.16",
@@ -50,5 +50,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.2"
+  "version": "0.2.4"
 }
