@@ -7,11 +7,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^0.2.4"
+    "@travetto/di": "^0.2.5"
   },
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "devDependencies": {
-    "@travetto/test": "^0.2.2"
+    "@travetto/test": "^0.2.3"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -30,6 +30,6 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.4",
+  "version": "0.2.5",
   "gitHead": "b341ad30d6dd66c933577b0b99de2d4a748715a5"
 }

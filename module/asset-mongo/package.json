@@ -3,12 +3,11 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@travetto/asset": "^0.2.4",
+    "@travetto/asset": "^0.2.5",
     "@types/gridfs-stream": "^0.5.30",
     "@types/mongodb": "^3.1.1",
     "gridfs-stream": "^1.1.1",
@@ -16,7 +15,7 @@
   },
   "description": "Mongo/GridFS backend for the travetto asset module",
   "devDependencies": {
-    "@travetto/test": "^0.2.2"
+    "@travetto/test": "^0.2.3"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -34,6 +33,6 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.4",
+  "version": "0.2.5",
   "gitHead": "b341ad30d6dd66c933577b0b99de2d4a748715a5"
 }
