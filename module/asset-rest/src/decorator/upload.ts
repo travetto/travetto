@@ -1,4 +1,6 @@
-import { ControllerRegistry, Filter, EndpointDecorator, Request, Response } from '@travetto/rest';
+/// <reference path="../typings.d.ts" />
+
+import { ControllerRegistry, Filter, EndpointDecorator, Request, Response, MimeType } from '@travetto/rest';
 import { Class } from '@travetto/registry';
 import { ConfigLoader } from '@travetto/config';
 
@@ -17,6 +19,8 @@ export function AssetUpload(config: Partial<AssetRestConfig> = {}) {
     const filter = async function (req: Request, res: Response) {
       req.files = await UploadUtil.upload(req, finalCOnf, `${(target.constructor as any).basePath}/`);
     };
+
+    ep.requestType = { type: 'file', mime: MimeType.MULTIPART };
 
     ep.filters!.unshift(filter);
     return descriptor;

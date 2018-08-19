@@ -5,10 +5,9 @@ import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
 import { ConfigLoader } from '@travetto/config';
+import { ControllerConfig, RestAppProvider, RestAppUtil } from '@travetto/rest';
 
-import { ControllerConfig, RestAppProvider, Request, Response } from '@travetto/rest';
 import { KoaConfig } from './config';
-import { MimeType } from '@travetto/rest/src';
 
 export class KoaAppProvider extends RestAppProvider {
 
@@ -35,7 +34,7 @@ export class KoaAppProvider extends RestAppProvider {
     this.app = this.create();
   }
   getRequest(ctx: koa.Context) {
-    return {
+    return RestAppUtil.decorateRequest({
       _raw: ctx,
       method: ctx.method,
       path: ctx.path,
@@ -45,20 +44,16 @@ export class KoaAppProvider extends RestAppProvider {
       session: ctx.session,
       headers: ctx.headers,
       cookies: ctx.cookies,
-      header: ctx.get.bind(ctx),
       files: {},
       auth: undefined as any,
       pipe: ctx.req.pipe.bind(ctx.req),
       on: ctx.req.on.bind(ctx.req)
-    } as Request;
+    });
   }
 
   getResponse(ctx: koa.Context) {
-    return {
+    return RestAppUtil.decorateResponse({
       _raw: ctx,
-      get statusCode() {
-        return ctx.status;
-      },
       get headersSent() {
         return ctx.headerSent;
       },
@@ -73,18 +68,21 @@ export class KoaAppProvider extends RestAppProvider {
         ctx.body = b;
       },
       on: ctx.res.on.bind(ctx.res),
-      end: ctx.flushHeaders.bind(ctx),
+      end: (val?: any) => {
+        if (val) {
+          ctx.body = val;
+        }
+        ctx.flushHeaders();
+        if (ctx.status < 200 || (ctx.status < 400 && ctx.status >= 300)) {
+          ctx.res.end(); // Only end on redirect
+        }
+      },
       setHeader: ctx.set.bind(ctx),
       getHeader: ctx.response.get.bind(ctx),
       removeHeader: ctx.remove.bind(ctx),
       write: ctx.res.write.bind(ctx.res),
       cookie: ctx.cookies.set.bind(ctx.cookies),
-      // tslint:disable-next-line:object-literal-shorthand
-      json: function (val: any) {
-        this.setHeader('Content-Type', MimeType.JSON);
-        this.send(JSON.stringify(val));
-      },
-    } as Response;
+    });
   }
 
   async unregisterController(config: ControllerConfig) {

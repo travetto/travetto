@@ -6,6 +6,7 @@ declare global {
       _raw?: any;
       method?: string;
       path: string;
+      url: string;
       query: { [key: string]: any };
       params: { [key: string]: any };
       session: any;
@@ -20,9 +21,7 @@ declare global {
     interface Response {
       _raw?: any;
       statusCode: number;
-      status(): number;
-      status(code: number): void;
-      status(code?: number): number | void;
+      status(code?: number): (number | undefined);
       headersSent: boolean;
       getHeader(key: string): string;
       setHeader(key: string, value: string | string[]): void;
@@ -30,10 +29,16 @@ declare global {
 
       on(ev: 'close' | 'finish', cb: Function): any;
 
+      redirect(path: string): any;
+      redirect(code: number, path: string): any;
+      redirect(code: number | string, path?: string): any;
+
+      location(path: string): any;
+
       json(value: any): any;
       send(value: any): any;
       write(value: any): any;
-      end(): any;
+      end(val?: any): any;
 
       cookie(key: string, value: any, options: Partial<{
         domain: string,

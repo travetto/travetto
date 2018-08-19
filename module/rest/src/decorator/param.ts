@@ -38,12 +38,13 @@ export function parseParam(type: Class | undefined, name: string, param: any) {
 
 async function paramHandler(config: EndpointConfig, req: Request) {
   for (const { name, required, type, location } of Object.values(config.params)) {
-    const param = req[location][name];
+    const finalLoc = location === 'path' ? 'params' : location;
+    const param = req[finalLoc][name];
 
     if (required && !param) {
       throw new AppError(`Missing field: ${name}`, 400);
     } else if (param) {
-      (req as any)[location][name] = parseParam(type, name, param);
+      (req as any)[finalLoc][name] = parseParam(type, name, param);
     }
   }
 }
@@ -61,7 +62,7 @@ export const Param = (param: ParamConfig) => {
 };
 
 export const PathParam = (param: Partial<ParamConfig>) => {
-  return Param({ type: String, location: 'params', required: true, ...(param as ParamConfig) });
+  return Param({ type: String, location: 'path', required: true, ...(param as ParamConfig) });
 };
 
 export const QueryParam = (param: Partial<ParamConfig>) => {
