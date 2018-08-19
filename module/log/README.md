@@ -1,7 +1,7 @@
 travetto: Log
 ===
 
-This module provides logging functionality relying up the built in ```console``` operations. This is achieved via AST transformations. The code is rewritten at compile time to transform the `console` operations into proper logging commands. In addition to the transformation, class name and line number are added to the log messages to provide additional context.
+This module provides logging functionality relying up the built in `console` operations. This is achieved via AST transformations. The code is rewritten at compile time to transform the `console` operations into proper logging commands. In addition to the transformation, class name and line number are added to the log messages to provide additional context.
 
 The supported operations are:
 * `console.fatal` which logs at the `FATAL` level
@@ -63,7 +63,7 @@ console.debug('Test');
 console.fatal('hi');
 ```
 The corresponding output would be
-```output
+```bash
 2018-06-23T16:57:58 info  [test.simple:  5] Hello World
 2018-06-23T16:57:58 info  [test.simple:  7] Woah! { a: { b: { c: [Object] } } }
 2018-06-23T16:57:58 info  [test.simple:  9] Woah!

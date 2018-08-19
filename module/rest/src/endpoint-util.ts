@@ -1,7 +1,7 @@
 import { ConfigLoader } from '@travetto/config';
 
 import { MimeType, isRenderable } from './model';
-import { ControllerConfig, EndpointConfig, HeaderMap, Request, Response } from './types';
+import { ControllerConfig, EndpointConfig, HeaderMap, Request, Response, RestInterceptor } from './types';
 import { RestConfig } from './service/config';
 
 const restCfg = new RestConfig();
@@ -31,7 +31,7 @@ export class EndpointUtil {
     if (!res.headersSent) {
       if (headers) {
         for (const [h, v] of Object.entries(headers)) {
-          res.header(h, typeof v === 'string' ? v : v());
+          res.setHeader(h, typeof v === 'string' ? v : v());
         }
       }
 
@@ -39,22 +39,23 @@ export class EndpointUtil {
         if (isRenderable(output)) {
           await output.render(res);
         } else if (typeof output === 'string') {
-          res.header('Content-Type', MimeType.TEXT);
+          res.setHeader('Content-Type', MimeType.TEXT);
           res.send(output);
         } else if ('toJSON' in output) {
-          res.header('Content-Type', MimeType.JSON);
+          res.setHeader('Content-Type', MimeType.JSON);
           res.send((output as any).toJSON());
         } else {
-          res.header('Content-Type', MimeType.JSON);
-          res.send(output);
+          res.json(output);
         }
+      } else {
+        res.status(201);
       }
     }
 
     res.end();
   }
 
-  static createEndpointHandler(cConfig: ControllerConfig, endpoint: EndpointConfig) {
+  static createEndpointHandler(cConfig: ControllerConfig, endpoint: EndpointConfig, interceptors: RestInterceptor[]) {
     const { class: cls, headers: cHeaders } = cConfig;
     const { instance, handler, headers: eHeaders } = endpoint;
 
@@ -80,6 +81,9 @@ export class EndpointUtil {
     return async (req: Request, res: Response) => {
 
       try {
+        for (const inter of interceptors) {
+          await inter.intercept(req, res);
+        }
         for (const filter of ops) {
           await filter(req, res);
         }
@@ -88,9 +92,9 @@ export class EndpointUtil {
       } catch (error) {
         console.log(error);
         await EndpointUtil.sendOutput(req, res, error);
+      } finally {
+        EndpointUtil.logRequest(req, res);
       }
-
-      EndpointUtil.logRequest(req, res);
     };
   }
 }

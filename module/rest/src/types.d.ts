@@ -3,6 +3,7 @@ import * as exp from 'express-serve-static-core';
 declare global {
   namespace Travetto {
     interface Request {
+      _raw?: any;
       method?: string;
       path: string;
       query: { [key: string]: any };
@@ -17,15 +18,19 @@ declare global {
     }
 
     interface Response {
+      _raw?: any;
       statusCode: number;
+      status(): number;
+      status(code: number): void;
+      status(code?: number): number | void;
       headersSent: boolean;
       getHeader(key: string): string;
-      setHeader(key: string, value: string): void;
+      setHeader(key: string, value: string | string[]): void;
       removeHeader(key: string): void;
 
-      header(key: string, value: string | string[]): any;
       on(ev: 'close' | 'finish', cb: Function): any;
 
+      json(value: any): any;
       send(value: any): any;
       write(value: any): any;
       end(): any;

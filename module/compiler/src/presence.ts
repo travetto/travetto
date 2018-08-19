@@ -69,6 +69,9 @@ export class FilePresenceManager {
       setTimeout(() => {
         console.debug('Watching files', rootFiles.length);
         this.buildWatcher(path.join(this.cwd, 'src'), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+        if (Env.e2e) {
+          this.buildWatcher(path.join(this.cwd, 'e2e'), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+        }
       }, 1000);
     }
   }

@@ -4,7 +4,7 @@ import { PrincipalConfig } from '@travetto/auth';
 import { AuthProvider } from '../src';
 import { AuthPassportProvider } from '../extension/passport';
 
-import { Strategy as FacebookStrategy } from 'passport-facebook';
+import { Strategy as FacebookStrategy, StrategyOption } from 'passport-facebook';
 
 export class FbUser {
   id: string;
@@ -19,10 +19,10 @@ export class AppConfig {
     return new AuthPassportProvider('facebook',
       new FacebookStrategy(
         {
-          clientID: '<clientId>',
-          clientSecret: '<clientSecret>',
+          clientID: '165936444084265',
+          clientSecret: 'fd12224c46311b83349653733913a5f6',
           callbackURL: 'http://localhost:3000/auth/facebook/callback',
-          profileFields: ['id', 'displayName', 'photos', 'email']
+          profileFields: ['id', 'displayName', 'photos', 'email'],
         },
         (accessToken, refreshToken, profile, cb) => {
           return cb(undefined, profile);

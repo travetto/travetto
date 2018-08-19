@@ -8,6 +8,6 @@ export class Redirect implements Renderable {
 
   render(res: Response) {
     res.status(this.status);
-    res.header('Location', this.location);
+    res.setHeader('Location', this.location);
   }
 }

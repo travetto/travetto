@@ -1,0 +1,43 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@travetto/rest": "^0.2.7",
+    "@types/koa": "^2.0.46",
+    "@types/koa-bodyparser": "^5.0.1",
+    "@types/koa-compress": "^2.0.8",
+    "@types/koa-router": "^7.0.31",
+    "@types/koa-session": "^5.7.4",
+    "koa": "^2.5.2",
+    "koa-bodyparser": "^4.2.1",
+    "koa-compress": "^3.0.0",
+    "koa-router": "^7.4.0",
+    "koa-session": "^5.8.2"
+  },
+  "devDependencies": {
+    "@travetto/test": "^0.2.5"
+  },
+  "description": "Koa provider for the travetto rest module.",
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "rest",
+    "koa",
+    "travetto",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/rest-koa",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/travetto-test"
+  },
+  "version": "0.2.7"
+}
