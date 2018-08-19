@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/context": "^0.2.8",
-    "@travetto/util": "^0.2.6"
+    "@travetto/context": "^0.2.9",
+    "@travetto/util": "^0.2.7"
   },
   "description": "Authentication scaffolding for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.2.6"
+    "@travetto/test": "^0.2.7"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -28,5 +28,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.8"
+  "version": "0.2.9"
 }
