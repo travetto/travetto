@@ -173,7 +173,7 @@ errors:
 Integration with other modules can be supported by extensions.  The dependencies are `optionalExtensionDependencies` and must be installed directly if you want to use them:
 
 ### Express
-The module provides high level access for [`Express`](https://github.com/travetto/express) support, via decorators, for validating and typing request bodies.  
+The module provides high level access for [`Express`](https://github.com/travetto/travetto/tree/master/module/express) support, via decorators, for validating and typing request bodies.  
 
 ## Decorators
 `@SchemaBody` provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.

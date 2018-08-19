@@ -55,7 +55,7 @@ class AuthService<U> {
   checkPermissions(include: string[], exclude: string[]);
 }
 ```
-The context can be read/set and will be backed by the [`Context`](https://github.com/travetto/context) module.  This provides access to the security principal through an entire call chain, asynchronous or other-wise.  This is also leveraged by the [`Auth-Express`](https://github.com/travetto/auth-express) module to keep the security context available throughout the entire request.
+The context can be read/set and will be backed by the [`Context`](https://github.com/travetto/travetto/tree/master/module/context) module.  This provides access to the security principal through an entire call chain, asynchronous or other-wise.  This is also leveraged by the [`Auth-Express`](https://github.com/travetto/travetto/tree/master/module/auth-express) module to keep the security context available throughout the entire request.
 
 ```checkPermissions``` is probably the only functionality that needs to be explained. The function operates in a `DENY/ALLOW` mode.  This means that a permission check will succeed only if:
 * The user is logged in
@@ -73,5 +73,5 @@ class AuthUtil {
 The functionality above is aimed at password generation/management, but the functionality with grow over time as more sub modules are added.
 
 The officially supported auth modules are:
-  - [`Auth-Model`](https://github.com/travetto/auth-model) integration between this module and the [`Model`](https://github.com/travetto/model) module.
-  - [`Auth-Express`](https://github.com/travetto/auth-express) integration between this module and the [`Express`](https://github.com/travetto/express) module.
+  - [`Auth-Model`](https://github.com/travetto/travetto/tree/master/module/auth-model) integration between this module and the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module.
+  - [`Auth-Express`](https://github.com/travetto/travetto/tree/master/module/auth-express) integration between this module and the [`Express`](https://github.com/travetto/travetto/tree/master/module/express) module.

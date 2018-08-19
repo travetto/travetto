@@ -7,7 +7,7 @@ This module provides the framework for storing/retrieving assets. It also provid
 
 The primary driver for the Asset framework is an [`AssetSource`](./src/service/source.ts) which needs to be implemented to provide code on how to read and write files.  
 
-Initially you need to configure the [`AssetSource`](./src/service/source.ts) to provide a backend for the storage and retrieval. Below we are using the [`Asset-Mongo`](https://github.com/travetto/asset-mongo) as the backend, but there are others to choose from.
+Initially you need to configure the [`AssetSource`](./src/service/source.ts) to provide a backend for the storage and retrieval. Below we are using the [`Asset-Mongo`](https://github.com/travetto/travetto/tree/master/module/asset-mongo) as the backend, but there are others to choose from.
 
 ```typescript
 class AppConfig {
@@ -51,7 +51,7 @@ class UserProfileService {
 
 The current set of supported [`AssetSource`](./src/service/source.ts) implementations are:
 
-- [`Asset-Mongo`](https://github.com/travetto/asset-mongo#readme) provides the mongodb driver for file management
-- [`Asset-S3`](https://github.com/travetto/asset-s3#readme) provides the S3 driver for file management
+- [`Asset-Mongo`](https://github.com/travetto/travetto/tree/master/module/asset-mongo#readme) provides the mongodb driver for file management
+- [`Asset-S3`](https://github.com/travetto/travetto/tree/master/module/asset-s3#readme) provides the S3 driver for file management
 
 

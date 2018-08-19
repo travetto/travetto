@@ -96,7 +96,7 @@ During the lifecycle of an application, there is a need to handle different phas
     2. The priority within the phase, a number in which lower is of higher importance
     3. The actual functionality to execute
 
-An example would be something like `phase.bootstrap.ts` in the [`Config`](https://github.com/travetto/config) module.  
+An example would be something like `phase.bootstrap.ts` in the [`Config`](https://github.com/travetto/travetto/tree/master/module/config) module.  
 
 ```typescript
 export const init = {

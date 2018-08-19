@@ -16,7 +16,7 @@ This flow ensures all files are loaded and processed before application starts.
 ### Live Flow
 At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries.
 
-As the [`Compiler`](https://github.com/travetto/compiler) notifies that a file has been changed and recompiled, the `RootRegistry` will pick it up, and process it accordingly.
+As the [`Compiler`](https://github.com/travetto/travetto/tree/master/module/compiler) notifies that a file has been changed and recompiled, the `RootRegistry` will pick it up, and process it accordingly.
 
 ## Supporting Metadata
 For the registries to work properly, metadata needs to be collected about files and classes to uniquely identify them, especially across file reloads for the live flow.  To achieve this, every `class` is decorated with additional fields.  The data that is added is:
