@@ -4,7 +4,7 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/asset": "^0.2.2",
+    "@travetto/asset": "^0.2.4",
     "@types/gridfs-stream": "^0.5.30",
     "@types/mongodb": "^3.1.1",
     "gridfs-stream": "^1.1.1",
@@ -30,5 +30,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.2"
+  "version": "0.2.4"
 }

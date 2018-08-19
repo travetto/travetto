@@ -4,8 +4,8 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/cache": "^0.2.2",
-    "@travetto/di": "^0.2.2",
+    "@travetto/cache": "^0.2.4",
+    "@travetto/di": "^0.2.4",
     "@travetto/exec": "^0.2.2",
     "@travetto/util": "^0.2.2",
     "@types/file-type": "^5.2.1",
@@ -37,5 +37,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.2"
+  "version": "0.2.4"
 }
