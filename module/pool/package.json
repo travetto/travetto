@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^0.2.3",
+    "@travetto/base": "^0.2.5",
     "@types/generic-pool": "^3.1.2",
     "generic-pool": "^3.4.2"
   },
@@ -28,5 +28,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.3"
+  "version": "0.2.5"
 }
