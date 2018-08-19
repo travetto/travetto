@@ -1,6 +1,6 @@
 import { Config } from '@travetto/config';
 
-@Config('express')
+@Config('rest.express')
 export class ExpressConfig {
   cookie = {
     secure: false

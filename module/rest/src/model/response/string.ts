@@ -7,6 +7,6 @@ export class StringResponse implements Renderable {
 
   render(res: Response): void {
     res.status(this.status);
-    res.body(this.content);
+    res.send(this.content);
   }
 }

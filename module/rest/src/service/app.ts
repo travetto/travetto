@@ -3,7 +3,7 @@ import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
 
 import { RestConfig } from './config';
-import { RestAppProvider, RestInterceptor, RestInterceptorSet } from '../types';
+import { RestAppProvider, RestInterceptor, RestInterceptorSet, ControllerConfig } from '../types';
 import { ControllerRegistry } from './registry';
 import { EndpointUtil } from '../endpoint-util';
 
@@ -19,6 +19,19 @@ export class RestApp {
   constructor(
     private app: RestAppProvider<any>,
   ) { }
+
+  private async registerController(c: Class, interceptors: RestInterceptor[]) {
+    const cConfig = ControllerRegistry.get(c);
+    const controller = await DependencyRegistry.getInstance(cConfig.class);
+
+    cConfig.instance = controller;
+    for (const ep of cConfig.endpoints) {
+      ep.instance = controller;
+      ep.handlerFinalized = EndpointUtil.createEndpointHandler(cConfig, ep, interceptors);
+    }
+
+    return this.app.registerController(cConfig);
+  }
 
   async init() {
     await ControllerRegistry.init();
@@ -42,25 +55,15 @@ export class RestApp {
       target: x
     }))).map(x => x.target);
 
-    console.log('Sorting interceptors', sorted.length, sorted.map(x => x.constructor.name));
-
-    for (const inst of sorted) {
-      inst.intercept = inst.intercept.bind(inst);
-      this.app.registerInterceptor(inst);
+    for (const inter of sorted) {
+      inter.intercept = inter.intercept.bind(inter);
     }
+
+    console.log('Sorting interceptors', sorted.length, sorted.map(x => x.constructor.name));
 
     // Register all active
     await Promise.all(ControllerRegistry.getClasses()
-      .map(async c => {
-        const cConfig = ControllerRegistry.get(c);
-        const controller = await DependencyRegistry.getInstance(cConfig.class);
-        cConfig.instance = controller;
-        for (const ep of cConfig.endpoints) {
-          ep.instance = controller;
-          ep.handlerFinalized = EndpointUtil.createEndpointHandler(cConfig, ep);
-        }
-        this.app.registerController(cConfig);
-      }));
+      .map(c => this.registerController(c, sorted)));
 
     // Listen for updates
     ControllerRegistry.on(e => {
@@ -69,7 +72,7 @@ export class RestApp {
         this.app.unregisterController(ControllerRegistry.getExpired(e.prev)!);
       }
       if (e.curr) {
-        this.app.registerController(ControllerRegistry.get(e.curr!)!);
+        this.registerController(e.curr!, sorted);
       }
     });
   }

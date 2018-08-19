@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
 import * as passport from 'passport';
+
 import { PrincipalConfig, AuthContext } from '@travetto/auth';
+import { Request, Response } from '@travetto/rest';
 
 import { AuthProvider } from '../../src';
 

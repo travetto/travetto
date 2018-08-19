@@ -3,7 +3,7 @@ travetto: Test
 
 This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the [`TAP 13`](https://testanything.org/tap-version-13-specification.html) format. 
 
-The [`test-plugin`](https://github.com/travetto/test-plugin) directly integrates with the module to provide real-time feedback on unit tests. 
+The [`test-plugin`](https://www.github.com/travetto/test-plugin) directly integrates with the module to provide real-time feedback on unit tests. 
 
 ## Definition
 A test suite is a collection of individual tests.  All test suites are classes with the `@Suite` decorator. Tests are defined as methods on the suite class, using the `@Test` decorator.  All tests intrinsically support async/await.  

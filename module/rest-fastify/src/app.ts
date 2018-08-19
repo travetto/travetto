@@ -3,8 +3,9 @@ import * as fastify from 'fastify';
 
 import { ConfigLoader } from '@travetto/config';
 
-import { ControllerConfig, RestAppProvider, RestInterceptor, Request, Response } from '@travetto/rest';
+import { ControllerConfig, RestAppProvider, Request, Response } from '@travetto/rest';
 import { FastifyConfig } from './config';
+import { MimeType } from '@travetto/rest/src';
 
 export class FastifyAppProvider extends RestAppProvider {
 
@@ -20,13 +21,13 @@ export class FastifyAppProvider extends RestAppProvider {
     app.register(require('fastify-compress'));
     app.register(require('fastify-formbody'));
     app.register(require('fastify-cookie'));
-    app.register(require('fastify-session'), this.config);
+    app.register(require('fastify-session'), this.config.session);
     app.addContentTypeParser('multipart/form-data;', (req: IncomingMessage, done: (err: Error | null, body?: any) => void) => {
       done(null);
     });
 
     // Enable proxy for cookies
-    if (this.config.cookie.secure) {
+    if (this.config.session.cookie.secure) {
       // app.enable('trust proxy');
     }
 
@@ -35,7 +36,7 @@ export class FastifyAppProvider extends RestAppProvider {
 
   async init() {
     this.config = new FastifyConfig();
-    ConfigLoader.bindTo(this.config, 'express');
+    ConfigLoader.bindTo(this.config, 'rest.fastify');
 
     this.app = this.create();
   }
@@ -46,7 +47,7 @@ export class FastifyAppProvider extends RestAppProvider {
 
   getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
     return {
-      ...reqs.req,
+      _raw: reqs,
       path: reqs.req.url!,
       query: reqs.query,
       params: reqs.params,
@@ -57,6 +58,8 @@ export class FastifyAppProvider extends RestAppProvider {
       header(key: string) {
         return reqs.headers[key];
       },
+      files: {},
+      auth: undefined as any,
       pipe: reqs.req.pipe.bind(reqs.req),
       on: reqs.req.on.bind(reqs.req)
     } as Request;
@@ -64,14 +67,14 @@ export class FastifyAppProvider extends RestAppProvider {
 
   getResponse(reply: fastify.FastifyReply<ServerResponse>) {
     return {
-      ...reply.res,
-      header: reply.header.bind(reply),
+      _raw: reply,
       get statusCode() {
         return reply.res.statusCode;
       },
       get headersSent() {
         return reply.sent;
       },
+      status: reply.status.bind(reply),
       send: reply.send.bind(reply),
       on: reply.res.on.bind(reply.res),
       end: reply.res.end.bind(reply.res, undefined),
@@ -79,6 +82,11 @@ export class FastifyAppProvider extends RestAppProvider {
       getHeader: reply.res.getHeader.bind(reply.res),
       removeHeader: reply.res.removeHeader.bind(reply.res),
       write: reply.res.write.bind(reply.res),
+      // tslint:disable-next-line:object-literal-shorthand
+      json: function (val: any) {
+        this.setHeader('Content-Type', MimeType.JSON);
+        this.send(JSON.stringify(val));
+      },
       cookie: (reply as any).setCookie.bind(reply)
     } as Response;
   }
@@ -91,19 +99,14 @@ export class FastifyAppProvider extends RestAppProvider {
       } else {
         path = `${path}/${endpoint.path.source}`.replace(/\/+/g, '/');
       }
-      this.app[endpoint.method!](path, (reqs, reply) => {
+      this.app[endpoint.method!](path, async (reqs, reply) => {
         const req = this.getRequest(reqs);
         const res = this.getResponse(reply);
-        endpoint.handlerFinalized!(req, res);
+        await endpoint.handlerFinalized!(req, res);
       });
-
     }
 
     console.debug('Registering Controller Instance', cConfig.class.__id, cConfig.basePath, cConfig.endpoints.length);
-  }
-
-  registerInterceptor(op: RestInterceptor) {
-    this.app.use(op.intercept as any);
   }
 
   listen(port: number) {

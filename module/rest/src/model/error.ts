@@ -24,7 +24,7 @@ export class AppError extends BaseError<Status> implements Renderable {
   res.status(computedStatus);
 
   if ('toJSON' in this) {
-    res.header('Content-Type', MimeType.JSON);
+    res.setHeader('Content-Type', MimeType.JSON);
     res.send(this.toJSON());
   } else {
     res.json({ message: this.message, status: computedStatus, type: this.type || this.name });

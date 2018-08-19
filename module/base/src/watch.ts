@@ -18,7 +18,6 @@ export class Watcher extends EventEmitter {
   private watchers = new Map<string, fs.FSWatcher>();
   private pollers = new Map<string, (curr: fs.Stats, prev: fs.Stats) => void>();
   private findHandlers: ScanHandler[] = [];
-  private cached = new Map<string, (string | symbol)[]>();
   private pendingWatched: ScanEntry[] = [];
   private pending = true;
   private suppress = false;
@@ -74,7 +73,7 @@ export class Watcher extends EventEmitter {
           this.unwatch(child.file);
           dir.children!.splice(dir.children!.indexOf(child), 1);
 
-          if (!child.stats.isDirectory()) {
+          if (ScanFs.isNotDir(child)) {
             this._emit('removed', child);
             this._emit('all', { event: 'removed', entry: child });
           }
@@ -99,7 +98,7 @@ export class Watcher extends EventEmitter {
           this.watch(sub);
           dir.children!.push(sub);
 
-          if (!sub.stats.isDirectory()) {
+          if (ScanFs.isNotDir(sub)) {
             this._emit('added', sub);
             this._emit('all', { event: 'added', entry: sub });
           }
@@ -116,7 +115,7 @@ export class Watcher extends EventEmitter {
   }
 
   private watchDirectory(entry: ScanEntry) {
-    if (!entry.stats.isDirectory()) {
+    if (ScanFs.isNotDir(entry)) {
       throw new Error(`Not a directory: ${entry.file}`);
     }
 
@@ -140,7 +139,7 @@ export class Watcher extends EventEmitter {
   }
 
   private watchFile(entry: ScanEntry) {
-    if (entry.stats.isDirectory()) {
+    if (ScanFs.isDir(entry)) {
       throw new Error(`Not a file: ${entry.file}`);
     }
 
@@ -256,7 +255,7 @@ export class Watcher extends EventEmitter {
 
     this.watched.set(entry.file, entry);
 
-    if (entry.stats.isDirectory()) { // Watch Directory
+    if (ScanFs.isDir(entry)) { // Watch Directory
       this.watchDirectory(entry);
     } else { // Watch File
       this.watchFile(entry);
@@ -270,7 +269,7 @@ export class Watcher extends EventEmitter {
     const entry = this.watched.get(file)!;
     this.watched.delete(file);
 
-    if (entry.stats.isDirectory()) {
+    if (ScanFs.isDir(entry)) {
       this.unwatchDirectory(entry);
     } else {
       this.unwatchFile(entry);

@@ -69,7 +69,7 @@ export class AuthInterceptor extends RestInterceptor {
   }
 
   async loadContext(req: Request, res: Response) {
-    const { _authStored: serialized, _authType: type, _authPrincipal: principal } = req.session!;
+    const { _authStored: serialized, _authType: type, _authPrincipal: principal } = (req.session! || {}) as any;
     if (principal) {
       this.service.context = principal;
     } else if (serialized && type) {
@@ -79,10 +79,8 @@ export class AuthInterceptor extends RestInterceptor {
     }
   }
 
-  async intercept(req: Request, res: Response, proceed: Function) {
+  intercept(req: Request, res: Response) {
     req.auth = new AuthServiceAdapter(this.service, this, req, res);
-    await this.loadContext(req, res);
-
-    proceed();
+    return this.loadContext(req, res);
   }
 }

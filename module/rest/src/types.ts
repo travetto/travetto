@@ -72,7 +72,6 @@ export abstract class RestAppProvider<T = any> {
   abstract registerController(controller: ControllerConfig): Promise<any>;
   abstract unregisterController(controller: ControllerConfig): Promise<any>;
   abstract listen(port?: number): void;
-  abstract registerInterceptor(op: RestInterceptor): void;
 }
 
 export abstract class RestInterceptor {
@@ -80,7 +79,7 @@ export abstract class RestInterceptor {
   public after?: Class<RestInterceptor>[] | Set<Class<RestInterceptor>> | Class<RestInterceptor>;
   public before?: Class<RestInterceptor>[] | Set<Class<RestInterceptor>> | Class<RestInterceptor>;
 
-  abstract intercept(req: Request, res: Response, proceed: () => any): void;
+  abstract intercept(req: Request, res: Response): Promise<any>;
 }
 
 export class RestInterceptorSet {
