@@ -38,5 +38,5 @@
     "postinstall": "./bin/travetto-clean.js",
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.5"
+  "version": "0.2.6"
 }
