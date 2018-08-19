@@ -90,7 +90,6 @@ export class EndpointUtil {
         const output = await handlerBound(req, res);
         await EndpointUtil.sendOutput(req, res, output, headers);
       } catch (error) {
-        console.log(error);
         await EndpointUtil.sendOutput(req, res, error);
       } finally {
         EndpointUtil.logRequest(req, res);

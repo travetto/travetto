@@ -2,10 +2,9 @@ import { ServerResponse, IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
 import { ConfigLoader } from '@travetto/config';
+import { ControllerConfig, RestAppProvider, RestAppUtil } from '@travetto/rest';
 
-import { ControllerConfig, RestAppProvider, Request, Response } from '@travetto/rest';
 import { FastifyConfig } from './config';
-import { MimeType } from '@travetto/rest/src';
 
 export class FastifyAppProvider extends RestAppProvider {
 
@@ -46,7 +45,7 @@ export class FastifyAppProvider extends RestAppProvider {
   }
 
   getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
-    return {
+    return RestAppUtil.decorateRequest({
       _raw: reqs,
       path: reqs.req.url!,
       query: reqs.query,
@@ -55,40 +54,41 @@ export class FastifyAppProvider extends RestAppProvider {
       session: (reqs as any).session,
       headers: reqs.headers,
       cookies: (reqs as any).cookies,
-      header(key: string) {
-        return reqs.headers[key];
-      },
       files: {},
       auth: undefined as any,
       pipe: reqs.req.pipe.bind(reqs.req),
       on: reqs.req.on.bind(reqs.req)
-    } as Request;
+    });
   }
 
   getResponse(reply: fastify.FastifyReply<ServerResponse>) {
-    return {
+    return RestAppUtil.decorateResponse({
       _raw: reply,
-      get statusCode() {
-        return reply.res.statusCode;
-      },
       get headersSent() {
         return reply.sent;
       },
-      status: reply.status.bind(reply),
+      status(val?: number): number | undefined {
+        if (val) {
+          reply.status(val);
+          reply.res.statusCode = val;
+        } else {
+          return reply.res.statusCode;
+        }
+      },
       send: reply.send.bind(reply),
       on: reply.res.on.bind(reply.res),
-      end: reply.res.end.bind(reply.res, undefined),
+      end: (val?: any) => {
+        if (val) {
+          reply.send(val);
+        }
+        reply.res.end();
+      },
       setHeader: reply.res.setHeader.bind(reply.res),
       getHeader: reply.res.getHeader.bind(reply.res),
       removeHeader: reply.res.removeHeader.bind(reply.res),
       write: reply.res.write.bind(reply.res),
-      // tslint:disable-next-line:object-literal-shorthand
-      json: function (val: any) {
-        this.setHeader('Content-Type', MimeType.JSON);
-        this.send(JSON.stringify(val));
-      },
       cookie: (reply as any).setCookie.bind(reply)
-    } as Response;
+    });
   }
 
   async registerController(cConfig: ControllerConfig) {

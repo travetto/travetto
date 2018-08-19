@@ -11,6 +11,11 @@ export class SampleAuth {
   @Inject()
   private service: AuthService;
 
+  @Get('/name')
+  async getName() {
+    return { name: 'bob' };
+  }
+
   @Get('/facebook')
   @Authenticate(FB_AUTH)
   async fbLogin() {

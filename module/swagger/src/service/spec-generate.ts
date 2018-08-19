@@ -1,8 +1,12 @@
-import { ControllerRegistry, MimeType } from '@travetto/rest';
+import { ControllerRegistry, MimeType, EndpointClassType } from '@travetto/rest';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, DEFAULT_VIEW } from '@travetto/schema';
 
 import { Spec, Parameter, Path, Response, Schema, Operation } from '../types';
+
+export function isEndpointClassType(o: any): o is EndpointClassType {
+  return !!o && !o.mime;
+}
 
 const DEFINITION = '#/definitions';
 
@@ -120,37 +124,62 @@ export class SpecGenerateUtil {
       for (const ep of ctrl.endpoints) {
 
         const epParams: Parameter[] = [];
-        const epProd = ep.responseType! || {};
-        const epCons = ep.requestType! || {};
+        const epProd = ep.responseType;
+        const epCons = ep.requestType;
         const produces = [];
         const consumes = [];
-
-        const epProduces = this.processSchema(epProd.type, definitions);
-        const epConsumes = this.processSchema(epCons.type, definitions);
         const responses: { [key: string]: Response } = {};
 
-        if (epProduces) {
-          const ref: Schema = { $ref: `${DEFINITION}/${epProduces}` };
-          responses[200] = {
-            description: definitions[epProduces!].description || '',
-            schema: epProd!.wrapper !== Array ? ref : { type: 'array', items: ref }
-          };
-          produces.push(MimeType.JSON);
+        if (epProd) {
+          if (isEndpointClassType(epProd)) {
+            const epProduces = this.processSchema(epProd.type, definitions);
+            if (epProduces) {
+              const ref: Schema = { $ref: `${DEFINITION}/${epProduces}` };
+              responses[200] = {
+                description: definitions[epProduces!].description || '',
+                schema: epProd!.wrapper !== Array ? ref : { type: 'array', items: ref }
+              };
+              produces.push(MimeType.JSON);
+            } else {
+              responses[201] = {
+                description: ''
+              };
+            }
+          } else {
+            produces.push(epProd.mime);
+            responses[200] = {
+              description: '',
+              schema: {
+                type: epProd.type
+              }
+            };
+          }
         } else {
           responses[201] = {
             description: ''
           };
         }
-
-        if (epConsumes) {
-          const ref: Schema = { $ref: `${DEFINITION}/${epConsumes}` };
-          epParams.push({
-            in: 'body',
-            name: 'body',
-            description: definitions[epConsumes!].description || '',
-            schema: epCons!.wrapper !== Array ? ref : { type: 'array', items: ref }
-          } as Parameter);
-          consumes.push(MimeType.JSON);
+        if (epCons) {
+          if (isEndpointClassType(epCons)) {
+            const epConsumes = this.processSchema(epCons.type, definitions);
+            if (epConsumes) {
+              const ref: Schema = { $ref: `${DEFINITION}/${epConsumes}` };
+              epParams.push({
+                in: 'body',
+                name: 'body',
+                description: definitions[epConsumes!].description || '',
+                schema: epCons!.wrapper !== Array ? ref : { type: 'array', items: ref }
+              } as Parameter);
+              consumes.push(MimeType.JSON);
+            }
+          } else {
+            consumes.push(epCons.mime);
+            epParams.push({
+              in: epCons.type === 'file' ? 'formData' : 'body',
+              name: epCons.type === 'file' ? 'form' : 'body',
+              type: epCons.type || 'object'
+            } as Parameter);
+          }
         }
 
         for (const param of Object.values(ep.params)) {

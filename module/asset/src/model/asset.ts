@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as util from 'util';
+import { MimeType } from '../../../rest';
 
 const fsReadFileAsync = util.promisify(fs.readFile);
 const fsUnlinkAsync = util.promisify(fs.unlink);

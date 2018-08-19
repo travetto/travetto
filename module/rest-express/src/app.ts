@@ -5,8 +5,8 @@ import * as session from 'express-session';
 import * as compression from 'compression';
 
 import { ConfigLoader } from '@travetto/config';
-
 import { ControllerConfig, RestAppProvider } from '@travetto/rest';
+
 import { RouteStack } from './types';
 import { ExpressConfig } from './config';
 
