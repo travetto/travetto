@@ -39,4 +39,12 @@ export class SampleAuth {
   async logout(req: Request) {
     await req.auth.logout();
   }
+
+  /**
+ * Simple Echo
+ */
+  @Post('/')
+  async echo(req: Request): Promise<Object> {
+    return req.body;
+  }
 }
