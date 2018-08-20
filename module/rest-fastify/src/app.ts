@@ -47,6 +47,7 @@ export class FastifyAppProvider extends RestAppProvider {
   getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
     return RestAppUtil.decorateRequest({
       _raw: reqs,
+      method: reqs.req.method,
       path: reqs.req.url!,
       query: reqs.query,
       params: reqs.params,
@@ -95,10 +96,11 @@ export class FastifyAppProvider extends RestAppProvider {
     for (const endpoint of cConfig.endpoints.reverse()) {
       let path: string = cConfig.basePath;
       if (typeof endpoint.path === 'string') {
-        path = `${path}/${endpoint.path}`.replace(/\/+/g, '/');
+        path = `${path}/${endpoint.path}`;
       } else {
-        path = `${path}/${endpoint.path.source}`.replace(/\/+/g, '/');
+        path = `${path}/${endpoint.path.source}`;
       }
+      path = path.replace(/\/+/g, '/').replace(/\/+$/, '');
       this.app[endpoint.method!](path, async (reqs, reply) => {
         const req = this.getRequest(reqs);
         const res = this.getResponse(reply);
