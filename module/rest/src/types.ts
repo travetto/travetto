@@ -59,8 +59,8 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
   endpoints: EndpointConfig[];
 }
 
-export type Filter<T = any> = (req: Request, res: Response) => T;
-export type FilterReq<T = any> = (req: Request) => T;
+export type Filter<T = any, R extends Request = Request, RS extends Response = Response> = (req: R, res: Response) => T;
+export type FilterReq<T = any, R extends Request = Request> = (req: R) => T;
 export type FilterNone<T = any> = () => T;
 
 export interface EndpointDecorator<T = any> {
