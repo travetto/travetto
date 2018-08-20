@@ -2,8 +2,7 @@ import * as passport from 'passport';
 
 import { PrincipalConfig, AuthContext } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
-
-import { AuthProvider } from '../../src';
+import { AuthProvider } from '@travetto/auth-rest';
 
 export class AuthPassportProvider<U> extends AuthProvider<U> {
   constructor(private strategyName: string, private strategy: passport.Strategy, private principalConfig: PrincipalConfig<U>) {

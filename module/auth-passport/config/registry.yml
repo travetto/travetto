@@ -1,0 +1,4 @@
+---
+rest.interceptor:
+  '@travetto/auth-passport':
+    - AuthPassportInterceptor
