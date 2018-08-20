@@ -79,7 +79,7 @@ export class SchemaValidator {
       (field.type === Boolean && typeof value !== 'boolean')
     ) {
       criteria.push('type');
-      return [{ kind: 'type', type: field.type }];
+      return [{ kind: 'type', type: field.type.name.toLowerCase() }];
     }
 
     if (field.match && !field.match.re.test(`${value}`)) {
