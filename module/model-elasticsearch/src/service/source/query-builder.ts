@@ -13,8 +13,8 @@ export function extractWhereTermQuery<T>(o: { [key: string]: any }, cls: Class<T
 
   for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
     const top = o[key];
-    const declaredType = schema[key].type;
-    const sPath = declaredType === String ? `${path}${key}.raw` : `${path}${key}`;
+    const declaredType = schema[key === '_id' ? 'id' : key].type;
+    const sPath = declaredType === String && key !== '_id' ? `${path}${key}.raw` : `${path}${key}`;
 
     if (Util.isPlainObject(top)) {
       const subKey = Object.keys(top)[0];
@@ -115,7 +115,7 @@ export function extractWhereTermQuery<T>(o: { [key: string]: any }, cls: Class<T
     } else {
       items.push({
         [Array.isArray(top) ? 'terms' : 'term']: {
-          [declaredType === String ? `${path}${key}.raw` : `${path}${key}`]: top
+          [declaredType === String && key !== '_id' ? `${path}${key}.raw` : `${path}${key}`]: top
         }
       });
     }

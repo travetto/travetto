@@ -55,8 +55,8 @@ export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any 
 
 export class ModelElasticsearchSource extends ModelSource {
 
-  private client: es.Client;
   private indices: { [key: string]: IndexConfig<any>[] } = {};
+  public client: es.Client;
 
   constructor(private config: ModelElasticsearchConfig) {
     super();
@@ -170,6 +170,8 @@ export class ModelElasticsearchSource extends ModelSource {
 
   getSearchObject<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
     const conf = ModelRegistry.get(cls);
+
+    query = this.translateQueryIds(query);
 
     const search: es.SearchParams = {
       ...this.getIdentity(cls),
