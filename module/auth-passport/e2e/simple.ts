@@ -1,8 +1,8 @@
 import { Inject } from '@travetto/di';
 import { Controller, Get, Redirect, Post, Request } from '@travetto/rest';
 import { AuthService } from '@travetto/auth';
+import { Authenticate, Authenticated, Unauthenticated } from '@travetto/auth-rest';
 
-import { Authenticate, Authenticated, Unauthenticated } from '../src';
 import { FB_AUTH } from './conf';
 
 @Controller('/auth')
