@@ -1,10 +1,10 @@
+import { Strategy as FacebookStrategy } from 'passport-facebook';
+
 import { InjectableFactory } from '@travetto/di';
 import { PrincipalConfig } from '@travetto/auth';
-
 import { AuthProvider } from '@travetto/auth-rest';
-import { AuthPassportProvider } from '../src';
 
-import { Strategy as FacebookStrategy } from 'passport-facebook';
+import { AuthPassportProvider } from '../src';
 
 export class FbUser {
   id: string;
