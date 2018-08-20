@@ -46,8 +46,9 @@ export class ExpressAppProvider extends RestAppProvider<express.Application> {
   }
 
   async unregisterController(config: ControllerConfig) {
-    this.app._router.stack = (this.app._router.stack as RouteStack[])
-      .filter(x => x.handle.key === config.class.__id);
+    const routes = (this.app._router.stack as RouteStack[]);
+    const pos = routes.findIndex(x => x.handle.key === config.class.__id);
+    routes.splice(pos, 1);
   }
 
   async registerController(cConfig: ControllerConfig) {
