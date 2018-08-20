@@ -1,14 +1,12 @@
-import { Request } from 'express';
-
-import { ControllerRegistry } from '@travetto/rest';
-import { getSchemaBody } from '@travetto/schema/extension/express';
+import { ControllerRegistry, Request } from '@travetto/rest';
+import { getSchemaBody } from '@travetto/schema/extension/rest';
 import { Class } from '@travetto/registry';
 
-import { BaseModel, ModelService } from '../src';
+import { ModelService, ModelCore } from '../src';
 
 type Svc = { source: ModelService };
 
-export function ModelController<T extends BaseModel>(path: string, cls: Class<T>) {
+export function ModelController<T extends ModelCore>(path: string, cls: Class<T>) {
   return (target: Class<Svc>) => {
 
     Object.assign(

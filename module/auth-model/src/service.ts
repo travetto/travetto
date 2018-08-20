@@ -1,9 +1,9 @@
-import { ModelService, BaseModel, Query } from '@travetto/model';
+import { ModelService, Query, ModelCore } from '@travetto/model';
 import { AuthUtil, ERR_INVALID_PASSWORD } from '@travetto/auth';
 
 import { RegisteredPrincipalConfig } from './principal';
 
-export class AuthModelService<T extends BaseModel> {
+export class AuthModelService<T extends ModelCore> {
 
   constructor(
     private modelService: ModelService,

@@ -1,4 +1,4 @@
-import { Model, BaseModel, ModelSource, ModelService } from '@travetto/model';
+import { Model, ModelCore, ModelSource, ModelService } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 
@@ -13,7 +13,8 @@ class Address {
 }
 
 @Model()
-class Person extends BaseModel {
+class Person implements ModelCore {
+  id?: string;
   name: string;
   age: number;
   gender: 'm' | 'f';

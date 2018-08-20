@@ -1,11 +1,11 @@
 import { AppError, Request, Response } from '@travetto/rest';
-import { BaseModel } from '@travetto/model';
+import { ModelCore } from '@travetto/model';
 import { AuthProvider } from '@travetto/auth-rest';
 import { ERR_INVALID_PASSWORD, AuthContext } from '@travetto/auth';
 
 import { AuthModelService } from '../src';
 
-export class AuthModelProvider<U extends BaseModel> extends AuthProvider<U> {
+export class AuthModelProvider<U extends ModelCore> extends AuthProvider<U> {
 
   constructor(private service: AuthModelService<U>) {
     super();
