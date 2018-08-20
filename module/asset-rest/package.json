@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@travetto/asset": "^0.2.9",
-    "@travetto/rest": "^0.2.9",
+    "@travetto/rest": "^0.2.10",
     "@types/busboy": "^0.2.3",
     "@types/multiparty": "^0.0.31",
     "busboy": "^0.2.14",
@@ -36,5 +36,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.9"
+  "version": "0.2.10"
 }

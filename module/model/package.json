@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@travetto/di": "^0.2.9",
-    "@travetto/schema": "^0.2.9"
+    "@travetto/schema": "^0.2.10"
   },
   "description": "Datastore abstraction for CRUD operations with advanced query support.",
   "devDependencies": {
@@ -35,5 +35,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.9"
+  "version": "0.2.10"
 }

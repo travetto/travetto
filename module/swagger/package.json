@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@travetto/exec": "^0.2.7",
-    "@travetto/rest": "^0.2.9",
-    "@travetto/schema": "^0.2.9"
+    "@travetto/rest": "^0.2.10",
+    "@travetto/schema": "^0.2.10"
   },
   "description": "Swagger integration support for the travetto framework",
   "devDependencies": {
@@ -31,5 +31,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.11"
+  "version": "0.2.12"
 }
