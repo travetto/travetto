@@ -121,7 +121,9 @@ export class ModelElasticsearchSource extends ModelSource {
         waitForCompletion: true
       });
 
-      await this.client.indices.delete({ index: curr });
+      await Promise.all(Object.keys(aliases)
+        .map(x => this.client.indices.delete({ index: x })));
+
       await this.client.indices.putAlias({ index: next, name: index });
     } else { // Only update
       const schema = generateSourceSchema(e.cls);
