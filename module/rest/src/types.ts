@@ -59,8 +59,8 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
   endpoints: EndpointConfig[];
 }
 
-export type Filter<T = any, R extends Request = Request, RS extends Response = Response> = (req: R, res: Response) => T;
-export type FilterReq<T = any, R extends Request = Request> = (req: R) => T;
+export type Filter<T = any> = (req: Request & TypedBody<any> & TypedQuery<any>, res: Response) => T;
+export type FilterReq<T = any> = (req: Request & TypedBody<any> & TypedQuery<any>) => T;
 export type FilterNone<T = any> = () => T;
 
 export interface EndpointDecorator<T = any> {
@@ -99,9 +99,5 @@ export class RestInterceptorSet {
 export type Request = Travetto.Request;
 export type Response = Travetto.Response;
 
-export interface TypedQuery<T> extends Request {
-  query: T;
-}
-export interface TypedBody<T> extends Request {
-  body: T;
-}
+export interface TypedQuery<T> extends Request { query: T; }
+export interface TypedBody<T> extends Request { body: T; }
