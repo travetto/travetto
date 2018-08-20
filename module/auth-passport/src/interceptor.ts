@@ -2,7 +2,7 @@ import * as passport from 'passport';
 
 import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
-import { AuthInterceptor } from '../../src';
+import { AuthInterceptor } from '@travetto/auth-rest';
 
 interface Handler {
   (req: Request, res: Response, next: Function): any;
