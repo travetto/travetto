@@ -1,11 +1,13 @@
-import { Request } from 'express';
-
 import { Get } from '@travetto/rest';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { Injectable, InjectableFactory } from '@travetto/di';
 
-import { ModelController } from '../extension/express';
-import { Model, BaseModel, ModelSource, ModelService, ModelCore, ModelQuery, Query, BulkState, BulkResponse, PageableModelQuery } from '../src';
+import { ModelController } from '../extension/rest';
+import {
+  Model, ModelSource, ModelService, ModelCore,
+  ModelQuery, Query, BulkState, BulkResponse,
+  PageableModelQuery
+} from '../src';
 import { QueryVerifierService } from '../src/service/query';
 
 @Injectable({ target: ModelSource })
@@ -82,7 +84,8 @@ export class TestSource implements ModelSource {
 }
 
 @Model()
-class Simple extends BaseModel {
+class Simple implements ModelCore {
+  id?: string;
   name: string;
 }
 
@@ -98,7 +101,7 @@ export class SimpleModelController {
   constructor(public source: ModelService) { }
 
   @Get('/fun')
-  getById(req: Request) {
+  getById() {
     return {
       message: 'Custom get all by'
     };
