@@ -1,8 +1,8 @@
 import { ConfigLoader } from '@travetto/config';
 
-import { MimeType, isRenderable } from './model';
-import { ControllerConfig, EndpointConfig, HeaderMap, Request, Response, RestInterceptor } from './types';
-import { RestConfig } from './service/config';
+import { MimeType, isRenderable } from '../model';
+import { ControllerConfig, EndpointConfig, HeaderMap, Request, Response, RestInterceptor } from '../types';
+import { RestConfig } from '../service/config';
 
 const restCfg = new RestConfig();
 ConfigLoader.bindTo(restCfg, 'rest');
@@ -13,7 +13,7 @@ export class EndpointUtil {
     const reqLog = {
       meta: {
         method: req.method,
-        path: req.path,
+        path: req.baseUrl ? `${req.baseUrl}${req.path}`.replace(/\/+/, '/') : req.path,
         query: req.query,
         params: req.params,
         statusCode: res.statusCode

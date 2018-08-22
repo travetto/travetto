@@ -1,7 +1,7 @@
 import { Response, Request } from '../types';
 import { MimeType } from '../model';
 
-export class RestAppUtil {
+export class RestUtil {
   static decorateRequest<T extends Request>(req: Partial<T> & { [key: string]: any }): T {
     delete req.redirect;
     Object.setPrototypeOf(req, BaseRequest.prototype);

@@ -5,7 +5,7 @@ import { Util } from '@travetto/base';
 import { RestConfig } from './config';
 import { RestAppProvider, RestInterceptor, RestInterceptorSet } from '../types';
 import { ControllerRegistry } from './registry';
-import { EndpointUtil } from '../endpoint-util';
+import { EndpointUtil } from '../util';
 
 @Injectable()
 export class RestApp {

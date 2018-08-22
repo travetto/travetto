@@ -2,7 +2,7 @@ import { ServerResponse, IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
 import { ConfigLoader } from '@travetto/config';
-import { ControllerConfig, RestAppProvider, RestAppUtil } from '@travetto/rest';
+import { ControllerConfig, RestAppProvider, RestUtil } from '@travetto/rest';
 
 import { FastifyConfig } from './config';
 
@@ -45,7 +45,7 @@ export class FastifyAppProvider extends RestAppProvider {
   }
 
   getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
-    return RestAppUtil.decorateRequest({
+    return RestUtil.decorateRequest({
       _raw: reqs,
       method: reqs.req.method,
       path: reqs.req.url!,
@@ -63,7 +63,7 @@ export class FastifyAppProvider extends RestAppProvider {
   }
 
   getResponse(reply: fastify.FastifyReply<ServerResponse>) {
-    return RestAppUtil.decorateResponse({
+    return RestUtil.decorateResponse({
       _raw: reply,
       get headersSent() {
         return reply.sent;

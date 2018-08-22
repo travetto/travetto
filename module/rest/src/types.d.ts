@@ -7,6 +7,8 @@ declare global {
       method?: string;
       path: string;
       url: string;
+      baseUrl?: string;
+
       query: { [key: string]: any };
       params: { [key: string]: any };
       session: any;
