@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^0.2.9",
-    "@travetto/log": "^0.2.7",
+    "@travetto/di": "^0.2.10",
+    "@travetto/log": "^0.2.8",
     "@types/express-serve-static-core": "^4.16.0"
   },
   "devDependencies": {
-    "@travetto/test": "^0.2.7"
+    "@travetto/test": "^0.2.8"
   },
   "optionalExtensionDependencies": {
     "@travetto/context": "^0.1.1"
@@ -35,5 +35,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.10"
+  "version": "0.2.11"
 }
