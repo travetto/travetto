@@ -100,7 +100,7 @@ export async function server() {
       console.debug('*Running*', data.file);
 
       try {
-        await new Runner(['-f', 'exec', '-m', 'single', data.file, data.class, data.method]).run();
+        await new Runner(['node', __filename, '-f', 'exec', '-m', 'single', data.file, data.class, data.method]).run();
         worker.send(Events.RUN_COMPLETE);
       } catch (e) {
         worker.send(Events.RUN_COMPLETE, { error: ExecUtil.serializeError(e) });

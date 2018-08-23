@@ -1,6 +1,7 @@
 import * as cp from 'child_process';
-import { ExecutionOptions, ExecutionResult } from './types';
 import { BaseError } from '@travetto/base';
+
+import { ExecutionOptions, ExecutionResult } from './types';
 
 export type WithOpts<T> = T & ExecutionOptions;
 

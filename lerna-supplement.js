@@ -63,6 +63,13 @@ function init(mod, base) {
   deps.regular.add('@travetto/test');
   const NM_MOD = `${base}/${mod}/node_modules`;
 
+  for (const f of ['tsconfig.json', 'tslint.json', '.npmignore', '.eslintrc', '.npmrc']) {
+    const destFile = `${base}/${mod}/${f}`;
+    if (fs.existsSync(destFile)) {
+      fs.copyFileSync(`${ROOT}/${f}`, destFile);
+    }
+  }
+
   if (!fs.existsSync(NM_MOD)) { fs.mkdirSync(NM_MOD); }
   if (!fs.existsSync(`${NM_MOD}/@travetto`)) { fs.mkdirSync(`${NM_MOD}/@travetto`); }
   if (!fs.existsSync(`${NM_MOD}/.bin`)) { fs.mkdirSync(`${NM_MOD}/.bin`); }
