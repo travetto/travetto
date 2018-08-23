@@ -9,9 +9,6 @@
       "es2015.proxy",
       "es2018"
     ],
-    "types": [
-      "node_modules/typescript/typescript.d.ts"
-    ],
     "preserveConstEnums": true,
     "experimentalDecorators": true,
     "rootDir": "src/",

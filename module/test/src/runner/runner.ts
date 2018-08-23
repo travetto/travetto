@@ -1,4 +1,4 @@
-import * as minimist from 'minimist';
+import * as commander from 'commander';
 
 import { PhaseManager } from '@travetto/base';
 import { ArrayDataSource } from '@travetto/pool';
@@ -13,17 +13,8 @@ import { watch } from './watcher';
 interface State {
   format: 'tap' | 'json' | 'noop' | 'exec';
   mode: 'single' | 'watch' | 'all';
-  _: string[];
+  args: string[];
 }
-
-const RUNNER_OPTIONS = {
-  default: {
-    format: 'tap',
-    mode: 'all',
-  },
-  alias: { f: 'format', m: 'mode' },
-  string: ['format', 'mode'],
-};
 
 const FORMAT_MAPPING: { [key: string]: Class<Consumer> } = {
   json: JSONEmitter,
@@ -34,8 +25,21 @@ const FORMAT_MAPPING: { [key: string]: Class<Consumer> } = {
 export class Runner {
   private state: State;
 
-  constructor(args: string[] = process.argv) {
-    this.state = minimist(args, RUNNER_OPTIONS) as any as State;
+  constructor(argv: string[]) {
+
+    const program = new commander.Command()
+      .usage('[-m, --mode <mode>] [-f, --format <format>] <regex of test files ...>')
+      .version(require(`${__dirname}/../../package.json`).version)
+      .arguments('<regex of test files ...>')
+      .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec)$/, 'tap')
+      .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
+      .parse(argv.filter(x => !!x));
+
+    if (program.args.length === 0) {
+      program.help();
+    }
+
+    this.state = { format: program.format, mode: program.mode, args: program.args } as State;
   }
 
   getConsumer(): Consumer & { summarize?: () => AllResultsCollector } {
@@ -85,9 +89,9 @@ export class Runner {
   }
 
   async getFiles() {
-    const globs = this.state._; // strip off node and worker name
+    const { args } = this.state; // strip off node and worker name
     // Glob to module path
-    const files = await TestExecutor.getTests(globs.map(x => new RegExp(`${x}`.replace(/[\\\/]/g, '/'))));
+    const files = await TestExecutor.getTests(args.map(x => new RegExp(`${x}`.replace(/[\\\/]/g, '/'))));
     return files;
   }
 
@@ -127,8 +131,7 @@ export class Runner {
 
   async runSome() {
     const consumer = this.getConsumer();
-    const args: string[] = this.state._;
-    return await TestExecutor.execute(consumer, args);
+    return await TestExecutor.execute(consumer, this.state.args);
   }
 
   async run() {

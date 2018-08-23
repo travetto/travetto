@@ -1,54 +1,32 @@
-const minimist = require('minimist');
+const commander = require('commander');
 
-function getArgs() {
-  return minimist(process.argv.slice(2), {
-    alias: {},
-    string: ['env', 'profile'],
-    boolean: ['watch'],
-    alias: {
-      profile: ['P']
-    }
-  });
+const program = commander
+  .usage('[-p <profile>] [--profile profile] [--profile profile2] [--watch <boolean>] [--env dev|test|e2e|prod] <application>')
+  .arguments('<application>')
+  .version(require(`${__dirname}/../package.json`).version)
+  .option('-e, --env <env>', 'Application environment', /^(dev|test|e2e|prod)$/i, 'dev')
+  .option('-w, --watch [watch]', 'Run the application in watch mode', x => /^(true|yes|on)$/i.test(x), false)
+  .option('-p, --profile <profile>', 'Specify additional application profiles', (v, ls) => { ls.push(v); }, [])
+  .parse(process.argv);
+
+console.log(program);
+
+if (program.args.length !== 1) {
+  program.help();
 }
 
-function showHelp() {
-  console.log(`Usage for ${process.argv[1]}: [--P <profile>] [--profile=profile] [--profile profile2] [--watch=<boolean>] [--env dev|test|e2e|prod] <application name>`);
-}
+process.env.TRV_APP = program.args[0];
+process.env.ENV = program.env;
+process.env.PROFILE = [program.args, (process.env.PROFILE || '').split(/,/g), program.profile]
+  .reduce((acc, v) => { acc.push(...v); return acc; })
+  .map(x => x.trim())
+  .filter(x => !!x)
+  .join(',');
 
-const args = getArgs();
-
-if (args._.length !== 1) {
-  showHelp();
-  process.exit(1);
-} else {
-  const app = args._[0];
-  process.env.TRV_APP = app;
-  const profiles = [app];
-
-  if (process.env.PROFILE) {
-    profiles.push(...process.env.PROFILE.split(/[, ]+/g));
-  }
-
-  for (const p of (args.profile || [])) {
-    if (p.includes(',')) {
-      profiles.push(...p.split(','));
-    } else {
-      profiles.push(p);
-    }
-  }
-
-  if (profiles.length) {
-    process.env.PROFILE = profiles.join(',');
-  }
-
-  if ('watch' in args) {
-    if (args.watch) {
-      process.env.WATCH = true;
-    } else {
-      process.env.NO_WATCH = true;
-    }
-  }
-  if ('env' in args) {
-    process.env.ENV = args.env;
+if (program.watch !== undefined) {
+  if (program.watch) {
+    process.env.WATCH = true;
+  } else {
+    process.env.NO_WATCH = true;
   }
 }

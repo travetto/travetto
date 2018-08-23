@@ -1,7 +1,7 @@
 import * as os from 'os';
+import { createPool, Pool, Options } from 'generic-pool';
 
 import { Shutdown } from '@travetto/base';
-import { createPool, Pool, Options } from 'generic-pool';
 
 import { DataSource, ConcurrentOp } from './types';
 
