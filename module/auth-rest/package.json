@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth": "^0.2.11",
-    "@travetto/rest": "^0.2.12"
+    "@travetto/auth": "^0.2.12",
+    "@travetto/rest": "^0.2.13"
   },
   "description": "Rest authentication integration support for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.2.9"
+    "@travetto/test": "^0.2.10"
   },
   "optionalExtensionDependencies": {
     "passport": "^0.4.0"
@@ -33,5 +33,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.13"
+  "version": "0.2.14"
 }
