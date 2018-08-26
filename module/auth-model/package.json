@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth": "^0.2.10",
-    "@travetto/model": "^0.2.11"
+    "@travetto/auth": "^0.2.11",
+    "@travetto/model": "^0.2.12"
   },
   "description": "Model-based authentication and registration support for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.2.8"
+    "@travetto/test": "^0.2.9"
   },
   "optionalExtensionDependencies": {
     "@travetto/auth-rest": "^0.1.11"
@@ -33,5 +33,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.12"
+  "version": "0.2.13"
 }
