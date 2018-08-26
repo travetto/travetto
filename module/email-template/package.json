@@ -6,30 +6,39 @@
   "publishConfig": {
     "access": "public"
   },
+  "bin": {
+    "travetto-email-template": "./bin/travetto-email.sh"
+  },
   "dependencies": {
     "@travetto/di": "^0.2.10",
-    "@travetto/exec": "^0.2.8"
+    "@travetto/exec": "^0.2.8",
+    "@travetto/email": "^0.2.10",
+    "@types/html-entities": "^1.2.16",
+    "@types/marked": "0.3.0",
+    "@types/mustache": "^0.8.30",
+    "foundation-emails": "^2.2.1",
+    "html-entities": "^1.2.1",
+    "inky": "https://github.com/arciisine/inky.git#develop",
+    "marked": "^0.3.19",
+    "mustache": "^2.3.0",
+    "sass": "1.5.1"
   },
-  "description": "Email transmission module.",
+  "description": "Email templating module",
   "devDependencies": {
     "@travetto/test": "^0.2.8"
-  },
-  "optionalExtensionDependencies": {
-    "@types/nodemailer": "^4.6.0",
-    "nodemailer": "^4.6.8",
-    "nodemailer-sendmail-transport": "^1.0.2",
-    "nodemailer-smtp-transport": "^2.7.4",
-    "nodemailer-ses-transport": "^1.5.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [
     "email",
+    "inky",
+    "templating",
+    "mustache",
     "travetto",
     "typescript"
   ],
   "license": "MIT",
   "main": "index.ts",
-  "name": "@travetto/email",
+  "name": "@travetto/email-template",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },

@@ -1,0 +1,5 @@
+test/**
+.npmrc
+.gitignore
+tslint.json
+package-lock.json
