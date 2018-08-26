@@ -32,5 +32,5 @@
   "scripts": {
     "test": "node ./bin/travetto-test.js"
   },
-  "version": "0.2.10"
+  "version": "0.2.11"
 }
