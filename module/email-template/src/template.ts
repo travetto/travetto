@@ -86,8 +86,15 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     let html = new Inky({}).releaseTheKraken(tpl);
 
     const css = await this.compiledSass;
+    const styles = [`<style>\n${css}\n</style>`];
+
+    html = html.replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (all) => {
+      styles.push(all);
+      return '';
+    });
+
     html = html
-      .replace(/<\/head>/, all => `${css}\n${all}`)
+      .replace(/<\/head>/, all => `${styles.join('\n')}\n${all}`)
       .replace(/%WIDTH%/g, `580`);
 
     // Inline Images

@@ -1,4 +1,5 @@
 test/**
+e2e/**
 .npmrc
 .gitignore
 tslint.json
