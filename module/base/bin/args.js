@@ -9,8 +9,6 @@ const program = commander
   .option('-p, --profile <profile>', 'Specify additional application profiles', (v, ls) => { ls.push(v); }, [])
   .parse(process.argv);
 
-console.log(program);
-
 if (program.args.length !== 1) {
   program.help();
 }
