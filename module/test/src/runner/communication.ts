@@ -1,7 +1,6 @@
 import * as os from 'os';
 
-import { LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
-import { ConcurrentPool, IdleManager } from '@travetto/pool';
+import { ExecutionPool, IdleManager, LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
 import { PhaseManager, Env } from '@travetto/base';
 
 /***
@@ -115,7 +114,7 @@ export async function server() {
 }
 
 export function client() {
-  return new ConcurrentPool(async () => {
+  return new ExecutionPool(async () => {
     const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true, {
       cwd: Env.cwd
     });

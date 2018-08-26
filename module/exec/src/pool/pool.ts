@@ -3,9 +3,9 @@ import { createPool, Pool, Options } from 'generic-pool';
 
 import { Shutdown } from '@travetto/base';
 
-import { DataSource, ConcurrentOp } from './types';
+import { ExecutionSource, ConcurrentExecution } from './types';
 
-export class ConcurrentPool<T extends ConcurrentOp> {
+export class ExecutionPool<T extends ConcurrentExecution> {
 
   private pool: Pool<T>;
 
@@ -25,7 +25,7 @@ export class ConcurrentPool<T extends ConcurrentOp> {
         ...(opts || {})
       });
 
-    Shutdown.onShutdown(ConcurrentPool.name, () => this.shutdown());
+    Shutdown.onShutdown(ExecutionPool.name, () => this.shutdown());
   }
 
   release(execution: T) {
@@ -47,7 +47,7 @@ export class ConcurrentPool<T extends ConcurrentOp> {
     }
   }
 
-  async process<X>(src: DataSource<X>, exec: (inp: X, exe: T) => Promise<any>) {
+  async process<X>(src: ExecutionSource<X>, exec: (inp: X, exe: T) => Promise<any>) {
     const pending = new Set();
 
     while (src.hasNext()) {

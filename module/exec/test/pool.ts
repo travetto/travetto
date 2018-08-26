@@ -1,8 +1,6 @@
 import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
-import { ConcurrentPool, ArrayDataSource, IteratorDataSource } from '@travetto/pool';
-
-import { ChildExecution } from '../src';
+import { ChildExecution, ExecutionPool, ArrayExecutionSource, IteratorExecutionSource } from '../src';
 
 @Suite()
 export class PoolExecTest {
@@ -10,7 +8,7 @@ export class PoolExecTest {
   @Test()
   async simple() {
 
-    const pool = new ConcurrentPool<ChildExecution>(async () => {
+    const pool = new ExecutionPool<ChildExecution>(async () => {
       console.log('Initializing child');
       const child = new ChildExecution(`${__dirname}/simple.child-launcher.js`, true, {
         env: { SRC: './simple.child' }
@@ -23,8 +21,8 @@ export class PoolExecTest {
     }, { max: 1 });
 
     await pool.process(
-      //  new ArrayDataSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
-      new IteratorDataSource(function* () {
+      //  new ArrayExecutionSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+      new IteratorExecutionSource(function* () {
         for (let i = 0; i < 5; i++) {
           yield `${i}-`;
         }

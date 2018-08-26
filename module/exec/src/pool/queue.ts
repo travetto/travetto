@@ -1,6 +1,6 @@
-import { DataSource } from './types';
+import { ExecutionSource } from './types';
 
-export class QueueDataSource<T> implements DataSource<T> {
+export class QueueExecutionSource<T> implements ExecutionSource<T> {
   private items: T[] = [];
 
   constructor(data?: T[], private tick: number = 500) {
