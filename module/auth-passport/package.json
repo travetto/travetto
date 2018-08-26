@@ -7,13 +7,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^0.2.13",
+    "@travetto/auth-rest": "^0.2.14",
     "@types/passport": "0.4.6",
     "passport": "^0.4.0"
   },
   "description": "Passport authentication integration support for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.2.9"
+    "@travetto/test": "^0.2.10"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -32,5 +32,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.13"
+  "version": "0.2.14"
 }

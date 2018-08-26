@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^0.2.9",
+    "@travetto/base": "^0.2.10",
     "@types/js-yaml": "^3.11.1",
     "js-yaml": "https://github.com/arciisine/js-yaml.git#3.11.0-slim"
   },
@@ -30,5 +30,5 @@
   "scripts": {
     "test": "./node_modules/.bin/travetto-test"
   },
-  "version": "0.2.9"
+  "version": "0.2.10"
 }
