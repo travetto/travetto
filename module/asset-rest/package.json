@@ -10,11 +10,8 @@
     "@travetto/asset": "^0.2.13",
     "@travetto/rest": "^0.2.14",
     "@types/busboy": "^0.2.3",
-    "@types/multiparty": "^0.0.31",
     "busboy": "^0.2.14",
-    "connect-multiparty": "^2.1.1",
-    "mime-match": "^1.0.2",
-    "multiparty": "^4.2.1"
+    "mime-match": "^1.0.2"
   },
   "description": "Provides integration between the travetto asset and rest module.",
   "devDependencies": {
