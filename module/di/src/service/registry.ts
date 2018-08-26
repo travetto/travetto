@@ -14,6 +14,8 @@ export interface ManagedExtra {
 type TargetId = string;
 type ClassId = string;
 
+type Proxy<T = any> = any;
+
 function getName(symbol: symbol) {
   return symbol.toString().split(/[()]/g)[1];
 }
