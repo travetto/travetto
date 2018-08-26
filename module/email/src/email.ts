@@ -1,38 +1,20 @@
-import * as nodemailer from 'nodemailer';
-import * as util from 'util';
-
-import { TemplateMailOptions } from './types';
 import { Injectable } from '@travetto/di';
-import { MailConfig } from './config';
-import { TemplateEngine } from './template';
+
+import { MailTemplateOptions, MailTransport, MessageOptions, MailTemplateEngine } from './types';
 
 @Injectable()
 export class EmailService {
 
-  private transporter: nodemailer.Transporter;
-
   constructor(
-    private config: MailConfig,
-    private tplEngine: TemplateEngine
+    private transport: MailTransport,
+    private tplEngine?: MailTemplateEngine
   ) { }
 
-  async postConstruct() {
-    let transport: nodemailer.Transport;
-    if (!this.config.transport) {
-      const mockTransport = require('nodemailer-mock-transport');
-      transport = mockTransport();
-    } else if (this.config.transport === 'sendmail') {
-      const sendmailTransport = require('nodemailer-sendmail-transport');
-      transport = sendmailTransport({ path: '/usr/sbin/sendmail' });
-    } else {
-      const smtpTransport = require('nodemailer-smtp-transport');
-      transport = smtpTransport(this.config.transport);
+  async sendTemplatedEmail(contexts: MailTemplateOptions | MailTemplateOptions[], base?: MailTemplateOptions) {
+    if (!this.tplEngine) {
+      throw new Error('Template engine has not been loaded, perhaps you should install @travetto/email-template');
     }
 
-    this.transporter = nodemailer.createTransport(transport);
-  }
-
-  async sendEmail(contexts: TemplateMailOptions | TemplateMailOptions[], base?: TemplateMailOptions) {
     const arr = Array.isArray(contexts) ? contexts : [contexts];
 
     const promises = arr.map(async (ctx) => {
@@ -43,9 +25,10 @@ export class EmailService {
         }
       }
 
+      ctx.context = ctx.context || {};
       ctx.attachments = [];
 
-      const { html, text } = await this.tplEngine.template(ctx.template, ctx.context);
+      const { html, text } = await this.tplEngine!.template(ctx.template, ctx.context);
       let x = 0;
 
       ctx.html = html.replace(/data:(image\/[^;]+);base64,([^"]+)/g, (_, type, content) => {
@@ -60,20 +43,17 @@ export class EmailService {
 
       ctx.text = text;
 
-      if (ctx.subject) {
-        ctx.subject = this.tplEngine.interpolate(ctx.subject, ctx.context);
+      if (ctx.subject && ctx.context) {
+        ctx.subject = await this.tplEngine!.interpolate(ctx.subject, ctx.context);
       }
 
-      return this.sendEmailRaw(ctx);
+      return this.sendEmail(ctx);
     });
 
     return Promise.all(promises);
   }
 
-  async sendEmailRaw(options: nodemailer.SendMailOptions) {
-    options = { ...this.config.defaults, ...options } as nodemailer.SendMailOptions;
-    const tp = this.transporter;
-    (await util.promisify(tp.sendMail).call(tp, options)) as nodemailer.SentMessageInfo;
-    return options;
+  async sendEmail(options: MessageOptions) {
+    return this.transport.sendMail(options);
   }
 }
