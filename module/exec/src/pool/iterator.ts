@@ -1,10 +1,10 @@
-import { DataSource } from './types';
+import { ExecutionSource } from './types';
 
 function isIterator<T>(o: any): o is Iterator<T> {
   return 'next' in o;
 }
 
-export class IteratorDataSource<T> implements DataSource<T> {
+export class IteratorExecutionSource<T> implements ExecutionSource<T> {
 
   private src: Iterator<T>;
   private ondeck: T;

@@ -1,6 +1,6 @@
-import { DataSource } from './types';
+import { ExecutionSource } from './types';
 
-export class ArrayDataSource<T> implements DataSource<T> {
+export class ArrayExecutionSource<T> implements ExecutionSource<T> {
   position = 0;
 
   constructor(public items: T[]) { }

@@ -1,8 +1,7 @@
 import * as commander from 'commander';
 
 import { PhaseManager } from '@travetto/base';
-import { ArrayDataSource } from '@travetto/pool';
-import { ExecUtil } from '@travetto/exec';
+import { ExecUtil, ArrayExecutionSource } from '@travetto/exec';
 import { Class } from '@travetto/registry';
 
 import { TestExecutor } from './executor';
@@ -104,7 +103,7 @@ export class Runner {
     await new PhaseManager('test').load().run();
 
     await client().process(
-      new ArrayDataSource(files),
+      new ArrayExecutionSource(files),
       async (file, exe) => {
         exe.listen(consumer.onEvent as any);
 

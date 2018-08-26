@@ -1,6 +1,5 @@
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
-import { ChildExecution } from '@travetto/exec';
-import { QueueDataSource } from '@travetto/pool';
+import { QueueExecutionSource, ChildExecution } from '@travetto/exec';
 
 import { client, Events } from './communication';
 import { TestRegistry } from '../service';
@@ -83,7 +82,7 @@ export async function watch() {
   }, 1);
 
   const all = client().process(
-    new QueueDataSource(queue),
+    new QueueExecutionSource(queue),
     async (conf, exe: ChildExecution) => {
       exe.listen(consumer.onEvent.bind(consumer));
       let event: any;

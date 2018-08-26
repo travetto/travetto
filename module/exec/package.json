@@ -6,10 +6,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {
-    "@travetto/pool": "^0.2.10"
-  },
   "description": "Common wrapper around process execution with high level docker support.",
+  "dependencies": {
+    "generic-pool": "^3.4.2",
+    "@types/generic-pool": "^3.1.4"
+  },
   "homepage": "https://travetto.io",
   "keywords": [
     "exec",
