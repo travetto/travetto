@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@travetto/base": "^0.2.10",
-    "@types/generic-pool": "^3.1.2",
+    "@types/generic-pool": "^3.1.4",
     "generic-pool": "^3.4.2"
   },
   "description": "Worker pool logic with constructs for concurrency management",
