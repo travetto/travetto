@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const path = require('path');
 
-const ROOT = fs.realpathSync(__dirname);
+const F_ROOT = fs.realpathSync(__dirname);
+const ROOT = path.dirname(F_ROOT); // Move up from ./bin folder
+
 const MOD_ROOT = `${ROOT}/module`;
+const MOD_TPL_ROOT = `${ROOT}/module-template`;
 const SAMPLE_ROOT = `${ROOT}/sample`;
 const NM_ROOT = `${ROOT}/node_modules`;
 
@@ -63,10 +67,10 @@ function init(mod, base) {
   deps.regular.add('@travetto/test');
   const NM_MOD = `${base}/${mod}/node_modules`;
 
-  for (const f of ['tsconfig.json', 'tslint.json', '.npmignore', '.eslintrc', '.npmrc']) {
+  for (const f of fs.readdirSync(MOD_TPL_ROOT)) {
     const destFile = `${base}/${mod}/${f}`;
     if (fs.existsSync(destFile)) {
-      fs.copyFileSync(`${ROOT}/${f}`, destFile);
+      fs.copyFileSync(`${MOD_TPL_ROOT}/${f}`, destFile);
     }
   }
 
