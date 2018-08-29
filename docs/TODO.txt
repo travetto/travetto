@@ -1,0 +1,74 @@
+X HTTP/2
+X Koa
+
+- Lambda
+  - Entire app as AWS lambda
+  - Individual routes as individual lambdas
+  - Auto deployment of application
+  - API Gateway configuration
+  - Profit?
+- WebSockets
+
+
+X Auth Module
+ X OAuth support
+ X Rewrite starter
+
+Website
+   X Landing Screen Images
+   X Docs
+   X Getting Started
+
+General
+   X Test Loading/Unloading
+   X Test auto import? or restrict completely
+
+ Documentaion
+   X Getting Started
+   X Overview
+   X General Docs
+   X Github project
+     X Basic Pass at README
+     X Project title/topics
+     X Deeper README
+
+Tests
+  ? Better unit tests
+
+X Win32
+  X Path issues
+    X Cache files
+    X Bulk require
+    X Bulk read
+    X Stack traces
+       X Output
+       X Testing
+    X Transformers file names
+    X Logging file names
+  X Execution
+    X Must have node at front at all times
+
+X Logging
+  X General Strategy
+    X DEBUG - Low frequency, but low level
+    X TRACE - Low level, but high frequency
+    X INFO - High level and useful
+  X Error messaging
+  X Modules
+     X Base
+     X Compiler
+     X Registry
+     X Dependency
+     X Express
+     X Util
+
+Express
+  X Add Swagger generation  
+
+Elasticsearch
+  X Schema management
+
+Announce
+  X Blog
+  X Twitter
+  - Friends/Coworkers
