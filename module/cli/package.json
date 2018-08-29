@@ -6,23 +6,21 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "Common wrapper around process execution with high level docker support.",
-  "dependencies": {
-    "@types/generic-pool": "^3.1.4",
-    "generic-pool": "^3.4.2"
+  "bin": {
+    "travetto": "bin/travetto.js"
   },
+  "dependencies": {
+    "commander": "^2.17.1"
+  },
+  "description": "CLI infrastructure for travetto framework",
   "homepage": "https://travetto.io",
   "keywords": [
-    "exec",
-    "docker",
-    "child-process",
-    "ipc",
-    "travetto",
-    "typescript"
+    "cli",
+    "travetto"
   ],
   "license": "MIT",
-  "main": "src/lib/",
-  "name": "@travetto/exec",
+  "main": "bin/travetto.js",
+  "name": "@travetto/cli",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },

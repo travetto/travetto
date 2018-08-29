@@ -1,11 +1,5 @@
 #!/usr/bin/env node
 
-global.INIT_TIME = Date.now();
-
-if (require.main === module) {
-  require('./args');
-}
-
 const fs = require('fs');
 const path = require('path');
 const Module = require('module');
@@ -59,8 +53,4 @@ const { PhaseManager } = require('../src/phase');
 const mgr = new PhaseManager('bootstrap');
 mgr.load();
 
-if (require.main === module) {
-  mgr.run();
-} else {
-  module.exports = mgr;
-}
+module.exports = mgr;

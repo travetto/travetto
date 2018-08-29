@@ -99,7 +99,7 @@ export async function server() {
       console.debug('*Running*', data.file);
 
       try {
-        await new Runner(['node', __filename, '-f', 'exec', '-m', 'single', data.file, data.class, data.method]).run();
+        await new Runner({ format: 'exec', mode: 'single', args: [data.file, data.class, data.method] }).run();
         worker.send(Events.RUN_COMPLETE);
       } catch (e) {
         worker.send(Events.RUN_COMPLETE, { error: ExecUtil.serializeError(e) });
@@ -115,7 +115,7 @@ export async function server() {
 
 export function client() {
   return new ExecutionPool(async () => {
-    const worker = new ChildExecution(require.resolve('../../bin/travetto-test.js'), true, {
+    const worker = new ChildExecution(require.resolve('../../bin/travetto-test-server'), true, {
       cwd: Env.cwd
     });
     worker.init();

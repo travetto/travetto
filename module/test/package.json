@@ -4,7 +4,7 @@
     "name": "Travetto Framework"
   },
   "bin": {
-    "travetto-test": "bin/travetto-test.js"
+    "travetto-cli-test": "bin/travetto-cli-test.js"
   },
   "dependencies": {
     "@travetto/exec": "^0.2.11",
@@ -27,9 +27,6 @@
   "name": "@travetto/test",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
-  },
-  "scripts": {
-    "test": "node ./bin/travetto-test.js"
   },
   "version": "0.2.12"
 }
