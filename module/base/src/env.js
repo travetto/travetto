@@ -26,7 +26,7 @@ function checkFrameworkDev() {
 
 function checkDocker() {
   let docker = !isEnvTrue('NO_DOCKER');
-  if (docker) { // Check for docker existance
+  if (docker) { // Check for docker existence
     try {
       const { execSync } = require('child_process');
       execSync('docker ps', { stdio: [undefined, undefined, undefined] });
@@ -38,7 +38,14 @@ function checkDocker() {
 }
 
 function checkWatch(profile) {
-  const watch = ((profile.dev || profile.e2e) && !isEnvTrue('NO_WATCH')) || isEnvTrue('watch');
+  const watch = (
+    (profile.dev || profile.e2e) &&
+    envVal('no_watch') === undefined &&
+    envVal('watch') === undefined
+  ) || (
+    !isEnvTrue('no_watch') &&
+    isEnvTrue('watch')
+  );
   return { watch };
 }
 

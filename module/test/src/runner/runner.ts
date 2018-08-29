@@ -1,5 +1,3 @@
-import * as commander from 'commander';
-
 import { PhaseManager } from '@travetto/base';
 import { ExecUtil, ArrayExecutionSource } from '@travetto/exec';
 import { Class } from '@travetto/registry';
@@ -22,24 +20,7 @@ const FORMAT_MAPPING: { [key: string]: Class<Consumer> } = {
 };
 
 export class Runner {
-  private state: State;
-
-  constructor(argv: string[]) {
-
-    const program = new commander.Command()
-      .usage('[-m, --mode <mode>] [-f, --format <format>] <regex of test files ...>')
-      .version(require(`${__dirname}/../../package.json`).version)
-      .arguments('<regex of test files ...>')
-      .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec)$/, 'tap')
-      .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
-      .parse(argv.filter(x => !!x));
-
-    if (program.args.length === 0) {
-      program.help();
-    }
-
-    this.state = { format: program.format, mode: program.mode, args: program.args } as State;
-  }
+  constructor(private state: State) { }
 
   getConsumer(): Consumer & { summarize?: () => AllResultsCollector } {
     const consumers: Consumer[] = [];

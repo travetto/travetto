@@ -1,4 +1,4 @@
-require('@travetto/base/bin/travetto')
+require('@travetto/base/bin/bootstrap')
   .run(x => {
     require('./watch');
     require('../src').SchemaRegistry.onFieldChange((e) => {

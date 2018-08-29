@@ -6,6 +6,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "bin": {
+    "travetto-cli-swagger": "bin/travetto-cli-swagger.js"
+  },
   "dependencies": {
     "@travetto/exec": "^0.2.11",
     "@travetto/rest": "^0.2.15",
@@ -27,9 +30,6 @@
   "name": "@travetto/swagger",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
-  },
-  "scripts": {
-    "test": "./node_modules/.bin/travetto-test"
   },
   "version": "0.2.17"
 }

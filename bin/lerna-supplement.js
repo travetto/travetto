@@ -92,14 +92,18 @@ function init(mod, base) {
   }
 
   const scripts = [
-    ['test', 'travetto-test'],
-    ['base', 'travetto-clean'],
+    ['test', 'travetto-cli-test'],
+    ['base', 'travetto-cli-clean'],
+    ['base', 'travetto-cli-run'],
+    ['swagger', 'travetto-cli-swagger-client'],
     ['base', 'travetto']
   ];
 
-  for (const [mod, script] of scripts) {
+  for (const [smod, script] of scripts) {
     try {
-      makeLink(`${MOD_ROOT}/${mod}/bin/${script}.js`, `${NM_MOD}/.bin/${script}`);
+      if (fs.existsSync(`${NM_MOD}/@travetto/${smod}`) || mod === smod) {
+        makeLink(`${MOD_ROOT}/${smod}/bin/${script}.js`, `${NM_MOD}/.bin/${script}`);
+      }
     } catch (e) {}
   }
 

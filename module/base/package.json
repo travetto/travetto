@@ -7,15 +7,15 @@
     "access": "public"
   },
   "bin": {
-    "travetto": "bin/travetto.js",
-    "travetto-clean": "bin/travetto-clean.js"
+    "travetto-cli-clean": "bin/travetto-cli-clean.js",
+    "travetto-cli-run": "bin/travetto-cli-run.js"
   },
   "dependencies": {
     "@types/node": "^10.3.2",
-    "commander": "^2.17.1",
+    "@travetto/cli": "^0.2.11",
     "trace": "^3.1.0",
     "tslib": "^1.9.3",
-    "typescript": "^3.0.0"
+    "typescript": "^3.0.3"
   },
   "description": "Bootstrapping, application phase management, environment config and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
@@ -35,8 +35,7 @@
     "url": "https://github.com/travetto/travetto.git"
   },
   "scripts": {
-    "postinstall": "./bin/travetto-clean.js",
-    "test": "./node_modules/.bin/travetto-test"
+    "postinstall": "node ./bin/travetto-cli-clean.js"
   },
   "version": "0.2.11"
 }
