@@ -95,9 +95,10 @@ function init(mod, base) {
     ['test', 'travetto-cli-test'],
     ['base', 'travetto-cli-clean'],
     ['base', 'travetto-cli-run'],
+    ['compiler', 'travetto-cli-compile'],
     ['rest-aws-lambda', 'travetto-cli-aws-lambda'],
     ['swagger', 'travetto-cli-swagger-client'],
-    ['base', 'travetto']
+    ['cli', 'travetto']
   ];
 
   for (const [smod, script] of scripts) {

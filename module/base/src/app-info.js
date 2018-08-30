@@ -4,7 +4,6 @@ const { Env } = require('./env');
 const pkg = require(path.join(Env.cwd, 'package.json'));
 
 const subName = pkg.name.split('/').pop();
-const args = process.argv.slice(2).pop();
 
 module.exports = {
   AppInfo: {

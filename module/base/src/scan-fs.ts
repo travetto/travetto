@@ -44,7 +44,7 @@ export class ScanFs {
             continue;
           }
 
-          const full = path.join(entry.file, file);
+          const full = path.resolve(entry.file, file);
           const stats = await fsStat(full);
           const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
@@ -99,7 +99,7 @@ export class ScanFs {
         continue;
       }
 
-      const full = path.join(entry.file, file);
+      const full = path.resolve(entry.file, file);
       const stats = fs.lstatSync(full);
       const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
 

@@ -19,6 +19,9 @@ module.exports = function init(program) {
         }).run();
       }).then(
         x => process.exit(x ? 0 : 1),
-        e => process.exit(1));
+        e => {
+          console.error(e);
+          process.exit(1);
+        });
     });
 };
