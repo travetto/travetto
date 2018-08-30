@@ -9,7 +9,7 @@ module.exports = function init(program) {
       process.env.API_CLIENT_OUTPUT = cmd.output;
       process.env.API_CLIENT_FORMAT = cmd.format;
       process.env.API_CLIENT_FORMATOPTIONS = cmd.formatOptions;
-      process.env.NO_WATCH = true;
+      process.env.WATCH = false;
 
       require('@travetto/base/bin/bootstrap').run(() => {
         const { ClientGenerate } = require('../src/service/client-generate');
