@@ -6,12 +6,20 @@ const fs = require('fs');
 
 const cwd = (process.env['init_cwd'] || process.env['INIT_CWD'] || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
 
+function dependOn(cmd, args) {
+  require('child_process').execSync(`${process.argv.slice(0, 2).join(' ')} ${cmd} ${(args||[]).join(' ')}`, {
+    env: process.env,
+    cwd,
+    stdio: [0, 1, 2]
+  });
+}
+
 function loadModule(f) {
   let p = fs.realpathSync(`${cwd}/node_modules/.bin/${f}`);
   if (!p.startsWith(cwd)) {
     p = `${cwd}/node_modules/@travetto/${p.split('travetto/module/')[1]}`;
   }
-  require(p)(commander);
+  require(p)(commander, cwd, dependOn);
 }
 
 const cmd = process.argv[2];

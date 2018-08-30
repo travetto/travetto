@@ -67,11 +67,11 @@ class Cache {
   }
 
   fromEntryName(cached) {
-    return path.join(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, path.sep));
+    return path.join(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, path.sep)).replace(/[.]js/g, '.ts');
   }
 
   toEntryName(full) {
-    const out = path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~'));
+    const out = path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~')).replace(/[.]ts/g, '.js');
     return out;
   }
 }
@@ -83,6 +83,13 @@ class $AppCache extends Cache {
 
   init() {
     super.init();
+
+    try {
+      // Ensure we have access before trying to delete
+      fs.accessSync(this.cacheDir, fs.constants.W_OK);
+    } catch (e) {
+      return; // Skip trying to delete;
+    }
 
     for (const f of fs.readdirSync(this.cacheDir)) {
       const full = this.fromEntryName(f);

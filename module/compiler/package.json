@@ -6,6 +6,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "bin": {
+    "travetto-cli-compile": "bin/travetto-cli-compile.js"
+  },
   "dependencies": {
     "@travetto/base": "^0.3.0",
     "@types/source-map-support": "^0.4.1",

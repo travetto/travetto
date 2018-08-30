@@ -1,7 +1,5 @@
 function clean() {
-  const { Env: { cwd } } = require('../src/env');
-  const { Cache } = require('../src/cache');
-  new Cache(cwd).clear();
+  require('../src/cache').AppCache.clear();
 }
 
 module.exports = function init(program) {
