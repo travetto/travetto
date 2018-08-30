@@ -11,8 +11,8 @@
     "travetto-cli-run": "bin/travetto-cli-run.js"
   },
   "dependencies": {
+    "@travetto/cli": "^0.3.0",
     "@types/node": "^10.3.2",
-    "@travetto/cli": "^0.2.11",
     "trace": "^3.1.0",
     "tslib": "^1.9.3",
     "typescript": "^3.0.3"
@@ -37,5 +37,5 @@
   "scripts": {
     "postinstall": "node ./bin/travetto-cli-clean.js"
   },
-  "version": "0.2.11"
+  "version": "0.3.0"
 }

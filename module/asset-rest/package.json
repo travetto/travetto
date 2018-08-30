@@ -7,15 +7,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/asset": "^0.2.14",
-    "@travetto/rest": "^0.2.15",
+    "@travetto/asset": "^0.3.0",
+    "@travetto/rest": "^0.3.0",
     "@types/busboy": "^0.2.3",
     "busboy": "^0.2.14",
     "mime-match": "^1.0.2"
   },
   "description": "Provides integration between the travetto asset and rest module.",
   "devDependencies": {
-    "@travetto/test": "^0.2.12"
+    "@travetto/test": "^0.3.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -30,5 +30,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.2.16"
+  "version": "0.3.0"
 }
