@@ -95,6 +95,7 @@ function init(mod, base) {
     ['test', 'travetto-cli-test'],
     ['base', 'travetto-cli-clean'],
     ['base', 'travetto-cli-run'],
+    ['rest-aws-lambda', 'travetto-cli-aws-lambda'],
     ['swagger', 'travetto-cli-swagger-client'],
     ['base', 'travetto']
   ];
