@@ -1,4 +1,3 @@
-export NODE_PRESERVE_SYMLINKS=1
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 BASEDIR=$(dirname $DIR)
 
