@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
 
-import { AppError } from '../model';
-import { ControllerRegistry } from '../service';
+import { AppError } from '../error';
+import { ControllerRegistry } from '../registry';
 import { Request, ParamConfig, EndpointConfig, Filter, EndpointDecorator } from '../types';
 
 export function parseParam(type: Class | undefined, name: string, param: any) {

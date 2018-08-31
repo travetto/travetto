@@ -2,7 +2,7 @@ import { ControllerRegistry, AppError, ParamConfig, Filter, EndpointDecorator, R
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
-import { SchemaRegistry, BindUtil, SchemaValidator, ValidationErrors } from '@travetto/schema/src';
+import { SchemaRegistry, BindUtil, SchemaValidator, ValidationErrors } from '..';
 
 // tslint:disable:no-invalid-this
 (ValidationErrors as any as Class<Error>).prototype.render = function (res: Response) {

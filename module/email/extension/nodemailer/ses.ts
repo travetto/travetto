@@ -1,7 +1,7 @@
 import { Inject } from '@travetto/di';
 
 import { BaseTransport } from './base';
-import { MailConfig } from '../../src';
+import { MailConfig } from '../../src/config';
 
 export class SesTransport extends BaseTransport {
   @Inject()

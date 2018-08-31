@@ -1,11 +1,12 @@
+import * as assert from 'assert';
+
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 
-import * as assert from 'assert';
 import { BaseElasticsearchTest } from './base';
-import { ModelElasticsearchSource } from '../src';
+import { ModelElasticsearchSource } from '../src/source';
 
 @Schema()
 class Address {

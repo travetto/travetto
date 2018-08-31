@@ -3,7 +3,12 @@ import { ExecUtil, ArrayExecutionSource } from '@travetto/exec';
 import { Class } from '@travetto/registry';
 
 import { TestExecutor } from './executor';
-import { ExecutionEmitter, Consumer, AllResultsCollector, TapEmitter, JSONEmitter } from '../consumer';
+import { Consumer } from '../consumer/types';
+import { JSONEmitter } from '../consumer/json';
+import { ExecutionEmitter } from '../consumer/execution';
+import { TapEmitter } from '../consumer/tap';
+import { AllResultsCollector } from '../consumer/collector';
+
 import { client, Events } from './communication';
 import { watch } from './watcher';
 

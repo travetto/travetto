@@ -1,5 +1,6 @@
-import { SortClause } from '@travetto/model/src/model';
 import { Class } from '@travetto/registry';
+
+import { SortClause } from './model/query';
 
 export interface IndexConfig<T> {
   fields: SortClause<T>;

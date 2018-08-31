@@ -1,7 +1,8 @@
 import * as yaml from 'js-yaml';
 import { ExecUtil } from '@travetto/exec';
 
-import { TestEvent, AllSuitesResult } from '../model';
+import { TestEvent } from '../model/event';
+import { AllSuitesResult } from '../model/suite';
 import { Consumer } from './types';
 
 export class TapEmitter implements Consumer {

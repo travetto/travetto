@@ -1,1 +1,2 @@
-export * from './src';
+export * from './src/principal';
+export * from './src/service';

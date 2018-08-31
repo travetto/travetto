@@ -1,6 +1,7 @@
-import { Suite, Test } from '@travetto/test';
-import { CommonRegExp } from '../src/service/validator/regexp';
 import * as assert from 'assert';
+
+import { Suite, Test } from '@travetto/test';
+import { CommonRegExp } from '../src/service/regexp';
 
 @Suite()
 export class RegExpTest {

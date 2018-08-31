@@ -14,7 +14,7 @@ module.exports = function init(program, cwd, dependOn) {
       process.env.WATCH = false;
 
       await require(`@travetto/base/bin/bootstrap`).run();
-      const { ScanApp, FsUtil } = require(`@travetto/base/src`);
+      const { ScanApp, FsUtil } = require(`@travetto/base`);
       const { AppCache } = require(`@travetto/base/src/cache`);
 
       // TODO: Need to refine this

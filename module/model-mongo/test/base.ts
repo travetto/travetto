@@ -1,8 +1,9 @@
 import { BeforeAll, AfterAll, BeforeEach } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { ModelMongoSource, ModelMongoConfig } from '../src/service';
 import { ModelSource } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
+
+import { ModelMongoSource, ModelMongoConfig } from '../';
 
 export class Init {
   @InjectableFactory()

@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
-import { TestRegistry } from '../service';
-import { SuiteConfig } from '../model';
+import { TestRegistry } from '../registry';
+import { SuiteConfig } from '../model/suite';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 

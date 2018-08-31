@@ -1,4 +1,5 @@
-import { CommonRegExp, SchemaRegistry } from '../service';
+import { SchemaRegistry } from '../registry';
+import { CommonRegExp } from '../service/regexp';
 import { ClassList, FieldConfig } from '../types';
 
 function prop(obj: { [key: string]: any }) {

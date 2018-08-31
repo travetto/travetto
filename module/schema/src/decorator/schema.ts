@@ -1,5 +1,7 @@
+/// <reference path="../typings.d.ts" />
+
 import { Class } from '@travetto/registry';
-import { SchemaRegistry } from '../service';
+import { SchemaRegistry } from '../registry';
 import { ValidatorFn } from '../types';
 
 export interface ClassWithSchema<T> extends Class<T> {

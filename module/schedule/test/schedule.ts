@@ -1,6 +1,8 @@
-import { Scheduler } from '../src';
+import * as assert from 'assert';
+
 import { Suite, Test } from '@travetto/test';
-import { assert } from 'console';
+
+import { Scheduler } from '../';
 
 @Suite()
 class Scheduling {

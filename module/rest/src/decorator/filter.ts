@@ -1,5 +1,5 @@
-import { ControllerRegistry } from '../service';
-import { AppError } from '../model';
+import { ControllerRegistry } from '../registry';
+import { AppError } from '../error';
 import { Request } from '../types';
 
 export function Accepts(contentTypes: string[]) {

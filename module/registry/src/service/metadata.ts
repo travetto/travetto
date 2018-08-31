@@ -1,6 +1,6 @@
 import { Util } from '@travetto/base';
 
-import { Registry } from './registry';
+import { Registry } from '../registry';
 import { Class, ChangeEvent } from '../types';
 
 function id(cls: string | Class) {

@@ -1,10 +1,12 @@
-import { AssetService, ImageService, AssetUtil, AssetSource, Asset, AssetMetadata } from '../../src';
-import { Test, Suite, BeforeAll } from '@travetto/test';
-import { DependencyRegistry, Injectable } from '@travetto/di';
 import * as fs from 'fs';
 import * as assert from 'assert';
 import * as util from 'util';
+
+import { Test, Suite, BeforeAll } from '@travetto/test';
+import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
+
+import { AssetService, ImageService, AssetUtil, AssetSource, Asset, AssetMetadata } from '../../';
 
 @Injectable({ target: AssetSource })
 class MockAssetSource extends AssetSource {

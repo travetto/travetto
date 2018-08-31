@@ -1,6 +1,6 @@
-import { Controller, Get, Cache, Request, Response } from '@travetto/rest';
+import { Controller, Get, Cache, Request, Response, Post } from '@travetto/rest';
+
 import { MockService } from './mock';
-import { Post } from '@travetto/rest/src';
 
 @Controller('/simple')
 export class Simple {

@@ -6,7 +6,7 @@ import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { GenerateUtil } from '@travetto/schema/extension/faker';
 
-import { ModelMongoSource } from '../index';
+import { ModelMongoSource } from '../';
 import { BaseMongoTest } from './base';
 
 @Schema()

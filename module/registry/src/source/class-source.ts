@@ -4,7 +4,7 @@ import { Compiler } from '@travetto/compiler';
 import { ScanApp, Env, AppInfo } from '@travetto/base';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
-import { PendingRegister } from '../decorator/register';
+import { PendingRegister } from '../decorator';
 
 export class CompilerClassSource implements ChangeSource<Class> {
 

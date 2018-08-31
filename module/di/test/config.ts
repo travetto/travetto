@@ -1,6 +1,7 @@
+import { Config } from '@travetto/config';
+
 import { Injectable, Inject } from '../src/decorator';
 import { Util } from './util';
-import { Config } from '@travetto/config';
 
 @Injectable()
 export class Empty {

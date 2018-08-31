@@ -2,7 +2,7 @@ import { Model, ModelCore, ModelSource, ModelService } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 
-import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../src';
+import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../';
 
 @Schema()
 class Address {

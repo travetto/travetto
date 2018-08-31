@@ -1,1 +1,2 @@
-export * from './src';
+export * from './src/service';
+export * from './src/decorator';

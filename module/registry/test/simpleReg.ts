@@ -1,6 +1,6 @@
 import { Suite, Test } from '@travetto/test';
 
-import { Registry, MethodSource, RootRegistry } from '../src';
+import { Registry, MethodSource, RootRegistry } from '../';
 
 class Simple extends Registry {
 }

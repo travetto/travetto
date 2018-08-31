@@ -1,5 +1,5 @@
-import { lineFormatter, LineFormatterOpts } from '../formatter';
-import { consoleOutput, ConsoleOutputOpts } from '../output';
+import { lineFormatter, LineFormatterOpts } from '../formatter/line';
+import { consoleOutput, ConsoleOutputOpts } from '../output/console';
 import { LogListener, LogEvent } from '../types';
 
 export function consoleListener(opts: {
