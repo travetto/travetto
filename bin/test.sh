@@ -1,3 +1,3 @@
 #!/bin/bash
-
-lerna run --parallel  test -- 'test/'
+lerna exec npx travetto clean
+lerna exec npx travetto test 
