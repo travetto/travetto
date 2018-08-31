@@ -13,8 +13,9 @@ export class SourceManager {
   private contents = new Map<string, string>();
   private hashes = new Map<string, number>();
   private cache = new Cache(Env.cwd);
+  private compilerOptions: ts.CompilerOptions;
 
-  constructor(private config: { cache?: boolean } = {}) {
+  constructor(private config: { cache?: boolean, cwd: string }) {
     Object.assign(config, { ... { cache: true }, config });
   }
 
@@ -43,7 +44,11 @@ export class SourceManager {
         }
       }
 
-      const res = ts.transpileModule(content, options);
+      if (!this.compilerOptions) {
+        this.compilerOptions = CompilerUtil.resolveOptions(this.config.cwd);
+      }
+
+      const res = ts.transpileModule(content, { ...options, compilerOptions: this.compilerOptions });
 
       if (this.logErrors(fileName, res.diagnostics)) {
         console.error(`Compiling ${fileName} failed`);

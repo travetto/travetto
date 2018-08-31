@@ -48,7 +48,7 @@ module.exports = function init(program, cwd, dependOn) {
       // Find final destination
       let outDir = path.resolve(cwd, cmd.output || AppCache.cacheDir);
 
-      const FILES = `ScanApp.setFileEntries('ts', [${files.map(x =>`'${x.module.replace(/node_modules\/@travetto/g, '#')}'`).join(', ')}])`;
+      const FILES = `ScanApp.setFileEntries('.ts', [${files.map(x =>`'${x.module.replace(/node_modules\/@travetto/g, '#')}'`).join(', ')}])`;
 
       // Rewrite files to allow for presume different path
       for (const f of fs.readdirSync(AppCache.cacheDir)) {
@@ -56,6 +56,7 @@ module.exports = function init(program, cwd, dependOn) {
         const out = path.resolve(outDir, f);
 
         let contents = fs.readFileSync(inp).toString();
+        contents = contents.replace(/[/][/]#.*$/, '');
         contents = contents.replace('ScanApp.cache = {}', x => `${x};\n${FILES}`);
         contents = contents.replace(new RegExp(cwd, 'g'), cmd.runtimeDir || process.cwd());
         fs.writeFileSync(out, contents);
