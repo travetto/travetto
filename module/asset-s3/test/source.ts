@@ -34,7 +34,7 @@ class TestAssetService {
     const service = await DependencyRegistry.getInstance(AssetService);
   }
 
-  @Test('downloads an file from a url')
+  // @Test('downloads an file from a url')
   async download() {
     const service = await DependencyRegistry.getInstance(AssetService);
     assert(service);
@@ -58,7 +58,7 @@ class TestAssetService {
     }
   }
 
-  @Test('downloads an file from a url')
+  // @Test('downloads an file from a url')
   async downloadAndResize() {
     const service = await DependencyRegistry.getInstance(ImageService);
     const assetService = await DependencyRegistry.getInstance(AssetService);
