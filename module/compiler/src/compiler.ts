@@ -15,8 +15,6 @@ class $Compiler {
   moduleManager: ModuleManager;
   sourceManager: SourceManager;
   presenceManager: FilePresenceManager;
-
-  options: ts.CompilerOptions;
   transformerManager: TransformerManager;
   active = false;
 
@@ -32,10 +30,9 @@ class $Compiler {
       exclude.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}[\\\/](${AppInfo.DEV_PACKAGES.join('|')})[\\\/]`));
     }
 
-    this.options = CompilerUtil.resolveOptions(this.cwd);
     this.transformerManager = new TransformerManager(this.cwd);
     this.moduleManager = new ModuleManager(this.cwd);
-    this.sourceManager = new SourceManager();
+    this.sourceManager = new SourceManager({ cwd: this.cwd });
     this.presenceManager = new FilePresenceManager(this.cwd, {
       added: (name: string) => {
         if (this.transpile(name)) {
@@ -58,6 +55,7 @@ class $Compiler {
     if (this.active) {
       return;
     }
+
     this.active = true;
     this.sourceManager.registerSourceMaps();
     this.transformerManager.init();
@@ -132,7 +130,6 @@ class $Compiler {
 
   transpile(fileName: string, force = false) {
     const changed = this.sourceManager.transpile(fileName, {
-      compilerOptions: this.options,
       fileName,
       reportDiagnostics: true,
       transformers: this.transformerManager.transformers || {}

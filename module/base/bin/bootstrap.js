@@ -11,9 +11,6 @@ const { resolveFrameworkFile } = require('../src/app-info');
 const { AppCache } = require('../src/cache');
 const cwd = Env.cwd;
 
-const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
-const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
-
 AppCache.init();
 
 //Rewrite Module for local development
@@ -33,12 +30,18 @@ if (Env.frameworkDev) {
   };
 }
 
+let opts;
+
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {
   const name = tsf.replace(/[\\\/]/g, path.sep);
 
   let content;
   if (!AppCache.hasEntry(name)) {
+    if (!opts) {
+      const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
+      opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
+    }
     content = ts.transpile(fs.readFileSync(tsf, 'utf-8'), opts);
     AppCache.writeEntry(name, content);
   } else {

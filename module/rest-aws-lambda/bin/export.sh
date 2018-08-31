@@ -16,5 +16,21 @@ cat $CWD/node_modules/@travetto/rest-aws-lambda/bin/lambda.js |\
 
 npx travetto compile -o ./cache -r '/var/task'
 
+rm -rf node_modules/typescript
+mkdir node_modules/typescript
+echo 'module.exports = {};' > node_modules/typescript/index.js
+
+# Clean up unused pieces
+rm -rf node_modules/@types
+rm -rf node_modules/bson/browser_build
+rm -rf node_modules/source-map-support/browser-source-map-support.js
+rm package-lock.json
+
+find node_modules -name 'dist' -type d | xargs rm -rf
+find node_modules -name '*.d.ts' | xargs rm
+find node_modules -name '*.md' | xargs rm
+find node_modules -name '*.lock' | xargs rm
+find node_modules -name 'bower.json' | xargs rm
+
 zip -qr $ZIP . -x '*.git*' -x '*e2e*' -x '*test*'
 popd
