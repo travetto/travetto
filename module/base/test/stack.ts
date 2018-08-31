@@ -1,5 +1,3 @@
-import * as assert from 'assert';
-
 import { Test, Suite } from '@travetto/test';
 
 @Suite()

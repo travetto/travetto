@@ -1,4 +1,4 @@
-import { LocalExecution } from '../src';
+import { LocalExecution } from '../src/local';
 
 const exec = new LocalExecution();
 

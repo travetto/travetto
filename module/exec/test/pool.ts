@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
-import { ChildExecution, ExecutionPool, ArrayExecutionSource, IteratorExecutionSource } from '../src';
+import { ChildExecution, ExecutionPool, ArrayExecutionSource, IteratorExecutionSource } from '../';
 
 @Suite()
 export class PoolExecTest {

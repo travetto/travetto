@@ -11,7 +11,7 @@ module.exports = function init(program) {
       }
 
       require('@travetto/base/bin/bootstrap').run(x => {
-        const { Runner } = require('../src/runner');
+        const { Runner } = require('../src/runner/runner');
         return new Runner({
           format: cmd.format,
           mode: cmd.mode,

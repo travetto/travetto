@@ -3,7 +3,8 @@ import * as yaml from 'js-yaml';
 
 import { Test, Suite, BeforeEach, AfterEach } from '@travetto/test';
 
-import { ConfigLoader, ConfigMap } from '../src';
+import { ConfigLoader } from '../src/service/loader';
+import { ConfigMap } from '../src/service/map';
 
 class DbConfig {
   name: string;

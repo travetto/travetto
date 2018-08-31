@@ -3,11 +3,13 @@ import { BindUtil, SchemaValidator, DEFAULT_VIEW } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Env, Util } from '@travetto/base';
 
-import { QueryVerifierService } from './query';
+import { QueryVerifierService } from './verify';
 import { ModelOptions } from '../types';
-import { ModelCore, Query, BulkState, ModelQuery, PageableModelQuery } from '../model';
+import { Query, ModelQuery, PageableModelQuery } from '../model/query';
+import { ModelCore } from '../model/core';
+import { BulkState } from '../model/bulk';
 import { ModelSource } from './source';
-import { ModelRegistry } from './registry';
+import { ModelRegistry } from '../registry';
 
 function getClass<T>(o: T) {
   return o.constructor as Class<T>;

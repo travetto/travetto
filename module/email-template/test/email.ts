@@ -5,7 +5,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { MailTemplateEngine } from '@travetto/email';
 
-import { DefaultMailTemplateEngine } from '../src';
+import { DefaultMailTemplateEngine } from '../';
 
 // Must force import
 require('../src/template');

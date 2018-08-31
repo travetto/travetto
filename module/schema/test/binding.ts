@@ -1,7 +1,7 @@
 import {
   Field, Url, View, Required, Alias,
   BindUtil, Schema, SchemaRegistry, Float, Integer
-} from '../src';
+} from '../';
 import { Address } from './address';
 import * as assert from 'assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';

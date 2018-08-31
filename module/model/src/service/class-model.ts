@@ -1,5 +1,8 @@
 import { Class } from '@travetto/registry';
-import { ModelCore, Query, BulkState, PageableModelQuery, ModelQuery } from '../model';
+import { Query, PageableModelQuery, ModelQuery } from '../model/query';
+import { BulkState } from '../model/bulk';
+import { ModelCore } from '../model/core';
+
 import { ModelService } from './model';
 
 export abstract class ClassModelService<T extends ModelCore> {

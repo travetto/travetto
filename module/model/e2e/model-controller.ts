@@ -7,8 +7,8 @@ import {
   Model, ModelSource, ModelService, ModelCore,
   ModelQuery, Query, BulkState, BulkResponse,
   PageableModelQuery
-} from '../src';
-import { QueryVerifierService } from '../src/service/query';
+} from '../';
+import { QueryVerifierService } from '../src/service/verify';
 
 @Injectable({ target: ModelSource })
 export class TestSource implements ModelSource {

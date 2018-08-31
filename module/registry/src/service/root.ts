@@ -1,5 +1,5 @@
-import { Registry } from './registry';
-import { CompilerClassSource } from '../source';
+import { Registry } from '../registry';
+import { CompilerClassSource } from '../source/class-source';
 import { Class, ChangeEvent } from '../types';
 
 class $RootRegistry extends Registry {

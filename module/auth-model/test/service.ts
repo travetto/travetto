@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory, Injectable } from '@travetto/di';
 import { ModelRegistry, BaseModel, Model, ModelSource, ModelService } from '@travetto/model';
-import { AuthModelService, RegisteredPrincipalConfig } from '../src';
+import { AuthModelService, RegisteredPrincipalConfig } from '../';
 import { SchemaRegistry } from '@travetto/schema';
 
 @Model()

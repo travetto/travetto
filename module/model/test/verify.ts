@@ -3,9 +3,9 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Schema, SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 
-import { QueryVerifierService } from '../src/service/query';
-import { RetainFields } from '../src/model/query/common';
-import { Model, ModelQuery, ModelCore, WhereClause, BaseModel, PropWhereClause } from '../src';
+import { QueryVerifierService } from '../src/service/verify';
+import { RetainFields } from '../src/model/where-clause';
+import { Model, ModelQuery, ModelCore, WhereClause, BaseModel, PropWhereClause } from '../';
 
 @Schema()
 class Preferences {

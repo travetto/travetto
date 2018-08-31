@@ -1,9 +1,10 @@
+import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
+
 import {
   MinLength, Url,
   SchemaValidator, Schema, ValidationError,
   SchemaRegistry, ValidationErrors, Validator, View, Match, CommonRegExp
-} from '../src';
-import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
+} from '../';
 import * as assert from 'assert';
 
 @Schema()

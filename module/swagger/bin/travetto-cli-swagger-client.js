@@ -12,7 +12,7 @@ module.exports = function init(program) {
       process.env.WATCH = false;
 
       require('@travetto/base/bin/bootstrap').run(() => {
-        const { ClientGenerate } = require('../src/service/client-generate');
+        const { ClientGenerate } = require('../src/client-generate');
         const { DependencyRegistry } = require('@travetto/di');
 
         return DependencyRegistry

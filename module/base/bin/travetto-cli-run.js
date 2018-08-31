@@ -12,10 +12,9 @@ module.exports = function init(program) {
 
       process.env.TRV_APP = app;
       process.env.ENV = cmd.env;
-      process.env.PROFILE = [app, (process.env.PROFILE || '').split(/,/g), cmd.profile]
-        .reduce((acc, v) => { acc.push(...v); return acc; }, [])
-        .map(x => x.trim())
+      process.env.PROFILE = [app, ...((process.env.PROFILE || '').split(/,+/g)), ...cmd.profile]
         .filter(x => !!x)
+        .map(x => x.trim())
         .join(',');
 
       if (cmd.watch !== undefined) {

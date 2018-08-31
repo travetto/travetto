@@ -27,7 +27,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     }
 
     if (!state.imported) {
-      state.imported = TransformUtil.importFile(state, require.resolve('../src/service/logger')).ident;
+      state.imported = TransformUtil.importFile(state, require.resolve('../src/service')).ident;
     }
 
     const loc = ts.getLineAndCharacterOfPosition(state.source, node.expression.name.pos);

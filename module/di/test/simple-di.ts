@@ -1,8 +1,8 @@
 import * as assert from 'assert';
-
-import { DependencyRegistry } from '../src/service';
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import { Class } from '@travetto/registry';
+
+import { DependencyRegistry } from '../src/registry';
 
 import {
   ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT,

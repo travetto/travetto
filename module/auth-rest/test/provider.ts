@@ -1,8 +1,10 @@
-import { Suite, Test } from '@travetto/test';
-import { AuthProvider } from '../src';
 import * as assert from 'assert';
-import { Request, Response } from 'express';
+
+import { Suite, Test } from '@travetto/test';
 import { ERR_INVALID_CREDS } from '@travetto/auth';
+import { Request, Response } from '@travetto/rest';
+
+import { AuthProvider } from '../';
 
 class DumbProvider extends AuthProvider<any> {
   toContext(user: { id: string, username: string }) {

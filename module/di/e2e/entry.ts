@@ -1,11 +1,11 @@
-import { EntryPoint, Inject, Injectable } from '@travetto/di/src';
+import { Application, Inject, Injectable } from '@travetto/di';
 
 @Injectable()
 class Element {
   name = 'roger';
 }
 
-@EntryPoint()
+@Application('test-eptest')
 class EPTest {
 
   @Inject()

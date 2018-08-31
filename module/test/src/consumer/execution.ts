@@ -1,6 +1,6 @@
 import { ExecUtil, LocalExecution } from '@travetto/exec';
 
-import { TestEvent } from '../model';
+import { TestEvent } from '../model/event';
 import { Consumer } from './types';
 
 export class ExecutionEmitter extends LocalExecution<TestEvent> implements Consumer {

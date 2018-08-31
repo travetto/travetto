@@ -1,8 +1,9 @@
 import { ConfigLoader } from '@travetto/config';
 
-import { MimeType, isRenderable } from '../model';
+import { isRenderable } from '../response/renderable';
+import { MimeType } from '../util/mime';
 import { ControllerConfig, EndpointConfig, HeaderMap, Request, Response, RestInterceptor } from '../types';
-import { RestConfig } from '../service/config';
+import { RestConfig } from '../config';
 
 const restCfg = new RestConfig();
 ConfigLoader.bindTo(restCfg, 'rest');
