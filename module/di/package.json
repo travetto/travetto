@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^0.3.3",
-    "@travetto/registry": "^0.3.3"
+    "@travetto/config": "^0.3.4",
+    "@travetto/registry": "^0.3.4"
   },
   "description": "Dependency registration/management and injection support.",
   "devDependencies": {
-    "@travetto/test": "^0.3.3"
+    "@travetto/test": "^0.3.4"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -29,5 +29,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.3"
+  "version": "0.3.4"
 }
