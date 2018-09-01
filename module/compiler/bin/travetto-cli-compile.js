@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-module.exports = function init(program, cwd, dependOn) {
-  return program
+const { Util: { cwd, dependOn, program } } = require('@travetto/cli/src/util');
+
+module.exports = function() {
+  program
     .command('compile')
     .option('-o, --output <output>', 'Output directory')
     .option('-r, --runtime-dir [runtimeDir]', 'Expected path during runtime')

@@ -1,5 +1,7 @@
-module.exports = function init(program) {
-  return program
+const { Util: { program } } = require('@travetto/cli/src/util');
+
+module.exports = function() {
+  program
     .command('run [application]')
     .option('-e, --env <env>', 'Application environment', /^(dev|test|e2e|prod)$/i, 'dev')
     .option('-w, --watch [watch]', 'Run the application in watch mode', x => /^(true|yes|on)$/i.test(x), undefined)

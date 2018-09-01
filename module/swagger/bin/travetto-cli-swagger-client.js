@@ -1,5 +1,7 @@
-module.exports = function init(program) {
-  return program
+const { Util: { program } } = require('@travetto/cli/src/util');
+
+module.exports = function() {
+  program
     .command('swagger-client')
     .option('-o, --output [output]', 'Output folder', './api-client')
     .option('-f, --format [format]', 'Client format', 'typescript-angular')
