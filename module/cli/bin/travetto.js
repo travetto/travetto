@@ -14,4 +14,4 @@ if (!fs.existsSync(rel)) {
   };
 }
 
-require('@travetto/cli/src/util').Util.run(process.argv);
+require('@travetto/cli')(process.argv);

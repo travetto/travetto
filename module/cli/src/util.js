@@ -4,6 +4,9 @@ const fs = require('fs');
 
 const cwd = (process.env['init_cwd'] || process.env['INIT_CWD'] || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
 
+commander
+  .version(require('../package.json').version);
+
 module.exports = {
   Util: {
     cwd,
@@ -15,48 +18,47 @@ module.exports = {
         stdio: [0, 1, 2]
       });
     },
-    loadModule(f) {
+    requireModule(f) {
       let p = fs.realpathSync(`${cwd}/node_modules/.bin/${f}`);
       if (!p.startsWith(cwd)) {
         p = `${cwd}/node_modules/@travetto/${p.split('travetto/module/')[1]}`;
       }
       require(p)();
     },
-    loadAll() {
+    loadAllPlugins() {
       const BIN_DIR = `${cwd}/node_modules/.bin`;
       if (fs.existsSync(BIN_DIR)) {
         const files = fs.readdirSync(BIN_DIR).filter(x => x.startsWith('travetto-cli-'));
         for (const f of files) {
-          this.loadModule(f);
+          this.requireModule(f);
         }
       }
     },
-    loadOne(cmd) {
+    loadSinglePlugin(cmd) {
       try {
-        this.loadModule(`travetto-cli-${cmd.replace(/:.*$/,'')}`);
+        this.requireModule(`travetto-cli-${cmd.replace(/:.*$/,'')}`);
       } catch (e) {
         console.error('Unknown command', cmd);
-        this.loadAll();
-        commander.help();
-        process.exit(1);
+        this.showHelp(1);
       }
     },
-    run(args) {
+    showHelp(code = 0) {
+      this.loadAllPlugins();
+      commander.help();
+      process.exit(code);
+    },
+    execute(args) {
       const cmd = args[2];
-      commander
-        .version(require(`${__dirname}/../package.json`).version);
 
-      if (cmd && !cmd.startsWith('-')) {
-        this.loadOne(cmd);
+      if (!cmd) {
+        this.showHelp();
+      } else if (!cmd.startsWith('-')) {
+        this.loadSinglePlugin(cmd);
       } else {
-        this.loadAll();
-        if (!cmd) {
-          commander.help();
-          process.exit();
-        }
+        this.loadAllPlugins();
       }
 
-      commander.parse(process.argv);
+      commander.parse(args);
     }
   }
 };
