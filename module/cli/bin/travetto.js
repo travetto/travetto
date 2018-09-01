@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
-const rel = `${root}/bin/travetto.js`;
+const rel = `${process.cwd()}/node_modules/.bin/travetto`;
 
-if (rel === __filename || !fs.existsSync(rel)) {
+if (!fs.existsSync(rel)) {
   const Module = require('module');
   const og = Module._load;
   Module._load = function(req, parent) {
