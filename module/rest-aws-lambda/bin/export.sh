@@ -24,13 +24,13 @@ echo 'module.exports = {};' > node_modules/typescript/index.js
 rm -rf node_modules/@types
 rm -rf node_modules/bson/browser_build
 rm -rf node_modules/source-map-support/browser-source-map-support.js
-rm package-lock.json
+rm -f package-lock.json
 
 find node_modules -name 'dist' -type d | xargs rm -rf
-find node_modules -name '*.d.ts' | xargs rm
-find node_modules -name '*.md' | xargs rm
-find node_modules -name '*.lock' | xargs rm
-find node_modules -name 'bower.json' | xargs rm
+find node_modules -name '*.d.ts' | xargs rm -f
+find node_modules -name '*.md' | xargs rm -f
+find node_modules -name '*.lock' | xargs rm -f
+find node_modules -name 'bower.json' | xargs rm -f
 
 zip -qr $ZIP . -x '*.git*' -x '*e2e*' -x '*test*'
 popd

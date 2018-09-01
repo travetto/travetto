@@ -26,7 +26,7 @@ export class ClientGenerate {
 
     console.info('Running code generator in watch mode', this.config.output);
 
-    await FsUtil.mkdirp(this.config.output);
+    await FsUtil.mkdirpAsync(this.config.output);
 
     this.codeGenCli = new DockerContainer(this.config.codeGenImage)
       .setEntryPoint('/bin/sh')
