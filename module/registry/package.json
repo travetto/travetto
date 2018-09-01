@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/compiler": "^0.3.3",
+    "@travetto/compiler": "^0.3.4",
     "string-hash": "^1.1.3"
   },
   "description": "Patterns and utilities for handling registration of metadata and functionality for run-time use",
@@ -26,5 +26,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.3"
+  "version": "0.3.4"
 }
