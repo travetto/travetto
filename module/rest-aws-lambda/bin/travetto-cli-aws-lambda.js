@@ -79,6 +79,7 @@ module.exports = function init(program, cwd, dependOn) {
       if (!config) {
         cmd.help();
       }
+      console.log('To be implemented...');
     });
 
   return program;
