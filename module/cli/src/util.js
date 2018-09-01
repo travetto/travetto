@@ -28,13 +28,13 @@ module.exports = {
       if (!cmd || cmd.startsWith('-')) {
         commander.version(require(`${__dirname}/../package.json`).version);
 
-        const files = fs.readdirSync(`${cwd}/node_modules/.bin`).filter(x => x.startsWith('.travetto-cli-'));
+        const files = fs.readdirSync(`${cwd}/node_modules/.bin`).filter(x => x.startsWith('travetto-cli-'));
         for (const f of files) {
           this.loadModule(f);
         }
       } else {
         try {
-          this.loadModule(`.travetto-cli-${cmd.replace(/:.*$/,'')}`);
+          this.loadModule(`travetto-cli-${cmd.replace(/:.*$/,'')}`);
         } catch (e) {
           console.error('Unknown command', cmd);
           console.error(e);
