@@ -4,13 +4,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as net from 'net';
 
-import { Shutdown, FsUtil } from '@travetto/base';
+import { Shutdown, ScanFs, ScanEntry } from '@travetto/base';
 
 import { CommonProcess, ExecutionResult } from './types';
 import { ExecUtil, WithOpts } from './util';
 
 const writeFile = util.promisify(fs.writeFile);
 const mkdir = util.promisify(fs.mkdir);
+const unlinkFile = util.promisify(fs.unlink);
 
 function exec(command: string, opts?: WithOpts<child_process.SpawnOptions>) {
   return ExecUtil.spawn(command, { shell: false, ...opts })[1];
@@ -257,6 +258,20 @@ export class DockerContainer {
     await this.cleanup();
   }
 
+  async rimraf(pth: string) {
+    const files = await ScanFs.scanDir({}, pth);
+    for (const filter of [
+      ScanFs.isNotDir,
+      (x: ScanEntry) => x.stats.isDirectory()
+    ]) {
+      await Promise.all(files
+        .filter(filter)
+        .map(x => unlinkFile(x.file)
+          .catch(e => { console.error(`Unable to delete ${e.file}`); }))
+      );
+    }
+  }
+
   forceDestroy() {
     try {
       execSync(`${this.cmd} kill ${this.container}`);
@@ -268,7 +283,7 @@ export class DockerContainer {
       execSync(`${this.cmd} rm -fv ${this.container}`);
     } catch (e) { /* ignore */ }
 
-    const temps = Object.keys(this.tempVolumes).map(x => FsUtil.rimraf(x).catch((e: any) => { }));
+    const temps = Object.keys(this.tempVolumes).map(x => this.rimraf(x).catch((e: any) => { }));
     Promise.all(temps);
 
     const ids = execSync(`${this.cmd} volume ls -qf dangling=true`);
@@ -290,7 +305,7 @@ export class DockerContainer {
 
   async cleanup() {
     console.debug('Cleaning', this.image, this.container);
-    const temps = Object.keys(this.tempVolumes).map(x => FsUtil.rimraf(x).catch((e: any) => { }));
+    const temps = Object.keys(this.tempVolumes).map(x => this.rimraf(x).catch((e: any) => { }));
     await Promise.all(temps);
   }
 

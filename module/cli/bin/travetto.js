@@ -6,10 +6,10 @@ const fs = require('fs');
 
 const cwd = (process.env['init_cwd'] || process.env['INIT_CWD'] || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
 
-function dependOn(cmd, args) {
+function dependOn(cmd, args, s_cwd) {
   require('child_process').execSync(`${process.argv.slice(0, 2).join(' ')} ${cmd} ${(args||[]).join(' ')}`, {
     env: process.env,
-    cwd,
+    cwd: s_cwd || cwd,
     stdio: [0, 1, 2]
   });
 }
@@ -38,7 +38,7 @@ if (!cmd || cmd.startsWith('-')) {
   }
 } else {
   try {
-    loadModule(`travetto-cli-${cmd}`);
+    loadModule(`travetto-cli-${cmd.replace(/:.*$/,'')}`);
     commander.parse(process.argv);
   } catch (e) {
     console.error('Unknown command', cmd);
