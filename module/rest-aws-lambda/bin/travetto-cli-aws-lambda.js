@@ -1,6 +1,7 @@
-const { FsUtil } = require('@travetto/base/src/fs-util');
+const { FsUtil } = require('@travetto/cli/src/fs-util');
+const { Util: { cwd, program, dependOn } } = require('@travetto/cli/src/util');
 
-module.exports = function init(program, cwd, dependOn) {
+module.exports = function() {
   const path = require('path');
   const cp = require('child_process');
   const exec = (...args) => cp.execSync(...args);
@@ -81,6 +82,4 @@ module.exports = function init(program, cwd, dependOn) {
       }
       console.log('To be implemented...');
     });
-
-  return program;
 };

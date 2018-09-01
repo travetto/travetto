@@ -1,5 +1,7 @@
-module.exports = function init(program) {
-  return program.command('test')
+const { Util: { program } } = require('@travetto/cli/src/util');
+
+module.exports = function() {
+  program.command('test')
     .arguments('[regexes...]')
     .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec)$/, 'tap')
     .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
