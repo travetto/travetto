@@ -44,7 +44,7 @@ module.exports = {
 
       const res = commander.parse(process.argv);
 
-      if (!res.constructor !== commander.Command) {
+      if (res.constructor !== commander.Command) {
         commander.help();
       }
     }
