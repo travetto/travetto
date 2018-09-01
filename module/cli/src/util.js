@@ -22,31 +22,41 @@ module.exports = {
       }
       require(p)();
     },
-    run(args) {
-      const cmd = args[2];
-
-      if (!cmd || cmd.startsWith('-')) {
-        commander.version(require(`${__dirname}/../package.json`).version);
-
-        const files = fs.readdirSync(`${cwd}/node_modules/.bin`).filter(x => x.startsWith('travetto-cli-'));
+    loadAll() {
+      const BIN_DIR = `${cwd}/node_modules/.bin`;
+      if (fs.existsSync(BIN_DIR)) {
+        const files = fs.readdirSync(BIN_DIR).filter(x => x.startsWith('travetto-cli-'));
         for (const f of files) {
           this.loadModule(f);
         }
+      }
+    },
+    loadOne(cmd) {
+      try {
+        this.loadModule(`travetto-cli-${cmd.replace(/:.*$/,'')}`);
+      } catch (e) {
+        console.error('Unknown command', cmd);
+        this.loadAll();
+        commander.help();
+        process.exit(1);
+      }
+    },
+    run(args) {
+      const cmd = args[2];
+      commander
+        .version(require(`${__dirname}/../package.json`).version);
+
+      if (cmd && !cmd.startsWith('-')) {
+        this.loadOne(cmd);
       } else {
-        try {
-          this.loadModule(`travetto-cli-${cmd.replace(/:.*$/,'')}`);
-        } catch (e) {
-          console.error('Unknown command', cmd);
-          console.error(e);
-          process.exit(1);
+        this.loadAll();
+        if (!cmd) {
+          commander.help();
+          process.exit();
         }
       }
 
-      const res = commander.parse(process.argv);
-
-      if (res.constructor !== commander.Command) {
-        commander.help();
-      }
+      commander.parse(process.argv);
     }
   }
 };
