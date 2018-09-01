@@ -47,24 +47,24 @@ module.exports.FsUtil = {
       console.log('Failed to remove', rel, e);
     }
   },
-  mkdir(rel) {
+  mkdirp(rel) {
     const pth = this.reorient(rel);
     if (!fs.existsSync(pth)) {
       try {
         fs.mkdirSync(pth);
       } catch (e) {
-        this.mkdir(path.dirname(pth));
+        this.mkdirp(path.dirname(pth));
         fs.mkdirSync(pth);
       }
     }
   },
-  async mkdirAsync(rel) {
+  async mkdirpAsync(rel) {
     const pth = this.reorient(rel);
     if (!(await existsAsync(pth))) {
       try {
         await mkdirAsync(pth);
       } catch (e) {
-        await this.mkdirAsync(path.dirname(pth));
+        await this.mkdirpAsync(path.dirname(pth));
         await mkdirASync(pth);
       }
     }
