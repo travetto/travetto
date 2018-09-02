@@ -380,14 +380,13 @@ export class ModelElasticsearchSource extends ModelSource {
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
     const id = data.id;
     delete data.id;
-    const update = this.client.update({
-      method: 'update',
+    const update = await this.client.update({
       ...this.getIdentity(cls),
       id,
       refresh: 'wait_for',
       body: { doc: data }
     });
-    return this.getById(cls, data.id);
+    return this.getById(cls, id);
   }
 
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<T> {
