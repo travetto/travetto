@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { Util: { cwd, dependOn, program } } = require('@travetto/cli/src/util');
+const { FsUtil } = require('@travetto/cli/src/fs-util');
 
 module.exports = function() {
   program
@@ -16,7 +17,7 @@ module.exports = function() {
       process.env.WATCH = false;
 
       await require(`@travetto/base/bin/bootstrap`).run();
-      const { ScanApp, FsUtil } = require(`@travetto/base`);
+      const { ScanApp } = require(`@travetto/base`);
       const { AppCache } = require(`@travetto/base/src/cache`);
 
       // TODO: Need to refine this
@@ -44,7 +45,7 @@ module.exports = function() {
         } catch (e) {
           // Ignore
         }
-        await FsUtil.mkdirp(cmd.output);
+        FsUtil.mkdirp(cmd.output);
       }
 
       // Find final destination
