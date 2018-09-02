@@ -19,9 +19,9 @@
     "@types/parse5": "^5.0.0",
     "foundation-emails": "^2.2.1",
     "html-entities": "^1.2.1",
-    "parse5": "^5.1.0",
     "marked": "^0.3.19",
     "mustache": "^2.3.0",
+    "parse5": "^5.1.0",
     "sass": "1.5.1"
   },
   "description": "Email templating module",
@@ -43,5 +43,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.5"
+  "version": "0.3.6"
 }
