@@ -9,5 +9,5 @@ function from(this: any, data: any, view?: string) {
 export const init = {
   key: 'schema',
   before: 'base', // Should be global
-  action: () => proto.from = from  // Register global from
+  action: () => proto.fromRaw = proto.from = from  // Register global from
 };

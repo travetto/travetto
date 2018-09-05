@@ -4,16 +4,11 @@ import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '../registry';
 import { ValidatorFn } from '../types';
 
-export interface ClassWithSchema<T> extends Class<T> {
-  from<U>(this: Class<U>, data: U, view?: string): U;
-}
-
 export function Schema(auto: boolean = true): ClassDecorator {
-  return <T>(target: Class<T>): Class<T> => {
-    const res: ClassWithSchema<T> = target as any;
+  return (<T>(target: Class<T>): Class<T> => {
     SchemaRegistry.getOrCreatePending(target);
-    return res;
-  };
+    return target;
+  }) as any;
 }
 
 export function Validator<T>(fn: ValidatorFn<T, string>) {

@@ -28,6 +28,8 @@ class Person {
 
   name: string;
 
+  dob: Date;
+
   @Integer()
   age: number;
 
@@ -66,9 +68,11 @@ class DataBinding {
 
   @Test('Validate bind')
   validateBind() {
-    const person = Person.from({
+    const person = Person.fromRaw({
       name: 'Test',
       age: 19.999978,
+      // dob: '2018-01-01',
+      dob: 1514764800000,
       address: {
         street1: '1234 Fun',
         street2: 'Unit 20'
@@ -78,9 +82,12 @@ class DataBinding {
         { area: 'B', value: 30 }
       ]
     });
+
     const a = 30;
     assert(person.age === 19);
     assert(person.address instanceof Address);
+    assert(person.dob instanceof Date);
+    assert(person.dob.toISOString() === '2018-01-01T00:00:00.000Z');
     assert(person.address.street1 === '1234 Fun');
     assert(person.counts.length === 2);
     assert(person.counts[0] instanceof Count);

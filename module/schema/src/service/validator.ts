@@ -69,13 +69,39 @@ export class SchemaValidator {
     return errors;
   }
 
+  static validateRange(field: FieldConfig, key: 'min' | 'max', value: any) {
+    const f = field[key];
+    if (f) {
+      if (typeof f.n === 'number') {
+        if (typeof value !== 'number') {
+          value = parseInt(value, 10);
+        }
+        if (field.type === Date) {
+          value = new Date(value);
+        }
+        if (value < f.n) {
+          return true;
+        }
+      } else {
+        const date = f.n.getTime();
+        if (typeof value === 'string') {
+          value = Date.parse(value);
+        }
+        if (value < date) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   static validateField(field: FieldConfig, value: any, parent: any) {
     const criteria: string[] = [];
 
     if (
       (field.type === String && (typeof value !== 'string')) ||
       (field.type === Number && ((typeof value !== 'number') || Number.isNaN(value))) ||
-      (field.type === Date && (typeof value !== 'number' && !(value instanceof Date))) ||
+      (field.type === Date && !(value instanceof Date)) ||
       (field.type === Boolean && typeof value !== 'boolean')
     ) {
       criteria.push('type');
@@ -98,42 +124,12 @@ export class SchemaValidator {
       criteria.push('enum');
     }
 
-    if (field.min) {
-      if (typeof field.min.n === 'number') {
-        if (typeof value !== 'number') {
-          value = parseInt(value, 10);
-        }
-        if (value < field.min.n) {
-          criteria.push('min');
-        }
-      } else {
-        const date = field.min.n.getTime();
-        if (typeof value === 'string') {
-          value = Date.parse(value);
-        }
-        if (value < date) {
-          criteria.push('min');
-        }
-      }
+    if (this.validateRange(field, 'min', value)) {
+      criteria.push('min');
     }
 
-    if (field.max) {
-      if (typeof field.max.n === 'number') {
-        if (typeof value !== 'number') {
-          value = parseInt(value, 10);
-        }
-        if (value > field.max.n) {
-          criteria.push('max');
-        }
-      } else {
-        const date = field.max.n.getTime();
-        if (typeof value === 'string') {
-          value = Date.parse(value);
-        }
-        if (value > date) {
-          criteria.push('max');
-        }
-      }
+    if (this.validateRange(field, 'max', value)) {
+      criteria.push('max');
     }
 
     const errors: ValidationError[] = [];
