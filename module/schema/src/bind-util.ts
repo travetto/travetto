@@ -69,6 +69,10 @@ export class BindUtil {
         }
       } else if (type === String) {
         val = `${val}`;
+      } else if (type === Date) {
+        if (typeof val === 'number' || typeof val === 'string') {
+          val = new Date(val);
+        }
       }
     }
 
