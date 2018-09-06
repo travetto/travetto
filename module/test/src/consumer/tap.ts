@@ -33,7 +33,6 @@ export class TapEmitter implements Consumer {
 
       if (test.assertions.length) {
         let subCount = 0;
-        const count = test.assertions.length;
         for (const a of test.assertions) {
           const text = a.message ? `${a.text} (${a.message})` : a.text;
           let subMessage = `ok ${++subCount} - ${text} ${a.file}:${a.line}`;

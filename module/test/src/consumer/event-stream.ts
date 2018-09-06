@@ -1,13 +1,14 @@
-import { LocalExecution } from '@travetto/exec';
-
 import { TestEvent } from '../model/event';
 import { Consumer } from './types';
 import { ConsumerUtil } from './util';
 
-export class ExecutionEmitter extends LocalExecution<TestEvent> implements Consumer {
+export class EventStream implements Consumer {
+
+  constructor(private stream: NodeJS.WriteStream = process.stdout) { }
+
   onEvent(event: TestEvent) {
     const out = { ...event };
     ConsumerUtil.serializeErrors(out);
-    this.send(event.type, out);
+    this.stream.write(`${JSON.stringify(out)}\n`);
   }
 }
