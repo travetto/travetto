@@ -113,7 +113,7 @@ export async function server() {
   setTimeout(_ => { }, Number.MAX_SAFE_INTEGER / 10000000);
 }
 
-export function client() {
+export function client(concurrency = os.cpus().length - 1) {
   return new ExecutionPool(async () => {
     const worker = new ChildExecution(require.resolve('../../bin/travetto-test-server'), true, {
       cwd: Env.cwd
@@ -125,6 +125,7 @@ export function client() {
     return worker;
   }, {
       idleTimeoutMillis: 10000,
-      min: os.cpus().length / 2
+      min: Math.max(1, Math.trunc(concurrency / 2)),
+      max: concurrency
     });
 }

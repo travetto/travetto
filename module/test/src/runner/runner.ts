@@ -1,28 +1,30 @@
 import { PhaseManager } from '@travetto/base';
 import { ExecUtil, ArrayExecutionSource } from '@travetto/exec';
-import { Class } from '@travetto/registry';
 
 import { TestExecutor } from './executor';
 import { Consumer } from '../consumer/types';
 import { JSONEmitter } from '../consumer/json';
 import { ExecutionEmitter } from '../consumer/execution';
+import { EventStream } from '../consumer/event-stream';
 import { TapEmitter } from '../consumer/tap';
 import { AllResultsCollector } from '../consumer/collector';
 
 import { client, Events } from './communication';
 import { watch } from './watcher';
 
-interface State {
-  format: 'tap' | 'json' | 'noop' | 'exec';
-  mode: 'single' | 'watch' | 'all';
-  args: string[];
-}
-
-const FORMAT_MAPPING: { [key: string]: Class<Consumer> } = {
+const FORMAT_MAPPING = {
   json: JSONEmitter,
   tap: TapEmitter,
+  event: EventStream,
   exec: ExecutionEmitter
 };
+
+interface State {
+  format: (keyof typeof FORMAT_MAPPING);
+  mode: 'single' | 'watch' | 'all';
+  concurrency: number;
+  args: string[];
+}
 
 export class Runner {
   constructor(private state: State) { }
@@ -88,7 +90,7 @@ export class Runner {
 
     await new PhaseManager('test').load().run();
 
-    await client().process(
+    await client(this.state.concurrency).process(
       new ArrayExecutionSource(files),
       async (file, exe) => {
         exe.listen(consumer.onEvent as any);

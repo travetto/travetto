@@ -97,8 +97,7 @@ function init(mod, base) {
     ['base', 'travetto-cli-run'],
     ['compiler', 'travetto-cli-compile'],
     ['rest-aws-lambda', 'travetto-cli-aws-lambda'],
-    ['swagger', 'travetto-cli-swagger-client'],
-    ['cli', 'travetto']
+    ['swagger', 'travetto-cli-swagger-client']
   ];
 
   for (const [smod, script] of scripts) {
@@ -109,6 +108,7 @@ function init(mod, base) {
     } catch (e) {}
   }
 
+  makeLink(`${MOD_ROOT}/cli/bin/travetto.js`, `${NM_MOD}/.bin/travetto`);
 }
 
 function initAll() {
