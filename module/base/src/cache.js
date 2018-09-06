@@ -1,3 +1,5 @@
+//@ts-check
+
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
@@ -55,9 +57,9 @@ class Cache {
     if (this.cacheDir) {
       try {
         if (os.platform().startsWith('win')) {
-          execSync(`del /S ${this.cacheDir}`, { shell: true });
+          execSync(`del /S ${this.cacheDir}`);
         } else {
-          execSync(`rm -rf ${this.cacheDir}`, { shell: true });
+          execSync(`rm -rf ${this.cacheDir}`);
         }
         console.debug(`Deleted ${this.cacheDir}`);
       } catch (e) {

@@ -1,3 +1,5 @@
+//@ts-check
+// @ts-ignore
 const { Util: { program } } = require('@travetto/cli/src/util');
 
 module.exports = function() {
@@ -11,7 +13,7 @@ module.exports = function() {
       process.env.API_CLIENT_OUTPUT = cmd.output;
       process.env.API_CLIENT_FORMAT = cmd.format;
       process.env.API_CLIENT_FORMATOPTIONS = cmd.formatOptions;
-      process.env.WATCH = false;
+      process.env.WATCH = 'false';
 
       require('@travetto/base/bin/bootstrap').run(() => {
         const { ClientGenerate } = require('../src/client-generate');

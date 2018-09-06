@@ -1,7 +1,10 @@
+//@ts-check
 const fs = require('fs');
 const path = require('path');
 
+// @ts-ignore
 const { Util: { cwd, dependOn, program } } = require('@travetto/cli/src/util');
+// @ts-ignore
 const { FsUtil } = require('@travetto/cli/src/fs-util');
 
 module.exports = function() {
@@ -14,8 +17,9 @@ module.exports = function() {
       dependOn('clean');
 
       // Bootstrap
-      process.env.WATCH = false;
+      process.env.WATCH = 'false';
 
+      // @ts-ignore
       await require(`@travetto/base/bin/bootstrap`).run();
       const { ScanApp } = require(`@travetto/base`);
       const { AppCache } = require(`@travetto/base/src/cache`);

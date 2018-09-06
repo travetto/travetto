@@ -1,3 +1,5 @@
+//@ts-check
+// @ts-ignore
 const { Util: { program } } = require('@travetto/cli/src/util');
 
 module.exports = function() {
@@ -20,8 +22,8 @@ module.exports = function() {
         .join(',');
 
       if (cmd.watch !== undefined) {
-        process.env.WATCH = program.watch;
-        process.env.NO_WATCH = !program.watch;
+        process.env.WATCH = `${program.watch}`;
+        process.env.NO_WATCH = `${!program.watch}`;
       }
       require('./bootstrap').run();
     });

@@ -1,10 +1,14 @@
+//@ts-check
+
+// @ts-ignore
 const { FsUtil } = require('@travetto/cli/src/fs-util');
+// @ts-ignore
 const { Util: { cwd, program, dependOn } } = require('@travetto/cli/src/util');
 
 module.exports = function() {
   const path = require('path');
   const cp = require('child_process');
-  const exec = (...args) => cp.execSync(...args);
+  const exec = (arg, ...args) => cp.execSync(arg, ...args);
 
   program
     .command('aws-lambda:build')

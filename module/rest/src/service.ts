@@ -17,7 +17,7 @@ export class RestApp {
   private config: RestConfig;
 
   constructor(
-    private app: RestAppProvider<any>,
+    public app: RestAppProvider<any>,
   ) { }
 
   private async registerController(c: Class, interceptors: RestInterceptor[]) {
