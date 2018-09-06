@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 
 import {
-  MinLength, Url,
+  Float, MinLength, Url, Trimmed,
   SchemaValidator, Schema, ValidationError,
   SchemaRegistry, ValidationErrors, Validator, View, Match, CommonRegExp
 } from '../';
@@ -11,11 +11,17 @@ import {
 @Schema()
 class Response {
 
+  @Trimmed()
   questionId: string;
+
   answer?: any;
+
   valid?: boolean;
+
+  @Float()
   validationCount?: number = 0;
   timestamp: Date;
+
   @Url()
   url?: string;
   pandaState: 'TIRED' | 'AMOROUS' | 'HUNGRY';
