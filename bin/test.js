@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 
+//@ts-check
+
 const readline = require('readline');
 const yaml = require('js-yaml');
 const cp = require('child_process');
 
 /**
  * 
- * @param {Error} e 
+ * @param {Error|Object} e 
  */
 function deserializeError(e) {
   if (e && e.$) {
@@ -28,6 +30,7 @@ function deserializeError(e) {
  * @typedef {Object} Assertion
  * @property {String} message
  * @property {String} text
+ * @property {Error} error
  * @property {String} file
  * @property {Number} line
  */
@@ -40,6 +43,7 @@ function deserializeError(e) {
  * @property {String} [description]
  * @property {String} status
  * @property {Error} [error]
+ * @property {String} [output]
  * @property {Assertion[]} assertions
  */
 
