@@ -2,11 +2,36 @@ import { SchemaRegistry } from '../registry';
 import { CommonRegExp } from '../service/regexp';
 import { ClassList, FieldConfig } from '../types';
 
-function prop<T = any>(obj: { [key: string]: any }) {
-  return (f: any, p: string) => {
-    SchemaRegistry.registerPendingFieldFacet(f.constructor, p, obj);
+function prop(obj: { [key: string]: any }) {
+  return (t: any, k: string) => {
+    SchemaRegistry.registerPendingFieldFacet(t.constructor, k, obj);
   };
 }
+
+const stringProp = prop as
+  (obj: { [key: string]: any }) =>
+    <T extends Partial<Record<K, string>>, K extends string>(t: T, k: K) =>
+      void;
+
+const stringArrProp = prop as
+  (obj: { [key: string]: any }) =>
+    <T extends Partial<Record<K, string | any[]>>, K extends string>(t: T, k: K) =>
+      void;
+
+const numberProp = prop as
+  (obj: { [key: string]: any }) =>
+    <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K) =>
+      void;
+
+const stringNumberProp = prop as
+  (obj: { [key: string]: any }) =>
+    <T extends Partial<Record<K, string | number>>, K extends string>(t: T, k: K) =>
+      void;
+
+const dateNumberProp = prop as
+  (obj: { [key: string]: any }) =>
+    <T extends Partial<Record<K, Date | number>>, K extends string>(t: T, k: K) =>
+      void;
 
 function enumKeys(c: any): string[] {
   if (Array.isArray(c) && typeof c[0] === 'string') {
@@ -28,18 +53,20 @@ export const Required = (message?: string) => prop({ required: { active: true, m
 export const Enum = ((vals: string[] | any, message?: string) => {
   const values = enumKeys(vals);
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
-  return prop<string | number>({ enum: { values, message } });
+  return stringNumberProp({ enum: { values, message } });
 });
-export const Trimmed = () => prop<string>({ trim: true });
-export const Match = (re: RegExp, message?: string) => prop<string>({ match: { re, message } });
-export const MinLength = (n: number, message?: string) => prop({ minlength: { n, message } });
-export const MaxLength = (n: number, message?: string) => prop({ maxlength: { n, message } });
-export const Min = <T extends number | Date>(n: T, message?: string) => prop<Date | number>({ min: { n, message } });
-export const Max = <T extends number | Date>(n: T, message?: string) => prop<Date | number>({ max: { n, message } });
+
+export const Trimmed = () => stringProp({ trim: true });
+
+export const Match = (re: RegExp, message?: string) => stringProp({ match: { re, message } });
+export const MinLength = (n: number, message?: string) => stringArrProp({ minlength: { n, message } });
+export const MaxLength = (n: number, message?: string) => stringArrProp({ maxlength: { n, message } });
+export const Min = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ min: { n, message } });
+export const Max = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ max: { n, message } });
 export const Email = (message?: string) => Match(CommonRegExp.email, message);
 export const Telephone = (message?: string) => Match(CommonRegExp.telephone, message);
 export const Url = (message?: string) => Match(CommonRegExp.url, message);
-export const Precision = (precision: number) => prop<number>({ precision });
+export const Precision = (precision: number) => numberProp({ precision });
 export const Integer = () => Precision(0);
 export const Float = () => Precision(10);
 export const Currency = () => Precision(2);
