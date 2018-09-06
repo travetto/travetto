@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
+//@ts-check
 const fs = require('fs');
 const path = require('path');
 const Module = require('module');
+// @ts-ignore
 const ts = global.ts = require('typescript');
 
 //Simple bootstrap to load compiler
@@ -16,7 +18,9 @@ AppCache.init();
 //Rewrite Module for local development
 if (Env.frameworkDev) {
   const parDir = path.resolve(path.dirname(path.dirname(cwd)), 'module');
+  // @ts-ignore
   const og = Module._load.bind(Module);
+  // @ts-ignore
   Module._load = (request, parent) => {
     const root = path.dirname(parent.filename);
     if (request.startsWith('@travetto')) { // Handle import directly
@@ -48,6 +52,7 @@ require.extensions['.ts'] = function load(m, tsf) {
     content = AppCache.readEntry(name);
   }
 
+  // @ts-ignore
   const r = m._compile(content, tsf.replace(/\.ts$/, '.js'));
   return r;
 };

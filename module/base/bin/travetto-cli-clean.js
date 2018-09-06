@@ -1,3 +1,5 @@
+//@ts-check
+
 function clean() {
   require('../src/cache').AppCache.clear();
 }
@@ -6,6 +8,7 @@ function clean() {
 if (require.main === module) {
   clean();
 } else {
+  // @ts-ignore
   const { Util: { program } } = require('@travetto/cli/src/util');
 
   module.exports = () => {

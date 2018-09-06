@@ -1,3 +1,5 @@
+//@ts-check
+// @ts-ignore
 const { Util: { program } } = require('@travetto/cli/src/util');
 const os = require('os');
 

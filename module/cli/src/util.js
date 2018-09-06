@@ -1,3 +1,4 @@
+//@ts-check
 const commander = require('commander');
 const path = require('path');
 const fs = require('fs');
@@ -5,6 +6,7 @@ const fs = require('fs');
 const cwd = (process.env['init_cwd'] || process.env['INIT_CWD'] || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
 
 commander
+  // @ts-ignore
   .version(require('../package.json').version);
 
 module.exports = {

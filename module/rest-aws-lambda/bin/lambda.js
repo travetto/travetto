@@ -1,3 +1,4 @@
+//@ts-check
 let inst;
 exports.handler = async (event, context) => {
   if (!inst) {

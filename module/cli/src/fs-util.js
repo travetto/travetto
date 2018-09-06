@@ -1,3 +1,5 @@
+//@ts-check
+
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -65,7 +67,7 @@ module.exports.FsUtil = {
         await mkdirAsync(pth);
       } catch (e) {
         await this.mkdirpAsync(path.dirname(pth));
-        await mkdirASync(pth);
+        await mkdirAsync(pth);
       }
     }
   },
