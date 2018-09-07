@@ -11,8 +11,8 @@ module.exports = function() {
   const exec = (arg, ...args) => cp.execSync(arg, ...args);
 
   program
-    .command('aws-lambda:build')
-    .option('-o --output [output]', 'Output file')
+    .command('aws-lambda:build-zip')
+    .option('-o --output [output]', 'Output file', 'dist/lambda.zip')
     .option('-w --workspace [workspace]', 'Workspace directory')
     .action(async (cmd) => {
 
@@ -21,37 +21,39 @@ module.exports = function() {
         console.log('Temp Workspace', cmd.workspace);
       }
 
-      const DIST = path.resolve(cwd, cmd.workspace);
-      const ZIP = path.resolve(cwd, cmd.output || 'lambda.zip');
+      cmd.workspace = path.resolve(cwd, cmd.workspace);
+      cmd.output = path.resolve(cwd, cmd.output);
 
-      FsUtil.remove(DIST);
-      FsUtil.remove(ZIP);
-      FsUtil.mkdirp(DIST);
+      FsUtil.mkdirp(path.dirname(cmd.output));
 
-      exec(`cp -r * ${DIST}`, { cwd });
+      FsUtil.remove(cmd.workspace);
+      FsUtil.remove(cmd.output);
+      FsUtil.mkdirp(cmd.workspace);
 
-      FsUtil.writeFile(`${DIST}/index.js`,
+      exec(`cp -r * ${cmd.workspace}`, { cwd });
+
+      FsUtil.writeFile(`${cmd.workspace}/index.js`,
         'process.env.TS_CACHE_DIR = `${__dirname}/cache`;\n' +
-        FsUtil.readFile(`${__dirname}/lambda.js`));
+        FsUtil.readFile(`${__dirname}/../resources/lambda.js`));
 
-      await dependOn('compile', ['-o', './cache', '-r', '/var/task'], DIST);
+      await dependOn('compile', ['-o', './cache', '-r', '/var/task'], cmd.workspace);
 
       // Removing baggage
-      FsUtil.remove(`${DIST}/node_modules/typescript`);
-      FsUtil.remove(`${DIST}/node_modules/@types`);
-      FsUtil.remove(`${DIST}/node_modules/bson/browser_build`);
-      FsUtil.remove(`${DIST}/.git`);
+      FsUtil.remove(`${cmd.workspace}/node_modules/typescript`);
+      FsUtil.remove(`${cmd.workspace}/node_modules/@types`);
+      FsUtil.remove(`${cmd.workspace}/node_modules/bson/browser_build`);
+      FsUtil.remove(`${cmd.workspace}/.git`);
 
-      FsUtil.remove(`${DIST}/node_modules/source-map-support/browser-source-map-support.js`);
-      FsUtil.remove(`${DIST}/package-lock.json`);
+      FsUtil.remove(`${cmd.workspace}/node_modules/source-map-support/browser-source-map-support.js`);
+      FsUtil.remove(`${cmd.workspace}/package-lock.json`);
 
       // Stub out ts
-      FsUtil.mkdirp(`${DIST}/node_modules/typescript`);
-      FsUtil.writeFile(`${DIST}/node_modules/typescript/index.js`,
+      FsUtil.mkdirp(`${cmd.workspace}/node_modules/typescript`);
+      FsUtil.writeFile(`${cmd.workspace}/node_modules/typescript/index.js`,
         'module.exports = {};');
 
       for (const p of ['e2e', 'test', 'dist']) {
-        for (const f of FsUtil.find(DIST, x => x.endsWith(`/${p}`), true)) {
+        for (const f of FsUtil.find(cmd.workspace, x => x.endsWith(`/${p}`), true)) {
           FsUtil.remove(f);
         }
       }
@@ -61,22 +63,46 @@ module.exports = function() {
           'apis/5.0.js', 'apis/5.1.js', 'apis/5.2.js',
           'apis/5.3.js', 'apis/5.4.js'
         ]) {
-        for (const f of FsUtil.find(`${DIST}/node_modules`, x => x.endsWith(p))) {
+        for (const f of FsUtil.find(`${cmd.workspace}/node_modules`, x => x.endsWith(p))) {
           FsUtil.remove(f);
         }
       }
 
       try {
         FsUtil.move(
-          `${DIST}/node_modules/lodash/lodash.min.js`,
-          `${DIST}/node_modules/lodash/lodash.js`
+          `${cmd.workspace}/node_modules/lodash/lodash.min.js`,
+          `${cmd.workspace}/node_modules/lodash/lodash.js`
         );
       } catch (e) {
         // Ignore
       }
 
-      exec(`zip -qr ${ZIP} . `, { cwd: DIST });
+      exec(`zip -qr ${cmd.output} . `, { cwd: cmd.workspace });
       // remove(DIST);
+    });
+
+  program
+    .command('aws-lambda:build-sam')
+    .option('-e --env [env]', 'Environment name', 'prod')
+    .option('-o --output [output]', 'Output file', 'dist/template.yml')
+    .action(async (cmd) => {
+      process.env.ENV = cmd.env;
+      process.env.WATCH = 'false';
+
+      cmd.output = path.resolve(cwd, cmd.output);
+
+      FsUtil.mkdirp(path.dirname(cmd.output));
+
+      await require('@travetto/base/bin/bootstrap').run()
+      const { ControllerRegistry } = require('@travetto/rest');
+
+      await ControllerRegistry.init()
+      const controllers = ControllerRegistry.getClasses().map(x => ControllerRegistry.get(x));
+
+      const { template } = require(`${__dirname}/../resources/template.yml.js`);
+      const sam = template(controllers, path.resolve(`${__dirname}/../resources`));
+
+      FsUtil.writeFile(cmd.output, sam);
     });
 
   program.command('aws-lambda:deploy')
