@@ -32,19 +32,7 @@ export function Injectable(...args: any[]): ClassDecorator {
 
 export function Application(name: string): ClassDecorator {
   return (target: Class | any) => {
-    if (Env.appMain === name) {
-      DependencyRegistry.init()
-        .then(() => DependencyRegistry.getInstance(target))
-        .then(ins => {
-          if ((ins as any).run) {
-            (ins as Runnable).run();
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          throw err;
-        });
-    }
+    DependencyRegistry.registerApplication(name, target);
     return target;
   };
 }

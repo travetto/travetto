@@ -46,6 +46,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private proxies = new Map<TargetId, Map<Symbol, Proxy<RetargettingHandler<any>>>>();
   private proxyHandlers = new Map<TargetId, Map<Symbol, RetargettingHandler<any>>>();
 
+  private applications = new Map<string, Class>();
+
   constructor() {
     super(RootRegistry);
   }
@@ -207,6 +209,30 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const aliasMap = this.aliases.get(targetId)!;
     const aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
     return aliasedIds.map(id => this.get(id)!);
+  }
+
+  registerApplication(app: string, target: Class) {
+    this.applications.set(app, target);
+  }
+
+  getApplications() {
+    return Array.from(this.applications.keys());
+  }
+
+  async runApplication(name: string) {
+    try {
+      const cls = this.applications.get(name);
+      if (!cls) {
+        throw new InjectionError(`Application: ${name} does not exist`);
+      }
+      const inst = await this.getInstance(cls);
+      if (inst.run) {
+        await inst.run();
+      }
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   }
 
   // Undefined indicates no constructor

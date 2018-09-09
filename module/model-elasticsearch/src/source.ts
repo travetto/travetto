@@ -59,7 +59,7 @@ export class ModelElasticsearchSource extends ModelSource {
   async createIndex(cls: Class, alias = true) {
     const schema = ElasticsearchUtil.generateSourceSchema(cls);
     const ident = this.getIdentity(cls); // Already namespaced
-    const concreteIndex = `${ident.index}_${Date.now()}_${(Math.random() * 1000000).toFixed(0)}`;
+    const concreteIndex = `${ident.index}_${Date.now()}`;
     try {
       await this.client.indices.create({
         index: concreteIndex,

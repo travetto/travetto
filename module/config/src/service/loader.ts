@@ -73,7 +73,7 @@ export class ConfigLoader {
     this.processConfigs();
     this.processProfiles();
 
-    if (!Env.test) {
+    if (!process.env.QUIET_CONFIG && !Env.test) {
       console.info(`Initializing: ${Env.profiles.join(',')}`);
     }
 

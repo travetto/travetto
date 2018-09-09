@@ -9,7 +9,6 @@ export declare const Env: {
   trace: boolean;
   cwd: string;
   frameworkDev: boolean;
-  appMain: string;
 
   error: (...args: any[]) => void;
 
