@@ -1,5 +1,6 @@
 #!/usr/bin/env node
- // @ts-check
+
+// @ts-check
 
 const fs = require('fs');
 const path = require('path');
@@ -105,7 +106,7 @@ const lernaModuleFinalize = (function() {
   function finalize(mod, base) {
     // Fetch deps
     const deps = resolveDeps(mod, base);
-    deps.regular.add(`@travetto/${mod}`);
+    // deps.regular.add(`@travetto/${mod}`);
     deps.regular.add('@travetto/test');
 
     // wrt to module's node_modules

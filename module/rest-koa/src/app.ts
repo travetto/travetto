@@ -5,7 +5,8 @@ import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
 import { ConfigLoader } from '@travetto/config';
-import { ControllerConfig, RestAppProvider, RestUtil } from '@travetto/rest';
+import { ControllerConfig, RestAppProvider } from '@travetto/rest';
+import { RestUtil } from '@travetto/rest/src/util/rest-util';
 
 import { KoaConfig } from './config';
 

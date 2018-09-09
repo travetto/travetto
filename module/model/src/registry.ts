@@ -16,14 +16,6 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   onInstallFinalize<T>(cls: Class<T>) {
     return this.pending.get(cls.__id)! as ModelOptions<T>;
   }
-
-  onSchemaChange(cb: (x: SchemaChangeEvent) => void) {
-    SchemaRegistry.onSchemaChange((e) => {
-      if (this.has(e.cls)) {
-        cb(e);
-      }
-    });
-  }
 }
 
 export const ModelRegistry = new $ModelRegistry();
