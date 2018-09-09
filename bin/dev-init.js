@@ -97,7 +97,7 @@ const lernaModuleFinalize = (function() {
   const COMMON_BIN_SCRIPTS = [
     ['test', 'travetto-cli-test'],
     ['base', 'travetto-cli-clean'],
-    ['base', 'travetto-cli-run'],
+    ['di', 'travetto-cli-run'],
     ['compiler', 'travetto-cli-compile'],
     ['rest-aws-lambda', 'travetto-cli-aws-lambda'],
     ['swagger', 'travetto-cli-swagger-client']
