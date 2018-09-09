@@ -3,8 +3,7 @@ import * as assert from 'assert';
 import { Schema, SchemaRegistry } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
-import { extractSimple } from '../src/source';
-import { extractWhereQuery } from '../src/query-builder';
+import { ElasticsearchUtil } from '../src/util';
 
 @Schema()
 class WhereTypeAB {
@@ -46,10 +45,10 @@ export class QueryTest {
 
   @Test()
   async validateQuery() {
-    let out = extractSimple({ a: { b: { c: 5 } } });
+    let out = ElasticsearchUtil.extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
-    out = extractWhereQuery({
+    out = ElasticsearchUtil.extractWhereQuery({
       $and: [
         { a: { b: { c: 5 } } },
         { d: { e: true } },

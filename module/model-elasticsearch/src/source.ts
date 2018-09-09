@@ -9,52 +9,17 @@ import {
   ModelQuery
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
-import { Util } from '@travetto/base';
+import { Util, Env } from '@travetto/base';
 import { SchemaChangeEvent } from '@travetto/schema';
 
 import { ModelElasticsearchConfig } from './config';
-import { extractWhereQuery } from './query-builder';
-import { generateSourceSchema } from './schema';
 
-type ESBulkItemPayload = {
-  _id: string;
-  status: 201 | 400 | 409 | 404 | 200;
-  result: 'created' | 'updated' | 'deleted' | 'not_found';
-  error?: {
-    type: string;
-    reason: string;
-  }
-};
-
-type EsBulkResponse = {
-  errors: boolean;
-  items: {
-    index?: ESBulkItemPayload,
-    update?: ESBulkItemPayload,
-    delete?: ESBulkItemPayload
-  }[]
-};
-
-const hasId = <T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) => 'id' in o;
-const has$In = (o: any): o is { $in: any[] } => '$in' in o && Array.isArray(o.$in);
-
-export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
-  const out: { [key: string]: any } = {};
-  const sub = o as { [key: string]: any };
-  const keys = Object.keys(sub);
-  for (const key of keys) {
-    const subpath = `${path}${key}`;
-    if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
-      Object.assign(out, extractSimple(sub[key], `${subpath}.`));
-    } else {
-      out[subpath] = sub[key];
-    }
-  }
-  return out;
-}
+import { EsBulkResponse, EsIdentity, EsBulkError } from './types';
+import { ElasticsearchUtil } from './util';
 
 export class ModelElasticsearchSource extends ModelSource {
 
+  private identities: Map<Class, EsIdentity> = new Map();
   private indices: { [key: string]: IndexConfig<any>[] } = {};
   public client: es.Client;
 
@@ -62,13 +27,42 @@ export class ModelElasticsearchSource extends ModelSource {
     super();
   }
 
-  async createIndex(cls: Class<any>, alias = true) {
-    const schema = generateSourceSchema(cls);
+  getNamespacedIndex(idx: string) {
+    if (this.config.namespace) {
+      return `${this.config.namespace}_${idx}`;
+    } else {
+      return idx;
+    }
+  }
+
+  getIdentity<T extends ModelCore>(cls: Class<T>): EsIdentity {
+    if (!this.identities.has(cls)) {
+      const conf = ModelRegistry.get(cls);
+      const type = this.getNamespacedIndex((conf.discriminator || conf.collection || cls.name).toLowerCase());
+      this.identities.set(cls, { index: type, type });
+    }
+    return { ...this.identities.get(cls)! };
+  }
+
+  async createIndexIfMissing(cls: Class) {
     const ident = this.getIdentity(cls);
-    const index = `${ident.index}_${(Math.random() * 1000000).toFixed(0)}`;
+    try {
+      await this.client.search({
+        index: ident.index,
+        type: ident.type
+      });
+    } catch (err) {
+      await this.createIndex(cls);
+    }
+  }
+
+  async createIndex(cls: Class, alias = true) {
+    const schema = ElasticsearchUtil.generateSourceSchema(cls);
+    const ident = this.getIdentity(cls); // Already namespaced
+    const concreteIndex = `${ident.index}_${Date.now()}_${(Math.random() * 1000000).toFixed(0)}`;
     try {
       await this.client.indices.create({
-        index,
+        index: concreteIndex,
         body: {
           mappings: {
             [ident.type]: schema
@@ -76,13 +70,13 @@ export class ModelElasticsearchSource extends ModelSource {
         }
       });
       if (alias) {
-        await this.client.indices.putAlias({ index, name: ident.index });
+        await this.client.indices.putAlias({ index: concreteIndex, name: ident.index });
       }
       console.debug(`Index ${ident.index} created`);
     } catch (e) {
       console.debug(`Index ${ident.index} already created`);
     }
-    return index;
+    return concreteIndex;
   }
 
   async onSchemaChange(e: SchemaChangeEvent) {
@@ -126,7 +120,7 @@ export class ModelElasticsearchSource extends ModelSource {
 
       await this.client.indices.putAlias({ index: next, name: index });
     } else { // Only update
-      const schema = generateSourceSchema(e.cls);
+      const schema = ElasticsearchUtil.generateSourceSchema(e.cls);
 
       await this.client.indices.putMapping({
         index,
@@ -142,48 +136,27 @@ export class ModelElasticsearchSource extends ModelSource {
     // Handle ADD/REMOVE
     if (e.prev && !e.curr) { // Removing
       this.client.indices.delete({
-        index: `${this.config.namespace}_${e.prev.__id.toLowerCase()}`
+        index: this.getNamespacedIndex(e.prev.__id.toLowerCase())
       });
     } else if (e.curr && !e.prev) { // Adding
-      const index = `${this.config.namespace}_${e.curr!.__id.toLowerCase()}`;
-      this.client.indices.getAlias({ index })
-        .then(async x => {
-          const src = Object.keys(x)[0];
-          await this.createIndex(e.curr!);
-        });
+      this.createIndexIfMissing(e.curr!);
     }
-  }
-
-  getSelect<T>(clause: SelectClause<T>) {
-    const simp = extractSimple(clause);
-    const include: string[] = [];
-    const exclude: string[] = [];
-    for (const k of Object.keys(simp)) {
-      const nk = k === 'id' ? '_id' : k;
-      const v: (1 | 0 | boolean) = simp[k];
-      if (v === 0 || v === false) {
-        exclude.push(nk);
-      } else {
-        include.push(nk);
-      }
-    }
-    return [include, exclude];
   }
 
   getSearchObject<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
     const conf = ModelRegistry.get(cls);
 
-    query = this.translateQueryIds(query);
+    query = ElasticsearchUtil.translateQueryIds(query);
 
     const search: es.SearchParams = {
       ...this.getIdentity(cls),
-      body: query.where ? { query: extractWhereQuery(query.where!, cls) } : {}
+      body: query.where ? { query: ElasticsearchUtil.extractWhereQuery(query.where!, cls) } : {}
     };
 
     const sort = query.sort || conf.defaultSort;
 
     if (query.select) {
-      const [inc, exc] = this.getSelect(query.select);
+      const [inc, exc] = ElasticsearchUtil.getSelect(query.select);
       if (inc.length) {
         search._sourceInclude = inc;
       }
@@ -194,7 +167,7 @@ export class ModelElasticsearchSource extends ModelSource {
 
     if (sort) {
       search.sort = sort.map(x => {
-        const o = extractSimple(x);
+        const o = ElasticsearchUtil.extractSimple(x);
         const k = Object.keys(o)[0];
         const v = o[k] as (boolean | -1 | 1);
         if (v === 1 || v === true) {
@@ -216,15 +189,9 @@ export class ModelElasticsearchSource extends ModelSource {
     return search;
   }
 
-  getIdentity<T extends ModelCore>(cls: Class<T>): { type: string, index: string } {
-    const conf = ModelRegistry.get(cls);
-    const type = `${this.config.namespace}_${(conf.discriminator || conf.collection || cls.name).toLowerCase()}`;
-    return { index: type, type };
-  }
-
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const req = this.getSearchObject(cls, query);
-    const results = await await this.client.search<U>(req);
+    const results = await this.client.search<U>(req);
 
     const out: U[] = [];
 
@@ -267,29 +234,16 @@ export class ModelElasticsearchSource extends ModelSource {
     this.client = new es.Client(Util.deepAssign({}, this.config));
     await this.client.cluster.health({});
 
-    // PreCreate indexes
-    const create = ModelRegistry.getClasses().map(x => this.createIndex(x));
-    await Promise.all(create);
-  }
-
-  translateQueryIds<T extends ModelCore, U extends Query<T>>(query: U) {
-    const where = (query.where || {});
-    if (hasId(where)) {
-      const val = where.id;
-      delete where.id;
-      if (Array.isArray(val) || typeof val === 'string') {
-        (where as any)._id = val;
-      } else if (has$In(val)) {
-        const res: { $in: string[] } = val;
-        (where as any)._id = { $in: res.$in };
-      }
+    // PreCreate indexes if missing
+    if (Env.dev || Env.test) {
+      const all = ModelRegistry.getClasses().map(x => this.createIndexIfMissing(x));
+      await Promise.all(all);
     }
-    return query;
   }
 
   async resetDatabase() {
     await this.client.indices.delete({
-      index: `${this.config.namespace}_*`
+      index: this.getNamespacedIndex('*')
     });
     await this.init();
   }
@@ -419,8 +373,6 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
-    const conf = this.getIdentity(cls);
-
     const payload: es.BulkIndexDocumentsParams['body'] = [
       ...(state.delete || []).reduce((acc, e) => {
         acc.push({ ['delete']: { _id: e.id } });
@@ -429,16 +381,15 @@ export class ModelElasticsearchSource extends ModelSource {
       ...(state.insert || []).reduce((acc, e) => {
         acc.push({ index: {} }, e);
         return acc;
-      }, [] as any),
+      }, [] as any[]),
       ...(state.update || []).reduce((acc, e) => {
         acc.push({ update: { _id: e.id } }, { doc: e });
         return acc;
-      }, [] as any)
+      }, [] as any[])
     ];
 
     const res: EsBulkResponse = await this.client.bulk({
-      index: conf.index,
-      type: conf.type,
+      ...this.getIdentity(cls),
       body: payload,
       refresh: true
     });
@@ -450,17 +401,17 @@ export class ModelElasticsearchSource extends ModelSource {
         update: 0,
         error: 0
       },
-      error: [] as any[]
+      error: [] as EsBulkError[]
     };
 
     for (const item of res.items) {
-      const k = Object.keys(item)[0];
-      const v = (item as any)[k] as ESBulkItemPayload;
+      const k = Object.keys(item)[0] as (keyof typeof res.items[0]);
+      const v = item[k]!;
       if (v.error) {
         out.error.push(v.error);
         out.count.error += 1;
       } else {
-        (out.count as any)[k === 'index' ? 'insert' : k] += 1;
+        out.count[k === 'index' ? 'insert' : k] += 1;
       }
     }
 

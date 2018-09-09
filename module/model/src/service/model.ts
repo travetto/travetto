@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaValidator, DEFAULT_VIEW } from '@travetto/schema';
+import { BindUtil, SchemaValidator, DEFAULT_VIEW, SchemaRegistry } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Env, Util } from '@travetto/base';
 
@@ -32,7 +32,11 @@ export class ModelService extends ModelSource {
     await ModelRegistry.init();
     if (Env.watch) {
       if (this.source.onSchemaChange) {
-        ModelRegistry.onSchemaChange(this.source.onSchemaChange.bind(this.source));
+        SchemaRegistry.onSchemaChange(event => {
+          if (ModelRegistry.has(event.cls)) {
+            this.source.onSchemaChange!(event);
+          }
+        });
       }
       if (this.source.onChange) {
         ModelRegistry.on(this.source.onChange.bind(this.source));
@@ -83,11 +87,11 @@ export class ModelService extends ModelSource {
   }
 
   /** Executes a raw query against the model space */
-  async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>) {
+  async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     this.queryService.verify(cls, query);
 
     const res = await this.source.query<T, U>(cls, query);
-    return res.map(o => this.postLoad(cls, o as any as T));
+    return res.map(o => this.postLoad(cls, o as any as T) as any as U);
   }
 
   /** Retrieves all instances of cls that match query */

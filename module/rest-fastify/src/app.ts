@@ -2,7 +2,8 @@ import { ServerResponse, IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
 import { ConfigLoader } from '@travetto/config';
-import { ControllerConfig, RestAppProvider, RestUtil } from '@travetto/rest';
+import { ControllerConfig, RestAppProvider } from '@travetto/rest';
+import { RestUtil } from '@travetto/rest/src/util/rest-util';
 
 import { FastifyConfig } from './config';
 
