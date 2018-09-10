@@ -6,6 +6,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "bin": {
+    "travetto-cli-run": "bin/travetto-cli-run.js"
+  },
   "dependencies": {
     "@travetto/config": "^0.3.6",
     "@travetto/registry": "^0.3.6"
@@ -29,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.6"
+  "version": "0.3.8"
 }
