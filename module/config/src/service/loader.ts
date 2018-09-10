@@ -29,7 +29,7 @@ export class ConfigLoader {
         .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }))
         .map(x => {
           const tested = path.basename(x.name).replace(YAML_RE, '');
-          const found = Env.is(tested);
+          const found = Env.hasProfile(tested);
           return { name: tested, found, data: x.data };
         })
         .filter(x => x.found);
@@ -73,11 +73,8 @@ export class ConfigLoader {
     this.processConfigs();
     this.processProfiles();
 
-    if (!process.env.QUIET_CONFIG && !Env.test) {
+    if (!Env.isTrue('QUIET_CONFIG') && !Env.test) {
       console.info(`Initializing: ${Env.profiles.join(',')}`);
-    }
-
-    if (!process.env.QUIET_CONFIG && !Env.test) {
       console.info('Configured', this.map.toJSON());
     }
   }

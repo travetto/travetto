@@ -9,9 +9,13 @@ export declare const Env: {
   trace: boolean;
   cwd: string;
   frameworkDev: boolean;
-
-  error: (...args: any[]) => void;
-
-  is: (p: string) => boolean;
   profiles: string[];
+
+  error(...args: any[]): void;
+  hasProfile(p: string): boolean;
+  isTrue(key: string): boolean;
+  isFalse(key: string): boolean;
+  get(key: string, def: string): string;
+  get(key: string): string | undefined;
+  getList(key: string): string[];
 }

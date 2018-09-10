@@ -7,12 +7,13 @@ const { execSync } = require('child_process');
 const { Env } = require('./env');
 
 class Cache {
-  constructor(cwd, cacheDir = process.env.TS_CACHE_DIR) {
+  constructor(cwd, cacheDir) {
+
     this.cwd = cwd;
 
     if (!cacheDir) {
       const name = cwd.replace(/[\\\/:]/g, '_');
-      cacheDir = path.join(os.tmpdir(), name);
+      cacheDir = Env.get('TS_CACHE_DIR') || path.join(os.tmpdir(), name);
     }
 
     this.cacheDir = cacheDir;
@@ -79,7 +80,7 @@ class Cache {
 }
 
 class $AppCache extends Cache {
-  constructor(cwd, cacheDir = process.env.TS_CACHE_DIR) {
+  constructor(cwd, cacheDir) {
     super(cwd, cacheDir);
   }
 
