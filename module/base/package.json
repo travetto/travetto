@@ -7,8 +7,7 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-clean": "bin/travetto-cli-clean.js",
-    "travetto-cli-run": "bin/travetto-cli-run.js"
+    "travetto-cli-clean": "bin/travetto-cli-clean.js"
   },
   "dependencies": {
     "@types/node": "^10.3.2",
@@ -36,5 +35,5 @@
   "scripts": {
     "postinstall": "node ./bin/travetto-cli-clean.js"
   },
-  "version": "0.3.7"
+  "version": "0.3.8"
 }
