@@ -257,7 +257,7 @@ export class TestExecutor {
       throw err;
     }
 
-    if (process.env.DEBUGGER) {
+    if (Env.isTrue('DEBUGGER')) {
       await new Promise(t => setTimeout(t, 100));
     }
 

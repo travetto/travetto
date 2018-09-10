@@ -2,6 +2,7 @@ import * as child_process from 'child_process';
 import { ExecUtil } from './util';
 import { ChildOptions, ExecutionEvent } from './types';
 import { Execution } from './execution';
+import { Env } from '@travetto/base';
 
 export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends Execution<U, child_process.ChildProcess> {
 
@@ -24,7 +25,7 @@ export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends E
 
     const [sub, complete] = op(this.command, finalOpts);
 
-    if (process.env.DEBUG) {
+    if (Env.isTrue('DEBUG')) {
       sub.stdout.pipe(process.stdout);
       sub.stderr.pipe(process.stderr);
     }

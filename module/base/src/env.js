@@ -6,7 +6,10 @@ const TEST_KEY = 'test';
 const E2E_KEY = 'e2e';
 const DEV_KEY = 'dev';
 
-const envVal = k => process.env[k] || process.env[k.toLowerCase()] || process.env[k.toUpperCase()];
+const envVal = (k, def) => {
+  const temp = process.env[k] || process.env[k.toLowerCase()] || process.env[k.toUpperCase()];
+  return temp === undefined ? def : temp;
+};
 const envListVal = k => (envVal(k) || '').split(/[, ]+/g).filter(x => !!x);
 const isEnvTrue = k => {
   const val = envVal(k);
@@ -107,7 +110,7 @@ function buildProfile() {
 
   return {
     profiles: all,
-    is: allSet.has.bind(allSet),
+    hasProfile: allSet.has.bind(allSet),
     prod: primary === PROD_KEY,
     test: primary === TEST_KEY,
     e2e: primary === E2E_KEY,
@@ -119,6 +122,7 @@ const profile = buildProfile();
 
 const Env = [
   { cwd },
+  { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal },
   profile,
   buildLogging(profile),
   checkWatch(profile),

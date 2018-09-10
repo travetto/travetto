@@ -12,7 +12,7 @@ class $Logger {
 
   _init() {
     // Base logger, for free
-    const formatter = lineFormatter({});
+    const formatter = lineFormatter({ colorize: (process.stdout.isTTY && !Env.isTrue('NO_COLOR')) || Env.isTrue('FORCE_COLOR') });
     const output = consoleOutput({});
 
     this.listen(e => output(formatter(e)));

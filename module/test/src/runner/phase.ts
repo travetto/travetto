@@ -1,3 +1,5 @@
+import { Env } from '@travetto/base';
+
 import { AssertUtil } from './assert';
 import { Consumer } from '../consumer/types';
 import { Assertion, TestResult, TestConfig } from '../model/test';
@@ -6,12 +8,12 @@ import { SuiteConfig, SuiteResult } from '../model/suite';
 export const BREAKOUT = Symbol('breakout');
 export const TIMEOUT = Symbol('timeout');
 
-const DEFAULT_TIMEOUT = parseInt(process.env.DEFAULT_TIMEOUT || '5000', 10);
-const DEFAULT_PHASE_TIMEOUT = parseInt(process.env.DEFAULT_PHASE_TIMEOUT || '15000', 10);
+const DEFAULT_TIMEOUT = parseInt(Env.get('DEFAULT_TIMEOUT', '5000'), 10);
+const DEFAULT_PHASE_TIMEOUT = parseInt(Env.get('DEFAULT_PHASE_TIMEOUT', '15000'), 10);
 
 export function asyncTimeout(duration: number = DEFAULT_TIMEOUT): [Promise<any>, Function] {
   let id: NodeJS.Timer;
-  if (process.env.DEBUGGER) {
+  if (Env.isTrue('DEBUGGER')) {
     duration = 600000; // 10 minutes
   }
   const prom = new Promise((_, reject) => {

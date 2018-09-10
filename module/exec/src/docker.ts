@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as net from 'net';
 
-import { Shutdown, ScanFs, ScanEntry } from '@travetto/base';
+import { Shutdown, ScanFs, ScanEntry, Env } from '@travetto/base';
 
 import { CommonProcess, ExecutionResult } from './types';
 import { ExecUtil, WithOpts } from './util';
@@ -70,7 +70,7 @@ export class DockerContainer {
   public workingDir: string;
 
   constructor(private image: string, container?: string) {
-    this.container = container || `${process.env.DOCKER_NS || image}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
+    this.container = container || `${Env.get('DOCKER_NS', image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
   }
 
   private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
