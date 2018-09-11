@@ -56,7 +56,7 @@
     "no-empty": false,
     "no-boolean-literal-compare": true,
     "no-this-assignment": true,
-    "no-import-side-effect": true,
+    "no-import-side-effect": false,
     "no-eval": true,
     "no-for-in-array": true,
     "no-inferrable-types": false,
