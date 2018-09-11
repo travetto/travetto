@@ -59,7 +59,7 @@ export class RestApp {
       inter.intercept = inter.intercept.bind(inter);
     }
 
-    console.log('Sorting interceptors', sorted.length, sorted.map(x => x.constructor.name));
+    console.debug('Sorting interceptors', sorted.length, sorted.map(x => x.constructor.name));
 
     // Register all active
     await Promise.all(ControllerRegistry.getClasses()

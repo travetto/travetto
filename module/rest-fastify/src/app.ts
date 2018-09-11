@@ -42,7 +42,7 @@ export class FastifyAppProvider extends RestAppProvider {
   }
 
   async unregisterController(config: ControllerConfig) {
-    console.log('Does not support real-time updating of routes');
+    console.info('Does not support real-time updating of routes');
   }
 
   getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
