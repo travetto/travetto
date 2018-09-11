@@ -22,7 +22,7 @@ export class EndpointUtil {
     };
 
     if (reqLog.meta.statusCode < 400) {
-      console.log(`Request`, reqLog);
+      console.info(`Request`, reqLog);
     } else {
       console.error(`Request`, reqLog);
     }
