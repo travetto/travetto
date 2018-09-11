@@ -19,10 +19,10 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
     Object.assign(extra, r);
   }
 
-  return (target: Class<any>) => {
+  return ((target: Class<any>) => {
     TestRegistry.register(target, { description: (description as string), ...extra });
     return target;
-  };
+  }) as ClassDecorator;
 }
 
 function listener(phase: SuitePhase) {

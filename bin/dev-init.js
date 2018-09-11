@@ -103,6 +103,16 @@ const lernaModuleFinalize = (function() {
     ['swagger', 'travetto-cli-swagger-client']
   ];
 
+  function copyTemplateFiles(src, base) {
+    for (const f of fs.readdirSync(src)) {
+      const srcFile = `${src}/${f}`;
+      const destFile = `${base}/${f}`;
+      if (fs.statSync(srcFile).isFile() && fs.existsSync(destFile)) {
+        fs.copyFileSync(srcFile, destFile);
+      }
+    }
+  }
+
   function finalize(mod, base) {
     // Fetch deps
     const deps = resolveDeps(mod, base);
@@ -113,12 +123,8 @@ const lernaModuleFinalize = (function() {
     const NM_MOD = `${base}/${mod}/node_modules`;
 
     // Copy over all files that match from template
-    for (const f of fs.readdirSync(MOD_TPL_ROOT)) {
-      const destFile = `${base}/${mod}/${f}`;
-      if (fs.existsSync(destFile)) {
-        fs.copyFileSync(`${MOD_TPL_ROOT}/${f}`, destFile);
-      }
-    }
+    copyTemplateFiles(MOD_TPL_ROOT, `${base}/${mod}`);
+    // copyTemplateFiles(`${MOD_TPL_ROOT}/test`, `${base}/${mod}/test`);
 
     // Create necessary directories
     if (!fs.existsSync(NM_MOD)) { fs.mkdirSync(NM_MOD); }
