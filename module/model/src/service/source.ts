@@ -15,8 +15,8 @@ export abstract class ModelSource {
   abstract postLoad<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Partial<T>;
   abstract postLoad<T extends ModelCore>(cls: Class<T>, model: T): T;
 
-  abstract save<T extends ModelCore>(cls: Class<T>, model: T): Promise<T>;
-  abstract saveAll<T extends ModelCore>(cls: Class<T>, models: T[]): Promise<T[]>;
+  abstract save<T extends ModelCore>(cls: Class<T>, model: T, keepId?: boolean): Promise<T>;
+  abstract saveAll<T extends ModelCore>(cls: Class<T>, models: T[], keepId?: boolean): Promise<T[]>;
   abstract update<T extends ModelCore>(cls: Class<T>, model: T): Promise<T>;
   abstract updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number>;
   abstract updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T>;

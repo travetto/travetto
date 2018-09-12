@@ -206,17 +206,22 @@ export class ModelMongoSource extends ModelSource {
     return res.deletedCount || 0;
   }
 
-  async save<T extends ModelCore>(cls: Class<T>, o: T, removeId: boolean = true): Promise<T> {
+  async save<T extends ModelCore>(cls: Class<T>, o: T, keepId: boolean = false): Promise<T> {
     const col = await this.getCollection(cls);
+    if (!keepId) {
+      delete o.id;
+    }
     const res = await col.insertOne(o);
     o.id = res.insertedId.toHexString();
     return o;
   }
 
-  async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]): Promise<T[]> {
+  async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[], keepId: boolean = false): Promise<T[]> {
     const col = await this.getCollection(cls);
     for (const x of objs) {
-      delete x.id;
+      if (!keepId) {
+        delete x.id;
+      }
     }
     const res = await col.insertMany(objs);
     for (let i = 0; i < objs.length; i++) {
@@ -273,16 +278,19 @@ export class ModelMongoSource extends ModelSource {
 
     (state.insert || []).forEach(p => {
       count++;
-      bulk.insert({
-        $set: p
-      });
+      bulk.insert({ $set: p });
+    });
+
+    (state.upsert || []).forEach(p => {
+      count++;
+      bulk.find({ _id: p.id ? new mongo.ObjectId(p.id) : undefined })
+        .upsert()
+        .update({ $setOnInsert: p, $set: p });
     });
 
     (state.update || []).forEach(p => {
       count++;
-      bulk.find({ _id: new mongo.ObjectId(p.id) }).update({
-        $set: p
-      });
+      bulk.find({ _id: new mongo.ObjectId(p.id) }).update({ $set: p });
     });
 
     (state.delete || []).forEach(p => {
@@ -294,6 +302,7 @@ export class ModelMongoSource extends ModelSource {
       count: {
         delete: 0,
         update: 0,
+        upsert: 0,
         insert: 0
       }
     };
@@ -305,6 +314,7 @@ export class ModelMongoSource extends ModelSource {
         out.count.delete = res.nRemoved;
         out.count.update = res.nUpdated;
         out.count.insert = res.nInserted;
+        out.count.upsert = res.nUpserted;
       }
 
       if (res.hasWriteErrors()) {

@@ -297,8 +297,10 @@ export class ModelElasticsearchSource extends ModelSource {
     return res.deleted || 0;
   }
 
-  async save<T extends ModelCore>(cls: Class<T>, o: T, removeId: boolean = true): Promise<T> {
-    delete o.id;
+  async save<T extends ModelCore>(cls: Class<T>, o: T, keepId: boolean = false): Promise<T> {
+    if (!keepId) {
+      delete o.id;
+    }
     this.prePersist(cls, o);
 
     const res = await this.client.index({
@@ -311,9 +313,11 @@ export class ModelElasticsearchSource extends ModelSource {
     return o;
   }
 
-  async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]): Promise<T[]> {
+  async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[], keepId: boolean = false): Promise<T[]> {
     for (const x of objs) {
-      delete x.id;
+      if (!keepId) {
+        delete x.id;
+      }
       this.prePersist(cls, x);
     }
 
@@ -379,6 +383,10 @@ export class ModelElasticsearchSource extends ModelSource {
         return acc;
       }, [] as any[]),
       ...(state.insert || []).reduce((acc, e) => {
+        acc.push({ create: {} }, e);
+        return acc;
+      }, [] as any[]),
+      ...(state.upsert || []).reduce((acc, e) => {
         acc.push({ index: {} }, e);
         return acc;
       }, [] as any[]),
@@ -394,10 +402,11 @@ export class ModelElasticsearchSource extends ModelSource {
       refresh: true
     });
 
-    const out = {
+    const out: BulkResponse = {
       count: {
         delete: 0,
         insert: 0,
+        upsert: 0,
         update: 0,
         error: 0
       },
@@ -408,13 +417,19 @@ export class ModelElasticsearchSource extends ModelSource {
       const k = Object.keys(item)[0] as (keyof typeof res.items[0]);
       const v = item[k]!;
       if (v.error) {
-        out.error.push(v.error);
-        out.count.error += 1;
+        out.error!.push(v.error);
+        out.count!.error! += 1;
       } else {
-        out.count[k === 'index' ? 'insert' : k] += 1;
+        let sk: string = k;
+        if (sk === 'create') {
+          sk = 'insert';
+        } else if (sk === 'index') {
+          sk = 'upsert';
+        }
+        (out.count as any)[sk as any] += 1;
       }
     }
 
-    return out as BulkResponse;
+    return out;
   }
 }

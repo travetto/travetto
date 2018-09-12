@@ -39,7 +39,7 @@ class TestSave extends BaseElasticsearchTest {
     const service = await DependencyRegistry.getInstance(ModelService);
 
     const res = await service.bulkProcess(Person, {
-      insert: [1, 2, 3, 8].map(x => Person.from({
+      upsert: [1, 2, 3, 8].map(x => Person.from({
         name: 'Bob',
         age: 20 + x,
         gender: 'm',
@@ -49,6 +49,8 @@ class TestSave extends BaseElasticsearchTest {
         }
       }))
     });
+
+    assert(res.count!.upsert === 4);
 
     const match = await service.getAllByQuery(Person, {
       where: {
