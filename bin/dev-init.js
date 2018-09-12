@@ -98,6 +98,7 @@ const lernaModuleFinalize = (function() {
     ['test', 'travetto-cli-test'],
     ['base', 'travetto-cli-clean'],
     ['di', 'travetto-cli-run'],
+    ['email-template', 'travetto-cli-email-template'],
     ['compiler', 'travetto-cli-compile'],
     ['rest-aws-lambda', 'travetto-cli-aws-lambda'],
     ['swagger', 'travetto-cli-swagger-client']

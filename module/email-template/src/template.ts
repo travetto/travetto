@@ -13,7 +13,7 @@ import { Inky } from './inky';
 const readFile = util.promisify(fs.readFile);
 const exists = util.promisify(fs.exists);
 
-@Injectable({ target: MailTemplateEngine })
+@Injectable()
 export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
   private templates: { [key: string]: string } = {};

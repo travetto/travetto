@@ -6,7 +6,7 @@ X Koa
 ? CLI
   X Convert all current CLI scripts into cohesive unit
   X Create new CLI experience for Swagger
-  - Create new CLI for email template testing/compiling
+  ? Create new CLI for email template testing/compiling
 ? Lambda
   ? Entire app as an AWS lambda
   ? Individual routes as individual lambdas
