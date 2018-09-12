@@ -201,7 +201,7 @@ export class ElasticsearchUtil {
       if (conf.type === Number) {
         props[field] = { type: conf.precision ? 'float' : 'integer' };
       } else if (conf.type === Date) {
-        props[field] = { type: 'date' };
+        props[field] = { type: 'date', format: 'date_optional_time' };
       } else if (conf.type === Boolean) {
         props[field] = { type: 'boolean' };
       } else if (conf.type === String) {
