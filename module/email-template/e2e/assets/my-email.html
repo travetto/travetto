@@ -1,0 +1,13 @@
+<container>
+  {{> header.html }}
+  <spacer size="16"></spacer>
+  <row>
+    <columns small="12">
+      Hiho ${user.firstName},
+
+      Please follow click <a href="${this.config.baseUrl}/auth/reset/${user.resetToken}">reset password</a>!
+    </columns>
+  </row>
+  <spacer size="16"></spacer>
+  {{> footer.html }}
+</container>
