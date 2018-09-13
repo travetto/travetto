@@ -17,11 +17,11 @@ export class ElasticsearchUtil {
     const sub = o as { [key: string]: any };
     const keys = Object.keys(sub);
     for (const key of keys) {
-      const subpath = `${path}${key}`;
+      const subPath = `${path}${key}`;
       if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
-        Object.assign(out, this.extractSimple(sub[key], `${subpath}.`));
+        Object.assign(out, this.extractSimple(sub[key], `${subPath}.`));
       } else {
-        out[subpath] = sub[key];
+        out[subPath] = sub[key];
       }
     }
     return out;
