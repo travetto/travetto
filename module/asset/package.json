@@ -7,10 +7,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/cache": "^0.3.8",
-    "@travetto/di": "^0.3.10",
-    "@travetto/exec": "^0.3.8",
-    "@travetto/util": "^0.3.8",
+    "@travetto/cache": "^0.3.9",
+    "@travetto/di": "^0.3.11",
+    "@travetto/exec": "^0.3.9",
+    "@travetto/util": "^0.3.9",
     "@types/file-type": "^5.2.1",
     "@types/mime": "^2.0.0",
     "@types/os-tmpdir": "^1.0.0",
@@ -19,7 +19,7 @@
   },
   "description": "Modular library for storing and retrieving binary assets with additional support for image modification at runtime",
   "devDependencies": {
-    "@travetto/test": "^0.3.8"
+    "@travetto/test": "^0.3.9"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -37,5 +37,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.8"
+  "version": "0.3.9"
 }

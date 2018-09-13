@@ -10,9 +10,9 @@
     "travetto-cli-email-template": "./bin/travetto-cli-email-template.js"
   },
   "dependencies": {
-    "@travetto/di": "^0.3.10",
-    "@travetto/email": "^0.3.8",
-    "@travetto/exec": "^0.3.8",
+    "@travetto/di": "^0.3.11",
+    "@travetto/email": "^0.3.9",
+    "@travetto/exec": "^0.3.9",
     "@types/html-entities": "^1.2.16",
     "@types/marked": "0.3.0",
     "@types/mustache": "^0.8.30",
@@ -26,7 +26,7 @@
   },
   "description": "Email templating module",
   "devDependencies": {
-    "@travetto/test": "^0.3.8"
+    "@travetto/test": "^0.3.9"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -43,5 +43,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.9"
+  "version": "0.3.10"
 }
