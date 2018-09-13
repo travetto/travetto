@@ -408,11 +408,11 @@ export class ModelElasticsearchSource extends ModelSource {
         return acc;
       }, [] as any[]),
       ...(state.insert || []).reduce((acc, e) => {
-        acc.push({ create: {} }, e);
+        acc.push({ create: { _id: e.id } }, e);
         return acc;
       }, [] as any[]),
       ...(state.upsert || []).reduce((acc, e) => {
-        acc.push({ index: {} }, e);
+        acc.push({ index: e.id ? { _id: e.id } : {} }, e);
         return acc;
       }, [] as any[]),
       ...(state.update || []).reduce((acc, e) => {
