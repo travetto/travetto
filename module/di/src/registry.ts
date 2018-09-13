@@ -349,7 +349,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.aliases.get(targetId)!.set(config.qualifier, classId);
     this.targets.get(classId)!.set(config.qualifier, targetId);
 
-    // If targetting self (default @Injectable behavior)
+    // If targeting self (default @Injectable behavior)
     if (classId === targetId && (parentConfig || parentClass.__abstract)) {
       const parentId = parentClass.__id;
       const qualifier = config.qualifier === DEFAULT_INSTANCE ? Symbol(`Extends-${parentId}-${classId}`) : config.qualifier;

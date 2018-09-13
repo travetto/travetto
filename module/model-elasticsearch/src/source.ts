@@ -235,7 +235,7 @@ export class ModelElasticsearchSource extends ModelSource {
     await this.client.cluster.health({});
 
     // PreCreate indexes if missing
-    if (Env.dev || Env.test) {
+    if (!Env.prod) {
       const all = ModelRegistry.getClasses().map(x => this.createIndexIfMissing(x));
       await Promise.all(all);
     }
@@ -256,6 +256,31 @@ export class ModelElasticsearchSource extends ModelSource {
       ...query
     }));
     return res.hits.hits.map(x => x._source.id);
+  }
+
+  async getMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query: ModelQuery<T>) {
+    const idxMap = new Map<string, Class>();
+
+    const searchObj = this.getSearchObject(classes[0], query);
+    for (const cls of classes) {
+      idxMap.set(this.getIdentity(cls).index, cls);
+    }
+    searchObj.index = Array.from(idxMap.keys()).join(',');
+    delete searchObj.type;
+
+    const res = await this.client.search(searchObj);
+
+    const out: T[] = [];
+    for (const item of res.hits.hits) {
+      const itemCls = idxMap.get(item._index.replace(/_\d{13,14}$/, ''))!;
+      const obj: T = itemCls.from(item._source as T);
+      this.postLoad(itemCls, obj);
+      if (obj.postLoad) {
+        obj.postLoad();
+      }
+      out.push(obj);
+    }
+    return out;
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {
