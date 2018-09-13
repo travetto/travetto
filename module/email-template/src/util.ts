@@ -1,24 +1,8 @@
-import * as marked from 'marked';
 import * as Mustache from 'mustache';
-import * as htmlEntities from 'html-entities';
 import * as fs from 'fs';
 import * as path from 'path';
 
 import { CommandService, ExecUtil } from '@travetto/exec';
-
-const allEntities = new htmlEntities.AllHtmlEntities();
-
-class Renderer extends marked.Renderer {
-  strong(text: string) {
-    return `*${text}*`;
-  }
-  hr() {
-    return `\n\n-------------------\n\n`;
-  }
-  link(href: string, title: string, text: string): string {
-    return `[${title}]( ${href} )`;
-  }
-}
 
 export class TemplateUtil {
 
@@ -45,29 +29,6 @@ export class TemplateUtil {
         }
       });
     });
-  }
-
-  static async htmlToMarkdown(html: string) {
-    // Cleanup html from templating
-    let simple = html
-      .replace(/<table[^>]*spacer[^>]*>.*?<\/table>/g, x => { // Turn spacers into <br>
-        const height = parseInt(x.split('font-size:')[1].split(';')[0].trim().replace('px', ''), 10);
-        return '<br>'.repeat(Math.ceil(height / 16));
-      })
-      .replace(/<div class="hr[^>]+>/g, '<hr>')
-      .replace(/<[/]?(table|tr|th|thead|tbody|td|center|span|div|img)[^>]*>/g, '') // Remove purely structuring tags
-      .replace(/&#xA0;/g, ' ') // Remove entities
-      .replace(/style="[^"]+"/g, ''); // Remove all style tags
-
-    // Decode all encoded pieces
-    simple = allEntities.decode(simple);
-
-    const finalText = marked(simple, {
-      gfm: true,
-      renderer: new Renderer()
-    });
-
-    return finalText;
   }
 
   static interpolate(text: string, data: any) {

@@ -1,6 +1,6 @@
 import { Node, serialize, parse, parseFragment } from 'parse5';
 
-import { getAttrMap, Adapter, visit, classes, toStr, setDomAttribute, getInner } from './util';
+import { HtmlUtil, Parse5Adapter } from '../html-util';
 
 export const COMPONENT_DEFAULTS = {
   button: 'button',
@@ -8,38 +8,43 @@ export const COMPONENT_DEFAULTS = {
   columns: 'columns',
   container: 'container',
   callout: 'callout',
-  inky: 'inky',
   'block-grid': 'blockGrid',
   menu: 'menu',
   item: 'menuItem',
   center: 'center',
   spacer: 'spacer',
   wrapper: 'wrapper',
-  'h-line': 'hLine'
+  'h-line': 'hLine',
+  hr: 'hr'
 };
 
 export class ComponentFactory {
+  private spacer16: string;
+  public componentTags: typeof COMPONENT_DEFAULTS;
+
   constructor(
-    private columnCount: number = 12,
-    private componentTags: typeof COMPONENT_DEFAULTS = COMPONENT_DEFAULTS
+    public columnCount: number = 12,
+    componentTags: Partial<typeof COMPONENT_DEFAULTS> = {}
   ) {
+    this.componentTags = { ...COMPONENT_DEFAULTS, ...componentTags };
+    this.spacer16 = this.convertAll(`<spacer size="16"></spacer>`);
   }
 
   columns(element: Node) {
-    const attrs = getAttrMap(element);
-    const inner = getInner(element);
+    const attrs = HtmlUtil.getAttrMap(element);
+    const inner = HtmlUtil.getInner(element);
 
     let expander = '';
 
     // Add 1 to include current column
-    const colCount = Adapter.getChildNodes(element).length;
+    const colCount = Parse5Adapter.getChildNodes(element).length;
 
     // Check for sizes. If no attribute is provided, default to small-12. Divide evenly for large columns
     const smallSize = parseInt(attrs.small || '0', 10) || this.columnCount;
     const largeSize = parseInt(attrs.large || attrs.small || '0', 10) || Math.trunc(this.columnCount / colCount);
     const noExpander = 'no-expander' in attrs && attrs['no-expander'] !== 'false';
 
-    attrs.class = classes(`small-${smallSize}`, `large-${largeSize}`, 'columns', attrs.class);
+    attrs.class = HtmlUtil.classes(`small-${smallSize}`, `large-${largeSize}`, 'columns', attrs.class);
 
     delete attrs.large;
     delete attrs.small;
@@ -48,10 +53,10 @@ export class ComponentFactory {
     // If the column contains a nested row, the .expander class should not be used
     if (largeSize === this.columnCount && !noExpander) {
       let hasRow = false;
-      visit(element, (node, descend) => {
-        if (Adapter.getTagName(node) === 'row') {
+      HtmlUtil.visit(element, (node, descend) => {
+        if (Parse5Adapter.getTagName(node) === 'row') {
           hasRow = true;
-        } else if (/\brow\b/.test(getAttrMap(node).class || '')) {
+        } else if (/\brow\b/.test(HtmlUtil.getAttrMap(node).class || '')) {
           hasRow = true;
         } else {
           descend();
@@ -64,7 +69,7 @@ export class ComponentFactory {
 
     // Final HTML output
     return `
-      <th ${toStr(attrs)}>
+      <th ${HtmlUtil.toStr(attrs)}>
         <table>
           <tbody>
             <tr>
@@ -76,22 +81,22 @@ export class ComponentFactory {
   }
 
   hLine(element: Node) {
-    const attrs = getAttrMap(element);
+    const attrs = HtmlUtil.getAttrMap(element);
 
     return `
-    <table class="${classes('h-line', attrs.class)}">
+    <table class="${HtmlUtil.classes('h-line', attrs.class)}">
       <tr><th>&nbsp;</th></tr>
     </table>`;
   }
 
   row(element: Node) {
-    const attrs = getAttrMap(element);
-    const inner = getInner(element);
+    const attrs = HtmlUtil.getAttrMap(element);
+    const inner = HtmlUtil.getInner(element);
 
-    attrs.class = classes('row', attrs.class);
+    attrs.class = HtmlUtil.classes('row', attrs.class);
 
     return `
-    <table ${toStr(attrs)}>
+    <table ${HtmlUtil.toStr(attrs)}>
       <tbody>
         <tr>${inner}</tr>
       </tbody>
@@ -99,14 +104,14 @@ export class ComponentFactory {
   }
 
   button(element: Node) {
-    const attrs = getAttrMap(element);
-    let inner = getInner(element);
+    const attrs = HtmlUtil.getAttrMap(element);
+    let inner = HtmlUtil.getInner(element);
 
     const { href, target, class: cls, ...parentAttrs } = attrs;
     let expander = '';
     // If we have the href attribute we can create an anchor for the inner of the button;
     if (href) {
-      inner = `<a ${toStr({ href, target })}>${inner}</a>`;
+      inner = `<a ${HtmlUtil.toStr({ href, target })}>${inner}</a>`;
     }
 
     // If the button is expanded, it needs a <center> tag around the content
@@ -119,7 +124,7 @@ export class ComponentFactory {
 
     // The .button class is always there, along with any others on the <button> element
     return `
-      <table class="${classes('button', cls)}">
+      <table class="${HtmlUtil.classes('button', cls)}">
         <tbody>
           <tr>
             <td>
@@ -135,18 +140,19 @@ export class ComponentFactory {
             </td>${expander}
           </tr>
         </tbody>
-      </table>`;
+      </table>
+      ${this.spacer16}`;
   }
 
   container(element: Node) {
-    const attrs = getAttrMap(element);
-    const inner = getInner(element);
+    const attrs = HtmlUtil.getAttrMap(element);
+    const inner = HtmlUtil.getInner(element);
 
-    attrs.class = classes('container', attrs.class);
+    attrs.class = HtmlUtil.classes('container', attrs.class);
     attrs.align = 'center';
 
     return `
-    <table ${toStr(attrs)}>
+    <table ${HtmlUtil.toStr(attrs)}>
       <tbody>
         <tr><td>${inner}</td></tr>
       </tbody>
@@ -154,21 +160,12 @@ export class ComponentFactory {
 
   }
 
-  inky(element: Node) {
-    return `
-    <tr>
-      <td>
-        <img src="https://raw.githubusercontent.com/arvida/emoji-cheat-sheet.com/master/public/graphics/emojis/octopus.png" />
-      </tr>
-    </td>`;
-  }
-
   blockGrid(element: Node) {
-    const attrs = getAttrMap(element);
-    const inner = getInner(element);
+    const attrs = HtmlUtil.getAttrMap(element);
+    const inner = HtmlUtil.getInner(element);
 
     return `
-    <table class="${classes('block-grid', attrs.up ? `up-${attrs.up}` : '', attrs.class)}">
+    <table class="${HtmlUtil.classes('block-grid', attrs.up ? `up-${attrs.up}` : '', attrs.class)}">
       <tbody>
         <tr>${inner}</tr>
       </tbody>
@@ -176,16 +173,16 @@ export class ComponentFactory {
   }
 
   menu(element: Node) {
-    const attrs = getAttrMap(element);
-    let inner = getInner(element);
+    const attrs = HtmlUtil.getAttrMap(element);
+    let inner = HtmlUtil.getInner(element);
 
     if (inner.trim() && !/<(th|td)/.test(inner)) {
       inner = `<th class="menu-item">${inner}</th>`;
     }
 
-    attrs.class = classes('menu', attrs.class);
+    attrs.class = HtmlUtil.classes('menu', attrs.class);
     return `
-      <table ${toStr(attrs)}>
+      <table ${HtmlUtil.toStr(attrs)}>
         <tbody>
           <tr>
             <td>
@@ -203,49 +200,49 @@ export class ComponentFactory {
   }
 
   menuItem(element: Node) {
-    const attrs = getAttrMap(element);
-    const inner = getInner(element);
+    const attrs = HtmlUtil.getAttrMap(element);
+    const inner = HtmlUtil.getInner(element);
 
     // Prepare optional target attribute for the <a> element
-    attrs.class = classes('menu-item', attrs.class);
+    attrs.class = HtmlUtil.classes('menu-item', attrs.class);
     const { href, target, ...parentAttrs } = attrs;
     return `
-       <th ${toStr(parentAttrs)}>
-         <a ${toStr({ href, target })}>${inner}</a>
+       <th ${HtmlUtil.toStr(parentAttrs)}>
+         <a ${HtmlUtil.toStr({ href, target })}>${inner}</a>
        </th>`;
   }
 
   center(element: Node) {
-    for (const child of (Adapter.getChildNodes(element) || [])) {
-      if (Adapter.isElementNode(child)) {
-        setDomAttribute(child, 'align', 'center');
-        setDomAttribute(child, 'class', 'float-center');
+    for (const child of (Parse5Adapter.getChildNodes(element) || [])) {
+      if (Parse5Adapter.isElementNode(child)) {
+        HtmlUtil.setDomAttribute(child, 'align', 'center');
+        HtmlUtil.setDomAttribute(child, 'class', 'float-center');
       }
     }
 
-    visit(element, (node: Node, descend: () => void) => {
+    HtmlUtil.visit(element, (node: Node, descend: () => void) => {
       descend();
-      if (Adapter.getTagName(node) === 'item') {
-        setDomAttribute(node, 'class', 'float-center');
-      } else if (/\bmenu-item\b/.test(getAttrMap(node).class || '')) {
-        setDomAttribute(node, 'class', 'float-center');
+      if (Parse5Adapter.getTagName(node) === 'item') {
+        HtmlUtil.setDomAttribute(node, 'class', 'float-center');
+      } else if (/\bmenu-item\b/.test(HtmlUtil.getAttrMap(node).class || '')) {
+        HtmlUtil.setDomAttribute(node, 'class', 'float-center');
       }
     });
 
-    const df = Adapter.createDocumentFragment();
-    Adapter.appendChild(df, element);
+    const df = Parse5Adapter.createDocumentFragment();
+    Parse5Adapter.appendChild(df, element);
     return serialize(df);
   }
 
   callout(element: Node) {
-    const attrs = getAttrMap(element);
-    const inner = getInner(element);
+    const attrs = HtmlUtil.getAttrMap(element);
+    const inner = HtmlUtil.getInner(element);
 
-    const cls = classes('callout-inner', attrs.class);
+    const cls = HtmlUtil.classes('callout-inner', attrs.class);
     delete attrs.class;
 
     return `
-      <table ${toStr(attrs)} class="callout">
+      <table ${HtmlUtil.toStr(attrs)} class="callout">
         <tbody>
           <tr>
             <th class="${cls}">
@@ -258,10 +255,10 @@ export class ComponentFactory {
   }
 
   spacer(element: Node) {
-    const attrs = getAttrMap(element);
+    const attrs = HtmlUtil.getAttrMap(element);
     const html: string[] = [];
 
-    attrs.class = classes('spacer', attrs.class);
+    attrs.class = HtmlUtil.classes('spacer', attrs.class);
 
     const smAttr = attrs['size-sm'];
     const lgAttr = attrs['size-lg'];
@@ -277,7 +274,7 @@ export class ComponentFactory {
         newAttrs.class += ` ${extraClass}`;
       }
       return `
-        <table ${toStr(newAttrs)}>
+        <table ${HtmlUtil.toStr(newAttrs)}>
           <tbody>
             <tr>
               <td height="${size}px" style="font-size:${size}px;line-height:${size}px;">&nbsp;</td>
@@ -302,14 +299,14 @@ export class ComponentFactory {
   }
 
   wrapper(element: Node) {
-    const attrs = getAttrMap(element);
-    const inner = getInner(element);
+    const attrs = HtmlUtil.getAttrMap(element);
+    const inner = HtmlUtil.getInner(element);
 
-    attrs.class = classes('wrapper', attrs.class);
+    attrs.class = HtmlUtil.classes('wrapper', attrs.class);
     attrs.align = 'center';
 
     return `
-      <table ${toStr(attrs)}>
+      <table ${HtmlUtil.toStr(attrs)}>
         <tbody>
           <tr>
             <td class="wrapper-inner">
@@ -320,8 +317,14 @@ export class ComponentFactory {
       </table>`;
   }
 
+  hr(element: Node) {
+    const attrs = HtmlUtil.getAttrMap(element);
+    attrs.class = HtmlUtil.classes('hr', attrs.class);
+    return `<div ${HtmlUtil.toStr(attrs)}></div>`;
+  }
+
   generate(element: Node) {
-    const tagName = Adapter.getTagName(element);
+    const tagName = Parse5Adapter.getTagName(element);
 
     if (tagName in this.componentTags) {
       const fnName = (this.componentTags as { [key: string]: string })[tagName];
@@ -337,11 +340,11 @@ export class ComponentFactory {
   convertAll(document: string): string;
   convertAll(document: string | Node): string | Node {
     const traverse = (node: Node) => {
-      const children = Adapter.getChildNodes(node) || [];
+      const children = Parse5Adapter.getChildNodes(node) || [];
       let i = -1;
       for (const child of children.slice(0)) {
         i = i + 1;
-        const tagName = Adapter.getTagName(child);
+        const tagName = Parse5Adapter.getTagName(child);
         if (!tagName) {
           continue;
         }
@@ -349,13 +352,13 @@ export class ComponentFactory {
         if (tagName in this.componentTags) {
           if (tagName === this.componentTags.columns && !('hasColumns' in node)) {
             (node as any).hasColumns = true;
-            const all = children.filter(x => Adapter.isElementNode(x));
-            setDomAttribute(all[0], 'class', 'first');
-            setDomAttribute(all[all.length - 1], 'class', 'last');
+            const all = children.filter(x => Parse5Adapter.isElementNode(x));
+            HtmlUtil.setDomAttribute(all[0], 'class', 'first');
+            HtmlUtil.setDomAttribute(all[all.length - 1], 'class', 'last');
           }
           const text = this.generate(child);
           const newFrag = parseFragment(text);
-          const newNodes = (Adapter.getChildNodes(newFrag).filter(x => Adapter.isElementNode(x)))!;
+          const newNodes = (Parse5Adapter.getChildNodes(newFrag).filter(x => Parse5Adapter.isElementNode(x)))!;
           children.splice(i, 1, ...newNodes);
         }
       }
