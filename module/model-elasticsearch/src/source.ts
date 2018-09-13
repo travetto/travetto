@@ -9,7 +9,7 @@ import {
   ModelQuery
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
-import { Util, Env } from '@travetto/base';
+import { Util, Env, BaseError } from '@travetto/base';
 import { SchemaChangeEvent } from '@travetto/schema';
 
 import { ModelElasticsearchConfig } from './config';
@@ -297,7 +297,7 @@ export class ModelElasticsearchSource extends ModelSource {
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
     const res = await this.getAllByQuery(cls, { limit: 2, ...query });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
-      throw new Error(`Invalid number of results for find by id: ${res ? res.length : res}`);
+      throw new BaseError(`Invalid number of results for find by id: ${res ? res.length : res}`);
     }
     return res[0] as T;
   }
@@ -409,14 +409,17 @@ export class ModelElasticsearchSource extends ModelSource {
       }, [] as any[]),
       ...(state.insert || []).reduce((acc, e) => {
         acc.push({ create: { _id: e.id } }, e);
+        delete e.id;
         return acc;
       }, [] as any[]),
       ...(state.upsert || []).reduce((acc, e) => {
         acc.push({ index: e.id ? { _id: e.id } : {} }, e);
+        delete e.id;
         return acc;
       }, [] as any[]),
       ...(state.update || []).reduce((acc, e) => {
         acc.push({ update: { _id: e.id } }, { doc: e });
+        delete e.id;
         return acc;
       }, [] as any[])
     ];
