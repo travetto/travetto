@@ -21,7 +21,7 @@ export class MailTemplateConfig {
       this.assetRoots.push(path.resolve(__dirname, '..', 'e2e'));
     }
 
-    this.assetRoots = this.assetRoots.map(x => path.join(x, 'assets', 'email'));
+    this.assetRoots = this.assetRoots.map(x => path.join(x, 'assets'));
 
     this.scssRoots = [
       ...this.assetRoots.map(x => path.join(x, 'scss')),

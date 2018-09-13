@@ -1,43 +1,15 @@
-import { ComponentFactory, COMPONENT_DEFAULTS } from './componentFactory';
+import { ComponentFactory } from './factory';
 
-interface Options {
-  columnCount?: number;
-  components?: Partial<typeof COMPONENT_DEFAULTS>;
-}
-
-/**
- * Creates a new instance of the Inky parser.
- */
 export class Inky {
-  private factory: ComponentFactory;
+  static defaultFactory = new ComponentFactory();
 
-  constructor(options: Options) {
-    options = options || {};
-
-    // HTML tags for custom components
-    this.factory = new ComponentFactory(options.columnCount || 12, {
-      ...COMPONENT_DEFAULTS,
-      ...(options.components || {})
-    });
-  }
-
-  render(text: string) {
+  static render(text: string, factory?: ComponentFactory) {
+    factory = factory || this.defaultFactory;
     // Extract raws
     const raws: string[] = [];
-    let html = text.replace(/\< *raw *\>(.*?)\<\/ *raw *\>/gi, (all, inner) => raws.push(inner) ? `###RAW${raws.length - 1}###` : all);
+    const html = text.replace(/\< *raw *\>(.*?)\<\/ *raw *\>/gi, (all, inner) => raws.push(inner) ? `###RAW${raws.length - 1}###` : all);
 
-    // Inject inky specific directives before compilation to fix issues
-    html = html
-      .replace(/<\/button>/g, (all) => `${all}<spacer size="16"></spacer>`) // Insert spacers
-      .replace(/<hr[^>]*>/g, (a, e) => { // Turn <hr> to <div class="hr">
-        const classes = ['hr'];
-        const woClasses = a.replace(/class="([^"]*)"/g, (b, c) => { classes.push(c); return ''; });
-        return a
-          .replace(/<hr/, `<div class="${classes.join(' ')}"`)
-          .replace(/[/]?>/, '></div>');
-      }); // Pull out hrs
-
-    let out = this.factory.convertAll(html);
+    let out = factory.convertAll(html);
 
     // Take care of various minor fixes
     out = out

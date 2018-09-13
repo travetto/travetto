@@ -3,9 +3,10 @@
   <spacer size="16"></spacer>
   <row>
     <columns small="12">
-      Hiho ${user.firstName},
-
-      Please follow click <a href="${this.config.baseUrl}/auth/reset/${user.resetToken}">reset password</a>!
+      <h1>Hiho {{user.firstName}},</h1>
+      <p>
+        Please follow click <a href="${this.config.baseUrl}/auth/reset/${user.resetToken}">reset password</a>!
+      </p>
     </columns>
   </row>
   <spacer size="16"></spacer>

@@ -3,12 +3,11 @@ import * as assert from 'assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
-import { MailTemplateEngine } from '@travetto/email';
 
 import { DefaultMailTemplateEngine } from '../';
 
 // Must force import
-require('../src/template');
+import '../src/template';
 
 @Suite('Emails')
 class EmailSuite {
@@ -20,7 +19,7 @@ class EmailSuite {
   }
 
   async getEngine() {
-    return await DependencyRegistry.getInstance(MailTemplateEngine);
+    return await DependencyRegistry.getInstance(DefaultMailTemplateEngine);
   }
 
   @Test('Should template properly')
