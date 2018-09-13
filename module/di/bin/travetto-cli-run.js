@@ -41,7 +41,7 @@ module.exports = function() {
       }
 
       if (cmd.watch !== undefined) {
-        const watch = cmd.watch.test(/^(true|yes|on)$/i)
+        const watch = /^(true|yes|on)$/i.test(cmd.watch);
         process.env.WATCH = `${watch}`;
         process.env.NO_WATCH = `${!watch}`;
       }
