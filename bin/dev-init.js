@@ -114,7 +114,7 @@ const lernaModuleFinalize = (function() {
     }
   }
 
-  function finalize(mod, base) {
+  function finalize(mod, base, onlyModules) {
     // Fetch deps
     const deps = resolveDeps(mod, base);
     // deps.regular.add(`@travetto/${mod}`);
@@ -124,7 +124,9 @@ const lernaModuleFinalize = (function() {
     const NM_MOD = `${base}/${mod}/node_modules`;
 
     // Copy over all files that match from template
-    copyTemplateFiles(MOD_TPL_ROOT, `${base}/${mod}`);
+    if (!onlyModules) {
+      copyTemplateFiles(MOD_TPL_ROOT, `${base}/${mod}`);
+    }
     // copyTemplateFiles(`${MOD_TPL_ROOT}/test`, `${base}/${mod}/test`);
 
     // Create necessary directories
@@ -169,7 +171,7 @@ function init() {
   for (const dir of ['module', 'sample']) {
     const base = `${ROOT}/${dir}`;
     for (const mod of fs.readdirSync(base)) {
-      lernaModuleFinalize(mod, base);
+      lernaModuleFinalize(mod, base, true);
     }
   }
 }
