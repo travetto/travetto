@@ -40,6 +40,10 @@ export class TapEmitter implements Consumer {
             subMessage = `not ${subMessage}`;
           }
           this.log(`    ${subMessage}`);
+
+          if (a.message && a.message.length > 100) {
+            this.logMeta({ message: a.message.replace(/\\n/g, '\n') });
+          }
         }
         this.log(`    1..${subCount}`);
       }
