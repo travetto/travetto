@@ -2,15 +2,17 @@ import * as mongo from 'mongodb';
 
 import {
   ModelSource, IndexConfig, Query,
-  BulkState, BulkResponse,
+  BulkResponse,
   ModelRegistry, ModelCore,
   PageableModelQuery,
+  BulkOp,
   WhereClause,
   ModelQuery
 } from '@travetto/model';
-import { ModelMongoConfig } from './config';
 import { Class } from '@travetto/registry';
 import { BaseError, Util } from '@travetto/base';
+
+import { ModelMongoConfig } from './config';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -271,54 +273,46 @@ export class ModelMongoSource extends ModelSource {
     return res.matchedCount;
   }
 
-  async bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
+  async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]) {
     const col = await this.getCollection(cls);
     const bulk = col.initializeUnorderedBulkOp({});
-    let count = 0;
 
-    (state.insert || []).forEach(p => {
-      count++;
-      bulk.insert({ $set: p });
-    });
-
-    (state.upsert || []).forEach(p => {
-      count++;
-      bulk.find({ _id: p.id ? new mongo.ObjectId(p.id) : undefined })
-        .upsert()
-        .update({ $setOnInsert: p, $set: p });
-    });
-
-    (state.update || []).forEach(p => {
-      count++;
-      bulk.find({ _id: new mongo.ObjectId(p.id) }).update({ $set: p });
-    });
-
-    (state.delete || []).forEach(p => {
-      count++;
-      bulk.find({ _id: new mongo.ObjectId(p.id) }).removeOne();
-    });
+    for (const { action, payload } of operations) {
+      switch (action) {
+        case 'insert': bulk.insert({ $set: payload }); break;
+        case 'upsert': bulk.find({ _id: payload.id ? new mongo.ObjectId(payload.id) : undefined })
+          .upsert()
+          .update({ $setOnInsert: payload, $set: payload });
+          break;
+        case 'update': bulk.find({ _id: new mongo.ObjectId(payload.id) }).update({ $set: payload }); break;
+        case 'delete': bulk.find({ _id: new mongo.ObjectId(payload.id) }).removeOne(); break;
+      }
+    }
 
     const out: BulkResponse = {
-      count: {
+      errors: [],
+      counts: {
         delete: 0,
         update: 0,
         upsert: 0,
-        insert: 0
+        insert: 0,
+        error: 0
       }
     };
 
-    if (count > 0) {
+    if (operations.length > 0) {
       const res = await bulk.execute({});
 
-      if (out.count) {
-        out.count.delete = res.nRemoved;
-        out.count.update = res.nUpdated;
-        out.count.insert = res.nInserted;
-        out.count.upsert = res.nUpserted;
+      if (out.counts) {
+        out.counts.delete = res.nRemoved;
+        out.counts.update = res.nUpdated;
+        out.counts.insert = res.nInserted;
+        out.counts.upsert = res.nUpserted;
       }
 
       if (res.hasWriteErrors()) {
-        out.error = res.getWriteErrors();
+        out.errors = res.getWriteErrors();
+        out.counts.error = out.errors.length;
       }
     }
 

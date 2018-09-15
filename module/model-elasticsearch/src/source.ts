@@ -2,7 +2,7 @@ import * as es from 'elasticsearch';
 
 import {
   ModelSource, IndexConfig, Query,
-  QueryOptions, BulkState, BulkResponse,
+  QueryOptions, BulkResponse, BulkOp,
   ModelRegistry, ModelCore,
   PageableModelQuery,
   SelectClause,
@@ -13,7 +13,6 @@ import { Util, Env, BaseError } from '@travetto/base';
 import { SchemaChangeEvent } from '@travetto/schema';
 
 import { ModelElasticsearchConfig } from './config';
-
 import { EsBulkResponse, EsIdentity, EsBulkError } from './types';
 import { ElasticsearchUtil } from './util';
 
@@ -346,7 +345,7 @@ export class ModelElasticsearchSource extends ModelSource {
       this.prePersist(cls, x);
     }
 
-    const res = await this.bulkProcess(cls, { insert: objs });
+    const res = await this.bulkProcess(cls, objs.map(x => ({ action: 'insert', payload: x }) as BulkOp<T>));
     return objs;
   }
 
@@ -401,52 +400,40 @@ export class ModelElasticsearchSource extends ModelSource {
     return res.updated;
   }
 
-  async bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
-    const payload: es.BulkIndexDocumentsParams['body'] = [
-      ...(state.delete || []).reduce((acc, e) => {
-        acc.push({ ['delete']: { _id: e.id } });
-        return acc;
-      }, [] as any[]),
-      ...(state.insert || []).reduce((acc, e) => {
-        acc.push({ create: { _id: e.id } }, e);
-        delete e.id;
-        return acc;
-      }, [] as any[]),
-      ...(state.upsert || []).reduce((acc, e) => {
-        acc.push({ index: e.id ? { _id: e.id } : {} }, e);
-        delete e.id;
-        return acc;
-      }, [] as any[]),
-      ...(state.update || []).reduce((acc, e) => {
-        acc.push({ update: { _id: e.id } }, { doc: e });
-        delete e.id;
-        return acc;
-      }, [] as any[])
-    ];
+  async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]) {
+    const body: es.BulkIndexDocumentsParams['body'] = operations.reduce((acc, { action, payload }) => {
+      switch (action) {
+        case 'delete': acc.push({ ['delete']: { _id: payload.id } }); break;
+        case 'insert': acc.push({ create: { _id: payload.id } }, payload); break;
+        case 'upsert': acc.push({ index: payload.id ? { _id: payload.id } : {} }, payload); break;
+        case 'update': acc.push({ update: { _id: payload.id } }, { doc: payload }); break;
+      }
+      delete payload.id;
+    }, [] as any);
 
     const res: EsBulkResponse = await this.client.bulk({
       ...this.getIdentity(cls),
-      body: payload,
+      body,
       refresh: true
     });
 
     const out: BulkResponse = {
-      count: {
+      counts: {
         delete: 0,
         insert: 0,
         upsert: 0,
         update: 0,
         error: 0
       },
-      error: [] as EsBulkError[]
+      errors: [] as EsBulkError[]
     };
 
     for (const item of res.items) {
       const k = Object.keys(item)[0] as (keyof typeof res.items[0]);
       const v = item[k]!;
       if (v.error) {
-        out.error!.push(v.error);
-        out.count!.error! += 1;
+        out.errors.push(v.error);
+        out.counts.error += 1;
       } else {
         let sk: string = k;
         if (sk === 'create') {
@@ -454,7 +441,7 @@ export class ModelElasticsearchSource extends ModelSource {
         } else if (sk === 'index') {
           sk = 'upsert';
         }
-        (out.count as any)[sk as any] += 1;
+        (out.counts as any)[sk as any] += 1;
       }
     }
 

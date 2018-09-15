@@ -2,7 +2,7 @@ import { Class, ChangeEvent } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
 
 import { ModelQuery, Query, PageableModelQuery } from '../model/query';
-import { BulkState, BulkResponse } from '../model/bulk';
+import { BulkResponse, BulkOp } from '../model/bulk';
 import { ModelCore } from '../model/core';
 
 export abstract class ModelSource {
@@ -24,7 +24,7 @@ export abstract class ModelSource {
 
   abstract query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]>;
 
-  abstract bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>): Promise<BulkResponse>;
+  abstract bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse>;
   abstract getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T>;
   abstract getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T>;
   abstract getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]>;

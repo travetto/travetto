@@ -7,7 +7,7 @@ import { QueryVerifierService } from './verify';
 import { ModelOptions } from '../types';
 import { Query, ModelQuery, PageableModelQuery } from '../model/query';
 import { ModelCore } from '../model/core';
-import { BulkState } from '../model/bulk';
+import { BulkOp, BulkResponse } from '../model/bulk';
 import { ModelSource } from './source';
 import { ModelRegistry } from '../registry';
 
@@ -217,7 +217,37 @@ export class ModelService extends ModelSource {
   }
 
   /** Bulk create/update/delete */
-  bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
-    return this.source.bulkProcess(cls, state);
+  async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[], batchSize?: number) {
+
+    if (!batchSize) {
+      batchSize = operations.length;
+    }
+
+    const upper = Math.trunc(Math.ceil(operations.length / batchSize));
+    const out: BulkResponse = {
+      errors: [],
+      counts: {
+        insert: 0,
+        update: 0,
+        upsert: 0,
+        delete: 0,
+        error: 0
+      }
+    };
+
+    for (let i = 0; i < upper; i++) {
+      const start = i * batchSize;
+      const end = Math.min(operations.length, (i + 1) * batchSize);
+
+      const res = await this.source.bulkProcess(cls, operations.slice(start, end));
+
+      out.errors.push(...res.errors);
+      out.counts.insert += res.counts.insert;
+      out.counts.upsert += res.counts.upsert;
+      out.counts.update += res.counts.update;
+      out.counts.delete += res.counts.delete;
+      out.counts.error += res.counts.error;
+    }
+    return out;
   }
 }
