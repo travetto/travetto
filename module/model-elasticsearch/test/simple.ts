@@ -38,19 +38,21 @@ class TestSave extends BaseElasticsearchTest {
   async save() {
     const service = await DependencyRegistry.getInstance(ModelService);
 
-    const res = await service.bulkProcess(Person, {
-      upsert: [1, 2, 3, 8].map(x => Person.from({
-        name: 'Bob',
-        age: 20 + x,
-        gender: 'm',
-        address: {
-          street1: 'a',
-          ...(x === 1 ? { street2: 'b' } : {})
-        }
+    const res = await service.bulkProcess(Person,
+      [1, 2, 3, 8].map(x => ({
+        upsert: Person.from({
+          name: 'Bob',
+          age: 20 + x,
+          gender: 'm',
+          address: {
+            street1: 'a',
+            ...(x === 1 ? { street2: 'b' } : {})
+          }
+        })
       }))
-    });
+    );
 
-    assert(res.count!.upsert === 4);
+    assert(res.counts.upsert === 4);
 
     const match = await service.getAllByQuery(Person, {
       where: {
