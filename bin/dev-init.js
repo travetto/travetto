@@ -159,7 +159,9 @@ const lernaModuleFinalize = (function() {
     }
 
     // Link travetto cli
-    makeLink(`${MOD_ROOT}/cli/bin/travetto.js`, `${NM_MOD}/.bin/travetto`);
+    for (const f of fs.readdirSync(`${MOD_ROOT}/cli/bin`)) {
+      makeLink(`${MOD_ROOT}/cli/bin/${f}`, `${NM_MOD}/.bin/${f.replace(/[.][jt]s$/, '')}`);
+    }
   }
 
   return finalize;
