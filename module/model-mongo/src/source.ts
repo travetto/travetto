@@ -277,15 +277,17 @@ export class ModelMongoSource extends ModelSource {
     const col = await this.getCollection(cls);
     const bulk = col.initializeUnorderedBulkOp({});
 
-    for (const { action, payload } of operations) {
-      switch (action) {
-        case 'insert': bulk.insert({ $set: payload }); break;
-        case 'upsert': bulk.find({ _id: payload.id ? new mongo.ObjectId(payload.id) : undefined })
+    for (const op of operations) {
+      if (op.insert) {
+        bulk.insert({ $set: op.insert });
+      } else if (op.upsert) {
+        bulk.find({ _id: op.upsert.id ? new mongo.ObjectId(op.upsert.id) : undefined })
           .upsert()
-          .update({ $setOnInsert: payload, $set: payload });
-          break;
-        case 'update': bulk.find({ _id: new mongo.ObjectId(payload.id) }).update({ $set: payload }); break;
-        case 'delete': bulk.find({ _id: new mongo.ObjectId(payload.id) }).removeOne(); break;
+          .update({ $setOnInsert: op.upsert, $set: op.upsert });
+      } else if (op.update) {
+        bulk.find({ _id: new mongo.ObjectId(op.update.id) }).update({ $set: op.update });
+      } else if (op.delete) {
+        bulk.find({ _id: new mongo.ObjectId(op.delete.id) }).removeOne();
       }
     }
 

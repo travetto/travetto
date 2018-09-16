@@ -345,7 +345,7 @@ export class ModelElasticsearchSource extends ModelSource {
       this.prePersist(cls, x);
     }
 
-    const res = await this.bulkProcess(cls, objs.map(x => ({ action: 'insert', payload: x }) as BulkOp<T>));
+    const res = await this.bulkProcess(cls, objs.map(x => ({ upsert: x })));
     return objs;
   }
 
@@ -401,14 +401,19 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]) {
-    const body: es.BulkIndexDocumentsParams['body'] = operations.reduce((acc, { action, payload }) => {
-      switch (action) {
-        case 'delete': acc.push({ ['delete']: { _id: payload.id } }); break;
-        case 'insert': acc.push({ create: { _id: payload.id } }, payload); break;
-        case 'upsert': acc.push({ index: payload.id ? { _id: payload.id } : {} }, payload); break;
-        case 'update': acc.push({ update: { _id: payload.id } }, { doc: payload }); break;
+    const body: es.BulkIndexDocumentsParams['body'] = operations.reduce((acc, op) => {
+      if (op.delete) {
+        acc.push({ ['delete']: { _id: op.delete.id } });
+      } else if (op.insert) {
+        acc.push({ create: { _id: op.insert.id } }, op.insert);
+        delete op.insert.id;
+      } else if (op.upsert) {
+        acc.push({ index: op.upsert.id ? { _id: op.upsert.id } : {} }, op.upsert);
+        delete op.upsert.id;
+      } else if (op.update) {
+        acc.push({ update: { _id: op.update.id } }, { doc: op.update });
+        delete op.update.id;
       }
-      delete payload.id;
     }, [] as any);
 
     const res: EsBulkResponse = await this.client.bulk({
