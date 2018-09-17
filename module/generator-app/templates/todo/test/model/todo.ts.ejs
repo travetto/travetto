@@ -1,9 +1,10 @@
 import * as assert from 'assert';
 
-import { Suite, Test } from '@travetto/test';
-import { ModelService } from '@travetto/model';
+import { Suite, Test, BeforeAll, AfterEach } from '@travetto/test';
+import { ModelService, ModelRegistry } from '@travetto/model';
+import { SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
-import { Base<%= model.className %>Test } from '@travetto/model-<%= model.packageName %>';
+import { Model<%= model.className %>Source } from '@travetto/model-<%= model.packageName %>';
 
 import { Todo } from '../../src/model/todo';
 
@@ -11,7 +12,20 @@ import { Todo } from '../../src/model/todo';
 import '../../src/model/config';
 
 @Suite('Simple CRUD')
-class TestCRUD extends Base<%= model.className %>Test {
+class TestCRUD {
+
+  @BeforeAll()
+  async before() {
+    await SchemaRegistry.init();
+    await DependencyRegistry.init();
+    await ModelRegistry.init();
+  }
+
+  @AfterEach()
+  async afterEach() {
+    const mms = (await DependencyRegistry.getInstance(ModelSource)) as Model<%= model.className %>Source;
+    return await mms.resetDatabase();
+  }
 
   @Test('save it')
   async save() {
@@ -20,8 +34,8 @@ class TestCRUD extends Base<%= model.className %>Test {
     const saved = await service.save(Todo, Todo.from({
       title: 'A saved todo',
       completed: false
-    }))
+    }));
 
     assert(saved.id !== undefined);
   }
-} 
+}
