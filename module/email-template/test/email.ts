@@ -3,12 +3,11 @@ import * as assert from 'assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
-import { MailTemplateEngine } from '@travetto/email';
 
-import { DefaultMailTemplateEngine } from '../src';
+import { DefaultMailTemplateEngine } from '../';
 
 // Must force import
-require('../src/template');
+import '../src/template';
 
 @Suite('Emails')
 class EmailSuite {
@@ -20,7 +19,7 @@ class EmailSuite {
   }
 
   async getEngine() {
-    return await DependencyRegistry.getInstance(MailTemplateEngine);
+    return await DependencyRegistry.getInstance(DefaultMailTemplateEngine);
   }
 
   @Test('Should template properly')
@@ -32,8 +31,10 @@ class EmailSuite {
           <columns large="{{right}}"></columns>
         </row>`, { left: 6, right: 6 });
 
-    assert(out.html.includes('>Bob</th>'));
-    assert(out.html.includes('<meta name="viewport" content="width=device-width"'));
+    const hasBob = out.html.includes('>Bob</th>');
+    assert(hasBob);
+    const hasMeta = out.html.includes('<meta name="viewport" content="width=device-width"');
+    assert(hasMeta);
   }
 
   @Test('Should template images')
@@ -42,8 +43,14 @@ class EmailSuite {
 
     const out = await instance.template(`<img src="image/test.png">`, { left: 6, right: 6 });
     const img = await instance.getAssetBuffer('image/test.png');
-    assert(img !== null);
+
+    // Reworking to not send entire image for tests
+    const hasImg = img !== null;
+
+    assert(hasImg);
     assert(img.length > 1001);
-    assert(out.html.includes(img.toString('base64')));
+
+    const includesEncodedImage = out.html.includes(img.toString('base64'));
+    assert(includesEncodedImage);
   }
 }

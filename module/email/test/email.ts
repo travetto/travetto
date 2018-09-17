@@ -4,7 +4,7 @@ import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
-import { EmailService, MailTransport, NullTransport } from '../src';
+import { EmailService, MailTransport, NullTransport } from '../';
 
 class Config {
   @InjectableFactory()

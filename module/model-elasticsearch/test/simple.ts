@@ -1,11 +1,12 @@
+import * as assert from 'assert';
+
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 
-import * as assert from 'assert';
 import { BaseElasticsearchTest } from './base';
-import { ModelElasticsearchSource } from '../src';
+import { ModelElasticsearchSource } from '../src/source';
 
 @Schema()
 class Address {
@@ -37,17 +38,21 @@ class TestSave extends BaseElasticsearchTest {
   async save() {
     const service = await DependencyRegistry.getInstance(ModelService);
 
-    const res = await service.bulkProcess(Person, {
-      insert: [1, 2, 3, 8].map(x => Person.from({
-        name: 'Bob',
-        age: 20 + x,
-        gender: 'm',
-        address: {
-          street1: 'a',
-          ...(x === 1 ? { street2: 'b' } : {})
-        }
+    const res = await service.bulkProcess(Person,
+      [1, 2, 3, 8].map(x => ({
+        upsert: Person.from({
+          name: 'Bob',
+          age: 20 + x,
+          gender: 'm',
+          address: {
+            street1: 'a',
+            ...(x === 1 ? { street2: 'b' } : {})
+          }
+        })
       }))
-    });
+    );
+
+    assert(res.counts.upsert === 4);
 
     const match = await service.getAllByQuery(Person, {
       where: {

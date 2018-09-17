@@ -2,9 +2,10 @@ import { RootRegistry, MethodSource, Class } from '@travetto/registry';
 import { QueueExecutionSource, ChildExecution } from '@travetto/exec';
 
 import { client, Events } from './communication';
-import { TestRegistry } from '../service';
-import { TestConfig, SuiteConfig } from '../model';
-import { Consumer } from '../consumer';
+import { TestRegistry } from '../registry';
+import { TestConfig } from '../model/test';
+import { SuiteConfig } from '../model/suite';
+import { Consumer } from '../consumer/types';
 
 function getConf(o?: [Class, Function]) {
   if (o) {

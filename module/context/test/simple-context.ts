@@ -1,8 +1,10 @@
-import { Inject, Injectable, DependencyRegistry } from '@travetto/di';
-import { Suite, Test, BeforeAll, AfterAll } from '@travetto/test';
-import { Context, WithContext } from '../index';
 import * as assert from 'assert';
 import * as async_hooks from 'async_hooks';
+
+import { Inject, Injectable, DependencyRegistry } from '@travetto/di';
+import { Suite, Test, BeforeAll } from '@travetto/test';
+
+import { Context, WithContext } from '../';
 
 @Injectable()
 class TestService {

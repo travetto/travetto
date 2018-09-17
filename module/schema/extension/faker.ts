@@ -2,10 +2,10 @@ import * as faker from 'faker';
 
 import { Class } from '@travetto/registry';
 
-import { CommonRegExp } from '../src/service/validator/regexp';
+import { CommonRegExp } from '../src/service/regexp';
 import { FieldConfig } from '../src/types';
-import { SchemaRegistry } from '../src/service/registry';
-import { BindUtil } from '../src/util';
+import { SchemaRegistry } from '../src/registry';
+import { BindUtil } from '../src/bind-util';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 

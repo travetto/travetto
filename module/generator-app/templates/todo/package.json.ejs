@@ -1,0 +1,18 @@
+{
+  "author": {
+    "email": "<%= author.email %>",
+    "name": "<%= author.name %>"
+  },
+  "dependencies": {
+    <% for (const dep of depList) { %>"@travetto/<%= dep %>": "~<%= depVersion %>",<% } %>
+    "@travetto/test": "<%= depVersion %>"
+  },
+  "description": "A <%= modules.join(', ') %> based travetto project",
+  "keywords": ["traveto", <% for (const kw of keywords) {%>"<%= kw %>"<% }%>],
+  "license": "MIT",
+  "scripts": {
+    "start": "travetto run <%= name %>"
+  },
+  "name": "<%= name %>",
+  "version": "1.0.0"
+}

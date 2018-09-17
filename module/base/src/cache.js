@@ -1,3 +1,5 @@
+//@ts-check
+
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
@@ -5,12 +7,13 @@ const { execSync } = require('child_process');
 const { Env } = require('./env');
 
 class Cache {
-  constructor(cwd, cacheDir = process.env.TS_CACHE_DIR) {
+  constructor(cwd, cacheDir) {
+
     this.cwd = cwd;
 
     if (!cacheDir) {
       const name = cwd.replace(/[\\\/:]/g, '_');
-      cacheDir = path.join(os.tmpdir(), name);
+      cacheDir = Env.get('TS_CACHE_DIR') || path.join(os.tmpdir(), name);
     }
 
     this.cacheDir = cacheDir;
@@ -55,9 +58,9 @@ class Cache {
     if (this.cacheDir) {
       try {
         if (os.platform().startsWith('win')) {
-          execSync(`del /S ${this.cacheDir}`, { shell: true });
+          execSync(`del /S ${this.cacheDir}`);
         } else {
-          execSync(`rm -rf ${this.cacheDir}`, { shell: true });
+          execSync(`rm -rf ${this.cacheDir}`);
         }
         console.debug(`Deleted ${this.cacheDir}`);
       } catch (e) {
@@ -67,22 +70,29 @@ class Cache {
   }
 
   fromEntryName(cached) {
-    return path.join(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, path.sep));
+    return path.join(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, path.sep)).replace(/[.]js/g, '.ts');
   }
 
   toEntryName(full) {
-    const out = path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~'));
+    const out = path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~')).replace(/[.]ts/g, '.js');
     return out;
   }
 }
 
 class $AppCache extends Cache {
-  constructor(cwd, cacheDir = process.env.TS_CACHE_DIR) {
+  constructor(cwd, cacheDir) {
     super(cwd, cacheDir);
   }
 
   init() {
     super.init();
+
+    try {
+      // Ensure we have access before trying to delete
+      fs.accessSync(this.cacheDir, fs.constants.W_OK);
+    } catch (e) {
+      return; // Skip trying to delete;
+    }
 
     for (const f of fs.readdirSync(this.cacheDir)) {
       const full = this.fromEntryName(f);

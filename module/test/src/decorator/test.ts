@@ -1,5 +1,5 @@
-import { TestRegistry } from '../service';
-import { TestConfig } from '../model';
+import { TestRegistry } from '../registry';
+import { TestConfig } from '../model/test';
 
 export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;

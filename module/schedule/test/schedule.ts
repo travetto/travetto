@@ -1,6 +1,8 @@
-import { Scheduler } from '../src';
+import * as assert from 'assert';
+
 import { Suite, Test } from '@travetto/test';
-import { assert } from 'console';
+
+import { Scheduler } from '../';
 
 @Suite()
 class Scheduling {
@@ -8,16 +10,17 @@ class Scheduling {
   @Test()
   async timing() {
     let val = 0;
+
     Scheduler.perSecond(() => {
       val += 1;
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2010));
 
-    assert(val === 1);
+    assert(val >= 1);
 
-    await new Promise(resolve => setTimeout(resolve, 1600));
+    await new Promise(resolve => setTimeout(resolve, 2010));
 
-    assert(val === 3);
+    assert(val >= 3);
   }
 }

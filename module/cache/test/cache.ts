@@ -1,7 +1,8 @@
-import { Cacheable, CacheManager } from '../src';
-import { Shutdown } from '@travetto/base';
 import { Suite, Test, BeforeEach } from '@travetto/test';
-import { assert } from 'console';
+import * as assert from 'assert';
+
+import { CacheManager } from '../src/service';
+import { Cacheable } from '../src/decorator';
 
 class CachingService {
 

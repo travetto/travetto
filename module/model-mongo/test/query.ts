@@ -1,6 +1,7 @@
-import { Suite, Test } from '@travetto/test';
-import { extractSimple, extractWhereClause } from '..';
 import * as assert from 'assert';
+
+import { Suite, Test } from '@travetto/test';
+import { extractSimple, extractWhereClause } from '../';
 
 @Suite()
 export class QueryTest {

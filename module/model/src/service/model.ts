@@ -1,13 +1,15 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaValidator, DEFAULT_VIEW } from '@travetto/schema';
+import { BindUtil, SchemaValidator, DEFAULT_VIEW, SchemaRegistry } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Env, Util } from '@travetto/base';
 
-import { QueryVerifierService } from './query';
+import { QueryVerifierService } from './verify';
 import { ModelOptions } from '../types';
-import { ModelCore, Query, BulkState, ModelQuery, PageableModelQuery } from '../model';
+import { Query, ModelQuery, PageableModelQuery } from '../model/query';
+import { ModelCore } from '../model/core';
+import { BulkOp, BulkResponse } from '../model/bulk';
 import { ModelSource } from './source';
-import { ModelRegistry } from './registry';
+import { ModelRegistry } from '../registry';
 
 function getClass<T>(o: T) {
   return o.constructor as Class<T>;
@@ -30,7 +32,11 @@ export class ModelService extends ModelSource {
     await ModelRegistry.init();
     if (Env.watch) {
       if (this.source.onSchemaChange) {
-        ModelRegistry.onSchemaChange(this.source.onSchemaChange.bind(this.source));
+        SchemaRegistry.onSchemaChange(event => {
+          if (ModelRegistry.has(event.cls)) {
+            this.source.onSchemaChange!(event);
+          }
+        });
       }
       if (this.source.onChange) {
         ModelRegistry.on(this.source.onChange.bind(this.source));
@@ -81,11 +87,11 @@ export class ModelService extends ModelSource {
   }
 
   /** Executes a raw query against the model space */
-  async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>) {
+  async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     this.queryService.verify(cls, query);
 
     const res = await this.source.query<T, U>(cls, query);
-    return res.map(o => this.postLoad(cls, o as any as T));
+    return res.map(o => this.postLoad(cls, o as any as T) as any as U);
   }
 
   /** Retrieves all instances of cls that match query */
@@ -148,16 +154,16 @@ export class ModelService extends ModelSource {
   }
 
   /** Save a new instance */
-  async save<T extends ModelCore>(cls: Class<T>, o: T) {
+  async save<T extends ModelCore>(cls: Class<T>, o: T, keepId?: boolean) {
     o = await this.prePersist(cls, o);
-    const res = await this.source.save(cls, o);
+    const res = await this.source.save(cls, o, keepId);
     return this.postLoad(cls, res);
   }
 
   /** Save all as new instances */
-  async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]) {
+  async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[], keepId?: boolean) {
     objs = await Promise.all(objs.map(o => this.prePersist(cls, o)));
-    const res = await this.source.saveAll(cls, objs);
+    const res = await this.source.saveAll(cls, objs, keepId);
     return res.map(x => this.postLoad(cls, x));
   }
 
@@ -211,7 +217,37 @@ export class ModelService extends ModelSource {
   }
 
   /** Bulk create/update/delete */
-  bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>) {
-    return this.source.bulkProcess(cls, state);
+  async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[], batchSize?: number) {
+
+    if (!batchSize) {
+      batchSize = operations.length;
+    }
+
+    const upper = Math.trunc(Math.ceil(operations.length / batchSize));
+    const out: BulkResponse = {
+      errors: [],
+      counts: {
+        insert: 0,
+        update: 0,
+        upsert: 0,
+        delete: 0,
+        error: 0
+      }
+    };
+
+    for (let i = 0; i < upper; i++) {
+      const start = i * batchSize;
+      const end = Math.min(operations.length, (i + 1) * batchSize);
+
+      const res = await this.source.bulkProcess(cls, operations.slice(start, end));
+
+      out.errors.push(...res.errors);
+      out.counts.insert += res.counts.insert;
+      out.counts.upsert += res.counts.upsert;
+      out.counts.update += res.counts.update;
+      out.counts.delete += res.counts.delete;
+      out.counts.error += res.counts.error;
+    }
+    return out;
   }
 }

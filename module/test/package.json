@@ -7,8 +7,8 @@
     "travetto-cli-test": "bin/travetto-cli-test.js"
   },
   "dependencies": {
-    "@travetto/exec": "^0.3.0",
-    "@travetto/registry": "^0.3.0",
+    "@travetto/exec": "^0.3.9",
+    "@travetto/registry": "^0.3.9",
     "@types/js-yaml": "^3.11.1",
     "js-yaml": "https://github.com/arciisine/js-yaml.git#3.11.0-slim"
   },
@@ -28,5 +28,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.0"
+  "version": "0.3.11"
 }

@@ -3,7 +3,7 @@ import * as util from 'util';
 import * as path from 'path';
 
 import { Env, Util, Stacktrace } from '@travetto/base';
-import { Assertion, TestConfig } from '../model';
+import { Assertion, TestConfig } from '../model/test';
 
 const ASSERT_FN_OPERATOR: { [key: string]: string } = {
   equal: '==',

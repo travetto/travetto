@@ -1,5 +1,5 @@
 import { HeaderMap, EndpointConfig, ControllerConfig, DescribableConfig, Filter, EndpointDecorator } from '../types';
-import { ControllerRegistry } from '../service';
+import { ControllerRegistry } from '../registry';
 
 const MIN = 1000 * 60;
 const HOUR = MIN * 60;

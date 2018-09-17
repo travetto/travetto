@@ -1,6 +1,6 @@
 import * as nodemailer from 'nodemailer';
 
-import { MailTransport, MessageOptions, SentMessage } from '../../src';
+import { MailTransport, MessageOptions, SentMessage } from '../../src/types';
 
 export abstract class BaseTransport extends MailTransport {
   private transporter: nodemailer.Transporter;

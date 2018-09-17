@@ -1,7 +1,7 @@
-import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Watcher, Env } from '../src';
+import { Watcher } from '../src/watch';
+import { Env } from '../src/env';
 import { Test, Suite } from '@travetto/test';
 
 @Suite()

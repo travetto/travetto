@@ -2,7 +2,8 @@ import { ServerResponse, IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
 import { ConfigLoader } from '@travetto/config';
-import { ControllerConfig, RestAppProvider, RestUtil } from '@travetto/rest';
+import { ControllerConfig, RestAppProvider } from '@travetto/rest';
+import { RestAppUtil } from '@travetto/rest/src/util/rest-app-util';
 
 import { FastifyConfig } from './config';
 
@@ -41,11 +42,11 @@ export class FastifyAppProvider extends RestAppProvider {
   }
 
   async unregisterController(config: ControllerConfig) {
-    console.log('Does not support real-time updating of routes');
+    console.info('Does not support real-time updating of routes');
   }
 
   getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
-    return RestUtil.decorateRequest({
+    return RestAppUtil.decorateRequest({
       _raw: reqs,
       method: reqs.req.method,
       path: reqs.req.url!,
@@ -63,7 +64,7 @@ export class FastifyAppProvider extends RestAppProvider {
   }
 
   getResponse(reply: fastify.FastifyReply<ServerResponse>) {
-    return RestUtil.decorateResponse({
+    return RestAppUtil.decorateResponse({
       _raw: reply,
       get headersSent() {
         return reply.sent;

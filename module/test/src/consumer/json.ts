@@ -1,4 +1,6 @@
-import { AllSuitesResult, TestEvent } from '../model';
+import { TestEvent } from '../model/event';
+import { AllSuitesResult } from '../model/suite';
+
 import { Consumer } from './types';
 
 export class JSONEmitter implements Consumer {

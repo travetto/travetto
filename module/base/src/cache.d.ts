@@ -13,4 +13,4 @@ export declare class Cache {
   clear(): void;
 }
 
-export const AppCache: Cache;
+export const AppCache: Cache & { cacheDir: string };

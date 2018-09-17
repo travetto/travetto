@@ -3,7 +3,7 @@ import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { ModelSource, ModelRegistry } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../src/service';
+import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../';
 
 export class Init {
   @InjectableFactory()
