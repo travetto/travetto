@@ -1,0 +1,67 @@
+import { Controller, Get, Put, Post, Delete, DisableCache, Request } from '@travetto/rest';
+import { Inject } from '@travetto/di';
+import { ModelService } from '@travetto/model';
+import { SchemaBody, SchemaQuery } from '@travetto/schema/extension/rest';
+import { Schema } from '@travetto/schema';
+
+import { Todo } from '../model/todo';
+
+@Schema()
+class Query {
+  q: any = {};
+}
+
+/**
+ * Controller for managing all aspects of the Todo lifecycle
+ */
+@Controller('/todo')
+export class TodoController {
+
+  @Inject()
+  source: ModelService;
+
+  /**
+   * Get all Todos
+   */
+  @Get('/')
+  @SchemaQuery(Query)
+  @DisableCache()
+  async getAll(req: Request) {
+    return this.source.getAllByQuery(Todo, req.query.q);
+  }
+
+  /**
+   * Get Todo by id
+   */
+  @Get('/:id')
+  @DisableCache()
+  async getOne(req: Request) {
+    return this.source.getById(Todo, req.params.id);
+  }
+
+  /**
+   * Create a Todo
+   */
+  @Post('/')
+  @SchemaBody(Todo)
+  async save(req: Request) {
+    return this.source.save(Todo, req.body);
+  }
+
+  /**
+   * Update a Todo
+   */
+  @Put('/:id')
+  @SchemaBody(Todo)
+  async update(req: Request) {
+    return this.source.update(Todo, req.body);
+  }
+
+  /**
+   * Delete a Todo
+   */
+  @Delete('/:id')
+  async remove(req: Request) {
+    return this.source.deleteById(Todo, req.params.id);
+  }
+}

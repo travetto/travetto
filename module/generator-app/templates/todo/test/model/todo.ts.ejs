@@ -1,0 +1,27 @@
+import * as assert from 'assert';
+
+import { Suite, Test } from '@travetto/test';
+import { ModelService } from '@travetto/model';
+import { DependencyRegistry } from '@travetto/di';
+import { Base<%= model.className %>Test } from '@travetto/model-<%= model.packageName %>';
+
+import { Todo } from '../../src/model/todo';
+
+// Import with side effects
+import '../../src/model/config';
+
+@Suite('Simple CRUD')
+class TestCRUD extends Base<%= model.className %>Test {
+
+  @Test('save it')
+  async save() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+
+    const saved = await service.save(Todo, Todo.from({
+      title: 'A saved todo',
+      completed: false
+    }))
+
+    assert(saved.id !== undefined);
+  }
+} 
