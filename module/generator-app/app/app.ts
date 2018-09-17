@@ -101,7 +101,7 @@ export default class extends Generator {
     }
 
     for (const f of ['tsconfig.json', 'tslint.json', '.gitignore', '.eslintrc', '.npmignore']) {
-      this.fs.copy(path.resolve(__dirname, '..', 'templates', 'common', f), this.destinationPath(f));
+      this.fs.copyTpl(path.resolve(__dirname, '..', 'templates', 'common', `${f}.ejs`), this.destinationPath(f), context);
     }
   }
 
