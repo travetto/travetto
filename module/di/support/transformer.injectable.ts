@@ -1,7 +1,7 @@
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
 
-const INJECTABLE_MOD = require.resolve('../src/decorator/injectable');
+const INJECTABLE_MOD = require.resolve('../src/decorator');
 
 const INJECTABLES = TransformUtil.buildImportAliasMap({
   ...ConfigLoader.get('registry.injectable'),

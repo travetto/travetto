@@ -1,8 +1,9 @@
 import { ConfigLoader } from '@travetto/config';
 
-import { MimeType, isRenderable } from '../model';
+import { isRenderable } from '../response/renderable';
+import { MimeType } from '../util/mime';
 import { ControllerConfig, EndpointConfig, HeaderMap, Request, Response, RestInterceptor } from '../types';
-import { RestConfig } from '../service/config';
+import { RestConfig } from '../config';
 
 const restCfg = new RestConfig();
 ConfigLoader.bindTo(restCfg, 'rest');
@@ -21,7 +22,7 @@ export class EndpointUtil {
     };
 
     if (reqLog.meta.statusCode < 400) {
-      console.log(`Request`, reqLog);
+      console.info(`Request`, reqLog);
     } else {
       console.error(`Request`, reqLog);
     }

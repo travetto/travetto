@@ -1,7 +1,8 @@
 import * as yaml from 'js-yaml';
 import { ExecUtil } from '@travetto/exec';
 
-import { TestEvent, AllSuitesResult } from '../model';
+import { TestEvent } from '../model/event';
+import { AllSuitesResult } from '../model/suite';
 import { Consumer } from './types';
 
 export class TapEmitter implements Consumer {
@@ -32,7 +33,6 @@ export class TapEmitter implements Consumer {
 
       if (test.assertions.length) {
         let subCount = 0;
-        const count = test.assertions.length;
         for (const a of test.assertions) {
           const text = a.message ? `${a.text} (${a.message})` : a.text;
           let subMessage = `ok ${++subCount} - ${text} ${a.file}:${a.line}`;
@@ -40,6 +40,10 @@ export class TapEmitter implements Consumer {
             subMessage = `not ${subMessage}`;
           }
           this.log(`    ${subMessage}`);
+
+          if (a.message && a.message.length > 100) {
+            this.logMeta({ message: a.message.replace(/\\n/g, '\n') });
+          }
         }
         this.log(`    1..${subCount}`);
       }

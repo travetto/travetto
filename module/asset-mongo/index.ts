@@ -1,1 +1,2 @@
-export * from './src';
+export * from './src/source';
+export * from './src/config';

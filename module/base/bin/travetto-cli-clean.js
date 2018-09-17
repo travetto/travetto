@@ -1,16 +1,17 @@
-function clean() {
-  const { Env: { cwd } } = require('../src/env');
-  const { Cache } = require('../src/cache');
-  new Cache(cwd).clear();
-}
+//@ts-check
 
-module.exports = function init(program) {
-  return program
-    .command('clean')
-    .action(clean);
-};
+function clean() {
+  require('../src/cache').AppCache.clear();
+}
 
 // Allow for direct invocation
 if (require.main === module) {
   clean();
+} else {
+  // @ts-ignore
+  const { Util: { program } } = require('@travetto/cli/src/util');
+
+  module.exports = () => {
+    program.command('clean').action(clean);
+  };
 }

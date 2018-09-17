@@ -10,6 +10,12 @@ export class ExecutionPool<T extends ConcurrentExecution> {
   private pool: Pool<T>;
 
   constructor(private create: () => Promise<T>, opts?: Options) {
+    const args = {
+      max: os.cpus().length - 1,
+      min: 1,
+      ...(opts || {})
+    };
+
     this.pool = createPool({
       create,
       async destroy(x: T): Promise<undefined> {
@@ -19,11 +25,7 @@ export class ExecutionPool<T extends ConcurrentExecution> {
       async validate(x: T) {
         return x.active;
       }
-    }, {
-        max: os.cpus().length - 1,
-        min: 1,
-        ...(opts || {})
-      });
+    }, args);
 
     Shutdown.onShutdown(ExecutionPool.name, () => this.shutdown());
   }

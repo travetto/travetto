@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
-import { Inky } from 'inky';
 
 import { AppCache } from '@travetto/base/src/cache';
 import { Injectable, Inject } from '@travetto/di';
@@ -9,11 +8,13 @@ import { MailTemplateEngine, MailTemplateContext } from '@travetto/email';
 
 import { TemplateUtil } from './util';
 import { MailTemplateConfig } from './config';
+import { Inky } from './inky';
+import { MarkdownUtil } from './markdown';
 
 const readFile = util.promisify(fs.readFile);
 const exists = util.promisify(fs.exists);
 
-@Injectable({ target: MailTemplateEngine })
+@Injectable()
 export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
   private templates: { [key: string]: string } = {};
@@ -83,7 +84,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     // Resolve mustache partials
     tpl = await TemplateUtil.resolveNestedTemplates(tpl, this.templates);
 
-    let html = new Inky({}).releaseTheKraken(tpl);
+    let html = Inky.render(tpl);
 
     const css = await this.compiledSass;
     const styles = [`<style>\n${css}\n</style>`];
@@ -101,7 +102,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     html = await TemplateUtil.inlineImageSource(html, (k) => this.getAssetBuffer(k));
 
     // Generate text version
-    const text = await TemplateUtil.htmlToMarkdown(html);
+    const text = await MarkdownUtil.htmlToMarkdown(tpl);
 
     return { html, text };
   }

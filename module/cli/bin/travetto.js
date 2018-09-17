@@ -1,39 +1,29 @@
 #!/usr/bin/env node
 
-const commander = require('commander');
-const path = require('path');
+//@ts-check
+
 const fs = require('fs');
+const rel = `${process.cwd()}/node_modules/@travetto/cli/bin/travetto.js`;
 
-const cwd = (process.env['init_cwd'] || process.env['INIT_CWD'] || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
+const hasLocal = fs.existsSync(rel);
+const isLocal = __filename === rel;
 
-function loadModule(f) {
-  let p = fs.realpathSync(`${cwd}/node_modules/.bin/${f}`);
-  if (!p.startsWith(cwd)) {
-    p = `${cwd}/node_modules/@travetto/${p.split('travetto/module/')[1]}`;
-  }
-  require(p)(commander);
+if (!hasLocal || !isLocal) {
+  const Module = require('module');
+  // @ts-ignore
+  const og = Module._load;
+  // @ts-ignore
+  Module._load = function(req, parent) {
+    if (req.startsWith('@travetto/cli')) {
+      if (!hasLocal) { // Map all @travetto/cli calls to root of global package
+        req = `${__dirname}/../${req.split('@travetto/cli')[1]}`.replace(/[\\\/]+/g, '/');
+      } else { // Rewrite @travetto/cli to map to local folder, when calling globally
+        req = `${process.cwd()}/node_modules/${req}`;
+      }
+    }
+    return og.call(Module, req, parent);
+  };
 }
 
-const cmd = process.argv[2];
-if (!cmd || cmd.startsWith('-')) {
-  commander.version(require(`${__dirname}/../package.json`).version);
-
-  const files = fs.readdirSync(`${cwd}/node_modules/.bin`).filter(x => x.startsWith('travetto-cli-'));
-  for (const f of files) {
-    loadModule(f);
-  }
-
-  const res = commander.parse(process.argv);
-
-  if (!res.constructor !== commander.Command) {
-    commander.help();
-  }
-} else {
-  try {
-    loadModule(`travetto-cli-${cmd}`);
-    commander.parse(process.argv);
-  } catch (e) {
-    console.error('Unknown command', cmd);
-    console.error(e);
-  }
-}
+// @ts-ignore
+require('@travetto/cli/src')(process.argv);

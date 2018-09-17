@@ -1,5 +1,6 @@
-import { Model, BaseModel } from '../index';
 import { Schema } from '@travetto/schema';
+
+import { Model, BaseModel } from '../';
 
 @Schema()
 export class Address {

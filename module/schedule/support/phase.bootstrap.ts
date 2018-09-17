@@ -3,7 +3,7 @@ export const init = {
   key: 'schedule',
   action: () => {
     const { Shutdown } = require('@travetto/base');
-    const { Scheduler } = require('../src/service/schedule');
+    const { Scheduler } = require('../src/service');
     Shutdown.onShutdown('schedule.kill', () => Scheduler.kill());
   }
 };

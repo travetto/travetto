@@ -4,9 +4,10 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 
-import { ModelService } from '../index';
 import { TestSource } from './registry';
 import { Person, Address } from './models';
+
+import { ModelService } from '../';
 
 const street1 = '1234 Fun';
 

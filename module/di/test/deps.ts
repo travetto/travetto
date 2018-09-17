@@ -1,4 +1,4 @@
-import { Injectable, Inject, InjectableFactory } from '../src';
+import { Injectable, Inject, InjectableFactory } from '../';
 import { DbConfig, AltConfig, Empty } from './config';
 
 export abstract class BasePattern { }

@@ -7,8 +7,6 @@ export const init = {
   action: () => {
     process.env.NODE_ENV = Env.prod ? 'production' : 'development';
 
-    console.debug = Env.debug ? console.log : () => { };
-
     if (!Env.prod) {
       Stacktrace.initHandler();
     }

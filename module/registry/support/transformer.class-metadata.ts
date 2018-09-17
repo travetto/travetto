@@ -10,7 +10,7 @@ interface IState extends TransformerState {
   fullFile: string;
 }
 
-const REGISTER_MOD = require.resolve('../src/decorator/register');
+const REGISTER_MOD = require.resolve('../src/decorator');
 
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: IState): T {
   if (state.path === REGISTER_MOD) { // Cannot process self

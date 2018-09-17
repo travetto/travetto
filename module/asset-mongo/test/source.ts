@@ -3,11 +3,11 @@ import * as mongo from 'mongodb';
 import * as util from 'util';
 import * as assert from 'assert';
 
-import { AssetService, AssetUtil, Asset, AssetSource, ImageService } from '@travetto/asset';
+import { AssetService, AssetUtil, AssetSource, ImageService } from '@travetto/asset';
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
-import { DependencyRegistry, Injectable, InjectableFactory } from '@travetto/di';
-import { AssetMongoSource } from '../src/service/source';
-import { AssetMongoConfig } from '../src/service/config';
+import { DependencyRegistry, InjectableFactory } from '@travetto/di';
+import { AssetMongoSource } from '../src/source';
+import { AssetMongoConfig } from '../src/config';
 
 const fsStat = util.promisify(fs.stat);
 

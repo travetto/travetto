@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
-import { Logger } from '../src';
+import { Logger } from '../src/service';
 import { LogEvent } from '../src/types';
 
 @Suite('Suite')

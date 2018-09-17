@@ -15,8 +15,14 @@ export class MailTemplateConfig {
   scssRoots: string[];
 
   async postConstruct() {
-    this.assetRoots.push(...[Env.cwd, path.resolve(path.join(__dirname, '..'))]
-      .map(x => path.join(x, 'assets', 'email')));
+    this.assetRoots.push(...[Env.cwd, path.resolve(__dirname, '..')]);
+
+    if (Env.e2e) {
+      this.assetRoots.push(path.resolve(__dirname, '..', 'e2e'));
+    }
+
+    this.assetRoots = this.assetRoots.map(x => path.join(x, 'assets'));
+
     this.scssRoots = [
       ...this.assetRoots.map(x => path.join(x, 'scss')),
       // Never assume direct access to node_modules

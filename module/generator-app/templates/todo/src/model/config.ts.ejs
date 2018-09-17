@@ -1,0 +1,10 @@
+import { Model<%= model.className %>Config, Model<%= model.className %>Source } from '@travetto/model-<%= model.packageName %>';
+import { ModelSource } from '@travetto/model';
+import { InjectableFactory } from '@travetto/di';
+
+class Config {
+  @InjectableFactory()
+  static getSource(config: Model<%= model.className %>Config): ModelSource {
+    return new Model<%= model.className %>Source(config);
+  }
+}

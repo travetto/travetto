@@ -3,7 +3,7 @@ import { ModelCore } from '@travetto/model';
 import { AuthProvider } from '@travetto/auth-rest';
 import { ERR_INVALID_PASSWORD, AuthContext } from '@travetto/auth';
 
-import { AuthModelService } from '../src';
+import { AuthModelService } from '../src/service';
 
 export class AuthModelProvider<U extends ModelCore> extends AuthProvider<U> {
 

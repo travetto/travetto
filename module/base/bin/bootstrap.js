@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
+//@ts-check
 const fs = require('fs');
 const path = require('path');
 const Module = require('module');
+// @ts-ignore
 const ts = global.ts = require('typescript');
 
 //Simple bootstrap to load compiler
@@ -11,15 +13,14 @@ const { resolveFrameworkFile } = require('../src/app-info');
 const { AppCache } = require('../src/cache');
 const cwd = Env.cwd;
 
-const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
-const opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
-
 AppCache.init();
 
 //Rewrite Module for local development
 if (Env.frameworkDev) {
   const parDir = path.resolve(path.dirname(path.dirname(cwd)), 'module');
+  // @ts-ignore
   const og = Module._load.bind(Module);
+  // @ts-ignore
   Module._load = (request, parent) => {
     const root = path.dirname(parent.filename);
     if (request.startsWith('@travetto')) { // Handle import directly
@@ -33,18 +34,25 @@ if (Env.frameworkDev) {
   };
 }
 
+let opts;
+
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {
   const name = tsf.replace(/[\\\/]/g, path.sep);
 
   let content;
   if (!AppCache.hasEntry(name)) {
+    if (!opts) {
+      const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
+      opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
+    }
     content = ts.transpile(fs.readFileSync(tsf, 'utf-8'), opts);
     AppCache.writeEntry(name, content);
   } else {
     content = AppCache.readEntry(name);
   }
 
+  // @ts-ignore
   const r = m._compile(content, tsf.replace(/\.ts$/, '.js'));
   return r;
 };

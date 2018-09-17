@@ -1,5 +1,5 @@
 import { Method, PathType, ParamConfig, EndpointIOType, EndpointConfig, Filter, EndpointDecorator } from '../types';
-import { ControllerRegistry } from '../service';
+import { ControllerRegistry } from '../registry';
 
 function Endpoint(method: Method, path: PathType = '/', extra: Partial<EndpointConfig> = {}) {
   return function (target: any, prop: symbol | string, descriptor: TypedPropertyDescriptor<Filter>) {

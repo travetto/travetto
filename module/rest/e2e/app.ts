@@ -1,5 +1,5 @@
 import { Application, InjectableFactory, Inject } from '@travetto/di';
-import { RestApp, RestAppProvider, ControllerConfig, RestInterceptor } from '../src';
+import { RestApp, RestAppProvider, ControllerConfig, RestInterceptor } from '../';
 import { ContextInterceptor } from '../extension/context';
 
 class DummyAppProvider extends RestAppProvider {

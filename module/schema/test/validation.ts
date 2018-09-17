@@ -1,18 +1,27 @@
+import * as assert from 'assert';
+
+import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
+
 import {
-  MinLength, Url,
+  Float, MinLength, Url, Trimmed,
   SchemaValidator, Schema, ValidationError,
   SchemaRegistry, ValidationErrors, Validator, View, Match, CommonRegExp
-} from '../src';
-import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
-import * as assert from 'assert';
+} from '../';
 
 @Schema()
 class Response {
 
+  @Trimmed()
   questionId: string;
+
   answer?: any;
+
   valid?: boolean;
+
+  @Float()
   validationCount?: number = 0;
+  timestamp: Date;
+
   @Url()
   url?: string;
   pandaState: 'TIRED' | 'AMOROUS' | 'HUNGRY';
@@ -69,9 +78,7 @@ class ViewSpecific {
   }
 })
 class CustomValidated {
-
   age: number;
-
   age2: number;
 }
 
@@ -91,25 +98,26 @@ class Validation {
   async urlAndMessage() {
     const r = Response.from({
       url: 'htt://google'
-    } as any);
+    });
     try {
       await SchemaValidator.validate(r);
       assert.fail('Validation should have failed');
     } catch (e) {
       console.log(e);
       assert(findError(e.errors, 'url', 'not a valid url'));
+      assert(findError(e.errors, 'timestamp', 'is required'));
     }
   }
 
   @Test('Should validate nested')
   async nested() {
-    const res = Parent.from({
+    const res = Parent.fromRaw({
       response: {
         url: 'a.b',
         pandaState: 'orange'
       },
       responses: []
-    } as any); // To allow for validating
+    });
     try {
       await SchemaValidator.validate(res);
       assert.fail('Validation should have failed');
@@ -117,6 +125,7 @@ class Validation {
       assert(findError(e.errors, 'responses', 'required'));
       assert(findError(e.errors, 'response.pandaState', 'TIRED'));
       assert(findError(e.errors, 'response.url', 'not a valid url'));
+      assert(findError(e.errors, 'response.timestamp', 'is required'));
     }
   }
 
@@ -147,14 +156,14 @@ class Validation {
   @Test('Nested validations should be fine')
   @ShouldThrow(ValidationErrors)
   async nestedObjectErrors() {
-    const obj = Nested.from({
+    const obj = Nested.fromRaw({
       name: 5,
       address: {
         street1: 'abc',
         city: 'city',
         zip: 400
       }
-    } as any);
+    });
 
     await SchemaValidator.validate(obj);
   }

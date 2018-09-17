@@ -5,7 +5,6 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
 
-import { Context } from 'aws-lambda';
 import * as awsServerlessExpress from 'aws-serverless-express';
 import * as awsServerlessExpressMiddleware from 'aws-serverless-express/middleware';
 
@@ -20,7 +19,7 @@ export class AwsLambdaAppProvider extends RestAppProvider<express.Application> {
   private app: express.Application;
   private server: http.Server;
   private config: AwsLambdaConfig;
-  private _handler: (event: any, context: Context) => void;
+  private _handler: (event: any, context: any) => void;
 
   get _raw() {
     return this.app;
@@ -76,7 +75,7 @@ export class AwsLambdaAppProvider extends RestAppProvider<express.Application> {
     // No-op
   }
 
-  async handle(event: any, context: Context) {
+  async handle(event: any, context: any) {
     if (!this._handler) {
       await this.init();
       this.listen();

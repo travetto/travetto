@@ -29,7 +29,7 @@ export class UploadUtil {
     const allowedTypes = this.readTypeArr(config.allowedTypes);
     const excludeTypes = this.readTypeArr(config.excludeTypes);
 
-    console.log('Staring upload');
+    console.debug('Staring upload');
 
     return new Promise<AssetMap>((resolve, reject) => {
       const mapping: AssetMap = {};
@@ -42,7 +42,7 @@ export class UploadUtil {
       });
 
       uploader.on('file', async (fieldName, file, fileName, encoding, mimeType) => {
-        console.log('Uploading file', fieldName, fileName, encoding, mimeType);
+        console.debug('Uploading file', fieldName, fileName, encoding, mimeType);
 
         uploads.push((async () => {
           const uniqueDir = path.join(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
@@ -69,11 +69,11 @@ export class UploadUtil {
       });
 
       uploader.on('finish', async () => {
-        console.log('Finishing Upload');
+        console.debug('Finishing Upload');
 
         try {
           await Promise.all(uploads);
-          console.log('Finished Upload');
+          console.debug('Finished Upload');
           resolve(mapping);
         } catch (err) {
           reject(err);

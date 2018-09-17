@@ -1,24 +1,47 @@
-module.exports = function init(program) {
-  return program.command('test')
-    .arguments('[regexes...]')
-    .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec)$/, 'tap')
-    .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
-    .action((args, cmd) => {
-      process.env.ENV = 'test';
+//@ts-check
+const os = require('os');
 
-      if (args.length === 0) {
-        cmd.help();
-      }
+async function runTests(opts, args) {
+  try {
+    await require('@travetto/base/bin/bootstrap').run();
 
-      require('@travetto/base/bin/bootstrap').run(x => {
-        const { Runner } = require('../src/runner');
-        return new Runner({
-          format: cmd.format,
-          mode: cmd.mode,
-          args
-        }).run();
-      }).then(
-        x => process.exit(x ? 0 : 1),
-        e => process.exit(1));
-    });
-};
+    const { Runner } = require('../src/runner/runner');
+    const res = await new Runner({
+      format: opts.format,
+      mode: opts.mode,
+      concurrency: opts.concurrency,
+      args
+    }).run();
+    process.exit(res ? 0 : 1);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
+}
+
+if (require.main !== module) {
+  // @ts-ignore
+  const { Util: { program } } = require('@travetto/cli/src/util');
+  module.exports = function() {
+
+    program.command('test')
+      .arguments('[regexes...]')
+      .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec|event)$/, 'tap')
+      .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', undefined, os.cpus().length - 1)
+      .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
+      .action(async (args, cmd) => {
+        process.env.ENV = 'test';
+
+        if (args.length === 0) {
+          args = ['test/.*'];
+        }
+        await runTests(cmd, args);
+      });
+  };
+} else { // Run single mode, directly
+  runTests({
+    format: process.env.TEST_FORMAT || 'tap',
+    mode: process.env.TEST_MODE || 'single',
+    concurrency: parseInt(process.env.TEST_CONCURRENCY || '1', 10)
+  }, process.argv.slice(2));
+}

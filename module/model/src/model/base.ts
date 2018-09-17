@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
 import { Schema } from '@travetto/schema';
-import { ModelCore } from './model';
-import { ModelRegistry } from '../service';
+import { ModelCore } from './core';
+import { ModelRegistry } from '../registry';
 
 @Schema()
 export abstract class BaseModel implements ModelCore {

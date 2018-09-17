@@ -52,7 +52,7 @@ export async function server() {
   const worker = new LocalExecution<Event>();
 
   // Die if no communication within 120 seconds
-  const idle = new IdleManager(parseInt(process.env.IDLE_TIMEOUT || '120000', 10));
+  const idle = new IdleManager(parseInt(Env.get('IDLE_TIMEOUT') || '120000', 10));
   idle.extend();
 
   worker.listen(async (data: Event) => {
@@ -113,7 +113,7 @@ export async function server() {
   setTimeout(_ => { }, Number.MAX_SAFE_INTEGER / 10000000);
 }
 
-export function client() {
+export function client(concurrency = os.cpus().length - 1) {
   return new ExecutionPool(async () => {
     const worker = new ChildExecution(require.resolve('../../bin/travetto-test-server'), true, {
       cwd: Env.cwd
@@ -125,6 +125,7 @@ export function client() {
     return worker;
   }, {
       idleTimeoutMillis: 10000,
-      min: os.cpus().length / 2
+      min: Math.max(1, Math.trunc(concurrency / 2)),
+      max: concurrency
     });
 }

@@ -5,7 +5,8 @@ import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
 import { ConfigLoader } from '@travetto/config';
-import { ControllerConfig, RestAppProvider, RestUtil } from '@travetto/rest';
+import { ControllerConfig, RestAppProvider } from '@travetto/rest';
+import { RestAppUtil } from '@travetto/rest/src/util/rest-app-util';
 
 import { KoaConfig } from './config';
 
@@ -34,7 +35,7 @@ export class KoaAppProvider extends RestAppProvider {
     this.app = this.create();
   }
   getRequest(ctx: koa.Context) {
-    return RestUtil.decorateRequest({
+    return RestAppUtil.decorateRequest({
       _raw: ctx,
       method: ctx.method,
       path: ctx.path,
@@ -52,7 +53,7 @@ export class KoaAppProvider extends RestAppProvider {
   }
 
   getResponse(ctx: koa.Context) {
-    return RestUtil.decorateResponse({
+    return RestAppUtil.decorateResponse({
       _raw: ctx,
       get headersSent() {
         return ctx.headerSent;

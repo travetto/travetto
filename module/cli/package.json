@@ -7,10 +7,12 @@
     "access": "public"
   },
   "bin": {
-    "travetto": "bin/travetto.js"
+    "travetto": "bin/travetto.js",
+    "travetto-cli-new-app": "bin/travetto-cli-new-app.js"
   },
   "dependencies": {
-    "commander": "^2.17.1"
+    "commander": "^2.17.1",
+    "select-shell": "^1.1.2"
   },
   "description": "CLI infrastructure for travetto framework",
   "homepage": "https://travetto.io",
@@ -24,5 +26,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.0"
+  "version": "0.3.17"
 }

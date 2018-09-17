@@ -7,7 +7,7 @@ export type ClassList = Class | [Class];
 
 export type ValidatorFn<T, U> = (value: T, parent?: U) => ValidationError | undefined;
 
-export interface DescriableConfig {
+export interface DescribableConfig {
   title?: string;
   description?: string;
   examples?: string[];
@@ -21,13 +21,13 @@ export interface ViewConfig {
   fields: string[];
 }
 
-export interface ClassConfig extends DescriableConfig {
+export interface ClassConfig extends DescribableConfig {
   class: Class;
   views: { [key: string]: ViewConfig };
   validators: ValidatorFn<any, any>[];
 }
 
-export interface FieldConfig extends DescriableConfig {
+export interface FieldConfig extends DescribableConfig {
   owner: any;
   name: string;
   aliases?: string[];

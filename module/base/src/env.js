@@ -1,3 +1,4 @@
+//@ts-check
 const path = require('path');
 
 const PROD_KEY = 'prod';
@@ -5,11 +6,18 @@ const TEST_KEY = 'test';
 const E2E_KEY = 'e2e';
 const DEV_KEY = 'dev';
 
-const envVal = k => process.env[k] || process.env[k.toLowerCase()] || process.env[k.toUpperCase()];
+const envVal = (k, def) => {
+  const temp = process.env[k] || process.env[k.toLowerCase()] || process.env[k.toUpperCase()];
+  return temp === undefined ? def : temp;
+};
 const envListVal = k => (envVal(k) || '').split(/[, ]+/g).filter(x => !!x);
 const isEnvTrue = k => {
   const val = envVal(k);
-  return !!val && !/(0|false|off)/i.test(val);
+  return val !== undefined && /(1|true|on)/i.test(val);
+};
+const isEnvFalse = k => {
+  const val = envVal(k);
+  return val !== undefined && /(0|false|off)/i.test(val);
 };
 
 const cwd = (envVal('init_cwd') || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
@@ -50,7 +58,7 @@ function checkWatch(profile) {
 }
 
 function buildLogging(profile) {
-  const debug = isEnvTrue('debug') || (profile.dev || profile.e2e);
+  const debug = isEnvTrue('debug') || ((profile.dev || profile.e2e) && !isEnvFalse('debug'));
   const trace = isEnvTrue('trace');
 
   console.warn = (...args) => console.log('WARN', ...args);
@@ -102,7 +110,7 @@ function buildProfile() {
 
   return {
     profiles: all,
-    is: allSet.has.bind(allSet),
+    hasProfile: allSet.has.bind(allSet),
     prod: primary === PROD_KEY,
     test: primary === TEST_KEY,
     e2e: primary === E2E_KEY,
@@ -110,17 +118,12 @@ function buildProfile() {
   };
 }
 
-function buildAppMain() {
-  const appMain = envVal('TRV_APP');
-  return { appMain };
-}
-
 const profile = buildProfile();
 
 const Env = [
   { cwd },
+  { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal },
   profile,
-  buildAppMain(),
   buildLogging(profile),
   checkWatch(profile),
   checkFrameworkDev(),
