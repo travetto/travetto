@@ -29,6 +29,9 @@
     "name": "Travetto Framework",
     "email": "travetto.framework@gmail.com"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "files": [
     "app",
