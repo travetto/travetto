@@ -154,16 +154,16 @@ export class ModelService extends ModelSource {
   }
 
   /** Save a new instance */
-  async save<T extends ModelCore>(cls: Class<T>, o: T) {
+  async save<T extends ModelCore>(cls: Class<T>, o: T, keepId?: boolean) {
     o = await this.prePersist(cls, o);
-    const res = await this.source.save(cls, o);
+    const res = await this.source.save(cls, o, keepId);
     return this.postLoad(cls, res);
   }
 
   /** Save all as new instances */
-  async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[]) {
+  async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[], keepId?: boolean) {
     objs = await Promise.all(objs.map(o => this.prePersist(cls, o)));
-    const res = await this.source.saveAll(cls, objs);
+    const res = await this.source.saveAll(cls, objs, keepId);
     return res.map(x => this.postLoad(cls, x));
   }
 
