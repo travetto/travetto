@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll, AfterEach } from '@travetto/test';
-import { ModelService, ModelRegistry } from '@travetto/model';
+import { ModelService, ModelRegistry, ModelSource } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 import { Model<%= model.className %>Source } from '@travetto/model-<%= model.packageName %>';
@@ -32,7 +32,7 @@ class TestCRUD {
     const service = await DependencyRegistry.getInstance(ModelService);
 
     const saved = await service.save(Todo, Todo.from({
-      title: 'A saved todo',
+      text: 'A saved todo',
       completed: false
     }));
 
