@@ -1,6 +1,6 @@
 {
   "name": "@travetto/generator-app",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Yeoman app generator for the Travetto framework",
   "main": "index.js",
   "dependencies": {
