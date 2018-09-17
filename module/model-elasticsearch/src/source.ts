@@ -414,6 +414,7 @@ export class ModelElasticsearchSource extends ModelSource {
         acc.push({ update: { _id: op.update.id } }, { doc: op.update });
         delete op.update.id;
       }
+      return acc;
     }, [] as any);
 
     const res: EsBulkResponse = await this.client.bulk({
