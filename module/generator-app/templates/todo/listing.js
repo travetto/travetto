@@ -1,5 +1,6 @@
 module.exports = {
   'package.json': {},
+  'README.md': {},
   'src/model/config.ts': {
     requires: ['model', 'model-'],
   },
