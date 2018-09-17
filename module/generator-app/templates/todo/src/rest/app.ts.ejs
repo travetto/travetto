@@ -1,0 +1,12 @@
+import { Application } from '@travetto/di';
+import { RestApp } from '@travetto/rest';
+
+@Application('<%= name %>')
+export class SampleApp {
+
+  constructor(private app: RestApp) { }
+
+  run() {
+    this.app.run();
+  }
+}

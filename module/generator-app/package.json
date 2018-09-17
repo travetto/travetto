@@ -1,0 +1,37 @@
+{
+  "name": "@travetto/generator-app",
+  "version": "0.3.0",
+  "description": "Yeoman app generator for the Travetto framework",
+  "main": "index.js",
+  "dependencies": {
+    "@travetto/base": "^0.3.12",
+    "yeoman-generator": "^3.1.1",
+    "yo": "^2.0.5"
+  },
+  "devDependencies": {
+    "@types/yeoman-generator": "^2.0.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.io/travetto/travetto.git"
+  },
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "travetto",
+    "yeoman",
+    "generator",
+    "scaffolding"
+  ],
+  "author": {
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "license": "MIT",
+  "files": [
+    "app",
+    "resources"
+  ]
+}

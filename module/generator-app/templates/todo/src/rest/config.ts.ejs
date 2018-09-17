@@ -1,0 +1,10 @@
+import { <%= rest.className %>AppProvider } from '@travetto/rest-<%= rest.packageName %>';
+import { RestAppProvider } from '@travetto/rest';
+import { InjectableFactory } from '@travetto/di';
+
+class RestConfig {
+  @InjectableFactory()
+  static getProvider(): RestAppProvider {
+    return new <%= rest.className %>AppProvider();
+  }
+}
