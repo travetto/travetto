@@ -4,7 +4,7 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/base": "^0.3.11"
+    "@travetto/base": "^0.3.13"
   },
   "description": "Catch-all library for utilities of the travetto framework",
   "homepage": "https://travetto.io",
@@ -19,5 +19,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.9"
+  "version": "0.3.10"
 }
