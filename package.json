@@ -7,7 +7,7 @@
     "access": "private"
   },
   "name": "travetto-mono-repo",
-  "license" : "MIT",
+  "license": "MIT",
   "devDependencies": {
     "@types/faker": "^4.1.2",
     "@types/passport-facebook": "^2.1.8",
