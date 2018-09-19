@@ -1,20 +1,68 @@
-X HTTP/2
-X Koa
+To Do
+==============
+- Lambda for Handlers
+  - Kinesis/S3 Endpoint
+  - Deployment
+  - Serverless framework?
 
+- WebSockets
+  - Observables in Angular?
+  - Firebase?
 
-X CLI
-  X Convert all current CLI scripts into cohesive unit
-  X Create new CLI experience for Swagger
-  X Create new CLI for email template testing/compiling
-? Lambda
-  ? Entire app as an AWS lambda
+- Docs
+  - Document @Application
+  - Document CLI behavior within module
+  - Document Yeoman Generator
+    - Integrate with Getting Started
+  - Blog Post about 
+    - CLI
+    - Generator
+    - Lambda Goals
+  
+- SQL
+  - Model support for SQL databases
+  - Using Sequelize?
+  - Already supports most of the needed features, might be an easy win  
+
+- Auth
+  - Move to JWT as prep for Lambda
+
+In-Progress
+==============
+? Yeoman Generator
+  X Generate Rest app
+  X Generate Model app
+  X Generate Rest x Model app
+  - Lambda
+  - Email
+  - Assets
+  - Auth
+
+? Lambda for REST
+  ? Entire rest app as an AWS lambda
   ? Individual routes as individual lambdas
   ? Auto deployment of application
   ? API Gateway configuration
   ? CLI entry point to facilitate
   - Profit?
-- WebSockets
-  - Observables in Angular?
+
+Tests
+  ? Better unit tests
+
+? Remove Email Dependencies
+  X Rewrite Inky in parse5
+  X Migrate tests
+  X Deprecate custom inky branch
+
+Done
+==============
+X HTTP/2
+X Koa
+
+X CLI
+  X Convert all current CLI scripts into cohesive unit
+  X Create new CLI experience for Swagger
+  X Create new CLI for email template testing/compiling
 
 X Auth Module
  X OAuth support
@@ -37,9 +85,6 @@ Documentation
     X Basic Pass at README
     X Project title/topics
     X Deeper README
-
-Tests
-  ? Better unit tests
 
 X Win32
   X Path issues

@@ -257,7 +257,7 @@ export class ModelElasticsearchSource extends ModelSource {
     return res.hits.hits.map(x => x._source.id);
   }
 
-  async getMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query: ModelQuery<T>) {
+  async getMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query: PageableModelQuery<T>) {
     const idxMap = new Map<string, Class>();
 
     const searchObj = this.getSearchObject(classes[0], query);
