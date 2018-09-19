@@ -20,6 +20,7 @@ export class ModelElasticsearchSource extends ModelSource {
 
   private identities: Map<Class, EsIdentity> = new Map();
   private indices: { [key: string]: IndexConfig<any>[] } = {};
+  private indexToClass: Map<string, Class> = new Map();
   public client: es.Client;
 
   constructor(private config: ModelElasticsearchConfig) {
@@ -32,6 +33,24 @@ export class ModelElasticsearchSource extends ModelSource {
     } else {
       return idx;
     }
+  }
+
+  getClassFromIndex(idx: string) {
+    if (!this.indexToClass.has(idx)) {
+      let type = idx;
+      if (this.config.namespace) {
+        type = idx.replace(`${this.config.namespace}_`, '');
+      }
+      const cls = ModelRegistry.getClasses()
+        .find(x => {
+          const conf = ModelRegistry.get(x);
+          const expected = (conf.discriminator || conf.collection || x.name).toLowerCase();
+          return type === expected;
+        })!;
+
+      this.indexToClass.set(idx, cls);
+    }
+    return this.indexToClass.get(idx)!;
   }
 
   getIdentity<T extends ModelCore>(cls: Class<T>): EsIdentity {
@@ -257,26 +276,30 @@ export class ModelElasticsearchSource extends ModelSource {
     return res.hits.hits.map(x => x._source.id);
   }
 
-  async getMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query: PageableModelQuery<T>) {
-    const idxMap = new Map<string, Class>();
-
+  async getMultiQueryRaw<T extends ModelCore = ModelCore>(classes: Class<T>[], query: Query<T>) {
     const searchObj = this.getSearchObject(classes[0], query);
-    for (const cls of classes) {
-      idxMap.set(this.getIdentity(cls).index, cls);
-    }
-    searchObj.index = Array.from(idxMap.keys()).join(',');
+    searchObj.index = this.getIndices(classes);
     delete searchObj.type;
+    return await this.client.search(searchObj);
+  }
 
-    const res = await this.client.search(searchObj);
+  getIndices<T extends ModelCore>(classes: Class<T>[]) {
+    return classes.map(t => this.getIdentity(t).index).join(',');
+  }
 
+  async convertRawResponse<T extends ModelCore>(response: es.SearchResponse<T>) {
     const out: T[] = [];
-    for (const item of res.hits.hits) {
-      const itemCls = idxMap.get(item._index.replace(/_\d{13,14}$/, ''))!;
+
+    for (const item of response.hits.hits) {
+      const index = item._type;
+      const itemCls = this.getClassFromIndex(index);
       const obj: T = itemCls.from(item._source as T);
+      obj.id = item._id;
       this.postLoad(itemCls, obj);
       if (obj.postLoad) {
         obj.postLoad();
       }
+      obj.type = itemCls.name.toLowerCase();
       out.push(obj);
     }
     return out;
