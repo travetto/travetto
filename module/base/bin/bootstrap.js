@@ -62,3 +62,7 @@ const mgr = new PhaseManager('bootstrap');
 mgr.load();
 
 module.exports = mgr;
+
+if (require.main === module) {
+  mgr.run();
+}
