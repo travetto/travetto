@@ -1,3 +1,31 @@
+In-Progress
+==============
+? Yeoman Generator
+  X Generate Rest app
+  X Generate Model app
+  X Generate Rest x Model app
+  - Lambda
+  - Email
+  - Assets
+  - Auth
+
+? Lambda for REST
+  ? Entire rest app as an AWS lambda
+  ? Individual routes as individual lambdas
+  ? Auto deployment of application
+  ? API Gateway configuration
+  ? CLI entry point to facilitate
+  - Profit?
+
+Tests
+  ? Better unit tests
+
+? Remove Email Dependencies
+  X Rewrite Inky in parse5
+  X Migrate tests
+  X Deprecate custom inky branch
+
+
 To Do
 ==============
 - Lambda for Handlers
@@ -27,32 +55,8 @@ To Do
 - Auth
   - Move to JWT as prep for Lambda
 
-In-Progress
-==============
-? Yeoman Generator
-  X Generate Rest app
-  X Generate Model app
-  X Generate Rest x Model app
-  - Lambda
-  - Email
-  - Assets
-  - Auth
-
-? Lambda for REST
-  ? Entire rest app as an AWS lambda
-  ? Individual routes as individual lambdas
-  ? Auto deployment of application
-  ? API Gateway configuration
-  ? CLI entry point to facilitate
-  - Profit?
-
-Tests
-  ? Better unit tests
-
-? Remove Email Dependencies
-  X Rewrite Inky in parse5
-  X Migrate tests
-  X Deprecate custom inky branch
+- Model
+  - Query Language Support
 
 Done
 ==============
