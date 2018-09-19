@@ -7,11 +7,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^0.3.11",
+    "@travetto/di": "^0.3.12",
     "@types/express-serve-static-core": "^4.16.0"
   },
   "devDependencies": {
-    "@travetto/test": "^0.3.9"
+    "@travetto/test": "^0.3.12"
   },
   "optionalExtensionDependencies": {
     "@travetto/context": "^0.1.1"
@@ -31,5 +31,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.10"
+  "version": "0.3.11"
 }
