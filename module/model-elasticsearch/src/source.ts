@@ -41,7 +41,13 @@ export class ModelElasticsearchSource extends ModelSource {
       if (this.config.namespace) {
         type = idx.replace(`${this.config.namespace}_`, '');
       }
-      const cls = ModelRegistry.getClasses().find(x => x.name.toLowerCase() === type)!;
+      const cls = ModelRegistry.getClasses()
+        .find(x => {
+          const conf = ModelRegistry.get(x);
+          const expected = (conf.discriminator || conf.collection || x.name).toLowerCase();
+          return type === expected;
+        })!;
+
       this.indexToClass.set(idx, cls);
     }
     return this.indexToClass.get(idx)!;
