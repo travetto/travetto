@@ -7,6 +7,7 @@ import { Schema } from '@travetto/schema';
 
 import { BaseElasticsearchTest } from './base';
 import { ModelElasticsearchSource } from '../src/source';
+import { BaseError } from '@travetto/base';
 
 @Schema()
 class Address {
@@ -41,6 +42,7 @@ class TestSave extends BaseElasticsearchTest {
     const res = await service.bulkProcess(Person,
       [1, 2, 3, 8].map(x => ({
         upsert: Person.from({
+          id: `Orange-${x}`,
           name: 'Bob',
           age: 20 + x,
           gender: 'm',
@@ -53,6 +55,14 @@ class TestSave extends BaseElasticsearchTest {
     );
 
     assert(res.counts.upsert === 4);
+
+    const single = await service.getById(Person, 'Orange-3');
+    assert(single !== undefined);
+    assert(single.age === 23);
+
+    await assert.throws(async () => {
+      await service.getById(Person, 'Orange-20');
+    }, /Invalid/);
 
     const match = await service.getAllByQuery(Person, {
       where: {

@@ -276,13 +276,6 @@ export class ModelElasticsearchSource extends ModelSource {
     return res.hits.hits.map(x => x._source.id);
   }
 
-  async getMultiQueryRaw<T extends ModelCore = ModelCore>(classes: Class<T>[], query: Query<T>) {
-    const searchObj = this.getSearchObject(classes[0], query);
-    searchObj.index = this.getIndices(classes);
-    delete searchObj.type;
-    return await this.client.search(searchObj);
-  }
-
   getIndices<T extends ModelCore>(classes: Class<T>[]) {
     return classes.map(t => this.getIdentity(t).index).join(',');
   }
@@ -325,10 +318,12 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
-    const query: PageableModelQuery<ModelCore> = {
-      where: { id }
-    };
-    return await this.getByQuery<T>(cls, query as PageableModelQuery<T>);
+    try {
+      const res = await this.client.get({ ...this.getIdentity(cls), id });
+      return res._source as T;
+    } catch (err) {
+      throw new BaseError(`Invalid number of results for find by id: 0`);
+    }
   }
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
