@@ -2,8 +2,8 @@ import * as assert from 'assert';
 import * as util from 'util';
 import * as path from 'path';
 
-import { Env, Util, Stacktrace } from '@travetto/base';
-import { Assertion, TestConfig } from '../model/test';
+import { Env, Util, Stacktrace, BaseError } from '@travetto/base';
+import { Assertion, TestConfig, ThrowableError } from '../model/test';
 
 const ASSERT_FN_OPERATOR: { [key: string]: string } = {
   equal: '==',
@@ -85,15 +85,21 @@ export class AssertUtil {
     this.assertions = [];
   }
 
-  static check(filename: string, text: string, fn: string, positive: boolean, ...args: any[]) {
+  static buildAssertion(filename: string, text: string) {
     const { file, line } = this.readFilePosition(new Error(), filename.replace(/[.][tj]s$/, ''));
 
     const assertion: Assertion = {
       className: this.test.className,
       methodName: this.test.methodName,
       file, line, text,
-      operator: ASSERT_FN_OPERATOR[fn],
+      operator: 'throws',
     };
+
+    return assertion;
+  }
+
+  static check(filename: string, text: string, fn: string, positive: boolean, ...args: any[]) {
+    const assertion = this.buildAssertion(filename, text);
 
     const common: { [key: string]: string } = {
       state: positive ? 'should' : 'should not'
@@ -152,7 +158,9 @@ export class AssertUtil {
         case 'greaterThanEqual': asrt(args[0] >= args[1], args[2]); break;
         default:
           if (fn && (assert as any)[fn]) { // Assert call
-            (assert as any)[fn].apply(null, args);
+            if (fn === 'throws') {
+              (assert as any)[fn].apply(null, args);
+            }
           } else if (args[1] && fn && args[1][fn]) { // Method call
             asrt(args[1][fn](args[0]));
           } else {
@@ -178,6 +186,58 @@ export class AssertUtil {
         this.add(assertion);
       }
       throw e;
+    }
+  }
+
+  static checkError(shouldThrow: ThrowableError, err: Error | string | undefined): Error | undefined {
+    if (typeof shouldThrow === 'boolean') {
+      if (err && !shouldThrow) {
+        return new BaseError('Expected an error to not be thrown');
+      } else if (!err && shouldThrow) {
+        return new BaseError('Expected an error to be thrown');
+      }
+    } else if (typeof shouldThrow === 'string' || shouldThrow instanceof RegExp) {
+      const actual = `${err instanceof Error ? `'${err.message}'` : (err ? `'${err}'` : 'nothing')}`;
+
+      if (typeof shouldThrow === 'string' && (!err || !(err instanceof Error ? err.message : err).includes(shouldThrow))) {
+        return new BaseError(`Expected error containing text '${shouldThrow}', but got ${actual}`);
+      }
+      if (shouldThrow instanceof RegExp && (!err || !shouldThrow.test(typeof err === 'string' ? err : err.message))) {
+        return new BaseError(`Expected error with message matching '${shouldThrow.source}', but got ${actual}`);
+      }
+    } else if (shouldThrow === Error ||
+      shouldThrow === BaseError ||
+      Object.getPrototypeOf(shouldThrow) !== Object.getPrototypeOf(Function)
+    ) { // if not simple function, treat as class
+      if (!err || !(err instanceof shouldThrow)) {
+        return new BaseError(`Expected to throw ${shouldThrow.name}, but got ${err || 'nothing'}`);
+      }
+    } else {
+      const res = shouldThrow(err);
+      if (res && !(res instanceof Error)) {
+        return new Error(`Invalid check, "${shouldThrow.name}" should return an Error or undefined`);
+      } else {
+        return res;
+      }
+
+    }
+  }
+
+  static async checkThrow(filename: string, text: string, action: Function, shouldThrow: ThrowableError, message?: string) {
+    const assertion = this.buildAssertion(filename, text);
+
+    try {
+      await action();
+    } catch (e) {
+      const err = this.checkError(shouldThrow, e);
+      if (err) {
+        assertion.message = message || err.message;
+        assertion.error = err;
+        (err as Error).stack = Stacktrace.simplifyStack(err as Error);
+        throw err;
+      }
+    } finally {
+      this.add(assertion);
     }
   }
 
