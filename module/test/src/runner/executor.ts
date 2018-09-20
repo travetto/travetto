@@ -41,33 +41,6 @@ export class TestExecutor {
       .map(x => x.file);
   }
 
-  static checkError(test: TestConfig, err: Error | string | undefined) {
-    const st = test.shouldThrow!;
-
-    if (typeof st === 'boolean') {
-      if (err && !st) {
-        throw new Error('Expected an error to not be thrown');
-      } else if (!err && st) {
-        throw new Error('Expected an error to be thrown');
-      }
-    } else if (typeof st === 'string' || st instanceof RegExp) {
-      const actual = `${err instanceof Error ? `'${err.message}'` : (err ? `'${err}'` : 'nothing')}`;
-
-      if (typeof st === 'string' && (!err || !(err instanceof Error ? err.message : err).includes(st))) {
-        return new Error(`Expected error containing text '${st}', but got ${actual}`);
-      }
-      if (st instanceof RegExp && (!err || !st.test(typeof err === 'string' ? err : err.message))) {
-        return new Error(`Expected error with message matching '${st.source}', but got ${actual}`);
-      }
-    } else if (st === Error || st === BaseError || Object.getPrototypeOf(st) !== Object.getPrototypeOf(Function)) { // if not simple function, treat as class
-      if (!err || !(err instanceof st)) {
-        return new Error(`Expected to throw ${st.name}, but got ${err || 'nothing'}`);
-      }
-    } else {
-      return st(err);
-    }
-  }
-
   static async executeTest(consumer: Consumer, test: TestConfig) {
 
     consumer.onEvent({ type: 'test', phase: 'before', test });
@@ -104,7 +77,7 @@ export class TestExecutor {
       if (err === TIMEOUT) {
         err = new Error('Operation timed out');
       } else if (test.shouldThrow) {
-        err = this.checkError(test, err);
+        err = AssertUtil.checkError(test.shouldThrow!, err);
       }
 
       // If error isn't defined, we are good

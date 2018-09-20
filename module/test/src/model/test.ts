@@ -1,5 +1,7 @@
 import { Class } from '@travetto/registry/src/types';
 
+export type ThrowableError = string | RegExp | Function | boolean;
+
 export interface TestConfig {
   class: Class<any>;
   className: string;
@@ -7,7 +9,7 @@ export interface TestConfig {
   file: string;
   lines: { start: number, end: number };
   methodName: string;
-  shouldThrow?: string | RegExp | Function | boolean;
+  shouldThrow?: ThrowableError;
   skip: boolean;
   timeout?: number;
 }

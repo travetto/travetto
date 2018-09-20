@@ -35,6 +35,7 @@ interface AssertState extends TransformerState {
   hasAssertCall: boolean;
   assertCheck: ts.PropertyAccessExpression;
   assertInvoke: ts.PropertyAccessExpression;
+  checkThrow: ts.PropertyAccessExpression;
   source: ts.SourceFile;
 }
 
@@ -49,12 +50,17 @@ function isDeepLiteral(node: ts.Expression) {
     ts.isObjectLiteralExpression(node);
 }
 
-function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, cmd: Command): T {
+function initState(state: AssertState) {
   if (!state.assert) {
     state.assert = TransformUtil.importFile(state, require.resolve('../src/runner/assert')).ident;
     state.assertCheck = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'check');
     state.assertInvoke = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'invoke');
+    state.checkThrow = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'checkThrow');
   }
+}
+
+function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, cmd: Command): T {
+  initState(state);
 
   const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);
   const firstText = first!.getText();
@@ -75,6 +81,18 @@ function doAssert<T extends ts.CallExpression>(state: AssertState, node: T, cmd:
   check.parent = node.parent;
 
   return check as any as T;
+}
+
+function doThrows(state: AssertState, node: ts.CallExpression, args: ts.Expression[]): ts.Node {
+  const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);
+  const firstText = first!.getText();
+
+  initState(state);
+  return ts.createCall(state.checkThrow, undefined, ts.createNodeArray([
+    ts.createIdentifier('__filename'),
+    ts.createLiteral(firstText),
+    ...args
+  ]));
 }
 
 function getCommand(args: ts.Expression[] | ts.NodeArray<ts.Expression>): Command | undefined {
@@ -132,7 +150,11 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) {
       const ident = exp.expression;
       if (ident.escapedText === ASSERT_CMD) {
-        node = doAssert(state, node, { fn: exp.name.escapedText as string, args: [...node.arguments] });
+        if (exp.name.escapedText === 'throws') {
+          node = doThrows(state, node, [...node.arguments]) as T;
+        } else {
+          node = doAssert(state, node, { fn: exp.name.escapedText as string, args: [...node.arguments] });
+        }
         replaced = true;
       }
     }
