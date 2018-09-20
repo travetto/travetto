@@ -19,17 +19,13 @@ class CachingService {
     return num * 2;
   }
 
-  @Cacheable({
-    maxAge: 1000
-  })
+  @Cacheable({ maxAge: 1000 })
   async youngAndComplex(num: number) {
     await new Promise(resolve => setTimeout(resolve, 105));
     return num * 3;
   }
 
-  @Cacheable({
-    max: 1000
-  })
+  @Cacheable({ max: 1000 })
   async complexInput(config: any, size: number) {
     return { length: Object.keys(config).length, size };
   }
@@ -112,6 +108,9 @@ class TestSuite {
 
     const val4 = await test.complexInputWithCustomKey({ a: 5, b: 20 }, 20);
     const val5 = await test.complexInputWithCustomKey({ b: 5, a: 20 }, 30);
-    assert(val4 === val5);
+    assert(val4 !== val5);
+
+    const val6 = await test.complexInputWithCustomKey({ a: 5, b: 100 }, 50);
+    assert(val4 === val6);
   }
 }
