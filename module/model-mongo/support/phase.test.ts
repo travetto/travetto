@@ -1,9 +1,9 @@
 export const init = {
   key: 'mongod',
   action: async () => {
-    const { DockerContainer } = require('@travetto/exec/src/docker');
+    const { DockerContainer } = await import('@travetto/exec/src/docker');
 
-    const defPort = process.env.MODEL_MONGO_PORT || 27017;
+    const defPort = parseInt(`${process.env.MODEL_MONGO_PORT || 27017}`, 10);
 
     try {
       await DockerContainer.waitForPort(defPort, 10);
