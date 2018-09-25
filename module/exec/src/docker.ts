@@ -65,6 +65,7 @@ export class DockerContainer {
   public evict: boolean = false;
   public interactive: boolean = false;
   public tty: boolean = false;
+  public daemon: boolean = false;
 
   public volumes: { [key: string]: string } = {};
   public workingDir: string;
@@ -120,6 +121,12 @@ export class DockerContainer {
     return this;
   }
 
+  addEnvVars(vars: { [key: string]: string }) {
+    Object.assign(this.env, vars);
+    return this;
+  }
+
+
   addVolume(local: string, container: string) {
     this.volumes[local] = container;
     return this;
@@ -145,6 +152,11 @@ export class DockerContainer {
     return this;
   }
 
+  setDaemon(on: boolean) {
+    this.daemon = on;
+    return this;
+  }
+
   getFlags(extra?: string[]) {
     const flags = [];
     if (this.workingDir) {
@@ -161,6 +173,9 @@ export class DockerContainer {
     }
     if (this.entryPoint) {
       flags.push('--entrypoint', this.entryPoint);
+    }
+    if (this.daemon) {
+      flags.push('-d');
     }
     for (const k of Object.keys(this.volumes)) {
       flags.push('-v', `${k}:${this.volumes[k]}`);
