@@ -9,7 +9,7 @@
   },
   "description": "Data type registry for runtime validation, reflection and binding. ",
   "devDependencies": {
-    "@travetto/test": "^0.3.14"
+    "@travetto/test": "^0.3.15"
   },
   "optionalExtensionDependencies": {
     "@travetto/rest": "^0.1.11",
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.13"
+  "version": "0.3.14"
 }
