@@ -6,9 +6,6 @@ import { RootRegistry } from '@travetto/registry';
 
 import { DefaultMailTemplateEngine } from '../';
 
-// Must force import
-import '../src/template';
-
 @Suite('Emails')
 class EmailSuite {
 
