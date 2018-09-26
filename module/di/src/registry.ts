@@ -4,6 +4,7 @@ import { RetargettingHandler } from '@travetto/compiler';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
+import { ClassConfig } from '@travetto/schema';
 
 export const DEFAULT_INSTANCE = Symbol('__default');
 
@@ -153,6 +154,16 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return await Promise.all(promises);
   }
 
+  async resolveFieldDependencies<T>(keys: string[], config: InjectableConfig<T>, instance: T) {
+    // And auto-wire
+    if (keys.length) {
+      const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]));
+      for (let i = 0; i < keys.length; i++) {
+        (instance as any)[keys[i]] = deps[i];
+      }
+    }
+  }
+
   async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
     const targetId = target.__id;
 
@@ -177,11 +188,16 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const fieldKeys = Object.keys(managed.dependencies.fields!)
       .filter(x => !managed.factory || !(x in inst)); // Only apply fields that were not set on the factory instance
 
-    // And auto-wire
-    if (fieldKeys.length) {
-      const fieldDeps = await this.fetchDependencies(managed, fieldKeys.map(x => managed.dependencies.fields[x]));
-      for (let i = 0; i < fieldKeys.length; i++) {
-        (inst as any)[fieldKeys[i]] = fieldDeps[i];
+    // And auto-wire fields
+    await this.resolveFieldDependencies(fieldKeys, managed, inst);
+
+    // If factory with field properties on the sub class
+    if (managed.factory) {
+      const resolved = this.get(inst.constructor);
+
+      if (resolved) {
+        const subKeys = Object.keys(resolved.dependencies.fields).filter(x => !managed.dependencies.fields[x]);
+        await this.resolveFieldDependencies(subKeys, resolved, inst);
       }
     }
 
@@ -207,7 +223,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   getCandidateTypes<T>(target: Class<T>) {
     const targetId = target.__id;
     const aliasMap = this.aliases.get(targetId)!;
-    const aliasedIds = aliasMap ? Array.from(aliasMap.values()) : [];
+    const aliasedIds = aliasMap ? Array.from(new Set(aliasMap.values())) : [];
     return aliasedIds.map(id => this.get(id)!);
   }
 
@@ -356,6 +372,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
       if (!this.aliases.has(parentId)) {
         this.aliases.set(parentId, new Map());
+      }
+
+      // First type will be default
+      if (!this.aliases.get(parentId)!.has(DEFAULT_INSTANCE)) {
+        this.aliases.get(parentId)!.set(DEFAULT_INSTANCE, classId);
       }
 
       this.aliases.get(parentId)!.set(qualifier, classId);
