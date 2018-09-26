@@ -67,15 +67,18 @@ export class ConfigLoader {
     if (this._initialized) {
       return;
     }
-    this.map.reset();
     this._initialized = true;
-
-    this.processConfigs();
-    this.processProfiles();
+    this.reloadConfig();
 
     if (!Env.isTrue('QUIET_CONFIG') && !Env.test) {
       console.info(`Initializing: ${Env.profiles.join(',')}`);
       console.info('Configured', this.map.toJSON());
     }
+  }
+
+  static reloadConfig() {
+    this.map.reset();
+    this.processConfigs();
+    this.processProfiles();
   }
 }

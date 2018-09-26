@@ -118,6 +118,7 @@ export class Runner {
 
   async runSome() {
     const consumer = this.getConsumer();
+    await new PhaseManager('test').load().run();
     return await TestExecutor.execute(consumer, this.state.args);
   }
 
