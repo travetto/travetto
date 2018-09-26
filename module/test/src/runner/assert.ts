@@ -85,21 +85,21 @@ export class AssertUtil {
     this.assertions = [];
   }
 
-  static buildAssertion(filename: string, text: string) {
+  static buildAssertion(filename: string, text: string, operator: string) {
     const { file, line } = this.readFilePosition(new Error(), filename.replace(/[.][tj]s$/, ''));
 
     const assertion: Assertion = {
       className: this.test.className,
       methodName: this.test.methodName,
       file, line, text,
-      operator: 'throws',
+      operator,
     };
 
     return assertion;
   }
 
   static check(filename: string, text: string, fn: string, positive: boolean, ...args: any[]) {
-    const assertion = this.buildAssertion(filename, text);
+    const assertion = this.buildAssertion(filename, text, ASSERT_FN_OPERATOR[fn]);
 
     const common: { [key: string]: string } = {
       state: positive ? 'should' : 'should not'
@@ -158,9 +158,7 @@ export class AssertUtil {
         case 'greaterThanEqual': asrt(args[0] >= args[1], args[2]); break;
         default:
           if (fn && (assert as any)[fn]) { // Assert call
-            if (fn === 'throws') {
-              (assert as any)[fn].apply(null, args);
-            }
+            (assert as any)[fn].apply(null, args);
           } else if (args[1] && fn && args[1][fn]) { // Method call
             asrt(args[1][fn](args[0]));
           } else {
@@ -224,7 +222,7 @@ export class AssertUtil {
   }
 
   static async checkThrow(filename: string, text: string, action: Function, shouldThrow: ThrowableError, message?: string) {
-    const assertion = this.buildAssertion(filename, text);
+    const assertion = this.buildAssertion(filename, text, 'throws');
 
     try {
       await action();
