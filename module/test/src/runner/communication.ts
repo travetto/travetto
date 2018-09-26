@@ -66,7 +66,7 @@ export async function server() {
       mgr.load('compiler');
 
       // Init Compiler
-      Compiler = require('@travetto/compiler').Compiler;
+      Compiler = (await import('@travetto/compiler')).Compiler;
 
       // Initialize
       await mgr.run();
@@ -94,13 +94,17 @@ export async function server() {
 
       // Reload runner
       Compiler.reset();
-      const { Runner } = require('./runner');
+      const { Runner } = await import('./runner');
 
       console.debug('*Running*', data.file);
 
       try {
-        await new Runner({ format: 'exec', mode: 'single', args: [data.file, data.class, data.method] }).run();
-        worker.send(Events.RUN_COMPLETE);
+        await new Runner({
+          format: 'exec',
+          mode: 'single',
+          args: [data.file!, data.class!, data.method!],
+          concurrency: 1
+        }).run(); worker.send(Events.RUN_COMPLETE);
       } catch (e) {
         worker.send(Events.RUN_COMPLETE, { error: ExecUtil.serializeError(e) });
       }

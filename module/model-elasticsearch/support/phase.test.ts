@@ -1,6 +1,7 @@
 export const init = {
   key: 'elasticsearch',
   action: async () => {
+    const { ConfigLoader } = await import('@travetto/config');
     const { DockerContainer } = await import('@travetto/exec/src/docker');
 
     const defPort = parseInt(`${process.env.MODEL_ELASTICSEARCH_PORT || 9200}`, 10);
@@ -33,5 +34,7 @@ export const init = {
       container.run();
       await waitForUrl(`http://127.0.0.1:${port}`, 10000);
     }
+
+    ConfigLoader.reloadConfig();
   }
 };

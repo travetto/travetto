@@ -85,7 +85,7 @@ export class ConfigMap {
       return false;
     }
 
-    key = this.getKeyName(key, data) || key;
+    key = this.getKeyName(key, data) || (/^[A-Z_0-9]+$/.test(key) ? key.toLowerCase() : key);
     data[key] = ConfigMap.coerce(value, data[key]);
 
     return true;

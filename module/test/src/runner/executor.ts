@@ -188,9 +188,9 @@ export class TestExecutor {
     if (clsName && /^\d+$/.test(clsName)) {
       const line = parseInt(clsName, 10);
       const clses = TestRegistry.getClasses().filter(f => f.__filename === file).map(x => TestRegistry.get(x));
-      const cls = clses.find(x => line >= x.lines.start && line <= x.lines.end);
+      const cls = clses.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
       if (cls) {
-        const meth = cls.tests.find(x => line >= x.lines.start && line <= x.lines.end);
+        const meth = cls.tests.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
         if (meth) {
           res = [cls, meth];
         } else {

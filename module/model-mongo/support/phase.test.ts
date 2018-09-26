@@ -1,6 +1,7 @@
 export const init = {
   key: 'mongod',
   action: async () => {
+    const { ConfigLoader } = await import('@travetto/config');
     const { DockerContainer } = await import('@travetto/exec/src/docker');
 
     const defPort = parseInt(`${process.env.MODEL_MONGO_PORT || 27017}`, 10);
@@ -17,5 +18,7 @@ export const init = {
       container.run('--storageEngine', 'ephemeralForTest', '--port', `${port}`);
       await DockerContainer.waitForPort(port, 5000);
     }
+
+    ConfigLoader.reloadConfig();
   }
 };

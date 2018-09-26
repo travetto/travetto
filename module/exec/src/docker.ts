@@ -80,7 +80,7 @@ export class DockerContainer {
       op,
       ...(args || []).map((x: any) => `${x}`)
     ]).join(' ');
-    const [proc, prom] = ExecUtil.spawn(cmd, { shell: false });
+    const [proc, prom] = ExecUtil.spawn(cmd, { shell: this.tty });
     if (op !== 'run' && op !== 'exec') {
       prom.catch(e => { this.evict = true; });
     }
@@ -125,7 +125,6 @@ export class DockerContainer {
     Object.assign(this.env, vars);
     return this;
   }
-
 
   addVolume(local: string, container: string) {
     this.volumes[local] = container;
