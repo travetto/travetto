@@ -176,8 +176,8 @@ async function test() {
 
   // Rewrite
   const child = cp.spawn('npx', [
-    'lerna', '--concurrency', '3', 'exec', '--no-bail', '--stream', '--',
-    'npx', 'travetto', 'test', '-f', 'event', '-c', '2'
+    'lerna', '--concurrency', '6', 'exec', '--no-bail', '--stream', '--',
+    'npx', 'travetto', 'test', '-f', 'event', '-c', '1'
   ]);
 
   const emitter = new TapEmitter();
