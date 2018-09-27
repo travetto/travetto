@@ -13,7 +13,8 @@ export class ExecutionPool<T extends ConcurrentExecution> {
     const args = {
       max: os.cpus().length - 1,
       min: 1,
-      ...(opts || {})
+      evictionRunIntervalMillis: 5000,
+      ...(opts || {}),
     };
 
     this.pool = createPool({
@@ -72,6 +73,6 @@ export class ExecutionPool<T extends ConcurrentExecution> {
 
   async shutdown() {
     await this.pool.drain();
-    this.pool.clear();
+    await this.pool.clear();
   }
 }
