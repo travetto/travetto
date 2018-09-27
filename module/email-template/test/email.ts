@@ -45,7 +45,7 @@ class EmailSuite {
     const hasImg = img !== null;
 
     assert(hasImg);
-    assert(img.length > 1001);
+    assert(img.length > 900);
 
     const includesEncodedImage = out.html.includes(img.toString('base64'));
     assert(includesEncodedImage);
