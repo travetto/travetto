@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
 import { Query, PageableModelQuery, ModelQuery } from '../model/query';
-import { BulkState } from '../model/bulk';
+import { BulkOp } from '../model/bulk';
 import { ModelCore } from '../model/core';
 
 import { ModelService } from './model';
@@ -75,7 +75,7 @@ export abstract class ClassModelService<T extends ModelCore> {
     return this.service.updatePartialViewByQuery(this.class, o, view, query);
   }
 
-  bulkProcess(state: BulkState<T>) {
+  bulkProcess(state: BulkOp<T>[]) {
     return this.service.bulkProcess(this.class, state);
   }
 }

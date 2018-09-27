@@ -8,7 +8,7 @@ import { ModelOptions } from '../types';
 import { Query, ModelQuery, PageableModelQuery } from '../model/query';
 import { ModelCore } from '../model/core';
 import { BulkOp, BulkResponse } from '../model/bulk';
-import { ModelSource } from './source';
+import { ModelSource, IModelSource } from './source';
 import { ModelRegistry } from '../registry';
 
 function getClass<T>(o: T) {
@@ -16,10 +16,9 @@ function getClass<T>(o: T) {
 }
 
 @Injectable({ target: ModelService })
-export class ModelService extends ModelSource {
+export class ModelService implements IModelSource {
 
   constructor(private source: ModelSource, private queryService: QueryVerifierService) {
-    super();
   }
 
   postConstruct() {
