@@ -43,6 +43,7 @@ function deserializeError(e) {
  * @property {String} [description]
  * @property {String} status
  * @property {Error} [error]
+ * @property {Number} duration
  * @property {String} [output]
  * @property {Assertion[]} assertions
  */
@@ -61,8 +62,10 @@ class TapEmitter {
     this.count = 0;
     this.fail = 0;
     this.ok = 0;
+    this.duration = 0;
     this.skipped = 0;
     this.errors = [];
+    this.suiteDuration = 0;
   }
 
   /**
@@ -89,7 +92,9 @@ class TapEmitter {
    * @param {TestEvent} e 
    */
   onEvent(pkg, e) {
-    if (e.type === 'test' && e.phase === 'after') {
+    if (e.type === 'suite' && e.phase === 'after') {
+      this.suiteDuration += e['suite'].duration;
+    } else if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
       let header = `${pkg}#${test.className} - ${test.methodName}`;
       if (test.description) {
@@ -121,6 +126,10 @@ class TapEmitter {
         this.ok++;
       }
       status += header;
+
+      status += `# (Time: ${test.duration})`
+
+      this.duration += test.duration;
 
       this.log(status);
 
@@ -154,7 +163,7 @@ class TapEmitter {
       }
     }
 
-    this.log(`Results ${this.ok}/${this.count}, failed ${this.fail}, skipped ${this.skipped}`);
+    this.log(`Results ${this.ok}/${this.count}, failed ${this.fail}, skipped ${this.skipped} # (Test Time: ${this.duration}, Suite Time: ${this.suiteDuration})`);
   }
 }
 

@@ -36,6 +36,8 @@ export interface TestResult {
   className: string;
   description: string;
   assertions: Assertion[];
+  duration: number;
+  durationTotal: number;
   output: {
     [key: string]: string;
   };

@@ -9,6 +9,7 @@ export class AllResultsCollector implements Consumer {
     fail: 0,
     skip: 0,
     total: 0,
+    duration: 0,
     suites: [],
     errors: []
   };
@@ -18,6 +19,7 @@ export class AllResultsCollector implements Consumer {
     this.summary.fail += src.fail;
     this.summary.success += src.success;
     this.summary.skip += src.skip;
+    this.summary.duration += src.duration;
     this.summary.total += (src.fail + src.success + src.skip);
   }
 

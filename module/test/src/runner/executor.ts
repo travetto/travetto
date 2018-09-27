@@ -45,6 +45,8 @@ export class TestExecutor {
 
     consumer.onEvent({ type: 'test', phase: 'before', test });
 
+    const startTime = Date.now();
+
     const suite = TestRegistry.get(test.class);
     const result: Partial<TestResult> = {
       methodName: test.methodName,
@@ -113,6 +115,8 @@ export class TestExecutor {
       result.assertions = AssertUtil.end();
     }
 
+    result.duration = Date.now() - startTime;
+
     consumer.onEvent({ type: 'test', phase: 'after', test: result as TestResult });
 
     return result as TestResult;
@@ -127,8 +131,11 @@ export class TestExecutor {
       lines: { ...suite.lines },
       file: suite.file,
       className: suite.className,
+      duration: 0,
       tests: []
     };
+
+    const suiteStart = Date.now();
 
     const mgr = new ExecutionPhaseManager(consumer, suite, result);
 
@@ -148,12 +155,15 @@ export class TestExecutor {
       success: 0,
       fail: 0,
       skip: 0,
+      duration: 0,
       total: 0,
       lines: { ...suite.lines },
       file: suite.file,
       className: suite.className,
       tests: []
     };
+
+    const startTime = Date.now();
 
     consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
@@ -163,6 +173,7 @@ export class TestExecutor {
       await mgr.startPhase('all');
 
       for (const testConfig of suite.tests) {
+        const testStart = Date.now();
         await mgr.startPhase('each');
 
         const ret = await this.executeTest(consumer, testConfig);
@@ -170,11 +181,14 @@ export class TestExecutor {
         result.tests.push(ret);
 
         await mgr.endPhase('each');
+        ret.durationTotal = Date.now() - testStart;
       }
       await mgr.endPhase('all');
     } catch (e) {
       await mgr.onError(e);
     }
+
+    result.duration = Date.now() - startTime;
 
     consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
 
