@@ -5,7 +5,8 @@ export declare class Cache {
   init(): void;
   writeEntry(full: string, contents: string): void;
   readEntry(full: string): string;
-  removeEntry(full: string, unlink?: boolean): void;
+  removeEntry(full: string): void;
+  removeExpiredEntry(full: string, force?: boolean): void;
   hasEntry(full: string): boolean;
   statEntry(full: string): Stats;
   fromEntryName(cached: string): string;
