@@ -29,9 +29,11 @@ export interface SuiteResult extends Counts {
   file: string;
   lines: { start: number, end: number };
   tests: TestResult[];
+  duration: number;
 }
 
 export interface AllSuitesResult extends Counts {
   suites: SuiteResult[];
   errors: Error[];
+  duration: number;
 }

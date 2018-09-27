@@ -51,6 +51,8 @@ export class ExecutionPhaseManager {
       description: methodName,
       lines: { start: line, end: line },
       file,
+      duration: 0,
+      durationTotal: 0,
       error,
       assertions: [badAssert],
       output: {}

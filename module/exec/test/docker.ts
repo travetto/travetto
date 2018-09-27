@@ -8,15 +8,13 @@ export class DockerTet {
   @Test()
   async test() {
     const port = 10000;
-    const container = new DockerContainer('mongo:latest')
-      .createTempVolume('/var/workspace')
-      .exposePort(port)
-      .setWorkingDir('/var/workspace')
+    const container = new DockerContainer('nginx:latest')
+      .exposePort(port, 80)
       .forceDestroyOnShutdown();
 
-    container.run('--storageEngine', 'ephemeralForTest', '--port', port);
+    container.run();
     await DockerContainer.waitForPort(port);
-
+    assert(true);
     return;
   }
 }
