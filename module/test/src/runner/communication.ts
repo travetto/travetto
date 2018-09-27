@@ -104,7 +104,8 @@ export async function server() {
           mode: 'single',
           args: [data.file!, data.class!, data.method!],
           concurrency: 1
-        }).run(); worker.send(Events.RUN_COMPLETE);
+        }).run();
+        worker.send(Events.RUN_COMPLETE);
       } catch (e) {
         worker.send(Events.RUN_COMPLETE, { error: ExecUtil.serializeError(e) });
       }
@@ -114,7 +115,10 @@ export async function server() {
   });
 
   worker.send(Events.READY);
-  setTimeout(_ => { }, Number.MAX_SAFE_INTEGER / 10000000);
+
+  if (Env.isTrue('EXECUTION_REUSABLE')) {
+    setTimeout(_ => { }, Number.MAX_SAFE_INTEGER / 10000000);
+  }
 }
 
 export function client(concurrency = os.cpus().length - 1) {
@@ -129,7 +133,7 @@ export function client(concurrency = os.cpus().length - 1) {
     return worker;
   }, {
       idleTimeoutMillis: 10000,
-      min: Math.max(1, Math.trunc(concurrency / 2)),
+      min: Env.isTrue('EXECUTION_REUSABLE') ? 1 : 0,
       max: concurrency
     });
 }
