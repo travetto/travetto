@@ -53,10 +53,9 @@ Shutdown.onShutdown('handler-name', async () => {
 If knowing when shutdown finishes is all you want, you can simply use:
 
 ```typescript
-async function messageOnShutdown() {
-  await Shutdown.onShutdownPromise();
-  console.log('Shutdown is complete!');
-}
+Shutdown.onShutdown('final-message', () => {
+  console.log('Shutdown is complete!')
+});
 ```
 
 ## Stacktrace 

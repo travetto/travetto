@@ -1,32 +1,23 @@
 import { EventEmitter } from 'events';
 import { Env } from './env';
 
+const px = process.exit;
+
+const MAX_SHUTDOWN_TIME = parseInt(Env.get('MAX_SHUTDOWN_WAIT', '2000'), 10);
+
 export class Shutdown {
   private static listeners: { name: string, handler: Function }[] = [];
   private static shutdownCode = -1;
-  private static shutdownEmitter = new EventEmitter();
-  private static shutdownPromise = new Promise(resolve => {
-    Shutdown.shutdownEmitter.on('shutdown', resolve);
-  });
 
-  static register() {
-    process.on('exit', Shutdown.shutdown.bind(Shutdown, 0));
-    process.on('SIGINT', Shutdown.shutdown.bind(Shutdown, 130));
-    process.on('uncaughtException', Shutdown.shutdown.bind(Shutdown, 1));
-  }
-
-  static onShutdownPromise() {
-    return Shutdown.shutdownPromise;
-  }
-
-  static onShutdown(name: string, handler: Function) {
-    Shutdown.listeners.push({ name, handler });
-  }
-
-  static async shutdown(exitCode: number = 0, err?: any) {
+  private static async _execute(exitCode: number = 0, err?: any) {
 
     if (this.shutdownCode > 0) {
-      return this.shutdownPromise;
+      // Handle force kill
+      if (exitCode > 0) {
+        px(exitCode);
+      } else {
+        return;
+      }
     }
 
     this.shutdownCode = exitCode;
@@ -62,17 +53,35 @@ export class Shutdown {
         }
       }
 
-      await Promise.all(promises);
+      const finalRun = Promise.race([
+        ...promises,
+        new Promise((r, rej) => setTimeout(rej, MAX_SHUTDOWN_TIME))
+      ]);
+
+      await finalRun;
+
     } catch (e) {
       Env.error('Error on shutting down', e);
     }
 
-    this.shutdownEmitter.emit('shutdown');
-
     if (this.shutdownCode >= 0) {
-      process.nextTick(() => process.exit(this.shutdownCode));
+      px(this.shutdownCode);
     }
-
-    return this.shutdownPromise;
   }
+
+  static register() {
+    process.exit = this.execute.bind(this);
+    process.on('exit', this.execute.bind(this));
+    process.on('SIGINT', this.execute.bind(this, 130));
+    process.on('uncaughtException', this.execute.bind(this, 1));
+  }
+
+  static onShutdown(name: string, handler: Function) {
+    this.listeners.push({ name, handler });
+  }
+
+  static execute(exitCode: number = 0, err?: any) {
+    this._execute(exitCode, err);
+  }
+
 }
