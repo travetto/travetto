@@ -39,7 +39,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     if (!this._compiledSass) {
       this._compiledSass = (async () => {
         const partial = '/scss/app.scss';
-        const full = path.resolve(`${__dirname}/../assets/email/${partial}`);
+        const full = path.resolve(`${__dirname}/../assets/${partial}`);
 
         if (!AppCache.hasEntry(full)) {
           const file = await this.config.findFirst(partial);
