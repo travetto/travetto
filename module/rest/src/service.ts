@@ -44,7 +44,11 @@ export class RestApp {
     const instances = await Promise.all<RestInterceptor>(interceptors.map(op =>
       DependencyRegistry.getInstance(op.target, op.qualifier)
         .catch(err => {
-          console.error(`Unable to load operator ${op.class.name}#${op.qualifier.toString()}`);
+          if ((err.message || '').includes('Cannot find module')) {
+            console.error(`Unable to load operator ${op.class.name}#${op.qualifier.toString()}, module not found`);
+          } else {
+            throw err;
+          }
         })
     ));
 
