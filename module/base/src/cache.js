@@ -6,6 +6,10 @@ const fs = require('fs');
 const { execSync } = require('child_process');
 const { Env } = require('./env');
 
+function isOlder(cacheStat, fullStat) {
+  return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs || cacheStat.atimeMs < fullStat.atimeMs;
+}
+
 class Cache {
   constructor(cwd, cacheDir) {
 
@@ -35,10 +39,16 @@ class Cache {
     return fs.readFileSync(this.toEntryName(full)).toString();
   }
 
-  removeEntry(full, unlink = true) {
-    if (unlink) {
-      fs.unlinkSync(this.toEntryName(full));
+  removeExpiredEntry(full, force = false) {
+    if (this.hasEntry(full)) {
+      if (force || isOlder(this.statEntry(full), fs.statSync(full))) {
+        fs.unlinkSync(this.toEntryName(full));
+      }
+      this.removeEntry(full);
     }
+  }
+
+  removeEntry(full) {
     delete this.cache[full];
   }
 
@@ -97,12 +107,7 @@ class $AppCache extends Cache {
     for (const f of fs.readdirSync(this.cacheDir)) {
       const full = this.fromEntryName(f);
       try {
-        const cacheStat = this.statEntry(full);
-        const fullStat = fs.statSync(full);
-
-        if (cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs || cacheStat.atimeMs < fullStat.atimeMs) {
-          this.removeEntry(full);
-        }
+        this.removeExpiredEntry(full);
       } catch (e) {
         console.debug('Cannot read', e.message);
         // Cannot remove missing file
