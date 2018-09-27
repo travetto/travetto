@@ -4,7 +4,6 @@ import { RetargettingHandler } from '@travetto/compiler';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
-import { ClassConfig } from '@travetto/schema';
 
 export const DEFAULT_INSTANCE = Symbol('__default');
 
@@ -426,6 +425,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   onReset() {
     super.onReset();
+    this.resolved = false;
     this.pendingFinalize = [];
     this.instances.clear();
     this.instancePromises.clear();
@@ -433,6 +433,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.proxyHandlers.clear();
     this.aliases.clear();
     this.targets.clear();
+    this.factories.clear();
+    this.applications.clear();
   }
 }
 
