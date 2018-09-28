@@ -11,7 +11,7 @@ module.exports = function() {
   const exec = (arg, ...args) => cp.execSync(arg, ...args);
 
   program
-    .command('aws-lambda:build-zip')
+    .command('rest-lambda:build-zip')
     .option('-o --output [output]', 'Output file', 'dist/lambda.zip')
     .option('-w --workspace [workspace]', 'Workspace directory')
     .action(async (cmd) => {
@@ -82,7 +82,7 @@ module.exports = function() {
     });
 
   program
-    .command('aws-lambda:build-sam')
+    .command('rest-lambda:build-sam')
     .option('-e --env [env]', 'Environment name', 'prod')
     .option('-o --output [output]', 'Output file', 'dist/template.yml')
     .action(async (cmd) => {
@@ -105,7 +105,7 @@ module.exports = function() {
       FsUtil.writeFile(cmd.output, sam);
     });
 
-  program.command('aws-lambda:deploy')
+  program.command('rest-lambda:deploy')
     .action((config, cmd) => {
       if (!config) {
         cmd.help();

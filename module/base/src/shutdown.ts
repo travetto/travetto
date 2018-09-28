@@ -76,10 +76,10 @@ export class Shutdown {
     process.on('SIGTERM', this.execute.bind(this, 143));
     process.on('uncaughtException', this.execute.bind(this, 1));
     process.on('unhandledRejection', (err, p) => {
-      if (err && (err.message || '').includes('Cannot find module') && !(Env.dev || Env.e2e)) {
-        this.execute(1, err);
-      } else {
+      if (err && (err.message || '').includes('Cannot find module') && Env.watch) { // Handle module reloading
         Env.error(err);
+      } else {
+        this.execute(1, err);
       }
     });
   }
