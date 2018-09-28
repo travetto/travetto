@@ -19,7 +19,7 @@ module.exports = function() {
     })
     .option('-e, --env [env]', 'Application environment', /^(dev|test|e2e|prod)$/i, 'dev')
     .option('-w, --watch [watch]', 'Run the application in watch mode', x => /^(true|yes|on)$/i.test(x), undefined)
-    .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); }, [])
+    .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
     .action(async (app, cmd) => {
 
       process.env.PROFILE = [app, ...((process.env.PROFILE || '').split(/,+/g)), ...cmd.profile]
@@ -46,10 +46,11 @@ module.exports = function() {
         process.env.NO_WATCH = `${!watch}`;
       }
 
-      await require('@travetto/base/bin/bootstrap').run();
       try {
+        await require('@travetto/base/bin/bootstrap').run();
         await require('../src/registry').DependencyRegistry.runApplication(app);
       } catch (err) {
+        console.error(err && err.stack ? err.stack : err);
         process.exit(1);
       }
     });

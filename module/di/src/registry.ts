@@ -235,18 +235,13 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   async runApplication(name: string) {
-    try {
-      const cls = this.applications.get(name);
-      if (!cls) {
-        throw new InjectionError(`Application: ${name} does not exist`);
-      }
-      const inst = await this.getInstance(cls);
-      if (inst.run) {
-        await inst.run();
-      }
-    } catch (err) {
-      console.error(err);
-      throw err;
+    const cls = this.applications.get(name);
+    if (!cls) {
+      throw new InjectionError(`Application: ${name} does not exist`);
+    }
+    const inst = await this.getInstance(cls);
+    if (inst.run) {
+      await inst.run();
     }
   }
 

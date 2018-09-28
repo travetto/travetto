@@ -40,9 +40,6 @@ export abstract class Registry implements ChangeSource<Class> {
       await Promise.all(this.descendants.map(x => x.init()));
 
       console.debug('Initialized', this.constructor.__id);
-    } catch (e) {
-      console.error(e);
-      throw e;
     } finally {
       this.resolved = true;
     }

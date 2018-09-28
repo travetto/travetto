@@ -51,7 +51,7 @@ export class ExecUtil {
         finish({ code: 1, stdout, stderr, message: err.message, valid: false }));
 
       p.on('close', (code: number) =>
-        finish({ code, stdout, stderr, valid: code === null || code === 0 || code === 130 })); // Sigint
+        finish({ code, stdout, stderr, valid: code === null || code === 0 || code === 130 || code === 143 })); // Sigint/term
 
       if (timeout) {
         timer = setTimeout(async x => {
