@@ -49,7 +49,7 @@ export class SourceManager {
 
     const msg = `Compiling ${fileName.replace(`${Env.cwd}/`, '')} failed:\n [\n    ${errors.join('\n    ')}\n ]`;
 
-    if (Env.dev || Env.e2e) { // If attempting to load an optional require
+    if (Env.watch) { // If attempting to load an optional require
       console.error(msg);
       console.error(`Unable to import ${fileName}, stubbing out`);
       this.set(fileName, CompilerUtil.EMPTY_MODULE);
