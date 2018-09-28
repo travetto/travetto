@@ -13,7 +13,7 @@
     "@types/node": "^10.3.2",
     "trace": "^3.1.0",
     "tslib": "^1.9.3",
-    "typescript": "^3.0.3"
+    "typescript": "^3.1.1"
   },
   "description": "Bootstrapping, application phase management, environment config and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
@@ -35,5 +35,5 @@
   "scripts": {
     "postinstall": "node ./bin/travetto-cli-clean.js"
   },
-  "version": "0.3.15"
+  "version": "0.3.16"
 }

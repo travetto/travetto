@@ -1,42 +1,19 @@
 In-Progress
 ==============
-? Yeoman Generator
-  X Generate Rest app
-  X Generate Model app
-  X Generate Rest x Model app
-  - Lambda
-  - Email
-  - Assets
-  - Auth
-
 ? Lambda for REST
-  ? Entire rest app as an AWS lambda
-  ? Individual routes as individual lambdas
+  X Entire rest app as an AWS lambda
+  X Individual routes as individual lambdas
+  X API Gateway configuration
   ? Auto deployment of application
-  ? API Gateway configuration
-  ? CLI entry point to facilitate
-  - Profit?
+  X CLI entry point to facilitate
 
-Tests
-  ? Better unit tests
-
-? SQL
-  ? Model support for SQL databases
-  ? Using Sequelize?
-  ? Already supports most of the needed features, might be an easy win  
-
-To Do
+Up Next
 ==============
-- Test catastrophic erros need to propagate
+- Auth
+  - Move to JWT as prep for Lambda
 
-- Lambda for Handlers
-  - Kinesis/S3 Endpoint
-  - Deployment
-  - Serverless framework?
-
-- WebSockets
-  - Observables in Angular?
-  - Firebase?
+- Model
+  - Query Language Support
 
 - Docs
   - Document @Application
@@ -47,17 +24,54 @@ To Do
     - CLI
     - Generator
     - Lambda Goals
-  
-- Auth
-  - Move to JWT as prep for Lambda
+    - Model SQL
 
-- Model
-  - Query Language Support
+
+To Do
+==============
+- Yeoman Generator
+  - Lambda
+  - Email
+  - Assets
+  - Auth
+
+- Lambda for Handlers
+  - Kinesis/S3 Endpoint
+  - Deployment
+  - Serverless framework?
+
+- Tests
+  ? Better unit tests
+
+Future
+==============
+- WebSockets
+  - Observables in Angular?
+  - Firebase?
+
+? SQL
+  ? Model support for SQL databases
+  ? Might need to be a whole new set of sql operations
+  X Using Sequelize?
+  X Already supports most of the needed features, might be an easy win  
 
 Done
 ==============
 X HTTP/2
 X Koa
+
+X Yeoman Generator
+  X Generate Rest app
+  X Generate Model app
+  X Generate Rest x Model app
+
+X Test catastrophic errors need to propagate
+  X Updated test plugin
+  X use Env.error when possible
+  X force pieces through the shutdown process
+  X Handle exit locations in the CLI (test/run)
+  X Expose compilation errors
+  X Expose transpilation errors
 
 X Remove Email Dependencies
   X Rewrite Inky in parse5
