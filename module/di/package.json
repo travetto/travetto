@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "@travetto/config": "^0.3.13",
-    "@travetto/registry": "^0.3.12"
+    "@travetto/registry": "^0.3.13"
   },
   "description": "Dependency registration/management and injection support.",
   "devDependencies": {
-    "@travetto/test": "^0.3.17"
+    "@travetto/test": "^0.3.18"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.18"
+  "version": "0.3.19"
 }
