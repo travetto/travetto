@@ -93,15 +93,24 @@ class $Compiler {
       console.trace(content);
     }
 
-    const ret = this.moduleManager.compile(m, jsf, content);
-    if (ret) {
-      if (isNew) {
-        this.events.emit('required-after', tsf);
+    try {
+      const ret = this.moduleManager.compile(m, jsf, content);
+      if (ret) {
+        if (isNew) {
+          this.events.emit('required-after', tsf);
+        }
+      } else {
+        this.sourceManager.set(tsf, CompilerUtil.EMPTY_MODULE);
       }
-    } else {
-      this.sourceManager.set(tsf, CompilerUtil.EMPTY_MODULE);
+      return ret;
+    } catch (e) {
+      if (e.message.startsWith('Cannot find module')) {
+        const name = m.filename.replace(`${Env.cwd}/`, '');
+        const err = new Error(`${e.message} ${e.message.includes('from') ? `[via ${name}]` : `from ${name}`}`);
+        err.stack = err.stack;
+        throw err;
+      }
     }
-    return ret;
   }
 
   markForReload(files: string[] | string) {

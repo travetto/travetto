@@ -123,15 +123,10 @@ export class Runner {
   }
 
   async run() {
-    try {
-      switch (this.state.mode) {
-        case 'single': return await this.runSome();
-        case 'watch': return await watch();
-        default: return await this.runFiles();
-      }
-    } catch (e) {
-      console.error(e);
-      throw e;
+    switch (this.state.mode) {
+      case 'single': return await this.runSome();
+      case 'watch': return await watch();
+      default: return await this.runFiles();
     }
   }
 }

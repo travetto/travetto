@@ -7,7 +7,7 @@ export class DockerTet {
 
   @Test()
   async test() {
-    const port = 10000;
+    const port = Math.trunc(Math.random() * 40000) + 10000;
     const container = new DockerContainer('nginx:latest')
       .exposePort(port, 80)
       .forceDestroyOnShutdown();
@@ -15,6 +15,5 @@ export class DockerTet {
     container.run();
     await DockerContainer.waitForPort(port);
     assert(true);
-    return;
   }
 }

@@ -14,7 +14,7 @@ async function runTests(opts, args) {
     }).run();
     process.exit(res ? 0 : 1);
   } catch (e) {
-    console.error(e);
+    console.error(e && e.stack ? e.stack : e);
     process.exit(1);
   }
 }

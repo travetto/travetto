@@ -297,8 +297,7 @@ export class DockerContainer {
       execSync(`${this.cmd} rm -fv ${this.container}`);
     } catch (e) { /* ignore */ }
 
-    const temps = Object.keys(this.tempVolumes).map(x => this.rimraf(x).catch((e: any) => { }));
-    Promise.all(temps);
+    this.cleanup();
 
     const ids = execSync(`${this.cmd} volume ls -qf dangling=true`);
     if (ids) {

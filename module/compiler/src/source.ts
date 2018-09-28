@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as sourcemap from 'source-map-support';
 
-import { Env } from '@travetto/base';
+import { Env, BaseError } from '@travetto/base';
 import { Cache } from '@travetto/base/src/cache';
 
 import { CompilerUtil } from './util';
@@ -27,6 +27,37 @@ export class SourceManager {
     });
   }
 
+  checkTranspileErrors(fileName: string, res: ts.TranspileOutput) {
+
+    if (!res.diagnostics || !res.diagnostics.length) {
+      return;
+    }
+
+    const errors = res.diagnostics.slice(0, 5).map(diag => {
+      const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+      if (diag.file) {
+        const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start as number);
+        return ` @ ${diag.file.fileName.replace(`${Env.cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
+      } else {
+        return ` ${message}`;
+      }
+    });
+
+    if (res.diagnostics.length > 5) {
+      errors.push(`${res.diagnostics.length - 5} more ...`);
+    }
+
+    const msg = `Compiling ${fileName.replace(`${Env.cwd}/`, '')} failed:\n [\n    ${errors.join('\n    ')}\n ]`;
+
+    if (Env.dev || Env.e2e) { // If attempting to load an optional require
+      console.error(msg);
+      console.error(`Unable to import ${fileName}, stubbing out`);
+      this.set(fileName, CompilerUtil.EMPTY_MODULE);
+    } else {
+      throw new BaseError(msg);
+    }
+  }
+
   transpile(fileName: string, options: ts.TranspileOptions, force = false) {
     if (force || !this.hasCached(fileName)) {
       console.trace('Emitting', fileName);
@@ -50,48 +81,18 @@ export class SourceManager {
 
       const res = ts.transpileModule(content, { ...options, compilerOptions: this.compilerOptions });
 
-      if (this.logErrors(fileName, res.diagnostics)) {
-        console.error(`Compiling ${fileName} failed`);
-
-        if (Env.dev) { // If attempting to load an optional require
-          console.error(`Unable to import ${fileName}, stubbing out`);
-          this.set(fileName, CompilerUtil.EMPTY_MODULE);
-          return true;
-        } else {
-          return false;
-        }
-      }
+      this.checkTranspileErrors(fileName, res);
 
       if (Env.watch) {
         this.hashes.set(fileName, hash);
       }
 
       this.set(fileName, res.outputText);
-
-      return true;
     } else {
       const cached = this.getCached(fileName);
       this.contents.set(fileName, cached);
-      return true;
     }
-  }
-
-  logErrors(fileName: string, diagnostics?: ts.Diagnostic[]) {
-    if (!diagnostics || !diagnostics.length) {
-      return false;
-    }
-
-    for (const diagnostic of diagnostics) {
-      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-      if (diagnostic.file) {
-        const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start as number);
-        console.error(`  Error ${diagnostic.file.fileName}(${line + 1}, ${character + 1}): ${message}`);
-      } else {
-        console.error(`  Error: ${message}`);
-      }
-    }
-
-    return diagnostics.length !== 0;
+    return true;
   }
 
   has(name: string) {

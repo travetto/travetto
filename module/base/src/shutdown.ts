@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import { Env } from './env';
 
 const px = process.exit;
@@ -38,30 +37,31 @@ export class Shutdown {
         const { name, handler } = listener;
 
         try {
-          console.debug(`Shutting down ${name}`);
+          console.debug(`[Shutdown] Starting ${name}`);
           const res = handler();
           if (res && res.then) {
             promises.push(res as Promise<any>);
             res
-              .then(() => console.debug(`Successfully shut down ${name}`))
-              .catch((e: any) => Env.error(`Error shutting down ${name}`, e));
+              .then(() => console.debug(`Completed shut down ${name}`))
+              .catch((e: any) => Env.error('[Shutdown]', `Failed shut down of ${name}`, e));
           } else {
-            console.debug(`Successfully shut down ${name}`);
+            console.debug('[Shutdown]', `Completed shut down ${name}`);
           }
         } catch (e) {
-          Env.error(`Error shutting down ${name}`, e);
+          Env.error('[Shutdown]', `Failed shut down of ${name}`, e);
         }
       }
 
-      const finalRun = Promise.race([
-        ...promises,
-        new Promise((r, rej) => setTimeout(rej, MAX_SHUTDOWN_TIME))
-      ]);
-
-      await finalRun;
+      if (promises.length) {
+        const finalRun = Promise.race([
+          ...promises,
+          new Promise((r, rej) => setTimeout(() => rej(new Error('Timeout on shutdown')), MAX_SHUTDOWN_TIME))
+        ]);
+        await finalRun;
+      }
 
     } catch (e) {
-      Env.error('Error on shutting down', e);
+      Env.error('[Shutdown]', e);
     }
 
     if (this.shutdownCode >= 0) {
@@ -73,7 +73,15 @@ export class Shutdown {
     process.exit = this.execute.bind(this);
     process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
+    process.on('SIGTERM', this.execute.bind(this, 143));
     process.on('uncaughtException', this.execute.bind(this, 1));
+    process.on('unhandledRejection', (err, p) => {
+      if (err && (err.message || '').includes('Cannot find module') && !(Env.dev || Env.e2e)) {
+        this.execute(1, err);
+      } else {
+        Env.error(err);
+      }
+    });
   }
 
   static onShutdown(name: string, handler: Function) {
