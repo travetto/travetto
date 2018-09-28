@@ -1,3 +1,5 @@
+import * as assert from 'assert';
+
 import { createReadStream } from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -21,6 +23,8 @@ class DockerIOTest {
     createReadStream(path.resolve(`${os.homedir}/Documents/download.jpeg`)).pipe(proc.stdin);
 
     proc.stdout.pipe(process.stdout);
+
+    assert(true);
 
     await prom;
   }

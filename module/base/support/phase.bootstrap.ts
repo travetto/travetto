@@ -11,9 +11,6 @@ export const init = {
       Stacktrace.initHandler();
     }
 
-    // Log unhandled rejections
-    process.on('unhandledRejection', (reason, p) => Env.error(reason));
-
     Shutdown.register();
   }
 };

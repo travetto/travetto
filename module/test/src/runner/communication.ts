@@ -1,7 +1,7 @@
 import * as os from 'os';
 
 import { ExecutionPool, IdleManager, LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
-import { PhaseManager, Env } from '@travetto/base';
+import { PhaseManager, Env, Shutdown } from '@travetto/base';
 
 /***
   Flow of events
@@ -94,6 +94,7 @@ export async function server() {
 
       // Reload runner
       Compiler.reset();
+      Shutdown.execute(-1);
       const { Runner } = await import('./runner');
 
       console.debug('*Running*', data.file);

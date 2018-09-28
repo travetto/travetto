@@ -54,7 +54,7 @@ export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends E
 
   kill() {
     if (this._proc) {
-      this._proc.kill('SIGKILL');
+      this._proc.kill('SIGTERM');
     }
     super.kill();
   }
