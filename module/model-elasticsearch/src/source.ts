@@ -191,7 +191,7 @@ export class ModelElasticsearchSource extends ModelSource {
         if (v === 1 || v === true) {
           return k;
         } else {
-          return `-${k}`;
+          return `${k}:desc`;
         }
       });
     }
