@@ -7,6 +7,12 @@ In-Progress
   ? Auto deployment of application
   X CLI entry point to facilitate
 
+? SQL - as a doc store, limited functionality
+  ? Model support for SQL databases
+  ? Might need to be a whole new set of sql operations
+  X Using Sequelize?
+  X Already supports most of the needed features, might be an easy win  
+
 Up Next
 ==============
 - Auth
@@ -16,6 +22,33 @@ Up Next
   - Query Language Support
 
 - Docs
+  - Reorganize Docs into high level groupings
+    - Asset
+    - Auth
+    - Core
+      - Base
+      - Compiler
+      - Config
+      - Context
+      - Log
+      - Registry
+    - Dependency Injection
+    - Email
+    - Model
+    - Schema
+    - Rest
+      + Swagger
+    - Test
+    - Utils
+      - Cache
+      - Pool
+      - Exec
+      - Schedule
+      - Util
+    - Extras
+      - CLI
+      - Yeoman
+
   - Document @Application
   - Document CLI behavior within module
   - Document Yeoman Generator
@@ -48,12 +81,6 @@ Future
 - WebSockets
   - Observables in Angular?
   - Firebase?
-
-? SQL
-  ? Model support for SQL databases
-  ? Might need to be a whole new set of sql operations
-  X Using Sequelize?
-  X Already supports most of the needed features, might be an easy win  
 
 Done
 ==============
