@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^0.3.15",
+    "@travetto/base": "^0.3.17",
     "@types/generic-pool": "^3.1.4",
     "generic-pool": "^3.4.2"
   },
@@ -25,5 +25,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.12"
+  "version": "0.3.13"
 }
