@@ -6,7 +6,7 @@ import * as util from 'util';
 import * as os from 'os';
 import * as crypto from 'crypto';
 
-import { HttpRequest } from '@travetto/util';
+import { HttpRequest } from '@travetto/net';
 import { Asset, AssetFile } from './model';
 
 const fsStatAsync = util.promisify(fs.stat);
@@ -112,7 +112,7 @@ export class AssetUtil {
       if (filePathExt) {
         newFilePath = newFilePath.replace(`.${filePathExt}`, `.${responseExt}`);
       } else {
-        newFilePath += `.${responseExt}`;
+        newFilePath = `${newFilePath}.${responseExt}`;
       }
       await fsRenameAsync(filePath, newFilePath);
       filePath = newFilePath;

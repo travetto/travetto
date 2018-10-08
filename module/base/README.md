@@ -1,22 +1,39 @@
 travetto: Base
 ===
+Base is the foundation of all `travetto` applications.  It is intended to be a minimal application bootstrap, as well as support for commonly shared functionality. It has support for the following key areas:
+* Environmental Information
+* File Operations
+* Lifecycle Support
+* Stacktrace Management 
+* General Utilities
 
-Base is the foundation of all `travetto` applications.  It is intended to be a minimal application bootstrap, as well as support for commonly shared functionality. The key areas that it offers
+## Environmental Information
+The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers as well. The information that is available is:
+* `prod`/`dev`/`test`/`e2e` - Run type flags.  These are mutually exclusive and are `boolean` flags.
+* `watch: boolean` - Does the current run support file watching.  Primarily used internally, but should be useful to indicate if the program will finish immediately or wait indefinitely.
+* `profiles: string[]` - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.
+* `debug`/`trace` - Simple logging flags.  These `boolean` flags will enable or disable logging at various levels. By default `debug` is on in `dev` or `e2e` mode, and nowhere else.  `trace` is always off by default.
+* `cwd: string` - The root of the current application, 
+* `docker` - Determine if docker support is enabled. If explicitly set, honor, otherwise it will attempt to invoke the `docker` cli and use that as it's indicator. 
 
-## General App Info
-This is a programmatic interface to `package.json`, which provides key information on:
-* Application Name
-* Version
-* Package
-* Development Dependencies
-* ...more
+With respect to `process.env`, we specifically test for all uppercase, lowercase, and given case.  This allows us to test various patterns and catch flags that might be off due to casing.  That would mean that a key of `Enable_Feature` would be tested as:
+* `Enable_Feature`
+* `ENABLE_FEATURE`
+* `enable_feature`
 
-## Bulk File System Operations
-The framework does a bit of file system scanning to auto load files, and to have knowledge of what files are available. The tools provide:
-* Very simple functionality for recursively finding files, and caching the results
-* Utilizes RegEx in lieu of glob for pattern matching on files (this is to minimize overall code complexity)
+This pattern is used throughout the following functionality for testing and retrieving environmental values.
 
-A simple example of finding all `.config` files in your codebase:
+ The functionality we support for testing and retrieving is:
+* `hasProfile(p: string): boolean;` - Test whether or not a profile is active.
+* `isTrue(key: string): boolean;` - Test whether or not an environment flag is set and is true
+* `isFalse(key: string): boolean;` - Test whether or not an environment flag is set and is false
+* `get(key: string, def?: string): string;` - Retrieve an environmental value with a potential default
+* `getList(key: string): string[];` - Retrieve an environmental value as a list
+
+## File Operations
+The framework does a fair amount of file system scanning to auto-load files.  It also needs to have knowledge of what files are available. The framework provides a simple and performant functionality for recursively finding files. This functionality leverages regular expressions in lieu of glob pattern matching (this is to minimize overall code complexity).
+
+A simple example of finding specific `.config` files in your codebase:
 
 ```typescript
   function processServiceConfigs(svc: string) {
@@ -27,39 +44,54 @@ A simple example of finding all `.config` files in your codebase:
   }
 ```
 
-## Environmental Information
-The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers as well. The information that is available is:
-* `prod: boolean` - is the application in prod mode 
-* `dev: boolean` - is the application in development mode
-* `test: boolean` - is the application currently in test mode
-* `watch: boolean` - is the application currently watching for file changes and reloads (normally only during development)
-* `profiles: string[]` - a list of all the profiles that are passed in and configured
-* `docker: boolean` - does the environment support docker, and should it use it if needed
-* `debug: boolean` - is the application currently in debug mode
-* `trace: boolean` - is the application currently in trace mode
-* `cwd: string` - what is the root folder of the application
+The framework utilizes caching to enable these lookups to be repeated without performance impact.  In addition to file system scanning, the framework offers a simple file watching library.  The goal is to provide a substantially smaller footprint than [`gaze`](https://github.com/shama/gaze) or [`chokidar`](https://github.com/paulmillr/chokidar).  Utilizing the patterns from the file scanning, you create a `Watcher` that either has files added manually, or has patterns added that will recursively look for files. 
+
+```typescript
+const watcher = new Watcher({cwd: 'base/path/to/...'});
+watcher.add([
+  'local.config',
+  {
+    testFile: x => x.endsWith('.config') || x.endsWith('.config.json')
+  }
+]);
+watcher.run();
+```
+
+## Lifecycle Support
+
+During the lifecycle of an application, there is a need to handle different phases of execution.  When executing a phase, the code will recursively find all `phase.<phase>.ts` files under `node_modules/@travetto`, and in the root of your project.  The format of each phase handler is comprised of five main elements:
+* The phase of execution, which is defined by the file name `phase.<phase>.ts`
+* The key of the handler to be referenced for dependency management.
+* The list of dependent handlers that the current handler depends on, if any.
+* The list of handlers that should be dependent on the current handler, if any.
+* The actual functionality to execute
+
+An example would be something like `phase.bootstrap.ts` in the [`Config`](https://github.com/travetto/travetto/tree/master/module/config) module.  
+
+```typescript
+export const init = {
+  key: 'config',
+  after: 'base',
+  action: () => {
+    require('../src/service/config').init();
+  }
+}
+```
 
 ## Shutdown
-This is centralized functionality for running operations on shutdown.  Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers and awaiting shutdown to finish.
+Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown.  Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers.  The code overrides `process.exit` to properly handle `SIGKILL` and `SIGINT`, with a default threshold of 3 seconds.  In the advent of a `SIGTERM` signal, the code exits immediately without any cleanup.
 
-As a registered handler, you can do.
+As a registered shutdown handler, you can do.
 
 ```typescript
 Shutdown.onShutdown('handler-name', async () => {
-  // Do important work
+  // Do important work, the framework will wait until all async 
+  //   operations are completed before finishing shutdown
 })
 ```
 
-If knowing when shutdown finishes is all you want, you can simply use:
-
-```typescript
-Shutdown.onShutdown('final-message', () => {
-  console.log('Shutdown is complete!')
-});
-```
-
 ## Stacktrace 
-Integration with [`trace.js`](https://trace.js.org/) to handle asynchronous call stacks, and provide higher quality stack traces.  The stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.
+We integrate with [`trace.js`](https://trace.js.org/) to handle asynchronous call stacks, and provide higher quality stack traces.  The stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  This is primarily used for development purposes, and is disabled by default in `prod`.  That means in a production environment you will get the full stacktrace, in all it's glory.
 
 From a test scenario:
 ```typescript
@@ -86,26 +118,6 @@ Error: Uh oh
     at Object.load [as .ts] (./bin/travetto.js:27:12)
 ```
 
-
-## Phase management
-During the lifecycle of an application, there is a need to handle different phases of execution
-  * Recursively finds all `phase.<phase>.ts` files under `node_modules/@travetto`, and in the root of your project
-  * The format of each initializer is comprised of three main elements:
-    1. The phase of execution, which is defined by the file name `phase.<phase>.ts`
-    2. The priority within the phase, a number in which lower is of higher importance
-    3. The actual functionality to execute
-
-An example would be something like `phase.bootstrap.ts` in the [`Config`](https://github.com/travetto/travetto/tree/master/module/config) module.  
-
-```typescript
-export const init = {
-  priority: 1, // Lower is of more importance, and runs first
-  action: () => {
-    require('../src/service/config').init();
-  }
-}
-```
-
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
 
 ## Util 
@@ -121,17 +133,3 @@ Simple functions for providing a minimal facsimile to [`lodash`](https://lodash.
   * `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out
   * `strict`, will error out if the types do not match  
 * `throttle(fn, threshhold?: number)` produces a function that will execute `fn`, at most once per `threshold`
-
-## Watch
-A very simple file watching library, with a substantially smaller footprint than [`gaze`](https://github.com/shama/gaze) or [`chokidar`](https://github.com/paulmillr/chokidar).  
-
-```typescript
-const watcher = new Watcher({cwd: 'base/path/to/...'});
-watcher.add([
-  'local.config',
-  {
-    testFile: x => x.endsWith('.config') || x.endsWith('.config.json')
-  }
-]);
-watcher.run();
-```

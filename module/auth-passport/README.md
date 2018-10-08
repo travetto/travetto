@@ -1,7 +1,7 @@
 travetto: Auth-Passport
 ===
 
-Within the node ecosystem, the most prevalent auth framework is [`passport`](http://passportjs.org).  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for `passport` baked in, and registering and configuring a strategy is fairly straightforward.
+Within the node ecosystem, the most prevalent auth framework is [`passport`](http://passportjs.org).  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for `passport` baked in. Registering and configuring a `passport` strategy is fairly straightforward.
 
 ```typescript
 export const FB_AUTH = Symbol('facebook');

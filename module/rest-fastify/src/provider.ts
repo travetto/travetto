@@ -7,7 +7,7 @@ import { RestAppUtil } from '@travetto/rest/src/util/rest-app-util';
 
 import { FastifyConfig } from './config';
 
-export class FastifyAppProvider extends RestAppProvider {
+export class RestFastifyAppProvider extends RestAppProvider {
 
   private app: fastify.FastifyInstance;
   private config: FastifyConfig;

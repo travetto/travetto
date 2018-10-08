@@ -3,14 +3,8 @@ travetto: Asset-S3
 
 This provides an [`s3`](https://aws.amazon.com/documentation/s3/) implementation of the `AssetSource` that which is a backend for the [`Asset`](https://github.com/travetto/travetto/tree/master/module/asset) module.  
 
-The primary utilization of this module, is to configure the `AssetSource` injectable, and provide whatever configuration you would like to use.  
-
 ```typescript
 class AppConfig {
-  @InjectableFactory()
-  static getConf(): AssetS3Config {
-    return new AssetS3Config();
-  }
   @InjectableFactory()
   static getSource(cfg: AssetS3Config): AssetSource {
     return new AssetS3Source(cfg);
@@ -18,9 +12,7 @@ class AppConfig {
 }
 ```
 
-As seen, there is a default configuration that you can easily use, with some sensible defaults.
-
-The default configuration class looks like:
+There is a default configuration that you can easily use, with some sensible defaults.
 
 ```typescript
 @Config('asset.s3')

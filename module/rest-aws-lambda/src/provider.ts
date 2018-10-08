@@ -1,25 +1,32 @@
+import * as http from 'http';
+
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
-import * as session from 'express-session';
 import * as compression from 'compression';
+
+import * as awsServerlessExpress from 'aws-serverless-express';
+import * as awsServerlessExpressMiddleware from 'aws-serverless-express/middleware';
 
 import { ConfigLoader } from '@travetto/config';
 import { ControllerConfig, RestAppProvider } from '@travetto/rest';
 
 import { RouteStack } from './types';
-import { ExpressConfig } from './config';
+import { AwsLambdaConfig } from './config';
 
-export class ExpressAppProvider extends RestAppProvider<express.Application> {
+export class RestAwsLambdaAppProvider extends RestAppProvider<express.Application> {
 
   private app: express.Application;
-  private config: ExpressConfig;
+  private server: http.Server;
+  private config: AwsLambdaConfig;
+  private _handler: (event: any, context: any) => void;
 
   get _raw() {
     return this.app;
   }
 
   create(): express.Application {
+
     const app = express();
 
     app.use(compression());
@@ -27,8 +34,7 @@ export class ExpressAppProvider extends RestAppProvider<express.Application> {
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use(cookieParser());
-
-    app.use(session(this.config)); // session secret
+    app.use(awsServerlessExpressMiddleware.eventContext());
 
     // Enable proxy for cookies
     if (this.config.cookie.secure) {
@@ -39,10 +45,12 @@ export class ExpressAppProvider extends RestAppProvider<express.Application> {
   }
 
   async init() {
-    this.config = new ExpressConfig();
-    ConfigLoader.bindTo(this.config, 'rest.express');
+    this.config = new AwsLambdaConfig();
+    ConfigLoader.bindTo(this.config, 'rest.awsLambda');
 
     this.app = this.create();
+    this.server = awsServerlessExpress.createServer(this.app);
+    this._handler = awsServerlessExpress.proxy.bind(awsServerlessExpress, this.server);
   }
 
   async unregisterController(config: ControllerConfig) {
@@ -63,7 +71,16 @@ export class ExpressAppProvider extends RestAppProvider<express.Application> {
     this.app.use(cConfig.basePath, router);
   }
 
-  listen(port: number) {
-    this.app.listen(port);
+  listen() {
+    // No-op
+  }
+
+  async handle(event: any, context: any) {
+    if (!this._handler) {
+      await this.init();
+      this.listen();
+    }
+
+    this._handler(event, context);
   }
 }

@@ -7,7 +7,6 @@ The integration with the [`Rest`](https://github.com/travetto/travetto/tree/mast
 * Security information management
 * Patterns for auth framework integrations
 * Route declaration
-* Passport integration
 
 ## Security information management
 When working with framework's authentication, the user information is exposed via the ```Request``` object.  The auth functionality is exposed on the request as the property `auth`.
@@ -62,7 +61,7 @@ class DumbProvider extends AuthProvider<any> {
 }
 ```
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered ```AuthProvider```s are collected and stored for reference at runtime, via symbol.
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered ```AuthProvider```s are collected and stored for reference at runtime, via symbol. For example:
 
 ```typescript
 export const FB_AUTH = Symbol('facebook');

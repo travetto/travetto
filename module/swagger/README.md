@@ -1,6 +1,9 @@
 travetto: Swagger
 ===
-The module is provides a [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) v2 representation of the API metadata provided via the [`Express`](https://github.com/travetto/travetto/tree/master/module/express) and [`Schema`](https://github.com/travetto/travetto/tree/master/module/schema) modules.
+
+In the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap.
+
+The module is provides a [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) v2 representation of the API metadata provided via the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) and [`Schema`](https://github.com/travetto/travetto/tree/master/module/schema) modules.
 
 
 ## Configuration
@@ -31,4 +34,4 @@ api:
 ```
 
 ## Client Generation
-In addition to the [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) JSON file generation, the module also supports generating a client output as the schema changes.  
+In addition to the [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) JSON file generation, the module also supports generating a client via `swagger-codegen-cli`.  This module integrates with the file watching paradigm and can regenerate the swagger client as changes to endpoints and models are made during development.

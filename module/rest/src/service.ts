@@ -17,7 +17,7 @@ export class RestApp {
   private config: RestConfig;
 
   constructor(
-    public app: RestAppProvider<any>,
+    public provider: RestAppProvider<any>,
   ) { }
 
   private async registerController(c: Class, interceptors: RestInterceptor[]) {
@@ -30,13 +30,13 @@ export class RestApp {
       ep.handlerFinalized = EndpointUtil.createEndpointHandler(cConfig, ep, interceptors);
     }
 
-    return this.app.registerController(cConfig);
+    return this.provider.registerController(cConfig);
   }
 
   async init() {
     await ControllerRegistry.init();
 
-    await this.app.init();
+    await this.provider.init();
 
     const interceptors = DependencyRegistry.getCandidateTypes(RestInterceptor as Class)
       .filter(x => this.interceptorSet.interceptors.has(x.class));
@@ -73,7 +73,7 @@ export class RestApp {
     ControllerRegistry.on(e => {
       console.trace('Registry event', e);
       if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
-        this.app.unregisterController(ControllerRegistry.getExpired(e.prev)!);
+        this.provider.unregisterController(ControllerRegistry.getExpired(e.prev)!);
       }
       if (e.curr) {
         this.registerController(e.curr!, sorted);
@@ -84,6 +84,6 @@ export class RestApp {
   async run() {
     await this.init();
     console.info(`Listening on ${this.config.port}`);
-    this.app.listen(this.config.port);
+    this.provider.listen(this.config.port);
   }
 }

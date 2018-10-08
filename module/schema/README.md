@@ -60,6 +60,7 @@ This schema provides a powerful base for data binding and validation at runtime.
  * `@Ignore` exclude from auto schema registration
  * `@Integer` ensures number passed in is only a whole number
  * `@Float` ensures number passed in allows fractional values
+ * `@Currency` provides support for standard currency
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated.
 
@@ -118,9 +119,7 @@ Person(
 **NOTE** Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.
 
 ### Validation
-Validation is very similar to binding, but instead of attempting to assign values, any mismatch or violation of the schema will result in all errors being collected and returned.
-
-Given the same schema as above, 
+Validation is very similar to binding, but instead of attempting to assign values, any mismatch or violation of the schema will result in errors. All errors will be collected and returned. Given the same schema as above, 
 
 ```typescript
 @Schema()
@@ -169,16 +168,14 @@ errors:
     message: address.street2 is a required field
 ```
 
-## Extensions
-Integration with other modules can be supported by extensions.  The dependencies are `optionalExtensionDependencies` and must be installed directly if you want to use them:
+## Rest - Extension
+The module provides high level access for [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) support, via decorators, for validating and typing request bodies.  
 
-### Express
-The module provides high level access for [`Express`](https://github.com/travetto/travetto/tree/master/module/express) support, via decorators, for validating and typing request bodies.  
-
-## Decorators
 `@SchemaBody` provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
  ```typescript
- class User {
+ import { SearchBody } from '@travetto/schema/extension/rest';
+
+class User {
    name: string;
    age: number;
  }
@@ -193,6 +190,8 @@ The module provides high level access for [`Express`](https://github.com/travett
  ```
 `@SchemaQuery` provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request. 
 ```typescript
+ import { SearchQuery } from '@travetto/schema/extension/rest';
+
  class SearchParams {
    page: number = 0;
    pageSize: number = 100;
@@ -206,3 +205,81 @@ The module provides high level access for [`Express`](https://github.com/travett
  ...
  ```
 
+ ## Generation - Extension
+
+In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward.  The generation utility is built upon [`faker`](https://github.com/marak/Faker.js/), mapping data types, and various field names into specific `faker` generation routines.
+
+By default all types are mapped as-is:
+* `string`
+* `number`
+* `Date`
+* `boolean`
+* Enumerations as `string` or `number` types.
+* Provided regular expressions:
+  * email
+  * url
+  * telephone
+  * postal_code
+* Sub-schemas as registered via `@Schema` decorators.
+
+In addition to the general types, the code relies upon name matching to provide additional refinement:
+* string
+ * `/^(image|img).*url$/` - image.imageUrl
+ * `/^url$/` - internet.url
+ * `/^email(addr(ress)?)?$/` - internet.email
+ * `/^(tele)?phone(num|number)?$/` - phone.phoneNumber
+ * `/^((postal|zip)code)|zip$/` - address.zipCode
+ * `/f(irst)?name/` - name.firstName
+ * `/l(ast)?name/` - name.lastName
+ * `/^ip(add(ress)?)?$/` - internet.ip
+ * `/^ip(add(ress)?)?(v?)6$/` - internet.ipv6
+ * `/^username$/` - internet.userName
+ * `/^domain(name)?$/` - internet.domainName
+ * `/^file(path|name)?$/` - system.filePath
+ * `/^street(1)?$/` - address.streetAddress
+ * `/^street2$/` - address.secondaryAddress
+ * `/^county$/` - address.county
+ * `/^country$/` - address.country
+ * `/^state$/` - address.state
+ * `/^lon(gitude)/` - address.longitude
+ * `/^lat(itude)/` - address.latitude
+ * `/(profile).*(image|img)/` - image.avatar
+ * `/(image|img)/` - image.image
+ * `/^company(name)?$/` - company.companyName
+ * `/(desc|description)$/` - lorem.sentences(10)
+* Date
+ * `/dob|birth/` - date.past(60)
+ * `/creat(e|ion)/` - dates between 200 and 100 days ago
+ * `/(update|modif(y|ied))/` - dates between 100 and 50 days ago
+* number
+ * `/(price|amt|amount)$/` - parseFloat(finance.amount()
+
+An example of this would be:
+```typescript
+
+@Schema()
+class Address {
+  street1: string;
+  street2?: string;
+  city: string;
+  state: string;
+  country: string;
+}
+
+@Schema()
+class User {
+  fName: string;
+  lName: string;
+  email: string;
+  phone: string;
+  dob?: Date;
+  address: Address;
+}
+
+const user = GenerateUtil.generate(User);
+assert(user instanceof User);
+assert.ok(user.fName);
+assert.ok(user.address);
+assert(user.address instanceof Address);
+
+```

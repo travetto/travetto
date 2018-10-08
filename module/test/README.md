@@ -1,14 +1,12 @@
 travetto: Test
 ===
 
-This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the [`TAP 13`](https://testanything.org/tap-version-13-specification.html) format. 
+This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the [`TAP 13`](https://testanything.org/tap-version-13-specification.html) format to be consumed by other processes. 
 
-The [`test-plugin`](https://www.github.com/travetto/test-plugin) directly integrates with the module to provide real-time feedback on unit tests. 
+**NOTE** All tests should be under the `test/.*` folders.  The pattern for tests is defined as a regex and not standard globbing.
 
 ## Definition
-A test suite is a collection of individual tests.  All test suites are classes with the `@Suite` decorator. Tests are defined as methods on the suite class, using the `@Test` decorator.  All tests intrinsically support async/await.  
-
-Additionally, the the suite classes support [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di).
+A test suite is a collection of individual tests.  All test suites are classes with the `@Suite` decorator. Tests are defined as methods on the suite class, using the `@Test` decorator.  All tests intrinsically support `async`/`await`.  
 
 A simple example would be:
 ```typescript
@@ -33,9 +31,8 @@ class SimpleTest {
 ```
 
 ## Assertions
-A common aspect of the tests themselves are the assertions that are made.  `Node` provides a built-in [`assert`](https://nodejs.org/api/assert.html) library.  The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions. 
+A common aspect of the tests themselves are the assertions that are made.  `Node` provides a built-in [`assert`](https://nodejs.org/api/assert.html) library.  The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions.  For example:
 
-For example:
 ```typescript
 assert({size: 20, address: { state: 'VA' }} === {});
 ```
@@ -48,11 +45,16 @@ AssertionError(
 )
 ```
 
-## Execution
-`travetto-test` is packaged as a included script to execute tests from the command line.  The script can be invoked as 
+The equivalences for the assertion operations are:
 
-```bash
-./node_modules/.bin/travetto-test test/.*
-```
-
-All tests should be under the `test/.*` folders.  The pattern for tests is defined as a regex and not standard globbing.
+* `assert(a == b)` as `assert.equal(a, b)`
+* `assert(a !== b)` as `assert.notEqual(a, b)`
+* `assert(a === b)` as `assert.strictEqual(a, b)`
+* `assert(a !== b)` as `assert.notStrictEqual(a, b)`
+* `assert(a >= b)` as `assert.greaterThanEqual(a, b)`
+* `assert(a > b)` as `assert.greaterThan(a, b)`
+* `assert(a <= b)` as `assert.lessThanEqual(a, b)`
+* `assert(a < b)` as `assert.lessThan(a, b)`
+* `assert(a instanceof b)` as `assert.instanceOf(a, b)`
+* `assert(a.includes(b))` as `assert.ok(a.includes(b))`
+* `assert(/a/.test(b))` as `assert.ok(/a/.test(b))`
