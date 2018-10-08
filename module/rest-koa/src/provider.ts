@@ -10,7 +10,7 @@ import { RestAppUtil } from '@travetto/rest/src/util/rest-app-util';
 
 import { KoaConfig } from './config';
 
-export class KoaAppProvider extends RestAppProvider {
+export class RestKoaAppProvider extends RestAppProvider {
 
   private app: koa;
   private config: KoaConfig;

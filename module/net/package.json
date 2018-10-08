@@ -3,25 +3,19 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "dependencies": {
-    "@travetto/base": "^0.3.17",
-    "@types/generic-pool": "^3.1.4",
-    "generic-pool": "^3.4.2"
+    "@travetto/base": "^0.3.17"
   },
-  "description": "Worker pool logic with constructs for concurrency management",
+  "description": "Network utilities of the travetto framework",
   "homepage": "https://travetto.io",
   "keywords": [
-    "pool",
+    "travetto",
     "typescript",
-    "generic-pool",
-    "travetto"
+    "http-request"
   ],
   "license": "MIT",
   "main": "index.ts",
-  "name": "@travetto/pool",
+  "name": "@travetto/net",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },

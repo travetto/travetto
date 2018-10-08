@@ -43,7 +43,7 @@ class UserManager {
 
 ```
 
-The [`ModelService`](./src/service/model.ts) itself relies upon a [`ModelSource`](./src/service/source.ts) which is the driver for the storage layer. Currently the only `ModelSource` implementations are for [`mongodb`](https://mongodb.com) and [`elasticsearch`](https://elastic.co), with sql support on the roadmap.
+The [`ModelService`](./src/service/model.ts) itself relies upon a [`ModelSource`](./src/service/source.ts) which is the driver for the storage layer.  
 
 During development, `ModelSource` supports the ability to respond to model changes in real-time, and to modify the underlying storage mechanism.  An example of this would be `elasticsearch` schemas being updated as fields are added or removed from the `Model` class.
 
@@ -53,37 +53,37 @@ Additionally there is a class [`ClassModelService`](./src/service/class-model.ts
 One of the complexities of abstracting multiple storage mechanisms, is providing a consistent query language.  The query language the module uses is a derivation of `mongodb`'s query language, with some restrictions, additions, and caveats. Additionally, given the nature of typescript, all queries are statically typed, and will catch type errors at compile time.
 
 ### General Fields
-* ```field : { $eq : T }``` to determine if a field is equal to a value
-* ```field : { $ne: T }``` to determine if a field is not equal to a value
-* ```field : { $exists : boolean }``` to determine if a field exists or not
-* ```field : T``` to see if the field is equal to whatever value is passed in
+```field : { $eq : T }``` to determine if a field is equal to a value
+```field : { $ne: T }``` to determine if a field is not equal to a value
+```field : { $exists : boolean }``` to determine if a field exists or not
+```field : T``` to see if the field is equal to whatever value is passed in
 
 ### General Single Valued Fields
-* ```field : { $in : T[] }``` to see if a record's value appears in the array provided to `$in`
-* ```field : { $nin: T[] }``` to see if a record's value does not appear in the array provided to `$in`
+```field : { $in : T[] }``` to see if a record's value appears in the array provided to `$in`
+```field : { $nin: T[] }``` to see if a record's value does not appear in the array provided to `$in`
 
 ### Ordered Fields
-* ```field : { $lt: T }``` checks if value is less than
-* ```field : { $lte: T }``` checks if value is less than or equal to
-* ```field : { $gt: T }``` checks if value is greater than
-* ```field : { $gte : T }``` checks if value is greater than or equal to
+```field : { $lt: T }``` checks if value is less than
+```field : { $lte: T }``` checks if value is less than or equal to
+```field : { $gt: T }``` checks if value is greater than
+```field : { $gte : T }``` checks if value is greater than or equal to
 
 ### Array Fields
-* ```field : { $all: T[]] }``` checks to see if the records value contains everything within `$all`
+```field : { $all: T[]] }``` checks to see if the records value contains everything within `$all`
 
 ### String Fields
-* ```field : { $regex: RegExp; }``` checks the field against the regular expression
+```field : { $regex: RegExp; }``` checks the field against the regular expression
 
 ### Geo Point Fields
-* ```field : { $geoWithin: Point[] }``` determines if the value is within the bounding region of the points
-* ```field : { $geoIntersects: Point[] }``` determines if the value intersects with the bounding region of the points
+```field : { $geoWithin: Point[] }``` determines if the value is within the bounding region of the points
+```field : { $geoIntersects: Point[] }``` determines if the value intersects with the bounding region of the points
 
 ### Groupings
-* ```{ $and: [] }``` provides a grouping in which all sub clauses are required
-* ```{ $or: [] }``` provides a grouping in which at least one of the sub clauses is required
-* ```{ $not : {} }``` negates a clause
+```{ $and: [] }``` provides a grouping in which all sub clauses are required
+```{ $or: [] }``` provides a grouping in which at least one of the sub clauses is required
+```{ $not : {} }``` negates a clause
 
-A sample query for `User`s might be:
+A sample query for `User`'s might be:
 ```typescript
 this.service.getAllByQuery(User, {
   $and: [
@@ -105,11 +105,10 @@ this.service.getAllByQuery(User, {
 
 This would find all users who are over 35 and that have the `contact` field specified. 
 
-## Extensions
-Integration with other modules can be supported by extensions.  The dependencies are `optionalExtensionDependencies` and must be installed directly if you want to use them:
+<!-- SUB -->
 
-### Express
-[`Express`](https://github.com/travetto/travetto/tree/master/module/express) support with the `@ModelController` for exposing common RESTful patterns for routes.
+## Rest - Extension
+To facilitate common RESTful patterns, the module exposes [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) support in the form of `@ModelController`.
 
 ```typescript
 @ModelController('/user', User) 

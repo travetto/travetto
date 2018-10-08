@@ -1,15 +1,55 @@
 travetto: Email
 ===
-A standard API for sending and templating emails. The templating engine is optional, and will only fail if you attempt to send a templatedEmail without declaring the dependency first.
+A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the `NullTransport` which will just drop emails. The structure of the API is derived from  [`nodemailer`](https://nodemailer.com/about/), but is compatible with any library that can handle the `MessageOptions` input.
 
-To send an email, a transport must be defined.  By default the module ships with a `NullTransport` which will just consume messages quietly.  The structure of the API is derived from  [`nodemailer`](https://nodemailer.com/about/), but is compatible with any library that can handle the `MessageOptions` input.
+To expose the necessary email transport, the following pattern is commonly used:
 
-Given the amorphous nature of the transports, in `MailConfig`, the `transport` field is open for any configuration that you may want there.
+```typescript
+class Config {
+  @InjectableFactory()
+  static getTransport(): MailTransport {
+    return new NullTransport();
+  }
+}
+```
 
-## Extensions
-Due to the connection with `nodemailer`, all nodemailer extensions should be usable out of the box, assuming the correct dependencies are installed.
+Given the amorphous nature of transports, the `transport` field in `MailConfig` is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
 
-When sending emails you can use the following transports:
-* `sendmail` to send all messages via the sendmail operation
-* `smtp` to utilizing the protocol directly and send to a specific server
-* `ses` send via Amazon's SES apis
+## Nodemailer - Extension
+Due to the connection with `nodemailer`, all nodemailer extensions should be usable out of the box. The primary `nodemailer` modules are provided (assuming dependencies are installed):
+
+`sendmail` to send all messages via the sendmail operation
+```typescript
+import { SendMailTransport } from '@travetto/email/extension/nodemailer/sendmail';
+
+class Config {
+  @InjectableFactory()
+  static getTransport(): MailTransport {
+    return new SendMailTransport();
+  }
+}
+```
+
+`smtp` to utilizing the protocol directly and send to a specific server
+```typescript
+import { SmtpTransport } from '@travetto/email/extension/nodemailer/smtp';
+
+class Config {
+  @InjectableFactory()
+  static getTransport(): MailTransport {
+    return new SmtpTransport();
+  }
+}
+```
+
+`ses` send via Amazon's SES apis
+```typescript
+import { SesTransport } from '@travetto/email/extension/nodemailer/ses';
+
+class Config {
+  @InjectableFactory()
+  static getTransport(): MailTransport {
+    return new SesTransport();
+  }
+}
+```

@@ -1,43 +1,18 @@
 travetto: Config 
 ===
-The config module provides support for loading application config on startup. Configuration values support all valid [`yaml`](https://en.wikipedia.org/wiki/YAML) constructs.
+The config module provides support for loading application config on startup. Configuration values support all valid [`yaml`](https://en.wikipedia.org/wiki/YAML) constructs.  The configuration information is comprised of:
+* `yaml` files
+* environment variables
 
 ## Resolution
-Config loading follows a defined resolution path:
+Config loading follows a defined resolution path, below is the order in increasing specificity:
 
-1. Load framework module configurations.  Defines general configuration that should be easily overridden.
-```bash
-node_modules/@travetto/<module>/config/*.yml
-```
+1. `node_modules/@travetto/<module>/config/*.yml` - Load framework module configurations.  Defines general configuration that should be easily 
+1. `config/*.yml` - Load local application configurations
+1. `profile/*.yml` - Load profile specific configurations as defined by the values in `process.env.PROFILE`, `process.env.ENV`.
+1. `process.env` - Read startup configuration from environment to allow for overriding any values. Because we are overriding a [`yaml`](https://en.wikipedia.org/wiki/YAML) based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as `UPPER_SNAKE_CASE`. When reading from `process.env` we will map `UPPER_SNAKE_CASE` to `upper.snake.case`, and will attempt to match by case-insensitive name.
 
-2. Load local application configurations
-```bash
-config/*.yml
-```
-
-3. Load profile specific configurations as defined by the values in `process.env.PROFILE`, `process.env.ENV` or passed in as command line arguments.
-```properties
-process.env.PROFILE=<val1>,<val2>...
-```
-or
-```properties
-process.env.ENV=<val1>,<val2>...
-```
-would load
-```bash
-profile/<val1>.yml
-profile/<val2>.yml
-```
-
-Additionally you can achieve the above state by invoking the app with parameters:
-```bash
-$ npm start <val1> <val2>
-```
-
-
-4. Read startup configuration from `process.env` to allow for overriding any values. Because we are overriding a[`yaml`](https://en.wikipedia.org/wiki/YAML) based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as `UPPER_SNAKE_CASE`. When reading from `process.env` we will map `UPPER_SNAKE_CASE` to `upper.snake.case`, and will attempt to match by case-insensitive name.
-
-## Example Resolution
+### A Complete Example
 
 A more complete example setup would look like:
 
@@ -77,11 +52,11 @@ database:
     password: <secret>
 ```
 
-## Reading
+## Consuming
 
-The module provides a decorator, `@Config` that allows for classes to automatically be bound with config information on post construction. The decorator will install a `postConstruct` method if not already defined, that allows actually performs the binding of configuration.  
+The `ConfigLoader` service provides direct access to all of the loaded configuration. For simplicity, a decorator, `@Config` allows for classes to automatically be bound with config information on post construction. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matterns.
 
-The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class
+The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 
 ```typescript
 @Config('database')
@@ -95,7 +70,7 @@ class DBConfig {
 }
 ```
 
-And the corresponding config file
+And the corresponding config file:
 
 ```yaml
 database:

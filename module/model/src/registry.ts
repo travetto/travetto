@@ -1,4 +1,4 @@
-import { SchemaRegistry, SchemaChangeEvent } from '@travetto/schema';
+import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry, Class } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 

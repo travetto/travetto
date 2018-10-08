@@ -1,4 +1,72 @@
-travetto: CLI
+CLI Support
 ===
 
-Provides a cohesive interface for executing `travetto` functionality.  This will be the location of future functionality for initializing and creating applications.
+The cli is the primary structure for interacting with the external requirements of the framework.  This can range from running tests, to running applications, to generating email templates. The main executable can be installed globally or locally.  If installed globally and locally, it will defer to the local installation for execution.
+
+As is the custom, modules are able to register their own cli extensions as scripts, whose name starts with `travetto-cli-`.  These scripts are then picked up at runtime and all available options are provided when viewing the help documentation.  The following are all the supported cli operations and the various settings they allow.
+
+## General
+```bash
+travetto --help
+Usage: travetto [options] 
+Options:
+  ...
+```
+This will show all the available options/choices that are exposed given the currently installed modules.
+
+
+## Base
+```bash
+travetto clean
+```
+
+Clears [`Base`](https://github.com/travetto/travetto/tree/master/module/base) compilation cache to handle any inconsistencies that may arise from checking timestamps for cache freshness.
+
+## Compiler
+```bash
+travetto compile
+  -o, --output <output>  # Output directory
+  -r, --runtime-dir [runtimeDir]  # Expected root path during runtime      
+```
+This command line operation invokes the [`Compiler`](https://github.com/travetto/travetto/tree/master/module/compiler) to pre-compile of all the application source code.  This is useful for production builds when startup performance is critical.
+
+## Dependency Injection
+```bash
+travetto run [application]
+  -e, --env [env]  # Application environment
+  -w, --watch [watch]  # Run the application in watch mode
+  -p, --profile [profile]  # Specify additional application profiles
+```
+The run command allows for invocation of [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di)-based applications as defined by the `@Application` decorator.  Additionally, the environment can manually be specified (dev, test, prod, e2e) as well as whether or not the application should be run in `watch` mode.
+
+## Testing
+```bash
+travetto test [regexes...]
+  -f, --format <format>  # Output format for test results, valid formats are: tap (default), json, noop, exec, event
+  -c, --concurrency <concurrency>  # Number of tests to run concurrently, defaults to number of CPUs - 1
+  -m, --mode <mode>  # Test run mode: all (default), single
+```
+The regexes are the patterns of tests you want to run, and all tests must be found under the `test/` folder.
+
+The test command is the only supported method for invoking the [`Test`](https://github.com/travetto/travetto/tree/master/module/test) module via the command line.  As stated in the test documentation, the primary output format is `tap`.  Additionally the code supports `json` and `event` as formats that can be consumed programmatically.  `exec` is used internally for sub-dividing tests to run concurrently, and communicate results over IPC.
+
+## Email Templating
+```bash
+travetto email-template
+``` 
+
+This command is provided by [`email-template`](https://github.com/travetto/travetto/tree/master/module/email-template).  It will spin up a web server (port 3839) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline.  You would navigate to the path of an asset, e.g. `http://localhost:3839/my-email.html`, to test and develop the file in `<root>/assets/my-email.html`.  You can also change the extension to `.txt` to see the textual representation.
+
+Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
+
+## Swagger Client Generation
+```bash
+travetto swagger-client
+  -o, --output [output]  # Output folder, defaults to ./api-client
+  -f, --format [format]  # Client format, defaults to 'typescript-angular'
+  -a, --additional-properties [props]  # Additional format properties
+```
+
+The command relies upon `swagger-codegen` to generate the output client code.  The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `swagger.json`.  Once produced, the code will invoke `swagger-codegen` to produce the desired client code in the desired location.  
+
+**NOTE** The [`Swagger`](https://github.com/travetto/travetto/tree/master/module/swagger) module supports generating the client in real-time while listening for changes to routes and models.

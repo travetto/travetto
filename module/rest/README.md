@@ -1,17 +1,26 @@
 travetto: Rest
 ===
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [`express`](https://expressjs.com) in the `Request` and `Response` objects).  Currently the platform supports are [`Express`](https://github.com/travetto/travetto/tree/master/module/rest-express), [`Fastify`](https://github.com/travetto/travetto/tree/master/module/rest-fastify) and [`Koa`](https://github.com/travetto/travetto/tree/master/module/rest-koa), with more being added in the future.
 
-## Route management 
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [`express`](https://expressjs.com) in the `Request` and `Response` objects). 
 
-### Controller
+## Routes: Controller
 To define a route, you must first declare a `@Controller` which is only allowed on classes. Controllers can be configured with:
 * `title` - The definition of the controller
 * `description` - High level description fo the controller
 
 [`JSDoc`](http://usejsdoc.org/about-getting-started.html) comments can also be used to define the `title` attribute.
 
-### Endpoints
+```typescript
+/**
+ * Provides basic interface to our primary service
+ */
+@Controller('/simple-route')
+class SimpleController {
+  ...
+}
+```
+
+## Routes: Endpoints
 Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported.  
 
 The HTTP methods that are supported via:
@@ -33,13 +42,32 @@ Each endpoint decorator handles the following config:
 
 Additionally, the annotated return type on the method will also be used to describe the `responseType` if specified.
 
+```typescript
+/**
+ * Provides basic interface to our primary service
+ */
+@Controller('/simple-route')
+class SimpleController {
+
+  /**
+   * Gets the most basic of data
+   */
+  @Get('/')
+  simpleGet():Promise<Data> {
+    ...
+    return data;
+  }
+}
+```
+
+
 ### Parameters
 Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined  in three areas:
 * `@PathParam`
 * `@QueryParam`
 * `@BodyParam`
 
-Each `@*Param` can be configured to indicate:
+Each `@Param` can be configured to indicate:
 * `name` - Name of param, field name
 * `description` - Description of param
 * `required?` - Is the field required?
@@ -48,7 +76,7 @@ Each `@*Param` can be configured to indicate:
 [`JSDoc`](http://usejsdoc.org/about-getting-started.html) comments can also be used to describe parameters using `@param` tags in the comment.
 
 ### Example
-A simple example is:
+A simple example could look like:
 
 ```typescript
 @Controller('/simple')
@@ -104,22 +132,6 @@ The module provides standard structure for rendering content on the response.  T
 
 Additionally, there is support for typing requests and request bodies.  This can be utilized by other modules to handle special types of requests.
  
-```typescript
-@Injectable()
-export class LoggingInterceptor extends ExpressInterceptor {
-  intercept(req: Request, res: Response, next: Function) {
-    console.log(req.method, req.path, req.query);
-
-    if (next) {
-      next();
-    }
-  }
-}
-```
-
-## Documentation
-As shown above, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. To generate a usable API doc, a separate module should be used. Currently [`Swagger`](https://github.com/travetto/travetto/tree/master/module/swagger) is the only module that exists, but other implementations should be available in the future.
-
 ## Creating and Running an App
 To run a REST server, you will need to construct an entry point using the `@Application` decorator, as well as define a valid [`RestAppProvider`](./src/types.ts) to provide initialization for the application.  This could look like:
 
@@ -129,7 +141,7 @@ export class SampleApp {
 
   @InjectableFactory()
   static getProvider(): RestAppProvider {
-    return new ExpressAppProvider();
+    return new RestExpressAppProvider();
   }
 
   @Inject()
@@ -146,12 +158,20 @@ export class SampleApp {
 And using the pattern established in the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) module, you would run your program using `npx travetto sample`.
 
 ## Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) by extending the [`RestInterceptor`](./src/interceptor) class.  The interceptors are tied to the defined `Request` and `Response` objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed.  Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module/asset-rest) is implemented in the fashion, as well as [`Auth-Rest`](https://github.com/travetto/travetto/tree/master/module/auth-rest).
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) by extending the [`RestInterceptor`](./src/interceptor) class.  The interceptors are tied to the defined `Request` and `Response` objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
-## Extensions
-Integration with other modules can be supported by extensions.  The dependencies are in `optionalExtensionDependencies` and must be installed directly if you want to use them:
+```typescript
+@Injectable()
+export class LoggingInterceptor extends ExpressInterceptor {
+  async intercept(req: Request, res: Response) {
+    console.log(req.method, req.path, req.query);
+  }
+}
+```
 
-### Context
+Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module/asset-rest) is implemented in the fashion, as well as [`Auth-Rest`](https://github.com/travetto/travetto/tree/master/module/auth-rest).
+
+## Context Support
 [`Context`](https://github.com/travetto/travetto/tree/master/module/context) provides support for automatically injecting an async context into every request. The context management is provided via an `Interceptor` and is transparent to the programmer.
 
 ```typescript

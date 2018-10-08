@@ -11,7 +11,25 @@ The primary flow occurs on initialization of the application. At that point, the
 1. Initialize `RootRegistry` and will automatically register/load all relevant files
 2. As files are imported, decorators within the files will record various metadata relevant to the respective registries 
 3. When all files are processed, the `RootRegistry` is finished, and it will signal to anything waiting on registered data that its free to use it.  
-This flow ensures all files are loaded and processed before application starts.
+This flow ensures all files are loaded and processed before application starts. A sample registry, pulled from the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module, looks like:
+
+```typescript
+export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
+  constructor() {
+    super(SchemaRegistry, DependencyRegistry);
+  }
+
+  createPending(cls: Class) {
+    return { class: cls };
+  }
+
+  onInstallFinalize<T>(cls: Class<T>) {
+    return this.pending.get(cls.__id)! as ModelOptions<T>;
+  }
+}
+```
+
+The registry is a `MetadataRegistry` that depends on the `SchemaRegistry` and the `DependencyRegistry`.
 
 ### Live Flow
 At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries.

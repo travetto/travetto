@@ -1,7 +1,7 @@
-travetto: Util
+travetto: Net
 ===
 
-Common utilities for executing HTTP requests and any other future catch alls. 
+Network utilities used by the framework. 
 
 ## HTTP Requests
 The http request functionality exists to allow for simple usage of the `node` [`http`](https://nodejs.org/api/http.html) and [`https`](https://nodejs.org/api/http.html) modules.  This functionality exists, in lieu of alternatives, as a means to provide the smallest footprint  possible.  The logic itself is simple:

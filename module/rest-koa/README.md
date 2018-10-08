@@ -1,25 +1,13 @@
 travetto: Rest-Koa
 ===
-The module is a [`koa`](https://koajs.com/) provider for the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) module.
-
-## Creating and Running an App
-To run a REST server, you will need to construct an entry point using the `@Application` decorator, as well as define a valid [`RestAppProvider`](./src/types.ts) to provide initialization for the application.  This would look like:
+The module is a [`koa`](https://koajs.com/) provider for the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) module. A valid configuration of [`RestAppProvider`](./src/types.ts) would look like:
 
 ```typescript
-@Application('sample')
-export class SampleApp {
+export class SampleConfig {
 
   @InjectableFactory()
   static getProvider(): RestAppProvider {
-    return new KoaAppProvider();
-  }
-
-constructor(private app: RestApp) { }
-
-  run() {
-    this.app.run();
+    return new RestKoaAppProvider();
   }
 }
 ```
-
-And using the pattern established in the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) module, you would run your program using `npx travetto sample`.

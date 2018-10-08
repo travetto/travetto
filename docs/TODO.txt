@@ -1,11 +1,21 @@
 In-Progress
 ==============
-? Lambda for REST
-  X Entire rest app as an AWS lambda
-  X Individual routes as individual lambdas
-  X API Gateway configuration
-  ? Auto deployment of application
-  X CLI entry point to facilitate
+
+? Blog Post about 
+  - CLI
+  - Generator
+  - Lambda Goals
+  - Model SQL status
+  - Model query language support
+
+- Model
+  - Query Language Support
+
+- Auth
+  - Move to JWT as prep for Lambda
+
+Up Next
+==============
 
 ? SQL - as a doc store, limited functionality
   ? Model support for SQL databases
@@ -13,55 +23,17 @@ In-Progress
   X Using Sequelize?
   X Already supports most of the needed features, might be an easy win  
 
-Up Next
-==============
-- Auth
-  - Move to JWT as prep for Lambda
-
-- Model
-  - Query Language Support
-
-- Docs
-  - Reorganize Docs into high level groupings
-    - Asset
-    - Auth
-    - Core
-      - Base
-      - Compiler
-      - Config
-      - Context
-      - Log
-      - Registry
-    - Dependency Injection
-    - Email
-    - Model
-    - Schema
-    - Rest
-      + Swagger
-    - Test
-    - Utils
-      - Cache
-      - Pool
-      - Exec
-      - Schedule
-      - Util
-    - Extras
-      - CLI
-      - Yeoman
-
-  - Document @Application
-  - Document CLI behavior within module
-  - Document Yeoman Generator
-    - Integrate with Getting Started
-  - Blog Post about 
-    - CLI
-    - Generator
-    - Lambda Goals
-    - Model SQL
-
+? Lambda for REST
+  X Entire rest app as an AWS lambda
+  X Individual routes as individual lambdas
+  X API Gateway configuration
+  ? Auto deployment of application
+  X CLI entry point to facilitate
 
 To Do
 ==============
+- How to develop, markdown for how to contribute
+
 - Yeoman Generator
   - Lambda
   - Email
@@ -169,3 +141,45 @@ Announce
   X Blog
   X Twitter
   - Friends/Coworkers
+
+Docs, v2
+  X Reorganize Docs into high level groupings
+  X Rewrite Docs:
+    X base
+    X config
+    X log    
+    X exec
+    X schedule
+    X util
+    X cache
+    X compiler
+    X context
+    X registry
+    X schema
+    X asset
+    X asset-mongo
+    X asset-rest
+    X asset-s3
+    X rest
+    X rest-aws-lambda
+    X rest-express
+    X rest-fastify
+    X rest-koa
+    X swagger
+    X model
+    X model-elasticsearch
+    X model-mongo
+    X auth
+    X auth-model
+    X auth-passport
+    X auth-rest
+    X di
+      X Document @Application
+    X email
+    X email-template
+    X test
+    X cli      
+    X generator-app
+      X Document Yeoman Generator
+    X Overview diagram    
+    X Integrate with Getting Started with yeoman generator

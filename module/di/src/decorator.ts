@@ -1,7 +1,6 @@
 import { Class } from '@travetto/registry';
-import { Env } from '@travetto/base';
 
-import { InjectableFactoryConfig, InjectableConfig, Dependency, Runnable } from './types';
+import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry } from './registry';
 
 function extractSymbolOrConfig<T extends { qualifier?: Symbol }>(args: any[]) {

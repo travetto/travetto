@@ -1,16 +1,10 @@
 travetto: Asset-Mongo
 ===
 
-This provides a [`mongodb`](https://mongodb.com) implementation of the `AssetSource` that which is a backend for the [`Asset`](https://github.com/travetto/travetto/tree/master/module/asset) module.  
-
-The primary utilization of this module, is to configure the `AssetSource` injectable, and provide whatever configuration you would like to use.  
+This provides a [`mongodb`](https://mongodb.com) implementation of the `AssetSource` which is a backend for the [`Asset`](https://github.com/travetto/travetto/tree/master/module/asset) module.  
 
 ```typescript
 class AppConfig {
-  @InjectableFactory()
-  static getConf(): AssetMongoConfig {
-    return new AssetMongoConfig();
-  }
   @InjectableFactory()
   static getSource(cfg: AssetMongoConfig): AssetSource {
     return new AssetMongoSource(cfg);
@@ -18,9 +12,7 @@ class AppConfig {
 }
 ```
 
-As seen, there is a default configuration that you can easily use, with some sensible defaults.
-
-The default configuration class looks like:
+There is a default configuration that you can easily use, with some sensible defaults. 
 
 ```typescript
 @Config('asset.mongo')

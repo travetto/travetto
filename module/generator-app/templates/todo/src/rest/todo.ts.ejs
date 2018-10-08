@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Delete, DisableCache, Request } from '@travetto/rest';
+import { Controller, Get, Put, Post, Delete, DisableCache, Request, TypedBody } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 import { ModelService } from '@travetto/model';
 import { SchemaBody, SchemaQuery } from '@travetto/schema/extension/rest';
@@ -26,7 +26,7 @@ export class TodoController {
   @Get('/')
   @SchemaQuery(Query)
   @DisableCache()
-  async getAll(req: Request) {
+  async getAll(req: Request): Promise<Todo[]> {
     return this.source.getAllByQuery(Todo, req.query.q);
   }
 
@@ -35,7 +35,7 @@ export class TodoController {
    */
   @Get('/:id')
   @DisableCache()
-  async getOne(req: Request) {
+  async getOne(req: Request): Promise<Todo> {
     return this.source.getById(Todo, req.params.id);
   }
 
@@ -43,8 +43,8 @@ export class TodoController {
    * Create a Todo
    */
   @Post('/')
-  @SchemaBody(Todo)
-  async save(req: Request) {
+  @SchemaBody(Todo): Promise<Todo>
+  async save(req: TypedBody<Todo>) {
     return this.source.save(Todo, req.body);
   }
 
@@ -53,7 +53,7 @@ export class TodoController {
    */
   @Put('/:id')
   @SchemaBody(Todo)
-  async update(req: Request) {
+  async update(req: TypedBody<Todo>): Promise<Todo> {
     return this.source.update(Todo, req.body);
   }
 
@@ -61,7 +61,7 @@ export class TodoController {
    * Delete a Todo
    */
   @Delete('/:id')
-  async remove(req: Request) {
+  async remove(req: Request): Promise<void> {
     return this.source.deleteById(Todo, req.params.id);
   }
 }
