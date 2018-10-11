@@ -2,17 +2,17 @@ In-Progress
 ==============
 
 ? Blog Post about 
-  - CLI
-  - Generator
-  - Lambda Goals
-  - Model SQL status
-  - Model query language support
+  ? CLI
+  ? Generator
+  ? Lambda Goals
+  ? Model SQL status
+  ? Model query language support
 
 - Model
   - Query Language Support
 
 - Auth
-  - Move to JWT as prep for Lambda
+  - Move to JWT as session store, prep for Lambda
 
 Up Next
 ==============
