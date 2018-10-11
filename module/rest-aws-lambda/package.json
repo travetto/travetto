@@ -7,7 +7,7 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-aws-lambda": "bin/travetto-cli-aws-lambda.js"
+    "travetto-cli-aws-lambda": "bin/travetto-cli-rest-aws-lambda.js"
   },
   "dependencies": {
     "@travetto/rest": "^0.3.20",
