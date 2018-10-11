@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth": "^0.3.18",
-    "@travetto/rest": "^0.3.19"
+    "@travetto/auth": "^0.3.19",
+    "@travetto/rest": "^0.3.20"
   },
   "description": "Rest authentication integration support for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.3.19"
+    "@travetto/test": "^0.3.20"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -27,5 +27,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.19"
+  "version": "0.3.20"
 }
