@@ -18,4 +18,4 @@ The framework relies up five key principles:
 Every module within the framework follows the overarching philosophy.  For the most part each module is as isolated as possible.  The modules are stacked vertically to generally indicate dependencies.  The only exception is for common libraries, which are unrelated.
 
 
-![Module Layout](https://2.bp.blogspot.com/-UHEnn_I_CnA/WzmNrEgL7ZI/AAAAAAAARPw/nEkywI1ig8U7BEIOV47CivTp0IXg3uYSACLcBGAs/s640/Screenshot_20180701_222259.png)
+![Module Layout](https://travetto.github.io/assets/module-layout.png)
