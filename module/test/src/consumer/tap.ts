@@ -1,4 +1,4 @@
-import * as yaml from 'js-yaml';
+import { YamlUtil } from '@travetto/yaml';
 import { ExecUtil } from '@travetto/exec';
 
 import { TestEvent } from '../model/event';
@@ -17,7 +17,7 @@ export class TapEmitter implements Consumer {
   }
 
   logMeta(obj: any) {
-    let body = yaml.safeDump(obj, { indent: 2 });
+    let body = YamlUtil.serialize(obj);
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${body}\n...`);
   }

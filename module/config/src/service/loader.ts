@@ -1,8 +1,8 @@
 import * as path from 'path';
-import * as yaml from 'js-yaml';
 import { readFileSync } from 'fs';
 
 import { Env, ScanApp } from '@travetto/base';
+import { YamlUtil } from '@travetto/yaml';
 
 import { ConfigMap } from './map';
 
@@ -37,7 +37,8 @@ export class ConfigLoader {
       console.debug('Found configurations for', envFiles.map(x => x.name));
 
       for (const file of envFiles) {
-        yaml.safeLoadAll(file.data, doc => this.map.putAll(doc));
+        const data = YamlUtil.parse(file.data);
+        this.map.putAll(data);
       }
     }
   }
@@ -53,7 +54,8 @@ export class ConfigLoader {
   static processConfig(file: string) {
     const data = readFileSync(file).toString();
     const ns = path.basename(file).replace(YAML_RE, '');
-    yaml.safeLoadAll(data, doc => this.map.putAll({ [ns]: doc }));
+    const doc = YamlUtil.parse(data);
+    this.map.putAll({ [ns]: doc });
   }
 
   /*
