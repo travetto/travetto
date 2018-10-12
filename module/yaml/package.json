@@ -7,24 +7,20 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^0.3.18",
-    "@travetto/yaml": "^0.3.10"
+    "@travetto/base": "^0.3.16"
   },
-  "description": "Environment-aware config management using yaml files",
+  "description": "Simple YAML support, provides only clean subset of yaml",
   "homepage": "https://travetto.io",
   "keywords": [
     "yaml",
-    "decorators",
-    "configuration",
-    "environment-detection",
     "travetto",
-    "typescript"
+    "simple-yaml"
   ],
   "license": "MIT",
   "main": "index.ts",
-  "name": "@travetto/config",
+  "name": "@travetto/yaml",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.15"
+  "version": "0.3.22"
 }

@@ -1,13 +1,13 @@
 import { Application, InjectableFactory } from '@travetto/di';
 import { RestApp, RestAppProvider } from '@travetto/rest';
-import { ExpressAppProvider } from '../src/app';
+import { RestExpressAppProvider } from '../src/provider';
 
 @Application('sample')
 export class SampleApp {
 
   @InjectableFactory()
   static getProvider(): RestAppProvider {
-    return new ExpressAppProvider();
+    return new RestExpressAppProvider();
   }
 
   constructor(private app: RestApp) { }
