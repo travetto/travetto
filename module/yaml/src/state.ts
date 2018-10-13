@@ -1,4 +1,5 @@
-import { Block, Node, ListBlock, MapBlock } from './types';
+import { Block, ListBlock, MapBlock, TextBlock } from './type/block';
+import { Node } from './type/node';
 
 export class State {
   blocks: Block[] = [];
@@ -33,8 +34,8 @@ export class State {
   }
 
   startBlock(block: Block) {
-    if (!this.top.canNest) {
-      throw new Error(`Cannot nest in current block ${this.top.type}`);
+    if (this.top instanceof TextBlock) {
+      throw new Error(`Cannot nest in current block ${this.top.constructor.name}`);
     }
     this.top = block;
     this.blocks.push(block);
@@ -43,19 +44,21 @@ export class State {
   endBlock() {
     const ret = this.blocks.pop()!;
     this.top = this.blocks[this.blocks.length - 1];
+    if (typeof ret.value === 'string') {
+      ret.value = ret.value.trimRight();
+    }
     this.consumeNode(ret);
     return ret;
   }
 
   consumeNode(node: Node) {
     if (!this.top.consume) {
-      throw new Error(`Cannot consume in current block ${this.top.type}`);
+      throw new Error(`Cannot consume in current block ${this.top.constructor.name}`);
     }
 
     if (this.top instanceof MapBlock) {
       const [ind, field] = this.fields.pop()!;
       if ('indent' in node && this.top.indent !== ind) {
-        console.log(node, [ind, field]);
         throw new Error('Unable to set value, incorrect nesting');
       }
       this.top.consume(node, field);

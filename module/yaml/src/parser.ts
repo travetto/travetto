@@ -1,6 +1,6 @@
 import { State } from './state';
-import { ListBlock, MapBlock, TextBlock } from './types';
-import { Util, TOKENS } from './util';
+import { ListBlock, MapBlock, TextBlock } from './type/block';
+import { Tokenizer } from './tokenizer';
 
 export class Parser {
 
@@ -10,22 +10,6 @@ export class Parser {
   state = new State();
 
   constructor(public text: string) { }
-
-  private readTextLines(line: string, indent: number) {
-    if (this.state.top instanceof TextBlock && (indent === this.state.top.indent || TOKENS.BLANK_LINE.test(line))) {
-      if (this.state.top.subtype === 'full' && this.state.top.value) {
-        this.state.top.value += '\n';
-      }
-      this.state.top.value += (line || '\n');
-      return true;
-    }
-
-    return false;
-  }
-
-  private readLine(nextPos?: number) {
-    return Util.readLine(this.text, nextPos === undefined ? this.pos : nextPos);
-  }
 
   private startList(indent: number) {
     this.pos += 1;
@@ -39,18 +23,7 @@ export class Parser {
     }
   }
 
-  private startMap(line: string, indent: number) {
-    let field: string;
-    let anchor: number;
-    if (TOKENS.QUOTE_START.test(line)) {
-      [, field] = Util.readQuoted(line, false);
-      anchor = line.indexOf(':', field.length) + 1;
-    } else {
-      anchor = line.indexOf(':') + 1;
-      field = line.substring(0, anchor - 1);
-    }
-    this.pos += anchor + 1;
-
+  private startMap(field: string, indent: number) {
     this.state.nestField(field, indent);
 
     if (indent === this.state.top.indent) {
@@ -62,17 +35,36 @@ export class Parser {
     }
   }
 
-  private readText(line: string, indent: number, nextLine: number) {
-    const res = Util.readValue(line, indent);
-    if (res) {
-      if (res instanceof TextBlock) {
-        const [p, i, t] = this.readLine(nextLine);
-        res.indent = i;
-        this.state.startBlock(res);
-      } else {
-        this.state.consumeNode(res);
-      }
+  private readLine() {
+    const nlPos = this.text.indexOf('\n', this.pos);
+    const nextLineStart = nlPos < 0 ? this.text.length + 1 : nlPos + 1;
+    let tokens = Tokenizer.tokenize(this.text, this.pos, nextLineStart);
+    const indent = Tokenizer.getIndent(tokens);
+
+    if (indent) {
+      tokens.shift(); // Drop leading space
     }
+
+    const line = this.text.substring(this.pos, nextLineStart - 1);
+    this.lines.push(line);
+
+    if (this.state.top instanceof TextBlock && (
+      this.state.top.indent === undefined ||
+      indent === this.state.top.indent ||
+      tokens.length === 0
+    )) {
+      if (this.state.top.indent === undefined && tokens.length > 0) {
+        this.state.top.indent = indent;
+      }
+      this.state.top.readLine(tokens);
+      return [nextLineStart] as [number];
+    } else if (tokens.length === 0) {
+      return [nextLineStart] as [number];
+    }
+
+    tokens = Tokenizer.cleanTokens(tokens);
+
+    return [nextLineStart, indent, tokens] as [number, number, string[]];
   }
 
   private _parse() {
@@ -80,39 +72,54 @@ export class Parser {
     while (this.pos < this.text.length) {
       this.lineCount += 1;
 
-      const [nextLinePos, indent, line] = this.readLine();
+      const res = this.readLine();
 
-      this.lines.push(line);
-
-      // Eat lines
-      if (TOKENS.COMMENT_START.test(line) || this.readTextLines(line, indent)) {
-        this.pos = nextLinePos;
+      if (res.length === 1) {
+        this.pos = res[0];
         continue;
       }
 
+      const [nextLineStart, indent, tokens] = res;
       this.state.popToLevel(indent);
 
-      let subIndent = 0;
-      let subLine = '';
-      let subPos;
-      const lineStart = this.pos;
+      let subIndent = indent;
+      let pending: string[] = [];
 
-      // Process single line
-      while (this.pos < nextLinePos) {
-        [subPos, subIndent, subLine] = this.readLine();
-        this.pos += subIndent;
-        subIndent = this.pos - lineStart;
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        const lastToken = i === tokens.length - 1;
+        const isEndOrSpace = (lastToken || Tokenizer.isWhitespace(tokens[i + 1]));
 
-        if (TOKENS.LIST_PREFIX.test(subLine)) {
+        if (pending.length === 0 && token === '-' && isEndOrSpace) {
           this.startList(subIndent);
-        } else if (TOKENS.FIELD_PREFIX.test(subLine)) {
-          this.startMap(subLine, subIndent);
+          subIndent += token.length;
+          if (!lastToken) { // Consume whitespace
+            i += 1;
+            subIndent += tokens[i].length;
+          }
+        } else if (pending.length === 1 && token === ':' && isEndOrSpace) {
+          this.startMap(pending[0], subIndent);
+          subIndent += pending[0].length + token.length;
+          if (!lastToken) {  // Consume whitespace
+            i += 1;
+            subIndent += tokens[i].length;
+          }
+          pending = [];
         } else {
-          this.readText(subLine, subIndent, nextLinePos);
-          break;
+          pending.push(token);
         }
       }
-      this.pos = nextLinePos;
+
+      // What to do
+      if (pending.length) {
+        const node = Tokenizer.readValue(pending.join(''))!;
+        if (node instanceof TextBlock) {
+          this.state.startBlock(node);
+        } else {
+          this.state.consumeNode(node);
+        }
+      }
+      this.pos = nextLineStart;
     }
 
     this.state.popToLevel(0);

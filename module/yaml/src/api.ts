@@ -1,25 +1,17 @@
-import { Parser } from './parser';
-import { Util } from './util';
+import { Env } from '@travetto/base';
 
-let jsyaml: any = undefined;
-try {
-  jsyaml = require('js-yaml');
-} catch (e) { }
+import { Parser } from './parser';
+import { Serializer } from './serializer';
 
 export class YamlUtil {
-  static parse(text: string) {
-    if (jsyaml) {
-      const docs = jsyaml.safeLoadAll(text);
-      return Object.assign({}, ...docs);
-    } else {
-      return new Parser(text).parse();
-    }
-  }
-  static serialize(o: any) {
-    if (jsyaml) {
-      return jsyaml.safeDump(o) as string;
-    } else {
-      return Util.serialize(o);
-    }
-  }
+  static parse = (text: string) => new Parser(text).parse();
+  static serialize = (o: any) => Serializer.serialize(o);
+}
+
+if (!Env.isTrue('NO_JSYAML')) {
+  try {
+    const yaml = require('js-yaml');
+    YamlUtil.parse = t => Object.assign({}, ...yaml.safeLoadAll(t));
+    YamlUtil.serialize = o => yaml.safeDump(o);
+  } catch (e) { }
 }
