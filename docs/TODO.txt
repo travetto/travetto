@@ -50,6 +50,8 @@ To Do
 
 Future
 ==============
+- Electron basis
+
 - WebSockets
   - Observables in Angular?
   - Firebase?
