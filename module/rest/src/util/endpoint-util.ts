@@ -46,7 +46,8 @@ export class EndpointUtil {
           res.setHeader('Content-Type', MimeType.JSON);
           res.send((output as any).toJSON());
         } else {
-          res.json(output);
+          res.setHeader('Content-Type', MimeType.JSON);
+          res.send(JSON.stringify(output as any, undefined, 'pretty' in req.query ? 2 : 0));
         }
       } else {
         res.status(201);
