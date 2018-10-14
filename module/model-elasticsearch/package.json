@@ -7,14 +7,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/model": "^0.3.27",
-    "@travetto/schema": "^0.3.19",
+    "@travetto/model": "^0.3.28",
+    "@travetto/schema": "^0.3.20",
     "@types/elasticsearch": "^5.0.23",
     "elasticsearch": "^15.0.0"
   },
   "description": "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.",
   "devDependencies": {
-    "@travetto/test": "^0.3.20"
+    "@travetto/test": "^0.3.21"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.3.31"
+  "version": "0.3.32"
 }
