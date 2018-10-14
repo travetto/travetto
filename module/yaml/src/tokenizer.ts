@@ -4,44 +4,43 @@ import { TextBlock } from './type/block';
 export class Tokenizer {
 
   static isComment = (ch: string, pos: number) => ch[pos] === '#' || (ch[pos] === '-' && ch[pos + 1] === '-' && ch[pos + 2] === '-');
-  static isWhitespace = (ch: string) => ch[0] === ' ' || ch[0] === '\t' || ch[0] === '\n';
-  static isQuote = (ch: string) => ch[0] === '"' || ch[0] === `'`;
+  static isWhitespace = (ch: string) => ch[0] === ' ' || ch[0] === '\t' || ch[0] === '\n' || ch === '\r';
+
+  static readQuote(text: string, pos: number, end: number) {
+    const start = pos;
+    const ch = text[pos++];
+    while (text[pos] !== ch && pos < end) {
+      pos += (text[pos] === '\\' ? 2 : 1);
+    }
+    if (pos === end) {
+      throw new Error('Unterminated string literal');
+    }
+    return [pos, text.substring(start, pos + 1)] as [number, string];
+  }
 
   static readJSON(text: string, pos: number = 0, end: number = text.length) {
-    if (!JSONNode.test(text[pos])) {
-      throw new Error('Invalid JSON src');
-    }
     const start = pos;
     const stack = [text[pos] === '[' ? ']' : '}'];
     pos += 1;
 
     while (stack.length && pos < end) {
       const ch = text[pos];
-      pos += 1;
 
       if (ch === stack[stack.length - 1]) {
         stack.pop();
       } else if (ch === '[' || ch === '{') {
         stack.push(ch === '[' ? ']' : '}');
-      } else if (this.isQuote(ch)) {
-        while (text[pos] !== ch && pos < end) {
-          if (ch === '\\') {
-            pos += 1;
-          }
-          pos += 1;
-        }
-        if (pos === end) {
-          throw new Error('Unterminated string literal');
-        }
-        pos += 1;
+      } else if (TextNode.isQuote(ch)) {
+        [pos] = this.readQuote(text, pos, end);
       }
+      pos += 1;
     }
 
     if (stack.length) {
       throw new Error('Invalid JSON');
     }
 
-    return [pos + 1, text.substring(start, pos)] as [number, string];
+    return [pos, text.substring(start, pos)] as [number, string];
   }
 
   static getIndent(tokens: string[]) {
@@ -57,11 +56,11 @@ export class Tokenizer {
 
     // Remove trailing baggage
     let lst = tokens[end - 1] || '';
-    if (lst && Tokenizer.isComment(lst, 0)) {
+    if (lst && this.isComment(lst, 0)) {
       end -= 1;
     }
     lst = tokens[end - 1];
-    if (lst && Tokenizer.isWhitespace(lst)) {
+    if (lst && this.isWhitespace(lst)) {
       end -= 1;
     }
 
@@ -70,94 +69,70 @@ export class Tokenizer {
 
   static tokenize(text: string, pos: number = 0, end: number = text.length) {
     const tokens: string[] = [];
+    let token = '';
 
     let start = pos;
-    let quoted = [];
-    let inQuote = '';
 
     end = Math.max(0, Math.min(end, text.length));
 
-    const flush = () => {
+    const flushToken = () => {
       if (start !== pos) {
         tokens.push(text.substring(start, pos));
+        start = pos;
       }
-      start = pos;
     };
+    const pushToken = (ch: string) => { tokens.push(ch); start = pos + 1; };
 
     while (pos < end) {
       const ch = text[pos];
-      if (inQuote) {
-        if (text[pos] === '\\') {
-          // Escape
-          quoted.push(text[pos + 1]);
-          pos += 1;
-        } else if (this.isQuote(ch) && ch === inQuote) {
-          // Done
-          inQuote = '';
-          tokens.push(quoted.join(''));
-          quoted = [];
-          start = pos + 1;
-        } else {
-          quoted.push(ch);
-        }
-      } else if (this.isQuote(ch)) {
-        inQuote = ch;
-        start = pos + 1;
-      } else if (JSONNode.test(ch)) {
-        flush();
-        const [sub, subText] = this.readJSON(text, pos, end);
-        tokens.push(subText);
-        start = pos = sub;
+      if (TextNode.isQuote(ch)) {
+        flushToken();
+        [pos, token] = this.readQuote(text, pos, end);
+        pushToken(token);
+      } else if (ch === '[' || ch === '{') {
+        flushToken();
+        [pos, token] = this.readJSON(text, pos, end);
+        pushToken(token);
       } else if (this.isComment(text, pos)) {
         break;
       } else if (ch === ':' || ch === '-') { // Special tokens
-        flush();
-        tokens.push(ch);
-        start = pos + 1;
+        flushToken();
+        pushToken(ch);
       } else if (this.isWhitespace(ch)) {
-        flush();
+        flushToken();
         const len = tokens.length - 1;
 
         if (len >= 0 && this.isWhitespace(tokens[len])) {
           tokens[len] += ch;
+          start = pos + 1;
         } else {
-          tokens.push(ch);
+          pushToken(ch);
         }
-        start = pos + 1;
       }
       pos += 1;
     }
 
-    if (inQuote) {
-      throw new Error('Unterminated string literal');
-    }
-
     pos = end;
-
-    if (pos !== start) {
-      tokens.push(text.substring(start, pos));
-    }
-
+    flushToken();
     return tokens;
   }
 
   static readValue(token: string): Node | undefined {
-    if (token === '') {
-      return;
+    switch (token.toLowerCase()) {
+      case '': return;
+      case 'yes': case 'no': case 'on': case 'off': case 'true': case 'false': return new BooleanNode(token);
+      case 'null': return new NullNode();
+    }
+    switch (token[0]) {
+      case '{': case '[': return new JSONNode(token);
+      case '>': case '|': return new TextBlock(token[0] === '>' ? 'inline' : 'full');
     }
 
-    if (NullNode.test(token)) {
-      return new NullNode();
-    } else if (BooleanNode.test(token)) {
-      return new BooleanNode(token);
-    } else if (JSONNode.test(token)) {
-      return new JSONNode(token);
-    } else if (TextBlock.test(token)) {
-      return new TextBlock(token);
-    } else if (NumberNode.test(token)) {
+    const lastChar = token[token.length - 1]; // Optimize for simple checks
+    if (lastChar >= '0' && lastChar <= '9' && /^[-]?(\d*[.])?\d+$/.test(token)) {
       return new NumberNode(token);
-    } else {
-      return new TextNode(token.trim());
     }
+
+    return new TextNode(token.trim());
   }
 }

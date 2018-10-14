@@ -1,5 +1,3 @@
-import { Env } from '@travetto/base';
-
 import { Parser } from './parser';
 import { Serializer } from './serializer';
 
@@ -8,7 +6,7 @@ export class YamlUtil {
   static serialize = (o: any) => Serializer.serialize(o);
 }
 
-if (!Env.isTrue('NO_JSYAML')) {
+if (!('NO_JSYAML' in process.env)) {
   try {
     const yaml = require('js-yaml');
     YamlUtil.parse = t => Object.assign({}, ...yaml.safeLoadAll(t));

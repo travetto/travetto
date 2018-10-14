@@ -100,7 +100,7 @@ age: 20
 
     @Test()
     testNestedLists() {
-
+        assert(true);
         const output = YamlUtil.parse(`
 ---
 - - 1
