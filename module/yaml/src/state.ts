@@ -1,12 +1,14 @@
 import { Block, ListBlock, MapBlock, TextBlock } from './type/block';
-import { Node } from './type/node';
+import { Node, TextNode } from './type/node';
 
 export class State {
-  blocks: Block[] = [];
+  blocks: Block[];
   top: Block;
   fields: [number, string][] = [];
+  lines: [number, number][] = [];
+  lineCount: number = 0;
 
-  constructor() {
+  constructor(public text: string) {
     this.top = new ListBlock(-1);
     this.blocks = [this.top];
   }
@@ -21,7 +23,6 @@ export class State {
       if (this.top.indent < 0) {
         throw new Error('Invalid indentation, could not find matching level');
       }
-
     }
   }
 
@@ -44,7 +45,7 @@ export class State {
   endBlock() {
     const ret = this.blocks.pop()!;
     this.top = this.blocks[this.blocks.length - 1];
-    if (typeof ret.value === 'string') {
+    if (ret instanceof TextBlock || ret instanceof TextNode) {
       ret.value = ret.value.trimRight();
     }
     this.consumeNode(ret);
@@ -82,5 +83,10 @@ export class State {
       return true;
     }
     return false;
+  }
+
+  buildError(message: string) {
+    const [start, end] = this.lines[this.lineCount - 1];
+    return new Error(`${message}, line: ${this.lineCount}\n${this.text.substring(start, end)}`);
   }
 }

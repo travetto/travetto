@@ -3,9 +3,9 @@ export interface Node<T = any> {
 }
 
 export class TextNode implements Node<string> {
-  static isQuote = (ch: string) => ch[0] === '"' || ch[0] === `'`;
   constructor(public value: string) {
-    if (TextNode.isQuote(value)) {
+    const ch = value.charCodeAt(0);
+    if (ch === 0x22 /* dbl quote*/ || ch === 0x27 /* sngl quote */) {
       this.value = this.value.substring(1, this.value.length - 1).replace(new RegExp(`\\\\${value[0]}`, 'g'), value[0]);
     }
   }
