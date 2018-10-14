@@ -1,6 +1,7 @@
 import { State } from './state';
 import { ListBlock, MapBlock, TextBlock } from './type/block';
 import { Tokenizer } from './tokenizer';
+import { TextNode } from './type/node';
 
 export class Parser {
 
@@ -24,7 +25,7 @@ export class Parser {
   }
 
   private startMap(field: string, indent: number) {
-    this.state.nestField(field, indent);
+    this.state.nestField(new TextNode(field).value, indent);
 
     if (indent === this.state.top.indent) {
       if (!(this.state.top instanceof MapBlock)) {
@@ -48,17 +49,7 @@ export class Parser {
     const line = this.text.substring(this.pos, nextLineStart - 1);
     this.lines.push(line);
 
-    if (this.state.top instanceof TextBlock && (
-      this.state.top.indent === undefined ||
-      indent === this.state.top.indent ||
-      tokens.length === 0
-    )) {
-      if (this.state.top.indent === undefined && tokens.length > 0) {
-        this.state.top.indent = indent;
-      }
-      this.state.top.readLine(tokens);
-      return [nextLineStart] as [number];
-    } else if (tokens.length === 0) {
+    if (this.state.readTextLine(tokens, indent)) {
       return [nextLineStart] as [number];
     }
 

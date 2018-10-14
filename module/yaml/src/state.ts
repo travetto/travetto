@@ -66,4 +66,21 @@ export class State {
       this.top.consume!(node);
     }
   }
+
+  readTextLine(tokens: string[], indent: number) {
+    if (this.top instanceof TextBlock && (
+      this.top.indent === undefined ||
+      indent === this.top.indent ||
+      tokens.length === 0
+    )) {
+      if (this.top.indent === undefined && tokens.length > 0) {
+        this.top.indent = indent;
+      }
+      this.top.readLine(tokens);
+      return true;
+    } else if (tokens.length === 0) {
+      return true;
+    }
+    return false;
+  }
 }

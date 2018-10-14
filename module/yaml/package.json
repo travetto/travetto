@@ -6,9 +6,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {
-    "@travetto/base": "^0.3.16"
-  },
   "description": "Simple YAML support, provides only clean subset of yaml",
   "homepage": "https://travetto.io",
   "keywords": [

@@ -6,17 +6,12 @@ export interface Block<T = any> extends Node<T> {
 }
 
 export class TextBlock implements Block<string> {
-  static test(token: string) {
-    return token.charAt(0) === '|' || token.charAt(0) === '>';
-  }
+  static test = (token: string) => token[0] === '|' || token[0] === '>';
 
-  subtype: 'inline' | 'full';
   value = '';
   indent: number;
 
-  constructor(token: string) {
-    this.subtype = token === '>' ? 'inline' : 'full';
-  }
+  constructor(public subtype: 'inline' | 'full') { }
 
   readLine(tokens: string[]) {
     if (tokens.length === 0) { // New line
@@ -36,9 +31,7 @@ export class TextBlock implements Block<string> {
 }
 
 export class ListBlock implements Block<Node[]> {
-  value: Node[] = [];
-
-  constructor(public indent: number) { }
+  constructor(public indent: number, public value: Node[] = []) { }
 
   consume(node: Node<any>) {
     this.value.push(node.value);
@@ -46,9 +39,7 @@ export class ListBlock implements Block<Node[]> {
 }
 
 export class MapBlock implements Block<{ [key: string]: Node }> {
-  value: { [key: string]: Node } = {};
-
-  constructor(public indent: number) { }
+  constructor(public indent: number, public value: { [key: string]: Node } = {}) { }
 
   consume(node: Node<any>, key: string) {
     this.value[key] = node.value;

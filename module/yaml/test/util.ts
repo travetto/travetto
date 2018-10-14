@@ -3,7 +3,6 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
 import { Tokenizer } from '../src/tokenizer';
-import { WordWrapper } from '../src/wordwrap';
 
 @Suite()
 export class TokenizerTest {
@@ -12,11 +11,11 @@ export class TokenizerTest {
   testTokenize() {
     const inp = '   "name": "bob"   #This is a "comment"';
     const tokens = Tokenizer.tokenize(inp);
-    assert(tokens === ['   ', 'name', ':', ' ', 'bob', '   ', '#This is a "comment"']);
+    assert(tokens === ['   ', '"name"', ':', ' ', '"bob"', '   ', '#This is a "comment"']);
 
     const tokens2 = Tokenizer.tokenize(inp);
     const indent = Tokenizer.getIndent(tokens2);
-    assert(Tokenizer.cleanTokens(tokens2) === ['name', ':', ' ', 'bob']);
+    assert(Tokenizer.cleanTokens(tokens2) === ['"name"', ':', ' ', '"bob"']);
 
     assert(indent === 3);
 
@@ -32,15 +31,9 @@ export class TokenizerTest {
   }
 
   @Test()
-  testWordWrap() {
-    const wrap = WordWrapper.wrap('lorem ipsum whadya think about them apples, huh?', 20);
-    assert(wrap === ['lorem ipsum whadya', 'think about them', 'apples, huh?']);
-  }
-
-  @Test()
   testSpacing() {
     const complex = Tokenizer.tokenize(`"hello my"name is 'bob-o-rama\\'s'`);
-    assert(complex === ['hello my', 'name', ' ', 'is', ' ', `bob-o-rama's`]);
+    assert(complex === ['"hello my"', 'name', ' ', 'is', ' ', `'bob-o-rama\\'s'`]);
   }
 
   @Test()
@@ -48,6 +41,12 @@ export class TokenizerTest {
     assert(true);
     const json = Tokenizer.tokenize(`hello [1,2,3,4,5] #Woah`);
     assert(Tokenizer.cleanTokens(json) === ['hello', ' ', '[1,2,3,4,5]']);
+  }
+
+  @Test()
+  testNested() {
+    const tokens = Tokenizer.tokenize('- - a: 4');
+    assert(tokens === ['-', ' ', '-', ' ', 'a', ':', ' ', '4']);
   }
 
   @Test()
@@ -60,6 +59,9 @@ export class TokenizerTest {
 
     const [, json3] = Tokenizer.readJSON(`{1,2,[3,{"4"}],5}`);
     assert(json3 === '{1,2,[3,{"4"}],5}');
+
+    const [, json4] = Tokenizer.readJSON(`{1,2,[3,{"4\\"5"}],5}`);
+    assert(json4 === '{1,2,[3,{"4\\"5"}],5}');
 
     assert.throws(() => {
       Tokenizer.readJSON(`{1,2,[3,{"4}],5}`);
