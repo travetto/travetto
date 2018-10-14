@@ -16,7 +16,7 @@ export class Serializer {
     let subl: number = 0;
 
     const pushLine = () => {
-      while (line.length && Tokenizer.isWhitespace(line[line.length - 1])) {
+      while (line.length && Tokenizer.isWhitespace(line[line.length - 1].charCodeAt(0))) {
         line.pop();
       }
       if (subl > 0) {
@@ -32,7 +32,7 @@ export class Serializer {
       } else {
         if (subl + part.length > width) {
           pushLine();
-          if (Tokenizer.isWhitespace(part)) {
+          if (Tokenizer.isWhitespace(part.charCodeAt(0))) {
             continue;
           }
         }

@@ -6,8 +6,6 @@ export interface Block<T = any> extends Node<T> {
 }
 
 export class TextBlock implements Block<string> {
-  static test = (token: string) => token[0] === '|' || token[0] === '>';
-
   value = '';
   indent: number;
 
