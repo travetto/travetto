@@ -1,0 +1,30 @@
+{
+  "name": "@travetto/jwt",
+  "version": "0.3.10",
+  "description": "JSON Web Token implementation",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/travetto/jwt"
+  },
+  "keywords": [
+    "jwt",
+    "travetto"
+  ],
+  "author": "auth0",
+  "contributors": [
+    "travetto framework"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/travetto/jwt/issues"
+  },
+  "dependencies": {
+    "@travetto/base": "^0.3.18",
+    "@types/jws": "^3.1.1",
+    "jws": "^3.1.5"
+  },
+  "devDependencies": {
+    "@travetto/test": "^0.3.21"
+  }
+}
