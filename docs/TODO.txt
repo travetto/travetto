@@ -58,6 +58,9 @@ Future
 
 Done
 ==============
+X JWT Lib
+X YAML lib
+
 X HTTP/2
 X Koa
 

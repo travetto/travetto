@@ -217,17 +217,22 @@ export class AssertUtil {
       } else {
         return res;
       }
-
     }
   }
 
   static async checkThrow(filename: string, text: string, action: Function, shouldThrow: ThrowableError, message?: string) {
     const assertion = this.buildAssertion(filename, text, 'throws');
 
+    let missed: Error | undefined;
+
     try {
       await action();
+      if (typeof shouldThrow === 'boolean' && !shouldThrow) {
+        return;
+      }
+      throw (missed = new Error(`No error thrown, but expected ${shouldThrow}`));
     } catch (e) {
-      const err = this.checkError(shouldThrow, e);
+      const err = missed || this.checkError(shouldThrow, e);
       if (err) {
         assertion.message = message || err.message;
         assertion.error = err;
