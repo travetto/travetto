@@ -1,13 +1,5 @@
 In-Progress
 ==============
-
-? Blog Post about 
-  ? CLI
-  ? Generator
-  ? Lambda Goals
-  ? Model SQL status
-  ? Model query language support
-
 - Model
   - Query Language Support
 
@@ -16,6 +8,10 @@ In-Progress
 
 Up Next
 ==============
+
+? Elasticsearch Support
+  ? Extended query language
+  ? 
 
 ? SQL - as a doc store, limited functionality
   ? Model support for SQL databases
@@ -58,6 +54,13 @@ Future
 
 Done
 ==============
+X Blog Post about 
+  X CLI
+  X Generator
+  X Lambda Goals
+  X Model SQL status
+  X Model query language support
+
 X JWT Lib
 X YAML lib
 
@@ -111,7 +114,7 @@ Documentation
 
 X Win32
   X Path issues
-    X Cache files
+    X Cache functionalityfiles
     X Bulk require
     X Bulk read
     X Stack traces
