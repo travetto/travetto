@@ -107,7 +107,7 @@ export class QueryVerifierService {
     }
 
     if (!Util.isPlainObject(value)) {
-      // Ha ndle literal
+      // Handle literal
       const actualType = TypeUtil.getActualType(value);
       if (!this.typesMatch(declaredType, actualType)) {
         state.log(`Operator clause only supports types of ${declaredType}, not ${actualType}`);
@@ -189,7 +189,7 @@ export class QueryVerifierService {
     });
   }
 
-  processGroupByClause(state: State, vlue: object) {
+  processGroupByClause(state: State, value: object) {
 
   }
 

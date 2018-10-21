@@ -5,11 +5,12 @@ import { Env, Util } from '@travetto/base';
 
 import { QueryVerifierService } from './verify';
 import { ModelOptions } from '../types';
-import { Query, ModelQuery, PageableModelQuery } from '../model/query';
+import { Query, ModelQuery, PageableModelQuery, PageableModelQueryStringQuery } from '../model/query';
 import { ModelCore } from '../model/core';
 import { BulkOp, BulkResponse } from '../model/bulk';
 import { ModelSource, IModelSource } from './source';
 import { ModelRegistry } from '../registry';
+import { QueryLanguageParser } from '../query-lang/parser';
 
 function getClass<T>(o: T) {
   return o.constructor as Class<T>;
@@ -19,6 +20,10 @@ function getClass<T>(o: T) {
 export class ModelService implements IModelSource {
 
   constructor(private source: ModelSource, private queryService: QueryVerifierService) {
+  }
+
+  prepareQuery<T>(cls: Class<T>, query: Query<T>) {
+    this.queryService.verify(cls, query);
   }
 
   postConstruct() {
@@ -87,15 +92,21 @@ export class ModelService implements IModelSource {
 
   /** Executes a raw query against the model space */
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
-    this.queryService.verify(cls, query);
+    this.prepareQuery(cls, query);
 
     const res = await this.source.query<T, U>(cls, query);
     return res.map(o => this.postLoad(cls, o as any as T) as any as U);
   }
 
+  async getAllByQueryString<T extends ModelCore>(cls: Class<T>, query: PageableModelQueryStringQuery<T>) {
+    const where = QueryLanguageParser.parse(query.query);
+    const final = { where, ...query };
+    return this.getAllByQuery(cls, final);
+  }
+
   /** Retrieves all instances of cls that match query */
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}) {
-    this.queryService.verify(cls, query);
+    this.prepareQuery(cls, query);
 
     const config = ModelRegistry.get(cls) as ModelOptions<T>;
     if (!query.sort && config.defaultSort) {
@@ -107,14 +118,14 @@ export class ModelService implements IModelSource {
 
   /** Find the count of matching documetns by query */
   getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}) {
-    this.queryService.verify(cls, query);
+    this.prepareQuery(cls, query);
 
     return this.source.getCountByQuery(cls, query);
   }
 
   /** Find one by query, fail if not found */
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}, failOnMany: boolean = true) {
-    this.queryService.verify(cls, query);
+    this.prepareQuery(cls, query);
 
     const res = await this.source.getByQuery(cls, query, failOnMany);
     return this.postLoad(cls, res);
@@ -122,7 +133,7 @@ export class ModelService implements IModelSource {
 
   /** Save or update, upsert, for a document */
   async saveOrUpdate<T extends ModelCore>(cls: Class<T>, o: T, query: ModelQuery<T>) {
-    this.queryService.verify(cls, query);
+    this.prepareQuery(cls, query);
 
     const res = await this.getAllByQuery(getClass(o), { ...query, limit: 2 });
     if (res.length === 1) {
@@ -147,7 +158,7 @@ export class ModelService implements IModelSource {
 
   /** Delete all by query */
   deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}) {
-    this.queryService.verify(cls, query);
+    this.prepareQuery(cls, query);
 
     return this.source.deleteByQuery(cls, query);
   }
@@ -175,7 +186,7 @@ export class ModelService implements IModelSource {
 
   /** Update/replace all with partial data, by query */
   updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>) {
-    this.queryService.verify(cls, query);
+    this.prepareQuery(cls, query);
 
     return this.source.updateAllByQuery(cls, query, data);
   }
@@ -188,7 +199,7 @@ export class ModelService implements IModelSource {
 
   /** Partial update, by query*/
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>) {
-    this.queryService.verify(cls, query);
+    this.prepareQuery(cls, query);
 
     // Do not do pre-persist, because we don't know what we would be validating
 
@@ -207,7 +218,7 @@ export class ModelService implements IModelSource {
 
   /** Partial update by view and by query */
   async updatePartialViewByQuery<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string, query: ModelQuery<T>) {
-    this.queryService.verify(cls, query);
+    this.prepareQuery(cls, query);
 
     o = await this.prePersist(cls, o, view);
     const partial = BindUtil.bindSchema(cls, {}, o, view);
