@@ -43,6 +43,8 @@ export class TypeUtil {
     const type = typeof v;
     if (['string', 'number', 'boolean'].includes(type)) {
       return type;
+    } else if (v instanceof RegExp) {
+      return 'RegExp';
     } else if (v instanceof Date) {
       return 'Date';
     } else if (Array.isArray(v)) {

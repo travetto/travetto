@@ -105,6 +105,32 @@ this.service.getAllByQuery(User, {
 
 This would find all users who are over 35 and that have the `contact` field specified. 
 
+## Query Language
+
+In addition to the standard query interface, the module also supports querying by query language to facilitate end-user queries.  This is meant to act as an interface that is simpler to write than the default object structure.
+
+The language itself is fairly simple, boolean logic, with parenthetical support.  The operators supported are:
+* `<`,  `<=` - Less than, and less than or equal to
+* `>`,  `>=` - Greater than, and greater than or equal to
+* `!=`, `==` - Not equal to, and equal to
+* `~` - Matches regular expression
+* `!`, `not` - Negates a clause
+* `in`, `not-in` - Supports checking if a field is in a list of literal values
+* `and`, `&&` - Intersection of clauses
+* `or`, `||` - Union of clauses
+
+All sub fields are dot separated for access, e.g. `user.address.city`. A query language version of the previous query could look like:
+
+```sql
+not (age < 35) and contact != null
+```
+
+A more complex query would look like:
+
+```sql
+user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')
+```
+
 <!-- SUB -->
 
 ## Rest - Extension
