@@ -1,17 +1,20 @@
 In-Progress
 ==============
-- Model
-  - Query Language Support
 
-- Auth
-  - Move to JWT as session store, prep for Lambda
-
-Up Next
+On Deck
 ==============
 
 ? Elasticsearch Support
   ? Extended query language
   ? 
+
+? Lambda for REST
+  - Move to JWT as session store, prep for Lambda
+  X Entire rest app as an AWS lambda
+  X Individual routes as individual lambdas
+  X API Gateway configuration
+  ? Auto deployment of application
+  X CLI entry point to facilitate
 
 ? SQL - as a doc store, limited functionality
   ? Model support for SQL databases
@@ -19,12 +22,6 @@ Up Next
   X Using Sequelize?
   X Already supports most of the needed features, might be an easy win  
 
-? Lambda for REST
-  X Entire rest app as an AWS lambda
-  X Individual routes as individual lambdas
-  X API Gateway configuration
-  ? Auto deployment of application
-  X CLI entry point to facilitate
 
 To Do
 ==============
@@ -46,11 +43,12 @@ To Do
 
 Future
 ==============
-- Electron basis
+- Electron basis (maybe)
 
 - WebSockets
   - Observables in Angular?
-  - Firebase?
+
+- Firebase? for data model
 
 Done
 ==============
@@ -60,6 +58,9 @@ X Blog Post about
   X Lambda Goals
   X Model SQL status
   X Model query language support
+
+X Model
+  X Query Language Support
 
 X JWT Lib
 X YAML lib

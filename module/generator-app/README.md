@@ -1,6 +1,18 @@
 travetto: Yeoman App Generator
 ===
-A simple [`yeoman`](http://yeoman.io) generator for scaffolding a reference project.  Currently, the generator supports, two main features.
+A simple [`yeoman`](http://yeoman.io) generator for scaffolding a reference project.  To get started, you need to make sure: 
+```bash
+$ npm i -g yo #Ensure yeoman is installed globally
+$ npm i -g @travetto/generator-app #Ensure this yeoman generator is installed
+$ git config --global.username <Username> #Set your git username
+```
+
+Once installed you can invoke the scaffolding by running
+```bash
+$ yo @travetto/app
+```
+
+Currently, the generator supports, two main features.
 
 ## Restful Architecture
 The [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) provides the necessary integration for exposing restful apis.  When selecting the `rest` feature, you will need to specify which backend you want to include with your application, the default being `express`.  Currently you can select from:
@@ -56,6 +68,7 @@ export class TodoController {
 
   @Delete('/:id')
   async delete(req: Request): Promise<void>;
+}
 ```  
 
 ## Executing
