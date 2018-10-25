@@ -139,6 +139,7 @@ To facilitate common RESTful patterns, the module exposes [`Rest`](https://githu
 ```typescript
 @ModelController('/user', User) 
 class UserController {
+  @Inject()
   source: ModelService;
 }
 ```
@@ -148,6 +149,7 @@ is a shorthand that is equal to:
 @Controller('/user') 
 class UserController {
   
+  @Inject()
   source: ModelService;
 
   @Get('')
