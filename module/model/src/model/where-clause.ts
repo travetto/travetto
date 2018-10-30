@@ -36,9 +36,12 @@ type ComparableFieldQuery<T> =
   };
 
 type ArrayFieldQuery<T> =
-  GeneralFieldQuery<T> |
+  { $exists?: boolean } |
+  { $eq?: T | T[] } |
+  { $ne?: T | T[] } |
   { $all?: T[]; } |
-  T;
+  PropWhereClause<RetainFields<T>> |
+  T | T[];
 
 type StringFieldQuery =
   GeneralScalarFieldQuery<string> |

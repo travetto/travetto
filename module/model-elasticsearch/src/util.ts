@@ -64,18 +64,19 @@ export class ElasticsearchUtil {
 
     for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
       const top = o[key];
-      const declaredType = schema[key === '_id' ? 'id' : key].type;
+      const declaredSchema = schema[key === '_id' ? 'id' : key];
+      const declaredType = declaredSchema.type;
       const sPath = declaredType === String && key !== '_id' ? `${path}${key}.raw` : `${path}${key}`;
 
       if (Util.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
-          items.push({
-            nested: {
-              path: sPath,
-              query: this.extractWhereTermQuery(top, declaredType as Class<any>, `${sPath}.`)
-            }
-          });
+          const inner = this.extractWhereTermQuery(top, declaredType as Class<any>, `${sPath}.`);
+          items.push(
+            declaredSchema.array ?
+              { nested: { path: sPath, query: inner } } :
+              inner
+          );
         } else {
           const v = top[subKey];
 
@@ -190,7 +191,7 @@ export class ElasticsearchUtil {
     }
   }
 
-  static generateSourceSchema<T>(cls: Class<T>) {
+  static generateSourceSchema<T>(cls: Class<T>): any {
     const schema = SchemaRegistry.getViewSchema(cls);
 
     const props: any = {};
@@ -199,7 +200,24 @@ export class ElasticsearchUtil {
       const conf = schema.schema[field];
 
       if (conf.type === Number) {
-        props[field] = { type: conf.precision ? 'float' : 'integer' };
+        let prop: any = { type: 'integer' };
+        if (conf.precision) {
+          const [digits, decimals] = conf.precision;
+          if (decimals) {
+            if ((decimals + digits) < 16) {
+              prop = { type: 'scaled_float', scaling_factor: decimals };
+            } else {
+              if (digits < 6 && decimals < 9) {
+                prop = { type: 'half_float' };
+              } else if (digits > 20) {
+                prop = { type: 'double' };
+              } else {
+                prop = { type: 'float' };
+              }
+            }
+          }
+        }
+        props[field] = prop;
       } else if (conf.type === Date) {
         props[field] = { type: 'date', format: 'date_optional_time' };
       } else if (conf.type === Boolean) {
@@ -213,9 +231,11 @@ export class ElasticsearchUtil {
             }
           }
         };
+      } else if (conf.type === Object) {
+        props[field] = { type: 'object', dynamic: true };
       } else if (SchemaRegistry.has(conf.type)) {
         props[field] = {
-          type: 'nested',
+          type: conf.array ? 'nested' : 'object',
           ...this.generateSourceSchema(conf.type)
         };
       }
