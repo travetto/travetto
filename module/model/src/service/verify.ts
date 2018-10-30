@@ -26,12 +26,12 @@ const $NOT = '$not';
 const $ALL = '$all';
 const $ELEM_MATCH = '$elemMatch';
 
-const TOP_LEVEL_OPS = new Set([$AND, $OR, $NOT]);
+// const TOP_LEVEL_OPS = new Set([$AND, $OR, $NOT]);
 
 const SELECT = 'select';
 const WHERE = 'where';
 const SORT = 'sort';
-const GROUP_BY = 'groupBy';
+// const GROUP_BY = 'groupBy';
 
 @Injectable()
 export class QueryVerifierService {

@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as readline from 'readline';
 import * as assert from 'assert';
 
-import { ScanFs, BaseError, Env } from '@travetto/base';
+import { ScanFs, Env } from '@travetto/base';
 
 import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
@@ -70,7 +70,7 @@ export class TestExecutor {
         consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a });
       });
 
-      const res = await Promise.race([suite.instance[test.methodName](), timeout]);
+      await Promise.race([suite.instance[test.methodName](), timeout]);
 
       // Ensure nothing was meant to be caught
       throw undefined;
@@ -134,8 +134,6 @@ export class TestExecutor {
       duration: 0,
       tests: []
     };
-
-    const suiteStart = Date.now();
 
     const mgr = new ExecutionPhaseManager(consumer, suite, result);
 

@@ -5,7 +5,6 @@ import { ModelQuery, Query, PageableModelQuery } from '../model/query';
 import { BulkResponse, BulkOp } from '../model/bulk';
 import { ModelCore } from '../model/core';
 
-export interface ModelSource extends IModelSource { }
 export abstract class ModelSource { }
 
 export interface IModelSource {
@@ -35,3 +34,5 @@ export interface IModelSource {
   deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number>;
   deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>): Promise<number>;
 }
+
+export interface ModelSource extends IModelSource { }

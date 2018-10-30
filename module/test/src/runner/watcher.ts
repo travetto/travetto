@@ -105,7 +105,7 @@ export async function watch() {
       exe.send(event.type, event);
 
       console.debug('Running test', event);
-      const { error } = await complete;
+      await complete;
     }
   );
 

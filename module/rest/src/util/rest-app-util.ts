@@ -1,21 +1,6 @@
 import { Response, Request } from '../types';
 import { MimeType } from './mime';
 
-export class RestAppUtil {
-  static decorateRequest<T extends Request>(req: Partial<T> & { [key: string]: any }): T {
-    delete req.redirect;
-    Object.setPrototypeOf(req, BaseRequest.prototype);
-    req.url = req.path;
-    req.connection = {};
-    return req as T;
-  }
-
-  static decorateResponse<T extends Response>(res: Partial<T> & { [key: string]: any }): T {
-    Object.setPrototypeOf(res, BaseResponse.prototype);
-    return res as T;
-  }
-}
-
 abstract class BaseResponse implements Partial<Response> {
   json(this: Response, val: any) {
     this.setHeader('Content-Type', MimeType.JSON);
@@ -49,5 +34,20 @@ abstract class BaseResponse implements Partial<Response> {
 abstract class BaseRequest implements Partial<Request> {
   header(this: Request, key: string) {
     return this.headers![key] as string;
+  }
+}
+
+export class RestAppUtil {
+  static decorateRequest<T extends Request>(req: Partial<T> & { [key: string]: any }): T {
+    delete req.redirect;
+    Object.setPrototypeOf(req, BaseRequest.prototype);
+    req.url = req.path;
+    req.connection = {};
+    return req as T;
+  }
+
+  static decorateResponse<T extends Response>(res: Partial<T> & { [key: string]: any }): T {
+    Object.setPrototypeOf(res, BaseResponse.prototype);
+    return res as T;
   }
 }

@@ -32,13 +32,13 @@ export interface ClauseNode extends Node {
 export interface GroupNode extends Node {
   type: 'group';
   op?: 'and' | 'or';
-  value: Node[]
+  value: Node[];
 }
 
 export interface UnaryNode extends Node {
   type: 'unary';
   op?: 'not';
-  value: Node
+  value: Node;
 }
 
 export const OP_TRANSLATION: { [key: string]: string } = {
@@ -46,7 +46,7 @@ export const OP_TRANSLATION: { [key: string]: string } = {
   '>': '$gt', '>=': '$gte',
   '!=': '$neq', '==': '$eq',
   '~': '$regex', '!': '$not',
-  'in': '$in', 'not-in': '$nin'
+  in: '$in', 'not-in': '$nin'
 };
 
 export const VALID_OPS = new Set(Object.keys(OP_TRANSLATION));

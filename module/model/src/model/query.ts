@@ -22,7 +22,7 @@ type _QueryOptions<T> = {
 
 type _QueryMain<T> = {
   select?: _SelectClause<T>;
-  where?: _WhereClause<T> | string;
+  where?: _WhereClause<T>;
   // TODO: Add grouping in later
   // group?: _GroupClause<T>;
 };

@@ -3,6 +3,30 @@
 // Definitions by: Mohsen Azimi <https://github.com/mohsen1>, Ben Southgate <https://github.com/bsouthga>, Nicholas Merritt <https://github.com/nimerritt>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
+// Base
+export interface BaseSchema {
+  format?: string;
+  title?: string;
+  description?: string;
+  default?: string | boolean | number | {};
+  multipleOf?: number;
+  maximum?: number;
+  exclusiveMaximum?: number;
+  minimum?: number;
+  exclusiveMinimum?: number;
+  maxLength?: number;
+  minLength?: number;
+  pattern?: string;
+  maxItems?: number;
+  minItems?: number;
+  uniqueItems?: boolean;
+  maxProperties?: number;
+  minProperties?: number;
+  enum?: (string | boolean | number | {})[];
+  type?: string;
+  items?: Schema | Schema[];
+}
+
 export interface Info {
   title: string;
   version: string;
@@ -115,29 +139,6 @@ export interface Response {
 }
 
 // ------------------------------ Schema -------------------------------------
-export interface BaseSchema {
-  format?: string;
-  title?: string;
-  description?: string;
-  default?: string | boolean | number | {};
-  multipleOf?: number;
-  maximum?: number;
-  exclusiveMaximum?: number;
-  minimum?: number;
-  exclusiveMinimum?: number;
-  maxLength?: number;
-  minLength?: number;
-  pattern?: string;
-  maxItems?: number;
-  minItems?: number;
-  uniqueItems?: boolean;
-  maxProperties?: number;
-  minProperties?: number;
-  enum?: (string | boolean | number | {})[];
-  type?: string;
-  items?: Schema | Schema[];
-}
-
 export interface Schema extends BaseSchema {
   $ref?: string;
   allOf?: Schema[];

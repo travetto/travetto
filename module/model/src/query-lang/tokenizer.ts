@@ -29,7 +29,7 @@ const TOKEN_MAPPING: { [key: string]: Token } = {
   null: { type: 'literal', value: null },
   true: { type: 'literal', value: true },
   false: { type: 'literal', value: false },
-}
+};
 
 export class QueryLanguageTokenizer {
   private static processToken(state: TokenizeState, mode?: TokenType) {
@@ -39,7 +39,7 @@ export class QueryLanguageTokenizer {
     if (!res && state.mode === 'literal') {
       if (/^["']/.test(text)) {
         value = text.substring(1, text.length - 1)
-          .replace(/\\[.]/g, (a, b) => ESCAPE[a] || b);;
+          .replace(/\\[.]/g, (a, b) => ESCAPE[a] || b);
       } else if (/^\//.test(text)) {
         value = new RegExp(text.substring(1, text.length - 1));
       } else if (/^\d+$/.test(text)) {

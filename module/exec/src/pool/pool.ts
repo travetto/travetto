@@ -9,7 +9,7 @@ export class ExecutionPool<T extends ConcurrentExecution> {
 
   private pool: Pool<T>;
 
-  constructor(private create: () => Promise<T>, opts?: Options) {
+  constructor(create: () => Promise<T>, opts?: Options) {
     const args = {
       max: os.cpus().length - 1,
       min: 1,

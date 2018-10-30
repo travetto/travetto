@@ -2,7 +2,7 @@ import * as Generator from 'yeoman-generator';
 import * as path from 'path';
 
 import { FEATURES, pkg } from './features';
-import { verifyDestination, meetsRequirement, run } from './util';
+import { verifyDestination, meetsRequirement } from './util';
 import { Context, getContext } from './context';
 
 export default class extends Generator {
