@@ -76,10 +76,11 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
   }
 
   listen(handler: (e: U, complete: Function) => any) {
+    let fn: (e: U) => void;
     const kill = (e?: any) => {
       this.removeListener(fn);
     };
-    const fn = (e: U) => {
+    fn = (e: U) => {
       if (Env.trace) {
         console.trace(process.pid, 'RECEIVING', e.type, e);
       }

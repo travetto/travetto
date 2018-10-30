@@ -204,7 +204,7 @@ export class Watcher extends EventEmitter {
   }
 
   close() {
-    for (const [k, watcher] of this.watchers) {
+    for (const [, watcher] of this.watchers) {
       watcher.close();
     }
     this.watchers = new Map();

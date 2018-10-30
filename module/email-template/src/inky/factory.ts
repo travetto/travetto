@@ -107,7 +107,7 @@ export class ComponentFactory {
     const attrs = HtmlUtil.getAttrMap(element);
     let inner = HtmlUtil.getInner(element);
 
-    const { href, target, class: cls, ...parentAttrs } = attrs;
+    const { href, target, class: cls } = attrs;
     let expander = '';
     // If we have the href attribute we can create an anchor for the inner of the button;
     if (href) {

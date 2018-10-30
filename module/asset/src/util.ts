@@ -85,7 +85,7 @@ export class AssetUtil {
   static async readChunk(filePath: string, bytes: number) {
     const fd = await fsOpenAsync(filePath, 'r');
     const buffer = new Buffer(bytes);
-    const num = await fsReadyAync(fd, buffer, 0, bytes, 0);
+    await fsReadyAync(fd, buffer, 0, bytes, 0);
     return buffer;
   }
 

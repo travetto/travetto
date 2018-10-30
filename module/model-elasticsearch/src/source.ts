@@ -1,7 +1,7 @@
 import * as es from 'elasticsearch';
 
 import {
-  ModelSource, IndexConfig, Query,
+  ModelSource, Query,
   QueryOptions, BulkResponse, BulkOp,
   ModelRegistry, ModelCore,
   PageableModelQuery,
@@ -19,7 +19,7 @@ import { ElasticsearchUtil } from './util';
 export class ModelElasticsearchSource extends ModelSource {
 
   private identities: Map<Class, EsIdentity> = new Map();
-  private indices: { [key: string]: IndexConfig<any>[] } = {};
+  // private indices: { [key: string]: IndexConfig<any>[] } = {};
   private indexToClass: Map<string, Class> = new Map();
   public client: es.Client;
 
@@ -363,7 +363,8 @@ export class ModelElasticsearchSource extends ModelSource {
       this.prePersist(cls, x);
     }
 
-    const res = await this.bulkProcess(cls, objs.map(x => ({ upsert: x })));
+    await this.bulkProcess(cls, objs.map(x => ({ upsert: x })));
+
     return objs;
   }
 
@@ -380,12 +381,14 @@ export class ModelElasticsearchSource extends ModelSource {
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
     const id = data.id;
     delete data.id;
-    const update = await this.client.update({
+
+    await this.client.update({
       ...this.getIdentity(cls),
       id,
       refresh: 'wait_for',
       body: { doc: data }
     });
+
     return this.getById(cls, id);
   }
 

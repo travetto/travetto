@@ -45,7 +45,7 @@ export class QueryLanguageParser {
       } else {
         nodes.push({
           type: 'group',
-          op: op,
+          op,
           value: [left, right]
         } as GroupNode);
       }
@@ -62,7 +62,7 @@ export class QueryLanguageParser {
         type: 'unary',
         op: 'not',
         value: node
-      } as UnaryNode)
+      } as UnaryNode);
     }
   }
 
@@ -137,9 +137,9 @@ export class QueryLanguageParser {
       case 'clause':
         const cn = node as ClauseNode;
         const parts = cn.field!.split('.');
-        let top: any = {};
+        const top: any = {};
         let sub = top;
-        for (let p of parts) {
+        for (const p of parts) {
           sub = sub[p] = {};
         }
         if ((cn.op === '$eq' || cn.op === '$neq') && cn.value === null) {

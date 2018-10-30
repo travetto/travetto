@@ -4,7 +4,7 @@ export class TransformerManager {
 
   transformers: ts.CustomTransformers = {};
 
-  constructor(private cwd: string) { }
+  constructor() { }
 
   init() {
     const transformers: { [key: string]: any } = {};
