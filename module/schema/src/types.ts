@@ -34,7 +34,7 @@ export interface FieldConfig extends DescribableConfig {
   type: Class<any>;
   array: boolean;
   specifier?: string;
-  precision?: number;
+  precision?: [number, number] | [number, undefined];
   required?: { active: boolean, message?: string };
   match?: { re: RegExp, message?: string };
   min?: { n: number | Date, message?: string };

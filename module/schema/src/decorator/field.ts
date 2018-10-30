@@ -66,10 +66,10 @@ export const Max = <T extends number | Date>(n: T, message?: string) => dateNumb
 export const Email = (message?: string) => Match(CommonRegExp.email, message);
 export const Telephone = (message?: string) => Match(CommonRegExp.telephone, message);
 export const Url = (message?: string) => Match(CommonRegExp.url, message);
-export const Precision = (precision: number) => numberProp({ precision });
+export const Precision = (digits: number, decimals?: number) => numberProp({ precision: [digits, decimals] });
 export const Integer = () => Precision(0);
-export const Float = () => Precision(10);
-export const Currency = () => Precision(2);
+export const Float = () => Precision(10, 7);
+export const Currency = () => Precision(13, 2);
 
 export function View(...names: string[]) {
   return (f: any, p: string) => {

@@ -4,6 +4,7 @@ import { Schema, SchemaRegistry } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
 import { ElasticsearchUtil } from '../src/util';
+import { WhereClause } from '../../model/src/model/where-clause';
 
 @Schema()
 class WhereTypeAB {
@@ -28,7 +29,7 @@ class WhereTypeG {
 
 @Schema()
 class WhereType {
-  a: WhereTypeA;
+  a: WhereTypeA[];
   d: WhereTypeD;
   g: WhereTypeG;
   name: number;
@@ -48,7 +49,7 @@ export class QueryTest {
     let out = ElasticsearchUtil.extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
-    out = ElasticsearchUtil.extractWhereQuery({
+    const qry: WhereClause<WhereType> = {
       $and: [
         { a: { b: { c: 5 } } },
         { d: { e: true } },
@@ -58,7 +59,9 @@ export class QueryTest {
         { g: { z: { $all: ['a', 'b', 'c'] } } },
         { a: { d: { $gt: 20 } } }
       ]
-    }, WhereType);
+    };
+
+    out = ElasticsearchUtil.extractWhereQuery(qry, WhereType);
 
     assert.ok(out.bool);
 
@@ -68,12 +71,12 @@ export class QueryTest {
 
     assert(out.bool.must[0].nested.path === 'a');
 
-    assert(out.bool.must[0].nested.query.nested.path === 'a.b');
+    assert(out.bool.must[0].nested.query);
 
-    assert.ok(out.bool.must[0].nested.query.nested.query.term);
+    assert.ok(out.bool.must[0].nested.query.term);
 
-    assert.ok(out.bool.must[0].nested.query.nested.query.term['a.b.c']);
+    assert.ok(out.bool.must[0].nested.query.term['a.b.c']);
 
-    assert(out.bool.must[0].nested.query.nested.query.term['a.b.c'] === 5);
+    assert(out.bool.must[0].nested.query.term['a.b.c'] === 5);
   }
 }

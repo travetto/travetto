@@ -70,7 +70,7 @@ class DataBinding {
   validateBind() {
     const person = Person.fromRaw({
       name: 'Test',
-      age: 19.999978,
+      age: 19.99978,
       // dob: '2018-01-01',
       dob: 1514764800000,
       address: {
