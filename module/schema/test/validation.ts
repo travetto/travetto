@@ -82,6 +82,13 @@ class CustomValidated {
   age2: number;
 }
 
+@Schema()
+class StringMatches {
+
+  @Match(/^ab*c$/)
+  names: string[];
+}
+
 function findError(errors: ValidationError[], path: string, message: string) {
   return errors.find(x => x.path === path && x.message.includes(message));
 }
@@ -198,4 +205,22 @@ class Validation {
 
     await SchemaValidator.validate(obj, 'profile');
   }
+
+  @Test('Regex Array')
+  async regexArray() {
+    const obj = StringMatches.from({
+      names: ['abc', 'ac', 'abbbc']
+    });
+
+    await SchemaValidator.validate(obj);
+
+    const obj2 = StringMatches.from({
+      names: ['bc', 'ab', 'bac']
+    });
+
+    await assert.throws(() =>
+      SchemaValidator.validate(obj2)
+      , ValidationErrors);
+  }
 }
+
