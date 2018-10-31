@@ -5,7 +5,7 @@
   },
   "dependencies": {
     <% for (const dep of depList) { %>"@travetto/<%= dep %>": "~<%= depVersion %>",<% } %>
-    "@travetto/test": "<%= depVersion %>"
+    "@travetto/test": "~<%= depVersion %>"
   },
   "description": "A <%= modules.join(', ') %> based travetto project",
   "keywords": ["traveto", <% for (const kw of keywords) {%>"<%= kw %>"<% }%>],
