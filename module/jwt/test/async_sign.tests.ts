@@ -31,13 +31,13 @@ class AsyncSignTest {
   @ShouldThrow(jwt.JWTError)
   async testBadArgs() {
     // this throw an error because the secret is not a cert and RS256 requires a cert.
-    await jwt.sign({ foo: 'bar' }, { key, alg: 'RS256', payload: { nbf: -1 } });
+    await jwt.sign({ foo: 'bar', nbf: -1 }, { key, alg: 'RS256' });
   }
 
   @Test('should not apply claims to the original payload object (mutatePayload defaults to false)')
   async testClaimsImmutable() {
     const originalPayload: { [key: string]: any } = { foo: 'bar' };
-    await jwt.sign(originalPayload, { key, payload: { nbf: 60, exp: 600 } });
+    await jwt.sign({ ...originalPayload, nbf: 60, exp: 600 }, { key });
     assert(originalPayload.nbf === undefined);
     assert(originalPayload.exp === undefined);
   }

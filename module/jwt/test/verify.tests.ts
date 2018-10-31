@@ -153,7 +153,7 @@ class VerifyExpirationSuite {
       // maxAge not exceded, but still expired
       assert(err instanceof JWTError);
       assert(err.message === 'expired');
-      assert(err.payload.expiredAt === 1437018800000);
+      assert(+err.payload.expiredAt === 1437018800000);
     }
   }
 }

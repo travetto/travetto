@@ -16,6 +16,6 @@ class DecodingTest {
   @Test('should not crash when decoding a null.null.null token')
   @ShouldThrow('invalid token')
   async testDecodeInvalid() {
-    const decoded = await jwt.decode('null.null.null');
+    const decoded = jwt.decode('null.null.null');
   }
 }
