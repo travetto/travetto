@@ -22,12 +22,12 @@ export class QueryStringTest {
     ]);
     assert(QueryLanguageTokenizer.tokenize('A.b.c  ==  D') === [
       { type: 'identifier', value: 'A.b.c' },
-      { type: 'operator', value: '$eq' },
+      { type: 'operator', value: '==' },
       { type: 'identifier', value: 'D' },
     ]);
     assert(QueryLanguageTokenizer.tokenize(`"A.b.c"   =='  D'`) === [
       { type: 'literal', value: 'A.b.c' },
-      { type: 'operator', value: '$eq' },
+      { type: 'operator', value: '==' },
       { type: 'literal', value: '  D' }
     ]);
 
@@ -41,7 +41,7 @@ export class QueryStringTest {
 
     assert(QueryLanguageTokenizer.tokenize(`A ~ /b.c.d/`) === [
       { type: 'identifier', value: 'A' },
-      { type: 'operator', value: '$regex' },
+      { type: 'operator', value: '~' },
       { type: 'literal', value: /b.c.d/ }
     ]);
   }

@@ -9,7 +9,7 @@ class HeaderSuite {
   @Test('should add the header')
   async testHeaderAdd() {
     const token = await jwt.sign({ foo: 123 }, { key: '123', header: { foo: 'bar' } });
-    const decoded = await jwt.decodeComplete(token);
+    const decoded = jwt.decodeComplete(token);
     assert(decoded.header.foo === 'bar');
   }
 

@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Suite, Test, ShouldThrow } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 
 import * as jwt from '..';
 
@@ -24,7 +24,7 @@ class IssueAtSuite {
       { foo: 'bar' },
     ]) {
       const token = `${noneAlgorithmHeader}.${Buffer.from(JSON.stringify({ iat: val })).toString('base64')}.`;
-      await assert.throws(() => jwt.decode(token), 'invalid token');
+      await assert.throws(async () => jwt.verify(token), 'invalid');
     }
   }
 
@@ -61,9 +61,9 @@ class IssueAtSuite {
     for (const testCase of OPS) {
       const token = await jwt.sign({ iat: now + (testCase.iat! || 0) }, { iatExclude: testCase.iatExclude });
       if (!testCase.expectedIssueAt) {
-        assert(jwt.decode(token).iat === undefined);
+        assert((jwt.decode(token)).iat === undefined);
       } else {
-        assert(jwt.decode(token).iat === now + testCase.expectedIssueAt);
+        assert((jwt.decode(token)).iat === now + testCase.expectedIssueAt);
       }
     }
   }
@@ -73,21 +73,19 @@ class IssueAtSuite {
     const OPS = [
       {
         desc: 'should verify using "iat" before the "maxAge"',
-        clockAdvance: 10000,
+        clockTimestamp: 10,
         maxAge: 11,
         options: {},
       },
       {
         desc: 'should verify using "iat" before the "maxAge" with a provided "clockTimestamp',
-        clockAdvance: 60000,
         maxAge: 11,
-        options: { clockTimestamp: 70 },
+        clockTimestamp: 10,
       },
       {
         desc: 'should verify using "iat" after the "maxAge" but within "clockTolerance"',
-        clockAdvance: 10000,
         maxAge: 9,
-        options: { clockTimestamp: 2 },
+        clockTimestamp: 8,
       },
     ];
 
@@ -100,7 +98,7 @@ class IssueAtSuite {
       });
       await jwt.verify(token, {
         clock: {
-          timestamp: NOW + (testCase.options.clockTimestamp || 0)
+          timestamp: NOW + (testCase.clockTimestamp || 0)
         },
       });
 
@@ -113,52 +111,40 @@ class IssueAtSuite {
     const OPS = [
       {
         desc: 'should throw using "iat" equal to the "maxAge"',
-        clockAdvance: 10000,
-        maxAge: 10,
-        options: {},
-        expectedError: 'maxAge exceeded',
-        expectedExpiresAt: 70000,
+        clockAdvance: 10,
+        maxAge: 10
       },
       {
         desc: 'should throw using "iat" after the "maxAge"',
-        clockAdvance: 10000,
+        clockAdvance: 10,
         maxAge: 9,
-        options: {},
-        expectedError: 'maxAge exceeded',
-        expectedExpiresAt: 69000,
       },
       {
         desc: 'should throw using "iat" after the "maxAge" with a provided "clockTimestamp',
-        clockAdvance: 60000,
+        clockAdvance: 60,
         maxAge: 10,
-        options: { clockTimestamp: 70 },
-        expectedError: 'maxAge exceeded',
-        expectedExpiresAt: 70000,
       },
       {
         desc: 'should throw using "iat" after the "maxAge" and "clockTolerance',
-        clockAdvance: 10000,
+        clockAdvance: 10,
         maxAge: 8,
-        options: { clockTolerance: 2 },
-        expectedError: 'maxAge exceeded',
-        expectedExpiresAt: 68000,
+        clockTolerance: 2,
       },
     ];
 
     const NOW = Math.trunc(Date.now() / 1000);
 
     for (const testCase of OPS) {
-      const token = await jwt.sign({}, { key: 'secret', alg: 'none' });
+      const token = await jwt.sign({ iat: NOW }, { key: 'secret', alg: 'none' });
       await assert.throws(async () => {
-        await new Promise(r => setTimeout(r, 1));
         return jwt.verify(token, {
-          maxAgeSec: NOW + testCase.maxAge,
+          maxAgeSec: testCase.maxAge,
           clock: {
-            tolerance: testCase.options.clockTolerance,
-            timestamp: NOW + (testCase.options.clockTimestamp || 0)
+            tolerance: (testCase.clockTolerance || 0),
+            timestamp: NOW + testCase.clockAdvance
           }
         });
-      });
+      }, 'maxAge exceeded');
     }
   }
 }

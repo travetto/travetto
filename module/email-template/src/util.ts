@@ -9,7 +9,11 @@ export class TemplateUtil {
   static converter = new CommandService({
     image: 'agregad/pngquant',
     checkForLocal: async () => {
-      return (await ExecUtil.spawn('pngquant -h')[1]).valid;
+      try {
+        return (await ExecUtil.spawn('pngquant -h')[1]).valid;
+      } catch (e) {
+        return false;
+      }
     }
   });
 

@@ -32,12 +32,12 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
   const verifyPayload = { ...(options.payload || {}) };
 
   const oct = (options.clock && options.clock.timestamp);
-  const octn = oct instanceof Date ? oct.getTime() : (typeof oct === 'number' ? oct : Date.now());
+  const octn = oct instanceof Date ? Math.trunc(oct.getTime() / 1000) : (typeof oct === 'number' ? oct : Math.trunc(Date.now() / 1000));
 
   const clock = {
     tolerance: 0,
     ...(options.clock || {}),
-    timestamp: Math.trunc(octn / 1000),
+    timestamp: octn,
   };
 
   const ignore = {
@@ -139,7 +139,7 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
 
     const maxAgeTimestamp = options.maxAgeSec + payload.iat;
 
-    if (clock.timestamp >= maxAgeTimestamp + clock.tolerance) {
+    if (clock.timestamp >= maxAgeTimestamp + (clock.tolerance || 0)) {
       throw new JWTError('maxAge exceeded', { date: new Date(maxAgeTimestamp * 1000) });
     }
   }
