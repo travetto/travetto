@@ -18,6 +18,11 @@ const stringArrProp = prop as
     <T extends Partial<Record<K, string | any[]>>, K extends string>(t: T, k: K) =>
       void;
 
+const stringArrStringProp = prop as
+  (obj: { [key: string]: any }) =>
+    <T extends Partial<Record<K, string | string[]>>, K extends string>(t: T, k: K) =>
+      void;
+
 const numberProp = prop as
   (obj: { [key: string]: any }) =>
     <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K) =>
@@ -58,7 +63,7 @@ export const Enum = ((vals: string[] | any, message?: string) => {
 
 export const Trimmed = () => stringProp({ trim: true });
 
-export const Match = (re: RegExp, message?: string) => stringProp({ match: { re, message } });
+export const Match = (re: RegExp, message?: string) => stringArrStringProp({ match: { re, message } });
 export const MinLength = (n: number, message?: string) => stringArrProp({ minlength: { n, message } });
 export const MaxLength = (n: number, message?: string) => stringArrProp({ maxlength: { n, message } });
 export const Min = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ min: { n, message } });
