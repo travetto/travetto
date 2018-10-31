@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import * as util from 'util';
 
+import { FsUtil } from '@travetto/base';
 import { AppCache } from '@travetto/base/src/cache';
 import { Injectable, Inject } from '@travetto/di';
 import { MailTemplateEngine, MailTemplateContext } from '@travetto/email';
@@ -11,8 +11,6 @@ import { MailTemplateConfig } from './config';
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
 
-const readFile = util.promisify(fs.readFile);
-const exists = util.promisify(fs.exists);
 
 @Injectable()
 export class DefaultMailTemplateEngine extends MailTemplateEngine {
@@ -58,7 +56,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     if (!name) {
       name = pth.split('/').pop() as string;
     }
-    const contents = await readFile(pth);
+    const contents = await FsUtil.readFileAsync(pth);
     this.registerTemplate(name, contents.toString());
   }
 
@@ -70,11 +68,11 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     const pth = await this.config.findFirst(rel);
     const out = AppCache.toEntryName(pth);
 
-    if (!(await exists(out))) {
+    if (!(await FsUtil.existsAsync(out))) {
       await TemplateUtil.optimizeImage(pth, out);
     }
 
-    return readFile(out);
+    return FsUtil.readFileAsync(out);
   }
 
   async compile(tpl: string) {

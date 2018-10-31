@@ -1,17 +1,13 @@
 import * as child_process from 'child_process';
-import * as util from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as net from 'net';
 
-import { Shutdown, ScanFs, ScanEntry, Env } from '@travetto/base';
+import { Shutdown, ScanFs, ScanEntry, Env, FsUtil } from '@travetto/base';
 
 import { CommonProcess, ExecutionResult } from './types';
 import { ExecUtil, WithOpts } from './util';
 
-const writeFile = util.promisify(fs.writeFile);
-const mkdir = util.promisify(fs.mkdir);
-const unlinkFile = util.promisify(fs.unlink);
 
 function exec(command: string, opts?: WithOpts<child_process.SpawnOptions>) {
   return ExecUtil.spawn(command, { shell: false, ...opts })[1];
@@ -197,7 +193,7 @@ export class DockerContainer {
 
   async initTemp() {
     // Make temp dirs
-    const mkdirAll = Object.keys(this.tempVolumes).map(x => mkdir(x).catch(e => { }));
+    const mkdirAll = Object.keys(this.tempVolumes).map(x => FsUtil.mkdirpAsync(x).catch(e => { }));
     await Promise.all(mkdirAll);
   }
 
@@ -280,7 +276,7 @@ export class DockerContainer {
     ]) {
       await Promise.all(files
         .filter(filter)
-        .map(x => unlinkFile(x.file)
+        .map(x => FsUtil.unlinkAsync(x.file)
           .catch(e => { console.error(`Unable to delete ${e.file}`); }))
       );
     }
@@ -310,7 +306,7 @@ export class DockerContainer {
     if (files) {
       for (const { name, content } of files) {
         const f = path.join(dir, name);
-        await writeFile(f, content, { mode: '755' });
+        await FsUtil.writeFileAsync(f, content, { mode: '755' });
       }
     }
     return;

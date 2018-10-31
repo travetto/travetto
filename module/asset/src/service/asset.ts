@@ -1,12 +1,10 @@
 import * as fs from 'fs';
-import * as util from 'util';
 
 import { Injectable } from '@travetto/di';
+import { FsUtil } from '@travetto/base';
 
 import { Asset } from '../model';
 import { AssetSource } from '../source';
-
-const fsUnlinkAsync = util.promisify(fs.unlink);
 
 @Injectable()
 export class AssetService {
@@ -35,7 +33,7 @@ export class AssetService {
     } finally {
       if (removeOnComplete) {
         try {
-          await fsUnlinkAsync(asset.path);
+          await FsUtil.unlinkAsync(asset.path);
         } catch (e) {
           // Do nothings
         }

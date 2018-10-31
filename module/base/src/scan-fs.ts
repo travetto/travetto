@@ -1,12 +1,8 @@
 import * as fs from 'fs';
-import * as util from 'util';
 import * as path from 'path';
-import { Env } from './env';
 
-const fsReadFileAsync = util.promisify(fs.readFile);
-const fsStat = util.promisify(fs.lstat);
-const fsReaddir = util.promisify(fs.readdir);
-const fsRealpath = util.promisify(fs.realpath);
+import { Env } from './env';
+import { FsUtil } from './fs-util';
 
 export interface ScanEntry {
   file: string;
@@ -39,18 +35,18 @@ export class ScanFs {
         base = base || Env.cwd;
         entry = (entry || { file: base, children: [] }) as ScanEntry;
 
-        for (const file of (await fsReaddir(entry.file))) {
+        for (const file of (await FsUtil.readdirAsync(entry.file))) {
           if (file.startsWith('.')) {
             continue;
           }
 
           const full = path.resolve(entry.file, file);
-          const stats = await fsStat(full);
+          const stats = await FsUtil.lstatAsync(full);
           const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
 
           if (ScanFs.isDir(subEntry)) {
             if (subEntry.stats.isSymbolicLink()) {
-              const p = await fsRealpath(full);
+              const p = await FsUtil.realpathAsync(full);
               if (!visited.has(p)) {
                 visited.add(p);
               } else {
@@ -148,7 +144,7 @@ export class ScanFs {
     const files = await ScanFs.bulkScanDir(handlers);
     const promises = files
       .filter(ScanFs.isNotDir)
-      .map(x => fsReadFileAsync(x.file).then(d => ({ name: x.file, data: d.toString() })));
+      .map(x => FsUtil.readFileAsync(x.file).then(d => ({ name: x.file, data: d.toString() })));
     return await Promise.all(promises);
   }
 

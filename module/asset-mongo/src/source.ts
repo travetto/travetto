@@ -5,8 +5,6 @@ import * as util from 'util';
 import { AssetSource, Asset } from '@travetto/asset';
 import { AssetMongoConfig } from './config';
 
-const setTimeoutAsync = util.promisify(setTimeout);
-
 export class AssetMongoSource extends AssetSource {
 
   private client: Grid.Grid;
@@ -39,7 +37,7 @@ export class AssetMongoSource extends AssetSource {
         return await this.info(file.filename);
       } catch (e) {
         // Wait for load
-        await setTimeoutAsync(100);
+        await new Promise(res => setTimeout(res, 100));
       }
     }
 

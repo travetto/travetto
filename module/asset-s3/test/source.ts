@@ -1,14 +1,12 @@
-import * as fs from 'fs';
-import * as util from 'util';
 import * as assert from 'assert';
 
 import { AssetService, AssetUtil, AssetSource, ImageService } from '@travetto/asset';
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
+import { FsUtil } from '@travetto/base';
+
 import { AssetS3Source } from '../src/source';
 import { AssetS3Config } from '../src/config';
-
-const fsStat = util.promisify(fs.stat);
 
 class Config extends AssetS3Config {
   @InjectableFactory()
@@ -51,7 +49,7 @@ class TestAssetService {
     assert(file.length > 0);
 
     try {
-      await fsStat(filePath);
+      await FsUtil.statAsync(filePath);
       assert(false);
     } catch {
       assert(true);
