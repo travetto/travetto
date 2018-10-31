@@ -3,22 +3,25 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 
-const mkdirAsync = util.promisify(fs.mkdir);
-const existsAsync = util.promisify(fs.exists);
+const FsUtil = {
+  reorient: f => f.replace(/[\/]+/, path.sep)
+};
+for (const k of [
+    'readFile', 'writeFile', 'stat', 'lstat', 'unlink', 'readlink', 'realpath',
+    'rename', 'open', 'read', 'write', 'readdir', 'exists', 'mkdir'
+  ]) {
+  FsUtil[`${k}Async`] = util.promisify(fs[k]);
+}
 
-module.exports.FsUtil = {
-  reorient(file) {
-    return file.replace(/[\/]+/, path.sep);
-  },
-  async mkdirpAsync(rel) {
-    const pth = this.reorient(rel);
-    if (!(await existsAsync(pth))) {
-      try {
-        await mkdirAsync(pth);
-      } catch (e) {
-        await this.mkdirpAsync(path.dirname(pth));
-        await mkdirAsync(pth);
-      }
+module.exports.FsUtil = FsUtil;
+FsUtil.mkdirpAsync = async function mkdirpAsync(rel) {
+  const pth = FsUtil.reorient(rel);
+  if (!(await FsUtil.existsAsync(pth))) {
+    try {
+      await FsUtil.mkdirAsync(pth);
+    } catch (e) {
+      await mkdirpAsync(path.dirname(pth));
+      await FsUtil.mkdirAsync(pth);
     }
   }
 };

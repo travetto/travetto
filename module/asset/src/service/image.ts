@@ -1,16 +1,14 @@
 import * as fs from 'fs';
-import * as util from 'util';
 
 import { CommandService, ExecUtil } from '@travetto/exec';
 import { Cacheable } from '@travetto/cache';
 import { Injectable } from '@travetto/di';
+import { FsUtil } from '@travetto/base';
 
 import { AssetService } from './asset';
 import { Asset } from '../model';
 import { AssetUtil } from '../util';
 import { ImageOptions } from '../types';
-
-const fsUnlinkAsync = util.promisify(fs.unlink);
 
 @Injectable()
 export class ImageService {
@@ -27,7 +25,7 @@ export class ImageService {
   @Cacheable({
     max: 1000,
     dispose: (key: string, n: Promise<string | undefined>) => {
-      n.then(v => v ? fsUnlinkAsync(v) : undefined).catch(err => {
+      n.then(v => v ? FsUtil.unlinkAsync(v) : undefined).catch(err => {
         console.error(err);
       });
     }

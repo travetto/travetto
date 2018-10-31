@@ -1,11 +1,7 @@
 import * as path from 'path';
-import * as fs from 'fs';
-import * as util from 'util';
 
-import { Env } from '@travetto/base';
+import { Env, FsUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
-
-const exists = util.promisify(fs.exists);
 
 @Config('mail.template')
 export class MailTemplateConfig {
@@ -37,7 +33,7 @@ export class MailTemplateConfig {
     }
 
     for (const f of this.assetRoots.map(x => path.join(x, pth))) {
-      if (await exists(f)) {
+      if (await FsUtil.existsAsync(f)) {
         return this._cache[pth] = f;
       }
     }

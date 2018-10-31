@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as assert from 'assert';
-import * as util from 'util';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
+import { FsUtil } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
@@ -65,7 +65,7 @@ class AssetTest {
     assert(file.contentType === 'image/png');
     assert(file.length > -1);
 
-    assert(await util.promisify(fs.exists)(filePath) === false);
+    assert(await FsUtil.existsAsync(filePath) === false);
   }
 
   @Test('Test caching')

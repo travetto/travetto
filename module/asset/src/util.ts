@@ -2,17 +2,12 @@ import * as fs from 'fs';
 import * as mime from 'mime';
 import * as path from 'path';
 import * as fileType from 'file-type';
-import * as util from 'util';
 import * as os from 'os';
 import * as crypto from 'crypto';
 
+import { FsUtil } from '@travetto/base';
 import { HttpRequest } from '@travetto/net';
 import { Asset, AssetFile } from './model';
-
-const fsStatAsync = util.promisify(fs.stat);
-const fsRenameAsync = util.promisify(fs.rename);
-const fsReadyAync = util.promisify(fs.read);
-const fsOpenAsync = util.promisify(fs.open);
 
 const tmpDir = path.resolve(os.tmpdir());
 
@@ -30,9 +25,11 @@ export class AssetUtil {
 
     const str = fs.createReadStream(pth);
     str.pipe(hash);
-    await util.promisify(str.on).call(str, 'end');
 
-    const size = (await fsStatAsync(pth)).size;
+    await new Promise((res, rej) =>
+      str.on('end', e => e ? rej(e) : res()));
+
+    const size = (await FsUtil.statAsync(pth)).size;
 
     const upload = this.fileToAsset({
       name: pth,
@@ -83,9 +80,9 @@ export class AssetUtil {
   }
 
   static async readChunk(filePath: string, bytes: number) {
-    const fd = await fsOpenAsync(filePath, 'r');
+    const fd = await FsUtil.openAsync(filePath, 'r');
     const buffer = new Buffer(bytes);
-    await fsReadyAync(fd, buffer, 0, bytes, 0);
+    await FsUtil.readAsync(fd, buffer, 0, bytes, 0);
     return buffer;
   }
 
@@ -114,7 +111,7 @@ export class AssetUtil {
       } else {
         newFilePath = `${newFilePath}.${responseExt}`;
       }
-      await fsRenameAsync(filePath, newFilePath);
+      await FsUtil.renameAsync(filePath, newFilePath);
       filePath = newFilePath;
     }
     return filePath;
