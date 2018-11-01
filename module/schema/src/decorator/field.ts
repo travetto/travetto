@@ -54,7 +54,7 @@ export function Field(type: ClassList, config?: Partial<FieldConfig>) {
   };
 }
 export const Alias = (...aliases: string[]) => prop({ aliases });
-export const Required = (message?: string) => prop({ required: { active: true, message } });
+export const Required = (active = true, message?: string) => prop({ required: { active, message } });
 export const Enum = ((vals: string[] | any, message?: string) => {
   const values = enumKeys(vals);
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
@@ -63,7 +63,7 @@ export const Enum = ((vals: string[] | any, message?: string) => {
 
 export const Trimmed = () => stringProp({ trim: true });
 
-export const Match = (re: RegExp, message?: string) => stringArrStringProp({ match: { re, message, reSource: re.source } });
+export const Match = (re: RegExp, message?: string) => stringArrStringProp({ match: { re, message } });
 export const MinLength = (n: number, message?: string) => stringArrProp({ minlength: { n, message } });
 export const MaxLength = (n: number, message?: string) => stringArrProp({ maxlength: { n, message } });
 export const Min = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ min: { n, message } });

@@ -37,7 +37,7 @@ function computeProperty(state: AutoState, node: ts.PropertyDeclaration) {
   }
 
   const dec = TransformUtil.createDecorator(state, require.resolve('../src/decorator/field'), 'Field', ...params);
-  const newDecs = [dec, ...(node.decorators || [])];
+  const newDecs = [...(node.decorators || []), dec];
 
   const comments = TransformUtil.describeByComments(state, node);
   if (comments.description) {

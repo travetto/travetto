@@ -146,14 +146,15 @@ export class SchemaValidator {
     for (const err of errs) {
       err.path = path;
 
-      if (err.re) {
-        err.re = err.re.source;
-      }
-
       const msg = err.message ||
         (err.re && Messages.get(err.re)) ||
         Messages.get(err.kind) ||
         Messages.get('default');
+
+
+      if (err.re) {
+        err.re = err.re.source;
+      }
 
       err.message = msg
         .replace(/\{([^}]+)\}/g, (a: string, k: string) => err[k]);

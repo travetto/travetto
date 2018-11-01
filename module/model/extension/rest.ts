@@ -1,7 +1,6 @@
 import { ControllerRegistry, Request } from '@travetto/rest';
 import { getSchemaBody } from '@travetto/schema/extension/rest';
 import { Class } from '@travetto/registry';
-import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelService, ModelCore } from '../';
 
@@ -21,12 +20,6 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
         }
       }
     );
-
-    Object.assign(
-      ControllerRegistry.getOrCreateEndpointConfig(
-        target, function (this: Svc, req: Request) {
-          return SchemaRegistry.getViewSchema(cls, req.query.view).schema;
-        }), { priority: 101, method: 'get', path: '/schema.json' });
 
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(

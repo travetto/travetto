@@ -1,12 +1,18 @@
-import { Application } from '@travetto/di';
-import { RestApp } from '@travetto/rest';
+import { Application, InjectableFactory } from '@travetto/di';
+import { RestApp, RestAppProvider } from '@travetto/rest';
+import { RestExpressAppProvider } from '@travetto/rest-express';
 
-import { ClientGenerate } from '../src';
+import '../src/controller';
 
 @Application('sample')
 export class SampleApp {
 
-  constructor(private app: RestApp, private cg: ClientGenerate) { }
+  @InjectableFactory()
+  static getRestApp(): RestAppProvider {
+    return new RestExpressAppProvider();
+  }
+
+  constructor(private app: RestApp) { }
 
   run() {
     this.app.run();
