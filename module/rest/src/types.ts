@@ -7,6 +7,12 @@ export type HeaderMap = { [key: string]: (string | (() => string)) };
 export type Method = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head';
 export type PathType = string | RegExp;
 
+export type Request = Travetto.Request;
+export type Response = Travetto.Response;
+
+export interface TypedQuery<T> extends Request { query: T; }
+export interface TypedBody<T> extends Request { body: T; }
+
 export interface DescribableConfig {
   title?: string;
   description?: string;
@@ -73,16 +79,7 @@ export interface ControllerDecorator<T = any> {
   (target: Class<T>): Class<T> | undefined;
 }
 
-export abstract class RestAppProvider<T = any> {
-  abstract get _raw(): T;
-  abstract init(): Promise<any>;
-  abstract registerController(controller: ControllerConfig): Promise<any>;
-  abstract unregisterController(controller: ControllerConfig): Promise<any>;
-  abstract listen(port?: number): void;
-}
-
 export abstract class RestInterceptor {
-
   public after?: Class<RestInterceptor>[] | Set<Class<RestInterceptor>> | Class<RestInterceptor>;
   public before?: Class<RestInterceptor>[] | Set<Class<RestInterceptor>> | Class<RestInterceptor>;
 
@@ -96,8 +93,34 @@ export class RestInterceptorSet {
   }
 }
 
-export type Request = Travetto.Request;
-export type Response = Travetto.Response;
 
-export interface TypedQuery<T> extends Request { query: T; }
-export interface TypedBody<T> extends Request { body: T; }
+export abstract class RestAppProvider<T = any> {
+  interceptors: RestInterceptor[] = [];
+
+  abstract get _raw(): T;
+  abstract init(): Promise<any>;
+  abstract registerController(controller: ControllerConfig): Promise<any>;
+  abstract unregisterController(controller: ControllerConfig): Promise<any>;
+  abstract listen(port?: number): void;
+
+  registerInterceptor(interceptor: RestInterceptor) {
+    this.interceptors.push(interceptor);
+  }
+
+  async executeInterceptors(req: Request, res: Response, proceed?: (err?: any) => any) {
+    try {
+      for (const it of this.interceptors) {
+        await it.intercept(req, res);
+      }
+      if (proceed) {
+        proceed();
+      }
+    } catch (e) {
+      if (proceed) {
+        proceed(e);
+      } else {
+        throw e;
+      }
+    }
+  }
+}

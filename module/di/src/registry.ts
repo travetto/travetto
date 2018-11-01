@@ -50,6 +50,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   constructor() {
     super(RootRegistry);
+
+    if (Env.get('TRV_APP_NAME')) {
+      this.init().then(x => this.runApplication(Env.get('TRV_APP_NAME')!));
+    }
   }
 
   private async createInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE) {

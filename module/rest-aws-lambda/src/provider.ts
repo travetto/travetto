@@ -49,6 +49,10 @@ export class RestAwsLambdaAppProvider extends RestAppProvider<express.Applicatio
     ConfigLoader.bindTo(this.config, 'rest.awsLambda');
 
     this.app = this.create();
+
+    this.app.use((req, res, next) =>
+      this.executeInterceptors(req as any, res as any, next));
+
     this.server = awsServerlessExpress.createServer(this.app);
     this._handler = awsServerlessExpress.proxy.bind(awsServerlessExpress, this.server);
   }
