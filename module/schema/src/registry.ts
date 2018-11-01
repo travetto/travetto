@@ -52,7 +52,11 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   getViewSchema<T>(cls: Class<T>, view?: string) {
-    const res = this.get(cls)!.views[view || DEFAULT_VIEW];
+    const schm = this.get(cls)!;
+    if (!schm) {
+      throw new Error(`Unknown schema class ${cls.name}`);
+    }
+    const res = schm.views[view || DEFAULT_VIEW];
     if (!res) {
       throw new Error(`Unknown view ${view || DEFAULT_VIEW} for ${cls.name}`);
     }

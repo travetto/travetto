@@ -63,7 +63,7 @@ export const Enum = ((vals: string[] | any, message?: string) => {
 
 export const Trimmed = () => stringProp({ trim: true });
 
-export const Match = (re: RegExp, message?: string) => stringArrStringProp({ match: { re, message } });
+export const Match = (re: RegExp, message?: string) => stringArrStringProp({ match: { re, message, reSource: re.source } });
 export const MinLength = (n: number, message?: string) => stringArrProp({ minlength: { n, message } });
 export const MaxLength = (n: number, message?: string) => stringArrProp({ maxlength: { n, message } });
 export const Min = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ min: { n, message } });
