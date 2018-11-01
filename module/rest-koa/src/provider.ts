@@ -33,57 +33,70 @@ export class RestKoaAppProvider extends RestAppProvider {
     ConfigLoader.bindTo(this.config, 'rest.koa');
 
     this.app = this.create();
-  }
-  getRequest(ctx: koa.Context) {
-    return RestAppUtil.decorateRequest({
-      _raw: ctx,
-      method: ctx.method,
-      path: ctx.path,
-      query: ctx.query,
-      params: ctx.params,
-      body: ctx.body,
-      session: ctx.session,
-      headers: ctx.headers,
-      cookies: ctx.cookies,
-      files: {},
-      auth: undefined as any,
-      pipe: ctx.req.pipe.bind(ctx.req),
-      on: ctx.req.on.bind(ctx.req)
+
+    this.app.use(ctx => {
+      const req = this.getRequest(ctx);
+      const res = this.getResponse(ctx);
+      return this.executeInterceptors(req, res);
     });
   }
 
+  getRequest(ctx: koa.Context) {
+    if (!(ctx as any)._trvReq) {
+      (ctx as any)._trvReq = RestAppUtil.decorateRequest({
+        _raw: ctx,
+        method: ctx.method,
+        path: ctx.path,
+        query: ctx.query,
+        params: ctx.params,
+        body: ctx.body,
+        session: ctx.session,
+        headers: ctx.headers,
+        cookies: ctx.cookies,
+        files: {},
+        auth: undefined as any,
+        pipe: ctx.req.pipe.bind(ctx.req),
+        on: ctx.req.on.bind(ctx.req)
+      });
+    }
+    return (ctx as any)._trvReq;
+  }
+
   getResponse(ctx: koa.Context) {
-    return RestAppUtil.decorateResponse({
-      _raw: ctx,
-      get headersSent() {
-        return ctx.headerSent;
-      },
-      status(value?: number) {
-        if (value) {
-          ctx.status = value;
-        } else {
-          return ctx.status;
-        }
-      },
-      send: (b) => {
-        ctx.body = b;
-      },
-      on: ctx.res.on.bind(ctx.res),
-      end: (val?: any) => {
-        if (val) {
-          ctx.body = val;
-        }
-        ctx.flushHeaders();
-        if (ctx.status < 200 || (ctx.status < 400 && ctx.status >= 300)) {
-          ctx.res.end(); // Only end on redirect
-        }
-      },
-      setHeader: ctx.set.bind(ctx),
-      getHeader: ctx.response.get.bind(ctx),
-      removeHeader: ctx.remove.bind(ctx),
-      write: ctx.res.write.bind(ctx.res),
-      cookie: ctx.cookies.set.bind(ctx.cookies),
-    });
+    if (!(ctx as any)._trvRes) {
+      (ctx as any)._trvRes = RestAppUtil.decorateResponse({
+        _raw: ctx,
+        get headersSent() {
+          return ctx.headerSent;
+        },
+        status(value?: number) {
+          if (value) {
+            ctx.status = value;
+          } else {
+            return ctx.status;
+          }
+        },
+        send: (b) => {
+          ctx.body = b;
+        },
+        on: ctx.res.on.bind(ctx.res),
+        end: (val?: any) => {
+          if (val) {
+            ctx.body = val;
+          }
+          ctx.flushHeaders();
+          if (ctx.status < 200 || (ctx.status < 400 && ctx.status >= 300)) {
+            ctx.res.end(); // Only end on redirect
+          }
+        },
+        setHeader: ctx.set.bind(ctx),
+        getHeader: ctx.response.get.bind(ctx),
+        removeHeader: ctx.remove.bind(ctx),
+        write: ctx.res.write.bind(ctx.res),
+        cookie: ctx.cookies.set.bind(ctx.cookies),
+      });
+    }
+    return (ctx as any)._trvReq;
   }
 
   async unregisterController(config: ControllerConfig) {

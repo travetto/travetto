@@ -1,4 +1,4 @@
-import { Response, Request } from '../types';
+import { Response, Request, RestInterceptor } from '../types';
 import { MimeType } from './mime';
 
 abstract class BaseResponse implements Partial<Response> {

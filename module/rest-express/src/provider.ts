@@ -43,6 +43,9 @@ export class RestExpressAppProvider extends RestAppProvider<express.Application>
     ConfigLoader.bindTo(this.config, 'rest.express');
 
     this.app = this.create();
+
+    this.app.use((req, res, next) =>
+      this.executeInterceptors(req as any, res as any, next));
   }
 
   async unregisterController(config: ControllerConfig) {

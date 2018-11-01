@@ -39,6 +39,12 @@ export class RestFastifyAppProvider extends RestAppProvider {
     ConfigLoader.bindTo(this.config, 'rest.fastify');
 
     this.app = this.create();
+
+    this.app.addHook('preHandler', (reqs, reply) => {
+      const req = this.getRequest(reqs);
+      const res = this.getResponse(reply);
+      return this.executeInterceptors(req, res);
+    });
   }
 
   async unregisterController(config: ControllerConfig) {
@@ -46,52 +52,60 @@ export class RestFastifyAppProvider extends RestAppProvider {
   }
 
   getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
-    return RestAppUtil.decorateRequest({
-      _raw: reqs,
-      method: reqs.req.method,
-      path: reqs.req.url!,
-      query: reqs.query,
-      params: reqs.params,
-      body: (reqs as any).body,
-      session: (reqs as any).session,
-      headers: reqs.headers,
-      cookies: (reqs as any).cookies,
-      files: {},
-      auth: undefined as any,
-      pipe: reqs.req.pipe.bind(reqs.req),
-      on: reqs.req.on.bind(reqs.req)
-    });
+    if (!(reqs as any)._trvReq) {
+      (reqs as any)._trvReq = RestAppUtil.decorateRequest({
+        _raw: reqs,
+        method: reqs.req.method,
+        path: reqs.req.url!,
+        query: reqs.query,
+        params: reqs.params,
+        body: (reqs as any).body,
+        session: (reqs as any).session,
+        headers: reqs.headers,
+        cookies: (reqs as any).cookies,
+        files: {},
+        auth: undefined as any,
+        pipe: reqs.req.pipe.bind(reqs.req),
+        on: reqs.req.on.bind(reqs.req)
+      });
+    }
+    return (reqs as any)._trvReq;
   }
 
   getResponse(reply: fastify.FastifyReply<ServerResponse>) {
-    return RestAppUtil.decorateResponse({
-      _raw: reply,
-      get headersSent() {
-        return reply.sent;
-      },
-      status(val?: number): number | undefined {
-        if (val) {
-          reply.status(val);
-          reply.res.statusCode = val;
-        } else {
-          return reply.res.statusCode;
-        }
-      },
-      send: reply.send.bind(reply),
-      on: reply.res.on.bind(reply.res),
-      end: (val?: any) => {
-        if (val) {
-          reply.send(val);
-        }
-        reply.res.end();
-      },
-      setHeader: reply.res.setHeader.bind(reply.res),
-      getHeader: reply.res.getHeader.bind(reply.res),
-      removeHeader: reply.res.removeHeader.bind(reply.res),
-      write: reply.res.write.bind(reply.res),
-      cookie: (reply as any).setCookie.bind(reply)
-    });
+    if (!(reply as any)._trvRes) {
+      (reply as any)._trvRes = RestAppUtil.decorateResponse({
+        _raw: reply,
+        get headersSent() {
+          return reply.sent;
+        },
+        status(val?: number): number | undefined {
+          if (val) {
+            reply.status(val);
+            reply.res.statusCode = val;
+          } else {
+            return reply.res.statusCode;
+          }
+        },
+        send: reply.send.bind(reply),
+        on: reply.res.on.bind(reply.res),
+        end: (val?: any) => {
+          if (val) {
+            reply.send(val);
+          }
+          reply.res.end();
+        },
+        setHeader: reply.res.setHeader.bind(reply.res),
+        getHeader: reply.res.getHeader.bind(reply.res),
+        removeHeader: reply.res.removeHeader.bind(reply.res),
+        write: reply.res.write.bind(reply.res),
+        cookie: (reply as any).setCookie.bind(reply)
+      });
+    }
+
+    return (reply as any)._trvRes;
   }
+
 
   async registerController(cConfig: ControllerConfig) {
     for (const endpoint of cConfig.endpoints.reverse()) {

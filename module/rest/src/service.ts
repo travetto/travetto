@@ -20,7 +20,7 @@ export class RestApp {
     public provider: RestAppProvider<any>,
   ) { }
 
-  private async registerController(c: Class, interceptors: RestInterceptor[]) {
+  private async registerController(c: Class, interceptors: RestInterceptor[] = []) {
     const cConfig = ControllerRegistry.get(c);
     const controller = await DependencyRegistry.getInstance(cConfig.class);
 
@@ -52,22 +52,26 @@ export class RestApp {
         })
     ));
 
-    const sorted = Util.computeOrdering(instances.map(x => ({
-      key: x.constructor,
-      before: x.before,
-      after: x.after,
-      target: x
-    }))).map(x => x.target);
-
-    for (const inter of sorted) {
-      inter.intercept = inter.intercept.bind(inter);
-    }
+    const sorted = Util.computeOrdering(
+      instances
+        .map(x => ({
+          key: x.constructor,
+          before: x.before,
+          after: x.after,
+          target: x
+        }))
+    )
+      .map(x => x.target);
 
     console.debug('Sorting interceptors', sorted.length, sorted.map(x => x.constructor.name));
 
+    for (const inter of sorted) {
+      this.provider.registerInterceptor(inter);
+    }
+
     // Register all active
     await Promise.all(ControllerRegistry.getClasses()
-      .map(c => this.registerController(c, sorted)));
+      .map(c => this.registerController(c)));
 
     // Listen for updates
     ControllerRegistry.on(e => {

@@ -1,4 +1,0 @@
----
-rest.interceptor:
-  '@travetto/auth-rest':
-    - AuthInterceptor
