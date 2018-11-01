@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Request, Response } from '@travetto/rest';
-import { SchemaQuery, SchemaBody } from '@travetto/schema/extension/express';
+import { SchemaQuery, SchemaBody } from '@travetto/schema/extension/rest';
 
 import { User, UserSearch } from './model';
 

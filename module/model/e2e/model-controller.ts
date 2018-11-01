@@ -2,6 +2,7 @@ import { Get, RestApp, RestAppProvider } from '@travetto/rest';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { Injectable, InjectableFactory, Application } from '@travetto/di';
 import { RestExpressAppProvider } from '@travetto/rest-express';
+import { Schema, Match } from '@travetto/schema';
 
 import { ModelController } from '../extension/rest';
 import {
@@ -11,7 +12,6 @@ import {
 } from '../';
 import { QueryVerifierService } from '../src/service/verify';
 import { BulkOp } from '../src/model/bulk';
-import { Match } from '../../schema';
 
 @Injectable({ target: ModelSource })
 export class TestSource implements ModelSource {
@@ -92,12 +92,19 @@ export class TestSource implements ModelSource {
   }
 }
 
+@Schema()
+class SubSimple {
+  name: string;
+}
+
 @Model()
 class Simple implements ModelCore {
   id?: string;
   name: string;
   @Match(/^\w{10}.\w{3}@\w{10}.com/)
   userName: string;
+
+  sub: SubSimple;
 }
 
 class Config {

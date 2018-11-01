@@ -1,4 +1,4 @@
-import { Schema } from '@travetto/schema';
+import { Schema, Match } from '@travetto/schema';
 
 /**
  * User instance for framework
@@ -9,6 +9,7 @@ export class User {
   /**
    * User's first and last name
    */
+  @Match(/\w{3,20}/)
   name: string;
 
   /**

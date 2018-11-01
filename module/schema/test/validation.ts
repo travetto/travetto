@@ -7,6 +7,7 @@ import {
   SchemaValidator, Schema, ValidationError,
   SchemaRegistry, ValidationErrors, Validator, View, Match, CommonRegExp
 } from '../';
+import { Required } from '../src/decorator/field';
 
 @Schema()
 class Response {
@@ -91,6 +92,12 @@ class StringMatches {
 
 function findError(errors: ValidationError[], path: string, message: string) {
   return errors.find(x => x.path === path && x.message.includes(message));
+}
+
+@Schema()
+class NotRequiredUndefinable {
+  @Required(false)
+  name: string;
 }
 
 @Suite()
@@ -221,6 +228,15 @@ class Validation {
     await assert.throws(() =>
       SchemaValidator.validate(obj2)
       , ValidationErrors);
+  }
+
+  @Test('manually unrequired')
+  async unrequired() {
+    const o = NotRequiredUndefinable.from({
+
+    });
+
+    await SchemaValidator.validate(o);
   }
 }
 
