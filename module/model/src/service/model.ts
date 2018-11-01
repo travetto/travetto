@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaValidator, DEFAULT_VIEW, SchemaRegistry } from '@travetto/schema';
+import { BindUtil, SchemaValidator, DEFAULT_VIEW, SchemaRegistry, ValidationError } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-import { Env, Util } from '@travetto/base';
+import { Env, Util, BaseError } from '@travetto/base';
 
 import { QueryVerifierService } from './verify';
 import { ModelOptions } from '../types';
@@ -11,6 +11,7 @@ import { BulkOp, BulkResponse } from '../model/bulk';
 import { ModelSource, IModelSource } from './source';
 import { ModelRegistry } from '../registry';
 import { QueryLanguageParser } from '../query-lang/parser';
+import { ValidationErrors } from '../error';
 
 function getClass<T>(o: T) {
   return o.constructor as Class<T>;
@@ -224,6 +225,25 @@ export class ModelService implements IModelSource {
     const partial = BindUtil.bindSchema(cls, {}, o, view);
     const res = await this.updatePartialByQuery(cls, query, partial);
     return res;
+  }
+
+  async bulkPrepare<T extends ModelCore>(cls: Class<T>, items: T[]) {
+    const errs: { idx: number, error: ValidationErrors }[] = [];
+    const out: { idx: number, v: T }[] = [];
+
+    await Promise.all(
+      items.map((x, idx) =>
+        this.prePersist(cls, x)
+          .then(v => out.push({ idx, v }))
+          .catch(error => errs.push({ idx, error }))));
+
+    if (errs.length) {
+      throw new BaseError('Bulk Preparation Errors', errs.sort((a, b) => a.idx - b.idx));
+    }
+
+    return out
+      .sort((a, b) => a.idx - b.idx)
+      .map(x => x.v);
   }
 
   /** Bulk create/update/delete */

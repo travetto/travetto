@@ -15,7 +15,7 @@ export class ValidationErrors extends BaseError {
 
 export class SchemaValidator {
 
-  private static validateSchema<T>(schema: SchemaConfig, o: T, view: string | undefined, relative: string) {
+  private static validateSchema<T>(schema: SchemaConfig, o: T, relative: string) {
     let errors: ValidationError[] = [];
 
     for (const field of Object.keys(schema)) {
@@ -48,7 +48,7 @@ export class SchemaValidator {
         }
         if (sub) {
           for (let i = 0; i < val.length; i++) {
-            const subErrors = this.validateSchema(sub, val[i], undefined, `${path}[${i}]`);
+            const subErrors = this.validateSchema(sub, val[i], `${path}[${i}]`);
             errors = errors.concat(subErrors);
           }
         } else {
@@ -58,7 +58,7 @@ export class SchemaValidator {
           }
         }
       } else if (sub) {
-        const subErrors = this.validateSchema(sub, val, undefined, path);
+        const subErrors = this.validateSchema(sub, val, path);
         errors.push(...subErrors);
       } else {
         const fieldErrors = this.validateField(fieldSchema, val, o);
@@ -168,7 +168,7 @@ export class SchemaValidator {
     const config = SchemaRegistry.getViewSchema(cls, view);
     const validators = SchemaRegistry.get(cls).validators;
 
-    const errors = this.validateSchema(config.schema, o, view, '');
+    const errors = this.validateSchema(config.schema, o, '');
 
     for (const fn of validators) {
       const res = fn(o, view);

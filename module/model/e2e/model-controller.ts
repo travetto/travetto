@@ -1,14 +1,17 @@
-import { Get } from '@travetto/rest';
+import { Get, RestApp, RestAppProvider } from '@travetto/rest';
 import { ChangeEvent, Class } from '@travetto/registry';
-import { Injectable, InjectableFactory } from '@travetto/di';
+import { Injectable, InjectableFactory, Application } from '@travetto/di';
+import { RestExpressAppProvider } from '@travetto/rest-express';
 
 import { ModelController } from '../extension/rest';
 import {
   Model, ModelSource, ModelService, ModelCore,
-  ModelQuery, Query, BulkState, BulkResponse,
+  ModelQuery, Query, BulkResponse,
   PageableModelQuery
 } from '../';
 import { QueryVerifierService } from '../src/service/verify';
+import { BulkOp } from '../src/model/bulk';
+import { Match } from '../../schema';
 
 @Injectable({ target: ModelSource })
 export class TestSource implements ModelSource {
@@ -56,10 +59,16 @@ export class TestSource implements ModelSource {
     return [];
   }
 
-  async bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>): Promise<BulkResponse> {
+  async bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkOp<T>[]): Promise<BulkResponse> {
     return {
-      count: {},
-      error: []
+      counts: {
+        delete: 0,
+        update: 0,
+        insert: 0,
+        upsert: 0,
+        error: 0
+      },
+      errors: []
     };
   }
 
@@ -87,12 +96,19 @@ export class TestSource implements ModelSource {
 class Simple implements ModelCore {
   id?: string;
   name: string;
+  @Match(/^\w{10}.\w{3}@\w{10}.com/)
+  userName: string;
 }
 
 class Config {
   @InjectableFactory()
   static getSvc(src: ModelSource, qry: QueryVerifierService): ModelService {
     return new ModelService(src, qry);
+  }
+
+  @InjectableFactory()
+  static getRest(): RestAppProvider {
+    return new RestExpressAppProvider();
   }
 }
 
@@ -107,4 +123,13 @@ export class SimpleModelController {
     };
   }
 
+}
+
+@Application('simple')
+class App {
+  constructor(private app: RestApp) { }
+
+  run() {
+    return this.app.run();
+  }
 }
