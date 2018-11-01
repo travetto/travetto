@@ -100,6 +100,11 @@ class NotRequiredUndefinable {
   name: string;
 }
 
+@Schema()
+class DateTestSchema {
+  date: Date;
+}
+
 @Suite()
 class Validation {
 
@@ -238,5 +243,55 @@ class Validation {
 
     await SchemaValidator.validate(o);
   }
-}
 
+  @Test('date tests')
+  async dates() {
+
+    assert.throws(() => {
+      const o = DateTestSchema.fromRaw({ date: '' });
+      return SchemaValidator.validate(o)
+    }, (err: any) => {
+      if (!(err instanceof ValidationErrors && err.errors[0].kind === 'required')) {
+        return err;
+      }
+    });
+
+    assert.throws(() => {
+      const o = DateTestSchema.fromRaw({ date: null });
+      return SchemaValidator.validate(o)
+    }, (err: any) => {
+      if (!(err instanceof ValidationErrors && err.errors[0].kind === 'required')) {
+        return err;
+      }
+    });
+
+    assert.throws(() => {
+      const o = DateTestSchema.fromRaw({ date: NaN });
+      return SchemaValidator.validate(o);
+    }, (err: any) => {
+      if (!(err instanceof ValidationErrors && err.errors[0].kind === 'type')) {
+        return err;
+      }
+    });
+
+
+    assert.throws(() => {
+      const o = CustomValidated.fromRaw({ age: Number.NaN, age2: 1 });
+      return SchemaValidator.validate(o)
+    }, (err: any) => {
+      if (!(err instanceof ValidationErrors && err.errors[0].kind === 'type')) {
+        return err;
+      }
+    });
+
+    assert.throws(() => {
+      const o = CustomValidated.fromRaw({ age: 1, age2: 1 });
+      return SchemaValidator.validate(o)
+    }, (err: any) => {
+      if (!(err instanceof ValidationErrors && err.errors[0].kind === 'custom')) {
+        return err;
+      }
+    });
+
+  }
+}

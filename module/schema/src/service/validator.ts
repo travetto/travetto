@@ -101,7 +101,7 @@ export class SchemaValidator {
     if (
       (field.type === String && (typeof value !== 'string')) ||
       (field.type === Number && ((typeof value !== 'number') || Number.isNaN(value))) ||
-      (field.type === Date && !(value instanceof Date)) ||
+      (field.type === Date && (!(value instanceof Date) || Number.isNaN(value.getTime()))) ||
       (field.type === Boolean && typeof value !== 'boolean')
     ) {
       criteria.push('type');
