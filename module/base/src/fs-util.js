@@ -1,27 +1,28 @@
 //@ts-check
 const fs = require('fs');
 const path = require('path');
-const util = require('util');
 
-const FsUtil = {
-  reorient: f => f.replace(/[\/]+/, path.sep)
-};
-for (const k of [
-    'readFile', 'writeFile', 'stat', 'lstat', 'unlink', 'readlink', 'realpath',
-    'rename', 'open', 'read', 'write', 'readdir', 'exists', 'mkdir'
-  ]) {
-  FsUtil[`${k}Async`] = util.promisify(fs[k]);
+const stdProm = (res, rej) => (err, val) => {
+  (err !== undefined && err !== null) ? rej(err): res(val);
 }
 
-module.exports.FsUtil = FsUtil;
+const FsUtil = [
+  'readFile', 'writeFile', 'stat', 'lstat', 'unlink', 'readlink', 'realpath',
+  'rename', 'open', 'read', 'write', 'readdir', 'exists', 'mkdir'
+].reduce((acc, k) => {
+  acc[`${k}Async`] = (...args) => new Promise((res, rej) =>
+    fs[k](...args, k === 'exists' ? res : stdProm(res, rej)));
+  return acc;
+}, {
+  reorient: f => f.replace(/[\/]+/, path.sep)
+});
+
 FsUtil.mkdirpAsync = async function mkdirpAsync(rel) {
   const pth = FsUtil.reorient(rel);
-  if (!(await FsUtil.existsAsync(pth))) {
-    try {
-      await FsUtil.mkdirAsync(pth);
-    } catch (e) {
-      await mkdirpAsync(path.dirname(pth));
-      await FsUtil.mkdirAsync(pth);
-    }
+  if (pth && !(await FsUtil.existsAsync(pth))) {
+    await mkdirpAsync(path.dirname(pth));
+    await FsUtil.mkdirAsync(pth);
   }
 };
+
+module.exports.FsUtil = FsUtil;
