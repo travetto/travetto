@@ -100,8 +100,8 @@ export default class extends Generator {
       this.fs.copyTpl(this.templatePath(`${key}.ejs`), this.destinationPath(key), context);
     }
 
-    for (const f of ['tsconfig.json', 'tslint.json', '.gitignore', '.eslintrc', '.npmignore']) {
-      this.fs.copyTpl(path.resolve(__dirname, '..', 'templates', 'common', `${f}.ejs`), this.destinationPath(f), context);
+    for (const f of ['tsconfig.json', 'tslint.json', '.gitignore', '.eslintrc', '.npmignore', '.vscode_launch.json']) {
+      this.fs.copyTpl(path.resolve(__dirname, '..', 'templates', 'common', `${f}.ejs`), this.destinationPath(f.replace(/_/, '/')), context);
     }
   }
 
