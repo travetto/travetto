@@ -15,7 +15,7 @@ export class SwaggerController {
   generator: ClientGenerate;
 
   postConstruct() {
-    this.generator.run();
+    return this.generator.run();
   }
 
   @Options('/swagger.json')
