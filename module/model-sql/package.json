@@ -1,0 +1,37 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@travetto/model": "^0.4.3",
+    "@travetto/schema": "^0.4.3",
+    "@types/sequelize": "^4.27.30",
+    "sequelize": "^4.41.0"
+  },
+  "description": "Sequelize backing for the travetto model module, with real-time modeling support for SQL mappings.",
+  "devDependencies": {
+    "@travetto/test": "^0.4.1"
+  },
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "sql",
+    "sequelize",
+    "data-modeling",
+    "real-time",
+    "docker",
+    "model",
+    "travetto",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "name": "@travetto/model-sql",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "version": "0.4.3"
+}
