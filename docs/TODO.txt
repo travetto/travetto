@@ -1,6 +1,9 @@
 In-Progress
 ==============
 
+? Tests
+  ? Better unit tests
+
 On Deck
 ==============
 
@@ -37,9 +40,6 @@ To Do
   - Kinesis/S3 Endpoint
   - Deployment
   - Serverless framework?
-
-- Tests
-  ? Better unit tests
 
 Future
 ==============
