@@ -169,7 +169,7 @@ export class LoggingInterceptor extends ExpressInterceptor {
 }
 ```
 
-Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module/asset-rest) is implemented in the fashion, as well as [`Auth-Rest`](https://github.com/travetto/travetto/tree/master/module/auth-rest).
+Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module/asset-rest) is implemented in this fashion, as well as [`Auth-Rest`](https://github.com/travetto/travetto/tree/master/module/auth-rest).
 
 ## Context Support
 [`Context`](https://github.com/travetto/travetto/tree/master/module/context) provides support for automatically injecting an async context into every request. The context management is provided via an `Interceptor` and is transparent to the programmer.

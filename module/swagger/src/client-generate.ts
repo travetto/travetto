@@ -38,11 +38,11 @@ export class ClientGenerate {
 
   async postConstruct() {
     if (this.config.output && this.config.format && Env.watch) {
-      this.init();
+      return this.init();
     }
   }
 
-  async start() {
+  async _start() {
     await this.init();
 
     if (!this.running) {
@@ -68,7 +68,7 @@ export class ClientGenerate {
       throw new Error('Output format not set');
     }
 
-    await this.start();
+    await this._start();
 
     const spec = this.service.getSpec();
     const specFile = path.join(this.config.output, 'spec.json');
