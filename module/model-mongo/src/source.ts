@@ -246,7 +246,7 @@ export class ModelMongoSource extends ModelSource {
     if (res.matchedCount === 0) {
       throw new BaseError(`Invalid update, no ${cls.name} found with id '${id}'`);
     }
-    return o;
+    return this.getById(cls, id.toHexString());
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T>): Promise<T> {
