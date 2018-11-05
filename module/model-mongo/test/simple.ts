@@ -23,6 +23,13 @@ class Person extends BaseModel {
   address: Address;
 }
 
+@Model()
+class Simple {
+  id?: string;
+  name: string;
+}
+
+
 @Suite('Simple Save')
 class TestSave extends BaseMongoTest {
 
@@ -97,5 +104,18 @@ class TestSave extends BaseMongoTest {
     assert(Object.keys(match3[0]).includes('id'));
     // assert(!Object.keys(match3[0].address).includes('street2'));
     assert(Object.keys(match3[0].address).includes('street1'));
+  }
+
+  @Test('Verify update')
+  async testUpdate() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    const o = await service.save(Simple, Simple.from({ name: 'bob' }));
+    o.name = 'roger';
+    const b = await service.update(Simple, o);
+    const id = b.id!;
+
+    const z = await service.getById(Simple, id);
+
+    assert(z.name === 'roger');
   }
 }
