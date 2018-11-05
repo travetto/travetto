@@ -3,6 +3,11 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { extractSimple, extractWhereClause } from '../';
 
+class User {
+  id: string;
+  name: string;
+}
+
 @Suite()
 export class QueryTest {
 
@@ -36,5 +41,16 @@ export class QueryTest {
     assert(out.$and[4]['a.d'].$gt === 20);
 
     assert(out.$and[3]['g.z'] === 'a');
+  }
+
+  @Test()
+  async translateIds() {
+    let out = extractWhereClause<User>({
+      $and: [
+        { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
+      ]
+    });
+
+    assert(!!out.$and[0]._id);
   }
 }

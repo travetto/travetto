@@ -164,8 +164,6 @@ export class ModelElasticsearchSource extends ModelSource {
   getSearchObject<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
     const conf = ModelRegistry.get(cls);
 
-    query = ElasticsearchUtil.translateQueryIds(query);
-
     const search: es.SearchParams = {
       ...this.getIdentity(cls),
       body: query.where ? { query: ElasticsearchUtil.extractWhereQuery(query.where!, cls) } : {}
