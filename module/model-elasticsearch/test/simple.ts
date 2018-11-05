@@ -230,9 +230,9 @@ class TestSave extends BaseElasticsearchTest {
   async testUpdate() {
     const service = await DependencyRegistry.getInstance(ModelService);
     const o = await service.save(Simple, Simple.from({ name: 'bob' }));
-    const id = o.id!;
     o.name = 'roger';
     const b = await service.update(Simple, o);
+    const id = b.id!;
 
     const z = await service.getById(Simple, id);
 

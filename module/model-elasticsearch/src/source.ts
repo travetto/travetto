@@ -330,7 +330,9 @@ export class ModelElasticsearchSource extends ModelSource {
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
     try {
       const res = await this.client.get({ ...this.getIdentity(cls), id });
-      return res._source as T;
+      const out = res._source as T;
+      out.id = res._id;
+      return out;
     } catch (err) {
       throw new BaseError(`Invalid number of results for find by id: 0`);
     }
@@ -387,7 +389,7 @@ export class ModelElasticsearchSource extends ModelSource {
       refresh: 'wait_for',
       body: o
     });
-    return o;
+    return this.getById(cls, id);
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
