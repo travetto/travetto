@@ -89,11 +89,15 @@ export class ModelMongoSource extends ModelSource {
   }
 
   prePersist<T extends ModelCore>(cls: Class<T>, o: T) {
+    return o;
+  }
+
+  cleanseId<T extends ModelCore>(o: T): mongo.ObjectId {
     if (o.id) {
-      (o as any)._id = new mongo.ObjectId(o.id) as any;
+      (o as any)._id = new mongo.ObjectId(o.id);
       delete o.id;
     }
-    return o;
+    return (o as any)._id;
   }
 
   async postConstruct() {
@@ -213,6 +217,7 @@ export class ModelMongoSource extends ModelSource {
     if (!keepId) {
       delete o.id;
     }
+    this.cleanseId(o);
     const res = await col.insertOne(o);
     o.id = res.insertedId.toHexString();
     return o;
@@ -224,6 +229,7 @@ export class ModelMongoSource extends ModelSource {
       if (!keepId) {
         delete x.id;
       }
+      this.cleanseId(x);
     }
     const res = await col.insertMany(objs);
     for (let i = 0; i < objs.length; i++) {
@@ -234,12 +240,13 @@ export class ModelMongoSource extends ModelSource {
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
     o = this.prePersist(cls, o);
+    const id = this.cleanseId(o);
     const col = await this.getCollection(cls);
-    const res = await col.replaceOne({ _id: (o as any)._id }, o);
+    const res = await col.replaceOne({ _id: id }, o);
     if (res.matchedCount === 0) {
-      throw new BaseError(`Invalid update, no ${cls.name} found with id '${(o as any)._id}'`);
+      throw new BaseError(`Invalid update, no ${cls.name} found with id '${id}'`);
     }
-    return o;
+    return this.getById(cls, id.toHexString());
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T>): Promise<T> {

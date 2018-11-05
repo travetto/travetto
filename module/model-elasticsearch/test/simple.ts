@@ -30,6 +30,13 @@ class SimpleNested {
   random: any;
 }
 
+@Model()
+class Simple {
+  id?: string;
+  name: string;
+}
+
+
 
 @Model()
 class Numerical {
@@ -217,5 +224,18 @@ class TestSave extends BaseElasticsearchTest {
     });
 
     assert(!Object.keys(match4[0]).includes('id'));
+  }
+
+  @Test('Verify update')
+  async testUpdate() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    const o = await service.save(Simple, Simple.from({ name: 'bob' }));
+    o.name = 'roger';
+    const b = await service.update(Simple, o);
+    const id = b.id!;
+
+    const z = await service.getById(Simple, id);
+
+    assert(z.name === 'roger');
   }
 }
