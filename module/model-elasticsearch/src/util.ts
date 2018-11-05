@@ -1,10 +1,7 @@
 import { Util } from '@travetto/base';
-import { WhereClause, ModelCore, Query, SelectClause } from '@travetto/model';
+import { WhereClause, SelectClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
-
-const hasId = <T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) => 'id' in o;
-const has$In = (o: any): o is { $in: any[] } => '$in' in o && Array.isArray(o.$in);
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -25,21 +22,6 @@ export class ElasticsearchUtil {
       }
     }
     return out;
-  }
-
-  static translateQueryIds<T extends ModelCore, U extends Query<T>>(query: U) {
-    const where = (query.where || {});
-    if (hasId(where)) {
-      const val = where.id;
-      delete where.id;
-      if (Array.isArray(val) || typeof val === 'string') {
-        (where as any)._id = val;
-      } else if (has$In(val)) {
-        const res: { $in: string[] } = val;
-        (where as any)._id = { $in: res.$in };
-      }
-    }
-    return query;
   }
 
   static getSelect<T>(clause: SelectClause<T>) {
@@ -64,9 +46,11 @@ export class ElasticsearchUtil {
 
     for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
       const top = o[key];
-      const declaredSchema = schema[key === '_id' ? 'id' : key];
+      const declaredSchema = schema[key];
       const declaredType = declaredSchema.type;
-      const sPath = declaredType === String && key !== '_id' ? `${path}${key}.raw` : `${path}${key}`;
+      const sPath = declaredType === String ?
+        (key === 'id' ? `${path}_${key}` : `${path}${key}.raw`) :
+        `${path}${key}`;
 
       if (Util.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
@@ -167,7 +151,7 @@ export class ElasticsearchUtil {
       } else {
         items.push({
           [Array.isArray(top) ? 'terms' : 'term']: {
-            [declaredType === String && key !== '_id' ? `${path}${key}.raw` : `${path}${key}`]: top
+            [declaredType === String ? (key !== 'id' ? `${path}${key}.raw` : `${path}_${key}`) : `${path}${key}`]: top
           }
         });
       }

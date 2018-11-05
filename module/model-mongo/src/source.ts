@@ -17,8 +17,6 @@ import { ModelMongoConfig } from './config';
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
-const hasId = <T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) => 'id' in o;
-const has$In = (o: any): o is { $in: any[] } => '$in' in o && Array.isArray(o.$in);
 
 export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
   if (has$And(o)) {
@@ -32,16 +30,36 @@ export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any }
   }
 }
 
+export function replaceId<T>(v: T): T {
+  if (typeof v === 'string') {
+    return new mongo.ObjectId(v) as any as T;
+  } else if (Array.isArray(v)) {
+    return v.map(replaceId) as any as T;
+  } else if (Util.isPlainObject(v)) {
+    const out: any = {};
+    for (const k of Object.keys(v)) {
+      out[k] = replaceId((v as any)[k]);
+    }
+    return out as T;
+  } else {
+    return v;
+  }
+}
+
 export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
   const out: { [key: string]: any } = {};
   const sub = o as { [key: string]: any };
   const keys = Object.keys(sub);
   for (const key of keys) {
     const subpath = `${path}${key}`;
-    if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
-      Object.assign(out, extractSimple(sub[key], `${subpath}.`));
+    const v = sub[key];
+
+    if (subpath === 'id') { // Handle ids directly
+      out._id = replaceId(v);
+    } else if (Util.isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) {
+      Object.assign(out, extractSimple(v, `${subpath}.`));
     } else {
-      out[subpath] = sub[key];
+      out[subpath] = v;
     }
   }
   return out;
@@ -123,27 +141,6 @@ export class ModelMongoSource extends ModelSource {
     return Promise.all(promises);
   }
 
-  translateQueryIds<T extends ModelCore, U extends Query<T>>(query: U) {
-    const where = (query.where || {});
-    if (hasId(where)) {
-      const val = where.id;
-      if (Array.isArray(val) || typeof val === 'string') {
-        let res: (mongo.ObjectId | mongo.ObjectId[]);
-        if (typeof val === 'string') {
-          res = new mongo.ObjectId(val);
-        } else {
-          res = val.map(x => typeof x === 'string' ? new mongo.ObjectId(x) : x);
-        }
-        delete where.id;
-        (where as any)._id = res;
-      } else if (has$In(val)) {
-        const res: { $in: (string | mongo.ObjectId)[] } = val;
-        (where as any)._id = { $in: res.$in.map(x => typeof x === 'string' ? new mongo.ObjectId(x) : x) };
-      }
-    }
-    return query;
-  }
-
   getCollectionName<T extends ModelCore>(cls: Class<T>): string {
     return ModelRegistry.get(cls).collection || cls.name;
   }
@@ -170,16 +167,13 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {
-    query = this.translateQueryIds(query);
     const res = await this.query(cls, query);
     return res;
   }
 
   async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
-    query = this.translateQueryIds(query);
-
     const col = await this.getCollection(cls);
-    const cursor = col.count(query.where || {});
+    const cursor = col.count(extractWhereClause(query.where || {}));
 
     const res = await cursor;
     return res;
@@ -206,7 +200,6 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
-    query = this.translateQueryIds(query);
     const col = await this.getCollection(cls);
     const res = await col.deleteMany(extractWhereClause(query.where || {}));
     return res.deletedCount || 0;
@@ -255,7 +248,6 @@ export class ModelMongoSource extends ModelSource {
 
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<T> {
     const col = await this.getCollection(cls);
-    query = this.translateQueryIds(query);
 
     let final: any = data;
 
@@ -274,7 +266,6 @@ export class ModelMongoSource extends ModelSource {
 
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, data: Partial<T>) {
     const col = await this.getCollection(cls);
-    query = this.translateQueryIds(query);
 
     const res = await col.updateMany(extractWhereClause(query.where || {}), data);
     return res.matchedCount;
