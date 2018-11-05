@@ -194,7 +194,10 @@ export class ModelService implements IModelSource {
 
   /** Partial update single record, by id */
   async updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>) {
+    this.prePersist(cls, model);
+
     const res = await this.source.updatePartial(cls, model);
+
     return this.postLoad(cls, res);
   }
 
@@ -203,7 +206,6 @@ export class ModelService implements IModelSource {
     this.prepareQuery(cls, query);
 
     // Do not do pre-persist, because we don't know what we would be validating
-
     const res = await this.source.updatePartialByQuery(cls, query, body);
 
     return this.postLoad(cls, res);
@@ -212,8 +214,10 @@ export class ModelService implements IModelSource {
   /** Partial update single record, by view and by id */
   async updatePartialView<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string) {
     o = await this.prePersist(cls, o, view);
+
     const partial = BindUtil.bindSchema(cls, {}, o, view);
-    const res = await this.updatePartial(cls, partial);
+    const res = await this.source.updatePartial(cls, partial);
+
     return this.postLoad(cls, res);
   }
 
@@ -223,8 +227,9 @@ export class ModelService implements IModelSource {
 
     o = await this.prePersist(cls, o, view);
     const partial = BindUtil.bindSchema(cls, {}, o, view);
-    const res = await this.updatePartialByQuery(cls, query, partial);
-    return res;
+    const res = await this.source.updatePartialByQuery(cls, query, partial);
+
+    return this.postLoad(cls, res);
   }
 
   async bulkPrepare<T extends ModelCore>(cls: Class<T>, items: T[]) {

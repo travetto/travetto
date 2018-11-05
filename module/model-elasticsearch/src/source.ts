@@ -237,11 +237,21 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   prePersist<T extends ModelCore>(cls: Class<T>, o: T) {
+    return o;
+  }
+
+  cleanseId<T extends ModelCore>(o: T) {
     if (o.id) {
       (o as any)._id = o.id as string;
       delete o.id;
     }
-    return o;
+    return (o as any)._id;
+  }
+
+  extractId<T extends ModelCore>(o: T) {
+    const id = this.cleanseId(o);
+    delete (o as any)._id;
+    return id;
   }
 
   async postConstruct() {
@@ -343,7 +353,7 @@ export class ModelElasticsearchSource extends ModelSource {
     if (!keepId) {
       delete o.id;
     }
-    this.prePersist(cls, o);
+    this.cleanseId(o);
 
     const res = await this.client.index({
       ...this.getIdentity(cls),
@@ -360,7 +370,7 @@ export class ModelElasticsearchSource extends ModelSource {
       if (!keepId) {
         delete x.id;
       }
-      this.prePersist(cls, x);
+      this.cleanseId(x);
     }
 
     await this.bulkProcess(cls, objs.map(x => ({ upsert: x })));
@@ -369,9 +379,11 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
-    await this.client.update({
+    const id = this.extractId(o);
+    await this.client.index({
       ...this.getIdentity(cls),
-      id: o.id!,
+      id,
+      opType: 'index',
       refresh: 'wait_for',
       body: o
     });
@@ -379,8 +391,7 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
-    const id = data.id;
-    delete data.id;
+    const id = this.extractId(data);
 
     await this.client.update({
       ...this.getIdentity(cls),
