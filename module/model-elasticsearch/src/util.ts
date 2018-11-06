@@ -1,10 +1,7 @@
 import { Util } from '@travetto/base';
-import { WhereClause, ModelCore, Query, SelectClause } from '@travetto/model';
+import { WhereClause, SelectClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
-
-const hasId = <T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) => 'id' in o;
-const has$In = (o: any): o is { $in: any[] } => '$in' in o && Array.isArray(o.$in);
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -51,7 +48,9 @@ export class ElasticsearchUtil {
       const top = o[key];
       const declaredSchema = schema[key];
       const declaredType = declaredSchema.type;
-      const sPath = declaredType === String && key !== 'id' ? `${path}${key}.raw` : `${path}_id`;
+      const sPath = declaredType === String ?
+        (key === 'id' ? `${path}_${key}` : `${path}${key}.raw`) :
+        `${path}${key}`;
 
       if (Util.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
@@ -69,11 +68,7 @@ export class ElasticsearchUtil {
             case '$all':
               const arr = Array.isArray(v) ? v : [v];
               items.push({
-                bool: {
-                  must: arr.map(v => ({
-                    terms: { [sPath]: v }
-                  }))
-                }
+                bool: { must: arr.map(x => ({ term: { [sPath]: x } })) }
               });
               break;
             case '$in':
@@ -151,7 +146,7 @@ export class ElasticsearchUtil {
       } else {
         items.push({
           [Array.isArray(top) ? 'terms' : 'term']: {
-            [declaredType === String && key !== '_id' ? `${path}${key}.raw` : `${path}${key}`]: top
+            [declaredType === String ? (key !== 'id' ? `${path}${key}.raw` : `${path}_${key}`) : `${path}${key}`]: top
           }
         });
       }

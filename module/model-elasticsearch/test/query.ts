@@ -7,6 +7,12 @@ import { ElasticsearchUtil } from '../src/util';
 import { WhereClause } from '../../model/src/model/where-clause';
 
 @Schema()
+class User {
+  id: string;
+  name: string;
+}
+
+@Schema()
 class WhereTypeAB {
   c: number;
 }
@@ -78,5 +84,16 @@ export class QueryTest {
     assert.ok(out.bool.must[0].nested.query.term['a.b.c']);
 
     assert(out.bool.must[0].nested.query.term['a.b.c'] === 5);
+  }
+
+  @Test()
+  async translateIds() {
+    let out = ElasticsearchUtil.extractWhereQuery({
+      $and: [
+        { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
+      ]
+    }, User);
+
+    assert(!!out.bool.must[0].terms._id);
   }
 }
