@@ -5,9 +5,9 @@ import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { Schema, Currency, Integer, Precision, Float } from '@travetto/schema';
 
-import { BaseElasticsearchTest } from './base';
-import { ModelElasticsearchSource } from '../src/source';
-import { ElasticsearchUtil } from '../src/util';
+import { BaseSqlTest } from './base';
+import { ModelSqlSource } from '../src/source';
+import { SqlUtil } from '../src/util';
 
 @Schema()
 class Address {
@@ -48,20 +48,20 @@ class Numerical {
 
 
 @Suite('Simple Save')
-class TestSave extends BaseElasticsearchTest {
+class TestSave extends BaseSqlTest {
 
   @Test()
   async verifySource() {
     const source = await DependencyRegistry.getInstance(ModelSource);
 
     assert.ok(source);
-    assert(source instanceof ModelElasticsearchSource);
+    assert(source instanceof ModelSqlSource);
 
   }
 
   @Test('verifySchema')
   async verifySchema() {
-    const schema = ElasticsearchUtil.generateSourceSchema(Person);
+    const schema = SqlUtil.generateSourceSchema(Person);
     assert(schema === {
       properties: {
         id: { type: 'text', fields: { raw: { type: 'keyword' } } },
@@ -84,7 +84,7 @@ class TestSave extends BaseElasticsearchTest {
       dynamic: false
     });
 
-    const schema2 = ElasticsearchUtil.generateSourceSchema(SimpleNested);
+    const schema2 = SqlUtil.generateSourceSchema(SimpleNested);
     assert(schema2 === {
       properties: {
         id: { type: 'text', fields: { raw: { type: 'keyword' } } },
@@ -107,7 +107,7 @@ class TestSave extends BaseElasticsearchTest {
 
   @Test('Numeric schema')
   async testNumericSchema() {
-    const schema3 = ElasticsearchUtil.generateSourceSchema(Numerical);
+    const schema3 = SqlUtil.generateSourceSchema(Numerical);
     assert(schema3.properties.money.type === 'scaled_float');
     assert(schema3.properties.whole.type === 'integer');
     assert(schema3.properties.big.type === 'double');

@@ -2,7 +2,7 @@ import { Model, ModelCore, ModelSource, ModelService } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 import { DependencyRegistry, InjectableFactory, Application, Inject } from '@travetto/di';
 
-import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../';
+import { ModelElasticsearchSource, ModelSqlConfig } from '../';
 import { Class } from '@travetto/registry';
 
 @Schema()
@@ -31,7 +31,7 @@ class Employee implements ModelCore {
 
 class Config {
   @InjectableFactory()
-  static getSource(config: ModelElasticsearchConfig): ModelSource {
+  static getSource(config: ModelSqlConfig): ModelSource {
     return new ModelElasticsearchSource(config);
   }
 }

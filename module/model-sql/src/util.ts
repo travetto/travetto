@@ -1,16 +1,15 @@
-import { Util } from '@travetto/base';
-import { WhereClause, ModelCore, Query, SelectClause } from '@travetto/model';
+import * as Sequelize from 'sequelize';
+
+import { Util, BaseError } from '@travetto/base';
+import { WhereClause, SelectClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
-
-const hasId = <T>(o: T): o is (T & { id: string | string[] | { $in: string[] } }) => 'id' in o;
-const has$In = (o: any): o is { $in: any[] } => '$in' in o && Array.isArray(o.$in);
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
 
-export class ElasticsearchUtil {
+export class SqlUtil {
 
   static extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
     const out: { [key: string]: any } = {};
@@ -27,23 +26,8 @@ export class ElasticsearchUtil {
     return out;
   }
 
-  static translateQueryIds<T extends ModelCore, U extends Query<T>>(query: U) {
-    const where = (query.where || {});
-    if (hasId(where)) {
-      const val = where.id;
-      delete where.id;
-      if (Array.isArray(val) || typeof val === 'string') {
-        (where as any)._id = val;
-      } else if (has$In(val)) {
-        const res: { $in: string[] } = val;
-        (where as any)._id = { $in: res.$in };
-      }
-    }
-    return query;
-  }
-
   static getSelect<T>(clause: SelectClause<T>) {
-    const simp = ElasticsearchUtil.extractSimple(clause);
+    const simp = SqlUtil.extractSimple(clause);
     const include: string[] = [];
     const exclude: string[] = [];
     for (const k of Object.keys(simp)) {
@@ -199,46 +183,48 @@ export class ElasticsearchUtil {
     for (const field of schema.fields) {
       const conf = schema.schema[field];
 
-      if (conf.type === Number) {
-        let prop: any = { type: 'integer' };
+      let prop: any;
+
+      if (conf.array && !SchemaRegistry.has(conf.type)) {
+        // Build related table for 1 to many
+
+      } else if (conf.type === Number) {
+        prop = { type: Sequelize.INTEGER };
         if (conf.precision) {
           const [digits, decimals] = conf.precision;
           if (decimals) {
             if ((decimals + digits) < 16) {
-              prop = { type: 'scaled_float', scaling_factor: decimals };
+              prop = { type: Sequelize.DECIMAL(digits, decimals) };
             } else {
               if (digits < 6 && decimals < 9) {
-                prop = { type: 'half_float' };
+                prop = { type: Sequelize.FLOAT(digits, decimals) };
               } else if (digits > 20) {
-                prop = { type: 'double' };
+                prop = { type: Sequelize.DOUBLE(digits, decimals) };
               } else {
-                prop = { type: 'float' };
+                prop = { type: Sequelize.FLOAT(digits, decimals) };
               }
             }
           }
         }
-        props[field] = prop;
       } else if (conf.type === Date) {
-        props[field] = { type: 'date', format: 'date_optional_time' };
+        prop = { type: Sequelize.DATE };
       } else if (conf.type === Boolean) {
-        props[field] = { type: 'boolean' };
+        prop = { type: Sequelize.BOOLEAN };
       } else if (conf.type === String) {
-        props[field] = {
-          type: 'text',
-          fields: {
-            raw: {
-              type: 'keyword'
-            }
-          }
-        };
-      } else if (conf.type === Object) {
-        props[field] = { type: 'object', dynamic: true };
+        prop = { type: Sequelize.STRING };
       } else if (SchemaRegistry.has(conf.type)) {
-        props[field] = {
+        prop = {
           type: conf.array ? 'nested' : 'object',
           ...this.generateSourceSchema(conf.type)
         };
+      } else {
+        throw new BaseError('Unable to support nested objects');
       }
+
+      prop.allowNull = !conf.required;
+
+
+      props[field] = prop;
     }
 
     return { properties: props, dynamic: false };

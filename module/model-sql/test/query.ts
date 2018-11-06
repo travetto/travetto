@@ -2,9 +2,9 @@ import * as assert from 'assert';
 
 import { Schema, SchemaRegistry } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { WhereClause } from '@travetto/model';
 
-import { ElasticsearchUtil } from '../src/util';
-import { WhereClause } from '../../model/src/model/where-clause';
+import { SqlUtil } from '../src/util';
 
 @Schema()
 class WhereTypeAB {
@@ -46,7 +46,7 @@ export class QueryTest {
 
   @Test()
   async validateQuery() {
-    let out = ElasticsearchUtil.extractSimple({ a: { b: { c: 5 } } });
+    let out = SqlUtil.extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
     const qry: WhereClause<WhereType> = {
@@ -61,7 +61,7 @@ export class QueryTest {
       ]
     };
 
-    out = ElasticsearchUtil.extractWhereQuery(qry, WhereType);
+    out = SqlUtil.extractWhereQuery(qry, WhereType);
 
     assert.ok(out.bool);
 
