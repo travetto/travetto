@@ -68,12 +68,7 @@ export class ElasticsearchUtil {
             case '$all':
               const arr = Array.isArray(v) ? v : [v];
               items.push({
-                terms_set: {
-                  [sPath]: {
-                    terms: arr,
-                    minimum_should_match: arr.length
-                  }
-                }
+                bool: { must: arr.map(x => ({ term: { [sPath]: x } })) }
               });
               break;
             case '$in':
