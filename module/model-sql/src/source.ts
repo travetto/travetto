@@ -9,7 +9,7 @@ import {
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Env, BaseError } from '@travetto/base';
-import { SchemaChangeEvent } from '@travetto/schema';
+import { SchemaChangeEvent, SchemaRegistry } from '@travetto/schema';
 
 import { ModelSqlConfig } from './config';
 import { SqlUtil } from './util';
@@ -46,9 +46,9 @@ export class ModelSqlSource extends ModelSource {
       const [inc, exc] = SqlUtil.getSelect(query.select);
       if (inc.length) {
         search.attributes = inc;
-      }
-      if (exc.length) {
-        search._sourceExclude = exc;
+      } else if (exc.length) {
+        const toRemove = new Set(exc);
+        search.attributes = SchemaRegistry.getViewSchema(cls).fields.filter(f => !toRemove.has(f));
       }
     }
 

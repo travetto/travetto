@@ -27,21 +27,6 @@ export class ElasticsearchUtil {
     return out;
   }
 
-  static translateQueryIds<T extends ModelCore, U extends Query<T>>(query: U) {
-    const where = (query.where || {});
-    if (hasId(where)) {
-      const val = where.id;
-      delete where.id;
-      if (Array.isArray(val) || typeof val === 'string') {
-        (where as any)._id = val;
-      } else if (has$In(val)) {
-        const res: { $in: string[] } = val;
-        (where as any)._id = { $in: res.$in };
-      }
-    }
-    return query;
-  }
-
   static getSelect<T>(clause: SelectClause<T>) {
     const simp = ElasticsearchUtil.extractSimple(clause);
     const include: string[] = [];
@@ -64,9 +49,9 @@ export class ElasticsearchUtil {
 
     for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
       const top = o[key];
-      const declaredSchema = schema[key === '_id' ? 'id' : key];
+      const declaredSchema = schema[key];
       const declaredType = declaredSchema.type;
-      const sPath = declaredType === String && key !== '_id' ? `${path}${key}.raw` : `${path}${key}`;
+      const sPath = declaredType === String && key !== 'id' ? `${path}${key}.raw` : `${path}_id`;
 
       if (Util.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
@@ -84,11 +69,10 @@ export class ElasticsearchUtil {
             case '$all':
               const arr = Array.isArray(v) ? v : [v];
               items.push({
-                terms_set: {
-                  [sPath]: {
-                    terms: arr,
-                    minimum_should_match: arr.length
-                  }
+                bool: {
+                  must: arr.map(v => ({
+                    terms: { [sPath]: v }
+                  }))
                 }
               });
               break;
