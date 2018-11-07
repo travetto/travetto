@@ -4,6 +4,7 @@ import { Schema, SchemaRegistry } from '../';
 import { GenerateUtil } from '../extension/faker';
 
 import * as assert from 'assert';
+import { Precision, Max, Min } from '../src/decorator/field';
 
 @Schema()
 class Tag {
@@ -34,6 +35,17 @@ class User {
   address: Address;
 }
 
+@Schema()
+class UserScore {
+  grade: string;
+
+  @Precision(3, 2)
+  @Max(100)
+  @Min(-10)
+  score: number;
+}
+
+
 @Suite()
 class DataGenerationSuite {
 
@@ -53,5 +65,13 @@ class DataGenerationSuite {
     assert.ok(user.address);
 
     assert(user.address instanceof Address);
+  }
+
+  @Test()
+  verifyNumberGen() {
+    const user = GenerateUtil.generate(UserScore);
+    assert(user.score >= -10);
+    assert(user.score <= 100);
+    assert(`${user.score}`.split('.')[1].length < 3);
   }
 }
