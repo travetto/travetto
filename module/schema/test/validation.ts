@@ -7,7 +7,7 @@ import {
   SchemaValidator, Schema, ValidationError,
   SchemaRegistry, ValidationErrors, Validator, View, Match, CommonRegExp
 } from '../';
-import { Required } from '../src/decorator/field';
+import { Required, Max, Min } from '../src/decorator/field';
 
 @Schema()
 class Response {
@@ -66,6 +66,13 @@ class ViewSpecific {
 
   @View('profile')
   address: Address;
+}
+
+@Schema()
+class Grade {
+  @Max(10)
+  @Min(0)
+  score: number;
 }
 
 @Schema()
@@ -293,5 +300,11 @@ class Validation {
       }
     });
 
+  }
+
+  @Test()
+  async ensureRange() {
+    const v = Grade.from({ score: 5 });
+    await SchemaValidator.validate(v);
   }
 }
