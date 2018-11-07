@@ -54,9 +54,6 @@ export class GenerateUtil {
       [/dob|birth/, () => faker.date.past(60)],
       [/creat(e|ion)/, () => between(-200, -100)],
       [/(update|modif(y|ied))/, () => between(-100, -50)]
-    ],
-    number: [
-      [/(price|amt|amount)$/, () => parseFloat(faker.finance.amount())]
     ]
   };
 
@@ -72,21 +69,30 @@ export class GenerateUtil {
   }
 
   static getNumberValue(cfg: FieldConfig) {
-    const min = cfg.min ? cfg.min.n as number : undefined;
-    const max = cfg.max ? cfg.max.n as number : undefined;
-    const name = cfg.name.toUpperCase();
-    const precision = cfg.precision;
+    let min = cfg.min ? cfg.min.n as number : undefined;
+    let max = cfg.max ? cfg.max.n as number : undefined;
+    let precision = cfg.precision;
 
-    if (min !== undefined || max !== undefined) {
-      return faker.random.number({ min, max, precision });
-    } else {
-      for (const [re, fn] of this.NAMES_TO_TYPE.number) {
-        if (re.test(name)) {
-          return fn();
-        }
-      }
-      return faker.random.number();
+    const name = cfg.name.toUpperCase();
+
+    if (/(price|amt|amount)$/.test(name)) {
+      precision = [20, 2];
     }
+
+    if (precision !== undefined) {
+      min = min === undefined ? -((10 ** precision[0]) - 1) : min;
+      max = max === undefined ? ((10 ** precision[0]) - 1) : max;
+    }
+
+    max = max === undefined ? Number.MAX_SAFE_INTEGER : max;
+    min = min === undefined ? Number.MIN_SAFE_INTEGER : min;
+
+    const offset = (10 ** (precision && precision[1] ? precision[1] : 1));
+    const range = (max - min) * offset;
+
+    const val = Math.trunc(Math.random() * range);
+
+    return (val / offset) + min;
   }
 
   static getDateValue(cfg: FieldConfig) {
