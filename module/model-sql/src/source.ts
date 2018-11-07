@@ -23,6 +23,75 @@ export class ModelSqlSource extends ModelSource {
     super();
   }
 
+  private setSelect<T>(cls: Class<T>, query: Query<T>,
+    search: sequelize.FindOptions<T>) {
+    if (query.select) {
+      const [inc, exc] = SqlUtil.getSelect(query.select);
+      if (inc.length) {
+        search.attributes = inc;
+      } else if (exc.length) {
+        const toRemove = new Set(exc);
+        search.attributes = SchemaRegistry.getViewSchema(cls).fields.filter(f => !toRemove.has(f));
+      }
+    }
+  }
+
+  private setOptions<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T>,
+    opts: sequelize.FindOptions<T>) {
+    const conf = ModelRegistry.get(cls);
+
+    const sort = options.sort || query.sort || conf.defaultSort;
+
+    if (sort) {
+      opts.order = sort.map(x => {
+        const o = SqlUtil.extractSimple(x);
+        const k = Object.keys(o)[0];
+        const v = o[k] as (boolean | -1 | 1);
+        if (v === 1 || v === true) {
+          return [k, 'ASC'];
+        } else {
+          return [k, 'DESC'];
+        }
+      });
+    }
+
+    if (options.offset || query.offset) {
+      opts.offset = options.offset || query.offset;
+    }
+
+    if (options.limit || query.limit) {
+      opts.limit = options.limit || query.limit;
+    }
+  }
+
+  private getFindOptions<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}): sequelize.FindOptions<T> {
+    const opts: sequelize.FindOptions<T> = {};
+    this.setSelect(cls, query, opts);
+    opts.where = SqlUtil.extractWhereClause(query.where || {}) as sequelize.WhereOptions<T>;
+    this.setOptions(cls, query, options, opts);
+    return opts;
+  }
+
+  private getDestroyOptions<T>(cls: Class<T>, query: Query<T>): sequelize.DestroyOptions {
+    const opts: sequelize.DestroyOptions = {};
+    opts.where = SqlUtil.extractWhereClause(query.where || {});
+    opts.limit = query.limit;
+    return opts;
+  }
+
+  private getCountOptions<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}): sequelize.CountOptions {
+    const opts: sequelize.DestroyOptions = {};
+    opts.where = SqlUtil.extractWhereClause(query.where || {});
+    return opts;
+  }
+
+  private getUpdateOptions<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}): sequelize.UpdateOptions {
+    const opts: sequelize.UpdateOptions = { where: {} };
+    opts.where = SqlUtil.extractWhereClause(query.where || {});
+    return opts;
+  }
+
+
   async onSchemaChange(e: SchemaChangeEvent) {
     await this.sequelize.sync({ alter: true });
   }
@@ -36,49 +105,9 @@ export class ModelSqlSource extends ModelSource {
     }
   }
 
-  getQueryOptions<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}): sequelize.FindOptions<T> {
-    const conf = ModelRegistry.get(cls);
-    const search: sequelize.FindOptions<T> = {};
-
-    const sort = query.sort || conf.defaultSort;
-
-    if (query.select) {
-      const [inc, exc] = SqlUtil.getSelect(query.select);
-      if (inc.length) {
-        search.attributes = inc;
-      } else if (exc.length) {
-        const toRemove = new Set(exc);
-        search.attributes = SchemaRegistry.getViewSchema(cls).fields.filter(f => !toRemove.has(f));
-      }
-    }
-
-    if (sort) {
-      search.order = sort.map(x => {
-        const o = SqlUtil.extractSimple(x);
-        const k = Object.keys(o)[0];
-        const v = o[k] as (boolean | -1 | 1);
-        if (v === 1 || v === true) {
-          return [k, 'ASC'];
-        } else {
-          return [k, 'DESC'];
-        }
-      });
-    }
-
-    if (query.offset) {
-      search.offset = query.offset;
-    }
-
-    if (query.limit) {
-      search.limit = query.limit;
-    }
-
-    return search;
-  }
-
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const results = await this.getModel(cls).findAll({
-      ...this.getQueryOptions(cls, query),
+      ...this.getFindOptions(cls, query),
     });
     return results as any as U[];
   }
@@ -129,7 +158,7 @@ export class ModelSqlSource extends ModelSource {
   }
 
   async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>) {
-    const opts = this.getQueryOptions(cls, query);
+    const opts = this.getFindOptions(cls, query);
     opts.attributes = ['id'];
 
     const res = await this.getModel(cls).findAll(opts);
@@ -141,7 +170,7 @@ export class ModelSqlSource extends ModelSource {
   }
 
   async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
-    const results = await this.getModel(cls).count(this.getQueryOptions(cls, query, {
+    const results = await this.getModel(cls).count(this.getCountOptions(cls, query, {
       limit: 0
     }) as sequelize.CountOptions);
     return results;
@@ -178,7 +207,7 @@ export class ModelSqlSource extends ModelSource {
 
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     const res = await this.getModel(cls).destroy(
-      this.getQueryOptions(cls, query) as sequelize.DestroyOptions
+      this.getDestroyOptions(cls, query) as sequelize.DestroyOptions
     );
     return res || 0;
   }
@@ -213,9 +242,9 @@ export class ModelSqlSource extends ModelSource {
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
-    const query = this.getQueryOptions(cls, {
+    const query = this.getUpdateOptions(cls, {
       where: { id: o.id }
-    } as Query<ModelCore>) as sequelize.UpdateOptions;
+    } as Query<ModelCore>);
 
     const [count, res] = await this.getModel(cls).update(o, {
       sideEffects: false,
@@ -229,7 +258,7 @@ export class ModelSqlSource extends ModelSource {
     const id = data.id;
     delete data.id;
 
-    const query = this.getQueryOptions(cls, { where: { id } } as Query<ModelCore>) as sequelize.UpdateOptions;
+    const query = this.getUpdateOptions(cls, { where: { id } } as Query<ModelCore>);
     query.fields = Object.keys(data);
 
     const [res, o] = await this.getModel(cls).update({
@@ -250,9 +279,7 @@ export class ModelSqlSource extends ModelSource {
   }
 
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, data: Partial<T>) {
-    const allQuery = this.getQueryOptions(cls, query) as sequelize.UpdateOptions;
-    allQuery.fields = Object.keys(data);
-
+    const allQuery = this.getUpdateOptions(cls, query);
 
     allQuery.fields = Object.keys(data);
 
@@ -277,7 +304,7 @@ export class ModelSqlSource extends ModelSource {
 
     if (deletes.length) {
       await model.destroy({
-        ...this.getQueryOptions(cls, { id: { $in: deletes.map(x => x.id!) } } as Query<T>) as sequelize.DestroyOptions,
+        ...this.getDestroyOptions(cls, { id: { $in: deletes.map(x => x.id!) } } as Query<T>) as sequelize.DestroyOptions,
         transaction: tx
       });
     }
@@ -297,7 +324,7 @@ export class ModelSqlSource extends ModelSource {
         sideEffects: false,
         validate: false,
         transaction: tx,
-        ...this.getQueryOptions(cls, {
+        ...this.getUpdateOptions(cls, {
           where: { id: x.id! }
         } as Query<ModelCore>) as sequelize.UpdateOptions
       })));

@@ -1,4 +1,4 @@
-import * as Sequelize from 'sequelize';
+import * as sequelize from 'sequelize';
 
 import { Util, BaseError } from '@travetto/base';
 import { WhereClause, SelectClause } from '@travetto/model';
@@ -9,6 +9,13 @@ const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
 
+
+const OP_MAP = {
+  $nin: (v: any) => ({ $notIn: v }),
+  $regex: (v: any) => ({ $regexp: v }),
+  $exists: (v: boolean) => (!v ? { $is: null } : { $not: { $is: null } })
+}
+
 export class SqlUtil {
 
   static extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
@@ -16,11 +23,13 @@ export class SqlUtil {
     const sub = o as { [key: string]: any };
     const keys = Object.keys(sub);
     for (const key of keys) {
-      const subPath = `${path}${key}`;
-      if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
-        Object.assign(out, this.extractSimple(sub[key], `${subPath}.`));
+      const subpath = `${path}${key}`;
+      const v = sub[key];
+
+      if (Util.isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) {
+        Object.assign(out, this.extractSimple(v, `${subpath}.`));
       } else {
-        out[subPath] = sub[key];
+        out[subpath] = v;
       }
     }
     return out;
@@ -42,138 +51,19 @@ export class SqlUtil {
     return [include, exclude];
   }
 
-  static extractWhereTermQuery<T>(o: { [key: string]: any }, cls: Class<T>, path: string = ''): any {
-    const items = [];
-    const schema = SchemaRegistry.getViewSchema(cls).schema;
 
-    for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
-      const top = o[key];
-      const declaredSchema = schema[key === '_id' ? 'id' : key];
-      const declaredType = declaredSchema.type;
-      const sPath = declaredType === String && key !== '_id' ? `${path}${key}.raw` : `${path}${key}`;
-
-      if (Util.isPlainObject(top)) {
-        const subKey = Object.keys(top)[0];
-        if (!subKey.startsWith('$')) {
-          const inner = this.extractWhereTermQuery(top, declaredType as Class<any>, `${sPath}.`);
-          items.push(
-            declaredSchema.array ?
-              { nested: { path: sPath, query: inner } } :
-              inner
-          );
-        } else {
-          const v = top[subKey];
-
-          switch (subKey) {
-            case '$all':
-              const arr = Array.isArray(v) ? v : [v];
-              items.push({
-                terms_set: {
-                  [sPath]: {
-                    terms: arr,
-                    minimum_should_match: arr.length
-                  }
-                }
-              });
-              break;
-            case '$in':
-              items.push({ terms: { [sPath]: Array.isArray(v) ? v : [v] } });
-              break;
-            case '$nin':
-              items.push({
-                bool: { must_not: [{ terms: { [sPath]: Array.isArray(v) ? v : [v] } }] }
-              });
-              break;
-            case '$eq':
-              items.push({ term: { [sPath]: v } });
-              break;
-            case '$ne':
-              items.push({
-                bool: { must_not: [{ term: { [sPath]: v } }] }
-              });
-              break;
-            case '$exists':
-              const q = {
-                exists: {
-                  field: sPath
-                }
-              };
-              items.push(v ? q : {
-                bool: {
-                  must_not: q
-                }
-              });
-              break;
-            case '$lt':
-            case '$gt':
-            case '$gte':
-            case '$lte':
-              const out: any = {};
-              for (const k of Object.keys(top)) {
-                out[k.replace(/^[$]/, '')] = top[k];
-              }
-              items.push({
-                range: {
-                  [sPath]: out
-                }
-              });
-              break;
-            case '$regex':
-              items.push({
-                regexp: {
-                  [sPath]: typeof v === 'string' ? v : `${v.source}`
-                }
-              });
-              break;
-            case '$geoWithin':
-              items.push({
-                geo_polygon: {
-                  [sPath]: {
-                    points: v.map(([lat, lon]: [number, number]) => ({ lat, lon }))
-                  }
-                }
-              });
-              break;
-            case '$geoIntersects':
-              items.push({
-                geo_shape: {
-                  [sPath]: {
-                    type: 'envelope',
-                    coordinates: v
-                  },
-                  relation: 'within'
-                }
-              });
-              break;
-          }
-        }
-        // Handle operations
-      } else {
-        items.push({
-          [Array.isArray(top) ? 'terms' : 'term']: {
-            [declaredType === String && key !== '_id' ? `${path}${key}.raw` : `${path}${key}`]: top
-          }
-        });
-      }
-    }
-    if (items.length === 1) {
-      return items[0];
-    } else {
-      return { bool: { must: items } };
-    }
-  }
-
-  static extractWhereQuery<T>(o: WhereClause<T>, cls: Class<T>): { [key: string]: any } {
+  static extractWhereClause<T>(o: WhereClause<T>): sequelize.AnyWhereOptions {
     if (has$And(o)) {
-      return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(x, cls)) } };
+      return { $and: o.$and.map(x => this.extractWhereClause<T>(x)) };
     } else if (has$Or(o)) {
-      return { bool: { should: o.$or.map(x => this.extractWhereQuery<T>(x, cls)), minimum_should_match: 1 } };
+      return { $or: o.$or.map(x => this.extractWhereClause<T>(x)) };
     } else if (has$Not(o)) {
-      return { bool: { must_not: this.extractWhereQuery<T>(o.$not, cls) } };
+      return { $nor: [this.extractWhereClause<T>(o.$not)] };
     } else {
-      return this.extractWhereTermQuery(o, cls);
+      return this.extractSimple(o);
     }
   }
+
 
   static generateSourceSchema<T>(cls: Class<T>): any {
     const schema = SchemaRegistry.getViewSchema(cls);
@@ -189,29 +79,29 @@ export class SqlUtil {
         // Build related table for 1 to many
 
       } else if (conf.type === Number) {
-        prop = { type: Sequelize.INTEGER };
+        prop = { type: sequelize.INTEGER };
         if (conf.precision) {
           const [digits, decimals] = conf.precision;
           if (decimals) {
             if ((decimals + digits) < 16) {
-              prop = { type: Sequelize.DECIMAL(digits, decimals) };
+              prop = { type: sequelize.DECIMAL(digits, decimals) };
             } else {
               if (digits < 6 && decimals < 9) {
-                prop = { type: Sequelize.FLOAT(digits, decimals) };
+                prop = { type: sequelize.FLOAT(digits, decimals) };
               } else if (digits > 20) {
-                prop = { type: Sequelize.DOUBLE(digits, decimals) };
+                prop = { type: sequelize.DOUBLE(digits, decimals) };
               } else {
-                prop = { type: Sequelize.FLOAT(digits, decimals) };
+                prop = { type: sequelize.FLOAT(digits, decimals) };
               }
             }
           }
         }
       } else if (conf.type === Date) {
-        prop = { type: Sequelize.DATE };
+        prop = { type: sequelize.DATE };
       } else if (conf.type === Boolean) {
-        prop = { type: Sequelize.BOOLEAN };
+        prop = { type: sequelize.BOOLEAN };
       } else if (conf.type === String) {
-        prop = { type: Sequelize.STRING };
+        prop = { type: sequelize.STRING };
       } else if (SchemaRegistry.has(conf.type)) {
         prop = {
           type: conf.array ? 'nested' : 'object',
