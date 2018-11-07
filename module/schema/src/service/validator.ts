@@ -79,7 +79,7 @@ export class SchemaValidator {
         if (field.type === Date) {
           value = new Date(value);
         }
-        if (value < f.n) {
+        if (key === 'min' && value < f.n || key === 'max' && value > f.n) {
           return true;
         }
       } else {
@@ -87,7 +87,7 @@ export class SchemaValidator {
         if (typeof value === 'string') {
           value = Date.parse(value);
         }
-        if (value < date) {
+        if (key === 'min' && value < date || key === 'max' && value > date) {
           return true;
         }
       }
