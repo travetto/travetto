@@ -23,16 +23,38 @@ export class ModelSqlSource extends ModelSource {
     super();
   }
 
-  private setSelect<T>(cls: Class<T>, query: Query<T>,
-    search: sequelize.FindOptions<T>) {
+  private getIncludes<T>(cls: Class<T>, fields?: string[]): any[] {
+    const view = SchemaRegistry.getViewSchema(cls);
+
+    const includes = [];
+    for (const f of (fields || view.fields)) {
+      const fcls = view.schema[f].type;
+      if (SchemaRegistry.has(fcls)) {
+        includes.push({
+          model: this.getModel(fcls),
+          include: this.getIncludes(fcls)
+        });
+      }
+    }
+    return includes;
+  }
+
+  private setSelect<T>(cls: Class<T>, query: Query<T>, search: sequelize.FindOptions<T>) {
+    const view = SchemaRegistry.getViewSchema(cls);
     if (query.select) {
       const [inc, exc] = SqlUtil.getSelect(query.select);
       if (inc.length) {
         search.attributes = inc;
       } else if (exc.length) {
         const toRemove = new Set(exc);
-        search.attributes = SchemaRegistry.getViewSchema(cls).fields.filter(f => !toRemove.has(f));
+        search.attributes = view.fields.filter(f => !toRemove.has(f));
       }
+    }
+
+    const includes = this.getIncludes(cls, search.attributes as string[]);
+
+    if (includes.length) {
+      search.include = includes;
     }
   }
 

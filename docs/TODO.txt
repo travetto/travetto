@@ -6,6 +6,9 @@ In-Progress
 
 On Deck
 ==============
+? Cyclically dependencies, errors
+? Faker, numbers with precision
+? 
 
 ? Elasticsearch Support
   ? Extended query language
