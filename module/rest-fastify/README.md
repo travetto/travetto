@@ -1,7 +1,14 @@
 travetto: Rest-Fastify
 ===
+
+**Install: Fastify Provider**
+```bash
+$ npm install @travetto/rest-fastify
+```
+
 The module is an [`fastify`](https://www.fastify.io/) provider for the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) module. A valid configuration of [`RestAppProvider`](./src/types.ts) would look like:
 
+**Code: Wiring up Fastify Provider**
 ```typescript
 export class SampleConfig {
 

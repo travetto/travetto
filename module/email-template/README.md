@@ -1,5 +1,11 @@
 travetto: Email-Template
 ===
+
+**Install: templating support for email module**
+```bash
+$ npm install @travetto/email-template
+```
+
 This is the primary templating email engine.  The templating process is built upon three primary ideas, with the final output being an [`inky`](https://github.com/zurb/inky) rendered html/text email.  
 
 ## Asset Management
@@ -35,6 +41,8 @@ Templating emails is achieved through a combination of multiple libraries, speci
 
 ## Example
 A sample template could look like:
+
+**Code: Example inky template with mustache support**
 ```xml
 <row>
   <columns large="{{left}}">Bob</columns>

@@ -1,6 +1,11 @@
 Travetto: Registry
 =================
 
+**Install: primary**
+```bash
+$ npm install @travetto/registry
+```
+
 This module is the backbone for all "discovered" and "registered" behaviors within the framework. This is primarily used for building modules within the framework and not directly useful for application development.
 
 ## Flows
@@ -13,6 +18,7 @@ The primary flow occurs on initialization of the application. At that point, the
 3. When all files are processed, the `RootRegistry` is finished, and it will signal to anything waiting on registered data that its free to use it.  
 This flow ensures all files are loaded and processed before application starts. A sample registry, pulled from the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module, looks like:
 
+**Code: Custom Registry based on Metadata Registry**
 ```typescript
 export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   constructor() {

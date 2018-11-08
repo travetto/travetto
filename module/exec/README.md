@@ -1,12 +1,19 @@
 travetto: Exec
 ===
 
+**Install: primary**
+```bash
+$ npm install @travetto/exec
+```
+
 The exec module provides the necessary foundation for calling executables at runtime. Additionally special attention is provided to running [`docker`](https://www.docker.com/community-edition) containers.
 
 ## Simple Execution
 Just like [`child_process`](https://www.docker.com/community-edition), the module exposes ```spawn```, ```fork```, and ```exec```.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ```Promise``` structure, that throws an error on an non-zero return status.
 
 A simple example would be
+
+**Code: Running a directory listing via ls**
 ```typescript
 async function executeListing() {
   const [process, resultPromise] = spawn('ls');
@@ -28,6 +35,7 @@ Docker provides a unified way of executing external programs with a high level o
 * Invoke a single operation against a container
 * Spin up a container and run multiple executions against it.  In this format, the container, once started, will be scheduled to terminate on ```Shutdown``` of the application. 
 
+**Code: Establishing mongo as a DockerContainer instance**
 ```typescript
 async function runMongo() {
   const port = 10000;
@@ -47,6 +55,7 @@ async function runMongo() {
 ## Command Service
 While docker containers provide a high level of flexibility, performance can be an issue.  [```CommandService```](./src/command.ts) is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
 
+**Code: Command Service example, using pngquant**
 ```typescript
   const converter = new CommandService({
     image: 'agregad/pngquant',
@@ -78,6 +87,7 @@ The supported `DataExecutionSource`s are
 
 Below is a pool that will convert images on demand, while queuing as needed.
 
+**Code: Image processing queue, with a fixed batch/pool size**
 ```typescript
 class ImageProcessor {
   active = false;

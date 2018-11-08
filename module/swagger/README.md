@@ -1,6 +1,11 @@
 travetto: Swagger
 ===
 
+**Install: primary**
+```bash
+$ npm install @travetto/swagger
+```
+
 In the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap.
 
 The module is provides a [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) v2 representation of the API metadata provided via the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) and [`Schema`](https://github.com/travetto/travetto/tree/master/module/schema) modules.
@@ -11,6 +16,7 @@ By installing the dependency, the [`swagger`](https://github.com/OAI/OpenAPI-Spe
 
 All of the high level configurations can be found in the following structure:
 
+**Config: Swagger configuration**
 ```yaml
 api:
   info:

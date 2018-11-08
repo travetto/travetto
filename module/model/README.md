@@ -1,6 +1,11 @@
 travetto: Model
 ===
 
+**Install: primary**
+```bash
+$ npm install @travetto/model
+```
+
 This module provides a clean interface to data model persistence, modification and retrieval.  This module builds heavily upon the [`Schema`](https://github.com/travetto/travetto/tree/master/module/schema), which is used for data model validation.
 
 The module can be segmented into three main areas: Model declaration, access/storage, and querying
@@ -8,6 +13,7 @@ The module can be segmented into three main areas: Model declaration, access/sto
 ## Declaration
 Models are declared via the `@Model` decorator, which allows the system to know that this is a class that is compatible with the module.
 
+**Code: Extending BaseModel**
 ```typescript
 @Model()
 class User extends BaseModel {
@@ -22,6 +28,7 @@ The `User` model is now ready to be used with the model services.
 ## Access/Storage
 The [`ModelService`](./src/service/model.ts) is the foundation for all access to the storage layer, and provides a comprehensive set of functionality.  The service includes support for modifying individual records, bulk update/insert/delete, partial updates, finding records, and more.  This should be the expected set of functionality for storage and retrieval.
 
+**Code: Using ModelService with the User model**
 ```typescript
 class UserManager {
   private service: ModelService;
@@ -84,6 +91,8 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 ```{ $not : {} }``` negates a clause
 
 A sample query for `User`'s might be:
+
+**Code: Using the query structure for specific queries**
 ```typescript
 this.service.getAllByQuery(User, {
   $and: [
@@ -121,12 +130,14 @@ The language itself is fairly simple, boolean logic, with parenthetical support.
 
 All sub fields are dot separated for access, e.g. `user.address.city`. A query language version of the previous query could look like:
 
+**Code: Query language with boolean checks and exists check**
 ```sql
 not (age < 35) and contact != null
 ```
 
 A more complex query would look like:
 
+**Code: Query language with more complex needs**
 ```sql
 user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')
 ```
@@ -136,6 +147,7 @@ user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.ci
 ## Rest - Extension
 To facilitate common RESTful patterns, the module exposes [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) support in the form of `@ModelController`.
 
+**Code: ModelController example**
 ```typescript
 @ModelController('/user', User) 
 class UserController {
@@ -145,6 +157,7 @@ class UserController {
 ```
 is a shorthand that is equal to:
 
+**Code: Comparable UserController, built manually**
 ```typescript
 @Controller('/user') 
 class UserController {
@@ -179,5 +192,4 @@ class UserController {
     return await this.source.update(User, req.body);
   }
 }
-
 ```

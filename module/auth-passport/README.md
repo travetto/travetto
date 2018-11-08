@@ -1,8 +1,14 @@
 travetto: Auth-Passport
 ===
 
+**Install: passport provider**
+```bash
+$ npm install @travetto/auth-passport
+```
+
 Within the node ecosystem, the most prevalent auth framework is [`passport`](http://passportjs.org).  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for `passport` baked in. Registering and configuring a `passport` strategy is fairly straightforward.
 
+**Code: Sample Facebook/passport config**
 ```typescript
 export const FB_AUTH = Symbol('facebook');
 
@@ -42,6 +48,7 @@ As you can see, ```AuthPassportProvider``` will take care of the majority of the
 
 After that, the provider is no different than any other, and can be used accordingly.  Additionally, because passport runs first, in it's entirety, you can use the provider as you normally would any passport middleware.
 
+**Code: Sample routes using Facebook/passport provider**
 ```typescript
 @Controller('/auth')
 export class AppAuth {

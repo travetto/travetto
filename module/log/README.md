@@ -1,6 +1,11 @@
 travetto: Log
 ===
 
+**Install: primary**
+```bash
+$ npm install @travetto/log
+```
+
 This module provides logging functionality relying up the built in `console` operations. This is achieved via AST transformations. The code is rewritten at compile time to transform the `console` operations into proper logging commands. In addition to the transformation, class name and line number are added to the log messages to provide additional context.
 
 The supported operations are:
@@ -15,6 +20,8 @@ The supported operations are:
 **Note:** In production mode, all `console.debug` and `console.trace` invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.
 
 A sample of the transformation would be:
+
+**Code: Sample logging at various levels**
 ```typescript
 function work() {
   console.trace('Start Work');
@@ -28,6 +35,8 @@ function work() {
 }
 ```
 Which, when in *dev* mode transforms into:
+
+**Code: Dev-time Transformation**
 ```typescript
 function work() {
   Logger.log('trace', 'Start Work');
@@ -40,6 +49,8 @@ function work() {
 }
 ```
 And when in *prod* mode transforms into:
+
+**Code: Prod-time Transformation**
 ```typescript
 function work() {
   try {
@@ -51,6 +62,8 @@ function work() {
 ```
 
 The logging output, as indicated provides context for location of invocation. Given the file `test/simple.ts`:
+
+**Code: Various log levels**
 ```typescript
 console.log('Hello World');
 
@@ -63,6 +76,8 @@ console.debug('Test');
 console.fatal('hi');
 ```
 The corresponding output would be
+
+**Terminal: Logging output**
 ```bash
 2018-06-23T16:57:58 info  [test.simple:  5] Hello World
 2018-06-23T16:57:58 info  [test.simple:  7] Woah! { a: { b: { c: [Object] } } }

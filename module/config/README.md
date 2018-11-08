@@ -1,5 +1,11 @@
 travetto: Config 
 ===
+
+**Install: primary**
+```bash
+$ npm install @travetto/config
+```
+
 The config module provides support for loading application config on startup. Configuration values support all valid [`yaml`](https://en.wikipedia.org/wiki/YAML) constructs.  The configuration information is comprised of:
 * `yaml` files
 * environment variables
@@ -16,7 +22,7 @@ Config loading follows a defined resolution path, below is the order in increasi
 
 A more complete example setup would look like:
 
-`config/database.yml`
+**Config: config/database.yml**
 ```yaml
 database:
   host: localhost
@@ -26,7 +32,7 @@ database:
     password: test
 ```
 
-`profile/prod.yml`
+**Config: profile/prod.yml**
 ```yaml
 database:
   host: prod-host-db
@@ -36,6 +42,7 @@ database:
 
 with environment variables
 
+**Config: Environment variables**
 ```properties
 PROFILE=prod
 DATABASE_PORT=1234
@@ -43,6 +50,8 @@ DATABASE_CREDS_PASSWORD=<secret>
 ```
 
 At runtime the resolved config would be:
+
+**Config: Runtime resolution**
 ```yaml
 database:
   host: prod-host-db
@@ -58,6 +67,7 @@ The `ConfigLoader` service provides direct access to all of the loaded configura
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 
+**Code: Database config object**
 ```typescript
 @Config('database')
 class DBConfig {
@@ -72,6 +82,7 @@ class DBConfig {
 
 And the corresponding config file:
 
+**Config: Database config via yaml**
 ```yaml
 database:
   host: localhost
@@ -83,6 +94,7 @@ database:
 
 The instance of `DBConfig`  would be equivalent to:
 
+**Config: Resolved database config as JSON**
 ```js
 {
   host: 'localhost',
