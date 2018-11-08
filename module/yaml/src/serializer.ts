@@ -10,7 +10,7 @@ export class Serializer {
     return key;
   }
 
-  static wordWrap(text: string, width: number = 100) {
+  static wordWrap(text: string, width: number = 160) {
     const lines: string[] = [];
     let line: string[] = [];
     let subl: number = 0;
