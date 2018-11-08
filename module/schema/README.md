@@ -1,6 +1,11 @@
 travetto: Schema
 ===
 
+**Install: primary**
+```bash
+$ npm install @travetto/schema
+```
+
 This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
 
 ## Registration
@@ -14,6 +19,7 @@ The module utilizes AST transformations to collect schema information, and facil
 
 The `title` will be picked up from the [`JSDoc`](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [`@Describe`](./src/decorator/common) decorator.
 
+**Code: Sample User Schema**
 ```typescript
 @Schema()
 class User {
@@ -24,6 +30,7 @@ class User {
 ```
 From this schema, the registry would have the following information:
 
+**Config: User schema as yaml**
 ```yaml
 User:
   fields:
@@ -76,6 +83,7 @@ At runtime, once a schema is registered, a programmer can utilize this structure
 ### Binding
 Binding is a very simple operation, as it takes in a class registered as as `@Schema` and a JS object that will be the source of the binding. Given the schema
 
+**Code: Sub Schemas via Address**
 ```typescript
 @Schema()
 class Address {
@@ -93,6 +101,7 @@ class Person {
 
 A binding operation could look like
 
+**Code: Binding from JSON to Schema**
 ```typescript
 Person.from({
   name: 'Test',
@@ -105,6 +114,8 @@ Person.from({
 ```
 
 and the output would be a `Person` instance with the following structure
+
+**Code: Sample data output after binding**
 ```typescript
 Person(
   name: 'Test',
@@ -121,6 +132,7 @@ Person(
 ### Validation
 Validation is very similar to binding, but instead of attempting to assign values, any mismatch or violation of the schema will result in errors. All errors will be collected and returned. Given the same schema as above, 
 
+**Code: Reference Schema for Validations**
 ```typescript
 @Schema()
 class Address {
@@ -137,6 +149,8 @@ class Person {
 ```
 
 But now with an invalid json object
+
+**Code: Read Person, and validate**
 ```typescript
 const person = Person.from({
   name: 'Test',
@@ -156,6 +170,8 @@ try {
 ```
 
 would produce an exception similar to following structure
+
+**Config: Sample error output**
 ```yaml
 errors:
   - 
@@ -172,7 +188,9 @@ errors:
 The module provides high level access for [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) support, via decorators, for validating and typing request bodies.  
 
 `@SchemaBody` provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
- ```typescript
+ 
+**Code: Using SchemaBody for POST requests**
+```typescript
  import { SearchBody } from '@travetto/schema/extension/rest';
 
 class User {
@@ -188,9 +206,12 @@ class User {
   }
  ...
  ```
+
 `@SchemaQuery` provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request. 
+
+**Code: Using SchemaQuery for GET requests**
 ```typescript
- import { SearchQuery } from '@travetto/schema/extension/rest';
+ import { SchemaQuery } from '@travetto/schema/extension/rest';
 
  class SearchParams {
    page: number = 0;
@@ -255,6 +276,8 @@ In addition to the general types, the code relies upon name matching to provide 
  * `/(price|amt|amount)$/` - parseFloat(finance.amount()
 
 An example of this would be:
+
+**Code: More complex Schema, used with Faker**
 ```typescript
 
 @Schema()

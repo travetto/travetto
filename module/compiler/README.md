@@ -1,6 +1,13 @@
 travetto: Compiler
 ===
 
+
+**Install: primary**
+```bash
+$ npm install @travetto/compiler
+```
+
+
 This module expands upon [`typescript`](http://typescriptlang.org), with supplemental functionality:
 * Read `tsconfig.json` from the project directory to provide 
 * Supports on-the-fly compilation, nothing needs to be compiled ahead of time
@@ -12,8 +19,9 @@ This module expands upon [`typescript`](http://typescriptlang.org), with supplem
   * Utilizes `es2015` ```Proxy```s to allow for swapping out implementation at runtime
 
 Additionally, there is support for common AST transformation patterns to facilitate all the transformers used throughout the framework.
-Transformations are defined by `support/transformation.<name>.ts` as the filename. The schema for a transformer is:
+Transformations are defined by `support/transformer.<name>.ts` as the filename. The schema for a transformer is:
 
+**Code: Sample transformer, registration and execution**
 ```typescript
   export class CustomerTransformer {
     after: ['base'],

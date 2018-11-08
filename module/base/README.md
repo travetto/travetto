@@ -1,5 +1,11 @@
 travetto: Base
 ===
+
+**Install: primary**
+```bash
+$ npm install @travetto/base
+```
+
 Base is the foundation of all `travetto` applications.  It is intended to be a minimal application bootstrap, as well as support for commonly shared functionality. It has support for the following key areas:
 * Environmental Information
 * File Operations
@@ -35,6 +41,7 @@ The framework does a fair amount of file system scanning to auto-load files.  It
 
 A simple example of finding specific `.config` files in your codebase:
 
+**Code: Looking for all .config files with the prefix defined by svc**
 ```typescript
   function processServiceConfigs(svc: string) {
     const svcConfigs = await ScanApp.findFiles('.config', file => path.basename(file).startsWith(`${svc}.`));
@@ -46,6 +53,7 @@ A simple example of finding specific `.config` files in your codebase:
 
 The framework utilizes caching to enable these lookups to be repeated without performance impact.  In addition to file system scanning, the framework offers a simple file watching library.  The goal is to provide a substantially smaller footprint than [`gaze`](https://github.com/shama/gaze) or [`chokidar`](https://github.com/paulmillr/chokidar).  Utilizing the patterns from the file scanning, you create a `Watcher` that either has files added manually, or has patterns added that will recursively look for files. 
 
+**Code: Example of watching for specific files**
 ```typescript
 const watcher = new Watcher({cwd: 'base/path/to/...'});
 watcher.add([
@@ -68,6 +76,7 @@ During the lifecycle of an application, there is a need to handle different phas
 
 An example would be something like `phase.bootstrap.ts` in the [`Config`](https://github.com/travetto/travetto/tree/master/module/config) module.  
 
+**Code: Sample phase bootstrap**
 ```typescript
 export const init = {
   key: 'config',
@@ -83,6 +92,7 @@ Another key lifecycle is the process of shutting down. The framework provides ce
 
 As a registered shutdown handler, you can do.
 
+**Code: Registering a shutdown handler**
 ```typescript
 Shutdown.onShutdown('handler-name', async () => {
   // Do important work, the framework will wait until all async 
@@ -94,6 +104,8 @@ Shutdown.onShutdown('handler-name', async () => {
 We integrate with [`trace.js`](https://trace.js.org/) to handle asynchronous call stacks, and provide higher quality stack traces.  The stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  This is primarily used for development purposes, and is disabled by default in `prod`.  That means in a production environment you will get the full stacktrace, in all it's glory.
 
 From a test scenario:
+
+**Code: Tracking asynchronous behavior**
 ```typescript
 function test() {
   setTimeout(function inner1() {
@@ -110,7 +122,8 @@ test();
 
 Will produce the following stack trace:
 
-```
+`Terminal: Stack trace from async errors`
+```bash
 Error: Uh oh
     at Timeout.inner3 [as _onTimeout] (./test/stack.js:6:23)
     at Timeout.inner2 [as _onTimeout] (./test/stack.js:5:13)

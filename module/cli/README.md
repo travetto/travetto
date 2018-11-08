@@ -1,11 +1,19 @@
 CLI Support
 ===
 
+**Install: primary**
+```bash
+$ npm install -g @travetto/cli
+```
+
+
 The cli is the primary structure for interacting with the external requirements of the framework.  This can range from running tests, to running applications, to generating email templates. The main executable can be installed globally or locally.  If installed globally and locally, it will defer to the local installation for execution.
 
 As is the custom, modules are able to register their own cli extensions as scripts, whose name starts with `travetto-cli-`.  These scripts are then picked up at runtime and all available options are provided when viewing the help documentation.  The following are all the supported cli operations and the various settings they allow.
 
 ## General
+
+**Terminal: General Usage**
 ```bash
 travetto --help
 Usage: travetto [options] 
@@ -16,6 +24,8 @@ This will show all the available options/choices that are exposed given the curr
 
 
 ## Base
+
+**Terminal: Clean operation**
 ```bash
 travetto clean
 ```
@@ -23,6 +33,8 @@ travetto clean
 Clears [`Base`](https://github.com/travetto/travetto/tree/master/module/base) compilation cache to handle any inconsistencies that may arise from checking timestamps for cache freshness.
 
 ## Compiler
+
+**Terminal: Compiler usage**
 ```bash
 travetto compile
   -o, --output <output>  # Output directory
@@ -31,6 +43,8 @@ travetto compile
 This command line operation invokes the [`Compiler`](https://github.com/travetto/travetto/tree/master/module/compiler) to pre-compile of all the application source code.  This is useful for production builds when startup performance is critical.
 
 ## Dependency Injection
+
+**Terminal: Run usage**
 ```bash
 travetto run [application]
   -e, --env [env]  # Application environment
@@ -40,6 +54,8 @@ travetto run [application]
 The run command allows for invocation of [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di)-based applications as defined by the `@Application` decorator.  Additionally, the environment can manually be specified (dev, test, prod, e2e) as well as whether or not the application should be run in `watch` mode.
 
 ## Testing
+
+**Terminal: Test usage**
 ```bash
 travetto test [regexes...]
   -f, --format <format>  # Output format for test results, valid formats are: tap (default), json, noop, exec, event
@@ -51,6 +67,8 @@ The regexes are the patterns of tests you want to run, and all tests must be fou
 The test command is the only supported method for invoking the [`Test`](https://github.com/travetto/travetto/tree/master/module/test) module via the command line.  As stated in the test documentation, the primary output format is `tap`.  Additionally the code supports `json` and `event` as formats that can be consumed programmatically.  `exec` is used internally for sub-dividing tests to run concurrently, and communicate results over IPC.
 
 ## Email Templating
+
+**Terminal: Email template usage**
 ```bash
 travetto email-template
 ``` 
@@ -60,6 +78,8 @@ This command is provided by [`email-template`](https://github.com/travetto/trave
 Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
 
 ## Swagger Client Generation
+
+**Terminal: Swagger usage**
 ```bash
 travetto swagger-client
   -o, --output [output]  # Output folder, defaults to ./api-client

@@ -1,10 +1,18 @@
 travetto: JWT
 ===
 
+
+**Install: primary**
+```bash
+$ npm install @travetto/jwt
+```
+
+
 This module is a simple component to support [`JWT`](https://jwt.io/) signing and verification.  The framework provides a port of [`node-jsonwebtoken`](https://github.com/auth0/node-jsonwebtoken). The API has been streamlined, and is intended as a lower level component as a basis for other modules.
 
 The API exposes:
 
+**Code: Signing typings**
 ```typescript
 sign(payload:object, config:{
   key?: string | Buffer | Promise<string | Buffer>;  // Signing Key
@@ -15,6 +23,7 @@ sign(payload:object, config:{
 }):Promise<string>;
 ```
 
+**Code: Decode typings**
 ```typescript
 decode(token: string): Payload;
 
@@ -25,6 +34,7 @@ decodeComplete(token:string): {
 }
 ```
 
+**Code: Verify typings**
 ```typescript
 verify(token: string, options: {
   clock?: { 
