@@ -13,6 +13,5 @@ class CycleTest {
   @ShouldThrow('cyclical dependency')
   async tryCycle() {
     const { BCD } = require('./cycle/b');
-    console.log('hi');
   }
 }

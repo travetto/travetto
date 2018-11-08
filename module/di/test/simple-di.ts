@@ -137,11 +137,11 @@ class DiTest2 {
 
     assert(inst);
 
-    assert(inst.empty);
+    assert(inst.empty.age === 10);
   }
 
   @Test('abstract inheritance')
-  async abstrct() {
+  async absTract() {
     const types = DependencyRegistry.getCandidateTypes(BasePattern as Class<any>);
     assert(types.length > 0);
 
@@ -155,3 +155,4 @@ class DiTest2 {
     assert(specInst instanceof SpecificPattern);
   }
 }
+

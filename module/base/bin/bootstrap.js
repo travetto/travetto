@@ -31,7 +31,7 @@ if (Env.frameworkDev) {
     }
     request = resolveFrameworkFile(request);
     const mod = og.apply(null, [request, parent]);
-    if (!parent.loaded && (!mod || !mod.__TRAVETTO__)) {
+    if (!parent.loaded && (!mod || !mod._$TRV)) {
       let p;
       try {
         // @ts-ignore      
@@ -59,7 +59,7 @@ require.extensions['.ts'] = function load(m, tsf) {
       const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
       opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
     }
-    content = ts.transpile(`${fs.readFileSync(tsf, 'utf-8')};\nexport const __TRAVETTO__ = 1;`, opts);
+    content = ts.transpile(`${fs.readFileSync(tsf, 'utf-8')};\nexport const _$TRV = 1;`, opts);
     AppCache.writeEntry(name, content);
   } else {
     content = AppCache.readEntry(name);
