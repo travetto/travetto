@@ -63,7 +63,7 @@ export class SourceManager {
     if (force || !this.hasCached(fileName)) {
       console.trace('Emitting', fileName);
 
-      const content = `${fs.readFileSync(fileName).toString()};\nexport const __TRAVETTO__ = 1;`;
+      const content = `${fs.readFileSync(fileName).toString()};\nexport const _$TRV = 1;`;
 
       let hash = 0;
 

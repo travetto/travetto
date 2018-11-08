@@ -10,7 +10,7 @@ const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
   [ts.SyntaxKind.GreaterThanToken]: 'greaterThan',
   [ts.SyntaxKind.LessThanEqualsToken]: 'lessThanEqual',
   [ts.SyntaxKind.LessThanToken]: 'lessThan',
-  [ts.SyntaxKind.InstanceOfKeyword]: 'instanceOf'
+  [ts.SyntaxKind.InstanceOfKeyword]: 'instanceof'
 };
 
 const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
@@ -100,7 +100,9 @@ function getCommand(args: ts.Expression[] | ts.NodeArray<ts.Expression>): Comman
   const comp = args[0]!;
   const message = args.length === 2 ? args[1] : undefined;
 
-  if (ts.isBinaryExpression(comp)) {
+  if (ts.isParenthesizedExpression(comp)) {
+    return getCommand([comp.expression, ...args.slice(1)]);
+  } else if (ts.isBinaryExpression(comp)) {
     let opFn = OPTOKEN_ASSERT_FN[comp.operatorToken.kind];
 
     if (opFn) {

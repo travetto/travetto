@@ -31,6 +31,7 @@ const OP_MAPPING: { [key: string]: string } = {
   notStrictDeepEqual: '{actual} {state} strictly not deep equal {expected}',
   greaterThanEqual: '{actual} {state} be greater than or equal to {expected}',
   greaterThan: '{actual} {state} be greater than {expected}',
+  instanceof: '{actual} instance {state} be of type {expected}',
   lessThanEqual: '{actual} {state} be less than or equal to {expected}',
   lessThan: '{actual} {state} be less than {expected}'
 };
@@ -39,7 +40,7 @@ function clean(val: any) {
   if (val === null || val === undefined || (!(val instanceof RegExp) && Util.isPrimitive(val)) || Util.isPlainObject(val) || Array.isArray(val)) {
     return JSON.stringify(val);
   } else {
-    if (!val.constructor || (!val.constructor.__id && Util.isFunction(val))) {
+    if (val.__id || !val.constructor || (!val.constructor.__id && Util.isFunction(val))) {
       return val.name;
     } else {
       return util.inspect(val, false, 1).replace(/\n/g, ' ');
@@ -72,7 +73,9 @@ export class AssertUtil {
     const [, pth] = best.trim().split(/\s+/g).slice(1);
     const [file, lineNo] = pth.replace(/[()]/g, '').replace(/^[A-Za-z]:/, '').split(':');
 
-    const outFile = file.split(base.replace(/^[A-Za-z]:/, ''))[1].replace(/^[\\\/]/, '');
+    const outFileParts = file.split(base.replace(/^[A-Za-z]:/, ''));
+
+    const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\\\/]/, '') : filename;
 
     const res = { file: outFile, line: parseInt(lineNo, 10) };
 
@@ -130,10 +133,15 @@ export class AssertUtil {
       assertion.expected = true;
       assertion.operator = '';
     } else if (fn === 'includes') {
-      assertion.operator = fn || '';
+      assertion.operator = fn;
       assertion.message = args[2];
       assertion.expected = args[0];
       assertion.actual = args[1];
+    } else if (fn === 'instanceof') {
+      assertion.expected = args[1];
+      assertion.actual = args[0].constructor;
+      assertion.message = args[2];
+      assertion.operator = fn;
     } else {
       assertion.operator = fn || '';
       assertion.message = args[2];
@@ -151,7 +159,7 @@ export class AssertUtil {
       }
 
       switch (fn) {
-        case 'instanceOf': asrt(args[0] instanceof args[1], args[2]); break;
+        case 'instanceof': asrt(args[0] instanceof args[1], args[2]); break;
         case 'lessThan': asrt(args[0] < args[1], args[2]); break;
         case 'lessThanEqual': asrt(args[0] <= args[1], args[2]); break;
         case 'greaterThan': asrt(args[0] > args[1], args[2]); break;
@@ -171,7 +179,7 @@ export class AssertUtil {
     } catch (e) {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
-          assertion.message = (OP_MAPPING[fn] || `{state} be {expected}`);
+          assertion.message = (OP_MAPPING[fn] || `{ state } be { expected }`);
         }
         assertion.message = assertion.message
           .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || (assertion as any)[k])
@@ -201,14 +209,14 @@ export class AssertUtil {
         return new BaseError(`Expected error containing text '${shouldThrow}', but got ${actual}`);
       }
       if (shouldThrow instanceof RegExp && (!err || !shouldThrow.test(typeof err === 'string' ? err : err.message))) {
-        return new BaseError(`Expected error with message matching '${shouldThrow.source}', but got ${actual}`);
+        return new BaseError(`Expected error with message matching '${shouldThrow.source}', but got ${actual} `);
       }
     } else if (shouldThrow === Error ||
       shouldThrow === BaseError ||
       Object.getPrototypeOf(shouldThrow) !== Object.getPrototypeOf(Function)
     ) { // if not simple function, treat as class
       if (!err || !(err instanceof shouldThrow)) {
-        return new BaseError(`Expected to throw ${shouldThrow.name}, but got ${err || 'nothing'}`);
+        return new BaseError(`Expected to throw ${shouldThrow.name}, but got ${err || 'nothing'} `);
       }
     } else {
       const res = shouldThrow(err);
@@ -230,7 +238,7 @@ export class AssertUtil {
       if (typeof shouldThrow === 'boolean' && !shouldThrow) {
         return;
       }
-      throw (missed = new Error(`No error thrown, but expected ${shouldThrow}`));
+      throw (missed = new Error(`No error thrown, but expected ${shouldThrow} `));
     } catch (e) {
       const err = missed || this.checkError(shouldThrow, e);
       if (err) {
