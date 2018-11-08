@@ -84,7 +84,8 @@ export class ModelElasticsearchSource extends ModelSource {
         body: {
           mappings: {
             [ident.type]: schema
-          }
+          },
+          settings: this.config.indexCreate
         }
       });
       if (alias) {
