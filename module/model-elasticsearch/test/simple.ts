@@ -150,22 +150,7 @@ class TestSave extends BaseElasticsearchTest {
       await service.getById(Person, 'Orange-20');
     }, /Invalid/);
 
-    const match = await service.getAllByQuery(Person, {
-      where: {
-        $and: [
-          {
-            name: 'Bob'
-          },
-          {
-            $not: {
-              age: {
-                $gte: 24
-              }
-            }
-          }
-        ]
-      }
-    });
+    const match = await service.getAllByQueryString(Person, { query: 'name=="Bob" and age < 24' });
 
     assert(match.length === 3);
 
