@@ -32,7 +32,7 @@ class $Compiler {
 
     this.transformerManager = new TransformerManager(this.cwd);
     this.moduleManager = new ModuleManager(this.cwd);
-    this.sourceManager = new SourceManager({ cwd: this.cwd });
+    this.sourceManager = new SourceManager(this.cwd, {});
     this.presenceManager = new FilePresenceManager(this.cwd, {
       added: (name: string) => {
         if (this.transpile(name)) {
@@ -104,11 +104,13 @@ class $Compiler {
       }
       return ret;
     } catch (e) {
-      if (e.message.startsWith('Cannot find module')) {
+      if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
         const name = m.filename.replace(`${Env.cwd}/`, '');
         const err = new Error(`${e.message} ${e.message.includes('from') ? `[via ${name}]` : `from ${name}`}`);
         err.stack = err.stack;
         throw err;
+      } else {
+        throw e;
       }
     }
   }

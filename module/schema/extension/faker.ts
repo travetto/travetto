@@ -76,18 +76,22 @@ export class GenerateUtil {
     const name = cfg.name.toUpperCase();
 
     if (/(price|amt|amount)$/.test(name)) {
-      precision = [20, 2];
+      precision = [13, 2];
     }
+
+    let offset = 1;
 
     if (precision !== undefined) {
       min = min === undefined ? -((10 ** precision[0]) - 1) : min;
       max = max === undefined ? ((10 ** precision[0]) - 1) : max;
+      if (precision[1] !== undefined) {
+        offset = (10 ** (precision[1] || 0));
+      }
     }
 
     max = max === undefined ? Number.MAX_SAFE_INTEGER : max;
     min = min === undefined ? Number.MIN_SAFE_INTEGER : min;
 
-    const offset = (10 ** (precision && precision[1] ? precision[1] : 1));
     const range = (max - min) * offset;
 
     const val = Math.trunc(Math.random() * range);

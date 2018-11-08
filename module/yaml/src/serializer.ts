@@ -10,7 +10,7 @@ export class Serializer {
     return key;
   }
 
-  static wordWrap(text: string, width: number = 100) {
+  static wordWrap(text: string, width: number = 160) {
     const lines: string[] = [];
     let line: string[] = [];
     let subl: number = 0;
@@ -45,20 +45,20 @@ export class Serializer {
     return lines;
   }
 
-  static serialize(o: any, indent = 0) {
+  static serialize(o: any, indent = 2, wordwrap = 160, indentLevel = 0) {
     let out = '';
-    const prefix = ' '.repeat(indent);
+    const prefix = ' '.repeat(indentLevel);
     if (typeof o === 'function' || o instanceof RegExp || o instanceof Set || o instanceof Map) {
       throw new Error('Types are not supported');
     } else if (Array.isArray(o)) {
-      out = o.map(el => `${prefix}-${this.serialize(el, indent + 2)}`).join('\n');
-      if (indent > 0) {
+      out = o.map(el => `${prefix}-${this.serialize(el, indent, wordwrap, indentLevel + indent)}`).join('\n');
+      if (indentLevel > 0) {
         out = `\n${out}`;
       }
     } else if (typeof o === 'number' || typeof o === 'boolean' || o === null) {
       out = ` ${o}`;
     } else if (typeof o === 'string') {
-      const lines = this.wordWrap(o);
+      const lines = this.wordWrap(o, wordwrap);
       if (lines.length > 1) {
         out = [' >', ...lines.map(x => `${prefix}${x}`)].join('\n');
       } else {
@@ -66,9 +66,9 @@ export class Serializer {
       }
     } else {
       out = Object.keys(o)
-        .map(x => `${prefix}${this.clean(x)}:${this.serialize(o[x], indent + 2)}`)
+        .map(x => `${prefix}${this.clean(x)}:${this.serialize(o[x], indent, wordwrap, indentLevel + indent)}`)
         .join('\n');
-      if (indent > 0) {
+      if (indentLevel > 0) {
         out = `\n${out}`;
       }
     }

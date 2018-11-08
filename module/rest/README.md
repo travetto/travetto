@@ -1,6 +1,11 @@
 travetto: Rest
 ===
 
+**Install: primary**
+```bash
+$ npm install @travetto/rest
+```
+
 The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [`express`](https://expressjs.com) in the `Request` and `Response` objects). 
 
 ## Routes: Controller
@@ -10,6 +15,7 @@ To define a route, you must first declare a `@Controller` which is only allowed 
 
 [`JSDoc`](http://usejsdoc.org/about-getting-started.html) comments can also be used to define the `title` attribute.
 
+**Code: Example of Controller decorator**
 ```typescript
 /**
  * Provides basic interface to our primary service
@@ -42,6 +48,7 @@ Each endpoint decorator handles the following config:
 
 Additionally, the annotated return type on the method will also be used to describe the `responseType` if specified.
 
+**Code: Controller with Sample Route**
 ```typescript
 /**
  * Provides basic interface to our primary service
@@ -78,6 +85,7 @@ Each `@Param` can be configured to indicate:
 ### Example
 A simple example could look like:
 
+**Code: Full-fledged Controller with Routes**
 ```typescript
 @Controller('/simple')
 export class Simple {
@@ -135,6 +143,7 @@ Additionally, there is support for typing requests and request bodies.  This can
 ## Creating and Running an App
 To run a REST server, you will need to construct an entry point using the `@Application` decorator, as well as define a valid [`RestAppProvider`](./src/types.ts) to provide initialization for the application.  This could look like:
 
+**Code: Application entry point for Rest Applications**
 ```typescript
 @Application('sample')
 export class SampleApp {
@@ -160,9 +169,10 @@ And using the pattern established in the [`Dependency Injection`](https://github
 ## Custom Interceptors
 Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) by extending the [`RestInterceptor`](./src/interceptor) class.  The interceptors are tied to the defined `Request` and `Response` objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
+**Code: Defining a new Interceptor**
 ```typescript
 @Injectable()
-export class LoggingInterceptor extends ExpressInterceptor {
+export class LoggingInterceptor extends RestInterceptor {
   async intercept(req: Request, res: Response) {
     console.log(req.method, req.path, req.query);
   }
@@ -174,6 +184,7 @@ Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module
 ## Context Support
 [`Context`](https://github.com/travetto/travetto/tree/master/module/context) provides support for automatically injecting an async context into every request. The context management is provided via an `Interceptor` and is transparent to the programmer.
 
+**Code: Showing contextual support for Routes**
 ```typescript
  ...
   @Post('/preferences')

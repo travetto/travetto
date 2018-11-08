@@ -1,8 +1,14 @@
 travetto: Asset-Mongo
 ===
 
+**Install: mongo provider**
+```bash
+$ npm install @travetto/asset-mongo
+```
+
 This provides a [`mongodb`](https://mongodb.com) implementation of the `AssetSource` which is a backend for the [`Asset`](https://github.com/travetto/travetto/tree/master/module/asset) module.  
 
+**Code: Mongo backend wiring**
 ```typescript
 class AppConfig {
   @InjectableFactory()
@@ -14,6 +20,7 @@ class AppConfig {
 
 There is a default configuration that you can easily use, with some sensible defaults. 
 
+**Code: Mongo configuration**
 ```typescript
 @Config('asset.mongo')
 export class AssetMongoConfig {

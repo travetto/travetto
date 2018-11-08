@@ -6,6 +6,10 @@ export class ModelElasticsearchConfig {
   port = 9200;
   options = {};
   namespace = 'app';
+  indexCreate = {
+    number_of_replicas: 0,
+    number_of_shards: 1
+  };
 
   postConstruct() {
     console.debug('Constructed', this);

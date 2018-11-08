@@ -1,6 +1,11 @@
 travetto: Auth
 ===
 
+**Install: primary**
+```bash
+$ npm install @travetto/auth
+```
+
 This module provides the high-level backdrop for managing security principals.  The goal of this module is to be a centralized location for various security frameworks to plug into.  The primary contributions are:
 * Interfaces for standard security primitives
 * Principal configuration
@@ -9,6 +14,8 @@ This module provides the high-level backdrop for managing security principals.  
 
 ## Interfaces / Primitives
 The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [`AuthContext`](./src/types.ts).
+
+**Code: Auth context structure**
 ```typescript
 export interface AuthContext<U> {
   id: string;
@@ -16,6 +23,7 @@ export interface AuthContext<U> {
   principal: U;
 }
 ```
+
 The structure is simple, but drives home the primary use cases of the framework.  The goals are
 * Be able to identify a user uniquely
 * To have a reference to a user's set of permissions
@@ -25,6 +33,8 @@ This is the only contract that needs to be satisfied to be able to integrate a s
 
 ## Principal Configuration
 Additionally, there exists a common practice of mapping various external security principals into a local contract. These external principals, as provided from countless authentication schemes, need to be homogeonized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this framework, we leverage `typescript`'s power to enforce the configuration via code.  This requires that there is a type to describe the external principal. At that point, we are ready to define our mapping:
+
+**Code: Simple principal configuration**
 ```typescript
 class ExternalUser {
   id: string;
@@ -37,6 +47,8 @@ const config = new PrincipalConfig(ExternalUser, {
 });
 ```
 At this point, the config is now type-checked against the ```ExternalUser``` class, such that passing in bad field names will throw a compile-time error.  With the configuration established, a programmer can now invoke:
+
+**Code: Converting principal to context**
 ```typescript
 const context:AuthContext<ExternalUser> = config.toContext(externalPrincipal);
 ```
@@ -44,6 +56,8 @@ And now the context is established.
 
 ## Centralized Auth Services
 Given the above contract definitions, the next step is to provide a localized place for interacting with the security principal for a given set of operations.  Again, with a desire to be flexible, the `AuthService` is as simple as possible:
+
+**Code: Auth service structure**
 ```typescript
 class AuthService<U> {
 
@@ -64,10 +78,13 @@ The context can be read/set and will be backed by the [`Context`](https://github
 
 ## Common Utilities
 The [```AuthUtil```](./src/util.ts) provides the following functionality:
+
+**Code: Auth util structure**
 ```typescript
 class AuthUtil {
   static async generateHash(password: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256'): Promise<string>;
   static async generateSalt(saltlen = 32): Promise<string>;
   static async generatePassword(password: string, saltlen = 32, validator?: (password: string) => Promise<boolean>): Promise<string>
 ```
+
 The functionality above is aimed at password generation/management, but the functionality with grow over time as more sub modules are added.

@@ -1,6 +1,8 @@
 travetto: Yeoman App Generator
 ===
 A simple [`yeoman`](http://yeoman.io) generator for scaffolding a reference project.  To get started, you need to make sure: 
+
+**Install: Setting up yeoman and the generator**
 ```bash
 $ npm i -g yo #Ensure yeoman is installed globally
 $ npm i -g @travetto/generator-app #Ensure this yeoman generator is installed
@@ -8,6 +10,8 @@ $ git config --global.username <Username> #Set your git username
 ```
 
 Once installed you can invoke the scaffolding by running
+
+**Terminal: Running generator**
 ```bash
 $ yo @travetto/app
 ```
@@ -36,6 +40,8 @@ The [`Model`](https://github.com/travetto/travetto/tree/master/module/model) all
 <!-- * ...more to come -->
 
 A default model is constructed, a `Todo` class:
+
+**Code: Todo model**
 ```typescript
 @Model()
 export class Todo implements ModelCore {
@@ -50,6 +56,7 @@ Basic tests are also included for the `model` to verify that database interactio
 ## Rest + Model
 In the case both `Rest` and `Model` features are enabled, the code will produce a controller that exposes the `Todo` model via restful patterns.
 
+**Code: Todo controller**
 ```typescript 
 @Controller('/todo')
 export class TodoController {
@@ -75,6 +82,7 @@ export class TodoController {
 
 Once finished the application will reflect the modules chosen, and will be ready for execution, if you have configured a runnable application.  Currently, this requires the `rest` feature to be selected.
 
+**Terminal: starting app**
 ```bash
 $ npm start
 ```

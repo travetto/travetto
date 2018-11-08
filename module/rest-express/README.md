@@ -1,8 +1,14 @@
 travetto: Rest-Express
 ===
 
+**Install: Express Provider**
+```bash
+$ npm install @travetto/rest-express
+```
+
 The module is an [`express`](https://expressjs.com) provider for the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) module. A valid configuration of [`RestAppProvider`](./src/types.ts) would look like:
 
+**Code: Wiring up Express App Provider**
 ```typescript
 export class SampleConfig {
   @InjectableFactory()

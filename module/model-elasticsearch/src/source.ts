@@ -84,7 +84,8 @@ export class ModelElasticsearchSource extends ModelSource {
         body: {
           mappings: {
             [ident.type]: schema
-          }
+          },
+          settings: this.config.indexCreate
         }
       });
       if (alias) {
@@ -357,7 +358,7 @@ export class ModelElasticsearchSource extends ModelSource {
 
     const res = await this.client.index({
       ...this.getIdentity(cls),
-      refresh: 'wait_for',
+      refresh: true,
       body: o
     });
 
@@ -384,7 +385,7 @@ export class ModelElasticsearchSource extends ModelSource {
       ...this.getIdentity(cls),
       id,
       opType: 'index',
-      refresh: 'wait_for',
+      refresh: true,
       body: o
     });
     return this.getById(cls, id);
@@ -396,7 +397,7 @@ export class ModelElasticsearchSource extends ModelSource {
     await this.client.update({
       ...this.getIdentity(cls),
       id,
-      refresh: 'wait_for',
+      refresh: true,
       body: { doc: data }
     });
 

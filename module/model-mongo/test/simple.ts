@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
-import { Schema } from '@travetto/schema';
+import { Schema, Min, Max } from '@travetto/schema';
 import { GenerateUtil } from '@travetto/schema/extension/faker';
 
 import { ModelMongoSource } from '../';
@@ -18,7 +18,7 @@ class Address {
 @Model()
 class Person extends BaseModel {
   name: string;
-  age: number;
+  @Max(200) @Min(0) age: number;
   gender: 'm' | 'f';
   address: Address;
 }
