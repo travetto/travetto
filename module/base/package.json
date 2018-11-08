@@ -35,5 +35,5 @@
   "scripts": {
     "postinstall": "node ./bin/travetto-cli-clean.js"
   },
-  "version": "0.4.2"
+  "version": "0.4.3"
 }
