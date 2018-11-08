@@ -122,7 +122,7 @@ test();
 
 Will produce the following stack trace:
 
-`Terminal: Stack trace from async errors`
+**Terminal: Stack trace from async errors**
 ```bash
 Error: Uh oh
     at Timeout.inner3 [as _onTimeout] (./test/stack.js:6:23)
