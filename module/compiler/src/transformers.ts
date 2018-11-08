@@ -4,13 +4,14 @@ export class TransformerManager {
 
   transformers: ts.CustomTransformers = {};
 
-  constructor() { }
+  constructor(private cwd: string) { }
 
   init() {
     const transformers: { [key: string]: any } = {};
 
     for (const trns of ScanApp.requireFiles('.ts', x => /transformer[.].*?[.]ts$/.test(x))) {
-      for (const key of Object.keys(trns)) {
+      const keys = Object.keys(trns).filter(x => !x.startsWith('_'));
+      for (const key of keys) {
         const item = trns[key];
         if (!transformers[item.phase]) {
           transformers[item.phase] = [];

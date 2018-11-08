@@ -12,11 +12,12 @@ export class SourceManager {
   private sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   private contents = new Map<string, string>();
   private hashes = new Map<string, number>();
-  private cache = new Cache(Env.cwd);
+  private cache: Cache;
   private compilerOptions: ts.CompilerOptions;
 
-  constructor(private config: { cache?: boolean, cwd: string }) {
+  constructor(private cwd: string, private config: { cache?: boolean }) {
     Object.assign(config, { ... { cache: true }, config });
+    this.cache = new Cache(this.cwd);
   }
 
   registerSourceMaps() {
@@ -37,7 +38,7 @@ export class SourceManager {
       const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
       if (diag.file) {
         const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start as number);
-        return ` @ ${diag.file.fileName.replace(`${Env.cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
+        return ` @ ${diag.file.fileName.replace(`${this.cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
       } else {
         return ` ${message}`;
       }
@@ -47,7 +48,7 @@ export class SourceManager {
       errors.push(`${res.diagnostics.length - 5} more ...`);
     }
 
-    const msg = `Compiling ${fileName.replace(`${Env.cwd}/`, '')} failed:\n [\n    ${errors.join('\n    ')}\n ]`;
+    const msg = `Compiling ${fileName.replace(`${this.cwd}/`, '')} failed:\n [\n    ${errors.join('\n    ')}\n ]`;
 
     if (Env.watch) { // If attempting to load an optional require
       console.error(msg);
@@ -62,7 +63,7 @@ export class SourceManager {
     if (force || !this.hasCached(fileName)) {
       console.trace('Emitting', fileName);
 
-      const content = fs.readFileSync(fileName).toString();
+      const content = `${fs.readFileSync(fileName).toString()};\nexport const __TRAVETTO__ = 1;`;
 
       let hash = 0;
 
@@ -76,7 +77,7 @@ export class SourceManager {
       }
 
       if (!this.compilerOptions) {
-        this.compilerOptions = CompilerUtil.resolveOptions(this.config.cwd);
+        this.compilerOptions = CompilerUtil.resolveOptions(this.cwd);
       }
 
       const res = ts.transpileModule(content, { ...options, compilerOptions: this.compilerOptions });
@@ -126,7 +127,7 @@ export class SourceManager {
 
   unload(name: string, unlink: boolean = true) {
     if (this.config.cache) {
-      this.cache.removeExpiredEntry(name);
+      this.cache.removeExpiredEntry(name, unlink);
     }
 
     if (this.hashes.has(name)) {
