@@ -9,7 +9,7 @@
   "dependencies": {
     "@travetto/exec": "^0.4.3",
     "@travetto/registry": "^0.4.3",
-    "@travetto/yaml": "^0.4.0"
+    "@travetto/yaml": "^0.4.1"
   },
   "description": "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin",
   "homepage": "https://travetto.io",
@@ -27,5 +27,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.4.3"
+  "version": "0.4.4"
 }
