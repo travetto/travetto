@@ -5,6 +5,7 @@ function clean() {
 }
 
 // Allow for direct invocation
+// @ts-ignore
 if (require.main === module) {
   clean();
 } else {
