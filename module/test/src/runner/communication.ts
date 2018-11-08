@@ -86,7 +86,7 @@ export async function server() {
         if (k.endsWith('.ts') &&
           !/@travetto[\/\\](base|config|compiler|exec|pool)/.test(k) &&
           !(k.startsWith(__filename.replace(/.[tj]s$/, ''))) &&
-          !/(phase|transformer)[.]/.test(k)
+          !/support\/(phase|transformer)[.]/.test(k)
         ) {
           Compiler.unload(k, false);
         }
