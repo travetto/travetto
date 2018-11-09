@@ -9,7 +9,7 @@ export class TransformerManager {
   init() {
     const transformers: { [key: string]: any } = {};
 
-    for (const trns of ScanApp.requireFiles('.ts', x => /transformer[.].*?[.]ts$/.test(x))) {
+    for (const trns of ScanApp.requireFiles('.ts', x => /support\/transformer[.].*?[.]ts$/.test(x))) {
       const keys = Object.keys(trns).filter(x => !x.startsWith('_'));
       for (const key of keys) {
         const item = trns[key];
