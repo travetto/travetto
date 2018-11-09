@@ -13,7 +13,7 @@ export class PhaseManager {
   constructor(public scope: string) { }
 
   load(upto?: string) {
-    const pattern = new RegExp(`phase[.]${this.scope}[.]ts$`);
+    const pattern = new RegExp(`support/phase[.]${this.scope}[.]ts$`);
     const initFiles = ScanApp.requireFiles('.ts', x => pattern.test(x));
     this.initializers = Util.computeOrdering(initFiles.map(x => x.init));
 
