@@ -407,6 +407,7 @@ export class ModelElasticsearchSource extends ModelSource {
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<T> {
     if (!data.id) {
       const item = await this.getByQuery(cls, query);
+      this.postLoad(cls, item);
       data.id = item.id;
     }
     return await this.updatePartial(cls, data as any);
