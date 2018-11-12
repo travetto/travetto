@@ -4,3 +4,5 @@
 [submodule "sample/todo-app"]
 	path = sample/todo-app
 	url = https://github.com/travetto/todo-app.git
+[submodule "sample.starter"]
+	ignore = untracked
