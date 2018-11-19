@@ -98,23 +98,24 @@ export class HttpRequest {
   static async rawRequest(client: HttpClient, requestOpts: http.ClientRequestArgs, payload?: any, pipeTo?: any) {
     return new Promise<string | http.IncomingMessage>((resolve, reject) => {
       const req = client.request(requestOpts, (msg: http.IncomingMessage) => {
-        const body = Buffer.from('', 'utf8');
+        const body: Buffer[] = [];
 
         if (!pipeTo) {
           msg.setEncoding('utf8');
         }
 
-        msg.on('data', (chunk: string) => {
+        msg.on('data', (chunk: Buffer) => {
           if ((msg.statusCode || 200) > 299 || !pipeTo) {
-            body.write(chunk);
+            body.push(Buffer.from(chunk));
           }
         });
 
         msg.on('end', () => {
+          const bodyText = Buffer.concat(body).toString();
           if ((msg.statusCode || 200) > 299) {
-            reject({ message: body.toString(), status: msg.statusCode, headers: msg.headers });
+            reject({ message: bodyText, status: msg.statusCode, headers: msg.headers });
           } else {
-            resolve(pipeTo ? msg : body.toString());
+            resolve(pipeTo ? msg : bodyText);
           }
         });
 
