@@ -54,4 +54,10 @@ export class RequestTest {
     });
     assert(args3b.opts.headers!['Content-Length'] === JSON.stringify(payload3).length);
   }
+
+  // @Test()
+  async testRealCall() {
+    const req = await HttpRequest.exec({ url: 'https://jsonplaceholder.typicode.com/todos/1' });
+    assert(req.trim().length > 0);
+  }
 }
