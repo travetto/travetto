@@ -36,8 +36,6 @@ class Simple {
   name: string;
 }
 
-
-
 @Model()
 class Numerical {
   @Currency()
@@ -52,7 +50,6 @@ class Numerical {
   @Float()
   floater: number;
 }
-
 
 @Suite('Simple Save')
 class TestSave extends BaseElasticsearchTest {

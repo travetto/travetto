@@ -15,6 +15,6 @@ export class ModelOptions<T> {
   defaultSort?: SortClause<T>[];
   indicies: IndexConfig<T>[] = [];
   discriminator?: string;
-  subtypes?: { [key: string]: Class };
+  subtype?: boolean;
   extra?: object;
 }

@@ -45,7 +45,6 @@ class UserScore {
   score: number;
 }
 
-
 @Suite()
 class DataGenerationSuite {
 

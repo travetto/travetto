@@ -10,6 +10,21 @@ import {
 import { Required, Max, Min } from '../src/decorator/field';
 
 @Schema()
+abstract class A {
+  a: boolean;
+}
+
+@Schema()
+class B extends A {
+  b: number;
+}
+
+@Schema()
+class C extends B {
+  c: string;
+}
+
+@Schema()
 class Response {
 
   @Trimmed()
@@ -256,7 +271,7 @@ class Validation {
 
     assert.throws(() => {
       const o = DateTestSchema.fromRaw({ date: '' });
-      return SchemaValidator.validate(o)
+      return SchemaValidator.validate(o);
     }, (err: any) => {
       if (!(err instanceof ValidationErrors && err.errors[0].kind === 'required')) {
         return err;
@@ -265,7 +280,7 @@ class Validation {
 
     assert.throws(() => {
       const o = DateTestSchema.fromRaw({ date: null });
-      return SchemaValidator.validate(o)
+      return SchemaValidator.validate(o);
     }, (err: any) => {
       if (!(err instanceof ValidationErrors && err.errors[0].kind === 'required')) {
         return err;
@@ -281,10 +296,9 @@ class Validation {
       }
     });
 
-
     assert.throws(() => {
       const o = CustomValidated.fromRaw({ age: Number.NaN, age2: 1 });
-      return SchemaValidator.validate(o)
+      return SchemaValidator.validate(o);
     }, (err: any) => {
       if (!(err instanceof ValidationErrors && err.errors[0].kind === 'type')) {
         return err;
@@ -293,7 +307,7 @@ class Validation {
 
     assert.throws(() => {
       const o = CustomValidated.fromRaw({ age: 1, age2: 1 });
-      return SchemaValidator.validate(o)
+      return SchemaValidator.validate(o);
     }, (err: any) => {
       if (!(err instanceof ValidationErrors && err.errors[0].kind === 'custom')) {
         return err;
@@ -306,5 +320,13 @@ class Validation {
   async ensureRange() {
     const v = Grade.from({ score: 5 });
     await SchemaValidator.validate(v);
+  }
+
+  @Test()
+  async verifyMultipleNested() {
+    const schema = SchemaRegistry.getViewSchema(C);
+    assert(schema.fields.includes('c'));
+    assert(schema.fields.includes('b'));
+    assert(schema.fields.includes('a'));
   }
 }

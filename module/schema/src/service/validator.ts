@@ -151,7 +151,6 @@ export class SchemaValidator {
         Messages.get(err.kind) ||
         Messages.get('default');
 
-
       if (err.re) {
         err.re = err.re.source;
       }

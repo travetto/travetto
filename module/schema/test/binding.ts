@@ -1,10 +1,11 @@
 import {
-  Field, Url, View, Required, Alias,
+  Field, Url, View, Alias,
   BindUtil, Schema, SchemaRegistry, Float, Integer
 } from '../';
 import { Address } from './address';
 import * as assert from 'assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';
+import { Class } from '@travetto/registry';
 
 @Schema(false)
 class SuperAddress extends Address {
@@ -56,6 +57,26 @@ export class Response {
   url?: string;
 
   status?: 'ACTIVE' | 'INACTIVE';
+}
+
+@Schema()
+abstract class BasePoly {
+  private type: string;
+  constructor() {
+    this.type = this.constructor.__id;
+  }
+}
+
+@Schema()
+class Poly1 extends BasePoly {
+  name: string;
+  age: number;
+}
+
+@Schema()
+class Poly2 extends BasePoly {
+  names: string[];
+  age: string;
 }
 
 @Suite('Data Binding')
@@ -151,5 +172,55 @@ class DataBinding {
   validateExpand() {
     assert(BindUtil.expandPaths({ 'a.b.c[]': 20 }) === { a: { b: { c: [20] } } });
     assert(BindUtil.expandPaths({ 'a.d[0].c': 20 }) === { a: { d: [{ c: 20 }] } });
+  }
+
+  @Test('Should handle nulls in arrays')
+  validateNullArrays() {
+    const p = Person.fromRaw({
+      counts: [
+        {
+          area: 'a',
+          value: 5
+        },
+        null,
+        {
+          area: 'b',
+          value: 6
+        }]
+    });
+
+    assert(p.counts);
+    assert(p.counts.length === 3);
+    assert(p.counts[0] instanceof Count);
+    assert(p.counts[1] === null);
+    assert(p.counts[2] instanceof Count);
+  }
+
+  @Test('Should handle polymorphic structure')
+  validatePolymorphism() {
+    const items = [
+      {
+        type: 'Poly1',
+        name: 'bob',
+        names: ['1', '2', '3'],
+        age: 30
+      },
+      {
+        type: 'Poly2',
+        name: 'bob',
+        names: ['1', '2', '3'],
+        age: 30
+      }
+    ].map(v => {
+      return (BasePoly as Class).from(v);
+    });
+
+    assert(items);
+    assert(items.length === 2);
+    assert(items[0] instanceof Poly1);
+    assert(!items[0].names);
+    assert(items[1] instanceof Poly2);
+    assert(!items[1].name);
+    assert(typeof items[1].age === 'string');
   }
 }
