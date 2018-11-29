@@ -13,9 +13,9 @@ export abstract class BaseModel implements ModelCore {
   updatedDate?: Date;
 
   constructor() {
-    const type = ModelRegistry.get(this.constructor as Class).discriminator;
-    if (type) {
-      this.type = type;
+    const conf = ModelRegistry.get(this.constructor as Class);
+    if (conf.subtype) {
+      this.type = conf.discriminator;
     }
   }
 

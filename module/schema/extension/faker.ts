@@ -174,6 +174,6 @@ export class GenerateUtil {
       out[f] = this.getValue(fieldConfig);
     }
 
-    return BindUtil.bindSchema(cls, new cls(), out, view);
+    return BindUtil.bindSchema(cls, out, view);
   }
 }

@@ -51,10 +51,12 @@ export class BindUtil {
     return out;
   }
 
-  static coerceType<T>(conf: FieldConfig, val: any): T {
+  static coerceType<T>(conf: FieldConfig, val: any): T | null | undefined {
     const type = conf.type;
 
-    if (type === Number) {
+    if (val === undefined || val === null) {
+      return val;
+    } else if (type === Number) {
       if (conf.precision && conf.precision[1]) {
         val = +parseFloat(`${val}`).toFixed(conf.precision[1]);
       } else {
@@ -79,7 +81,22 @@ export class BindUtil {
     return val as T;
   }
 
-  static bindSchema<T>(cons: Class<T>, obj: T, data?: any, view?: string): T {
+  static bindSchema<T>(cons: Class<T>, data?: undefined, view?: string): undefined;
+  static bindSchema<T>(cons: Class<T>, data?: null, view?: string): null;
+  static bindSchema<T>(cons: Class<T>, data?: any, view?: string): T;
+  static bindSchema<T>(cons: Class<T>, data?: any, view?: string): T | null | undefined {
+    if (data === null || data === undefined) {
+      return data;
+    }
+    const cls = SchemaRegistry.resolveSubtype(cons, data && data.type);
+    if (data instanceof cls) {
+      return data;
+    } else {
+      return BindUtil.bindSchemaToObject(cls, new cls(), data, view);
+    }
+  }
+
+  static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: any, view?: string): T {
     view = view || DEFAULT_VIEW;
 
     if (!!data) {
@@ -127,14 +144,14 @@ export class BindUtil {
 
             if (SchemaRegistry.has(config.type)) {
               if (config.array) {
-                v = v.map((x: any) => BindUtil.bindSchema(config.type, new config.type(), x));
+                v = v.map((el: any) => BindUtil.bindSchema(config.type, el));
               } else {
-                v = BindUtil.bindSchema(config.type, new config.type(), v);
+                v = BindUtil.bindSchema(config.type, v);
               }
+            } else if (config.array) {
+              v = v.map((el: any) => BindUtil.coerceType(config, el));
             } else {
-              v = config.array ?
-                v.map((e: any) => BindUtil.coerceType(config, e)) :
-                BindUtil.coerceType(config, v);
+              v = BindUtil.coerceType(config, v);
             }
           }
 

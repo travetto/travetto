@@ -9,8 +9,29 @@ import {
 
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
+  subTypes = new Map<Class, Map<string, Class>>();
+
   constructor() {
     super(RootRegistry);
+  }
+
+  resolveSubtype(cls: Class, type: string) {
+    return (this.subTypes.has(cls) && this.subTypes.get(cls)!.get(type)!) || cls;
+  }
+
+  registerSubtypes(cls: Class, type: string) {
+    let parent = this.getParentClass(cls)!;
+    let parentConfig = this.get(parent);
+
+    while (parentConfig) {
+      if (!this.subTypes.has(parent)) {
+        this.subTypes.set(parent, new Map());
+      }
+      this.subTypes.get(parent)!.set(type, cls);
+      this.subTypes.get(parent)!.set(cls.__id, cls);
+      parent = this.getParentClass(parent!)!;
+      parentConfig = this.get(parent);
+    }
   }
 
   computeSchemaDependencies(cls: Class, curr: Class = cls, path: string[] = []) {
@@ -146,6 +167,8 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
         config = this.mergeConfigs(config, parentConfig);
       }
     }
+
+    this.registerSubtypes(cls, cls.name);
 
     // Merge pending
     const pending = this.getOrCreatePending(cls);

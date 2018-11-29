@@ -51,19 +51,7 @@ export class ModelService implements IModelSource {
 
   /** Handles subtyping on polymorphic endpoints */
   convert<T extends ModelCore>(cls: Class<T>, o: T) {
-    const config = ModelRegistry.get(cls);
-
-    let cons = cls;
-
-    if (config && config.subtypes && !!o.type) {
-      cons = config.subtypes[o.type];
-    }
-
-    if (o instanceof cons) {
-      return o;
-    } else {
-      return BindUtil.bindSchema(cons, new cons(), o);
-    }
+    return BindUtil.bindSchema(cls, o);
   }
 
   /** Handles any pre-persistance activities needed */
@@ -215,7 +203,7 @@ export class ModelService implements IModelSource {
   async updatePartialView<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string) {
     o = await this.prePersist(cls, o, view);
 
-    const partial = BindUtil.bindSchema(cls, {}, o, view);
+    const partial = BindUtil.bindSchemaToObject(cls, {}, o, view);
     const res = await this.source.updatePartial(cls, partial);
 
     return this.postLoad(cls, res);
@@ -226,7 +214,7 @@ export class ModelService implements IModelSource {
     this.prepareQuery(cls, query);
 
     o = await this.prePersist(cls, o, view);
-    const partial = BindUtil.bindSchema(cls, {}, o, view);
+    const partial = BindUtil.bindSchemaToObject(cls, {}, o, view);
     const res = await this.source.updatePartialByQuery(cls, query, partial);
 
     return this.postLoad(cls, res);

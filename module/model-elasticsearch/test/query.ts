@@ -88,7 +88,7 @@ export class QueryTest {
 
   @Test()
   async translateIds() {
-    let out = ElasticsearchUtil.extractWhereQuery({
+    const out = ElasticsearchUtil.extractWhereQuery({
       $and: [
         { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
       ]
