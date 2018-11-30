@@ -21,10 +21,17 @@ export class BaseElasticsearchTest {
     await ModelRegistry.init();
   }
 
-  @AfterEach()
   @BeforeEach()
+  async beforeEach() {
+    const mms = (await DependencyRegistry.getInstance(ModelSource)) as ModelElasticsearchSource;
+    await mms.init();
+  }
+
+  @AfterEach()
   async afterEach() {
     const mms = (await DependencyRegistry.getInstance(ModelSource)) as ModelElasticsearchSource;
-    return await mms.resetDatabase();
+    await mms.client.indices.delete({
+      index: mms.getNamespacedIndex('*')
+    });
   }
 }

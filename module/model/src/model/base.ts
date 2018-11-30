@@ -14,8 +14,8 @@ export abstract class BaseModel implements ModelCore {
 
   constructor() {
     const conf = ModelRegistry.get(this.constructor as Class);
-    if (conf.subtype) {
-      this.type = conf.discriminator;
+    if (conf.subType) {
+      this.type = conf.subType;
     }
   }
 

@@ -18,6 +18,14 @@ const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
 
+export function extractTypedWhereClause<T>(cls: Class<T>, o: WhereClause<T>): { [key: string]: any } {
+  const conf = ModelRegistry.get(cls);
+  if (conf.subType) {
+    o = { $and: [o, { type: conf.subType }] } as WhereClause<T>;
+  }
+  return extractWhereClause(o);
+}
+
 export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
   if (has$And(o)) {
     return { $and: o.$and.map(x => extractWhereClause<T>(x)) };
@@ -78,7 +86,7 @@ export class ModelMongoSource extends ModelSource {
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const col = await this.getCollection(cls);
 
-    const projected = extractWhereClause(query.where || {});
+    const projected = extractTypedWhereClause(cls, query.where || {});
 
     let cursor = col.find(projected);
     if (query.select) {
@@ -142,7 +150,8 @@ export class ModelMongoSource extends ModelSource {
   }
 
   getCollectionName<T extends ModelCore>(cls: Class<T>): string {
-    return ModelRegistry.get(cls).collection || cls.name;
+    cls = ModelRegistry.getBaseModel(cls);
+    return ModelRegistry.getCollectionName(cls);
   }
 
   async getCollection<T extends ModelCore>(cls: Class<T>): Promise<mongo.Collection> {
@@ -173,7 +182,7 @@ export class ModelMongoSource extends ModelSource {
 
   async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     const col = await this.getCollection(cls);
-    const cursor = col.count(extractWhereClause(query.where || {}));
+    const cursor = col.count(extractTypedWhereClause(cls, query.where || {}));
 
     const res = await cursor;
     return res;
@@ -194,14 +203,15 @@ export class ModelMongoSource extends ModelSource {
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
     const col = await this.getCollection(cls);
-    const res = await col.deleteOne({ _id: new mongo.ObjectId(id) });
+    const conf = ModelRegistry.get(cls);
+    const res = await col.deleteOne({ _id: new mongo.ObjectId(id), ...(conf.subType ? { type: conf.subType } : {}) });
 
     return res.deletedCount || 0;
   }
 
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     const col = await this.getCollection(cls);
-    const res = await col.deleteMany(extractWhereClause(query.where || {}));
+    const res = await col.deleteMany(extractTypedWhereClause(cls, query.where || {}));
     return res.deletedCount || 0;
   }
 
@@ -235,7 +245,8 @@ export class ModelMongoSource extends ModelSource {
     o = this.prePersist(cls, o);
     const id = this.cleanseId(o);
     const col = await this.getCollection(cls);
-    const res = await col.replaceOne({ _id: id }, o);
+    const conf = ModelRegistry.get(cls);
+    const res = await col.replaceOne({ _id: id, ...(conf.subType ? { type: conf.subType } : {}) }, o);
     if (res.matchedCount === 0) {
       throw new BaseError(`Invalid update, no ${cls.name} found with id '${id}'`);
     }
@@ -255,7 +266,7 @@ export class ModelMongoSource extends ModelSource {
       final = { $set: extractSimple(final) };
     }
 
-    const res = await col.findOneAndUpdate(extractWhereClause(query.where || {}), final, { returnOriginal: false });
+    const res = await col.findOneAndUpdate(extractTypedWhereClause(cls, query.where || {}), final, { returnOriginal: false });
     if (!res.value) {
       throw new BaseError('Object not found for updating');
     }
@@ -267,28 +278,13 @@ export class ModelMongoSource extends ModelSource {
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, data: Partial<T>) {
     const col = await this.getCollection(cls);
 
-    const res = await col.updateMany(extractWhereClause(query.where || {}), data);
+    const res = await col.updateMany(extractTypedWhereClause(cls, query.where || {}), data);
     return res.matchedCount;
   }
 
   async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]) {
     const col = await this.getCollection(cls);
     const bulk = col.initializeUnorderedBulkOp({});
-
-    for (const op of operations) {
-      if (op.insert) {
-        bulk.insert({ $set: op.insert });
-      } else if (op.upsert) {
-        bulk.find({ _id: op.upsert.id ? new mongo.ObjectId(op.upsert.id) : undefined })
-          .upsert()
-          .update({ $setOnInsert: op.upsert, $set: op.upsert });
-      } else if (op.update) {
-        bulk.find({ _id: new mongo.ObjectId(op.update.id) }).update({ $set: op.update });
-      } else if (op.delete) {
-        bulk.find({ _id: new mongo.ObjectId(op.delete.id) }).removeOne();
-      }
-    }
-
     const out: BulkResponse = {
       errors: [],
       counts: {
@@ -297,15 +293,39 @@ export class ModelMongoSource extends ModelSource {
         upsert: 0,
         insert: 0,
         error: 0
-      }
+      },
+      insertedIds: new Map()
     };
+
+    for (let i = 0; i < operations.length; i++) {
+      const op = operations[i];
+      if (op.insert) {
+        op.insert.id = new mongo.ObjectId().toHexString();
+        out.insertedIds.set(i, op.insert.id!);
+
+        bulk.insert(op.insert);
+      } else if (op.upsert) {
+        if (!op.upsert.id) {
+          op.upsert.id = new mongo.ObjectId().toHexString();
+          out.insertedIds.set(i, op.upsert.id!);
+        }
+
+        bulk.find({ _id: op.upsert.id ? new mongo.ObjectId(op.upsert.id) : undefined })
+          .upsert()
+          .updateOne({ $set: op.upsert });
+      } else if (op.update) {
+        bulk.find({ _id: new mongo.ObjectId(op.update.id) }).update({ $set: op.update });
+      } else if (op.delete) {
+        bulk.find({ _id: new mongo.ObjectId(op.delete.id) }).removeOne();
+      }
+    }
 
     if (operations.length > 0) {
       const res = await bulk.execute({});
 
       if (out.counts) {
         out.counts.delete = res.nRemoved;
-        out.counts.update = res.nUpdated;
+        out.counts.update = (res.nModified || 0) + (res.nUpdated || 0);
         out.counts.insert = res.nInserted;
         out.counts.upsert = res.nUpserted;
       }

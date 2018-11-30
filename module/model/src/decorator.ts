@@ -6,16 +6,14 @@ import { ModelOptions, IndexConfig } from './types';
 
 export function Model(conf: Partial<ModelOptions<any>> = {}) {
   return function <T extends Class>(target: T) {
-    const parent = Object.getPrototypeOf(target) as Class;
-    const parentConfig = ModelRegistry.get(parent);
-    if (parentConfig) { // Subtyping
-      conf.subtype = true;
-      if (conf.discriminator) {
-        SchemaRegistry.registerSubtypes(target, conf.discriminator);
+    const baseModel = ModelRegistry.getBaseModel(target);
+    if (baseModel !== target) { // Subtyping if base isn't self
+      if (conf.subType) {
+        SchemaRegistry.registerSubTypes(target, conf.subType);
       } else {
-        conf.discriminator = target.name;
+        conf.subType = target.name;
       }
-      conf.collection = parentConfig.collection || parent.name;
+      conf.collection = ModelRegistry.getBaseCollection(target);
     }
     ModelRegistry.register(target, conf);
     return target;
@@ -23,7 +21,7 @@ export function Model(conf: Partial<ModelOptions<any>> = {}) {
 }
 
 function createIndex<T extends Class>(target: T, config: IndexConfig<T>) {
-  ModelRegistry.register(target, { indicies: [config] });
+  ModelRegistry.register(target, { indices: [config] });
   return target;
 }
 

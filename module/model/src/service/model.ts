@@ -255,7 +255,8 @@ export class ModelService implements IModelSource {
         upsert: 0,
         delete: 0,
         error: 0
-      }
+      },
+      insertedIds: new Map()
     };
 
     for (let i = 0; i < upper; i++) {
@@ -263,13 +264,16 @@ export class ModelService implements IModelSource {
       const end = Math.min(operations.length, (i + 1) * batchSize);
 
       const res = await this.source.bulkProcess(cls, operations.slice(start, end));
+      for (const [idx, id] of res.insertedIds.entries()) {
+        out.insertedIds.set(idx + start, id);
+      }
 
       out.errors.push(...res.errors);
-      out.counts.insert += res.counts.insert;
-      out.counts.upsert += res.counts.upsert;
-      out.counts.update += res.counts.update;
-      out.counts.delete += res.counts.delete;
-      out.counts.error += res.counts.error;
+      out.counts.insert += (res.counts.insert || 0);
+      out.counts.upsert += (res.counts.upsert || 0);
+      out.counts.update += (res.counts.update || 0);
+      out.counts.delete += (res.counts.delete || 0);
+      out.counts.error += (res.counts.error || 0);
     }
     return out;
   }

@@ -6,6 +6,7 @@ export type BulkOp<T> =
 
 export interface BulkResponse {
   errors: any[];
+  insertedIds: Map<number, string>;
   counts: {
     update: number;
     insert: number;

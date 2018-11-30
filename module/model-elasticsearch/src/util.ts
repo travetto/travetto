@@ -1,5 +1,5 @@
 import { Util } from '@travetto/base';
-import { WhereClause, SelectClause } from '@travetto/model';
+import { WhereClause, ModelRegistry, SelectClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -158,6 +158,15 @@ export class ElasticsearchUtil {
     }
   }
 
+  static extractTypedWhereQuery<T>(o: WhereClause<T>, cls: Class<T>): { [key: string]: any } {
+    const conf = ModelRegistry.get(cls);
+    if (conf.subType) {
+      o = (o ? { $and: [o, { type: conf.subType }] } : { type: conf.subType }) as WhereClause<T>;
+    }
+
+    return o && this.extractWhereQuery(o, cls);
+  }
+
   static extractWhereQuery<T>(o: WhereClause<T>, cls: Class<T>): { [key: string]: any } {
     if (has$And(o)) {
       return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(x, cls)) } };
@@ -170,7 +179,21 @@ export class ElasticsearchUtil {
     }
   }
 
-  static generateSourceSchema<T>(cls: Class<T>): any {
+  static generateSourceSchema(cls: Class) {
+    return ModelRegistry.get(cls).baseType ?
+      this.generateAllSourceSchema(cls) :
+      this.generateSingleSourceSchema(cls);
+  }
+
+  static generateAllSourceSchema(cls: Class) {
+    const allTypes = Array.from(new Set(SchemaRegistry.subTypes.get(cls)!.values()));
+    return allTypes.reduce((acc, scls) => {
+      Util.deepAssign(acc, this.generateSingleSourceSchema(scls));
+      return acc;
+    }, {} as any);
+  }
+
+  static generateSingleSourceSchema<T>(cls: Class<T>): any {
     const schema = SchemaRegistry.getViewSchema(cls);
 
     const props: any = {};
@@ -215,7 +238,7 @@ export class ElasticsearchUtil {
       } else if (SchemaRegistry.has(conf.type)) {
         props[field] = {
           type: conf.array ? 'nested' : 'object',
-          ...this.generateSourceSchema(conf.type)
+          ...this.generateSingleSourceSchema(conf.type)
         };
       }
     }

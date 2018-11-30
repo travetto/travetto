@@ -11,10 +11,10 @@ export interface IndexConfig<T> {
 
 export class ModelOptions<T> {
   class: Class<T>;
-  collection: string;
+  collection?: string;
   defaultSort?: SortClause<T>[];
-  indicies: IndexConfig<T>[] = [];
-  discriminator?: string;
-  subtype?: boolean;
+  indices: IndexConfig<T>[] = [];
+  subType?: string;
+  baseType?: boolean;
   extra?: object;
 }

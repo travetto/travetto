@@ -9,6 +9,8 @@ function id(cls: string | Class) {
 
 export abstract class MetadataRegistry<C extends { class: Class }, M = any, F = Function> extends Registry {
 
+  static id = id;
+
   protected expired = new Map<string, C>();
   protected pending = new Map<string, Partial<C>>();
   protected pendingFields = new Map<string, Map<F, Partial<M>>>();

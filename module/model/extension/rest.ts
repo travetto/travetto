@@ -69,7 +69,6 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
         priority: 105, method: 'delete', path: '/:id'
       });
 
-
     ControllerRegistry.register(target, {
       basePath: path,
       class: target,
