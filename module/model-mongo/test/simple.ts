@@ -29,7 +29,6 @@ class Simple {
   name: string;
 }
 
-
 @Suite('Simple Save')
 class TestSave extends BaseMongoTest {
 

@@ -68,6 +68,7 @@ export class TestSource implements ModelSource {
         upsert: 0,
         error: 0
       },
+      insertedIds: new Map(),
       errors: []
     };
   }

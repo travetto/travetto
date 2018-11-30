@@ -15,11 +15,11 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     super(RootRegistry);
   }
 
-  resolveSubtype(cls: Class, type: string) {
+  resolveSubType(cls: Class, type: string) {
     return (this.subTypes.has(cls) && this.subTypes.get(cls)!.get(type)!) || cls;
   }
 
-  registerSubtypes(cls: Class, type: string) {
+  registerSubTypes(cls: Class, type: string) {
     let parent = this.getParentClass(cls)!;
     let parentConfig = this.get(parent);
 
@@ -168,7 +168,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
       }
     }
 
-    this.registerSubtypes(cls, cls.name);
+    this.registerSubTypes(cls, cls.name);
 
     // Merge pending
     const pending = this.getOrCreatePending(cls);

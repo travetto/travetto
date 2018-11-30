@@ -35,6 +35,10 @@ export class ModelElasticsearchSource extends ModelSource {
     }
   }
 
+  getCollectionName(cls: Class) {
+    return ModelRegistry.getBaseCollection(cls)!;
+  }
+
   getClassFromIndex(idx: string) {
     if (!this.indexToClass.has(idx)) {
       let type = idx;
@@ -42,11 +46,7 @@ export class ModelElasticsearchSource extends ModelSource {
         type = idx.replace(`${this.config.namespace}_`, '');
       }
       const cls = ModelRegistry.getClasses()
-        .find(x => {
-          const conf = ModelRegistry.get(x);
-          const expected = (conf.discriminator || conf.collection || x.name).toLowerCase();
-          return type === expected;
-        })!;
+        .find(x => type === ModelRegistry.getCollectionName(x))!;
 
       this.indexToClass.set(idx, cls);
     }
@@ -55,20 +55,18 @@ export class ModelElasticsearchSource extends ModelSource {
 
   getIdentity<T extends ModelCore>(cls: Class<T>): EsIdentity {
     if (!this.identities.has(cls)) {
-      const conf = ModelRegistry.get(cls);
-      const type = this.getNamespacedIndex((conf.discriminator || conf.collection || cls.name).toLowerCase());
-      this.identities.set(cls, { index: type, type });
+      const col = this.getCollectionName(cls);
+      const index = this.getNamespacedIndex(col);
+      this.identities.set(cls, { index, type: '_doc' });
     }
     return { ...this.identities.get(cls)! };
   }
 
   async createIndexIfMissing(cls: Class) {
+    cls = ModelRegistry.getBaseModel(cls);
     const ident = this.getIdentity(cls);
     try {
-      await this.client.search({
-        index: ident.index,
-        type: ident.type
-      });
+      await this.client.search(ident);
     } catch (err) {
       await this.createIndex(cls);
     }
@@ -155,7 +153,7 @@ export class ModelElasticsearchSource extends ModelSource {
     // Handle ADD/REMOVE
     if (e.prev && !e.curr) { // Removing
       this.client.indices.delete({
-        index: this.getNamespacedIndex(e.prev.__id.toLowerCase())
+        index: this.getNamespacedIndex(this.getCollectionName(e.prev))
       });
     } else if (e.curr && !e.prev) { // Adding
       this.createIndexIfMissing(e.curr!);
@@ -164,10 +162,11 @@ export class ModelElasticsearchSource extends ModelSource {
 
   getSearchObject<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
     const conf = ModelRegistry.get(cls);
+    const q = ElasticsearchUtil.extractTypedWhereQuery(query.where!, cls);
 
     const search: es.SearchParams = {
       ...this.getIdentity(cls),
-      body: query.where ? { query: ElasticsearchUtil.extractWhereQuery(query.where!, cls) } : {}
+      body: q ? { query: q } : {}
     };
 
     const sort = query.sort || conf.defaultSort;
@@ -263,7 +262,9 @@ export class ModelElasticsearchSource extends ModelSource {
 
     // PreCreate indexes if missing
     if (!Env.prod) {
-      const all = ModelRegistry.getClasses().map(x => this.createIndexIfMissing(x));
+      const all = ModelRegistry.getClasses()
+        .filter(x => !ModelRegistry.get(x).subType)
+        .map(x => this.createIndexIfMissing(x));
       await Promise.all(all);
     }
   }
@@ -328,16 +329,23 @@ export class ModelElasticsearchSource extends ModelSource {
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
     try {
-      const res = await this.client.get({ ...this.getIdentity(cls), id });
-      const out = res._source as T;
-      out.id = res._id;
-      return out;
+      const res = await this.getByQuery(cls, { where: { id } } as any as ModelQuery<T>);
+      return res;
     } catch (err) {
       throw new BaseError(`Invalid number of results for find by id: 0`);
     }
   }
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
+    const conf = ModelRegistry.get(cls);
+    if (conf.subType) {
+      try {
+        await this.getById(cls, id);
+      } catch (e) {
+        throw new BaseError(`Invalid delete, no ${cls.name} found with id '${id}'`);
+      }
+    }
+
     const res = await this.client.delete({
       ...this.getIdentity(cls),
       id
@@ -357,7 +365,7 @@ export class ModelElasticsearchSource extends ModelSource {
     this.cleanseId(o);
 
     const res = await this.client.index({
-      ...this.getIdentity(cls),
+      ...this.getIdentity(o.constructor as Class),
       refresh: true,
       body: o
     });
@@ -374,14 +382,26 @@ export class ModelElasticsearchSource extends ModelSource {
       this.cleanseId(x);
     }
 
-    await this.bulkProcess(cls, objs.map(x => ({ upsert: x })));
+    const res = await this.bulkProcess(cls, objs.map(x => ({ upsert: x })));
+    for (const idx of res.insertedIds.keys()) {
+      objs[idx].id = res.insertedIds.get(idx)!;
+    }
 
     return objs;
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
     const id = this.extractId(o);
-    await this.client.index({
+    const conf = ModelRegistry.get(cls);
+    if (conf.subType) {
+      try {
+        await this.getById(cls, id);
+      } catch (e) {
+        throw new BaseError(`Invalid update, no ${cls.name} found with id '${id}'`);
+      }
+
+    }
+    const res = await this.client.index({
       ...this.getIdentity(cls),
       id,
       opType: 'index',
@@ -435,24 +455,32 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]) {
+
     const body: es.BulkIndexDocumentsParams['body'] = operations.reduce((acc, op) => {
+
+      const _ident = this.getIdentity((op.upsert || op.delete || op.insert || op.update || { constructor: cls }).constructor as Class);
+      const ident = { _index: _ident.index, _type: _ident.type };
+
       if (op.delete) {
-        acc.push({ ['delete']: { _id: op.delete.id } });
+        acc.push({ ['delete']: { ...ident, _id: op.delete.id } });
       } else if (op.insert) {
-        acc.push({ create: { _id: op.insert.id } }, op.insert);
-        delete op.insert.id;
+        if (op.insert.id) {
+          acc.push({ create: { ...ident, _id: op.insert.id } }, op.insert);
+          delete op.insert.id;
+        } else {
+          acc.push({ index: { ...ident } }, op.insert);
+        }
       } else if (op.upsert) {
-        acc.push({ index: op.upsert.id ? { _id: op.upsert.id } : {} }, op.upsert);
+        acc.push({ index: { ...ident, ...(op.upsert.id ? { _id: op.upsert.id } : {}) } }, op.upsert);
         delete op.upsert.id;
       } else if (op.update) {
-        acc.push({ update: { _id: op.update.id } }, { doc: op.update });
+        acc.push({ update: { ...ident, _id: op.update.id } }, { doc: op.update });
         delete op.update.id;
       }
       return acc;
     }, [] as any);
 
     const res: EsBulkResponse = await this.client.bulk({
-      ...this.getIdentity(cls),
       body,
       refresh: true
     });
@@ -465,10 +493,12 @@ export class ModelElasticsearchSource extends ModelSource {
         update: 0,
         error: 0
       },
+      insertedIds: new Map(),
       errors: [] as EsBulkError[]
     };
 
-    for (const item of res.items) {
+    for (let i = 0; i < res.items.length; i++) {
+      const item = res.items[i];
       const k = Object.keys(item)[0] as (keyof typeof res.items[0]);
       const v = item[k]!;
       if (v.error) {
@@ -481,6 +511,11 @@ export class ModelElasticsearchSource extends ModelSource {
         } else if (sk === 'index') {
           sk = 'upsert';
         }
+
+        if (v.result === 'created') {
+          out.insertedIds.set(i, v._id);
+        }
+
         (out.counts as any)[sk as any] += 1;
       }
     }

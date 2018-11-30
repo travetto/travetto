@@ -25,7 +25,6 @@ class User {
   prefs: Preferences;
 }
 
-
 @Model()
 class ModelUser extends BaseModel {
   email: string;
