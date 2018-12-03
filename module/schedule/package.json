@@ -13,7 +13,7 @@
   },
   "description": "Managed registry for scheduling jobs using cron expressions.",
   "devDependencies": {
-    "@travetto/test": "^0.4.6"
+    "@travetto/test": "^0.4.7"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -28,5 +28,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.4.6"
+  "version": "0.4.7"
 }
