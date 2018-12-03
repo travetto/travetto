@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^0.4.7",
+    "@travetto/di": "^0.4.8",
     "@travetto/exec": "^0.4.4"
   },
   "description": "Email transmission module.",
   "devDependencies": {
-    "@travetto/test": "^0.4.6"
+    "@travetto/test": "^0.4.7"
   },
   "optionalExtensionDependencies": {
     "@types/nodemailer": "^4.6.0",
@@ -33,5 +33,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.4.7"
+  "version": "0.4.8"
 }
