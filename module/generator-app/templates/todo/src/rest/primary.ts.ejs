@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Delete, DisableCache, Request } from '@travetto/rest';
+import { Controller, Get, DisableCache } from '@travetto/rest';
 
 /**
  * Describes API
@@ -11,7 +11,7 @@ export class ApiController {
    */
   @Get('/')
   @DisableCache()
-  async getAll(req: Request) {
+  async getAll() {
     return require('../../package.json');
   }
 }
