@@ -43,8 +43,8 @@ export class TodoController {
    * Create a Todo
    */
   @Post('/')
-  @SchemaBody(Todo): Promise<Todo>
-  async save(req: TypedBody<Todo>) {
+  @SchemaBody(Todo)
+  async save(req: TypedBody<Todo>): Promise<Todo> {
     return this.source.save(Todo, req.body);
   }
 
@@ -62,6 +62,6 @@ export class TodoController {
    */
   @Delete('/:id')
   async remove(req: Request): Promise<void> {
-    return this.source.deleteById(Todo, req.params.id);
+    await this.source.deleteById(Todo, req.params.id);
   }
 }
