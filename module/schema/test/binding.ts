@@ -200,13 +200,13 @@ class DataBinding {
   validatePolymorphism() {
     const items = [
       {
-        type: 'Poly1',
+        type: 'poly1',
         name: 'bob',
         names: ['1', '2', '3'],
         age: 30
       },
       {
-        type: 'Poly2',
+        type: 'poly2',
         name: 'bob',
         names: ['1', '2', '3'],
         age: 30

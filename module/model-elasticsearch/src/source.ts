@@ -10,7 +10,7 @@ import {
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Util, Env, BaseError } from '@travetto/base';
-import { SchemaChangeEvent } from '@travetto/schema';
+import { SchemaChangeEvent, SchemaRegistry } from '@travetto/schema';
 
 import { ModelElasticsearchConfig } from './config';
 import { EsBulkResponse, EsIdentity, EsBulkError } from './types';
@@ -39,18 +39,28 @@ export class ModelElasticsearchSource extends ModelSource {
     return ModelRegistry.getBaseCollection(cls)!;
   }
 
-  getClassFromIndex(idx: string) {
-    if (!this.indexToClass.has(idx)) {
-      let type = idx;
+  getClassFromIndexType(idx: string, type: string) {
+    const key = `${idx}.${type}`;
+    if (!this.indexToClass.has(key)) {
+      let index = idx;
       if (this.config.namespace) {
-        type = idx.replace(`${this.config.namespace}_`, '');
+        index = idx.replace(`${this.config.namespace}_`, '');
       }
-      const cls = ModelRegistry.getClasses()
-        .find(x => type === ModelRegistry.getCollectionName(x))!;
+      const clsList = ModelRegistry.getClasses()
+        .filter(x => index === ModelRegistry.getCollectionName(x))!;
 
-      this.indexToClass.set(idx, cls);
+      let cls: Class;
+
+      if (clsList.length > 1) {
+        cls = clsList.find(c => !!ModelRegistry.get(c).baseType)!;
+        cls = SchemaRegistry.resolveSubType(cls, type);
+      } else {
+        [cls] = clsList;
+      }
+
+      this.indexToClass.set(key, cls);
     }
-    return this.indexToClass.get(idx)!;
+    return this.indexToClass.get(key)!;
   }
 
   getIdentity<T extends ModelCore>(cls: Class<T>): EsIdentity {
@@ -160,7 +170,7 @@ export class ModelElasticsearchSource extends ModelSource {
     }
   }
 
-  getSearchObject<T>(cls: Class<T>, query: Query<T>, options: QueryOptions<T> = {}) {
+  getSearchObject<T>(cls: Class<T>, query: Query<T>) {
     const conf = ModelRegistry.get(cls);
     const q = ElasticsearchUtil.extractTypedWhereQuery(query.where!, cls);
 
@@ -294,8 +304,7 @@ export class ModelElasticsearchSource extends ModelSource {
     const out: T[] = [];
 
     for (const item of response.hits.hits) {
-      const index = item._type;
-      const itemCls = this.getClassFromIndex(index);
+      const itemCls = this.getClassFromIndexType(item._index, item._type);
       const obj: T = itemCls.from(item._source as T);
       obj.id = item._id;
       this.postLoad(itemCls, obj);
@@ -306,6 +315,13 @@ export class ModelElasticsearchSource extends ModelSource {
       out.push(obj);
     }
     return out;
+  }
+
+  async getMultiQueryRaw<T extends ModelCore = ModelCore>(classes: Class<T>[], query: Query<T>) {
+    const searchObj = this.getSearchObject(classes[0], query);
+    searchObj.index = this.getIndices(classes);
+    delete searchObj.type;
+    return await this.client.search(searchObj);
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {
