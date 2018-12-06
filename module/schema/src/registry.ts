@@ -19,6 +19,13 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     return (this.subTypes.has(cls) && this.subTypes.get(cls)!.get(type)!) || cls;
   }
 
+  getDefaultSubTypeName(cls: Class) {
+    return cls.name
+      .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
+      .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
+      .toLowerCase();
+  }
+
   registerSubTypes(cls: Class, type: string) {
     let parent = this.getParentClass(cls)!;
     let parentConfig = this.get(parent);
@@ -168,7 +175,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
       }
     }
 
-    this.registerSubTypes(cls, cls.name);
+    this.registerSubTypes(cls, this.getDefaultSubTypeName(cls));
 
     // Merge pending
     const pending = this.getOrCreatePending(cls);

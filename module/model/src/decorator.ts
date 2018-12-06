@@ -11,7 +11,7 @@ export function Model(conf: Partial<ModelOptions<any>> = {}) {
       if (conf.subType) {
         SchemaRegistry.registerSubTypes(target, conf.subType);
       } else {
-        conf.subType = target.name;
+        conf.subType = SchemaRegistry.getDefaultSubTypeName(target);
       }
       conf.collection = ModelRegistry.getBaseCollection(target);
     }
