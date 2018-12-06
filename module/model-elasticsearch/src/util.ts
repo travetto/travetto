@@ -158,15 +158,6 @@ export class ElasticsearchUtil {
     }
   }
 
-  static extractTypedWhereQuery<T>(o: WhereClause<T>, cls: Class<T>): { [key: string]: any } {
-    const conf = ModelRegistry.get(cls);
-    if (conf.subType) {
-      o = (o ? { $and: [o, { type: conf.subType }] } : { type: conf.subType }) as WhereClause<T>;
-    }
-
-    return o && this.extractWhereQuery(o, cls);
-  }
-
   static extractWhereQuery<T>(o: WhereClause<T>, cls: Class<T>): { [key: string]: any } {
     if (has$And(o)) {
       return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(x, cls)) } };

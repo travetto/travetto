@@ -2,11 +2,11 @@ import * as es from 'elasticsearch';
 
 import {
   ModelSource, Query,
-  QueryOptions, BulkResponse, BulkOp,
+  BulkResponse, BulkOp,
   ModelRegistry, ModelCore,
   PageableModelQuery,
   SelectClause,
-  ModelQuery
+  ModelQuery, WhereClause
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Util, Env, BaseError } from '@travetto/base';
@@ -40,6 +40,8 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   getClassFromIndexType(idx: string, type: string) {
+    idx = idx.replace(/_[0-9]{8,32}$/g, '');
+
     const key = `${idx}.${type}`;
     if (!this.indexToClass.has(key)) {
       let index = idx;
@@ -170,12 +172,11 @@ export class ModelElasticsearchSource extends ModelSource {
     }
   }
 
-  getSearchObject<T>(cls: Class<T>, query: Query<T>) {
-    const conf = ModelRegistry.get(cls);
-    const q = ElasticsearchUtil.extractTypedWhereQuery(query.where!, cls);
+  getPlainSearchObject<T extends ModelCore>(cls: Class<T>, query: Query<T>) {
 
+    const conf = ModelRegistry.get(cls);
+    const q = ElasticsearchUtil.extractWhereQuery(query.where! || {}, cls);
     const search: es.SearchParams = {
-      ...this.getIdentity(cls),
       body: q ? { query: q } : {}
     };
 
@@ -213,6 +214,18 @@ export class ModelElasticsearchSource extends ModelSource {
     }
 
     return search;
+  }
+
+  getSearchObject<T>(cls: Class<T>, query: Query<T>) {
+    const conf = ModelRegistry.get(cls);
+
+    if (conf.subType) {
+      query.where = (query.where ? { $and: [query.where, { type: conf.subType }] } : { type: conf.subType }) as WhereClause<T>;
+    }
+
+    const res = this.getPlainSearchObject(cls, query);
+    Object.assign(res, this.getIdentity(cls));
+    return res;
   }
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
@@ -304,7 +317,7 @@ export class ModelElasticsearchSource extends ModelSource {
     const out: T[] = [];
 
     for (const item of response.hits.hits) {
-      const itemCls = this.getClassFromIndexType(item._index, item._type);
+      const itemCls = this.getClassFromIndexType(item._index, item._source.type!);
       const obj: T = itemCls.from(item._source as T);
       obj.id = item._id;
       this.postLoad(itemCls, obj);
@@ -317,11 +330,44 @@ export class ModelElasticsearchSource extends ModelSource {
     return out;
   }
 
-  async getMultiQueryRaw<T extends ModelCore = ModelCore>(classes: Class<T>[], query: Query<T>) {
-    const searchObj = this.getSearchObject(classes[0], query);
-    searchObj.index = this.getIndices(classes);
-    delete searchObj.type;
-    return await this.client.search(searchObj);
+  getRawModelFilters<T extends ModelCore = ModelCore>(classes: Class<T>[]) {
+    const types = classes.map(t => {
+      const conf = ModelRegistry.get(t);
+      if (!conf.subType) {
+        return { wildcard: { _index: `${this.getIdentity(conf.class).index}_*` } };
+      } else {
+        return {
+          bool: {
+            must: [
+              { wildcard: { _index: `${this.getIdentity(conf.class).index}_*` } },
+              { term: { type: conf.subType } },
+            ]
+          }
+        };
+      }
+    });
+
+    return {
+      bool: {
+        minimum_should_match: 1,
+        should: types
+      }
+    };
+  }
+
+  async getRawMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query: Query<T>) {
+    const searchObj = this.getPlainSearchObject(classes[0], query);
+
+    searchObj.body.query = searchObj.body!.query ?
+      {
+        bool: {
+          must: [searchObj.body.query],
+          filter: [this.getRawModelFilters(classes)]
+        }
+      } :
+      this.getRawModelFilters(classes);
+
+    return await this.client.search<T>(searchObj);
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {

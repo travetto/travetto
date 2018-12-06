@@ -128,4 +128,22 @@ class TestPolymorphism extends BaseElasticsearchTest {
     assert(o.insertedIds.size === 3);
     assert(Array.from(o.insertedIds.keys()) === [0, 1, 2]);
   }
+
+  @Test('Multi Query')
+  async testMultiQuery() {
+    const service = (await DependencyRegistry.getInstance(ModelSource)) as ModelElasticsearchSource;
+    const res = service.getRawModelFilters([Person, Doctor, Engineer, Firefighter]);
+
+    assert(res.bool.should.length === 4);
+    assert(res.bool.should[0].wildcard);
+    assert(res.bool.should[1].bool);
+    assert(res.bool.should[1].bool!.must.length);
+
+    await this.testBulk();
+
+    const rawRes = await service.getRawMultiQuery<Person>([Firefighter, Engineer], {});
+    const items = await service.convertRawResponse(rawRes);
+    assert(items.length === 2);
+    assert(items[0] instanceof Firefighter);
+  }
 }
