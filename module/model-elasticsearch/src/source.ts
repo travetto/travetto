@@ -18,6 +18,9 @@ import { ElasticsearchUtil } from './util';
 
 export class ModelElasticsearchSource extends ModelSource {
 
+  private indexToAlias: Map<string, string> = new Map();
+  private aliasToIndex: Map<string, string> = new Map();
+
   private identities: Map<Class, EsIdentity> = new Map();
   // private indices: { [key: string]: IndexConfig<any>[] } = {};
   private indexToClass: Map<string, Class> = new Map();
@@ -40,7 +43,7 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   getClassFromIndexType(idx: string, type: string) {
-    idx = idx.replace(/_[0-9]{8,32}$/g, '');
+    idx = this.indexToAlias.get(idx) || idx;
 
     const key = `${idx}.${type}`;
     if (!this.indexToClass.has(key)) {
@@ -74,6 +77,20 @@ export class ModelElasticsearchSource extends ModelSource {
     return { ...this.identities.get(cls)! };
   }
 
+  async computeAliasMappings(force = false) {
+    if (force || !this.indexToAlias.size) {
+      const aliases = (await this.client.cat.aliases({
+        format: 'json'
+      })) as { index: string, alias: string }[];
+      this.indexToAlias = new Map();
+      this.aliasToIndex = new Map();
+      for (const al of aliases) {
+        this.indexToAlias.set(al.index, al.alias);
+        this.aliasToIndex.set(al.alias, al.index);
+      }
+    }
+  }
+
   async createIndexIfMissing(cls: Class) {
     cls = ModelRegistry.getBaseModel(cls);
     const ident = this.getIdentity(cls);
@@ -99,6 +116,8 @@ export class ModelElasticsearchSource extends ModelSource {
         }
       });
       if (alias) {
+        this.indexToAlias.set(concreteIndex, ident.index);
+        this.aliasToIndex.set(ident.index, concreteIndex);
         await this.client.indices.putAlias({ index: concreteIndex, name: ident.index });
       }
       console.debug(`Index ${ident.index} created`);
@@ -290,6 +309,8 @@ export class ModelElasticsearchSource extends ModelSource {
         .map(x => this.createIndexIfMissing(x));
       await Promise.all(all);
     }
+
+    await this.computeAliasMappings(true);
   }
 
   async resetDatabase() {
@@ -333,13 +354,15 @@ export class ModelElasticsearchSource extends ModelSource {
   getRawModelFilters<T extends ModelCore = ModelCore>(classes: Class<T>[]) {
     const types = classes.map(t => {
       const conf = ModelRegistry.get(t);
+      let idx = this.getIdentity(conf.class).index;
+      idx = this.aliasToIndex.get(idx) || idx;
       if (!conf.subType) {
-        return { wildcard: { _index: `${this.getIdentity(conf.class).index}_*` } };
+        return { term: { _index: idx } };
       } else {
         return {
           bool: {
             must: [
-              { wildcard: { _index: `${this.getIdentity(conf.class).index}_*` } },
+              { term: { _index: idx } },
               { term: { type: conf.subType } },
             ]
           }

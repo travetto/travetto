@@ -135,7 +135,7 @@ class TestPolymorphism extends BaseElasticsearchTest {
     const res = service.getRawModelFilters([Person, Doctor, Engineer, Firefighter]);
 
     assert(res.bool.should.length === 4);
-    assert(res.bool.should[0].wildcard);
+    assert(res.bool.should[0].term);
     assert(res.bool.should[1].bool);
     assert(res.bool.should[1].bool!.must.length);
 
