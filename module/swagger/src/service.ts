@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { ControllerRegistry } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ApiHostConfig, ApiInfoConfig } from './config';
+import { ApiHostConfig, ApiInfoConfig, ApiClientConfig } from './config';
 import { Spec } from './types';
 import { SpecGenerateUtil } from './spec-generate';
 
@@ -14,6 +14,9 @@ export class SwaggerService {
 
   @Inject()
   private apiInfoConfig: ApiInfoConfig;
+
+  @Inject()
+  private apiClientConfig: ApiClientConfig;
 
   private spec: Spec;
 
@@ -27,7 +30,7 @@ export class SwaggerService {
       this.spec = {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
-        ...SpecGenerateUtil.generate(),
+        ...SpecGenerateUtil.generate(this.apiClientConfig),
       } as Spec;
     }
     return this.spec;

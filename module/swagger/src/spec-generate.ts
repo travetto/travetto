@@ -3,6 +3,7 @@ import { Class } from '@travetto/registry';
 import { SchemaRegistry, DEFAULT_VIEW } from '@travetto/schema';
 
 import { Spec, Parameter, Path, Response, Schema, Operation } from './types';
+import { ApiClientConfig } from './config';
 
 export function isEndpointClassType(o: any): o is EndpointClassType {
   return !!o && !o.mime;
@@ -10,13 +11,24 @@ export function isEndpointClassType(o: any): o is EndpointClassType {
 
 const DEFINITION = '#/definitions';
 
+interface Tag {
+  name: string;
+  description?: string;
+}
+
+interface PartialSpec {
+  tags: Tag[];
+  definitions: { [key: string]: Schema };
+  paths: { [key: string]: Path };
+}
+
 export class SpecGenerateUtil {
 
-  static getType(cls: Class, schemas: { [key: string]: Schema }) {
+  static getType(cls: Class, state: PartialSpec) {
     const out: { [key: string]: any } = {};
     // Handle nested types
     if (SchemaRegistry.has(cls)) {
-      out.$ref = `${DEFINITION}/${this.processSchema(cls, schemas)}`;
+      out.$ref = `${DEFINITION}/${this.processSchema(cls, state)}`;
       out.type = 'object';
     } else {
       switch (cls) {
@@ -35,13 +47,13 @@ export class SpecGenerateUtil {
     return out;
   }
 
-  static processSchema(type: string | Class | undefined, schemas: { [key: string]: Schema }) {
+  static processSchema(type: string | Class | undefined, state: PartialSpec) {
     if (type === undefined || typeof type === 'string') {
       return undefined;
     } else {
       const typeId = type.name;
 
-      if (!schemas[typeId]) {
+      if (!state.definitions[typeId]) {
         const config = SchemaRegistry.get(type);
         if (config) {
           const properties: { [key: string]: Schema } = {};
@@ -50,7 +62,7 @@ export class SpecGenerateUtil {
 
           for (const fieldName of def.fields) {
             const field = def.schema[fieldName];
-            let prop: Schema = this.getType(field.type, schemas);
+            let prop: Schema = this.getType(field.type, state);
 
             if (field.examples) {
               prop.example = field.examples;
@@ -88,7 +100,7 @@ export class SpecGenerateUtil {
             properties[fieldName] = prop;
           }
 
-          schemas[typeId] = {
+          state.definitions[typeId] = {
             title: config.title || config.description,
             description: config.description || config.title,
             example: config.examples,
@@ -96,136 +108,147 @@ export class SpecGenerateUtil {
             required
           };
         } else {
-          schemas[typeId] = { title: typeId };
+          state.definitions[typeId] = { title: typeId };
         }
       }
       return typeId;
     }
   }
 
-  static generate(): Partial<Spec> {
-    const paths: { [key: string]: Path } = {};
-    const definitions: { [key: string]: Schema } = {};
-    const tags: { name: string, description?: string }[] = [];
+  static processController(cls: Class, state: PartialSpec) {
+    const ctrl = ControllerRegistry.get(cls);
+    const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '');
 
-    for (const cls of ControllerRegistry.getClasses()) {
-      const ctrl = ControllerRegistry.get(cls);
-      const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '');
+    if (tagName === 'Swagger') {
+      return;
+    }
 
-      if (tagName === 'Swagger') {
-        continue;
-      }
+    state.tags.push({
+      name: tagName,
+      description: ctrl.description || ctrl.title
+    });
 
-      tags.push({
-        name: tagName,
-        description: ctrl.description || ctrl.title
-      });
+    for (const ep of ctrl.endpoints) {
 
-      for (const ep of ctrl.endpoints) {
+      const epParams: Parameter[] = [];
+      const epProd = ep.responseType;
+      const epCons = ep.requestType;
+      const produces = [];
+      const consumes = [];
+      const responses: { [key: string]: Response } = {};
 
-        const epParams: Parameter[] = [];
-        const epProd = ep.responseType;
-        const epCons = ep.requestType;
-        const produces = [];
-        const consumes = [];
-        const responses: { [key: string]: Response } = {};
-
-        if (epProd) {
-          if (isEndpointClassType(epProd)) {
-            const epProduces = this.processSchema(epProd.type, definitions);
-            if (epProduces) {
-              const ref: Schema = { $ref: `${DEFINITION}/${epProduces}` };
-              responses[200] = {
-                description: definitions[epProduces!].description || '',
-                schema: epProd!.wrapper !== Array ? ref : { type: 'array', items: ref }
-              };
-              produces.push(MimeType.JSON);
-            } else {
-              responses[201] = {
-                description: ''
-              };
-            }
-          } else {
-            produces.push(epProd.mime);
+      if (epProd) {
+        if (isEndpointClassType(epProd)) {
+          const epProduces = this.processSchema(epProd.type, state);
+          if (epProduces) {
+            const ref: Schema = { $ref: `${DEFINITION}/${epProduces}` };
             responses[200] = {
-              description: '',
-              schema: {
-                type: epProd.type
-              }
+              description: state.definitions[epProduces!].description || '',
+              schema: epProd!.wrapper !== Array ? ref : { type: 'array', items: ref }
+            };
+            produces.push(MimeType.JSON);
+          } else {
+            responses[201] = {
+              description: ''
             };
           }
         } else {
-          responses[201] = {
-            description: ''
+          produces.push(epProd.mime);
+          responses[200] = {
+            description: '',
+            schema: {
+              type: epProd.type
+            }
           };
         }
-        if (epCons) {
-          if (isEndpointClassType(epCons)) {
-            const epConsumes = this.processSchema(epCons.type, definitions);
-            if (epConsumes) {
-              const ref: Schema = { $ref: `${DEFINITION}/${epConsumes}` };
-              epParams.push({
-                in: 'body',
-                name: 'body',
-                description: definitions[epConsumes!].description || '',
-                schema: epCons!.wrapper !== Array ? ref : { type: 'array', items: ref }
-              } as Parameter);
-              consumes.push(MimeType.JSON);
-            }
-          } else {
-            consumes.push(epCons.mime);
-            epParams.push({
-              in: epCons.type === 'file' ? 'formData' : 'body',
-              name: epCons.type === 'file' ? 'form' : 'body',
-              type: epCons.type || 'object'
-            } as Parameter);
-          }
-        }
-
-        for (const param of Object.values(ep.params)) {
-          const epParam: Parameter = {
-            in: param.location,
-            name: param.name,
-            description: param.description,
-            required: !!param.required,
-          };
-          if (param.type) {
-            const type = this.getType(param.type!, definitions);
-            if (type.$ref) {
-              // Not supported yet
-              // epParam.schema = type;
-            } else {
-              Object.assign(epParam, type);
-            }
-          }
-
-          epParams.push(epParam);
-        }
-
-        const epPath = !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source;
-
-        const key = `${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/');
-
-        paths[key] = {
-          ...(paths[key] || {}),
-          [ep.method!]: {
-            tags: [tagName],
-            produces,
-            consumes,
-            responses,
-            summary: ep.title,
-            description: ep.description || ep.title,
-            operationId: `${ep.class.name}_${ep.handlerName}`,
-            parameters: epParams
-          } as Operation
+      } else {
+        responses[201] = {
+          description: ''
         };
+      }
+      if (epCons) {
+        if (isEndpointClassType(epCons)) {
+          const epConsumes = this.processSchema(epCons.type, state);
+          if (epConsumes) {
+            const ref: Schema = { $ref: `${DEFINITION}/${epConsumes}` };
+            epParams.push({
+              in: 'body',
+              name: 'body',
+              description: state.definitions[epConsumes!].description || '',
+              schema: epCons!.wrapper !== Array ? ref : { type: 'array', items: ref }
+            } as Parameter);
+            consumes.push(MimeType.JSON);
+          }
+        } else {
+          consumes.push(epCons.mime);
+          epParams.push({
+            in: epCons.type === 'file' ? 'formData' : 'body',
+            name: epCons.type === 'file' ? 'form' : 'body',
+            type: epCons.type || 'object'
+          } as Parameter);
+        }
+      }
+
+      for (const param of Object.values(ep.params)) {
+        const epParam: Parameter = {
+          in: param.location,
+          name: param.name,
+          description: param.description,
+          required: !!param.required,
+        };
+        if (param.type) {
+          const type = this.getType(param.type!, state);
+          if (type.$ref) {
+            // Not supported yet
+            // epParam.schema = type;
+          } else {
+            Object.assign(epParam, type);
+          }
+        }
+
+        epParams.push(epParam);
+      }
+
+      const epPath = !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source;
+
+      const key = `${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/');
+
+      state.paths[key] = {
+        ...(state.paths[key] || {}),
+        [ep.method!]: {
+          tags: [tagName],
+          produces,
+          consumes,
+          responses,
+          summary: ep.title,
+          description: ep.description || ep.title,
+          operationId: `${ep.class.name}_${ep.handlerName}`,
+          parameters: epParams
+        } as Operation
+      };
+    }
+  }
+
+  static generate(config: ApiClientConfig): Partial<Spec> {
+    const state: PartialSpec = {
+      paths: {},
+      definitions: {},
+      tags: []
+    };
+
+    // Prime all schemas
+    if (config.exposeAllSchemas) {
+      for (const cls of SchemaRegistry.getClasses()) {
+        this.processSchema(cls, state);
       }
     }
 
-    return {
-      paths,
-      tags,
-      definitions
-    };
+    if (!config.skipRoutes) {
+      for (const cls of ControllerRegistry.getClasses()) {
+        this.processController(cls, state);
+      }
+    }
+
+    return state as Partial<Spec>;
   }
 }
