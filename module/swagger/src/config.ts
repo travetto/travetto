@@ -28,6 +28,8 @@ export class ApiClientConfig {
   output: string = '';
   format?: string = '';
   formatOptions?: string = '';
+  skipRoutes: boolean = false;
+  exposeAllSchemas: boolean = false;
 
   postConstruct() {
     this.output = path.resolve(this.output);
