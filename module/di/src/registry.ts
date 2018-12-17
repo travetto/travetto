@@ -227,7 +227,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const targetId = target.__id;
     const aliasMap = this.aliases.get(targetId)!;
     const aliasedIds = aliasMap ? Array.from(new Set(aliasMap.values())) : [];
-    return aliasedIds.map(id => this.get(id)!);
+    return aliasedIds.map(id => this.get(id)! as InjectableConfig<T>);
   }
 
   registerApplication(app: string, target: Class) {
