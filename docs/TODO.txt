@@ -3,6 +3,18 @@ In-Progress
 
 ? Tests
   ? Better unit tests
+? Test Plugin failures, and "stuckness"
+? Test runner returning non-0 exit code
+
+Areas for Improvement
+==============
+
+x Documentation on auth, w.r.t sessions and cookies
+   - Making sessions optional?
+x Partial Updates/Query Updates
+   - Set updates 
+x Views, exclude fields vs include
+x FSEvents
 
 On Deck
 ==============
@@ -24,7 +36,6 @@ On Deck
   ? Might need to be a whole new set of sql operations
   X Using Sequelize?
   X Already supports most of the needed features, might be an easy win  
-
 
 To Do
 ==============
