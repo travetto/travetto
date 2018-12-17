@@ -350,6 +350,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
+    if (cls.__abstract) { // Skip out early, only needed to inherit
+      return config;
+    }
+
     if (!this.targets.has(classId)) {
       this.targets.set(classId, new Map());
     }
