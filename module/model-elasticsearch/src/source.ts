@@ -212,16 +212,7 @@ export class ModelElasticsearchSource extends ModelSource {
     }
 
     if (sort) {
-      search.sort = sort.map(x => {
-        const o = ElasticsearchUtil.extractSimple(x);
-        const k = Object.keys(o)[0];
-        const v = o[k] as (boolean | -1 | 1);
-        if (v === 1 || v === true) {
-          return k;
-        } else {
-          return `${k}:desc`;
-        }
-      });
+      search.sort = ElasticsearchUtil.getSort(sort);
     }
 
     if (query.offset) {
@@ -324,7 +315,7 @@ export class ModelElasticsearchSource extends ModelSource {
     const res = await this.client.search<ModelCore>(this.getSearchObject(cls, {
       select: {
         id: 1
-      } as SelectClause<ModelCore>,
+      } as any as SelectClause<T>,
       ...query
     }));
     return res.hits.hits.map(x => x._source.id);

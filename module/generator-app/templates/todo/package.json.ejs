@@ -8,7 +8,7 @@
     "@travetto/test": "~<%= depVersion %>"
   },
   "description": "A <%= modules.join(', ') %> based travetto project",
-  "keywords": ["travetto", <% for (const kw of keywords) {%>"<%= kw %>"<% }%>],
+  "keywords": [<% for (const kw of keywords) {%>"<%= kw %>"<% }%>],
   "license": "MIT",
   "scripts": {
     "start": "travetto run <%= name %>"

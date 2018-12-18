@@ -68,6 +68,8 @@ This schema provides a powerful base for data binding and validation at runtime.
  * `@Integer` ensures number passed in is only a whole number
  * `@Float` ensures number passed in allows fractional values
  * `@Currency` provides support for standard currency
+ * `@Text` indicates that a field is expecting natural language input, not just discrete values
+ * `@LongText` same as text, but expects longer form content
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated.
 

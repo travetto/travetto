@@ -62,6 +62,8 @@ export const Enum = ((vals: string[] | any, message?: string) => {
 });
 
 export const Trimmed = () => stringProp({ trim: true });
+export const Text = () => stringProp({ specifier: 'text' });
+export const LongText = () => stringProp({ specifier: 'text-long' });
 
 export const Match = (re: RegExp, message?: string) => stringArrStringProp({ match: { re, message } });
 export const MinLength = (n: number, message?: string) => stringArrProp({ minlength: { n, message } });

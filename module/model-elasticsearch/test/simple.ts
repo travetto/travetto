@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
-import { Schema, Currency, Integer, Precision, Float } from '@travetto/schema';
+import { Schema, Currency, Integer, Precision, Float, Text } from '@travetto/schema';
 
 import { BaseElasticsearchTest } from './base';
 import { ModelElasticsearchSource } from '../src/source';
@@ -11,8 +11,8 @@ import { ElasticsearchUtil } from '../src/util';
 
 @Schema()
 class Address {
-  street1: string;
-  street2?: string;
+  @Text() street1: string;
+  @Text() street2?: string;
 }
 
 @Model()
@@ -68,19 +68,19 @@ class TestSave extends BaseElasticsearchTest {
     const schema = ElasticsearchUtil.generateSourceSchema(Person);
     assert(schema === {
       properties: {
-        id: { type: 'text', fields: { raw: { type: 'keyword' } } },
-        version: { type: 'text', fields: { raw: { type: 'keyword' } } },
-        type: { type: 'text', fields: { raw: { type: 'keyword' } } },
+        id: { type: 'keyword' },
+        version: { type: 'keyword' },
+        type: { type: 'keyword' },
         createdDate: { type: 'date', format: 'date_optional_time' },
         updatedDate: { type: 'date', format: 'date_optional_time' },
-        name: { type: 'text', fields: { raw: { type: 'keyword' } } },
+        name: { type: 'keyword' },
         age: { type: 'integer' },
-        gender: { type: 'text', fields: { raw: { type: 'keyword' } } },
+        gender: { type: 'keyword' },
         address: {
           type: 'object',
           properties: {
-            street1: { type: 'text', fields: { raw: { type: 'keyword' } } },
-            street2: { type: 'text', fields: { raw: { type: 'keyword' } } },
+            street1: { type: 'keyword', fields: { text: { type: 'text' } } },
+            street2: { type: 'keyword', fields: { text: { type: 'text' } } },
           },
           dynamic: false
         }
@@ -91,12 +91,12 @@ class TestSave extends BaseElasticsearchTest {
     const schema2 = ElasticsearchUtil.generateSourceSchema(SimpleNested);
     assert(schema2 === {
       properties: {
-        id: { type: 'text', fields: { raw: { type: 'keyword' } } },
+        id: { type: 'keyword' },
         addresses: {
           type: 'nested',
           properties: {
-            street1: { type: 'text', fields: { raw: { type: 'keyword' } } },
-            street2: { type: 'text', fields: { raw: { type: 'keyword' } } },
+            street1: { type: 'keyword', fields: { text: { type: 'text' } } },
+            street2: { type: 'keyword', fields: { text: { type: 'text' } } },
           },
           dynamic: false
         },
