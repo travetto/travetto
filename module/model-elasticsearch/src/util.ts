@@ -1,5 +1,5 @@
 import { Util } from '@travetto/base';
-import { WhereClause, ModelRegistry, SelectClause } from '@travetto/model';
+import { WhereClause, ModelRegistry, SelectClause, SortClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -40,6 +40,19 @@ export class ElasticsearchUtil {
     return [include, exclude];
   }
 
+  static getSort<T>(sort: SortClause<T>[]) {
+    return sort.map(x => {
+      const o = ElasticsearchUtil.extractSimple(x);
+      const k = Object.keys(o)[0];
+      const v = o[k] as (boolean | -1 | 1);
+      if (v === 1 || v === true) {
+        return k;
+      } else {
+        return `${k}:desc`;
+      }
+    });
+  }
+
   static extractWhereTermQuery<T>(o: { [key: string]: any }, cls: Class<T>, path: string = ''): any {
     const items = [];
     const schema = SchemaRegistry.getViewSchema(cls).schema;
@@ -49,7 +62,7 @@ export class ElasticsearchUtil {
       const declaredSchema = schema[key];
       const declaredType = declaredSchema.type;
       const sPath = declaredType === String ?
-        (key === 'id' ? `${path}_${key}` : `${path}${key}.raw`) :
+        (key === 'id' ? `${path}_${key}` : `${path}${key}`) :
         `${path}${key}`;
 
       if (Util.isPlainObject(top)) {
@@ -146,7 +159,7 @@ export class ElasticsearchUtil {
       } else {
         items.push({
           [Array.isArray(top) ? 'terms' : 'term']: {
-            [declaredType === String ? (key !== 'id' ? `${path}${key}.raw` : `${path}_${key}`) : `${path}${key}`]: top
+            [key === 'id' ? `${path}_${key}` : `${path}${key}`]: top
           }
         });
       }
@@ -216,14 +229,9 @@ export class ElasticsearchUtil {
       } else if (conf.type === Boolean) {
         props[field] = { type: 'boolean' };
       } else if (conf.type === String) {
-        props[field] = {
-          type: 'text',
-          fields: {
-            raw: {
-              type: 'keyword'
-            }
-          }
-        };
+        const text = conf.specifier && conf.specifier.startsWith('text') ?
+          { fields: { text: { type: 'text' } } } : {};
+        props[field] = { type: 'keyword', ...text };
       } else if (conf.type === Object) {
         props[field] = { type: 'object', dynamic: true };
       } else if (SchemaRegistry.has(conf.type)) {
