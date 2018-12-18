@@ -34,10 +34,10 @@ export class RestKoaAppProvider extends RestAppProvider {
 
     this.app = this.create();
 
-    this.app.use(ctx => {
+    this.app.use((ctx, next) => {
       const req = this.getRequest(ctx);
       const res = this.getResponse(ctx);
-      return this.executeInterceptors(req, res);
+      return this.executeInterceptors(req, res, next);
     });
   }
 
@@ -96,7 +96,7 @@ export class RestKoaAppProvider extends RestAppProvider {
         cookie: ctx.cookies.set.bind(ctx.cookies),
       });
     }
-    return (ctx as any)._trvReq;
+    return (ctx as any)._trvRes;
   }
 
   async unregisterController(config: ControllerConfig) {

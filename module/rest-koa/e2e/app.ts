@@ -1,13 +1,13 @@
 import { Application, InjectableFactory } from '@travetto/di';
 import { RestApp, RestAppProvider } from '@travetto/rest';
-import { KoaAppProvider } from '../src/app';
+import { RestKoaAppProvider } from '../src/provider';
 
 @Application('sample')
 export class SampleApp {
 
   @InjectableFactory()
   static getProvider(): RestAppProvider {
-    return new KoaAppProvider();
+    return new RestKoaAppProvider();
   }
 
   constructor(private app: RestApp) { }
