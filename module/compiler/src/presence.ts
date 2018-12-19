@@ -11,9 +11,14 @@ export interface Listener {
 export class FilePresenceManager {
   fileWatchers: { [key: string]: Watcher } = {};
   files = new Map<string, { version: number }>();
-  seen = new Set();
+  seen = new Set<string>();
+  watchSpaces = new Set<string>();
 
   constructor(private cwd: string, private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = Env.watch) {
+    this.watchSpaces.add('src');
+    if (Env.e2e) {
+      this.watchSpaces.add('e2e');
+    }
   }
 
   private watcherListener({ event, entry }: { event: string, entry: ScanEntry }) {
@@ -68,9 +73,8 @@ export class FilePresenceManager {
     if (this.watch) { // Start watching after startup
       setTimeout(() => {
         console.debug('Watching files', rootFiles.length);
-        this.buildWatcher(path.join(this.cwd, 'src'), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
-        if (Env.e2e) {
-          this.buildWatcher(path.join(this.cwd, 'e2e'), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+        for (const p of this.watchSpaces) {
+          this.buildWatcher(path.join(this.cwd, p), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
         }
       }, 1000);
     }
@@ -95,14 +99,16 @@ export class FilePresenceManager {
     }
     this.seen.add(name);
 
-    if (this.watch) {
+    // Only watch workspace files, not node_modules
+    if (this.watch && !name.includes('node_modules')) {
+      // Already known to be a used file, just don't watch node modules
       const topLevel = path.dirname(name);
-
       if (!this.fileWatchers[topLevel]) {
         this.fileWatchers[topLevel] = this.buildWatcher(topLevel, []);
       }
       this.fileWatchers[topLevel].add([name.replace(`${topLevel}${path.sep}`, '')]);
     }
+
     this.files.set(name, { version: 0 });
     this.listener.added(name);
   }
