@@ -7,13 +7,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/compiler": "^0.4.4",
+    "@travetto/compiler": "^0.4.6",
     "@types/lru-cache": "^4.1.1",
     "lru-cache": "^5.1.1"
   },
   "description": "Caching functionality with decorators for declarative use.",
   "devDependencies": {
-    "@travetto/test": "^0.4.7"
+    "@travetto/test": "^0.4.8"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -27,5 +27,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.4.7"
+  "version": "0.4.8"
 }
