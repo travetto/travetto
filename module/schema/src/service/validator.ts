@@ -13,6 +13,15 @@ export class ValidationErrors extends BaseError {
   }
 }
 
+function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
+  if (base.__id) {
+    return SchemaRegistry.getViewSchema(
+      SchemaRegistry.resolveSubTypeForInstance(base as Class<T>, o), undefined).schema;
+  } else {
+    return base as SchemaConfig;
+  }
+}
+
 export class SchemaValidator {
 
   private static validateSchema<T>(schema: SchemaConfig, o: T, relative: string) {
@@ -33,22 +42,16 @@ export class SchemaValidator {
       }
 
       const { type, array } = fieldSchema;
-
-      let sub: SchemaConfig | undefined;
-      if (SchemaRegistry.has(type)) {
-        sub = SchemaRegistry.getViewSchema(type, undefined).schema;
-      } else if (type === Object) {
-        sub = type as any as SchemaConfig;
-      }
+      const complex = SchemaRegistry.has(type) || type === Object;
 
       if (array) {
         if (!Array.isArray(val)) {
           errors = errors.concat(this.prepareErrors(path, [{ kind: 'type', type: Array, value: val }]));
           continue;
         }
-        if (sub) {
+        if (complex) {
           for (let i = 0; i < val.length; i++) {
-            const subErrors = this.validateSchema(sub, val[i], `${path}[${i}]`);
+            const subErrors = this.validateSchema(resolveSchema(type, val[i]), val[i], `${path}[${i}]`);
             errors = errors.concat(subErrors);
           }
         } else {
@@ -57,8 +60,8 @@ export class SchemaValidator {
             errors.push(...this.prepareErrors(`${path}[${i}]`, subErrors));
           }
         }
-      } else if (sub) {
-        const subErrors = this.validateSchema(sub, val, path);
+      } else if (complex) {
+        const subErrors = this.validateSchema(resolveSchema(type, val), val, path);
         errors.push(...subErrors);
       } else {
         const fieldErrors = this.validateField(fieldSchema, val, o);
@@ -164,7 +167,9 @@ export class SchemaValidator {
   }
 
   static async validate<T>(o: T, view?: string): Promise<T> {
-    const cls = o.constructor as Class;
+    let cls = o.constructor as Class;
+    cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
+
     const config = SchemaRegistry.getViewSchema(cls, view);
     const validators = SchemaRegistry.get(cls).validators;
 

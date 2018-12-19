@@ -10,18 +10,23 @@ import {
 import { Required, Max, Min } from '../src/decorator/field';
 
 @Schema()
-abstract class A {
+abstract class Aaaz {
   a: boolean;
 }
 
 @Schema()
-class B extends A {
+class Bbbbz extends Aaaz {
   b: number;
 }
 
 @Schema()
-class C extends B {
+class Ccccz extends Bbbbz {
   c: string;
+}
+
+@Schema()
+class AllAs {
+  all: Aaaz[];
 }
 
 @Schema()
@@ -324,9 +329,47 @@ class Validation {
 
   @Test()
   async verifyMultipleNested() {
-    const schema = SchemaRegistry.getViewSchema(C);
+    const schema = SchemaRegistry.getViewSchema(Ccccz);
     assert(schema.fields.includes('c'));
     assert(schema.fields.includes('b'));
     assert(schema.fields.includes('a'));
+  }
+
+  @Test()
+  async verifyNestedPolymorphic() {
+    const item = AllAs.fromRaw({
+      all: [{
+        type: 'bbbbz',
+        a: true
+      }, {
+        type: 'ccccz',
+        a: false
+      }, {
+        type: 'aaaz',
+        a: false
+      }]
+    });
+
+    assert(item.all);
+    assert(item.all.length === 3);
+    assert(item.all[0] instanceof Bbbbz);
+    assert(item.all[1] instanceof Ccccz);
+    assert(item.all[2] instanceof Aaaz);
+
+    assert.rejects(async () => {
+      await SchemaValidator.validate(item);
+    });
+
+    try {
+      await SchemaValidator.validate(item);
+    } catch (err) {
+      assert(err instanceof ValidationErrors);
+      assert((err as ValidationErrors).errors[0].path === 'all[0].b');
+      assert((err as ValidationErrors).errors[0].message === 'all[0].b is required');
+      assert((err as ValidationErrors).errors[1].path === 'all[1].b');
+      assert((err as ValidationErrors).errors[1].message === 'all[1].b is required');
+      assert((err as ValidationErrors).errors[2].path === 'all[1].c');
+      assert((err as ValidationErrors).errors[2].message === 'all[1].c is required');
+    }
   }
 }

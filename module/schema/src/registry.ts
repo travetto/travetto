@@ -15,8 +15,12 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     super(RootRegistry);
   }
 
-  resolveSubType(cls: Class, type: string) {
-    return (this.subTypes.has(cls) && this.subTypes.get(cls)!.get(type)!) || cls;
+  resolveSubTypeForInstance<T>(cls: Class<T>, o: T) {
+    return this.resolveSubType(cls, (o as any).type || o.constructor);
+  }
+
+  resolveSubType(cls: Class, type: Class | string) {
+    return (this.subTypes.has(cls) && this.subTypes.get(cls)!.get(typeof type === 'string' ? type : type.__id)!) || cls;
   }
 
   getDefaultSubTypeName(cls: Class) {
