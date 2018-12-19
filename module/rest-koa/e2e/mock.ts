@@ -1,4 +1,5 @@
 import { Injectable } from '@travetto/di';
+import { hi } from './test2';
 
 class User {
   constructor(public first: string, public last: string, public middle?: string) { }
@@ -16,8 +17,8 @@ export class MockService {
   fetch() {
     return new User(
       `Hello-${this.count++}`,
-      'World',
-      '!!!'
+      `World ${hi}`,
+      `!!! ${hi}`
     );
   }
 }
