@@ -18,7 +18,7 @@ export class CacheManager {
         ...this.defaultConfig,
         ...(config || {})
       };
-      const cache = LRU<string, T>(config);
+      const cache = new LRU<string, T>(config);
       this.caches.set(name, cache);
     }
     return this.caches.get(name)!;
