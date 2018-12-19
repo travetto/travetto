@@ -70,6 +70,8 @@ The equivalences for the assertion operations are:
 
 In addition to the standard operations, there is support for throwing/rejecting errors (or the inverse).  This is useful for testing error states or ensuring errors do not occur.  
 * `throws`/`doesNotThrow` is for catching synchronous rejections
+
+**Code: Throws vs Does Not Throw**
 ```typescript
 assert.throws(() => {
   throw new Error();
@@ -79,7 +81,10 @@ assert.doesNotThrow(() => {
   let a = 5;
 });
 ```
+
 * `rejects`/`doesNotReject` is for catching asynchronous rejections
+
+**Code: Reject vs Does Not Reject**
 ```typescript
 await assert.rejects(async () => {
   throw new Error();
@@ -95,6 +100,7 @@ Additionally, the `throws`/`rejects` assertions take in a secondary parameter to
 * A class to ensure the returned error is an instance of the class passed in
 * A function to allow for whatever custom verification of the error is needed
 
+**Code: Example of different Error matching paradigms** 
 ```typescript
 assert.throws(() => {
   throw new Error('Big Error');
