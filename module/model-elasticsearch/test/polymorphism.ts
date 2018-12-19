@@ -57,11 +57,11 @@ class TestPolymorphism extends BaseElasticsearchTest {
     const o = await service.saveAll(Person, people);
 
     assert(o[0] instanceof Doctor);
-    await assert.throws(async () => {
+    await assert.rejects(async () => {
       return service.update(Engineer, Doctor.from({ ...o[0] }) as any);
     }, 'Invalid update');
 
-    await assert.throws(async () => {
+    await assert.rejects(async () => {
       return service.getById(Engineer, o[0].id!);
     }, 'Invalid number');
 

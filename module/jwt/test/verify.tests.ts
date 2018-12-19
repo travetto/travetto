@@ -82,9 +82,9 @@ class VerifySuite {
     const p2 = await jwt.verify(token, { ...options, key: Promise.resolve(key) });
     assert.deepEqual(p2, payload);
 
-    assert.throws(() =>
-      jwt.verify(token, { ...options, key: Promise.reject('key not found') })
-      , jwt.JWTError);
+    await assert.rejects(() =>
+      jwt.verify(token, { ...options, key: Promise.reject('key not found') }),
+      'key not found');
   }
 }
 

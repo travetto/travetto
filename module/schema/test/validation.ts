@@ -257,7 +257,7 @@ class Validation {
       names: ['bc', 'ab', 'bac']
     });
 
-    await assert.throws(() =>
+    await assert.rejects(() =>
       SchemaValidator.validate(obj2)
       , ValidationErrors);
   }
@@ -274,7 +274,7 @@ class Validation {
   @Test('date tests')
   async dates() {
 
-    assert.throws(() => {
+    assert.rejects(() => {
       const o = DateTestSchema.fromRaw({ date: '' });
       return SchemaValidator.validate(o);
     }, (err: any) => {
@@ -283,7 +283,7 @@ class Validation {
       }
     });
 
-    assert.throws(() => {
+    assert.rejects(() => {
       const o = DateTestSchema.fromRaw({ date: null });
       return SchemaValidator.validate(o);
     }, (err: any) => {
@@ -292,7 +292,7 @@ class Validation {
       }
     });
 
-    assert.throws(() => {
+    assert.rejects(() => {
       const o = DateTestSchema.fromRaw({ date: NaN });
       return SchemaValidator.validate(o);
     }, (err: any) => {
@@ -301,7 +301,7 @@ class Validation {
       }
     });
 
-    assert.throws(() => {
+    assert.rejects(() => {
       const o = CustomValidated.fromRaw({ age: Number.NaN, age2: 1 });
       return SchemaValidator.validate(o);
     }, (err: any) => {
@@ -310,7 +310,7 @@ class Validation {
       }
     });
 
-    assert.throws(() => {
+    assert.rejects(() => {
       const o = CustomValidated.fromRaw({ age: 1, age2: 1 });
       return SchemaValidator.validate(o);
     }, (err: any) => {

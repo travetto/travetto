@@ -35,9 +35,9 @@ export class QueryStringTest {
       QueryLanguageTokenizer.tokenize('"hello');
     }, 'Unterminated string literal');
 
-    assert.throws(() => {
+    assert.doesNotReject(() => {
       QueryLanguageTokenizer.tokenize('"hello"');
-    }, false);
+    });
 
     assert(QueryLanguageTokenizer.tokenize(`A ~ /b.c.d/`) === [
       { type: 'identifier', value: 'A' },
@@ -110,7 +110,6 @@ export class QueryStringTest {
     } as any as WhereClause<any>);
   }
 
-
   @Test('Parse Dotted Fields')
   async parseFields() {
     const res2 = QueryLanguageParser.parse('A.b.c == 5 and (NOT B.z == 6.2 OR c == /a/)');
@@ -164,6 +163,6 @@ export class QueryStringTest {
           ]
         }
       ]
-    })
+    });
   }
 }
