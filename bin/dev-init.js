@@ -20,7 +20,8 @@ function makeLink(actual, linkPath) {
 
 function lernaSetup() {
   const config = require(`${ROOT}/lerna.json`);
-  const configNew = { ...config,
+  const configNew = {
+    ...config,
     packages: config.packages.slice(0)
   };
   configNew.packages.push("sample/*");
@@ -31,10 +32,12 @@ function lernaSetup() {
 
   fs.writeFileSync(`${ROOT}/lerna.json`, JSON.stringify(config, undefined, 2));
 
-  fs.unlinkSync(`${ROOT}/package-lock.json`);
+  try {
+    fs.unlinkSync(`${ROOT}/package-lock.json`);
+  } catch { }
 }
 
-const resolveDeps = (function() {
+const resolveDeps = (function () {
   const PEER_DEPS = `${process.argv[2]}`.trim() !== '';
   const DEP_CACHE = {};
   const CORE_SCOPE = new Set(['dependencies', 'devDependencies']);
@@ -88,7 +91,7 @@ const resolveDeps = (function() {
   return resolve;
 })();
 
-const lernaModuleFinalize = (function() {
+const lernaModuleFinalize = (function () {
   const MOD_ROOT = `${ROOT}/module`;
   const MOD_TPL_ROOT = `${ROOT}/module-template`;
   const SAMPLE_ROOT = `${ROOT}/sample`;
@@ -155,7 +158,7 @@ const lernaModuleFinalize = (function() {
         if (fs.existsSync(`${NM_MOD}/@travetto/${smod}`) || mod === smod) {
           makeLink(`${MOD_ROOT}/${smod}/bin/${script}.js`, `${NM_MOD}/.bin/${script}`);
         }
-      } catch (e) {}
+      } catch { }
     }
 
     // Link travetto cli
