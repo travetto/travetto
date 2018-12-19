@@ -90,7 +90,7 @@ function doThrows(state: AssertState, node: ts.CallExpression, args: ts.Expressi
   initState(state);
   return ts.createCall(state.checkThrow, undefined, ts.createNodeArray([
     ts.createIdentifier('__filename'),
-    ts.createLiteral(firstText),
+    ts.createLiteral(`throws ${firstText}`),
     ...args
   ]));
 }

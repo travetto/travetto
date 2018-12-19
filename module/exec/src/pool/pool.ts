@@ -31,23 +31,19 @@ export class ExecutionPool<T extends ConcurrentExecution> {
     Shutdown.onShutdown(ExecutionPool.name, () => this.shutdown());
   }
 
-  release(execution: T) {
-    if (execution.active) {
-      if (execution.release) {
-        execution.release();
+  async release(execution: T) {
+    try {
+      if (execution.active) {
+        if (execution.release) {
+          try {
+            await execution.release();
+          } catch { }
+        }
+        await this.pool.release(execution);
+      } else {
+        await this.pool.destroy(execution);
       }
-      try {
-        this.pool.release(execution);
-      } catch (e) {
-        // Ignore if not owned
-      }
-    } else {
-      try {
-        this.pool.destroy(execution);
-      } catch (e) {
-        // Ignore if not owned
-      }
-    }
+    } catch { }
   }
 
   async process<X>(src: ExecutionSource<X>, exec: (inp: X, exe: T) => Promise<any>) {
