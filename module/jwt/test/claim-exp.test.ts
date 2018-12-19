@@ -28,7 +28,7 @@ class ExpiresSuite {
     ]) {
       const encodedPayload = Buffer.from(JSON.stringify({ exp })).toString('base64');
       const token = `${noneAlgorithmHeader}.${encodedPayload}.`;
-      await assert.throws(() => jwt.verify(token, { alg: 'none' }), jwt.JWTError);
+      await assert.rejects(() => jwt.verify(token, { alg: 'none' }), jwt.JWTError);
     }
   }
 

@@ -54,7 +54,7 @@ export class VerifyTest {
       verifier.verify(cls, t as Query<T>);
     };
 
-    assert.throws(() => test(ModelUser), false);
+    assert.doesNotThrow(() => test(ModelUser));
     assert.throws(() => test(User), ValidationErrors);
   }
 
@@ -89,7 +89,7 @@ export class VerifyTest {
       verifier.verify(cls, t as Query<T>);
     };
 
-    assert.throws(() => test(ModelUser), false);
+    assert.doesNotThrow(() => test(ModelUser));
     assert.throws(() => test(User), ValidationErrors);
 
     const test2 = <T>(cls: Class<T>) => {
@@ -99,7 +99,7 @@ export class VerifyTest {
       verifier.verify(cls, t as Query<T>);
     };
 
-    assert.throws(() => test2(ModelUser), false);
-    assert.throws(() => test2(User), false);
+    assert.doesNotThrow(() => test2(ModelUser));
+    assert.doesNotThrow(() => test2(User));
   }
 }

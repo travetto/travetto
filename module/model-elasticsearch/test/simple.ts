@@ -143,7 +143,7 @@ class TestSave extends BaseElasticsearchTest {
     assert(single !== undefined);
     assert(single.age === 23);
 
-    await assert.throws(async () => {
+    await assert.rejects(async () => {
       await service.getById(Person, 'Orange-20');
     }, /Invalid/);
 

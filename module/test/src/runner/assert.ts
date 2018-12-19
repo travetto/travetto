@@ -21,6 +21,8 @@ const OP_MAPPING: { [key: string]: string } = {
   test: '{expected} {state} match {actual}',
   throws: '{state} throw {expected}',
   doesNotThrow: '{state} not throw {expected}',
+  rejects: '{state} reject {expected}',
+  doesNotReject: '{state} not reject {expected}',
   equal: '{actual} {state} equal {expected}',
   notEqual: '{actual} {state} not equal {expected}',
   deepEqual: '{actual} {state} deep equal {expected}',
@@ -119,8 +121,8 @@ export class AssertUtil {
       } else {
         assertion.message = args[0];
       }
-    } else if (/throw/i.test(fn)) {
-      assertion.operator = 'throw';
+    } else if (/throw|reject/i.test(fn)) {
+      assertion.operator = fn;
       if (typeof args[1] !== 'string') {
         assertion.expected = args[1];
         assertion.message = args[2];
@@ -170,7 +172,7 @@ export class AssertUtil {
           } else if (args[1] && fn && args[1][fn]) { // Method call
             asrt(args[1][fn](args[0]));
           } else {
-            asrt.apply(null, args); // Do normal
+            asrt.apply(null, args as any); // Do normal
           }
       }
 
@@ -195,14 +197,11 @@ export class AssertUtil {
     }
   }
 
-  static checkError(shouldThrow: ThrowableError, err: Error | string | undefined): Error | undefined {
-    if (typeof shouldThrow === 'boolean') {
-      if (err && !shouldThrow) {
-        return new BaseError('Expected an error to not be thrown');
-      } else if (!err && shouldThrow) {
-        return new BaseError('Expected an error to be thrown');
-      }
-    } else if (typeof shouldThrow === 'string' || shouldThrow instanceof RegExp) {
+  static checkError(shouldThrow: ThrowableError | undefined, err: Error | string | undefined): Error | undefined {
+    if (!shouldThrow) {
+      return; // If nothing defined, then all errors are expected
+    }
+    if (typeof shouldThrow === 'string' || shouldThrow instanceof RegExp) {
       const actual = `${err instanceof Error ? `'${err.message}'` : (err ? `'${err}'` : 'nothing')}`;
 
       if (typeof shouldThrow === 'string' && (!err || !(err instanceof Error ? err.message : err).includes(shouldThrow))) {
@@ -228,24 +227,52 @@ export class AssertUtil {
     }
   }
 
-  static async checkThrow(filename: string, text: string, action: Function, shouldThrow: ThrowableError, message?: string) {
-    const assertion = this.buildAssertion(filename, text, 'throws');
+  static checkThrow(filename: string, text: string, key: string, negative: boolean,
+    action: Function, shouldThrow?: ThrowableError, message?: string) {
+    const assertion = this.buildAssertion(filename, text, key);
+    let missed: Error | undefined;
 
+    try {
+      action();
+      if (negative) {
+        throw (missed = new Error(`No error thrown, but expected ${shouldThrow || 'an error'} `));
+      }
+    } catch (e) {
+      if (!negative) {
+        missed = new Error(`Error thrown, but expected no errors `);
+      }
+
+      e = missed || this.checkError(shouldThrow, e);
+      if (e) {
+        assertion.message = message || e.message;
+        (e as Error).stack = Stacktrace.simplifyStack(e as Error);
+        throw (assertion.error = e);
+      }
+    } finally {
+      this.add(assertion);
+    }
+  }
+
+  static async checkThrowAsync(filename: string, text: string, key: string, negative: boolean,
+    action: Function, shouldThrow?: ThrowableError, message?: string) {
+    const assertion = this.buildAssertion(filename, text, key);
     let missed: Error | undefined;
 
     try {
       await action();
-      if (typeof shouldThrow === 'boolean' && !shouldThrow) {
-        return;
+      if (negative) {
+        throw (missed = new Error(`No error thrown, but expected ${shouldThrow || 'an error'} `));
       }
-      throw (missed = new Error(`No error thrown, but expected ${shouldThrow} `));
     } catch (e) {
-      const err = missed || this.checkError(shouldThrow, e);
-      if (err) {
-        assertion.message = message || err.message;
-        assertion.error = err;
-        (err as Error).stack = Stacktrace.simplifyStack(err as Error);
-        throw err;
+      if (!negative) {
+        missed = new Error(`Error thrown, but expected no errors `);
+      }
+
+      e = missed || this.checkError(shouldThrow, e);
+      if (e) {
+        assertion.message = message || e.message;
+        (e as Error).stack = Stacktrace.simplifyStack(e as Error);
+        throw (assertion.error = e);
       }
     } finally {
       this.add(assertion);

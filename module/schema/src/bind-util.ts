@@ -88,7 +88,7 @@ export class BindUtil {
     if (data === null || data === undefined) {
       return data;
     }
-    const cls = SchemaRegistry.resolveSubType(cons, data && data.type);
+    const cls = SchemaRegistry.resolveSubTypeForInstance(cons, data);
     if (data instanceof cls) {
       return data;
     } else {

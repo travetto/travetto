@@ -6,7 +6,6 @@ travetto: Test
 $ npm install @travetto/test
 ```
 
-
 This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the [`TAP 13`](https://testanything.org/tap-version-13-specification.html) format to be consumed by other processes. 
 
 **NOTE** All tests should be under the `test/.*` folders.  The pattern for tests is defined as a regex and not standard globbing.
@@ -68,3 +67,50 @@ The equivalences for the assertion operations are:
 * `assert(a instanceof b)` as `assert.instanceOf(a, b)`
 * `assert(a.includes(b))` as `assert.ok(a.includes(b))`
 * `assert(/a/.test(b))` as `assert.ok(/a/.test(b))`
+
+In addition to the standard operations, there is support for throwing/rejecting errors (or the inverse).  This is useful for testing error states or ensuring errors do not occur.  
+* `throws`/`doesNotThrow` is for catching synchronous rejections
+```typescript
+assert.throws(() => {
+  throw new Error();
+});
+
+assert.doesNotThrow(() => {
+  let a = 5;
+});
+```
+* `rejects`/`doesNotReject` is for catching asynchronous rejections
+```typescript
+await assert.rejects(async () => {
+  throw new Error();
+});
+
+await assert.doesNotReject(async () => {
+  let a = 5;
+});
+```
+
+Additionally, the `throws`/`rejects` assertions take in a secondary parameter to allow for specification of the type of error expected.  This can be:
+* A regular expression or string to match against the error's message
+* A class to ensure the returned error is an instance of the class passed in
+* A function to allow for whatever custom verification of the error is needed
+
+```typescript
+assert.throws(() => {
+  throw new Error('Big Error');
+}, 'Big Error');
+
+assert.throws(() => {
+  throw new Error('Big Error');
+}, /B.*Error/);
+
+assert.throws(() => {
+  throw new Error('Big Error');
+}, Error);
+
+assert.throws(() => {
+  throw new Error('Big Error');
+}, (err: any) => {
+  return err.message.startsWith('Big') && err.message.length > 4 ? undefined : err;
+});
+```

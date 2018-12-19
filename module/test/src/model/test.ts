@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry/src/types';
 
-export type ThrowableError = string | RegExp | Function | boolean;
+export type ThrowableError = string | RegExp | Function;
 
 export interface TestConfig {
   class: Class<any>;

@@ -24,7 +24,7 @@ class IssueAtSuite {
       { foo: 'bar' },
     ]) {
       const token = `${noneAlgorithmHeader}.${Buffer.from(JSON.stringify({ iat: val })).toString('base64')}.`;
-      await assert.throws(async () => jwt.verify(token), 'invalid');
+      await assert.rejects(async () => jwt.verify(token), 'invalid');
     }
   }
 
@@ -136,7 +136,7 @@ class IssueAtSuite {
 
     for (const testCase of OPS) {
       const token = await jwt.sign({ iat: NOW }, { key: 'secret', alg: 'none' });
-      await assert.throws(async () => {
+      await assert.rejects(async () => {
         return jwt.verify(token, {
           maxAgeSec: testCase.maxAge,
           clock: {

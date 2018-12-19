@@ -47,4 +47,67 @@ class Simple {
     await new Promise(resolve => setTimeout(resolve, 1000));
     assert(1 === a);
   }
+
+  @Test()
+  async validateThrows() {
+    assert.throws(() => {
+      throw new Error();
+    });
+
+    assert.doesNotThrow(() => {
+      let a = 5;
+    });
+
+    await assert.rejects(async () => {
+      throw new Error();
+    });
+
+    await assert.doesNotReject(async () => {
+      let a = 5;
+    });
+
+    assert.throws(() => {
+      assert.doesNotThrow(() => {
+        throw new Error();
+      });
+    });
+
+    assert.throws(() => {
+      assert.throws(() => {
+        let a = 5;
+      });
+    });
+
+    await assert.rejects(async () => {
+      await assert.doesNotReject(async () => {
+        throw new Error();
+      });
+    });
+    await assert.rejects(async () => {
+      await assert.rejects(async () => {
+        let a = 5;
+      });
+    });
+  }
+
+  @Test()
+  asyncErrorChecking() {
+    assert.throws(() => {
+      throw new Error('Big Error');
+    }, 'Big Error');
+
+    assert.throws(() => {
+      throw new Error('Big Error');
+    }, /B.*Error/);
+
+    assert.throws(() => {
+      throw new Error('Big Error');
+    }, Error);
+
+    assert.throws(() => {
+      throw new Error('Big Error');
+    }, (err: any) => {
+      return err.message.startsWith('Big') && err.message.length > 4 ? undefined : err;
+    });
+  }
 }
