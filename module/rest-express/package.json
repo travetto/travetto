@@ -9,14 +9,14 @@
   "dependencies": {
     "@travetto/rest": "^0.4.8",
     "@types/body-parser": "^1.17.0",
-    "@types/compression": "0.0.36",
+    "@types/compression": "^0.0.36",
     "@types/cookie-parser": "^1.4.1",
     "@types/express": "^4.16.0",
-    "@types/express-session": "^1.15.10",
+    "@types/express-session": "^1.15.11",
     "body-parser": "^1.18.3",
     "compression": "^1.7.3",
     "cookie-parser": "^1.4.3",
-    "express": "^4.16.3",
+    "express": "^4.16.4",
     "express-session": "^1.15.6"
   },
   "devDependencies": {

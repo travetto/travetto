@@ -87,8 +87,8 @@ export class AssetUtil {
   }
 
   static async detectFileType(filePath: string) {
-    const buffer = await this.readChunk(filePath, 262);
-    return fileType(buffer) as { ext: string, mime: string } || {};
+    const buffer = await this.readChunk(filePath, fileType.minimumBytes);
+    return fileType(buffer) || {};
   }
 
   static async downloadUrl(url: string) {

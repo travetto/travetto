@@ -11,11 +11,10 @@
     "@travetto/di": "^0.4.8",
     "@travetto/exec": "^0.4.4",
     "@travetto/net": "^0.4.5",
-    "@types/file-type": "^5.2.1",
+    "@types/file-type": "^10.6.0",
     "@types/mime": "^2.0.0",
-    "@types/os-tmpdir": "^1.0.0",
-    "file-type": "^7.6.0",
-    "mime": "^2.2.0"
+    "file-type": "^10.7.0",
+    "mime": "^2.4.0"
   },
   "description": "Modular library for storing and retrieving binary assets with additional support for image modification at runtime",
   "devDependencies": {

@@ -9,9 +9,9 @@
   "dependencies": {
     "@travetto/asset": "^0.4.10",
     "@types/gridfs-stream": "^0.5.30",
-    "@types/mongodb": "^3.1.1",
+    "@types/mongodb": "^3.1.17",
     "gridfs-stream": "^1.1.1",
-    "mongodb": "^3.1.1"
+    "mongodb": "^3.1.10"
   },
   "description": "Mongo/GridFS backend for the travetto asset module",
   "devDependencies": {
