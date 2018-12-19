@@ -34,10 +34,12 @@ export class RestKoaAppProvider extends RestAppProvider {
 
     this.app = this.create();
 
-    this.app.use((ctx, next) => {
+    this.app.use(async (ctx, next) => {
       const req = this.getRequest(ctx);
       const res = this.getResponse(ctx);
-      return this.executeInterceptors(req, res, next);
+
+      await this.executeInterceptors(req, res);
+      await next();
     });
   }
 
@@ -59,7 +61,7 @@ export class RestKoaAppProvider extends RestAppProvider {
         on: ctx.req.on.bind(ctx.req)
       });
     }
-    return (ctx as any)._trvReq;
+    return (ctx as any)._trvReq as Travetto.Request;
   }
 
   getResponse(ctx: koa.Context) {
@@ -96,7 +98,7 @@ export class RestKoaAppProvider extends RestAppProvider {
         cookie: ctx.cookies.set.bind(ctx.cookies),
       });
     }
-    return (ctx as any)._trvRes;
+    return (ctx as any)._trvRes as Travetto.Response;
   }
 
   async unregisterController(config: ControllerConfig) {
@@ -108,7 +110,7 @@ export class RestKoaAppProvider extends RestAppProvider {
   }
 
   async registerController(cConfig: ControllerConfig) {
-    const router = new kRouter({ prefix: cConfig.basePath });
+    const router = new kRouter(cConfig.basePath !== '/' ? { prefix: cConfig.basePath } : {});
 
     for (const endpoint of cConfig.endpoints.reverse()) {
       router[endpoint.method!](endpoint.path!, async (ctx) => {
