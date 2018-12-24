@@ -8,6 +8,7 @@ import * as crypto from 'crypto';
 import { FsUtil } from '@travetto/base';
 import { HttpRequest } from '@travetto/net';
 import { Asset, AssetFile } from './model';
+import { IncomingMessage } from 'http';
 
 const tmpDir = path.resolve(os.tmpdir());
 
@@ -95,8 +96,14 @@ export class AssetUtil {
     let filePath = this.generateTempFile(url.split('/').pop() as string);
     const file = fs.createWriteStream(filePath);
     const filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
-    const res = await HttpRequest.exec({ url, pipeTo: file });
-    let responseExt = mime.getExtension((res.headers['content-type'] as string) || '');
+    let responseExt: string | undefined | null;
+
+    await HttpRequest.exec({
+      url, responseHandler: async (msg: IncomingMessage) => {
+        responseExt = mime.getExtension((msg.headers['content-type'] as string) || '');
+        await HttpRequest.pipe(msg, file);
+      }
+    });
 
     if (!responseExt) {
       const detectedType = await this.detectFileType(filePath);

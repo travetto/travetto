@@ -14,15 +14,18 @@ interface HttpClient {
 type ExecArgs = http.RequestOptions & { url: string };
 type _ExecArgs = ExecArgs & { payload?: any };
 
+type ResponseHandler<T> = (msg: http.IncomingMessage) => Promise<T>;
+
 export class HttpRequest {
 
   private static async _exec(opts: _ExecArgs, retry?: number): Promise<string>;
-  private static async _exec(opts: _ExecArgs & { pipeTo: NodeJS.WritableStream }, retry?: number): Promise<http.IncomingMessage>;
-  private static async _exec(inOpts: _ExecArgs & { pipeTo?: NodeJS.WritableStream }, retry = 0): Promise<string | http.IncomingMessage> {
-    const { client, payload, pipeTo, opts } = this.requestOpts(inOpts);
+  private static async _exec<T>(opts: _ExecArgs & { binary: true }, retry?: number): Promise<Buffer>;
+  private static async _exec<T>(opts: _ExecArgs & { responseHandler: ResponseHandler<T> }, retry?: number): Promise<T>;
+  private static async _exec<T = any>(inOpts: _ExecArgs & { responseHandler?: ResponseHandler<T> }, retry = 0): Promise<string | Buffer | T> {
+    const { client, payload, responseHandler, binary, opts } = this.requestOpts(inOpts);
 
     try {
-      return await this.rawRequest(client, opts, payload, pipeTo);
+      return await this.rawRequest(client, opts, payload, responseHandler, binary);
     } catch (e) {
       if (typeof e === 'string') {
         try {
@@ -41,8 +44,8 @@ export class HttpRequest {
     }
   }
 
-  static requestOpts(inOpts: _ExecArgs & { pipeTo?: NodeJS.WritableStream }) {
-    const { url: requestUrl, payload: inPayload, pipeTo, ...rest } = inOpts;
+  static requestOpts<T>(inOpts: _ExecArgs & { binary?: boolean, responseHandler?: ResponseHandler<T> }) {
+    const { url: requestUrl, payload: inPayload, responseHandler, ...rest } = inOpts;
     const { hostname: host, port, pathname: path, username, password, searchParams, protocol } = new url.URL(requestUrl);
 
     const opts = {
@@ -74,7 +77,7 @@ export class HttpRequest {
         opts.path = `${opts.path || ''}?${searchParams.toString()}`;
       }
     }
-    return { client, payload, pipeTo, opts };
+    return { client, payload, responseHandler, opts, binary: inOpts.binary };
   }
 
   static configJSON(opts: _ExecArgs) {
@@ -95,38 +98,36 @@ export class HttpRequest {
     return out;
   }
 
-  static async rawRequest(client: HttpClient, requestOpts: http.ClientRequestArgs, payload?: any, pipeTo?: any) {
-    return new Promise<string | http.IncomingMessage>((resolve, reject) => {
+  static async rawRequest<T>(client: HttpClient, requestOpts: http.ClientRequestArgs, payload?: any, responseHandler?: ResponseHandler<T>, binary?: boolean) {
+    return new Promise<string | Buffer | T>((resolve, reject) => {
       const req = client.request(requestOpts, (msg: http.IncomingMessage) => {
         const body: Buffer[] = [];
 
-        if (!pipeTo) {
-          msg.setEncoding('utf8');
+        if (!responseHandler) {
+          if (!binary) {
+            msg.setEncoding('utf8');
+          }
         }
 
         msg.on('data', (chunk: Buffer) => {
-          if ((msg.statusCode || 200) > 299 || !pipeTo) {
+          if ((msg.statusCode || 200) > 299 || !responseHandler) {
             body.push(Buffer.from(chunk));
           }
         });
 
         msg.on('end', () => {
-          const bodyText = Buffer.concat(body).toString();
+          const message = Buffer.concat(body);
           if ((msg.statusCode || 200) > 299) {
-            reject({ message: bodyText, status: msg.statusCode, headers: msg.headers });
+            reject({ message: message.toString(), status: msg.statusCode, headers: msg.headers });
           } else {
-            resolve(pipeTo ? msg : bodyText);
+            if (!responseHandler) {
+              resolve(binary ? message : message.toString());
+            }
           }
         });
 
-        if (pipeTo) {
-          msg.pipe(pipeTo);
-          if (pipeTo.on) {
-            pipeTo.on('error', reject);
-            if (pipeTo.close) {
-              pipeTo.on('finish', () => pipeTo.close());
-            }
-          }
+        if (responseHandler) {
+          responseHandler(msg).then(resolve, reject);
         }
       });
 
@@ -139,8 +140,9 @@ export class HttpRequest {
   }
 
   static async exec(opts: ExecArgs, payload?: any): Promise<string>;
-  static async exec(opts: ExecArgs & { pipeTo: NodeJS.WritableStream }, payload?: any): Promise<http.IncomingMessage>;
-  static async exec(opts: ExecArgs & { pipeTo?: NodeJS.WritableStream }, payload?: any): Promise<string | http.IncomingMessage> {
+  static async exec(opts: ExecArgs & { binary: true }, payload?: any): Promise<Buffer>;
+  static async exec<T>(opts: ExecArgs & { responseHandler: ResponseHandler<T> }, payload?: any): Promise<T>;
+  static async exec<T>(opts: ExecArgs & { binary?: boolean, responseHandler?: ResponseHandler<T> }, payload?: any): Promise<string | Buffer | T> {
     return await this._exec({ ...opts, payload });
   }
 
@@ -148,5 +150,17 @@ export class HttpRequest {
 
     const res = await this._exec(this.configJSON({ ...opts, payload }));
     return JSON.parse(res) as T;
+  }
+
+  static async pipe(readable: NodeJS.ReadableStream, writable: NodeJS.WritableStream) {
+    return new Promise((resolve, reject) => {
+      writable
+        .on('error', reject);
+
+      readable.pipe(writable)
+        .on('finish', resolve)
+        .on('end', resolve)
+        .on('error', reject);
+    });
   }
 }
