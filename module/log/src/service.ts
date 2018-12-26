@@ -1,8 +1,8 @@
 import { Env } from '@travetto/base';
 
 import { LogEvent, LogListener, LogLevel, LogLevels } from './types';
-import { consoleOutput } from './output/console';
 import { lineFormatter } from './formatter/line';
+import { consoleOutput } from './output/console';
 
 class $Logger {
 
@@ -12,10 +12,21 @@ class $Logger {
 
   _init() {
     // Base logger, for free
-    const formatter = lineFormatter({ colorize: (process.stdout.isTTY && !Env.isTrue('NO_COLOR')) || Env.isTrue('FORCE_COLOR') });
-    const output = consoleOutput({});
+    const formatter = lineFormatter({
+      colorize: (process.stdout.isTTY && !Env.isTrue('NO_COLOR')) || Env.isTrue('FORCE_COLOR')
+    });
 
-    this.listen(e => output(formatter(e)));
+    const errorOutput = consoleOutput({ method: 'error' });
+    const output = consoleOutput({ method: 'log' });
+
+    this.listen(ev => {
+      const msg = formatter(ev);
+      if (ev.level === 'error' || ev.level === 'fatal') {
+        errorOutput(msg);
+      } else {
+        output(msg);
+      }
+    });
   }
 
   removeAll() {

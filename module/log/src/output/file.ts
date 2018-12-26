@@ -10,7 +10,5 @@ export function fileOutput(opts: FileOutputOpts) {
     flags: 'a'
   });
 
-  return (message: string) => {
-    stream.write(`${message}\n`);
-  };
+  return (msg: string) => stream.write(`${msg}\n`);
 }
