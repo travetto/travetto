@@ -1,8 +1,7 @@
 export interface ConsoleOutputOpts {
-
+  method: 'log' | 'error';
 }
+
 export function consoleOutput(opts: ConsoleOutputOpts) {
-  return (msg: string) => {
-    (console as any).log(msg);
-  };
+  return (message: string) => (console as any)[opts.method](message);
 }
