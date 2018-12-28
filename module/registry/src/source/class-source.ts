@@ -73,7 +73,7 @@ export class CompilerClassSource implements ChangeSource<Class> {
   }
 
   async init() {
-    if (!Env.test || Env.e2e) {
+    if (!Env.test) {
       const folder = Env.e2e ? 'e2e/' : 'src/';
       const entries = await ScanApp.findFiles('.ts', (f: string) =>
         Compiler.presenceManager.validFile(f)

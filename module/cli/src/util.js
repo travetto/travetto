@@ -14,7 +14,7 @@ module.exports = {
     cwd,
     program: commander,
     dependOn(cmd, args, s_cwd) {
-      require('child_process').execSync(`${process.argv.slice(0, 2).join(' ')} ${cmd} ${(args||[]).join(' ')}`, {
+      require('child_process').execSync(`${process.argv.slice(0, 2).join(' ')} ${cmd} ${(args || []).join(' ')}`, {
         env: process.env,
         cwd: s_cwd || cwd,
         stdio: [0, 1, 2]
@@ -38,7 +38,7 @@ module.exports = {
     },
     loadSinglePlugin(cmd) {
       try {
-        this.requireModule(`travetto-cli-${cmd.replace(/:.*$/,'')}`);
+        this.requireModule(`travetto-cli-${cmd.replace(/:.*$/, '')}`);
       } catch (e) {
         console.error('Unknown command', cmd);
         this.showHelp(1);
@@ -61,6 +61,21 @@ module.exports = {
       }
 
       commander.parse(args);
+    },
+    fork(cmd, args) {
+      return new Promise((resolve, reject) => {
+        let text = [];
+        let err = [];
+        const proc = require('child_process').fork(cmd, args || [], {
+          env: process.env,
+          cwd: cwd,
+          stdio: ['pipe', 'pipe', 'pipe', 'ipc']
+        });
+        proc.stdout.on('data', v => text.push(v));
+        proc.stderr.on('data', v => err.push(v));
+        proc.on('close', v => resolve(Buffer.concat(text).toString()));
+        proc.on('error', v => reject(Buffer.concat(err).toString()));
+      });
     }
   }
 };

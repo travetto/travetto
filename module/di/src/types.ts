@@ -29,3 +29,10 @@ export interface InjectableFactoryConfig<T> {
 export interface Runnable {
   run(): any;
 }
+
+export interface ApplicationConfig<T = any> {
+  name: string;
+  description?: string;
+  target: Class<T>;
+  watchable?: boolean;
+}

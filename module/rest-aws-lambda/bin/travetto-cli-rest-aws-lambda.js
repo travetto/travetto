@@ -5,7 +5,7 @@ const { FsUtil } = require('@travetto/cli/src/fs-util');
 // @ts-ignore
 const { Util: { cwd, program, dependOn } } = require('@travetto/cli/src/util');
 
-module.exports = function() {
+module.exports = function () {
   const path = require('path');
   const cp = require('child_process');
   const exec = (arg, ...args) => cp.execSync(arg, ...args);
@@ -59,10 +59,10 @@ module.exports = function() {
       }
 
       for (const p of ['.d.ts', '.md', '.lock', 'bower.json',
-          'apis/1_7.js', 'apis/0_9.js', 'apis/2_4.js',
-          'apis/5.0.js', 'apis/5.1.js', 'apis/5.2.js',
-          'apis/5.3.js', 'apis/5.4.js'
-        ]) {
+        'apis/1_7.js', 'apis/0_9.js', 'apis/2_4.js',
+        'apis/5.0.js', 'apis/5.1.js', 'apis/5.2.js',
+        'apis/5.3.js', 'apis/5.4.js'
+      ]) {
         for (const f of FsUtil.find(`${cmd.workspace}/node_modules`, x => x.endsWith(p))) {
           FsUtil.remove(f);
         }
@@ -87,7 +87,6 @@ module.exports = function() {
     .option('-o --output [output]', 'Output file', 'dist/template.yml')
     .action(async (cmd) => {
       process.env.ENV = cmd.env;
-      process.env.WATCH = 'false';
 
       cmd.output = path.resolve(cwd, cmd.output);
 

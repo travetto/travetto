@@ -5,6 +5,7 @@ declare class UtilStatic {
   program: typeof Commander;
   dependOn(command: string, args: string[], cwd: string): void;
   execute(args: string[]): void;
+  fork(cmd: string, args?: string[]): Promise<string>;
 }
 
 declare const Util: UtilStatic;

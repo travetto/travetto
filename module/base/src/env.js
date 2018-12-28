@@ -27,7 +27,7 @@ function checkFrameworkDev() {
 
   try {
     frameworkDev = require(`${cwd}/package.json`).name.startsWith('@travetto');
-  } catch (e) {}
+  } catch (e) { }
 
   return { frameworkDev };
 }
@@ -45,16 +45,8 @@ function checkDocker() {
   return { docker };
 }
 
-function checkWatch(profile) {
-  const watch = (
-    (profile.dev || profile.e2e) &&
-    envVal('no_watch') === undefined &&
-    envVal('watch') === undefined
-  ) || (
-    !isEnvTrue('no_watch') &&
-    isEnvTrue('watch')
-  );
-  return { watch };
+function checkWatch() {
+  return { watch: isEnvTrue('watch') };
 }
 
 function buildLogging(profile) {
@@ -67,11 +59,11 @@ function buildLogging(profile) {
   console.trace = (...args) => console.log('TRACE', ...args);
 
   if (!trace) {
-    console.trace = (...args) => {};
+    console.trace = () => { };
   }
 
   if (!debug) {
-    console.debug = () => {}; // Suppress debug statements
+    console.debug = () => { }; // Suppress debug statements
   }
 
   function error(...args) {
@@ -125,7 +117,7 @@ const Env = [
   { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal },
   profile,
   buildLogging(profile),
-  checkWatch(profile),
+  checkWatch(),
   checkFrameworkDev(),
   checkDocker()
 ].reduce((acc, el) =>

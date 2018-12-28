@@ -7,7 +7,8 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-run": "bin/travetto-cli-run.js"
+    "travetto-cli-run": "bin/travetto-cli-run.js",
+    "travetto-find-apps": "bin/travetto-find-apps.js"
   },
   "dependencies": {
     "@travetto/config": "^0.4.7",
