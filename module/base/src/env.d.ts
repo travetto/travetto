@@ -19,3 +19,5 @@ export declare const Env: {
   get(key: string): string | undefined;
   getList(key: string): string[];
 }
+
+export declare const showEnv: () => void;

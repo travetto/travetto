@@ -8,12 +8,15 @@ const Module = require('module');
 const ts = global.ts = require('typescript');
 
 //Simple bootstrap to load compiler
-const { Env } = require('../src/env');
+const { Env, showEnv } = require('../src/env');
 const { resolveFrameworkFile } = require('../src/app-info');
 const { AppCache } = require('../src/cache');
 const cwd = Env.cwd;
 
 AppCache.init();
+
+// Show init
+showEnv();
 
 //Rewrite Module for local development
 if (Env.frameworkDev) {
