@@ -1,5 +1,4 @@
 /// <reference path="./error.d.ts" />
-
 import { BaseError } from '@travetto/base';
 
 import { Renderable } from './response/renderable';

@@ -58,7 +58,8 @@ export class UploadUtil {
           asset.metadata.name = fileName;
           asset.filename = fileName;
 
-          const contentType = (await AssetUtil.detectFileType(asset.path)).mime;
+          const detectedType = await AssetUtil.detectFileType(asset.path);
+          const contentType = detectedType ? detectedType.mime : '';
 
           if (
             this.matchType(allowedTypes, contentType, true) ||

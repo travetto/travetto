@@ -54,7 +54,7 @@ export class RestAwsLambdaAppProvider extends RestAppProvider<express.Applicatio
       this.executeInterceptors(req as any, res as any, next));
 
     this.server = awsServerlessExpress.createServer(this.app);
-    this._handler = awsServerlessExpress.proxy.bind(awsServerlessExpress, this.server);
+    this._handler = awsServerlessExpress.proxy.bind(awsServerlessExpress, this.server) as any /** TODO: Typings seem off */;
   }
 
   async unregisterController(config: ControllerConfig) {

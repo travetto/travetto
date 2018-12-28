@@ -96,7 +96,7 @@ export class RestFastifyAppProvider extends RestAppProvider {
           reply.res.end();
         },
         setHeader: reply.res.setHeader.bind(reply.res),
-        getHeader: reply.res.getHeader.bind(reply.res),
+        getHeader: reply.res.getHeader.bind(reply.res) as (key: string) => string, // NOTE: Forcing type, may be incorrect
         removeHeader: reply.res.removeHeader.bind(reply.res),
         write: reply.res.write.bind(reply.res),
         cookie: (reply as any).setCookie.bind(reply)
@@ -105,7 +105,6 @@ export class RestFastifyAppProvider extends RestAppProvider {
 
     return (reply as any)._trvRes;
   }
-
 
   async registerController(cConfig: ControllerConfig) {
     for (const endpoint of cConfig.endpoints.reverse()) {

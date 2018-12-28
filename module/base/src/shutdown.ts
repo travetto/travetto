@@ -70,7 +70,7 @@ export class Shutdown {
   }
 
   static register() {
-    process.exit = this.execute.bind(this);
+    process.exit = this.execute.bind(this) as (() => never); // NOTE: We do not actually throw an error the first time, to allow for graceful shutdown
     process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
     process.on('SIGTERM', this.execute.bind(this, 143));
