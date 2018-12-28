@@ -93,7 +93,6 @@ export class RestInterceptorSet {
   }
 }
 
-
 export abstract class RestAppProvider<T = any> {
   interceptors: RestInterceptor[] = [];
 

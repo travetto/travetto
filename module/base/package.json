@@ -10,7 +10,7 @@
     "travetto-cli-clean": "bin/travetto-cli-clean.js"
   },
   "dependencies": {
-    "@types/node": "^10.12.17",
+    "@types/node": "^10.12.18",
     "trace": "^3.1.1",
     "tslib": "^1.9.3",
     "typescript": "^3.2.2"

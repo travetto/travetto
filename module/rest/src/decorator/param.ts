@@ -54,7 +54,7 @@ export const Param = (param: ParamConfig) => {
     const existing = ControllerRegistry.getOrCreatePendingField(target.constructor as Class, descriptor.value!);
     const config: Partial<EndpointConfig> = { params: { [param.name]: param } };
     if (Object.keys(existing.params!).length === 0) {
-      config.filters = [paramHandler.bind(null, existing)];
+      config.filters = [paramHandler.bind(null, existing as EndpointConfig)];
     }
     ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor!, config);
     return descriptor;

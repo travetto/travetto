@@ -89,7 +89,7 @@ export class AssetUtil {
 
   static async detectFileType(filePath: string) {
     const buffer = await this.readChunk(filePath, fileType.minimumBytes);
-    return fileType(buffer) || {};
+    return fileType(buffer);
   }
 
   static async downloadUrl(url: string) {

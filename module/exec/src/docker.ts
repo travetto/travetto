@@ -8,7 +8,6 @@ import { Shutdown, ScanFs, ScanEntry, Env, FsUtil } from '@travetto/base';
 import { CommonProcess, ExecutionResult } from './types';
 import { ExecUtil, WithOpts } from './util';
 
-
 function exec(command: string, opts?: WithOpts<child_process.SpawnOptions>) {
   return ExecUtil.spawn(command, { shell: false, ...opts })[1];
 }
