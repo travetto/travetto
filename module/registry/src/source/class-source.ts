@@ -79,7 +79,7 @@ export class CompilerClassSource implements ChangeSource<Class> {
         Compiler.presenceManager.validFile(f)
         && (f.startsWith(folder) || (
           /^node_modules\/@travetto\/[^\/]+\/src\/.*/.test(f)
-          && !f.startsWith(`node_modules/${AppInfo.NAME}`)
+          && !f.startsWith(`node_modules/${AppInfo.NAME}/`)
         )) // No more side effect code, load all files
       );
 
