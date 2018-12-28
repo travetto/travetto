@@ -72,7 +72,7 @@ export class ConfigLoader {
     this._initialized = true;
     this.reloadConfig();
 
-    if (!Env.isTrue('QUIET_CONFIG') && !Env.test) {
+    if (!Env.isTrue('QUIET_INIT') && !Env.test) {
       console.info(`Initializing: ${Env.profiles.join(',')}`);
       console.info('Configured', this.map.toJSON());
     }

@@ -123,4 +123,11 @@ const Env = [
 ].reduce((acc, el) =>
   Object.assign(acc, el));
 
-module.exports = { Env };
+function showEnv() {
+  if (!Env.isTrue('QUIET_INIT') && !Env.test) {
+    console.log('Env', JSON.stringify(Env,
+      (e, v) => typeof v === 'boolean' && v === false || typeof v === 'function' ? undefined : v, 2));
+  }
+}
+
+module.exports = { Env, showEnv };

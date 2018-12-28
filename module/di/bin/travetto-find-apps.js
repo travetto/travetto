@@ -1,6 +1,6 @@
 //@ts-check
 async function getApps() {
-  process.env.QUIET_CONFIG = 'true';
+  process.env.QUIET_INIT = 'true';
   process.env.DEBUG = 'false';
 
   // Suppress all output
