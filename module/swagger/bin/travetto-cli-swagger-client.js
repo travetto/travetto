@@ -2,7 +2,7 @@
 // @ts-ignore
 const { Util: { program } } = require('@travetto/cli/src/util');
 
-module.exports = function() {
+module.exports = function () {
   program
     .command('swagger-client')
     .option('-o, --output [output]', 'Output folder', './api-client')
@@ -13,7 +13,6 @@ module.exports = function() {
       process.env.API_CLIENT_OUTPUT = cmd.output;
       process.env.API_CLIENT_FORMAT = cmd.format;
       process.env.API_CLIENT_FORMATOPTIONS = cmd.formatOptions;
-      process.env.WATCH = 'false';
 
       require('@travetto/base/bin/bootstrap').run(() => {
         const { ClientGenerate } = require('../src/client-generate');

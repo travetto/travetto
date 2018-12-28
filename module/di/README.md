@@ -183,7 +183,7 @@ class Server {
   }
 }
 
-@Application('config')
+@Application('config', { watchable: true })
 class ConfigApp {
 
   @Inject()
@@ -194,3 +194,5 @@ class ConfigApp {
   }
 }
 ```
+
+This additional entry point will also default to a watch mode that can still be overridden via the command line flags.

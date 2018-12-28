@@ -2,7 +2,7 @@ import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/re
 import { Env, Util } from '@travetto/base';
 import { RetargettingHandler } from '@travetto/compiler';
 
-import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
+import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig, ApplicationConfig } from './types';
 import { InjectionError } from './error';
 
 export const DEFAULT_INSTANCE = Symbol('__default');
@@ -46,14 +46,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private proxies = new Map<TargetId, Map<Symbol, Proxy<RetargettingHandler<any>>>>();
   private proxyHandlers = new Map<TargetId, Map<Symbol, RetargettingHandler<any>>>();
 
-  private applications = new Map<string, Class>();
+  private applications = new Map<string, ApplicationConfig>();
 
   constructor() {
     super(RootRegistry);
-
-    if (Env.get('TRV_APP_NAME')) {
-      this.init().then(x => this.runApplication(Env.get('TRV_APP_NAME')!));
-    }
   }
 
   private async createInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE) {
@@ -230,20 +226,20 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return aliasedIds.map(id => this.get(id)! as InjectableConfig<T>);
   }
 
-  registerApplication(app: string, target: Class) {
-    this.applications.set(app, target);
+  registerApplication(app: string, config: ApplicationConfig) {
+    this.applications.set(app, config);
   }
 
   getApplications() {
-    return Array.from(this.applications.keys());
+    return Array.from(this.applications.values());
   }
 
   async runApplication(name: string) {
-    const cls = this.applications.get(name);
-    if (!cls) {
+    const config = this.applications.get(name);
+    if (!config) {
       throw new InjectionError(`Application: ${name} does not exist`);
     }
-    const inst = await this.getInstance(cls);
+    const inst = await this.getInstance(config.target);
     if (inst.run) {
       await inst.run();
     }

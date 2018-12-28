@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
 
-import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
+import { InjectableFactoryConfig, InjectableConfig, Dependency, ApplicationConfig } from './types';
 import { DependencyRegistry } from './registry';
 
 function extractSymbolOrConfig<T extends { qualifier?: Symbol }>(args: any[]) {
@@ -29,9 +29,11 @@ export function Injectable(...args: any[]): ClassDecorator {
   };
 }
 
-export function Application(name: string): ClassDecorator {
+export function Application(name: string, config: Partial<ApplicationConfig> = {}): ClassDecorator {
   return (target: Class | any) => {
-    DependencyRegistry.registerApplication(name, target);
+    config.target = target;
+    config.name = name;
+    DependencyRegistry.registerApplication(name, config as ApplicationConfig);
     return target;
   };
 }

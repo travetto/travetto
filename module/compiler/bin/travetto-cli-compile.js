@@ -7,7 +7,7 @@ const { Util: { cwd, dependOn, program } } = require('@travetto/cli/src/util');
 // @ts-ignore
 const { FsUtil } = require('@travetto/cli/src/fs-util');
 
-module.exports = function() {
+module.exports = function () {
   program
     .command('compile')
     .option('-o, --output <output>', 'Output directory')
@@ -15,9 +15,6 @@ module.exports = function() {
     .action(async (cmd) => {
 
       dependOn('clean');
-
-      // Bootstrap
-      process.env.WATCH = 'false';
 
       // @ts-ignore
       await require(`@travetto/base/bin/bootstrap`).run();
@@ -55,7 +52,7 @@ module.exports = function() {
       // Find final destination
       let outDir = path.resolve(cwd, cmd.output || AppCache.cacheDir);
 
-      const FILES = `ScanApp.setFileEntries('.ts', [${files.map(x =>`'${x.module.replace(/node_modules\/@travetto/g, '#')}'`).join(', ')}])`;
+      const FILES = `ScanApp.setFileEntries('.ts', [${files.map(x => `'${x.module.replace(/node_modules\/@travetto/g, '#')}'`).join(', ')}])`;
 
       // Rewrite files to allow for presume different path
       for (const f of fs.readdirSync(AppCache.cacheDir)) {
