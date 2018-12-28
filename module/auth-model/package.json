@@ -15,7 +15,7 @@
     "@travetto/test": "^0.4.9"
   },
   "optionalExtensionDependencies": {
-    "@travetto/auth-rest": "^0.1.11"
+    "@travetto/auth-rest": "^0.4.11"
   },
   "homepage": "https://travetto.io",
   "keywords": [
