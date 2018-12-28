@@ -12,7 +12,7 @@
     "@travetto/test": "^0.4.9"
   },
   "optionalExtensionDependencies": {
-    "@travetto/rest": "^0.4.0",
+    "@travetto/rest": "^0.4.10",
     "@types/faker": "^4.1.4",
     "faker": "^4.1.0"
   },
