@@ -35,7 +35,43 @@ async function getApps() {
   }))));
 }
 
-getApps().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+function fork(cmd, args) {
+  return new Promise((resolve, reject) => {
+    let text = [];
+    let err = [];
+    const proc = require('child_process').fork(cmd, args || [], {
+      stdio: ['pipe', 'pipe', 'pipe', 'ipc']
+    });
+    proc.stdout.on('data', v => text.push(v));
+    proc.stderr.on('data', v => err.push(v));
+    proc.on('exit', v => {
+      if (v === 0) {
+        resolve(Buffer.concat(text).toString());
+      } else {
+        reject(Buffer.concat(err).toString());
+      }
+    });
+  });
+}
+
+module.exports.getCachedAppList = async function getCachedAppList() {
+  const config = 'di-app-cache.json';
+  const { AppCache } = require('@travetto/base/src/cache');
+
+  //Read cache it
+  if (!AppCache.hasEntry(config)) {
+    const text = await fork(__filename);
+    AppCache.writeEntry(config, text);
+  }
+
+  const text = AppCache.readEntry(config);
+  return JSON.parse(text);
+}
+
+//@ts-ignore
+if (require.main === module) {
+  getApps().catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
+}
