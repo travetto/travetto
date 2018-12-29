@@ -1,3 +1,5 @@
+/// <reference types="typescript/lib/typescriptServices" />
+
 import { ScanApp, Util } from '@travetto/base';
 
 export class TransformerManager {
