@@ -52,7 +52,7 @@ function checkWatch() {
 function buildLogging(profile) {
   const debug = isEnvTrue('debug') || ((profile.dev || profile.e2e) && !isEnvFalse('debug'));
   const trace = isEnvTrue('trace');
-  const quietInit = !(Env.isTrue('quiet_init') || profile.test);
+  const quietInit = !(isEnvTrue('quiet_init') || profile.test);
 
   console.warn = (...args) => console.log('WARN', ...args);
   console.info = (...args) => console.log('INFO', ...args);
