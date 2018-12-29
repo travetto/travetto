@@ -8,14 +8,19 @@ const { Util: { cwd, program, fork } } = require('@travetto/cli/src/util');
 const config = path.join(cwd, '.app-config.cache');
 
 async function getAppList() {
-  //Read cache it
-  if (!fs.existsSync(config)) {
-    const text = await fork(`${__dirname}/travetto-find-apps.js`);
-    return JSON.parse(text); // Skipping remainder
-    // fs.writeFileSync(config, text); // Skip for now
-  }
+  try {
+    //Read cache it
+    if (!fs.existsSync(config)) {
+      const text = await fork(`${__dirname}/travetto-find-apps.js`);
+      return JSON.parse(text); // Skipping remainder
+      // fs.writeFileSync(config, text); // Skip for now
+    }
 
-  return JSON.parse(fs.readFileSync(config).toString());
+    return JSON.parse(fs.readFileSync(config).toString());
+  } catch (err) {
+    console.error(err && err.stack ? err.stack : err);
+    process.exit(1);
+  }
 }
 
 function generateAppHelpList(apps, cmd) {
@@ -34,6 +39,16 @@ function generateAppHelpList(apps, cmd) {
     lines.push(line);
   }
   return lines.map(x => `    * ${x}`).join('\n');
+}
+
+async function runApp(app) {
+  try {
+    await require('@travetto/base/bin/bootstrap').run();
+    await require('../src/registry').DependencyRegistry.runApplication(app);
+  } catch (err) {
+    console.error(err && err.stack ? err.stack : err);
+    process.exit(1);
+  }
 }
 
 module.exports = function () {
@@ -88,16 +103,15 @@ module.exports = function () {
         }
       }
 
-      try {
-        process.env.ENV = cmd.env;
-        process.env.PROFILE = cmd.profile.join(',');
-        process.env.WATCH = `${cmd.watch}`;
+      process.env.ENV = cmd.env;
+      process.env.PROFILE = cmd.profile.join(',');
+      process.env.WATCH = `${cmd.watch}`;
 
-        await require('@travetto/base/bin/bootstrap').run();
-        await require('../src/registry').DependencyRegistry.runApplication(app);
-      } catch (err) {
-        console.error(err && err.stack ? err.stack : err);
-        process.exit(1);
-      }
+      runApp(app);
     });
 };
+
+//@ts-ignore
+if (require.main === module) {
+  runApp(process.argv.pop()); //If loaded directly as main entry, run
+}
