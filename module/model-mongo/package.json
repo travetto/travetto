@@ -7,14 +7,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/model": "^0.5.0",
+    "@travetto/model": "^0.5.1",
     "@types/mongodb": "^3.1.17",
     "mongodb": "^3.1.10"
   },
   "description": "Mongo backing for the travetto model module.",
   "devDependencies": {
     "@travetto/exec": "^0.5.0",
-    "@travetto/test": "^0.5.0"
+    "@travetto/test": "^0.5.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -29,5 +29,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.5.0"
+  "version": "0.5.1"
 }
