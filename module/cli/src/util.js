@@ -73,9 +73,14 @@ module.exports = {
         });
         proc.stdout.on('data', v => text.push(v));
         proc.stderr.on('data', v => err.push(v));
-        proc.on('close', v => resolve(Buffer.concat(text).toString()));
-        proc.on('error', v => reject(Buffer.concat(err).toString()));
+        proc.on('exit', v => {
+          if (v === 0) {
+            resolve(Buffer.concat(text).toString());
+          } else {
+            reject(Buffer.concat(err).toString());
+          }
+        });
       });
     }
   }
-};
+}

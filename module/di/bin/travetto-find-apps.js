@@ -1,10 +1,10 @@
+#!/usr/bin/env node
+
 //@ts-check
+
 const fs = require('fs');
 
 async function getApps() {
-  process.env.QUIET_INIT = 'true';
-  process.env.DEBUG = 'false';
-
   // Suppress all output
   const og = console.log;
   console.warn = console.debug = console.log = function () { };
@@ -35,4 +35,7 @@ async function getApps() {
   }))));
 }
 
-getApps();
+getApps().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
