@@ -67,7 +67,7 @@ module.exports = function () {
         .map(x => x.trim());
 
 
-      process.env.ENV = cmd.env;
+      process.env.ENV = cmd.env; //Preemptively set b/c env changes how we compile some things
 
       const apps = await getAppList();
       const selected = apps.find(x => x.name === app);
@@ -89,6 +89,7 @@ module.exports = function () {
       }
 
       try {
+        process.env.ENV = cmd.env;
         process.env.PROFILE = cmd.profile.join(',');
         process.env.WATCH = `${cmd.watch}`;
 

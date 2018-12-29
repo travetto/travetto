@@ -19,10 +19,11 @@ async function runTests(opts, args) {
   }
 }
 
+// @ts-ignore
 if (require.main !== module) {
   // @ts-ignore
   const { Util: { program } } = require('@travetto/cli/src/util');
-  module.exports = function() {
+  module.exports = function () {
 
     program.command('test')
       .arguments('[regexes...]')
