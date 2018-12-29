@@ -22,7 +22,7 @@ export class SourceManager {
 
   registerSourceMaps() {
     sourcemap.install({
-      emptyCacheBetweenOperations: Env.test || Env.debug,
+      emptyCacheBetweenOperations: Env.test || Env.watch,
       retrieveFile: (p: string) => this.contents.get(p.replace('.js', '.ts'))!,
       retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
     });

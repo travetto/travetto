@@ -7,6 +7,7 @@ export declare const Env: {
   docker: boolean;
   debug: boolean;
   trace: boolean;
+  quietInit: boolean;
   cwd: string;
   frameworkDev: boolean;
   profiles: string[];

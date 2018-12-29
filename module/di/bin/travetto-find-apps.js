@@ -1,4 +1,6 @@
 //@ts-check
+const fs = require('fs');
+
 async function getApps() {
   process.env.QUIET_INIT = 'true';
   process.env.DEBUG = 'false';
@@ -17,7 +19,9 @@ async function getApps() {
 
   //Load app files
   const { ScanApp } = require('@travetto/base/src/scan-app');
-  ScanApp.requireFiles('.ts', x => !x.endsWith('.d.ts') && x.startsWith('src') || x.startsWith('e2e'));
+  ScanApp.requireFiles('.ts', x =>
+    /^(src|e2e)\/.*[^.][^d][.]ts$/.test(x) &&
+    fs.readFileSync(x).toString().includes('@Application')); // Only load files that are candidates
 
   //Get applications
   const res = require('../src/registry').DependencyRegistry.getApplications();

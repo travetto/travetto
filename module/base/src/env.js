@@ -52,6 +52,7 @@ function checkWatch() {
 function buildLogging(profile) {
   const debug = isEnvTrue('debug') || ((profile.dev || profile.e2e) && !isEnvFalse('debug'));
   const trace = isEnvTrue('trace');
+  const quietInit = !(Env.isTrue('quiet_init') || profile.test);
 
   console.warn = (...args) => console.log('WARN', ...args);
   console.info = (...args) => console.log('INFO', ...args);
@@ -70,7 +71,7 @@ function buildLogging(profile) {
     console.error(...args.map(x => x && x.stack ? x.stack : x));
   }
 
-  return { debug, trace, error };
+  return { debug, trace, error, quietInit };
 }
 
 function buildProfile() {
@@ -124,7 +125,7 @@ const Env = [
   Object.assign(acc, el));
 
 function showEnv() {
-  if (!Env.isTrue('QUIET_INIT') && !Env.test) {
+  if (!Env.quietInit) {
     console.log('Env', JSON.stringify(Env,
       (e, v) => typeof v === 'boolean' && v === false || typeof v === 'function' ? undefined : v, 2));
   }
