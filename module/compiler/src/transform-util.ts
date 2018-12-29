@@ -1,4 +1,4 @@
-/// <reference path="../node_modules/typescript/lib/typescriptServices.d.ts" />
+/// <reference types="typescript/lib/typescriptServices" />
 
 import { dirname, sep } from 'path';
 

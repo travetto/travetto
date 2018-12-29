@@ -1,3 +1,5 @@
+/// <reference types="typescript/lib/typescriptServices" />
+
 import * as fs from 'fs';
 import * as sourcemap from 'source-map-support';
 

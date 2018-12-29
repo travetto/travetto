@@ -1,3 +1,5 @@
+/// <reference types="typescript/lib/typescriptServices" />
+
 import { Env } from '@travetto/base';
 
 export class CompilerUtil {
@@ -15,7 +17,7 @@ export class CompilerUtil {
       }, `${dir}/${name}`
     );
     out.options.importHelpers = true;
-    out.options.noEmitOnError = !Env.dev;
+    out.options.noEmitOnError = !Env.watch;
     out.options.moduleResolution = ts.ModuleResolutionKind.NodeJs;
 
     return out.options;
