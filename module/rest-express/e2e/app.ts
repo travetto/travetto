@@ -2,7 +2,7 @@ import { Application, InjectableFactory } from '@travetto/di';
 import { RestApp, RestAppProvider } from '@travetto/rest';
 import { RestExpressAppProvider } from '../src/provider';
 
-@Application('sample')
+@Application('sample', { watchable: true, description: 'Sample rest application' })
 export class SampleApp {
 
   @InjectableFactory()
