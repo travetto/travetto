@@ -3,7 +3,7 @@ const commander = require('commander');
 const path = require('path');
 const fs = require('fs');
 
-const cwd = (process.env['init_cwd'] || process.env['INIT_CWD'] || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
+const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
 
 commander
   // @ts-ignore

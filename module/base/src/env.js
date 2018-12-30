@@ -1,5 +1,5 @@
 //@ts-check
-const path = require('path');
+const { cwd } = require('./_app-core');
 
 const PROD_KEY = 'prod';
 const TEST_KEY = 'test';
@@ -19,8 +19,6 @@ const isEnvFalse = k => {
   const val = envVal(k);
   return val !== undefined && /(0|false|off)/i.test(val);
 };
-
-const cwd = (envVal('init_cwd') || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
 
 function checkFrameworkDev() {
   let frameworkDev = false;

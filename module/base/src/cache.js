@@ -4,7 +4,7 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const { execSync } = require('child_process');
-const { Env } = require('./env');
+const appCore = require('./_app-core');
 
 function isOlder(cacheStat, fullStat) {
   return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs || cacheStat.atimeMs < fullStat.atimeMs;
@@ -12,15 +12,8 @@ function isOlder(cacheStat, fullStat) {
 
 class Cache {
   constructor(cwd, cacheDir) {
-
-    this.cwd = cwd;
-
-    if (!cacheDir) {
-      const name = cwd.replace(/[\\\/:]/g, '_');
-      cacheDir = Env.get('TS_CACHE_DIR') || path.join(os.tmpdir(), name);
-    }
-
-    this.cacheDir = cacheDir;
+    this.cwd = cwd || appCore.cwd;
+    this.cacheDir = cacheDir || appCore.cacheDir;
     this.cache = {};
   }
 
@@ -80,11 +73,11 @@ class Cache {
   }
 
   fromEntryName(cached) {
-    return path.join(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, path.sep)).replace(/[.]js/g, '.ts');
+    return path.join(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, path.sep)).replace(/[.]js$/g, '.ts');
   }
 
   toEntryName(full) {
-    const out = path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~')).replace(/[.]ts/g, '.js');
+    const out = path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~')).replace(/[.]ts$/g, '.js');
     return out;
   }
 }
@@ -109,8 +102,11 @@ class $AppCache extends Cache {
       try {
         this.removeExpiredEntry(full);
       } catch (e) {
-        console.debug('Cannot read', e.message);
-        // Cannot remove missing file
+        // Only care if it's source, otherwise might be dynamically cached data without backing file
+        if (full.endsWith('.ts') || full.endsWith('.js')) {
+          // Cannot remove file, source is missing
+          console.debug('Cannot read', e.message);
+        }
       }
     }
   }
@@ -118,4 +114,4 @@ class $AppCache extends Cache {
 
 exports.Cache = Cache;
 
-exports.AppCache = new $AppCache(Env.cwd);
+exports.AppCache = new $AppCache(appCore.cwd, appCore.cacheDir);
