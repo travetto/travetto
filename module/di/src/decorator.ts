@@ -1,4 +1,5 @@
 import { Class } from '@travetto/registry';
+import { Util } from '@travetto/base';
 
 import { InjectableFactoryConfig, InjectableConfig, Dependency, ApplicationConfig } from './types';
 import { DependencyRegistry } from './registry';
@@ -29,10 +30,13 @@ export function Injectable(...args: any[]): ClassDecorator {
   };
 }
 
-export function Application(name: string, config: Partial<ApplicationConfig> = {}): ClassDecorator {
+export function Application(name: string, config: Partial<ApplicationConfig> = {}, extra?: Partial<ApplicationConfig>): ClassDecorator {
   return (target: Class | any) => {
     config.target = target;
     config.name = name;
+    if (extra) {
+      config.params = Util.deepAssign(extra.params || [], config.params || []);
+    }
     DependencyRegistry.registerApplication(name, config as ApplicationConfig);
     return target;
   };

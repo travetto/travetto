@@ -234,14 +234,14 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return Array.from(this.applications.values());
   }
 
-  async runApplication(name: string) {
+  async runApplication(name: string, args: any[]) {
     const config = this.applications.get(name);
     if (!config) {
       throw new InjectionError(`Application: ${name} does not exist`);
     }
     const inst = await this.getInstance(config.target);
     if (inst.run) {
-      await inst.run();
+      await inst.run(...args);
     }
   }
 
