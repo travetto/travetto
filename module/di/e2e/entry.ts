@@ -5,13 +5,13 @@ class Element {
   name = 'roger';
 }
 
-@Application('test-eptest', { watchable: true, arguments: [{ name: 'age', def: '20' }] })
+@Application('test-eptest', { watchable: true })
 class EPTest {
 
   @Inject()
   el: Element;
 
-  run() {
-    console.log('Entry point for the win', this.el.name);
+  run(age = 5, format: 'html' | 'pdf' = 'html') {
+    console.log('Entry point for the win', age, typeof age, format);
   }
 }

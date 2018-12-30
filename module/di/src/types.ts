@@ -33,6 +33,7 @@ export interface Runnable {
 export interface ApplicationParameter {
   name: string;
   type?: string;
+  subtype?: string;
   meta?: any;
   def?: string;
 }
@@ -40,7 +41,7 @@ export interface ApplicationParameter {
 export interface ApplicationConfig<T = any> {
   name: string;
   description?: string;
-  arguments?: ApplicationParameter[];
+  params?: ApplicationParameter[];
   target: Class<T>;
   watchable?: boolean;
 }
