@@ -29,6 +29,7 @@ async function getApps() {
   og.call(console, JSON.stringify(res.map(x => ({
     watchable: x.watchable,
     description: x.description,
+    arguments: x.arguments,
     name: x.name,
     filename: x.target.__filename,
     id: x.target.__id
