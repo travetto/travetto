@@ -32,6 +32,8 @@ export interface Runnable {
 
 export interface ApplicationParameter {
   name: string;
+  type?: string;
+  meta?: any;
   def?: string;
 }
 

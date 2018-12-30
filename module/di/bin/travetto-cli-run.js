@@ -69,7 +69,7 @@ async function runApp(app) {
 
 //@ts-ignore
 if (require.main === module) {
-  runApp(process.argv.slice(-1)[0]); //If loaded directly as main entry, run
+  runApp(process.argv[2]); //If loaded directly as main entry, run, idx 2 is where non-node arguments start at
 } else {
   module.exports = function () {
     let listHelper;
