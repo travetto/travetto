@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/rest": "^0.5.3",
+    "@travetto/rest": "^0.5.4",
     "fastify": "^1.13.2",
     "fastify-compress": "^0.7.1",
     "fastify-cookie": "^2.1.4",
@@ -31,5 +31,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.5.3"
+  "version": "0.5.4"
 }
