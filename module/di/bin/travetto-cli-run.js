@@ -10,26 +10,44 @@ async function getAppList() {
   }
 }
 
+function envFromApp(app) {
+  return app.filename.includes('e2e') ? 'e2e' : 'dev';
+}
+
 function generateAppHelpList(apps, cmd) {
-  const lines = [];
+  const choices = [];
   for (const conf of apps) {
-    let line = conf.name;
+    let lines = [];
+    let usage = conf.name;
+
+    if (conf.arguments) {
+      usage = `${usage} ${conf.arguments.map(x => {
+        return x.def ? `(${x.name}=${x.def})` : `[${x.name}]`;
+      }).join(' ')}`
+    }
+
+    lines.push(usage);
+
     if (conf.description) {
-      line = `${line} -- ${conf.description}`;
+      lines.push(conf.description);
     }
-    const watched = cmd.watchSpecified ? cmd.watch : (conf.watchable && cmd.env !== 'prod');
-    if (watched) {
-      line = `${line} [watch=true]`;
+    const features = [];
+    if (cmd.watchReal || (conf.watchable && cmd.env !== 'prod')) {
+      features.push('Watchable');
     }
-    const env = (!cmd.envSpecified && conf.filename.includes('e2e') && 'e2e') || cmd.env;
-    line = `${line} [env=${env}]`;
-    lines.push(line);
+    features.push(`Environment ${cmd.env === undefined ? envFromApp(conf) : cmd.env}`);
+
+    lines.push(`Flags: ${features.join(', ')}`);
+
+    choices.push(lines.join('\n      '));
   }
-  return lines.map(x => `    * ${x}`).join('\n');
+  return choices.map(x => `    * ${x}`).join('\n');
 }
 
 async function runApp(app) {
   try {
+    //@ts-ignore
+    require('@travetto/base/src/env').reload();
     await require('@travetto/base/bin/bootstrap').run();
     await require('../src/registry').DependencyRegistry.runApplication(app);
   } catch (err) {
@@ -40,7 +58,7 @@ async function runApp(app) {
 
 //@ts-ignore
 if (require.main === module) {
-  runApp(process.argv.pop()); //If loaded directly as main entry, run
+  runApp(process.argv.slice(-1)[0]); //If loaded directly as main entry, run
 } else {
   module.exports = function () {
     let listHelper;
@@ -60,13 +78,13 @@ if (require.main === module) {
         }
         console.log();
       })
-      .option('-e, --env [env]', 'Application environment (dev|test|e2e|prod)', /^(dev|test|e2e|prod)$/i, 'dev')
-      .option('-w, --watch', 'Run the application in watch mode')
+      .option('-e, --env [env]', 'Application environment (dev|test|e2e|prod), defaults to dev', /^(dev|test|e2e|prod)$/i)
+      .option('-w, --watch [watch]', 'Run the application in watch mode, defaults to auto', /^(1|0|yes|no|on|off|auto|true|false)$/i)
       .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
       .action(async (app, cmd) => {
 
-        cmd.watchSpecified = cmd.watch !== undefined;
-        cmd.envSpecified = !(cmd.env === undefined || (cmd.env === 'dev' && !process.argv.find(x => x === 'dev'))); // If env is default selected
+        cmd.env = cmd.env || process.env.ENV || process.env.env || undefined;
+        cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
 
         cmd.profile = [
           ...(cmd.profile || []),
@@ -87,14 +105,8 @@ if (require.main === module) {
           }
           cmd.help();
         } else {
-          cmd.env = cmd.env || process.env.ENV || process.env.env;
-
-          if (!cmd.envSpecified && selected.filename.includes('e2e')) {
-            cmd.env = 'e2e';
-          }
-          if (!cmd.watchSpecified) {
-            cmd.watch = selected.watchable && cmd.env !== 'prod';
-          }
+          cmd.env = cmd.env !== undefined ? cmd.env : envFromApp(selected);
+          cmd.watch = cmd.watch !== undefined ? cmd.watchReal : (selected.watchable && cmd.env !== 'prod');
         }
 
         process.env.ENV = cmd.env;

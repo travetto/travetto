@@ -5,7 +5,7 @@ class Element {
   name = 'roger';
 }
 
-@Application('test-eptest', { watchable: true })
+@Application('test-eptest', { watchable: true, arguments: [{ name: 'age', def: '20' }] })
 class EPTest {
 
   @Inject()

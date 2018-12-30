@@ -30,9 +30,15 @@ export interface Runnable {
   run(): any;
 }
 
+export interface ApplicationParameter {
+  name: string;
+  def?: string;
+}
+
 export interface ApplicationConfig<T = any> {
   name: string;
   description?: string;
+  arguments?: ApplicationParameter[];
   target: Class<T>;
   watchable?: boolean;
 }
