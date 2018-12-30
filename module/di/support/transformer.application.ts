@@ -51,10 +51,12 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
               const literals = p.type.types.map(x => (x as ts.LiteralTypeNode).literal);
               type = readType(p.type.types[0]);
               subtype = 'choice';
-              meta = literals.map(x => {
-                const val = x.getText();
-                return ts.isStringLiteral(x) ? val.substring(1, val.length - 1) : val;
-              });
+              meta = {
+                choices: literals.map(x => {
+                  const val = x.getText();
+                  return ts.isStringLiteral(x) ? val.substring(1, val.length - 1) : val;
+                })
+              };
             } else {
               type = readType(typeNode as ts.TypeNode);
               if (type === 'string' && /file/.test(name)) {

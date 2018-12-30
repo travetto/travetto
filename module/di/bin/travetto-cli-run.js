@@ -61,7 +61,7 @@ function processApplicationParam(config, param) {
   if (
     (config.type === 'boolean' && !/^(true|false|1|0|yes|no|on|off)/i.test(param)) ||
     (config.type === 'number' && !/^[-]?[0-9]*[.]?[0-9]*$/.test(param)) ||
-    (config.meta && config.meta.choice && !config.meta.choice.find(c => `${c}` === param))
+    (config.meta && config.meta.choices && !config.meta.choices.find(c => `${c}` === param))
   ) {
     throw new Error(`Invalid parameter`);
   }
@@ -89,7 +89,7 @@ async function runApp(args) {
   } catch (err) {
     if (err.message === 'Invalid parameter') {
       // @ts-ignore
-      console.error('Invalid input', sub, 'expected', app.params.map(x => (x.meta && x.meta.choice) ? x.meta.choice : x.type))
+      console.error('Invalid input', sub, 'expected', app.params.map(x => (x.meta && x.meta.choices) ? x.meta.choices : x.type))
     } else {
       console.error(err && err.stack ? err.stack : err);
     }
