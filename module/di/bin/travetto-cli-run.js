@@ -46,8 +46,6 @@ function generateAppHelpList(apps, cmd) {
 
 async function runApp(app) {
   try {
-    //@ts-ignore
-    require('@travetto/base/src/env').reload();
     await require('@travetto/base/bin/bootstrap').run();
     await require('../src/registry').DependencyRegistry.runApplication(app);
   } catch (err) {
