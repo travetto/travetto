@@ -189,7 +189,7 @@ async function test() {
   });
 
   rl
-    .on('line', function(line) {
+    .on('line', function (line) {
       const space = line.indexOf(' ');
       const body = line.substring(space + 1);
       const name = line.substring(0, space - 1);
@@ -203,6 +203,12 @@ async function test() {
     })
     .on('close', () => {
       emitter.summarize();
+
+      // Clean up
+      cp.spawnSync('npx', [
+        'lerna', '--no-bail', 'exec', '--parallel', '--',
+        'npx', 'travetto', 'clean'
+      ]);
     });
 }
 

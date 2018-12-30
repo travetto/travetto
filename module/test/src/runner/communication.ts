@@ -1,9 +1,10 @@
 import * as os from 'os';
 import * as path from 'path';
 
+import { Cache } from '@travetto/base/src/cache';
 import { ExecutionPool, IdleManager, LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
 import { PhaseManager, Env, Shutdown } from '@travetto/base';
-import { AppCache } from '@travetto/base/src/cache';
+
 
 /***
   Flow of events
@@ -136,7 +137,7 @@ export function client(concurrency = os.cpus().length - 1) {
     });
 
     // Clean it up
-    Shutdown.onShutdown(`Remove-Tempdir ${key}`, () => AppCache.clear());
+    Shutdown.onShutdown(`Remove-Tempdir ${key}`, () => new Cache(Env.cwd, cacheDir).clear());
 
     worker.init();
     await worker.listenOnce(Events.READY);
