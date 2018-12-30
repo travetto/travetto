@@ -16,6 +16,11 @@ function envFromApp(app) {
 
 function generateAppHelpList(apps, cmd) {
   const choices = [];
+  apps = apps.sort((a, b) => {
+    let ae2e = envFromApp(a);
+    let be2e = envFromApp(b);
+    return ae2e === be2e ? a.name.localeCompare(b.name) : (ae2e ? b : a);
+  });
   for (const conf of apps) {
     let lines = [];
     let usage = conf.name;
@@ -26,22 +31,30 @@ function generateAppHelpList(apps, cmd) {
       }).join(' ')}`
     }
 
-    lines.push(usage);
-
-    if (conf.description) {
-      lines.push(conf.description);
-    }
     const features = [];
+    let featureStr = '';
     if (cmd.watchReal || (conf.watchable && cmd.env !== 'prod')) {
-      features.push('Watchable');
+      features.push('{watch}');
     }
-    features.push(`Environment ${cmd.env === undefined ? envFromApp(conf) : cmd.env}`);
+    if (envFromApp(conf) === 'e2e') {
+      features.push('{e2e}');
+    }
+    if (features.length) {
+      featureStr = ` | ${features.join(' ')}`;
+    }
 
-    lines.push(`Flags: ${features.join(', ')}`);
+    lines.push(`${conf.name}${featureStr}`);
+    if (conf.description) {
+      lines.push(`desc:  ${conf.description || ''}`);
+    }
+    lines.push(`usage: ${usage}`);
 
-    choices.push(lines.join('\n      '));
+    const len = lines.reduce((acc, v) => Math.max(acc, v.length), 0);
+    lines.splice(1, 0, '-'.repeat(len));
+
+    choices.push(lines.join('\n       '));
   }
-  return choices.map(x => `    * ${x}`).join('\n');
+  return choices.map(x => `     ● ${x}`).join('\n\n');
 }
 
 async function runApp(app) {
