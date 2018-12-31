@@ -7,7 +7,7 @@ const config = module.exports.CACHE_FILE = 'di-app-cache.json';
 const stat = require('util').promisify(fs.lstat);
 
 function maxTime(stat) {
-  return Math.max(stat.ctimeMs, stat.mtimeMs, stat.atimeMs);
+  return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
 }
 
 async function getApps() {
