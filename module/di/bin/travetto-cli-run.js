@@ -82,6 +82,9 @@ async function runApp(args) {
     if (app) {
       const appParams = app.params || [];
       sub = sub.map((x, i) => appParams[i] === undefined ? x : processApplicationParam(appParams[i], x));
+      if (sub.length < appParams.filter(x => x.def === undefined).length) {
+        throw new Error('Invalid parameter');
+      }
     }
 
     await require('@travetto/base/bin/bootstrap').run();
@@ -89,7 +92,10 @@ async function runApp(args) {
   } catch (err) {
     if (err.message === 'Invalid parameter') {
       // @ts-ignore
-      console.error('Invalid input', sub, 'expected', app.params.map(x => (x.meta && x.meta.choices) ? x.meta.choices : x.type))
+      console.error('usage:', app.name, app.params.map(x =>
+        `${x.name}${x.def ? `=[${x.def}]` : ''} (${(x.meta && x.meta.choices) ?
+          x.meta.choices.join('|') :
+          x.type})`.trim()).join(', '))
     } else {
       console.error(err && err.stack ? err.stack : err);
     }
