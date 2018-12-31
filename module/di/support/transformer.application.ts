@@ -59,7 +59,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
               };
             } else {
               type = readType(typeNode as ts.TypeNode);
-              if (type === 'string' && /file/.test(name)) {
+              if (type === 'string' && /file$/i.test(name)) {
                 subtype = 'file';
               }
             }
@@ -70,9 +70,15 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           return { name, def, type, subtype, meta };
         });
 
+        const declArgs = [...foundDec.expression.arguments];
+
+        if (foundDec.expression.arguments.length === 1) {
+          declArgs.push(TransformUtil.fromLiteral({}));
+        }
+
         foundDec.expression.arguments = ts.createNodeArray([
-          ...foundDec.expression.arguments,
-          TransformUtil.fromLiteral({ params: outParams })
+          ...declArgs,
+          TransformUtil.fromLiteral(outParams)
         ]);
 
         const decls = node.decorators;

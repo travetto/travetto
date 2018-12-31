@@ -3,6 +3,12 @@
 //@ts-check
 
 const fs = require('fs');
+const config = module.exports.CACHE_FILE = 'di-app-cache.json';
+const stat = require('util').promisify(fs.lstat);
+
+function maxTime(stat) {
+  return Math.max(stat.ctimeMs, stat.mtimeMs, stat.atimeMs);
+}
 
 async function getApps() {
   // Suppress all output
@@ -26,14 +32,17 @@ async function getApps() {
   //Get applications
   const res = require('../src/registry').DependencyRegistry.getApplications();
 
-  og.call(console, JSON.stringify(res.map(x => ({
+  const items = Promise.all(res.map(async x => ({
     watchable: x.watchable,
     description: x.description,
     params: x.params,
     name: x.name,
+    generatedTime: maxTime(await stat(x.target.__filename)),
     filename: x.target.__filename,
     id: x.target.__id
-  }))));
+  })));
+
+  og.call(console, JSON.stringify(await items));
 }
 
 function fork(cmd, args) {
@@ -56,17 +65,29 @@ function fork(cmd, args) {
 }
 
 module.exports.getCachedAppList = async function getCachedAppList() {
-  const config = 'di-app-cache.json';
   const { AppCache } = require('@travetto/base/src/cache');
+  try {
+    //Read cache it
+    if (!AppCache.hasEntry(config)) {
+      const text = await fork(__filename);
+      AppCache.writeEntry(config, text);
+    }
+    const text = AppCache.readEntry(config);
+    const res = JSON.parse(text);
 
-  //Read cache it
-  if (!AppCache.hasEntry(config)) {
-    const text = await fork(__filename);
-    AppCache.writeEntry(config, text);
+    for (const el of res) {
+      const elStat = await stat(el.filename);
+      // invalidate cache if changed
+      if (maxTime(elStat) > el.generatedTime) {
+        AppCache.removeExpiredEntry(config, true);
+        return getCachedAppList();
+      }
+    }
+    return res;
+  } catch (e) {
+    AppCache.removeExpiredEntry(config, true);
+    throw e;
   }
-
-  const text = AppCache.readEntry(config);
-  return JSON.parse(text);
 }
 
 //@ts-ignore
