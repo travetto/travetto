@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^0.5.4",
+    "@travetto/auth-rest": "^0.5.5",
     "@types/passport": "^0.4.7",
     "passport": "^0.4.0"
   },
@@ -29,5 +29,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.5.4"
+  "version": "0.5.5"
 }
