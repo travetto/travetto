@@ -104,6 +104,10 @@ User Tooling
   - [x] Convert all current CLI scripts into cohesive unit
   - [x] Create new CLI experience for Swagger
   - [x] Create new CLI for email template testing/compiling
+- [x] Plugin Features
+  - [x] Rerun all tests via command
+  - [x] Export application setup for more config
+  - [x] Provide debug config for plugin
 
 Auth Support
 ------------------------
