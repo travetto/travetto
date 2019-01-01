@@ -25,6 +25,7 @@ class Count {
 }
 
 @Schema(true)
+@View('test', { with: ['address', 'counts'] })
 class Person {
 
   name: string;
@@ -34,10 +35,8 @@ class Person {
   @Integer()
   age: number;
 
-  @View('test')
   address: Address;
 
-  @View('test')
   @Field([Count])
   counts: Count[];
 }

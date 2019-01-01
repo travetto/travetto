@@ -78,13 +78,10 @@ class Nested {
 }
 
 @Schema()
+@View('profile', { with: ['name', 'address'] })
 class ViewSpecific {
   id: string;
-
-  @View('profile')
   name: string;
-
-  @View('profile')
   address: Address;
 }
 
@@ -284,7 +281,7 @@ class Validation {
     });
 
     assert.rejects(() => {
-      const o = DateTestSchema.fromRaw({ date: null });
+      const o = DateTestSchema.fromRaw({ date: undefined });
       return SchemaValidator.validate(o);
     }, (err: any) => {
       if (!(err instanceof ValidationErrors && err.errors[0].kind === 'required')) {

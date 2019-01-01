@@ -1,6 +1,6 @@
 import { MetadataRegistry, RootRegistry, Class, ChangeEvent } from '@travetto/registry';
 import { Env } from '@travetto/base';
-import { ClassList, FieldConfig, ClassConfig, DEFAULT_VIEW } from './types';
+import { ClassList, FieldConfig, ClassConfig, ALL_VIEW, SchemaConfig, ViewFieldsConfig } from './types';
 import {
   SchemaChangeListener,
   SchemaChangeEvent, FieldChangeEvent,
@@ -10,6 +10,7 @@ import {
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
   subTypes = new Map<Class, Map<string, Class>>();
+  pendingViews = new Map<Class, Map<string, ViewFieldsConfig<any>>>();
 
   constructor() {
     super(RootRegistry);
@@ -51,7 +52,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.get(cls));
 
     // Read children
-    const view = config.views[DEFAULT_VIEW];
+    const view = config.views[ALL_VIEW];
     for (const k of view.fields) {
       if (this.has(view.schema[k].type)) {
         this.computeSchemaDependencies(cls, view.schema[k].type, [...path, k]);
@@ -64,7 +65,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
       class: cls,
       validators: [],
       views: {
-        [DEFAULT_VIEW]: {
+        [ALL_VIEW]: {
           schema: {},
           fields: []
         }
@@ -72,63 +73,36 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     };
   }
 
-  getPendingViewSchema<T>(cls: Class<T>, view?: string) {
-    view = view || DEFAULT_VIEW;
-
-    if (cls.__id) {
-      const conf = this.getOrCreatePending(cls);
-      return conf.views![view].schema;
-    } else {
-      return;
-    }
-  }
-
   getViewSchema<T>(cls: Class<T>, view?: string) {
+    view = view || ALL_VIEW;
+
     const schm = this.get(cls)!;
     if (!schm) {
       throw new Error(`Unknown schema class ${cls.name}`);
     }
-    const res = schm.views[view || DEFAULT_VIEW];
+    const res = schm.views[view];
     if (!res) {
-      throw new Error(`Unknown view ${view || DEFAULT_VIEW} for ${cls.name}`);
+      throw new Error(`Unknown view ${view} for ${cls.name}`);
     }
     return res;
   }
 
-  getOrCreatePendingViewConfig<T>(target: Class<T>, view?: string) {
-    view = view || DEFAULT_VIEW;
-
-    const conf = this.getOrCreatePending(target);
-
-    let viewConf = conf.views![view];
-    if (!viewConf) {
-      viewConf = conf.views![view] = {
-        schema: {},
-        fields: []
-      };
+  registerPendingView<T>(target: Class<T>, view: string, fields: ViewFieldsConfig<T>) {
+    if (!this.pendingViews.has(target)) {
+      this.pendingViews.set(target, new Map());
     }
-    return viewConf;
+    this.pendingViews.get(target)!.set(view, fields);
   }
 
-  registerPendingFieldFacet(target: Class, prop: string, config: any, view?: string) {
-    view = view || DEFAULT_VIEW;
+  registerPendingFieldFacet(target: Class, prop: string, config: any) {
+    const allViewConf = this.getOrCreatePending(target).views![ALL_VIEW];
 
-    const defViewConf = this.getOrCreatePendingViewConfig(target);
-
-    if (!defViewConf.schema[prop]) {
-      defViewConf.fields.push(prop);
-      defViewConf.schema[prop] = {} as any;
+    if (!allViewConf.schema[prop]) {
+      allViewConf.fields.push(prop);
+      allViewConf.schema[prop] = {} as any;
     }
 
-    if (view !== DEFAULT_VIEW) {
-      const viewConf = this.getOrCreatePendingViewConfig(target, view);
-      if (!viewConf.schema[prop]) {
-        viewConf.schema[prop] = defViewConf.schema[prop];
-        viewConf.fields.push(prop);
-      }
-    }
-
-    Object.assign(defViewConf.schema[prop], config);
+    Object.assign(allViewConf.schema[prop], config);
 
     return target;
   }
@@ -147,23 +121,36 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   mergeConfigs(dest: ClassConfig, src: ClassConfig) {
-    for (const v of Object.keys(src.views)) {
-      const view = src.views[v];
-      if (v in dest.views) {
-        dest.views[v] = {
-          schema: { ...dest.views[v].schema, ...view.schema },
-          fields: (dest.views[v].fields).concat(view.fields)
-        };
-      } else {
-        dest.views[v] = {
-          schema: { ...(view.schema || {}) },
-          fields: view.fields.slice(0)
-        };
-      }
-    }
+    dest.views[ALL_VIEW] = {
+      schema: { ...dest.views[ALL_VIEW].schema, ...src.views[ALL_VIEW].schema },
+      fields: [...dest.views[ALL_VIEW].fields, ...src.views[ALL_VIEW].fields]
+    };
     dest.title = src.title || dest.title;
     dest.validators = [...src.validators, ...dest.validators];
     return dest;
+  }
+
+  finalizeViews<T>(target: Class<T>, conf: ClassConfig) {
+    const allViewConf = conf.views![ALL_VIEW];
+    const pending = this.pendingViews.get(target) || new Map();
+    this.pendingViews.delete(target);
+
+    for (const [view, fields] of pending.entries()) {
+      const withoutSet = fields.without ? new Set(fields.without as string[]) : undefined;
+      const fieldList = withoutSet ?
+        allViewConf.fields.filter(x => !withoutSet.has(x)) :
+        fields.with as string[];
+
+      conf.views![view] = {
+        fields: fieldList as string[],
+        schema: fieldList.reduce((acc, v) => {
+          acc[v] = allViewConf.schema[v];
+          return acc;
+        }, {} as SchemaConfig)
+      };
+    }
+
+    return conf;
   }
 
   onInstallFinalize(cls: Class) {
@@ -181,11 +168,14 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
 
     this.registerSubTypes(cls, this.getDefaultSubTypeName(cls));
 
-    // Merge pending
+    // Merge pending, back on top, to allow child to have higher precedence
     const pending = this.getOrCreatePending(cls);
     if (pending) {
       config = this.mergeConfigs(config, pending as ClassConfig);
     }
+
+    // Write views out
+    config = this.finalizeViews(cls, config);
 
     return config;
   }

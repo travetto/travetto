@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaValidator, DEFAULT_VIEW, SchemaRegistry, ValidationError } from '@travetto/schema';
+import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Env, Util, BaseError } from '@travetto/base';
 
@@ -57,7 +57,7 @@ export class ModelService implements IModelSource {
   /** Handles any pre-persistance activities needed */
   async prePersist<T extends ModelCore>(cls: Class<T>, o: T): Promise<T>;
   async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string): Promise<Partial<T>>;
-  async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T> | T, view: string = DEFAULT_VIEW) {
+  async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T> | T, view: string = ALL_VIEW) {
     if (o.prePersist) {
       o.prePersist();
     }
