@@ -12,10 +12,6 @@ Rest
   - [ ] Deployment
   - [ ] Serverless framework?
 
-Schema
------------------------
-- [ ] Views, exclude fields vs include
-
 Base
 -----------------------
 - [ ] Watcher to use FSEvents

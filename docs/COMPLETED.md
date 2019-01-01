@@ -108,6 +108,7 @@ User Tooling
   - [x] Rerun all tests via command
   - [x] Export application setup for more config
   - [x] Provide debug config for plugin
+  - [x] Test failures, and "stuckness"
 
 Auth Support
 ------------------------
