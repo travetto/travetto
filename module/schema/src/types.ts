@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
 import { ValidationError } from './service/validator';
 
-export const DEFAULT_VIEW = '__all';
+export const ALL_VIEW = '__all';
 
 export type ClassList = Class | [Class];
 
@@ -43,3 +43,5 @@ export interface FieldConfig extends DescribableConfig {
   maxlength?: { n: number, message?: string };
   enum?: { values: any[], message: string };
 }
+
+export type ViewFieldsConfig<T> = { with: (keyof T)[] } | { without: (keyof T)[] };

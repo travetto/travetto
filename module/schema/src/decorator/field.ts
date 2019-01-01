@@ -78,14 +78,6 @@ export const Integer = () => Precision(0);
 export const Float = () => Precision(10, 7);
 export const Currency = () => Precision(13, 2);
 
-export function View(...names: string[]) {
-  return (f: any, p: string) => {
-    for (const name of names) {
-      SchemaRegistry.registerPendingFieldFacet(f.constructor, p, {}, name);
-    }
-  };
-}
-
 // For Auto schemas
 export function Ignore(): PropertyDecorator {
   return (target: any, property: string | symbol) => { };

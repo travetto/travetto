@@ -1,6 +1,6 @@
 import { ControllerRegistry, MimeType, EndpointClassType } from '@travetto/rest';
 import { Class } from '@travetto/registry';
-import { SchemaRegistry, DEFAULT_VIEW } from '@travetto/schema';
+import { SchemaRegistry, ALL_VIEW } from '@travetto/schema';
 
 import { Spec, Parameter, Path, Response, Schema, Operation } from './types';
 import { ApiClientConfig } from './config';
@@ -57,7 +57,7 @@ export class SpecGenerateUtil {
         const config = SchemaRegistry.get(type);
         if (config) {
           const properties: { [key: string]: Schema } = {};
-          const def = config.views[DEFAULT_VIEW];
+          const def = config.views[ALL_VIEW];
           const required = [];
 
           for (const fieldName of def.fields) {

@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '../registry';
-import { ValidatorFn } from '../types';
+import { ValidatorFn, ViewFieldsConfig } from '../types';
 
 export function Schema(auto: boolean = true): ClassDecorator { // Auto is used during compilation
   return (<T>(target: Class<T>): Class<T> => {
@@ -12,5 +12,11 @@ export function Schema(auto: boolean = true): ClassDecorator { // Auto is used d
 export function Validator<T>(fn: ValidatorFn<T, string>) {
   return (target: Class<T>) => {
     SchemaRegistry.getOrCreatePending(target).validators!.push(fn);
+  };
+}
+
+export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
+  return (target: Class<T>) => {
+    SchemaRegistry.registerPendingView(target, name, fields);
   };
 }
