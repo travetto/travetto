@@ -5,7 +5,6 @@ import { Cache } from '@travetto/base/src/cache';
 import { ExecutionPool, IdleManager, LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
 import { PhaseManager, Env, Shutdown } from '@travetto/base';
 
-
 /***
   Flow of events
 
@@ -82,27 +81,27 @@ export async function server() {
       // Clear require cache of all data loaded minus base framework pieces
       console.debug('Resetting', Object.keys(require.cache).length);
 
-      for (const k of Object.keys(require.cache)) {
-        if (/node_modules/.test(k) && (!/@travetto/.test(k) || /@travetto\/[^/]+\/node_modules/.test(k))) {
-          continue;
-        }
-        if (k.endsWith('.ts') &&
-          !/@travetto[\/\\](base|config|compiler|exec|pool)/.test(k) &&
-          !(k.startsWith(__filename.replace(/.[tj]s$/, ''))) &&
-          !/support\/(phase|transformer)[.]/.test(k)
-        ) {
-          Compiler.unload(k, false);
-        }
-      }
-
-      // Reload runner
-      Compiler.reset();
-      Shutdown.execute(-1);
-      const { Runner } = await import('./runner');
-
-      console.debug('*Running*', data.file);
-
       try {
+        for (const k of Object.keys(require.cache)) {
+          if (/node_modules/.test(k) && (!/@travetto/.test(k) || /@travetto\/[^/]+\/node_modules/.test(k))) {
+            continue;
+          }
+          if (k.endsWith('.ts') &&
+            !/@travetto[\/\\](base|config|compiler|exec|pool)/.test(k) &&
+            !(k.startsWith(__filename.replace(/.[tj]s$/, ''))) &&
+            !/support\/(phase|transformer)[.]/.test(k)
+          ) {
+            Compiler.unload(k, false);
+          }
+        }
+
+        // Reload runner
+        Compiler.reset();
+        Shutdown.execute(-1);
+        const { Runner } = await import('./runner');
+
+        console.debug('*Running*', data.file);
+
         await new Runner({
           format: 'exec',
           mode: 'single',
