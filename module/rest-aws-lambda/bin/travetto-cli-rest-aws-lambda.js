@@ -33,7 +33,7 @@ module.exports = function () {
       exec(`cp -r * ${cmd.workspace}`, { cwd });
 
       FsUtil.writeFile(`${cmd.workspace}/index.js`,
-        'process.env.TS_CACHE_DIR = `${__dirname}/cache`;\n' +
+        'process.env.TRV_CACHE_DIR = `${__dirname}/cache`;\n' +
         FsUtil.readFile(`${__dirname}/../resources/lambda.js`));
 
       await dependOn('compile', ['-o', './cache', '-r', '/var/task'], cmd.workspace);

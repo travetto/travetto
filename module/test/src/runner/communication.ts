@@ -1,5 +1,4 @@
 import * as os from 'os';
-import * as path from 'path';
 
 import { Cache } from '@travetto/base/src/cache';
 import { ExecutionPool, IdleManager, LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
@@ -46,6 +45,8 @@ export const Events = {
 };
 
 export async function server() {
+
+  Shutdown.onShutdown(`Remove-Tempdir`, () => new Cache(Env.cwd).clear(), true);
 
   let Compiler: any;
 
@@ -126,17 +127,7 @@ export async function server() {
 
 export function client(concurrency = os.cpus().length - 1) {
   return new ExecutionPool(async () => {
-    const name = Env.cwd.replace(/[\\\/:]/g, '_');
-    const key = `${Math.random()}`.replace(/[.]/g, '_');
-    const cacheDir = `${path.join(os.tmpdir(), name)}_${key}`;
-
-    const worker = new ChildExecution(require.resolve('../../bin/travetto-test-server'), true, {
-      cwd: Env.cwd,
-      env: { TS_CACHE_DIR: cacheDir }
-    });
-
-    // Clean it up
-    Shutdown.onShutdown(`Remove-Tempdir ${key}`, () => new Cache(Env.cwd, cacheDir).clear());
+    const worker = new ChildExecution(require.resolve('../../bin/travetto-test-server'), true, { cwd: Env.cwd });
 
     worker.init();
     await worker.listenOnce(Events.READY);

@@ -84,7 +84,7 @@ export async function watch() {
 
   const all = client().process(
     new QueueExecutionSource(queue),
-    async (conf, exe: ChildExecution) => {
+    async (conf, exe: ChildExecution<any>) => { // TODO: Type incompatibility with ExecutionEvent and TestEvent
       exe.listen(consumer.onEvent.bind(consumer));
       let event: any;
       if (isSuite(conf)) {
