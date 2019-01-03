@@ -137,7 +137,7 @@ class ManualLookup {
 }
 ```
 
-## Application
+## `@Application`
 Given that dependency injection is generally a pre-requisite for application execution, it stands as the primary entrypoint for application invocation.  The [`Base`](https://github.com/travetto/travetto/tree/master/module/base) provides a simplistic bootstrap to allow for the application to run, but that is not sufficient for more complex applications.
 
 The module provides a decorator, `@Application` who's job is to register entry points into the application.  For example:
@@ -167,32 +167,78 @@ class SimpleApp {
 }
 ```
 
-Will expose an entrypoint named 'simple'.  This additionally allows for other entry points to be named for handling specific use cases.  An additional entry point could look like:
+The `@Application` decorator exposes some additional functionality, which can be used to launch the application. 
 
-**Code: Example of multiple @Application support**
+### `.run()` Arguments
+
+The arguments specified in the `run` method, will now be able to be specified when invoking the application from the command line.  For instance:
+
+**Code: Simple Entrypoint with Parameters**
 ```typescript
-import { Application, Inject, Injectable } from '../';
-
-@Injectable()
-class Server {
-  name = 'roger';
-  config = { ... };
-
-  async launch() {
-    ...
-  }
-}
-
-@Application('config', { watchable: true })
-class ConfigApp {
-
-  @Inject()
-  server: Server
-
-  async run() {
-    console.log(server.configuration);
+@Application('simple')
+class SimpleApp {
+  async run(domain: string, port = 3000) {
+    console.log('Launching', domain, 'on port', port);
   }
 }
 ```
 
-This additional entry point will also default to a watch mode that can still be overridden via the command line flags.
+These command line invocation of `travetto run` would look like:
+
+**Terminal: Sample CLI Output**
+```bash
+$ travetto run
+....
+
+     ● simple | {e2e}
+       ----------------------------------
+       usage: simple [domain] (port=3000)
+```
+
+To invoke the `simple` application, you need to pass `domain` where port is optional with a default.
+
+**Terminal: Invoke Simple**
+```bash
+$ travetto run simple mydomain.biz 4000
+
+[INFO] Launching mydomain.biz on port 4000
+```
+
+Additionally, the parameters will be type checked, to ensure proper evaluation.
+
+**Terminal: Invoke Simple with bad port**
+```bash
+$ travetto run simple mydomain.biz orange
+usage: simple domain (string), port=[3000] (number)
+```
+
+The types are inferred from the `.run()` method parameters, but can be overridden in the `@Application` annotation to support customization. Only primitive types are supported:
+* `number` - Float or decimal
+* `string` - Default if no type is specified
+* `boolean` - true(yes/on/1) and false(no/off/0)
+* `union` - Type unions of the same type (`string_a|string_b` or `1|2|3|4`)
+
+Customizing the types is done by name, and allows for greater control:
+
+**Code: Complex Entrypoint with Customization**
+```typescript
+@Application('complex', {
+  watchable: true,
+  paramMap: {
+    domain: {
+      title: 'Domain Name',
+      type: 'string',
+      subtype: 'url'      
+    },
+    port : {
+      title: 'Server Port',
+      def: 3000
+    }
+  }
+})
+class ComplexApp {
+  async run(domain: string, port: number) {
+    console.log('Launching', domain, 'on port', port);
+  }
+}
+```
