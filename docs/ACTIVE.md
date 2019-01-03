@@ -14,10 +14,14 @@ Serverless Initiative
   - [ ] Auto deployment of application
   - [x] CLI entry point to facilitate
 
+Model Enhancements
+--------------------------
+- [ ] SQL - as a doc store, limited functionality
+  - [ ] Model support for SQL databases
+  - [ ] Might need to be a whole new set of sql operations
+  - [x] Using Sequelize?
+  - [x] Already supports most of the needed features, might be an easy win  
+
 Auth
 --------------------------
 - [ ] Move to JWT as session store, prep for Lambda
-
-Schema
------------------------
-- [?] Views, exclude fields vs include
