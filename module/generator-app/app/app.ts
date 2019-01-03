@@ -91,10 +91,10 @@ export default class extends Generator {
   }
 
   async _templateFiles(context: Context) {
-    const files = require(path.resolve(this.sourceRoot(), 'listing.js')) as { [key: string]: { required?: string[] } };
+    const files = require(path.resolve(this.sourceRoot(), 'listing.js')) as { [key: string]: { requires?: string[] } };
     for (const key of Object.keys(files)) {
       const conf = files[key];
-      if (conf.required && !meetsRequirement(context.depList, conf.required)) {
+      if (conf.requires && !meetsRequirement(context.depList, conf.requires)) {
         continue;
       }
       this.fs.copyTpl(this.templatePath(`${key}.ejs`), this.destinationPath(key), context);

@@ -79,6 +79,10 @@ Model Library
 - [x] Elasticsearch
   - [x] Schema management
 
+Schema
+-----------------------
+- [x] Views, exclude fields vs include
+
 Library Reduction
 ---------------
 - [x] JWT Lib
