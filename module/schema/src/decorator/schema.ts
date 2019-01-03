@@ -16,7 +16,7 @@ export function Validator<T>(fn: ValidatorFn<T, string>) {
 }
 
 export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
-  return (target: Class<T>) => {
+  return (target: Class<Partial<T>>) => {
     SchemaRegistry.registerPendingView(target, name, fields);
   };
 }

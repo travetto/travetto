@@ -93,7 +93,7 @@ class Grade {
 }
 
 @Schema()
-@Validator((o: any) => {
+@Validator((o: CustomValidated) => {
   if ((o.age + o.age2) % 2 === 0) {
     return {
       kind: 'custom',
