@@ -17,6 +17,7 @@ const ASSERT_FN_OPERATOR: { [key: string]: string } = {
 };
 
 const OP_MAPPING: { [key: string]: string } = {
+  ok: '{actual} {state} {expected}',
   includes: '{actual} {state} include {expected}',
   test: '{expected} {state} match {actual}',
   throws: '{state} throw {expected}',
@@ -134,9 +135,8 @@ export class AssertUtil {
     } else if (fn === 'ok' || fn === 'assert') {
       assertion.actual = args[0];
       assertion.message = args[1];
-      assertion.expected = { toClean: () => positive ? 'truthy' : 'falsy' };
-      assertion.operator = '';
-      common.state = 'should';
+      assertion.expected = { toClean: () => 'truthy' };
+      assertion.operator = 'ok';
     } else if (fn === 'includes') {
       assertion.operator = fn;
       assertion.message = args[2];

@@ -5,7 +5,7 @@ const px = process.exit;
 const MAX_SHUTDOWN_TIME = parseInt(Env.get('MAX_SHUTDOWN_WAIT', '2000'), 10);
 
 export class Shutdown {
-  private static listeners: { name: string, handler: Function }[] = [];
+  private static listeners: { name: string, handler: Function, final?: boolean }[] = [];
   private static shutdownCode = -1;
 
   private static async _execute(exitCode: number = 0, err?: any) {
@@ -21,15 +21,16 @@ export class Shutdown {
 
     this.shutdownCode = exitCode;
 
-    const listeners = this.listeners.slice(0);
-    this.listeners = [];
+    // Get valid listeners depending on lifecycle
+    const listeners = this.listeners.filter(x => exitCode >= 0 || !x.final);
+
+    // Retain unused listeners for final attempt, if needed
+    this.listeners = this.listeners.filter(x => exitCode < 0 && x.final);
 
     try {
       if (err && typeof err !== 'number') {
         Env.error(err);
       }
-
-      this.listeners = [];
 
       const promises: Promise<any>[] = [];
 
@@ -84,8 +85,8 @@ export class Shutdown {
     });
   }
 
-  static onShutdown(name: string, handler: Function) {
-    this.listeners.push({ name, handler });
+  static onShutdown(name: string, handler: Function, final = false) {
+    this.listeners.push({ name, handler, final });
   }
 
   static execute(exitCode: number = 0, err?: any) {
