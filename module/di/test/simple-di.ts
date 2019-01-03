@@ -155,4 +155,3 @@ class DiTest2 {
     assert(specInst instanceof SpecificPattern);
   }
 }
-

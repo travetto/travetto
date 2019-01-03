@@ -158,11 +158,13 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       }
     } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) {
       const ident = exp.expression;
+      const fn = exp.name.escapedText.toString();
       if (ident.escapedText === ASSERT_CMD) {
-        if (/^(doesNot)?(Throw|Reject)s?$/i.test(exp.name.escapedText.toString())) {
-          node = doThrows(state, node, exp.name.escapedText.toString(), [...node.arguments]) as T;
+        if (/^(doesNot)?(Throw|Reject)s?$/i.test(fn)) {
+          node = doThrows(state, node, fn, [...node.arguments]) as T;
         } else {
-          node = doAssert(state, node, getCommand(node.arguments)!);
+          const sub = { ...getCommand(node.arguments)!, fn };
+          node = doAssert(state, node, sub);
         }
         replaced = true;
       }
