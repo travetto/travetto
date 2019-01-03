@@ -1,6 +1,6 @@
 {
   "name": "@travetto/jwt",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "JSON Web Token implementation",
   "main": "index.js",
   "repository": {
@@ -20,11 +20,11 @@
     "url": "https://github.com/travetto/jwt/issues"
   },
   "dependencies": {
-    "@travetto/base": "^0.5.3",
+    "@travetto/base": "^0.5.4",
     "@types/jws": "^3.1.1",
     "jws": "^3.1.5"
   },
   "devDependencies": {
-    "@travetto/test": "^0.5.2"
+    "@travetto/test": "^0.5.4"
   }
 }
