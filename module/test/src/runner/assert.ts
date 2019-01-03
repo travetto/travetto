@@ -39,7 +39,9 @@ const OP_MAPPING: { [key: string]: string } = {
 };
 
 function clean(val: any) {
-  if (val === null || val === undefined || (!(val instanceof RegExp) && Util.isPrimitive(val)) || Util.isPlainObject(val) || Array.isArray(val)) {
+  if (val && val.toClean) {
+    return val.toClean();
+  } else if (val === null || val === undefined || (!(val instanceof RegExp) && Util.isPrimitive(val)) || Util.isPlainObject(val) || Array.isArray(val)) {
     return JSON.stringify(val);
   } else {
     if (val.__id || !val.constructor || (!val.constructor.__id && Util.isFunction(val))) {
@@ -132,8 +134,9 @@ export class AssertUtil {
     } else if (fn === 'ok' || fn === 'assert') {
       assertion.actual = args[0];
       assertion.message = args[1];
-      assertion.expected = true;
+      assertion.expected = { toClean: () => positive ? 'truthy' : 'falsy' };
       assertion.operator = '';
+      common.state = 'should';
     } else if (fn === 'includes') {
       assertion.operator = fn;
       assertion.message = args[2];
@@ -152,11 +155,11 @@ export class AssertUtil {
     }
 
     try {
-      if (assertion.actual) {
+      if (assertion.actual !== undefined) {
         assertion.actual = clean(assertion.actual);
       }
 
-      if (assertion.expected) {
+      if (assertion.expected !== undefined) {
         assertion.expected = clean(assertion.expected);
       }
 
@@ -181,7 +184,7 @@ export class AssertUtil {
     } catch (e) {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
-          assertion.message = (OP_MAPPING[fn] || `{ state } be { expected }`);
+          assertion.message = (OP_MAPPING[fn] || `{state} be {expected}`);
         }
         assertion.message = assertion.message
           .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || (assertion as any)[k])

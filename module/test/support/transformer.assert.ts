@@ -162,7 +162,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         if (/^(doesNot)?(Throw|Reject)s?$/i.test(exp.name.escapedText.toString())) {
           node = doThrows(state, node, exp.name.escapedText.toString(), [...node.arguments]) as T;
         } else {
-          node = doAssert(state, node, { fn: exp.name.escapedText as string, args: [...node.arguments] });
+          node = doAssert(state, node, getCommand(node.arguments)!);
         }
         replaced = true;
       }

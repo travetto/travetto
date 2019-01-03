@@ -1,7 +1,7 @@
 import { Schema, View } from '../';
 
 @Schema()
-@View('login', { with: ['street1', 'city'] })
+@View('login', { with: ['street1', 'city', 'street3'] })
 class Address {
   street1: string;
   street2?: string;
