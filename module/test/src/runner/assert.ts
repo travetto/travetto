@@ -135,8 +135,9 @@ export class AssertUtil {
     } else if (fn === 'ok' || fn === 'assert') {
       assertion.actual = args[0];
       assertion.message = args[1];
-      assertion.expected = { toClean: () => 'truthy' };
-      assertion.operator = 'ok';
+      assertion.expected = { toClean: () => positive ? 'truthy' : 'falsy' };
+      common.state = 'should';
+      fn = assertion.operator = 'ok';
     } else if (fn === 'includes') {
       assertion.operator = fn;
       assertion.message = args[2];
@@ -169,13 +170,12 @@ export class AssertUtil {
         case 'lessThanEqual': asrt(args[0] <= args[1], args[2]); break;
         case 'greaterThan': asrt(args[0] > args[1], args[2]); break;
         case 'greaterThanEqual': asrt(args[0] >= args[1], args[2]); break;
+        case 'ok': asrt.apply(null, args as any); break;
         default:
           if (fn && (assert as any)[fn]) { // Assert call
             (assert as any)[fn].apply(null, args);
           } else if (args[1] && fn && args[1][fn]) { // Method call
             asrt(args[1][fn](args[0]));
-          } else {
-            asrt.apply(null, args as any); // Do normal
           }
       }
 
