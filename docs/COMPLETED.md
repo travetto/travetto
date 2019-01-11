@@ -1,6 +1,10 @@
 Completed Tasks
 ==============
 
+Exec
+-----------------------
+- [X] Modify spawn to take in command and args, not full string
+
 Tests
 -------------------
 - [x] Test runner returning non-0 exit code

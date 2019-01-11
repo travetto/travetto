@@ -10,7 +10,7 @@ export class TemplateUtil {
     image: 'agregad/pngquant',
     checkForLocal: async () => {
       try {
-        return (await ExecUtil.spawn('pngquant -h')[1]).valid;
+        return (await ExecUtil.spawn('pngquant', ['-h'])[1]).valid;
       } catch (e) {
         return false;
       }

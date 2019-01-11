@@ -68,21 +68,23 @@ export class ExecUtil {
     return prom;
   }
 
-  static spawn(cmdStr: string, options: WithOpts<cp.SpawnOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
-    const { cmd, args } = ExecUtil.getArgs(cmdStr);
+  static spawn(cmd: string, args: string[], options: WithOpts<cp.SpawnOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
+    args = args.map(x => `${x}`);
     const p = cp.spawn(cmd, args, { shell: true, ...(options as cp.SpawnOptions) });
-    return [p, ExecUtil.enhanceProcess(p, options, cmdStr)];
+    return [p, ExecUtil.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`)];
   }
 
-  static fork(cmdStr: string, options: WithOpts<cp.ForkOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
-    const { cmd, args } = ExecUtil.getArgs(cmdStr);
+  static fork(cmd: string, args: string[], options: WithOpts<cp.ForkOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
+    args = args.map(x => `${x}`);
     const p = cp.fork(cmd, args, options);
-    return [p, ExecUtil.enhanceProcess(p, options, cmdStr)];
+    return [p, ExecUtil.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`)];
   }
 
-  static exec(cmd: string, options: WithOpts<cp.ExecOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
-    const p = cp.exec(cmd, options);
-    return [p, ExecUtil.enhanceProcess(p, options, cmd)];
+  static exec(cmd: string, args: string[], options: WithOpts<cp.ExecOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
+    args = args.map(x => `${x}`);
+    const cmdStr = `${cmd} ${args.join(' ')}`;
+    const p = cp.exec(cmdStr, options);
+    return [p, ExecUtil.enhanceProcess(p, options, cmdStr)];
   }
 
   static serializeError(e: Error | any) {

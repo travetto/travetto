@@ -8,8 +8,8 @@ import { Shutdown, ScanFs, ScanEntry, Env, FsUtil } from '@travetto/base';
 import { CommonProcess, ExecutionResult } from './types';
 import { ExecUtil, WithOpts } from './util';
 
-function exec(command: string, opts?: WithOpts<child_process.SpawnOptions>) {
-  return ExecUtil.spawn(command, { shell: false, ...opts })[1];
+function exec(command: string, args: string[], opts?: WithOpts<child_process.SpawnOptions>) {
+  return ExecUtil.spawn(command, args, { shell: false, ...opts })[1];
 }
 
 function execSync(command: string) {
@@ -70,12 +70,7 @@ export class DockerContainer {
   }
 
   private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
-    const cmd = ([
-      this.cmd,
-      op,
-      ...(args || []).map((x: any) => `${x}`)
-    ]).join(' ');
-    const [proc, prom] = ExecUtil.spawn(cmd, { shell: this.tty });
+    const [proc, prom] = ExecUtil.spawn(this.cmd, [op, ...(args || [])], { shell: this.tty });
     if (op !== 'run' && op !== 'exec') {
       prom.catch(e => { this.evict = true; });
     }
@@ -253,13 +248,13 @@ export class DockerContainer {
     this.runAway = this.runAway || runAway;
 
     try {
-      await exec(`${this.cmd} kill ${this.container}`);
+      await exec(this.cmd, ['kill', this.container]);
     } catch (e) { /* ignore */ }
 
     console.debug('Removing', this.image, this.container);
 
     try {
-      await exec(`${this.cmd} rm -fv ${this.container}`);
+      await exec(this.cmd, ['rm', '-fv', this.container]);
     } catch (e) { /* ignore */ }
 
     delete this._proc;
@@ -319,9 +314,9 @@ export class DockerContainer {
 
   async removeDanglingVolumes() {
     try {
-      const ids = (await exec(`${this.cmd} volume ls -qf dangling=true`)).stdout.trim();
+      const ids = (await exec(this.cmd, ['volume', 'ls', '-qf', 'dangling=true'])).stdout.trim();
       if (ids) {
-        await exec(`${this.cmd} volume rm ${ids.split('\n').join(' ')}`);
+        await exec(this.cmd, ['volume', 'rm', ...ids.split('\n')]);
       }
     } catch (e) {
       // error

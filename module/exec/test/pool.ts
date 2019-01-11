@@ -10,7 +10,7 @@ export class PoolExecTest {
 
     const pool = new ExecutionPool<ChildExecution>(async () => {
       console.log('Initializing child');
-      const child = new ChildExecution(`${__dirname}/simple.child-launcher.js`, true, {
+      const child = new ChildExecution(`${__dirname}/simple.child-launcher.js`, [], true, {
         env: { SRC: './simple.child' }
       });
       child.init();
