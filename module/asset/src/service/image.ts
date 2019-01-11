@@ -16,7 +16,7 @@ export class ImageService {
   converter = new CommandService({
     image: 'v4tech/imagemagick',
     checkForLocal: async () => {
-      return (await ExecUtil.spawn('convert --version')[1]).valid;
+      return (await ExecUtil.spawn('convert', ['--version'])[1]).valid;
     }
   });
 

@@ -127,7 +127,7 @@ export async function server() {
 
 export function client(concurrency = os.cpus().length - 1) {
   return new ExecutionPool(async () => {
-    const worker = new ChildExecution(require.resolve('../../bin/travetto-test-server'), true, { cwd: Env.cwd });
+    const worker = new ChildExecution(require.resolve('../../bin/travetto-test-server'), [], true, { cwd: Env.cwd });
 
     worker.init();
     await worker.listenOnce(Events.READY);

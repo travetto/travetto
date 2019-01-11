@@ -48,7 +48,7 @@ export class CommandService {
       exec = this.container.exec(['-i'], cmd);
     } else {
       const cmd = this.config.processCommand ? this.config.processCommand(args) : args;
-      exec = ExecUtil.spawn(cmd.join(' '), { quiet: true });
+      exec = ExecUtil.spawn(cmd[0], cmd.slice(1), { quiet: true });
     }
     return exec as [CommonProcess, Promise<ExecutionResult>];
   }

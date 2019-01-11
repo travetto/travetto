@@ -6,7 +6,7 @@ import { Env } from '@travetto/base';
 
 export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends Execution<U, child_process.ChildProcess> {
 
-  constructor(public command: string, public fork = false, public opts: ChildOptions = {}) {
+  constructor(public command: string, public args: string[], public fork = false, public opts: ChildOptions = {}) {
     super();
   }
 
@@ -23,7 +23,7 @@ export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends E
       }
     };
 
-    const [sub, complete] = op(this.command, finalOpts);
+    const [sub, complete] = op(this.command, this.args, finalOpts);
 
     if (Env.isTrue('DEBUG')) {
       sub.stdout.pipe(process.stdout);
