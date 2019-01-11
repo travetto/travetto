@@ -39,7 +39,10 @@ export async function getSchemaBody<T>(req: Request, cls: Class<T>, view?: strin
 
 function schemaToParams(cls: Class, view?: string, prefix: string = '') {
   const viewConf = SchemaRegistry.has(cls) && SchemaRegistry.getViewSchema(cls, view);
-  const schemaConf = viewConf ? viewConf.schema : SchemaRegistry.getPendingViewSchema(cls, view)!;
+  const schemaConf = viewConf && viewConf.schema;
+  if (!schemaConf) {
+    throw new Error(`Unknown class, not registered as a schema: ${cls.__id}`);
+  }
   const params = Object.keys(schemaConf).reduce((acc, x) => {
     const field = schemaConf[x];
     if (SchemaRegistry.has(field.type) || SchemaRegistry.hasPending(field.type)) {
