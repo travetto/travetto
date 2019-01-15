@@ -29,12 +29,13 @@ export function Injectable(...args: any[]): ClassDecorator {
   };
 }
 
-type AppDecorator = Partial<ApplicationConfig> & {
+export type AppDecorator = Partial<ApplicationConfig> & {
   paramMap?: {
     [key: string]: Partial<ApplicationParameter> & { name?: never }
   }
   params?: never;
 };
+
 export function Application(
   name: string,
   config?: AppDecorator,

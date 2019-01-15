@@ -2,6 +2,7 @@
 
 export * from './src/config';
 export * from './src/error';
+export * from './src/decorator/application';
 export * from './src/decorator/common';
 export * from './src/decorator/controller';
 export * from './src/decorator/param';

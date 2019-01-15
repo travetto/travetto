@@ -1,6 +1,8 @@
 import { TransformUtil, TransformerState } from '@travetto/compiler';
+import { ConfigLoader } from '@travetto/config';
 
 const APPLICATION = TransformUtil.buildImportAliasMap({
+  ...ConfigLoader.get('registry.application'),
   '@travetto/di': ['Application']
 });
 
