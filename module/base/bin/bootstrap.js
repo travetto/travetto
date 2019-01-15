@@ -5,7 +5,9 @@ const fs = require('fs');
 const path = require('path');
 const Module = require('module');
 // @ts-ignore
-const ts = global.ts = require('typescript');
+let ts = global.ts = new Proxy({}, {
+  get(t, p, r) { ts = global['ts'] = require('typescript'); return ts[p]; }
+});
 
 //Simple bootstrap to load compiler
 const { Env, showEnv } = require('../src/env');
