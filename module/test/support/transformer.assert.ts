@@ -1,18 +1,6 @@
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 import { Env } from '@travetto/base/src/env';
 
-const OPTOKEN_ASSERT_FN: { [key: number]: string } = {
-  [ts.SyntaxKind.EqualsEqualsToken]: 'equal',
-  [ts.SyntaxKind.ExclamationEqualsToken]: 'notEqual',
-  [ts.SyntaxKind.EqualsEqualsEqualsToken]: 'strictEqual',
-  [ts.SyntaxKind.ExclamationEqualsEqualsToken]: 'notStrictEqual',
-  [ts.SyntaxKind.GreaterThanEqualsToken]: 'greaterThanEqual',
-  [ts.SyntaxKind.GreaterThanToken]: 'greaterThan',
-  [ts.SyntaxKind.LessThanEqualsToken]: 'lessThanEqual',
-  [ts.SyntaxKind.LessThanToken]: 'lessThan',
-  [ts.SyntaxKind.InstanceOfKeyword]: 'instanceof'
-};
-
 const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
   equal: 'deepEqual',
   notEqual: 'notDeepEqual',
@@ -29,6 +17,21 @@ const METHODS: { [key: string]: string } = {
 };
 
 const METHOD_REGEX = new RegExp(`[.](${Object.keys(METHODS).join('|')})[(]`);
+
+const OPTOKEN_ASSERT_FN = (key: number): string => {
+  switch (key) {
+    case ts.SyntaxKind.EqualsEqualsToken: return 'equal';
+    case ts.SyntaxKind.ExclamationEqualsToken: return 'notEqual';
+    case ts.SyntaxKind.EqualsEqualsEqualsToken: return 'strictEqual';
+    case ts.SyntaxKind.ExclamationEqualsEqualsToken: return 'notStrictEqual';
+    case ts.SyntaxKind.GreaterThanEqualsToken: return 'greaterThanEqual';
+    case ts.SyntaxKind.GreaterThanToken: return 'greaterThan';
+    case ts.SyntaxKind.LessThanEqualsToken: return 'lessThanEqual';
+    case ts.SyntaxKind.LessThanToken: return 'lessThan';
+    case ts.SyntaxKind.InstanceOfKeyword: return 'instanceof';
+  }
+  throw new Error('Unknown optoken');
+};
 
 interface AssertState extends TransformerState {
   assert: ts.Identifier;
@@ -110,7 +113,7 @@ function getCommand(args: ts.Expression[] | ts.NodeArray<ts.Expression>): Comman
   if (ts.isParenthesizedExpression(comp)) {
     return getCommand([comp.expression, ...args.slice(1)]);
   } else if (ts.isBinaryExpression(comp)) {
-    let opFn = OPTOKEN_ASSERT_FN[comp.operatorToken.kind];
+    let opFn = OPTOKEN_ASSERT_FN(comp.operatorToken.kind);
 
     if (opFn) {
       const literal = isDeepLiteral(comp.left) ? comp.left : isDeepLiteral(comp.right) ? comp.right : undefined;
