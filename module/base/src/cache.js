@@ -7,7 +7,7 @@ const { execSync } = require('child_process');
 const appCore = require('./_app-core');
 
 function isOlder(cacheStat, fullStat) {
-  return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs || cacheStat.atimeMs < fullStat.atimeMs;
+  return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
 }
 
 class Cache {
