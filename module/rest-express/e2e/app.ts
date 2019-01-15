@@ -1,9 +1,8 @@
-import { Application, InjectableFactory } from '@travetto/di';
-import { RestApp, RestConfig, RestAppProvider } from '@travetto/rest';
+import { InjectableFactory } from '@travetto/di';
+import { Application, RestApp, RestConfig, RestAppProvider } from '@travetto/rest';
 import { RestExpressAppProvider } from '../src/provider';
 
 @Application('sample', {
-  watchable: true,
   description: 'Sample rest application'
 })
 export class SampleApp {

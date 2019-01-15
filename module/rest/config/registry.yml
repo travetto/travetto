@@ -1,7 +1,12 @@
 ---
 injectable:
  '@travetto/rest': 
-  - Controller
+    - Controller
+    - Application
+    
+application:
+  '@travetto/rest':
+    - Application
 
 rest.interceptor:
   '@travetto/rest':
