@@ -2,7 +2,14 @@ import { RetargettingHandler } from './proxy';
 import { Env } from '@travetto/base';
 import { CompilerUtil } from './util';
 
-const Module = require('module');
+const Module = require('module') as typeof NodeJS.Module;
+
+declare namespace NodeJS {
+  class Module {
+    static _resolveFilename(request: string, parent: Module): string;
+    static _load(request: string, parent: Module): Module;
+  }
+}
 
 const originalLoader = Module._load.bind(Module);
 
@@ -15,7 +22,7 @@ export class ModuleManager {
     Module._load = this.load.bind(this);
   }
 
-  load(request: string, parent: string) {
+  load(request: string, parent: NodeJS.Module) {
     let mod;
     try {
       mod = originalLoader.apply(null, [request, parent]);
