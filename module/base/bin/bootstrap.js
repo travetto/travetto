@@ -20,13 +20,34 @@ AppCache.init();
 // Show init
 showEnv();
 
-//Rewrite Module for local development
+// @ts-ignore
+const ogModuleLoad = Module._load.bind(Module);
+
+function moduleLoaderHandler(request, parent) {
+
+  const mod = ogModuleLoad.apply(null, [request, parent]);
+
+  if (!parent.loaded && (!mod || !mod._$TRV)) {
+    let p;
+    try {
+      // @ts-ignore      
+      p = Module._resolveFilename(request, parent);
+    } catch (err) {
+      // Ignore if we can't resolve
+    }
+    if (p && p.endsWith('.ts')) {
+      throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
+    }
+  }
+
+  return mod;
+}
+
+let moduleLoader = moduleLoaderHandler;
+
 if (Env.frameworkDev) {
   const parDir = path.resolve(path.dirname(path.dirname(cwd)), 'module');
-  // @ts-ignore
-  const og = Module._load.bind(Module);
-  // @ts-ignore
-  Module._load = (request, parent) => {
+  moduleLoader = (request, parent) => {
     const root = path.dirname(parent.filename);
     if (request.startsWith('@travetto')) { // Handle import directly
       request = `${cwd}/node_modules/${request}`;
@@ -35,22 +56,13 @@ if (Env.frameworkDev) {
       request = path.resolve(`${cwd}/node_modules/@travetto/${relativeRoot}`, request);
     }
     request = resolveFrameworkFile(request);
-    const mod = og.apply(null, [request, parent]);
-    if (!parent.loaded && (!mod || !mod._$TRV)) {
-      let p;
-      try {
-        // @ts-ignore      
-        p = Module._resolveFilename(request, parent);
-      } catch (err) {
-        // Ignore if we can't resolve
-      }
-      if (p && p.endsWith('.ts')) {
-        throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
-      }
-    }
-    return mod;
-  };
+
+    return moduleLoaderHandler(request, parent);
+  }
 }
+
+// @ts-ignore, catch cyclical dependencies
+Module._load = moduleLoader;
 
 let opts;
 
