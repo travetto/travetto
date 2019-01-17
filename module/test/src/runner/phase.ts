@@ -8,8 +8,8 @@ import { SuiteConfig, SuiteResult } from '../model/suite';
 export const BREAKOUT = Symbol('breakout');
 export const TIMEOUT = Symbol('timeout');
 
-const DEFAULT_TIMEOUT = parseInt(Env.get('DEFAULT_TIMEOUT', '5000'), 10);
-const DEFAULT_PHASE_TIMEOUT = parseInt(Env.get('DEFAULT_PHASE_TIMEOUT', '15000'), 10);
+const DEFAULT_TIMEOUT = Env.getInt('DEFAULT_TIMEOUT', 5000);
+const DEFAULT_PHASE_TIMEOUT = Env.getInt('DEFAULT_PHASE_TIMEOUT', 15000);
 
 export function asyncTimeout(duration: number = DEFAULT_TIMEOUT): [Promise<any>, Function] {
   let id: NodeJS.Timer;

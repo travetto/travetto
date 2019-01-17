@@ -46,7 +46,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     }
   }
 
-  computeSchemaDependencies(cls: Class, curr: Class = cls, path: string[] = []) {
+  trackSchemaDependencies(cls: Class, curr: Class = cls, path: string[] = []) {
     const config = this.get(curr);
 
     SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.get(cls));
@@ -55,7 +55,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     const view = config.views[ALL_VIEW];
     for (const k of view.fields) {
       if (this.has(view.schema[k].type)) {
-        this.computeSchemaDependencies(cls, view.schema[k].type, [...path, k]);
+        this.trackSchemaDependencies(cls, view.schema[k].type, [...path, k]);
       }
     }
   }
@@ -184,7 +184,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     super.onInstall(cls, e);
 
     if (Env.watch && this.has(cls)) {
-      this.computeSchemaDependencies(cls);
+      this.trackSchemaDependencies(cls);
     }
   }
 

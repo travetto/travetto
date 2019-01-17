@@ -1,4 +1,4 @@
-import { Application, Inject, Injectable } from '../';
+import { Application, Inject, Injectable } from '../..';
 
 @Injectable()
 class Element {

@@ -55,7 +55,7 @@ export async function server() {
   const worker = new LocalExecution<Event>();
 
   // Die if no communication within 120 seconds
-  const idle = new IdleManager(parseInt(Env.get('IDLE_TIMEOUT') || '120000', 10));
+  const idle = new IdleManager(Env.getInt('IDLE_TIMEOUT', 120000));
   idle.extend();
 
   worker.listen(async (data: Event) => {

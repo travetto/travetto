@@ -1,6 +1,11 @@
 In-Progress
 =============
 
+Rework Env
+--------------
+- [?] Remove dependency on dev/test
+- [ ] Unify path usage, default to URI model and convert to local path when needed, look into upath
+
 Tests
 --------------
 - [?] Better unit tests
@@ -12,9 +17,6 @@ Tooling
   - [ ] Handle cross dependencies
   - [ ] Provide better inputs for controlling name of packages/folders
   - [ ] Move tests to devDependencies
-
-- [ ] VSCode Plugin
-  - [ ] Hit Swagger Endpoint from list, maybe swagger against self
 
 Serverless Initiative
 --------------------------

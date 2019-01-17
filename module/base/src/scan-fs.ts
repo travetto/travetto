@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { Env } from './env';
 import { FsUtil } from './fs-util';
 
 export interface ScanEntry {
@@ -26,13 +25,12 @@ export class ScanFs {
     return !x.stats.isDirectory() && !x.stats.isSymbolicLink();
   }
 
-  static scanDir(handler: ScanHandler, base?: string, entry?: ScanEntry, visited = new Set()) {
+  static scanDir(handler: ScanHandler, base: string, entry?: ScanEntry, visited = new Set()) {
     return new Promise<ScanEntry[]>(async (resolve, reject) => {
 
       try {
         const out: ScanEntry[] = [];
 
-        base = base || Env.cwd;
         entry = (entry || { file: base, children: [] }) as ScanEntry;
 
         for (const file of (await FsUtil.readdirAsync(entry.file))) {
@@ -69,7 +67,7 @@ export class ScanFs {
     });
   }
 
-  static async bulkScanDir(handlers: ScanHandler[], base?: string) {
+  static async bulkScanDir(handlers: ScanHandler[], base: string) {
     const res = await Promise.all(handlers.map(x => ScanFs.scanDir(x, base)));
     const names = new Set<string>();
     const out = [];
@@ -84,10 +82,9 @@ export class ScanFs {
     return out;
   }
 
-  static scanDirSync(handler: ScanHandler, base?: string, entry?: ScanEntry, visited = new Set()) {
+  static scanDirSync(handler: ScanHandler, base: string, entry?: ScanEntry, visited = new Set()) {
     const out: ScanEntry[] = [];
 
-    base = base || Env.cwd;
     entry = (entry || { file: base, children: [] }) as ScanEntry;
 
     for (const file of fs.readdirSync(entry.file)) {
@@ -119,7 +116,7 @@ export class ScanFs {
     return out;
   }
 
-  static bulkScanDirSync(handlers: ScanHandler[], base?: string) {
+  static bulkScanDirSync(handlers: ScanHandler[], base: string) {
     const names = new Set<string>();
     const out = [];
     for (const h of handlers) {
@@ -133,23 +130,23 @@ export class ScanFs {
     return out;
   }
 
-  static bulkRequire<T = any>(handlers: ScanHandler[], cwd?: string): T[] {
+  static bulkRequire<T = any>(handlers: ScanHandler[], cwd: string): T[] {
     return ScanFs.bulkScanDirSync(handlers, cwd)
       .filter(ScanFs.isNotDir) // Skip folders
       .map(x => require(x.file.replace(/[\\]+/g, '/')))
       .filter(x => !!x); // Return non-empty values
   }
 
-  static async bulkRead(handlers: ScanHandler[]) {
-    const files = await ScanFs.bulkScanDir(handlers);
+  static async bulkRead(handlers: ScanHandler[], base: string) {
+    const files = await ScanFs.bulkScanDir(handlers, base);
     const promises = files
       .filter(ScanFs.isNotDir)
       .map(x => FsUtil.readFileAsync(x.file).then(d => ({ name: x.file, data: d.toString() })));
     return await Promise.all(promises);
   }
 
-  static bulkReadSync(handlers: ScanHandler[]) {
-    return ScanFs.bulkScanDirSync(handlers)
+  static bulkReadSync(handlers: ScanHandler[], base: string) {
+    return ScanFs.bulkScanDirSync(handlers, base)
       .filter(ScanFs.isNotDir)
       .map(x => ({ name: x.file, data: fs.readFileSync(x.file).toString() }));
   }

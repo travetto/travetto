@@ -24,7 +24,7 @@ export class SourceManager {
 
   registerSourceMaps() {
     sourcemap.install({
-      emptyCacheBetweenOperations: Env.test || Env.watch,
+      emptyCacheBetweenOperations: !Env.prod, // Be less strict in non-dev
       retrieveFile: (p: string) => this.contents.get(p.replace('.js', '.ts'))!,
       retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
     });

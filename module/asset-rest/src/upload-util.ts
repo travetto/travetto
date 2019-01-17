@@ -45,9 +45,9 @@ export class UploadUtil {
         console.debug('Uploading file', fieldName, fileName, encoding, mimeType);
 
         uploads.push((async () => {
-          const uniqueDir = path.join(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
+          const uniqueDir = path.resolve(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
           await FsUtil.mkdirpAsync(uniqueDir);
-          const uniqueLocal = path.join(uniqueDir, path.basename(fileName));
+          const uniqueLocal = path.resolve(uniqueDir, path.basename(fileName));
 
           file.pipe(fs.createWriteStream(uniqueLocal));
           await new Promise((res, rej) =>

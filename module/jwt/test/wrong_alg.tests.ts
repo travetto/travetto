@@ -5,7 +5,7 @@ import { FsUtil } from '@travetto/base';
 import * as jwt from '..';
 
 const TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE0MjY1NDY5MTl9.ETgkTn8BaxIX4YqvUWVFPmum3moNZ7oARZtSBXb_vP4';
-const PUB_KEY = path.join(__dirname, 'pub.pem');
+const PUB_KEY = path.resolve(__dirname, 'pub.pem');
 
 @Suite('when setting a wrong `header.alg`')
 class BadAlgoSuite {

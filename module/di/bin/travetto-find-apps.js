@@ -2,12 +2,23 @@
 
 //@ts-check
 
+const path = require('path')
 const fs = require('fs');
 const config = module.exports.CACHE_FILE = 'di-app-cache.json';
 const stat = require('util').promisify(fs.lstat);
 
 function maxTime(stat) {
   return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
+}
+
+/**
+ * 
+ * @param {string} filename 
+ */
+function getApp(filename) {
+  const [, root] = filename.split(process.cwd());
+  const [, first,] = root.split(path.sep);
+  return first === 'src' ? '' : first;
 }
 
 async function getApps() {
@@ -25,8 +36,9 @@ async function getApps() {
 
   //Load app files
   const { ScanApp } = require('@travetto/base/src/scan-app');
+
   ScanApp.requireFiles('.ts', x =>
-    /^(src|e2e)\/.*[^.][^d][.]ts$/.test(x) &&
+    (/^(src[\\\/])/.test(x) || /^[^\\\/]+[\/\\]src[\\\/]/.test(x)) && x.endsWith('.ts') && !x.endsWith('d.ts') &&
     fs.readFileSync(x).toString().includes('@Application')); // Only load files that are candidates
 
   //Get applications
@@ -36,13 +48,21 @@ async function getApps() {
     watchable: x.watchable,
     description: x.description,
     params: x.params,
+    appRoot: getApp(x.target.__filename),
     name: x.name,
     generatedTime: maxTime(await stat(x.target.__filename)),
     filename: x.target.__filename,
     id: x.target.__id
   })));
 
-  og.call(console, JSON.stringify(await items));
+  let resolved = await items;
+
+  resolved = resolved.sort((a, b) => {
+    return a.appRoot === b.appRoot ? a.name.localeCompare(b.name) : (a.appRoot === '' ? -1 : 1);
+  });
+
+
+  og.call(console, JSON.stringify(resolved));
 }
 
 function fork(cmd, args) {
@@ -76,7 +96,7 @@ module.exports.getCachedAppList = async function getCachedAppList() {
     const res = JSON.parse(text);
 
     for (const el of res) {
-      const elStat = await stat(el.filename);
+      const elStat = (await stat(el.filename).catch(e => delete el.generatedTime));
       // invalidate cache if changed
       if (!el.generatedTime || maxTime(elStat) > el.generatedTime) {
         AppCache.removeExpiredEntry(config, true);

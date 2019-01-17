@@ -13,8 +13,8 @@ export class MailTemplateConfig {
   async postConstruct() {
     this.assetRoots.push(...[Env.cwd, path.resolve(__dirname, '..')]);
 
-    if (Env.e2e) {
-      this.assetRoots.push(path.resolve(__dirname, '..', 'e2e'));
+    if (Env.appRoot) {
+      this.assetRoots.push(path.resolve(__dirname, '..', Env.appRoot));
     }
 
     this.assetRoots = this.assetRoots.map(x => path.join(x, 'assets'));

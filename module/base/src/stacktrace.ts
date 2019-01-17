@@ -74,8 +74,8 @@ export class Stacktrace {
     }
   }
 
-  static simplifyStack(err: Error, cwd = Env.cwd) {
-    cwd = cwd.replace(/[\\]/g, '/');
+  static simplifyStack(err: Error) {
+    const cwd = Env.cwd;
 
     const getName = (x: string) => {
       const l = x.split(cwd.replace(/[\\]/g, '/'))[1];

@@ -36,10 +36,11 @@ function simpleWatcher(commonFolder, paths, handler) {
   return watcher;
 }
 
-module.exports = function() {
+module.exports = function () {
   // @ts-ignore
   program.command('email-template').action(async (cmd) => {
-    process.env.MAIL_TEMPLATE_ASSETROOTS = `${path.resolve(process.cwd(), 'e2e')}`;
+
+    process.env.MAIL_TEMPLATE_ASSETROOTS = `${path.resolve(process.cwd(), process.env.APP_ROOT)}`;
 
     // @ts-ignore
     await require('@travetto/base/bin/bootstrap').run();

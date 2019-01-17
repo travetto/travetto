@@ -1,5 +1,4 @@
 import { TransformUtil } from '@travetto/compiler';
-import { Env } from '@travetto/base/src/env';
 
 const TEST_IMPORT = '@travetto/test';
 
@@ -38,20 +37,14 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   return out;
 }
 
-const TRANSFORMER = TransformUtil.importingVisitor<any>((source) => {
-  return { source };
-}, visitNode);
+const TRANSFORMER = TransformUtil.importingVisitor<any>((source) => ({ source }), visitNode);
 
 export const TestLineNumberTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
     const name = source.fileName.replace(/[\\]+/g, '/');
 
     // Only apply to test files
-    if (Env.test &&
-      name.includes('/test/') &&
-      !name.includes('/src/') &&
-      !name.includes('/node_modules/')
-    ) {
+    if (/\/test\//.test(name) && !/\/(src|node_modules)\//.test(name)) {
       // Annotate
       return TRANSFORMER(context)(source);
     } else {

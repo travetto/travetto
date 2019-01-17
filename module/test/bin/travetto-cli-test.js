@@ -3,6 +3,8 @@ const os = require('os');
 
 async function runTests(opts, args) {
   try {
+    require('./init');
+
     await require('@travetto/base/bin/bootstrap').run();
 
     const { Runner } = require('../src/runner/runner');
@@ -31,8 +33,6 @@ if (require.main !== module) {
       .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', undefined, os.cpus().length - 1)
       .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
       .action(async (args, cmd) => {
-        process.env.ENV = 'test';
-
         if (args.length === 0) {
           args = ['test/.*'];
         }

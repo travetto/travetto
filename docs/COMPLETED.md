@@ -1,6 +1,10 @@
 Completed Tasks
 ==============
 
+Base
+----------------------
+- [X] Separate out e2e into a better pattern
+
 Exec
 -----------------------
 - [X] Modify spawn to take in command and args, not full string

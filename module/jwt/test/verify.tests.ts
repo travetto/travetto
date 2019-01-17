@@ -9,8 +9,8 @@ import * as jwt from '..';
 import { VerifyOptions } from '../src/types';
 import { JWTError } from '../src/common';
 
-const pubKey = path.join(__dirname, 'pub.pem');
-const privKey = path.join(__dirname, 'priv.pem');
+const pubKey = path.resolve(__dirname, 'pub.pem');
+const privKey = path.resolve(__dirname, 'priv.pem');
 
 @Suite('verify')
 class VerifySuite {

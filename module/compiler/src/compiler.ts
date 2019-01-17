@@ -21,7 +21,7 @@ class $Compiler {
   // Event manager
   events = new EventEmitter();
 
-  constructor(public cwd: string = Env.cwd) {
+  constructor(public cwd: string) {
 
     const exclude = [/\.d\.ts$/]; // Definition files
 
@@ -89,7 +89,7 @@ class $Compiler {
     // Log transpiled content as needed
     const content = this.sourceManager.get(tsf)!;
 
-    if (/[\/\\](test|e2e)[\/\\]/.test(tsf) && !tsf.includes(CompilerUtil.LIBRARY_PATH)) {
+    if (Env.trace && !tsf.includes(CompilerUtil.LIBRARY_PATH)) {
       console.trace(content);
     }
 
@@ -105,7 +105,7 @@ class $Compiler {
       return ret;
     } catch (e) {
       if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
-        const name = m.filename.replace(`${Env.cwd}/`, '');
+        const name = m.filename.replace(`${this.cwd}/`, '');
         const err = new Error(`${e.message} ${e.message.includes('from') ? `[via ${name}]` : `from ${name}`}`);
         err.stack = err.stack;
         throw err;
@@ -163,4 +163,4 @@ class $Compiler {
   }
 }
 
-export const Compiler = new $Compiler();
+export const Compiler = new $Compiler(Env.cwd);

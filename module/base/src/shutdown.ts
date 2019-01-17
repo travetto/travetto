@@ -2,7 +2,7 @@ import { Env } from './env';
 
 const px = process.exit;
 
-const MAX_SHUTDOWN_TIME = parseInt(Env.get('MAX_SHUTDOWN_WAIT', '2000'), 10);
+const MAX_SHUTDOWN_TIME = Env.getInt('MAX_SHUTDOWN_WAIT', 2000);
 
 export class Shutdown {
   private static listeners: { name: string, handler: Function, final?: boolean }[] = [];
