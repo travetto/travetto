@@ -2,22 +2,20 @@
 const { cwd } = require('./_app-core');
 
 const PROD_KEY = 'prod';
-const TEST_KEY = 'test';
-const E2E_KEY = 'e2e';
-const DEV_KEY = 'dev';
 
 const envVal = (k, def) => {
   const temp = process.env[k] || process.env[k.toLowerCase()] || process.env[k.toUpperCase()];
   return temp === undefined ? def : temp;
 };
 const envListVal = k => (envVal(k) || '').split(/[, ]+/g).filter(x => !!x);
+const envIntVal = (k, def) => parseInt(envVal(k, def), 10);
 const isEnvTrue = k => {
   const val = envVal(k);
-  return val !== undefined && /(1|true|on)/i.test(val);
+  return val !== undefined && /(1|true|on|yes)/i.test(val);
 };
 const isEnvFalse = k => {
   const val = envVal(k);
-  return val !== undefined && /(0|false|off)/i.test(val);
+  return val !== undefined && /(0|false|off|no)/i.test(val);
 };
 
 function checkFrameworkDev() {
@@ -48,7 +46,7 @@ function checkWatch() {
 }
 
 function buildLogging(profile) {
-  const debug = isEnvTrue('debug') || ((profile.dev || profile.e2e) && !isEnvFalse('debug'));
+  const debug = isEnvTrue('debug') || (profile.dev && !isEnvFalse('debug'));
   const trace = isEnvTrue('trace');
   const quietInit = isEnvTrue('quiet_init') || profile.test;
 
@@ -75,37 +73,35 @@ function buildLogging(profile) {
 function buildProfile() {
 
   const mapping = {
-    production: PROD_KEY,
-    testing: TEST_KEY,
-    development: DEV_KEY
+    production: PROD_KEY
   };
 
   const ext = [...envListVal('node_env'), ...envListVal('env'), ...envListVal('profile')]
     .map(x => mapping[x] || x);
 
-  const primary =
-    (ext.includes(PROD_KEY) && PROD_KEY) ||
-    (ext.includes(TEST_KEY) && TEST_KEY) ||
-    (ext.includes(E2E_KEY) && E2E_KEY) ||
-    DEV_KEY;
+  const prod = ext.includes(PROD_KEY) && PROD_KEY;
 
   const allSet = new Set();
 
   // Shift to front
-  const all = ['application', primary, ...ext]
+  const all = ['application', prod || '', ...ext]
+    .filter(x => !!x)
     .filter(x => {
       const isNew = !allSet.has(x);
       allSet.add(x);
       return isNew;
     });
 
+  const isApp = !isEnvFalse('APP_ROOT');
+  const appRoot = envVal('APP_ROOT', '');
+
   return {
     profiles: all,
     hasProfile: allSet.has.bind(allSet),
-    prod: primary === PROD_KEY,
-    test: primary === TEST_KEY,
-    e2e: primary === E2E_KEY,
-    dev: primary === DEV_KEY
+    prod,
+    dev: !prod,
+    appRoot: isApp ? appRoot : '',
+    isApp
   };
 }
 
@@ -113,7 +109,7 @@ const profile = buildProfile();
 
 const Env = [
   { cwd },
-  { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal },
+  { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal, getInt: envIntVal },
   profile,
   buildLogging(profile),
   checkWatch(),
@@ -124,8 +120,13 @@ const Env = [
 
 function showEnv() {
   if (!Env.quietInit) {
-    console.log('Env', JSON.stringify(Env,
-      (e, v) => typeof v === 'boolean' && v === false || typeof v === 'function' ? undefined : v, 2));
+    console.log('Env',
+      JSON.stringify(Env, (e, v) =>
+        (typeof v === 'boolean' && v === false) ||
+          (typeof v === 'string' && v === '') ||
+          (typeof v === 'function') ? undefined : v, 2
+      )
+    );
   }
 }
 

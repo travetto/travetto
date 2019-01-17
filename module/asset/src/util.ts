@@ -17,7 +17,7 @@ export class AssetUtil {
   static generateTempFile(ext: string): string {
     const now = new Date();
     const name = `image-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${process.pid}-${(Math.random() * 100000000 + 1).toString(36)}.${ext}`;
-    return path.join(tmpDir, name);
+    return path.resolve(tmpDir, name);
   }
 
   static async localFileToAsset(pth: string, prefix?: string, tags?: string[]) {

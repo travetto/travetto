@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import * as path from 'path';
 import * as fs from 'fs';
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 
@@ -9,8 +10,8 @@ class Issue70 {
 
   @Test('should work')
   async test() {
-    const cert_pub = fs.readFileSync(`${__dirname}/rsa-public.pem`);
-    const cert_priv = fs.readFileSync(`${__dirname}/rsa-private.pem`);
+    const cert_pub = fs.readFileSync(path.resolve(__dirname, 'rsa-public.pem'));
+    const cert_priv = fs.readFileSync(path.resolve(__dirname, 'rsa-private.pem'));
 
     const token = await jwt.sign({ foo: 'bar' }, { key: cert_priv, alg: 'RS256' });
 

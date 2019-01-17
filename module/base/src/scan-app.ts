@@ -58,9 +58,7 @@ export class ScanApp {
     return ScanApp.findFiles(ext, filter).map(x => require(x.file.replace(/[\\]/g, '/')));
   }
 
-  static setFileEntries(key: string, paths: string[], base?: string) {
-    base = base || Env.cwd;
-
+  static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {
     this.cache[key] = paths.map(mod => {
       mod = mod.replace(/[\\]+/g, '/').replace('#', 'node_modules/@travetto');
 

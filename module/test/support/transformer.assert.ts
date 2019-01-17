@@ -1,5 +1,4 @@
 import { TransformUtil, TransformerState } from '@travetto/compiler';
-import { Env } from '@travetto/base/src/env';
 
 const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
   equal: 'deepEqual',
@@ -189,20 +188,16 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   return node;
 }
 
-const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({
-  source,
-  hasAssertCall: /\s+assert(.[^(]+)\(/.test(source!.text)
-}), visitNode);
+const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({ source }), visitNode);
 
 export const TestAssertTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
     const name = source.fileName.replace(/[\\]+/g, '/');
 
     // Only apply to test files
-    if (Env.test &&
-      name.includes('/test/') &&
-      !name.includes('/src/') &&
-      !name.includes('/node_modules/')
+    if (/\/test\//.test(name) &&
+      !/\/(src|node_modules)\//.test(name) &&
+      /\s+assert[^(]*\(/.test(source!.text)
     ) {
       // Assert
       return TRANSFORMER(context)(source);

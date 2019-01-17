@@ -1,16 +1,17 @@
 export declare const Env: {
   prod: boolean;
   dev: boolean;
-  test: boolean;
-  e2e: boolean;
   watch: boolean;
   docker: boolean;
   debug: boolean;
   trace: boolean;
   quietInit: boolean;
   cwd: string;
+  isApp: boolean;
+  appRoot: string | undefined;
   frameworkDev: boolean;
   profiles: string[];
+
 
   error(...args: any[]): void;
   hasProfile(p: string): boolean;
@@ -18,6 +19,7 @@ export declare const Env: {
   isFalse(key: string): boolean;
   get(key: string, def: string): string;
   get(key: string): string | undefined;
+  getInt(key: string, def: number): number;
   getList(key: string): string[];
 }
 

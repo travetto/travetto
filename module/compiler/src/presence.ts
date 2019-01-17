@@ -16,8 +16,8 @@ export class FilePresenceManager {
 
   constructor(private cwd: string, private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = Env.watch) {
     this.watchSpaces.add('src');
-    if (Env.e2e) {
-      this.watchSpaces.add('e2e');
+    if (Env.appRoot) {
+      this.watchSpaces.add(path.join(Env.appRoot, 'src'));
     }
   }
 
@@ -60,7 +60,8 @@ export class FilePresenceManager {
   }
 
   init() {
-    const SRC_RE = Env.e2e ? /^((e2e|src)\/.*|index)$/ : /^(src\/.*|index)$/;
+    const SRC_RE = new RegExp(`^(${Env.appRoot || '-'})?(\/src\/.*|index)$`);
+
     const rootFiles = ScanApp.findFiles('.ts', x => SRC_RE.test(x) && this.validFile(x)) // Only watch own files
       .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable
       .map(x => x.file);

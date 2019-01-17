@@ -1,5 +1,6 @@
 //@ts-check
 const { getCachedAppList } = require('./travetto-find-apps');
+const path = require('path');
 
 async function getAppList() {
   try {
@@ -10,17 +11,8 @@ async function getAppList() {
   }
 }
 
-function envFromApp(app) {
-  return app.filename.includes('e2e') ? 'e2e' : 'dev';
-}
-
 function generateAppHelpList(apps, cmd) {
   const choices = [];
-  apps = apps.sort((a, b) => {
-    let ae2e = envFromApp(a);
-    let be2e = envFromApp(b);
-    return ae2e === be2e ? a.name.localeCompare(b.name) : (ae2e ? b : a);
-  });
   for (const conf of apps) {
     let lines = [];
     let usage = conf.name;
@@ -36,14 +28,11 @@ function generateAppHelpList(apps, cmd) {
     if (cmd.watchReal || (conf.watchable && cmd.env !== 'prod')) {
       features.push('{watch}');
     }
-    if (envFromApp(conf) === 'e2e') {
-      features.push('{e2e}');
-    }
     if (features.length) {
       featureStr = ` | ${features.join(' ')}`;
     }
 
-    lines.push(`${conf.name}${featureStr}`);
+    lines.push(`${conf.appRoot ? `[${conf.appRoot}] ` : ''}${conf.name}${featureStr}`);
     if (conf.description) {
       lines.push(`desc:  ${conf.description || ''}`);
     }
@@ -78,7 +67,7 @@ async function runApp(args) {
   let [name, ...sub] = args;
   try {
     app = (await getAppList()).find(x => x.name === name);
-
+   
     if (app) {
       const appParams = app.params || [];
       sub = sub.map((x, i) => appParams[i] === undefined ? x : processApplicationParam(appParams[i], x));
@@ -86,6 +75,11 @@ async function runApp(args) {
         throw new Error('Invalid parameter');
       }
     }
+
+    process.env.APP_ROOT = process.env.APP_ROOT || app.appRoot;
+    process.env.ENV      = process.env.ENV || 'dev';
+    process.env.PROFILE  = process.env.PROFILE || '';
+    process.env.WATCH    = process.env.WATCH || app.watchable;
 
     await require('@travetto/base/bin/bootstrap').run();
     await require('../src/registry').DependencyRegistry.runApplication(name, sub);
@@ -126,7 +120,8 @@ if (require.main === module) {
         console.log();
       })
       .allowUnknownOption()
-      .option('-e, --env [env]', 'Application environment (dev|test|e2e|prod), defaults to dev', /^(dev|test|e2e|prod)$/i)
+      .option('-e, --env [env]', 'Application environment (dev||prod), defaults to dev', /^(dev|prod)$/i)
+      .option('-a, --app [app]', 'Application root, defaults to associated root by name')
       .option('-w, --watch [watch]', 'Run the application in watch mode, defaults to auto', /^(1|0|yes|no|on|off|auto|true|false)$/i)
       .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
       .action(async (app, args, cmd) => {
@@ -151,14 +146,13 @@ if (require.main === module) {
             listHelper = generateAppHelpList.bind(null, apps, cmd);
           }
           cmd.help();
-        } else {
-          cmd.env = cmd.env !== undefined ? cmd.env : envFromApp(selected);
-          cmd.watch = cmd.watch !== undefined ? cmd.watchReal : (selected.watchable && cmd.env !== 'prod');
         }
 
-        process.env.ENV = cmd.env;
-        process.env.PROFILE = cmd.profile.join(',');
-        process.env.WATCH = `${cmd.watch}`;
+        if (cmd.app)      process.env.APP_ROOT = cmd.app;
+        if (cmd.env)      process.env.ENV = cmd.env;
+        if (cmd.profile)  process.env.PROFILE = cmd.profile.join(',');
+        if (cmd.watch)    process.env.WATCH = `${cmd.watch}`;
+
         runApp([app, ...args]);
       });
   };

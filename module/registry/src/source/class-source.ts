@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
-import { ScanApp, Env, AppInfo } from '@travetto/base';
+import { ScanApp, AppInfo } from '@travetto/base';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';
@@ -11,7 +11,7 @@ export class CompilerClassSource implements ChangeSource<Class> {
   private classes = new Map<string, Map<string, Class>>();
   private events = new EventEmitter();
 
-  constructor() {
+  constructor(private appRoot: string | undefined) {
     this.watch = this.watch.bind(this);
   }
 
@@ -73,14 +73,16 @@ export class CompilerClassSource implements ChangeSource<Class> {
   }
 
   async init() {
-    if (!Env.test) {
-      const folder = Env.e2e ? 'e2e/' : 'src/';
-      const entries = await ScanApp.findFiles('.ts', (f: string) =>
-        Compiler.presenceManager.validFile(f)
-        && (f.startsWith(folder) || (
-          /^node_modules\/@travetto\/[^\/]+\/src\/.*/.test(f)
-          && !f.startsWith(`node_modules/${AppInfo.NAME}/`)
-        )) // No more side effect code, load all files
+    if (this.appRoot !== undefined) {
+      const root = this.appRoot ? `${this.appRoot}/` : '';
+
+      const entries = await ScanApp.findFiles('.ts', (f: string) => {
+        return Compiler.presenceManager.validFile(f)
+          && (f.startsWith(`${root}src/`) || (
+            /^node_modules\/@travetto\/[^\/]+\/src\/.*/.test(f)
+            && !f.startsWith(`node_modules/${AppInfo.NAME}/`)
+          )); // No more side effect code, load all files
+      }
       );
 
       const files = entries.map(x => x.file);

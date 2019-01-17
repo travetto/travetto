@@ -1,4 +1,4 @@
-import { Application } from '..';
+import { Application } from '../..';
 
 @Application('simple')
 class SimpleApp {

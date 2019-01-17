@@ -52,7 +52,8 @@ module.exports = function () {
       FsUtil.writeFile(`${cmd.workspace}/node_modules/typescript/index.js`,
         'module.exports = {};');
 
-      for (const p of ['e2e', 'test', 'dist']) {
+      // Invert
+      for (const p of ['test', 'dist']) {
         for (const f of FsUtil.find(cmd.workspace, x => x.endsWith(`/${p}`), true)) {
           FsUtil.remove(f);
         }

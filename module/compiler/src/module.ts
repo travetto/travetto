@@ -1,13 +1,14 @@
-import { RetargettingHandler } from './proxy';
 import { Env } from '@travetto/base';
+
+import { RetargettingHandler } from './proxy';
 import { CompilerUtil } from './util';
 
 const Module = require('module') as typeof NodeJS.Module;
 
 declare namespace NodeJS {
   class Module {
-    static _resolveFilename(request: string, parent: Module): string;
-    static _load(request: string, parent: Module): Module;
+    static _resolveFilename(request: string, parent: NodeModule): string;
+    static _load(request: string, parent: NodeModule): NodeModule;
   }
 }
 
@@ -22,13 +23,13 @@ export class ModuleManager {
     Module._load = this.load.bind(this);
   }
 
-  load(request: string, parent: NodeJS.Module) {
+  load(request: string, parent: NodeModule) {
     let mod;
     try {
       mod = originalLoader.apply(null, [request, parent]);
     } catch (e) {
       const p = Module._resolveFilename(request, parent);
-      if (Env.dev) { // If attempting to load an optional require
+      if (Env.watch) { // If in a state where imports can come and go
         console.error(`Unable to import ${p}, stubbing out`, e);
       } else if (e) {
         // Marking file as being loaded, useful for the test framework
@@ -57,7 +58,7 @@ export class ModuleManager {
       }
     }
 
-    return out;
+    return out as NodeModule;
   }
 
   compile(m: NodeModule, name: string, content: string) {

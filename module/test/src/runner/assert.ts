@@ -192,7 +192,7 @@ export class AssertUtil {
         assertion.error = e;
         e.message = assertion.message;
         if (e instanceof Error) {
-          (e as Error).stack = Stacktrace.simplifyStack(e as Error);
+          (e as Error).stack = Stacktrace.simplifyStack(e);
         }
         this.add(assertion);
       }
@@ -248,7 +248,7 @@ export class AssertUtil {
       e = missed || this.checkError(shouldThrow, e);
       if (e) {
         assertion.message = message || e.message;
-        (e as Error).stack = Stacktrace.simplifyStack(e as Error);
+        (e as Error).stack = Stacktrace.simplifyStack(e);
         throw (assertion.error = e);
       }
     } finally {
@@ -274,7 +274,7 @@ export class AssertUtil {
       e = missed || this.checkError(shouldThrow, e);
       if (e) {
         assertion.message = message || e.message;
-        (e as Error).stack = Stacktrace.simplifyStack(e as Error);
+        (e as Error).stack = Stacktrace.simplifyStack(e);
         throw (assertion.error = e);
       }
     } finally {
