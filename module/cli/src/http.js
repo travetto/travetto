@@ -26,11 +26,11 @@ const CHECK_SCRIPT = `<head>
         }
       });
     });
-  }, 500);
+  }, %RATE%);
 </script>
 `;
 
-exports.Server = function Server(handler, port) {
+exports.Server = function Server(handler, port, reloadRate = 500) {
 
   let timestamp = Date.now();
 
@@ -45,6 +45,7 @@ exports.Server = function Server(handler, port) {
 
     let contentType;
     let content;
+    let static = false;
 
     try {
       if (reqUrl.pathname === '/check') {
@@ -53,6 +54,7 @@ exports.Server = function Server(handler, port) {
       } else {
         const res = await handler.resolve(request);
         content = res.content;
+        static = res.static;
 
         if (res.contentType) {
           contentType = res.contentType;
@@ -63,12 +65,15 @@ exports.Server = function Server(handler, port) {
 
       if (contentType === CONTENT_TYPES.json && typeof content !== 'string') {
         content = JSON.stringify(content);
-      } else if (contentType === CONTENT_TYPES.html && handler.onChange) {
-        content = content.replace(/<head>/, CHECK_SCRIPT);
+      } else if (contentType === CONTENT_TYPES.html && handler.onChange && !static) {
+        content = content.replace(/<head>/, CHECK_SCRIPT).replace('%RATE%', reloadRate);
       }
     } catch (e) {
+      console.log(e.message);
       content = new Error(e).stack;
       contentType = CONTENT_TYPES.txt;
+      response.statusCode = 503;
+      response.statusMessage = e.message;
     }
 
     response.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

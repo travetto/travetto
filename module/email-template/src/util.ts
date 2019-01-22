@@ -89,24 +89,4 @@ export class TemplateUtil {
       return this.resolveNestedTemplates(templates[name], templates);
     });
   }
-
-  static proxiedContext(o: any, ns = ''): any {
-    return new Proxy({}, {
-      get(self: any, key) {
-        if (typeof key === 'string') {
-          if (key === 'toString') {
-            const sub = ns.substring(0, ns.length - 1);
-            if (sub in o) {
-              return () => o[sub];
-            } else {
-              return () => `{{${sub}}}`;
-            }
-          }
-          return TemplateUtil.proxiedContext(o, `${ns}${key.toString()}.`);
-        } else {
-          return self[key];
-        }
-      }
-    });
-  }
 }

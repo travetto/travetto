@@ -5,6 +5,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
 import { DefaultMailTemplateEngine } from '../';
+import { ResourceManager } from '@travetto/base';
 
 @Suite('Emails')
 class EmailSuite {
@@ -13,6 +14,7 @@ class EmailSuite {
   async init() {
     await RootRegistry.init();
     await DependencyRegistry.init();
+    ResourceManager.addPath('e2e/resources');
   }
 
   async getEngine() {
@@ -38,8 +40,8 @@ class EmailSuite {
   async templatingImages() {
     const instance = (await this.getEngine()) as DefaultMailTemplateEngine;
 
-    const out = await instance.template(`<img src="image/test.png">`, { left: 6, right: 6 });
-    const img = await instance.getAssetBuffer('image/test.png');
+    const out = await instance.template(`<img src="email/test.png">`, { left: 6, right: 6 });
+    const img = await instance.getImage('email/test.png');
 
     // Reworking to not send entire image for tests
     const hasImg = img !== null;

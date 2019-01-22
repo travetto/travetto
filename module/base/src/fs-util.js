@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const stdProm = (res, rej) => (err, val) => {
-  (err !== undefined && err !== null) ? rej(err): res(val);
+  (err !== undefined && err !== null) ? rej(err) : res(val);
 }
 
 const FsUtil = [
@@ -14,8 +14,8 @@ const FsUtil = [
     fs[k](...args, k === 'exists' ? res : stdProm(res, rej)));
   return acc;
 }, {
-  reorient: f => f.replace(/[\/]+/, path.sep)
-});
+    reorient: f => f.replace(/[\/]+/, path.sep)
+  });
 
 FsUtil.mkdirpAsync = async function mkdirpAsync(rel) {
   const pth = FsUtil.reorient(rel);
@@ -24,5 +24,9 @@ FsUtil.mkdirpAsync = async function mkdirpAsync(rel) {
     await FsUtil.mkdirAsync(pth);
   }
 };
+
+FsUtil.normalize = function (rel) {
+  return rel.replace(/[\/\\]+/g, path.sep);
+}
 
 module.exports.FsUtil = FsUtil;

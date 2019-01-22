@@ -1,0 +1,40 @@
+<style>
+  .footer-icon {
+    height: 40px;
+    width: 40px;
+  }
+
+  .footer-text {
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .footer-email {
+    text-align: center;
+  }
+
+</style>
+
+<row class="collapsed footer">
+  <columns>
+    <spacer size="16"></spacer>
+    <p class="footer-text">This is an email from HirePower, if you have any questions please feel
+      free to contact us through one of the links below.</p>
+    <center>
+      <menu>
+        <item>
+          <a href="mailto:{{footerOptions.email}}" title="email-link"><img class="footer-icon" src="{{baseUrl}}/email/email-icon.png"></a>
+        </item>
+        <item>
+          <a href="{{footerOptions.facebookLink}}" title="facebook"><img class="footer-icon" src="{{baseUrl}}/email/facebook-icon.png"></a>
+        </item>
+        <item>
+          <a href="{{footerOptions.linkedInLink}}" title="linked-in"><img class="footer-icon" src="{{baseUrl}}/email/linkedIn-icon.png"></a>
+        </item>
+        <item>
+          <a href="{{footerOptions.twitterLink}}" title="twitter"><img class="footer-icon" src="{{baseUrl}}/email/twitter-icon.png"></a>
+        </item>
+      </menu>
+    </center>
+  </columns>
+</row>

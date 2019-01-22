@@ -1,7 +1,6 @@
 import * as path from 'path';
-import * as fs from 'fs';
 
-import { FsUtil } from '@travetto/base';
+import { FsUtil, ResourceManager, Env } from '@travetto/base';
 import { AppCache } from '@travetto/base/src/cache';
 import { Injectable, Inject } from '@travetto/di';
 import { MailTemplateEngine, MailTemplateContext } from '@travetto/email';
@@ -11,36 +10,28 @@ import { MailTemplateConfig } from './config';
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
 
-
 @Injectable()
 export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
-  private templates: { [key: string]: string } = {};
   private cache: { [key: string]: { html: string, text: string } } = {};
+
+  private defaultTemplateWidth = Env.getInt('EMAIL_WIDTH', 580);
 
   @Inject()
   private config: MailTemplateConfig;
 
-  private _wrapper: Promise<string>;
   private _compiledSass: Promise<string>;
-
-  get wrapper(): Promise<string> {
-    if (!this._wrapper) {
-      this._wrapper = this.config.findFirst('/html/wrapper.html')
-        .then(f => fs.readFileSync(f))
-        .then(x => x.toString());
-    }
-    return this._wrapper;
-  }
+  private _templatesLoaded: boolean;
+  private _templates: { [key: string]: string } = {};
 
   get compiledSass(): Promise<string> {
     if (!this._compiledSass) {
       this._compiledSass = (async () => {
-        const partial = '/scss/app.scss';
-        const full = path.resolve(`${__dirname}/../assets/${partial}`);
+        const partial = '/email/app.scss';
+        const full = path.resolve(__dirname, '..', 'resources', partial);
 
         if (!AppCache.hasEntry(full)) {
-          const file = await this.config.findFirst(partial);
+          const file = await ResourceManager.find(partial);
           const css = await TemplateUtil.compileSass(file, this.config.scssRoots);
           AppCache.writeEntry(full, css);
           return css;
@@ -52,20 +43,22 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     return this._compiledSass;
   }
 
-  async registerTemplateFile(pth: string, name?: string) {
-    if (!name) {
-      name = pth.split('/').pop() as string;
+  private async initTemplates() {
+    if (!this._templatesLoaded) {
+      this._templatesLoaded = true;
+      for (const f of await ResourceManager.findAllByExtension('.html', 'email')) {
+        await this.registerTemplate(f, await ResourceManager.read(f));
+      }
     }
-    const contents = await FsUtil.readFileAsync(pth);
-    this.registerTemplate(name, contents.toString());
   }
 
-  registerTemplate(name: string, partial: string) {
-    this.templates[name] = partial;
+  registerTemplate(name: string, partial: string | Buffer) {
+    console.log('Registering template', name);
+    this._templates[name] = partial.toString();
   }
 
-  async getAssetBuffer(rel: string) {
-    const pth = await this.config.findFirst(rel);
+  async getImage(rel: string) {
+    const pth = await ResourceManager.find(rel);
     const out = AppCache.toEntryName(pth);
 
     if (!(await FsUtil.existsAsync(out))) {
@@ -75,12 +68,16 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     return FsUtil.readFileAsync(out);
   }
 
+  get wrapper() {
+    return this._templates['email/wrapper.html'];
+  }
+
   async compile(tpl: string) {
     // Load wrapper
-    tpl = TemplateUtil.wrapWithBody(tpl, await this.wrapper);
+    tpl = TemplateUtil.wrapWithBody(tpl, this.wrapper);
 
     // Resolve mustache partials
-    tpl = await TemplateUtil.resolveNestedTemplates(tpl, this.templates);
+    tpl = await TemplateUtil.resolveNestedTemplates(tpl, await this._templates);
 
     let html = Inky.render(tpl);
 
@@ -94,10 +91,10 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
     html = html
       .replace(/<\/head>/, all => `${styles.join('\n')}\n${all}`)
-      .replace(/%WIDTH%/g, `580`);
+      .replace(/%EMAIL_WIDTH%/g, `${this.defaultTemplateWidth}`);
 
     // Inline Images
-    html = await TemplateUtil.inlineImageSource(html, (k) => this.getAssetBuffer(k));
+    html = await TemplateUtil.inlineImageSource(html, (k) => this.getImage(k));
 
     // Generate text version
     const text = await MarkdownUtil.htmlToMarkdown(tpl);
@@ -107,7 +104,8 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
   async getCompiled(template: string) {
     if (!this.cache[template]) {
-      this.cache[template] = await this.compile(this.templates[template] || template); // Handle if template is not a name
+      await this.initTemplates();
+      this.cache[template] = await this.compile(this._templates[template] || template); // Handle if template is not a name
     }
     return this.cache[template];
   }

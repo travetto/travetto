@@ -3,8 +3,11 @@ In-Progress
 
 Rework Env
 --------------
-- [?] Remove dependency on dev/test
 - [ ] Unify path usage, default to URI model and convert to local path when needed, look into upath
+
+Email
+--------------
+
 
 Tests
 --------------

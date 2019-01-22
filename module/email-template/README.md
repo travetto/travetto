@@ -15,7 +15,7 @@ The templating process involves loading various assets (html, css, images), and 
 1. `%ROOT%/assets`
 1. `foundation-emails/scss` (specifically for `sass` files)
 
-When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.
+When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  All email .html files, are loaded automatically and can be referenced by individual file name.  E.g. `%ROOT%/assets/receipt.html` can be referenced by the name `receipt`.
 
 ## Template Compilation
 
@@ -28,6 +28,10 @@ The general process is as follows:
 1. Inline and optimize all images for email transmission.
 1. Generate markdown version of email to support the alternate text format.
 1. Render the final output via the `mustache` templating process, interpolating the contextual data into the final output.
+
+
+## Common Email Elements
+In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. `{{{> common-element}}}`
 
 ## Supporting Libraries
 Templating emails is achieved through a combination of multiple libraries, specifically:
@@ -51,3 +55,41 @@ A sample template could look like:
 ```
 
 which will then interpolate the context to replace `left` and `right`, and compile to a final html output. When using mustache expressions, make sure to use `{{{ }}}`, triple braces on complex text, to prevent mustache from escaping any characters.
+
+## Example inky template with partials
+Given two files, `assets/welcome.html` and `assets/footer.hml`
+
+**Code: assets/welcome.html**
+```xml
+<row>
+  <row>
+    <columns large="{{left}}">Bob</columns>
+    <columns large="{{right}}"></columns>
+  </row>
+  {{{> footer }}}
+</row>
+```
+
+**Code: assets/footer.html**
+```xml
+<row>
+  This is a footer
+  <a href="{{salesLink}}">Sales Link</a>
+</row>
+```
+
+The final template will render as
+
+**Code: final output**
+```xml
+<row>
+  <row>
+    <columns large="{{left}}">Bob</columns>
+    <columns large="{{right}}"></columns>
+  </row>
+  <row>
+    This is a footer
+    <a href="{{salesLink}}">Sales Link</a>
+  </row>
+</row>
+```
