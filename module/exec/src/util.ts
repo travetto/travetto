@@ -1,5 +1,5 @@
 import * as cp from 'child_process';
-import { BaseError } from '@travetto/base';
+import { AppError } from '@travetto/base';
 
 import { ExecutionOptions, ExecutionResult } from './types';
 
@@ -36,7 +36,7 @@ export class ExecUtil {
         done = true;
 
         if (!result.valid) {
-          reject(new BaseError(`Error executing ${cmd}: ${result.message || 'failed'}`, result));
+          reject(new AppError(`Error executing ${cmd}: ${result.message || 'failed'}`, result));
         } else {
           resolve(result);
         }

@@ -1,11 +1,11 @@
-import { BaseError } from '@travetto/base';
+import { AppError } from '@travetto/base';
 
 export interface ValidationError {
   message: string;
   path: string;
 }
 
-export class ValidationErrors extends BaseError<ValidationError[]> {
+export class ValidationErrors extends AppError<ValidationError[]> {
   constructor(public errors: ValidationError[]) {
     super(`Validation Errors`);
   }

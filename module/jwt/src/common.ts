@@ -1,6 +1,6 @@
-import { BaseError } from '@travetto/base';
+import { AppError } from '@travetto/base';
 
-export class JWTError extends BaseError {
+export class JWTError extends AppError {
   constructor(message: string, public payload: { [key: string]: any } = {}) {
     super(message);
   }

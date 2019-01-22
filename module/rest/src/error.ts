@@ -1,5 +1,5 @@
 /// <reference path="./error.d.ts" />
-import { BaseError } from '@travetto/base';
+import { AppError } from '@travetto/base';
 
 import { Renderable } from './response/renderable';
 import { Response } from './types';
@@ -7,7 +7,7 @@ import { MimeType } from './util/mime';
 
 type Status = { status: number };
 
-export class AppError extends BaseError<Status> implements Renderable {
+export class RestError extends AppError<Status> implements Renderable {
   constructor(message: string, status: number = 500) {
     super(message, { status });
   }

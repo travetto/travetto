@@ -1,3 +1,3 @@
-import { BaseError } from '@travetto/base';
+import { AppError } from '@travetto/base';
 
-export class InjectionError extends BaseError { }
+export class InjectionError extends AppError { }

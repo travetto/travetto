@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { RestInterceptor, AppError, Request, Response } from '@travetto/rest';
+import { RestInterceptor, RestError, Request, Response } from '@travetto/rest';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
 import { AuthService, ERR_INVALID_AUTH } from '@travetto/auth';
@@ -52,7 +52,7 @@ export class AuthInterceptor extends RestInterceptor {
       }
     }
 
-    const err = new AppError(ERR_INVALID_AUTH, 401);
+    const err = new RestError(ERR_INVALID_AUTH, 401);
     err.stack = errors[errors.length - 1].stack;
     throw err;
   }
