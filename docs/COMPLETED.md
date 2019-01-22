@@ -4,6 +4,7 @@ Completed Tasks
 Base
 ----------------------
 - [X] Separate out e2e into a better pattern
+- [X] Remove dependency on dev/test
 
 Exec
 -----------------------

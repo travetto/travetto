@@ -9,3 +9,4 @@ export * from './src/scan-app';
 export * from './src/fs-util';
 export * from './src/watch';
 export * from './src/phase';
+export * from './src/resource';

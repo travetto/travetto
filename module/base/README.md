@@ -67,6 +67,20 @@ watcher.add([
 watcher.run();
 ```
 
+## Application Resources
+
+Resource management, loading of files, and other assets at runtime is a common pattern that the `ResourceManager` encapsulates.  It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
+
+**Code: Finding Image Resource**
+```typescript
+const imagePath = await ResourceManager.findFirst('/images/asset.gif');
+```
+
+**Code: Finding All Image Resource**
+```typescript
+const imagePaths = await ResourceManager.findAllByExtension('gif', 'images/');
+```
+
 ## Lifecycle Support
 
 During the lifecycle of an application, there is a need to handle different phases of execution.  When executing a phase, the code will recursively find all `phase.<phase>.ts` files under `node_modules/@travetto`, and in the root of your project.  The format of each phase handler is comprised of five main elements:

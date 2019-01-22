@@ -35,6 +35,8 @@ declare class FsUtilType {
   readdirAsync(path: fs.PathLike, options?: { encoding?: BufferEncoding | null } | BufferEncoding | null): Promise<string[]>;
   readdirAsync(path: fs.PathLike, options: { encoding: "buffer" } | "buffer"): Promise<Buffer[]>;
   readdirAsync(path: fs.PathLike, options?: { encoding?: string | null } | string | null): Promise<string[] | Buffer[]>;
+
+  normalize(path: string): string;
 }
 
 export const FsUtil: FsUtilType;

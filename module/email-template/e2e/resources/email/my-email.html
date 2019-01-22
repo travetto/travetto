@@ -1,0 +1,14 @@
+<container>
+  {{> email/header.html }}
+  <spacer size="16"></spacer>
+  <row>
+    <columns small="12">
+      <h1>Sweets {{user.firstName}},</h1>
+      <p>
+        Please follow click <a href="${this.config.baseUrl}/auth/reset/${user.resetToken}">reset
+          passwords</a>! </p>
+    </columns>
+  </row>
+  <spacer size="16"></spacer>
+  {{> email/footer.html }}
+</container>

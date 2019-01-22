@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
+
 import { ScanEntry, ScanHandler, ScanFs } from './scan-fs';
 import { Util } from './util';
 import { Env } from './env';
@@ -60,7 +61,7 @@ export class Watcher extends EventEmitter {
       }
 
       // Convert to full paths
-      current = current.map(x => path.join(dir.file, x));
+      current = current.filter(x => !x.startsWith('.')).map(x => path.join(dir.file, x));
 
       // Get watched files for this dir
       const previous = (dir.children || []).slice(0);
