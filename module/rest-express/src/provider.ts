@@ -9,6 +9,7 @@ import { ControllerConfig, RestAppProvider } from '@travetto/rest';
 
 import { RouteStack } from './types';
 import { ExpressConfig } from './config';
+import { RestConfig } from '../../rest/src/config';
 
 export class RestExpressAppProvider extends RestAppProvider<express.Application> {
 
@@ -66,7 +67,12 @@ export class RestExpressAppProvider extends RestAppProvider<express.Application>
     this.app.use(cConfig.basePath, router);
   }
 
-  listen(port: number) {
-    this.app.listen(port);
+  async listen(config: RestConfig) {
+    if (config.ssl) {
+      const https = await import('https');
+      https.createServer(await config.getKeys(), this.app).listen(config.port);
+    } else {
+      this.app.listen(config.port);
+    }
   }
 }
