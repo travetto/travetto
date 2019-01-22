@@ -5,7 +5,7 @@ import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
 import { ConfigLoader } from '@travetto/config';
-import { ControllerConfig, RestAppProvider } from '@travetto/rest';
+import { RestConfig, ControllerConfig, RestAppProvider } from '@travetto/rest';
 import { RestAppUtil } from '@travetto/rest/src/util/rest-app-util';
 
 import { KoaConfig } from './config';
@@ -43,7 +43,7 @@ export class RestKoaAppProvider extends RestAppProvider {
     });
   }
 
-  getRequest(ctx: koa.Context) {
+  getRequest(ctx: koa.ParameterizedContext) {
     if (!(ctx as any)._trvReq) {
       (ctx as any)._trvReq = RestAppUtil.decorateRequest({
         _raw: ctx,
@@ -64,7 +64,7 @@ export class RestKoaAppProvider extends RestAppProvider {
     return (ctx as any)._trvReq as Travetto.Request;
   }
 
-  getResponse(ctx: koa.Context) {
+  getResponse(ctx: koa.ParameterizedContext) {
     if (!(ctx as any)._trvRes) {
       (ctx as any)._trvRes = RestAppUtil.decorateResponse({
         _raw: ctx,
@@ -126,7 +126,12 @@ export class RestKoaAppProvider extends RestAppProvider {
     this.app.use(middleware);
   }
 
-  listen(port: number) {
-    this.app.listen(port);
+  async listen(config: RestConfig) {
+    if (config.ssl) {
+      const https = await import('https');
+      https.createServer(await config.getKeys(), this.app.callback()).listen(config.port);
+    } else {
+      this.app.listen(config.port);
+    }
   }
 }

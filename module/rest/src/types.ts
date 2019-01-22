@@ -1,6 +1,7 @@
 /// <reference path="./types.d.ts" />
 
 import { Class } from '@travetto/registry';
+import { RestConfig } from './config';
 
 export type HeaderMap = { [key: string]: (string | (() => string)) };
 
@@ -97,10 +98,10 @@ export abstract class RestAppProvider<T = any> {
   interceptors: RestInterceptor[] = [];
 
   abstract get _raw(): T;
-  abstract init(): Promise<any>;
+  abstract init(config: RestConfig): Promise<any>;
   abstract registerController(controller: ControllerConfig): Promise<any>;
   abstract unregisterController(controller: ControllerConfig): Promise<any>;
-  abstract listen(port?: number): void;
+  abstract listen(config: RestConfig): void | Promise<void>;
 
   registerInterceptor(interceptor: RestInterceptor) {
     this.interceptors.push(interceptor);

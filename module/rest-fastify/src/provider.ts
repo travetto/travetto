@@ -2,7 +2,7 @@ import { ServerResponse, IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
 import { ConfigLoader } from '@travetto/config';
-import { ControllerConfig, RestAppProvider } from '@travetto/rest';
+import { RestConfig, ControllerConfig, RestAppProvider } from '@travetto/rest';
 import { RestAppUtil } from '@travetto/rest/src/util/rest-app-util';
 
 import { FastifyConfig } from './config';
@@ -16,8 +16,13 @@ export class RestFastifyAppProvider extends RestAppProvider {
     return this.app;
   }
 
-  create(): any {
-    const app = fastify();
+  async create(restConfig: RestConfig) {
+    const fastConf: any = {};
+    if (restConfig.ssl) {
+      fastConf.https = await restConfig.getKeys();
+    }
+
+    const app = fastify(fastConf);
     app.register(require('fastify-compress'));
     app.register(require('fastify-formbody'));
     app.register(require('fastify-cookie'));
@@ -34,11 +39,11 @@ export class RestFastifyAppProvider extends RestAppProvider {
     return app;
   }
 
-  async init() {
+  async init(restConfig: RestConfig) {
     this.config = new FastifyConfig();
     ConfigLoader.bindTo(this.config, 'rest.fastify');
 
-    this.app = this.create();
+    this.app = await this.create(restConfig);
 
     this.app.addHook('preHandler', (reqs, reply) => {
       const req = this.getRequest(reqs);
@@ -125,7 +130,7 @@ export class RestFastifyAppProvider extends RestAppProvider {
     console.debug('Registering Controller Instance', cConfig.class.__id, cConfig.basePath, cConfig.endpoints.length);
   }
 
-  listen(port: number) {
-    this.app.listen(port);
+  listen(config: RestConfig) {
+    this.app.listen(config.port);
   }
 }

@@ -36,7 +36,7 @@ export class RestApp {
   async init() {
     await ControllerRegistry.init();
 
-    await this.provider.init();
+    await this.provider.init(this.config);
 
     const interceptors = DependencyRegistry.getCandidateTypes(RestInterceptor as Class)
       .filter(x => this.interceptorSet.interceptors.has(x.class));
@@ -88,6 +88,6 @@ export class RestApp {
   async run() {
     await this.init();
     console.info(`Listening on ${this.config.port}`);
-    this.provider.listen(this.config.port);
+    await this.provider.listen(this.config);
   }
 }
