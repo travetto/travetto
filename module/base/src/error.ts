@@ -1,4 +1,4 @@
-export class BaseError<T = any> extends Error {
+export class AppError<T = any> extends Error {
   name: string;
 
   constructor(public message: string, public payload?: T) {

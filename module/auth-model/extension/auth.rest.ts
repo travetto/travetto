@@ -1,4 +1,4 @@
-import { AppError, Request, Response } from '@travetto/rest';
+import { RestError, Request, Response } from '@travetto/rest';
 import { ModelCore } from '@travetto/model';
 import { AuthProvider } from '@travetto/auth-rest';
 import { ERR_INVALID_PASSWORD, AuthContext } from '@travetto/auth';
@@ -29,7 +29,7 @@ export class AuthModelProvider<U extends ModelCore> extends AuthProvider<U> {
           status = 401;
           break;
       }
-      const out = new AppError(e.message, status);
+      const out = new RestError(e.message, status);
       out.stack = e.stack;
       throw out;
     }

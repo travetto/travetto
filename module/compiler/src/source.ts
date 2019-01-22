@@ -3,7 +3,7 @@
 import * as fs from 'fs';
 import * as sourcemap from 'source-map-support';
 
-import { Env, BaseError } from '@travetto/base';
+import { Env, AppError } from '@travetto/base';
 import { Cache } from '@travetto/base/src/cache';
 
 import { CompilerUtil } from './util';
@@ -57,7 +57,7 @@ export class SourceManager {
       console.error(`Unable to import ${fileName}, stubbing out`);
       this.set(fileName, CompilerUtil.EMPTY_MODULE);
     } else {
-      throw new BaseError(msg);
+      throw new AppError(msg);
     }
   }
 

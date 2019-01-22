@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
 import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-import { Env, Util, BaseError } from '@travetto/base';
+import { Env, Util, AppError } from '@travetto/base';
 
 import { QueryVerifierService } from './verify';
 import { ModelOptions } from '../types';
@@ -231,7 +231,7 @@ export class ModelService implements IModelSource {
           .catch(error => errs.push({ idx, error }))));
 
     if (errs.length) {
-      throw new BaseError('Bulk Preparation Errors', errs.sort((a, b) => a.idx - b.idx));
+      throw new AppError('Bulk Preparation Errors', errs.sort((a, b) => a.idx - b.idx));
     }
 
     return out

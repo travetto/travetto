@@ -1,4 +1,4 @@
-import { ControllerRegistry, AppError, EndpointDecorator, Request } from '@travetto/rest';
+import { ControllerRegistry, RestError, EndpointDecorator, Request } from '@travetto/rest';
 import { ERR_UNAUTHENTICATED, ERR_AUTHENTICATED, ERR_FORBIDDEN, ERR_INVALID_CREDS } from '@travetto/auth';
 
 export function Authenticate(provider: symbol, ...providers: symbol[]) {
@@ -8,7 +8,7 @@ export function Authenticate(provider: symbol, ...providers: symbol[]) {
       await req.auth.login(computed);
     } catch (e) {
       if (e.message === ERR_INVALID_CREDS) {
-        const err = new AppError(e.message, 400);
+        const err = new RestError(e.message, 400);
         err.stack = e.stack;
         throw err;
       } else {
@@ -28,7 +28,7 @@ export async function requireAuth(config: { include: string[], exclude: string[]
       case ERR_AUTHENTICATED: status = 403; break;
       case ERR_FORBIDDEN: status = 401; break;
     }
-    const err = new AppError(e.message, status);
+    const err = new RestError(e.message, status);
     err.stack = e.stack;
     throw err;
   }
@@ -44,7 +44,7 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
 export function Unauthenticated() {
   return ControllerRegistry.createFilterDecorator(req => {
     if (!req.auth.unauthenticated) {
-      throw new AppError(ERR_UNAUTHENTICATED, 401);
+      throw new RestError(ERR_UNAUTHENTICATED, 401);
     }
   });
 }

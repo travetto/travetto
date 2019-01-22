@@ -5,7 +5,7 @@ import * as busboy from 'busboy';
 import match = require('mime-match');
 
 import { FsUtil } from '@travetto/base';
-import { Request, AppError } from '@travetto/rest';
+import { Request, RestError } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 
 import { AssetRestConfig } from './config';
@@ -65,7 +65,7 @@ export class UploadUtil {
             this.matchType(allowedTypes, contentType, true) ||
             this.matchType(excludeTypes, contentType)
           ) {
-            throw new AppError(`Content type not allowed: ${contentType}`, 403);
+            throw new RestError(`Content type not allowed: ${contentType}`, 403);
           }
         })());
       });

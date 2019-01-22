@@ -10,7 +10,7 @@ import {
   ModelQuery
 } from '@travetto/model';
 import { Class } from '@travetto/registry';
-import { BaseError, Util } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
 
 import { ModelMongoConfig } from './config';
 
@@ -191,7 +191,7 @@ export class ModelMongoSource extends ModelSource {
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
     const res = await this.getAllByQuery(cls, { limit: 200, ...query });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
-      throw new BaseError(`Invalid number of results for find by id: ${res ? res.length : res}`);
+      throw new AppError(`Invalid number of results for find by id: ${res ? res.length : res}`);
     }
     return res[0] as T;
   }
@@ -248,7 +248,7 @@ export class ModelMongoSource extends ModelSource {
     const conf = ModelRegistry.get(cls);
     const res = await col.replaceOne({ _id: id, ...(conf.subType ? { type: conf.subType } : {}) }, o);
     if (res.matchedCount === 0) {
-      throw new BaseError(`Invalid update, no ${cls.name} found with id '${id}'`);
+      throw new AppError(`Invalid update, no ${cls.name} found with id '${id}'`);
     }
     return this.getById(cls, id.toHexString());
   }
@@ -268,7 +268,7 @@ export class ModelMongoSource extends ModelSource {
 
     const res = await col.findOneAndUpdate(extractTypedWhereClause(cls, query.where || {}), final, { returnOriginal: false });
     if (!res.value) {
-      throw new BaseError('Object not found for updating');
+      throw new AppError('Object not found for updating');
     }
 
     const ret: T = res.value as T;

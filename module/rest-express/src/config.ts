@@ -6,4 +6,9 @@ export class ExpressConfig {
     secure: false
   };
   secret = 'secret';
+  ssl?: boolean;
+  keys?: {
+    public: string,
+    private: string
+  };
 }

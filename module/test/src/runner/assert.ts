@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as util from 'util';
 import * as path from 'path';
 
-import { Env, Util, Stacktrace, BaseError } from '@travetto/base';
+import { Env, Util, Stacktrace, AppError } from '@travetto/base';
 import { Assertion, TestConfig, ThrowableError } from '../model/test';
 
 const ASSERT_FN_OPERATOR: { [key: string]: string } = {
@@ -208,17 +208,17 @@ export class AssertUtil {
       const actual = `${err instanceof Error ? `'${err.message}'` : (err ? `'${err}'` : 'nothing')}`;
 
       if (typeof shouldThrow === 'string' && (!err || !(err instanceof Error ? err.message : err).includes(shouldThrow))) {
-        return new BaseError(`Expected error containing text '${shouldThrow}', but got ${actual}`);
+        return new AppError(`Expected error containing text '${shouldThrow}', but got ${actual}`);
       }
       if (shouldThrow instanceof RegExp && (!err || !shouldThrow.test(typeof err === 'string' ? err : err.message))) {
-        return new BaseError(`Expected error with message matching '${shouldThrow.source}', but got ${actual} `);
+        return new AppError(`Expected error with message matching '${shouldThrow.source}', but got ${actual} `);
       }
     } else if (shouldThrow === Error ||
-      shouldThrow === BaseError ||
+      shouldThrow === AppError ||
       Object.getPrototypeOf(shouldThrow) !== Object.getPrototypeOf(Function)
     ) { // if not simple function, treat as class
       if (!err || !(err instanceof shouldThrow)) {
-        return new BaseError(`Expected to throw ${shouldThrow.name}, but got ${err || 'nothing'} `);
+        return new AppError(`Expected to throw ${shouldThrow.name}, but got ${err || 'nothing'} `);
       }
     } else {
       const res = shouldThrow(err);
