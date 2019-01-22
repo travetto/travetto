@@ -1,4 +1,4 @@
-import { Controller, Get, Cache, Request, Response } from '../src';
+import { Controller, Get, Cache, Request, Response } from '../..';
 import { MockService } from './mock';
 
 @Controller('/simple')

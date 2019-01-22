@@ -5,11 +5,10 @@ import * as session from 'express-session';
 import * as compression from 'compression';
 
 import { ConfigLoader } from '@travetto/config';
-import { ControllerConfig, RestAppProvider } from '@travetto/rest';
+import { RestConfig, ControllerConfig, RestAppProvider } from '@travetto/rest';
 
 import { RouteStack } from './types';
 import { ExpressConfig } from './config';
-import { RestConfig } from '../../rest/src/config';
 
 export class RestExpressAppProvider extends RestAppProvider<express.Application> {
 
