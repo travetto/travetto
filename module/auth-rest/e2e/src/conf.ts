@@ -1,8 +1,8 @@
 import { InjectableFactory } from '@travetto/di';
 import { PrincipalConfig } from '@travetto/auth';
 
-import { AuthProvider } from '../src';
-import { AuthPassportProvider } from '../extension/passport';
+import { AuthProvider } from '../..';
+import { AuthPassportProvider } from '../../extension/passport';
 
 import { Strategy as FacebookStrategy, StrategyOption } from 'passport-facebook';
 

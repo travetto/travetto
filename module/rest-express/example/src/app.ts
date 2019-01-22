@@ -1,7 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
 import { Application, RestApp, RestConfig, RestAppProvider } from '@travetto/rest';
 import { RestExpressAppProvider } from '../../src/provider';
-import { ControllerRegistry } from '@travetto/rest/src/registry';
 
 @Application('sample', {
   description: 'Sample rest application'
@@ -18,8 +17,9 @@ export class SampleApp {
     private config: RestConfig
   ) { }
 
-  run(port = 3000, logLevel: 'debug' | 'info' | 'trace' = 'info') {
+  run(port = 3000, ssl = false) {
     this.config.port = port;
+    this.config.ssl = ssl;
     this.app.run();
   }
 }

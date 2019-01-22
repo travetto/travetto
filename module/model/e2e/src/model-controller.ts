@@ -4,14 +4,14 @@ import { Injectable, InjectableFactory, Application } from '@travetto/di';
 import { RestExpressAppProvider } from '@travetto/rest-express';
 import { Schema, Match } from '@travetto/schema';
 
-import { ModelController } from '../extension/rest';
+import { ModelController } from '../../extension/rest';
 import {
   Model, ModelSource, ModelService, ModelCore,
   ModelQuery, Query, BulkResponse,
   PageableModelQuery
-} from '../';
-import { QueryVerifierService } from '../src/service/verify';
-import { BulkOp } from '../src/model/bulk';
+} from '../..';
+import { QueryVerifierService } from '../../src/service/verify';
+import { BulkOp } from '../../src/model/bulk';
 
 @Injectable({ target: ModelSource })
 export class TestSource implements ModelSource {

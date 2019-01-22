@@ -1,6 +1,6 @@
 import { WithContext, Context } from '@travetto/context';
 
-import { Controller, Get } from '../src';
+import { Controller, Get } from '../..';
 import { MockService } from './mock';
 
 @Controller('/simple2')
