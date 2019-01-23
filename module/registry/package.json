@@ -22,6 +22,11 @@
   ],
   "license": "MIT",
   "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src",
+    "support"
+  ],
   "name": "@travetto/registry",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"

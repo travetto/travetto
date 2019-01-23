@@ -2,7 +2,11 @@
   "name": "@travetto/jwt",
   "version": "0.5.4",
   "description": "JSON Web Token implementation",
-  "main": "index.js",
+  "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/travetto/jwt"

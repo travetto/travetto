@@ -28,6 +28,12 @@
   ],
   "license": "MIT",
   "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src",
+    "config",
+    "extension"
+  ],
   "name": "@travetto/model",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"

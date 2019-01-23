@@ -27,6 +27,10 @@
   ],
   "license": "MIT",
   "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src"
+  ],
   "name": "@travetto/rest-fastify",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"

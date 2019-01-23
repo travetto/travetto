@@ -32,6 +32,10 @@
   ],
   "license": "MIT",
   "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src"
+  ],
   "name": "@travetto/rest-express",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
