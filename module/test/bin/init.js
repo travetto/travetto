@@ -5,7 +5,7 @@ Object.assign(process.env, {
   PROD: 'false',
   WATCH: 'false',
   TRV_CACHE_DIR: 'PID',
-  PROFILES: 'test'
+  PROFILE: 'test'
 });
 
 module.exports = {};

@@ -32,6 +32,7 @@
   "files": [
     "index.ts",
     "src",
+    "config",
     "bin",
     "support"
   ],
@@ -39,5 +40,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.5.14"
+  "version": "0.5.15"
 }
