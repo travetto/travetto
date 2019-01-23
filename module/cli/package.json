@@ -22,6 +22,11 @@
   "license": "MIT",
   "main": "bin/travetto.js",
   "name": "@travetto/cli",
+  "files": [
+    "index.ts",
+    "src",
+    "bin"
+  ],
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },

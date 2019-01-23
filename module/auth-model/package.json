@@ -26,6 +26,11 @@
   ],
   "license": "MIT",
   "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src",
+    "extension"
+  ],
   "name": "@travetto/auth-model",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"

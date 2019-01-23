@@ -22,7 +22,11 @@
     "typescript"
   ],
   "license": "MIT",
-  "main": "src/lib/",
+  "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src"
+  ],
   "name": "@travetto/exec",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"

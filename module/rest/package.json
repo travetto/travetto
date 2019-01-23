@@ -27,6 +27,13 @@
   ],
   "license": "MIT",
   "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src",
+    "support",
+    "extension",
+    "config"
+  ],
   "name": "@travetto/rest",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"

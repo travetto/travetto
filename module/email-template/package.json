@@ -43,5 +43,11 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
+  "files": [
+    "index.ts",
+    "src",
+    "resources",
+    "bin"
+  ],
   "version": "0.5.7"
 }
