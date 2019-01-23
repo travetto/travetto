@@ -7,7 +7,7 @@ import { DependencyRegistry } from '@travetto/di';
 
 import { QueryVerifierService } from '../src/service/verify';
 import { RetainFields } from '../src/model/where-clause';
-import { Model, ModelQuery, ModelCore, WhereClause, BaseModel, PropWhereClause } from '../';
+import { Model, ModelQuery, ModelCore, BaseModel } from '../';
 import { Query } from '../src/model/query';
 import { ValidationErrors } from '../src/error';
 import { QueryLanguageParser } from '../src/query-lang/parser';

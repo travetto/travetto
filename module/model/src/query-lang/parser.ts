@@ -142,7 +142,9 @@ export class QueryLanguageParser {
         for (const p of parts) {
           sub = sub[p] = {};
         }
-        if ((cn.op === '$eq' || cn.op === '$neq') && cn.value === null) {
+        if (cn.op === '$regex' && typeof cn.value === 'string') {
+          sub[cn.op!] = new RegExp(`^${cn.value}`);
+        } else if ((cn.op === '$eq' || cn.op === '$neq') && cn.value === null) {
           sub.$exists = cn.op !== '$eq';
         } else if ((cn.op === '$in' || cn.op === '$nin') && !Array.isArray(cn.value)) {
           throw new Error(`Expected array literal for ${cn.op}`);
