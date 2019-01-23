@@ -165,4 +165,17 @@ export class QueryStringTest {
       ]
     });
   }
+
+  @Test('Parse Regex')
+  async parseRegex() {
+    const res = QueryLanguageParser.parse(`user.role ~ /^admin/`);
+    assert(res === { user: { role: { $regex: /^admin/ } } });
+    assert(res.user.role.$regex instanceof RegExp);
+    assert(res.user.role.$regex.toString() === '/^admin/');
+
+    const res2 = QueryLanguageParser.parse(`user.role ~ 'admin'`);
+    assert(res2 === { user: { role: { $regex: /^admin/ } } });
+    assert(res2.user.role.$regex instanceof RegExp);
+    assert(res2.user.role.$regex.toString() === '/^admin/');
+  }
 }

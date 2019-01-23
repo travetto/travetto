@@ -2,6 +2,7 @@ import { Class, ChangeEvent } from '@travetto/registry';
 import { Injectable } from '@travetto/di';
 
 import { ModelSource, Query, BulkResponse, ModelCore, ModelQuery, PageableModelQuery } from '../';
+import { BulkOp } from '../src/model/bulk';
 
 @Injectable({ target: ModelSource })
 export class TestSource implements ModelSource {
@@ -40,7 +41,7 @@ export class TestSource implements ModelSource {
   query<T extends ModelCore, U>(cls: Class<T>, builder: Query<T>): Promise<U[]> {
     throw new Error('Method not implemented.');
   }
-  bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkState<T>): Promise<BulkResponse> {
+  bulkProcess<T extends ModelCore>(cls: Class<T>, state: BulkOp<T>[], batchSize?: number): Promise<BulkResponse> {
     throw new Error('Method not implemented.');
   }
   getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
