@@ -42,14 +42,14 @@ export async function watch() {
   TestRegistry.on(e => {
     if (e.type === 'added') {
       send('suite-added', {
-        file: e.curr!.__filename,
+        file: e.curr!.__file,
         class: e.curr!.__id
       });
       queue.push(TestRegistry.get(e.curr!));
 
     } else if (e.type === 'removing') {
       send('suite-removed', {
-        file: e.prev!.__filename,
+        file: e.prev!.__file,
         class: e.prev!.__id
       });
     }
@@ -90,7 +90,7 @@ export async function watch() {
       if (isSuite(conf)) {
         event = {
           type: Events.RUN,
-          file: conf.class.__filename,
+          file: conf.class.__file,
           class: conf.class.name
         };
       } else {

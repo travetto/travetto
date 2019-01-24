@@ -5,12 +5,12 @@ class $PendingRegister {
   ordered: [string, Class<any>[]][] = [];
 
   add(cls: Class<any>) {
-    if (!this.map.has(cls.__filename)) {
+    if (!this.map.has(cls.__file)) {
       const sub: Class<any>[] = [];
-      this.map.set(cls.__filename, sub);
-      this.ordered.push([cls.__filename, sub]);
+      this.map.set(cls.__file, sub);
+      this.ordered.push([cls.__file, sub]);
     }
-    this.map.get(cls.__filename)!.push(cls);
+    this.map.get(cls.__file)!.push(cls);
   }
 
   flush() {

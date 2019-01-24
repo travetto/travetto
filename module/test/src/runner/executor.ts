@@ -197,7 +197,7 @@ export class TestExecutor {
     let res = undefined;
     if (clsName && /^\d+$/.test(clsName)) {
       const line = parseInt(clsName, 10);
-      const clses = TestRegistry.getClasses().filter(f => f.__filename === file).map(x => TestRegistry.get(x));
+      const clses = TestRegistry.getClasses().filter(f => f.__file === file).map(x => TestRegistry.get(x));
       const cls = clses.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
       if (cls) {
         const meth = cls.tests.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));

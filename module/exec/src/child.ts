@@ -2,7 +2,7 @@ import * as child_process from 'child_process';
 import { ExecUtil } from './util';
 import { ChildOptions, ExecutionEvent } from './types';
 import { Execution } from './execution';
-import { Env } from '@travetto/base';
+import { Env, FsUtil } from '@travetto/base';
 
 export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends Execution<U, child_process.ChildProcess> {
 
@@ -20,7 +20,8 @@ export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends E
         ...this.opts.env || {},
         ...process.env,
         EXECUTION: true
-      }
+      },
+      cwd: FsUtil.toNative(this.opts.cwd || Env.cwd)
     };
 
     const [sub, complete] = op(this.command, this.args, finalOpts);

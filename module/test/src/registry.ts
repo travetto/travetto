@@ -8,7 +8,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     return {
       class: cls,
       className: cls.__id.split(':')[1].replace(/^test[.]/, '').replace('#', '.'),
-      file: cls.__filename,
+      file: cls.__file,
       tests: [],
       beforeAll: [],
       beforeEach: [],
@@ -20,7 +20,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPendingField(cls: Class, fn: Function) {
     return {
       class: cls,
-      file: cls.__filename,
+      file: cls.__file,
       methodName: fn.name
     };
   }

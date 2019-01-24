@@ -49,7 +49,7 @@ class TestAssetService {
     assert(file.length > 0);
 
     try {
-      await FsUtil.statAsync(filePath);
+      await FsUtil.stat(filePath);
       assert(false);
     } catch {
       assert(true);

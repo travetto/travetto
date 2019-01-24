@@ -21,14 +21,14 @@ export class ScanningInterceptorSet extends RestInterceptorSet {
 
     const out: Class<RestInterceptor>[] = [];
     for (const item of items) {
-      const file = item.class.__filename;
+      const file = item.class.__file;
       let target = AppInfo.NAME;
       if (file.includes('node_modules')) {
         target = file.replace(/^.*(@travetto\/[^\/]+).*/, (a, key) => key);
       }
       if (interceptors[target] && interceptors[target].has(item.class.name)) { // Load if specified to be loaded, and it exists
         out.push(item.class as Class<RestInterceptor>);
-      } else if (!item.class.__filename.includes('/extension/')) { // Auto load all non-ext interceptors
+      } else if (!item.class.__file.includes('/extension/')) { // Auto load all non-ext interceptors
         out.push(item.class as Class<RestInterceptor>);
       }
     }

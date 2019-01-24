@@ -1,7 +1,6 @@
-import * as path from 'path';
-
 import { Env } from '@travetto/base/src/env';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
+import { FsUtil } from '@travetto/base';
 
 const stringHash = require('string-hash');
 
@@ -43,7 +42,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       node.typeParameters,
       ts.createNodeArray(node.heritageClauses),
       ts.createNodeArray([
-        TransformUtil.createStaticField('__filename', state.fullFile.replace(/[\\\/]/g, path.sep)),
+        TransformUtil.createStaticField('__location', FsUtil.toURI(state.fullFile)),
         TransformUtil.createStaticField('__id', `${state.file}#${node.name!.getText()}`),
         TransformUtil.createStaticField('__hash', stringHash(node.getText())),
         TransformUtil.createStaticField('__methods', TransformUtil.extendObjectLiteral(methods)),
@@ -67,17 +66,17 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 export const ClassMetadataTransformer = {
   transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
-    let fileRoot = file.fileName.replace(/[\\\/]/g, path.sep);
+    let fileRoot = file.fileName;
 
     let ns = '@sys';
 
     if (fileRoot.includes(Env.cwd)) {
-      fileRoot = fileRoot.split(Env.cwd)[1].replace(/^[\\\/]+/, '');
+      fileRoot = fileRoot.split(Env.cwd)[1].replace(/^[\/]+/, '');
       ns = '@app';
       if (fileRoot.startsWith('node_modules')) {
-        fileRoot = fileRoot.split('node_modules').pop()!.replace(/^[\\\/]+/, '');
+        fileRoot = fileRoot.split('node_modules').pop()!.replace(/^[\/]+/, '');
         if (fileRoot.startsWith('@')) {
-          const [ns1, ns2, ...rest] = fileRoot.split(/[\\\/]/);
+          const [ns1, ns2, ...rest] = fileRoot.split(/[\/]/);
           ns = `${ns1}.${ns2}`;
           fileRoot = rest.join('.');
         }
@@ -85,7 +84,7 @@ export const ClassMetadataTransformer = {
     }
 
     fileRoot = fileRoot
-      .replace(/[\\\/]+/g, '.')
+      .replace(/[\/]+/g, '.')
       .replace(/^\./, '')
       .replace(/\.(t|j)s$/, '');
 

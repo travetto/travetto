@@ -1,6 +1,6 @@
 declare interface Function {
   __id: string;
-  __filename: string;
+  __file: string;
   __hash: string;
   __methods?: {
     [key: string]: {
