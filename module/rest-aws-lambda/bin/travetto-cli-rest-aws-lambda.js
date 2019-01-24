@@ -1,12 +1,13 @@
 //@ts-check
 
+const path = require('path');
+
 // @ts-ignore
 const { FsUtil } = require('@travetto/cli/src/fs-util');
 // @ts-ignore
-const { Util: { cwd, program, dependOn } } = require('@travetto/cli/src/util');
+const { Util: { program, dependOn } } = require('@travetto/cli/src/util');
 
 module.exports = function () {
-  const path = require('path');
   const cp = require('child_process');
   const exec = (arg, ...args) => cp.execSync(arg, ...args);
 
@@ -21,8 +22,8 @@ module.exports = function () {
         console.log('Temp Workspace', cmd.workspace);
       }
 
-      cmd.workspace = path.resolve(cwd, cmd.workspace);
-      cmd.output = path.resolve(cwd, cmd.output);
+      cmd.workspace = FsUtil.resolveUnix(FsUtil.cwd, cmd.workspace);
+      cmd.output = FsUtil.resolveUnix(FsUtil.cwd, cmd.output);
 
       FsUtil.mkdirp(path.dirname(cmd.output));
 
@@ -30,7 +31,7 @@ module.exports = function () {
       FsUtil.remove(cmd.output);
       FsUtil.mkdirp(cmd.workspace);
 
-      exec(`cp -r * ${cmd.workspace}`, { cwd });
+      exec(`cp -r * ${cmd.workspace}`, { cwd: FsUtil.cwd });
 
       FsUtil.writeFile(`${cmd.workspace}/index.js`,
         'process.env.TRV_CACHE_DIR = `${__dirname}/cache`;\n' +
@@ -89,7 +90,7 @@ module.exports = function () {
     .action(async (cmd) => {
       process.env.ENV = cmd.env;
 
-      cmd.output = path.resolve(cwd, cmd.output);
+      cmd.output = FsUtil.resolveUnix(FsUtil.cwd, cmd.output);
 
       FsUtil.mkdirp(path.dirname(cmd.output));
 
@@ -99,8 +100,8 @@ module.exports = function () {
       await ControllerRegistry.init()
       const controllers = ControllerRegistry.getClasses().map(x => ControllerRegistry.get(x));
 
-      const { template } = require(`${__dirname}/../resources/template.yml.js`);
-      const sam = template(controllers, path.resolve(`${__dirname}/../resources`));
+      const { template } = require(FsUtil.resolveUnix(__dirname, '../resources/template.yml.js'));
+      const sam = template(controllers, FsUtil.resolveUnix(__dirname, '../resources'));
 
       FsUtil.writeFile(cmd.output, sam);
     });

@@ -1,8 +1,8 @@
 /// <reference types="typescript/lib/typescriptServices" />
 
-import { dirname, sep } from 'path';
+import { dirname, } from 'path';
 
-import { AppInfo, Env, resolveFrameworkFile } from '@travetto/base';
+import { AppInfo, Env, FsUtil } from '@travetto/base';
 
 const stringHash = require('string-hash');
 
@@ -43,15 +43,16 @@ export class TransformUtil {
         continue;
       }
       if (ident && ident.escapedText in patterns) {
-        const { path } = state.imports.get(ident.escapedText! as string)!;
+        let { path } = state.imports.get(ident.escapedText! as string)!;
         const packages = patterns[ident.escapedText as string];
+        path = FsUtil.toUnix(path);
 
         if (path.includes('@travetto') || (!path.includes('node_modules') && AppInfo.PACKAGE === '@travetto')) {
           let pkg = '';
           if (!path.includes('node_modules')) {
             pkg = AppInfo.NAME;
           } else {
-            pkg = `@travetto/${path.split(/@travetto[\/\\]/)[1].split(/[\\\/]/)[0]}`;
+            pkg = `@travetto/${path.split(/@travetto[\/]/)[1].split(/[\/]/)[0]}`;
           }
           if (packages.has(pkg)) {
             return dec;
@@ -153,8 +154,8 @@ export class TransformUtil {
         const pth = require.resolve(file.fileName);
         const state = {
           ...init(file, context) as any,
-          path: pth.replace(/[\\\/]/g, sep),
-          modulePath: pth.replace(/[\\\/]/g, '/'),
+          path: FsUtil.resolveNative(pth),
+          modulePath: FsUtil.resolveUnix(pth),
           newImports: new Map(),
           source: file,
           ids: new Map(),
@@ -169,7 +170,7 @@ export class TransformUtil {
               .replace(/^\.\//, `${dirname(state.path)}/`));
 
             if (Env.frameworkDev) {
-              path = resolveFrameworkFile(path);
+              path = FsUtil.resolveFrameworkFile(path);
             }
 
             if (stmt.importClause) {

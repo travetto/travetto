@@ -1,4 +1,5 @@
 import { TransformUtil } from '@travetto/compiler';
+import { FsUtil } from '@travetto/base/src/fs-util';
 
 const TEST_IMPORT = '@travetto/test';
 
@@ -41,7 +42,7 @@ const TRANSFORMER = TransformUtil.importingVisitor<any>((source) => ({ source })
 
 export const TestLineNumberTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
-    const name = source.fileName.replace(/[\\]+/g, '/');
+    const name = FsUtil.toUnix(source.fileName);
 
     // Only apply to test files
     if (/\/test\//.test(name) && !/\/(src|node_modules)\//.test(name)) {

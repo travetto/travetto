@@ -7,12 +7,7 @@ import { SchemaRegistry, BindUtil, SchemaValidator, ValidationErrors } from '..'
 // tslint:disable:no-invalid-this
 (ValidationErrors as Class).prototype.render = function (res: Response) {
   res.status(403);
-  res.json({
-    message: this.message,
-    errors: this.errors,
-    status: 403,
-    type: this.name
-  });
+  res.json(this.toJSON({ status: 403 }));
 };
 // tslint:enable:no-invalid-this
 

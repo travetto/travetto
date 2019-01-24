@@ -1,8 +1,6 @@
-import * as path from 'path';
-
+import { FsUtil } from './fs-util';
 import { ScanEntry, ScanFs } from './scan-fs';
 import { Env } from './env';
-import { resolveFrameworkFile } from './app-info';
 
 type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
 
@@ -26,8 +24,8 @@ export class ScanApp {
 
       if (Env.frameworkDev) {
         this.cache[key] = this.cache[key].map(x => {
-          x.file = resolveFrameworkFile(x.file);
-          x.module = x.file.replace(`${Env.cwd}${path.sep}`, '').replace(/[\\]+/g, '/');
+          x.file = FsUtil.resolveFrameworkFile(x.file);
+          x.module = FsUtil.toUnix(x.file).replace(`${Env.cwd}/`, '');
           return x;
         });
       }
@@ -55,16 +53,16 @@ export class ScanApp {
   }
 
   static requireFiles(ext: string | RegExp, filter: RegExp | ((rel: string) => boolean)) {
-    return ScanApp.findFiles(ext, filter).map(x => require(x.file.replace(/[\\]/g, '/')));
+    return ScanApp.findFiles(ext, filter).map(x => {
+      return require(x.file);
+    });
   }
 
   static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {
     this.cache[key] = paths.map(mod => {
-      mod = mod.replace(/[\\]+/g, '/').replace('#', 'node_modules/@travetto');
+      mod = FsUtil.toUnix(mod).replace('#', 'node_modules/@travetto');
 
-      const full = path
-        .resolve(base!, mod)
-        .replace(/[\\]+/g, '/');
+      const full = FsUtil.resolveUnix(base!, mod);
 
       if (mod === full) {
         mod = full.replace(`${base}/`, '');

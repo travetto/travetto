@@ -1,4 +1,5 @@
 import { TransformUtil, TransformerState } from '@travetto/compiler';
+import { FsUtil } from '@travetto/base/src/fs-util';
 
 const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
   equal: 'deepEqual',
@@ -192,7 +193,7 @@ const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({ s
 
 export const TestAssertTransformer = {
   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
-    const name = source.fileName.replace(/[\\]+/g, '/');
+    const name = FsUtil.toUnix(source.fileName);
 
     // Only apply to test files
     if (/\/test\//.test(name) &&

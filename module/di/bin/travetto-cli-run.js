@@ -1,6 +1,6 @@
 //@ts-check
-const { getCachedAppList } = require('./travetto-find-apps');
 const path = require('path');
+const { getCachedAppList } = require('./travetto-find-apps');
 
 async function getAppList() {
   try {
@@ -67,7 +67,7 @@ async function runApp(args) {
   let [name, ...sub] = args;
   try {
     app = (await getAppList()).find(x => x.name === name);
-   
+
     if (app) {
       const appParams = app.params || [];
       sub = sub.map((x, i) => appParams[i] === undefined ? x : processApplicationParam(appParams[i], x));
@@ -77,12 +77,20 @@ async function runApp(args) {
     }
 
     process.env.APP_ROOT = process.env.APP_ROOT || app.appRoot;
-    process.env.ENV      = process.env.ENV || 'dev';
-    process.env.PROFILE  = process.env.PROFILE || '';
-    process.env.WATCH    = process.env.WATCH || app.watchable;
+    process.env.ENV = process.env.ENV || 'dev';
+    process.env.PROFILE = process.env.PROFILE || '';
+    process.env.WATCH = process.env.WATCH || app.watchable;
 
+    const { Env } = require('@travetto/base/src/env');
     await require('@travetto/base/bin/bootstrap').run();
-    await require('../src/registry').DependencyRegistry.runApplication(name, sub);
+    let registryPath = '../src/registry';
+
+    // Handle bad symlink behavior on windows
+    if (Env.frameworkDev === 'win32') {
+      registryPath = path.resolve(process.env.__dirname, registryPath);
+    }
+
+    await require(registryPath).DependencyRegistry.runApplication(name, sub);
   } catch (err) {
     if (err.message === 'Invalid parameter') {
       // @ts-ignore
@@ -148,10 +156,10 @@ if (require.main === module) {
           cmd.help();
         }
 
-        if (cmd.app)      process.env.APP_ROOT = cmd.app;
-        if (cmd.env)      process.env.ENV = cmd.env;
-        if (cmd.profile)  process.env.PROFILE = cmd.profile.join(',');
-        if (cmd.watch)    process.env.WATCH = `${cmd.watch}`;
+        if (cmd.app) process.env.APP_ROOT = cmd.app;
+        if (cmd.env) process.env.ENV = cmd.env;
+        if (cmd.profile) process.env.PROFILE = cmd.profile.join(',');
+        if (cmd.watch) process.env.WATCH = `${cmd.watch}`;
 
         runApp([app, ...args]);
       });

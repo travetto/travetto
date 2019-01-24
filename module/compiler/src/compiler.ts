@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { AppInfo, Env } from '@travetto/base';
+import { AppInfo, Env, FsUtil } from '@travetto/base';
 
 import { TransformerManager } from './transformers';
 import { CompilerUtil } from './util';
@@ -27,7 +27,7 @@ class $Compiler {
 
     // Get Files proper like
     if (AppInfo.DEV_PACKAGES && AppInfo.DEV_PACKAGES.length) {
-      exclude.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}[\\\/](${AppInfo.DEV_PACKAGES.join('|')})[\\\/]`));
+      exclude.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}[\/](${AppInfo.DEV_PACKAGES.join('|')})[\/]`));
     }
 
     this.transformerManager = new TransformerManager(this.cwd);
@@ -132,8 +132,9 @@ class $Compiler {
       this.sourceManager.unload(fileName, unlink);
     }
 
-    if (fileName in require.cache) {
-      delete require.cache[fileName];
+    const native = FsUtil.toNative(fileName);
+    if (native in require.cache) {
+      delete require.cache[native];
     }
 
     this.moduleManager.unload(fileName);

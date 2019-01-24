@@ -1,10 +1,14 @@
-import * as path from 'path';
 import * as fs from 'fs';
+import * as util from 'util';
 
-import { Env } from './env';
 import { FsUtil } from './fs-util';
+import { Env } from './env';
 import { AppError } from './error';
 import { ScanFs } from './scan-fs';
+
+const fsStat = util.promisify(fs.stat);
+const fsReadFile = util.promisify(fs.readFile);
+const fsCreateReadStream = util.promisify(fs.createReadStream);
 
 export class $ResourceManager {
   private _cache: { [key: string]: string } = {};
@@ -17,16 +21,18 @@ export class $ResourceManager {
 
   private init() {
     if (Env.appRoot) {
-      this.paths.push(path.resolve(Env.cwd, Env.appRoot));
+      this.paths.push(FsUtil.resolveUnix(Env.cwd, Env.appRoot));
     }
 
     this.paths.push(Env.cwd);
 
-    this.paths = this.paths.map(x => path.join(x, this.folder)).filter(x => fs.existsSync(x));
+    this.paths = this.paths
+      .map(x => FsUtil.joinUnix(x, this.folder))
+      .filter(x => fs.existsSync(x));
   }
 
   addPath(searchPath: string) {
-    this.paths.push(FsUtil.normalize(searchPath));
+    this.paths.push(FsUtil.toUnix(searchPath));
   }
 
   getPaths() {
@@ -34,38 +40,36 @@ export class $ResourceManager {
   }
 
   async find(pth: string) {
-    pth = FsUtil.normalize(pth);
-
     if (pth in this._cache) {
       return this._cache[pth];
     }
 
-    for (const f of this.paths.map(x => path.join(x, pth))) {
-      if (await FsUtil.existsAsync(f)) {
+    for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
+      try {
+        await fsStat(f);
         return this._cache[pth] = f;
-      }
+      } catch { }
     }
 
     throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`);
   }
 
-  async read(pth: string) {
+  async read(pth: string, encoding?: string) {
     pth = await this.find(pth);
-    return FsUtil.readFileAsync(pth);
+    return fsReadFile(pth, encoding);
   }
 
   async readToStream(pth: string) {
     pth = await this.find(pth);
-    return fs.createReadStream(pth);
+    return fsCreateReadStream(pth, undefined);
   }
 
   async findAllByExtension(ext: string, base: string = '') {
-    base = FsUtil.normalize(base);
-
     const out: string[] = [];
     for (const root of this.paths) {
-      const results = await ScanFs.scanDir({ testFile: x => x.endsWith(ext) }, path.resolve(root, base));
-      out.push(...results.map(x => `${base}/${x.module}`.replace(/[\/\\]+/g, '/')));
+      const results = await ScanFs.scanDir({ testFile: x => x.endsWith(ext) },
+        FsUtil.resolveUnix(root, base));
+      out.push(...results.map(x => `${base}/${x.module}`));
     }
     return out;
   }

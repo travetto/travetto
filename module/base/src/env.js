@@ -1,6 +1,6 @@
-//@ts-check
-const { cwd } = require('./_app-core');
+const { FsUtil } = require('./fs-util');
 
+//@ts-check
 const PROD_KEY = 'prod';
 
 const envVal = (k, def) => {
@@ -19,13 +19,13 @@ const isEnvFalse = k => {
 };
 
 function checkFrameworkDev() {
-  let frameworkDev = false;
+  let inFramework = false;
 
   try {
-    frameworkDev = require(`${cwd}/package.json`).name.startsWith('@travetto');
+    inFramework = require(`${FsUtil.cwd}/package.json`).name.startsWith('@travetto');
   } catch (e) { }
 
-  return { frameworkDev };
+  return { frameworkDev: inFramework ? process.platform : undefined };
 }
 
 function checkDocker() {
@@ -108,7 +108,7 @@ function buildProfile() {
 const profile = buildProfile();
 
 const Env = [
-  { cwd },
+  { cwd: FsUtil.cwd },
   { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal, getInt: envIntVal },
   profile,
   buildLogging(profile),
