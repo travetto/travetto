@@ -1,10 +1,9 @@
 import * as fs from 'fs';
-import * as path from 'path';
 
 import { FsUtil } from './fs-util';
 
 export interface ScanEntry {
-  file: string;
+  uri: string;
   module: string;
   stats: fs.Stats;
   children?: ScanEntry[];
@@ -33,18 +32,23 @@ export class ScanFs {
 
         entry = (entry || { file: base, children: [] }) as ScanEntry;
 
-        for (const file of (await FsUtil.readdirAsync(entry.file))) {
+        for (const file of (await FsUtil.readdir(entry.uri))) {
           if (file.startsWith('.')) {
             continue;
           }
 
-          const full = path.resolve(entry.file, file);
-          const stats = await FsUtil.lstatAsync(full);
-          const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
+          const uri = FsUtil.resolveURI(entry.uri, file);
+
+          const stats = await FsUtil.stat(uri);
+          const subEntry: ScanEntry = {
+            stats,
+            uri,
+            module: uri.replace(`${base}/`, '')
+          };
 
           if (ScanFs.isDir(subEntry)) {
             if (subEntry.stats.isSymbolicLink()) {
-              const p = await FsUtil.realpathAsync(full);
+              const p = await FsUtil.realpath(uri);
               if (!visited.has(p)) {
                 visited.add(p);
               } else {
@@ -73,8 +77,8 @@ export class ScanFs {
     const out = [];
     for (const ls of res) {
       for (const e of ls) {
-        if (!names.has(e.file)) {
-          names.add(e.file);
+        if (!names.has(e.uri)) {
+          names.add(e.uri);
           out.push(e);
         }
       }
@@ -87,18 +91,23 @@ export class ScanFs {
 
     entry = (entry || { file: base, children: [] }) as ScanEntry;
 
-    for (const file of fs.readdirSync(entry.file)) {
+    for (const file of FsUtil.readdirSync(entry.uri)) {
       if (file.startsWith('.')) {
         continue;
       }
 
-      const full = path.resolve(entry.file, file);
-      const stats = fs.lstatSync(full);
-      const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
+      const uri = FsUtil.resolveURI(entry.uri, file);
+
+      const stats = FsUtil.statSync(uri);
+      const subEntry: ScanEntry = {
+        stats,
+        uri,
+        module: uri.replace(`${base}/`, '')
+      };
 
       if (ScanFs.isDir(subEntry)) {
         if (subEntry.stats.isSymbolicLink()) {
-          const p = fs.realpathSync(full);
+          const p = FsUtil.realpathSync(uri);
           if (!visited.has(p)) {
             visited.add(p);
           } else {
@@ -121,8 +130,8 @@ export class ScanFs {
     const out = [];
     for (const h of handlers) {
       for (const e of ScanFs.scanDirSync(h, base)) {
-        if (!names.has(e.file)) {
-          names.add(e.file);
+        if (!names.has(e.uri)) {
+          names.add(e.uri);
           out.push(e);
         }
       }
@@ -133,7 +142,7 @@ export class ScanFs {
   static bulkRequire<T = any>(handlers: ScanHandler[], cwd: string): T[] {
     return ScanFs.bulkScanDirSync(handlers, cwd)
       .filter(ScanFs.isNotDir) // Skip folders
-      .map(x => require(x.file.replace(/[\\]+/g, '/')))
+      .map(x => require(x.module))
       .filter(x => !!x); // Return non-empty values
   }
 
@@ -141,13 +150,13 @@ export class ScanFs {
     const files = await ScanFs.bulkScanDir(handlers, base);
     const promises = files
       .filter(ScanFs.isNotDir)
-      .map(x => FsUtil.readFileAsync(x.file).then(d => ({ name: x.file, data: d.toString() })));
+      .map(x => FsUtil.readFile(x.uri).then(d => ({ name: x.uri, data: d.toString() })));
     return await Promise.all(promises);
   }
 
   static bulkReadSync(handlers: ScanHandler[], base: string) {
     return ScanFs.bulkScanDirSync(handlers, base)
       .filter(ScanFs.isNotDir)
-      .map(x => ({ name: x.file, data: fs.readFileSync(x.file).toString() }));
+      .map(x => ({ name: x.uri, data: FsUtil.readFileSync(x.uri).toString() }));
   }
 }

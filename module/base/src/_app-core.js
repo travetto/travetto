@@ -1,8 +1,9 @@
-const path = require('path');
 const os = require('os');
+const { FsUtil } = require('./fs/fs-util');
 
-const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
-let defCache = path.join(os.tmpdir(), cwd.replace(/[\\\/:]/g, '_'));
+const cwd = FsUtil.toURI(process.env.INIT_CWD || process.cwd()).replace(/[\/]$/, '');
+const defCache = FsUtil.resolveURI(os.tmpdir(), cwd.replace(/[\/:]/g, '_'));
+
 const cacheDir =
   process.env.TRV_CACHE_DIR ?
     (process.env.TRV_CACHE_DIR === 'PID' ?

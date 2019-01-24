@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
-import * as path from 'path';
 
+import { FsUtil } from './fs/fs-util';
 import { ScanEntry, ScanHandler, ScanFs } from './fs/scan-fs';
 import { Util } from './util';
 import { Env } from './env';
@@ -32,7 +32,7 @@ export class Watcher extends EventEmitter {
       maxListeners: opts.maxListeners,
       interval: opts.interval || 250,
       debounceDelay: opts.debounceDelay || 250,
-      cwd: opts.cwd || Env.cwd
+      cwd: FsUtil.toURI(opts.cwd || Env.cwd)
     };
 
     // Set maxListeners
@@ -42,16 +42,20 @@ export class Watcher extends EventEmitter {
     }
 
     this.pendingWatched.push({
-      file: this.options.cwd,
+      uri: this.options.cwd,
       module: this.options.cwd.replace(/[\\]/g, '/'),
-      stats: fs.lstatSync(this.options.cwd)
+      stats: FsUtil.statSync(this.options.cwd)
     });
   }
 
-  private processDirectoryChange(dir: ScanEntry) {
+  private async processDirectoryChange(dir: ScanEntry) {
     dir.children = dir.children || [];
 
-    fs.readdir(dir.file, (err, current) => {
+    let current: string[] = [];
+
+    try {
+      current = await FsUtil.readdir(dir.uri);
+    } catch (err) {
       if (err) {
         if (err.code === 'ENOENT') {
           current = [];
@@ -59,53 +63,53 @@ export class Watcher extends EventEmitter {
           return this._emit('error', err);
         }
       }
+    }
 
-      // Convert to full paths
-      current = current.filter(x => !x.startsWith('.')).map(x => path.join(dir.file, x));
+    // Convert to full paths
+    current = current.filter(x => !x.startsWith('.')).map(x => FsUtil.resolveURI(dir.uri, x));
 
-      // Get watched files for this dir
-      const previous = (dir.children || []).slice(0);
+    // Get watched files for this dir
+    const previous = (dir.children || []).slice(0);
 
-      // If file was deleted
-      for (const child of previous) {
-        if (current.indexOf(child.file) < 0) {
+    // If file was deleted
+    for (const child of previous) {
+      if (current.indexOf(child.uri) < 0) {
 
-          // Remove from watching
-          this.unwatch(child.file);
-          dir.children!.splice(dir.children!.indexOf(child), 1);
+        // Remove from watching
+        this.unwatch(child.uri);
+        dir.children!.splice(dir.children!.indexOf(child), 1);
 
-          if (ScanFs.isNotDir(child)) {
-            this._emit('removed', child);
-            this._emit('all', { event: 'removed', entry: child });
-          }
+        if (ScanFs.isNotDir(child)) {
+          this._emit('removed', child);
+          this._emit('all', { event: 'removed', entry: child });
         }
       }
+    }
 
-      const prevSet = new Set(previous.map(x => x.file));
+    const prevSet = new Set(previous.map(x => x.uri));
 
-      // If file was added
-      for (const next of current) {
-        const nextRel = next.replace(this.options.cwd, '');
-        const nextStats = fs.lstatSync(next);
+    // If file was added
+    for (const next of current) {
+      const nextRel = next.replace(this.options.cwd, '');
+      const nextStats = FsUtil.statSync(next);
 
-        if (!prevSet.has(next) && (nextStats.isDirectory() ||
-          this.findHandlers.find(x => x.testFile ? x.testFile(nextRel) : false))
-        ) {
-          const sub: ScanEntry = {
-            file: next,
-            module: next.replace(/[\\]/g, '/'),
-            stats: nextStats
-          };
-          this.watch(sub);
-          dir.children!.push(sub);
+      if (!prevSet.has(next) && (nextStats.isDirectory() ||
+        this.findHandlers.find(x => x.testFile ? x.testFile(nextRel) : false))
+      ) {
+        const sub: ScanEntry = {
+          uri: next,
+          module: next,
+          stats: nextStats
+        };
+        this.watch(sub);
+        dir.children!.push(sub);
 
-          if (ScanFs.isNotDir(sub)) {
-            this._emit('added', sub);
-            this._emit('all', { event: 'added', entry: sub });
-          }
+        if (ScanFs.isNotDir(sub)) {
+          this._emit('added', sub);
+          this._emit('all', { event: 'added', entry: sub });
         }
       }
-    });
+    }
   }
 
   private _emit(type: string, payload?: any) {
@@ -117,12 +121,12 @@ export class Watcher extends EventEmitter {
 
   private watchDirectory(entry: ScanEntry) {
     if (ScanFs.isNotDir(entry)) {
-      throw new Error(`Not a directory: ${entry.file}`);
+      throw new Error(`Not a directory: ${entry.uri}`);
     }
 
     try {
-      console.trace('Watching Directory', entry.file);
-      const watcher = fs.watch(entry.file, Util.throttle((event, f) => {
+      console.trace('Watching Directory', entry.uri);
+      const watcher = FsUtil.watch(entry.uri, Util.throttle((event, f) => {
         this.processDirectoryChange(entry);
       }, this.options.debounceDelay));
 
@@ -130,7 +134,7 @@ export class Watcher extends EventEmitter {
         this.handleError(err);
       });
 
-      this.watchers.set(entry.file, watcher);
+      this.watchers.set(entry.uri, watcher);
 
       this.processDirectoryChange(entry);
 
@@ -141,19 +145,19 @@ export class Watcher extends EventEmitter {
 
   private watchFile(entry: ScanEntry) {
     if (ScanFs.isDir(entry)) {
-      throw new Error(`Not a file: ${entry.file}`);
+      throw new Error(`Not a file: ${entry.uri}`);
     }
 
-    console.trace('Watching File', entry.file);
+    console.trace('Watching File', entry.uri);
 
     const opts = { persistent: true, interval: this.options.interval };
 
-    this.pollers.set(entry.file, (curr: fs.Stats, prev: fs.Stats) => {
+    this.pollers.set(entry.uri, (curr: fs.Stats, prev: fs.Stats) => {
       // Only emit changed if the file still exists
       // Prevents changed/deleted duplicate events
       try {
         // Get stats on file
-        const stats = fs.lstatSync(entry.file);
+        const stats = FsUtil.statSync(entry.uri);
         entry.stats = stats;
 
         this._emit('changed', entry);
@@ -168,32 +172,32 @@ export class Watcher extends EventEmitter {
     });
 
     try {
-      fs.watchFile(entry.file, opts, this.pollers.get(entry.file)!);
+      FsUtil.watchFile(entry.uri, opts, this.pollers.get(entry.uri)!);
     } catch (err) {
       return this.handleError(err);
     }
   }
 
   private unwatchFile(entry: ScanEntry) {
-    if (this.pollers.has(entry.file)) {
-      console.trace('Unwatching File', entry.file);
+    if (this.pollers.has(entry.uri)) {
+      console.trace('Unwatching File', entry.uri);
 
-      fs.unwatchFile(entry.file, this.pollers.get(entry.file)!);
-      this.pollers.delete(entry.file);
+      FsUtil.unwatchFile(entry.uri, this.pollers.get(entry.uri)!);
+      this.pollers.delete(entry.uri);
     }
   }
 
   private unwatchDirectory(entry: ScanEntry) {
-    if (this.watchers.has(entry.file)) {
-      console.trace('Unwatching Directory', entry.file);
+    if (this.watchers.has(entry.uri)) {
+      console.trace('Unwatching Directory', entry.uri);
 
       for (const child of (entry.children || [])) {
-        this.unwatch(child.file);
+        this.unwatch(child.uri);
       }
 
-      const watcher = this.watchers.get(entry.file)!;
+      const watcher = this.watchers.get(entry.uri)!;
       watcher.close();
-      this.watchers.delete(entry.file);
+      this.watchers.delete(entry.uri);
     }
   }
 
@@ -229,7 +233,7 @@ export class Watcher extends EventEmitter {
     this.findHandlers = this.findHandlers.concat(finalHandlers);
 
     for (const entry of ScanFs.bulkScanDirSync(finalHandlers, this.options.cwd)) {
-      if (!this.watched.has(entry.file)) {
+      if (!this.watched.has(entry.uri)) {
         if (this.pending) {
           this.pendingWatched.push(entry);
         } else {
@@ -250,11 +254,11 @@ export class Watcher extends EventEmitter {
   }
 
   watch(entry: ScanEntry) {
-    if (this.watched.has(entry.file)) {
+    if (this.watched.has(entry.uri)) {
       return;
     }
 
-    this.watched.set(entry.file, entry);
+    this.watched.set(entry.uri, entry);
 
     if (ScanFs.isDir(entry)) { // Watch Directory
       this.watchDirectory(entry);

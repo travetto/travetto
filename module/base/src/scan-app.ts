@@ -1,10 +1,9 @@
-import * as path from 'path';
-
 import { ScanEntry, ScanFs } from './fs/scan-fs';
+import { FsUtil } from './fs/fs-util';
 import { Env } from './env';
 import { resolveFrameworkFile } from './app-info';
 
-type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
+type SimpleEntry = Pick<ScanEntry, 'uri' | 'module'>;
 
 export class ScanApp {
 
@@ -26,17 +25,17 @@ export class ScanApp {
 
       if (Env.frameworkDev) {
         this.cache[key] = this.cache[key].map(x => {
-          x.file = resolveFrameworkFile(x.file);
-          x.module = x.file.replace(`${Env.cwd}${path.sep}`, '').replace(/[\\]+/g, '/');
+          x.uri = FsUtil.toURI(resolveFrameworkFile(x.uri));
+          x.module = x.uri.replace(`${Env.cwd}/`, '');
           return x;
         });
       }
 
       // De-deduplicate
       this.cache[key] = this.cache[key]
-        .sort((a, b) => a.file.localeCompare(b.file))
+        .sort((a, b) => a.uri.localeCompare(b.uri))
         .reduce((acc: SimpleEntry[], x: SimpleEntry) => {
-          if (!acc.length || x.file !== acc[acc.length - 1].file) {
+          if (!acc.length || x.uri !== acc[acc.length - 1].uri) {
             acc.push(x);
           }
           return acc;
@@ -55,21 +54,19 @@ export class ScanApp {
   }
 
   static requireFiles(ext: string | RegExp, filter: RegExp | ((rel: string) => boolean)) {
-    return ScanApp.findFiles(ext, filter).map(x => require(x.file.replace(/[\\]/g, '/')));
+    return ScanApp.findFiles(ext, filter).map(x => require(x.module));
   }
 
   static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {
     this.cache[key] = paths.map(mod => {
       mod = mod.replace(/[\\]+/g, '/').replace('#', 'node_modules/@travetto');
 
-      const full = path
-        .resolve(base!, mod)
-        .replace(/[\\]+/g, '/');
+      const uri = FsUtil.resolveURI(base!, mod);
 
-      if (mod === full) {
-        mod = full.replace(`${base}/`, '');
+      if (mod === uri) {
+        mod = uri.replace(`${base}/`, '');
       }
-      return { file: full, module: mod };
+      return { uri, module: mod };
     });
   }
 }

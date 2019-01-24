@@ -1,9 +1,7 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import * as readline from 'readline';
 import * as assert from 'assert';
 
-import { ScanFs, Env } from '@travetto/base';
+import { ScanFs, Env, FsUtil } from '@travetto/base';
 
 import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
@@ -17,7 +15,7 @@ export class TestExecutor {
 
   static isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
-      const input = fs.createReadStream(file);
+      const input = FsUtil.createReadStream(file);
       const reader = readline.createInterface({ input })
         .on('line', line => {
           if (line.includes('@Suite')) {
@@ -33,12 +31,12 @@ export class TestExecutor {
   static async getTests(globs: RegExp[]) {
     const files = (await ScanFs.bulkScanDir(globs.map(x => ({ testFile: (y: string) => x.test(y) })), Env.cwd))
       .filter(x => !x.stats.isDirectory())
-      .filter(x => !x.file.includes('node_modules'))
-      .map(f => this.isTest(f.file).then(valid => ({ file: f.file, valid })));
+      .filter(x => !x.uri.includes('node_modules'))
+      .map(f => this.isTest(f.uri).then(valid => ({ uri: f.uri, valid })));
 
     return (await Promise.all(files))
       .filter(x => x.valid)
-      .map(x => x.file);
+      .map(x => x.uri);
   }
 
   static async executeTest(consumer: Consumer, test: TestConfig) {
@@ -231,12 +229,14 @@ export class TestExecutor {
   }
 
   static async execute(consumer: Consumer, [file, ...args]: string[]) {
-    if (!file.startsWith(Env.cwd)) {
-      file = path.join(Env.cwd, file);
+    let uri = FsUtil.toURI(file);
+
+    if (!uri.startsWith(Env.cwd)) {
+      uri = FsUtil.resolveURI(Env.cwd, uri);
     }
 
     try {
-      require(file.replace(/[\\]/g, '/')); // Path to module
+      require(uri); // Path to module
     } catch (err) {
       err.FATAL = true;
       throw err;
