@@ -1,6 +1,4 @@
-import * as path from 'path';
-
-import { Watcher, ScanEntry, Env, ScanHandler, ScanApp } from '@travetto/base';
+import { Watcher, ScanEntry, Env, ScanHandler, ScanApp, FsUtil } from '@travetto/base';
 
 export interface Listener {
   added(name: string): any;
@@ -10,39 +8,39 @@ export interface Listener {
 
 export class FilePresenceManager {
   fileWatchers: { [key: string]: Watcher } = {};
-  files = new Map<string, { version: number }>();
+  uris = new Map<string, { version: number }>();
   seen = new Set<string>();
   watchSpaces = new Set<string>();
 
   constructor(private cwd: string, private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = Env.watch) {
     this.watchSpaces.add('src');
     if (Env.appRoot) {
-      this.watchSpaces.add(path.join(Env.appRoot, 'src'));
+      this.watchSpaces.add(FsUtil.resolveURI(Env.appRoot, 'src'));
     }
   }
 
   private watcherListener({ event, entry }: { event: string, entry: ScanEntry }) {
-    if (!this.validFile(entry.file)) {
+    if (!this.validFile(entry.uri)) {
       return;
     }
 
-    console.trace('Watch', event, entry.file);
+    console.trace('Watch', event, entry.uri);
 
     if (event === 'added') {
-      this.files.set(entry.file, { version: 1 });
-      this.listener.added(entry.file);
+      this.uris.set(entry.uri, { version: 1 });
+      this.listener.added(entry.uri);
     } else if (event === 'changed') {
-      const changed = this.files.has(entry.file);
+      const changed = this.uris.has(entry.uri);
       if (changed) {
-        this.listener.changed(entry.file);
-        this.files.get(entry.file)!.version++;
+        this.listener.changed(entry.uri);
+        this.uris.get(entry.uri)!.version++;
       } else {
-        this.files.set(entry.file, { version: 1 });
-        this.listener.added(entry.file);
+        this.uris.set(entry.uri, { version: 1 });
+        this.listener.added(entry.uri);
       }
     } else if (event === 'removed') {
-      this.files.delete(entry.file);
-      this.listener.removed(entry.file);
+      this.uris.delete(entry.uri);
+      this.listener.removed(entry.uri);
     }
   }
 
@@ -63,11 +61,11 @@ export class FilePresenceManager {
     const SRC_RE = new RegExp(`^(${Env.appRoot || '-'})?(\/src\/.*|index)$`);
 
     const rootFiles = ScanApp.findFiles('.ts', x => SRC_RE.test(x) && this.validFile(x)) // Only watch own files
-      .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable
-      .map(x => x.file);
+      .filter(x => !(x.uri in require.cache)) // Pre-loaded items are fundamental and non-reloadable
+      .map(x => x.uri);
 
     for (const fileName of rootFiles) {
-      this.files.set(fileName, { version: 0 });
+      this.uris.set(fileName, { version: 0 });
       this.listener.added(fileName);
     }
 
@@ -75,14 +73,14 @@ export class FilePresenceManager {
       setTimeout(() => {
         console.debug('Watching files', rootFiles.length);
         for (const p of this.watchSpaces) {
-          this.buildWatcher(path.join(this.cwd, p), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+          this.buildWatcher(FsUtil.resolveURI(this.cwd, p), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
         }
       }, 1000);
     }
   }
 
   has(name: string) {
-    return this.files.has(name);
+    return this.uris.has(name);
   }
 
   validFile(name: string) {
@@ -103,14 +101,14 @@ export class FilePresenceManager {
     // Only watch workspace files, not node_modules
     if (this.watch && !name.includes('node_modules')) {
       // Already known to be a used file, just don't watch node modules
-      const topLevel = path.dirname(name);
+      const topLevel = FsUtil.dirname(name);
       if (!this.fileWatchers[topLevel]) {
         this.fileWatchers[topLevel] = this.buildWatcher(topLevel, []);
       }
-      this.fileWatchers[topLevel].add([name.replace(`${topLevel}${path.sep}`, '')]);
+      this.fileWatchers[topLevel].add([name.replace(`${topLevel}/`, '')]);
     }
 
-    this.files.set(name, { version: 0 });
+    this.uris.set(name, { version: 0 });
     this.listener.added(name);
   }
 
@@ -120,10 +118,10 @@ export class FilePresenceManager {
       this.fileWatchers = {};
     }
     this.seen.clear();
-    this.files.clear();
+    this.uris.clear();
   }
 
   isWatchedFileLoaded(name: string) {
-    return this.watch && this.files.get(name.replace('.js', '.ts'))!.version > 0;
+    return this.watch && this.uris.get(name.replace('.js', '.ts'))!.version > 0;
   }
 }

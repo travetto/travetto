@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { FsUtil, ResourceManager, Env } from '@travetto/base';
 import { AppCache } from '@travetto/base/src/cache';
 import { Injectable, Inject } from '@travetto/di';
@@ -28,7 +26,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     if (!this._compiledSass) {
       this._compiledSass = (async () => {
         const partial = '/email/app.scss';
-        const full = path.resolve(__dirname, '..', 'resources', partial);
+        const full = FsUtil.resolveURI(__dirname, '..', 'resources', partial);
 
         if (!AppCache.hasEntry(full)) {
           const file = await ResourceManager.find(partial);

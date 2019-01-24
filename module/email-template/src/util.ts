@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { CommandService, ExecUtil } from '@travetto/exec';
+import { FsUtil } from '@travetto/base';
 
 export class TemplateUtil {
 
@@ -46,7 +47,7 @@ export class TemplateUtil {
 
   static async optimizeImage(file: string, out: string) {
     const [proc, prom] = await this.converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
-    fs.createReadStream(file).pipe(proc.stdin);
+    FsUtil.createReadStream(file).pipe(proc.stdin);
     proc.stdout.pipe(fs.createWriteStream(out));
     await prom;
   }
@@ -63,7 +64,7 @@ export class TemplateUtil {
 
     const pendingImages = srcs.map(async src => {
       // TODO: fix this up?
-      const ext = path.extname(src).split('.')[1];
+      const ext = FsUtil.extname(src).split('.')[1];
       const data = (await lookup(src)).toString('base64');
 
       return { data, ext, src };

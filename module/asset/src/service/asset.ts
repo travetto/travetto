@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-
 import { Injectable } from '@travetto/di';
 import { FsUtil } from '@travetto/base';
 
@@ -27,13 +25,13 @@ export class AssetService {
       if (res && !upsert) {
         throw new Error(`File already exists: ${asset.filename}`);
       } else {
-        return await this.source.write(asset, fs.createReadStream(asset.path));
+        return await this.source.write(asset, FsUtil.createReadStream(asset.path));
       }
 
     } finally {
       if (removeOnComplete) {
         try {
-          await FsUtil.unlinkAsync(asset.path);
+          await FsUtil.unlink(asset.path);
         } catch (e) {
           // Do nothings
         }

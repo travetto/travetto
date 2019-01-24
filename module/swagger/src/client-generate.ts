@@ -1,6 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
 import { DockerContainer } from '@travetto/exec';
 import { Injectable } from '@travetto/di';
 import { Env, FsUtil } from '@travetto/base';
@@ -71,8 +68,8 @@ export class ClientGenerate {
     await this._start();
 
     const spec = this.service.getSpec();
-    const specFile = path.join(this.config.output, 'spec.json');
-    await new Promise((res, rej) => fs.writeFile(specFile, JSON.stringify(spec, undefined, 2), (err) => err ? rej(err) : res()));
+    const specFile = FsUtil.resolveURI(this.config.output, 'spec.json');
+    await new Promise((res, rej) => FsUtil.writeFile(specFile, JSON.stringify(spec, undefined, 2), (err) => err ? rej(err) : res()));
 
     const [, prom] = await this.codeGenCli.exec([], [
       'java',

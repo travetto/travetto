@@ -1,6 +1,3 @@
-import * as path from 'path';
-import * as fs from 'fs';
-
 import { Env } from './env';
 import { FsUtil } from './fs/fs-util';
 import { AppError } from './error';
@@ -17,16 +14,16 @@ export class $ResourceManager {
 
   private init() {
     if (Env.appRoot) {
-      this.paths.push(path.resolve(Env.cwd, Env.appRoot));
+      this.paths.push(FsUtil.resolveURI(Env.cwd, Env.appRoot));
     }
 
     this.paths.push(Env.cwd);
 
-    this.paths = this.paths.map(x => path.join(x, this.folder)).filter(x => fs.existsSync(x));
+    this.paths = this.paths.map(x => FsUtil.resolveURI(x, this.folder)).filter(x => FsUtil.existsSync(x));
   }
 
   addPath(searchPath: string) {
-    this.paths.push(FsUtil.normalize(searchPath));
+    this.paths.push(FsUtil.toURI(searchPath));
   }
 
   getPaths() {
@@ -34,14 +31,12 @@ export class $ResourceManager {
   }
 
   async find(pth: string) {
-    pth = FsUtil.normalize(pth);
-
     if (pth in this._cache) {
       return this._cache[pth];
     }
 
-    for (const f of this.paths.map(x => path.join(x, pth))) {
-      if (await FsUtil.existsAsync(f)) {
+    for (const f of this.paths.map(x => FsUtil.resolveURI(x, pth))) {
+      if (await FsUtil.exists(f)) {
         return this._cache[pth] = f;
       }
     }
@@ -51,21 +46,19 @@ export class $ResourceManager {
 
   async read(pth: string) {
     pth = await this.find(pth);
-    return FsUtil.readFileAsync(pth);
+    return FsUtil.readFile(pth);
   }
 
   async readToStream(pth: string) {
     pth = await this.find(pth);
-    return fs.createReadStream(pth);
+    return FsUtil.createReadStream(pth);
   }
 
   async findAllByExtension(ext: string, base: string = '') {
-    base = FsUtil.normalize(base);
-
     const out: string[] = [];
     for (const root of this.paths) {
-      const results = await ScanFs.scanDir({ testFile: x => x.endsWith(ext) }, path.resolve(root, base));
-      out.push(...results.map(x => `${base}/${x.module}`.replace(/[\/\\]+/g, '/')));
+      const results = await ScanFs.scanDir({ testFile: x => x.endsWith(ext) }, FsUtil.resolveURI(root, base));
+      out.push(...results.map(x => FsUtil.resolveURI(base, x.module)));
     }
     return out;
   }

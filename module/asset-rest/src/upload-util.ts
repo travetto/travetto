@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import * as os from 'os';
 import * as busboy from 'busboy';
 import match = require('mime-match');
@@ -45,11 +43,12 @@ export class UploadUtil {
         console.debug('Uploading file', fieldName, fileName, encoding, mimeType);
 
         uploads.push((async () => {
-          const uniqueDir = path.resolve(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
+          const uniqueDir = FsUtil.resolveURI(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
           await FsUtil.mkdirpAsync(uniqueDir);
-          const uniqueLocal = path.resolve(uniqueDir, path.basename(fileName));
+          const uniqueLocal = FsUtil.resolveURI(uniqueDir, FsUtil.basename(fileName));
 
-          file.pipe(fs.createWriteStream(uniqueLocal));
+          file.pipe(FsUtil.createWriteStream(uniqueLocal));
+
           await new Promise((res, rej) =>
             file.on('end', e => e ? rej(e) : res()));
 

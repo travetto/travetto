@@ -1,10 +1,11 @@
-import * as aws from 'aws-sdk';
-import * as fs from 'fs';
-
-import { AssetSource, Asset, AssetMetadata } from '@travetto/asset';
-import { AssetS3Config } from './config';
 import { TagSet } from 'aws-sdk/clients/s3';
 import { Readable } from 'stream';
+import * as aws from 'aws-sdk';
+
+import { AssetSource, Asset, AssetMetadata } from '@travetto/asset';
+import { FsUtil } from '@travetto/base';
+
+import { AssetS3Config } from './config';
 
 function toTagSet(metadata: AssetMetadata): TagSet {
   return ['name', 'title', 'hash', 'createdDate', 'tags']
@@ -51,7 +52,7 @@ export class AssetS3Source extends AssetSource {
 
   async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
     const upload = this.client.upload(this.q(file.filename, {
-      Body: fs.createReadStream(file.path),
+      Body: FsUtil.createReadStream(file.path),
       ContentType: file.contentType,
       ContentLength: file.length
     })).promise();

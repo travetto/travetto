@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-
 import { CommandService, ExecUtil } from '@travetto/exec';
 import { Cacheable } from '@travetto/cache';
 import { Injectable } from '@travetto/di';
@@ -25,7 +23,7 @@ export class ImageService {
   @Cacheable({
     max: 1000,
     dispose: (key: string, n: Promise<string | undefined>) => {
-      n.then(v => v ? FsUtil.unlinkAsync(v) : undefined).catch(err => {
+      n.then(v => v ? FsUtil.unlink(v) : undefined).catch(err => {
         console.error(err);
       });
     }
@@ -41,7 +39,7 @@ export class ImageService {
       const [proc, prom] = await this.converter.exec('convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-');
 
       info.stream.pipe(proc.stdin);
-      proc.stdout.pipe(fs.createWriteStream(filePath));
+      proc.stdout.pipe(FsUtil.createWriteStream(filePath));
       await prom;
       return filePath;
     }
@@ -51,7 +49,7 @@ export class ImageService {
     const file = await this.generateAndStoreImage(filename, options, hasTags);
     const info = await this.assetService.get(filename, hasTags);
     if (file) {
-      info.stream = fs.createReadStream(file);
+      info.stream = FsUtil.createReadStream(file);
       delete info.length;
     }
     return info;

@@ -1,11 +1,11 @@
-import * as fs from 'fs';
+import { FsUtil } from '@travetto/base';
 
 export interface FileOutputOpts {
   file: string;
 }
 
 export function fileOutput(opts: FileOutputOpts) {
-  const stream = fs.createWriteStream(opts.file, {
+  const stream = FsUtil.createWriteStream(opts.file, {
     autoClose: true,
     flags: 'a'
   });

@@ -1,6 +1,4 @@
 import * as child_process from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as net from 'net';
 
 import { Shutdown, ScanFs, ScanEntry, Env, FsUtil } from '@travetto/base';
@@ -88,7 +86,7 @@ export class DockerContainer {
   }
 
   createTempVolume(volume: string) {
-    const p = fs.mkdtempSync(`/tmp/${this.image.replace(/[^A-Za-z0-9]/g, '_')}`);
+    const p = FsUtil.mkdtempSync(`/tmp/${this.image.replace(/[^A-Za-z0-9]/g, '_')}`);
     this.tempVolumes[volume] = p;
     return this;
   }
@@ -270,7 +268,7 @@ export class DockerContainer {
     ]) {
       await Promise.all(files
         .filter(filter)
-        .map(x => FsUtil.unlinkAsync(x.file)
+        .map(x => FsUtil.unlink(x.uri)
           .catch(e => { console.error(`Unable to delete ${e.file}`); }))
       );
     }
@@ -299,8 +297,8 @@ export class DockerContainer {
     await this.cleanup();
     if (files) {
       for (const { name, content } of files) {
-        const f = path.join(dir, name);
-        await FsUtil.writeFileAsync(f, content, { mode: '755' });
+        const f = FsUtil.resolveURI(dir, name);
+        await FsUtil.writeFile(f, content, { mode: '755' });
       }
     }
     return;

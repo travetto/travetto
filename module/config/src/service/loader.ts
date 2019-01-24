@@ -1,7 +1,4 @@
-import * as path from 'path';
-import { readFileSync } from 'fs';
-
-import { Env, ScanApp } from '@travetto/base';
+import { Env, ScanApp, FsUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 import { ConfigMap } from './map';
@@ -18,7 +15,7 @@ export class ConfigLoader {
     const entries = ScanApp.findFiles(YAML_RE, x => /config\/[^/]+.yml$/.test(x));
 
     for (const entry of entries) {
-      this.processConfig(entry.file);
+      this.processConfig(entry.uri);
     }
   }
 
@@ -26,9 +23,9 @@ export class ConfigLoader {
     // Handle profile loads
     if (Env.profiles.length) {
       const envFiles = ScanApp.findFiles(YAML_RE, x => x.startsWith('profile/'))
-        .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }))
+        .map(x => ({ name: x.uri, data: FsUtil.readFileSync(x.uri).toString() }))
         .map(x => {
-          const tested = path.basename(x.name).replace(YAML_RE, '');
+          const tested = FsUtil.basename(x.name).replace(YAML_RE, '');
           const found = Env.hasProfile(tested);
           return { name: tested, found, data: x.data };
         })
@@ -52,8 +49,8 @@ export class ConfigLoader {
   }
 
   static processConfig(file: string) {
-    const data = readFileSync(file).toString();
-    const ns = path.basename(file).replace(YAML_RE, '');
+    const data = FsUtil.readFileSync(file).toString();
+    const ns = FsUtil.basename(file).replace(YAML_RE, '');
     const doc = YamlUtil.parse(data);
     this.map.putAll({ [ns]: doc });
   }

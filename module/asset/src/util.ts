@@ -1,36 +1,31 @@
-import * as fs from 'fs';
 import * as mime from 'mime';
-import * as path from 'path';
 import * as fileType from 'file-type';
-import * as os from 'os';
 import * as crypto from 'crypto';
+import { IncomingMessage } from 'http';
 
 import { FsUtil } from '@travetto/base';
 import { HttpRequest } from '@travetto/net';
 import { Asset, AssetFile } from './model';
-import { IncomingMessage } from 'http';
-
-const tmpDir = path.resolve(os.tmpdir());
 
 export class AssetUtil {
 
   static generateTempFile(ext: string): string {
     const now = new Date();
     const name = `image-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${process.pid}-${(Math.random() * 100000000 + 1).toString(36)}.${ext}`;
-    return path.resolve(tmpDir, name);
+    return FsUtil.resolveURI(FsUtil.tmpdir, name);
   }
 
   static async localFileToAsset(pth: string, prefix?: string, tags?: string[]) {
     const hash = crypto.createHash('sha256');
     hash.setEncoding('hex');
 
-    const str = fs.createReadStream(pth);
+    const str = FsUtil.createReadStream(pth);
     str.pipe(hash);
 
     await new Promise((res, rej) =>
       str.on('end', e => e ? rej(e) : res()));
 
-    const size = (await FsUtil.statAsync(pth)).size;
+    const size = (await FsUtil.stat(pth)).size;
 
     const upload = this.fileToAsset({
       name: pth,
@@ -81,9 +76,9 @@ export class AssetUtil {
   }
 
   static async readChunk(filePath: string, bytes: number) {
-    const fd = await FsUtil.openAsync(filePath, 'r');
+    const fd = await FsUtil.open(filePath, 'r');
     const buffer = new Buffer(bytes);
-    await FsUtil.readAsync(fd, buffer, 0, bytes, 0);
+    await FsUtil.read(fd, buffer, 0, bytes, 0);
     return buffer;
   }
 
@@ -94,7 +89,7 @@ export class AssetUtil {
 
   static async downloadUrl(url: string) {
     let filePath = this.generateTempFile(url.split('/').pop() as string);
-    const file = fs.createWriteStream(filePath);
+    const file = FsUtil.createWriteStream(filePath);
     const filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
     let responseExt: string | undefined | null;
 
@@ -118,7 +113,7 @@ export class AssetUtil {
       } else {
         newFilePath = `${newFilePath}.${responseExt}`;
       }
-      await FsUtil.renameAsync(filePath, newFilePath);
+      await FsUtil.rename(filePath, newFilePath);
       filePath = newFilePath;
     }
     return filePath;
