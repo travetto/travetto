@@ -185,7 +185,7 @@ export class DockerContainer {
 
   async initTemp() {
     // Make temp dirs
-    const mkdirAll = Object.keys(this.tempVolumes).map(x => FsUtil.mkdirpAsync(x).catch(e => { }));
+    const mkdirAll = Object.keys(this.tempVolumes).map(x => FsUtil.mkdirp(x).catch(e => { }));
     await Promise.all(mkdirAll);
   }
 

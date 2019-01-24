@@ -44,9 +44,9 @@ export class $ResourceManager {
     throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`);
   }
 
-  async read(pth: string) {
+  async read(pth: string, encoding?: string) {
     pth = await this.find(pth);
-    return FsUtil.readFile(pth);
+    return FsUtil.readFile(pth, encoding);
   }
 
   async readToStream(pth: string) {

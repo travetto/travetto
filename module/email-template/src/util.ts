@@ -1,6 +1,4 @@
 import * as Mustache from 'mustache';
-import * as fs from 'fs';
-import * as path from 'path';
 
 import { CommandService, ExecUtil } from '@travetto/exec';
 import { FsUtil } from '@travetto/base';
@@ -48,7 +46,7 @@ export class TemplateUtil {
   static async optimizeImage(file: string, out: string) {
     const [proc, prom] = await this.converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
     FsUtil.createReadStream(file).pipe(proc.stdin);
-    proc.stdout.pipe(fs.createWriteStream(out));
+    proc.stdout.pipe(FsUtil.createWriteStream(out));
     await prom;
   }
 

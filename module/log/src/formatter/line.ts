@@ -42,7 +42,7 @@ export function lineFormatter(opts: LineFormatterOpts) {
       let ns = ev.file
         .replace(Env.cwd, '')
         .replace(/^.*node_modules/, '')
-        .replace(/[\/\\]/g, '.')
+        .replace(/[\/]/g, '.')
         .replace(/^[.]/, '')
         .replace(/[.](t|j)s$/, '');
 

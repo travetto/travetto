@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { ResourceManager, FsUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 

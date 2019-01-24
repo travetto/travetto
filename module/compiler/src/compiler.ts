@@ -27,7 +27,7 @@ class $Compiler {
 
     // Get Files proper like
     if (AppInfo.DEV_PACKAGES && AppInfo.DEV_PACKAGES.length) {
-      exclude.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}[\\\/](${AppInfo.DEV_PACKAGES.join('|')})[\\\/]`));
+      exclude.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}[\/](${AppInfo.DEV_PACKAGES.join('|')})[\/]`));
     }
 
     this.transformerManager = new TransformerManager(this.cwd);

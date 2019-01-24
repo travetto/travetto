@@ -3,7 +3,7 @@ import * as fs from 'fs';
 declare class FsUtilType {
   tmpdir: string;
 
-  mkdirpAsync(rel: string): Promise<void>;
+  mkdirp(rel: string): Promise<void>;
   toURI(path: string): string;
   toNative(path: string): string;
   basename(path: string): string;

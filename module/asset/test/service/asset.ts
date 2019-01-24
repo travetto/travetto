@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import * as assert from 'assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
@@ -24,7 +23,7 @@ class MockAssetSource extends AssetSource {
   }
 
   async read(filename: string): Promise<NodeJS.ReadableStream> {
-    return fs.createReadStream(this.streams.get(filename)!);
+    return FsUtil.createReadStream(this.streams.get(filename)!);
   }
 
   async info(filename: string, filter?: Partial<AssetMetadata>): Promise<Asset> {
@@ -65,7 +64,7 @@ class AssetTest {
     assert(file.contentType === 'image/png');
     assert(file.length > -1);
 
-    assert(await FsUtil.existsAsync(filePath) === false);
+    assert(await FsUtil.exists(filePath) === false);
   }
 
   @Test('Test caching')

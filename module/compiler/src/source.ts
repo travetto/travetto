@@ -1,9 +1,8 @@
 /// <reference types="typescript/lib/typescriptServices" />
 
-import * as fs from 'fs';
 import * as sourcemap from 'source-map-support';
 
-import { Env, AppError } from '@travetto/base';
+import { Env, AppError, FsUtil } from '@travetto/base';
 import { Cache } from '@travetto/base/src/cache';
 
 import { CompilerUtil } from './util';
@@ -65,7 +64,7 @@ export class SourceManager {
     if (force || !this.hasCached(fileName)) {
       console.trace('Emitting', fileName);
 
-      const content = `${fs.readFileSync(fileName).toString()};\nexport const _$TRV = 1;`;
+      const content = `${FsUtil.readFileSync(fileName).toString()};\nexport const _$TRV = 1;`;
 
       let hash = 0;
 

@@ -26,7 +26,7 @@ const All = {
   extname: rel => path.extname(All.toNative(rel)),
   dirname: rel => path.dirname(All.toNative(rel)),
 
-  mkdirpAsync: async function mkdirpAsync(rel) {
+  mkdirp: async function mkdirpAsync(rel) {
     const pth = asFile(rel);
     if (pth && !(await existsAsync(pth))) {
       await mkdirpAsync(path.dirname(pth));

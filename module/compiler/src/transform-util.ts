@@ -1,8 +1,6 @@
 /// <reference types="typescript/lib/typescriptServices" />
 
-import { dirname, sep } from 'path';
-
-import { AppInfo, Env, resolveFrameworkFile } from '@travetto/base';
+import { AppInfo, Env, resolveFrameworkFile, FsUtil } from '@travetto/base';
 
 const stringHash = require('string-hash');
 
@@ -51,7 +49,7 @@ export class TransformUtil {
           if (!path.includes('node_modules')) {
             pkg = AppInfo.NAME;
           } else {
-            pkg = `@travetto/${path.split(/@travetto[\/\\]/)[1].split(/[\\\/]/)[0]}`;
+            pkg = `@travetto/${path.split(/@travetto[\/]/)[1].split(/[\/]/)[0]}`;
           }
           if (packages.has(pkg)) {
             return dec;
@@ -153,8 +151,8 @@ export class TransformUtil {
         const pth = require.resolve(file.fileName);
         const state = {
           ...init(file, context) as any,
-          path: pth.replace(/[\\\/]/g, sep),
-          modulePath: pth.replace(/[\\\/]/g, '/'),
+          path: FsUtil.toNative(pth),
+          modulePath: FsUtil.toURI(pth),
           newImports: new Map(),
           source: file,
           ids: new Map(),
@@ -165,8 +163,8 @@ export class TransformUtil {
         for (const stmt of file.statements) {
           if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
             let path = require.resolve(stmt.moduleSpecifier.text
-              .replace(/^\.\./, dirname(dirname(state.path)))
-              .replace(/^\.\//, `${dirname(state.path)}/`));
+              .replace(/^\.\./, FsUtil.dirname(FsUtil.dirname(state.path)))
+              .replace(/^\.\//, `${FsUtil.dirname(state.path)}/`));
 
             if (Env.frameworkDev) {
               path = resolveFrameworkFile(path);

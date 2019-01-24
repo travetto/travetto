@@ -88,7 +88,7 @@ export async function server() {
             continue;
           }
           if (k.endsWith('.ts') &&
-            !/@travetto[\/\\](base|config|compiler|exec|pool)/.test(k) &&
+            !/@travetto[\/](base|config|compiler|exec|pool)/.test(k) &&
             !(k.startsWith(__filename.replace(/.[tj]s$/, ''))) &&
             !/support\/(phase|transformer)[.]/.test(k)
           ) {

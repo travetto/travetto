@@ -1,11 +1,9 @@
-import * as path from 'path';
 import { Suite, Test, ShouldThrow } from '@travetto/test';
-import { FsUtil } from '@travetto/base';
+import { ResourceManager } from '@travetto/base';
 
 import * as jwt from '..';
 
 const TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE0MjY1NDY5MTl9.ETgkTn8BaxIX4YqvUWVFPmum3moNZ7oARZtSBXb_vP4';
-const PUB_KEY = path.resolve(__dirname, 'pub.pem');
 
 @Suite('when setting a wrong `header.alg`')
 class BadAlgoSuite {
@@ -13,16 +11,15 @@ class BadAlgoSuite {
   @Test('signing with pub key as symmetric')
   @ShouldThrow('invalid algorithm')
   async testSymmetric() {
-    const pub = await FsUtil.readFileAsync(PUB_KEY, 'utf8');
+    const pub = await ResourceManager.read('pub.pem', 'utf8');
     // priv is never used
-    // var priv = fs.readFileSync(path.join(__dirname, 'priv.pem'));
     await jwt.verify(TOKEN, { key: pub });
   }
 
   @Test('signing with pub key as HS256 and whitelisting only RS256')
   @ShouldThrow('invalid algorithm')
   async testAsymmetric() {
-    const pub = await FsUtil.readFileAsync(PUB_KEY, 'utf8');
+    const pub = await ResourceManager.read('pub.pem', 'utf8');
 
     await jwt.verify(TOKEN, { key: pub, alg: 'RS256' });
   }

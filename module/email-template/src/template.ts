@@ -59,11 +59,11 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     const pth = await ResourceManager.find(rel);
     const out = AppCache.toEntryName(pth);
 
-    if (!(await FsUtil.existsAsync(out))) {
+    if (!(await FsUtil.exists(out))) {
       await TemplateUtil.optimizeImage(pth, out);
     }
 
-    return FsUtil.readFileAsync(out);
+    return FsUtil.readFile(out);
   }
 
   get wrapper() {

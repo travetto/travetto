@@ -1,8 +1,6 @@
-import * as path from 'path';
-
 import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
-import { FsUtil } from '@travetto/base';
+import { ResourceManager } from '@travetto/base';
 
 import * as jwt from '..';
 
@@ -11,8 +9,8 @@ class PublicKeySuite {
 
   @Test('should work')
   async test() {
-    const cert_pub = FsUtil.readFileAsync(path.resolve(__dirname, 'rsa-public-key.pem'));
-    const cert_priv = FsUtil.readFileAsync(path.resolve(__dirname, 'rsa-private.pem'));
+    const cert_pub = await ResourceManager.read('rsa-public-key.pem');
+    const cert_priv = await ResourceManager.read('rsa-private.pem');
 
     const token = await jwt.sign({ foo: 'bar' }, { key: cert_priv, alg: 'RS256' });
 

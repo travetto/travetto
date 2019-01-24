@@ -1,4 +1,4 @@
-import { PhaseManager } from '@travetto/base';
+import { PhaseManager, FsUtil } from '@travetto/base';
 import { ExecUtil, ArrayExecutionSource } from '@travetto/exec';
 
 import { TestExecutor } from './executor';
@@ -78,7 +78,7 @@ export class Runner {
   async getFiles() {
     const { args } = this.state; // strip off node and worker name
     // Glob to module path
-    const files = await TestExecutor.getTests(args.map(x => new RegExp(`${x}`.replace(/[\\\/]/g, '/'))));
+    const files = await TestExecutor.getTests(args.map(x => new RegExp(FsUtil.toURI(x))));
     return files;
   }
 
