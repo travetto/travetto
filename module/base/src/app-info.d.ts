@@ -11,5 +11,3 @@ export declare const AppInfo: {
   DESCRIPTION: string,
   DEV_PACKAGES: string[]
 };
-
-export declare function resolveFrameworkFile(pth: string): string;

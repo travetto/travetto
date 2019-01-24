@@ -1,7 +1,5 @@
-import * as path from 'path';
-
 import { Config } from '@travetto/config';
-import { AppInfo } from '@travetto/base';
+import { AppInfo, FsUtil } from '@travetto/base';
 
 import { Contact, License } from './types';
 
@@ -32,6 +30,6 @@ export class ApiClientConfig {
   exposeAllSchemas: boolean = false;
 
   postConstruct() {
-    this.output = path.resolve(this.output);
+    this.output = FsUtil.toUnix(this.output);
   }
 }

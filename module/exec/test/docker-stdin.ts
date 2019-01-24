@@ -1,9 +1,9 @@
 import * as assert from 'assert';
-
 import { createReadStream } from 'fs';
-import * as path from 'path';
 import * as os from 'os';
+
 import { Suite, Test } from '@travetto/test';
+import { FsUtil } from '@travetto/base';
 
 import { DockerContainer } from '../src/docker';
 
@@ -20,7 +20,7 @@ class DockerIOTest {
 
     const [proc, prom] = await container.exec(['-i'], ['gm', 'convert', '-resize 100x50', '-', '-']);
 
-    createReadStream(path.resolve(`${os.homedir}/Documents/download.jpeg`)).pipe(proc.stdin);
+    createReadStream(FsUtil.toUnix(`${os.homedir}/Documents/download.jpeg`)).pipe(proc.stdin);
 
     proc.stdout.pipe(process.stdout);
 

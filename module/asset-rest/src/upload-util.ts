@@ -4,9 +4,9 @@ import * as os from 'os';
 import * as busboy from 'busboy';
 import match = require('mime-match');
 
-import { FsUtil } from '@travetto/base';
 import { Request, RestError } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
+import { FsUtil } from '@travetto/base';
 
 import { AssetRestConfig } from './config';
 
@@ -45,9 +45,9 @@ export class UploadUtil {
         console.debug('Uploading file', fieldName, fileName, encoding, mimeType);
 
         uploads.push((async () => {
-          const uniqueDir = path.resolve(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
-          await FsUtil.mkdirpAsync(uniqueDir);
-          const uniqueLocal = path.resolve(uniqueDir, path.basename(fileName));
+          const uniqueDir = FsUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
+          await FsUtil.mkdirp(uniqueDir);
+          const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(fileName));
 
           file.pipe(fs.createWriteStream(uniqueLocal));
           await new Promise((res, rej) =>

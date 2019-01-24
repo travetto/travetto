@@ -1,6 +1,5 @@
 import * as assert from 'assert';
 import * as util from 'util';
-import * as path from 'path';
 
 import { Env, Util, Stacktrace, AppError } from '@travetto/base';
 import { Assertion, TestConfig, ThrowableError } from '../model/test';
@@ -53,7 +52,7 @@ function clean(val: any) {
   }
 }
 
-const excludeNode = /[\\\/]node_modules[\\\/]/;
+const excludeNode = /[\/]node_modules[\/]/;
 
 export class AssertUtil {
 
@@ -64,11 +63,15 @@ export class AssertUtil {
   static readFilePosition(err: Error, filename: string) {
     const base = Env.cwd;
 
-    const lines = (err.stack || new Error().stack!).split('\n').filter(x => !excludeNode.test(x) && x.includes(base));
+    const lines = (err.stack || new Error().stack!)
+      .replace(/[\\]/g, '/')
+      .split('\n')
+      .filter(x => !excludeNode.test(x) && x.includes(base));
+
     let best = lines.filter(x => x.includes(filename))[0];
 
     if (!best) {
-      best = lines.filter(x => x.includes(path.join(base, 'test')))[0];
+      best = lines.filter(x => x.includes(`${base}/test`))[0];
     }
 
     if (!best) {
@@ -80,7 +83,7 @@ export class AssertUtil {
 
     const outFileParts = file.split(base.replace(/^[A-Za-z]:/, ''));
 
-    const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\\\/]/, '') : filename;
+    const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
 
     const res = { file: outFile, line: parseInt(lineNo, 10) };
 

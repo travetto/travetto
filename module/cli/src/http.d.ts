@@ -6,4 +6,4 @@ export interface HttpHandler {
   resolve(message: IncomingMessage): Promise<{ content: string | Buffer, contentType?: string }>;
 }
 
-export function Server(handler: HttpHandler, port?: number): void;
+export function Server(config: { handler: HttpHandler, port?: number, open?: boolean, reloadRate?: number }): void;

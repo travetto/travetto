@@ -6,7 +6,7 @@ export class YamlUtil {
   static serialize = (o: any) => Serializer.serialize(o);
 }
 
-if ('JS_YAML' in process.env || (!('NO_JS_YAML' in process.env) && !__dirname.includes('travetto/module'))) {
+if ('JS_YAML' in process.env || (!('NO_JS_YAML' in process.env) && !/travetto[\/\\]module/.test(__dirname))) {
   try {
     const yaml = require('js-yaml');
     YamlUtil.parse = t => Object.assign({}, ...yaml.safeLoadAll(t));

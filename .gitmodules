@@ -1,8 +1,0 @@
-[submodule "sample/starter"]
-	path = sample/starter
-	url = https://github.com/travetto/starter.git
-[submodule "sample/todo-app"]
-	path = sample/todo-app
-	url = https://github.com/travetto/todo-app.git
-[submodule "sample.starter"]
-	ignore = untracked

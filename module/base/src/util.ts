@@ -145,7 +145,7 @@ export class Util {
       key: T;
       target: U
     }
-    >(items: U[]) {
+  >(items: U[]) {
 
     // Turn items into a map by .key value, pointing to a mapping of type V
     const allMap = new Map(items.map(x => [

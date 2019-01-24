@@ -1,6 +1,7 @@
-import * as path from 'path';
+import * as fs from 'fs';
+import * as util from 'util';
 
-import { FsUtil, ResourceManager, Env } from '@travetto/base';
+import { ResourceManager, Env, FsUtil } from '@travetto/base';
 import { AppCache } from '@travetto/base/src/cache';
 import { Injectable, Inject } from '@travetto/di';
 import { MailTemplateEngine, MailTemplateContext } from '@travetto/email';
@@ -9,6 +10,9 @@ import { TemplateUtil } from './util';
 import { MailTemplateConfig } from './config';
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
+
+const fsStat = util.promisify(fs.stat);
+const fsReadFile = util.promisify(fs.readFile);
 
 @Injectable()
 export class DefaultMailTemplateEngine extends MailTemplateEngine {
@@ -28,7 +32,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     if (!this._compiledSass) {
       this._compiledSass = (async () => {
         const partial = '/email/app.scss';
-        const full = path.resolve(__dirname, '..', 'resources', partial);
+        const full = FsUtil.resolveUnix(__dirname, `../resources/${partial}`);
 
         if (!AppCache.hasEntry(full)) {
           const file = await ResourceManager.find(partial);
@@ -61,11 +65,13 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     const pth = await ResourceManager.find(rel);
     const out = AppCache.toEntryName(pth);
 
-    if (!(await FsUtil.existsAsync(out))) {
+    try {
+      await fsStat(out);
+    } catch {
       await TemplateUtil.optimizeImage(pth, out);
     }
 
-    return FsUtil.readFileAsync(out);
+    return fsReadFile(out);
   }
 
   get wrapper() {

@@ -1,9 +1,8 @@
 //@ts-check
 const fs = require('fs');
-const path = require('path');
 
 // @ts-ignore
-const { Util: { cwd, dependOn, program } } = require('@travetto/cli/src/util');
+const { Util: { dependOn, program } } = require('@travetto/cli/src/util');
 // @ts-ignore
 const { FsUtil } = require('@travetto/cli/src/fs-util');
 
@@ -42,7 +41,7 @@ module.exports = function () {
       // Clear out cache if specified
       if (cmd.output) {
         try {
-          require('child_process').execSync(`rm -rf ${path.resolve(cwd, cmd.output)}`)
+          require('child_process').execSync(`rm -rf ${FsUtil.resolveNative(FsUtil.cwd, cmd.output)}`)
         } catch (e) {
           // Ignore
         }
@@ -50,19 +49,19 @@ module.exports = function () {
       }
 
       // Find final destination
-      let outDir = path.resolve(cwd, cmd.output || AppCache.cacheDir);
+      let outDir = FsUtil.resolveUnix(FsUtil.cwd, cmd.output || AppCache.cacheDir);
 
       const FILES = `ScanApp.setFileEntries('.ts', [${files.map(x => `'${x.module.replace(/node_modules\/@travetto/g, '#')}'`).join(', ')}])`;
 
       // Rewrite files to allow for presume different path
       for (const f of fs.readdirSync(AppCache.cacheDir)) {
-        const inp = path.resolve(AppCache.cacheDir, f);
-        const out = path.resolve(outDir, f);
+        const inp = FsUtil.resolveUnix(AppCache.cacheDir, f);
+        const out = FsUtil.resolveUnix(outDir, f);
 
         let contents = fs.readFileSync(inp).toString();
         contents = contents.replace(/[/][/]#.*$/, '');
         contents = contents.replace('ScanApp.cache = {}', x => `${x};\n${FILES}`);
-        contents = contents.replace(new RegExp(cwd, 'g'), cmd.runtimeDir || process.cwd());
+        contents = contents.replace(new RegExp(FsUtil.cwd, 'g'), cmd.runtimeDir || process.cwd());
         fs.writeFileSync(out, contents);
       }
     });

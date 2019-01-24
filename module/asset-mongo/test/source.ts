@@ -1,13 +1,16 @@
 import * as mongo from 'mongodb';
 import * as assert from 'assert';
+import * as fs from 'fs';
+import * as util from 'util';
 
 import { AssetService, AssetUtil, AssetSource, ImageService } from '@travetto/asset';
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { FsUtil } from '@travetto/base';
 
 import { AssetMongoSource } from '../src/source';
 import { AssetMongoConfig } from '../src/config';
+
+const fsStat = util.promisify(fs.stat);
 
 class Config extends AssetMongoConfig {
   @InjectableFactory()
@@ -53,7 +56,7 @@ class TestAssetService {
     assert(file.length > 0);
 
     try {
-      await FsUtil.statAsync(filePath);
+      await fsStat(filePath);
       assert(false);
     } catch {
       assert(true);

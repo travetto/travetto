@@ -30,9 +30,11 @@ const CHECK_SCRIPT = `<head>
 </script>
 `;
 
-exports.Server = function Server(handler, port, reloadRate = 500) {
+exports.Server = function Server({ handler, port, open, reloadRate }) {
 
   let timestamp = Date.now();
+
+  reloadRate = reloadRate || 500;
 
   if (handler.onChange) {
     handler.onChange(() => timestamp = Date.now());
@@ -83,4 +85,10 @@ exports.Server = function Server(handler, port, reloadRate = 500) {
     response.write(content);
     response.end();
   }).listen(port);
+
+  if (open) {
+    const url = `http://localhost:${port}`;
+    console.log(`Now running at ${url}`);
+    require('./os').launch(url);
+  }
 };

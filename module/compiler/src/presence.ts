@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { Watcher, ScanEntry, Env, ScanHandler, ScanApp } from '@travetto/base';
+import { Watcher, ScanEntry, Env, ScanHandler, ScanApp, FsUtil } from '@travetto/base';
 
 export interface Listener {
   added(name: string): any;
@@ -17,7 +17,7 @@ export class FilePresenceManager {
   constructor(private cwd: string, private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = Env.watch) {
     this.watchSpaces.add('src');
     if (Env.appRoot) {
-      this.watchSpaces.add(path.join(Env.appRoot, 'src'));
+      this.watchSpaces.add(FsUtil.joinUnix(Env.appRoot, 'src'));
     }
   }
 
@@ -75,7 +75,7 @@ export class FilePresenceManager {
       setTimeout(() => {
         console.debug('Watching files', rootFiles.length);
         for (const p of this.watchSpaces) {
-          this.buildWatcher(path.join(this.cwd, p), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+          this.buildWatcher(FsUtil.joinUnix(this.cwd, p), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
         }
       }, 1000);
     }
@@ -107,7 +107,7 @@ export class FilePresenceManager {
       if (!this.fileWatchers[topLevel]) {
         this.fileWatchers[topLevel] = this.buildWatcher(topLevel, []);
       }
-      this.fileWatchers[topLevel].add([name.replace(`${topLevel}${path.sep}`, '')]);
+      this.fileWatchers[topLevel].add([name.replace(`${topLevel}/`, '')]);
     }
 
     this.files.set(name, { version: 0 });

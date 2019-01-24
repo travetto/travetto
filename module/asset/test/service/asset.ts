@@ -1,12 +1,14 @@
 import * as fs from 'fs';
+import * as util from 'util';
 import * as assert from 'assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
-import { FsUtil } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
 import { AssetService, ImageService, AssetUtil, AssetSource, Asset, AssetMetadata } from '../../';
+
+const fsStat = util.promisify(fs.stat);
 
 @Injectable({ target: AssetSource })
 class MockAssetSource extends AssetSource {
@@ -65,7 +67,7 @@ class AssetTest {
     assert(file.contentType === 'image/png');
     assert(file.length > -1);
 
-    assert(await FsUtil.existsAsync(filePath) === false);
+    assert.rejects(fsStat(filePath));
   }
 
   @Test('Test caching')

@@ -1,16 +1,12 @@
 import * as jws from 'jws';
-import * as path from 'path';
 
 import * as assert from 'assert';
 import { Suite, Test, ShouldThrow } from '@travetto/test';
-import { FsUtil } from '@travetto/base';
+import { ResourceManager } from '@travetto/base';
 
 import * as jwt from '..';
 import { VerifyOptions } from '../src/types';
 import { JWTError } from '../src/common';
-
-const pubKey = path.resolve(__dirname, 'pub.pem');
-const privKey = path.resolve(__dirname, 'priv.pem');
 
 @Suite('verify')
 class VerifySuite {
@@ -18,8 +14,8 @@ class VerifySuite {
   @Test('should first assume JSON claim set')
   async simpleVerify() {
     const payload = { iat: Math.floor(Date.now() / 1000) };
-    const priv = await FsUtil.readFileAsync(privKey);
-    const pub = await FsUtil.readFileAsync(pubKey);
+    const priv = await ResourceManager.read('priv.pem');
+    const pub = await ResourceManager.read('pub.pem');
 
     const signed = jws.sign({
       header: { alg: 'RS256', typ: 'JWT' },
@@ -35,7 +31,7 @@ class VerifySuite {
   @Test('should be able to validate unsigned token')
   async validateUnsigned() {
     const payload = { iat: Math.floor(Date.now() / 1000) };
-    const priv = await FsUtil.readFileAsync(privKey);
+    const priv = await ResourceManager.read('priv.pem');
 
     const signed = jws.sign({
       header: { alg: 'none' },
@@ -50,7 +46,7 @@ class VerifySuite {
 
   @Test('should not mutate options')
   async noMutate() {
-    const priv = await FsUtil.readFileAsync(privKey);
+    const priv = await ResourceManager.read('priv.pem');
 
     const payload = { iat: Math.floor(Date.now() / 1000) };
 

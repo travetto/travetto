@@ -1,9 +1,8 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import * as readline from 'readline';
 import * as assert from 'assert';
 
-import { ScanFs, Env } from '@travetto/base';
+import { ScanFs, Env, FsUtil } from '@travetto/base';
 
 import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
@@ -232,11 +231,11 @@ export class TestExecutor {
 
   static async execute(consumer: Consumer, [file, ...args]: string[]) {
     if (!file.startsWith(Env.cwd)) {
-      file = path.join(Env.cwd, file);
+      file = FsUtil.joinUnix(Env.cwd, file);
     }
 
     try {
-      require(file.replace(/[\\]/g, '/')); // Path to module
+      require(FsUtil.toUnix(file)); // Path to module
     } catch (err) {
       err.FATAL = true;
       throw err;
