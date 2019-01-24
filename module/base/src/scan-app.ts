@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { ScanEntry, ScanFs } from './scan-fs';
+import { ScanEntry, ScanFs } from './fs/scan-fs';
 import { Env } from './env';
 import { resolveFrameworkFile } from './app-info';
 

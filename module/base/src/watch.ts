@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { ScanEntry, ScanHandler, ScanFs } from './scan-fs';
+import { ScanEntry, ScanHandler, ScanFs } from './fs/scan-fs';
 import { Util } from './util';
 import { Env } from './env';
 

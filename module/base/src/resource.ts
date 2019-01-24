@@ -2,9 +2,9 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { Env } from './env';
-import { FsUtil } from './fs-util';
+import { FsUtil } from './fs/fs-util';
 import { AppError } from './error';
-import { ScanFs } from './scan-fs';
+import { ScanFs } from './fs/scan-fs';
 
 export class $ResourceManager {
   private _cache: { [key: string]: string } = {};
