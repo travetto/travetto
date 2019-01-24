@@ -1,10 +1,6 @@
 //@ts-check
-
-const os = require('os');
-const path = require('path');
 const fs = require('fs');
-const { execSync } = require('child_process');
-const appCore = require('./_app-core');
+const { FsUtil } = require('./fs-util');
 
 function isOlder(cacheStat, fullStat) {
   return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
@@ -12,8 +8,8 @@ function isOlder(cacheStat, fullStat) {
 
 class Cache {
   constructor(cwd, cacheDir) {
-    this.cwd = cwd || appCore.cwd;
-    this.cacheDir = cacheDir || appCore.cacheDir;
+    this.cwd = FsUtil.toUnix(cwd || FsUtil.cwd);
+    this.cacheDir = FsUtil.toUnix(cacheDir || FsUtil.cacheDir);
     this.cache = {};
   }
 
@@ -60,11 +56,7 @@ class Cache {
   clear() {
     if (this.cacheDir) {
       try {
-        if (os.platform().startsWith('win')) {
-          execSync(`del /S ${this.cacheDir}`);
-        } else {
-          execSync(`rm -rf ${this.cacheDir}`);
-        }
+        FsUtil.unlinkDirSync(this.cacheDir);
         console.debug(`Deleted ${this.cacheDir}`);
       } catch (e) {
         console.error('Failed in deleting');
@@ -73,11 +65,11 @@ class Cache {
   }
 
   fromEntryName(cached) {
-    return path.join(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, path.sep)).replace(/[.]js$/g, '.ts');
+    return FsUtil.joinUnix(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, '/')).replace(/[.]js$/g, '.ts');
   }
 
   toEntryName(full) {
-    const out = path.join(this.cacheDir, full.replace(this.cwd, '').replace(/^[\\\/]+/, '').replace(/[\/\\]+/g, '~')).replace(/[.]ts$/g, '.js');
+    const out = FsUtil.joinUnix(this.cacheDir, FsUtil.toUnix(full).replace(this.cwd, '').replace(/^[\/]+/, '').replace(/[\/]+/g, '~')).replace(/[.]ts$/g, '.js');
     return out;
   }
 }
@@ -114,4 +106,4 @@ class $AppCache extends Cache {
 
 exports.Cache = Cache;
 
-exports.AppCache = new $AppCache(appCore.cwd, appCore.cacheDir);
+exports.AppCache = new $AppCache(FsUtil.cwd, FsUtil.cacheDir);

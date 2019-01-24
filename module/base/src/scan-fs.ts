@@ -1,7 +1,12 @@
 import * as fs from 'fs';
-import * as path from 'path';
+import * as util from 'util';
 
 import { FsUtil } from './fs-util';
+
+const fsReaddir = util.promisify(fs.readdir);
+const fsLstat = util.promisify(fs.lstat);
+const fsRealpath = util.promisify(fs.realpath);
+const fsReadFile = util.promisify(fs.readFile);
 
 export interface ScanEntry {
   file: string;
@@ -33,18 +38,18 @@ export class ScanFs {
 
         entry = (entry || { file: base, children: [] }) as ScanEntry;
 
-        for (const file of (await FsUtil.readdirAsync(entry.file))) {
+        for (const file of (await fsReaddir(entry.file))) {
           if (file.startsWith('.')) {
             continue;
           }
 
-          const full = path.resolve(entry.file, file);
-          const stats = await FsUtil.lstatAsync(full);
-          const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
+          const full = FsUtil.resolveUnix(entry.file, file);
+          const stats = await fsLstat(full);
+          const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
           if (ScanFs.isDir(subEntry)) {
             if (subEntry.stats.isSymbolicLink()) {
-              const p = await FsUtil.realpathAsync(full);
+              const p = await fsRealpath(full);
               if (!visited.has(p)) {
                 visited.add(p);
               } else {
@@ -92,9 +97,9 @@ export class ScanFs {
         continue;
       }
 
-      const full = path.resolve(entry.file, file);
+      const full = FsUtil.resolveUnix(entry.file, file);
       const stats = fs.lstatSync(full);
-      const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}${path.sep}`, '').replace(/[\\]+/g, '/') };
+      const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
       if (ScanFs.isDir(subEntry)) {
         if (subEntry.stats.isSymbolicLink()) {
@@ -133,7 +138,7 @@ export class ScanFs {
   static bulkRequire<T = any>(handlers: ScanHandler[], cwd: string): T[] {
     return ScanFs.bulkScanDirSync(handlers, cwd)
       .filter(ScanFs.isNotDir) // Skip folders
-      .map(x => require(x.file.replace(/[\\]+/g, '/')))
+      .map(x => require(x.file))
       .filter(x => !!x); // Return non-empty values
   }
 
@@ -141,7 +146,7 @@ export class ScanFs {
     const files = await ScanFs.bulkScanDir(handlers, base);
     const promises = files
       .filter(ScanFs.isNotDir)
-      .map(x => FsUtil.readFileAsync(x.file).then(d => ({ name: x.file, data: d.toString() })));
+      .map(x => fsReadFile(x.file).then(d => ({ name: x.file, data: d.toString() })));
     return await Promise.all(promises);
   }
 

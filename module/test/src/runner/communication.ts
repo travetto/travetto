@@ -2,7 +2,7 @@ import * as os from 'os';
 
 import { Cache } from '@travetto/base/src/cache';
 import { ExecutionPool, IdleManager, LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
-import { PhaseManager, Env, Shutdown } from '@travetto/base';
+import { PhaseManager, Env, Shutdown, FsUtil } from '@travetto/base';
 
 /***
   Flow of events
@@ -83,23 +83,32 @@ export async function server() {
       console.debug('Resetting', Object.keys(require.cache).length);
 
       try {
-        for (const k of Object.keys(require.cache)) {
+        for (const rk of Object.keys(require.cache)) {
+          const k = FsUtil.toUnix(rk);
           if (/node_modules/.test(k) && (!/@travetto/.test(k) || /@travetto\/[^/]+\/node_modules/.test(k))) {
             continue;
           }
           if (k.endsWith('.ts') &&
-            !/@travetto[\/\\](base|config|compiler|exec|pool)/.test(k) &&
-            !(k.startsWith(__filename.replace(/.[tj]s$/, ''))) &&
+            !/@travetto\/(base|config|compiler|exec)/.test(k) &&
+            !(k.startsWith(FsUtil.toUnix(__filename).replace(/.[tj]s$/, ''))) &&
             !/support\/(phase|transformer)[.]/.test(k)
           ) {
-            Compiler.unload(k, false);
+            Compiler.unload(rk, false);
           }
         }
 
         // Reload runner
         Compiler.reset();
         Shutdown.execute(-1);
-        const { Runner } = await import('./runner');
+
+        let runnerPath = './runner';
+
+        // Handle bad symlink behavior on windows
+        if (Env.frameworkDev === 'win32') {
+          runnerPath = FsUtil.resolveUnix(process.env.__dirname!, runnerPath);
+        }
+
+        const { Runner } = await import(runnerPath);
 
         console.debug('*Running*', data.file);
 
@@ -127,7 +136,10 @@ export async function server() {
 
 export function client(concurrency = os.cpus().length - 1) {
   return new ExecutionPool(async () => {
-    const worker = new ChildExecution(require.resolve('../../bin/travetto-test-server'), [], true, { cwd: Env.cwd });
+    const worker = new ChildExecution(require.resolve('../../bin/travetto-test-server'), [], true, {
+      cwd: Env.cwd,
+      env: { ...process.env, __dirname }
+    });
 
     worker.init();
     await worker.listenOnce(Events.READY);

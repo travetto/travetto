@@ -1,6 +1,6 @@
-import * as assert from 'assert';
+import { FsUtil } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
-import { ChildExecution, ExecutionPool, ArrayExecutionSource, IteratorExecutionSource } from '../';
+import { ChildExecution, ExecutionPool, IteratorExecutionSource } from '../';
 
 @Suite()
 export class PoolExecTest {
@@ -10,7 +10,7 @@ export class PoolExecTest {
 
     const pool = new ExecutionPool<ChildExecution>(async () => {
       console.log('Initializing child');
-      const child = new ChildExecution(`${__dirname}/simple.child-launcher.js`, [], true, {
+      const child = new ChildExecution(FsUtil.resolveUnix(__dirname, 'simple.child-launcher.js'), [], true, {
         env: { SRC: './simple.child' }
       });
       child.init();

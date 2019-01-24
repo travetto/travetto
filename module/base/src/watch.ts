@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
-import * as path from 'path';
 
+import { FsUtil } from './fs-util';
 import { ScanEntry, ScanHandler, ScanFs } from './scan-fs';
 import { Util } from './util';
 import { Env } from './env';
@@ -43,7 +43,7 @@ export class Watcher extends EventEmitter {
 
     this.pendingWatched.push({
       file: this.options.cwd,
-      module: this.options.cwd.replace(/[\\]/g, '/'),
+      module: FsUtil.toUnix(this.options.cwd),
       stats: fs.lstatSync(this.options.cwd)
     });
   }
@@ -61,7 +61,7 @@ export class Watcher extends EventEmitter {
       }
 
       // Convert to full paths
-      current = current.filter(x => !x.startsWith('.')).map(x => path.join(dir.file, x));
+      current = current.filter(x => !x.startsWith('.')).map(x => FsUtil.joinUnix(dir.file, x));
 
       // Get watched files for this dir
       const previous = (dir.children || []).slice(0);
@@ -93,7 +93,7 @@ export class Watcher extends EventEmitter {
         ) {
           const sub: ScanEntry = {
             file: next,
-            module: next.replace(/[\\]/g, '/'),
+            module: FsUtil.toUnix(next),
             stats: nextStats
           };
           this.watch(sub);

@@ -1,10 +1,11 @@
 import * as http from 'http';
 import * as url from 'url';
 import * as Mustache from 'mustache';
+import * as fs from 'fs';
 
 import { DefaultMailTemplateEngine } from '../src/template';
 
-const INDEX = require('fs').readFileSync(require('path').resolve(__dirname, 'index.html')).toString();
+const INDEX = fs.readFileSync(`${__dirname}/index.html`).toString();
 
 async function simpleWatcher(commonFolder: string, paths: string[], handler: {
   changed?(file: string): void;
@@ -115,7 +116,7 @@ async function resolve(engine: DefaultMailTemplateEngine, request: http.Incoming
   }
 }
 
-export async function runServer(port: number) {
+export async function serverHandler() {
   const { DependencyRegistry } = await import('@travetto/di/src/registry');
   const { ResourceManager } = await import('@travetto/base/src/resource');
   const [config] = DependencyRegistry.getCandidateTypes(DefaultMailTemplateEngine);
@@ -137,8 +138,7 @@ export async function runServer(port: number) {
     }
   });
 
-  // @ts-ignore
-  require('@travetto/cli/src/http').Server({
+  return {
     onChange(cb: () => void) {
       watcher.on('changed', () => {
         console.log('Something changed');
@@ -146,11 +146,5 @@ export async function runServer(port: number) {
       });
     },
     resolve: resolve.bind(null, engine)
-  }, port, 1000);
-
-  console.log(`Now running at https://localhost:${port}`);
-
-  if (process.platform === 'darwin') {
-    require('child_process').exec(`open http://localhost:${port}`);
-  }
+  };
 }

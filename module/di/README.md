@@ -190,7 +190,7 @@ These command line invocation of `travetto run` would look like:
 $ travetto run
 ....
 
-     ● simple | {e2e}
+     ● [e2e] simple
        ----------------------------------
        usage: simple [domain] (port=3000)
 ```

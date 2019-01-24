@@ -6,35 +6,37 @@ const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
 
-const F_ROOT = fs.realpathSync(__dirname);
-const ROOT = path.dirname(F_ROOT); // Move up from ./bin folder
+const F_ROOT = fs.realpathSync(__dirname).replace(/[\\\/]+/g, '/');
+const ROOT = path.dirname(F_ROOT).replace(/[\\\/]+/g, '/'); // Move up from ./bin folder
+
+function makeDir(dir) {
+  if (!fs.existsSync(dir)) {
+    try {
+      fs.mkdirSync(dir.replace(/[\\\/]+/g, path.sep));
+    } catch (e) {
+      // Do nothing
+    }
+  }
+}
 
 function makeLink(actual, linkPath) {
   try {
     fs.lstatSync(linkPath);
   } catch (e) {
-    fs.symlinkSync(actual, linkPath);
+    const local = fs.statSync(actual);
+    const file = local.isFile();
+    fs.symlinkSync(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
     fs.lstatSync(linkPath);
   }
 }
 
 function lernaSetup() {
-  const config = require(`${ROOT}/lerna.json`);
-  const configNew = {
-    ...config,
-    packages: config.packages.slice(0)
-  };
-  configNew.packages.push("sample/*");
-  fs.writeFileSync(`${ROOT}/lerna.json`, JSON.stringify(configNew));
-
-  cp.spawnSync('npx', ['lerna', 'clean', '--yes'], { stdio: [undefined, process.stdout, process.stderr] });
-  cp.spawnSync('npx', ['lerna', 'bootstrap', '--hoist'], { stdio: [undefined, process.stdout, process.stderr] });
-
-  fs.writeFileSync(`${ROOT}/lerna.json`, JSON.stringify(config, undefined, 2));
+  cp.spawnSync('npx', ['lerna', 'clean', '--yes'], { stdio: [undefined, process.stdout, process.stderr], shell: true });
+  cp.spawnSync('npx', ['lerna', 'bootstrap', '--hoist'], { stdio: [undefined, process.stdout, process.stderr], shell: true });
 
   try {
     fs.unlinkSync(`${ROOT}/package-lock.json`);
-  } catch { }
+  } catch (e) { }
 }
 
 const resolveDeps = (function () {
@@ -94,7 +96,6 @@ const resolveDeps = (function () {
 const lernaModuleFinalize = (function () {
   const MOD_ROOT = `${ROOT}/module`;
   const MOD_TPL_ROOT = `${ROOT}/module-template`;
-  const SAMPLE_ROOT = `${ROOT}/sample`;
   const NM_ROOT = `${ROOT}/node_modules`;
   const COMMON_LIBS = ['typescript', 'tslib'];
   const COMMON_BIN_SCRIPTS = [
@@ -133,9 +134,9 @@ const lernaModuleFinalize = (function () {
     // copyTemplateFiles(`${MOD_TPL_ROOT}/test`, `${base}/${mod}/test`);
 
     // Create necessary directories
-    if (!fs.existsSync(NM_MOD)) { fs.mkdirSync(NM_MOD); }
-    if (!fs.existsSync(`${NM_MOD}/@travetto`)) { fs.mkdirSync(`${NM_MOD}/@travetto`); }
-    if (!fs.existsSync(`${NM_MOD}/.bin`)) { fs.mkdirSync(`${NM_MOD}/.bin`); }
+    makeDir(NM_MOD);
+    makeDir(`${NM_MOD}/@travetto`);
+    makeDir(`${NM_MOD}/.bin`);
 
     // Link common libraries
     for (const dep of COMMON_LIBS) {
@@ -147,18 +148,22 @@ const lernaModuleFinalize = (function () {
       const sub = dep.split('@travetto/')[1];
       if (fs.existsSync(`${MOD_ROOT}/${sub}`)) {
         makeLink(`${MOD_ROOT}/${sub}`, `${NM_MOD}/${dep}`);
-      } else if (fs.existsSync(`${SAMPLE_ROOT}/${sub}`)) {
-        makeLink(`${SAMPLE_ROOT}/${sub}`, `${NM_MOD}/${dep}`);
       }
     }
 
     // Link common binary scripts
     for (const [smod, script] of COMMON_BIN_SCRIPTS) {
+
+      if (fs.existsSync(`${NM_MOD}/.bin/${script}.cmd`)) {
+        fs.unlinkSync(`${NM_MOD}/.bin/${script}.cmd`);
+        fs.unlinkSync(`${NM_MOD}/.bin/${script}`);
+      }
+
       try {
         if (fs.existsSync(`${NM_MOD}/@travetto/${smod}`) || mod === smod) {
           makeLink(`${MOD_ROOT}/${smod}/bin/${script}.js`, `${NM_MOD}/.bin/${script}`);
         }
-      } catch { }
+      } catch (e) { }
     }
 
     // Link travetto cli
@@ -173,7 +178,7 @@ const lernaModuleFinalize = (function () {
 function init() {
   lernaSetup();
 
-  for (const dir of ['module', 'sample']) {
+  for (const dir of ['module']) {
     const base = `${ROOT}/${dir}`;
     for (const mod of fs.readdirSync(base)) {
       lernaModuleFinalize(mod, base, true);

@@ -1,5 +1,6 @@
 import * as Generator from 'yeoman-generator';
-import * as path from 'path';
+
+import { FsUtil } from '@travetto/base';
 
 import { FEATURES, pkg } from './features';
 import { verifyDestination, meetsRequirement } from './util';
@@ -27,7 +28,7 @@ export default class extends Generator {
       name = res.name;
     }
 
-    this.destinationRoot(path.resolve(process.env.FINAL_CWD!, name));
+    this.destinationRoot(FsUtil.resolveUnix(process.env.FINAL_CWD!, name));
 
     try {
       verifyDestination(this.destinationPath('package.json'));
@@ -39,7 +40,7 @@ export default class extends Generator {
     const context = getContext(name);
     context.template = (this.options as any).template;
 
-    this.sourceRoot(path.resolve(__dirname, '..', 'templates', (this.options as any).template));
+    this.sourceRoot(FsUtil.resolveUnix(__dirname, `../templates/${(this.options as any).template}`));
 
     return context;
   }
@@ -80,7 +81,7 @@ export default class extends Generator {
     if (implPrompts.length) {
       const impls = await this.prompt(implPrompts);
       for (const mod of modules) {
-        context.depList.push(`${mod}-${impls[mod]}`);
+        context.depList.push(`${mod} -${impls[mod]} `);
         if (FEATURES[mod].addons) {
           context.depList.push(...FEATURES[mod].addons);
         }
@@ -91,7 +92,7 @@ export default class extends Generator {
   }
 
   async _templateFiles(context: Context) {
-    const files = require(path.resolve(this.sourceRoot(), 'listing.js')) as { [key: string]: { requires?: string[] } };
+    const files = require(FsUtil.resolveUnix(this.sourceRoot(), 'listing.js')) as { [key: string]: { requires?: string[] } };
     for (const key of Object.keys(files)) {
       const conf = files[key];
       if (conf.requires && !meetsRequirement(context.depList, conf.requires)) {
@@ -101,7 +102,11 @@ export default class extends Generator {
     }
 
     for (const f of ['tsconfig.json', 'tslint.json', '.gitignore', '.eslintrc', '.npmignore']) {
-      this.fs.copyTpl(path.resolve(__dirname, '..', 'templates', 'common', `${f}.ejs`), this.destinationPath(f.replace(/_/, '/')), context);
+      this.fs.copyTpl(
+        FsUtil.resolveUnix(__dirname, `../templates/common/${f}.ejs`),
+        this.destinationPath(f.replace(/_/, '/')),
+        context
+      );
     }
   }
 

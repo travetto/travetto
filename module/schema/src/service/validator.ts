@@ -11,6 +11,15 @@ export class ValidationErrors extends AppError {
   constructor(public errors: ValidationError[]) {
     super('Errors have occurred');
   }
+
+  toJSON(extra?: any) {
+    return JSON.stringify({
+      message: this.message,
+      errors: this.errors,
+      type: this.name,
+      ...(extra || {})
+    });
+  }
 }
 
 function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {

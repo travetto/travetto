@@ -1,5 +1,6 @@
 import * as path from 'path';
 
+import { FsUtil } from './fs-util';
 import { Env } from './env';
 
 export class Stacktrace {
@@ -34,7 +35,7 @@ export class Stacktrace {
       'source-map-support.js'
     );
 
-    const BASE = Env.cwd;
+    const BASE = FsUtil.toNative(Env.cwd);
 
     chain.filter.attach(function (error: Error, frames: NodeJS.CallSite[]) {
 
@@ -78,7 +79,7 @@ export class Stacktrace {
     const cwd = Env.cwd;
 
     const getName = (x: string) => {
-      const l = x.split(cwd.replace(/[\\]/g, '/'))[1];
+      const l = x.split(FsUtil.toUnix(cwd))[1];
       if (l) {
         return l.split(/[.][tj]s/)[0];
       }
