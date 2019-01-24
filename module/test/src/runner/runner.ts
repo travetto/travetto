@@ -1,5 +1,6 @@
-import { PhaseManager } from '@travetto/base';
+import { PhaseManager, Shutdown, Env, FsUtil } from '@travetto/base';
 import { ExecUtil, ArrayExecutionSource } from '@travetto/exec';
+import { Cache } from '@travetto/base/src/cache';
 
 import { TestExecutor } from './executor';
 import { Consumer } from '../consumer/types';
@@ -27,7 +28,12 @@ interface State {
 }
 
 export class Runner {
-  constructor(private state: State) { }
+  constructor(private state: State) {
+    if (!process.send) { // Remove if not child
+      Shutdown.onShutdown(`Remove-Root-Tempdir`, // Remove when done, this is for single interaction
+        () => new Cache(Env.cwd).clear(), true);
+    }
+  }
 
   getConsumer(): Consumer & { summarize?: () => AllResultsCollector } {
     const consumers: Consumer[] = [];
@@ -78,7 +84,7 @@ export class Runner {
   async getFiles() {
     const { args } = this.state; // strip off node and worker name
     // Glob to module path
-    const files = await TestExecutor.getTests(args.map(x => new RegExp(`${x}`.replace(/[\\\/]/g, '/'))));
+    const files = await TestExecutor.getTests(args.map(x => new RegExp(FsUtil.toUnix(x))));
     return files;
   }
 
@@ -90,7 +96,8 @@ export class Runner {
 
     await new PhaseManager('test').load().run();
 
-    await client(this.state.concurrency).process(
+    const pool = client(this.state.concurrency);
+    await pool.process(
       new ArrayExecutionSource(files),
       async (file, exe) => {
         exe.listen(consumer.onEvent as any);
@@ -103,6 +110,8 @@ export class Runner {
         errors.push(deserialized);
       }
     );
+
+    await pool.shutdown();
 
     for (const err of errors) {
       if (err && 'FATAL' in err) {

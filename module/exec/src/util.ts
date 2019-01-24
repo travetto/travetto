@@ -36,7 +36,7 @@ export class ExecUtil {
         done = true;
 
         if (!result.valid) {
-          reject(new AppError(`Error executing ${cmd}: ${result.message || 'failed'}`, result));
+          reject(new AppError(`Error executing ${cmd}: ${result.message || result.stderr || result.stdout || 'failed'}`, result));
         } else {
           resolve(result);
         }

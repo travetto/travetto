@@ -1,4 +1,8 @@
-import { FsUtil } from '@travetto/base';
+import * as fs from 'fs';
+import * as util from 'util';
+
+const fsUnlink = util.promisify(fs.unlink);
+const fsReadFile = util.promisify(fs.readFile);
 
 export interface AssetFile {
   name: string;
@@ -42,8 +46,8 @@ export class Asset {
   }
 
   async read() {
-    const res = (await FsUtil.readFileAsync(this.path)).toString();
-    await FsUtil.unlinkAsync(this.path);
+    const res = (await fsReadFile(this.path)).toString();
+    await fsUnlink(this.path);
     return res;
   }
 }

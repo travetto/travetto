@@ -11,7 +11,7 @@ export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends E
   }
 
   _init() {
-    const op: typeof ExecUtil.fork = (this.fork ? ExecUtil.fork : ExecUtil.spawn);
+    const op: typeof ExecUtil.fork = (this.fork && process.platform !== 'win32' ? ExecUtil.fork : ExecUtil.spawn);
 
     const finalOpts: ChildOptions = {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
@@ -22,6 +22,12 @@ export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends E
         EXECUTION: true
       }
     };
+
+    if (this.fork && process.platform === 'win32') {
+      this.args.unshift(this.command);
+      this.command = process.argv0;
+      (finalOpts as any).shell = false;
+    }
 
     const [sub, complete] = op(this.command, this.args, finalOpts);
 
@@ -54,7 +60,7 @@ export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends E
 
   kill() {
     if (this._proc) {
-      this._proc.kill('SIGTERM');
+      this._proc.kill(process.platform === 'win32' ? undefined : 'SIGTERM');
     }
     super.kill();
   }

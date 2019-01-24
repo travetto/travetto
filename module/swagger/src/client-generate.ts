@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as path from 'path';
 
 import { DockerContainer } from '@travetto/exec';
 import { Injectable } from '@travetto/di';
@@ -26,7 +25,7 @@ export class ClientGenerate {
 
     console.info('Running code generator in watch mode', this.config.output);
 
-    await FsUtil.mkdirpAsync(this.config.output);
+    await FsUtil.mkdirp(this.config.output);
 
     this.codeGenCli = new DockerContainer(this.config.codeGenImage)
       .setEntryPoint('/bin/sh')
@@ -71,7 +70,7 @@ export class ClientGenerate {
     await this._start();
 
     const spec = this.service.getSpec();
-    const specFile = path.join(this.config.output, 'spec.json');
+    const specFile = FsUtil.joinUnix(this.config.output, 'spec.json');
     await new Promise((res, rej) => fs.writeFile(specFile, JSON.stringify(spec, undefined, 2), (err) => err ? rej(err) : res()));
 
     const [, prom] = await this.codeGenCli.exec([], [

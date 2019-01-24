@@ -2,6 +2,7 @@ import * as Mustache from 'mustache';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { FsUtil } from '@travetto/base';
 import { CommandService, ExecUtil } from '@travetto/exec';
 
 export class TemplateUtil {
@@ -86,6 +87,7 @@ export class TemplateUtil {
 
   static resolveNestedTemplates(template: string, templates: { [key: string]: string }) {
     return template.replace(/[{]{2}>\s+(\S+)\s*[}]{2}/g, (all: string, name: string): any => {
+      name = FsUtil.toUnix(name);
       return this.resolveNestedTemplates(templates[name], templates);
     });
   }

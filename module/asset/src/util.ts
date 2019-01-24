@@ -1,6 +1,6 @@
 import * as fs from 'fs';
+import * as util from 'util';
 import * as mime from 'mime';
-import * as path from 'path';
 import * as fileType from 'file-type';
 import * as os from 'os';
 import * as crypto from 'crypto';
@@ -10,14 +10,19 @@ import { HttpRequest } from '@travetto/net';
 import { Asset, AssetFile } from './model';
 import { IncomingMessage } from 'http';
 
-const tmpDir = path.resolve(os.tmpdir());
+const fsStat = util.promisify(fs.stat);
+const fsOpen = util.promisify(fs.open);
+const fsRead = util.promisify(fs.read);
+const fsRename = util.promisify(fs.rename);
+
+const tmpDir = FsUtil.toUnix(os.tmpdir());
 
 export class AssetUtil {
 
   static generateTempFile(ext: string): string {
     const now = new Date();
     const name = `image-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${process.pid}-${(Math.random() * 100000000 + 1).toString(36)}.${ext}`;
-    return path.resolve(tmpDir, name);
+    return FsUtil.resolveUnix(tmpDir, name);
   }
 
   static async localFileToAsset(pth: string, prefix?: string, tags?: string[]) {
@@ -30,7 +35,7 @@ export class AssetUtil {
     await new Promise((res, rej) =>
       str.on('end', e => e ? rej(e) : res()));
 
-    const size = (await FsUtil.statAsync(pth)).size;
+    const size = (await fsStat(pth)).size;
 
     const upload = this.fileToAsset({
       name: pth,
@@ -81,9 +86,9 @@ export class AssetUtil {
   }
 
   static async readChunk(filePath: string, bytes: number) {
-    const fd = await FsUtil.openAsync(filePath, 'r');
+    const fd = await fsOpen(filePath, 'r');
     const buffer = new Buffer(bytes);
-    await FsUtil.readAsync(fd, buffer, 0, bytes, 0);
+    await fsRead(fd, buffer, 0, bytes, 0);
     return buffer;
   }
 
@@ -118,7 +123,7 @@ export class AssetUtil {
       } else {
         newFilePath = `${newFilePath}.${responseExt}`;
       }
-      await FsUtil.renameAsync(filePath, newFilePath);
+      await fsRename(filePath, newFilePath);
       filePath = newFilePath;
     }
     return filePath;

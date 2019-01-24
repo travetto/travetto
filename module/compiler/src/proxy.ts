@@ -42,7 +42,8 @@ export class RetargettingHandler<T extends any> implements ProxyHandler<T> {
   }
 
   set(target: T, prop: PropertyKey, value: any) {
-    return this.target[prop] = value;
+    this.target[prop] = value;
+    return true;
   }
 
   ownKeys(target: T): PropertyKey[] {

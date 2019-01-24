@@ -4,14 +4,15 @@
 const fs = require('fs');
 const path = require('path');
 const Module = require('module');
+
 // @ts-ignore
 let ts = global.ts = new Proxy({}, {
   get(t, p, r) { ts = global['ts'] = require('typescript'); return ts[p]; }
 });
 
 //Simple bootstrap to load compiler
+const { FsUtil } = require('../src/fs-util');
 const { Env, showEnv } = require('../src/env');
-const { resolveFrameworkFile } = require('../src/app-info');
 const { AppCache } = require('../src/cache');
 const cwd = Env.cwd;
 
@@ -46,16 +47,16 @@ function moduleLoaderHandler(request, parent) {
 let moduleLoader = moduleLoaderHandler;
 
 if (Env.frameworkDev) {
-  const parDir = path.resolve(path.dirname(path.dirname(cwd)), 'module');
+  const parDir = FsUtil.resolveUnix(cwd, '../../module');
   moduleLoader = (request, parent) => {
     const root = path.dirname(parent.filename);
     if (request.startsWith('@travetto')) { // Handle import directly
       request = `${cwd}/node_modules/${request}`;
     } else if (request.startsWith('.') && root.startsWith(parDir) && !root.startsWith(cwd)) { // Handle relative and sub
       const relativeRoot = root.split(parDir).pop();
-      request = path.resolve(`${cwd}/node_modules/@travetto/${relativeRoot}`, request);
+      request = FsUtil.resolveUnix(cwd, `node_modules/@travetto/${relativeRoot}`, request);
     }
-    request = resolveFrameworkFile(request);
+    request = FsUtil.resolveFrameworkFile(request);
 
     return moduleLoaderHandler(request, parent);
   }
@@ -68,7 +69,7 @@ let opts;
 
 // Cache on require
 require.extensions['.ts'] = function load(m, tsf) {
-  const name = tsf.replace(/[\\\/]/g, path.sep);
+  const name = FsUtil.toUnix(tsf);
 
   let content;
   if (!AppCache.hasEntry(name)) {

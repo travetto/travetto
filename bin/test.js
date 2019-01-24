@@ -172,13 +172,13 @@ async function test() {
   cp.spawnSync('npx', [
     'lerna', '--no-bail', 'exec', '--parallel', '--',
     'npx', 'travetto', 'clean'
-  ]);
+  ], { shell: true });
 
   // Rewrite
   const child = cp.spawn('npx', [
     'lerna', '--concurrency', '6', 'exec', '--no-bail', '--stream', '--',
     'npx', 'travetto', 'test', '-f', 'event', '-c', '1'
-  ]);
+  ], { shell: true });
 
   const emitter = new TapEmitter();
 
@@ -208,7 +208,7 @@ async function test() {
       cp.spawnSync('npx', [
         'lerna', '--no-bail', 'exec', '--parallel', '--',
         'npx', 'travetto', 'clean'
-      ]);
+      ], { shell: true });
     });
 }
 

@@ -1,9 +1,8 @@
 //@ts-check
 const commander = require('commander');
-const path = require('path');
 const fs = require('fs');
 
-const cwd = (process.env.INIT_CWD || process.cwd()).replace(/[\\]+/g, path.sep).replace(/[\/\\]+$/, '');
+const { FsUtil } = require('../src/fs-util');
 
 commander
   // @ts-ignore
@@ -11,24 +10,24 @@ commander
 
 module.exports = {
   Util: {
-    cwd,
     program: commander,
     dependOn(cmd, args, s_cwd) {
-      require('child_process').execSync(`${process.argv.slice(0, 2).join(' ')} ${cmd} ${(args || []).join(' ')}`, {
+      require('child_process').spawnSync(`${process.argv.slice(0, 2).join(' ')} ${cmd} ${(args || []).join(' ')}`, {
         env: process.env,
-        cwd: s_cwd || cwd,
-        stdio: [0, 1, 2]
+        cwd: s_cwd || FsUtil.cwd,
+        stdio: [0, 1, 2],
+        shell: true
       });
     },
     requireModule(f) {
-      let p = fs.realpathSync(`${cwd}/node_modules/.bin/${f}`);
-      if (!p.startsWith(cwd)) {
-        p = `${cwd}/node_modules/@travetto/${p.split('travetto/module/')[1]}`;
+      let p = FsUtil.toUnix(fs.realpathSync(`${FsUtil.cwd}/node_modules/.bin/${f}`));
+      if (!p.startsWith(FsUtil.cwd)) {
+        p = `${FsUtil.cwd}/node_modules/@travetto/${p.split('travetto/module/')[1]}`;
       }
       require(p)();
     },
     loadAllPlugins() {
-      const BIN_DIR = `${cwd}/node_modules/.bin`;
+      const BIN_DIR = `${FsUtil.cwd}/node_modules/.bin`;
       if (fs.existsSync(BIN_DIR)) {
         const files = fs.readdirSync(BIN_DIR).filter(x => x.startsWith('travetto-cli-'));
         for (const f of files) {
@@ -68,7 +67,7 @@ module.exports = {
         let err = [];
         const proc = require('child_process').fork(cmd, args || [], {
           env: process.env,
-          cwd: cwd,
+          cwd: FsUtil.cwd,
           stdio: ['pipe', 'pipe', 'pipe', 'ipc']
         });
         proc.stdout.on('data', v => text.push(v));
