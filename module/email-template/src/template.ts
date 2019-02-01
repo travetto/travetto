@@ -57,7 +57,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
   }
 
   registerTemplate(name: string, partial: string | Buffer) {
-    console.log('Registering template', name);
+    console.debug('Registering template', name);
     this._templates[name] = partial.toString();
   }
 
