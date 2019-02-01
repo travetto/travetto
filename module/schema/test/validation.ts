@@ -2,131 +2,14 @@ import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 
+import { SchemaValidator, ValidationError, SchemaRegistry, ValidationErrors } from '../';
 import {
-  Float, MinLength, Url, Trimmed,
-  SchemaValidator, Schema, ValidationError,
-  SchemaRegistry, ValidationErrors, Validator, View, Match, CommonRegExp
-} from '../';
-import { Required, Max, Min } from '../src/decorator/field';
-
-@Schema()
-abstract class Aaaz {
-  a: boolean;
-}
-
-@Schema()
-class Bbbbz extends Aaaz {
-  b: number;
-}
-
-@Schema()
-class Ccccz extends Bbbbz {
-  c: string;
-}
-
-@Schema()
-class AllAs {
-  all: Aaaz[];
-}
-
-@Schema()
-class Response {
-
-  @Trimmed()
-  questionId: string;
-
-  answer?: any;
-
-  valid?: boolean;
-
-  @Float()
-  validationCount?: number = 0;
-  timestamp: Date;
-
-  @Url()
-  url?: string;
-  pandaState: 'TIRED' | 'AMOROUS' | 'HUNGRY';
-}
-
-@Schema()
-class Parent {
-
-  response: Response;
-  responses: Response[];
-}
-
-@Schema()
-class MinTest {
-  @MinLength(10)
-  value: string;
-}
-
-@Schema()
-class Address {
-  street1: string;
-  city?: string;
-  zip: 200 | 500;
-
-  @Match(CommonRegExp.postal_code)
-  postal: string;
-}
-
-@Schema()
-class Nested {
-  name: string;
-  address: Address;
-}
-
-@Schema()
-@View('profile', { with: ['name', 'address'] })
-class ViewSpecific {
-  id: string;
-  name: string;
-  address: Address;
-}
-
-@Schema()
-class Grade {
-  @Max(10)
-  @Min(0)
-  score: number;
-}
-
-@Schema()
-@Validator((o: CustomValidated) => {
-  if ((o.age + o.age2) % 2 === 0) {
-    return {
-      kind: 'custom',
-      message: 'age1 + age2 cannot be even',
-      path: 'age1'
-    };
-  }
-})
-class CustomValidated {
-  age: number;
-  age2: number;
-}
-
-@Schema()
-class StringMatches {
-
-  @Match(/^ab*c$/)
-  names: string[];
-}
+  Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaz,
+  CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema
+} from './models/validation';
 
 function findError(errors: ValidationError[], path: string, message: string) {
   return errors.find(x => x.path === path && x.message.includes(message));
-}
-
-@Schema()
-class NotRequiredUndefinable {
-  @Required(false)
-  name: string;
-}
-
-@Schema()
-class DateTestSchema {
-  date: Date;
 }
 
 @Suite()

@@ -5,6 +5,7 @@ Base
 ----------------------
 - [X] Separate out e2e into a better pattern
 - [X] Remove dependency on dev/test
+- [X] Unify path usage, default to URI model and convert to local path when needed, look into upath
 
 Exec
 -----------------------
