@@ -14,8 +14,8 @@ class VerifySuite {
   @Test('should first assume JSON claim set')
   async simpleVerify() {
     const payload = { iat: Math.floor(Date.now() / 1000) };
-    const priv = await ResourceManager.read('priv.pem');
-    const pub = await ResourceManager.read('pub.pem');
+    const priv = await ResourceManager.read('/priv.pem');
+    const pub = await ResourceManager.read('/pub.pem');
 
     const signed = jws.sign({
       header: { alg: 'RS256', typ: 'JWT' },
@@ -31,7 +31,7 @@ class VerifySuite {
   @Test('should be able to validate unsigned token')
   async validateUnsigned() {
     const payload = { iat: Math.floor(Date.now() / 1000) };
-    const priv = await ResourceManager.read('priv.pem');
+    const priv = await ResourceManager.read('/priv.pem');
 
     const signed = jws.sign({
       header: { alg: 'none' },
@@ -46,7 +46,7 @@ class VerifySuite {
 
   @Test('should not mutate options')
   async noMutate() {
-    const priv = await ResourceManager.read('priv.pem');
+    const priv = await ResourceManager.read('/priv.pem');
 
     const payload = { iat: Math.floor(Date.now() / 1000) };
 
