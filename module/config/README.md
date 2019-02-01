@@ -15,7 +15,7 @@ Config loading follows a defined resolution path, below is the order in increasi
 
 1. `node_modules/@travetto/<module>/config/*.yml` - Load framework module configurations.  Defines general configuration that should be easily 
 1. `config/*.yml` - Load local application configurations
-1. `profile/*.yml` - Load profile specific configurations as defined by the values in `process.env.PROFILE`, `process.env.ENV`.
+1. `resources/*.yml` - Load profile specific configurations as defined by the values in `process.env.PROFILE`, `process.env.ENV`.
 1. `process.env` - Read startup configuration from environment to allow for overriding any values. Because we are overriding a [`yaml`](https://en.wikipedia.org/wiki/YAML) based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as `UPPER_SNAKE_CASE`. When reading from `process.env` we will map `UPPER_SNAKE_CASE` to `upper.snake.case`, and will attempt to match by case-insensitive name.
 
 ### A Complete Example
@@ -32,7 +32,7 @@ database:
     password: test
 ```
 
-**Config: profile/prod.yml**
+**Config: resources/prod.yml**
 ```yaml
 database:
   host: prod-host-db
