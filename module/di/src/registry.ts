@@ -176,7 +176,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const managed = this.get(clz)!;
 
     // Only fetch constructor values
-    console.log('Fetch dependencies for', target.__id)
     const consValues = await this.fetchDependencies(managed, managed.dependencies.cons);
 
     // Create instance
