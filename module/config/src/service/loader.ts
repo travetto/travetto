@@ -1,12 +1,10 @@
 import * as path from 'path';
 import { readFileSync } from 'fs';
 
-import { Env, ScanApp } from '@travetto/base';
+import { Env, ResourceManager, ScanApp } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 import { ConfigMap } from './map';
-
-const YAML_RE = /.ya?ml$/;
 
 export class ConfigLoader {
 
@@ -15,24 +13,23 @@ export class ConfigLoader {
 
   private static processConfigs() {
     // Load all namespaces from core
-    const entries = ScanApp.findFiles(YAML_RE, x => /config\/[^/]+.yml$/.test(x));
+    const entries = ScanApp.findFiles('.yml', x => /config\/[^/]+.yml$/.test(x));
 
-    for (const entry of entries) {
-      this.processConfig(entry.file);
+    for (const { file } of entries) {
+      this.processConfig(file);
     }
   }
 
   private static processProfiles() {
     // Handle profile loads
     if (Env.profiles.length) {
-      const envFiles = ScanApp.findFiles(YAML_RE, x => x.startsWith('profile/'))
-        .map(x => ({ name: x.file, data: readFileSync(x.file).toString() }))
-        .map(x => {
-          const tested = path.basename(x.name).replace(YAML_RE, '');
-          const found = Env.hasProfile(tested);
-          return { name: tested, found, data: x.data };
-        })
-        .filter(x => x.found);
+      const envFiles = ResourceManager.findAllByExtensionSync('.yml')
+        .map(file => ({ file, profile: path.basename(file).replace('.yml', '') }))
+        .filter(({ profile }) => Env.hasProfile(profile))
+        .map(({ file, profile }) => {
+          const data = ResourceManager.readSync(file).toString();
+          return { name: profile, data };
+        });
 
       console.debug('Found configurations for', envFiles.map(x => x.name));
 
@@ -53,7 +50,7 @@ export class ConfigLoader {
 
   static processConfig(file: string) {
     const data = readFileSync(file).toString();
-    const ns = path.basename(file).replace(YAML_RE, '');
+    const ns = path.basename(file).replace('.yml', '');
     const doc = YamlUtil.parse(data);
     this.map.putAll({ [ns]: doc });
   }
