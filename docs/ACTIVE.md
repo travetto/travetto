@@ -1,17 +1,14 @@
 In-Progress
 =============
 
-Rework Env
---------------
-- [ ] Unify path usage, default to URI model and convert to local path when needed, look into upath
-
-Email
---------------
-
-
 Tests
 --------------
 - [?] Better unit tests
+
+Model Elasticsearch
+-----------------------
+- [ ] Regex as strings wrt to binding and schema validation
+- [ ] Schema config for text field arrays
 
 Tooling
 -----------------------
