@@ -9,8 +9,8 @@ class PublicKeySuite {
 
   @Test('should work')
   async test() {
-    const cert_pub = await ResourceManager.read('rsa-public-key.pem');
-    const cert_priv = await ResourceManager.read('rsa-private.pem');
+    const cert_pub = await ResourceManager.read('/rsa-public-key.pem');
+    const cert_priv = await ResourceManager.read('/rsa-private.pem');
 
     const token = await jwt.sign({ foo: 'bar' }, { key: cert_priv, alg: 'RS256' });
 

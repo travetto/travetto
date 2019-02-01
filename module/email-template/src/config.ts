@@ -6,7 +6,7 @@ export class MailTemplateConfig {
   scssRoots: string[];
 
   async postConstruct() {
-    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '../resources'));
+    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '..'));
 
     this.scssRoots = [
       ...ResourceManager.getPaths().map(x => FsUtil.resolveUnix(x, 'email')),

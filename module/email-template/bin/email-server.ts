@@ -121,9 +121,8 @@ export async function serverHandler() {
   const { ResourceManager } = await import('@travetto/base/src/resource');
   const [config] = DependencyRegistry.getCandidateTypes(DefaultMailTemplateEngine);
   const engine = await DependencyRegistry.getInstance(config.target, config.qualifier);
-  const { Env } = await import('@travetto/base/src/env');
 
-  const watcher = await simpleWatcher('resources/email', ResourceManager.getPaths().map(x => x.replace(Env.cwd, '').replace(/^[\/\\]/, '')), {
+  const watcher = await simpleWatcher('resources/email', ResourceManager.getRelativePaths(), {
     changed(file) {
       console.log('Updating file', file);
 
