@@ -20,26 +20,37 @@ export class $ResourceManager {
   }
 
   private init() {
-    if (Env.appRoot) {
-      this.paths.push(FsUtil.resolveUnix(Env.cwd, Env.appRoot));
+    if (Env.get('RESOURCE_PATHS')) {
+      this.paths.unshift(...Env.getList('RESOURCE_PATHS'));
     }
 
-    this.paths.push(Env.cwd);
+    if (Env.appRoot) {
+      this.paths.push(Env.appRoot);
+    }
+
+    this.paths.push('.');
 
     this.paths = this.paths
-      .map(x => FsUtil.joinUnix(x, this.folder))
+      .map(x => FsUtil.resolveUnix(Env.cwd, x, this.folder))
       .filter(x => fs.existsSync(x));
   }
 
-  addPath(searchPath: string) {
-    this.paths.push(FsUtil.toUnix(searchPath));
+  addPath(searchPath: string, full = false) {
+    this.paths.push(full ? FsUtil.resolveUnix(Env.cwd, searchPath) : FsUtil.resolveUnix(Env.cwd, searchPath, this.folder));
   }
 
   getPaths() {
     return this.paths.slice(0);
   }
 
+  getRelativePaths() {
+    return this.paths.slice(0).map(x => x.replace(`${Env.cwd}/`, ''));
+  }
+
   async find(pth: string) {
+    if (pth.startsWith('/')) {
+      pth = pth.substring(1);
+    }
     if (pth in this._cache) {
       return this._cache[pth];
     }
