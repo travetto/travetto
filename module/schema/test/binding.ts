@@ -1,82 +1,11 @@
-import {
-  Field, Url, View, Alias,
-  BindUtil, Schema, SchemaRegistry, Float, Integer
-} from '../';
-import { Address } from './address';
 import * as assert from 'assert';
+
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { Class } from '@travetto/registry';
 
-@Schema(false)
-class SuperAddress extends Address {
-  @Field(String)
-  unit: string;
-}
-
-@Schema(false)
-class Count {
-
-  @Field(String)
-  area: string;
-
-  @Float()
-  @Field(Number)
-  value: number;
-}
-
-@Schema(true)
-@View('test', { with: ['address', 'counts'] })
-class Person {
-
-  name: string;
-
-  dob: Date;
-
-  @Integer()
-  age: number;
-
-  address: Address;
-
-  @Field([Count])
-  counts: Count[];
-}
-
-@Schema(true)
-export class Response {
-
-  questionId: string;
-  answer?: any;
-
-  @Alias('correct', 'is_valid')
-  valid?: boolean;
-
-  validationCount?: number = 0;
-
-  @Url()
-  url?: string;
-
-  status?: 'ACTIVE' | 'INACTIVE';
-}
-
-@Schema()
-abstract class BasePoly {
-  private type: string;
-  constructor() {
-    this.type = this.constructor.__id;
-  }
-}
-
-@Schema()
-class Poly1 extends BasePoly {
-  name: string;
-  age: number;
-}
-
-@Schema()
-class Poly2 extends BasePoly {
-  names: string[];
-  age: string;
-}
+import { BindUtil, SchemaRegistry } from '../';
+import { Address } from './models/address';
+import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple } from './models/binding';
 
 @Suite('Data Binding')
 class DataBinding {
@@ -221,5 +150,45 @@ class DataBinding {
     assert(items[1] instanceof Poly2);
     assert(!items[1].name);
     assert(typeof items[1].age === 'string');
+  }
+
+  @Test('should handle regex fields')
+  validateRegexFields() {
+    const item = {
+      regex: '/helloWorld/i'
+    };
+
+    const simple = BindUtil.bindSchema(RegexSimple, item);
+
+    assert(simple.regex instanceof RegExp);
+    assert(simple.regex.source === 'helloWorld');
+    assert(simple.regex.ignoreCase === true);
+    assert(simple.regex.global === false);
+    assert(simple.regex.dotAll === false);
+
+    const item2 = {
+      regex: 'helloWorld'
+    };
+
+    const simple2 = BindUtil.bindSchema(RegexSimple, item2);
+
+    assert(simple2.regex instanceof RegExp);
+    assert(simple2.regex.source === 'helloWorld');
+    assert(simple2.regex.ignoreCase === false);
+    assert(simple2.regex.global === false);
+    assert(simple2.regex.dotAll === false);
+
+    const item3 = {
+      regex: '/helloWorld'
+    };
+
+    const simple3 = BindUtil.bindSchema(RegexSimple, item3);
+
+    assert(simple3.regex instanceof RegExp);
+    assert(simple3.regex.source === '\\/helloWorld');
+    assert(simple3.regex.ignoreCase === false);
+    assert(simple3.regex.global === false);
+    assert(simple3.regex.dotAll === false);
+
   }
 }

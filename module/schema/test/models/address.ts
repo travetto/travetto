@@ -1,4 +1,4 @@
-import { Schema, Field, Required } from '../index';
+import { Schema, Field, Required } from '../../';
 
 @Schema()
 export class Address {

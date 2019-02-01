@@ -2,6 +2,8 @@ import { Class } from '@travetto/registry';
 import { SchemaRegistry } from './registry';
 import { FieldConfig, ALL_VIEW } from './types';
 
+const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
+
 export class BindUtil {
 
   static expandPaths(obj: { [key: string]: any }) {
@@ -74,6 +76,17 @@ export class BindUtil {
       } else if (type === Date) {
         if (typeof val === 'number' || (typeof val === 'string' && val)) {
           val = new Date(val);
+        }
+      } else if (type === RegExp) {
+        if (typeof val === 'string') {
+          if (REGEX_PAT.test(val)) {
+            val.replace(REGEX_PAT, (all, pat, mod) => {
+              val = new RegExp(pat, mod);
+              return '';
+            });
+          } else {
+            val = new RegExp(val);
+          }
         }
       }
     }
