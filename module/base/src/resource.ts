@@ -24,11 +24,9 @@ export class $ResourceManager {
       this.paths.unshift(...Env.getList('RESOURCE_PATHS'));
     }
 
-    if (Env.appRoot) {
-      this.paths.push(Env.appRoot);
+    if (Env.appRoot !== undefined) {
+      this.paths.push(Env.appRoot || '.');
     }
-
-    this.paths.push('.');
 
     this.paths = this.paths
       .map(x => FsUtil.resolveUnix(Env.cwd, x, this.folder))
@@ -65,9 +63,32 @@ export class $ResourceManager {
     throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`);
   }
 
+  findSync(pth: string) {
+    if (pth.startsWith('/')) {
+      pth = pth.substring(1);
+    }
+    if (pth in this._cache) {
+      return this._cache[pth];
+    }
+
+    for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
+      try {
+        fs.statSync(f);
+        return this._cache[pth] = f;
+      } catch { }
+    }
+
+    throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`);
+  }
+
   async read(pth: string, encoding?: string) {
     pth = await this.find(pth);
     return fsReadFile(pth, encoding);
+  }
+
+  readSync(pth: string, encoding?: string) {
+    pth = this.findSync(pth);
+    return fs.readFileSync(pth, encoding);
   }
 
   async readToStream(pth: string) {
@@ -79,6 +100,16 @@ export class $ResourceManager {
     const out: string[] = [];
     for (const root of this.paths) {
       const results = await ScanFs.scanDir({ testFile: x => x.endsWith(ext) },
+        FsUtil.resolveUnix(root, base));
+      out.push(...results.map(x => `${base}/${x.module}`));
+    }
+    return out;
+  }
+
+  findAllByExtensionSync(ext: string, base: string = '') {
+    const out: string[] = [];
+    for (const root of this.paths) {
+      const results = ScanFs.scanDirSync({ testFile: x => x.endsWith(ext) },
         FsUtil.resolveUnix(root, base));
       out.push(...results.map(x => `${base}/${x.module}`));
     }

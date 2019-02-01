@@ -93,7 +93,7 @@ export class ConfigTest {
 
   @Test()
   async verifyTopLevelKeys() {
-    yaml.safeLoadAll(SAMPLE_YAML, doc => (ConfigLoader as any).map.putAll(doc));
+    yaml.safeLoadAll(SAMPLE_YAML, (doc: any) => (ConfigLoader as any).map.putAll(doc));
     const conf = new Test2Config();
     ConfigLoader.bindTo(conf, 'test.beta');
     assert(conf.values.length === 3);
