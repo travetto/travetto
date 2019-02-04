@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/rest": "^0.5.9",
+    "@travetto/rest": "^0.5.10",
     "@types/koa": "^2.0.47",
     "@types/koa-bodyparser": "^4.2.1",
     "@types/koa-compress": "^2.0.8",
@@ -40,5 +40,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.5.9"
+  "version": "0.5.10"
 }
