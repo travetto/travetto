@@ -45,7 +45,7 @@ type ArrayFieldQuery<T> =
 
 type StringFieldQuery =
   GeneralScalarFieldQuery<string> |
-  { $regex?: RegExp; } |
+  { $regex?: RegExp | string; } |
   string;
 
 type GeoFieldQuery =

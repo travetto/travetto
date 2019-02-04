@@ -45,12 +45,22 @@ export class QueryTest {
 
   @Test()
   async translateIds() {
-    let out = extractWhereClause<User>({
+    const out = extractWhereClause<User>({
       $and: [
         { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
       ]
     });
 
     assert(!!out.$and[0]._id);
+  }
+
+  @Test()
+  async translateRegex() {
+    const out = extractWhereClause<User>({
+      name: { $regex: '/google.$/' }
+    });
+
+    assert(out.name.$regex instanceof RegExp);
+    assert(out.name.$regex.source === 'google.$');
   }
 }

@@ -96,4 +96,17 @@ export class QueryTest {
 
     assert(!!out.bool.must[0].terms._id);
   }
+
+  @Test()
+  async testRegEx() {
+
+    const out = ElasticsearchUtil.extractWhereQuery({
+      name: {
+        $regex: '/google.$/'
+      }
+    }, User);
+
+    assert(typeof out.regexp.name === 'string');
+    assert(out.regexp.name === 'google.$');
+  }
 }

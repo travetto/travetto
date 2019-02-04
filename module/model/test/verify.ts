@@ -102,4 +102,19 @@ export class VerifyTest {
     assert.doesNotThrow(() => test2(ModelUser));
     assert.doesNotThrow(() => test2(User));
   }
+
+  @Test()
+  async verifyQueryRegex() {
+    const verifier = await DependencyRegistry.getInstance(QueryVerifierService);
+
+    assert.doesNotThrow(() => {
+      verifier.verify(User, {
+        where: {
+          email: {
+            $regex: '.*'
+          }
+        }
+      });
+    });
+  }
 }
