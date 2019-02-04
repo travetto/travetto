@@ -6,6 +6,24 @@ const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 
 export class BindUtil {
 
+  static extractRegex(val: string | RegExp): RegExp {
+    let out: RegExp;
+    if (typeof val === 'string') {
+      if (REGEX_PAT.test(val)) {
+        val.replace(REGEX_PAT, (all, pat, mod) => {
+          out = new RegExp(pat, mod);
+          return '';
+        });
+        out = out!;
+      } else {
+        out = new RegExp(val);
+      }
+    } else {
+      out = val;
+    }
+    return out;
+  }
+
   static expandPaths(obj: { [key: string]: any }) {
     const out: { [key: string]: any } = {};
     for (const k of Object.keys(obj)) {
@@ -78,16 +96,7 @@ export class BindUtil {
           val = new Date(val);
         }
       } else if (type === RegExp) {
-        if (typeof val === 'string') {
-          if (REGEX_PAT.test(val)) {
-            val.replace(REGEX_PAT, (all, pat, mod) => {
-              val = new RegExp(pat, mod);
-              return '';
-            });
-          } else {
-            val = new RegExp(val);
-          }
-        }
+        val = BindUtil.extractRegex(val);
       }
     }
 

@@ -9,8 +9,10 @@ import {
   WhereClause,
   ModelQuery
 } from '@travetto/model';
+
 import { Class } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
+import { BindUtil } from '@travetto/schema';
 
 import { ModelMongoConfig } from './config';
 
@@ -67,6 +69,9 @@ export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any 
     } else if (Util.isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) {
       Object.assign(out, extractSimple(v, `${subpath}.`));
     } else {
+      if (Object.keys(v)[0] === '$regex') {
+        v.$regex = BindUtil.extractRegex(v.$regex);
+      }
       out[subpath] = v;
     }
   }

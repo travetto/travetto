@@ -46,7 +46,7 @@ export class TemplateUtil {
   }
 
   static async optimizeImage(file: string, out: string) {
-    const [proc, prom] = await this.converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
+    const [proc, prom] = await this.converter.exec('pngquant', '--quality', '40-80', '--speed', '1', '--force', '-');
     fs.createReadStream(file).pipe(proc.stdin);
     proc.stdout.pipe(fs.createWriteStream(out));
     await prom;

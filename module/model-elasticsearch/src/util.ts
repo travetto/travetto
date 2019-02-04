@@ -1,7 +1,7 @@
 import { Util } from '@travetto/base';
 import { WhereClause, ModelRegistry, SelectClause, SortClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
-import { SchemaRegistry } from '@travetto/schema';
+import { BindUtil, SchemaRegistry } from '@travetto/schema';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -129,7 +129,7 @@ export class ElasticsearchUtil {
             case '$regex':
               items.push({
                 regexp: {
-                  [sPath]: typeof v === 'string' ? v : `${v.source}`
+                  [sPath]: BindUtil.extractRegex(v).source
                 }
               });
               break;
