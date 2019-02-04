@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/asset": "^0.5.9",
+    "@travetto/asset": "^0.5.10",
     "@types/gridfs-stream": "^0.5.30",
     "@types/mongodb": "^3.1.17",
     "gridfs-stream": "^1.1.1",
@@ -34,5 +34,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.5.9"
+  "version": "0.5.10"
 }
