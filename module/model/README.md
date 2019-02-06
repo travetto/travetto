@@ -79,7 +79,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 ```field : { $all: T[]] }``` checks to see if the records value contains everything within `$all`
 
 ### String Fields
-```field : { $regex: RegExp; }``` checks the field against the regular expression
+```field : { $regex: RegExp | string; }``` checks the field against the regular expression
 
 ### Geo Point Fields
 ```field : { $geoWithin: Point[] }``` determines if the value is within the bounding region of the points
