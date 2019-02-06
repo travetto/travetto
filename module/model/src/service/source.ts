@@ -7,6 +7,11 @@ import { ModelCore } from '../model/core';
 
 export abstract class ModelSource { }
 
+export type ValidStringFields<T> = {
+  [K in keyof T]:
+  (T[K] extends (String | string) ? K : never)
+}[keyof T];
+
 export interface IModelSource {
   onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
   onSchemaChange?(e: SchemaChangeEvent): void;
@@ -23,6 +28,10 @@ export interface IModelSource {
   updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number>;
   updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T>;
   updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>): Promise<T>;
+
+  suggestField<T extends ModelCore, U = T>(
+    cls: Class<T>, field: ValidStringFields<T>, query: string, limit?: number
+  ): Promise<U[]>;
 
   query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]>;
 
