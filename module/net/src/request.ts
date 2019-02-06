@@ -76,7 +76,14 @@ export class HttpRequest {
       if (Array.from(searchParams.values()).length) {
         opts.path = `${opts.path || ''}?${searchParams.toString()}`;
       }
+    } else {
+      const q = Array.from(searchParams.entries())
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join('&');
+
+      opts.path = `${opts.path}?${q}`;
     }
+
     return { client, payload, responseHandler, opts, binary: inOpts.binary };
   }
 
