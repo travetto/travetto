@@ -258,7 +258,7 @@ export class ModelElasticsearchSource extends ModelSource {
   }
 
   async suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, limit: number = 10
+    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
   ): Promise<U[]> {
     const spec = SchemaRegistry.getViewSchema(cls).schema[field as any].specifier;
     const text = spec && spec.startsWith('text');
@@ -267,17 +267,28 @@ export class ModelElasticsearchSource extends ModelSource {
       console.warn(`${cls.__id}.${field} is not registered as @Text, reverting to keyword search`);
     }
 
-    const search = this.getSearchObject(cls, {});
+    if (!filter) {
+      filter = {};
+    }
+
+    filter.limit = filter.limit || 10;
+
+    const search = this.getSearchObject(cls, filter || {});
     search.body = {
       query: {
-        match_phrase_prefix: {
-          [text ? `${field}.text` : field]: {
-            query
+        bool: {
+          filter: search.body.query ? search.body.query : {},
+          must: {
+            match_phrase_prefix: {
+              [text ? `${field}.text` : field]: {
+                query
+              }
+            }
           }
         }
       }
     };
-    search.size = limit;
+
     const res = await this.client.search<U>(search);
     return this.safeLoad<U>(search, res);
   }

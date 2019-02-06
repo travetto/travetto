@@ -16,6 +16,7 @@ import { AppError, Util } from '@travetto/base';
 import { BindUtil } from '@travetto/schema';
 
 import { ModelMongoConfig } from './config';
+import { PropWhereClause, _WhereClause } from '../../model/src/model/where-clause';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -90,14 +91,27 @@ export class ModelMongoSource extends ModelSource {
   }
 
   async suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, limit: number = 10
+    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
   ): Promise<U[]> {
-    return this.query(cls, {
-      limit,
-      where: {
-        [field]: new RegExp(`\\b${query}`, 'i')
-      } as any
-    });
+    if (!filter) {
+      filter = {};
+    }
+    filter.limit = filter.limit || 10;
+    const suggestQuery = {
+      [field]: new RegExp(`\\b${query}`, 'i')
+    } as any as _WhereClause<T>;
+
+    if (!filter.where) {
+      filter.where = suggestQuery;
+    } else {
+      filter.where = {
+        $and: [
+          filter.where,
+          suggestQuery
+        ]
+      } as _WhereClause<T>;
+    }
+    return this.query(cls, filter);
   }
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
