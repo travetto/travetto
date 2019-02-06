@@ -245,5 +245,16 @@ class TestSave extends BaseElasticsearchTest {
 
     suggested = await service.suggestField(Person, 'name', 'b');
     assert(suggested.length === 3);
+
+    suggested = await service.suggestField(Person, 'name', 'b', {
+      where: {
+        address: {
+          street2: {
+            $exists: true
+          }
+        }
+      }
+    });
+    assert(suggested.length === 1);
   }
 }

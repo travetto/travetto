@@ -80,9 +80,8 @@ export class ModelService implements IModelSource {
   }
 
   async suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, limit?: number
-  ): Promise<U[]> {
-    const res = await this.source.suggestField(cls, field, query, limit);
+    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>): Promise<U[]> {
+    const res = await this.source.suggestField(cls, field, query, filter);
     return res.map(o => this.postLoad(cls, o as any as T) as any as U);
   }
 

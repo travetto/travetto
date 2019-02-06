@@ -12,8 +12,8 @@ export abstract class ClassModelService<T extends ModelCore> {
 
   abstract get class(): Class<T>;
 
-  suggestField(field: ValidStringFields<T>, query: string, limit?: number) {
-    return this.service.suggestField(this.class, field, query, limit);
+  suggestField(field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>) {
+    return this.service.suggestField(this.class, field, query, filter);
   }
 
   query(query: Query<T>) {
