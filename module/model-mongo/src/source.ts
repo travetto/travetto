@@ -9,7 +9,7 @@ import {
   WhereClause,
   ModelQuery,
   ValidStringFields
-}l';
+} from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
 
