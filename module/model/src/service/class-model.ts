@@ -4,12 +4,17 @@ import { BulkOp } from '../model/bulk';
 import { ModelCore } from '../model/core';
 
 import { ModelService } from './model';
+import { ValidStringFields } from './source';
 
 export abstract class ClassModelService<T extends ModelCore> {
 
   constructor(private service: ModelService) { }
 
   abstract get class(): Class<T>;
+
+  suggestField(field: ValidStringFields<T>, query: string, limit?: number) {
+    return this.service.suggestField(this.class, field, query, limit);
+  }
 
   query(query: Query<T>) {
     return this.service.query(this.class, query);

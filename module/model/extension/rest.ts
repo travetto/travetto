@@ -26,7 +26,8 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
         priority: 101, method: 'get', path: '/', headers: {
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
-        }, responseType: { description: `List of ${cls.name}`, type: cls, wrapper: Array }
+        },
+        responseType: { description: `List of ${cls.name}`, type: cls, wrapper: Array }
       }
     );
 
@@ -37,6 +38,20 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
         }), {
         description: `Get ${cls.name} by id`,
         priority: 102, method: 'get', path: '/:id', headers: {
+          Expires: '-1',
+          'Cache-Control': 'max-age=0, no-cache'
+        },
+        responseType: { description: cls.name, type: cls }
+      }
+    );
+
+    Object.assign(
+      ControllerRegistry.getOrCreateEndpointConfig(
+        target, async function suggestField(this: Svc, req: Request) {
+          return this.source.suggestField(cls, req.params.field, req.query.q, req.query.limit);
+        }), {
+        description: `Suggest ${cls.name} by specific field`,
+        priority: 101, method: 'get', path: '/suggest/:field', headers: {
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
         },
