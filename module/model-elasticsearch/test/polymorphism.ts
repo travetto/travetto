@@ -132,7 +132,7 @@ class TestPolymorphism extends BaseElasticsearchTest {
   @Test('Multi Query')
   async testMultiQuery() {
     const service = (await DependencyRegistry.getInstance(ModelSource)) as ModelElasticsearchSource;
-    const res = service.getRawModelFilters([Person, Doctor, Engineer, Firefighter]);
+    const res = service.buildRawModelFilters([Person, Doctor, Engineer, Firefighter]);
 
     assert(res.bool.should.length === 4);
     assert(res.bool.should[0].term);
