@@ -7,7 +7,8 @@ import {
   PageableModelQuery,
   BulkOp,
   WhereClause,
-  ModelQuery
+  ModelQuery,
+  ValidStringFields
 } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
@@ -81,6 +82,17 @@ export class ModelMongoSource extends ModelSource {
 
   constructor(private config: ModelMongoConfig) {
     super();
+  }
+
+  async suggestField<T extends ModelCore, U = T>(
+    cls: Class<T>, field: ValidStringFields<T>, query: string, limit: number = 10
+  ): Promise<U[]> {
+    return this.query(cls, {
+      limit,
+      where: {
+        [field]: new RegExp(`\\b${query}`, 'i')
+      } as any
+    });
   }
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
