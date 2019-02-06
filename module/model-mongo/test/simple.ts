@@ -117,4 +117,29 @@ class TestSave extends BaseMongoTest {
 
     assert(z.name === 'roger');
   }
+
+  @Test('Verify autocomplete')
+  async testAutocomplete() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    const names = ['Bob', 'Bo', 'Barry', 'Rob', 'Robert', 'Robbie'];
+    const res = await service.bulkProcess(Person,
+      [0, 1, 2, 3, 4, 5].map(x => ({
+        upsert: Person.from({
+          name: names[x],
+          age: 20 + x,
+          gender: 'm',
+          address: {
+            street1: 'a',
+            ...(x === 1 ? { street2: 'b' } : {})
+          }
+        })
+      }))
+    );
+
+    let suggested = await service.suggestField(Person, 'name', 'bo');
+    assert(suggested.length === 2);
+
+    suggested = await service.suggestField(Person, 'name', 'b');
+    assert(suggested.length === 3);
+  }
 }

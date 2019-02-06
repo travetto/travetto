@@ -6,7 +6,8 @@ import {
   ModelRegistry, ModelCore,
   PageableModelQuery,
   SelectClause,
-  ModelQuery, WhereClause
+  ModelQuery, WhereClause,
+  ValidStringFields
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Util, Env, AppError } from '@travetto/base';
@@ -238,11 +239,8 @@ export class ModelElasticsearchSource extends ModelSource {
     return res;
   }
 
-  async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
-    const req = this.getSearchObject(cls, query);
-    const results = await this.client.search<U>(req);
-
-    const out: U[] = [];
+  safeLoad<T>(req: es.SearchParams, results: es.SearchResponse<T>): T[] {
+    const out: T[] = [];
 
     // determine if id
     const select = [req._sourceInclude as string[] || [], req._sourceExclude as string[] || []];
@@ -257,6 +255,37 @@ export class ModelElasticsearchSource extends ModelSource {
     }
 
     return out;
+  }
+
+  async suggestField<T extends ModelCore, U = T>(
+    cls: Class<T>, field: ValidStringFields<T>, query: string, limit: number = 10
+  ): Promise<U[]> {
+    const spec = SchemaRegistry.getViewSchema(cls).schema[field as any].specifier;
+    const text = spec && spec.startsWith('text');
+
+    if (!text) {
+      console.warn(`${cls.__id}.${field} is not registered as @Text, reverting to keyword search`);
+    }
+
+    const search = this.getSearchObject(cls, {});
+    search.body = {
+      query: {
+        match_phrase_prefix: {
+          [text ? `${field}.text` : field]: {
+            query
+          }
+        }
+      }
+    };
+    search.size = limit;
+    const res = await this.client.search<U>(search);
+    return this.safeLoad<U>(search, res);
+  }
+
+  async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
+    const req = this.getSearchObject(cls, query);
+    const results = await this.client.search<U>(req);
+    return this.safeLoad<U>(req, results);
   }
 
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {

@@ -8,7 +8,7 @@ import { ModelOptions } from '../types';
 import { Query, ModelQuery, PageableModelQuery, PageableModelQueryStringQuery } from '../model/query';
 import { ModelCore } from '../model/core';
 import { BulkOp, BulkResponse } from '../model/bulk';
-import { ModelSource, IModelSource } from './source';
+import { ModelSource, IModelSource, ValidStringFields } from './source';
 import { ModelRegistry } from '../registry';
 import { QueryLanguageParser } from '../query-lang/parser';
 import { ValidationErrors } from '../error';
@@ -77,6 +77,13 @@ export class ModelService implements IModelSource {
       o.postLoad();
     }
     return o;
+  }
+
+  async suggestField<T extends ModelCore, U = T>(
+    cls: Class<T>, field: ValidStringFields<T>, query: string, limit?: number
+  ): Promise<U[]> {
+    const res = await this.source.suggestField(cls, field, query, limit);
+    return res.map(o => this.postLoad(cls, o as any as T) as any as U);
   }
 
   /** Executes a raw query against the model space */
