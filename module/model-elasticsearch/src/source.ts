@@ -257,42 +257,6 @@ export class ModelElasticsearchSource extends ModelSource {
     return out;
   }
 
-  async suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
-  ): Promise<U[]> {
-    const spec = SchemaRegistry.getViewSchema(cls).schema[field as any].specifier;
-    const text = spec && spec.startsWith('text');
-
-    if (!text) {
-      console.warn(`${cls.__id}.${field} is not registered as @Text, reverting to keyword search`);
-    }
-
-    if (!filter) {
-      filter = {};
-    }
-
-    filter.limit = filter.limit || 10;
-
-    const search = this.getSearchObject(cls, filter || {});
-    search.body = {
-      query: {
-        bool: {
-          filter: search.body.query ? search.body.query : {},
-          must: {
-            match_phrase_prefix: {
-              [text ? `${field}.text` : field]: {
-                query
-              }
-            }
-          }
-        }
-      }
-    };
-
-    const res = await this.client.search<U>(search);
-    return this.safeLoad<U>(search, res);
-  }
-
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const req = this.getSearchObject(cls, query);
     const results = await this.client.search<U>(req);
@@ -351,6 +315,14 @@ export class ModelElasticsearchSource extends ModelSource {
     await this.init();
   }
 
+  async suggestField<T extends ModelCore, U = T>(
+    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
+  ): Promise<U[]> {
+    const search = this.buildRawMultiSuggestQuery([cls], field, query, filter);
+    const res = await this.client.search<U>(search);
+    return this.safeLoad<U>(search, res);
+  }
+
   async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>) {
     const res = await this.client.search<ModelCore>(this.getSearchObject(cls, {
       select: {
@@ -382,7 +354,7 @@ export class ModelElasticsearchSource extends ModelSource {
     return out;
   }
 
-  getRawModelFilters<T extends ModelCore = ModelCore>(classes: Class<T>[]) {
+  buildRawModelFilters<T extends ModelCore = ModelCore>(classes: Class<T>[]) {
     const types = classes.map(t => {
       const conf = ModelRegistry.get(t);
       let idx = this.getIdentity(conf.class).index;
@@ -409,19 +381,50 @@ export class ModelElasticsearchSource extends ModelSource {
     };
   }
 
-  async getRawMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query: Query<T>) {
-    const searchObj = this.getPlainSearchObject(classes[0], query);
+  buildRawMultiSuggestQuery<T extends ModelCore = ModelCore>(
+    classes: Class<T>[], field: ValidStringFields<T>, query: string,
+    filter?: PageableModelQuery<T>
+  ) {
+    const spec = SchemaRegistry.getViewSchema(classes[0]).schema[field as any].specifier;
+    const text = spec && spec.startsWith('text');
 
-    searchObj.body.query = searchObj.body!.query ?
-      {
-        bool: {
-          must: [searchObj.body.query],
-          filter: [this.getRawModelFilters(classes)]
+    if (!text) {
+      console.warn(`${classes[0].__id}.${field} is not registered as @Text, reverting to keyword search`);
+    }
+
+    const res = this.buildRawMultiQuery(classes, filter, {
+      match_phrase_prefix: {
+        [text ? `${field}.text` : field]: {
+          query
         }
-      } :
-      this.getRawModelFilters(classes);
+      }
+    });
 
+    res.size = filter && filter.limit || 10;
+
+    return res;
+  }
+
+  buildRawMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query?: Query<T>, raw?: any) {
+    const searchObj = this.getPlainSearchObject(classes[0], query || {});
+    searchObj.body = {
+      query: {
+        bool: {
+          must: [
+            searchObj.body.query || { match_all: {} },
+            ...(raw ? [raw] : [])
+          ],
+          filter: this.buildRawModelFilters(classes)
+        }
+      }
+    };
+    return searchObj;
+  }
+
+  async getRawMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query: Query<T>) {
+    const searchObj = this.buildRawMultiQuery(classes, query);
     return await this.client.search<T>(searchObj);
+
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {
