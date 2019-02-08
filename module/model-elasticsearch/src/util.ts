@@ -62,7 +62,7 @@ export class ElasticsearchUtil {
       const declaredSchema = schema[key];
       const declaredType = declaredSchema.type;
       const sPath = declaredType === String ?
-        (key === 'id' ? `${path}_${key}` : `${path}${key}`) :
+        ((key === 'id' && !path) ? `${path}_${key}` : `${path}${key}`) :
         `${path}${key}`;
 
       if (Util.isPlainObject(top)) {
@@ -159,7 +159,7 @@ export class ElasticsearchUtil {
       } else {
         items.push({
           [Array.isArray(top) ? 'terms' : 'term']: {
-            [key === 'id' ? `${path}_${key}` : `${path}${key}`]: top
+            [(key === 'id' && !path) ? `${path}_${key}` : `${path}${key}`]: top
           }
         });
       }
