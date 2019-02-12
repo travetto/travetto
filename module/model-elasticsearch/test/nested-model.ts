@@ -2,10 +2,11 @@ import * as assert from 'assert';
 
 import { Model, ModelService, ModelSource, ModelCore } from '@travetto/model';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { SchemaRegistry, Schema, Text } from '@travetto/schema';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
+
 import { ModelElasticsearchSource } from '../src/source';
 import { ModelElasticsearchConfig } from '../src/config';
-import { SchemaRegistry, Schema, Text } from '@travetto/schema';
 
 class TestConfig {
   @InjectableFactory()

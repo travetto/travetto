@@ -6,9 +6,14 @@ function client(url: string) {
 }
 
 function check(url: string) {
-  return new Promise(resolve => {
-    client(url).get(url, (msg: http.IncomingMessage) =>
-      msg.on('end', () => resolve((msg.statusCode || 200))));
+  return new Promise((resolve) => {
+    try {
+      const req = client(url).get(url, (msg: http.IncomingMessage) =>
+        msg.on('end', () => resolve((msg.statusCode || 200))));
+      req.on('error', () => resolve(500));
+    } catch (e) {
+      resolve(400);
+    }
   });
 }
 
@@ -38,7 +43,7 @@ export const init = {
 
       const port = 50000 + Math.trunc(Math.random() * 10000);
       process.env.MODEL_ELASTICSEARCH_PORT = `${port}`;
-      const container = new DockerContainer('elasticsearch:latest')
+      const container = new DockerContainer('elasticsearch:6.5.4')
         .forceDestroyOnShutdown()
         .exposePort(port, 9200)
         .addEnvVar('discovery.type', 'single-node');

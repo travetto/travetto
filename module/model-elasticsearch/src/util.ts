@@ -190,7 +190,7 @@ export class ElasticsearchUtil {
   }
 
   static generateAllSourceSchema(cls: Class) {
-    const allTypes = Array.from(new Set(SchemaRegistry.subTypes.get(cls)!.values()));
+    const allTypes = ModelRegistry.getClassesByBaseType(cls);
     return allTypes.reduce((acc, scls) => {
       Util.deepAssign(acc, this.generateSingleSourceSchema(scls));
       return acc;
