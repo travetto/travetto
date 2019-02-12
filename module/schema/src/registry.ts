@@ -21,10 +21,12 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   resolveSubType(cls: Class, type: Class | string) {
-    return (this.subTypes.has(cls) && type && (this.subTypes.get(cls)!.get(typeof type === 'string' ? type : type.__id)!)) || cls;
+    const typeId = type && (typeof type === 'string' ? type : type.__id);
+    const hasId = this.subTypes.has(cls) && type;
+    return (hasId && this.subTypes.get(cls)!.get(typeId!)!) || cls;
   }
 
-  getDefaultSubTypeName(cls: Class) {
+  getSubTypeName(cls: Class) {
     return cls.name
       .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
       .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
@@ -166,7 +168,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
       }
     }
 
-    this.registerSubTypes(cls, this.getDefaultSubTypeName(cls));
+    this.registerSubTypes(cls, this.getSubTypeName(cls));
 
     // Merge pending, back on top, to allow child to have higher precedence
     const pending = this.getOrCreatePending(cls);
@@ -191,6 +193,13 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   onUninstall<T>(cls: Class<T>, e: ChangeEvent<Class>) {
     super.onUninstall(cls, e);
     if (e.type === 'removing' && this.hasExpired(cls)) {
+      // Recompute subtypes
+      this.subTypes.clear();
+      for (const el of this.entries.keys()) {
+        const clz = this.entries.get(el)!.class;
+        this.registerSubTypes(clz, this.getSubTypeName(clz));
+      }
+
       SchemaChangeListener.clearSchemaDependency(cls);
     }
   }

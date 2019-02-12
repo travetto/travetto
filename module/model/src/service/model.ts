@@ -61,9 +61,14 @@ export class ModelService implements IModelSource {
     if (o.prePersist) {
       o.prePersist();
     }
+
+    if (!(o instanceof cls)) {
+      throw new Error(`Expected object of type ${cls.name}, but received ${o.constructor.name}`);
+    }
+
     let res = await SchemaValidator.validate(o, view);
-    res = await this.source.prePersist(cls, res);
-    return res as T;
+    res = await this.source.prePersist(cls, res) as T;
+    return res;
   }
 
   /** Handles any pre-retrieval activities needed */

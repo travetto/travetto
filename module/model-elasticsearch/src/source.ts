@@ -59,7 +59,8 @@ export class ModelElasticsearchSource extends ModelSource {
 
       if (clsList.length > 1) {
         cls = clsList.find(c => !!ModelRegistry.get(c).baseType)!;
-        cls = SchemaRegistry.resolveSubType(cls, type);
+        cls = ModelRegistry.getClassesByBaseType(cls)
+          .find(x => ModelRegistry.get(x).subType === type)!;
       } else {
         [cls] = clsList;
       }

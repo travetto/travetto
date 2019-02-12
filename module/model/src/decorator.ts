@@ -6,12 +6,15 @@ import { ModelOptions, IndexConfig } from './types';
 
 export function Model(conf: Partial<ModelOptions<any>> = {}) {
   return function <T extends Class>(target: T) {
+    // Force registry first, and update with extra information after computing
+    ModelRegistry.register(target, conf);
+
     const baseModel = ModelRegistry.getBaseModel(target);
     if (baseModel !== target) { // Subtyping if base isn't self
       if (conf.subType) {
         SchemaRegistry.registerSubTypes(target, conf.subType);
       } else {
-        conf.subType = SchemaRegistry.getDefaultSubTypeName(target);
+        conf.subType = SchemaRegistry.getSubTypeName(target);
       }
       conf.collection = ModelRegistry.getBaseCollection(target);
     }
