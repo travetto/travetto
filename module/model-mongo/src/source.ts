@@ -222,7 +222,7 @@ export class ModelMongoSource extends ModelSource {
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
     const res = await this.getAllByQuery(cls, { limit: 200, ...query });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
-      throw new AppError(`Invalid number of results for find by id: ${res ? res.length : res}`);
+      throw new AppError(`Invalid number of results for find by id: ${res ? res.length : res}`, 'missing');
     }
     return res[0] as T;
   }
@@ -279,7 +279,7 @@ export class ModelMongoSource extends ModelSource {
     const conf = ModelRegistry.get(cls);
     const res = await col.replaceOne({ _id: id, ...(conf.subType ? { type: conf.subType } : {}) }, o);
     if (res.matchedCount === 0) {
-      throw new AppError(`Invalid update, no ${cls.name} found with id '${id}'`);
+      throw new AppError(`Invalid update, no ${cls.name} found with id '${id}'`, 'missing');
     }
     return this.getById(cls, id.toHexString());
   }
@@ -299,7 +299,7 @@ export class ModelMongoSource extends ModelSource {
 
     const res = await col.findOneAndUpdate(extractTypedWhereClause(cls, query.where || {}), final, { returnOriginal: false });
     if (!res.value) {
-      throw new AppError('Object not found for updating');
+      throw new AppError('Object not found for updating', 'missing');
     }
 
     const ret: T = res.value as T;

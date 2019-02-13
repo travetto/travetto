@@ -60,7 +60,7 @@ export class $ResourceManager {
       } catch { }
     }
 
-    throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`);
+    throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`, 'missing');
   }
 
   findSync(pth: string) {
@@ -78,7 +78,7 @@ export class $ResourceManager {
       } catch { }
     }
 
-    throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`);
+    throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`, 'missing');
   }
 
   async read(pth: string, encoding?: string) {

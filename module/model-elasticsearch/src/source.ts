@@ -442,7 +442,7 @@ export class ModelElasticsearchSource extends ModelSource {
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
     const res = await this.getAllByQuery(cls, { limit: 2, ...query });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
-      throw new AppError(`Invalid number of results for find by id: ${res ? res.length : res}`);
+      throw new AppError(`Invalid number of results for find by id: ${res ? res.length : res}`, 'data');
     }
     return res[0] as T;
   }
@@ -452,7 +452,7 @@ export class ModelElasticsearchSource extends ModelSource {
       const res = await this.getByQuery(cls, { where: { id } } as any as ModelQuery<T>);
       return res;
     } catch (err) {
-      throw new AppError(`Invalid number of results for find by id: 0`);
+      throw new AppError(`Invalid number of results for find by id: 0`, 'missing');
     }
   }
 
@@ -462,7 +462,7 @@ export class ModelElasticsearchSource extends ModelSource {
       try {
         await this.getById(cls, id);
       } catch (e) {
-        throw new AppError(`Invalid delete, no ${cls.name} found with id '${id}'`);
+        throw new AppError(`Invalid delete, no ${cls.name} found with id '${id}'`, 'missing');
       }
     }
 
@@ -517,7 +517,7 @@ export class ModelElasticsearchSource extends ModelSource {
       try {
         await this.getById(cls, id);
       } catch (e) {
-        throw new AppError(`Invalid update, no ${cls.name} found with id '${id}'`);
+        throw new AppError(`Invalid update, no ${cls.name} found with id '${id}'`, 'missing');
       }
 
     }

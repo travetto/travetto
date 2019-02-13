@@ -103,6 +103,19 @@ export const init = {
 }
 ```
 
+## Common Application Error Class
+While the framework is 100% compatible with standard `Error` instances, there are cases in which additional functionality is desired.  Within the framework we use `AppError` (or its derivatives) to represent framework errors.  This class is available for use in your own projects.  Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) module and HTTP status codes).  
+
+The `AppError` takes in a message, and an optional payload and/or error classification.  The currently supported error classifications are:
+* `general` - General purpose errors
+* `system`  - Synonym for `general`
+* `data` - Data format, content, etc are incorrect.  Generally correlated to bad input.
+* `permission` - Operation failed due to lack of permissions
+* `auth` - Operation failed due to lack of authentication
+* `missing` - Resource was not found when requested
+* `timeout` - Operation did not finish in a timely manner
+* `unavailable` - Resource was unresponsive
+
 ## Shutdown
 Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown.  Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers.  The code overrides `process.exit` to properly handle `SIGKILL` and `SIGINT`, with a default threshold of 3 seconds.  In the advent of a `SIGTERM` signal, the code exits immediately without any cleanup.
 

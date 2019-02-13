@@ -59,7 +59,7 @@ class TestPolymorphism extends BaseElasticsearchTest {
     assert(o[0] instanceof Doctor);
     await assert.rejects(async () => {
       return service.update(Engineer, Doctor.from({ ...o[0] }) as any);
-    }, 'Invalid update');
+    }, 'Expected object of type Engineer');
 
     await assert.rejects(async () => {
       return service.getById(Engineer, o[0].id!);
