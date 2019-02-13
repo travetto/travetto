@@ -5,6 +5,7 @@ import { FsUtil } from './fs-util';
 import { Env } from './env';
 import { AppError } from './error';
 import { ScanFs } from './scan-fs';
+import { Readable } from 'stream';
 
 const fsStat = util.promisify(fs.stat);
 const fsReadFile = util.promisify(fs.readFile);
@@ -35,6 +36,16 @@ export class $ResourceManager {
 
   addPath(searchPath: string, full = false) {
     this.paths.push(full ? FsUtil.resolveUnix(Env.cwd, searchPath) : FsUtil.resolveUnix(Env.cwd, searchPath, this.folder));
+  }
+
+  async getAbsolutePath(rel: string) {
+    await this.find(rel);
+    return this._cache[rel];
+  }
+
+  getAbsolutePathSync(rel: string) {
+    this.findSync(rel);
+    return this._cache[rel];
   }
 
   getPaths() {
@@ -93,7 +104,8 @@ export class $ResourceManager {
 
   async readToStream(pth: string) {
     pth = await this.find(pth);
-    return fsCreateReadStream(pth, undefined);
+    const res = await fsCreateReadStream(pth, undefined);
+    return res as Readable;
   }
 
   async findAllByExtension(ext: string, base: string = '') {
