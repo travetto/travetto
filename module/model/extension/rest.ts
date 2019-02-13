@@ -1,18 +1,10 @@
-import { ControllerRegistry, Request, Response } from '@travetto/rest';
+import { ControllerRegistry, Request } from '@travetto/rest';
 import { getSchemaBody } from '@travetto/schema/extension/rest';
 import { Class } from '@travetto/registry';
 
 import { ModelService, ModelCore } from '../';
-import { ValidationErrors } from '../src/error';
 
 type Svc = { source: ModelService };
-
-// tslint:disable:no-invalid-this
-(ValidationErrors as Class).prototype.render = function (res: Response) {
-  res.status(403);
-  res.json(this.toJSON({ status: 403 }));
-};
-// tslint:enable:no-invalid-this
 
 export function ModelController<T extends ModelCore>(path: string, cls: Class<T>) {
   return (target: Class<Svc>) => {

@@ -1,15 +1,8 @@
-import { ControllerRegistry, RestError, ParamConfig, Filter, EndpointDecorator, Response, Request } from '@travetto/rest';
+import { ControllerRegistry, RestError, ParamConfig, Filter, EndpointDecorator, Request } from '@travetto/rest';
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
-import { SchemaRegistry, BindUtil, SchemaValidator, ValidationErrors } from '..';
-
-// tslint:disable:no-invalid-this
-(ValidationErrors as Class).prototype.render = function (res: Response) {
-  res.status(403);
-  res.json(this.toJSON({ status: 403 }));
-};
-// tslint:enable:no-invalid-this
+import { SchemaRegistry, BindUtil, SchemaValidator } from '..';
 
 function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
