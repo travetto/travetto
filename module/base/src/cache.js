@@ -6,7 +6,7 @@ function isOlder(cacheStat, fullStat) {
   return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
 }
 
-class Cache {
+class FileCache {
   constructor(cwd, cacheDir) {
     this.cwd = FsUtil.toUnix(cwd || FsUtil.cwd);
     this.cacheDir = FsUtil.toUnix(cacheDir || FsUtil.cacheDir);
@@ -74,7 +74,7 @@ class Cache {
   }
 }
 
-class $AppCache extends Cache {
+class $AppCache extends FileCache {
   constructor(cwd, cacheDir) {
     super(cwd, cacheDir);
   }
@@ -104,6 +104,6 @@ class $AppCache extends Cache {
   }
 }
 
-exports.Cache = Cache;
+exports.FileCache = FileCache;
 
 exports.AppCache = new $AppCache(FsUtil.cwd, FsUtil.cacheDir);
