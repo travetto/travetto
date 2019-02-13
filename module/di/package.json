@@ -11,12 +11,12 @@
     "travetto-find-apps": "bin/travetto-find-apps.js"
   },
   "dependencies": {
-    "@travetto/config": "^0.5.6",
-    "@travetto/registry": "^0.5.6"
+    "@travetto/config": "^0.5.7",
+    "@travetto/registry": "^0.5.7"
   },
   "description": "Dependency registration/management and injection support.",
   "devDependencies": {
-    "@travetto/test": "^0.5.10"
+    "@travetto/test": "^0.5.11"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -40,5 +40,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.5.18"
+  "version": "0.5.19"
 }
