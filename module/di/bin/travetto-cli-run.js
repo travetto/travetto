@@ -56,8 +56,12 @@ function processApplicationParam(config, param) {
   }
   let out = param;
   switch (config.type) {
-    case 'number': out = param.includes('.') ? parseFloat(param) : parseInt(param, 10); break;
-    case 'boolean': out = /^(true|1|yes|on)$/i.test(param); break;
+    case 'number':
+      out = param.includes('.') ? parseFloat(param) : parseInt(param, 10);
+      break;
+    case 'boolean':
+      out = /^(true|1|yes|on)$/i.test(param);
+      break;
   }
   return out;
 }
@@ -72,7 +76,7 @@ async function runApp(args) {
       const appParams = app.params || [];
       sub = sub.map((x, i) => appParams[i] === undefined ? x : processApplicationParam(appParams[i], x));
       if (sub.length < appParams.filter(x => x.def === undefined).length) {
-        throw new Error('Invalid parameter');
+        throw new Error(`Invalid parameter: ${JSON.stringify(appParams,null,2)}`);
       }
     }
 
@@ -93,6 +97,7 @@ async function runApp(args) {
     await require(registryPath).DependencyRegistry.runApplication(name, sub);
   } catch (err) {
     if (err.message === 'Invalid parameter') {
+      console.error(err);
       // @ts-ignore
       console.error('usage:', app.name, app.params.map(x =>
         `${x.name}${x.def ? `=[${x.def}]` : ''} (${(x.meta && x.meta.choices) ?
@@ -109,7 +114,7 @@ async function runApp(args) {
 if (require.main === module) {
   runApp(process.argv.slice(2)); //If loaded directly as main entry, run, idx 2 is where non-node arguments start at
 } else {
-  module.exports = function () {
+  module.exports = function() {
     let listHelper;
 
     // @ts-ignore
@@ -137,12 +142,11 @@ if (require.main === module) {
         cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
 
         cmd.profile = [
-          ...(cmd.profile || []),
-          ...(process.env.PROFILE || '').split(/,/g)
-        ]
+            ...(cmd.profile || []),
+            ...(process.env.PROFILE || '').split(/,/g)
+          ]
           .filter(x => !!x)
           .map(x => x.trim());
-
 
         process.env.ENV = cmd.env; //Preemptively set b/c env changes how we compile some things
 

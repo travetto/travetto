@@ -1,4 +1,4 @@
-/// <reference types="typescript/lib/typescriptServices" />
+import * as ts from 'typescript';
 
 import { ScanApp, Util } from '@travetto/base';
 
