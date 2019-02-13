@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@travetto/auth": "^0.5.11",
-    "@travetto/model": "^0.5.13"
+    "@travetto/model": "^0.5.14"
   },
   "description": "Model-based authentication and registration support for the travetto framework",
   "devDependencies": {
@@ -35,5 +35,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.5.13"
+  "version": "0.5.14"
 }
