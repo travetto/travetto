@@ -67,7 +67,7 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   }
 
   getClassesByBaseType(base: Class) {
-    return this.getAllClassesByBaseType().get(base)!;
+    return this.getAllClassesByBaseType().get(base)! || [];
   }
 
   getBaseCollection(cls: Class) {

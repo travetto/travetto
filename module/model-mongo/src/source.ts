@@ -16,7 +16,7 @@ import { AppError, Util } from '@travetto/base';
 import { BindUtil } from '@travetto/schema';
 
 import { ModelMongoConfig } from './config';
-import { PropWhereClause, _WhereClause } from '../../model/src/model/where-clause';
+import { _WhereClause } from '../../model/src/model/where-clause';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
