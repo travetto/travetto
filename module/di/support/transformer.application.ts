@@ -43,7 +43,8 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       if (runMethod && ts.isMethodDeclaration(runMethod)) {
         const outParams = runMethod.parameters.map(p => {
           const name = p.name.getText();
-          const def = p.initializer && ts.isLiteralExpression(p.initializer) ? p.initializer.text : undefined;
+          const hasDefault = !!p.initializer || !!p.questionToken;
+          const def = p.initializer ? TransformUtil.toLiteral(p.initializer) : undefined;
           const typeNode = p.type || p.initializer;
 
           let type;
@@ -71,7 +72,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
             type = 'string';
           }
 
-          return { name, def, type, subtype, meta };
+          return { name, type, subtype, meta, optional: hasDefault, def };
         });
 
         const declArgs = [...foundDec.expression.arguments];

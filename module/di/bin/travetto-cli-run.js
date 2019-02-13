@@ -11,17 +11,57 @@ async function getAppList() {
   }
 }
 
+function getParamType(config) {
+  return (config.meta && config.meta.choices) ? config.meta.choices.join('|') : config.type;
+}
+
+const COLORS = {
+  blue: `\x1b[94m`,
+  yellow: `\x1b[93m`,
+  green: `\x1b[92m`,
+  gray: `\x1b[37m\x1b[2m`,
+  red: `\x1b[31m`,
+  cyan: `\x1b[96m`,
+  magenta: `\x1b[95m`,
+  white: `\x1b[97m\x1b[1m`,
+  reset: `\x1b[0m`
+};
+
+function colorize(text, color) {
+  if (process.stdout.isTTY) {
+    const code = COLORS[color];
+    text = `${code}${text}${COLORS.reset}`;
+  }
+  return text;
+}
+
+function getAppUsage(app) {
+  let usage = app.name;
+
+  if (app.params) {
+    usage = `${colorize(usage,'white')} ${app.params.map(x => {
+      const type = colorize(getParamType(x), 'green');
+      const nm = colorize(x.name, 'blue');
+      const def = x.def !== undefined ? colorize(x.def, 'yellow') : undefined;
+
+      return x.optional ? (
+        x.def !== undefined ? 
+        `[${nm}:${type}=${def}]` : 
+        `[${nm}:${type}]`
+        ) : nm;
+    }).join(' ')}`
+  }
+
+  return usage;
+}
+
 function generateAppHelpList(apps, cmd) {
   const choices = [];
   for (const conf of apps) {
     let lines = [];
-    let usage = conf.name;
 
-    if (conf.params) {
-      usage = `${usage} ${conf.params.map(x => {
-        return x.def ? `(${x.name}=${x.def})` : `[${x.name}]`;
-      }).join(' ')}`
-    }
+    const root = conf.appRoot ? `[${colorize(conf.appRoot, 'gray')}] ` : '';
+    const usage = getAppUsage(conf);
 
     const features = [];
     let featureStr = '';
@@ -32,13 +72,13 @@ function generateAppHelpList(apps, cmd) {
       featureStr = ` | ${features.join(' ')}`;
     }
 
-    lines.push(`${conf.appRoot ? `[${conf.appRoot}] ` : ''}${conf.name}${featureStr}`);
+    lines.push(`${root}${colorize(conf.name, 'white')}${featureStr}`);
     if (conf.description) {
-      lines.push(`desc:  ${conf.description || ''}`);
+      lines.push(`desc:  ${colorize(conf.description || '', 'red')}`);
     }
     lines.push(`usage: ${usage}`);
 
-    const len = lines.reduce((acc, v) => Math.max(acc, v.length), 0);
+    const len = lines.reduce((acc, v) => Math.max(acc, v.replace(/\x1b\[\d+m/g, '').length), 0);
     lines.splice(1, 0, '-'.repeat(len));
 
     choices.push(lines.join('\n       '));
@@ -52,7 +92,7 @@ function processApplicationParam(config, param) {
     (config.type === 'number' && !/^[-]?[0-9]*[.]?[0-9]*$/.test(param)) ||
     (config.meta && config.meta.choices && !config.meta.choices.find(c => `${c}` === param))
   ) {
-    throw new Error(`Invalid parameter`);
+    throw new Error(`Invalid parameter ${colorize(config.name, 'blue')}: Received ${colorize('yellow', param)} expected ${colorize(getParamType(config), 'green')}`);
   }
   let out = param;
   switch (config.type) {
@@ -75,8 +115,9 @@ async function runApp(args) {
     if (app) {
       const appParams = app.params || [];
       sub = sub.map((x, i) => appParams[i] === undefined ? x : processApplicationParam(appParams[i], x));
-      if (sub.length < appParams.filter(x => x.def === undefined).length) {
-        throw new Error(`Invalid parameter: ${JSON.stringify(appParams,null,2)}`);
+      const reqdCount = appParams.filter(x => !x.optional).length;
+      if (sub.length < reqdCount) {
+        throw new Error(`Invalid parameter count: received ${colorize(sub.length, 'yellow')} but needed ${colorize(reqdCount, 'yellow')}}`);
       }
     }
 
@@ -96,13 +137,10 @@ async function runApp(args) {
 
     await require(registryPath).DependencyRegistry.runApplication(name, sub);
   } catch (err) {
-    if (err.message === 'Invalid parameter') {
-      console.error(err);
-      // @ts-ignore
-      console.error('usage:', app.name, app.params.map(x =>
-        `${x.name}${x.def ? `=[${x.def}]` : ''} (${(x.meta && x.meta.choices) ?
-          x.meta.choices.join('|') :
-          x.type})`.trim()).join(', '))
+    if (err.message.startsWith('Invalid parameter')) {
+      console.error(err.message);
+      console.error();
+      console.error(`Usage: ${getAppUsage(app)}`);
     } else {
       console.error(err && err.stack ? err.stack : err);
     }
@@ -133,7 +171,7 @@ if (require.main === module) {
         console.log();
       })
       .allowUnknownOption()
-      .option('-e, --env [env]', 'Application environment (dev||prod), defaults to dev', /^(dev|prod)$/i)
+      .option('-e, --env [env]', 'Application environment (dev|prod), defaults to dev', /^(dev|prod)$/i)
       .option('-a, --app [app]', 'Application root, defaults to associated root by name')
       .option('-w, --watch [watch]', 'Run the application in watch mode, defaults to auto', /^(1|0|yes|no|on|off|auto|true|false)$/i)
       .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])

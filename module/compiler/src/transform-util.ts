@@ -111,6 +111,13 @@ export class TransformUtil {
     return val;
   }
 
+  static toLiteral(val: ts.Expression): any {
+    if (val) {
+      return JSON.parse(val.getFullText());
+    }
+    throw new Error('Not a valid input, should be a literal expression');
+  }
+
   static extendObjectLiteral(addTo: object, lit?: ts.ObjectLiteralExpression) {
     lit = lit || this.fromLiteral({});
     const props = lit.properties;

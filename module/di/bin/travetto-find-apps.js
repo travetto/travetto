@@ -6,6 +6,8 @@ const util = require('util');
 const config = module.exports.CACHE_FILE = 'di-app-cache.json';
 const pcwd = process.cwd().replace(/[\\\/]+/g, '/');
 
+const og = console.log;
+
 function maxTime(stat) {
   return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
 }
@@ -18,14 +20,13 @@ const fsLstat = util.promisify(fs.lstat);
  */
 function getApp(filename) {
   const [, root] = filename.split(pcwd);
-  const [, first,] = root.split('/');
+  const [, first, ] = root.split('/');
   return first === 'src' ? '' : first;
 }
 
 async function getApps() {
   // Suppress all output
-  const og = console.log;
-  console.warn = console.debug = console.log = function () { };
+  console.warn = console.debug = console.log = function() {};
 
   const { Env } = require('@travetto/base/src/env');
 
@@ -71,8 +72,7 @@ async function getApps() {
     return a.appRoot === b.appRoot ? a.name.localeCompare(b.name) : (a.appRoot === '' ? -1 : 1);
   });
 
-
-  og.call(console, JSON.stringify(resolved));
+  return resolved;
 }
 
 function fork(cmd, args) {
@@ -129,8 +129,12 @@ module.exports.getCachedAppList = async function getCachedAppList() {
 
 //@ts-ignore
 if (require.main === module) {
-  getApps().catch(err => {
-    console.error(err);
-    process.exit(1);
-  });
+  getApps()
+    .then(resolved => {
+      og.call(console, JSON.stringify(resolved));
+    })
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
 }
