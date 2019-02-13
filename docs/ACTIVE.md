@@ -5,10 +5,9 @@ Tests
 --------------
 - [?] Better unit tests
 
-Model Elasticsearch
------------------------
-- [ ] Regex as strings wrt to binding and schema validation
-- [ ] Schema config for text field arrays
+Auth
+--------------------------
+- [ ] Move to JWT as session store, prep for Lambda
 
 Tooling
 -----------------------
@@ -34,7 +33,3 @@ Model Enhancements
   - [ ] Might need to be a whole new set of sql operations
   - [x] Using Sequelize?
   - [x] Already supports most of the needed features, might be an easy win  
-
-Auth
---------------------------
-- [ ] Move to JWT as session store, prep for Lambda

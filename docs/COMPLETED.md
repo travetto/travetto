@@ -7,6 +7,11 @@ Base
 - [X] Remove dependency on dev/test
 - [X] Unify path usage, default to URI model and convert to local path when needed, look into upath
 
+Model Elasticsearch
+-----------------------
+- [X] Regex as strings wrt to binding and schema validation
+- [X] Schema config for text field arrays
+
 Exec
 -----------------------
 - [X] Modify spawn to take in command and args, not full string
