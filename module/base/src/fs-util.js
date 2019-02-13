@@ -21,11 +21,11 @@ const subName = pkgName.split('/').pop();
 
 const cacheDir =
   process.env.TRV_CACHE_DIR ?
-    (process.env.TRV_CACHE_DIR === 'PID' ?
-      `${defCache}_${process.pid}` :
-      process.env.TRV_CACHE_DIR
-    ) :
-    defCache;
+  (process.env.TRV_CACHE_DIR === 'PID' ?
+    `${defCache}_${process.pid}` :
+    process.env.TRV_CACHE_DIR
+  ) :
+  defCache;
 
 const FsUtil = {
   cacheDir,
@@ -52,6 +52,14 @@ const FsUtil = {
   toNative,
   toUnix,
   joinUnix,
+  prepareTranspile: (fileName) => {
+    let fileContents = fs.readFileSync(fileName, 'utf-8').toString();
+
+    // Drop typescript import, and use global. Great speedup;
+    fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript';?/g, '');
+
+    return `${fileContents};\nexport const _$TRV = 1;`;
+  },
   resolveFrameworkFile: (pth) => {
     if (pth.includes('@travetto')) {
       pth = FsUtil.toUnix(pth).replace(/.*\/@travetto\/([^/]+)\/([^@]+)$/g, (all, name, rest) => {

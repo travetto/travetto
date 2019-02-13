@@ -9,4 +9,5 @@ export declare class FsUtil {
   static resolveNative(base: string, ...rest: string[]): string;
   static joinUnix(base: string, ...rest: string[]): string;
   static resolveFrameworkFile(pth: string): string;
+  static prepareTranspile(fileName: string): string;
 }

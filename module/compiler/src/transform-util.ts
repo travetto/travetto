@@ -1,5 +1,4 @@
-/// <reference types="typescript/lib/typescriptServices" />
-
+import * as ts from 'typescript';
 import { dirname, } from 'path';
 
 import { AppInfo, Env, FsUtil } from '@travetto/base';

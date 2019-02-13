@@ -1,5 +1,4 @@
-/// <reference types="typescript/lib/typescriptServices" />
-
+import * as ts from 'typescript';
 import { Env } from '@travetto/base';
 
 export class CompilerUtil {

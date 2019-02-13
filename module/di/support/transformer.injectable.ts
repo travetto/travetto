@@ -1,3 +1,5 @@
+import * as ts from 'typescript';
+
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 import { ConfigLoader } from '@travetto/config';
 

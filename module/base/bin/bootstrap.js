@@ -77,7 +77,7 @@ require.extensions['.ts'] = function load(m, tsf) {
       const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
       opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
     }
-    content = ts.transpile(`${fs.readFileSync(tsf, 'utf-8')};\nexport const _$TRV = 1;`, opts);
+    content = ts.transpile(FsUtil.prepareTranspile(tsf), opts);
     AppCache.writeEntry(name, content);
   } else {
     content = AppCache.readEntry(name);
