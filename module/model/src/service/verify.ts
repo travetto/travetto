@@ -1,12 +1,11 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry } from '@travetto/schema';
+import { SchemaRegistry, ValidationErrors, ValidationError } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Util } from '@travetto/base';
 
 import { ModelQuery, Query, PageableModelQuery } from '../model/query';
 
 import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from '../util/types';
-import { ValidationErrors } from '../error';
 
 interface State extends ErrorCollector<string> {
   path: string;
@@ -235,12 +234,12 @@ export class QueryVerifierService {
   }
 
   verify<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>) {
-    const errors: { message: string, path: string }[] = [];
+    const errors: ValidationError[] = [];
 
     const state = {
       path: '',
       collect(path: string, message: string) {
-        errors.push({ message: `${path}: ${message}`, path });
+        errors.push({ message: `${path}: ${message}`, path, kind: 'model' });
       },
       log(err: string) {
         this.collect(this.path, err);

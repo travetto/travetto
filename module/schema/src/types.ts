@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { ValidationError } from './service/validator';
+import { ValidationError } from './service/error';
 
 export const ALL_VIEW = '__all';
 

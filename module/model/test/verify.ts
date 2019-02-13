@@ -2,14 +2,13 @@ import * as assert from 'assert';
 
 import { Class } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Schema, SchemaRegistry } from '@travetto/schema';
+import { ValidationErrors, Schema, SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 
 import { QueryVerifierService } from '../src/service/verify';
 import { RetainFields } from '../src/model/where-clause';
 import { Model, ModelQuery, ModelCore, BaseModel } from '../';
 import { Query } from '../src/model/query';
-import { ValidationErrors } from '../src/error';
 import { QueryLanguageParser } from '../src/query-lang/parser';
 
 @Schema()

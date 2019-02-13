@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
+import { AppError } from '@travetto/base';
 
-import { RestError } from '../error';
 import { ControllerRegistry } from '../registry';
 import { Request, ParamConfig, EndpointConfig, Filter, EndpointDecorator } from '../types';
 
@@ -10,12 +10,12 @@ export function parseParam(type: Class | undefined, name: string, param: any) {
     case Date:
       typedParam = Date.parse(param);
       if (Number.isNaN(typedParam)) {
-        throw new RestError(`Incorrect field type for ${name}, ${param} is not a Date`, 400);
+        throw new AppError(`Incorrect field type for ${name}, ${param} is not a Date`, 'data');
       }
       break;
     case Boolean:
       if (!/^(0|1|true|false|yes|no)$/i.test(param)) {
-        throw new RestError(`Incorrect field type for ${name}, ${param} is not a boolean value`, 400);
+        throw new AppError(`Incorrect field type for ${name}, ${param} is not a boolean value`, 'data');
       }
       typedParam = param === 'true' || param === '1' || param === 'yes';
       break;
@@ -26,7 +26,7 @@ export function parseParam(type: Class | undefined, name: string, param: any) {
         typedParam = parseInt(param, 10);
       }
       if (Number.isNaN(typedParam)) {
-        throw new RestError(`Incorrect field type for ${name}, ${param} is not a number`, 400);
+        throw new AppError(`Incorrect field type for ${name}, ${param} is not a number`, 'data');
       }
       break;
     case String:
@@ -42,7 +42,7 @@ async function paramHandler(config: EndpointConfig, req: Request) {
     const param = req[finalLoc][name];
 
     if (required && !param) {
-      throw new RestError(`Missing field: ${name}`, 400);
+      throw new AppError(`Missing field: ${name}`, 'data');
     } else if (param) {
       (req as any)[finalLoc][name] = parseParam(type, name, param);
     }

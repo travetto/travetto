@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry } from '@travetto/schema';
+import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry, ValidationErrors } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Env, Util, AppError } from '@travetto/base';
 
@@ -11,7 +11,6 @@ import { BulkOp, BulkResponse } from '../model/bulk';
 import { ModelSource, IModelSource, ValidStringFields } from './source';
 import { ModelRegistry } from '../registry';
 import { QueryLanguageParser } from '../query-lang/parser';
-import { ValidationErrors } from '../error';
 
 function getClass<T>(o: T) {
   return o.constructor as Class<T>;
