@@ -37,6 +37,7 @@ export interface ApplicationParameter {
   subtype?: string;
   meta?: any;
   def?: string;
+  optional?: boolean;
 }
 
 export interface ApplicationConfig<T = any> {

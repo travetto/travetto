@@ -17,7 +17,7 @@ export class SampleApp {
     private config: RestConfig
   ) { }
 
-  run(port = 3000, ssl = false) {
+  run(port = 3000, ssl = false, fast?: string, toggle?: 'on' | 'off') {
     this.config.port = port;
     this.config.ssl = ssl;
     this.app.run();
