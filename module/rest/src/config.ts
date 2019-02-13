@@ -17,7 +17,7 @@ export class RestConfig {
   async getKeys() {
     if (!this.keys) {
       if (Env.prod) {
-        throw new AppError('Cannot use test keys in production');
+        throw new AppError('Cannot use test keys in production', 'permissions');
       }
       return SSLUtil.generateKeyPair();
     } else {

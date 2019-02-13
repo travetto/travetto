@@ -57,7 +57,7 @@ export class SourceManager {
       console.error(`Unable to import ${fileName}, stubbing out`);
       this.set(fileName, CompilerUtil.EMPTY_MODULE);
     } else {
-      throw new AppError(msg);
+      throw new AppError(msg, 'unavailable');
     }
   }
 

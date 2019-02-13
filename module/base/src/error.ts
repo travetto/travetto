@@ -14,22 +14,23 @@ const ERROR_TYPES = new Set([
 export class AppError<T = any> extends Error {
   name: string;
   payload: T | undefined;
-  classification: ErrorType = 'general';
+  errorType: ErrorType = 'general';
 
   constructor(message: string, payload: T, errorType: ErrorType);
   constructor(message: string, errorType: ErrorType);
   constructor(message: string, payload: T);
+  constructor(message: string);
   constructor(
     public message: string,
     payload?: T | ErrorType,
-    classification?: ErrorType
+    errorType?: ErrorType
   ) {
     super(message);
-    if (typeof classification === 'string') {
-      this.classification = classification;
+    if (typeof errorType === 'string') {
+      this.errorType = errorType;
     }
     if (typeof payload === 'string' && ERROR_TYPES.has(payload)) {
-      this.classification = payload as ErrorType;
+      this.errorType = payload as ErrorType;
     } else {
       this.payload = payload as T;
     }
