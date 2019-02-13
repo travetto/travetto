@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as sourcemap from 'source-map-support';
 
 import { Env, AppError } from '@travetto/base';
-import { Cache } from '@travetto/base/src/cache';
+import { FileCache } from '@travetto/base/src/cache';
 
 import { CompilerUtil } from './util';
 
@@ -14,12 +14,12 @@ export class SourceManager {
   private sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   private contents = new Map<string, string>();
   private hashes = new Map<string, number>();
-  private cache: Cache;
+  private cache: FileCache;
   private compilerOptions: ts.CompilerOptions;
 
   constructor(private cwd: string, private config: { cache?: boolean }) {
     Object.assign(config, { ... { cache: true }, config });
-    this.cache = new Cache(this.cwd);
+    this.cache = new FileCache(this.cwd);
   }
 
   registerSourceMaps() {

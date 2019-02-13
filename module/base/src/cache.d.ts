@@ -1,6 +1,6 @@
 import { Stats } from "fs";
 
-export declare class Cache {
+export declare class FileCache {
   constructor(cwd: string, cacheDir?: string)
   init(): void;
   writeEntry(full: string, contents: string): void;
@@ -14,4 +14,4 @@ export declare class Cache {
   clear(): void;
 }
 
-export const AppCache: Cache & { cacheDir: string };
+export const AppCache: FileCache & { cacheDir: string };

@@ -1,6 +1,6 @@
 import { PhaseManager, Shutdown, Env, FsUtil } from '@travetto/base';
 import { ExecUtil, ArrayExecutionSource } from '@travetto/exec';
-import { Cache } from '@travetto/base/src/cache';
+import { FileCache } from '@travetto/base/src/cache';
 
 import { TestExecutor } from './executor';
 import { Consumer } from '../consumer/types';
@@ -31,7 +31,7 @@ export class Runner {
   constructor(private state: State) {
     if (!process.send) { // Remove if not child
       Shutdown.onShutdown(`Remove-Root-Tempdir`, // Remove when done, this is for single interaction
-        () => new Cache(Env.cwd).clear(), true);
+        () => new FileCache(Env.cwd).clear(), true);
     }
   }
 

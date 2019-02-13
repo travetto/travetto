@@ -1,6 +1,6 @@
 import * as os from 'os';
 
-import { Cache } from '@travetto/base/src/cache';
+import { FileCache } from '@travetto/base/src/cache';
 import { ExecutionPool, IdleManager, LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
 import { PhaseManager, Env, Shutdown, FsUtil } from '@travetto/base';
 
@@ -46,7 +46,7 @@ export const Events = {
 
 export async function server() {
 
-  Shutdown.onShutdown(`Remove-Tempdir`, () => new Cache(Env.cwd).clear(), true);
+  Shutdown.onShutdown(`Remove-Tempdir`, () => new FileCache(Env.cwd).clear(), true);
 
   let Compiler: any;
 
