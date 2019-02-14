@@ -65,11 +65,21 @@ class FileCache {
   }
 
   fromEntryName(cached) {
-    return FsUtil.joinUnix(this.cwd, cached.replace(this.cacheDir, '').replace(/~/g, '/')).replace(/[.]js$/g, '.ts');
+    return FsUtil.joinUnix(this.cwd, cached
+        .replace(this.cacheDir, '')
+        .replace(/~/g, '/')
+      )
+      .replace(/[.]js$/g, '.ts');
   }
 
   toEntryName(full) {
-    const out = FsUtil.joinUnix(this.cacheDir, FsUtil.toUnix(full).replace(this.cwd, '').replace(/^[\/]+/, '').replace(/[\/]+/g, '~')).replace(/[.]ts$/g, '.js');
+    const out = FsUtil.joinUnix(this.cacheDir,
+        FsUtil.toUnix(full)
+        .replace(this.cwd, '')
+        .replace(/^[\/]+/, '')
+        .replace(/[\/]+/g, '~')
+      )
+      .replace(/[.]ts$/g, '.js');
     return out;
   }
 }
