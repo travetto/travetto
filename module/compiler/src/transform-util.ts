@@ -111,11 +111,38 @@ export class TransformUtil {
     return val;
   }
 
-  static toLiteral(val: ts.Expression): any {
-    if (val) {
-      return JSON.parse(val.getFullText());
+  static toLiteral(val: ts.Node): any {
+    if (!val) {
+      throw new Error('Val is not defined');
+    } else if (ts.isArrayLiteralExpression(val)) {
+      return val.elements.map(x => this.toLiteral(x));
+    } else if (ts.isIdentifier(val) && val.getText() === 'undefined') {
+      return undefined;
+    } else if (val.kind === ts.SyntaxKind.NullKeyword) {
+      return null;
+    } else if (ts.isStringLiteral(val)) {
+      return val.getText().substring(1, val.getText().length - 1);
+    } else if (ts.isNumericLiteral(val)) {
+      const txt = val.getText();
+      if (txt.includes('.')) {
+        return parseFloat(txt);
+      } else {
+        return parseInt(txt, 10);
+      }
+    } else if (val.kind === ts.SyntaxKind.FalseKeyword) {
+      return false;
+    } else if (val.kind === ts.SyntaxKind.TrueKeyword) {
+      return true;
+    } else if (ts.isObjectLiteralExpression(val)) {
+      const out: { [key: string]: any } = {};
+      for (const pair of val.properties) {
+        if (ts.isPropertyAssignment(pair)) {
+          out[pair.name.getText()] = this.toLiteral(pair.initializer);
+        }
+      }
+      return out;
     }
-    throw new Error('Not a valid input, should be a literal expression');
+    throw new Error('Not a valid input, should be a valid ts.Node');
   }
 
   static extendObjectLiteral(addTo: object, lit?: ts.ObjectLiteralExpression) {
