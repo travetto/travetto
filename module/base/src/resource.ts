@@ -9,7 +9,6 @@ import { Readable } from 'stream';
 
 const fsStat = util.promisify(fs.stat);
 const fsReadFile = util.promisify(fs.readFile);
-const fsCreateReadStream = util.promisify(fs.createReadStream);
 
 export class $ResourceManager {
   private _cache: { [key: string]: string } = {};
@@ -102,9 +101,9 @@ export class $ResourceManager {
     return fs.readFileSync(pth, encoding);
   }
 
-  async readToStream(pth: string) {
+  async readToStream(pth: string, options: Parameters<typeof fs.createReadStream>[1]) {
     pth = await this.find(pth);
-    const res = await fsCreateReadStream(pth, undefined);
+    const res = fs.createReadStream(pth, options);
     return res as Readable;
   }
 
