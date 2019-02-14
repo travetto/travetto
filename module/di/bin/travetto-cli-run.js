@@ -44,9 +44,11 @@ function getAppUsage(app) {
       const nm = colorize(x.name, 'blue');
       const def = x.def !== undefined ? colorize(x.def, 'yellow') : undefined;
 
-      return (x.optional &&  x.def !== undefined) ? 
+      return x.optional ?  
+      (x.def !== undefined ?
         `[${nm}:${type}=${def}]` : 
-        `[${nm}:${type}]`;
+        `[${nm}:${type}]`
+      ) : `${nm}:${type}`;
     }).join(' ')}`
   }
 
@@ -115,7 +117,7 @@ async function runApp(args) {
       sub = sub.map((x, i) => appParams[i] === undefined ? x : processApplicationParam(appParams[i], x));
       const reqdCount = appParams.filter(x => !x.optional).length;
       if (sub.length < reqdCount) {
-        throw new Error(`Invalid parameter count: received ${colorize(sub.length, 'yellow')} but needed ${colorize(reqdCount, 'yellow')}}`);
+        throw new Error(`Invalid parameter count: received ${colorize(sub.length, 'yellow')} but needed ${colorize(reqdCount, 'yellow')}`);
       }
     }
 
