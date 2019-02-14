@@ -1,6 +1,6 @@
-import { ControllerRegistry, RestError, ParamConfig, Filter, EndpointDecorator, Request } from '@travetto/rest';
+import { ControllerRegistry, RestError, ParamConfig, Filter, EndpointDecorator, Request, ControllerConfig } from '@travetto/rest';
 import { Util } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, ChangeEvent } from '@travetto/registry';
 
 import { SchemaRegistry, BindUtil, SchemaValidator } from '..';
 
@@ -67,10 +67,16 @@ export function SchemaBody<T>(cls: Class<T>, view?: string) {
 export function SchemaQuery<T>(cls: Class<T>, view?: string) {
 
   return function (target: any, prop: string | symbol, descriptor: TypedPropertyDescriptor<Filter>) {
-    const params = schemaToParams(cls, view);
+    // Need to wait on schema finalization
+    SchemaRegistry.on(function work(ev) {
+      if (ev.type === 'added' && ev.curr!.name === cls.name) {
+        SchemaRegistry['events'].off('change', work); // Unregister
+        const params = schemaToParams(cls, view);
+        ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { params });
+      }
+    });
 
     ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, {
-      params: { ...params },
       filters: [
         async (req: Request) => {
           const o = getBound(cls, BindUtil.expandPaths(req.query), view);
