@@ -1,9 +1,16 @@
 //@ts-check
 const path = require('path');
-const { getCachedAppList } = require('./travetto-find-apps');
+let colorize;
+
+try {
+  colorize = require('@travetto/cli/src/util').Util.colorize;
+} catch (e) {
+  colorize = v => v;
+}
 
 async function getAppList() {
   try {
+    const { getCachedAppList } = require('./travetto-find-apps');
     return await getCachedAppList();
   } catch (err) {
     console.error(err && err.stack ? err.stack : err);
@@ -13,26 +20,6 @@ async function getAppList() {
 
 function getParamType(config) {
   return (config.meta && config.meta.choices) ? config.meta.choices.join('|') : config.type;
-}
-
-const COLORS = {
-  blue: `\x1b[94m`,
-  yellow: `\x1b[93m`,
-  green: `\x1b[92m`,
-  gray: `\x1b[37m\x1b[2m`,
-  red: `\x1b[31m`,
-  cyan: `\x1b[96m`,
-  magenta: `\x1b[95m`,
-  white: `\x1b[97m\x1b[1m`,
-  reset: `\x1b[0m`
-};
-
-function colorize(text, color) {
-  if (process.stdout.isTTY) {
-    const code = COLORS[color];
-    text = `${code}${text}${COLORS.reset}`;
-  }
-  return text;
 }
 
 function getAppUsage(app) {
@@ -148,62 +135,62 @@ async function runApp(args) {
   }
 }
 
-//@ts-ignore
-if (require.main === module) {
-  runApp(process.argv.slice(2)); //If loaded directly as main entry, run, idx 2 is where non-node arguments start at
-} else {
-  module.exports = function() {
-    let listHelper;
+function init() {
+  let listHelper;
 
-    // @ts-ignore
-    const { Util: { program } } = require('@travetto/cli/src/util');
+  const { Util: { program } } = require('@travetto/cli/src/util');
 
-    program
-      .command('run [application] [args...]')
-      .on('--help', () => {
-        console.log('\n  Available Applications:');
-        if (listHelper) {
-          console.log();
-          console.log(listHelper());
-        } else {
-          console.log('\n  No applications defined, use @Application to registry entry points');
-        }
+  program
+    .command('run [application] [args...]')
+    .on('--help', () => {
+      console.log('\n  Available Applications:');
+      if (listHelper) {
         console.log();
-      })
-      .allowUnknownOption()
-      .option('-e, --env [env]', 'Application environment (dev|prod), defaults to dev', /^(dev|prod)$/i)
-      .option('-a, --app [app]', 'Application root, defaults to associated root by name')
-      .option('-w, --watch [watch]', 'Run the application in watch mode, defaults to auto', /^(1|0|yes|no|on|off|auto|true|false)$/i)
-      .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
-      .action(async (app, args, cmd) => {
-        cmd.env = cmd.env || process.env.ENV || process.env.env || undefined;
-        cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
+        console.log(listHelper());
+      } else {
+        console.log(`\n  No applications defined, use ${colorize('@Application', 'yellow')} to registry entry points`);
+      }
+      console.log();
+    })
+    .allowUnknownOption()
+    .option('-e, --env [env]', 'Application environment (dev|prod), defaults to dev', /^(dev|prod)$/i)
+    .option('-a, --app [app]', 'Application root, defaults to associated root by name')
+    .option('-w, --watch [watch]', 'Run the application in watch mode, defaults to auto', /^(1|0|yes|no|on|off|auto|true|false)$/i)
+    .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
+    .action(async (app, args, cmd) => {
+      cmd.env = cmd.env || process.env.ENV || process.env.env || undefined;
+      cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
 
-        cmd.profile = [
-            ...(cmd.profile || []),
-            ...(process.env.PROFILE || '').split(/,/g)
-          ]
-          .filter(x => !!x)
-          .map(x => x.trim());
+      cmd.profile = [
+          ...(cmd.profile || []),
+          ...(process.env.PROFILE || '').split(/,/g)
+        ]
+        .filter(x => !!x)
+        .map(x => x.trim());
 
-        process.env.ENV = cmd.env; //Preemptively set b/c env changes how we compile some things
+      process.env.ENV = cmd.env; //Preemptively set b/c env changes how we compile some things
 
-        const apps = await getAppList();
-        const selected = apps.find(x => x.name === app);
+      const apps = await getAppList();
+      const selected = apps.find(x => x.name === app);
 
-        if (!selected) {
-          if (apps.length) {
-            listHelper = generateAppHelpList.bind(null, apps, cmd);
-          }
-          cmd.help();
+      if (!selected) {
+        if (apps.length) {
+          listHelper = generateAppHelpList.bind(null, apps, cmd);
         }
+        cmd.help();
+      }
 
-        if (cmd.app) process.env.APP_ROOT = cmd.app;
-        if (cmd.env) process.env.ENV = cmd.env;
-        if (cmd.profile) process.env.PROFILE = cmd.profile.join(',');
-        if (cmd.watch) process.env.WATCH = `${cmd.watch}`;
+      if (cmd.app) process.env.APP_ROOT = cmd.app;
+      if (cmd.env) process.env.ENV = cmd.env;
+      if (cmd.profile) process.env.PROFILE = cmd.profile.join(',');
+      if (cmd.watch) process.env.WATCH = `${cmd.watch}`;
 
-        runApp([app, ...args]);
-      });
-  };
+      runApp([app, ...args]);
+    });
 }
+
+if (!process.env.TRV_CLI) {
+  runApp(process.argv.slice(2)); //If loaded directly as main entry, run, idx 2 is where non-node arguments start at
+}
+
+module.exports = { init };

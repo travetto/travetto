@@ -17,11 +17,11 @@ let defCache = joinUnix(os.tmpdir(), cwd.replace(/[\/:]/g, '_'));
 
 const cacheDir =
   process.env.TRV_CACHE_DIR ?
-    (process.env.TRV_CACHE_DIR === 'PID' ?
-      `${defCache}_${process.pid}` :
-      process.env.TRV_CACHE_DIR
-    ) :
-    defCache;
+  (process.env.TRV_CACHE_DIR === 'PID' ?
+    `${defCache}_${process.pid}` :
+    process.env.TRV_CACHE_DIR
+  ) :
+  defCache;
 
 const FsUtil = {
   cwd,
@@ -90,7 +90,7 @@ const FsUtil = {
         } else if (!test || test(subPth)) {
           list.push(FsUtil.toUnix(subPth));
         }
-      } catch (e) { }
+      } catch (e) {}
     }
     return list;
   },

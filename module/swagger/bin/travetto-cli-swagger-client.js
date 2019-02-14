@@ -1,8 +1,7 @@
 //@ts-check
-// @ts-ignore
 const { Util: { program } } = require('@travetto/cli/src/util');
 
-module.exports = function () {
+function init() {
   program
     .command('swagger-client')
     .option('-o, --output [output]', 'Output folder', './api-client')
@@ -23,4 +22,6 @@ module.exports = function () {
           .then(x => x.generate());
       });
     });
-};
+}
+
+module.exports = { init };
