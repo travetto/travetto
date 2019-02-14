@@ -44,11 +44,9 @@ function getAppUsage(app) {
       const nm = colorize(x.name, 'blue');
       const def = x.def !== undefined ? colorize(x.def, 'yellow') : undefined;
 
-      return x.optional ? (
-        x.def !== undefined ? 
+      return (x.optional &&  x.def !== undefined) ? 
         `[${nm}:${type}=${def}]` : 
-        `[${nm}:${type}]`
-        ) : nm;
+        `[${nm}:${type}]`;
     }).join(' ')}`
   }
 
