@@ -36,10 +36,10 @@ function lernaSetup() {
 
   try {
     fs.unlinkSync(`${ROOT}/package-lock.json`);
-  } catch (e) { }
+  } catch (e) {}
 }
 
-const resolveDeps = (function () {
+const resolveDeps = (function() {
   const PEER_DEPS = `${process.argv[2]}`.trim() !== '';
   const DEP_CACHE = {};
   const CORE_SCOPE = new Set(['dependencies', 'devDependencies']);
@@ -93,12 +93,13 @@ const resolveDeps = (function () {
   return resolve;
 })();
 
-const lernaModuleFinalize = (function () {
+const lernaModuleFinalize = (function() {
   const MOD_ROOT = `${ROOT}/module`;
   const MOD_TPL_ROOT = `${ROOT}/module-template`;
   const NM_ROOT = `${ROOT}/node_modules`;
   const COMMON_LIBS = ['typescript', 'tslib'];
   const COMMON_BIN_SCRIPTS = [
+    ['cli', 'travetto-cli'],
     ['test', 'travetto-cli-test'],
     ['base', 'travetto-cli-clean'],
     ['di', 'travetto-cli-run'],
@@ -144,7 +145,7 @@ const lernaModuleFinalize = (function () {
     }
 
     // Link framework dependent modules
-    for (const dep of new Set([...deps.regular, ...(resolveDeps('test', base).regular)])) {
+    for (const dep of new Set([...deps.regular, ...(resolveDeps('test', base).regular), '@travetto/cli'])) {
       const sub = dep.split('@travetto/')[1];
       if (fs.existsSync(`${MOD_ROOT}/${sub}`)) {
         makeLink(`${MOD_ROOT}/${sub}`, `${NM_MOD}/${dep}`);
@@ -163,7 +164,7 @@ const lernaModuleFinalize = (function () {
         if (fs.existsSync(`${NM_MOD}/@travetto/${smod}`) || mod === smod) {
           makeLink(`${MOD_ROOT}/${smod}/bin/${script}.js`, `${NM_MOD}/.bin/${script}`);
         }
-      } catch (e) { }
+      } catch (e) {}
     }
 
     // Link travetto cli
