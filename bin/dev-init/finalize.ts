@@ -14,7 +14,9 @@ export class Finalize {
     ['di', 'travetto-cli-run'],
     ['email-template', 'travetto-cli-email-template'],
     ['compiler', 'travetto-cli-compile'],
-    ['rest-aws-lambda', 'travetto-cli-aws-lambda'],
+    ['rest-aws-lambda', 'travetto-cli-rest-aws-lambda_deploy'],
+    ['rest-aws-lambda', 'travetto-cli-rest-aws-lambda_build-zip'],
+    ['rest-aws-lambda', 'travetto-cli-rest-aws-lambda_build-sam'],
     ['swagger', 'travetto-cli-swagger-client']
   ];
 

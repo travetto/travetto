@@ -8,6 +8,7 @@ commander
 const fs = require('fs');
 
 const { FsUtil } = require('./fs-util');
+const { Util } = require('./util');
 
 const PREFIX = 'travetto-cli';
 
@@ -17,7 +18,7 @@ const Execute = {
     if (!p.startsWith(FsUtil.cwd)) {
       p = `${FsUtil.cwd}/node_modules/@travetto/${p.split('travetto/module/')[1]}`;
     }
-    require(p).init();
+    return require(p).init();
   },
   loadAllPlugins() {
     const BIN_DIR = `${FsUtil.cwd}/node_modules/.bin`;
@@ -30,26 +31,27 @@ const Execute = {
   },
   loadSinglePlugin(cmd) {
     try {
-      this.requireModule(`${PREFIX}-${cmd.replace(/:.*$/, '')}`);
+      return this.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
     } catch (e) {
       console.error('Unknown command', cmd);
-      this.showHelp(1);
+      Util.showHelp(commander, 1);
     }
-  },
-  showHelp(code = 0) {
-    this.loadAllPlugins();
-    commander.help();
-    process.exit(code);
   },
   run(args) {
     const cmd = args[2];
+    const hasCmd = cmd && !cmd.startsWith('-');
+    const wantsHelp = args.includes('-h') || args.includes('--help');
 
-    if (!cmd) {
-      this.showHelp();
-    } else if (!cmd.startsWith('-')) {
-      this.loadSinglePlugin(cmd);
+    if (hasCmd) {
+      const prog = this.loadSinglePlugin(cmd);
+      if (wantsHelp) {
+        Util.showHelp(prog);
+      }
     } else {
       this.loadAllPlugins();
+      if (!cmd || wantsHelp) {
+        Util.showHelp(commander);
+      }
     }
 
     commander.parse(args);

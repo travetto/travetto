@@ -22,9 +22,9 @@ async function runTests(opts, args) {
 }
 
 function init() {
-  const { Util: { program } } = require('@travetto/cli/src/util');
+  const { Util } = require('@travetto/cli/src/util');
 
-  program.command('test')
+  return Util.program.command('test')
     .arguments('[regexes...]')
     .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec|event)$/, 'tap')
     .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', undefined, os.cpus().length - 1)
