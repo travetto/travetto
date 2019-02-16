@@ -1,9 +1,13 @@
 //@ts-check
 
 const path = require('path');
+const fs = require('fs');
+const readFile = f => fs.readFileSync(f, 'utf-8');
+const writeFile = (f, c) => fs.writeFileSync(f, c, 'utf-8');
 
-const { FsUtil } = require('@travetto/cli/src/fs-util');
 const { Util: { program, dependOn } } = require('@travetto/cli/src/util');
+const { FsUtil } = require('@travetto/base/src/bootstrap/fs-util');
+const { ScanFs } = require('@travetto/base/src/bootstrap/scan-fs');
 
 function init() {
   const cp = require('child_process');
@@ -25,36 +29,38 @@ function init() {
 
       FsUtil.mkdirp(path.dirname(cmd.output));
 
-      FsUtil.remove(cmd.workspace);
-      FsUtil.remove(cmd.output);
+      FsUtil.unlinkRecursiveSync(cmd.workspace);
+      FsUtil.unlinkRecursiveSync(cmd.output);
       FsUtil.mkdirp(cmd.workspace);
 
       exec(`cp -r * ${cmd.workspace}`, { cwd: FsUtil.cwd });
 
-      FsUtil.writeFile(`${cmd.workspace}/index.js`,
+      writeFile(`${cmd.workspace}/index.js`,
         'process.env.TRV_CACHE_DIR = `${__dirname}/cache`;\n' +
-        FsUtil.readFile(`${__dirname}/../resources/lambda.js`));
+        readFile(`${__dirname}/../resources/lambda.js`));
 
       await dependOn('compile', ['-o', './cache', '-r', '/var/task'], cmd.workspace);
 
       // Removing baggage
-      FsUtil.remove(`${cmd.workspace}/node_modules/typescript`);
-      FsUtil.remove(`${cmd.workspace}/node_modules/@types`);
-      FsUtil.remove(`${cmd.workspace}/node_modules/bson/browser_build`);
-      FsUtil.remove(`${cmd.workspace}/.git`);
+      FsUtil.unlinkRecursiveSync(`${cmd.workspace}/node_modules/typescript`);
+      FsUtil.unlinkRecursiveSync(`${cmd.workspace}/node_modules/@types`);
+      FsUtil.unlinkRecursiveSync(`${cmd.workspace}/node_modules/bson/browser_build`);
+      FsUtil.unlinkRecursiveSync(`${cmd.workspace}/.git`);
 
-      FsUtil.remove(`${cmd.workspace}/node_modules/source-map-support/browser-source-map-support.js`);
-      FsUtil.remove(`${cmd.workspace}/package-lock.json`);
+      FsUtil.unlinkRecursiveSync(`${cmd.workspace}/node_modules/source-map-support/browser-source-map-support.js`);
+      FsUtil.unlinkRecursiveSync(`${cmd.workspace}/package-lock.json`);
 
       // Stub out ts
       FsUtil.mkdirp(`${cmd.workspace}/node_modules/typescript`);
-      FsUtil.writeFile(`${cmd.workspace}/node_modules/typescript/index.js`,
+      writeFile(`${cmd.workspace}/node_modules/typescript/index.js`,
         'module.exports = {};');
 
       // Invert
       for (const p of ['test', 'dist']) {
-        for (const f of FsUtil.find(cmd.workspace, x => x.endsWith(`/${p}`), true)) {
-          FsUtil.remove(f);
+        for (const f of ScanFs.scanDirSync({ testFile: x => false }, cmd.workspace)) {
+          if (f.file.endsWith(`/${p}`)) {
+            FsUtil.unlinkRecursiveSync(f.file);
+          }
         }
       }
 
@@ -63,13 +69,15 @@ function init() {
           'apis/5.0.js', 'apis/5.1.js', 'apis/5.2.js',
           'apis/5.3.js', 'apis/5.4.js'
         ]) {
-        for (const f of FsUtil.find(`${cmd.workspace}/node_modules`, x => x.endsWith(p))) {
-          FsUtil.remove(f);
+        for (const f of ScanFs.scanDirSync({ testFile: x => false, testDir: x => true }, `${cmd.workspace}/node_modules`)) {
+          if (f.file.endsWith(p)) {
+            FsUtil.unlinkRecursiveSync(f.file);
+          }
         }
       }
 
       try {
-        FsUtil.move(
+        fs.renameSync(
           `${cmd.workspace}/node_modules/lodash/lodash.min.js`,
           `${cmd.workspace}/node_modules/lodash/lodash.js`
         );
@@ -101,7 +109,7 @@ function init() {
       const { template } = require(FsUtil.resolveUnix(__dirname, '../resources/template.yml.js'));
       const sam = template(controllers, FsUtil.resolveUnix(__dirname, '../resources'));
 
-      FsUtil.writeFile(cmd.output, sam);
+      writeFile(cmd.output, sam);
     });
 
   program.command('rest-lambda:deploy')

@@ -1,11 +1,12 @@
 import * as fs from 'fs';
 import * as util from 'util';
-
-import { FsUtil } from './fs-util';
-import { Env } from './env';
-import { AppError } from './error';
-import { ScanFs } from './scan-fs';
 import { Readable } from 'stream';
+
+import { FsUtil } from './bootstrap/fs-util';
+import { Env } from './bootstrap/env';
+import { ScanFs } from './bootstrap/scan-fs';
+
+import { AppError } from './error';
 
 const fsStat = util.promisify(fs.stat);
 const fsReadFile = util.promisify(fs.readFile);

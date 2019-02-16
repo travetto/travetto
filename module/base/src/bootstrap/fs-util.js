@@ -40,7 +40,7 @@ const FsUtil = {
       }
     }
   },
-  unlinkDirSync(pth) {
+  unlinkRecursiveSync(pth) {
     if (process.platform === 'win32') {
       execSync(`rmdir /Q /S ${FsUtil.toNative(pth)}`);
     } else {

@@ -1,6 +1,5 @@
-import { PhaseManager, Shutdown, Env, FsUtil } from '@travetto/base';
+import { FileCache, PhaseManager, Shutdown, Env, FsUtil } from '@travetto/base';
 import { ExecUtil, ArrayExecutionSource } from '@travetto/exec';
-import { FileCache } from '@travetto/base/src/cache';
 
 import { TestExecutor } from './executor';
 import { Consumer } from '../consumer/types';
