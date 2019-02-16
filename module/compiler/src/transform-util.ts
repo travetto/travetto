@@ -203,7 +203,7 @@ export class TransformUtil {
               .replace(/^\.\//, `${dirname(state.path)}/`));
 
             if (process.env.TRV_FRAMEWORK_DEV) {
-              path = FsUtil.resolveFrameworkFile(path);
+              path = FsUtil.resolveFrameworkDevFile(path);
             }
 
             if (stmt.importClause) {

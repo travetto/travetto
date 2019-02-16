@@ -24,7 +24,7 @@ export class ScanApp {
 
       if (process.env.TRV_FRAMEWORK_DEV) {
         this.cache[key] = this.cache[key].map(x => {
-          x.file = FsUtil.resolveFrameworkFile(x.file);
+          x.file = FsUtil.resolveFrameworkDevFile(x.file);
           x.module = FsUtil.toUnix(x.file).replace(`${Env.cwd}/`, '');
           return x;
         });

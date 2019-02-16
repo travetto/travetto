@@ -1,3 +1,3 @@
-const { Util } = require('./util');
+const { Execute } = require('./execute');
 
-module.exports = Util.execute.bind(Util);
+module.exports = Execute.run.bind(Execute);

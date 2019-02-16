@@ -8,7 +8,7 @@ export declare class FsUtil {
   static resolveUnix(base: string, ...rest: string[]): string;
   static resolveNative(base: string, ...rest: string[]): string;
   static joinUnix(base: string, ...rest: string[]): string;
-  static resolveFrameworkFile(pth: string): string;
+  static resolveFrameworkDevFile(pth: string): string;
   static prepareTranspile(fileName: string): string;
   static tempDir(pre: string): void;
 }
