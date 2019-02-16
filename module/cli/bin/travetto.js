@@ -19,7 +19,11 @@ if (__dirname.includes('travetto/module/') && !process.env.NODE_PRESERVE_SYMLINK
     cwd: process.cwd(),
     stdio: [0, 1, 2],
     shell: true,
-    env: { ...process.env, NODE_PRESERVE_SYMLINKS: '1' }
+    env: { // Handle symlinks, and denote we are in framework dev mode
+      ...process.env,
+      NODE_PRESERVE_SYMLINKS: '1',
+      TRV_FRAMEWORK_DEV: process.platform,
+    }
   });
   process.exit(res.status);
 }

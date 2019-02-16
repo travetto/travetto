@@ -3,7 +3,7 @@ const commander = require('commander');
 const fs = require('fs');
 const child_process = require('child_process');
 
-const { FsUtil } = require('../src/fs-util');
+const { FsUtil } = require('./fs-util');
 
 const PREFIX = 'travetto-cli';
 

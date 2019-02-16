@@ -2,9 +2,10 @@ export const init = {
   key: 'log',
   after: 'base',
   before: 'config',
-  action: () => {
-    const Logger = require('../src/service').Logger;
+  action: async () => {
+    const { Logger } = await import('../src/service');
     Logger._init();
-    require('@travetto/base/src/env').Env.error = (...args: any[]) => Logger.log('error', ...args);
+    const { Env } = await import('@travetto/base');
+    Env.error = (msg: string, ...args: any[]) => Logger.log('error', msg, ...args);
   }
 };
