@@ -40,7 +40,7 @@ const FsUtil = {
       }
     }
   },
-  unlinkDirSync(pth) {
+  unlinkRecursiveSync(pth) {
     if (process.platform === 'win32') {
       execSync(`rmdir /Q /S ${FsUtil.toNative(pth)}`);
     } else {
@@ -60,7 +60,7 @@ const FsUtil = {
 
     return `${fileContents};\nexport const _$TRV = 1;`;
   },
-  resolveFrameworkFile: (pth) => {
+  resolveFrameworkDevFile: (pth) => {
     if (pth.includes('@travetto')) {
       pth = FsUtil.toUnix(pth).replace(/.*\/@travetto\/([^/]+)\/([^@]+)$/g, (all, name, rest) => {
         const mid = subName === name ? '' : `node_modules/@travetto/${name}/`;

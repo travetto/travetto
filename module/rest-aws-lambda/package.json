@@ -7,22 +7,24 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-aws-lambda": "bin/travetto-cli-rest-aws-lambda.js"
+    "travetto-cli-rest-aws-lambda_deploy": "bin/travetto-cli-rest-aws-lambda_deploy.js",
+    "travetto-cli-rest-aws-lambda_build-zip": "bin/travetto-cli-rest-aws-lambda_build-zip.js",
+    "travetto-cli-rest-aws-lambda_build-sam": "bin/travetto-cli-rest-aws-lambda_build-sam.js"
   },
   "dependencies": {
     "@travetto/rest": "^0.5.12",
     "@types/aws-lambda": "^8.10.11",
     "@types/aws-serverless-express": "^3.0.1",
     "@types/body-parser": "^1.17.0",
-    "@types/compression": "0.0.36",
+    "@types/compression": "^0.0.36",
     "@types/cookie-parser": "^1.4.1",
     "@types/express": "^4.16.0",
-    "@types/express-session": "^1.15.10",
+    "@types/express-session": "^1.15.11",
     "aws-serverless-express": "^3.3.5",
     "body-parser": "^1.18.3",
     "compression": "^1.7.3",
     "cookie-parser": "^1.4.3",
-    "express": "^4.16.3",
+    "express": "^4.16.4",
     "express-session": "^1.15.6"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
-const { FsUtil } = reqiure('@travetto/base/src/file');
-process.env.FINAL_CWD = FsUtil.toUnix(process.cwd());
+const { FsUtil } = require('@travetto/base/src/bootstrap/fs-util');
+process.env.INIT_CWD = FsUtil.toUnix(process.cwd());
 process.chdir(FsUtil.resolveUnix(__dirname, '..'));
 
 process.env.DEBUG = '0';

@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Stacktrace } from '@travetto/base/src/stacktrace';
+import { Stacktrace } from '@travetto/base';
 
 @Suite()
 class StackTest {

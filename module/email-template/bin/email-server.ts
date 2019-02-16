@@ -12,7 +12,7 @@ async function simpleWatcher(commonFolder: string, paths: string[], handler: {
   removed?(file: string): void;
   added?(file: string): void;
 }) {
-  const { Watcher } = await import('@travetto/base/src/watch');
+  const { Watcher } = await import('@travetto/base');
   const watcher = new Watcher();
 
   watcher.add([{
@@ -117,8 +117,8 @@ async function resolve(engine: DefaultMailTemplateEngine, request: http.Incoming
 }
 
 export async function serverHandler() {
-  const { DependencyRegistry } = await import('@travetto/di/src/registry');
-  const { ResourceManager } = await import('@travetto/base/src/resource');
+  const { DependencyRegistry } = await import('@travetto/di');
+  const { ResourceManager } = await import('@travetto/base');
   const [config] = DependencyRegistry.getCandidateTypes(DefaultMailTemplateEngine);
   const engine = await DependencyRegistry.getInstance(config.target, config.qualifier);
 

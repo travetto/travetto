@@ -1,26 +1,25 @@
 //@ts-check
-// @ts-ignore
-const { Util: { program } } = require('@travetto/cli/src/util');
+const { Util } = require('@travetto/cli/src/util');
 
-module.exports = function () {
-  program
+function init() {
+  return Util.program
     .command('swagger-client')
     .option('-o, --output [output]', 'Output folder', './api-client')
     .option('-f, --format [format]', 'Client format', 'typescript-angular')
     .option('-a, --additional-properties [props]', 'Additional format properties', 'supportsES6=true,ngVersion=6.1')
-    .action((cmd) => {
+    .action(async (cmd) => {
 
       process.env.API_CLIENT_OUTPUT = cmd.output;
       process.env.API_CLIENT_FORMAT = cmd.format;
       process.env.API_CLIENT_FORMATOPTIONS = cmd.formatOptions;
 
-      require('@travetto/base/bin/bootstrap').run(() => {
-        const { ClientGenerate } = require('../src/client-generate');
-        const { DependencyRegistry } = require('@travetto/di');
+      await require('@travetto/base/bin/bootstrap').run();
+      const { ClientGenerate } = require('../src/client-generate');
+      const { DependencyRegistry } = require('@travetto/di');
 
-        return DependencyRegistry
-          .getInstance(ClientGenerate)
-          .then(x => x.generate());
-      });
+      const instance = await DependencyRegistry.getInstance(ClientGenerate)
+      await instance.generate();
     });
-};
+}
+
+module.exports = { init };

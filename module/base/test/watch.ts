@@ -1,7 +1,9 @@
 import * as fs from 'fs';
+
+import { Env } from '../src/bootstrap/env';
+import { FsUtil } from '../src/bootstrap/fs-util';
+
 import { Watcher } from '../src/watch';
-import { Env } from '../src/env';
-import { FsUtil } from '../src/fs-util';
 import { Test, Suite } from '@travetto/test';
 
 @Suite()

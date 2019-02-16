@@ -1,6 +1,6 @@
-import { FsUtil } from './fs-util';
-import { ScanEntry, ScanFs } from './scan-fs';
-import { Env } from './env';
+import { Env } from './bootstrap/env';
+import { FsUtil } from './bootstrap/fs-util';
+import { ScanEntry, ScanFs } from './bootstrap/scan-fs';
 
 type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
 
@@ -22,9 +22,9 @@ export class ScanApp {
       }, Env.cwd)
         .filter(ScanFs.isNotDir);
 
-      if (Env.frameworkDev) {
+      if (process.env.TRV_FRAMEWORK_DEV) {
         this.cache[key] = this.cache[key].map(x => {
-          x.file = FsUtil.resolveFrameworkFile(x.file);
+          x.file = FsUtil.resolveFrameworkDevFile(x.file);
           x.module = FsUtil.toUnix(x.file).replace(`${Env.cwd}/`, '');
           return x;
         });

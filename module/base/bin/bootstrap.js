@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 //@ts-check
-const fs = require('fs');
 const path = require('path');
 const Module = require('module');
 
@@ -11,9 +10,9 @@ let ts = global.ts = new Proxy({}, {
 });
 
 //Simple bootstrap to load compiler
-const { FsUtil } = require('../src/fs-util');
-const { Env, showEnv } = require('../src/env');
-const { AppCache } = require('../src/cache');
+const { FsUtil } = require('../src/bootstrap/fs-util');
+const { Env, showEnv } = require('../src/bootstrap/env');
+const { AppCache } = require('../src/bootstrap/cache');
 const cwd = Env.cwd;
 
 AppCache.init();
@@ -46,7 +45,7 @@ function moduleLoaderHandler(request, parent) {
 
 let moduleLoader = moduleLoaderHandler;
 
-if (Env.frameworkDev) {
+if (process.env.TRV_FRAMEWORK_DEV) {
   const parDir = FsUtil.resolveUnix(cwd, '../../module');
   moduleLoader = (request, parent) => {
     const root = path.dirname(parent.filename);
@@ -56,7 +55,7 @@ if (Env.frameworkDev) {
       const relativeRoot = root.split(parDir).pop();
       request = FsUtil.resolveUnix(cwd, `node_modules/@travetto/${relativeRoot}`, request);
     }
-    request = FsUtil.resolveFrameworkFile(request);
+    request = FsUtil.resolveFrameworkDevFile(request);
 
     return moduleLoaderHandler(request, parent);
   }

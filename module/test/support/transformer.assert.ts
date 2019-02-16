@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { TransformUtil, TransformerState } from '@travetto/compiler';
-import { FsUtil } from '@travetto/base/src/fs-util';
+import { FsUtil } from '@travetto/base';
 
 const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
   equal: 'deepEqual',

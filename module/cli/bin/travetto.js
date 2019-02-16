@@ -1,25 +1,43 @@
 #!/usr/bin/env node
 
-//@ts-check
+// @ts-check
+const fs = require('fs');
+const path = require('path');
 const { FsUtil } = require('../src/fs-util');
 
-const fs = require('fs');
+process.env.TRV_CLI = '1';
 
-const rel = `${FsUtil.cwd}/node_modules/@travetto/cli/bin/travetto.js`;
+const pkg = '@travetto/cli';
+const rel = `${FsUtil.cwd}/node_modules/${pkg}/bin/${path.basename(__filename)}`;
 
 const hasLocal = fs.existsSync(rel);
 const isLocal = FsUtil.toUnix(__filename) === rel;
+
+if (__dirname.includes('travetto/module/') && !process.env.NODE_PRESERVE_SYMLINKS) {
+  const res = require('child_process').spawnSync(process.argv0, process.argv.slice(1), {
+    argv0: process.argv0,
+    cwd: process.cwd(),
+    stdio: [0, 1, 2],
+    shell: true,
+    env: { // Handle symlinks, and denote we are in framework dev mode
+      ...process.env,
+      NODE_PRESERVE_SYMLINKS: '1',
+      TRV_FRAMEWORK_DEV: process.platform,
+    }
+  });
+  process.exit(res.status);
+}
 
 if (!hasLocal || !isLocal) {
   const Module = require('module');
   // @ts-ignore
   const og = Module._load;
   // @ts-ignore
-  Module._load = function (req, parent) {
-    if (req.startsWith('@travetto/cli')) {
-      if (!hasLocal) { // Map all @travetto/cli calls to root of global package
-        req = FsUtil.resolveUnix(__dirname, `../${FsUtil.toUnix(req).split('@travetto/cli/')[1]}`);
-      } else { // Rewrite @travetto/cli to map to local folder, when calling globally
+  Module._load = function(req, parent) {
+    if (req.startsWith(pkg)) {
+      if (!hasLocal) { // Map all $pkg calls to root of global package
+        req = FsUtil.resolveUnix(__dirname, `../${FsUtil.toUnix(req).split(`${pkg}/`)[1]}`);
+      } else { // Rewrite $pkg to map to local folder, when calling globally
         req = FsUtil.resolveUnix(FsUtil.cwd, `node_modules/${req}`);
       }
     }
@@ -28,4 +46,4 @@ if (!hasLocal || !isLocal) {
 }
 
 // @ts-ignore
-require('@travetto/cli/src')(process.argv);
+require(`${pkg}/src/launch`)(process.argv);

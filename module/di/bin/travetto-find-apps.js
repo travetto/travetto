@@ -1,9 +1,9 @@
 //@ts-check
-//@ts-ignore
 const path = require('path')
 const fs = require('fs');
+const child_process = require('child_process');
 const util = require('util');
-const config = module.exports.CACHE_FILE = 'di-app-cache.json';
+const config = 'di-app-cache.json';
 const pcwd = process.cwd().replace(/[\\\/]+/g, '/');
 
 const og = console.log;
@@ -20,7 +20,7 @@ const fsLstat = util.promisify(fs.lstat);
  */
 function getApp(filename) {
   const [, root] = filename.split(pcwd);
-  const [, first, ] = root.split('/');
+  const [, first] = root.split('/');
   return first === 'src' ? '' : first;
 }
 
@@ -28,19 +28,15 @@ async function getApps() {
   // Suppress all output
   console.warn = console.debug = console.log = function() {};
 
-  const { Env } = require('@travetto/base/src/env');
-
   await require('@travetto/base/bin/bootstrap'); // Load base transpiler
 
   //Initialize upto compiler
-  const { PhaseManager } = require('@travetto/base/src/phase');
+  const { PhaseManager, ScanApp } = require('@travetto/base');
   const mgr = new PhaseManager('bootstrap');
   mgr.load('compiler');
   await mgr.run();
 
   //Load app files
-  const { ScanApp } = require('@travetto/base/src/scan-app');
-
   ScanApp.requireFiles('.ts', x =>
     (/^(src[\/])/.test(x) || /^[^\/]+[\/]src[\/]/.test(x)) && x.endsWith('.ts') && !x.endsWith('d.ts') &&
     fs.readFileSync(x).toString().includes('@Application')); // Only load files that are candidates
@@ -48,7 +44,7 @@ async function getApps() {
   let registryPath = '../src/registry';
 
   //Handle weirdness of symlinks on windows
-  if (Env.frameworkDev === 'win32') {
+  if (process.env.TRV_FRAMEWORK_DEV === 'win32') {
     registryPath = path.resolve(process.env.__dirname, registryPath);
   }
 
@@ -75,18 +71,20 @@ async function getApps() {
   return resolved;
 }
 
+/**
+ * Re-implement fork b/c the cli may not be installed, but this is used by the vscode plugin
+ */
 function fork(cmd, args) {
-  const { Env } = require('@travetto/base/src/env');
-
   return new Promise((resolve, reject) => {
     let text = [];
     let err = [];
-    const proc = require('child_process').spawn(process.argv0, [cmd, ...(args || [])], {
+    const proc = child_process.spawn(process.argv0, [cmd, ...(args || [])], {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       shell: false,
       env: {
         ...process.env,
-        ...(Env.frameworkDev === 'win32' ? { __dirname } : {})
+        ...(process.env.TRV_FRAMEWORK_DEV === 'win32' ? { __dirname } : {}),
+        TRV_CLI: ''
       }
     });
     proc.stdout.on('data', v => text.push(v));
@@ -101,8 +99,8 @@ function fork(cmd, args) {
   });
 }
 
-module.exports.getCachedAppList = async function getCachedAppList() {
-  const { AppCache } = require('@travetto/base/src/cache');
+async function getCachedAppList() {
+  const { AppCache } = require('@travetto/base/src/bootstrap/cache'); // Should not init the app, only load cache
   try {
     //Read cache it
     if (!AppCache.hasEntry(config)) {
@@ -127,8 +125,7 @@ module.exports.getCachedAppList = async function getCachedAppList() {
   }
 }
 
-//@ts-ignore
-if (require.main === module) {
+if (!process.env.TRV_CLI) {
   getApps()
     .then(resolved => {
       og.call(console, JSON.stringify(resolved));
@@ -138,3 +135,8 @@ if (require.main === module) {
       process.exit(1);
     });
 }
+
+module.exports = {
+  CACHE_FILE: config,
+  getCachedAppList
+};
