@@ -55,7 +55,7 @@ if (process.env.TRV_FRAMEWORK_DEV) {
       const relativeRoot = root.split(parDir).pop();
       request = FsUtil.resolveUnix(cwd, `node_modules/@travetto/${relativeRoot}`, request);
     }
-    request = FsUtil.resolveFrameworkFile(request);
+    request = FsUtil.resolveFrameworkDevFile(request);
 
     return moduleLoaderHandler(request, parent);
   }
