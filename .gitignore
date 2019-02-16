@@ -9,3 +9,4 @@ package-lock.json
 **/*.lerna_backup
 lerna-debug.log
 **/.DS_STORE
+bin/test/model/**
