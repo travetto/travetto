@@ -59,9 +59,9 @@ async function writeToOutput(cmd, files) {
 
 function init() {
 
-  const { Util: { dependOn, program, colorize } } = require('@travetto/cli/src/util');
+  const { Util } = require('@travetto/cli/src/util');
 
-  program
+  return Util.program
     .command('compile')
     .option('-o, --output <output>', 'Output directory')
     .option('-r, --runtime-dir [runtimeDir]', 'Expected path during runtime')
@@ -70,13 +70,13 @@ function init() {
       process.env.DEBUG = '0';
       process.env.QUIET_INIT = '1';
 
-      dependOn('clean');
+      Util.dependOn('clean');
 
       const files = await loadFiles();
 
       if (cmd.output) {
         await writeToOutput(cmd, files);
-        console.log(`${colorize('Successfully', 'green')} wrote ${colorize(''+files.length, 'yellow')} files to ${colorize(cmd.output, 'white')}`);
+        console.log(`${Util.colorize.success('Successfully')} wrote ${Util.colorize.output(files.length)} files to ${Util.colorize.path(cmd.output)}`);
       }
     });
 }

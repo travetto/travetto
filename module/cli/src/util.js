@@ -46,13 +46,89 @@ const Util = {
       });
     });
   },
-  colorize(text, color) {
-    if (process.stdout.isTTY) {
+  colorize(color, value) {
+    if (process.stdout.isTTY && value !== undefined && value !== null && value !== '') {
       const code = COLORS[color];
-      text = `${code}${text}${COLORS.reset}`;
+      value = `${code}${value}${COLORS.reset}`;
     }
-    return text;
+    return value;
+  },
+  showHelp(commander, code = 0) {
+    commander.outputHelp((text) => {
+      function extract(key) {
+        let out;
+        if (text.includes(key)) {
+          const start = text.indexOf(key)
+          let end = text.indexOf('\n\n', start);
+          if (end < 0) {
+            end = text.length;
+          }
+          out = text.substring(start, end);
+          text = text.substring(end);
+        }
+        return out;
+      }
+      const usage = extract('Usage:');
+      const options = extract('Options:');
+      const commands = extract('Commands:');
+
+      let out = [];
+      if (usage) {
+        out.push(
+          usage
+          .replace(/Usage:/, x => Util.colorize['title'](x))
+        );
+      }
+      if (options) {
+        out.push(
+          options
+          .replace(/(\s*)(-[^, ]+)(,?\s*)(--\S+)?((\s+)?((?:\[[^\]]+\])|(?:\<[^>]+>)))?((\s+)(.*))?/g,
+            (p, spacing, simpleParam, psep, fullParam, sub, subSp, subVal, desc, descSp, descVal) => {
+              return [spacing,
+                  Util.colorize['param'](simpleParam),
+                  psep,
+                  Util.colorize['param'](fullParam),
+                  subSp,
+                  Util.colorize['type'](subVal),
+                  descSp,
+                  Util.colorize['description'](descVal)
+                  .replace(/([(]default:\s+)(.*?)([)])/g, (all, l, val, r) => `${l}${Util.colorize['input'](val)}${r}`)
+                ]
+                .filter(x => x !== '' && x !== undefined)
+                .join('');
+            })
+          .replace(/Options:/, x => Util.colorize['title'](x))
+        );
+      }
+      if (commands) {
+        out.push(
+          commands
+          .replace(/\s([^\[\]]\S+)/g, x => Util.colorize['param'](x))
+          .replace(/(\s*[^\x1b]\[[^\]]+\])/g, x => Util.colorize['input'](x))
+          .replace(/Commands:/, x => Util.colorize['title'](x))
+        );
+      }
+
+      out.push(text);
+
+      return out.filter(x => !!x).map(x => x.trim()).join('\n\n') + '\n';
+    });
+    process.exit(code);
   }
 };
+
+Object.assign(Util.colorize, {
+  input: Util.colorize.bind(null, 'yellow'),
+  output: Util.colorize.bind(null, 'magenta'),
+  path: Util.colorize.bind(null, 'white'),
+  success: Util.colorize.bind(null, 'green'),
+  failure: Util.colorize.bind(null, 'red'),
+  param: Util.colorize.bind(null, 'green'),
+  type: Util.colorize.bind(null, 'blue'),
+  description: Util.colorize.bind(null, 'gray'),
+  title: Util.colorize.bind(null, 'white'),
+  identifier: Util.colorize.bind(null, 'magenta'),
+  subtitle: Util.colorize.bind(null, 'gray')
+});
 
 module.exports = { Util };

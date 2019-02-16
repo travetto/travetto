@@ -5,7 +5,7 @@ const fs = require('fs');
 const readFile = f => fs.readFileSync(f, 'utf-8');
 const writeFile = (f, c) => fs.writeFileSync(f, c, 'utf-8');
 
-const { Util: { program, dependOn } } = require('@travetto/cli/src/util');
+const { Util } = require('@travetto/cli/src/util');
 const { FsUtil } = require('@travetto/base/src/bootstrap/fs-util');
 const { ScanFs } = require('@travetto/base/src/bootstrap/scan-fs');
 
@@ -13,8 +13,8 @@ function init() {
   const cp = require('child_process');
   const exec = (arg, ...args) => cp.execSync(arg, ...args);
 
-  program
-    .command('rest-lambda:build-zip')
+  return Util.program
+    .command('rest-aws-lambda:build-zip')
     .option('-o --output [output]', 'Output file', 'dist/lambda.zip')
     .option('-w --workspace [workspace]', 'Workspace directory')
     .action(async (cmd) => {
@@ -39,7 +39,7 @@ function init() {
         'process.env.TRV_CACHE_DIR = `${__dirname}/cache`;\n' +
         readFile(`${__dirname}/../resources/lambda.js`));
 
-      await dependOn('compile', ['-o', './cache', '-r', '/var/task'], cmd.workspace);
+      await Util.dependOn('compile', ['-o', './cache', '-r', '/var/task'], cmd.workspace);
 
       // Removing baggage
       FsUtil.unlinkRecursiveSync(`${cmd.workspace}/node_modules/typescript`);
@@ -87,37 +87,6 @@ function init() {
 
       exec(`zip -qr ${cmd.output} . `, { cwd: cmd.workspace });
       // remove(DIST);
-    });
-
-  program
-    .command('rest-lambda:build-sam')
-    .option('-e --env [env]', 'Environment name', 'prod')
-    .option('-o --output [output]', 'Output file', 'dist/template.yml')
-    .action(async (cmd) => {
-      process.env.ENV = cmd.env;
-
-      cmd.output = FsUtil.resolveUnix(FsUtil.cwd, cmd.output);
-
-      FsUtil.mkdirp(path.dirname(cmd.output));
-
-      await require('@travetto/base/bin/bootstrap').run()
-      const { ControllerRegistry } = require('@travetto/rest');
-
-      await ControllerRegistry.init()
-      const controllers = ControllerRegistry.getClasses().map(x => ControllerRegistry.get(x));
-
-      const { template } = require(FsUtil.resolveUnix(__dirname, '../resources/template.yml.js'));
-      const sam = template(controllers, FsUtil.resolveUnix(__dirname, '../resources'));
-
-      writeFile(cmd.output, sam);
-    });
-
-  program.command('rest-lambda:deploy')
-    .action((config, cmd) => {
-      if (!config) {
-        cmd.help();
-      }
-      console.log('To be implemented...');
     });
 }
 
