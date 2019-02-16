@@ -1,7 +1,6 @@
 import * as ts from 'typescript';
 
-import { Env } from '@travetto/base/src/env';
-import { FsUtil } from '@travetto/base/src/fs-util';
+import { Env, FsUtil } from '@travetto/base';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 
 const stringHash = require('string-hash');

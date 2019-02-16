@@ -18,16 +18,6 @@ const isEnvFalse = k => {
   return val !== undefined && /(0|false|off|no)/i.test(val);
 };
 
-function checkFrameworkDev() {
-  let inFramework = false;
-
-  try {
-    inFramework = require(`${FsUtil.cwd}/package.json`).name.startsWith('@travetto');
-  } catch (e) { }
-
-  return { frameworkDev: inFramework ? process.platform : undefined };
-}
-
 function checkDocker() {
   let docker = !isEnvTrue('NO_DOCKER');
   if (docker) { // Check for docker existence
@@ -48,7 +38,7 @@ function checkWatch() {
 function buildLogging(profile) {
   const debug = isEnvTrue('debug') || (profile.dev && !isEnvFalse('debug'));
   const trace = isEnvTrue('trace');
-  const quietInit = isEnvTrue('quiet_init') || profile.test;
+  const quietInit = isEnvTrue('quiet_init');
 
   console.warn = (...args) => console.log('WARN', ...args);
   console.info = (...args) => console.log('INFO', ...args);
@@ -56,11 +46,11 @@ function buildLogging(profile) {
   console.trace = (...args) => console.log('TRACE', ...args);
 
   if (!trace) {
-    console.trace = () => { };
+    console.trace = () => {};
   }
 
   if (!debug) {
-    console.debug = () => { }; // Suppress debug statements
+    console.debug = () => {}; // Suppress debug statements
   }
 
   function error(...args) {
@@ -113,18 +103,17 @@ const Env = [
   profile,
   buildLogging(profile),
   checkWatch(),
-  checkFrameworkDev(),
   checkDocker()
 ].reduce((acc, el) =>
   Object.assign(acc, el));
 
 function showEnv() {
   if (!Env.quietInit) {
-    console.log('Env',
+    console.info('Env',
       JSON.stringify(Env, (e, v) =>
         (typeof v === 'boolean' && v === false) ||
-          (typeof v === 'string' && v === '') ||
-          (typeof v === 'function') ? undefined : v, 2
+        (typeof v === 'string' && v === '') ||
+        (typeof v === 'function') ? undefined : v, 2
       )
     );
   }

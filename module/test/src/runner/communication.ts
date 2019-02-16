@@ -1,8 +1,7 @@
 import * as os from 'os';
 
-import { FileCache } from '@travetto/base/src/cache';
+import { FileCache, PhaseManager, Env, Shutdown, FsUtil } from '@travetto/base';
 import { ExecutionPool, IdleManager, LocalExecution, ChildExecution, ExecUtil } from '@travetto/exec';
-import { PhaseManager, Env, Shutdown, FsUtil } from '@travetto/base';
 
 /***
   Flow of events
@@ -104,7 +103,7 @@ export async function server() {
         let runnerPath = './runner';
 
         // Handle bad symlink behavior on windows
-        if (Env.frameworkDev === 'win32') {
+        if (process.env.TRV_FRAMEWORK_DEV === 'win32') {
           runnerPath = FsUtil.resolveUnix(process.env.__dirname!, runnerPath);
         }
 

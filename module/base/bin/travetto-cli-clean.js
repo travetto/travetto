@@ -1,18 +1,27 @@
 //@ts-check
 
 function clean() {
-  require('../src/cache').AppCache.clear();
+  require('../src/bootstrap/cache').AppCache.clear();
 }
 
-// Allow for direct invocation
-// @ts-ignore
-if (require.main === module) {
+function init() {
+  const { Util } = require('@travetto/cli/src/util');
+  return Util.program.command('clean').action(() => {
+
+    const { FsUtil } = require('../src/bootstrap/fs-util');
+    const { AppCache } = require('../src/bootstrap/cache');
+
+    try {
+      FsUtil.unlinkRecursiveSync(AppCache.cacheDir);
+      console.log(`${Util.colorize.success('Successfully')} deleted temp dir ${Util.colorize.path(AppCache.cacheDir)}`);
+    } catch (e) {
+      console.error(`${Util.colorize.failure('Failed')} to delete temp dir ${Util.colorize.path(AppCache.cacheDir)}`);
+    }
+  });
+}
+
+if (!process.env.TRV_CLI) {
   clean();
-} else {
-  // @ts-ignore
-  const { Util: { program } } = require('@travetto/cli/src/util');
-
-  module.exports = () => {
-    program.command('clean').action(clean);
-  };
 }
+
+module.exports = { init };

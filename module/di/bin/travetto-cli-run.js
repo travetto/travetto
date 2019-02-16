@@ -1,9 +1,16 @@
 //@ts-check
 const path = require('path');
-const { getCachedAppList } = require('./travetto-find-apps');
+let colorize;
+
+try {
+  colorize = require('@travetto/cli/src/util').Util.colorize;
+} catch (e) {
+  colorize = v => v;
+}
 
 async function getAppList() {
   try {
+    const { getCachedAppList } = require('./travetto-find-apps');
     return await getCachedAppList();
   } catch (err) {
     console.error(err && err.stack ? err.stack : err);
@@ -15,34 +22,14 @@ function getParamType(config) {
   return (config.meta && config.meta.choices) ? config.meta.choices.join('|') : config.type;
 }
 
-const COLORS = {
-  blue: `\x1b[94m`,
-  yellow: `\x1b[93m`,
-  green: `\x1b[92m`,
-  gray: `\x1b[37m\x1b[2m`,
-  red: `\x1b[31m`,
-  cyan: `\x1b[96m`,
-  magenta: `\x1b[95m`,
-  white: `\x1b[97m\x1b[1m`,
-  reset: `\x1b[0m`
-};
-
-function colorize(text, color) {
-  if (process.stdout.isTTY) {
-    const code = COLORS[color];
-    text = `${code}${text}${COLORS.reset}`;
-  }
-  return text;
-}
-
 function getAppUsage(app) {
   let usage = app.name;
 
   if (app.params) {
-    usage = `${colorize(usage,'white')} ${app.params.map(x => {
-      const type = colorize(getParamType(x), 'green');
-      const nm = colorize(x.name, 'blue');
-      const def = x.def !== undefined ? colorize(x.def, 'yellow') : undefined;
+    usage = `${colorize.identifier(usage)} ${app.params.map(x => {
+      const type = colorize.type(getParamType(x));
+      const nm = colorize.param(x.name);
+      const def = x.def !== undefined ? colorize.input(x.def) : undefined;
 
       return x.optional ?  
       (x.def !== undefined ?
@@ -60,7 +47,7 @@ function generateAppHelpList(apps, cmd) {
   for (const conf of apps) {
     let lines = [];
 
-    const root = conf.appRoot ? `[${colorize(conf.appRoot, 'gray')}] ` : '';
+    const root = conf.appRoot ? `[${colorize.subtitle(conf.appRoot)}] ` : '';
     const usage = getAppUsage(conf);
 
     const features = [];
@@ -72,18 +59,18 @@ function generateAppHelpList(apps, cmd) {
       featureStr = ` | ${features.join(' ')}`;
     }
 
-    lines.push(`${root}${colorize(conf.name, 'white')}${featureStr}`);
+    lines.push(`${root}${colorize.identifier(conf.name)}${featureStr}`);
     if (conf.description) {
-      lines.push(`desc:  ${colorize(conf.description || '', 'red')}`);
+      lines.push(`desc:  ${colorize.description(conf.description || '')}`);
     }
     lines.push(`usage: ${usage}`);
 
     const len = lines.reduce((acc, v) => Math.max(acc, v.replace(/\x1b\[\d+m/g, '').length), 0);
     lines.splice(1, 0, '-'.repeat(len));
 
-    choices.push(lines.join('\n       '));
+    choices.push(lines.join('\n     '));
   }
-  return choices.map(x => `     ● ${x}`).join('\n\n');
+  return choices.map(x => `   ● ${x}`).join('\n\n');
 }
 
 function processApplicationParam(config, param) {
@@ -92,7 +79,7 @@ function processApplicationParam(config, param) {
     (config.type === 'number' && !/^[-]?[0-9]*[.]?[0-9]*$/.test(param)) ||
     (config.meta && config.meta.choices && !config.meta.choices.find(c => `${c}` === param))
   ) {
-    throw new Error(`Invalid parameter ${colorize(config.name, 'blue')}: Received ${colorize('yellow', param)} expected ${colorize(getParamType(config), 'green')}`);
+    throw new Error(`Invalid parameter ${colorize.param(config.name)}: Received ${colorize.input(param)} expected ${colorize.type(getParamType(config))}`);
   }
   let out = param;
   switch (config.type) {
@@ -117,7 +104,7 @@ async function runApp(args) {
       sub = sub.map((x, i) => appParams[i] === undefined ? x : processApplicationParam(appParams[i], x));
       const reqdCount = appParams.filter(x => !x.optional).length;
       if (sub.length < reqdCount) {
-        throw new Error(`Invalid parameter count: received ${colorize(sub.length, 'yellow')} but needed ${colorize(reqdCount, 'yellow')}`);
+        throw new Error(`Invalid parameter count: received ${colorize.input(sub.length)} but needed ${colorize.input(reqdCount)}`);
       }
     }
 
@@ -126,12 +113,11 @@ async function runApp(args) {
     process.env.PROFILE = process.env.PROFILE || '';
     process.env.WATCH = process.env.WATCH || app.watchable;
 
-    const { Env } = require('@travetto/base/src/env');
     await require('@travetto/base/bin/bootstrap').run();
     let registryPath = '../src/registry';
 
     // Handle bad symlink behavior on windows
-    if (Env.frameworkDev === 'win32') {
+    if (process.env.TRV_FRAMEWORK_DEV === 'win32') {
       registryPath = path.resolve(process.env.__dirname, registryPath);
     }
 
@@ -148,62 +134,62 @@ async function runApp(args) {
   }
 }
 
-//@ts-ignore
-if (require.main === module) {
-  runApp(process.argv.slice(2)); //If loaded directly as main entry, run, idx 2 is where non-node arguments start at
-} else {
-  module.exports = function() {
-    let listHelper;
+function init() {
+  let listHelper;
 
-    // @ts-ignore
-    const { Util: { program } } = require('@travetto/cli/src/util');
+  const { Util } = require('@travetto/cli/src/util');
 
-    program
-      .command('run [application] [args...]')
-      .on('--help', () => {
-        console.log('\n  Available Applications:');
-        if (listHelper) {
-          console.log();
-          console.log(listHelper());
-        } else {
-          console.log('\n  No applications defined, use @Application to registry entry points');
-        }
+  return Util.program
+    .command('run [application] [args...]')
+    .on('--help', () => {
+      console.log(`\n${Util.colorize.title('Available Applications:')}`);
+      if (listHelper) {
         console.log();
-      })
-      .allowUnknownOption()
-      .option('-e, --env [env]', 'Application environment (dev|prod), defaults to dev', /^(dev|prod)$/i)
-      .option('-a, --app [app]', 'Application root, defaults to associated root by name')
-      .option('-w, --watch [watch]', 'Run the application in watch mode, defaults to auto', /^(1|0|yes|no|on|off|auto|true|false)$/i)
-      .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
-      .action(async (app, args, cmd) => {
-        cmd.env = cmd.env || process.env.ENV || process.env.env || undefined;
-        cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
+        console.log(listHelper());
+      } else {
+        console.log(`\nNo applications defined, use ${colorize.type('@Application')} to registry entry points`);
+      }
+      console.log();
+    })
+    .allowUnknownOption()
+    .option('-e, --env [env]', 'Application environment (dev|prod), (default: dev)', /^(dev|prod)$/i)
+    .option('-a, --app [app]', 'Application root, defaults to associated root by name')
+    .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', /^(1|0|yes|no|on|off|auto|true|false)$/i)
+    .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
+    .action(async (app, args, cmd) => {
+      cmd.env = cmd.env || process.env.ENV || process.env.env || undefined;
+      cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
 
-        cmd.profile = [
-            ...(cmd.profile || []),
-            ...(process.env.PROFILE || '').split(/,/g)
-          ]
-          .filter(x => !!x)
-          .map(x => x.trim());
+      cmd.profile = [
+          ...(cmd.profile || []),
+          ...(process.env.PROFILE || '').split(/,/g)
+        ]
+        .filter(x => !!x)
+        .map(x => x.trim());
 
-        process.env.ENV = cmd.env; //Preemptively set b/c env changes how we compile some things
+      process.env.ENV = cmd.env; //Preemptively set b/c env changes how we compile some things
 
-        const apps = await getAppList();
-        const selected = apps.find(x => x.name === app);
+      const apps = await getAppList();
+      const selected = apps.find(x => x.name === app);
 
-        if (!selected) {
-          if (apps.length) {
-            listHelper = generateAppHelpList.bind(null, apps, cmd);
-          }
-          cmd.help();
+      if (!selected) {
+        if (apps.length) {
+          listHelper = generateAppHelpList.bind(null, apps, cmd);
         }
+        Util.showHelp(cmd);
+      }
 
-        if (cmd.app) process.env.APP_ROOT = cmd.app;
-        if (cmd.env) process.env.ENV = cmd.env;
-        if (cmd.profile) process.env.PROFILE = cmd.profile.join(',');
-        if (cmd.watch) process.env.WATCH = `${cmd.watch}`;
+      if (cmd.app) process.env.APP_ROOT = cmd.app;
+      if (cmd.env) process.env.ENV = cmd.env;
+      if (cmd.profile) process.env.PROFILE = cmd.profile.join(',');
+      if (cmd.watch) process.env.WATCH = `${cmd.watch}`;
 
-        runApp([app, ...args]);
-      });
-  };
+      runApp([app, ...args]);
+    });
 }
+
+if (!process.env.TRV_CLI) {
+  runApp(process.argv.slice(2)); //If loaded directly as main entry, run, idx 2 is where non-node arguments start at
+}
+
+module.exports = { init };

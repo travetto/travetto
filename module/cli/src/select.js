@@ -1,4 +1,4 @@
-const select = require('select-shell');
+const selectShell = require('select-shell');
 const readline = require('readline');
 
 /**
@@ -6,8 +6,8 @@ const readline = require('readline');
  * @param {string[]} items 
  * @param {boolean} [multiSelect]
  */
-exports.select = function(title, items, multiSelect) {
-  const list = select({
+function select(title, items, multiSelect) {
+  const list = selectShell({
     multiSelect,
     checked: '[X] ',
     unchecked: '[ ] ',
@@ -41,4 +41,6 @@ exports.select = function(title, items, multiSelect) {
     // @ts-ignore
     list.on('cancel', x => reject(new Error('Selection cancelled')));
   }).then(a => cleanup() || a, a => { cleanup(); throw a; });
-};
+}
+
+module.exports = { select };

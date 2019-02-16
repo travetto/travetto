@@ -21,28 +21,28 @@ async function runTests(opts, args) {
   }
 }
 
-// @ts-ignore
-if (require.main !== module) {
-  // @ts-ignore
-  const { Util: { program } } = require('@travetto/cli/src/util');
-  module.exports = function () {
+function init() {
+  const { Util } = require('@travetto/cli/src/util');
 
-    program.command('test')
-      .arguments('[regexes...]')
-      .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec|event)$/, 'tap')
-      .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', undefined, os.cpus().length - 1)
-      .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
-      .action(async (args, cmd) => {
-        if (args.length === 0) {
-          args = ['test/.*'];
-        }
-        await runTests(cmd, args);
-      });
-  };
-} else { // Run single mode, directly
+  return Util.program.command('test')
+    .arguments('[regexes...]')
+    .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec|event)$/, 'tap')
+    .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', undefined, os.cpus().length - 1)
+    .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
+    .action(async (args, cmd) => {
+      if (args.length === 0) {
+        args = ['test/.*'];
+      }
+      await runTests(cmd, args);
+    });
+};
+
+if (!process.env.TRV_CLI) {
   runTests({
     format: process.env.TEST_FORMAT || 'tap',
     mode: process.env.TEST_MODE || 'single',
     concurrency: parseInt(process.env.TEST_CONCURRENCY || '1', 10)
   }, process.argv.slice(2));
 }
+
+module.exports = { init };
