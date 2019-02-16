@@ -7,7 +7,9 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-aws-lambda": "bin/travetto-cli-rest-aws-lambda.js"
+    "travetto-cli-rest-aws-lambda_deploy": "bin/travetto-cli-rest-aws-lambda_deploy.js",
+    "travetto-cli-rest-aws-lambda_build-zip": "bin/travetto-cli-rest-aws-lambda_build-zip.js",
+    "travetto-cli-rest-aws-lambda_build-sam": "bin/travetto-cli-rest-aws-lambda_build-sam.js"
   },
   "dependencies": {
     "@travetto/rest": "^0.5.12",

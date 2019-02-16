@@ -5,17 +5,17 @@ function clean() {
 }
 
 function init() {
-  const { Util: { colorize, program } } = require('@travetto/cli/src/util');
-  program.command('clean').action(() => {
+  const { Util } = require('@travetto/cli/src/util');
+  return Util.program.command('clean').action(() => {
 
     const { FsUtil } = require('../src/bootstrap/fs-util');
     const { AppCache } = require('../src/bootstrap/cache');
 
     try {
       FsUtil.unlinkRecursiveSync(AppCache.cacheDir);
-      console.log(`${colorize('Successfully', 'green')} deleted temp dir ${colorize(AppCache.cacheDir, 'white')}`);
+      console.log(`${Util.colorize.success('Successfully')} deleted temp dir ${Util.colorize.path(AppCache.cacheDir)}`);
     } catch (e) {
-      console.error(`${colorize('Failed', 'red')} to delete temp dir ${colorize(AppCache.cacheDir, 'white')}`);
+      console.error(`${Util.colorize.failure('Failed')} to delete temp dir ${Util.colorize.path(AppCache.cacheDir)}`);
     }
   });
 }
