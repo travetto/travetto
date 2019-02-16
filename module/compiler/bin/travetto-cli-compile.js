@@ -27,13 +27,12 @@ async function loadFiles() {
 
 async function writeToOutput(cmd, files) {
   const fs = require('fs');
-  const { FsUtil } = require('@travetto/cli/src/fs-util');
-  const { AppCache } = require(`@travetto/base/src/cache`);
+  const { FsUtil, AppCache } = require(`@travetto/base`);
 
   // Clear out cache if specified
   if (cmd.output) {
     try {
-      FsUtil.unlinkDirSync(FsUtil.resolveNative(FsUtil.cwd, cmd.output));
+      FsUtil.unlinkRecursiveSync(FsUtil.resolveNative(FsUtil.cwd, cmd.output));
     } catch (e) {
       // Ignore
     }

@@ -202,7 +202,7 @@ export class TransformUtil {
               .replace(/^\.\./, dirname(dirname(state.path)))
               .replace(/^\.\//, `${dirname(state.path)}/`));
 
-            if (Env.frameworkDev) {
+            if (process.env.TRV_FRAMEWORK_DEV) {
               path = FsUtil.resolveFrameworkFile(path);
             }
 

@@ -9,7 +9,6 @@ export declare const Env: {
   cwd: string;
   isApp: boolean;
   appRoot: string | undefined;
-  frameworkDev: string;
   profiles: string[];
 
 

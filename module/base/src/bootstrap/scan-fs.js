@@ -1,42 +1,30 @@
-import * as fs from 'fs';
-import * as util from 'util';
+const fs = require('fs');
+const util = require('util');
 
-import { FsUtil } from './fs-util';
+const { FsUtil } = require('./fs-util');
 
 const fsReaddir = util.promisify(fs.readdir);
 const fsLstat = util.promisify(fs.lstat);
 const fsRealpath = util.promisify(fs.realpath);
 const fsReadFile = util.promisify(fs.readFile);
 
-export interface ScanEntry {
-  file: string;
-  module: string;
-  stats: fs.Stats;
-  children?: ScanEntry[];
-}
+const ScanFs = {
 
-export interface ScanHandler {
-  testFile?(relative: string, entry?: ScanEntry): boolean;
-  testDir?(relative: string, entry?: ScanEntry): boolean;
-}
-
-export class ScanFs {
-
-  static isDir(x: ScanEntry) {
+  isDir(x) {
     return x.stats.isDirectory() || x.stats.isSymbolicLink();
-  }
+  },
 
-  static isNotDir(x: ScanEntry) {
+  isNotDir(x) {
     return !x.stats.isDirectory() && !x.stats.isSymbolicLink();
-  }
+  },
 
-  static scanDir(handler: ScanHandler, base: string, entry?: ScanEntry, visited = new Set()) {
-    return new Promise<ScanEntry[]>(async (resolve, reject) => {
+  scanDir(handler, base, entry = undefined, visited = new Set()) {
+    return new Promise(async (resolve, reject) => {
 
       try {
-        const out: ScanEntry[] = [];
+        const out = [];
 
-        entry = (entry || { file: base, children: [] }) as ScanEntry;
+        entry = (entry || { file: base, children: [] });
 
         for (const file of (await fsReaddir(entry.file))) {
           if (file.startsWith('.')) {
@@ -45,7 +33,7 @@ export class ScanFs {
 
           const full = FsUtil.resolveUnix(entry.file, file);
           const stats = await fsLstat(full);
-          const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
+          const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
           if (ScanFs.isDir(subEntry)) {
             if (subEntry.stats.isSymbolicLink()) {
@@ -61,7 +49,7 @@ export class ScanFs {
               out.push(subEntry, ...await ScanFs.scanDir(handler, base, subEntry, visited));
             }
           } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
-            (entry.children = entry.children || [])!.push(subEntry);
+            (entry.children = entry.children || []).push(subEntry);
             out.push(subEntry);
           }
         }
@@ -70,11 +58,11 @@ export class ScanFs {
         reject(e);
       }
     });
-  }
+  },
 
-  static async bulkScanDir(handlers: ScanHandler[], base: string) {
+  async bulkScanDir(handlers, base) {
     const res = await Promise.all(handlers.map(x => ScanFs.scanDir(x, base)));
-    const names = new Set<string>();
+    const names = new Set();
     const out = [];
     for (const ls of res) {
       for (const e of ls) {
@@ -85,12 +73,12 @@ export class ScanFs {
       }
     }
     return out;
-  }
+  },
 
-  static scanDirSync(handler: ScanHandler, base: string, entry?: ScanEntry, visited = new Set()) {
-    const out: ScanEntry[] = [];
+  scanDirSync(handler, base, entry = undefined, visited = new Set()) {
+    const out = [];
 
-    entry = (entry || { file: base, children: [] }) as ScanEntry;
+    entry = (entry || { file: base, children: [] });
 
     for (const file of fs.readdirSync(entry.file)) {
       if (file.startsWith('.')) {
@@ -99,7 +87,7 @@ export class ScanFs {
 
       const full = FsUtil.resolveUnix(entry.file, file);
       const stats = fs.lstatSync(full);
-      const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
+      const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
       if (ScanFs.isDir(subEntry)) {
         if (subEntry.stats.isSymbolicLink()) {
@@ -114,15 +102,15 @@ export class ScanFs {
           out.push(subEntry, ...ScanFs.scanDirSync(handler, base, subEntry, visited));
         }
       } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
-        (entry.children = entry.children || [])!.push(subEntry);
+        (entry.children = entry.children || []).push(subEntry);
         out.push(subEntry);
       }
     }
     return out;
-  }
+  },
 
-  static bulkScanDirSync(handlers: ScanHandler[], base: string) {
-    const names = new Set<string>();
+  bulkScanDirSync(handlers, base) {
+    const names = new Set();
     const out = [];
     for (const h of handlers) {
       for (const e of ScanFs.scanDirSync(h, base)) {
@@ -133,26 +121,28 @@ export class ScanFs {
       }
     }
     return out;
-  }
+  },
 
-  static bulkRequire<T = any>(handlers: ScanHandler[], cwd: string): T[] {
+  bulkRequire(handlers, cwd) {
     return ScanFs.bulkScanDirSync(handlers, cwd)
       .filter(ScanFs.isNotDir) // Skip folders
       .map(x => require(x.file))
       .filter(x => !!x); // Return non-empty values
-  }
+  },
 
-  static async bulkRead(handlers: ScanHandler[], base: string) {
+  async bulkRead(handlers, base) {
     const files = await ScanFs.bulkScanDir(handlers, base);
     const promises = files
       .filter(ScanFs.isNotDir)
       .map(x => fsReadFile(x.file).then(d => ({ name: x.file, data: d.toString() })));
     return await Promise.all(promises);
-  }
+  },
 
-  static bulkReadSync(handlers: ScanHandler[], base: string) {
+  bulkReadSync(handlers, base) {
     return ScanFs.bulkScanDirSync(handlers, base)
       .filter(ScanFs.isNotDir)
       .map(x => ({ name: x.file, data: fs.readFileSync(x.file).toString() }));
   }
 }
+
+module.exports = { ScanFs };

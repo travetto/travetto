@@ -113,12 +113,11 @@ async function runApp(args) {
     process.env.PROFILE = process.env.PROFILE || '';
     process.env.WATCH = process.env.WATCH || app.watchable;
 
-    const { Env } = require('@travetto/base/src/env');
     await require('@travetto/base/bin/bootstrap').run();
     let registryPath = '../src/registry';
 
     // Handle bad symlink behavior on windows
-    if (Env.frameworkDev === 'win32') {
+    if (process.env.TRV_FRAMEWORK_DEV === 'win32') {
       registryPath = path.resolve(process.env.__dirname, registryPath);
     }
 

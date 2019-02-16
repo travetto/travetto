@@ -18,16 +18,6 @@ const isEnvFalse = k => {
   return val !== undefined && /(0|false|off|no)/i.test(val);
 };
 
-function checkFrameworkDev() {
-  let inFramework = false;
-
-  try {
-    inFramework = require(`${FsUtil.cwd}/package.json`).name.startsWith('@travetto');
-  } catch (e) {}
-
-  return { frameworkDev: inFramework ? process.platform : undefined };
-}
-
 function checkDocker() {
   let docker = !isEnvTrue('NO_DOCKER');
   if (docker) { // Check for docker existence
@@ -113,7 +103,6 @@ const Env = [
   profile,
   buildLogging(profile),
   checkWatch(),
-  checkFrameworkDev(),
   checkDocker()
 ].reduce((acc, el) =>
   Object.assign(acc, el));
