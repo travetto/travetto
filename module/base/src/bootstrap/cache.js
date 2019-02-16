@@ -58,6 +58,7 @@ class FileCache {
       try {
         FsUtil.unlinkRecursiveSync(this.cacheDir);
         console.debug(`Deleted ${this.cacheDir}`);
+        this.cache = {}; // Clear it out
       } catch (e) {
         console.error('Failed in deleting');
       }
