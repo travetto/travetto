@@ -21,6 +21,7 @@ const FORMAT_MAPPING = {
 
 interface State {
   format: (keyof typeof FORMAT_MAPPING);
+  consumer?: Consumer;
   mode: 'single' | 'watch' | 'all';
   concurrency: number;
   args: string[];
@@ -36,10 +37,15 @@ export class Runner {
 
   getConsumer(): Consumer & { summarize?: () => AllResultsCollector } {
     const consumers: Consumer[] = [];
-    const fmtClass = FORMAT_MAPPING[this.state.format];
 
-    if (fmtClass) {
-      consumers.push(new fmtClass());
+    if (this.state.consumer) {
+      consumers.push(this.state.consumer);
+    } else {
+      const fmtClass = FORMAT_MAPPING[this.state.format];
+
+      if (fmtClass) {
+        consumers.push(new fmtClass());
+      }
     }
 
     for (const c of consumers) {

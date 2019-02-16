@@ -7,7 +7,7 @@ declare interface colorize {
 
   success(value: Primitive): string;
   failure(value: Primitive): string;
-  path(value: Primitive): string;
+  path(value: string): string;
   input(value: Primitive): string;
   output(value: Primitive): string;
   param(value: Primitive): string;
@@ -19,6 +19,7 @@ declare interface colorize {
 }
 
 declare class UtilStatic {
+  HAS_COLOR: boolean;
   cwd: string;
   program: typeof Commander;
   dependOn(command: string, args?: string[], cwd?: string): void;
