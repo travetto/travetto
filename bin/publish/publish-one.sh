@@ -1,6 +1,6 @@
 #!/bin/bash
 SCRIPTS=`dirname $0`
-BASE=`dirname $SCRIPTS`
+BASE=`dirname $(dirname $SCRIPTS)`
 
 MOD=$1
 pushd $BASE/module/$MOD
