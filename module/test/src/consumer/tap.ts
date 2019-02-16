@@ -4,11 +4,12 @@ import { ExecUtil } from '@travetto/exec';
 import { TestEvent } from '../model/event';
 import { AllSuitesResult } from '../model/suite';
 import { Consumer } from './types';
+import { TapEnhancer, DUMMY_ENHANCER } from './tap-enhancer';
 
 export class TapEmitter implements Consumer {
   private count = 0;
 
-  constructor(private stream: NodeJS.WriteStream = process.stdout) {
+  constructor(private stream: NodeJS.WriteStream = process.stdout, private enhancer: TapEnhancer = DUMMY_ENHANCER) {
     this.log('TAP version 13');
   }
 
@@ -19,25 +20,33 @@ export class TapEmitter implements Consumer {
   logMeta(obj: any) {
     let body = YamlUtil.serialize(obj);
     body = body.split('\n').map(x => `  ${x}`).join('\n');
-    this.log(`---\n${body}\n...`);
+    this.log(`---\n${this.enhancer.objectInspect(body)}\n...`);
   }
 
   onEvent(e: TestEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
-      let header = `${test.className} - ${test.methodName}`;
+      let header = `${this.enhancer.suiteName(test.className)} - ${this.enhancer.testName(test.methodName)}`;
       if (test.description) {
-        header += `: ${test.description}`;
+        header += `: ${this.enhancer.testDescription(test.description)}`;
       }
       this.log(`# ${header}`);
 
       if (test.assertions.length) {
         let subCount = 0;
         for (const a of test.assertions) {
-          const text = a.message ? `${a.text} (${a.message})` : a.text;
-          let subMessage = `ok ${++subCount} - ${text} ${a.file}:${a.line}`;
+          const text = a.message ? `${a.text} (${this.enhancer.failure(a.message)})` : a.text;
+          let subMessage = [
+            this.enhancer.assertNumber(++subCount),
+            '-',
+            this.enhancer.assertDescription(text),
+            `${this.enhancer.assertFile(a.file)}:${this.enhancer.assertLine(a.line)}`
+          ].join(' ');
+
           if (a.error) {
-            subMessage = `not ${subMessage}`;
+            subMessage = `${this.enhancer.failure('not ok')} ${subMessage}`;
+          } else {
+            subMessage = `${this.enhancer.success('ok')} ${subMessage}`;
           }
           this.log(`    ${subMessage}`);
 
@@ -45,14 +54,16 @@ export class TapEmitter implements Consumer {
             this.logMeta({ message: a.message.replace(/\\n/g, '\n') });
           }
         }
-        this.log(`    1..${subCount}`);
+        this.log(`    ${this.enhancer.assertNumber(1)}..${this.enhancer.assertNumber(subCount)}`);
       }
 
-      let status = `ok ${++this.count} `;
+      let status = `${this.enhancer.testNumber(++this.count)} `;
       if (test.status === 'skip') {
         status += ' # SKIP';
       } else if (test.status === 'fail') {
-        status = `not ${status}`;
+        status = `${this.enhancer.failure('not ok')} ${status}`;
+      } else {
+        status = `${this.enhancer.success('ok')} ${status}`;
       }
       status += header;
 
@@ -74,15 +85,24 @@ export class TapEmitter implements Consumer {
   }
 
   onSummary(summary: AllSuitesResult) {
-    this.log(`1..${summary.total}`);
+    this.log(`${this.enhancer.testNumber(1)}..${this.enhancer.testNumber(summary.total)}`);
 
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(err.stack || `${err}`);
+        this.log(this.enhancer.failure(err.stack || `${err}`) as string);
       }
     }
 
-    this.log(`Results ${summary.success}/${summary.total}, failed ${summary.fail}, skipped ${summary.skip}`);
+    const allSucc = summary.success === summary.total;
+
+    this.log([
+      this.enhancer[allSucc ? 'success' : 'failure']('Results'),
+      `${this.enhancer.total(summary.success)}/${this.enhancer.total(summary.total)},`,
+      allSucc ? 'failed' : this.enhancer.failure('failed'),
+      `${this.enhancer.total(summary.fail)}`,
+      'skipped',
+      this.enhancer.total(summary.skip)
+    ].join(' '));
   }
 }

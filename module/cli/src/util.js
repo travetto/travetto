@@ -16,7 +16,10 @@ const COLORS = {
   reset: `\x1b[0m`
 };
 
+const HAS_COLOR = process.stdout.isTTY && !/^(1|yes|on|true)$/i.test(`${process.env.NO_COLOR}`);
+
 const Util = {
+  HAS_COLOR,
   program: commander,
   dependOn(cmd, args, s_cwd) {
     child_process.spawnSync(`${process.argv.slice(0, 2).join(' ')} ${cmd} ${(args || []).join(' ')}`, {
@@ -47,7 +50,7 @@ const Util = {
     });
   },
   colorize(color, value) {
-    if (process.stdout.isTTY && value !== undefined && value !== null && value !== '') {
+    if (HAS_COLOR && value !== undefined && value !== null && value !== '') {
       const code = COLORS[color];
       value = `${code}${value}${COLORS.reset}`;
     }
