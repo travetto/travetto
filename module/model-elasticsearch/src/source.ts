@@ -206,10 +206,12 @@ export class ModelElasticsearchSource extends ModelSource {
     if (query.select) {
       const [inc, exc] = ElasticsearchUtil.getSelect(query.select);
       if (inc.length) {
-        search._sourceInclude = inc;
+        // search._sourceInclude = inc;
+        (search as any)['_sourceIncludes'] = inc;
       }
       if (exc.length) {
-        search._sourceExclude = exc;
+        // search._sourceExclude = exc;
+        (search as any)['_sourceExcludes'] = exc;
       }
     }
 
@@ -244,7 +246,7 @@ export class ModelElasticsearchSource extends ModelSource {
     const out: T[] = [];
 
     // determine if id
-    const select = [req._sourceInclude as string[] || [], req._sourceExclude as string[] || []];
+    const select = [(req as any)._sourceIncludes as string[] || [], (req as any)._sourceExcludes as string[] || []];
     const includeId = select[0].includes('_id') || (select[0].length === 0 && !select[1].includes('_id'));
 
     for (const r of results.hits.hits) {
