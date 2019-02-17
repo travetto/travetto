@@ -111,7 +111,7 @@ export class Watcher extends EventEmitter {
 
   private _emit(type: string, payload?: any) {
     if (!this.suppress) {
-      console.trace('Watch Event', type, payload);
+      console.trace('Watch Event', type, payload && payload.file);
       this.emit(type, payload);
     }
   }

@@ -92,5 +92,4 @@ export class Shutdown {
   static execute(exitCode: number = 0, err?: any) {
     this._execute(exitCode, err);
   }
-
 }

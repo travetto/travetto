@@ -89,10 +89,6 @@ class $Compiler {
     // Log transpiled content as needed
     const content = this.sourceManager.get(tsf)!;
 
-    if (Env.trace && !tsf.includes(CompilerUtil.LIBRARY_PATH)) {
-      console.trace(content);
-    }
-
     try {
       const ret = this.moduleManager.compile(m, jsf, content);
       if (ret) {

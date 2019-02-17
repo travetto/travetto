@@ -44,7 +44,7 @@ async function getApps() {
   let registryPath = '../src/registry';
 
   //Handle weirdness of symlinks on windows
-  if (process.env.TRV_FRAMEWORK_DEV === 'win32') {
+  if (process.env.TRV_FRAMEWORK_DEV) {
     registryPath = path.resolve(process.env.__dirname, registryPath);
   }
 
@@ -83,7 +83,7 @@ function fork(cmd, args) {
       shell: false,
       env: {
         ...process.env,
-        ...(process.env.TRV_FRAMEWORK_DEV === 'win32' ? { __dirname } : {}),
+        ...(process.env.TRV_FRAMEWORK_DEV ? { __dirname } : {}),
         TRV_CLI: ''
       }
     });
