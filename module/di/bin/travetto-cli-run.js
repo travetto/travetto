@@ -116,7 +116,7 @@ async function runApp(args) {
     await require('@travetto/base/bin/bootstrap').run();
     let registryPath = '../src/registry';
 
-    // Handle bad symlink behavior on windows
+    // Handle bad symlink behavior
     if (process.env.TRV_FRAMEWORK_DEV) {
       registryPath = path.resolve(process.env.__dirname, registryPath);
     }

@@ -13,7 +13,7 @@ const rel = `${FsUtil.cwd}/node_modules/${pkg}/bin/${path.basename(__filename)}`
 const hasLocal = fs.existsSync(rel);
 const isLocal = FsUtil.toUnix(__filename) === rel;
 
-if (__dirname.includes('travetto/module/') && !process.env.NODE_PRESERVE_SYMLINKS) {
+if (__dirname.includes('travetto/module/') && !process.env.NODE_PRESERVE_SYMLINKS) { // If in framework development mode
   const res = require('child_process').spawnSync(process.argv0, process.argv.slice(1), {
     argv0: process.argv0,
     cwd: process.cwd(),
