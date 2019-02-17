@@ -46,16 +46,13 @@ function moduleLoaderHandler(request, parent) {
 let moduleLoader = moduleLoaderHandler;
 
 if (process.env.TRV_FRAMEWORK_DEV) {
-  const parDir = FsUtil.resolveUnix(cwd, '../../module');
   moduleLoader = (request, parent) => {
     const root = path.dirname(parent.filename);
-    if (request.startsWith('@travetto')) { // Handle import directly
-      request = `${cwd}/node_modules/${request}`;
-    } else if (request.startsWith('.') && root.startsWith(parDir) && !root.startsWith(cwd)) { // Handle relative and sub
-      const relativeRoot = root.split(parDir).pop();
-      request = FsUtil.resolveUnix(cwd, `node_modules/@travetto/${relativeRoot}`, request);
+    const resolved = path.resolve(root, request);
+
+    if (/^[.\/]/.test(request) || request.startsWith('@travetto')) { // If relative or framework
+      request = FsUtil.resolveFrameworkDevFile(request.startsWith('@travetto') ? request : resolved);
     }
-    request = FsUtil.resolveFrameworkDevFile(request);
 
     return moduleLoaderHandler(request, parent);
   }
