@@ -32,6 +32,14 @@ travetto clean
 
 Clears [`Base`](https://github.com/travetto/travetto/tree/master/module/base) compilation cache to handle any inconsistencies that may arise from checking timestamps for cache freshness.
 
+**Terminal: Boot operation**
+```bash
+travetto boot <script> [method]
+  -p, --phase [run phase]  The run phase to execute (default: "bootstrap")
+```
+
+Will execute `<script>` via the bootstrapping of the framework.  This will give you access to all of the framework features with nearly zero overhead.  Additionally you can specify a method to invoke on the results of the `<script>` import. You can also specify a phase to execute with `bootstrap` being the default and most common usecase.
+
 ## Compiler
 
 **Terminal: Compiler usage**
