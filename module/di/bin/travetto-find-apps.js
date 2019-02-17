@@ -41,11 +41,13 @@ async function getApps() {
     (/^(src[\/])/.test(x) || /^[^\/]+[\/]src[\/]/.test(x)) && x.endsWith('.ts') && !x.endsWith('d.ts') &&
     fs.readFileSync(x).toString().includes('@Application')); // Only load files that are candidates
 
-  let registryPath = '../src/registry';
+  let registryPath = 'src/registry';
 
   // Handle weirdness of symlinks
   if (process.env.TRV_FRAMEWORK_DEV) {
-    registryPath = path.resolve(process.env.__dirname, registryPath);
+    registryPath = path.resolve(process.env.TRV_DI_BASE, registryPath);
+  } else {
+    registryPath = path.resolve('..', registryPath);
   }
 
   // Get applications
@@ -83,7 +85,7 @@ function fork(cmd, args) {
       shell: false,
       env: {
         ...process.env,
-        ...(process.env.TRV_FRAMEWORK_DEV ? { __dirname } : {}),
+        TRV_DI_BASE: path.resolve(__dirname, '..'),
         TRV_CLI: ''
       }
     });

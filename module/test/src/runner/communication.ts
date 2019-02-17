@@ -100,11 +100,13 @@ export async function server() {
         Compiler.reset();
         Shutdown.execute(-1);
 
-        let runnerPath = './runner';
+        let runnerPath = 'src/runner/runner';
 
         // Handle bad symlink behavior
         if (process.env.TRV_FRAMEWORK_DEV) {
-          runnerPath = FsUtil.resolveUnix(process.env.__dirname!, runnerPath);
+          runnerPath = FsUtil.resolveUnix(process.env.TRV_TEST_BASE!, runnerPath);
+        } else {
+          runnerPath = FsUtil.resolveUnix('../..', runnerPath);
         }
 
         const { Runner } = await import(runnerPath);
@@ -137,7 +139,10 @@ export function client(concurrency = os.cpus().length - 1) {
   return new ExecutionPool(async () => {
     const worker = new ChildExecution(require.resolve('../../bin/travetto-test-server'), [], true, {
       cwd: Env.cwd,
-      env: { ...process.env, __dirname }
+      env: {
+        ...process.env,
+        TRV_TEST_BASE: FsUtil.resolveUnix(__dirname, '../..')
+      }
     });
 
     worker.init();
