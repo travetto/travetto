@@ -40,10 +40,14 @@ function buildLogging(profile) {
   const trace = isEnvTrue('trace');
   const quietInit = isEnvTrue('quiet_init');
 
-  console.warn = (...args) => console.log('WARN', ...args);
-  console.info = (...args) => console.log('INFO', ...args);
-  console.debug = (...args) => console.log('DEBUG', ...args);
-  console.trace = (...args) => console.log('TRACE', ...args);
+  function log(lvl, ...args) {
+    console.log(new Date().toISOString().split(/[.]/)[0], lvl, '[core]', ...args);
+  }
+
+  console.warn = log.bind(null, 'warn ');
+  console.info = log.bind(null, 'info ');
+  console.debug = log.bind(null, 'debug');
+  console.trace = log.bind(null, 'trace');
 
   if (!trace) {
     console.trace = () => {};
