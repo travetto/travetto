@@ -2,7 +2,7 @@
 
 console.log('Hello World');
 
-console.log('Woah!', { a: { b: { c: { d: 10 } } } });
+console.warn('Woah!', { a: { b: { c: { d: 10 } } } });
 
 console.info('Woah!');
 
