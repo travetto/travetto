@@ -63,8 +63,6 @@ function init() {
 
 if (!process.env.TRV_CLI) {
   require('./init');
-  require('@travetto/base/bin/bootstrap')
-
   runTests({
     format: process.env.TEST_FORMAT || 'tap',
     mode: process.env.TEST_MODE || 'single',
