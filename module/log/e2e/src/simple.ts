@@ -1,4 +1,4 @@
-/// <reference path="../src/typings.d.ts" />
+/// <reference path="../../src/typings.d.ts" />
 
 console.log('Hello World');
 
