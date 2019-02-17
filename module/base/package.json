@@ -7,13 +7,14 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-clean": "bin/travetto-cli-clean.js"
+    "travetto-cli-clean": "bin/travetto-cli-clean.js",
+    "travetto-cli-boot": "bin/travetto-cli-boot.js"
   },
   "dependencies": {
     "@types/node": "^11.9.4",
     "trace": "^3.1.1",
     "tslib": "^1.9.3",
-    "typescript": "^3.3.1"
+    "typescript": "^3.3.3"
   },
   "description": "Bootstrapping, application phase management, environment config and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
