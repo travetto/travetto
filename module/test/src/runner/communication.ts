@@ -102,7 +102,7 @@ export async function server() {
 
         let runnerPath = './runner';
 
-        // Handle bad symlink behavior on windows
+        // Handle bad symlink behavior
         if (process.env.TRV_FRAMEWORK_DEV) {
           runnerPath = FsUtil.resolveUnix(process.env.__dirname!, runnerPath);
         }

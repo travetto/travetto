@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 const path = require('path')
 const fs = require('fs');
 const child_process = require('child_process');
@@ -30,25 +30,25 @@ async function getApps() {
 
   await require('@travetto/base/bin/bootstrap'); // Load base transpiler
 
-  //Initialize upto compiler
+  // Initialize upto compiler
   const { PhaseManager, ScanApp } = require('@travetto/base');
   const mgr = new PhaseManager('bootstrap');
   mgr.load('compiler');
   await mgr.run();
 
-  //Load app files
+  // Load app files
   ScanApp.requireFiles('.ts', x =>
     (/^(src[\/])/.test(x) || /^[^\/]+[\/]src[\/]/.test(x)) && x.endsWith('.ts') && !x.endsWith('d.ts') &&
     fs.readFileSync(x).toString().includes('@Application')); // Only load files that are candidates
 
   let registryPath = '../src/registry';
 
-  //Handle weirdness of symlinks on windows
+  // Handle weirdness of symlinks
   if (process.env.TRV_FRAMEWORK_DEV) {
     registryPath = path.resolve(process.env.__dirname, registryPath);
   }
 
-  //Get applications
+  // Get applications
   const res = require(registryPath).DependencyRegistry.getApplications();
 
   const items = Promise.all(res.map(async x => ({
