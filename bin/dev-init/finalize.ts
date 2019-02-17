@@ -2,22 +2,25 @@ import * as fs from 'fs';
 import { Util } from './util';
 import { DepResolver } from './resolver';
 
+const CLI = 'travetto-cli';
+
 export class Finalize {
   static MOD_ROOT = `${Util.ROOT}/module`;
   static MOD_TPL_ROOT = `${Util.ROOT}/module-template`;
   static NM_ROOT = `${Util.ROOT}/node_modules`;
   static COMMON_LIBS = ['typescript', 'tslib'];
   static COMMON_BIN_SCRIPTS = [
-    ['cli', 'travetto-cli'],
-    ['test', 'travetto-cli-test'],
-    ['base', 'travetto-cli-clean'],
-    ['di', 'travetto-cli-run'],
-    ['email-template', 'travetto-cli-email-template'],
-    ['compiler', 'travetto-cli-compile'],
-    ['rest-aws-lambda', 'travetto-cli-rest-aws-lambda_deploy'],
-    ['rest-aws-lambda', 'travetto-cli-rest-aws-lambda_build-zip'],
-    ['rest-aws-lambda', 'travetto-cli-rest-aws-lambda_build-sam'],
-    ['swagger', 'travetto-cli-swagger-client']
+    ['cli', CLI],
+    ['test', `${CLI}-test`],
+    ['base', `${CLI}-clean`],
+    ['base', `${CLI}-boot`],
+    ['di', `${CLI}-run`],
+    ['email-template', `${CLI}-email-template`],
+    ['compiler', `${CLI}-compile`],
+    ['rest-aws-lambda', `${CLI}-rest-aws-lambda_deploy`],
+    ['rest-aws-lambda', `${CLI}-rest-aws-lambda_build-zip`],
+    ['rest-aws-lambda', `${CLI}-rest-aws-lambda_build-sam`],
+    ['swagger', `${CLI}-swagger-client`]
   ];
 
   static linkCommon(base: string) {
