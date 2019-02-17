@@ -130,7 +130,7 @@ Object.assign(Util.colorize, {
   type: Util.colorize.bind(null, 'blue'),
   description: Util.colorize.bind(null, 'gray'),
   title: Util.colorize.bind(null, 'white'),
-  identifier: Util.colorize.bind(null, 'magenta'),
+  identifier: Util.colorize.bind(null, 'blue'),
   subtitle: Util.colorize.bind(null, 'gray')
 });
 

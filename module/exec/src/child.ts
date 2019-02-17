@@ -31,6 +31,8 @@ export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends E
 
     const [sub, complete] = op(this.command, this.args, finalOpts);
 
+    console.trace(`[${process.pid}] Launched ${sub.pid}`);
+
     if (Env.isTrue('DEBUG')) {
       sub.stdout.pipe(process.stdout);
       sub.stderr.pipe(process.stderr);

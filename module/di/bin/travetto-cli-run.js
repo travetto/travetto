@@ -117,7 +117,7 @@ async function runApp(args) {
     let registryPath = '../src/registry';
 
     // Handle bad symlink behavior on windows
-    if (process.env.TRV_FRAMEWORK_DEV === 'win32') {
+    if (process.env.TRV_FRAMEWORK_DEV) {
       registryPath = path.resolve(process.env.__dirname, registryPath);
     }
 

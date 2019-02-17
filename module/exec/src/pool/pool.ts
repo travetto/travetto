@@ -20,6 +20,7 @@ export class ExecutionPool<T extends ConcurrentExecution> {
     this.pool = createPool({
       create,
       async destroy(x: T): Promise<undefined> {
+        console.trace(`[${process.pid}] Destroying ${(x as any)['pid']}`);
         x.kill();
         return;
       },
@@ -32,6 +33,7 @@ export class ExecutionPool<T extends ConcurrentExecution> {
   }
 
   async release(execution: T) {
+    console.trace(`[${process.pid}] Releasing ${(execution as any)['pid']}`);
     try {
       if (execution.active) {
         if (execution.release) {

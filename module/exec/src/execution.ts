@@ -9,6 +9,7 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
   constructor(proc?: T) {
     if (proc) {
       this._proc = proc;
+      console.trace(`[${proc.pid}] Constructed Execution`);
     }
   }
 
@@ -35,7 +36,7 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
 
   send(eventType: string, data?: any) {
     if (Env.trace) {
-      console.trace(process.pid, 'SENDING', eventType, data);
+      console.trace(`[${process.pid}] Sending [${this._proc.pid}] ${eventType}`);
     }
     if (this._proc.send) {
       this._proc.send({ type: eventType, ...(data || {}) });
@@ -82,7 +83,7 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
     };
     fn = (e: U) => {
       if (Env.trace) {
-        console.trace(process.pid, 'RECEIVING', e.type, e);
+        console.trace(`[${process.pid}] Received [${this._proc.pid}] ${e.type}`);
       }
 
       let res;
@@ -102,6 +103,9 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
   }
 
   kill() {
+    if (this._proc) {
+      console.trace(`[${process.pid}] Killing [${this._proc.pid}]`);
+    }
     this.release();
     delete this._proc;
   }
@@ -112,6 +116,7 @@ export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends Comm
 
   release() {
     if (this._proc) {
+      console.trace(`[${process.pid}] Released [${this._proc.pid}]`);
       this._proc.removeAllListeners('message');
     }
   }

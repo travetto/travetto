@@ -84,14 +84,14 @@ export async function server() {
       try {
         for (const rk of Object.keys(require.cache)) {
           const k = FsUtil.toUnix(rk);
-          if (/node_modules/.test(k) && (!/@travetto/.test(k) || /@travetto\/[^/]+\/node_modules/.test(k))) {
-            continue;
-          }
-          if (k.endsWith('.ts') &&
-            !/@travetto\/(base|config|compiler|exec)/.test(k) &&
-            !(k.startsWith(FsUtil.toUnix(__filename).replace(/.[tj]s$/, ''))) &&
-            !/support\/(phase|transformer)[.]/.test(k)
-          ) {
+          const isTs = k.endsWith('.ts');
+          const isFramework = /travetto(\/module)?\/([^/]+)\/(src|index)/.test(k);
+          const isFrameworkCore = isFramework && /travetto(\/module)?\/(base|config|compiler|exec|yaml)\/(src|index)/.test(k);
+          const isSupport = /travetto(\/module)?\/([^/]+)\/support\//.test(k);
+          const isSelf = k.replace(/[.][tj]s$/, '').endsWith('test/src/runner/communication');
+
+          if (!isSelf && !isSupport && isTs && (!isFramework || !isFrameworkCore)) {
+            console.debug(`[${process.pid}]`, 'Unloading', rk);
             Compiler.unload(rk, false);
           }
         }
@@ -103,7 +103,7 @@ export async function server() {
         let runnerPath = './runner';
 
         // Handle bad symlink behavior on windows
-        if (process.env.TRV_FRAMEWORK_DEV === 'win32') {
+        if (process.env.TRV_FRAMEWORK_DEV) {
           runnerPath = FsUtil.resolveUnix(process.env.__dirname!, runnerPath);
         }
 

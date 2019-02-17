@@ -25,12 +25,10 @@ function init() {
   const { Util } = require('@travetto/cli/src/util');
   const Col = Util.colorize;
 
-  const cpuCount = os.cpus().length - 1;
-
   return Util.program.command('test')
     .arguments('[regexes...]')
     .option('-f, --format <format>', 'Output format for test results', /^(tap|json|jsonStream|noop|exec|event)$/, 'tap')
-    .option('-c, --concurrency <concurrency>', `Number of tests to run concurrently (default: ${cpuCount})`, undefined, cpuCount)
+    .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', os.cpus().length - 1)
     .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
     .action(async (args, cmd) => {
       if (args.length === 0) {
