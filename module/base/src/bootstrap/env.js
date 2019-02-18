@@ -1,6 +1,6 @@
 const { FsUtil } = require('./fs-util');
 
-//@ts-check
+// @ts-check
 const PROD_KEY = 'prod';
 
 const envVal = (k, def) => {
@@ -35,8 +35,8 @@ function checkWatch() {
   return { watch: isEnvTrue('watch') };
 }
 
-function buildLogging(profile) {
-  const debug = isEnvTrue('debug') || (profile.dev && !isEnvFalse('debug'));
+function buildLogging(prof) {
+  const debug = isEnvTrue('debug') || (prof.dev && !isEnvFalse('debug'));
   const trace = isEnvTrue('trace');
   const quietInit = isEnvTrue('quiet_init');
 
@@ -102,14 +102,14 @@ function buildProfile() {
 const profile = buildProfile();
 
 const Env = [
-  { cwd: FsUtil.cwd },
-  { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal, getInt: envIntVal },
-  profile,
-  buildLogging(profile),
-  checkWatch(),
-  checkDocker()
-].reduce((acc, el) =>
-  Object.assign(acc, el));
+    { cwd: FsUtil.cwd },
+    { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal, getInt: envIntVal },
+    profile,
+    buildLogging(profile),
+    checkWatch(),
+    checkDocker()
+  ]
+  .reduce((acc, el) => ({ ...acc, ...el }), {});
 
 function showEnv() {
   if (!Env.quietInit) {

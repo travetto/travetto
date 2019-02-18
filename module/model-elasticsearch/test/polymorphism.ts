@@ -77,20 +77,20 @@ class TestPolymorphism extends BaseElasticsearchTest {
     const all = await service.getAllByQuery(Person, { where: {} });
     assert(all.length === 3);
 
-    const didx = all.findIndex(x => x instanceof Doctor);
-    assert(all[didx] instanceof Doctor);
-    assert((all[didx] as Doctor).specialty === 'feet');
-    assert(all[didx].name === 'bob');
+    const dIdx = all.findIndex(x => x instanceof Doctor);
+    assert(all[dIdx] instanceof Doctor);
+    assert((all[dIdx] as Doctor).specialty === 'feet');
+    assert(all[dIdx].name === 'bob');
 
-    const fidx = all.findIndex(x => x instanceof Firefighter);
-    assert(all[fidx] instanceof Firefighter);
-    assert((all[fidx] as Firefighter).firehouse === 20);
-    assert(all[fidx].name === 'rob');
+    const fIdx = all.findIndex(x => x instanceof Firefighter);
+    assert(all[fIdx] instanceof Firefighter);
+    assert((all[fIdx] as Firefighter).firehouse === 20);
+    assert(all[fIdx].name === 'rob');
 
-    const eidx = all.findIndex(x => x instanceof Engineer);
-    assert(all[eidx] instanceof Engineer);
-    assert((all[eidx] as Engineer).major === 'oranges');
-    assert(all[eidx].name === 'cob');
+    const eIdx = all.findIndex(x => x instanceof Engineer);
+    assert(all[eIdx] instanceof Engineer);
+    assert((all[eIdx] as Engineer).major === 'oranges');
+    assert(all[eIdx].name === 'cob');
 
     const engineers = await service.getAllByQuery(Engineer, {});
     assert(engineers.length === 1);
@@ -108,15 +108,15 @@ class TestPolymorphism extends BaseElasticsearchTest {
   async testBulk() {
     const service = await DependencyRegistry.getInstance(ModelService);
     const created1 = await service.save(Doctor, Doctor.from({ name: 'greg', specialty: 'hair' }));
-    const created2 = await service.save(Doctor, Doctor.from({ name: 'breg', specialty: 'hearing' }));
-    const created3 = await service.save(Doctor, Doctor.from({ name: 'wreg', specialty: 'eyess' }));
+    const created2 = await service.save(Doctor, Doctor.from({ name: 'b.reg', specialty: 'hearing' }));
+    const created3 = await service.save(Doctor, Doctor.from({ name: 'w.reg', specialty: 'eyes' }));
 
     const o = await service.bulkProcess(Person, [
       { insert: Doctor.from({ name: 'bob', speciality: 'feet' }) },
       { upsert: Firefighter.from({ id: '3534aaaa3c19', name: 'rob', firehouse: 20 }) },
       { upsert: Firefighter.from({ name: 'rob', firehouse: 20 }) },
       { update: Doctor.from(created1) },
-      { upsert: Doctor.from({ id: created2.id, name: 'shmeg', speciality: 'arms' }) },
+      { upsert: Doctor.from({ id: created2.id, name: 'sh.meg', speciality: 'arms' }) },
       { delete: Doctor.from({ id: created3.id }) }
     ]);
 

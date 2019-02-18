@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 
 const path = require('path');
 const fs = require('fs');
@@ -19,10 +19,10 @@ function init() {
 
       FsUtil.mkdirp(path.dirname(cmd.output));
 
-      await require('@travetto/base/bin/bootstrap').run()
+      await require('@travetto/base/bin/bootstrap').run();
       const { ControllerRegistry } = require('@travetto/rest');
 
-      await ControllerRegistry.init()
+      await ControllerRegistry.init();
       const controllers = ControllerRegistry.getClasses().map(x => ControllerRegistry.get(x));
 
       const { template } = require(FsUtil.resolveUnix(__dirname, '../resources/template.yml.js'));

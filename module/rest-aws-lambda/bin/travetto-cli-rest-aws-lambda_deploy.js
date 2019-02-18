@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 
 const { Util } = require('@travetto/cli/src/util');
 

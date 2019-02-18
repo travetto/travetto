@@ -1,10 +1,10 @@
 // @ts-check
-const path = require('path')
+const path = require('path');
 const fs = require('fs');
 const child_process = require('child_process');
 const util = require('util');
 const config = 'di-app-cache.json';
-const pcwd = process.cwd().replace(/[\\\/]+/g, '/');
+const pCwd = process.cwd().replace(/[\\\/]+/g, '/');
 
 const og = console.log;
 
@@ -15,11 +15,10 @@ function maxTime(stat) {
 const fsLstat = util.promisify(fs.lstat);
 
 /**
- * 
- * @param {string} filename 
+ * @param {string} filename
  */
 function getApp(filename) {
-  const [, root] = filename.split(pcwd);
+  const [, root] = filename.split(pCwd);
   const [, first] = root.split('/');
   return first === 'src' ? '' : first;
 }
@@ -30,7 +29,7 @@ async function getApps() {
 
   await require('@travetto/base/bin/bootstrap'); // Load base transpiler
 
-  // Initialize upto compiler
+  // Initialize up to compiler
   const { PhaseManager, ScanApp } = require('@travetto/base');
   const mgr = new PhaseManager('bootstrap');
   mgr.load('compiler');
@@ -78,8 +77,8 @@ async function getApps() {
  */
 function fork(cmd, args) {
   return new Promise((resolve, reject) => {
-    let text = [];
-    let err = [];
+    const text = [];
+    const err = [];
     const proc = child_process.spawn(process.argv0, [cmd, ...(args || [])], {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       shell: false,
@@ -104,12 +103,14 @@ function fork(cmd, args) {
 async function getCachedAppList() {
   const { AppCache } = require('@travetto/base/src/bootstrap/cache'); // Should not init the app, only load cache
   try {
-    //Read cache it
+    // Read cache it
+    let text;
     if (!AppCache.hasEntry(config)) {
-      const text = await fork(__filename);
+      text = await fork(__filename);
       AppCache.writeEntry(config, text);
+    } else {
+      text = AppCache.readEntry(config);
     }
-    const text = AppCache.readEntry(config);
     const res = JSON.parse(text);
 
     for (const el of res) {

@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 const fs = require('fs');
 const { FsUtil } = require('./fs-util');
 

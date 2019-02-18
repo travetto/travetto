@@ -38,7 +38,7 @@ travetto boot <script> [method]
   -p, --phase [run phase]  The run phase to execute (default: "bootstrap")
 ```
 
-Will execute `<script>` via the bootstrapping of the framework.  This will give you access to all of the framework features with nearly zero overhead.  Additionally you can specify a method to invoke on the results of the `<script>` import. You can also specify a phase to execute with `bootstrap` being the default and most common usecase.
+Will execute `<script>` via the bootstrapping of the framework.  This will give you access to all of the framework features with nearly zero overhead.  Additionally you can specify a method to invoke on the results of the `<script>` import. You can also specify a phase to execute with `bootstrap` being the default and most common use-case.
 
 ## Compiler
 

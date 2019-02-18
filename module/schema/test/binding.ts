@@ -162,9 +162,9 @@ class DataBinding {
 
     assert(simple.regex instanceof RegExp);
     assert(simple.regex.source === 'helloWorld');
-    assert(simple.regex.ignoreCase === true);
-    assert(simple.regex.global === false);
-    assert(simple.regex.dotAll === false);
+    assert(simple.regex.ignoreCase);
+    assert(!simple.regex.global);
+    assert(!simple.regex.dotAll);
 
     const item2 = {
       regex: 'helloWorld'
@@ -174,9 +174,9 @@ class DataBinding {
 
     assert(simple2.regex instanceof RegExp);
     assert(simple2.regex.source === 'helloWorld');
-    assert(simple2.regex.ignoreCase === false);
-    assert(simple2.regex.global === false);
-    assert(simple2.regex.dotAll === false);
+    assert(!simple2.regex.ignoreCase);
+    assert(!simple2.regex.global);
+    assert(!simple2.regex.dotAll);
 
     const item3 = {
       regex: '/helloWorld'
@@ -186,9 +186,9 @@ class DataBinding {
 
     assert(simple3.regex instanceof RegExp);
     assert(simple3.regex.source === '\\/helloWorld');
-    assert(simple3.regex.ignoreCase === false);
-    assert(simple3.regex.global === false);
-    assert(simple3.regex.dotAll === false);
+    assert(!simple3.regex.ignoreCase);
+    assert(!simple3.regex.global);
+    assert(!simple3.regex.dotAll);
 
   }
 }

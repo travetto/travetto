@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 const os = require('os');
 
 async function runTests(opts, args) {
@@ -57,7 +57,7 @@ function init() {
 
       await runTests(cmd, args);
     });
-};
+}
 
 if (!process.env.TRV_CLI) {
   require('./init');

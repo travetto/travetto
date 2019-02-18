@@ -30,7 +30,7 @@ interface State {
 export class Runner {
   constructor(private state: State) {
     if (!process.send) { // Remove if not child
-      Shutdown.onShutdown(`Remove-Root-Tempdir`, // Remove when done, this is for single interaction
+      Shutdown.onShutdown(`Remove-Root-TempDir`, // Remove when done, this is for single interaction
         () => new FileCache(Env.cwd).clear(), true);
     }
   }

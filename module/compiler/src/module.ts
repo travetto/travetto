@@ -1,9 +1,9 @@
+/// <reference types="node" />
+
 import { Env } from '@travetto/base';
 
 import { RetargettingHandler } from './proxy';
 import { CompilerUtil } from './util';
-
-const Module = require('module') as typeof NodeJS.Module;
 
 declare namespace NodeJS {
   class Module {
@@ -11,6 +11,8 @@ declare namespace NodeJS {
     static _load(request: string, parent: NodeModule): NodeModule;
   }
 }
+
+const Module = require('module') as typeof NodeJS.Module;
 
 const originalLoader = Module._load.bind(Module);
 

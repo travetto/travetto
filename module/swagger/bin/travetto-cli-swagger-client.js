@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 const { Util } = require('@travetto/cli/src/util');
 
 function init() {
@@ -17,7 +17,7 @@ function init() {
       const { ClientGenerate } = require('../src/client-generate');
       const { DependencyRegistry } = require('@travetto/di');
 
-      const instance = await DependencyRegistry.getInstance(ClientGenerate)
+      const instance = await DependencyRegistry.getInstance(ClientGenerate);
       await instance.generate();
     });
 }

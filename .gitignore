@@ -1,4 +1,5 @@
 module/*/node_modules/**
+module/*/build/**
 build/**
 rpm_build/**
 .vscode/

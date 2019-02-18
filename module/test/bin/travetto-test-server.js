@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 
 require('./init');
 require('@travetto/base/bin/bootstrap');
