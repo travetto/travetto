@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 const commander = require('commander');
 const child_process = require('child_process');
 
@@ -31,8 +31,8 @@ const Util = {
   },
   fork(cmd, args, env) {
     return new Promise((resolve, reject) => {
-      let text = [];
-      let err = [];
+      const text = [];
+      const err = [];
       const proc = child_process.fork(cmd, args || [], {
         env: { ...process.env, ...(env || {}) },
         cwd: FsUtil.cwd,
@@ -56,26 +56,26 @@ const Util = {
     }
     return value;
   },
-  showHelp(commander, code = 0) {
-    commander.outputHelp((text) => {
+  showHelp(cmd, code = 0) {
+    cmd.outputHelp((text) => {
       function extract(key) {
-        let out;
+        let sub;
         if (text.includes(key)) {
-          const start = text.indexOf(key)
+          const start = text.indexOf(key);
           let end = text.indexOf('\n\n', start);
           if (end < 0) {
             end = text.length;
           }
-          out = text.substring(start, end);
+          sub = text.substring(start, end);
           text = text.substring(end);
         }
-        return out;
+        return sub;
       }
       const usage = extract('Usage:');
       const options = extract('Options:');
       const commands = extract('Commands:');
 
-      let out = [];
+      const out = [];
       if (usage) {
         out.push(
           usage
@@ -86,10 +86,10 @@ const Util = {
         out.push(
           options
           .replace(/(\s*)(-[^, ]+)(,?\s*)(--\S+)?((\s+)?((?:\[[^\]]+\])|(?:\<[^>]+>)))?((\s+)(.*))?/g,
-            (p, spacing, simpleParam, psep, fullParam, sub, subSp, subVal, desc, descSp, descVal) => {
+            (p, spacing, simpleParam, pSep, fullParam, sub, subSp, subVal, desc, descSp, descVal) => {
               return [spacing,
                   Util.colorize['param'](simpleParam),
-                  psep,
+                  pSep,
                   Util.colorize['param'](fullParam),
                   subSp,
                   Util.colorize['type'](subVal),
@@ -114,7 +114,7 @@ const Util = {
 
       out.push(text);
 
-      return out.filter(x => !!x).map(x => x.trim()).join('\n\n') + '\n';
+      return `${out.filter(x => !!x).map(x => x.trim()).join('\n\n')}\n`;
     });
     process.exit(code);
   }

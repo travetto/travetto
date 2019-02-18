@@ -3,7 +3,7 @@ const readline = require('readline');
 
 /**
  * @param {string} title
- * @param {string[]} items 
+ * @param {string[]} items
  * @param {boolean} [multiSelect]
  */
 function select(title, items, multiSelect) {
@@ -37,7 +37,7 @@ function select(title, items, multiSelect) {
   return new Promise((resolve, reject) => {
     list.list();
     // @ts-ignore
-    list.on('select', x => resolve(multiSelect ? x.map(x => x.value) : x[0].value));
+    list.on('select', x => resolve(multiSelect ? x.map(y => y.value) : x[0].value));
     // @ts-ignore
     list.on('cancel', x => reject(new Error('Selection cancelled')));
   }).then(a => cleanup() || a, a => { cleanup(); throw a; });

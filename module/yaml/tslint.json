@@ -1,4 +1,5 @@
 {
+  "jsRules": true,
   "rules": {
     "class-name": true,
     "comment-format": [
@@ -68,13 +69,11 @@
     "no-consecutive-blank-lines": true,
     "prefer-object-spread": true,
     "no-invalid-template-strings": true,
-    "typeof-compare": true,
     "no-sparse-arrays": true,
     "no-stateless-class": false,
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
     "no-unused-expression": false,
-    "no-unused-variable": true,
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "object-literal-shorthand": true,

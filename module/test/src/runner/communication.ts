@@ -45,7 +45,7 @@ export const Events = {
 
 export async function server() {
 
-  Shutdown.onShutdown(`Remove-Tempdir`, () => new FileCache(Env.cwd).clear(), true);
+  Shutdown.onShutdown(`Remove-TempDir`, () => new FileCache(Env.cwd).clear(), true);
 
   let Compiler: any;
 

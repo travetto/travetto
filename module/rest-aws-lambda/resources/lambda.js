@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 let inst;
 exports.handler = async (event, context) => {
   if (!inst) {
@@ -9,7 +9,7 @@ exports.handler = async (event, context) => {
     await DependencyRegistry.init();
 
     const { RestApp } = require('@travetto/rest');
-    const app = await DependencyRegistry.getInstance(RestApp)
+    const app = await DependencyRegistry.getInstance(RestApp);
     await app.run();
 
     inst = app['app'];

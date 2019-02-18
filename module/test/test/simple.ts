@@ -55,7 +55,7 @@ class Simple {
     });
 
     assert.doesNotThrow(() => {
-      let a = 5;
+      const c = 5;
     });
 
     await assert.rejects(async () => {
@@ -63,7 +63,7 @@ class Simple {
     });
 
     await assert.doesNotReject(async () => {
-      let a = 5;
+      const c = 5;
     });
 
     assert.throws(() => {
@@ -74,7 +74,7 @@ class Simple {
 
     assert.throws(() => {
       assert.throws(() => {
-        let a = 5;
+        const c = 5;
       });
     });
 
@@ -85,7 +85,7 @@ class Simple {
     });
     await assert.rejects(async () => {
       await assert.rejects(async () => {
-        let a = 5;
+        const c = 5;
       });
     });
   }

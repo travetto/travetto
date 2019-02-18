@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 const commander = require('commander');
 
 commander
@@ -25,13 +25,13 @@ const Execute = {
     if (fs.existsSync(BIN_DIR)) {
       const files = fs.readdirSync(BIN_DIR).filter(x => x.startsWith(`${PREFIX}-`));
       for (const f of files) {
-        this.requireModule(f);
+        Execute.requireModule(f);
       }
     }
   },
   loadSinglePlugin(cmd) {
     try {
-      return this.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
+      return Execute.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
     } catch (e) {
       console.error('Unknown command', cmd);
       Util.showHelp(commander, 1);
@@ -43,12 +43,12 @@ const Execute = {
     const wantsHelp = args.includes('-h') || args.includes('--help');
 
     if (hasCmd) {
-      const prog = this.loadSinglePlugin(cmd);
+      const prog = Execute.loadSinglePlugin(cmd);
       if (wantsHelp) {
         Util.showHelp(prog);
       }
     } else {
-      this.loadAllPlugins();
+      Execute.loadAllPlugins();
       if (!cmd || wantsHelp) {
         Util.showHelp(commander);
       }
@@ -56,6 +56,6 @@ const Execute = {
 
     commander.parse(args);
   }
-}
+};
 
 module.exports = { Execute };

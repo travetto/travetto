@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 
 function clean() {
   require('../src/bootstrap/cache').AppCache.clear();

@@ -25,7 +25,7 @@ ${cont.endpoints.map(ep => `
           Properties:
             Path: ${(cont.basePath + ep.path).replace(/\/+/g, '/').replace(/:([A-Za-z0-9_]+)/g, (a, n) => `{${n}}`)}
             Method: ${ep.method.toUpperCase()}
-`.replace(/^\n|\n$/g,'')).join('\n')}
-`.replace(/^\n|\n$/g,'')).join('\n')}
+`.replace(/^\n|\n$/g, '')).join('\n')}
+`.replace(/^\n|\n$/g, '')).join('\n')}
 `.trim();
-}
+};

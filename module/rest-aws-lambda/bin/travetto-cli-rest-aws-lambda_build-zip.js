@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 
 const path = require('path');
 const fs = require('fs');
@@ -35,9 +35,11 @@ function init() {
 
       exec(`cp -r * ${cmd.workspace}`, { cwd: FsUtil.cwd });
 
-      writeFile(`${cmd.workspace}/index.js`,
-        'process.env.TRV_CACHE_DIR = `${__dirname}/cache`;\n' +
-        readFile(`${__dirname}/../resources/lambda.js`));
+      // tslint:disable-next-line: no-invalid-template-strings
+      const dirVar = 'process.env.TRV_CACHE_DIR = `${__dirname}/cache`;';
+      const lambda = readFile(`${__dirname}/../resources/lambda.js`);
+
+      writeFile(`${cmd.workspace}/index.js`, `${dirVar}\n${lambda}`);
 
       await Util.dependOn('compile', ['-o', './cache', '-r', '/var/task'], cmd.workspace);
 

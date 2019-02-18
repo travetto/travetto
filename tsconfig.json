@@ -1,4 +1,5 @@
 {
+  "exclude": ["module/**"],
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2018",

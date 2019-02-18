@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const F_ROOT = fs.realpathSync(path.resolve(__dirname, '..').replace(/[\\\/]+/g, '/');
+const F_ROOT = fs.realpathSync(path.resolve(__dirname, '..').replace(/[\\\/]+/g, '/'));
 const ROOT = path.dirname(F_ROOT).replace(/[\\\/]+/g, '/'); // Move up from ./bin folder
 
 export class Util {
@@ -9,7 +9,7 @@ export class Util {
   static ROOT = ROOT;
   static F_ROOT = F_ROOT;
 
-  static copyTemplateFiles(src, base) {
+  static copyTemplateFiles(src: string, base: string) {
     for (const f of fs.readdirSync(src)) {
       const srcFile = `${src}/${f}`;
       const destFile = `${base}/${f}`;

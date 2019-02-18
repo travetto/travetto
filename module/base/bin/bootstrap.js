@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-//@ts-check
+// @ts-check
 const path = require('path');
 const Module = require('module');
 
@@ -9,7 +9,7 @@ let ts = global.ts = new Proxy({}, {
   get(t, p, r) { ts = global['ts'] = require('typescript'); return ts[p]; }
 });
 
-//Simple bootstrap to load compiler
+// Simple bootstrap to load compiler
 const { FsUtil } = require('../src/bootstrap/fs-util');
 const { Env, showEnv } = require('../src/bootstrap/env');
 const { AppCache } = require('../src/bootstrap/cache');
@@ -30,7 +30,7 @@ function moduleLoaderHandler(request, parent) {
   if (!parent.loaded && (!mod || !mod._$TRV)) {
     let p;
     try {
-      // @ts-ignore      
+      // @ts-ignore
       p = Module._resolveFilename(request, parent);
     } catch (err) {
       // Ignore if we can't resolve
@@ -55,7 +55,7 @@ if (process.env.TRV_FRAMEWORK_DEV) {
     }
 
     return moduleLoaderHandler(request, parent);
-  }
+  };
 }
 
 // @ts-ignore, catch cyclical dependencies

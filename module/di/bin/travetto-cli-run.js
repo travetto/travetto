@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 const path = require('path');
 let colorize;
 
@@ -31,12 +31,12 @@ function getAppUsage(app) {
       const nm = colorize.param(x.name);
       const def = x.def !== undefined ? colorize.input(x.def) : undefined;
 
-      return x.optional ?  
+      return x.optional ?
       (x.def !== undefined ?
-        `[${nm}:${type}=${def}]` : 
+        `[${nm}:${type}=${def}]` :
         `[${nm}:${type}]`
       ) : `${nm}:${type}`;
-    }).join(' ')}`
+    }).join(' ')}`;
   }
 
   return usage;
@@ -45,7 +45,7 @@ function getAppUsage(app) {
 function generateAppHelpList(apps, cmd) {
   const choices = [];
   for (const conf of apps) {
-    let lines = [];
+    const lines = [];
 
     const root = conf.appRoot ? `[${colorize.subtitle(conf.appRoot)}] ` : '';
     const usage = getAppUsage(conf);
@@ -95,16 +95,17 @@ function processApplicationParam(config, param) {
 
 async function runApp(args) {
   let app;
-  let [name, ...sub] = args;
+  const name = args[0];
+  let [, ...sub] = args;
   try {
     app = (await getAppList()).find(x => x.name === name);
 
     if (app) {
       const appParams = app.params || [];
       sub = sub.map((x, i) => appParams[i] === undefined ? x : processApplicationParam(appParams[i], x));
-      const reqdCount = appParams.filter(x => !x.optional).length;
-      if (sub.length < reqdCount) {
-        throw new Error(`Invalid parameter count: received ${colorize.input(sub.length)} but needed ${colorize.input(reqdCount)}`);
+      const reqCount = appParams.filter(x => !x.optional).length;
+      if (sub.length < reqCount) {
+        throw new Error(`Invalid parameter count: received ${colorize.input(sub.length)} but needed ${colorize.input(reqCount)}`);
       }
     }
 
@@ -169,7 +170,7 @@ function init() {
         .filter(x => !!x)
         .map(x => x.trim());
 
-      process.env.ENV = cmd.env; //Preemptively set b/c env changes how we compile some things
+      process.env.ENV = cmd.env; // Preemptively set b/c env changes how we compile some things
 
       const apps = await getAppList();
       const selected = apps.find(x => x.name === app);
@@ -181,17 +182,25 @@ function init() {
         Util.showHelp(cmd);
       }
 
-      if (cmd.app) process.env.APP_ROOT = cmd.app;
-      if (cmd.env) process.env.ENV = cmd.env;
-      if (cmd.profile) process.env.PROFILE = cmd.profile.join(',');
-      if (cmd.watch) process.env.WATCH = `${cmd.watch}`;
+      if (cmd.app) {
+        process.env.APP_ROOT = cmd.app;
+      }
+      if (cmd.env) {
+        process.env.ENV = cmd.env;
+      }
+      if (cmd.profile) {
+        process.env.PROFILE = cmd.profile.join(',');
+      }
+      if (cmd.watch) {
+        process.env.WATCH = `${cmd.watch}`;
+      }
 
       runApp([app, ...args]);
     });
 }
 
 if (!process.env.TRV_CLI) {
-  runApp(process.argv.slice(2)); //If loaded directly as main entry, run, idx 2 is where non-node arguments start at
+  runApp(process.argv.slice(2)); // If loaded directly as main entry, run, idx 2 is where non-node arguments start at
 }
 
 module.exports = { init };

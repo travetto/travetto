@@ -143,6 +143,6 @@ const ScanFs = {
       .filter(ScanFs.isNotDir)
       .map(x => ({ name: x.file, data: fs.readFileSync(x.file).toString() }));
   }
-}
+};
 
 module.exports = { ScanFs };

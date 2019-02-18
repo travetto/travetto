@@ -87,8 +87,8 @@ exports.Server = function Server({ handler, port, open, reloadRate }) {
   }).listen(port);
 
   if (open) {
-    const url = `http://localhost:${port}`;
-    console.log(`Now running at ${url}`);
-    require('./os').launch(url);
+    const finalUrl = `http://localhost:${port}`;
+    console.log(`Now running at ${finalUrl}`);
+    require('./os').launch(finalUrl);
   }
 };

@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 
 async function loadFiles() {
   await require(`@travetto/base/bin/bootstrap`).run();
@@ -40,7 +40,7 @@ async function writeToOutput(cmd, files) {
   }
 
   // Find final destination
-  let outDir = FsUtil.resolveUnix(FsUtil.cwd, cmd.output || AppCache.cacheDir);
+  const outDir = FsUtil.resolveUnix(FsUtil.cwd, cmd.output || AppCache.cacheDir);
 
   const FILES = `ScanApp.setFileEntries('.ts', [${files.map(x => `'${x.module.replace(/node_modules\/@travetto/g, '#')}'`).join(', ')}])`;
 
