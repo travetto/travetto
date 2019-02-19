@@ -185,4 +185,19 @@ export class SchemaValidator {
     return await Promise.all<T>((obj || [])
       .map((o, i) => this.validate(o, view)));
   }
+
+  static async validatePartial<T>(o: T, view?: string): Promise<T> {
+    try {
+      await this.validate(o, view);
+    } catch (e) {
+      if (e instanceof ValidationErrors) { // Don't check required fields
+        const errs = e.errors.filter(x => x.kind !== 'required');
+        if (errs.length) {
+          e.errors = errs;
+          throw e;
+        }
+      }
+    }
+    return o;
+  }
 }

@@ -27,7 +27,7 @@ export interface IModelSource {
   update<T extends ModelCore>(cls: Class<T>, model: T): Promise<T>;
   updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number>;
   updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T>;
-  updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>): Promise<T>;
+  updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, model: Partial<T>): Promise<T>;
 
   suggestField<T extends ModelCore, U = T>(
     cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
