@@ -14,8 +14,8 @@ export class WorkerClient<U extends WorkerEvent = WorkerEvent> extends Execution
     if (res && this.timeout) {
       if (!this.idle) {
         this.idle = new IdleManager(this.timeout);
+        this._proc.on('message', () => this.idle.extend());
       }
-      this._proc.on('message', () => this.idle.extend());
       this.idle.start();
     }
 
@@ -26,7 +26,6 @@ export class WorkerClient<U extends WorkerEvent = WorkerEvent> extends Execution
     super.kill();
     if (this.idle) {
       this.idle.stop();
-      delete this.idle;
     }
   }
 }

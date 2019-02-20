@@ -122,6 +122,10 @@ export class HttpRequest {
           }
         });
 
+        msg.on('error', err => {
+          reject({ message: err.message, status: msg.statusCode || 500, headers: msg.headers });
+        });
+
         msg.on('end', () => {
           const message = Buffer.concat(body);
           if ((msg.statusCode || 200) > 299) {
@@ -139,9 +143,11 @@ export class HttpRequest {
       });
 
       req.on('error', reject);
+
       if ((requestOpts.method === 'PUT' || requestOpts.method === 'POST') && payload !== undefined) {
         req.write(payload);
       }
+
       req.end();
     });
   }
@@ -167,6 +173,7 @@ export class HttpRequest {
       readable.pipe(writable)
         .on('finish', resolve)
         .on('end', resolve)
+        .on('close', resolve)
         .on('error', reject);
     });
   }

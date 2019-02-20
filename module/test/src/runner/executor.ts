@@ -148,6 +148,7 @@ export class TestExecutor {
   }
 
   static async executeSuite(consumer: Consumer, suite: SuiteConfig) {
+
     const result: SuiteResult = {
       success: 0,
       fail: 0,
