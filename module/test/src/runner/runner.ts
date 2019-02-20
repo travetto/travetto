@@ -1,5 +1,5 @@
 import { FileCache, PhaseManager, Shutdown, Env, FsUtil } from '@travetto/base';
-import { ExecUtil, ArrayExecutionSource } from '@travetto/exec';
+import { WorkerUtil, WorkerPool, WorkerArrayInputSource } from '@travetto/worker';
 
 import { TestExecutor } from './executor';
 import { Consumer } from '../consumer/types';
@@ -9,7 +9,9 @@ import { EventStream } from '../consumer/event-stream';
 import { TapEmitter } from '../consumer/tap';
 import { AllResultsCollector } from '../consumer/collector';
 
-import { client, Events } from './communication';
+import { workerFactory } from '../worker/factory';
+import { Events } from '../worker/types';
+
 import { watch } from './watcher';
 
 const FORMAT_MAPPING = {
@@ -101,9 +103,14 @@ export class Runner {
 
     await new PhaseManager('test').load().run();
 
-    const pool = client(this.state.concurrency);
+    const pool = new WorkerPool(workerFactory, {
+      idleTimeoutMillis: 10000,
+      min: Env.isTrue('EXECUTION_REUSABLE') ? 1 : 0,
+      max: this.state.concurrency
+    });
+
     await pool.process(
-      new ArrayExecutionSource(files),
+      new WorkerArrayInputSource(files),
       async (file, exe) => {
         exe.listen(consumer.onEvent as any);
 
@@ -111,7 +118,7 @@ export class Runner {
         exe.send(Events.RUN, { file });
 
         const { error } = await complete;
-        const deserialized = ExecUtil.deserializeError(error);
+        const deserialized = WorkerUtil.deserializeError(error);
         errors.push(deserialized);
       }
     );

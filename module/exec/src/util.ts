@@ -1,24 +1,11 @@
-import * as cp from 'child_process';
-import { AppError } from '@travetto/base';
+import * as child_process from 'child_process';
+import * as net from 'net';
 
+import { AppError } from '@travetto/base';
 import { ExecutionOptions, ExecutionResult } from './types';
 
-export type WithOpts<T> = T & ExecutionOptions;
-
 export class ExecUtil {
-
-  private static getArgs(cmd: string) {
-    let args: string[] = [];
-
-    if (cmd.indexOf(' ') > 0) {
-      [cmd, ...args] = cmd.split(' ');
-    }
-
-    console.debug('exec:', [cmd, ...args].join(' '));
-    return { cmd, args };
-  }
-
-  static enhanceProcess(p: cp.ChildProcess, options: ExecutionOptions, cmd: string) {
+  static enhanceProcess(p: child_process.ChildProcess, options: ExecutionOptions, cmd: string) {
     const timeout = options.timeout;
 
     const prom = new Promise<ExecutionResult>((resolve, reject) => {
@@ -68,54 +55,52 @@ export class ExecUtil {
     return prom;
   }
 
-  static spawn(cmd: string, args: string[], options: WithOpts<cp.SpawnOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
+  static spawn(cmd: string, args: string[], options: ExecutionOptions & child_process.SpawnOptions = {}) {
     args = args.map(x => `${x}`);
-    const p = cp.spawn(cmd, args, { shell: true, ...(options as cp.SpawnOptions) });
-    return [p, ExecUtil.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`)];
+    const p = child_process.spawn(cmd, args, { shell: false, ...options });
+    const prom = ExecUtil.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
+    return [p, prom] as [typeof p, typeof prom];
   }
 
-  static fork(cmd: string, args: string[], options: WithOpts<cp.ForkOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
+  static fork(cmd: string, args: string[], options: ExecutionOptions & child_process.ForkOptions = {}) {
     args = args.map(x => `${x}`);
-    const p = cp.fork(cmd, args, options);
-    return [p, ExecUtil.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`)];
+    const p = child_process.fork(cmd, args, options);
+    const prom = ExecUtil.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
+    return [p, prom] as [typeof p, typeof prom];
   }
 
-  static exec(cmd: string, args: string[], options: WithOpts<cp.ExecOptions> = {}): [cp.ChildProcess, Promise<ExecutionResult>] {
+  static exec(cmd: string, args: string[], options: ExecutionOptions & child_process.ExecOptions = {}) {
     args = args.map(x => `${x}`);
     const cmdStr = `${cmd} ${args.join(' ')}`;
-    const p = cp.exec(cmdStr, options);
-    return [p, ExecUtil.enhanceProcess(p, options, cmdStr)];
+    const p = child_process.exec(cmdStr, options);
+    const prom = ExecUtil.enhanceProcess(p, options, cmdStr);
+    return [p, prom] as [typeof p, typeof prom];
   }
 
-  static serializeError(e: Error | any) {
-    let error: any = undefined;
-
-    if (e) {
-      error = {};
-      for (const k of Object.keys(e)) {
-        error[k] = e[k];
+  static async waitForPort(port: number, ms = 5000) {
+    const start = Date.now();
+    while ((Date.now() - start) < ms) {
+      try {
+        await new Promise((res, rej) => {
+          try {
+            const sock = net.createConnection(port, 'localhost', (err: any, succ: any) => {
+              if (err) {
+                rej(err);
+              } else {
+                sock.destroy();
+                res(succ);
+              }
+            });
+            sock.on('error', rej);
+          } catch (e) {
+            rej(e);
+          }
+        });
+        return;
+      } catch (e) {
+        await new Promise(res => setTimeout(res, 50));
       }
-      error.$ = true;
-      error.message = e.message;
-      error.stack = e.stack;
-      error.name = e.name;
     }
-
-    return error;
-  }
-
-  static deserializeError(e: any) {
-    if (e && e.$) {
-      const err = new Error();
-      for (const k of Object.keys(e)) {
-        (err as any)[k] = e[k];
-      }
-      err.message = e.message;
-      err.stack = e.stack;
-      err.name = e.name;
-      return err;
-    } else if (e) {
-      return e;
-    }
+    throw new Error('Could not acquire port');
   }
 }

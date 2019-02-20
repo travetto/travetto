@@ -1,6 +1,6 @@
 import { FsUtil } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
-import { ChildExecution, ExecutionPool, IteratorExecutionSource } from '../';
+import { WorkerIteratorInputSource, WorkerPool, Worker } from '../';
 
 @Suite()
 export class PoolExecTest {
@@ -8,9 +8,9 @@ export class PoolExecTest {
   @Test()
   async simple() {
 
-    const pool = new ExecutionPool<ChildExecution>(async () => {
+    const pool = new WorkerPool<Worker>(async () => {
       console.log('Initializing child');
-      const child = new ChildExecution(FsUtil.resolveUnix(__dirname, 'simple.child-launcher.js'), [], true, {
+      const child = new Worker(FsUtil.resolveUnix(__dirname, 'simple.child-launcher.js'), [], true, {
         env: { SRC: './simple.child' }
       });
       child.init();
@@ -22,12 +22,12 @@ export class PoolExecTest {
 
     await pool.process(
       //  new ArrayExecutionSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
-      new IteratorExecutionSource(function* () {
+      new WorkerIteratorInputSource(function* () {
         for (let i = 0; i < 5; i++) {
           yield `${i}-`;
         }
       }),
-      async (i: string, exe: ChildExecution) => {
+      async (i: string, exe: Worker) => {
         const res = exe.listenOnce('response');
         exe.send('request', { data: i });
         const { data } = await res;

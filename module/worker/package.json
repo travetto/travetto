@@ -1,0 +1,36 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Process management utilties, with a focus on inter-process communication",
+  "dependencies": {
+    "@travetto/base": "^0.5.9",
+    "@travetto/exec": "^0.5.7",
+    "@types/generic-pool": "^3.1.6",
+    "generic-pool": "^3.4.2"
+  },
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "exec",
+    "docker",
+    "child-process",
+    "ipc",
+    "travetto",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "name": "@travetto/worker",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "version": "0.5.7"
+}

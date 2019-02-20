@@ -1,6 +1,6 @@
-import { LocalExecution } from '../src/local';
+import { WorkerClient } from '../src/client';
 
-const exec = new LocalExecution();
+const exec = new WorkerClient();
 
 function go() {
   exec.listenFor('request', async (data: any) => {
