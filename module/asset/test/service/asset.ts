@@ -67,7 +67,7 @@ class AssetTest {
     assert(file.contentType === 'image/png');
     assert(file.length > -1);
 
-    assert.rejects(fsStat(filePath));
+    await assert.rejects(fsStat(filePath));
   }
 
   @Test('Test caching')

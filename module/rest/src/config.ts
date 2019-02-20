@@ -1,6 +1,7 @@
 import { Config } from '@travetto/config';
+import { Env, AppError } from '@travetto/base';
+
 import { SSLUtil } from './util/ssl';
-import { Env, AppError } from '../../base';
 
 @Config('rest')
 export class RestConfig {
@@ -19,7 +20,7 @@ export class RestConfig {
       if (Env.prod) {
         throw new AppError('Cannot use test keys in production', 'permissions');
       }
-      return SSLUtil.generateKeyPair();
+      return SSLUtil.generateKeyPair('/C=WR/ST=STATE/O=TRAVETTO/OU=REST/CN=DEV-APP');
     } else {
       return this.keys;
     }

@@ -1,5 +1,5 @@
 import { YamlUtil } from '@travetto/yaml';
-import { ExecUtil } from '@travetto/exec';
+import { WorkerUtil } from '@travetto/worker';
 
 import { TestEvent } from '../model/event';
 import { AllSuitesResult } from '../model/suite';
@@ -71,7 +71,7 @@ export class TapEmitter implements Consumer {
 
       if (test.status === 'fail') {
         if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
-          this.logMeta({ error: ExecUtil.deserializeError(test.error).stack });
+          this.logMeta({ error: WorkerUtil.deserializeError(test.error).stack });
         }
       }
       if (test.output) {

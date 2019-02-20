@@ -1,13 +1,13 @@
-import { ExecutionSource } from './types';
+import { WorkerInputSource } from '../types';
 
-export class QueueExecutionSource<T> implements ExecutionSource<T> {
-  private items: T[] = [];
+export class WorkerQueueInputSource<X> implements WorkerInputSource<X> {
+  private items: X[] = [];
 
-  constructor(data?: T[], private tick: number = 500) {
+  constructor(data?: X[], private tick: number = 500) {
     this.items = data || [];
   }
 
-  enqueue(item: T) {
+  enqueue(item: X) {
     this.items.push(item);
   }
 
