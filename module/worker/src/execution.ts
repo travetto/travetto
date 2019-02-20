@@ -9,8 +9,16 @@ export class Execution<U extends WorkerEvent = WorkerEvent, T extends CommonProc
   constructor(proc?: T) {
     if (proc) {
       this._proc = proc;
-      console.trace(`[${proc.pid}] Constructed Execution`);
+      console.trace(`[${this.id}] Constructed Execution`);
     }
+  }
+
+  get id() {
+    return this._proc && this._proc.pid;
+  }
+
+  private get parentId() {
+    return process.pid;
   }
 
   _init(): T {
@@ -36,7 +44,7 @@ export class Execution<U extends WorkerEvent = WorkerEvent, T extends CommonProc
 
   send(eventType: string, data?: any) {
     if (Env.trace) {
-      console.trace(`[${process.pid}] Sending [${this._proc.pid}] ${eventType}`);
+      console.trace(`[${this.parentId}] Sending [${this.id}] ${eventType}`);
     }
     if (this._proc.send) {
       this._proc.send({ type: eventType, ...(data || {}) });
@@ -83,7 +91,7 @@ export class Execution<U extends WorkerEvent = WorkerEvent, T extends CommonProc
     };
     fn = (e: U) => {
       if (Env.trace) {
-        console.trace(`[${process.pid}] Received [${this._proc.pid}] ${e.type}`);
+        console.trace(`[${this.parentId}] Received [${this.id}] ${e.type}`);
       }
 
       let res;
@@ -104,19 +112,15 @@ export class Execution<U extends WorkerEvent = WorkerEvent, T extends CommonProc
 
   kill() {
     if (this._proc) {
-      console.trace(`[${process.pid}] Killing [${this._proc.pid}]`);
+      console.trace(`[${this.parentId}] Killing [${this.id}]`);
     }
     this.release();
     delete this._proc;
   }
 
-  get pid() {
-    return this._proc && this._proc.pid;
-  }
-
   release() {
     if (this._proc) {
-      console.trace(`[${process.pid}] Released [${this._proc.pid}]`);
+      console.trace(`[${this.parentId}] Released [${this.id}]`);
       this._proc.removeAllListeners('message');
     }
   }

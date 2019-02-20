@@ -51,6 +51,7 @@ class AssetTest {
   @BeforeAll()
   async init() {
     await RootRegistry.init();
+    await DependencyRegistry.init();
   }
 
   @Test('downloads an file from a url')
@@ -67,7 +68,7 @@ class AssetTest {
     assert(file.contentType === 'image/png');
     assert(file.length > -1);
 
-    await assert.rejects(fsStat(filePath));
+    await assert.rejects(() => fsStat(filePath));
   }
 
   @Test('Test caching')

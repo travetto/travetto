@@ -7,11 +7,13 @@ import { WorkerInputSource, WorkerPoolElement } from './types';
 
 export class WorkerPool<T extends WorkerPoolElement> {
 
+  static DEFAULT_SIZE = Math.min(os.cpus().length - 1, 4);
+
   private pool: Pool<T>;
 
   constructor(create: () => Promise<T>, opts?: Options) {
     const args = {
-      max: Math.min(os.cpus().length - 1, 4),
+      max: WorkerPool.DEFAULT_SIZE,
       min: 1,
       evictionRunIntervalMillis: 5000,
       ...(opts || {}),
@@ -22,12 +24,12 @@ export class WorkerPool<T extends WorkerPoolElement> {
         try {
           return await create();
         } catch (e) {
-          process.exit(1); // TODO: evaluate strategy
+          // process.exit(1); // TODO: evaluate strategy
           throw e;
         }
       },
       async destroy(x: T): Promise<undefined> {
-        console.trace(`[${process.pid}] Destroying ${(x as any)['pid']}`);
+        console.trace(`[${process.pid}] Destroying ${x.id}`);
         x.kill();
         return;
       },
@@ -39,18 +41,18 @@ export class WorkerPool<T extends WorkerPoolElement> {
     Shutdown.onShutdown(WorkerPool.name, () => this.shutdown());
   }
 
-  async release(Worker: T) {
-    console.trace(`[${process.pid}] Releasing ${(Worker as any)['pid']}`);
+  async release(worker: T) {
+    console.trace(`[${process.pid}] Releasing ${worker.id}`);
     try {
-      if (Worker.active) {
-        if (Worker.release) {
+      if (worker.active) {
+        if (worker.release) {
           try {
-            await Worker.release();
+            await worker.release();
           } catch { }
         }
-        await this.pool.release(Worker);
+        await this.pool.release(worker);
       } else {
-        await this.pool.destroy(Worker);
+        await this.pool.destroy(worker);
       }
     } catch { }
   }

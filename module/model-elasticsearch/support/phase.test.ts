@@ -32,12 +32,12 @@ export const init = {
   key: 'elasticsearch',
   action: async () => {
     const { ConfigLoader } = await import('@travetto/config');
-    const { DockerContainer } = await import('@travetto/exec/src/docker');
+    const { DockerContainer, ExecUtil } = await import('@travetto/exec');
 
     const defPort = parseInt(`${process.env.MODEL_ELASTICSEARCH_PORT || 9200}`, 10);
 
     try {
-      await DockerContainer.waitForPort(defPort, 10);
+      await ExecUtil.waitForPort(defPort, 10);
       process.env.MODEL_ELASTICSEARCH_NAMESPACE = `test_${Math.trunc(Math.random() * 10000)}`; // Randomize schema
     } catch (e) {
 

@@ -4,6 +4,11 @@ import { Events, TEST_BASE } from './types';
 
 type Event = { type: string, error?: any, file?: string, class?: string, method?: string };
 
+const FIXED_MODULES = new Set(['base', 'config', 'compiler', 'exec', 'worker', 'yaml']);
+const IS_SUPPORT_FILE = /\/support\//;
+const IS_SELF_FILE = /\/test\/src\/worker\//;
+const GET_FILE_MODULE = /^.*travetto(?:\/module)?\/([^/]+)\/(?:src\/|index).*$/;
+
 export class TestRunWorker extends WorkerClient<Event> {
   private compiler: any;
   private runs = 0;
@@ -18,7 +23,7 @@ export class TestRunWorker extends WorkerClient<Event> {
     }
   }
 
-  async start() {
+  async activate() {
     // Die if no communication within 120 seconds
     this.listen(async (event: Event) => {
       console.debug('on message', event);
@@ -51,13 +56,14 @@ export class TestRunWorker extends WorkerClient<Event> {
 
   isFileResettable(path: string) {
     const k = FsUtil.toUnix(path);
-    const isTs = k.endsWith('.ts');
-    const isFramework = /travetto(\/module)?\/([^/]+)\/(src|index)/.test(k);
-    const isFrameworkCore = isFramework && /travetto(\/module)?\/(base|config|compiler|exec|yaml)\/(src|index)/.test(k);
-    const isSupport = /travetto(\/module)?\/([^/]+)\/support\//.test(k);
-    const isSelf = k.replace(/[.][tj]s$/, '').endsWith('test/src/runner/communication');
+    const frameworkModule = k.replace(GET_FILE_MODULE, (_, mod) => mod);
 
-    return !isSelf && !isSupport && isTs && (!isFramework || !isFrameworkCore);
+    return !frameworkModule || // A user file
+      (
+        !FIXED_MODULES.has(frameworkModule) && // Not a core module
+        !IS_SUPPORT_FILE.test(k) && // Not a support file
+        !IS_SELF_FILE.test(k) // Not self
+      );
   }
 
   async resetForRun() {
@@ -65,7 +71,7 @@ export class TestRunWorker extends WorkerClient<Event> {
     console.debug('Resetting', Object.keys(require.cache).length);
 
     for (const file of Object.keys(require.cache)) {
-      if (this.isFileResettable(file)) {
+      if (file.endsWith('.ts') && this.isFileResettable(file)) {
         console.debug(`[${process.pid}]`, 'Unloading', file);
         this.compiler.unload(file, false);
       }
@@ -76,16 +82,8 @@ export class TestRunWorker extends WorkerClient<Event> {
     Shutdown.execute(-1);
   }
 
-  async getRunner() {
-    const runnerPath = 'src/runner/runner';
-
-    const { Runner } = await import(FsUtil.resolveUnix(TEST_BASE, runnerPath));
-
-    return Runner;
-  }
-
   async runTest(event: Event) {
-    const Runner = await this.getRunner();
+    const { Runner } = await import(FsUtil.resolveUnix(TEST_BASE, 'src/runner/runner'));
 
     console.debug('*Running*', event.file);
 

@@ -9,5 +9,4 @@ export const Events = {
 };
 
 // Handle bad symlink behavior, used in conjunction with TRV_FRAMEWORK_DEV
-export const TEST_BASE = (process.env.TRV_FRAMEWORK_DEV && process.env.TRV_TEST_BASE)
-  || FsUtil.resolveUnix(__dirname, '../..');
+export const TEST_BASE = process.env.TRV_TEST_BASE || FsUtil.resolveUnix(__dirname, '../..');

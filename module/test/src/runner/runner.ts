@@ -1,5 +1,6 @@
 import { FileCache, PhaseManager, Shutdown, Env, FsUtil } from '@travetto/base';
 import { WorkerUtil, WorkerPool, WorkerArrayInputSource } from '@travetto/worker';
+import { Class } from '@travetto/registry';
 
 import { TestExecutor } from './executor';
 import { Consumer } from '../consumer/types';
@@ -14,7 +15,7 @@ import { Events } from '../worker/types';
 
 import { watch } from './watcher';
 
-const FORMAT_MAPPING = {
+const FORMAT_MAPPING: { [key: string]: Class<Consumer> } = {
   json: JSONEmitter,
   tap: TapEmitter,
   event: EventStream,
@@ -118,8 +119,8 @@ export class Runner {
         exe.send(Events.RUN, { file });
 
         const { error } = await complete;
-        const deserialized = WorkerUtil.deserializeError(error);
-        errors.push(deserialized);
+        const fullError = WorkerUtil.deserializeError(error);
+        errors.push(fullError);
       }
     );
 
@@ -137,7 +138,7 @@ export class Runner {
     }
   }
 
-  async runSome() {
+  async runSingle() {
     const consumer = this.getConsumer();
     await new PhaseManager('test').load().run();
     return await TestExecutor.execute(consumer, this.state.args);
@@ -145,7 +146,7 @@ export class Runner {
 
   async run() {
     switch (this.state.mode) {
-      case 'single': return await this.runSome();
+      case 'single': return await this.runSingle();
       case 'watch': return await watch();
       default: return await this.runFiles();
     }
