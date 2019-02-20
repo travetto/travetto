@@ -70,6 +70,16 @@ export class ModelService implements IModelSource {
     return res;
   }
 
+  async prePersistPartial<T extends ModelCore>(cls: Class<T>, o: Partial<T>) {
+    if (!(o instanceof cls)) {
+      throw new Error(`Expected object of type ${cls.name}, but received ${o.constructor.name}`);
+    }
+
+    // Do not call source or instance prePersist
+
+    return await SchemaValidator.validatePartial(o);
+  }
+
   /** Handles any pre-retrieval activities needed */
   postLoad<T extends ModelCore>(cls: Class<T>, o: T): T;
   postLoad<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string): Partial<T>;
@@ -192,7 +202,8 @@ export class ModelService implements IModelSource {
 
   /** Partial update single record, by id */
   async updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>) {
-    this.prePersist(cls, model);
+    // Do not do a standard pre-persist, because we don't know what we would be validating
+    await this.prePersistPartial(cls, model);
 
     const res = await this.source.updatePartial(cls, model);
 
@@ -200,11 +211,13 @@ export class ModelService implements IModelSource {
   }
 
   /** Partial update, by query*/
-  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>) {
+  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, model: Partial<T>) {
+    // Do not do a standard pre-persist, because we don't know what we would be validating
+    await this.prePersistPartial(cls, model);
+
     this.prepareQuery(cls, query);
 
-    // Do not do pre-persist, because we don't know what we would be validating
-    const res = await this.source.updatePartialByQuery(cls, query, body);
+    const res = await this.source.updatePartialByQuery(cls, query, model);
 
     return this.postLoad(cls, res);
   }
