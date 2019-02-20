@@ -37,7 +37,7 @@ abstract class BaseRequest implements Partial<Request> {
   }
 }
 
-export class RestAppUtil {
+export class ProviderUtil {
   static decorateRequest<T extends Request>(req: Partial<T> & { [key: string]: any }): T {
     delete req.redirect;
     Object.setPrototypeOf(req, BaseRequest.prototype);

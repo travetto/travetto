@@ -2,8 +2,7 @@ import { ServerResponse, IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
 import { ConfigLoader } from '@travetto/config';
-import { RestConfig, ControllerConfig, RestAppProvider } from '@travetto/rest';
-import { RestAppUtil } from '@travetto/rest/src/util/rest-app-util';
+import { RestConfig, ControllerConfig, RestAppProvider, ProviderUtil } from '@travetto/rest';
 
 import { FastifyConfig } from './config';
 
@@ -26,7 +25,6 @@ export class RestFastifyAppProvider extends RestAppProvider {
     app.register(require('fastify-compress'));
     app.register(require('fastify-formbody'));
     app.register(require('fastify-cookie'));
-    app.register(require('fastify-session'), this.config.session);
     app.addContentTypeParser('multipart/form-data;', (req: IncomingMessage, done: (err: Error | null, body?: any) => void) => {
       done(null);
     });
@@ -58,7 +56,7 @@ export class RestFastifyAppProvider extends RestAppProvider {
 
   getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
     if (!(reqs as any)._trvReq) {
-      (reqs as any)._trvReq = RestAppUtil.decorateRequest({
+      (reqs as any)._trvReq = ProviderUtil.decorateRequest({
         _raw: reqs,
         method: reqs.req.method,
         path: reqs.req.url!,
@@ -79,7 +77,7 @@ export class RestFastifyAppProvider extends RestAppProvider {
 
   getResponse(reply: fastify.FastifyReply<ServerResponse>) {
     if (!(reply as any)._trvRes) {
-      (reply as any)._trvRes = RestAppUtil.decorateResponse({
+      (reply as any)._trvRes = ProviderUtil.decorateResponse({
         _raw: reply,
         get headersSent() {
           return reply.sent;
