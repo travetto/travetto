@@ -201,32 +201,45 @@ export class ModelService implements IModelSource {
   }
 
   /** Partial update single record, by id */
-  async updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>) {
-    // Do not do a standard pre-persist, because we don't know what we would be validating
-    await this.prePersistPartial(cls, model);
+  async updatePartial<T extends ModelCore>(cls: Class<T>, o: Partial<T>) {
+    if (!o.id) {
+      throw new AppError('Id is required for a partial update', 'data');
+    }
 
-    const res = await this.source.updatePartial(cls, model);
+    // Do not do a standard pre-persist, because we don't know what we would be validating
+    await this.prePersistPartial(cls, o);
+
+    const res = await this.source.updatePartial(cls, o);
 
     return this.postLoad(cls, res);
   }
 
   /** Partial update, by query*/
-  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, model: Partial<T>) {
+  async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, o: Partial<T>) {
     // Do not do a standard pre-persist, because we don't know what we would be validating
-    await this.prePersistPartial(cls, model);
+    await this.prePersistPartial(cls, o);
 
     this.prepareQuery(cls, query);
 
-    const res = await this.source.updatePartialByQuery(cls, query, model);
+    const res = await this.source.updatePartialByQuery(cls, query, o);
 
     return this.postLoad(cls, res);
   }
 
   /** Partial update single record, by view and by id */
   async updatePartialView<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string) {
+    if (!o.id) {
+      throw new AppError('Id is required for a partial update', 'data');
+    }
+
     o = await this.prePersist(cls, o, view);
 
-    const partial = BindUtil.bindSchemaToObject(cls, {}, o, view);
+    const partial = BindUtil.bindSchemaToObject(cls, {}, o, view) as Partial<T>;
+
+    if (!partial.id) {
+      partial.id = o.id;
+    }
+
     const res = await this.source.updatePartial(cls, partial);
 
     return this.postLoad(cls, res);
