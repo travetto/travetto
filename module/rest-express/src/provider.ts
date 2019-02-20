@@ -1,7 +1,6 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
-import * as session from 'express-session';
 import * as compression from 'compression';
 
 import { ConfigLoader } from '@travetto/config';
@@ -27,8 +26,6 @@ export class RestExpressAppProvider extends RestAppProvider<express.Application>
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use(cookieParser());
-
-    app.use(session(this.config)); // session secret
 
     // Enable proxy for cookies
     if (this.config.cookie.secure) {
