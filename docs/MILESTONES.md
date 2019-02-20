@@ -111,6 +111,7 @@ Released  0.5.x: 2018-12-28 - a8c58104a586baa6203f38c9517fbb5a60ecec5c
   * Cleanup tests output on run
 * Using latest typescript
 * Unified file path usage and resource loading
+* Reworked CLI, supporting color, and standardizing architecture
 
 ------------------------------------------------------
 Release 0.6.x: ???
