@@ -11,8 +11,7 @@
     "fastify": "^1.13.2",
     "fastify-compress": "^0.7.1",
     "fastify-cookie": "^2.1.4",
-    "fastify-formbody": "^2.0.3",
-    "fastify-session": "^1.2.1"
+    "fastify-formbody": "^2.0.3"
   },
   "devDependencies": {
     "@travetto/test": "^0.5.11"

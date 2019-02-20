@@ -16,3 +16,6 @@ export * from './src/service';
 export * from './src/interceptor';
 export * from './src/types';
 export * from './src/util/mime';
+export * from './src/util/provider-util';
+export * from './src/util/endpoint-util';
+export * from './src/util/ssl';
