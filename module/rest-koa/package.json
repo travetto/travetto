@@ -12,12 +12,10 @@
     "@types/koa-bodyparser": "^4.2.1",
     "@types/koa-compress": "^2.0.8",
     "@types/koa-router": "^7.0.35",
-    "@types/koa-session": "^5.7.4",
     "koa": "^2.6.2",
     "koa-bodyparser": "^4.2.1",
     "koa-compress": "^3.0.0",
-    "koa-router": "^7.4.0",
-    "koa-session": "^5.10.1"
+    "koa-router": "^7.4.0"
   },
   "devDependencies": {
     "@travetto/test": "^0.5.11"
