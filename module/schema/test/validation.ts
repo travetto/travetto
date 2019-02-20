@@ -5,7 +5,7 @@ import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 import { SchemaValidator, ValidationError, SchemaRegistry, ValidationErrors } from '../';
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaz,
-  CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema
+  CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address
 } from './models/validation';
 
 function findError(errors: ValidationError[], path: string, message: string) {
@@ -251,5 +251,24 @@ class Validation {
       assert((err as ValidationErrors).errors[2].path === 'all[1].c');
       assert((err as ValidationErrors).errors[2].message === 'all[1].c is required');
     }
+  }
+
+  @Test()
+  async verifyOptional() {
+    const addr = Address.fromRaw({
+      street1: 'street1',
+      city: 'city',
+      postal: '30000',
+      zip: 200
+    });
+
+    await assert.doesNotReject(() => SchemaValidator.validate(addr));
+    addr.zip = '800' as any;
+    await assert.rejects(() => SchemaValidator.validate(addr));
+    await assert.rejects(() => SchemaValidator.validatePartial(addr));
+    delete addr.zip;
+    delete addr.street1;
+    await assert.rejects(() => SchemaValidator.validate(addr));
+    await assert.doesNotReject(() => SchemaValidator.validatePartial(addr));
   }
 }
