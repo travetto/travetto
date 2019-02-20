@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { DockerContainer } from '../src/docker';
+import { ExecUtil } from '../src/util';
 
 @Suite()
 export class DockerTet {
@@ -13,7 +14,7 @@ export class DockerTet {
       .forceDestroyOnShutdown();
 
     container.run();
-    await DockerContainer.waitForPort(port);
+    await ExecUtil.waitForPort(port);
     assert(true);
   }
 }

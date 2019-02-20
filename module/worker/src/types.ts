@@ -28,6 +28,7 @@ export interface CommonProcess {
 
 export interface WorkerPoolElement {
   active: boolean;
+  id: any;
   kill(): any;
   release?(): any;
 }

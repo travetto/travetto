@@ -71,7 +71,7 @@ export class DockerContainer {
     return this.tempVolumes[volume];
   }
 
-  get pid() {
+  get id() {
     return this._proc !== undefined ? this._proc.pid : -1;
   }
 
