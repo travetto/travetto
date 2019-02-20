@@ -1,8 +1,8 @@
 import { Env } from '@travetto/base';
 
-import { CommonProcess, ExecutionEvent } from './types';
+import { WorkerEvent, CommonProcess } from './types';
 
-export class Execution<U extends ExecutionEvent = ExecutionEvent, T extends CommonProcess = CommonProcess> {
+export class Execution<U extends WorkerEvent = WorkerEvent, T extends CommonProcess = CommonProcess> {
 
   public _proc: T;
 

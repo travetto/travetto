@@ -28,7 +28,7 @@ function init() {
   return Util.program.command('test')
     .arguments('[regexes...]')
     .option('-f, --format <format>', 'Output format for test results', /^(tap|json|jsonStream|noop|exec|event)$/, 'tap')
-    .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', os.cpus().length - 1)
+    .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', Math.min(4, os.cpus().length - 1))
     .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
     .action(async (args, cmd) => {
       if (args.length === 0) {

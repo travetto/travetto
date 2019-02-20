@@ -7,7 +7,7 @@
     "travetto-cli-test": "bin/travetto-cli-test.js"
   },
   "dependencies": {
-    "@travetto/exec": "^0.5.7",
+    "@travetto/worker": "^0.5.7",
     "@travetto/registry": "^0.5.7",
     "@travetto/yaml": "^0.5.2"
   },

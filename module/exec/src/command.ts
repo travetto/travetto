@@ -1,7 +1,7 @@
 import { Env } from '@travetto/base';
+
 import { ExecUtil } from './util';
 import { DockerContainer } from './docker';
-import { ExecutionResult, CommonProcess } from './types';
 
 export class CommandService {
 
@@ -13,16 +13,31 @@ export class CommandService {
     image: string;
     imageStartCommand?: string;
     checkForLocal?: () => Promise<boolean>;
+    localCommandCheck?: [string, string[]];
     imageCommand?: (args: string[]) => string[];
     processCommand?: (args: string[]) => string[];
     docker?: boolean;
   }) { }
 
-  async _init() {
+  async useDocker(): Promise<boolean> {
     const canUseDocker = Env.docker && (this.config.docker === undefined || !!this.config.docker);
-    const useDocker = canUseDocker && (!this.config.checkForLocal || !(await this.config.checkForLocal()));
 
-    if (useDocker) {
+    let useDocker = canUseDocker;
+
+    if (useDocker && this.config.checkForLocal) {
+      useDocker = !(await this.config.checkForLocal());
+    }
+
+    if (useDocker && this.config.localCommandCheck) {
+      try {
+        useDocker = !(await ExecUtil.spawn(...this.config.localCommandCheck)[1]).valid;
+      } catch { }
+    }
+    return useDocker;
+  }
+
+  async _init() {
+    if (await this.useDocker()) {
       this.container = new DockerContainer(this.config.image)
         .forceDestroyOnShutdown()
         .setInteractive(true);
@@ -42,14 +57,12 @@ export class CommandService {
   async exec(...args: string[]) {
     await this.init();
 
-    let exec;
     if (this.container) {
       const cmd = this.config.imageCommand ? this.config.imageCommand(args) : args;
-      exec = this.container.exec(['-i'], cmd);
+      return this.container.exec(['-i'], cmd);
     } else {
       const cmd = this.config.processCommand ? this.config.processCommand(args) : args;
-      exec = ExecUtil.spawn(cmd[0], cmd.slice(1), { quiet: true });
+      return ExecUtil.spawn(cmd[0], cmd.slice(1), { quiet: true });
     }
-    return exec as [CommonProcess, Promise<ExecutionResult>];
   }
 }
