@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { CommandService, ExecUtil } from '@travetto/exec';
+import { CommandService } from '@travetto/exec';
 import { Cacheable } from '@travetto/cache';
 import { Injectable } from '@travetto/di';
 
@@ -17,9 +17,7 @@ export class ImageService {
 
   converter = new CommandService({
     image: 'v4tech/imagemagick',
-    checkForLocal: async () => {
-      return (await ExecUtil.spawn('convert', ['--version'])[1]).valid;
-    }
+    localCommandCheck: ['convert', ['--version']]
   });
 
   constructor(private assetService: AssetService) { }

@@ -1,9 +1,9 @@
-import { ExecutionSource } from './types';
+import { WorkerInputSource } from '../types';
 
-export class ArrayExecutionSource<T> implements ExecutionSource<T> {
+export class WorkerArrayInputSource<X> implements WorkerInputSource<X> {
   position = 0;
 
-  constructor(public items: T[]) { }
+  constructor(public items: X[]) { }
 
   hasNext() {
     return this.position < this.items.length;

@@ -1,19 +1,13 @@
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as util from 'util';
-import * as net from 'net';
 
 import { Shutdown, ScanFs, ScanEntry, Env, FsUtil } from '@travetto/base';
 
-import { CommonProcess, ExecutionResult } from './types';
-import { ExecUtil, WithOpts } from './util';
+import { ExecUtil } from './util';
 
 const fsWriteFile = util.promisify(fs.writeFile);
 const fsUnlink = util.promisify(fs.unlink);
-
-function exec(command: string, args: string[], opts?: WithOpts<child_process.SpawnOptions>) {
-  return ExecUtil.spawn(command, args, { shell: false, ...opts })[1];
-}
 
 function execSync(command: string) {
   console.debug('execSync', command);
@@ -22,35 +16,12 @@ function execSync(command: string) {
 
 export class DockerContainer {
 
-  static async waitForPort(port: number, ms = 5000) {
-    const start = Date.now();
-    while ((Date.now() - start) < ms) {
-      try {
-        await new Promise((res, rej) => {
-          try {
-            const sock = net.createConnection(port, 'localhost', (err: any, succ: any) => {
-              if (err) {
-                rej(err);
-              } else {
-                sock.destroy();
-                res(succ);
-              }
-            });
-            sock.on('error', rej);
-          } catch (e) {
-            rej(e);
-          }
-        });
-        return;
-      } catch (e) {
-        await new Promise(res => setTimeout(res, 50));
-      }
-    }
-    throw new Error('Could not acquire port');
+  private static getContainerName(image: string, container?: string) {
+    return container || `${Env.get('DOCKER_NS', image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
   }
 
   private cmd: string = 'docker';
-  private _proc: CommonProcess;
+  private _proc: child_process.ChildProcess;
 
   private container: string;
   private env: { [key: string]: string } = {};
@@ -69,7 +40,7 @@ export class DockerContainer {
   public workingDir: string;
 
   constructor(private image: string, container?: string) {
-    this.container = container || `${Env.get('DOCKER_NS', image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
+    this.container = DockerContainer.getContainerName(image, container);
   }
 
   private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
@@ -216,10 +187,10 @@ export class DockerContainer {
     }).then(v => {
       delete this._proc;
     });
-    return [proc, prom] as [CommonProcess, Promise<ExecutionResult>];
+    return [proc, prom] as [typeof proc, typeof prom];
   }
 
-  async run(...args: any[]): Promise<ExecutionResult> {
+  async run(...args: any[]) {
 
     if (!this.deleteOnFinish) {
       // Kill existing
@@ -251,13 +222,15 @@ export class DockerContainer {
     this.runAway = this.runAway || runAway;
 
     try {
-      await exec(this.cmd, ['kill', this.container]);
+      const [, res] = ExecUtil.spawn(this.cmd, ['kill', this.container]);
+      await res;
     } catch (e) { /* ignore */ }
 
     console.debug('Removing', this.image, this.container);
 
     try {
-      await exec(this.cmd, ['rm', '-fv', this.container]);
+      const [, res] = ExecUtil.spawn(this.cmd, ['rm', '-fv', this.container]);
+      await res;
     } catch (e) { /* ignore */ }
 
     delete this._proc;
@@ -317,9 +290,11 @@ export class DockerContainer {
 
   async removeDanglingVolumes() {
     try {
-      const ids = (await exec(this.cmd, ['volume', 'ls', '-qf', 'dangling=true'])).stdout.trim();
+      const [, res] = ExecUtil.spawn(this.cmd, ['volume', 'ls', '-qf', 'dangling=true']);
+      const ids = (await res).stdout.trim();
       if (ids) {
-        await exec(this.cmd, ['volume', 'rm', ...ids.split('\n')]);
+        const [, volRmRes] = ExecUtil.spawn(this.cmd, ['volume', 'rm', ...ids.split('\n')]);
+        await volRmRes;
       }
     } catch (e) {
       // error

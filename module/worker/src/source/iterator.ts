@@ -1,16 +1,16 @@
-import { ExecutionSource } from './types';
+import { WorkerInputSource } from '../types';
 
 function isIterator<T>(o: any): o is Iterator<T> {
   return 'next' in o;
 }
 
-export class IteratorExecutionSource<T> implements ExecutionSource<T> {
+export class WorkerIteratorInputSource<X> implements WorkerInputSource<X> {
 
-  private src: Iterator<T>;
-  private ondeck: T;
+  private src: Iterator<X>;
+  private ondeck: X;
   done = false;
 
-  constructor(src: (() => Iterator<T>) | Iterator<T>) {
+  constructor(src: (() => Iterator<X>) | Iterator<X>) {
     if (isIterator(src)) {
       this.src = src;
     } else {

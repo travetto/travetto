@@ -1,7 +1,8 @@
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
-import { QueueExecutionSource, ChildExecution } from '@travetto/exec';
+import { WorkerQueueInputSource, Worker } from '@travetto/worker';
 
-import { client, Events } from './communication';
+import { workerFactory } from '../worker/factory';
+import { Events } from '../worker/types';
 import { TestRegistry } from '../registry';
 import { TestConfig } from '../model/test';
 import { SuiteConfig } from '../model/suite';
@@ -82,38 +83,38 @@ export async function watch() {
     });
   }, 1);
 
-  const all = client().process(
-    new QueueExecutionSource(queue),
-    async (conf, exe: ChildExecution<any>) => { // TODO: Type incompatibility with ExecutionEvent and TestEvent
-      exe.listen(consumer.onEvent.bind(consumer));
-      let event: any;
-      if (isSuite(conf)) {
-        event = {
-          type: Events.RUN,
-          file: conf.class.__filename,
-          class: conf.class.name
-        };
-      } else {
-        event = {
-          type: Events.RUN,
-          file: conf.file,
-          class: conf.class.name,
-          method: conf.methodName
-        };
-      }
-      const complete = exe.listenOnce(Events.RUN_COMPLETE);
-      exe.send(event.type, event);
+  // // const all = client().process(
+  // //   new QueueExecutionSource(queue),
+  // //   async (conf, exe: ChildExecution<any>) => { // TODO: Type incompatibility with ExecutionEvent and TestEvent
+  // //     exe.listen(consumer.onEvent.bind(consumer));
+  // //     let event: any;
+  // //     if (isSuite(conf)) {
+  // //       event = {
+  // //         type: Events.RUN,
+  // //         file: conf.class.__filename,
+  // //         class: conf.class.name
+  // //       };
+  // //     } else {
+  // //       event = {
+  // //         type: Events.RUN,
+  // //         file: conf.file,
+  // //         class: conf.class.name,
+  // //         method: conf.methodName
+  // //       };
+  // //     }
+  // //     const complete = exe.listenOnce(Events.RUN_COMPLETE);
+  // //     exe.send(event.type, event);
 
-      console.debug('Running test', event);
-      await complete;
-    }
-  );
+  // //     console.debug('Running test', event);
+  // //     await complete;
+  // //   }
+  // // );
 
-  // ScanFs.bulkRequire('test/**/*.ts');
+  // // ScanFs.bulkRequire('test/**/*.ts');
 
-  console.debug('Waiting');
+  // console.debug('Waiting');
 
-  await all;
+  // await all;
 }
 
 function isSuite(c: any): c is SuiteConfig {

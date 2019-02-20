@@ -3,19 +3,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { FsUtil } from '@travetto/base';
-import { CommandService, ExecUtil } from '@travetto/exec';
+import { CommandService } from '@travetto/exec';
 
 export class TemplateUtil {
 
   static converter = new CommandService({
     image: 'agregad/pngquant',
-    checkForLocal: async () => {
-      try {
-        return (await ExecUtil.spawn('pngquant', ['-h'])[1]).valid;
-      } catch (e) {
-        return false;
-      }
-    }
+    localCommandCheck: ['pngquant', ['-h']]
   });
 
   static async compileSass(file: string, roots: string[]) {

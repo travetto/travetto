@@ -1,10 +1,12 @@
 import * as child_process from 'child_process';
-import { ExecUtil } from './util';
-import { ChildOptions, ExecutionEvent } from './types';
-import { Execution } from './execution';
-import { Env } from '@travetto/base';
 
-export class ChildExecution<U extends ExecutionEvent = ExecutionEvent> extends Execution<U, child_process.ChildProcess> {
+import { Env } from '@travetto/base';
+import { ExecUtil } from '@travetto/exec';
+
+import { ChildOptions, WorkerEvent } from './types';
+import { Execution } from './execution';
+
+export class Worker<U extends WorkerEvent = WorkerEvent> extends Execution<U, child_process.ChildProcess> {
 
   constructor(public command: string, public args: string[], public fork = false, public opts: ChildOptions = {}) {
     super();
