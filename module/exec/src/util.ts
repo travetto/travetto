@@ -1,80 +1,36 @@
-import * as child_process from 'child_process';
 import * as net from 'net';
-
-import { AppError } from '@travetto/base';
-import { ExecutionOptions, ExecutionResult } from './types';
+import * as http from 'http';
+import * as https from 'https';
 
 export class ExecUtil {
-  static enhanceProcess(p: child_process.ChildProcess, options: ExecutionOptions, cmd: string) {
-    const timeout = options.timeout;
 
-    const prom = new Promise<ExecutionResult>((resolve, reject) => {
-      let stdout = '';
-      let stderr = '';
-      let timer: any;
-      let done = false;
-      const finish = async function (result: ExecutionResult) {
-        if (done) {
-          return;
-        }
-        if (timer) {
-          clearTimeout(timer);
-        }
-        done = true;
+  static async waitForHttp(url: string, ms = 5000) {
+    const start = Date.now();
+    const port = /:\d+/.test(url) ? parseInt(url.replace(/.*:(\d+).*/, (all, p) => p), 10) : (url.startsWith('https') ? 443 : 80);
+    console.debug('Waiting for port', port);
+    await ExecUtil.waitForPort(port, ms);
+    console.debug('Acquired port', port);
 
-        if (!result.valid) {
-          reject(new AppError(`Error executing ${cmd}: ${result.message || result.stderr || result.stdout || 'failed'}`, result));
-        } else {
-          resolve(result);
+    while ((Date.now() - start) < ms) {
+      const status = await new Promise((resolve) => {
+        try {
+          const client = url.startsWith('https') ? https : http;
+          const req = client.get(url, (msg) =>
+            msg
+              .on('data', () => { }) // Consume data
+              .on('error', (err) => resolve(500))
+              .on('end', () => resolve((msg.statusCode || 200)))
+              .on('close', () => resolve((msg.statusCode || 200))));
+          req.on('error', (err) => resolve(500));
+        } catch (e) {
+          resolve(400);
         }
-      };
-
-      if (!options.quiet) {
-        p.stdout.on('data', (d: string) => stdout += `${d}\n`);
-        p.stderr.on('data', (d: string) => stderr += `${d}\n`);
+      });
+      if (status >= 200 && status <= 299) {
+        return; // We good
       }
-
-      p.on('error', (err: Error) =>
-        finish({ code: 1, stdout, stderr, message: err.message, valid: false }));
-
-      p.on('close', (code: number) =>
-        finish({ code, stdout, stderr, valid: code === null || code === 0 || code === 130 || code === 143 })); // Sigint/term
-
-      if (timeout) {
-        timer = setTimeout(async x => {
-          if (options.timeoutKill) {
-            await options.timeoutKill(p);
-          } else {
-            p.kill('SIGKILL');
-          }
-          finish({ code: 1, stderr, stdout, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
-        }, timeout);
-      }
-    });
-
-    return prom;
-  }
-
-  static spawn(cmd: string, args: string[], options: ExecutionOptions & child_process.SpawnOptions = {}) {
-    args = args.map(x => `${x}`);
-    const p = child_process.spawn(cmd, args, { shell: false, ...options });
-    const prom = ExecUtil.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
-    return [p, prom] as [typeof p, typeof prom];
-  }
-
-  static fork(cmd: string, args: string[], options: ExecutionOptions & child_process.ForkOptions = {}) {
-    args = args.map(x => `${x}`);
-    const p = child_process.fork(cmd, args, options);
-    const prom = ExecUtil.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
-    return [p, prom] as [typeof p, typeof prom];
-  }
-
-  static exec(cmd: string, args: string[], options: ExecutionOptions & child_process.ExecOptions = {}) {
-    args = args.map(x => `${x}`);
-    const cmdStr = `${cmd} ${args.join(' ')}`;
-    const p = child_process.exec(cmdStr, options);
-    const prom = ExecUtil.enhanceProcess(p, options, cmdStr);
-    return [p, prom] as [typeof p, typeof prom];
+      await new Promise(res => setTimeout(res, 100));
+    }
   }
 
   static async waitForPort(port: number, ms = 5000) {
@@ -85,6 +41,7 @@ export class ExecUtil {
           try {
             const sock = net.createConnection(port, 'localhost', (err: any, succ: any) => {
               if (err) {
+                console.debug('Failed for port', port, err.message);
                 rej(err);
               } else {
                 sock.destroy();

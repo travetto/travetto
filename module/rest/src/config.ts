@@ -20,7 +20,7 @@ export class RestConfig {
       if (Env.prod) {
         throw new AppError('Cannot use test keys in production', 'permissions');
       }
-      return SSLUtil.generateKeyPair('/C=WR/ST=STATE/O=TRAVETTO/OU=REST/CN=DEV-APP');
+      return SSLUtil.generateKeyPair('/C=US/ST=CA/O=TRAVETTO/OU=REST/CN=DEV');
     } else {
       return this.keys;
     }

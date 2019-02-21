@@ -31,11 +31,7 @@ async function writeToOutput(cmd, files) {
 
   // Clear out cache if specified
   if (cmd.output) {
-    try {
-      FsUtil.unlinkRecursiveSync(FsUtil.resolveNative(FsUtil.cwd, cmd.output));
-    } catch (e) {
-      // Ignore
-    }
+    FsUtil.unlinkRecursiveSync(FsUtil.resolveNative(FsUtil.cwd, cmd.output), true);
     FsUtil.mkdirp(cmd.output);
   }
 

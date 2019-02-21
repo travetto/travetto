@@ -1,7 +1,7 @@
 import * as child_process from 'child_process';
 
 import { Env } from '@travetto/base';
-import { ExecUtil } from '@travetto/exec';
+import { Exec } from '@travetto/exec';
 
 import { ChildOptions, WorkerEvent } from './types';
 import { Execution } from './execution';
@@ -13,7 +13,7 @@ export class Worker<U extends WorkerEvent = WorkerEvent> extends Execution<U, ch
   }
 
   _init() {
-    const op: typeof ExecUtil.fork = (this.fork && process.platform !== 'win32' ? ExecUtil.fork : ExecUtil.spawn);
+    const op: typeof Exec.fork = (this.fork && process.platform !== 'win32' ? Exec.fork : Exec.spawn);
 
     const finalOpts: ChildOptions = {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
@@ -25,7 +25,7 @@ export class Worker<U extends WorkerEvent = WorkerEvent> extends Execution<U, ch
       }
     };
 
-    if (this.fork && process.platform === 'win32') {
+    if (this.fork && op === Exec.spawn) {
       this.args.unshift(this.command);
       this.command = process.argv0;
       (finalOpts as any).shell = false;

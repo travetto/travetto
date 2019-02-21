@@ -13,10 +13,10 @@ class DockerIOTest {
       .forceDestroyOnShutdown()
       .setInteractive(true);
 
-    await container.create(['-i'], ['/bin/sh']);
+    await container.create(['/bin/sh']);
     await container.start();
 
-    const [proc, prom] = await container.exec(['-i'], ['gm', 'convert', '-resize', '100x50', '-', '-']);
+    const [proc, prom] = await container.exec(['gm', 'convert', '-resize', '100x50', '-', '-']);
 
     (await ResourceManager.readToStream('/download.jpeg')).pipe(proc.stdin);
 

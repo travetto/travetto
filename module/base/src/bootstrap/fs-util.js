@@ -2,10 +2,11 @@ const os = require('os');
 const fs = require('fs');
 const util = require('util');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, exec } = require('child_process');
 
 const fsStat = util.promisify(fs.stat);
 const fsMkdir = util.promisify(fs.mkdir);
+const execProm = util.promisify(exec);
 
 const toUnix = (rest) => rest.replace(/[\\\/]+/g, '/');
 const toNative = (rest) => rest.replace(/[\\\/]+/g, path.sep);
@@ -40,13 +41,31 @@ const FsUtil = {
       }
     }
   },
-  unlinkRecursiveSync(pth) {
+  unlinkCommand(pth) {
+    if (!pth || pth === '/') {
+      throw new AppError('Path has not been defined');
+    }
     if (process.platform === 'win32') {
-      execSync(`rmdir /Q /S ${FsUtil.toNative(pth)}`);
+      return `rmdir /Q /S ${FsUtil.toNative(pth)}`;
     } else {
-      execSync(`rm -rf ${pth}`);
+      return `rm -rf ${pth}`;
     }
   },
+  unlinkRecursiveSync: (pth, ignore = false) => {
+    try {
+      execSync(FsUtil.unlinkCommand(pth));
+    } catch (e) {
+      if (!ignore) {
+        throw e;
+      }
+    }
+  },
+  unlinkRecursive: (pth, ignore = false) =>
+    execProm(FsUtil.unlinkCommand(pth)).catch(err => {
+      if (!ignore) {
+        throw err;
+      }
+    }),
   resolveNative,
   resolveUnix,
   toNative,

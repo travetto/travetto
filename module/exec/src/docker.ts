@@ -2,17 +2,12 @@ import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { Shutdown, ScanFs, ScanEntry, Env, FsUtil } from '@travetto/base';
+import { Shutdown, Env, FsUtil } from '@travetto/base';
 
+import { Exec } from './exec';
 import { ExecUtil } from './util';
 
 const fsWriteFile = util.promisify(fs.writeFile);
-const fsUnlink = util.promisify(fs.unlink);
-
-function execSync(command: string) {
-  console.debug('execSync', command);
-  return child_process.execSync(command, { stdio: ['pipe', 'pipe'] }).toString().trim();
-}
 
 export class DockerContainer {
 
@@ -44,7 +39,7 @@ export class DockerContainer {
   }
 
   private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
-    const [proc, prom] = ExecUtil.spawn(this.cmd, [op, ...(args || [])], { shell: this.tty });
+    const [proc, prom] = Exec.spawn(this.cmd, [op, ...(args || [])], { shell: this.tty });
     if (op !== 'run' && op !== 'exec') {
       prom.catch(e => { this.evict = true; });
     }
@@ -120,6 +115,21 @@ export class DockerContainer {
     return this;
   }
 
+  getRuntimeFlags(extra?: string[]) {
+    const flags = [];
+    if (this.interactive) {
+      flags.push('-i');
+    }
+    if (this.tty) {
+      flags.push('-t');
+    }
+    for (const k of Object.keys(this.env)) {
+      flags.push('-e', `"${k}=${this.env[k]}"`);
+    }
+    flags.push(...(extra || []));
+    return flags;
+  }
+
   getFlags(extra?: string[]) {
     const flags = [];
     if (this.workingDir) {
@@ -127,12 +137,6 @@ export class DockerContainer {
     }
     if (this.deleteOnFinish) {
       flags.push('--rm');
-    }
-    if (this.interactive) {
-      flags.push('-i');
-    }
-    if (this.tty) {
-      flags.push('-t');
     }
     if (this.entryPoint) {
       flags.push('--entrypoint', this.entryPoint);
@@ -153,44 +157,39 @@ export class DockerContainer {
       flags.push('-e', `"${k}=${this.env[k]}"`);
     }
 
-    if (extra) {
-      flags.push(...extra);
-    }
+    flags.push(...this.getRuntimeFlags(extra));
+
     return flags;
   }
 
   async initTemp() {
-    // Make temp dirs
-    const mkdirAll = Object.keys(this.tempVolumes).map(x => FsUtil.mkdirp(x).catch(e => { }));
-    await Promise.all(mkdirAll);
+    await Promise.all( // Make temp dirs
+      Object.keys(this.tempVolumes).map(x => FsUtil.mkdirp(x)));
   }
 
-  async create(flags?: string[], args?: string[]) {
+  async create(args?: string[], flags?: string[]) {
     const allFlags = this.getFlags(flags);
     return this._cmd('create', '--name', this.container, ...allFlags, this.image, ...(args || [])).prom;
   }
 
-  async start(flags?: string[], args?: string[]) {
+  async start(args?: string[], flags?: string[]) {
     await this.initTemp();
     return this._cmd('start', ...(flags || []), this.container, ...(args || [])).prom;
   }
 
-  async stop(flags?: string[], args?: string[]) {
+  async stop(args?: string[], flags?: string[]) {
     return this._cmd('stop', ...(flags || []), this.container, ...(args || [])).prom;
   }
 
-  exec(flags?: string[], args?: string[]) {
-    const { proc, prom } = this._cmd('exec', ...(flags || []), this.container, ...(args || []));
+  exec(args?: string[], extraFlags?: string[]) {
+    const flags = this.getRuntimeFlags(extraFlags);
+    const { proc, prom } = this._cmd('exec', ...flags, this.container, ...(args || []));
     this._proc = proc;
-    prom.catch(e => {
-      delete this._proc;
-    }).then(v => {
-      delete this._proc;
-    });
+    prom.finally(() => delete this._proc);
     return [proc, prom] as [typeof proc, typeof prom];
   }
 
-  async run(...args: any[]) {
+  async run(args?: any[], flags?: string[]) {
 
     if (!this.deleteOnFinish) {
       // Kill existing
@@ -201,7 +200,7 @@ export class DockerContainer {
     await this.initTemp();
 
     try {
-      const { proc, prom } = this._cmd('run', `--name=${this.container}`, ...this.getFlags(), this.image, ...(args || []));
+      const { proc, prom } = this._cmd('run', `--name=${this.container}`, ...this.getFlags(flags), this.image, ...(args || []));
       proc.unref();
       this._proc = proc;
       return prom;
@@ -222,14 +221,14 @@ export class DockerContainer {
     this.runAway = this.runAway || runAway;
 
     try {
-      const [, res] = ExecUtil.spawn(this.cmd, ['kill', this.container]);
+      const [, res] = Exec.spawn(this.cmd, ['kill', this.container]);
       await res;
     } catch (e) { /* ignore */ }
 
     console.debug('Removing', this.image, this.container);
 
     try {
-      const [, res] = ExecUtil.spawn(this.cmd, ['rm', '-fv', this.container]);
+      const [, res] = Exec.spawn(this.cmd, ['rm', '-fv', this.container]);
       await res;
     } catch (e) { /* ignore */ }
 
@@ -238,66 +237,63 @@ export class DockerContainer {
     await this.cleanup();
   }
 
-  async rimraf(pth: string) {
-    const files = await ScanFs.scanDir({}, pth);
-    for (const filter of [
-      ScanFs.isNotDir,
-      (x: ScanEntry) => x.stats.isDirectory()
-    ]) {
-      await Promise.all(files
-        .filter(filter)
-        .map(x => fsUnlink(x.file)
-          .catch(e => { console.error(`Unable to delete ${e.file}`); }))
-      );
-    }
-  }
-
   forceDestroy() {
     try {
-      execSync(`${this.cmd} kill ${this.container}`);
+      Exec.execSync(`${this.cmd} kill ${this.container}`);
     } catch (e) { /* ignore */ }
 
     console.debug('Removing', this.image, this.container);
 
     try {
-      execSync(`${this.cmd} rm -fv ${this.container}`);
+      Exec.execSync(`${this.cmd} rm -fv ${this.container}`);
     } catch (e) { /* ignore */ }
 
     this.cleanup();
 
-    const ids = execSync(`${this.cmd} volume ls -qf dangling=true`);
+    const ids = Exec.execSync(`${this.cmd} volume ls -qf dangling=true`);
     if (ids) {
-      execSync(`${this.cmd} volume rm ${ids.split('\n').join(' ')}`);
+      Exec.execSync(`${this.cmd} volume rm ${ids.split('\n').join(' ')}`);
     }
   }
 
   async writeFiles(dir: string, files?: { name: string, content: string }[]) {
     await this.cleanup();
     if (files) {
-      for (const { name, content } of files) {
-        const f = FsUtil.joinUnix(dir, name);
-        await fsWriteFile(f, content, { mode: '755' });
-      }
+      await Promise.all(
+        files.map(({ name, content }) =>
+          fsWriteFile(FsUtil.joinUnix(dir, name), content, { mode: '755' })
+        )
+      );
     }
     return;
   }
 
   async cleanup() {
     console.debug('Cleaning', this.image, this.container);
-    const temps = Object.keys(this.tempVolumes).map(x => this.rimraf(x).catch((e: any) => { }));
-    await Promise.all(temps);
+
+    await Promise.all(
+      Object.keys(this.tempVolumes)
+        .map(x => FsUtil.unlinkRecursive(x, true))
+    );
   }
 
   async removeDanglingVolumes() {
     try {
-      const [, res] = ExecUtil.spawn(this.cmd, ['volume', 'ls', '-qf', 'dangling=true']);
+      const [, res] = Exec.spawn(this.cmd, ['volume', 'ls', '-qf', 'dangling=true']);
       const ids = (await res).stdout.trim();
       if (ids) {
-        const [, volRmRes] = ExecUtil.spawn(this.cmd, ['volume', 'rm', ...ids.split('\n')]);
+        const [, volRmRes] = Exec.spawn(this.cmd, ['volume', 'rm', ...ids.split('\n')]);
         await volRmRes;
       }
     } catch (e) {
       // error
     }
+  }
+
+  waitForPorts(timeout = 5000) {
+    return Promise.all(
+      Object.keys(this.ports)
+        .map(x => ExecUtil.waitForPort(parseInt(x, 10), timeout))
+    );
   }
 }
