@@ -55,12 +55,7 @@ class TestAssetService {
     assert(file.contentType === 'image/png');
     assert(file.length > 0);
 
-    try {
-      await fsStat(filePath);
-      assert(false);
-    } catch {
-      assert(true);
-    }
+    assert.rejects(() => fsStat(filePath));
   }
 
   @Test('downloads an file from a url')
