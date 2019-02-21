@@ -26,6 +26,14 @@ export class State {
     }
   }
 
+  popToTop() {
+    let last;
+    while (this.top.indent >= 0) {
+      last = this.endBlock();
+    }
+    return last;
+  }
+
   nestField(field: string, indent: number) {
     if (this.fields.length && this.fields[this.fields.length - 1][0] === indent) {
       this.fields[this.fields.length - 1][1] = field;
