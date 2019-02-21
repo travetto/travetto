@@ -40,17 +40,11 @@ async function getApps() {
     (/^(src[\/])/.test(x) || /^[^\/]+[\/]src[\/]/.test(x)) && x.endsWith('.ts') && !x.endsWith('d.ts') &&
     fs.readFileSync(x).toString().includes('@Application')); // Only load files that are candidates
 
-  let registryPath = 'src/registry';
-
-  // Handle weirdness of symlinks
-  if (process.env.TRV_FRAMEWORK_DEV) {
-    registryPath = path.resolve(process.env.TRV_DI_BASE, registryPath);
-  } else {
-    registryPath = path.resolve('..', registryPath);
-  }
+  // Handle bad symlink behavior, by allowing specifying full path.  Used for dev generally
+  const base = process.env.TRV_DI_BASE || path.resolve(__dirname, '..');
 
   // Get applications
-  const res = require(registryPath).DependencyRegistry.getApplications();
+  const res = require(path.resolve(base, 'src/registry')).DependencyRegistry.getApplications();
 
   const items = Promise.all(res.map(async x => ({
     watchable: x.watchable,
@@ -84,7 +78,9 @@ function fork(cmd, args) {
       shell: false,
       env: {
         ...process.env,
-        TRV_DI_BASE: path.resolve(__dirname, '..'),
+        ...(process.env.NODE_PRESERVE_SYMLINKS === '1' ? { // Only pass base path if preserving symlinks
+          TRV_DI_BASE: path.resolve(__dirname, '..')
+        } : {}),
         TRV_CLI: ''
       }
     });
