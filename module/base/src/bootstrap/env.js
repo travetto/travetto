@@ -18,19 +18,6 @@ const isEnvFalse = k => {
   return val !== undefined && /(0|false|off|no)/i.test(val);
 };
 
-function checkDocker() {
-  let docker = !isEnvTrue('NO_DOCKER');
-  if (docker) { // Check for docker existence
-    try {
-      const { execSync } = require('child_process');
-      execSync('docker ps', { stdio: [undefined, undefined, undefined] });
-    } catch (e) {
-      docker = false;
-    }
-  }
-  return { docker };
-}
-
 function checkWatch() {
   return { watch: isEnvTrue('watch') };
 }
@@ -106,8 +93,7 @@ const Env = [
     { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal, getInt: envIntVal },
     profile,
     buildLogging(profile),
-    checkWatch(),
-    checkDocker()
+    checkWatch()
   ]
   .reduce((acc, el) => ({ ...acc, ...el }), {});
 

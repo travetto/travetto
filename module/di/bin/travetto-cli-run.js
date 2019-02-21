@@ -115,16 +115,11 @@ async function runApp(args) {
     process.env.WATCH = process.env.WATCH || app.watchable;
 
     await require('@travetto/base/bin/bootstrap').run();
-    let registryPath = 'src/registry';
 
-    // Handle bad symlink behavior
-    if (process.env.TRV_FRAMEWORK_DEV) {
-      registryPath = path.resolve(process.env.TRV_DI_BASE, registryPath);
-    } else {
-      registryPath = path.resolve('..', registryPath);
-    }
+    // Handle bad symlink behavior, by allowing specifying full path.  Used for dev generally
+    const base = process.env.TRV_DI_BASE || path.resolve(__dirname, '..');
 
-    await require(registryPath).DependencyRegistry.runApplication(name, sub);
+    await require(path.resolve(base, 'src/registry')).DependencyRegistry.runApplication(name, sub);
   } catch (err) {
     if (err.message.startsWith('Invalid parameter')) {
       console.error(err.message);

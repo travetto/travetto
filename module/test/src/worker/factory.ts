@@ -8,7 +8,9 @@ export async function workerFactory() {
     cwd: Env.cwd,
     env: {
       ...process.env,
-      TRV_TEST_BASE: TEST_BASE
+      ...(process.env.NODE_PRESERVE_SYMLINKS === '1' ? { // Only pass base path if preserving symlinks
+        TRV_TEST_BASE: TEST_BASE
+      } : {}),
     }
   });
 

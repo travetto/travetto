@@ -66,7 +66,8 @@ export class RestExpressAppProvider extends RestAppProvider<express.Application>
   async listen(config: RestConfig) {
     if (config.ssl) {
       const https = await import('https');
-      https.createServer(await config.getKeys(), this.app).listen(config.port);
+      const keys = await config.getKeys();
+      https.createServer(keys, this.app).listen(config.port);
     } else {
       this.app.listen(config.port);
     }

@@ -1,68 +1,86 @@
 import { Env } from '@travetto/base';
 
-import { ExecUtil } from './util';
+import { Exec } from './exec';
 import { DockerContainer } from './docker';
+import { CommandConfig } from './types';
 
 export class CommandService {
 
-  private _initPromise: Promise<any>;
+  private static _hasDocker: boolean;
 
-  container: DockerContainer;
-
-  constructor(private config: {
-    image: string;
-    imageStartCommand?: string;
-    checkForLocal?: () => Promise<boolean>;
-    localCommandCheck?: [string, string[]];
-    imageCommand?: (args: string[]) => string[];
-    processCommand?: (args: string[]) => string[];
-    docker?: boolean;
-  }) { }
-
-  async useDocker(): Promise<boolean> {
-    const canUseDocker = Env.docker && (this.config.docker === undefined || !!this.config.docker);
-
-    let useDocker = canUseDocker;
-
-    if (useDocker && this.config.checkForLocal) {
-      useDocker = !(await this.config.checkForLocal());
+  static async dockerAvailable() {
+    if (this._hasDocker === undefined && !Env.isTrue('NO_DOCKER')) { // Check for docker existence
+      const [, prom] = Exec.spawn('docker', ['ps']);
+      this._hasDocker = (await prom).valid;
     }
-
-    if (useDocker && this.config.localCommandCheck) {
-      try {
-        useDocker = !(await ExecUtil.spawn(...this.config.localCommandCheck)[1]).valid;
-      } catch { }
-    }
-    return useDocker;
+    return this._hasDocker;
   }
 
-  async _init() {
-    if (await this.useDocker()) {
-      this.container = new DockerContainer(this.config.image)
+  _runContainer: Promise<DockerContainer | undefined>;
+  _execContainer: Promise<DockerContainer | undefined>;
+  config: CommandConfig;
+
+  constructor(config: Partial<CommandConfig>) {
+    this.config = {
+      localCommand: x => x,
+      containerCommand: x => x,
+      localCheck: async () => false,
+      allowDocker: true, containerEntry: '/bin/sh',
+      ...(config as CommandConfig)
+    };
+  }
+
+  async _getContainer() {
+    const { localCheck } = this.config;
+
+    const useLocal = await (Array.isArray(localCheck) ?
+      Exec.spawn(...localCheck)[1].then(x => x.valid, () => false) :
+      localCheck());
+
+    const useContainer = this.config.allowDocker && !useLocal && (await CommandService.dockerAvailable());
+
+    if (useContainer) {
+      return new DockerContainer(this.config.containerImage)
         .forceDestroyOnShutdown()
         .setInteractive(true);
-
-      await this.container.create([], [this.config.imageStartCommand || '/bin/sh']);
-      await this.container.start();
     }
   }
 
-  async init() {
-    if (!this._initPromise) {
-      this._initPromise = this._init();
-    }
-    return await this._initPromise;
+  getRunContainer() {
+    return this._runContainer = this._runContainer || this._getContainer();
+  }
+
+  getExecContainer() {
+    return this._execContainer = this._execContainer || this._getContainer().then(async c => {
+      if (c) {
+        await c.create();
+        await c.start();
+        c.setEntryPoint(this.config.containerEntry);
+      }
+      return c;
+    });
   }
 
   async exec(...args: string[]) {
-    await this.init();
+    const container = await this.getExecContainer();
+    args = (container ? this.config.containerCommand : this.config.localCommand)(args);
 
-    if (this.container) {
-      const cmd = this.config.imageCommand ? this.config.imageCommand(args) : args;
-      return this.container.exec(['-i'], cmd);
+    if (container) {
+      return container.exec(args);
     } else {
-      const cmd = this.config.processCommand ? this.config.processCommand(args) : args;
-      return ExecUtil.spawn(cmd[0], cmd.slice(1), { quiet: true });
+      return Exec.spawn(args[0], args.slice(1), { shell: true, quiet: false });
+    }
+  }
+
+  async run(...args: string[]) {
+    const container = await this.getRunContainer();
+    const [cmd, ...rest] = (container ? this.config.containerCommand : this.config.localCommand)(args);
+    console.debug('Running command', cmd, rest, !!container);
+
+    if (container) {
+      return container.setEntryPoint(cmd).run(rest);
+    } else {
+      return (await Exec.spawn(cmd, rest, { shell: true, quiet: false }))[1];
     }
   }
 }
