@@ -102,7 +102,7 @@ export class $ResourceManager {
     return fs.readFileSync(pth, encoding);
   }
 
-  async readToStream(pth: string, options: Parameters<typeof fs.createReadStream>[1]) {
+  async readToStream(pth: string, options?: Parameters<typeof fs.createReadStream>[1]) {
     pth = await this.find(pth);
     const res = fs.createReadStream(pth, options);
     return res as Readable;
