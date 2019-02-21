@@ -1,14 +1,12 @@
 import * as mongo from 'mongodb';
-import * as Grid from 'gridfs-stream';
-import * as util from 'util';
 
 import { AssetSource, Asset } from '@travetto/asset';
 import { AssetMongoConfig } from './config';
 
 export class AssetMongoSource extends AssetSource {
 
-  private client: Grid.Grid;
   private mongoClient: mongo.MongoClient;
+  private bucket: mongo.GridFSBucket;
 
   constructor(private config: AssetMongoConfig) {
     super();
@@ -16,13 +14,15 @@ export class AssetMongoSource extends AssetSource {
 
   async postConstruct() {
     this.mongoClient = await mongo.MongoClient.connect(this.config.url);
-    this.client = await Grid(this.mongoClient.db(), mongo);
+    this.bucket = new mongo.GridFSBucket(this.mongoClient.db());
   }
 
   async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
-    const conf = { mode: 'w', ...file };
-    const writeStream = this.client.createWriteStream(conf);
-    writeStream.options.content_type = conf.contentType;
+    const writeStream = this.bucket.openUploadStream(file.filename, {
+      contentType: file.contentType,
+      metadata: file.metadata
+    });
+
     stream.pipe(writeStream);
 
     await new Promise<any>((resolve, reject) => {
@@ -45,7 +45,7 @@ export class AssetMongoSource extends AssetSource {
   }
 
   async read(filename: string): Promise<NodeJS.ReadableStream> {
-    return this.client.createReadStream({ filename });
+    return this.bucket.openDownloadStreamByName(filename);
   }
 
   async info(filename: string, filter?: Partial<Asset>): Promise<Asset> {
@@ -55,7 +55,7 @@ export class AssetMongoSource extends AssetSource {
       Object.assign(query, filter);
     }
 
-    const files = await this.client.files.find(query).toArray();
+    const files = await this.bucket.find(query).toArray();
 
     if (!files || !files.length) {
       throw new Error('Unable to find file');
@@ -68,7 +68,16 @@ export class AssetMongoSource extends AssetSource {
   }
 
   async remove(filename: string): Promise<void> {
-    await util.promisify(this.client.remove).call(this.client, { filename });
-    return;
+    const files = await this.bucket.find({ filename }).toArray();
+    const id = files[0]._id;
+    return new Promise((resolve, reject) => {
+      this.bucket.delete(id, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
   }
 }
