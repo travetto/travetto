@@ -1,3 +1,4 @@
+import { Env } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 import { WorkerUtil } from '@travetto/worker';
 
@@ -71,7 +72,7 @@ export class TapEmitter implements Consumer {
 
       if (test.status === 'fail') {
         if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
-          this.logMeta({ error: WorkerUtil.deserializeError(test.error).stack });
+          this.logMeta({ error: WorkerUtil.deserializeError(test.error).stack.replace(new RegExp(Env.cwd, 'g'), '.') });
         }
       }
       if (test.output) {

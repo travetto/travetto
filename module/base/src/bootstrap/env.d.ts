@@ -2,7 +2,6 @@ export declare const Env: {
   prod: boolean;
   dev: boolean;
   watch: boolean;
-  docker: boolean;
   debug: boolean;
   trace: boolean;
   quietInit: boolean;

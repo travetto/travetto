@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@travetto/di": "^0.5.19",
+    "@travetto/exec": "^0.5.7",
     "@types/express-serve-static-core": "^4.16.0"
   },
   "devDependencies": {

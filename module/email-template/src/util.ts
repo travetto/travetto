@@ -8,8 +8,8 @@ import { CommandService } from '@travetto/exec';
 export class TemplateUtil {
 
   static converter = new CommandService({
-    image: 'agregad/pngquant',
-    localCommandCheck: ['pngquant', ['-h']]
+    containerImage: 'agregad/pngquant',
+    localCheck: ['pngquant', ['-h']]
   });
 
   static async compileSass(file: string, roots: string[]) {

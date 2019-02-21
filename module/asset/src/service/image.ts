@@ -16,8 +16,8 @@ const fsUnlink = util.promisify(fs.unlink);
 export class ImageService {
 
   converter = new CommandService({
-    image: 'v4tech/imagemagick',
-    localCommandCheck: ['convert', ['--version']]
+    containerImage: 'v4tech/imagemagick',
+    localCheck: ['convert', ['--version']]
   });
 
   constructor(private assetService: AssetService) { }

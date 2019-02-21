@@ -42,8 +42,8 @@ async function runMongo() {
     .setWorkingDir('/var/workspace')
     .forceDestroyOnShutdown();
 
-  container.run('--storageEngine', 'ephemeralForTest', '--port', port);
-  await DockerContainer.waitForPort(port);
+  container.run(['--storageEngine', 'ephemeralForTest', '--port', port]);
+  await container.waitForPorts();
 
   return;
 }
@@ -55,10 +55,8 @@ While docker containers provide a high level of flexibility, performance can be 
 **Code: Command Service example, using pngquant**
 ```typescript
   const converter = new CommandService({
-    image: 'agregad/pngquant',
-    checkForLocal: async () => {
-      return (await spawn('pngquant -h')[1]).valid;
-    }
+    containerImage: 'agregad/pngquant',
+    localCheck: ['pngquant', ['-h']]
   });
 
   async function compress(img) {

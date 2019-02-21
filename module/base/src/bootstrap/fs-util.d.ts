@@ -1,7 +1,8 @@
 export declare class FsUtil {
   static cwd: string;
   static cacheDir: string;
-  static unlinkRecursiveSync(path: string): void;
+  static unlinkRecursiveSync(path: string, ignoreErrors?: boolean): void;
+  static unlinkRecursive(path: string, ignoreErrors?: boolean): Promise<void>;
   static mkdirp(path: string): Promise<void>;
   static toUnix(base: string): string;
   static toNative(base: string): string;
