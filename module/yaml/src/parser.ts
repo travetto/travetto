@@ -109,9 +109,7 @@ export class Parser {
       pos = nextLineStart;
     }
 
-    state.popToLevel(0);
-
-    return state.top!.value;
+    return state.popToTop()!.value;
   }
 
   static parse(text: string) {

@@ -112,4 +112,14 @@ age: 20
 
         assert(output === [[1, 2], [{ a: 4 }, { c: 5 }, { d: 6 }]]);
     }
+
+    @Test()
+    testSimple() {
+        const output = YamlUtil.parse(`
+---
+  mail:
+     transport: null
+  `);
+        assert(output === { mail: { transport: null } });
+    }
 }
