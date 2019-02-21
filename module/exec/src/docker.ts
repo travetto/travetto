@@ -11,7 +11,7 @@ const fsUnlink = util.promisify(fs.unlink);
 
 function execSync(command: string) {
   console.debug('execSync', command);
-  return child_process.execSync(command).toString().trim();
+  return child_process.execSync(command, { stdio: ['pipe', 'pipe'] }).toString().trim();
 }
 
 export class DockerContainer {
