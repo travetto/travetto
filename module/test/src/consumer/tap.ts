@@ -11,7 +11,7 @@ export class TapEmitter implements Consumer {
   private count = 0;
 
   constructor(private stream: NodeJS.WriteStream = process.stdout, private enhancer: TapEnhancer = DUMMY_ENHANCER) {
-    this.log('TAP version 13');
+    this.log(this.enhancer.suiteName('TAP version 13'));
   }
 
   private log(message: string) {
