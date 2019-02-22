@@ -1,6 +1,6 @@
 import { AllSuitesResult, SuiteResult } from '../model/suite';
 import { TestEvent } from '../model/event';
-import { Consumer } from './types';
+import { Consumer } from '../model/consumer';
 
 export class AllResultsCollector implements Consumer {
 

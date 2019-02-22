@@ -4,7 +4,7 @@ import { WorkerUtil } from '@travetto/worker';
 
 import { TestEvent } from '../model/event';
 import { AllSuitesResult } from '../model/suite';
-import { Consumer } from './types';
+import { Consumer } from '../model/consumer';
 import { TapEnhancer, DUMMY_ENHANCER } from './tap-enhancer';
 
 export class TapEmitter implements Consumer {

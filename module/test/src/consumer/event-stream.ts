@@ -1,5 +1,5 @@
 import { TestEvent } from '../model/event';
-import { Consumer } from './types';
+import { Consumer } from '../model/consumer';
 import { ConsumerUtil } from './util';
 
 export class EventStream implements Consumer {
