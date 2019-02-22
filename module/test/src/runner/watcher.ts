@@ -6,7 +6,7 @@ import { Events } from '../worker/types';
 import { TestRegistry } from '../registry';
 import { TestConfig } from '../model/test';
 import { SuiteConfig } from '../model/suite';
-import { Consumer } from '../consumer/types';
+import { Consumer } from '../model/consumer';
 
 function getConf(o?: [Class, Function]) {
   if (o) {

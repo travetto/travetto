@@ -1,27 +1,13 @@
 import { Env } from '@travetto/base';
 
-import { AssertUtil } from './assert';
-import { Consumer } from '../consumer/types';
-import { Assertion, TestResult, TestConfig } from '../model/test';
+import { Consumer } from '../model/consumer';
 import { SuiteConfig, SuiteResult } from '../model/suite';
+import { AssertUtil } from '../assert/util';
+import { TestUtil } from './util';
 
 export const BREAKOUT = Symbol('breakout');
-export const TIMEOUT = Symbol('timeout');
 
-const DEFAULT_TIMEOUT = Env.getInt('DEFAULT_TIMEOUT', 5000);
 const DEFAULT_PHASE_TIMEOUT = Env.getInt('DEFAULT_PHASE_TIMEOUT', 15000);
-
-export function asyncTimeout(duration: number = DEFAULT_TIMEOUT): [Promise<any>, Function] {
-  let id: NodeJS.Timer;
-  if (Env.isTrue('DEBUGGER')) {
-    duration = 600000; // 10 minutes
-  }
-  const prom = new Promise((_, reject) => {
-    id = setTimeout(() => reject(TIMEOUT), duration);
-    id.unref();
-  });
-  return [prom, () => clearTimeout(id)];
-}
 
 export class ExecutionPhaseManager {
   private progress: ('all' | 'each')[] = [];
@@ -30,60 +16,24 @@ export class ExecutionPhaseManager {
 
   async generateSuiteError(methodName: string, error: Error) {
     // tslint:disable:prefer-const
-    let { line, file } = AssertUtil.readFilePosition(error, this.suite.file);
-    if (line === 1) {
-      line = this.suite.lines.start;
-    }
-    const badAssert: Assertion = {
-      line,
-      file,
-      error,
-      className: this.suite.className,
-      methodName,
-      message: error.message,
-      text: methodName,
-      operator: 'throws'
-    };
-    const badTest: TestResult = {
-      status: 'fail',
-      className: this.suite.className,
-      methodName,
-      description: methodName,
-      lines: { start: line, end: line },
-      file,
-      duration: 0,
-      durationTotal: 0,
-      error,
-      assertions: [badAssert],
-      output: {}
-    };
+    const bad = AssertUtil.generateSuiteError(this.suite, methodName, error);
 
-    const badTestConfig: TestConfig = {
-      class: this.suite.class,
-      className: this.suite.className,
-      file: this.suite.file,
-      lines: badTest.lines,
-      methodName: badTest.methodName,
-      description: badTest.description,
-      skip: false
-    };
+    this.consumer.onEvent({ type: 'test', phase: 'before', test: bad.testConfig });
+    this.consumer.onEvent({ type: 'assertion', phase: 'after', assertion: bad.assert });
+    this.consumer.onEvent({ type: 'test', phase: 'after', test: bad.testResult });
 
-    this.consumer.onEvent({ type: 'test', phase: 'before', test: badTestConfig });
-    this.consumer.onEvent({ type: 'assertion', phase: 'after', assertion: badAssert });
-    this.consumer.onEvent({ type: 'test', phase: 'after', test: badTest });
-
-    return badTest;
+    return bad.testResult;
   }
 
   async runPhase(phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
     try {
       for (const fn of this.suite[phase]) {
-        const [timeout, clear] = asyncTimeout(DEFAULT_PHASE_TIMEOUT);
+        const [timeout, clear] = TestUtil.asyncTimeout(DEFAULT_PHASE_TIMEOUT);
         await Promise.race([timeout, fn.call(this.suite.instance)]);
         clear();
       }
     } catch (error) {
-      if (error === TIMEOUT) {
+      if (error === TestUtil.TIMEOUT) {
         error = new Error(`${this.suite.className}: ${phase} timed out`);
       }
       const res = await this.generateSuiteError(`[[${phase}]]`, error);
