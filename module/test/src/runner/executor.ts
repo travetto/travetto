@@ -1,64 +1,30 @@
-import * as fs from 'fs';
-import * as readline from 'readline';
 import * as assert from 'assert';
 
-import { ScanFs, Env, FsUtil } from '@travetto/base';
+import { Env, FsUtil } from '@travetto/base';
 
+import { TestRegistry } from '../registry';
 import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
-import { TestRegistry } from '../registry';
+import { Consumer } from '../model/consumer';
+import { AssertCheck } from '../assert/check';
+import { AssertCapture } from '../assert/capture';
 import { ConsoleCapture } from './console';
-import { AssertUtil } from './assert';
-import { Consumer } from '../consumer/types';
-import { asyncTimeout, TIMEOUT, ExecutionPhaseManager } from './phase';
+import { ExecutionPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
+import { TestUtil } from './util';
+import { AssertUtil } from '../assert/util';
 
 export class TestExecutor {
 
-  static assertUncaught(test: TestConfig, err: Error) {
-    delete (err as any).toJSON; // Do not allow the value to propagate as JSON
-
-    let line = AssertUtil.readFilePosition(err, test.file).line;
-    if (line === 1) {
-      line = test.lines.start;
-    }
-
-    AssertUtil.add({
-      className: test.className,
-      methodName: test.methodName,
-      file: test.file,
-      line,
-      operator: 'throws',
-      error: err,
-      message: err.message,
-      text: '(uncaught)'
-    });
-  }
-
-  static isTest(file: string) {
-    return new Promise<boolean>((resolve, reject) => {
-      const input = fs.createReadStream(file);
-      const reader = readline.createInterface({ input })
-        .on('line', line => {
-          if (line.includes('@Suite')) {
-            resolve(true);
-            reader.close();
-          }
-        })
-        .on('end', resolve.bind(null, false))
-        .on('close', resolve.bind(null, false));
-    });
-  }
-
-  static async getTests(globs: RegExp[]) {
-    const files = (await ScanFs.bulkScanDir(globs.map(x => ({ testFile: (y: string) => x.test(y) })), Env.cwd))
-      .filter(x => !x.stats.isDirectory())
-      .filter(x => !x.file.includes('node_modules'))
-      .map(f => this.isTest(f.file).then(valid => ({ file: f.file, valid })));
-
-    return (await Promise.all(files))
-      .filter(x => x.valid)
-      .map(x => x.file);
+  static failFile(consumer: Consumer, file: string, err: Error) {
+    const name = file.split(/\//).pop()!;
+    const suite = { class: { name }, className: name, lines: { start: 1, end: 1 }, file, } as any;
+    const res = AssertUtil.generateSuiteError(suite, 'require', err);
+    consumer.onEvent({ type: 'suite', phase: 'before', suite });
+    consumer.onEvent({ type: 'test', phase: 'before', test: res.testConfig });
+    consumer.onEvent({ type: 'assertion', phase: 'after', assertion: res.assert });
+    consumer.onEvent({ type: 'test', phase: 'after', test: res.testResult });
+    consumer.onEvent({ type: 'suite', phase: 'after', suite: { ...suite, fail: 1, success: 0, total: 1, skip: 0 } });
   }
 
   static async executeTest(consumer: Consumer, test: TestConfig) {
@@ -81,13 +47,12 @@ export class TestExecutor {
       return result as TestResult;
     }
 
-    const [timeout, clear] = asyncTimeout(test.timeout);
+    const [timeout, clear] = TestUtil.asyncTimeout(test.timeout);
 
     try {
       ConsoleCapture.start();
       PromiseCapture.start();
-
-      AssertUtil.start(test, (a) =>
+      AssertCapture.start(test, (a) =>
         consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
 
       await Promise.race([suite.instance[test.methodName](), timeout]);
@@ -96,10 +61,10 @@ export class TestExecutor {
       throw undefined;
 
     } catch (err) {
-      if (err === TIMEOUT) {
+      if (err === TestUtil.TIMEOUT) {
         err = new Error('Operation timed out');
       } else if (test.shouldThrow) {
-        err = AssertUtil.checkError(test.shouldThrow!, err)!;
+        err = AssertCheck.checkError(test.shouldThrow!, err)!;
       }
 
       // If error isn't defined, we are good
@@ -110,20 +75,20 @@ export class TestExecutor {
         result.error = err;
 
         if (!(err instanceof assert.AssertionError)) {
-          this.assertUncaught(test, err);
+          AssertCheck.checkUnhandled(test, err);
         }
       }
     } finally {
-      try {
-        await Promise.race([PromiseCapture.stop(), timeout]);
-      } catch (err) {
+      const err = PromiseCapture.stop();
+      if (err) {
+        const finalErr = await Promise.race([err, timeout]).catch(e => e);
         result.status = 'fail';
-        result.error = err;
-        this.assertUncaught(test, err);
+        result.error = finalErr;
+        AssertCheck.checkUnhandled(test, finalErr);
       }
       clear();
       result.output = ConsoleCapture.end();
-      result.assertions = AssertUtil.end();
+      result.assertions = AssertCapture.end();
     }
 
     result.duration = Date.now() - startTime;
@@ -207,41 +172,6 @@ export class TestExecutor {
     return result as SuiteResult;
   }
 
-  static getRunParams(file: string, clsName?: string, method?: string): [SuiteConfig] | [SuiteConfig, TestConfig] | [SuiteConfig[]] {
-    let res = undefined;
-    if (clsName && /^\d+$/.test(clsName)) {
-      const line = parseInt(clsName, 10);
-      const clses = TestRegistry.getClasses().filter(f => f.__filename === file).map(x => TestRegistry.get(x));
-      const cls = clses.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
-      if (cls) {
-        const meth = cls.tests.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
-        if (meth) {
-          res = [cls, meth];
-        } else {
-          res = [cls];
-        }
-      } else {
-        res = [clses];
-      }
-    } else {
-      if (method) {
-        const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
-        const clsConf = TestRegistry.get(cls);
-        const meth = clsConf.tests.find(x => x.methodName === method)!;
-        res = [clsConf, meth];
-      } else if (clsName) {
-        const cls = TestRegistry.getClasses().find(x => x.name === clsName)!;
-        const clsConf = TestRegistry.get(cls);
-        res = [clsConf];
-      } else {
-        const clses = TestRegistry.getClasses().map(x => TestRegistry.get(x));
-        res = [clses];
-      }
-    }
-
-    return res as any;
-  }
-
   static async execute(consumer: Consumer, [file, ...args]: string[]) {
     if (!file.startsWith(Env.cwd)) {
       file = FsUtil.joinUnix(Env.cwd, file);
@@ -250,8 +180,8 @@ export class TestExecutor {
     try {
       require(FsUtil.toUnix(file)); // Path to module
     } catch (err) {
-      err.FATAL = true;
-      throw err;
+      this.failFile(consumer, file, err);
+      return;
     }
 
     if (Env.isTrue('DEBUGGER')) {
@@ -260,22 +190,19 @@ export class TestExecutor {
 
     await TestRegistry.init();
 
-    const params = this.getRunParams(file, args[0], args[1]);
+    const params = TestRegistry.getRunParams(file, args[0], args[1]);
 
-    const suites: SuiteConfig | SuiteConfig[] = params[0];
-    const test = params[1] as TestConfig;
-
-    if (Array.isArray(suites)) {
-      for (const suite of suites) {
+    if ('suites' in params) {
+      for (const suite of params.suites) {
         if (suite.tests.length) {
           await this.executeSuite(consumer, suite);
         }
       }
     } else {
-      if (test) {
-        await this.executeSuiteTest(consumer, suites, test);
+      if (params.test) {
+        await this.executeSuiteTest(consumer, params.suite, params.test);
       } else {
-        await this.executeSuite(consumer, suites);
+        await this.executeSuite(consumer, params.suite);
       }
     }
   }

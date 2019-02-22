@@ -1,7 +1,6 @@
 import { TestEvent } from '../model/event';
 import { AllSuitesResult } from '../model/suite';
-
-import { Consumer } from './types';
+import { Consumer } from '../model/consumer';
 
 export class JSONEmitter implements Consumer {
 
