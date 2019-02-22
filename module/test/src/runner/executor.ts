@@ -11,8 +11,29 @@ import { ConsoleCapture } from './console';
 import { AssertUtil } from './assert';
 import { Consumer } from '../consumer/types';
 import { asyncTimeout, TIMEOUT, ExecutionPhaseManager } from './phase';
+import { PromiseCapture } from './promise';
 
 export class TestExecutor {
+
+  static assertUncaught(test: TestConfig, err: Error) {
+    delete (err as any).toJSON; // Do not allow the value to propagate as JSON
+
+    let line = AssertUtil.readFilePosition(err, test.file).line;
+    if (line === 1) {
+      line = test.lines.start;
+    }
+
+    AssertUtil.add({
+      className: test.className,
+      methodName: test.methodName,
+      file: test.file,
+      line,
+      operator: 'throws',
+      error: err,
+      message: err.message,
+      text: '(uncaught)'
+    });
+  }
 
   static isTest(file: string) {
     return new Promise<boolean>((resolve, reject) => {
@@ -64,10 +85,10 @@ export class TestExecutor {
 
     try {
       ConsoleCapture.start();
+      PromiseCapture.start();
 
-      AssertUtil.start(test, (a) => {
-        consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a });
-      });
+      AssertUtil.start(test, (a) =>
+        consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
 
       await Promise.race([suite.instance[test.methodName](), timeout]);
 
@@ -78,7 +99,7 @@ export class TestExecutor {
       if (err === TIMEOUT) {
         err = new Error('Operation timed out');
       } else if (test.shouldThrow) {
-        err = AssertUtil.checkError(test.shouldThrow!, err);
+        err = AssertUtil.checkError(test.shouldThrow!, err)!;
       }
 
       // If error isn't defined, we are good
@@ -89,26 +110,17 @@ export class TestExecutor {
         result.error = err;
 
         if (!(err instanceof assert.AssertionError)) {
-          delete err.toJSON; // Do not allow the value to propagate as JSON
-
-          let line = AssertUtil.readFilePosition(err, test.file).line;
-          if (line === 1) {
-            line = test.lines.start;
-          }
-
-          AssertUtil.add({
-            className: test.className,
-            methodName: test.methodName,
-            file: test.file,
-            line,
-            operator: 'throws',
-            error: err,
-            message: err.message,
-            text: '(uncaught)'
-          });
+          this.assertUncaught(test, err);
         }
       }
     } finally {
+      try {
+        await Promise.race([PromiseCapture.stop(), timeout]);
+      } catch (err) {
+        result.status = 'fail';
+        result.error = err;
+        this.assertUncaught(test, err);
+      }
       clear();
       result.output = ConsoleCapture.end();
       result.assertions = AssertUtil.end();

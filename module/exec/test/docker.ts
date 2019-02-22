@@ -11,9 +11,11 @@ export class DockerTet {
     const container = new DockerContainer('nginx:latest')
       .exposePort(port, 80)
       .forceDestroyOnShutdown();
-
-    container.run();
-    await container.waitForPorts();
-    assert(true);
+    try {
+      container.run();
+      await assert.doesNotReject(() => container.waitForPorts());
+    } finally {
+      await container.stop();
+    }
   }
 }
