@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { AssetService, AssetUtil, AssetSource, ImageService } from '@travetto/asset';
-import { Suite, BeforeAll, BeforeEach } from '@travetto/test';
+import { Suite, BeforeAll, BeforeEach, Test } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 
 import { AssetS3Source } from '../src/source';
@@ -30,12 +30,7 @@ class TestAssetService {
     await DependencyRegistry.init();
   }
 
-  @BeforeEach()
-  async resetDb() {
-    const service = await DependencyRegistry.getInstance(AssetService);
-  }
-
-  // @Test('downloads an file from a url')
+  @Test('downloads an file from a url', { skip: true })
   async download() {
     const service = await DependencyRegistry.getInstance(AssetService);
     assert(service);
@@ -54,7 +49,7 @@ class TestAssetService {
     assert.rejects(fsStat(filePath));
   }
 
-  // @Test('downloads an file from a url')
+  @Test('downloads an file from a url', { skip: true })
   async downloadAndResize() {
     const service = await DependencyRegistry.getInstance(ImageService);
     const assetService = await DependencyRegistry.getInstance(AssetService);

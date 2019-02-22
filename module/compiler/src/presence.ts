@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { Watcher, ScanEntry, Env, ScanHandler, ScanApp, FsUtil } from '@travetto/base';
+import { Watcher, ScanEntry, Env, ScanHandler, ScanApp, FsUtil, Shutdown } from '@travetto/base';
 
 export interface Listener {
   added(name: string): any;
@@ -18,6 +18,17 @@ export class FilePresenceManager {
     this.watchSpaces.add('src');
     if (Env.appRoot) {
       this.watchSpaces.add(FsUtil.joinUnix(Env.appRoot, 'src'));
+    }
+
+    if (Env.watch) {
+      Shutdown.onUnhandled(e => this.handleMissingModule(e), 0);
+    }
+  }
+
+  private handleMissingModule(err: Error) {
+    if (err && (err.message || '').includes('Cannot find module')) { // Handle module reloading
+      Env.error(err);
+      return true;
     }
   }
 
