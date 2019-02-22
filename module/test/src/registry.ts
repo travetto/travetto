@@ -51,6 +51,35 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     }
     return config;
   }
+
+  getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
+    if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
+      const line = parseInt(clsName, 10);
+      const suites = this.getClasses().filter(f => f.__filename === file).map(x => this.get(x));
+      const suite = suites.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
+
+      if (suite) {
+        const test = suite.tests.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
+        return test ? { suite, test } : { suite };
+      } else {
+        return { suites };
+      }
+    } else { // Else lookup directly
+      if (method) {
+        const cls = this.getClasses().find(x => x.name === clsName)!;
+        const suite = this.get(cls);
+        const test = suite.tests.find(x => x.methodName === method)!;
+        return { suite, test };
+      } else if (clsName) {
+        const cls = this.getClasses().find(x => x.name === clsName)!;
+        const suite = this.get(cls);
+        return { suite };
+      } else {
+        const suites = this.getClasses().map(x => this.get(x));
+        return { suites };
+      }
+    }
+  }
 }
 
 export const TestRegistry = new $TestRegistry();

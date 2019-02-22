@@ -1,116 +1,15 @@
 import * as assert from 'assert';
-import * as util from 'util';
 
-import { Env, Util, Stacktrace, AppError } from '@travetto/base';
-import { Assertion, TestConfig, ThrowableError } from '../model/test';
+import { Stacktrace, AppError } from '@travetto/base';
 
-const ASSERT_FN_OPERATOR: { [key: string]: string } = {
-  equal: '==',
-  notEqual: '!=',
-  strictEqual: '===',
-  notStrictEqual: '!==',
-  greaterThanEqual: '>=',
-  greaterThan: '>',
-  lessThanEqual: '<=',
-  lessThan: '<'
-};
+import { ThrowableError, TestConfig } from '../model/test';
+import { AssertCapture } from './capture';
+import { AssertUtil } from './util';
+import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types';
 
-const OP_MAPPING: { [key: string]: string } = {
-  ok: '{actual} {state} {expected}',
-  includes: '{actual} {state} include {expected}',
-  test: '{expected} {state} match {actual}',
-  throws: '{state} throw {expected}',
-  doesNotThrow: '{state} not throw {expected}',
-  rejects: '{state} reject {expected}',
-  doesNotReject: '{state} not reject {expected}',
-  equal: '{actual} {state} equal {expected}',
-  notEqual: '{actual} {state} not equal {expected}',
-  deepEqual: '{actual} {state} deep equal {expected}',
-  notDeepEqual: '{actual} {state} not deep equal {expected}',
-  strictEqual: '{actual} {state} strictly equal {expected}',
-  notStrictEqual: '{actual} {state} strictly not equal {expected}',
-  deepStrictEqual: '{actual} {state} strictly deep equal {expected}',
-  notStrictDeepEqual: '{actual} {state} strictly not deep equal {expected}',
-  greaterThanEqual: '{actual} {state} be greater than or equal to {expected}',
-  greaterThan: '{actual} {state} be greater than {expected}',
-  instanceof: '{actual} instance {state} be of type {expected}',
-  lessThanEqual: '{actual} {state} be less than or equal to {expected}',
-  lessThan: '{actual} {state} be less than {expected}'
-};
-
-function clean(val: any) {
-  if (val && val.toClean) {
-    return val.toClean();
-  } else if (val === null || val === undefined || (!(val instanceof RegExp) && Util.isPrimitive(val)) || Util.isPlainObject(val) || Array.isArray(val)) {
-    return JSON.stringify(val);
-  } else {
-    if (val.__id || !val.constructor || (!val.constructor.__id && Util.isFunction(val))) {
-      return val.name;
-    } else {
-      return util.inspect(val, false, 1).replace(/\n/g, ' ');
-    }
-  }
-}
-
-const excludeNode = /[\/]node_modules[\/]/;
-
-export class AssertUtil {
-
-  static assertions: Assertion[] = [];
-  static listener?: (a: Assertion) => void;
-  static test: TestConfig;
-
-  static readFilePosition(err: Error, filename: string) {
-    const base = Env.cwd;
-
-    const lines = (err.stack || new Error().stack!)
-      .replace(/[\\]/g, '/')
-      .split('\n')
-      .filter(x => !excludeNode.test(x) && x.includes(base));
-
-    let best = lines.filter(x => x.includes(filename))[0];
-
-    if (!best) {
-      best = lines.filter(x => x.includes(`${base}/test`))[0];
-    }
-
-    if (!best) {
-      return { file: filename, line: 1 };
-    }
-
-    const [, pth] = best.trim().split(/\s+/g).slice(1);
-    const [file, lineNo] = pth.replace(/[()]/g, '').replace(/^[A-Za-z]:/, '').split(':');
-
-    const outFileParts = file.split(base.replace(/^[A-Za-z]:/, ''));
-
-    const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
-
-    const res = { file: outFile, line: parseInt(lineNo, 10) };
-
-    return res;
-  }
-
-  static start(test: TestConfig, listener?: (a: Assertion) => void) {
-    this.test = test;
-    this.listener = listener;
-    this.assertions = [];
-  }
-
-  static buildAssertion(filename: string, text: string, operator: string) {
-    const { file, line } = this.readFilePosition(new Error(), filename.replace(/[.][tj]s$/, ''));
-
-    const assertion: Assertion = {
-      className: this.test.className,
-      methodName: this.test.methodName,
-      file, line, text,
-      operator,
-    };
-
-    return assertion;
-  }
-
+export class AssertCheck {
   static check(filename: string, text: string, fn: string, positive: boolean, ...args: any[]) {
-    const assertion = this.buildAssertion(filename, text, ASSERT_FN_OPERATOR[fn]);
+    const assertion = AssertCapture.buildAssertion(filename, text, ASSERT_FN_OPERATOR[fn]);
 
     const common: { [key: string]: string } = {
       state: positive ? 'should' : 'should not'
@@ -160,11 +59,11 @@ export class AssertUtil {
 
     try {
       if (assertion.actual !== undefined) {
-        assertion.actual = clean(assertion.actual);
+        assertion.actual = AssertUtil.cleanValue(assertion.actual);
       }
 
       if (assertion.expected !== undefined) {
-        assertion.expected = clean(assertion.expected);
+        assertion.expected = AssertUtil.cleanValue(assertion.expected);
       }
 
       switch (fn) {
@@ -183,7 +82,7 @@ export class AssertUtil {
       }
 
       // Pushing on not error
-      this.add(assertion);
+      AssertCapture.add(assertion);
     } catch (e) {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
@@ -197,7 +96,7 @@ export class AssertUtil {
         if (e instanceof Error) {
           (e as Error).stack = Stacktrace.simplifyStack(e);
         }
-        this.add(assertion);
+        AssertCapture.add(assertion);
       }
       throw e;
     }
@@ -235,7 +134,7 @@ export class AssertUtil {
 
   static checkThrow(filename: string, text: string, key: string, negative: boolean,
     action: Function, shouldThrow?: ThrowableError, message?: string) {
-    const assertion = this.buildAssertion(filename, text, key);
+    const assertion = AssertCapture.buildAssertion(filename, text, key);
     let missed: Error | undefined;
 
     try {
@@ -255,13 +154,13 @@ export class AssertUtil {
         throw (assertion.error = e);
       }
     } finally {
-      this.add(assertion);
+      AssertCapture.add(assertion);
     }
   }
 
   static async checkThrowAsync(filename: string, text: string, key: string, negative: boolean,
     action: Function, shouldThrow?: ThrowableError, message?: string) {
-    const assertion = this.buildAssertion(filename, text, key);
+    const assertion = AssertCapture.buildAssertion(filename, text, key);
     let missed: Error | undefined;
 
     try {
@@ -281,21 +180,27 @@ export class AssertUtil {
         throw (assertion.error = e);
       }
     } finally {
-      this.add(assertion);
+      AssertCapture.add(assertion);
     }
   }
 
-  static add(a: Assertion) {
-    this.assertions.push(a);
-    if (this.listener) {
-      this.listener(a);
-    }
-  }
+  static checkUnhandled(test: TestConfig, err: Error) {
+    delete (err as any).toJSON; // Do not allow the value to propagate as JSON
 
-  static end() {
-    const ret = this.assertions;
-    this.assertions = [];
-    delete this.listener, this.test;
-    return ret;
+    let line = AssertUtil.getPositionOfError(err, test.file).line;
+    if (line === 1) {
+      line = test.lines.start;
+    }
+
+    AssertCapture.add({
+      className: test.className,
+      methodName: test.methodName,
+      file: test.file,
+      line,
+      operator: 'throws',
+      error: err,
+      message: err.message,
+      text: (err as any).operator || '(uncaught)'
+    });
   }
 }

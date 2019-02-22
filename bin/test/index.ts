@@ -11,7 +11,7 @@ export async function run() {
 
   // Rewrite
   const child = child_process.spawn('npx', [
-    'lerna', '--concurrency', '6', 'exec', '--no-bail', '--stream', '--',
+    'lerna', '--concurrency', '4', 'exec', '--no-bail', '--stream', '--',
     'npx', 'travetto', 'test', '-f', 'event', '-c', '1'
   ], { shell: true });
 
