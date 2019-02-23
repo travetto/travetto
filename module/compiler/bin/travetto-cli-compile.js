@@ -1,55 +1,20 @@
 // @ts-check
 
-async function loadFiles() {
-  await require(`@travetto/base/bin/bootstrap`).run();
-  const { ScanApp } = require(`@travetto/base`);
-
-  // TODO: Need to refine this
-  // Collect all files to force compilation
-  const files = ScanApp.findFiles('.ts', x =>
-    // Allow specific files
-    (
-      x.endsWith('index.ts') ||
-      (
-        (x.includes('support/') || /^src\//.test(x)) &&
-        !x.endsWith('.d.ts')
-      )
-    )
-  ).filter(x => !x.file.includes('@travetto/test'));
-
-  // Require them
-  for (const f of files) {
-    require(f.file);
-  }
-
-  return files;
-}
-
-async function writeToOutput(cmd, files) {
+async function rewriteRuntimeDir(runtimeDir) {
   const fs = require('fs');
   const { FsUtil, AppCache } = require(`@travetto/base`);
 
-  // Clear out cache if specified
-  if (cmd.output) {
-    FsUtil.unlinkRecursiveSync(FsUtil.resolveNative(FsUtil.cwd, cmd.output), true);
-    FsUtil.mkdirp(cmd.output);
-  }
-
-  // Find final destination
-  const outDir = FsUtil.resolveUnix(FsUtil.cwd, cmd.output || AppCache.cacheDir);
-
-  const FILES = `ScanApp.setFileEntries('.ts', [${files.map(x => `'${x.module.replace(/node_modules\/@travetto/g, '#')}'`).join(', ')}])`;
+  const files = fs.readdirSync(AppCache.cacheDir).map(x => FsUtil.resolveUnix(AppCache.cacheDir, x));
 
   // Rewrite files to allow for presume different path
-  for (const f of fs.readdirSync(AppCache.cacheDir)) {
-    const inp = FsUtil.resolveUnix(AppCache.cacheDir, f);
-    const out = FsUtil.resolveUnix(outDir, f);
+  const FILES = `ScanApp.setFileEntries('.ts', [${files.map(x => `'${x.replace(/node_modules\/@travetto/g, '#')}'`).join(', ')}])`;
 
-    let contents = fs.readFileSync(inp).toString();
+  for (const file of files) {
+    let contents = fs.readFileSync(file).toString();
     contents = contents.replace(/[/][/]#.*$/, '');
     contents = contents.replace('ScanApp.cache = {}', x => `${x};\n${FILES}`);
-    contents = contents.replace(new RegExp(FsUtil.cwd, 'g'), cmd.runtimeDir || process.cwd());
-    fs.writeFileSync(out, contents);
+    contents = contents.replace(new RegExp(FsUtil.cwd, 'g'), runtimeDir || process.cwd());
+    fs.writeFileSync(file, contents);
   }
 }
 
@@ -59,20 +24,30 @@ function init() {
 
   return Util.program
     .command('compile')
+    .option('-c, --clean', 'Indicates if the cache dir should be cleaned')
     .option('-o, --output <output>', 'Output directory')
     .option('-r, --runtime-dir [runtimeDir]', 'Expected path during runtime')
+    .option('-q, --quiet', 'Quiet operation')
     .action(async (cmd) => {
 
       process.env.DEBUG = '0';
       process.env.QUIET_INIT = '1';
+      process.env.TRV_CACHE_DIR = cmd.output || '-';
 
-      Util.dependOn('clean');
+      if (cmd.clean) {
+        Util.dependOn('clean');
+      }
 
-      const files = await loadFiles();
+      await require(`@travetto/base/bin/bootstrap`).run();
+      const { Compiler } = require('../src/compiler');
+      const count = Compiler.compileAll();
 
-      if (cmd.output) {
-        await writeToOutput(cmd, files);
-        console.log(`${Util.colorize.success('Successfully')} wrote ${Util.colorize.output(files.length)} files to ${Util.colorize.path(cmd.output)}`);
+      if (cmd.runtimeDir) {
+        await rewriteRuntimeDir(cmd.runtimeDir);
+      }
+
+      if (!cmd.quiet) {
+        console.log(`${Util.colorize.success('Successfully')} wrote ${Util.colorize.output(count)} files to ${Util.colorize.path(cmd.output)}`);
       }
     });
 }

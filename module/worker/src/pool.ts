@@ -28,9 +28,9 @@ export class WorkerPool<T extends WorkerPoolElement> {
           throw e;
         }
       },
-      async destroy(x: T): Promise<undefined> {
+      async destroy(x: T) {
         console.trace(`[${process.pid}] Destroying ${x.id}`);
-        x.kill();
+        await x.kill();
         return;
       },
       async validate(x: T) {
@@ -38,7 +38,7 @@ export class WorkerPool<T extends WorkerPoolElement> {
       }
     }, args);
 
-    Shutdown.onShutdown(WorkerPool.name, () => this.shutdown());
+    Shutdown.onShutdown(`worker.pool.${WorkerPool.name}`, () => this.shutdown());
   }
 
   async release(worker: T) {

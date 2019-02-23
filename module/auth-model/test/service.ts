@@ -70,7 +70,7 @@ export class ServiceTest {
 
   @Test()
   async register() {
-    const svc: AuthModelService<User> = await DependencyRegistry.getInstance(AuthModelService);
+    const svc = (await DependencyRegistry.getInstance(AuthModelService)) as AuthModelService<User>;
     assert.ok(svc);
 
     const pre = User.from({

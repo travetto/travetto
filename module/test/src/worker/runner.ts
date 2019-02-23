@@ -10,13 +10,24 @@ const IS_SELF_FILE = /\/test\/src\/worker\//;
 const GET_FILE_MODULE = /^.*travetto(?:\/module)?\/([^/]+)\/(?:src\/|index).*$/;
 
 export class TestRunWorker extends WorkerClient<Event> {
+  static import(rel: string) {
+    return import(FsUtil.resolveUnix(TEST_BASE, rel));
+  }
+
   private compiler: any;
   private runs = 0;
 
   constructor() {
     super(Env.getInt('IDLE_TIMEOUT', 120000));
 
-    Shutdown.onShutdown(`Remove-TempDir`, () => new FileCache(Env.cwd).clear(), true);
+    TestRunWorker.import('src/runner/util').then(({ TestUtil }) => TestUtil.registerCleanup('worker'));
+
+    if (process.env.TRV_CACHE_DIR === 'PID') {
+      Shutdown.onShutdown(`test.worker.clearWorkspace`, () => new FileCache(Env.cwd).clear(), true);
+    }
+
+    Shutdown.onShutdown(`test.worker.bufferOutput`,
+      () => new Promise(res => setTimeout(res, 100)));
 
     if (Env.isTrue('EXECUTION_REUSABLE')) {
       setTimeout(_ => { }, Number.MAX_SAFE_INTEGER / 10000000);
@@ -83,7 +94,7 @@ export class TestRunWorker extends WorkerClient<Event> {
   }
 
   async runTest(event: Event) {
-    const { Runner } = await import(FsUtil.resolveUnix(TEST_BASE, 'src/runner/runner'));
+    const { Runner } = await TestRunWorker.import('src/runner/runner');
 
     console.debug('*Running*', event.file);
 

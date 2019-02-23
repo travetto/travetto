@@ -81,8 +81,9 @@ export class TestExecutor {
       }
     } finally {
       const err = PromiseCapture.stop();
-      if (err) {
-        const finalErr = await Promise.race([err, timeout]).catch(e => e);
+      const finalErr = await (err && Promise.race([err, timeout]).catch(e => e));
+
+      if (result.status !== 'fail' && finalErr) {
         result.status = 'fail';
         result.error = finalErr;
         AssertCheck.checkUnhandled(test, finalErr);
