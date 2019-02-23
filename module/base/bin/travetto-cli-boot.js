@@ -7,7 +7,7 @@ function init() {
     .allowUnknownOption()
     .action(async (script, method, cmd) => {
       if (!script) {
-        Util.showHelp(cmd);
+        Util.showHelp(cmd, 'You must specify the script you want to boot');
       }
       process.env.QUIET_INIT = ('QUIET_INIT' in process.env) ? process.env.QUIET_INIT : '1';
       process.env.DEBUG = ('DEBUG' in process.env) ? process.env.DEBUG : '0';

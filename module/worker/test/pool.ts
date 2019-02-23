@@ -1,6 +1,7 @@
 import { FsUtil } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 import { WorkerIteratorInputSource, WorkerPool, Worker } from '../';
+import { WorkerArrayInputSource } from '../src/source/array';
 
 @Suite()
 export class PoolExecTest {
@@ -21,12 +22,12 @@ export class PoolExecTest {
     }, { max: 1 });
 
     await pool.process(
-      //  new ArrayExecutionSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
-      new WorkerIteratorInputSource(function* () {
-        for (let i = 0; i < 5; i++) {
-          yield `${i}-`;
-        }
-      }),
+      new WorkerArrayInputSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+      // new WorkerIteratorInputSource(function* () {
+      //   for (let i = 0; i < 5; i++) {
+      //     yield `${i}-`;
+      //   }
+      // }),
       async (i: string, exe: Worker) => {
         const res = exe.listenOnce('response');
         exe.send('request', { data: i });

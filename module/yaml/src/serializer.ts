@@ -16,30 +16,27 @@ export class Serializer {
     let subl: number = 0;
 
     const pushLine = () => {
-      while (line.length && Tokenizer.isWhitespace(line[line.length - 1].charCodeAt(0))) {
-        line.pop();
+      if (line.length > 0) {
+        lines.push(line.join('').replace(/\s+$/g, ''));
       }
-      if (subl > 0) {
-        lines.push(line.join(''));
-        line = [];
-        subl = 0;
-      }
+      line = [];
+      subl = 0;
     };
 
-    for (const part of Tokenizer.tokenize(text)) {
-      if (part === '\n') {
+    text.replace(/\S+(\s+|$)/g, part => {
+      if (part.startsWith('\n')) {
+        line = [part];
         pushLine();
       } else {
         if (subl + part.length > width) {
           pushLine();
-          if (Tokenizer.isWhitespace(part.charCodeAt(0))) {
-            continue;
-          }
         }
         line.push(part);
         subl += part.length;
       }
-    }
+
+      return '';
+    });
 
     pushLine();
     return lines;
@@ -58,6 +55,7 @@ export class Serializer {
     } else if (typeof o === 'number' || typeof o === 'boolean' || o === null) {
       out = ` ${o}`;
     } else if (typeof o === 'string') {
+      o = o.replace(/\t/g, ' '.repeat(indentLevel));
       const lines = this.wordWrap(o, wordwrap);
       if (lines.length > 1) {
         out = [' >', ...lines.map(x => `${prefix}${x}`)].join('\n');

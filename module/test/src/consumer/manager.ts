@@ -46,6 +46,13 @@ export class ConsumerManager {
       return consumers[0];
     } else {
       const multi: Consumer & { summarize?: () => any } = {
+        onStart() {
+          for (const c of consumers) {
+            if (c.onStart) {
+              c.onStart();
+            }
+          }
+        },
         onEvent(e: any) {
           for (const c of consumers) {
             c.onEvent(e);

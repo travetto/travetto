@@ -39,12 +39,16 @@ export class AssertUtil {
 
     const [, pth] = best.trim().split(/\s+/g).slice(1);
     const [file, lineNo] = pth.replace(/[()]/g, '').replace(/^[A-Za-z]:/, '').split(':');
+    let line = parseInt(lineNo, 10);
+    if (Number.isNaN(line)) {
+      line = -1;
+    }
 
     const outFileParts = file.split(base.replace(/^[A-Za-z]:/, ''));
 
     const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
 
-    const res = { file: outFile, line: parseInt(lineNo, 10) };
+    const res = { file: outFile, line };
 
     return res;
   }
