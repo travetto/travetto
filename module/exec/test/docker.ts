@@ -3,7 +3,7 @@ import { Suite, Test } from '@travetto/test';
 import { DockerContainer } from '../src/docker';
 
 @Suite()
-export class DockerTet {
+export class DockerTest {
 
   @Test()
   async test() {

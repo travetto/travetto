@@ -11,3 +11,5 @@ package-lock.json
 lerna-debug.log
 **/.DS_STORE
 bin/test/model/**
+module/*/temp
+temp/

@@ -1,12 +1,21 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 
-import { ScanFs, Env } from '@travetto/base';
+import { ScanFs, Env, Shutdown, FileCache } from '@travetto/base';
 
 const DEFAULT_TIMEOUT = Env.getInt('DEFAULT_TIMEOUT', 5000);
 
 export class TestUtil {
   static TIMEOUT = Symbol('timeout');
+
+  static registerCleanup(scope: string) {
+    if (process.env.TRV_CACHE_DIR === 'PID') {
+      Shutdown.onShutdown(`test.${scope}.clearWorkspace`, // Remove when done, this is for single interaction
+        () => new FileCache(Env.cwd).clear(), true);
+    }
+    Shutdown.onShutdown(`test.${scope}.bufferOutput`,
+      () => new Promise(res => setTimeout(res, 100)));
+  }
 
   static asyncTimeout(duration: number = DEFAULT_TIMEOUT): [Promise<any>, Function] {
     let id: NodeJS.Timer;

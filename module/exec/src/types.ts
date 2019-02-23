@@ -25,3 +25,8 @@ export interface CommandConfig {
   containerEntry: string;
   containerCommand: (args: string[]) => string[];
 }
+
+export interface ExecutionState {
+  result: Promise<ExecutionResult>;
+  process: child_process.ChildProcess;
+}

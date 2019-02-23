@@ -1,7 +1,7 @@
 import * as child_process from 'child_process';
 
 import { AppError } from '@travetto/base';
-import { ExecutionOptions, ExecutionResult } from './types';
+import { ExecutionOptions, ExecutionResult, ExecutionState } from './types';
 
 export class Exec {
 
@@ -55,26 +55,26 @@ export class Exec {
     return prom;
   }
 
-  static spawn(cmd: string, args: string[], options: ExecutionOptions & child_process.SpawnOptions = {}) {
+  static spawn(cmd: string, args: string[], options: ExecutionOptions & child_process.SpawnOptions = {}): ExecutionState {
     args = args.map(x => `${x}`);
     const p = child_process.spawn(cmd, args, { shell: false, ...options });
-    const prom = Exec.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
-    return [p, prom] as [typeof p, typeof prom];
+    const result = Exec.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
+    return { process: p, result };
   }
 
-  static fork(cmd: string, args: string[], options: ExecutionOptions & child_process.ForkOptions = {}) {
+  static fork(cmd: string, args: string[], options: ExecutionOptions & child_process.ForkOptions = {}): ExecutionState {
     args = args.map(x => `${x}`);
     const p = child_process.fork(cmd, args, options);
-    const prom = Exec.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
-    return [p, prom] as [typeof p, typeof prom];
+    const result = Exec.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
+    return { process: p, result };
   }
 
-  static exec(cmd: string, args: string[], options: ExecutionOptions & child_process.ExecOptions = {}) {
+  static exec(cmd: string, args: string[], options: ExecutionOptions & child_process.ExecOptions = {}): ExecutionState {
     args = args.map(x => `${x}`);
     const cmdStr = `${cmd} ${args.join(' ')}`;
     const p = child_process.exec(cmdStr, options);
-    const prom = Exec.enhanceProcess(p, options, cmdStr);
-    return [p, prom] as [typeof p, typeof prom];
+    const result = Exec.enhanceProcess(p, options, cmdStr);
+    return { process: p, result };
   }
 
   static execSync(command: string) {
