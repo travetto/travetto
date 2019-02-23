@@ -26,7 +26,7 @@ declare class UtilStatic {
   execute(args: string[]): void;
   fork(cmd: string, args?: string[]): Promise<string>;
   colorize: colorize;
-  showHelp(commander: typeof Commander, code?: number): void;
+  showHelp(commander: typeof Commander, message?: string, code?: number): void;
 }
 
 declare const Util: UtilStatic;
