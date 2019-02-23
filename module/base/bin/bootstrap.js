@@ -6,7 +6,10 @@ const Module = require('module');
 
 // @ts-ignore
 let ts = global.ts = new Proxy({}, {
-  get(t, p, r) { ts = global['ts'] = require('typescript'); return ts[p]; }
+  get(t, p, r) {
+    ts = global['ts'] = require('typescript');
+    return ts[p];
+  }
 });
 
 // Simple bootstrap to load compiler
@@ -16,9 +19,6 @@ const { AppCache } = require('../src/bootstrap/cache');
 const cwd = Env.cwd;
 
 AppCache.init();
-
-// Show init
-showEnv();
 
 // @ts-ignore
 const ogModuleLoad = Module._load.bind(Module);
@@ -43,28 +43,8 @@ function moduleLoaderHandler(request, parent) {
   return mod;
 }
 
-let moduleLoader = moduleLoaderHandler;
-
-if (process.env.TRV_FRAMEWORK_DEV) {
-  moduleLoader = (request, parent) => {
-    const root = path.dirname(parent.filename);
-    const resolved = path.resolve(root, request);
-
-    if (/^[.\/]/.test(request) || request.startsWith('@travetto')) { // If relative or framework
-      request = FsUtil.resolveFrameworkDevFile(request.startsWith('@travetto') ? request : resolved);
-    }
-
-    return moduleLoaderHandler(request, parent);
-  };
-}
-
-// @ts-ignore, catch cyclical dependencies
-Module._load = moduleLoader;
-
 let opts;
-
-// Cache on require
-require.extensions['.ts'] = function load(m, tsf) {
+function compileTypescript(m, tsf) {
   const name = FsUtil.toUnix(tsf);
 
   let content;
@@ -82,7 +62,31 @@ require.extensions['.ts'] = function load(m, tsf) {
   // @ts-ignore
   const r = m._compile(content, tsf.replace(/\.ts$/, '.js'));
   return r;
-};
+}
+
+if (process.env.TRV_FRAMEWORK_DEV) {
+  // @ts-ignore
+  Module._load = (request, parent) => {
+    const root = path.dirname(parent.filename);
+    const resolved = path.resolve(root, request);
+
+    if (/^[.\/]/.test(request) || request.startsWith('@travetto')) { // If relative or framework
+      request = FsUtil.resolveFrameworkDevFile(request.startsWith('@travetto') ? request : resolved);
+    }
+
+    return moduleLoaderHandler(request, parent);
+  };
+  require.extensions['.ts'] = function (m, tsf) {
+    return compileTypescript(m, FsUtil.resolveFrameworkDevFile(tsf));
+  }
+} else {
+  // @ts-ignore
+  Module._load = moduleLoaderHandler; // catch cyclical dependencies
+  require.extensions['.ts'] = compileTypescript; // Cache on require
+}
+
+// Show init
+showEnv();
 
 const { PhaseManager } = require('../src/phase');
 const mgr = new PhaseManager('bootstrap');

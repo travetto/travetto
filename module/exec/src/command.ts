@@ -10,7 +10,7 @@ export class CommandService {
 
   static async dockerAvailable() {
     if (this._hasDocker === undefined && !Env.isTrue('NO_DOCKER')) { // Check for docker existence
-      const [, prom] = Exec.spawn('docker', ['ps']);
+      const { result: prom } = Exec.spawn('docker', ['ps']);
       this._hasDocker = (await prom).valid;
     }
     return this._hasDocker;
@@ -34,7 +34,7 @@ export class CommandService {
     const { localCheck } = this.config;
 
     const useLocal = await (Array.isArray(localCheck) ?
-      Exec.spawn(...localCheck)[1].then(x => x.valid, () => false) :
+      Exec.spawn(...localCheck).result.then(x => x.valid, () => false) :
       localCheck());
 
     const useContainer = this.config.allowDocker && !useLocal && (await CommandService.dockerAvailable());
@@ -80,7 +80,7 @@ export class CommandService {
     if (container) {
       return container.setEntryPoint(cmd).run(rest);
     } else {
-      return (await Exec.spawn(cmd, rest, { shell: true, quiet: false }))[1];
+      return await Exec.spawn(cmd, rest, { shell: true, quiet: false }).result;
     }
   }
 }

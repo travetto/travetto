@@ -18,18 +18,13 @@ const cwd = toUnix(process.env.INIT_CWD || process.cwd()).replace(/[\/]+$/, '');
 let defCache = joinUnix(os.tmpdir(), cwd.replace(/[\/:]/g, '_'));
 
 const pkgName = require(joinUnix(cwd, 'package.json')).name;
-const subName = pkgName.split('/').pop();
+const subPkgName = pkgName.split('/').pop();
 
-const cacheDir =
-  process.env.TRV_CACHE_DIR ?
-  (process.env.TRV_CACHE_DIR === 'PID' ?
-    `${defCache}_${process.pid}` :
-    process.env.TRV_CACHE_DIR
-  ) :
-  defCache;
+const peTcd = process.env.TRV_CACHE_DIR;
+const cacheDir = peTcd === 'PID' ? `${defCache}_${process.pid}` : (peTcd && peTcd !== '-' ? peTcd : defCache);
 
 const FsUtil = {
-  cacheDir,
+  cacheDir: resolveUnix(cwd, cacheDir),
   cwd,
   async mkdirp(pth) {
     if (pth) {
@@ -81,8 +76,8 @@ const FsUtil = {
   },
   resolveFrameworkDevFile: (pth) => {
     if (pth.includes('@travetto')) {
-      pth = FsUtil.toUnix(pth).replace(/.*\/@travetto\/([^/]+)\/([^@]+)$/g, (all, name, rest) => {
-        const mid = subName === name ? '' : `node_modules/@travetto/${name}/`;
+      pth = FsUtil.toUnix(pth).replace(/.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
+        const mid = subPkgName === name ? '' : `node_modules/@travetto/${name}/`;
         return `${cwd}/${mid}${rest}`;
       });
     }

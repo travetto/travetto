@@ -73,7 +73,7 @@ export class ClientGenerate {
     const specFile = FsUtil.joinUnix(this.config.output, 'spec.json');
     await new Promise((res, rej) => fs.writeFile(specFile, JSON.stringify(spec, undefined, 2), (err) => err ? rej(err) : res()));
 
-    const [, prom] = await this.codeGenCli.exec([], [
+    const { result: prom } = await this.codeGenCli.exec([], [
       'java',
       '-jar', '/opt/swagger-codegen-cli/swagger-codegen-cli.jar',
       'generate',

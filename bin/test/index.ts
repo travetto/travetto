@@ -4,14 +4,8 @@ import { TapEmitter } from './emitter';
 
 export async function run() {
 
-  child_process.spawnSync('npx', [
-    'lerna', '--no-bail', 'exec', '--parallel', '--',
-    'npx', 'travetto', 'clean'
-  ], { shell: true });
-
-  // Rewrite
   const child = child_process.spawn('npx', [
-    'lerna', '--concurrency', '4', 'exec', '--no-bail', '--stream', '--',
+    'lerna', '--concurrency', '6', 'exec', '--no-bail', '--stream', '--',
     'npx', 'travetto', 'test', '-f', 'event', '-c', '1'
   ], { shell: true });
 
@@ -38,11 +32,5 @@ export async function run() {
     })
     .on('close', () => {
       emitter.summarize();
-
-      // Clean up
-      child_process.spawnSync('npx', [
-        'lerna', '--no-bail', 'exec', '--parallel', '--',
-        'npx', 'travetto', 'clean'
-      ], { shell: true });
     });
 }

@@ -1,19 +1,10 @@
 import * as assert from 'assert';
 
-import { Model, ModelService, ModelSource, ModelCore } from '@travetto/model';
+import { Model, ModelService, ModelCore } from '@travetto/model';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { SchemaRegistry, Schema, Text } from '@travetto/schema';
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-
-import { ModelElasticsearchSource } from '../src/source';
-import { ModelElasticsearchConfig } from '../src/config';
-
-class TestConfig {
-  @InjectableFactory()
-  static getSource(config: ModelElasticsearchConfig): ModelSource {
-    return new ModelElasticsearchSource(config);
-  }
-}
+import { DependencyRegistry } from '@travetto/di';
+import { BaseElasticsearchTest } from './base';
 
 @Schema()
 export class NoteEntity {
@@ -29,7 +20,7 @@ export class Note implements ModelCore {
 }
 
 @Suite()
-export class NestedSuite {
+export class NestedSuite extends BaseElasticsearchTest {
 
   @BeforeAll()
   async init() {

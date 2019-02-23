@@ -1,12 +1,14 @@
 import * as child_process from 'child_process';
 
 import { Env } from '@travetto/base';
-import { Exec } from '@travetto/exec';
+import { Exec, ExecutionResult } from '@travetto/exec';
 
 import { ChildOptions, WorkerEvent } from './types';
 import { Execution } from './execution';
 
 export class Worker<U extends WorkerEvent = WorkerEvent> extends Execution<U, child_process.ChildProcess> {
+
+  private _complete: Promise<ExecutionResult>;
 
   constructor(public command: string, public args: string[], public fork = false, public opts: ChildOptions = {}) {
     super();
@@ -31,7 +33,7 @@ export class Worker<U extends WorkerEvent = WorkerEvent> extends Execution<U, ch
       (finalOpts as any).shell = false;
     }
 
-    const [sub, complete] = op(this.command, this.args, finalOpts);
+    const { process: sub, result: complete } = op(this.command, this.args, finalOpts);
 
     console.trace(`[${process.pid}] Launched ${sub.pid}`);
 
@@ -44,28 +46,17 @@ export class Worker<U extends WorkerEvent = WorkerEvent> extends Execution<U, ch
       delete this._proc;
     });
 
+    this._complete = complete;
+
     return sub;
   }
 
-  async waitForComplete() {
-    await this._init();
-    return new Promise((resolve, reject) => {
-      this._proc.on('close', () => {
-        resolve();
-      });
-      this._proc.on('exit', () => {
-        resolve();
-      });
-      this._proc.on('error', (err) => {
-        reject(err);
-      });
-    });
-  }
-
-  kill() {
+  async kill() {
     if (this._proc) {
       this._proc.kill(process.platform === 'win32' ? undefined : 'SIGTERM');
+      await this._complete;
     }
+
     super.kill();
   }
 }
