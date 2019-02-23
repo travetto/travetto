@@ -38,7 +38,7 @@ export class ImageService {
     if (options && (options.w || options.h)) {
       const filePath = AssetUtil.generateTempFile(info.filename.split('.').pop() as string);
 
-      const [proc, prom] = await this.converter.exec('convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-');
+      const { process: proc, result: prom } = await this.converter.exec('convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-');
 
       info.stream.pipe(proc.stdin);
       proc.stdout.pipe(fs.createWriteStream(filePath));

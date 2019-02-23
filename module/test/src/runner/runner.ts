@@ -1,4 +1,4 @@
-import { FileCache, PhaseManager, Shutdown, Env, FsUtil } from '@travetto/base';
+import { PhaseManager, Env, FsUtil } from '@travetto/base';
 import { WorkerUtil, WorkerPool, WorkerArrayInputSource } from '@travetto/worker';
 
 import { ConsumerManager } from '../consumer/manager';
@@ -20,12 +20,8 @@ interface State {
 }
 
 export class Runner {
-  constructor(private state: State) {
-    if (!process.send) { // Remove if not child
-      Shutdown.onShutdown(`Remove-Root-TempDir`, // Remove when done, this is for single interaction
-        () => new FileCache(Env.cwd).clear(), true);
-    }
-  }
+
+  constructor(private state: State) { }
 
   async getFiles() {
     const { args } = this.state; // strip off node and worker name
@@ -82,8 +78,18 @@ export class Runner {
 
   async runSingle() {
     const consumer = ConsumerManager.create(this.state.consumer || this.state.format);
+    if (consumer.onStart) {
+      consumer.onStart();
+    }
+
     await new PhaseManager('test').load().run();
-    return await TestExecutor.execute(consumer, this.state.args);
+    const res = await TestExecutor.execute(consumer, this.state.args);
+
+    if (consumer.summarize) {
+      consumer.summarize();
+    }
+
+    return res;
   }
 
   async run() {

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { AppInfo, Env, FsUtil } from '@travetto/base';
+import { AppInfo, Env, FsUtil, ScanApp, AppCache } from '@travetto/base';
 
 import { TransformerManager } from './transformers';
 import { CompilerUtil } from './util';
@@ -157,6 +157,17 @@ class $Compiler {
 
   off(event: WatchEvent, callback: (filename: string) => any) {
     this.events.removeListener(event, callback);
+  }
+
+  compileAll() {
+    let compiled = 0;
+    ScanApp.getStandardAppFiles().forEach(x => {
+      if (!AppCache.hasEntry(x)) {
+        compiled += 1;
+        require(x);
+      }
+    });
+    return compiled;
   }
 }
 

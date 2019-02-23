@@ -6,7 +6,14 @@ async function runTests(opts, args) {
 
     await require('@travetto/base/bin/bootstrap').run();
 
+    // Pre compile all
+    require('@travetto/compiler').Compiler.compileAll();
+
     const { Runner } = require('../src/runner/runner');
+    const { TestUtil } = require('../src/runner/util');
+
+    TestUtil.registerCleanup('runner');
+
     const res = await new Runner({
       format: opts.format,
       consumer: opts.consumer,

@@ -25,7 +25,7 @@ function getApp(filename) {
 
 async function getApps() {
   // Suppress all output
-  console.warn = console.debug = console.log = function() {};
+  console.warn = console.debug = console.log = function () { };
 
   await require('@travetto/base/bin/bootstrap'); // Load base transpiler
 

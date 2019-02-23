@@ -53,9 +53,7 @@ export class ScanApp {
   }
 
   static requireFiles(ext: string | RegExp, filter: RegExp | ((rel: string) => boolean)) {
-    return ScanApp.findFiles(ext, filter).map(x => {
-      return require(x.file);
-    });
+    return ScanApp.findFiles(ext, filter).map(x => require(x.file));
   }
 
   static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {
@@ -69,5 +67,15 @@ export class ScanApp {
       }
       return { file: full, module: mod };
     });
+  }
+
+  static getStandardAppFiles() {
+    return ScanApp
+      .findFiles('.ts', x =>
+        !x.endsWith('.d.ts') && (
+          /^(src\/|support\/|index)/.test(x) ||
+          /(@travetto\/[^\/]+\/(src\/|support\/|index))/.test(x)
+        ) && !x.includes('@travetto/test'))
+      .map(x => x.file);
   }
 }
