@@ -33,8 +33,7 @@ const Execute = {
     try {
       return Execute.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
     } catch (e) {
-      console.error('Unknown command', cmd);
-      Util.showHelp(commander, 1);
+      Util.showHelp(commander, `Unknown command ${cmd}`);
     }
   },
   run(args) {

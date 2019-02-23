@@ -10,12 +10,17 @@ import { TapEnhancer, DUMMY_ENHANCER } from './tap-enhancer';
 export class TapEmitter implements Consumer {
   private count = 0;
 
-  constructor(private stream: NodeJS.WriteStream = process.stdout, private enhancer: TapEnhancer = DUMMY_ENHANCER) {
-    this.log(this.enhancer.suiteName('TAP version 13'));
-  }
+  constructor(
+    private stream: NodeJS.WriteStream = process.stdout,
+    private enhancer: TapEnhancer = DUMMY_ENHANCER
+  ) { }
 
   private log(message: string) {
     this.stream.write(`${message}\n`);
+  }
+
+  onStart() {
+    this.log(this.enhancer.suiteName('TAP version 13'));
   }
 
   logMeta(obj: any) {

@@ -48,6 +48,10 @@ export class Runner {
       max: this.state.concurrency
     });
 
+    if (consumer.onStart) {
+      consumer.onStart();
+    }
+
     await pool.process(
       new WorkerArrayInputSource(files),
       async (file, exe) => {

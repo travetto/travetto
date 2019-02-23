@@ -19,6 +19,7 @@ export class TestExecutor {
   static failFile(consumer: Consumer, file: string, err: Error) {
     const name = file.split(/\//).pop()!;
     const suite = { class: { name }, className: name, lines: { start: 1, end: 1 }, file, } as any;
+    err.message = err.message.replace(Env.cwd, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
     consumer.onEvent({ type: 'test', phase: 'before', test: res.testConfig });
