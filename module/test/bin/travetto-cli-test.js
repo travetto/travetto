@@ -31,9 +31,6 @@ function init() {
     .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', Math.min(4, os.cpus().length - 1))
     .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
     .action(async (args, cmd) => {
-      if (args.length === 0) {
-        args = ['test/.*'];
-      }
       require('./init');
 
       if (cmd.format === 'tap' && Util.HAS_COLOR) {
@@ -53,6 +50,12 @@ function init() {
           testName: Col.title,
           total: Col.title
         });
+      }
+
+      if (args.length === 0 && cmd.mode === 'all') {
+        args = ['test/.*'];
+      } else if (args.length !== 1 && cmd.mode === 'single') {
+        return Util.showHelp(cmd, 'You must specify a file to run in single mode');
       }
 
       await runTests(cmd, args);

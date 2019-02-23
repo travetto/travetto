@@ -56,7 +56,12 @@ const Util = {
     }
     return value;
   },
-  showHelp(cmd, code = 0) {
+  showHelp(cmd, msg = '', code = msg === '' ? 0 : 1) {
+
+    if (msg) {
+      console.error(Util.colorize['failure'](`${msg}\n`));
+    }
+
     cmd.outputHelp((text) => {
       function extract(key) {
         let sub;
@@ -79,15 +84,15 @@ const Util = {
       if (usage) {
         out.push(
           usage
-          .replace(/Usage:/, x => Util.colorize['title'](x))
+            .replace(/Usage:/, x => Util.colorize['title'](x))
         );
       }
       if (options) {
         out.push(
           options
-          .replace(/(\s*)(-[^, ]+)(,?\s*)(--\S+)?((\s+)?((?:\[[^\]]+\])|(?:\<[^>]+>)))?((\s+)(.*))?/g,
-            (p, spacing, simpleParam, pSep, fullParam, sub, subSp, subVal, desc, descSp, descVal) => {
-              return [spacing,
+            .replace(/(\s*)(-[^, ]+)(,?\s*)(--\S+)?((\s+)?((?:\[[^\]]+\])|(?:\<[^>]+>)))?((\s+)(.*))?/g,
+              (p, spacing, simpleParam, pSep, fullParam, sub, subSp, subVal, desc, descSp, descVal) => {
+                return [spacing,
                   Util.colorize['param'](simpleParam),
                   pSep,
                   Util.colorize['param'](fullParam),
@@ -95,20 +100,20 @@ const Util = {
                   Util.colorize['type'](subVal),
                   descSp,
                   Util.colorize['description'](descVal)
-                  .replace(/([(]default:\s+)(.*?)([)])/g, (all, l, val, r) => `${l}${Util.colorize['input'](val)}${r}`)
+                    .replace(/([(]default:\s+)(.*?)([)])/g, (all, l, val, r) => `${l}${Util.colorize['input'](val)}${r}`)
                 ]
-                .filter(x => x !== '' && x !== undefined)
-                .join('');
-            })
-          .replace(/Options:/, x => Util.colorize['title'](x))
+                  .filter(x => x !== '' && x !== undefined)
+                  .join('');
+              })
+            .replace(/Options:/, x => Util.colorize['title'](x))
         );
       }
       if (commands) {
         out.push(
           commands
-          .replace(/\s([^\[\]]\S+)/g, x => Util.colorize['param'](x))
-          .replace(/(\s*[^\x1b]\[[^\]]+\])/g, x => Util.colorize['input'](x))
-          .replace(/Commands:/, x => Util.colorize['title'](x))
+            .replace(/\s([^\[\]]\S+)/g, x => Util.colorize['param'](x))
+            .replace(/(\s*[^\x1b]\[[^\]]+\])/g, x => Util.colorize['input'](x))
+            .replace(/Commands:/, x => Util.colorize['title'](x))
         );
       }
 
