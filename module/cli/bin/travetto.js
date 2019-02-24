@@ -5,8 +5,6 @@ const fs = require('fs');
 const path = require('path');
 const { FsUtil } = require('../src/fs-util');
 
-process.env.TRV_CLI = '1';
-
 const pkg = '@travetto/cli';
 const rel = `${FsUtil.cwd}/node_modules/${pkg}/bin/${path.basename(__filename)}`;
 

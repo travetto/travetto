@@ -1,6 +1,6 @@
 import { FileCache, PhaseManager, Env, Shutdown, FsUtil } from '@travetto/base';
 import { CommUtil, ChildCommChannel } from '@travetto/worker';
-import { Events, TEST_BASE } from './types';
+import { Events } from './types';
 
 type Event = { type: string, error?: any, file?: string, class?: string, method?: string };
 
@@ -10,9 +10,6 @@ const IS_SELF_FILE = /\/test\/src\/worker\//;
 const GET_FILE_MODULE = /^.*travetto(?:\/module)?\/([^/]+)\/(?:src\/|index).*$/;
 
 export class TestChildWorker extends ChildCommChannel<Event> {
-  static import(rel: string) {
-    return import(FsUtil.resolveUnix(TEST_BASE, rel));
-  }
 
   private compiler: any;
   private runs = 0;
@@ -20,7 +17,7 @@ export class TestChildWorker extends ChildCommChannel<Event> {
   constructor() {
     super(Env.getInt('IDLE_TIMEOUT', 120000));
 
-    TestChildWorker.import('src/runner/util').then(({ TestUtil }) => TestUtil.registerCleanup('worker'));
+    import('../runner/util').then(({ TestUtil }) => TestUtil.registerCleanup('worker'));
 
     if (process.env.TRV_CACHE_DIR === 'PID') {
       Shutdown.onShutdown(`test.worker.clearWorkspace`, () => new FileCache(Env.cwd).clear(), true);
@@ -94,7 +91,7 @@ export class TestChildWorker extends ChildCommChannel<Event> {
   }
 
   async runTest(event: Event) {
-    const { Runner } = await TestChildWorker.import('src/runner/runner');
+    const { Runner } = await import(`../runner/runner`);
 
     console.debug('*Running*', event.file);
 

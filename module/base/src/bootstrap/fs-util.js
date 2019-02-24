@@ -76,8 +76,8 @@ const FsUtil = {
   },
   resolveFrameworkDevFile: (pth) => {
     if (pth.includes('@travetto')) {
-      pth = FsUtil.toUnix(pth).replace(/.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
-        const mid = subPkgName === name ? '' : `node_modules/@travetto/${name}/`;
+      pth = FsUtil.toUnix(pth).replace(/^.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
+        const mid = subPkgName === name ? '' : `node_modules/@travetto/${name}`;
         return `${cwd}/${mid}${rest || ''}`;
       });
     }

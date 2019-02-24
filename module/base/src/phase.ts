@@ -8,6 +8,12 @@ interface Initializer {
 
 export class PhaseManager {
 
+  static init(scope: string) {
+    const mgr = new PhaseManager(scope);
+    mgr.load();
+    return mgr;
+  }
+
   initializers: Initializer[] = [];
 
   constructor(public scope: string) { }
