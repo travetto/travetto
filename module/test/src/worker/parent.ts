@@ -1,22 +1,18 @@
+import * as path from 'path';
+
 import { Env } from '@travetto/base';
 
 import { ParentCommChannel, CommUtil, WorkUtil } from '@travetto/worker';
-import { Events, TEST_BASE } from './types';
+import { Events } from './types';
 import { Consumer } from '../model/consumer';
+
+const TRV_TEST_BASE = path.resolve(__dirname, '../..');
 
 export function buildWorkManager(consumer: Consumer) {
   return WorkUtil.spawnedWorker<string>({
-    command: `${TEST_BASE}/bin/travetto-test-worker`,
+    command: `${TRV_TEST_BASE}/bin/test-worker`,
     fork: true,
-    opts: {
-      cwd: Env.cwd,
-      env: {
-        ...process.env,
-        ...(process.env.NODE_PRESERVE_SYMLINKS === '1' ? { // Only pass base path if preserving symlinks
-          TRV_TEST_BASE: TEST_BASE
-        } : {}),
-      }
-    },
+    opts: { cwd: Env.cwd, env: { ...process.env, TRV_TEST_BASE } },
     async init(channel: ParentCommChannel) {
       await channel.listenOnce(Events.READY);
       await channel.send(Events.INIT);
