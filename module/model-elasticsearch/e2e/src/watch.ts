@@ -2,7 +2,7 @@ import { Model, ModelCore, ModelSource, ModelService } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 import { DependencyRegistry, InjectableFactory, Application, Inject } from '@travetto/di';
 
-import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../';
+import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../..';
 import { Class } from '@travetto/registry';
 
 @Schema()
@@ -46,7 +46,7 @@ class Service {
     await this.src.save(Person, Person.from({ name: 'bob', age: 10, gender: 'm', }));
     await this.src.save(Employee, Employee.from({ name: 'bob2' }));
 
-    const res = await (this.src as ModelElasticsearchSource).getMultiQuery([Employee, Person], {
+    const res = await (this.src as ModelElasticsearchSource).getRawMultiQuery([Employee, Person], {
       where: {
         name: {
           $regex: /.*/

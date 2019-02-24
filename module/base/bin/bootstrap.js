@@ -44,6 +44,7 @@ function moduleLoaderHandler(request, parent) {
 }
 
 let opts;
+
 function compileTypescript(m, tsf) {
   const name = FsUtil.toUnix(tsf);
 
@@ -53,6 +54,7 @@ function compileTypescript(m, tsf) {
       const json = ts.readJsonConfigFile(`${cwd}/tsconfig.json`, ts.sys.readFile);
       opts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, cwd).options;
     }
+
     content = ts.transpile(FsUtil.prepareTranspile(tsf), opts);
     AppCache.writeEntry(name, content);
   } else {
@@ -76,9 +78,9 @@ if (process.env.TRV_FRAMEWORK_DEV) {
 
     return moduleLoaderHandler(request, parent);
   };
-  require.extensions['.ts'] = function (m, tsf) {
+  require.extensions['.ts'] = function(m, tsf) {
     return compileTypescript(m, FsUtil.resolveFrameworkDevFile(tsf));
-  }
+  };
 } else {
   // @ts-ignore
   Module._load = moduleLoaderHandler; // catch cyclical dependencies

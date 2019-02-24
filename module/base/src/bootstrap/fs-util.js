@@ -78,7 +78,7 @@ const FsUtil = {
     if (pth.includes('@travetto')) {
       pth = FsUtil.toUnix(pth).replace(/.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
         const mid = subPkgName === name ? '' : `node_modules/@travetto/${name}/`;
-        return `${cwd}/${mid}${rest}`;
+        return `${cwd}/${mid}${rest || ''}`;
       });
     }
     return pth;

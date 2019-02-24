@@ -47,7 +47,7 @@ export class AssertCheck {
       assertion.actual = args[1];
     } else if (fn === 'instanceof') {
       assertion.expected = args[1];
-      assertion.actual = args[0].constructor;
+      assertion.actual = (args[0] === null || args[0] === undefined) ? args[0] : args[0].constructor;
       assertion.message = args[2];
       assertion.operator = fn;
     } else {
