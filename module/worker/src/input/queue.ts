@@ -1,6 +1,6 @@
-import { WorkerInputSource } from '../types';
+import { InputSource } from './types';
 
-export class WorkerQueueInputSource<X> implements WorkerInputSource<X> {
+export class QueueInputSource<X> implements InputSource<X> {
   private items: X[] = [];
 
   constructor(data?: X[], private tick: number = 500) {

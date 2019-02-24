@@ -1,34 +1,30 @@
-export class WorkerUtil {
+import { SpawnConfig } from './comm/types';
+import { ParentCommChannel } from './comm/parent';
+import { CommUtil } from './comm/util';
+import { Worker } from './pool';
 
-  static serializeError(e: Error | any) {
-    let error: any = undefined;
-
-    if (e) {
-      error = {};
-      for (const k of Object.keys(e)) {
-        error[k] = e[k];
-      }
-      error.$ = true;
-      error.message = e.message;
-      error.stack = e.stack;
-      error.name = e.name;
+export class WorkUtil {
+  static spawnedWorker<X>(
+    config: SpawnConfig & {
+      execute: (channel: ParentCommChannel, input: X) => any,
+      destroy?: (channel: ParentCommChannel) => any,
+      init?: (channel: ParentCommChannel) => any,
     }
-
-    return error;
-  }
-
-  static deserializeError(e: any) {
-    if (e && e.$) {
-      const err = new Error();
-      for (const k of Object.keys(e)) {
-        (err as any)[k] = e[k];
-      }
-      err.message = e.message;
-      err.stack = e.stack;
-      err.name = e.name;
-      return err;
-    } else if (e) {
-      return e;
-    }
+  ): Worker<X> {
+    const channel = new ParentCommChannel(
+      CommUtil.spawnProcess(config)
+    );
+    return {
+      get id() { return channel.id; },
+      get active() { return channel.active; },
+      destroy: async () => {
+        if (config.destroy) {
+          await config.destroy(channel);
+        }
+        await channel.destroy();
+      },
+      init: () => config.init ? config.init(channel) : undefined,
+      execute: (inp: X) => config.execute(channel, inp)
+    };
   }
 }

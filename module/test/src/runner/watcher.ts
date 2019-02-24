@@ -1,7 +1,7 @@
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
-import { WorkerQueueInputSource, Worker } from '@travetto/worker';
+import { QueueInputSource, Worker } from '@travetto/worker';
 
-import { workerFactory } from '../worker/factory';
+import { buildWorkManager } from '../worker/parent';
 import { Events } from '../worker/types';
 import { TestRegistry } from '../registry';
 import { TestConfig } from '../model/test';

@@ -159,9 +159,9 @@ function init() {
       cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
 
       cmd.profile = [
-        ...(cmd.profile || []),
-        ...(process.env.PROFILE || '').split(/,/g)
-      ]
+          ...(cmd.profile || []),
+          ...(process.env.PROFILE || '').split(/,/g)
+        ]
         .filter(x => !!x)
         .map(x => x.trim());
 
@@ -174,7 +174,7 @@ function init() {
         if (apps.length) {
           listHelper = generateAppHelpList.bind(null, apps, cmd);
         }
-        Util.showHelp(cmd, app ? `${app} is an unknown application` : 'You must specify and application to run');
+        Util.showHelp(cmd, app ? `${app} is an unknown application` : 'You must specify an application to run');
       }
 
       if (cmd.app) {

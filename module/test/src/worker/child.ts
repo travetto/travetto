@@ -1,5 +1,5 @@
 import { FileCache, PhaseManager, Env, Shutdown, FsUtil } from '@travetto/base';
-import { WorkerClient, WorkerUtil } from '@travetto/worker';
+import { CommUtil, ChildCommChannel } from '@travetto/worker';
 import { Events, TEST_BASE } from './types';
 
 type Event = { type: string, error?: any, file?: string, class?: string, method?: string };
@@ -9,7 +9,7 @@ const IS_SUPPORT_FILE = /\/support\//;
 const IS_SELF_FILE = /\/test\/src\/worker\//;
 const GET_FILE_MODULE = /^.*travetto(?:\/module)?\/([^/]+)\/(?:src\/|index).*$/;
 
-export class TestRunWorker extends WorkerClient<Event> {
+export class TestChildWorker extends ChildCommChannel<Event> {
   static import(rel: string) {
     return import(FsUtil.resolveUnix(TEST_BASE, rel));
   }
@@ -20,7 +20,7 @@ export class TestRunWorker extends WorkerClient<Event> {
   constructor() {
     super(Env.getInt('IDLE_TIMEOUT', 120000));
 
-    TestRunWorker.import('src/runner/util').then(({ TestUtil }) => TestUtil.registerCleanup('worker'));
+    TestChildWorker.import('src/runner/util').then(({ TestUtil }) => TestUtil.registerCleanup('worker'));
 
     if (process.env.TRV_CACHE_DIR === 'PID') {
       Shutdown.onShutdown(`test.worker.clearWorkspace`, () => new FileCache(Env.cwd).clear(), true);
@@ -94,7 +94,7 @@ export class TestRunWorker extends WorkerClient<Event> {
   }
 
   async runTest(event: Event) {
-    const { Runner } = await TestRunWorker.import('src/runner/runner');
+    const { Runner } = await TestChildWorker.import('src/runner/runner');
 
     console.debug('*Running*', event.file);
 
@@ -116,7 +116,7 @@ export class TestRunWorker extends WorkerClient<Event> {
       await this.runTest(event);
       this.send(Events.RUN_COMPLETE);
     } catch (e) {
-      this.send(Events.RUN_COMPLETE, { error: WorkerUtil.serializeError(e) });
+      this.send(Events.RUN_COMPLETE, { error: CommUtil.serializeError(e) });
     }
 
     this.runs += 1;

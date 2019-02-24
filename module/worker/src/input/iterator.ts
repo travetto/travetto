@@ -1,10 +1,10 @@
-import { WorkerInputSource } from '../types';
+import { InputSource } from './types';
 
 function isIterator<T>(o: any): o is Iterator<T> {
   return 'next' in o;
 }
 
-export class WorkerIteratorInputSource<X> implements WorkerInputSource<X> {
+export class IteratorInputSource<X> implements InputSource<X> {
 
   private src: Iterator<X>;
   private ondeck: X;
