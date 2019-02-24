@@ -29,14 +29,27 @@ export class WorkPool<X, T extends Worker<X>> {
       ...(opts || {}),
     };
 
+    let createErrors = 0;
+
     this.pool = gp.createPool({
       create: async () => {
-        const res = await getWorker();
+        try {
+          const res = await getWorker();
 
-        if (res.init) {
-          await res.init();
+          if (res.init) {
+            await res.init();
+          }
+
+          createErrors = 0; // Reset errors on success
+
+          return res;
+        } catch (e) {
+          if (createErrors++ > args.max) { // If error count is bigger than pool size, we broke
+            console.error(e);
+            process.exit(1);
+          }
+          throw e;
         }
-        return res;
       },
       async destroy(x: T) {
         console.trace(`[${process.pid}] Destroying ${x.id}`);

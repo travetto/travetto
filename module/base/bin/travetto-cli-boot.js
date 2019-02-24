@@ -12,22 +12,10 @@ function init() {
       process.env.QUIET_INIT = ('QUIET_INIT' in process.env) ? process.env.QUIET_INIT : '1';
       process.env.DEBUG = ('DEBUG' in process.env) ? process.env.DEBUG : '0';
 
-      require('./bootstrap');
+      const { runScript } = require('./lib');
 
-      if (cmd.phase && cmd.phase !== 'none') {
-        const { PhaseManager } = require('../src/phase');
-        const mgr = new PhaseManager(cmd.phase);
-        mgr.load();
-        await mgr.run();
-      }
+      const res = await runScript(script, cmd.phase);
 
-      let res;
-      try {
-        const { FsUtil } = require('../src/bootstrap/fs-util');
-        res = require(FsUtil.resolveUnix(FsUtil.cwd, script));
-      } catch {
-        res = require(script);
-      }
       if (res && method) {
         res[method]();
       }

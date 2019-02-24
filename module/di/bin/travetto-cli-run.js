@@ -1,26 +1,7 @@
 // @ts-check
-const path = require('path');
-let colorize;
+const { getAppList, getParamType, runApp, getAppByName } = require(`./lib`);
 
-try {
-  colorize = require('@travetto/cli/src/util').Util.colorize;
-} catch (e) {
-  colorize = v => v;
-}
-
-async function getAppList() {
-  try {
-    const { getCachedAppList } = require('./travetto-find-apps');
-    return await getCachedAppList();
-  } catch (err) {
-    console.error(err && err.stack ? err.stack : err);
-    process.exit(1);
-  }
-}
-
-function getParamType(config) {
-  return (config.meta && config.meta.choices) ? config.meta.choices.join('|') : config.type;
-}
+const colorize = require('@travetto/cli/src/util').Util.colorize;
 
 function getAppUsage(app) {
   let usage = app.name;
@@ -71,65 +52,6 @@ function generateAppHelpList(apps, cmd) {
     choices.push(lines.join('\n     '));
   }
   return choices.map(x => `   ● ${x}`).join('\n\n');
-}
-
-function processApplicationParam(config, param) {
-  if (
-    (config.type === 'boolean' && !/^(true|false|1|0|yes|no|on|off)/i.test(param)) ||
-    (config.type === 'number' && !/^[-]?[0-9]*[.]?[0-9]*$/.test(param)) ||
-    (config.meta && config.meta.choices && !config.meta.choices.find(c => `${c}` === param))
-  ) {
-    throw new Error(`Invalid parameter ${colorize.param(config.name)}: Received ${colorize.input(param)} expected ${colorize.type(getParamType(config))}`);
-  }
-  let out = param;
-  switch (config.type) {
-    case 'number':
-      out = param.includes('.') ? parseFloat(param) : parseInt(param, 10);
-      break;
-    case 'boolean':
-      out = /^(true|1|yes|on)$/i.test(param);
-      break;
-  }
-  return out;
-}
-
-async function runApp(args) {
-  let app;
-  const name = args[0];
-  let [, ...sub] = args;
-  try {
-    app = (await getAppList()).find(x => x.name === name);
-
-    if (app) {
-      const appParams = app.params || [];
-      sub = sub.map((x, i) => appParams[i] === undefined ? x : processApplicationParam(appParams[i], x));
-      const reqCount = appParams.filter(x => !x.optional).length;
-      if (sub.length < reqCount) {
-        throw new Error(`Invalid parameter count: received ${colorize.input(sub.length)} but needed ${colorize.input(reqCount)}`);
-      }
-    }
-
-    process.env.APP_ROOT = process.env.APP_ROOT || app.appRoot;
-    process.env.ENV = process.env.ENV || 'dev';
-    process.env.PROFILE = process.env.PROFILE || '';
-    process.env.WATCH = process.env.WATCH || app.watchable;
-
-    await require('@travetto/base/bin/bootstrap').run();
-
-    // Handle bad symlink behavior, by allowing specifying full path.  Used for dev generally
-    const base = process.env.TRV_DI_BASE || path.resolve(__dirname, '..');
-
-    await require(path.resolve(base, 'src/registry')).DependencyRegistry.runApplication(name, sub);
-  } catch (err) {
-    if (err.message.startsWith('Invalid parameter')) {
-      console.error(err.message);
-      console.error();
-      console.error(`Usage: ${getAppUsage(app)}`);
-    } else {
-      console.error(err && err.stack ? err.stack : err);
-    }
-    process.exit(1);
-  }
 }
 
 function init() {
@@ -190,12 +112,19 @@ function init() {
         process.env.WATCH = `${cmd.watch}`;
       }
 
-      runApp([app, ...args]);
+      try {
+        await runApp([app, ...args]);
+      } catch (err) {
+        if (err.message.startsWith('Invalid parameter')) {
+          console.error(err.message);
+          console.error();
+          console.error(`Usage: ${getAppUsage((await getAppByName(app)))}`);
+        } else {
+          console.error(err && err.stack ? err.stack : err);
+        }
+        process.exit(1);
+      }
     });
-}
-
-if (!process.env.TRV_CLI) {
-  runApp(process.argv.slice(2)); // If loaded directly as main entry, run, idx 2 is where non-node arguments start at
 }
 
 module.exports = { init };
