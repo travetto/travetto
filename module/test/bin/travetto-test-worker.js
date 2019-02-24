@@ -1,6 +1,6 @@
 // @ts-check
 
-require('./init');
+const { TRV_TEST_BASE } = require('./init');
 require('@travetto/base/bin/bootstrap');
-const { TestRunWorker } = require('../src/worker/runner');
-new TestRunWorker().activate();
+const { TestChildWorker } = require(`${TRV_TEST_BASE}/src/worker/child`);
+new TestChildWorker().activate();

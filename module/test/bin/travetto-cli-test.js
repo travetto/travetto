@@ -1,6 +1,8 @@
 // @ts-check
 const os = require('os');
 
+const { TRV_TEST_BASE } = require('./init');
+
 async function runTests(opts, args) {
   try {
 
@@ -9,8 +11,8 @@ async function runTests(opts, args) {
     // Pre compile all
     require('@travetto/compiler').Compiler.compileAll();
 
-    const { Runner } = require('../src/runner/runner');
-    const { TestUtil } = require('../src/runner/util');
+    const { Runner } = require(`${TRV_TEST_BASE}/src/runner/runner`);
+    const { TestUtil } = require(`${TRV_TEST_BASE}/src/runner/util`);
 
     TestUtil.registerCleanup('runner');
 
@@ -42,7 +44,7 @@ function init() {
 
       if (cmd.format === 'tap' && Util.HAS_COLOR) {
         require('@travetto/base/bin/bootstrap');
-        const { TapEmitter } = require('../src/consumer/tap');
+        const { TapEmitter } = require(`${TRV_TEST_BASE}/src/consumer/tap`);
         cmd.consumer = new TapEmitter(process.stdout, {
           assertDescription: Col.description,
           testDescription: Col.description,
@@ -70,7 +72,6 @@ function init() {
 }
 
 if (!process.env.TRV_CLI) {
-  require('./init');
   runTests({
     format: process.env.TEST_FORMAT || 'tap',
     mode: process.env.TEST_MODE || 'single',

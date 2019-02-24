@@ -1,6 +1,6 @@
-import { WorkerInputSource } from '../types';
+import { InputSource } from './types';
 
-export class WorkerArrayInputSource<X> implements WorkerInputSource<X> {
+export class ArrayInputSource<X> implements InputSource<X> {
   position = 0;
 
   constructor(public items: X[]) { }

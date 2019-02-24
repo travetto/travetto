@@ -75,9 +75,9 @@ export const LoggerTransformer = {
     return { source: file };
   }, (ctx, node, state) => {
     const name = node.getSourceFile().fileName.toString();
-    // Only apply to test files
+    // Only apply to non-test files, logging test files
     // Don't treat test logging as standard log messages
-    if (name.includes('travetto/test/src') || !name.includes('/test/') || name.includes('module/log/test')) {
+    if (/travetto\/(module\/)?test\/src\//.test(name) || !name.includes('/test/') || name.includes('module/log/test')) {
       return visitNode(ctx, node, state);
     } else {
       return node;

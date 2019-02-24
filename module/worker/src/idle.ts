@@ -1,4 +1,5 @@
 export class IdleManager {
+
   private timer: NodeJS.Timer;
 
   constructor(private timeout: number) { }

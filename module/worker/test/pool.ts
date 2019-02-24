@@ -2,8 +2,9 @@ import * as assert from 'assert';
 
 import { FsUtil } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
-import { WorkerIteratorInputSource, WorkerPool, Worker } from '../';
-import { WorkerArrayInputSource } from '../src/source/array';
+import { WorkPool } from '../src/pool';
+import { IteratorInputSource } from '../src/input/iterator';
+import { WorkUtil } from '../src/util';
 
 @Suite()
 export class PoolExecTest {
@@ -11,32 +12,33 @@ export class PoolExecTest {
   @Test()
   async simple() {
 
-    const pool = new WorkerPool<Worker>(async () => {
-      console.log('Initializing child');
-      const child = new Worker(FsUtil.resolveUnix(__dirname, 'simple.child-launcher.js'), [], true);
-      child.init();
-      await child.listenOnce('ready');
-      console.log('Child ready');
-      return child;
-
-    }, { max: 1 });
-
-    await pool.process(
-      // new WorkerArrayInputSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
-      new WorkerIteratorInputSource(function* () {
-        for (let i = 0; i < 5; i++) {
-          yield `${i}-`;
-        }
-      }),
-      async (i: string, exe: Worker) => {
-        const res = exe.listenOnce('response');
-        exe.send('request', { data: i });
-        const { data } = await res;
-        console.log('Sent', i, 'Received', data);
-        assert(i + i === data);
+    // new ArrayInputSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+    const input = new IteratorInputSource(function* () {
+      for (let i = 0; i < 5; i++) {
+        yield `${i}-`;
       }
+    });
+
+    const pool = new WorkPool(() =>
+      WorkUtil.spawnedWorker<string>({
+        command: FsUtil.resolveUnix(__dirname, 'simple.child-launcher.js'),
+        fork: true,
+        async init(channel) {
+          return channel.listenOnce('ready');
+        },
+        async execute(channel, inp) {
+          const res = channel.listenOnce('response');
+          channel.send('request', { data: inp });
+
+          const { data } = await res;
+          console.log('Sent', inp, 'Received', data);
+
+          assert(inp + inp === data);
+        }
+      })
     );
 
+    await pool.process(input);
     await pool.shutdown();
   }
 }

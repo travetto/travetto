@@ -1,20 +1,13 @@
-import { WorkerClient } from '../src/client';
+import { ChildCommChannel } from '../src/comm/child';
 
-const exec = new WorkerClient();
+const exec = new ChildCommChannel<{ data: string }>();
 
-function go() {
-  exec.listenFor('request', async (data: any) => {
-    console.log(process.pid, 'RECEIVED', data);
-    exec.send('response', { data: (data.data + data.data) });
-  });
-}
-
-go();
+exec.listenFor('request', data => {
+  console.log(process.pid, 'RECEIVED', data);
+  exec.send('response', { data: (data.data + data.data) });
+});
 
 exec.send('ready');
 
-function heartbeat() {
-  setTimeout(heartbeat, 5000);
-}
-
+const heartbeat = () => setTimeout(heartbeat, 5000);
 heartbeat();
