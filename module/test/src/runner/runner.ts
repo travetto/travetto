@@ -1,12 +1,11 @@
 import { PhaseManager, Env, FsUtil } from '@travetto/base';
-import { WorkerUtil, WorkerPool, WorkerArrayInputSource } from '@travetto/worker';
+import { WorkPool, ArrayInputSource } from '@travetto/worker';
 
 import { ConsumerManager } from '../consumer/manager';
 import { Consumer } from '../model/consumer';
 
 import { TestExecutor } from './executor';
-import { workerFactory } from '../worker/factory';
-import { Events } from '../worker/types';
+import { buildWorkManager } from '../worker/parent';
 
 import { watch } from './watcher';
 import { TestUtil } from './util';
@@ -34,11 +33,12 @@ export class Runner {
     const consumer = ConsumerManager.create(this.state.consumer || this.state.format);
 
     const files = await this.getFiles();
-    const errors: Error[] = [];
+
+    console.debug('Running', files);
 
     await new PhaseManager('test').load().run();
 
-    const pool = new WorkerPool(workerFactory, {
+    const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
       idleTimeoutMillis: 10000,
       min: Env.isTrue('EXECUTION_REUSABLE') ? 1 : 0,
       max: this.state.concurrency
@@ -48,27 +48,9 @@ export class Runner {
       consumer.onStart();
     }
 
-    await pool.process(
-      new WorkerArrayInputSource(files),
-      async (file, exe) => {
-        exe.listen(consumer.onEvent as any);
-
-        const complete = exe.listenOnce(Events.RUN_COMPLETE);
-        exe.send(Events.RUN, { file });
-
-        const { error } = await complete;
-        if (error) {
-          const fullError = WorkerUtil.deserializeError(error);
-          errors.push(fullError);
-        }
-      }
-    );
-
-    await pool.shutdown();
-
-    if (errors.length) {
-      throw errors[0];
-    }
+    await pool
+      .process(new ArrayInputSource(files))
+      .finally(() => pool.shutdown());
 
     if (consumer.summarize) {
       const result = consumer.summarize();

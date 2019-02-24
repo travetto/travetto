@@ -6,16 +6,12 @@ travetto: Worker
 $ npm install @travetto/worker
 ```
 
-This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc functionality out of the box, and this module builds upon this by providing enhanced event management functionality, as well as constructs for orchestrating multi-step processes.  
-
-IPC allows for the program to create the workers, and effectively communicate with it.
+This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc (inter-process communication) functionality out of the box. This module builds upon that by providing enhanced event management, richer process management, as well as constructs for orchestrating a conversation between two processes.  
 
 ## Execution Pools
-With respect to managing multiple executions, [`ExecutionPool`](./src/pool.ts) is provided to allow for concurrent operation, and processing of jobs as quickly as possible.
+With respect to managing multiple executions, [`WorkerPool`](./src/pool.ts) is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various [`WorkerInputSource`](./src/types.ts) implementation that allow for a wide range of use cases.
 
-To manage the flow of jobs, there are various [`DataExecutionSource`](./src/pool/types.ts) implementation that allow for a wide range of use cases.
-
-The supported `DataExecutionSource`s are
+The supported `WorkerInputSource`s are
 * ```Array``` is a list of jobs, will execute in order until list is exhausted. 
 - ```Queue``` is similar to list but will execute forever waiting for new items to be added to the queue.
 - ```Iterator``` is a generator function that will continue to produce jobs until the iterator is exhausted.
@@ -32,7 +28,7 @@ class ImageProcessor {
     this.proc.kill();
   }
 
-  async convert(path: string) {
+  async execute(path: string) {
     this.active = true;
     try {
       this.proc = ...convert ...
@@ -44,17 +40,16 @@ class ImageProcessor {
   }
 }
 
-class ImageCompressor {
-  pendingImages: QueueExecutionSource<string>;
+class ImageCompressor extends WorkerPool {
 
-  pool = new ExecutionPool(async () => {
-    return new ImageProcessor();
-  });
+  pendingImages: WorkerQueueInputSource<string>;
 
   constructor() {
-    this.pool.process(this.pendingImages, async (inp, exe) => {
-      exe.convert(inp);
-    });
+    super(async () => new ImageProcess());
+  }
+
+  begin() {
+    this.process(this.pendingImages);
   }
 
   convert(...images: string[]) {
@@ -64,3 +59,5 @@ class ImageCompressor {
   }
 }
 ```
+
+Once a pool is constructed, it can be shutdown by calling the `.shutdown()` method, and awaiting the result.

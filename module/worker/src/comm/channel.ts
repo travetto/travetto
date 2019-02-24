@@ -1,16 +1,16 @@
+import { ChildProcess } from 'child_process';
+
 import { Env } from '@travetto/base';
 
-import { WorkerEvent, CommonProcess } from './types';
+import { CommEvent } from './types';
 
-export class Execution<U extends WorkerEvent = WorkerEvent, T extends CommonProcess = CommonProcess> {
+export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, U extends CommEvent = CommEvent> {
 
   public _proc: T;
 
-  constructor(proc?: T) {
-    if (proc) {
-      this._proc = proc;
-      console.trace(`[${this.id}] Constructed Execution`);
-    }
+  constructor(proc: T) {
+    this._proc = proc;
+    console.trace(`[${this.id}] Constructed Execution`);
   }
 
   get id() {
@@ -19,23 +19,6 @@ export class Execution<U extends WorkerEvent = WorkerEvent, T extends CommonProc
 
   private get parentId() {
     return process.pid;
-  }
-
-  _init(): T {
-    if (!this._proc) {
-      throw new Error('Process not defined');
-    }
-    return this._proc;
-  }
-
-  init() {
-    if (this._proc) {
-      return false;
-    }
-
-    this._proc = this._init();
-
-    return true;
   }
 
   get active() {
@@ -110,7 +93,7 @@ export class Execution<U extends WorkerEvent = WorkerEvent, T extends CommonProc
     return kill;
   }
 
-  kill() {
+  destroy() {
     if (this._proc) {
       console.trace(`[${this.parentId}] Killing [${this.id}]`);
     }
