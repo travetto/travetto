@@ -120,3 +120,7 @@ assert.throws(() => {
   return err.message.startsWith('Big') && err.message.length > 4 ? undefined : err;
 });
 ```
+## Additional Considerations
+During the test execution, a few things additionally happen that should be helpful.  The primary addition, is that all console output is captured, and will be exposed in the test output.  This allows for investigation at a later point in time by analyzing the output.  
+
+Like output, all promises are also intercepted.  This allows the code to ensure that all promises have been resolved before completing the test.  Any uncompleted promises will automatically trigger an error state and fail the test.
