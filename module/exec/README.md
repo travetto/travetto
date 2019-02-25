@@ -16,8 +16,8 @@ A simple example would be
 **Code: Running a directory listing via ls**
 ```typescript
 async function executeListing() {
-  const [process, resultPromise] = spawn('ls');
-  await resultPromise;
+  const { result } = Exec.spawn('ls');
+  await result;
 }
 ```
 
@@ -60,12 +60,12 @@ While docker containers provide a high level of flexibility, performance can be 
   });
 
   async function compress(img) {
-    const [proc, prom] = await converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
+    const state = await converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
     const out = `${img}.compressed`;
 
-    fs.createReadStream(img).pipe(proc.stdin);
-    proc.stdout.pipe(fs.createWriteStream(out));
+    fs.createReadStream(img).pipe(state.process.stdin);
+    state.process.stdout.pipe(fs.createWriteStream(out));
     
-    await prom;
+    await state.result;
   }
 ```
