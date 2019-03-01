@@ -1,6 +1,6 @@
-import { ControllerRegistry, RestError, ParamConfig, Filter, EndpointDecorator, Request, ControllerConfig } from '@travetto/rest';
-import { Util } from '@travetto/base';
-import { Class, ChangeEvent } from '@travetto/registry';
+import { ControllerRegistry, ParamConfig, Filter, EndpointDecorator, Request } from '@travetto/rest';
+import { Util, AppError } from '@travetto/base';
+import { Class } from '@travetto/registry';
 
 import { SchemaRegistry, BindUtil, SchemaValidator } from '..';
 
@@ -8,7 +8,7 @@ function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
     return BindUtil.bindSchema(cls, obj, view);
   } catch (e) {
-    throw new RestError(`Supplied data is incompatible with ${cls.__id}: ${e.message}`);
+    throw new AppError(`Supplied data is incompatible with ${cls.__id}: ${e.message}`);
   }
 }
 
@@ -21,7 +21,7 @@ export async function getSchemaBody<T>(req: Request, cls: Class<T>, view?: strin
       return o;
     }
   } else {
-    throw new RestError(`Body is missing or wrong type: ${req.body}`, 503);
+    throw new AppError(`Body is missing or wrong type: ${req.body}`, 'data');
   }
 }
 

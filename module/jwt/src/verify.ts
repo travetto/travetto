@@ -1,6 +1,6 @@
 import * as jws from 'jws';
 
-import { JWTError } from './common';
+import { JWTError } from './error';
 import { decodeComplete } from './decode';
 import { VerifyOptions, Payload, AlgType } from './types';
 
@@ -85,7 +85,7 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
   const valid = jws.verify(jwt, header.alg, key || '');
 
   if (!valid) {
-    throw new JWTError('invalid signature');
+    throw new JWTError('invalid signature', 'permissions');
   }
 
   verifyTypes(payload);
@@ -93,13 +93,13 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
   if (payload.nbf !== undefined && !ignore.nbf &&
     payload.nbf > clock.timestamp + clock.tolerance
   ) {
-    throw new JWTError('not active', { date: new Date(payload.nbf * 1000) });
+    throw new JWTError('not active', { date: new Date(payload.nbf * 1000) }, 'permissions');
   }
 
   if (payload.exp !== undefined && !ignore.exp &&
     clock.timestamp >= payload.exp + clock.tolerance
   ) {
-    throw new JWTError('expired', { expiredAt: new Date(payload.exp * 1000) });
+    throw new JWTError('expired', { expiredAt: new Date(payload.exp * 1000) }, 'permissions');
   }
 
   if (verifyPayload.aud) {

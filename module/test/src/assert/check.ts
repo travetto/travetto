@@ -120,7 +120,7 @@ export class AssertCheck {
       Object.getPrototypeOf(shouldThrow) !== Object.getPrototypeOf(Function)
     ) { // if not simple function, treat as class
       if (!err || !(err instanceof shouldThrow)) {
-        return new AppError(`Expected to throw ${shouldThrow.name}, but got ${err || 'nothing'} `, 'missing');
+        return new AppError(`Expected to throw ${shouldThrow.name}, but got ${err || 'nothing'} `, 'notfound');
       }
     } else {
       const res = shouldThrow(err);

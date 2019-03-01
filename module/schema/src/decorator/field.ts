@@ -1,6 +1,6 @@
-import { SchemaRegistry } from '../registry';
-import { CommonRegExp } from '../service/regexp';
-import { ClassList, FieldConfig } from '../types';
+import { SchemaRegistry } from '../service/registry';
+import { CommonRegExp } from '../validate/regexp';
+import { ClassList, FieldConfig } from '../service/types';
 
 function prop(obj: { [key: string]: any }) {
   return (t: any, k: string) => {

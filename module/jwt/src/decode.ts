@@ -1,6 +1,6 @@
 import * as jws from 'jws';
 import { TypedSig, Payload } from './types';
-import { JWTError } from './common';
+import { JWTError } from './error';
 
 export function decodeComplete<T extends Payload = Payload>(jwt: string): TypedSig<T> {
 

@@ -37,11 +37,11 @@ function buildLogging(prof) {
   console.trace = log.bind(null, 'trace');
 
   if (!trace) {
-    console.trace = () => { };
+    console.trace = () => {};
   }
 
   if (!debug) {
-    console.debug = () => { }; // Suppress debug statements
+    console.debug = () => {}; // Suppress debug statements
   }
 
   function error(...args) {
@@ -89,12 +89,12 @@ function buildProfile() {
 const profile = buildProfile();
 
 const Env = [
-  { cwd: FsUtil.cwd },
-  { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal, getInt: envIntVal },
-  profile,
-  buildLogging(profile),
-  checkWatch()
-]
+    { cwd: FsUtil.cwd },
+    { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal, getInt: envIntVal },
+    profile,
+    buildLogging(profile),
+    checkWatch()
+  ]
   .reduce((acc, el) => ({ ...acc, ...el }), {});
 
 function showEnv() {
@@ -102,8 +102,8 @@ function showEnv() {
     console.info('Env',
       JSON.stringify(Env, (e, v) =>
         (typeof v === 'boolean' && v === false) ||
-          (typeof v === 'string' && v === '') ||
-          (typeof v === 'function') ? undefined : v, 2
+        (typeof v === 'string' && v === '') ||
+        (typeof v === 'function') ? undefined : v, 2
       )
     );
   }

@@ -1,5 +1,5 @@
-import { DescribableConfig } from '../types';
-import { SchemaRegistry } from '../registry';
+import { DescribableConfig } from '../service/types';
+import { SchemaRegistry } from '../service/registry';
 
 export function Describe(config: Partial<DescribableConfig>) {
   return (target: any, property?: string, descriptor?: PropertyDescriptor) => {

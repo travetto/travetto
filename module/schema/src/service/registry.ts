@@ -5,7 +5,7 @@ import {
   SchemaChangeListener,
   SchemaChangeEvent, FieldChangeEvent,
   SCHEMA_CHANGE_EVENT, FIELD_CHANGE_EVENT
-} from './service/changes';
+} from './changes';
 
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 

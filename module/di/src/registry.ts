@@ -141,7 +141,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         try {
           return await this.getInstance(x.target, x.qualifier);
         } catch (e) {
-          if (x.optional && e instanceof InjectionError) {
+          if (x.optional && e instanceof InjectionError && e.category === 'notfound') {
             return undefined;
           } else {
             e.message = `${e.message} for ${managed.class.__id}`;
@@ -169,7 +169,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const aliasMap = this.aliases.get(targetId);
 
     if (!aliasMap || !aliasMap.has(qualifier)) {
-      throw new InjectionError(`Dependency not found: ${targetId}[${getName(qualifier)}]`, 'missing');
+      throw new InjectionError(`Dependency not found: ${targetId}[${getName(qualifier)}]`, 'notfound');
     }
 
     const clz = aliasMap.get(qualifier)!;
@@ -237,7 +237,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   async runApplication(name: string, args: any[]) {
     const config = this.applications.get(name);
     if (!config) {
-      throw new InjectionError(`Application: ${name} does not exist`, 'missing');
+      throw new InjectionError(`Application: ${name} does not exist`, 'notfound');
     }
     const inst = await this.getInstance(config.target);
     if (inst.run) {

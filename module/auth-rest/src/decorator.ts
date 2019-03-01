@@ -1,5 +1,6 @@
-import { ControllerRegistry, RestError, EndpointDecorator, Request } from '@travetto/rest';
+import { ControllerRegistry, EndpointDecorator, Request } from '@travetto/rest';
 import { ERR_UNAUTHENTICATED, ERR_AUTHENTICATED, ERR_FORBIDDEN, ERR_INVALID_CREDS } from '@travetto/auth';
+import { AppError, ErrorCategory } from '@travetto/base';
 
 export function Authenticate(provider: symbol, ...providers: symbol[]) {
   const computed = [provider, ...providers];
@@ -8,7 +9,7 @@ export function Authenticate(provider: symbol, ...providers: symbol[]) {
       await req.auth.login(computed);
     } catch (e) {
       if (e.message === ERR_INVALID_CREDS) {
-        const err = new RestError(e.message, 400);
+        const err = new AppError(e.message, 'authentication');
         err.stack = e.stack;
         throw err;
       } else {
@@ -22,13 +23,13 @@ export async function requireAuth(config: { include: string[], exclude: string[]
   try {
     req.auth.checkPermissions(config.include, config.exclude);
   } catch (e) {
-    let status = 500;
+    let status: ErrorCategory = 'general';
     switch (e.message) {
-      case ERR_UNAUTHENTICATED: status = 403; break;
-      case ERR_AUTHENTICATED: status = 403; break;
-      case ERR_FORBIDDEN: status = 401; break;
+      case ERR_UNAUTHENTICATED: status = 'authentication'; break;
+      case ERR_AUTHENTICATED: status = 'permissions'; break;
+      case ERR_FORBIDDEN: status = 'permissions'; break;
     }
-    const err = new RestError(e.message, status);
+    const err = new AppError(e.message, status);
     err.stack = e.stack;
     throw err;
   }
@@ -44,7 +45,7 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
 export function Unauthenticated() {
   return ControllerRegistry.createFilterDecorator(req => {
     if (!req.auth.unauthenticated) {
-      throw new RestError(ERR_UNAUTHENTICATED, 401);
+      throw new AppError(ERR_UNAUTHENTICATED, 'authentication');
     }
   });
 }

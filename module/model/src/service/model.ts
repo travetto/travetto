@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry, ValidationErrors } from '@travetto/schema';
+import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry, ValidationError } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Env, Util, AppError } from '@travetto/base';
 
@@ -257,7 +257,7 @@ export class ModelService implements IModelSource {
   }
 
   async bulkPrepare<T extends ModelCore>(cls: Class<T>, items: T[]) {
-    const errs: { idx: number, error: ValidationErrors }[] = [];
+    const errs: { idx: number, error: ValidationError }[] = [];
     const out: { idx: number, v: T }[] = [];
 
     await Promise.all(
@@ -267,7 +267,7 @@ export class ModelService implements IModelSource {
           .catch(error => errs.push({ idx, error }))));
 
     if (errs.length) {
-      throw new AppError('Bulk Preparation Errors', errs.sort((a, b) => a.idx - b.idx));
+      throw new AppError('Bulk Preparation Errors', 'data', { errors: errs.sort((a, b) => a.idx - b.idx) });
     }
 
     return out

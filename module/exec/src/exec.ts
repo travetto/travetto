@@ -23,7 +23,7 @@ export class Exec {
         done = true;
 
         if (!result.valid) {
-          reject(new AppError(`Error executing ${cmd}: ${result.message || result.stderr || result.stdout || 'failed'}`, result));
+          reject(new AppError(`Error executing ${cmd}: ${result.message || result.stderr || result.stdout || 'failed'}`, 'general', result));
         } else {
           resolve(result);
         }

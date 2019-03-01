@@ -38,7 +38,7 @@ const FsUtil = {
   },
   unlinkCommand(pth) {
     if (!pth || pth === '/') {
-      throw new AppError('Path has not been defined');
+      throw new AppError('Path has not been defined', 'data');
     }
     if (process.platform === 'win32') {
       return `rmdir /Q /S ${FsUtil.toNative(pth)}`;

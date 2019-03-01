@@ -1,4 +1,5 @@
 import { ConfigLoader } from '@travetto/config';
+import { AppError } from '@travetto/base';
 
 import { isRenderable } from '../response/renderable';
 import { MimeType } from '../util/mime';
@@ -92,6 +93,9 @@ export class EndpointUtil {
         const output = await handlerBound(req, res);
         await EndpointUtil.sendOutput(req, res, output, headers);
       } catch (error) {
+        if (!(error instanceof Error)) {  // Ensure we always throw "Errors"
+          error = new AppError(error.message || 'Unexpected error', 'general', error);
+        }
         await EndpointUtil.sendOutput(req, res, error);
       } finally {
         EndpointUtil.logRequest(req, res);

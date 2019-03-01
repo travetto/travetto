@@ -3,6 +3,8 @@ import * as https from 'https';
 import * as qs from 'querystring';
 import * as url from 'url';
 
+import { AppError, HTTP_ERROR_CONVERSION } from '@travetto/base';
+
 interface HttpClient {
   request(args: http.ClientRequestArgs, cb: (response: http.IncomingMessage) => void): {
     on(type: 'error', cb: (err: any) => void): void;
@@ -17,6 +19,24 @@ type _ExecArgs = ExecArgs & { payload?: any };
 type ResponseHandler<T> = (msg: http.IncomingMessage) => Promise<T>;
 
 export class HttpRequest {
+
+  private static buildError(config: {
+    message: string,
+    status?: number,
+    payload: { [key: string]: any }
+  }) {
+    let finalStatus = HTTP_ERROR_CONVERSION.to.get(config.status!) || 'general';
+    try {
+      const parsedMessage = JSON.parse(config.message);
+      const { status, statusCode, message, ...rest } = parsedMessage;
+      finalStatus = HTTP_ERROR_CONVERSION.to.get(status) ||
+        HTTP_ERROR_CONVERSION.to.get(statusCode) ||
+        finalStatus;
+      config.message = message || config.message;
+      Object.assign(config.payload, rest); // Merge it in
+    } catch { }
+    return new AppError(config.message, finalStatus, config.payload);
+  }
 
   private static async _exec(opts: _ExecArgs, retry?: number): Promise<string>;
   private static async _exec<T>(opts: _ExecArgs & { binary: true }, retry?: number): Promise<Buffer>;
@@ -123,13 +143,13 @@ export class HttpRequest {
         });
 
         msg.on('error', err => {
-          reject({ message: err.message, status: msg.statusCode || 500, headers: msg.headers });
+          reject(this.buildError({ message: err.message, status: msg.statusCode, payload: { headers: msg.headers } }));
         });
 
         msg.on('end', () => {
           const message = Buffer.concat(body);
           if ((msg.statusCode || 200) > 299) {
-            reject({ message: message.toString(), status: msg.statusCode, headers: msg.headers });
+            reject(this.buildError({ message: message.toString(), status: msg.statusCode, payload: { headers: msg.headers } }));
           } else {
             if (!responseHandler) {
               resolve(binary ? message : message.toString());
@@ -160,7 +180,6 @@ export class HttpRequest {
   }
 
   static async execJSON<T, U = any>(opts: ExecArgs, payload?: U): Promise<T> {
-
     const res = await this._exec(this.configJSON({ ...opts, payload }));
     return JSON.parse(res) as T;
   }

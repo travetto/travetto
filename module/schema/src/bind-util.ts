@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry } from './registry';
-import { FieldConfig, ALL_VIEW } from './types';
+import { SchemaRegistry } from './service/registry';
+import { FieldConfig, ALL_VIEW } from './service/types';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 

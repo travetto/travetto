@@ -1,5 +1,5 @@
 import { ChangeEvent, Class } from '@travetto/registry';
-import { FieldConfig, ALL_VIEW, ClassConfig } from '../types';
+import { FieldConfig, ALL_VIEW, ClassConfig } from './types';
 import { EventEmitter } from 'events';
 
 const id = (c: Class | string) => typeof c === 'string' ? c : c.__id;

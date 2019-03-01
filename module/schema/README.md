@@ -165,7 +165,7 @@ const person = Person.from({
 try {
   await SchemaValidator.validate(person);
 } catch (e) {
-  if (e instanceof ValidationErrors) {
+  if (e instanceof ValidationError) {
     ... Handle errors ...
   }
 }
