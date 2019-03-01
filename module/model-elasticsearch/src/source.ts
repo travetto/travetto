@@ -454,7 +454,7 @@ export class ModelElasticsearchSource extends ModelSource {
       const res = await this.getByQuery(cls, { where: { id } } as any as ModelQuery<T>);
       return res;
     } catch (err) {
-      throw new AppError(`Invalid number of results for find by id: 0`, 'missing');
+      throw new AppError(`Invalid number of results for find by id: 0`, 'notfound');
     }
   }
 
@@ -464,7 +464,7 @@ export class ModelElasticsearchSource extends ModelSource {
       try {
         await this.getById(cls, id);
       } catch (e) {
-        throw new AppError(`Invalid delete, no ${cls.name} found with id '${id}'`, 'missing');
+        throw new AppError(`Invalid delete, no ${cls.name} found with id '${id}'`, 'notfound');
       }
     }
 
@@ -519,7 +519,7 @@ export class ModelElasticsearchSource extends ModelSource {
       try {
         await this.getById(cls, id);
       } catch (e) {
-        throw new AppError(`Invalid update, no ${cls.name} found with id '${id}'`, 'missing');
+        throw new AppError(`Invalid update, no ${cls.name} found with id '${id}'`, 'notfound');
       }
 
     }

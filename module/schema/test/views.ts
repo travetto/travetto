@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Schema, View } from '../src/decorator/schema';
-import { SchemaRegistry } from '../src/registry';
+import { SchemaRegistry } from '../src/service/registry';
 
 @Schema()
 class BaseAccount {

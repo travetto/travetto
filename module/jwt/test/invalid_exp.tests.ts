@@ -3,13 +3,12 @@ import * as assert from 'assert';
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 
 import * as jwt from '..';
-import { JWTError } from '../src/common';
 
 @Suite('invalid expiration')
 class InvalidExpSuite {
 
   @Test('should fail with string')
-  @ShouldThrow(JWTError)
+  @ShouldThrow(jwt.JWTError)
   async testStringFail() {
     const broken_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIxMjMiLCJmb28iOiJhZGFzIn0.cDa81le-pnwJMcJi3o3PBwB7cTJMiXCkizIhxbXAKRg';
     await jwt.verify(broken_token, { key: '123' });

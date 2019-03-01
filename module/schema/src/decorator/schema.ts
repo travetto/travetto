@@ -1,6 +1,7 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry } from '../registry';
-import { ValidatorFn, ViewFieldsConfig } from '../types';
+import { SchemaRegistry } from '../service/registry';
+import { ViewFieldsConfig } from '../service/types';
+import { ValidatorFn } from '../validate/types';
 
 export function Schema(auto: boolean = true): ClassDecorator { // Auto is used during compilation
   return (<T>(target: Class<T>): Class<T> => {

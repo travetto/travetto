@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Class } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { ValidationErrors, Schema, SchemaRegistry } from '@travetto/schema';
+import { ValidationError, Schema, SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 
 import { QueryVerifierService } from '../src/service/verify';
@@ -54,7 +54,7 @@ export class VerifyTest {
     };
 
     assert.doesNotThrow(() => test(ModelUser));
-    assert.throws(() => test(User), ValidationErrors);
+    assert.throws(() => test(User), ValidationError);
   }
 
   @Test()
@@ -89,7 +89,7 @@ export class VerifyTest {
     };
 
     assert.doesNotThrow(() => test(ModelUser));
-    assert.throws(() => test(User), ValidationErrors);
+    assert.throws(() => test(User), ValidationError);
 
     const test2 = <T>(cls: Class<T>) => {
       const t: Query<ModelCore> = {

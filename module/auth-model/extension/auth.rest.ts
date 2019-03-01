@@ -1,4 +1,5 @@
-import { RestError, Request, Response } from '@travetto/rest';
+import { AppError, ErrorCategory } from '@travetto/base';
+import { Request, Response } from '@travetto/rest';
 import { ModelCore } from '@travetto/model';
 import { AuthProvider } from '@travetto/auth-rest';
 import { ERR_INVALID_PASSWORD, AuthContext } from '@travetto/auth';
@@ -23,13 +24,13 @@ export class AuthModelProvider<U extends ModelCore> extends AuthProvider<U> {
       const user = await this.service.login(userId, password);
       return this.toContext(user);
     } catch (e) {
-      let status = 500;
+      let status: ErrorCategory = 'general';
       switch ((e as Error).message) {
         case ERR_INVALID_PASSWORD:
-          status = 401;
+          status = 'authentication';
           break;
       }
-      const out = new RestError(e.message, status);
+      const out = new AppError(e.message, status);
       out.stack = e.stack;
       throw out;
     }

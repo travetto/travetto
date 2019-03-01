@@ -1,9 +1,10 @@
 import { Class } from '@travetto/registry';
 
-import { FieldConfig, SchemaConfig } from '../types';
-import { SchemaRegistry } from '../registry';
+import { FieldConfig, SchemaConfig } from '../service/types';
+import { SchemaRegistry } from '../service/registry';
+import { ValidationError } from './types';
 import { Messages } from './messages';
-import { ValidationError, ValidationErrors } from './error';
+import { ValidationResultError } from './error';
 
 function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
   if (base.__id) {
@@ -175,7 +176,7 @@ export class SchemaValidator {
     }
 
     if (errors.length) {
-      throw new ValidationErrors(errors);
+      throw new ValidationResultError(errors);
     }
 
     return o;
@@ -190,7 +191,7 @@ export class SchemaValidator {
     try {
       await this.validate(o, view);
     } catch (e) {
-      if (e instanceof ValidationErrors) { // Don't check required fields
+      if (e instanceof ValidationResultError) { // Don't check required fields
         const errs = e.errors.filter(x => x.kind !== 'required');
         if (errs.length) {
           e.errors = errs;

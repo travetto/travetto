@@ -1,6 +1,6 @@
 import * as jws from 'jws';
 
-import { JWTError } from './common';
+import { JWTError } from './error';
 import { Payload, SignOptions, SignHeader } from './types';
 
 export async function sign<T extends Payload>(payload: T, options: SignOptions = {}): Promise<string> {

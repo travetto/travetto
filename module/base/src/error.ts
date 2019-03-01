@@ -1,41 +1,51 @@
-export type ErrorType =
-  'general' | 'system' |
-  'data' | 'permission' |
-  'auth' | 'missing' |
-  'timeout' | 'unavailable';
+const ERROR_CATEGORIES_WITH_CODES = {
+  general: [500, 501],
+  notfound: [404, 416],
+  data: [400, 411, 414, 415, 431, 417, 428],
+  permissions: [403],
+  authentication: [401, 407, 511],
+  timeout: [408, 504],
+  unavailable: [503, 502, 429]
+};
 
-const ERROR_TYPES = new Set([
-  'general', 'system',
-  'data', 'permission',
-  'auth', 'missing',
-  'timeout', 'unavailable'
-]);
+export type ErrorCategory = keyof typeof ERROR_CATEGORIES_WITH_CODES;
 
-export class AppError<T = any> extends Error {
-  name: string;
-  payload: T | undefined;
-  errorType: ErrorType = 'general';
+export const HTTP_ERROR_CONVERSION = (Object.entries(ERROR_CATEGORIES_WITH_CODES) as [ErrorCategory, number[]][])
+  .reduce(
+    (acc, [typ, codes]) => {
+      codes.forEach(c => acc.to.set(c, typ));
+      acc.from.set(typ, codes[0]);
+      return acc;
+    },
+    {
+      to: new Map<number, ErrorCategory>(),
+      from: new Map<ErrorCategory, number>()
+    }
+  );
 
-  constructor(message: string, payload: T, errorType: ErrorType);
-  constructor(message: string, errorType: ErrorType);
-  constructor(message: string, payload: T);
-  constructor(message: string);
+export class AppError extends Error {
+  type: string;
+
   constructor(
     public message: string,
-    payload?: T | ErrorType,
-    errorType?: ErrorType
+    public category: ErrorCategory = 'general',
+    public payload?: { [key: string]: any },
+
   ) {
     super(message);
-    if (typeof errorType === 'string') {
-      this.errorType = errorType;
-    }
-    if (typeof payload === 'string' && ERROR_TYPES.has(payload)) {
-      this.errorType = payload as ErrorType;
-    } else {
-      this.payload = payload as T;
-    }
-
-    this.name = this.constructor.name;
+    this.type = this.constructor.name;
     this.stack = this.stack;
+  }
+
+  toJSON(extra: { [key: string]: any } = {}) {
+    if (this.payload) {
+      Object.assign(extra, this.payload);
+    }
+    return JSON.stringify({
+      ...extra,
+      message: this.message,
+      category: this.category,
+      type: this.type
+    });
   }
 }

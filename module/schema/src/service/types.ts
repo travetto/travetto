@@ -1,11 +1,9 @@
 import { Class } from '@travetto/registry';
-import { ValidationError } from './service/error';
+import { ValidatorFn } from '../validate/types';
 
 export const ALL_VIEW = '__all';
 
 export type ClassList = Class | [Class];
-
-export type ValidatorFn<T, U> = (value: T, parent?: U) => ValidationError | undefined;
 
 export interface DescribableConfig {
   title?: string;

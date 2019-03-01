@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 
-import { SchemaValidator, ValidationError, SchemaRegistry, ValidationErrors } from '../';
+import { SchemaValidator, ValidationResultError, SchemaRegistry, ValidationError } from '../';
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaz,
   CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address
@@ -48,15 +48,19 @@ class Validation {
       await SchemaValidator.validate(res);
       assert.fail('Validation should have failed');
     } catch (e) {
-      assert(findError(e.errors, 'responses', 'required'));
-      assert(findError(e.errors, 'response.pandaState', 'TIRED'));
-      assert(findError(e.errors, 'response.url', 'not a valid url'));
-      assert(findError(e.errors, 'response.timestamp', 'is required'));
+      if (e instanceof ValidationResultError) {
+        assert(findError(e.errors, 'responses', 'required'));
+        assert(findError(e.errors, 'response.pandaState', 'TIRED'));
+        assert(findError(e.errors, 'response.url', 'not a valid url'));
+        assert(findError(e.errors, 'response.timestamp', 'is required'));
+      } else {
+        throw e;
+      }
     }
   }
 
   @Test('Should ensure message for min')
-  @ShouldThrow(ValidationErrors)
+  @ShouldThrow(ValidationResultError)
   async minMessage() {
     const o = MinTest.from({ value: 'hello' });
 
@@ -80,7 +84,7 @@ class Validation {
   }
 
   @Test('Nested validations should be fine')
-  @ShouldThrow(ValidationErrors)
+  @ShouldThrow(ValidationResultError)
   async nestedObjectErrors() {
     const obj = Nested.fromRaw({
       name: 5,
@@ -105,9 +109,13 @@ class Validation {
       await SchemaValidator.validate(obj);
       assert(false);
     } catch (e) {
-      assert((e as ValidationErrors).errors[0].path === 'age1');
-      assert((e as ValidationErrors).errors[0].kind === 'custom');
-      assert((e as ValidationErrors).errors[0].message === 'age1 + age2 cannot be even');
+      if (e instanceof ValidationResultError) {
+        assert(e.errors[0].path === 'age1');
+        assert(e.errors[0].kind === 'custom');
+        assert(e.errors[0].message === 'age1 + age2 cannot be even');
+      } else {
+        throw e;
+      }
     }
   }
 
@@ -139,7 +147,7 @@ class Validation {
 
     await assert.rejects(() =>
       SchemaValidator.validate(obj2)
-      , ValidationErrors);
+      , ValidationResultError);
   }
 
   @Test('manually unrequired')
@@ -158,7 +166,7 @@ class Validation {
       const o = DateTestSchema.fromRaw({ date: '' });
       return SchemaValidator.validate(o);
     }, (err: any) => {
-      if (!(err instanceof ValidationErrors && err.errors[0].kind === 'required')) {
+      if (!(err instanceof ValidationResultError && err.errors[0].kind === 'required')) {
         return err;
       }
     });
@@ -167,7 +175,7 @@ class Validation {
       const o = DateTestSchema.fromRaw({ date: undefined });
       return SchemaValidator.validate(o);
     }, (err: any) => {
-      if (!(err instanceof ValidationErrors && err.errors[0].kind === 'required')) {
+      if (!(err instanceof ValidationResultError && err.errors[0].kind === 'required')) {
         return err;
       }
     });
@@ -176,7 +184,7 @@ class Validation {
       const o = DateTestSchema.fromRaw({ date: NaN });
       return SchemaValidator.validate(o);
     }, (err: any) => {
-      if (!(err instanceof ValidationErrors && err.errors[0].kind === 'type')) {
+      if (!(err instanceof ValidationResultError && err.errors[0].kind === 'type')) {
         return err;
       }
     });
@@ -185,7 +193,7 @@ class Validation {
       const o = CustomValidated.fromRaw({ age: Number.NaN, age2: 1 });
       return SchemaValidator.validate(o);
     }, (err: any) => {
-      if (!(err instanceof ValidationErrors && err.errors[0].kind === 'type')) {
+      if (!(err instanceof ValidationResultError && err.errors[0].kind === 'type')) {
         return err;
       }
     });
@@ -194,7 +202,7 @@ class Validation {
       const o = CustomValidated.fromRaw({ age: 1, age2: 1 });
       return SchemaValidator.validate(o);
     }, (err: any) => {
-      if (!(err instanceof ValidationErrors && err.errors[0].kind === 'custom')) {
+      if (!(err instanceof ValidationResultError && err.errors[0].kind === 'custom')) {
         return err;
       }
     });
@@ -243,13 +251,16 @@ class Validation {
     try {
       await SchemaValidator.validate(item);
     } catch (err) {
-      assert(err instanceof ValidationErrors);
-      assert((err as ValidationErrors).errors[0].path === 'all[0].b');
-      assert((err as ValidationErrors).errors[0].message === 'all[0].b is required');
-      assert((err as ValidationErrors).errors[1].path === 'all[1].b');
-      assert((err as ValidationErrors).errors[1].message === 'all[1].b is required');
-      assert((err as ValidationErrors).errors[2].path === 'all[1].c');
-      assert((err as ValidationErrors).errors[2].message === 'all[1].c is required');
+      if (err instanceof ValidationResultError) {
+        assert(err.errors[0].path === 'all[0].b');
+        assert(err.errors[0].message === 'all[0].b is required');
+        assert(err.errors[1].path === 'all[1].b');
+        assert(err.errors[1].message === 'all[1].b is required');
+        assert(err.errors[2].path === 'all[1].c');
+        assert(err.errors[2].message === 'all[1].c is required');
+      } else {
+        throw err;
+      }
     }
   }
 
