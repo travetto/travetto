@@ -65,7 +65,10 @@ async function runApp(args) {
     }
   }
 
-  process.env.APP_ROOT = process.env.APP_ROOT || app.appRoot;
+  process.env.APP_ROOTS = [
+    process.env.APP_ROOTS || app.appRoot || '',
+    !app.standalone && app.appRoot ? '-' : ''
+  ].join(',');
   process.env.ENV = process.env.ENV || 'dev';
   process.env.PROFILE = process.env.PROFILE || '';
   process.env.WATCH = process.env.WATCH || app.watchable;
@@ -96,9 +99,10 @@ async function computeApps() {
   await mgr.run();
 
   // Load app files
-  ScanApp.requireFiles('.ts', x =>
-    (/^(src[\/])/.test(x) || /^[^\/]+[\/]src[\/]/.test(x)) && x.endsWith('.ts') && !x.endsWith('d.ts') &&
-    fs.readFileSync(x).toString().includes('@Application')); // Only load files that are candidates
+  ScanApp.requireFiles('.ts', x => {
+    return /^([^/]+\/)?(src[\/])/.test(x) && x.endsWith('.ts') && !x.endsWith('d.ts') &&
+      fs.readFileSync(x).toString().includes('@Application');
+  }); // Only load files that are candidates
 
   // Get applications
   const res = require('../src/registry').DependencyRegistry.getApplications();
@@ -106,6 +110,7 @@ async function computeApps() {
   const items = Promise.all(res.map(async x => ({
     watchable: x.watchable,
     description: x.description,
+    standalone: x.standalone,
     params: x.params,
     appRoot: determineAppFromFile(x.target.__filename),
     name: x.name,

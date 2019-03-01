@@ -20,7 +20,7 @@ The framework provides basic environment information, e.g. in prod/test/dev.  Th
 * `profiles: string[]` - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.
 * `debug`/`trace` - Simple logging flags.  These `boolean` flags will enable or disable logging at various levels. By default `debug` is on in `dev` or `e2e` mode, and nowhere else.  `trace` is always off by default.
 * `cwd: string` - The root of the current project, 
-* `appRoot: string` - The location of the specific application to run, with the base folder being the default
+* `appRoots: string[]` - The file root paths for the application, the default set is the current project. Order matters with respect to resource resolution. All paths should be relative to the project base
 * `docker` - Determine if docker support is enabled. If explicitly set, honor, otherwise it will attempt to invoke the `docker` cli and use that as it's indicator. 
 
 With respect to `process.env`, we specifically test for all uppercase, lowercase, and given case.  This allows us to test various patterns and catch flags that might be off due to casing.  That would mean that a key of `Enable_Feature` would be tested as:

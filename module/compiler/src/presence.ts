@@ -14,10 +14,10 @@ export class FilePresenceManager {
   seen = new Set<string>();
   watchSpaces = new Set<string>();
 
-  constructor(private cwd: string, private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = Env.watch) {
+  constructor(private cwd: string, private rootPaths: string[], private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = Env.watch) {
     this.watchSpaces.add('src');
-    if (Env.appRoot) {
-      this.watchSpaces.add(FsUtil.joinUnix(Env.appRoot, 'src'));
+    for (const root of this.rootPaths) {
+      this.watchSpaces.add(FsUtil.joinUnix(root, 'src'));
     }
 
     if (Env.watch) {
@@ -71,7 +71,7 @@ export class FilePresenceManager {
   }
 
   init() {
-    const SRC_RE = new RegExp(`^(${Env.appRoot || '-'})?(\/src\/.*|index)$`);
+    const SRC_RE = FsUtil.appRootMatcher(this.rootPaths);
 
     const rootFiles = ScanApp.findFiles('.ts', x => SRC_RE.test(x) && this.validFile(x)) // Only watch own files
       .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable

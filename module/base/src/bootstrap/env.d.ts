@@ -6,8 +6,7 @@ export declare const Env: {
   trace: boolean;
   quietInit: boolean;
   cwd: string;
-  isApp: boolean;
-  appRoot: string | undefined;
+  appRoots: string[];
   profiles: string[];
 
 
