@@ -33,22 +33,23 @@ class $Compiler {
     this.transformerManager = new TransformerManager(this.cwd);
     this.moduleManager = new ModuleManager(this.cwd);
     this.sourceManager = new SourceManager(this.cwd, {});
-    this.presenceManager = new FilePresenceManager(this.cwd, {
-      added: (name: string) => {
-        if (this.transpile(name)) {
-          this.events.emit('added', name);
+    this.presenceManager = new FilePresenceManager(this.cwd, Env.appRoots,
+      {
+        added: (name: string) => {
+          if (this.transpile(name)) {
+            this.events.emit('added', name);
+          }
+        },
+        changed: (name: string) => {
+          if (this.transpile(name, true)) {
+            this.events.emit('changed', name);
+          }
+        },
+        removed: (name: string) => {
+          this.unload(name);
+          this.events.emit('removed', name);
         }
-      },
-      changed: (name: string) => {
-        if (this.transpile(name, true)) {
-          this.events.emit('changed', name);
-        }
-      },
-      removed: (name: string) => {
-        this.unload(name);
-        this.events.emit('removed', name);
-      }
-    }, exclude);
+      }, exclude);
   }
 
   init() {

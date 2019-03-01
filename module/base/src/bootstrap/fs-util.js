@@ -82,6 +82,16 @@ const FsUtil = {
       });
     }
     return pth;
+  },
+  appRootMatcher: (paths) => {
+    if (!paths.length) {
+      return /^$/;
+    } else {
+      const finalPaths =
+        paths.map(x => x.replace(/^[.]\//, ''));
+      const re = new RegExp(`^(${finalPaths.map(x => `${x}${x && '/'}(index|src\/)`).join('|')})`);
+      return re;
+    }
   }
 };
 

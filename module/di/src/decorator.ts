@@ -47,9 +47,12 @@ export function Application(
 
     out.target = target;
     out.name = name;
+    out.standalone = out.standalone === undefined || out.standalone; // Default to standalone
+
     if (params) {
       out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] || {}), name: x.name! }) as ApplicationParameter);
     }
+
     DependencyRegistry.registerApplication(name, out as ApplicationConfig);
     return target;
   };

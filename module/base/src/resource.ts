@@ -16,18 +16,12 @@ export class $ResourceManager {
 
   private paths: string[] = [];
 
-  constructor(private folder = 'resources') {
+  constructor(private rootPaths: string[], private folder = 'resources') {
     this.init();
   }
 
   private init() {
-    if (Env.get('RESOURCE_PATHS')) {
-      this.paths.unshift(...Env.getList('RESOURCE_PATHS'));
-    }
-
-    if (Env.appRoot !== undefined) {
-      this.paths.push(Env.appRoot || '.');
-    }
+    this.paths.push(...this.rootPaths);
 
     this.paths = this.paths
       .map(x => FsUtil.resolveUnix(Env.cwd, x, this.folder))
@@ -129,4 +123,7 @@ export class $ResourceManager {
   }
 }
 
-export const ResourceManager = new $ResourceManager();
+export const ResourceManager = new $ResourceManager([
+  ...Env.appRoots,
+  ...Env.getList('RESOURCE_ROOTS')
+]);

@@ -12,4 +12,5 @@ export declare class FsUtil {
   static resolveFrameworkDevFile(pth: string): string;
   static prepareTranspile(fileName: string): string;
   static tempDir(pre: string): void;
+  static appRootMatcher(paths: string[]): RegExp;
 }

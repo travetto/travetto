@@ -5,8 +5,8 @@ import { CompilerClassSource } from '../source/class-source';
 import { Class, ChangeEvent } from '../types';
 
 class $RootRegistry extends Registry {
-  constructor(appRoot: string | undefined) {
-    super(new CompilerClassSource(appRoot));
+  constructor(rootPaths: string[]) {
+    super(new CompilerClassSource(rootPaths));
   }
 
   // Auto propagate
@@ -22,4 +22,4 @@ class $RootRegistry extends Registry {
   }
 }
 
-export const RootRegistry = new $RootRegistry(Env.isApp ? Env.appRoot : undefined);
+export const RootRegistry = new $RootRegistry(Env.appRoots);

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
-import { ScanApp, AppInfo } from '@travetto/base';
+import { ScanApp, AppInfo, FsUtil } from '@travetto/base';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';
@@ -11,7 +11,7 @@ export class CompilerClassSource implements ChangeSource<Class> {
   private classes = new Map<string, Map<string, Class>>();
   private events = new EventEmitter();
 
-  constructor(private appRoot: string | undefined) {
+  constructor(private rootPaths: string[]) {
     this.watch = this.watch.bind(this);
   }
 
@@ -73,12 +73,12 @@ export class CompilerClassSource implements ChangeSource<Class> {
   }
 
   async init() {
-    if (this.appRoot !== undefined) {
-      const root = this.appRoot ? `${this.appRoot}/` : '';
+    if (this.rootPaths.length) {
+      const rootsRe = FsUtil.appRootMatcher(this.rootPaths);
 
       const entries = await ScanApp.findFiles('.ts', (f: string) => {
         return Compiler.presenceManager.validFile(f)
-          && (f.startsWith(`${root}src/`) || (
+          && (rootsRe.test(f) || (
             /^node_modules\/@travetto\/[^\/]+\/src\/.*/.test(f)
             && !f.startsWith(`node_modules/${AppInfo.NAME}/`)
           )); // No more side effect code, load all files

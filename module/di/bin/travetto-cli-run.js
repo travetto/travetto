@@ -28,7 +28,7 @@ function generateAppHelpList(apps, cmd) {
   for (const conf of apps) {
     const lines = [];
 
-    const root = conf.appRoot ? `[${colorize.subtitle(conf.appRoot)}] ` : '';
+    const root = conf.appRoot ? `[${colorize.subtitle(conf.appRoot)}${!conf.standalone ? '^' : ''}] ` : '';
     const usage = getAppUsage(conf);
 
     const features = [];
@@ -87,7 +87,9 @@ function init() {
         .filter(x => !!x)
         .map(x => x.trim());
 
-      process.env.ENV = cmd.env; // Preemptively set b/c env changes how we compile some things
+      if (cmd.env) {
+        process.env.ENV = cmd.env; // Preemptively set b/c env changes how we compile some things
+      }
 
       const apps = await getAppList();
       const selected = apps.find(x => x.name === app);
@@ -100,7 +102,7 @@ function init() {
       }
 
       if (cmd.app) {
-        process.env.APP_ROOT = cmd.app;
+        process.env.APP_ROOTS = cmd.app;
       }
       if (cmd.env) {
         process.env.ENV = cmd.env;
