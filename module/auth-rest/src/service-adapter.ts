@@ -34,7 +34,7 @@ export class AuthServiceAdapter {
     return await this.interceptor.logout(this.req, this.res);
   }
 
-  updateSessionPrincipal(principal: any) {
-    this.interceptor.updateSessionPrincipal(this.req, principal);
+  updatePrincipalState(principal: any) {
+    this.interceptor.updatePrincipalState(this.req, principal);
   }
 }

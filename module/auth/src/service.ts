@@ -17,6 +17,14 @@ export class AuthService<U = { id: string }> {
     this._context.get().auth = ctx;
   }
 
+  serializeContext() {
+    return '';
+  }
+
+  deserializeContext(ctx: string) {
+
+  }
+
   clearContext() {
     this._context.get().auth = {};
   }
