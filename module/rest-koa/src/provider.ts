@@ -1,6 +1,5 @@
 import * as koa from 'koa';
 import * as kCompress from 'koa-compress';
-import * as kSession from 'koa-session';
 import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
@@ -22,7 +21,6 @@ export class RestKoaAppProvider extends RestAppProvider {
     const app = new koa();
     app.use(kCompress());
     app.use(kBodyParser());
-    app.use(kSession(this.config.session, app));
 
     return app;
   }

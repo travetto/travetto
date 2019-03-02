@@ -29,11 +29,6 @@ export class RestFastifyAppProvider extends RestAppProvider {
       done(null);
     });
 
-    // Enable proxy for cookies
-    if (this.config.session.cookie.secure) {
-      // app.enable('trust proxy');
-    }
-
     return app;
   }
 
