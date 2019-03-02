@@ -25,11 +25,17 @@ export class AuthInterceptor extends RestInterceptor {
     }
   }
 
-  updateSessionPrincipal(req: Request, principal: any) {
-    if (req.session!._authType) {
-      const provider = this.providers.get(req.session!._authType)!;
+  getPrincipalState(req: Request) {
+    return req.session!;
+  }
+
+  updatePrincipalState(req: Request, principal: any) {
+    const state = this.getPrincipalState(req);
+
+    if (state._authType) {
+      const provider = this.providers.get(state._authType)!;
       const context = provider.toContext(principal);
-      req.session!._authStored = provider.serialize(this.service.context = context);
+      state._authStored = provider.serialize(this.service.context = context);
     } else {
       throw new Error('Principal not loaded, unable to serialize');
     }
@@ -37,13 +43,14 @@ export class AuthInterceptor extends RestInterceptor {
 
   async login(req: Request, res: Response, providers: symbol[]) {
     const errors = [];
+    const state = this.getPrincipalState(req);
     for (const provider of providers) {
       const p = this.providers.get(provider.toString())!;
       try {
         const ctx = await p.login(req, res);
         if (ctx) {
-          req.session!._authStored = p.serialize(ctx);
-          req.session!._authType = provider.toString();
+          state._authStored = p.serialize(ctx);
+          state._authType = provider.toString();
 
           this.service.context = ctx;
         }
@@ -59,18 +66,20 @@ export class AuthInterceptor extends RestInterceptor {
   }
 
   async logout(req: Request, res: Response) {
-    const { _authType: type } = req.session!;
+    const state = this.getPrincipalState(req);
+    const { _authType: type } = state;
     if (type) {
       await this.providers.get(type)!.logout(req, res);
     }
 
     this.service.clearContext();
-    await util.promisify(req.session!.destroy).call(req.session);
+    await util.promisify(state.destroy).call(state);
     res.cookie('connect.sid', undefined, { path: '/', expires: new Date(1) });
   }
 
   async loadContext(req: Request, res: Response) {
-    const { _authStored: serialized, _authType: type, _authPrincipal: principal } = (req.session! || {}) as any;
+    const state = this.getPrincipalState(req);
+    const { _authStored: serialized, _authType: type, _authPrincipal: principal } = (state || {}) as any;
     if (principal) {
       this.service.context = principal;
     } else if (serialized && type) {

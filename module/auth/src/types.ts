@@ -1,7 +1,8 @@
-export interface AuthContext<U> {
+export interface AuthContext<U, T = any> {
   id: string;
   permissions?: Set<string>;
   principal: U;
+  state?: T;
 }
 
 export const ERR_FORBIDDEN = 'User is forbidden';
