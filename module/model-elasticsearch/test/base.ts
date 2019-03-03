@@ -3,12 +3,12 @@ import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { ModelSource, ModelRegistry } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../';
+import { ElasticsearchModelSource, ModelElasticsearchConfig } from '../';
 
 export class Init {
   @InjectableFactory()
   static getModelSource(conf: ModelElasticsearchConfig): ModelSource {
-    return new ModelElasticsearchSource(conf);
+    return new ElasticsearchModelSource(conf);
   }
 }
 
@@ -23,13 +23,13 @@ export class BaseElasticsearchTest {
 
   @BeforeEach()
   async beforeEach() {
-    const mms = (await DependencyRegistry.getInstance(ModelSource)) as ModelElasticsearchSource;
+    const mms = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
     await mms.init();
   }
 
   @AfterEach()
   async afterEach() {
-    const mms = (await DependencyRegistry.getInstance(ModelSource)) as ModelElasticsearchSource;
+    const mms = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
     await mms.client.indices.delete({
       index: mms.getNamespacedIndex('*')
     });

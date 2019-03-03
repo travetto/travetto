@@ -14,7 +14,7 @@ export class SampleConfig {
 
   @InjectableFactory()
   static getProvider(): RestAppProvider {
-    return new RestKoaAppProvider();
+    return new KoaRestAppProvider();
   }
 }
 ```

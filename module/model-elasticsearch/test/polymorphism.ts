@@ -5,7 +5,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseElasticsearchTest } from './base';
-import { ModelElasticsearchSource } from '../src/source';
+import { ElasticsearchModelSource } from '../src/source';
 
 @Model({ baseType: true })
 class Person extends BaseModel {
@@ -35,13 +35,13 @@ class TestPolymorphism extends BaseElasticsearchTest {
     const source = await DependencyRegistry.getInstance(ModelSource);
 
     assert.ok(source);
-    assert(source instanceof ModelElasticsearchSource);
+    assert(source instanceof ElasticsearchModelSource);
 
   }
 
   @Test('Extraction')
   async testRetrieve() {
-    const service = (await DependencyRegistry.getInstance(ModelSource)) as ModelElasticsearchSource;
+    const service = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
     const res = service.getClassFromIndexType('person', 'doctor');
     assert(res === Doctor);
   }
@@ -131,7 +131,7 @@ class TestPolymorphism extends BaseElasticsearchTest {
 
   @Test('Multi Query')
   async testMultiQuery() {
-    const service = (await DependencyRegistry.getInstance(ModelSource)) as ModelElasticsearchSource;
+    const service = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
     const res = service.buildRawModelFilters([Person, Doctor, Engineer, Firefighter]);
 
     assert(res.bool.should.length === 4);

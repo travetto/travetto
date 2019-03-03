@@ -2,7 +2,7 @@ import { Model, ModelCore, ModelSource, ModelService } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 import { DependencyRegistry, InjectableFactory, Application, Inject } from '@travetto/di';
 
-import { ModelElasticsearchSource, ModelElasticsearchConfig } from '../..';
+import { ElasticsearchModelSource, ModelElasticsearchConfig } from '../..';
 import { Class } from '@travetto/registry';
 
 @Schema()
@@ -32,7 +32,7 @@ class Employee implements ModelCore {
 class Config {
   @InjectableFactory()
   static getSource(config: ModelElasticsearchConfig): ModelSource {
-    return new ModelElasticsearchSource(config);
+    return new ElasticsearchModelSource(config);
   }
 }
 
@@ -46,7 +46,7 @@ class Service {
     await this.src.save(Person, Person.from({ name: 'bob', age: 10, gender: 'm', }));
     await this.src.save(Employee, Employee.from({ name: 'bob2' }));
 
-    const res = await (this.src as ModelElasticsearchSource).getRawMultiQuery([Employee, Person], {
+    const res = await (this.src as ElasticsearchModelSource).getRawMultiQuery([Employee, Person], {
       where: {
         name: {
           $regex: /.*/

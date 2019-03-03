@@ -1,96 +1,76 @@
-import * as util from 'util';
-
 import { AppError } from '@travetto/base';
 import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
-import { AuthService, ERR_INVALID_AUTH } from '@travetto/auth';
+import { AuthService } from '@travetto/auth';
 
-import { AuthProvider } from './provider';
-import { AuthServiceAdapter } from './service-adapter';
+import { ERR_INVALID_AUTH } from './errors';
+import { IdentityProvider } from './provider';
+import { AuthSerializerProvider } from './serializer';
 
 @Injectable()
 export class AuthInterceptor extends RestInterceptor {
 
-  private providers = new Map<string, AuthProvider<any>>();
+  private identityProviders = new Map<string, IdentityProvider>();
 
-  constructor(private service: AuthService) {
+  constructor(
+    private authService: AuthService,
+    protected _serializer: AuthSerializerProvider
+  ) {
     super();
   }
 
   async postConstruct() {
-    for (const provider of DependencyRegistry.getCandidateTypes(AuthProvider as Class)) {
-      const dep = await DependencyRegistry.getInstance(AuthProvider, provider.qualifier);
-      this.providers.set(provider.qualifier.toString(), dep);
+    for (const provider of DependencyRegistry.getCandidateTypes(IdentityProvider as Class)) {
+      const dep = await DependencyRegistry.getInstance(IdentityProvider, provider.qualifier);
+      this.identityProviders.set(provider.qualifier.toString(), dep);
     }
   }
 
-  getPrincipalState(req: Request) {
-    return req.session!;
-  }
-
-  updatePrincipalState(req: Request, principal: any) {
-    const state = this.getPrincipalState(req);
-
-    if (state._authType) {
-      const provider = this.providers.get(state._authType)!;
-      const context = provider.toContext(principal);
-      state._authStored = provider.serialize(this.service.context = context);
-    } else {
-      throw new Error('Principal not loaded, unable to serialize');
-    }
-  }
-
-  async login(req: Request, res: Response, providers: symbol[]) {
-    const errors = [];
-    const state = this.getPrincipalState(req);
-    for (const provider of providers) {
-      const p = this.providers.get(provider.toString())!;
+  async authenticate(req: Request, res: Response, identityProviders: symbol[]) {
+    let lastError: Error | undefined;
+    for (const provider of identityProviders) {
       try {
-        const ctx = await p.login(req, res);
-        if (ctx) {
-          state._authStored = p.serialize(ctx);
-          state._authType = provider.toString();
-
-          this.service.context = ctx;
+        const idp = this.identityProviders.get(provider.toString())!;
+        const ident = await idp.authenticate(req, res);
+        if (ident) { // Multi-step login process
+          await this.authService.authorize(ident);
         }
-        return ctx;
+        return ident;
       } catch (e) {
-        errors.push(e);
+        lastError = e;
       }
     }
 
     const err = new AppError(ERR_INVALID_AUTH, 'authentication');
-    err.stack = errors[errors.length - 1].stack;
+    err.stack = (lastError ? lastError.stack : err.stack);
     throw err;
   }
 
   async logout(req: Request, res: Response) {
-    const state = this.getPrincipalState(req);
-    const { _authType: type } = state;
-    if (type) {
-      await this.providers.get(type)!.logout(req, res);
-    }
-
-    this.service.clearContext();
-    await util.promisify(state.destroy).call(state);
-    res.cookie('connect.sid', undefined, { path: '/', expires: new Date(1) });
+    await this.authService.logout();
   }
 
-  async loadContext(req: Request, res: Response) {
-    const state = this.getPrincipalState(req);
-    const { _authStored: serialized, _authType: type, _authPrincipal: principal } = (state || {}) as any;
-    if (principal) {
-      this.service.context = principal;
-    } else if (serialized && type) {
-      const provider = this.providers.get(type)!;
-      const ctx = await provider.deserialize(serialized);
-      this.service.context = ctx;
+  async restore(req: Request, res: Response): Promise<void> {
+    const ctx = await this._serializer.deserialize(req, res);
+    if (ctx) {
+      this.authService.context = ctx;
     }
+  }
+
+  async updatePrincipalDetails(req: Request, res: Response, details: any) {
+    await this.authService.updatePrincipalDetails(details);
   }
 
   intercept(req: Request, res: Response) {
-    req.auth = new AuthServiceAdapter(this.service, this, req, res);
-    return this.loadContext(req, res);
+    // tslint:disable-next-line: no-this-assignment
+    const self = this;
+    req.auth = {
+      get principal() { return self.authService.principal; },
+      logout: this.logout.bind(this, req, res),
+      updatePrincipalDetails: this.updatePrincipalDetails.bind(this, req, res),
+      authenticate: this.authenticate.bind(this, req, res)
+    };
+    return this.restore(req, res);
   }
 }

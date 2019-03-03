@@ -1,21 +1,21 @@
 import * as passport from 'passport';
 
-import { PrincipalConfig, AuthContext } from '@travetto/auth';
+import { Identity } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
-import { AuthProvider } from '@travetto/auth-rest';
+import { IdentityProvider } from '@travetto/auth-rest';
 
-export class AuthPassportProvider<U> extends AuthProvider<U> {
-  constructor(private strategyName: string, private strategy: passport.Strategy, private principalConfig: PrincipalConfig<U>) {
+export class PassportIdentityProvider<U> extends IdentityProvider {
+  constructor(
+    private strategyName: string,
+    private strategy: passport.Strategy,
+    private toIdentity: (user: U) => Pick<Identity, 'id' | 'permissions' | 'details'> & { provider?: string }
+  ) {
     super();
     passport.use(this.strategyName, this.strategy);
   }
 
-  toContext(principal: U) {
-    return this.principalConfig.toContext(principal);
-  }
-
-  async login(req: Request, res: Response) {
-    return new Promise<AuthContext<U> | undefined>((resolve, reject) => {
+  async authenticate(req: Request, res: Response) {
+    return new Promise<Identity | undefined>((resolve, reject) => {
       passport.authenticate(this.strategyName, (err, user, ...rest) => {
         if (err) {
           reject(err);
@@ -25,7 +25,11 @@ export class AuthPassportProvider<U> extends AuthProvider<U> {
           delete user._raw;
           delete user.provider;
 
-          resolve(this.toContext(user));
+          const ident = this.toIdentity(user);
+          if (!ident.provider) {
+            ident.provider = this.strategyName;
+          }
+          resolve(ident as Identity);
         }
       })(req, res);
     });

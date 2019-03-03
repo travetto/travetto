@@ -19,8 +19,8 @@ export class FbUser {
 
 export class AppConfig {
   @InjectableFactory(FB_AUTH)
-  static facebookPassport(): AuthProvider<any> {
-    return new AuthPassportProvider('facebook',
+  static facebookPassport(): IdentityProvider {
+    return new PassportIdentityProvider('facebook',
       new FacebookStrategy(
         {
           clientID: '<clientId>',
@@ -32,9 +32,9 @@ export class AppConfig {
           return cb(undefined, profile);
         }
       ),
-      new PrincipalConfig(FbUser, {
-        id: 'id',
-        permissions: 'roles'
+      (user: FbUser) => ({
+        id: user.id,
+        permissions: new Set(user.roles)
       })
     );
   }

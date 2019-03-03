@@ -6,7 +6,7 @@ import { RestConfig, ControllerConfig, RestAppProvider, ProviderUtil } from '@tr
 
 import { FastifyConfig } from './config';
 
-export class RestFastifyAppProvider extends RestAppProvider {
+export class FastifyRestAppProvider extends RestAppProvider {
 
   private app: fastify.FastifyInstance;
   private config: FastifyConfig;

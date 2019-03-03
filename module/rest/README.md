@@ -150,7 +150,7 @@ export class SampleApp {
 
   @InjectableFactory()
   static getProvider(): RestAppProvider {
-    return new RestExpressAppProvider();
+    return new ExpressRestAppProvider();
   }
 
   @Inject()

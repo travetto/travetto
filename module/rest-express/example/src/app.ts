@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
 import { Application, RestApp, RestConfig, RestAppProvider } from '@travetto/rest';
-import { RestExpressAppProvider } from '../../src/provider';
+import { ExpressRestAppProvider } from '../../src/provider';
 
 @Application('sample', {
   description: 'Sample rest application'
@@ -9,7 +9,7 @@ export class SampleApp {
 
   @InjectableFactory()
   static getProvider(): RestAppProvider {
-    return new RestExpressAppProvider();
+    return new ExpressRestAppProvider();
   }
 
   constructor(

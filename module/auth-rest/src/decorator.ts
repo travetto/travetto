@@ -1,51 +1,27 @@
-import { ControllerRegistry, EndpointDecorator, Request } from '@travetto/rest';
-import { ERR_UNAUTHENTICATED, ERR_AUTHENTICATED, ERR_FORBIDDEN, ERR_INVALID_CREDS } from '@travetto/auth';
-import { AppError, ErrorCategory } from '@travetto/base';
+import { ControllerRegistry, EndpointDecorator } from '@travetto/rest';
+import { AppError } from '@travetto/base';
+import { AuthUtil } from '@travetto/auth';
 
 export function Authenticate(provider: symbol, ...providers: symbol[]) {
   const computed = [provider, ...providers];
-  return ControllerRegistry.createFilterDecorator(async (req) => {
-    try {
-      await req.auth.login(computed);
-    } catch (e) {
-      if (e.message === ERR_INVALID_CREDS) {
-        const err = new AppError(e.message, 'authentication');
-        err.stack = e.stack;
-        throw err;
-      } else {
-        throw e;
-      }
-    }
-  }) as EndpointDecorator;
-}
-
-export async function requireAuth(config: { include: string[], exclude: string[] }, req: Request) {
-  try {
-    req.auth.checkPermissions(config.include, config.exclude);
-  } catch (e) {
-    let status: ErrorCategory = 'general';
-    switch (e.message) {
-      case ERR_UNAUTHENTICATED: status = 'authentication'; break;
-      case ERR_AUTHENTICATED: status = 'permissions'; break;
-      case ERR_FORBIDDEN: status = 'permissions'; break;
-    }
-    const err = new AppError(e.message, status);
-    err.stack = e.stack;
-    throw err;
-  }
+  return ControllerRegistry.createFilterDecorator(req => req.auth.authenticate(computed)) as EndpointDecorator;
 }
 
 export function Authenticated(include: string[] = [], exclude: string[] = []) {
-  return ControllerRegistry.createFilterDecorator(requireAuth.bind(null, {
-    include: include.map(x => x.toLowerCase()),
-    exclude: exclude.map(x => x.toLowerCase())
-  }));
+  const checker = AuthUtil.permissionSetChecker(include, exclude);
+
+  return ControllerRegistry.createFilterDecorator(async (req, res) => {
+    const p = req.auth.principal;
+    if (!checker(p ? p.permissions : new Set())) {
+      throw new AppError('Access denied', 'permissions');
+    }
+  });
 }
 
 export function Unauthenticated() {
   return ControllerRegistry.createFilterDecorator(req => {
-    if (!req.auth.unauthenticated) {
-      throw new AppError(ERR_UNAUTHENTICATED, 'authentication');
+    if (!req.auth.principal) {
+      throw new AppError('User is unauthenticated', 'authentication');
     }
   });
 }

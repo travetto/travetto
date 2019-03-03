@@ -1,6 +1,6 @@
 import { Application, InjectableFactory } from '@travetto/di';
 import { RestApp, RestAppProvider } from '@travetto/rest';
-import { RestExpressAppProvider } from '@travetto/rest-express';
+import { ExpressRestAppProvider } from '@travetto/rest-express';
 
 export * from '../../src/controller'; // Force loading, and bypass no-side-effect
 
@@ -9,7 +9,7 @@ export class SampleApp {
 
   @InjectableFactory()
   static getRestApp(): RestAppProvider {
-    return new RestExpressAppProvider();
+    return new ExpressRestAppProvider();
   }
 
   constructor(private app: RestApp) { }

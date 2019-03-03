@@ -80,7 +80,7 @@ export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any 
   return out;
 }
 
-export class ModelMongoSource extends ModelSource {
+export class MongoModelSource extends ModelSource {
 
   private client: mongo.MongoClient;
   private db: mongo.Db;

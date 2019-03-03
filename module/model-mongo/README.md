@@ -17,7 +17,7 @@ All that is needed to use the `ModelSource` is to register it with the [`Depende
 export class Init {
   @InjectableFactory()
   static getModelSource(conf: ModelMongoConfig): ModelSource {
-    return new ModelMongoSource(conf);
+    return new MongoModelSource(conf);
   }
 }
 ```
