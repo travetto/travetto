@@ -6,7 +6,7 @@ import { Suite, Test } from '@travetto/test';
 import { Schema, Currency, Integer, Precision, Float, Text } from '@travetto/schema';
 
 import { BaseElasticsearchTest } from './base';
-import { ModelElasticsearchSource } from '../src/source';
+import { ElasticsearchModelSource } from '../src/source';
 import { ElasticsearchUtil } from '../src/util';
 
 @Schema()
@@ -59,7 +59,7 @@ class TestSave extends BaseElasticsearchTest {
     const source = await DependencyRegistry.getInstance(ModelSource);
 
     assert.ok(source);
-    assert(source instanceof ModelElasticsearchSource);
+    assert(source instanceof ElasticsearchModelSource);
 
   }
 

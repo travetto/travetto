@@ -3,12 +3,12 @@ import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { ModelSource } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ModelMongoSource, ModelMongoConfig } from '../';
+import { MongoModelSource, ModelMongoConfig } from '../';
 
 export class Init {
   @InjectableFactory()
   static getModelSource(conf: ModelMongoConfig): ModelSource {
-    return new ModelMongoSource(conf);
+    return new MongoModelSource(conf);
   }
 }
 
@@ -22,13 +22,13 @@ export class BaseMongoTest {
 
   @BeforeEach()
   async beforeEach() {
-    const mms = (await DependencyRegistry.getInstance(ModelSource)) as ModelMongoSource;
+    const mms = (await DependencyRegistry.getInstance(ModelSource)) as MongoModelSource;
     await mms.init();
   }
 
   @AfterEach()
   async afterEach() {
-    const mms = (await DependencyRegistry.getInstance(ModelSource)) as ModelMongoSource;
+    const mms = (await DependencyRegistry.getInstance(ModelSource)) as MongoModelSource;
     await (mms as any).db.dropDatabase();
   }
 }

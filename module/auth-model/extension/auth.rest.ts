@@ -1,38 +1,18 @@
-import { AppError, ErrorCategory } from '@travetto/base';
 import { Request, Response } from '@travetto/rest';
 import { ModelCore } from '@travetto/model';
-import { AuthProvider } from '@travetto/auth-rest';
-import { ERR_INVALID_PASSWORD, AuthContext } from '@travetto/auth';
+import { IdentityProvider } from '@travetto/auth-rest';
+import { Identity } from '@travetto/auth';
 
-import { AuthModelService } from '../src/service';
+import { ModelPrincipalProvider } from '../src/service';
 
-export class AuthModelProvider<U extends ModelCore> extends AuthProvider<U> {
+export class ModelIdentityProvider<U extends ModelCore> extends IdentityProvider {
 
-  constructor(private service: AuthModelService<U>) {
+  constructor(private service: ModelPrincipalProvider<U>) {
     super();
   }
 
-  toContext(principal: U) {
-    return this.service.principalConfig.toContext(principal);
-  }
-
-  async login(req: Request, res: Response): Promise<AuthContext<U>> {
-    const userId = this.service.principalConfig.getId(req.body);
-    const password = this.service.principalConfig.getPassword(req.body);
-
-    try {
-      const user = await this.service.login(userId, password);
-      return this.toContext(user);
-    } catch (e) {
-      let status: ErrorCategory = 'general';
-      switch ((e as Error).message) {
-        case ERR_INVALID_PASSWORD:
-          status = 'authentication';
-          break;
-      }
-      const out = new AppError(e.message, status);
-      out.stack = e.stack;
-      throw out;
-    }
+  async authenticate(req: Request, res: Response): Promise<Identity | undefined> {
+    const ident = this.service.toIdentity(req.body);
+    return this.service.authenticate(ident.id!, ident.password!);
   }
 }

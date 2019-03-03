@@ -1,6 +1,6 @@
 import { Application, InjectableFactory, Inject } from '@travetto/di';
 import { RestApp, RestAppProvider } from '@travetto/rest';
-import { RestFastifyAppProvider } from '../../src/provider';
+import { FastifyRestAppProvider } from '../../src/provider';
 import { RestConfig } from '@travetto/rest/src/config';
 
 @Application('sample')
@@ -8,7 +8,7 @@ export class SampleApp {
 
   @InjectableFactory()
   static getProvider(): RestAppProvider {
-    return new RestFastifyAppProvider();
+    return new FastifyRestAppProvider();
   }
 
   constructor(private app: RestApp, private config: RestConfig) { }

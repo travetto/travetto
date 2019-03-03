@@ -1,7 +1,7 @@
 import { Get, RestApp, RestAppProvider } from '@travetto/rest';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { Injectable, InjectableFactory, Application } from '@travetto/di';
-import { RestExpressAppProvider } from '@travetto/rest-express';
+import { ExpressRestAppProvider } from '@travetto/rest-express';
 import { Schema, Match } from '@travetto/schema';
 
 import { ModelController } from '../../extension/rest';
@@ -116,7 +116,7 @@ class Config {
 
   @InjectableFactory()
   static getRest(): RestAppProvider {
-    return new RestExpressAppProvider();
+    return new ExpressRestAppProvider();
   }
 }
 

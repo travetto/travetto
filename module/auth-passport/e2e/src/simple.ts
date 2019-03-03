@@ -9,7 +9,7 @@ import { FB_AUTH } from './conf';
 export class SampleAuth {
 
   @Inject()
-  private service: AuthService;
+  private state: AuthService;
 
   @Get('/name')
   async getName() {
@@ -25,7 +25,7 @@ export class SampleAuth {
   @Get('/self')
   @Authenticated()
   async getSelf() {
-    return this.service.context;
+    return this.state.context;
   }
 
   @Get('/facebook/callback')

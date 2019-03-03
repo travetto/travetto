@@ -1,32 +1,34 @@
 import { Inject, Injectable } from '@travetto/di';
 import { Context } from '@travetto/context';
+import { AppError } from '@travetto/base';
 
-import { AuthContext, ERR_UNAUTHENTICATED, ERR_FORBIDDEN } from './types';
+import { AuthContext, Identity } from './types';
+import { PrincipalProvider } from './principal';
+import { AuthUtil } from './util';
+
+export const AUTH_PERM = '__AUTH__';
+
+const EMPTY_SET = new Set<string>();
 
 @Injectable()
-export class AuthService<U = { id: string }> {
+export class AuthService {
 
   @Inject()
   protected _context: Context;
 
-  get context(): AuthContext<U> {
+  @Inject()
+  protected _principal: PrincipalProvider;
+
+  get context(): AuthContext {
     return (this._context.get() || {}).auth || {};
   }
 
-  set context(ctx: AuthContext<U>) {
+  set context(ctx: AuthContext) {
     this._context.get().auth = ctx;
   }
 
-  serializeContext() {
-    return '';
-  }
-
-  deserializeContext(ctx: string) {
-
-  }
-
-  clearContext() {
-    this._context.get().auth = {};
+  get principal() {
+    return this.context.principal;
   }
 
   get authenticated() {
@@ -34,21 +36,30 @@ export class AuthService<U = { id: string }> {
   }
 
   get unauthenticated() {
-    return !this.context.principal;
+    return !this.principal;
   }
 
-  checkPermissions(include: string[], exclude: string[]) {
-    if (this.unauthenticated) {
-      throw new Error(ERR_UNAUTHENTICATED);
-    }
+  logout() {
+    this.context = {} as any;
+  }
 
-    const perms = this.context!.permissions || new Set();
-
-    if (exclude.length && exclude.find(x => perms.has(x))) {
-      throw new Error(ERR_FORBIDDEN);
+  async updatePrincipalDetails(details: { [key: string]: any }) {
+    if (this.principal) {
+      Object.assign(this.principal.details, details);
     }
-    if (include.length && include.find(x => !perms.has(x))) {
-      throw new Error(ERR_FORBIDDEN);
+  }
+
+  async authorize(identity: Identity) {
+    const ctx = this.context = await this._principal.authorize(identity);
+    ctx.principal = ctx.principal || ctx.identity;
+    ctx.principal.permissions = ctx.principal.permissions || new Set<string>();
+    ctx.principal.permissions.add(AUTH_PERM);
+  }
+
+  checkPermissions(include: string[] | Set<string>, exclude: string[] | Set<string>, matchAll = true) {
+    const perms = this.principal ? this.principal.permissions : EMPTY_SET;
+    if (!AuthUtil.permissionSetChecker(include, exclude, matchAll)(perms)) {
+      throw new AppError('Insufficient permissions', 'permissions');
     }
   }
 }

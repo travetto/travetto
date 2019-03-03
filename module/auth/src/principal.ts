@@ -1,32 +1,31 @@
-import { Class } from '@travetto/registry';
-import { AuthContext } from './types';
+import { AppError } from '@travetto/base';
 
-export type PrincipalFields<T> = {
-  id: keyof T;
-  permissions: keyof T;
-};
+import { Identity, Principal, AuthContext } from './types';
 
-export class PrincipalConfig<T = any, U extends PrincipalFields<T> = PrincipalFields<T>> {
+export abstract class PrincipalProvider {
 
-  constructor(public readonly type: Class<T>, public readonly fields: U) { }
+  createPrincipal?(principal: Principal): Promise<Principal>;
 
-  protected lookup<V = any>(obj: T, field: keyof T): V {
-    return obj[field] as any as V;
+  get autoCreate() { return false; }
+
+  abstract resolvePrincipal(ident: Identity): Promise<Principal>;
+
+  async resolveOrCreatePrincipal(ident: Identity) {
+    try {
+      return await this.resolvePrincipal(ident);
+    } catch (e) {
+      if (this.autoCreate && this.createPrincipal && ((e instanceof AppError && e.category === 'notfound') || /not found/i.test(e.message))) {
+        return await this.createPrincipal(ident);
+      } else {
+        throw e;
+      }
+    }
   }
 
-  getId = (obj: T) => this.lookup<string>(obj, this.fields.id);
-  getPermissions(obj: T) {
-    const val = this.lookup<string | string[] | Set<string>>(obj, this.fields.permissions);
-    return val instanceof Set ? val :
-      (Array.isArray(val) ? new Set(val) :
-        new Set(`${val}`.split(',').map(x => x.trim())));
-  }
-
-  toContext(obj: T): AuthContext<T> {
+  async authorize(ident: Identity): Promise<AuthContext> {
     return {
-      id: this.getId(obj),
-      permissions: this.getPermissions(obj),
-      principal: obj
+      principal: await this.resolveOrCreatePrincipal(ident),
+      identity: ident
     };
   }
 }

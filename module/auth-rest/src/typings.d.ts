@@ -1,9 +1,9 @@
-import { AuthServiceAdapter } from './service-adapter';
+import { AuthRequestAdapter } from './types';
 
 declare global {
   namespace Travetto {
     export interface Request {
-      auth: AuthServiceAdapter;
+      auth: AuthRequestAdapter;
     }
   }
 }

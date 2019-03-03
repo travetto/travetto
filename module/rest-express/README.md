@@ -13,7 +13,7 @@ The module is an [`express`](https://expressjs.com) provider for the [`Rest`](ht
 export class SampleConfig {
   @InjectableFactory()
   static getProvider(): RestAppProvider {
-    return new RestExpressAppProvider();
+    return new ExpressRestAppProvider();
   }
 }
 ```

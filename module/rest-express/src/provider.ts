@@ -9,7 +9,7 @@ import { RestConfig, ControllerConfig, RestAppProvider } from '@travetto/rest';
 import { RouteStack } from './types';
 import { ExpressConfig } from './config';
 
-export class RestExpressAppProvider extends RestAppProvider<express.Application> {
+export class ExpressRestAppProvider extends RestAppProvider<express.Application> {
 
   private app: express.Application;
   private config: ExpressConfig;

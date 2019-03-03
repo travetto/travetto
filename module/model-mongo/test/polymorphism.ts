@@ -5,7 +5,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseMongoTest } from './base';
-import { ModelMongoSource } from '../src/source';
+import { MongoModelSource } from '../src/source';
 
 @Model({ baseType: true })
 class Person extends BaseModel {
@@ -35,7 +35,7 @@ class TestPolymorphism extends BaseMongoTest {
     const source = await DependencyRegistry.getInstance(ModelSource);
 
     assert.ok(source);
-    assert(source instanceof ModelMongoSource);
+    assert(source instanceof MongoModelSource);
 
   }
 

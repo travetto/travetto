@@ -8,7 +8,7 @@ import { RestConfig, ControllerConfig, RestAppProvider, ProviderUtil } from '@tr
 
 import { KoaConfig } from './config';
 
-export class RestKoaAppProvider extends RestAppProvider {
+export class KoaRestAppProvider extends RestAppProvider {
 
   private app: koa;
   private config: KoaConfig;

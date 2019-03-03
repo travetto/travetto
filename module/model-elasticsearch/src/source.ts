@@ -17,7 +17,7 @@ import { ModelElasticsearchConfig } from './config';
 import { EsBulkResponse, EsIdentity, EsBulkError } from './types';
 import { ElasticsearchUtil } from './util';
 
-export class ModelElasticsearchSource extends ModelSource {
+export class ElasticsearchModelSource extends ModelSource {
 
   private indexToAlias: Map<string, string> = new Map();
   private aliasToIndex: Map<string, string> = new Map();

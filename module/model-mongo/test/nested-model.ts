@@ -3,14 +3,14 @@ import * as assert from 'assert';
 import { Model, ModelService, ModelSource, ModelCore } from '@travetto/model';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { ModelMongoSource } from '../src/source';
+import { MongoModelSource } from '../src/source';
 import { ModelMongoConfig } from '../src/config';
 import { SchemaRegistry, Schema, Text } from '@travetto/schema';
 
 class TestConfig {
   @InjectableFactory()
   static getSource(config: ModelMongoConfig): ModelSource {
-    return new ModelMongoSource(config);
+    return new MongoModelSource(config);
   }
 }
 

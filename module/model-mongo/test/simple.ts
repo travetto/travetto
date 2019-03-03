@@ -6,7 +6,7 @@ import { Suite, Test } from '@travetto/test';
 import { Schema, Min, Max } from '@travetto/schema';
 import { GenerateUtil } from '@travetto/schema/extension/faker';
 
-import { ModelMongoSource } from '../';
+import { MongoModelSource } from '../';
 import { BaseMongoTest } from './base';
 
 @Schema()
@@ -37,7 +37,7 @@ class TestSave extends BaseMongoTest {
     const source = await DependencyRegistry.getInstance(ModelSource);
     assert.ok(source);
 
-    assert(source instanceof ModelMongoSource);
+    assert(source instanceof MongoModelSource);
   }
 
   @Test('save it')
