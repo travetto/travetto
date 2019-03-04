@@ -141,7 +141,7 @@ The module provides standard structure for rendering content on the response.  T
 Additionally, there is support for typing requests and request bodies.  This can be utilized by other modules to handle special types of requests.
  
 ## Creating and Running an App
-To run a REST server, you will need to construct an entry point using the `@Application` decorator, as well as define a valid [`RestAppProvider`](./src/types.ts) to provide initialization for the application.  This could look like:
+To run a REST server, you will need to construct an entry point using the `@Application` decorator, as well as define a valid [`RestApp`](./src/types.ts) to provide initialization for the application.  This could look like:
 
 **Code: Application entry point for Rest Applications**
 ```typescript
@@ -149,17 +149,17 @@ To run a REST server, you will need to construct an entry point using the `@Appl
 export class SampleApp {
 
   @InjectableFactory()
-  static getProvider(): RestAppProvider {
-    return new ExpressRestAppProvider();
+  static getProvider(): RestApp {
+    return new ExpressRestApp();
   }
 
   @Inject()
   contextInterceptor: ContextInterceptor;
 
-  constructor(private app: RestApp) { }
+  constructor(private server: RestServer) { }
 
   run() {
-    this.app.run();
+    this.server.run();
   }
 }
 ```

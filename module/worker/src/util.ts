@@ -6,9 +6,9 @@ import { Worker } from './pool';
 export class WorkUtil {
   static spawnedWorker<X>(
     config: SpawnConfig & {
-      execute: (channel: ParentCommChannel, input: X) => any,
-      destroy?: (channel: ParentCommChannel) => any,
-      init?: (channel: ParentCommChannel) => any,
+      init?: (channel: ParentCommChannel) => Promise<any>,
+      execute: (channel: ParentCommChannel, input: X) => Promise<any>,
+      destroy?: (channel: ParentCommChannel) => Promise<any>,
     }
   ): Worker<X> {
     const channel = new ParentCommChannel(
@@ -17,14 +17,14 @@ export class WorkUtil {
     return {
       get id() { return channel.id; },
       get active() { return channel.active; },
-      destroy: async () => {
+      init: config.init ? config.init.bind(config, channel) : undefined,
+      execute: config.execute.bind(config, channel),
+      async destroy() {
         if (config.destroy) {
           await config.destroy(channel);
         }
         await channel.destroy();
       },
-      init: () => config.init ? config.init(channel) : undefined,
-      execute: (inp: X) => config.execute(channel, inp)
     };
   }
 }

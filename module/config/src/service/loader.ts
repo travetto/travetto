@@ -8,7 +8,7 @@ import { ConfigMap } from './map';
 
 export class ConfigLoader {
 
-  private static _initialized: boolean = false;
+  private static initialized: boolean = false;
   private static map = new ConfigMap();
 
   private static processConfigs() {
@@ -63,10 +63,10 @@ export class ConfigLoader {
       - Environment vars -> Overrides everything (happens at bind time)
   */
   static initialize() {
-    if (this._initialized) {
+    if (this.initialized) {
       return;
     }
-    this._initialized = true;
+    this.initialized = true;
     this.reloadConfig();
 
     if (!Env.quietInit) {

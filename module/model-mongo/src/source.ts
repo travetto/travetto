@@ -8,7 +8,8 @@ import {
   BulkOp,
   WhereClause,
   ModelQuery,
-  ValidStringFields
+  ValidStringFields,
+  WhereClauseRaw
 } from '@travetto/model';
 
 import { Class } from '@travetto/registry';
@@ -16,7 +17,6 @@ import { AppError, Util } from '@travetto/base';
 import { BindUtil } from '@travetto/schema';
 
 import { ModelMongoConfig } from './config';
-import { _WhereClause } from '../../model/src/model/where-clause';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -99,7 +99,7 @@ export class MongoModelSource extends ModelSource {
     filter.limit = filter.limit || 10;
     const suggestQuery = {
       [field]: new RegExp(`\\b${query}`, 'i')
-    } as any as _WhereClause<T>;
+    } as any as WhereClauseRaw<T>;
 
     if (!filter.where) {
       filter.where = suggestQuery;
@@ -109,7 +109,7 @@ export class MongoModelSource extends ModelSource {
           filter.where,
           suggestQuery
         ]
-      } as _WhereClause<T>;
+      } as WhereClauseRaw<T>;
     }
     return this.query(cls, filter);
   }

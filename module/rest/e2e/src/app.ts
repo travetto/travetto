@@ -1,9 +1,9 @@
 import { Application, InjectableFactory, Inject } from '@travetto/di';
-import { RestApp, RestAppProvider, ControllerConfig, RestInterceptor } from '../';
-import { ContextInterceptor } from '../extension/context';
+import { RestServer, RestApp, ControllerConfig, RestInterceptor } from '../..';
+import { ContextInterceptor } from '../../extension/context';
 
-class DummyAppProvider extends RestAppProvider {
-  _raw: any = {};
+class DummyAppProvider extends RestApp {
+  raw: any = {};
 
   async init() {
     console.log('Initializing');
@@ -30,14 +30,14 @@ class DummyAppProvider extends RestAppProvider {
 export class SampleApp {
 
   @InjectableFactory()
-  static getProvider(): RestAppProvider {
+  static getProvider(): RestApp {
     return new DummyAppProvider();
   }
 
   @Inject()
   contextInterceptor: ContextInterceptor;
 
-  constructor(private app: RestApp) { }
+  constructor(private app: RestServer) { }
 
   run() {
     this.app.run();

@@ -6,7 +6,7 @@ import { ResourceManager } from '@travetto/base';
 import { DockerContainer } from '../src/docker';
 
 @Suite()
-class DockerIOTest {
+export class DockerIOTest {
   @Test()
   async test() {
     const container = new DockerContainer('rafakato/alpine-graphicsmagick')

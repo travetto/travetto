@@ -1,7 +1,7 @@
-import { Get, RestApp, RestAppProvider } from '@travetto/rest';
+import { Get, RestServer, RestApp } from '@travetto/rest';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { Injectable, InjectableFactory, Application } from '@travetto/di';
-import { ExpressRestAppProvider } from '@travetto/rest-express';
+import { ExpressRestApp } from '@travetto/rest-express';
 import { Schema, Match } from '@travetto/schema';
 
 import { ModelController } from '../../extension/rest';
@@ -12,6 +12,7 @@ import {
 } from '../..';
 import { QueryVerifierService } from '../../src/service/verify';
 import { BulkOp } from '../../src/model/bulk';
+import { ValidStringFields } from '../../src/service/source';
 
 @Injectable({ target: ModelSource })
 export class TestSource implements ModelSource {
@@ -53,6 +54,20 @@ export class TestSource implements ModelSource {
 
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>): Promise<T> {
     return body as T;
+  }
+
+  async updatePartialView<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string): Promise<T> {
+    return o as T;
+  }
+
+  async updatePartialViewByQuery<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string, query: ModelQuery<T>): Promise<T> {
+    return o as T;
+  }
+
+  async suggestField<T extends ModelCore, U = T>(
+    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
+  ): Promise<U[]> {
+    return [] as U[];
   }
 
   async query<T extends ModelCore, U>(cls: Class<T>, builder: Query<T>): Promise<U[]> {
@@ -115,8 +130,8 @@ class Config {
   }
 
   @InjectableFactory()
-  static getRest(): RestAppProvider {
-    return new ExpressRestAppProvider();
+  static getRest(): RestApp {
+    return new ExpressRestApp();
   }
 }
 
@@ -135,9 +150,9 @@ export class SimpleModelController {
 
 @Application('simple')
 class App {
-  constructor(private app: RestApp) { }
+  constructor(private server: RestServer) { }
 
   run() {
-    return this.app.run();
+    return this.server.run();
   }
 }

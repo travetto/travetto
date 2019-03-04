@@ -2,16 +2,18 @@ import { ServerResponse, IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
 import { ConfigLoader } from '@travetto/config';
-import { RestConfig, ControllerConfig, RestAppProvider, ProviderUtil } from '@travetto/rest';
+import { RestConfig, ControllerConfig, RestApp, ProviderUtil } from '@travetto/rest';
 
 import { FastifyConfig } from './config';
 
-export class FastifyRestAppProvider extends RestAppProvider {
+const TRV_KEY = Symbol('TRV_KEY');
+
+export class FastifyRestApp extends RestApp {
 
   private app: fastify.FastifyInstance;
   private config: FastifyConfig;
 
-  get _raw() {
+  get raw() {
     return this.app;
   }
 
@@ -50,9 +52,9 @@ export class FastifyRestAppProvider extends RestAppProvider {
   }
 
   getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
-    if (!(reqs as any)._trvReq) {
-      (reqs as any)._trvReq = ProviderUtil.decorateRequest({
-        _raw: reqs,
+    if (!(reqs as any)[TRV_KEY]) {
+      (reqs as any)[TRV_KEY] = ProviderUtil.decorateRequest({
+        __raw: reqs,
         method: reqs.req.method,
         path: reqs.req.url!,
         query: reqs.query,
@@ -67,13 +69,13 @@ export class FastifyRestAppProvider extends RestAppProvider {
         on: reqs.req.on.bind(reqs.req)
       });
     }
-    return (reqs as any)._trvReq;
+    return (reqs as any)[TRV_KEY];
   }
 
   getResponse(reply: fastify.FastifyReply<ServerResponse>) {
-    if (!(reply as any)._trvRes) {
-      (reply as any)._trvRes = ProviderUtil.decorateResponse({
-        _raw: reply,
+    if (!(reply as any)[TRV_KEY]) {
+      (reply as any)[TRV_KEY] = ProviderUtil.decorateResponse({
+        __raw: reply,
         get headersSent() {
           return reply.sent;
         },
@@ -101,7 +103,7 @@ export class FastifyRestAppProvider extends RestAppProvider {
       });
     }
 
-    return (reply as any)._trvRes;
+    return (reply as any)[TRV_KEY];
   }
 
   async registerController(cConfig: ControllerConfig) {

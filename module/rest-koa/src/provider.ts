@@ -4,16 +4,18 @@ import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
 import { ConfigLoader } from '@travetto/config';
-import { RestConfig, ControllerConfig, RestAppProvider, ProviderUtil } from '@travetto/rest';
+import { RestConfig, ControllerConfig, RestApp, ProviderUtil } from '@travetto/rest';
 
 import { KoaConfig } from './config';
 
-export class KoaRestAppProvider extends RestAppProvider {
+const TRV_KEY = Symbol('TRV_KEY');
+
+export class KoaRestApp extends RestApp {
 
   private app: koa;
   private config: KoaConfig;
 
-  get _raw() {
+  get raw() {
     return this.app;
   }
 
@@ -41,9 +43,9 @@ export class KoaRestAppProvider extends RestAppProvider {
   }
 
   getRequest(ctx: koa.ParameterizedContext) {
-    if (!(ctx as any)._trvReq) {
-      (ctx as any)._trvReq = ProviderUtil.decorateRequest({
-        _raw: ctx,
+    if (!(ctx as any)[TRV_KEY]) {
+      (ctx as any)[TRV_KEY] = ProviderUtil.decorateRequest({
+        __raw: ctx,
         method: ctx.method,
         path: ctx.path,
         query: ctx.query,
@@ -58,13 +60,13 @@ export class KoaRestAppProvider extends RestAppProvider {
         on: ctx.req.on.bind(ctx.req)
       });
     }
-    return (ctx as any)._trvReq as Travetto.Request;
+    return (ctx as any)[TRV_KEY] as Travetto.Request;
   }
 
   getResponse(ctx: koa.ParameterizedContext) {
-    if (!(ctx as any)._trvRes) {
-      (ctx as any)._trvRes = ProviderUtil.decorateResponse({
-        _raw: ctx,
+    if (!(ctx as any)[TRV_KEY]) {
+      (ctx as any)[TRV_KEY] = ProviderUtil.decorateResponse({
+        __raw: ctx,
         get headersSent() {
           return ctx.headerSent;
         },
@@ -95,7 +97,7 @@ export class KoaRestAppProvider extends RestAppProvider {
         cookie: ctx.cookies.set.bind(ctx.cookies),
       });
     }
-    return (ctx as any)._trvRes as Travetto.Response;
+    return (ctx as any)[TRV_KEY] as Travetto.Response;
   }
 
   async unregisterController(config: ControllerConfig) {

@@ -6,18 +6,18 @@ import { CommandConfig } from './types';
 
 export class CommandService {
 
-  private static _hasDocker: boolean;
+  private static hasDocker: boolean;
 
   static async dockerAvailable() {
-    if (this._hasDocker === undefined && !Env.isTrue('NO_DOCKER')) { // Check for docker existence
+    if (this.hasDocker === undefined && !Env.isTrue('NO_DOCKER')) { // Check for docker existence
       const { result: prom } = Exec.spawn('docker', ['ps']);
-      this._hasDocker = (await prom).valid;
+      this.hasDocker = (await prom).valid;
     }
-    return this._hasDocker;
+    return this.hasDocker;
   }
 
-  _runContainer: Promise<DockerContainer | undefined>;
-  _execContainer: Promise<DockerContainer | undefined>;
+  runContainer: Promise<DockerContainer | undefined>;
+  execContainer: Promise<DockerContainer | undefined>;
   config: CommandConfig;
 
   constructor(config: Partial<CommandConfig>) {
@@ -30,7 +30,7 @@ export class CommandService {
     };
   }
 
-  async _getContainer() {
+  async getContainer(): Promise<DockerContainer | undefined> {
     const { localCheck } = this.config;
 
     const useLocal = await (Array.isArray(localCheck) ?
@@ -47,11 +47,11 @@ export class CommandService {
   }
 
   getRunContainer() {
-    return this._runContainer = this._runContainer || this._getContainer();
+    return this.runContainer = this.runContainer || this.getContainer();
   }
 
   getExecContainer() {
-    return this._execContainer = this._execContainer || this._getContainer().then(async c => {
+    return this.execContainer = this.execContainer || this.getContainer().then(async c => {
       if (c) {
         await c.create();
         await c.start();

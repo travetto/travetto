@@ -12,7 +12,7 @@ export class Shutdown {
   private static shutdownCode = -1;
   private static unhandled: UnhandledHandler[] = [];
 
-  private static async _getAvailableListeners(exitCode: number) {
+  private static async getAvailableListeners(exitCode: number) {
     const promises: Promise<any>[] = [];
 
     // Get valid listeners depending on lifecycle
@@ -43,7 +43,7 @@ export class Shutdown {
     return promises;
   }
 
-  private static async _execute(exitCode: number = 0, err?: any) {
+  private static async executeAsync(exitCode: number = 0, err?: any) {
 
     if (this.shutdownCode > 0) { // Killed twice
       if (exitCode > 0) { // Handle force kill
@@ -60,7 +60,7 @@ export class Shutdown {
         Env.error(err);
       }
 
-      const promises = await this._getAvailableListeners(exitCode);
+      const promises = await this.getAvailableListeners(exitCode);
 
       if (promises.length) {
         const finalRun = Promise.race([
@@ -80,7 +80,7 @@ export class Shutdown {
   }
 
   static execute(exitCode: number = 0, err?: any) {
-    this._execute(exitCode, err);
+    this.executeAsync(exitCode, err); // Fire and forget
   }
 
   static register() {

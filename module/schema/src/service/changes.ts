@@ -45,11 +45,11 @@ export class $SchemaChangeListener extends EventEmitter {
   }
 
   trackSchemaDependency(src: Class, parent: Class, path: string[], config: ClassConfig) {
-    const _id = id(src);
-    if (!this.mapping.has(_id)) {
-      this.mapping.set(_id, new Map());
+    const idValue = id(src);
+    if (!this.mapping.has(idValue)) {
+      this.mapping.set(idValue, new Map());
     }
-    this.mapping.get(_id)!.set(id(parent), { path, config });
+    this.mapping.get(idValue)!.set(id(parent), { path, config });
   }
 
   emitSchemaChanges({ cls, changes }: FieldChangeEvent) {

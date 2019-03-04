@@ -23,9 +23,7 @@ export class PoolExecTest {
       WorkUtil.spawnedWorker<string>({
         command: FsUtil.resolveUnix(__dirname, 'simple.child-launcher.js'),
         fork: true,
-        async init(channel) {
-          return channel.listenOnce('ready');
-        },
+        init: channel => channel.listenOnce('ready'),
         async execute(channel, inp) {
           const res = channel.listenOnce('response');
           channel.send('request', { data: inp });

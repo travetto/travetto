@@ -23,7 +23,7 @@ export abstract class Registry implements ChangeSource<Class> {
     }
   }
 
-  protected async _init(): Promise<any> {
+  protected async runInit(): Promise<any> {
     try {
       this.resolved = false;
 
@@ -57,7 +57,7 @@ export abstract class Registry implements ChangeSource<Class> {
 
   async init(): Promise<any> {
     if (!this.initialized) {
-      this.initialized = this._init();
+      this.initialized = this.runInit();
     }
     return this.initialized;
   }

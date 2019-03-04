@@ -21,7 +21,7 @@ function moduleLoaderHandler(request, parent) {
 
   const mod = ogModuleLoad.apply(null, [request, parent]);
 
-  if (!parent.loaded && (!mod || !mod._$TRV)) {
+  if (!parent.loaded && (!mod || !mod.__$TRV)) {
     let p;
     try {
       // @ts-ignore

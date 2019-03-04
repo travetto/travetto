@@ -72,7 +72,7 @@ const FsUtil = {
     // Drop typescript import, and use global. Great speedup;
     fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript';?/g, '');
 
-    return `${fileContents};\nexport const _$TRV = 1;`;
+    return `${fileContents};\nexport const __$TRV = 1;`;
   },
   resolveFrameworkDevFile: (pth) => {
     if (pth.includes('@travetto')) {

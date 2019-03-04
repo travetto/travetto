@@ -22,7 +22,7 @@ function toList<T>(items: T | T[] | Set<T> | undefined) {
 
 export class Util {
 
-  private static _deepAssign(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose') {
+  private static deepAssignRaw(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;
     const isArrA = Array.isArray(a);
@@ -47,7 +47,7 @@ export class Util {
       if (isArrB) { // Arrays
         ret = a; // Write onto A
         for (let i = 0; i < b.length; i++) {
-          ret[i] = Util._deepAssign(ret[i], b[i], mode);
+          ret[i] = Util.deepAssignRaw(ret[i], b[i], mode);
         }
       } else if (isSimpB) { // Scalars
         const match = typeof a === typeof b;
@@ -70,7 +70,7 @@ export class Util {
         ret = a;
 
         for (const key of Object.keys(b)) {
-          ret[key] = Util._deepAssign(ret[key], b[key], mode);
+          ret[key] = Util.deepAssignRaw(ret[key], b[key], mode);
         }
       }
     }
@@ -111,7 +111,7 @@ export class Util {
     if (!a || Util.isSimple(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
     }
-    return Util._deepAssign(a, b, mode) as T & U;
+    return Util.deepAssignRaw(a, b, mode) as T & U;
   }
 
   static throttle<T, U, V>(fn: (a: T, b: U) => V, threshold?: number): (a: T, b: U) => V;

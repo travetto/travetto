@@ -67,10 +67,10 @@ export type PropWhereClause<T> = {
               (T[P] extends (object | undefined) ? PropWhereClause<RetainFields<T[P]>> : never)))))));
 };
 
-export type _WhereClause<T> =
-  ({ $and: _WhereClause<T>[]; } & { [P in keyof T]?: never }) |
-  ({ $or: _WhereClause<T>[]; } & { [P in keyof T]?: never }) |
-  ({ $not: _WhereClause<T>; } & { [P in keyof T]?: never }) |
+export type WhereClauseRaw<T> =
+  ({ $and: WhereClauseRaw<T>[]; } & { [P in keyof T]?: never }) |
+  ({ $or: WhereClauseRaw<T>[]; } & { [P in keyof T]?: never }) |
+  ({ $not: WhereClauseRaw<T>; } & { [P in keyof T]?: never }) |
   (PropWhereClause<T> & { $and?: never; $or?: never; $not?: never });
 
-export type WhereClause<T> = _WhereClause<RetainFields<T>>;
+export type WhereClause<T> = WhereClauseRaw<RetainFields<T>>;

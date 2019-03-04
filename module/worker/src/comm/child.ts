@@ -15,8 +15,8 @@ export class ChildCommChannel<U extends CommEvent = CommEvent> extends ProcessCo
     }
   }
 
-  destroy() {
-    super.destroy();
+  async destroy() {
+    await super.destroy();
     if (this.idle) {
       this.idle.stop();
     }

@@ -17,6 +17,7 @@ export class CompilerUtil {
     );
     out.options.importHelpers = true;
     out.options.noEmitOnError = !Env.watch;
+    out.options.noErrorTruncation = true;
     out.options.moduleResolution = ts.ModuleResolutionKind.NodeJs;
 
     return out.options;

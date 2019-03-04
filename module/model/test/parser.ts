@@ -48,7 +48,7 @@ export class QueryStringTest {
 
   @Test('Parser')
   async parseSimple() {
-    const res = QueryLanguageParser.parse('A == 5 and B == 6 or C == 7 and d == 8 or e == 10');
+    const res = QueryLanguageParser.parseToQuery('A == 5 and B == 6 or C == 7 and d == 8 or e == 10');
     assert.deepStrictEqual(res, {
       $or: [
         {
@@ -70,7 +70,7 @@ export class QueryStringTest {
 
   @Test('Parse Complex Boolean')
   async parseComplexBoolean() {
-    const res2 = QueryLanguageParser.parse('A == 5 and (B == 6 or C == 7 and G == 1) and d == 8 or e == 10');
+    const res2 = QueryLanguageParser.parseToQuery('A == 5 and (B == 6 or C == 7 and G == 1) and d == 8 or e == 10');
     assert.deepStrictEqual(res2, {
       $or: [
         {
@@ -101,7 +101,7 @@ export class QueryStringTest {
 
   @Test('Parse Negation')
   async parseNegation() {
-    const res2 = QueryLanguageParser.parse('A == 5 and NOT B == 6');
+    const res2 = QueryLanguageParser.parseToQuery('A == 5 and NOT B == 6');
     assert.deepStrictEqual(res2, {
       $and: [
         { A: { $eq: 5 } },
@@ -112,7 +112,7 @@ export class QueryStringTest {
 
   @Test('Parse Dotted Fields')
   async parseFields() {
-    const res2 = QueryLanguageParser.parse('A.b.c == 5 and (NOT B.z == 6.2 OR c == /a/)');
+    const res2 = QueryLanguageParser.parseToQuery('A.b.c == 5 and (NOT B.z == 6.2 OR c == /a/)');
     assert.deepStrictEqual(res2, {
       $and: [
         { A: { b: { c: { $eq: 5 } } } },
@@ -128,22 +128,22 @@ export class QueryStringTest {
 
   @Test('Parse Unique Outputs')
   async parseUnique() {
-    const res = QueryLanguageParser.parse('a.b.c in [1,2,3]');
+    const res = QueryLanguageParser.parseToQuery('a.b.c in [1,2,3]');
     assert.deepStrictEqual(res, {
       a: { b: { c: { $in: [1, 2, 3] } } }
     } as any as WhereClause<any>);
 
-    const res3 = QueryLanguageParser.parse('a.b.c not-in [1,2,3]');
+    const res3 = QueryLanguageParser.parseToQuery('a.b.c not-in [1,2,3]');
     assert.deepStrictEqual(res3, {
       a: { b: { c: { $nin: [1, 2, 3] } } }
     } as any as WhereClause<any>);
 
-    const res1 = QueryLanguageParser.parse('a.b.c == null');
+    const res1 = QueryLanguageParser.parseToQuery('a.b.c == null');
     assert.deepStrictEqual(res1, {
       a: { b: { c: { $exists: false } } }
     } as any as WhereClause<any>);
 
-    const res2 = QueryLanguageParser.parse('a.b.c != null');
+    const res2 = QueryLanguageParser.parseToQuery('a.b.c != null');
     assert.deepStrictEqual(res2, {
       a: { b: { c: { $exists: true } } }
     } as any as WhereClause<any>);
@@ -151,7 +151,7 @@ export class QueryStringTest {
 
   @Test('Parse complex')
   async parseComplex() {
-    const res = QueryLanguageParser.parse(
+    const res = QueryLanguageParser.parseToQuery(
       `user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')`);
     assert(res === {
       $and: [
@@ -168,12 +168,12 @@ export class QueryStringTest {
 
   @Test('Parse Regex')
   async parseRegex() {
-    const res = QueryLanguageParser.parse(`user.role ~ /^admin/`);
+    const res = QueryLanguageParser.parseToQuery(`user.role ~ /^admin/`);
     assert(res === { user: { role: { $regex: /^admin/ } } });
     assert(res.user.role.$regex instanceof RegExp);
     assert(res.user.role.$regex.toString() === '/^admin/');
 
-    const res2 = QueryLanguageParser.parse(`user.role ~ 'admin'`);
+    const res2 = QueryLanguageParser.parseToQuery(`user.role ~ 'admin'`);
     assert(res2 === { user: { role: { $regex: /^admin/ } } });
     assert(res2.user.role.$regex instanceof RegExp);
     assert(res2.user.role.$regex.toString() === '/^admin/');
