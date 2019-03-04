@@ -12,7 +12,7 @@ const fsStat = util.promisify(fs.stat);
 const fsReadFile = util.promisify(fs.readFile);
 
 export class $ResourceManager {
-  private _cache: { [key: string]: string } = {};
+  private cache: { [key: string]: string } = {};
 
   private paths: string[] = [];
 
@@ -34,12 +34,12 @@ export class $ResourceManager {
 
   async getAbsolutePath(rel: string) {
     await this.find(rel);
-    return this._cache[rel];
+    return this.cache[rel];
   }
 
   getAbsolutePathSync(rel: string) {
     this.findSync(rel);
-    return this._cache[rel];
+    return this.cache[rel];
   }
 
   getPaths() {
@@ -54,14 +54,14 @@ export class $ResourceManager {
     if (pth.startsWith('/')) {
       pth = pth.substring(1);
     }
-    if (pth in this._cache) {
-      return this._cache[pth];
+    if (pth in this.cache) {
+      return this.cache[pth];
     }
 
     for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
       try {
         await fsStat(f);
-        return this._cache[pth] = f;
+        return this.cache[pth] = f;
       } catch { }
     }
 
@@ -72,14 +72,14 @@ export class $ResourceManager {
     if (pth.startsWith('/')) {
       pth = pth.substring(1);
     }
-    if (pth in this._cache) {
-      return this._cache[pth];
+    if (pth in this.cache) {
+      return this.cache[pth];
     }
 
     for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
       try {
         fs.statSync(f);
-        return this._cache[pth] = f;
+        return this.cache[pth] = f;
       } catch { }
     }
 

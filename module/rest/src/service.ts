@@ -3,12 +3,12 @@ import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
 
 import { RestConfig } from './config';
-import { RestAppProvider, RestInterceptor, RestInterceptorSet } from './types';
+import { RestApp, RestInterceptor, RestInterceptorSet } from './types';
 import { ControllerRegistry } from './registry';
 import { EndpointUtil } from './util/endpoint-util';
 
 @Injectable()
-export class RestApp {
+export class RestServer {
 
   @Inject()
   private interceptorSet: RestInterceptorSet;
@@ -17,7 +17,7 @@ export class RestApp {
   private config: RestConfig;
 
   constructor(
-    public provider: RestAppProvider<any>,
+    public provider: RestApp<any>,
   ) { }
 
   private async registerController(c: Class, interceptors: RestInterceptor[] = []) {

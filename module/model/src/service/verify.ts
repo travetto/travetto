@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry, ValidationError, ValidationErrorItem } from '@travetto/schema';
+import { SchemaRegistry, ValidationResultError, ValidationError } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Util } from '@travetto/base';
 
@@ -234,7 +234,7 @@ export class QueryVerifierService {
   }
 
   verify<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>) {
-    const errors: ValidationErrorItem[] = [];
+    const errors: ValidationError[] = [];
 
     const state = {
       path: '',
@@ -267,7 +267,7 @@ export class QueryVerifierService {
     }
 
     if (errors.length) {
-      throw new ValidationError(errors);
+      throw new ValidationResultError(errors);
     }
   }
 }

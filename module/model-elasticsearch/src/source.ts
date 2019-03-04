@@ -523,13 +523,14 @@ export class ElasticsearchModelSource extends ModelSource {
       }
 
     }
-    const res = await this.client.index({
+    await this.client.index({
       ...this.getIdentity(cls),
       id,
       opType: 'index',
       refresh: true,
       body: o
     });
+
     return this.getById(cls, id);
   }
 
@@ -580,8 +581,8 @@ export class ElasticsearchModelSource extends ModelSource {
 
     const body: es.BulkIndexDocumentsParams['body'] = operations.reduce((acc, op) => {
 
-      const _ident = this.getIdentity((op.upsert || op.delete || op.insert || op.update || { constructor: cls }).constructor as Class);
-      const ident = { _index: _ident.index, _type: _ident.type };
+      const esIdent = this.getIdentity((op.upsert || op.delete || op.insert || op.update || { constructor: cls }).constructor as Class);
+      const ident = { _index: esIdent.index, _type: esIdent.type };
 
       if (op.delete) {
         acc.push({ ['delete']: { ...ident, _id: op.delete.id } });

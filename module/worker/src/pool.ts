@@ -8,9 +8,9 @@ import { InputSource } from './input/types';
 export interface Worker<X> {
   active: boolean;
   id: any;
-  init?(): any;
+  init?(): Promise<any>;
   execute(input: X): Promise<any>;
-  destroy(): any;
+  destroy(): Promise<any>;
   release?(): any;
 }
 
@@ -19,6 +19,7 @@ export class WorkPool<X, T extends Worker<X>> {
   static DEFAULT_SIZE = Math.min(os.cpus().length - 1, 4);
 
   private pool: gp.Pool<T>;
+  private pendingAcquires = 0;
   private errors: Error[] = [];
 
   constructor(getWorker: () => Promise<T> | T, opts?: gp.Options) {
@@ -31,9 +32,13 @@ export class WorkPool<X, T extends Worker<X>> {
 
     let createErrors = 0;
 
+    // tslint:disable-next-line: no-this-assignment
+    const self = this;
+
     this.pool = gp.createPool({
-      create: async () => {
+      async create() {
         try {
+          self.pendingAcquires += 1;
           const res = await getWorker();
 
           if (res.init) {
@@ -49,6 +54,8 @@ export class WorkPool<X, T extends Worker<X>> {
             process.exit(1);
           }
           throw e;
+        } finally {
+          self.pendingAcquires -= 1;
         }
       },
       async destroy(x: T) {
@@ -80,16 +87,15 @@ export class WorkPool<X, T extends Worker<X>> {
   }
 
   async process(src: InputSource<X>) {
-    const pending = new Set();
+    const pending = new Set<Promise<any>>();
 
     while (src.hasNext()) {
       const worker = (await this.pool.acquire())!;
       const nextInput = await src.next();
-      const release = this.release.bind(this, worker);
 
       const completion = worker.execute(nextInput)
         .catch(err => this.errors.push(err)) // Catch error
-        .then(release, release);
+        .finally(() => this.release(worker));
 
       completion.finally(() => pending.delete(completion));
 
@@ -104,6 +110,9 @@ export class WorkPool<X, T extends Worker<X>> {
   }
 
   async shutdown() {
+    while (this.pendingAcquires) {
+      await new Promise(r => setTimeout(r, 10));
+    }
     await this.pool.drain();
     await this.pool.clear();
   }

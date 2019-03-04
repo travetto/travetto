@@ -1,5 +1,4 @@
-import { Identity } from '@travetto/auth';
-import { Principal } from '../../auth/src/types';
+import { Identity, Principal } from '@travetto/auth';
 
 export interface AuthRequestAdapter {
   principal: Principal | undefined;

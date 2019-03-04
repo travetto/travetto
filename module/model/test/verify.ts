@@ -2,13 +2,10 @@ import * as assert from 'assert';
 
 import { Class } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { ValidationError, Schema, SchemaRegistry } from '@travetto/schema';
+import { ValidationResultError, Schema, SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 
-import { QueryVerifierService } from '../src/service/verify';
-import { RetainFields } from '../src/model/where-clause';
-import { Model, ModelQuery, ModelCore, BaseModel } from '../';
-import { Query } from '../src/model/query';
+import { Model, ModelQuery, ModelCore, BaseModel, QueryVerifierService, Query, RetainFields } from '../';
 import { QueryLanguageParser } from '../src/query-lang/parser';
 
 @Schema()
@@ -54,7 +51,7 @@ export class VerifyTest {
     };
 
     assert.doesNotThrow(() => test(ModelUser));
-    assert.throws(() => test(User), ValidationError);
+    assert.throws(() => test(User), ValidationResultError);
   }
 
   @Test()
@@ -83,17 +80,17 @@ export class VerifyTest {
 
     const test = <T>(cls: Class<T>) => {
       const t: Query<ModelCore> = {
-        where: QueryLanguageParser.parse('id == "5"')
+        where: QueryLanguageParser.parseToQuery('id == "5"')
       };
       verifier.verify(cls, t as Query<T>);
     };
 
     assert.doesNotThrow(() => test(ModelUser));
-    assert.throws(() => test(User), ValidationError);
+    assert.throws(() => test(User), ValidationResultError);
 
     const test2 = <T>(cls: Class<T>) => {
       const t: Query<ModelCore> = {
-        where: QueryLanguageParser.parse('email ~ /bob.*/')
+        where: QueryLanguageParser.parseToQuery('email ~ /bob.*/')
       };
       verifier.verify(cls, t as Query<T>);
     };

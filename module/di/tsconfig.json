@@ -3,6 +3,8 @@
     "module": "commonjs",
     "target": "es2018",
     "strict": true,
+    "noUnusedLocals": true,
+    "noFallthroughCasesInSwitch": true,
     "strictPropertyInitialization": false,
     "sourceMap": true,
     "lib": [

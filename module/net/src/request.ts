@@ -14,7 +14,7 @@ interface HttpClient {
 }
 
 type ExecArgs = http.RequestOptions & { url: string };
-type _ExecArgs = ExecArgs & { payload?: any };
+type RawExecArgs = ExecArgs & { payload?: any };
 
 type ResponseHandler<T> = (msg: http.IncomingMessage) => Promise<T>;
 
@@ -38,10 +38,10 @@ export class HttpRequest {
     return new AppError(config.message, finalStatus, config.payload);
   }
 
-  private static async _exec(opts: _ExecArgs, retry?: number): Promise<string>;
-  private static async _exec<T>(opts: _ExecArgs & { binary: true }, retry?: number): Promise<Buffer>;
-  private static async _exec<T>(opts: _ExecArgs & { responseHandler: ResponseHandler<T> }, retry?: number): Promise<T>;
-  private static async _exec<T = any>(inOpts: _ExecArgs & { responseHandler?: ResponseHandler<T> }, retry = 0): Promise<string | Buffer | T> {
+  private static async rawExec(opts: RawExecArgs, retry?: number): Promise<string>;
+  private static async rawExec<T>(opts: RawExecArgs & { binary: true }, retry?: number): Promise<Buffer>;
+  private static async rawExec<T>(opts: RawExecArgs & { responseHandler: ResponseHandler<T> }, retry?: number): Promise<T>;
+  private static async rawExec<T = any>(inOpts: RawExecArgs & { responseHandler?: ResponseHandler<T> }, retry = 0): Promise<string | Buffer | T> {
     const { client, payload, responseHandler, binary, opts } = this.requestOpts(inOpts);
 
     try {
@@ -55,7 +55,7 @@ export class HttpRequest {
       // Handle redirect
       if (e.status && e.status >= 300 && e.status < 400 && e.headers.location) {
         if (retry < 5) {
-          return this._exec({ ...inOpts, url: e.headers.location }, retry + 1);
+          return this.rawExec({ ...inOpts, url: e.headers.location }, retry + 1);
         } else {
           throw new Error('Maximum number of redirects attempted');
         }
@@ -64,7 +64,7 @@ export class HttpRequest {
     }
   }
 
-  static requestOpts<T>(inOpts: _ExecArgs & { binary?: boolean, responseHandler?: ResponseHandler<T> }) {
+  static requestOpts<T>(inOpts: RawExecArgs & { binary?: boolean, responseHandler?: ResponseHandler<T> }) {
     const { url: requestUrl, payload: inPayload, responseHandler, ...rest } = inOpts;
     const { hostname: host, port, pathname: path, username, password, searchParams, protocol } = new url.URL(requestUrl);
 
@@ -107,8 +107,8 @@ export class HttpRequest {
     return { client, payload, responseHandler, opts, binary: inOpts.binary };
   }
 
-  static configJSON(opts: _ExecArgs) {
-    const out: _ExecArgs = { ...opts };
+  static configJSON(opts: RawExecArgs) {
+    const out: RawExecArgs = { ...opts };
 
     if (!out.headers) {
       out.headers = {};
@@ -176,11 +176,11 @@ export class HttpRequest {
   static async exec(opts: ExecArgs & { binary: true }, payload?: any): Promise<Buffer>;
   static async exec<T>(opts: ExecArgs & { responseHandler: ResponseHandler<T> }, payload?: any): Promise<T>;
   static async exec<T>(opts: ExecArgs & { binary?: boolean, responseHandler?: ResponseHandler<T> }, payload?: any): Promise<string | Buffer | T> {
-    return await this._exec({ ...opts, payload });
+    return await this.rawExec({ ...opts, payload });
   }
 
   static async execJSON<T, U = any>(opts: ExecArgs, payload?: U): Promise<T> {
-    const res = await this._exec(this.configJSON({ ...opts, payload }));
+    const res = await this.rawExec(this.configJSON({ ...opts, payload }));
     return JSON.parse(res) as T;
   }
 

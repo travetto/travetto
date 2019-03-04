@@ -4,7 +4,7 @@ export const init = {
   before: 'config',
   action: async () => {
     const { Logger } = await import('../src/service');
-    Logger._init();
+    Logger.init();
     const { Env } = await import('@travetto/base');
     Env.error = (msg: string, ...args: any[]) => Logger.log('error', msg, ...args);
   }

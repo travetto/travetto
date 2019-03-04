@@ -14,7 +14,7 @@ export default class extends Generator {
     this.argument('name', { type: String, required: false });
   }
 
-  async _init() {
+  async init() {
     let name: string = (this.options as any).name;
 
     if (!name) {
@@ -45,7 +45,7 @@ export default class extends Generator {
     return context;
   }
 
-  async _getModules(context: Context) {
+  async getModules(context: Context) {
 
     const { modules } = await this.prompt([
       {
@@ -61,7 +61,7 @@ export default class extends Generator {
 
   }
 
-  async _getModuleImpls(context: Context) {
+  async getModuleImpls(context: Context) {
     const implPrompts = [];
 
     const modules = Object.keys(FEATURES) as (keyof typeof FEATURES)[];
@@ -91,7 +91,7 @@ export default class extends Generator {
     }
   }
 
-  async _templateFiles(context: Context) {
+  async templateFiles(context: Context) {
     const files = require(FsUtil.resolveUnix(this.sourceRoot(), 'listing.js')) as { [key: string]: { requires?: string[] } };
     for (const key of Object.keys(files)) {
       const conf = files[key];
@@ -111,11 +111,11 @@ export default class extends Generator {
   }
 
   async start() {
-    const context = await this._init();
+    const context = await this.init();
 
-    await this._getModules(context);
-    await this._getModuleImpls(context);
-    await this._templateFiles(context);
+    await this.getModules(context);
+    await this.getModuleImpls(context);
+    await this.templateFiles(context);
 
     await this.npmInstall();
     await this.npmInstall('@travetto/cli', { global: true });

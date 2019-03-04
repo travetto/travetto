@@ -4,7 +4,7 @@ import * as async_hooks from 'async_hooks';
 @Injectable()
 export class Context {
   threads = new Map<number, number>();
-  storage = new Map<number, any>();
+  storageState = new Map<number, any>();
   hooks: async_hooks.AsyncHook;
   active = 0;
 
@@ -38,33 +38,33 @@ export class Context {
     }
   }
 
-  _storage(val: any): void;
-  _storage(): any;
-  _storage(val?: any) {
+  storage(val: any): void;
+  storage(): any;
+  storage(val?: any) {
     const currId = async_hooks.executionAsyncId();
     const key = this.threads.get(currId)!;
     if (val) {
-      this.storage.set(key, val);
+      this.storageState.set(key, val);
     } else {
-      let obj = this.storage.get(key);
+      let obj = this.storageState.get(key);
       if (!obj) {
         obj = {};
-        this._storage(obj);
+        this.storage(obj);
       }
       return obj;
     }
   }
 
   clear() {
-    const obj = this._storage();
+    const obj = this.storage();
     const keys = Object.keys(obj);
     for (const k of keys) {
       delete obj[k];
     }
   }
 
-  get = () => this._storage();
-  set = (val: any) => this._storage(val);
+  get = () => this.storage();
+  set = (val: any) => this.storage(val);
 
   async run(fn: () => Promise<any>, init: any = {}) {
     if (!this.active) {
@@ -79,7 +79,7 @@ export class Context {
     let err;
 
     this.active += 1;
-    this.storage.set(runId, init);
+    this.storageState.set(runId, init);
     this.threads.set(runId, runId);
 
     try {
@@ -90,7 +90,7 @@ export class Context {
     }
 
     this.active -= 1;
-    this.storage.delete(runId);
+    this.storageState.delete(runId);
     this.threads.delete(runId);
 
     if (!this.active) {

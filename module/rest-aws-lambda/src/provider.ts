@@ -9,19 +9,19 @@ import * as awsServerlessExpress from 'aws-serverless-express';
 import * as awsServerlessExpressMiddleware from 'aws-serverless-express/middleware';
 
 import { ConfigLoader } from '@travetto/config';
-import { ControllerConfig, RestAppProvider } from '@travetto/rest';
+import { ControllerConfig, RestApp } from '@travetto/rest';
 
 import { RouteStack } from './types';
 import { AwsLambdaConfig } from './config';
 
-export class RestAwsLambdaAppProvider extends RestAppProvider<express.Application> {
+export class RestAwsLambdaAppProvider extends RestApp<express.Application> {
 
   private app: express.Application;
   private server: http.Server;
   private config: AwsLambdaConfig;
-  private _handler: (event: any, context: any) => void;
+  private handler: (event: any, context: any) => void;
 
-  get _raw() {
+  get raw() {
     return this.app;
   }
 
@@ -54,7 +54,7 @@ export class RestAwsLambdaAppProvider extends RestAppProvider<express.Applicatio
       this.executeInterceptors(req as any, res as any, next));
 
     this.server = awsServerlessExpress.createServer(this.app);
-    this._handler = awsServerlessExpress.proxy.bind(awsServerlessExpress, this.server) as any /** TODO: Typings seem off */;
+    this.handler = awsServerlessExpress.proxy.bind(awsServerlessExpress, this.server) as any /** TODO: Typings seem off */;
   }
 
   async unregisterController(config: ControllerConfig) {
@@ -80,11 +80,11 @@ export class RestAwsLambdaAppProvider extends RestAppProvider<express.Applicatio
   }
 
   async handle(event: any, context: any) {
-    if (!this._handler) {
+    if (!this.handler) {
       await this.init();
       this.listen();
     }
 
-    this._handler(event, context);
+    this.handler(event, context);
   }
 }

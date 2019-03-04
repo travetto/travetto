@@ -57,7 +57,7 @@ export class Watcher extends EventEmitter {
         if (err.code === 'ENOENT') {
           current = [];
         } else {
-          return this._emit('error', err);
+          return this.registryEmit('error', err);
         }
       }
 
@@ -76,8 +76,8 @@ export class Watcher extends EventEmitter {
           dir.children!.splice(dir.children!.indexOf(child), 1);
 
           if (ScanFs.isNotDir(child)) {
-            this._emit('removed', child);
-            this._emit('all', { event: 'removed', entry: child });
+            this.registryEmit('removed', child);
+            this.registryEmit('all', { event: 'removed', entry: child });
           }
         }
       }
@@ -101,15 +101,15 @@ export class Watcher extends EventEmitter {
           dir.children!.push(sub);
 
           if (ScanFs.isNotDir(sub)) {
-            this._emit('added', sub);
-            this._emit('all', { event: 'added', entry: sub });
+            this.registryEmit('added', sub);
+            this.registryEmit('all', { event: 'added', entry: sub });
           }
         }
       }
     });
   }
 
-  private _emit(type: string, payload?: any) {
+  private registryEmit(type: string, payload?: any) {
     if (!this.suppress) {
       console.trace('Watch Event', type, payload && payload.file);
       this.emit(type, payload);
@@ -157,8 +157,8 @@ export class Watcher extends EventEmitter {
         const stats = fs.lstatSync(entry.file);
         entry.stats = stats;
 
-        this._emit('changed', entry);
-        this._emit('all', { event: 'changed', entry });
+        this.registryEmit('changed', entry);
+        this.registryEmit('all', { event: 'changed', entry });
 
       } catch (e) {
         if (e.code === 'ENOENT') {
@@ -200,9 +200,9 @@ export class Watcher extends EventEmitter {
 
   handleError(err: Error & { code?: string }) {
     if (err.code === 'EMFILE') {
-      this._emit('error', new Error('EMFILE: Too many opened files.'));
+      this.registryEmit('error', new Error('EMFILE: Too many opened files.'));
     }
-    this._emit('error', err);
+    this.registryEmit('error', err);
   }
 
   close() {
@@ -218,7 +218,7 @@ export class Watcher extends EventEmitter {
     this.watched = new Map();
 
     setImmediate(() => {
-      this._emit('end');
+      this.registryEmit('end');
       this.removeAllListeners();
     });
   }

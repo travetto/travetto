@@ -6,31 +6,31 @@ import { CommEvent } from './types';
 
 export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, U extends CommEvent = CommEvent> {
 
-  public _proc: T;
+  public proc: T;
 
   constructor(proc: T) {
-    this._proc = proc;
+    this.proc = proc;
     console.trace(`[${this.id}] Constructed Execution`);
-  }
-
-  get id() {
-    return this._proc && this._proc.pid;
   }
 
   private get parentId() {
     return process.pid;
   }
 
+  get id() {
+    return this.proc && this.proc.pid;
+  }
+
   get active() {
-    return !!this._proc;
+    return !!this.proc;
   }
 
   send(eventType: string, data?: any) {
     if (Env.trace) {
       console.trace(`[${this.parentId}] Sending [${this.id}] ${eventType}`);
     }
-    if (this._proc.send) {
-      this._proc.send({ type: eventType, ...(data || {}) });
+    if (this.proc.send) {
+      this.proc.send({ type: eventType, ...(data || {}) });
     } else {
       throw new Error('this._proc.send was not defined');
     }
@@ -55,7 +55,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, U exten
   }
 
   removeListener(fn: (e: U) => any) {
-    this._proc.removeListener('message', fn);
+    this.proc.removeListener('message', fn);
   }
 
   listenFor(eventType: string, callback: (e: U, complete: Function) => any) {
@@ -88,23 +88,23 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, U exten
       }
     };
 
-    this._proc.on('message', fn);
+    this.proc.on('message', fn);
 
     return kill;
   }
 
-  destroy() {
-    if (this._proc) {
+  async destroy() {
+    if (this.proc) {
       console.trace(`[${this.parentId}] Killing [${this.id}]`);
     }
     this.release();
-    delete this._proc;
+    delete this.proc;
   }
 
   release() {
-    if (this._proc) {
+    if (this.proc) {
       console.trace(`[${this.parentId}] Released [${this.id}]`);
-      this._proc.removeAllListeners('message');
+      this.proc.removeAllListeners('message');
     }
   }
 }

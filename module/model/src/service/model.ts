@@ -108,7 +108,7 @@ export class ModelService implements IModelSource {
   }
 
   async getAllByQueryString<T extends ModelCore>(cls: Class<T>, query: PageableModelQueryStringQuery<T>) {
-    const where = QueryLanguageParser.parse(query.query);
+    const where = QueryLanguageParser.parseToQuery(query.query);
     const final = { where, ...query };
     return this.getAllByQuery(cls, final);
   }

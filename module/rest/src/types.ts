@@ -94,10 +94,10 @@ export class RestInterceptorSet {
   }
 }
 
-export abstract class RestAppProvider<T = any> {
+export abstract class RestApp<T = any> {
   interceptors: RestInterceptor[] = [];
 
-  abstract get _raw(): T;
+  abstract get raw(): T;
   abstract init(config: RestConfig): Promise<any>;
   abstract registerController(controller: ControllerConfig): Promise<any>;
   abstract unregisterController(controller: ControllerConfig): Promise<any>;

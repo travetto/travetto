@@ -2,9 +2,9 @@ import * as assert from 'assert';
 
 import { Schema, SchemaRegistry } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { WhereClause } from '@travetto/model/';
 
 import { ElasticsearchUtil } from '../src/util';
-import { WhereClause } from '../../model/src/model/where-clause';
 
 @Schema()
 class User {

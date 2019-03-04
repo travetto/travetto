@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
-import { Application, RestApp, RestConfig, RestAppProvider } from '@travetto/rest';
-import { ExpressRestAppProvider } from '../../src/provider';
+import { Application, RestServer, RestConfig, RestApp } from '@travetto/rest';
+import { ExpressRestApp } from '../../src/provider';
 
 @Application('sample', {
   description: 'Sample rest application'
@@ -8,18 +8,18 @@ import { ExpressRestAppProvider } from '../../src/provider';
 export class SampleApp {
 
   @InjectableFactory()
-  static getProvider(): RestAppProvider {
-    return new ExpressRestAppProvider();
+  static getProvider(): RestApp {
+    return new ExpressRestApp();
   }
 
   constructor(
-    private app: RestApp,
+    private server: RestServer,
     private config: RestConfig
   ) { }
 
   run(port = 3000, ssl = false, fast?: string, toggle?: 'on' | 'off') {
     this.config.port = port;
     this.config.ssl = ssl;
-    this.app.run();
+    this.server.run();
   }
 }

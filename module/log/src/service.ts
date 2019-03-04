@@ -8,9 +8,9 @@ class $Logger {
 
   private listeners: LogListener[] = [];
 
-  private _level: number = Env.trace ? LogLevels.trace : (Env.debug ? LogLevels.debug : LogLevels.info);
+  private level: number = Env.trace ? LogLevels.trace : (Env.debug ? LogLevels.debug : LogLevels.info);
 
-  _init() {
+  init() {
     // Base logger, for free
     const formatter = lineFormatter({
       colorize: (process.stdout.isTTY && !Env.isTrue('NO_COLOR')) || Env.isTrue('FORCE_COLOR')
@@ -55,7 +55,7 @@ class $Logger {
 
     event.level = (event.level! in LogLevels) ? event.level : 'info';
 
-    if (LogLevels[event.level!] < this._level) {
+    if (LogLevels[event.level!] < this.level) {
       return;
     }
 
@@ -77,7 +77,7 @@ class $Logger {
   }
 
   enabled(level: LogLevel): boolean {
-    return LogLevels[level] >= this._level;
+    return LogLevels[level] >= this.level;
   }
 }
 

@@ -1,7 +1,7 @@
 import { AuthContext } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
 
-export abstract class AuthSerializerProvider {
+export abstract class AuthContextSerializer {
   abstract serialize(req: Request, res: Response, context: AuthContext): Promise<void>;
   abstract deserialize(req: Request, res: Response): Promise<AuthContext>;
 }

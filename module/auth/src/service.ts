@@ -14,17 +14,17 @@ const EMPTY_SET = new Set<string>();
 export class AuthService {
 
   @Inject()
-  protected _context: Context;
+  protected contextProvider: Context;
 
   @Inject()
-  protected _principal: PrincipalProvider;
+  protected principalProvider: PrincipalProvider;
 
   get context(): AuthContext {
-    return (this._context.get() || {}).auth || {};
+    return (this.contextProvider.get() || {}).auth || {};
   }
 
   set context(ctx: AuthContext) {
-    this._context.get().auth = ctx;
+    this.contextProvider.get().auth = ctx;
   }
 
   get principal() {
@@ -50,7 +50,7 @@ export class AuthService {
   }
 
   async authorize(identity: Identity) {
-    const ctx = this.context = await this._principal.authorize(identity);
+    const ctx = this.context = await this.principalProvider.authorize(identity);
     ctx.principal = ctx.principal || ctx.identity;
     ctx.principal.permissions = ctx.principal.permissions || new Set<string>();
     ctx.principal.permissions.add(AUTH_PERM);

@@ -1,21 +1,21 @@
-import { Application, InjectableFactory, Inject } from '@travetto/di';
-import { RestApp, RestAppProvider } from '@travetto/rest';
-import { FastifyRestAppProvider } from '../../src/provider';
+import { Application, InjectableFactory } from '@travetto/di';
+import { RestServer, RestApp } from '@travetto/rest';
+import { FastifyRestApp } from '../../src/provider';
 import { RestConfig } from '@travetto/rest/src/config';
 
 @Application('sample')
 export class SampleApp {
 
   @InjectableFactory()
-  static getProvider(): RestAppProvider {
-    return new FastifyRestAppProvider();
+  static getProvider(): RestApp {
+    return new FastifyRestApp();
   }
 
-  constructor(private app: RestApp, private config: RestConfig) { }
+  constructor(private server: RestServer, private config: RestConfig) { }
 
   run() {
     this.config.port = 3000;
     this.config.ssl = false;
-    this.app.run();
+    this.server.run();
   }
 }

@@ -41,7 +41,7 @@ export class ClientGenerate {
     }
   }
 
-  async _start() {
+  async start() {
     await this.init();
 
     if (!this.running) {
@@ -67,7 +67,7 @@ export class ClientGenerate {
       throw new Error('Output format not set');
     }
 
-    await this._start();
+    await this.start();
 
     const spec = this.service.getSpec();
     const specFile = FsUtil.joinUnix(this.config.output, 'spec.json');

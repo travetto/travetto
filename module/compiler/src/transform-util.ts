@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { dirname, } from 'path';
 
-import { AppInfo, Env, FsUtil } from '@travetto/base';
+import { AppInfo, FsUtil } from '@travetto/base';
 
 const stringHash = require('string-hash');
 

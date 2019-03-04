@@ -3,7 +3,7 @@ import * as exp from 'express-serve-static-core';
 declare global {
   namespace Travetto {
     interface Request {
-      _raw?: any;
+      __raw?: any;
       method?: string;
       path: string;
       url: string;
@@ -21,7 +21,7 @@ declare global {
     }
 
     interface Response {
-      _raw?: any;
+      __raw?: any;
       statusCode: number;
       status(code?: number): (number | undefined);
       headersSent: boolean;

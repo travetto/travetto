@@ -8,6 +8,3 @@ exec.listenFor('request', data => {
 });
 
 exec.send('ready');
-
-const heartbeat = () => setTimeout(heartbeat, 5000);
-heartbeat();

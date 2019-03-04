@@ -4,17 +4,17 @@ import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
 
 import { ConfigLoader } from '@travetto/config';
-import { RestConfig, ControllerConfig, RestAppProvider } from '@travetto/rest';
+import { RestConfig, ControllerConfig, RestApp } from '@travetto/rest';
 
 import { RouteStack } from './types';
 import { ExpressConfig } from './config';
 
-export class ExpressRestAppProvider extends RestAppProvider<express.Application> {
+export class ExpressRestApp extends RestApp<express.Application> {
 
   private app: express.Application;
   private config: ExpressConfig;
 
-  get _raw() {
+  get raw() {
     return this.app;
   }
 

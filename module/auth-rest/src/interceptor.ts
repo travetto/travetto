@@ -6,7 +6,7 @@ import { AuthService } from '@travetto/auth';
 
 import { ERR_INVALID_AUTH } from './errors';
 import { IdentityProvider } from './provider';
-import { AuthSerializerProvider } from './serializer';
+import { AuthContextSerializer } from './serializer';
 
 @Injectable()
 export class AuthInterceptor extends RestInterceptor {
@@ -15,7 +15,7 @@ export class AuthInterceptor extends RestInterceptor {
 
   constructor(
     private authService: AuthService,
-    protected _serializer: AuthSerializerProvider
+    private serializer: AuthContextSerializer
   ) {
     super();
   }
@@ -52,7 +52,7 @@ export class AuthInterceptor extends RestInterceptor {
   }
 
   async restore(req: Request, res: Response): Promise<void> {
-    const ctx = await this._serializer.deserialize(req, res);
+    const ctx = await this.serializer.deserialize(req, res);
     if (ctx) {
       this.authService.context = ctx;
     }

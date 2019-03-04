@@ -20,7 +20,7 @@ export function init() {
   for (const dir of ['module']) {
     const base = `${Util.ROOT}/${dir}`;
     for (const mod of fs.readdirSync(base)) {
-      Finalize.finalize(mod, base, true);
+      Finalize.finalize(mod, base, /^(yes|1|true|on)$/.test(`${process.argv[2]}`));
     }
   }
 }

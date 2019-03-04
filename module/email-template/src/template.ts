@@ -23,13 +23,13 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
   @Inject()
   private config: MailTemplateConfig;
 
-  private _compiledSass: Promise<string>;
-  private _templatesLoaded: boolean;
-  private _templates: { [key: string]: string } = {};
+  private compiledSass: Promise<string>;
+  private templatesLoaded: boolean;
+  private templates: { [key: string]: string } = {};
 
-  get compiledSass(): Promise<string> {
-    if (!this._compiledSass) {
-      this._compiledSass = (async () => {
+  get compiledStyles(): Promise<string> {
+    if (!this.compiledSass) {
+      this.compiledSass = (async () => {
         const partial = '/email/app.scss';
         const full = FsUtil.resolveUnix(__dirname, `../resources/${partial}`);
 
@@ -43,12 +43,12 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
         }
       })();
     }
-    return this._compiledSass;
+    return this.compiledSass;
   }
 
   private async initTemplates() {
-    if (!this._templatesLoaded) {
-      this._templatesLoaded = true;
+    if (!this.templatesLoaded) {
+      this.templatesLoaded = true;
       for (const f of await ResourceManager.findAllByExtension('.html', 'email')) {
         await this.registerTemplate(f, await ResourceManager.read(f));
       }
@@ -57,7 +57,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
   registerTemplate(name: string, partial: string | Buffer) {
     console.debug('Registering template', name);
-    this._templates[name] = partial.toString();
+    this.templates[name] = partial.toString();
   }
 
   async getImage(rel: string) {
@@ -74,7 +74,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
   }
 
   get wrapper() {
-    return this._templates['email/wrapper.html'];
+    return this.templates['email/wrapper.html'];
   }
 
   async compile(tpl: string) {
@@ -82,11 +82,11 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     tpl = TemplateUtil.wrapWithBody(tpl, this.wrapper);
 
     // Resolve mustache partials
-    tpl = await TemplateUtil.resolveNestedTemplates(tpl, await this._templates);
+    tpl = await TemplateUtil.resolveNestedTemplates(tpl, await this.templates);
 
     let html = Inky.render(tpl);
 
-    const css = await this.compiledSass;
+    const css = await this.compiledStyles;
     const styles = [`<style>\n${css}\n</style>`];
 
     html = html.replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (all) => {
@@ -110,7 +110,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
   async getCompiled(template: string) {
     if (!this.cache[template]) {
       await this.initTemplates();
-      this.cache[template] = await this.compile(this._templates[template] || template); // Handle if template is not a name
+      this.cache[template] = await this.compile(this.templates[template] || template); // Handle if template is not a name
     }
     return this.cache[template];
   }

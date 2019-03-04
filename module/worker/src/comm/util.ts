@@ -62,16 +62,16 @@ export class CommUtil {
       (finalOpts as any).shell = false;
     }
 
-    const { process: sub, result: complete } = op(command, args, finalOpts);
+    const result = op(command, args, finalOpts);
 
-    console.trace(`[${process.pid}] Launched ${sub.pid}`);
+    console.trace(`[${process.pid}] Launched ${result.process.pid}`);
 
-    if (Env.isTrue('DEBUG')) {
-      sub.stdout.pipe(process.stdout);
-      sub.stderr.pipe(process.stderr);
+    if (Env.debug) {
+      result.process.stdout.pipe(process.stdout);
+      result.process.stderr.pipe(process.stderr);
     }
 
-    return { process: sub, result: complete };
+    return result;
   }
 
   static killSpawnedProcess(proc: ChildProcess) {

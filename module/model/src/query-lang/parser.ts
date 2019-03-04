@@ -3,7 +3,7 @@ import { Node, Token, ClauseNode, UnaryNode, Literal, GroupNode, OP_TRANSLATION 
 
 export class QueryLanguageParser {
 
-  static _handleClause(nodes: (Node | Token)[]) {
+  static handleClause(nodes: (Node | Token)[]) {
     const val = nodes.pop()! as Token;
     const op = nodes.pop()! as Token;
     const ident = nodes.pop()! as Token;
@@ -28,11 +28,11 @@ export class QueryLanguageParser {
       value: val.value as any
     } as ClauseNode);
 
-    this._unary(nodes);
-    this._condense(nodes, 'and');
+    this.unary(nodes);
+    this.condense(nodes, 'and');
   }
 
-  static _condense(nodes: (Node | Token)[], op: string) {
+  static condense(nodes: (Node | Token)[], op: string) {
     let second = nodes[nodes.length - 2];
     while (second && second.type && second.type === 'boolean' && (second as any).value === op) {
       const right = nodes.pop()!;
@@ -53,7 +53,7 @@ export class QueryLanguageParser {
     }
   }
 
-  static _unary(nodes: (Node | Token)[]) {
+  static unary(nodes: (Node | Token)[]) {
     const second = nodes[nodes.length - 2] as Token;
     if (second && second.type === 'unary' && second.value === 'not') {
       const node = nodes.pop()!;
@@ -66,7 +66,7 @@ export class QueryLanguageParser {
     }
   }
 
-  static _parse(tokens: Token[], pos: number = 0): Node {
+  static parse(tokens: Token[], pos: number = 0): Node {
 
     let top: (Node | Token)[] = [];
     const stack: (Node | Token)[][] = [top];
@@ -81,10 +81,10 @@ export class QueryLanguageParser {
           } else {
             const group = stack.pop()!;
             top = stack[stack.length - 1];
-            this._condense(group, 'or');
+            this.condense(group, 'or');
             top.push(group[0]);
-            this._unary(top);
-            this._condense(top, 'and');
+            this.unary(top);
+            this.condense(top, 'and');
           }
           break;
         case 'array':
@@ -93,7 +93,7 @@ export class QueryLanguageParser {
           } else {
             top.push({ type: 'literal', value: arr } as any);
             arr = undefined;
-            this._handleClause(top);
+            this.handleClause(top);
           }
           break;
         case 'literal':
@@ -101,7 +101,7 @@ export class QueryLanguageParser {
             arr.push(token.value);
           } else {
             top.push(token);
-            this._handleClause(top);
+            this.handleClause(top);
           }
           break;
         case 'punctuation':
@@ -115,14 +115,14 @@ export class QueryLanguageParser {
       token = tokens[++pos];
     }
 
-    this._condense(top, 'or');
+    this.condense(top, 'or');
 
     return top[0];
   }
 
-  static parse(text: string) {
+  static parseToQuery(text: string) {
     const tokens = QueryLanguageTokenizer.tokenize(text);
-    const node = this._parse(tokens);
+    const node = this.parse(tokens);
     return this.convert(node);
   }
 

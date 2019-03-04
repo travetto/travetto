@@ -14,8 +14,8 @@ export class DockerContainer {
     return container || `${Env.get('DOCKER_NS', image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
   }
 
-  private cmd: string = 'docker';
-  private _exec: ExecutionState;
+  private dockerCmd: string = 'docker';
+  private execState: ExecutionState;
 
   private container: string;
   private env: { [key: string]: string } = {};
@@ -41,20 +41,20 @@ export class DockerContainer {
     state.result = state.result.catch(e => {
       if (all || e.killed) {
         this.evict = true;
-        delete this._exec;
+        delete this.execState;
       }
       throw e;
     });
     return state;
   }
 
-  private _cmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
-    const state = Exec.spawn(this.cmd, [op, ...(args || [])], { shell: this.tty });
+  private runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
+    const state = Exec.spawn(this.dockerCmd, [op, ...(args || [])], { shell: this.tty });
     return (op !== 'run' && op !== 'exec') ? this.watchForEviction(state, true) : state;
   }
 
   get id() {
-    return this._exec && !this._exec.process.killed ? this._exec.process.pid : -1;
+    return this.execState && !this.execState.process.killed ? this.execState.process.pid : -1;
   }
 
   forceDestroyOnShutdown() {
@@ -176,28 +176,28 @@ export class DockerContainer {
 
   async create(args?: string[], flags?: string[]) {
     const allFlags = this.getFlags(flags);
-    return this._cmd('create', '--name', this.container, ...allFlags, this.image, ...(args || [])).result;
+    return this.runCmd('create', '--name', this.container, ...allFlags, this.image, ...(args || [])).result;
   }
 
   async start(args?: string[], flags?: string[]) {
     await this.initTemp();
-    return this._cmd('start', ...(flags || []), this.container, ...(args || [])).result;
+    return this.runCmd('start', ...(flags || []), this.container, ...(args || [])).result;
   }
 
   async stop(args?: string[], flags?: string[]) {
-    const toStop = this._cmd('stop', ...(flags || []), this.container, ...(args || [])).result;
+    const toStop = this.runCmd('stop', ...(flags || []), this.container, ...(args || [])).result;
     let prom = toStop;
-    if (this._exec) {
-      prom = Promise.all([toStop, this._exec.result]).then(x => x[0]);
+    if (this.execState) {
+      prom = Promise.all([toStop, this.execState.result]).then(x => x[0]);
     }
     return prom;
   }
 
   exec(args?: string[], extraFlags?: string[]) {
     const flags = this.getRuntimeFlags(extraFlags);
-    this._exec = this._cmd('exec', ...flags, this.container, ...(args || []));
-    this._exec.result = this._exec.result.finally(() => delete this._exec);
-    return this._exec;
+    this.execState = this.runCmd('exec', ...flags, this.container, ...(args || []));
+    this.execState.result = this.execState.result.finally(() => delete this.execState);
+    return this.execState;
   }
 
   async run(args?: any[], flags?: string[]) {
@@ -210,10 +210,10 @@ export class DockerContainer {
 
     await this.initTemp();
 
-    const state = this._cmd('run', `--name=${this.container}`, ...this.getFlags(flags), this.image, ...(args || []));
-    this._exec = this.watchForEviction(state);
-    this._exec.process.unref();
-    return this._exec.result;
+    const state = this.runCmd('run', `--name=${this.container}`, ...this.getFlags(flags), this.image, ...(args || []));
+    this.execState = this.watchForEviction(state);
+    this.execState.process.unref();
+    return this.execState.result;
   }
 
   async validate() {
@@ -225,18 +225,18 @@ export class DockerContainer {
     this.runAway = this.runAway || runAway;
 
     try {
-      await Exec.spawn(this.cmd, ['kill', this.container]).result;
+      await Exec.spawn(this.dockerCmd, ['kill', this.container]).result;
     } catch (e) { /* ignore */ }
 
     console.debug('Removing', this.image, this.container);
 
     try {
-      await Exec.spawn(this.cmd, ['rm', '-fv', this.container]).result;
+      await Exec.spawn(this.dockerCmd, ['rm', '-fv', this.container]).result;
     } catch (e) { /* ignore */ }
 
-    if (this._exec) {
-      const state = this._exec;
-      delete this._exec;
+    if (this.execState) {
+      const state = this.execState;
+      delete this.execState;
       await state.result;
     }
 
@@ -245,20 +245,20 @@ export class DockerContainer {
 
   forceDestroy() { // Cannot be async as it's used on exit, that's why it's all sync
     try {
-      Exec.execSync(`${this.cmd} kill ${this.container}`);
+      Exec.execSync(`${this.dockerCmd} kill ${this.container}`);
     } catch (e) { /* ignore */ }
 
     console.debug('Removing', this.image, this.container);
 
     try {
-      Exec.execSync(`${this.cmd} rm -fv ${this.container}`);
+      Exec.execSync(`${this.dockerCmd} rm -fv ${this.container}`);
     } catch (e) { /* ignore */ }
 
     this.cleanupSync();
 
-    const ids = Exec.execSync(`${this.cmd} volume ls -qf dangling=true`);
+    const ids = Exec.execSync(`${this.dockerCmd} volume ls -qf dangling=true`);
     if (ids) {
-      Exec.execSync(`${this.cmd} volume rm ${ids.split('\n').join(' ')}`);
+      Exec.execSync(`${this.dockerCmd} volume rm ${ids.split('\n').join(' ')}`);
     }
   }
 
@@ -293,10 +293,10 @@ export class DockerContainer {
 
   async removeDanglingVolumes() {
     try {
-      const { result } = Exec.spawn(this.cmd, ['volume', 'ls', '-qf', 'dangling=true']);
+      const { result } = Exec.spawn(this.dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
       const ids = (await result).stdout.trim();
       if (ids) {
-        await Exec.spawn(this.cmd, ['volume', 'rm', ...ids.split('\n')]).result;
+        await Exec.spawn(this.dockerCmd, ['volume', 'rm', ...ids.split('\n')]).result;
       }
     } catch (e) {
       // error
