@@ -115,6 +115,10 @@ export abstract class Registry implements ChangeSource<Class> {
     this.events.on('change', callback);
   }
 
+  off<T>(callback: (e: ChangeEvent<Class>) => any) {
+    this.events.off('change', callback);
+  }
+
   listen(source: ChangeSource<Class>) {
     source.on(this.onEvent.bind(this));
   }

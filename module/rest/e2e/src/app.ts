@@ -1,9 +1,11 @@
 import { Application, InjectableFactory, Inject } from '@travetto/di';
-import { RestServer, RestApp, ControllerConfig, RestInterceptor } from '../..';
+import { RouteConfig, RestApp, RestInterceptor } from '../..';
 import { ContextInterceptor } from '../../extension/context';
 
-class DummyAppProvider extends RestApp {
+class DummyApp extends RestApp {
   raw: any = {};
+
+  async createRaw() { }
 
   async init() {
     console.log('Initializing');
@@ -13,16 +15,16 @@ class DummyAppProvider extends RestApp {
     console.log('Listening');
   }
 
-  async registerController(config: ControllerConfig) {
-    console.log('Registering Controller', config);
+  async registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[]) {
+    console.log('Registering Controller', path, endpoints);
   }
 
   registerInterceptor(inter: RestInterceptor) {
     console.log('Registering Interceptor', inter);
   }
 
-  async unregisterController(config: ControllerConfig) {
-    console.log('Un-registering Controller', config);
+  async unregisterRoutes(key: string | symbol) {
+    console.log('Un-registering global');
   }
 }
 
@@ -31,13 +33,13 @@ export class SampleApp {
 
   @InjectableFactory()
   static getProvider(): RestApp {
-    return new DummyAppProvider();
+    return new DummyApp();
   }
 
   @Inject()
   contextInterceptor: ContextInterceptor;
 
-  constructor(private app: RestServer) { }
+  constructor(private app: RestApp) { }
 
   run() {
     this.app.run();

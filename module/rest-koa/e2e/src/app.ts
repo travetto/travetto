@@ -1,7 +1,6 @@
-import { Application, InjectableFactory } from '@travetto/di';
-import { RestServer, RestApp } from '@travetto/rest';
+import { InjectableFactory } from '@travetto/di';
+import { RestConfig, Application, RestApp } from '@travetto/rest';
 import { KoaRestApp } from '../../src/app';
-import { RestConfig } from '@travetto/rest/src/config';
 
 @Application('sample')
 export class SampleApp {
@@ -11,7 +10,7 @@ export class SampleApp {
     return new KoaRestApp();
   }
 
-  constructor(private server: RestServer, private config: RestConfig) { }
+  constructor(private server: RestApp, private config: RestConfig) { }
 
   run(port = 3000, ssl = false) {
     this.config.port = port;

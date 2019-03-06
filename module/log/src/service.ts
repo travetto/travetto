@@ -6,16 +6,15 @@ import { consoleOutput } from './output/console';
 
 class $Logger {
 
+  static COLORIZE = (process.stdout.isTTY && !Env.isTrue('NO_COLOR')) || Env.isTrue('FORCE_COLOR');
+
   private listeners: LogListener[] = [];
 
   private level: number = Env.trace ? LogLevels.trace : (Env.debug ? LogLevels.debug : LogLevels.info);
 
   init() {
     // Base logger, for free
-    const formatter = lineFormatter({
-      colorize: (process.stdout.isTTY && !Env.isTrue('NO_COLOR')) || Env.isTrue('FORCE_COLOR')
-    });
-
+    const formatter = lineFormatter({ colorize: $Logger.COLORIZE });
     const errorOutput = consoleOutput({ method: 'error' });
     const output = consoleOutput({ method: 'log' });
 

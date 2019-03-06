@@ -3,6 +3,7 @@ import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
 import { AuthContextSerializer, AuthService } from '@travetto/auth';
+import { ContextInterceptor } from '@travetto/rest/extension/context';
 
 import { ERR_INVALID_AUTH } from './errors';
 import { IdentityProvider } from './identity';
@@ -12,6 +13,8 @@ export class AuthInterceptor extends RestInterceptor {
 
   private identityProviders = new Map<string, IdentityProvider>();
   private requestAuthLocation: 'header' | 'cookie' = 'cookie';
+
+  after = ContextInterceptor;
 
   constructor(
     private authService: AuthService,
@@ -64,6 +67,7 @@ export class AuthInterceptor extends RestInterceptor {
       const ctx = await this.serializer.deserialize(input);
       if (ctx) {
         this.authService.context = ctx;
+        console.log('Restoring', ctx);
       }
     }
   }
@@ -81,7 +85,7 @@ export class AuthInterceptor extends RestInterceptor {
     await this.authService.updatePrincipalDetails(details);
   }
 
-  intercept(req: Request, res: Response) {
+  async intercept(req: Request, res: Response, next: () => Promise<any>) {
     // tslint:disable-next-line: no-this-assignment
     const self = this;
     req.auth = {
@@ -90,6 +94,13 @@ export class AuthInterceptor extends RestInterceptor {
       updatePrincipalDetails: this.updatePrincipalDetails.bind(this, req, res),
       authenticate: this.authenticate.bind(this, req, res)
     };
-    return this.restore(req, res);
+    const start = Date.now();
+
+    try {
+      await this.restore(req, res);
+      await next();
+    } finally {
+      console.log(`Request took ${Date.now() - start}ms`);
+    }
   }
 }

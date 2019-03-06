@@ -11,7 +11,7 @@ export class Simple {
   @Get('/name')
   async doIt(req: Request, res: Response): Promise<{ name: string }> {
     const user = await this.service.fetch();
-    return { name: `/simple/name => ${user.first.toLowerCase()}` };
+    return { name: `/simple/names => ${user.first.toLowerCase()}` };
   }
 
   @Cache(1, 'd')

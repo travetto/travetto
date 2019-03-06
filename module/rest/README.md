@@ -179,6 +179,23 @@ export class LoggingInterceptor extends RestInterceptor {
 }
 ```
 
+A `next` parameter is also available to allow for controlling the flow of the request, either by stopping the flow of interceptors, or being able to determine when a request starts, and when it is ending.
+
+**Code: Defining a fully controlled Interceptor**
+```typescript
+@Injectable()
+export class LoggingInterceptor extends RestInterceptor {
+  async intercept(req: Request, res: Response, next: () => Promise<any>) {
+    let start = Date.now();
+    try {
+      await next();
+    } finally {
+      console.log(`Request took ${Date.now() - start}ms`);
+    }
+  }
+}
+```
+
 Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module/asset-rest) is implemented in this fashion, as well as [`Auth-Rest`](https://github.com/travetto/travetto/tree/master/module/auth-rest).
 
 ## Context Support

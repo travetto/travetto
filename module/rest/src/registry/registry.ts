@@ -1,7 +1,8 @@
 import { DependencyRegistry } from '@travetto/di';
 import { MetadataRegistry, Class } from '@travetto/registry';
 
-import { EndpointConfig, Filter, ControllerConfig, EndpointDecorator, ControllerDecorator } from './types';
+import { EndpointConfig, ControllerConfig, EndpointDecorator, ControllerDecorator } from './types';
+import { Filter } from '../types';
 
 class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointConfig> {
 
