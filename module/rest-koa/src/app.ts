@@ -3,143 +3,59 @@ import * as kCompress from 'koa-compress';
 import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
-import { ConfigLoader } from '@travetto/config';
-import { RestConfig, ControllerConfig, RestApp, RestAppUtil, EndpointUtil } from '@travetto/rest';
+import { Inject } from '@travetto/di';
+import { RestApp, RouteConfig } from '@travetto/rest';
 
 import { KoaConfig } from './config';
+import { KoaAppUtil } from './util';
 
-const TRV_RES = Symbol('TRV_RES');
-const TRV_REQ = Symbol('TRV_REQ');
+export class KoaRestApp extends RestApp<koa> {
 
-export class KoaRestApp extends RestApp {
+  @Inject()
+  private koaConfig: KoaConfig;
 
-  private app: koa;
-  private config: KoaConfig;
-
-  get raw() {
-    return this.app;
-  }
-
-  create(): any {
+  createRaw(): koa {
     const app = new koa();
-    app.use((ctx, next) =>
-      next().catch(err => {
-        EndpointUtil.sendOutput((ctx as any)[TRV_REQ], (ctx as any)[TRV_RES], err);
-      }));
     app.use(kCompress());
     app.use(kBodyParser());
-
     return app;
   }
 
-  async init() {
-    this.config = new KoaConfig();
-    ConfigLoader.bindTo(this.config, 'rest.koa');
-
-    this.app = this.create();
-
-    this.app.use(async (ctx, next) => {
-      const req = this.getRequest(ctx);
-      const res = this.getResponse(ctx);
-
-      await this.executeInterceptors(req, res);
-      await next();
-    });
-  }
-
-  getRequest(ctx: koa.ParameterizedContext) {
-    if (!(ctx as any)[TRV_REQ]) {
-      (ctx as any)[TRV_REQ] = RestAppUtil.decorateRequest({
-        __raw: ctx,
-        method: ctx.method,
-        path: ctx.path,
-        query: ctx.query,
-        params: ctx.params,
-        body: ctx.body,
-        session: ctx.session,
-        headers: ctx.headers,
-        cookies: new Proxy(ctx.cookies, {
-          get(target, key, receiver) {
-            return ctx.cookies.get(key as string);
-          }
-        }),
-        files: {},
-        auth: undefined as any,
-        pipe: ctx.req.pipe.bind(ctx.req),
-        on: ctx.req.on.bind(ctx.req)
-      });
-    }
-    return (ctx as any)[TRV_REQ] as Travetto.Request;
-  }
-
-  getResponse(ctx: koa.ParameterizedContext) {
-    if (!(ctx as any)[TRV_RES]) {
-      (ctx as any)[TRV_RES] = RestAppUtil.decorateResponse({
-        __raw: ctx,
-        get headersSent() {
-          return ctx.headerSent;
-        },
-        status(value?: number) {
-          if (value) {
-            ctx.status = value;
-          } else {
-            return ctx.status;
-          }
-        },
-        send: (b) => {
-          ctx.body = b;
-        },
-        on: ctx.res.on.bind(ctx.res),
-        end: (val?: any) => {
-          if (val) {
-            ctx.body = val;
-          }
-          ctx.flushHeaders();
-          if (ctx.status < 200 || (ctx.status < 400 && ctx.status >= 300)) {
-            ctx.res.end(); // Only end on redirect
-          }
-        },
-        setHeader: ctx.set.bind(ctx),
-        getHeader: ctx.response.get.bind(ctx),
-        removeHeader: ctx.remove.bind(ctx),
-        write: ctx.res.write.bind(ctx.res),
-        cookie: ctx.cookies.set.bind(ctx.cookies),
-      });
-    }
-    return (ctx as any)[TRV_RES] as Travetto.Response;
-  }
-
-  async unregisterController(config: ControllerConfig) {
-    const loc = this.app.middleware.
-      findIndex(x => ((x as any).key === config.class.__id));
-    if (loc) {
-      this.app.middleware.splice(loc, 1); // Router
+  async unregisterRoutes(key: string | symbol) {
+    // Delete previous
+    const pos = this.raw.middleware.findIndex(x => (x as any).key === key);
+    if (pos >= 0) {
+      this.raw.middleware.splice(pos, 1);
     }
   }
 
-  async registerController(cConfig: ControllerConfig) {
-    const router = new kRouter(cConfig.basePath !== '/' ? { prefix: cConfig.basePath } : {});
+  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
+    const router = new kRouter(path !== '/' ? { prefix: path } : {});
 
-    for (const endpoint of cConfig.endpoints.reverse()) {
-      router[endpoint.method!](endpoint.path!, async (ctx) => {
-        const req = this.getRequest(ctx);
-        const res = this.getResponse(ctx);
-        return await endpoint.handlerFinalized!(req, res);
+    for (const route of routes) {
+      router[route.method!](route.path!, async (ctx) => {
+        const req = KoaAppUtil.getRequest(ctx);
+        const res = KoaAppUtil.getResponse(ctx);
+        return await route.handlerFinalized!(req, res);
       });
     }
 
-    console.debug('Registering Controller Instance', cConfig.class.__id, cConfig.basePath, cConfig.endpoints.length);
     const middleware = router.routes();
-    (middleware as any).key = cConfig.class.__id;
-    this.app.use(middleware);
+    (middleware as any).key = key;
+    this.raw.use(middleware);
+
+    if (this.listening && key !== RestApp.GLOBAL) {
+      await this.unregisterGlobal();
+      await this.registerGlobal();
+    }
   }
 
-  async listen(config: RestConfig) {
-    if (config.ssl) {
+  async listen() {
+    if (this.config.ssl) {
       const https = await import('https');
-      https.createServer(await config.getKeys(), this.app.callback()).listen(config.port);
+      https.createServer(await this.config.getKeys(), this.raw.callback()).listen(this.config.port);
     } else {
-      this.app.listen(config.port);
+      this.raw.listen(this.config.port);
     }
   }
 }

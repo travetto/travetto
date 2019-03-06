@@ -1,7 +1,6 @@
-import { Application, InjectableFactory } from '@travetto/di';
-import { RestServer, RestApp } from '@travetto/rest';
+import { InjectableFactory } from '@travetto/di';
+import { RestConfig, Application, RestApp } from '@travetto/rest';
 import { FastifyRestApp } from '../../src/app';
-import { RestConfig } from '@travetto/rest/src/config';
 
 @Application('sample')
 export class SampleApp {
@@ -11,7 +10,7 @@ export class SampleApp {
     return new FastifyRestApp();
   }
 
-  constructor(private server: RestServer, private config: RestConfig) { }
+  constructor(private server: RestApp, private config: RestConfig) { }
 
   run() {
     this.config.port = 3000;

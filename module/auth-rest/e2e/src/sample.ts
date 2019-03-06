@@ -1,5 +1,5 @@
-import { Application, InjectableFactory } from '@travetto/di';
-import { RestServer, RestApp } from '@travetto/rest';
+import { InjectableFactory } from '@travetto/di';
+import { Application, RestApp } from '@travetto/rest';
 import { KoaRestApp } from '@travetto/rest-koa';
 
 // tslint:disable-next-line: no-import-side-effect
@@ -13,9 +13,9 @@ export class SampleApp {
     return new KoaRestApp();
   }
 
-  constructor(private server: RestServer) { }
+  constructor(private app: RestApp) { }
 
   run() {
-    this.server.run();
+    this.app.run();
   }
 }

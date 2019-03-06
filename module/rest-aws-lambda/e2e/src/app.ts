@@ -1,18 +1,18 @@
 import { Application, InjectableFactory } from '@travetto/di';
-import { RestServer, RestApp } from '@travetto/rest';
-import { RestAwsLambdaAppProvider } from '../../src/provider';
+import { RestApp } from '@travetto/rest';
+import { AwsLambdaRestApp } from '../../src/app';
 
 @Application('sample')
 export class SampleApp {
 
   @InjectableFactory()
   static getProvider(): RestApp {
-    return new RestAwsLambdaAppProvider();
+    return new AwsLambdaRestApp();
   }
 
-  constructor(private server: RestServer) { }
+  constructor(private app: RestApp) { }
 
   run() {
-    this.server.run();
+    this.app.run();
   }
 }

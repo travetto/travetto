@@ -3,12 +3,10 @@ import { ConfigLoader } from '@travetto/config';
 import { Class } from '@travetto/registry';
 import { AppInfo } from '@travetto/base';
 
-import { RestInterceptorSet, RestInterceptor } from './types';
+import { RestInterceptorGroup, RestInterceptor } from './types';
 
-@Injectable({
-  target: RestInterceptorSet
-})
-export class ScanningInterceptorSet extends RestInterceptorSet {
+@Injectable({ target: RestInterceptorGroup })
+export class AllInterceptorGroup extends RestInterceptorGroup {
 
   async postConstruct() {
     const interceptors = ConfigLoader.get('registry.rest.interceptor') as { [key: string]: Set<string> };

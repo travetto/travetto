@@ -1,5 +1,7 @@
-import { Injectable } from '@travetto/di';
 import * as async_hooks from 'async_hooks';
+
+import { Injectable } from '@travetto/di';
+import { AppError } from '@travetto/base';
 
 @Injectable()
 export class Context {
@@ -13,7 +15,6 @@ export class Context {
       before: this.enter.bind(this),
       init: this.enter.bind(this),
       after: this.leave.bind(this),
-      promiseResolve: this.leave.bind(this),
       destroy: this.leave.bind(this)
     });
 
@@ -43,6 +44,9 @@ export class Context {
   storage(val?: any) {
     const currId = async_hooks.executionAsyncId();
     const key = this.threads.get(currId)!;
+    if (!key) {
+      throw new AppError('Context is not initialized', 'general');
+    }
     if (val) {
       this.storageState.set(key, val);
     } else {
@@ -85,7 +89,6 @@ export class Context {
     try {
       val = await fn();
     } catch (e) {
-      require('fs').writeSync(1, e.stack);
       err = e;
     }
 

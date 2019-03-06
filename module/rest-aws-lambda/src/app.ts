@@ -1,34 +1,49 @@
+import * as http from 'http';
+
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
 
-import { RouteUtil, RestApp, RouteConfig } from '@travetto/rest';
+import * as awsServerlessExpress from 'aws-serverless-express';
+import * as awsServerlessExpressMiddleware from 'aws-serverless-express/middleware';
 
+import { Inject } from '@travetto/di';
+import { RestApp, RouteConfig } from '@travetto/rest';
+
+import { AwsLambdaConfig } from './config';
 import { RouteStack } from './types';
-import { ExpressConfig } from './config';
-import { Inject } from '../../di';
 
-export class ExpressRestApp extends RestApp<express.Application> {
+export class AwsLambdaRestApp extends RestApp<express.Application> {
+
+  private server: http.Server;
 
   @Inject()
-  expressConfig: ExpressConfig;
+  private awsLambdaConfig: AwsLambdaConfig;
+
+  private handler: (event: any, context: any) => void;
 
   createRaw(): express.Application {
     const app = express();
-
     app.use(compression());
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use(cookieParser());
+    app.use(awsServerlessExpressMiddleware.eventContext());
 
     // Enable proxy for cookies
-    if (this.expressConfig.cookie.secure) {
+    if (this.awsLambdaConfig.cookie.secure) {
       app.enable('trust proxy');
     }
 
     return app;
+  }
+
+  async init() {
+    await super.init();
+    this.server = awsServerlessExpress.createServer(this.raw);
+    this.handler = awsServerlessExpress.proxy.bind(awsServerlessExpress, this.server) as any /** TODO: Typings seem off */;
   }
 
   async unregisterRoutes(key: string | symbol) {
@@ -41,35 +56,22 @@ export class ExpressRestApp extends RestApp<express.Application> {
 
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
     const router = express.Router({ mergeParams: true });
-
     for (const route of routes) {
       router[route.method!](route.path!, route.handlerFinalized! as any);
     }
-
-    // Register options handler for each controller
-    if (key !== RestApp.GLOBAL) {
-      const optionHandler = RouteUtil.createRouteHandler(this.interceptors,
-        { method: 'options', path: '*', handler: RestApp.GLOBAL_HANDLER });
-
-      router.options('*', optionHandler as any);
-    }
-
     (router as any).key = key;
     this.raw.use(path, router);
-
-    if (this.listening && key !== RestApp.GLOBAL) {
-      await this.unregisterGlobal();
-      await this.registerGlobal();
-    }
   }
 
-  async listen() {
-    if (this.config.ssl) {
-      const https = await import('https');
-      const keys = await this.config.getKeys();
-      https.createServer(keys, this.raw).listen(this.config.port);
-    } else {
-      this.raw.listen(this.config.port);
+  listen() {
+    // No-op
+  }
+
+  async handle(event: any, context: any) {
+    if (!this.handler) {
+      await this.run();
     }
+
+    this.handler(event, context);
   }
 }

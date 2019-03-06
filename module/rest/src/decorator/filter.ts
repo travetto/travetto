@@ -1,5 +1,5 @@
 import { AppError } from '@travetto/base';
-import { ControllerRegistry } from '../registry';
+import { ControllerRegistry } from '../registry/registry';
 import { Request } from '../types';
 
 export function Accepts(contentTypes: string[]) {

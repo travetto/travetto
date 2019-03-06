@@ -1,9 +1,9 @@
-import { RestInterceptor } from '@travetto/rest';
+import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
-export class LoggingInterceptor extends RestInterceptor {
-  async intercept(req: Travetto.Request, res: Travetto.Response) {
+export class CorsInterceptor extends RestInterceptor {
+  async intercept(req: Request, res: Response) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', '*');
     res.setHeader('Access-Control-Allow-Headers', '*');

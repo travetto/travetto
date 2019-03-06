@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
-import { ControllerDecorator } from '../types';
-import { ControllerRegistry } from '../registry';
+import { ControllerRegistry } from '../registry/registry';
+import { ControllerDecorator } from '../registry/types';
 
 export function Controller(path = '') {
   return function (target: Class) {
