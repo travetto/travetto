@@ -2,8 +2,9 @@ import { Injectable, DependencyRegistry, Inject } from '@travetto/di';
 import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
 
+import { RestApp } from './app';
 import { RestConfig } from './config';
-import { RestApp, RestInterceptor, RestInterceptorSet } from './types';
+import { RestInterceptor, RestInterceptorSet } from './types';
 import { ControllerRegistry } from './registry';
 import { EndpointUtil } from './util/endpoint-util';
 

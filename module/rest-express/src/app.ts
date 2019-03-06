@@ -4,7 +4,7 @@ import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
 
 import { ConfigLoader } from '@travetto/config';
-import { RestConfig, ControllerConfig, RestApp } from '@travetto/rest';
+import { RestConfig, ControllerConfig, RestApp, EndpointUtil } from '@travetto/rest';
 
 import { RouteStack } from './types';
 import { ExpressConfig } from './config';
@@ -43,6 +43,10 @@ export class ExpressRestApp extends RestApp<express.Application> {
 
     this.app.use((req, res, next) =>
       this.executeInterceptors(req as any, res as any, next));
+
+    this.app.use((err: Error, req: any, res: any, next: Function) => {
+      EndpointUtil.sendOutput(req, res, err);
+    });
   }
 
   async unregisterController(config: ControllerConfig) {

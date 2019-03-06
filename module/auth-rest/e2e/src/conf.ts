@@ -1,37 +1,42 @@
-import { Strategy as FacebookStrategy } from 'passport-facebook';
-
+import { PrincipalProvider, AuthContextSerializer, Identity } from '@travetto/auth';
 import { InjectableFactory } from '@travetto/di';
-import { PassportIdentityProvider } from '@travetto/auth-passport';
 
-import { IdentityProvider } from '../..';
+import { IdentityProvider, JWTAuthContextSerializer } from '../..';
 
 export class FbUser {
   id: string;
   roles: string[];
 }
 
-export const FB_AUTH = Symbol('facebook');
+export const SIMPLE_AUTH = Symbol('simple-auth');
 
 export class AppConfig {
-  @InjectableFactory(FB_AUTH)
+  @InjectableFactory()
+  static serializer(): AuthContextSerializer {
+    return new JWTAuthContextSerializer('testkey');
+  }
+
+  @InjectableFactory()
+  static provider(): PrincipalProvider {
+    return new (class extends PrincipalProvider {
+      async resolvePrincipal(ident: Identity) {
+        return ident;
+      }
+    })();
+  }
+
+  @InjectableFactory(SIMPLE_AUTH)
   static facebookPassport(): IdentityProvider {
-    return new PassportIdentityProvider('facebook',
-      new FacebookStrategy(
-        {
-          clientID: '165936444084265',
-          clientSecret: 'fd12224c46311b83349653733913a5f6',
-          callbackURL: 'http://localhost:3000/auth/facebook/callback',
-          profileFields: ['id', 'displayName', 'photos', 'email'],
-        },
-        (accessToken, refreshToken, profile, cb) => {
-          return cb(undefined, profile);
-        }
-      ),
-      (user: FbUser) => ({
-        id: user.id,
-        permissions: new Set(user.roles),
-        details: {}
-      })
-    );
+    return {
+      async authenticate(req, res) {
+        return {
+          id: '5',
+          expires: new Date(Date.now() + 1000 * 60),
+          details: { woah: 'fun' },
+          provider: 'simple',
+          permissions: new Set<string>()
+        };
+      }
+    };
   }
 }

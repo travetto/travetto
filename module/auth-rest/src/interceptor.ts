@@ -2,16 +2,16 @@ import { AppError } from '@travetto/base';
 import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
-import { AuthService } from '@travetto/auth';
+import { AuthContextSerializer, AuthService } from '@travetto/auth';
 
 import { ERR_INVALID_AUTH } from './errors';
-import { IdentityProvider } from './provider';
-import { AuthContextSerializer } from './serializer';
+import { IdentityProvider } from './identity';
 
 @Injectable()
 export class AuthInterceptor extends RestInterceptor {
 
   private identityProviders = new Map<string, IdentityProvider>();
+  private requestAuthLocation: 'header' | 'cookie' = 'cookie';
 
   constructor(
     private authService: AuthService,
@@ -35,6 +35,7 @@ export class AuthInterceptor extends RestInterceptor {
         const ident = await idp.authenticate(req, res);
         if (ident) { // Multi-step login process
           await this.authService.authorize(ident);
+          this.store(req, res);
         }
         return ident;
       } catch (e) {
@@ -52,9 +53,27 @@ export class AuthInterceptor extends RestInterceptor {
   }
 
   async restore(req: Request, res: Response): Promise<void> {
-    const ctx = await this.serializer.deserialize(req, res);
-    if (ctx) {
-      this.authService.context = ctx;
+    let input: string | undefined;
+    if (this.requestAuthLocation === 'header') {
+      input = req.header('auth-token');
+    } else {
+      input = req.cookies['auth-token'] as string;
+    }
+
+    if (input) {
+      const ctx = await this.serializer.deserialize(input);
+      if (ctx) {
+        this.authService.context = ctx;
+      }
+    }
+  }
+
+  async store(req: Request, res: Response): Promise<void> {
+    const output = await this.serializer.serialize(this.authService.context);
+    if (this.requestAuthLocation === 'header') {
+      res.setHeader('auth-token', output);
+    } else {
+      res.cookie('auth-token', output, { expires: this.authService.principal.expires });
     }
   }
 

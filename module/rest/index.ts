@@ -1,5 +1,6 @@
 /// <reference path="./src/types.d.ts" />
 
+export * from './src/app';
 export * from './src/config';
 export * from './src/error';
 export * from './src/decorator/application';
@@ -16,6 +17,6 @@ export * from './src/service';
 export * from './src/interceptor';
 export * from './src/types';
 export * from './src/util/mime';
-export * from './src/util/provider-util';
+export * from './src/util/app-util';
 export * from './src/util/endpoint-util';
 export * from './src/util/ssl';

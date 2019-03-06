@@ -26,14 +26,14 @@ export class AssetUtil {
   }
 
   static async localFileToAsset(pth: string, prefix?: string, tags?: string[]) {
-    const hash = crypto.createHash('sha256');
-    hash.setEncoding('hex');
+    const hash = crypto.createHash('sha256').setEncoding('hex');
 
     const str = fs.createReadStream(pth);
     str.pipe(hash);
 
-    await new Promise((res, rej) =>
-      str.on('end', e => e ? rej(e) : res()));
+    await new Promise((res, rej) => {
+      str.on('end', e => e ? rej(e) : res());
+    });
 
     const size = (await fsStat(pth)).size;
 

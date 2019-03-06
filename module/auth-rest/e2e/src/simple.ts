@@ -3,7 +3,7 @@ import { Controller, Get, Redirect, Post, Request } from '@travetto/rest';
 import { AuthService } from '@travetto/auth';
 
 import { Authenticate, Authenticated, Unauthenticated } from '../..';
-import { FB_AUTH } from './conf';
+import { SIMPLE_AUTH } from './conf';
 
 @Controller('/auth')
 export class SampleAuth {
@@ -16,22 +16,16 @@ export class SampleAuth {
     return { name: 'bob' };
   }
 
-  @Get('/facebook')
-  @Authenticate(FB_AUTH)
-  async fbLogin() {
-
+  @Get('/simple')
+  @Authenticate(SIMPLE_AUTH)
+  async simpleLogin() {
+    return new Redirect('/auth/self', 301);
   }
 
   @Get('/self')
   @Authenticated()
   async getSelf() {
     return this.state.context;
-  }
-
-  @Get('/facebook/callback')
-  @Authenticate(FB_AUTH)
-  async fbLoginComplete() {
-    return new Redirect('/auth/self', 301);
   }
 
   @Post('/logout')

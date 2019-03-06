@@ -1,8 +1,13 @@
+// Handle weiredness on sending json as text
+const flv = require('fastify/lib/validation');
+const ogSer = flv.serialize;
+flv.serialize = (c: any, v: any) => typeof v === 'string' ? v : ogSer(v);
+
 import { ServerResponse, IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
 import { ConfigLoader } from '@travetto/config';
-import { RestConfig, ControllerConfig, RestApp, ProviderUtil } from '@travetto/rest';
+import { RestConfig, ControllerConfig, RestApp, RestAppUtil, EndpointUtil } from '@travetto/rest';
 
 import { FastifyConfig } from './config';
 
@@ -40,6 +45,10 @@ export class FastifyRestApp extends RestApp {
 
     this.app = await this.create(restConfig);
 
+    this.app.setErrorHandler(async (error, req, reply) => {
+      EndpointUtil.sendOutput((req as any)[TRV_KEY], (reply as any)[TRV_KEY], error);
+    });
+
     this.app.addHook('preHandler', (reqs, reply) => {
       const req = this.getRequest(reqs);
       const res = this.getResponse(reply);
@@ -53,7 +62,7 @@ export class FastifyRestApp extends RestApp {
 
   getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
     if (!(reqs as any)[TRV_KEY]) {
-      (reqs as any)[TRV_KEY] = ProviderUtil.decorateRequest({
+      (reqs as any)[TRV_KEY] = RestAppUtil.decorateRequest({
         __raw: reqs,
         method: reqs.req.method,
         path: reqs.req.url!,
@@ -74,7 +83,7 @@ export class FastifyRestApp extends RestApp {
 
   getResponse(reply: fastify.FastifyReply<ServerResponse>) {
     if (!(reply as any)[TRV_KEY]) {
-      (reply as any)[TRV_KEY] = ProviderUtil.decorateResponse({
+      (reply as any)[TRV_KEY] = RestAppUtil.decorateResponse({
         __raw: reply,
         get headersSent() {
           return reply.sent;

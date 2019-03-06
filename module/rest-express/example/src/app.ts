@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
 import { Application, RestServer, RestConfig, RestApp } from '@travetto/rest';
-import { ExpressRestApp } from '../../src/provider';
+import { ExpressRestApp } from '../../src/app';
 
 @Application('sample', {
   description: 'Sample rest application'

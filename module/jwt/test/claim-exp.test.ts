@@ -7,7 +7,7 @@ import * as jwt from '..';
 const noneAlgorithmHeader = 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0';
 
 @Suite('expires')
-class ExpiresSuite {
+export class ExpiresSuite {
 
   @Test('"exp" in payload validation')
   async testInvalidPayload() {

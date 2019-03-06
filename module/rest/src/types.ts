@@ -1,7 +1,6 @@
 /// <reference path="./types.d.ts" />
 
 import { Class } from '@travetto/registry';
-import { RestConfig } from './config';
 
 export type HeaderMap = { [key: string]: (string | (() => string)) };
 
@@ -91,36 +90,5 @@ export class RestInterceptorSet {
   public interceptors: Set<Class<RestInterceptor>>;
   constructor(...interceptors: Class<RestInterceptor>[]) {
     this.interceptors = new Set(interceptors);
-  }
-}
-
-export abstract class RestApp<T = any> {
-  interceptors: RestInterceptor[] = [];
-
-  abstract get raw(): T;
-  abstract init(config: RestConfig): Promise<any>;
-  abstract registerController(controller: ControllerConfig): Promise<any>;
-  abstract unregisterController(controller: ControllerConfig): Promise<any>;
-  abstract listen(config: RestConfig): void | Promise<void>;
-
-  registerInterceptor(interceptor: RestInterceptor) {
-    this.interceptors.push(interceptor);
-  }
-
-  async executeInterceptors(req: Request, res: Response, proceed?: (err?: any) => any) {
-    try {
-      for (const it of this.interceptors) {
-        await it.intercept(req, res);
-      }
-      if (proceed) {
-        proceed();
-      }
-    } catch (e) {
-      if (proceed) {
-        proceed(e);
-      } else {
-        throw e;
-      }
-    }
   }
 }

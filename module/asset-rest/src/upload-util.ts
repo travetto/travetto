@@ -17,12 +17,8 @@ export class UploadUtil {
     return (Array.isArray(arr) ? arr : (arr || '').split(',')).filter(x => !!x);
   }
 
-  static matchType(types: string[], type: string, invert: boolean = false) {
-    if (types.length) {
-      const matches = types.filter(match(type));
-      return invert ? matches.length === 0 : matches.length > 0;
-    }
-    return false;
+  static matchType(types: string[], type: string) {
+    return types.findIndex(match(type)) >= 0;
   }
 
   static upload(req: Request, config: Partial<AssetRestConfig>, relativeRoot?: string) {
@@ -61,10 +57,10 @@ export class UploadUtil {
           const detectedType = await AssetUtil.detectFileType(asset.path);
           const contentType = detectedType ? detectedType.mime : '';
 
-          if (
-            this.matchType(allowedTypes, contentType, true) ||
-            this.matchType(excludeTypes, contentType)
-          ) {
+          const notMatchPositive = allowedTypes.length && !this.matchType(allowedTypes, contentType);
+          const matchNegative = excludeTypes.length && this.matchType(excludeTypes, contentType);
+
+          if (notMatchPositive || matchNegative) {
             throw new AppError(`Content type not allowed: ${contentType}`, 'data');
           }
         })());
