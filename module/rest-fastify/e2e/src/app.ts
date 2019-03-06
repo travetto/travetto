@@ -1,6 +1,6 @@
 import { Application, InjectableFactory } from '@travetto/di';
 import { RestServer, RestApp } from '@travetto/rest';
-import { FastifyRestApp } from '../../src/provider';
+import { FastifyRestApp } from '../../src/app';
 import { RestConfig } from '@travetto/rest/src/config';
 
 @Application('sample')

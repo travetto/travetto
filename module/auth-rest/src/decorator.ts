@@ -11,8 +11,9 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
   const checker = AuthUtil.permissionSetChecker(include, exclude);
 
   return ControllerRegistry.createFilterDecorator(async (req, res) => {
-    const p = req.auth.principal;
-    if (!checker(p ? p.permissions : new Set())) {
+    if (!req.auth.principal) {
+      throw new AppError('User is unauthenticated', 'authentication');
+    } else if (!checker(req.auth.principal.permissions)) {
       throw new AppError('Access denied', 'permissions');
     }
   });
@@ -20,8 +21,8 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
 
 export function Unauthenticated() {
   return ControllerRegistry.createFilterDecorator(req => {
-    if (!req.auth.principal) {
-      throw new AppError('User is unauthenticated', 'authentication');
+    if (!!req.auth.principal) {
+      throw new AppError('User is authenticated', 'authentication');
     }
   });
 }

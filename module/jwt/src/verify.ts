@@ -85,7 +85,7 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
   const valid = jws.verify(jwt, header.alg, key || '');
 
   if (!valid) {
-    throw new JWTError('invalid signature', 'permissions');
+    throw new JWTError('Token has invalid signature', {}, 'permissions');
   }
 
   verifyTypes(payload);
@@ -93,13 +93,13 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
   if (payload.nbf !== undefined && !ignore.nbf &&
     payload.nbf > clock.timestamp + clock.tolerance
   ) {
-    throw new JWTError('not active', { date: new Date(payload.nbf * 1000) }, 'permissions');
+    throw new JWTError('Token is not active', { date: new Date(payload.nbf * 1000) }, 'permissions');
   }
 
   if (payload.exp !== undefined && !ignore.exp &&
     clock.timestamp >= payload.exp + clock.tolerance
   ) {
-    throw new JWTError('expired', { expiredAt: new Date(payload.exp * 1000) }, 'permissions');
+    throw new JWTError('Token is expired', { expiredAt: new Date(payload.exp * 1000) }, 'permissions');
   }
 
   if (verifyPayload.aud) {
@@ -111,7 +111,7 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
     );
 
     if (!match) {
-      throw new JWTError(`audience invalid. expected: ${aud.join(' or ')}`);
+      throw new JWTError(`Token audience is invalid. expected: ${aud.join(' or ')}`);
     }
   }
 
@@ -120,16 +120,16 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
       payload.iss !== verifyPayload.iss || (Array.isArray(verifyPayload.iss) && !verifyPayload.iss.includes(payload.iss));
 
     if (invalid) {
-      throw new JWTError(`issuer invalid. expected: ${verifyPayload.iss}`);
+      throw new JWTError(`Token issuer is invalid. expected: ${verifyPayload.iss}`);
     }
   }
 
   if (verifyPayload.sub && payload.sub !== verifyPayload.sub) {
-    throw new JWTError(`subject invalid. expected: ${verifyPayload.sub}`);
+    throw new JWTError(`Token subject is invalid. expected: ${verifyPayload.sub}`);
   }
 
   if (verifyPayload.jti && payload.jti !== verifyPayload.jti) {
-    throw new JWTError(`id invalid. expected: ${verifyPayload.jti}`);
+    throw new JWTError(`Token id id invalid. expected: ${verifyPayload.jti}`);
   }
 
   if (options.maxAgeSec) {
@@ -140,7 +140,7 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
     const maxAgeTimestamp = options.maxAgeSec + payload.iat;
 
     if (clock.timestamp >= maxAgeTimestamp + (clock.tolerance || 0)) {
-      throw new JWTError('maxAge exceeded', { date: new Date(maxAgeTimestamp * 1000) });
+      throw new JWTError('Token maxAge exceeded', { date: new Date(maxAgeTimestamp * 1000) });
     }
   }
 

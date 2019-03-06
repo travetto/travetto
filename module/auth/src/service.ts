@@ -6,8 +6,6 @@ import { AuthContext, Identity } from './types';
 import { PrincipalProvider } from './principal';
 import { AuthUtil } from './util';
 
-export const AUTH_PERM = '__AUTH__';
-
 const EMPTY_SET = new Set<string>();
 
 @Injectable()
@@ -53,7 +51,6 @@ export class AuthService {
     const ctx = this.context = await this.principalProvider.authorize(identity);
     ctx.principal = ctx.principal || ctx.identity;
     ctx.principal.permissions = ctx.principal.permissions || new Set<string>();
-    ctx.principal.permissions.add(AUTH_PERM);
   }
 
   checkPermissions(include: string[] | Set<string>, exclude: string[] | Set<string>, matchAll = true) {

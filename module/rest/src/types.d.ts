@@ -11,7 +11,7 @@ declare global {
 
       query: { [key: string]: any };
       params: { [key: string]: any };
-      session: any;
+      session?: any;
       headers: { [key: string]: string | string[] };
       cookies: { [key: string]: any };
       body: any;

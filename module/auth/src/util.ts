@@ -38,9 +38,12 @@ export class AuthUtil {
     return { salt, hash };
   }
 
-  static permissionChecker(perms: string[] | Set<string>, matchAll = true) {
+  static permissionChecker(perms: string[] | Set<string>, matchAll = true, defaultIfEmpty = true) {
     const permArr = [...perms].map(x => x.toLowerCase());
     const permSet = new Set(permArr);
+    if (permArr.length === 0) {
+      return () => defaultIfEmpty;
+    }
     return matchAll ?
       (uPerms: Set<string>) => !permArr.find(x => !uPerms.has(x)) :
       (uPerms: Set<string>) => !!permArr.find(x => uPerms.has(x));
@@ -48,10 +51,10 @@ export class AuthUtil {
 
   static permissionSetChecker(include: string[] | Set<string>, exclude: string[] | Set<string>, matchAll = true) {
     if (!this.CHECK_CACHE.has(include)) {
-      this.CHECK_CACHE.set(include, [AuthUtil.permissionChecker(include, true), AuthUtil.permissionChecker(include, false)]);
+      this.CHECK_CACHE.set(include, [AuthUtil.permissionChecker(include, true, true), AuthUtil.permissionChecker(include, false, true)]);
     }
     if (!this.CHECK_CACHE.has(exclude)) {
-      this.CHECK_CACHE.set(exclude, [AuthUtil.permissionChecker(exclude, true), AuthUtil.permissionChecker(exclude, false)]);
+      this.CHECK_CACHE.set(exclude, [AuthUtil.permissionChecker(exclude, true, false), AuthUtil.permissionChecker(exclude, false, false)]);
     }
 
     const includes = this.CHECK_CACHE.get(include)![matchAll ? 1 : 0];
