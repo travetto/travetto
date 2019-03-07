@@ -77,14 +77,13 @@ function buildProfile() {
   if (!isEnvFalse('APP_ROOTS')) {
     appRoots.push(...envListVal('APP_ROOTS'));
     if (appRoots.length === 0) {
-      appRoots.push('');
+      appRoots.push('.');
     }
   }
 
   appRoots = appRoots
     .filter(x => !!x)
-    .map(x => x === '-' ? FsUtil.cwd : x)
-    .map(x => FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, '.'));
+    .map(x => FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, './'));
 
   return {
     profiles: all,
