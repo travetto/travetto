@@ -1,7 +1,7 @@
 import { Config } from '@travetto/config';
 
-@Config('model.elasticsearch')
-export class ModelElasticsearchConfig {
+@Config('elasticsearch.model')
+export class ElasticsearchModelConfig {
   hosts = ['127.0.0.1'];
   port = 9200;
   options = {};

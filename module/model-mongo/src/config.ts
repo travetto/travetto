@@ -1,7 +1,7 @@
 import { Config } from '@travetto/config';
 
-@Config('model.mongo')
-export class ModelMongoConfig {
+@Config('mongo.model')
+export class MongoModelConfig {
   hosts = 'localhost';
   namespace = 'app';
   port = 27017;

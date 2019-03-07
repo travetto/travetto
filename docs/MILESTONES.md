@@ -107,12 +107,17 @@ Released  0.5.x: 2018-12-28 - a8c58104a586baa6203f38c9517fbb5a60ecec5c
 * Schema modifications
   * All view changes
   * New view management
-* Test assertions and output cleanup
-  * Cleanup tests output on run
-* Using latest typescript
 * Unified file path usage and resource loading
-* Reworked CLI, supporting color, and standardizing architecture
 
 ------------------------------------------------------
 Release 0.6.x: ???
 ------------------------------------------------------
+* Test assertions and output cleanup
+  * Cleanup tests output on run
+* Using latest typescript
+* Reworked CLI, supporting color, and standardizing architecture
+* Auth Rewrite
+* Worker breakout/rewrite
+* Rest module rewrite, interceptors overhauled
+* General test stability
+* Support for unhandled rejections in the testing framework

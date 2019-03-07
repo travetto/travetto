@@ -1,9 +1,8 @@
-import { Model, ModelCore, ModelSource, ModelService } from '@travetto/model';
+import { Model, ModelCore, ModelSource } from '@travetto/model';
 import { Schema } from '@travetto/schema';
-import { DependencyRegistry, InjectableFactory, Application, Inject } from '@travetto/di';
+import { InjectableFactory, Application, Inject } from '@travetto/di';
 
-import { ElasticsearchModelSource, ModelElasticsearchConfig } from '../..';
-import { Class } from '@travetto/registry';
+import { ElasticsearchModelSource, ElasticsearchModelConfig } from '../..';
 
 @Schema()
 class Address {
@@ -29,15 +28,15 @@ class Employee implements ModelCore {
   name: string;
 }
 
-class Config {
+export class Config {
   @InjectableFactory()
-  static getSource(config: ModelElasticsearchConfig): ModelSource {
+  static getSource(config: ElasticsearchModelConfig): ModelSource {
     return new ElasticsearchModelSource(config);
   }
 }
 
 @Application('multi')
-class Service {
+export class Service {
 
   @Inject()
   src: ModelSource;

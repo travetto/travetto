@@ -13,7 +13,7 @@ import { Class, ChangeEvent } from '@travetto/registry';
 import { Util, Env, AppError } from '@travetto/base';
 import { SchemaChangeEvent, SchemaRegistry } from '@travetto/schema';
 
-import { ModelElasticsearchConfig } from './config';
+import { ElasticsearchModelConfig } from './config';
 import { EsBulkResponse, EsIdentity, EsBulkError } from './types';
 import { ElasticsearchUtil } from './util';
 
@@ -27,7 +27,7 @@ export class ElasticsearchModelSource extends ModelSource {
   private indexToClass: Map<string, Class> = new Map();
   public client: es.Client;
 
-  constructor(private config: ModelElasticsearchConfig) {
+  constructor(private config: ElasticsearchModelConfig) {
     super();
   }
 

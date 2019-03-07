@@ -3,7 +3,7 @@ import { ModelCore } from '@travetto/model';
 import { IdentityProvider } from '@travetto/auth-rest';
 import { Identity } from '@travetto/auth';
 
-import { ModelPrincipalProvider } from '../src/service';
+import { ModelPrincipalProvider } from '../src/principal';
 
 export class ModelIdentityProvider<U extends ModelCore> extends IdentityProvider {
 

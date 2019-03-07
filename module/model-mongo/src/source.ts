@@ -16,7 +16,7 @@ import { Class } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
 import { BindUtil } from '@travetto/schema';
 
-import { ModelMongoConfig } from './config';
+import { MongoModelConfig } from './config';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -86,7 +86,7 @@ export class MongoModelSource extends ModelSource {
   private db: mongo.Db;
   private indices: { [key: string]: IndexConfig<any>[] } = {};
 
-  constructor(private config: ModelMongoConfig) {
+  constructor(private config: MongoModelConfig) {
     super();
   }
 
