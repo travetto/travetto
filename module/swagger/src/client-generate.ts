@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as util from 'util';
 
 import { DockerContainer } from '@travetto/exec';
 import { Injectable } from '@travetto/di';
@@ -9,12 +10,16 @@ import { SchemaRegistry } from '@travetto/schema';
 import { ApiClientConfig } from './config';
 import { SwaggerService } from './service';
 
+const fsWriteFile = util.promisify(fs.writeFile);
+
 @Injectable()
 export class ClientGenerate {
 
   private running = false;
 
   codeGenCli: DockerContainer;
+  workspace: string;
+  internalRoot = '/opt/swagger-codegen-cli';
 
   constructor(private config: ApiClientConfig, private service: SwaggerService) { }
 
@@ -23,14 +28,15 @@ export class ClientGenerate {
       return;
     }
 
+    this.workspace = FsUtil.resolveUnix(this.internalRoot, this.config.output);
+
     console.info('Running code generator in watch mode', this.config.output);
 
     await FsUtil.mkdirp(this.config.output);
 
     this.codeGenCli = new DockerContainer(this.config.codeGenImage)
       .setEntryPoint('/bin/sh')
-      .setTTY(true)
-      .addVolume(this.config.output, this.config.output)
+      .addVolume(FsUtil.resolveUnix(Env.cwd, this.config.output), this.workspace)
       .setInteractive(true)
       .forceDestroyOnShutdown();
   }
@@ -71,16 +77,16 @@ export class ClientGenerate {
 
     const spec = this.service.getSpec();
     const specFile = FsUtil.joinUnix(this.config.output, 'spec.json');
-    await new Promise((res, rej) => fs.writeFile(specFile, JSON.stringify(spec, undefined, 2), (err) => err ? rej(err) : res()));
+    await fsWriteFile(specFile, JSON.stringify(spec, undefined, 2));
 
-    const { result: prom } = await this.codeGenCli.exec([], [
+    const { result: prom } = await this.codeGenCli.exec([
       'java',
-      '-jar', '/opt/swagger-codegen-cli/swagger-codegen-cli.jar',
+      '-jar', FsUtil.resolveUnix(this.internalRoot, 'swagger-codegen-cli.jar'),
       'generate',
       '--remove-operation-id-prefix',
       '-l', this.config.format!,
-      '-o', this.config.output,
-      '-i', specFile,
+      '-o', this.workspace,
+      '-i', FsUtil.resolveUnix(this.internalRoot, specFile),
       ...(this.config.formatOptions ? ['--additional-properties', this.config.formatOptions] : [])
     ]);
 
