@@ -3,11 +3,11 @@ import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { ModelSource, ModelRegistry } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ElasticsearchModelSource, ModelElasticsearchConfig } from '../';
+import { ElasticsearchModelSource, ElasticsearchModelConfig } from '../';
 
 export class Init {
   @InjectableFactory()
-  static getModelSource(conf: ModelElasticsearchConfig): ModelSource {
+  static getModelSource(conf: ElasticsearchModelConfig): ModelSource {
     return new ElasticsearchModelSource(conf);
   }
 }

@@ -3,11 +3,11 @@ import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { ModelSource } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { MongoModelSource, ModelMongoConfig } from '../';
+import { MongoModelSource, MongoModelConfig } from '../';
 
 export class Init {
   @InjectableFactory()
-  static getModelSource(conf: ModelMongoConfig): ModelSource {
+  static getModelSource(conf: MongoModelConfig): ModelSource {
     return new MongoModelSource(conf);
   }
 }

@@ -4,12 +4,12 @@ import { Model, ModelService, ModelSource, ModelCore } from '@travetto/model';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { MongoModelSource } from '../src/source';
-import { ModelMongoConfig } from '../src/config';
+import { MongoModelConfig } from '../src/config';
 import { SchemaRegistry, Schema, Text } from '@travetto/schema';
 
-class TestConfig {
+export class TestConfig {
   @InjectableFactory()
-  static getSource(config: ModelMongoConfig): ModelSource {
+  static getSource(config: MongoModelConfig): ModelSource {
     return new MongoModelSource(config);
   }
 }

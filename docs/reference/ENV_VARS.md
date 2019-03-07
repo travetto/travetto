@@ -14,7 +14,8 @@ The common environment variables throughout the code base:
 * `PROFILE`=['application'] - Additional profiles to run app under
 
 * `QUIET_INIT` = 0|1        - Display the init information on startup
-* `NO_COLOR` = 0|1          - Suppress color output in all usages, defaults to true if tty is available
+* `NO_COLOR` = 0|1          - Suppress color output in all usages, defaults to false if tty is available
+* `FORCE_COLOR` = 0|1       - Require color output in all usages, defaults to true if tty is available
 * `DEBUG` = 0|1             - Outputs all console.debug messages, defaults to 1 in dev, and 0 in prod
 * `TRACE` = 0|1             - Outputs all console.trace messages, defaults to 0 in dev, and 0 in prod
 
