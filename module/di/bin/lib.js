@@ -67,7 +67,7 @@ async function runApp(args) {
 
   process.env.APP_ROOTS = [
     process.env.APP_ROOTS || app.appRoot || '',
-    !app.standalone && app.appRoot ? '-' : ''
+    !app.standalone && app.appRoot ? '.' : ''
   ].join(',');
   process.env.ENV = process.env.ENV || 'dev';
   process.env.PROFILE = process.env.PROFILE || '';
@@ -83,7 +83,7 @@ async function runApp(args) {
 function determineAppFromFile(filename) {
   const [, root] = filename.split(pCwd);
   const [, first] = root.split('/');
-  return first === 'src' ? '' : first;
+  return first === 'src' ? '.' : first;
 }
 
 async function computeApps() {
