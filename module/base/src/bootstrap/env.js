@@ -83,7 +83,7 @@ function buildProfile() {
 
   appRoots = appRoots
     .filter(x => !!x)
-    .map(x => FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, './'));
+    .map(x => (!x || x === '.') ? './' : FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, '.'));
 
   return {
     profiles: all,
