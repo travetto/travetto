@@ -12,10 +12,10 @@ const EMPTY_SET = new Set<string>();
 export class AuthService {
 
   @Inject()
-  protected contextProvider: Context;
+  public contextProvider: Context;
 
   @Inject()
-  protected principalProvider: PrincipalProvider;
+  public principalProvider: PrincipalProvider;
 
   get context(): AuthContext {
     return (this.contextProvider.get() || {}).auth || {};
@@ -51,6 +51,7 @@ export class AuthService {
     const ctx = this.context = await this.principalProvider.authorize(identity);
     ctx.principal = ctx.principal || ctx.identity;
     ctx.principal.permissions = ctx.principal.permissions || new Set<string>();
+    return ctx;
   }
 
   checkPermissions(include: string[] | Set<string>, exclude: string[] | Set<string>, matchAll = true) {

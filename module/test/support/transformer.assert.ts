@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 import { FsUtil } from '@travetto/base';
-import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT } from '../src/assert/types';
+import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT, DEEP_LITERAL_TYPES } from '../src/assert/types';
 
 const ASSERT_CMD = 'assert';
 const ASSERT_UTIL = 'AssertCheck';
@@ -56,7 +56,8 @@ class AssertTransformer {
 
   static isDeepLiteral(node: ts.Expression) {
     return ts.isArrayLiteralExpression(node) ||
-      ts.isObjectLiteralExpression(node);
+      ts.isObjectLiteralExpression(node) ||
+      (ts.isNewExpression(node) && DEEP_LITERAL_TYPES.has(node.expression.getText()));
   }
 
   static initState(state: AssertState) {

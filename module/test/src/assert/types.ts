@@ -9,6 +9,8 @@ export const ASSERT_FN_OPERATOR: { [key: string]: string } = {
   lessThan: '<'
 };
 
+export const DEEP_LITERAL_TYPES = new Set(['Set', 'Map', 'Array', 'String', 'Number', 'Object', 'Boolean']);
+
 export const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
   equal: 'deepEqual',
   notEqual: 'notDeepEqual',

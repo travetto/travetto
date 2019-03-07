@@ -144,12 +144,13 @@ export class AssertCheck {
       }
     } catch (e) {
       if (!negative) {
-        missed = new Error(`Error thrown, but expected no errors `);
+        missed = new Error(`Error thrown, but expected no errors`);
+        missed.stack = e.stack;
       }
 
-      e = missed || this.checkError(shouldThrow, e);
+      e = (missed && e) || this.checkError(shouldThrow, e);
       if (e) {
-        assertion.message = message || e.message;
+        assertion.message = message || (missed ? missed.message : e.message);
         (e as Error).stack = Stacktrace.simplifyStack(e);
         throw (assertion.error = e);
       }
@@ -170,12 +171,12 @@ export class AssertCheck {
       }
     } catch (e) {
       if (!negative) {
-        missed = new Error(`Error thrown, but expected no errors `);
+        missed = new Error(`Error thrown, but expected no errors`);
       }
 
-      e = missed || this.checkError(shouldThrow, e);
+      e = (missed && e) || this.checkError(shouldThrow, e);
       if (e) {
-        assertion.message = message || e.message;
+        assertion.message = message || (missed ? missed.message : e.message);
         (e as Error).stack = Stacktrace.simplifyStack(e);
         throw (assertion.error = e);
       }
