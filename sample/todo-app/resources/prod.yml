@@ -1,0 +1,4 @@
+model.elasticsearch:
+  hosts: 
+    - search-ig-telemetry-output-dj6gzfuzxrqi6fypzon56dxluy.us-east-1.es.amazonaws.com
+  port: 80

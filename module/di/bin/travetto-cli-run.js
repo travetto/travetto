@@ -28,7 +28,7 @@ function generateAppHelpList(apps, cmd) {
   for (const conf of apps) {
     const lines = [];
 
-    const root = conf.appRoot ? `[${colorize.subtitle(conf.appRoot)}${!conf.standalone ? '^' : ''}] ` : '';
+    const root = conf.appRoot !== '.' ? `[${colorize.subtitle(conf.appRoot)}${!conf.standalone ? '^' : ''}] ` : '';
     const usage = getAppUsage(conf);
 
     const features = [];
@@ -81,9 +81,9 @@ function init() {
       cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
 
       cmd.profile = [
-          ...(cmd.profile || []),
-          ...(process.env.PROFILE || '').split(/,/g)
-        ]
+        ...(cmd.profile || []),
+        ...(process.env.PROFILE || '').split(/,/g)
+      ]
         .filter(x => !!x)
         .map(x => x.trim());
 

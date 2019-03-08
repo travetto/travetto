@@ -17,8 +17,8 @@ export class CorsInterceptor extends RestInterceptor {
   postConstruct() {
     if (this.restConfig.cors) {
       this.origins = new Set(this.restConfig.cors.origins || []);
-      this.methods = (this.restConfig.cors!.methods || ['*']).join(',');
-      this.headers = (this.restConfig.cors!.headers || ['*']).join(',');
+      this.methods = (this.restConfig.cors!.methods || []).join(',');
+      this.headers = (this.restConfig.cors!.headers || []).join(',');
     }
   }
 
@@ -27,18 +27,13 @@ export class CorsInterceptor extends RestInterceptor {
   }
 
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
-    if (this.origins.size) {
-      const origin = req.header('origin') as string;
-      if (this.origins.has(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-      } else {
-        return;
-      }
-    } else {
-      res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.header('origin') as string;
+    if (this.origins.size && !this.origins.has(origin)) {
+      return;
     }
-    res.setHeader('Access-Control-Allow-Methods', this.methods);
-    res.setHeader('Access-Control-Allow-Headers', this.headers);
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', this.methods || '*');
+    res.setHeader('Access-Control-Allow-Headers', this.headers || '*');
     await next();
   }
 }

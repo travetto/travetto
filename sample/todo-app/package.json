@@ -1,0 +1,20 @@
+{
+  "name": "@travetto/todo-app",
+  "private": true,
+  "version": "0.5.0",
+  "scripts": {
+    "test": "npx travetto test",
+    "start": "npx travetto run todo"
+  },
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "description": "",
+  "dependencies": {
+    "@travetto/log": "^0.5.8",
+    "@travetto/model-elasticsearch": "^0.5.17",
+    "@travetto/rest-express": "^0.5.12",
+    "@travetto/swagger": "^0.5.12",
+    "@travetto/test": "^0.5.11"
+  }
+}
