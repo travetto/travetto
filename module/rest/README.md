@@ -149,17 +149,17 @@ To run a REST server, you will need to construct an entry point using the `@Appl
 export class SampleApp {
 
   @InjectableFactory()
-  static getProvider(): RestApp {
+  static getApp(): RestApp {
     return new ExpressRestApp();
   }
 
   @Inject()
   contextInterceptor: ContextInterceptor;
 
-  constructor(private server: RestServer) { }
+  constructor(private app: RestApp) { }
 
   run() {
-    this.server.run();
+    this.app.run();
   }
 }
 ```

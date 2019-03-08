@@ -4,4 +4,4 @@ process.chdir(FsUtil.resolveUnix(__dirname, '..'));
 
 process.env.DEBUG = '0';
 require('@travetto/base/bin/bootstrap');
-module.exports = require('./app.ts');
+module.exports = require('./app.ts').TravettoGenerator;

@@ -6,7 +6,7 @@ import { FEATURES, pkg } from './features';
 import { verifyDestination, meetsRequirement } from './util';
 import { Context, getContext } from './context';
 
-export default class extends Generator {
+export class TravettoGenerator extends Generator {
   constructor(args: string[], options: any) {
     super(args, options);
 
@@ -101,7 +101,7 @@ export default class extends Generator {
       this.fs.copyTpl(this.templatePath(`${key}.ejs`), this.destinationPath(key), context);
     }
 
-    for (const f of ['tsconfig.json', 'tslint.json', '.gitignore', '.eslintrc', '.npmignore']) {
+    for (const f of ['tsconfig.json', 'tslint.json', '.gitignore']) {
       this.fs.copyTpl(
         FsUtil.resolveUnix(__dirname, `../templates/common/${f}.ejs`),
         this.destinationPath(f.replace(/_/, '/')),
@@ -118,6 +118,5 @@ export default class extends Generator {
     await this.templateFiles(context);
 
     await this.npmInstall();
-    await this.npmInstall('@travetto/cli', { global: true });
   }
 }

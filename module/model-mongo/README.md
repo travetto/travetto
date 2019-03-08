@@ -16,18 +16,18 @@ All that is needed to use the `ModelSource` is to register it with the [`Depende
 ```typescript
 export class Init {
   @InjectableFactory()
-  static getModelSource(conf: ModelMongoConfig): ModelSource {
+  static getModelSource(conf: MongoModelConfig): ModelSource {
     return new MongoModelSource(conf);
   }
 }
 ```
 
-where the `ModelMongoConfig` is defined by:
+where the `MongoModelConfig` is defined by:
 
-**Code: Structure of ModelMongoConfig**
+**Code: Structure of MongoModelConfig**
 ```typescript
 @Config('model.mongo')
-export class ModelMongoConfig {
+export class MongoModelConfig {
   hosts = 'localhost';
   namespace = 'app';
   port = 27017;

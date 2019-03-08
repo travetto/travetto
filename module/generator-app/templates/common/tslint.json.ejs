@@ -1,4 +1,5 @@
 {
+  "jsRules": true,
   "rules": {
     "class-name": true,
     "comment-format": [
@@ -56,7 +57,7 @@
     "no-empty": false,
     "no-boolean-literal-compare": true,
     "no-this-assignment": true,
-    "no-import-side-effect": false,
+    "no-import-side-effect": true,
     "no-eval": true,
     "no-for-in-array": true,
     "no-inferrable-types": false,
@@ -68,13 +69,11 @@
     "no-consecutive-blank-lines": true,
     "prefer-object-spread": true,
     "no-invalid-template-strings": true,
-    "typeof-compare": true,
     "no-sparse-arrays": true,
     "no-stateless-class": false,
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
     "no-unused-expression": false,
-    "no-unused-variable": true,
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "object-literal-shorthand": true,
@@ -118,7 +117,13 @@
         "variable-declaration": "nospace"
       }
     ],
-    "variable-name": false,
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-pascal-case",
+      "allow-snake-case"
+    ],
     "whitespace": [
       true,
       "check-branch",

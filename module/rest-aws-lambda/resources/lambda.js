@@ -8,8 +8,8 @@ exports.handler = async (event, context) => {
     const { DependencyRegistry } = require('@travetto/di');
     await DependencyRegistry.init();
 
-    const { RestServer } = require('@travetto/rest');
-    const server = await DependencyRegistry.getInstance(RestServer);
+    const { RestApp } = require('@travetto/rest');
+    const server = await DependencyRegistry.getInstance(RestApp);
     await server.run();
 
     inst = server['app'];

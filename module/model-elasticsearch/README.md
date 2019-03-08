@@ -16,18 +16,18 @@ All that is needed to use the `ModelSource` is to register it with the [`Depende
 ```typescript
 export class Init {
   @InjectableFactory()
-  static getModelSource(conf: ModelElasticsearchConfig): ModelSource {
+  static getModelSource(conf: ElasticsearchModelConfig): ModelSource {
     return new ElasticsearchModelSource(conf);
   }
 }
 ```
 
-where the `ModelElasticsearchConfig` is defined by:
+where the `ElasticsearchModelConfig` is defined by:
 
-**Code: Structure of ModelElasticsearchConfig**
+**Code: Structure of ElasticsearchModelConfig**
 ```typescript
 @Config('model.elasticsearch')
-export class ModelElasticsearchConfig {
+export class ElasticsearchModelConfig {
   hosts = ['127.0.0.1'];
   port = 9200;
   options = {};
