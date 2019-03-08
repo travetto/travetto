@@ -52,4 +52,11 @@ function init() {
     });
 }
 
-module.exports = { init };
+function complete(c) {
+  c.all.push('compile');
+  c.compile = {
+    '': ['--clean', '--quiet', '--runtime-dir', '--output']
+  }
+}
+
+module.exports = { init, complete };

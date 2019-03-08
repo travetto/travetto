@@ -5,6 +5,8 @@ import { Request, Response } from '@travetto/rest';
 import { IdentityProvider } from '@travetto/auth-rest';
 
 export class PassportIdentityProvider<U> extends IdentityProvider {
+  session = false;
+
   constructor(
     private strategyName: string,
     private strategy: passport.Strategy,
@@ -16,22 +18,25 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
 
   async authenticate(req: Request, res: Response) {
     return new Promise<Identity | undefined>((resolve, reject) => {
-      passport.authenticate(this.strategyName, (err, user, ...rest) => {
-        if (err) {
-          reject(err);
-        } else {
-          // Remove profile fields from passport
-          delete user._json;
-          delete user._raw;
-          delete user.provider;
-
-          const ident = this.toIdentity(user);
-          if (!ident.provider) {
-            ident.provider = this.strategyName;
-          }
-          resolve(ident as Identity);
-        }
-      })(req, res);
+      passport.authenticate(this.strategyName, { session: this.session },
+        (err, u) => this.authHandler(err, u).then(resolve, reject))(req, res);
     });
+  }
+
+  async authHandler(err: Error | undefined, user: U) {
+    if (err) {
+      throw err;
+    } else {
+      // Remove profile fields from passport
+      delete (user as any)._json;
+      delete (user as any)._raw;
+      delete (user as any).provider;
+
+      const ident = this.toIdentity(user);
+      if (!ident.provider) {
+        ident.provider = this.strategyName;
+      }
+      return ident as Identity;
+    }
   }
 }

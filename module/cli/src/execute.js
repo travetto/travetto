@@ -18,36 +18,74 @@ const Execute = {
     if (!p.startsWith(FsUtil.cwd)) {
       p = `${FsUtil.cwd}/node_modules/@travetto/${p.split('travetto/module/')[1]}`;
     }
-    return require(p).init();
+    return require(p);
   },
   loadAllPlugins() {
     const BIN_DIR = `${FsUtil.cwd}/node_modules/.bin`;
     if (fs.existsSync(BIN_DIR)) {
       const files = fs.readdirSync(BIN_DIR).filter(x => x.startsWith(`${PREFIX}-`));
+      const all = [];
       for (const f of files) {
-        Execute.requireModule(f);
+        all.push(Execute.requireModule(f));
       }
+      return all;
     }
   },
   loadSinglePlugin(cmd) {
-    try {
-      return Execute.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
-    } catch (e) {
-      Util.showHelp(commander, `Unknown command ${cmd}`);
+    return Execute.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
+  },
+  async getCompletion(args) {
+    const compl = { all: [] };
+    const cmd = args.shift() || '';
+    await Promise.all(Execute.loadAllPlugins().map(x => x.complete(compl)));
+
+    let last = cmd;
+    let opts = [];
+
+    if (!compl[cmd]) {
+      opts = compl.all;
+    } else {
+      last = args.pop() || '';
+      let second = args.pop() || '';
+      let flag = '';
+
+      if (last in compl[cmd]) {
+        flag = last;
+        last = '';
+      } else if (second in compl[cmd]) {
+        if (compl[cmd][second].includes(last)) {
+          flag = '';
+          last = '';
+        } else {
+          flag = second;
+        }
+      }
+      opts = compl[cmd][flag];
     }
+
+    return last ? opts.filter(x => x.startsWith(last)) : opts.filter(x => !x.startsWith('-'));
   },
   run(args) {
     const cmd = args[2];
     const hasCmd = cmd && !cmd.startsWith('-');
     const wantsHelp = args.includes('-h') || args.includes('--help');
 
+    if (cmd === 'complete') {
+      this.getCompletion(args.slice(3)).then(x => console.log((x || []).join(' ')));
+      return;
+    }
+
     if (hasCmd) {
-      const prog = Execute.loadSinglePlugin(cmd);
-      if (wantsHelp) {
-        Util.showHelp(prog);
+      try {
+        const prog = Execute.loadSinglePlugin(cmd).init();
+        if (wantsHelp) {
+          Util.showHelp(prog);
+        }
+      } catch (err) {
+        Util.showHelp(commander, `Unknown command ${cmd}`);
       }
     } else {
-      Execute.loadAllPlugins();
+      Execute.loadAllPlugins().map(x => x.init());
       if (!cmd || wantsHelp) {
         Util.showHelp(commander);
       }

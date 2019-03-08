@@ -116,6 +116,7 @@ Release 0.6.x: ???
   * Cleanup tests output on run
 * Using latest typescript
 * Reworked CLI, supporting color, and standardizing architecture
+* Added in tab completion support for cli
 * Auth Rewrite
 * Worker breakout/rewrite
 * Rest module rewrite, interceptors overhauled

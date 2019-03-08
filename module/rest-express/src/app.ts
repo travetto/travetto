@@ -3,11 +3,11 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
 
+import { Inject } from '@travetto/di';
 import { RouteUtil, RestApp, RouteConfig } from '@travetto/rest';
 
 import { RouteStack } from './types';
 import { ExpressConfig } from './config';
-import { Inject } from '../../di';
 
 export class ExpressRestApp extends RestApp<express.Application> {
 

@@ -22,4 +22,12 @@ function init() {
     });
 }
 
-module.exports = { init };
+function complete(c) {
+  c.all.push('boot');
+  c.boot = {
+    '': ['--phase', ''],
+    '--phase': ['bootstrap', 'compile']
+  };
+}
+
+module.exports = { complete, init };

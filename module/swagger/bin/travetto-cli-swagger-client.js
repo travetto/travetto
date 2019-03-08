@@ -22,4 +22,14 @@ function init() {
     });
 }
 
-module.exports = { init };
+function complete(c) {
+  c.all.push('swagger-client');
+  const formats = ['typescript-angular'];
+  c['swagger-client'] = {
+    '': ['--format', '--output', '--additional-properties'],
+    '--format': formats,
+    '-f': formats
+  };
+}
+
+module.exports = { init, complete };

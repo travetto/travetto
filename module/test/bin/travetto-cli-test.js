@@ -46,4 +46,17 @@ function init() {
     });
 }
 
-module.exports = { init };
+function complete(c) {
+  const formats = ['tap', 'json', 'event']
+  const modes = ['single', 'all'];
+  c.all.push('test');
+  c.test = {
+    '': ['--format', '--mode'],
+    '--format': formats,
+    '-f': formats,
+    '--mode': modes,
+    '-m': modes
+  };
+}
+
+module.exports = { init, complete };

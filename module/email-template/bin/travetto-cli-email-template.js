@@ -11,4 +11,8 @@ function init() {
   });
 }
 
-module.exports = { init };
+function complete(c) {
+  c.all.push('email-template');
+}
+
+module.exports = { init, complete };
