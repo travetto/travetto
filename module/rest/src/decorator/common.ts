@@ -36,9 +36,3 @@ export function Cache(value: number, unit: Units = 's') {
     'Cache-Control': () => `max-age=${delta}`
   });
 }
-
-export const Cors = (methods: string = '*', domain: string = '*') =>
-  Header({
-    'Access-Control-Allow-Origin': domain,
-    'Access-Control-Allow-Methods': methods
-  });

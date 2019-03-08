@@ -2,6 +2,7 @@ import { Config } from '@travetto/config';
 import { Env, AppError } from '@travetto/base';
 
 import { SSLUtil } from './util/ssl';
+import { Method } from './types';
 
 @Config('rest')
 export class RestConfig {
@@ -14,6 +15,15 @@ export class RestConfig {
     cert: string,
     key: string
   };
+
+  cors: {
+    active: boolean;
+    origins?: string[],
+    methods?: Method[],
+    headers?: string[]
+  } = {
+      active: false
+    };
 
   async getKeys() {
     if (!this.keys) {

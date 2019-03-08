@@ -1,10 +1,9 @@
-import { Controller, Options, Get, Cors } from '@travetto/rest';
+import { Controller, Get } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 
 import { SwaggerService } from './service';
 import { ClientGenerate } from './client-generate';
 
-@Cors()
 @Controller('/')
 export class SwaggerController {
 
@@ -17,9 +16,6 @@ export class SwaggerController {
   postConstruct() {
     return this.generator.run();
   }
-
-  @Options('/swagger.json')
-  async getSpecOptions() { }
 
   @Get('/swagger.json')
   async getSpec() {
