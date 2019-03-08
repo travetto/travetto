@@ -25,3 +25,6 @@ The common environment variables throughout the code base:
 * `TEST_FORMAT` = tap|json  - Defaults to tap
 * `TEST_CONCURRENCY` = 4    - Defaults to 4 or 1 - cpu count
 * `TEST_MODE` = single|all  - Single vs all
+
+* `JS_YAML` = 0|1           - Defaults to none, forces use of js-yaml over @travetto/yaml
+* `NO_JS_YAML` = 0|1        - Defaults to none, forces use of @travetto/yaml over js-yaml

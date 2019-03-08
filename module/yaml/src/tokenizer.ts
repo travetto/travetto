@@ -22,12 +22,26 @@ const NINE = 0x39;
 
 export class Tokenizer {
 
+  static isIdentifierStart = (c: number) => c >= 65 && c <= 91 || c >= 97 && c <= 123 || c === 36 || c === 95;
+  static isIdentifierFull = (c: number) => Tokenizer.isIdentifierStart(c) || c >= 48 && c <= 57;
+
   static isComment = (ch: string, pos: number) => {
     const c = ch.charCodeAt(pos);
     return c === HASH || (c === DASH && ch.charCodeAt(pos + 1) === c && ch.charCodeAt(pos + 2) === c);
   }
   static isWhitespace = (c: number) => c === SPC || c === TAB || c === NEWLINE || c === CR;
   static isWhitespaceStr = (c: string) => Tokenizer.isWhitespace(c.charCodeAt(0));
+
+  static handleReplacements(text: string, replacements: [string, number, number][]) {
+    const out: string[] = [];
+    let replPos = 0;
+    for (const [o, s, l] of replacements) {
+      out.push(text.substring(replPos, s), o);
+      replPos = s + l;
+    }
+    out.push(text.substring(replPos));
+    return out.join('');
+  }
 
   static readQuote(text: string, pos: number, end: number) {
     const start = pos;
@@ -41,9 +55,18 @@ export class Tokenizer {
     return [pos, text.substring(start, pos + 1)] as [number, string];
   }
 
+  static readIdentifier(text: string, pos: number, end: number) {
+    const start = pos++;
+    while (this.isIdentifierFull(text.charCodeAt(pos)) && pos < end) {
+      pos += 1;
+    }
+    return [pos, text.substring(start, pos)] as [number, string];
+  }
+
   static readJSON(text: string, pos: number = 0, end: number = text.length) {
     const start = pos;
     const stack: number[] = [];
+    const replacements: [string, number, number][] = [];
 
     while (start === pos || (stack.length && pos < end)) {
       const c = text.charCodeAt(pos);
@@ -53,7 +76,19 @@ export class Tokenizer {
       } else if (c === OPEN_SQ_BRACE || c === OPEN_BRACE) { // Nest Inward
         stack.push(c === OPEN_SQ_BRACE ? CLOSE_SQ_BRACE : CLOSE_BRACE); // Pop outward
       } else if (c === QUOTE || c === SINGLE_QUOTE) { // Start quote
-        [pos] = this.readQuote(text, pos, end);
+        let quote;
+        const qStart = pos;
+        [pos, quote] = this.readQuote(text, pos, end);
+        if (c === SINGLE_QUOTE) {
+          replacements.push([`"${text.substring(qStart + 1, pos).replace(/"/g, '\\"')}"`, qStart - start, quote.length]);
+        }
+      } else if (this.isIdentifierStart(c)) {
+        let ident;
+        const idStart = pos;
+        [pos, ident] = this.readIdentifier(text, pos, end);
+        if (!/true|false|null/.test(ident)) {
+          replacements.push([`"${ident}"`, idStart - start, ident.length]);
+        }
       }
       pos += 1;
     }
@@ -62,7 +97,13 @@ export class Tokenizer {
       throw new Error('Invalid JSON');
     }
 
-    return [pos, text.substring(start, pos)] as [number, string];
+    let final = text.substring(start, pos);
+    if (replacements.length) {
+      // Replace out single quotes, and escape keys
+      final = this.handleReplacements(final, replacements);
+    }
+
+    return [pos, final] as [number, string];
   }
 
   static getIndent(tokens: string[]) {
