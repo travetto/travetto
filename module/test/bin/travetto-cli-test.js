@@ -38,7 +38,7 @@ function init() {
 
       if (args.length === 0 && cmd.mode === 'all') {
         args = ['test/.*'];
-      } else if (args.length !== 1 && cmd.mode === 'single') {
+      } else if (args.length < 1 && cmd.mode === 'single') {
         return Util.showHelp(cmd, 'You must specify a file to run in single mode');
       }
 

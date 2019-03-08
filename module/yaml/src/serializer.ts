@@ -1,5 +1,3 @@
-import { Tokenizer } from './tokenizer';
-
 export class Serializer {
   static clean(key: string) {
     if (/['"@ -:]/.test(key)) {

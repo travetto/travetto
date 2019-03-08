@@ -122,4 +122,31 @@ age: 20
   `);
         assert(output === { mail: { transport: null } });
     }
+
+    @Test()
+    testJSONQuotes() {
+        const output = YamlUtil.parse(`
+---
+  mail: 'hello'
+  `);
+        assert(output === { mail: 'hello' });
+
+        const output2 = YamlUtil.parse(`
+---
+  mail: ['hello']
+  `);
+        assert(output2 === { mail: ['hello'] });
+
+        const output3 = YamlUtil.parse(`
+---
+  mail: { 'hello' : 'goodbye' }
+          `);
+        assert(output3 === { mail: { hello: 'goodbye' } });
+
+        const output4 = YamlUtil.parse(`
+---
+  mail: { hello : 'goodbye' }
+          `);
+        assert(output4 === { mail: { hello: 'goodbye' } });
+    }
 }

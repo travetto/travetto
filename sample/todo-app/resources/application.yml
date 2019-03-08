@@ -7,5 +7,4 @@ elasticsearch.model:
   namespace: todo
 
 rest:
-  cors:
-    active: true
+  cors: { active : true }
