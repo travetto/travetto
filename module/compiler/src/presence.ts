@@ -15,7 +15,11 @@ export class FilePresenceManager {
   watchSpaces = new Set<string>();
 
   constructor(private cwd: string, private rootPaths: string[], private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = Env.watch) {
-    this.watchSpaces.add('src');
+
+    if (!this.rootPaths.includes('.')) {
+      this.rootPaths.push('.');
+    }
+
     for (const root of this.rootPaths) {
       this.watchSpaces.add(FsUtil.joinUnix(root, 'src'));
     }

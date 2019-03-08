@@ -129,4 +129,22 @@ function init() {
     });
 }
 
-module.exports = { init };
+async function complete(c) {
+  const apps = await getAppList();
+  const env = ['prod', 'dev'];
+  const bool = ['yes', 'no'];
+  const profiles = require('fs').readdirSync(`${process.cwd()}`).filter(x => x.endsWith('.yml')).map(x => x.replace('.yml', ''));
+  profiles.push('application');
+  c.all.push('run');
+  c.run = {
+    '': apps.map(x => x.name).concat(['--env', '--watch', '--profile']),
+    '--env': env,
+    '-e': env,
+    '--watch': bool,
+    '-w': bool,
+    '--profile': profiles,
+    '-p': profiles,
+  };
+}
+
+module.exports = { init, complete };

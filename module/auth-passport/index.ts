@@ -1,2 +1,2 @@
 export * from './src/interceptor';
-export * from './src/provider';
+export * from './src/identity';
