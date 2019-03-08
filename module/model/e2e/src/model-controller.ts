@@ -1,4 +1,4 @@
-import { Get, RestServer, RestApp } from '@travetto/rest';
+import { Get, RestApp } from '@travetto/rest';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { Injectable, InjectableFactory, Application } from '@travetto/di';
 import { ExpressRestApp } from '@travetto/rest-express';
@@ -150,9 +150,9 @@ export class SimpleModelController {
 
 @Application('simple')
 class App {
-  constructor(private server: RestServer) { }
+  constructor(private app: RestApp) { }
 
   run() {
-    return this.server.run();
+    return this.app.run();
   }
 }

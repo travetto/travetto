@@ -4,7 +4,7 @@ import { Suite, Test, BeforeAll, AfterEach } from '@travetto/test';
 import { ModelService, ModelRegistry, ModelSource } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
-import { Model<%= model.className %>Source } from '@travetto/model-<%= model.packageName %>';
+import { <%= model.className %>ModelSource } from '@travetto/model-<%= model.packageName %>';
 
 import { Todo } from '../../src/model/todo';
 
@@ -23,7 +23,7 @@ class TestCRUD {
 
   @AfterEach()
   async afterEach() {
-    const mms = (await DependencyRegistry.getInstance(ModelSource)) as Model<%= model.className %>Source;
+    const mms = (await DependencyRegistry.getInstance(ModelSource)) as <%= model.className %>ModelSource;
     return await mms.resetDatabase();
   }
 

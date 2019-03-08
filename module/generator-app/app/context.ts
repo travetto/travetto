@@ -27,7 +27,7 @@ export function getContext(name: string): Context {
     },
     template: '',
     keywords: ['travetto'],
-    modules: [],
+    modules: ['@travetto/cli'],
     depList: []
   };
 }

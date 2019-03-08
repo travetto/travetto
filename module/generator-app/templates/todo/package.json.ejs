@@ -11,8 +11,13 @@
   "keywords": [<% for (const kw of keywords) {%>"<%= kw %>"<% }%>],
   "license": "MIT",
   "scripts": {
-    "start": "travetto run <%= name %>"
+    "start": "npx travetto run <%= name %>",
+    "test": "npx travetto test"
   },
+  "files": [
+    "src",
+    "resources"
+  ],
   "name": "<%= name %>",
   "version": "1.0.0"
 }

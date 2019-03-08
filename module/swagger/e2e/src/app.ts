@@ -1,20 +1,18 @@
 import { Application, InjectableFactory } from '@travetto/di';
-import { RestServer, RestApp } from '@travetto/rest';
+import { RestApp } from '@travetto/rest';
 import { ExpressRestApp } from '@travetto/rest-express';
 
-export * from '../../src/controller'; // Force loading, and bypass no-side-effect
-
-@Application('sample')
+@Application('sample', { standalone: false })
 export class SampleApp {
 
   @InjectableFactory()
-  static getRestApp(): RestApp {
+  static getApp(): RestApp {
     return new ExpressRestApp();
   }
 
-  constructor(private server: RestServer) { }
+  constructor(private app: RestApp) { }
 
   run() {
-    this.server.run();
+    this.app.run();
   }
 }
