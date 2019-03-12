@@ -20,10 +20,10 @@ export const STYLES: { [key: string]: [number, number] } = {
 export const LEVEL_STYLES: { [key: string]: string[] } = {
   info: ['white'],
   error: ['red'],
-  debug: ['grey'],
+  debug: ['yellow'],
   warn: ['magenta'],
   fatal: ['cyan', 'inverse'],
-  trace: ['yellow']
+  trace: ['grey']
 };
 
 /**

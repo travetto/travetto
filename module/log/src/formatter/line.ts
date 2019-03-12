@@ -39,34 +39,18 @@ export function lineFormatter(opts: LineFormatterOpts) {
     }
 
     if (ev.file && opts.location) {
-      let ns = ev.file
-        .replace(Env.cwd, '')
-        .replace(/^.*node_modules/, '')
-        .replace(/[\/\\]/g, '.')
-        .replace(/^[.]/, '')
-        .replace(/[.](t|j)s$/, '');
+      const ns = ev.category;
 
-      if (ns.length > 20) {
-        ns = ns.split(/[.]/g)
-          .map((x, i, arr) => {
-            if ((i + 1) === arr.length) {
-              return x;
-            } else {
-              return x.replace('@travetto', '@trv').substring(0, 4).replace(/[aeiou]/g, '');
-            }
-          }).join('.');
-      }
-
-      const loc = ev.line ? `${ns}:${' '.repeat(2 - Math.trunc(Math.floor(Math.log10(ev.line)))) + ev.line}` : ns;
+      const loc = ev.line ? `${ns}:${`${ev.line}`.padStart(3)}` : ns;
       if (opts.colorize) {
         // ev.category = makeLink(ev.category, `file://${ev.file}:${ev.line}`);
       }
-      out = `${out}[${loc}] `;
+      out = `${out}[${stylize(loc!, 'blue')}] `;
     }
 
-    if (ev.category) {
-      out = `${out}[${ev.category}] `;
-    }
+    // if (ev.category) {
+    //   out = `${out}[${ev.category}] `;
+    // }
 
     let message = ev.message;
 

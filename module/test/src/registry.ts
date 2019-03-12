@@ -7,7 +7,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPending(cls: Class): Partial<SuiteConfig> {
     return {
       class: cls,
-      className: cls.__id.split(':')[1].replace(/^test[.]/, '').replace('#', '.'),
+      className: cls.__id.replace(/^@app./, '').replace(/^test[.]/, '').replace('#', '.'),
       file: cls.__filename,
       tests: [],
       beforeAll: [],

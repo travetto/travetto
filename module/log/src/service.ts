@@ -3,6 +3,7 @@ import { Env } from '@travetto/base';
 import { LogEvent, LogListener, LogLevel, LogLevels } from './types';
 import { lineFormatter } from './formatter/line';
 import { consoleOutput } from './output/console';
+import { LogUtil } from './util';
 
 class $Logger {
 
@@ -10,9 +11,29 @@ class $Logger {
 
   private listeners: LogListener[] = [];
 
-  private level: number = Env.trace ? LogLevels.trace : (Env.debug ? LogLevels.debug : LogLevels.info);
+  private filters: { [key: string]: (x: string) => boolean } = {};
+  private exclude: { [key: string]: boolean } = {
+    debug: true,
+    trace: true
+  };
 
   init() {
+
+    const flags = {
+      debug: LogUtil.readEnvVal('debug', Env.dev ? '*' : ''),
+      trace: LogUtil.readEnvVal('trace'),
+    };
+
+    for (const k of ['debug', 'trace'] as ['debug', 'trace']) {
+      const filter = LogUtil.buildFilter(flags[k]);
+      if (filter !== LogUtil.falsehood) {
+        delete this.exclude[k];
+        if (filter !== LogUtil.truth) {
+          this.filters[k] = filter;
+        }
+      }
+    }
+
     // Base logger, for free
     const formatter = lineFormatter({ colorize: $Logger.COLORIZE });
     const errorOutput = consoleOutput({ method: 'error' });
@@ -54,7 +75,7 @@ class $Logger {
 
     event.level = (event.level! in LogLevels) ? event.level : 'info';
 
-    if (LogLevels[event.level!] < this.level) {
+    if ((event.level! in this.exclude) || (event.level! in this.filters && !this.filters[event.level!](event.category!))) {
       return;
     }
 
@@ -76,7 +97,7 @@ class $Logger {
   }
 
   enabled(level: LogLevel): boolean {
-    return LogLevels[level] >= this.level;
+    return !(level in this.exclude);
   }
 }
 

@@ -11,11 +11,11 @@ const envListVal = k => (envVal(k) || '').split(/[, ]+/g).filter(x => !!x);
 const envIntVal = (k, def) => parseInt(envVal(k, def), 10);
 const isEnvTrue = k => {
   const val = envVal(k);
-  return val !== undefined && /(1|true|on|yes)/i.test(val);
+  return val !== undefined && /^(1|true|on|yes)$/i.test(val);
 };
 const isEnvFalse = k => {
   const val = envVal(k);
-  return val !== undefined && /(0|false|off|no)/i.test(val);
+  return val !== undefined && /^(0|false|off|no)$/i.test(val);
 };
 
 function checkWatch() {
@@ -23,13 +23,11 @@ function checkWatch() {
 }
 
 function buildLogging(prof) {
-  const debug = isEnvTrue('debug') || (prof.dev && !isEnvFalse('debug'));
-  const trace = isEnvTrue('trace');
+  const debug = !isEnvFalse('debug') && (isEnvTrue('debug') || /,(@trv:)?[*],/.test(`,${envVal('debug', prof.dev ? '*' : '')},`));
+  const trace = !isEnvFalse('trace') && (isEnvTrue('trace') || /,(@trv:)?[*],/.test(`,${envVal('trace', '')},`));
   const quietInit = isEnvTrue('quiet_init');
 
-  const log = trace ?
-    (lvl, ...args) => console.log(new Date().toISOString(), lvl, '[core]', ...args) : // ms resolution on trace mode
-    (lvl, ...args) => console.log(new Date().toISOString().split(/[.]/)[0], lvl, '[core]', ...args);
+  const log = (...args) => console.log(new Date().toISOString().split(/[.]/)[0], ...args);
 
   console.warn = log.bind(null, 'warn ');
   console.info = log.bind(null, 'info ');
@@ -37,11 +35,11 @@ function buildLogging(prof) {
   console.trace = log.bind(null, 'trace');
 
   if (!trace) {
-    console.trace = () => {};
+    console.trace = () => { };
   }
 
   if (!debug) {
-    console.debug = () => {}; // Suppress debug statements
+    console.debug = () => { }; // Suppress debug statements
   }
 
   function error(...args) {
@@ -97,12 +95,12 @@ function buildProfile() {
 const profile = buildProfile();
 
 const Env = [
-    { cwd: FsUtil.cwd },
-    { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal, getInt: envIntVal },
-    profile,
-    buildLogging(profile),
-    checkWatch()
-  ]
+  { cwd: FsUtil.cwd },
+  { isTrue: isEnvTrue, isFalse: isEnvFalse, get: envVal, getList: envListVal, getInt: envIntVal },
+  profile,
+  buildLogging(profile),
+  checkWatch()
+]
   .reduce((acc, el) => ({ ...acc, ...el }), {});
 
 function showEnv() {
@@ -110,8 +108,8 @@ function showEnv() {
     console.info('Env',
       JSON.stringify(Env, (e, v) =>
         (typeof v === 'boolean' && v === false) ||
-        (typeof v === 'string' && v === '') ||
-        (typeof v === 'function') ? undefined : v, 2
+          (typeof v === 'string' && v === '') ||
+          (typeof v === 'function') ? undefined : v, 2
       )
     );
   }

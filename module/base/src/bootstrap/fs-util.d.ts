@@ -13,4 +13,5 @@ export declare class FsUtil {
   static prepareTranspile(fileName: string): string;
   static tempDir(pre: string): void;
   static appRootMatcher(paths: string[]): RegExp;
+  static computeModuleFromFile(file: string): string;
 }

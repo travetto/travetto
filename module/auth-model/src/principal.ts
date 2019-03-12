@@ -3,7 +3,7 @@ import { ModelService, Query, ModelCore } from '@travetto/model';
 import { AuthUtil, Identity, Principal, PrincipalProvider } from '@travetto/auth';
 import { Class } from '@travetto/registry';
 
-interface RegisteredIdentity extends Identity {
+export interface RegisteredIdentity extends Identity {
   hash: string;
   salt: string;
   resetToken: string;

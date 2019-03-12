@@ -15,6 +15,6 @@ import { Application } from '../..';
 })
 class Complex {
   async run(domain: string, port: number) {
-    console.log('Launching', domain, 'on port', port);
+    console.debug('Launching', domain, 'on port', port);
   }
 }

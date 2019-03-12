@@ -3,8 +3,9 @@ import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory, Injectable } from '@travetto/di';
 import { ModelRegistry, BaseModel, Model, ModelSource, ModelService } from '@travetto/model';
-import { AuthModelService, RegisteredPrincipalConfig } from '../';
+import { ModelPrincipalProvider } from '../';
 import { SchemaRegistry } from '@travetto/schema';
+import { RegisteredIdentity } from '../src/principal';
 
 @Model()
 class User extends BaseModel {
@@ -44,16 +45,16 @@ class MockModelSource {
 
 class TestConfig {
   @InjectableFactory()
-  static getAuthService(service: ModelService): AuthModelService<User> {
-    return new AuthModelService<User>(
-      service, new RegisteredPrincipalConfig(User, {
-        id: 'id',
-        password: 'password',
-        permissions: 'permissions',
-        hash: 'hash',
-        salt: 'salt',
-        resetExpires: 'resetExpires',
-        resetToken: 'resetToken'
+  static getAuthService(service: ModelService): ModelPrincipalProvider<User> {
+    return new ModelPrincipalProvider<User>(
+      service, User, (u) => ({
+        ...(u as any as RegisteredIdentity),
+        details: u,
+        permissions: new Set(u.permissions || []),
+        provider: 'model'
+      }),
+      (rid) => User.from({
+        rid
       })
     );
   }
@@ -70,7 +71,7 @@ export class ServiceTest {
 
   @Test()
   async register() {
-    const svc = (await DependencyRegistry.getInstance(AuthModelService)) as AuthModelService<User>;
+    const svc = (await DependencyRegistry.getInstance(ModelPrincipalProvider)) as ModelPrincipalProvider<User>;
     assert.ok(svc);
 
     const pre = User.from({

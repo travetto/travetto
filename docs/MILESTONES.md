@@ -122,3 +122,4 @@ Release 0.6.x: ???
 * Rest module rewrite, interceptors overhauled
 * General test stability
 * Support for unhandled rejections in the testing framework
+* Base logging upgrade, and ability to filter logging by package, folder etc.

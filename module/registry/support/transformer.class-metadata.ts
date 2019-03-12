@@ -1,13 +1,11 @@
 import * as ts from 'typescript';
 
-import { Env, FsUtil } from '@travetto/base';
+import { FsUtil, Util } from '@travetto/base';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 
-const stringHash = require('string-hash');
-
 interface IState extends TransformerState {
+  module: string;
   file: string;
-  fullFile: string;
 }
 
 const REGISTER_MOD = require.resolve('../src/decorator');
@@ -22,7 +20,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     for (const child of node.members) {
       if (ts.isMethodDeclaration(child)) {
-        const hash = stringHash(child.getText());
+        const hash = Util.naiveHash(child.getText());
 
         const conf: any = {
           hash
@@ -43,9 +41,9 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       node.typeParameters,
       ts.createNodeArray(node.heritageClauses),
       ts.createNodeArray([
-        TransformUtil.createStaticField('__filename', FsUtil.toUnix(state.fullFile)),
-        TransformUtil.createStaticField('__id', `${state.file}#${node.name!.getText()}`),
-        TransformUtil.createStaticField('__hash', stringHash(node.getText())),
+        TransformUtil.createStaticField('__filename', FsUtil.toUnix(state.file)),
+        TransformUtil.createStaticField('__id', `${state.module}#${node.name!.getText()}`),
+        TransformUtil.createStaticField('__hash', Util.naiveHash(node.getText())),
         TransformUtil.createStaticField('__methods', TransformUtil.extendObjectLiteral(methods)),
         TransformUtil.createStaticField('__abstract', TransformUtil.fromLiteral(isAbstract)),
         ...node.members
@@ -66,31 +64,10 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 }
 
 export const ClassMetadataTransformer = {
-  transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => {
-    let fileRoot = FsUtil.toUnix(file.fileName);
-
-    let ns = '@sys';
-
-    if (fileRoot.includes(Env.cwd)) {
-      fileRoot = fileRoot.split(Env.cwd)[1].replace(/^[\/]+/, '');
-      ns = '@app';
-      if (fileRoot.startsWith('node_modules')) {
-        fileRoot = fileRoot.split('node_modules').pop()!.replace(/^[\/]+/, '');
-        if (fileRoot.startsWith('@')) {
-          const [ns1, ns2, ...rest] = fileRoot.split(/[\/]/);
-          ns = `${ns1}.${ns2}`;
-          fileRoot = rest.join('.');
-        }
-      }
-    }
-
-    fileRoot = fileRoot
-      .replace(/[\/]+/g, '.')
-      .replace(/^\./, '')
-      .replace(/\.(t|j)s$/, '');
-
-    return { file: `${ns}:${fileRoot}`, fullFile: file.fileName };
-  }, visitNode),
+  transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => ({
+    module: FsUtil.computeModuleFromFile(file.fileName),
+    file: file.fileName
+  }), visitNode),
   phase: 'before',
   key: 'registry',
 };

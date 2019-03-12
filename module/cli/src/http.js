@@ -71,7 +71,7 @@ exports.Server = function Server({ handler, port, open, reloadRate }) {
         content = content.replace(/<head>/, CHECK_SCRIPT).replace('%RATE%', reloadRate);
       }
     } catch (e) {
-      console.log(e.message);
+      console.error(e.message);
       content = new Error(e).stack;
       contentType = CONTENT_TYPES.txt;
       response.statusCode = 503;
@@ -88,7 +88,7 @@ exports.Server = function Server({ handler, port, open, reloadRate }) {
 
   if (open) {
     const finalUrl = `http://localhost:${port}`;
-    console.log(`Now running at ${finalUrl}`);
+    console.debug(`Now running at ${finalUrl}`);
     require('./os').launch(finalUrl);
   }
 };

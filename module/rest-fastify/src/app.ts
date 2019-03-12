@@ -30,7 +30,7 @@ export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
   }
 
   async unregisterRoutes(key: string | symbol) {
-    console.log('Fastify does not allow for route reloading');
+    console.debug('Fastify does not allow for route reloading');
   }
 
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
