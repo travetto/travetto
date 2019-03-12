@@ -67,8 +67,8 @@ export function lineFormatter(opts: LineFormatterOpts) {
         typeof x === 'string' ? x :
           (x instanceof Error ? (Env.prod ? x.stack : Stacktrace.simplifyStack(x)) :
             util.inspect(x,
-              ev.level === 'debug',
-              ev.level === 'debug' ? 4 : 2,
+              ev.level === 'debug' || ev.level === 'trace',
+              (ev.level === 'debug' || ev.level === 'trace') ? 4 : 2,
               opts.colorize !== false
             )
           )).join(' ');
