@@ -9,8 +9,7 @@
   "dependencies": {
     "@travetto/auth": "^0.5.12",
     "@travetto/context": "^0.5.12",
-    "@travetto/rest": "^0.5.12",
-    "@travetto/jwt": "^0.5.8"
+    "@travetto/rest": "^0.5.12"
   },
   "description": "Rest authentication integration support for the travetto framework",
   "devDependencies": {

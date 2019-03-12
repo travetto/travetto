@@ -3,4 +3,5 @@ export * from './src/interceptor';
 export * from './src/decorator';
 export * from './src/identity';
 export * from './src/errors';
-export * from './src/serializer/jwt';
+export * from './src/serializer/session';
+export * from './src/serializer/rest';
