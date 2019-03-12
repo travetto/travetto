@@ -1,11 +1,9 @@
 import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
 
-import { FileCache, Env, AppError, FsUtil } from '@travetto/base';
+import { FileCache, Env, AppError, FsUtil, Util } from '@travetto/base';
 
 import { CompilerUtil } from './util';
-
-const stringHash = require('string-hash');
 
 export class SourceManager {
   private sourceMaps = new Map<string, { url: string, map: string, content: string }>();
@@ -68,7 +66,7 @@ export class SourceManager {
 
       if (Env.watch && this.hashes.has(fileName)) {
         // Let's see if they are really different
-        hash = stringHash(content);
+        hash = Util.naiveHash(content);
         if (hash === this.hashes.get(fileName)) {
           console.trace(`Contents Unchanged: ${fileName}`);
           return false;

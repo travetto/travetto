@@ -11,6 +11,6 @@ if ('JS_YAML' in process.env || (!('NO_JS_YAML' in process.env) && !/travetto[\/
     const yaml = require('js-yaml');
     YamlUtil.parse = t => Object.assign({}, ...yaml.safeLoadAll(t));
     YamlUtil.serialize = (o, indent = 2, lineWidth = 160) => yaml.safeDump(o, { indent, lineWidth });
-    console.log('Running with js-yaml');
+    console.debug('Running with js-yaml');
   } catch (e) { }
 }

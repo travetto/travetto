@@ -46,12 +46,12 @@ export class DomainContext {
 
     this.storageState.set(id, init);
 
-    console.log('My Id', id);
+    console.trace('My Id', id);
 
     try {
       return await new Promise((res, rej) => {
         d.run(() => {
-          console.log('My Id2', this.id);
+          console.trace('My Id2', this.id);
           fn().then(res, rej);
         });
       });

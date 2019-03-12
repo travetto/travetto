@@ -24,7 +24,7 @@ export class TodoService {
 
   async complete(id: string, completed = true) {
     return this.modelService.updatePartial(Todo,
-      { id, completed }
+      Todo.from({ id, completed })
     );
   }
 

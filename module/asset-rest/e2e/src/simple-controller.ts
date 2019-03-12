@@ -1,5 +1,5 @@
 import { Controller, Request, Post, Get } from '@travetto/rest';
-import { AssetUpload } from '../';
+import { AssetUpload } from '../..';
 
 @Controller('/simple')
 export class Simple {

@@ -13,7 +13,7 @@ export abstract class RestAuthContextSerializer extends AuthContextSerializer {
     if (input) {
       const ctx = await this.deserialize(input);
       if (ctx) {
-        console.log('Restoring', ctx);
+        console.debug('Restoring', ctx);
         return ctx;
       }
     }

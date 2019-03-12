@@ -7,12 +7,12 @@ export async function run() {
   const child = child_process.spawn('npx', [
     'lerna', '--concurrency', '6', 'exec', '--no-bail', '--stream', '--',
     'npx', 'travetto', 'test', '-f', 'event', '-c', '1'
-  ], { shell: true });
+  ], { shell: true, stdio: [null, null, 2] });
 
   const emitter = new TapEmitter();
 
   const rl = readline.createInterface({
-    input: child.stdout,
+    input: child.stdout!,
     output: process.stdout,
     terminal: false
   });

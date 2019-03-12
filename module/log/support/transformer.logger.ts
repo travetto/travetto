@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { Env } from '@travetto/base';
+import { Env, FsUtil } from '@travetto/base';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 
 import { LogLevels } from '../src/types';
@@ -37,10 +37,16 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
     let payload = TransformUtil.fromLiteral({
       file: state.source.fileName,
       line: loc.line + 1,
-      level
+      level,
+      category: FsUtil.computeModuleFromFile(state.source.fileName!)
     });
 
     const args = node.arguments.slice(0);
+
+    // Drop the inserted category message by the compiler, if present
+    if (args.length && ts.isStringLiteral(args[0]) && args[0].getFullText().includes('[@trv:')) {
+      args.shift();
+    }
 
     if (args.length) {
       const arg = args[0];

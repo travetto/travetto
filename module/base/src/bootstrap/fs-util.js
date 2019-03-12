@@ -72,6 +72,10 @@ const FsUtil = {
     // Drop typescript import, and use global. Great speedup;
     fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript';?/g, '');
 
+    // Insert filename into all log statements for all components, when logger isn't loaded
+    fileContents = fileContents.replace(/\bconsole[.](debug|info|trace|warn)[(]/g,
+      a => `${a}'[${FsUtil.computeModuleFromFile(fileName)}]',`);
+
     return `${fileContents};\nexport const __$TRV = 1;`;
   },
   resolveFrameworkDevFile: (pth) => {
@@ -92,6 +96,37 @@ const FsUtil = {
       const re = new RegExp(`^(${finalPaths.map(x => `${x === '.' ? '' : `${x}/`}(index|src\/)`).join('|')})`);
       return re;
     }
+  },
+  computeModuleFromFile: (fileName) => {
+    /** @type string */
+    let mod = FsUtil.toUnix(fileName);
+
+    let ns = '@sys';
+
+    if (mod.includes(cwd)) {
+      mod = mod.split(cwd)[1].replace(/^[\/]+/, '');
+      ns = '@app';
+    }
+
+    if (mod.startsWith('node_modules')) {
+      mod = mod.split('node_modules').pop().replace(/^[\/]+/, '');
+    }
+
+    if (mod.startsWith('@')) {
+      const [ns1, ns2, ...rest] = mod.split(/[\/]/);
+      ns = `${ns1}:${ns2}`.replace('@travetto', '@trv');
+      if (rest[0] === 'src') {
+        rest.shift();
+      }
+      mod = rest.join('.');
+    }
+
+    mod = mod
+      .replace(/[\/]+/g, '.')
+      .replace(/^\./, '')
+      .replace(/\.(t|j)s$/, '');
+
+    return `${ns}/${mod}`;
   }
 };
 

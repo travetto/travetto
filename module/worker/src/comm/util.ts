@@ -67,8 +67,8 @@ export class CommUtil {
     console.trace(`[${process.pid}] Launched ${result.process.pid}`);
 
     if (Env.debug) {
-      result.process.stdout.pipe(process.stdout);
-      result.process.stderr.pipe(process.stderr);
+      result.process.stdout!.pipe(process.stdout);
+      result.process.stderr!.pipe(process.stderr);
     }
 
     return result;

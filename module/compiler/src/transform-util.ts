@@ -1,9 +1,7 @@
 import * as ts from 'typescript';
 import { dirname, } from 'path';
 
-import { AppInfo, FsUtil } from '@travetto/base';
-
-const stringHash = require('string-hash');
+import { AppInfo, FsUtil, Util } from '@travetto/base';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
@@ -288,7 +286,7 @@ export class TransformUtil {
 
   static importFile(state: TransformerState, pth: string) {
     if (!state.newImports.has(pth)) {
-      const ident = ts.createIdentifier(`i_${stringHash(pth)}`);
+      const ident = ts.createIdentifier(`i_${Util.naiveHash(pth)}`);
       const imprt = {
         path: pth,
         ident

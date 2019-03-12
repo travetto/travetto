@@ -134,6 +134,17 @@ export class Util {
     } as any as T;
   }
 
+  static naiveHash(text: string) {
+    let hash = 5381;
+
+    for (let i = 0; i < text.length; i++) {
+      // tslint:disable-next-line: no-bitwise
+      hash = (hash * 33) ^ text.charCodeAt(i);
+    }
+
+    return Math.abs(hash);
+  }
+
   static computeOrdering<T,
     U extends {
       after?: T | Set<T> | T[],
