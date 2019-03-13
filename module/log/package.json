@@ -7,11 +7,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/compiler": "^0.5.7"
+    "@travetto/compiler": "^0.6.0-rc.0"
   },
   "description": "Logging framework that integrates at the console.log level.",
   "devDependencies": {
-    "@travetto/test": "^0.5.11"
+    "@travetto/test": "^0.6.0-rc.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.5.8"
+  "version": "0.6.0-rc.0"
 }
