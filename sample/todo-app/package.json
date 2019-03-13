@@ -1,7 +1,6 @@
 {
   "name": "@travetto/todo-app",
   "private": true,
-  "version": "0.5.0",
   "scripts": {
     "test": "npx travetto test",
     "start": "npx travetto run todo"
