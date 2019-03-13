@@ -5,7 +5,7 @@ import { TapEmitter } from './emitter';
 export async function run() {
 
   const child = child_process.spawn('npx', [
-    'lerna', '--concurrency', '6', 'exec', '--no-bail', '--stream', '--',
+    'lerna', '--no-sort', 'exec', '--no-bail', '--ignore', '@travetto/*-app', '--stream', '--',
     'npx', 'travetto', 'test', '-f', 'event', '-c', '1'
   ], { shell: true, stdio: [null, null, 2] });
 

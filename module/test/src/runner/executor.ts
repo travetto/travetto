@@ -117,9 +117,13 @@ export class TestExecutor {
 
     try {
       await mgr.startPhase('all');
-      await mgr.startPhase('each');
+      if (!test.skip) {
+        await mgr.startPhase('each');
+      }
       await this.executeTest(consumer, test);
-      await mgr.endPhase('each');
+      if (!test.skip) {
+        await mgr.endPhase('each');
+      }
       await mgr.endPhase('all');
     } catch (e) {
       await mgr.onError(e);
@@ -151,11 +155,15 @@ export class TestExecutor {
 
       for (const testConfig of suite.tests) {
         const testStart = Date.now();
-        await mgr.startPhase('each');
+        if (!testConfig.skip) {
+          await mgr.startPhase('each');
+        }
 
         const ret = await this.executeTest(consumer, testConfig);
         result[ret.status]++;
-        result.tests.push(ret);
+        if (!testConfig.skip) {
+          result.tests.push(ret);
+        }
 
         await mgr.endPhase('each');
         ret.durationTotal = Date.now() - testStart;

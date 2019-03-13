@@ -29,7 +29,7 @@ export class Scheduler {
     return this.schedule('* * * * * *', { onTick });
   }
 
-  static schedule(expression: string, options: CronOptions) {
+  static schedule(expression: string | Date, options: CronOptions) {
     // Validate expression
     new cron.CronTime(expression);
 

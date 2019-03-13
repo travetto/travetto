@@ -7,8 +7,7 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-run": "bin/travetto-cli-run.js",
-    "travetto-find-apps": "bin/travetto-find-apps.js"
+    "travetto-cli-run": "bin/travetto-cli-run.js"
   },
   "dependencies": {
     "@travetto/config": "^0.6.0-rc.0",
@@ -40,5 +39,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.0"
+  "version": "0.6.0-rc.1"
 }

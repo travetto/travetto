@@ -64,6 +64,7 @@ export class AuthInterceptor extends RestInterceptor {
     const self = this;
     req.auth = {
       get principal() { return self.authService.principal; },
+      get principalDetails() { return self.authService.principalDetails; },
       logout: this.logout.bind(this, req, res),
       updatePrincipalDetails: this.updatePrincipalDetails.bind(this, req, res),
       authenticate: this.authenticate.bind(this, req, res)
@@ -74,10 +75,12 @@ export class AuthInterceptor extends RestInterceptor {
       this.authService.context = ctx;
     }
 
-    await next();
+    const result = await next();
 
     if (this.serializer.refresh && this.authService.context) {
       this.serializer.refresh(req, res, this.authService.context);
     }
+
+    return result;
   }
 }

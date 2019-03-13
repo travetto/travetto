@@ -28,12 +28,11 @@ export class CorsInterceptor extends RestInterceptor {
 
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
     const origin = req.header('origin') as string;
-    if (this.origins.size && !this.origins.has(origin)) {
-      return;
+    if (!this.origins.size || this.origins.has(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin || '*');
+      res.setHeader('Access-Control-Allow-Methods', this.methods || '*');
+      res.setHeader('Access-Control-Allow-Headers', this.headers || '*');
     }
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Methods', this.methods || '*');
-    res.setHeader('Access-Control-Allow-Headers', this.headers || '*');
-    await next();
+    return next();
   }
 }

@@ -9,7 +9,7 @@ import { AuthUtil } from './util';
 const EMPTY_SET = new Set<string>();
 
 @Injectable()
-export class AuthService {
+export class AuthService<U = any> {
 
   @Inject()
   public contextProvider: Context;
@@ -23,6 +23,10 @@ export class AuthService {
 
   set context(ctx: AuthContext) {
     this.contextProvider.get().auth = ctx;
+  }
+
+  get principalDetails() {
+    return this.principal.details as U;
   }
 
   get principal() {
@@ -41,9 +45,15 @@ export class AuthService {
     this.context = {} as any;
   }
 
-  async updatePrincipalDetails(details: { [key: string]: any }) {
+  updatePrincipalDetails(details: U) {
     if (this.principal) {
       Object.assign(this.principal.details, details);
+    }
+  }
+
+  setPrincipalDetails(details: U) {
+    if (this.principal) {
+      this.principal.details = details;
     }
   }
 
