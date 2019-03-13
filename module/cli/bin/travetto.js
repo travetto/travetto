@@ -11,7 +11,7 @@ const rel = `${FsUtil.cwd}/node_modules/${pkg}/bin/${path.basename(__filename)}`
 const hasLocal = fs.existsSync(rel);
 const isLocal = FsUtil.toUnix(__filename) === rel;
 
-if (__dirname.includes('travetto/module/') && !process.env.NODE_PRESERVE_SYMLINKS) { // If in framework development mode
+if (FsUtil.toUnix(__dirname).includes('module/cli') && !process.env.TRV_FRAMEWORK_DEV) { // If in framework development mode
   const res = require('child_process').spawnSync(process.argv0, process.argv.slice(1), {
     argv0: process.argv0,
     cwd: process.cwd(),
@@ -31,7 +31,7 @@ if (!hasLocal || !isLocal) {
   // @ts-ignore
   const og = Module._load;
   // @ts-ignore
-  Module._load = function(req, parent) {
+  Module._load = function (req, parent) {
     if (req.startsWith(pkg)) {
       if (!hasLocal) { // Map all $pkg calls to root of global package
         req = FsUtil.resolveUnix(__dirname, `../${FsUtil.toUnix(req).split(`${pkg}/`)[1]}`);
