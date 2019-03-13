@@ -1,15 +1,17 @@
 import { Context } from '@travetto/context';
 import { Injectable, Inject } from '@travetto/di';
 
-import { RestInterceptor, Request, Response } from '../';
+import { GetCacheInterceptor, RestInterceptor, Request, Response } from '../';
 
 @Injectable()
 export class ContextInterceptor extends RestInterceptor {
 
+  after = GetCacheInterceptor;
+
   @Inject()
-  private context: Context;
+  context: Context;
 
   async intercept(req: Request, res: Response, next: () => Promise<void>) {
-    await this.context.run(next);
+    return this.context.run(next);
   }
 }

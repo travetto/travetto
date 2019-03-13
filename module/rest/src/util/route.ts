@@ -58,21 +58,10 @@ export class RouteUtil {
   }
 
   static createFilterChain(filters: (Filter | RestInterceptor['intercept'])[]): Filter<Promise<any>> {
-    let last: any = undefined;
-    const trackReturn = async (x?: any) => last = (x === undefined ? last : x);
-
-    return function filterChain(req: Request, res: Response, position: number = 0): Promise<any> {
-      const it = filters[position];
-      const paramCount = it.length;
-      let next = filterChain.bind(null, req, res, position + 1);
-      if (position === filters.length - 1) {
-        next = trackReturn;
-      }
-      if (paramCount === 3) {
-        return it(req, res, next).then(trackReturn);
-      } else {
-        return it(req, res).then(next);
-      }
+    return function filterChain(req: Request, res: Response, idx: number = filters.length - 1): Promise<any> {
+      const it = filters[idx];
+      const next = idx === 0 ? (x?: any) => x : filterChain.bind(null, req, res, idx - 1);
+      return it.length === 3 ? it(req, res, next) : it(req, res).then(next);
     };
   }
 
@@ -111,7 +100,7 @@ export class RouteUtil {
         .filter(x => x.applies ? x.applies(route) : true)
         .map(x => x.intercept.bind(x)),
       ...filters, handlerBound
-    ]);
+    ].reverse());
 
     return this._routeHandler.bind(this, filterChain, headers);
   }

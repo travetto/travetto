@@ -12,6 +12,6 @@ export interface Identity extends Principal {
 export interface AuthContext<
   P extends Principal = Principal,
   I extends Identity = Identity> {
-  identity: Identity;
-  principal: Principal;
+  identity: I;
+  principal: P;
 }

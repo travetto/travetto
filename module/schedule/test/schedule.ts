@@ -15,12 +15,12 @@ class Scheduling {
       val += 1;
     });
 
-    await new Promise(resolve => setTimeout(resolve, 2010));
+    await new Promise(resolve => setTimeout(resolve, 1010));
 
-    assert(val >= 1);
+    assert(val > 0);
 
-    await new Promise(resolve => setTimeout(resolve, 2010));
+    await new Promise(resolve => setTimeout(resolve, 1010));
 
-    assert(val >= 3);
+    assert(val > 1);
   }
 }

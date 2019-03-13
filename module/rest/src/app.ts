@@ -4,7 +4,7 @@ import { Class, ChangeEvent } from '@travetto/registry';
 
 import { RouteConfig, Request } from './types';
 import { RestConfig } from './config';
-import { RouteUtil } from './util/route-util';
+import { RouteUtil } from './util/route';
 import { RestInterceptor, RestInterceptorGroup } from './interceptor/types';
 import { ControllerRegistry } from './registry/registry';
 

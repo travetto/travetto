@@ -22,12 +22,6 @@ export class Note implements ModelCore {
 @Suite()
 export class NestedSuite extends BaseElasticsearchTest {
 
-  @BeforeAll()
-  async init() {
-    await SchemaRegistry.init();
-    await DependencyRegistry.init();
-  }
-
   @Test()
   async verifyQuery() {
     const service = await DependencyRegistry.getInstance(ModelService);
