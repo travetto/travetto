@@ -18,7 +18,10 @@ export class BaseElasticsearchTest {
   async before() {
     await SchemaRegistry.init();
     await DependencyRegistry.init();
+    const config = await DependencyRegistry.getInstance(ElasticsearchModelConfig);
+    config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
     await ModelRegistry.init();
+
   }
 
   @BeforeEach()

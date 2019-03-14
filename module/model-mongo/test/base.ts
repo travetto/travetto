@@ -18,6 +18,8 @@ export class BaseMongoTest {
   async before() {
     await DependencyRegistry.init();
     await SchemaRegistry.init();
+    const config = await DependencyRegistry.getInstance(MongoModelConfig);
+    config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
   }
 
   @BeforeEach()
