@@ -47,7 +47,7 @@ function init() {
       }
 
       if (!cmd.quiet) {
-        console.log(`${Util.colorize.success('Successfully')} wrote ${Util.colorize.output(count)} files to ${Util.colorize.path(cmd.output)}`);
+        console.log(`${Util.colorize.success('Successfully')} wrote ${Util.colorize.output(count)} files to ${Util.colorize.path(cmd.output || 'default')}`);
       }
     });
 }

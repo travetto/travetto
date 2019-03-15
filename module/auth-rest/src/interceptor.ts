@@ -1,9 +1,10 @@
 import { AppError } from '@travetto/base';
 import { RestInterceptor, Request, Response } from '@travetto/rest';
-import { Injectable, DependencyRegistry } from '@travetto/di';
+import { Injectable, DependencyRegistry, Inject } from '@travetto/di';
 import { Class } from '@travetto/registry';
-import { AuthService } from '@travetto/auth';
 import { ContextInterceptor } from '@travetto/rest/extension/context';
+import { AuthContext, PrincipalProvider } from '@travetto/auth';
+import { Context } from '@travetto/context';
 
 import { ERR_INVALID_AUTH } from './errors';
 import { IdentityProvider } from './identity';
@@ -16,9 +17,14 @@ export class AuthInterceptor extends RestInterceptor {
 
   after = ContextInterceptor;
 
+  @Inject()
+  context?: Context;
+
+  @Inject()
+  serializer?: RestAuthContextSerializer;
+
   constructor(
-    private authService: AuthService,
-    private serializer: RestAuthContextSerializer
+    private principalProvider: PrincipalProvider
   ) {
     super();
   }
@@ -30,6 +36,13 @@ export class AuthInterceptor extends RestInterceptor {
     }
   }
 
+  setContext(req: Request, ctx: AuthContext) {
+    if (this.context) {
+      this.context.set('auth', ctx);
+    }
+    req.__authContext = ctx;
+  }
+
   async authenticate(req: Request, res: Response, identityProviders: symbol[]) {
     let lastError: Error | undefined;
     for (const provider of identityProviders) {
@@ -37,8 +50,11 @@ export class AuthInterceptor extends RestInterceptor {
         const idp = this.identityProviders.get(provider.toString())!;
         const ident = await idp.authenticate(req, res);
         if (ident) { // Multi-step login process
-          await this.authService.authorize(ident);
-          await this.serializer.store(req, res, this.authService.context);
+          const ctx = await this.principalProvider.authorize(ident);
+          this.setContext(req, ctx);
+          if (this.serializer) {
+            await this.serializer.store(req, res, ctx);
+          }
         }
         return ident;
       } catch (e) {
@@ -52,33 +68,32 @@ export class AuthInterceptor extends RestInterceptor {
   }
 
   async logout(req: Request, res: Response) {
-    await this.authService.logout();
-  }
-
-  async updatePrincipalDetails(req: Request, res: Response, details: any) {
-    await this.authService.updatePrincipalDetails(details);
+    if (this.context) {
+      this.context.clear('auth');
+    }
+    delete req.__authContext;
   }
 
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
-    // tslint:disable-next-line: no-this-assignment
-    const self = this;
+    if (this.serializer) {
+      const ctx = await this.serializer.restore(req);
+      if (ctx) {
+        this.setContext(req, ctx);
+      }
+    }
+
     req.auth = {
-      get principal() { return self.authService.principal; },
-      get principalDetails() { return self.authService.principalDetails; },
+      get principal() { return req.__authContext.principal; },
+      get principalDetails() { return req.__authContext.principalDetails; },
+      async updatePrincipalDetails(val: any) { req.__authContext.updatePrincipalDetails(val); },
       logout: this.logout.bind(this, req, res),
-      updatePrincipalDetails: this.updatePrincipalDetails.bind(this, req, res),
       authenticate: this.authenticate.bind(this, req, res)
     };
 
-    const ctx = await this.serializer.restore(req);
-    if (ctx) {
-      this.authService.context = ctx;
-    }
-
     const result = await next();
 
-    if (this.serializer.refresh && this.authService.context) {
-      this.serializer.refresh(req, res, this.authService.context);
+    if (this.serializer && this.serializer.refresh && req.__authContext) {
+      this.serializer.refresh(req, res, req.__authContext);
     }
 
     return result;

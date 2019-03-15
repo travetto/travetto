@@ -10,4 +10,4 @@ application:
 
 rest.interceptor:
   '@travetto/rest':
-    - ContextInterceptor
+    - ContextInterceptor    

@@ -70,12 +70,11 @@ export class ScanApp {
   }
 
   static getStandardAppFiles() {
-    const res = ScanApp
-      .findFiles('.ts', x =>
-        !x.endsWith('.d.ts') && (
-          /^(src\/|support\/|index)/.test(x) ||
-          /(@travetto\/[^\/]+\/(src\/|support\/|index))/.test(x)
-        ) && !x.includes('@travetto/test'))
+    const res = ScanApp.findFiles('.ts', x =>
+      !x.endsWith('.d.ts') && (
+        /^(src\/|support\/|index)/.test(x) ||
+        /(@travetto\/[^\/]+\/(src\/|support\/|index))/.test(x)
+      ) && !x.includes('@travetto/test'))
       .map(x => x.file);
     return res;
   }
