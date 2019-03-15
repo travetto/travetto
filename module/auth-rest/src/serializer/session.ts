@@ -10,12 +10,18 @@ interface SessionConfig {
   secure: boolean;
 }
 
+export interface SessionStore {
+  get(key: string): any;
+  set(key: string, obj: any): void;
+  clear(key: string): void;
+}
+
 export class SessionAuthContextSerializer extends RestAuthContextSerializer {
 
   private config: SessionConfig;
-  private state = new Map<string, string>();
+  private store: SessionStore;
 
-  constructor(config: Partial<SessionConfig>) {
+  constructor(store: SessionStore, config: Partial<SessionConfig>) {
     super();
     this.config = {
       cookieName: 'session_id',
@@ -23,17 +29,17 @@ export class SessionAuthContextSerializer extends RestAuthContextSerializer {
       secure: false,
       ...config
     };
+    this.store = store;
   }
 
   async serialize(context: AuthContext): Promise<string> {
     const id = crypto.randomBytes(16).toString('hex');
-    this.state.set(id, JSON.stringify(context));
+    this.store.set(id, context);
     return id;
   }
 
   async deserialize(id: string): Promise<AuthContext> {
-    const res = this.state.get(id)!;
-    return JSON.parse(res);
+    return this.store.get(id)!;
   }
 
   async refresh(request: Request, response: Response, context: AuthContext): Promise<void> {

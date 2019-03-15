@@ -5,10 +5,11 @@ import { AppError } from '@travetto/base';
 
 @Injectable()
 export class Context {
-  threads = new Map<number, number>();
+  private threads = new Map<number, number>();
+  private hooks: async_hooks.AsyncHook;
+  private active = 0;
+
   storageState = new Map<number, any>();
-  hooks: async_hooks.AsyncHook;
-  active = 0;
 
   constructor() {
     this.hooks = async_hooks.createHook({
@@ -21,27 +22,9 @@ export class Context {
     this.run = this.run.bind(this);
   }
 
-  enter(asyncId: number) {
-    const exAsyncId = async_hooks.executionAsyncId();
-    const triggerId = async_hooks.triggerAsyncId() || asyncId;
-    const target = this.threads.get(triggerId)! || this.threads.get(exAsyncId)!;
-    if (target) {
-      this.threads.set(asyncId, target);
-    }
-  }
-
-  leave(asyncId: number) {
-    const exAsyncId = async_hooks.executionAsyncId();
-    if (this.threads.has(asyncId)) {
-      this.threads.delete(asyncId);
-    } else if (this.threads.has(exAsyncId)) {
-      this.threads.delete(exAsyncId);
-    }
-  }
-
-  storage(val: any): void;
-  storage(): any;
-  storage(val?: any) {
+  private storage(val: any): void;
+  private storage(): any;
+  private storage(val?: any) {
     const currId = async_hooks.executionAsyncId();
     const key = this.threads.get(currId)!;
     if (!key) {
@@ -59,16 +42,50 @@ export class Context {
     }
   }
 
-  clear() {
+  private enter(asyncId: number) {
+    const exAsyncId = async_hooks.executionAsyncId();
+    const triggerId = async_hooks.triggerAsyncId() || asyncId;
+    const target = this.threads.get(triggerId)! || this.threads.get(exAsyncId)!;
+    if (target) {
+      this.threads.set(asyncId, target);
+    }
+  }
+
+  private leave(asyncId: number) {
+    const exAsyncId = async_hooks.executionAsyncId();
+    if (this.threads.has(asyncId)) {
+      this.threads.delete(asyncId);
+    } else if (this.threads.has(exAsyncId)) {
+      this.threads.delete(exAsyncId);
+    }
+  }
+
+  clear(key?: string) {
     const obj = this.storage();
-    const keys = Object.keys(obj);
+    const keys = key ? [key] : Object.keys(obj);
     for (const k of keys) {
       delete obj[k];
     }
   }
 
-  get = () => this.storage();
-  set = (val: any) => this.storage(val);
+  get(key?: string) {
+    const root = this.storage();
+    if (key) {
+      return root[key] || (root[key] = {});
+    } else {
+      return root;
+    }
+  }
+
+  set(key: string, val: any): void;
+  set(val: any): void;
+  set(keyOrVal: string, valWithKey?: any) {
+    if (valWithKey) {
+      this.get()[keyOrVal] = valWithKey;
+    } else {
+      this.storage(keyOrVal);
+    }
+  }
 
   async run(fn: () => Promise<any>, init: any = {}) {
     if (!this.active) {

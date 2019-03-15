@@ -1,6 +1,7 @@
 import { AppError } from '@travetto/base';
 
-import { Identity, Principal, AuthContext } from './types';
+import { Identity, Principal } from './types';
+import { AuthContext } from './context';
 
 export abstract class PrincipalProvider {
 
@@ -23,9 +24,6 @@ export abstract class PrincipalProvider {
   }
 
   async authorize(ident: Identity): Promise<AuthContext> {
-    return {
-      principal: await this.resolveOrCreatePrincipal(ident),
-      identity: ident
-    };
+    return new AuthContext(ident, await this.resolveOrCreatePrincipal(ident));
   }
 }

@@ -7,12 +7,12 @@ import { ModelPrincipalProvider } from '../src/principal';
 
 export class ModelIdentityProvider<U extends ModelCore> extends IdentityProvider {
 
-  constructor(private service: ModelPrincipalProvider<U>) {
+  constructor(private provider: ModelPrincipalProvider<U>) {
     super();
   }
 
   async authenticate(req: Request, res: Response): Promise<Identity | undefined> {
-    const ident = this.service.toIdentity(req.body);
-    return this.service.authenticate(ident.id!, ident.password!);
+    const ident = this.provider.toIdentity(req.body);
+    return this.provider.authenticate(ident.id!, ident.password!);
   }
 }
