@@ -1,7 +1,8 @@
 import { AuthContext } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
 import { RestAuthContextSerializer } from '@travetto/auth-rest';
-import { sign, verify } from '..';
+import { sign } from '../sign';
+import { verify } from '../verify';
 
 export class JWTAuthContextSerializer extends RestAuthContextSerializer {
 

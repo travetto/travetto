@@ -13,30 +13,9 @@ function prepareEnv(extra = {}) {
 }
 
 async function runTests(opts, args) {
-  try {
-
-    await require('@travetto/base/bin/bootstrap').run();
-
-    // Pre compile all
-    require('@travetto/compiler').Compiler.compileAll();
-
-    const { Runner } = require('../src/runner/runner');
-    const { TestUtil } = require('../src/runner/util');
-
-    TestUtil.registerCleanup('runner');
-
-    const res = await new Runner({
-      format: opts.format,
-      consumer: opts.consumer,
-      mode: opts.mode,
-      concurrency: opts.concurrency,
-      args
-    }).run();
-    process.exit(res ? 0 : 1);
-  } catch (e) {
-    console.error(e && e.stack ? e.stack : e);
-    process.exit(1);
-  }
+  require('@travetto/base/bin/bootstrap');
+  const { StandardWorker } = require('../src/worker/standard');
+  return StandardWorker.run(opts, args);
 }
 
 function worker() {

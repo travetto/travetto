@@ -1,7 +1,7 @@
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
 import { Schema, SchemaRegistry } from '../';
-import { GenerateUtil } from '../extension/faker';
+import { GenerateUtil } from '../src/extension/faker.ext';
 
 import * as assert from 'assert';
 import { Precision, Max, Min } from '../src/decorator/field';

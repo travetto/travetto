@@ -8,9 +8,9 @@ interface Initializer {
 
 export class PhaseManager {
 
-  static init(scope: string) {
+  static init(scope: string, upto?: string, after?: string) {
     const mgr = new PhaseManager(scope);
-    mgr.load();
+    mgr.load(upto, after);
     return mgr;
   }
 
@@ -18,16 +18,26 @@ export class PhaseManager {
 
   constructor(public scope: string) { }
 
-  load(upto?: string) {
+  load(upto?: string, after?: string) {
     const pattern = new RegExp(`support/phase[.]${this.scope}[.]ts$`);
     const initFiles = ScanApp.requireFiles('.ts', x => pattern.test(x));
     this.initializers = Util.computeOrdering(initFiles.map(x => x.init));
 
     if (upto) {
-      const index = this.initializers.findIndex(x => x.key === upto);
-      if (index >= 0) {
-        this.initializers = this.initializers.slice(0, index + 1);
+      let end = this.initializers.length - 1;
+      let start = 0;
+
+      const endIndex = this.initializers.findIndex(x => x.key === upto);
+      if (after) {
+        const startIndex = this.initializers.findIndex(x => x.key === after);
+        if (startIndex >= 0) {
+          start = startIndex + 1;
+        }
       }
+      if (endIndex >= 0) {
+        end = endIndex;
+      }
+      this.initializers = this.initializers.slice(start, end + 1);
     }
 
     console.debug('Initializing Phase', this.scope, this.initializers.map(x => x.key));

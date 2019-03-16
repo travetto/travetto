@@ -1,7 +1,7 @@
 export const init = {
   key: 'mongod',
   action: async () => {
-    const { ConfigLoader } = await import('@travetto/config');
+    const { ConfigSource } = await import('@travetto/config');
     const { ExecUtil, DockerContainer } = await import('@travetto/exec');
     const { Env } = await import('@travetto/base');
 
@@ -22,6 +22,6 @@ export const init = {
       await container.waitForPorts();
     }
 
-    ConfigLoader.reloadConfig();
+    ConfigSource.loadExternal();
   }
 };

@@ -10,7 +10,7 @@ export declare class FsUtil {
   static resolveNative(base: string, ...rest: string[]): string;
   static joinUnix(base: string, ...rest: string[]): string;
   static resolveFrameworkDevFile(pth: string): string;
-  static prepareTranspile(fileName: string): string;
+  static prepareTranspile(fileName: string, contents?: string): string;
   static tempDir(pre: string): void;
   static appRootMatcher(paths: string[]): RegExp;
   static computeModuleFromFile(file: string): string;

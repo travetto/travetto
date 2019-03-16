@@ -1,8 +1,7 @@
 const { runTests, prepareEnv } = require(`${process.env.TRV_TEST_BASE || '..'}/bin/lib`);
 
-prepareEnv({
-  DEBUGGER: true
-});
+prepareEnv({ DEBUGGER: true });
+
 runTests(
   {
     format: process.env.TEST_FORMAT || 'tap',

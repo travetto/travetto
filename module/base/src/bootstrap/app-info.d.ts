@@ -8,6 +8,5 @@ export declare const AppInfo: {
   LICENSE: string,
   MAIN: string,
   AUTHOR: { email?: string, name: string },
-  DESCRIPTION: string,
-  DEV_PACKAGES: string[]
+  DESCRIPTION: string
 };

@@ -1,6 +1,8 @@
 import { Injectable } from '@travetto/di';
 
-import { MailTemplateOptions, MailTransport, MessageOptions, MailTemplateEngine } from './types';
+import { MessageOptions } from './types';
+import { MailTransport } from './transport';
+import { MailTemplateOptions, MailTemplateEngine } from './template';
 
 @Injectable()
 export class EmailService {

@@ -22,4 +22,4 @@ class $RootRegistry extends Registry {
   }
 }
 
-export const RootRegistry = new $RootRegistry(Env.appRoots);
+export const RootRegistry = new $RootRegistry([...Env.appRoots]);

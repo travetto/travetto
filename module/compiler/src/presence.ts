@@ -14,9 +14,9 @@ export class FilePresenceManager {
   seen = new Set<string>();
   watchSpaces = new Set<string>();
 
-  constructor(private cwd: string, private rootPaths: string[], private listener: Listener, private excludeFiles: RegExp[], private watch: boolean = Env.watch) {
+  constructor(private cwd: string, private rootPaths: string[], private listener: Listener, private excludeFiles: RegExp[] = [], private watch: boolean = Env.watch) {
 
-    if (!this.rootPaths.includes('.')) {
+    if (this.rootPaths.length && !this.rootPaths.includes('.')) {
       this.rootPaths.push('.');
     }
 
@@ -24,7 +24,7 @@ export class FilePresenceManager {
       this.watchSpaces.add(FsUtil.joinUnix(root, 'src'));
     }
 
-    if (Env.watch) {
+    if (watch) {
       Shutdown.onUnhandled(e => this.handleMissingModule(e), 0);
     }
   }
@@ -101,6 +101,9 @@ export class FilePresenceManager {
   }
 
   validFile(name: string) {
+    if (name.endsWith('.d.ts')) {
+      return false;
+    }
     for (const re of this.excludeFiles) {
       if (re.test(name)) {
         return false;

@@ -31,15 +31,16 @@ export class ModuleManager {
       mod = originalLoader.apply(null, [request, parent]);
     } catch (e) {
       const p = Module._resolveFilename(request, parent);
-      if (Env.watch) { // If in a state where imports can come and go
-        console.error(`Unable to import ${p}, stubbing out`, e);
-      } else if (e) {
+      if (!(Env.watch || p.endsWith('.ext.ts'))) {
         // Marking file as being loaded, useful for the test framework
         require.cache[p] = {};
         throw e;
       }
+      if (Env.watch) {
+        console.warn(`Unable to import ${p}, stubbing out`, e.message);
+      }
 
-      mod = {};
+      mod = CompilerUtil.getErrorModuleProxy(e.message);
     }
 
     let out = mod;
@@ -47,7 +48,7 @@ export class ModuleManager {
     // Proxy modules, if in watch mode for non node_modules paths
     if (Env.watch) {
       const p = Module._resolveFilename(request, parent);
-      if (p.includes(this.cwd) && !p.includes(CompilerUtil.LIBRARY_PATH)) {
+      if (p.includes(this.cwd) && !p.includes('node_modules')) {
         if (!this.modules.has(p)) {
           const handler = new RetargettingHandler(mod);
           out = new Proxy({}, handler);
@@ -67,18 +68,20 @@ export class ModuleManager {
     const jsf = name.replace(/[.]ts$/, '.js');
 
     try {
-      (m as any)._compile(content, jsf);
-      return true;
+      return (m as any)._compile(content, jsf);
     } catch (e) {
-      if (Env.watch) { // If attempting to load an optional require
-        console.error(`Unable to import ${name}, stubbing out`, e);
-        (m as any)._compile(CompilerUtil.EMPTY_MODULE, jsf);
-        return false;
-      } else {
-        throw e;
+      if (Env.watch) { // If compiling fails, treat as recoverable in watch mode
+        console.warn(`Unable to compile ${name}, stubbing out`, e.message);
+        (m as any)._compile(CompilerUtil.getErrorModuleProxySource(e.message), jsf);
       }
+      if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
+        const modName = m.filename.replace(`${this.cwd}/`, '');
+        const err = new Error(`${e.message} ${e.message.includes('from') ? `[via ${modName}]` : `from ${modName}`}`);
+        err.stack = err.stack;
+        e = err;
+      }
+      throw e;
     }
-
   }
 
   unload(fileName: string) {

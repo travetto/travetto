@@ -31,8 +31,7 @@
   "files": [
     "index.ts",
     "src",
-    "config",
-    "extension"
+    "config"
   ],
   "name": "@travetto/model",
   "repository": {

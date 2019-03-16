@@ -1,7 +1,7 @@
 export const init = {
   key: 'elasticsearch',
   action: async () => {
-    const { ConfigLoader } = await import('@travetto/config');
+    const { ConfigSource } = await import('@travetto/config');
     const { DockerContainer, ExecUtil } = await import('@travetto/exec');
     const { Env } = await import('@travetto/base');
 
@@ -26,6 +26,6 @@ export const init = {
       await ExecUtil.waitForHttp(`http://localhost:${port}`, 10000);
     }
 
-    ConfigLoader.reloadConfig();
+    ConfigSource.loadExternal();
   }
 };

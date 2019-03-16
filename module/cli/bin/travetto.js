@@ -19,6 +19,7 @@ if (FsUtil.toUnix(__dirname).includes('module/cli') && !process.env.TRV_FRAMEWOR
     shell: true,
     env: { // Handle symlinks, and denote we are in framework dev mode
       ...process.env,
+      NO_JS_YAML: '1',
       NODE_PRESERVE_SYMLINKS: '1',
       TRV_FRAMEWORK_DEV: process.platform,
     }

@@ -3,8 +3,9 @@ import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory, Injectable } from '@travetto/di';
 import { ModelRegistry, BaseModel, Model, ModelSource, ModelService } from '@travetto/model';
-import { ModelPrincipalProvider } from '../';
 import { SchemaRegistry } from '@travetto/schema';
+
+import { ModelPrincipalProvider } from '../';
 import { RegisteredIdentity } from '../src/principal';
 
 @Model()
@@ -45,16 +46,16 @@ class MockModelSource {
 
 class TestConfig {
   @InjectableFactory()
-  static getAuthService(service: ModelService): ModelPrincipalProvider<User> {
+  static getAuthService(): ModelPrincipalProvider<User> {
     return new ModelPrincipalProvider<User>(
-      service, User, (u) => ({
+      User, (u) => ({
         ...(u as any as RegisteredIdentity),
         details: u,
         permissions: new Set(u.permissions || []),
         provider: 'model'
       }),
       (rid) => User.from({
-        rid
+        ...(rid as User)
       })
     );
   }

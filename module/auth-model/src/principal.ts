@@ -1,4 +1,5 @@
 import { AppError } from '@travetto/base';
+import { Inject } from '@travetto/di';
 import { ModelService, Query, ModelCore } from '@travetto/model';
 import { AuthUtil, Identity, Principal, PrincipalProvider } from '@travetto/auth';
 import { Class } from '@travetto/registry';
@@ -13,8 +14,10 @@ export interface RegisteredIdentity extends Identity {
 
 export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvider {
 
+  @Inject()
+  private modelService: ModelService;
+
   constructor(
-    private modelService: ModelService,
     private cls: Class<T>,
     public toIdentity: (t: T) => RegisteredIdentity,
     public fromIdentity: (t: Partial<RegisteredIdentity>) => Partial<T>,

@@ -13,6 +13,9 @@
   "devDependencies": {
     "@travetto/test": "^0.6.0-rc.0"
   },
+  "optionalExtensionDependencies": {
+    "@travetto/rest": "^0.6.0-rc.0"
+  },
   "homepage": "https://travetto.io",
   "keywords": [
     "async-hooks",

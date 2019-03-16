@@ -1,10 +1,10 @@
 import * as ts from 'typescript';
 
 import { TransformUtil, TransformerState } from '@travetto/compiler';
-import { ConfigLoader } from '@travetto/config';
+import { ConfigSource } from '@travetto/config';
 
 const SCHEMAS = TransformUtil.buildImportAliasMap({
-  ...ConfigLoader.get('registry.schema'),
+  ...ConfigSource.get('registry.schema'),
   '@travetto/schema': 'Schema'
 });
 

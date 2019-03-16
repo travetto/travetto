@@ -4,7 +4,7 @@ import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { Schema, Min, Max } from '@travetto/schema';
-import { GenerateUtil } from '@travetto/schema/extension/faker';
+import { GenerateUtil } from '@travetto/schema/src/extension/faker.ext';
 
 import { MongoModelSource } from '../';
 import { BaseMongoTest } from './base';

@@ -3,5 +3,6 @@ export * from './src/interceptor';
 export * from './src/decorator';
 export * from './src/identity';
 export * from './src/errors';
-export * from './src/serializer/session';
-export * from './src/serializer/rest';
+export * from './src/service';
+export * from './src/context-store/session';
+export * from './src/context-store/types';

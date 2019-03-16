@@ -4,7 +4,7 @@ import { Injectable, InjectableFactory, Application } from '@travetto/di';
 import { ExpressRestApp } from '@travetto/rest-express';
 import { Schema, Match } from '@travetto/schema';
 
-import { ModelController } from '../../extension/rest';
+import { ModelController } from '../../src/extension/rest.ext';
 import {
   Model, ModelSource, ModelService, ModelCore,
   ModelQuery, Query, BulkResponse,

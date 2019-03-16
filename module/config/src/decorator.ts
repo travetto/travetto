@@ -1,4 +1,4 @@
-import { ConfigLoader } from './service/loader';
+import { ConfigSource } from './source';
 
 export function Config(ns: string, depTarget?: new (...args: any[]) => any, name: string = '') {
 
@@ -7,7 +7,7 @@ export function Config(ns: string, depTarget?: new (...args: any[]) => any, name
 
     target.prototype.postConstruct = function () {
       // Apply config
-      ConfigLoader.bindTo(this, ns); // tslint:disable-line no-invalid-this
+      ConfigSource.bindTo(this, ns); // tslint:disable-line no-invalid-this
       if (og) {
         return og.apply(this, arguments); // tslint:disable-line no-invalid-this
       }

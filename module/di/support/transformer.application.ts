@@ -1,10 +1,10 @@
 import * as ts from 'typescript';
 
 import { TransformUtil, TransformerState } from '@travetto/compiler';
-import { ConfigLoader } from '@travetto/config';
+import { ConfigSource } from '@travetto/config';
 
 const APPLICATION = TransformUtil.buildImportAliasMap({
-  ...ConfigLoader.get('registry.application'),
+  ...ConfigSource.get('registry.application'),
   '@travetto/di': ['Application']
 });
 

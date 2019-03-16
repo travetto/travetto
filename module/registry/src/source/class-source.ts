@@ -13,6 +13,7 @@ export class CompilerClassSource implements ChangeSource<Class> {
 
   constructor(private rootPaths: string[]) {
     this.watch = this.watch.bind(this);
+    this.handleFileChanges = this.handleFileChanges.bind(this);
   }
 
   private flush() {
@@ -28,7 +29,7 @@ export class CompilerClassSource implements ChangeSource<Class> {
     }
   }
 
-  protected async handleFileChanges(file: string, classes: Class<any>[]) {
+  protected async handleFileChanges(file: string, classes: Class<any>[] = []) {
     const next = new Map(classes.map(cls => [cls.__id, cls] as [string, Class]));
 
     let prev = new Map<string, Class>();
@@ -94,10 +95,10 @@ export class CompilerClassSource implements ChangeSource<Class> {
 
     this.flush();
 
-    Compiler.on('changed', this.watch);
-    Compiler.on('removed', this.watch);
     Compiler.on('added', this.watch);
-    Compiler.on('required-after', f => this.flush());
+    Compiler.on('changed', this.watch);
+    Compiler.on('removed', this.handleFileChanges);
+    Compiler.on('required-after', () => this.flush());
   }
 
   on(callback: (e: ChangeEvent<Class>) => void): void {

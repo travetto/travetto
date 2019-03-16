@@ -27,32 +27,23 @@ export class SourceManager {
 
   checkTranspileErrors(fileName: string, res: ts.TranspileOutput) {
 
-    if (!res.diagnostics || !res.diagnostics.length) {
-      return;
-    }
+    if (res.diagnostics && res.diagnostics.length) {
 
-    const errors = res.diagnostics.slice(0, 5).map(diag => {
-      const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
-      if (diag.file) {
-        const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start as number);
-        return ` @ ${diag.file.fileName.replace(`${this.cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
-      } else {
-        return ` ${message}`;
+      const errors = res.diagnostics.slice(0, 5).map(diag => {
+        const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+        if (diag.file) {
+          const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start as number);
+          return ` @ ${diag.file.fileName.replace(`${this.cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
+        } else {
+          return ` ${message}`;
+        }
+      });
+
+      if (res.diagnostics.length > 5) {
+        errors.push(`${res.diagnostics.length - 5} more ...`);
       }
-    });
 
-    if (res.diagnostics.length > 5) {
-      errors.push(`${res.diagnostics.length - 5} more ...`);
-    }
-
-    const msg = `Compiling ${fileName.replace(`${this.cwd}/`, '')} failed:\n [\n    ${errors.join('\n    ')}\n ]`;
-
-    if (Env.watch) { // If attempting to load an optional require
-      console.error(msg);
-      console.error(`Unable to import ${fileName}, stubbing out`);
-      this.set(fileName, CompilerUtil.EMPTY_MODULE);
-    } else {
-      throw new AppError(msg, 'unavailable');
+      throw new AppError(`Transpiling ${fileName.replace(`${this.cwd}/`, '')} failed:[    ${errors.join('\n    ')}\n ]`, 'unavailable');
     }
   }
 

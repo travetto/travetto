@@ -28,3 +28,6 @@ The common environment variables throughout the code base:
 
 * `JS_YAML` = 0|1           - Defaults to none, forces use of js-yaml over @travetto/yaml
 * `NO_JS_YAML` = 0|1        - Defaults to none, forces use of @travetto/yaml over js-yaml
+
+* `IDLE_TIMEOUT` = 120000   - Default timeout for a test-worker, determines self termination if no request within that time window
+* `EXECUTION_REUSABLE`= 0|1 - Determines if a test-worker can be reused, within the `IDLE_TIMEOUT` window.  Primarily used for integration with external test runners.

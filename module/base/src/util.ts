@@ -57,13 +57,7 @@ export class Util {
           if (mode === 'strict') { // Bail on strict
             throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
           } else if (mode === 'coerce') { // Force on coerce
-            switch (typeof a) {
-              case 'string': ret = `${b}`; break;
-              case 'number': ret = `${b}`.indexOf('.') >= 0 ? parseFloat(`${b}`) : parseInt(`${b}`, 10); break;
-              case 'boolean': ret = !!b; break;
-              default:
-                throw new Error(`Unknown type ${typeof a}`);
-            }
+            ret = Util.coerceType(b, a);
           }
         }
       } else { // Object merge
@@ -75,6 +69,16 @@ export class Util {
       }
     }
     return ret;
+  }
+
+  static coerceType(input: any, baseline: any) {
+    switch (typeof baseline) {
+      case 'string': return `${input}`;
+      case 'number': return `${input}`.indexOf('.') >= 0 ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
+      case 'boolean': return (typeof input === 'string' && input === 'true') || !!input;
+      default:
+        throw new Error(`Unknown type ${typeof baseline}`);
+    }
   }
 
   static shallowClone(a: any) {

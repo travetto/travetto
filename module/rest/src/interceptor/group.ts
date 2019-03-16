@@ -1,5 +1,5 @@
 import { Injectable, DependencyRegistry } from '@travetto/di';
-import { ConfigLoader } from '@travetto/config';
+import { ConfigSource } from '@travetto/config';
 import { Class } from '@travetto/registry';
 import { AppInfo } from '@travetto/base';
 
@@ -9,7 +9,7 @@ import { RestInterceptorGroup, RestInterceptor } from './types';
 export class AllInterceptorGroup extends RestInterceptorGroup {
 
   async postConstruct() {
-    const interceptors = ConfigLoader.get('registry.rest.interceptor') as { [key: string]: Set<string> };
+    const interceptors = ConfigSource.get('registry.rest.interceptor') as { [key: string]: Set<string> };
 
     for (const k of Object.keys(interceptors)) {
       interceptors[k] = new Set(interceptors[k]);
@@ -25,8 +25,6 @@ export class AllInterceptorGroup extends RestInterceptorGroup {
         target = file.replace(/^.*(@travetto\/[^\/]+).*/, (a, key) => key);
       }
       if (interceptors[target] && interceptors[target].has(item.class.name)) { // Load if specified to be loaded, and it exists
-        out.push(item.class as Class<RestInterceptor>);
-      } else if (!item.class.__filename.includes('/extension/')) { // Auto load all non-ext interceptors
         out.push(item.class as Class<RestInterceptor>);
       }
     }
