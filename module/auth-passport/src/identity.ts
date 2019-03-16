@@ -28,9 +28,10 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
       throw err;
     } else {
       // Remove profile fields from passport
-      delete (user as any)._json;
-      delete (user as any)._raw;
-      delete (user as any).provider;
+      const du = user as U & { _json: any, _raw: any, provider: any };
+      delete du._json;
+      delete du._raw;
+      delete du.provider;
 
       const ident = this.toIdentity(user);
       if (!ident.provider) {

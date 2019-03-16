@@ -6,6 +6,6 @@ export const init = {
     const { Logger } = await import('../src/service');
     Logger.init();
     const { Env } = await import('@travetto/base');
-    Env.error = (msg: string, ...args: any[]) => Logger.log('error', msg, ...args);
+    Env.error = (Logger.log as (level: 'error') => void).bind(Logger, 'error');
   }
 };

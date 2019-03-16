@@ -10,7 +10,7 @@ import { buildWorkManager } from '../worker/parent';
 import { watch } from './watcher';
 import { TestUtil } from './util';
 
-interface State {
+export interface State {
   format: string;
   consumer?: Consumer;
   mode: 'single' | 'watch' | 'all';
@@ -36,7 +36,7 @@ export class Runner {
 
     console.debug('Running', files);
 
-    await new PhaseManager('test').load().run();
+    await PhaseManager.init('test').run();
 
     const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
       idleTimeoutMillis: 10000,
@@ -66,7 +66,7 @@ export class Runner {
       consumer.onStart();
     }
 
-    await new PhaseManager('test').load().run();
+    await PhaseManager.init('test').run();
     const res = await TestExecutor.execute(consumer, this.state.args);
 
     if (consumer.summarize) {

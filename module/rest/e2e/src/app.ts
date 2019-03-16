@@ -1,6 +1,7 @@
 import { Application, InjectableFactory, Inject } from '@travetto/di';
+import { ContextInterceptor } from '@travetto/context/src/extension/rest';
+
 import { RouteConfig, RestApp, RestInterceptor } from '../..';
-import { ContextInterceptor } from '../../extension/context';
 
 class DummyApp extends RestApp {
   raw: any = {};

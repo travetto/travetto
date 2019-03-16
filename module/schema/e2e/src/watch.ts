@@ -1,4 +1,4 @@
-import { Schema, View } from '../';
+import { Schema, View } from '../..';
 
 @Schema()
 @View('login', { with: ['street1', 'city', 'street3'] })

@@ -1,8 +1,9 @@
 import { ControllerRegistry, Request } from '@travetto/rest';
-import { getSchemaBody } from '@travetto/schema/extension/rest';
+import { getSchemaBody } from '@travetto/schema/src/extension/rest.ext';
 import { Class } from '@travetto/registry';
 
-import { ModelService, ModelCore } from '../';
+import { ModelService } from '../service/model';
+import { ModelCore } from '../model/core';
 
 type Svc = { source: ModelService };
 

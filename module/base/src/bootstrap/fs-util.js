@@ -66,8 +66,8 @@ const FsUtil = {
   toNative,
   toUnix,
   joinUnix,
-  prepareTranspile: (fileName) => {
-    let fileContents = fs.readFileSync(fileName, 'utf-8').toString();
+  prepareTranspile: (fileName, contents) => {
+    let fileContents = contents || fs.readFileSync(fileName, 'utf-8');
 
     // Drop typescript import, and use global. Great speedup;
     fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript';?/g, '');

@@ -1,9 +1,8 @@
 import { EventEmitter } from 'events';
 
-import { AppInfo, Env, FsUtil, ScanApp, AppCache } from '@travetto/base';
+import { Env, FsUtil, ScanApp, AppCache } from '@travetto/base';
 
 import { TransformerManager } from './transformers';
-import { CompilerUtil } from './util';
 import { SourceManager } from './source';
 import { ModuleManager } from './module';
 import { FilePresenceManager } from './presence';
@@ -23,17 +22,11 @@ class $Compiler {
 
   constructor(public cwd: string) {
 
-    const exclude = [/\.d\.ts$/]; // Definition files
-
     // Get Files proper like
-    if (AppInfo.DEV_PACKAGES && AppInfo.DEV_PACKAGES.length) {
-      exclude.push(new RegExp(`${CompilerUtil.LIBRARY_PATH}[\/](${AppInfo.DEV_PACKAGES.join('|')})[\/]`));
-    }
-
     this.transformerManager = new TransformerManager(this.cwd);
     this.moduleManager = new ModuleManager(this.cwd);
     this.sourceManager = new SourceManager(this.cwd, {});
-    this.presenceManager = new FilePresenceManager(this.cwd, Env.appRoots,
+    this.presenceManager = new FilePresenceManager(this.cwd, [...Env.appRoots],
       {
         added: (name: string) => {
           if (this.transpile(name)) {
@@ -49,7 +42,7 @@ class $Compiler {
           this.unload(name);
           this.events.emit('removed', name);
         }
-      }, exclude);
+      });
   }
 
   init() {
@@ -78,6 +71,16 @@ class $Compiler {
     this.init();
   }
 
+  handleLoadFailure(action: string, fileName: string, err: Error) {
+    if (Env.watch) {
+      console.trace(`Error in ${action} ${fileName}, removing`);
+      this.unload(fileName);
+      this.events.emit('removed', fileName);
+    } else {
+      throw err;
+    }
+  }
+
   requireHandler(m: NodeModule, tsf: string) {
     const jsf = tsf.replace(/\.ts$/, '.js');
 
@@ -89,27 +92,16 @@ class $Compiler {
 
     // Log transpiled content as needed
     const content = this.sourceManager.get(tsf)!;
-
     try {
-      const ret = this.moduleManager.compile(m, jsf, content);
-      if (ret) {
-        if (isNew) {
-          this.events.emit('required-after', tsf);
-        }
-      } else {
-        this.sourceManager.set(tsf, CompilerUtil.EMPTY_MODULE);
+      const res = this.moduleManager.compile(m, jsf, content);
+      if (isNew) {
+        this.events.emit('required-after', tsf);
       }
-      return ret;
-    } catch (e) {
-      if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
-        const name = m.filename.replace(`${this.cwd}/`, '');
-        const err = new Error(`${e.message} ${e.message.includes('from') ? `[via ${name}]` : `from ${name}`}`);
-        err.stack = err.stack;
-        throw err;
-      } else {
-        throw e;
-      }
+      return res;
+    } catch (err) {
+      this.handleLoadFailure('transpiling', tsf, err);
     }
+
   }
 
   markForReload(files: string[] | string) {
@@ -138,18 +130,22 @@ class $Compiler {
   }
 
   transpile(fileName: string, force = false) {
-    const changed = this.sourceManager.transpile(fileName, {
-      fileName,
-      reportDiagnostics: true,
-      transformers: this.transformerManager.transformers || {}
-    }, force);
+    try {
+      const changed = this.sourceManager.transpile(fileName, {
+        fileName,
+        reportDiagnostics: true,
+        transformers: this.transformerManager.transformers || {}
+      }, force);
 
-    if (changed && (force || this.presenceManager.isWatchedFileLoaded(fileName))) {
-      // If file is already loaded, mark for reload
-      this.markForReload(fileName);
+      if (changed && (force || this.presenceManager.isWatchedFileLoaded(fileName))) {
+        // If file is already loaded, mark for reload
+        this.markForReload(fileName);
+      }
+
+      return changed;
+    } catch (err) {
+      this.handleLoadFailure('transpiling', fileName, err);
     }
-
-    return changed;
   }
 
   on(event: WatchEvent, callback: (filename: string) => any) {

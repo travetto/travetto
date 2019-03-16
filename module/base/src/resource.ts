@@ -104,20 +104,36 @@ export class $ResourceManager {
 
   async findAllByExtension(ext: string, base: string = '') {
     const out: string[] = [];
+    const found = new Set<string>();
     for (const root of this.paths) {
       const results = await ScanFs.scanDir({ testFile: x => x.endsWith(ext) },
         FsUtil.resolveUnix(root, base));
-      out.push(...results.map(x => `${base}/${x.module}`));
+      for (const r of results) {
+        const p = `${base}/${r.module}`;
+        if (!found.has(p)) {
+          found.add(p);
+          out.push(p);
+          this.cache[p] = r.file;
+        }
+      }
     }
     return out;
   }
 
   findAllByExtensionSync(ext: string, base: string = '') {
     const out: string[] = [];
+    const found = new Set<string>();
     for (const root of this.paths) {
       const results = ScanFs.scanDirSync({ testFile: x => x.endsWith(ext) },
         FsUtil.resolveUnix(root, base));
-      out.push(...results.map(x => `${base}/${x.module}`));
+      for (const r of results) {
+        const p = `${base}/${r.module}`;
+        if (!found.has(p)) {
+          found.add(p);
+          out.push(p);
+          this.cache[p] = r.file;
+        }
+      }
     }
     return out;
   }

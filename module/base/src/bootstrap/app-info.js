@@ -16,7 +16,6 @@ module.exports = {
     AUTHOR: pkg.author,
     MAIN: pkg.main,
     DESCRIPTION: pkg.description,
-    SUB_NAME: subName,
-    DEV_PACKAGES: Object.keys(pkg.devDependencies || {})
+    SUB_NAME: subName
   }
 };

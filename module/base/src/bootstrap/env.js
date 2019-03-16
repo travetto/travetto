@@ -72,16 +72,17 @@ function buildProfile() {
     });
 
   let appRoots = [];
+
   if (!isEnvFalse('APP_ROOTS')) {
     appRoots.push(...envListVal('APP_ROOTS'));
     if (appRoots.length === 0) {
       appRoots.push('.');
     }
-  }
 
-  appRoots = appRoots
-    .filter(x => !!x)
-    .map(x => (!x || x === '.') ? './' : FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, '.'));
+    appRoots = appRoots
+      .filter(x => !!x)
+      .map(x => (!x || x === '.') ? './' : FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, '.'));
+  }
 
   return {
     profiles: all,

@@ -2,9 +2,35 @@ import * as ts from 'typescript';
 import { Env } from '@travetto/base';
 
 export class CompilerUtil {
-  static LIBRARY_PATH = 'node_modules';
 
-  static EMPTY_MODULE = 'module.exports = {}';
+  static getErrorModuleProxySource(err: string = 'Module is not found') {
+    return this.getErrorModuleProxy.toString().split(/[(]err[)]\s*[{]/)[1]
+      .replace(/[}]$/, '')
+      .replace('err', `\`${err.replace(/[`]/g, `'`)}\``)
+      .replace('return ', 'module.exports = ');
+  }
+
+  static getErrorModuleProxy(err: string) {
+    const onError = () => {
+      throw new Error(err);
+    };
+    return new Proxy({}, {
+      enumerate: () => [],
+      isExtensible: () => false,
+      getOwnPropertyDescriptor: () => ({}),
+      preventExtensions: () => true,
+      apply: onError,
+      construct: onError,
+      setPrototypeOf: onError,
+      getPrototypeOf: onError,
+      get: onError,
+      has: onError,
+      set: onError,
+      ownKeys: onError,
+      deleteProperty: onError,
+      defineProperty: onError
+    });
+  }
 
   static resolveOptions(dir: string, name: string = 'tsconfig.json') {
     const out = ts.parseJsonSourceFileConfigFileContent(

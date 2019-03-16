@@ -29,12 +29,12 @@ Due to the connection with `nodemailer`, all nodemailer extensions should be usa
 
 **Code: Sendmail transport from nodemailer**
 ```typescript
-import { SendMailTransport } from '@travetto/email/extension/nodemailer/sendmail';
+import { NodeMailerTransport } from '@travetto/email/src/extension/nodemailer';
 
 class Config {
   @InjectableFactory()
   static getTransport(): MailTransport {
-    return new SendMailTransport();
+    return new NodeMailerTransport(require('nodemailer-sendmail-transport'));
   }
 }
 ```
@@ -43,12 +43,12 @@ class Config {
 
 **Code: SMTP transport from nodemailer**
 ```typescript
-import { SmtpTransport } from '@travetto/email/extension/nodemailer/smtp';
+import { NodeMailerTransport } from '@travetto/email/src/extension/nodemailer';
 
 class Config {
   @InjectableFactory()
   static getTransport(): MailTransport {
-    return new SmtpTransport();
+    return new NodeMailerTransport(require('nodemailer-smtp-transport'));
   }
 }
 ```
@@ -57,12 +57,12 @@ class Config {
 
 **Code: SES transport from nodemailer**
 ```typescript
-import { SesTransport } from '@travetto/email/extension/nodemailer/ses';
+import { NodeMailerTransport } from '@travetto/email/src/extension/nodemailer';
 
 class Config {
   @InjectableFactory()
   static getTransport(): MailTransport {
-    return new SesTransport();
+    return new NodeMailerTransport(require('nodemailer-ses-transport'));
   }
 }
 ```

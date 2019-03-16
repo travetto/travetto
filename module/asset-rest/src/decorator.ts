@@ -2,13 +2,13 @@
 
 import { ControllerRegistry, Filter, EndpointDecorator, Request, Response, MimeType } from '@travetto/rest';
 import { Class } from '@travetto/registry';
-import { ConfigLoader } from '@travetto/config';
+import { ConfigSource } from '@travetto/config';
 
 import { UploadUtil } from './upload-util';
 import { AssetRestConfig } from './config';
 
 const globalConf = new AssetRestConfig();
-ConfigLoader.bindTo(globalConf, 'rest.upload');
+ConfigSource.bindTo(globalConf, 'rest.upload');
 
 export function AssetUpload(config: Partial<AssetRestConfig> = {}) {
 

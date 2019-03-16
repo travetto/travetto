@@ -15,10 +15,7 @@
   },
   "optionalExtensionDependencies": {
     "@types/nodemailer": "^4.6.5",
-    "nodemailer": "^4.7.0",
-    "nodemailer-sendmail-transport": "^1.0.2",
-    "nodemailer-smtp-transport": "^2.7.4",
-    "nodemailer-ses-transport": "^1.5.1"
+    "nodemailer": "^4.7.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -30,8 +27,7 @@
   "main": "index.ts",
   "files": [
     "index.ts",
-    "src",
-    "extension"
+    "src"
   ],
   "name": "@travetto/email",
   "repository": {

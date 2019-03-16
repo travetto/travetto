@@ -1,7 +1,8 @@
-import { Context } from '@travetto/context';
+import { GetCacheInterceptor, RestInterceptor, Request, Response, RouteConfig } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
+import { ConfigSource } from '@travetto/config';
 
-import { GetCacheInterceptor, RestInterceptor, Request, Response } from '../';
+import { Context } from '../service';
 
 @Injectable()
 export class ContextInterceptor extends RestInterceptor {
@@ -10,6 +11,10 @@ export class ContextInterceptor extends RestInterceptor {
 
   @Inject()
   context: Context;
+
+  public applies?(route: RouteConfig): boolean {
+    return !ConfigSource.get('rest.context.disabled')!;
+  }
 
   async intercept(req: Request, res: Response, next: () => Promise<void>) {
     return this.context.run(next);

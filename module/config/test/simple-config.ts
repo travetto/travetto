@@ -3,8 +3,8 @@ import * as yaml from 'js-yaml';
 
 import { Test, Suite, BeforeEach, AfterEach } from '@travetto/test';
 
-import { ConfigLoader } from '../src/service/loader';
-import { ConfigMap } from '../src/service/map';
+import { ConfigSource } from '../src/source';
+import { ConfigUtil } from '../src/util';
 
 class DbConfig {
   name: string;
@@ -41,8 +41,8 @@ export class ConfigTest {
   envCopy: any;
 
   private reinit() {
-    delete (ConfigLoader as any)['_initialized'];
-    ConfigLoader.initialize();
+    delete ConfigSource['initialized'];
+    ConfigSource.init();
   }
 
   @BeforeEach()
@@ -59,7 +59,7 @@ export class ConfigTest {
   @Test()
   async verifyBasic() {
     const conf = new TestConfig();
-    ConfigLoader.bindTo(conf, 'db.mysql');
+    ConfigSource.bindTo(conf, 'db.mysql');
     assert(conf.name === 'Oscar');
   }
 
@@ -69,14 +69,14 @@ export class ConfigTest {
     this.reinit();
 
     const conf = new TestConfig();
-    ConfigLoader.bindTo(conf, 'db.mysql');
+    ConfigSource.bindTo(conf, 'db.mysql');
     assert(conf.name === 'Roger');
   }
 
   @Test()
   async verifyNotdefined() {
     const conf = new TestConfig();
-    ConfigLoader.bindTo(conf, 'model.mongo');
+    ConfigSource.bindTo(conf, 'model.mongo');
 
     // Default value from
     assert(conf.anonHosts === ['a', 'b']);
@@ -85,7 +85,7 @@ export class ConfigTest {
     this.reinit();
 
     const newConf = new TestConfig();
-    ConfigLoader.bindTo(newConf, 'model.mongo');
+    ConfigSource.bindTo(newConf, 'model.mongo');
 
     // Default value from
     assert(newConf.anonHosts === ['a', 'b', 'c', 'd']);
@@ -93,13 +93,13 @@ export class ConfigTest {
 
   @Test()
   async verifyTopLevelKeys() {
-    yaml.safeLoadAll(SAMPLE_YAML, (doc: any) => (ConfigLoader as any).map.putAll(doc));
+    yaml.safeLoadAll(SAMPLE_YAML, (doc: any) => ConfigSource.putAll(doc));
     const conf = new Test2Config();
-    ConfigLoader.bindTo(conf, 'test.beta');
+    ConfigSource.bindTo(conf, 'test.beta');
     assert(conf.values.length === 3);
 
     const conf2 = new Test2Config();
-    ConfigLoader.bindTo(conf2, 'test.alpha');
+    ConfigSource.bindTo(conf2, 'test.alpha');
     assert(conf2.values.length === 3);
   }
 
@@ -116,7 +116,7 @@ a:
   e:
     g: test`);
 
-    const broken: any = ConfigMap.breakDownKeys(data);
+    const broken: any = ConfigUtil.breakDownKeys(data);
     assert(broken['a.b.c'] === undefined);
     assert(broken['a.b'] === undefined);
 

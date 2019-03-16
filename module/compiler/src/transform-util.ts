@@ -175,6 +175,17 @@ export class TransformUtil {
     return undefined;
   }
 
+  /*
+   * useful for handling failed imports, but still transpiling
+   */
+  static optionalResolve(file: string) {
+    try {
+      return require.resolve(file);
+    } catch {
+      return file;
+    }
+  }
+
   static importingVisitor<T extends TransformerState>(
     init: (file: ts.SourceFile, context?: ts.TransformationContext) => Partial<T>,
     visitor: <Z extends ts.Node>(context: ts.TransformationContext, node: Z, state: T) => Z
@@ -196,7 +207,7 @@ export class TransformUtil {
 
         for (const stmt of file.statements) {
           if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
-            let path = require.resolve(stmt.moduleSpecifier.text
+            let path = this.optionalResolve(stmt.moduleSpecifier.text
               .replace(/^\.\./, dirname(dirname(state.path)))
               .replace(/^\.\//, `${dirname(state.path)}/`));
 

@@ -51,8 +51,7 @@ export class TestChildWorker extends ChildCommChannel<Event> {
   async initEvent() {
     console.debug('Init');
 
-    const mgr = new PhaseManager('bootstrap');
-    mgr.load('compiler');
+    const mgr = PhaseManager.init('bootstrap', 'compiler');
 
     // Init compiler
     this.compiler = (await import('@travetto/compiler')).Compiler;
@@ -91,6 +90,10 @@ export class TestChildWorker extends ChildCommChannel<Event> {
   }
 
   async runTest(event: Event) {
+    // Run all remaining bootstraps as needed for tests
+    const mgr = PhaseManager.init('bootstrap', '*', 'registry');
+    await mgr.run();
+
     const { Runner } = await import(`../runner/runner`);
 
     console.debug('*Running*', event.file);
