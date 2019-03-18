@@ -37,7 +37,7 @@ export class LogUtil {
       p = p.trim().replace(/[.]/g, '\\.');
 
       // Auto wildcard for modules
-      if (p.includes('@') && !p.includes('/') && !p.includes(':')) {
+      if (p.includes('@') && !p.includes('/') && !p.endsWith('*')) {
         p = `${p}/*`;
       }
 

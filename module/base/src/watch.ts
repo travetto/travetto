@@ -163,8 +163,9 @@ export class Watcher extends EventEmitter {
       } catch (e) {
         if (e.code === 'ENOENT') {
           // Missing file, continue
+        } else {
+          throw e;
         }
-        throw e;
       }
     });
 
