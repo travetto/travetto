@@ -1,7 +1,7 @@
 import { PrincipalProvider, Identity } from '@travetto/auth';
 import { InjectableFactory } from '@travetto/di';
 
-import { IdentityProvider, SessionAuthContextSerializer, RestAuthContextSerializer } from '../..';
+import { IdentityProvider, SessionAuthContextStore, AuthContextStore } from '../..';
 
 export class FbUser {
   id: string;
@@ -12,8 +12,8 @@ export const SIMPLE_AUTH = Symbol('simple-auth');
 
 export class AppConfig {
   @InjectableFactory()
-  static serializer(): RestAuthContextSerializer {
-    return new SessionAuthContextSerializer({});
+  static serializer(): AuthContextStore {
+    return new SessionAuthContextStore({});
   }
 
   @InjectableFactory()

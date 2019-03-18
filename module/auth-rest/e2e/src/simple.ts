@@ -1,8 +1,7 @@
 import { Inject } from '@travetto/di';
 import { Controller, Get, Redirect, Post, Request } from '@travetto/rest';
-import { AuthService } from '@travetto/auth';
 
-import { Authenticate, Authenticated, Unauthenticated } from '../..';
+import { Authenticate, Authenticated, Unauthenticated, AuthService } from '../..';
 import { SIMPLE_AUTH } from './conf';
 
 @Controller('/auth')
