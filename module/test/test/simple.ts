@@ -44,7 +44,7 @@ class Simple {
 
   @Test()
   async test1d() {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 100));
     assert(1 === a);
   }
 

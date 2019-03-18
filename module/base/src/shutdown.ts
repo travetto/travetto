@@ -25,7 +25,7 @@ export class Shutdown {
       const { name, handler } = listener;
 
       try {
-        console.debug(`[Shutdown] Starting ${name}`);
+        console.debug(`Starting ${name}`);
         const res = handler();
         if (res && res.then) {
           promises.push(res as Promise<any>);
@@ -33,7 +33,7 @@ export class Shutdown {
             .then(() => console.debug(`Completed shut down ${name}`))
             .catch((e: any) => Env.error('[Shutdown]', `Failed shut down of ${name}`, e));
         } else {
-          console.debug('[Shutdown]', `Completed shut down ${name}`);
+          console.debug(`Completed shut down ${name}`);
         }
       } catch (e) {
         Env.error('[Shutdown]', `Failed shut down of ${name}`, e);
@@ -89,7 +89,7 @@ export class Shutdown {
     process.on('SIGINT', this.execute.bind(this, 130));
     process.on('SIGTERM', this.execute.bind(this, 143));
     process.on('uncaughtException', this.execute.bind(this, 1));
-    process.on('unhandledRejection', (err, p) => this.unhandled.find(x => !!x(err, p)));
+    process.on('unhandledRejection', (err, p) => this.unhandled.find(x => !!x(err as Error, p)));
     this.unhandled.push(this.execute.bind(this, 1));
   }
 

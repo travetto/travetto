@@ -46,7 +46,8 @@ function init() {
         return Util.showHelp(cmd, 'You must specify a file to run in single mode');
       }
 
-      await runTests(cmd, args);
+      const res = await runTests(cmd, args);
+      process.exit(res);
     });
 }
 
