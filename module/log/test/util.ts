@@ -23,7 +23,7 @@ class UtilTest {
     assert(!filter('@app:test'));
     assert(filter('@app:test:2'));
 
-    filter = LogUtil.buildFilter('@app:test*,-@app:test/2');
+    filter = LogUtil.buildFilter('@app:test,-@app:test/2');
     assert(filter('@app:test/@'));
     assert(!filter('@app:test/2'));
   }

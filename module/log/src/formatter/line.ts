@@ -20,7 +20,10 @@ export function lineFormatter(opts: LineFormatterOpts) {
     let out = '';
 
     if (opts.timestamp) {
-      let timestamp = new Date(ev.timestamp).toISOString().split('.')[0];
+      let timestamp = new Date(ev.timestamp).toISOString();
+      if (!Env.trace) {
+        timestamp = timestamp.split('.')[0];
+      }
       if (opts.colorize) {
         timestamp = stylize(timestamp, 'white', 'bold');
       }
