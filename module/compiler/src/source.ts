@@ -43,7 +43,7 @@ export class SourceManager {
         errors.push(`${res.diagnostics.length - 5} more ...`);
       }
 
-      throw new AppError(`Transpiling ${fileName.replace(`${this.cwd}/`, '')} failed:[    ${errors.join('\n    ')}\n ]`, 'unavailable');
+      throw new AppError(`Transpiling ${fileName.replace(`${this.cwd}/`, '')} failed`, 'unavailable', { errors });
     }
   }
 
