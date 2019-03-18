@@ -13,7 +13,7 @@ export class ContextInterceptor extends RestInterceptor {
   context: Context;
 
   public applies?(route: RouteConfig): boolean {
-    return !ConfigSource.get('rest.context.disabled')!;
+    return !ConfigSource.get('rest.context').disabled;
   }
 
   async intercept(req: Request, res: Response, next: () => Promise<void>) {
