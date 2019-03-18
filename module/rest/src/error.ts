@@ -1,5 +1,5 @@
 /// <reference path="./error.d.ts" />
-import { HTTP_ERROR_CONVERSION } from '@travetto/base';
+import { Env, HTTP_ERROR_CONVERSION } from '@travetto/base';
 
 import { Response } from './types';
 import { MimeType } from './util/mime';
@@ -11,6 +11,10 @@ import { MimeType } from './util/mime';
     500;
 
   res.status(status);
+
+  if (status === 500 && Env.dev) {
+    console.error(this.stack);
+  }
 
   if ('toJSON' in this) {
     res.setHeader('Content-Type', MimeType.JSON);
