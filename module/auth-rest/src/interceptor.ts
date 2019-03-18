@@ -14,6 +14,8 @@ export class AuthInterceptor extends RestInterceptor {
 
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
 
+    req.__authContext = {} as any;
+
     await this.service.restore(req);
 
     // Expose request api

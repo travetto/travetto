@@ -21,7 +21,7 @@ export class SessionAuthContextStore extends AuthContextStore {
   private config: SessionConfig;
   private session: SessionStore;
 
-  constructor(session: SessionStore, config: Partial<SessionConfig>) {
+  constructor(config: Partial<SessionConfig>, session?: SessionStore) {
     super();
     this.config = {
       cookieName: 'session_id',
@@ -29,7 +29,7 @@ export class SessionAuthContextStore extends AuthContextStore {
       secure: false,
       ...config
     };
-    this.session = session;
+    this.session = session || new Map();
   }
 
   getId(request: Request) {
