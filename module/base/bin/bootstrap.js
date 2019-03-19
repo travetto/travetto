@@ -1,12 +1,8 @@
 #!/usr/bin/env node
-
-// @ts-check
-require('../src/bootstrap/register').registerLoaders();
-require('../src/bootstrap/env').showEnv();
-
-const mgr = module.exports = require('../src/phase').PhaseManager.init('bootstrap');
+const TRV_BASE_ROOT = !process.env.TRV_FRAMEWORK_DEV ? '..' :
+  (process.cwd().includes('/module/base') ? process.cwd() :
+    `${process.cwd()}/node_modules/@travetto/base`);
 
 // @ts-ignore
-if (require.main === module) {
-  mgr.run();
-}
+module.exports = require(`${TRV_BASE_ROOT}/bin/lib`)
+  .bootstrap(require.main === module);

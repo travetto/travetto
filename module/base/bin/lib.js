@@ -8,7 +8,7 @@ function clean() {
 }
 
 async function runScript(script, phase) {
-  require('./bootstrap');
+  bootstrap();
 
   if (phase && phase !== 'none') {
     await require('../src/phase')
@@ -25,4 +25,15 @@ async function runScript(script, phase) {
   return res;
 }
 
-module.exports = { clean, runScript };
+function bootstrap(run = false) {
+  require('../src/bootstrap/register').registerLoaders();
+  require('../src/bootstrap/env').showEnv();
+
+  const mgr = require('../src/phase').PhaseManager.init('bootstrap');
+  if (run) {
+    mgr.run();
+  }
+  return mgr;
+}
+
+module.exports = { clean, runScript, bootstrap };

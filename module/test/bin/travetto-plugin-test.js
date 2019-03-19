@@ -1,4 +1,8 @@
-const { runTests, prepareEnv } = require(`${process.env.TRV_TEST_ROOT || '..'}/bin/lib`);
+const TRV_TEST_ROOT = !process.env.TRV_FRAMEWORK_DEV ? '..' :
+  (process.cwd().includes('/module/test') ? process.cwd() :
+    `${process.cwd()}/node_modules/@travetto/test`);
+
+const { runTests, prepareEnv } = require(`${TRV_TEST_ROOT}/bin/lib`);
 
 prepareEnv({ DEBUGGER: true });
 

@@ -3,5 +3,5 @@ export interface ConsoleOutputOpts {
 }
 
 export function consoleOutput(opts: ConsoleOutputOpts) {
-  return (message: string) => (console as any)[opts.method].raw(message);
+  return (message: string) => (console as any).raw[opts.method](message);
 }
