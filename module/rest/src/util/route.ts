@@ -58,10 +58,15 @@ export class RouteUtil {
   }
 
   static createFilterChain(filters: (Filter | RestInterceptor['intercept'])[]): Filter<Promise<any>> {
-    return function filterChain(req: Request, res: Response, idx: number = filters.length - 1): Promise<any> {
+    return function filterChain(req: Request, res: Response, idx: number = filters.length - 1): Promise<any> | any {
       const it = filters[idx];
       const next = idx === 0 ? (x?: any) => x : filterChain.bind(null, req, res, idx - 1);
-      return it.length === 3 ? it(req, res, next) : it(req, res).then(next);
+      if (it.length === 3) {
+        return it(req, res, next);
+      } else {
+        const out = it(req, res);
+        return out.then ? out.then(next) : next();
+      }
     };
   }
 

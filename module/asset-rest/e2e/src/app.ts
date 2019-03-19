@@ -1,5 +1,5 @@
-import { Application, InjectableFactory } from '@travetto/di';
-import { RestApp } from '@travetto/rest';
+import { InjectableFactory } from '@travetto/di';
+import { Application, RestApp } from '@travetto/rest';
 import { KoaRestApp } from '@travetto/rest-koa';
 
 @Application('sample')

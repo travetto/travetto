@@ -16,7 +16,7 @@ export function AssetUpload(config: Partial<AssetRestConfig> = {}) {
 
   return function (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<Filter>) {
     const ep = ControllerRegistry.getOrCreateEndpointConfig(target.constructor as Class, descriptor.value!);
-    const filter = async function (req: Request, res: Response) {
+    const filter = async (req: Request, res: Response) => {
       req.files = await UploadUtil.upload(req, finalCOnf, `${(target.constructor as any).basePath}/`);
     };
 

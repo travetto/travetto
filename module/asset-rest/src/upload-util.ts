@@ -21,64 +21,81 @@ export class UploadUtil {
     return types.findIndex(match(type)) >= 0;
   }
 
+  static async streamFile(data: NodeJS.ReadableStream, fileName: string, allowedTypes: string[], excludeTypes: string[], relativeRoot?: string) {
+    const uniqueDir = FsUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
+    await FsUtil.mkdirp(uniqueDir);
+    const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(fileName));
+
+    data.pipe(fs.createWriteStream(uniqueLocal));
+    await new Promise((res, rej) =>
+      data.on('end', (e: any) => e ? rej(e) : res()));
+
+    const asset = await AssetUtil.localFileToAsset(uniqueLocal, relativeRoot);
+    asset.metadata.title = fileName;
+    asset.metadata.name = fileName;
+    asset.filename = fileName;
+
+    const detectedType = await AssetUtil.detectFileType(asset.path);
+    const contentType = detectedType ? detectedType.mime : '';
+
+    const notMatchPositive = allowedTypes.length && !this.matchType(allowedTypes, contentType);
+    const matchNegative = excludeTypes.length && this.matchType(excludeTypes, contentType);
+
+    if (notMatchPositive || matchNegative) {
+      throw new AppError(`Content type not allowed: ${contentType}`, 'data');
+    }
+
+    return asset;
+  }
+
+  static getFileName(req: Request) {
+    return ((req.header('content-disposition') || '')
+      .split('filename=')[1] || '')
+      .replace(/"/g, '') ||
+      `file-upload.${req.header('content-type')!.split('/').pop()}`;
+  }
+
   static upload(req: Request, config: Partial<AssetRestConfig>, relativeRoot?: string) {
     const allowedTypes = this.readTypeArr(config.allowedTypes);
     const excludeTypes = this.readTypeArr(config.excludeTypes);
 
-    console.debug('Staring upload');
-
     return new Promise<AssetMap>((resolve, reject) => {
-      const mapping: AssetMap = {};
-      const uploads: Promise<any>[] = [];
-      const uploader = new busboy({
-        headers: req.headers,
-        limits: {
-          fileSize: config.maxSize
-        }
-      });
-
-      uploader.on('file', async (fieldName, file, fileName, encoding, mimeType) => {
-        console.debug('Uploading file', fieldName, fileName, encoding, mimeType);
-
-        uploads.push((async () => {
-          const uniqueDir = FsUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
-          await FsUtil.mkdirp(uniqueDir);
-          const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(fileName));
-
-          file.pipe(fs.createWriteStream(uniqueLocal));
-          await new Promise((res, rej) =>
-            file.on('end', e => e ? rej(e) : res()));
-
-          const asset = mapping[fieldName] = await AssetUtil.localFileToAsset(uniqueLocal, relativeRoot);
-          asset.metadata.title = fileName;
-          asset.metadata.name = fileName;
-          asset.filename = fileName;
-
-          const detectedType = await AssetUtil.detectFileType(asset.path);
-          const contentType = detectedType ? detectedType.mime : '';
-
-          const notMatchPositive = allowedTypes.length && !this.matchType(allowedTypes, contentType);
-          const matchNegative = excludeTypes.length && this.matchType(excludeTypes, contentType);
-
-          if (notMatchPositive || matchNegative) {
-            throw new AppError(`Content type not allowed: ${contentType}`, 'data');
+      if (!/multipart|urlencoded/i.test(req.header('content-type')!)) {
+        const filename = this.getFileName(req);
+        this.streamFile(req as any as NodeJS.ReadableStream, filename, allowedTypes, excludeTypes, relativeRoot)
+          .then(file => resolve({ file }));
+      } else {
+        const mapping: AssetMap = {};
+        const uploads: Promise<any>[] = [];
+        const uploader = new busboy({
+          headers: req.headers,
+          limits: {
+            fileSize: config.maxSize
           }
-        })());
-      });
+        });
 
-      uploader.on('finish', async () => {
-        console.debug('Finishing Upload');
+        uploader.on('file', async (fieldName, file, fileName, encoding, mimeType) => {
+          console.debug('Uploading file', fieldName, fileName, encoding, mimeType);
+          uploads.push(
+            this.streamFile(file, fileName, allowedTypes, excludeTypes, relativeRoot)
+              .then(res => mapping[fieldName] = res)
+          );
+        });
 
-        try {
-          await Promise.all(uploads);
-          console.debug('Finished Upload');
-          resolve(mapping);
-        } catch (err) {
-          reject(err);
-        }
-      });
+        uploader.on('finish', async () => {
+          console.debug('Finishing Upload');
 
-      req.pipe(uploader);
+          try {
+            await Promise.all(uploads);
+            console.debug('Finished Upload');
+            resolve(mapping);
+          } catch (err) {
+            reject(err);
+          }
+        });
+
+        req.pipe(uploader);
+      }
     });
   }
 }
