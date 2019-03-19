@@ -27,7 +27,11 @@
   ],
   "license": "MIT",
   "main": "index.ts",
+  "bin": {
+    "travetto-cli-es_schema": "bin/travetto-cli-es_schema.js"
+  },
   "files": [
+    "bin",
     "index.ts",
     "src",
     "support"

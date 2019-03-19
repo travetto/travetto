@@ -28,7 +28,7 @@ class Employee implements ModelCore {
   name: string;
 }
 
-export class Config {
+export class Conf {
   @InjectableFactory()
   static getSource(config: ElasticsearchModelConfig): ModelSource {
     return new ElasticsearchModelSource(config);
