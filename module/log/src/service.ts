@@ -35,7 +35,7 @@ class $Logger {
     }
 
     // Base logger, for free
-    const formatter = lineFormatter({ colorize: $Logger.COLORIZE });
+    const formatter = lineFormatter({ colorize: $Logger.COLORIZE, timestamp: !Env.isFalse('log_time') });
     const errorOutput = consoleOutput({ method: 'error' });
     const output = consoleOutput({ method: 'log' });
 
