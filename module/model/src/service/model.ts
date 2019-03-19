@@ -58,7 +58,7 @@ export class ModelService implements IModelSource {
   async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string): Promise<Partial<T>>;
   async prePersist<T extends ModelCore>(cls: Class<T>, o: Partial<T> | T, view: string = ALL_VIEW) {
     if (o.prePersist) {
-      o.prePersist();
+      await o.prePersist();
     }
 
     if (!(o instanceof cls)) {
@@ -122,7 +122,7 @@ export class ModelService implements IModelSource {
       query.sort = config.defaultSort;
     }
     const res = await this.source.getAllByQuery(cls, query);
-    return res.map(o => this.postLoad(cls, o));
+    return Promise.all(res.map(o => this.postLoad(cls, o)));
   }
 
   /** Find the count of matching documetns by query */
@@ -183,7 +183,7 @@ export class ModelService implements IModelSource {
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[], keepId?: boolean) {
     objs = await Promise.all(objs.map(o => this.prePersist(cls, o)));
     const res = await this.source.saveAll(cls, objs, keepId);
-    return res.map(x => this.postLoad(cls, x));
+    return Promise.all(res.map(x => this.postLoad(cls, x)));
   }
 
   /** Update/replace an existing record */

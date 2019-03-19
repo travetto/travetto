@@ -353,7 +353,7 @@ export class ElasticsearchModelSource extends ModelSource {
       obj.id = item._id;
       this.postLoad(itemCls, obj);
       if (obj.postLoad) {
-        obj.postLoad();
+        await obj.postLoad();
       }
       obj.type = itemCls.name.toLowerCase();
       out.push(obj);
