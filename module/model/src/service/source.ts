@@ -16,8 +16,8 @@ export interface IModelSource {
   onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
   onSchemaChange?(e: SchemaChangeEvent): void;
 
-  prePersist<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Partial<T>;
-  prePersist<T extends ModelCore>(cls: Class<T>, model: T): T;
+  prePersist<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<Partial<T>> | Partial<T>;
+  prePersist<T extends ModelCore>(cls: Class<T>, model: T): T | Promise<T>;
 
   postLoad<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Partial<T>;
   postLoad<T extends ModelCore>(cls: Class<T>, model: T): T;
