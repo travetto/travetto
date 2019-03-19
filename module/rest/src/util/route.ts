@@ -84,7 +84,7 @@ export class RouteUtil {
     interceptors: RestInterceptor[],
     route: RouteConfig | EndpointConfig,
     router: Partial<ControllerConfig> = {}): Filter<any> {
-    const handlerBound = route.handler.bind(route.instance);
+    const handlerBound = async (req: Request, res: Response) => route.handler.call(route.instance, req, res);
 
     const filters: Filter[] = [
       ...(router.filters || []).map(x => x.bind(router.instance)),
@@ -99,7 +99,8 @@ export class RouteUtil {
       ...interceptors
         .filter(x => x.applies ? x.applies(route) : true)
         .map(x => x.intercept.bind(x)),
-      ...filters, handlerBound
+      ...filters,
+      handlerBound
     ].reverse());
 
     return this._routeHandler.bind(this, filterChain, headers);
