@@ -183,6 +183,10 @@ export class ElasticsearchModelSource extends ModelSource {
   onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>): void {
     console.debug('Model Changed', e);
 
+    if (!this.config.autoCreate) {
+      return;
+    }
+
     // Handle ADD/REMOVE
     if (e.prev && !e.curr) { // Removing
       this.client.indices.delete({
@@ -301,7 +305,7 @@ export class ElasticsearchModelSource extends ModelSource {
     await this.client.cluster.health({});
 
     // PreCreate indexes if missing
-    if (!Env.prod) {
+    if (this.config.autoCreate) {
       const all = ModelRegistry.getClasses()
         .filter(x => !ModelRegistry.get(x).subType)
         .map(x => this.createIndexIfMissing(x));

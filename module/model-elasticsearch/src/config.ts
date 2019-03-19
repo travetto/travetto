@@ -1,3 +1,4 @@
+import { Env } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('elasticsearch.model')
@@ -6,6 +7,7 @@ export class ElasticsearchModelConfig {
   port = 9200;
   options = {};
   namespace = 'app';
+  autoCreate = !Env.prod;
   indexCreate = {
     number_of_replicas: 0,
     number_of_shards: 1
