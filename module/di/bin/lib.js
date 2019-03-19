@@ -88,7 +88,7 @@ function determineAppFromFile(filename) {
 
 async function computeApps() {
   // Suppress all output
-  console.warn = console.debug = console.log = function() {};
+  console.warn = console.debug = console.log = function () { };
 
   await require('@travetto/base/bin/bootstrap'); // Load base transpiler
 
@@ -137,11 +137,7 @@ function fork(cmd, args) {
     const err = [];
     const proc = child_process.spawn(process.argv0, [cmd, ...(args || [])], {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-      shell: false,
-      env: {
-        ...process.env,
-        TRV_DI_ROOT: path.resolve(__dirname, '..')
-      }
+      shell: false
     });
     proc.stdout.on('data', v => text.push(v));
     proc.stderr.on('data', v => err.push(v));

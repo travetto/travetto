@@ -19,7 +19,7 @@ function init() {
       require('@travetto/base/bin/bootstrap');
 
       if (cmd.format === 'tap' && Util.HAS_COLOR) {
-        const { TapEmitter } = require('../src/consumer/tap');
+        const { TapEmitter } = await import('../src/consumer/tap');
         cmd.consumer = new TapEmitter(process.stdout, {
           assertDescription: Col.description,
           testDescription: Col.description,
