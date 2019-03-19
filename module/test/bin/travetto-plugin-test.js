@@ -1,4 +1,4 @@
-const { runTests, prepareEnv } = require(`${process.env.TRV_TEST_BASE || '..'}/bin/lib`);
+const { runTests, prepareEnv } = require(`${process.env.TRV_TEST_ROOT || '..'}/bin/lib`);
 
 prepareEnv({ DEBUGGER: true });
 
