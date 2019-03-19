@@ -3,6 +3,7 @@ function prepareEnv(extra = {}) {
     QUIET_INIT: '1',
     DEBUG: process.env.DEBUG || '0',
     PROD: '0',
+    LOG_TIME: '0',
     TRV_CACHE_DIR: 'TRV_CACHE_DIR' in process.env ? process.env.TRV_CACHE_DIR : '-',
     APP_ROOTS: '0',
     WATCH: '0',

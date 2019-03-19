@@ -18,6 +18,7 @@ The common environment variables throughout the code base:
 * `FORCE_COLOR` = 0|1       - Require color output in all usages, defaults to true if tty is available
 * `DEBUG` = 0|1             - Outputs all console.debug messages, defaults to 1 in dev, and 0 in prod
 * `TRACE` = 0|1             - Outputs all console.trace messages, defaults to 0 in dev, and 0 in prod
+* `LOG_TIME` = 0|1          - Determines if we should log time when logging, defaults to 1
 
 * `WATCH` = 0|1             - Wether or not to run the program in watch mode
 * `DEBUGGER` = 0|1          - Indicates whether or not a debugger is attached.  Some timing compensation is needed

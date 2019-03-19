@@ -31,9 +31,10 @@ function buildLogging(prof) {
   const ce = console.error.bind(console);
   console.raw = { log: cl, error: ce };
 
-  const log = trace ?
-    (op, ...args) => op(new Date().toISOString(), ...args) :
-    (op, ...args) => op(new Date().toISOString().split(/[.]/)[0], ...args);
+  const log = isEnvFalse('log_time') ? (op, ...args) => op(...args) :
+    (trace ?
+      (op, ...args) => op(new Date().toISOString(), ...args) :
+      (op, ...args) => op(new Date().toISOString().split(/[.]/)[0], ...args));
 
   console.log = log.bind(null, cl, 'info ');
   console.warn = log.bind(null, cl, 'warn ');
