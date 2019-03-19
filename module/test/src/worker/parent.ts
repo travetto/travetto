@@ -6,7 +6,7 @@ import { Consumer } from '../model/consumer';
 
 export function buildWorkManager(consumer: Consumer) {
   return WorkUtil.spawnedWorker<string>({
-    command: `../../bin/test-worker`,
+    command: `${__dirname}/../../bin/test-worker`,
     fork: true,
     opts: { cwd: Env.cwd },
     async init(channel: ParentCommChannel) {
