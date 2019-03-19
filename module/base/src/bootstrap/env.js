@@ -27,15 +27,23 @@ function buildLogging(prof) {
   const trace = !isEnvFalse('trace') && (isEnvTrue('trace') || /,(@trv:)?[*],/.test(`,${envVal('trace', '')},`));
   const quietInit = isEnvTrue('quiet_init');
 
+  const cl = console.log.raw = console.log.bind(console);
+  const ce = console.error.raw = console.error.bind(console);
+
   const log = trace ?
-    (...args) => console.log(new Date().toISOString(), ...args) :
-    (...args) => console.log(new Date().toISOString().split(/[.]/)[0], ...args);
+    (...args) => cl(new Date().toISOString(), ...args) :
+    (...args) => cl(new Date().toISOString().split(/[.]/)[0], ...args);
 
+  const logErr = trace ?
+    (...args) => ce(new Date().toISOString(), ...args) :
+    (...args) => ce(new Date().toISOString().split(/[.]/)[0], ...args);
 
+  console.log = log.bind(null, 'info ');
   console.warn = log.bind(null, 'warn ');
   console.info = log.bind(null, 'info ');
   console.debug = log.bind(null, 'debug');
   console.trace = log.bind(null, 'trace');
+  console.error = logErr.bind(null, 'error');
 
   if (!trace) {
     console.trace = () => { };

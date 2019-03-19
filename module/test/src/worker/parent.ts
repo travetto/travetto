@@ -6,13 +6,13 @@ import { ParentCommChannel, CommUtil, WorkUtil } from '@travetto/worker';
 import { Events } from './types';
 import { Consumer } from '../model/consumer';
 
-const TRV_TEST_BASE = path.resolve(__dirname, '../..');
+const TRV_TEST_ROOT = path.resolve(__dirname, '../..');
 
 export function buildWorkManager(consumer: Consumer) {
   return WorkUtil.spawnedWorker<string>({
-    command: `${TRV_TEST_BASE}/bin/test-worker`,
+    command: `${TRV_TEST_ROOT}/bin/test-worker`,
     fork: true,
-    opts: { cwd: Env.cwd, env: { ...process.env, TRV_TEST_BASE } },
+    opts: { cwd: Env.cwd, env: { ...process.env, TRV_TEST_ROOT } },
     async init(channel: ParentCommChannel) {
       await channel.listenOnce(Events.READY);
       await channel.send(Events.INIT);

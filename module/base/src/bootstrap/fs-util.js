@@ -73,7 +73,7 @@ const FsUtil = {
     fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript';?/g, '');
 
     // Insert filename into all log statements for all components, when logger isn't loaded
-    fileContents = fileContents.replace(/\bconsole[.](debug|info|trace|warn)[(]/g,
+    fileContents = fileContents.replace(/\bconsole[.](debug|info|trace|warn|error)[(]/g,
       a => `${a}'[${FsUtil.computeModuleFromFile(fileName)}]',`);
 
     return `${fileContents};\nexport const __$TRV = 1;`;

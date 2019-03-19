@@ -140,7 +140,7 @@ function fork(cmd, args) {
       shell: false,
       env: {
         ...process.env,
-        TRV_DI_BASE: path.resolve(__dirname, '..')
+        TRV_DI_ROOT: path.resolve(__dirname, '..')
       }
     });
     proc.stdout.on('data', v => text.push(v));
