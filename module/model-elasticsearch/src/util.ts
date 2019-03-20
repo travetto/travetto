@@ -183,6 +183,23 @@ export class ElasticsearchUtil {
     }
   }
 
+  static generateUpdateScript(o: any, path: string = '', arr = false) {
+    const out: string[] = [];
+    for (const x of Object.keys(o || {})) {
+      const prop = arr ? `${path}[${x}]` : `${path}${path && '.' || ''}${x}`;
+      const line = o[x] === undefined || o[x] === null ?
+        `ctx._source.${path}remove('${x}')` :
+        (Util.isPrimitive(o[x]) || Array.isArray(o[x]) ?
+          `ctx._source.${prop} = ${JSON.stringify(o[x]).replace(/[{]/g, '[').replace(/[}]/g, ']')}` :
+          (Array.isArray(o[x]) ?
+            this.generateUpdateScript(o[x], prop, true) :
+            this.generateUpdateScript(o[x], prop)));
+
+      out.push(line);
+    }
+    return out.join(';');
+  }
+
   static generateSourceSchema(cls: Class) {
     return ModelRegistry.get(cls).baseType ?
       this.generateAllSourceSchema(cls) :

@@ -540,12 +540,18 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
     const id = this.extractId(data);
+    const script = ElasticsearchUtil.generateUpdateScript(data);
 
     await this.client.update({
       ...this.getIdentity(cls),
       id,
       refresh: true,
-      body: { doc: data }
+      body: {
+        script: {
+          lang: 'painless',
+          inline: script
+        }
+      }
     });
 
     return this.getById(cls, id);
@@ -561,10 +567,8 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, data: Partial<T>) {
-    // TODO: finish
-    const script = Object.keys(data).map(x => {
-      return `ctx._source.${x} = ${JSON.stringify((data as any)[x])}`;
-    }).join(';');
+
+    const script = ElasticsearchUtil.generateUpdateScript(data);
 
     const res = await this.client.updateByQuery({
       ...this.getIdentity(cls),
