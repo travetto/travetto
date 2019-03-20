@@ -29,6 +29,13 @@ class Simple {
   name: string;
 }
 
+@Model()
+class SimpleList {
+  id?: string;
+  names: string[];
+  simples?: Simple[];
+}
+
 @Suite('Simple Save')
 class TestSave extends BaseMongoTest {
 
@@ -152,5 +159,75 @@ class TestSave extends BaseMongoTest {
       }
     });
     assert(suggested.length === 1);
+  }
+
+
+
+  @Test('Verify partial update with field removal')
+  async testPartialUpdate() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    const o = await service.save(Person, Person.from({
+      name: 'bob',
+      age: 20,
+      gender: 'm',
+      address: {
+        street1: 'road',
+        street2: 'roader'
+      }
+    }));
+    assert(o.id);
+    assert(o.name === 'bob');
+
+    const o2 = await service.updatePartial(Person, Person.from({
+      id: o.id,
+      name: 'oscar'
+    }));
+
+    assert(o2.name === 'oscar');
+    assert(o2.age === 20);
+    assert(o2.address.street2 === 'roader');
+
+    await service.updatePartial(Person, Person.from({
+      id: o2.id,
+      address: {
+        street1: 'changed',
+        street2: undefined
+      }
+    }));
+
+    const o3 = await service.getById(Person, o.id!);
+
+    assert(o3.name === 'oscar');
+    assert(o3.age === 20);
+    assert(o3.address.street1 === 'changed');
+    assert(!('street2' in o3.address));
+  }
+
+  @Test('Verify partial update with field removal and lists')
+  async testPartialUpdateList() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    const o = await service.save(SimpleList, SimpleList.from({
+      names: ['a', 'b', 'c'],
+      simples: [
+        {
+          name: 'a',
+        },
+        {
+          name: 'b',
+        },
+        {
+          name: 'c',
+        }
+      ]
+    }));
+
+    const o2 = await service.updatePartial(SimpleList, SimpleList.from({
+      id: o.id,
+      names: ['a', 'd'],
+      simples: [{ name: 'd' }]
+    }));
+
+    assert(o2.names === ['a', 'd']);
+    assert(o2.simples === [Simple.from({ name: 'd' })]);
   }
 }
