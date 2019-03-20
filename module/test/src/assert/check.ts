@@ -68,6 +68,7 @@ export class AssertCheck {
 
       switch (fn) {
         case 'instanceof': asrt(args[0] instanceof args[1], args[2]); break;
+        case 'in': asrt(args[0] in args[1], args[2]); break;
         case 'lessThan': asrt(args[0] < args[1], args[2]); break;
         case 'lessThanEqual': asrt(args[0] <= args[1], args[2]); break;
         case 'greaterThan': asrt(args[0] > args[1], args[2]); break;

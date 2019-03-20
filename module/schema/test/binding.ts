@@ -189,6 +189,31 @@ class DataBinding {
     assert(!simple3.regex.ignoreCase);
     assert(!simple3.regex.global);
     assert(!simple3.regex.dotAll);
+  }
 
+  @Test()
+  async validateNullOrUndefined() {
+    const simple = BindUtil.bindSchema(Address, {
+      street1: undefined
+    });
+    assert('street1' in simple);
+    assert(simple.street1 === undefined);
+
+    const simple2 = BindUtil.bindSchema(Address, {
+      street1: null
+    });
+    assert('street1' in simple2);
+    assert(simple2.street1 === null);
+
+    const simple3 = Address.fromRaw({
+      street1: null as any,
+      street2: undefined
+    });
+
+    assert('street1' in simple3);
+    assert(simple3.street1 === null);
+
+    assert('street2' in simple3);
+    assert(simple3.street2 === undefined);
   }
 }

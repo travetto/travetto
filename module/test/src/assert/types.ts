@@ -20,6 +20,7 @@ export const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
 
 export const OP_MAPPING: { [key: string]: string } = {
   ok: '{actual} {state} {expected}',
+  in: '{actual} {state} be in {expected}',
   includes: '{actual} {state} include {expected}',
   test: '{expected} {state} match {actual}',
   throws: '{state} throw {expected}',
@@ -42,6 +43,7 @@ export const OP_MAPPING: { [key: string]: string } = {
 };
 
 export const OPTOKEN_ASSERT = {
+  InKeyword: 'in',
   EqualsEqualsToken: 'equal',
   ExclamationEqualsToken: 'notEqual',
   EqualsEqualsEqualsToken: 'strictEqual',
