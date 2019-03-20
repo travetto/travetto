@@ -542,6 +542,8 @@ export class ElasticsearchModelSource extends ModelSource {
     const id = this.extractId(data);
     const script = ElasticsearchUtil.generateUpdateScript(data);
 
+    console.log(script);
+
     await this.client.update({
       ...this.getIdentity(cls),
       id,

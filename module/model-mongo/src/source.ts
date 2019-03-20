@@ -68,10 +68,10 @@ export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any 
 
     if (subpath === 'id') { // Handle ids directly
       out._id = replaceId(v);
-    } else if (Util.isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) {
+    } else if ((Util.isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) || (v && v.constructor && v.constructor.__id)) {
       Object.assign(out, extractSimple(v, `${subpath}.`));
     } else {
-      if (Object.keys(v)[0] === '$regex') {
+      if (v && Object.keys(v)[0] === '$regex') {
         v.$regex = BindUtil.extractRegex(v.$regex);
       }
       out[subpath] = v;
@@ -294,7 +294,17 @@ export class MongoModelSource extends ModelSource {
     let final: any = data;
 
     if (Object.keys(data)[0].charAt(0) !== '$') {
-      final = { $set: extractSimple(final) };
+      const items = extractSimple(final);
+      final = Object.entries(items).reduce((acc, [k, v]) => {
+        if (v === null || v === undefined) {
+          acc.$unset = acc.$unset || {};
+          acc.$unset[k] = v;
+        } else {
+          acc.$set = acc.$set || {};
+          acc.$set[k] = v;
+        }
+        return acc;
+      }, {} as any);
     }
 
     const res = await col.findOneAndUpdate(extractTypedWhereClause(cls, query.where || {}), final, { returnOriginal: false });

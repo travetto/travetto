@@ -186,16 +186,14 @@ export class ElasticsearchUtil {
   static generateUpdateScript(o: any, path: string = '', arr = false) {
     const out: string[] = [];
     for (const x of Object.keys(o || {})) {
-      const prop = arr ? `${path}[${x}]` : `${path}${path && '.' || ''}${x}`;
-      const line = o[x] === undefined || o[x] === null ?
-        `ctx._source.${path}remove('${x}')` :
-        (Util.isPrimitive(o[x]) || Array.isArray(o[x]) ?
-          `ctx._source.${prop} = ${JSON.stringify(o[x]).replace(/[{]/g, '[').replace(/[}]/g, ']')}` :
-          (Array.isArray(o[x]) ?
-            this.generateUpdateScript(o[x], prop, true) :
-            this.generateUpdateScript(o[x], prop)));
-
-      out.push(line);
+      const prop = arr ? `${path}[${x}]` : `${path}${path ? '.' : ''}${x}`;
+      if (o[x] === undefined || o[x] === null) {
+        out.push(`ctx._source.${path}${path ? '.' : ''}remove('${x}')`);
+      } else if (Util.isPrimitive(o[x]) || Array.isArray(o[x])) {
+        out.push(`ctx._source.${prop} = ${JSON.stringify(o[x]).replace(/[{]/g, '[').replace(/[}]/g, ']')}`);
+      } else {
+        out.push(this.generateUpdateScript(o[x], prop));
+      }
     }
     return out.join(';');
   }
