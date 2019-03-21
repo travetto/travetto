@@ -4,5 +4,4 @@ export * from './src/decorator';
 export * from './src/identity';
 export * from './src/errors';
 export * from './src/service';
-export * from './src/context-store/session';
-export * from './src/context-store/types';
+export * from './src/context-store/session.ext';

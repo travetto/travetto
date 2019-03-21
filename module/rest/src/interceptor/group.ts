@@ -1,5 +1,4 @@
 import { Injectable, DependencyRegistry } from '@travetto/di';
-import { ConfigSource } from '@travetto/config';
 import { Class } from '@travetto/registry';
 import { AppInfo } from '@travetto/base';
 
