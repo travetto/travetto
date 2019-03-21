@@ -43,7 +43,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     const args = node.arguments.slice(0);
 
-    // Drop the inserted category message by the compiler, if present
+    // Drop the inserted category message by bootstrap, if present
     if (args.length && ts.isStringLiteral(args[0]) && args[0].getFullText().includes('[@trv:')) {
       args.shift();
     }
