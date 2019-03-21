@@ -39,23 +39,11 @@ function buildLogging(prof) {
   console.log = log.bind(null, cl, 'info ');
   console.warn = log.bind(null, cl, 'warn ');
   console.info = log.bind(null, cl, 'info ');
-  console.debug = log.bind(null, cl, 'debug');
-  console.trace = log.bind(null, cl, 'trace');
-  console.error = log.bind(null, ce, 'error');
+  console.error = (...args) => log(ce, 'error', ...args.map(x => x && x.stack ? x.stack : x));
+  console.trace = !trace ? () => { } : log.bind(null, cl, 'trace'); // Suppress trace statements
+  console.debug = !debug ? () => { } : log.bind(null, cl, 'debug'); // Suppress debug statements
 
-  if (!trace) {
-    console.trace = () => { };
-  }
-
-  if (!debug) {
-    console.debug = () => { }; // Suppress debug statements
-  }
-
-  function error(...args) {
-    console.error(...args.map(x => x && x.stack ? x.stack : x));
-  }
-
-  return { debug, trace, error, quietInit };
+  return { debug, trace, quietInit };
 }
 
 function buildProfile() {

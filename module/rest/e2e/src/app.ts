@@ -58,7 +58,7 @@ export class SampleApp {
 
   constructor(private app: RestApp) { }
 
-  run() {
-    this.app.run();
+  async run() {
+    await this.app.run();
   }
 }

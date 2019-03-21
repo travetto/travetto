@@ -9,8 +9,6 @@ export declare const Env: {
   appRoots: string[];
   profiles: string[];
 
-
-  error(...args: any[]): void;
   hasProfile(p: string): boolean;
   isTrue(key: string): boolean;
   isFalse(key: string): boolean;

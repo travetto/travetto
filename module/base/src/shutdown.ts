@@ -31,12 +31,12 @@ export class Shutdown {
           promises.push(res as Promise<any>);
           res
             .then(() => console.debug(`Completed shut down ${name}`))
-            .catch((e: any) => Env.error('[Shutdown]', `Failed shut down of ${name}`, e));
+            .catch((e: any) => console.error(`Failed shut down of ${name}`, e));
         } else {
           console.debug(`Completed shut down ${name}`);
         }
       } catch (e) {
-        Env.error('[Shutdown]', `Failed shut down of ${name}`, e);
+        console.error(`Failed shut down of ${name}`, e);
       }
     }
 
@@ -57,7 +57,7 @@ export class Shutdown {
 
     try {
       if (err && typeof err !== 'number') {
-        Env.error(err);
+        console.error(err);
       }
 
       const promises = await this.getAvailableListeners(exitCode);
@@ -71,7 +71,7 @@ export class Shutdown {
       }
 
     } catch (e) {
-      Env.error('[Shutdown]', e);
+      console.error(e);
     }
 
     if (this.shutdownCode >= 0) {
