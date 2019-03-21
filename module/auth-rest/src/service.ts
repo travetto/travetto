@@ -7,7 +7,7 @@ import { Context } from '@travetto/context';
 
 import { ERR_INVALID_AUTH } from './errors';
 import { IdentityProvider } from './identity';
-import { AuthContextStore } from './context-store/types';
+import { AuthContextStore } from './types';
 
 @Injectable()
 export class AuthService {
