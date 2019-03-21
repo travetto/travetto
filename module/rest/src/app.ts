@@ -7,6 +7,7 @@ import { RestConfig } from './config';
 import { RouteUtil } from './util/route';
 import { RestInterceptor, RestInterceptorGroup } from './interceptor/types';
 import { ControllerRegistry } from './registry/registry';
+import { RestAppCustomizer } from './customizer';
 
 export abstract class RestApp<T = any> {
 
@@ -25,6 +26,9 @@ export abstract class RestApp<T = any> {
   @Inject()
   config: RestConfig;
 
+  @Inject()
+  customizer?: RestAppCustomizer<T>;
+
   raw: T;
   interceptors: RestInterceptor[] = [];
   listening = false;
@@ -42,6 +46,10 @@ export abstract class RestApp<T = any> {
     await ControllerRegistry.init();
 
     this.raw = await this.createRaw();
+
+    if (this.customizer) {
+      this.raw = (await this.customizer.customize(this.raw)) || this.raw;
+    }
 
     this.interceptors = await this.interceptorGroup.getActive();
 

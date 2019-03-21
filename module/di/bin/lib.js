@@ -94,9 +94,7 @@ async function computeApps() {
 
   // Initialize up to compiler
   const { PhaseManager, ScanApp } = require('@travetto/base');
-  const mgr = new PhaseManager('bootstrap');
-  mgr.load('compiler');
-  await mgr.run();
+  await PhaseManager.init('bootstrap', 'compiler').run();
 
   // Load app files
   ScanApp.requireFiles('.ts', x => {

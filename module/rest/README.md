@@ -166,6 +166,39 @@ export class SampleApp {
 
 And using the pattern established in the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) module, you would run your program using `npx travetto sample`.
 
+Additionally, you can customize the underlying application, by declaring a `RestAppCustomizer`.  This is helpful if you want to install additional core modules that are outside of the interceptor flow.  
+
+**Code: Rest Applications with Customizer**
+```typescript
+@Application('sample')
+export class SampleApp {
+
+  @InjectableFactory()
+  static getCustomer(): RestAppCustomizer<express.Application> {
+    return new class extends RestAppCustomizer<express.Application> {
+      customizer(app: express.Application) {
+        app.use(customFilter({ }));
+        return app;
+      }
+    }();
+  }
+
+  @InjectableFactory()
+  static getApp(): RestApp {
+    return new ExpressRestApp();
+  }
+
+  @Inject()
+  contextInterceptor: ContextInterceptor;
+
+  constructor(private app: RestApp) { }
+
+  run() {
+    this.app.run();
+  }
+}
+```
+
 ## Custom Interceptors
 Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) by extending the [`RestInterceptor`](./src/interceptor) class.  The interceptors are tied to the defined `Request` and `Response` objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
