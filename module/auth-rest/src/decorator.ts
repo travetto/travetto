@@ -8,12 +8,12 @@ export function Authenticate(provider: symbol, ...providers: symbol[]) {
 }
 
 export function Authenticated(include: string[] = [], exclude: string[] = []) {
-  const checker = AuthUtil.permissionSetChecker(include, exclude);
+  const checker = AuthUtil.permissionSetChecker(new Set(include), new Set(exclude));
 
   return ControllerRegistry.createFilterDecorator(async (req, res) => {
     if (!req.auth.principal) {
       throw new AppError('User is unauthenticated', 'authentication');
-    } else if (!checker(req.auth.principal.permissions)) {
+    } else if (!checker(req.auth.permissions)) {
       throw new AppError('Access denied', 'permissions');
     }
   });

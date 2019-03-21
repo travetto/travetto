@@ -13,7 +13,7 @@ export const SIMPLE_AUTH = Symbol('simple-auth');
 export class AppConfig {
   @InjectableFactory()
   static serializer(): AuthContextStore {
-    return new SessionAuthContextStore({});
+    return new SessionAuthContextStore();
   }
 
   @InjectableFactory()
@@ -34,7 +34,7 @@ export class AppConfig {
           expires: new Date(Date.now() + 1000 * 60),
           details: { woah: 'fun' },
           provider: 'simple',
-          permissions: new Set<string>()
+          permissions: []
         };
       }
     };

@@ -23,12 +23,12 @@ export class SampleAuth {
 
   @Get('/self')
   @Authenticated()
-  async getSelf() {
-    return this.state.context;
+  async getSelf(req: Request) {
+    return req.auth.principal;
   }
 
-  @Post('/logout')
-  @Unauthenticated()
+  @Get('/logout')
+  @Authenticated()
   async logout(req: Request) {
     await req.auth.logout();
   }

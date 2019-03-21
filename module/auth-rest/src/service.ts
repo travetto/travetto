@@ -7,7 +7,7 @@ import { Context } from '@travetto/context';
 
 import { ERR_INVALID_AUTH } from './errors';
 import { IdentityProvider } from './identity';
-import { AuthContextStore } from './types';
+import { AuthContextStore } from './context-store';
 
 @Injectable()
 export class AuthService {
@@ -29,9 +29,15 @@ export class AuthService {
     }
   }
 
-  setAuthContext(req: Request, ctx: AuthContext) {
+  setAuthContext(req: Request, res: Response, ctx: AuthContext) {
+    if (ctx && ctx.constructor !== AuthContext) {
+      ctx = new AuthContext(ctx.identity, ctx.principal);
+    }
     if (this.context) {
       this.context.set('auth', ctx);
+    }
+    if (this.authContextStore) {
+      this.authContextStore.store(req, res, ctx);
     }
     req.__authContext = ctx;
   }
@@ -39,6 +45,9 @@ export class AuthService {
   async clearAuthContext(req: Request, res: Response) {
     if (this.context) {
       this.context.clear('auth');
+    }
+    if (this.authContextStore) {
+      this.authContextStore.clear(req);
     }
     delete req.__authContext;
   }
@@ -51,7 +60,7 @@ export class AuthService {
         const ident = await idp.authenticate(req, res);
         if (ident) { // Multi-step login process
           const ctx = await this.principalProvider.authorize(ident);
-          this.setAuthContext(req, ctx);
+          this.setAuthContext(req, res, ctx);
           if (this.authContextStore) {
             await this.authContextStore.store(req, res, ctx);
           }
@@ -67,11 +76,11 @@ export class AuthService {
     throw err;
   }
 
-  async restore(req: Request) {
+  async restore(req: Request, res: Response) {
     if (this.authContextStore) {
       const ctx = await this.authContextStore.load(req);
       if (ctx) {
-        this.setAuthContext(req, ctx);
+        this.setAuthContext(req, res, ctx);
       }
     }
   }

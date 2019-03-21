@@ -16,12 +16,13 @@ export class AuthInterceptor extends RestInterceptor {
 
     req.__authContext = {} as any;
 
-    await this.service.restore(req);
+    await this.service.restore(req, res);
 
     // Expose request api
     req.auth = {
       get principal() { return req.__authContext.principal; },
       get principalDetails() { return req.__authContext.principalDetails; },
+      get permissions() { return req.__authContext.permissions; },
       async updatePrincipalDetails(val: any) { req.__authContext.updatePrincipalDetails(val); },
       logout: this.service.clearAuthContext.bind(this.service, req, res),
       authenticate: this.service.authenticate.bind(this.service, req, res)
