@@ -1,6 +1,6 @@
 export interface Principal {
   id: string;
-  permissions: Set<string>;
+  permissions: string[];
   details: { [key: string]: any };
   expires?: Date;
 }

@@ -11,7 +11,8 @@ type Checker = ReturnType<(typeof AuthUtil)['permissionChecker']>;
 
 export class AuthUtil {
 
-  private static CHECK_CACHE = new Map<string, [Checker, Checker]>();
+  private static CHECK_EXC_CACHE = new Map<string, [Checker, Checker]>();
+  private static CHECK_INC_CACHE = new Map<string, [Checker, Checker]>();
 
   static generateHash(password: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256') {
     return pbkdf2(password, salt, iterations, keylen, digest).then(toHex);
@@ -38,7 +39,7 @@ export class AuthUtil {
     return { salt, hash };
   }
 
-  static permissionChecker(perms: string[] | Set<string>, matchAll = true, defaultIfEmpty = true) {
+  static permissionChecker(perms: Set<string>, matchAll = true, defaultIfEmpty = true) {
     const permArr = [...perms].map(x => x.toLowerCase());
     const permSet = new Set(permArr);
     if (permArr.length === 0) {
@@ -49,19 +50,19 @@ export class AuthUtil {
       (uPerms: Set<string>) => !!permArr.find(x => uPerms.has(x));
   }
 
-  static permissionSetChecker(include: string[] | Set<string>, exclude: string[] | Set<string>, matchAll = true) {
+  static permissionSetChecker(include: Set<string>, exclude: Set<string>, matchAll = true) {
     const incKey = Array.from(include).sort().join(',');
     const excKey = Array.from(include).sort().join(',');
 
-    if (!this.CHECK_CACHE.has(incKey)) {
-      this.CHECK_CACHE.set(incKey, [AuthUtil.permissionChecker(include, true, true), AuthUtil.permissionChecker(include, false, true)]);
+    if (!this.CHECK_INC_CACHE.has(incKey)) {
+      this.CHECK_INC_CACHE.set(incKey, [AuthUtil.permissionChecker(include, true, true), AuthUtil.permissionChecker(include, false, true)]);
     }
-    if (!this.CHECK_CACHE.has(excKey)) {
-      this.CHECK_CACHE.set(excKey, [AuthUtil.permissionChecker(exclude, true, false), AuthUtil.permissionChecker(exclude, false, false)]);
+    if (!this.CHECK_EXC_CACHE.has(excKey)) {
+      this.CHECK_EXC_CACHE.set(excKey, [AuthUtil.permissionChecker(exclude, true, false), AuthUtil.permissionChecker(exclude, false, false)]);
     }
 
-    const includes = this.CHECK_CACHE.get(incKey)![matchAll ? 1 : 0];
-    const excludes = this.CHECK_CACHE.get(excKey)![matchAll ? 1 : 0];
+    const includes = this.CHECK_INC_CACHE.get(incKey)![matchAll ? 1 : 0];
+    const excludes = this.CHECK_EXC_CACHE.get(excKey)![matchAll ? 1 : 0];
 
     return (perms: Set<string>) => includes(perms) && !excludes(perms);
   }

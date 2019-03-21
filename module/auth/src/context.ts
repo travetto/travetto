@@ -3,8 +3,6 @@ import { AppError } from '@travetto/base';
 import { AuthUtil } from './util';
 import { Principal, Identity } from './types';
 
-const EMPTY_SET = new Set<string>();
-
 export class AuthContext<
   U = any,
   I extends Identity = Identity,
@@ -13,6 +11,7 @@ export class AuthContext<
 
   public identity: I;
   public principal: P;
+  public readonly permissions: Set<string>;
 
   constructor(identity: I, principal?: P) {
     if (!principal) {
@@ -20,7 +19,7 @@ export class AuthContext<
     }
     this.principal = principal;
     this.identity = identity;
-    this.principal.permissions = this.principal.permissions || new Set<string>();
+    this.permissions = new Set(principal.permissions);
   }
 
   get principalDetails() {
@@ -35,9 +34,8 @@ export class AuthContext<
     Object.assign(this.principal.details, details);
   }
 
-  checkPermissions(include: string[] | Set<string>, exclude: string[] | Set<string>, matchAll = true) {
-    const perms = this.principal ? this.principal.permissions : EMPTY_SET;
-    if (!AuthUtil.permissionSetChecker(include, exclude, matchAll)(perms)) {
+  checkPermissions(include: Set<string>, exclude: Set<string>, matchAll = true) {
+    if (!AuthUtil.permissionSetChecker(include, exclude, matchAll)(this.permissions)) {
       throw new AppError('Insufficient permissions', 'permissions');
     }
   }
