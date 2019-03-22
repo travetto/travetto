@@ -91,17 +91,17 @@ We need to create `src/config.ts`
 **Code: Configuration, src/config.ts**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { ModelMongoSource, ModelMongoConfig } from '@travetto/model-mongo';
+import { MongoModelSource, MongoModelConfig } from '@travetto/model-mongo';
 import { ModelSource } from '@travetto/model';
 
 export class AppConfig {
   @InjectableFactory()
-  static getDataSource(config: ModelMongoConfig): ModelSource {
-    return new ModelMongoSource(config);
+  static getDataSource(config: MongoModelConfig): ModelSource {
+    return new MongoModelSource(config);
   }
 }
 ```
-The `@InjectableFactory` allows you to create injection candidates.  Note that the `ModelMongoSource` has the return type 
+The `@InjectableFactory` allows you to create injection candidates.  Note that the `MongoModelSource` has the return type 
 specified as `ModelSource`.
 
 ## Building the service layer
@@ -157,13 +157,13 @@ Create the new test config at `test/config.ts`
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 import { ModelSource, ModelService } from '@travetto/model';
-import { ModelMongoSource, ModelMongoConfig } from '@travetto/model-mongo';
+import { MongoModelSource, MongoModelConfig } from '@travetto/model-mongo';
 import { QueryVerifierService } from '@travetto/model/src/service/query';
 
 export class TestConfig {
   @InjectableFactory()
   static testSource(): ModelSource {
-    return new ModelMongoSource(ModelMongoConfig.from({
+    return new MongoModelSource(MongoModelConfig.from({
       namespace: `test-${Math.trunc(Math.random() * 10000)}`
     }));
   }
@@ -263,7 +263,7 @@ Finally, we establish the controller at `src/controller.ts`
 ```typescript
 import { Controller, Get, TypedBody, Post, Put, Delete, Request, TypedQuery } from '@travetto/rest';
 import { Inject } from '@travetto/di';
-import { SchemaBody, SchemaQuery } from '@travetto/schema/src/extension/rest';
+import { SchemaBody, SchemaQuery } from '@travetto/schema/src/extension/rest.ext';
 
 import { TodoService } from './service';
 import { Todo, TodoSearch } from './model';
