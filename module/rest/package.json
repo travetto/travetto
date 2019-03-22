@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^0.6.0-rc.0",
-    "@travetto/exec": "^0.6.0-rc.0",
+    "@travetto/di": "^0.6.0-rc.2",
+    "@travetto/exec": "^0.6.0-rc.1",
     "@types/express-serve-static-core": "^4.16.0"
   },
   "devDependencies": {
-    "@travetto/test": "^0.6.0-rc.0"
+    "@travetto/test": "^0.6.0-rc.1"
   },
   "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
   "homepage": "https://travetto.io",
@@ -35,5 +35,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.0"
+  "version": "0.6.0-rc.1"
 }
