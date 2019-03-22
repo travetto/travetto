@@ -22,8 +22,8 @@ class LoggerTest {
     });
     console.log('Hello', 1, 2, 3);
     assert(events.length === 1);
-    assert(events[0].message === 'Hello');
-    assert.deepStrictEqual(events[0].args, [1, 2, 3]);
+    assert(events[0].message === '[@app/test.logger]');
+    assert.deepStrictEqual(events[0].args, ['Hello', 1, 2, 3]);
   }
 
   @Test('Formatter')
