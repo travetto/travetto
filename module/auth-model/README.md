@@ -24,7 +24,7 @@ class User extends BaseModel {
 
 class AuthConfig {
   @InjectableFactory()
-  static getAuthModelProvider(): PrincipalProvider {
+  static getModelPrincipalProvider(): PrincipalProvider {
     new ModelPrincipalProvider(
       User,
       (u:User) => ({ 
@@ -72,3 +72,5 @@ class UserService {
   ...
 }
 ```
+
+Additinoaly
