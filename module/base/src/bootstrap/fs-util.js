@@ -92,8 +92,8 @@ const FsUtil = {
       return /^$/;
     } else {
       const finalPaths =
-        paths.map(x => x.replace(/^[.]\//, ''));
-      const re = new RegExp(`^(${finalPaths.map(x => `${x === '.' ? '' : `${x}/`}(index|src\/)`).join('|')})`);
+        paths.map(x => x.replace(/^[.]\//, '').replace(/^[.]$/g, ''));
+      const re = new RegExp(`^(${finalPaths.map(x => `${x === '' ? '' : `${x}/`}(index|src\/)`).join('|')})`);
       return re;
     }
   },
