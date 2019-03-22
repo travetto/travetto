@@ -28,6 +28,7 @@ abstract class BaseResponse implements Partial<Response> {
     this.status(code as number);
     this.location(path!);
     this.setHeader('Content-Length', '0');
+    this.send('');
   }
 }
 

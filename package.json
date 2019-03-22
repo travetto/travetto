@@ -15,6 +15,7 @@
     "@types/nodemailer": "^4.6.6",
     "@types/passport-facebook": "^2.1.8",
     "faker": "^4.1.0",
+    "fastify-session": "^2.0.0",
     "js-yaml": "^3.12.2",
     "koa-session": "^5.10.1",
     "lerna": "^3.13.1",

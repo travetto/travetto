@@ -38,13 +38,14 @@ export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
       return;
     }
     for (const route of routes) {
+      let sub = path;
       if (typeof route.path === 'string') {
-        path = `${path}/${route.path}`;
+        sub = `${path}/${route.path}`;
       } else {
-        path = `${path}/${route.path.source}`;
+        sub = `${path}/${route.path.source}`;
       }
-      path = path.replace(/\/+/g, '/').replace(/\/+$/, '');
-      this.raw[route.method!](path, async (reqs, reply) => {
+      sub = sub.replace(/\/+/g, '/').replace(/\/+$/, '');
+      this.raw[route.method!](sub, async (reqs, reply) => {
         const req = FastifyAppUtil.getRequest(reqs);
         const res = FastifyAppUtil.getResponse(reply);
         await route.handlerFinalized!(req, res);
