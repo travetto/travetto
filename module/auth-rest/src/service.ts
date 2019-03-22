@@ -29,6 +29,16 @@ export class AuthService {
     }
   }
 
+  getAuthContext(req?: Request) {
+    if (req) {
+      return req.__authContext;
+    } else if (this.context) {
+      return this.context.get('auth');
+    } else {
+      throw new AppError('No method available to find request, include @travetto/context to access the context outside of a request', 'notfound');
+    }
+  }
+
   setAuthContext(req: Request, res: Response, ctx: AuthContext) {
     if (ctx && ctx.constructor !== AuthContext) {
       ctx = new AuthContext(ctx.identity, ctx.principal);

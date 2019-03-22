@@ -41,12 +41,12 @@ export class AppConfig {
 }
 ```
 
-As you can see, ```AuthPassportProvider``` will take care of the majority of the work, and all that is required is:
+As you can see, ```PassportIdentityProvider``` will take care of the majority of the work, and all that is required is:
 * Provide the name of the strategy (should be unique)
 * Provide the strategy instance. **NOTE** you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework
-* The ```PrincipalConfig``` which defines the mapping between external and local principals.
+* The conversion functions which defines the mapping between external and local identities.
 
-After that, the provider is no different than any other, and can be used accordingly.  Additionally, because passport runs first, in it's entirety, you can use the provider as you normally would any passport middleware.
+After that, the provider is no different than any other, and can be used accordingly.  Additionally, because `passport` runs first, in it's entirety, you can use the provider as you normally would any passport middleware.
 
 **Code: Sample routes using Facebook/passport provider**
 ```typescript

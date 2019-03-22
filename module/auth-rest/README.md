@@ -20,35 +20,31 @@ When working with framework's authentication, the user information is exposed vi
 ```typescript
 export interface Request {
   auth: {
-    context: AuthContext<any>; 
-    authenticated: boolean;
-    unauthenticated: boolean;
-    checkPermissions(include: string[], exclude: string[]): boolean;
-    login(providers: symbol[]): Promise<AuthContext<any>|undefined>;
-    logout: Promise<void>;
+    principal: Principal | undefined;
+    principalDetails: U;
+    permissions: Set<string>;
+    logout(): Promise<void>;
+    authenticate(providers: symbol[]): Promise<Identity | undefined>;
+    updatePrincipalDetails(details: U): Promise<void>;
   }
 }
 ```
 
-This allows for any filters/middleware to access this information without deeper knowledge of the framework itself.  Also, for performance benefits, the auth context is stored in the user session as a means to minimize future lookups. Since we are storing the entire principal in the session, it is best to keep the principal as small as possible.
+This allows for any filters/middleware to access this information without deeper knowledge of the framework itself.  Also, for performance benefits, the auth context can be stored in the user session as a means to minimize future lookups. If storing the entire principal in the session, it is best to keep the principal as small as possible.
 
 ## Patterns for Integration
-Every external framework integration relies upon the ```AuthProvider``` contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
+Every external framework integration relies upon the ```IdentityProvider``` contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
 **Code: Structure for the AuthProvider**
 ```typescript
-export class AuthProvider<U> {
-  async logout(req: Request, res: Response): Promise<void>;
-  async login(req: Request, res: Response): Promise<AuthContext<U> | undefined>;
-  serialize(ctx: AuthContext<U>): string;
-  async deserialize(serialized: string): Promise<AuthContext<U>>;
+export abstract class IdentityProvider {
+  // Undefined allows for multi step identification
+  abstract async authenticate(req: Request, res: Response): Promise<Identity | undefined>;
 }
 ```
 
-By default, logout does nothing, as the  session cleanup will generally suffice.  Additionally, the ```serialize```/```deserialize``` functionality default to ```JSON.stringify```/```JSON.parse``` respectively.  These can be overridden as needed, but sensible defaults help to minimize the friction between pieces.
-
-The only required method to be defined is the ```login``` method.  This takes in a ```Request``` and ```Response```, and is responsible for:
-* Returning an ```AuthContext``` if authentication was successful
+The only required method to be defined is the ```authenticate``` method.  This takes in a ```Request``` and ```Response```, and is responsible for:
+* Returning an ```Identity``` if authentication was successful
 * Throwing an error if it failed
 * Returning undefined if the authentication is multi-staged and has not completed yet
 
@@ -56,14 +52,14 @@ A sample auth provider would look like:
 
 **Code: Sample Dummy Provider**
 ```typescript
-class DumbProvider extends AuthProvider<any> {
-  async login(req: Request, res: Response) {
+class DumbProvider extends Identity<any> {
+  async authenticate(req: Request, res: Response) {
     const { username, password } = req.body;
     if (username === 'test' && password === 'test') {
       return {
         id: 'test',
         permissions: new Set(),
-        principal: {
+        details: {
           username: 'test'
         }
       };
@@ -74,7 +70,7 @@ class DumbProvider extends AuthProvider<any> {
 }
 ```
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered ```AuthProvider```s are collected and stored for reference at runtime, via symbol. For example:
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered ```IdentityPRovider```s are collected and stored for reference at runtime, via symbol. For example:
 
 **Code: Potential Facebook provider**
 ```typescript
@@ -82,8 +78,8 @@ export const FB_AUTH = Symbol('facebook');
 
 export class AppConfig {
   @InjectableFactory(FB_AUTH)
-  static facebookProvider(): AuthProvider<any> {
-    return new AuthProvider(...);
+  static facebookProvider(): IdentityProvider<any> {
+    return new IdentityProvider(...);
   }
 }
 ```
