@@ -42,7 +42,12 @@ export class FastifyAppUtil {
             return reply.res.statusCode;
           }
         },
-        send: reply.send.bind(reply),
+        send(data) {
+          if ((reply.getHeader('Content-Type') || '').includes('json') && typeof data === 'string') {
+            data = Buffer.from(data);
+          }
+          reply.send(data);
+        },
         on: reply.res.on.bind(reply.res),
         end: (val?: any) => {
           if (val) {

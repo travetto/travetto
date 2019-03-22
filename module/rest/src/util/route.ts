@@ -53,8 +53,6 @@ export class RouteUtil {
         res.send('');
       }
     }
-
-    res.end();
   }
 
   static createFilterChain(filters: (Filter | RestInterceptor['intercept'])[]): Filter<Promise<any>> {
