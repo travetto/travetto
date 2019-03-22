@@ -354,10 +354,22 @@ First we must start the application
 **Terminal: Output of application startup**
 ```bash
 $ npx travetto todo
-DEBUG Initializing Phase bootstrap [ 'schema', 'base', 'log', 'config', 'compiler', 'registry' ]
-Found configurations for [ 'dev' ]
-INFO Initializing: application,dev,todo
-INFO Configured {
+2019-03-22T04:51:28 info  Env {
+  "cwd": "/Users/tim/Code/travetto/sample/todo-app",
+  "profiles": [
+    "application",
+    "dev"
+  ],
+  "dev": true,
+  "appRoots": [
+    "./"
+  ],
+  "debug": true,
+  "watch": true
+}
+2019-03-22T04:51:28 debug [@trv:base/phase] Initializing Phase bootstrap [ 'base', 'log', 'config', 'compiler', 'registry', 'schema' ]
+2019-03-22T04:51:28 debug [@trv:config/source] Found configurations for [ 'application' ]
+2019-03-22T04:51:28 info  [@trv:config/source] Configured {
   "registry": {
     "injectable": {
       "@travetto/config": "Config",
@@ -365,18 +377,22 @@ INFO Configured {
         "ModelController"
       ],
       "@travetto/rest": [
-        "Controller"
+        "Controller",
+        "Application"
       ]
     },
     "schema": {
       "@travetto/model": "Model"
     },
-    "rest": {
-      "interceptor": {
-        "@travetto/rest": [
-          "ContextInterceptor"
-        ]
-      }
+    "application": {
+      "@travetto/rest": [
+        "Application"
+      ]
+    }
+  },
+  "rest": {
+    "cors": {
+      "active": true
     }
   },
   "api": {
@@ -385,30 +401,41 @@ INFO Configured {
       "format": "typescript-angular",
       "formatOptions": "supportsES6=true,ngVersion=6.1"
     }
+  },
+  "elasticsearch": {
+    "model": {
+      "namespace": "todo"
+    }
   }
 }
-Configured Transformers before [ 'test:line-numbers',
+2019-03-22T04:51:28 debug [@trv:compiler/transformers] Configured Transformers before [ 'application',
+  'test:line-numbers',
   'registry',
   'di',
   'log',
   'rest',
   'schema',
   'test:assert' ]
-Initialized 0.072
-2018-08-20T23:13:16 debug [@trv.rg.src.srv.registry: 42] Initialized @travetto.model:src.service.registry#$ModelRegistry
-2018-08-20T23:13:16 debug [@trv.rg.src.srv.registry: 42] Initialized @travetto.rest:src.service.registry#$ControllerRegistry
-2018-08-20T23:13:16 debug [@trv.rg.src.srv.registry: 42] Initialized @travetto.schema:src.service.registry#$SchemaRegistry
-2018-08-20T23:13:16 debug [@trv.rg.src.srv.registry: 42] Initialized @travetto.di:src.service.registry#$DependencyRegistry
-2018-08-20T23:13:16 debug [@trv.rg.src.srv.registry: 42] Initialized @travetto.registry:src.service.root#$RootRegistry
-body-parser deprecated undefined extended: provide extended option node_modules/@travetto/registry/src/source/class-source.js:74:17
-express-session deprecated undefined resave option; provide resave option node_modules/@travetto/registry/src/source/class-source.js:74:17
-express-session deprecated undefined saveUninitialized option; provide saveUninitialized option node_modules/@travetto/registry/src/source/class-source.js:74:17
-2018-08-20T23:13:16 info  [@trv.rst.src.srv.app: 62] Sorting interceptors 0 []
-2018-08-20T23:13:16 debug [@trv.rst.src.app: 62] Registering Controller Instance @travetto.swagger:src.service.controller#SwaggerController / 2
-(node:29806) DeprecationWarning: current URL string parser is deprecated, and will be removed in a future version. To use the new parser, pass option { useNewUrlParser: true } to MongoClient.connect.
-2018-08-20T23:13:16 debug [@trv.rst.src.app: 62] Registering Controller Instance @app:src.route#TodoController /todo 5
-2018-08-20T23:13:16 info  [@trv.rst.src.srv.app: 82] Listening on 3000
-
+2019-03-22T04:51:28 debug [@trv:compiler/compiler] Initialized 0.002
+2019-03-22T04:51:28 debug [@trv:registry/registry: 42] Initialized @trv:model/registry#$ModelRegistry
+2019-03-22T04:51:28 debug [@trv:registry/registry: 42] Initialized @trv:rest/registry.registry#$ControllerRegistry
+2019-03-22T04:51:28 debug [@trv:registry/registry: 42] Initialized @trv:schema/service.registry#$SchemaRegistry
+2019-03-22T04:51:28 debug [@trv:registry/registry: 42] Initialized @trv:di/registry#$DependencyRegistry
+2019-03-22T04:51:28 debug [@trv:registry/registry: 42] Initialized @trv:registry/service.root#$RootRegistry
+body-parser deprecated undefined extended: provide extended option node_modules/@travetto/di/bin/lib.js:76:49
+2019-03-22T04:51:28 debug [@trv:rest/interceptor.types: 51] Sorting interceptors 2 [ 'CorsInterceptor', 'GetCacheInterceptor', [length]: 2 ]
+2019-03-22T04:51:28 debug [@trv:model-elasticsearch/config: 17] Constructed ElasticsearchModelConfig {
+  hosts: [ '127.0.0.1', [length]: 1 ],
+  port: 9200,
+  options: {},
+  namespace: 'todo',
+  autoCreate: true,
+  indexCreate: { number_of_replicas: 0, number_of_shards: 1 } }
+2019-03-22T04:51:28 info  [@trv:swagger/client-generate: 33] Running code generator in watch mode ./api-client
+2019-03-22T04:51:28 debug [@trv:rest/app: 87] Registering Controller Instance @trv:swagger/controller#SwaggerController / 1
+2019-03-22T04:51:28 debug [@trv:rest/app: 87] Registering Controller Instance @app/src.route#TodoController /todo 5
+2019-03-22T04:51:28 info  [@trv:rest/app:106] Listening on 3000
+2019-03-22T04:51:29 debug [@trv:compiler/presence] Watching files 5
 ```
 
 next, let's execute `curl` requests to interact with the new api
