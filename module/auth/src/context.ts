@@ -22,6 +22,10 @@ export class AuthContext<
     this.permissions = new Set(principal.permissions);
   }
 
+  get id() {
+    return (this.principal && this.principal.id) || this.identity.id;
+  }
+
   get principalDetails() {
     return this.principal.details as U;
   }
