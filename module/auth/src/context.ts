@@ -19,7 +19,7 @@ export class AuthContext<
     }
     this.principal = principal;
     this.identity = identity;
-    this.permissions = new Set(principal.permissions);
+    this.permissions = new Set((principal || {}).permissions || []);
   }
 
   get id() {
@@ -38,7 +38,7 @@ export class AuthContext<
     Object.assign(this.principal.details, details);
   }
 
-  checkPermissions(include: Set<string>, exclude: Set<string>, matchAll = true) {
+  checkPermissions(include: Set<string>, exclude: Set<string>, matchAll = false) {
     if (!AuthUtil.permissionSetChecker(include, exclude, matchAll)(this.permissions)) {
       throw new AppError('Insufficient permissions', 'permissions');
     }
