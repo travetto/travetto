@@ -33,7 +33,7 @@ export class AuthService {
     if (req) {
       return req.__authContext;
     } else if (this.context) {
-      return this.context.get('auth');
+      return this.context.get('auth') as AuthContext;
     } else {
       throw new AppError('No method available to find request, include @travetto/context to access the context outside of a request', 'notfound');
     }
