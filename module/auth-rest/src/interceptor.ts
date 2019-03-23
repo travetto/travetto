@@ -4,6 +4,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { ContextInterceptor } from '@travetto/context/src/extension/rest.ext';
 
 import { AuthService } from './service';
+import { AuthRequestAdapter } from './adapter';
+import { AuthContextStore } from './state';
 
 @Injectable()
 export class AuthInterceptor extends RestInterceptor {
@@ -13,24 +15,22 @@ export class AuthInterceptor extends RestInterceptor {
   @Inject()
   service: AuthService;
 
+  @Inject()
+  contextStore: AuthContextStore;
+
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
+    const auth = req.auth = new AuthRequestAdapter();
 
-    req.session.context = {};
+    try {
+      auth.context = await this.contextStore.read(req);
 
-    await this.service.restore(req, res);
+      req.authenticate = this.service.authenticate.bind(this.service, req, res);
 
-    // Expose request api
-    req.auth = {
-      get principal() { return req.session.context.principal; },
-      get principalDetails() { return req.session.context.principalDetails; },
-      get permissions() { return req.session.context.permissions; },
-      async updatePrincipalDetails(val: any) { req.session.context.updatePrincipalDetails(val); },
-      logout: this.service.clearAuthContext.bind(this.service, req, res),
-      authenticate: this.service.authenticate.bind(this.service, req, res)
-    };
+      this.service.registerContext(req);
 
-    const result = await next();
-
-    return result;
+      return await next();
+    } finally {
+      await this.contextStore.write(req, res, auth.context);
+    }
   }
 }
