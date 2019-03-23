@@ -5,8 +5,8 @@ import { Session } from '../types';
 const HALF_HOUR = 30 * 60 * 1000;
 
 export abstract class SessionStore {
-  async validate(id: string): Promise<boolean> {
-    return !!(await this.get(id));
+  async validate(session: Session): Promise<boolean> {
+    return !!(await this.load(session.id));
   }
   async create(payload: any, expiresAt?: number) {
     const id = Util.uuid();
@@ -16,9 +16,10 @@ export abstract class SessionStore {
       expiresAt: expiresAt || (Date.now() + HALF_HOUR),
       payload
     };
-    return this.set(id, sess);
+    this.store(sess);
+    return sess;
   }
-  abstract get(id: string): Promise<Session | undefined>;
-  abstract set(id: string, data: Session, extend?: boolean): Promise<void>;
-  abstract destroy(id: string): Promise<boolean>;
+  abstract load(id: string): Promise<Session | undefined>;
+  abstract store(data: Session, extend?: boolean): Promise<void>;
+  abstract destroy(session: Session): Promise<boolean>;
 }
