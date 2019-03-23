@@ -22,12 +22,7 @@ export class SampleApp {
     })();
   }
 
-  @InjectableFactory()
-  static getProvider(): RestApp {
-    return new FastifyRestApp();
-  }
-
-  constructor(private app: RestApp) { }
+  constructor(private app: FastifyRestApp) { }
 
   run() {
     this.app.run();
