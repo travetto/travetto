@@ -20,7 +20,8 @@ export class RestConfig {
     active: boolean;
     origins?: string[],
     methods?: Method[],
-    headers?: string[]
+    headers?: string[],
+    credentials?: boolean
   } = {
       active: false
     };
