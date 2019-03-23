@@ -1,11 +1,11 @@
 import { Test, Suite } from '@travetto/test';
 
-import { JWTAuthContextSerializer } from '../src/extension/auth-rest.serializer.ext';
+import { JWTAuthContextStore } from '../src/extension/auth-rest.store.ext';
 
 @Suite()
 class DummySuite {
   @Test({ skip: true })
   dummyTest() {
-    console.log(JWTAuthContextSerializer === undefined);
+    console.log(JWTAuthContextStore === undefined);
   }
 }

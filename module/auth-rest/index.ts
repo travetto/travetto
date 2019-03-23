@@ -4,3 +4,5 @@ export * from './src/decorator';
 export * from './src/identity';
 export * from './src/errors';
 export * from './src/service';
+export * from './src/state';
+export * from './src/adapter';
