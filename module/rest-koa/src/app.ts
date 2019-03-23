@@ -3,12 +3,13 @@ import * as kCompress from 'koa-compress';
 import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
-import { Inject } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 import { RestApp, RouteConfig } from '@travetto/rest';
 
 import { KoaConfig } from './config';
 import { KoaAppUtil } from './util';
 
+@Injectable()
 export class KoaRestApp extends RestApp<koa> {
 
   @Inject()
