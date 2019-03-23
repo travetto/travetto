@@ -26,12 +26,7 @@
 //     })();
 //   }
 
-//   @InjectableFactory()
-//   static getProvider(): RestApp {
-//     return new ExpressRestApp();
-//   }
-
-//   constructor(private app: RestApp) { }
+//   constructor(private app: ExpressRestApp) { }
 
 //   run() {
 //     this.app.run();

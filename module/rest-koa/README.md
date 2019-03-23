@@ -1,4 +1,4 @@
-travetto: Rest-Koa
+travetto: Rest-Session
 ===
 
 **Install: KOA Provider**
@@ -6,15 +6,34 @@ travetto: Rest-Koa
 $ npm install @travetto/rest-koa
 ```
 
-The module is a [`koa`](https://koajs.com/) provider for the [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) module. A valid configuration of [`RestApp`](./src/types.ts) would look like:
+The module is a [`koa`](https://koajs.com/) implementation of a [`RestApp`](https://github.com/travetto/travetto/tree/master/module/rest). A valid customization of the [`RestApp`](./src/app.ts) would look like:
 
-**Code: Wiring up Koa Provider**
+**Code: Customizing a Koa App**
 ```typescript
 export class SampleConfig {
 
-  @InjectableFactory()
-  static getProvider(): RestApp {
-    return new KoaRestApp();
+ @InjectableFactory()
+  static customizer(): RestAppCustomizer<koa> {
+    return new (class extends RestAppCustomizer<koa> {
+      customize(raw: koa) {
+        raw.use(koaSession({
+          key: 'koa:sess',
+          maxAge: 86400000,
+          autoCommit: true,
+          overwrite: true,
+          httpOnly: true,
+          signed: true,
+          rolling: false,
+          renew: false,
+        } as any, raw));
+        raw.keys = ['this is a super special key'];
+      }
+    })();
   }
 }
 ```
+
+## Default Stack
+When working with [`koa`](https://koajs.com/) applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
+* `kCompress()`
+* `kBodyParser()`

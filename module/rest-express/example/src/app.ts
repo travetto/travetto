@@ -1,16 +1,9 @@
-import { InjectableFactory } from '@travetto/di';
 import { Application, RestConfig, RestApp } from '@travetto/rest';
-import { ExpressRestApp } from '../../src/app';
 
 @Application('sample', {
   description: 'Sample rest application'
 })
 export class SampleApp {
-
-  @InjectableFactory()
-  static getProvider(): RestApp {
-    return new ExpressRestApp();
-  }
 
   constructor(
     private app: RestApp,
