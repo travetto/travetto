@@ -4,15 +4,15 @@ import { SessionStore } from './store';
 export class MemoryStore extends SessionStore {
   storage = new Map<string, Session>();
 
-  async get(id: string) {
+  async load(id: string) {
     return this.storage.get(id);
   }
 
-  async set(id: string, session: Session<any>) {
-    this.storage.set(id, session);
+  async store(session: Session<any>) {
+    this.storage.set(session.id, session);
   }
 
-  async destroy(id: string) {
-    return this.storage.delete(id);
+  async destroy(session: Session) {
+    return this.storage.delete(session.id);
   }
 }

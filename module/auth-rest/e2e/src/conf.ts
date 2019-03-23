@@ -1,7 +1,8 @@
 import { PrincipalProvider, Identity } from '@travetto/auth';
 import { InjectableFactory } from '@travetto/di';
+import { MemoryStore, SessionStore, SessionEncoder, CookieEncoder } from '@travetto/rest-session';
 
-import { IdentityProvider, SessionAuthContextStore, AuthContextStore } from '../..';
+import { IdentityProvider } from '../..';
 
 export class FbUser {
   id: string;
@@ -11,9 +12,15 @@ export class FbUser {
 export const SIMPLE_AUTH = Symbol('simple-auth');
 
 export class AppConfig {
+
   @InjectableFactory()
-  static serializer(): AuthContextStore {
-    return new SessionAuthContextStore();
+  static sessionStore(): SessionStore {
+    return new MemoryStore();
+  }
+
+  @InjectableFactory()
+  static sessionEncoder(): SessionEncoder {
+    return new CookieEncoder();
   }
 
   @InjectableFactory()

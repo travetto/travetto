@@ -5,7 +5,6 @@ import { AuthRequestAdapter } from './types';
 declare global {
   namespace Travetto {
     export interface Request {
-      __authContext: AuthContext;
       auth: AuthRequestAdapter;
     }
   }
