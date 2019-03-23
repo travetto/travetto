@@ -69,12 +69,21 @@ const FsUtil = {
   prepareTranspile: (fileName, contents) => {
     let fileContents = contents || fs.readFileSync(fileName, 'utf-8');
 
-    // Drop typescript import, and use global. Great speedup;
-    fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript';?/g, '');
+    let line = 1;
 
     // Insert filename into all log statements for all components, when logger isn't loaded
-    fileContents = fileContents.replace(/\bconsole[.](debug|info|trace|warn|log|error)[(]/g,
-      a => `${a}'[${FsUtil.computeModuleFromFile(fileName)}]',`);
+    fileContents = fileContents.replace(/(\bconsole[.](debug|info|trace|warn|log|error)[(])|\n/g,
+      a => {
+        if (a === '\n') {
+          line += 1;
+          return a;
+        } else {
+          return `${a}'[${FsUtil.computeModuleFromFile(fileName)}:${line}]',`;
+        }
+      });
+
+    // Drop typescript import, and use global. Great speedup;
+    fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript';?/g, '');
 
     return `${fileContents};\nexport const __$TRV = 1;`;
   },
