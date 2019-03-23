@@ -20,8 +20,7 @@ export class ExpressRestApp extends RestApp<express.Application> {
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use(Cookies.express(['keys']));
 
-    // Enable proxy for cookies
-    if (this.config.cookie.secure) {
+    if (this.config.trustProxy) {
       app.enable('trust proxy');
     }
 

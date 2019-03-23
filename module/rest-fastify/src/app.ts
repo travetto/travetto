@@ -15,6 +15,9 @@ export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
     if (this.config.ssl.active) {
       fastConf.https = await this.config.getKeys();
     }
+    if (this.config.trustProxy) {
+      fastConf.trustProxy = true;
+    }
 
     const app = fastify(fastConf);
     app.register(require('fastify-compress'));
