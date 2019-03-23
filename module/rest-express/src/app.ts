@@ -1,19 +1,15 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
+import * as Cookies from 'cookies';
 
-import { Inject, Injectable } from '@travetto/di';
+import { Injectable } from '@travetto/di';
 import { RouteUtil, RestApp, RouteConfig } from '@travetto/rest';
 
 import { RouteStack } from './types';
-import { ExpressConfig } from './config';
 
 @Injectable()
 export class ExpressRestApp extends RestApp<express.Application> {
-
-  @Inject()
-  expressConfig: ExpressConfig;
 
   createRaw(): express.Application {
     const app = express();
@@ -22,10 +18,10 @@ export class ExpressRestApp extends RestApp<express.Application> {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
-    app.use(cookieParser());
+    app.use(Cookies.express(['keys']));
 
     // Enable proxy for cookies
-    if (this.expressConfig.cookie.secure) {
+    if (this.config.cookie.secure) {
       app.enable('trust proxy');
     }
 
@@ -65,10 +61,10 @@ export class ExpressRestApp extends RestApp<express.Application> {
   }
 
   async listen() {
-    if (this.config.ssl) {
+    if (this.config.ssl.active) {
       const https = await import('https');
       const keys = await this.config.getKeys();
-      https.createServer(keys, this.raw).listen(this.config.port);
+      https.createServer(keys!, this.raw).listen(this.config.port);
     } else {
       this.raw.listen(this.config.port);
     }

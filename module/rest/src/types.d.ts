@@ -1,4 +1,5 @@
 import * as exp from 'express-serve-static-core';
+import * as Cookies from 'cookies';
 
 declare global {
   namespace Travetto {
@@ -13,7 +14,9 @@ declare global {
       params: { [key: string]: any };
       session?: any;
       headers: { [key: string]: string | string[] };
-      cookies: { [key: string]: any };
+      cookies: {
+        get(name: string, options?: Cookies.GetOption): string;
+      }
       body: any;
       pipe(stream: NodeJS.WritableStream): any;
       header(key: string): string | undefined;
@@ -41,16 +44,9 @@ declare global {
       send(value: any): any;
       write(value: any): any;
       end(val?: any): any;
-
-      cookie(key: string, value: any, options: Partial<{
-        domain: string,
-        expires: Date,
-        maxAge: number,
-        path: string,
-        secure: boolean,
-        signed: boolean,
-        httpOnly: boolean
-      }>): void;
+      cookies: {
+        set(name: string, value?: any, options?: Cookies.SetOption): void;
+      }
     }
   }
 }

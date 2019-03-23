@@ -3,22 +3,19 @@ import * as kCompress from 'koa-compress';
 import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
-import { Inject, Injectable } from '@travetto/di';
+import { Injectable } from '@travetto/di';
 import { RestApp, RouteConfig } from '@travetto/rest';
 
-import { KoaConfig } from './config';
 import { KoaAppUtil } from './util';
 
 @Injectable()
 export class KoaRestApp extends RestApp<koa> {
 
-  @Inject()
-  private koaConfig: KoaConfig;
-
   createRaw(): koa {
     const app = new koa();
     app.use(kCompress());
     app.use(kBodyParser());
+    app.keys = this.config.cookie.keys;
     return app;
   }
 
@@ -52,9 +49,9 @@ export class KoaRestApp extends RestApp<koa> {
   }
 
   async listen() {
-    if (this.config.ssl) {
+    if (this.config.ssl.active) {
       const https = await import('https');
-      https.createServer(await this.config.getKeys(), this.raw.callback()).listen(this.config.port);
+      https.createServer((await this.config.getKeys())!, this.raw.callback()).listen(this.config.port);
     } else {
       this.raw.listen(this.config.port);
     }

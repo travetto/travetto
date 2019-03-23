@@ -1,31 +1,29 @@
 import { IncomingMessage } from 'http';
 import * as fastify from 'fastify';
+import * as cookies from 'cookies';
 
 import { RouteConfig, RestApp } from '@travetto/rest';
-import { Inject, Injectable } from '@travetto/di';
+import { Injectable } from '@travetto/di';
 
-import { FastifyConfig } from './config';
 import { FastifyAppUtil } from './util';
 
 @Injectable()
 export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
 
-  @Inject()
-  private fastifyConfig: FastifyConfig;
-
   async createRaw() {
     const fastConf: any = {};
-    if (this.config.ssl) {
+    if (this.config.ssl.active) {
       fastConf.https = await this.config.getKeys();
     }
 
     const app = fastify(fastConf);
     app.register(require('fastify-compress'));
     app.register(require('fastify-formbody'));
-    app.register(require('fastify-cookie'));
     app.addContentTypeParser('multipart/form-data;', (req: IncomingMessage, done: (err: Error | null, body?: any) => void) => {
       done(null);
     });
+
+    app.use(cookies.express(this.config.cookie.keys) as any);
 
     return app;
   }

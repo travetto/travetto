@@ -1,5 +1,4 @@
 import * as fastify from 'fastify';
-const fastifySession = require('fastify-session');
 
 import { InjectableFactory } from '@travetto/di';
 import { Application, RestApp, RestAppCustomizer } from '@travetto/rest';
@@ -12,12 +11,12 @@ export class SampleApp {
   static customizer(): RestAppCustomizer<fastify.FastifyInstance> {
     return new (class extends RestAppCustomizer<fastify.FastifyInstance> {
       customize(raw: fastify.FastifyInstance) {
-        raw.register(fastifySession, {
-          secret: 'fastify-fastify-fastify-fastify-fastify-',
-          cookie: {
-            secure: false
-          }
-        });
+        // raw.register(fastifySession, {
+        //   secret: 'fastify-fastify-fastify-fastify-fastify-',
+        //   cookie: {
+        //     secure: false
+        //   }
+        // });
       }
     })();
   }

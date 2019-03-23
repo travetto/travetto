@@ -10,11 +10,27 @@ export class RestConfig {
   port = 3000;
   disableGetCache = true;
 
-  ssl?: boolean;
-  keys?: {
-    cert: string,
-    key: string
-  };
+  cookie: {
+    keys: string[];
+    signed?: boolean;
+    secure?: boolean;
+    domain?: string;
+    path?: string;
+    expires?: number;
+  } = {
+      signed: true,
+      keys: ['default-insecure']
+    };
+
+  ssl: {
+    active?: boolean,
+    keys?: {
+      cert: string,
+      key: string
+    }
+  } = {
+      active: false
+    };
 
   cors: {
     active: boolean;
@@ -27,13 +43,15 @@ export class RestConfig {
     };
 
   async getKeys() {
-    if (!this.keys) {
-      if (Env.prod) {
-        throw new AppError('Cannot use test keys in production', 'permissions');
+    if (this.ssl.active) {
+      if (!this.ssl.keys) {
+        if (Env.prod) {
+          throw new AppError('Cannot use test keys in production', 'permissions');
+        }
+        return SSLUtil.generateKeyPair('/C=US/ST=CA/O=TRAVETTO/OU=REST/CN=DEV');
+      } else {
+        return this.ssl.keys;
       }
-      return SSLUtil.generateKeyPair('/C=US/ST=CA/O=TRAVETTO/OU=REST/CN=DEV');
-    } else {
-      return this.keys;
     }
   }
 }
