@@ -27,12 +27,7 @@
 //     })();
 //   }
 
-//   @InjectableFactory()
-//   static getProvider(): RestApp {
-//     return new KoaRestApp();
-//   }
-
-//   constructor(private app: RestApp) { }
+//   constructor(private app: KoaRestApp) { }
 
 //   run() {
 //     this.app.run();
