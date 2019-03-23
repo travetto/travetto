@@ -1,0 +1,34 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@travetto/rest": "^0.6.0-rc.2"
+  },
+  "devDependencies": {
+    "@travetto/test": "^0.6.0-rc.2"
+  },
+  "description": "Session provider for the travetto rest module.",
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "rest",
+    "session",
+    "travetto",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "name": "@travetto/rest-session",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "version": "0.6.0-rc.3"
+}
