@@ -1,3 +1,5 @@
+import * as crypto from 'crypto';
+
 function find<T>(set: Set<T>, pred: (x: T) => boolean): T | undefined {
   for (const i of set) {
     if (pred(i)) {
@@ -147,6 +149,10 @@ export class Util {
     }
 
     return Math.abs(hash);
+  }
+
+  static uuid(len: number = 32) {
+    return crypto.randomBytes(len).toString('hex');
   }
 
   static computeOrdering<T,

@@ -1,11 +1,9 @@
 import * as crypto from 'crypto';
 import * as util from 'util';
 
-import { AppError } from '@travetto/base';
+import { Util, AppError } from '@travetto/base';
 
 const pbkdf2 = util.promisify(crypto.pbkdf2);
-const randomBytes = util.promisify(crypto.randomBytes);
-const toHex = (val: Buffer) => val.toString('hex');
 
 type Checker = ReturnType<(typeof AuthUtil)['permissionChecker']>;
 
@@ -15,11 +13,7 @@ export class AuthUtil {
   private static CHECK_INC_CACHE = new Map<string, [Checker, Checker]>();
 
   static generateHash(password: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256') {
-    return pbkdf2(password, salt, iterations, keylen, digest).then(toHex);
-  }
-
-  static generateSalt(len: number = 32) {
-    return randomBytes(len).then(toHex);
+    return pbkdf2(password, salt, iterations, keylen, digest).then(x => x.toString('hex'));
   }
 
   static async generatePassword(password: string, saltLen = 32, validator?: (password: string) => boolean | Promise<boolean>) {
@@ -33,7 +27,7 @@ export class AuthUtil {
       }
     }
 
-    const salt = await this.generateSalt(saltLen);
+    const salt = Util.uuid(saltLen);
     const hash = await this.generateHash(password, salt);
 
     return { salt, hash };

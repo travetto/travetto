@@ -16,11 +16,7 @@ export class KoaAppUtil {
         body: ctx.body,
         session: ctx.session,
         headers: ctx.headers,
-        cookies: new Proxy(ctx.cookies, {
-          get(target, key, receiver) {
-            return ctx.cookies.get(key as string);
-          }
-        }),
+        cookies: ctx.cookies,
         files: {},
         auth: undefined as any,
         pipe: ctx.req.pipe.bind(ctx.req),
@@ -61,7 +57,7 @@ export class KoaAppUtil {
         getHeader: ctx.response.get.bind(ctx),
         removeHeader: ctx.remove.bind(ctx),
         write: ctx.res.write.bind(ctx.res),
-        cookie: ctx.cookies.set.bind(ctx.cookies),
+        cookies: ctx.cookies,
       });
     }
     return (ctx as any)[TRV_RES] as Travetto.Response;

@@ -17,7 +17,7 @@ export class FastifyAppUtil {
         body: (reqs as any).body,
         session: (reqs as any).session,
         headers: reqs.headers,
-        cookies: (reqs as any).cookies,
+        cookies: (reqs as any).req.cookies,
         files: {},
         auth: undefined as any,
         pipe: reqs.req.pipe.bind(reqs.req),
@@ -59,7 +59,7 @@ export class FastifyAppUtil {
         getHeader: reply.res.getHeader.bind(reply.res) as (key: string) => string, // NOTE: Forcing type, may be incorrect
         removeHeader: reply.res.removeHeader.bind(reply.res),
         write: reply.res.write.bind(reply.res),
-        cookie: (reply as any).setCookie.bind(reply)
+        cookies: (reply.res as any).cookies
       });
     }
 
