@@ -1,15 +1,17 @@
 #!/bin/bash
 
-if [ -L "$0" ]; then
-  SCRIPT=`readlink -f "$0"`
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BASENAME="$( basename "${BASH_SOURCE[0]}" )"
+
+if [ -L "$DIR/$BASENAME" ]; then
+  SCRIPT=`readlink -f "$DIR/$BASENAME"`
   DIR=`dirname $SCRIPT`
-else
-  DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 fi
 
 BIN=`dirname $DIR`
 ROOT=`dirname $BIN`
-MODULE="$1"
+ACTION="$1"
+MODULE="$2"
 CURR=`pwd`
 SOURCE="$ROOT/module/$MODULE"
 
@@ -30,8 +32,13 @@ BASE="${CURR//"${ROOT}/module/"}"
 TARGET="$CURR/node_modules/@travetto/$MODULE"
 
 if [ -f "${CURR}/package.json" ] && [[ "$CURR" =~ "travetto/module" ]]; then
-  ln -sf $SOURCE $TARGET
-  echo $BASE/node_modules/@travetto/$MODULE now points to $ROOT/module/$MODULE 
+  if [ "$ACTION" == "add" ]; then 
+    ln -sf "$SOURCE" "$TARGET"
+    echo "$BASE is linking @travetto/$MODULE to ../$MODULE" 
+  else
+    rm $TARGET 
+    echo "$BASE is unlinking @travetto/$MODULE" 
+  fi
 else
   echo 'Script must be run from a travetto module directory'
   exit 1
