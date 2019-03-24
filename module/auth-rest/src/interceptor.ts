@@ -5,7 +5,7 @@ import { ContextInterceptor } from '@travetto/context/src/extension/rest.ext';
 
 import { AuthService } from './service';
 import { AuthRequestAdapter } from './adapter';
-import { AuthContextStore } from './state';
+import { AuthContextStore } from './store';
 
 @Injectable()
 export class AuthInterceptor extends RestInterceptor {
