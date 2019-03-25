@@ -30,6 +30,6 @@ export class SampleAuth {
   @Get('/logout')
   @Authenticated()
   async logout(req: Request) {
-    await req.auth.logout();
+    await req.logout();
   }
 }

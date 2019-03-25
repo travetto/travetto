@@ -33,7 +33,7 @@ export class AuthService {
 
   getAuthContext() {
     if (this.context) {
-      return (this.context.get('_req') as Request).auth.context;
+      return (this.context.get('_req') as Request).auth;
     } else {
       throw new AppError('Cannot retrieve information without request unless @travetto/context is installed', 'notfound');
     }
@@ -46,7 +46,7 @@ export class AuthService {
         const idp = this.identityProviders.get(provider.toString())!;
         const ident = await idp.authenticate(req, res);
         if (ident) { // Multi-step login process
-          req.auth.context = await this.principalProvider.authorize(ident);
+          req.auth = await this.principalProvider.authorize(ident);
         }
         return ident;
       } catch (e) {

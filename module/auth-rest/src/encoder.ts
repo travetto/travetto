@@ -10,7 +10,7 @@ function toCtx(val: AuthContext | undefined) {
 
 export abstract class AuthContextEncoder {
   abstract read(req: Request): Promise<AuthContext | undefined> | undefined | AuthContext;
-  abstract write(req: Request, res: Response, ctx?: AuthContext): Promise<void> | void;
+  abstract write(req: Request, res: Response): Promise<void> | void;
 }
 
 export class SessionAuthContextEncoder extends AuthContextEncoder {
@@ -20,9 +20,9 @@ export class SessionAuthContextEncoder extends AuthContextEncoder {
     return toCtx(req.session[this.key]);
   }
 
-  write(req: Request, res: Response, ctx?: AuthContext) {
-    if (ctx && ctx.principal) {
-      req.session[this.key] = toCtx(ctx);
+  write(req: Request, res: Response) {
+    if (req.auth && req.auth.principal) {
+      req.session[this.key] = req.auth;
     } else {
       req.session = undefined;
     }
