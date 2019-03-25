@@ -3,7 +3,7 @@ import { InjectableFactory } from '@travetto/di';
 import { MemoryStore, SessionStore, SessionEncoder, CookieEncoder } from '@travetto/rest-session';
 
 import { IdentityProvider } from '../..';
-import { AuthContextStore, SessionAuthContextStore } from '../../src/store';
+import { AuthContextEncoder, SessionAuthContextEncoder } from '../../src/encoder';
 
 export class FbUser {
   id: string;
@@ -25,8 +25,8 @@ export class AppConfig {
   }
 
   @InjectableFactory()
-  static sessionAuthStore(): AuthContextStore {
-    return new SessionAuthContextStore();
+  static sessionAuthStore(): AuthContextEncoder {
+    return new SessionAuthContextEncoder();
   }
 
   @InjectableFactory()

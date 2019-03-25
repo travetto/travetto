@@ -13,7 +13,7 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
   return ControllerRegistry.createFilterDecorator(async (req, res) => {
     if (!req.auth.principal) {
       throw new AppError('User is unauthenticated', 'authentication');
-    } else if (!checker(req.auth.permissions)) {
+    } else if (!checker(req.auth.permissionSet)) {
       throw new AppError('Access denied', 'permissions');
     }
   });

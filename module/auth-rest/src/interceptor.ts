@@ -1,11 +1,13 @@
+import { AuthContext } from '@travetto/auth';
 import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { SessionInterceptor } from '@travetto/rest-session';
 import { Injectable, Inject } from '@travetto/di';
 import { ContextInterceptor } from '@travetto/context/src/extension/rest.ext';
 
 import { AuthService } from './service';
-import { AuthRequestAdapter } from './adapter';
-import { AuthContextStore } from './store';
+import { AuthContextEncoder } from './encoder';
+
+const CTX = Symbol('auth-ctx');
 
 @Injectable()
 export class AuthInterceptor extends RestInterceptor {
@@ -16,21 +18,34 @@ export class AuthInterceptor extends RestInterceptor {
   service: AuthService;
 
   @Inject()
-  contextStore: AuthContextStore;
+  contextStore: AuthContextEncoder;
+
+  async configure(req: Request, res: Response) {
+    Object.defineProperty(req, 'auth', {
+      get() { return (req as any)[CTX]; },
+      set(ctx: AuthContext) { (req as any)[CTX] = ctx; },
+      enumerable: true,
+      configurable: true,
+    });
+
+    req.logout = async () => {
+      delete req.auth.principal;
+    };
+
+    req.auth = (await this.contextStore.read(req)) || new AuthContext(null as any);
+
+    req.authenticate = this.service.authenticate.bind(this.service, req, res);
+  }
 
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
-    const auth = req.auth = new AuthRequestAdapter();
-
     try {
-      auth.context = await this.contextStore.read(req);
-
-      req.authenticate = this.service.authenticate.bind(this.service, req, res);
+      await this.configure(req, res);
 
       this.service.registerContext(req);
 
       return await next();
     } finally {
-      await this.contextStore.write(req, res, auth.context);
+      await this.contextStore.write(req, res, req.auth);
     }
   }
 }

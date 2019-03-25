@@ -7,6 +7,8 @@ const pbkdf2 = util.promisify(crypto.pbkdf2);
 
 type Checker = ReturnType<(typeof AuthUtil)['permissionChecker']>;
 
+type PermSet = Set<string> | ReadonlySet<string>;
+
 export class AuthUtil {
 
   private static CHECK_EXC_CACHE = new Map<string, [Checker, Checker]>();
@@ -33,18 +35,18 @@ export class AuthUtil {
     return { salt, hash };
   }
 
-  static permissionChecker(perms: Set<string>, matchAll = true, defaultIfEmpty = true) {
+  static permissionChecker(perms: PermSet, matchAll = true, defaultIfEmpty = true) {
     const permArr = [...perms].map(x => x.toLowerCase());
     const permSet = new Set(permArr);
     if (permArr.length === 0) {
       return () => defaultIfEmpty;
     }
     return matchAll ?
-      (uPerms: Set<string>) => !permArr.find(x => !uPerms.has(x)) :
-      (uPerms: Set<string>) => !!permArr.find(x => uPerms.has(x));
+      (uPerms: PermSet) => !permArr.find(x => !uPerms.has(x)) :
+      (uPerms: PermSet) => !!permArr.find(x => uPerms.has(x));
   }
 
-  static permissionSetChecker(include: Set<string>, exclude: Set<string>, matchAll = true) {
+  static permissionSetChecker(include: PermSet, exclude: PermSet, matchAll = true) {
     const incKey = Array.from(include).sort().join(',');
     const excKey = Array.from(include).sort().join(',');
 
@@ -58,6 +60,6 @@ export class AuthUtil {
     const includes = this.CHECK_INC_CACHE.get(incKey)![matchAll ? 1 : 0];
     const excludes = this.CHECK_EXC_CACHE.get(excKey)![matchAll ? 1 : 0];
 
-    return (perms: Set<string>) => includes(perms) && !excludes(perms);
+    return (perms: PermSet) => includes(perms) && !excludes(perms);
   }
 }
