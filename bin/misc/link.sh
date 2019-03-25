@@ -4,7 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BASENAME="$( basename "${BASH_SOURCE[0]}" )"
 
 if [ -L "$DIR/$BASENAME" ]; then
-  SCRIPT=`readlink -f "$DIR/$BASENAME"`
+  SCRIPT=`readlink -f "$DIR/$BASENAME" 2> /dev/null || readlink "$DIR/$BASENAME"`
   DIR=`dirname $SCRIPT`
 fi
 
