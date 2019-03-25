@@ -68,7 +68,7 @@ export class Context {
     }
   }
 
-  get(key?: string) {
+  get(key?: string | symbol) {
     const root = this.storage();
     if (key) {
       return root[key] || (root[key] = {});
@@ -77,9 +77,9 @@ export class Context {
     }
   }
 
-  set(key: string, val: any): void;
+  set(key: string | symbol, val: any): void;
   set(val: any): void;
-  set(keyOrVal: string, valWithKey?: any) {
+  set(keyOrVal: string | symbol, valWithKey?: any) {
     if (valWithKey) {
       this.get()[keyOrVal] = valWithKey;
     } else {
