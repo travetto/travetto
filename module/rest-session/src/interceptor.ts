@@ -3,9 +3,7 @@ import { RestInterceptor, Request, Response } from '@travetto/rest';
 
 import { SessionEncoder } from './encoder/encoder';
 import { SessionStore } from './store/store';
-import { Session } from './types';
-
-const RAW_SESSION = Symbol('raw_session');
+import { Session, RAW_SESSION, RAW_SESSION_PRIV } from './types';
 
 @Injectable()
 export class SessionInterceptor extends RestInterceptor {
@@ -26,7 +24,7 @@ export class SessionInterceptor extends RestInterceptor {
     }
     if (session) {
       if (await this.store.validate(session)) {
-        (req as any)[RAW_SESSION] = session;
+        req[RAW_SESSION_PRIV] = session;
       } else {
         await this.store.destroy(session);
       }
@@ -35,10 +33,10 @@ export class SessionInterceptor extends RestInterceptor {
 
   async storeToExternal(req: Request, res: Response) {
 
-    let session: Session | undefined = (req as any)[RAW_SESSION];
+    let session: Session | undefined = req[RAW_SESSION];
     let created = false;
 
-    if (req.session && !(req as any)[RAW_SESSION]!.id) {
+    if (req.session && !req[RAW_SESSION]!.id) {
       session = await this.store.create(req.session);
       created = true;
     } else if (session) {
@@ -52,21 +50,19 @@ export class SessionInterceptor extends RestInterceptor {
   }
 
   modifyRequest(req: Request) {
-    Object.defineProperty(req, 'session', {
-      get() {
-        if (!(req as any)[RAW_SESSION]) {
-          (req as any)[RAW_SESSION] = { payload: {} } as any;
+    Object.defineProperties(req, {
+      [RAW_SESSION]: {
+        get() {
+          this[RAW_SESSION_PRIV] = this[RAW_SESSION_PRIV] || { payload: {} };
+          return this[RAW_SESSION_PRIV];
         }
-        return (req as any)[RAW_SESSION]!.payload;
       },
-      set(val: any) {
-        if (!(req as any)[RAW_SESSION]) {
-          (req as any)[RAW_SESSION] = { payload: {} } as any;
-        }
-        (req as any)[RAW_SESSION]!.payload = val;
-      },
-      enumerable: true,
-      configurable: true
+      session: {
+        get() { return this[RAW_SESSION]!.payload; },
+        set(val: any) { this[RAW_SESSION]!.payload = val; },
+        enumerable: true,
+        configurable: true
+      }
     });
   }
 
