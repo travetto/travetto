@@ -58,7 +58,7 @@ export function Application(
   };
 }
 
-export type InjectConfig = { qualifier?: symbol, optional?: boolean };
+export type InjectConfig = { qualifier?: symbol, optional?: boolean, defaultIfMissing?: Class };
 
 export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
   return (target: any) => {

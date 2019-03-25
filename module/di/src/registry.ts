@@ -141,7 +141,17 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         try {
           return await this.getInstance(x.target, x.qualifier);
         } catch (e) {
+
+          if (x.defaultIfMissing && e instanceof InjectionError && e.category === 'notfound') {
+            try {
+              return await this.getInstance(x.defaultIfMissing);
+            } catch (e2) {
+              e = e2;
+            }
+          }
+
           if (x.optional && e instanceof InjectionError && e.category === 'notfound') {
+
             return undefined;
           } else {
             e.message = `${e.message} for ${managed.class.__id}`;
@@ -314,7 +324,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.factories.get(config.src.__id)!.set(cls, finalConfig);
   }
 
-  onInstall(cls: Class<InjectableConfig>, e: ChangeEvent<Class<any>>) {
+  onInstall<T>(cls: Class<T>, e: ChangeEvent<Class<T>>) {
     super.onInstall(cls, e);
 
     // Install factories separate from classes

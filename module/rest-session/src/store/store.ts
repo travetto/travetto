@@ -2,21 +2,17 @@ import { Util } from '@travetto/base';
 
 import { Session } from '../types';
 
-const HALF_HOUR = 30 * 60 * 1000;
-
 export abstract class SessionStore {
   async validate(session: Session): Promise<boolean> {
-    return !!(await this.load(session.id));
+    return !!(await this.load(session.id!));
   }
-  async create(payload: any, expiresAt?: number) {
-    const id = Util.uuid();
-    const sess: Session = {
-      id,
+  async create(payload: any, maxAge: number) {
+    const sess: Session = new Session({
+      id: Util.uuid(),
       issuedAt: Date.now(),
-      expiresAt: expiresAt || (Date.now() + HALF_HOUR),
+      maxAge,
       payload
-    };
-    this.store(sess);
+    });
     return sess;
   }
   abstract load(id: string): Promise<Session | undefined>;

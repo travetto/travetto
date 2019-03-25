@@ -3,16 +3,16 @@ import { Inject } from '@travetto/di';
 
 import { SessionEncoder } from './encoder';
 import { Session } from '../types';
-import { SessionEncoderConfig } from './config';
+import { SessionConfig } from '../config';
 
 export class HeaderEncoder extends SessionEncoder {
 
   @Inject()
-  config: SessionEncoderConfig;
+  config: SessionConfig;
 
   async encode(req: Request, res: Response, session: Session<any> | null): Promise<void> {
     if (session) {
-      res.setHeader(this.config.keyName, session.id);
+      res.setHeader(this.config.keyName, session.id!);
     }
     return;
   }

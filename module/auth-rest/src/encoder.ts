@@ -16,6 +16,14 @@ export abstract class AuthContextEncoder {
 export class SessionAuthContextEncoder extends AuthContextEncoder {
   key = '__auth_context__';
 
+  async postConstruct() {
+    try {
+      await import('@travetto/rest-session');
+    } catch (e) {
+      console.error('To use session based auth contexts, @travetto/rest-session must be installed');
+    }
+  }
+
   read(req: Request) {
     return toCtx(req.session[this.key]);
   }
@@ -24,7 +32,7 @@ export class SessionAuthContextEncoder extends AuthContextEncoder {
     if (req.auth && req.auth.principal) {
       req.session[this.key] = req.auth;
     } else {
-      req.session = undefined;
+      req.session = undefined; // Kill session
     }
   }
 }
