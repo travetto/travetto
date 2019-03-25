@@ -21,11 +21,13 @@ export class AuthInterceptor extends RestInterceptor {
   contextStore: AuthContextEncoder;
 
   async configure(req: Request, res: Response) {
-    Object.defineProperty(req, 'auth', {
-      get() { return (req as any)[CTX]; },
-      set(ctx: AuthContext) { (req as any)[CTX] = ctx; },
-      enumerable: true,
-      configurable: true,
+    Object.defineProperties(req, {
+      auth: {
+        get() { return (req as any)[CTX]; },
+        set(ctx: AuthContext) { (req as any)[CTX] = ctx; },
+        enumerable: true,
+        configurable: true,
+      }
     });
 
     req.logout = async () => { delete req.auth.principal; };
