@@ -10,6 +10,8 @@ export class CookieEncoder extends SessionEncoder {
   config: SessionEncoderConfig;
 
   async encode(req: Request, res: Response, session: Session<any> | null): Promise<void> {
+    console.log('Encoding state', session);
+
     if (session) {
       res.cookies.set(this.config.keyName, session.id, {
         expires: new Date(session.expiresAt),

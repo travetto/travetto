@@ -9,9 +9,10 @@ export class AuthContext<
   P extends Principal = Principal
   > {
 
+  private permsSet: Set<string>;
+  private permsArr: string[];
   public identity: I;
   public principal: P;
-  public readonly permissions: Set<string>;
 
   constructor(identity: I, principal?: P) {
     if (!principal) {
@@ -19,11 +20,24 @@ export class AuthContext<
     }
     this.principal = principal;
     this.identity = identity;
-    this.permissions = new Set((principal || {}).permissions || []);
+    this.permissions = (principal || {}).permissions || [];
   }
 
   get id() {
     return (this.principal && this.principal.id) || this.identity.id;
+  }
+
+  get permissions(): Readonly<string[]> {
+    return this.permsArr;
+  }
+
+  get permissionSet(): ReadonlySet<string> {
+    return this.permsSet;
+  }
+
+  set permissions(perms: string[]) {
+    this.permsSet = new Set(perms);
+    this.permsArr = [...this.permsSet];
   }
 
   get principalDetails() {
@@ -39,7 +53,7 @@ export class AuthContext<
   }
 
   checkPermissions(include: Set<string>, exclude: Set<string>, matchAll = false) {
-    if (!AuthUtil.permissionSetChecker(include, exclude, matchAll)(this.permissions)) {
+    if (!AuthUtil.permissionSetChecker(include, exclude, matchAll)(this.permsSet)) {
       throw new AppError('Insufficient permissions', 'permissions');
     }
   }
