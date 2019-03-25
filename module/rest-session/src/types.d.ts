@@ -5,7 +5,6 @@ declare global {
   namespace Travetto {
     interface Request {
       session?: any;
-      __rawSession?: Session;
     }
   }
 }

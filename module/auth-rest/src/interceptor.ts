@@ -28,13 +28,10 @@ export class AuthInterceptor extends RestInterceptor {
       configurable: true,
     });
 
-    req.logout = async () => {
-      delete req.auth.principal;
-    };
+    req.logout = async () => { delete req.auth.principal; };
+    req.authenticate = this.service.authenticate.bind(this.service, req, res);
 
     req.auth = (await this.contextStore.read(req)) || new AuthContext(null as any);
-
-    req.authenticate = this.service.authenticate.bind(this.service, req, res);
   }
 
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
@@ -45,7 +42,7 @@ export class AuthInterceptor extends RestInterceptor {
 
       return await next();
     } finally {
-      await this.contextStore.write(req, res, req.auth);
+      await this.contextStore.write(req, res);
     }
   }
 }

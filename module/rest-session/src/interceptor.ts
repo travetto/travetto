@@ -5,6 +5,8 @@ import { SessionEncoder } from './encoder/encoder';
 import { SessionStore } from './store/store';
 import { Session } from './types';
 
+const RAW_SESSION = Symbol('raw_session');
+
 @Injectable()
 export class SessionInterceptor extends RestInterceptor {
 
@@ -24,7 +26,7 @@ export class SessionInterceptor extends RestInterceptor {
     }
     if (session) {
       if (await this.store.validate(session)) {
-        req.__rawSession = session;
+        (req as any)[RAW_SESSION] = session;
       } else {
         await this.store.destroy(session);
       }
@@ -32,9 +34,11 @@ export class SessionInterceptor extends RestInterceptor {
   }
 
   async storeToExternal(req: Request, res: Response) {
-    let session: Session | undefined = req.__rawSession;
+
+    let session: Session | undefined = (req as any)[RAW_SESSION];
     let created = false;
-    if (req.session && !req.__rawSession!.id) {
+
+    if (req.session && !(req as any)[RAW_SESSION]!.id) {
       session = await this.store.create(req.session);
       created = true;
     } else if (session) {
@@ -42,7 +46,7 @@ export class SessionInterceptor extends RestInterceptor {
     }
     if (created && session) {
       await this.encoder.encode(req, res, session);
-    } else if (!session) {
+    } else if (!session || !session.payload) {
       await this.encoder.encode(req, res, null);
     }
   }
@@ -50,16 +54,16 @@ export class SessionInterceptor extends RestInterceptor {
   modifyRequest(req: Request) {
     Object.defineProperty(req, 'session', {
       get() {
-        if (!req.__rawSession) {
-          req.__rawSession = { payload: {} } as any;
+        if (!(req as any)[RAW_SESSION]) {
+          (req as any)[RAW_SESSION] = { payload: {} } as any;
         }
-        return req.__rawSession!.payload;
+        return (req as any)[RAW_SESSION]!.payload;
       },
       set(val: any) {
-        if (!req.__rawSession) {
-          req.__rawSession = { payload: {} } as any;
+        if (!(req as any)[RAW_SESSION]) {
+          (req as any)[RAW_SESSION] = { payload: {} } as any;
         }
-        req.__rawSession!.payload = val;
+        (req as any)[RAW_SESSION]!.payload = val;
       },
       enumerable: true,
       configurable: true
