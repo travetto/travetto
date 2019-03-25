@@ -3,16 +3,18 @@ import { Inject } from '@travetto/di';
 
 import { SessionEncoder } from './encoder';
 import { Session } from '../types';
-import { SessionEncoderConfig } from './config';
+import { SessionConfig } from '../config';
 
 export class CookieEncoder extends SessionEncoder {
+
   @Inject()
-  config: SessionEncoderConfig;
+  config: SessionConfig;
 
   async encode(req: Request, res: Response, session: Session<any> | null): Promise<void> {
-    if (session) {
+    if (session && session.payload) {
       res.cookies.set(this.config.keyName, session.id, {
-        expires: new Date(session.expiresAt),
+        maxAge: !session.expiresAt ? -1 : undefined, // Session cookie by default
+        expires: session.expiresAt ? new Date(session.expiresAt) : undefined,
         httpOnly: true,
         signed: this.config.sign,
       });

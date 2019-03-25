@@ -5,7 +5,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { ContextInterceptor } from '@travetto/context/src/extension/rest.ext';
 
 import { AuthService } from './service';
-import { AuthContextEncoder } from './encoder';
+import { AuthContextEncoder, SessionAuthContextEncoder } from './encoder';
 
 @Injectable()
 export class AuthInterceptor extends RestInterceptor {
@@ -15,13 +15,13 @@ export class AuthInterceptor extends RestInterceptor {
   @Inject()
   service: AuthService;
 
-  @Inject()
+  @Inject({ defaultIfMissing: SessionAuthContextEncoder })
   contextStore: AuthContextEncoder;
 
   async configure(req: Request, res: Response) {
+    req.auth = (await this.contextStore.read(req)) || new AuthContext(null as any);
     req.logout = async () => { delete req.auth.principal; };
     req.authenticate = this.service.authenticate.bind(this.service, req, res);
-    req.auth = (await this.contextStore.read(req)) || new AuthContext(null as any);
   }
 
   async intercept(req: Request, res: Response, next: () => Promise<any>) {

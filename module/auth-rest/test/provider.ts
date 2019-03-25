@@ -20,7 +20,7 @@ class DumbProvider extends IdentityProvider {
       return {
         id: 'test',
         provider: 'dummy',
-        permissions: new Set(),
+        permissions: [],
         details: {
           username: 'test'
         }

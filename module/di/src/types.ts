@@ -6,6 +6,7 @@ export interface Dependency<T = any> {
   target: ClassTarget<T>;
   qualifier: symbol;
   optional?: boolean;
+  defaultIfMissing?: ClassTarget<T>;
   original?: Symbol | object;
 }
 
