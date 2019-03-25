@@ -8,6 +8,8 @@ import { Context } from '@travetto/context';
 import { ERR_INVALID_AUTH } from './errors';
 import { IdentityProvider } from './identity';
 
+const REQ_SYM = Symbol('trv_req');
+
 @Injectable()
 export class AuthService {
   identityProviders = new Map<string, IdentityProvider>();
@@ -27,13 +29,13 @@ export class AuthService {
 
   registerContext(req: Request) {
     if (this.context) {
-      this.context.set('_req', req);
+      this.context.set(REQ_SYM, req);
     }
   }
 
   getAuthContext() {
     if (this.context) {
-      return (this.context.get('_req') as Request).auth;
+      return (this.context.get(REQ_SYM) as Request).auth;
     } else {
       throw new AppError('Cannot retrieve information without request unless @travetto/context is installed', 'notfound');
     }
