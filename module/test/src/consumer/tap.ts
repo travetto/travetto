@@ -1,4 +1,3 @@
-import { Env } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 import { CommUtil } from '@travetto/worker';
 
@@ -77,7 +76,8 @@ export class TapEmitter implements Consumer {
 
       if (test.status === 'fail') {
         if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
-          this.logMeta({ error: CommUtil.deserializeError(test.error).stack.replace(new RegExp(Env.cwd, 'g'), '.') });
+          const err = CommUtil.deserializeError(test.error);
+          this.logMeta({ error: err.toConsole() });
         }
       }
       if (test.output) {
@@ -96,7 +96,7 @@ export class TapEmitter implements Consumer {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.enhancer.failure(err.stack || `${err}`) as string);
+        this.log(this.enhancer.failure(err instanceof Error ? err.toConsole!() : `${err}`) as string);
       }
     }
 

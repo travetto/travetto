@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-import { Env } from '@travetto/base';
+import { Env, AppError } from '@travetto/base';
 
 import { RetargettingHandler } from './proxy';
 import { CompilerUtil } from './util';
@@ -76,8 +76,7 @@ export class ModuleManager {
       }
       if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
         const modName = m.filename.replace(`${this.cwd}/`, '');
-        const err = new Error(`${e.message} ${e.message.includes('from') ? `[via ${modName}]` : `from ${modName}`}`);
-        err.stack = err.stack;
+        const err = new AppError(`${e.message} ${e.message.includes('from') ? `[via ${modName}]` : `from ${modName}`}`, 'general');
         e = err;
       }
       throw e;

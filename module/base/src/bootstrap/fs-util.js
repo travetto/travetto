@@ -78,7 +78,7 @@ const FsUtil = {
           line += 1;
           return a;
         } else {
-          return `${a}'[${FsUtil.computeModuleFromFile(fileName)}:${line}]',`;
+          return `${a}'[${FsUtil.computeModuleFromFile(fileName)}:${line.toString().padStart(3)}]',`;
         }
       });
 

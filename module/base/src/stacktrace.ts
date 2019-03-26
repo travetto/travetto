@@ -88,7 +88,7 @@ export class Stacktrace {
 
     let lastName: string = '';
     const body = err.stack!.replace(/\\/g, '/').split('\n')
-      .filter(x => !/[\/]@travetto[\/](base|compile|registry|exec|pool|context)/.test(x)) // Exclude framework boilerplate
+      .filter(x => !/[\/]@travetto[\/](base|compile|registry|exec|worker|context)/.test(x)) // Exclude framework boilerplate
       .reduce((acc, l) => {
         const name = getName(l);
 
@@ -102,9 +102,10 @@ export class Stacktrace {
         }
         return acc;
       }, [] as string[])
-      .map(x => x.replace(cwd, '').replace(/^[\/]+/, '')
-        .replace('node_modules', 'n_m')
-        .replace(/n_m[\/]@travetto[\/]([^\/]+)[\/]src/g, (a, p) => `@trv/${p}`)
+      .map(x => x
+        .replace(`${cwd}/`, '')
+        .replace(/^[\/]+/, '')
+        .replace(/\bjs\b/g, (a, f) => `ts`)
       )
       .join('  \n');
 

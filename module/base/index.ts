@@ -1,3 +1,5 @@
+/// <reference path="./src/error.d.ts" />
+
 export * from './src/bootstrap/fs-util';
 export * from './src/bootstrap/env';
 export * from './src/bootstrap/cache';

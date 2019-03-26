@@ -39,7 +39,9 @@ function buildLogging(prof) {
   console.log = log.bind(null, cl, 'info ');
   console.warn = log.bind(null, cl, 'warn ');
   console.info = log.bind(null, cl, 'info ');
-  console.error = (...args) => log(ce, 'error', ...args.map(x => x && x.stack ? x.stack : x));
+  console.error = (...args) => {
+    log(ce, 'error', ...args.map(x => x && x.toConsole ? x.toConsole() : (x && x.stack ? x.stack : x)));
+  };
   console.trace = !trace ? () => { } : log.bind(null, cl, 'trace'); // Suppress trace statements
   console.debug = !debug ? () => { } : log.bind(null, cl, 'debug'); // Suppress debug statements
 
