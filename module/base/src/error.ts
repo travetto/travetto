@@ -1,3 +1,6 @@
+import { Stacktrace } from './stacktrace';
+import { Env } from './bootstrap/env';
+
 const ERROR_CATEGORIES_WITH_CODES = {
   general: [500, 501],
   notfound: [404, 416],
@@ -37,6 +40,11 @@ export class AppError extends Error {
     this.stack = this.stack;
   }
 
+  toConsole(sub?: string) {
+    sub = sub || (this.payload ? `${JSON.stringify(this.payload, null, 2)}\n` : '');
+    return super.toConsole!(sub);
+  }
+
   toJSON(extra: { [key: string]: any } = {}) {
     if (this.payload) {
       Object.assign(extra, this.payload);
@@ -49,3 +57,9 @@ export class AppError extends Error {
     });
   }
 }
+
+// tslint:disable:no-invalid-this
+(Error as any).prototype.toConsole = function (mid?: any) {
+  const stack = Env.trace ? this.stack : Stacktrace.simplifyStack(this);
+  return `${this.message}\n${mid}${stack.substring(stack.indexOf('\n'))}`;
+};

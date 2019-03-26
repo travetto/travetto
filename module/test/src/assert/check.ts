@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Stacktrace, AppError } from '@travetto/base';
+import { AppError, Env } from '@travetto/base';
 
 import { ThrowableError, TestConfig } from '../model/test';
 import { AssertCapture } from './capture';
@@ -94,9 +94,6 @@ export class AssertCheck {
           .replace(/not not/g, ''); // Handle double negatives
         assertion.error = e;
         e.message = assertion.message;
-        if (e instanceof Error) {
-          (e as Error).stack = Stacktrace.simplifyStack(e);
-        }
         AssertCapture.add(assertion);
       }
       throw e;
@@ -152,7 +149,6 @@ export class AssertCheck {
       e = (missed && e) || this.checkError(shouldThrow, e);
       if (e) {
         assertion.message = message || (missed ? missed.message : e.message);
-        (e as Error).stack = Stacktrace.simplifyStack(e);
         throw (assertion.error = e);
       }
     } finally {
@@ -178,7 +174,6 @@ export class AssertCheck {
       e = (missed && e) || this.checkError(shouldThrow, e);
       if (e) {
         assertion.message = message || (missed ? missed.message : e.message);
-        (e as Error).stack = Stacktrace.simplifyStack(e);
         throw (assertion.error = e);
       }
     } finally {
@@ -197,7 +192,7 @@ export class AssertCheck {
     AssertCapture.add({
       className: test.className,
       methodName: test.methodName,
-      file: test.file,
+      file: test.file.replace(`${Env.cwd}/`, ''),
       line,
       operator: 'throws',
       error: err,

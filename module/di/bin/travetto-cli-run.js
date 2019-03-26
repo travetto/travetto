@@ -1,5 +1,5 @@
 // @ts-check
-const { getAppList, getParamType, runApp, getAppByName } = require(`./lib`);
+const { handleFailure, getAppList, getParamType, runApp, getAppByName } = require(`./lib`);
 
 const colorize = require('@travetto/cli/src/util').Util.colorize;
 
@@ -122,7 +122,7 @@ function init() {
           console.error();
           console.error(`Usage: ${getAppUsage((await getAppByName(app)))}`);
         } else {
-          console.error(err && err.stack ? err.stack : err);
+          handleFailure(err);
         }
         process.exit(1);
       }

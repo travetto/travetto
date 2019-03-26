@@ -1,10 +1,11 @@
 import { Request, Response } from '@travetto/rest';
-import { Inject } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 
 import { SessionEncoder } from './encoder';
 import { Session } from '../types';
 import { SessionConfig } from '../config';
 
+@Injectable({ target: HeaderEncoder })
 export class HeaderEncoder extends SessionEncoder {
 
   @Inject()

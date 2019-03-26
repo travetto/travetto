@@ -6,6 +6,13 @@ const util = require('util');
 const pCwd = process.cwd().replace(/[\\\/]+/g, '/');
 const cacheConfig = 'di-app-cache.json';
 
+function handleFailure(err, exitCode = undefined) {
+  console.error(err && err.toConsole ? err : (err && err.stack ? err.stack : err));
+  if (exitCode) {
+    process.exit(exitCode);
+  }
+}
+
 function maxTime(stat) {
   return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
 }
@@ -20,10 +27,7 @@ async function getAppList(killOnFail = true) {
   try {
     return await getCachedAppList();
   } catch (err) {
-    console.error(err && err.stack ? err.stack : err);
-    if (killOnFail) {
-      process.exit(1);
-    }
+    handleFailure(err, killOnFail && 1);
   }
 }
 
@@ -178,6 +182,7 @@ async function getCachedAppList() {
 }
 
 module.exports = {
+  handleFailure,
   runApp,
   cacheConfig,
   getAppList,

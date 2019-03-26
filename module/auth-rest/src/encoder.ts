@@ -1,5 +1,6 @@
 import { Request, Response } from '@travetto/rest';
 import { AuthContext } from '@travetto/auth';
+import { Injectable } from '@travetto/di';
 
 function toCtx(val: AuthContext | undefined) {
   if (val && val.constructor !== AuthContext) {
@@ -13,6 +14,7 @@ export abstract class AuthContextEncoder {
   abstract write(req: Request, res: Response): Promise<void> | void;
 }
 
+@Injectable({ target: SessionAuthContextEncoder })
 export class SessionAuthContextEncoder extends AuthContextEncoder {
   key = '__auth_context__';
 

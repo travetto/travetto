@@ -282,4 +282,14 @@ class Validation {
     await assert.rejects(() => SchemaValidator.validate(addr));
     await assert.doesNotReject(() => SchemaValidator.validatePartial(addr));
   }
+
+  // @Test({ skip: false })
+  async badValidate() {
+    const addr = Address.fromRaw({
+      city: 'city',
+      postal: '30000',
+    });
+
+    await SchemaValidator.validate(addr);
+  }
 }
