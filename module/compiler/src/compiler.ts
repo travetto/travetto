@@ -6,6 +6,7 @@ import { TransformerManager } from './transformers';
 import { SourceManager } from './source';
 import { ModuleManager } from './module';
 import { FilePresenceManager } from './presence';
+import { CompilerUtil } from './util';
 
 type WatchEvent = 'required-after' | 'added' | 'changed' | 'removed';
 
@@ -71,23 +72,13 @@ class $Compiler {
     this.init();
   }
 
-  handleLoadFailure(action: string, fileName: string, err: Error) {
-    if (Env.watch) {
-      console.trace(`Error in ${action} ${fileName}, removing`);
-      this.unload(fileName);
-      this.events.emit('removed', fileName);
-    } else {
-      throw err;
-    }
-  }
-
   requireHandler(m: NodeModule, tsf: string) {
     const jsf = tsf.replace(/\.ts$/, '.js');
 
     const isNew = !this.sourceManager.has(tsf);
 
     if (isNew) {
-      this.presenceManager.addNewFile(tsf);
+      this.presenceManager.addNewFile(tsf); // Will transpile
     }
 
     // Log transpiled content as needed
@@ -98,10 +89,17 @@ class $Compiler {
         this.events.emit('required-after', tsf);
       }
       return res;
-    } catch (err) {
-      this.handleLoadFailure('transpiling', tsf, err);
+    } catch (e) {
+      const file = tsf.replace(`${Env.cwd}/`, '');
+      if (tsf.endsWith('.ext.ts')) {
+        console.debug(`Omitting extension ${file}: ${e.message.split(' from ')[0]}`);
+      } else if (Env.watch) {
+        console.error(`Stubbing out with error proxy due to error in compiling ${file}: `, e.message);
+        return this.moduleManager.compile(m, jsf, CompilerUtil.getErrorModuleProxySource(e.message));
+      } else {
+        throw e;
+      }
     }
-
   }
 
   markForReload(files: string[] | string) {
@@ -130,22 +128,28 @@ class $Compiler {
   }
 
   transpile(fileName: string, force = false) {
+    let changed: boolean = false;
     try {
-      const changed = this.sourceManager.transpile(fileName, {
+      changed = this.sourceManager.transpile(fileName, {
         fileName,
         reportDiagnostics: true,
         transformers: this.transformerManager.transformers || {}
       }, force);
-
-      if (changed && (force || this.presenceManager.isWatchedFileLoaded(fileName))) {
-        // If file is already loaded, mark for reload
-        this.markForReload(fileName);
-      }
-
-      return changed;
     } catch (err) {
-      this.handleLoadFailure('transpiling', fileName, err);
+      if (Env.watch) { // Handle transpilation errors
+        this.sourceManager.set(fileName, CompilerUtil.getErrorModuleProxySource(err.message));
+        changed = this.sourceManager.transpile(fileName, { fileName }, true);
+      } else {
+        throw err;
+      }
     }
+
+    if (changed && (force || this.presenceManager.isWatchedFileLoaded(fileName))) {
+      // If file is already loaded, mark for reload
+      this.markForReload(fileName);
+    }
+
+    return changed;
   }
 
   on(event: WatchEvent, callback: (filename: string) => any) {

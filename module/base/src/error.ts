@@ -27,6 +27,17 @@ export const HTTP_ERROR_CONVERSION = (Object.entries(ERROR_CATEGORIES_WITH_CODES
   );
 
 export class AppError extends Error {
+  static build(e: any, cat: ErrorCategory = 'general') {
+    if (e instanceof AppError) {
+      return e;
+    }
+    const out = new AppError(e.message, cat);
+    if (e.stack) {
+      out.stack = e.stack;
+    }
+    return out;
+  }
+
   type: string;
 
   constructor(

@@ -22,7 +22,7 @@ class LoggerTest {
     });
     console.log('Hello', 1, 2, 3);
     assert(events.length === 1);
-    assert(events[0].message === '[@app/test.logger]');
+    assert(events[0].message === '[@app/test.logger: 23]');
     assert.deepStrictEqual(events[0].args, ['Hello', 1, 2, 3]);
   }
 

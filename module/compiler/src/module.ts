@@ -29,17 +29,14 @@ export class ModuleManager {
     let mod;
     try {
       mod = originalLoader.apply(null, [request, parent]);
-    } catch (e) {
+    } catch (e) { // Failed due to compilation error
       const p = Module._resolveFilename(request, parent);
-      if (!(Env.watch || p.endsWith('.ext.ts'))) {
-        // Marking file as being loaded, useful for the test framework
-        require.cache[p] = {};
+
+      if (!Env.watch && !request.endsWith('.ext.ts')) {
         throw e;
       }
-      if (Env.watch) {
-        console.warn(`Unable to import ${p}, stubbing out`, e.message);
-      }
 
+      console.debug(`Unable to load ${p.replace(`${Env.cwd}/`, '')}: stubbing out with error proxy.`, e.message);
       mod = CompilerUtil.getErrorModuleProxy(e.message);
     }
 
@@ -70,10 +67,6 @@ export class ModuleManager {
     try {
       return (m as any)._compile(content, jsf);
     } catch (e) {
-      if (Env.watch) { // If compiling fails, treat as recoverable in watch mode
-        console.warn(`Unable to compile ${name}, stubbing out`, e.message);
-        (m as any)._compile(CompilerUtil.getErrorModuleProxySource(e.message), jsf);
-      }
       if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
         const modName = m.filename.replace(`${this.cwd}/`, '');
         const err = new AppError(`${e.message} ${e.message.includes('from') ? `[via ${modName}]` : `from ${modName}`}`, 'general');
