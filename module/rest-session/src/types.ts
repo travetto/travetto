@@ -22,11 +22,12 @@ export class Session<T = any> {
     for (const k of Object.keys(data) as (keyof Session)[]) {
       this[k] = data[k];
     }
+
+    this.expiresAtLoaded = this.expiresAt || Date.now();
+
     if (this.maxAge && !this.expiresAt) {
       this.expiresAt = this.maxAge + Date.now();
     }
-
-    this.expiresAtLoaded = this.expiresAt;
 
     this.hash = Util.naiveHash(JSON.stringify(this));
   }
@@ -51,6 +52,7 @@ export class Session<T = any> {
 
   destroy() {
     this.action = 'destroy';
+    delete this.payload;
   }
 
   toJSON() {

@@ -27,6 +27,11 @@ export class RestSessionService {
     return await this.store.validate(session);
   }
 
+  async destory(req: Request) {
+    req[RAW_SESSION].destroy();
+    delete req.session;
+  }
+
   async loadFromExternal(req: Request) {
     const sessionKey = await this.encoder.decode(req);
     let session: Session | undefined;
@@ -91,7 +96,14 @@ export class RestSessionService {
       },
       session: {
         get(this: Request) { return this[RAW_SESSION].payload; },
-        set(this: Request, val: any) { this[RAW_SESSION].payload = val; },
+        set(this: Request, val: any) {
+          const sess = this[RAW_SESSION];
+          if (!val) {
+            sess.destroy();
+          } else {
+            sess.payload = val;
+          }
+        },
         enumerable: true,
         configurable: false
       }
