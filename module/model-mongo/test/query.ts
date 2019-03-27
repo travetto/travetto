@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { extractSimple, extractWhereClause } from '../';
+import { MongoUtil } from '../';
 
 class User {
   id: string;
@@ -13,12 +13,12 @@ export class QueryTest {
 
   @Test()
   async validateQuery() {
-    let out = extractSimple({ a: { b: { c: 5 } } });
+    let out = MongoUtil.extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
     type Type = { a: { d: number, b: { c: number } }, d: { e: boolean }, g: { z: string[] }, name: number, age: number };
 
-    out = extractWhereClause<Type>({
+    out = MongoUtil.extractWhereClause<Type>({
       $and: [
         { a: { b: { c: 5 } } },
         { d: { e: true } },
@@ -45,7 +45,7 @@ export class QueryTest {
 
   @Test()
   async translateIds() {
-    const out = extractWhereClause<User>({
+    const out = MongoUtil.extractWhereClause<User>({
       $and: [
         { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
       ]
@@ -56,7 +56,7 @@ export class QueryTest {
 
   @Test()
   async translateRegex() {
-    const out = extractWhereClause<User>({
+    const out = MongoUtil.extractWhereClause<User>({
       name: { $regex: '/google.$/' }
     });
 

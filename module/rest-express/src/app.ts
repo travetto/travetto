@@ -1,7 +1,7 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
-import * as Cookies from 'cookies';
+import * as cookies from 'cookies';
 
 import { Injectable } from '@travetto/di';
 import { RouteUtil, RestApp, RouteConfig } from '@travetto/rest';
@@ -18,7 +18,7 @@ export class ExpressRestApp extends RestApp<express.Application> {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
-    app.use(Cookies.express(['keys']));
+    app.use(cookies.express(this.config.cookie.keys));
 
     if (this.config.trustProxy) {
       app.enable('trust proxy');

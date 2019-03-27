@@ -1,5 +1,5 @@
 <h1>   
-  <sub><img src="https://travetto.io/assets/logo.png" height="40"></sub>
+  <sub><img src="./docs/images/logo.png" height="40"></sub>
   The Travetto Framework
 </h1>
 

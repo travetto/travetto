@@ -15,18 +15,15 @@ export class SampleConfig {
 
  @InjectableFactory()
   static customizer(): RestAppCustomizer<express.Application> {
-return new (class extends RestAppCustomizer<express.Application> {
+    return new (class extends RestAppCustomizer<express.Application> {
       customize(raw: express.Application) {
-        raw.use(session({
-          secret: 'keyboard cat',
-          resave: false,
-          saveUninitialized: true,
-          cookie: {
-            secure: false,
-            httpOnly: true,
-            expires: new Date(Date.now() + 1000 * 60 * 30)
-          }
-        }));
+        const limiter = rateLimit({
+          windowMs: 15 * 60 * 1000, // 15 minutes
+          max: 100 // limit each IP to 100 requests per windowMs
+        });
+       
+        //  apply to all requests
+        raw.use(limiter);
       }
     })();
   }
@@ -36,7 +33,6 @@ return new (class extends RestAppCustomizer<express.Application> {
 ## Default Stack
 When working with [`express`](https://expressjs.com) applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
 * ```compression()```
-* ```cookieParser()```
 * ```bodyParser.json()```
 * ```bodyParser.urlencoded()```
 * ```bodyParser.raw({ type: 'image/*' })```

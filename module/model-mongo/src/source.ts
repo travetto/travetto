@@ -6,80 +6,19 @@ import {
   ModelRegistry, ModelCore,
   PageableModelQuery,
   BulkOp,
-  WhereClause,
   ModelQuery,
   ValidStringFields,
   WhereClauseRaw
 } from '@travetto/model';
 
 import { Class } from '@travetto/registry';
-import { AppError, Util } from '@travetto/base';
-import { BindUtil } from '@travetto/schema';
+import { AppError } from '@travetto/base';
+import { Injectable } from '@travetto/di';
 
+import { MongoUtil } from './util';
 import { MongoModelConfig } from './config';
 
-const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
-const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
-const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
-
-export function extractTypedWhereClause<T>(cls: Class<T>, o: WhereClause<T>): { [key: string]: any } {
-  const conf = ModelRegistry.get(cls);
-  if (conf.subType) {
-    o = { $and: [o, { type: conf.subType }] } as WhereClause<T>;
-  }
-  return extractWhereClause(o);
-}
-
-export function extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
-  if (has$And(o)) {
-    return { $and: o.$and.map(x => extractWhereClause<T>(x)) };
-  } else if (has$Or(o)) {
-    return { $or: o.$or.map(x => extractWhereClause<T>(x)) };
-  } else if (has$Not(o)) {
-    return { $nor: [extractWhereClause<T>(o.$not)] };
-  } else {
-    return extractSimple(o);
-  }
-}
-
-export function replaceId<T>(v: T): T {
-  if (typeof v === 'string') {
-    return new mongo.ObjectId(v) as any as T;
-  } else if (Array.isArray(v)) {
-    return v.map(replaceId) as any as T;
-  } else if (Util.isPlainObject(v)) {
-    const out: any = {};
-    for (const k of Object.keys(v)) {
-      out[k] = replaceId((v as any)[k]);
-    }
-    return out as T;
-  } else {
-    return v;
-  }
-}
-
-export function extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
-  const out: { [key: string]: any } = {};
-  const sub = o as { [key: string]: any };
-  const keys = Object.keys(sub);
-  for (const key of keys) {
-    const subpath = `${path}${key}`;
-    const v = sub[key];
-
-    if (subpath === 'id') { // Handle ids directly
-      out._id = replaceId(v);
-    } else if ((Util.isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) || (v && v.constructor && v.constructor.__id)) {
-      Object.assign(out, extractSimple(v, `${subpath}.`));
-    } else {
-      if (v && Object.keys(v)[0] === '$regex') {
-        v.$regex = BindUtil.extractRegex(v.$regex);
-      }
-      out[subpath] = v;
-    }
-  }
-  return out;
-}
-
+@Injectable()
 export class MongoModelSource extends ModelSource {
 
   private client: mongo.MongoClient;
@@ -117,15 +56,15 @@ export class MongoModelSource extends ModelSource {
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const col = await this.getCollection(cls);
 
-    const projected = extractTypedWhereClause(cls, query.where || {});
+    const projected = MongoUtil.extractTypedWhereClause(cls, query.where || {});
 
     let cursor = col.find(projected);
     if (query.select) {
-      cursor.project(Object.keys(query.select)[0].startsWith('$') ? query.select : extractSimple(query.select));
+      cursor.project(Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select));
     }
 
     if (query.sort) {
-      cursor = cursor.sort(query.sort.map(x => extractSimple(x)));
+      cursor = cursor.sort(query.sort.map(x => MongoUtil.extractSimple(x)));
     }
 
     cursor = cursor.limit(Math.trunc(query.limit || 200) || 200);
@@ -213,7 +152,7 @@ export class MongoModelSource extends ModelSource {
 
   async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     const col = await this.getCollection(cls);
-    const cursor = col.count(extractTypedWhereClause(cls, query.where || {}));
+    const cursor = col.count(MongoUtil.extractTypedWhereClause(cls, query.where || {}));
 
     const res = await cursor;
     return res;
@@ -242,7 +181,7 @@ export class MongoModelSource extends ModelSource {
 
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     const col = await this.getCollection(cls);
-    const res = await col.deleteMany(extractTypedWhereClause(cls, query.where || {}));
+    const res = await col.deleteMany(MongoUtil.extractTypedWhereClause(cls, query.where || {}));
     return res.deletedCount || 0;
   }
 
@@ -294,7 +233,7 @@ export class MongoModelSource extends ModelSource {
     let final: any = data;
 
     if (Object.keys(data)[0].charAt(0) !== '$') {
-      const items = extractSimple(final);
+      const items = MongoUtil.extractSimple(final);
       final = Object.entries(items).reduce((acc, [k, v]) => {
         if (v === null || v === undefined) {
           acc.$unset = acc.$unset || {};
@@ -307,7 +246,7 @@ export class MongoModelSource extends ModelSource {
       }, {} as any);
     }
 
-    const res = await col.findOneAndUpdate(extractTypedWhereClause(cls, query.where || {}), final, { returnOriginal: false });
+    const res = await col.findOneAndUpdate(MongoUtil.extractTypedWhereClause(cls, query.where || {}), final, { returnOriginal: false });
     if (!res.value) {
       throw new AppError('Object not found for updating', 'notfound');
     }
@@ -319,7 +258,7 @@ export class MongoModelSource extends ModelSource {
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, data: Partial<T>) {
     const col = await this.getCollection(cls);
 
-    const res = await col.updateMany(extractTypedWhereClause(cls, query.where || {}), data);
+    const res = await col.updateMany(MongoUtil.extractTypedWhereClause(cls, query.where || {}), data);
     return res.matchedCount;
   }
 

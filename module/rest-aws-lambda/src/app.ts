@@ -2,14 +2,14 @@ import * as http from 'http';
 
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
+import * as cookies from 'cookies';
 
 import * as awsServerlessExpress from 'aws-serverless-express';
 import * as awsServerlessExpressMiddleware from 'aws-serverless-express/middleware';
 
 import { Inject } from '@travetto/di';
-import { RestApp, RouteConfig } from '@travetto/rest';
+import { RestApp, RouteConfig, RouteUtil } from '@travetto/rest';
 
 import { AwsLambdaConfig } from './config';
 import { RouteStack } from './types';
@@ -29,11 +29,11 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
-    app.use(cookieParser());
     app.use(awsServerlessExpressMiddleware.eventContext());
+    app.use(cookies.express(this.config.cookie.keys));
 
     // Enable proxy for cookies
-    if (this.awsLambdaConfig.cookie.secure) {
+    if (this.config.trustProxy) {
       app.enable('trust proxy');
     }
 
@@ -56,11 +56,26 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
 
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
     const router = express.Router({ mergeParams: true });
+
     for (const route of routes) {
       router[route.method!](route.path!, route.handlerFinalized! as any);
     }
+
+    // Register options handler for each controller
+    if (key !== RestApp.GLOBAL) {
+      const optionHandler = RouteUtil.createRouteHandler(this.interceptors,
+        { method: 'options', path: '*', handler: RestApp.GLOBAL_HANDLER });
+
+      router.options('*', optionHandler as any);
+    }
+
     (router as any).key = key;
     this.raw.use(path, router);
+
+    if (this.listening && key !== RestApp.GLOBAL) {
+      await this.unregisterGlobal();
+      await this.registerGlobal();
+    }
   }
 
   listen() {

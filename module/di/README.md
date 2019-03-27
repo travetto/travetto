@@ -41,6 +41,11 @@ When declaring a dependency, you can also provide a token to allow for multiple 
       // Do some additional work
     }
   }
+
+  class Consumer {
+    @Inject(CUSTOM2) // Pull in specific service 
+    service: CustomService;
+  }
 ```
 
 As you can see, the `target` field is also set, which indicates to the dependency registration process what `class` the injectable is compatible with.  Additionally, when using `abstract` classes, the parent `class` is always considered as a valid candidate type.
@@ -118,6 +123,37 @@ Via `@InjectableFactory` params, which are comparable to constructor params
     @InjectableFactory()
     static initService(dependentService: DependentService): CustomService {
       return new CustomService(dependentService);
+    }
+  }
+```
+
+**NOTE** If you are building modules for others to consume, often times it is desirable to have default implementations for contracts that can be overridden.  The `@Inject` decorator takes a flag of `defaultIfMissing` and a class name, that it will use to satisfy the dependency if nothing else matches.  This would look like:
+
+**Code: Example of default if missing**
+```typescript
+  abstract class Contract {
+
+  }
+
+  @Injectable({ targets: SimpleContract })
+  class SimpleContract extends Contract {}
+
+  @Injectable({ targets: ComplexContract })
+  class ComplexContract extends Contract {}
+
+  @Injectable()
+  class ContractConsumer {
+    // Will default to SimpleContract if nothing else registered
+    @Inject({ defaultIfMissing: SimpleContract })
+    contract: Contract;
+  }
+
+  
+  class Config {
+    // Complex will be marked as the available Contract
+    @InjectableFactory()
+    getContract(complex: ComplexContract): Contract { 
+      return complex;
     }
   }
 ```
@@ -242,3 +278,6 @@ class ComplexApp {
   }
 }
 ```
+
+*** Note ***
+The applications, by default, will not scan other application's folders.  This means, if you have an application in the `e2e/` folder, all of the code in your `src/` folder will not be picked up automatically.  This defined under the assumption that each application is unique.  If you have an application that is an extension of the primary application (`src/`), you can specify the `@Application` config property of `standalone` to be false.  This will now scan both folders to run your application.

@@ -56,6 +56,10 @@ export class AuthService {
       }
     }
 
+    if (lastError) {
+      console.error(lastError);
+    }
+
     const err = new AppError(ERR_INVALID_AUTH, 'authentication');
     err.stack = (lastError ? lastError.stack : err.stack);
     throw err;

@@ -1,11 +1,7 @@
 import { Config } from '@travetto/config';
 
-@Config('rest.express')
+@Config('rest.aws')
 export class AwsLambdaConfig {
-  cookie = {
-    secure: false
-  };
-  secret = 'secret';
   binaryMimeTypes: [
     'application/javascript',
     'application/json',

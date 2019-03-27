@@ -16,12 +16,9 @@ export class SampleConfig {
   static customizer(): RestAppCustomizer<fastify.FastifyInstance> {
     return new (class extends RestAppCustomizer<fastify.FastifyInstance> {
       customize(raw: fastify.FastifyInstance) {
-        raw.register(fastifySession, {
-          secret: 'fastify-fastify-fastify-fastify-fastify-',
-          cookie: {
-            secure: false
-          }
-        });
+        raw.register(fastifyCaching, {
+           privacy: fastifyCaching.privacy.NOCACHE,
+        }, err => { if (err) throw err });
       }
     })();
   }
@@ -34,5 +31,4 @@ export class SampleConfig {
 When working with [`fastify`](https://www.fastify.io/) applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
 * `fastify-compress`
 * `fastify-formbody`
-* `fastify-cookie`
 * `app.addContentTypeParser('multipart/form-data;')`

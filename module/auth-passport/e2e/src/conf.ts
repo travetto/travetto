@@ -1,12 +1,13 @@
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 
 import { InjectableFactory } from '@travetto/di';
+import { PrincipalProvider, Identity } from '@travetto/auth';
 import { IdentityProvider } from '@travetto/auth-rest';
 
 import { PassportIdentityProvider } from '../../';
 
 export class FbUser {
-  id: string;
+  username: string;
   roles: string[];
 }
 
@@ -18,20 +19,29 @@ export class AppConfig {
     return new PassportIdentityProvider('facebook',
       new FacebookStrategy(
         {
-          clientID: '<clientId>',
-          clientSecret: '<clientSecret>',
+          clientID: '<appId>',
+          clientSecret: '<appSecret>',
           callbackURL: 'http://localhost:3000/auth/facebook/callback',
-          profileFields: ['id', 'displayName', 'photos', 'email'],
+          profileFields: ['id', 'username', 'displayName', 'photos', 'email'],
         },
         (accessToken, refreshToken, profile, cb) => {
           return cb(undefined, profile);
         }
       ),
       (user: FbUser) => ({
-        id: user.id,
-        permissions: new Set(user.roles),
-        details: {}
+        id: user.username,
+        permissions: user.roles,
+        details: user
       })
     );
+  }
+
+  @InjectableFactory()
+  static principalProvider(): PrincipalProvider {
+    return new class extends PrincipalProvider {
+      async resolvePrincipal(ident: Identity) {
+        return ident;
+      }
+    }();
   }
 }

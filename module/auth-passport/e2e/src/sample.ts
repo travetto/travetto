@@ -1,14 +1,7 @@
-import { Application, InjectableFactory } from '@travetto/di';
-import { RestApp } from '@travetto/rest';
-import { FastifyRestApp } from '@travetto/rest-fastify';
+import { Application, RestApp } from '@travetto/rest';
 
 @Application('sample')
 export class SampleApp {
-
-  @InjectableFactory()
-  static getApp(): RestApp {
-    return new FastifyRestApp();
-  }
 
   constructor(private app: RestApp) { }
 
