@@ -34,7 +34,7 @@ export class AppConfig {
       ),
       (user: FbUser) => ({
         id: user.id,
-        permissions: new Set(user.roles)
+        permissions: user.roles
       })
     );
   }

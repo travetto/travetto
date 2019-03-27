@@ -140,6 +140,29 @@ The module provides standard structure for rendering content on the response.  T
 
 Additionally, there is support for typing requests and request bodies.  This can be utilized by other modules to handle special types of requests.
  
+## Interceptors
+[`Interceptor`](./src/interceptor/types.ts)s are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+
+**Code: A Simple Timing Interceptor**
+```typescript
+@Injectable()
+export class LoggingInterceptor extends RestInterceptor {
+  async intercept(req: Request, res: Response, next: () => Promise<any>) {
+    let start = Date.now();
+    try {
+      await next();
+    } finally {
+      console.log(`Request took ${Date.now() - start}ms`);
+    }
+  }
+}
+```
+
+Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
+
+* ['CORS support'](./src/interceptor/cors.ts) - This interceptor allows cors functionality to be configured out of the box, by setting properties in your application.yml, specifically, `rest.cors.active: true`
+* ['GET request cache control'](./src/interceptor/get-cache.ts) - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting `res.disableGetCache: true` in your config. 
+
 ## Creating and Running an App
 To run a REST server, you will need to construct an entry point using the `@Application` decorator, as well as define a valid [`RestApp`](./src/types.ts) to provide initialization for the application.  This could look like:
 
@@ -147,11 +170,6 @@ To run a REST server, you will need to construct an entry point using the `@Appl
 ```typescript
 @Application('sample')
 export class SampleApp {
-
-  @InjectableFactory()
-  static getApp(): RestApp {
-    return new ExpressRestApp();
-  }
 
   @Inject()
   contextInterceptor: ContextInterceptor;
@@ -181,11 +199,6 @@ export class SampleApp {
         return app;
       }
     }();
-  }
-
-  @InjectableFactory()
-  static getApp(): RestApp {
-    return new ExpressRestApp();
   }
 
   @Inject()
@@ -254,3 +267,20 @@ Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module
    }
  }
 ``` 
+
+## Cookie Support
+Express/Koa/Fastify all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [`cookies`](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the request/response object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+
+**Code: Sample Cookie Usage**
+```typescript
+req.cookies.get('name', options);
+res.cookies.set('name', value, options);
+```
+
+## SSL Support
+Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if SSL support is configured, but no keys provided.  This is useful for local development where you implicitly trust the cert.
+
+SSL support can be enabled by setting `rest.ssl.active: true`
+
+## Full Config
+The entire [`config object`](./src/config.ts) which will show the full set of valid configuration parameters for the rest module.

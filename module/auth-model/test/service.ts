@@ -1,12 +1,12 @@
 import * as assert from 'assert';
 
+import { AppError } from '@travetto/base';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory, Injectable } from '@travetto/di';
-import { ModelRegistry, BaseModel, Model, ModelSource, ModelService } from '@travetto/model';
-import { SchemaRegistry } from '@travetto/schema';
+import { RootRegistry } from '@travetto/registry';
+import { BaseModel, Model, ModelSource } from '@travetto/model';
 
-import { ModelPrincipalProvider } from '../';
-import { RegisteredIdentity } from '../src/principal';
+import { ModelPrincipalProvider, RegisteredIdentity } from '../';
 
 @Model()
 class User extends BaseModel {
@@ -23,11 +23,20 @@ class MockModelSource {
   private users: User[] = [];
   private ids: number = 0;
 
-  async getAllByQuery(...args: any[]) {
-    return this.users;
+  async getAllByQuery(cls: User, q: any) {
+    const res = this.users.filter(u => u.id === q.where.id);
+    return res;
   }
 
-  async save(u: User) {
+  async getByQuery(cls: User, q: any) {
+    const res = this.users.find(v => q.where.id === v.id);
+    if (!res) {
+      throw new AppError('Unable to find user', 'notfound');
+    }
+    return res;
+  }
+
+  async save(cls: User, u: User) {
     if (!u.id) {
       u.id = `${this.ids++}`;
     }
@@ -48,14 +57,15 @@ class TestConfig {
   @InjectableFactory()
   static getAuthService(): ModelPrincipalProvider<User> {
     return new ModelPrincipalProvider<User>(
-      User, (u) => ({
+      User,
+      (u) => ({
         ...(u as any as RegisteredIdentity),
         details: u,
-        permissions: new Set(u.permissions || []),
+        permissions: u.permissions || [],
         provider: 'model'
       }),
-      (rid) => User.from({
-        ...(rid as User)
+      (registered) => User.from({
+        ...(registered as User)
       })
     );
   }
@@ -65,14 +75,12 @@ class TestConfig {
 export class ServiceTest {
   @BeforeAll()
   async init() {
-    await ModelRegistry.init();
-    await SchemaRegistry.init();
-    await DependencyRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test()
   async register() {
-    const svc = (await DependencyRegistry.getInstance(ModelPrincipalProvider)) as ModelPrincipalProvider<User>;
+    const svc = await DependencyRegistry.getInstance<ModelPrincipalProvider<User>>(ModelPrincipalProvider);
     assert.ok(svc);
 
     const pre = User.from({
@@ -80,7 +88,32 @@ export class ServiceTest {
     });
 
     const user = await svc.register(pre);
-    assert(user.hash === undefined);
+    assert.ok(user.hash);
     assert.ok(user.id);
+  }
+
+  @Test()
+  async authenticate() {
+    const svc = await DependencyRegistry.getInstance<ModelPrincipalProvider<User>>(ModelPrincipalProvider);
+    assert.ok(svc);
+
+    const pre = User.from({
+      id: '5',
+      password: 'bob'
+    });
+
+    try {
+      await svc.authenticate(pre.id!, pre.password!);
+    } catch (err) {
+      if (err instanceof AppError && err.category === 'notfound') {
+        const user = await svc.register(pre);
+        assert.ok(user.hash);
+        assert.ok(user.id);
+      } else {
+        throw err;
+      }
+    }
+
+    await assert.doesNotReject(() => svc.authenticate(pre.id!, pre.password!));
   }
 }

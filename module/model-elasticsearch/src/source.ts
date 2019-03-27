@@ -10,13 +10,15 @@ import {
   ValidStringFields
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
-import { Util, Env, AppError } from '@travetto/base';
+import { Util, AppError } from '@travetto/base';
+import { Injectable } from '@travetto/di';
 import { SchemaChangeEvent, SchemaRegistry } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config';
 import { EsBulkResponse, EsIdentity, EsBulkError } from './types';
 import { ElasticsearchUtil } from './util';
 
+@Injectable()
 export class ElasticsearchModelSource extends ModelSource {
 
   private indexToAlias: Map<string, string> = new Map();

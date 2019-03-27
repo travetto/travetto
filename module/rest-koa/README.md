@@ -1,4 +1,4 @@
-travetto: Rest-Session
+travetto: Rest-Koa
 ===
 
 **Install: KOA Provider**
@@ -16,18 +16,7 @@ export class SampleConfig {
   static customizer(): RestAppCustomizer<koa> {
     return new (class extends RestAppCustomizer<koa> {
       customize(raw: koa) {
-        raw.use(koaSession({
-          key: 'koa:sess',
-          maxAge: 86400000,
-          autoCommit: true,
-          overwrite: true,
-          httpOnly: true,
-          signed: true,
-          rolling: false,
-          renew: false,
-        } as any, raw));
-        raw.keys = ['this is a super special key'];
-      }
+        raw.use(koaBunyanLogger());
     })();
   }
 }

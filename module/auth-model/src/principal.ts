@@ -1,16 +1,10 @@
-import { AppError } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
 import { Inject } from '@travetto/di';
 import { ModelService, Query, ModelCore } from '@travetto/model';
-import { AuthUtil, Identity, Principal, PrincipalProvider } from '@travetto/auth';
+import { AuthUtil, Principal, PrincipalProvider } from '@travetto/auth';
 import { Class } from '@travetto/registry';
 
-export interface RegisteredIdentity extends Identity {
-  hash: string;
-  salt: string;
-  resetToken: string;
-  resetExpires: Date;
-  password?: string;
-}
+import { RegisteredIdentity } from './identity';
 
 export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvider {
 
@@ -33,7 +27,7 @@ export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvid
     return user;
   }
 
-  async resolvePrincipal(ident: Identity): Promise<Principal> {
+  async resolvePrincipal(ident: RegisteredIdentity): Promise<Principal> {
     const user = await this.retrieve(ident.id);
     return this.toIdentity(user);
   }
@@ -100,7 +94,7 @@ export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvid
   async generateResetToken(userId: string): Promise<RegisteredIdentity> {
     const user = await this.retrieve(userId);
     const ident = this.toIdentity(user);
-    const salt = await AuthUtil.generateSalt();
+    const salt = await Util.uuid();
 
     ident.resetToken = await AuthUtil.generateHash(`${new Date().getTime()}`, salt, 25000, 32);
     ident.resetExpires = new Date(Date.now() + (60 * 60 * 1000 /* 1 hour */));

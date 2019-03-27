@@ -27,7 +27,7 @@ export class RestSessionService {
     return await this.store.validate(session);
   }
 
-  async destory(req: Request) {
+  async destroy(req: Request) {
     req[RAW_SESSION].destroy();
     delete req.session;
   }

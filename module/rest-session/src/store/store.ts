@@ -16,6 +16,6 @@ export abstract class SessionStore {
     return sess;
   }
   abstract load(id: string): Promise<Session | undefined>;
-  abstract store(data: Session, extend?: boolean): Promise<void>;
+  abstract store(data: Session): Promise<void>;
   abstract destroy(session: Session): Promise<boolean>;
 }

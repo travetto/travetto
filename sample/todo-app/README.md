@@ -156,9 +156,8 @@ Create the new test config at `test/config.ts`
 **Code: Test configuration, test/config.ts**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { ModelSource, ModelService } from '@travetto/model';
+import { ModelSource } from '@travetto/model';
 import { MongoModelSource, MongoModelConfig } from '@travetto/model-mongo';
-import { QueryVerifierService } from '@travetto/model/src/service/query';
 
 export class TestConfig {
   @InjectableFactory()
@@ -166,11 +165,6 @@ export class TestConfig {
     return new MongoModelSource(MongoModelConfig.from({
       namespace: `test-${Math.trunc(Math.random() * 10000)}`
     }));
-  }
-
-  @InjectableFactory()
-  static modelService(src: ModelSource): ModelService {
-    return new ModelService(src, new QueryVerifierService());
   }
 }
 ```
@@ -328,19 +322,14 @@ The entry-point should be at `src/app.ts` as:
 
 **Code: Application entry point, src/app.ts**
 ```typescript
-import { Application, InjectableFactory } from '@travetto/di';
-import { RestApp, RestAppProvider } from '@travetto/rest';
-import { RestExpressAppProvider } from '@travetto/rest-express';
+import { Inject } from '@travetto/di';
+import { Application, RestApp } from '@travetto/rest';
 
 @Application('todo')
 export class TodoApp {
 
-  @InjectableFactory()
-  static getProvider(): RestAppProvider {
-    return new RestExpressAppProvider();
-  }
-
-  constructor(private app: RestApp) { }
+  @Inject()
+  app: RestApp;
 
   run() {
     this.app.run();
