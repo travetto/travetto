@@ -10,7 +10,7 @@ $ npm install @travetto/model-elasticsearch
 
 This module provides an [`elasticsearch`](https://elastic.co)-based implementation of `ModelSource` for the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module.  This source allows the `Model` module to read, write and query against `elasticsearch`. In development mode, the `ModelSource` will also modify the `elasticsearch` schema in real time to minimize impact to development.  
 
-All that is needed to use the `ModelSource` is to register it with the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) module.
+Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) module.
 
 **Code: Wiring up the Elasticsearch Model Source**
 ```typescript

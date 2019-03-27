@@ -276,6 +276,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
     const config = this.getOrCreatePending(pconfig.class!);
 
+    // Last one to register wins
     config.class = cls;
 
     if (pconfig.factory) {

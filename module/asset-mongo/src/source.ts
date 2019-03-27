@@ -1,8 +1,11 @@
 import * as mongo from 'mongodb';
 
 import { AssetSource, Asset } from '@travetto/asset';
+import { Injectable } from '@travetto/di';
+
 import { AssetMongoConfig } from './config';
 
+@Injectable()
 export class AssetMongoSource extends AssetSource {
 
   private mongoClient: mongo.MongoClient;

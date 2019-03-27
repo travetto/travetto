@@ -40,8 +40,8 @@ export class ImageService {
 
       const { process: proc, result: prom } = await this.converter.exec('convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-');
 
-      info.stream.pipe(proc.stdin);
-      proc.stdout.pipe(fs.createWriteStream(filePath));
+      info.stream.pipe(proc.stdin!);
+      proc.stdout!.pipe(fs.createWriteStream(filePath));
       await prom;
       return filePath;
     }
