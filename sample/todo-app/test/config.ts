@@ -6,7 +6,6 @@ export class TestConfig {
 
   @InjectableFactory()
   static testSource(config: ElasticsearchModelConfig): ModelSource {
-    config.namespace = `test-${Date.now()}`;
     return new ElasticsearchModelSource(config);
   }
 }

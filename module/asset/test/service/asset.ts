@@ -10,7 +10,7 @@ import { AssetService, ImageService, AssetUtil, AssetSource, Asset, AssetMetadat
 
 const fsStat = util.promisify(fs.stat);
 
-@Injectable({ target: AssetSource })
+@Injectable()
 class MockAssetSource extends AssetSource {
   streams = new Map<string, string>();
   files = new Map<string, Asset>();

@@ -1,10 +1,12 @@
 import * as aws from 'aws-sdk';
 import * as fs from 'fs';
-
-import { AssetSource, Asset, AssetMetadata } from '@travetto/asset';
-import { AssetS3Config } from './config';
 import { TagSet } from 'aws-sdk/clients/s3';
 import { Readable } from 'stream';
+
+import { AssetSource, Asset, AssetMetadata } from '@travetto/asset';
+import { Injectable } from '@travetto/di';
+
+import { AssetS3Config } from './config';
 
 function toTagSet(metadata: AssetMetadata): TagSet {
   return ['name', 'title', 'hash', 'createdDate', 'tags']
@@ -28,6 +30,7 @@ function fromTagSet(tags: TagSet) {
   return map;
 }
 
+@Injectable()
 export class AssetS3Source extends AssetSource {
 
   private client: aws.S3;
