@@ -10,3 +10,4 @@ bin/test/model/**
 **/*.lerna_backup
 **/.DS_STORE
 **/api-client/**
+sample/dummy/**

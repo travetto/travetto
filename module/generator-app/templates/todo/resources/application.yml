@@ -1,0 +1,9 @@
+# {{#modules.map.rest}}
+rest:
+  ssl:
+    active: true
+  context:
+    active: true
+  cors:
+    active: true
+# {{/modules.map.rest}}

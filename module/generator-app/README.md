@@ -26,12 +26,18 @@ The [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) provi
 
 The code will establish some basic routes, specifically, `GET /` as the root endpoint.  This will return the contents of your `package.json` as an identification operation.  
 
-### Optional Rest Features
+### Additional Rest Features
 In addition to the core functionality, the `rest` feature has some useful sub-features.  Specifically:
 
 [`Swagger`](https://github.com/travetto/travetto/tree/master/module/swagger) support for the restful api.  This will automatically expose a `swagger.json` endpoint, and provide the necessary plumbing to support client generation.
 
 [`Log`](https://github.com/travetto/travetto/tree/master/module/log) support for better formatting and colorized output.  This is generally useful for server logs, especially during development.
+
+## Authentication
+Authentication is also supported on the Restful endpoints by selecting [`Auth-Rest`](https://github.com/travetto/travetto/tree/master/module/auth-rest) during setup.  This will support basic authentication running out of local memory, with user [`Session`](https://github.com/travetto/travetto/tree/master/module/rest-session)s. 
+
+## Testing
+[`Test`](https://github.com/travetto/travetto/tree/master/module/test)ing can also be configured out of the box to provide simple test cases for the data model.  
 
 ## Data Modelling and Storage
 The [`Model`](https://github.com/travetto/travetto/tree/master/module/model) allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:

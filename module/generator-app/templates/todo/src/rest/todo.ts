@@ -36,7 +36,7 @@ export class TodoController {
     req.query.q = req.query.q || {};
     req.query.q.userId = req.auth.id;
     // {{/modules.map.auth-rest}}
-    return this.source.getAllByQuery(Todo, req.query.q);
+    return this.source.getAllByQuery(Todo, { where: req.query.q });
   }
 
   /**
