@@ -13,12 +13,13 @@ ROOT=`dirname $BIN`
 ACTION="$1"
 MODULE="$2"
 CURR=`pwd`
-SOURCE="$ROOT/module/$MODULE"
 
 if [[ -z "$MODULE" ]] && [[ "$ACTION" != 'add' ]] && [[ "$ACTION" != 'remove' ]]; then
   MODULE="$1"
   ACTION="add"
 fi
+
+SOURCE="$ROOT/module/$MODULE"
 
 if [ -z "$MODULE" ]; then
   echo 'Please specify which module you want to link'

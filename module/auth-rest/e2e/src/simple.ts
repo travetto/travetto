@@ -27,5 +27,6 @@ export class SampleAuth {
   @Authenticated()
   async logout(req: Request) {
     await req.logout();
+    return new Redirect('/auth/self', 301);
   }
 }
