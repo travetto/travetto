@@ -5,19 +5,11 @@ import { Env } from './bootstrap/env';
 
 export class Stacktrace {
 
-  private static registered = false;
-
-  private static FILTERS: string[] = [];
+  private static filters: string[] = [];
 
   private static filterRegex: RegExp = /./g;
 
   static initHandler() {
-
-    if (this.registered) {
-      return;
-    } else {
-      this.registered = true;
-    }
 
     Error.stackTraceLimit = 500;
 
@@ -69,8 +61,8 @@ export class Stacktrace {
   }
 
   static addStackFilters(...names: string[]) {
-    if (this.FILTERS) {
-      this.FILTERS.push(...names);
+    if (this.filters) {
+      this.filters.push(...names);
       this.filterRegex = new RegExp(`(${names.map(x => x.replace(/[().\[\]|?]/g, z => `\\${z}`)).join('|')})`);
     }
   }
