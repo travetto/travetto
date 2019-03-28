@@ -273,10 +273,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     dependency.qualifier = dependency.qualifier || DEFAULT_INSTANCE;
   }
 
+  /**  Last one to register wins */
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
     const config = this.getOrCreatePending(pconfig.class!);
 
-    // Last one to register wins
     config.class = cls;
 
     if (pconfig.factory) {
