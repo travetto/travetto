@@ -7,6 +7,8 @@ import { AssertCapture } from './capture';
 import { AssertUtil } from './util';
 import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types';
 
+const { AssertionError } = assert;
+
 export class AssertCheck {
   static check(filename: string, text: string, fn: string, positive: boolean, ...args: any[]) {
     const assertion = AssertCapture.buildAssertion(filename, text, ASSERT_FN_OPERATOR[fn]);
@@ -108,22 +110,22 @@ export class AssertCheck {
       const actual = `${err instanceof Error ? `'${err.message}'` : (err ? `'${err}'` : 'nothing')}`;
 
       if (typeof shouldThrow === 'string' && (!err || !(err instanceof Error ? err.message : err).includes(shouldThrow))) {
-        return new AppError(`Expected error containing text '${shouldThrow}', but got ${actual}`, 'data');
+        return new AssertionError({ message: `Expected error containing text '${shouldThrow}', but got ${actual}` });
       }
       if (shouldThrow instanceof RegExp && (!err || !shouldThrow.test(typeof err === 'string' ? err : err.message))) {
-        return new AppError(`Expected error with message matching '${shouldThrow.source}', but got ${actual} `, 'data');
+        return new AssertionError({ message: `Expected error with message matching '${shouldThrow.source}', but got ${actual} ` });
       }
     } else if (shouldThrow === Error ||
       shouldThrow === AppError ||
       Object.getPrototypeOf(shouldThrow) !== Object.getPrototypeOf(Function)
     ) { // if not simple function, treat as class
       if (!err || !(err instanceof shouldThrow)) {
-        return new AppError(`Expected to throw ${shouldThrow.name}, but got ${err || 'nothing'} `, 'notfound');
+        return new AssertionError({ message: `Expected to throw ${shouldThrow.name}, but got ${err || 'nothing'} ` });
       }
     } else {
       const res = shouldThrow(err);
       if (res && !(res instanceof Error)) {
-        return new Error(`Invalid check, "${shouldThrow.name}" should return an Error or undefined`);
+        return new AppError(`Invalid check, "${shouldThrow.name}" should return an Error or undefined`, 'data');
       } else {
         return res;
       }
@@ -138,11 +140,11 @@ export class AssertCheck {
     try {
       action();
       if (negative) {
-        throw (missed = new Error(`No error thrown, but expected ${shouldThrow || 'an error'} `));
+        throw (missed = new AppError(`No error thrown, but expected ${shouldThrow || 'an error'}`));
       }
     } catch (e) {
       if (!negative) {
-        missed = new Error(`Error thrown, but expected no errors`);
+        missed = new AppError(`Error thrown, but expected no errors`);
         missed.stack = e.stack;
       }
 
@@ -164,11 +166,11 @@ export class AssertCheck {
     try {
       await action();
       if (negative) {
-        throw (missed = new Error(`No error thrown, but expected ${shouldThrow || 'an error'} `));
+        throw (missed = new AppError(`No error thrown, but expected ${shouldThrow || 'an error'} `));
       }
     } catch (e) {
       if (!negative) {
-        missed = new Error(`Error thrown, but expected no errors`);
+        missed = new AppError(`Error thrown, but expected no errors`);
       }
 
       e = (missed && e) || this.checkError(shouldThrow, e);
