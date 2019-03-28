@@ -4,12 +4,11 @@ import { Suite, Test, BeforeAll, AfterEach } from '@travetto/test';
 import { ModelService, ModelRegistry, ModelSource } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
-import { <%= model.className %>ModelSource } from '@travetto/model-<%= model.packageName %>';
 
 import { Todo } from '../../src/model/todo';
 
-// Import with side effects
-import '../../src/model/config';
+// Import with side effects as test will not automatically scan all files due to performance
+require('../config');
 
 @Suite('Simple CRUD')
 class TestCRUD {
@@ -23,7 +22,7 @@ class TestCRUD {
 
   @AfterEach()
   async afterEach() {
-    const mms = (await DependencyRegistry.getInstance(ModelSource)) as <%= model.className %>ModelSource;
+    const mms = (await DependencyRegistry.getInstance(ModelSource)) as any;
     return await mms.resetDatabase();
   }
 

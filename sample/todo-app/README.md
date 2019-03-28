@@ -83,27 +83,6 @@ export class TodoSearch {
 ```
 as you can see, the model structure is simple.  Everything that uses the `Model` services needs to implement `ModelCore`.
 
-## Configuring the data source
-Next we need to prepare the `MongoModelSource` to be used at runtime.
-
-We need to create `src/config.ts`
-
-**Code: Configuration, src/config.ts**
-```typescript
-import { InjectableFactory } from '@travetto/di';
-import { MongoModelSource, MongoModelConfig } from '@travetto/model-mongo';
-import { ModelSource } from '@travetto/model';
-
-export class AppConfig {
-  @InjectableFactory()
-  static getDataSource(config: MongoModelConfig): ModelSource {
-    return new MongoModelSource(config);
-  }
-}
-```
-The `@InjectableFactory` allows you to create injection candidates.  Note that the `MongoModelSource` has the return type 
-specified as `ModelSource`.
-
 ## Building the service layer
 Next we establish the functionality for the service layer. The operations we need are:
 * Create a new todo
@@ -454,3 +433,27 @@ $ curl -XGET localhost:3000/todo -H 'Content-Type: application/json'
 ]
 
 ```
+
+## Appendix
+
+### Configuring the data source
+By default the data source is automatically configured to point to localhost at startup. These properties can be overridden in the application's configuration yaml files.  Alternatively, you can augment the configuration in code, to do so  we need to create a config source file, e.g. `src/config.ts`:
+
+**Code: Configuration, src/config.ts**
+```typescript
+import { InjectableFactory } from '@travetto/di';
+import { MongoModelSource, MongoModelConfig } from '@travetto/model-mongo';
+import { ModelSource } from '@travetto/model';
+
+export class AppConfig {
+  @InjectableFactory()
+  static getDataSource(config: MongoModelConfig): ModelSource {
+    return new MongoModelSource(config);
+  }
+}
+```
+
+The `@InjectableFactory` allows you to create injection candidates.  Note that the `MongoModelSource` has the return type 
+specified as `ModelSource`.
+
+At this point, the config, the model source and any other value can be modified programmatically.

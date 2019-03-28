@@ -3,7 +3,7 @@
 const path = require('path');
 
 const toUnix = (rest) => rest.replace(/[\\\/]+/g, '/');
-const cwd = toUnix(process.env.INIT_CWD || process.cwd()).replace(/[\/]+$/, '');
+const cwd = toUnix(process.cwd()).replace(/[\/]+$/, '');
 
 const FsUtil = {
   cwd,

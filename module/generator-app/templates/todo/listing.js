@@ -1,25 +1,28 @@
 module.exports = {
   'package.json': {},
   'README.md': {},
-  'src/model/config.ts': {
-    requires: ['model', 'model-'],
-  },
   'src/model/todo.ts': {
     requires: ['model'],
-  },
-  'test/model/todo.ts': {
-    requires: ['model', 'test'],
   },
   'src/rest/todo.ts': {
     requires: ['rest', 'model'],
   },
+  'src/rest/auth.ts': {
+    requires: ['rest', 'auth-rest'],
+  },
+  'src/rest/auth.config.ts': {
+    requires: ['rest', 'auth-rest'],
+  },
   'src/rest/primary.ts': {
     requires: ['rest'],
   },
-  'src/rest/config.ts': {
-    requires: ['rest', 'rest-'],
-  },
   'src/rest/app.ts': {
     requires: ['rest']
-  }
+  },
+  'test/config.ts': {
+    requires: ['model', 'test'],
+  },
+  'test/model/todo.ts': {
+    requires: ['model', 'test'],
+  },
 };

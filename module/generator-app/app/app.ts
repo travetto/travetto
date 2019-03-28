@@ -3,7 +3,7 @@ import * as Generator from 'yeoman-generator';
 import { FsUtil } from '@travetto/base';
 
 import { FEATURES, pkg } from './features';
-import { verifyDestination, meetsRequirement } from './util';
+import { verifyDestination, meetsRequirement, template } from './util';
 import { Context, getContext } from './context';
 
 export class TravettoGenerator extends Generator {
@@ -14,7 +14,17 @@ export class TravettoGenerator extends Generator {
     this.argument('name', { type: String, required: false });
   }
 
-  async init() {
+  async start() {
+    const context = await this._init();
+
+    await this._getModules(context);
+    await this._getModuleImpls(context);
+    await this._templateFiles(context);
+
+    await this.npmInstall();
+  }
+
+  async _init() {
     let name: string = (this.options as any).name;
 
     if (!name) {
@@ -38,14 +48,15 @@ export class TravettoGenerator extends Generator {
     }
 
     const context = getContext(name);
+
     context.template = (this.options as any).template;
 
-    this.sourceRoot(FsUtil.resolveUnix(__dirname, `../templates/${(this.options as any).template}`));
+    this.sourceRoot(FsUtil.resolveUnix(__dirname, `../templates/${context.template}`));
 
     return context;
   }
 
-  async getModules(context: Context) {
+  async _getModules(context: Context) {
 
     const { modules } = await this.prompt([
       {
@@ -56,23 +67,27 @@ export class TravettoGenerator extends Generator {
       }
     ]);
 
-    context.modules.push(...modules);
-    context.depList.push(...modules);
+    for (const mod of modules) {
+      context.modules.list.push(mod);
+      context.modules.map[mod.split('/').pop()] = 1;
+    }
 
+    context.dependencies.list.push(...modules);
   }
 
-  async getModuleImpls(context: Context) {
+  async _getModuleImpls(context: Context) {
     const implPrompts = [];
 
-    const modules = Object.keys(FEATURES) as (keyof typeof FEATURES)[];
+    const modules = Object.keys(FEATURES) as string[];
 
     for (const mod of modules) {
-      if (context.modules.includes(mod) && FEATURES[mod] && FEATURES[mod].sub) {
+      const feat = FEATURES[mod];
+      if (feat && context.modules.list.includes(mod) && 'sub' in feat) {
         implPrompts.push({
           type: 'list',
-          choices: FEATURES[mod].sub,
+          choices: feat.sub,
           name: mod,
-          default: FEATURES[mod].default,
+          default: feat.default,
           message: `Choose the ${mod} implementation: `
         });
       }
@@ -81,42 +96,36 @@ export class TravettoGenerator extends Generator {
     if (implPrompts.length) {
       const impls = await this.prompt(implPrompts);
       for (const mod of modules) {
-        context.depList.push(`${mod} -${impls[mod]} `);
-        if (FEATURES[mod].addons) {
-          context.depList.push(...FEATURES[mod].addons);
-        }
+        const feat = FEATURES[mod];
         const sub = impls[mod];
-        Object.assign(context, (FEATURES[mod].context as any)[sub] || pkg(mod, sub));
+        if (sub) {
+          const full = `${mod}-${sub}`;
+          context.dependencies.list.push(full);
+          context.modules.map[full] = '1';
+          context.modules.list.push(`@travetto/${full}`);
+          if ('addons' in feat) {
+            context.dependencies.list.push(...(feat.addons!));
+          }
+          if ('context' in feat) {
+            Object.assign(context, (feat.context as any)[sub] || pkg(mod, sub));
+          }
+        }
       }
     }
   }
 
-  async templateFiles(context: Context) {
+  async _templateFiles(context: Context) {
     const files = require(FsUtil.resolveUnix(this.sourceRoot(), 'listing.js')) as { [key: string]: { requires?: string[] } };
     for (const key of Object.keys(files)) {
       const conf = files[key];
-      if (conf.requires && !meetsRequirement(context.depList, conf.requires)) {
+      if (conf.requires && !meetsRequirement(context.dependencies.list, conf.requires)) {
         continue;
       }
-      this.fs.copyTpl(this.templatePath(`${key}.ejs`), this.destinationPath(key), context);
+      this.fs.write(this.destinationPath(key), await template(this.templatePath(key), context));
     }
 
     for (const f of ['tsconfig.json', 'tslint.json', '.gitignore']) {
-      this.fs.copyTpl(
-        FsUtil.resolveUnix(__dirname, `../templates/common/${f}.ejs`),
-        this.destinationPath(f.replace(/_/, '/')),
-        context
-      );
+      this.fs.write(this.destinationPath(f.replace(/_/, '/')), await template(FsUtil.resolveUnix(__dirname, `../${f}`), context));
     }
-  }
-
-  async start() {
-    const context = await this.init();
-
-    await this.getModules(context);
-    await this.getModuleImpls(context);
-    await this.templateFiles(context);
-
-    await this.npmInstall();
   }
 }

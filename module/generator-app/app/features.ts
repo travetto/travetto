@@ -1,14 +1,24 @@
-export const FEATURES = {
+export const FEATURES: {
+  [key: string]: {
+    addons?: string[];
+    sub: string[];
+    context?: { [key: string]: any };
+    default: string;
+  } | {
+    addons?: string[];
+  }
+} = {
   rest: {
     sub: ['express', 'koa', 'fastify'],
     addons: ['swagger', 'log'],
-    context: {},
     default: 'express'
+  },
+  test: {},
+  'auth-rest': {
+    addons: ['rest-session']
   },
   model: {
     sub: ['elasticsearch', 'mongo'],
-    addons: [],
-    context: {},
     default: 'mongo'
   },
 };

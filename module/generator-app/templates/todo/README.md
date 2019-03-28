@@ -1,4 +1,4 @@
-<%= name %> Todo App
+{{app.name}} Todo App
 ===
 
 To get application up and running, first checkout the code repository.

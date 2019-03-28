@@ -2,7 +2,6 @@
 
 The common environment variables throughout the code base:
 
-* `INIT_CWD` = cwd          - The current running directory
 * `TRV_FRAMEWORK_DEV` = 0|1 - If we are in development mode, 
 * `TRV_CACHE_DIR` = cwd     - The output directory for compilation, PID is a special value that generates a new folder based on the process id
 * `TRV_TEST_BASE`           - A variable that indicates the fully qualified path for the test module, used to bypass issues with symlinks
