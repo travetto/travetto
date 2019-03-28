@@ -118,10 +118,6 @@ export class SourceManager {
       this.cache.removeExpiredEntry(name, unlink);
     }
 
-    if (this.contents.has(name)) {
-      this.contents.delete(name);
-    }
-
     if (this.hashes.has(name)) {
       this.hashes.delete(name);
     }

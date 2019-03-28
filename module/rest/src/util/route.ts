@@ -4,7 +4,7 @@ import { MimeType } from './mime';
 import { HeaderMap, Request, Response, Filter, RouteConfig } from '../types';
 import { isRenderable } from '../response/renderable';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
-import { RestInterceptor } from '../interceptor/types';
+import { RestInterceptor } from '../interceptor/interceptor';
 
 export class RouteUtil {
 

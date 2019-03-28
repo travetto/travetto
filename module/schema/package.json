@@ -31,7 +31,8 @@
   "files": [
     "index.ts",
     "src",
-    "support"
+    "support",
+    "extension"
   ],
   "name": "@travetto/schema",
   "repository": {

@@ -61,11 +61,11 @@ function compileTypescript(m, tsf) {
 }
 
 function frameworkModuleHandler(request, parent) {
-  const root = path.dirname(parent.filename);
-  const resolved = path.resolve(root, request);
+  // @ts-ignore
+  const resolved = Module._resolveFilename(request, parent);
 
   if (/^[.\/]/.test(request) || request.startsWith('@travetto')) { // If relative or framework
-    request = FsUtil.resolveFrameworkDevFile(request.startsWith('@travetto') ? request : resolved);
+    request = FsUtil.resolveFrameworkDevFile(resolved);
   }
 
   return moduleLoaderHandler(request, parent);

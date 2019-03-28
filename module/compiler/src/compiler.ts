@@ -91,8 +91,8 @@ class $Compiler {
       return res;
     } catch (e) {
       const file = tsf.replace(`${Env.cwd}/`, '');
-      if (tsf.endsWith('.ext.ts')) {
-        console.debug(`Omitting extension ${file}: ${e.message.split(' from ')[0]}`);
+      if (tsf.includes('/extension/')) {
+        console.debug(`Ignoring load for ${file}:`, e.message.split(' from ')[0]);
       } else if (Env.watch) {
         console.error(`Stubbing out with error proxy due to error in compiling ${file}: `, e.message);
         return this.moduleManager.compile(m, jsf, CompilerUtil.getErrorModuleProxySource(e.message));

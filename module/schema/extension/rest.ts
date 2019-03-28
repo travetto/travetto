@@ -2,7 +2,7 @@ import { ControllerRegistry, ParamConfig, Filter, EndpointDecorator, Request } f
 import { Util, AppError } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
-import { SchemaRegistry, BindUtil, SchemaValidator } from '../..';
+import { SchemaRegistry, BindUtil, SchemaValidator } from '..';
 
 function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {

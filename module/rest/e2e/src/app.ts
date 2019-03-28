@@ -1,5 +1,5 @@
 import { Application, InjectableFactory, Inject } from '@travetto/di';
-import { ContextInterceptor } from '@travetto/context/src/extension/rest.ext';
+import { ContextInterceptor } from '@travetto/context/extension/rest';
 
 import { RouteConfig, RestApp, RestInterceptor, RestAppCustomizer } from '../..';
 

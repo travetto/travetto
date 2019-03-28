@@ -5,7 +5,8 @@ import { Class, ChangeEvent } from '@travetto/registry';
 import { RouteConfig, Request } from './types';
 import { RestConfig } from './config';
 import { RouteUtil } from './util/route';
-import { RestInterceptor, RestInterceptorGroup } from './interceptor/types';
+import { RestInterceptorGroup } from './interceptor/group';
+import { RestInterceptor } from './interceptor/interceptor';
 import { ControllerRegistry } from './registry/registry';
 import { RestAppCustomizer } from './customizer';
 
