@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { dirname, } from 'path';
 
-import { AppInfo, FsUtil, Util } from '@travetto/base';
+import { Env, AppInfo, FsUtil, Util } from '@travetto/base';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
@@ -60,24 +60,34 @@ export class TransformUtil {
   }
 
   static addImport(file: ts.SourceFile, imports: Import[]) {
-    const importStmts = imports
-      .map(({ path, ident }) => {
-        const imptStmt = ts.createImportDeclaration(
-          undefined, undefined,
-          ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
-          ts.createLiteral(require.resolve(path))
-        );
-        return imptStmt;
-      });
+    try {
+      const importStmts = imports
+        .map(({ path, ident }) => {
+          const imptStmt = ts.createImportDeclaration(
+            undefined, undefined,
+            ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
+            ts.createLiteral(require.resolve(path))
+          );
+          return imptStmt;
+        });
 
-    const out = ts.updateSourceFileNode(file, ts.createNodeArray([
-      ...importStmts,
-      ...file.statements
-    ]),
-      file.isDeclarationFile, file.referencedFiles,
-      file.typeReferenceDirectives, file.hasNoDefaultLib);
+      const out = ts.updateSourceFileNode(file, ts.createNodeArray([
+        ...importStmts,
+        ...file.statements
+      ]),
+        file.isDeclarationFile, file.referencedFiles,
+        file.typeReferenceDirectives, file.hasNoDefaultLib);
 
-    return out;
+      return out;
+    } catch (err) { // Missing import
+      if (file.fileName.includes('/extension/')) {
+        return file;
+      } else {
+        const out = new Error(`${err.message} in ${file.fileName.replace(`${Env.cwd}/`, '')}`);
+        out.stack = err.stack;
+        throw out;
+      }
+    }
   }
 
   static fromLiteral<T extends ts.Node>(val: T): T;
