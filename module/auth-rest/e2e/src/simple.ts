@@ -1,18 +1,14 @@
-import { Inject } from '@travetto/di';
 import { Controller, Get, Redirect, Request } from '@travetto/rest';
 
-import { Authenticate, Authenticated, AuthService } from '../..';
+import { Authenticate, Authenticated } from '../..';
 import { SIMPLE_AUTH } from './conf';
 
 @Controller('/auth')
 export class SampleAuth {
 
-  @Inject()
-  private state: AuthService;
-
   @Get('/name')
   async getName() {
-    return { name: 'bob' };
+    return { name: 'bobs' };
   }
 
   @Get('/simple')

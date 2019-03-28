@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@travetto/di';
 
 import { Request, Response, RouteConfig } from '../types';
-import { RestInterceptor } from './types';
+import { RestInterceptor } from './interceptor';
 import { RestConfig } from '../config';
 
 @Injectable()

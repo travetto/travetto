@@ -20,21 +20,21 @@ export class SessionAuthContextEncoder extends AuthContextEncoder {
 
   async postConstruct() {
     try {
-      await import('@travetto/rest-session');
+      require('@travetto/rest-session');
     } catch (e) {
       console.error('To use session based auth contexts, @travetto/rest-session must be installed');
     }
   }
 
   read(req: Request) {
-    return toCtx(req.session[this.key]);
+    return toCtx((req as any).session[this.key]);
   }
 
   write(req: Request, res: Response) {
     if (req.auth && req.auth.principal) {
-      req.session[this.key] = req.auth;
+      (req as any).session[this.key] = req.auth;
     } else {
-      req.session = undefined; // Kill session
+      (req as any).session = undefined; // Kill session
     }
   }
 }

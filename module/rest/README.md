@@ -141,7 +141,7 @@ The module provides standard structure for rendering content on the response.  T
 Additionally, there is support for typing requests and request bodies.  This can be utilized by other modules to handle special types of requests.
  
 ## Interceptors
-[`Interceptor`](./src/interceptor/types.ts)s are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+[`Interceptor`](./src/interceptor/interceptor.ts)s are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
 **Code: A Simple Timing Interceptor**
 ```typescript

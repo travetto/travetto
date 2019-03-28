@@ -1,16 +1,12 @@
 import { AuthContext } from '@travetto/auth';
 import { RestInterceptor, Request, Response } from '@travetto/rest';
-import { SessionInterceptor } from '@travetto/rest-session';
 import { Injectable, Inject } from '@travetto/di';
-import { ContextInterceptor } from '@travetto/context/src/extension/rest.ext';
 
 import { AuthService } from './service';
 import { AuthContextEncoder, SessionAuthContextEncoder } from './encoder';
 
 @Injectable()
 export class AuthInterceptor extends RestInterceptor {
-
-  after = [ContextInterceptor, SessionInterceptor];
 
   @Inject()
   service: AuthService;

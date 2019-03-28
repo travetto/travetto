@@ -1,8 +1,7 @@
 import { AuthContext } from '@travetto/auth';
 import { AuthContextStore } from '@travetto/auth-rest';
 
-import { sign } from '../sign';
-import { verify } from '../verify';
+import { sign, verify } from '..';
 
 export class JWTAuthContextStore extends AuthContextStore {
 

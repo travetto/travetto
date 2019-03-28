@@ -1,8 +1,7 @@
 import { Injectable, Inject } from '@travetto/di';
 import { ModelService, Model } from '@travetto/model';
 
-import { SessionStore } from '../store/store';
-import { Session } from '../types';
+import { Session, SessionStore } from '..';
 
 @Model()
 export class SessionModel extends Session {

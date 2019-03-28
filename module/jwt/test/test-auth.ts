@@ -1,6 +1,6 @@
 import { Test, Suite } from '@travetto/test';
 
-import { JWTAuthContextStore } from '../src/extension/auth-rest.store.ext';
+import { JWTAuthContextStore } from '../extension/auth-rest.store';
 
 @Suite()
 class DummySuite {

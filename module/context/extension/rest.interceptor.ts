@@ -2,7 +2,7 @@ import { GetCacheInterceptor, RestInterceptor, Request, Response, RouteConfig } 
 import { Injectable, Inject } from '@travetto/di';
 import { ConfigSource } from '@travetto/config';
 
-import { Context } from '../service';
+import { Context } from '..';
 
 @Injectable()
 export class ContextInterceptor extends RestInterceptor {
