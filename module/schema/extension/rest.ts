@@ -6,7 +6,8 @@ import { SchemaRegistry, BindUtil, SchemaValidator } from '..';
 
 function getBound<T>(cls: Class<T>, obj: any, view?: string) {
   try {
-    return BindUtil.bindSchema(cls, obj, view);
+    const resolved = SchemaRegistry.get(cls).class; // Get actual class separate from decorator value
+    return BindUtil.bindSchema(resolved, obj, view);
   } catch (e) {
     throw new AppError(`Supplied data is incompatible with ${cls.__id}: ${e.message}`);
   }

@@ -4,8 +4,8 @@ import { Model, ModelCore } from '@travetto/model';
 export class Todo implements ModelCore {
   id?: string;
   text: string;
-  completed: boolean;
+  completed?: boolean;
   // {{#modules.map.auth-rest}}
-  userId: string;
+  userId?: string;
   // {{/modules.map.auth-rest}}
 }

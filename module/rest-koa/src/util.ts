@@ -9,13 +9,13 @@ export class KoaAppUtil {
     if (!(ctx as any)[TRV_REQ]) {
       (ctx as any)[TRV_REQ] = RestAppUtil.decorateRequest({
         __raw: ctx,
-        method: ctx.method,
-        path: ctx.path,
-        query: ctx.query,
+        method: ctx.request.method,
+        path: ctx.request.path,
+        query: ctx.request.query,
         params: ctx.params,
-        body: ctx.body,
+        body: ctx.request.body,
         session: ctx.session,
-        headers: ctx.headers,
+        headers: ctx.request.headers,
         cookies: ctx.cookies,
         files: {},
         auth: undefined as any,
@@ -53,9 +53,9 @@ export class KoaAppUtil {
             ctx.res.end(); // Only end on redirect
           }
         },
-        setHeader: ctx.set.bind(ctx),
+        setHeader: ctx.response.set.bind(ctx),
         getHeader: ctx.response.get.bind(ctx),
-        removeHeader: ctx.remove.bind(ctx),
+        removeHeader: ctx.response.remove.bind(ctx),
         write: ctx.res.write.bind(ctx.res),
         cookies: ctx.cookies,
       });

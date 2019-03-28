@@ -12,7 +12,7 @@ export class ApiController {
   @Post('/login')
   @Authenticate(BASIC)
   async getAll() {
-
+    return new Redirect('/auth/self', 301);
   }
 
   @Get('/self')

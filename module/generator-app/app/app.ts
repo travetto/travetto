@@ -41,7 +41,9 @@ export class TravettoGenerator extends Generator {
     this.destinationRoot(FsUtil.resolveUnix(process.env.FINAL_CWD!, name));
 
     try {
-      verifyDestination(this.destinationPath('package.json'));
+      if (!process.env.NO_VERIFY) {
+        verifyDestination(this.destinationPath('package.json'));
+      }
     } catch (err) {
       console.error(err);
       process.exit(1);
@@ -103,12 +105,12 @@ export class TravettoGenerator extends Generator {
           context.dependencies.list.push(full);
           context.modules.map[full] = '1';
           context.modules.list.push(`@travetto/${full}`);
-          if ('addons' in feat) {
-            context.dependencies.list.push(...(feat.addons!));
-          }
           if ('context' in feat) {
             Object.assign(context, (feat.context as any)[sub] || pkg(mod, sub));
           }
+        }
+        if ('addons' in feat) {
+          context.dependencies.list.push(...(feat.addons!));
         }
       }
     }

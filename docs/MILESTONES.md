@@ -125,3 +125,4 @@ Release 0.6.x: ???
 * Base logging upgrade, and ability to filter logging by package, folder etc.
 * Reworked config/compiler, handling unloading properly now
 * Session support at the framework level
+* Reworked yeoman generator to use mustache and add auth support

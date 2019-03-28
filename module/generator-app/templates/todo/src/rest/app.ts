@@ -1,7 +1,6 @@
-import { Application } from '@travetto/di';
-import { RestApp } from '@travetto/rest';
+import { Application, RestApp } from '@travetto/rest';
 
-@Application('{{app_name}}')
+@Application('{{app.name}}')
 export class SampleApp {
 
   constructor(private app: RestApp) { }

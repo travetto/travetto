@@ -16,8 +16,8 @@ export class SSLUtil {
       '-days', '3650',
       '-nodes',
       '-x509',
-      '-keyout', '-',
-      '-out', '-',
+      '-keyout', '/dev/stdout',
+      '-out', '/dev/stdout',
       '-subj', subj
     );
 

@@ -46,5 +46,5 @@ export function meetsRequirement(modules: string[], desired: string[]) {
 
 export async function template(file: string, context: any) {
   const contents = await fsRead(file, 'utf-8');
-  return mustache.render(contents, context).replace(/^\s*\/\/\s*\n/gsm, '');
+  return mustache.render(contents, context).replace(/^\s*(\/\/|#)\s*\n/gsm, '');
 }
