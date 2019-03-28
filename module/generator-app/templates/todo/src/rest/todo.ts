@@ -1,3 +1,4 @@
+import { AppError } from '@travetto/base';
 import { Controller, Get, Put, Post, Delete, Request, TypedBody } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 import { ModelService, ModelQuery } from '@travetto/model';
@@ -84,6 +85,8 @@ export class TodoController {
     // {{#modules.map.auth-rest}}
     q.where!.userId = req.auth.id;
     // {{/modules.map.auth-rest}}
-    await this.source.deleteByQuery(Todo, q);
+    if (await this.source.deleteByQuery(Todo, q) !== 1) {
+      throw new AppError('Not found by id', 'notfound');
+    }
   }
 }
