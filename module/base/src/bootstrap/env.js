@@ -23,8 +23,8 @@ function checkWatch() {
 }
 
 function buildLogging(prof) {
-  const debug = !isEnvFalse('debug') && (isEnvTrue('debug') || /,(@trv:)?[*],/.test(`,${envVal('debug', prof.dev ? '*' : '')},`));
-  const trace = !isEnvFalse('trace') && (isEnvTrue('trace') || /,(@trv:)?[*],/.test(`,${envVal('trace', '')},`));
+  const debug = !isEnvFalse('debug') && (isEnvTrue('debug') || /,(@trv:)?[*],/.test(`,${envVal('debug', prof.dev ? '*' : '')},`) || !!envVal('debug'));
+  const trace = !isEnvFalse('trace') && (isEnvTrue('trace') || /,(@trv:)?[*],/.test(`,${envVal('trace', '')},`) || !!envVal('trace'));
   const quietInit = isEnvTrue('quiet_init');
 
   const cl = console.log.bind(console);

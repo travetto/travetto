@@ -81,6 +81,7 @@ export class CompilerClassSource implements ChangeSource<Class> {
         return Compiler.presenceManager.validFile(f)
           && (rootsRe.test(f) || f.startsWith('extension/') || (
             /^node_modules\/@travetto\/[^\/]+\/(src|extension)\/.*/.test(f)
+            && !f.includes('node_modules/@travetto/test') // Exclude test code by default
             && !f.startsWith(`node_modules/${AppInfo.NAME}/`)
           )); // No more side effect code, load all files
       }

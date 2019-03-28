@@ -7,6 +7,7 @@ import { stylize, LEVEL_STYLES } from './styles';
 
 export interface LineFormatterOpts {
   timestamp?: boolean;
+  time_millis?: boolean;
   colorize?: boolean;
   align?: boolean;
   level?: boolean;
@@ -21,7 +22,7 @@ export function lineFormatter(opts: LineFormatterOpts) {
 
     if (opts.timestamp) {
       let timestamp = new Date(ev.timestamp).toISOString();
-      if (!Env.trace) {
+      if (!opts.time_millis) {
         timestamp = timestamp.split('.')[0];
       }
       if (opts.colorize) {

@@ -1,12 +1,12 @@
-import { Application, InjectableFactory, Inject } from '@travetto/di';
-import { ContextInterceptor } from '@travetto/context/extension/rest';
+import { InjectableFactory, Injectable } from '@travetto/di';
 
-import { RouteConfig, RestApp, RestInterceptor, RestAppCustomizer } from '../..';
+import { Application, RouteConfig, RestApp, RestInterceptor, RestAppCustomizer } from '../..';
 
 type Inner = {
   use(factory: any): void;
 };
 
+@Injectable()
 class DummyApp extends RestApp<Inner> {
   raw: any = {};
 
@@ -39,11 +39,6 @@ class DummyApp extends RestApp<Inner> {
 export class SampleApp {
 
   @InjectableFactory()
-  static getProvider(): RestApp<Inner> {
-    return new DummyApp();
-  }
-
-  @InjectableFactory()
   static getCustomer(): RestAppCustomizer<Inner> {
     return new class extends RestAppCustomizer<Inner> {
       customize(app: Inner) {
@@ -52,9 +47,6 @@ export class SampleApp {
       }
     }();
   }
-
-  @Inject()
-  contextInterceptor: ContextInterceptor;
 
   constructor(private app: RestApp) { }
 

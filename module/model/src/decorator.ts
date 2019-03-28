@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
-import { ModelRegistry } from './registry';
 import { SchemaRegistry } from '@travetto/schema';
 
+import { ModelRegistry } from './registry';
 import { ModelOptions, IndexConfig } from './types';
 
 export function Model(conf: Partial<ModelOptions<any>> = {}) {

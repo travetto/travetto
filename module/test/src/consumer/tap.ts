@@ -100,7 +100,7 @@ export class TapEmitter implements Consumer {
       }
     }
 
-    const allSuccess = summary.success === summary.total;
+    const allSuccess = summary.fail === 0;
 
     this.log([
       this.enhancer[allSuccess ? 'success' : 'failure']('Results'),

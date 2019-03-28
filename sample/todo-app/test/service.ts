@@ -8,7 +8,8 @@ import { ElasticsearchModelSource } from '@travetto/model-elasticsearch';
 import { RootRegistry } from '@travetto/registry';
 
 import { Todo } from '../src/model';
-import './config';
+
+require('./config');
 
 @Suite()
 export class TodoTest {
