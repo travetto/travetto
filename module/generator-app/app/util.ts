@@ -1,6 +1,10 @@
 import * as fs from 'fs';
 import * as cp from 'child_process';
 import * as path from 'path';
+import * as mustache from 'mustache';
+import * as util from 'util';
+
+const fsRead = util.promisify(fs.readFile);
 
 export const run = (x: string, cwd = process.cwd()) => {
   const res = cp.execSync(x, { env: process.env, cwd });
@@ -38,4 +42,9 @@ export function meetsRequirement(modules: string[], desired: string[]) {
     }
   }
   return valid;
+}
+
+export async function template(file: string, context: any) {
+  const contents = await fsRead(file, 'utf-8');
+  return mustache.render(contents, context).replace(/^\s*\/\/\s*\n/gsm, '');
 }

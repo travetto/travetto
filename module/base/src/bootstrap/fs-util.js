@@ -14,7 +14,7 @@ const resolveUnix = (...rest) => toUnix(path.resolve(...rest));
 const resolveNative = (...rest) => toNative(path.resolve(...rest));
 const joinUnix = (...rest) => toUnix(path.join(...rest));
 
-const cwd = toUnix(process.env.INIT_CWD || process.cwd()).replace(/[\/]+$/, '');
+const cwd = toUnix(process.cwd()).replace(/[\/]+$/, '');
 let defCache = joinUnix(os.tmpdir(), cwd.replace(/[\/:]/g, '_'));
 
 const pkgName = require(joinUnix(cwd, 'package.json')).name;

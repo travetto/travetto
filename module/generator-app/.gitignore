@@ -1,7 +1,4 @@
-module/*/node_modules/**
-build/**
-rpm_build/**
-.vscode/
-module/*/npm-debug.log
-module/*/package-lock.json
-node_modules/**
+**/.vscode/
+**/npm-debug.log
+**/package-lock.json
+**/node_modules/**

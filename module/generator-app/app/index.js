@@ -1,7 +1,6 @@
-const { FsUtil } = require('@travetto/base/src/bootstrap/fs-util');
-process.env.INIT_CWD = FsUtil.toUnix(process.cwd());
-process.chdir(FsUtil.resolveUnix(__dirname, '..'));
-
-process.env.DEBUG = '0';
+process.env.FINAL_CWD = process.cwd();
+process.chdir(`${__dirname}/..`);
+process.env.QUIET_INIT = '1';
+process.env.ENV = 'prod';
 require('@travetto/base/bin/bootstrap');
 module.exports = require('./app.ts').TravettoGenerator;

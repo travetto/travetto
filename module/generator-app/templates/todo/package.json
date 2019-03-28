@@ -1,0 +1,30 @@
+{
+  "author": {
+    "email": "{{author.email}}",
+    "name": "{{author.name}}"
+  },
+  "dependencies": {
+    // {{#dependencies.list}}
+    "@travetto/{{.}}": "^{{dependencies.version}}",
+    // {{/dependencies.list}}
+    "@travetto/test": "^{{dependencies.version}}"
+  },
+  "description": "A travetto based project",
+  "keywords": [
+    // {{#modules.mapKeys}}
+    "{{.}}",
+    // {{/modules.mapKeys}}
+    "travetto"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "start": "npx travetto run {{app.name}}",
+    "test": "npx travetto test"
+  },
+  "files": [
+    "src",
+    "resources"
+  ],
+  "name": "{{app.name}}",
+  "version": "1.0.0"
+}
