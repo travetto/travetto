@@ -15,6 +15,11 @@ MODULE="$2"
 CURR=`pwd`
 SOURCE="$ROOT/module/$MODULE"
 
+if [[ -z "$MODULE" ]] && [[ "$ACTION" != 'add' ]] && [[ "$ACTION" != 'remove' ]]; then
+  MODULE="$1"
+  ACTION="add"
+fi
+
 if [ -z "$MODULE" ]; then
   echo 'Please specify which module you want to link'
   exit 1
@@ -27,7 +32,7 @@ while [ ! -f "${CURR}/package.json" ] && [[ "$CURR" =~ "travetto/module" ]]; do
   CURR=`dirname $CURR`
 done
 
-BASE="${CURR//"${ROOT}/module/"}"
+BASE="${CURR//${ROOT}\/module\/}"
 
 TARGET="$CURR/node_modules/@travetto/$MODULE"
 
