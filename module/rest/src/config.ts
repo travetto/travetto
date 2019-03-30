@@ -13,11 +13,12 @@ export class RestConfig {
   disableGetCache = true;
   trustProxy = false;
 
-  cookieKeys: ['default-insecure'];
-  cookie: cookies.SetOption & { signed: boolean } = {
+  cookie: cookies.SetOption & { active: boolean, signed: boolean, keys: string[] } = {
+    active: true,
     signed: true,
     httpOnly: true,
     sameSite: 'lax',
+    keys: ['default-insecure']
   };
 
   ssl: {

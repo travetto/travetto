@@ -10,6 +10,7 @@ export class Simple {
   @Get('/name')
   async doIt(req: Request, res: Response): Promise<string> {
     const user = await this.service.fetch();
+    res.cookies.set('Fun', 'Value');
     return `/simple/name => ${user.first.toLowerCase()}`;
   }
 
