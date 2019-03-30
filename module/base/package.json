@@ -14,7 +14,7 @@
     "@types/node": "^11.10.5",
     "trace": "^3.1.1",
     "tslib": "^1.9.3",
-    "typescript": "^3.3.3333"
+    "typescript": "^3.4.1"
   },
   "description": "Bootstrapping, application phase management, environment config and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
