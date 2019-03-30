@@ -1,10 +1,12 @@
 import { Injectable, Inject } from '@travetto/di';
-import { RestInterceptor, Request, Response } from '@travetto/rest';
+import { CookiesInterceptor, RestInterceptor, Request, Response } from '@travetto/rest';
 
 import { RestSessionService } from './service';
 
 @Injectable()
 export class SessionInterceptor extends RestInterceptor {
+
+  after = CookiesInterceptor;
 
   @Inject()
   service: RestSessionService;

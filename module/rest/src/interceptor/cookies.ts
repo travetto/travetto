@@ -28,6 +28,9 @@ export class CookiesInterceptor extends RestInterceptor {
       return set.call(this, key, value, { ...self, ...opts });
     };
     cookies.prototype.get = function (key: string, opts: any = {}) {
+      if (key.endsWith('.sig')) {
+        opts.secure = false;
+      }
       return get.call(this, key, { ...self, ...opts });
     };
   }

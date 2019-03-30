@@ -17,6 +17,7 @@ export * from './src/response/renderable';
 export * from './src/response/string';
 export * from './src/interceptor/all';
 export * from './src/interceptor/cors';
+export * from './src/interceptor/cookies';
 export * from './src/interceptor/get-cache';
 export * from './src/interceptor/group';
 export * from './src/interceptor/interceptor';

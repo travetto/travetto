@@ -1,5 +1,3 @@
-import * as cookies from 'cookies';
-
 import { Config } from '@travetto/config';
 
 @Config('rest.session')
