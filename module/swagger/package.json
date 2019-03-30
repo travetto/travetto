@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@travetto/exec": "^0.6.0-rc.4",
-    "@travetto/rest": "^0.6.0-rc.5",
+    "@travetto/rest": "^0.6.0-rc.6",
     "@travetto/schema": "^0.6.0-rc.4"
   },
   "description": "Swagger integration support for the travetto framework",
@@ -36,5 +36,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.4"
+  "version": "0.6.0-rc.5"
 }
