@@ -1,7 +1,8 @@
 import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
-import { Env, ScanApp, AppInfo, FsUtil } from '@travetto/base';
+import { AppInfo, FsUtil } from '@travetto/boot';
+import { ScanApp } from '@travetto/base';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';

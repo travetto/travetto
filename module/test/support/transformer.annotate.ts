@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { TransformUtil } from '@travetto/compiler';
-import { FsUtil } from '@travetto/base';
+import { FsUtil } from '@travetto/boot';
 
 const TEST_IMPORT = '@travetto/test';
 

@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 
-import { Env, FsUtil, ScanApp, AppCache } from '@travetto/base';
+import { Env, FsUtil, AppCache } from '@travetto/boot';
+import { ScanApp } from '@travetto/base';
 
 import { TransformerManager } from './transformers';
 import { SourceManager } from './source';

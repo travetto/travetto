@@ -1,4 +1,4 @@
-import { Env } from './bootstrap/env';
+import { Env } from '@travetto/boot';
 
 const px = process.exit;
 

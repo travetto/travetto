@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/boot';
 
 import { Consumer } from '../model/consumer';
 import { SuiteConfig, SuiteResult } from '../model/suite';

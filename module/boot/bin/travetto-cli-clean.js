@@ -5,7 +5,7 @@ function init() {
   return Util.program.command('clean')
     .option('-q, --quiet', 'Quiet operation')
     .action(cmd => {
-      const { AppCache } = require('../src/bootstrap/cache');
+      const { AppCache } = require('../src/cache');
       try {
         require('./lib').clean();
         if (!cmd.quiet) {

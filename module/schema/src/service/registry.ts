@@ -1,5 +1,5 @@
 import { MetadataRegistry, RootRegistry, Class, ChangeEvent } from '@travetto/registry';
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/boot';
 import { ClassList, FieldConfig, ClassConfig, ALL_VIEW, SchemaConfig, ViewFieldsConfig } from './types';
 import {
   SchemaChangeListener,

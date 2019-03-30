@@ -1,9 +1,9 @@
 // @ts-check
-const path = require('path');
 const Module = require('module');
 const { FsUtil } = require('./fs-util');
-const { Env, } = require('./env');
+const { Env } = require('./env');
 const { AppCache } = require('./cache');
+
 const cwd = Env.cwd;
 
 // @ts-ignore

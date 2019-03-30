@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { AppCache, ResourceManager, Env, FsUtil } from '@travetto/base';
+import { Env, AppCache, FsUtil } from '@travetto/boot';
+import { ResourceManager } from '@travetto/base';
 import { Injectable, Inject } from '@travetto/di';
 import { MailTemplateEngine, MailTemplateContext } from '@travetto/email';
 

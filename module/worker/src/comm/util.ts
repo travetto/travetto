@@ -1,5 +1,5 @@
 import { Exec } from '@travetto/exec';
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/boot';
 
 import { SpawnConfig, ChildOptions } from './types';
 import { ChildProcess } from 'child_process';

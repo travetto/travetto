@@ -1,6 +1,6 @@
 import { ChildProcess } from 'child_process';
 
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/boot';
 
 import { CommEvent } from './types';
 

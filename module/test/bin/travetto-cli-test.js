@@ -16,7 +16,7 @@ function init() {
 
       prepareEnv();
 
-      require('@travetto/base/bin/bootstrap');
+      require('@travetto/base/bin/start');
 
       if (cmd.format === 'tap' && Util.HAS_COLOR) {
         const { TapEmitter } = require('../src/consumer/tap');
@@ -52,7 +52,7 @@ function init() {
 }
 
 function complete(c) {
-  const formats = ['tap', 'json', 'event']
+  const formats = ['tap', 'json', 'event'];
   const modes = ['single', 'all'];
   c.all.push('test');
   c.test = {

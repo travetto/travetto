@@ -1,6 +1,7 @@
 /// <reference types="node" />
 
-import { Env, AppError } from '@travetto/base';
+import { Env } from '@travetto/boot';
+import { AppError } from '@travetto/base';
 
 import { RetargettingHandler } from './proxy';
 import { CompilerUtil } from './util';

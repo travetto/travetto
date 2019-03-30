@@ -5,7 +5,7 @@ const fs = require('fs');
 const writeFile = (f, c) => fs.writeFileSync(f, c, 'utf-8');
 
 const { Util } = require('@travetto/cli/src/util');
-const { FsUtil } = require('@travetto/base/src/bootstrap/fs-util');
+const { FsUtil } = require('@travetto/boot/src/fs-util');
 
 function init() {
   return Util.program
@@ -19,7 +19,7 @@ function init() {
 
       FsUtil.mkdirp(path.dirname(cmd.output));
 
-      await require('@travetto/base/bin/bootstrap').run();
+      await require('@travetto/base/bin/start').run();
       const { ControllerRegistry } = require('@travetto/rest');
 
       await ControllerRegistry.init();

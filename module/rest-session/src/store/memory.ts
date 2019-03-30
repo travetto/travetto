@@ -1,4 +1,5 @@
-import { Env, AppError } from '@travetto/base';
+import { Env } from '@travetto/boot';
+import { AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { Session } from '../types';

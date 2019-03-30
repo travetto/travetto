@@ -3,7 +3,7 @@ import * as util from 'util';
 
 import { DockerContainer } from '@travetto/exec';
 import { Injectable } from '@travetto/di';
-import { Env, FsUtil } from '@travetto/base';
+import { Env, FsUtil } from '@travetto/boot';
 import { ControllerRegistry } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 

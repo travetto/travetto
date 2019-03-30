@@ -3,7 +3,7 @@ export const init = {
   action: async () => {
     const { ConfigSource } = await import('@travetto/config');
     const { ExecUtil, DockerContainer } = await import('@travetto/exec');
-    const { Env } = await import('@travetto/base');
+    const { Env } = await import('@travetto/boot');
 
     const defPort = Env.getInt('MODEL_MONGO_PORT', 27017);
 

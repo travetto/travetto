@@ -1,4 +1,5 @@
-import { FileCache, PhaseManager, Env, Shutdown, FsUtil } from '@travetto/base';
+import { Env, FileCache, FsUtil } from '@travetto/boot';
+import { PhaseManager, Shutdown } from '@travetto/base';
 import { CommUtil, ChildCommChannel } from '@travetto/worker';
 import { Events } from './types';
 

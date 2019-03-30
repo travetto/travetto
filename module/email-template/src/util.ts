@@ -2,7 +2,7 @@ import * as Mustache from 'mustache';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { FsUtil } from '@travetto/base';
+import { FsUtil } from '@travetto/boot';
 import { CommandService } from '@travetto/exec';
 
 export class TemplateUtil {
@@ -41,8 +41,8 @@ export class TemplateUtil {
 
   static async optimizeImage(file: string, out: string) {
     const { process: proc, result: prom } = await this.converter.exec('pngquant', '--quality', '40-80', '--speed', '1', '--force', '-');
-    fs.createReadStream(file).pipe(proc.stdin);
-    proc.stdout.pipe(fs.createWriteStream(out));
+    fs.createReadStream(file).pipe(proc.stdin!);
+    proc.stdout!.pipe(fs.createWriteStream(out));
     await prom;
   }
 

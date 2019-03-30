@@ -1,0 +1,44 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Bootstrapping and environment information for travetto applications.",
+  "homepage": "https://travetto.io",
+  "dependencies": {
+    "@types/node": "^11.10.5",
+    "trace": "^3.1.1",
+    "tslib": "^1.9.3",
+    "typescript": "^3.4.1"
+  },
+  "bin": {
+    "travetto-cli-clean": "bin/travetto-cli-clean.js"
+  },
+  "scripts": {
+    "postinstall": "node ./bin/travetto-cli-clean.js"
+  },
+  "keywords": [
+    "environment",
+    "caching",
+    "filesystem-traversal",
+    "travetto"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src",
+    "tsconfig.json"
+  ],
+  "name": "@travetto/boot",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "version": "0.6.0-rc.5"
+}

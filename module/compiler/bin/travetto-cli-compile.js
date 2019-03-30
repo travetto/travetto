@@ -2,7 +2,7 @@
 
 async function rewriteRuntimeDir(runtimeDir) {
   const fs = require('fs');
-  const { FsUtil, AppCache } = require(`@travetto/base`);
+  const { FsUtil, AppCache } = require(`@travetto/boot`);
 
   const files = fs.readdirSync(AppCache.cacheDir).map(x => FsUtil.resolveUnix(AppCache.cacheDir, x));
 
@@ -38,7 +38,7 @@ function init() {
         Util.dependOn('clean');
       }
 
-      await require(`@travetto/base/bin/bootstrap`).run();
+      await require(`@travetto/base/bin/start`).run();
       const { Compiler } = require('../src/compiler');
       const count = Compiler.compileAll();
 
@@ -56,7 +56,7 @@ function complete(c) {
   c.all.push('compile');
   c.compile = {
     '': ['--clean', '--quiet', '--runtime-dir', '--output']
-  }
+  };
 }
 
 module.exports = { init, complete };

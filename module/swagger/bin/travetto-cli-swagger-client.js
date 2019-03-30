@@ -13,7 +13,7 @@ function init() {
       process.env.API_CLIENT_FORMAT = cmd.format;
       process.env.API_CLIENT_FORMATOPTIONS = cmd.formatOptions;
 
-      await require('@travetto/base/bin/bootstrap').run();
+      await require('@travetto/base/bin/start').run();
       const { ClientGenerate } = require('../src/client-generate');
       const { DependencyRegistry } = require('@travetto/di');
 

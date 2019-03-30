@@ -1,39 +1,28 @@
 // @ts-check
 
-const { FsUtil } = require('../src/bootstrap/fs-util');
-const { AppCache } = require('../src/bootstrap/cache');
+const { FsUtil } = require('@travetto/boot');
+const { bootstrap } = require('@travetto/boot/bin/lib');
 
-function clean() {
-  FsUtil.unlinkRecursiveSync(AppCache.cacheDir);
-}
-
-async function runScript(script, phase) {
+function start(script, phase = 'start') {
   bootstrap();
 
-  if (phase && phase !== 'none') {
-    await require('../src/phase')
-      .PhaseManager.init(phase).run();
-  }
+  const mgr = require('../src/phase')
+    .PhaseManager.init(phase);
 
-  let res;
-  try {
-    res = require(FsUtil.resolveUnix(FsUtil.cwd, script));
-  } catch {
-    res = require(script);
-  }
-
-  return res;
-}
-
-function bootstrap(run = false) {
-  require('../src/bootstrap/register').registerLoaders();
-  require('../src/bootstrap/env').showEnv();
-
-  const mgr = require('../src/phase').PhaseManager.init('bootstrap');
-  if (run) {
+  if (typeof script === 'string') {
+    let res;
     mgr.run();
+
+    try {
+      res = require(FsUtil.resolveUnix(FsUtil.cwd, script));
+    } catch {
+      res = require(script);
+    }
+
+    return res;
+  } else {
+    return mgr.run();
   }
-  return mgr;
 }
 
-module.exports = { clean, runScript, bootstrap };
+module.exports = { start };

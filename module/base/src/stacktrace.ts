@@ -1,7 +1,6 @@
 import * as path from 'path';
 
-import { FsUtil } from './bootstrap/fs-util';
-import { Env } from './bootstrap/env';
+import { Env, FsUtil } from '@travetto/boot';
 
 export class Stacktrace {
 

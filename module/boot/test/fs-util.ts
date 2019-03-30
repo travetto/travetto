@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 
-import { FsUtil } from '../src/bootstrap/fs-util';
+import { FsUtil } from '../src/fs-util';
 
 @Suite()
 class FsUtilTests {
@@ -12,7 +12,7 @@ class FsUtilTests {
     const modName = FsUtil.computeModuleFromFile(__filename);
     assert(modName === '@app/test.fs-util');
 
-    const modName2 = FsUtil.computeModuleFromFile('node_modules/@travetto/base/src/bootstrap/fs-util.js');
+    const modName2 = FsUtil.computeModuleFromFile('node_modules/@travetto/boot/src/bootstrap/fs-util.js');
     assert(modName2 === '@trv:base/bootstrap.fs-util');
   }
 

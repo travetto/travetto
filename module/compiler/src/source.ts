@@ -1,7 +1,8 @@
 import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
 
-import { FileCache, Env, AppError, FsUtil, Util } from '@travetto/base';
+import { Env, FileCache, FsUtil } from '@travetto/boot';
+import { AppError, Util } from '@travetto/base';
 
 import { CompilerUtil } from './util';
 

@@ -1,4 +1,5 @@
-import { ResourceManager, FsUtil } from '@travetto/base';
+import { FsUtil } from '@travetto/boot';
+import { ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('mail.template')

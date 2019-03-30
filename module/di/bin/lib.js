@@ -77,7 +77,7 @@ async function runApp(args) {
   process.env.PROFILE = process.env.PROFILE || '';
   process.env.WATCH = process.env.WATCH || app.watchable;
 
-  await require('@travetto/base/bin/bootstrap').run();
+  await require('@travetto/base/bin/start').run();
   await require('../src/registry').DependencyRegistry.runApplication(name, sub);
 }
 
@@ -92,9 +92,9 @@ function determineAppFromFile(filename) {
 
 async function computeApps() {
   // Suppress all output
-  console.warn = console.debug = console.log = function () { };
+  console.warn = console.debug = console.log = function() {};
 
-  await require('@travetto/base/bin/bootstrap'); // Load base transpiler
+  await require('@travetto/base/bin/start'); // Load base transpiler
 
   // Initialize up to compiler
   const { PhaseManager, ScanApp } = require('@travetto/base');
@@ -154,7 +154,7 @@ function fork(cmd, args) {
 }
 
 async function getCachedAppList() {
-  const { AppCache } = require('@travetto/base/src/bootstrap/cache'); // Should not init the app, only load cache
+  const { AppCache } = require('@travetto/boot/src/cache'); // Should not init the app, only load cache
   try {
     // Read cache it
     let text;

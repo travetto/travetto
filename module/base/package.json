@@ -3,30 +3,18 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "engines": {
-    "node": ">=10.0.0"
-  },
   "publishConfig": {
     "access": "public"
   },
-  "bin": {
-    "travetto-cli-clean": "bin/travetto-cli-clean.js",
-    "travetto-cli-boot": "bin/travetto-cli-boot.js"
-  },
   "dependencies": {
-    "@types/node": "^11.10.5",
-    "trace": "^3.1.1",
-    "tslib": "^1.9.3",
-    "typescript": "^3.4.1"
+    "@travetto/boot": "^0.6.0-rc.0"
   },
-  "description": "Bootstrapping, application phase management, environment config and common utilities for travetto applications.",
+  "description": "Bootstrapping, application phase management, common utilities for travetto applications.",
   "homepage": "https://travetto.io",
   "keywords": [
     "bootstrapping",
     "shutdown-helper",
     "file-watcher",
-    "caching",
-    "filesystem-traversal",
     "travetto",
     "typescript"
   ],
@@ -42,9 +30,6 @@
   "name": "@travetto/base",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
-  },
-  "scripts": {
-    "postinstall": "node ./bin/travetto-cli-clean.js"
   },
   "version": "0.6.0-rc.5"
 }
