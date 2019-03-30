@@ -8,8 +8,8 @@
   },
   "description": "Process management utilties, with a focus on inter-process communication",
   "dependencies": {
-    "@travetto/base": "^0.6.0-rc.2",
-    "@travetto/exec": "^0.6.0-rc.2",
+    "@travetto/base": "^0.6.0-rc.3",
+    "@travetto/exec": "^0.6.0-rc.3",
     "@types/generic-pool": "^3.1.6",
     "generic-pool": "^3.4.2"
   },
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.2"
+  "version": "0.6.0-rc.3"
 }
