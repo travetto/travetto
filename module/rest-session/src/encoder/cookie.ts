@@ -16,21 +16,17 @@ export class CookieEncoder extends SessionEncoder {
       res.cookies.set(this.config.keyName, session.id, {
         maxAge: !session.expiresAt ? -1 : undefined, // Session cookie by default
         expires: session.expiresAt ? new Date(session.expiresAt) : undefined,
-        httpOnly: true,
-        signed: this.config.sign,
       });
     } else if (req.cookies.get(this.config.keyName)) { // If cookie present, clear out
       res.cookies.set(this.config.keyName, null, {
-        signed: this.config.sign,
-        httpOnly: true,
-        maxAge: 0
+        maxAge: 0,
       });
     }
     return;
   }
 
   async decode(req: Request): Promise<string | Session | undefined> {
-    const cookie = req.cookies.get(this.config.keyName, { signed: this.config.sign });
+    const cookie = req.cookies.get(this.config.keyName);
     return cookie as string;
   }
 }

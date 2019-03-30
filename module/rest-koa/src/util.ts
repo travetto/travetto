@@ -8,7 +8,9 @@ export class KoaAppUtil {
   static getRequest(ctx: koa.ParameterizedContext) {
     if (!(ctx as any)[TRV_REQ]) {
       (ctx as any)[TRV_REQ] = RestAppUtil.decorateRequest({
-        __raw: ctx,
+        __og: ctx,
+        __raw: ctx.req,
+        protocol: ctx.protocol,
         method: ctx.request.method,
         path: ctx.request.path,
         query: ctx.request.query,
@@ -29,7 +31,8 @@ export class KoaAppUtil {
   static getResponse(ctx: koa.ParameterizedContext) {
     if (!(ctx as any)[TRV_RES]) {
       (ctx as any)[TRV_RES] = RestAppUtil.decorateResponse({
-        __raw: ctx,
+        __og: ctx,
+        __raw: ctx.res,
         get headersSent() {
           return ctx.headerSent;
         },

@@ -1,6 +1,5 @@
 import { IncomingMessage } from 'http';
 import * as fastify from 'fastify';
-import * as cookies from 'cookies';
 
 import { RouteConfig, RestApp } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
@@ -25,8 +24,6 @@ export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
     app.addContentTypeParser('multipart/form-data;', (req: IncomingMessage, done: (err: Error | null, body?: any) => void) => {
       done(null);
     });
-
-    app.use(cookies.express(this.config.cookie.keys) as any);
 
     return app;
   }

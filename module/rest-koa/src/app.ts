@@ -15,7 +15,6 @@ export class KoaRestApp extends RestApp<koa> {
     const app = new koa();
     app.use(kCompress());
     app.use(kBodyParser());
-    app.keys = this.config.cookie.keys;
 
     // Enable proxy for cookies
     if (this.config.trustProxy) {

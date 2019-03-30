@@ -9,7 +9,9 @@ export class FastifyAppUtil {
   static getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
     if (!(reqs as any)[TRV_KEY]) {
       (reqs as any)[TRV_KEY] = RestAppUtil.decorateRequest({
-        __raw: reqs,
+        __og: reqs,
+        __raw: reqs.req,
+        protocol: 'encrypted' in reqs.req.socket ? 'https' : 'http',
         method: reqs.req.method,
         path: reqs.req.url!,
         query: reqs.query,
@@ -30,7 +32,8 @@ export class FastifyAppUtil {
   static getResponse(reply: fastify.FastifyReply<ServerResponse>) {
     if (!(reply as any)[TRV_KEY]) {
       (reply as any)[TRV_KEY] = RestAppUtil.decorateResponse({
-        __raw: reply,
+        __og: reply,
+        __raw: reply.res,
         get headersSent() {
           return reply.sent;
         },

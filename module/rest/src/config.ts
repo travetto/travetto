@@ -1,3 +1,5 @@
+import * as cookies from 'cookies';
+
 import { Config } from '@travetto/config';
 import { Env, AppError } from '@travetto/base';
 
@@ -11,17 +13,12 @@ export class RestConfig {
   disableGetCache = true;
   trustProxy = false;
 
-  cookie: {
-    keys: string[];
-    signed?: boolean;
-    secure?: boolean;
-    domain?: string;
-    path?: string;
-    expires?: number;
-  } = {
-      signed: true,
-      keys: ['default-insecure']
-    };
+  cookieKeys: ['default-insecure'];
+  cookie: cookies.SetOption & { signed: boolean } = {
+    signed: true,
+    httpOnly: true,
+    sameSite: 'lax',
+  };
 
   ssl: {
     active?: boolean,
