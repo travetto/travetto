@@ -2,8 +2,7 @@
 let inst;
 exports.handler = async (event, context) => {
   if (!inst) {
-    const mgr = require('@travetto/base/bin/start');
-    await mgr.run();
+    await require('@travetto/base/bin/start');
 
     const { DependencyRegistry } = require('@travetto/di');
     await DependencyRegistry.init();

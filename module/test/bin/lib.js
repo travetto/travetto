@@ -14,13 +14,13 @@ function prepareEnv(extra = {}) {
 }
 
 async function runTests(opts, args) {
-  require('@travetto/base/bin/start');
+  await require('@travetto/base/bin/start');
   const { StandardWorker } = require('../src/worker/standard');
   return StandardWorker.run(opts, args);
 }
 
-function worker() {
-  require('@travetto/base/bin/start');
+async function worker() {
+  await require('@travetto/base/bin/start');
   const { TestChildWorker } = require('../src/worker/child');
   return new TestChildWorker().activate();
 }

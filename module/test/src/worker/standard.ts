@@ -4,7 +4,7 @@ import { State } from '../runner/runner';
 export class StandardWorker {
   static async run(opts: State, args: string[]) {
     try {
-      await PhaseManager.init('start', 'compiler').run();
+      await PhaseManager.init('init', 'compiler').run();
       const { Compiler } = await import('@travetto/compiler');
 
       // Pre compile all
@@ -15,7 +15,7 @@ export class StandardWorker {
 
       TestUtil.registerCleanup('runner');
 
-      await PhaseManager.init('start', '*', 'registry').run();
+      await PhaseManager.init('init', '*', 'registry').run();
 
       const res = await new Runner({
         format: opts.format,

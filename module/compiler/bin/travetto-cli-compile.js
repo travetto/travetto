@@ -38,7 +38,7 @@ function init() {
         Util.dependOn('clean');
       }
 
-      await require(`@travetto/base/bin/start`).run();
+      await require(`@travetto/base/bin/start`);
       const { Compiler } = require('../src/compiler');
       const count = Compiler.compileAll();
 

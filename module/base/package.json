@@ -9,7 +9,10 @@
   "dependencies": {
     "@travetto/boot": "^0.6.0-rc.0"
   },
-  "description": "Bootstrapping, application phase management, common utilities for travetto applications.",
+  "description": "Application phase management, file/resource management and common utilities for travetto applications.",
+  "bin": {
+    "travetto-cli-script": "bin/travetto-cli-script.js"
+  },
   "homepage": "https://travetto.io",
   "keywords": [
     "bootstrapping",

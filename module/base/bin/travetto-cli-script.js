@@ -2,19 +2,19 @@
 
 function init() {
   const { Util } = require('@travetto/cli/src/util');
-  return Util.program.command('start [script] [method]')
-    .option('-p, --phase [run phase]', 'The run phase to execute', 'start')
+  return Util.program.command('script [file] [method]')
+    .option('-p, --phase [run phase]', 'The run phase to execute', 'init')
     .allowUnknownOption()
-    .action(async (script, method, cmd) => {
-      if (!script) {
-        Util.showHelp(cmd, 'You must specify the script you want to boot');
+    .action(async (file, method, cmd) => {
+      if (!file) {
+        Util.showHelp(cmd, 'You must specify the file you want to start');
       }
       process.env.QUIET_INIT = ('QUIET_INIT' in process.env) ? process.env.QUIET_INIT : '1';
       process.env.DEBUG = ('DEBUG' in process.env) ? process.env.DEBUG : '0';
 
       const { start } = require('./lib');
 
-      const res = await start(script, cmd.phase);
+      const res = await start(file, cmd.phase);
 
       if (res && method) {
         res[method]();
@@ -23,10 +23,10 @@ function init() {
 }
 
 function complete(c) {
-  c.all.push('boot');
-  c.boot = {
+  c.all.push('script');
+  c.start = {
     '': ['--phase', ''],
-    '--phase': ['start', 'compile']
+    '--phase': ['init', 'compile']
   };
 }
 

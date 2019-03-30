@@ -1,17 +1,16 @@
 {
-  "exclude": ["test/"],
+  "exclude": ["test/**"],
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2018",
     "strict": true,
     "strictPropertyInitialization": false,
-    "noEmitHelpers": true,
     "sourceMap": false,
+    "declaration": true,
     "lib": [
       "es2015.proxy",
       "es2018"
     ],
-    "declaration": true,
     "preserveConstEnums": true,
     "experimentalDecorators": true,
     "importHelpers": true

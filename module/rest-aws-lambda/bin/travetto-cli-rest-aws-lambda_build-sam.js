@@ -19,7 +19,7 @@ function init() {
 
       FsUtil.mkdirp(path.dirname(cmd.output));
 
-      await require('@travetto/base/bin/start').run();
+      await require('@travetto/base/bin/start');
       const { ControllerRegistry } = require('@travetto/rest');
 
       await ControllerRegistry.init();

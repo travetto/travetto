@@ -1,5 +1,5 @@
 require('@travetto/base/bin/start')
-  .run(x => {
+  .then(x => {
     require('./watch');
     require('../src').SchemaRegistry.onFieldChange((e) => {
       console.log('Field', e);

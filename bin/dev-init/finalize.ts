@@ -12,8 +12,8 @@ export class Finalize {
   static COMMON_BIN_SCRIPTS = [
     ['cli', CLI],
     ['test', `${CLI}-test`],
-    ['base', `${CLI}-clean`],
-    ['base', `${CLI}-boot`],
+    ['boot', `${CLI}-clean`],
+    ['base', `${CLI}-script`],
     ['di', `${CLI}-run`],
     ['email-template', `${CLI}-email-template`],
     ['compiler', `${CLI}-compile`],

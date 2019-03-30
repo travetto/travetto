@@ -77,7 +77,7 @@ async function runApp(args) {
   process.env.PROFILE = process.env.PROFILE || '';
   process.env.WATCH = process.env.WATCH || app.watchable;
 
-  await require('@travetto/base/bin/start').run();
+  await require('@travetto/base/bin/start');
   await require('../src/registry').DependencyRegistry.runApplication(name, sub);
 }
 
@@ -98,7 +98,7 @@ async function computeApps() {
 
   // Initialize up to compiler
   const { PhaseManager, ScanApp } = require('@travetto/base');
-  await PhaseManager.init('start', 'compiler').run();
+  await PhaseManager.init('init', 'compiler').run();
 
   // Load app files
   ScanApp.requireFiles('.ts', x => {

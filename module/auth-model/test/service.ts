@@ -75,7 +75,7 @@ class TestConfig {
 export class ServiceTest {
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await DependencyRegistry.init();
   }
 
   @Test()

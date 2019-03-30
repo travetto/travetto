@@ -16,7 +16,7 @@ class DataBinding {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await DependencyRegistry.init();
   }
 
   @Test('Binding Test One')

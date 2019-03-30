@@ -21,7 +21,7 @@
     "travetto-cli-clean": "bin/travetto-cli-clean.js"
   },
   "scripts": {
-    "prepublish": "tsc --project .",
+    "prepublish": "tsc --project . && mv main.d.ts index.d.ts && mv main.js index.js",
     "postinstall": "node ./bin/travetto-cli-clean.js"
   },
   "keywords": [

@@ -1,5 +1,5 @@
 async function getSchemas() {
-  await require('@travetto/base/bin/start').run();
+  await require('@travetto/base/bin/start');
   const di = require('@travetto/di').DependencyRegistry;
   const mod = require('@travetto/model').ModelRegistry;
   const srcCls = require('@travetto/model').ModelSource;
