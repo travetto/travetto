@@ -3,6 +3,9 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
+  "engines": {
+    "node": ">=10.0.0"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -43,5 +46,5 @@
   "scripts": {
     "postinstall": "node ./bin/travetto-cli-clean.js"
   },
-  "version": "0.6.0-rc.4"
+  "version": "0.6.0-rc.5"
 }
