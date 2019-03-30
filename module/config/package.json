@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^0.6.0-rc.3",
-    "@travetto/yaml": "^0.6.0-rc.1"
+    "@travetto/base": "^0.6.0-rc.4",
+    "@travetto/yaml": "^0.6.0-rc.2"
   },
   "description": "Environment-aware config management using yaml files",
   "homepage": "https://travetto.io",
@@ -31,5 +31,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.3"
+  "version": "0.6.0-rc.4"
 }

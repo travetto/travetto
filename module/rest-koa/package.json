@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/rest": "^0.6.0-rc.4",
+    "@travetto/rest": "^0.6.0-rc.5",
     "@types/koa": "^2.0.48",
     "@types/koa-bodyparser": "^4.2.2",
     "@types/koa-compress": "^2.0.8",
@@ -18,7 +18,7 @@
     "koa-router": "^7.4.0"
   },
   "devDependencies": {
-    "@travetto/test": "^0.6.0-rc.3"
+    "@travetto/test": "^0.6.0-rc.4"
   },
   "description": "Koa provider for the travetto rest module.",
   "homepage": "https://travetto.io",
@@ -38,5 +38,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.4"
+  "version": "0.6.0-rc.5"
 }
