@@ -30,6 +30,7 @@ export class CookiesInterceptor extends RestInterceptor {
     cookies.prototype.get = function (key: string, opts: any = {}) {
       if (key.endsWith('.sig')) {
         opts.secure = false;
+        opts.signed = false;
       }
       return get.call(this, key, { ...self, ...opts });
     };
