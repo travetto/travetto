@@ -1,14 +1,17 @@
 import * as exp from 'express-serve-static-core';
 import * as cookies from 'cookies';
+import { IncomingMessage, ServerResponse } from 'http';
 
 declare global {
   namespace Travetto {
     interface Request {
-      __raw?: any;
+      __og?: any;
+      __raw: IncomingMessage;
       method?: string;
       path: string;
       url: string;
       baseUrl?: string;
+      protocol: string;
 
       query: { [key: string]: any };
       params: { [key: string]: any };
@@ -23,7 +26,8 @@ declare global {
     }
 
     interface Response {
-      __raw?: any;
+      __og?: any;
+      __raw: ServerResponse;
       statusCode: number;
       status(code?: number): (number | undefined);
       headersSent: boolean;

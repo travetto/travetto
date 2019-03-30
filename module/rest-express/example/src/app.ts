@@ -1,7 +1,8 @@
 import { Application, RestConfig, RestApp } from '@travetto/rest';
 
 @Application('sample', {
-  description: 'Sample rest application'
+  description: 'Sample rest application',
+  standalone: false
 })
 export class SampleApp {
 
@@ -12,7 +13,7 @@ export class SampleApp {
 
   run(port = 3000, ssl = false, fast?: string, toggle?: 'on' | 'off') {
     this.config.port = port;
-    this.config.ssl = ssl;
+    this.config.ssl.active = ssl;
     this.app.run();
   }
 }

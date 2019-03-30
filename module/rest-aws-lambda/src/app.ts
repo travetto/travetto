@@ -3,7 +3,6 @@ import * as http from 'http';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
-import * as cookies from 'cookies';
 
 import * as awsServerlessExpress from 'aws-serverless-express';
 import * as awsServerlessExpressMiddleware from 'aws-serverless-express/middleware';
@@ -30,7 +29,11 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use(awsServerlessExpressMiddleware.eventContext());
-    app.use(cookies.express(this.config.cookie.keys));
+    app.use((req, res, next) => {
+      (req as any).__raw = req;
+      (res as any).__raw = res;
+      next();
+    });
 
     // Enable proxy for cookies
     if (this.config.trustProxy) {
