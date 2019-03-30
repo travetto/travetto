@@ -18,31 +18,31 @@ export class CookiesInterceptor extends RestInterceptor {
   @Inject()
   config: RestConfig;
 
+  postConstruct() {
+    const self = this.config.cookie;
+
+    // Patch all cookies to default to the cookie values
+    const set = cookies.prototype.set;
+    const get = cookies.prototype.get;
+    cookies.prototype.set = function (key: string, value?: any, opts: any = {}) {
+      return set.call(this, key, value, { ...self, ...opts });
+    };
+    cookies.prototype.get = function (key: string, opts: any = {}) {
+      return get.call(this, key, { ...self, ...opts });
+    };
+  }
+
   applies(route: RouteConfig) {
-    return route.method === 'get' && this.config.disableGetCache;
+    return this.config.cookie.active;
   }
 
   async intercept(req: Request, res: Response) {
     if (!req.cookies) {
       req.cookies = res.cookies = new cookies(
         req as any as IncomingMessage,
-        res as any as ServerResponse, {
-          keys: this.config.cookieKeys
-        });
+        res as any as ServerResponse,
+        this.config.cookie
+      );
     }
-
-    const self = this.config.cookie;
-
-    // Patch all cookies to default to the cookie values
-    const set = cookies.Cookie.prototype.set;
-    const get = cookies.Cookie.prototype.get;
-    cookies.Cookie.prototype.set = function (key: string, value?: any, opts: any = {}) {
-      return set.call(this, key, value, { ...self, ...opts });
-    };
-    cookies.Cookie.prototype.get = function (key: string, opts: any = {}) {
-      return get.call(this, key, { ...self, ...opts });
-    };
-
-    return;
   }
 }
