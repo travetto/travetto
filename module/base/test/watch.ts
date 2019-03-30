@@ -3,10 +3,8 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 
-import { Env } from '../src/bootstrap/env';
-import { FsUtil } from '../src/bootstrap/fs-util';
+import { Env, FsUtil, ScanFs } from '@travetto/boot';
 import { Watcher } from '../src/watch';
-import { ScanFs } from '../src/bootstrap/scan-fs';
 
 @Suite()
 export class WatchTest {

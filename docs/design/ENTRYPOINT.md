@@ -20,7 +20,7 @@ Within the framework, we expose CLI actions through the various modules.  These 
 
 ##Direct Invocation
 
-This is assumed that the caller knows what they are doing.  Usually these scripts support being forked in a symlinked environment, but there are some exceptions (`@travetto/base/bin/bootstrap`).
+This is assumed that the caller knows what they are doing.  Usually these scripts support being forked in a symlinked environment, but there are some exceptions (`@travetto/base/bin/start`).
 
 ##Plugin Adapters
 

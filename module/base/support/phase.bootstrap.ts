@@ -1,4 +1,4 @@
-import { Env } from '../src/bootstrap/env';
+import { Env } from '@travetto/boot';
 import { Shutdown } from '../src/shutdown';
 import { Stacktrace } from '../src/stacktrace';
 

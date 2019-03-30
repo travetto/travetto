@@ -12,8 +12,8 @@ class FsUtilTests {
     const modName = FsUtil.computeModuleFromFile(__filename);
     assert(modName === '@app/test.fs-util');
 
-    const modName2 = FsUtil.computeModuleFromFile('node_modules/@travetto/boot/src/bootstrap/fs-util.js');
-    assert(modName2 === '@trv:base/bootstrap.fs-util');
+    const modName2 = FsUtil.computeModuleFromFile('node_modules/@travetto/boot/src/fs-util.js');
+    assert(modName2 === '@trv:boot/fs-util');
   }
 
 }

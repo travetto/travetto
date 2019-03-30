@@ -21,6 +21,7 @@
     "travetto-cli-clean": "bin/travetto-cli-clean.js"
   },
   "scripts": {
+    "prepublish": "tsc --project .",
     "postinstall": "node ./bin/travetto-cli-clean.js"
   },
   "keywords": [
@@ -32,9 +33,10 @@
   "license": "MIT",
   "main": "index.ts",
   "files": [
-    "index.ts",
-    "src",
-    "tsconfig.json"
+    "index.js",
+    "index.d.ts",
+    "src/*.js",
+    "src/*.d.ts"
   ],
   "name": "@travetto/boot",
   "repository": {

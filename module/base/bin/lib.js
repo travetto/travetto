@@ -1,10 +1,10 @@
 // @ts-check
 
 const { FsUtil } = require('@travetto/boot');
-const { bootstrap } = require('@travetto/boot/bin/lib');
+const { boot } = require('@travetto/boot/bin/lib');
 
 function start(script, phase = 'start') {
-  bootstrap();
+  boot();
 
   const mgr = require('../src/phase')
     .PhaseManager.init(phase);

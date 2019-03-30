@@ -5,4 +5,4 @@ const TRV_BASE_ROOT = !process.env.TRV_FRAMEWORK_DEV ? '..' :
     `${process.cwd()}/node_modules/@travetto/boot`);
 
 // @ts-ignore
-module.exports = require(`${TRV_BASE_ROOT}/bin/lib`).bootstrap();
+module.exports = require(`${TRV_BASE_ROOT}/bin/lib`).register();

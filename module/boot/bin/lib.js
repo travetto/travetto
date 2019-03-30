@@ -2,14 +2,14 @@
 
 const { FsUtil } = require('../src/fs-util');
 const { AppCache } = require('../src/cache');
-const { showEnv } = require('../src/env');
+const { Env } = require('../src/env');
 
 function clean() {
   FsUtil.unlinkRecursiveSync(AppCache.cacheDir);
 }
 
 async function runScript(script) {
-  bootstrap();
+  register();
 
   let res;
   try {
@@ -21,9 +21,9 @@ async function runScript(script) {
   return res;
 }
 
-function bootstrap() {
+function register() {
   require('../src/register').registerLoaders();
-  showEnv();
+  Env.show();
 }
 
-module.exports = { clean, runScript, bootstrap };
+module.exports = { clean, runScript, register };
