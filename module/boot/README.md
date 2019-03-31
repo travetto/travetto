@@ -3,7 +3,7 @@ travetto: Boot
 
 **Install: primary**
 ```bash
-$ npm install @travetto/env
+$ npm install @travetto/boot
 ```
 
 Boot is basic environment  awareness coupled with typescript bootstrapping for `travetto` apps and libraries.  It has support for the following key areas:
@@ -38,3 +38,30 @@ This pattern is used throughout the following functionality for testing and retr
 * `getInt(key: string, def?: number): number;` - Retrieve an environmental value as a number
 * `getList(key: string): string[];` - Retrieve an environmental value as a list
 
+## File Cache
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  `AppCache` is the cache that is used specific to the framework, and is an instance of `FileCache`.  `FileCache` is the generic structure for supporting a file cache that invalidates on modification/creation changse.
+
+The class organization looks like:
+```typescript
+class FileCache {    
+  constructor(cwd: string, cacheDir?: string);
+  init(): void;
+  writeEntry(full: string, contents: string | Buffer): void;
+  readEntry(full: string): string;
+  removeExpiredEntry(full: string, force?: boolean): void;
+  removeEntry(full: string): void;
+  hasEntry(full: string): boolean;
+  statEntry(full: string): fs.Stats;
+  clear(): void;
+}
+```
+Everything is based on absolute paths being passed in, and translated into cache specific files.  
+
+## App Information
+This basically exposes your `package.json` data as a typed data structure, useful for integrating package information into your application.
+
+## Registration
+This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
+
+## File System Interaction
+The two pieces of functionality used for file system interaction are `FsUtil` and `ScanFs`.  `FsUtil` provides some high level functionality (like recursive directory delete).  `ScanFs` is meant for searching (and caching) traversals through the file system, looking for patterns via regex or function handlers.
