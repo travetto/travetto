@@ -5,7 +5,7 @@ import { Events } from './types';
 
 type Event = { type: string, error?: any, file?: string, class?: string, method?: string };
 
-const FIXED_MODULES = new Set(['base', 'config', 'compiler', 'exec', 'worker', 'yaml']);
+const FIXED_MODULES = new Set(['boot', 'base', 'config', 'compiler', 'exec', 'worker', 'yaml']);
 const IS_SUPPORT_FILE = /\/support\//;
 const IS_SELF_FILE = /\/test\/src\/worker\//;
 const GET_FILE_MODULE = /^.*travetto(?:\/module)?\/([^/]+)\/(?:src\/|index).*$/;

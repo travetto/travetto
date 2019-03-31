@@ -16,7 +16,7 @@ function init() {
 
       prepareEnv();
 
-      require('@travetto/base/bin/lib').register();
+      require('@travetto/base/bin/register');
 
       if (cmd.format === 'tap' && Util.HAS_COLOR) {
         const { TapEmitter } = require('../src/consumer/tap');

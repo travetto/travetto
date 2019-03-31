@@ -46,7 +46,7 @@ const Execute = {
       opts = compl.all;
     } else {
       last = args.pop() || '';
-      let second = args.pop() || '';
+      const second = args.pop() || '';
       let flag = '';
 
       if (last in compl[cmd]) {

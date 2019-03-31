@@ -1,9 +1,7 @@
 // @ts-check
 
-const { register: bootRegister } = require('@travetto/boot/bin/lib');
-
 function register(phase = 'init') {
-  bootRegister();
+  require('@travetto/boot/bin/boot');
   return require('../src/phase').PhaseManager.init(phase);
 }
 

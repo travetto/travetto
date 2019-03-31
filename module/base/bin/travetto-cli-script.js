@@ -1,6 +1,4 @@
 // @ts-check
-const { FsUtil } = require('@travetto/boot');
-
 function init() {
   const { Util } = require('@travetto/cli/src/util');
   return Util.program.command('script [file] [method]')
@@ -20,6 +18,7 @@ function init() {
       let res;
 
       try {
+        const { FsUtil } = require('@travetto/boot');
         res = require(FsUtil.resolveUnix(FsUtil.cwd, cmd));
       } catch {
         res = require(script);

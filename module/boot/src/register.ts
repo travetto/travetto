@@ -90,7 +90,9 @@ class Register {
     // @ts-ignore
     Module._load = (tfd ? this.frameworkModuleHandler : this.moduleLoaderHandler).bind(this);
     require.extensions['.ts'] = (tfd ? this.frameworkCompileTypescript : this.compileTypescript).bind(this);
+
+    Env.show();
   }
 }
 
-export const registerLoaders = Register.register.bind(Register);
+export const register = () => Register.register();
