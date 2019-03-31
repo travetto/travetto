@@ -50,7 +50,6 @@ class AssetTest {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
     await DependencyRegistry.init();
   }
 

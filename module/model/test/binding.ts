@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { SchemaRegistry } from '@travetto/schema';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 
 import { TestSource } from './registry';
@@ -16,6 +16,7 @@ class DataBinding {
 
   @BeforeAll()
   async init() {
+    await SchemaRegistry.init();
     await DependencyRegistry.init();
   }
 

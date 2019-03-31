@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { AppError } from '@travetto/base';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory, Injectable } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
+import { SchemaRegistry } from '@travetto/schema';
 import { BaseModel, Model, ModelSource } from '@travetto/model';
 
 import { ModelPrincipalProvider, RegisteredIdentity } from '../';
@@ -76,6 +76,7 @@ export class ServiceTest {
   @BeforeAll()
   async init() {
     await DependencyRegistry.init();
+    await SchemaRegistry.init();
   }
 
   @Test()

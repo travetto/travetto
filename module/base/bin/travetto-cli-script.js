@@ -1,4 +1,5 @@
 // @ts-check
+const { FsUtil } = require('@travetto/boot');
 
 function init() {
   const { Util } = require('@travetto/cli/src/util');
@@ -14,7 +15,15 @@ function init() {
 
       const { start } = require('./lib');
 
-      const res = await start(file, cmd.phase);
+      await start(cmd.phase);
+
+      let res;
+
+      try {
+        res = require(FsUtil.resolveUnix(FsUtil.cwd, cmd));
+      } catch {
+        res = require(script);
+      }
 
       if (res && method) {
         res[method]();
@@ -24,7 +33,7 @@ function init() {
 
 function complete(c) {
   c.all.push('script');
-  c.start = {
+  c.script = {
     '': ['--phase', ''],
     '--phase': ['init', 'compile']
   };
