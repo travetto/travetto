@@ -4,11 +4,12 @@ import * as mime from 'mime';
 import * as fileType from 'file-type';
 import * as os from 'os';
 import * as crypto from 'crypto';
+import { IncomingMessage } from 'http';
 
 import { FsUtil } from '@travetto/base/bootstrap';
 import { HttpRequest } from '@travetto/net';
+
 import { Asset, AssetFile } from './model';
-import { IncomingMessage } from 'http';
 
 const fsStat = util.promisify(fs.stat);
 const fsOpen = util.promisify(fs.open);
