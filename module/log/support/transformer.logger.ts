@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { Env, FsUtil } from '@travetto/base';
+import { Env, FsUtil } from '@travetto/base/bootstrap';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 
 import { LogLevels } from '../src/types';

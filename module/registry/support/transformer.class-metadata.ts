@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 
-import { FsUtil, Util } from '@travetto/base';
+import { FsUtil } from '@travetto/base/bootstrap';
+import { Util } from '@travetto/base';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 
 interface IState extends TransformerState {

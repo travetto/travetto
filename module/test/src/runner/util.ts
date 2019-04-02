@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 
-import { ScanFs, Env, Shutdown, FileCache } from '@travetto/base';
+import { ScanFs, Env, FileCache } from '@travetto/base/bootstrap';
+import { Shutdown } from '@travetto/base';
 
 const DEFAULT_TIMEOUT = Env.getInt('DEFAULT_TIMEOUT', 5000);
 

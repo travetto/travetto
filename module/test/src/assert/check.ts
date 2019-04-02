@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
-import { AppError, Env } from '@travetto/base';
+import { AppError } from '@travetto/base';
+import { Env } from '@travetto/base/bootstrap';
 
 import { ThrowableError, TestConfig } from '../model/test';
 import { AssertCapture } from './capture';

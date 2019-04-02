@@ -3,7 +3,7 @@ export const init = {
   action: async () => {
     const { ConfigSource } = await import('@travetto/config');
     const { DockerContainer, ExecUtil } = await import('@travetto/exec');
-    const { Env } = await import('@travetto/base');
+    const { Env } = await import('@travetto/base/bootstrap');
 
     const defPort = Env.getInt('MODEL_ELASTICSEARCH_PORT', 9200);
 

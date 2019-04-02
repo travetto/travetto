@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/base/bootstrap';
 
 export class CompilerUtil {
 

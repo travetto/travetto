@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { FsUtil } from '@travetto/base';
+import { FsUtil } from '@travetto/base/bootstrap';
 import { Suite, Test } from '@travetto/test';
 import { WorkPool } from '../src/pool';
 import { IteratorInputSource } from '../src/input/iterator';

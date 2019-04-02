@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Env, FsUtil } from '@travetto/base';
+import { Env, FsUtil } from '@travetto/base/bootstrap';
 
 import { TestRegistry } from '../registry';
 import { TestConfig, TestResult } from '../model/test';

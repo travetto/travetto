@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/base/bootstrap';
 
 import { LogEvent, LogListener, LogLevel, LogLevels } from './types';
 import { lineFormatter } from './formatter/line';
@@ -35,8 +35,8 @@ class $Logger {
     }
 
     // Base logger, for free
-    const formatter = lineFormatter({ 
-      colorize: $Logger.COLORIZE, 
+    const formatter = lineFormatter({
+      colorize: $Logger.COLORIZE,
       timestamp: !Env.isFalse('log_time'),
       time_millis: !!flags.trace
     });

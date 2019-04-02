@@ -1,6 +1,6 @@
 import { Injectable, DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
-import { AppInfo } from '@travetto/base';
+import { AppInfo } from '@travetto/base/bootstrap';
 
 import { RestInterceptorGroup } from './group';
 import { RestInterceptor } from './interceptor';

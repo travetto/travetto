@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/base/bootstrap';
 
 import { Registry } from '../registry';
 import { CompilerClassSource } from '../source/class-source';

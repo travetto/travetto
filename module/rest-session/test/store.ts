@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/base/bootstrap';
 
 import { MemoryStore } from '../src/store/memory';
 
@@ -37,10 +37,10 @@ export class StoreTest {
   @Test()
   async testFailure() {
     try {
-      Env.prod = !(Env.dev = !Env.dev);
+      (Env as any).prod = !((Env as any).dev = !(Env as any).dev);
       await assert.rejects(async () => new MemoryStore().postConstruct(), 'not intended for production');
     } finally {
-      Env.prod = !(Env.dev = !Env.dev);
+      (Env as any).prod = !((Env as any).dev = !(Env as any).dev);
     }
   }
 }
