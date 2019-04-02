@@ -12,6 +12,10 @@ class DbConfig {
   hosts: string[];
 }
 
+class NameConfig {
+  active = false;
+}
+
 class TestConfig extends DbConfig {
   anonHosts = ['a', 'b'];
 }
@@ -128,5 +132,15 @@ a:
     assert(broken.a.b.d === 'name');
 
     assert(broken.a.e.g === 'test');
+  }
+
+  @Test()
+  async environmentOverrideFalse() {
+    process.env.NAME_ACTIVE = 'false';
+    this.reinit();
+
+    const res = ConfigSource.bindTo(new NameConfig(), 'name');
+
+    assert(res.active === false);
   }
 }

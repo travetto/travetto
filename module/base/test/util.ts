@@ -23,6 +23,15 @@ class MergeTests {
   }
 
   @Test()
+  testCoerceType() {
+    assert(Util.coerceType('false', true) === false);
+    assert(Util.coerceType('off', true) === false);
+    assert(Util.coerceType('no', true) === false);
+    assert(Util.coerceType('true', false) === true);
+    assert(Util.coerceType('truee', false) === true);
+  }
+
+  @Test()
   testMerge() {
     assert(Util.deepAssign({ a: 1, b: 2 }, { a: 5 }).a === 5);
     assert(typeof Util.deepAssign({ a: 1, b: () => { } }, { a: 5, c: 10 }).b !== 'number');
