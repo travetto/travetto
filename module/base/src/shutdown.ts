@@ -1,4 +1,4 @@
-import { Env } from './bootstrap/env';
+import { Env } from '../bootstrap/env';
 
 const px = process.exit;
 

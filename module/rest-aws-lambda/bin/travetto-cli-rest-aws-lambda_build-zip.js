@@ -6,8 +6,8 @@ const readFile = f => fs.readFileSync(f, 'utf-8');
 const writeFile = (f, c) => fs.writeFileSync(f, c, 'utf-8');
 
 const { Util } = require('@travetto/cli/src/util');
-const { FsUtil } = require('@travetto/base/src/bootstrap/fs-util');
-const { ScanFs } = require('@travetto/base/src/bootstrap/scan-fs');
+const { FsUtil } = require('@travetto/base/bootstrap/fs-util');
+const { ScanFs } = require('@travetto/base/bootstrap/scan-fs');
 
 function init() {
   const cp = require('child_process');
@@ -67,10 +67,10 @@ function init() {
       }
 
       for (const p of ['.d.ts', '.md', '.lock', 'bower.json',
-          'apis/1_7.js', 'apis/0_9.js', 'apis/2_4.js',
-          'apis/5.0.js', 'apis/5.1.js', 'apis/5.2.js',
-          'apis/5.3.js', 'apis/5.4.js'
-        ]) {
+        'apis/1_7.js', 'apis/0_9.js', 'apis/2_4.js',
+        'apis/5.0.js', 'apis/5.1.js', 'apis/5.2.js',
+        'apis/5.3.js', 'apis/5.4.js'
+      ]) {
         for (const f of ScanFs.scanDirSync({ testFile: x => false, testDir: x => true }, `${cmd.workspace}/node_modules`)) {
           if (f.file.endsWith(p)) {
             FsUtil.unlinkRecursiveSync(f.file);

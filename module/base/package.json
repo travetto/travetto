@@ -32,6 +32,8 @@
   "files": [
     "index.ts",
     "src",
+    "bootstrap/*.js",
+    "bootstrap/*.d.ts",
     "bin",
     "support",
     "tsconfig.json"
@@ -41,7 +43,8 @@
     "url": "https://github.com/travetto/travetto.git"
   },
   "scripts": {
-    "postinstall": "node ./bin/travetto-cli-clean.js"
+    "postinstall": "node ./bin/travetto-cli-clean.js",
+    "prepublish": "cd bootstrap && tsc --project . && mv main.js index.js && mv main.d.ts index.d.ts"
   },
   "version": "0.6.0-rc.4"
 }

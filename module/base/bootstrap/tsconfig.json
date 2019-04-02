@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2018",
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "sourceMap": false,
+    "declaration": true,
+    "lib": [
+      "es2015.proxy",
+      "es2018"
+    ],
+    "preserveConstEnums": true,
+    "experimentalDecorators": true,
+    "importHelpers": true
+  }
+}

@@ -1,9 +1,9 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 
-import { Env } from './bootstrap/env';
-import { FsUtil } from './bootstrap/fs-util';
-import { ScanEntry, ScanHandler, ScanFs } from './bootstrap/scan-fs';
+import { Env } from '../bootstrap/env';
+import { FsUtil } from '../bootstrap/fs-util';
+import { ScanEntry, ScanHandler, ScanFs } from '../bootstrap/scan-fs';
 
 import { Util } from './util';
 
