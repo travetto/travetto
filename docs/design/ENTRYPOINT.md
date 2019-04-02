@@ -25,3 +25,47 @@ This is assumed that the caller knows what they are doing.  Usually these script
 ##Plugin Adapters
 
 These are scripts exposed for the plugin to execute, and to honor the contract the vscode plugin expects for execution.  These are 100% forked and require the environment variable to be set for proper invocation.
+
+## Inventory 
+i = init, r = run, a = await
+
+* base/bin (Used as a bootstrap, when running script run as app)
+  ------------------------------------------------------
+  [i  ] ./bootstrap.js           [ lib.js - bootstrap ]  
+  [ira] ./travetto-cli-boot.js   [ lib.js - runScript ]
+
+* compiler/bin (Run app to establish all transformers)
+  ------------------------------------------------------
+  [ira] ./travetto-cli-compile.js  
+
+* di/bin (Run app selected, collect app data)
+  ------------------------------------------------------
+  [ira] ./find-apps.js           [ lib.js - computeApps, bootstrap - compiler ]
+  [ira] ./travetto-cli-run.js    [ lib.js - runApp ] 
+  [ira] ./travetto-plugin-run.js [ lib.js - runApp ]
+
+* email-template/bin (Run app for email activity)
+  ------------------------------------------------------
+  [ira] ./travetto-cli-email-template.js  
+
+* generator-app/app (Used as a bootstrap)
+  ------------------------------------------------------
+  [i  ] ./index.js                        
+
+* model-elasticsearch/bin (Run app to collect data)
+  ------------------------------------------------------
+  [ira] ./travetto-cli-es_schema.js [ lib.js - getSchemas ] 
+
+* rest-aws-lambda/bin (Run app to collect data)
+  ------------------------------------------------------
+  [ira] ./travetto-cli-rest-aws-lambda_build-sam.js  
+
+* swagger/bin  (Run app to collect data)
+  ------------------------------------------------------
+  [ira] ./travetto-cli-swagger-client.js [ lib.js ] 
+
+* test/bin (Initialize compiler, not loading transformers)
+  ------------------------------------------------------
+  [i  ] ./test-worker.js          [ lib.js - worker ]
+  [i  ] ./travetto-cli-test.js    [ self, lib.js - runTests ]
+  [i  ] ./travetto-plugin-test.js [ lib.js - runTests ]

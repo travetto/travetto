@@ -94,7 +94,7 @@ async function computeApps() {
   // Suppress all output
   console.warn = console.debug = console.log = function () { };
 
-  await require('@travetto/base/bin/bootstrap'); // Load base transpiler
+  require('@travetto/base/bin/bootstrap'); // Load base transpiler
 
   // Initialize up to compiler
   const { PhaseManager, ScanApp } = require('@travetto/base');
