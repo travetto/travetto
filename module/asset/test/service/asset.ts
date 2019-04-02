@@ -4,7 +4,6 @@ import * as assert from 'assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, Injectable } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
 
 import { AssetService, ImageService, AssetUtil, AssetSource, Asset, AssetMetadata } from '../../';
 
@@ -50,7 +49,6 @@ class AssetTest {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
     await DependencyRegistry.init();
   }
 

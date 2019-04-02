@@ -3,9 +3,8 @@ import * as assert from 'assert';
 import { Suite, Test, BeforeAll, AfterAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { TodoService } from '../src/service';
-import { ModelSource } from '@travetto/model';
+import { ModelSource, ModelRegistry } from '@travetto/model';
 import { ElasticsearchModelSource } from '@travetto/model-elasticsearch';
-import { RootRegistry } from '@travetto/registry';
 
 import { Todo } from '../src/model';
 
@@ -16,7 +15,8 @@ export class TodoTest {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
+    await DependencyRegistry.init();
+    await ModelRegistry.init();
   }
 
   @AfterAll()

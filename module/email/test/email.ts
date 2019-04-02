@@ -2,7 +2,6 @@ import * as assert from 'assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
 
 import { EmailService, MailTransport, NullTransport } from '../';
 
@@ -18,7 +17,6 @@ class EmailSuite {
 
   @BeforeAll()
   async init() {
-    await RootRegistry.init();
     await DependencyRegistry.init();
   }
 
