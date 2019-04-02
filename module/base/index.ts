@@ -1,6 +1,5 @@
 /// <reference path="./src/error.d.ts" />
 
-export * from './bootstrap';
 export * from './src/stacktrace';
 export * from './src/error';
 export * from './src/shutdown';

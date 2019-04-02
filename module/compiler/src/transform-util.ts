@@ -1,7 +1,8 @@
 import * as ts from 'typescript';
 import { dirname, } from 'path';
 
-import { Env, AppInfo, FsUtil, Util } from '@travetto/base';
+import { Env, AppInfo, FsUtil } from '@travetto/base/bootstrap';
+import { Util } from '@travetto/base';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;

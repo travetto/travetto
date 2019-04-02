@@ -1,7 +1,8 @@
 import * as cookies from 'cookies';
 
 import { Config } from '@travetto/config';
-import { Env, AppError } from '@travetto/base';
+import { AppError } from '@travetto/base';
+import { Env } from '@travetto/base/bootstrap';
 
 import { SSLUtil } from './util/ssl';
 import { Method } from './types';

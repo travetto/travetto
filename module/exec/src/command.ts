@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/base/bootstrap';
 
 import { Exec } from './exec';
 import { DockerContainer } from './docker';

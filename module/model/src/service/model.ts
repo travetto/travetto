@@ -1,7 +1,8 @@
 import { Class } from '@travetto/registry';
 import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry, ValidationError } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-import { Env, Util, AppError } from '@travetto/base';
+import { Env } from '@travetto/base/bootstrap';
+import { Util, AppError } from '@travetto/base';
 
 import { QueryVerifierService } from './verify';
 import { ModelOptions } from '../types';

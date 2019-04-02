@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { Shutdown, Env, FsUtil } from '@travetto/base';
+import { Env, FsUtil } from '@travetto/base/bootstrap';
+import { Shutdown } from '@travetto/base';
 
 import { Exec } from './exec';
 import { ExecUtil } from './util';

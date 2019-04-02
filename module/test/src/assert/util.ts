@@ -1,6 +1,7 @@
 import * as util from 'util';
 
-import { Util, Env } from '@travetto/base';
+import { Util } from '@travetto/base';
+import { Env } from '@travetto/base/bootstrap';
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
 
