@@ -35,7 +35,11 @@ export class AuthService {
 
   getAuthContext() {
     if (this.context) {
-      return (this.context.get(REQ_SYM) as Request).auth;
+      const ctx = this.context.get(REQ_SYM) as Request;
+      if (!ctx) {
+        throw new AppError('Auth context is not present, please authenticate first', 'authentication');
+      }
+      return ctx.auth;
     } else {
       throw new AppError('Cannot retrieve information without request unless @travetto/context is installed', 'notfound');
     }
