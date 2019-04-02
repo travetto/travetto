@@ -21,15 +21,15 @@ export class StoreTest {
     const now = Date.now();
     const session = await instance.create({ user: 'tom' }, 100);
     assert.ok(session.id);
-    assert(session.issuedAt + 1000 > Date.now());
+    assert(session.issuedAt.getTime() + 1000 > Date.now());
 
-    assert(session.expiresAt! > (now + 90));
+    assert(session.expiresAt!.getTime() > (now + 90));
 
     session.refresh();
 
     assert(session.isTimeChanged());
 
-    session.expiresAt = now + 10;
+    session.expiresAt = new Date(now + 10);
 
     assert(session.isAlmostExpired());
   }

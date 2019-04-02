@@ -21,7 +21,7 @@ export class RestSessionService {
   store: SessionStore;
 
   async validate(session: Session) {
-    if (session.expiresAt && session.expiresAt < Date.now()) { // Time has passed
+    if (session.expiresAt && session.expiresAt.getTime() < Date.now()) { // Time has passed
       return false;
     }
     return await this.store.validate(session);
@@ -63,6 +63,8 @@ export class RestSessionService {
     if (!session) {
       return;
     }
+
+    console.log(session);
 
     if (session.action !== 'destroy') {
       if (session.action === 'create') {

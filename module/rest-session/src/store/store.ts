@@ -9,7 +9,7 @@ export abstract class SessionStore {
   async create(payload: any, maxAge: number) {
     const sess: Session = new Session({
       id: Util.uuid(),
-      issuedAt: Date.now(),
+      issuedAt: new Date(),
       maxAge,
       payload
     });
