@@ -77,7 +77,8 @@ export class Util {
     switch (typeof baseline) {
       case 'string': return `${input}`;
       case 'number': return `${input}`.indexOf('.') >= 0 ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
-      case 'boolean': return (typeof input === 'string' && input === 'true') || !!input;
+      case 'boolean':
+        return typeof input === 'string' && /^(false|no|off|0)$/i.test(input) ? false : !!input;
       default:
         throw new Error(`Unknown type ${typeof baseline}`);
     }
