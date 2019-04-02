@@ -4,15 +4,14 @@ import { ModelService, Model } from '@travetto/model';
 import { Session, SessionStore } from '..';
 
 @Model()
-export class SessionModel extends Session {
+export class SessionModel {
   id?: string;
-  expiresAt: number | undefined;
-  action?: 'create' | 'destroy' | 'modify';
+  expiresAt?: Date;
   maxAge?: number;
   signature?: string;
-  issuedAt: number;
-  payload: any;
-  payloadData: string;
+  issuedAt: Date;
+  payload?: any;
+  payloadData?: string;
 }
 
 @Injectable({ target: ModelStore })
@@ -31,16 +30,17 @@ export class ModelStore extends SessionStore {
         } catch (e) { }
       }
       if (out.payload) {
-        return out;
+        return new Session(out);
       }
     }
   }
-  async store(data: SessionModel) {
+  async store(sess: Session) {
+    const data = SessionModel.from(sess);
     data.payloadData = JSON.stringify(data.payload);
     delete data.payload;
     await this.modelService.saveOrUpdate(SessionModel, data, { id: data.id } as any);
   }
-  async destroy(session: SessionModel) {
+  async destroy(session: Session) {
     return (await this.modelService.deleteById(SessionModel, session.id!)) > 0;
   }
 }

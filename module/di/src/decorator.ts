@@ -46,14 +46,14 @@ export function Application(
     const paramMap = config && config.paramMap || {};
 
     out.target = target;
-    out.name = name;
+    out.name = name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-');
     out.standalone = out.standalone === undefined || out.standalone; // Default to standalone
 
     if (params) {
       out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] || {}), name: x.name! }) as ApplicationParameter);
     }
 
-    DependencyRegistry.registerApplication(name, out as ApplicationConfig);
+    DependencyRegistry.registerApplication(out.name, out as ApplicationConfig);
     return target;
   };
 }

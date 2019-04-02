@@ -4,29 +4,29 @@ export const RAW_SESSION = Symbol('raw_session');
 export const RAW_SESSION_PRIV = Symbol('raw_session_priv');
 
 export class Session<T = any> {
-  private expiresAtLoaded: number | undefined;
+  private expiresAtLoaded: Date | undefined;
   private hash: number;
 
   readonly id?: string;
 
-  expiresAt: number | undefined;
+  expiresAt: Date | undefined;
   action?: 'create' | 'destroy' | 'modify';
   maxAge?: number;
   signature?: string;
-  issuedAt: number;
+  issuedAt: Date;
   payload: T;
 
   constructor(data: Partial<Session>) {
-    this.issuedAt = Date.now();
+    this.issuedAt = new Date();
 
     for (const k of Object.keys(data) as (keyof Session)[]) {
       this[k] = data[k];
     }
 
-    this.expiresAtLoaded = this.expiresAt || Date.now();
+    this.expiresAtLoaded = this.expiresAt || new Date();
 
     if (this.maxAge && !this.expiresAt) {
-      this.expiresAt = this.maxAge + Date.now();
+      this.expiresAt = new Date(this.maxAge + Date.now());
     }
 
     this.hash = Util.naiveHash(JSON.stringify(this));
@@ -41,12 +41,12 @@ export class Session<T = any> {
   }
 
   isAlmostExpired() {
-    return (!!this.maxAge && (this.expiresAt! - Date.now()) < this.maxAge / 2);
+    return (!!this.maxAge && (this.expiresAt!.getTime() - Date.now()) < this.maxAge / 2);
   }
 
   refresh() {
     if (this.maxAge) {
-      this.expiresAt = this.maxAge + Date.now();
+      this.expiresAt = new Date(this.maxAge + Date.now());
     }
   }
 
