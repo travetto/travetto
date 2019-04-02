@@ -20,7 +20,7 @@ function init() {
     .action(async (cmd) => {
 
       if (!cmd.workspace) {
-        cmd.workspace = FsUtil.tempDir('lambda-');
+        cmd.workspace = fs.mkdtempSync('lambda-');
         console.log('Temp Workspace', cmd.workspace);
       }
 
