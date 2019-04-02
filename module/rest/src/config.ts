@@ -14,6 +14,8 @@ export class RestConfig {
   disableGetCache = true;
   trustProxy = false;
 
+  defaultMessage = true;
+
   cookie: cookies.SetOption & { active: boolean, signed: boolean, keys: string[] } = {
     active: true,
     signed: true,
