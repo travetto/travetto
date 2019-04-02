@@ -84,7 +84,7 @@ async function resolve(engine: DefaultMailTemplateEngine, request: http.Incoming
   if (!filename || filename === 'index.html') {
     return {
       content: Mustache.render(INDEX, {
-        templates: Object.keys(engine['_templates']).sort()
+        templates: Object.keys(engine['templates']).sort()
       }),
       contentType: 'text/html',
       static: true
@@ -128,11 +128,11 @@ export async function serverHandler() {
 
       if (file.endsWith('.html')) {
         engine['cache'] = {};
-        engine['_templatesLoaded'] = false;
+        engine['templatesLoaded'] = false;
       }
 
       if (file.endsWith('.scss')) {
-        delete engine['_compiledSass'];
+        delete engine['compiledSass'];
       }
     }
   });
