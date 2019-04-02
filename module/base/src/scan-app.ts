@@ -1,6 +1,6 @@
-import { Env } from './bootstrap/env';
-import { FsUtil } from './bootstrap/fs-util';
-import { ScanEntry, ScanFs } from './bootstrap/scan-fs';
+import { Env } from '../bootstrap/env';
+import { FsUtil } from '../bootstrap/fs-util';
+import { ScanEntry, ScanFs } from '../bootstrap/scan-fs';
 
 type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
 

@@ -1,7 +1,7 @@
 // @ts-check
 
-const { FsUtil } = require('../src/bootstrap/fs-util');
-const { AppCache } = require('../src/bootstrap/cache');
+const { FsUtil } = require('../bootstrap/fs-util');
+const { AppCache } = require('../bootstrap/cache');
 
 function clean() {
   FsUtil.unlinkRecursiveSync(AppCache.cacheDir);
@@ -26,8 +26,8 @@ async function runScript(script, phase) {
 }
 
 function bootstrap(run = false) {
-  require('../src/bootstrap/register').registerLoaders();
-  require('../src/bootstrap/env').showEnv();
+  require('../bootstrap/register').registerLoaders();
+  require('../bootstrap/env').Env.show();
 
   const mgr = require('../src/phase').PhaseManager.init('bootstrap');
   if (run) {

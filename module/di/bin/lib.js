@@ -154,7 +154,7 @@ function fork(cmd, args) {
 }
 
 async function getCachedAppList() {
-  const { AppCache } = require('@travetto/base/src/bootstrap/cache'); // Should not init the app, only load cache
+  const { AppCache } = require('@travetto/base/bootstrap/cache'); // Should not init the app, only load cache
   try {
     // Read cache it
     let text;
