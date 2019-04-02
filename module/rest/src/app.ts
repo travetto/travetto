@@ -1,3 +1,4 @@
+import { AppInfo } from '@travetto/base/bootstrap';
 import { AppError } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { Class, ChangeEvent } from '@travetto/registry';
@@ -13,13 +14,6 @@ import { RestAppCustomizer } from './customizer';
 export abstract class RestApp<T = any> {
 
   static GLOBAL = '___GLOBAL___';
-  static GLOBAL_HANDLER = async (req: Request) => {
-    if (req.method === 'OPTIONS') {
-      return '';
-    } else {
-      throw new AppError('Resource not found', 'notfound');
-    }
-  }
 
   @Inject()
   interceptorGroup: RestInterceptorGroup;
@@ -34,8 +28,24 @@ export abstract class RestApp<T = any> {
   interceptors: RestInterceptor[] = [];
   listening = false;
 
+  info = {
+    TRAVETTO_VERSION: require('../package.json').version,
+    REST_PROVIDER: this.constructor.name,
+    ...AppInfo
+  };
+
   constructor() {
     this.onControllerChange = this.onControllerChange.bind(this);
+  }
+
+  async globalHandler(req: Request) {
+    if (req.method === 'OPTIONS') {
+      return '';
+    } else if (req.path === '/' && this.config.defaultMessage) {
+      return this.info;
+    } else {
+      throw new AppError('Resource not found', 'notfound');
+    }
   }
 
   abstract createRaw(): Promise<T> | T;
@@ -93,7 +103,7 @@ export abstract class RestApp<T = any> {
   }
 
   async registerGlobal() {
-    const route: RouteConfig = { instance: {}, handler: RestApp.GLOBAL_HANDLER, method: 'all', path: '*' };
+    const route: RouteConfig = { instance: {}, handler: this.globalHandler.bind(this), method: 'all', path: '*' };
     route.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, route);
     await this.registerRoutes(RestApp.GLOBAL, '/', [route]);
   }
