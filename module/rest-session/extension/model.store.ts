@@ -21,7 +21,7 @@ export class ModelStore extends SessionStore {
   modelService: ModelService;
 
   async load(id: string) {
-    const res = await this.modelService.getAllByQuery(SessionModel, { id } as any);
+    const res = await this.modelService.getAllByQuery(SessionModel, { where: { id } });
     if (res.length === 1) {
       const out = res[0];
       if (out.payloadData && !out.payload) {
@@ -38,8 +38,9 @@ export class ModelStore extends SessionStore {
     const data = SessionModel.from(sess);
     data.payloadData = JSON.stringify(data.payload);
     delete data.payload;
-    await this.modelService.saveOrUpdate(SessionModel, data, { id: data.id } as any);
+    await this.modelService.saveOrUpdate(SessionModel, data, { where: { id: data.id }, keepId: true });
   }
+
   async destroy(session: Session) {
     return (await this.modelService.deleteById(SessionModel, session.id!)) > 0;
   }

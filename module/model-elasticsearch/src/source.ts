@@ -487,13 +487,14 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async save<T extends ModelCore>(cls: Class<T>, o: T, keepId: boolean = false): Promise<T> {
-    if (!keepId) {
-      delete o.id;
-    }
+    const id = o.id;
+    delete o.id;
+
     this.cleanseId(o);
 
     const res = await this.client.index({
       ...this.getIdentity(o.constructor as Class),
+      ... (id ? { id } : {}),
       refresh: true,
       body: o
     });

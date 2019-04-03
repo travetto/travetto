@@ -36,6 +36,7 @@ export abstract class RestApp<T = any> {
 
   constructor() {
     this.onControllerChange = this.onControllerChange.bind(this);
+    this.globalHandler = this.globalHandler.bind(this);
   }
 
   async globalHandler(req: Request) {
@@ -103,7 +104,7 @@ export abstract class RestApp<T = any> {
   }
 
   async registerGlobal() {
-    const route: RouteConfig = { instance: {}, handler: this.globalHandler.bind(this), method: 'all', path: '*' };
+    const route: RouteConfig = { instance: {}, handler: this.globalHandler, method: 'all', path: '*' };
     route.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, route);
     await this.registerRoutes(RestApp.GLOBAL, '/', [route]);
   }

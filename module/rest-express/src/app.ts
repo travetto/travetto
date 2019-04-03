@@ -48,7 +48,7 @@ export class ExpressRestApp extends RestApp<express.Application> {
     // Register options handler for each controller
     if (key !== RestApp.GLOBAL) {
       const optionHandler = RouteUtil.createRouteHandler(this.interceptors,
-        { method: 'options', path: '*', handler: RestApp.GLOBAL_HANDLER });
+        { method: 'options', path: '*', handler: this.globalHandler });
 
       router.options('*', optionHandler as any);
     }

@@ -64,8 +64,6 @@ export class RestSessionService {
       return;
     }
 
-    console.log(session);
-
     if (session.action !== 'destroy') {
       if (session.action === 'create') {
         session = await this.store.create(session.payload, this.config.maxAge);

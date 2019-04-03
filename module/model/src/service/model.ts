@@ -142,7 +142,7 @@ export class ModelService implements IModelSource {
   }
 
   /** Save or update, upsert, for a document */
-  async saveOrUpdate<T extends ModelCore>(cls: Class<T>, o: T, query: ModelQuery<T>) {
+  async saveOrUpdate<T extends ModelCore>(cls: Class<T>, o: T, query: ModelQuery<T> & { keepId?: boolean }) {
     this.prepareQuery(cls, query);
 
     const res = await this.getAllByQuery(getClass(o), { ...query, limit: 2 });
@@ -150,7 +150,7 @@ export class ModelService implements IModelSource {
       o = Util.deepAssign(res[0], o);
       return await this.update(cls, o);
     } else if (res.length === 0) {
-      return await this.save(cls, o);
+      return await this.save(cls, o, query.keepId);
     }
     throw new Error(`Too many already exist: ${res.length}`);
   }
