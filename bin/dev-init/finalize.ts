@@ -17,6 +17,7 @@ export class Finalize {
     ['di', `${CLI}-run`],
     ['email-template', `${CLI}-email-template`],
     ['compiler', `${CLI}-compile`],
+    ['model-elasticsearch', `${CLI}-es_schema`],
     ['rest-aws-lambda', `${CLI}-rest-aws-lambda_deploy`],
     ['rest-aws-lambda', `${CLI}-rest-aws-lambda_build-zip`],
     ['rest-aws-lambda', `${CLI}-rest-aws-lambda_build-sam`],

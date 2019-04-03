@@ -94,8 +94,9 @@ class $Env {
     console.debug = !this.debug ? () => { } : log.bind(null, cl, 'debug'); // Suppress debug statements
   }
 
+  get(k: string, def?: string): string | undefined;
   get(k: string, def: string): string;
-  get(k: string, def?: string) {
+  get(k: string, def?: string | undefined): string | undefined {
     const temp = process.env[k] || process.env[k.toLowerCase()] || process.env[k.toUpperCase()];
     return temp === undefined ? def : temp;
   }
