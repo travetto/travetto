@@ -16,12 +16,14 @@ function computeProperty(state: AutoState, node: ts.PropertyDeclaration) {
 
   const typeExpr = TransformUtil.resolveType(state, node.type!);
   const properties = [];
-  if (!node.questionToken) {
+  const isUnion = node.type && node.type!.kind === ts.SyntaxKind.UnionType;
+
+  if (!node.questionToken && !(isUnion && (node.type as ts.UnionTypeNode).types.find(x => x.kind === ts.SyntaxKind.UndefinedKeyword))) {
     properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral({ active: true })));
   }
 
   // If we have a union type
-  if (node.type && node.type!.kind === ts.SyntaxKind.UnionType && ['Number', 'String'].includes((typeExpr as any).text)) {
+  if (isUnion && ['Number', 'String'].includes((typeExpr as any).text)) {
 
     const types = (node.type! as ts.UnionTypeNode).types;
     const literals = types.map(x => (x as ts.LiteralTypeNode).literal);
