@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/asset": "^0.6.0-rc.5",
+    "@travetto/asset": "^0.6.0-rc.6",
     "aws-sdk": "^2.379.0"
   },
   "description": "AWS S3 backend for the travetto asset module",
   "devDependencies": {
-    "@travetto/test": "^0.6.0-rc.5"
+    "@travetto/test": "^0.6.0-rc.6"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -30,5 +30,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.5"
+  "version": "0.6.0-rc.6"
 }

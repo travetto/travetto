@@ -49,5 +49,5 @@
     "postinstall": "node ./bin/travetto-cli-clean.js",
     "prepublish": "cd bootstrap && tsc --project . && mv main.js index.js && mv main.d.ts index.d.ts"
   },
-  "version": "0.6.0-rc.5"
+  "version": "0.6.0-rc.6"
 }
