@@ -1,31 +1,31 @@
 import { Env } from '@travetto/base/bootstrap';
 
-import { LogEvent, LogListener, LogLevel, LogLevels } from './types';
-import { lineFormatter } from './formatter/line';
-import { consoleOutput } from './output/console';
+import { LogEvent, LogListener, LogLevel, LogLevels, LogStream } from './types';
+import { LineFormatter } from './formatter/line';
+import { ConsoleOutput } from './output/console';
 import { LogUtil } from './util';
+
+const DEFAULT = Symbol('default');
 
 class $Logger {
 
   static COLORIZE = (process.stdout.isTTY && !Env.isTrue('NO_COLOR')) || Env.isTrue('FORCE_COLOR');
 
-  private listeners: LogListener[] = [];
+  private listeners = new Map<string | symbol, LogListener>();
+  private listenList: LogListener[] = [];
 
   private filters: { [key: string]: (x: string) => boolean } = {};
-  private exclude: { [key: string]: boolean } = {
-    debug: true,
-    trace: true
-  };
+  private exclude: { [key: string]: boolean } = { debug: true, trace: true };
+  private flags: { debug?: string, trace?: string };
 
   init() {
-
-    const flags = {
+    this.flags = {
       debug: LogUtil.readEnvVal('debug', Env.dev ? '*' : ''),
       trace: LogUtil.readEnvVal('trace'),
     };
 
     for (const k of ['debug', 'trace'] as ['debug', 'trace']) {
-      const filter = LogUtil.buildFilter(flags[k]);
+      const filter = LogUtil.buildFilter(this.flags[k]);
       if (filter !== LogUtil.falsehood) {
         delete this.exclude[k];
         if (filter !== LogUtil.truth) {
@@ -35,33 +35,46 @@ class $Logger {
     }
 
     // Base logger, for free
-    const formatter = lineFormatter({
+    this.listen();
+  }
+
+  listen({ formatter, stdout, stderr, key }: Partial<LogStream> = {}) {
+    formatter = formatter || new LineFormatter({
       colorize: $Logger.COLORIZE,
       timestamp: !Env.isFalse('log_time'),
-      time_millis: !!flags.trace
+      time_millis: !!this.flags.trace
     });
-    const errorOutput = consoleOutput({ method: 'error' });
-    const output = consoleOutput({ method: 'log' });
 
-    this.listen(ev => {
-      const msg = formatter(ev);
+    stderr = stderr || new ConsoleOutput({ method: 'error' });
+    stdout = stdout || new ConsoleOutput({ method: 'log' });
+
+    this.listenRaw(key || DEFAULT, (ev: LogEvent) => {
+      const msg = formatter!.format(ev);
       if (ev.level === 'error' || ev.level === 'fatal') {
-        errorOutput(msg);
+        stderr!.output(msg);
       } else {
-        output(msg);
+        stdout!.output(msg);
       }
     });
   }
 
-  removeAll() {
-    this.listeners = [];
+  listenRaw(key: string | symbol, handler: (ev: LogEvent) => void) {
+    this.listeners.set(key || DEFAULT, handler);
+    this.listenList = [...this.listeners.values()];
   }
 
-  listen(listener: LogListener) {
-    this.listeners.push(listener);
-    return () => {
-      this.listeners.splice(this.listeners.indexOf(listener), 1);
-    };
+  removeAll() {
+    this.listeners.clear();
+    this.listenList = [];
+  }
+
+  removeListener(key: string | symbol) {
+    this.listeners.delete(key);
+    this.listenList = [...this.listeners.values()];
+  }
+
+  enabled(level: LogLevel): boolean {
+    return !(level in this.exclude);
   }
 
   log(level: LogLevel, message: string, ...args: any[]): void;
@@ -95,13 +108,9 @@ class $Logger {
     // Use sliced values
     event.args = args;
 
-    for (const l of this.listeners) {
+    for (const l of this.listenList) {
       l(event as LogEvent);
     }
-  }
-
-  enabled(level: LogLevel): boolean {
-    return !(level in this.exclude);
   }
 }
 

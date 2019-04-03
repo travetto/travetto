@@ -20,7 +20,23 @@ export interface LogContext {
 }
 
 export interface LogEvent extends LogContext {
+  prefix?: string;
   message?: string;
   args?: any[];
   meta?: any;
 }
+
+export interface OutputHandler {
+  output(msg: string): void;
+}
+
+export interface Formatter {
+  format(e: LogEvent): string;
+}
+
+export type LogStream = {
+  formatter: Formatter,
+  stdout: OutputHandler,
+  stderr: OutputHandler,
+  key: string | symbol
+};

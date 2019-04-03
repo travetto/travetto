@@ -4,11 +4,16 @@ export interface FileOutputOpts {
   file: string;
 }
 
-export function fileOutput(opts: FileOutputOpts) {
-  const stream = fs.createWriteStream(opts.file, {
-    autoClose: true,
-    flags: 'a'
-  });
+export class FileOutput {
+  stream: fs.WriteStream;
 
-  return (msg: string) => stream.write(`${msg}\n`);
+  constructor(private opts: FileOutputOpts) {
+    this.stream = fs.createWriteStream(opts.file, {
+      autoClose: true,
+      flags: 'a'
+    });
+  }
+  output(msg: string) {
+    this.stream.write(`${msg}\n`);
+  }
 }

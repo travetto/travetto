@@ -2,6 +2,10 @@ import { LogEvent } from '../types';
 
 export interface JSONFormatterOpts { }
 
-export function jsonFormatter(opts: JSONFormatterOpts) {
-  return (ev: LogEvent) => JSON.stringify(ev);
+export class JsonFormatter {
+  constructor(private opts: JSONFormatterOpts) { }
+
+  format(ev: LogEvent) {
+    return JSON.stringify(ev);
+  }
 }

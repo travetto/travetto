@@ -4,7 +4,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 
 import { Logger } from '../src/service';
 import { LogEvent } from '../src/types';
-import { jsonFormatter } from '../src/formatter/json';
+import { JsonFormatter } from '../src/formatter/json';
 
 @Suite('Suite')
 class LoggerTest {
@@ -17,7 +17,7 @@ class LoggerTest {
   @Test('Should Log')
   async shouldLog() {
     const events: LogEvent[] = [];
-    Logger.listen((e) => {
+    Logger.listenRaw('test', (e) => {
       events.push(e);
     });
     console.log('Hello', 1, 2, 3);
@@ -28,8 +28,8 @@ class LoggerTest {
 
   @Test('Formatter')
   async shouldFormat() {
-    const formatter = jsonFormatter({});
+    const formatter = new JsonFormatter({});
     const now = Date.now();
-    assert(formatter({ level: 'error', timestamp: now }) === `{"level":"error","timestamp":${now}}`);
+    assert(formatter.format({ level: 'error', timestamp: now }) === `{"level":"error","timestamp":${now}}`);
   }
 }
