@@ -3,7 +3,7 @@ import * as util from 'util';
 import { Env } from '@travetto/base/bootstrap';
 import { Stacktrace } from '@travetto/base';
 
-import { LogEvent } from '../types';
+import { LogEvent, Formatter } from '../types';
 import { stylize, LEVEL_STYLES } from './styles';
 
 export interface LineFormatterOpts {
@@ -15,10 +15,15 @@ export interface LineFormatterOpts {
   location?: boolean;
 }
 
-export function lineFormatter(opts: LineFormatterOpts) {
-  opts = { colorize: true, timestamp: true, align: true, level: true, location: true, ...opts };
+export class LineFormatter implements Formatter {
+  private opts: LineFormatterOpts;
 
-  return (ev: LogEvent) => {
+  constructor(opts: LineFormatterOpts) {
+    opts = { colorize: true, timestamp: true, align: true, level: true, location: true, ...opts };
+  }
+
+  format(ev: LogEvent) {
+    const opts = this.opts;
     let out = '';
 
     if (opts.timestamp) {
@@ -45,17 +50,9 @@ export function lineFormatter(opts: LineFormatterOpts) {
 
     if (ev.file && opts.location) {
       const ns = ev.category;
-
       const loc = ev.line ? `${ns}:${`${ev.line}`.padStart(3)}` : ns;
-      if (opts.colorize) {
-        // ev.category = makeLink(ev.category, `file://${ev.file}:${ev.line}`);
-      }
       out = `${out}[${stylize(loc!, 'blue')}] `;
     }
-
-    // if (ev.category) {
-    //   out = `${out}[${ev.category}] `;
-    // }
 
     let message = ev.message;
 
@@ -68,6 +65,7 @@ export function lineFormatter(opts: LineFormatterOpts) {
       if (ev.meta) {
         args.push(ev.meta);
       }
+
       message = args.map((x: any) =>
         typeof x === 'string' ? x :
           (x instanceof Error ? (Env.prod ? x.stack : Stacktrace.simplifyStack(x)) :
@@ -80,8 +78,8 @@ export function lineFormatter(opts: LineFormatterOpts) {
     }
 
     if (message) {
-      out = `${out}${message} `;
+      out = `${out}${ev.prefix || ''}${message} `;
     }
     return out.substring(0, out.length - 1);
-  };
+  }
 }
