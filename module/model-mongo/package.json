@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/model": "^0.6.0-rc.6",
+    "@travetto/model": "^0.6.0-rc.7",
     "@types/mongodb": "^3.1.19",
     "mongodb": "^3.1.13"
   },
@@ -34,5 +34,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.6"
+  "version": "0.6.0-rc.7"
 }
