@@ -19,7 +19,7 @@ export class LineFormatter implements Formatter {
   private opts: LineFormatterOpts;
 
   constructor(opts: LineFormatterOpts) {
-    opts = { colorize: true, timestamp: true, align: true, level: true, location: true, ...opts };
+    this.opts = { colorize: true, timestamp: true, align: true, level: true, location: true, ...opts };
   }
 
   format(ev: LogEvent) {
