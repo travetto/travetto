@@ -2,9 +2,8 @@ import * as fs from 'fs';
 import * as util from 'util';
 import { Readable } from 'stream';
 
-import { FsUtil } from '../bootstrap/fs-util';
-import { Env } from '../bootstrap/env';
-import { ScanFs } from '../bootstrap/scan-fs';
+import { EnvUtil, ScanFs, FsUtil } from '@travetto/boot';
+import { Env } from './env';
 
 import { AppError } from './error';
 
@@ -141,5 +140,5 @@ export class $ResourceManager {
 
 export const ResourceManager = new $ResourceManager([
   ...Env.appRoots,
-  ...Env.getList('RESOURCE_ROOTS')
+  ...EnvUtil.getList('RESOURCE_ROOTS')
 ]);

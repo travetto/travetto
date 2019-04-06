@@ -1,13 +1,14 @@
-// @ts-check
+import * as commander from 'commander';
+import { Util, CompletionConfig } from '@travetto/cli/src/util';
 
-function init() {
-  const { Util } = require('@travetto/cli/src/util');
+export function init() {
   return Util.program.command('clean')
     .option('-q, --quiet', 'Quiet operation')
-    .action(cmd => {
-      const { AppCache } = require('../bootstrap/cache');
+    .action(async (cmd: commander.Command) => {
+      const { AppCache } = await import('../src/app-cache');
       try {
-        require('./lib').clean();
+        AppCache.clear(true);
+
         if (!cmd.quiet) {
           console.log(`${Util.colorize.success('Successfully')} deleted temp dir ${Util.colorize.path(AppCache.cacheDir)}`);
         }
@@ -17,11 +18,9 @@ function init() {
     });
 }
 
-function complete(c) {
+export function complete(c: CompletionConfig) {
   c.all.push('clean');
   c.clean = {
     '': ['--quiet']
   };
 }
-
-module.exports = { complete, init };

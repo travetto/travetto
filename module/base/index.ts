@@ -1,5 +1,6 @@
 /// <reference path="./src/error.d.ts" />
 
+export * from './src/app-info';
 export * from './src/stacktrace';
 export * from './src/error';
 export * from './src/shutdown';
