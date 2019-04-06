@@ -41,7 +41,7 @@
     "url": "https://github.com/travetto/travetto.git"
   },
   "scripts": {
-    "postinstall": "node -e 'require(\"./bin/bootstrap\"); require(\"./src/app-cache\").AppCache.clear()",
+    "postinstall": "node -e 'require(\"./bin/init\"); require(\"./src/app-cache\").AppCache.clear()'",
     "prepublish": "tsc --project . && mv main.js index.js && mv main.d.ts index.d.ts",
     "clean": "rm -f src/*.d.ts src/*.js index.js index.d.ts"
   },

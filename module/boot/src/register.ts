@@ -137,7 +137,7 @@ export class RegisterUtil {
     return this.compileTypescript(m, this.resolveFrameworkDevFile(tsf));
   }
 
-  static registerLoaders() {
+  static init() {
     // @ts-ignore
     ts = global.ts = new Proxy({}, {
       get(t, p, r) {

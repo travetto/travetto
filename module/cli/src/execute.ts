@@ -1,26 +1,25 @@
-// @ts-check
-const commander = require('commander');
+import * as commander from 'commander';
+import * as fs from 'fs';
+import { FsUtil } from '@travetto/boot';
+
+import { Util, CompletionConfig } from './util';
 
 commander
   // @ts-ignore
   .version(require('../package.json').version);
 
-const fs = require('fs');
-
-const { FsUtil } = require('./fs-util');
-const { Util } = require('./util');
-
 const PREFIX = 'travetto-cli';
 
-const Execute = {
-  requireModule(f) {
+export class Execute {
+  static requireModule(f: string) {
     let p = FsUtil.toUnix(fs.realpathSync(`${FsUtil.cwd}/node_modules/.bin/${f}`));
     if (!p.startsWith(FsUtil.cwd)) {
       p = `${FsUtil.cwd}/node_modules/@travetto/${p.split('travetto/module/')[1]}`;
     }
     return require(p);
-  },
-  loadAllPlugins() {
+  }
+
+  static loadAllPlugins() {
     const BIN_DIR = `${FsUtil.cwd}/node_modules/.bin`;
     if (fs.existsSync(BIN_DIR)) {
       const files = fs.readdirSync(BIN_DIR).filter(x => x.startsWith(`${PREFIX}-`));
@@ -30,23 +29,26 @@ const Execute = {
       }
       return all;
     }
-  },
-  loadSinglePlugin(cmd) {
+    return [];
+  }
+  static loadSinglePlugin(cmd: string) {
     return Execute.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
-  },
-  async getCompletion(args) {
-    const compl = { all: [] };
+  }
+
+  static async getCompletion(args: string[]) {
+    const compl: CompletionConfig = { all: { all: [] } };
+
     const cmd = args.shift() || '';
-    await Promise.all(Execute.loadAllPlugins().map(x => x.complete(compl)));
+    await Promise.all(this.loadAllPlugins().map(x => x.complete(compl)));
 
     let last = cmd;
     let opts = [];
 
     if (!compl[cmd]) {
-      opts = compl.all;
+      opts = compl.all.all;
     } else {
       last = args.pop() || '';
-      let second = args.pop() || '';
+      const second = args.pop() || '';
       let flag = '';
 
       if (last in compl[cmd]) {
@@ -64,8 +66,8 @@ const Execute = {
     }
 
     return last ? opts.filter(x => x.startsWith(last)) : opts.filter(x => !x.startsWith('-'));
-  },
-  run(args) {
+  }
+  static run(args: string[]) {
     const cmd = args[2];
     const hasCmd = cmd && !cmd.startsWith('-');
     const wantsHelp = args.includes('-h') || args.includes('--help');
@@ -77,7 +79,7 @@ const Execute = {
 
     if (hasCmd) {
       try {
-        const prog = Execute.loadSinglePlugin(cmd).init();
+        const prog = this.loadSinglePlugin(cmd).init();
         if (wantsHelp) {
           Util.showHelp(prog);
         }
@@ -85,7 +87,7 @@ const Execute = {
         Util.showHelp(commander, `Unknown command ${cmd}`);
       }
     } else {
-      Execute.loadAllPlugins().map(x => x.init());
+      this.loadAllPlugins().map(x => x.init());
       if (!cmd || wantsHelp) {
         Util.showHelp(commander);
       }
@@ -93,6 +95,4 @@ const Execute = {
 
     commander.parse(args);
   }
-};
-
-module.exports = { Execute };
+}

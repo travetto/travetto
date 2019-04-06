@@ -10,6 +10,7 @@
     "travetto": "bin/travetto.js"
   },
   "dependencies": {
+    "@travetto/boot": "^0.6.0-rc.0",
     "commander": "^2.19.0",
     "select-shell": "^1.1.2"
   },
@@ -23,7 +24,6 @@
   "main": "bin/travetto.js",
   "name": "@travetto/cli",
   "files": [
-    "index.ts",
     "src",
     "bin"
   ],

@@ -1,13 +1,14 @@
 {
   "exclude": [
-    "bin/"
+    "bin"
   ],
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2018",
     "strict": true,
-    "strictPropertyInitialization": false,
     "declaration": true,
+    "strictPropertyInitialization": false,
+    "sourceMap": false,
     "lib": [
       "es2015.proxy",
       "es2018"
