@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { FsUtil } from './fs-util';
+import { FsUtil } from '@travetto/boot';
 
 const fsReaddir = util.promisify(fs.readdir);
 const fsLstat = util.promisify(fs.lstat);

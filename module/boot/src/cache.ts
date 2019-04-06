@@ -1,6 +1,7 @@
-// @ts-check
+import * as os from 'os';
 import * as fs from 'fs';
 import { FsUtil } from './fs-util';
+import { EnvUtil } from './env';
 
 function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
   return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
@@ -13,8 +14,13 @@ export class FileCache {
   readonly cacheDir: string;
 
   constructor(cwd: string, cacheDir?: string) {
-    this.cwd = FsUtil.toUnix(cwd || FsUtil.cwd);
-    this.cacheDir = FsUtil.toUnix(cacheDir || FsUtil.cacheDir);
+    if (!cacheDir) {
+      const peTcd = process.env.TRV_CACHE_DIR;
+      const defCache = FsUtil.joinUnix(os.tmpdir(), EnvUtil.cwd.replace(/[\/:]/g, '_'));
+      cacheDir = peTcd === 'PID' ? `${defCache}_${process.pid}` : (peTcd && peTcd !== '-' ? peTcd : defCache);
+    }
+    this.cwd = FsUtil.toUnix(cwd || EnvUtil.cwd);
+    this.cacheDir = FsUtil.toUnix(cacheDir);
     this.cache = {};
   }
 
@@ -58,11 +64,13 @@ export class FileCache {
     return this.cache[full];
   }
 
-  clear() {
+  clear(quiet = false) {
     if (this.cacheDir) {
       try {
         FsUtil.unlinkRecursiveSync(this.cacheDir);
-        console.debug(`Deleted ${this.cacheDir}`);
+        if (!quiet) {
+          console.debug(`Deleted ${this.cacheDir}`);
+        }
         this.cache = {}; // Clear it out
       } catch (e) {
         console.error('Failed in deleting');
@@ -89,31 +97,3 @@ export class FileCache {
     return out;
   }
 }
-
-class $AppCache extends FileCache {
-  init() {
-    super.init();
-
-    try {
-      // Ensure we have access before trying to delete
-      fs.accessSync(this.cacheDir, fs.constants.W_OK);
-    } catch (e) {
-      return; // Skip trying to delete;
-    }
-
-    for (const f of fs.readdirSync(this.cacheDir)) {
-      const full = this.fromEntryName(f);
-      try {
-        this.removeExpiredEntry(full);
-      } catch (e) {
-        // Only care if it's source, otherwise might be dynamically cached data without backing file
-        if (full.endsWith('.ts') || full.endsWith('.js')) {
-          // Cannot remove file, source is missing
-          console.debug('Cannot read', e.message);
-        }
-      }
-    }
-  }
-}
-
-export const AppCache = new $AppCache(FsUtil.cwd, FsUtil.cacheDir);

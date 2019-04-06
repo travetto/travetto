@@ -14,29 +14,36 @@
     "travetto-cli-boot": "bin/travetto-cli-boot.js"
   },
   "dependencies": {
-    "@travetto/boot": "^0.6.0-rc.0"
+    "@types/node": "^11.13.0",
+    "trace": "^3.1.1",
+    "tslib": "^1.9.3",
+    "typescript": "^3.4.2"
   },
-  "description": "Application phase management, environment config and common utilities for travetto applications.",
+  "description": "Bootstrapping and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
   "keywords": [
-    "shutdown-helper",
-    "file-watcher",
-    "filesystem-traversal",
+    "bootstrapping",
+    "caching",
     "travetto",
     "typescript"
   ],
   "license": "MIT",
-  "main": "index.ts",
+  "main": "index.js",
   "files": [
-    "index.ts",
+    "index.js",
+    "index.d.ts",
     "src",
     "bin",
-    "support",
     "tsconfig.json"
   ],
-  "name": "@travetto/base",
+  "name": "@travetto/boot",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
+  },
+  "scripts": {
+    "postinstall": "node -e 'require(\"./bin/bootstrap\"); require(\"./src/app-cache\").AppCache.clear()",
+    "prepublish": "tsc --project . && mv main.js index.js && mv main.d.ts index.d.ts",
+    "clean": "rm -f src/*.d.ts src/*.js index.js index.d.ts"
   },
   "version": "0.6.0-rc.6"
 }
