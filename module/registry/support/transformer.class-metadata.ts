@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { FsUtil } from '@travetto/base/bootstrap';
+import { FsUtil, RegisterUtil } from '@travetto/boot';
 import { Util } from '@travetto/base';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 
@@ -66,7 +66,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
 export const ClassMetadataTransformer = {
   transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => ({
-    module: FsUtil.computeModuleFromFile(file.fileName),
+    module: RegisterUtil.computeModuleFromFile(file.fileName),
     file: file.fileName
   }), visitNode),
   phase: 'before',

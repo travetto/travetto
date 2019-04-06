@@ -1,8 +1,8 @@
 import * as ts from 'typescript';
 import { dirname, } from 'path';
 
-import { Env, AppInfo, FsUtil } from '@travetto/base/bootstrap';
-import { Util } from '@travetto/base';
+import { FsUtil, RegisterUtil } from '@travetto/boot';
+import { Env, AppInfo, Util } from '@travetto/base';
 
 export type Import = { path: string, ident: ts.Identifier };
 export type DecList = ts.NodeArray<ts.Decorator>;
@@ -223,7 +223,7 @@ export class TransformUtil {
               .replace(/^\.\//, `${dirname(state.path)}/`));
 
             if (process.env.TRV_FRAMEWORK_DEV) {
-              path = FsUtil.resolveFrameworkDevFile(path);
+              path = RegisterUtil.resolveFrameworkDevFile(path);
             }
 
             if (stmt.importClause) {

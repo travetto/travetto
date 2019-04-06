@@ -1,6 +1,7 @@
-import { Env } from '../bootstrap/env';
-import { FsUtil } from '../bootstrap/fs-util';
-import { ScanEntry, ScanFs } from '../bootstrap/scan-fs';
+import { FsUtil, RegisterUtil } from '@travetto/boot';
+
+import { Env } from './env';
+import { ScanEntry, ScanFs } from './scan-fs';
 
 type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
 
@@ -24,7 +25,7 @@ export class ScanApp {
 
       if (process.env.TRV_FRAMEWORK_DEV) {
         this.cache[key] = this.cache[key].map(x => {
-          x.file = FsUtil.resolveFrameworkDevFile(x.file);
+          x.file = RegisterUtil.resolveFrameworkDevFile(x.file);
           x.module = FsUtil.toUnix(x.file).replace(`${Env.cwd}/`, '');
           return x;
         });

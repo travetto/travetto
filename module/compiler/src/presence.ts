@@ -1,7 +1,10 @@
 import * as path from 'path';
 
-import { Watcher, ScanApp, Shutdown } from '@travetto/base';
-import { ScanEntry, Env, ScanHandler, FsUtil } from '@travetto/base/bootstrap';
+import {
+  ScanEntry, Env, ScanHandler,
+  Watcher, ScanApp, Shutdown
+} from '@travetto/base';
+import { FsUtil } from '@travetto/boot';
 
 export interface Listener {
   added(name: string): any;
@@ -76,7 +79,7 @@ export class FilePresenceManager {
   }
 
   init() {
-    const SRC_RE = FsUtil.appRootMatcher(this.rootPaths);
+    const SRC_RE = Env.appRootMatcher(this.rootPaths);
 
     const rootFiles = ScanApp.findFiles('.ts', x => SRC_RE.test(x) && this.validFile(x)) // Only watch own files
       .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable

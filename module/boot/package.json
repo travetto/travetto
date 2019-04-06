@@ -30,6 +30,7 @@
   "license": "MIT",
   "main": "index.js",
   "files": [
+    "tsconfig.json",
     "index.js",
     "index.d.ts",
     "src",

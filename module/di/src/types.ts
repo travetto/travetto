@@ -36,7 +36,10 @@ export interface ApplicationParameter {
   title?: string;
   type?: string;
   subtype?: string;
-  meta?: any;
+  meta?: {
+    choices: string[];
+    [key: string]: any;
+  };
   def?: string;
   optional?: boolean;
 }

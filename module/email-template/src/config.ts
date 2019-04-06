@@ -1,4 +1,4 @@
-import { FsUtil } from '@travetto/base/bootstrap';
+import { FsUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
 

@@ -7,7 +7,7 @@ import match = require('mime-match');
 import { Request } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 import { AppError } from '@travetto/base';
-import { FsUtil } from '@travetto/base/bootstrap';
+import { FsUtil } from '@travetto/boot';
 
 import { AssetRestConfig } from './config';
 

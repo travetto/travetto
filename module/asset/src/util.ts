@@ -6,7 +6,7 @@ import * as os from 'os';
 import * as crypto from 'crypto';
 import { IncomingMessage } from 'http';
 
-import { FsUtil } from '@travetto/base/bootstrap';
+import { FsUtil } from '@travetto/boot';
 import { HttpRequest } from '@travetto/net';
 
 import { Asset, AssetFile } from './model';

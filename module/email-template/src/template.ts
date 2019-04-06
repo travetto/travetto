@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { AppCache, Env, FsUtil } from '@travetto/base/bootstrap';
+import { AppCache, EnvUtil, FsUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
 import { Injectable, Inject } from '@travetto/di';
 import { MailTemplateEngine, MailTemplateContext } from '@travetto/email';
@@ -19,7 +19,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
   private cache: { [key: string]: { html: string, text: string } } = {};
 
-  private defaultTemplateWidth = Env.getInt('EMAIL_WIDTH', 580);
+  private defaultTemplateWidth = EnvUtil.getInt('EMAIL_WIDTH', 580);
 
   @Inject()
   private config: MailTemplateConfig;

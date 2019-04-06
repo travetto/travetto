@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base/bootstrap';
+import { Env } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('elasticsearch.model')

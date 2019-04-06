@@ -1,9 +1,17 @@
-// @ts-check
-const { handleFailure, getAppList, getParamType, runApp, getAppByName } = require(`./lib`);
+import * as fs from 'fs';
+import * as commander from 'commander';
 
-const colorize = require('@travetto/cli/src/util').Util.colorize;
+import { Util, CompletionConfig } from '@travetto/cli/src/util';
 
-function getAppUsage(app) {
+import { handleFailure, getAppList, getParamType, runApp, getAppByName, CachedAppConfig } from './lib';
+const { colorize } = Util;
+
+interface DiCommand {
+  watchReal: boolean;
+  env?: string;
+}
+
+function getAppUsage(app: CachedAppConfig) {
   let usage = app.name;
 
   if (app.params) {
@@ -23,7 +31,7 @@ function getAppUsage(app) {
   return usage;
 }
 
-function generateAppHelpList(apps, cmd) {
+function generateAppHelpList(apps: CachedAppConfig[], cmd: DiCommand) {
   const choices = [];
   for (const conf of apps) {
     const lines = [];
@@ -55,9 +63,7 @@ function generateAppHelpList(apps, cmd) {
 }
 
 function init() {
-  let listHelper;
-
-  const { Util } = require('@travetto/cli/src/util');
+  let listHelper: Function;
 
   return Util.program
     .command('run [application] [args...]')
@@ -76,7 +82,7 @@ function init() {
     .option('-a, --app [app]', 'Application root, defaults to associated root by name')
     .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', /^(1|0|yes|no|on|off|auto|true|false)$/i)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
-    .action(async (app, args, cmd) => {
+    .action(async (app: string, args: string[], cmd: commander.Command & DiCommand) => {
       cmd.env = cmd.env || process.env.ENV || process.env.env || undefined;
       cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
 
@@ -120,7 +126,7 @@ function init() {
         if (err.message.startsWith('Invalid parameter')) {
           console.error(err.message);
           console.error();
-          console.error(`Usage: ${getAppUsage((await getAppByName(app)))}`);
+          console.error(`Usage: ${getAppUsage((await getAppByName(app))!)}`);
         } else {
           handleFailure(err);
         }
@@ -129,14 +135,17 @@ function init() {
     });
 }
 
-async function complete(c) {
+export async function complete(c: CompletionConfig) {
   const apps = await getAppList();
   const env = ['prod', 'dev'];
   const bool = ['yes', 'no'];
-  const profiles = require('fs').readdirSync(`${process.cwd()}`).filter(x => x.endsWith('.yml')).map(x => x.replace('.yml', ''));
+  const profiles = fs.readdirSync(process.cwd())
+    .filter(x => x.endsWith('.yml'))
+    .map(x => x.replace('.yml', ''));
+
   profiles.push('application');
   c.all.push('run');
-  c.run = {
+  c.task.run = {
     '': apps.map(x => x.name).concat(['--env', '--watch', '--profile']),
     '--env': env,
     '-e': env,
@@ -146,5 +155,3 @@ async function complete(c) {
     '-p': profiles,
   };
 }
-
-module.exports = { init, complete };

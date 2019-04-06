@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 
-import { Env, FsUtil } from '@travetto/base/bootstrap';
+import { Env } from '@travetto/base';
+import { RegisterUtil } from '@travetto/boot';
 import { TransformUtil, TransformerState } from '@travetto/compiler';
 
 import { LogLevels } from '../src/types';
@@ -38,7 +39,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
       file: state.source.fileName,
       line: loc.line + 1,
       level,
-      category: FsUtil.computeModuleFromFile(state.source.fileName!)
+      category: RegisterUtil.computeModuleFromFile(state.source.fileName!)
     });
 
     const args = node.arguments.slice(0);

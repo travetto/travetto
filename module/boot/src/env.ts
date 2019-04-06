@@ -1,7 +1,7 @@
 export class EnvUtil {
 
-  static get(k: string, def?: string): string | undefined;
   static get(k: string, def: string): string;
+  static get(k: string, def?: string): string | undefined;
   static get(k: string, def?: string | undefined): string | undefined {
     const temp = process.env[k] || process.env[k.toLowerCase()] || process.env[k.toUpperCase()];
     return temp === undefined ? def : temp;

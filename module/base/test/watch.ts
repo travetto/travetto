@@ -2,10 +2,10 @@ import * as fs from 'fs';
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
+import { FsUtil } from '@travetto/boot';
 
-import { Env } from '../bootstrap/env';
-import { FsUtil } from '../bootstrap/fs-util';
-import { ScanFs } from '../bootstrap/scan-fs';
+import { Env } from '../src/env';
+import { ScanFs } from '../src/scan-fs';
 import { Watcher } from '../src/watch';
 
 @Suite()

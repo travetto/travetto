@@ -1,6 +1,5 @@
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
-import { Util } from '@travetto/base';
-import { Env } from '@travetto/base/bootstrap';
+import { Env, Util } from '@travetto/base';
 import { RetargettingHandler } from '@travetto/compiler';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig, ApplicationConfig } from './types';

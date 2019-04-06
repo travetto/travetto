@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base/bootstrap';
+import { Env } from '@travetto/base';
 
 import { ParentCommChannel, CommUtil, WorkUtil } from '@travetto/worker';
 import { Events } from './types';

@@ -20,7 +20,7 @@ export function init() {
 
 export function complete(c: CompletionConfig) {
   c.all.push('clean');
-  c.clean = {
+  c.task.clean = {
     '': ['--quiet']
   };
 }

@@ -2,7 +2,7 @@ import * as Mustache from 'mustache';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { FsUtil } from '@travetto/base/bootstrap';
+import { FsUtil } from '@travetto/boot';
 import { CommandService } from '@travetto/exec';
 
 export class TemplateUtil {

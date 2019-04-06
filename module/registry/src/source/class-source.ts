@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
-import { Env, AppInfo, FsUtil } from '@travetto/base/bootstrap';
-import { ScanApp } from '@travetto/base';
+import { Env, AppInfo, ScanApp } from '@travetto/base';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';
@@ -76,7 +75,7 @@ export class CompilerClassSource implements ChangeSource<Class> {
 
   async init() {
     if (this.rootPaths.length) {
-      const rootsRe = FsUtil.appRootMatcher(this.rootPaths);
+      const rootsRe = Env.appRootMatcher(this.rootPaths);
 
       const entries = await ScanApp.findFiles('.ts', (f: string) => {
         return Compiler.presenceManager.validFile(f)
