@@ -1,7 +1,5 @@
 export class EnvUtil {
 
-  static cwd = process.cwd().replace(/[\/]+/g, '/').replace(/\/$/, '');
-
   static get(k: string, def?: string): string | undefined;
   static get(k: string, def: string): string;
   static get(k: string, def?: string | undefined): string | undefined {

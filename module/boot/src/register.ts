@@ -4,7 +4,6 @@ import * as fs from 'fs';
 
 import { FsUtil } from './fs-util';
 import { AppCache } from './app-cache';
-import { EnvUtil } from './env';
 
 let tsOpts: any;
 
@@ -21,8 +20,8 @@ export class RegisterUtil {
 
     let ns = '@sys';
 
-    if (mod.includes(EnvUtil.cwd)) {
-      mod = mod.split(EnvUtil.cwd)[1].replace(/^[\/]+/, '');
+    if (mod.includes(FsUtil.cwd)) {
+      mod = mod.split(FsUtil.cwd)[1].replace(/^[\/]+/, '');
       ns = '@app';
     }
 
@@ -71,12 +70,12 @@ export class RegisterUtil {
   static resolveFrameworkDevFile(pth: string) {
     if (pth.includes('@travetto')) {
       if (!this.subPkgName) {
-        const pkgName = require(FsUtil.joinUnix(EnvUtil.cwd, 'package.json')).name;
+        const pkgName = require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')).name;
         this.subPkgName = pkgName.split('/').pop();
       }
       pth = FsUtil.toUnix(pth).replace(/^.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
         const mid = this.subPkgName === name ? '' : `node_modules/@travetto/${name}`;
-        return `${EnvUtil.cwd}/${mid}${rest || ''}`;
+        return `${FsUtil.cwd}/${mid}${rest || ''}`;
       });
     }
     return pth;
@@ -107,8 +106,8 @@ export class RegisterUtil {
     let content;
     if (!AppCache.hasEntry(name)) {
       if (!tsOpts) {
-        const json = ts.readJsonConfigFile(`${EnvUtil.cwd}/tsconfig.json`, ts.sys.readFile);
-        tsOpts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, EnvUtil.cwd).options;
+        const json = ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, ts.sys.readFile);
+        tsOpts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options;
       }
 
       content = ts.transpile(this.prepareTranspile(tsf), tsOpts);

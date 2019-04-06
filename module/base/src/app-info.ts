@@ -1,6 +1,6 @@
-import { EnvUtil, FsUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 
-const pkg = require(FsUtil.joinUnix(EnvUtil.cwd, 'package.json'));
+const pkg = require(FsUtil.joinUnix(FsUtil.cwd, 'package.json'));
 
 const subName = pkg.name.split('/').pop();
 
