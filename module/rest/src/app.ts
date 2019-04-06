@@ -1,5 +1,4 @@
-import { AppInfo } from '@travetto/base/bootstrap';
-import { AppError } from '@travetto/base';
+import { AppInfo, AppError } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { Class, ChangeEvent } from '@travetto/registry';
 

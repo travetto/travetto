@@ -1,6 +1,5 @@
 /// <reference path="./error.d.ts" />
-import { HTTP_ERROR_CONVERSION } from '@travetto/base';
-import { Env } from '@travetto/base/bootstrap';
+import { Env, HTTP_ERROR_CONVERSION } from '@travetto/base';
 
 import { Response } from './types';
 import { MimeType } from './util/mime';

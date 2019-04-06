@@ -1,5 +1,6 @@
 import { Config } from '@travetto/config';
-import { AppInfo, FsUtil } from '@travetto/base/bootstrap';
+import { FsUtil } from '@travetto/boot';
+import { AppInfo } from '@travetto/base';
 
 import { Contact, License } from './types';
 

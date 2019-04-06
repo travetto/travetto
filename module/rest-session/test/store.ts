@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
-import { Env } from '@travetto/base/bootstrap';
+import { Env } from '@travetto/base';
 
 import { MemoryStore } from '../src/store/memory';
 

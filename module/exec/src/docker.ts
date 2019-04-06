@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { Env, FsUtil } from '@travetto/base/bootstrap';
+import { EnvUtil, FsUtil } from '@travetto/boot';
 import { Shutdown } from '@travetto/base';
 
 import { Exec } from './exec';
@@ -12,7 +12,7 @@ const fsWriteFile = util.promisify(fs.writeFile);
 export class DockerContainer {
 
   private static getContainerName(image: string, container?: string) {
-    return container || `${Env.get('DOCKER_NS', image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
+    return container || `${EnvUtil.get('DOCKER_NS', image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
   }
 
   private dockerCmd: string = 'docker';

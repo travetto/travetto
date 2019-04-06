@@ -1,4 +1,5 @@
-import { Env } from '@travetto/base/bootstrap';
+import { Env } from '@travetto/base';
+import { EnvUtil } from '@travetto/boot';
 
 import { LogEvent, LogListener, LogLevel, LogLevels, LogStream } from './types';
 import { LineFormatter } from './formatter/line';
@@ -9,7 +10,7 @@ const DEFAULT = Symbol('default');
 
 class $Logger {
 
-  static COLORIZE = (process.stdout.isTTY && !Env.isTrue('NO_COLOR')) || Env.isTrue('FORCE_COLOR');
+  static COLORIZE = (process.stdout.isTTY && !EnvUtil.isTrue('NO_COLOR')) || EnvUtil.isTrue('FORCE_COLOR');
 
   private listeners = new Map<string | symbol, LogListener>();
   private listenList: LogListener[] = [];
@@ -41,7 +42,7 @@ class $Logger {
   listen({ formatter, stdout, stderr, key }: Partial<LogStream> = {}) {
     formatter = formatter || new LineFormatter({
       colorize: $Logger.COLORIZE,
-      timestamp: !Env.isFalse('log_time'),
+      timestamp: !EnvUtil.isFalse('log_time'),
       time_millis: !!this.flags.trace
     });
 

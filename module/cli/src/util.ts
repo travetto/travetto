@@ -16,8 +16,11 @@ const COLORS = {
 };
 
 export interface CompletionConfig {
-  [key: string]: {
-    [key: string]: string[]
+  all: string[];
+  task: {
+    [key: string]: {
+      [key: string]: string[]
+    }
   };
 }
 
@@ -64,29 +67,6 @@ export class Util {
       const text: Buffer[] = [];
       const err: Buffer[] = [];
       const proc = child_process.fork(cmd, args || [], {
-        env: { ...process.env, ...(env || {}) },
-        cwd: FsUtil.cwd,
-        stdio: ['pipe', 'pipe', 'pipe', 'ipc']
-      });
-      proc.stdout!.on('data', v => text.push(v));
-      proc.stderr!.on('data', v => err.push(v));
-      proc.on('exit', v => {
-        if (v === 0) {
-          resolve(Buffer.concat(text).toString());
-        } else {
-          reject(Buffer.concat(err).toString());
-        }
-      });
-    });
-  }
-
-  static bootstrap(file: string, methodOrArgs: string | string[], env: { [key: string]: string | undefined }) {
-    return new Promise((resolve, reject) => {
-      const text: Buffer[] = [];
-      const err: Buffer[] = [];
-      const args = typeof methodOrArgs === 'string' ? [methodOrArgs] : methodOrArgs;
-
-      const proc = child_process.fork(process.argv0, ['-e', `require('@travetto/boot/bin/init').run('${file}', ${args.map(x => `'${x}`).join(', ')})`], {
         env: { ...process.env, ...(env || {}) },
         cwd: FsUtil.cwd,
         stdio: ['pipe', 'pipe', 'pipe', 'ipc']

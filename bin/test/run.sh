@@ -8,4 +8,4 @@ done
 
 export QUIET_INIT=1
 export DEBUG=0
-node -e 'require("./module/base/bin/bootstrap"); require("./bin/test").run()';
+node -e 'require("./module/boot/bin/init").run("./bin/test", "run")';

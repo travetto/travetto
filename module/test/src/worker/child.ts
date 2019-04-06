@@ -1,5 +1,5 @@
-import { PhaseManager, Shutdown } from '@travetto/base';
-import { FileCache, Env, FsUtil } from '@travetto/base/bootstrap';
+import { Env, PhaseManager, Shutdown } from '@travetto/base';
+import { FileCache, EnvUtil, FsUtil } from '@travetto/boot';
 import { CommUtil, ChildCommChannel } from '@travetto/worker';
 import { Events } from './types';
 
@@ -16,7 +16,7 @@ export class TestChildWorker extends ChildCommChannel<Event> {
   private runs = 0;
 
   constructor() {
-    super(Env.getInt('IDLE_TIMEOUT', 120000));
+    super(EnvUtil.getInt('IDLE_TIMEOUT', 120000));
 
     import('../runner/util').then(({ TestUtil }) => TestUtil.registerCleanup('worker'));
 
@@ -27,7 +27,7 @@ export class TestChildWorker extends ChildCommChannel<Event> {
     Shutdown.onShutdown(`test.worker.bufferOutput`,
       () => new Promise(res => setTimeout(res, 100)));
 
-    if (Env.isTrue('EXECUTION_REUSABLE')) {
+    if (EnvUtil.isTrue('EXECUTION_REUSABLE')) {
       setTimeout(_ => { }, Number.MAX_SAFE_INTEGER / 10000000);
     }
   }

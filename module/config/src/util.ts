@@ -1,8 +1,7 @@
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
-import { Env } from '@travetto/base/bootstrap';
-import { ScanApp, ResourceManager, Util } from '@travetto/base';
+import { Env, ScanApp, ResourceManager, Util } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 type Prim = number | string | boolean | null;

@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
+import { Env } from '@travetto/base';
 import { DockerContainer } from '@travetto/exec';
 import { Injectable } from '@travetto/di';
-import { Env, FsUtil } from '@travetto/base/bootstrap';
+import { FsUtil } from '@travetto/boot';
 import { ControllerRegistry } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 

@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base/bootstrap';
+import { EnvUtil } from '@travetto/boot';
 
 export class LogUtil {
 
@@ -6,14 +6,14 @@ export class LogUtil {
   static falsehood = () => false;
 
   static readEnvVal(key: string, def: string = '') {
-    if (Env.isFalse(key)) {
+    if (EnvUtil.isFalse(key)) {
       return;
     }
-    if (Env.isTrue(key)) {
+    if (EnvUtil.isTrue(key)) {
       return '*';
     }
 
-    let val = Env.get(key, def);
+    let val = EnvUtil.get(key, def);
     if (/,(@trv:)?[*],/.test(`,${val},`)) {
       if (!val.includes(',-')) {
         return '*';

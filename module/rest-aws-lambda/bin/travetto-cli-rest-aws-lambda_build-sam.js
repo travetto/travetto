@@ -5,7 +5,7 @@ const fs = require('fs');
 const writeFile = (f, c) => fs.writeFileSync(f, c, 'utf-8');
 
 const { Util } = require('@travetto/cli/src/util');
-const { FsUtil } = require('@travetto/base/bootstrap/fs-util');
+const { FsUtil } = require('@travetto/boot');
 
 function init() {
   return Util.program

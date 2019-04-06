@@ -30,9 +30,7 @@
   "files": [
     "index.ts",
     "src",
-    "bin",
-    "support",
-    "tsconfig.json"
+    "support"
   ],
   "name": "@travetto/base",
   "repository": {

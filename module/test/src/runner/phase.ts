@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base/bootstrap';
+import { EnvUtil } from '@travetto/boot';
 
 import { Consumer } from '../model/consumer';
 import { SuiteConfig, SuiteResult } from '../model/suite';
@@ -7,7 +7,7 @@ import { TestUtil } from './util';
 
 export const BREAKOUT = Symbol('breakout');
 
-const DEFAULT_PHASE_TIMEOUT = Env.getInt('DEFAULT_PHASE_TIMEOUT', 15000);
+const DEFAULT_PHASE_TIMEOUT = EnvUtil.getInt('DEFAULT_PHASE_TIMEOUT', 15000);
 
 export class ExecutionPhaseManager {
   private progress: ('all' | 'each')[] = [];

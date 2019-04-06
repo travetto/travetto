@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { TransformUtil, TransformerState } from '@travetto/compiler';
-import { FsUtil } from '@travetto/base/bootstrap';
+import { FsUtil } from '@travetto/boot';
 import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT, DEEP_LITERAL_TYPES } from '../src/assert/types';
 
 const ASSERT_CMD = 'assert';

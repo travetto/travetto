@@ -3,9 +3,9 @@ export const init = {
   action: async () => {
     const { ConfigSource } = await import('@travetto/config');
     const { ExecUtil, DockerContainer } = await import('@travetto/exec');
-    const { Env } = await import('@travetto/base/bootstrap');
+    const { EnvUtil } = await import('@travetto/boot');
 
-    const defPort = Env.getInt('MODEL_MONGO_PORT', 27017);
+    const defPort = EnvUtil.getInt('MODEL_MONGO_PORT', 27017);
 
     try {
       await ExecUtil.waitForPort(defPort, 10);

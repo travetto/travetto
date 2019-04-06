@@ -1,4 +1,4 @@
-import { Env } from '../bootstrap/env';
+import { Env } from '../src/env';
 import { Shutdown } from '../src/shutdown';
 import { Stacktrace } from '../src/stacktrace';
 

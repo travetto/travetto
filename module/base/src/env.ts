@@ -21,16 +21,16 @@ class $Env {
   readonly appRoots: string[];
 
   constructor() {
-    this.prod = EnvUtil.computeNodeEnv().includes(EnvUtil.PROD_KEY);
+    this.prod = this.computeNodeEnv().includes(PROD_KEY);
     this.dev = !this.prod;
 
-    this.profiles = EnvUtil.computeProfiles();
+    this.profiles = this.computeProfiles();
     this.profileSet = new Set(this.profiles);
-    this.appRoots = EnvUtil.computeAppRoots();
+    this.appRoots = this.computeAppRoots();
 
     this.watch = EnvUtil.isTrue('watch');
-    this.debug = EnvUtil.computeLogLevel('debug', this.dev ? '*' : '');
-    this.trace = EnvUtil.computeLogLevel('trace', '');
+    this.debug = this.computeLogLevel('debug', this.dev ? '*' : '');
+    this.trace = this.computeLogLevel('trace', '');
     this.quietInit = EnvUtil.isTrue('quiet_init');
 
     this.initLogging(this.debug, this.trace);

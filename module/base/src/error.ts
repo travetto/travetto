@@ -1,5 +1,5 @@
 import { Stacktrace } from './stacktrace';
-import { Env } from '../bootstrap/env';
+import { Env } from './env';
 
 const ERROR_CATEGORIES_WITH_CODES = {
   general: [500, 501],

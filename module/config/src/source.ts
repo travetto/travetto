@@ -1,5 +1,4 @@
-import { Util } from '@travetto/base';
-import { Env } from '@travetto/base/bootstrap';
+import { Env, Util } from '@travetto/base';
 
 import { ConfigUtil, Nested } from './util';
 

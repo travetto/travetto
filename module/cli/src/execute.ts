@@ -4,9 +4,7 @@ import { FsUtil } from '@travetto/boot';
 
 import { Util, CompletionConfig } from './util';
 
-commander
-  // @ts-ignore
-  .version(require('../package.json').version);
+commander.version(require('../package.json').version);
 
 const PREFIX = 'travetto-cli';
 

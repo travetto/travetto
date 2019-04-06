@@ -1,8 +1,8 @@
 import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
 
-import { FileCache, Env, FsUtil } from '@travetto/base/bootstrap';
-import { AppError, Util } from '@travetto/base';
+import { FileCache, RegisterUtil } from '@travetto/boot';
+import { Env, AppError, Util } from '@travetto/base';
 
 import { CompilerUtil } from './util';
 
@@ -52,7 +52,7 @@ export class SourceManager {
     if (force || !this.hasCached(fileName)) {
       console.trace('Emitting', fileName);
 
-      const content = FsUtil.prepareTranspile(fileName);
+      const content = RegisterUtil.prepareTranspile(fileName);
 
       let hash = 0;
 

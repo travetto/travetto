@@ -6,8 +6,8 @@ const readFile = f => fs.readFileSync(f, 'utf-8');
 const writeFile = (f, c) => fs.writeFileSync(f, c, 'utf-8');
 
 const { Util } = require('@travetto/cli/src/util');
-const { FsUtil } = require('@travetto/base/bootstrap/fs-util');
-const { ScanFs } = require('@travetto/base/bootstrap/scan-fs');
+const { FsUtil } = require('@travetto/boot');
+const { ScanFs } = require('@travetto/base');
 
 function init() {
   const cp = require('child_process');

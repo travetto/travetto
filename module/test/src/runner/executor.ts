@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
-import { Env, FsUtil } from '@travetto/base/bootstrap';
+import { Env } from '@travetto/base';
+import { EnvUtil, FsUtil } from '@travetto/boot';
 
 import { TestRegistry } from '../registry';
 import { TestConfig, TestResult } from '../model/test';
@@ -194,7 +195,7 @@ export class TestExecutor {
       return;
     }
 
-    if (Env.isTrue('DEBUGGER')) {
+    if (EnvUtil.isTrue('DEBUGGER')) {
       await new Promise(t => setTimeout(t, 100));
     }
 

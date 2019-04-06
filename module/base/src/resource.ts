@@ -2,8 +2,9 @@ import * as fs from 'fs';
 import * as util from 'util';
 import { Readable } from 'stream';
 
-import { EnvUtil, ScanFs, FsUtil } from '@travetto/boot';
+import { EnvUtil, FsUtil } from '@travetto/boot';
 import { Env } from './env';
+import { ScanFs } from './scan-fs';
 
 import { AppError } from './error';
 
