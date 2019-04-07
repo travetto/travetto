@@ -2,9 +2,8 @@ import { PhaseManager } from '@travetto/base';
 import { State } from '../runner/runner';
 
 export class StandardWorker {
-  static async run(opts: State, args: string[]) {
+  static async run(opts: State) {
     try {
-      await PhaseManager.init('bootstrap', 'compiler').run();
       const { Compiler } = await import('@travetto/compiler');
 
       // Pre compile all
@@ -22,7 +21,7 @@ export class StandardWorker {
         consumer: opts.consumer,
         mode: opts.mode,
         concurrency: opts.concurrency,
-        args
+        args: opts.args
       }).run();
       return res ? 0 : 1;
     } catch (e) {

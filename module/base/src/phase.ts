@@ -14,6 +14,10 @@ export class PhaseManager {
     return mgr;
   }
 
+  static run(scope: string = 'bootstrap') {
+    return this.init(scope).run();
+  }
+
   initializers: Initializer[] = [];
 
   constructor(public scope: string) { }

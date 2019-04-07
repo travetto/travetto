@@ -1,26 +1,26 @@
-// @ts-check
+import * as path from 'path';
+import * as fs from 'fs';
+import * as commander from 'commander';
 
-const path = require('path');
-const fs = require('fs');
-const writeFile = (f, c) => fs.writeFileSync(f, c, 'utf-8');
+import { Util } from '@travetto/cli/src/util';
+import { FsUtil } from '@travetto/boot';
 
-const { Util } = require('@travetto/cli/src/util');
-const { FsUtil } = require('@travetto/boot');
-
-function init() {
+export function init() {
   return Util.program
     .command('rest-aws-lambda:build-sam')
     .option('-e --env [env]', 'Environment name', 'prod')
     .option('-o --output [output]', 'Output file', 'dist/template.yml')
-    .action(async (cmd) => {
+    .action(async (cmd: commander.Command) => {
       process.env.ENV = cmd.env;
 
       cmd.output = FsUtil.resolveUnix(FsUtil.cwd, cmd.output);
 
       FsUtil.mkdirp(path.dirname(cmd.output));
 
-      await require('@travetto/base/bin/bootstrap').run();
-      const { ControllerRegistry } = require('@travetto/rest');
+      const { PhaseManager } = await import('@travetto/base');
+      await PhaseManager.init('bootstrap').run();
+
+      const { ControllerRegistry } = await import('@travetto/rest');
 
       await ControllerRegistry.init();
       const controllers = ControllerRegistry.getClasses().map(x => ControllerRegistry.get(x));
@@ -28,8 +28,6 @@ function init() {
       const { template } = require(FsUtil.resolveUnix(__dirname, '../resources/template.yml.js'));
       const sam = template(controllers, FsUtil.resolveUnix(__dirname, '../resources'));
 
-      writeFile(cmd.output, sam);
+      fs.writeFileSync(cmd.output, sam, 'utf-8');
     });
 }
-
-module.exports = { init };

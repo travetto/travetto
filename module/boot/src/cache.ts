@@ -10,7 +10,7 @@ export class FileCache {
   private cache: { [key: string]: fs.Stats } = {};
 
   readonly cwd: string;
-  readonly cacheDir: string;
+  cacheDir: string;
 
   constructor(cwd: string, cacheDir?: string) {
     if (!cacheDir) {

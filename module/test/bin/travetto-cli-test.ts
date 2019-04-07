@@ -1,8 +1,7 @@
-// @ts-check
-const os = require('os');
+import * as os from 'os';
+import { Util, CompletionConfig } from '@travetto/cli/src/util';
 
-function init() {
-  const { Util } = require('@travetto/cli/src/util');
+export function init() {
   const Col = Util.colorize;
 
   return Util.program.command('test')
@@ -12,14 +11,15 @@ function init() {
     .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
     .action(async (args, cmd) => {
 
-      const { runTests, prepareEnv } = require('./lib');
+      const { runTests, prepareEnv } = await import('./lib');
 
       prepareEnv();
 
-      require('@travetto/base/bin/bootstrap');
+      const { PhaseManager } = await import('@travetto/base');
+      await PhaseManager.run();
 
       if (cmd.format === 'tap' && Util.HAS_COLOR) {
-        const { TapEmitter } = require('../src/consumer/tap');
+        const { TapEmitter } = await import('../src/consumer/tap');
         cmd.consumer = new TapEmitter(process.stdout, {
           assertDescription: Col.description,
           testDescription: Col.description,
@@ -46,16 +46,18 @@ function init() {
         return Util.showHelp(cmd, 'You must specify a file to run in single mode');
       }
 
-      const res = await runTests(cmd, args);
+      cmd.args = args;
+
+      const res = await runTests(cmd);
       process.exit(res);
     });
 }
 
-function complete(c) {
-  const formats = ['tap', 'json', 'event']
+export function complete(c: CompletionConfig) {
+  const formats = ['tap', 'json', 'event'];
   const modes = ['single', 'all'];
   c.all.push('test');
-  c.test = {
+  c.task.test = {
     '': ['--format', '--mode'],
     '--format': formats,
     '-f': formats,
@@ -63,5 +65,3 @@ function complete(c) {
     '-m': modes
   };
 }
-
-module.exports = { init, complete };

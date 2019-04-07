@@ -34,7 +34,7 @@ export class Execute {
   }
 
   static async getCompletion(args: string[]) {
-    const compl: CompletionConfig = { all: { all: [] } };
+    const compl: CompletionConfig = { all: [], task: {} };
 
     const cmd = args.shift() || '';
     await Promise.all(this.loadAllPlugins().map(x => x.complete(compl)));
@@ -42,25 +42,25 @@ export class Execute {
     let last = cmd;
     let opts = [];
 
-    if (!compl[cmd]) {
-      opts = compl.all.all;
+    if (!compl.task[cmd]) {
+      opts = compl.all;
     } else {
       last = args.pop() || '';
       const second = args.pop() || '';
       let flag = '';
 
-      if (last in compl[cmd]) {
+      if (last in compl.task[cmd]) {
         flag = last;
         last = '';
-      } else if (second in compl[cmd]) {
-        if (compl[cmd][second].includes(last)) {
+      } else if (second in compl.task[cmd]) {
+        if (compl.task[cmd][second].includes(last)) {
           flag = '';
           last = '';
         } else {
           flag = second;
         }
       }
-      opts = compl[cmd][flag];
+      opts = compl.task[cmd][flag];
     }
 
     return last ? opts.filter(x => x.startsWith(last)) : opts.filter(x => !x.startsWith('-'));
