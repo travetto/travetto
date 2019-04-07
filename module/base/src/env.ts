@@ -74,7 +74,7 @@ class $Env {
 
   computeNodeEnv() {
     const envs = ['node_env', 'env', 'profile'];
-    const all = envs.reduce((acc, x) => acc.concat(x), [] as string[]);
+    const all = envs.reduce((acc, x) => acc.concat(EnvUtil.getList(x)), [] as string[]);
     return all.map(x => PROD_ENV_MAPPING[x] || x);
   }
 

@@ -52,7 +52,7 @@ export class RegisterUtil {
     let line = 1;
 
     // Insert filename into all log statements for all components, when logger isn't loaded
-    if (!fileName.includes('cli/') && fileName.includes('src')) {
+    if (!fileName.includes('/cli/') && !fileName.includes('/bin/')) {
       fileContents = fileContents.replace(/(\bconsole[.](debug|info|trace|warn|log|error)[(])|\n/g, a => {
         if (a === '\n') {
           line += 1;
@@ -155,5 +155,12 @@ export class RegisterUtil {
     Module._load = (tfd ? this.frameworkModuleHandler : this.moduleLoaderHandler).bind(this);
     // @ts-ignore
     require.extensions['.ts'] = (tfd ? this.frameworkCompileTypescript : this.compileTypescript).bind(this);
+
+    return {
+      libRequire: (x: string) => {
+        const f = RegisterUtil.resolveFrameworkDevFile(`/${x}`);
+        return require(f);
+      }
+    };
   }
 }

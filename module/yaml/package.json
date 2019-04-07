@@ -13,6 +13,9 @@
     "travetto",
     "simple-yaml"
   ],
+  "dependencies": {
+    "@travetto/boot": "^0.6.0-rc.0"
+  },
   "license": "MIT",
   "main": "index.ts",
   "files": [

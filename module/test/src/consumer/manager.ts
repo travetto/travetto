@@ -6,6 +6,7 @@ import { JSONEmitter } from './json';
 import { ExecutionEmitter } from './execution';
 import { EventStream } from './event-stream';
 import { TapEmitter } from './tap';
+import { NoopConsumer } from './noop';
 
 import { AllResultsCollector } from './collector';
 
@@ -24,7 +25,7 @@ export class ConsumerManager {
     if (typeof consumer !== 'string') {
       consumers.push(consumer);
     } else {
-      const fmtClass = this.FORMAT_MAPPING[consumer];
+      const fmtClass = this.FORMAT_MAPPING[consumer] || NoopConsumer;
 
       if (fmtClass) {
         consumers.push(new fmtClass());

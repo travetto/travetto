@@ -1,6 +1,6 @@
-require('@travetto/boot/bin/init');
-
-require(`@travetto/base`).PhaseManager.run().then(() => {
-  const { Compiler } = require('../src/compiler');
-  return Compiler.compileAll();
-});
+require('@travetto/boot/bin/init')
+  .libRequire('@travetto/base').PhaseManager
+  .run().then(() => {
+    const { Compiler } = require('@travetto/compiler/src/compiler');
+    return Compiler.compileAll();
+  });

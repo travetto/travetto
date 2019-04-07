@@ -1,6 +1,6 @@
 import * as commander from 'commander';
 import * as child_process from 'child_process';
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, EnvUtil } from '@travetto/boot';
 
 const COLORS = {
   blue: `\x1b[94m`,
@@ -24,7 +24,7 @@ export interface CompletionConfig {
   };
 }
 
-const HAS_COLOR = process.stdout.isTTY && !/^(1|yes|on|true)$/i.test(`${process.env.NO_COLOR}`);
+const HAS_COLOR = process.stdout.isTTY && !EnvUtil.isTrue('NO_COLOR');
 
 function colorizeAny(color: keyof typeof COLORS, value: string | number | boolean): string;
 function colorizeAny(color: keyof typeof COLORS, value: any) {

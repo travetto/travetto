@@ -14,7 +14,7 @@ export class StandardWorker {
 
       TestUtil.registerCleanup('runner');
 
-      await PhaseManager.init('bootstrap', '*', 'registry').run();
+      await PhaseManager.init('bootstrap', '*', 'registry').run(); // Registry and up
 
       const res = await new Runner({
         format: opts.format,

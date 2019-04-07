@@ -5,7 +5,10 @@ import { TapEmitter } from './emitter';
 export async function run() {
 
   const child = child_process.spawn('npx', [
-    'lerna', '--no-sort', 'exec', '--no-bail', '--ignore', '@travetto/*-app', '--stream', '--',
+    'lerna', '--no-sort', 'exec', '--no-bail',
+    '--ignore', '@travetto/*-app',
+    '--ignore', '@travetto/cli',
+    '--stream', '--',
     'npx', 'travetto', 'test', '-f', 'event', '-c', '1'
   ], { shell: true, stdio: [null, null, 2] });
 
@@ -20,8 +23,9 @@ export async function run() {
   rl
     .on('line', function (line) {
       const space = line.indexOf(' ');
-      const body = line.substring(space + 1);
+      const body = line.substring(space + 1).trim();
       const name = line.substring(0, space - 1);
+
       try {
         emitter.onEvent(name, JSON.parse(body));
       } catch (e) {

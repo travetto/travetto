@@ -23,7 +23,7 @@ export class Session<T = any> {
       this[k] = data[k];
     }
 
-    if (!(this.expiresAt instanceof Date)) {
+    if (this.expiresAt && !(this.expiresAt instanceof Date)) {
       this.expiresAt = new Date(this.expiresAt as any);
     }
 
