@@ -39,7 +39,7 @@ class VerifyContext {
   @Test()
   @WithContext({})
   async nextContext() {
-    console.log(this.context.threads.size);
+    console.log(this.context['threads'].size);
     assert(this.context.get().name === undefined);
   }
 

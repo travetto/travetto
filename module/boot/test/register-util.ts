@@ -10,10 +10,10 @@ class RegisterUtilTests {
   @Test()
   async buildModuleName() {
     const modName = RegisterUtil.computeModuleFromFile(__filename);
-    assert(modName === '@app/test.fs-util');
+    assert(modName === '@app/test.register-util');
 
-    const modName2 = RegisterUtil.computeModuleFromFile('node_modules/@travetto/boot/src/fs-util.js');
-    assert(modName2 === '@trv:boot/src/fs-util');
+    const modName2 = RegisterUtil.computeModuleFromFile('node_modules/@travetto/boot/src/register-util.js');
+    assert(modName2 === '@trv:boot/register-util');
   }
 
 }

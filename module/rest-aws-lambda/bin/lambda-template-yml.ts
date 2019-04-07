@@ -1,6 +1,7 @@
-const { AppInfo } = require('@travetto/base/src/app-info');
+import { AppInfo } from '@travetto/base/src/app-info';
+import { ControllerConfig } from '@travetto/rest';
 
-exports.template = function template(controllers, lambdaDir) {
+export function template(controllers: ControllerConfig[], lambdaDir?: string) {
   return `
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
@@ -28,4 +29,4 @@ ${cont.endpoints.map(ep => `
 `.replace(/^\n|\n$/g, '')).join('\n')}
 `.replace(/^\n|\n$/g, '')).join('\n')}
 `.trim();
-};
+}

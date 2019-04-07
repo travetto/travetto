@@ -2,8 +2,6 @@ import { FsUtil } from '@travetto/boot';
 
 const pkg = require(FsUtil.joinUnix(FsUtil.cwd, 'package.json'));
 
-const subName = pkg.name.split('/').pop();
-
 export const AppInfo = {
   VERSION: pkg.version,
   NAME: pkg.name,
@@ -12,6 +10,5 @@ export const AppInfo = {
   LICENSE: pkg.license,
   AUTHOR: pkg.author,
   MAIN: pkg.main,
-  DESCRIPTION: pkg.description,
-  SUB_NAME: subName
+  DESCRIPTION: pkg.description
 };

@@ -14,10 +14,10 @@ export function init() {
       process.env.API_CLIENT_FORMATOPTIONS = cmd.formatOptions;
 
       const { PhaseManager } = await import('@travetto/base');
-      await PhaseManager.init('bootstrap').run();
+      await PhaseManager.run();
 
-      const { ClientGenerate } = await import('../src/client-generate');
       const { DependencyRegistry } = await import('@travetto/di');
+      const { ClientGenerate } = await import('../src/client-generate');
 
       const instance = await DependencyRegistry.getInstance(ClientGenerate);
       await instance.generate();

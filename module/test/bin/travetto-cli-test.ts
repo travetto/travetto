@@ -16,7 +16,7 @@ export function init() {
       prepareEnv();
 
       const { PhaseManager } = await import('@travetto/base');
-      await PhaseManager.run();
+      await PhaseManager.init('bootstrap', 'compiler').run();
 
       if (cmd.format === 'tap' && Util.HAS_COLOR) {
         const { TapEmitter } = await import('../src/consumer/tap');

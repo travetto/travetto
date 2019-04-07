@@ -87,7 +87,7 @@ export async function runApp(args: string[]) {
   }
 
   const { PhaseManager } = await import('@travetto/base');
-  await PhaseManager.init('bootstrap', 'compiler').run();
+  await PhaseManager.init('bootstrap').run();
 
   const { DependencyRegistry } = await import('../src/registry');
   await DependencyRegistry.runApplication(name, typedSub);
@@ -192,8 +192,21 @@ export async function getCachedAppList(): Promise<CachedAppConfig[]> {
   }
 }
 
-export function findApps() {
-  computeApps()
-    .then(resolved => require('fs').writeSync(1, `${JSON.stringify(resolved)}\n`))
-    .catch(err => handleFailure(err, 1));
+export async function findApps() {
+  try {
+    const resolved = await computeApps();
+    fs.writeSync(1, `${JSON.stringify(resolved)}\n`);
+  } catch (err) {
+    handleFailure(err, 1);
+    throw err;
+  }
+}
+
+export async function runAppDirect() {
+  try {
+    return runApp(process.argv.slice(2));
+  } catch (err) {  // If loaded directly as main entry, run, idx 2 is where non-node arguments start at
+    handleFailure(err, 1);
+    throw err;
+  }
 }

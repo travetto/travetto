@@ -1,11 +1,11 @@
-import { Env, PhaseManager, Shutdown } from '@travetto/base';
-import { FileCache, EnvUtil, FsUtil } from '@travetto/boot';
+import { EnvUtil, FsUtil } from '@travetto/boot';
+import { PhaseManager, Shutdown } from '@travetto/base';
 import { CommUtil, ChildCommChannel } from '@travetto/worker';
 import { Events } from './types';
 
 type Event = { type: string, error?: any, file?: string, class?: string, method?: string };
 
-const FIXED_MODULES = new Set(['base', 'config', 'compiler', 'exec', 'worker', 'yaml']);
+const FIXED_MODULES = new Set(['boot', 'base', 'config', 'compiler', 'exec', 'worker', 'yaml']);
 const IS_SUPPORT_FILE = /\/support\//;
 const IS_SELF_FILE = /\/test\/src\/worker\//;
 const GET_FILE_MODULE = /^.*travetto(?:\/module)?\/([^/]+)\/(?:src\/|index).*$/;
@@ -19,13 +19,6 @@ export class TestChildWorker extends ChildCommChannel<Event> {
     super(EnvUtil.getInt('IDLE_TIMEOUT', 120000));
 
     import('../runner/util').then(({ TestUtil }) => TestUtil.registerCleanup('worker'));
-
-    if (process.env.TRV_CACHE_DIR === 'PID') {
-      Shutdown.onShutdown(`test.worker.clearWorkspace`, () => new FileCache(Env.cwd).clear(), true);
-    }
-
-    Shutdown.onShutdown(`test.worker.bufferOutput`,
-      () => new Promise(res => setTimeout(res, 100)));
 
     if (EnvUtil.isTrue('EXECUTION_REUSABLE')) {
       setTimeout(_ => { }, Number.MAX_SAFE_INTEGER / 10000000);
@@ -52,13 +45,17 @@ export class TestChildWorker extends ChildCommChannel<Event> {
   async initEvent() {
     console.debug('Init');
 
-    const mgr = PhaseManager.init('bootstrap', 'compiler');
+    // const mgr = PhaseManager.init('bootstrap', 'compiler');
 
-    // Init compiler
+    // // Init compiler
+    // this.compiler = (await import('@travetto/compiler')).Compiler;
+
+    // // Initialize
+    // await mgr.run();
+
+    // await PhaseManager.init('bootstrap', 'compiler').run();
     this.compiler = (await import('@travetto/compiler')).Compiler;
 
-    // Initialize
-    await mgr.run();
     this.send(Events.INIT_COMPLETE);
   }
 

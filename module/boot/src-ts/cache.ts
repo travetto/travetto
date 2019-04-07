@@ -10,17 +10,19 @@ export class FileCache {
   private cache: { [key: string]: fs.Stats } = {};
 
   readonly cwd: string;
-  cacheDir: string;
+  readonly cacheDir: string;
 
   constructor(cwd: string, cacheDir?: string) {
+    this.cache = {};
+    this.cwd = FsUtil.toUnix(cwd || FsUtil.cwd);
+
     if (!cacheDir) {
       const peTcd = process.env.TRV_CACHE_DIR;
       const defCache = FsUtil.joinUnix(os.tmpdir(), FsUtil.cwd.replace(/[\/:]/g, '_'));
       cacheDir = peTcd === 'PID' ? `${defCache}_${process.pid}` : (peTcd && peTcd !== '-' ? peTcd : defCache);
     }
-    this.cwd = FsUtil.toUnix(cwd || FsUtil.cwd);
+
     this.cacheDir = FsUtil.toUnix(cacheDir);
-    this.cache = {};
   }
 
   init() {

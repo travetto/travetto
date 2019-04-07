@@ -47,5 +47,6 @@ if (cliExternal) {
 
 
 // @ts-ignore
-require('@travetto/boot/bin/init');
-require('@travetto/cli/src/launch').run(process.argv); // Allow for handing off to local/external cli
+require('@travetto/boot/bin/init')
+  .libRequire('@travetto/cli/src/launch')
+  .run(process.argv); // Allow for handing off to local/external cli

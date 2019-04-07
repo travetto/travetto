@@ -25,7 +25,7 @@ export function init() {
       await ControllerRegistry.init();
       const controllers = ControllerRegistry.getClasses().map(x => ControllerRegistry.get(x));
 
-      const { template } = require(FsUtil.resolveUnix(__dirname, '../resources/template.yml.js'));
+      const { template } = await import('./lambda-template-yml');
       const sam = template(controllers, FsUtil.resolveUnix(__dirname, '../resources'));
 
       fs.writeFileSync(cmd.output, sam, 'utf-8');

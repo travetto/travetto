@@ -21,6 +21,9 @@ export async function runTests(opts: State) {
 
 export async function worker() {
   prepareEnv();
+  const { PhaseManager } = await import('@travetto/base');
+  await PhaseManager.init('bootstrap', 'compiler').run();
+
   const { TestChildWorker } = await import('../src/worker/child');
   return new TestChildWorker().activate();
 }
