@@ -1,23 +1,19 @@
 // @ts-check
 
-const path = require('path');
-const fs = require('fs');
-const readFile = f => fs.readFileSync(f, 'utf-8');
-const writeFile = (f, c) => fs.writeFileSync(f, c, 'utf-8');
+import * as path from 'path';
+import * as fs from 'fs';
+import * as child_process from 'child_process';
+import * as commander from 'commander';
 
-const { Util } = require('@travetto/cli/src/util');
-const { FsUtil } = require('@travetto/boot');
-const { ScanFs } = require('@travetto/base');
+import { Util } from '@travetto/cli/src/util';
+import { FsUtil } from '@travetto/boot';
 
-function init() {
-  const cp = require('child_process');
-  const exec = (arg, ...args) => cp.execSync(arg, ...args);
-
+export function init() {
   return Util.program
     .command('rest-aws-lambda:build-zip')
     .option('-o --output [output]', 'Output file', 'dist/lambda.zip')
     .option('-w --workspace [workspace]', 'Workspace directory')
-    .action(async (cmd) => {
+    .action(async (cmd: commander.Command) => {
 
       if (!cmd.workspace) {
         cmd.workspace = fs.mkdtempSync('lambda-');
@@ -33,13 +29,13 @@ function init() {
       FsUtil.unlinkRecursiveSync(cmd.output);
       FsUtil.mkdirp(cmd.workspace);
 
-      exec(`cp -r * ${cmd.workspace}`, { cwd: FsUtil.cwd });
+      child_process.execSync(`cp -r * ${cmd.workspace}`, { cwd: FsUtil.cwd });
 
       // tslint:disable-next-line: no-invalid-template-strings
       const dirVar = 'process.env.TRV_CACHE_DIR = `${__dirname}/cache`;';
-      const lambda = readFile(`${__dirname}/../resources/lambda.js`);
+      const lambda = fs.readFileSync(`${__dirname}/../resources/lambda.js`, 'utf-8');
 
-      writeFile(`${cmd.workspace}/index.js`, `${dirVar}\n${lambda}`);
+      fs.writeFileSync(`${cmd.workspace}/index.js`, `${dirVar}\n${lambda}`);
 
       await Util.dependOn('compile', ['-o', './cache', '-r', '/var/task'], cmd.workspace);
 
@@ -54,8 +50,10 @@ function init() {
 
       // Stub out ts
       FsUtil.mkdirp(`${cmd.workspace}/node_modules/typescript`);
-      writeFile(`${cmd.workspace}/node_modules/typescript/index.js`,
+      fs.writeFileSync(`${cmd.workspace}/node_modules/typescript/index.js`,
         'module.exports = {};');
+
+      const { ScanFs } = await import('@travetto/base');
 
       // Invert
       for (const p of ['test', 'dist']) {
@@ -87,9 +85,7 @@ function init() {
         // Ignore
       }
 
-      exec(`zip -qr ${cmd.output} . `, { cwd: cmd.workspace });
+      child_process.execSync(`zip -qr ${cmd.output} . `, { cwd: cmd.workspace });
       // remove(DIST);
     });
 }
-
-module.exports = { init };

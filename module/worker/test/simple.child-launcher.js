@@ -1,2 +1,2 @@
-require('@travetto/base/bin/bootstrap')
+require('@travetto/boot/bin/init')
   .run(() => require('./simple.child'));
