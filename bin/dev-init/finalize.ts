@@ -12,8 +12,7 @@ export class Finalize {
   static COMMON_BIN_SCRIPTS = [
     ['cli', CLI],
     ['test', `${CLI}-test`],
-    ['base', `${CLI}-clean`],
-    ['base', `${CLI}-boot`],
+    ['boot', `${CLI}-clean`],
     ['di', `${CLI}-run`],
     ['email-template', `${CLI}-email-template`],
     ['compiler', `${CLI}-compile`],
@@ -50,7 +49,7 @@ export class Finalize {
 
       try {
         if (fs.existsSync(`${base}/@travetto/${smod}`) || mod === smod) {
-          Util.makeLink(`${this.MOD_ROOT}/${smod}/bin/${script}.js`, `${base}/.bin/${script}`);
+          Util.makeLink(`${this.MOD_ROOT}/${smod}/bin/${script}.ts`, `${base}/.bin/${script}`);
         }
       } catch (e) { }
     }

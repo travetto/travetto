@@ -62,7 +62,7 @@ function generateAppHelpList(apps: CachedAppConfig[], cmd: DiCommand) {
   return choices.map(x => `   ● ${x}`).join('\n\n');
 }
 
-function init() {
+export function init() {
   let listHelper: Function;
 
   return Util.program

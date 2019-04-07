@@ -52,14 +52,16 @@ export class RegisterUtil {
     let line = 1;
 
     // Insert filename into all log statements for all components, when logger isn't loaded
-    fileContents = fileContents.replace(/(\bconsole[.](debug|info|trace|warn|log|error)[(])|\n/g, a => {
-      if (a === '\n') {
-        line += 1;
-        return a;
-      } else {
-        return `${a}'[${this.computeModuleFromFile(fileName)}:${line.toString().padStart(3)}]',`;
-      }
-    });
+    if (!fileName.includes('cli/') && fileName.includes('src')) {
+      fileContents = fileContents.replace(/(\bconsole[.](debug|info|trace|warn|log|error)[(])|\n/g, a => {
+        if (a === '\n') {
+          line += 1;
+          return a;
+        } else {
+          return `${a}'[${this.computeModuleFromFile(fileName)}:${line.toString().padStart(3)}]',`;
+        }
+      });
+    }
 
     // Drop typescript import, and use global. Great speedup;
     fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript';?/g, '');

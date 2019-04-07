@@ -191,3 +191,9 @@ export async function getCachedAppList(): Promise<CachedAppConfig[]> {
     throw e;
   }
 }
+
+export function findApps() {
+  computeApps()
+    .then(resolved => require('fs').writeSync(1, `${JSON.stringify(resolved)}\n`))
+    .catch(err => handleFailure(err, 1));
+}

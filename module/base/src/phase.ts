@@ -49,14 +49,11 @@ export class PhaseManager {
     return this;
   }
 
-  async run(cb?: () => any) {
+  async run() {
     for (const i of this.initializers) {
       const start = Date.now();
       await i.action();
       console.trace(this.scope, 'Phase', i.key, Date.now() - start);
-    }
-    if (cb) {
-      await cb();
     }
   }
 }

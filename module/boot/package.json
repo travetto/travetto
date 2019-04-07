@@ -28,14 +28,12 @@
     "typescript"
   ],
   "license": "MIT",
-  "main": "index.js",
+  "main": "src/index.js",
   "files": [
-    "tsconfig.json",
-    "index.js",
-    "index.d.ts",
     "src",
     "bin",
-    "tsconfig.json"
+    "tsconfig.json",
+    "!src/tsconfig.json"
   ],
   "name": "@travetto/boot",
   "repository": {
@@ -43,8 +41,8 @@
   },
   "scripts": {
     "postinstall": "node -e 'require(\"./bin/init\"); require(\"./src/app-cache\").AppCache.clear()'",
-    "prepublish": "tsc --project . && mv main.js index.js && mv main.d.ts index.d.ts",
-    "clean": "rm -f src/*.d.ts src/*.js index.js index.d.ts"
+    "prepublish": "cd src-ts; tsc --project .",
+    "clean": "rm -f src/"
   },
   "version": "0.6.0-rc.6"
 }
