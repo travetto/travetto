@@ -3,8 +3,8 @@ let inst;
 exports.handler = async (event, context) => {
   if (!inst) {
     await require('@travetto/boot/bin/init')
-      .libRequire('@travetto/base').PhaseManager
-      .run();
+      .libRequire('@travetto/base')
+      .PhaseManager.run();
 
     const { DependencyRegistry } = require('@travetto/di');
     await DependencyRegistry.init();

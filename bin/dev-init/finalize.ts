@@ -72,7 +72,7 @@ export class Finalize {
     const NM_MOD = `${base}/${mod}/node_modules`;
 
     // Copy over all files that match from template
-    if (!onlyModules && mod !== 'boot') {
+    if (!onlyModules) {
       Util.copyTemplateFiles(this.MOD_TPL_ROOT, `${base}/${mod}`);
     }
 
