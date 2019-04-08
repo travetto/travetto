@@ -12,7 +12,7 @@ export class Execute {
   static requireModule(f: string) {
     let p = FsUtil.toUnix(fs.realpathSync(`${FsUtil.cwd}/node_modules/.bin/${f}`));
     if (!p.startsWith(FsUtil.cwd)) {
-      p = `${FsUtil.cwd}/node_modules/@travetto/${p.split('travetto/module/')[1]}`;
+      p = `${FsUtil.cwd}/node_modules/@travetto/${p.split(/travetto[^/]*\/module\//)[1]}`;
     }
     return require(p);
   }

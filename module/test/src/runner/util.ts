@@ -15,7 +15,7 @@ export class TestUtil {
         () => new FileCache(Env.cwd).clear(), true);
     }
     Shutdown.onShutdown(`test.${scope}.bufferOutput`,
-      () => new Promise(res => setTimeout(res, 100)));
+      () => new Promise(res => setTimeout(res, 50)));
   }
 
   static asyncTimeout(duration: number = DEFAULT_TIMEOUT): [Promise<any>, Function] {

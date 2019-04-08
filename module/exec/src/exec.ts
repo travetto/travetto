@@ -30,8 +30,8 @@ export class Exec {
       };
 
       if (!options.quiet) {
-        p.stdout.on('data', (d: string) => stdout += `${d}\n`);
-        p.stderr.on('data', (d: string) => stderr += `${d}\n`);
+        p.stdout!.on('data', (d: string) => stdout += `${d}\n`);
+        p.stderr!.on('data', (d: string) => stderr += `${d}\n`);
       }
 
       p.on('error', (err: Error) =>

@@ -39,7 +39,7 @@ export class ExecUtil {
       try {
         await new Promise((res, rej) => {
           try {
-            const sock = net.createConnection(port, 'localhost', (err: any, succ: any) => {
+            const sock = net.createConnection(port, 'localhost', (err: any, succ: any) => { // FIXME: What do I want anymore
               if (err) {
                 console.debug('Failed for port', port, err.message);
                 rej(err);

@@ -165,7 +165,7 @@ export function fork(cmd: string, args: string[] = []) {
 }
 
 export async function getCachedAppList(): Promise<CachedAppConfig[]> {
-  const { AppCache } = await import('@travetto/boot'); // Should not init the app, only load cache
+  const { AppCache } = await import('@travetto/boot/src/app-cache'); // Should not init the app, only load cache
   try {
     // Read cache it
     let text: string;

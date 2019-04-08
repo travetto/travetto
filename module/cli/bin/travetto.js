@@ -1,12 +1,9 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
-const child_process = require('child_process');
-const { FsUtil } = require('@travetto/boot');
-
+const { FsUtil } = require('@travetto/boot/src/fs-util');
 const frameworkYetDeclared = FsUtil.toUnix(__dirname).includes('module/cli') && !process.env.TRV_FRAMEWORK_DEV;
 
 if (frameworkYetDeclared) { // If in framework development mode
+  const child_process = require('child_process');
   const res = child_process.spawnSync(process.argv0, process.argv.slice(1), {
     argv0: process.argv0,
     cwd: process.cwd(),
@@ -23,6 +20,8 @@ if (frameworkYetDeclared) { // If in framework development mode
 
 }
 
+const fs = require('fs');
+const path = require('path');
 const rel = `${FsUtil.cwd}/node_modules/@travetto/cli/bin/${path.basename(__filename)}`;
 const hasLocal = fs.existsSync(rel);
 const isLocal = FsUtil.toUnix(__filename) === rel;
