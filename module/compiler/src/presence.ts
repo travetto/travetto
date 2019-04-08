@@ -96,7 +96,7 @@ export class FilePresenceManager {
         for (const p of this.watchSpaces) {
           this.buildWatcher(FsUtil.joinUnix(this.cwd, p), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
         }
-      }, 1000);
+      }, 50); // FIXME: 1000 og
     }
   }
 
