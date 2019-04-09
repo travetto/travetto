@@ -14,7 +14,7 @@
     "travetto-cli-boot": "bin/travetto-cli-boot.js"
   },
   "dependencies": {
-    "@travetto/boot": "^0.6.0-rc.0"
+    "@travetto/boot": "^0.6.0-rc.7"
   },
   "description": "Application phase management, environment config and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
@@ -36,5 +36,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.6"
+  "version": "0.6.0-rc.7"
 }

@@ -10,7 +10,7 @@
     "travetto-cli-compile": "bin/travetto-cli-compile.js"
   },
   "dependencies": {
-    "@travetto/base": "^0.6.0-rc.6",
+    "@travetto/base": "^0.6.0-rc.7",
     "@types/source-map-support": "^0.4.1",
     "source-map-support": "^0.5.9"
   },
@@ -39,5 +39,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.6"
+  "version": "0.6.0-rc.7"
 }
