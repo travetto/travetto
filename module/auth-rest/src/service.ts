@@ -5,9 +5,9 @@ import { Class } from '@travetto/registry';
 import { PrincipalProvider } from '@travetto/auth';
 import { Context } from '@travetto/context';
 
-import { ERR_INVALID_AUTH } from './errors';
 import { IdentityProvider } from './identity';
 
+const ERR_INVALID_AUTH = 'Unable to authenticate';
 const REQ_SYM = Symbol('trv_req');
 
 @Injectable()
