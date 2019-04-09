@@ -5,7 +5,7 @@ import { Suite, Test } from '@travetto/test';
 import { Request, Response } from '@travetto/rest';
 import { Identity } from '@travetto/auth';
 
-import { IdentityProvider, ERR_INVALID_CREDS } from '../';
+import { IdentityProvider } from '../';
 
 class DumbProvider extends IdentityProvider {
   toContext(user: { id: string, username: string }) {
@@ -26,7 +26,7 @@ class DumbProvider extends IdentityProvider {
         }
       } as Identity;
     } else {
-      throw new AppError(ERR_INVALID_CREDS, 'authentication');
+      throw new AppError('Unable to authenticate, credentials are invalid', 'authentication');
     }
   }
 }

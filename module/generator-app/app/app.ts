@@ -1,6 +1,6 @@
 import * as Generator from 'yeoman-generator';
 
-import { FsUtil } from '@travetto/base';
+import { FsUtil } from '@travetto/boot';
 
 import { FEATURES, pkg } from './features';
 import { verifyDestination, meetsRequirement, template } from './util';
