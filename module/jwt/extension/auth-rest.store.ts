@@ -10,9 +10,9 @@ export class JWTAuthContextStore extends AuthContextEncoder {
   location: 'cookie' | 'header';
   name: string;
 
-  async write(req: Request, res: Response) {
-    const body = { ...req.auth, exp: req.auth.principal.expires!.getTime() / 1000 };
-    (body.principal as any).permissions = [...req.auth.principal.permissions];
+  async write(ctx: AuthContext, req: Request, res: Response) {
+    const body = { ...ctx, exp: ctx.principal.expires!.getTime() / 1000 };
+    (body.principal as any).permissions = [...ctx.principal.permissions];
     const token = await sign(body, { key: this.signingKey });
     if (this.location === 'cookie') {
       res.cookies.set(this.name, token);

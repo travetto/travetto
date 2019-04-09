@@ -60,20 +60,23 @@ export class Context {
     }
   }
 
-  clear(key?: string) {
-    const obj = this.storage();
-    const keys = key ? [key] : Object.keys(obj);
-    for (const k of keys) {
-      delete obj[k];
+  clear(key?: string | symbol) {
+    if (key) {
+      const obj = this.storage();
+      delete obj[key];
+    } else {
+      this.storage({});
     }
   }
 
-  get(key?: string | symbol) {
+  get<T = any>(key: string | symbol): T;
+  get(): any;
+  get<T>(key?: string | symbol) {
     const root = this.storage();
     if (key) {
-      return root[key] || (root[key] = {});
+      return root[key] || (root[key] = {}) as T;
     } else {
-      return root;
+      return root as T;
     }
   }
 
