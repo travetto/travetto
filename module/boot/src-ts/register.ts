@@ -124,10 +124,9 @@ export class RegisterUtil {
   }
 
   static frameworkModuleHandler(request: string, parent: Module) {
-    // @ts-ignore
-    const resolved = Module._resolveFilename(request, parent);
-
     if (/^[.\/]/.test(request) || request.startsWith('@travetto')) { // If relative or framework
+      // @ts-ignore
+      const resolved = Module._resolveFilename(request, parent);
       request = this.resolveFrameworkDevFile(resolved);
     }
 
