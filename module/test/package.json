@@ -4,7 +4,7 @@
     "name": "Travetto Framework"
   },
   "bin": {
-    "travetto-cli-test": "bin/travetto-cli-test.js"
+    "travetto-cli-test": "bin/travetto-cli-test.ts"
   },
   "dependencies": {
     "@travetto/registry": "^0.6.0-rc.7",

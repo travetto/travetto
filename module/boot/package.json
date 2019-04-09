@@ -10,8 +10,7 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-clean": "bin/travetto-cli-clean.js",
-    "travetto-cli-boot": "bin/travetto-cli-boot.js"
+    "travetto-cli-clean": "bin/travetto-cli-clean.ts"
   },
   "dependencies": {
     "@types/node": "^11.13.0",

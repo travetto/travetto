@@ -9,10 +9,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "bin": {
-    "travetto-cli-clean": "bin/travetto-cli-clean.js",
-    "travetto-cli-boot": "bin/travetto-cli-boot.js"
-  },
   "dependencies": {
     "@travetto/boot": "^0.6.0-rc.7"
   },

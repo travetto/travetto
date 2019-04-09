@@ -7,7 +7,7 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-run": "bin/travetto-cli-run.js"
+    "travetto-cli-run": "bin/travetto-cli-run.ts"
   },
   "dependencies": {
     "@travetto/config": "^0.6.0-rc.7",

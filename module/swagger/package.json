@@ -7,7 +7,7 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-swagger-client": "bin/travetto-cli-swagger-client.js"
+    "travetto-cli-swagger-client": "bin/travetto-cli-swagger-client.ts"
   },
   "dependencies": {
     "@travetto/exec": "^0.6.0-rc.7",

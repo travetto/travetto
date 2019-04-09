@@ -7,7 +7,7 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-email-template": "./bin/travetto-cli-email-template.js"
+    "travetto-cli-email-template": "./bin/travetto-cli-email-template.ts"
   },
   "dependencies": {
     "@travetto/di": "^0.6.0-rc.8",

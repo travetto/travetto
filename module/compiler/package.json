@@ -7,7 +7,7 @@
     "access": "public"
   },
   "bin": {
-    "travetto-cli-compile": "bin/travetto-cli-compile.js"
+    "travetto-cli-compile": "bin/travetto-cli-compile.ts"
   },
   "dependencies": {
     "@travetto/base": "^0.6.0-rc.7",
