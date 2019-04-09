@@ -92,7 +92,7 @@ class $Compiler {
       return res;
     } catch (e) {
       const file = tsf.replace(`${Env.cwd}/`, '');
-      if (tsf.includes('/extension/')) {
+      if (tsf.includes('/extension/')) { // If errored out on extension loading
         console.debug(`Ignoring load for ${file}:`, e.message.split(' from ')[0]);
       } else if (Env.watch) {
         console.error(`Stubbing out with error proxy due to error in compiling ${file}: `, e.message);
