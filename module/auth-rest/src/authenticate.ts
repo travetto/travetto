@@ -3,45 +3,22 @@ import { Request, Response } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { Class } from '@travetto/registry';
 import { PrincipalProvider } from '@travetto/auth';
-import { Context } from '@travetto/context';
 
 import { IdentityProvider } from './identity';
 
 const ERR_INVALID_AUTH = 'Unable to authenticate';
-const REQ_SYM = Symbol('trv_req');
 
 @Injectable()
-export class AuthService {
+export class AuthenticationService {
   identityProviders = new Map<string, IdentityProvider>();
-
-  @Inject()
-  context?: Context;
 
   @Inject()
   principalProvider: PrincipalProvider;
 
   async postConstruct() {
-    for (const provider of DependencyRegistry.getCandidateTypes(IdentityProvider as Class)) {
+    for (const provider of DependencyRegistry.getCandidateTypes(IdentityProvider as Class<IdentityProvider>)) {
       const dep = await DependencyRegistry.getInstance(IdentityProvider, provider.qualifier);
       this.identityProviders.set(provider.qualifier.toString(), dep);
-    }
-  }
-
-  registerContext(req: Request) {
-    if (this.context) {
-      this.context.set(REQ_SYM, req);
-    }
-  }
-
-  getAuthContext() {
-    if (this.context) {
-      const ctx = this.context.get(REQ_SYM) as Request;
-      if (!ctx) {
-        throw new AppError('Auth context is not present, please authenticate first', 'authentication');
-      }
-      return ctx.auth;
-    } else {
-      throw new AppError('Cannot retrieve information without request unless @travetto/context is installed', 'notfound');
     }
   }
 
@@ -51,9 +28,6 @@ export class AuthService {
       try {
         const idp = this.identityProviders.get(provider.toString())!;
         const ident = await idp.authenticate(req, res);
-        if (ident) { // Multi-step login process
-          req.auth = await this.principalProvider.authorize(ident);
-        }
         return ident;
       } catch (e) {
         lastError = e;

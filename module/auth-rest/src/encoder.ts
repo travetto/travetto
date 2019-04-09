@@ -11,7 +11,7 @@ function toCtx(val: AuthContext | undefined) {
 
 export abstract class AuthContextEncoder {
   abstract read(req: Request): Promise<AuthContext | undefined> | undefined | AuthContext;
-  abstract write(req: Request, res: Response): Promise<void> | void;
+  abstract write(ctx: AuthContext, req: Request, res: Response): Promise<void> | void;
 }
 
 @Injectable({ target: SessionAuthContextEncoder })
@@ -30,9 +30,9 @@ export class SessionAuthContextEncoder extends AuthContextEncoder {
     return toCtx((req as any).session[this.key]);
   }
 
-  write(req: Request, res: Response) {
-    if (req.auth && req.auth.principal) {
-      (req as any).session[this.key] = req.auth;
+  write(ctx: AuthContext, req: Request, res: Response) {
+    if (ctx && ctx.principal) {
+      (req as any).session[this.key] = ctx;
     } else {
       (req as any).session = undefined; // Kill session
     }
