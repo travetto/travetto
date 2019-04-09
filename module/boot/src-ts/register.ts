@@ -9,6 +9,14 @@ let tsOpts: any;
 
 let ts: any;
 
+declare const global: {
+  ts: any;
+  trvInit: {
+    libRequire: (x: string) => any;
+    deinit: () => void;
+  }
+};
+
 export class RegisterUtil {
   // @ts-ignore
   static ogModuleLoad = Module._load.bind(Module);
@@ -137,7 +145,16 @@ export class RegisterUtil {
     return this.compileTypescript(m, this.resolveFrameworkDevFile(tsf));
   }
 
+  static libRequire(x: string) {
+    const f = this.resolveFrameworkDevFile(`/${x}`);
+    return require(f);
+  }
+
   static init() {
+    if (global.trvInit) {
+      return;
+    }
+
     // @ts-ignore
     ts = global.ts = new Proxy({}, {
       get(t, p, r) {
@@ -155,11 +172,23 @@ export class RegisterUtil {
     // @ts-ignore
     require.extensions['.ts'] = (tfd ? this.frameworkCompileTypescript : this.compileTypescript).bind(this);
 
-    return {
-      libRequire: (x: string) => {
-        const f = RegisterUtil.resolveFrameworkDevFile(`/${x}`);
-        return require(f);
+    global.trvInit = this;
+  }
+
+  static deinit() {
+    if (!global.trvInit) {
+      return;
+    }
+
+    delete require.extensions['.ts'];
+    delete global.trvInit;
+    // @ts-ignore
+    Module._load = this.ogModuleLoad;
+
+    for (const k of Object.keys(require.cache)) {
+      if (k.includes('@travetto')) {
+        delete require.cache[k];
       }
-    };
+    }
   }
 }
