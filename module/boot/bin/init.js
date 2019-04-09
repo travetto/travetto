@@ -2,7 +2,6 @@
 function init() {
   let root = '..';
 
-  global.TRV_FRAMEWORK_REGISTERED = '1';
   const cwd = process.cwd();
   const isSelf = cwd.includes('/module/boot');
   const isFwk = cwd.includes('/travetto/');
@@ -10,10 +9,10 @@ function init() {
     root = isSelf ? cwd : `${cwd}/node_modules/@travetto/boot`;
   }
   const { RegisterUtil } = require(`${root}/src/register`);
-  global.trvInit = RegisterUtil.init();
+  RegisterUtil.init();
 }
 
-if (!global.TRV_FRAMEWORK_REGISTERED) { // Register once
+if (!global.trvInit) { // Register once
   init();
 }
 
