@@ -7,9 +7,9 @@
     "travetto-cli-test": "bin/travetto-cli-test.ts"
   },
   "dependencies": {
-    "@travetto/registry": "^0.6.0-rc.7",
-    "@travetto/worker": "^0.6.0-rc.7",
-    "@travetto/yaml": "^0.6.0-rc.3"
+    "@travetto/registry": "^0.6.0-rc.8",
+    "@travetto/worker": "^0.6.0-rc.8",
+    "@travetto/yaml": "^0.6.0-rc.4"
   },
   "description": "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin",
   "homepage": "https://travetto.io",
@@ -33,5 +33,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.7"
+  "version": "0.6.0-rc.8"
 }

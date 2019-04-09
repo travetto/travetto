@@ -10,12 +10,12 @@
     "travetto-cli-run": "bin/travetto-cli-run.ts"
   },
   "dependencies": {
-    "@travetto/config": "^0.6.0-rc.7",
-    "@travetto/registry": "^0.6.0-rc.7"
+    "@travetto/config": "^0.6.0-rc.8",
+    "@travetto/registry": "^0.6.0-rc.8"
   },
   "description": "Dependency registration/management and injection support.",
   "devDependencies": {
-    "@travetto/test": "^0.6.0-rc.7"
+    "@travetto/test": "^0.6.0-rc.8"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -39,5 +39,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.8"
+  "version": "0.6.0-rc.9"
 }
