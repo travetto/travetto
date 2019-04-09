@@ -32,7 +32,7 @@ export class ModuleManager {
     } catch (e) { // Failed due to compilation error
       const p = Module._resolveFilename(request, parent);
 
-      if (!Env.watch || p.includes('/extension/')) {
+      if (!Env.watch || p.includes('/extension/')) { // Do not build proxy if an extension, let error bubble up
         throw e;
       }
 

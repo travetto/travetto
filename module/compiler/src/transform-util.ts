@@ -82,7 +82,7 @@ export class TransformUtil {
       return out;
     } catch (err) { // Missing import
       if (file.fileName.includes('/extension/')) {
-        return file;
+        return file; // Swallow missing extensions
       } else {
         const out = new Error(`${err.message} in ${file.fileName.replace(`${Env.cwd}/`, '')}`);
         out.stack = err.stack;
