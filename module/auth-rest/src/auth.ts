@@ -29,8 +29,9 @@ export class AuthService {
         const ident = await idp.authenticate(req, res);
         if (ident) { // Multi-step login process
           return await this.principalProvider.authorize(ident);
+        } else {
+          return;
         }
-        return ident;
       } catch (e) {
         lastError = e;
       }

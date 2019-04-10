@@ -4,7 +4,7 @@ import { Injectable, Inject } from '@travetto/di';
 
 import { AuthContextService } from './context';
 import { AuthContextEncoder, SessionAuthContextEncoder } from './encoder';
-import { AuthService } from './authenticate';
+import { AuthService } from './auth';
 
 @Injectable()
 export class AuthInterceptor extends RestInterceptor {
@@ -20,7 +20,13 @@ export class AuthInterceptor extends RestInterceptor {
 
   async configure(req: Request, res: Response) {
     req.logout = async function () { delete this.auth.principal; };
-    req.login = this.service.login.bind(this.service, req, res);
+    req.login = async (providers: symbol[]) => {
+      const ctx = await this.service.login(req, res, providers);
+      if (ctx) {
+        this.context.set(ctx, req);
+      }
+      return ctx;
+    };
   }
 
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
