@@ -35,7 +35,7 @@ export class AuthContext<
     return this.permsSet;
   }
 
-  set permissions(perms: string[]) {
+  set permissions(perms: Readonly<string[]>) {
     this.permsSet = new Set(perms);
     this.permsArr = [...this.permsSet];
   }

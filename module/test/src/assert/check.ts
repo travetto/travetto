@@ -159,12 +159,16 @@ export class AssertCheck {
   }
 
   static async checkThrowAsync(filename: string, text: string, key: string, negative: boolean,
-    action: Function, shouldThrow?: ThrowableError, message?: string) {
+    action: Function | Promise<any>, shouldThrow?: ThrowableError, message?: string) {
     const assertion = AssertCapture.buildAssertion(filename, text, key);
     let missed: Error | undefined;
 
     try {
-      await action();
+      if ('then' in action) {
+        await action;
+      } else {
+        await action();
+      }
       if (negative) {
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow || 'an error'} `));
       }

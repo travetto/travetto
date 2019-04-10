@@ -31,8 +31,7 @@
   "files": [
     "src",
     "bin",
-    "tsconfig.json",
-    "!src/tsconfig.json"
+    "tsconfig.json"
   ],
   "name": "@travetto/boot",
   "repository": {
