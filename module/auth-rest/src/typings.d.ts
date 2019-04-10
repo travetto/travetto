@@ -5,7 +5,7 @@ declare global {
     export interface Request {
       auth: AuthContext;
       logout(): Promise<void>;
-      authenticate(providers: (symbol | string)[]): Promise<Identity | undefined>;
+      login(providers: (symbol | string)[]): Promise<AuthContext | undefined>; // Undefined is for multi step logins
     }
   }
 }

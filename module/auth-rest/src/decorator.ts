@@ -4,7 +4,7 @@ import { AuthUtil } from '@travetto/auth';
 
 export function Authenticate(provider: symbol, ...providers: symbol[]) {
   const computed = [provider, ...providers];
-  return ControllerRegistry.createFilterDecorator(req => req.authenticate(computed)) as EndpointDecorator;
+  return ControllerRegistry.createFilterDecorator(req => req.login(computed)) as EndpointDecorator;
 }
 
 export function Authenticated(include: string[] = [], exclude: string[] = []) {

@@ -5,11 +5,10 @@ import { Class } from '@travetto/registry';
 import { PrincipalProvider } from '@travetto/auth';
 
 import { IdentityProvider } from './identity';
-
-const ERR_INVALID_AUTH = 'Unable to authenticate';
+import { AuthContext } from '@travetto/auth/src/context';
 
 @Injectable()
-export class AuthenticationService {
+export class AuthService {
   identityProviders = new Map<string, IdentityProvider>();
 
   @Inject()
@@ -22,12 +21,15 @@ export class AuthenticationService {
     }
   }
 
-  async authenticate(req: Request, res: Response, identityProviders: symbol[]) {
+  async login(req: Request, res: Response, identityProviders: symbol[]): Promise<AuthContext | undefined> {
     let lastError: Error | undefined;
     for (const provider of identityProviders) {
       try {
         const idp = this.identityProviders.get(provider.toString())!;
         const ident = await idp.authenticate(req, res);
+        if (ident) { // Multi-step login process
+          return await this.principalProvider.authorize(ident);
+        }
         return ident;
       } catch (e) {
         lastError = e;
@@ -38,7 +40,7 @@ export class AuthenticationService {
       console.error(lastError);
     }
 
-    const err = new AppError(ERR_INVALID_AUTH, 'authentication');
+    const err = new AppError('Unable to authenticate', 'authentication');
     err.stack = (lastError ? lastError.stack : err.stack);
     throw err;
   }
