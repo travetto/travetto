@@ -10,7 +10,7 @@
     "travetto": "bin/travetto.js"
   },
   "dependencies": {
-    "@travetto/boot": "^0.6.0-rc.8",
+    "@travetto/boot": "^0.6.0-rc.9",
     "commander": "^2.19.0",
     "select-shell": "^1.1.2"
   },
@@ -30,5 +30,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.5"
+  "version": "0.6.0-rc.6"
 }

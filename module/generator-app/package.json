@@ -1,6 +1,6 @@
 {
   "name": "@travetto/generator-app",
-  "version": "0.6.0-rc.10",
+  "version": "0.6.0-rc.11",
   "description": "Yeoman app generator for the Travetto framework",
   "main": "app/index.js",
   "files": [
@@ -9,14 +9,14 @@
     "tslint.json"
   ],
   "dependencies": {
-    "@travetto/base": "^0.6.0-rc.8",
+    "@travetto/base": "^0.6.0-rc.9",
     "yeoman-generator": "^3.2.0",
     "yo": "^2.0.5"
   },
   "devDependencies": {
-    "@travetto/auth-rest": "^0.6.0-rc.12",
-    "@travetto/model-elasticsearch": "^0.6.0-rc.9",
-    "@travetto/model-mongo": "^0.6.0-rc.9",
+    "@travetto/auth-rest": "^0.6.0-rc.13",
+    "@travetto/model-elasticsearch": "^0.6.0-rc.10",
+    "@travetto/model-mongo": "^0.6.0-rc.10",
     "@types/yeoman-generator": "^3.1.1"
   },
   "scripts": {
