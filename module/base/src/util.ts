@@ -78,10 +78,11 @@ export class Util {
       case 'string': return `${input}`;
       case 'number': return `${input}`.indexOf('.') >= 0 ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
       case 'boolean':
-        return typeof input === 'string' && /^(false|no|off|0)$/i.test(input) ? false : !!input;
-      default:
-        throw new Error(`Unknown type ${typeof baseline}`);
+        if (/^(false|no|off|0|true|yes|on|1)$/i.test(input)) {
+          return /^(true|yes|1|on)$/.test(input);
+        }
     }
+    throw new Error(`Unknown type ${typeof baseline}`);
   }
 
   static shallowClone(a: any) {

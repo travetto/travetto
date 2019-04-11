@@ -1,40 +1,22 @@
 import { Class } from '@travetto/registry';
-import { AppError } from '@travetto/base';
+import { Util, AppError } from '@travetto/base';
 
 import { Request, Filter } from '../types';
 import { ControllerRegistry } from '../registry/registry';
 import { ParamConfig, EndpointConfig, EndpointDecorator } from '../registry/types';
 
 export function parseParam(type: Class | undefined, name: string, param: any) {
-  let typedParam: any = param;
-  switch (type) {
-    case Date:
-      typedParam = Date.parse(param);
-      if (Number.isNaN(typedParam)) {
-        throw new AppError(`Incorrect field type for ${name}, ${param} is not a Date`, 'data');
-      }
-      break;
-    case Boolean:
-      if (!/^(0|1|true|false|yes|no)$/i.test(param)) {
-        throw new AppError(`Incorrect field type for ${name}, ${param} is not a boolean value`, 'data');
-      }
-      typedParam = param === 'true' || param === '1' || param === 'yes';
-      break;
-    case Number:
-      if (param.includes('.')) {
-        typedParam = parseFloat(param);
-      } else {
-        typedParam = parseInt(param, 10);
-      }
-      if (Number.isNaN(typedParam)) {
-        throw new AppError(`Incorrect field type for ${name}, ${param} is not a number`, 'data');
-      }
-      break;
-    case String:
-    case undefined: typedParam = `${param}`; break;
+  try {
+    switch (type) {
+      case Date: return Util.coerceType(param, new Date());
+      case Boolean: return Util.coerceType(param, true);
+      case Number: return Util.coerceType(param, 0);
+      case String:
+      case undefined: return `${param}`;
+    }
+  } catch (e) {
+    throw new AppError(`Incorrect field type for ${name}, ${param} is not a ${type!.name}`, 'data');
   }
-
-  return typedParam;
 }
 
 async function paramHandler(config: EndpointConfig, req: Request) {

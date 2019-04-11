@@ -28,7 +28,7 @@ class MergeTests {
     assert(Util.coerceType('off', true) === false);
     assert(Util.coerceType('no', true) === false);
     assert(Util.coerceType('true', false) === true);
-    assert(Util.coerceType('truee', false) === true);
+    assert.throws(() => Util.coerceType('truee', false));
   }
 
   @Test()

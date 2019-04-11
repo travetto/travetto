@@ -8,7 +8,6 @@ import { RouteUtil } from './util/route';
 import { RestInterceptorGroup } from './interceptor/group';
 import { RestInterceptor } from './interceptor/interceptor';
 import { ControllerRegistry } from './registry/registry';
-import { RestAppCustomizer } from './customizer';
 
 export abstract class RestApp<T = any> {
 
