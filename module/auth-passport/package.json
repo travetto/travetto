@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@travetto/auth-rest": "^0.6.0-rc.14",
-    "@types/passport": "^0.4.7",
+    "@types/passport": "^1.0.0",
     "passport": "^0.4.0"
   },
   "description": "Passport authentication integration support for the travetto framework",

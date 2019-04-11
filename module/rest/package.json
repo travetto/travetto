@@ -10,7 +10,7 @@
     "@travetto/di": "^0.6.0-rc.10",
     "@travetto/exec": "^0.6.0-rc.9",
     "@types/cookies": "^0.7.1",
-    "@types/express-serve-static-core": "^4.16.0",
+    "@types/express-serve-static-core": "^4.16.2",
     "cookies": "^0.7.3"
   },
   "devDependencies": {

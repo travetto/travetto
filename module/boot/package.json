@@ -13,10 +13,10 @@
     "travetto-cli-clean": "bin/travetto-cli-clean.ts"
   },
   "dependencies": {
-    "@types/node": "^11.13.0",
+    "@types/node": "^11.13.4",
     "trace": "^3.1.1",
     "tslib": "^1.9.3",
-    "typescript": "^3.4.2"
+    "typescript": "^3.4.3"
   },
   "description": "Bootstrapping and common utilities for travetto applications.",
   "homepage": "https://travetto.io",

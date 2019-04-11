@@ -12,7 +12,8 @@
   "dependencies": {
     "@travetto/exec": "^0.6.0-rc.9",
     "@travetto/rest": "^0.6.0-rc.12",
-    "@travetto/schema": "^0.6.0-rc.9"
+    "@travetto/schema": "^0.6.0-rc.9",
+    "@types/swagger-schema-official": "^2.0.15"
   },
   "description": "Swagger integration support for the travetto framework",
   "devDependencies": {

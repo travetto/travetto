@@ -11,8 +11,7 @@
   },
   "dependencies": {
     "@travetto/boot": "^0.6.0-rc.9",
-    "commander": "^2.19.0",
-    "select-shell": "^1.1.2"
+    "commander": "^2.20.0"
   },
   "description": "CLI infrastructure for travetto framework",
   "homepage": "https://travetto.io",

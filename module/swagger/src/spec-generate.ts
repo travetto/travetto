@@ -1,9 +1,11 @@
 import { ControllerRegistry, MimeType, EndpointClassType } from '@travetto/rest';
+
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, ALL_VIEW } from '@travetto/schema';
 
-import { Spec, Parameter, Path, Response, Schema, Operation } from './types';
 import { ApiClientConfig } from './config';
+
+import { Schema, Path, Parameter, Response, Operation, Spec } from 'swagger-schema-official';
 
 export function isEndpointClassType(o: any): o is EndpointClassType {
   return !!o && !o.mime;
@@ -191,10 +193,10 @@ export class SpecGenerateUtil {
 
       for (const param of Object.values(ep.params)) {
         const epParam: Parameter = {
-          in: param.location,
+          in: param.location as 'body',
           name: param.name,
           description: param.description,
-          required: !!param.required,
+          required: !!param.required
         };
         if (param.type) {
           const type = this.getType(param.type!, state);

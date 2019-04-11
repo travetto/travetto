@@ -12,8 +12,8 @@
     "@travetto/test": "^0.6.0-rc.9"
   },
   "optionalExtensionDependencies": {
-    "@travetto/rest": "^0.4.10",
-    "@types/faker": "^4.1.4",
+    "@travetto/rest": "^0.6.0-rc.9",
+    "@types/faker": "^4.1.5",
     "faker": "^4.1.0"
   },
   "homepage": "https://travetto.io",
