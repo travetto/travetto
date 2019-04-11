@@ -29,7 +29,7 @@ export interface Request {
     checkPermissions(include: Set<string>, exclude: Set<string>, matchAll = false): void; // Throws an error on exception
   }
   logout(): Promise<void>;
-  authenticate(providers: symbol[]): Promise<Identity | undefined>;
+  login(providers: symbol[]): Promise<AuthContext | undefined>;
 }
 ```
 
