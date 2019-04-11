@@ -40,6 +40,11 @@ export class Scheduler {
     return id;
   }
 
+  static stop(jobId: number) {
+    this.jobs.get(jobId)!.stop();
+    this.jobs.delete(jobId);
+  }
+
   static kill() {
     for (const job of this.jobs.values()) {
       job.stop();
