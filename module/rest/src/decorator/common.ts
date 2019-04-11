@@ -1,4 +1,5 @@
-import { HeaderMap, Filter } from '../types';
+import { AppError } from '@travetto/base';
+import { HeaderMap, Request, RouteHandler } from '../types';
 import { ControllerRegistry } from '../registry/registry';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator } from '../registry/types';
 
@@ -10,7 +11,7 @@ const UNIT_MAPPING = { s: 1000, ms: 1, m: MIN, h: HOUR, d: DAY, w: DAY * 7, y: D
 type Units = keyof (typeof UNIT_MAPPING);
 
 function register(config: Partial<EndpointConfig | ControllerConfig>) {
-  return function (target: any, property?: string, descriptor?: TypedPropertyDescriptor<Filter>) {
+  return function (target: any, property?: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) {
     if (descriptor) {
       return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, config);
     } else {
@@ -21,7 +22,7 @@ function register(config: Partial<EndpointConfig | ControllerConfig>) {
 
 export const Describe = (desc: DescribableConfig) => register(desc);
 
-export const Header = (headers: HeaderMap) => register({ headers });
+export const SetHeader = (headers: HeaderMap) => register({ headers });
 export const DisableCache = () => register({
   headers: {
     Expires: '-1',
@@ -31,8 +32,20 @@ export const DisableCache = () => register({
 
 export function Cache(value: number, unit: Units = 's') {
   const delta = UNIT_MAPPING[unit] * value;
-  return Header({
+  return SetHeader({
     Expires: () => `${new Date(Date.now() + delta).toUTCString()}`,
     'Cache-Control': () => `max-age=${delta}`
   });
+}
+
+export function Accepts(contentTypes: string[]) {
+  const types = new Set(contentTypes);
+  const handler = async function (req: Request) {
+    const contentType = req.header('content-type');
+    if (!contentType || !types.has(contentType)) {
+      throw new AppError(`Content type ${contentType} not one of ${contentTypes}`, 'data');
+    }
+  };
+
+  return ControllerRegistry.createFilterDecorator(handler);
 }

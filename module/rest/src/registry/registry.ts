@@ -2,7 +2,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { MetadataRegistry, Class } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, ControllerDecorator } from './types';
-import { Filter } from '../types';
+import { Filter, RouteHandler, ParamConfig } from '../types';
 
 class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointConfig> {
 
@@ -20,7 +20,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     };
   }
 
-  createPendingField(cls: Class, handler: Filter) {
+  createPendingField(cls: Class, handler: RouteHandler) {
     const controllerConf = this.getOrCreatePending(cls);
 
     const fieldConf = {
@@ -31,7 +31,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       filters: [],
       priority: controllerConf.endpoints!.length, // Lowest is first
       headers: {},
-      params: {},
+      params: [],
       handlerName: handler.name,
       handler
     } as EndpointConfig;
@@ -41,7 +41,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     return fieldConf;
   }
 
-  getOrCreateEndpointConfig(cls: Class, handler: Filter) {
+  getOrCreateEndpointConfig(cls: Class, handler: RouteHandler) {
     const fieldConf = this.getOrCreatePendingField(cls, handler) as EndpointConfig;
     return fieldConf;
   }
@@ -51,13 +51,21 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     config.filters!.push(fn);
   }
 
-  registerEndpointFilter(target: Class, handler: Filter, fn: Filter) {
+  registerEndpointFilter(target: Class, handler: RouteHandler, fn: Filter) {
     const config = this.getOrCreateEndpointConfig(target, handler);
     config.filters!.unshift(fn);
   }
 
+  registerEndpointParameter(target: Class, handler: RouteHandler, param: ParamConfig, index: number) {
+    const config = this.getOrCreateEndpointConfig(target, handler);
+    if (index >= config.params.length) {
+      config.params.length = index + 1;
+    }
+    config.params[index] = param;
+  }
+
   createFilterDecorator(fn: Filter) {
-    return ((target: any, prop: string, descriptor: TypedPropertyDescriptor<Filter>) => {
+    return ((target: any, prop: string, descriptor: TypedPropertyDescriptor<RouteHandler>) => {
       if (prop) {
         this.registerEndpointFilter(target.constructor, descriptor.value!, fn);
       } else {
@@ -73,18 +81,13 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     dest.description = src.description || dest.description;
   }
 
-  registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<Filter>, config: Partial<EndpointConfig>) {
+  registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<RouteHandler>, config: Partial<EndpointConfig>) {
     const srcConf = this.getOrCreateEndpointConfig(target, descriptor.value!);
     srcConf.method = config.method || srcConf.method;
     srcConf.path = config.path || srcConf.path;
     srcConf.responseType = config.responseType || srcConf.responseType;
     srcConf.requestType = config.requestType || srcConf.requestType;
-
-    if (config.params) {
-      for (const p of Object.values(config.params)) {
-        srcConf.params[p.name] = { ...(srcConf.params[p.name] || {}), ...p };
-      }
-    }
+    srcConf.params = (config.params || []).map(x => ({ ...x }));
 
     this.mergeDescribable(config, srcConf);
 

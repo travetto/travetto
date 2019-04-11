@@ -16,13 +16,26 @@ const CONTROLLER_DECORATORS = {
   Controller: new Set(['@travetto/rest'])
 };
 
+const PARAM_DECORATORS = {
+  Path: new Set(['@travetto/rest']),
+  Query: new Set(['@travetto/rest']),
+  Header: new Set(['@travetto/rest']),
+  Body: new Set(['@travetto/rest'])
+};
+
 const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
 const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
 const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 
-function defineType(state: TransformerState, type: ts.Expression) {
-  const isArray = ts.isArrayLiteralExpression(type);
-  const typeIdent = isArray ? (type as ts.ArrayLiteralExpression).elements[0] as ts.Expression : type as ts.Expression;
+function defineType(state: TransformerState, type: ts.Expression | ts.TypeNode) {
+  let typeIdent: ts.Expression | ts.TypeNode = type;
+  let isArray: boolean = false;
+  if (!ts.isTypeNode(typeIdent)) {
+    isArray = ts.isArrayLiteralExpression(type);
+    typeIdent = isArray ? (type as ts.ArrayLiteralExpression).elements[0] as ts.Expression : type as ts.Expression;
+  } else {
+    isArray = type.kind === ts.SyntaxKind.ArrayType;
+  }
   const finalTarget = ts.isIdentifier(typeIdent) ? TransformUtil.importTypeIfExternal(state, typeIdent) : typeIdent;
 
   const res = {
@@ -73,29 +86,6 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         newDecls.push(produces);
       }
 
-      // If there are parameters to process
-      if (comments.params) {
-        for (const p of comments.params) {
-          // Handle body/request special as they are the input
-          if (p.name === 'req.body' || p.name === 'req.query') {
-            const dec = TransformUtil.createDecorator(state, ENDPOINT_DEC_FILE, 'RequestType', TransformUtil.fromLiteral({
-              ...defineType(state, p.type!),
-              title: p.description
-            }));
-            newDecls.push(dec);
-          } else {
-            // Handle as standard input param
-            const dec = TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Param', TransformUtil.fromLiteral({
-              description: p.description,
-              name: p.name,
-              required: !p.optional,
-              ...defineType(state, p.type!)
-            }));
-            newDecls.push(dec);
-          }
-        }
-      }
-
       // Handle description/title/summary w/e
       if (comments.description) {
         newDecls.push(TransformUtil.createDecorator(state, COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
@@ -103,7 +93,71 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
         })));
       }
 
-      if (newDecls.length) {
+      let nParams = node.parameters;
+
+      // Handle parameters
+      if (node.parameters.length) {
+        const params = [] as ts.ParameterDeclaration[];
+        // If there are parameters to process
+        for (const p of node.parameters) {
+          const typeName = p.type ? p.type.getText() : '';
+          const pName = p.name.getText();
+
+          const pDec = TransformUtil.findAnyDecorator(state, p, PARAM_DECORATORS);
+
+          const decs = (p.decorators || []).filter(x => x !== pDec);
+          const comment = (comments.params || []).find(x => x.name === pName);
+
+          const common = {
+            name: pName,
+            description: comment && comment.description || pName,
+            required: !(p.questionToken && (!comment || comment.optional)),
+            defaultValue: p.initializer,
+            ...defineType(state, comment && comment.type! || p.type! || ts.createIdentifier('String'))
+          };
+
+          if (!pDec) {
+            // Handle body/request special as they are the input
+            if (/^Request|Response$/.test(typeName)) {
+              decs.push(TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Param', TransformUtil.fromLiteral({
+                location: typeName.toLowerCase(),
+                ...common
+              })));
+            } else {
+              decs.push(TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Query',
+                TransformUtil.fromLiteral(common))
+              );
+            }
+          } else {
+
+            if (ts.isCallExpression(pDec.expression)) {
+              const arg = pDec.expression.arguments[0];
+              if (ts.isObjectLiteralExpression(arg)) {
+                pDec.expression.arguments = ts.createNodeArray([
+                  TransformUtil.extendObjectLiteral(common, arg),
+                  ...pDec.expression.arguments.slice(1)]
+                );
+              }
+            }
+
+            decs.push(pDec);
+          }
+
+          params.push(ts.createParameter(
+            decs,
+            p.modifiers,
+            p.dotDotDotToken,
+            p.name,
+            p.questionToken,
+            p.type,
+            p.initializer
+          ));
+        }
+
+        nParams = ts.createNodeArray(params);
+      }
+
+      if (newDecls.length || nParams !== node.parameters) {
         const ret = ts.createMethod(
           [...decls!, ...newDecls],
           node.modifiers,
@@ -111,7 +165,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           node.name,
           node.questionToken,
           node.typeParameters,
-          node.parameters,
+          nParams,
           node.type,
           node.body
         ) as any;

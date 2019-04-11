@@ -95,7 +95,9 @@ export abstract class RestApp<T = any> {
   }
 
   async registerGlobal() {
-    const route: RouteConfig = { instance: {}, handler: this.globalHandler, method: 'all', path: '*' };
+    const route: RouteConfig = {
+      params: [{ type: 'Request' }], instance: {}, handler: this.globalHandler, method: 'all', path: '*'
+    };
     route.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, route);
     await this.registerRoutes(RestApp.GLOBAL, '/', [route]);
   }

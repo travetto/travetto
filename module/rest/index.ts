@@ -8,7 +8,6 @@ export * from './src/decorator/common';
 export * from './src/decorator/controller';
 export * from './src/decorator/param';
 export * from './src/decorator/endpoint';
-export * from './src/decorator/filter';
 export * from './src/registry/registry';
 export * from './src/registry/types';
 export * from './src/response/redirect';

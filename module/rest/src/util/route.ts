@@ -1,4 +1,5 @@
-import { AppError } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
+import { Class } from '@travetto/registry';
 
 import { MimeType } from './mime';
 import { HeaderMap, Request, Response, Filter, RouteConfig } from '../types';
@@ -6,7 +7,28 @@ import { isRenderable } from '../response/renderable';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { RestInterceptor } from '../interceptor/interceptor';
 
+const fieldMapping: { [key: string]: 'params' | 'query' | 'body' | 'headers' } = {
+  path: 'params',
+  query: 'query',
+  body: 'body',
+  header: 'headers'
+};
+
 export class RouteUtil {
+
+  static parseParam(type: Class | undefined, name: string, param: any) {
+    try {
+      switch (type) {
+        case Date: return Util.coerceType(param, new Date());
+        case Boolean: return Util.coerceType(param, true);
+        case Number: return Util.coerceType(param, 0);
+        case String:
+        case undefined: return `${param}`;
+      }
+    } catch (e) {
+      throw new AppError(`Incorrect field type for ${name}, ${param} is not a ${type!.name}`, 'data');
+    }
+  }
 
   static logRequest(req: Request, res: Response, duration: number) {
     const reqLog = {
@@ -83,16 +105,41 @@ export class RouteUtil {
     }
   }
 
+  static computeRouteParams(route: RouteConfig, req: Request, res: Response) {
+    const params: any[] = [];
+    for (const { name, required, type, location } of route.params) {
+      if ((location as any) === 'req') {
+        params.push(req);
+      } else if ((location as any) === 'res') {
+        params.push(res);
+      } else {
+        const finalLoc = fieldMapping[location];
+        const param = req[finalLoc][name];
+
+        if (required && !param) {
+          throw new AppError(`Missing field: ${name}`, 'data');
+        } else if (param) {
+          params.push(this.parseParam(type, name, param));
+        }
+      }
+    }
+    return params;
+  }
+
   static createRouteHandler(
     interceptors: RestInterceptor[],
     route: RouteConfig | EndpointConfig,
     router: Partial<ControllerConfig> = {}): Filter<any> {
-    const handlerBound = async (req: Request, res: Response) => route.handler.call(route.instance, req, res);
+    const handlerBound = async (req: Request, res: Response) => {
+      return route.handler(...this.computeRouteParams(route, req, res));
+    };
 
     const filters: Filter[] = [
       ...(router.filters || []).map(x => x.bind(router.instance)),
-      ...('filters' in route ? route.filters : []).map(x => x.bind(route.instance))
+      ...('filters' in route ? route.filters : []).map(x => x.bind(route.instance)),
+      ...(route.params.filter(x => x.resolve).map(x => x.resolve!))
     ];
+
     const headers = {
       ...(router.headers || {}),
       ...('headers' in route ? route.headers : {})
