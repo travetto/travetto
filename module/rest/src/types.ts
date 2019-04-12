@@ -8,9 +8,6 @@ export type PathType = string | RegExp;
 export type Request = Travetto.Request;
 export type Response = Travetto.Response;
 
-export interface TypedQuery<T> extends Request { query: T; }
-export interface TypedBody<T> extends Request { body: T; }
-
 export type RouteHandler<T = any> = (...args: any[]) => Promise<T> | T | void;
 
 export type Filter<T = any> = (req: Request, res: Response) => Promise<T> | T | void;

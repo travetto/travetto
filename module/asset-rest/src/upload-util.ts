@@ -109,6 +109,7 @@ export class UploadUtil {
         await new Promise((resolve, reject) => {
           stream.pipe(res.__raw);
           res.__raw.on('error', reject);
+          res.__raw.on('drain', resolve);
           res.__raw.on('close', resolve);
         });
       }

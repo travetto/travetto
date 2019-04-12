@@ -10,7 +10,11 @@ import { AssetRestConfig } from './config';
 const globalConf = new AssetRestConfig();
 ConfigSource.bindTo(globalConf, 'rest.upload');
 
-export function Upload(param: Partial<ParamConfig> & Partial<AssetRestConfig> = {}) {
+export function Upload(param: string | Partial<ParamConfig> & Partial<AssetRestConfig> = {}) {
+
+  if (typeof param === 'string') {
+    param = { name: param };
+  }
 
   const finalConf = { ...globalConf, ...param };
 
