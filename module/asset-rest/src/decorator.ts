@@ -30,7 +30,9 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<AssetRestC
       ...param as ParamConfig,
       location: 'files' as any,
       async resolve(req: Request) {
-        req.files = await UploadUtil.upload(req, finalConf, `${(target.constructor as any).basePath}/`);
+        if (!req.files) { // Prevent duplication if given multiple decorators
+          req.files = await UploadUtil.upload(req, finalConf, `${(target.constructor as any).basePath}/`);
+        }
       }
     }, index);
   };

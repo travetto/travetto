@@ -437,7 +437,7 @@ export class TransformUtil {
   }
 }
 
-interface Documentation {
+export interface Documentation {
   return?: { description?: string; type?: ts.Expression };
   description?: string;
   params?: { name: string, description: string, optional?: boolean, type?: ts.Expression }[];
