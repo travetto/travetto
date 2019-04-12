@@ -8,15 +8,24 @@ export const Param = (param: ParamConfig) => {
   };
 };
 
-export const Path = (param: Partial<ParamConfig> = {}) => {
+export const Path = (param: string | Partial<ParamConfig> = {}) => {
+  if (typeof param === 'string') {
+    param = { name: param };
+  }
   return Param({ type: String, location: 'path', required: true, ...(param as ParamConfig) });
 };
 
-export const Query = (param: Partial<ParamConfig> = {}) => {
+export const Query = (param: string | Partial<ParamConfig> = {}) => {
+  if (typeof param === 'string') {
+    param = { name: param };
+  }
   return Param({ type: String, location: 'query', required: false, ...(param as ParamConfig) });
 };
 
-export const Header = (param: Partial<ParamConfig> = {}) => {
+export const Header = (param: string | Partial<ParamConfig> = {}) => {
+  if (typeof param === 'string') {
+    param = { name: param };
+  }
   return Param({ type: String, location: 'header', required: false, ...(param as ParamConfig) });
 };
 

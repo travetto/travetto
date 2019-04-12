@@ -129,12 +129,19 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
               );
             }
           } else {
-
             if (ts.isCallExpression(pDec.expression)) {
               const arg = pDec.expression.arguments[0];
               if (arg && ts.isObjectLiteralExpression(arg)) {
                 pDec.expression.arguments = ts.createNodeArray([
                   TransformUtil.extendObjectLiteral(common, arg),
+                  ...pDec.expression.arguments.slice(1)]
+                );
+              } else if (arg) {
+                pDec.expression.arguments = ts.createNodeArray([
+                  TransformUtil.extendObjectLiteral({
+                    ...common,
+                    name: arg
+                  }),
                   ...pDec.expression.arguments.slice(1)]
                 );
               } else {
