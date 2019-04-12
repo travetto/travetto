@@ -87,7 +87,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     srcConf.path = config.path || srcConf.path;
     srcConf.responseType = config.responseType || srcConf.responseType;
     srcConf.requestType = config.requestType || srcConf.requestType;
-    srcConf.params = (config.params || []).map(x => ({ ...x }));
+    srcConf.params = (config.params || srcConf.params).map(x => ({ ...x }));
 
     this.mergeDescribable(config, srcConf);
 

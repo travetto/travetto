@@ -3,7 +3,7 @@ import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 
 import { Injectable } from '@travetto/di';
-import { RouteUtil, RestApp, RouteConfig } from '@travetto/rest';
+import { RouteUtil, RestApp, RouteConfig, RouteHandler } from '@travetto/rest';
 
 import { RouteStack } from './types';
 
@@ -48,7 +48,7 @@ export class ExpressRestApp extends RestApp<express.Application> {
     // Register options handler for each controller
     if (key !== RestApp.GLOBAL) {
       const optionHandler = RouteUtil.createRouteHandler(this.interceptors,
-        { method: 'options', path: '*', handler: this.globalHandler });
+        { method: 'options', path: '*', handler: this.globalHandler as RouteHandler, params: [{ location: 'request' } as any] });
 
       router.options('*', optionHandler as any);
     }

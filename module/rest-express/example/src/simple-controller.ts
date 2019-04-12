@@ -1,4 +1,4 @@
-import { Controller, Get, Cache, Request, Response } from '@travetto/rest';
+import { Controller, Post, Get, Cache, Path, Query, Body } from '@travetto/rest';
 import { MockService } from './mock';
 
 @Controller('/simple')
@@ -7,11 +7,10 @@ export class Simple {
   constructor(private service: MockService) {
   }
 
-  @Get('/name')
-  async doIt(req: Request, res: Response): Promise<string> {
+  @Get('/name/:age')
+  async doIt(@Path() age: number, @Query() page: number = 5): Promise<string> {
     const user = await this.service.fetch();
-    res.cookies.set('Fun', 'Value');
-    return `/simple/name => ${user.first.toLowerCase()}`;
+    return `/simple/name => ${user.first.toLowerCase()} ${age + page}`;
   }
 
   @Cache(1, 'd')
@@ -41,5 +40,10 @@ export class Simple {
   @Get('/age3')
   async age3() {
     return 'hi';
+  }
+
+  @Post('/age4')
+  async age4(@Body() obj: any) {
+    console.log(obj);
   }
 }

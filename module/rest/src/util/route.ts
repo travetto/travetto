@@ -107,20 +107,22 @@ export class RouteUtil {
 
   static computeRouteParams(route: RouteConfig, req: Request, res: Response) {
     const params: any[] = [];
-    for (const { name, required, type, location } of route.params) {
-      if ((location as any) === 'req') {
-        params.push(req);
-      } else if ((location as any) === 'res') {
-        params.push(res);
-      } else {
-        const finalLoc = fieldMapping[location];
-        const param = req[finalLoc][name];
+    for (const { name, required, type, location, defaultValue } of route.params) {
+      switch (location) {
+        case 'request': params.push(req); break;
+        case 'response': params.push(res); break;
+        case 'body': params.push(req.body); break;
+        default:
+          const finalLoc = fieldMapping[location];
+          const param = req[finalLoc][name];
 
-        if (required && !param) {
-          throw new AppError(`Missing field: ${name}`, 'data');
-        } else if (param) {
-          params.push(this.parseParam(type, name, param));
-        }
+          if (required && !param) {
+            throw new AppError(`Missing field: ${name}`, 'data');
+          } else if (param) {
+            params.push(this.parseParam(type, name, param));
+          } else {
+            params.push(defaultValue);
+          }
       }
     }
     return params;
@@ -130,8 +132,10 @@ export class RouteUtil {
     interceptors: RestInterceptor[],
     route: RouteConfig | EndpointConfig,
     router: Partial<ControllerConfig> = {}): Filter<any> {
+
     const handlerBound = async (req: Request, res: Response) => {
-      return route.handler(...this.computeRouteParams(route, req, res));
+      const params = this.computeRouteParams(route, req, res);
+      return route.handler.apply(route.instance, params);
     };
 
     const filters: Filter[] = [

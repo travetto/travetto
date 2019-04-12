@@ -36,7 +36,7 @@ function defineType(state: TransformerState, type: ts.Expression | ts.TypeNode) 
   } else {
     isArray = type.kind === ts.SyntaxKind.ArrayType;
   }
-  const finalTarget = ts.isIdentifier(typeIdent) ? TransformUtil.importTypeIfExternal(state, typeIdent) : typeIdent;
+  const finalTarget = ts.isIdentifier(typeIdent) ? TransformUtil.importTypeIfExternal(state, typeIdent) : TransformUtil.resolveType(state, type);
 
   const res = {
     type: finalTarget,
@@ -111,7 +111,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
           const common = {
             name: pName,
             description: comment && comment.description || pName,
-            required: !(p.questionToken && (!comment || comment.optional)),
+            required: !(p.questionToken || (comment && comment.optional) || !!p.initializer),
             defaultValue: p.initializer,
             ...defineType(state, comment && comment.type! || p.type! || ts.createIdentifier('String'))
           };
@@ -132,11 +132,13 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
             if (ts.isCallExpression(pDec.expression)) {
               const arg = pDec.expression.arguments[0];
-              if (ts.isObjectLiteralExpression(arg)) {
+              if (arg && ts.isObjectLiteralExpression(arg)) {
                 pDec.expression.arguments = ts.createNodeArray([
                   TransformUtil.extendObjectLiteral(common, arg),
                   ...pDec.expression.arguments.slice(1)]
                 );
+              } else {
+                pDec.expression.arguments = ts.createNodeArray([TransformUtil.extendObjectLiteral(common)]);
               }
             }
 
