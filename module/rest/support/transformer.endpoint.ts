@@ -18,7 +18,7 @@ const CONTROLLER_DECORATORS = {
 };
 
 const PARAM_DECORATORS = TransformUtil.buildImportAliasMap({
-  ...ConfigSource.get('registry.rest_param'),
+  ...ConfigSource.get('registry.rest-param'),
   '@travetto/rest': ['Path', 'Query', 'Header', 'Body']
 });
 
@@ -109,7 +109,7 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
   );
 }
 
-function visitMethod(context: ts.TransformationContext, node: ts.MethodDeclaration, state: TransformerState) {
+function visitEndpoint(context: ts.TransformationContext, node: ts.MethodDeclaration, state: TransformerState) {
 
   const decls = node.decorators;
   const newDecls = [];
@@ -184,13 +184,35 @@ function visitMethod(context: ts.TransformationContext, node: ts.MethodDeclarati
   }
 }
 
+function visitController(context: ts.TransformationContext, node: ts.ClassDeclaration, state: TransformerState) {
+  // Read title/description/summary from jsdoc on class
+  const comments = TransformUtil.describeByComments(state, node);
+  if (comments.description) {
+    const decls = [...(node.decorators || [])];
+    decls.push(TransformUtil.createDecorator(state, COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
+      title: comments.description
+    })));
+    return ts.updateClassDeclaration(
+      node,
+      ts.createNodeArray(decls),
+      node.modifiers,
+      node.name,
+      node.typeParameters,
+      node.heritageClauses,
+      node.members
+    ) as any;
+  } else {
+    return node;
+  }
+}
+
 function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: TransformerState): T {
   if (ts.isMethodDeclaration(node) && (ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static) === 0) { // tslint:disable-line no-bitwise
     const foundDec = TransformUtil.findAnyDecorator(state, node, ENDPOINT_DECORATORS);
 
     // Endpoint exists
     if (foundDec) {
-      return visitMethod(context, node as ts.MethodDeclaration, state);
+      return visitEndpoint(context, node as ts.MethodDeclaration, state);
     } else {
       return node;
     }
@@ -198,23 +220,7 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
   } else if (ts.isClassDeclaration(node)) {
     const foundDec = TransformUtil.findAnyDecorator(state, node, CONTROLLER_DECORATORS);
     if (foundDec) {
-      // Read title/description/summary from jsdoc on class
-      const comments = TransformUtil.describeByComments(state, node);
-      if (comments.description) {
-        const decls = [...(node.decorators || [])];
-        decls.push(TransformUtil.createDecorator(state, COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
-          title: comments.description
-        })));
-        node = ts.updateClassDeclaration(
-          node,
-          ts.createNodeArray(decls),
-          node.modifiers,
-          node.name,
-          node.typeParameters,
-          node.heritageClauses,
-          node.members
-        ) as any;
-      }
+      node = visitController(context, node, state);
     }
   }
   return ts.visitEachChild(node, c => visitNode(context, c, state), context);

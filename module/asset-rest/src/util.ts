@@ -13,7 +13,7 @@ import { AssetRestConfig } from './config';
 
 type AssetMap = { [key: string]: Asset };
 
-export class UploadUtil {
+export class AssetRestUtil {
   static readTypeArr(arr?: string[] | string) {
     return (Array.isArray(arr) ? arr : (arr || '').split(',')).filter(x => !!x);
   }

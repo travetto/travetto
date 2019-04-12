@@ -6,7 +6,7 @@ import { Class } from '@travetto/registry';
 import { ConfigSource } from '@travetto/config';
 import { Asset } from '@travetto/asset';
 
-import { UploadUtil } from './upload-util';
+import { AssetRestUtil } from './util';
 import { AssetRestConfig } from './config';
 
 const globalConf = new AssetRestConfig();
@@ -31,7 +31,7 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<AssetRestC
       location: 'files' as any,
       async resolve(req: Request) {
         if (!req.files) { // Prevent duplication if given multiple decorators
-          req.files = await UploadUtil.upload(req, finalConf, `${(target.constructor as any).basePath}/`);
+          req.files = await AssetRestUtil.upload(req, finalConf, `${(target.constructor as any).basePath}/`);
         }
       }
     }, index);
