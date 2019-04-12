@@ -21,7 +21,7 @@ export class TodoController {
 
   /**
    * Get Todo by id
-   * @param id {String} Todo id
+   * @param id Todo id
    */
   @Get('/:id')
   async getById(@Path() id: string): Promise<Todo> {
@@ -38,7 +38,7 @@ export class TodoController {
 
   /**
    * Complete a todo
-   * @param id {String} Todo id
+   * @param id Todo id
    */
   @Put('/:id/complete')
   async complete(@Path() id: string, @Query() completed: boolean = true) {
@@ -47,7 +47,7 @@ export class TodoController {
 
   /**
    * Delete a todo
-   * @param id {String} Todo id
+   * @param id Todo id
    */
   @Delete('/:id')
   async remove(@Path() id: string) {
