@@ -34,7 +34,7 @@ abstract class BaseResponse implements Partial<Response> {
 
 abstract class BaseRequest implements Partial<Request> {
   header(this: Request, key: string) {
-    return this.headers![key] as string;
+    return this.headers![key.toLowerCase()] as string;
   }
 }
 

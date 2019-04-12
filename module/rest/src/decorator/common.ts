@@ -22,21 +22,16 @@ function register(config: Partial<EndpointConfig | ControllerConfig>) {
 
 export const Describe = (desc: DescribableConfig) => register(desc);
 
-export const SetHeader = (headers: HeaderMap) => register({ headers });
-export const DisableCache = () => register({
-  headers: {
-    Expires: '-1',
-    'Cache-Control': 'max-age=0, no-cache'
-  }
-});
-
+export const SetHeaders = (headers: HeaderMap) => register({ headers });
 export function Cache(value: number, unit: Units = 's') {
   const delta = UNIT_MAPPING[unit] * value;
-  return SetHeader({
-    Expires: () => `${new Date(Date.now() + delta).toUTCString()}`,
-    'Cache-Control': () => `max-age=${delta}`
+  return SetHeaders({
+    Expires: value === 0 ? '-1' : () => `${new Date(Date.now() + delta).toUTCString()}`,
+    'Cache-Control': () => `max-age=${delta}${delta === 0 ? ',no-cache' : ''}`
   });
 }
+
+export const DisableCache = Cache.bind(null, 0, 's');
 
 export function Accepts(contentTypes: string[]) {
   const types = new Set(contentTypes);

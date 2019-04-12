@@ -1,6 +1,12 @@
 import { ParamConfig } from '../types';
 import { ControllerRegistry } from '../registry/registry';
-import { ParamName } from 'koa-router';
+
+function toConfig(param: string | Partial<ParamConfig>) {
+  if (typeof param === 'string') {
+    param = { name: param };
+  }
+  return param as ParamConfig;
+}
 
 export const Param = (param: ParamConfig) => {
   return (target: any, propertyKey: string | symbol, idx: number) => {
@@ -9,30 +15,7 @@ export const Param = (param: ParamConfig) => {
   };
 };
 
-export const Path = (param: string | Partial<ParamConfig> = {}) => {
-  if (typeof param === 'string') {
-    param = { name: param };
-  }
-  return Param({ type: String, location: 'path', required: true, ...(param as ParamConfig) });
-};
-
-export const Query = (param: string | Partial<ParamConfig> = {}) => {
-  if (typeof param === 'string') {
-    param = { name: param };
-  }
-  return Param({ type: String, location: 'query', required: false, ...(param as ParamConfig) });
-};
-
-export const Header = (param: string | Partial<ParamConfig> = {}) => {
-  if (typeof param === 'string') {
-    param = { name: param };
-  }
-  if (param.name) {
-    param.name = param.name.toLowerCase();
-  }
-  return Param({ type: String, location: 'header', required: false, ...(param as ParamConfig) });
-};
-
-export const Body = (param: Partial<ParamConfig> = {}) => {
-  return Param({ type: Object, location: 'body', required: true, ...(param as ParamConfig) });
-};
+export const Path = (param: string | Partial<ParamConfig> = {}) => Param({ location: 'path', ...toConfig(param) });
+export const Query = (param: string | Partial<ParamConfig> = {}) => Param({ location: 'query', ...toConfig(param) });
+export const Header = (param: string | Partial<ParamConfig> = {}) => Param({ location: 'header', ...toConfig(param) });
+export const Body = (param: Partial<ParamConfig> = {}) => Param({ location: 'body', ...(param as ParamConfig) });

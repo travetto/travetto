@@ -19,18 +19,17 @@ class Controller {
 
   constructor(assetService: AssetService, imageService: ImageService) {}
 
-  @AssetUpload()
   @Post('/')
-  async setAvatar(req:Request, res:Response) {
-    const stored = await this.assetService.store(req.files[0]);
+  async setAvatar(@Upload() file: Asset) {
+    const stored = await this.assetService.store(asset);
     return {
       path: stored.path
     };
   }
 
-  @Get('/:path')
-  async getAvatar(req:TypedQuery<ImageOptions>) {
-    return await this.imageService.get(req.params.path, req.query);
+  @Get('/:imgPath')
+  async getAvatar(@Path() imgPath: string, @Query() opts:ImageOptions>) {
+    return await this.imageService.get(imgPath, opts);
   }
 }
 ```

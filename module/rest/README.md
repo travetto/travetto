@@ -69,16 +69,17 @@ class SimpleController {
 
 
 ### Parameters
-Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined  in three areas:
-* `@PathParam`
-* `@QueryParam`
-* `@BodyParam`
+Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in four areas:
+* `@Path`
+* `@Query`
+* `@Body`
+* `@Header`
 
 Each `@Param` can be configured to indicate:
-* `name` - Name of param, field name
-* `description` - Description of param
-* `required?` - Is the field required?
-* `type` - The class of the type to be enforced
+* `name` - Name of param, field name, defaults to handler parameter name if necessary
+* `description` - Description of param, pulled from `JSdoc`, or defaults to name if empty
+* `required?` - Is the field required?, defaults to whether or not the parameter itself is optional
+* `type` - The class of the type to be enforced, pulled from parameter type
 
 [`JSDoc`](http://usejsdoc.org/about-getting-started.html) comments can also be used to describe parameters using `@param` tags in the comment.
 
@@ -105,24 +106,21 @@ export class Simple {
    * Get a user by id
    */
   @Get('/:id')
-  @PathParam({ name: 'id', type: Number })
-  async doIt(req: Request): string {
-    const user = await this.service.fetch(req.params.id);
+  async doIt(@Path() id: number): string {
+    const user = await this.service.fetch(id);
     return `/simple/name => ${user.first.toLowerCase()}`;
   }
 
 
   @Post('/name')
-  async doIt(req: Request) {
+  async doIt(@Body() person: { name: string }) {
     const user = await this.service.update({ name: req.body.name });
     return { success : true };
   }
 
   @Get(/\/img(.*)[.](jpg|png|gif)/)
-  @QueryParam({ name: 'w', type: Number })
-  @QueryParam({ name: 'h', type: Number })
-  async getImage(req: Request, res:Response) {
-    const img =  await this.service.fetch(req.path, req.query);
+  async getImage(req: Request, @Query('w') width?: number, @Query('h') height?:number) {
+    const img =  await this.service.fetch(req.path, {w, h});
     ... return image ...
   }
 }
@@ -223,9 +221,8 @@ Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module
 ```typescript
  ...
   @Post('/preferences')
-  @SchemaBody(User)
-  async save(req: TypedBody<Preferences>) {
-    await this.service.update(req.body);
+  async save(@Body() prefs: Preferences) {
+    await this.service.update(prefs);
     return { success : true };
   }
  ...
