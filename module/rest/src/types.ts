@@ -20,6 +20,7 @@ export interface ParamConfig {
   type: Class;
   resolve?: Filter;
   defaultValue?: any;
+  extract(config: ParamConfig, req?: Request, res?: Response): any;
 }
 
 export interface RouteConfig {

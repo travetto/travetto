@@ -1,35 +1,12 @@
 import { AppError, Util } from '@travetto/base';
-import { Class } from '@travetto/registry';
 
 import { MimeType } from './mime';
-import { HeaderMap, Request, Response, Filter, RouteConfig } from '../types';
+import { HeaderMap, Request, Response, Filter, RouteConfig, ParamConfig } from '../types';
 import { isRenderable } from '../response/renderable';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { RestInterceptor } from '../interceptor/interceptor';
 
-const fieldMapping: { [key: string]: 'params' | 'query' | 'body' | 'headers' } = {
-  path: 'params',
-  query: 'query',
-  body: 'body',
-  header: 'headers'
-};
-
 export class RouteUtil {
-
-  static parseParam(type: Class | undefined, name: string, param: any) {
-    try {
-      switch (type) {
-        case Date: return Util.coerceType(param, new Date());
-        case Boolean: return Util.coerceType(param, true);
-        case Number: return Util.coerceType(param, 0);
-        case String:
-        case undefined: return `${param}`;
-      }
-      return param;
-    } catch (e) {
-      throw new AppError(`Incorrect field type for ${name}, ${param} is not a ${type!.name}`, 'data');
-    }
-  }
 
   static logRequest(req: Request, res: Response, duration: number) {
     const reqLog = {
@@ -106,24 +83,30 @@ export class RouteUtil {
     }
   }
 
-  static computeRouteParams(route: RouteConfig, req: Request, res: Response) {
+  static computeRouteParams(configs: ParamConfig[], req: Request, res: Response) {
     const params: any[] = [];
-    for (const { name, required, type, location, defaultValue } of route.params) {
-      switch (location) {
-        case 'request': params.push(req); break;
-        case 'response': params.push(res); break;
-        case 'body': params.push(req.body); break;
-        default:
-          const finalLoc = fieldMapping[location] || location;
-          const param = req[finalLoc][name!];
-          if (param) {
-            params.push(this.parseParam(type, name!, param));
-          } else if (required) {
-            throw new AppError(`Missing ${location.replace(/s$/, '')}: ${name}`, 'data');
-          } else {
-            params.push(defaultValue);
+    for (const config of configs) {
+      let paramValue = config.extract(config, req, res);
+      if (config.location === 'header' || config.location === 'path' || config.location === 'query') {
+        try {
+          switch (config.type) {
+            case Date: paramValue = Util.coerceType(paramValue, new Date()); break;
+            case Boolean: paramValue = Util.coerceType(paramValue, true); break;
+            case Number: paramValue = Util.coerceType(paramValue, 0); break;
+            case String:
+            case undefined: paramValue = `${paramValue}`; break;
           }
+        } catch (e) {
+          throw new AppError(`Incorrect type for ${config.location} param ${config.name}, ${paramValue} is not a ${config.type!.name}`, 'data');
+        }
       }
+      paramValue = paramValue === undefined ? config.defaultValue : paramValue;
+
+      if (paramValue === undefined && config.required) {
+        throw new AppError(`Missing ${config.location.replace(/s$/, '')}: ${config.name}`, 'data');
+      }
+
+      params.push(paramValue);
     }
     return params;
   }
@@ -134,7 +117,7 @@ export class RouteUtil {
     router: Partial<ControllerConfig> = {}): Filter<any> {
 
     const handlerBound = async (req: Request, res: Response) => {
-      const params = this.computeRouteParams(route, req, res);
+      const params = this.computeRouteParams(route.params, req, res);
       return route.handler.apply(route.instance, params);
     };
 

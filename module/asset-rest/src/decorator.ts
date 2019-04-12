@@ -12,6 +12,8 @@ import { AssetRestConfig } from './config';
 const globalConf = new AssetRestConfig();
 ConfigSource.bindTo(globalConf, 'rest.upload');
 
+const extractUpload = (config: ParamConfig, req: Request) => req.files[config.name!];
+
 export function Upload(param: string | Partial<ParamConfig> & Partial<AssetRestConfig> = {}) {
 
   if (typeof param === 'string') {
@@ -33,7 +35,8 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<AssetRestC
         if (!req.files) { // Prevent duplication if given multiple decorators
           req.files = await AssetRestUtil.upload(req, finalConf, `${(target.constructor as any).basePath}/`);
         }
-      }
+      },
+      extract: extractUpload
     }, index);
   };
 }
