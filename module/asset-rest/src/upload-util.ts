@@ -104,6 +104,7 @@ export class UploadUtil {
     return {
       async render(res: Response) {
         const stream = asset.stream || fs.createReadStream(asset.path);
+        res.status(200);
         res.setHeader('Content-Type', asset.contentType);
         res.setHeader('Content-Disposition', `attachment;filename=${asset.filename}`);
         await new Promise((resolve, reject) => {
