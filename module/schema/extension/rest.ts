@@ -4,29 +4,30 @@ import { Class } from '@travetto/registry';
 
 import { SchemaRegistry, BindUtil, SchemaValidator } from '..';
 
-function getBound<T>(cls: Class<T>, obj: any, view?: string) {
+const getBody = (c: ParamConfig, r: Request) => r.body;
+const getQuery = (c: ParamConfig, r: Request) => (r.query._schema && r.query._schema[c.name!]);
+
+export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: string) {
+  if (!Util.isPlainObject(obj)) {
+    throw new AppError(`Object is missing or wrong type: ${obj}`, 'data');
+  }
+
+  let bound: T;
   try {
     const resolved = SchemaRegistry.get(cls).class; // Get actual class separate from decorator value
-    return BindUtil.bindSchema(resolved, obj, view);
+    bound = BindUtil.bindSchema(resolved, obj, view);
   } catch (e) {
     throw new AppError(`Supplied data is incompatible with ${cls.__id}: ${e.message}`);
   }
-}
 
-export async function getSchemaBody<T>(req: Request, cls: Class<T>, view?: string) {
-  if (Util.isPlainObject(req.body)) {
-    const o = getBound(cls, req.body, view);
-    if (SchemaRegistry.has(cls)) {
-      return await SchemaValidator.validate(o, view);
-    } else {
-      return o;
-    }
-  } else {
-    throw new AppError(`Body is missing or wrong type: ${req.body}`, 'data');
+  if (SchemaRegistry.has(cls)) {
+    await SchemaValidator.validate(bound, view);
   }
+
+  return bound;
 }
 
-export function SchemaBody<T>(config: Partial<ParamConfig> = {}, view?: string) {
+export function SchemaBody<T>(config: Partial<ParamConfig> & { view?: string } = {}) {
   return function (target: any, prop: string | symbol, idx: number) {
     const handler = target.constructor.prototype[prop];
 
@@ -38,13 +39,14 @@ export function SchemaBody<T>(config: Partial<ParamConfig> = {}, view?: string) 
       ...config as ParamConfig,
       location: 'body',
       async resolve(req: Request) {
-        req.body = await getSchemaBody(req, config.type!, view);
-      }
+        req.body = await getSchemaInstance(req.body, config.type!, config.view);
+      },
+      extract: getBody
     }, idx);
   };
 }
 
-export function SchemaQuery<T>(config: Partial<ParamConfig> = {}, view?: string) {
+export function SchemaQuery<T>(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
   return function (target: any, prop: string | symbol, idx: number) {
     const handler = target.constructor.prototype[prop];
 
@@ -57,13 +59,11 @@ export function SchemaQuery<T>(config: Partial<ParamConfig> = {}, view?: string)
       name: '_all',
       location: 'query',
       async resolve(req: Request) {
-        const o = getBound(config.type!, BindUtil.expandPaths(req.query), view);
-        if (SchemaRegistry.has(config.type!)) {
-          req.query._all = await SchemaValidator.validate(o, view);
-        } else {
-          req.query._all = o;
-        }
-      }
+        req.query._schema = req.query._schema || {};
+        const exploded = BindUtil.expandPaths(req.query);
+        req.query._schema[config.name!] = await getSchemaInstance(config.key ? exploded[config.key] : exploded, config.type!, config.view!);
+      },
+      extract: getQuery
     }, idx);
   };
 }
