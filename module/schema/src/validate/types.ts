@@ -3,4 +3,4 @@ export interface ValidationError {
   path: string;
   kind: string;
 }
-export type ValidatorFn<T, U> = (value: T, parent?: U) => ValidationError | undefined;
+export type ValidatorFn<T, U> = (value: T, parent?: U) => ValidationError | undefined | Promise<ValidationError | undefined>;

@@ -169,7 +169,7 @@ export class SchemaValidator {
     const errors = this.validateSchema(config.schema, o, '');
 
     for (const fn of validators) {
-      const res = fn(o, view);
+      const res = await fn(o, view);
       if (res) {
         errors.push(res);
       }
