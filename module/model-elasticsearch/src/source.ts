@@ -552,10 +552,7 @@ export class ElasticsearchModelSource extends ModelSource {
       id,
       refresh: true,
       body: {
-        script: {
-          lang: 'painless',
-          inline: script
-        }
+        script
       }
     });
 

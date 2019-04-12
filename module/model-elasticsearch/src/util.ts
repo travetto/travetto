@@ -184,18 +184,29 @@ export class ElasticsearchUtil {
   }
 
   static generateUpdateScript(o: any, path: string = '', arr = false) {
-    const out: string[] = [];
+    const ops: string[] = [];
+    const out = {
+      params: {} as { [key: string]: any },
+      lang: 'painless',
+      inline: ''
+    };
     for (const x of Object.keys(o || {})) {
       const prop = arr ? `${path}[${x}]` : `${path}${path ? '.' : ''}${x}`;
       if (o[x] === undefined || o[x] === null) {
-        out.push(`ctx._source.${path}${path ? '.' : ''}remove('${x}')`);
+        ops.push(`ctx._source.${path}${path ? '.' : ''}remove("${x}")`);
       } else if (Util.isPrimitive(o[x]) || Array.isArray(o[x])) {
-        out.push(`ctx._source.${prop} = ${JSON.stringify(o[x]).replace(/[{]/g, '[').replace(/[}]/g, ']')}`);
+        const param = prop.replace(/[^A-Za-z_$]/g, '_');
+        ops.push(`ctx._source.${prop} = params.${param}`);
+        out.params[param] = o[x];
       } else {
-        out.push(this.generateUpdateScript(o[x], prop));
+        const sub = this.generateUpdateScript(o[x], prop);
+        ops.push(sub.inline);
+        Object.assign(out.params, sub.params);
       }
     }
-    return out.join(';');
+    out.inline = ops.join(';');
+
+    return out;
   }
 
   static generateSourceSchema(cls: Class) {
