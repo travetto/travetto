@@ -25,6 +25,7 @@ export class RouteUtil {
         case String:
         case undefined: return `${param}`;
       }
+      return param;
     } catch (e) {
       throw new AppError(`Incorrect field type for ${name}, ${param} is not a ${type!.name}`, 'data');
     }
@@ -113,13 +114,12 @@ export class RouteUtil {
         case 'response': params.push(res); break;
         case 'body': params.push(req.body); break;
         default:
-          const finalLoc = fieldMapping[location];
+          const finalLoc = fieldMapping[location] || location;
           const param = req[finalLoc][name!];
-
-          if (required && !param) {
-            throw new AppError(`Missing field: ${name}`, 'data');
-          } else if (param) {
+          if (param) {
             params.push(this.parseParam(type, name!, param));
+          } else if (required) {
+            throw new AppError(`Missing ${location.replace(/s$/, '')}: ${name}`, 'data');
           } else {
             params.push(defaultValue);
           }

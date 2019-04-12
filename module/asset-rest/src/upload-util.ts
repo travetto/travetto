@@ -4,7 +4,7 @@ import * as os from 'os';
 import * as busboy from 'busboy';
 import match = require('mime-match');
 
-import { Request } from '@travetto/rest';
+import { Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 import { AppError } from '@travetto/base';
 import { FsUtil } from '@travetto/boot';
@@ -98,5 +98,20 @@ export class UploadUtil {
         req.pipe(uploader);
       }
     });
+  }
+
+  static downloadable(asset: Asset) {
+    return {
+      async render(res: Response) {
+        const stream = asset.stream || fs.createReadStream(asset.path);
+        res.setHeader('Content-Type', asset.contentType);
+        res.setHeader('Content-Disposition', `attachment;filename=${asset.filename}`);
+        await new Promise((resolve, reject) => {
+          stream.pipe(res.__raw);
+          res.__raw.on('error', reject);
+          res.__raw.on('close', resolve);
+        });
+      }
+    };
   }
 }

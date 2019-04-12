@@ -1,0 +1,4 @@
+---
+rest_param:
+  '@travetto/asset-rest': 
+    - Upload

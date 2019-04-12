@@ -1,5 +1,6 @@
 import { ParamConfig } from '../types';
 import { ControllerRegistry } from '../registry/registry';
+import { ParamName } from 'koa-router';
 
 export const Param = (param: ParamConfig) => {
   return (target: any, propertyKey: string | symbol, idx: number) => {
@@ -25,6 +26,9 @@ export const Query = (param: string | Partial<ParamConfig> = {}) => {
 export const Header = (param: string | Partial<ParamConfig> = {}) => {
   if (typeof param === 'string') {
     param = { name: param };
+  }
+  if (param.name) {
+    param.name = param.name.toLowerCase();
   }
   return Param({ type: String, location: 'header', required: false, ...(param as ParamConfig) });
 };

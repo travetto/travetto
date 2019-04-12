@@ -1,22 +1,29 @@
-import { Controller, Request, Post, Get } from '@travetto/rest';
-import { AssetUpload } from '../..';
+import * as fs from 'fs';
+
+import { Controller, Post, Get } from '@travetto/rest';
+import { Asset } from '@travetto/asset';
+
+import { Upload } from '../../src/decorator';
+import { UploadUtil } from '../../src/upload-util';
 
 @Controller('/simple')
 export class Simple {
 
   @Get('/age')
   getAge() {
-    return { age: 20 };
+    return { age: 50 };
   }
 
   @Post('/age')
-  getPAge() {
+  getPage() {
     return { age: 20 };
   }
 
-  @AssetUpload()
+  /**
+   * @param file - A file to upload
+   */
   @Post('/files')
-  loadFiles(req: Request) {
-    console.log(req.files);
+  loadFiles(@Upload() file: Asset) {
+    return UploadUtil.downloadable(file);
   }
 }
