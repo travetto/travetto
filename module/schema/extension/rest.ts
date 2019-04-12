@@ -1,4 +1,4 @@
-import { ControllerRegistry, ParamConfig, Filter, EndpointDecorator, Request } from '@travetto/rest';
+import { ControllerRegistry, Request, ParamConfig } from '@travetto/rest';
 import { Util, AppError } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
@@ -26,68 +26,44 @@ export async function getSchemaBody<T>(req: Request, cls: Class<T>, view?: strin
   }
 }
 
-function schemaToParams(cls: Class, view?: string, prefix: string = '') {
-  const viewConf = SchemaRegistry.has(cls) && SchemaRegistry.getViewSchema(cls, view);
-  const schemaConf = viewConf && viewConf.schema;
-  if (!schemaConf) {
-    throw new Error(`Unknown class, not registered as a schema: ${cls.__id}`);
-  }
-  const params = Object.keys(schemaConf).reduce((acc, x) => {
-    const field = schemaConf[x];
-    if (SchemaRegistry.has(field.type) || SchemaRegistry.hasPending(field.type)) {
-      acc = { ...acc, ...schemaToParams(field.type, undefined, prefix ? `${prefix}.${field.name}` : `${field.name}.`) };
-    } else {
-      acc[x] = {
-        name: `${prefix}${field.name}`,
-        description: field.description,
-        type: field.type,
-        required: field.required && field.required.active,
-        location: 'query'
-      };
+export function SchemaBody<T>(config: Partial<ParamConfig> = {}, view?: string) {
+  return function (target: any, prop: string | symbol, idx: number) {
+    const handler = target.constructor.prototype[prop];
+
+    if (!config.type) {
+      throw new AppError('A schema type is required for binding');
     }
-    return acc;
-  }, {} as { [key: string]: ParamConfig });
-  return params;
-}
 
-export function SchemaBody<T>(cls: Class<T>, view?: string) {
-  return function (target: any, prop: string | symbol, descriptor: TypedPropertyDescriptor<Filter>) {
-    ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, {
-      requestType: {
-        type: cls
-      },
-      filters: [
-        async function (req: Request) {
-          req.body = await getSchemaBody(req, cls, view);
-        }
-      ]
-    });
-  } as EndpointDecorator;
-}
-
-export function SchemaQuery<T>(cls: Class<T>, view?: string) {
-
-  return function (target: any, prop: string | symbol, descriptor: TypedPropertyDescriptor<Filter>) {
-    // Need to wait on schema finalization
-    SchemaRegistry.on(function work(ev) {
-      if (ev.type === 'added' && ev.curr!.name === cls.name) {
-        SchemaRegistry['events'].off('change', work); // Unregister
-        const params = schemaToParams(cls, view);
-        ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { params });
+    ControllerRegistry.registerEndpointParameter(target.constructor, handler, {
+      ...config as ParamConfig,
+      location: 'body',
+      async resolve(req: Request) {
+        req.body = await getSchemaBody(req, config.type!, view);
       }
-    });
+    }, idx);
+  };
+}
 
-    ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, {
-      filters: [
-        async (req: Request) => {
-          const o = getBound(cls, BindUtil.expandPaths(req.query), view);
-          if (SchemaRegistry.has(cls)) {
-            req.query = await SchemaValidator.validate(o, view);
-          } else {
-            req.query = o;
-          }
+export function SchemaQuery<T>(config: Partial<ParamConfig> = {}, view?: string) {
+  return function (target: any, prop: string | symbol, idx: number) {
+    const handler = target.constructor.prototype[prop];
+
+    if (!config.type) {
+      throw new AppError('A schema type is required for binding');
+    }
+
+    ControllerRegistry.registerEndpointParameter(target.constructor, handler, {
+      ...config as ParamConfig,
+      name: '_all',
+      location: 'query',
+      async resolve(req: Request) {
+        const o = getBound(config.type!, BindUtil.expandPaths(req.query), view);
+        if (SchemaRegistry.has(config.type!)) {
+          req.query._all = await SchemaValidator.validate(o, view);
+        } else {
+          req.query._all = o;
         }
-      ]
-    });
-  } as EndpointDecorator;
+      }
+    }, idx);
+  };
 }

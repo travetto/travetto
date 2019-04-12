@@ -1,4 +1,4 @@
-import { ControllerRegistry, MimeType, EndpointClassType } from '@travetto/rest';
+import { ControllerRegistry, MimeType, EndpointClassType, ParamConfig } from '@travetto/rest';
 
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, ALL_VIEW } from '@travetto/schema';
@@ -22,6 +22,31 @@ interface PartialSpec {
   tags: Tag[];
   definitions: { [key: string]: Schema };
   paths: { [key: string]: Path };
+}
+
+// TODO: resolve schema at render time
+function schemaToParams(cls: Class, view?: string, prefix: string = '') {
+  const viewConf = SchemaRegistry.has(cls) && SchemaRegistry.getViewSchema(cls, view);
+  const schemaConf = viewConf && viewConf.schema;
+  if (!schemaConf) {
+    throw new Error(`Unknown class, not registered as a schema: ${cls.__id}`);
+  }
+  const params = Object.keys(schemaConf).reduce((acc, x) => {
+    const field = schemaConf[x];
+    if (SchemaRegistry.has(field.type) || SchemaRegistry.hasPending(field.type)) {
+      acc = { ...acc, ...schemaToParams(field.type, undefined, prefix ? `${prefix}.${field.name}` : `${field.name}.`) };
+    } else {
+      acc[x] = {
+        name: `${prefix}${field.name}`,
+        description: field.description,
+        type: field.type,
+        required: field.required && field.required.active,
+        location: 'query'
+      };
+    }
+    return acc;
+  }, {} as { [key: string]: ParamConfig });
+  return params;
 }
 
 export class SpecGenerateUtil {
@@ -194,7 +219,7 @@ export class SpecGenerateUtil {
       for (const param of Object.values(ep.params)) {
         const epParam: Parameter = {
           in: param.location as 'body',
-          name: param.name,
+          name: param.name || param.location,
           description: param.description,
           required: !!param.required
         };

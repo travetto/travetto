@@ -16,7 +16,7 @@ export type RouteHandler<T = any> = (...args: any[]) => Promise<T> | T | void;
 export type Filter<T = any> = (req: Request, res: Response) => Promise<T> | T | void;
 
 export interface ParamConfig {
-  name: string;
+  name?: string;
   description?: string;
   required?: boolean;
   location: 'path' | 'query' | 'body' | 'header' | 'request' | 'response';

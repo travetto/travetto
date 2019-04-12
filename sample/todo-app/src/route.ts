@@ -1,4 +1,4 @@
-import { Controller, Get, TypedBody, Post, Put, Delete, Request, TypedQuery } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete, Path, Query } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 import { SchemaBody, SchemaQuery } from '@travetto/schema/extension/rest';
 
@@ -15,9 +15,8 @@ export class TodoController {
    * Get all todos
    */
   @Get('/')
-  @SchemaQuery(TodoSearch)
-  async getAll(req: TypedQuery<TodoSearch>): Promise<Todo[]> {
-    return this.svc.getAll(req.query);
+  async getAll(@SchemaQuery() search: TodoSearch): Promise<Todo[]> {
+    return this.svc.getAll(search);
   }
 
   /**
@@ -25,17 +24,16 @@ export class TodoController {
    * @param id {String} Todo id
    */
   @Get('/:id')
-  async getById(req: Request): Promise<Todo> {
-    return this.svc.get(req.params.id);
+  async getById(@Path() id: string): Promise<Todo> {
+    return this.svc.get(id);
   }
 
   /**
    * Create a todo
    */
   @Post('/')
-  @SchemaBody(Todo)
-  async create(req: TypedBody<Todo>): Promise<Todo> {
-    return await this.svc.add(req.body);
+  async create(@SchemaBody() todo: Todo): Promise<Todo> {
+    return await this.svc.add(todo);
   }
 
   /**
@@ -43,8 +41,8 @@ export class TodoController {
    * @param id {String} Todo id
    */
   @Put('/:id/complete')
-  async complete(req: Request) {
-    return await this.svc.complete(req.params.id, req.query.completed);
+  async complete(@Path() id: string, @Query() completed: boolean = true) {
+    return await this.svc.complete(id, completed);
   }
 
   /**
@@ -52,7 +50,7 @@ export class TodoController {
    * @param id {String} Todo id
    */
   @Delete('/:id')
-  async remove(req: Request) {
-    await this.svc.remove(req.params.id);
+  async remove(@Path() id: string) {
+    await this.svc.remove(id);
   }
 }

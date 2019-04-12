@@ -114,12 +114,12 @@ export class RouteUtil {
         case 'body': params.push(req.body); break;
         default:
           const finalLoc = fieldMapping[location];
-          const param = req[finalLoc][name];
+          const param = req[finalLoc][name!];
 
           if (required && !param) {
             throw new AppError(`Missing field: ${name}`, 'data');
           } else if (param) {
-            params.push(this.parseParam(type, name, param));
+            params.push(this.parseParam(type, name!, param));
           } else {
             params.push(defaultValue);
           }

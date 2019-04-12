@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 
 import { TransformUtil, TransformerState } from '@travetto/compiler';
+import { ConfigSource } from '@travetto/config';
 
 const ENDPOINT_DECORATORS = {
   All: new Set(['@travetto/rest']),
@@ -16,12 +17,12 @@ const CONTROLLER_DECORATORS = {
   Controller: new Set(['@travetto/rest'])
 };
 
-const PARAM_DECORATORS = {
-  Path: new Set(['@travetto/rest']),
-  Query: new Set(['@travetto/rest']),
-  Header: new Set(['@travetto/rest']),
-  Body: new Set(['@travetto/rest'])
-};
+const PARAM_DECORATORS = TransformUtil.buildImportAliasMap({
+  ...ConfigSource.get('registry.rest_param'),
+  '@travetto/rest': ['Path', 'Query', 'Header', 'Body']
+});
+
+console.log(PARAM_DECORATORS);
 
 const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
 const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
