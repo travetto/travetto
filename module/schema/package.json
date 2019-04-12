@@ -4,12 +4,12 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/config": "^0.6.0-rc.9",
-    "@travetto/registry": "^0.6.0-rc.9"
+    "@travetto/config": "^0.6.0-rc.10",
+    "@travetto/registry": "^0.6.0-rc.10"
   },
   "description": "Data type registry for runtime validation, reflection and binding. ",
   "devDependencies": {
-    "@travetto/test": "^0.6.0-rc.9"
+    "@travetto/test": "^0.6.0-rc.10"
   },
   "optionalExtensionDependencies": {
     "@travetto/rest": "^0.6.0-rc.9",
@@ -38,5 +38,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0-rc.9"
+  "version": "0.6.0-rc.10"
 }
