@@ -156,7 +156,7 @@ export class Tokenizer {
         start = pos + 1;
       } else if (this.isComment(text, pos)) { // Comment
         break;
-      } else if (c === COLON || c === DASH) { // Control tokens
+      } else if (c === COLON || (c === DASH && text.length === 0)) { // Control tokens, dash only applies when its the beginning of a word
         if (start !== pos) {
           tokens.push(text.substring(start, pos));
         }

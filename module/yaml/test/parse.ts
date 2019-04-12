@@ -149,4 +149,15 @@ age: 20
           `);
         assert(output4 === { mail: { hello: 'goodbye' } });
     }
+
+    @Test()
+    testDashes() {
+        const output = YamlUtil.parse(`
+---
+  mail-settings:
+    name: 'hello'
+    age-num: 20
+  `);
+        assert(output === { 'mail-settings': { name: 'hello', 'age-num': 20 } });
+    }
 }
