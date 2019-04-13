@@ -65,8 +65,11 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
   if (!pDec) {
     // Handle body/request special as they are the input
     if (/^Request|Response$/.test(typeName)) {
+      TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Param'); // Enforce import
+
       decs.push(TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Param', TransformUtil.fromLiteral({
         location: typeName.toLowerCase(),
+        extract: ts.createPropertyAccess(TransformUtil.importFile(state, PARAM_DEC_FILE).ident, `extract${typeName}`),
         ...common
       })));
     } else {
@@ -79,7 +82,7 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
       const arg = pDec.expression.arguments[0];
       if (arg && ts.isObjectLiteralExpression(arg)) {
         pDec.expression.arguments = ts.createNodeArray([
-          TransformUtil.extendObjectLiteral(common, arg),
+          TransformUtil.extendObjectLiteral(TransformUtil.toLiteral(arg), TransformUtil.fromLiteral(common)),
           ...pDec.expression.arguments.slice(1)]
         );
       } else if (arg) {

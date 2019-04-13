@@ -7,7 +7,7 @@ export class SSLUtil {
     localCheck: ['openssl', ['help']]
   });
 
-  static async generateKeyPair(subj: string) {
+  static async generateKeyPair(subj: string = '/C=US/ST=CA/O=TRAVETTO/OU=REST/CN=DEV') {
 
     const res = await this.ssl.run('openssl', 'req',
       '-new',
