@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Controller, ControllerRegistry, Get } from '../';
+import { Controller, ControllerRegistry, Get, Path } from '../';
 
 /**
  * Test Controller For Fun
@@ -11,10 +11,10 @@ class TestController {
 
   /**
    * Get user by name
-   * @param {number} name User name as a number
+   * @param name User name as a number
    */
   @Get('/user/:name')
-  async getUser() {
+  async getUser(@Path() name: number) {
 
   }
 }
@@ -44,23 +44,10 @@ export class ConfigureTest {
     assert(ep.handler === TestController.prototype.getUser);
     assert(ep.title === 'Get user by name');
 
-    assert(Object.keys(ep.params).length === 1);
+    assert(ep.params.length === 1);
 
-    assert(ep.params.name.name === 'name');
-    assert(ep.params.name.type === Number);
-    assert(ep.params.name.description === 'User name as a number');
-
-    assert(ep.filters.length === 1);
-
-    const testParams: any = {
-      params: {
-        name: '55'
-      }
-    };
-
-    await ep.filters[0](testParams, null as any);
-    // console.log(testParams);
-
-    assert(testParams.params.name === 55);
+    assert(ep.params[0].name === 'name');
+    assert(ep.params[0].type === Number);
+    assert(ep.params[0].description === 'User name as a number');
   }
 }

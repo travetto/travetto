@@ -89,12 +89,21 @@ export class RouteUtil {
       let paramValue = config.extract(config, req, res);
       if (config.location === 'header' || config.location === 'path' || config.location === 'query') {
         try {
-          switch (config.type) {
-            case Date: paramValue = Util.coerceType(paramValue, new Date()); break;
-            case Boolean: paramValue = Util.coerceType(paramValue, true); break;
-            case Number: paramValue = Util.coerceType(paramValue, 0); break;
-            case String:
-            case undefined: paramValue = `${paramValue}`; break;
+          if (paramValue !== undefined) {
+            switch (config.type) {
+              case Date: paramValue = Util.coerceType(paramValue, new Date()); break;
+              case Boolean: paramValue = Util.coerceType(paramValue, true); break;
+              case Number: {
+                const sub = Util.coerceType(paramValue, 0);
+                if (Number.isNaN(sub as any)) {
+                  throw new AppError(`Invalid number`);
+                }
+                paramValue = sub;
+                break;
+              }
+              case String:
+              case undefined: paramValue = `${paramValue}`; break;
+            }
           }
         } catch (e) {
           throw new AppError(`Incorrect type for ${config.location} param ${config.name}, ${paramValue} is not a ${config.type!.name}`, 'data');
