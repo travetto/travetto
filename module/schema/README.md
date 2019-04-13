@@ -186,6 +186,43 @@ errors:
     message: address.street2 is a required field
 ```
 
+### Custom Validators
+Within the schema framework, it is possible to add custom validators class level.  This allows for more flexibility when dealing with specific situations (e.g. password requirements or ensuring two fields match)
+
+**Code: Password Validator**
+```ts
+const passwordValidator = (user: User) => {
+  const p = user.password;
+  const hasNum = /\d/.test(p);
+  const hasSpecial = /[!@#$%%^&*()<>?/,.;':"']/.test(p);
+  const noRepeat = !/(.)(\1)/.test(p);
+  if (!hasNum || !hasSpecial || !noRepeat) {
+    return {
+      kind: 'password-rules',
+      path: 'password',
+      message: 'A password must include at least one number, one special char, and have no repeating characters'
+    };
+  }
+}
+
+@Schema()
+@Validator(passwordValidator)
+class User {
+  password: string;
+}
+```
+
+When the validator is executed, it has access to the entire object, and you can check any of the values.  The validator expects an object of a specific structure if you are looking to indicate an error has occurred.
+
+**Code: Validation Error**
+```js
+  {
+    kind: '<what type of error is it>',
+    path: '<which field, or field path did the error occur at>',
+    message: '<human readable message to indicate what the error was>'
+  }
+```
+
 ## Rest - Extension
 The module provides high level access for [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) support, via decorators, for validating and typing request bodies.  
 
