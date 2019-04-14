@@ -98,7 +98,13 @@ export function init() {
       }
 
       const apps = await getAppList();
-      const selected = apps.find(x => x.name === app);
+      let selected = apps.find(x => x.name === app);
+
+      if (!app && apps.length === 1) {
+        selected = apps[0];
+        app = selected.name;
+        console.log('No app selected, defaulting to', app, 'as the only target');
+      }
 
       if (!selected) {
         if (apps.length) {
