@@ -22,6 +22,12 @@ class ParamController {
   @Post('/req/res')
   async reqRes(req: Request, res: Response, req2?: Request) { }
 
+  @Post('/array')
+  async array(values: number[]) { }
+
+  @Post('/array2')
+  async array2(...values: boolean[]) { }
+
   /**
    * @param name User's name
    */
@@ -86,11 +92,11 @@ export class ParameterTest {
       } as any, {} as any)
     );
 
-    assert.throws(() =>
+    assert.throws(() => {
       RouteUtil.computeRouteParams(ep.params, {
         header: (key: string) => { }
-      } as any, {} as any)
-    );
+      } as any, {} as any);
+    });
 
   }
 
@@ -147,5 +153,17 @@ export class ParameterTest {
     assert(ep3.params[0].description === 'User\'s name');
     assert(ep3.params[0].name === 'nm');
     assert(ep3.params[0].type === Object);
+  }
+
+  @Test()
+  async testArray() {
+    const ep = ParameterTest.getEndpoint('/array', 'post');
+    const ep2 = ParameterTest.getEndpoint('/array2', 'post');
+
+    assert(RouteUtil.computeRouteParams(ep2.params, { query: { values: 'no' } } as any, {} as any) === [[false]]);
+    assert(RouteUtil.computeRouteParams(ep2.params, { query: { values: ['no', 'yes'] } } as any, {} as any) === [[false, true]]);
+
+    assert(RouteUtil.computeRouteParams(ep.params, { query: { values: '0' } } as any, {} as any) === [[0]]);
+    assert(RouteUtil.computeRouteParams(ep.params, { query: { values: ['5', '3'] } } as any, {} as any) === [[5, 3]]);
   }
 }

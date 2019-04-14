@@ -16,13 +16,11 @@ export class CorsInterceptor extends RestInterceptor {
   credentials: boolean = false;
 
   postConstruct() {
-    if (this.restConfig.cors) {
-      this.origins = new Set(this.restConfig.cors.origins || []);
-      this.methods = (this.restConfig.cors!.methods || []).join(',');
-      this.headers = (this.restConfig.cors!.headers || []).join(',');
-      if (this.restConfig.cors!.credentials !== undefined) {
-        this.credentials = this.restConfig.cors!.credentials;
-      }
+    this.origins = new Set(this.restConfig.cors.origins || []);
+    this.methods = (this.restConfig.cors.methods || []).join(',');
+    this.headers = (this.restConfig.cors.headers || []).join(',');
+    if (this.restConfig.cors.credentials !== undefined) {
+      this.credentials = this.restConfig.cors.credentials;
     }
   }
 

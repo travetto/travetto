@@ -1,7 +1,8 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, Documentation } from '@travetto/compiler';
+import { TransformUtil, TransformerState, Documentation, ParamDoc } from '@travetto/compiler';
 import { ConfigSource } from '@travetto/config';
+import { ParamConfig } from '../src/types';
 
 const ENDPOINT_DECORATORS = {
   All: new Set(['@travetto/rest']),
@@ -29,13 +30,16 @@ const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 function defineType(state: TransformerState, type: ts.Expression | ts.TypeNode) {
   let typeIdent: ts.Expression | ts.TypeNode = type;
   let isArray: boolean = false;
+
   if (!ts.isTypeNode(typeIdent)) {
     isArray = ts.isArrayLiteralExpression(type);
     typeIdent = isArray ? (type as ts.ArrayLiteralExpression).elements[0] as ts.Expression : type as ts.Expression;
   } else {
     isArray = type.kind === ts.SyntaxKind.ArrayType;
+    typeIdent = isArray ? (type as ts.ArrayTypeNode).elementType : type;
   }
-  const finalTarget = ts.isIdentifier(typeIdent) ? TransformUtil.importTypeIfExternal(state, typeIdent) : TransformUtil.resolveType(state, type);
+
+  const finalTarget = ts.isIdentifier(typeIdent) ? TransformUtil.importTypeIfExternal(state, typeIdent) : TransformUtil.resolveType(state, typeIdent);
 
   const res = {
     type: finalTarget,
@@ -49,24 +53,38 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
   const typeName = node.type ? node.type.getText() : '';
   const pName = node.name.getText();
 
+  let decConfig: ParamConfig = { name: pName } as any;
+  let commentConfig: ParamDoc = {} as any;
+
   const pDec = TransformUtil.findAnyDecorator(state, node, PARAM_DECORATORS);
-
+  const pDecArg = TransformUtil.getPrimaryArgument(pDec);
+  if (pDecArg) {
+    if (ts.isObjectLiteralExpression(pDecArg)) {
+      decConfig = { ...decConfig, ...TransformUtil.toLiteral(pDecArg), };
+    } else if (ts.isStringLiteral(pDecArg)) {
+      decConfig = { ...decConfig, name: TransformUtil.toLiteral(pDecArg) };
+    } else {
+      throw new Error('Only literal objects and or strings allows in parameter declarations');
+    }
+  }
   const decs = (node.decorators || []).filter(x => x !== pDec);
-  const comment = (comments.params || []).find(x => x.name === pName);
+  commentConfig = (comments.params || []).find(x => x.name === decConfig.name) || {} as ParamDoc;
 
-  const common = {
-    name: pName,
-    description: comment && comment.description || pName,
-    required: !(node.questionToken || (comment && comment.optional) || !!node.initializer),
-    defaultValue: node.initializer,
-    ...defineType(state, comment && comment.type! || node.type! || ts.createIdentifier('String'))
+  const type = defineType(state, commentConfig.type! || node.type! || ts.createIdentifier('String'));
+
+  const common: ParamConfig = {
+    description: decConfig.name,
+    defaultValue: node.initializer && TransformUtil.toLiteral(node.initializer),
+    ...commentConfig,
+    ...decConfig,
+    required: decConfig.required !== undefined ? decConfig.required : (!(node.questionToken || node.initializer) || commentConfig.required),
+    type: type.type as any,
+    wrapper: type.wrapper as any
   };
 
   if (!pDec) {
     // Handle body/request special as they are the input
     if (/^Request|Response$/.test(typeName)) {
-      TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Param'); // Enforce import
-
       decs.push(TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Param', TransformUtil.fromLiteral({
         location: typeName.toLowerCase(),
         extract: ts.createPropertyAccess(TransformUtil.importFile(state, PARAM_DEC_FILE).ident, `extract${typeName}`),
@@ -77,27 +95,11 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
         TransformUtil.fromLiteral(common))
       );
     }
-  } else {
-    if (ts.isCallExpression(pDec.expression)) {
-      const arg = pDec.expression.arguments[0];
-      if (arg && ts.isObjectLiteralExpression(arg)) {
-        pDec.expression.arguments = ts.createNodeArray([
-          TransformUtil.extendObjectLiteral(TransformUtil.toLiteral(arg), TransformUtil.fromLiteral(common)),
-          ...pDec.expression.arguments.slice(1)]
-        );
-      } else if (arg) {
-        pDec.expression.arguments = ts.createNodeArray([
-          TransformUtil.extendObjectLiteral({
-            ...common,
-            name: arg
-          }),
-          ...pDec.expression.arguments.slice(1)]
-        );
-      } else {
-        pDec.expression.arguments = ts.createNodeArray([TransformUtil.extendObjectLiteral(common)]);
-      }
-    }
-
+  } else if (ts.isCallExpression(pDec.expression)) {
+    pDec.expression.arguments = ts.createNodeArray([
+      TransformUtil.fromLiteral(common),
+      ...pDec.expression.arguments.slice(1)]
+    );
     decs.push(pDec);
   }
 

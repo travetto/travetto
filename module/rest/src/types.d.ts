@@ -21,7 +21,7 @@ declare global {
       }
       body: any;
       pipe(stream: NodeJS.WritableStream): any;
-      header(key: string): string | undefined;
+      header(key: string): string | string[] | undefined;
       on(ev: 'end' | 'close' | 'error', cb: Function): any;
     }
 

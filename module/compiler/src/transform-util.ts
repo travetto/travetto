@@ -427,7 +427,7 @@ export class TransformUtil {
             name: tag.name && tag.name.getText(),
             description: tag.comment || '',
             type: tag.typeExpression && this.resolveType(state, tag.typeExpression.type),
-            optional: tag.isBracketed
+            required: !tag.isBracketed
           });
         }
       }
@@ -437,8 +437,15 @@ export class TransformUtil {
   }
 }
 
+export interface ParamDoc {
+  name: string;
+  description: string;
+  required?: boolean;
+  type?: ts.Expression;
+}
+
 export interface Documentation {
   return?: { description?: string; type?: ts.Expression };
   description?: string;
-  params?: { name: string, description: string, optional?: boolean, type?: ts.Expression }[];
+  params?: ParamDoc[];
 }
