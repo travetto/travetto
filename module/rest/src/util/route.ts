@@ -109,7 +109,7 @@ export class RouteUtil {
       if (config.location === 'header' || config.location === 'path' || config.location === 'query') {
         if (paramValue !== undefined && paramValue !== null) {
           try {
-            if (config.wrapper === Array) {
+            if (config.array) {
               if (!Array.isArray(paramValue)) {
                 paramValue = [paramValue];
               }

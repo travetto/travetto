@@ -56,7 +56,6 @@ export function SchemaQuery<T>(config: Partial<ParamConfig> & { view?: string, k
 
     ControllerRegistry.registerEndpointParameter(target.constructor, handler, {
       ...config as ParamConfig,
-      name: '_all',
       location: 'query',
       async resolve(req: Request) {
         req.query._schema = req.query._schema || {};

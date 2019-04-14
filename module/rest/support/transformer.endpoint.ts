@@ -43,7 +43,7 @@ function defineType(state: TransformerState, type: ts.Expression | ts.TypeNode) 
 
   const res = {
     type: finalTarget,
-    wrapper: isArray ? ts.createIdentifier('Array') : undefined,
+    array: isArray
   };
 
   return res;
@@ -79,7 +79,7 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
     ...decConfig,
     required: decConfig.required !== undefined ? decConfig.required : (!(node.questionToken || node.initializer) || commentConfig.required),
     type: type.type as any,
-    wrapper: type.wrapper as any
+    array: type.array
   };
 
   if (!pDec) {

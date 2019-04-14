@@ -24,32 +24,33 @@ interface PartialSpec {
   paths: { [key: string]: Path };
 }
 
-// TODO: resolve schema at render time
-function schemaToParams(cls: Class, view?: string, prefix: string = '') {
-  const viewConf = SchemaRegistry.has(cls) && SchemaRegistry.getViewSchema(cls, view);
-  const schemaConf = viewConf && viewConf.schema;
-  if (!schemaConf) {
-    throw new Error(`Unknown class, not registered as a schema: ${cls.__id}`);
-  }
-  const params = Object.keys(schemaConf).reduce((acc, x) => {
-    const field = schemaConf[x];
-    if (SchemaRegistry.has(field.type) || SchemaRegistry.hasPending(field.type)) {
-      acc = { ...acc, ...schemaToParams(field.type, undefined, prefix ? `${prefix}.${field.name}` : `${field.name}.`) };
-    } else {
-      acc[x] = {
-        name: `${prefix}${field.name}`,
-        description: field.description,
-        type: field.type,
-        required: field.required && field.required.active,
-        location: 'query'
-      };
-    }
-    return acc;
-  }, {} as { [key: string]: ParamConfig });
-  return params;
-}
-
 export class SpecGenerateUtil {
+
+  static schemaToQueryParams(cls: Class, view?: string, prefix: string = '') {
+    const viewConf = SchemaRegistry.has(cls) && SchemaRegistry.getViewSchema(cls, view);
+    const schemaConf = viewConf && viewConf.schema;
+    if (!schemaConf) {
+      throw new Error(`Unknown class, not registered as a schema: ${cls.__id}`);
+    }
+    const params = Object.keys(schemaConf).reduce((acc, x) => {
+      const field = schemaConf[x];
+      if (SchemaRegistry.has(field.type) || SchemaRegistry.hasPending(field.type)) {
+        acc = [...acc, ...this.schemaToQueryParams(field.type, undefined, prefix ? `${prefix}.${field.name}` : `${field.name}.`)];
+      } else {
+        acc.push({
+          name: `${prefix}${field.name}`,
+          description: field.description,
+          array: field.array,
+          type: field.type,
+          required: field.required && field.required.active,
+          location: 'query',
+          extract: undefined as any
+        });
+      }
+      return acc;
+    }, [] as ParamConfig[]);
+    return params;
+  }
 
   static getType(cls: Class, state: PartialSpec) {
     const out: { [key: string]: any } = {};
@@ -216,24 +217,36 @@ export class SpecGenerateUtil {
         }
       }
 
-      for (const param of Object.values(ep.params)) {
-        const epParam: Parameter = {
-          in: param.location as 'body',
-          name: param.name || param.location,
-          description: param.description,
-          required: !!param.required
-        };
-        if (param.type) {
-          const type = this.getType(param.type!, state);
-          if (type.$ref) {
-            // Not supported yet
-            // epParam.schema = type;
-          } else {
-            Object.assign(epParam, type);
+      for (const param of ep.params) {
+        if (param.type && param.location === 'query') {
+          epParams.push(
+            ...this.schemaToQueryParams(param.type, (param as any).view as any).map(x => ({
+              in: param.location as 'header',
+              name: x.name!,
+              description: x.description,
+              required: !!x.required,
+              ...(this.getType(x.type, state) as any)
+            }))
+          );
+        } else if (param.location === 'body' || param.location === 'query' || param.location === 'header' || param.location === 'path') {
+          const epParam: Parameter = {
+            in: param.location as 'body',
+            name: param.name || param.location,
+            description: param.description,
+            required: !!param.required
+          };
+          if (param.type) {
+            const type = this.getType(param.type!, state);
+            if (type.$ref) {
+              // Not supported yet
+              // epParam.schema = type;
+            } else {
+              Object.assign(epParam, type);
+            }
           }
-        }
 
-        epParams.push(epParam);
+          epParams.push(epParam);
+        }
       }
 
       const epPath = !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source;

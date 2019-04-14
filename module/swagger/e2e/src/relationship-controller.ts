@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Request, Response } from '@travetto/rest';
-import { SchemaQuery, SchemaBody } from '@travetto/schema/src/extension/rest';
+import { Controller, Get, Post, Put, Delete, Request, Response, Path } from '@travetto/rest';
+import { SchemaQuery, SchemaBody } from '@travetto/schema/extension/rest';
 
 import { User, UserSearch } from './model';
 
@@ -11,11 +11,11 @@ export class RelationshipController {
 
   /**
    * Get user by name.
-   * @param name {String} User name
+   * @param name User name
    * @returns A user by name
    */
   @Get('/:name')
-  async getByName(req: Request, res: Response): Promise<User> {
+  async getByName(@Path() name: string): Promise<User> {
     return undefined as any;
   }
 
@@ -24,32 +24,29 @@ export class RelationshipController {
    * @returns A list of users
    */
   @Get('/')
-  @SchemaQuery(UserSearch)
-  async getAll(req: Request, res: Response): Promise<User[]> {
+  async getAll(@SchemaQuery() search: UserSearch): Promise<User[]> {
     return undefined as any;
   }
 
   @Post('/')
-  @SchemaBody(User)
-  async createUser(req: Request, res: Response): Promise<User> {
+  async createUser(@SchemaBody() user: User): Promise<User> {
     return undefined as any;
   }
 
   /**
    * Update user by id
-   * @param id {Number} User id
+   * @param id User id
    */
   @Put('/:id')
-  @SchemaBody(User)
-  async updateUser(req: Request, res: Response): Promise<void> {
+  async updateUser(@Path() id: number, @SchemaBody() user: User): Promise<void> {
 
   }
   /**
    * Delete user by id
-   * @param id {Number} User id
+   * @param id User id
    */
   @Delete('/:id')
-  async removeUser(req: Request, res: Response): Promise<void> {
+  async removeUser(@Path() id: Number): Promise<void> {
 
   }
 }

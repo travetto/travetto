@@ -16,6 +16,19 @@ export interface TransformerState {
   ids: Map<String, number>;
 }
 
+export interface ParamDoc {
+  name: string;
+  description: string;
+  required?: boolean;
+  type?: ts.Expression;
+}
+
+export interface Documentation {
+  return?: { description?: string; type?: ts.Expression };
+  description?: string;
+  params?: ParamDoc[];
+}
+
 export class TransformUtil {
 
   static generateUniqueId(state: TransformerState, name: string) {
@@ -435,17 +448,4 @@ export class TransformUtil {
 
     return out;
   }
-}
-
-export interface ParamDoc {
-  name: string;
-  description: string;
-  required?: boolean;
-  type?: ts.Expression;
-}
-
-export interface Documentation {
-  return?: { description?: string; type?: ts.Expression };
-  description?: string;
-  params?: ParamDoc[];
 }
