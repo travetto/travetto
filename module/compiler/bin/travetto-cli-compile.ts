@@ -30,8 +30,7 @@ export function init() {
     .option('-q, --quiet', 'Quiet operation')
     .action(async (cmd: commander.Command) => {
 
-      process.env.DEBUG = '0';
-      process.env.QUIET_INIT = '1';
+      // process.env.DEBUG = '0';
       process.env.TRV_CACHE_DIR = cmd.output || '-';
 
       if (cmd.clean) {
@@ -39,7 +38,7 @@ export function init() {
       }
 
       //  Compile
-      await Util.fork(process.argv0, [`${__dirname}/compile-target.js`], process.env);
+      await Util.fork(`${__dirname}/compile-target.js`, [], process.env);
 
       if (cmd.runtimeDir) {
         await rewriteRuntimeDir(cmd.runtimeDir);
