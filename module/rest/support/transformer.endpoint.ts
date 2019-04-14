@@ -28,25 +28,25 @@ const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
 const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 
 function defineType(state: TransformerState, type: ts.Expression | ts.TypeNode) {
+
   let typeIdent: ts.Expression | ts.TypeNode = type;
   let isArray: boolean = false;
 
   if (!ts.isTypeNode(typeIdent)) {
-    isArray = ts.isArrayLiteralExpression(type);
-    typeIdent = isArray ? (type as ts.ArrayLiteralExpression).elements[0] as ts.Expression : type as ts.Expression;
+    if (ts.isArrayLiteralExpression(type)) {
+      isArray = true;
+      typeIdent = type.elements[0];
+    }
   } else {
-    isArray = type.kind === ts.SyntaxKind.ArrayType;
-    typeIdent = isArray ? (type as ts.ArrayTypeNode).elementType : type;
+    if (ts.isArrayTypeNode(type)) {
+      isArray = true;
+      typeIdent = type.elementType;
+    }
   }
 
-  const finalTarget = ts.isIdentifier(typeIdent) ? TransformUtil.importTypeIfExternal(state, typeIdent) : TransformUtil.resolveType(state, typeIdent);
+  const finalTarget = !ts.isTypeNode(typeIdent) ? typeIdent : TransformUtil.resolveType(state, typeIdent);
 
-  const res = {
-    type: finalTarget,
-    array: isArray
-  };
-
-  return res;
+  return { type: finalTarget, array: isArray };
 }
 
 function visitParameter(context: ts.TransformationContext, node: ts.ParameterDeclaration, state: TransformerState, comments: Documentation) {
@@ -86,7 +86,6 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
     // Handle body/request special as they are the input
     if (/^Request|Response$/.test(typeName)) {
       decs.push(TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Param', TransformUtil.fromLiteral({
-        location: typeName.toLowerCase(),
         extract: ts.createPropertyAccess(TransformUtil.importFile(state, PARAM_DEC_FILE).ident, `extract${typeName}`),
         ...common
       })));
@@ -141,8 +140,17 @@ function visitEndpoint(context: ts.TransformationContext, node: ts.MethodDeclara
 
   // IF we have a winner, declare response type
   if (retType) {
+    const type = {
+      array: false,
+      type: retType
+    };
+    if (ts.isArrayLiteralExpression(retType)) {
+      type.array = true;
+      type.type = retType.elements[0];
+    }
     const produces = TransformUtil.createDecorator(state, ENDPOINT_DEC_FILE, 'ResponseType', TransformUtil.fromLiteral({
-      ...defineType(state, retType),
+      ...type,
+      array: type.array,
       title: comments.return && comments.return.description
     }));
     newDecls.push(produces);

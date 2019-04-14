@@ -13,7 +13,7 @@
     "@travetto/exec": "^0.6.0-rc.10",
     "@travetto/rest": "^0.6.0-rc.13",
     "@travetto/schema": "^0.6.0-rc.10",
-    "@types/swagger-schema-official": "^2.0.15"
+    "openapi3-ts": "^1.2.0"
   },
   "description": "Swagger integration support for the travetto framework",
   "devDependencies": {

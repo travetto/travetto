@@ -79,18 +79,16 @@ export class ClientGenerate {
     const spec = this.service.getSpec();
     const specFile = FsUtil.joinUnix(this.config.output, 'spec.json');
     await fsWriteFile(specFile, JSON.stringify(spec, undefined, 2));
-
     const { result: prom } = await this.codeGenCli.exec([
       'java',
       '-jar', FsUtil.resolveUnix(this.internalRoot, 'swagger-codegen-cli.jar'),
       'generate',
-      '--remove-operation-id-prefix',
+      '--remove-operation-id-prefix', '1',
       '-l', this.config.format!,
       '-o', this.workspace,
       '-i', FsUtil.resolveUnix(this.internalRoot, specFile),
       ...(this.config.formatOptions ? ['--additional-properties', this.config.formatOptions] : [])
     ]);
-
     await prom;
   }
 }

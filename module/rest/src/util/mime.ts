@@ -3,5 +3,6 @@ export const MimeType = {
   HTML: 'text/html',
   TEXT: 'text/plain',
   XML: 'application/xml',
-  MULTIPART: 'multipart/form-data'
+  MULTIPART: 'multipart/form-data',
+  BINARY: 'application/octet-stream'
 };

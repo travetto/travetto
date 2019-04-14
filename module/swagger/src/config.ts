@@ -1,14 +1,13 @@
 import { Config } from '@travetto/config';
 import { FsUtil } from '@travetto/boot';
 import { AppInfo } from '@travetto/base';
-
-import { Contact, License } from './types';
+import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
 
 @Config('api.info')
 export class ApiInfoConfig {
-  contact: Contact = AppInfo.AUTHOR;
+  contact: ContactObject = AppInfo.AUTHOR;
   description: string = AppInfo.DESCRIPTION;
-  license: License = { name: AppInfo.LICENSE };
+  license: LicenseObject = { name: AppInfo.LICENSE };
   termsOfService?: string;
   title: string = AppInfo.NAME;
   version: string = AppInfo.VERSION;
@@ -16,14 +15,13 @@ export class ApiInfoConfig {
 
 @Config('api.host')
 export class ApiHostConfig {
-  basePath: string = '/';
-  host?: string = 'localhost';
-  swagger = '2.0';
+  servers?: ServerObject[] = [{ url: 'http://localhost:3000' }];
+  openapi = '3.0.7';
 }
 
 @Config('api.client')
 export class ApiClientConfig {
-  codeGenImage: string = 'swaggerapi/swagger-codegen-cli';
+  codeGenImage: string = 'swaggerapi/swagger-codegen-cli-v3:3.0.7';
   output: string = '';
   format?: string = '';
   formatOptions?: string = '';

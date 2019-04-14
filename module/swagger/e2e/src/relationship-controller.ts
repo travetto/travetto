@@ -25,7 +25,7 @@ export class RelationshipController {
    */
   @Get('/')
   async getAll(@SchemaQuery() search: UserSearch): Promise<User[]> {
-    return undefined as any;
+    return search as any;
   }
 
   @Post('/')

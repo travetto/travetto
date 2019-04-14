@@ -9,7 +9,7 @@ export class User {
   /**
    * User's first and last name
    */
-  @Match(/\w{3,20}/)
+  @Match(/\w{4,20}/)
   name: string;
 
   /**
@@ -36,5 +36,5 @@ export class UserSearch {
    */
   deceased?: boolean;
 
-  page: Paging;
+  page?: Paging;
 }

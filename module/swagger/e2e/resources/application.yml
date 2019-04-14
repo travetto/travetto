@@ -1,5 +1,6 @@
 api:
   client:
     format: typescript-angular
-    formatOptions: supportsES6=true,ngVersion=6.1
+    formatOptions: supportsES6=true,ngVersion=8.0
     output: ./api-client
+rest.cors.active: true

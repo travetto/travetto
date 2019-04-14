@@ -1,5 +1,5 @@
 import { ControllerRegistry, Request } from '@travetto/rest';
-import { getSchemaBody } from '@travetto/schema/extension/rest';
+import { getSchemaInstance } from '@travetto/schema/extension/rest';
 import { Class } from '@travetto/registry';
 
 import { ModelService, ModelCore } from '..';
@@ -19,7 +19,7 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
         },
-        responseType: { description: `List of ${cls.name}`, type: cls, wrapper: Array }
+        responseType: { description: `List of ${cls.name}`, type: cls, array: true }
       }
     );
 
@@ -54,7 +54,7 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
         target, async function update(this: Svc, req: Request) {
-          return this.source.update(cls, await getSchemaBody(req, cls));
+          return this.source.update(cls, await getSchemaInstance(req, cls));
         }), {
         description: `Update ${cls.name}`,
         priority: 103, method: 'put', path: '/',
@@ -66,7 +66,7 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
         target, async function create(this: Svc, req: Request) {
-          return this.source.save(cls, await getSchemaBody(req, cls));
+          return this.source.save(cls, await getSchemaInstance(req, cls));
         }), {
         description: `Create ${cls.name}`,
         priority: 104, method: 'post', path: '/',

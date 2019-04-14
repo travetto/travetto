@@ -18,7 +18,7 @@ export interface ParamConfig {
   required?: boolean;
   location: 'path' | 'query' | 'body' | 'header' | 'request' | 'response';
   type: Class;
-  array: boolean;
+  array?: boolean;
   resolve?: Filter;
   defaultValue?: any;
   extract(config: ParamConfig, req?: Request, res?: Response): any;

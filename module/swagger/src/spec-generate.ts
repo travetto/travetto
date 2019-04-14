@@ -1,32 +1,28 @@
-import { ControllerRegistry, MimeType, EndpointClassType, ParamConfig } from '@travetto/rest';
+import { ControllerRegistry, MimeType, EndpointClassType, ParamConfig, EndpointIOType } from '@travetto/rest';
 
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, ALL_VIEW } from '@travetto/schema';
 
 import { ApiClientConfig } from './config';
 
-import { Schema, Path, Parameter, Response, Operation, Spec } from 'swagger-schema-official';
+import { SchemaObject, OpenAPIObject, SchemasObject, ParameterObject, OperationObject } from 'openapi3-ts';
 
-export function isEndpointClassType(o: any): o is EndpointClassType {
-  return !!o && !o.mime;
+export function isEndpointClassType(o: EndpointIOType): o is EndpointClassType {
+  return !!o && !('mime' in o);
 }
 
-const DEFINITION = '#/definitions';
+const DEFINITION = '#/components/schemas';
 
 interface Tag {
   name: string;
   description?: string;
 }
 
-interface PartialSpec {
-  tags: Tag[];
-  definitions: { [key: string]: Schema };
-  paths: { [key: string]: Path };
-}
+type PartialSpec = Required<Pick<OpenAPIObject, 'tags' | 'components' | 'paths'>> & { components: { schemas: SchemasObject } };
 
 export class SpecGenerateUtil {
 
-  static schemaToQueryParams(cls: Class, view?: string, prefix: string = '') {
+  static schemaToDotParams(state: PartialSpec, location: 'query' | 'header', cls: Class, view?: string, prefix: string = ''): ParameterObject[] {
     const viewConf = SchemaRegistry.has(cls) && SchemaRegistry.getViewSchema(cls, view);
     const schemaConf = viewConf && viewConf.schema;
     if (!schemaConf) {
@@ -35,20 +31,22 @@ export class SpecGenerateUtil {
     const params = Object.keys(schemaConf).reduce((acc, x) => {
       const field = schemaConf[x];
       if (SchemaRegistry.has(field.type) || SchemaRegistry.hasPending(field.type)) {
-        acc = [...acc, ...this.schemaToQueryParams(field.type, undefined, prefix ? `${prefix}.${field.name}` : `${field.name}.`)];
+        acc = [...acc, ...this.schemaToDotParams(state, location, field.type, undefined, prefix ? `${prefix}.${field.name}` : `${field.name}.`)];
       } else {
         acc.push({
           name: `${prefix}${field.name}`,
           description: field.description,
-          array: field.array,
-          type: field.type,
-          required: field.required && field.required.active,
-          location: 'query',
+          schema: field.array ? {
+            type: 'array',
+            ...this.getType(field.type, state)
+          } : this.getType(field.type, state),
+          required: field.required && !!field.required.active,
+          in: location,
           extract: undefined as any
         });
       }
       return acc;
-    }, [] as ParamConfig[]);
+    }, [] as ParameterObject[]);
     return params;
   }
 
@@ -57,7 +55,6 @@ export class SpecGenerateUtil {
     // Handle nested types
     if (SchemaRegistry.has(cls)) {
       out.$ref = `${DEFINITION}/${this.processSchema(cls, state)}`;
-      out.type = 'object';
     } else {
       switch (cls) {
         case String: out.type = 'string'; break;
@@ -81,16 +78,16 @@ export class SpecGenerateUtil {
     } else {
       const typeId = type.name;
 
-      if (!state.definitions[typeId]) {
+      if (!state.components.schemas[typeId]) {
         const config = SchemaRegistry.get(type);
         if (config) {
-          const properties: { [key: string]: Schema } = {};
+          const properties: { [key: string]: SchemaObject } = {};
           const def = config.views[ALL_VIEW];
           const required = [];
 
           for (const fieldName of def.fields) {
             const field = def.schema[fieldName];
-            let prop: Schema = this.getType(field.type, state);
+            let prop: SchemaObject = this.getType(field.type, state);
 
             if (field.examples) {
               prop.example = field.examples;
@@ -128,18 +125,77 @@ export class SpecGenerateUtil {
             properties[fieldName] = prop;
           }
 
-          state.definitions[typeId] = {
+          state.components.schemas[typeId] = {
             title: config.title || config.description,
             description: config.description || config.title,
             example: config.examples,
             properties,
-            required
+            ...(required.length ? { required } : {})
           };
         } else {
-          state.definitions[typeId] = { title: typeId };
+          state.components.schemas[typeId] = { title: typeId };
         }
       }
       return typeId;
+    }
+  }
+
+  static buildReqResObject(state: PartialSpec, eType?: EndpointIOType) {
+    if (!eType) {
+      return { description: '' };
+    }
+    if (isEndpointClassType(eType)) {
+      const schemaName = this.processSchema(eType.type, state);
+      if (schemaName) {
+        const ref: SchemaObject = { $ref: `${DEFINITION}/${schemaName}` };
+        return {
+          content: {
+            [MimeType.JSON]: {
+              schema: !eType!.array ? ref : { type: 'array', items: ref }
+            }
+          },
+          description: state.components.schemas[schemaName!].description || '',
+        };
+      } else {
+        return {
+          description: ''
+        };
+      }
+    } else {
+      return {
+        description: '',
+        content: {
+          [eType.mime]: {
+            schema: {
+              type: eType.type
+            }
+          }
+        }
+      };
+    }
+  }
+
+  static buildRequestBody(state: PartialSpec, type: EndpointIOType) {
+    const cConf = this.buildReqResObject(state, type);
+    if (type && type.type === 'file') {
+      return {
+        content: {
+          [MimeType.MULTIPART]: {
+            schema: {
+              properties: {
+                file: {
+                  type: 'array',
+                  items: { type: 'string', format: 'binary' }
+                }
+              }
+            }
+          }
+        }
+      };
+    } else if (cConf.content) {
+      return cConf;
+    } else {
+      return undefined;
     }
   }
 
@@ -158,96 +214,39 @@ export class SpecGenerateUtil {
 
     for (const ep of ctrl.endpoints) {
 
-      const epParams: Parameter[] = [];
-      const epProd = ep.responseType;
-      const epCons = ep.requestType;
-      const produces = [];
-      const consumes = [];
-      const responses: { [key: string]: Response } = {};
+      const op: OperationObject = {
+        tags: [tagName],
+        responses: {},
+        summary: ep.title,
+        description: ep.description || ep.title,
+        operationId: `${ep.class.name}_${ep.handlerName}`,
+        parameters: []
+      };
 
-      if (epProd) {
-        if (isEndpointClassType(epProd)) {
-          const epProduces = this.processSchema(epProd.type, state);
-          if (epProduces) {
-            const ref: Schema = { $ref: `${DEFINITION}/${epProduces}` };
-            responses[200] = {
-              description: state.definitions[epProduces!].description || '',
-              schema: epProd!.wrapper !== Array ? ref : { type: 'array', items: ref }
-            };
-            produces.push(MimeType.JSON);
+      const pConf = this.buildReqResObject(state, ep.responseType);
+      const code = pConf.content ? 200 : 201;
+      op.responses[code] = pConf;
+
+      ep.params.forEach(param => {
+        if (param.location) {
+          if (param.location === 'body') {
+            op.requestBody = this.buildRequestBody(state, param);
           } else {
-            responses[201] = {
-              description: ''
-            };
-          }
-        } else {
-          produces.push(epProd.mime);
-          responses[200] = {
-            description: '',
-            schema: {
-              type: epProd.type
-            }
-          };
-        }
-      } else {
-        responses[201] = {
-          description: ''
-        };
-      }
-      if (epCons) {
-        if (isEndpointClassType(epCons)) {
-          const epConsumes = this.processSchema(epCons.type, state);
-          if (epConsumes) {
-            const ref: Schema = { $ref: `${DEFINITION}/${epConsumes}` };
-            epParams.push({
-              in: 'body',
-              name: 'body',
-              description: state.definitions[epConsumes!].description || '',
-              schema: epCons!.wrapper !== Array ? ref : { type: 'array', items: ref }
-            } as Parameter);
-            consumes.push(MimeType.JSON);
-          }
-        } else {
-          consumes.push(epCons.mime);
-          epParams.push({
-            in: epCons.type === 'file' ? 'formData' : 'body',
-            name: epCons.type === 'file' ? 'form' : 'body',
-            type: epCons.type || 'object'
-          } as Parameter);
-        }
-      }
-
-      for (const param of ep.params) {
-        if (param.type && param.location === 'query') {
-          epParams.push(
-            ...this.schemaToQueryParams(param.type, (param as any).view as any).map(x => ({
-              in: param.location as 'header',
-              name: x.name!,
-              description: x.description,
-              required: !!x.required,
-              ...(this.getType(x.type, state) as any)
-            }))
-          );
-        } else if (param.location === 'body' || param.location === 'query' || param.location === 'header' || param.location === 'path') {
-          const epParam: Parameter = {
-            in: param.location as 'body',
-            name: param.name || param.location,
-            description: param.description,
-            required: !!param.required
-          };
-          if (param.type) {
-            const type = this.getType(param.type!, state);
-            if (type.$ref) {
-              // Not supported yet
-              // epParam.schema = type;
+            if (param.type && SchemaRegistry.has(param.type) && (param.location === 'query' || param.location === 'header')) {
+              op.parameters!.push(...this.schemaToDotParams(state, param.location, param.type));
             } else {
-              Object.assign(epParam, type);
+              const epParam: ParameterObject = {
+                in: param.location as 'path',
+                name: param.name || param.location,
+                description: param.description,
+                required: !!param.required || false,
+                schema: this.getType(param.type, state)
+              };
+              op.parameters!.push(epParam);
             }
           }
-
-          epParams.push(epParam);
         }
-      }
+      });
 
       const epPath = !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source;
 
@@ -255,24 +254,15 @@ export class SpecGenerateUtil {
 
       state.paths[key] = {
         ...(state.paths[key] || {}),
-        [ep.method!]: {
-          tags: [tagName],
-          produces,
-          consumes,
-          responses,
-          summary: ep.title,
-          description: ep.description || ep.title,
-          operationId: `${ep.class.name}_${ep.handlerName}`,
-          parameters: epParams
-        } as Operation
+        [ep.method!]: op
       };
     }
   }
 
-  static generate(config: ApiClientConfig): Partial<Spec> {
+  static generate(config: ApiClientConfig): OpenAPIObject {
     const state: PartialSpec = {
       paths: {},
-      definitions: {},
+      components: { schemas: {} },
       tags: []
     };
 
@@ -289,6 +279,6 @@ export class SpecGenerateUtil {
       }
     }
 
-    return state as Partial<Spec>;
+    return state as OpenAPIObject;
   }
 }

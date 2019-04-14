@@ -25,7 +25,7 @@ export class UserController {
    * @returns Users by age
    */
   @Get('/age/:age')
-  async getByAge(@Path() age: number): Promise<User[]> {
+  async getByAge(@Path() age: number = 20): Promise<User[]> {
     return undefined as any;
   }
 

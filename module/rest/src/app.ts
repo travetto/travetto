@@ -96,7 +96,7 @@ export abstract class RestApp<T = any> {
 
   async registerGlobal() {
     const route: RouteConfig = {
-      params: [{ location: 'request' } as any],
+      params: [{ extract: (c: any, r: any) => r } as any],
       instance: {},
       handler: this.globalHandler as RouteHandler,
       method: 'all', path: '*'

@@ -3,7 +3,7 @@ import { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
 
 export interface EndpointClassType {
   type: Class;
-  wrapper?: Class;
+  array?: boolean;
   description?: string;
 }
 

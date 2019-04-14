@@ -1,5 +1,4 @@
-import { Application } from '@travetto/di';
-import { RestApp } from '@travetto/rest';
+import { Application, RestApp } from '@travetto/rest';
 
 @Application('sample', { standalone: false })
 export class SampleApp {
