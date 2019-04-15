@@ -10,14 +10,14 @@
     "travetto-cli-swagger-client": "bin/travetto-cli-swagger-client.ts"
   },
   "dependencies": {
-    "@travetto/exec": "^0.6.0",
-    "@travetto/rest": "^0.6.0",
-    "@travetto/schema": "^0.6.0",
+    "@travetto/exec": "^0.6.1",
+    "@travetto/rest": "^0.6.1",
+    "@travetto/schema": "^0.6.1",
     "openapi3-ts": "^1.2.0"
   },
   "description": "Swagger integration support for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.6.0"
+    "@travetto/test": "^0.6.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -37,5 +37,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0"
+  "version": "0.6.1"
 }

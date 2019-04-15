@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/compiler": "^0.6.0"
+    "@travetto/compiler": "^0.6.1"
   },
   "description": "Patterns and utilities for handling registration of metadata and functionality for run-time use",
   "homepage": "https://travetto.io",
@@ -30,5 +30,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0"
+  "version": "0.6.1"
 }

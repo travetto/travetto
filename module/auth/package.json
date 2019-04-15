@@ -7,11 +7,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/compiler": "^0.6.0"
+    "@travetto/compiler": "^0.6.1"
   },
   "description": "Authentication scaffolding for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.6.0"
+    "@travetto/test": "^0.6.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -28,5 +28,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.0"
+  "version": "0.6.1"
 }
