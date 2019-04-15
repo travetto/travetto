@@ -251,45 +251,43 @@ export class TodoController {
    * Get all todos
    */
   @Get('/')
-  @SchemaQuery(TodoSearch)
-  async getAll(req: TypedQuery<TodoSearch>): Promise<Todo[]> {
-    return this.svc.getAll(req.query);
+  async getAll(@SchemaQuery() search: TodoSearch): Promise<Todo[]> {
+    return this.svc.getAll(search);
   }
 
   /**
    * Get Todo by id
-   * @param id {String} Todo id
+   * @param id Todo id
    */
   @Get('/:id')
-  async getById(req: Request): Promise<Todo> {
-    return this.svc.get(req.params.id);
+  async getById(@Path() id: string): Promise<Todo> {
+    return this.svc.get(id);
   }
 
   /**
    * Create a todo
    */
   @Post('/')
-  @SchemaBody(Todo)
-  async create(req: TypedBody<Todo>): Promise<Todo> {
-    return await this.svc.add(req.body);
+  async create(@SchemaBody() todo: Todo): Promise<Todo> {
+    return await this.svc.add(todo);
   }
 
   /**
-   * Complete a todod
-   * @param id {String} Todo id
+   * Complete a todo
+   * @param id Todo id
    */
   @Put('/:id/complete')
-  async complete(req: Request) {
-    return await this.svc.complete(req.params.id, req.query.completed);
+  async complete(@Path() id: string, @Query() completed: boolean = true) {
+    return await this.svc.complete(id, completed);
   }
 
   /**
    * Delete a todo
-   * @param id {String} Todo id
+   * @param id Todo id
    */
   @Delete('/:id')
-  async remove(req: Request) {
-    await this.svc.remove(req.params.id);
+  async remove(@Path() id: string) {
+    await this.svc.remove(id);
   }
 }
 ```
@@ -321,7 +319,7 @@ First we must start the application
 
 **Terminal: Output of application startup**
 ```bash
-$ npx travetto todo
+$ npx travetto run todo
 2019-03-22T04:51:28 info  Env {
   "cwd": "/Users/tim/Code/travetto/sample/todo-app",
   "profiles": [

@@ -9,6 +9,7 @@ $ npm install @travetto/base
 Base is the foundation of all `travetto` applications.  It is intended to be a minimal application bootstrap, as well as support for commonly shared functionality. It has support for the following key areas:
 * Environmental Information
 * File Operations
+* Resource Management
 * Life-cycle Support
 * Stacktrace Management 
 * General Utilities
