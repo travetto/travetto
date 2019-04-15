@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Query, Header, Body, Param, Path } from '../src/decorator/param';
-import { Post } from '../src/decorator/endpoint';
+import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
 import { RouteUtil } from '../src/util/route';
 import { ControllerRegistry } from '../src/registry/registry';
@@ -27,6 +27,9 @@ class ParamController {
 
   @Post('/array2')
   async array2(...values: boolean[]) { }
+
+  @Get('/job/output/:jobId')
+  async jobOutput(@Path() jobId: string, @Query({ required: false }) time: Date) { }
 
   /**
    * @param name User's name
@@ -165,5 +168,13 @@ export class ParameterTest {
 
     assert(RouteUtil.computeRouteParams(ep.params, { query: { values: '0' } } as any, {} as any) === [[0]]);
     assert(RouteUtil.computeRouteParams(ep.params, { query: { values: ['5', '3'] } } as any, {} as any) === [[5, 3]]);
+  }
+
+  @Test()
+  async realWorld() {
+    const ep = ParameterTest.getEndpoint('/job/output/:jobId', 'get');
+    assert.doesNotThrow(() => RouteUtil.computeRouteParams(ep.params, { params: { jobId: '5' }, query: {} } as any, {} as any));
+    assert.throws(() => RouteUtil.computeRouteParams(ep.params, { params: {}, query: {} } as any, {} as any), /missing path/i);
+    assert.throws(() => RouteUtil.computeRouteParams(ep.params, { params: { jobId: '5' }, query: { time: 'blue' } } as any, {} as any), 'Incorrect type');
   }
 }
