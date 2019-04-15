@@ -120,7 +120,7 @@ export class Simple {
 
   @Get(/\/img(.*)[.](jpg|png|gif)/)
   async getImage(req: Request, @Query('w') width?: number, @Query('h') height?:number) {
-    const img =  await this.service.fetch(req.path, {w, h});
+    const img =  await this.service.fetch(req.path, {width, height});
     ... return image ...
   }
 }
@@ -144,14 +144,9 @@ Additionally, there is support for typing requests and request bodies.  This can
 **Code: A Simple Timing Interceptor**
 ```typescript
 @Injectable()
-export class LoggingInterceptor extends RestInterceptor {
-  async intercept(req: Request, res: Response, next: () => Promise<any>) {
-    let start = Date.now();
-    try {
-      await next();
-    } finally {
-      console.log(`Request took ${Date.now() - start}ms`);
-    }
+export class HelloWorldInterceptor extends RestInterceptor {
+  intercept(req: Request, res: Response) {
+    console.log('Hello world!');
   }
 }
 ```

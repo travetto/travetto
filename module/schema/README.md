@@ -237,10 +237,9 @@ class User {
    age: number;
  }
  ...
-  @Post('/saveUser')
-  @SchemaBody(User)
-  async save(req: TypedBody<User>) {
-    const user = await this.service.update(req.body);
+  @Post('/saveUser')  
+  async save(@SchemaBody() user: User) {
+    const user = await this.service.update(user);
     return { success : true };
   }
  ...
@@ -257,10 +256,9 @@ class User {
    pageSize: number = 100;
  }
  ...
-  @Get('/search')
-  @SchemaQuery(SearchParams)
-  async search(req: TypedQuery<SearchParams>) {
-    return await this.service.search(req.query);
+  @Get('/search')  
+  async search(@SchemaQuery() query: SearchParams) {
+    return await this.service.search(query);
   }
  ...
  ```
