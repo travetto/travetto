@@ -86,7 +86,15 @@ export class RouteUtil {
 
   static coerceParamValue(paramValue: any, type: Class) {
     switch (type) {
-      case Date: paramValue = Util.coerceType(paramValue, new Date()); break;
+      case Date: {
+        const sub = typeof paramValue === 'number' || /^[-]?\d+$/.test(`${paramValue}`) ?
+          new Date(parseInt(paramValue, 10)) : new Date(Date.parse(paramValue));
+        if (Number.isNaN(sub.getTime())) {
+          throw new AppError(`Invalid date`);
+        }
+        paramValue = sub;
+        break;
+      }
       case Boolean: paramValue = Util.coerceType(paramValue, true); break;
       case Number: {
         const sub = Util.coerceType(paramValue, 0);
