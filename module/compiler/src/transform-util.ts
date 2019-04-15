@@ -4,7 +4,7 @@ import { dirname, } from 'path';
 import { FsUtil, RegisterUtil } from '@travetto/boot';
 import { Env, AppInfo, Util } from '@travetto/base';
 
-export type Import = { path: string, ident: ts.Identifier };
+export type Import = { path: string, ident: ts.Identifier, stmt?: ts.ImportDeclaration };
 export type DecList = ts.NodeArray<ts.Decorator>;
 export interface TransformerState {
   source: ts.SourceFile;
@@ -87,7 +87,7 @@ export class TransformUtil {
 
       const out = ts.updateSourceFileNode(file, ts.createNodeArray([
         ...importStmts,
-        ...file.statements
+        ...file.statements.filter(x => !(x as any).remove) // Exclude culled imports
       ]),
         file.isDeclarationFile, file.referencedFiles,
         file.typeReferenceDirectives, file.hasNoDefaultLib);
@@ -243,10 +243,10 @@ export class TransformUtil {
               if (stmt.importClause.namedBindings) {
                 const bindings = stmt.importClause.namedBindings;
                 if (ts.isNamespaceImport(bindings)) {
-                  state.imports.set(bindings.name.text, { path, ident: bindings.name });
+                  state.imports.set(bindings.name.text, { path, ident: bindings.name, stmt });
                 } else if (ts.isNamedImports(bindings)) {
                   for (const n of bindings.elements) {
-                    state.imports.set(n.name.text, { path, ident: n.name });
+                    state.imports.set(n.name.text, { path, ident: n.name, stmt });
                   }
                 }
               }
@@ -322,6 +322,10 @@ export class TransformUtil {
   static importFile(state: TransformerState, pth: string) {
     if (!state.newImports.has(pth)) {
       const ident = ts.createIdentifier(`i_${Util.naiveHash(pth)}`);
+      if (state.imports.has(ident.text)) {
+        // Remove previous phase import if we will be adding it again
+        (state.imports.get(ident.text)!.stmt as any)['remove'] = true;
+      }
       const imprt = {
         path: pth,
         ident
