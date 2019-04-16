@@ -39,7 +39,8 @@ export function SchemaBody<T>(config: Partial<ParamConfig> & { view?: string } =
       ...config as ParamConfig,
       location: 'body',
       async resolve(req: Request) {
-        req.body = await getSchemaInstance(req.body, config.type!, config.view);
+        const cls = SchemaRegistry.get(config.type!).class;
+        req.body = await getSchemaInstance(req.body, cls, config.view);
       },
       extract: getBody
     }, idx);
@@ -60,7 +61,8 @@ export function SchemaQuery<T>(config: Partial<ParamConfig> & { view?: string, k
       async resolve(req: Request) {
         req.query._schema = req.query._schema || {};
         const exploded = BindUtil.expandPaths(req.query);
-        req.query._schema[config.name!] = await getSchemaInstance(config.key ? exploded[config.key] : exploded, config.type!, config.view!);
+        const cls = SchemaRegistry.get(config.type!).class;
+        req.query._schema[config.name!] = await getSchemaInstance(config.key ? exploded[config.key] : exploded, cls!, config.view!);
       },
       extract: getQuery
     }, idx);
