@@ -50,10 +50,10 @@ export class AssetRestUtil {
   }
 
   static getFileName(req: Request) {
-    return ((req.header('content-disposition') || '')
+    return ((req.header('content-disposition') as string || '')
       .split('filename=')[1] || '')
       .replace(/"/g, '') ||
-      `file-upload.${req.header('content-type')!.split('/').pop()}`;
+      `file-upload.${(req.header('content-type') as string)!.split('/').pop()}`;
   }
 
   static upload(req: Request, config: Partial<AssetRestConfig>, relativeRoot?: string) {
@@ -61,7 +61,7 @@ export class AssetRestUtil {
     const excludeTypes = this.readTypeArr(config.excludeTypes);
 
     return new Promise<AssetMap>((resolve, reject) => {
-      if (!/multipart|urlencoded/i.test(req.header('content-type')!)) {
+      if (!/multipart|urlencoded/i.test(req.header('content-type') as string)) {
         const filename = this.getFileName(req);
         this.streamFile(req as any as NodeJS.ReadableStream, filename, allowedTypes, excludeTypes, relativeRoot)
           .then(file => resolve({ file }));
