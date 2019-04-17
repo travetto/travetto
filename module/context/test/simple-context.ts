@@ -61,5 +61,9 @@ class VerifyContext {
     assert(attempts.length === 10);
 
     await Promise.all(attempts.map(x => this.context.run(x)));
+
+    assert(this.context.storageState.size === 0);
+    assert(this.context['active'] === 0);
+    assert(this.context['threads'].size === 0);
   }
 }
