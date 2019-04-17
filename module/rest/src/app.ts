@@ -1,20 +1,16 @@
-import { AppInfo, AppError } from '@travetto/base';
+import { AppInfo, AppError, Util } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { Class, ChangeEvent } from '@travetto/registry';
 
 import { RouteConfig, Request, RouteHandler } from './types';
 import { RestConfig } from './config';
 import { RouteUtil } from './util/route';
-import { RestInterceptorGroup } from './interceptor/group';
 import { RestInterceptor } from './interceptor/interceptor';
 import { ControllerRegistry } from './registry/registry';
 
 export abstract class RestApp<T = any> {
 
   static GLOBAL = '___GLOBAL___';
-
-  @Inject()
-  interceptorGroup: RestInterceptorGroup;
 
   @Inject()
   config: RestConfig;
@@ -54,7 +50,7 @@ export abstract class RestApp<T = any> {
 
     this.raw = await this.createRaw();
 
-    this.interceptors = await this.interceptorGroup.getActive();
+    this.interceptors = await this.getInterceptors();
 
     // Register all active
     await Promise.all(ControllerRegistry.getClasses()
@@ -65,6 +61,28 @@ export abstract class RestApp<T = any> {
     // Listen for updates
     ControllerRegistry.off(this.onControllerChange); // Ensure only one register
     ControllerRegistry.on(this.onControllerChange);
+  }
+
+  async getInterceptors() {
+    const interceptors = DependencyRegistry.getCandidateTypes(RestInterceptor as Class);
+    const instances: RestInterceptor[] = [];
+    for (const op of interceptors) {
+      try {
+        instances.push(await DependencyRegistry.getInstance(op.target, op.qualifier));
+      } catch (err) {
+        if ((err.message || '').includes('Cannot find module')) {
+          console.error(`Unable to load operator ${op.class.name}#${op.qualifier.toString()}, module not found`);
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    const ordered = instances.map(x => ({ key: x.constructor, before: x.before, after: x.after, target: x }));
+    const sorted = Util.computeOrdering(ordered).map(x => x.target);
+
+    console.debug('Sorting interceptors', sorted.length, sorted.map(x => x.constructor.name));
+    return sorted;
   }
 
   async onControllerChange(e: ChangeEvent<Class>) {
