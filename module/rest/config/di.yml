@@ -1,0 +1,4 @@
+---
+application:
+  '@travetto/rest': 
+    - '@travetto/rest/src/entrypoint'

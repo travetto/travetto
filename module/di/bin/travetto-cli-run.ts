@@ -3,7 +3,7 @@ import * as commander from 'commander';
 
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
 
-import { handleFailure, getAppList, getParamType, runApp, getAppByName, CachedAppConfig } from './lib';
+import { handleFailure, AppListUtil, RunUtil, CachedAppConfig } from './lib';
 const { colorize } = Util;
 
 interface DiCommand {
@@ -16,7 +16,7 @@ function getAppUsage(app: CachedAppConfig) {
 
   if (app.params) {
     usage = `${colorize.identifier(usage)} ${app.params.map(x => {
-      const type = colorize.type(getParamType(x));
+      const type = colorize.type(RunUtil.getParamType(x));
       const nm = colorize.param(x.name);
       const def = x.def !== undefined ? colorize.input(x.def) : undefined;
 
@@ -96,28 +96,8 @@ export function init() {
       if (cmd.env) {
         process.env.ENV = cmd.env; // Preemptively set b/c env changes how we compile some things
       }
-
-      const apps = await getAppList();
-      let selected = apps.find(x => x.name === app);
-
-      if (!app && apps.length === 1) {
-        selected = apps[0];
-        app = selected.name;
-        console.log('No app selected, defaulting to', app, 'as the only target');
-      }
-
-      if (!selected) {
-        if (apps.length) {
-          listHelper = generateAppHelpList.bind(null, apps, cmd);
-        }
-        Util.showHelp(cmd, app ? `${app} is an unknown application` : 'You must specify an application to run');
-      }
-
       if (cmd.app) {
         process.env.APP_ROOTS = cmd.app;
-      }
-      if (cmd.env) {
-        process.env.ENV = cmd.env;
       }
       if (cmd.profile) {
         process.env.PROFILE = cmd.profile.join(',');
@@ -127,37 +107,57 @@ export function init() {
       }
 
       try {
-        await runApp([app, ...args]);
+        const apps = await AppListUtil.getList();
+        let selected = apps.find(x => x.name === app);
+
+        if (!app && apps.length === 1) {
+          selected = apps[0];
+          app = selected.name;
+          console.log('No app selected, defaulting to', app, 'as the only target');
+        }
+
+        if (!selected) {
+          if (apps.length) {
+            listHelper = generateAppHelpList.bind(null, apps, cmd);
+          }
+          Util.showHelp(cmd, app ? `${app} is an unknown application` : 'You must specify an application to run');
+        }
+
+        await RunUtil.run([app, ...args]);
       } catch (err) {
         if (err.message.startsWith('Invalid parameter')) {
           console.error(err.message);
           console.error();
-          console.error(`Usage: ${getAppUsage((await getAppByName(app))!)}`);
+          console.error(`Usage: ${getAppUsage((await AppListUtil.getByName(app))!)}`);
+          process.exit(1);
         } else {
-          handleFailure(err);
+          handleFailure(err), 1;
         }
-        process.exit(1);
       }
     });
 }
 
 export async function complete(c: CompletionConfig) {
-  const apps = await getAppList();
-  const env = ['prod', 'dev'];
-  const bool = ['yes', 'no'];
-  const profiles = fs.readdirSync(process.cwd())
-    .filter(x => x.endsWith('.yml'))
-    .map(x => x.replace('.yml', ''));
+  try {
+    const apps = await AppListUtil.getList();
+    const env = ['prod', 'dev'];
+    const bool = ['yes', 'no'];
+    const profiles = fs.readdirSync(process.cwd())
+      .filter(x => x.endsWith('.yml'))
+      .map(x => x.replace('.yml', ''));
 
-  profiles.push('application');
-  c.all.push('run');
-  c.task.run = {
-    '': apps.map(x => x.name).concat(['--env', '--watch', '--profile']),
-    '--env': env,
-    '-e': env,
-    '--watch': bool,
-    '-w': bool,
-    '--profile': profiles,
-    '-p': profiles,
-  };
+    profiles.push('application');
+    c.all.push('run');
+    c.task.run = {
+      '': apps.map(x => x.name).concat(['--env', '--watch', '--profile']),
+      '--env': env,
+      '-e': env,
+      '--watch': bool,
+      '-w': bool,
+      '--profile': profiles,
+      '-p': profiles,
+    };
+  } catch (err) {
+    handleFailure(err, 1);
+  }
 }
