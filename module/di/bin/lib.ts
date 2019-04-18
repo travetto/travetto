@@ -3,8 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
 
-import { Util } from '@travetto/base';
-import { ConfigSource } from '@travetto/config';
+import { Util } from '@travetto/base/src/util';
 
 import { ApplicationParameter, ApplicationConfig } from '../src/types';
 
@@ -202,4 +201,5 @@ export class RunUtil {
   }
 }
 
+// For plugin
 export const getAppList = AppListUtil.getList.bind(AppListUtil);

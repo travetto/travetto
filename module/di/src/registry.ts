@@ -1,5 +1,5 @@
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
-import { Env, Util } from '@travetto/base';
+import { Env, Util, AppInfo } from '@travetto/base';
 import { ConfigSource } from '@travetto/config';
 import { RetargettingHandler } from '@travetto/compiler';
 
@@ -259,6 +259,14 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       throw new InjectionError(`Application: ${name} does not exist`, 'notfound');
     }
     const inst = await this.getInstance(config.target);
+    if (!Env.quietInit) {
+      console.log('Running application', name);
+      console.log('Configured', JSON.stringify({
+        app: AppInfo,
+        env: Env.toJSON(),
+        config: ConfigSource.get(''),
+      }, undefined, 2));
+    }
     if (inst.run) {
       await inst.run(...args);
     }
