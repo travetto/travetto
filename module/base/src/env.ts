@@ -43,6 +43,10 @@ class $Env {
       error: c.error.bind(c)
     });
 
+    if (EnvUtil.isTrue('plain_logs')) {
+      return; // Don't decorate
+    }
+
     const logFn = EnvUtil.isFalse('log_time') ? (op: typeof log, ...args: string[]) => op(...args) :
       (trace ?
         (op: typeof log, ...args: any[]) => op(new Date().toISOString(), ...args) :
