@@ -64,9 +64,6 @@ export class AppListUtil {
   }
 
   static async discover() {
-    // Suppress all output
-    console.warn = console.debug = console.log = function () { };
-
     // Initialize up to compiler
     const { PhaseManager, ScanApp } = await import('@travetto/base');
     await PhaseManager.init('bootstrap', 'compiler').run();
@@ -134,7 +131,7 @@ export class AppListUtil {
   static async discoverAsJson() {
     try {
       const resolved = await this.discover();
-      fs.writeSync(1, `${JSON.stringify(resolved)}\n`);
+      (console as any).raw.log(JSON.stringify(resolved));
     } catch (err) {
       handleFailure(err, 1);
       throw err;
