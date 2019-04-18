@@ -18,7 +18,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "start": "npx travetto run {{app.name}}",
+    "start": "npx travetto run rest",
     "test": "npx travetto test"
   },
   "files": [

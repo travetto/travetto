@@ -1,17 +1,10 @@
-import { Controller, Get, DisableCache } from '@travetto/rest';
+import { Controller, Get, Query } from '@travetto/rest';
 
-/**
- * Describes API
- */
-@Controller('/api')
-export class ApiController {
+@Controller('/')
+export class SimpleController {
 
-  /**
-   * Describe API
-   */
   @Get('/')
-  @DisableCache()
-  async getAll() {
-    return require('../../package.json');
+  async hello(@Query() name = 'world') {
+    return { hello: name };
   }
 }

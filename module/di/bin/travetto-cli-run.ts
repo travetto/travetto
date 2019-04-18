@@ -110,10 +110,13 @@ export function init() {
         const apps = await AppListUtil.getList();
         let selected = apps.find(x => x.name === app);
 
-        if (!app && apps.length === 1) {
-          selected = apps[0];
-          app = selected.name;
-          console.log('No app selected, defaulting to', app, 'as the only target');
+        if (!app) {
+          const rootApps = apps.filter(x => x.appRoot === '.');
+          if (rootApps.length === 1) {
+            selected = rootApps[0];
+            app = selected.name;
+            console.log('No app selected, defaulting to', app, 'as the only root target');
+          }
         }
 
         if (!selected) {
