@@ -14,7 +14,8 @@ export class Execute {
     if (!p.startsWith(FsUtil.cwd)) {
       p = `${FsUtil.cwd}/node_modules/@travetto/${p.split(/travetto[^/]*\/module\//)[1]}`;
     }
-    return require(p);
+    const res = require(p);
+    return res;
   }
 
   static loadAllPlugins() {
@@ -29,6 +30,7 @@ export class Execute {
     }
     return [];
   }
+
   static loadSinglePlugin(cmd: string) {
     return Execute.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
   }
@@ -65,7 +67,8 @@ export class Execute {
 
     return last ? opts.filter(x => x.startsWith(last)) : opts.filter(x => !x.startsWith('-'));
   }
-  static run(args: string[]) {
+
+  static async run(args: string[]) {
     const cmd = args[2];
     const hasCmd = cmd && !cmd.startsWith('-');
     const wantsHelp = args.includes('-h') || args.includes('--help');
@@ -77,7 +80,11 @@ export class Execute {
 
     if (hasCmd) {
       try {
-        const prog = this.loadSinglePlugin(cmd).init();
+        const plugin = await this.loadSinglePlugin(cmd);
+        if (plugin.setup) {
+          await plugin.setup();
+        }
+        const prog = plugin.init();
         if (wantsHelp) {
           Util.showHelp(prog);
         }
