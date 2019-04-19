@@ -33,6 +33,9 @@ function getAppUsage(app: CachedAppConfig) {
 
 function generateAppHelpList(apps: CachedAppConfig[], cmd: DiCommand) {
   const choices = [];
+  if (!apps.length) {
+    return `\nNo applications defined, use ${colorize.type('@Application')} to registry entry points`;
+  }
   for (const conf of apps) {
     const lines = [];
 
@@ -62,20 +65,20 @@ function generateAppHelpList(apps: CachedAppConfig[], cmd: DiCommand) {
   return choices.map(x => `   ● ${x}`).join('\n\n');
 }
 
-export function init() {
-  let listHelper: Function;
+let listHelper: Function;
+let apps: CachedAppConfig[];
 
+export async function setup() {
+  apps = await AppListUtil.getList();
+  listHelper = generateAppHelpList.bind(null, apps, {} as any);
+}
+
+export function init() {
   return Util.program
     .command('run [application] [args...]')
     .on('--help', () => {
       console.log(`\n${Util.colorize.title('Available Applications:')}`);
-      if (listHelper) {
-        console.log();
-        console.log(listHelper());
-      } else {
-        console.log(`\nNo applications defined, use ${colorize.type('@Application')} to registry entry points`);
-      }
-      console.log();
+      console.log(`\n${listHelper()}\n`);
     })
     .allowUnknownOption()
     .option('-e, --env [env]', 'Application environment (dev|prod), (default: dev)', /^(dev|prod)$/i)
@@ -107,7 +110,6 @@ export function init() {
       }
 
       try {
-        const apps = await AppListUtil.getList();
         let selected = apps.find(x => x.name === app);
 
         if (!app) {
