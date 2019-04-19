@@ -7,10 +7,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/rest": "^0.6.1"
+    "@travetto/rest": "^0.6.3"
   },
   "devDependencies": {
-    "@travetto/test": "^0.6.1"
+    "@travetto/test": "^0.6.3"
   },
   "description": "Session provider for the travetto rest module.",
   "homepage": "https://travetto.io",
@@ -31,5 +31,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.1"
+  "version": "0.6.3"
 }
