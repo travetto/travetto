@@ -321,11 +321,13 @@ export class TransformUtil {
 
   static importFile(state: TransformerState, pth: string) {
     if (!state.newImports.has(pth)) {
-      const ident = ts.createIdentifier(`i_${Util.naiveHash(pth)}`);
-      if (state.imports.has(ident.text)) {
-        // Remove previous phase import if we will be adding it again
-        (state.imports.get(ident.text)!.stmt as any)['remove'] = true;
+      const id = `i_${Util.naiveHash(pth)}`;
+
+      if (state.imports.has(id)) { // Already imported, be cool
+        return state.imports.get(id)!;
       }
+
+      const ident = ts.createIdentifier(id);
       const imprt = {
         path: pth,
         ident
@@ -367,6 +369,16 @@ export class TransformUtil {
     switch (kind) {
       case ts.SyntaxKind.TypeReference:
         expr = TransformUtil.importTypeIfExternal(state, type as ts.TypeReferenceNode);
+
+        // Wrapping reference to handle interfaces, and failing gracefully
+        const imp = TransformUtil.importFile(state, FsUtil.resolveUnix(__dirname, 'util'));
+        expr = ts.createCall(
+          ts.createPropertyAccess(ts.createPropertyAccess(imp.ident, 'CompilerUtil'), 'resolveAsType'), undefined,
+          [
+            ts.createArrowFunction(undefined, undefined,
+              ts.createNodeArray([]), undefined, ts.createToken(ts.SyntaxKind.EqualsGreaterThanToken), expr),
+            ts.createLiteral(type.getText())
+          ]);
         break;
       case ts.SyntaxKind.VoidKeyword: expr = ts.createIdentifier('undefined'); break;
       case ts.SyntaxKind.LiteralType: expr = this.resolveType(state, (type as any as ts.LiteralTypeNode).literal); break;

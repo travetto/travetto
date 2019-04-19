@@ -8,6 +8,12 @@ import { RouteUtil } from '../src/util/route';
 import { ControllerRegistry } from '../src/registry/registry';
 import { Method, Request, Response } from '../src/types';
 
+interface Wrapper<T> {
+  items: T[];
+}
+
+interface Complex { }
+
 @Controller('/')
 class ParamController {
   @Post('/:name')
@@ -48,6 +54,11 @@ class ParamController {
   */
   @Post('/alias3')
   async alias3(@Query() nm: string | number = 'green') { }
+
+  /**
+  */
+  @Post('/wrapper')
+  async wrapper(@Body() wrapper: Wrapper<Complex>) { }
 }
 
 @Suite()
@@ -176,5 +187,11 @@ export class ParameterTest {
     assert.doesNotThrow(() => RouteUtil.computeRouteParams(ep.params, { params: { jobId: '5' }, query: {} } as any, {} as any));
     assert.throws(() => RouteUtil.computeRouteParams(ep.params, { params: {}, query: {} } as any, {} as any), /missing path/i);
     assert.throws(() => RouteUtil.computeRouteParams(ep.params, { params: { jobId: '5' }, query: { time: 'blue' } } as any, {} as any), 'Incorrect type');
+  }
+
+  @Test()
+  async wrapper() {
+    const ep = ParameterTest.getEndpoint('/wrapper', 'post');
+    assert(ep.params.length === 1);
   }
 }
