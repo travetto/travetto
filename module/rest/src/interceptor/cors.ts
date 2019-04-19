@@ -28,7 +28,7 @@ export class CorsInterceptor extends RestInterceptor {
     return !!this.restConfig.cors && this.restConfig.cors.active;
   }
 
-  async intercept(req: Request, res: Response, next: () => Promise<any>) {
+  intercept(req: Request, res: Response) {
     const origin = req.header('origin') as string;
     if (!this.origins.size || this.origins.has(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');
@@ -36,6 +36,5 @@ export class CorsInterceptor extends RestInterceptor {
       res.setHeader('Access-Control-Allow-Methods', this.methods || '*');
       res.setHeader('Access-Control-Allow-Headers', this.headers || '*');
     }
-    return next();
   }
 }

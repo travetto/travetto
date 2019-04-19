@@ -6,6 +6,7 @@ import { AppError } from '@travetto/base';
 @Injectable()
 export class Context {
   private threads = new Map<number, number>();
+  private threadsSet = new Map<number, Set<number>>();
   private hooks: async_hooks.AsyncHook;
   private active = 0;
 
@@ -45,9 +46,10 @@ export class Context {
   private enter(asyncId: number) {
     const exAsyncId = async_hooks.executionAsyncId();
     const triggerId = async_hooks.triggerAsyncId() || asyncId;
-    const target = this.threads.get(triggerId)! || this.threads.get(exAsyncId)!;
+    const target = this.threads.get(triggerId) || this.threads.get(exAsyncId);
     if (target) {
       this.threads.set(asyncId, target);
+      this.threadsSet.get(target)!.add(asyncId);
     }
   }
 
@@ -105,6 +107,7 @@ export class Context {
     this.active += 1;
     this.storageState.set(runId, init);
     this.threads.set(runId, runId);
+    this.threadsSet.set(runId, new Set([runId]));
 
     try {
       val = await fn();
@@ -114,7 +117,9 @@ export class Context {
 
     this.active -= 1;
     this.storageState.delete(runId);
-    this.threads.delete(runId);
+    for (const el of this.threadsSet.get(runId)!) {
+      this.threads.delete(el);
+    }
 
     if (!this.active) {
       this.hooks.disable();

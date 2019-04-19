@@ -8,6 +8,12 @@ import { RouteUtil } from '../src/util/route';
 import { ControllerRegistry } from '../src/registry/registry';
 import { Method, Request, Response } from '../src/types';
 
+interface Wrapper<T> {
+  items: T[];
+}
+
+interface Complex { }
+
 @Controller('/')
 class ParamController {
   @Post('/:name')
@@ -48,6 +54,11 @@ class ParamController {
   */
   @Post('/alias3')
   async alias3(@Query() nm: string | number = 'green') { }
+
+  /**
+  */
+  @Post('/wrapper')
+  async wrapper(@Body() wrapper: Wrapper<Complex>) { }
 }
 
 @Suite()

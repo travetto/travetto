@@ -43,7 +43,7 @@ export function init() {
           cmd.mode = 'single';
         }
       } else if (args.length < 1 && cmd.mode === 'single') {
-        return Util.showHelp(cmd, 'You must specify a file to run in single mode');
+        Util.showHelp(cmd, 'You must specify a file to run in single mode');
       }
 
       cmd.args = args;

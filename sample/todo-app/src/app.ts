@@ -1,13 +1,12 @@
-import { Inject } from '@travetto/di';
-import { Application, RestApp } from '@travetto/rest';
+import { Application } from '@travetto/di';
 
-@Application('todo')
-export class TodoApp {
+@Application('rest2', { watchable: false })
+export class App {
+  constructor() {
 
-  @Inject()
-  app: RestApp;
+  }
 
   run() {
-    this.app.run();
+    console.log('howdy');
   }
 }

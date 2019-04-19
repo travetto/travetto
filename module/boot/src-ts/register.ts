@@ -4,6 +4,7 @@ import * as fs from 'fs';
 
 import { FsUtil } from './fs-util';
 import { AppCache } from './app-cache';
+import { EnvUtil } from './env';
 
 let tsOpts: any;
 
@@ -21,6 +22,7 @@ export class RegisterUtil {
   // @ts-ignore
   static ogModuleLoad = Module._load.bind(Module);
   static subPkgName: string;
+  static plainLogs = EnvUtil.isTrue('plain_logs');
 
   static computeModuleFromFile(fileName: string) {
     /** @type string */
@@ -60,7 +62,7 @@ export class RegisterUtil {
     let line = 1;
 
     // Insert filename into all log statements for all components, when logger isn't loaded
-    if (!fileName.includes('/cli/') && !fileName.includes('/bin/')) {
+    if (!this.plainLogs && !fileName.includes('/cli/') && !fileName.includes('/bin/')) {
       fileContents = fileContents.replace(/(\bconsole[.](debug|info|trace|warn|log|error)[(])|\n/g, a => {
         if (a === '\n') {
           line += 1;

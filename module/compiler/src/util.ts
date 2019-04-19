@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { Env } from '@travetto/base';
+import { Env, AppError } from '@travetto/base';
 
 export class CompilerUtil {
 
@@ -47,5 +47,13 @@ export class CompilerUtil {
     out.options.moduleResolution = ts.ModuleResolutionKind.NodeJs;
 
     return out.options;
+  }
+
+  static resolveAsType<T>(fn: () => T, text: string): T {
+    try {
+      return fn();
+    } catch {
+      throw new AppError(`Cannot use interface '${text}' when a class is required`);
+    }
   }
 }

@@ -64,7 +64,7 @@ export class RouteUtil {
         return it(req, res, next);
       } else {
         const out = it(req, res);
-        return out.then ? out.then(next) : next();
+        return out && out.then ? out.then(next) : next();
       }
     };
   }

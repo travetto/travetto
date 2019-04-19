@@ -43,6 +43,10 @@ class $Env {
       error: c.error.bind(c)
     });
 
+    if (EnvUtil.isTrue('plain_logs')) {
+      return; // Don't decorate
+    }
+
     const logFn = EnvUtil.isFalse('log_time') ? (op: typeof log, ...args: string[]) => op(...args) :
       (trace ?
         (op: typeof log, ...args: any[]) => op(new Date().toISOString(), ...args) :
@@ -58,14 +62,12 @@ class $Env {
     console.debug = !debug ? () => { } : logFn.bind(null, log, 'debug'); // Suppress debug statements
   }
 
-  show() {
-    console.info('Env',
-      JSON.stringify(this, (e: string, v: any) =>
-        (typeof v === 'boolean' && !v) ||
-          (typeof v === 'string' && v === '') ||
-          (typeof v === 'function') ? undefined : v, 2
-      )
-    );
+  toJSON() {
+    return (['trace', 'debug', 'cwd', 'dev', 'prod', 'watch', 'profiles', 'appRoots'] as (keyof this)[])
+      .reduce((acc, k) => {
+        acc[k] = this[k];
+        return acc;
+      }, {} as any);
   }
 
   computeLogLevel(key: string, def?: string) {

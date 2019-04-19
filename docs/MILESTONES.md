@@ -110,19 +110,25 @@ Released  0.5.x: 2018-12-28 - a8c58104a586baa6203f38c9517fbb5a60ecec5c
 * Unified file path usage and resource loading
 
 ------------------------------------------------------
-Release 0.6.x: ???
+Release 0.6.x: 2019-04-15 -- BETA -- 215e821ceede371bfc9046e1a902fd09adc7f8c4
 ------------------------------------------------------
 * Test assertions and output cleanup
   * Cleanup tests output on run
 * Using latest typescript
-* Reworked CLI, supporting color, and standardizing architecture
+* Reworked CLI, convert to typescript, supporting color, and standardizing architecture
 * Added in tab completion support for cli
 * Auth Rewrite
 * Worker breakout/rewrite
 * Rest module rewrite, interceptors overhauled
+   * Allow for direct binding of query/path/form params to function parameters
 * General test stability
 * Support for unhandled rejections in the testing framework
 * Base logging upgrade, and ability to filter logging by package, folder etc.
 * Reworked config/compiler, handling unloading properly now
 * Session support at the framework level
 * Reworked yeoman generator to use mustache and add auth support
+* Separated boot (typescript to javascript compile) from base, base is now used by simple modules
+
+------------------------------------------------------
+Release 0.7.x: 
+------------------------------------------------------

@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry, ValidationError } from '@travetto/schema';
+import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Env, Util, AppError } from '@travetto/base';
 
@@ -7,7 +7,7 @@ import { QueryVerifierService } from './verify';
 import { ModelOptions } from '../types';
 import { Query, ModelQuery, PageableModelQuery, PageableModelQueryStringQuery } from '../model/query';
 import { ModelCore } from '../model/core';
-import { BulkOp, BulkResponse } from '../model/bulk';
+import { BulkOp, BulkResponse, BulkProcessError } from '../model/bulk';
 import { ModelSource, IModelSource, ValidStringFields } from './source';
 import { ModelRegistry } from '../registry';
 import { QueryLanguageParser } from '../query-lang/parser';
@@ -70,14 +70,14 @@ export class ModelService implements IModelSource {
     return res;
   }
 
-  async prePersistPartial<T extends ModelCore>(cls: Class<T>, o: Partial<T>) {
+  async prePersistPartial<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view?: string) {
     if (!(o instanceof cls)) {
       throw new Error(`Expected object of type ${cls.name}, but received ${o.constructor.name}`);
     }
 
     // Do not call source or instance prePersist
 
-    return await SchemaValidator.validatePartial(o);
+    return await SchemaValidator.validatePartial(o, view);
   }
 
   /** Handles any pre-retrieval activities needed */
@@ -232,7 +232,7 @@ export class ModelService implements IModelSource {
       throw new AppError('Id is required for a partial update', 'data');
     }
 
-    o = await this.prePersist(cls, o, view);
+    o = await this.prePersistPartial(cls, o, view);
 
     const partial = BindUtil.bindSchemaToObject(cls, {}, o, view) as Partial<T>;
 
@@ -257,17 +257,17 @@ export class ModelService implements IModelSource {
   }
 
   async bulkPrepare<T extends ModelCore>(cls: Class<T>, items: T[]) {
-    const errs: { idx: number, error: ValidationError }[] = [];
+    const errs: { idx: number, error: Error }[] = [];
     const out: { idx: number, v: T }[] = [];
 
     await Promise.all(
       items.map((x, idx) =>
         this.prePersist(cls, x)
           .then(v => out.push({ idx, v }))
-          .catch(error => errs.push({ idx, error }))));
+          .catch((error) => errs.push({ idx, error }))));
 
     if (errs.length) {
-      throw new AppError('Bulk Preparation Errors', 'data', { errors: errs.sort((a, b) => a.idx - b.idx) });
+      throw new BulkProcessError(errs.sort((a, b) => a.idx - b.idx));
     }
 
     return out

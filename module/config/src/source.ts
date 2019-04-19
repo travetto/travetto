@@ -1,4 +1,4 @@
-import { Env, Util } from '@travetto/base';
+import { Util } from '@travetto/base';
 
 import { ConfigUtil, Nested } from './util';
 
@@ -19,10 +19,6 @@ export class $ConfigSource {
     }
     this.initialized = true;
     this.loadExternal();
-
-    if (!Env.quietInit) {
-      console.info('Configured', this.toJSON());
-    }
   }
 
   loadExternal() {

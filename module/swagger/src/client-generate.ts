@@ -84,6 +84,8 @@ export class ClientGenerate {
       '-jar', FsUtil.resolveUnix(this.internalRoot, 'swagger-codegen-cli.jar'),
       'generate',
       '--remove-operation-id-prefix', '1',
+      '--type-mappings', 'BigDecimal=number',
+      '--template-engine', 'mustache',
       '-l', this.config.format!,
       '-o', this.workspace,
       '-i', FsUtil.resolveUnix(this.internalRoot, specFile),

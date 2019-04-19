@@ -291,35 +291,12 @@ export class TodoController {
   }
 }
 ```
-
-## Creating the App Entry-point
-Finally, to pull all of this together, we need to launch the application entry point.  This requires us to use the `@Application` decorator to identify a class as an entry-point for the application.  Any application can have multiple entry-points.
-
-The entry-point should be at `src/app.ts` as:
-
-**Code: Application entry point, src/app.ts**
-```typescript
-import { Inject } from '@travetto/di';
-import { Application, RestApp } from '@travetto/rest';
-
-@Application('todo')
-export class TodoApp {
-
-  @Inject()
-  app: RestApp;
-
-  run() {
-    this.app.run();
-  }
-}
-```
-
 ## Test the final product
 First we must start the application
 
 **Terminal: Output of application startup**
 ```bash
-$ npx travetto run todo
+$ npx travetto run rest
 2019-03-22T04:51:28 info  Env {
   "cwd": "/Users/tim/Code/travetto/sample/todo-app",
   "profiles": [

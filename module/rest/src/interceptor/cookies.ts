@@ -40,7 +40,7 @@ export class CookiesInterceptor extends RestInterceptor {
     return this.config.cookie.active;
   }
 
-  async intercept(req: Request, res: Response) {
+  intercept(req: Request, res: Response) {
     if (!req.cookies) {
       req.cookies = res.cookies = new cookies(
         req as any as IncomingMessage,
