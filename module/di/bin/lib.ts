@@ -93,7 +93,7 @@ export class AppListUtil {
     let resolved = await items;
 
     resolved = resolved.sort((a, b) => {
-      return a.appRoot === b.appRoot ? a.name.localeCompare(b.name) : (a.appRoot === '' ? -1 : 1);
+      return a.appRoot === b.appRoot ? a.name.localeCompare(b.name) : (a.appRoot === '.' ? -1 : 1);
     });
 
     return resolved;

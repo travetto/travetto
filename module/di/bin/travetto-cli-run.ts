@@ -31,12 +31,12 @@ function getAppUsage(app: CachedAppConfig) {
   return usage;
 }
 
-function generateAppHelpList(apps: CachedAppConfig[], cmd: DiCommand) {
+function generateAppHelpList(confs: CachedAppConfig[], cmd: DiCommand) {
   const choices = [];
-  if (!apps.length) {
+  if (!confs.length) {
     return `\nNo applications defined, use ${colorize.type('@Application')} to registry entry points`;
   }
-  for (const conf of apps) {
+  for (const conf of confs) {
     const lines = [];
 
     const root = conf.appRoot !== '.' ? `[${colorize.subtitle(conf.appRoot)}${!conf.standalone ? '^' : ''}] ` : '';
