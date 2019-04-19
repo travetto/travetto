@@ -70,14 +70,14 @@ export class ModelService implements IModelSource {
     return res;
   }
 
-  async prePersistPartial<T extends ModelCore>(cls: Class<T>, o: Partial<T>) {
+  async prePersistPartial<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view?: string) {
     if (!(o instanceof cls)) {
       throw new Error(`Expected object of type ${cls.name}, but received ${o.constructor.name}`);
     }
 
     // Do not call source or instance prePersist
 
-    return await SchemaValidator.validatePartial(o);
+    return await SchemaValidator.validatePartial(o, view);
   }
 
   /** Handles any pre-retrieval activities needed */
@@ -232,7 +232,7 @@ export class ModelService implements IModelSource {
       throw new AppError('Id is required for a partial update', 'data');
     }
 
-    o = await this.prePersist(cls, o, view);
+    o = await this.prePersistPartial(cls, o, view);
 
     const partial = BindUtil.bindSchemaToObject(cls, {}, o, view) as Partial<T>;
 
