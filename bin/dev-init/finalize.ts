@@ -2,26 +2,11 @@ import * as fs from 'fs';
 import { Util } from './util';
 import { DepResolver } from './resolver';
 
-const CLI = 'travetto-cli';
-
 export class Finalize {
   static MOD_ROOT = `${Util.ROOT}/module`;
   static MOD_TPL_ROOT = `${Util.ROOT}/module-template`;
   static NM_ROOT = `${Util.ROOT}/node_modules`;
   static COMMON_LIBS = ['typescript', 'tslib'];
-  static COMMON_BIN_SCRIPTS = [
-    ['cli', CLI],
-    ['test', `${CLI}-test`],
-    ['boot', `${CLI}-clean`],
-    ['di', `${CLI}-run`],
-    ['email-template', `${CLI}-email-template`],
-    ['compiler', `${CLI}-compile`],
-    ['model-elasticsearch', `${CLI}-es_schema`],
-    ['rest-aws-lambda', `${CLI}-rest-aws-lambda_deploy`],
-    ['rest-aws-lambda', `${CLI}-rest-aws-lambda_build-zip`],
-    ['rest-aws-lambda', `${CLI}-rest-aws-lambda_build-sam`],
-    ['swagger', `${CLI}-swagger-client`]
-  ];
 
   static linkCommon(base: string) {
     for (const dep of this.COMMON_LIBS) {
@@ -38,27 +23,22 @@ export class Finalize {
     }
   }
 
-  static linkScripts(base: string, mod: string) {
+  static linkScripts(base: string, mod: string, bin: { [key: string]: { [key: string]: string } }) {
     // Link common binary scripts
-    for (const [smod, script] of this.COMMON_BIN_SCRIPTS) {
+    for (const smod of Object.keys(bin)) {
+      for (const name of Object.keys(bin[smod])) {
+        const src = bin[smod][name];
 
-      if (fs.existsSync(`${base}/.bin/${script}.cmd`)) {
-        fs.unlinkSync(`${base}/.bin/${script}.cmd`);
-        fs.unlinkSync(`${base}/.bin/${script}`);
-      }
-
-      try {
-        if (fs.existsSync(`${base}/@travetto/${smod}`) || mod === smod) {
-          Util.makeLink(`${this.MOD_ROOT}/${smod}/bin/${script}.ts`, `${base}/.bin/${script}`);
+        if (fs.existsSync(`${base}/.bin/${name}.cmd`)) {
+          fs.unlinkSync(`${base}/.bin/${name}.cmd`);
+          fs.unlinkSync(`${base}/.bin/${name}`);
         }
-      } catch (e) { }
-    }
-  }
 
-  static linkCLI(base: string) {
-    // Link travetto cli
-    for (const f of fs.readdirSync(`${this.MOD_ROOT}/cli/bin`)) {
-      Util.makeLink(`${this.MOD_ROOT}/cli/bin/${f}`, `${base}/.bin/${f.replace(/[.][jt]s$/, '')}`);
+        try {
+          Util.makeLink(`${this.MOD_ROOT}/${smod}/${src}`, `${base}/.bin/${name}`);
+        } catch (e) {
+        }
+      }
     }
   }
 
@@ -67,6 +47,8 @@ export class Finalize {
     const deps = DepResolver.resolve(mod, base);
     // deps.regular.add(`@travetto/${mod}`);
     deps.regular.add('@travetto/test');
+
+    Object.assign(deps.bin, DepResolver.resolve('cli', base).bin);
 
     // wrt to module's node_modules
     const NM_MOD = `${base}/${mod}/node_modules`;
@@ -83,7 +65,6 @@ export class Finalize {
 
     this.linkCommon(NM_MOD);
     this.linkFramework(NM_MOD, deps.regular);
-    this.linkScripts(NM_MOD, mod);
-    this.linkCLI(NM_MOD);
+    this.linkScripts(NM_MOD, mod, deps.bin);
   }
 }

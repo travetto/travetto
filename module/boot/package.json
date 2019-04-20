@@ -38,9 +38,9 @@
     "url": "https://github.com/travetto/travetto.git"
   },
   "scripts": {
-    "postinstall": "node -e 'require(\"./bin/init\"); require(\"./src/app-cache\").AppCache.clear()'",
+    "postinstall": "node bin/postinstall",
     "prepublish": "cd src-ts; tsc --project .",
     "clean": "rm -f src/"
   },
-  "version": "0.6.3"
+  "version": "0.6.4"
 }

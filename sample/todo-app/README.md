@@ -1,7 +1,7 @@
 Getting Started: A Todo App
 ====
 
-The following tutorial wil walk you through setting up a `travetto` application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [`github`](https://www.github.com/travetto/todo-app).  Additionally, you can use the [`Yeoman Generator`](https://github.com/travetto/travetto/tree/master/module/generator-app)
+The following tutorial wil walk you through setting up a `travetto` application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [`github`](https://www.github.com/travetto/todo-app).  Additionally, you can use the [`Yeoman Generator`](https://github.com/travetto/travetto/tree/master/module/generator-app).
 
 ### Overview
 * [Prerequisites](#prerequisites)
@@ -18,10 +18,10 @@ The following tutorial wil walk you through setting up a `travetto` application 
 
 Install
 
-* [`Node`](https://nodejs.org/en/download/current/) v10.x + (required)
+* [`Node`](https://nodejs.org/en/download/current/) v11.x + (required)
 * [`Mongodb`](https://docs.mongodb.com/manual/administration/install-community/) 3.6+ (required)
 * [`vscode`](https://code.visualstudio.com/download) (recommended)
-* [`Travetto Test Plugin`](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-test-plugin) (recommended)
+* [`Travetto Plugin`](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) (recommended)
 
 ## Project initialization
 
@@ -41,7 +41,7 @@ Set `tsconfig.json` to the following:
 **Config: Setting up tsconfig.json**
 ```json
 {
-    "extends": "./node_modules/@travetto/base/tsconfig.json"
+    "extends": "./node_modules/@travetto/boot/tsconfig.json"
 }
 ```
 
@@ -50,7 +50,7 @@ And set `tslint.json` to the following:
 **Config: Setting up tslint.json**
 ```json
 {
-  "extends": "@travetto/base/tslint.json"
+  "extends": "@travetto/boot/tslint.json"
 }
 ```
 
@@ -68,7 +68,7 @@ Create the file `src/model.ts`
 import { Model, ModelCore } from '@travetto/model';
 
 @Model()
-export class Todo implements ModelCore {
+export class Todo {
   id?: string;
   text: string;
   created?: Date;
@@ -296,7 +296,7 @@ First we must start the application
 
 **Terminal: Output of application startup**
 ```bash
-$ npx travetto run rest
+$ npx travetto run
 2019-03-22T04:51:28 info  Env {
   "cwd": "/Users/tim/Code/travetto/sample/todo-app",
   "profiles": [

@@ -1,7 +1,9 @@
+import { resolve } from 'url';
+
 export class DepResolver {
 
   static PEER_DEPS = `${process.argv[2]}`.trim() !== '';
-  static DEP_CACHE: { [key: string]: { regular: Set<string>, peer: Set<string> } } = {};
+  static DEP_CACHE: { [key: string]: { regular: Set<string>, peer: Set<string>, bin: { [key: string]: { [key: string]: string } } } } = {};
   static CORE_SCOPE = new Set(['dependencies', 'devDependencies']);
   static PEER_SCOPE = new Set(['peerDependencies', 'optionalExtensionDependencies']);
   static GLOBAL_PEER = new Set();
@@ -18,7 +20,7 @@ export class DepResolver {
       const sub = this.resolve(dep.split('/')[1], base);
 
       // Share regular, but not peer
-      return { regular: new Set([...sub.regular, dep]) };
+      return { regular: new Set([...sub.regular, dep]), bin: sub.bin };
     } else if (this.PEER_SCOPE.has(scope)) { // If dealing with peer
       if (!this.GLOBAL_PEER.has(dep)) { // Load it once
         this.GLOBAL_PEER.add(dep);
@@ -33,13 +35,17 @@ export class DepResolver {
       return this.DEP_CACHE[mod];
     }
 
-    const out = {
+    const out: typeof DepResolver.DEP_CACHE[''] = {
       peer: new Set(),
-      regular: new Set()
+      regular: new Set(),
+      bin: {}
     };
 
     // Open package.json
     const pkg = require(`${base}/${mod}/package.json`);
+    if (pkg.bin) {
+      Object.assign(out.bin, { [mod]: pkg.bin });
+    }
 
     // Loop through scopes
     for (const scope of this.SCOPE) {
@@ -53,6 +59,9 @@ export class DepResolver {
           out.regular = new Set([...out.regular, ...res.regular]);
         } else if (res && res.peer) {
           out.peer = new Set([...out.peer, ...res.peer]);
+        }
+        if (res && res.bin) {
+          Object.assign(out.bin, res.bin);
         }
       }
     }

@@ -21,7 +21,7 @@ declare const global: {
 export class RegisterUtil {
   // @ts-ignore
   static ogModuleLoad = Module._load.bind(Module);
-  static subPkgName: string;
+  static pkgName: string;
   static plainLogs = EnvUtil.isTrue('plain_logs');
 
   static computeModuleFromFile(fileName: string) {
@@ -81,12 +81,11 @@ export class RegisterUtil {
 
   static resolveFrameworkDevFile(pth: string) {
     if (pth.includes('@travetto')) {
-      if (!this.subPkgName) {
-        const pkgName = require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')).name;
-        this.subPkgName = pkgName.split('/').pop();
+      if (!this.pkgName) {
+        this.pkgName = require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')).name;
       }
       pth = FsUtil.toUnix(pth).replace(/^.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
-        const mid = this.subPkgName === name ? '' : `node_modules/@travetto/${name}`;
+        const mid = this.pkgName === `@travetto/${name}` ? '' : `node_modules/@travetto/${name}`;
         return `${FsUtil.cwd}/${mid}${rest || ''}`;
       });
     }
