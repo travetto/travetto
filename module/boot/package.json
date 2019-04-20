@@ -31,6 +31,7 @@
   "files": [
     "src",
     "bin",
+    "tslint.json",
     "tsconfig.json"
   ],
   "name": "@travetto/boot",
@@ -42,5 +43,5 @@
     "prepublish": "cd src-ts; tsc --project .",
     "clean": "rm -f src/"
   },
-  "version": "0.6.5"
+  "version": "0.6.6"
 }
