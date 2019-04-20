@@ -30,11 +30,6 @@
       "rest"
     ]
   },
-  "src/rest/app.ts": {
-    "requires": [
-      "rest"
-    ]
-  },
   "test/config.ts": {
     "requires": [
       "model",
