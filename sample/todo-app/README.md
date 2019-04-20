@@ -36,24 +36,6 @@ $ npm init -f
 $ npm i @travetto/{log,test,rest-express,model-mongo}
 ```
 
-Set `tsconfig.json` to the following:
-
-**Config: Setting up tsconfig.json**
-```json
-{
-    "extends": "./node_modules/@travetto/boot/tsconfig.json"
-}
-```
-
-And set `tslint.json` to the following:
-
-**Config: Setting up tslint.json**
-```json
-{
-  "extends": "@travetto/boot/tslint.json"
-}
-```
-
 ## Establishing the model
 Let's create the model for the todo application.  The fields we will need should be:
 * `id` as a unique identifier
