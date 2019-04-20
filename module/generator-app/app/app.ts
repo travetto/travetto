@@ -126,7 +126,7 @@ export class TravettoGenerator extends Generator {
       this.fs.write(this.destinationPath(key), await template(this.templatePath(key), context));
     }
 
-    for (const f of ['tsconfig.json', 'tslint.json', '.gitignore']) {
+    for (const f of ['.gitignore']) {
       this.fs.write(this.destinationPath(f.replace(/_/, '/')), await template(FsUtil.resolveUnix(__dirname, `../${f}`), context));
     }
   }
