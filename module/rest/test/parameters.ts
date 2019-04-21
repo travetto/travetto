@@ -26,7 +26,7 @@ class ParamController {
   async users(@Path() id: string, @Query() age?: number) { }
 
   @Post('/req/res')
-  async reqRes(@Context() req: Request, @Context() res: Response, @Context() req2?: Request) { }
+  async reqRes(@Context() req: Request, @Context() res: Response, req2?: Request) { }
 
   @Post('/array')
   async array(values: number[]) { }

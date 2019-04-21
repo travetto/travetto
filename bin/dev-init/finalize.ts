@@ -49,6 +49,7 @@ export class Finalize {
     deps.regular.add('@travetto/test');
 
     Object.assign(deps.bin, DepResolver.resolve('cli', base).bin);
+    Object.assign(deps.bin, DepResolver.resolve('test', base).bin);
 
     // wrt to module's node_modules
     const NM_MOD = `${base}/${mod}/node_modules`;
