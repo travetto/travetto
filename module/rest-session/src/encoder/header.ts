@@ -19,6 +19,6 @@ export class HeaderEncoder extends SessionEncoder {
   }
 
   async decode(req: Request): Promise<string | Session | undefined> {
-    return req.header(this.config.keyName);
+    return req.header(this.config.keyName) as string;
   }
 }

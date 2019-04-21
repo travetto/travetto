@@ -1,4 +1,4 @@
-import { ControllerRegistry, Request, extractRequest } from '@travetto/rest';
+import { ControllerRegistry, Request, REQUEST } from '@travetto/rest';
 import { getSchemaInstance } from '@travetto/schema/extension/rest';
 import { Class } from '@travetto/registry';
 
@@ -24,8 +24,8 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
         },
-        params: [{ extract: extractRequest }],
-        responseType: { description: `List of ${cls.name}`, type: cls, array: true }
+        params: [{ type: REQUEST, location: 'context' }],
+        responseType: { type: cls, array: true, description: `List of ${cls.name}` }
       }
     );
 
@@ -40,10 +40,10 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
           'Cache-Control': 'max-age=0, no-cache'
         },
         params: [
-          { extract: extractRequest },
+          { type: REQUEST, location: 'context' },
           { type: String, name: 'id', location: 'path', extract: () => { } }
         ],
-        responseType: { description: cls.name, type: cls }
+        responseType: { type: cls, description: cls.name }
       }
     );
 
@@ -58,12 +58,12 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
           'Cache-Control': 'max-age=0, no-cache'
         },
         params: [
-          { extract: extractRequest },
+          { type: REQUEST, location: 'context' },
           { type: String, name: 'field', location: 'path', extract: () => { } },
           { type: String, name: 'query.q', location: 'query', required: false, extract: () => { } },
           { type: Number, name: 'query.limit', location: 'query', required: false, extract: () => { } }
         ],
-        responseType: { description: cls.name, type: cls }
+        responseType: { type: cls, description: cls.name }
       }
     );
 
@@ -75,11 +75,11 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
         description: `Update ${cls.name}`,
         priority: 103, method: 'put', path: '/',
         params: [
-          { extract: extractRequest },
+          { type: REQUEST, location: 'context' },
           { type: cls, location: 'body', extract: () => { } },
         ],
         requestType: { type: cls, description: cls.name },
-        responseType: { description: cls.name, type: cls }
+        responseType: { type: cls, description: cls.name }
       }
     );
 
@@ -91,11 +91,11 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
         description: `Create ${cls.name}`,
         priority: 104, method: 'post', path: '/',
         params: [
-          { extract: extractRequest },
+          { type: REQUEST, location: 'context' },
           { type: cls, location: 'body', extract: () => { } },
         ],
         requestType: { type: cls, description: cls.name },
-        responseType: { description: cls.name, type: cls }
+        responseType: { type: cls, description: cls.name }
       }
     );
 
@@ -105,7 +105,7 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
           return this.source.deleteById(getCls(), req.params.id);
         }), {
         params: [
-          { extract: extractRequest },
+          { type: REQUEST, location: 'context' },
           { type: String, name: 'id', location: 'path', extract: () => { } }
         ],
         description: `Delete ${cls.name} by id`,

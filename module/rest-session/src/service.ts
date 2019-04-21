@@ -3,10 +3,12 @@ import { Request, ContextParamRegistry, Response } from '@travetto/rest';
 
 import { SessionEncoder } from './encoder/encoder';
 import { SessionStore } from './store/store';
-import { Session, RAW_SESSION_PRIV, RAW_SESSION } from './types';
+import { Session, SessionData } from './types';
 import { SessionConfig } from './config';
 import { CookieEncoder } from './encoder/cookie';
 import { MemoryStore } from './store/memory';
+
+const SESS = Symbol('sess');
 
 @Injectable()
 export class RestSessionService {
@@ -22,18 +24,18 @@ export class RestSessionService {
 
   postConstruct() {
     ContextParamRegistry.set(Session, (c, req) => req!.session);
+    ContextParamRegistry.set(SessionData, (c, req) => req!.session.payload);
   }
 
   async validate(session: Session) {
-    if (session.expiresAt && session.expiresAt.getTime() < Date.now()) { // Time has passed
+    if (session.isExpired()) { // Time has passed
       return false;
     }
     return await this.store.validate(session);
   }
 
   async destroy(req: Request) {
-    req[RAW_SESSION].destroy();
-    delete req.session;
+    req.session.destroy();
   }
 
   async loadFromExternal(req: Request) {
@@ -52,17 +54,17 @@ export class RestSessionService {
       session = session instanceof Session ? session : new Session(session);
 
       if (await this.validate(session)) {
-        req[RAW_SESSION_PRIV] = session;
+        (req as any)[SESS] = session;
       } else {
         await this.store.destroy(session); // Invalid session, nuke it
-        req[RAW_SESSION_PRIV] = new Session({ action: 'destroy' });
+        (req as any)[SESS] = new Session({ action: 'destroy' });
       }
     }
   }
 
   async storeToExternal(req: Request, res: Response) {
 
-    let session: Session | undefined = req[RAW_SESSION_PRIV];
+    let session: Session | undefined = (this as any)[SESS]; // Do not create automatically
 
     if (!session) {
       return;
@@ -90,23 +92,12 @@ export class RestSessionService {
 
   configure(req: Request) {
     Object.defineProperties(req, {
-      [RAW_SESSION]: {
-        get(this: Request) {
-          if (!(RAW_SESSION_PRIV in this) || this[RAW_SESSION_PRIV].action === 'destroy') {
-            this[RAW_SESSION_PRIV] = new Session({ action: 'create', payload: {} });
-          }
-          return this[RAW_SESSION_PRIV];
-        }
-      },
       session: {
-        get(this: Request) { return this[RAW_SESSION].payload; },
-        set(this: Request, val: any) {
-          const sess = this[RAW_SESSION];
-          if (!val) {
-            sess.destroy();
-          } else {
-            sess.payload = val;
+        get(this: Request) {
+          if (!(SESS in this) || (this as any)[SESS].action === 'destroy') {
+            (this as any)[SESS] = new Session({ action: 'create', payload: {} });
           }
+          return (this as any)[SESS];
         },
         enumerable: true,
         configurable: false

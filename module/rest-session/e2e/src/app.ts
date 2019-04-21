@@ -1,9 +1,10 @@
-import { RestApp, Application, Controller, Get, Request } from '@travetto/rest';
+import { RestApp, Application, Controller, Get, Context } from '@travetto/rest';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { ModelStore } from '../../extension/model.store';
 import { SessionStore } from '../../src/store/store';
+import { SessionData, Session } from '../../src/types';
 
-@Application('main man')
+@Application('e2e')
 export class App {
   @InjectableFactory()
   static getSessionStore(): SessionStore {
@@ -21,18 +22,18 @@ export class App {
 @Controller('/auth')
 class Test {
   @Get('/login')
-  async login(req: Request) {
-    if (!req.session.age) {
-      req.session = { age: 10 };
+  async login(@Context() data: SessionData) {
+    if (!data.age) {
+      data.age = 10;
     } else {
-      req.session.age *= 10;
+      data.age *= 10;
     }
-    return req.session;
+    return data;
   }
 
   @Get('/logout')
-  async logout(req: Request) {
-    req.session = undefined;
+  async logout(session: Session) {
+    session.destroy();
     return {};
   }
 }

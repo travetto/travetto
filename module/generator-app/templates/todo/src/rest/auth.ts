@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
+import { Controller, Get, Post, Redirect, Context, Request } from '@travetto/rest';
 import { Authenticate, Authenticated, Unauthenticated } from '@travetto/auth-rest';
+import { AuthContext } from '@travetto/auth';
 
 import { BASIC } from './auth.config';
 
@@ -17,13 +18,13 @@ export class ApiController {
 
   @Get('/self')
   @Authenticated()
-  async getSelf(req: Request) {
-    return req.auth;
+  async getSelf(@Context() auth: AuthContext) {
+    return auth;
   }
 
   @Get('/logout')
   @Unauthenticated()
-  async logout(req: Request) {
+  async logout(@Context() req: Request) {
     await req.logout();
     return new Redirect('/auth/self', 301);
   }

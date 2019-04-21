@@ -1,7 +1,8 @@
 import { Util } from '@travetto/base';
 
-export const RAW_SESSION = Symbol('raw_session');
-export const RAW_SESSION_PRIV = Symbol('raw_session_priv');
+export class SessionData {
+  [key: string]: any;
+}
 
 export class Session<T = any> {
   private expiresAtLoaded: Date | undefined;
@@ -9,11 +10,12 @@ export class Session<T = any> {
 
   readonly id?: string;
 
+  readonly maxAge?: number;
+  readonly signature?: string;
+  readonly issuedAt: Date;
+
   expiresAt: Date | undefined;
   action?: 'create' | 'destroy' | 'modify';
-  maxAge?: number;
-  signature?: string;
-  issuedAt: Date;
   payload: T;
 
   constructor(data: Partial<Session>) {
@@ -50,6 +52,10 @@ export class Session<T = any> {
 
   isAlmostExpired() {
     return (!!this.maxAge && (this.expiresAt!.getTime() - Date.now()) < this.maxAge / 2);
+  }
+
+  isExpired() {
+    return this.expiresAt && this.expiresAt.getTime() < Date.now();
   }
 
   refresh() {

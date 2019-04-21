@@ -15,7 +15,7 @@ export class CookieEncoder extends SessionEncoder {
     if (session && session.payload) {
       res.cookies.set(this.config.keyName, session.id, {
         maxAge: !session.expiresAt ? -1 : undefined, // Session cookie by default
-        expires: session.expiresAt ? new Date(session.expiresAt) : undefined,
+        expires: session.expiresAt,
       });
     } else if (req.cookies.get(this.config.keyName)) { // If cookie present, clear out
       res.cookies.set(this.config.keyName, null, {
