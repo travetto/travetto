@@ -119,7 +119,7 @@ export class Simple {
   }
 
   @Get(/\/img(.*)[.](jpg|png|gif)/)
-  async getImage(req: Request, @Query('w') width?: number, @Query('h') height?:number) {
+  async getImage(@Context() req: Request, @Query('w') width?: number, @Query('h') height?:number) {
     const img =  await this.service.fetch(req.path, {width, height});
     ... return image ...
   }

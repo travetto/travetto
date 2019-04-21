@@ -20,7 +20,7 @@ export interface Session<T = any> {
 }
 ```
 
-A session allows for defining the expiration time, what state the session should be in, as well as the payload information (session data).  The session payload is exposed on the `request` as a session property.  
+A session allows for defining the expiration time, what state the session should be in, as well as the payload information (session data).  The session payload is accessible via a `@Context` parameter.  Iit can also be accessed via the `request` as a session property. 
 
 **Code: Sample Session Usage**
 ```typescript
@@ -30,13 +30,13 @@ async storeInfo(req: Request) {
 }
 ...
 @Get('/logout')
-async logout(req; Request) {
-  req.session = undefined; // Destroying session
+async logout(@Context() session: Session) {
+  await session.destroy();
 }
 ...
 @Get('/info/age')
-async getInfo(req: Request) {
-  return req.session.age;
+async getInfo(@Context() session: Session) {
+  return session.age;
 }
 ```
 
