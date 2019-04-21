@@ -1,9 +1,9 @@
-import { Injectable } from '@travetto/di';
+import { Injectable, DEFAULT_INSTANCE } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { AuthContext } from '@travetto/auth';
 import { AuthContextEncoder } from '@travetto/auth-rest';
 
-@Injectable()
+@Injectable({ target: AuthContextEncoder, qualifier: DEFAULT_INSTANCE })
 export class SessionAuthContextEncoder extends AuthContextEncoder {
   key = '__auth_context__';
   loaded = false;
