@@ -69,8 +69,13 @@ function generateAppHelpList(confs: CachedAppConfig[], cmd: DiCommand) {
 }
 
 export async function setup() {
-  apps = await AppListUtil.getList();
-  listHelper = generateAppHelpList.bind(null, apps, {} as any);
+  try {
+    apps = await AppListUtil.getList();
+    listHelper = generateAppHelpList.bind(null, apps, {} as any);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
 }
 
 export function init() {

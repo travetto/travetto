@@ -3,7 +3,7 @@ import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 
 import { AuthContextService } from './context';
-import { AuthContextEncoder, SessionAuthContextEncoder } from './encoder';
+import { AuthContextEncoder, HeaderAuthContextEncoder } from './encoder';
 import { AuthService } from './auth';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class AuthInterceptor extends RestInterceptor {
   @Inject()
   service: AuthService;
 
-  @Inject({ defaultIfMissing: SessionAuthContextEncoder })
+  @Inject({ defaultIfMissing: HeaderAuthContextEncoder })
   contextStore: AuthContextEncoder;
 
   async configure(req: Request, res: Response) {
