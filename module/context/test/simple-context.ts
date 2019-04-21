@@ -4,11 +4,11 @@ import * as async_hooks from 'async_hooks';
 import { Inject, Injectable, DependencyRegistry } from '@travetto/di';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
-import { Context, WithContext } from '../';
+import { ContextService, WithContext } from '../';
 
 @Injectable()
 class TestService {
-  @Inject() context: Context;
+  @Inject() context: ContextService;
 
   postConstruct() {
     console.log('Context Found', this.context);
@@ -18,7 +18,7 @@ class TestService {
 @Suite()
 class VerifyContext {
 
-  context: Context;
+  context: ContextService;
 
   @BeforeAll()
   async init() {

@@ -2,7 +2,7 @@ import { GetCacheInterceptor, RestInterceptor, Request, Response, RouteConfig } 
 import { Injectable, Inject } from '@travetto/di';
 import { ConfigSource } from '@travetto/config';
 
-import { Context } from '..';
+import { ContextService } from '..';
 
 @Injectable()
 export class ContextInterceptor extends RestInterceptor {
@@ -10,7 +10,7 @@ export class ContextInterceptor extends RestInterceptor {
   after = GetCacheInterceptor;
 
   @Inject()
-  context: Context;
+  context: ContextService;
 
   public applies?(route: RouteConfig): boolean {
     return !ConfigSource.get('rest.context').disabled;

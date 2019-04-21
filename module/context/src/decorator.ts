@@ -1,6 +1,6 @@
-import { Context } from './service';
+import { ContextService } from './service';
 
-export function WithContext<T extends { context: Context }>(data?: any) {
+export function WithContext<T extends { context: ContextService }>(data?: any) {
   return function (target: T, prop: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) {
     const og = descriptor.value!;
     descriptor.value = function (this: T, ...args: any[]) {
