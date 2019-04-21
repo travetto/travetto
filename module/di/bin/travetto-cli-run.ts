@@ -82,7 +82,7 @@ export function init() {
     })
     .allowUnknownOption()
     .option('-e, --env [env]', 'Application environment (dev|prod), (default: dev)', /^(dev|prod)$/i)
-    .option('-a, --app [app]', 'Application root, defaults to associated root by name')
+    .option('-r, --root [root]', 'Application root, defaults to associated root by name')
     .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', /^(1|0|yes|no|on|off|auto|true|false)$/i)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
     .action(async (app: string, args: string[], cmd: commander.Command & DiCommand) => {
@@ -99,8 +99,8 @@ export function init() {
       if (cmd.env) {
         process.env.ENV = cmd.env; // Preemptively set b/c env changes how we compile some things
       }
-      if (cmd.app) {
-        process.env.APP_ROOTS = cmd.app;
+      if (cmd.root) {
+        process.env.APP_ROOTS = cmd.root;
       }
       if (cmd.profile) {
         process.env.PROFILE = cmd.profile.join(',');

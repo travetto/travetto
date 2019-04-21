@@ -86,14 +86,16 @@ export class $ResourceManager {
     throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`, 'notfound');
   }
 
-  async read(pth: string, encoding?: string) {
+  async read(pth: string, options: 'utf8' | { encoding: 'utf8' }): Promise<string>;
+  async read(pth: string, options?: string | { encoding?: string; flag?: string; }) {
     pth = await this.find(pth);
-    return fsReadFile(pth, encoding);
+    return fsReadFile(pth, options);
   }
 
-  readSync(pth: string, encoding?: string) {
+  readSync(pth: string, options: 'utf8' | { encoding: 'utf8' }): string;
+  readSync(pth: string, options?: string | { encoding?: string; flag?: string; }) {
     pth = this.findSync(pth);
-    return fs.readFileSync(pth, encoding);
+    return fs.readFileSync(pth, options);
   }
 
   async readToStream(pth: string, options?: Parameters<typeof fs.createReadStream>[1]) {
