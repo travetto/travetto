@@ -16,17 +16,18 @@ export interface Session<T = any> {
   maxAge?: number;
   signature?: string;
   issuedAt: number;
-  payload: T;
+  data: T;
 }
 ```
 
-A session allows for defining the expiration time, what state the session should be in, as well as the payload information (session data).  The session payload is accessible via a `@Context` parameter.  Iit can also be accessed via the `request` as a session property. 
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the `@Context` parameter as `Session` and `SessionData` respectively.  Iit can also be accessed via the `request` as a session property. 
 
 **Code: Sample Session Usage**
 ```typescript
 @Put('/info')
-async storeInfo(req: Request) {
-  req.session = { age: 20, name: 'Roger' }; // Setting data
+async storeInfo(@Context() data: SessionData) {
+  data.age = 20;
+  data.name = 'Roger';; // Setting data
 }
 ...
 @Get('/logout')
@@ -35,8 +36,8 @@ async logout(@Context() session: Session) {
 }
 ...
 @Get('/info/age')
-async getInfo(@Context() session: Session) {
-  return session.age;
+async getInfo(@Context() data: SessionData) {
+  return data.age;
 }
 ```
 
@@ -98,7 +99,7 @@ Session stores represent the ability to store session information internal to th
 ```typescript
 export abstract class SessionStore {
   async validate(session: Session): Promise<boolean>;
-  async create(payload: any, maxAge: number): Promise<Session>;
+  async create(data: any, maxAge: number): Promise<Session>;
   abstract load(id: string): Promise<Session | undefined>;
   abstract store(data: Session): Promise<void>;
   abstract destroy(session: Session): Promise<boolean>;

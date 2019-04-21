@@ -6,12 +6,12 @@ export abstract class SessionStore {
   async validate(session: Session): Promise<boolean> {
     return !!(await this.load(session.id!));
   }
-  async create(payload: any, maxAge: number) {
+  async create(data: any, maxAge: number) {
     const sess: Session = new Session({
       id: Util.uuid(),
       issuedAt: new Date(),
       maxAge,
-      payload
+      data
     });
     return sess;
   }

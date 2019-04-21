@@ -108,7 +108,7 @@ export class Auth {
 }
 ```
 
-`@Authenticated` and `@Unauthenticated` will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed.  Additionally, `AuthContext` is accessible via `@Context` directly, without wiring in a request object.
+`@Authenticated` and `@Unauthenticated` will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed.  Additionally, `AuthContext` is accessible via `@Context` directly, without wiring in a request object, but is also accessible on the request object as `request.auth`.
 
 **Code: Showing standard user operations as routes**
 ```typescript
@@ -131,6 +131,6 @@ export class Auth {
   @Post('/logout')
   @Unauthenticated()
   async logout(req: Request, res: Response) {
-    await req.auth.logout();
+    await req.logout();
   }
 ```

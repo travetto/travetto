@@ -16,7 +16,7 @@ export class Session<T = any> {
 
   expiresAt: Date | undefined;
   action?: 'create' | 'destroy' | 'modify';
-  payload: T;
+  data: T;
 
   constructor(data: Partial<Session>) {
     this.issuedAt = new Date();
@@ -66,7 +66,7 @@ export class Session<T = any> {
 
   destroy() {
     this.action = 'destroy';
-    delete this.payload;
+    delete this.data;
   }
 
   toJSON() {
@@ -76,7 +76,7 @@ export class Session<T = any> {
       expiresAt: this.expiresAt,
       maxAge: this.maxAge,
       issuedAt: this.issuedAt,
-      payload: this.payload
+      data: this.data
     };
   }
 }

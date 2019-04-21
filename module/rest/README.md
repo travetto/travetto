@@ -69,11 +69,12 @@ class SimpleController {
 
 
 ### Parameters
-Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in four areas:
-* `@Path`
-* `@Query`
-* `@Body`
-* `@Header`
+Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
+* `@Path` - Path params
+* `@Query` - Query params
+* `@Body` - Request body (in it's entirety)
+* `@Header` - Header values
+* `@Context` - Special values exposed (e.g. Request, Response, Session, AuthContext, etc.)
 
 Each `@Param` can be configured to indicate:
 * `name` - Name of param, field name, defaults to handler parameter name if necessary

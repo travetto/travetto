@@ -12,7 +12,7 @@ export class CookieEncoder extends SessionEncoder {
   config: SessionConfig;
 
   async encode(req: Request, res: Response, session: Session<any> | null): Promise<void> {
-    if (session && session.payload) {
+    if (session && session.data) {
       res.cookies.set(this.config.keyName, session.id, {
         maxAge: !session.expiresAt ? -1 : undefined, // Session cookie by default
         expires: session.expiresAt,

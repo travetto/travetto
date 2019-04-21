@@ -72,8 +72,11 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
 
   const type = defineType(state, commentConfig.type! || node.type! || ts.createIdentifier('String'));
 
-  if (typeName === 'Request' || typeName === 'Response') { // Convert to custom types
+  let defaultType = 'Query';
+
+  if (typeName === 'Request' || typeName === 'Response') { // Convert to custom types, special handling for interfaces
     type.type = ts.createPropertyAccess(TransformUtil.importFile(state, PARAM_DEC_FILE).ident, typeName.toUpperCase());
+    defaultType = 'Context'; // White list request/response as context
   }
 
   const common: ParamConfig = {
@@ -86,9 +89,8 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
     array: type.array
   };
 
-  if (!pDec) {
-    // Handle body/request special as they are the input
-    decs.push(TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Query',
+  if (!pDec) { // Handle default
+    decs.push(TransformUtil.createDecorator(state, PARAM_DEC_FILE, defaultType,
       TransformUtil.fromLiteral(common))
     );
   } else if (ts.isCallExpression(pDec.expression)) {

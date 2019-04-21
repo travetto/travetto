@@ -10,8 +10,8 @@ export class SessionModel {
   maxAge?: number;
   signature?: string;
   issuedAt: Date;
-  payload?: any;
-  payloadData?: string;
+  data?: any;
+  dataSerialized?: string;
 }
 
 @Injectable({ target: ModelStore })
@@ -24,20 +24,20 @@ export class ModelStore extends SessionStore {
     const res = await this.modelService.getAllByQuery(SessionModel, { where: { id } });
     if (res.length === 1) {
       const out = res[0];
-      if (out.payloadData && !out.payload) {
+      if (out.dataSerialized && !out.dataSerialized) {
         try {
-          out.payload = JSON.parse(out.payloadData);
+          out.data = JSON.parse(out.dataSerialized);
         } catch (e) { }
       }
-      if (out.payload) {
+      if (out.data) {
         return new Session(out);
       }
     }
   }
   async store(sess: Session) {
     const data = SessionModel.from(sess);
-    data.payloadData = JSON.stringify(data.payload);
-    delete data.payload;
+    data.dataSerialized = JSON.stringify(data.data);
+    delete data.data;
     await this.modelService.saveOrUpdate(SessionModel, data, { where: { id: data.id }, keepId: true });
   }
 

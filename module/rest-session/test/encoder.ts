@@ -30,7 +30,7 @@ export class EncoderTest {
       }
     } as any, new Session({
       id: 'true',
-      payload: {
+      data: {
         data: 'hello'
       }
     }));

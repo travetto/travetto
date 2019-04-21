@@ -24,7 +24,7 @@ export class RestSessionService {
 
   postConstruct() {
     ContextParamRegistry.set(Session, (c, req) => req!.session);
-    ContextParamRegistry.set(SessionData, (c, req) => req!.session.payload);
+    ContextParamRegistry.set(SessionData, (c, req) => req!.session.data);
   }
 
   async validate(session: Session) {
@@ -72,7 +72,7 @@ export class RestSessionService {
 
     if (session.action !== 'destroy') {
       if (session.action === 'create') {
-        session = await this.store.create(session.payload, this.config.maxAge);
+        session = await this.store.create(session.data, this.config.maxAge);
         session.refresh();
       } else if (this.config.rolling || this.config.renew && session.isAlmostExpired()) {
         session.refresh();
@@ -84,7 +84,7 @@ export class RestSessionService {
       if (session.isTimeChanged()) {
         await this.encoder.encode(req, res, session);
       }
-    } else if (session.id) { // If no payload and id
+    } else if (session.id) { // If destroy and id
       await this.store.destroy(session);
       await this.encoder.encode(req, res, null);
     }
@@ -95,7 +95,7 @@ export class RestSessionService {
       session: {
         get(this: Request) {
           if (!(SESS in this) || (this as any)[SESS].action === 'destroy') {
-            (this as any)[SESS] = new Session({ action: 'create', payload: {} });
+            (this as any)[SESS] = new Session({ action: 'create', data: {} });
           }
           return (this as any)[SESS];
         },
