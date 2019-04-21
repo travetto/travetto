@@ -1,3 +1,4 @@
+import { Class } from '@travetto/registry';
 import { ParamConfig, Request, Response } from '../types';
 import { ControllerRegistry } from '../registry/registry';
 
@@ -15,14 +16,21 @@ export const Param = (param: ParamConfig) => {
   };
 };
 
+export const REQUEST = class { };
+export const RESPONSE = class { };
+
+export const ContextParamRegistry = new Map<Class<any>, (c: ParamConfig, req?: Request, res?: Response) => any>([
+  [REQUEST, (c: any, req: any) => req],
+  [RESPONSE, (c: any, req: any, res: any) => res]
+]);
+
 const extractPath = (c: ParamConfig, r: Request) => r.params[c.name!];
 const extractQuery = (c: ParamConfig, r: Request) => r.query[c.name!];
 const extractHeader = (c: ParamConfig, r: Request) => r.header(c.name!);
 const extractBody = (c: ParamConfig, r: Request) => r.body;
+const extractContext = (c: ParamConfig, req: Request, res: Response) => ContextParamRegistry.get(c.type)!(c, req, res);
 
-export const extractRequest = (c: ParamConfig, r: Request) => r;
-export const extractResponse = (c: ParamConfig, r: Request, res: Response) => res;
-
+export const Context = (param: string | Partial<ParamConfig> = {}) => Param({ location: 'context', extract: extractContext, ...toConfig(param) });
 export const Path = (param: string | Partial<ParamConfig> = {}) => Param({ location: 'path', extract: extractPath, ...toConfig(param) });
 export const Query = (param: string | Partial<ParamConfig> = {}) => Param({ location: 'query', extract: extractQuery, ...toConfig(param) });
 export const Header = (param: string | Partial<ParamConfig> = {}) => Param({ location: 'header', extract: extractHeader, ...toConfig(param), });

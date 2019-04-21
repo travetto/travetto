@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Query, Header, Body, Param, Path } from '../src/decorator/param';
+import { Query, Header, Path, Context } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
 import { RouteUtil } from '../src/util/route';
@@ -26,7 +26,7 @@ class ParamController {
   async users(@Path() id: string, @Query() age?: number) { }
 
   @Post('/req/res')
-  async reqRes(req: Request, res: Response, req2?: Request) { }
+  async reqRes(@Context() req: Request, @Context() res: Response, @Context() req2?: Request) { }
 
   @Post('/array')
   async array(values: number[]) { }
@@ -57,8 +57,8 @@ class ParamController {
 
   /**
   */
-  @Post('/wrapper')
-  async wrapper(@Body() wrapper: Wrapper<Complex>) { }
+  // @Post('/wrapper')
+  // async wrapper(@Body() wrapper: Wrapper<Complex>) { }
 }
 
 @Suite()

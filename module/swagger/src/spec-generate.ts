@@ -231,19 +231,17 @@ export class SpecGenerateUtil {
         if (param.location) {
           if (param.location === 'body') {
             op.requestBody = this.buildRequestBody(state, param);
-          } else {
-            if (param.type && SchemaRegistry.has(param.type) && (param.location === 'query' || param.location === 'header')) {
-              op.parameters!.push(...this.schemaToDotParams(state, param.location, param.type));
-            } else {
-              const epParam: ParameterObject = {
-                in: param.location as 'path',
-                name: param.name || param.location,
-                description: param.description,
-                required: !!param.required || false,
-                schema: this.getType(param.type, state)
-              };
-              op.parameters!.push(epParam);
-            }
+          } else if (param.type && SchemaRegistry.has(param.type) && (param.location === 'query' || param.location === 'header')) {
+            op.parameters!.push(...this.schemaToDotParams(state, param.location, param.type));
+          } else if (param.location !== 'context') {
+            const epParam: ParameterObject = {
+              in: param.location as 'path',
+              name: param.name || param.location,
+              description: param.description,
+              required: !!param.required || false,
+              schema: this.getType(param.type, state)
+            };
+            op.parameters!.push(epParam);
           }
         }
       });

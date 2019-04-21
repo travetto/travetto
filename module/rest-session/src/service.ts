@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Request, Response } from '@travetto/rest';
+import { Request, ContextParamRegistry, Response } from '@travetto/rest';
 
 import { SessionEncoder } from './encoder/encoder';
 import { SessionStore } from './store/store';
@@ -19,6 +19,10 @@ export class RestSessionService {
 
   @Inject({ defaultIfMissing: MemoryStore })
   store: SessionStore;
+
+  postConstruct() {
+    ContextParamRegistry.set(Session, (c, req) => req!.session);
+  }
 
   async validate(session: Session) {
     if (session.expiresAt && session.expiresAt.getTime() < Date.now()) { // Time has passed

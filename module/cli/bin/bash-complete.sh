@@ -1,20 +1,21 @@
 _travetto()
 {
-    local trvComp="${PWD}/node_modules/.bin/travetto";
-    local cur=${COMP_WORDS[COMP_CWORD]}    
-    if [ -f "$trvComp" ]; then
-      if [[ 'module/cli' == *"$PWD" ]] && [[ -z "$TRV_FRAMEWORK_DEV" ]]; then
-        export NODE_PRESERVE_SYMLINKS=1
-        export TRV_FRAMEWORK_DEV=1
+    local TRV_COMP="${PWD}/node_modules/.bin/travetto";
+    local CUR=${COMP_WORDS[COMP_CWORD]}    
+    if [ -f "$TRV_COMP" ]; then
+      local ON=0
+      if (cat ${PWD}/package.json | grep '"name": "@travetto"'); then
+        ON=1
       fi
-      local words=`${trvComp} complete ${COMP_WORDS[@]:1}`
-      if [[ -z "$words" ]]; then
+      local WORDS=`TRV_FRAMEWORK_DEV=$ON NODE_PRESERVE_SYMLINKS=$ON ${TRV_COMP} complete ${COMP_WORDS[@]:1}`
+      if [[ -z "$WORDS" ]]; then
         COMPREPLY=( )
       else
-      COMPREPLY=( $(compgen  -W "$words" -- $cur) )
+      COMPREPLY=( $(compgen  -W "$WORDS" -- $CUR) )
       fi
     else
       COMPREPLY=( )
     fi 
 }
 complete -o default -F _travetto travetto
+complete -o default -F _travetto trv

@@ -20,7 +20,7 @@ const CONTROLLER_DECORATORS = {
 
 const PARAM_DECORATORS = TransformUtil.buildImportAliasMap({
   ...ConfigSource.get('registry.rest-param'),
-  '@travetto/rest': ['Path', 'Query', 'Header', 'Body']
+  '@travetto/rest': ['Path', 'Query', 'Header', 'Body', 'Context']
 });
 
 const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
@@ -72,6 +72,10 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
 
   const type = defineType(state, commentConfig.type! || node.type! || ts.createIdentifier('String'));
 
+  if (typeName === 'Request' || typeName === 'Response') { // Convert to custom types
+    type.type = ts.createPropertyAccess(TransformUtil.importFile(state, PARAM_DEC_FILE).ident, typeName.toUpperCase());
+  }
+
   const common: ParamConfig = {
     description: decConfig.name,
     defaultValue: node.initializer && TransformUtil.toLiteral(node.initializer),
@@ -84,16 +88,9 @@ function visitParameter(context: ts.TransformationContext, node: ts.ParameterDec
 
   if (!pDec) {
     // Handle body/request special as they are the input
-    if (/^Request|Response$/.test(typeName)) {
-      decs.push(TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Param', TransformUtil.fromLiteral({
-        extract: ts.createPropertyAccess(TransformUtil.importFile(state, PARAM_DEC_FILE).ident, `extract${typeName}`),
-        ...common
-      })));
-    } else {
-      decs.push(TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Query',
-        TransformUtil.fromLiteral(common))
-      );
-    }
+    decs.push(TransformUtil.createDecorator(state, PARAM_DEC_FILE, 'Query',
+      TransformUtil.fromLiteral(common))
+    );
   } else if (ts.isCallExpression(pDec.expression)) {
     pDec.expression.arguments = ts.createNodeArray([
       TransformUtil.fromLiteral(common),

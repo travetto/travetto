@@ -11,6 +11,9 @@ interface DiCommand {
   env?: string;
 }
 
+let listHelper: Function;
+let apps: CachedAppConfig[];
+
 function getAppUsage(app: CachedAppConfig) {
   let usage = app.name;
 
@@ -64,9 +67,6 @@ function generateAppHelpList(confs: CachedAppConfig[], cmd: DiCommand) {
   }
   return choices.map(x => `   ● ${x}`).join('\n\n');
 }
-
-let listHelper: Function;
-let apps: CachedAppConfig[];
 
 export async function setup() {
   apps = await AppListUtil.getList();
@@ -144,7 +144,7 @@ export function init() {
 
 export async function complete(c: CompletionConfig) {
   try {
-    const apps = await AppListUtil.getList();
+    apps = await AppListUtil.getList();
     const env = ['prod', 'dev'];
     const bool = ['yes', 'no'];
     const profiles = fs.readdirSync(process.cwd())
