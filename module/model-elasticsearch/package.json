@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/model": "^0.6.4",
+    "@travetto/model": "^0.6.5",
     "@types/elasticsearch": "^5.0.32",
     "elasticsearch": "^15.4.1"
   },
@@ -40,5 +40,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.4"
+  "version": "0.6.5"
 }

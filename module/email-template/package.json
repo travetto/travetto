@@ -10,8 +10,8 @@
     "travetto-cli-email-template": "./bin/travetto-cli-email-template.ts"
   },
   "dependencies": {
-    "@travetto/di": "^0.6.4",
-    "@travetto/email": "^0.6.4",
+    "@travetto/di": "^0.6.5",
+    "@travetto/email": "^0.6.5",
     "@travetto/exec": "^0.6.4",
     "@types/html-entities": "^1.2.16",
     "@types/mustache": "^0.8.32",
@@ -49,5 +49,5 @@
     "resources",
     "bin"
   ],
-  "version": "0.6.4"
+  "version": "0.6.5"
 }

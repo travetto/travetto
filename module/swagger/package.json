@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@travetto/exec": "^0.6.4",
-    "@travetto/rest": "^0.6.5",
+    "@travetto/rest": "^0.6.6",
     "@travetto/schema": "^0.6.4",
     "openapi3-ts": "^1.2.0"
   },
@@ -37,5 +37,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.4"
+  "version": "0.6.5"
 }

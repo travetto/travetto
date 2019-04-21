@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@travetto/cache": "^0.6.4",
-    "@travetto/di": "^0.6.4",
+    "@travetto/di": "^0.6.5",
     "@travetto/exec": "^0.6.4",
     "@travetto/net": "^0.6.4",
     "@types/mime": "^2.0.1",
@@ -39,5 +39,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.4"
+  "version": "0.6.5"
 }
