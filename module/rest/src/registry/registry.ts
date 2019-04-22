@@ -89,6 +89,14 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     srcConf.requestType = config.requestType || srcConf.requestType;
     srcConf.params = (config.params || srcConf.params).map(x => ({ ...x }));
 
+    // Ensure path starts with '/'
+    const p = srcConf.path;
+    if (typeof p === 'string' && !p.startsWith('/')) {
+      srcConf.path = `/${p}`;
+    } else if (p instanceof RegExp && !p.source.startsWith('/')) {
+      srcConf.path = new RegExp(`/${p.source}`, p.flags);
+    }
+
     this.mergeDescribable(config, srcConf);
 
     return descriptor;
@@ -97,6 +105,11 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   registerPending(target: Class, config: Partial<ControllerConfig>) {
     const srcConf = this.getOrCreatePending(target);
     srcConf.basePath = config.basePath || srcConf.basePath;
+
+    if (!srcConf.basePath!.startsWith('/')) {
+      srcConf.basePath = `/${srcConf.basePath}`;
+    }
+
     this.mergeDescribable(config, srcConf);
   }
 
@@ -106,7 +119,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     // Handle duplicates, take latest
     const found = new Map<string, EndpointConfig>();
     for (const ep of final.endpoints) {
-      ep.id = `${ep.method}#${final.basePath}${ep.path === undefined ? '' : (typeof ep.path === 'string' ? ep.path : ep.path.source)}`;
+      ep.id = `${ep.method}#${final.basePath}${typeof ep.path === 'string' ? ep.path : ep.path.source}`;
       found.set(ep.id, ep);
     }
     final.endpoints = Array.from(found.values()).sort((a, b) => b.priority - a.priority); // Run in reverse

@@ -7,7 +7,6 @@ import { RestConfig } from './config';
 import { RouteUtil } from './util/route';
 import { RestInterceptor } from './interceptor/interceptor';
 import { ControllerRegistry } from './registry/registry';
-import { Application } from './decorator/application';
 
 export abstract class RestApp<T = any> {
 
