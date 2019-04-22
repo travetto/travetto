@@ -1,5 +1,4 @@
 import { AppError, Util } from '@travetto/base';
-import { Class } from '@travetto/registry';
 
 import { MimeType } from './mime';
 import { HeaderMap, Request, Response, Filter, RouteConfig, ParamConfig } from '../types';
@@ -84,32 +83,6 @@ export class RouteUtil {
     }
   }
 
-  static coerceParamValue(paramValue: any, type: Class) {
-    switch (type) {
-      case Date: {
-        const sub = typeof paramValue === 'number' || /^[-]?\d+$/.test(`${paramValue}`) ?
-          new Date(parseInt(paramValue, 10)) : new Date(Date.parse(paramValue));
-        if (Number.isNaN(sub.getTime())) {
-          throw new AppError(`Invalid date`);
-        }
-        paramValue = sub;
-        break;
-      }
-      case Boolean: paramValue = Util.coerceType(paramValue, true); break;
-      case Number: {
-        const sub = Util.coerceType(paramValue, 0);
-        if (Number.isNaN(sub as any)) {
-          throw new AppError(`Invalid number`);
-        }
-        paramValue = sub;
-        break;
-      }
-      case String:
-      case undefined: paramValue = `${paramValue}`; break;
-    }
-    return paramValue;
-  }
-
   static computeRouteParams(configs: ParamConfig[], req: Request, res: Response) {
     const params: any[] = [];
     for (const config of configs) {
@@ -121,9 +94,9 @@ export class RouteUtil {
               if (!Array.isArray(paramValue)) {
                 paramValue = [paramValue];
               }
-              paramValue = paramValue.map((x: any) => this.coerceParamValue(x, config.type));
+              paramValue = paramValue.map((x: any) => Util.coerceType(x, config.type));
             } else {
-              paramValue = this.coerceParamValue(paramValue, config.type);
+              paramValue = Util.coerceType(paramValue, config.type);
             }
           } catch (e) {
             throw new AppError(`Incorrect type for ${config.location} param ${config.name}, ${paramValue} is not a ${config.type!.name}`, 'data');

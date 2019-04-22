@@ -23,12 +23,41 @@ class MergeTests {
   }
 
   @Test()
-  testCoerceType() {
-    assert(Util.coerceType('false', true) === false);
-    assert(Util.coerceType('off', true) === false);
-    assert(Util.coerceType('no', true) === false);
-    assert(Util.coerceType('true', false) === true);
-    assert.throws(() => Util.coerceType('truee', false));
+  testCoerceBooleanType() {
+    assert(!Util.coerceType(false, Boolean));
+    assert(!Util.coerceType('false', Boolean));
+    assert(!Util.coerceType('off', Boolean));
+    assert(!Util.coerceType('no', Boolean));
+    assert(!Util.coerceType('0', Boolean));
+    assert(Util.coerceType('1', Boolean));
+    assert(Util.coerceType(true, Boolean));
+    assert(Util.coerceType('yes', Boolean));
+    assert(Util.coerceType('on', Boolean));
+    assert(Util.coerceType('true', Boolean));
+    assert.throws(() => Util.coerceType('truee', Boolean));
+    assert.doesNotThrow(() => Util.coerceType('truee', Boolean, false));
+    assert(!Util.coerceType('truee', Boolean, false));
+  }
+
+  @Test()
+  testCoerceNumericType() {
+    assert(Util.coerceType(0, Number) === 0);
+    assert(Util.coerceType('0', Number) === 0);
+    assert(Util.coerceType('-1', Number) === -1);
+    assert(Util.coerceType('20.323', Number) === 20.323);
+    assert.throws(() => Util.coerceType('truee', Number));
+    assert.doesNotThrow(() => Util.coerceType('truee', Number, false));
+    assert(Number.isNaN(Util.coerceType('truee', Number, false)));
+  }
+
+  @Test()
+  testCoerceDateType() {
+    assert(Util.coerceType(2014, Date).getTime() === new Date(2014).getTime());
+    assert(Util.coerceType('2014', Date).getTime() === new Date(2014).getTime());
+    assert(Util.coerceType('2018-01-01', Date).toString() === new Date('2018-01-01').toString());
+    assert.throws(() => Util.coerceType('a', Date));
+    assert.doesNotThrow(() => Util.coerceType('a', Date, false));
+    assert(Number.isNaN(Util.coerceType('a', Date, false).getTime()));
   }
 
   @Test()

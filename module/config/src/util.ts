@@ -69,7 +69,7 @@ export class ConfigUtil {
     }
 
     if (Util.isSimple(val)) {
-      return Util.coerceType(a, val);
+      return Util.coerceType(a, val.constructor, false);
     } else if (Array.isArray(val)) {
       return `${a}`.split(',').map(x => x.trim()).map(x => this.coerce(x, val[0]));
     }

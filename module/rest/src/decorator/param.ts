@@ -16,13 +16,14 @@ export const Param = (param: ParamConfig) => {
   };
 };
 
-export const REQUEST = class { };
-export const RESPONSE = class { };
+type ExtractFn = (c: ParamConfig, req?: Request, res?: Response) => any;
+export const ContextParamRegistry = new Map<Class<any>, ExtractFn>();
+export const ContextSource = (fn: ExtractFn) => (target: any) => { ContextParamRegistry.set(target, fn); };
 
-export const ContextParamRegistry = new Map<Class<any>, (c: ParamConfig, req?: Request, res?: Response) => any>([
-  [REQUEST, (c: any, req: any) => req],
-  [RESPONSE, (c: any, req: any, res: any) => res]
-]);
+@ContextSource((c: any, req: any) => req)
+export class REQUEST { }
+@ContextSource((c: any, req: any, res: any) => res)
+export class RESPONSE { }
 
 const extractPath = (c: ParamConfig, r: Request) => r.params[c.name!];
 const extractQuery = (c: ParamConfig, r: Request) => r.query[c.name!];

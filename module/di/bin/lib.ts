@@ -145,19 +145,12 @@ export class RunUtil {
   }
 
   static enforceParamType(config: ApplicationParameter, param: string) {
-    if (
-      (config.type === 'boolean' && !/^(true|false|1|0|yes|no|on|off)/i.test(param)) ||
-      (config.type === 'number' && !/^[-]?[0-9]*[.]?[0-9]*$/.test(param)) ||
-      (config.meta && config.meta.choices && !config.meta.choices.find(c => `${c}` === param))
-    ) {
-      throw new Error(`Invalid parameter ${config.name}: Received ${param} expected ${this.getParamType(config)}`);
+    if (config.type === 'boolean') { return Util.coerceType(param, Boolean); }
+    if (config.type === 'number') { return Util.coerceType(param, Number); }
+    if (config.meta && config.meta.choices && !config.meta.choices.find(c => `${c}` === param)) {
+      throw new Error(`Invalid parameter ${config.name}: Received ${param} expected ${config.meta.choices.join('|')}`);
     }
-    let out: number | string | boolean = param;
-    switch (config.type) {
-      case 'number': out = Util.coerceType(param, 0); break;
-      case 'boolean': out = Util.coerceType(param, false); break;
-    }
-    return out;
+    return Util.coerceType(param, String);
   }
 
   static async run(args: string[]) {
@@ -165,7 +158,7 @@ export class RunUtil {
     const [, ...sub] = args;
     const app = await AppListUtil.getByName(name);
 
-    let typedSub: (string | number | boolean)[] = sub;
+    let typedSub: (string | number | boolean | Date)[] = sub;
 
     if (app) {
       const appParams = app.params || [];

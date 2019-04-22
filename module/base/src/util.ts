@@ -59,7 +59,7 @@ export class Util {
           if (mode === 'strict') { // Bail on strict
             throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
           } else if (mode === 'coerce') { // Force on coerce
-            ret = Util.coerceType(b, a);
+            ret = Util.coerceType(b, a.constructor, false);
           }
         }
       } else { // Object merge
@@ -73,16 +73,42 @@ export class Util {
     return ret;
   }
 
-  static coerceType(input: any, baseline: any) {
-    switch (typeof baseline) {
-      case 'string': return `${input}`;
-      case 'number': return `${input}`.indexOf('.') >= 0 ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
-      case 'boolean':
-        if (/^(false|no|off|0|true|yes|on|1)$/i.test(input)) {
-          return /^(true|yes|1|on)$/.test(input);
-        }
+  static coerceType(input: any, type: typeof String, strict?: boolean): string;
+  static coerceType(input: any, type: typeof Number, strict?: boolean): number;
+  static coerceType(input: any, type: typeof Boolean, strict?: boolean): boolean;
+  static coerceType(input: any, type: typeof Date, strict?: boolean): Date;
+  static coerceType<T>(input: any, type: { new(...args: any[]): T }, strict?: boolean): T;
+  static coerceType(input: any, type: any, strict = true) {
+    if (type && input instanceof type) {
+      return input;
     }
-    throw new Error(`Unknown type ${typeof baseline}`);
+    switch (type) {
+      case Date: {
+        const res = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
+          new Date(parseInt(input, 10)) : new Date(input);
+        if (strict && Number.isNaN(res.getTime())) {
+          throw new Error(`Invalid date value: ${input}`);
+        }
+        return res;
+      }
+      case Number: {
+        const res = `${input}`.indexOf('.') >= 0 ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
+        if (strict && Number.isNaN(res)) {
+          throw new Error(`Invalid numeric value: ${input}`);
+        }
+        return res;
+      }
+      case Boolean: {
+        const res = /^(true|yes|1|on)$/.test(input);
+        if (strict && !/^(false|no|off|0|true|yes|on|1)$/i.test(input)) {
+          throw new Error(`Invalid boolean value: ${input}`);
+        }
+        return res;
+      }
+      case undefined:
+      case String: return `${input}`;
+    }
+    throw new Error(`Unknown type ${type.name}`);
   }
 
   static shallowClone(a: any) {
