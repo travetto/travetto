@@ -24,7 +24,7 @@ export class ModelStore extends SessionStore {
     const res = await this.modelService.getAllByQuery(SessionModel, { where: { id } });
     if (res.length === 1) {
       const out = res[0];
-      if (out.dataSerialized && !out.dataSerialized) {
+      if (out.dataSerialized && !out.data) {
         try {
           out.data = JSON.parse(out.dataSerialized);
         } catch (e) { }

@@ -64,7 +64,7 @@ export class RestSessionService {
 
   async storeToExternal(req: Request, res: Response) {
 
-    let session: Session | undefined = (this as any)[SESS]; // Do not create automatically
+    let session: Session | undefined = (req as any)[SESS]; // Do not create automatically
 
     if (!session) {
       return;
