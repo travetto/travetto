@@ -8,7 +8,7 @@
   },
   "description": "Common wrapper around process execution with high level docker support.",
   "dependencies": {
-    "@travetto/base": "^0.6.4"
+    "@travetto/base": "^0.6.6"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -29,5 +29,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.4"
+  "version": "0.6.5"
 }
