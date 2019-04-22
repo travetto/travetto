@@ -2,7 +2,7 @@ import { AppError } from '@travetto/base';
 import { Request, ContextProvider } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
 import { AuthContext } from '@travetto/auth';
-import { ContextService } from '@travetto/context';
+import { AsyncContext } from '@travetto/context';
 
 const CTX_SYM = Symbol('trv_ctx');
 
@@ -10,7 +10,7 @@ const CTX_SYM = Symbol('trv_ctx');
 @ContextProvider(AuthContext, (c, req) => req!.auth)
 export class AuthContextService {
   @Inject()
-  context?: ContextService;
+  context?: AsyncContext;
 
   set(ctx: AuthContext, req?: Request) {
     if (this.context) {

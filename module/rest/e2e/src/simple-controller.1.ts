@@ -1,4 +1,4 @@
-import { WithContext, Context } from '@travetto/context';
+import { WithAsyncContext, Context } from '@travetto/context';
 
 import { Controller, Get } from '../..';
 import { MockService } from './mock';
@@ -6,7 +6,7 @@ import { MockService } from './mock';
 @Controller('/simple2')
 export class Simple {
 
-  constructor(private service: MockService, public context: Context) {
+  constructor(private service: MockService, public context: AsyncContext) {
   }
 
   @Get('/name')
@@ -20,7 +20,7 @@ export class Simple {
   }
 
   @Get('/age2')
-  @WithContext()
+  @WithAsyncContext()
   async age2() {
     if (Math.random() > .66) {
       this.context.get().name = `Roger-${Date.now()}`;

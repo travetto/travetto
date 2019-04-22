@@ -2,15 +2,15 @@ import { GetCacheInterceptor, RestInterceptor, Request, Response, RouteConfig } 
 import { Injectable, Inject } from '@travetto/di';
 import { ConfigSource } from '@travetto/config';
 
-import { ContextService } from '..';
+import { AsyncContext } from '..';
 
 @Injectable()
-export class ContextInterceptor extends RestInterceptor {
+export class AsyncContextInterceptor extends RestInterceptor {
 
   after = GetCacheInterceptor;
 
   @Inject()
-  context: ContextService;
+  context: AsyncContext;
 
   public applies?(route: RouteConfig): boolean {
     return !ConfigSource.get('rest.context').disabled;

@@ -166,7 +166,7 @@ To run a REST server, you will need to construct an entry point using the `@Appl
 export class SampleApp {
 
   @Inject()
-  contextInterceptor: ContextInterceptor;
+  contextInterceptor: AsyncContextInterceptor;
 
   constructor(private app: RestApp) { }
 
@@ -210,8 +210,8 @@ export class LoggingInterceptor extends RestInterceptor {
 
 Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module/asset-rest) is implemented in this fashion, as well as [`Auth-Rest`](https://github.com/travetto/travetto/tree/master/module/auth-rest).
 
-## Context Support
-[`Context`](https://github.com/travetto/travetto/tree/master/module/context) provides support for automatically injecting an async context into every request. The context management is provided via an `Interceptor` and is transparent to the programmer.
+## Async Context Support
+[`AsyncContext`](https://github.com/travetto/travetto/tree/master/module/context) provides support for automatically injecting an async context into every request. The context management is provided via an `Interceptor` and is transparent to the programmer.
 
 **Code: Showing contextual support for Routes**
 ```typescript
@@ -223,7 +223,7 @@ Currently [`Asset-Rest`](https://github.com/travetto/travetto/tree/master/module
   }
  ...
  class PreferenceService {
-   private context: Context;
+   private context: AsyncContext;
 
    async update(prefs: Preferences) {
      const userId = this.context.get().userId;

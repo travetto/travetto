@@ -10,7 +10,7 @@ $ npm install @travetto/context
 
 This module provides a wrapper around `nodejs`'s [`async_hooks`](https://nodejs.org/api/async_hooks.html) to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow.
 
-The most common way of utilizing the context, is via the `@WithContext` decorator.  The decorator requires the class it's being used in, to have a [`ContextService`](./src/service/context.ts) member, as it is the source of the contextual information.
+The most common way of utilizing the context, is via the `@WithAsyncContext` decorator.  The decorator requires the class it's being used in, to have a [`AsyncContext`](./src/service/context.ts) member, as it is the source of the contextual information.
 
 The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain.
 
@@ -18,9 +18,9 @@ The decorator will load the context on invocation, and will keep the context act
 ```typescript
 class ContextAwareService {
 
-   constructor(public context:ContextService){}
+   constructor(public context:AsyncContext){}
 
-   @WithContext()
+   @WithAsyncContext()
    async complexOperator(name: string) {
      this.context.set({ name })
      await this.additionalOp(name);
@@ -41,7 +41,7 @@ The decorator also allows for a priming of the contextual information.  This is 
 ```typescript
 class SystemInitiatedContext {
 
-   constructor(public context:ContextService){}
+   constructor(public context:AsyncContext){}
 
    @WithContext({
      user: 'system',

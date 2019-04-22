@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Context } from '@travetto/context';
+import { AsyncContext } from '@travetto/context';
 
 class User {
   constructor(public first: string, public last: string, public middle?: string) { }
@@ -11,7 +11,7 @@ export class MockService {
   private count = 0;
 
   @Inject()
-  private context: Context;
+  private context: AsyncContext;
 
   fetch2() {
     return new User('Goodbye', 'Cruel', 'World');

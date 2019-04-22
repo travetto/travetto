@@ -4,11 +4,11 @@ import * as async_hooks from 'async_hooks';
 import { Inject, Injectable, DependencyRegistry } from '@travetto/di';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
-import { ContextService, WithContext } from '../';
+import { AsyncContext, WithAsyncContext } from '../';
 
 @Injectable()
 class TestService {
-  @Inject() context: ContextService;
+  @Inject() context: AsyncContext;
 
   postConstruct() {
     console.log('Context Found', this.context);
@@ -18,7 +18,7 @@ class TestService {
 @Suite()
 class VerifyContext {
 
-  context: ContextService;
+  context: AsyncContext;
 
   @BeforeAll()
   async init() {
@@ -28,7 +28,7 @@ class VerifyContext {
   }
 
   @Test()
-  @WithContext({})
+  @WithAsyncContext({})
   async loadContext() {
     assert(this.context !== null);
     this.context.set({ user: 'bob' });
@@ -37,7 +37,7 @@ class VerifyContext {
   }
 
   @Test()
-  @WithContext({})
+  @WithAsyncContext({})
   async nextContext() {
     console.log(this.context['threads'].size);
     assert(this.context.get().name === undefined);

@@ -1,7 +1,7 @@
 // import { Injectable } from '@travetto/di';
 import * as domain from 'domain';
 
-export class DomainContext {
+export class DomainAsyncContext {
   storageState = new Map<string, any>();
 
   get id() {

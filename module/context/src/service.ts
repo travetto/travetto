@@ -4,7 +4,7 @@ import { Injectable } from '@travetto/di';
 import { AppError } from '@travetto/base';
 
 @Injectable()
-export class ContextService {
+export class AsyncContext {
   private threads = new Map<number, number>();
   private threadsSet = new Map<number, Set<number>>();
   private hooks: async_hooks.AsyncHook;
