@@ -1,3 +1,4 @@
+import { AppError } from '@travetto/base';
 import { Class } from '@travetto/registry';
 import { ParamConfig, Request, Response } from '../types';
 import { ControllerRegistry } from '../registry/registry';
@@ -17,19 +18,38 @@ export const Param = (param: ParamConfig) => {
 };
 
 type ExtractFn = (c: ParamConfig, req?: Request, res?: Response) => any;
-export const ContextParamRegistry = new Map<Class<any>, ExtractFn>();
-export const ContextSource = (fn: ExtractFn) => (target: any) => { ContextParamRegistry.set(target, fn); };
+const ContextParamRegistry = new Map<Class<any>, ExtractFn>();
 
-@ContextSource((c: any, req: any) => req)
+export function ContextProvider(type: Class, fn: ExtractFn): Function;
+export function ContextProvider(fnOrType: ExtractFn): Function;
+export function ContextProvider(fnOrType: ExtractFn | Class, fn?: ExtractFn) {
+  return (target: any) => {
+    let finalType = target;
+    if (fn) {
+      finalType = fnOrType as Class;
+    } else {
+      fn = fnOrType as ExtractFn;
+    }
+    ContextParamRegistry.set(finalType, fn);
+  };
+}
+
+@ContextProvider((c: any, req: any) => req)
 export class REQUEST { }
-@ContextSource((c: any, req: any, res: any) => res)
+@ContextProvider((c: any, req: any, res: any) => res)
 export class RESPONSE { }
 
 const extractPath = (c: ParamConfig, r: Request) => r.params[c.name!];
 const extractQuery = (c: ParamConfig, r: Request) => r.query[c.name!];
 const extractHeader = (c: ParamConfig, r: Request) => r.header(c.name!);
 const extractBody = (c: ParamConfig, r: Request) => r.body;
-const extractContext = (c: ParamConfig, req: Request, res: Response) => ContextParamRegistry.get(c.type)!(c, req, res);
+const extractContext = (c: ParamConfig, req: Request, res: Response) => {
+  const fn = ContextParamRegistry.get(c.type);
+  if (!fn) {
+    throw new AppError(`Unknown context type: ${c.type.name}`, 'data');
+  }
+  return fn(c, req, res);
+};
 
 export const Context = (param: string | Partial<ParamConfig> = {}) => Param({ location: 'context', extract: extractContext, ...toConfig(param) });
 export const Path = (param: string | Partial<ParamConfig> = {}) => Param({ location: 'path', extract: extractPath, ...toConfig(param) });

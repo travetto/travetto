@@ -1,9 +1,12 @@
 import { Util } from '@travetto/base';
+import { ContextProvider } from '@travetto/rest';
 
+@ContextProvider((c, req) => req!.session.data)
 export class SessionData {
   [key: string]: any;
 }
 
+@ContextProvider((c, req) => req!.session)
 export class Session<T = any> {
   private expiresAtLoaded: Date | undefined;
   private hash: number;

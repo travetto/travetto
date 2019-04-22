@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Request, ContextParamRegistry, Response } from '@travetto/rest';
+import { Request, Response } from '@travetto/rest';
 
 import { SessionEncoder } from './encoder/encoder';
 import { SessionStore } from './store/store';
-import { Session, SessionData } from './types';
+import { Session } from './types';
 import { SessionConfig } from './config';
 import { CookieEncoder } from './encoder/cookie';
 import { MemoryStore } from './store/memory';
@@ -21,11 +21,6 @@ export class RestSessionService {
 
   @Inject({ defaultIfMissing: MemoryStore })
   store: SessionStore;
-
-  postConstruct() {
-    ContextParamRegistry.set(Session, (c, req) => req!.session);
-    ContextParamRegistry.set(SessionData, (c, req) => req!.session.data);
-  }
 
   async validate(session: Session) {
     if (session.isExpired()) { // Time has passed
