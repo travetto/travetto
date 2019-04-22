@@ -23,6 +23,7 @@ export class RegisterUtil {
   static ogModuleLoad = Module._load.bind(Module);
   static pkgName: string;
   static plainLogs = EnvUtil.isTrue('plain_logs');
+  static libRequire: (x: string) => any;
 
   static computeModuleFromFile(fileName: string) {
     /** @type string */
@@ -146,11 +147,6 @@ export class RegisterUtil {
     return this.compileTypescript(m, this.resolveFrameworkDevFile(tsf));
   }
 
-  static libRequire(x: string) {
-    const f = this.resolveFrameworkDevFile(`/${x}`);
-    return require(f);
-  }
-
   static init() {
     if (global.trvInit) {
       return;
@@ -172,6 +168,8 @@ export class RegisterUtil {
     Module._load = (tfd ? this.frameworkModuleHandler : this.moduleLoaderHandler).bind(this);
     // @ts-ignore
     require.extensions['.ts'] = (tfd ? this.frameworkCompileTypescript : this.compileTypescript).bind(this);
+
+    this.libRequire = tfd ? x => require(this.resolveFrameworkDevFile(`/${x}`)) : require;
 
     global.trvInit = this;
   }

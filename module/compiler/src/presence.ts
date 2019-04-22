@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as fs from 'fs';
 
 import {
   ScanEntry, Env, ScanHandler,
@@ -94,6 +95,10 @@ export class FilePresenceManager {
       setTimeout(() => {
         console.debug('Watching files', rootFiles.length);
         for (const p of this.watchSpaces) {
+          if (!fs.existsSync(p)) {
+            console.warn(`Directory ${FsUtil.resolveUnix(FsUtil.cwd, p)} missing, cannot watch`);
+            continue;
+          }
           this.buildWatcher(FsUtil.joinUnix(this.cwd, p), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
         }
       }, 50); // FIXME: 1000 og
