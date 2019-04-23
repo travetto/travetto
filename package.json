@@ -18,6 +18,6 @@
 		"passport-facebook": "^3.0.0"
 	},
 	"dependencies": {
-		"typescript": "^3.4.4"
+		"typescript": "^3.4.5"
 	}
 }

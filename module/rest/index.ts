@@ -18,6 +18,7 @@ export * from './src/interceptor/get-cache';
 export * from './src/interceptor/interceptor';
 export * from './src/types';
 export * from './src/util/mime';
+export * from './src/util/param';
 export * from './src/util/rest-app';
 export * from './src/util/route';
 export * from './src/util/ssl';

@@ -4,9 +4,9 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Query, Header, Path, Context } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
-import { RouteUtil } from '../src/util/route';
 import { ControllerRegistry } from '../src/registry/registry';
 import { Method, Request, Response } from '../src/types';
+import { ParamUtil } from '../src/util/param';
 
 interface Wrapper<T> {
   items: T[];
@@ -76,7 +76,7 @@ export class ParameterTest {
   async simpleParameters() {
     const ep = ParameterTest.getEndpoint('/:name', 'post');
     assert.doesNotThrow(() =>
-      RouteUtil.computeRouteParams(ep.params, {
+      ParamUtil.extractParams(ep.params, {
         params: { name: 'bob' },
         query: {
           age: '20'
@@ -85,7 +85,7 @@ export class ParameterTest {
     );
 
     assert.throws(() => {
-      RouteUtil.computeRouteParams(ep.params, {
+      ParamUtil.extractParams(ep.params, {
         params: { name: 'bob' },
         query: {
           age: 'blue'
@@ -99,7 +99,7 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/login', 'post');
 
     assert.doesNotThrow(() =>
-      RouteUtil.computeRouteParams(ep.params, {
+      ParamUtil.extractParams(ep.params, {
         header: (key: string) => {
           return key;
         }
@@ -107,7 +107,7 @@ export class ParameterTest {
     );
 
     assert.throws(() => {
-      RouteUtil.computeRouteParams(ep.params, {
+      ParamUtil.extractParams(ep.params, {
         header: (key: string) => { }
       } as any, {} as any);
     });
@@ -119,21 +119,21 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/user/:id', 'post');
 
     assert.doesNotThrow(() =>
-      RouteUtil.computeRouteParams(ep.params, {
+      ParamUtil.extractParams(ep.params, {
         query: {},
         params: { id: '5' }
       } as any, {} as any)
     );
 
     assert.throws(() =>
-      RouteUtil.computeRouteParams(ep.params, {
+      ParamUtil.extractParams(ep.params, {
         query: { age: 'blue' },
         params: { id: '5' }
       } as any, {} as any), 'Incorrect type'
     );
 
     assert.throws(() =>
-      RouteUtil.computeRouteParams(ep.params, {
+      ParamUtil.extractParams(ep.params, {
         params: {}, query: {}
       } as any, {} as any), /Missing.*\bid/i
     );
@@ -144,7 +144,7 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/req/res', 'post');
     const req = { path: '/path' };
     const res = { status: 200 };
-    const items = RouteUtil.computeRouteParams(ep.params, req as any, res as any);
+    const items = ParamUtil.extractParams(ep.params, req as any, res as any);
 
     assert(req === items[0]);
     assert(res === items[1]);
@@ -155,8 +155,8 @@ export class ParameterTest {
   async testAliasing() {
     const ep = ParameterTest.getEndpoint('/alias', 'post');
     assert(ep.params[0].description === 'User name');
-    assert(RouteUtil.computeRouteParams(ep.params, { query: { nm: 'blue' } } as any, {} as any) === ['green']);
-    assert(RouteUtil.computeRouteParams(ep.params, { query: { name: 'blue' } } as any, {} as any) === ['blue']);
+    assert(ParamUtil.extractParams(ep.params, { query: { nm: 'blue' } } as any, {} as any) === ['green']);
+    assert(ParamUtil.extractParams(ep.params, { query: { name: 'blue' } } as any, {} as any) === ['blue']);
 
     const ep2 = ParameterTest.getEndpoint('/alias2', 'post');
     assert(ep2.params[0].description === 'User\'s name');
@@ -174,18 +174,18 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/array', 'post');
     const ep2 = ParameterTest.getEndpoint('/array2', 'post');
 
-    assert(RouteUtil.computeRouteParams(ep2.params, { query: { values: 'no' } } as any, {} as any) === [[false]]);
-    assert(RouteUtil.computeRouteParams(ep2.params, { query: { values: ['no', 'yes'] } } as any, {} as any) === [[false, true]]);
+    assert(ParamUtil.extractParams(ep2.params, { query: { values: 'no' } } as any, {} as any) === [[false]]);
+    assert(ParamUtil.extractParams(ep2.params, { query: { values: ['no', 'yes'] } } as any, {} as any) === [[false, true]]);
 
-    assert(RouteUtil.computeRouteParams(ep.params, { query: { values: '0' } } as any, {} as any) === [[0]]);
-    assert(RouteUtil.computeRouteParams(ep.params, { query: { values: ['5', '3'] } } as any, {} as any) === [[5, 3]]);
+    assert(ParamUtil.extractParams(ep.params, { query: { values: '0' } } as any, {} as any) === [[0]]);
+    assert(ParamUtil.extractParams(ep.params, { query: { values: ['5', '3'] } } as any, {} as any) === [[5, 3]]);
   }
 
   @Test()
   async realWorld() {
     const ep = ParameterTest.getEndpoint('/job/output/:jobId', 'get');
-    assert.doesNotThrow(() => RouteUtil.computeRouteParams(ep.params, { params: { jobId: '5' }, query: {} } as any, {} as any));
-    assert.throws(() => RouteUtil.computeRouteParams(ep.params, { params: {}, query: {} } as any, {} as any), /missing path/i);
-    assert.throws(() => RouteUtil.computeRouteParams(ep.params, { params: { jobId: '5' }, query: { time: 'blue' } } as any, {} as any), 'Incorrect type');
+    assert.doesNotThrow(() => ParamUtil.extractParams(ep.params, { params: { jobId: '5' }, query: {} } as any, {} as any));
+    assert.throws(() => ParamUtil.extractParams(ep.params, { params: {}, query: {} } as any, {} as any), /missing path/i);
+    assert.throws(() => ParamUtil.extractParams(ep.params, { params: { jobId: '5' }, query: { time: 'blue' } } as any, {} as any), 'Incorrect type');
   }
 }

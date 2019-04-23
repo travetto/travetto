@@ -1,10 +1,12 @@
-import { AppError, Util } from '@travetto/base';
+import { AppError } from '@travetto/base';
+
+import { HeaderMap, Request, Response, Filter, RouteConfig } from '../types';
+import { EndpointConfig, ControllerConfig } from '../registry/types';
+import { isRenderable } from '../response/renderable';
+import { RestInterceptor } from '../interceptor/interceptor';
 
 import { MimeType } from './mime';
-import { HeaderMap, Request, Response, Filter, RouteConfig, ParamConfig } from '../types';
-import { isRenderable } from '../response/renderable';
-import { EndpointConfig, ControllerConfig } from '../registry/types';
-import { RestInterceptor } from '../interceptor/interceptor';
+import { ParamUtil } from './param';
 
 export class RouteUtil {
 
@@ -72,46 +74,15 @@ export class RouteUtil {
     const start = Date.now();
     try {
       const output = await filterChain(req, res);
-      await RouteUtil.sendOutput(req, res, output, headers);
+      await this.sendOutput(req, res, output, headers);
     } catch (error) {
       if (!(error instanceof Error)) {  // Ensure we always throw "Errors"
         error = new AppError(error.message || 'Unexpected error', 'general', error);
       }
-      await RouteUtil.sendOutput(req, res, error);
+      await this.sendOutput(req, res, error);
     } finally {
-      RouteUtil.logRequest(req, res, Date.now() - start);
+      this.logRequest(req, res, Date.now() - start);
     }
-  }
-
-  static computeRouteParams(configs: ParamConfig[], req: Request, res: Response) {
-    const params: any[] = [];
-    for (const config of configs) {
-      let paramValue = config.extract(config, req, res);
-      if (config.location === 'header' || config.location === 'path' || config.location === 'query') {
-        if (paramValue !== undefined && paramValue !== null) {
-          try {
-            if (config.array) {
-              if (!Array.isArray(paramValue)) {
-                paramValue = [paramValue];
-              }
-              paramValue = paramValue.map((x: any) => Util.coerceType(x, config.type));
-            } else {
-              paramValue = Util.coerceType(paramValue, config.type);
-            }
-          } catch (e) {
-            throw new AppError(`Incorrect type for ${config.location} param ${config.name}, ${paramValue} is not a ${config.type!.name}`, 'data');
-          }
-        }
-      }
-      paramValue = paramValue === undefined ? config.defaultValue : paramValue;
-
-      if (paramValue === undefined && config.required) {
-        throw new AppError(`Missing ${config.location.replace(/s$/, '')}: ${config.name}`, 'data');
-      }
-
-      params.push(paramValue);
-    }
-    return params;
   }
 
   static createRouteHandler(
@@ -120,7 +91,7 @@ export class RouteUtil {
     router: Partial<ControllerConfig> = {}): Filter<any> {
 
     const handlerBound = async (req: Request, res: Response) => {
-      const params = this.computeRouteParams(route.params, req, res);
+      const params = ParamUtil.extractParams(route.params, req, res);
       return route.handler.apply(route.instance, params);
     };
 
