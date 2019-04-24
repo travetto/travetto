@@ -6,7 +6,7 @@
 	"publishConfig": {
 		"access": "private"
 	},
-	"name": "travetto-mono-repo",
+	"name": "@travetto/mono-repo",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/faker": "^4.1.5",

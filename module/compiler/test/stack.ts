@@ -1,31 +1,30 @@
 import * as assert from 'assert';
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Stacktrace } from '@travetto/base';
+import { Suite, Test } from '@travetto/test';
 
 @Suite()
 class StackTest {
 
-  @BeforeAll()
-  beforeAll() {
-    Stacktrace.initHandler();
+  inner3() {
+    throw new Error('uh oh');
+  }
+
+  async inner2() {
+    return await this.inner3();
+  }
+
+  async inner1() {
+    return this.inner2();
   }
 
   @Test()
   async test() {
-    const prom = new Promise((resolve, reject) => {
-      setTimeout(function inner1() {
-        setTimeout(function inner2() {
-          setTimeout(function inner3() {
-            reject(new Error('Uh oh'));
-          }, 1);
-        }, 1);
-      }, 1);
-    });
     try {
-      await prom;
+      await this.inner1();
       assert(false);
     } catch (e) {
-      assert(e);
+      assert(e.stack.includes('inner1'));
+      assert(e.stack.includes('inner2'));
+      assert(e.stack.includes('inner3'));
       console.log(e);
     }
   }

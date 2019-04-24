@@ -1,9 +1,11 @@
-import * as commander from 'commander';
+
+import { Command } from 'commander';
 import * as fs from 'fs';
 import { FsUtil } from '@travetto/boot';
 
 import { Util, CompletionConfig } from './util';
 
+const commander = new Command();
 commander.version(require('../package.json').version);
 
 const PREFIX = 'travetto-cli';
@@ -24,7 +26,7 @@ export class Execute {
       const files = fs.readdirSync(BIN_DIR).filter(x => x.startsWith(`${PREFIX}-`));
       const all = [];
       for (const f of files) {
-        all.push(Execute.requireModule(f));
+        all.push(this.requireModule(f));
       }
       return all;
     }
@@ -32,7 +34,7 @@ export class Execute {
   }
 
   static loadSinglePlugin(cmd: string) {
-    return Execute.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
+    return this.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
   }
 
   static async getCompletion(args: string[]) {
