@@ -10,7 +10,6 @@
     "access": "public"
   },
   "dependencies": {
-    "trace": "^3.1.1",
     "@travetto/boot": "^0.6.7"
   },
   "description": "Application phase management, environment config and common utilities for travetto applications.",

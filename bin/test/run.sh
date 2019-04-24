@@ -9,4 +9,4 @@ done
 export DEBUG=0
 export TRV_FRAMEWORK_DEV=1
 export NODE_PRESERVE_SYMLINKS=1
-node -e 'require("./module/boot/bin/init"); require("./bin/test").run()';
+node -r './module/boot/bin/init' -e 'require("./bin/test").run()';

@@ -1,11 +1,10 @@
 
-import { Command } from 'commander';
+import * as commander from 'commander';
 import * as fs from 'fs';
 import { FsUtil } from '@travetto/boot';
 
 import { Util, CompletionConfig } from './util';
 
-const commander = new Command();
 commander.version(require('../package.json').version);
 
 const PREFIX = 'travetto-cli';

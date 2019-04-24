@@ -1,5 +1,3 @@
-import { resolve } from 'url';
-
 export class DepResolver {
 
   static PEER_DEPS = `${process.argv[2]}`.trim() !== '';
