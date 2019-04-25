@@ -6,7 +6,7 @@ export function init() {
 
   return Util.program.command('test')
     .arguments('[regexes...]')
-    .option('-f, --format <format>', 'Output format for test results', /^(tap|json|jsonStream|noop|exec|event)$/, 'tap')
+    .option('-f, --format <format>', 'Output format for test results', /^(tap|json|jsonStream|noop|exec|event|xunit)$/, 'tap')
     .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, Math.min(4, os.cpus().length - 1))
     .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
     .action(async (args, cmd) => {
@@ -54,7 +54,7 @@ export function init() {
 }
 
 export function complete(c: CompletionConfig) {
-  const formats = ['tap', 'json', 'event'];
+  const formats = ['tap', 'json', 'event', 'xunit'];
   const modes = ['single', 'all'];
   c.all.push('test');
   c.task.test = {

@@ -48,6 +48,7 @@ export class RestTest {
 
     const res = {
       result: undefined as any,
+      statusCode: 201,
       setHeader() { },
       send(val: any) {
         this.result = JSON.parse(val);
@@ -83,6 +84,7 @@ export class RestTest {
 
     const res = {
       result: undefined as any,
+      statusCode: 201,
       setHeader() { },
       send(val: any) {
         this.result = JSON.parse(val);

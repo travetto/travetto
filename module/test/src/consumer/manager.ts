@@ -7,6 +7,7 @@ import { ExecutionEmitter } from './execution';
 import { EventStream } from './event-stream';
 import { TapEmitter } from './tap';
 import { NoopConsumer } from './noop';
+import { XunitEmitter } from './xunit';
 
 import { AllResultsCollector } from './collector';
 
@@ -16,7 +17,8 @@ export class ConsumerManager {
     json: JSONEmitter,
     tap: TapEmitter,
     event: EventStream,
-    exec: ExecutionEmitter
+    exec: ExecutionEmitter,
+    xunit: XunitEmitter
   };
 
   static create(consumer: string | Consumer): Consumer & { summarize?: () => AllResultsCollector } {
