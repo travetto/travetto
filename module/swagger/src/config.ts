@@ -15,7 +15,7 @@ export class ApiInfoConfig {
 
 @Config('api.host')
 export class ApiHostConfig {
-  servers?: ServerObject[] = [{ url: 'http://localhost:3000' }];
+  servers?: ServerObject[];
   openapi = '3.0.7';
 }
 

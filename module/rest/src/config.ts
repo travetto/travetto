@@ -12,6 +12,8 @@ export class RestConfig {
   port = 3000;
   disableGetCache = true;
   trustProxy = false;
+  hostname = 'localhost';
+  baseUrl: string;
 
   defaultMessage = true;
 
@@ -42,6 +44,18 @@ export class RestConfig {
   } = {
       active: false
     };
+
+  postConstruct() {
+    if (this.cookie.secure === undefined) {
+      this.cookie.secure = this.ssl.active;
+    }
+    if (this.baseUrl === undefined) {
+      this.baseUrl = `http${this.ssl.active ? 's' : ''}://${this.hostname}${[80, 443].includes(this.port) ? '' : this.port}`;
+    }
+    if (this.cookie.domain === undefined) {
+      this.cookie.domain = this.hostname;
+    }
+  }
 
   async getKeys() {
     if (this.ssl.active) {

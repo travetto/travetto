@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
-import { ControllerRegistry } from '@travetto/rest';
+import { ControllerRegistry, RestConfig } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { OpenAPIObject } from 'openapi3-ts';
@@ -19,6 +19,9 @@ export class SwaggerService {
   @Inject()
   private apiClientConfig: ApiClientConfig;
 
+  @Inject()
+  private restConfig: RestConfig;
+
   private spec: OpenAPIObject;
 
   async postConstruct() {
@@ -28,6 +31,9 @@ export class SwaggerService {
 
   getSpec(): OpenAPIObject {
     if (!this.spec) {
+      if (!this.apiHostConfig.servers) {
+        this.apiHostConfig.servers = [{ url: this.restConfig.baseUrl }];
+      }
       this.spec = {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
