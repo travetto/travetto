@@ -19,13 +19,11 @@ export class CorsInterceptor extends RestInterceptor {
     this.origins = new Set(this.restConfig.cors.origins || []);
     this.methods = (this.restConfig.cors.methods || []).join(',');
     this.headers = (this.restConfig.cors.headers || []).join(',');
-    if (this.restConfig.cors.credentials !== undefined) {
-      this.credentials = this.restConfig.cors.credentials;
-    }
+    this.credentials = !!this.restConfig.cors.credentials;
   }
 
   public applies?(route: RouteConfig) {
-    return !!this.restConfig.cors && this.restConfig.cors.active;
+    return this.restConfig.cors && this.restConfig.cors.active;
   }
 
   intercept(req: Request, res: Response) {
@@ -34,7 +32,7 @@ export class CorsInterceptor extends RestInterceptor {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');
       res.setHeader('Access-Control-Allow-Credentials', `${this.credentials}`);
       res.setHeader('Access-Control-Allow-Methods', this.methods || '*');
-      res.setHeader('Access-Control-Allow-Headers', this.headers || '*');
+      res.setHeader('Access-Control-Allow-Headers', this.headers || req.header('access-control-request-headers')!);
     }
   }
 }
