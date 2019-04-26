@@ -66,7 +66,7 @@ export const Text = () => stringArrStringProp({ specifier: 'text' });
 export const LongText = () => stringArrStringProp({ specifier: 'text-long' });
 
 export const Match = (re: RegExp, message?: string) => stringArrStringProp({ match: { re, message } });
-export const MinLength = (n: number, message?: string) => stringArrProp({ minlength: { n, message } });
+export const MinLength = (n: number, message?: string) => stringArrProp({ minlength: { n, message }, ...(n === 0 ? { required: { active: false } } : {}) });
 export const MaxLength = (n: number, message?: string) => stringArrProp({ maxlength: { n, message } });
 export const Min = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ min: { n, message } });
 export const Max = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ max: { n, message } });
