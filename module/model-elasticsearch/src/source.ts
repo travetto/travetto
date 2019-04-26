@@ -154,6 +154,8 @@ export class ElasticsearchModelSource extends ModelSource {
       const aliases = await this.client.indices.getAlias({ index });
       const curr = Object.keys(aliases)[0];
 
+      const allChange = removes.concat(typeChanges);
+
       // Reindex
       await this.client.reindex({
         body: {
@@ -161,7 +163,7 @@ export class ElasticsearchModelSource extends ModelSource {
           dest: { index: next },
           script: {
             lang: 'painless',
-            inline: removes.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
+            inline: allChange.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
           }
         },
         waitForCompletion: true
