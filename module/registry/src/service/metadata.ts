@@ -7,6 +7,8 @@ function id(cls: string | Class) {
   return cls && typeof cls !== 'string' ? cls.__id : cls;
 }
 
+export const OG_VAL = Symbol('Original Value');
+
 export abstract class MetadataRegistry<C extends { class: Class }, M = any, F = Function> extends Registry {
 
   static id = id;
@@ -74,9 +76,14 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any, F = 
   getOrCreatePendingField(cls: Class, field: F): Partial<M> {
     this.getOrCreatePending(cls);
 
+    if (OG_VAL in field) {
+      field = (field as any)[OG_VAL];
+    }
+
     if (!this.pendingFields.get(cls.__id)!.has(field)) {
       this.pendingFields.get(cls.__id)!.set(field, this.createPendingField(cls, field));
     }
+
     return this.pendingFields.get(cls.__id)!.get(field)!;
   }
 

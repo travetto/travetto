@@ -1,16 +1,20 @@
-import { Suite, Test, BeforeEach } from '@travetto/test';
 import * as assert from 'assert';
 
-import { CacheManager } from '../src/service';
+import { Suite, Test, BeforeAll, AfterEach } from '@travetto/test';
+import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
+
+import { CacheFactory } from '../src/service';
 import { Cacheable } from '../src/decorator';
 
+@Injectable()
 class CachingService {
 
-  constructor() { }
+  @Inject()
+  cache: CacheFactory;
 
   @Cacheable({
     max: 5,
-    dispose: (k: string, v: Promise<number>) => {
+    dispose: (v: any, k: string, ) => {
 
     }
   })
@@ -19,7 +23,7 @@ class CachingService {
     return num * 2;
   }
 
-  @Cacheable({ maxAge: 1000 })
+  @Cacheable({ ttl: 1000 })
   async youngAndComplex(num: number) {
     await new Promise(resolve => setTimeout(resolve, 105));
     return num * 3;
@@ -30,7 +34,7 @@ class CachingService {
     return { length: Object.keys(config).length, size };
   }
 
-  @Cacheable({ max: 1000 }, config => config.a)
+  @Cacheable({ max: 1000, keyFn: (config) => config.a })
   async complexInputWithCustomKey(config: any, size: number) {
     return { length: Object.keys(config).length, size };
   }
@@ -39,15 +43,20 @@ class CachingService {
 @Suite()
 class TestSuite {
 
-  @BeforeEach()
+  @BeforeAll()
+  async init() {
+    await DependencyRegistry.init();
+  }
+
+  @AfterEach()
   async cleanup() {
-    CacheManager.cleanup();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    const cf = await DependencyRegistry.getInstance(CacheFactory);
+    await cf.cleanup();
   }
 
   @Test()
   async basic() {
-    const test = new CachingService();
+    const test = await DependencyRegistry.getInstance(CachingService);
 
     let start = Date.now();
     let res = await test.youngAndComplex(10);
@@ -64,7 +73,7 @@ class TestSuite {
 
   @Test()
   async age() {
-    const test = new CachingService();
+    const test = await DependencyRegistry.getInstance(CachingService);
 
     let start = Date.now();
     let res = await test.youngAndComplex(10);
@@ -72,18 +81,18 @@ class TestSuite {
     assert(diff > 100);
     assert(res === 30);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1100));
 
     start = Date.now();
     res = await test.youngAndComplex(10);
     diff = Date.now() - start;
-    assert(diff > 100);
     assert(res === 30);
+    assert(diff > 100);
   }
 
   @Test()
   async size() {
-    const test = new CachingService();
+    const test = await DependencyRegistry.getInstance(CachingService);
 
     for (const y of [1, 2]) {
       for (const x of [1, 2, 3, 4, 5, 6]) {
@@ -98,7 +107,7 @@ class TestSuite {
 
   @Test()
   async complex() {
-    const test = new CachingService();
+    const test = await DependencyRegistry.getInstance(CachingService);
 
     const val = await test.complexInput({ a: 5, b: 20 }, 20);
     const val2 = await test.complexInput({ a: 5, b: 20 }, 20);
