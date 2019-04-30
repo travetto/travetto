@@ -33,6 +33,7 @@ export class FileCache {
 
   writeEntry(full: string, contents: string | Buffer) {
     fs.writeFileSync(this.toEntryName(full), contents);
+    this.removeEntry(full);
     this.statEntry(full);
   }
 

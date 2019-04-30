@@ -1,7 +1,7 @@
 import { Class, OG_VAL } from '@travetto/registry';
 
 import { CacheConfig } from './types';
-import { CacheFactory } from './service';
+import { CacheFactory } from './factory';
 import { Cache } from './cache';
 
 type TypedMethodDecorator<U> = (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => U>) => void;
@@ -12,7 +12,7 @@ type DecoratorConfig<U> = Partial<CacheConfig<U> & {
 }>;
 
 export function Cacheable<U = any>(config: DecoratorConfig<U>): TypedMethodDecorator<Promise<U>> {
-  return function <C extends { cache: CacheFactory<U> }>(target: C, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<U>>) {
+  return function (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<U>>) {
     const fn = descriptor.value!;
     const conf: DecoratorConfig<U> & { name: string } = {
       name: propertyKey,
@@ -26,11 +26,11 @@ export function Cacheable<U = any>(config: DecoratorConfig<U>): TypedMethodDecor
       conf.name = `${conf.namespace}.${conf.name}`;
     }
 
-    let cache: Cache<U>;
+    let cache: Cache<any>;
 
-    const caching = descriptor.value = async function (this: { cache: CacheFactory<U> }, ...args: any[]) {
+    const caching = descriptor.value = async function (this: any, ...args: any[]) {
       if (!cache) {
-        cache = await this.cache.get(conf as { name: string });
+        cache = await CacheFactory.get(conf as { name: string });
       }
       return cache.cacheExecution(conf.keyFn as any, fn, this, args);
     };

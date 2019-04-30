@@ -1,17 +1,14 @@
 import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll, AfterAll, BeforeEach } from '@travetto/test';
-import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
+import { Injectable, DependencyRegistry } from '@travetto/di';
 import { OG_VAL } from '@travetto/registry';
 
-import { CacheFactory } from '../src/service';
+import { CacheFactory } from '../src/factory';
 import { Cacheable } from '../src/decorator';
 
 @Injectable()
 class CachingService {
-
-  @Inject()
-  cache: CacheFactory;
 
   @Cacheable({
     max: 5,
@@ -51,14 +48,12 @@ class TestSuite {
 
   @BeforeEach()
   async cleanup() {
-    const cf = await DependencyRegistry.getInstance(CacheFactory);
-    await cf.clear();
+    await CacheFactory.clear();
   }
 
   @AfterAll()
   async cleanupAll() {
-    const cf = await DependencyRegistry.getInstance(CacheFactory);
-    await cf.destroy();
+    await CacheFactory.destroy();
   }
 
   @Test()
@@ -66,7 +61,7 @@ class TestSuite {
     assert(OG_VAL in CachingService.prototype.complexInput);
     assert(CachingService.prototype.complexInput.name === 'complexInput');
     assert(!CachingService.prototype.complexInput.toString().includes('num * 3'));
-    assert(CachingService.prototype.complexInput.toString().includes('await this.cache.get'));
+    assert(CachingService.prototype.complexInput.toString().includes('CacheFactory.get'));
   }
 
   @Test()
@@ -118,7 +113,7 @@ class TestSuite {
   @Test()
   async size() {
     const test = await DependencyRegistry.getInstance(CachingService);
-    const cache = await test.cache.get({ name: `smallAndComplex`, max: 5 });
+    const cache = await CacheFactory.get({ name: `smallAndComplex`, max: 5 });
 
     for (const y of [1, 2]) {
       for (const x of [1, 2, 3, 4, 5, 6]) {

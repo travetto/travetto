@@ -22,7 +22,7 @@ export class AssertUtil {
   static getPositionOfError(err: Error, filename: string) {
     const base = Env.cwd;
 
-    const lines = (err.stack || new Error().stack!)
+    const lines = (err.stack || new Error().stack! || '')
       .replace(/[\\]/g, '/')
       .split('\n')
       .filter(x => !/[\/]node_modules[\/]/.test(x) && x.includes(base));
@@ -38,7 +38,7 @@ export class AssertUtil {
     }
 
     const [, pth] = best.trim().split(/\s+/g).slice(1);
-    const [file, lineNo] = pth.replace(/[()]/g, '').replace(/^[A-Za-z]:/, '').split(':');
+    const [file, lineNo] = (pth || '').replace(/[()]/g, '').replace(/^[A-Za-z]:/, '').split(':');
     let line = parseInt(lineNo, 10);
     if (Number.isNaN(line)) {
       line = -1;

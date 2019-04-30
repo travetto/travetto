@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as util from 'util';
+import * as path from 'path';
 
 import { CommandService } from '@travetto/exec';
 import { Cacheable } from '@travetto/cache';
@@ -9,8 +9,6 @@ import { AssetService } from './asset';
 import { Asset } from '../model';
 import { AssetUtil } from '../util';
 import { ImageOptions } from '../types';
-
-const fsUnlink = util.promisify(fs.unlink);
 
 @Injectable()
 export class ImageService {
@@ -24,10 +22,12 @@ export class ImageService {
 
   @Cacheable({
     max: 1000,
-    dispose: (key: string, n: Promise<string | undefined>) => {
-      n.then(v => v ? fsUnlink(v) : undefined).catch(err => {
-        console.error(err);
-      });
+    dispose: (v: string | undefined, key: string) => {
+      if (v) {
+        fs.unlink(v, err => {
+          console.log(err);
+        });
+      }
     }
   })
   async generateAndStoreImage(filename: string, options: ImageOptions, hasTags?: string[]): Promise<string | undefined> {
@@ -36,7 +36,7 @@ export class ImageService {
       throw new Error('Stream not found');
     }
     if (options && (options.w || options.h)) {
-      const filePath = AssetUtil.generateTempFile(info.filename.split('.').pop() as string);
+      const filePath = AssetUtil.generateTempFile(path.extname(info.filename).substr(1));
 
       const { process: proc, result: prom } = await this.converter.exec('convert', '-resize', `${options.w}x${options.h}`, '-auto-orient', '-', '-');
 
