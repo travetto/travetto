@@ -3,35 +3,44 @@ import { Shutdown } from '@travetto/base';
 
 import { Cache } from './cache';
 import { CacheConfig } from './types';
+import { MemoryCacheStore } from './store/memory';
+import { FileCacheStore } from './store/file';
 
 type Simple<T extends Simple<any> = Simple<any>> = { [key: string]: T } | number | string | boolean | T[];
 
 @Injectable()
 export class CacheFactory<V = Simple> {
-  protected static defaultConfig = { max: 1000 };
+
+  static defaultConfig = {
+    max: 1000,
+    ttl: Infinity,
+    type: FileCacheStore
+  };
 
   protected caches = new Map<string, Cache<V>>();
 
   postConstruct() {
-    Shutdown.onShutdown('Cache Manager', this.cleanup.bind(this));
+    Shutdown.onShutdown('Cache Manager', this.destroy.bind(this));
   }
 
-  get(config: Partial<CacheConfig<V>> & { name: string }) {
-    const name = config.name;
-
-    if (!this.caches.has(name)) {
-      this.caches.set(name, new Cache({
+  async get(config: Partial<CacheConfig<V>> & { name: string }) {
+    if (!this.caches.has(config.name)) {
+      const cache = new Cache<V>({
         ...CacheFactory.defaultConfig,
         ...(config || {})
-      }));
+      });
+      this.caches.set(config.name, cache);
+      await cache.init();
     }
 
-    return this.caches.get(name)!;
+    return this.caches.get(config.name)!;
   }
 
-  async cleanup() {
-    for (const c of this.caches.values()) {
-      await c.reset();
-    }
+  async clear() {
+    await Promise.all([...this.caches.values()].map(x => x.clear()));
+  }
+
+  async destroy() {
+    await Promise.all([...this.caches.values()].map(x => x.destroy()));
   }
 }

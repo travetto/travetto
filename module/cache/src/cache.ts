@@ -1,19 +1,10 @@
 import { CacheEntry, CacheStore, CacheConfig } from './types';
-import { MemoryCacheStore } from './store/memory';
 
 export class Cache<V> {
-  public options: CacheConfig<V>;
   public store: CacheStore<V>;
 
-  constructor(options: Partial<CacheConfig<V>>) {
-    this.options = {
-      type: MemoryCacheStore,
-      max: Infinity,
-      ttl: Infinity,
-      ...options
-    };
-    this.store = new this.options.type(this.options.name);
-    this.reset();
+  constructor(public options: CacheConfig<V>) {
+    this.store = new this.options.type(this.options);
   }
 
   private isStale(entry: CacheEntry<V>) {
@@ -36,15 +27,21 @@ export class Cache<V> {
   }
 
   private async internalGet(key: string, doUse = false) {
-    if (this.has(key)) {
+    if (await this.has(key)) {
       const hit = await this.store.get(key)!;
       if (doUse) {
         hit.time = Date.now();
-        this.store.set(key, hit);
+        await this.store.set(key, hit);
       }
       return hit.value;
     } else {
       return;
+    }
+  }
+
+  async init() {
+    if (this.store.init) {
+      await this.store.init();
     }
   }
 
@@ -76,37 +73,37 @@ export class Cache<V> {
     return this.internalGet(key, false);
   }
 
-  async reset() {
+  async clear() {
     if (this.options.dispose) {
-      this.forEach(this.options.dispose);
+      await this.forEach(this.options.dispose);
     }
     await this.store.clear();
+  }
+
+  async destroy() {
+    if (this.store.destroy) {
+      await this.store.destroy();
+    }
   }
 
   async set(key: string, value: V, ttl: number = this.options.ttl) {
 
     const now = ttl ? Date.now() : 0;
-    if (this.store.has(key)) {
-      if (this.size > this.options.max!) {
-        await this.internalDelete(key, await this.store.get(key)!);
-        return false;
-      }
+    let size = await this.size;
 
-      const item = await this.store.get(key)!;
-
-      if (this.options.dispose) {
-        await this.options.dispose(item.value, key);
-      }
-
-      this.get(key);
+    if (await this.store.has(key)) {
+      await this.delete(key);
+      size -= 1;
     }
 
     const hit: CacheEntry<V> = { value, time: now, ttl };
 
-    this.store.set(key, hit);
+    await this.store.set(key, hit);
 
-    if (this.size > this.options.max) {
-      this.store.trim(this.options.max);
+    size += 1;
+
+    if (size > this.options.max) {
+      await this.store.trim(this.options.max);
     }
 
     return true;
@@ -121,11 +118,11 @@ export class Cache<V> {
 
   async cacheExecution(keyFn: (...args: any[]) => string, fn: Function, self: any, args: any[]): Promise<any> {
     // tslint:disable-next-line: no-this-assignment
-    const key = keyFn(...args);
+    const key = JSON.stringify(keyFn(...args));
     if (!(await this.has(key))) {
       const res = await fn.apply(self, args || []);
       await this.set(key, res);
     }
-    return await this.get(key);
+    return this.get(key);
   }
 }

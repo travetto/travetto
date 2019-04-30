@@ -10,8 +10,8 @@ export type OptProm<K> = K | Promise<K>;
 
 export interface CacheStore<V> {
   size: OptProm<number>;
-  name: string;
   init?(): OptProm<void>;
+  destroy?(): OptProm<void>;
   get(key: string): OptProm<CacheEntry<V>> | undefined;
   has(key: string): OptProm<boolean>;
   delete(key: string): OptProm<boolean>;

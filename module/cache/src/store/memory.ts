@@ -1,8 +1,8 @@
-import { CacheStore, CacheEntry } from '../types';
+import { CacheStore, CacheEntry, CacheConfig } from '../types';
 
 export class MemoryCacheStore<V> extends Map<string, CacheEntry<V>> implements CacheStore<V> {
 
-  constructor(public name: string) {
+  constructor(public conf: CacheConfig<V>) {
     super();
   }
 

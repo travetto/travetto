@@ -50,7 +50,7 @@ class AssertTransformer {
     if (name in OPTOKEN_ASSERT) {
       return OPTOKEN_ASSERT[name as keyof typeof OPTOKEN_ASSERT];
     } else {
-      throw new Error(`Unknown optoken: ${name}:${key}`);
+      return;
     }
   }
 

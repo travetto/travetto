@@ -1,39 +1,46 @@
 import * as fs from 'fs';
 import * as util from 'util';
-import * as os from 'os';
 import * as path from 'path';
 
-import { FsUtil } from '@travetto/boot';
-import { Util } from '@travetto/base';
+import { AppCache, FsUtil } from '@travetto/boot';
+import { AppError } from '@travetto/base';
+
+import { CacheStore, CacheEntry, CacheConfig } from '../types';
 
 const read = util.promisify(fs.readFile);
 const write = util.promisify(fs.writeFile);
 const unlink = util.promisify(fs.unlink);
 const stat = util.promisify(fs.stat);
-
-import { CacheStore, CacheEntry } from '../types';
+const readdir = util.promisify(fs.readdir);
+const mkdir = util.promisify(fs.mkdir);
 
 export class FileCacheStore<V> implements CacheStore<V> {
 
   private stats = new Map<string, fs.Stats>();
+  private pullThrough = new Map<string, CacheEntry<V>>();
   private dir: string;
 
-  constructor(public name: string) {
-    this.dir = FsUtil.resolveUnix(os.tmpdir(), `cache_${Util.uuid(10)}_${name.replace(/[^A-Za-z0-9_]/g, '_')}`);
-    this.primeCache();
+  constructor(public config: CacheConfig<V>) {
+    this.dir = FsUtil.resolveUnix(AppCache.cacheDir, `${config.name!.replace(/[^A-Za-z0-9_]/g, '_')}`);
   }
 
-  primeCache() {
+  async init() {
     try {
-      fs.mkdirSync(this.dir);
+      const stats = await stat(this.dir);
+      if (!stats.isDirectory()) {
+        throw new AppError('Cache path is not a directory');
+      }
+      for (const el of await readdir(this.dir)) {
+        const k = Buffer.from(path.basename(el), 'base64').toString();
+        this.stats.set(k, await stat(FsUtil.resolveUnix(this.dir, el)));
+      }
     } catch (e) {
-      console.log(e);
+      await mkdir(this.dir);
     }
+  }
 
-    for (const el of fs.readdirSync(this.dir)) {
-      const k = Buffer.from(path.basename(el), 'base64').toString();
-      this.stats.set(k, fs.statSync(FsUtil.resolveUnix(this.dir, el)));
-    }
+  async destroy() {
+    await FsUtil.unlinkRecursive(this.dir);
   }
 
   getPath(key: string) {
@@ -46,35 +53,37 @@ export class FileCacheStore<V> implements CacheStore<V> {
   }
 
   async get(key: string) {
-    const text = await read(this.getPath(key), 'utf8');
-    const entry = JSON.parse(text) as CacheEntry<V>;
-    return entry;
+    if (!this.pullThrough.has(key)) {
+      const text = await read(this.getPath(key), 'utf8');
+      const entry = JSON.parse(text) as CacheEntry<V>;
+      return entry;
+    } else {
+      return this.pullThrough.get(key)!;
+    }
   }
 
   async has(key: string) {
-    try {
-      this.stats.has(this.getPath(key));
-      return true;
-    } catch {
-      return false;
-    }
+    return this.stats.has(key);
   }
 
   async delete(key: string) {
     await unlink(this.getPath(key));
+    this.pullThrough.delete(key);
     this.stats.delete(key);
     return true;
   }
 
   async set(key: string, v: CacheEntry<V>) {
     const f = this.getPath(key);
-    await write(f, JSON.stringify(v));
+    const text = JSON.stringify(v);
+    this.pullThrough.set(key, JSON.parse(text));
+    await write(f, text);
     const stats = await stat(f);
     this.stats.set(key, stats);
   }
 
   async clear() {
-    await FsUtil.unlinkRecursive(this.dir);
+    this.pullThrough.clear();
     this.stats.clear();
   }
 

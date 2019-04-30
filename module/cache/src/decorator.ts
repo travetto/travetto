@@ -2,6 +2,7 @@ import { Class, OG_VAL } from '@travetto/registry';
 
 import { CacheConfig } from './types';
 import { CacheFactory } from './service';
+import { Cache } from './cache';
 
 type TypedMethodDecorator<U> = (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => U>) => void;
 
@@ -15,7 +16,7 @@ export function Cacheable<U = any>(config: DecoratorConfig<U>): TypedMethodDecor
     const fn = descriptor.value!;
     const conf: DecoratorConfig<U> & { name: string } = {
       name: propertyKey,
-      keyFn: x => JSON.stringify(x),
+      keyFn: x => x,
       ...config
     };
 
@@ -25,13 +26,13 @@ export function Cacheable<U = any>(config: DecoratorConfig<U>): TypedMethodDecor
       conf.name = `${conf.namespace}.${conf.name}`;
     }
 
-    let cache: any;
+    let cache: Cache<U>;
 
-    const caching = descriptor.value = function (this: { cache: CacheFactory<U> }, ...args: any[]) {
+    const caching = descriptor.value = async function (this: { cache: CacheFactory<U> }, ...args: any[]) {
       if (!cache) {
-        cache = this.cache.get(conf as { name: string });
+        cache = await this.cache.get(conf as { name: string });
       }
-      return cache.cacheExecution(conf.keyFn, fn, this, args);
+      return cache.cacheExecution(conf.keyFn as any, fn, this, args);
     };
 
     Object.defineProperties(caching, {
