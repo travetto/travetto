@@ -4,7 +4,6 @@ import { Shutdown } from '@travetto/base';
 import { Cache } from './cache';
 import { CacheConfig } from './types';
 import { MemoryCacheStore } from './store/memory';
-import { FileCacheStore } from './store/file';
 
 type Simple<T extends Simple<any> = Simple<any>> = { [key: string]: T } | number | string | boolean | T[];
 
@@ -14,7 +13,7 @@ export class CacheFactory<V = Simple> {
   static defaultConfig = {
     max: 1000,
     ttl: Infinity,
-    type: FileCacheStore
+    type: MemoryCacheStore
   };
 
   protected caches = new Map<string, Cache<V>>();
