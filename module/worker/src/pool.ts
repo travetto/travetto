@@ -89,7 +89,7 @@ export class WorkPool<X, T extends Worker<X>> {
   async process(src: InputSource<X>) {
     const pending = new Set<Promise<any>>();
 
-    while (src.hasNext()) {
+    while (await src.hasNext()) {
       const worker = (await this.pool.acquire())!;
       const nextInput = await src.next();
 

@@ -1,4 +1,4 @@
 export interface InputSource<X> {
-  hasNext(): boolean;
+  hasNext(): boolean | Promise<boolean>;
   next(): X | Promise<X>;
 }
