@@ -6,7 +6,10 @@ travetto: Test
 $ npm install @travetto/test
 ```
 
-This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the [`TAP 13`](https://testanything.org/tap-version-13-specification.html) format to be consumed by other processes. 
+This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the following formats:
+ * [`TAP 13`](https://testanything.org/tap-version-13-specification.html), default and human-readable
+ * `JSON`, best for integrating with at a code level
+ * [`xUnit`](https://en.wikipedia.org/wiki/XUnit), standard format for CI/CD systems e.g. Jenkins, Bamboo, etc.
 
 **NOTE** All tests should be under the `test/.*` folders.  The pattern for tests is defined as a regex and not standard globbing.
 
