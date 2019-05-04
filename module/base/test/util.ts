@@ -11,7 +11,7 @@ class MergeTests {
 
   @Test()
   testPrimitive() {
-    for (const v of [1, '1', true, false, 0.0, /ab/g]) {
+    for (const v of [1, '1', true, false, 0.0, /ab/g, new Date()]) {
       assert(Util.isPrimitive(v));
     }
 

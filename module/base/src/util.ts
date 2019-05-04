@@ -117,7 +117,7 @@ export class Util {
 
   static isPrimitive(el: any): el is (string | boolean | number | RegExp) {
     const type = typeof el;
-    return el !== null && el !== undefined && (type === 'string' || type === 'boolean' || type === 'number' || el instanceof RegExp);
+    return el !== null && el !== undefined && (type === 'string' || type === 'boolean' || type === 'number' || el instanceof RegExp || el instanceof Date);
   }
 
   static isPlainObject(obj: any): obj is { [key: string]: any } {
