@@ -48,6 +48,7 @@ export class AppError extends Error {
   ) {
     super(message);
     this.type = this.constructor.name;
+    this.stack = this.stack;
   }
 
   toConsole(sub?: string) {
