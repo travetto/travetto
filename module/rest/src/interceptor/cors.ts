@@ -32,7 +32,7 @@ export class CorsInterceptor extends RestInterceptor {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');
       res.setHeader('Access-Control-Allow-Credentials', `${this.credentials}`);
       res.setHeader('Access-Control-Allow-Methods', this.methods || '*');
-      res.setHeader('Access-Control-Allow-Headers', this.headers || req.header('access-control-request-headers')!);
+      res.setHeader('Access-Control-Allow-Headers', this.headers || req.header('access-control-request-headers')! || '*');
     }
   }
 }
