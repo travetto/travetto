@@ -12,7 +12,7 @@
     "travetto-cli-rest-aws-lambda_build-sam": "bin/travetto-cli-rest-aws-lambda_build-sam.ts"
   },
   "dependencies": {
-    "@travetto/rest": "^0.6.10",
+    "@travetto/rest": "^0.6.11",
     "@types/aws-lambda": "^8.10.24",
     "@types/aws-serverless-express": "^3.3.0",
     "@types/body-parser": "^1.17.0",
@@ -47,5 +47,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.9"
+  "version": "0.6.10"
 }

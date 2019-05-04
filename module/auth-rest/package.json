@@ -9,7 +9,7 @@
   "dependencies": {
     "@travetto/auth": "^0.6.7",
     "@travetto/context": "^0.6.9",
-    "@travetto/rest": "^0.6.10"
+    "@travetto/rest": "^0.6.11"
   },
   "description": "Rest authentication integration support for the travetto framework",
   "devDependencies": {
@@ -33,5 +33,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.6.9"
+  "version": "0.6.10"
 }
