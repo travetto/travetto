@@ -69,7 +69,7 @@ export class RestSessionService {
       if (session.action === 'create') {
         session = await this.store.create(session.data, this.config.maxAge);
         session.refresh();
-      } else if (this.config.rolling || this.config.renew && session.isAlmostExpired()) {
+      } else if (this.config.rolling || (this.config.renew && session.isAlmostExpired())) {
         session.refresh();
       }
 
