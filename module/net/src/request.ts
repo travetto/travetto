@@ -149,7 +149,11 @@ export class HttpRequest {
         msg.on('end', () => {
           const message = Buffer.concat(body);
           if ((msg.statusCode || 200) > 299) {
-            reject(this.buildError({ message: message.toString(), status: msg.statusCode, payload: { headers: msg.headers } }));
+            if (msg.statusCode! > 399) {
+              reject(this.buildError({ message: message.toString(), status: msg.statusCode, payload: { headers: msg.headers } }));
+            } else {
+              reject({ status: msg.statusCode, message: 'Redirect', headers: msg.headers });
+            }
           } else {
             if (!responseHandler) {
               resolve(binary ? message : message.toString());
