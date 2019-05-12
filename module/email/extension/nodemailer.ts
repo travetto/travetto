@@ -1,9 +1,8 @@
 import * as nodemailer from 'nodemailer';
 
-import { Injectable } from '@travetto/di';
-import { MailTransport, MessageOptions, SentMessage } from '..';
+import { MessageOptions, SentMessage } from '../src/types';
+import { MailTransport } from '../src/transport';
 
-@Injectable()
 export class NodemailerTransport extends MailTransport {
   private transport: nodemailer.Transporter;
 
