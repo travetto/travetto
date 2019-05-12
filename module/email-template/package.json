@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@travetto/di": "^0.6.8",
-    "@travetto/email": "^0.6.8",
+    "@travetto/email": "^0.6.9",
     "@travetto/exec": "^0.6.7",
     "@types/html-entities": "^1.2.16",
     "@types/mustache": "^0.8.32",
@@ -49,5 +49,5 @@
     "resources",
     "bin"
   ],
-  "version": "0.6.8"
+  "version": "0.6.9"
 }
