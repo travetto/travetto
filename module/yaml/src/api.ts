@@ -9,8 +9,8 @@ export class YamlUtil {
 if ('JS_YAML' in process.env || (!('NO_JS_YAML' in process.env) && !/travetto[\/\\]module/.test(__dirname))) {
   try {
     const yaml = require('js-yaml');
-    YamlUtil.parse = t => Object.assign({}, ...yaml.safeLoadAll(t));
-    YamlUtil.serialize = (o, indent = 2, lineWidth = 160) => yaml.safeDump(o, { indent, lineWidth });
+    YamlUtil.parse = (t: string) => Object.assign({}, ...yaml.safeLoadAll(t));
+    YamlUtil.serialize = (o: any, indent = 2, lineWidth = 160) => yaml.safeDump(o, { indent, lineWidth });
     console.debug('Running with js-yaml');
   } catch (e) { }
 }

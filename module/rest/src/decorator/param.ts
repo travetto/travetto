@@ -1,4 +1,4 @@
-import { ParamConfig } from '../types';
+import { ParamConfig, Request, Response } from '../types';
 import { ControllerRegistry } from '../registry/registry';
 import { ParamUtil, ExtractFn } from '../util/param';
 
@@ -23,5 +23,5 @@ export const Header = (param: string | Partial<ParamConfig> = {}) => Param({ loc
 export const Body = (param: Partial<ParamConfig> = {}) => Param({ location: 'body', extract: extractBody, ...toConfig(param) });
 
 export const ContextProvider = ParamUtil.provider.bind(ParamUtil);
-@ContextProvider((_, rq) => rq) export class REQUEST { }
-@ContextProvider((_, rq, rs) => rs) export class RESPONSE { }
+@ContextProvider((_: any, rq: Request) => rq) export class REQUEST { }
+@ContextProvider((_: any, rq: Request, rs: Response) => rs) export class RESPONSE { }
