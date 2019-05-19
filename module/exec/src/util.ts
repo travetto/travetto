@@ -39,14 +39,10 @@ export class ExecUtil {
       try {
         await new Promise((res, rej) => {
           try {
-            const sock = net.createConnection(port, 'localhost', (err: any, succ: any) => { // FIXME: What do I want anymore
-              if (err) {
-                console.debug('Failed for port', port, err.message);
-                rej(err);
-              } else {
-                sock.destroy();
-                res(succ);
-              }
+            const sock = net.createConnection(port, 'localhost');
+            sock.on('connect', () => {
+              sock.destroy();
+              res();
             });
             sock.on('error', rej);
           } catch (e) {
