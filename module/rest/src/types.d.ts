@@ -17,7 +17,7 @@ declare global {
       params: { [key: string]: any };
       headers: { [key: string]: string | string[] };
       cookies: {
-        get(name: string, options?: cookies.GetOption): string;
+        get(name: string, options?: cookies.GetOption): string | undefined;
       }
       body: any;
       pipe(stream: NodeJS.WritableStream): any;
