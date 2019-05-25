@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { FsUtil, AppCache } from '@travetto/boot';
 import { Env, ScanApp } from '@travetto/base';
 
-import { TransformerManager } from './transformers';
+import { TransformerManager } from './transformer/transformers';
 import { SourceManager } from './source';
 import { ModuleManager } from './module';
 import { FilePresenceManager } from './presence';

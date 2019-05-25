@@ -25,6 +25,7 @@
   "main": "index.ts",
   "files": [
     "index.ts",
+    "config",
     "src",
     "bin",
     "support"

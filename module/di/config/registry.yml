@@ -1,3 +1,6 @@
 ---
 injectable:
    '@travetto/config': Config  
+   '@travetto/di': 
+      - Injectable
+      - Application
