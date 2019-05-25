@@ -5,8 +5,6 @@ Rest
 ----------------------
 - [ ] Documentation on auth, w.r.t sessions and cookies
    - [ ] Making sessions optional?
-- [ ] Partial Updates/Query Updates
-   - [ ] Set updates 
 - [ ] Lambda for Handlers
   - [ ] Kinesis/S3 Endpoint
   - [ ] Deployment

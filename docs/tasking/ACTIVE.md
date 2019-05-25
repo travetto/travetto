@@ -1,10 +1,6 @@
 In-Progress
 =============
 
-Auth
---------------------------
-- [ ] Move to JWT as session store, prep for Lambda
-
 Tooling
 -----------------------
 - [ ] Yeoman Generator Full Rewrite

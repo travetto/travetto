@@ -93,6 +93,8 @@ Model Library
   - [x] Query Language Support
 - [x] Elasticsearch
   - [x] Schema management
+- [x] Partial Updates/Query Updates
+   - [x] Set updates 
 
 Schema
 -----------------------
@@ -133,7 +135,9 @@ Auth Support
 ------------------------
 - [x] Auth Module
  - [x] OAuth support
- - [x] Rewrite starter
+ - [x] Rewrite st
+- [X] Move to JWT as session store, prep for Lambda
+ 
 
 Platform Support
 ------------------------
