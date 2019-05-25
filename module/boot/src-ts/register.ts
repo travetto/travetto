@@ -87,7 +87,7 @@ export class RegisterUtil {
       }
       pth = FsUtil.toUnix(pth).replace(/^.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
         const mid = this.pkgName === `@travetto/${name}` ? '' : `node_modules/@travetto/${name}`;
-        return `${FsUtil.cwd}/${mid}${rest || ''}`;
+        return `${FsUtil.cwd}/${mid}${rest || ''}`.replace(/\/\/+/g, '/');
       });
     }
     return pth;

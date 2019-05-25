@@ -206,24 +206,24 @@ class AssertTransformer {
   }
 }
 
-const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({ source }),
-  AssertTransformer.visitNode.bind(AssertTransformer));
+// const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({ source }),
+//   AssertTransformer.visitNode.bind(AssertTransformer));
 
-export const TestAssertTransformer = {
-  transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
-    const name = FsUtil.toUnix(source.fileName);
+// export const TestAssertTransformer = {
+//   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
+//     const name = FsUtil.toUnix(source.fileName);
 
-    // Only apply to test files
-    if (/\/test\//.test(name) &&
-      !/\/(src|node_modules)\//.test(name) &&
-      /\s+assert[^(]*\(/.test(source!.text)
-    ) {
-      return TRANSFORMER(context)(source);
-    } else {
-      return source;
-    }
-  },
-  key: 'test:assert',
-  phase: 'before',
-  after: 'registry'
-};
+//     // Only apply to test files
+//     if (/\/test\//.test(name) &&
+//       !/\/(src|node_modules)\//.test(name) &&
+//       /\s+assert[^(]*\(/.test(source!.text)
+//     ) {
+//       return TRANSFORMER(context)(source);
+//     } else {
+//       return source;
+//     }
+//   },
+//   key: 'test:assert',
+//   phase: 'before',
+//   after: 'registry'
+// };

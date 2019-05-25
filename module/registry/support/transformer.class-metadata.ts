@@ -2,54 +2,70 @@ import * as ts from 'typescript';
 
 import { FsUtil, RegisterUtil } from '@travetto/boot';
 import { Util } from '@travetto/base';
-import { TransformUtil, TransformerState } from '@travetto/compiler';
-
-interface IState extends TransformerState {
-  module: string;
-  file: string;
-}
+import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
 
 const REGISTER_MOD = require.resolve('../src/decorator');
 
-function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: IState): T {
-  if (state.path === REGISTER_MOD) { // Cannot process self
+const methods = Symbol('methods');
+const mod = Symbol('module');
+
+interface RegisterInfo {
+  [methods]?: {
+    [key: string]: { hash: string }
+  };
+  [mod]?: string;
+}
+
+class RegisterTransformer {
+
+  static transformMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration) {
+    const hash = Util.naiveHash(node.getText());
+
+    const conf: any = {
+      hash
+    };
+
+    state[methods] = state[methods] || {};
+    state[methods]![node.name.getText()] = conf;
     return node;
   }
 
-  if (ts.isClassDeclaration(node) && node.name && node.parent && ts.isSourceFile(node.parent)) {
-    const methods: any = {};
-
-    for (const child of node.members) {
-      if (ts.isMethodDeclaration(child)) {
-        const hash = Util.naiveHash(child.getText());
-
-        const conf: any = {
-          hash
-        };
-
-        methods[child.name.getText()] = conf;
-      }
+  static transformClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration, dec: ts.Decorator) {
+    if (
+      state.path === REGISTER_MOD || // Cannot process self
+      !(node.name && node.parent && ts.isSourceFile(node.parent)) // If not top level, skip
+    ) {
+      return;
     }
 
     const isAbstract = (node.modifiers! || []).filter(x => x.kind === ts.SyntaxKind.AbstractKeyword).length > 0;
 
+    // If needed
+    state.importDecorator(REGISTER_MOD, 'Register');
+
+    if (!state[mod]) {
+      state[mod] = RegisterUtil.computeModuleFromFile(state.source.fileName);
+    }
+
+    const body = ts.createNodeArray([
+      TransformUtil.createStaticField('__filename', FsUtil.toUnix(state.source.fileName)),
+      TransformUtil.createStaticField('__id', `${state[mod]}#${node.name!.getText()}`),
+      TransformUtil.createStaticField('__hash', Util.naiveHash(node.getText())),
+      TransformUtil.createStaticField('__methods', TransformUtil.extendObjectLiteral(state[methods] || {})),
+      TransformUtil.createStaticField('__abstract', TransformUtil.fromLiteral(isAbstract)),
+      ...node.members
+    ]);
+
     const ret = ts.updateClassDeclaration(node,
-      ts.createNodeArray([
-        TransformUtil.createDecorator(state, REGISTER_MOD, 'Register')
-        , ...(node.decorators || [])]),
+      ts.createNodeArray([state.createDecorator('Register'), ...(node.decorators || [])]),
       node.modifiers,
       node.name,
       node.typeParameters,
       ts.createNodeArray(node.heritageClauses),
-      ts.createNodeArray([
-        TransformUtil.createStaticField('__filename', FsUtil.toUnix(state.file)),
-        TransformUtil.createStaticField('__id', `${state.module}#${node.name!.getText()}`),
-        TransformUtil.createStaticField('__hash', Util.naiveHash(node.getText())),
-        TransformUtil.createStaticField('__methods', TransformUtil.extendObjectLiteral(methods)),
-        TransformUtil.createStaticField('__abstract', TransformUtil.fromLiteral(isAbstract)),
-        ...node.members
-      ])
-    ) as any;
+      body
+    );
+
+    state[methods] = {};
 
     ret.parent = node.parent;
 
@@ -61,14 +77,17 @@ function visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T
 
     return ret;
   }
-  return ts.visitEachChild(node, c => visitNode(context, c, state), context);
 }
 
-export const ClassMetadataTransformer = {
-  transformer: TransformUtil.importingVisitor<IState>((file: ts.SourceFile) => ({
-    module: RegisterUtil.computeModuleFromFile(file.fileName),
-    file: file.fileName
-  }), visitNode),
-  phase: 'before',
-  key: 'registry',
-};
+export const transformers: NodeTransformer[] = [
+  {
+    type: 'class',
+    aliases: ['*'],
+    after: RegisterTransformer.transformClass
+  },
+  {
+    type: 'method',
+    aliases: ['*'],
+    before: RegisterTransformer.transformMethod
+  }
+];

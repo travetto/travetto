@@ -12,6 +12,7 @@
   "dependencies": {
     "@travetto/base": "^0.6.8",
     "@types/source-map-support": "^0.5.0",
+    "@travetto/config": "^0.6.7",
     "source-map-support": "^0.5.12"
   },
   "description": "Node-integration of Typescript Compiler with advanced functionality for collecting AST transformers, and detecting changes in classes and methods.",
