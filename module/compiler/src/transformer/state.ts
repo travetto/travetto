@@ -3,7 +3,7 @@ import { dirname } from 'path';
 
 import { FsUtil, RegisterUtil } from '@travetto/boot';
 import { Util, Env } from '@travetto/base';
-import { TransformUtil } from './transform-util';
+import { TransformUtil } from './util';
 import { Import, Documentation } from './types';
 
 export class TransformerState {
@@ -19,6 +19,7 @@ export class TransformerState {
     const pth = require.resolve(source.fileName);
     this.path = FsUtil.resolveNative(pth);
     this.modulePath = FsUtil.resolveUnix(pth);
+    this.collectInitialImports();
   }
 
   generateUniqueId(name: string) {
@@ -54,7 +55,6 @@ export class TransformerState {
         }
       }
     }
-
   }
 
   addImport(imports: Import[], file = this.source) {
@@ -179,7 +179,7 @@ export class TransformerState {
         expr = this.importTypeIfExternal(type as ts.TypeReferenceNode);
 
         // Wrapping reference to handle interfaces, and failing gracefully
-        const imp = this.importFile(FsUtil.resolveUnix(__dirname, 'util'));
+        const imp = this.importFile(FsUtil.resolveUnix(__dirname, '../util'));
         expr = ts.createCall(
           ts.createPropertyAccess(ts.createPropertyAccess(imp.ident, 'CompilerUtil'), 'resolveAsType'), undefined,
           [

@@ -82,12 +82,12 @@ class RegisterTransformer {
 export const transformers: NodeTransformer[] = [
   {
     type: 'class',
-    aliases: ['*'],
+    all: true,
     after: RegisterTransformer.transformClass
   },
   {
     type: 'method',
-    aliases: ['*'],
+    all: true,
     before: RegisterTransformer.transformMethod
   }
 ];

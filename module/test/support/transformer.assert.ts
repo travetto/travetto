@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState } from '@travetto/compiler';
+import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
 import { FsUtil } from '@travetto/boot';
 import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT, DEEP_LITERAL_TYPES } from '../src/assert/types';
 
@@ -16,13 +16,18 @@ const METHOD_REGEX = new RegExp(`[.](${Object.keys(METHODS).join('|')})[(]`);
 
 const OP_TOKEN_TO_NAME = new Map<number, string>();
 
-interface AssertState extends TransformerState {
-  assert: ts.Identifier;
-  hasAssertCall: boolean;
-  assertCheck: ts.PropertyAccessExpression;
-  checkThrow: ts.PropertyAccessExpression;
-  checkThrowAsync: ts.PropertyAccessExpression;
-  source: ts.SourceFile;
+const asrt = Symbol('assert');
+const isTest = Symbol('isTest');
+
+interface AssertState {
+  [asrt]?: {
+    assert: ts.Identifier;
+    hasAssertCall?: boolean;
+    assertCheck: ts.PropertyAccessExpression;
+    checkThrow: ts.PropertyAccessExpression;
+    checkThrowAsync: ts.PropertyAccessExpression;
+  };
+  [isTest]?: boolean;
 }
 
 type Args = ts.Expression[] | ts.NodeArray<ts.Expression>;
@@ -60,23 +65,26 @@ class AssertTransformer {
       (ts.isNewExpression(node) && DEEP_LITERAL_TYPES.has(node.expression.getText()));
   }
 
-  static initState(state: AssertState) {
-    if (!state.assert) {
-      state.assert = TransformUtil.importFile(state, require.resolve('../src/assert/check')).ident;
-      state.assertCheck = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'check');
-      state.checkThrow = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'checkThrow');
-      state.checkThrowAsync = ts.createPropertyAccess(ts.createPropertyAccess(state.assert, ASSERT_UTIL), 'checkThrowAsync');
+  static initState(state: TransformerState & AssertState) {
+    if (!state[asrt]) {
+      const assrt = state.importFile(require.resolve('../src/assert/check')).ident;
+      state[asrt] = {
+        assert: assrt,
+        assertCheck: ts.createPropertyAccess(ts.createPropertyAccess(assrt, ASSERT_UTIL), 'check'),
+        checkThrow: ts.createPropertyAccess(ts.createPropertyAccess(assrt, ASSERT_UTIL), 'checkThrow'),
+        checkThrowAsync: ts.createPropertyAccess(ts.createPropertyAccess(assrt, ASSERT_UTIL), 'checkThrowAsync'),
+      };
     }
   }
 
-  static doAssert<T extends ts.CallExpression>(state: AssertState, node: T, cmd: Command): T {
+  static doAssert<T extends ts.CallExpression>(state: TransformerState & AssertState, node: T, cmd: Command): T {
     this.initState(state);
 
     const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);
     const firstText = first!.getText();
 
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
-    const check = ts.createCall(state.assertCheck, undefined, ts.createNodeArray([
+    const check = ts.createCall(state[asrt]!.assertCheck, undefined, ts.createNodeArray([
       ts.createIdentifier('__filename'),
       ts.createLiteral(firstText),
       ts.createLiteral(cmd.fn),
@@ -93,13 +101,13 @@ class AssertTransformer {
     return check as any as T;
   }
 
-  static doThrows(state: AssertState, node: ts.CallExpression, key: string, args: ts.Expression[]): ts.Node {
+  static doThrows(state: TransformerState & AssertState, node: ts.CallExpression, key: string, args: ts.Expression[]): ts.Node {
     const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);
     const firstText = first!.getText();
 
     this.initState(state);
     return ts.createCall(
-      /reject/i.test(key) ? state.checkThrowAsync : state.checkThrow,
+      /reject/i.test(key) ? state[asrt]!.checkThrowAsync : state[asrt]!.checkThrow,
       undefined,
       ts.createNodeArray([
         ts.createIdentifier('__filename'),
@@ -163,42 +171,39 @@ class AssertTransformer {
     }
   }
 
-  static visitNode<T extends ts.Node>(context: ts.TransformationContext, node: T, state: AssertState): T {
+  static handleCall(state: TransformerState & AssertState, node: ts.CallExpression) {
+    if (state[isTest] === undefined) {
+      const name = FsUtil.toUnix(state.source.fileName);
+      // Only apply to test files
+      state[isTest] = /\/test\//.test(name) &&
+        !/\/(src|node_modules)\//.test(name) &&
+        /\s+assert[^(]*\(/.test(state.source!.text);
+    }
+
+    if (!state[isTest]) {
+      return;
+    }
 
     let replaced = false;
+    const exp = node.expression;
 
-    if (ts.isCallExpression(node)) {
-      const exp = node.expression;
-      if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) { // Straight assert
-        const cmd = this.getCommand(node.arguments);
-        if (cmd) {
-          node = this.doAssert(state, node, cmd);
-          replaced = true;
-        }
-      } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) { // Assert method call
-        const ident = exp.expression;
-        const fn = exp.name.escapedText.toString();
-        if (ident.escapedText === ASSERT_CMD) {
-          if (/^(doesNot)?(Throw|Reject)s?$/i.test(fn)) {
-            node = this.doThrows(state, node, fn, [...node.arguments]) as T;
-          } else {
-            const sub = { ...this.getCommand(node.arguments)!, fn };
-            node = this.doAssert(state, node, sub);
-          }
-          replaced = true;
-        }
+    if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) { // Straight assert
+      const cmd = this.getCommand(node.arguments);
+      if (cmd) {
+        node = this.doAssert(state, node, cmd);
+        replaced = true;
       }
-    }
-
-    if (!replaced) {
-      node = ts.visitEachChild(node, c => this.visitNode(context, c, state), context);
-    }
-
-    if (ts.isClassDeclaration(node)) {
-      for (const el of node.members) {
-        if (!el.parent) {
-          el.parent = node;
+    } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) { // Assert method call
+      const ident = exp.expression;
+      const fn = exp.name.escapedText.toString();
+      if (ident.escapedText === ASSERT_CMD) {
+        if (/^(doesNot)?(Throw|Reject)s?$/i.test(fn)) {
+          node = this.doThrows(state, node, fn, [...node.arguments]) as ts.CallExpression;
+        } else {
+          const sub = { ...this.getCommand(node.arguments)!, fn };
+          node = this.doAssert(state, node, sub);
         }
+        replaced = true;
       }
     }
 
@@ -206,24 +211,10 @@ class AssertTransformer {
   }
 }
 
-// const TRANSFORMER = TransformUtil.importingVisitor<AssertState>((source) => ({ source }),
-//   AssertTransformer.visitNode.bind(AssertTransformer));
-
-// export const TestAssertTransformer = {
-//   transformer: (context: ts.TransformationContext) => (source: ts.SourceFile) => {
-//     const name = FsUtil.toUnix(source.fileName);
-
-//     // Only apply to test files
-//     if (/\/test\//.test(name) &&
-//       !/\/(src|node_modules)\//.test(name) &&
-//       /\s+assert[^(]*\(/.test(source!.text)
-//     ) {
-//       return TRANSFORMER(context)(source);
-//     } else {
-//       return source;
-//     }
-//   },
-//   key: 'test:assert',
-//   phase: 'before',
-//   after: 'registry'
-// };
+export const transformers: NodeTransformer[] = [
+  {
+    type: 'call',
+    all: true,
+    before: AssertTransformer.handleCall.bind(AssertTransformer)
+  }
+];

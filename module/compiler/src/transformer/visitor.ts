@@ -1,44 +1,47 @@
 import * as ts from 'typescript';
 
-import { TransformUtil } from './transform-util';
+import { TransformUtil } from './util';
 import { TransformerState } from './state';
-import { ConfigSource } from '@travetto/config';
 
 export type TransformerType = 'class' | 'method' | 'property' | 'static-method' | 'call';
 
 export type Alias = { name: string, pkg: string };
-export type ScopedTransformer = { pkg: string, transformer: NodeTransformer<any, any> };
 
-type TransformerSet = {
-  before: Map<string, ScopedTransformer>,
-  after: Map<string, ScopedTransformer>
-};
+type TransformerSet = { before: string[], after: string[], type: TransformerType, data: Map<string, Map<string, NodeTransformer>> };
 
 export interface NodeTransformer<T extends TransformerType = TransformerType, N = ts.Node> {
   type: T;
+  all?: boolean;
   aliasName?: string;
   aliases?: Alias[];
   before?(state: TransformerState, node: N, dec?: ts.Decorator): ts.Node | undefined;
   after?(state: TransformerState, node: N, dec?: ts.Decorator): ts.Node | undefined;
 }
 
+const ALL_MATCHER = TransformUtil.decoratorMatcher('*');
+
 export class VisitorFactory {
 
   static computeAliases(transformer: NodeTransformer) {
     const aliases: Alias[] = (transformer.aliases || []).slice(0);
+
     if (transformer.aliasName) {
-      const obj = ConfigSource.get(transformer.aliasName);
-      for (const pkg of Object.keys(obj)) {
-        const val = obj[pkg];
-        for (const name of Array.isArray(val) ? val : [val]) {
-          aliases.push({ name, pkg });
-        }
-      }
+      TransformUtil.aliasMapper(transformer.aliasName, (pkg, cls) => {
+        aliases.push({ pkg, name: cls });
+      });
+    }
+
+    if (transformer.all) {
+      aliases.push({ name: '*', pkg: '*' });
     }
     return aliases;
   }
 
   private transformers = new Map<TransformerType, TransformerSet>();
+  private always = {
+    before: new Map<TransformerType, NodeTransformer[]>(),
+    after: new Map<TransformerType, NodeTransformer[]>(),
+  };
 
   private hasMethod: boolean;
   private hasClass: boolean;
@@ -48,27 +51,54 @@ export class VisitorFactory {
   constructor(transformers: NodeTransformer<any, any>[]) {
     for (const trn of transformers) {
       if (!this.transformers.has(trn.type)) {
-        this.transformers.set(trn.type, {
-          before: new Map(),
-          after: new Map()
-        });
+        this.transformers.set(trn.type, { before: [], after: [], type: trn.type, data: new Map() });
       }
 
       const aliases = VisitorFactory.computeAliases(trn);
 
       for (const { name, pkg } of aliases) {
-        if (trn.before) {
-          this.transformers.get(trn.type)!.before.set(name, { pkg, transformer: trn });
+        const set = this.transformers.get(trn.type)!;
+        if (!set.data.has(name)) {
+          set.data.set(name, new Map());
         }
-        if (trn.after) {
-          this.transformers.get(trn.type)!.after.set(name, { pkg, transformer: trn });
+        set.after.push(name);
+        set.before.push(name);
+        set.data.get(name)!.set(pkg, trn);
+      }
+
+      // Handle always run elements
+      if (trn.all) {
+        for (const p of ['before', 'after'] as ['before', 'after']) {
+          if (trn[p]) {
+            if (!this.always[p].has(trn.type)) {
+              this.always[p].set(trn.type, []);
+            }
+            this.always[p].get(trn.type)!.push(trn);
+          }
         }
       }
     }
+
     this.hasMethod = this.transformers.has('method');
     this.hasCall = this.transformers.has('call');
     this.hasClass = this.transformers.has('class');
     this.hasProperty = this.transformers.has('property');
+  }
+
+  nodeToType(node: ts.Node) {
+    if (ts.isMethodDeclaration(node)) {
+      if (this.hasMethod) {
+        return (node.modifiers || []).some((x: ts.Modifier) => x.kind === ts.SyntaxKind.StaticKeyword) ?
+          'static-method' :
+          'method';
+      }
+    } else if (ts.isPropertyDeclaration(node)) {
+      return 'property';
+    } else if (ts.isCallExpression(node)) {
+      return 'call';
+    } else if (ts.isClassDeclaration(node)) {
+      return 'class';
+    }
   }
 
   generate(): ts.TransformerFactory<ts.SourceFile> {
@@ -82,73 +112,56 @@ export class VisitorFactory {
   }
 
   executePhase<T extends ts.Node>(state: TransformerState, target: TransformerSet, phase: 'before' | 'after', node: T) {
-    let touched = false;
-    const decs = TransformUtil.getDecoratorList(node);
-    for (const { dec, ident } of decs) {
-      const tgt = target[phase].get(ident);
-      if (tgt) {
-        const { pkg, transformer } = tgt;
-        const { pkg: computedPkg } = state.imports.get(ident)!;
-        if (pkg === computedPkg) {
-          const ret = (transformer[phase]!(state, node, dec) as T) || node;
-          touched = touched || (ret !== node);
-          node = ret;
+    if (target[phase].length) {
+      const decs = ALL_MATCHER(node, state.imports);
+
+      for (const [ident, dec] of decs.entries()) {
+        const tgt = target.data.get(ident)!.get(ident);
+        if (tgt && tgt[phase]) {
+          node = (tgt[phase]!(state, node, dec) as T) || node;
         }
       }
     }
 
-    if (target[phase].has('*')) {
-      const ret = (target[phase].get('*')!.transformer[phase]!(state, node) as T) || node;
-      touched = touched || (ret !== node);
-      node = ret;
+    const always = this.always[phase].get(target.type);
+    if (always) {
+      for (const all of always) {
+        node = (all[phase]!(state, node) as T) || node;
+      }
     }
     return node;
   }
 
   visit<T extends ts.Node>(state: TransformerState, context: ts.TransformationContext, node: T): T {
 
-    let target: TransformerSet | undefined;
+    const target: TransformerSet | undefined = this.transformers.get(this.nodeToType(node)!);
 
-    if (ts.isMethodDeclaration(node)) {
-      if (this.hasMethod) {
-        target = (node.modifiers || []).some((x: ts.Modifier) => x.kind === ts.SyntaxKind.StaticKeyword) ?
-          this.transformers.get('static-method')! :
-          this.transformers.get('method')!;
+    if (!target) {
+      return ts.visitEachChild(node, c => this.visit(state, context, c), context);
+    } else {
+      const og = node;
+
+      if (target.before.length || this.always.before.has(target.type)) {
+        node = this.executePhase(state, target, 'before', node);
       }
-    } else if (ts.isPropertyDeclaration(node)) {
-      target = this.transformers.get('property')!;
-    } else if (ts.isCallExpression(node)) {
-      target = this.transformers.get('call')!;
-    } else if (ts.isClassDeclaration(node)) {
-      target = this.transformers.get('class')!;
-    }
 
-    let touched = false;
+      const out = ts.visitEachChild(node, c => this.visit(state, context, c), context);
+      out.parent = node.parent;
+      node = out;
 
-    if (target && target.before.size) {
-      const res = this.executePhase(state, target, 'before', node);
-      touched = touched || (res !== node);
-      node = res;
-    }
+      if (target.after.length || this.always.after.has(target.type)) {
+        node = this.executePhase(state, target, 'after', node);
+      }
 
-    const out = ts.visitEachChild(node, c => this.visit(state, context, c), context);
-    out.parent = node.parent;
-    node = out;
-
-    if (target && target.after.size) {
-      const res = this.executePhase(state, target, 'after', node);
-      touched = touched || (res !== node);
-      node = res;
-    }
-
-    if (touched && ts.isClassDeclaration(node)) {
-      for (const el of node.members) {
-        if (!el.parent) {
-          el.parent = node;
+      if ((og !== node) && ts.isClassDeclaration(node)) {
+        for (const el of node.members) {
+          if (!el.parent) {
+            el.parent = node;
+          }
         }
       }
-    }
 
-    return node;
+      return node;
+    }
   }
 }

@@ -1,9 +1,0 @@
----
-injectable:
- '@travetto/rest': 
-    - Controller
-    - Application
-    
-application:
-  '@travetto/rest':
-    - Application

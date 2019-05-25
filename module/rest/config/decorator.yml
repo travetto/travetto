@@ -1,0 +1,31 @@
+---
+injectable:
+ '@travetto/rest': 
+    - Controller
+    - Application
+    
+application:
+  '@travetto/rest':
+    - Application
+
+rest-param:
+  '@travetto/rest': 
+    - Path
+    - Query
+    - Header
+    - Body
+    - Context
+
+rest-endpoint:
+  '@travetto/rest':
+    - Get
+    - Post
+    - Put
+    - Patch
+    - Delete
+    - Options
+    - Head    
+
+rest-controller:
+  '@travetto/rest':
+     - Controller

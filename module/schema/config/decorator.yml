@@ -1,0 +1,11 @@
+---
+rest-param:
+  '@travetto/schema': 
+    - SchemaBody
+    - SchemaQuery
+schema:
+  '@travetto/schema':
+    - Schema
+sechema-ignore:
+  '@travetto/schema':
+    - Ignore
