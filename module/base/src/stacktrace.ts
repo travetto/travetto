@@ -10,10 +10,6 @@ export class Stacktrace {
   private static filterRegex: RegExp = /./g;
 
   static initHandler() {
-
-    require('trace');
-    const chain = require('stack-chain');
-
     this.addStackFilters(
       __filename.replace(/\.js$/, ''),
       'timers.js',
@@ -24,38 +20,6 @@ export class Stacktrace {
       '<anonymous>',
       'source-map-support.js'
     );
-
-    const BASE = FsUtil.toNative(Env.cwd);
-
-    chain.filter.attach(function (error: Error, frames: NodeJS.CallSite[]) {
-
-      const rewrite = frames.filter(function (callSite) {
-        return (callSite.getFileName() &&
-          callSite.getFileName()!.indexOf(BASE) >= 0) &&
-          !callSite.isNative() &&
-          // !callSite.isToplevel() &&
-          !callSite.isEval() &&
-          !Stacktrace.filterRegex.test(callSite.toString());
-      });
-
-      // Handle broken depd
-      if (rewrite.length < 3) {
-        const depd = frames[0] && frames[0].getFileName() && frames[0].getFileName()!.includes(`${path.sep}depd${path.sep}`);
-        // depd requires at least 3 frames
-        while (depd && rewrite.length < 3) {
-          rewrite.push({
-            isNative: () => undefined,
-            isToplevel: () => undefined,
-            isEval: () => undefined,
-            getFileName: () => 'unknown',
-            getLineNumber: () => 1,
-            getColumnNumber: () => 1
-          } as any);
-        }
-      }
-
-      return rewrite;
-    });
   }
 
   static addStackFilters(...names: string[]) {

@@ -2,9 +2,28 @@ import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
 import { AppInfo } from '@travetto/base';
-import { DecList } from './types';
+import { ConfigSource } from '@travetto/config';
+import { DecList, Import } from './types';
 
 export class TransformUtil {
+
+  static aliasMapper<T>(name: string, onItem: (pkg: string, cls: string) => T) {
+    // Class to package, to element
+    if (name && name !== '*') {
+      const obj = ConfigSource.get(`decorator.${name}`);
+      for (const pkg of Object.keys(obj)) {
+        const val = obj[pkg];
+        for (const cls of Array.isArray(val) ? val : [val]) {
+          onItem(pkg, cls);
+        }
+      }
+    } else {
+      const obj = ConfigSource.get('decorator');
+      for (const space of Object.keys(obj)) {
+        this.aliasMapper(space, onItem);
+      }
+    }
+  }
 
   static extractPackage(path: string) {
     path = FsUtil.toUnix(path);
@@ -42,6 +61,33 @@ export class TransformUtil {
     } else {
       throw new Error('No Identifier');
     }
+  }
+
+  static decoratorMatcher(name: string) {
+    const aliases = new Map<string, Set<string>>();
+    this.aliasMapper(name, (pkg, cls) => {
+      if (!aliases.has(cls)) {
+        aliases.set(cls, new Set());
+      }
+      aliases.get(cls)!.add(pkg);
+    });
+
+    const decs = Symbol('decs');
+
+    return (node: ts.Node, imports: Map<string, Import>) => {
+      if (!(node as any)[decs]) {
+        const out = new Map<string, ts.Decorator>();
+        for (const { ident, dec } of this.getDecoratorList(node)) {
+          const imp = imports.get(ident);
+          const pkgs = aliases.get(ident);
+          if (imp && pkgs && pkgs.has(imp.pkg!)) {
+            out.set(ident, dec);
+          }
+        }
+        (node as any)[decs] = out;
+      }
+      return (node as any)[decs] as Map<string, ts.Decorator>;
+    };
   }
 
   static fromLiteral<T extends ts.Node>(val: T): T;

@@ -10,7 +10,6 @@
     "travetto-cli-run": "bin/travetto-cli-run.ts"
   },
   "dependencies": {
-    "@travetto/config": "^0.6.7",
     "@travetto/registry": "^0.6.7"
   },
   "description": "Dependency registration/management and injection support.",

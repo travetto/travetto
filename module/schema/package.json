@@ -4,7 +4,6 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/config": "^0.6.7",
     "@travetto/registry": "^0.6.7"
   },
   "description": "Data type registry for runtime validation, reflection and binding. ",

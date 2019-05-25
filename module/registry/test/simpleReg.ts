@@ -1,3 +1,4 @@
+import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
 import { Registry, MethodSource, RootRegistry } from '../';
@@ -19,5 +20,7 @@ export class RegistryTest {
     });
 
     console.log('hi');
+
+    assert(true);
   }
 }

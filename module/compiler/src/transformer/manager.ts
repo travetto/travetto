@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { ScanApp } from '@travetto/base';
-import { VisitorFactory, NodeTransformer } from './visitor';
+import { VisitorFactory, NodeTransformer } from '@travetto/compiler/src/transformer/visitor';
 
 export class TransformerManager {
 
@@ -17,9 +17,10 @@ export class TransformerManager {
       const { transformers } = require(name.file);
       allTransformers.push(...(transformers || []));
       for (const transformer of (transformers || [])) {
-        console.log('Configured Transformers', name.module, transformer);
+        console.debug('Configured Transformers', name.module, transformer);
       }
     }
+
     this.visitor = new VisitorFactory(allTransformers);
     this.transformers = {
       before: [this.visitor.generate()]

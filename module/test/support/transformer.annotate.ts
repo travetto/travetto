@@ -2,8 +2,6 @@ import * as ts from 'typescript';
 
 import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
 
-const TEST_IMPORT = '@travetto/test';
-
 class TestAnnotationTransformer {
 
   static annotateDecorator<T extends ts.Node>(state: TransformerState, node: T, dec: ts.Decorator) {
@@ -24,12 +22,12 @@ class TestAnnotationTransformer {
 export const transformers: NodeTransformer[] = [
   {
     type: 'method',
-    aliases: ['Test'],
+    aliasName: 'test',
     before: TestAnnotationTransformer.annotateDecorator
   },
   {
     type: 'class',
-    aliases: ['Suite'],
+    aliasName: 'suite',
     before: TestAnnotationTransformer.annotateDecorator
   }
 ];

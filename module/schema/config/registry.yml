@@ -1,5 +1,0 @@
----
-rest-param:
-  '@travetto/schema': 
-    - SchemaBody
-    - SchemaQuery
