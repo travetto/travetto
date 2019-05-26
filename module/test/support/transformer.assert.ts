@@ -212,9 +212,5 @@ class AssertTransformer {
 }
 
 export const transformers: NodeTransformer[] = [
-  {
-    type: 'call',
-    all: true,
-    before: AssertTransformer.handleCall.bind(AssertTransformer)
-  }
+  { type: 'call', all: true, before: AssertTransformer.handleCall.bind(AssertTransformer) }
 ];
