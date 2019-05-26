@@ -32,15 +32,13 @@ export class LoggerTransformer {
       node.expression.expression.text === 'console' &&
       VALID_METHODS.has(node.expression.name.text)
     )) {
-      return;
+      return node;
     }
 
     const level = node.expression.name.text;
 
     if (Env.prod && !VALID_PROD_METHODS.has(level)) {
-      const empty = ts.createEmptyStatement(); // Lose the logging if in prod
-      empty.parent = node.parent;
-      return empty;
+      return ts.createEmptyStatement(); // Lose the logging if in prod
     }
 
     if (!state[imported]) {
@@ -75,16 +73,10 @@ export class LoggerTransformer {
     }
 
     const argv = ts.createNodeArray([payload]);
-    const out = ts.createCall(ts.createPropertyAccess(ts.createPropertyAccess(state[imported]!, 'Logger'), 'log'), undefined, argv);
-    out.parent = node.parent;
-    return out;
+    return ts.createCall(ts.createPropertyAccess(ts.createPropertyAccess(state[imported]!, 'Logger'), 'log'), undefined, argv);
   }
 }
 
 export const transformers: NodeTransformer[] = [
-  {
-    type: 'call',
-    all: true,
-    before: LoggerTransformer.handleCall
-  }
+  { type: 'call', all: true, before: LoggerTransformer.handleCall }
 ];

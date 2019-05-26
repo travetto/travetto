@@ -7,10 +7,10 @@ import { DecList, Import } from './types';
 
 export class TransformUtil {
 
-  static aliasMapper<T>(name: string, onItem: (pkg: string, cls: string) => T) {
+  static aliasMapper<T>(ns: string, onItem: (pkg: string, cls: string) => T) {
     // Class to package, to element
-    if (name && name !== '*') {
-      const obj = ConfigSource.get(`decorator.${name}`);
+    if (ns && ns !== '*') {
+      const obj = ConfigSource.get(`decorator.${ns}`);
       for (const pkg of Object.keys(obj)) {
         const val = obj[pkg];
         for (const cls of Array.isArray(val) ? val : [val]) {
@@ -63,31 +63,46 @@ export class TransformUtil {
     }
   }
 
-  static decoratorMatcher(name: string) {
+  static customDecoratorMatcher<T>(
+    ns: string,
+    onDecorator: (pkg: string, name: string, dec: ts.Decorator) => T,
+  ) {
     const aliases = new Map<string, Set<string>>();
-    this.aliasMapper(name, (pkg, cls) => {
+    this.aliasMapper(ns, (pkg, cls) => {
       if (!aliases.has(cls)) {
         aliases.set(cls, new Set());
       }
       aliases.get(cls)!.add(pkg);
     });
 
-    const decs = Symbol('decs');
+    const decCache = Symbol('decCache');
 
     return (node: ts.Node, imports: Map<string, Import>) => {
-      if (!(node as any)[decs]) {
-        const out = new Map<string, ts.Decorator>();
+      if (!(node as any)[decCache]) {
+        const out = new Map<string, T>();
         for (const { ident, dec } of this.getDecoratorList(node)) {
           const imp = imports.get(ident);
           const pkgs = aliases.get(ident);
           if (imp && pkgs && pkgs.has(imp.pkg!)) {
-            out.set(ident, dec);
+            out.set(ident, onDecorator(imp.pkg!, ident, dec));
           }
         }
-        (node as any)[decs] = out;
+        (node as any)[decCache] = out;
       }
-      return (node as any)[decs] as Map<string, ts.Decorator>;
+      return (node as any)[decCache] as Map<string, T>;
     };
+  }
+
+  static allDecoratorMatcher() {
+    return this.customDecoratorMatcher('*', (pkg: string, name: string, dec: ts.Decorator) => {
+      return { pkg, name, dec };
+    });
+  }
+
+  static decoratorMatcher(ns: string) {
+    return this.customDecoratorMatcher(ns, (pkg, name, dec) => {
+      return dec;
+    });
   }
 
   static fromLiteral<T extends ts.Node>(val: T): T;

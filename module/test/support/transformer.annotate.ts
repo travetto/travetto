@@ -2,9 +2,9 @@ import * as ts from 'typescript';
 
 import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
 
-class TestAnnotationTransformer {
+class AnnotationTransformer {
 
-  static annotateDecorator<T extends ts.Node>(state: TransformerState, node: T, dec: ts.Decorator) {
+  static annotate<T extends ts.Node>(state: TransformerState, node: T, dec: ts.Decorator) {
     if (ts.isCallExpression(dec.expression)) {
       const args = [...(dec.expression.arguments || [])];
       const n = ((node as any)['original'] || node) as ts.Node;
@@ -20,14 +20,6 @@ class TestAnnotationTransformer {
 }
 
 export const transformers: NodeTransformer[] = [
-  {
-    type: 'method',
-    aliasName: 'test',
-    before: TestAnnotationTransformer.annotateDecorator
-  },
-  {
-    type: 'class',
-    aliasName: 'suite',
-    before: TestAnnotationTransformer.annotateDecorator
-  }
+  { type: 'method', aliasName: 'test', before: AnnotationTransformer.annotate },
+  { type: 'class', aliasName: 'suite', before: AnnotationTransformer.annotate }
 ];

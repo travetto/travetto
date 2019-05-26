@@ -98,9 +98,5 @@ class ApplicationTransformer {
 }
 
 export const transformers: NodeTransformer[] = [
-  {
-    type: 'class',
-    aliasName: 'application',
-    before: ApplicationTransformer.handleClass
-  }
+  { type: 'class', aliasName: 'application', before: ApplicationTransformer.handleClass }
 ];

@@ -7,7 +7,12 @@ export type TransformerType = 'class' | 'method' | 'property' | 'static-method' 
 
 export type Alias = { name: string, pkg: string };
 
-type TransformerSet = { before: string[], after: string[], type: TransformerType, data: Map<string, Map<string, NodeTransformer>> };
+type TransformerSet = {
+  before: string[],
+  after: string[],
+  type: TransformerType,
+  data: Map<string, Map<string, NodeTransformer[]>>
+};
 
 export interface NodeTransformer<T extends TransformerType = TransformerType, N = ts.Node> {
   type: T;
@@ -18,9 +23,22 @@ export interface NodeTransformer<T extends TransformerType = TransformerType, N 
   after?(state: TransformerState, node: N, dec?: ts.Decorator): ts.Node | undefined;
 }
 
-const ALL_MATCHER = TransformUtil.decoratorMatcher('*');
+const ALL_MATCHER = TransformUtil.allDecoratorMatcher();
 
 export class VisitorFactory {
+
+  static nodeToType(node: ts.Node): TransformerType | undefined {
+    if (ts.isMethodDeclaration(node)) {
+      // tslint:disable-next-line: no-bitwise
+      return (ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static) ? 'static-method' : 'method';
+    } else if (ts.isPropertyDeclaration(node)) {
+      return 'property';
+    } else if (ts.isCallExpression(node)) {
+      return 'call';
+    } else if (ts.isClassDeclaration(node)) {
+      return 'class';
+    }
+  }
 
   static computeAliases(transformer: NodeTransformer) {
     const aliases: Alias[] = (transformer.aliases || []).slice(0);
@@ -43,11 +61,6 @@ export class VisitorFactory {
     after: new Map<TransformerType, NodeTransformer[]>(),
   };
 
-  private hasMethod: boolean;
-  private hasClass: boolean;
-  private hasProperty: boolean;
-  private hasCall: boolean;
-
   constructor(transformers: NodeTransformer<any, any>[]) {
     for (const trn of transformers) {
       if (!this.transformers.has(trn.type)) {
@@ -63,7 +76,10 @@ export class VisitorFactory {
         }
         set.after.push(name);
         set.before.push(name);
-        set.data.get(name)!.set(pkg, trn);
+        if (!set.data.get(name)!.has(pkg)) {
+          set.data.get(name)!.set(pkg, []);
+        }
+        set.data.get(name)!.get(pkg)!.push(trn);
       }
 
       // Handle always run elements
@@ -78,27 +94,6 @@ export class VisitorFactory {
         }
       }
     }
-
-    this.hasMethod = this.transformers.has('method');
-    this.hasCall = this.transformers.has('call');
-    this.hasClass = this.transformers.has('class');
-    this.hasProperty = this.transformers.has('property');
-  }
-
-  nodeToType(node: ts.Node) {
-    if (ts.isMethodDeclaration(node)) {
-      if (this.hasMethod) {
-        return (node.modifiers || []).some((x: ts.Modifier) => x.kind === ts.SyntaxKind.StaticKeyword) ?
-          'static-method' :
-          'method';
-      }
-    } else if (ts.isPropertyDeclaration(node)) {
-      return 'property';
-    } else if (ts.isCallExpression(node)) {
-      return 'call';
-    } else if (ts.isClassDeclaration(node)) {
-      return 'class';
-    }
   }
 
   generate(): ts.TransformerFactory<ts.SourceFile> {
@@ -112,29 +107,33 @@ export class VisitorFactory {
   }
 
   executePhase<T extends ts.Node>(state: TransformerState, target: TransformerSet, phase: 'before' | 'after', node: T) {
-    if (target[phase].length) {
-      const decs = ALL_MATCHER(node, state.imports);
-
-      for (const [ident, dec] of decs.entries()) {
-        const tgt = target.data.get(ident)!.get(ident);
-        if (tgt && tgt[phase]) {
-          node = (tgt[phase]!(state, node, dec) as T) || node;
-        }
-      }
-    }
-
     const always = this.always[phase].get(target.type);
-    if (always) {
+    if (always && always.length) {
       for (const all of always) {
         node = (all[phase]!(state, node) as T) || node;
       }
     }
+
+    if (target[phase].length) {
+      const decs = ALL_MATCHER(node, state.imports);
+
+      for (const [ident, { dec, pkg }] of decs.entries()) {
+        const tgt = target.data.get(ident)!.get(pkg);
+        if (tgt) {
+          for (const el of tgt) {
+            if (el[phase]) {
+              node = (el[phase]!(state, node, dec) as T) || node;
+            }
+          }
+        }
+      }
+    }
+
     return node;
   }
 
   visit<T extends ts.Node>(state: TransformerState, context: ts.TransformationContext, node: T): T {
-
-    const target: TransformerSet | undefined = this.transformers.get(this.nodeToType(node)!);
+    const target = this.transformers.get(VisitorFactory.nodeToType(node)!);
 
     if (!target) {
       return ts.visitEachChild(node, c => this.visit(state, context, c), context);
@@ -145,18 +144,19 @@ export class VisitorFactory {
         node = this.executePhase(state, target, 'before', node);
       }
 
-      const out = ts.visitEachChild(node, c => this.visit(state, context, c), context);
-      out.parent = node.parent;
-      node = out;
+      node = ts.visitEachChild(node, c => this.visit(state, context, c), context);
 
       if (target.after.length || this.always.after.has(target.type)) {
         node = this.executePhase(state, target, 'after', node);
       }
 
-      if ((og !== node) && ts.isClassDeclaration(node)) {
-        for (const el of node.members) {
-          if (!el.parent) {
-            el.parent = node;
+      if (og !== node) {
+        node.parent = og.parent;
+        if (ts.isClassDeclaration(node)) {
+          for (const el of node.members) {
+            if (!el.parent) {
+              el.parent = node;
+            }
           }
         }
       }

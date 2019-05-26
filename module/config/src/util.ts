@@ -87,8 +87,8 @@ export class ConfigUtil {
     // fully exist until the config has been created
     const matcher = new RegExp(`^${key.replace(/[.]/g, '_')}`, 'i'); // Check is case insensitive
     for (const k of Object.keys(process.env)) { // Find all keys that match
-      if (k.includes('_') && matcher.test(k)) { // Require at least one level
-        ConfigUtil.bindEnvByParts(obj, k.substring(key.length + 1).split('_'), process.env[k] as string);
+      if (k.includes('_') && (!key || matcher.test(k))) { // Require at least one level
+        ConfigUtil.bindEnvByParts(obj, key ? k.substring(key.length + 1).split('_') : k.split('_'), process.env[k] as string);
       }
     }
   }

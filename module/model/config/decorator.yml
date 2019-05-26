@@ -1,6 +1,7 @@
 ---
 schema:
-  '@travetto/model': Model
+  '@travetto/model': 
+    - Model
 
 injectable:
   '@travetto/model': 

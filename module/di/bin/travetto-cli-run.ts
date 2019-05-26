@@ -3,7 +3,10 @@ import * as commander from 'commander';
 
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
 
-import { handleFailure, AppListUtil, RunUtil, CachedAppConfig } from './lib';
+import { handleFailure, CachedAppConfig } from './lib/util';
+import { AppListUtil } from './lib/app-list';
+import { RunUtil } from './lib/run';
+
 const { colorize } = Util;
 
 interface DiCommand {

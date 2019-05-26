@@ -7,38 +7,41 @@ import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/comp
 const REGISTER_MOD = require.resolve('../src/decorator');
 
 const methods = Symbol('methods');
+const cls = Symbol('class');
 const mod = Symbol('module');
 
 interface RegisterInfo {
   [methods]?: {
-    [key: string]: { hash: string }
+    [key: string]: { hash: number }
   };
   [mod]?: string;
+  [cls]?: number;
 }
 
 class RegisterTransformer {
 
+  static prepareClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
+    state[cls] = Util.naiveHash(node.getText());
+    return node;
+  }
+
   static transformMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration) {
     const hash = Util.naiveHash(node.getText());
 
-    const conf: any = {
-      hash
-    };
+    const conf = { hash };
 
     state[methods] = state[methods] || {};
     state[methods]![node.name.getText()] = conf;
     return node;
   }
 
-  static transformClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration, dec: ts.Decorator) {
-    if (
-      state.path === REGISTER_MOD || // Cannot process self
-      !(node.name && node.parent && ts.isSourceFile(node.parent)) // If not top level, skip
-    ) {
-      return;
+  static transformClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
+    if (state.path === REGISTER_MOD) {  // Cannot process self
+      return node;
     }
 
-    const isAbstract = (node.modifiers! || []).filter(x => x.kind === ts.SyntaxKind.AbstractKeyword).length > 0;
+    // tslint:disable-next-line: no-bitwise
+    const isAbstract = !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
 
     // If needed
     state.importDecorator(REGISTER_MOD, 'Register');
@@ -50,13 +53,15 @@ class RegisterTransformer {
     const body = ts.createNodeArray([
       TransformUtil.createStaticField('__filename', FsUtil.toUnix(state.source.fileName)),
       TransformUtil.createStaticField('__id', `${state[mod]}#${node.name!.getText()}`),
-      TransformUtil.createStaticField('__hash', Util.naiveHash(node.getText())),
+      TransformUtil.createStaticField('__hash', state[cls]!),
       TransformUtil.createStaticField('__methods', TransformUtil.extendObjectLiteral(state[methods] || {})),
       TransformUtil.createStaticField('__abstract', TransformUtil.fromLiteral(isAbstract)),
       ...node.members
     ]);
 
-    const ret = ts.updateClassDeclaration(node,
+    state[methods] = {};
+
+    return ts.updateClassDeclaration(node,
       ts.createNodeArray([state.createDecorator('Register'), ...(node.decorators || [])]),
       node.modifiers,
       node.name,
@@ -64,30 +69,14 @@ class RegisterTransformer {
       ts.createNodeArray(node.heritageClauses),
       body
     );
-
-    state[methods] = {};
-
-    ret.parent = node.parent;
-
-    for (const el of ret.members) {
-      if (!el.parent) {
-        el.parent = ret;
-      }
-    }
-
-    return ret;
   }
 }
 
 export const transformers: NodeTransformer[] = [
   {
-    type: 'class',
-    all: true,
+    type: 'class', all: true,
+    before: RegisterTransformer.prepareClass,
     after: RegisterTransformer.transformClass
   },
-  {
-    type: 'method',
-    all: true,
-    before: RegisterTransformer.transformMethod
-  }
+  { type: 'method', all: true, before: RegisterTransformer.transformMethod }
 ];
