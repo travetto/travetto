@@ -50,7 +50,10 @@ export class RestConfig {
       this.cookie.secure = this.ssl.active;
     }
     if (this.baseUrl === undefined) {
-      this.baseUrl = `http${this.ssl.active ? 's' : ''}://${this.hostname}${[80, 443].includes(this.port) ? '' : this.port}`;
+      this.baseUrl = `http${this.ssl.active ? 's' : ''}://${this.hostname}`;
+      if (![80, 443].includes(this.port)) {
+        this.baseUrl = `${this.baseUrl}:${this.port}`;
+      }
     }
     if (this.cookie.domain === undefined) {
       this.cookie.domain = this.hostname;
