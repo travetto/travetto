@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@travetto/model": "^0.6.8",
-    "@types/mongodb": "^3.1.22",
-    "mongodb": "^3.2.3"
+    "@types/mongodb": "^3.1.28",
+    "mongodb": "^3.2.6"
   },
   "description": "Mongo backing for the travetto model module.",
   "devDependencies": {

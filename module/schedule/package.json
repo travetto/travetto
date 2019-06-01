@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@travetto/base": "^0.6.8",
-    "@types/cron": "^1.7.0",
-    "cron": "^1.7.0"
+    "@types/cron": "^1.7.1",
+    "cron": "^1.7.1"
   },
   "description": "Managed registry for scheduling jobs using cron expressions.",
   "devDependencies": {

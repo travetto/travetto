@@ -14,8 +14,8 @@
     "@travetto/test": "^0.6.7"
   },
   "optionalExtensionDependencies": {
-    "nodemailer": "^6.1.0",
-    "@types/nodemailer": "^4.6.7"
+    "nodemailer": "^6.2.1",
+    "@types/nodemailer": "^6.2.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [
