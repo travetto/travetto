@@ -53,7 +53,7 @@ export class CommandService {
   getExecContainer() {
     return this.execContainer = this.execContainer || this.getContainer().then(async c => {
       if (c) {
-        await c.create();
+        await c.create([this.config.containerEntry].filter(x => !!x));
         await c.start();
         c.setEntryPoint(this.config.containerEntry);
       }
