@@ -5,17 +5,17 @@ export const init = {
     const { DockerContainer, ExecUtil } = await import('@travetto/exec');
     const { EnvUtil } = await import('@travetto/boot');
 
-    const defPort = EnvUtil.getInt('MODEL_ELASTICSEARCH_PORT', 9200);
+    const defPort = EnvUtil.getInt('ELASTICSEARCH_MODEL_PORT', 9200);
 
     try {
       await ExecUtil.waitForPort(defPort, 10);
-      process.env.MODEL_ELASTICSEARCH_NAMESPACE = `test_${Math.trunc(Math.random() * 10000)}`; // Randomize schema
+      process.env.ELASTICSEARCH_MODEL_NAMESPACE = `test_${Math.trunc(Math.random() * 10000)}`; // Randomize schema
     } catch (e) {
 
       console.debug('Starting up docker for elasticsearch:6.5.4');
 
       const port = 50000 + Math.trunc(Math.random() * 10000);
-      process.env.MODEL_ELASTICSEARCH_PORT = `${port}`;
+      process.env.ELASTICSEARCH_MODEL_PORT = `${port}`;
       const container = new DockerContainer('elasticsearch:6.5.4')
         .forceDestroyOnShutdown()
         .exposePort(port, 9200)

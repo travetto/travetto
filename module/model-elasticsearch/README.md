@@ -26,7 +26,7 @@ where the `ElasticsearchModelConfig` is defined by:
 
 **Code: Structure of ElasticsearchModelConfig**
 ```typescript
-@Config('model.elasticsearch')
+@Config('elasticsearch.model')
 export class ElasticsearchModelConfig {
   hosts = ['127.0.0.1'];
   port = 9200;

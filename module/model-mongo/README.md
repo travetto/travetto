@@ -26,7 +26,7 @@ where the `MongoModelConfig` is defined by:
 
 **Code: Structure of MongoModelConfig**
 ```typescript
-@Config('model.mongo')
+@Config('mongo.model')
 export class MongoModelConfig {
   hosts = 'localhost';
   namespace = 'app';
