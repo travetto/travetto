@@ -578,11 +578,8 @@ export class ElasticsearchModelSource extends ModelSource {
       ...this.getIdentity(cls),
       refresh: true,
       body: {
-        query: this.getSearchObject(cls, query).body,
-        script: {
-          lang: 'painless',
-          inline: script
-        }
+        query: this.getSearchObject(cls, query).body.query,
+        script
       }
     });
 
