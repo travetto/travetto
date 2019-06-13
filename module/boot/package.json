@@ -15,7 +15,7 @@
   "dependencies": {
     "@types/node": "^11.0.4",
     "tslib": "^1.10.0",
-    "typescript": "^3.5.1"
+    "typescript": "^3.5.2"
   },
   "description": "Bootstrapping and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
