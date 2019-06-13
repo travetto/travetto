@@ -42,5 +42,5 @@
     "prepublish": "cd src-ts; tsc --project .",
     "clean": "rm -f src/"
   },
-  "version": "0.6.8"
+  "version": "0.7.0-alpha.0"
 }

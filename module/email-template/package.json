@@ -10,9 +10,9 @@
     "travetto-cli-email-template": "./bin/travetto-cli-email-template.ts"
   },
   "dependencies": {
-    "@travetto/di": "^0.6.8",
-    "@travetto/email": "^0.6.9",
-    "@travetto/exec": "^0.6.7",
+    "@travetto/di": "^0.7.0-alpha.0",
+    "@travetto/email": "^0.7.0-alpha.0",
+    "@travetto/exec": "^0.7.0-alpha.0",
     "@types/html-entities": "^1.2.16",
     "@types/mustache": "^0.8.32",
     "@types/parse5": "^5.0.0",
@@ -24,7 +24,7 @@
   },
   "description": "Email templating module",
   "devDependencies": {
-    "@travetto/test": "^0.6.7",
+    "@travetto/test": "^0.7.0-alpha.0",
     "@types/js-beautify": "^1.8.1",
     "js-beautify": "^1.10.0"
   },
@@ -49,5 +49,5 @@
     "resources",
     "bin"
   ],
-  "version": "0.6.9"
+  "version": "0.7.0-alpha.0"
 }
