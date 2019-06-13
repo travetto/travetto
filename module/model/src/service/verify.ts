@@ -23,6 +23,8 @@ const $AND = '$and';
 const $OR = '$or';
 const $NOT = '$not';
 const $ALL = '$all';
+const $IN = '$in';
+const $NIN = '$nin';
 const $ELEM_MATCH = '$elemMatch';
 
 // const TOP_LEVEL_OPS = new Set([$AND, $OR, $NOT]);
@@ -119,20 +121,20 @@ export class QueryVerifierService {
 
     // Should only be one?
     for (const [k, v] of Object.entries(value)) {
+      if (k === $ALL || k === $ELEM_MATCH || k === $IN || k === $NIN) {
+        if (!Array.isArray(v)) {
+          state.log(`${k} operator requires comparison to be an array, not ${typeof v}`);
+          return;
+        } else if (v.length === 0) {
+          state.log(`${k} operator requires comparison to be a non-empty array`);
+          return;
+        }
 
-      if (isArray && (k === $ALL || k === $ELEM_MATCH)) {
-        if (k === $ALL) {
-          if (!Array.isArray(v)) {
-            state.log(`$all operator requires comparison to be an array, not ${typeof v}`);
+        for (const el of v) {
+          const elAct = TypeUtil.getActualType(el);
+          if (!this.typesMatch(declaredType, elAct)) {
+            state.log(`${k} operator requires all values to be ${declaredType}, but ${elAct} was found`);
             return;
-          } else {
-            for (const el of v) {
-              const elAct = TypeUtil.getActualType(el);
-              if (!this.typesMatch(declaredType, elAct)) {
-                state.log(`$all operator requires all values to be ${declaredType}, but ${elAct} was found`);
-                return;
-              }
-            }
           }
         }
       } else if (!(k in allowed)) {
