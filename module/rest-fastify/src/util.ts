@@ -8,12 +8,16 @@ const TRV_KEY = Symbol('TRV_KEY');
 export class FastifyAppUtil {
   static getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
     if (!(reqs as any)[TRV_KEY]) {
+      let [path] = (reqs.req.url || '').split(/[#?]/g);
+      if (!path.startsWith('/')) {
+        path = `/${path}`;
+      }
       (reqs as any)[TRV_KEY] = RestAppUtil.decorateRequest({
         __og: reqs,
         __raw: reqs.req,
         protocol: 'encrypted' in reqs.req.socket ? 'https' : 'http',
         method: reqs.req.method,
-        path: reqs.req.url!,
+        path,
         query: reqs.query,
         params: reqs.params,
         body: (reqs as any).body,
