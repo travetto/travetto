@@ -37,7 +37,8 @@ export class AssertUtil {
       return { file: filename, line: 1 };
     }
 
-    const [, pth] = best.trim().split(/\s+/g).slice(1);
+    const pth = best.trim().split(/\s+/g).slice(1).pop()!;
+
     const [file, lineNo] = pth.replace(/[()]/g, '').replace(/^[A-Za-z]:/, '').split(':');
     let line = parseInt(lineNo, 10);
     if (Number.isNaN(line)) {
