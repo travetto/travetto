@@ -7,13 +7,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/rest": "^0.7.0-alpha.0",
+    "@travetto/rest": "^0.7.1-alpha.0",
     "fastify": "^2.5.0",
     "fastify-compress": "^0.10.0",
     "fastify-formbody": "^3.1.0"
   },
   "devDependencies": {
-    "@travetto/test": "^0.7.0-alpha.0"
+    "@travetto/test": "^0.7.1-alpha.0"
   },
   "description": "Fastify provider for the travetto rest module.",
   "homepage": "https://travetto.io",
@@ -33,5 +33,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.7.0-alpha.0"
+  "version": "0.7.1-alpha.0"
 }
