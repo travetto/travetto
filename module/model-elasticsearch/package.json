@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@travetto/model": "^0.6.8",
-    "@types/elasticsearch": "^5.0.32",
-    "elasticsearch": "^16.1.0"
+    "@types/elasticsearch": "^5.0.34",
+    "elasticsearch": "^16.1.1"
   },
   "description": "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.",
   "devDependencies": {

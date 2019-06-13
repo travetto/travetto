@@ -10,14 +10,14 @@
   ],
   "dependencies": {
     "@travetto/base": "^0.6.8",
-    "yeoman-generator": "^3.2.0",
-    "yo": "^2.0.5"
+    "yeoman-generator": "^4.0.1",
+    "yo": "^2.0.6"
   },
   "devDependencies": {
     "@travetto/auth-rest": "^0.6.10",
     "@travetto/model-elasticsearch": "^0.6.8",
     "@travetto/model-mongo": "^0.6.8",
-    "@types/yeoman-generator": "^3.1.1"
+    "@types/yeoman-generator": "^3.1.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

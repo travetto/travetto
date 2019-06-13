@@ -4,7 +4,7 @@
     "name": "Travetto Framework"
   },
   "engines": {
-    "node": "^12.0.0"
+    "node": "^11.0.0"
   },
   "publishConfig": {
     "access": "public"
@@ -13,8 +13,8 @@
     "travetto-cli-clean": "bin/travetto-cli-clean.ts"
   },
   "dependencies": {
-    "@types/node": "^12.0.4",
-    "tslib": "^1.9.3",
+    "@types/node": "^11.0.4",
+    "tslib": "^1.10.0",
     "typescript": "^3.5.1"
   },
   "description": "Bootstrapping and common utilities for travetto applications.",

@@ -9,7 +9,7 @@
   "dependencies": {
     "@travetto/asset": "^0.6.8",
     "@types/mongodb": "^3.1.28",
-    "mongodb": "^3.2.6"
+    "mongodb": "^3.2.7"
   },
   "description": "Mongo/GridFS backend for the travetto asset module",
   "devDependencies": {
