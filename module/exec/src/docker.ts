@@ -83,7 +83,7 @@ export class DockerContainer {
     return this;
   }
 
-  addEnvVar(key: string, value: string) {
+  addEnvVar(key: string, value: string = '') {
     this.env[key] = value;
     return this;
   }
@@ -132,7 +132,11 @@ export class DockerContainer {
       flags.push('-t');
     }
     for (const k of Object.keys(this.env)) {
-      flags.push('-e', `"${k}=${this.env[k]}"`);
+      if (this.env[k] === '') {
+        flags.push('-e', k);
+      } else {
+        flags.push('-e', `${k}=${this.env[k]}`);
+      }
     }
     flags.push(...(extra || []));
     return flags;
@@ -160,9 +164,6 @@ export class DockerContainer {
     }
     for (const k of Object.keys(this.ports)) {
       flags.push('-p', `${k}:${this.ports[k]}`);
-    }
-    for (const k of Object.keys(this.env)) {
-      flags.push('-e', `"${k}=${this.env[k]}"`);
     }
 
     flags.push(...this.getRuntimeFlags(extra));

@@ -5,8 +5,6 @@ import { ModelQuery, Query, PageableModelQuery } from '../model/query';
 import { BulkResponse, BulkOp } from '../model/bulk';
 import { ModelCore } from '../model/core';
 
-export abstract class ModelSource { }
-
 export type ValidStringFields<T> = {
   [K in keyof T]:
   (T[K] extends (String | string) ? K : never)
@@ -29,8 +27,6 @@ export interface IModelSource {
   updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number>;
   updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T>;
   updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>): Promise<T>;
-  updatePartialView<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string): Promise<T>;
-  updatePartialViewByQuery<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view: string, query: ModelQuery<T>): Promise<T>;
 
   suggestField<T extends ModelCore, U = T>(
     cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
@@ -49,4 +45,29 @@ export interface IModelSource {
   deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>): Promise<number>;
 }
 
-export interface ModelSource extends IModelSource { }
+// Stupid but necessary
+export abstract class ModelSource implements IModelSource {
+  onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
+  onSchemaChange?(e: SchemaChangeEvent): void;
+  abstract prePersist<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<Partial<T>> | Partial<T>;
+  abstract prePersist<T extends ModelCore>(cls: Class<T>, model: T): T | Promise<T>;
+  abstract postLoad<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Partial<T>;
+  abstract postLoad<T extends ModelCore>(cls: Class<T>, model: T): T;
+  abstract save<T extends ModelCore>(cls: Class<T>, model: T, keepId?: boolean): Promise<T>;
+  abstract saveAll<T extends ModelCore>(cls: Class<T>, models: T[], keepId?: boolean): Promise<T[]>;
+  abstract update<T extends ModelCore>(cls: Class<T>, model: T): Promise<T>;
+  abstract updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number>;
+  abstract updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T>;
+  abstract updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>): Promise<T>;
+  abstract suggestField<T extends ModelCore, U = T>(
+    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
+  ): Promise<U[]>;
+  abstract query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]>;
+  abstract bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse>;
+  abstract getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T>;
+  abstract getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T>;
+  abstract getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]>;
+  abstract getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>): Promise<number>;
+  abstract deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number>;
+  abstract deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>): Promise<number>;
+}

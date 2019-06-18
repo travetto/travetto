@@ -16,8 +16,8 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     super(RootRegistry);
   }
 
-  resolveSubTypeForInstance<T>(cls: Class<T>, o: T) {
-    return this.resolveSubType(cls, (o as any).type || o.constructor);
+  resolveSubTypeForInstance<T extends any>(cls: Class<T>, o: T) {
+    return this.resolveSubType(cls, o.type || o.constructor);
   }
 
   resolveSubType(cls: Class, type: Class | string) {

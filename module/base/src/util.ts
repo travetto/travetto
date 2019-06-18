@@ -180,7 +180,7 @@ export class Util {
   }
 
   static uuid(len: number = 32) {
-    return crypto.randomBytes(len).toString('hex');
+    return crypto.randomBytes(Math.ceil(len / 2)).toString('hex').substring(0, len);
   }
 
   static computeOrdering<T,

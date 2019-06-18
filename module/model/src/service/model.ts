@@ -12,7 +12,7 @@ import { ModelSource, IModelSource, ValidStringFields } from './source';
 import { ModelRegistry } from '../registry';
 import { QueryLanguageParser } from '../query-lang/parser';
 
-function getClass<T>(o: T) {
+function getClass<T extends any>(o: T) {
   return o.constructor as Class<T>;
 }
 

@@ -46,4 +46,24 @@ export class Simple {
   async age4(@Body() obj: any) {
     console.log(obj);
   }
+
+  @Get('/map')
+  async map() {
+    return new Map([['key', 'value']]);
+  }
+
+  @Get('/set')
+  async set() {
+    return new Set(['key', 'value']);
+  }
+
+  @Get('/obj')
+  async obj() {
+    return { key: 'value' };
+  }
+
+  @Get('/arr')
+  async arr() {
+    return ['a', 'b'];
+  }
 }
