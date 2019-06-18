@@ -4,7 +4,7 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/base": "^0.7.1-alpha.0"
+    "@travetto/base": "^0.7.1-alpha.1"
   },
   "description": "Network utilities of the travetto framework",
   "homepage": "https://travetto.io",
@@ -23,5 +23,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.7.1-alpha.0"
+  "version": "0.7.1-alpha.1"
 }
