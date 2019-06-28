@@ -1,3 +1,5 @@
+import * as mongo from 'mongodb';
+
 import { Injectable, Inject } from '@travetto/di';
 import { ModelService, Model } from '@travetto/model';
 
@@ -19,6 +21,10 @@ export class ModelStore extends SessionStore {
 
   @Inject()
   modelService: ModelService;
+
+  generateId() {
+    return new mongo.ObjectID().toHexString();
+  }
 
   async load(id: string) {
     const res = await this.modelService.getAllByQuery(SessionModel, { where: { id } });
