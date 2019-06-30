@@ -1,5 +1,3 @@
-import * as mongo from 'mongodb';
-
 import { Injectable, Inject } from '@travetto/di';
 import { ModelService, Model } from '@travetto/model';
 
@@ -23,7 +21,7 @@ export class ModelStore extends SessionStore {
   modelService: ModelService;
 
   generateId() {
-    return new mongo.ObjectID().toHexString();
+    return this.modelService.generateId();
   }
 
   async load(id: string) {

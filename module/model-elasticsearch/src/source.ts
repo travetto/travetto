@@ -33,6 +33,10 @@ export class ElasticsearchModelSource extends ModelSource {
     super();
   }
 
+  generateId() {
+    return Util.uuid();
+  }
+
   getNamespacedIndex(idx: string) {
     if (this.config.namespace) {
       return `${this.config.namespace}_${idx}`;

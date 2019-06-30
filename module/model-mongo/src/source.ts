@@ -29,6 +29,10 @@ export class MongoModelSource extends ModelSource {
     super();
   }
 
+  generateId() {
+    return new mongo.ObjectId().toHexString();
+  }
+
   async suggestField<T extends ModelCore, U = T>(
     cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
   ): Promise<U[]> {
