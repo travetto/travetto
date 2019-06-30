@@ -4,6 +4,7 @@
   "description": "Yeoman app generator for the Travetto framework",
   "main": "app/index.js",
   "files": [
+    ".gitignore",
     "app",
     "templates",
     "tsconfig.json",
