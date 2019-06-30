@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as cp from 'child_process';
 import * as path from 'path';
 import * as util from 'util';
+import * as mustache from 'mustache';
 
 const fsRead = util.promisify(fs.readFile);
 
