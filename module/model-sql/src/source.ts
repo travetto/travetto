@@ -15,6 +15,7 @@ import { SQLModelConfig } from './config';
 import { SQLDialect } from './dialect/base';
 import { Connected } from './dialect/connection';
 import { Injectable } from '@travetto/di';
+import { SQLUtil } from './util';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,
@@ -296,8 +297,26 @@ export class SQLModelSource extends ModelSource {
   }
 
   @Connected(true)
-  bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse> {
-    return this.dialect.bulkProcess(cls, operations);
+  async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse> {
+    const deletes = operations.map(x => x.delete).filter(x => !!x) as T[];
+    const inserts = operations.map(x => x.insert).filter(x => !!x) as T[];
+
+    for (const el of inserts) {
+      if (!el.id) {
+        el.id = this.generateId();
+      }
+    }
+
+    const out = await this.dialect.bulkProcess(
+      [{ table: this.dialect.resolveTable(cls), ids: deletes.map(x => x.id!) }].filter(x => !!x.ids.length),
+      (await SQLUtil.extractInserts(this.dialect, cls, inserts)).filter(x => !!x.records.length),
+      (await SQLUtil.extractInserts(this.dialect, cls, operations.map(x => x.upsert).filter(x => !!x))).filter(x => !!x.records.length),
+      (await SQLUtil.extractInserts(this.dialect, cls, operations.map(x => x.update).filter(x => !!x))).filter(x => !!x.records.length)
+    );
+
+    out.insertedIds = new Map(inserts.map((el, i) => [i, el.id!]));
+
+    return out;
   }
 
   @Connected(true)

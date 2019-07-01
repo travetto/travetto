@@ -1,14 +1,12 @@
 import { FieldConfig, SchemaChangeEvent, SchemaRegistry, ALL_VIEW } from '@travetto/schema';
 import { Class } from '@travetto/registry';
-import { Query, ModelRegistry } from '@travetto/model';
+import { Query, ModelRegistry, SelectClause, BulkResponse } from '@travetto/model';
 import { AsyncContext } from '@travetto/context';
-import { SQLUtil, VisitHandler, VisitState, VisitInstanceNode } from '../util';
-import { SelectClause } from '@travetto/model/src/model/query';
-import { ModelCore } from '@travetto/model/src/model/core';
-import { BulkOp, BulkResponse } from '@travetto/model/src/model/bulk';
-import { ConnectionSupport } from './connection';
-import { Dialect } from '../types';
 import { Util } from '@travetto/base';
+
+import { ConnectionSupport } from './connection';
+import { Dialect, DeleteWrapper, InsertWrapper } from '../types';
+import { SQLUtil, VisitHandler, VisitState, VisitInstanceNode } from '../util';
 
 /**
  * Core implementation for specific sql queries, allowing
@@ -65,9 +63,9 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(name)} (
 
   resolveTable(cls: Class, prefix = '', aliases?: Record<string, string>) {
     const base = ModelRegistry.getBaseCollection(cls);
-    const ret = prefix ? `${prefix}_${base}` : base;
+    let ret = prefix ? `${prefix}_${base}` : base;
     if (aliases) {
-
+      ret = aliases[ret] || ret;
     }
     return ret;
   }
@@ -130,7 +128,7 @@ GROUP BY ${this.ROOT}.id`);
   async insertRows(table: string, columns: string[], rows: string[][]) {
     await this.executeSQL(`
 INSERT INTO ${this.namespace(table)} (${columns.join(', ')})
-VALUES  ${rows.map(row => `(${row.join(', ')})`).join('\n')}`);
+VALUES  ${rows.map(row => `(${row.join(', ')})`).join(',\n')};`);
   }
 
   /**
@@ -144,6 +142,11 @@ ${suffix}`);
     return -1;
   }
 
+  async deleteByIds(table: string, ids: string[]) {
+    const ret = await this.executeSQL<{ affectedRows: number }>(`DELETE FROM ${table} WHERE ${this.ID_FIELD} IN (${ids.join(', ')})`);
+    return ret.affectedRows;
+  }
+
   /**
    * Get elements by ids
    */
@@ -154,19 +157,62 @@ FROM ${this.namespace(table)}
 WHERE ${field} IN (${ids.map(id => `'${id}'`).join(', ')});`);
   }
 
-  async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse> {
-    throw new Error('Method not implemented.');
-    return {
+  /**
+   * Bulk processing
+   */
+  async bulkProcess(
+    dels: DeleteWrapper[],
+    inserts: InsertWrapper[],
+    upserts: InsertWrapper[],
+    updates: InsertWrapper[]
+  ): Promise<BulkResponse> {
+
+    const out = {
       counts: {
-        delete: 0,
+        delete: dels.filter(x => x.level === 1).reduce((acc, el) => acc + el.ids.length, 0),
         error: 0,
-        insert: 0,
-        update: 0,
-        upsert: 0
+        insert: inserts.filter(x => x.level === 1).reduce((acc, el) => acc + el.records.length, 0),
+        update: updates.filter(x => x.level === 1).reduce((acc, el) => acc + el.records.length, 0),
+        upsert: upserts.filter(x => x.level === 1).reduce((acc, el) => acc + el.records.length, 0)
       },
       errors: [],
       insertedIds: new Map()
     };
+
+    // Full removals
+    await Promise.all(dels.map(d => this.deleteByIds(d.table, d.ids)));
+
+    // Adding deletes
+    if (upserts.length || updates.length) {
+      await Promise.all([
+        ...upserts.map(i => {
+          const idx = i.fields.indexOf(this.ID_FIELD);
+          return this.deleteByIds(i.table, i.records.map(v => v[idx]))
+        }),
+        ...updates.map(i => {
+          const idx = i.fields.indexOf(this.ID_FIELD);
+          return this.deleteByIds(i.table, i.records.map(v => v[idx]))
+        }),
+      ]);
+    }
+
+    // Adding
+    for (const items of [inserts, upserts, updates]) {
+      if (!items.length) {
+        continue;
+      }
+      let lvl = 1; // Add by level
+      while (true) {
+        const leveled = items.filter(f => f.level === lvl);
+        if (!leveled.length) {
+          break;
+        }
+        await Promise.all(leveled.map(iw => this.insertRows(iw.table, iw.fields, iw.records)))
+        lvl += 1;
+      }
+    }
+
+    return out;
   }
 
   /**
@@ -223,8 +269,12 @@ WHERE ${field} IN (${ids.map(id => `'${id}'`).join(', ')});`);
     return SQLUtil.fetchDependents(this, cls, items, select);
   }
 
-  visitSchema(cls: Class, handler: VisitHandler, state?: VisitState) {
+  visitSchema(cls: Class, handler: VisitHandler<Promise<void>>, state?: VisitState) {
     return SQLUtil.visitSchema(this, SchemaRegistry.get(cls), handler, state);
+  }
+
+  visitSchemaSync(cls: Class, handler: VisitHandler<any>, state?: VisitState) {
+    return SQLUtil.visitSchemaSync(this, SchemaRegistry.get(cls), handler, state);
   }
 
   visitSchemaInstance<T>(cls: Class<T>, instance: T, handler: VisitHandler<Promise<any>, VisitInstanceNode>) {

@@ -1,6 +1,6 @@
 import * as mysql from 'mysql';
 
-import { SchemaChangeEvent, FieldConfig, BindUtil } from '@travetto/schema';
+import { FieldConfig, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { SQLModelConfig } from '../../config';
@@ -99,7 +99,7 @@ export class MySQLDialect extends SQLDialect {
    */
   async executeSQL<T = any>(query: string | mysql.QueryOptions): Promise<T> {
     return new Promise<T>((res, rej) => {
-      console.trace('Executing query\n', query);
+      (console as any).raw.log(`\n${'-'.repeat(20)}\nExecuting query\n`, query, '\n', '-'.repeat(20));
       this.conn.active.query(query, (err, results, fields) => {
         if (err) {
           console.debug(err);

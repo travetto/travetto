@@ -1,9 +1,20 @@
 import { ConnectionSupport } from './dialect/connection';
 import { FieldConfig } from '@travetto/schema';
 import { Class } from '@travetto/registry';
-import { Query } from '@travetto/model/src/model/query';
-import { ModelCore } from '@travetto/model/src/model/core';
-import { BulkOp, BulkResponse } from '@travetto/model/src/model/bulk';
+import { Query, BulkResponse } from '@travetto/model';
+
+export interface InsertWrapper {
+  table: string;
+  level: number;
+  fields: string[];
+  records: any[][];
+}
+
+export interface DeleteWrapper {
+  table: string;
+  level?: number;
+  ids: string[];
+}
 
 export interface Dialect {
   PARENT_PATH_ID: string;
@@ -34,5 +45,10 @@ export interface Dialect {
 
   // Basic data management
   selectRowsByIds<T>(table: string, field: string, ids: string[], select?: string): Promise<T[]>;
-  bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse>;
+  bulkProcess(
+    dels: DeleteWrapper[],
+    inserts: InsertWrapper[],
+    upserts: InsertWrapper[],
+    updates: InsertWrapper[]
+  ): Promise<BulkResponse>;
 }

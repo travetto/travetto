@@ -2,7 +2,7 @@ import { Util } from '@travetto/base';
 import { ModelCore, WhereClause, SelectClause, SortClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/schema';
-import { Dialect } from './types';
+import { Dialect, InsertWrapper } from './types';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -26,7 +26,6 @@ const SQL_OPS = {
   $isNot: 'IS NOT'
 };
 
-type VisitReturn = void | Promise<any>;
 export type VisitState = { path: string[], parentTable?: string };
 
 interface VisitNode {
@@ -41,7 +40,7 @@ export interface VisitInstanceNode extends VisitNode {
   value: any;
 }
 
-export interface VisitHandler<R = VisitReturn, U extends VisitNode = VisitNode> {
+export interface VisitHandler<R, U extends VisitNode = VisitNode> {
   onRoot(config: U & { config: ClassConfig }): R;
   onSub(config: U & { config: FieldConfig, parentTable: string }): R;
   onSimple(config: U & { config: FieldConfig, parentTable: string }): R;
@@ -107,7 +106,7 @@ export class SQLUtil {
 
           switch (subKey) {
             case '$all': case '$nin': case '$in': {
-              const arr = (Array.isArray(v) ? v : [v]).map(resolve);
+              const arr = (Array.isArray(v) ? v : [v]).map(el => resolve(el));
               items.push(`${sPath} ${SQL_OPS[subKey]} (${arr})`);
               break;
             }
@@ -201,7 +200,7 @@ export class SQLUtil {
     const descend = async () => {
       for (const field of foreign) {
         if (SchemaRegistry.has(field.type)) {
-          this.visitSchema(dct, field, handler, { path: state.path, parentTable: table });
+          this.visitSchemaSync(dct, field, handler, { path: state.path, parentTable: table });
         } else {
           handler.onSimple({
             ...state, config: field, parentTable: table, table: `${table}_${field.name}`, descend: null as any, fields: []
@@ -231,7 +230,7 @@ export class SQLUtil {
     }
   }
 
-  static async visitSchema(dct: Dialect, config: ClassConfig | FieldConfig, handler: VisitHandler, state: VisitState = { path: [], parentTable: '' }) {
+  static async visitSchema(dct: Dialect, config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [], parentTable: '' }) {
     const isRoot = 'class' in config;
     const type = 'class' in config ? config.class : config.type;
     const table = dct.resolveTable(type, state.parentTable);
@@ -270,7 +269,7 @@ export class SQLUtil {
     }
   }
 
-  static async visitSchemaInstance<T extends ModelCore>(dct: Dialect, cls: Class<T>, instance: T, handler: VisitHandler<Promise<any>, VisitInstanceNode>) {
+  static async visitSchemaInstance<T extends ModelCore>(dct: Dialect, cls: Class<T>, instance: T, handler: VisitHandler<Promise<any> | any, VisitInstanceNode>) {
     const pathObj: any[] = [instance];
     await this.visitSchema(dct, SchemaRegistry.get(cls), {
       onRoot: async (config) => {
@@ -421,4 +420,53 @@ export class SQLUtil {
 
     return items;
   }
+
+  static async extractInserts<T>(dct: Dialect, cls: Class<T>, els: T[]): Promise<InsertWrapper[]> {
+    const ins = {} as Record<string, InsertWrapper>;
+
+    function track(table: string, fields: FieldConfig[], level: number, extra: string[]) {
+      if (!ins[table]) {
+        const fieldNames = fields.map(x => x.name);
+        ins[table] = {
+          table,
+          level,
+          fields: [...extra, ...fieldNames],
+          records: []
+        }
+      }
+    }
+
+    const all = els.map(el =>
+      this.visitSchemaInstance(dct, cls, el, {
+        onRoot: ({ table, fields, path, value }) => {
+          track(table, fields, path.length, [dct.PATH_ID]);
+          ins[table].records.push([dct.hash(path.join('.')), ...fields.map(f => dct.resolveValue(f, value[f.name]))]);
+        },
+        onSub: ({ table, fields, path, value }) => {
+          track(table, fields, path.length, [dct.PARENT_PATH_ID, dct.PATH_ID]);
+
+          const parentPath = dct.hash(path.slice(0, path.length - 1).join('.'));
+          const currentPath = dct.hash(`${path.join('.')}`);
+
+          ins[table].records.push([
+            parentPath, currentPath, ...fields.map(f => dct.resolveValue(f, value[f.name]))
+          ]);
+        },
+        onSimple: async ({ table, config: field, path, value }) => {
+          track(table, [field], path.length, [dct.PARENT_PATH_ID, dct.PATH_ID]);
+
+          const parentPath = dct.hash(path.slice(0, path.length - 1).join('.'));
+          const currentPath = `${path.join('.')}`;
+
+          ins[table].records.push(...value.map((v: any, i: number) => [
+            parentPath, dct.hash(`${currentPath}[${i}]`), dct.resolveValue(field, v)
+          ]));
+        }
+      }));
+
+    await Promise.all(all);
+
+    return [...Object.values(ins)];
+  };
+
 }

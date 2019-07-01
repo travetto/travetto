@@ -7,6 +7,7 @@ import { WhereClause } from '@travetto/model/';
 import { SQLUtil } from '../src/util';
 
 import '../src/dialect/mysql/dialect';
+import { Dialect } from '../src/types';
 
 @Schema()
 class User {
@@ -47,11 +48,11 @@ class WhereType {
 @Suite()
 export class QueryTest {
 
-  defaultResolver: QueryResolver = {
+  defaultResolver = {
     resolveTable: (type) => type.name,
     resolveValue: (f, v) => v,
     namespace: (tbl) => typeof tbl === 'string' ? tbl : tbl.name
-  }
+  } as Dialect;
 
   @BeforeAll()
   async beforeAll() {
@@ -75,7 +76,7 @@ export class QueryTest {
       ]
     };
 
-    const qryStr = SQLUtil.buildWhere(qry, WhereType, this.defaultResolver);
+    const qryStr = SQLUtil.buildWhere(this.defaultResolver, qry, WhereType);
     assert(qryStr === '(WhereTypeAB.c = 5 AND WhereTypeD.e = true AND (WhereType.name = 5 OR WhereType.age = 10) AND WhereTypeG.z ALL = (a,b,c) AND (WhereTypeA.d > 20))');
   }
 
@@ -83,11 +84,11 @@ export class QueryTest {
   @Test()
   async testRegEx() {
 
-    const out = SQLUtil.buildWhere({
+    const out = SQLUtil.buildWhere(this.defaultResolver, {
       name: {
         $regex: '/google.$/'
       }
-    }, User, this.defaultResolver);
+    }, User);
 
     assert(out === 'User.name REGEXP /google.$/');
   }

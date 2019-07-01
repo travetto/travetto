@@ -78,9 +78,9 @@ class TestSave extends BaseSqlTest {
   async save() {
     const service = await DependencyRegistry.getInstance(ModelService);
 
-    for (const x of [1, 2, 3, 8]) {
-      const res = await service.save(Person,
-        Person.from({
+    const res = await service.bulkProcess(Person, [1, 2, 3, 8].map(x => {
+      return {
+        insert: Person.from({
           id: `Orange-${x}`,
           name: 'Bob',
           age: 20 + x,
@@ -89,9 +89,12 @@ class TestSave extends BaseSqlTest {
             street1: 'a',
             ...(x === 1 ? { street2: 'b' } : {})
           }
-        }), true);
-      assert(res);
-    }
+        })
+      };
+    }));
+
+    assert(res);
+    assert(res.counts.insert === 4);
 
     const single = await service.getById(Person, 'Orange-3');
     assert(single !== undefined);
