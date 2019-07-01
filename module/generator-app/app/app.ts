@@ -116,6 +116,10 @@ export class TravettoGenerator extends Generator {
     }
   }
 
+  getFinalPath(key: string) {
+    return this.destinationPath(key).replace(/gitignore/g, '.gitignore');
+  }
+
   async _templateFiles(context: Context) {
     const files = require(FsUtil.resolveUnix(this.sourceRoot(), 'listing.json')) as { [key: string]: { requires?: string[] } };
     for (const key of Object.keys(files)) {
@@ -123,11 +127,7 @@ export class TravettoGenerator extends Generator {
       if (conf.requires && !meetsRequirement(context.dependencies.list, conf.requires)) {
         continue;
       }
-      this.fs.write(this.destinationPath(key), await template(this.templatePath(key), context));
-    }
-
-    for (const f of ['.gitignore']) {
-      this.fs.write(this.destinationPath(f.replace(/_/, '/')), await template(FsUtil.resolveUnix(__dirname, `../${f}`), context));
+      this.fs.write(this.getFinalPath(key), await template(this.templatePath(key), context));
     }
   }
 }

@@ -1,6 +1,7 @@
 {
   "package.json": {},
   "README.md": {},
+  "gitignore": {},
   "resources/application.yml": {},
   "src/model/todo.ts": {
     "requires": [
