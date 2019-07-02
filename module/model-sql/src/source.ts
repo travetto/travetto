@@ -167,7 +167,9 @@ export class SQLModelSource extends ModelSource {
     }
     filter.limit = filter.limit || 10;
     const suggestQuery = {
-      [field]: new RegExp(`\\b${query}`, 'i')
+      [field]: {
+        $regex: new RegExp(`\\b${query}.*`, 'i')
+      }
     } as any as WhereClauseRaw<T>;
 
     if (!filter.where) {
@@ -292,8 +294,12 @@ export class SQLModelSource extends ModelSource {
   }
 
   @Connected()
-  query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]> {
-    return this.dialect.query(cls, builder);
+  async query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]> {
+    const res = await this.dialect.query(cls, builder);
+    if (ModelRegistry.has(cls) && builder) {
+      await this.dialect.fetchDependents(cls, res, builder.select);
+    }
+    return res as any as U[];
   }
 
   @Connected(true)

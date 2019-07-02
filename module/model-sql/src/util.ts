@@ -19,6 +19,8 @@ const SQL_OPS = {
   $eq: '=',
   $ne: '<>',
   $gte: '>=',
+  $like: 'LIKE',
+  $ilike: 'ILIKE',
   $lte: '<=',
   $gt: '>',
   $lt: '<',
@@ -110,8 +112,22 @@ export class SQLUtil {
               items.push(`${sPath} ${SQL_OPS[subKey]} (${arr})`);
               break;
             }
+            case '$regex': {
+              const re = (v as RegExp)
+              const src = re.source;
+              const ins = re.flags.includes('i');
+
+              if (/^[\^]\S+[.][*][$]?$/.test(src)) {
+                const inner = src.substring(1, src.length - 2);
+                items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(inner)}%`);
+              } else {
+                let val = resolve(v).replace(/\\b/g, '([[:<:]]|[[:>:]])');
+                items.push(`${sPath} ${SQL_OPS[subKey]} ${!ins ? 'BINARY' : ''} ${val}`);
+              }
+              break;
+            }
             case '$exists': items.push(`${sPath} ${v ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`); break;
-            case '$ne': case '$eq': case '$regex': items.push(`${sPath} ${SQL_OPS[subKey]} ${resolve(v)}`); break;
+            case '$ne': case '$eq': items.push(`${sPath} ${SQL_OPS[subKey]} ${resolve(v)}`); break;
             case '$lt': case '$gt': case '$gte': case '$lte': {
               const subItems = (Object.keys(top) as (keyof typeof SQL_OPS)[])
                 .map(ssk => `${sPath} ${SQL_OPS[ssk]} ${resolve(top[ssk])}`);
@@ -397,8 +413,8 @@ export class SQLUtil {
         if (ids.length && (!subSelectTop || sel)) {
           const children = await dct.selectRowsByIds(table, dct.PARENT_PATH_ID, ids, sel);
 
+          const res = buildSet(children, config);
           try {
-            const res = buildSet(children, config);
             stack.push(res);
             selectStack.push(subSelectTop);
             await descend();

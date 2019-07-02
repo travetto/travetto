@@ -230,7 +230,7 @@ class TestSave extends BaseSqlTest {
     assert(o.id);
     assert(o.name === 'bob');
 
-    const o2 = await service.updatePartial(Person, Person.from({
+    const o2 = await service.updatePartial(Person, Person.fromRaw({
       id: o.id,
       name: 'oscar'
     }));

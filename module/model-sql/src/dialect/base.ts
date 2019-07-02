@@ -143,7 +143,7 @@ ${suffix}`);
   }
 
   async deleteByIds(table: string, ids: string[]) {
-    const ret = await this.executeSQL<{ affectedRows: number }>(`DELETE FROM ${table} WHERE ${this.ID_FIELD} IN (${ids.join(', ')})`);
+    const ret = await this.executeSQL<{ affectedRows: number }>(`DELETE FROM ${this.namespace(table)} WHERE ${this.ID_FIELD} IN (${ids.join(', ')})`);
     return ret.affectedRows;
   }
 
@@ -185,11 +185,11 @@ WHERE ${field} IN (${ids.map(id => `'${id}'`).join(', ')});`);
     // Adding deletes
     if (upserts.length || updates.length) {
       await Promise.all([
-        ...upserts.map(i => {
+        ...upserts.filter(x => x.level === 1).map(i => {
           const idx = i.fields.indexOf(this.ID_FIELD);
           return this.deleteByIds(i.table, i.records.map(v => v[idx]))
         }),
-        ...updates.map(i => {
+        ...updates.filter(x => x.level === 1).map(i => {
           const idx = i.fields.indexOf(this.ID_FIELD);
           return this.deleteByIds(i.table, i.records.map(v => v[idx]))
         }),

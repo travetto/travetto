@@ -37,6 +37,6 @@ export class BaseSqlTest {
   @AfterEach()
   async afterEach() {
     const mms = (await DependencyRegistry.getInstance(ModelSource)) as SQLModelSource;
-    // await mms.clearDatabase();
+    await mms.clearDatabase();
   }
 }
