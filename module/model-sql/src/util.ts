@@ -34,6 +34,7 @@ export type VisitState = { path: string[], parentTable?: string };
 interface VisitNode {
   path: string[];
   table: string;
+  index?: number;
   fields: FieldConfig[];
   parentTable?: string;
   descend: () => Promise<any>;
@@ -78,7 +79,7 @@ export class SQLUtil {
       return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x)) as any;
     } else if (!Util.isSimple(o)) {
       for (const k of Object.keys(o) as (keyof T)[]) {
-        if (o[k] === null || o[k] === undefined || k === dct.parentPathField.name || k === dct.pathField.name) {
+        if (o[k] === null || o[k] === undefined || k === dct.parentPathField.name || k === dct.pathField.name || k === dct.idxField.name) {
           delete o[k];
         } else {
           o[k] = this.cleanResults(dct, o[k]);
@@ -133,7 +134,7 @@ export class SQLUtil {
             case '$regex': {
               const re = (v as RegExp)
               const src = re.source;
-              const ins = re.flags.includes('i');
+              const ins = re.flags && re.flags.includes('i');
 
               if (/^[\^]\S+[.][*][$]?$/.test(src)) {
                 const inner = src.substring(1, src.length - 2);
@@ -326,7 +327,7 @@ export class SQLUtil {
                 const len = path.length;
                 path = [...path.slice(0, len - 1), `${path[len - 1]}[${i}]`];
               }
-              await handler.onSub({ ...config, value: val, path });
+              await handler.onSub({ ...config, value: val, path, index: i });
             } finally {
               pathObj.pop();
             }
@@ -430,7 +431,15 @@ export class SQLUtil {
         // See if a selection exists at all
         const sel = subSelectTop ? fields
           .filter(f => (subSelectTop as any)[f.name] === 1)
-          .map(k => `${dct.resolveTable(config.type, parentTable)}.${k}`).join(', ') : undefined;
+          .map(f => f.name)
+          : [];
+
+        if (sel.length) {
+          sel.push(dct.pathField.name, dct.parentPathField.name);
+          if (config.array) {
+            sel.push(dct.idxField.name);
+          }
+        }
 
         // If children and selection exists
         if (ids.length && (!subSelectTop || sel)) {
@@ -451,7 +460,7 @@ export class SQLUtil {
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
         if (ids.length) {
-          const matching = await dct.selectRowsByIds(table, dct.parentPathField.name, ids);
+          const matching = await dct.selectRowsByIds(table, dct.parentPathField.name, ids, [], dct.sort(dct.idxField.name, true));
           buildSet(matching, config);
         }
       }

@@ -127,11 +127,12 @@ GROUP BY ${this.ROOT}.${this.idField.name}`);
   PRIMARY KEY(${this.idField.name})`).replace(new RegExp(`(\\b${this.idField.name}.*)DEFAULT NULL`), (_, s) => `${s} NOT NULL`);
   }
 
-  createSubTableSQL(table: string, fields: FieldConfig[], parentTable: string) {
+  createSubTableSQL(table: string, config: FieldConfig, fields: FieldConfig[], parentTable: string) {
     return this.createTableSQL(table, fields, `
-    ${this.getColumnDefinition(this.parentPathField)}, 
-    ${this.getColumnDefinition(this.pathField)},
-    PRIMARY KEY (${this.pathField.name}, ${this.parentPathField.name}),
+  ${this.getColumnDefinition(this.parentPathField)}, 
+  ${this.getColumnDefinition(this.pathField)},
+  ${config.array ? `${this.getColumnDefinition(this.idxField)},` : ''}
+  PRIMARY KEY (${this.pathField.name}, ${this.parentPathField.name}),
   FOREIGN KEY (${this.parentPathField.name}) REFERENCES ${this.namespace(parentTable)}(${this.pathField.name}) ON DELETE CASCADE`);
   }
 
@@ -165,7 +166,8 @@ VALUES  ${rows.map(row => `(${row.join(', ')})`).join(',\n')};`);
    */
   async updateRows(table: string, data: Record<string, string>, suffix?: string) {
     await this.executeSQL(`
-UPDATE ${table} SET
+UPDATE ${this.namespace(table)} 
+SET
   ${Object.entries(data).map(([k, v]) => `${k}=${v}`).join(', ')}
 ${suffix}`);
     return -1;
@@ -179,14 +181,19 @@ WHERE ${this.idField.name} IN (${ids.join(', ')})`);
     return ret.affectedRows;
   }
 
+  sort(column: string, asc: boolean) {
+    return `${column} ${asc ? 'ASC' : 'DESC'}`;
+  }
+
   /**
    * Get elements by ids
    */
-  async selectRowsByIds<T>(table: string, field: string, ids: string[], select = '*'): Promise<T[]> {
+  async selectRowsByIds<T>(table: string, field: string, ids: string[], select: string[] = [], orderBy = ''): Promise<T[]> {
     return this.executeSQL(`
-SELECT ${select || '*'}
-FROM ${this.namespace(table)}
-WHERE ${field} IN (${ids.map(id => `'${id}'`).join(', ')});`);
+SELECT ${select.length ? select.map(x => `${this.ROOT}.${x}`).join(',') : '*'}
+FROM ${this.namespace(table)} ${this.ROOT}
+WHERE ${this.ROOT}.${field} IN (${ids.map(id => `'${id}'`).join(', ')})
+${orderBy ? `ORDER BY ${orderBy}` : ''};`);
   }
 
   /**
@@ -293,6 +300,8 @@ WHERE ${field} IN (${ids.map(id => `'${id}'`).join(', ')});`);
         }
       }
     }
+
+    toGet.add(this.pathField.name);
 
     return `SELECT ${[...toGet].sort().map(c => `${clauses[tbl].alias}.${c}`).join(', ')}`;
   }

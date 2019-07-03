@@ -26,6 +26,8 @@ export interface Dialect {
 
   conn: ConnectionSupport;
 
+  sort(name: string, asc: boolean): string;
+
   // Schema support
   hash(name: string): string;
   getColumnDefinition(config: FieldConfig): string;
@@ -44,7 +46,7 @@ export interface Dialect {
   getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
 
   // Basic data management
-  selectRowsByIds<T>(table: string, field: string, ids: string[], select?: string): Promise<T[]>;
+  selectRowsByIds<T>(table: string, field: string, ids: string[], select?: string[], order?: string): Promise<T[]>;
   bulkProcess(
     dels: DeleteWrapper[],
     inserts: InsertWrapper[],

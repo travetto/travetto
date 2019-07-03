@@ -34,6 +34,11 @@ class Simple {
 }
 
 @Model()
+class SimpleModel extends Simple {
+
+}
+
+@Model()
 class SimpleList {
   id?: string;
   names: string[];
@@ -161,12 +166,12 @@ class TestSave extends BaseSqlTest {
   @Test('Verify update')
   async testUpdate() {
     const service = await DependencyRegistry.getInstance(ModelService);
-    const o = await service.save(Simple, Simple.from({ name: 'bob' }));
+    const o = await service.save(SimpleModel, SimpleModel.from({ name: 'bob' }));
     o.name = 'roger';
-    const b = await service.update(Simple, o);
+    const b = await service.update(SimpleModel, o);
     const id = b.id!;
 
-    const z = await service.getById(Simple, id);
+    const z = await service.getById(SimpleModel, id);
 
     assert(z.name === 'roger');
   }

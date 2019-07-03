@@ -24,7 +24,7 @@ function toList<T>(items: T | T[] | Set<T> | undefined) {
 
 export class Util {
 
-  private static deepAssignRaw(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose', deleteOnEmpty = false) {
+  private static deepAssignRaw(a: any, b: any, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;
     const isArrA = Array.isArray(a);
@@ -34,7 +34,7 @@ export class Util {
 
     let ret: any;
 
-    if (!deleteOnEmpty && (isEmptyA || isEmptyB)) { // If no `a`, `b` always wins
+    if (mode !== 'replace' && (isEmptyA || isEmptyB)) { // If no `a`, `b` always wins
       if (b === null || !isEmptyB) {
         ret = isEmptyB ? b : this.shallowClone(b);
       } else if (!isEmptyA) {
@@ -42,7 +42,7 @@ export class Util {
       } else {
         ret = undefined;
       }
-    } else if (deleteOnEmpty && isEmptyB) {
+    } else if (mode === 'replace' && isEmptyB) {
       ret = b;
     } else {
       if (isArrA !== isArrB || isSimpA !== isSimpB) {
@@ -50,8 +50,12 @@ export class Util {
       }
       if (isArrB) { // Arrays
         ret = a; // Write onto A
-        for (let i = 0; i < b.length; i++) {
-          ret[i] = this.deepAssignRaw(ret[i], b[i], mode, deleteOnEmpty);
+        if (mode === 'replace') {
+          ret = b;
+        } else {
+          for (let i = 0; i < b.length; i++) {
+            ret[i] = this.deepAssignRaw(ret[i], b[i], mode);
+          }
         }
       } else if (isSimpB) { // Scalars
         const match = typeof a === typeof b;
@@ -68,7 +72,7 @@ export class Util {
         ret = a;
 
         for (const key of Object.keys(b)) {
-          ret[key] = this.deepAssignRaw(ret[key], b[key], mode, deleteOnEmpty);
+          ret[key] = this.deepAssignRaw(ret[key], b[key], mode);
         }
       }
     }
@@ -143,11 +147,11 @@ export class Util {
     return this.isPrimitive(a) || this.isFunction(a) || this.isClass(a);
   }
 
-  static deepAssign<T extends any, U extends any>(a: T, b: U, mode: 'loose' | 'strict' | 'coerce' = 'loose', deleteOnEmpty = false): T & U {
+  static deepAssign<T extends any, U extends any>(a: T, b: U, mode: | 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
     if (!a || this.isSimple(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
     }
-    return this.deepAssignRaw(a, b, mode, deleteOnEmpty) as T & U;
+    return this.deepAssignRaw(a, b, mode) as T & U;
   }
 
   static throttle<T, U, V>(fn: (a: T, b: U) => V, threshold?: number): (a: T, b: U) => V;

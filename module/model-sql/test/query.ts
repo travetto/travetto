@@ -77,7 +77,7 @@ export class QueryTest {
     };
 
     const qryStr = SQLUtil.buildWhere(this.defaultResolver, qry, WhereType);
-    assert(qryStr === '(WhereTypeAB.c = 5 AND WhereTypeD.e = true AND (WhereType.name = 5 OR WhereType.age = 10) AND WhereTypeG.z ALL = (a,b,c) AND (WhereTypeA.d > 20))');
+    assert(qryStr === '(WhereTypeAB.c = 5 AND WhereTypeD.e = true AND (WhereType.name = 5 OR WhereType.age = 10) AND WhereTypeG.z ALL = (a,b,c) AND WhereTypeA.d > 20)');
   }
 
 
@@ -90,6 +90,6 @@ export class QueryTest {
       }
     }, User);
 
-    assert(out === 'User.name REGEXP /google.$/');
+    assert(out === 'User.name REGEXP BINARY /google.$/');
   }
 }

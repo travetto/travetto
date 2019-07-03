@@ -52,8 +52,8 @@ export class SQLModelSource extends ModelSource {
         await this.dialect.executeSQL(this.dialect.createPrimaryTableSQL(table, fields));
         return descend();
       },
-      onSub: async ({ table, fields, parentTable, descend }) => {
-        await this.dialect.executeSQL(this.dialect.createSubTableSQL(table, fields, parentTable));
+      onSub: async ({ table, config, fields, parentTable, descend }) => {
+        await this.dialect.executeSQL(this.dialect.createSubTableSQL(table, config, fields, parentTable));
         return descend();
       },
       onSimple: async ({ config, parentTable, table }) => {
@@ -185,7 +185,14 @@ export class SQLModelSource extends ModelSource {
   async insert<T = any>(cls: Class, instance: T) {
     return this.dialect.visitSchemaInstance(cls, instance, {
       onRoot: ({ table, fields, value, path }) => this.insertSingle(table, path, fields, value),
-      onSub: ({ table, fields, value, path }) => this.insertSingle(table, path, fields, value),
+      onSub: ({ table, config, fields, value, path, index }) => {
+        if (config.array) {
+          fields = [this.dialect.idxField, ...fields];
+          value = { ...value, [this.dialect.idxField.name]: index };
+        }
+        const res = this.insertSingle(table, path, fields, value);
+        return res;
+      },
       onSimple: async ({ table, config: field, value, path }) => {
         if (Array.isArray(value)) {
           const root = path.join('.');
@@ -249,7 +256,7 @@ export class SQLModelSource extends ModelSource {
   @Connected(true)
   async updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T> {
     const final = await this.getById(cls, model.id!);
-    Util.deepAssign(final, model, 'loose', true);
+    Util.deepAssign(final, model, 'replace');
     return this.update(cls, final);
   }
 
