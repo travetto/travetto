@@ -27,14 +27,7 @@ class Person extends BaseModel {
   address: Address;
 }
 
-@Model()
-class SimpleNested {
-  id: string;
-  addresses: Address[];
-  random: any;
-}
-
-@Model()
+@Schema()
 class Simple {
   id?: string;
   name: string;

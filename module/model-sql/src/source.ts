@@ -45,15 +45,9 @@ export class SQLModelSource extends ModelSource {
   createTables(cls: Class<any>): Promise<void> {
     return this.dialect.visitSchema(cls, {
       onRoot: async ({ table, fields, descend }) => {
-        let idField = fields.find(x => x.name === this.dialect.ID_FIELD);
+        let idField = fields.find(x => x.name === this.dialect.idField.name);
         if (!idField) {
-          fields.push(idField = {
-            name: this.dialect.ID_FIELD,
-            type: String,
-            required: { active: true },
-            array: false,
-            owner: null
-          });
+          fields.push(idField = this.dialect.idField);
         }
         await this.dialect.executeSQL(this.dialect.createPrimaryTableSQL(table, fields));
         return descend();
@@ -92,12 +86,14 @@ export class SQLModelSource extends ModelSource {
     const values = columns.map(x => this.dialect.resolveValue(x, instance[x.name]));
 
     const columnNames = columns.map(x => x.name);
-    columnNames.unshift(this.dialect.PATH_ID);
-    values.unshift(this.dialect.hash(path.join('.')));
+    columnNames.unshift(this.dialect.pathField.name);
+    const sub = path.join('.');
+    values.unshift(this.dialect.hash(sub));
 
     if (path.length > 1) {
-      columnNames.unshift(this.dialect.PARENT_PATH_ID);
-      values.unshift(this.dialect.hash(path.slice(0, path.length - 1).join('.')));
+      const root = path.slice(0, path.length - 1).join('.');
+      columnNames.unshift(this.dialect.parentPathField.name);
+      values.unshift(this.dialect.hash(root));
     }
 
     await this.dialect.insertRows(table, columnNames, [values]);
@@ -190,11 +186,23 @@ export class SQLModelSource extends ModelSource {
     return this.dialect.visitSchemaInstance(cls, instance, {
       onRoot: ({ table, fields, value, path }) => this.insertSingle(table, path, fields, value),
       onSub: ({ table, fields, value, path }) => this.insertSingle(table, path, fields, value),
-      onSimple: async ({ table, config: field, value, parentTable, path }) => {
+      onSimple: async ({ table, config: field, value, path }) => {
         if (Array.isArray(value)) {
-          await this.dialect.insertRows(table, [this.dialect.PARENT_PATH_ID, this.dialect.PATH_ID, field.name], value.map((v, i) =>
-            [this.dialect.hash(parentTable), this.dialect.hash(`${path.join('.')}[${i}]`), this.dialect.resolveValue(field, v)]
-          ));
+          const root = path.join('.');
+          await this.dialect.insertRows(table,
+            [
+              this.dialect.parentPathField,
+              this.dialect.pathField,
+              this.dialect.idxField,
+              field
+            ].map(x => x.name),
+            value.map((v, i) => [
+              this.dialect.hash(`${root}`),
+              this.dialect.hash(`${root}.${field.name}[${i}]`),
+              `${i}`,
+              this.dialect.resolveValue(field, v)
+            ])
+          );
         }
       }
     });
@@ -258,11 +266,6 @@ export class SQLModelSource extends ModelSource {
   @Connected()
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {
     const res = await this.query(cls, query);
-    try {
-      await this.dialect.fetchDependents(cls, res);
-    } catch (err) {
-      console.log(err);
-    }
     return res;
   }
 
@@ -281,7 +284,7 @@ export class SQLModelSource extends ModelSource {
       const res = await this.getByQuery(cls, { where: { id } } as any as ModelQuery<T>);
       return res;
     } catch (err) {
-      throw new AppError(`Invalid number of results for find by id: 0`, 'notfound');
+      throw new AppError(`Invalid number of results for find by id: ${err.message}`, 'notfound');
     }
   }
 
@@ -298,9 +301,10 @@ export class SQLModelSource extends ModelSource {
   @Connected()
   async query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]> {
     const res = await this.dialect.query(cls, builder);
-    if (ModelRegistry.has(cls) && builder) {
-      await this.dialect.fetchDependents(cls, res, builder.select);
+    if (ModelRegistry.has(cls)) {
+      await this.dialect.fetchDependents(cls, res, builder && builder.select);
     }
+    SQLUtil.cleanResults(this.dialect, res);
     return res as any as U[];
   }
 

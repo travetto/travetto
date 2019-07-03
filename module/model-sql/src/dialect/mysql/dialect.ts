@@ -6,7 +6,6 @@ import { AsyncContext } from '@travetto/context';
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../base';
 import { MySQLConnection } from './connection';
-import { SQLUtil } from '../../util';
 
 @Injectable({
   target: SQLDialect
@@ -56,7 +55,7 @@ export class MySQLDialect extends SQLDialect {
       if (conf.specifier && conf.specifier.startsWith('text')) {
         type = 'TEXT';
       } else {
-        type = `NVARCHAR(${conf.maxlength || 1024})`;
+        type = `NVARCHAR(${conf.maxlength ? conf.maxlength.n : 1024})`;
       }
     }
 
@@ -64,7 +63,7 @@ export class MySQLDialect extends SQLDialect {
       return '';
     }
 
-    return `${conf.name} ${type} ${conf.name === 'id' || (conf.required && conf.required.active) ? 'NOT NULL' : 'DEFAULT NULL'}`;
+    return `${conf.name} ${type} ${conf.required && conf.required.active ? 'NOT NULL' : 'DEFAULT NULL'}`;
   }
 
   /**
@@ -106,8 +105,7 @@ export class MySQLDialect extends SQLDialect {
           console.debug(err);
           rej(err);
         } else {
-          SQLUtil.deleteNulls(results);
-          res(results);
+          res(Array.isArray(results) ? [...results].map(v => ({ ...v })) : { ...results });
         }
       });
     });

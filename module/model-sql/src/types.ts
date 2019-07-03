@@ -17,12 +17,12 @@ export interface DeleteWrapper {
 }
 
 export interface Dialect {
-  PARENT_PATH_ID: string;
-  PATH_ID: string;
-  PATH_ID_LEN: number;
-  PATH_KEY_TYPE: string;
   ROOT: string;
-  ID_FIELD: string;
+
+  parentPathField: FieldConfig;
+  pathField: FieldConfig;
+  idField: FieldConfig;
+  idxField: FieldConfig;
 
   conn: ConnectionSupport;
 

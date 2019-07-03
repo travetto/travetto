@@ -1,7 +1,8 @@
 import { Util } from '@travetto/base';
-import { ModelCore, WhereClause, SelectClause, SortClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
+import { ModelCore, WhereClause, SelectClause, SortClause } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/schema';
+
 import { Dialect, InsertWrapper } from './types';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
@@ -72,23 +73,20 @@ export class SQLUtil {
     return out;
   }
 
-  static deleteNulls(o: any) {
+  static cleanResults<T>(dct: Dialect, o: T): T {
     if (Array.isArray(o)) {
-      for (let i = o.length - 1; i >= 0; i--) {
-        if (o[i] === null || o[i] === undefined) {
-          (o as any[]).splice(i, 1);
-        } else {
-          this.deleteNulls(o[i]);
-        }
-      }
+      return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x)) as any;
     } else if (!Util.isSimple(o)) {
-      for (const k of Object.keys(o)) {
-        if (o[k] === null || o[k] === undefined) {
+      for (const k of Object.keys(o) as (keyof T)[]) {
+        if (o[k] === null || o[k] === undefined || k === dct.parentPathField.name || k === dct.pathField.name) {
           delete o[k];
         } else {
-          this.deleteNulls(o[k]);
+          o[k] = this.cleanResults(dct, o[k]);
         }
       }
+      return { ...o };
+    } else {
+      return o;
     }
   }
 
@@ -323,7 +321,11 @@ export class SQLUtil {
           for (const val of vals) {
             try {
               pathObj.push(val);
-              const path = isArray ? [...config.path, `[${i}]`] : config.path;
+              let path = config.path;
+              if (isArray) {
+                const len = path.length;
+                path = [...path.slice(0, len - 1), `${path[len - 1]}[${i}]`];
+              }
               await handler.onSub({ ...config, value: val, path });
             } finally {
               pathObj.pop();
@@ -362,13 +364,13 @@ export class SQLUtil {
       },
       onSub: ({ table, descend, config, parentTable }) => {
         const alias = `${config.name.charAt(0)}${idx++}`;
-        const where = `${clauses[parentTable].alias}.${dct.PATH_ID} = ${alias}.${dct.PARENT_PATH_ID}`;
+        const where = `${clauses[parentTable].alias}.${dct.pathField.name} = ${alias}.${dct.parentPathField.name}`;
         clauses[table] = { alias, where };
         return descend();
       },
       onSimple: ({ table, config, parentTable }) => {
         const alias = `${config.name.charAt(0)}${idx++}`;
-        const where = `${clauses[parentTable].alias}.${dct.PATH_ID} = ${alias}.${dct.PARENT_PATH_ID}`;
+        const where = `${clauses[parentTable].alias}.${dct.pathField.name} = ${alias}.${dct.parentPathField.name}`;
         clauses[table] = { alias, where };
       }
     });
@@ -380,23 +382,24 @@ export class SQLUtil {
 
   static collectDependents<T extends any>(dct: Dialect, parent: any, v: T[], field?: FieldConfig) {
     if (field) {
+      const isSimple = SchemaRegistry.has(field.type);
       for (const el of v) {
-        const root = parent[el[dct.PARENT_PATH_ID]];
+        const root = parent[el[dct.parentPathField.name]];
         if (field.array) {
           if (!root[field.name]) {
-            root[field.name] = [el];
+            root[field.name] = [isSimple ? el : el[field.name]];
           } else {
-            root[field.name].push(el);
+            root[field.name].push(isSimple ? el : el[field.name]);
           }
         } else {
-          root[field.name] = el;
+          root[field.name] = isSimple ? el : el[field.name];
         }
       }
     }
 
     const mapping: Record<string, T> = {};
     for (const el of v) {
-      mapping[(el as any)[dct.PATH_ID]] = el;
+      mapping[(el as any)[dct.pathField.name]] = el; field
     }
     return mapping;
   }
@@ -431,7 +434,7 @@ export class SQLUtil {
 
         // If children and selection exists
         if (ids.length && (!subSelectTop || sel)) {
-          const children = await dct.selectRowsByIds(table, dct.PARENT_PATH_ID, ids, sel);
+          const children = await dct.selectRowsByIds(table, dct.parentPathField.name, ids, sel);
 
           const res = buildSet(children, config);
           try {
@@ -448,7 +451,7 @@ export class SQLUtil {
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
         if (ids.length) {
-          const matching = await dct.selectRowsByIds(table, dct.PARENT_PATH_ID, ids);
+          const matching = await dct.selectRowsByIds(table, dct.parentPathField.name, ids);
           buildSet(matching, config);
         }
       }
@@ -475,11 +478,11 @@ export class SQLUtil {
     const all = els.map(el =>
       this.visitSchemaInstance(dct, cls, el, {
         onRoot: ({ table, fields, path, value }) => {
-          track(table, fields, path.length, [dct.PATH_ID]);
+          track(table, fields, path.length, [dct.pathField.name]);
           ins[table].records.push([dct.hash(path.join('.')), ...fields.map(f => dct.resolveValue(f, value[f.name]))]);
         },
         onSub: ({ table, fields, path, value }) => {
-          track(table, fields, path.length, [dct.PARENT_PATH_ID, dct.PATH_ID]);
+          track(table, fields, path.length, [dct.parentPathField.name, dct.pathField.name]);
 
           const parentPath = dct.hash(path.slice(0, path.length - 1).join('.'));
           const currentPath = dct.hash(`${path.join('.')}`);
@@ -489,7 +492,7 @@ export class SQLUtil {
           ]);
         },
         onSimple: async ({ table, config: field, path, value }) => {
-          track(table, [field], path.length, [dct.PARENT_PATH_ID, dct.PATH_ID]);
+          track(table, [field], path.length, [dct.parentPathField.name, dct.pathField.name]);
 
           const parentPath = dct.hash(path.slice(0, path.length - 1).join('.'));
           const currentPath = `${path.join('.')}`;

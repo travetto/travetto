@@ -1,12 +1,23 @@
-import { FieldConfig, SchemaChangeEvent, SchemaRegistry, ALL_VIEW } from '@travetto/schema';
-import { Class } from '@travetto/registry';
-import { Query, ModelRegistry, SelectClause, BulkResponse } from '@travetto/model';
-import { AsyncContext } from '@travetto/context';
 import { Util } from '@travetto/base';
+import { AsyncContext } from '@travetto/context';
+import { Class } from '@travetto/registry';
+import { FieldConfig, SchemaChangeEvent, SchemaRegistry, ALL_VIEW } from '@travetto/schema';
+import { Query, ModelRegistry, SelectClause, BulkResponse } from '@travetto/model';
 
 import { ConnectionSupport } from './connection';
 import { Dialect, DeleteWrapper, InsertWrapper } from '../types';
 import { SQLUtil, VisitHandler, VisitState, VisitInstanceNode } from '../util';
+
+function makeField(name: string, type: Class, required: boolean, extra: any) {
+  return {
+    name,
+    owner: null,
+    type,
+    array: false,
+    ...(required ? { required: { active: true } } : {}),
+    ...extra
+  } as FieldConfig;
+}
 
 /**
  * Core implementation for specific sql queries, allowing
@@ -16,12 +27,27 @@ import { SQLUtil, VisitHandler, VisitState, VisitInstanceNode } from '../util';
  */
 export abstract class SQLDialect implements Dialect {
 
-  PARENT_PATH_ID = '__parent_path_id';
-  PATH_ID = '__path_id';
-  PATH_ID_LEN = 64;
-  PATH_KEY_TYPE = `CHAR(${this.PATH_ID_LEN})`;
   ROOT = '_root';
-  ID_FIELD = 'id';
+  KEY_LEN = 64;
+
+  idField = makeField('id', String, true, {
+    maxlength: { n: 32 },
+    minlength: { n: 32 }
+  });
+
+  idxField = makeField('__idx', Number, true, {});
+
+  parentPathField = makeField('__parent_path', String, true, {
+    maxlength: { n: this.KEY_LEN },
+    minlength: { n: this.KEY_LEN },
+    required: { active: true }
+  });
+
+  pathField = makeField('__path', String, true, {
+    maxlength: { n: this.KEY_LEN },
+    minlength: { n: this.KEY_LEN },
+    required: { active: true }
+  });
 
   constructor(public context: AsyncContext, private ns: string) { }
 
@@ -29,7 +55,7 @@ export abstract class SQLDialect implements Dialect {
     return Util.uuid();
   }
 
-  hash = (name: string) => `SHA2('${name}', ${this.PATH_ID_LEN * 4})`;
+  hash = (name: string) => `SHA2('${name}', ${this.KEY_LEN * 4})`;
 
   abstract get conn(): ConnectionSupport;
 
@@ -48,7 +74,7 @@ export abstract class SQLDialect implements Dialect {
     return this.executeSQL<U[]>(`
 ${select}
 ${from}
-GROUP BY ${this.ROOT}.id;`);
+GROUP BY ${this.ROOT}.${this.idField.name};`);
   }
 
   createTableSQL(name: string, fields: FieldConfig[], suffix?: string) {
@@ -90,29 +116,32 @@ ${await this.buildFrom(cls, query)}`);
     const { total } = await this.executeSQL<{ total: number }>(`
 SELECT COUNT(1) as total
 ${from}
-GROUP BY ${this.ROOT}.id`);
+GROUP BY ${this.ROOT}.${this.idField.name}`);
     return total;
   }
 
   createPrimaryTableSQL(table: string, fields: FieldConfig[]) {
     return this.createTableSQL(table, fields, `
-  ${this.PATH_ID} ${this.PATH_KEY_TYPE} NOT NULL,
-  UNIQUE KEY(${this.PATH_ID}),
-  PRIMARY KEY(${this.ID_FIELD})`);
+    ${this.getColumnDefinition(this.pathField)},
+  UNIQUE KEY(${this.pathField.name}),
+  PRIMARY KEY(${this.idField.name})`).replace(new RegExp(`(\\b${this.idField.name}.*)DEFAULT NULL`), (_, s) => `${s} NOT NULL`);
   }
 
   createSubTableSQL(table: string, fields: FieldConfig[], parentTable: string) {
     return this.createTableSQL(table, fields, `
-  ${this.PARENT_PATH_ID} ${this.PATH_KEY_TYPE} NOT NULL,
-  ${this.PATH_ID} ${this.PATH_KEY_TYPE} NOT NULL,
-  PRIMARY KEY (${this.PATH_ID}, ${this.PARENT_PATH_ID}),
-  FOREIGN KEY (${this.PARENT_PATH_ID}) REFERENCES ${this.namespace(parentTable)}(${this.PATH_ID}) ON DELETE CASCADE`);
+    ${this.getColumnDefinition(this.parentPathField)}, 
+    ${this.getColumnDefinition(this.pathField)},
+    PRIMARY KEY (${this.pathField.name}, ${this.parentPathField.name}),
+  FOREIGN KEY (${this.parentPathField.name}) REFERENCES ${this.namespace(parentTable)}(${this.pathField.name}) ON DELETE CASCADE`);
   }
 
   createSimpleTableSQL(table: string, field: FieldConfig, parentTable: string) {
     return this.createTableSQL(`${table}`, [field], `
-  ${this.PARENT_PATH_ID} ${this.PATH_KEY_TYPE} NOT NULL,
-  FOREIGN KEY (${this.PARENT_PATH_ID}) REFERENCES ${this.namespace(parentTable)}(${this.PATH_ID}) ON DELETE CASCADE`);
+  ${this.getColumnDefinition(this.parentPathField)}, 
+  ${this.getColumnDefinition(this.pathField)},
+  ${field.array ? `${this.getColumnDefinition(this.idxField)},` : ''}
+  PRIMARY KEY (${this.pathField.name}, ${this.parentPathField.name}),
+  FOREIGN KEY (${this.parentPathField.name}) REFERENCES ${this.namespace(parentTable)}(${this.pathField.name}) ON DELETE CASCADE`);
   }
 
   /**
@@ -146,7 +175,7 @@ ${suffix}`);
     const ret = await this.executeSQL<{ affectedRows: number }>(`
 DELETE 
 FROM ${this.namespace(table)} 
-WHERE ${this.ID_FIELD} IN (${ids.join(', ')})`);
+WHERE ${this.idField.name} IN (${ids.join(', ')})`);
     return ret.affectedRows;
   }
 
@@ -189,11 +218,11 @@ WHERE ${field} IN (${ids.map(id => `'${id}'`).join(', ')});`);
     if (upserts.length || updates.length) {
       await Promise.all([
         ...upserts.filter(x => x.level === 1).map(i => {
-          const idx = i.fields.indexOf(this.ID_FIELD);
+          const idx = i.fields.indexOf(this.idField.name);
           return this.deleteByIds(i.table, i.records.map(v => v[idx]))
         }),
         ...updates.filter(x => x.level === 1).map(i => {
-          const idx = i.fields.indexOf(this.ID_FIELD);
+          const idx = i.fields.indexOf(this.idField.name);
           return this.deleteByIds(i.table, i.records.map(v => v[idx]))
         }),
       ]);
