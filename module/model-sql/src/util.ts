@@ -72,6 +72,26 @@ export class SQLUtil {
     return out;
   }
 
+  static deleteNulls(o: any) {
+    if (Array.isArray(o)) {
+      for (let i = o.length - 1; i >= 0; i--) {
+        if (o[i] === null || o[i] === undefined) {
+          (o as any[]).splice(i, 1);
+        } else {
+          this.deleteNulls(o[i]);
+        }
+      }
+    } else if (!Util.isSimple(o)) {
+      for (const k of Object.keys(o)) {
+        if (o[k] === null || o[k] === undefined) {
+          delete o[k];
+        } else {
+          this.deleteNulls(o[k]);
+        }
+      }
+    }
+  }
+
   static getSort<T>(sort: SortClause<T>[]) {
     return sort.map(x => {
       const o = this.extractSimple(x);

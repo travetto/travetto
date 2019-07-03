@@ -7,7 +7,7 @@ import {
   ValidStringFields, WhereClauseRaw
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
-import { AppError } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
 import { SchemaChangeEvent, SchemaRegistry, FieldConfig } from '@travetto/schema';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 
@@ -240,7 +240,9 @@ export class SQLModelSource extends ModelSource {
 
   @Connected(true)
   async updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T> {
-    return this.update(cls, model as T);
+    const final = await this.getById(cls, model.id!);
+    Util.deepAssign(final, model, 'loose', true);
+    return this.update(cls, final);
   }
 
   @Connected(true)

@@ -143,7 +143,10 @@ ${suffix}`);
   }
 
   async deleteByIds(table: string, ids: string[]) {
-    const ret = await this.executeSQL<{ affectedRows: number }>(`DELETE FROM ${this.namespace(table)} WHERE ${this.ID_FIELD} IN (${ids.join(', ')})`);
+    const ret = await this.executeSQL<{ affectedRows: number }>(`
+DELETE 
+FROM ${this.namespace(table)} 
+WHERE ${this.ID_FIELD} IN (${ids.join(', ')})`);
     return ret.affectedRows;
   }
 

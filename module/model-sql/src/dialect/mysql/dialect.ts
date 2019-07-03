@@ -6,6 +6,7 @@ import { AsyncContext } from '@travetto/context';
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../base';
 import { MySQLConnection } from './connection';
+import { SQLUtil } from '../../util';
 
 @Injectable({
   target: SQLDialect
@@ -105,6 +106,7 @@ export class MySQLDialect extends SQLDialect {
           console.debug(err);
           rej(err);
         } else {
+          SQLUtil.deleteNulls(results);
           res(results);
         }
       });

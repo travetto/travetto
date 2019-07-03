@@ -24,24 +24,26 @@ function toList<T>(items: T | T[] | Set<T> | undefined) {
 
 export class Util {
 
-  private static deepAssignRaw(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose') {
+  private static deepAssignRaw(a: any, b: any, mode: 'loose' | 'strict' | 'coerce' = 'loose', deleteOnEmpty = false) {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;
     const isArrA = Array.isArray(a);
     const isArrB = Array.isArray(b);
-    const isSimpA = !isEmptyA && Util.isSimple(a);
-    const isSimpB = !isEmptyB && Util.isSimple(b);
+    const isSimpA = !isEmptyA && this.isSimple(a);
+    const isSimpB = !isEmptyB && this.isSimple(b);
 
     let ret: any;
 
-    if (isEmptyA || isEmptyB) { // If no `a`, `b` always wins
+    if (!deleteOnEmpty && (isEmptyA || isEmptyB)) { // If no `a`, `b` always wins
       if (b === null || !isEmptyB) {
-        ret = isEmptyB ? b : Util.shallowClone(b);
+        ret = isEmptyB ? b : this.shallowClone(b);
       } else if (!isEmptyA) {
-        ret = Util.shallowClone(a);
+        ret = this.shallowClone(a);
       } else {
         ret = undefined;
       }
+    } else if (deleteOnEmpty && isEmptyB) {
+      ret = b;
     } else {
       if (isArrA !== isArrB || isSimpA !== isSimpB) {
         throw new Error(`Cannot merge differing types ${a} and ${b}`);
@@ -49,7 +51,7 @@ export class Util {
       if (isArrB) { // Arrays
         ret = a; // Write onto A
         for (let i = 0; i < b.length; i++) {
-          ret[i] = Util.deepAssignRaw(ret[i], b[i], mode);
+          ret[i] = this.deepAssignRaw(ret[i], b[i], mode, deleteOnEmpty);
         }
       } else if (isSimpB) { // Scalars
         const match = typeof a === typeof b;
@@ -59,14 +61,14 @@ export class Util {
           if (mode === 'strict') { // Bail on strict
             throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
           } else if (mode === 'coerce') { // Force on coerce
-            ret = Util.coerceType(b, a.constructor, false);
+            ret = this.coerceType(b, a.constructor, false);
           }
         }
       } else { // Object merge
         ret = a;
 
         for (const key of Object.keys(b)) {
-          ret[key] = Util.deepAssignRaw(ret[key], b[key], mode);
+          ret[key] = this.deepAssignRaw(ret[key], b[key], mode, deleteOnEmpty);
         }
       }
     }
@@ -112,7 +114,7 @@ export class Util {
   }
 
   static shallowClone(a: any) {
-    return Array.isArray(a) ? a.slice(0) : (Util.isSimple(a) ? a : { ...a });
+    return Array.isArray(a) ? a.slice(0) : (this.isSimple(a) ? a : { ...a });
   }
 
   static isPrimitive(el: any): el is (string | boolean | number | RegExp) {
@@ -138,14 +140,14 @@ export class Util {
   }
 
   static isSimple(a: any) {
-    return Util.isPrimitive(a) || Util.isFunction(a) || Util.isClass(a);
+    return this.isPrimitive(a) || this.isFunction(a) || this.isClass(a);
   }
 
-  static deepAssign<T extends any, U extends any>(a: T, b: U, mode: 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
-    if (!a || Util.isSimple(a)) {
+  static deepAssign<T extends any, U extends any>(a: T, b: U, mode: 'loose' | 'strict' | 'coerce' = 'loose', deleteOnEmpty = false): T & U {
+    if (!a || this.isSimple(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
     }
-    return Util.deepAssignRaw(a, b, mode) as T & U;
+    return this.deepAssignRaw(a, b, mode, deleteOnEmpty) as T & U;
   }
 
   static throttle<T, U, V>(fn: (a: T, b: U) => V, threshold?: number): (a: T, b: U) => V;
