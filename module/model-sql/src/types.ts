@@ -1,7 +1,8 @@
-import { ConnectionSupport } from './dialect/connection';
 import { FieldConfig } from '@travetto/schema';
 import { Class } from '@travetto/registry';
 import { Query, BulkResponse } from '@travetto/model';
+
+import { ConnectionSupport } from './dialect/connection';
 
 export interface InsertWrapper {
   table: string;
@@ -46,7 +47,7 @@ export interface Dialect {
   getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
 
   // Basic data management
-  selectRowsByIds<T>(table: string, field: string, ids: string[], select?: string[], order?: string): Promise<T[]>;
+  selectRowsByIds<T>(table: string, field: string, ids: string[], select?: string[], order?: { field: string, asc: boolean }[]): Promise<T[]>;
   bulkProcess(
     dels: DeleteWrapper[],
     inserts: InsertWrapper[],

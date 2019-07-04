@@ -89,6 +89,14 @@ On update, we have a much more complex problem, as we now need to deal with the 
 3. Insert the new object
 
 For partial updates we, will now need to deal with the intricacies of the nested schema. For each change we will need to:
+### Non-Optimized
+1. Start a transaction
+2. Fetch the object
+3. Delete the object
+4. Merge the partial data with the object
+5. Insert the new object (with original id)
+
+### More optimization
 1. Start a transaction
 2. Start at the sub-root of the change, as provided by the update query
 3. Delete everything under that sub-root
@@ -103,7 +111,7 @@ allows for comprehensive interoperability, and a clear set of operations.  This 
 SQL databases.  Primarily one around selection in terms of tuples vs documents.  To query the full set of inner joins needed to honor
 a deep structure we have two options:
 
-1. Single query with all tables inner_joined
+1. Single query with all tables left outer joined
   - This could result in a large set of data being returned
   - This would require splitting up large tuples into various sub objects and aggregating them
 2. Multiple queries per foreign-keyed object
@@ -115,4 +123,47 @@ load on the database.
 
 Second option will be heavier in terms of query time, but lighter in terms of returned data.  Also, the shallower (which is more common) the data model, the less this is an issue for either of them.
 
-In addition to the retrieval option, we still have querying issues.  The primary here being that we need to alias every table appropriately and every field appropriately.  This will allow us to convert the nested query structure into a linear format.  
+In addition to the retrieval option, we still have querying issues.  The primary here being that we 
+need to alias every table appropriately and every field appropriately.  This will allow us to convert 
+the nested query structure into a linear format.  
+
+## Dialects and Aliasing and Naming
+### How are tables named?  
+                                                : e.g.
+::db name::                                     : app
+  |- ::namespace::                              :   |- xyz
+    |- Root Table Name of Multiple inheritance  :     |- xyz_shape
+      |- Sub-relationship A (Single or Array)   :       |- xyz_shape_dimensions
+        |- Sub-Relationship A.1                 :         |- xyz_shape_dimensions_volume
+        |- Simple List (Array of primitives)    :         |- xyz_shape_dimensions_coordinates
+        |- Simple object (not defined)          :         |- xyz_shape_dimensions_meta
+    |- Primary table name of single structure   :     |- xyz_person
+      ... Same as above ...                     :       |- xyz_person_address
+                                                :         |- xyz_person_address_street
+                                                :         |- xyz_person_address_alternates
+                                                :         |- xyz_person_address_other
+
+### How are tables aliased?
+When querying against a schema, the table naming process can be followed. For every table being accessed, 
+we can generate an alias for every node in the hierarchy, consistently, by using the first letter of the 
+sub-table and an incrementing index.
+
+This means that when referencing tables, we will reference every sub table by the created index.  The root
+table will be referenced by `_root` to facilitate simple operations.
+
+### Dialect
+A dialect will have the primary responsibility of turning structured queries into SQL statements, and 
+returning the results as a simple object or array of objects.
+
+This will be responsible for
+  - CREATE statements
+  - DROP statements
+  - SELECT 
+    - FROM
+    - WHERE
+    - ORDER BY
+  - INSERT
+  - UPDATE 
+  - DELETE
+
+

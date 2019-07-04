@@ -1,57 +1,58 @@
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
-import { ModelCore, WhereClause, SelectClause, SortClause } from '@travetto/model';
+import { ModelCore, SelectClause, SortClause } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
 import { Dialect, InsertWrapper } from './types';
 
-const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
-const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
-const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
+export type VisitStack = { config: ClassConfig | FieldConfig, type: Class, name: string; }
 
-const SQL_OPS = {
-  $and: ' AND ',
-  $or: ' OR ',
-  $not: 'NOT ',
-  $all: 'ALL =',
-  $regex: 'REGEXP',
-  $in: 'IN',
-  $nin: 'NOT IN',
-  $eq: '=',
-  $ne: '<>',
-  $gte: '>=',
-  $like: 'LIKE',
-  $ilike: 'ILIKE',
-  $lte: '<=',
-  $gt: '>',
-  $lt: '<',
-  $is: 'IS',
-  $isNot: 'IS NOT'
-};
+export type VisitState = { path: VisitStack[] };
 
-export type VisitState = { path: string[], parentTable?: string };
+export type SortData = { table: string, field: string, alias: string, asc: boolean };
 
-interface VisitNode {
-  path: string[];
-  table: string;
-  index?: number;
+interface VisitNode<R> {
+  path: VisitStack[];
   fields: FieldConfig[];
-  parentTable?: string;
-  descend: () => Promise<any>;
+  index?: number;
+  descend: () => R;
 }
 
-export interface VisitInstanceNode extends VisitNode {
+interface TableResolver {
+  resolveTable(cls: Class, prefix?: string): string;
+}
+
+interface Select {
+  type: Class;
+  field: string;
+}
+
+interface OrderBy {
+  type: Class;
+  field: string;
+  asc: boolean;
+}
+
+interface Alias {
+  alias: string;
+  parent?: Class;
+  table: string;
+}
+
+export interface VisitInstanceNode<R> extends VisitNode<R> {
   value: any;
 }
 
-export interface VisitHandler<R, U extends VisitNode = VisitNode> {
+export interface VisitHandler<R, U extends VisitNode<R> = VisitNode<R>> {
   onRoot(config: U & { config: ClassConfig }): R;
-  onSub(config: U & { config: FieldConfig, parentTable: string }): R;
-  onSimple(config: U & { config: FieldConfig, parentTable: string }): R;
+  onSub(config: U & { config: FieldConfig }): R;
+  onSimple(config: U & { config: FieldConfig }): R;
 }
 
 export class SQLUtil {
-  static fromMappingCache = new Map<Class, Record<string, { alias: string, where?: string }>>();
+  private static aliasCache = new Map<Class, Map<Class, Alias>>();
+  static readonly ROOT_ALIAS = '_ROOT';
+
   static schemaFieldsCache = new Map<Class, {
     local: FieldConfig[],
     localMap: Record<string, FieldConfig>,
@@ -59,20 +60,48 @@ export class SQLUtil {
     foreignMap: Record<string, FieldConfig>
   }>();
 
-  static extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
-    const out: { [key: string]: any } = {};
-    const sub = o as { [key: string]: any };
-    const keys = Object.keys(sub);
-    for (const key of keys) {
-      const subPath = `${path}${key}`;
-      if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
-        Object.assign(out, this.extractSimple(sub[key], `${subPath}.`));
-      } else {
-        out[subPath] = sub[key];
-      }
+
+  static getAliasCache(cls: Class, resolve: (path: VisitStack[]) => string) {
+    if (this.aliasCache.has(cls)) {
+      return this.aliasCache.get(cls)!;
     }
-    return out;
+
+    const clauses = new Map<Class, Alias>();
+    let idx = 0;
+
+    this.visitSchemaSync(SchemaRegistry.get(cls), {
+      onRoot: ({ descend, config, path }) => {
+        const table = resolve(path);
+        clauses.set(config.class, {
+          alias: this.ROOT_ALIAS,
+          table
+        });
+        return descend();
+      },
+      onSub: ({ descend, config, path }) => {
+        const table = resolve(path);
+        clauses.set(config.type, {
+          alias: `${config.name.charAt(0)}${idx++}`,
+          table,
+          parent: config.owner
+        });
+        return descend();
+      },
+      onSimple: ({ config, path }) => {
+        const table = resolve(path);
+        clauses.set(config.type, {
+          alias: `${config.name.charAt(0)}${idx++}`,
+          table,
+          parent: config.owner
+        });
+      }
+    });
+
+    this.aliasCache.set(cls, clauses);
+
+    return clauses;
   }
+
 
   static cleanResults<T>(dct: Dialect, o: T): T {
     if (Array.isArray(o)) {
@@ -91,112 +120,25 @@ export class SQLUtil {
     }
   }
 
-  static getSort<T>(sort: SortClause<T>[]) {
-    return sort.map(x => {
-      const o = this.extractSimple(x);
-      const k = Object.keys(o)[0];
-      const v = o[k] as (boolean | -1 | 1);
-      if (v === 1 || v === true) {
-        return k;
-      } else {
-        return `${k}:desc`;
-      }
-    });
-  }
-
-  static buildWhereField<T>(dct: Dialect, cls: Class<T>, o: Record<string, any>, aliases?: Record<string, string>, path: string = ''): any {
-    const items = [];
-    const schema = SchemaRegistry.getViewSchema(cls).schema;
-
-    const tPath = path ? `${path}_${cls.name.toLowerCase()}` : cls.name.toLowerCase();
-
-    for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
-      const top = o[key];
-      const declaredSchema = schema[key];
-      const declaredType = declaredSchema.type;
-      const sPath = `${dct.resolveTable(cls, path, aliases)}.${key}`;
-
-      if (Util.isPlainObject(top)) {
-        const subKey = Object.keys(top)[0];
-        if (!subKey.startsWith('$')) {
-          const inner = this.buildWhereField(dct, declaredType as Class<any>, top, aliases, tPath);
-          items.push(inner);
+  static buildSort<T>(dct: Dialect, cls: Class<T>, sort: SortClause<T>[], aliases: Record<string, { alias: string }>): SortData[] {
+    return sort.map((x: any) => {
+      let value = false;
+      let table = dct.resolveTable(cls);
+      let field: string;
+      while (true) {
+        let key = Object.keys(x)[0] as string;
+        if (Util.isPrimitive(x[key])) {
+          value = !!x[key];
+          field = key;
+          break;
         } else {
-          const v = top[subKey];
-          const resolve = dct.resolveValue.bind(null, declaredSchema);
-
-          switch (subKey) {
-            case '$all': case '$nin': case '$in': {
-              const arr = (Array.isArray(v) ? v : [v]).map(el => resolve(el));
-              items.push(`${sPath} ${SQL_OPS[subKey]} (${arr})`);
-              break;
-            }
-            case '$regex': {
-              const re = (v as RegExp)
-              const src = re.source;
-              const ins = re.flags && re.flags.includes('i');
-
-              if (/^[\^]\S+[.][*][$]?$/.test(src)) {
-                const inner = src.substring(1, src.length - 2);
-                items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(inner)}%`);
-              } else {
-                let val = resolve(v).replace(/\\b/g, '([[:<:]]|[[:>:]])');
-                items.push(`${sPath} ${SQL_OPS[subKey]} ${!ins ? 'BINARY' : ''} ${val}`);
-              }
-              break;
-            }
-            case '$exists': items.push(`${sPath} ${v ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`); break;
-            case '$ne': case '$eq': items.push(`${sPath} ${SQL_OPS[subKey]} ${resolve(v)}`); break;
-            case '$lt': case '$gt': case '$gte': case '$lte': {
-              const subItems = (Object.keys(top) as (keyof typeof SQL_OPS)[])
-                .map(ssk => `${sPath} ${SQL_OPS[ssk]} ${resolve(top[ssk])}`);
-              items.push(subItems.length > 1 ? `(${subItems.join(SQL_OPS.$and)})` : subItems[0]);
-              break;
-            }
-            case '$geoWithin':
-              items.push({
-                geo_polygon: {
-                  [sPath]: {
-                    points: v.map(([lat, lon]: [number, number]) => ({ lat, lon }))
-                  }
-                }
-              });
-              break;
-            case '$geoIntersects':
-              items.push({
-                geo_shape: {
-                  [sPath]: {
-                    type: 'envelope',
-                    coordinates: v
-                  },
-                  relation: 'within'
-                }
-              });
-              break;
-          }
+          table = `${table}_${key}`
+          x = x[key];
         }
-        // Handle operations
-      } else {
-        items.push(`${sPath} ${SQL_OPS.$eq} ${dct.resolveValue(declaredSchema, top)}`);
       }
-    }
-    if (items.length === 1) {
-      return items[0];
-    } else {
-      return `(${items.join(SQL_OPS.$and)})`;
-    }
-  }
 
-  static buildWhere<T>(dct: Dialect, o: WhereClause<T>, cls: Class<T>, aliases?: Record<string, string>): string {
-    if (has$And(o)) {
-      return `(${o.$and.map(x => this.buildWhere<T>(dct, x, cls, aliases)).join(SQL_OPS.$and)})`;
-    } else if (has$Or(o)) {
-      return `(${o.$or.map(x => this.buildWhere<T>(dct, x, cls, aliases)).join(SQL_OPS.$or)})`;
-    } else if (has$Not(o)) {
-      return `NOT (${this.buildWhere<T>(dct, o.$not, cls, aliases)})`;
-    } else {
-      return this.buildWhereField(dct, cls, o, aliases);
-    }
+      return { table, field, alias: aliases![table].alias, asc: value };
+    });
   }
 
   static getFieldsByLocation(cls: Class | ClassConfig) {
@@ -206,6 +148,7 @@ export class SQLUtil {
     if (this.schemaFieldsCache.has(cls.class)) {
       return this.schemaFieldsCache.get(cls.class)!;
     }
+
     const conf = cls.views[ALL_VIEW];
     const fields = conf.fields.map(x => conf.schema[x]);
     const ret = {
@@ -223,111 +166,88 @@ export class SQLUtil {
     return ret;
   }
 
-  static visitSchemaSync(
-    dct: Dialect, config: ClassConfig | FieldConfig, handler: VisitHandler<void>,
-    state: VisitState = { path: [], parentTable: '' }
-  ) {
-    const isRoot = 'class' in config;
+  static visitSchemaSync(config: ClassConfig | FieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }) {
     const type = 'class' in config ? config.class : config.type;
-    const table = dct.resolveTable(type, state.parentTable);
     const { local: fields, foreign } = this.getFieldsByLocation(type);
 
-    const descend = async () => {
+    const descend = () => {
       for (const field of foreign) {
         if (SchemaRegistry.has(field.type)) {
-          this.visitSchemaSync(dct, field, handler, { path: state.path, parentTable: table });
+          this.visitSchemaSync(field, handler, state);
         } else {
           handler.onSimple({
-            ...state, config: field, parentTable: table, table: `${table}_${field.name}`, descend: null as any, fields: []
+            config: field, path: [...state.path, {
+              config: field,
+              name: field.name,
+              type: field.type,
+            }], descend: null as any, fields: []
           });
         }
       }
     };
 
-    try {
-      if (!('class' in config)) {
-        state.path.push(config.name);
-      }
-
-      if (isRoot) {
-        return handler.onRoot({
-          config: config as ClassConfig, table, fields, descend, ...state
-        });
-      } else if (!isRoot) {
-        return handler.onSub({
-          config: config as FieldConfig, table, fields, descend, ...state, parentTable: state.parentTable!
-        });
-      }
-
-      return descend();
-    } finally {
-      state.path.pop();
-    }
+    return handler['class' in config ? 'onRoot' : 'onSub']({
+      config: config as any, fields, descend, path: [...state.path, {
+        config,
+        name: 'class' in config ? config.class.name : config.name,
+        type: 'class' in config ? config.class : config.type
+      }]
+    });
   }
 
-  static async visitSchema(dct: Dialect, config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [], parentTable: '' }) {
-    const isRoot = 'class' in config;
+  static async visitSchema(config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }) {
     const type = 'class' in config ? config.class : config.type;
-    const table = dct.resolveTable(type, state.parentTable);
     const { local: fields, foreign } = this.getFieldsByLocation(type);
 
     const descend = async () => {
       for (const field of foreign) {
         if (SchemaRegistry.has(field.type)) {
-          await this.visitSchema(dct, field, handler, { path: state.path, parentTable: table });
+          await this.visitSchemaSync(field, handler, state);
         } else {
           await handler.onSimple({
-            ...state, config: field, parentTable: table, table: `${table}_${field.name}`, descend: null as any, fields: []
+            config: field, path: [...state.path, {
+              config: field,
+              name: field.name,
+              type: field.type,
+            }], descend: null as any, fields: []
           });
         }
       }
     };
 
-    try {
-      if (!('class' in config)) {
-        state.path.push(config.name);
-      }
-
-      if (isRoot) {
-        return await handler.onRoot({
-          config: config as ClassConfig, table, fields, descend, ...state
-        });
-      } else if (!isRoot) {
-        return await handler.onSub({
-          config: config as FieldConfig, table, fields, descend, ...state, parentTable: state.parentTable!
-        });
-      }
-
-      return await descend();
-    } finally {
-      state.path.pop();
-    }
+    return handler['class' in config ? 'onRoot' : 'onSub']({
+      config: config as any, fields, descend, path: [...state.path, {
+        config,
+        name: 'class' in config ? config.class.name : config.name,
+        type: 'class' in config ? config.class : config.type
+      }]
+    });
   }
 
-  static async visitSchemaInstance<T extends ModelCore>(dct: Dialect, cls: Class<T>, instance: T, handler: VisitHandler<Promise<any> | any, VisitInstanceNode>) {
+  static async visitSchemaInstance<T extends ModelCore>(cls: Class<T>, instance: T, handler: VisitHandler<Promise<any> | any, VisitInstanceNode<Promise<any>>>) {
     const pathObj: any[] = [instance];
-    await this.visitSchema(dct, SchemaRegistry.get(cls), {
+    await this.visitSchema(SchemaRegistry.get(cls), {
       onRoot: async (config) => {
         await handler.onRoot({ ...config, value: instance });
         return config.descend();
       },
       onSub: async (config) => {
         const { config: field } = config;
-        const top = pathObj[pathObj.length - 1];
-        if (field.name in top) {
-          const value = top[field.name];
+        const topObj = pathObj[pathObj.length - 1];
+        const top = config.path[config.path.length - 1];
+        const ogName = top.name;
+
+        if (field.name in topObj) {
+          const value = topObj[field.name];
           const isArray = Array.isArray(value);
           const vals = isArray ? value : [value];
+
           let i = 0;
           for (const val of vals) {
             try {
               pathObj.push(val);
-              let path = config.path;
-              if (isArray) {
-                const len = path.length;
-                path = [...path.slice(0, len - 1), `${path[len - 1]}[${i}]`];
-              }
-              await handler.onSub({ ...config, value: val, path, index: i });
+              top.name = `${ogName}[${i++}]`;
+              await handler.onSub({ ...config, value: val });
             } finally {
               pathObj.pop();
             }
@@ -338,47 +258,51 @@ export class SQLUtil {
       },
       onSimple: (config) => {
         const { config: field } = config;
-        const top = pathObj[pathObj.length - 1];
-        const value = top[field.name];
+        const topObj = pathObj[pathObj.length - 1];
+        const value = topObj[field.name];
         return handler.onSimple({ ...config, value });
       }
-    }, {
-        parentTable: '',
-        path: [instance.id!]
-      });
+    });
   }
 
-  static buildSchemaToTableMapping<T>(dct: Dialect, cls: Class<T>) {
-    if (this.fromMappingCache.has(cls)) {
-      return this.fromMappingCache.get(cls)!;
+  static select<T>(cls: Class<T>, select: SelectClause<T>): Select[] {
+    if (!select || Object.keys(select).length === 0) {
+      return [{ type: cls, field: '*' }];
     }
 
-    const clauses: Record<string, { alias: string, where?: string }> = {};
-    let idx = 0;
+    const { localMap } = this.getFieldsByLocation(cls);
 
-    this.visitSchemaSync(dct, SchemaRegistry.get(cls), {
-      onRoot: ({ table, descend, config }) => {
-        clauses[table] = {
-          alias: dct.ROOT
-        };
-        return descend();
-      },
-      onSub: ({ table, descend, config, parentTable }) => {
-        const alias = `${config.name.charAt(0)}${idx++}`;
-        const where = `${clauses[parentTable].alias}.${dct.pathField.name} = ${alias}.${dct.parentPathField.name}`;
-        clauses[table] = { alias, where };
-        return descend();
-      },
-      onSimple: ({ table, config, parentTable }) => {
-        const alias = `${config.name.charAt(0)}${idx++}`;
-        const where = `${clauses[parentTable].alias}.${dct.pathField.name} = ${alias}.${dct.parentPathField.name}`;
-        clauses[table] = { alias, where };
+    let toGet = new Set<string>();
+
+    for (const [k, v] of Object.entries(select)) {
+      if (!Util.isPlainObject((select as any)[k]) && localMap[k]) {
+        if (!v) {
+          if (toGet.size === 0) {
+            toGet = new Set(SchemaRegistry.get(cls).views[ALL_VIEW].fields);
+          }
+          toGet.delete(k);
+        } else {
+          toGet.add(k);
+        }
+      }
+    }
+    return [...toGet].map((el) => ({ type: cls, field: el }));
+  }
+
+  static orderBy<T>(cls: Class<T>, sort: SortClause<T>[]): OrderBy[] {
+    return sort.map((cl: any) => {
+      let schema: ClassConfig = SchemaRegistry.get(cls);
+      while (true) {
+        let key = Object.keys(cl)[0] as string;
+        if (Util.isPrimitive(cl[key])) {
+          return { field: key, type: schema.class, asc: !!!!cl[key] };
+
+        } else {
+          schema = SchemaRegistry.get(schema.views[ALL_VIEW].schema[key].type);
+          cl = cl[key];
+        }
       }
     });
-
-    this.fromMappingCache.set(cls, clauses);
-
-    return clauses;
   }
 
   static collectDependents<T extends any>(dct: Dialect, parent: any, v: T[], field?: FieldConfig) {
@@ -405,6 +329,10 @@ export class SQLUtil {
     return mapping;
   }
 
+  static buildTable(list: VisitStack[]) {
+    return list.map(el => el.name).join('_');
+  }
+
   static async fetchDependents<T>(
     dct: Dialect,
     cls: Class<T>, items: T[],
@@ -415,14 +343,14 @@ export class SQLUtil {
 
     const buildSet = (children: any[], field?: any) => this.collectDependents(dct, stack[stack.length - 1], children, field);
 
-    await this.visitSchema(dct, SchemaRegistry.get(cls), {
+    await this.visitSchema(SchemaRegistry.get(cls), {
       onRoot: async (config) => {
         const res = buildSet(items); // Already filtered by initial select query
         selectStack.push(select);
         stack.push(res);
         await config.descend();
       },
-      onSub: async ({ config, parentTable, table, descend, fields }) => {
+      onSub: async ({ config, descend, fields, path }) => {
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
         const selectTop = selectStack[selectStack.length - 1] as any;
@@ -443,7 +371,12 @@ export class SQLUtil {
 
         // If children and selection exists
         if (ids.length && (!subSelectTop || sel)) {
-          const children = await dct.selectRowsByIds(table, dct.parentPathField.name, ids, sel);
+          const children = await dct.selectRowsByIds(
+            this.buildTable(path),
+            dct.parentPathField.name,
+            ids,
+            sel
+          );
 
           const res = buildSet(children, config);
           try {
@@ -456,11 +389,17 @@ export class SQLUtil {
           }
         }
       },
-      onSimple: async ({ config, table }) => {
+      onSimple: async ({ config, path }) => {
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
         if (ids.length) {
-          const matching = await dct.selectRowsByIds(table, dct.parentPathField.name, ids, [], dct.sort(dct.idxField.name, true));
+          const matching = await dct.selectRowsByIds(
+            this.buildTable(path),
+            dct.parentPathField.name,
+            ids,
+            [],
+            [{ field: dct.idxField.name, asc: true }]
+          );
           buildSet(matching, config);
         }
       }
@@ -485,12 +424,15 @@ export class SQLUtil {
     }
 
     const all = els.map(el =>
-      this.visitSchemaInstance(dct, cls, el, {
-        onRoot: ({ table, fields, path, value }) => {
+      this.visitSchemaInstance(cls, el, {
+        onRoot: ({ fields, path, value }) => {
+          const table = this.buildTable(path);
           track(table, fields, path.length, [dct.pathField.name]);
           ins[table].records.push([dct.hash(path.join('.')), ...fields.map(f => dct.resolveValue(f, value[f.name]))]);
         },
-        onSub: ({ table, fields, path, value }) => {
+        onSub: ({ fields, path, value }) => {
+
+          const table = this.buildTable(path);
           track(table, fields, path.length, [dct.parentPathField.name, dct.pathField.name]);
 
           const parentPath = dct.hash(path.slice(0, path.length - 1).join('.'));
@@ -500,7 +442,8 @@ export class SQLUtil {
             parentPath, currentPath, ...fields.map(f => dct.resolveValue(f, value[f.name]))
           ]);
         },
-        onSimple: async ({ table, config: field, path, value }) => {
+        onSimple: async ({ config: field, path, value }) => {
+          const table = this.buildTable(path);
           track(table, [field], path.length, [dct.parentPathField.name, dct.pathField.name]);
 
           const parentPath = dct.hash(path.slice(0, path.length - 1).join('.'));

@@ -12,7 +12,7 @@ import { SchemaChangeEvent, SchemaRegistry, FieldConfig } from '@travetto/schema
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 
 import { SQLModelConfig } from './config';
-import { SQLDialect } from './dialect/base';
+import { SQLDialect } from './dialect/base-old';
 import { Connected } from './dialect/connection';
 import { Injectable } from '@travetto/di';
 import { SQLUtil } from './util';

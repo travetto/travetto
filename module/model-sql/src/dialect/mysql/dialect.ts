@@ -3,9 +3,11 @@ import * as mysql from 'mysql';
 import { FieldConfig, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
+
 import { SQLModelConfig } from '../../config';
-import { SQLDialect } from '../base';
+import { SQLDialect } from '../dialect';
 import { MySQLConnection } from './connection';
+import { VisitStack } from '../../util';
 
 @Injectable({
   target: SQLDialect
@@ -13,10 +15,17 @@ import { MySQLConnection } from './connection';
 export class MySQLDialect extends SQLDialect {
 
   conn: MySQLConnection;
+  tablePostfix = `COLLATE='utf8mb4_unicode_ci' ENGINE=InnoDB`;
+  ns: string;
 
   constructor(context: AsyncContext, public config: SQLModelConfig) {
-    super(context, config.namespace);
+    super();
     this.conn = new MySQLConnection(context, config);
+    this.ns = config.namespace;
+  }
+
+  getCreateTableSQL(stack: VisitStack[]) {
+    return super.getCreateTableSQL(stack).replace(/[)];$/, `) ${this.tablePostfix};`);
   }
 
   /**
@@ -74,7 +83,8 @@ export class MySQLDialect extends SQLDialect {
       return 'NULL';
     } else if (conf.type === String) {
       if (value instanceof RegExp) {
-        return `'${BindUtil.extractRegex(value).source}'`;
+        const src = BindUtil.extractRegex(value).source.replace(/\\b/g, '([[:<:]]|[[:>:]])');
+        return `'${src}'`;
       } else {
         return `'${value}'`;
       }
@@ -89,17 +99,12 @@ export class MySQLDialect extends SQLDialect {
     throw new Error('Ruh roh?');
   }
 
-  createTableSQL(name: string, fields: FieldConfig[], suffix?: string) {
-    const query = super.createTableSQL(name, fields, suffix);
-    return query.replace(/;$/, `COLLATE='utf8mb4_unicode_ci' ENGINE=InnoDB;`);
-  }
-
   /**
    * Simple query execution
    */
   async executeSQL<T = any>(query: string | mysql.QueryOptions): Promise<T> {
     return new Promise<T>((res, rej) => {
-      (console as any).trace(`\n${'-'.repeat(20)}\nExecuting query\n`, query, '\n', '-'.repeat(20));
+      (console as any).trace(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
       this.conn.active.query(query, (err, results, fields) => {
         if (err) {
           console.debug(err);

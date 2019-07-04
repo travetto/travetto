@@ -61,9 +61,6 @@ export class QueryTest {
 
   @Test()
   async validateQuery() {
-    let out = SQLUtil.extractSimple({ a: { b: { c: 5 } } });
-    assert(out['a.b.c'] === 5);
-
     const qry: WhereClause<WhereType> = {
       $and: [
         { a: { b: { c: 5 } } },

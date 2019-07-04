@@ -1,6 +1,15 @@
 In-Progress
 =============
 
+SQL
+----------------------
+- [?] Building out SQL model support
+- [ ] Add tests to base for 'replace' mode of deepAssign
+- [ ] Figure out paradigm for ownership of namespacing
+- [ ] Look for query optimization opportunities
+- [ ] Basic polymorphism support
+- [X] Sorting/paging
+ 
 Tooling
 -----------------------
 - [ ] Yeoman Generator Full Rewrite

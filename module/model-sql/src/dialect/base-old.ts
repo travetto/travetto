@@ -7,6 +7,7 @@ import { Query, ModelRegistry, SelectClause, BulkResponse } from '@travetto/mode
 import { ConnectionSupport } from './connection';
 import { Dialect, DeleteWrapper, InsertWrapper } from '../types';
 import { SQLUtil, VisitHandler, VisitState, VisitInstanceNode } from '../util';
+import { SQLQueryState } from './dialect';
 
 function makeField(name: string, type: Class, required: boolean, extra: any) {
   return {
@@ -25,7 +26,7 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
  * primarily be simple queries.  More complex logic should
  * be moved to the source.
  */
-export abstract class SQLDialect implements Dialect {
+export abstract class SQLDialectOld implements Dialect {
 
   ROOT = '_root';
   KEY_LEN = 64;
@@ -68,13 +69,36 @@ export abstract class SQLDialect implements Dialect {
   }
 
   async query<T, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
-    const select = await this.buildSelect(cls, query.select);
-    const from = await this.buildFrom(cls, query);
+    const state = new SQLQueryState(this, cls);
+    if (query.sort) {
+      state.orderByFromModel(cls, query.sort);
+    }
+    if (query.select) {
+      state.selectByModel(cls, query.select);
+    }
+
+    const aliases = await SQLUtil.buildSchemaToTableMapping(this, cls);
+
+    let select = await this.buildSelect(cls, query.select);
+    let from = await this.buildFrom(cls, query);
+    let orderBy = '';
+    let limit = '';
+
+    if (query.sort) {
+      const clauses = SQLUtil.buildSort(this, cls, query.sort, aliases);
+      const fields = clauses.map(x => `${x.alias}.${x.field}`);
+      orderBy = `ORDER BY ${fields.join(', ')}`;
+    }
+
+    if (query.limit || query.offset) {
+      limit = `LIMIT ${query.offset || 0}, ${query.limit}`;
+    }
 
     return this.executeSQL<U[]>(`
 ${select}
 ${from}
-GROUP BY ${this.ROOT}.${this.idField.name};`);
+${orderBy}
+${limit};`);
   }
 
   createTableSQL(name: string, fields: FieldConfig[], suffix?: string) {
@@ -188,12 +212,12 @@ WHERE ${this.idField.name} IN (${ids.join(', ')})`);
   /**
    * Get elements by ids
    */
-  async selectRowsByIds<T>(table: string, field: string, ids: string[], select: string[] = [], orderBy = ''): Promise<T[]> {
+  async selectRowsByIds<T>(table: string, field: string, ids: string[], select: string[] = [], orderBy: { field: string, asc: boolean }[] = []): Promise<T[]> {
     return this.executeSQL(`
 SELECT ${select.length ? select.map(x => `${this.ROOT}.${x}`).join(',') : '*'}
 FROM ${this.namespace(table)} ${this.ROOT}
 WHERE ${this.ROOT}.${field} IN (${ids.map(id => `'${id}'`).join(', ')})
-${orderBy ? `ORDER BY ${orderBy}` : ''};`);
+${orderBy.length ? `ORDER BY ${orderBy.map(({ field, asc }) => `${this.ROOT}.${field} ${asc ? 'ASC' : 'DESC'}`)}` : ''};`);
   }
 
   /**
@@ -252,58 +276,6 @@ ${orderBy ? `ORDER BY ${orderBy}` : ''};`);
     }
 
     return out;
-  }
-
-  /**
-   * Query builders
-   */
-  async buildFrom<T>(cls: Class<T>, query: Query<T>): Promise<string> {
-    const clauses = await SQLUtil.buildSchemaToTableMapping(this, cls);
-    const aliases: Record<string, string> = {};
-    for (const [k, v] of Object.entries(clauses)) {
-      aliases[k] = v.alias;
-    }
-
-    const finalWhere = SQLUtil.buildWhere(this, query.where!, cls, aliases);
-
-    return `FROM ${this.namespace(cls)} ${clauses[this.resolveTable(cls)].alias} ${
-      Object.entries(clauses)
-        .filter(([t, c]) => c.where)
-        .map(([t, c]) => `\n  LEFT OUTER JOIN ${this.namespace(t)} ${c.alias} ON\n    ${c.where}`)
-        .join('\n')
-      }
-        ${ finalWhere ? `\nWHERE ${finalWhere}` : ''}`;
-  }
-
-  async buildSelect<T>(cls: Class<T>, select?: SelectClause<T>) {
-    const clauses = await SQLUtil.buildSchemaToTableMapping(this, cls);
-
-    const tbl = this.resolveTable(cls);
-
-    if (!select || Object.keys(select).length === 0) {
-      return `SELECT ${clauses[tbl].alias}.*`;
-    }
-
-    const { localMap } = SQLUtil.getFieldsByLocation(cls);
-
-    let toGet = new Set();
-
-    for (const [k, v] of Object.entries(select)) {
-      if (!Util.isPlainObject((select as any)[k]) && localMap[k]) {
-        if (!v) {
-          if (toGet.size === 0) {
-            toGet = new Set(SchemaRegistry.get(cls).views[ALL_VIEW].fields);
-          }
-          toGet.delete(k);
-        } else {
-          toGet.add(k);
-        }
-      }
-    }
-
-    toGet.add(this.pathField.name);
-
-    return `SELECT ${[...toGet].sort().map(c => `${clauses[tbl].alias}.${c}`).join(', ')}`;
   }
 
   fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>) {

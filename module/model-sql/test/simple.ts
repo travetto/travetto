@@ -253,6 +253,38 @@ class TestSave extends BaseSqlTest {
     assert(!('street2' in o3.address));
   }
 
+  @Test('Verify sorting')
+  async testSorting() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    const names = ' '.repeat(26).split('').map((a, i) => String.fromCharCode(65 + i));
+    await service.bulkProcess(Person,
+      names.map((x, i) => ({
+        upsert: Person.from({
+          id: `Orange-${i}`,
+          name: x,
+          age: 20 + i,
+          gender: 'm',
+          address: {
+            street1: x,
+          }
+        })
+      }))
+    );
+
+    const all = await service.query(Person, {
+      select: {
+        name: 1
+      },
+      sort: [{
+        address: { street1: 1 }
+      }],
+      limit: 4,
+      offset: 5
+    });
+
+    assert(all.map(x => x.name) === ['F', 'G', 'H', 'I']);
+  }
+
   @Test('Verify partial update with field removal and lists')
   async testPartialUpdateList() {
     console.log(Date.now(), 'running');
