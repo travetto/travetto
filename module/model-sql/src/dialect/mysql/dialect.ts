@@ -3,19 +3,19 @@ import * as mysql from 'mysql';
 import { FieldConfig, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
+import { Class } from '@travetto/registry';
+import { Query } from '@travetto/model';
 
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../dialect';
 import { MySQLConnection } from './connection';
 import { VisitStack, SQLUtil } from '../../util';
-import { Class } from '@travetto/registry';
-import { Query } from '@travetto/model/src/model/query';
-import { Util } from '@travetto/base';
+import { Dialect } from '../../types';
 
 @Injectable({
   target: SQLDialect
 })
-export class MySQLDialect extends SQLDialect {
+export class MySQLDialect extends SQLDialect implements Dialect {
 
   conn: MySQLConnection;
   tablePostfix = `COLLATE='utf8mb4_unicode_ci' ENGINE=InnoDB`;
@@ -124,19 +124,12 @@ export class MySQLDialect extends SQLDialect {
   }
 
   async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>) {
-    const res = await this.executeSQL<{ affectedRows: number }>(`
-DELETE ${this.rootAlias}
-${await this.getFromSQL(cls)}
-${await this.getWhereSQL(cls, query.where)}`);
+    const res = await this.executeSQL<{ affectedRows: number }>(this.getDeleteSQL(SQLUtil.classToStack(cls), query.where));
     return res.affectedRows;
   }
 
   async getCountForQuery<T>(cls: Class<T>, query: Query<T>) {
-    const { total } = await this.executeSQL<{ total: number }>(`
-SELECT COUNT(1) as total
-${await this.getFromSQL(cls)}
-${await this.getWhereSQL(cls, query.where)}
-GROUP BY ${this.rootAlias}.${this.idField.name}`);
+    const { total } = await this.executeSQL<{ total: number }>(this.getQueryCountSQL(cls, query));
     return total;
   }
 }

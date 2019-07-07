@@ -4,17 +4,16 @@ import { Query, BulkResponse } from '@travetto/model';
 
 import { ConnectionSupport } from './dialect/connection';
 import { VisitStack } from './util';
+import { WhereClause } from '@travetto/model/src/model/where-clause';
+import { SelectClause } from '@travetto/model/src/model/query';
 
 export interface InsertWrapper {
-  table: string;
-  level: number;
-  fields: string[];
-  records: any[][];
+  stack: VisitStack[];
+  records: [VisitStack[], any][];
 }
 
 export interface DeleteWrapper {
-  table: string;
-  level?: number;
+  stack: VisitStack[];
   ids: string[];
 }
 
@@ -40,9 +39,14 @@ export interface Dialect {
   getDropTableSQL(stack: VisitStack[]): string;
   getQuerySQL<T>(cls: Class<T>, query: Query<T>): string;
   getInsertSQL(stack: VisitStack[], instances: any[], idxOffset?: number): string;
-  getUpdateSQL(stack: VisitStack[], data: any, suffix?: string): string;
   getDeleteByIdsSQL(stack: VisitStack[], ids: string[]): string;
-  getSelectRowsByIdsSQL<T>(cls: Class<T>, stack: VisitStack[], ids: string[], select?: FieldConfig[]): string;
+  getSelectRowsByIdsSQL<T>(stack: VisitStack[], ids: string[], select?: FieldConfig[]): string;
+  getUpdateSQL(stack: VisitStack[], data: any, where?: WhereClause<any>): string;
+  getDeleteSQL(stack: VisitStack[], where?: WhereClause<any>): string;
+  getDeleteByIdsSQL(stack: VisitStack[], ids: string[]): string;
+  getSelectRowsByIdsSQL<T>(stack: VisitStack[], ids: string[], select?: FieldConfig[]): string;
+  getQueryCountSQL<T>(cls: Class<T>, query: Query<T>): string;
+  fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]>;
 
   executeSQL<T>(sql: string): Promise<T>;
 

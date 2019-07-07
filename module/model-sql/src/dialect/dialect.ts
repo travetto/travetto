@@ -1,11 +1,10 @@
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent } from '@travetto/schema';
 import { Util } from '@travetto/base';
-import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model';
+import { BulkResponse, SelectClause, Query, SortClause, WhereClause } from '@travetto/model';
 
 import { SQLUtil, VisitStack } from '../util';
 import { Dialect, DeleteWrapper, InsertWrapper } from '../types';
-import { BulkResponse } from '@travetto/model/src/model/bulk';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -89,13 +88,6 @@ export abstract class SQLDialect implements Dialect {
   abstract getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
 
   handleFieldChange?(ev: SchemaChangeEvent): Promise<void>;
-
-  bulkProcess?(
-    dels: DeleteWrapper[],
-    inserts: InsertWrapper[],
-    upserts: InsertWrapper[],
-    updates: InsertWrapper[]
-  ): Promise<BulkResponse>;
 
   generateId(): string {
     return Util.uuid(this.KEY_LEN);
@@ -225,16 +217,15 @@ export abstract class SQLDialect implements Dialect {
 
   getSelectSQL<T>(cls: Class<T>, select?: SelectClause<T>): string {
     return !select ?
-      'SELECT * ' :
+      `SELECT ${this.rootAlias}.* ` :
       `SELECT ${SQLUtil.select(cls, select).map((sel) => this.resolveName(sel.type, sel.field)).join(', ')}`
   }
 
   getFromSQL<T>(cls: Class<T>): string {
     const aliases = SQLUtil.getAliasCache(cls, this.namespace);
-    const classes = [cls, ...aliases.keys()];
+    const classes = [...aliases.keys()].sort((a, b) => a === cls ? -1 : 1)
     return `FROM ${classes.map((x, i) => {
       const { alias, parent, table } = aliases.get(x)!;
-
       if (!parent) {
         return `${table} ${alias}`;
       } else {
@@ -250,11 +241,16 @@ export abstract class SQLDialect implements Dialect {
       `LIMIT ${query.offset || 0}, ${query.limit}`;
   }
 
+  getGroupBySQL<T>(cls: Class<T>, query?: Query<T>): string {
+    return `GROUP BY ${this.rootAlias}.${this.idField.name}`;
+  }
+
   getQuerySQL<T>(cls: Class<T>, query: Query<T>) {
     return `
 ${this.getSelectSQL(cls, query.select)}
 ${this.getFromSQL(cls)}
 ${this.getWhereSQL(cls, query.where)}
+${this.getGroupBySQL(cls, query)}
 ${this.getOrderBySQL(cls, query.sort)}
 ${this.getLimitSQL(cls, query)}`;
   }
@@ -281,11 +277,12 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
         .map(f => this.getColumnDefinition(f))
         .filter(x => !!x.trim())
         .join(',\n  ')},
-  ${this.getColumnDefinition(this.pathField)}
-  ${!parent ? '' :
-        `, ${this.getColumnDefinition(this.parentPathField)}, 
+  ${this.getColumnDefinition(this.pathField)},
+  ${!parent ?
+        `PRIMARY KEY (${this.idField.name})` :
+        `${this.getColumnDefinition(this.parentPathField)}, 
     ${array ? `${this.getColumnDefinition(this.idxField)},` : ''}
-  PRIMARY KEY (${this.pathField.name}, ${this.parentPathField.name}),
+  PRIMARY KEY (${this.pathField.name}),
   FOREIGN KEY (${this.parentPathField.name}) REFERENCES ${this.namespace(stack.slice(0, stack.length - 1))}(${this.pathField.name}) ON DELETE CASCADE`},
   UNIQUE KEY (${ this.pathField.name})
 );`.replace(new RegExp(`(\\b${this.idField.name}.*)DEFAULT NULL`), (_, s) => `${s} NOT NULL`);
@@ -301,8 +298,8 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
   /**
    * Simple insertion
    */
-  getInsertSQL(stack: VisitStack[], instances: any[], idxOffset: number = 0) {
-    const { type, config } = stack[stack.length - 1];
+  getInsertSQL(stack: VisitStack[], instances: [VisitStack[], any][]) {
+    const { type, config, index } = stack[stack.length - 1];
     const columns = SQLUtil.getFieldsByLocation(type).local
       .filter(x => !SchemaRegistry.has(x.type) && !x.array)
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -311,23 +308,28 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
     const isArray = 'array' in config && config.array;
 
     const columnNames = columns.map(c => c.name);
-    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, inst[c.name])));
+    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, inst[1][c.name])));
 
+    columnNames.push(this.pathField.name);
     if (hasParent) {
-      columnNames.unshift(this.parentPathField.name);
+      columnNames.push(this.parentPathField.name);
+      if (isArray) {
+        columnNames.push(this.idxField.name);
+      }
     }
-    columnNames.unshift(this.pathField.name);
-    if (isArray) {
-      columnNames.unshift(this.idxField.name);
-    }
+
+    const idx = index || 0;
 
     for (let i = 0; i < matrix.length; i++) {
+      const [elStack] = instances[i];
       if (hasParent) {
-        matrix[i].unshift(SQLUtil.buildPath(stack.slice(0, stack.length - 1)));
-      }
-      matrix[i].unshift(`${SQLUtil.buildPath(stack)}${isArray ? `[${i + idxOffset}]` : ''}`);
-      if (isArray) {
-        matrix[i].unshift(this.resolveValue(this.idxField, i + idxOffset));
+        matrix[i].push(this.hash(`${SQLUtil.buildPath(elStack)}${isArray ? `[${i + idx}]` : ''}`));
+        matrix[i].push(this.hash(SQLUtil.buildPath(elStack.slice(0, elStack.length - 1))));
+        if (isArray) {
+          matrix[i].push(this.resolveValue(this.idxField, i + idx));
+        }
+      } else {
+        matrix[i].push(this.hash(SQLUtil.buildPath(elStack)));
       }
     }
 
@@ -340,7 +342,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
   /**
    * Simple data base updates
    */
-  getUpdateSQL(stack: VisitStack[], data: any, suffix?: string) {
+  getUpdateSQL(stack: VisitStack[], data: any, where?: WhereClause<any>) {
     const { type } = stack[stack.length - 1];
     const { localMap } = SQLUtil.getFieldsByLocation(type);
     return `
@@ -350,30 +352,164 @@ SET
         .entries(data)
         .filter(([k]) => k in localMap)
         .map(([k, v]) => `${k}=${this.resolveValue(localMap[k], v)}`).join(', ')}
-  ${suffix};`;
+  ${this.getWhereSQL(type, where)};`;
+  }
+
+  getDeleteSQL(stack: VisitStack[], where?: WhereClause<any>) {
+    const { type } = stack[stack.length - 1];
+    return `
+DELETE ${this.rootAlias}
+FROM ${this.namespace(stack)} ${this.rootAlias}
+${this.getWhereSQL(type, where)};`;
   }
 
   getDeleteByIdsSQL(stack: VisitStack[], ids: string[]) {
-    return `
-DELETE 
-FROM ${this.namespace(stack)} 
-WHERE ${this.idField.name} IN (${ids.map(id => this.resolveValue(this.idField, id)).join(', ')});`;
+    return this.getDeleteSQL(stack, {
+      [stack.length > 1 ? this.pathField.name : this.idField.name]: {
+        $in: ids
+      }
+    });
   }
-
 
   /**
   * Get elements by ids
   */
-  getSelectRowsByIdsSQL<T>(cls: Class<T>, stack: VisitStack[], ids: string[], select: FieldConfig[] = []): string {
+  getSelectRowsByIdsSQL<T>(stack: VisitStack[], ids: string[], select: FieldConfig[] = []): string {
     const { config } = stack[stack.length - 1];
     const orderBy = !('array' in config && config.array) ?
       '' :
       `ORDER BY ${this.rootAlias}.${this.idxField.name} ASC`;
 
+    const idField = ('type' in config ? this.pathField : this.idField);
+
     return `
 SELECT ${select.length ? select.map(x => `${this.rootAlias}.${x.name}`).join(',') : '*'}
 FROM ${this.namespace(stack)} ${this.rootAlias}
-WHERE ${this.rootAlias}.${('type' in config ? this.pathField : this.idField.name)} IN (${ids.map(id => `'${id}'`).join(', ')})
+WHERE ${this.rootAlias}.${idField.name} IN (${ids.map(id => this.resolveValue(idField, id)).join(', ')})
 ${orderBy};`;
+  }
+
+  getQueryCountSQL<T>(cls: Class<T>, query: Query<T>) {
+    return `
+SELECT COUNT(1) as total
+${this.getFromSQL(cls)}
+${this.getWhereSQL(cls, query.where)}
+${this.getGroupBySQL(cls, query)}`;
+  }
+
+
+  async fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]> {
+    const stack: Record<string, any>[] = [];
+    const selectStack: (SelectClause<T> | undefined)[] = [];
+
+    const buildSet = (children: any[], field?: any) => SQLUtil.collectDependents(this, stack[stack.length - 1], children, field);
+
+    await SQLUtil.visitSchema(SchemaRegistry.get(cls), {
+      onRoot: async (config) => {
+        const res = buildSet(items); // Already filtered by initial select query
+        selectStack.push(select);
+        stack.push(res);
+        await config.descend();
+      },
+      onSub: async ({ config, descend, fields, path }) => {
+        const top = stack[stack.length - 1];
+        const ids = Object.keys(top);
+        const selectTop = selectStack[selectStack.length - 1] as any;
+        const subSelectTop = selectTop ? selectTop[config.name] : undefined;
+
+        // See if a selection exists at all
+        const sel: FieldConfig[] = subSelectTop ? fields
+          .filter(f => (subSelectTop as any)[f.name] === 1)
+          : [];
+
+        if (sel.length) {
+          sel.push(this.pathField, this.parentPathField);
+          if (config.array) {
+            sel.push(this.idxField);
+          }
+        }
+
+        // If children and selection exists
+        if (ids.length && (!subSelectTop || sel)) {
+          const children = await this.executeSQL<any[]>(this.getSelectRowsByIdsSQL(
+            path,
+            ids,
+            sel
+          ));
+
+          const res = buildSet(children, config);
+          try {
+            stack.push(res);
+            selectStack.push(subSelectTop);
+            await descend();
+          } finally {
+            selectStack.pop();
+            stack.pop();
+          }
+        }
+      },
+      onSimple: async ({ config, path }) => {
+        const top = stack[stack.length - 1];
+        const ids = Object.keys(top);
+        if (ids.length) {
+          const matching = await this.executeSQL<any[]>(this.getSelectRowsByIdsSQL(
+            path,
+            ids
+          ));
+          buildSet(matching, config);
+        }
+      }
+    });
+
+    return items;
+  }
+
+  async bulkProcess(dels: DeleteWrapper[], inserts: InsertWrapper[], upserts: InsertWrapper[], updates: InsertWrapper[]): Promise<BulkResponse> {
+    const out = {
+      counts: {
+        delete: dels.reduce((acc, el) => acc + el.ids.length, 0),
+        error: 0,
+        insert: inserts.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0),
+        update: updates.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0),
+        upsert: upserts.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0)
+      },
+      errors: [],
+      insertedIds: new Map()
+    };
+
+    // Full removals
+    await Promise.all(dels.map(el => this.executeSQL(this.getDeleteByIdsSQL(el.stack, el.ids))));
+
+    // Adding deletes
+    if (upserts.length || updates.length) {
+      const idx: any = this.idField.name;
+
+      await Promise.all([
+        ...upserts.filter(x => x.stack.length === 1).map(i => {
+          return this.executeSQL(this.getDeleteByIdsSQL(i.stack, i.records.map(v => v[idx])))
+        }),
+        ...updates.filter(x => x.stack.length === 1).map(i => {
+          return this.executeSQL(this.getDeleteByIdsSQL(i.stack, i.records.map(v => v[idx])));
+        }),
+      ]);
+    }
+
+    // Adding
+    for (const items of [inserts, upserts, updates]) {
+      if (!items.length) {
+        continue;
+      }
+      let lvl = 1; // Add by level
+      while (true) {
+        const leveled = items.filter(f => f.stack.length === lvl);
+        if (!leveled.length) {
+          break;
+        }
+        await Promise.all(leveled.map(iw => this.executeSQL(this.getInsertSQL(iw.stack, iw.records))))
+        lvl += 1;
+      }
+    }
+
+    return out;
   }
 }
