@@ -1,13 +1,16 @@
 import * as assert from 'assert';
 
-import { Schema, SchemaRegistry } from '@travetto/schema';
+import { Schema, SchemaRegistry, FieldConfig } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { WhereClause } from '@travetto/model/';
 
-import { SQLUtil } from '../src/util';
+import { VisitStack } from '../src/util';
+
+import { ModelRegistry } from '@travetto/model/src/registry';
+import { DependencyRegistry } from '@travetto/di';
+import { SQLDialect } from '../src/dialect/dialect';
 
 import '../src/dialect/mysql/dialect';
-import { Dialect } from '../src/types';
 
 @Schema()
 class User {
@@ -48,15 +51,11 @@ class WhereType {
 @Suite()
 export class QueryTest {
 
-  defaultResolver = {
-    resolveTable: (type) => type.name,
-    resolveValue: (f, v) => v,
-    namespace: (tbl) => typeof tbl === 'string' ? tbl : tbl.name
-  } as Dialect;
-
   @BeforeAll()
   async beforeAll() {
     await SchemaRegistry.init();
+    await ModelRegistry.init();
+    await DependencyRegistry.init();
   }
 
   @Test()
@@ -73,20 +72,30 @@ export class QueryTest {
       ]
     };
 
-    const qryStr = SQLUtil.buildWhere(this.defaultResolver, qry, WhereType);
-    assert(qryStr === '(WhereTypeAB.c = 5 AND WhereTypeD.e = true AND (WhereType.name = 5 OR WhereType.age = 10) AND WhereTypeG.z ALL = (a,b,c) AND WhereTypeA.d > 20)');
-  }
+    const dct = await DependencyRegistry.getInstance(SQLDialect);
+    dct.resolveName = (stack: VisitStack[]) => {
+      const field = stack[stack.length - 1] as FieldConfig;
+      return `${field.owner.name}.${field.name}`;
+    };
 
+    const qryStr = dct.getWhereGroupingSQL(WhereType, qry);
+    assert(qryStr === `(WhereTypeAB.c = 5 AND WhereTypeD.e = TRUE AND (WhereType.name = 5 OR WhereType.age = 10) AND WhereTypeG.z ALL = ('a','b','c') AND WhereTypeA.d > 20)`);
+  }
 
   @Test()
   async testRegEx() {
+    const dct = await DependencyRegistry.getInstance(SQLDialect);
+    dct.resolveName = (stack: VisitStack[]) => {
+      const field = stack[stack.length - 1] as FieldConfig;
+      return `${field.owner.name}.${field.name}`;
+    };
 
-    const out = SQLUtil.buildWhere(this.defaultResolver, {
+    const out = dct.getWhereGroupingSQL(User, {
       name: {
-        $regex: '/google.$/'
+        $regex: /google.$/
       }
-    }, User);
+    });
 
-    assert(out === 'User.name REGEXP BINARY /google.$/');
+    assert(out === `User.name REGEXP BINARY 'google.$'`);
   }
 }

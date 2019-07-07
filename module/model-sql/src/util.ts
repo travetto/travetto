@@ -6,7 +6,7 @@ import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/sc
 import { Dialect, InsertWrapper } from './types';
 
 export type VisitStack = {
-  config: ClassConfig | FieldConfig;
+  array?: boolean;
   type: Class;
   name: string;
   index?: number;
@@ -14,27 +14,23 @@ export type VisitStack = {
 
 export type VisitState = { path: VisitStack[] };
 
+const TABLE_SYM = Symbol('TABLE');
+const PATH_SYM = Symbol('PATH');
+
 interface VisitNode<R> {
   path: VisitStack[];
   fields: FieldConfig[];
   descend: () => R;
 }
 
-interface Select {
-  type: Class;
-  field: string;
-}
-
 interface OrderBy {
-  type: Class;
-  field: string;
+  stack: VisitStack[];
   asc: boolean;
 }
 
 interface Alias {
   alias: string;
-  parent?: Class;
-  table: string;
+  path: VisitStack[];
 }
 
 export interface VisitInstanceNode<R> extends VisitNode<R> {
@@ -48,7 +44,7 @@ export interface VisitHandler<R, U extends VisitNode<R> = VisitNode<R>> {
 }
 
 export class SQLUtil {
-  private static aliasCache = new Map<Class, Map<Class, Alias>>();
+  private static aliasCache = new Map<Class, Map<string, Alias>>();
   static readonly ROOT_ALIAS = '_ROOT';
 
   static schemaFieldsCache = new Map<Class, {
@@ -59,43 +55,33 @@ export class SQLUtil {
   }>();
 
   static classToStack(type: Class): VisitStack[] {
-    const config = SchemaRegistry.get(type);
-    return [{ config, type, name: type.name }];
+    return [{ type, name: type.name }];
   }
 
-  static getAliasCache(cls: Class, resolve: (path: VisitStack[]) => string) {
+  static getAliasCache(stack: VisitStack[], resolve: (path: VisitStack[]) => string) {
+    const cls = stack[0].type;
+
     if (this.aliasCache.has(cls)) {
       return this.aliasCache.get(cls)!;
     }
 
-    const clauses = new Map<Class, Alias>();
+    const clauses = new Map<string, Alias>();
     let idx = 0;
 
     this.visitSchemaSync(SchemaRegistry.get(cls), {
-      onRoot: ({ descend, config, path }) => {
+      onRoot: ({ descend, path }) => {
         const table = resolve(path);
-        clauses.set(config.class, {
-          alias: this.ROOT_ALIAS,
-          table
-        });
+        clauses.set(table, { alias: this.ROOT_ALIAS, path });
         return descend();
       },
       onSub: ({ descend, config, path }) => {
         const table = resolve(path);
-        clauses.set(config.type, {
-          alias: `${config.name.charAt(0)}${idx++}`,
-          table,
-          parent: config.owner
-        });
+        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
         return descend();
       },
       onSimple: ({ config, path }) => {
         const table = resolve(path);
-        clauses.set(config.type, {
-          alias: `${config.name.charAt(0)}${idx++}`,
-          table,
-          parent: config.owner
-        });
+        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
       }
     });
 
@@ -121,10 +107,19 @@ export class SQLUtil {
     }
   }
 
-  static getFieldsByLocation(cls: Class | ClassConfig) {
-    if (!('views' in cls)) {
-      cls = SchemaRegistry.get(cls);
+  static getFieldsByLocation(stack: VisitStack[]) {
+    const top = stack[stack.length - 1];
+    const cls = SchemaRegistry.get(top.type);
+
+    if (!cls) { // If a simple type, it is it's own field
+      const field = top as FieldConfig;
+      const ret = {
+        local: [field], localMap: { [field.name]: field },
+        foreign: [], foreignMap: {}
+      };
+      return ret;
     }
+
     if (this.schemaFieldsCache.has(cls.class)) {
       return this.schemaFieldsCache.get(cls.class)!;
     }
@@ -147,9 +142,8 @@ export class SQLUtil {
   }
 
   static visitSchemaSync(config: ClassConfig | FieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }) {
-    const type = 'class' in config ? config.class : config.type;
-    const { local: fields, foreign } = this.getFieldsByLocation(type);
-    let path: VisitStack[];
+    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
+    const { local: fields, foreign } = this.getFieldsByLocation(path);
 
     const descend = () => {
       for (const field of foreign) {
@@ -159,7 +153,7 @@ export class SQLUtil {
           handler.onSimple({
             config: field, descend: null as any, fields: [], path: [
               ...path,
-              { config: field, name: field.name, type: field.type }
+              field
             ]
           });
         }
@@ -167,32 +161,25 @@ export class SQLUtil {
     };
 
     if ('class' in config) {
-      path = this.classToStack(type);
       return handler.onRoot({ config, fields, descend, path });
     } else {
-      path = [
-        ...state.path,
-        { config, name: config.name, type: config.type }
-      ];
       return handler.onSub({ config, fields, descend, path });
     }
   }
 
   static async visitSchema(config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }) {
-    const type = 'class' in config ? config.class : config.type;
-    const { local: fields, foreign } = this.getFieldsByLocation(type);
-
-    let path: VisitStack[];
+    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
+    const { local: fields, foreign } = this.getFieldsByLocation(path);
 
     const descend = async () => {
       for (const field of foreign) {
         if (SchemaRegistry.has(field.type)) {
-          await this.visitSchemaSync(field, handler, { path });
+          await this.visitSchema(field, handler, { path });
         } else {
           await handler.onSimple({
             config: field, descend: null as any, fields: [], path: [
               ...path,
-              { config: field, name: field.name, type: field.type }
+              field
             ]
           });
         }
@@ -200,13 +187,8 @@ export class SQLUtil {
     };
 
     if ('class' in config) {
-      path = this.classToStack(type);
       return handler.onRoot({ config, fields, descend: descend.bind(null, path), path });
     } else {
-      path = [
-        ...state.path,
-        { config, name: config.name, type: config.type }
-      ];
       return handler.onSub({ config, fields, descend: descend.bind(null, path), path });
     }
   }
@@ -234,7 +216,7 @@ export class SQLUtil {
           for (const val of vals) {
             try {
               pathObj.push(val);
-              top.index = i++;
+              config.path[config.path.length - 1] = { ...top, index: i++ };
               await handler.onSub({ ...config, value: val });
             } finally {
               pathObj.pop();
@@ -253,12 +235,12 @@ export class SQLUtil {
     });
   }
 
-  static select<T>(cls: Class<T>, select?: SelectClause<T>): Select[] {
+  static select<T>(cls: Class<T>, select?: SelectClause<T>): FieldConfig[] {
     if (!select || Object.keys(select).length === 0) {
-      return [{ type: cls, field: '*' }];
+      return [{ type: cls, name: '*' } as FieldConfig];
     }
 
-    const { localMap } = this.getFieldsByLocation(cls);
+    const { localMap } = this.getFieldsByLocation(this.classToStack(cls));
 
     let toGet = new Set<string>();
 
@@ -274,19 +256,22 @@ export class SQLUtil {
         }
       }
     }
-    return [...toGet].map((el) => ({ type: cls, field: el }));
+    return [...toGet].map(el => localMap[el]);
   }
 
   static orderBy<T>(cls: Class<T>, sort: SortClause<T>[]): OrderBy[] {
     return sort.map((cl: any) => {
       let schema: ClassConfig = SchemaRegistry.get(cls);
+      const stack = this.classToStack(cls);
       while (true) {
         let key = Object.keys(cl)[0] as string;
+        const field = schema.views[ALL_VIEW].schema[key];
         if (Util.isPrimitive(cl[key])) {
-          return { field: key, type: schema.class, asc: !!!!cl[key] };
-
+          stack.push(field);
+          return { stack, asc: !!!!cl[key] };
         } else {
-          schema = SchemaRegistry.get(schema.views[ALL_VIEW].schema[key].type);
+          stack.push(field);
+          schema = SchemaRegistry.get(field.type);
           cl = cl[key];
         }
       }
@@ -318,11 +303,19 @@ export class SQLUtil {
   }
 
   static buildTable(list: VisitStack[]) {
-    return list.map((el, i) => i === 0 ? ModelRegistry.getBaseCollection(el.type) : el.name).join('_');
+    const top = list[list.length - 1] as any;
+    if (!top[TABLE_SYM]) {
+      top[TABLE_SYM] = list.map((el, i) => i === 0 ? ModelRegistry.getBaseCollection(el.type) : el.name).join('_');
+    }
+    return top[TABLE_SYM];
   }
 
   static buildPath(list: VisitStack[]) {
-    return list.map((el, i) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
+    const top = list[list.length - 1] as any;
+    if (!top[PATH_SYM]) {
+      top[PATH_SYM] = list.map((el, i) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
+    }
+    return top[PATH_SYM];
   }
 
   static async extractInserts<T>(cls: Class<T>, els: T[]): Promise<InsertWrapper[]> {
@@ -330,7 +323,7 @@ export class SQLUtil {
 
     const track = (stack: VisitStack[], value: any) => {
       const key = this.buildTable(stack);
-      (ins[key] = ins[key] || { stack, records: [] }).records.push([stack, value]);
+      (ins[key] = ins[key] || { stack, records: [] }).records.push({ stack, value });
     }
 
     const all = els.map(el =>

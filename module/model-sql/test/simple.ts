@@ -288,6 +288,7 @@ class TestSave extends BaseSqlTest {
   @Test('Verify partial update with field removal and lists')
   async testPartialUpdateList() {
     console.log(Date.now(), 'running');
+
     const service = await DependencyRegistry.getInstance(ModelService);
     const o = await service.save(SimpleList, SimpleList.from({
       names: ['a', 'b', 'c'],

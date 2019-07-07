@@ -37,6 +37,10 @@ export class SQLModelSource extends ModelSource {
     return this.dialect.conn;
   }
 
+  private exec<T>(sql: string) {
+    return this.dialect.executeSQL<T>(sql);
+  }
+
   generateId() {
     return this.dialect.generateId();
   }
@@ -44,18 +48,18 @@ export class SQLModelSource extends ModelSource {
   @Connected(true)
   createTables(cls: Class<any>): Promise<void> {
     return SQLUtil.visitSchema(SchemaRegistry.get(cls), {
-      onRoot: ({ path, descend }) => this.dialect.executeSQL(this.dialect.getCreateTableSQL(path)).then(descend),
-      onSub: ({ path, descend }) => this.dialect.executeSQL(this.dialect.getCreateTableSQL(path)).then(descend),
-      onSimple: ({ path }) => this.dialect.executeSQL(this.dialect.getCreateTableSQL(path))
+      onRoot: ({ path, descend }) => this.exec(this.dialect.getCreateTableSQL(path)).then(descend),
+      onSub: ({ path, descend }) => this.exec(this.dialect.getCreateTableSQL(path)).then(descend),
+      onSimple: ({ path }) => this.exec(this.dialect.getCreateTableSQL(path))
     });
   }
 
   @Connected(true)
   async dropTables(cls: Class<any>): Promise<void> {
-    return SQLUtil.visitSchema(SchemaRegistry.get(cls), {
-      onRoot: ({ path, descend }) => descend().then(() => this.dialect.executeSQL(this.dialect.getDropTableSQL(path))),
-      onSub: ({ path, descend }) => descend().then(() => this.dialect.executeSQL(this.dialect.getDropTableSQL(path))),
-      onSimple: ({ path }) => this.dialect.executeSQL(this.dialect.getDropTableSQL(path))
+    return await SQLUtil.visitSchema(SchemaRegistry.get(cls), {
+      onRoot: ({ path, descend }) => descend().then(() => this.exec(this.dialect.getDropTableSQL(path))),
+      onSub: ({ path, descend }) => descend().then(() => this.exec(this.dialect.getDropTableSQL(path))),
+      onSimple: ({ path }) => this.exec(this.dialect.getDropTableSQL(path))
     });
   }
 
@@ -146,9 +150,9 @@ export class SQLModelSource extends ModelSource {
   @Connected()
   async insert<T = any>(cls: Class, instance: T) {
     return SQLUtil.visitSchemaInstance(cls, instance, {
-      onRoot: ({ value, path }) => this.dialect.executeSQL(this.dialect.getInsertSQL(path, [value])),
-      onSub: ({ value, path }) => this.dialect.executeSQL(this.dialect.getInsertSQL(path, [value])),
-      onSimple: ({ value, path }) => this.dialect.executeSQL(this.dialect.getInsertSQL(path, value as any[]))
+      onRoot: ({ value, path }) => this.exec(this.dialect.getInsertSQL(path, [{ stack: path, value }])),
+      onSub: ({ value, path }) => this.exec(this.dialect.getInsertSQL(path, [{ stack: path, value }])),
+      onSimple: ({ value, path }) => this.exec(this.dialect.getInsertSQL(path, [{ stack: path, value }]))
     });
   }
 
@@ -184,7 +188,7 @@ export class SQLModelSource extends ModelSource {
 
   @Connected(true)
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
-    await this.dialect.executeSQL(this.dialect.getUpdateSQL(SQLUtil.classToStack(cls), data, query.where));
+    await this.exec(this.dialect.getUpdateSQL(SQLUtil.classToStack(cls), data, query.where));
     return -1;
   }
 
@@ -242,7 +246,7 @@ export class SQLModelSource extends ModelSource {
 
   @Connected()
   async query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]> {
-    const res = await this.dialect.executeSQL<T[]>(this.dialect.getQuerySQL(cls, builder));
+    const res = await this.exec<T[]>(this.dialect.getQuerySQL(cls, builder));
     if (ModelRegistry.has(cls)) {
       await this.dialect.fetchDependents(cls, res, builder && builder.select);
     }

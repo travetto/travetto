@@ -9,7 +9,7 @@ import { SelectClause } from '@travetto/model/src/model/query';
 
 export interface InsertWrapper {
   stack: VisitStack[];
-  records: [VisitStack[], any][];
+  records: { stack: VisitStack[], value: any }[];
 }
 
 export interface DeleteWrapper {

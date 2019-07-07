@@ -79,7 +79,7 @@ export class MySQLDialect extends SQLDialect implements Dialect {
       return '';
     }
 
-    return `${conf.name} ${type} ${conf.required && conf.required.active ? 'NOT NULL' : 'DEFAULT NULL'}`;
+    return `${conf.name} ${type} ${(conf.required && conf.required.active) ? 'NOT NULL' : 'DEFAULT NULL'}`;
   }
 
   /**
@@ -90,13 +90,13 @@ export class MySQLDialect extends SQLDialect implements Dialect {
       return 'NULL';
     } else if (conf.type === String) {
       if (value instanceof RegExp) {
-        const src = BindUtil.extractRegex(value).source.replace(/\\b/g, '([[:<:]]|[[:>:]])');
+        let src = BindUtil.extractRegex(value).source.replace(/\\b/g, '([[:<:]]|[[:>:]])');
         return `'${src}'`;
       } else {
         return `'${value}'`;
       }
     } else if (conf.type === Boolean) {
-      return `'${value ? 'true' : 'false'}'`;
+      return `${value ? 'TRUE' : 'FALSE'}`;
     } else if (conf.type === Number) {
       return `${value}`;
     } else if (conf.type === Date) {

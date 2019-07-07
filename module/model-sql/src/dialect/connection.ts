@@ -57,8 +57,8 @@ async function runCommands<V extends ConnectionAware, R>(
 export function Connected<T extends ConnectionAware>(transactional = false) {
   return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(this: T, ...args: any[]) => Promise<any>>) {
     const og = desc.value!;
-    desc.value = async function (this: T, ...args: any[]) {
-      return await runCommands.call(this, transactional, og as any, args);
+    desc.value = function (this: T, ...args: any[]) {
+      return runCommands.call(this, transactional, og as any, args);
     };
   };
 }
