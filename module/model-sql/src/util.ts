@@ -5,7 +5,12 @@ import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/sc
 
 import { Dialect, InsertWrapper } from './types';
 
-export type VisitStack = { config: ClassConfig | FieldConfig, type: Class, name: string; }
+export type VisitStack = {
+  config: ClassConfig | FieldConfig;
+  type: Class;
+  name: string;
+  index?: number;
+}
 
 export type VisitState = { path: VisitStack[] };
 
@@ -14,7 +19,6 @@ export type SortData = { table: string, field: string, alias: string, asc: boole
 interface VisitNode<R> {
   path: VisitStack[];
   fields: FieldConfig[];
-  index?: number;
   descend: () => R;
 }
 
@@ -333,6 +337,10 @@ export class SQLUtil {
     return list.map(el => el.name).join('_');
   }
 
+  static buildPath(list: VisitStack[]) {
+    return list.map(el => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
+  }
+
   static async fetchDependents<T>(
     dct: Dialect,
     cls: Class<T>, items: T[],
@@ -359,7 +367,6 @@ export class SQLUtil {
         // See if a selection exists at all
         const sel = subSelectTop ? fields
           .filter(f => (subSelectTop as any)[f.name] === 1)
-          .map(f => f.name)
           : [];
 
         if (sel.length) {
@@ -371,12 +378,12 @@ export class SQLUtil {
 
         // If children and selection exists
         if (ids.length && (!subSelectTop || sel)) {
-          const children = await dct.selectRowsByIds(
-            this.buildTable(path),
-            dct.parentPathField.name,
+          const children = await dct.executeSQL<any[]>(dct.getSelectRowsByIdsSQL(
+            top.type,
+            path,
             ids,
             sel
-          );
+          ));
 
           const res = buildSet(children, config);
           try {

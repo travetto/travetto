@@ -1,8 +1,9 @@
-import { FieldConfig } from '@travetto/schema';
+import { FieldConfig, SchemaChangeEvent } from '@travetto/schema';
 import { Class } from '@travetto/registry';
 import { Query, BulkResponse } from '@travetto/model';
 
 import { ConnectionSupport } from './dialect/connection';
+import { VisitStack } from './util';
 
 export interface InsertWrapper {
   table: string;
@@ -18,8 +19,6 @@ export interface DeleteWrapper {
 }
 
 export interface Dialect {
-  ROOT: string;
-
   parentPathField: FieldConfig;
   pathField: FieldConfig;
   idField: FieldConfig;
@@ -27,28 +26,30 @@ export interface Dialect {
 
   conn: ConnectionSupport;
 
-  sort(name: string, asc: boolean): string;
+  generateId(): string;
+  handleFieldChange?(ev: SchemaChangeEvent): Promise<void>;
 
   // Schema support
   hash(name: string): string;
   getColumnDefinition(config: FieldConfig): string;
-  resolveTable(cls: Class, prefix?: string, aliases?: Record<string, string>): string;
   resolveValue(field: FieldConfig, value: any): string;
-  namespace(name: Class | string): string;
+  namespace(name: string | VisitStack[]): string;
 
-  // Basic table creation
-  createTableSQL(name: string, fields: FieldConfig[], suffix?: string): string;
-  dropTableSQL(name: string): string;
+  // SQL Generation
+  getCreateTableSQL(stack: VisitStack[]): string;
+  getDropTableSQL(stack: VisitStack[]): string;
+  getQuerySQL<T>(cls: Class<T>, query: Query<T>): string;
+  getInsertSQL(stack: VisitStack[], instances: any[], idxOffset?: number): string;
+  getUpdateSQL(stack: VisitStack[], data: any, suffix?: string): string;
+  getDeleteByIdsSQL(stack: VisitStack[], ids: string[]): string;
+  getSelectRowsByIdsSQL<T>(cls: Class<T>, stack: VisitStack[], ids: string[], select?: FieldConfig[]): string;
 
-  // Basic querying
   executeSQL<T>(sql: string): Promise<T>;
-  query<T, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]>;
+
   deleteAndGetCount<T>(cls: Class<T>, query: Query<T>): Promise<number>;
   getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
 
-  // Basic data management
-  selectRowsByIds<T>(table: string, field: string, ids: string[], select?: string[], order?: { field: string, asc: boolean }[]): Promise<T[]>;
-  bulkProcess(
+  bulkProcess?(
     dels: DeleteWrapper[],
     inserts: InsertWrapper[],
     upserts: InsertWrapper[],

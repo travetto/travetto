@@ -7,7 +7,10 @@ import { AsyncContext } from '@travetto/context';
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../dialect';
 import { MySQLConnection } from './connection';
-import { VisitStack } from '../../util';
+import { VisitStack, SQLUtil } from '../../util';
+import { Class } from '@travetto/registry';
+import { Query } from '@travetto/model/src/model/query';
+import { Util } from '@travetto/base';
 
 @Injectable({
   target: SQLDialect
@@ -22,6 +25,10 @@ export class MySQLDialect extends SQLDialect {
     super();
     this.conn = new MySQLConnection(context, config);
     this.ns = config.namespace;
+  }
+
+  hash(value: string) {
+    return `SHA2('${value}', ${this.KEY_LEN * 4})`;
   }
 
   getCreateTableSQL(stack: VisitStack[]) {
@@ -114,5 +121,22 @@ export class MySQLDialect extends SQLDialect {
         }
       });
     });
+  }
+
+  async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>) {
+    const res = await this.executeSQL<{ affectedRows: number }>(`
+DELETE ${this.rootAlias}
+${await this.getFromSQL(cls)}
+${await this.getWhereSQL(cls, query.where)}`);
+    return res.affectedRows;
+  }
+
+  async getCountForQuery<T>(cls: Class<T>, query: Query<T>) {
+    const { total } = await this.executeSQL<{ total: number }>(`
+SELECT COUNT(1) as total
+${await this.getFromSQL(cls)}
+${await this.getWhereSQL(cls, query.where)}
+GROUP BY ${this.rootAlias}.${this.idField.name}`);
+    return total;
   }
 }

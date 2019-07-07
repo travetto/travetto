@@ -12,10 +12,10 @@ import { SchemaChangeEvent, SchemaRegistry, FieldConfig } from '@travetto/schema
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 
 import { SQLModelConfig } from './config';
-import { SQLDialect } from './dialect/base-old';
 import { Connected } from './dialect/connection';
 import { Injectable } from '@travetto/di';
 import { SQLUtil } from './util';
+import { SQLDialect } from './dialect/dialect';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,
@@ -43,60 +43,20 @@ export class SQLModelSource extends ModelSource {
 
   @Connected(true)
   createTables(cls: Class<any>): Promise<void> {
-    return this.dialect.visitSchema(cls, {
-      onRoot: async ({ table, fields, descend }) => {
-        let idField = fields.find(x => x.name === this.dialect.idField.name);
-        if (!idField) {
-          fields.push(idField = this.dialect.idField);
-        }
-        await this.dialect.executeSQL(this.dialect.createPrimaryTableSQL(table, fields));
-        return descend();
-      },
-      onSub: async ({ table, config, fields, parentTable, descend }) => {
-        await this.dialect.executeSQL(this.dialect.createSubTableSQL(table, config, fields, parentTable));
-        return descend();
-      },
-      onSimple: async ({ config, parentTable, table }) => {
-        await this.dialect.executeSQL(this.dialect.createSimpleTableSQL(table, config, parentTable));
-      }
+    return SQLUtil.visitSchema(SchemaRegistry.get(cls), {
+      onRoot: ({ path, descend }) => this.dialect.executeSQL(this.dialect.getCreateTableSQL(path)).then(descend),
+      onSub: ({ path, descend }) => this.dialect.executeSQL(this.dialect.getCreateTableSQL(path)).then(descend),
+      onSimple: ({ path }) => this.dialect.executeSQL(this.dialect.getCreateTableSQL(path))
     });
   }
 
   @Connected(true)
   async dropTables(cls: Class<any>): Promise<void> {
-    return this.dialect.visitSchema(cls, {
-      onSimple: ({ table }) => this.dialect.executeSQL(this.dialect.dropTableSQL(table)),
-      onSub: async ({ table, descend }) => {
-        await descend();
-        await this.dialect.executeSQL(this.dialect.dropTableSQL(table));
-      },
-      onRoot: async ({ table, descend }) => {
-        await descend();
-        await this.dialect.executeSQL(this.dialect.dropTableSQL(table));
-      }
+    return SQLUtil.visitSchema(SchemaRegistry.get(cls), {
+      onRoot: ({ path, descend }) => descend().then(() => this.dialect.executeSQL(this.dialect.getDropTableSQL(path))),
+      onSub: ({ path, descend }) => descend().then(() => this.dialect.executeSQL(this.dialect.getDropTableSQL(path))),
+      onSimple: ({ path }) => this.dialect.executeSQL(this.dialect.getDropTableSQL(path))
     });
-  }
-
-  async insertSingle(table: string, path: string[], fields: FieldConfig[], instance: any) {
-    const columns = fields
-      .filter(x => x.name in instance)
-      .filter(x => !SchemaRegistry.has(x.type) && !x.array)
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    const values = columns.map(x => this.dialect.resolveValue(x, instance[x.name]));
-
-    const columnNames = columns.map(x => x.name);
-    columnNames.unshift(this.dialect.pathField.name);
-    const sub = path.join('.');
-    values.unshift(this.dialect.hash(sub));
-
-    if (path.length > 1) {
-      const root = path.slice(0, path.length - 1).join('.');
-      columnNames.unshift(this.dialect.parentPathField.name);
-      values.unshift(this.dialect.hash(root));
-    }
-
-    await this.dialect.insertRows(table, columnNames, [values]);
   }
 
   @WithAsyncContext({})
@@ -129,7 +89,9 @@ export class SQLModelSource extends ModelSource {
   }
 
   async onSchemaChange(ev: SchemaChangeEvent) {
-    this.dialect.handleFieldChange(ev);
+    if (this.dialect.handleFieldChange) {
+      this.dialect.handleFieldChange(ev);
+    }
   }
 
   onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>): void {
@@ -183,34 +145,16 @@ export class SQLModelSource extends ModelSource {
 
   @Connected()
   async insert<T = any>(cls: Class, instance: T) {
-    return this.dialect.visitSchemaInstance(cls, instance, {
-      onRoot: ({ table, fields, value, path }) => this.insertSingle(table, path, fields, value),
-      onSub: ({ table, config, fields, value, path, index }) => {
-        if (config.array) {
-          fields = [this.dialect.idxField, ...fields];
-          value = { ...value, [this.dialect.idxField.name]: index };
-        }
-        const res = this.insertSingle(table, path, fields, value);
-        return res;
+    return SQLUtil.visitSchemaInstance(cls, instance, {
+      onRoot: ({ value, path }) => {
+        return this.dialect.executeSQL(this.dialect.getInsertSQL(path, [value]));
       },
-      onSimple: async ({ table, config: field, value, path }) => {
-        if (Array.isArray(value)) {
-          const root = path.join('.');
-          await this.dialect.insertRows(table,
-            [
-              this.dialect.parentPathField,
-              this.dialect.pathField,
-              this.dialect.idxField,
-              field
-            ].map(x => x.name),
-            value.map((v, i) => [
-              this.dialect.hash(`${root}`),
-              this.dialect.hash(`${root}.${field.name}[${i}]`),
-              `${i}`,
-              this.dialect.resolveValue(field, v)
-            ])
-          );
-        }
+      onSub: ({ value, path }) => {
+        const { index } = path[path.length - 1];
+        return this.dialect.executeSQL(this.dialect.getInsertSQL(path, [value], index));
+      },
+      onSimple: ({ value, path }) => {
+        return this.dialect.executeSQL(this.dialect.getInsertSQL(path, value as any[]));
       }
     });
   }
@@ -307,7 +251,7 @@ export class SQLModelSource extends ModelSource {
 
   @Connected()
   async query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]> {
-    const res = await this.dialect.query(cls, builder);
+    const res = await this.dialect.executeSQL(this.dialect.getQuerySQL(cls, builder));
     if (ModelRegistry.has(cls)) {
       await this.dialect.fetchDependents(cls, res, builder && builder.select);
     }
@@ -317,23 +261,71 @@ export class SQLModelSource extends ModelSource {
 
   @Connected(true)
   async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse> {
-    const deletes = operations.map(x => x.delete).filter(x => !!x) as T[];
-    const inserts = operations.map(x => x.insert).filter(x => !!x) as T[];
+    const deleteOps = operations.map(x => x.delete).filter(x => !!x) as T[];
+    const insertOps = operations.map(x => x.insert).filter(x => !!x) as T[];
 
-    for (const el of inserts) {
+    for (const el of insertOps) {
       if (!el.id) {
         el.id = this.generateId();
       }
     }
 
-    const out = await this.dialect.bulkProcess(
-      [{ table: this.dialect.resolveTable(cls), ids: deletes.map(x => x.id!) }].filter(x => !!x.ids.length),
-      (await SQLUtil.extractInserts(this.dialect, cls, inserts)).filter(x => !!x.records.length),
-      (await SQLUtil.extractInserts(this.dialect, cls, operations.map(x => x.upsert).filter(x => !!x))).filter(x => !!x.records.length),
-      (await SQLUtil.extractInserts(this.dialect, cls, operations.map(x => x.update).filter(x => !!x))).filter(x => !!x.records.length)
-    );
+    const deletes = [{ type: cls, ids: deleteOps.map(x => x.id!) }].filter(x => !!x.ids.length);
+    const inserts = (await SQLUtil.extractInserts(this.dialect, cls, insertOps)).filter(x => !!x.records.length);
+    const upserts = (await SQLUtil.extractInserts(this.dialect, cls, operations.map(x => x.upsert).filter(x => !!x))).filter(x => !!x.records.length);
+    const updates = (await SQLUtil.extractInserts(this.dialect, cls, operations.map(x => x.update).filter(x => !!x))).filter(x => !!x.records.length);
 
-    out.insertedIds = new Map(inserts.map((el, i) => [i, el.id!]));
+
+    let out = {} as BulkResponse;
+
+    if (this.dialect.bulkProcess) {
+      out = await this.dialect.bulkProcess(deletes, inserts, upserts, updates);
+    } else {
+      out = {
+        counts: {
+          delete: deletes.filter(x => x.level === 1).reduce((acc, el) => acc + el.ids.length, 0),
+          error: 0,
+          insert: insertOps.filter(x => x.level === 1).reduce((acc, el) => acc + el.records.length, 0),
+          update: updates.filter(x => x.level === 1).reduce((acc, el) => acc + el.records.length, 0),
+          upsert: upserts.filter(x => x.level === 1).reduce((acc, el) => acc + el.records.length, 0)
+        },
+        errors: [],
+        insertedIds: new Map()
+      };
+
+      // Full removals
+      await Promise.all(deletes.map(d => this.deleteByIds(d.table, d.ids)));
+
+      // Adding deletes
+      if (upserts.length || updates.length) {
+        await Promise.all([
+          ...upserts.filter(x => x.level === 1).map(i => {
+            const idx = i.fields.indexOf(this.idField.name);
+            return this.deleteByIds(i.table, i.records.map(v => v[idx]))
+          }),
+          ...updates.filter(x => x.level === 1).map(i => {
+            const idx = i.fields.indexOf(this.idField.name);
+            return this.deleteByIds(i.table, i.records.map(v => v[idx]))
+          }),
+        ]);
+      }
+
+      // Adding
+      for (const items of [insertOps, upserts, updates]) {
+        if (!items.length) {
+          continue;
+        }
+        let lvl = 1; // Add by level
+        while (true) {
+          const leveled = items.filter(f => f.level === lvl);
+          if (!leveled.length) {
+            break;
+          }
+          await Promise.all(leveled.map(iw => this.insertRows(iw.table, iw.fields, iw.records)))
+          lvl += 1;
+        }
+      }
+    }
 
     return out;
   }

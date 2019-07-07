@@ -1,9 +1,11 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry, FieldConfig, ALL_VIEW, ClassConfig, BindUtil } from '@travetto/schema';
+import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent } from '@travetto/schema';
 import { Util } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model';
 
 import { SQLUtil, VisitStack } from '../util';
+import { Dialect, DeleteWrapper, InsertWrapper } from '../types';
+import { BulkResponse } from '@travetto/model/src/model/bulk';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -40,10 +42,8 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
   } as FieldConfig;
 }
 
-export abstract class SQLDialect {
+export abstract class SQLDialect implements Dialect {
   KEY_LEN = 64;
-
-  rootAlias = '_root';
 
   idField = makeField('id', String, true, {
     maxlength: { n: 32 },
@@ -68,12 +68,41 @@ export abstract class SQLDialect {
     this.namespace = this.namespace.bind(this);
   }
 
+  get rootAlias() {
+    return SQLUtil.ROOT_ALIAS;
+  }
+
+  abstract get conn(): any;
+
   abstract getColumnDefinition(field: FieldConfig): string;
 
   abstract get ns(): string;
 
-  namespace(name: string | VisitStack[]) {
-    return `${this.ns}_${typeof name === 'string' ? name : SQLUtil.buildTable(name)}`;
+  abstract hash(inp: string): string;
+
+  abstract executeSQL<T>(sql: string): Promise<T>;
+
+  abstract resolveValue(config: FieldConfig, value: any): string;
+
+  abstract deleteAndGetCount<T>(cls: Class<T>, query: Query<T>): Promise<number>;
+
+  abstract getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
+
+  handleFieldChange?(ev: SchemaChangeEvent): Promise<void>;
+
+  bulkProcess?(
+    dels: DeleteWrapper[],
+    inserts: InsertWrapper[],
+    upserts: InsertWrapper[],
+    updates: InsertWrapper[]
+  ): Promise<BulkResponse>;
+
+  generateId(): string {
+    return Util.uuid(this.KEY_LEN);
+  }
+
+  namespace(stack: VisitStack[]) {
+    return `${this.ns}_${SQLUtil.buildTable(stack)}`;
   }
 
   getKey(cls: Class, name: string) {
@@ -84,8 +113,6 @@ export abstract class SQLDialect {
     let base = SQLUtil.getAliasCache(type, this.namespace).get(type)!.alias;
     return field ? `${base}.${field}` : base;
   }
-
-  abstract resolveValue(config: FieldConfig, value: any): string;
 
   getWhereFieldSQL<T>(cls: Class<T>, o: Record<string, any>, path: string = ''): any {
     const items = [];
@@ -238,8 +265,15 @@ ${this.getLimitSQL(cls, query)}`;
     const array = parent && (config as FieldConfig).array;
 
     const fields = SchemaRegistry.has(type) ?
-      SQLUtil.getFieldsByLocation(type).local :
+      [...SQLUtil.getFieldsByLocation(type).local] :
       (array ? [config as FieldConfig] : []);
+
+    if (!parent) {
+      let idField = fields.find(x => x.name === this.idField.name);
+      if (!idField) {
+        fields.push(idField = this.idField);
+      }
+    }
 
     return `
 CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
@@ -262,5 +296,84 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
   */
   getDropTableSQL(stack: VisitStack[]) {
     return `DROP TABLE IF EXISTS ${this.namespace(stack)}; `;
+  }
+
+  /**
+   * Simple insertion
+   */
+  getInsertSQL(stack: VisitStack[], instances: any[], idxOffset: number = 0) {
+    const { type, config } = stack[stack.length - 1];
+    const columns = SQLUtil.getFieldsByLocation(type).local
+      .filter(x => !SchemaRegistry.has(x.type) && !x.array)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const hasParent = 'type' in config;
+    const isArray = 'array' in config && config.array;
+
+    const columnNames = columns.map(c => c.name);
+    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, inst[c.name])));
+
+    if (hasParent) {
+      columnNames.unshift(this.parentPathField.name);
+    }
+    columnNames.unshift(this.pathField.name);
+    if (isArray) {
+      columnNames.unshift(this.idxField.name);
+    }
+
+    for (let i = 0; i < matrix.length; i++) {
+      if (hasParent) {
+        matrix[i].unshift(SQLUtil.buildPath(stack.slice(0, stack.length - 1)));
+      }
+      matrix[i].unshift(`${SQLUtil.buildPath(stack)}${isArray ? `[${i + idxOffset}]` : ''}`);
+      if (isArray) {
+        matrix[i].unshift(this.resolveValue(this.idxField, i + idxOffset));
+      }
+    }
+
+    return `
+INSERT INTO ${this.namespace(stack)} (${columnNames.join(', ')})
+VALUES
+${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
+  }
+
+  /**
+   * Simple data base updates
+   */
+  getUpdateSQL(stack: VisitStack[], data: any, suffix?: string) {
+    const { type } = stack[stack.length - 1];
+    const { localMap } = SQLUtil.getFieldsByLocation(type);
+    return `
+UPDATE ${this.namespace(stack)} 
+SET
+  ${Object
+        .entries(data)
+        .filter(([k]) => k in localMap)
+        .map(([k, v]) => `${k}=${this.resolveValue(localMap[k], v)}`).join(', ')}
+  ${suffix};`;
+  }
+
+  getDeleteByIdsSQL(stack: VisitStack[], ids: string[]) {
+    return `
+DELETE 
+FROM ${this.namespace(stack)} 
+WHERE ${this.idField.name} IN (${ids.map(id => this.resolveValue(this.idField, id)).join(', ')});`;
+  }
+
+
+  /**
+  * Get elements by ids
+  */
+  getSelectRowsByIdsSQL<T>(cls: Class<T>, stack: VisitStack[], ids: string[], select: FieldConfig[] = []): string {
+    const { config } = stack[stack.length - 1];
+    const orderBy = !('array' in config && config.array) ?
+      '' :
+      `ORDER BY ${this.rootAlias}.${this.idxField.name} ASC`;
+
+    return `
+SELECT ${select.length ? select.map(x => `${this.rootAlias}.${x.name}`).join(',') : '*'}
+FROM ${this.namespace(stack)} ${this.rootAlias}
+WHERE ${this.rootAlias}.${('type' in config ? this.pathField : this.idField.name)} IN (${ids.map(id => `'${id}'`).join(', ')})
+${orderBy};`;
   }
 }
