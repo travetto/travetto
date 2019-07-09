@@ -38,6 +38,9 @@ export class AssertUtil {
     }
 
     const pth = best.trim().split(/\s+/g).slice(1).pop()!;
+    if (!pth) {
+      return { file: filename, line: 1 };
+    }
 
     const [file, lineNo] = pth.replace(/[()]/g, '').replace(/^[A-Za-z]:/, '').split(':');
     let line = parseInt(lineNo, 10);

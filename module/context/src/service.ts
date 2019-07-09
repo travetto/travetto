@@ -107,7 +107,6 @@ export class AsyncContext {
     await new Promise(r => process.nextTick(r));
 
     const runId = async_hooks.executionAsyncId() || async_hooks.triggerAsyncId();
-
     this.active += 1;
     this.storageState.set(runId, init);
     this.threads.set(runId, runId);
