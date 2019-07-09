@@ -93,17 +93,20 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
+  @WithAsyncContext({})
   async onSchemaChange(ev: SchemaChangeEvent) {
-    console.debug('Schema Changed', ev);
-
     if (this.dialect.handleFieldChange) {
-      this.dialect.handleFieldChange(ev);
+      return this.onFieldChange(ev);
     }
   }
 
-  onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>): void {
-    console.debug('Model Changed', e);
+  @Connected(true)
+  async onFieldChange(ev: SchemaChangeEvent) {
+    this.dialect.handleFieldChange(ev);
+  }
 
+  @WithAsyncContext({})
+  async onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>) {
     if (!this.config.autoCreate) {
       return;
     }

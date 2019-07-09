@@ -1,4 +1,4 @@
-import { Model, ModelCore, ModelSource } from '@travetto/model';
+import { Model, ModelCore, ModelService } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 import { Application, Inject } from '@travetto/di';
 
@@ -41,7 +41,7 @@ class Employee2 implements ModelCore {
 export class Service {
 
   @Inject()
-  src: ModelSource;
+  src: ModelService;
 
   @Inject()
   context: AsyncContext;

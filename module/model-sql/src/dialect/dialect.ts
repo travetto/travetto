@@ -88,63 +88,47 @@ export abstract class SQLDialect implements Dialect {
   abstract getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
 
   async handleFieldChange(e: SchemaChangeEvent): Promise<void> {
-    const root = e.cls;
-
-    function pathToStack(path: string[]) {
-      const out: VisitStack[] = SQLUtil.classToStack(root)
-      let top = SchemaRegistry.get(root);
-
-      for (const el of path) {
-        const field = top.views[ALL_VIEW].schema[el];
-        out.push(field);
-        if (!SchemaRegistry.has(field.type)) {
-          break;
-        }
-        top = SchemaRegistry.get(field.type);
-      }
-
-      return out;
-    }
+    const rootStack = SQLUtil.classToStack(e.cls);
 
     const removes = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'removing')
-        .map(ev => [...v.path, ev.prev!.name]));
+        .map(ev => [...v.path, ev.prev!]));
       return acc;
-    }, [] as string[][]);
+    }, [rootStack] as VisitStack[][]);
 
     const modifies = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'changed')
-        .map(ev => [...v.path, ev.prev!.name]));
+        .map(ev => [...v.path, ev.prev!]));
       return acc;
-    }, [] as string[][]);
+    }, [rootStack] as VisitStack[][]);
 
     const adds = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'added')
-        .map(ev => [...v.path, ev.curr!.name]));
+        .map(ev => [...v.path, ev.curr!]));
       return acc;
-    }, [] as string[][]);
+    }, [rootStack] as VisitStack[][]);
 
-    await Promise.all(removes.map(v => this.executeSQL(this.getDropColumnSQL(pathToStack(v)))));
-    await Promise.all(adds.map(v => this.executeSQL(this.getAddColumnSQL(pathToStack(v)))));
-    await Promise.all(modifies.map(v => this.executeSQL(this.getModifyColumnSQL(pathToStack(v)))));
+    await Promise.all(adds.map(v => this.executeSQL(this.getAddColumnSQL(v))));
+    await Promise.all(modifies.map(v => this.executeSQL(this.getModifyColumnSQL(v))));
+    await Promise.all(removes.map(v => this.executeSQL(this.getDropColumnSQL(v))));
   }
 
   getDropColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
-    return `ALTER TABLE ${this.namespaceParent(stack)} DROP COLUMN ${field.name}`;
+    return `ALTER TABLE ${this.namespaceParent(stack)} DROP COLUMN ${field.name};`;
   }
 
   getAddColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
-    return `ALTER TABLE ${this.namespaceParent(stack)} ADD COLUMN ${this.getColumnDefinition(field as FieldConfig)}`;
+    return `ALTER TABLE ${this.namespaceParent(stack)} ADD COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
   }
 
   getModifyColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
-    return `ALTER TABLE ${this.namespaceParent(stack)} MODIFY COLUMN ${this.getColumnDefinition(field as FieldConfig)}`;
+    return `ALTER TABLE ${this.namespaceParent(stack)} MODIFY COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
   }
 
   generateId(): string {
