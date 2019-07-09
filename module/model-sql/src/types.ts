@@ -39,12 +39,9 @@ export interface Dialect {
   getDropTableSQL(stack: VisitStack[]): string;
   getQuerySQL<T>(cls: Class<T>, query: Query<T>): string;
   getInsertSQL(stack: VisitStack[], instances: any[], idxOffset?: number): string;
-  getDeleteByIdsSQL(stack: VisitStack[], ids: string[]): string;
   getSelectRowsByIdsSQL<T>(stack: VisitStack[], ids: string[], select?: FieldConfig[]): string;
   getUpdateSQL(stack: VisitStack[], data: any, where?: WhereClause<any>): string;
   getDeleteSQL(stack: VisitStack[], where?: WhereClause<any>): string;
-  getDeleteByIdsSQL(stack: VisitStack[], ids: string[]): string;
-  getSelectRowsByIdsSQL<T>(stack: VisitStack[], ids: string[], select?: FieldConfig[]): string;
   getQueryCountSQL<T>(cls: Class<T>, query: Query<T>): string;
   fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]>;
 

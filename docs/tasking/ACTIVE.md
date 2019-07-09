@@ -5,10 +5,11 @@ SQL
 ----------------------
 - [?] Building out SQL model support
 - [ ] Add tests to base for 'replace' mode of deepAssign
-- [ ] Figure out paradigm for ownership of namespacing
-- [ ] Look for query optimization opportunities
-- [ ] Basic polymorphism support
+- [X] Figure out paradigm for ownership of namespacing
+- [?] Look for query optimization opportunities
+- [X] Basic polymorphism support
 - [X] Sorting/paging
+- [ ] Handle schema changes (columns added removed)
  
 Tooling
 -----------------------

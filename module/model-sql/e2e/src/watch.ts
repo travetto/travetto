@@ -1,16 +1,18 @@
 import { Model, ModelCore, ModelSource } from '@travetto/model';
 import { Schema } from '@travetto/schema';
-import { InjectableFactory, Application, Inject } from '@travetto/di';
+import { Application, Inject } from '@travetto/di';
 
-import { ElasticsearchModelSource, ElasticsearchModelConfig } from '../..';
+import '../../src/dialect/mysql/dialect';
+import { WithAsyncContext, AsyncContext } from '@travetto/context';
 
 @Schema()
 class Address {
   street1: string;
   street2?: string;
+  street3?: string;
   city: string;
   zip?: number;
-  name: string;
+  name?: string;
 }
 
 @Model()
@@ -28,31 +30,27 @@ class Employee implements ModelCore {
   name: string;
 }
 
-export class Conf {
-  @InjectableFactory()
-  static getSource(config: ElasticsearchModelConfig): ModelSource {
-    return new ElasticsearchModelSource(config);
-  }
+@Model()
+class Employee2 implements ModelCore {
+  id?: string;
+  name: string;
 }
 
-@Application('multi')
+
+@Application('multi', { watchable: true, standalone: false })
 export class Service {
 
   @Inject()
   src: ModelSource;
 
+  @Inject()
+  context: AsyncContext;
+
+  @WithAsyncContext({})
   async run() {
     await this.src.save(Person, Person.from({ name: 'bob', age: 10, gender: 'm', }));
     await this.src.save(Employee, Employee.from({ name: 'bob2' }));
 
-    const res = await (this.src as ElasticsearchModelSource).getRawMultiQuery([Employee, Person], {
-      where: {
-        name: {
-          $regex: /.*/
-        }
-      }
-    });
-
-    console.log(res);
+    setTimeout(() => { }, 100000000);
   }
 }

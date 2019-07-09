@@ -111,6 +111,10 @@ export class SQLUtil {
     const top = stack[stack.length - 1];
     const cls = SchemaRegistry.get(top.type);
 
+    if (cls && this.schemaFieldsCache.has(cls.class)) {
+      return this.schemaFieldsCache.get(cls.class)!;
+    }
+
     if (!cls) { // If a simple type, it is it's own field
       const field = top as FieldConfig;
       const ret = {
@@ -120,12 +124,24 @@ export class SQLUtil {
       return ret;
     }
 
-    if (this.schemaFieldsCache.has(cls.class)) {
-      return this.schemaFieldsCache.get(cls.class)!;
-    }
-
+    const model = ModelRegistry.get(cls.class)!;
     const conf = cls.views[ALL_VIEW];
     const fields = conf.fields.map(x => conf.schema[x]);
+
+    // Polymorphic
+    if (model && (model.baseType || model.subType)) {
+      const fieldMap = new Set(fields.map(f => f.name));
+      for (const type of ModelRegistry.getClassesByBaseType(ModelRegistry.getBaseModel(cls.class))) {
+        const conf = SchemaRegistry.get(type).views[ALL_VIEW];
+        for (const f of conf.fields) {
+          if (!fieldMap.has(f)) {
+            fieldMap.add(f);
+            fields.push({ ...conf.schema[f], required: { active: false } });
+          }
+        }
+      }
+    }
+
     const ret = {
       localMap: {} as Record<string, FieldConfig>,
       foreignMap: {} as Record<string, FieldConfig>,

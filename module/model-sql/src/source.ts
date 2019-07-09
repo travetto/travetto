@@ -4,7 +4,8 @@ import {
   PageableModelQuery,
   ModelQuery, Query,
   BulkOp, BulkResponse,
-  ValidStringFields, WhereClauseRaw
+  ValidStringFields, WhereClauseRaw,
+  WhereClause
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
@@ -93,6 +94,8 @@ export class SQLModelSource extends ModelSource {
   }
 
   async onSchemaChange(ev: SchemaChangeEvent) {
+    console.debug('Schema Changed', ev);
+
     if (this.dialect.handleFieldChange) {
       this.dialect.handleFieldChange(ev);
     }
@@ -246,6 +249,15 @@ export class SQLModelSource extends ModelSource {
 
   @Connected()
   async query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]> {
+    const conf = ModelRegistry.get(cls);
+
+    // Polymorphism
+    if (conf.subType) {
+      builder.where = (builder.where ?
+        { $and: [builder.where || {}, { type: conf.subType }] } :
+        { type: conf.subType }) as WhereClause<T>;
+    }
+
     const res = await this.exec<T[]>(this.dialect.getQuerySQL(cls, builder));
     if (ModelRegistry.has(cls)) {
       await this.dialect.fetchDependents(cls, res, builder && builder.select);
@@ -254,23 +266,69 @@ export class SQLModelSource extends ModelSource {
     return res as any as U[];
   }
 
+  /**
+   * Compute new ids for bulk operations
+   */
+  async computeInsertedIds<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]) {
+    const addedIds = new Map<number, string>();
+    const toCheck = new Map<string, number>();
+
+    // Compute ids
+    for (let i = 0; i < operations.length; i++) {
+      const op = operations[i];
+      const target = op.insert || op.upsert;
+      if (target) {
+        if (!target.id) {
+          target.id = this.generateId();
+          if (op.upsert) {
+            addedIds.set(i, target.id);
+          }
+        } else if (op.upsert) {
+          toCheck.set(target.id, i);
+        }
+        if (op.insert) {
+          addedIds.set(i, target.id);
+        }
+      }
+    }
+
+    // Get all upsert ids
+    const all = toCheck.size ?
+      await this.exec<any[]>(
+        this.dialect.getSelectRowsByIdsSQL(
+          SQLUtil.classToStack(cls), [...toCheck.keys()], [this.dialect.idField]
+        )
+      ) : [];
+
+    for (const el of all) {
+      toCheck.delete(el.id);
+    }
+
+    for (const [el, idx] of toCheck.entries()) {
+      addedIds.set(idx, el);
+    }
+
+    return addedIds;
+  }
+
   @Connected(true)
   async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse> {
     const deleteOps = operations.map(x => x.delete).filter(x => !!x) as T[];
     const insertOps = operations.map(x => x.insert).filter(x => !!x) as T[];
+    const upsertOps = operations.map(x => x.upsert).filter(x => !!x) as T[];
+    const updateOps = operations.map(x => x.update).filter(x => !!x) as T[];
 
-    for (const el of insertOps) {
-      if (!el.id) {
-        el.id = this.generateId();
-      }
-    }
+    const insertedIds = await this.computeInsertedIds(cls, operations);
 
     const deletes = [{ stack: SQLUtil.classToStack(cls), ids: deleteOps.map(x => x.id!) }].filter(x => !!x.ids.length);
     const inserts = (await SQLUtil.extractInserts(cls, insertOps)).filter(x => !!x.records.length);
-    const upserts = (await SQLUtil.extractInserts(cls, operations.map(x => x.upsert).filter(x => !!x))).filter(x => !!x.records.length);
-    const updates = (await SQLUtil.extractInserts(cls, operations.map(x => x.update).filter(x => !!x))).filter(x => !!x.records.length);
+    const upserts = (await SQLUtil.extractInserts(cls, upsertOps)).filter(x => !!x.records.length);
+    const updates = (await SQLUtil.extractInserts(cls, updateOps)).filter(x => !!x.records.length);
 
-    return this.dialect.bulkProcess(deletes, inserts, upserts, updates);
+
+    const ret = await this.dialect.bulkProcess(deletes, inserts, upserts, updates);
+    ret.insertedIds = insertedIds;
+    return ret;
   }
 
   @Connected(true)

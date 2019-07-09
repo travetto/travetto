@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent } from '@travetto/schema';
+import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent, ALL_VIEW } from '@travetto/schema';
 import { Util } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause } from '@travetto/model';
 
@@ -87,7 +87,65 @@ export abstract class SQLDialect implements Dialect {
 
   abstract getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
 
-  handleFieldChange?(ev: SchemaChangeEvent): Promise<void>;
+  async handleFieldChange(e: SchemaChangeEvent): Promise<void> {
+    const root = e.cls;
+
+    function pathToStack(path: string[]) {
+      const out: VisitStack[] = SQLUtil.classToStack(root)
+      let top = SchemaRegistry.get(root);
+
+      for (const el of path) {
+        const field = top.views[ALL_VIEW].schema[el];
+        out.push(field);
+        if (!SchemaRegistry.has(field.type)) {
+          break;
+        }
+        top = SchemaRegistry.get(field.type);
+      }
+
+      return out;
+    }
+
+    const removes = e.change.subs.reduce((acc, v) => {
+      acc.push(...v.fields
+        .filter(ev => ev.type === 'removing')
+        .map(ev => [...v.path, ev.prev!.name]));
+      return acc;
+    }, [] as string[][]);
+
+    const modifies = e.change.subs.reduce((acc, v) => {
+      acc.push(...v.fields
+        .filter(ev => ev.type === 'changed')
+        .map(ev => [...v.path, ev.prev!.name]));
+      return acc;
+    }, [] as string[][]);
+
+    const adds = e.change.subs.reduce((acc, v) => {
+      acc.push(...v.fields
+        .filter(ev => ev.type === 'added')
+        .map(ev => [...v.path, ev.curr!.name]));
+      return acc;
+    }, [] as string[][]);
+
+    await Promise.all(removes.map(v => this.executeSQL(this.getDropColumnSQL(pathToStack(v)))));
+    await Promise.all(adds.map(v => this.executeSQL(this.getAddColumnSQL(pathToStack(v)))));
+    await Promise.all(modifies.map(v => this.executeSQL(this.getModifyColumnSQL(pathToStack(v)))));
+  }
+
+  getDropColumnSQL(stack: VisitStack[]) {
+    const field = stack[stack.length - 1];
+    return `ALTER TABLE ${this.namespaceParent(stack)} DROP COLUMN ${field.name}`;
+  }
+
+  getAddColumnSQL(stack: VisitStack[]) {
+    const field = stack[stack.length - 1];
+    return `ALTER TABLE ${this.namespaceParent(stack)} ADD COLUMN ${this.getColumnDefinition(field as FieldConfig)}`;
+  }
+
+  getModifyColumnSQL(stack: VisitStack[]) {
+    const field = stack[stack.length - 1];
+    return `ALTER TABLE ${this.namespaceParent(stack)} MODIFY COLUMN ${this.getColumnDefinition(field as FieldConfig)}`;
+  }
 
   generateId(): string {
     return Util.uuid(this.KEY_LEN);
@@ -113,20 +171,23 @@ export abstract class SQLDialect implements Dialect {
     return `${base.alias}.${name}`;
   }
 
-  getWhereFieldSQL<T>(cls: Class<T>, o: Record<string, any>, stack: VisitStack[] = []): any {
+  getWhereFieldSQL<T>(stack: VisitStack[], o: Record<string, any>): any {
     const items = [];
-    const schema = SchemaRegistry.getViewSchema(cls).schema;
+    const { foreignMap, localMap } = SQLUtil.getFieldsByLocation(stack);
 
     for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
       const top = o[key];
-      const field = schema[key];
+      const field = localMap[key] || foreignMap[key];
+      if (!field) {
+        throw new Error(`Unknown field: ${key}`);
+      }
       const sStack = [...stack, field];
       const sPath = this.resolveName(sStack);
 
       if (Util.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
-          const inner = this.getWhereFieldSQL(field.type as Class<any>, top, [...stack, field]);
+          const inner = this.getWhereFieldSQL(sStack, top);
           items.push(inner);
         } else {
           const v = top[subKey];
@@ -202,12 +263,12 @@ export abstract class SQLDialect implements Dialect {
     } else if (has$Not(o)) {
       return `NOT (${this.getWhereGroupingSQL<T>(cls, o.$not)})`;
     } else {
-      return this.getWhereFieldSQL(cls, o, SQLUtil.classToStack(cls));
+      return this.getWhereFieldSQL(SQLUtil.classToStack(cls), o);
     }
   }
 
   getWhereSQL<T>(cls: Class<T>, where?: WhereClause<T>): string {
-    return !where ?
+    return !where || !Object.keys(where).length ?
       '' :
       `WHERE ${this.getWhereGroupingSQL(cls, where)}`;
   }
@@ -404,14 +465,6 @@ FROM ${this.namespace(stack)} ${this.rootAlias}
 ${this.getWhereSQL(type, where)};`;
   }
 
-  getDeleteByIdsSQL(stack: VisitStack[], ids: string[]) {
-    return this.getDeleteSQL(stack, {
-      [stack.length > 1 ? this.pathField.name : this.idField.name]: {
-        $in: ids
-      }
-    });
-  }
-
   /**
   * Get elements by ids
   */
@@ -505,6 +558,16 @@ ${this.getGroupBySQL(cls, query)}`;
     return items;
   }
 
+  async deleteByIds(stack: VisitStack[], ids: string[]) {
+    return this.deleteAndGetCount(stack[stack.length - 1].type, {
+      where: {
+        [stack.length === 1 ? this.idField.name : this.pathField.name]: {
+          $in: ids
+        }
+      }
+    });
+  }
+
   async bulkProcess(dels: DeleteWrapper[], inserts: InsertWrapper[], upserts: InsertWrapper[], updates: InsertWrapper[]): Promise<BulkResponse> {
     const out = {
       counts: {
@@ -519,7 +582,7 @@ ${this.getGroupBySQL(cls, query)}`;
     };
 
     // Full removals
-    await Promise.all(dels.map(el => this.executeSQL(this.getDeleteByIdsSQL(el.stack, el.ids))));
+    await Promise.all(dels.map(el => this.deleteByIds(el.stack, el.ids)));
 
     // Adding deletes
     if (upserts.length || updates.length) {
@@ -527,10 +590,10 @@ ${this.getGroupBySQL(cls, query)}`;
 
       await Promise.all([
         ...upserts.filter(x => x.stack.length === 1).map(i => {
-          return this.executeSQL(this.getDeleteByIdsSQL(i.stack, i.records.map(v => v.value[idx])))
+          return this.deleteByIds(i.stack, i.records.map(v => v.value[idx]));
         }),
         ...updates.filter(x => x.stack.length === 1).map(i => {
-          return this.executeSQL(this.getDeleteByIdsSQL(i.stack, i.records.map(v => v.value[idx])));
+          return this.deleteByIds(i.stack, i.records.map(v => v.value[idx]));
         }),
       ]);
     }

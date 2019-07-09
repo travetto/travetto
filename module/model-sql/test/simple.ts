@@ -60,6 +60,12 @@ class Numerical {
   floater: number;
 }
 
+@Model()
+class Dated {
+  id?: string;
+  time?: Date;
+}
+
 @Suite('Simple Save')
 class TestSave extends BaseSqlTest {
 
@@ -313,5 +319,13 @@ class TestSave extends BaseSqlTest {
 
     assert(o2.names === ['a', 'd']);
     assert(o2.simples === [Simple.from({ name: 'd' })]);
+  }
+
+  @Test('verify dates')
+  async testDates() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    const res = await service.save(Dated, Dated.from({ time: new Date() }));
+
+    assert(res.time instanceof Date);
   }
 }
