@@ -1,13 +1,12 @@
-import { SQLDialect } from '../src/dialect/dialect';
-
 export async function getSchemas() {
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.init('bootstrap').run();
 
   const { DependencyRegistry } = await import('@travetto/di');
   const { ModelRegistry } = await import('@travetto/model');
+  const { SQLDialect } = await import('../src/dialect');
 
-  const src = (await DependencyRegistry.getInstance<SQLDialect>(SQLDialect));
+  const src = (await DependencyRegistry.getInstance(SQLDialect)) as SQLDialect;
 
   let drops = [];
   let creates = [];

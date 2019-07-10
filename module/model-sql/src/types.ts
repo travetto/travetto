@@ -2,7 +2,7 @@ import { FieldConfig, SchemaChangeEvent } from '@travetto/schema';
 import { Class } from '@travetto/registry';
 import { Query, BulkResponse } from '@travetto/model';
 
-import { ConnectionSupport } from './dialect/connection';
+import { ConnectionSupport } from './connection';
 import { VisitStack } from './util';
 import { WhereClause } from '@travetto/model/src/model/where-clause';
 import { SelectClause } from '@travetto/model/src/model/query';

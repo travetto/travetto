@@ -11,7 +11,7 @@ import {
 } from '../src/source';
 
 // tslint:disable-next-line: no-import-side-effect
-import '../src/dialect/mysql/dialect';
+import '../extension/mysql/dialect';
 
 @Schema()
 class Address {

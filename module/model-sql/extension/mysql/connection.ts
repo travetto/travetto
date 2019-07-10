@@ -1,8 +1,8 @@
 import * as mysql from 'mysql';
 
 import { AsyncContext } from '@travetto/context';
-import { ConnectionSupport } from '../connection';
-import { SQLModelConfig } from '../../..';
+import { ConnectionSupport } from '../../src/connection';
+import { SQLModelConfig } from '../..';
 
 const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) => {
   return new Promise<V>((res, rej) => (ctx[prop] as any)(

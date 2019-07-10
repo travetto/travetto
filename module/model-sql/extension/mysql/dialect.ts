@@ -6,11 +6,11 @@ import { AsyncContext } from '@travetto/context';
 import { Class } from '@travetto/registry';
 import { Query } from '@travetto/model';
 
-import { SQLModelConfig } from '../../config';
-import { SQLDialect } from '../dialect';
+import { SQLModelConfig } from '../../src/config';
+import { SQLDialect } from '../../src/dialect';
 import { MySQLConnection } from './connection';
-import { VisitStack, SQLUtil } from '../../util';
-import { Dialect } from '../../types';
+import { VisitStack, SQLUtil } from '../../src/util';
+import { Dialect } from '../../src/types';
 
 @Injectable({
   target: SQLDialect

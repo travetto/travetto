@@ -14,9 +14,9 @@ import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 
 import { SQLModelConfig } from './config';
-import { Connected } from './dialect/connection';
+import { Connected } from './connection';
 import { SQLUtil } from './util';
-import { SQLDialect } from './dialect/dialect';
+import { SQLDialect } from './dialect';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,

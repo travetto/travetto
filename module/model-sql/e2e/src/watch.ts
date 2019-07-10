@@ -2,7 +2,7 @@ import { Model, ModelCore, ModelService } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 import { Application, Inject } from '@travetto/di';
 
-import '../../src/dialect/mysql/dialect';
+import '../../extension/mysql/dialect';
 import { WithAsyncContext, AsyncContext } from '@travetto/context';
 
 @Schema()

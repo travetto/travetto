@@ -8,9 +8,9 @@ import { VisitStack } from '../src/util';
 
 import { ModelRegistry } from '@travetto/model/src/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { SQLDialect } from '../src/dialect/dialect';
+import { SQLDialect } from '../src/dialect';
 
-import '../src/dialect/mysql/dialect';
+import '../extension/mysql/dialect';
 
 @Schema()
 class User {

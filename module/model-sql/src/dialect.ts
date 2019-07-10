@@ -3,8 +3,8 @@ import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent, ALL_VIEW } fr
 import { Util } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause } from '@travetto/model';
 
-import { SQLUtil, VisitStack } from '../util';
-import { Dialect, DeleteWrapper, InsertWrapper } from '../types';
+import { SQLUtil, VisitStack } from './util';
+import { Dialect, DeleteWrapper, InsertWrapper } from './types';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
