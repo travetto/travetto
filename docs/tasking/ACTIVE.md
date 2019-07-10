@@ -4,7 +4,8 @@ In-Progress
 SQL
 ----------------------
 - [?] Building out SQL model support
-- [ ] Add tests to base for 'replace' mode of deepAssign
+- [X] Add tests to base for 'replace' mode of deepAssign
+- [X] Support mysql/postgres as first pass
 - [X] Figure out paradigm for ownership of namespacing
 - [?] Look for query optimization opportunities
 - [X] Basic polymorphism support
