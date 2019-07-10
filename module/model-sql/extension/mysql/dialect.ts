@@ -32,7 +32,7 @@ export class MySQLDialect extends SQLDialect {
   }
 
   getCreateTableSQL(stack: VisitStack[]) {
-    return super.getCreateTableSQL(stack).replace(/[)];$/, `) ${this.tablePostfix};`);
+    return super.getCreateTableSQL(stack).replace(/;$/, `${this.tablePostfix};`);
   }
 
   getColumnDefinition(field: FieldConfig) {

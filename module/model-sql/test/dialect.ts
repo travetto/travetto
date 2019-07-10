@@ -1,1 +1,1 @@
-import '../extension/postgresql/dialect';
+import '../extension/mysql/dialect';
