@@ -11,7 +11,7 @@ import {
 } from '../src/source';
 
 // tslint:disable-next-line: no-import-side-effect
-import '../extension/mysql/dialect';
+import './dialect';
 
 @Schema()
 class Address {
@@ -105,7 +105,7 @@ class TestSave extends BaseSqlTest {
     assert(single.age === 23);
 
     await assert.rejects(async () => {
-      await service.getById(Person, 'Orange-20');
+      const res = await service.getById(Person, 'Orange-20');
     }, /Invalid/);
 
     const match = await service.getAllByQueryString(Person, { query: 'name=="Bob" and age < 24' });

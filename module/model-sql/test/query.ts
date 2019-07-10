@@ -10,7 +10,7 @@ import { ModelRegistry } from '@travetto/model/src/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { SQLDialect } from '../src/dialect';
 
-import '../extension/mysql/dialect';
+import './dialect';
 
 @Schema()
 class User {
@@ -96,6 +96,6 @@ export class QueryTest {
       }
     });
 
-    assert(out === `User.name REGEXP BINARY 'google.$'`);
+    assert(out === `User.name ${dct.SQL_OPS.$regex} 'google.$'`);
   }
 }

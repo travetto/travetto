@@ -8,7 +8,7 @@ import { BaseSqlTest } from './base';
 import { SQLModelSource } from '../src/source';
 
 // tslint:disable-next-line: no-import-side-effect
-import '../extension/mysql/dialect';
+import './dialect';
 
 @Model({ baseType: true })
 class Person extends BaseModel {

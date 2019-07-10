@@ -38,7 +38,7 @@ export class SQLModelSource extends ModelSource {
     return this.dialect.conn;
   }
 
-  private exec<T>(sql: string) {
+  private exec<T = any>(sql: string) {
     return this.dialect.executeSQL<T>(sql);
   }
 
@@ -255,7 +255,7 @@ export class SQLModelSource extends ModelSource {
         { type: conf.subType }) as WhereClause<T>;
     }
 
-    const res = await this.exec<T[]>(this.dialect.getQuerySQL(cls, builder));
+    const { records: res } = await this.exec<T>(this.dialect.getQuerySQL(cls, builder));
     if (ModelRegistry.has(cls)) {
       await this.dialect.fetchDependents(cls, res, builder && builder.select);
     }
@@ -288,11 +288,11 @@ export class SQLModelSource extends ModelSource {
 
     // Get all upsert ids
     const all = toCheck.size ?
-      await this.exec<any[]>(
+      (await this.exec(
         this.dialect.getSelectRowsByIdsSQL(
           SQLUtil.classToStack(cls), [...toCheck.keys()], [this.dialect.idField]
         )
-      ) : [];
+      )).records : [];
 
     for (const el of all) {
       toCheck.delete(el.id);

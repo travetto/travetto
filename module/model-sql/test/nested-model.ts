@@ -6,7 +6,7 @@ import { SchemaRegistry, Schema, Text } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 import { BaseSqlTest } from './base';
 
-import '../extension/mysql/dialect';
+import './dialect';
 
 @Schema()
 export class NoteEntity {

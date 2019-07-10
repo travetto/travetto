@@ -45,7 +45,7 @@ export interface Dialect {
   getQueryCountSQL<T>(cls: Class<T>, query: Query<T>): string;
   fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]>;
 
-  executeSQL<T>(sql: string): Promise<T>;
+  executeSQL<T>(sql: string): Promise<{ count: number, records: T[] }>;
 
   deleteAndGetCount<T>(cls: Class<T>, query: Query<T>): Promise<number>;
   getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;

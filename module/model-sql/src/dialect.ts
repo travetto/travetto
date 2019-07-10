@@ -10,26 +10,6 @@ const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
 
-const SQL_OPS = {
-  $and: ' AND ',
-  $or: ' OR ',
-  $not: 'NOT ',
-  $all: 'ALL =',
-  $regex: 'REGEXP',
-  $in: 'IN',
-  $nin: 'NOT IN',
-  $eq: '=',
-  $ne: '<>',
-  $gte: '>=',
-  $like: 'LIKE',
-  $ilike: 'ILIKE',
-  $lte: '<=',
-  $gt: '>',
-  $lt: '<',
-  $is: 'IS',
-  $isNot: 'IS NOT'
-};
-
 function makeField(name: string, type: Class, required: boolean, extra: any) {
   return {
     name,
@@ -43,6 +23,26 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
 
 export abstract class SQLDialect implements Dialect {
   KEY_LEN = 64;
+  SQL_OPS = {
+    $and: 'AND',
+    $or: 'OR',
+    $not: 'NOT',
+    $all: 'ALL =',
+    $regex: '<unknown>',
+    $iregex: '<unknown>',
+    $in: 'IN',
+    $nin: 'NOT IN',
+    $eq: '=',
+    $ne: '<>',
+    $gte: '>=',
+    $like: 'LIKE',
+    $ilike: 'ILIKE',
+    $lte: '<=',
+    $gt: '>',
+    $lt: '<',
+    $is: 'IS',
+    $isNot: 'IS NOT'
+  };
 
   idField = makeField('id', String, true, {
     maxlength: { n: 32 },
@@ -63,29 +63,101 @@ export abstract class SQLDialect implements Dialect {
     required: { active: true }
   });
 
-  constructor() {
-    this.namespace = this.namespace.bind(this);
-  }
+  regexWordBoundary = '\\b';
 
-  get rootAlias() {
-    return SQLUtil.ROOT_ALIAS;
+  rootAlias = SQLUtil.ROOT_ALIAS;
+
+  constructor(public ns: string) {
+    this.namespace = this.namespace.bind(this);
   }
 
   abstract get conn(): any;
 
-  abstract getColumnDefinition(field: FieldConfig): string;
-
-  abstract get ns(): string;
-
   abstract hash(inp: string): string;
 
-  abstract executeSQL<T>(sql: string): Promise<T>;
+  abstract executeSQL<T>(sql: string): Promise<{ count: number, records: T[] }>;
 
-  abstract resolveValue(config: FieldConfig, value: any): string;
+  /**
+   * Convert value to SQL valid representation
+   */
+  resolveValue(conf: FieldConfig, value: any) {
+    if (value === undefined || value === null) {
+      return 'NULL';
+    } else if (conf.type === String) {
+      if (value instanceof RegExp) {
+        let src = BindUtil.extractRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
+        return `'${src}'`;
+      } else {
+        return `'${value}'`;
+      }
+    } else if (conf.type === Boolean) {
+      return `${value ? 'TRUE' : 'FALSE'}`;
+    } else if (conf.type === Number) {
+      return `${value}`;
+    } else if (conf.type === Date) {
+      const [day, time] = (value as Date).toISOString().split(/[T.]/);
+      return `'${day} ${time}'`;
+    }
+    throw new Error('Ruh roh?');
+  }
 
-  abstract deleteAndGetCount<T>(cls: Class<T>, query: Query<T>): Promise<number>;
+  /**
+   * FieldConfig to Column definition
+   */
+  getColumnDefinition(conf: FieldConfig) {
+    let type: string = '';
 
-  abstract getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number>;
+    if (conf.type === Number) {
+      type = 'INT';
+      if (conf.precision) {
+        const [digits, decimals] = conf.precision;
+        if (decimals) {
+          type = `DECIMAL(${digits}, ${decimals})`;
+        } else if (digits) {
+          if (digits < 3) {
+            type = 'TINYINT';
+          } else if (digits < 5) {
+            type = 'SMALLINT';
+          } else if (digits < 7) {
+            type = 'MEDIUMINIT';
+          } else if (digits < 10) {
+            type = 'INT';
+          } else {
+            type = 'BIGINT';
+          }
+        }
+      } else {
+        type = 'INTEGER';
+      }
+    } else if (conf.type === Date) {
+      type = 'TIMESTAMP';
+    } else if (conf.type === Boolean) {
+      type = 'BOOLEAN';
+    } else if (conf.type === String) {
+      if (conf.specifier && conf.specifier.startsWith('text')) {
+        type = 'TEXT';
+      } else {
+        type = `VARCHAR(${conf.maxlength ? conf.maxlength.n : 1024})`;
+      }
+    }
+
+    if (!type) {
+      return '';
+    }
+
+    return `${conf.name} ${type} ${(conf.required && conf.required.active) ? 'NOT NULL' : 'DEFAULT NULL'}`;
+  }
+
+  async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>) {
+    const { count } = await this.executeSQL(this.getDeleteSQL(SQLUtil.classToStack(cls), query.where));
+    return count;
+  }
+
+  async getCountForQuery<T>(cls: Class<T>, query: Query<T>) {
+    const { records } = await this.executeSQL<{ total: number }>(this.getQueryCountSQL(cls, query));
+    const [{ total }] = records;
+    return total;
+  }
 
   async handleFieldChange(e: SchemaChangeEvent): Promise<void> {
     const rootStack = SQLUtil.classToStack(e.cls);
@@ -126,10 +198,7 @@ export abstract class SQLDialect implements Dialect {
     return `ALTER TABLE ${this.namespaceParent(stack)} ADD COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
   }
 
-  getModifyColumnSQL(stack: VisitStack[]) {
-    const field = stack[stack.length - 1];
-    return `ALTER TABLE ${this.namespaceParent(stack)} MODIFY COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
-  }
+  abstract getModifyColumnSQL(stack: VisitStack[]): string;
 
   generateId(): string {
     return Util.uuid(this.KEY_LEN);
@@ -158,6 +227,7 @@ export abstract class SQLDialect implements Dialect {
   getWhereFieldSQL<T>(stack: VisitStack[], o: Record<string, any>): any {
     const items = [];
     const { foreignMap, localMap } = SQLUtil.getFieldsByLocation(stack);
+    const SQL_OPS = this.SQL_OPS;
 
     for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
       const top = o[key];
@@ -175,7 +245,7 @@ export abstract class SQLDialect implements Dialect {
           items.push(inner);
         } else {
           const v = top[subKey];
-          const resolve = this.resolveValue.bind(null, field);
+          const resolve = this.resolveValue.bind(this, field);
 
           switch (subKey) {
             case '$all': case '$nin': case '$in': {
@@ -193,7 +263,7 @@ export abstract class SQLDialect implements Dialect {
                 items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(inner)}%`);
               } else {
                 let val = resolve(v);
-                items.push(`${sPath} ${SQL_OPS[subKey]} ${!ins ? 'BINARY' : ''} ${val}`);
+                items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${val}`);
               }
               break;
             }
@@ -240,12 +310,14 @@ export abstract class SQLDialect implements Dialect {
   }
 
   getWhereGroupingSQL<T>(cls: Class<T>, o: WhereClause<T>): string {
+    const SQL_OPS = this.SQL_OPS;
+
     if (has$And(o)) {
-      return `(${o.$and.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(SQL_OPS.$and)})`;
+      return `(${o.$and.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$and} `)})`;
     } else if (has$Or(o)) {
-      return `(${o.$or.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(SQL_OPS.$or)})`;
+      return `(${o.$or.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$or} `)})`;
     } else if (has$Not(o)) {
-      return `NOT (${this.getWhereGroupingSQL<T>(cls, o.$not)})`;
+      return `${SQL_OPS.$not} (${this.getWhereGroupingSQL<T>(cls, o.$not)})`;
     } else {
       return this.getWhereFieldSQL(SQLUtil.classToStack(cls), o);
     }
@@ -295,7 +367,7 @@ export abstract class SQLDialect implements Dialect {
   getLimitSQL<T>(cls: Class<T>, query?: Query<T>): string {
     return !query || (!query.limit && !query.offset) ?
       '' :
-      `LIMIT ${query.offset || 0}, ${query.limit}`;
+      `LIMIT ${query.limit} OFFSET ${query.offset || 0}`;
   }
 
   getGroupBySQL<T>(cls: Class<T>, query?: Query<T>): string {
@@ -339,14 +411,13 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
         .map(f => this.getColumnDefinition(f))
         .filter(x => !!x.trim())
         .join(',\n  ')},
-  ${this.getColumnDefinition(this.pathField)},
+  ${this.getColumnDefinition(this.pathField)} UNIQUE,
   ${!parent ?
         `PRIMARY KEY (${this.idField.name})` :
         `${this.getColumnDefinition(this.parentPathField)}, 
     ${array ? `${this.getColumnDefinition(this.idxField)},` : ''}
   PRIMARY KEY (${this.pathField.name}),
-  FOREIGN KEY (${this.parentPathField.name}) REFERENCES ${this.namespaceParent(stack)}(${this.pathField.name}) ON DELETE CASCADE`},
-  UNIQUE KEY (${ this.pathField.name})
+  FOREIGN KEY (${this.parentPathField.name}) REFERENCES ${this.namespaceParent(stack)}(${this.pathField.name}) ON DELETE CASCADE`}
 );`;
     return parent ?
       out :
@@ -474,7 +545,7 @@ SET
   getDeleteSQL(stack: VisitStack[], where?: WhereClause<any>) {
     const { type } = stack[stack.length - 1];
     return `
-DELETE ${this.rootAlias}
+DELETE 
 FROM ${this.namespace(stack)} ${this.rootAlias}
 ${this.getWhereSQL(type, where)};`;
   }
@@ -539,7 +610,7 @@ ${this.getGroupBySQL(cls, query)}`;
 
         // If children and selection exists
         if (ids.length && (!subSelectTop || sel)) {
-          const children = await this.executeSQL<any[]>(this.getSelectRowsByIdsSQL(
+          const { records: children } = await this.executeSQL<any[]>(this.getSelectRowsByIdsSQL(
             path,
             ids,
             sel
@@ -560,7 +631,7 @@ ${this.getGroupBySQL(cls, query)}`;
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
         if (ids.length) {
-          const matching = await this.executeSQL<any[]>(this.getSelectRowsByIdsSQL(
+          const { records: matching } = await this.executeSQL(this.getSelectRowsByIdsSQL(
             path,
             ids
           ));
