@@ -24,6 +24,14 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
       port: this.config.port,
       ...(this.config.options || {})
     });
+
+    const client = await this.pool.connect();
+    try {
+      await client.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+    } catch (err) {
+      // swallow
+    }
+    await client.release();
   }
 
   private get ctx() {
@@ -41,11 +49,6 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
     const res = await this.pool.connect();
     if (!this.active) {
       this.ctx.connection = res;
-    }
-    try {
-      await res.query('CREATE EXTENSION pgcrypto;');
-    } catch (err) {
-      // swallow
     }
     return res;
   }
