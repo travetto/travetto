@@ -1,5 +1,5 @@
 sql:
   model:
-    database: "app"
+    database: app
     user: root
     password: password

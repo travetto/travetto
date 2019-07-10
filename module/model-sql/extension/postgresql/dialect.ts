@@ -2,37 +2,36 @@ import { FieldConfig, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { Class } from '@travetto/registry';
-import { Query, WhereClause } from '@travetto/model';
+import { Query } from '@travetto/model';
 
 import { SQLModelConfig, SQLDialect, VisitStack } from '../..';
-import { MySQLConnection } from './connection';
+import { PostgreSQLConnection } from './connection';
 
 @Injectable({
   target: SQLDialect
 })
-export class MySQLDialect extends SQLDialect {
+export class PostgreSQLDialect extends SQLDialect {
 
-  conn: MySQLConnection;
-  tablePostfix = `COLLATE='utf8mb4_unicode_ci' ENGINE=InnoDB`;
+  conn: PostgreSQLConnection;
   ns: string;
 
   constructor(context: AsyncContext, public config: SQLModelConfig) {
     super();
-    this.conn = new MySQLConnection(context, config);
+    this.conn = new PostgreSQLConnection(context, config);
     this.ns = config.namespace;
 
     Object.assign(this.SQL_OPS, {
-      $regex: 'REGEXP BINARY',
-      $iregex: 'REGEXP'
+      $regex: '~',
+      $iregex: '~*'
     });
   }
 
   hash(value: string) {
-    return `SHA2('${value}', ${this.KEY_LEN * 4})`;
+    return `encode(digest('${value}', 'sha1'), 'hex')`;
   }
 
   getCreateTableSQL(stack: VisitStack[]) {
-    return super.getCreateTableSQL(stack).replace(/[)];$/, `) ${this.tablePostfix};`);
+    return super.getCreateTableSQL(stack).replace(/UNIQUE KEY/, `UNIQUE`);
   }
 
   /**
@@ -64,14 +63,14 @@ export class MySQLDialect extends SQLDialect {
         type = 'INTEGER';
       }
     } else if (conf.type === Date) {
-      type = 'DATETIME';
+      type = 'TIMESTAMP';
     } else if (conf.type === Boolean) {
-      type = 'BOOL';
+      type = 'BOOLEAN';
     } else if (conf.type === String) {
       if (conf.specifier && conf.specifier.startsWith('text')) {
         type = 'TEXT';
       } else {
-        type = `NVARCHAR(${conf.maxlength ? conf.maxlength.n : 1024})`;
+        type = `VARCHAR(${conf.maxlength ? conf.maxlength.n : 1024})`;
       }
     }
 
@@ -110,28 +109,14 @@ export class MySQLDialect extends SQLDialect {
    * Simple query execution
    */
   async executeSQL<T = any>(query: string): Promise<{ count: number, records: T[] }> {
-    return new Promise<{ count: number, records: T[] }>((res, rej) => {
-      (console as any).trace(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
-      this.conn.active.query(query, (err, results, fields) => {
-        if (err) {
-          console.debug(err);
-          rej(err);
-        } else {
-          const records = Array.isArray(results) ? [...results].map(v => ({ ...v })) : [{ ...results }] as T[];
-          res({ records, count: results.affectedRows });
-        }
-      });
-    });
-  }
-
-  getDeleteSQL(stack: VisitStack[], where?: WhereClause<any>) {
-    const sql = super.getDeleteSQL(stack, where);
-    return sql.replace(/\bDELETE\b/g, `DELETE ${this.rootAlias}`);
+    (console as any).trace(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
+    const out = await this.conn.active.query(query);
+    return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as any as T[] };
   }
 
   getLimitSQL<T>(cls: Class<T>, query?: Query<T>): string {
     return !query || (!query.limit && !query.offset) ?
       '' :
-      `LIMIT ${query.offset || 0}, ${query.limit}`;
+      `LIMIT ${query.limit} OFFSET ${query.offset || 0}`;
   }
 }

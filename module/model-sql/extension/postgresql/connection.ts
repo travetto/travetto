@@ -1,20 +1,14 @@
-import * as mysql from 'mysql';
+import * as pg from 'pg';
 
 import { AsyncContext } from '@travetto/context';
 import { SQLModelConfig, ConnectionSupport } from '../..';
 
-const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) => {
-  return new Promise<V>((res, rej) => (ctx[prop] as any)(
-    (err: any, val?: any) => err ? rej(err) : res(val)
-  ));
-};
-
 /**
  * Connection support
  */
-export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> {
+export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
 
-  pool: mysql.Pool;
+  pool: pg.Pool;
 
   constructor(
     private context: AsyncContext,
@@ -22,7 +16,7 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
   ) { }
 
   async init() {
-    this.pool = mysql.createPool({
+    this.pool = new pg.Pool({
       user: this.config.user,
       password: this.config.password,
       database: this.config.database,
@@ -36,7 +30,7 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
     return this.context.get<{ connection: any, topped?: boolean }>('connection');
   }
 
-  get active(): mysql.PoolConnection {
+  get active(): pg.PoolClient {
     return this.ctx.connection;
   }
 
@@ -44,9 +38,14 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
   * Acquire conn
   */
   async create() {
-    const res = await asAsync<mysql.PoolConnection>(this.pool, 'getConnection');
+    const res = await this.pool.connect();
     if (!this.active) {
       this.ctx.connection = res;
+    }
+    try {
+      await res.query('CREATE EXTENSION pgcrypto;');
+    } catch (err) {
+      // swallow
     }
     return res;
   }
@@ -54,17 +53,18 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
   /**
    * Release conn
    */
-  release(conn: mysql.PoolConnection) {
+  release(conn: pg.PoolClient) {
     if (conn) {
       if (this.active === conn) {
         this.context.clear('connection');
       }
-      this.pool.releaseConnection(conn);
+      conn.release();
     }
   }
 
   // Transaction operations
-  startTx = () => asAsync(this.active, 'beginTransaction');
-  commit = () => asAsync(this.active, 'commit');
-  rollback = () => asAsync(this.active, 'rollback');
+  startTx = async () => { await this.active.query('BEGIN') };
+  commit = async () => { await this.active.query('COMMIT'); };
+  rollback = async () => { await this.active.query('ROLLBACK'); };
 }
+
