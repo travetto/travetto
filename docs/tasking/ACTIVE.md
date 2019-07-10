@@ -9,7 +9,7 @@ SQL
 - [?] Look for query optimization opportunities
 - [X] Basic polymorphism support
 - [X] Sorting/paging
-- [?] Handle schema changes (columns added removed)
+- [X] Handle schema changes (columns added removed)
  
 Tooling
 -----------------------

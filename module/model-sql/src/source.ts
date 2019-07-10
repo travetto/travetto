@@ -9,7 +9,7 @@ import {
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
-import { SchemaChangeEvent, SchemaRegistry } from '@travetto/schema';
+import { SchemaChangeEvent } from '@travetto/schema';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 
@@ -47,21 +47,17 @@ export class SQLModelSource extends ModelSource {
   }
 
   @Connected(true)
-  createTables(cls: Class<any>): Promise<void> {
-    return SQLUtil.visitSchema(SchemaRegistry.get(cls), {
-      onRoot: ({ path, descend }) => this.exec(this.dialect.getCreateTableSQL(path)).then(descend),
-      onSub: ({ path, descend }) => this.exec(this.dialect.getCreateTableSQL(path)).then(descend),
-      onSimple: ({ path }) => this.exec(this.dialect.getCreateTableSQL(path))
-    });
+  async createTables(cls: Class<any>): Promise<void> {
+    for (const op of this.dialect.getCreateAllTablesSQL(cls)) {
+      await this.exec(op);
+    }
   }
 
   @Connected(true)
   async dropTables(cls: Class<any>): Promise<void> {
-    return await SQLUtil.visitSchema(SchemaRegistry.get(cls), {
-      onRoot: ({ path, descend }) => descend().then(() => this.exec(this.dialect.getDropTableSQL(path))),
-      onSub: ({ path, descend }) => descend().then(() => this.exec(this.dialect.getDropTableSQL(path))),
-      onSimple: ({ path }) => this.exec(this.dialect.getDropTableSQL(path))
-    });
+    for (const op of this.dialect.getDropAllTablesSQL(cls)) {
+      await this.exec(op);
+    }
   }
 
   @WithAsyncContext({})
@@ -154,12 +150,10 @@ export class SQLModelSource extends ModelSource {
   }
 
   @Connected()
-  async insert<T = any>(cls: Class, instance: T) {
-    return SQLUtil.visitSchemaInstance(cls, instance, {
-      onRoot: ({ value, path }) => this.exec(this.dialect.getInsertSQL(path, [{ stack: path, value }])),
-      onSub: ({ value, path }) => this.exec(this.dialect.getInsertSQL(path, [{ stack: path, value }])),
-      onSimple: ({ value, path }) => this.exec(this.dialect.getInsertSQL(path, [{ stack: path, value }]))
-    });
+  async insert<T = any>(cls: Class<T>, instance: T) {
+    for (const ins of this.dialect.getAllInsertSQL(cls, instance)) {
+      await this.exec(ins);
+    }
   }
 
   @Connected(true)
@@ -283,14 +277,11 @@ export class SQLModelSource extends ModelSource {
       if (target) {
         if (!target.id) {
           target.id = this.generateId();
-          if (op.upsert) {
-            addedIds.set(i, target.id);
-          }
+          addedIds.set(i, target.id!);
         } else if (op.upsert) {
           toCheck.set(target.id, i);
-        }
-        if (op.insert) {
-          addedIds.set(i, target.id);
+        } else if (op.insert) {
+          addedIds.set(i, target.id!);
         }
       }
     }

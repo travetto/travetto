@@ -1,4 +1,4 @@
-import { ElasticsearchModelSource } from '../src/source';
+import { SQLDialect } from '../src/dialect/dialect';
 
 export async function getSchemas() {
   const { PhaseManager } = await import('@travetto/base');
@@ -6,16 +6,16 @@ export async function getSchemas() {
 
   const { DependencyRegistry } = await import('@travetto/di');
   const { ModelRegistry } = await import('@travetto/model');
-  const { ModelSource } = await import('@travetto/model');
 
-  const src = (await DependencyRegistry.getInstance<ElasticsearchModelSource>(ModelSource));
+  const src = (await DependencyRegistry.getInstance<SQLDialect>(SQLDialect));
 
-  const { ElasticsearchUtil } = await import('../src/util');
+  let drops = [];
+  let creates = [];
 
-  const out: { [key: string]: string } = {};
   for (const cls of ModelRegistry.getClasses()) {
-    out[src.getCollectionName(cls)] = ElasticsearchUtil.generateSourceSchema(cls);
+    drops.push(...src.getDropAllTablesSQL(cls));
+    creates.push(...src.getCreateAllTablesSQL(cls));
   }
 
-  return out;
+  return [...drops, ...creates];
 }

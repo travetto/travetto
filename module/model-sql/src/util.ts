@@ -209,16 +209,16 @@ export class SQLUtil {
     }
   }
 
-  static async visitSchemaInstance<T extends ModelCore>(cls: Class<T>, instance: T, handler: VisitHandler<Promise<any> | any, VisitInstanceNode<Promise<any>>>) {
+  static visitSchemaInstance<T extends ModelCore>(cls: Class<T>, instance: T, handler: VisitHandler<any, VisitInstanceNode<any>>) {
     const pathObj: any[] = [instance];
-    await this.visitSchema(SchemaRegistry.get(cls), {
-      onRoot: async (config) => {
+    this.visitSchemaSync(SchemaRegistry.get(cls), {
+      onRoot: (config) => {
         const { path } = config;
         path[0].name = instance['id'] as any;
-        await handler.onRoot({ ...config, value: instance });
+        handler.onRoot({ ...config, value: instance });
         return config.descend();
       },
-      onSub: async (config) => {
+      onSub: (config) => {
         const { config: field } = config;
         const topObj = pathObj[pathObj.length - 1];
         const top = config.path[config.path.length - 1];
@@ -233,7 +233,7 @@ export class SQLUtil {
             try {
               pathObj.push(val);
               config.path[config.path.length - 1] = { ...top, index: i++ };
-              await handler.onSub({ ...config, value: val });
+              handler.onSub({ ...config, value: val });
             } finally {
               pathObj.pop();
             }

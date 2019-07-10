@@ -360,6 +360,26 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
     return `DROP TABLE IF EXISTS ${this.namespace(stack)}; `;
   }
 
+  getCreateAllTablesSQL(cls: Class<any>): string[] {
+    const out: string[] = [];
+    SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+      onRoot: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
+      onSub: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
+      onSimple: ({ path }) => out.push(this.getCreateTableSQL(path))
+    });
+    return out;
+  }
+
+  getDropAllTablesSQL(cls: Class<any>): string[] {
+    const out: string[] = [];
+    SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+      onRoot: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
+      onSub: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
+      onSimple: ({ path }) => out.push(this.getDropTableSQL(path))
+    });
+    return out;
+  }
+
   /**
    * Simple insertion
    */
@@ -423,6 +443,16 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
 INSERT INTO ${this.namespace(stack)} (${columnNames.join(', ')})
 VALUES
 ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
+  }
+
+  getAllInsertSQL<T>(cls: Class<T>, instance: T): string[] {
+    const out: string[] = []
+    SQLUtil.visitSchemaInstance(cls, instance, {
+      onRoot: ({ value, path }) => out.push(this.getInsertSQL(path, [{ stack: path, value }])),
+      onSub: ({ value, path }) => out.push(this.getInsertSQL(path, [{ stack: path, value }])),
+      onSimple: ({ value, path }) => out.push(this.getInsertSQL(path, [{ stack: path, value }]))
+    });
+    return out;
   }
 
   /**
