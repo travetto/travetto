@@ -1,6 +1,6 @@
 {
   "name": "@travetto/generator-app",
-  "version": "0.7.1-alpha.6",
+  "version": "0.7.1-alpha.7",
   "description": "Yeoman app generator for the Travetto framework",
   "main": "app/index.js",
   "files": [
@@ -10,7 +10,7 @@
     "tslint.json"
   ],
   "dependencies": {
-    "@travetto/base": "^0.7.1-alpha.1",
+    "@travetto/base": "^0.7.1-alpha.2",
     "mustache": "^3.0.1",
     "yeoman-generator": "^4.0.1",
     "yo": "^2.0.6"

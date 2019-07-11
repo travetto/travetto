@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^0.7.1-alpha.1",
-    "@travetto/schema": "^0.7.1-alpha.1"
+    "@travetto/di": "^0.7.1-alpha.2",
+    "@travetto/schema": "^0.7.1-alpha.2"
   },
   "description": "Datastore abstraction for CRUD operations with advanced query support.",
   "devDependencies": {
-    "@travetto/test": "^0.7.1-alpha.1"
+    "@travetto/test": "^0.7.1-alpha.2"
   },
   "optionalExtensionDependencies": {
     "@travetto/rest": "^0.6.8"
@@ -38,5 +38,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.7.1-alpha.2"
+  "version": "0.7.1-alpha.3"
 }
