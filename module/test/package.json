@@ -3,9 +3,6 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "bin": {
-    "travetto-cli-test": "bin/travetto-cli-test.ts"
-  },
   "dependencies": {
     "@travetto/registry": "^0.7.1-alpha.1",
     "@travetto/worker": "^0.7.1-alpha.1",

@@ -6,9 +6,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "bin": {
-    "travetto-cli-email-template": "./bin/travetto-cli-email-template.ts"
-  },
   "dependencies": {
     "@travetto/di": "^0.7.1-alpha.1",
     "@travetto/email": "^0.7.1-alpha.1",

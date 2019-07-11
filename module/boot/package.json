@@ -9,9 +9,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "bin": {
-    "travetto-cli-clean": "bin/travetto-cli-clean.ts"
-  },
   "dependencies": {
     "@types/node": "^11.0.4",
     "tslib": "^1.10.0",

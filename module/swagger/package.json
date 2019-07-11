@@ -6,9 +6,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "bin": {
-    "travetto-cli-swagger-client": "bin/travetto-cli-swagger-client.ts"
-  },
   "dependencies": {
     "@travetto/exec": "^0.7.1-alpha.1",
     "@travetto/rest": "^0.7.1-alpha.1",

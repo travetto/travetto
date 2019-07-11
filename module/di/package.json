@@ -6,9 +6,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "bin": {
-    "travetto-cli-run": "bin/travetto-cli-run.ts"
-  },
   "dependencies": {
     "@travetto/registry": "^0.7.1-alpha.1"
   },

@@ -6,11 +6,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "bin": {
-    "travetto-cli-rest-aws-lambda_deploy": "bin/travetto-cli-rest-aws-lambda_deploy.ts",
-    "travetto-cli-rest-aws-lambda_build-zip": "bin/travetto-cli-rest-aws-lambda_build-zip.ts",
-    "travetto-cli-rest-aws-lambda_build-sam": "bin/travetto-cli-rest-aws-lambda_build-sam.ts"
-  },
   "dependencies": {
     "@travetto/rest": "^0.7.1-alpha.1",
     "@types/aws-lambda": "^8.10.27",

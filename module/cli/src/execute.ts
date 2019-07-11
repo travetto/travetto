@@ -10,8 +10,38 @@ commander.version(require('../package.json').version);
 const PREFIX = 'travetto-cli';
 
 export class Execute {
+
+  static getPluginMapping() {
+    const all: Record<string, string> = {};
+    const ROOT_DIR = `${FsUtil.cwd}/node_modules/@travetto`;
+    if (fs.existsSync(ROOT_DIR)) {
+      const folders = fs.readdirSync(ROOT_DIR)
+        .map(x => `${ROOT_DIR}/${x}/bin`)
+        .filter(x => fs.existsSync(x));
+
+      for (const folder of folders) {
+        const files = fs.readdirSync(folder)
+          .filter(x => x.startsWith(PREFIX));
+
+        for (const f of files) {
+          all[f.replace(/[.]ts$/, '')] = `${folder}/${f}`;
+        }
+      }
+    }
+    const LOCAL_BIN = `${FsUtil.cwd}/bin`;
+    if (fs.existsSync(LOCAL_BIN)) {
+      const files = fs.readdirSync(LOCAL_BIN)
+        .filter(x => x.startsWith(PREFIX));
+
+      for (const f of files) {
+        all[f.replace(/[.]ts$/, '')] = `${LOCAL_BIN}/${f}`;
+      }
+    }
+    return all;
+  }
+
   static requireModule(f: string) {
-    let p = FsUtil.toUnix(fs.realpathSync(`${FsUtil.cwd}/node_modules/.bin/${f}`));
+    let p = FsUtil.toUnix(fs.realpathSync(f));
     if (!p.startsWith(FsUtil.cwd)) {
       p = `${FsUtil.cwd}/node_modules/@travetto/${p.split(/travetto[^/]*\/module\//)[1]}`;
     }
@@ -20,20 +50,13 @@ export class Execute {
   }
 
   static loadAllPlugins() {
-    const BIN_DIR = `${FsUtil.cwd}/node_modules/.bin`;
-    if (fs.existsSync(BIN_DIR)) {
-      const files = fs.readdirSync(BIN_DIR).filter(x => x.startsWith(`${PREFIX}-`));
-      const all = [];
-      for (const f of files) {
-        all.push(this.requireModule(f));
-      }
-      return all;
-    }
-    return [];
+    return Object.values(this.getPluginMapping()).map(f => this.requireModule(f));
   }
 
   static loadSinglePlugin(cmd: string) {
-    return this.requireModule(`${PREFIX}-${cmd.replace(/:/g, '_')}`);
+    const mapping = this.getPluginMapping();
+    const command = `${PREFIX}-${cmd.replace(/:/g, '_')}`;
+    return this.requireModule(mapping[command]);
   }
 
   static async getCompletion(args: string[]) {
