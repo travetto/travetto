@@ -1,3 +1,3 @@
-elasticsearch:
-  model:
-    schema: "sample-test"
+elasticsearch.model:
+  schema: "sample-test"
+  apiVersion: 6.8
