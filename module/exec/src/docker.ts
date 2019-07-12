@@ -19,9 +19,9 @@ export class DockerContainer {
   private execState: ExecutionState;
 
   private container: string;
-  private env: { [key: string]: string } = {};
-  private ports: { [key: string]: number } = {};
-  private tempVolumes: { [key: string]: string } = {};
+  private env: Record<string, string> = {};
+  private ports: Record<string, number> = {};
+  private tempVolumes: Record<string, string> = {};
   private deleteOnFinish = false;
 
   private entryPoint: string;
@@ -31,7 +31,7 @@ export class DockerContainer {
   public tty: boolean = false;
   public daemon: boolean = false;
 
-  public volumes: { [key: string]: string } = {};
+  public volumes: Record<string, string> = {};
   public workingDir: string;
 
   constructor(private image: string, container?: string) {
@@ -88,7 +88,7 @@ export class DockerContainer {
     return this;
   }
 
-  addEnvVars(vars: { [key: string]: string }) {
+  addEnvVars(vars: Record<string, string>) {
     Object.assign(this.env, vars);
     return this;
   }

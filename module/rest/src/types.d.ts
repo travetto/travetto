@@ -13,9 +13,9 @@ declare global {
       baseUrl?: string;
       protocol: string;
 
-      query: { [key: string]: any };
-      params: { [key: string]: any };
-      headers: { [key: string]: string | string[] };
+      query: Record<string, any>;
+      params: Record<string, any>;
+      headers: Record<string, string | string[]>;
       cookies: {
         get(name: string, options?: cookies.GetOption): string | undefined;
       }

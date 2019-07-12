@@ -11,6 +11,6 @@ type DeepPartialRaw<T> = {
 
 
 declare interface Function {
-  from<T>(this: { new(...args: any[]): T }, data: DeepPartial<T> & { [key: string]: any }, view?: string): T;
-  fromRaw<T>(this: { new(...args: any[]): T }, data: DeepPartialRaw<T> & { [key: string]: any }, view?: string): T;
+  from<T>(this: { new(...args: any[]): T }, data: DeepPartial<T> & Record<string, any>, view?: string): T;
+  fromRaw<T>(this: { new(...args: any[]): T }, data: DeepPartialRaw<T> & Record<string, any>, view?: string): T;
 }

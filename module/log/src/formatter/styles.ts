@@ -1,4 +1,4 @@
-export const STYLES: { [key: string]: [number, number] } = {
+export const STYLES: Record<string, [number, number]> = {
   // styles
   bold: [1, 22],
   italic: [3, 23],
@@ -17,7 +17,7 @@ export const STYLES: { [key: string]: [number, number] } = {
   yellow: [33, 39]
 };
 
-export const LEVEL_STYLES: { [key: string]: string[] } = {
+export const LEVEL_STYLES: Record<string, string[]> = {
   info: ['white'],
   error: ['red'],
   debug: ['yellow'],

@@ -7,7 +7,7 @@ import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT, DEEP_LITERAL_TYPES } from '../src/
 const ASSERT_CMD = 'assert';
 const ASSERT_UTIL = 'AssertCheck';
 
-const METHODS: { [key: string]: string } = {
+const METHODS: Record<string, string> = {
   includes: 'includes',
   test: 'test'
 };

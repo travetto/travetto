@@ -124,7 +124,7 @@ export class Util {
     return el !== null && el !== undefined && (type === 'string' || type === 'boolean' || type === 'number' || el instanceof RegExp || el instanceof Date);
   }
 
-  static isPlainObject(obj: any): obj is { [key: string]: any } {
+  static isPlainObject(obj: any): obj is Record<string, any> {
     return typeof obj === 'object' // separate from primitives
       && obj !== undefined
       && obj !== null         // is obvious

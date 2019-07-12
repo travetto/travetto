@@ -1,4 +1,4 @@
-export const ASSERT_FN_OPERATOR: { [key: string]: string } = {
+export const ASSERT_FN_OPERATOR: Record<string, string> = {
   equal: '==',
   notEqual: '!=',
   strictEqual: '===',
@@ -11,14 +11,14 @@ export const ASSERT_FN_OPERATOR: { [key: string]: string } = {
 
 export const DEEP_LITERAL_TYPES = new Set(['Set', 'Map', 'Array', 'String', 'Number', 'Object', 'Boolean']);
 
-export const DEEP_EQUALS_MAPPING: { [key: string]: string } = {
+export const DEEP_EQUALS_MAPPING: Record<string, string> = {
   equal: 'deepEqual',
   notEqual: 'notDeepEqual',
   strictEqual: 'deepStrictEqual',
   notStrictEqual: 'notDeepStrictEqual'
 };
 
-export const OP_MAPPING: { [key: string]: string } = {
+export const OP_MAPPING: Record<string, string> = {
   ok: '{actual} {state} {expected}',
   in: '{actual} {state} be in {expected}',
   includes: '{actual} {state} include {expected}',

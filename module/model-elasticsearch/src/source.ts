@@ -25,7 +25,7 @@ export class ElasticsearchModelSource extends ModelSource {
   private aliasToIndex: Map<string, string> = new Map();
 
   private identities: Map<Class, EsIdentity> = new Map();
-  // private indices: { [key: string]: IndexConfig<any>[] } = {};
+  // private indices: Record<string, IndexConfig<any>[]> = {};
   private indexToClass: Map<string, Class> = new Map();
   public client: es.Client;
 

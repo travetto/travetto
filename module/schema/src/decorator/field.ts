@@ -2,39 +2,39 @@ import { SchemaRegistry } from '../service/registry';
 import { CommonRegExp } from '../validate/regexp';
 import { ClassList, FieldConfig } from '../service/types';
 
-function prop(obj: { [key: string]: any }) {
+function prop(obj: Record<string, any>) {
   return (t: any, k: string) => {
     SchemaRegistry.registerPendingFieldFacet(t.constructor, k, obj);
   };
 }
 
 const stringProp = prop as
-  (obj: { [key: string]: any }) =>
+  (obj: Record<string, any>) =>
     <T extends Partial<Record<K, string>>, K extends string>(t: T, k: K) =>
       void;
 
 const stringArrProp = prop as
-  (obj: { [key: string]: any }) =>
+  (obj: Record<string, any>) =>
     <T extends Partial<Record<K, string | any[]>>, K extends string>(t: T, k: K) =>
       void;
 
 const stringArrStringProp = prop as
-  (obj: { [key: string]: any }) =>
+  (obj: Record<string, any>) =>
     <T extends Partial<Record<K, string | string[]>>, K extends string>(t: T, k: K) =>
       void;
 
 const numberProp = prop as
-  (obj: { [key: string]: any }) =>
+  (obj: Record<string, any>) =>
     <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K) =>
       void;
 
 const stringNumberProp = prop as
-  (obj: { [key: string]: any }) =>
+  (obj: Record<string, any>) =>
     <T extends Partial<Record<K, string | number>>, K extends string>(t: T, k: K) =>
       void;
 
 const dateNumberProp = prop as
-  (obj: { [key: string]: any }) =>
+  (obj: Record<string, any>) =>
     <T extends Partial<Record<K, Date | number>>, K extends string>(t: T, k: K) =>
       void;
 

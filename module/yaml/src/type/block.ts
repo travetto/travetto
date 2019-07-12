@@ -36,8 +36,8 @@ export class ListBlock implements Block<Node[]> {
   }
 }
 
-export class MapBlock implements Block<{ [key: string]: Node }> {
-  constructor(public indent: number, public value: { [key: string]: Node } = {}) { }
+export class MapBlock implements Block<Record<string, Node>> {
+  constructor(public indent: number, public value: Record<string, Node> = {}) { }
 
   consume(node: Node<any>, key: string) {
     this.value[key] = node.value;

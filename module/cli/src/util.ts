@@ -62,7 +62,7 @@ export class Util {
     });
   }
 
-  static fork(cmd: string, args: string[], env: { [key: string]: string | undefined }) {
+  static fork(cmd: string, args: string[], env: Record<string, string | undefined>) {
     return new Promise((resolve, reject) => {
       const text: Buffer[] = [];
       const err: Buffer[] = [];

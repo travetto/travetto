@@ -95,7 +95,7 @@ export class QueryVerifierService {
     return declared === actual;
   }
 
-  checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: { [key: string]: Set<string> }, isArray: boolean) {
+  checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: Record<string, Set<string>>, isArray: boolean) {
 
     if (isArray) {
       if (Array.isArray(value)) {

@@ -24,8 +24,8 @@ export class BindUtil {
     return out;
   }
 
-  static expandPaths(obj: { [key: string]: any }) {
-    const out: { [key: string]: any } = {};
+  static expandPaths(obj: Record<string, any>) {
+    const out: Record<string, any> = {};
     for (const k of Object.keys(obj)) {
       const val = obj[k];
       const parts = k.split('.');

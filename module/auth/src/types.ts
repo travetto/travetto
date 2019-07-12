@@ -1,7 +1,7 @@
 export interface Principal {
   id: string;
   permissions: string[];
-  details: { [key: string]: any };
+  details: Record<string, any>;
   expires?: Date;
 }
 

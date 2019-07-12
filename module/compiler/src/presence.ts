@@ -14,7 +14,7 @@ export interface Listener {
 }
 
 export class FilePresenceManager {
-  fileWatchers: { [key: string]: Watcher } = {};
+  fileWatchers: Record<string, Watcher> = {};
   files = new Map<string, { version: number }>();
   seen = new Set<string>();
   watchSpaces = new Set<string>();

@@ -21,7 +21,7 @@ export interface ViewConfig {
 
 export interface ClassConfig extends DescribableConfig {
   class: Class;
-  views: { [key: string]: ViewConfig };
+  views: Record<string, ViewConfig>;
   validators: ValidatorFn<any, any>[];
 }
 

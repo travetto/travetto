@@ -14,7 +14,7 @@ const str = (type: string) => ({ $regex: new Set(['RegExp', 'string']) });
 const comp = (type: string) => ({ $lt: st(type), $lte: st(type), $gt: st(type), $gte: st(type) });
 const geo = (type: string) => ({ $geoWithin: st(type, true), $geoIntersects: st(type, true) });
 
-export const OPERATORS: { [key: string]: { [key: string]: Set<string> } } = {
+export const OPERATORS: Record<string, Record<string, Set<string>>> = {
   string: { ...basic('string'), ...scalar('string'), ...str('string') },
   number: { ...basic('number'), ...scalar('number'), ...comp('number') },
   boolean: { ...basic('boolean'), ...scalar('boolean') },

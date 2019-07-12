@@ -14,7 +14,7 @@ export interface Context {
   template: string;
   modules: {
     list: string[],
-    map: { [key: string]: any }
+    map: Record<string, any>
     mapKeys: string[];
   };
   dependencies: {

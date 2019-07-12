@@ -10,7 +10,7 @@ const OG_CONSOLE = {
 
 export class ConsoleCapture {
 
-  static out: { [key: string]: string };
+  static out: Record<string, string>;
 
   static log(level: string, ...args: any[]) {
     const msg = args.map((x: any) => {

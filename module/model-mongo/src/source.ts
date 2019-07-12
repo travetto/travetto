@@ -23,7 +23,7 @@ export class MongoModelSource extends ModelSource {
 
   private client: mongo.MongoClient;
   private db: mongo.Db;
-  private indices: { [key: string]: IndexConfig<any>[] } = {};
+  private indices: Record<string, IndexConfig<any>[]> = {};
 
   constructor(private config: MongoModelConfig) {
     super();
@@ -137,7 +137,7 @@ export class MongoModelSource extends ModelSource {
     await this.init();
   }
 
-  registerIndex(cls: Class, fields: { [key: string]: number }, options: mongo.IndexOptions) {
+  registerIndex(cls: Class, fields: Record<string, number>, options: mongo.IndexOptions) {
     const col = this.getCollectionName(cls);
     this.indices[col] = this.indices[col] || [];
 

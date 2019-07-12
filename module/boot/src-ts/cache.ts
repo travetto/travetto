@@ -7,7 +7,7 @@ function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
 }
 
 export class FileCache {
-  private cache: { [key: string]: fs.Stats } = {};
+  private cache: Record<string, fs.Stats> = {};
 
   readonly cwd: string;
   readonly cacheDir: string;

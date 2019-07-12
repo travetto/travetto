@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
 
-export type HeaderMap = { [key: string]: (string | (() => string)) };
+export type HeaderMap = Record<string, (string | (() => string))>;
 
 export type Method = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head';
 export type PathType = string | RegExp;
