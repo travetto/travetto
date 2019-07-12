@@ -25,6 +25,7 @@ export class MySQLDialect extends SQLDialect {
     });
 
     this.regexWordBoundary = '([[:<:]]|[[:>:]])';
+    this.idField.minlength = this.idField.maxlength = { n: this.KEY_LEN };
   }
 
   hash(value: string) {
@@ -32,12 +33,11 @@ export class MySQLDialect extends SQLDialect {
   }
 
   getCreateTableSQL(stack: VisitStack[]) {
-    return super.getCreateTableSQL(stack).replace(/;$/, `${this.tablePostfix};`);
+    return super.getCreateTableSQL(stack).replace(/;$/, ` ${this.tablePostfix};`);
   }
 
   getColumnDefinition(field: FieldConfig) {
     return super.getColumnDefinition(field)
-      .replace(/\bVARCHAR\b/g, 'NVARCHAR')
       .replace(/\bTIMESTAMP\b/g, 'DATETIME');
   }
 

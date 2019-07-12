@@ -21,10 +21,12 @@ The schema generated will not generally map to existing tables as it is attempti
 a `SQL` database.  Every table generated will have a `path_id` which determines it's location in the document hierarchy as well as sub tables will have a `parent_path_id` to associate records with the parent values.
 
 The current SQL client support stands at:
-* MySQL - 5.7
+* MySQL - 5.6 and 5.7
 * Postgres - 11+
 * SQL Server - Currently unsupported
 * Oracle - Currently unsupported
+
+Note: Wider client support will roll out as usage increases.
 
 Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) module.
 
@@ -44,9 +46,9 @@ where the `SQLModelConfig` is defined by:
 ```typescript
 @Config('sql.model')
 export class SQLModelConfig {
-  hosts = '127.0.0.1';
+  host = '127.0.0.1';
   port = 3306;
-  databse = 'app';
+  database = 'app';
 }
 ```
 

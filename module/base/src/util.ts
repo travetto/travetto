@@ -34,16 +34,14 @@ export class Util {
 
     let ret: any;
 
-    if (mode !== 'replace' && (isEmptyA || isEmptyB)) { // If no `a`, `b` always wins
-      if (b === null || !isEmptyB) {
+    if (isEmptyA || isEmptyB) { // If no `a`, `b` always wins
+      if (mode === 'replace' || b === null || !isEmptyB) {
         ret = isEmptyB ? b : this.shallowClone(b);
       } else if (!isEmptyA) {
         ret = this.shallowClone(a);
       } else {
         ret = undefined;
       }
-    } else if (mode === 'replace' && isEmptyB) {
-      ret = b;
     } else {
       if (isArrA !== isArrB || isSimpA !== isSimpB) {
         throw new Error(`Cannot merge differing types ${a} and ${b}`);

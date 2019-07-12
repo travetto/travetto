@@ -69,6 +69,9 @@ export abstract class SQLDialect implements Dialect {
 
   constructor(public ns: string) {
     this.namespace = this.namespace.bind(this);
+    if (this.ns) {
+      this.ns = `${this.ns}_`;
+    }
   }
 
   abstract get conn(): any;
@@ -205,7 +208,7 @@ export abstract class SQLDialect implements Dialect {
   }
 
   namespace(stack: VisitStack[]) {
-    return `${this.ns}_${SQLUtil.buildTable(stack)}`;
+    return `${this.ns}${SQLUtil.buildTable(stack)}`;
   }
 
   namespaceParent(stack: VisitStack[]) {
@@ -402,6 +405,8 @@ ${this.getLimitSQL(cls, query)}`;
       let idField = fields.find(x => x.name === this.idField.name);
       if (!idField) {
         fields.push(idField = this.idField);
+      } else {
+        idField.maxlength = { n: this.KEY_LEN };
       }
     }
 
