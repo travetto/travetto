@@ -8,6 +8,14 @@ import {
 import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
 import { BindUtil } from '@travetto/schema';
+import { DistanceUnit } from '@travetto/model/src/model/where-clause';
+
+const RADIANS_TO: Record<DistanceUnit, number> = {
+  km: 6378,
+  mi: 3963,
+  m: 6378000,
+  ft: 20924640
+}
 
 export class MongoUtil {
 
@@ -64,8 +72,13 @@ export class MongoUtil {
       } else if ((Util.isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) || (v && v.constructor && v.constructor.__id)) {
         Object.assign(out, this.extractSimple(v, `${subpath}.`));
       } else {
-        if (v && Object.keys(v)[0] === '$regex') {
+        const key = v && Object.keys(v)[0];
+        if (key === '$regex') {
           v.$regex = BindUtil.extractRegex(v.$regex);
+        } else if (key === '$unit') {
+          const dist = v.$maxDistance;
+          const distance = dist / RADIANS_TO[v.$unit as DistanceUnit];
+          v.$maxDistance = distance;
         }
         out[subpath] = v;
       }

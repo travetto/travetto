@@ -2,6 +2,7 @@ import { Util } from '@travetto/base';
 import { WhereClause, ModelRegistry, SelectClause, SortClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { BindUtil, SchemaRegistry } from '@travetto/schema';
+import { Point } from '@travetto/model/src/model/where-clause';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -137,8 +138,18 @@ export class ElasticsearchUtil {
               items.push({
                 geo_polygon: {
                   [sPath]: {
-                    points: v.map(([lat, lon]: [number, number]) => ({ lat, lon }))
+                    points: v
                   }
+                }
+              });
+              break;
+            case '$unit':
+            case '$maxDistance':
+            case '$near':
+              items.push({
+                geo_distance: {
+                  distance: `${top.$maxDistance}${top.$unit || 'm'}`,
+                  [sPath]: top.$near
                 }
               });
               break;
@@ -231,7 +242,9 @@ export class ElasticsearchUtil {
     for (const field of schema.fields) {
       const conf = schema.schema[field];
 
-      if (conf.type === Number) {
+      if (conf.type === Point) {
+        props[field] = { type: 'geo_point' };
+      } else if (conf.type === Number) {
         let prop: any = { type: 'integer' };
         if (conf.precision) {
           const [digits, decimals] = conf.precision;

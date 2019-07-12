@@ -129,6 +129,12 @@ export class ElasticsearchModelSource extends ModelSource {
         await this.client.indices.putAlias({ index: concreteIndex, name: ident.index });
       }
       console.debug(`Index ${ident.index} created`);
+      console.trace('Index', JSON.stringify({
+        mappings: {
+          [ident.type]: schema
+        },
+        settings: this.config.indexCreate
+      }, null, 2));
     } catch (e) {
       console.debug(`Index ${ident.index} already created`);
     }
@@ -274,6 +280,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const req = this.getSearchObject(cls, query);
+    console.trace('Querying', JSON.stringify(req, null, 2));
     const results = await this.client.search<U>(req);
     return this.safeLoad<U>(req, results);
   }
