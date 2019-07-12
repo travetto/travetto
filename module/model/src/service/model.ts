@@ -32,6 +32,10 @@ export class ModelService implements IModelSource {
     this.init();
   }
 
+  generateId() {
+    return this.source.generateId();
+  }
+
   async init() {
     await ModelRegistry.init();
     if (Env.watch) {

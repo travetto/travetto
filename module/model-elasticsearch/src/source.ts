@@ -139,14 +139,14 @@ export class ElasticsearchModelSource extends ModelSource {
     const removes = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'removing')
-        .map(ev => [...v.path, ev.prev!.name].join('.')));
+        .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
       return acc;
     }, [] as string[]);
 
     const typeChanges = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'changed')
-        .map(ev => [...v.path, ev.prev!.name].join('.')));
+        .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
       return acc;
     }, [] as string[]);
 

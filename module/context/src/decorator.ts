@@ -5,7 +5,7 @@ export function WithAsyncContext<T extends { context: AsyncContext }>(data?: any
     const og = descriptor.value!;
     descriptor.value = function (this: T, ...args: any[]) {
       // tslint:disable-line no-invalid-this
-      return this.context.run(og.bind(this, args),
+      return this.context.run(og.bind(this, ...args),
         data ? JSON.parse(JSON.stringify(data)) : {});
     };
 

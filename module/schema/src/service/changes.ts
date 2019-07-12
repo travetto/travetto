@@ -5,7 +5,7 @@ import { EventEmitter } from 'events';
 const id = (c: Class | string) => typeof c === 'string' ? c : c.__id;
 
 interface FieldMapping {
-  path: string[];
+  path: FieldConfig[];
   config: ClassConfig;
 }
 
@@ -15,7 +15,7 @@ export interface FieldChangeEvent {
 }
 
 interface SubSchemaChange {
-  path: string[];
+  path: FieldConfig[];
   fields: ChangeEvent<FieldConfig>[];
 }
 
@@ -44,7 +44,7 @@ export class $SchemaChangeListener extends EventEmitter {
     this.mapping.delete(id(cls));
   }
 
-  trackSchemaDependency(src: Class, parent: Class, path: string[], config: ClassConfig) {
+  trackSchemaDependency(src: Class, parent: Class, path: FieldConfig[], config: ClassConfig) {
     const idValue = id(src);
     if (!this.mapping.has(idValue)) {
       this.mapping.set(idValue, new Map());
@@ -63,7 +63,7 @@ export class $SchemaChangeListener extends EventEmitter {
           updates.set(depClsId, { config: deps.get(depClsId)!.config, subs: [] });
         }
         const c = deps.get(depClsId)!;
-        updates.get(depClsId)!.subs.push({ path: c.path, fields: changes });
+        updates.get(depClsId)!.subs.push({ path: [...c.path], fields: changes });
       }
     }
 

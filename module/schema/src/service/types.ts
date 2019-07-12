@@ -26,7 +26,7 @@ export interface ClassConfig extends DescribableConfig {
 }
 
 export interface FieldConfig extends DescribableConfig {
-  owner: any;
+  owner: Class<any>;
   name: string;
   aliases?: string[];
   type: Class<any>;

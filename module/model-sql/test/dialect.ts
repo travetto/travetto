@@ -1,0 +1,1 @@
+import '../extension/mysql/dialect';

@@ -1,0 +1,47 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@travetto/model": "^0.7.1-alpha.0",
+    "@travetto/context": "^0.7.1-alpha.0"
+  },
+  "peerDependencies": {
+    "mysql": "^2.17.1",
+    "pg": "^7.11.0"
+  },
+  "description": "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
+  "devDependencies": {
+    "@travetto/test": "^0.7.1-alpha.0"
+  },
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "sql",
+    "data-modeling",
+    "real-time",
+    "docker",
+    "model",
+    "travetto",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "bin": {
+    "travetto-cli-sql_schema": "bin/travetto-cli-sql_schema.ts"
+  },
+  "files": [
+    "bin",
+    "index.ts",
+    "src",
+    "support"
+  ],
+  "name": "@travetto/model-sql",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "version": "0.7.1-alpha.0"
+}
