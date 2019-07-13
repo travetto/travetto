@@ -12,6 +12,13 @@ class Location {
   point: Point;
 }
 
+@Model()
+class Region {
+  id?: string;
+  points: Point[];
+}
+
+
 @Suite()
 export class GeoTestSuite extends BaseElasticsearchTest {
   @Test('Test within')
@@ -22,7 +29,9 @@ export class GeoTestSuite extends BaseElasticsearchTest {
 
     for (let i = 0; i < 5; i++) {
       for (let j = 0; j < 5; j++) {
-        toAdd.push(Location.from({ point: [i, j] }));
+        toAdd.push(Location.from({
+          point: [i, j],
+        }));
       }
     }
 

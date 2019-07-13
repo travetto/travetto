@@ -1,8 +1,7 @@
 import { Util } from '@travetto/base';
-import { WhereClause, ModelRegistry, SelectClause, SortClause } from '@travetto/model';
+import { Point, WhereClause, ModelRegistry, SelectClause, SortClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { BindUtil, SchemaRegistry } from '@travetto/schema';
-import { Point } from '@travetto/model/src/model/where-clause';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -145,25 +144,21 @@ export class ElasticsearchUtil {
               break;
             case '$unit':
             case '$maxDistance':
-            case '$near':
+            case '$near': {
+              let dist = top.$maxDistance;
+              let unit = top.$unit || 'm';
+              if (unit === 'rad') {
+                dist = 6378.1 * dist;
+                unit = 'km';
+              }
               items.push({
                 geo_distance: {
-                  distance: `${top.$maxDistance}${top.$unit || 'm'}`,
+                  distance: `${dist}${unit}`,
                   [sPath]: top.$near
                 }
               });
               break;
-            case '$geoIntersects':
-              items.push({
-                geo_shape: {
-                  [sPath]: {
-                    type: 'envelope',
-                    coordinates: v
-                  },
-                  relation: 'within'
-                }
-              });
-              break;
+            }
           }
         }
         // Handle operations

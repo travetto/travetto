@@ -64,6 +64,8 @@ export class MongoModelSource extends ModelSource {
 
     const projected = MongoUtil.extractTypedWhereClause(cls, query.where || {});
 
+    console.trace('Query', JSON.stringify(projected, null, 2));
+
     let cursor = col.find(projected);
     if (query.select) {
       cursor.project(Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select));

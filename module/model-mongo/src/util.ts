@@ -2,19 +2,20 @@ import * as mongo from 'mongodb';
 
 import {
   WhereClause,
-  ModelRegistry
+  ModelRegistry,
+  DistanceUnit
 } from '@travetto/model';
 
 import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
 import { BindUtil } from '@travetto/schema';
-import { DistanceUnit } from '@travetto/model/src/model/where-clause';
 
 const RADIANS_TO: Record<DistanceUnit, number> = {
   km: 6378,
   mi: 3963,
   m: 6378000,
-  ft: 20924640
+  ft: 20924640,
+  rad: 1
 }
 
 export class MongoUtil {
@@ -69,19 +70,36 @@ export class MongoUtil {
 
       if (subpath === 'id') { // Handle ids directly
         out._id = this.replaceId(v);
-      } else if ((Util.isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) || (v && v.constructor && v.constructor.__id)) {
-        Object.assign(out, this.extractSimple(v, `${subpath}.`));
       } else {
-        const key = v && Object.keys(v)[0];
-        if (key === '$regex') {
-          v.$regex = BindUtil.extractRegex(v.$regex);
-        } else if (v && '$unit' in v) {
-          const dist = v.$maxDistance;
-          const distance = dist / RADIANS_TO[v.$unit as DistanceUnit];
-          v.$maxDistance = distance;
-          delete v.$unit;
+        const isPlain = v && Util.isPlainObject(v);
+        const firstKey = isPlain ? Object.keys(v)[0] : '';
+        if ((isPlain && !firstKey.startsWith('$')) || (v && v.constructor && v.constructor.__id)) {
+          Object.assign(out, this.extractSimple(v, `${subpath}.`));
+        } else {
+          if (firstKey === '$regex') {
+            v.$regex = BindUtil.extractRegex(v.$regex);
+          } else if (firstKey && '$near' in v) {
+            const dist = v.$maxDistance;
+            const distance = dist / RADIANS_TO[(v.$unit as DistanceUnit || 'km')];
+            v.$maxDistance = distance;
+            delete v.$unit;
+          } else if (firstKey && '$geoWithin' in v) {
+            const coords = v.$geoWithin;
+            const first = coords[0];
+            const last = coords[coords.length - 1];
+            // Connect if not
+            if (first[0] !== last[0] || first[1] !== last[1]) {
+              coords.push(first);
+            }
+            v.$geoWithin = {
+              $geometry: {
+                type: 'Polygon',
+                coordinates: [coords]
+              }
+            };
+          }
+          out[subpath] = v;
         }
-        out[subpath] = v;
       }
     }
     return out;

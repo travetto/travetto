@@ -500,7 +500,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async save<T extends ModelCore>(cls: Class<T>, o: T, keepId: boolean = false): Promise<T> {
-    const id = o.id;
+    const id = keepId ? o.id : undefined;
     delete o.id;
 
     this.cleanseId(o);

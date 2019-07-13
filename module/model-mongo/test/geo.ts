@@ -28,24 +28,24 @@ export class GeoTestSuite extends BaseMongoTest {
 
     await svc.saveAll(Location, toAdd);
 
-    // const ret = await svc.getAllByQuery(Location, {
-    //   limit: 100,
-    //   where: {
-    //     point: {
-    //       $geoWithin: [[-1, -1], [-1, 6], [6, 6], [6, -1]]
-    //     }
-    //   }
-    // });
+    const ret = await svc.getAllByQuery(Location, {
+      limit: 100,
+      where: {
+        point: {
+          $geoWithin: [[-1, -1], [-1, 6], [6, 6], [6, -1]]
+        }
+      }
+    });
 
-    // assert(ret.length === 25);
+    assert(ret.length === 25);
 
     const rad = await svc.getAllByQuery(Location, {
       limit: 100,
       where: {
         point: {
           $near: [3, 3],
-          $maxDistance: 100,
-          $unit: 'km'
+          $maxDistance: 1,
+          $unit: 'm'
         }
       }
     });
