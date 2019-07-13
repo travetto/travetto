@@ -1,4 +1,5 @@
 import { VisitStack } from './util';
+import { FieldConfig } from '@travetto/schema';
 
 export interface InsertWrapper {
   stack: VisitStack[];
@@ -8,4 +9,11 @@ export interface InsertWrapper {
 export interface DeleteWrapper {
   stack: VisitStack[];
   ids: string[];
+}
+
+export interface DialectState {
+  pathField: FieldConfig;
+  parentPathField: FieldConfig;
+  idField: FieldConfig;
+  idxField: FieldConfig;
 }

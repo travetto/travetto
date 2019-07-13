@@ -4,7 +4,7 @@ import { Util } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
 
 import { SQLUtil, VisitStack } from './util';
-import { DeleteWrapper, InsertWrapper } from './types';
+import { DeleteWrapper, InsertWrapper, DialectState } from './types';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -21,7 +21,7 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
   } as FieldConfig;
 }
 
-export abstract class SQLDialect {
+export abstract class SQLDialect implements DialectState {
   KEY_LEN = 64;
   SQL_OPS = {
     $and: 'AND',

@@ -3,7 +3,7 @@ import { Class } from '@travetto/registry';
 import { ModelRegistry, ModelCore, SelectClause, SortClause } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
-import { Dialect, InsertWrapper } from './types';
+import { DialectState, InsertWrapper } from './types';
 
 export type VisitStack = {
   array?: boolean;
@@ -90,7 +90,7 @@ export class SQLUtil {
     return clauses;
   }
 
-  static cleanResults<T>(dct: Dialect, o: T): T {
+  static cleanResults<T>(dct: DialectState, o: T): T {
     if (Array.isArray(o)) {
       return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x)) as any;
     } else if (!Util.isSimple(o)) {
@@ -184,7 +184,7 @@ export class SQLUtil {
   }
 
   static async visitSchema(config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }) {
-    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
+    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, { ...config }];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
     const descend = async () => {
@@ -195,7 +195,7 @@ export class SQLUtil {
           await handler.onSimple({
             config: field, descend: null as any, fields: [], path: [
               ...path,
-              field
+              { ...field }
             ]
           });
         }
@@ -294,7 +294,7 @@ export class SQLUtil {
     });
   }
 
-  static collectDependents<T extends any>(dct: Dialect, parent: any, v: T[], field?: FieldConfig) {
+  static collectDependents<T extends any>(dct: DialectState, parent: any, v: T[], field?: FieldConfig) {
     if (field) {
       const isSimple = SchemaRegistry.has(field.type);
       for (const el of v) {
