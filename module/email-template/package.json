@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^0.7.1-alpha.3",
-    "@travetto/email": "^0.7.1-alpha.3",
+    "@travetto/di": "^0.7.1-alpha.4",
+    "@travetto/email": "^0.7.1-alpha.4",
     "@travetto/exec": "^0.7.1-alpha.3",
     "@types/html-entities": "^1.2.16",
     "@types/mustache": "^0.8.32",
@@ -21,7 +21,7 @@
   },
   "description": "Email templating module",
   "devDependencies": {
-    "@travetto/test": "^0.7.1-alpha.3",
+    "@travetto/test": "^0.7.1-alpha.4",
     "@types/js-beautify": "^1.8.1",
     "js-beautify": "^1.10.0"
   },
@@ -46,5 +46,5 @@
     "resources",
     "bin"
   ],
-  "version": "0.7.1-alpha.3"
+  "version": "0.7.1-alpha.4"
 }
