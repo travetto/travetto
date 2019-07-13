@@ -7,12 +7,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth": "^0.7.1-alpha.2",
-    "@travetto/model": "^0.7.1-alpha.3"
+    "@travetto/auth": "^0.7.1-alpha.3",
+    "@travetto/model": "^0.7.1-alpha.4"
   },
   "description": "Model-based authentication and registration support for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.7.1-alpha.2"
+    "@travetto/test": "^0.7.1-alpha.3"
   },
   "optionalExtensionDependencies": {
     "@travetto/auth-rest": "^0.4.11"
@@ -35,5 +35,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.7.1-alpha.3"
+  "version": "0.7.1-alpha.4"
 }
