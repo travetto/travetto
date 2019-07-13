@@ -2,14 +2,13 @@ import * as Generator from 'yeoman-generator';
 
 import { FsUtil } from '@travetto/boot';
 
-import { FEATURES, pkg } from './features';
+import { FEATURES, Feature } from './features';
 import { verifyDestination, meetsRequirement, template } from './util';
 import { Context, getContext } from './context';
 
 function finalize(path: string) {
   return path.replace('gitignore.txt', '.gitignore');
 }
-
 
 export class TravettoGenerator extends Generator {
   constructor(args: string[], options: any) {
@@ -22,11 +21,14 @@ export class TravettoGenerator extends Generator {
   async start() {
     const context = await this._init();
 
-    await this._getModules(context);
-    await this._getModuleImpls(context);
+    await this._resolveFeatures(context, FEATURES);
     await this._templateFiles(context);
 
     await this.npmInstall();
+
+    if (context.peerDependencies) {
+      await this.npmInstall(context.peerDependencies);
+    }
   }
 
   async _init() {
@@ -63,74 +65,59 @@ export class TravettoGenerator extends Generator {
     return context;
   }
 
-  async _getModules(context: Context) {
+  async _chooseFeature(feature: Feature): Promise<Feature> {
+    const { choice } = await this.prompt({
+      type: 'list',
+      name: 'choice',
+      message: 'Please select one',
+      choices: feature.choices!.map(x => x.title!),
+      default: feature.default
+    });
 
-    const { modules } = await this.prompt([
-      {
-        type: 'checkbox',
-        choices: Object.keys(FEATURES).sort(),
-        name: 'modules',
-        message: 'Select high level modules you want to use: '
-      }
-    ]);
-
-    for (const mod of modules) {
-      context.modules.list.push(mod);
-      context.modules.map[mod.split('/').pop()] = 1;
-    }
-
-    context.dependencies.list.push(...modules);
+    return feature.choices!.find(x => x.title === choice)!;
   }
 
-  async _getModuleImpls(context: Context) {
-    const implPrompts = [];
+  async _addDependency(context: Context, feat: Feature) {
 
-    const modules = Object.keys(FEATURES) as string[];
-
-    for (const mod of modules) {
-      const feat = FEATURES[mod];
-      if (feat && context.modules.list.includes(mod) && 'sub' in feat) {
-        implPrompts.push({
-          type: 'list',
-          choices: feat.sub,
-          name: mod,
-          default: feat.default,
-          message: `Choose the ${mod} implementation: `
-        });
-      }
+    if (feat.npm.startsWith('@travetto')) {
+      context.frameworkDependencies.push(feat.npm);
+    } else {
+      context.peerDependencies.push(feat.npm);
     }
 
-    if (implPrompts.length) {
-      const impls = await this.prompt(implPrompts as any);
-      for (const mod of modules) {
-        const feat = FEATURES[mod];
-        const sub = impls[mod];
-        if (sub) {
-          if (!('sub' in feat) || !feat.external) {
-            const full = `${mod}-${sub}`;
-            context.dependencies.list.push(full);
-            context.modules.map[full] = '1';
-            context.modules.list.push(`@travetto/${full}`);
-            if ('context' in feat) {
-              Object.assign(context, (feat.context as any)[sub] || pkg(mod, sub));
-            }
-          } else if (feat.external) {
-            context.dependencies.list.push(sub);
-          }
-        }
-        if ('addons' in feat) {
-          context.dependencies.list.push(...(feat.addons!));
-        }
-      }
+    for (const addon of (feat.addons || [])) {
+      this._addDependency(context, addon)
     }
   }
 
+  async _resolveFeatures(context: Context, features: Feature[], chosen = false) {
+    for (const feat of features) {
+      if (!chosen) {
+        const ans: any = await this.prompt([{
+          type: 'confirm',
+          name: 'choice',
+          message: `Include ${feat.title} support?`
+        }]);
+
+        if (ans.choice === 'No') {
+          continue;
+        }
+      }
+
+      if (feat.choices) {
+        const choice = await this._chooseFeature(feat);
+        await this._resolveFeatures(context, [choice], true);
+      }
+
+      await this._addDependency(context, feat);
+    }
+  }
 
   async _templateFiles(context: Context) {
     const files = require(FsUtil.resolveUnix(this.sourceRoot(), 'listing.json')) as Record<string, { requires?: string[] }>;
     for (const key of Object.keys(files)) {
       const conf = files[key];
-      if (conf.requires && !meetsRequirement(context.dependencies.list, conf.requires)) {
+      if (conf.requires && !meetsRequirement(context.frameworkDependencies, conf.requires)) {
         continue;
       }
       this.fs.write(finalize(this.destinationPath(key)), await template(this.templatePath(key), context));

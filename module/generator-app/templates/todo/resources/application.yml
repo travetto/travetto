@@ -1,4 +1,4 @@
-# {{#modules.map.rest}}
+# {{#moduleMap.rest}}
 rest:
   ssl:
     active: true
@@ -6,4 +6,4 @@ rest:
     active: true
   cors:
     active: true
-# {{/modules.map.rest}}
+# {{/moduleMap.rest}}

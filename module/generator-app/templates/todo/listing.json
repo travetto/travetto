@@ -5,42 +5,42 @@
   "resources/application.yml": {},
   "src/model/todo.ts": {
     "requires": [
-      "model"
+      "@travetto/model"
     ]
   },
   "src/rest/todo.ts": {
     "requires": [
-      "rest",
-      "model"
+      "@travetto/rest",
+      "@travetto/model"
     ]
   },
   "src/rest/auth.ts": {
     "requires": [
-      "rest",
-      "auth-rest"
+      "@travetto/rest",
+      "@travetto/auth-rest"
     ]
   },
   "src/rest/auth.config.ts": {
     "requires": [
-      "rest",
-      "auth-rest"
+      "@travetto/rest",
+      "@travetto/auth-rest"
     ]
   },
   "src/rest/primary.ts": {
     "requires": [
-      "rest"
+      "@travetto/rest"
     ]
   },
   "test/config.ts": {
     "requires": [
-      "model",
-      "test"
+      "@travetto/model",
+      "@travetto/test"
     ]
   },
   "test/model/todo.ts": {
     "requires": [
-      "model",
-      "test"
+      "@travetto/model",
+      "@travetto/test"
     ]
   }
 }

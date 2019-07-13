@@ -12,15 +12,11 @@ export interface Context {
     email: string;
   };
   template: string;
-  modules: {
-    list: string[],
-    map: Record<string, any>
-    mapKeys: string[];
-  };
-  dependencies: {
-    version: string;
-    list: string[];
-  };
+  modules?: string[];
+  moduleMap?: Record<string, string>;
+  frameworkVersion: string;
+  frameworkDependencies: string[];
+  peerDependencies: string[];
 }
 
 export function getContext(name: string): Context {
@@ -33,18 +29,15 @@ export function getContext(name: string): Context {
       name: run('git config user.name') || process.env.USER!,
       email: run('git config user.email')
     },
-    template: '',
-    modules: {
-      map: { cli: 1 },
-      list: ['@travetto/cli'],
-      get mapKeys() {
-        // tslint:disable-next-line: no-invalid-this
-        return Object.keys(this.map).sort();
-      }
+    get moduleMap() {
+      return this.frameworkDependencies.map(x => x.split('/')[1]).reduce((acc, v) => ({ ...acc, [v]: 1 }), {});
     },
-    dependencies: {
-      version: require('@travetto/base/package.json').version.replace(/[.]\d+$/, '.0'),
-      list: ['cli']
-    }
+    get modules() {
+      return Object.keys(this.moduleMap || {}).sort();
+    },
+    template: '',
+    frameworkVersion: require('@travetto/base/package.json').version.replace(/[.]\d+$/, '.0'),
+    frameworkDependencies: [],
+    peerDependencies: []
   };
 }
