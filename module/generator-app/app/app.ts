@@ -101,17 +101,21 @@ export class TravettoGenerator extends Generator {
     }
 
     if (implPrompts.length) {
-      const impls = await this.prompt(implPrompts);
+      const impls = await this.prompt(implPrompts as any);
       for (const mod of modules) {
         const feat = FEATURES[mod];
         const sub = impls[mod];
         if (sub) {
-          const full = `${mod}-${sub}`;
-          context.dependencies.list.push(full);
-          context.modules.map[full] = '1';
-          context.modules.list.push(`@travetto/${full}`);
-          if ('context' in feat) {
-            Object.assign(context, (feat.context as any)[sub] || pkg(mod, sub));
+          if (!('sub' in feat) || !feat.external) {
+            const full = `${mod}-${sub}`;
+            context.dependencies.list.push(full);
+            context.modules.map[full] = '1';
+            context.modules.list.push(`@travetto/${full}`);
+            if ('context' in feat) {
+              Object.assign(context, (feat.context as any)[sub] || pkg(mod, sub));
+            }
+          } else if (feat.external) {
+            context.dependencies.list.push(sub);
           }
         }
         if ('addons' in feat) {

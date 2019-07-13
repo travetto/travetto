@@ -103,20 +103,22 @@ export class MongoModelSource extends ModelSource {
     return (o as any)._id;
   }
 
-  async postConstruct() {
-    await this.init();
-  }
-
-  async init() {
+  async initClient() {
     this.client = await mongo.MongoClient.connect(this.config.url);
     this.db = this.client.db();
+  }
 
+  async initDatabase() {
     // Establish geo indices
     const promises: Promise<any>[] = [];
     for (const model of ModelRegistry.getClasses()) {
       promises.push(...this.establishIndices(model));
     }
-    return Promise.all(promises);
+    await Promise.all(promises);
+  }
+
+  async clearDatabase() {
+    await this.db.dropDatabase();
   }
 
   establishIndices<T extends ModelCore>(cls: Class<T>) {
@@ -155,11 +157,6 @@ export class MongoModelSource extends ModelSource {
 
   async getCollection<T extends ModelCore>(cls: Class<T>): Promise<mongo.Collection> {
     return this.db.collection(this.getCollectionName(cls));
-  }
-
-  async resetDatabase() {
-    await this.db.dropDatabase();
-    await this.init();
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {

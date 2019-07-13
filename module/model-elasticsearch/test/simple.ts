@@ -6,12 +6,8 @@ import { Suite, Test } from '@travetto/test';
 import { Schema, Currency, Integer, Precision, Float, Text } from '@travetto/schema';
 
 import { BaseElasticsearchTest } from './base';
-import {
-  ElasticsearchModelSource
-} from '../src/source';
-import {
-  ElasticsearchUtil
-} from '../src/util';
+import { ElasticsearchModelSource } from '../src/source';
+import { ElasticsearchUtil } from '../src/util';
 
 @Schema()
 class Address {
@@ -68,10 +64,8 @@ class TestSave extends BaseElasticsearchTest {
   @Test()
   async verifySource() {
     const source = await DependencyRegistry.getInstance(ModelSource);
-
     assert.ok(source);
     assert(source instanceof ElasticsearchModelSource);
-
   }
 
   @Test('verifySchema')

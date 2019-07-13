@@ -2,6 +2,7 @@ export const FEATURES: {
   [key: string]: {
     addons?: string[];
     sub: string[];
+    external?: boolean;
     context?: Record<string, any>;
     default: string;
   } | {
@@ -18,9 +19,14 @@ export const FEATURES: {
     addons: ['rest-session']
   },
   model: {
-    sub: ['elasticsearch', 'mongo'],
+    sub: ['elasticsearch', 'mongo', 'sql'],
     default: 'mongo'
   },
+  sql: {
+    sub: ['mysql', 'postgres'],
+    external: true,
+    default: 'mysql'
+  }
 };
 
 export const pkg = (mod: string, sub: string) => ({

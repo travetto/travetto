@@ -311,14 +311,12 @@ export class ElasticsearchModelSource extends ModelSource {
     return id;
   }
 
-  async postConstruct() {
-    await this.init();
-  }
-
-  async init() {
+  async initClient() {
     this.client = new es.Client(Util.deepAssign({}, this.config));
     await this.client.cluster.health({});
+  }
 
+  async initDatabase() {
     // PreCreate indexes if missing
     if (this.config.autoCreate) {
       const all = ModelRegistry.getClasses()
@@ -330,11 +328,10 @@ export class ElasticsearchModelSource extends ModelSource {
     await this.computeAliasMappings(true);
   }
 
-  async resetDatabase() {
+  async clearDatabase() {
     await this.client.indices.delete({
       index: this.getNamespacedIndex('*')
     });
-    await this.init();
   }
 
   async suggestField<T extends ModelCore, U = T>(

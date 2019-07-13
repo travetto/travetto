@@ -50,6 +50,16 @@ export interface IModelSource {
 export abstract class ModelSource implements IModelSource {
   onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
   onSchemaChange?(e: SchemaChangeEvent): void;
+
+  async postConstruct() {
+    await this.initClient();
+    await this.initDatabase();
+  }
+
+  abstract initClient(): Promise<void>;
+  abstract initDatabase(): Promise<void>;
+  abstract clearDatabase(): Promise<void>;
+
   abstract generateId(): string;
   abstract prePersist<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<Partial<T>> | Partial<T>;
   abstract prePersist<T extends ModelCore>(cls: Class<T>, model: T): T | Promise<T>;

@@ -71,11 +71,19 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
+  async initClient() {
+    if (this.conn.init) {
+      await this.conn.init();
+    }
+  }
+
   @WithAsyncContext({})
   @Connected(true)
-  async initializeDatabase() {
-    for (const cls of ModelRegistry.getClasses()) {
-      await this.createTables(cls);
+  async initDatabase() {
+    if (this.config.autoCreate) {
+      for (const cls of ModelRegistry.getClasses()) {
+        await this.createTables(cls);
+      }
     }
   }
 
@@ -88,15 +96,6 @@ export class SQLModelSource extends ModelSource {
       } catch {
         // Ignore
       }
-    }
-  }
-
-  async postConstruct() {
-    if (this.conn.init) {
-      await this.conn.init();
-    }
-    if (this.config.autoCreate) {
-      await this.initializeDatabase();
     }
   }
 
