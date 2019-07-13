@@ -18,7 +18,7 @@ sign(payload:object, config:{
   key?: string | Buffer | Promise<string | Buffer>;  // Signing Key
   iatExclude?: boolean; // Do not return or set the issuedAt flag
   alg?: string; // Which  encoding algorithm
-  header?: { [key: string]: string }; // Any additional header information
+  header?: Record<string, string>; // Any additional header information
   encoding?: string; // Encoding, defaults to utf8
 }):Promise<string>;
 ```
@@ -46,7 +46,7 @@ verify(token: string, options: {
     nbf?: boolean   // Ignore not before
   },
   maxAgeSec?: number, // Maximum age of token in seconds
-  header?: { [key: string]: string }, // Match against specific header fields
+  header?: Record<string, string>, // Match against specific header fields
   key?: string | Buffer | Promise<string | Buffer>, // Use the key for decoding token
   encoding?: string, // Defaults to utf8
   alg?: string | string[]; // Algorithm for decryption

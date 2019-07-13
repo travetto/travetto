@@ -12,7 +12,7 @@ const fsStat = util.promisify(fs.stat);
 const fsReadFile = util.promisify(fs.readFile);
 
 export class $ResourceManager {
-  private cache: { [key: string]: string } = {};
+  private cache: Record<string, string> = {};
 
   private paths: string[] = [];
 

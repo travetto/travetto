@@ -2,7 +2,7 @@ export const FEATURES: {
   [key: string]: {
     addons?: string[];
     sub: string[];
-    context?: { [key: string]: any };
+    context?: Record<string, any>;
     default: string;
   } | {
     addons?: string[];

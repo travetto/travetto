@@ -157,7 +157,7 @@ export class TransformUtil {
     } else if (val.kind === ts.SyntaxKind.TrueKeyword) {
       return true;
     } else if (ts.isObjectLiteralExpression(val)) {
-      const out: { [key: string]: any } = {};
+      const out: Record<string, any> = {};
       for (const pair of val.properties) {
         if (ts.isPropertyAssignment(pair)) {
           out[pair.name.getText()] = this.toLiteral(pair.initializer);

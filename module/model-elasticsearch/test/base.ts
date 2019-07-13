@@ -1,4 +1,4 @@
-import { BeforeAll, AfterEach, BeforeEach } from '@travetto/test';
+import { BeforeAll, AfterEach, AfterAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { ModelSource, ModelRegistry } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
@@ -24,17 +24,18 @@ export class BaseElasticsearchTest {
 
   }
 
-  @BeforeEach()
-  async beforeEach() {
-    const mms = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
-    await mms.init();
-  }
-
+  @AfterAll()
   @AfterEach()
   async afterEach() {
     const mms = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
     await mms.client.indices.delete({
       index: mms.getNamespacedIndex('*')
     });
+  }
+
+  @AfterEach()
+  async beforeEach() {
+    const mms = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
+    await mms.postConstruct();
   }
 }

@@ -12,7 +12,7 @@ export async function getSchemas() {
 
   const { ElasticsearchUtil } = await import('../src/util');
 
-  const out: { [key: string]: string } = {};
+  const out: Record<string, string> = {};
   for (const cls of ModelRegistry.getClasses()) {
     out[src.getCollectionName(cls)] = ElasticsearchUtil.generateSourceSchema(cls);
   }

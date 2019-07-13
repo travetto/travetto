@@ -38,7 +38,7 @@ async function simpleWatcher(commonFolder: string, paths: string[], handler: {
 
 function buildContext(reqUrl: url.URL, content: string) {
 
-  const base: { [key: string]: any } = {};
+  const base: Record<string, any> = {};
 
   content.replace(/[{]{2}\s*([A-Za-z0-9_.]+)\s*[}]{2}/g, (all, sub) => {
     if (!reqUrl.searchParams.has(sub) || reqUrl.searchParams.get(sub) === '') {

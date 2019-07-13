@@ -23,7 +23,7 @@ export class BulkProcessError extends AppError {
     super('Bulk processing errors have occurred', 'data', { errors });
   }
 
-  toJSON(extra: { [key: string]: any } = {}) {
+  toJSON(extra: Record<string, any> = {}) {
     console.log(this.errors);
     return JSON.stringify({
       ...extra,

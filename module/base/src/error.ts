@@ -43,7 +43,7 @@ export class AppError extends Error {
   constructor(
     public message: string,
     public category: ErrorCategory = 'general',
-    public payload?: { [key: string]: any },
+    public payload?: Record<string, any>,
 
   ) {
     super(message);
@@ -56,7 +56,7 @@ export class AppError extends Error {
     return super.toConsole!(sub);
   }
 
-  toJSON(extra: { [key: string]: any } = {}) {
+  toJSON(extra: Record<string, any> = {}) {
     if (this.payload) {
       Object.assign(extra, this.payload);
     }

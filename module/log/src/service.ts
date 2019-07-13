@@ -15,8 +15,8 @@ class $Logger {
   private listeners = new Map<string | symbol, LogListener>();
   private listenList: LogListener[] = [];
 
-  private filters: { [key: string]: (x: string) => boolean } = {};
-  private exclude: { [key: string]: boolean } = { debug: true, trace: true };
+  private filters: Record<string, (x: string) => boolean> = {};
+  private exclude: Record<string, boolean> = { debug: true, trace: true };
   private flags: { debug?: string, trace?: string };
 
   init() {

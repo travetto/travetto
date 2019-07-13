@@ -75,7 +75,7 @@ export class ConfigUtil {
     }
   }
 
-  static getKeyName(key: string, data: { [key: string]: any }) {
+  static getKeyName(key: string, data: Record<string, any>) {
     key = key.trim();
     const match = new RegExp(key, 'i');
     const next = Object.keys(data).find(x => match.test(x));

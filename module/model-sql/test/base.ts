@@ -1,4 +1,4 @@
-import { BeforeAll, AfterEach, BeforeEach } from '@travetto/test';
+import { BeforeAll, AfterEach, AfterAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { ModelSource, ModelRegistry } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
@@ -28,15 +28,16 @@ export class BaseSqlTest {
     }
   }
 
-  @BeforeEach()
-  async beforeEach() {
+  @AfterAll()
+  @AfterEach()
+  async clear() {
     const mms = (await DependencyRegistry.getInstance(ModelSource)) as SQLModelSource;
-    await mms.postConstruct();
+    await mms.clearDatabase();
   }
 
   @AfterEach()
-  async afterEach() {
+  async reset() {
     const mms = (await DependencyRegistry.getInstance(ModelSource)) as SQLModelSource;
-    await mms.clearDatabase();
+    await mms.postConstruct();
   }
 }

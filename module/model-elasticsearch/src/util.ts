@@ -1,5 +1,5 @@
 import { Util } from '@travetto/base';
-import { WhereClause, ModelRegistry, SelectClause, SortClause } from '@travetto/model';
+import { Point, WhereClause, ModelRegistry, SelectClause, SortClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { BindUtil, SchemaRegistry } from '@travetto/schema';
 
@@ -9,9 +9,9 @@ const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
 
 export class ElasticsearchUtil {
 
-  static extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
-    const out: { [key: string]: any } = {};
-    const sub = o as { [key: string]: any };
+  static extractSimple<T>(o: T, path: string = ''): Record<string, any> {
+    const out: Record<string, any> = {};
+    const sub = o as Record<string, any>;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subPath = `${path}${key}`;
@@ -53,7 +53,7 @@ export class ElasticsearchUtil {
     });
   }
 
-  static extractWhereTermQuery<T>(o: { [key: string]: any }, cls: Class<T>, path: string = ''): any {
+  static extractWhereTermQuery<T>(o: Record<string, any>, cls: Class<T>, path: string = ''): any {
     const items = [];
     const schema = SchemaRegistry.getViewSchema(cls).schema;
 
@@ -137,22 +137,28 @@ export class ElasticsearchUtil {
               items.push({
                 geo_polygon: {
                   [sPath]: {
-                    points: v.map(([lat, lon]: [number, number]) => ({ lat, lon }))
+                    points: v
                   }
                 }
               });
               break;
-            case '$geoIntersects':
+            case '$unit':
+            case '$maxDistance':
+            case '$near': {
+              let dist = top.$maxDistance;
+              let unit = top.$unit || 'm';
+              if (unit === 'rad') {
+                dist = 6378.1 * dist;
+                unit = 'km';
+              }
               items.push({
-                geo_shape: {
-                  [sPath]: {
-                    type: 'envelope',
-                    coordinates: v
-                  },
-                  relation: 'within'
+                geo_distance: {
+                  distance: `${dist}${unit}`,
+                  [sPath]: top.$near
                 }
               });
               break;
+            }
           }
         }
         // Handle operations
@@ -171,7 +177,7 @@ export class ElasticsearchUtil {
     }
   }
 
-  static extractWhereQuery<T>(o: WhereClause<T>, cls: Class<T>): { [key: string]: any } {
+  static extractWhereQuery<T>(o: WhereClause<T>, cls: Class<T>): Record<string, any> {
     if (has$And(o)) {
       return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(x, cls)) } };
     } else if (has$Or(o)) {
@@ -186,7 +192,7 @@ export class ElasticsearchUtil {
   static generateUpdateScript(o: any, path: string = '', arr = false) {
     const ops: string[] = [];
     const out = {
-      params: {} as { [key: string]: any },
+      params: {} as Record<string, any>,
       lang: 'painless',
       inline: ''
     };
@@ -231,7 +237,9 @@ export class ElasticsearchUtil {
     for (const field of schema.fields) {
       const conf = schema.schema[field];
 
-      if (conf.type === Number) {
+      if (conf.type === Point) {
+        props[field] = { type: 'geo_point' };
+      } else if (conf.type === Number) {
         let prop: any = { type: 'integer' };
         if (conf.precision) {
           const [digits, decimals] = conf.precision;

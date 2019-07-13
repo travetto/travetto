@@ -51,7 +51,7 @@ export class SpecGenerateUtil {
   }
 
   static getType(cls: Class, state: PartialSpec) {
-    const out: { [key: string]: any } = {};
+    const out: Record<string, any> = {};
     // Handle nested types
     if (SchemaRegistry.has(cls)) {
       out.$ref = `${DEFINITION}/${this.processSchema(cls, state)}`;
@@ -81,7 +81,7 @@ export class SpecGenerateUtil {
       if (!state.components.schemas[typeId]) {
         const config = SchemaRegistry.get(type);
         if (config) {
-          const properties: { [key: string]: SchemaObject } = {};
+          const properties: Record<string, SchemaObject> = {};
           const def = config.views[ALL_VIEW];
           const required = [];
 

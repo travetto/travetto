@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
+import { Index, Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { Schema, Currency, Integer, Precision, Float, Text } from '@travetto/schema';
@@ -46,6 +46,9 @@ class SimpleList {
 }
 
 @Model()
+@Index({
+  fields: [{ big: true }, { floater: false }]
+})
 class Numerical {
   @Currency()
   money: number;

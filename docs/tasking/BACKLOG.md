@@ -1,6 +1,11 @@
 Backlogged Requests
 ===============   
 
+Model
+----------------------
+- [ ] Basic aggregation support, to get model counts by a specific attribute
+- [?] Look for SQL query optimization opportunities
+
 Rest
 ----------------------
 - [ ] Documentation on auth, w.r.t sessions and cookies

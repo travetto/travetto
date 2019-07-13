@@ -25,11 +25,11 @@ export class MarkdownUtil {
       .replace(/[\n\s]+$/, ' ');
   }
 
-  private static getIntAttr(attrs: { [key: string]: string }, name: string, def?: number): number {
+  private static getIntAttr(attrs: Record<string, string>, name: string, def?: number): number {
     return (name in attrs ? parseInt(attrs[name], 10) : def) || 0;
   }
 
-  private static getAttr(attrs: { [key: string]: string }, name: string) {
+  private static getAttr(attrs: Record<string, string>, name: string) {
     return (attrs[name] || '').trim();
   }
 

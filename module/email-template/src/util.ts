@@ -79,7 +79,7 @@ export class TemplateUtil {
     return html;
   }
 
-  static resolveNestedTemplates(template: string, templates: { [key: string]: string }) {
+  static resolveNestedTemplates(template: string, templates: Record<string, string>) {
     return template.replace(/[{]{2}>\s+(\S+)\s*[}]{2}/g, (all: string, name: string): any => {
       name = FsUtil.toUnix(name);
       return this.resolveNestedTemplates(templates[name], templates);

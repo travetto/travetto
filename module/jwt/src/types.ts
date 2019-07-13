@@ -27,7 +27,7 @@ export type VerifyOptions = {
   clock?: { timestamp?: number | Date, tolerance?: number };
   ignore?: { exp?: boolean, nbf?: boolean };
   maxAgeSec?: number;
-  header?: { [key: string]: string }
+  header?: Record<string, string>
   key?: Key;
   encoding?: string;
   alg?: AlgType | AlgType[];

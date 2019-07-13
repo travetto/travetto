@@ -225,6 +225,11 @@ export class TransformerState {
         }, this.resolveType(types[0]));
         break;
       }
+      case ts.SyntaxKind.TupleType:
+        expr = ts.createArrayLiteral((type as ts.TupleTypeNode).elementTypes.map(t => {
+          return this.resolveType(t);
+        }));
+        break;
       case ts.SyntaxKind.ObjectKeyword:
       default:
         break;

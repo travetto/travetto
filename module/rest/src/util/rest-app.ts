@@ -39,15 +39,15 @@ abstract class BaseRequest implements Partial<Request> {
 }
 
 export class RestAppUtil {
-  static decorateRequest<T extends Request>(req: Partial<T> & { [key: string]: any }): T {
+  static decorateRequest<T extends Request>(req: Partial<T> & Record<string, any>): T {
     delete req.redirect;
     Object.setPrototypeOf(req, BaseRequest.prototype);
     req.url = req.path;
-    req.connection = {};
+    (req as Record<string, any>).connection = {};
     return req as T;
   }
 
-  static decorateResponse<T extends Response>(res: Partial<T> & { [key: string]: any }): T {
+  static decorateResponse<T extends Response>(res: Partial<T> & Record<string, any>): T {
     Object.setPrototypeOf(res, BaseResponse.prototype);
     return res as T;
   }

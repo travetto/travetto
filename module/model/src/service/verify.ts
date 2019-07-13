@@ -95,7 +95,7 @@ export class QueryVerifierService {
     return declared === actual;
   }
 
-  checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: { [key: string]: Set<string> }, isArray: boolean) {
+  checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: Record<string, Set<string>>, isArray: boolean) {
 
     if (isArray) {
       if (Array.isArray(value)) {
@@ -114,9 +114,13 @@ export class QueryVerifierService {
         state.log(`Operator clause only supports types of ${declaredType}, not ${actualType}`);
       }
       return;
-    } else if (Object.keys(value).length !== 1) {
-      state.log(`One and only one operation may be specified in an operator clause`);
-      return;
+    } else {
+      const keys = Object.keys(value).sort();
+
+      if (keys.length !== 1 && keys[0] !== '$maxDistance' && keys[0] !== '$gt') {
+        state.log(`One and only one operation may be specified in an operator clause`);
+        return;
+      }
     }
 
     // Should only be one?

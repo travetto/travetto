@@ -4,7 +4,7 @@ import { Response } from '@travetto/rest';
 declare global {
 	namespace Travetto {
 		interface Request {
-			files: { [key: string]: Asset };
+			files: Record<string, Asset>;
 		}
 	}
 }

@@ -2,12 +2,21 @@ import * as mongo from 'mongodb';
 
 import {
   WhereClause,
-  ModelRegistry
+  ModelRegistry,
+  DistanceUnit
 } from '@travetto/model';
 
 import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
 import { BindUtil } from '@travetto/schema';
+
+const RADIANS_TO: Record<DistanceUnit, number> = {
+  km: 6378,
+  mi: 3963,
+  m: 6378000,
+  ft: 20924640,
+  rad: 1
+}
 
 export class MongoUtil {
 
@@ -15,7 +24,7 @@ export class MongoUtil {
   static has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
   static has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
 
-  static extractTypedWhereClause<T>(cls: Class<T>, o: WhereClause<T>): { [key: string]: any } {
+  static extractTypedWhereClause<T>(cls: Class<T>, o: WhereClause<T>): Record<string, any> {
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
       o = { $and: [o, { type: conf.subType }] } as WhereClause<T>;
@@ -23,7 +32,7 @@ export class MongoUtil {
     return this.extractWhereClause(o);
   }
 
-  static extractWhereClause<T>(o: WhereClause<T>): { [key: string]: any } {
+  static extractWhereClause<T>(o: WhereClause<T>): Record<string, any> {
     if (this.has$And(o)) {
       return { $and: o.$and.map(x => this.extractWhereClause<T>(x)) };
     } else if (this.has$Or(o)) {
@@ -51,9 +60,9 @@ export class MongoUtil {
     }
   }
 
-  static extractSimple<T>(o: T, path: string = ''): { [key: string]: any } {
-    const out: { [key: string]: any } = {};
-    const sub = o as { [key: string]: any };
+  static extractSimple<T>(o: T, path: string = ''): Record<string, any> {
+    const out: Record<string, any> = {};
+    const sub = o as Record<string, any>;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subpath = `${path}${key}`;
@@ -61,13 +70,36 @@ export class MongoUtil {
 
       if (subpath === 'id') { // Handle ids directly
         out._id = this.replaceId(v);
-      } else if ((Util.isPlainObject(v) && !Object.keys(v)[0].startsWith('$')) || (v && v.constructor && v.constructor.__id)) {
-        Object.assign(out, this.extractSimple(v, `${subpath}.`));
       } else {
-        if (v && Object.keys(v)[0] === '$regex') {
-          v.$regex = BindUtil.extractRegex(v.$regex);
+        const isPlain = v && Util.isPlainObject(v);
+        const firstKey = isPlain ? Object.keys(v)[0] : '';
+        if ((isPlain && !firstKey.startsWith('$')) || (v && v.constructor && v.constructor.__id)) {
+          Object.assign(out, this.extractSimple(v, `${subpath}.`));
+        } else {
+          if (firstKey === '$regex') {
+            v.$regex = BindUtil.extractRegex(v.$regex);
+          } else if (firstKey && '$near' in v) {
+            const dist = v.$maxDistance;
+            const distance = dist / RADIANS_TO[(v.$unit as DistanceUnit || 'km')];
+            v.$maxDistance = distance;
+            delete v.$unit;
+          } else if (firstKey && '$geoWithin' in v) {
+            const coords = v.$geoWithin;
+            const first = coords[0];
+            const last = coords[coords.length - 1];
+            // Connect if not
+            if (first[0] !== last[0] || first[1] !== last[1]) {
+              coords.push(first);
+            }
+            v.$geoWithin = {
+              $geometry: {
+                type: 'Polygon',
+                coordinates: [coords]
+              }
+            };
+          }
+          out[subpath] = v;
         }
-        out[subpath] = v;
       }
     }
     return out;

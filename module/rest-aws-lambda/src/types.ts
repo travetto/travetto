@@ -11,7 +11,7 @@ export class RouteStack {
   };
   route: {
     path: string,
-    methods: { [key: string]: number },
+    methods: Record<string, number>,
     stack: RouteStack[]
   };
 }

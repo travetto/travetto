@@ -1,10 +1,10 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent, ALL_VIEW } from '@travetto/schema';
+import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent } from '@travetto/schema';
 import { Util } from '@travetto/base';
-import { BulkResponse, SelectClause, Query, SortClause, WhereClause } from '@travetto/model';
+import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
 
 import { SQLUtil, VisitStack } from './util';
-import { Dialect, DeleteWrapper, InsertWrapper } from './types';
+import { DeleteWrapper, InsertWrapper } from './types';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -21,7 +21,7 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
   } as FieldConfig;
 }
 
-export abstract class SQLDialect implements Dialect {
+export abstract class SQLDialect {
   KEY_LEN = 64;
   SQL_OPS = {
     $and: 'AND',
@@ -444,6 +444,26 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
       onSimple: ({ path }) => out.push(this.getCreateTableSQL(path))
     });
     return out;
+  }
+
+  getCreateAllIndicesSQL<T>(cls: Class<T>, indices: IndexConfig<T>[]): string[] {
+    return indices.map(idx => this.getCreateIndexSQL(cls, idx));
+  }
+
+  getCreateIndexSQL<T>(cls: Class<T>, idx: IndexConfig<T>): string {
+    const table = this.namespace(SQLUtil.classToStack(cls));
+    const fields: [string, boolean][] = idx.fields.map(x => {
+      const key = Object.keys(x)[0] as keyof typeof x;
+      const val = x[key];
+      if (Util.isPlainObject(val)) {
+        throw new Error('Unable to supported nested fields for indices');
+      }
+      return [key as string, typeof val === 'number' ? val === 1 : (!!val)];
+    });
+    const name = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
+    return `CREATE ${idx.options && idx.options.unique ? 'UNIQUE ' : ''}INDEX ${name} ON ${table} (${fields
+      .map(([name, sel]) => `${name} ${sel ? 'ASC' : 'DESC'}`)
+      .join(', ')})`;
   }
 
   getDropAllTablesSQL(cls: Class<any>): string[] {

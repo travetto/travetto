@@ -23,7 +23,7 @@ export class Finalize {
     }
   }
 
-  static linkScripts(base: string, mod: string, bin: { [key: string]: { [key: string]: string } }) {
+  static linkScripts(base: string, mod: string, bin: Record<string, Record<string, string>>) {
     // Link common binary scripts
     for (const smod of Object.keys(bin)) {
       for (const name of Object.keys(bin[smod])) {

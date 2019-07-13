@@ -159,7 +159,7 @@ export class SchemaValidator {
     return out;
   }
 
-  static async validate<T>(o: T, view?: string): Promise<T> {
+  static async validate<T extends any>(o: T, view?: string): Promise<T> {
     let cls = o.constructor as Class;
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
 

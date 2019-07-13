@@ -19,16 +19,16 @@ export class HtmlUtil {
   static getAttrMap(el: Node) {
     const attrs = Parse5Adapter.getAttrList(el);
     if (!attrs) {
-      return {} as { [key: string]: string };
+      return {} as Record<string, string>;
     } else {
       return attrs.reduce((acc, val) => {
         acc[val.name] = val.value;
         return acc;
-      }, {} as { [key: string]: string });
+      }, {} as Record<string, string>);
     }
   }
 
-  static toStr(o: string[] | { [key: string]: string }) {
+  static toStr(o: string[] | Record<string, string>) {
     if (Array.isArray(o)) {
       return o.join(' ');
     } else {

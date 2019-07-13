@@ -41,7 +41,7 @@ export interface UnaryNode extends Node {
   value: Node;
 }
 
-export const OP_TRANSLATION: { [key: string]: string } = {
+export const OP_TRANSLATION: Record<string, string> = {
   '<': '$lt', '<=': '$lte',
   '>': '$gt', '>=': '$gte',
   '!=': '$neq', '==': '$eq',

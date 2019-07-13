@@ -123,7 +123,7 @@ export class TravettoGenerator extends Generator {
 
 
   async _templateFiles(context: Context) {
-    const files = require(FsUtil.resolveUnix(this.sourceRoot(), 'listing.json')) as { [key: string]: { requires?: string[] } };
+    const files = require(FsUtil.resolveUnix(this.sourceRoot(), 'listing.json')) as Record<string, { requires?: string[] }>;
     for (const key of Object.keys(files)) {
       const conf = files[key];
       if (conf.requires && !meetsRequirement(context.dependencies.list, conf.requires)) {

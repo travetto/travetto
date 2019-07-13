@@ -25,7 +25,7 @@ export class ElasticsearchModelSource extends ModelSource {
   private aliasToIndex: Map<string, string> = new Map();
 
   private identities: Map<Class, EsIdentity> = new Map();
-  // private indices: { [key: string]: IndexConfig<any>[] } = {};
+  // private indices: Record<string, IndexConfig<any>[]> = {};
   private indexToClass: Map<string, Class> = new Map();
   public client: es.Client;
 
@@ -129,6 +129,12 @@ export class ElasticsearchModelSource extends ModelSource {
         await this.client.indices.putAlias({ index: concreteIndex, name: ident.index });
       }
       console.debug(`Index ${ident.index} created`);
+      console.trace('Index', JSON.stringify({
+        mappings: {
+          [ident.type]: schema
+        },
+        settings: this.config.indexCreate
+      }, null, 2));
     } catch (e) {
       console.debug(`Index ${ident.index} already created`);
     }
@@ -274,6 +280,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const req = this.getSearchObject(cls, query);
+    console.trace('Querying', JSON.stringify(req, null, 2));
     const results = await this.client.search<U>(req);
     return this.safeLoad<U>(req, results);
   }
@@ -493,7 +500,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async save<T extends ModelCore>(cls: Class<T>, o: T, keepId: boolean = false): Promise<T> {
-    const id = o.id;
+    const id = keepId ? o.id : undefined;
     delete o.id;
 
     this.cleanseId(o);

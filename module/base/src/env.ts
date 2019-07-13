@@ -2,7 +2,7 @@ import { FsUtil, EnvUtil } from '@travetto/boot';
 
 const PROD_KEY = 'prod';
 
-const PROD_ENV_MAPPING: { [key: string]: string } = {
+const PROD_ENV_MAPPING: Record<string, string> = {
   production: PROD_KEY
 };
 
