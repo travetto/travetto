@@ -75,10 +75,11 @@ export class MongoUtil {
         const key = v && Object.keys(v)[0];
         if (key === '$regex') {
           v.$regex = BindUtil.extractRegex(v.$regex);
-        } else if (key === '$unit') {
+        } else if (v && '$unit' in v) {
           const dist = v.$maxDistance;
           const distance = dist / RADIANS_TO[v.$unit as DistanceUnit];
           v.$maxDistance = distance;
+          delete v.$unit;
         }
         out[subpath] = v;
       }

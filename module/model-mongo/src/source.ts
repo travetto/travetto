@@ -6,6 +6,7 @@ import {
   ModelRegistry, ModelCore,
   PageableModelQuery,
   BulkOp,
+  Point,
   ModelQuery,
   ValidStringFields,
   WhereClauseRaw
@@ -17,6 +18,7 @@ import { Injectable } from '@travetto/di';
 
 import { MongoUtil } from './util';
 import { MongoModelConfig } from './config';
+import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
 @Injectable()
 export class MongoModelSource extends ModelSource {
@@ -111,7 +113,7 @@ export class MongoModelSource extends ModelSource {
   }
 
   async establishIndices() {
-    const promises = [];
+    const promises: Promise<any>[] = [];
 
     for (const colName of Object.keys(this.indices)) {
       const col = await this.db.collection(colName);
@@ -120,7 +122,27 @@ export class MongoModelSource extends ModelSource {
         promises.push(col.createIndex(fields, options));
       }
     }
+
+    for (const model of ModelRegistry.getClasses()) {
+      promises.push(this.establishGeoIndices(model));
+    }
+
     return Promise.all(promises);
+  }
+
+  async establishGeoIndices<T extends ModelCore>(cls: Class<T>, path: FieldConfig[] = [], root = cls) {
+    const fields = SchemaRegistry.has(cls) ?
+      Object.values(SchemaRegistry.get(cls).views[ALL_VIEW].schema) :
+      [];
+    for (const field of fields) {
+      if (SchemaRegistry.has(field.type)) {
+        await this.establishGeoIndices(field.type, [...path, field], root);
+      } else if (field.type === Point) {
+        const col = await this.getCollection(root);
+        const name = [...path, field].map(x => x.name).join('.');
+        await col.createIndex({ [name]: '2d' });
+      }
+    }
   }
 
   getCollectionName<T extends ModelCore>(cls: Class<T>): string {
