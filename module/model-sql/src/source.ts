@@ -48,8 +48,19 @@ export class SQLModelSource extends ModelSource {
 
   @Connected(true)
   async createTables(cls: Class<any>): Promise<void> {
+    const config = ModelRegistry.get(cls);
+    if (config.subType) {
+      return;
+    }
+
     for (const op of this.dialect.getCreateAllTablesSQL(cls)) {
       await this.exec(op);
+    }
+    const indices = ModelRegistry.get(cls).indices;
+    if (indices) {
+      for (const op of this.dialect.getCreateAllIndicesSQL(cls, indices)) {
+        await this.exec(op);
+      }
     }
   }
 

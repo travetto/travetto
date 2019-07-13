@@ -23,21 +23,8 @@ export function Model(conf: Partial<ModelOptions<any>> = {}) {
   };
 }
 
-function createIndex<T extends Class>(target: T, config: IndexConfig<T>) {
-  ModelRegistry.register(target, { indices: [config] });
-  return target;
-}
-
-export function Index(config: IndexConfig<any>) {
+export function Index(...indices: IndexConfig<any>[]) {
   return function <T extends Class>(target: T) {
-    return createIndex(target, config);
+    return ModelRegistry.register(target, { indices });
   };
 }
-
-/*
-export function Unique(...fields: string[]) {
-  return function <T extends Class>(target: T) {
-    return createIndex(target, { fields, options: { unique: true } });
-  };
-}
-*/

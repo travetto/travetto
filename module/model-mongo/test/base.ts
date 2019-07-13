@@ -1,4 +1,4 @@
-import { BeforeAll, BeforeEach, AfterEach } from '@travetto/test';
+import { BeforeAll, AfterEach, AfterAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { ModelSource } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
@@ -22,15 +22,16 @@ export class BaseMongoTest {
     config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
   }
 
-  @BeforeEach()
-  async beforeEach() {
+  @AfterAll()
+  @AfterEach()
+  async clean() {
     const mms = (await DependencyRegistry.getInstance(ModelSource)) as MongoModelSource;
-    await mms.init();
+    await (mms as any).db.dropDatabase();
   }
 
   @AfterEach()
-  async afterEach() {
+  async reset() {
     const mms = (await DependencyRegistry.getInstance(ModelSource)) as MongoModelSource;
-    await (mms as any).db.dropDatabase();
+    await mms.postConstruct();
   }
 }

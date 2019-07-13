@@ -25,7 +25,6 @@ export class MongoModelSource extends ModelSource {
 
   private client: mongo.MongoClient;
   private db: mongo.Db;
-  private indices: Record<string, IndexConfig<any>[]> = {};
 
   constructor(private config: MongoModelConfig) {
     super();
@@ -111,25 +110,27 @@ export class MongoModelSource extends ModelSource {
   async init() {
     this.client = await mongo.MongoClient.connect(this.config.url);
     this.db = this.client.db();
-    await this.establishIndices();
+
+    // Establish geo indices
+    const promises: Promise<any>[] = [];
+    for (const model of ModelRegistry.getClasses()) {
+      promises.push(...this.establishIndices(model));
+    }
+    return Promise.all(promises);
   }
 
-  async establishIndices() {
+  establishIndices<T extends ModelCore>(cls: Class<T>) {
     const promises: Promise<any>[] = [];
-
-    for (const colName of Object.keys(this.indices)) {
-      const col = await this.db.collection(colName);
-
-      for (const { fields, options } of this.indices[colName]) {
-        promises.push(col.createIndex(fields, options));
-      }
+    for (const idx of ModelRegistry.get(cls).indices) {
+      const [first, ...rest] = idx.fields;
+      rest.reduce((acc, f) => Object.assign(acc, f), first);
+      console.trace('Creating index', first, idx.options);
+      promises.push(
+        this.getCollection(cls)
+          .then((col) => col.createIndex(first, idx.options)));
     }
-
-    for (const model of ModelRegistry.getClasses()) {
-      promises.push(this.establishGeoIndices(model));
-    }
-
-    return Promise.all(promises);
+    promises.push(this.establishGeoIndices(cls));
+    return promises;
   }
 
   async establishGeoIndices<T extends ModelCore>(cls: Class<T>, path: FieldConfig[] = [], root = cls) {
@@ -159,18 +160,6 @@ export class MongoModelSource extends ModelSource {
   async resetDatabase() {
     await this.db.dropDatabase();
     await this.init();
-  }
-
-  registerIndex(cls: Class, fields: Record<string, number>, options: mongo.IndexOptions) {
-    const col = this.getCollectionName(cls);
-    this.indices[col] = this.indices[col] || [];
-
-    // TODO: Cleanup
-    this.indices[col].push({ fields, options } as any);
-  }
-
-  getIndices(cls: Class) {
-    return this.indices[this.getCollectionName(cls)];
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {
