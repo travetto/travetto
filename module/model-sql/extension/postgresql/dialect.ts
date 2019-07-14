@@ -29,6 +29,10 @@ export class PostgreSQLDialect extends SQLDialect {
     return `encode(digest('${value}', 'sha1'), 'hex')`;
   }
 
+  ident(field: FieldConfig | string) {
+    return `"${typeof field === 'string' ? field : field.name}"`;
+  }
+
   /**
    * Simple query execution
    */
@@ -40,6 +44,6 @@ export class PostgreSQLDialect extends SQLDialect {
 
   getModifyColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
-    return `ALTER TABLE ${this.namespaceParent(stack)} ALTER COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
+    return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
   }
 }

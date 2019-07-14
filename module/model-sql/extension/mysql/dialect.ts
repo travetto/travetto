@@ -32,6 +32,10 @@ export class MySQLDialect extends SQLDialect {
     return `SHA2('${value}', ${this.KEY_LEN * 4})`;
   }
 
+  ident(field: FieldConfig | string) {
+    return `\`${typeof field === 'string' ? field : field.name}\``;
+  }
+
   getCreateTableSQL(stack: VisitStack[]) {
     return super.getCreateTableSQL(stack).replace(/;$/, ` ${this.tablePostfix};`);
   }
@@ -61,7 +65,7 @@ export class MySQLDialect extends SQLDialect {
 
   getModifyColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
-    return `ALTER TABLE ${this.namespaceParent(stack)} MODIFY COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
+    return `ALTER TABLE ${this.parentTable(stack)} MODIFY COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
   }
 
   getDeleteSQL(stack: VisitStack[], where?: WhereClause<any>) {

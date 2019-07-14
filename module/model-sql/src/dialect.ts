@@ -69,6 +69,9 @@ export abstract class SQLDialect implements DialectState {
 
   constructor(public ns: string) {
     this.namespace = this.namespace.bind(this);
+    this.table = this.table.bind(this);
+    this.ident = this.ident.bind(this);
+
     if (this.ns) {
       this.ns = `${this.ns}_`;
     }
@@ -79,6 +82,8 @@ export abstract class SQLDialect implements DialectState {
   abstract hash(inp: string): string;
 
   abstract executeSQL<T>(sql: string): Promise<{ count: number, records: T[] }>;
+
+  abstract ident(name: string | FieldConfig): string;
 
   /**
    * Convert value to SQL valid representation
@@ -148,7 +153,7 @@ export abstract class SQLDialect implements DialectState {
       return '';
     }
 
-    return `${conf.name} ${type} ${(conf.required && conf.required.active) ? 'NOT NULL' : 'DEFAULT NULL'}`;
+    return `${this.ident(conf)} ${type} ${(conf.required && conf.required.active) ? 'NOT NULL' : 'DEFAULT NULL'}`;
   }
 
   async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>) {
@@ -193,12 +198,12 @@ export abstract class SQLDialect implements DialectState {
 
   getDropColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
-    return `ALTER TABLE ${this.namespaceParent(stack)} DROP COLUMN ${field.name};`;
+    return `ALTER TABLE ${this.parentTable(stack)} DROP COLUMN ${this.ident(field.name)};`;
   }
 
   getAddColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
-    return `ALTER TABLE ${this.namespaceParent(stack)} ADD COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
+    return `ALTER TABLE ${this.parentTable(stack)} ADD COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
   }
 
   abstract getModifyColumnSQL(stack: VisitStack[]): string;
@@ -215,8 +220,20 @@ export abstract class SQLDialect implements DialectState {
     return this.namespace(stack.slice(0, stack.length - 1));
   }
 
+  table(stack: VisitStack[]) {
+    return this.ident(this.namespace(stack));
+  }
+
+  parentTable(stack: VisitStack[]) {
+    return this.table(stack.slice(0, stack.length - 1));
+  }
+
   getKey(cls: Class, name: string) {
     return `${cls.name}:${name}`;
+  }
+
+  alias(field: string | FieldConfig, alias: string = this.rootAlias) {
+    return `${alias}.${this.ident(field)}`;
   }
 
   resolveName(stack: VisitStack[]): string {
@@ -224,7 +241,7 @@ export abstract class SQLDialect implements DialectState {
     const name = stack[stack.length - 1].name;
     const cache = SQLUtil.getAliasCache(stack, this.namespace);
     const base = cache.get(path)!;
-    return `${base.alias}.${name}`;
+    return this.alias(name, base.alias);
   }
 
   getWhereFieldSQL<T>(stack: VisitStack[], o: Record<string, any>): any {
@@ -344,7 +361,7 @@ export abstract class SQLDialect implements DialectState {
     const stack = SQLUtil.classToStack(cls);
     const columns = select && SQLUtil.select(cls, select).map((sel) => this.resolveName([...stack, sel]));
     if (columns) {
-      columns.unshift(`${this.rootAlias}.${this.pathField.name}`);
+      columns.unshift(this.alias(this.pathField));
     }
     return !columns ?
       `SELECT ${this.rootAlias}.* ` :
@@ -357,13 +374,16 @@ export abstract class SQLDialect implements DialectState {
     const tables = [...aliases.keys()].sort((a, b) => a.length - b.length); // Shortest first
     return `FROM ${tables.map((table, i) => {
       const { alias, path } = aliases.get(table)!;
-      if (path.length === 1) {
-        return `${table} ${alias}`;
-      } else {
+      let from = `${this.ident(table)} ${alias}`;
+      if (path.length > 1) {
         const key = this.namespaceParent(path);
         const { alias: parentAlias } = aliases.get(key)!;
-        return `  LEFT OUTER JOIN ${table} ${alias} ON\n    ${alias}.${this.parentPathField.name} = ${parentAlias}.${this.pathField.name}\n`;
+        from = `
+LEFT OUTER JOIN ${from} ON
+  ${this.alias(this.parentPathField, alias)} = ${this.alias(this.pathField, parentAlias)}
+`;
       }
+      return from;
     }).join('\n')}`;
   }
 
@@ -374,7 +394,7 @@ export abstract class SQLDialect implements DialectState {
   }
 
   getGroupBySQL<T>(cls: Class<T>, query?: Query<T>): string {
-    return `GROUP BY ${this.rootAlias}.${this.idField.name}`;
+    return `GROUP BY ${this.alias(this.idField)}`;
   }
 
   getQuerySQL<T>(cls: Class<T>, query: Query<T>) {
@@ -411,29 +431,29 @@ ${this.getLimitSQL(cls, query)}`;
     }
 
     const out = `
-CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
+CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   ${fields
         .map(f => this.getColumnDefinition(f))
         .filter(x => !!x.trim())
         .join(',\n  ')},
   ${this.getColumnDefinition(this.pathField)} UNIQUE,
   ${!parent ?
-        `PRIMARY KEY (${this.idField.name})` :
+        `PRIMARY KEY (${this.ident(this.idField)})` :
         `${this.getColumnDefinition(this.parentPathField)},
     ${array ? `${this.getColumnDefinition(this.idxField)},` : ''}
-  PRIMARY KEY (${this.pathField.name}),
-  FOREIGN KEY (${this.parentPathField.name}) REFERENCES ${this.namespaceParent(stack)}(${this.pathField.name}) ON DELETE CASCADE`}
+  PRIMARY KEY (${this.ident(this.pathField)}),
+  FOREIGN KEY (${this.ident(this.parentPathField)}) REFERENCES ${this.parentTable(stack)}(${this.ident(this.pathField)}) ON DELETE CASCADE`}
 );`;
     return parent ?
       out :
-      out.replace(new RegExp(`(\\b${this.idField.name}.*)DEFAULT NULL`), (_, s) => `${s} NOT NULL`);
+      out.replace(new RegExp(`(\\b${this.ident(this.idField)}.*)DEFAULT NULL`), (_, s) => `${s} NOT NULL`);
   }
 
   /**
   * Simple table drop
   */
   getDropTableSQL(stack: VisitStack[]) {
-    return `DROP TABLE IF EXISTS ${this.namespace(stack)}; `;
+    return `DROP TABLE IF EXISTS ${this.table(stack)}; `;
   }
 
   getCreateAllTablesSQL(cls: Class<any>): string[] {
@@ -461,8 +481,8 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
       return [key as string, typeof val === 'number' ? val === 1 : (!!val)];
     });
     const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
-    return `CREATE ${idx.options && idx.options.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${table} (${fields
-      .map(([name, sel]) => `${name} ${sel ? 'ASC' : 'DESC'}`)
+    return `CREATE ${idx.options && idx.options.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.ident(table)} (${fields
+      .map(([name, sel]) => `${this.ident(name)} ${sel ? 'ASC' : 'DESC'}`)
       .join(', ')})`;
   }
 
@@ -535,7 +555,7 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
     }
 
     return `
-INSERT INTO ${this.namespace(stack)} (${columnNames.join(', ')})
+INSERT INTO ${this.table(stack)} (${columnNames.map(this.ident).join(', ')})
 VALUES
 ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
   }
@@ -557,12 +577,12 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
     const { type } = stack[stack.length - 1];
     const { localMap } = SQLUtil.getFieldsByLocation(stack);
     return `
-UPDATE ${this.namespace(stack)}
+UPDATE ${this.table(stack)}
 SET
   ${Object
         .entries(data)
         .filter(([k]) => k in localMap)
-        .map(([k, v]) => `${k}=${this.resolveValue(localMap[k], v)}`).join(', ')}
+        .map(([k, v]) => `${this.ident(k)}=${this.resolveValue(localMap[k], v)}`).join(', ')}
   ${this.getWhereSQL(type, where)};`;
   }
 
@@ -570,7 +590,7 @@ SET
     const { type } = stack[stack.length - 1];
     return `
 DELETE
-FROM ${this.namespace(stack)} ${this.rootAlias}
+FROM ${this.table(stack)} ${this.rootAlias}
 ${this.getWhereSQL(type, where)};`;
   }
 
@@ -586,9 +606,9 @@ ${this.getWhereSQL(type, where)};`;
     const idField = (stack.length > 1 ? this.parentPathField : this.idField);
 
     return `
-SELECT ${select.length ? select.map(x => `${this.rootAlias}.${x.name}`).join(',') : '*'}
-FROM ${this.namespace(stack)} ${this.rootAlias}
-WHERE ${this.rootAlias}.${idField.name} IN (${ids.map(id => this.resolveValue(idField, id)).join(', ')})
+SELECT ${select.length ? select.map(x => this.alias(x)).join(',') : '*'}
+FROM ${this.table(stack)} ${this.rootAlias}
+WHERE ${this.alias(idField)} IN (${ids.map(id => this.resolveValue(idField, id)).join(', ')})
 ${orderBy};`;
   }
 
