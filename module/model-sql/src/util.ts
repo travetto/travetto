@@ -157,7 +157,7 @@ export class SQLUtil {
   }
 
   static visitSchemaSync(config: ClassConfig | FieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }) {
-    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
+    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, { ...config }];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
     const descend = () => {

@@ -198,23 +198,23 @@ export abstract class SQLDialect implements DialectState {
     const removes = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'removing')
-        .map(ev => [...v.path, ev.prev!]));
+        .map(ev => [...rootStack, ...v.path, ev.prev!]));
       return acc;
-    }, [rootStack] as VisitStack[][]);
+    }, [] as VisitStack[][]);
 
     const modifies = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'changed')
-        .map(ev => [...v.path, ev.prev!]));
+        .map(ev => [...rootStack, ...v.path, ev.prev!]));
       return acc;
-    }, [rootStack] as VisitStack[][]);
+    }, [] as VisitStack[][]);
 
     const adds = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'added')
-        .map(ev => [...v.path, ev.curr!]));
+        .map(ev => [...rootStack, ...v.path, ev.curr!]));
       return acc;
-    }, [rootStack] as VisitStack[][]);
+    }, [] as VisitStack[][]);
 
     await Promise.all(adds.map(v => this.executeSQL(this.getAddColumnSQL(v))));
     await Promise.all(modifies.map(v => this.executeSQL(this.getModifyColumnSQL(v))));
