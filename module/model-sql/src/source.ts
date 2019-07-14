@@ -329,7 +329,6 @@ export class SQLModelSource extends ModelSource {
     const upserts = (await SQLUtil.extractInserts(cls, upsertOps)).filter(x => !!x.records.length);
     const updates = (await SQLUtil.extractInserts(cls, updateOps)).filter(x => !!x.records.length);
 
-
     const ret = await this.dialect.bulkProcess(deletes, inserts, upserts, updates);
     ret.insertedIds = insertedIds;
     return ret;

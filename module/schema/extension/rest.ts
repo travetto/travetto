@@ -7,7 +7,7 @@ import { SchemaRegistry, BindUtil, SchemaValidator } from '..';
 const EXTRACTORS: Record<'body' | 'query', ExtractFn> = {
   body: (c, r) => r.body,
   query: (c, r) => (r.query._schema && r.query._schema[c.name!])
-}
+};
 
 export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: string) {
   if (!Util.isPlainObject(obj)) {

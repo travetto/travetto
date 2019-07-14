@@ -162,8 +162,6 @@ class TestSave extends BaseMongoTest {
     assert(suggested.length === 1);
   }
 
-
-
   @Test('Verify partial update with field removal')
   async testPartialUpdate() {
     const service = await DependencyRegistry.getInstance(ModelService);

@@ -2,42 +2,30 @@ import * as path from 'path';
 
 import { run } from './util';
 
-export interface Context {
+export class Context {
   cwd: string;
-  app: {
-    name: string;
-  };
-  author: {
-    name: string;
-    email: string;
-  };
-  template: string;
-  modules?: string[];
-  moduleMap?: Record<string, string>;
-  frameworkVersion: string;
-  frameworkDependencies: string[];
-  peerDependencies: string[];
-}
+  app: { name: string };
 
-export function getContext(name: string): Context {
-  return {
-    cwd: path.resolve(process.cwd(), name),
-    app: {
-      name,
-    },
-    author: {
-      name: run('git config user.name') || process.env.USER!,
-      email: run('git config user.email')
-    },
-    get moduleMap() {
-      return this.frameworkDependencies.map(x => x.split('/')[1]).reduce((acc, v) => ({ ...acc, [v]: 1 }), {});
-    },
-    get modules() {
-      return Object.keys(this.moduleMap || {}).sort();
-    },
-    template: '',
-    frameworkVersion: require('@travetto/base/package.json').version.replace(/[.]\d+$/, '.0'),
-    frameworkDependencies: [],
-    peerDependencies: []
+  template = '';
+  frameworkVersion = require('@travetto/base/package.json').version.replace(/[.]\d+$/, '.0');
+  frameworkDependencies: string[] = [];
+  peerDependencies: string[] = [];
+
+  author = {
+    name: run('git config user.name') || process.env.USER!,
+    email: run('git config user.email')
   };
+
+  constructor(public name: string) {
+    this.cwd = path.resolve(process.cwd(), name);
+    this.app = { name };
+  }
+
+  get moduleMap(): Record<string, string> {
+    return this.frameworkDependencies.map(x => x.split('/')[1]).reduce((acc, v) => ({ ...acc, [v]: 1 }), {});
+  }
+
+  get modules() {
+    return Object.keys(this.moduleMap || {}).sort();
+  }
 }

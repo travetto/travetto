@@ -4,6 +4,4 @@ import { SQLUtil } from '../src/util';
 
 @Suite()
 export class UtilTest {
-
-
 }

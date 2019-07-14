@@ -10,7 +10,7 @@ export type VisitStack = {
   type: Class;
   name: string;
   index?: number;
-}
+};
 
 export type VisitState = { path: VisitStack[] };
 
@@ -117,11 +117,10 @@ export class SQLUtil {
 
     if (!cls) { // If a simple type, it is it's own field
       const field = top as FieldConfig;
-      const ret = {
+      return {
         local: [field], localMap: { [field.name]: field },
         foreign: [], foreignMap: {}
       };
-      return ret;
     }
 
     const model = ModelRegistry.get(cls.class)!;
@@ -132,11 +131,11 @@ export class SQLUtil {
     if (model && (model.baseType || model.subType)) {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of ModelRegistry.getClassesByBaseType(ModelRegistry.getBaseModel(cls.class))) {
-        const conf = SchemaRegistry.get(type).views[ALL_VIEW];
-        for (const f of conf.fields) {
+        const typeConf = SchemaRegistry.get(type).views[ALL_VIEW];
+        for (const f of typeConf.fields) {
           if (!fieldMap.has(f)) {
             fieldMap.add(f);
-            fields.push({ ...conf.schema[f], required: { active: false } });
+            fields.push({ ...typeConf.schema[f], required: { active: false } });
           }
         }
       }
@@ -280,7 +279,7 @@ export class SQLUtil {
       let schema: ClassConfig = SchemaRegistry.get(cls);
       const stack = this.classToStack(cls);
       while (true) {
-        let key = Object.keys(cl)[0] as string;
+        const key = Object.keys(cl)[0] as string;
         const field = schema.views[ALL_VIEW].schema[key];
         if (Util.isPrimitive(cl[key])) {
           stack.push(field);
@@ -313,7 +312,7 @@ export class SQLUtil {
 
     const mapping: Record<string, T> = {};
     for (const el of v) {
-      mapping[(el as any)[dct.pathField.name]] = el; field
+      mapping[(el as any)[dct.pathField.name]] = el;
     }
     return mapping;
   }
@@ -340,7 +339,7 @@ export class SQLUtil {
     const track = (stack: VisitStack[], value: any) => {
       const key = this.buildTable(stack);
       (ins[key] = ins[key] || { stack, records: [] }).records.push({ stack, value });
-    }
+    };
 
     const all = els.map(el =>
       this.visitSchemaInstance(cls, el, {
@@ -351,9 +350,8 @@ export class SQLUtil {
 
     await Promise.all(all);
 
-    const ret = [...Object.values(ins)].sort((a, b) => a.stack.length - b.stack.length);;
+    const ret = [...Object.values(ins)].sort((a, b) => a.stack.length - b.stack.length);
 
     return ret;
-  };
-
+  }
 }

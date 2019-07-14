@@ -16,7 +16,7 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
   m: 6378000,
   ft: 20924640,
   rad: 1
-}
+};
 
 export class MongoUtil {
 

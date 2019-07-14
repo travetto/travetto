@@ -2,7 +2,6 @@ import { ParamConfig, Request, Response } from '../types';
 import { ControllerRegistry } from '../registry/registry';
 import { ParamUtil, ExtractFn } from '../util/param';
 
-
 const EXTRACTORS: Record<ParamConfig['location'], ExtractFn> = {
   path: (c, r) => ParamUtil.convertValue(c, r.params[c.name!]),
   query: (c, r) => ParamUtil.convertValue(c, r.query[c.name!]),

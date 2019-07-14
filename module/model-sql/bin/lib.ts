@@ -8,8 +8,8 @@ export async function getSchemas() {
 
   const src = (await DependencyRegistry.getInstance(SQLDialect)) as any;
 
-  let drops = [];
-  let creates = [];
+  const drops = [];
+  const creates = [];
 
   for (const cls of ModelRegistry.getClasses()) {
     drops.push(...src.getDropAllTablesSQL(cls));

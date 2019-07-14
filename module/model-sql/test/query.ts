@@ -10,6 +10,7 @@ import { ModelRegistry } from '@travetto/model/src/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { SQLDialect } from '../src/dialect';
 
+// tslint:disable-next-line: no-import-side-effect
 import './dialect';
 
 @Schema()

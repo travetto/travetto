@@ -66,8 +66,7 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
   }
 
   // Transaction operations
-  startTx = async () => { await this.active.query('BEGIN') };
+  startTx = async () => { await this.active.query('BEGIN'); };
   commit = async () => { await this.active.query('COMMIT'); };
   rollback = async () => { await this.active.query('ROLLBACK'); };
 }
-

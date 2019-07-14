@@ -18,7 +18,6 @@ class Region {
   points: Point[];
 }
 
-
 @Suite()
 export class GeoTestSuite extends BaseElasticsearchTest {
   @Test('Test within')

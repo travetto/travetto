@@ -1,4 +1,5 @@
 export type Point = [number, number] | { lat: number, lon: number };
+// tslint:disable-next-line: no-shadowed-variable
 export const Point = class Point { };
 
 export type Primitive = number | boolean | string | Date | Point;

@@ -7,9 +7,6 @@ import { Suite, Test } from '@travetto/test';
 import { BaseSqlTest } from './base';
 import { SQLModelSource } from '../src/source';
 
-// tslint:disable-next-line: no-import-side-effect
-import './dialect';
-
 @Model({ baseType: true })
 class Person extends BaseModel {
   name: string;
@@ -122,7 +119,6 @@ class TestPolymorphism extends BaseSqlTest {
       { upsert: Doctor.from({ id: created2.id, name: 'sh.meg', speciality: 'arms' }) },
       { delete: Doctor.from({ id: created3.id }) }
     ]);
-
 
     assert(o.counts.insert === 1);
     assert(o.counts.upsert === 3);

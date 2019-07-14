@@ -163,7 +163,7 @@ age: 20
 
     @Test()
     emptyFile() {
-        const output = YamlUtil.parse(`# 
+        const output = YamlUtil.parse(`#
 # `);
         assert(output === {});
     }

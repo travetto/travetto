@@ -19,6 +19,7 @@ import { Injectable } from '@travetto/di';
 import { MongoUtil } from './util';
 import { MongoModelConfig } from './config';
 import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
+import accepts = require('accepts');
 
 @Injectable()
 export class MongoModelSource extends ModelSource {
@@ -125,7 +126,7 @@ export class MongoModelSource extends ModelSource {
     const promises: Promise<any>[] = [];
     for (const idx of ModelRegistry.get(cls).indices) {
       const [first, ...rest] = idx.fields;
-      rest.reduce((acc, f) => Object.assign(acc, f), first);
+      rest.reduce((acc, f) => ({ ...acc, f }), first);
       console.trace('Creating index', first, idx.options);
       promises.push(
         this.getCollection(cls)

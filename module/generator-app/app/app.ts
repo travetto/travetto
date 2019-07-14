@@ -4,7 +4,7 @@ import { FsUtil } from '@travetto/boot';
 
 import { FEATURES, Feature } from './features';
 import { verifyDestination, meetsRequirement, template } from './util';
-import { Context, getContext } from './context';
+import { Context } from './context';
 
 function finalize(path: string) {
   return path.replace('gitignore.txt', '.gitignore');
@@ -56,7 +56,7 @@ export class TravettoGenerator extends Generator {
       process.exit(1);
     }
 
-    const context = getContext(name);
+    const context = new Context(name);
 
     context.template = (this.options as any).template;
 
@@ -86,7 +86,7 @@ export class TravettoGenerator extends Generator {
     }
 
     for (const addon of (feat.addons || [])) {
-      this._addDependency(context, addon)
+      this._addDependency(context, addon);
     }
   }
 

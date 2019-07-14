@@ -5,6 +5,9 @@ import { BaseModelTest } from '@travetto/model/extension/base.test';
 
 import { SQLModelConfig } from '../src/config';
 
+// tslint:disable-next-line: no-import-side-effect
+import './dialect';
+
 export class BaseSqlTest extends BaseModelTest {
 
   configClass = SQLModelConfig;

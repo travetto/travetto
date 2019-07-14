@@ -1,12 +1,10 @@
 import * as assert from 'assert';
 
 import { Model, ModelService, ModelCore } from '@travetto/model';
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import { SchemaRegistry, Schema, Text } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
+import { Schema, Text } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 import { BaseSqlTest } from './base';
-
-import './dialect';
 
 @Schema()
 export class NoteEntity {

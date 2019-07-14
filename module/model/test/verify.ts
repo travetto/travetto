@@ -127,7 +127,7 @@ export class VerifyTest {
               [op]: []
             }
           }
-        })
+        });
       }, /Validation Error/i);
     }
   }

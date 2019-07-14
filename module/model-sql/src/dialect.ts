@@ -88,7 +88,7 @@ export abstract class SQLDialect implements DialectState {
       return 'NULL';
     } else if (conf.type === String) {
       if (value instanceof RegExp) {
-        let src = BindUtil.extractRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
+        const src = BindUtil.extractRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
         return `'${src}'`;
       } else {
         return `'${value}'`;
@@ -257,7 +257,7 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$regex': {
-              const re = (v as RegExp)
+              const re = (v as RegExp);
               const src = BindUtil.extractRegex(re).source;
               const ins = re.flags && re.flags.includes('i');
 
@@ -265,7 +265,7 @@ export abstract class SQLDialect implements DialectState {
                 const inner = src.substring(1, src.length - 2);
                 items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(inner)}%`);
               } else {
-                let val = resolve(v);
+                const val = resolve(v);
                 items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${val}`);
               }
               break;
@@ -336,7 +336,7 @@ export abstract class SQLDialect implements DialectState {
     return !sortBy ?
       '' :
       `ORDER BY ${SQLUtil.orderBy(cls, sortBy).map((ob) => {
-        return `${this.resolveName(ob.stack)} ${ob.asc ? 'ASC' : 'DESC'}`
+        return `${this.resolveName(ob.stack)} ${ob.asc ? 'ASC' : 'DESC'}`;
       }).join(', ')}`;
   }
 
@@ -348,23 +348,23 @@ export abstract class SQLDialect implements DialectState {
     }
     return !columns ?
       `SELECT ${this.rootAlias}.* ` :
-      `SELECT ${columns.join(',')}`
+      `SELECT ${columns.join(',')}`;
   }
 
   getFromSQL<T>(cls: Class<T>): string {
     const stack = SQLUtil.classToStack(cls);
     const aliases = SQLUtil.getAliasCache(stack, this.namespace);
-    const tables = [...aliases.keys()].sort((a, b) => a.length - b.length) // Shortest first
+    const tables = [...aliases.keys()].sort((a, b) => a.length - b.length); // Shortest first
     return `FROM ${tables.map((table, i) => {
       const { alias, path } = aliases.get(table)!;
       if (path.length === 1) {
         return `${table} ${alias}`;
       } else {
         const key = this.namespaceParent(path);
-        let { alias: parentAlias } = aliases.get(key)!;
+        const { alias: parentAlias } = aliases.get(key)!;
         return `  LEFT OUTER JOIN ${table} ${alias} ON\n    ${alias}.${this.parentPathField.name} = ${parentAlias}.${this.pathField.name}\n`;
       }
-    }).join('\n')}`
+    }).join('\n')}`;
   }
 
   getLimitSQL<T>(cls: Class<T>, query?: Query<T>): string {
@@ -384,7 +384,7 @@ export abstract class SQLDialect implements DialectState {
         .map(x => this.resolveName(x.stack))
         .join(', ');
     return `
-${this.getSelectSQL(cls, query.select)} 
+${this.getSelectSQL(cls, query.select)}
 ${this.getFromSQL(cls)}
 ${this.getWhereSQL(cls, query.where)}
 ${this.getGroupBySQL(cls, query)}${sortFields ? `, ${sortFields}` : ''}
@@ -419,7 +419,7 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
   ${this.getColumnDefinition(this.pathField)} UNIQUE,
   ${!parent ?
         `PRIMARY KEY (${this.idField.name})` :
-        `${this.getColumnDefinition(this.parentPathField)}, 
+        `${this.getColumnDefinition(this.parentPathField)},
     ${array ? `${this.getColumnDefinition(this.idxField)},` : ''}
   PRIMARY KEY (${this.pathField.name}),
   FOREIGN KEY (${this.parentPathField.name}) REFERENCES ${this.namespaceParent(stack)}(${this.pathField.name}) ON DELETE CASCADE`}
@@ -460,8 +460,8 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
       }
       return [key as string, typeof val === 'number' ? val === 1 : (!!val)];
     });
-    const name = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
-    return `CREATE ${idx.options && idx.options.unique ? 'UNIQUE ' : ''}INDEX ${name} ON ${table} (${fields
+    const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
+    return `CREATE ${idx.options && idx.options.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${table} (${fields
       .map(([name, sel]) => `${name} ${sel ? 'ASC' : 'DESC'}`)
       .join(', ')})`;
   }
@@ -493,7 +493,6 @@ CREATE TABLE IF NOT EXISTS ${this.namespace(stack)} (
       const newInstances = [] as InsertWrapper['records'];
       for (const el of instances) {
         if (Array.isArray(el.value)) {
-          let i = 0;
           const name = el.stack[el.stack.length - 1].name;
           for (const sel of el.value) {
             newInstances.push({
@@ -542,7 +541,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
   }
 
   getAllInsertSQL<T>(cls: Class<T>, instance: T): string[] {
-    const out: string[] = []
+    const out: string[] = [];
     SQLUtil.visitSchemaInstance(cls, instance, {
       onRoot: ({ value, path }) => out.push(this.getInsertSQL(path, [{ stack: path, value }])),
       onSub: ({ value, path }) => out.push(this.getInsertSQL(path, [{ stack: path, value }])),
@@ -558,7 +557,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
     const { type } = stack[stack.length - 1];
     const { localMap } = SQLUtil.getFieldsByLocation(stack);
     return `
-UPDATE ${this.namespace(stack)} 
+UPDATE ${this.namespace(stack)}
 SET
   ${Object
         .entries(data)
@@ -570,7 +569,7 @@ SET
   getDeleteSQL(stack: VisitStack[], where?: WhereClause<any>) {
     const { type } = stack[stack.length - 1];
     return `
-DELETE 
+DELETE
 FROM ${this.namespace(stack)} ${this.rootAlias}
 ${this.getWhereSQL(type, where)};`;
   }
@@ -600,7 +599,6 @@ ${this.getFromSQL(cls)}
 ${this.getWhereSQL(cls, query.where)}
 ${this.getGroupBySQL(cls, query)}`;
   }
-
 
   async fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]> {
     const stack: Record<string, any>[] = [];
@@ -719,7 +717,7 @@ ${this.getGroupBySQL(cls, query)}`;
         if (!leveled.length) {
           break;
         }
-        await Promise.all(leveled.map(iw => this.executeSQL(this.getInsertSQL(iw.stack, iw.records))))
+        await Promise.all(leveled.map(iw => this.executeSQL(this.getInsertSQL(iw.stack, iw.records))));
         lvl += 1;
       }
     }
