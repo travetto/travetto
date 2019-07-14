@@ -313,7 +313,15 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$exists': items.push(`${sPath} ${v ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`); break;
-            case '$ne': case '$eq': items.push(`${sPath} ${SQL_OPS[subKey]} ${resolve(v)}`); break;
+            case '$ne': case '$eq': {
+              if (v === null || v === undefined) {
+                items.push(`${sPath} ${subKey === '$ne' ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`);
+              } else {
+                const base = `${sPath} ${SQL_OPS[subKey]} ${resolve(v)}`;
+                items.push(subKey === '$ne' ? `(${base} OR ${sPath} ${SQL_OPS.$is} NULL)` : base);
+              }
+              break;
+            }
             case '$lt': case '$gt': case '$gte': case '$lte': {
               const subItems = (Object.keys(top) as (keyof typeof SQL_OPS)[])
                 .map(ssk => `${sPath} ${SQL_OPS[ssk]} ${resolve(top[ssk])}`);
