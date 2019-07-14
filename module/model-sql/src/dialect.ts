@@ -370,7 +370,7 @@ export abstract class SQLDialect implements DialectState {
   getLimitSQL<T>(cls: Class<T>, query?: Query<T>): string {
     return !query || (!query.limit && !query.offset) ?
       '' :
-      `LIMIT ${query.limit} OFFSET ${query.offset || 0}`;
+      `LIMIT ${query.limit || 200} OFFSET ${query.offset || 0}`;
   }
 
   getGroupBySQL<T>(cls: Class<T>, query?: Query<T>): string {
