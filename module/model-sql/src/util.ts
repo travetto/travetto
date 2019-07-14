@@ -168,7 +168,7 @@ export class SQLUtil {
           handler.onSimple({
             config: field, descend: null as any, fields: [], path: [
               ...path,
-              field
+              { ...field }
             ]
           });
         }

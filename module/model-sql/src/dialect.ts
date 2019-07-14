@@ -509,7 +509,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Simple insertion
    */
-  getInsertSQL(stack: VisitStack[], instances: InsertWrapper['records']) {
+  getInsertSQL(stack: VisitStack[], instances: InsertWrapper['records']): string | undefined {
     const config = stack[stack.length - 1];
     const columns = SQLUtil.getFieldsByLocation(stack).local
       .filter(x => !SchemaRegistry.has(x.type))
@@ -537,6 +537,10 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
         }
       }
       instances = newInstances;
+    }
+
+    if (!instances.length) {
+      return;
     }
 
     const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, inst.value[c.name])));
@@ -572,10 +576,11 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
 
   getAllInsertSQL<T>(cls: Class<T>, instance: T): string[] {
     const out: string[] = [];
+    const add = (text?: string) => text && out.push(text);
     SQLUtil.visitSchemaInstance(cls, instance, {
-      onRoot: ({ value, path }) => out.push(this.getInsertSQL(path, [{ stack: path, value }])),
-      onSub: ({ value, path }) => out.push(this.getInsertSQL(path, [{ stack: path, value }])),
-      onSimple: ({ value, path }) => out.push(this.getInsertSQL(path, [{ stack: path, value }]))
+      onRoot: ({ value, path }) => add(this.getInsertSQL(path, [{ stack: path, value }])),
+      onSub: ({ value, path }) => add(this.getInsertSQL(path, [{ stack: path, value }])),
+      onSimple: ({ value, path }) => add(this.getInsertSQL(path, [{ stack: path, value }]))
     });
     return out;
   }
@@ -747,7 +752,10 @@ ${this.getGroupBySQL(cls, query)}`;
         if (!leveled.length) {
           break;
         }
-        await Promise.all(leveled.map(iw => this.executeSQL(this.getInsertSQL(iw.stack, iw.records))));
+        await Promise.all(leveled
+          .map(iw => this.getInsertSQL(iw.stack, iw.records))
+          .filter(sql => !sql)
+          .map(sql => this.executeSQL(sql!)));
         lvl += 1;
       }
     }

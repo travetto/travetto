@@ -11,8 +11,8 @@ type Svc = { source: ModelService };
 
 @Schema()
 class Query {
-  where?: any;
-  sort?: any;
+  where?: string;
+  sort?: string;
   limit?: number;
   offset?: number;
 }
@@ -34,7 +34,12 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(target,
         function getAll(this: Svc, full: Query) {
-          return this.source.getAllByQuery(getCls(), full);
+          return this.source.getAllByQuery(getCls(), {
+            limit: full.limit,
+            offset: full.offset,
+            sort: full.sort ? JSON.parse(full.sort) : undefined,
+            where: full.where ? JSON.parse(full.where) : undefined
+          });
         }
       ),
       {
