@@ -44,6 +44,23 @@ export abstract class SQLDialect implements DialectState {
     $isNot: 'IS NOT'
   };
 
+  COLUMN_TYPES = {
+    JSON: '',
+    BOOLEAN: 'BOOLEAN',
+    TINYINT: 'TINYINT',
+    SMALLINT: 'SMALLINT',
+    MEDIUMINIT: 'MEDIUMINT',
+    INT: 'INT',
+    BIGINT: 'BIGINT',
+    TIMESTAMP: 'TIMESTAMP',
+    TEXT: 'TEXT'
+  };
+
+  PARAMETERIZED_COLUMN_TYPES: Record<'VARCHAR' | 'DECIMAL', (...nums: number[]) => string> = {
+    VARCHAR: n => `VARCHAR(${n})`,
+    DECIMAL: (d, p) => `DECIMAL(${d},${p})`
+  };
+
   idField = makeField('id', String, true, {
     maxlength: { n: 32 },
     minlength: { n: 32 }
@@ -85,6 +102,10 @@ export abstract class SQLDialect implements DialectState {
 
   abstract ident(name: string | FieldConfig): string;
 
+  quote(text: string): string {
+    return `'${text}'`;
+  }
+
   /**
    * Convert value to SQL valid representation
    */
@@ -94,9 +115,9 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === String) {
       if (value instanceof RegExp) {
         const src = BindUtil.extractRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
-        return `'${src}'`;
+        return this.quote(src);
       } else {
-        return `'${value}'`;
+        return this.quote(value);
       }
     } else if (conf.type === Boolean) {
       return `${value ? 'TRUE' : 'FALSE'}`;
@@ -104,7 +125,9 @@ export abstract class SQLDialect implements DialectState {
       return `${value}`;
     } else if (conf.type === Date) {
       const [day, time] = (value as Date).toISOString().split(/[T.]/);
-      return `'${day} ${time}'`;
+      return this.quote(`${day} ${time}`);
+    } else if (conf.type === Object) {
+      return this.quote(JSON.stringify(value).replace(/[']/g, `''`));
     }
     throw new Error('Ruh roh?');
   }
@@ -116,37 +139,39 @@ export abstract class SQLDialect implements DialectState {
     let type: string = '';
 
     if (conf.type === Number) {
-      type = 'INT';
+      type = this.COLUMN_TYPES.INT;
       if (conf.precision) {
         const [digits, decimals] = conf.precision;
         if (decimals) {
-          type = `DECIMAL(${digits}, ${decimals})`;
+          type = this.PARAMETERIZED_COLUMN_TYPES.DECIMAL(digits, decimals);
         } else if (digits) {
           if (digits < 3) {
-            type = 'TINYINT';
+            type = this.COLUMN_TYPES.TINYINT;
           } else if (digits < 5) {
-            type = 'SMALLINT';
+            type = this.COLUMN_TYPES.SMALLINT;
           } else if (digits < 7) {
-            type = 'MEDIUMINIT';
+            type = this.COLUMN_TYPES.MEDIUMINIT;
           } else if (digits < 10) {
-            type = 'INT';
+            type = this.COLUMN_TYPES.INT;
           } else {
-            type = 'BIGINT';
+            type = this.COLUMN_TYPES.BIGINT;
           }
         }
       } else {
-        type = 'INTEGER';
+        type = this.COLUMN_TYPES.INT;
       }
     } else if (conf.type === Date) {
-      type = 'TIMESTAMP';
+      type = this.COLUMN_TYPES.TIMESTAMP;
     } else if (conf.type === Boolean) {
-      type = 'BOOLEAN';
+      type = this.COLUMN_TYPES.BOOLEAN;
     } else if (conf.type === String) {
       if (conf.specifier && conf.specifier.startsWith('text')) {
-        type = 'TEXT';
+        type = this.COLUMN_TYPES.TEXT;
       } else {
-        type = `VARCHAR(${conf.maxlength ? conf.maxlength.n : 1024})`;
+        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(conf.maxlength ? conf.maxlength.n : 1024);
       }
+    } else if (conf.type === Object) {
+      type = this.COLUMN_TYPES.JSON;
     }
 
     if (!type) {
@@ -295,26 +320,11 @@ export abstract class SQLDialect implements DialectState {
               items.push(subItems.length > 1 ? `(${subItems.join(SQL_OPS.$and)})` : subItems[0]);
               break;
             }
+            case '$near':
+            case '$unit':
+            case '$maxDistance':
             case '$geoWithin':
-              items.push({
-                geo_polygon: {
-                  [sPath]: {
-                    points: v.map(([lat, lon]: [number, number]) => ({ lat, lon }))
-                  }
-                }
-              });
-              break;
-            case '$geoIntersects':
-              items.push({
-                geo_shape: {
-                  [sPath]: {
-                    type: 'envelope',
-                    coordinates: v
-                  },
-                  relation: 'within'
-                }
-              });
-              break;
+              throw new Error('Geo-spatial queries are not currently supported in SQL');
           }
         }
         // Handle operations
@@ -446,7 +456,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
 );`;
     return parent ?
       out :
-      out.replace(new RegExp(`(\\b${this.ident(this.idField)}.*)DEFAULT NULL`), (_, s) => `${s} NOT NULL`);
+      out.replace(new RegExp(`(\\b${this.idField.name}.*)DEFAULT NULL`), (_, s) => `${s} NOT NULL`);
   }
 
   /**

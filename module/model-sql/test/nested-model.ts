@@ -19,6 +19,12 @@ export class Note implements ModelCore {
   entities?: NoteEntity[];
 }
 
+@Model()
+export class Wrapper implements ModelCore {
+  id: string;
+  content: any;
+}
+
 @Suite()
 export class NestedSuite extends BaseSqlTest {
 
@@ -45,5 +51,21 @@ export class NestedSuite extends BaseSqlTest {
     });
 
     assert(out.length > 0);
+  }
+
+  @Test()
+  async verifyUnindexedObject() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    const ret = await service.save(Wrapper, Wrapper.from({
+      id: '200',
+      content: {
+        a: 5,
+        b: 6
+      }
+    }));
+
+    const fetched = await service.getById(Wrapper, ret.id);
+
+    assert(fetched.content === { a: 5, b: 6 });
   }
 }

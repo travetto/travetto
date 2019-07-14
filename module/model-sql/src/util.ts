@@ -202,9 +202,9 @@ export class SQLUtil {
     };
 
     if ('class' in config) {
-      return handler.onRoot({ config, fields, descend: descend.bind(null, path), path });
+      return handler.onRoot({ config, fields, descend, path });
     } else {
-      return handler.onSub({ config, fields, descend: descend.bind(null, path), path });
+      return handler.onSub({ config, fields, descend, path });
     }
   }
 

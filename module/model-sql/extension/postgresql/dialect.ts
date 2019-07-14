@@ -22,6 +22,10 @@ export class PostgreSQLDialect extends SQLDialect {
       $iregex: '~*'
     });
 
+    Object.assign(this.COLUMN_TYPES, {
+      JSON: 'json'
+    });
+
     this.regexWordBoundary = '\\y';
   }
 

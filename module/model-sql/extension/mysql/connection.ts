@@ -28,6 +28,17 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
       database: this.config.database,
       host: this.config.host,
       port: this.config.port,
+      typeCast: (field, next) => {
+        const res = next() as any;
+        if ((field.type === 'JSON' || field.type === 'BLOB') && typeof res === 'string') {
+          if (res.charAt(0) === '{' && res.charAt(res.length - 1) === '}') {
+            try {
+              return (JSON.parse(res));
+            } catch { }
+          }
+        }
+        return res;
+      },
       ...(this.config.options || {})
     });
   }

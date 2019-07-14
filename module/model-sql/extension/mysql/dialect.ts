@@ -24,6 +24,11 @@ export class MySQLDialect extends SQLDialect {
       $iregex: 'REGEXP'
     });
 
+    Object.assign(this.COLUMN_TYPES, {
+      TIMESTAMP: 'DATETIME',
+      JSON: 'TEXT'
+    });
+
     this.regexWordBoundary = '([[:<:]]|[[:>:]])';
     this.idField.minlength = this.idField.maxlength = { n: this.KEY_LEN };
   }
@@ -38,11 +43,6 @@ export class MySQLDialect extends SQLDialect {
 
   getCreateTableSQL(stack: VisitStack[]) {
     return super.getCreateTableSQL(stack).replace(/;$/, ` ${this.tablePostfix};`);
-  }
-
-  getColumnDefinition(field: FieldConfig) {
-    return super.getColumnDefinition(field)
-      .replace(/\bTIMESTAMP\b/g, 'DATETIME');
   }
 
   /**

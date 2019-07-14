@@ -1,2 +1,2 @@
 // tslint:disable-next-line: no-import-side-effect
-import '../extension/postgresql/dialect';
+import '../extension/mysql/dialect';
