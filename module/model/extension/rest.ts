@@ -63,7 +63,7 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
         },
-        params: [paramConfig('path', 'id')],
+        params: [paramConfig('path', { name: 'id', required: true })],
         responseType: { type: cls, description: cls.name }
       }
     );
@@ -79,7 +79,7 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
           'Cache-Control': 'max-age=0, no-cache'
         },
         params: [
-          paramConfig('path', 'field'),
+          paramConfig('path', { name: 'field', required: true }),
           schemaParamConfig('query', { type: SuggestQuery, required: false })
         ],
         responseType: { type: cls, description: cls.name }
@@ -117,7 +117,7 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
         target, function remove(this: Svc, id: string) {
           return this.source.deleteById(getCls(), id);
         }), {
-        params: [paramConfig('path', 'id')],
+        params: [paramConfig('path', { name: 'id', required: true })],
         description: `Delete ${cls.name} by id`,
         priority: 105, method: 'delete', path: '/:id'
       });
