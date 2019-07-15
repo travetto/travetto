@@ -6,7 +6,7 @@ import { CachedAppConfig, fork, handleFailure } from './util';
 export class AppListUtil {
 
   private static pCwd = process.cwd().replace(/[\\\/]+/g, '/');
-  private static cacheConfig = 'di-app-cache.json';
+  private static cacheConfig = '@travetto/di/app-cache.json';
   private static fsLstat = util.promisify(fs.lstat);
 
   static maxTime(stat: fs.Stats) {
