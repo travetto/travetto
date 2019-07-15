@@ -102,13 +102,18 @@ export class SQLModelSource extends ModelSource {
   @WithAsyncContext({})
   async onSchemaChange(ev: SchemaChangeEvent) {
     if (this.dialect.handleFieldChange) {
-      return this.onFieldChange(ev);
+      try {
+        await this.onFieldChange(ev);
+      } catch (e) {
+        // Failed to change
+        console.error('Unable to change field', e);
+      }
     }
   }
 
   @Connected(true)
   async onFieldChange(ev: SchemaChangeEvent) {
-    this.dialect.handleFieldChange(ev);
+    return this.dialect.handleFieldChange(ev);
   }
 
   @WithAsyncContext({})

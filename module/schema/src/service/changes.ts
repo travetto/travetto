@@ -97,11 +97,17 @@ export class $SchemaChangeListener extends EventEmitter {
       }
     }
 
+    // Handle class references changing, but keeping same id
+    const compareTypes = (a: Class, b: Class) => '__id' in a ? a.__id === b.__id : a === b;
+
     for (const c of currFields) {
       if (prevFields.has(c)) {
         const prevSchema = prevView.schema[c];
         const currSchema = currView.schema[c];
-        if (JSON.stringify(prevSchema) !== JSON.stringify(currSchema) || prevSchema.type !== currSchema.type) {
+        if (
+          JSON.stringify(prevSchema) !== JSON.stringify(currSchema) ||
+          !compareTypes(prevSchema.type, currSchema.type)
+        ) {
           changes.push({ prev: prevView.schema[c], curr: currView.schema[c], type: 'changed' });
         }
       }

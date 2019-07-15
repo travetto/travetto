@@ -132,10 +132,7 @@ export abstract class SQLDialect implements DialectState {
     throw new Error('Ruh roh?');
   }
 
-  /**
-   * FieldConfig to Column definition
-   */
-  getColumnDefinition(conf: FieldConfig) {
+  getColumnType(conf: FieldConfig) {
     let type: string = '';
 
     if (conf.type === Number) {
@@ -174,10 +171,17 @@ export abstract class SQLDialect implements DialectState {
       type = this.COLUMN_TYPES.JSON;
     }
 
-    if (!type) {
-      return '';
-    }
+    return type;
+  }
 
+  /**
+   * FieldConfig to Column definition
+   */
+  getColumnDefinition(conf: FieldConfig) {
+    const type = this.getColumnType(conf);
+    if (!type) {
+      return;
+    }
     return `${this.ident(conf)} ${type} ${(conf.required && conf.required.active) ? 'NOT NULL' : 'DEFAULT NULL'}`;
   }
 
@@ -205,7 +209,7 @@ export abstract class SQLDialect implements DialectState {
     const modifies = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'changed')
-        .map(ev => [...rootStack, ...v.path, ev.prev!]));
+        .map(ev => [...rootStack, ...v.path, ev.curr!]));
       return acc;
     }, [] as VisitStack[][]);
 
@@ -451,7 +455,11 @@ ${this.getLimitSQL(cls, query)}`;
     const out = `
 CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   ${fields
-        .map(f => this.getColumnDefinition(f))
+        .map(f => {
+          const def = this.getColumnDefinition(f)!;
+          return f.name === this.idField.name && !parent ?
+            def.replace('DEFAULT NULL', 'NOT NULL') : def;
+        })
         .filter(x => !!x.trim())
         .join(',\n  ')},
   ${this.getColumnDefinition(this.pathField)} UNIQUE,
@@ -462,9 +470,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   PRIMARY KEY (${this.ident(this.pathField)}),
   FOREIGN KEY (${this.ident(this.parentPathField)}) REFERENCES ${this.parentTable(stack)}(${this.ident(this.pathField)}) ON DELETE CASCADE`}
 );`;
-    return parent ?
-      out :
-      out.replace(new RegExp(`(\\b${this.idField.name}.*)DEFAULT NULL`), (_, s) => `${s} NOT NULL`);
+    return out
   }
 
   /**

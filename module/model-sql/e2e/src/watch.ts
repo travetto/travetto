@@ -13,7 +13,6 @@ class Address {
   street3?: string;
   city: string;
   zip?: number;
-  name?: string;
 }
 
 @Model()
@@ -27,12 +26,6 @@ class Person implements ModelCore {
 
 @Model()
 class Employee implements ModelCore {
-  id?: string;
-  name: string;
-}
-
-@Model()
-class Employee2 implements ModelCore {
   id?: string;
   name: string;
 }
