@@ -15,7 +15,7 @@ $ npm install pg # Use this for postgres
 ```
 
 
-This module provides a [`SQL`]-based implementation of `ModelSource` for the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module.  This source allows the `Model` module to read, write and query against `SQL` databases. In development mode, the `ModelSource` will also modify the database schema in real time to minimize impact to development.  
+This module provides a `SQL`-based implementation of `ModelSource` for the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module.  This source allows the `Model` module to read, write and query against `SQL` databases. In development mode, the `ModelSource` will also modify the database schema in real time to minimize impact to development.  
 
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of
 a `SQL` database.  Every table generated will have a `path_id` which determines it's location in the document hierarchy as well as sub tables will have a `parent_path_id` to associate records with the parent values.
