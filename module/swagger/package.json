@@ -7,14 +7,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/exec": "^0.7.1-alpha.4",
-    "@travetto/rest": "^0.7.1-alpha.8",
-    "@travetto/schema": "^0.7.1-alpha.7",
+    "@travetto/exec": "^0.7.1",
+    "@travetto/rest": "^0.7.1",
+    "@travetto/schema": "^0.7.1",
     "openapi3-ts": "^1.3.0"
   },
   "description": "Swagger integration support for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^0.7.1-alpha.6"
+    "@travetto/test": "^0.7.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -34,5 +34,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.7.1-alpha.8"
+  "version": "0.7.1"
 }
