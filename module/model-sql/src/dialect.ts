@@ -768,7 +768,7 @@ ${this.getGroupBySQL(cls, query)}`;
         }
         await Promise.all(leveled
           .map(iw => this.getInsertSQL(iw.stack, iw.records))
-          .filter(sql => !sql)
+          .filter(sql => !!sql)
           .map(sql => this.executeSQL(sql!)));
         lvl += 1;
       }
