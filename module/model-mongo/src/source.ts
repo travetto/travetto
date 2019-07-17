@@ -105,7 +105,7 @@ export class MongoModelSource extends ModelSource {
   }
 
   async initClient() {
-    this.client = await mongo.MongoClient.connect(this.config.url);
+    this.client = await mongo.MongoClient.connect(this.config.url, this.config.clientOptions);
     this.db = this.client.db();
   }
 
