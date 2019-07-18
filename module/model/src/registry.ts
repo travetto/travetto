@@ -13,8 +13,8 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
     super(SchemaRegistry, DependencyRegistry);
   }
 
-  createPending(cls: Class) {
-    return { class: cls, root: cls };
+  createPending(cls: Class): Partial<ModelOptions<any>> {
+    return { class: cls, indices: [] };
   }
 
   onInstallFinalize<T>(cls: Class<T>) {

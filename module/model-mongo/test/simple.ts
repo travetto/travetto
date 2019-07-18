@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
+import { Index, Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { Schema, Min, Max } from '@travetto/schema';
@@ -16,6 +16,7 @@ class Address {
 }
 
 @Model()
+@Index({ fields: [{ name: 1 }, { gender: -1 }], options: { unique: true } })
 class Person extends BaseModel {
   name: string;
   @Max(200) @Min(0) age: number;
@@ -160,8 +161,6 @@ class TestSave extends BaseMongoTest {
     });
     assert(suggested.length === 1);
   }
-
-
 
   @Test('Verify partial update with field removal')
   async testPartialUpdate() {

@@ -23,6 +23,8 @@ const $AND = '$and';
 const $OR = '$or';
 const $NOT = '$not';
 const $ALL = '$all';
+const $IN = '$in';
+const $NIN = '$nin';
 const $ELEM_MATCH = '$elemMatch';
 
 // const TOP_LEVEL_OPS = new Set([$AND, $OR, $NOT]);
@@ -93,7 +95,7 @@ export class QueryVerifierService {
     return declared === actual;
   }
 
-  checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: { [key: string]: Set<string> }, isArray: boolean) {
+  checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: Record<string, Set<string>>, isArray: boolean) {
 
     if (isArray) {
       if (Array.isArray(value)) {
@@ -112,27 +114,31 @@ export class QueryVerifierService {
         state.log(`Operator clause only supports types of ${declaredType}, not ${actualType}`);
       }
       return;
-    } else if (Object.keys(value).length !== 1) {
-      state.log(`One and only one operation may be specified in an operator clause`);
-      return;
+    } else {
+      const keys = Object.keys(value).sort();
+
+      if (keys.length !== 1 && keys[0] !== '$maxDistance' && keys[0] !== '$gt') {
+        state.log(`One and only one operation may be specified in an operator clause`);
+        return;
+      }
     }
 
     // Should only be one?
     for (const [k, v] of Object.entries(value)) {
+      if (k === $ALL || k === $ELEM_MATCH || k === $IN || k === $NIN) {
+        if (!Array.isArray(v)) {
+          state.log(`${k} operator requires comparison to be an array, not ${typeof v}`);
+          return;
+        } else if (v.length === 0) {
+          state.log(`${k} operator requires comparison to be a non-empty array`);
+          return;
+        }
 
-      if (isArray && (k === $ALL || k === $ELEM_MATCH)) {
-        if (k === $ALL) {
-          if (!Array.isArray(v)) {
-            state.log(`$all operator requires comparison to be an array, not ${typeof v}`);
+        for (const el of v) {
+          const elAct = TypeUtil.getActualType(el);
+          if (!this.typesMatch(declaredType, elAct)) {
+            state.log(`${k} operator requires all values to be ${declaredType}, but ${elAct} was found`);
             return;
-          } else {
-            for (const el of v) {
-              const elAct = TypeUtil.getActualType(el);
-              if (!this.typesMatch(declaredType, elAct)) {
-                state.log(`$all operator requires all values to be ${declaredType}, but ${elAct} was found`);
-                return;
-              }
-            }
           }
         }
       } else if (!(k in allowed)) {

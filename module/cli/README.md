@@ -6,7 +6,6 @@ CLI Support
 $ npm install -g @travetto/cli
 ```
 
-
 The cli is the primary structure for interacting with the external requirements of the framework.  This can range from running tests, to running applications, to generating email templates. The main executable can be installed globally or locally.  If installed globally and locally, it will defer to the local installation for execution.
 
 As is the custom, modules are able to register their own cli extensions as scripts, whose name starts with `travetto-cli-`.  These scripts are then picked up at runtime and all available options are provided when viewing the help documentation.  The following are all the supported cli operations and the various settings they allow.
@@ -30,15 +29,7 @@ This will show all the available options/choices that are exposed given the curr
 travetto clean
 ```
 
-Clears [`Base`](https://github.com/travetto/travetto/tree/master/module/base) compilation cache to handle any inconsistencies that may arise from checking timestamps for cache freshness.
-
-**Terminal: Boot operation**
-```bash
-travetto boot <script> [method]
-  -p, --phase [run phase]  The run phase to execute (default: "bootstrap")
-```
-
-Will execute `<script>` via the bootstrapping of the framework.  This will give you access to all of the framework features with nearly zero overhead.  Additionally you can specify a method to invoke on the results of the `<script>` import. You can also specify a phase to execute with `bootstrap` being the default and most common use-case.
+Clears [`Boot`](https://github.com/travetto/travetto/tree/master/module/boot) compilation cache to handle any inconsistencies that may arise from checking timestamps for cache freshness.
 
 ## Compiler
 
@@ -81,7 +72,7 @@ The test command is the only supported method for invoking the [`Test`](https://
 travetto email-template
 ``` 
 
-This command is provided by [`email-template`](https://github.com/travetto/travetto/tree/master/module/email-template).  It will spin up a web server (port 3839) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline.  You would navigate to the path of an asset, e.g. `http://localhost:3839/my-email.html`, to test and develop the file in `<root>/assets/my-email.html`.  You can also change the extension to `.txt` to see the textual representation.
+This command is provided by [`email-template`](https://github.com/travetto/travetto/tree/master/module/email-template).  It will spin up a web server (port 3839) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline.  You would navigate to the path of an asset, e.g. `http://localhost:3839/my-email.html`, to test and develop the file in `<root>/resources/email/my-email.html`.  You can also change the extension to `.txt` to see the textual representation.
 
 Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
 

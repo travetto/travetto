@@ -6,6 +6,7 @@ export class ElasticsearchModelConfig {
   hosts = ['127.0.0.1'];
   port = 9200;
   options = {};
+  apiVersion = '';
   namespace = 'app';
   autoCreate = !Env.prod;
   indexCreate = {
@@ -15,6 +16,11 @@ export class ElasticsearchModelConfig {
 
   postConstruct() {
     console.debug('Constructed', this);
+    if (this.apiVersion) {
+      this.apiVersion = `${this.apiVersion}`;
+    } else {
+      delete this.apiVersion;
+    }
     this.hosts = this.hosts
       .map(x => x.includes(':') ? x : `${x}:${this.port}`)
       .map(x => x.startsWith('http') ? x : `http://${x}`) as any;

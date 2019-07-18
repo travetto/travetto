@@ -51,7 +51,7 @@ export class SpecGenerateUtil {
   }
 
   static getType(cls: Class, state: PartialSpec) {
-    const out: { [key: string]: any } = {};
+    const out: Record<string, any> = {};
     // Handle nested types
     if (SchemaRegistry.has(cls)) {
       out.$ref = `${DEFINITION}/${this.processSchema(cls, state)}`;
@@ -81,7 +81,7 @@ export class SpecGenerateUtil {
       if (!state.components.schemas[typeId]) {
         const config = SchemaRegistry.get(type);
         if (config) {
-          const properties: { [key: string]: SchemaObject } = {};
+          const properties: Record<string, SchemaObject> = {};
           const def = config.views[ALL_VIEW];
           const required = [];
 
@@ -111,7 +111,7 @@ export class SpecGenerateUtil {
             if (field.enum) {
               prop.enum = field.enum.values;
             }
-            if (field.required) {
+            if (field.required && field.required.active) {
               required.push(fieldName);
             }
 
@@ -230,7 +230,7 @@ export class SpecGenerateUtil {
       ep.params.forEach(param => {
         if (param.location) {
           if (param.location === 'body') {
-            op.requestBody = this.buildRequestBody(state, param);
+            op.requestBody = this.buildRequestBody(state, param) as any;
           } else if (param.type && SchemaRegistry.has(param.type) && (param.location === 'query' || param.location === 'header')) {
             op.parameters!.push(...this.schemaToDotParams(state, param.location, param.type));
           } else if (param.location !== 'context') {
@@ -246,13 +246,20 @@ export class SpecGenerateUtil {
         }
       });
 
-      const epPath = !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source;
+      const epPath = (
+        !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source
+      ).replace(/:([A-Za-z0-9_]+)\b/g, (_, param) => `{${param}}`);
 
       const key = `${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/');
 
+      const toAdd = ep.method === 'all' ?
+        ['get', 'post', 'put', 'delete'].reduce((acc, v) =>
+          ({ ...acc, [v]: { ...op, operationId: `${op.operationId}_${v}` } }), {}) :
+        { [ep.method!]: op };
+
       state.paths[key] = {
         ...(state.paths[key] || {}),
-        [ep.method!]: op
+        ...toAdd
       };
     }
   }

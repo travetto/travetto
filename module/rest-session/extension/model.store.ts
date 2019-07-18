@@ -20,6 +20,10 @@ export class ModelStore extends SessionStore {
   @Inject()
   modelService: ModelService;
 
+  generateId() {
+    return this.modelService.generateId();
+  }
+
   async load(id: string) {
     const res = await this.modelService.getAllByQuery(SessionModel, { where: { id } });
     if (res.length === 1) {

@@ -7,7 +7,7 @@ function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
 }
 
 export class FileCache {
-  private cache: { [key: string]: fs.Stats } = {};
+  private cache: Record<string, fs.Stats> = {};
 
   readonly cwd: string;
   readonly cacheDir: string;
@@ -82,6 +82,8 @@ export class FileCache {
   fromEntryName(cached: string) {
     return FsUtil.joinUnix(this.cwd, cached
       .replace(this.cacheDir, '')
+      .replace(/\btrv[.]/g, '@travetto/')
+      .replace(/^[.]/, 'node_modules/')
       .replace(/~/g, '/')
     )
       .replace(/[.]js$/g, '.ts');
@@ -92,6 +94,8 @@ export class FileCache {
       FsUtil.toUnix(full)
         .replace(this.cwd, '')
         .replace(/^[\/]+/, '')
+        .replace(/^node_modules\//, '.')
+        .replace('@travetto/', 'trv.')
         .replace(/[\/]+/g, '~')
     )
       .replace(/[.]ts$/g, '.js');

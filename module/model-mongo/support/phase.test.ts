@@ -5,16 +5,16 @@ export const init = {
     const { ExecUtil, DockerContainer } = await import('@travetto/exec');
     const { EnvUtil } = await import('@travetto/boot');
 
-    const defPort = EnvUtil.getInt('MODEL_MONGO_PORT', 27017);
+    const defPort = EnvUtil.getInt('MONGO_MODEL_PORT', 27017);
 
     try {
       await ExecUtil.waitForPort(defPort, 10);
-      process.env.MODEL_MONGO_NAMESPACE = `test_${Math.trunc(Math.random() * 10000)}`; // Randomize schema
+      process.env.MONGO_MODEL_NAMESPACE = `test_${Math.trunc(Math.random() * 10000)}`; // Randomize schema
     } catch (e) {
       console.debug('Starting up docker for mongo:latest');
 
       const port = 50000 + Math.trunc(Math.random() * 10000);
-      process.env.MODEL_MONGO_PORT = `${port}`;
+      process.env.MONGO_MODEL_PORT = `${port}`;
       const container = new DockerContainer('mongo:latest')
         .forceDestroyOnShutdown()
         .exposePort(port);

@@ -19,9 +19,9 @@ export class DockerContainer {
   private execState: ExecutionState;
 
   private container: string;
-  private env: { [key: string]: string } = {};
-  private ports: { [key: string]: number } = {};
-  private tempVolumes: { [key: string]: string } = {};
+  private env: Record<string, string> = {};
+  private ports: Record<string, number> = {};
+  private tempVolumes: Record<string, string> = {};
   private deleteOnFinish = false;
 
   private entryPoint: string;
@@ -31,7 +31,7 @@ export class DockerContainer {
   public tty: boolean = false;
   public daemon: boolean = false;
 
-  public volumes: { [key: string]: string } = {};
+  public volumes: Record<string, string> = {};
   public workingDir: string;
 
   constructor(private image: string, container?: string) {
@@ -83,12 +83,12 @@ export class DockerContainer {
     return this;
   }
 
-  addEnvVar(key: string, value: string) {
+  addEnvVar(key: string, value: string = '') {
     this.env[key] = value;
     return this;
   }
 
-  addEnvVars(vars: { [key: string]: string }) {
+  addEnvVars(vars: Record<string, string>) {
     Object.assign(this.env, vars);
     return this;
   }
@@ -132,7 +132,11 @@ export class DockerContainer {
       flags.push('-t');
     }
     for (const k of Object.keys(this.env)) {
-      flags.push('-e', `"${k}=${this.env[k]}"`);
+      if (this.env[k] === '') {
+        flags.push('-e', k);
+      } else {
+        flags.push('-e', `${k}=${this.env[k]}`);
+      }
     }
     flags.push(...(extra || []));
     return flags;
@@ -160,9 +164,6 @@ export class DockerContainer {
     }
     for (const k of Object.keys(this.ports)) {
       flags.push('-p', `${k}:${this.ports[k]}`);
-    }
-    for (const k of Object.keys(this.env)) {
-      flags.push('-e', `"${k}=${this.env[k]}"`);
     }
 
     flags.push(...this.getRuntimeFlags(extra));

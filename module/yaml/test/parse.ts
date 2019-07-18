@@ -160,4 +160,31 @@ age: 20
   `);
         assert(output === { 'mail-settings': { name: 'hello', 'age-num': 20 } });
     }
+
+    @Test()
+    emptyFile() {
+        const output = YamlUtil.parse(`#
+# `);
+        assert(output === {});
+    }
+
+    @Test()
+    blankFile() {
+        const output = YamlUtil.parse(``);
+        assert(output === {});
+    }
+
+    @Test()
+    mostlyBlankFile() {
+        const output = YamlUtil.parse(`#
+#
+#
+#
+name: bob
+#
+#
+#`);
+        assert(output === { name: 'bob' });
+    }
+
 }

@@ -1,7 +1,10 @@
-export type Point = [number, number];
+export type Point = [number, number] | { lat: number, lon: number };
+// tslint:disable-next-line: no-shadowed-variable
+export const Point = class Point { };
 
 export type Primitive = number | boolean | string | Date | Point;
 export type PrimitiveArray = Primitive[];
+export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
 
 export type ValidFieldNames<T> = {
   [K in keyof T]:
@@ -52,7 +55,9 @@ type GeoFieldQuery =
   GeneralScalarFieldQuery<Point> |
   {
     $geoWithin?: Point[];
-    $geoIntersects?: Point[];
+    $near?: Point;
+    $maxDistance?: number;
+    $unit?: DistanceUnit;
   } |
   Point;
 

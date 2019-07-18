@@ -1,11 +1,11 @@
 export class DepResolver {
 
   static PEER_DEPS = `${process.argv[2]}`.trim() !== '';
-  static DEP_CACHE: { [key: string]: { regular: Set<string>, peer: Set<string>, bin: { [key: string]: { [key: string]: string } } } } = {};
+  static DEP_CACHE: Record<string, { regular: Set<string>, peer: Set<string>, bin: Record<string, Record<string, string>> }> = {};
   static CORE_SCOPE = new Set(['dependencies', 'devDependencies']);
   static PEER_SCOPE = new Set(['peerDependencies', 'optionalExtensionDependencies']);
-  static GLOBAL_PEER = new Set();
-  static SCOPE = new Set();
+  static GLOBAL_PEER = new Set<any>();
+  static SCOPE = new Set<any>();
 
   static init() {
     this.SCOPE = this.PEER_DEPS ? new Set([...this.CORE_SCOPE, ...this.PEER_SCOPE]) : this.CORE_SCOPE;

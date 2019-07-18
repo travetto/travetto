@@ -12,7 +12,7 @@ import { ModelSource, IModelSource, ValidStringFields } from './source';
 import { ModelRegistry } from '../registry';
 import { QueryLanguageParser } from '../query-lang/parser';
 
-function getClass<T>(o: T) {
+function getClass<T extends any>(o: T) {
   return o.constructor as Class<T>;
 }
 
@@ -30,6 +30,10 @@ export class ModelService implements IModelSource {
     // Cannot block on registry since this is an injectable (circular dep)
     //   Call but ignore return
     this.init();
+  }
+
+  generateId() {
+    return this.source.generateId();
   }
 
   async init() {

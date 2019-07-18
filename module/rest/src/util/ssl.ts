@@ -16,8 +16,8 @@ export class SSLUtil {
       '-days', '3650',
       '-nodes',
       '-x509',
-      '-keyout', '-',
-      '-out', '-',
+      '-keyout', process.platform === 'linux' ? '-' : '/dev/stdout',
+      '-out', process.platform === 'linux' ? '-' : '/dev/stdout',
       '-subj', subj
     );
 

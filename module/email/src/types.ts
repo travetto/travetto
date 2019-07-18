@@ -18,7 +18,7 @@ interface Attachment extends AttachmentLike {
   contentType?: string;
   contentTransferEncoding?: string;
   contentDisposition?: string;
-  headers?: { [key: string]: string | string[] };
+  headers?: Record<string, string | string[]>;
   raw?: string | Buffer | Readable | AttachmentLike;
 }
 
@@ -34,7 +34,7 @@ export interface MessageOptions {
   subject?: string;
   text?: string | Buffer | Readable | AttachmentLike;
   html?: string | Buffer | Readable | AttachmentLike;
-  headers?: { [key: string]: string | string[] };
+  headers?: Record<string, string | string[]>;
   attachments?: Attachment[];
   alternatives?: Attachment[];
   messageId?: string;

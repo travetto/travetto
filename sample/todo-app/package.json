@@ -10,11 +10,11 @@
   "keywords": [],
   "description": "",
   "dependencies": {
-    "@travetto/log": "^0.6.0-rc.0",
-    "@travetto/cli": "^0.6.0-rc.0",
-    "@travetto/model-elasticsearch": "^0.6.0-rc.0",
-    "@travetto/rest-express": "^0.6.0-rc.0",
-    "@travetto/swagger": "^0.6.0-rc.0",
-    "@travetto/test": "^0.6.0-rc.0"
+    "@travetto/log": "^0.7.1-alpha.0",
+    "@travetto/cli": "^0.7.1-alpha.0",
+    "@travetto/model-sql": "^0.7.1-alpha.0",
+    "@travetto/rest-express": "^0.7.1-alpha.0",
+    "@travetto/swagger": "^0.7.1-alpha.0",
+    "@travetto/test": "^0.7.1-alpha.0"
   }
 }

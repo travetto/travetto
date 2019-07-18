@@ -24,7 +24,7 @@ export class GenerateUtil {
     [CommonRegExp.postal_code, faker.address.zipCode]
   ];
 
-  static NAMES_TO_TYPE: { [key: string]: [RegExp, () => any][] } = {
+  static NAMES_TO_TYPE: Record<string, [RegExp, () => any][]> = {
     string: [
       [/^(image|img).*url$/, faker.image.imageUrl],
       [/^url$/, faker.internet.url],
@@ -164,7 +164,7 @@ export class GenerateUtil {
 
   static generate<T>(cls: Class<T>, view?: string) {
     const cfg = SchemaRegistry.getViewSchema(cls, view);
-    const out: { [key: string]: any } = {};
+    const out: Record<string, any> = {};
 
     for (const f of cfg.fields) {
       const fieldConfig = cfg.schema[f];

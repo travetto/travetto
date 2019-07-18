@@ -3,12 +3,15 @@ import { Util } from '@travetto/base';
 import { Session } from '../types';
 
 export abstract class SessionStore {
+  generateId() {
+    return Util.uuid();
+  }
   async validate(session: Session): Promise<boolean> {
     return !!(await this.load(session.id!));
   }
   async create(data: any, maxAge: number) {
     const sess: Session = new Session({
-      id: Util.uuid(),
+      id: this.generateId(),
       issuedAt: new Date(),
       maxAge,
       data

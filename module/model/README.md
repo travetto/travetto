@@ -83,7 +83,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 
 ### Geo Point Fields
 ```field : { $geoWithin: Point[] }``` determines if the value is within the bounding region of the points
-```field : { $geoIntersects: Point[] }``` determines if the value intersects with the bounding region of the points
+```field : { $near: Point, $maxDistance: number, $unit: 'km'|'m'|'mi'|'ft' }``` searches at a point, and looks out radially
 
 ### Groupings
 ```{ $and: [] }``` provides a grouping in which all sub clauses are required

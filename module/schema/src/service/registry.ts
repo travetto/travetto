@@ -16,8 +16,8 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     super(RootRegistry);
   }
 
-  resolveSubTypeForInstance<T>(cls: Class<T>, o: T) {
-    return this.resolveSubType(cls, (o as any).type || o.constructor);
+  resolveSubTypeForInstance<T extends any>(cls: Class<T>, o: T) {
+    return this.resolveSubType(cls, o.type || o.constructor);
   }
 
   resolveSubType(cls: Class, type: Class | string) {
@@ -48,7 +48,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     }
   }
 
-  trackSchemaDependencies(cls: Class, curr: Class = cls, path: string[] = []) {
+  trackSchemaDependencies(cls: Class, curr: Class = cls, path: FieldConfig[] = []) {
     const config = this.get(curr);
 
     SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.get(cls));
@@ -57,7 +57,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     const view = config.views[ALL_VIEW];
     for (const k of view.fields) {
       if (this.has(view.schema[k].type)) {
-        this.trackSchemaDependencies(cls, view.schema[k].type, [...path, k]);
+        this.trackSchemaDependencies(cls, view.schema[k].type, [...path, view.schema[k]]);
       }
     }
   }

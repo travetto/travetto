@@ -25,12 +25,16 @@ export class ElasticsearchModelSource extends ModelSource {
   private aliasToIndex: Map<string, string> = new Map();
 
   private identities: Map<Class, EsIdentity> = new Map();
-  // private indices: { [key: string]: IndexConfig<any>[] } = {};
+  // private indices: Record<string, IndexConfig<any>[]> = {};
   private indexToClass: Map<string, Class> = new Map();
   public client: es.Client;
 
   constructor(private config: ElasticsearchModelConfig) {
     super();
+  }
+
+  generateId() {
+    return Util.uuid();
   }
 
   getNamespacedIndex(idx: string) {
@@ -125,6 +129,12 @@ export class ElasticsearchModelSource extends ModelSource {
         await this.client.indices.putAlias({ index: concreteIndex, name: ident.index });
       }
       console.debug(`Index ${ident.index} created`);
+      console.trace('Index', JSON.stringify({
+        mappings: {
+          [ident.type]: schema
+        },
+        settings: this.config.indexCreate
+      }, null, 2));
     } catch (e) {
       console.debug(`Index ${ident.index} already created`);
     }
@@ -135,14 +145,14 @@ export class ElasticsearchModelSource extends ModelSource {
     const removes = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'removing')
-        .map(ev => [...v.path, ev.prev!.name].join('.')));
+        .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
       return acc;
     }, [] as string[]);
 
     const typeChanges = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'changed')
-        .map(ev => [...v.path, ev.prev!.name].join('.')));
+        .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
       return acc;
     }, [] as string[]);
 
@@ -270,6 +280,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const req = this.getSearchObject(cls, query);
+    console.trace('Querying', JSON.stringify(req, null, 2));
     const results = await this.client.search<U>(req);
     return this.safeLoad<U>(req, results);
   }
@@ -300,14 +311,12 @@ export class ElasticsearchModelSource extends ModelSource {
     return id;
   }
 
-  async postConstruct() {
-    await this.init();
-  }
-
-  async init() {
+  async initClient() {
     this.client = new es.Client(Util.deepAssign({}, this.config));
     await this.client.cluster.health({});
+  }
 
+  async initDatabase() {
     // PreCreate indexes if missing
     if (this.config.autoCreate) {
       const all = ModelRegistry.getClasses()
@@ -319,11 +328,10 @@ export class ElasticsearchModelSource extends ModelSource {
     await this.computeAliasMappings(true);
   }
 
-  async resetDatabase() {
+  async clearDatabase() {
     await this.client.indices.delete({
       index: this.getNamespacedIndex('*')
     });
-    await this.init();
   }
 
   async suggestField<T extends ModelCore, U = T>(
@@ -489,7 +497,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async save<T extends ModelCore>(cls: Class<T>, o: T, keepId: boolean = false): Promise<T> {
-    const id = o.id;
+    const id = keepId ? o.id : undefined;
     delete o.id;
 
     this.cleanseId(o);

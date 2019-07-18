@@ -1,36 +1,11 @@
-import { BeforeAll, BeforeEach, AfterEach } from '@travetto/test';
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { ModelSource } from '@travetto/model';
-import { SchemaRegistry } from '@travetto/schema';
+import { BeforeAll, AfterEach, AfterAll } from '@travetto/test';
+import { BaseModelTest } from '@travetto/model/extension/base.test';
 
-import { MongoModelSource, MongoModelConfig } from '../';
+import { MongoModelConfig } from '../';
 
-export class Init {
-  @InjectableFactory()
-  static getModelSource(conf: MongoModelConfig): ModelSource {
-    return new MongoModelSource(conf);
-  }
-}
-
-export class BaseMongoTest {
-
-  @BeforeAll()
-  async before() {
-    await DependencyRegistry.init();
-    await SchemaRegistry.init();
-    const config = await DependencyRegistry.getInstance(MongoModelConfig);
-    config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
-  }
-
-  @BeforeEach()
-  async beforeEach() {
-    const mms = (await DependencyRegistry.getInstance(ModelSource)) as MongoModelSource;
-    await mms.init();
-  }
-
-  @AfterEach()
-  async afterEach() {
-    const mms = (await DependencyRegistry.getInstance(ModelSource)) as MongoModelSource;
-    await (mms as any).db.dropDatabase();
-  }
+export class BaseMongoTest extends BaseModelTest {
+  configClass = MongoModelConfig;
+  @BeforeAll() init() { return super.init(); }
+  @AfterEach() reinit() { return super.reinit(); }
+  @AfterAll() clear() { return super.clear(); }
 }

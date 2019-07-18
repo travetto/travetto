@@ -7,7 +7,7 @@ type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
 
 export class ScanApp {
 
-  static cache: { [key: string]: SimpleEntry[] } = {};
+  static cache: Record<string, SimpleEntry[]> = {};
 
   static findFiles(ext: string | RegExp, filter?: RegExp | ((rel: string) => boolean)): SimpleEntry[] {
     const key = typeof ext === 'string' ? ext : ext.source;

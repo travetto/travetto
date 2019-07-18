@@ -17,7 +17,7 @@ const fsReadFile = util.promisify(fs.readFile);
 @Injectable()
 export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
-  private cache: { [key: string]: { html: string, text: string } } = {};
+  private cache: Record<string, { html: string, text: string }> = {};
 
   private defaultTemplateWidth = EnvUtil.getInt('EMAIL_WIDTH', 580);
 
@@ -26,7 +26,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
   private compiledSass: Promise<string>;
   private templatesLoaded: boolean;
-  private templates: { [key: string]: string } = {};
+  private templates: Record<string, string> = {};
 
   get compiledStyles(): Promise<string> {
     if (!this.compiledSass) {

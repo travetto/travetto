@@ -113,4 +113,22 @@ export class VerifyTest {
       });
     });
   }
+
+  @Test()
+  async verifyArrayOperationsWithEmpty() {
+    const verifier = await DependencyRegistry.getInstance(QueryVerifierService);
+
+    for (const op of ['$in', '$nin', '$all', '$elemMatch']) {
+
+      assert.throws(() => {
+        verifier.verify(User, {
+          where: {
+            email: {
+              [op]: []
+            }
+          }
+        });
+      }, /Validation Error/i);
+    }
+  }
 }

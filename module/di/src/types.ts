@@ -15,7 +15,7 @@ export interface InjectableConfig<T = any> extends Dependency<T> {
   factory: (...args: any[]) => T;
   dependencies: {
     cons?: Dependency<any>[],
-    fields: { [key: string]: Dependency<any> }
+    fields: Record<string, Dependency<any>>
   };
 }
 

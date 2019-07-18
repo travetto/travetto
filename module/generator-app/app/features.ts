@@ -1,31 +1,44 @@
-export const FEATURES: {
-  [key: string]: {
-    addons?: string[];
-    sub: string[];
-    context?: { [key: string]: any };
-    default: string;
-  } | {
-    addons?: string[];
-  }
-} = {
-  rest: {
-    sub: ['express', 'koa', 'fastify'],
-    addons: ['swagger', 'log'],
-    default: 'express'
-  },
-  test: {},
-  'auth-rest': {
-    addons: ['rest-session']
-  },
-  model: {
-    sub: ['elasticsearch', 'mongo'],
-    default: 'mongo'
-  },
+export type Feature = {
+  title?: string;
+  npm: string;
+  version?: string;
+  addons?: Feature[];
+  choices?: Feature[];
+  external?: boolean;
+  context?: Record<string, any>;
+  default?: string;
 };
 
-export const pkg = (mod: string, sub: string) => ({
-  [mod]: {
-    packageName: sub,
-    className: sub.charAt(0).toUpperCase() + sub.substring(1)
-  }
-});
+export const FEATURES: Feature[] = [
+  {
+    title: 'Rest Framework',
+    npm: '@travetto/rest',
+    choices: [
+      { title: 'Express.js', npm: '@travetto/rest-express' },
+      { title: 'KOA', npm: '@travetto/rest-koa' },
+      { title: 'Fastify', npm: '@travetto/rest-fastify' },
+    ],
+    addons: [
+      { title: 'Swagger', npm: '@travetto/swagger' },
+      { title: 'Logging', npm: '@travetto/log' }
+    ],
+    default: 'Express.js'
+  },
+  { title: 'Test Framework', npm: '@travetto/test' },
+  {
+    title: 'Rest Authentication',
+    npm: '@travetto/auth-rest',
+    addons: [{ title: 'Rest Session', npm: '@travetto/rest-session' }]
+  },
+  {
+    title: 'Data Modelling',
+    npm: '@travetto/model',
+    choices: [
+      { title: 'Elasticsearch', npm: '@travetto/model-elasticsearch' },
+      { title: 'MongoDB', npm: '@travetto/model-mongo' },
+      { title: 'MySQL', npm: '@travetto/model-sql', addons: [{ npm: 'mysql' }] },
+      { title: 'PostgreSQL', npm: '@travetto/model-sql', addons: [{ npm: 'pg' }] }
+    ],
+    default: 'MongoDB'
+  },
+];

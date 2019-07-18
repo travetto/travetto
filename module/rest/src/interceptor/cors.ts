@@ -17,7 +17,7 @@ export class CorsInterceptor extends RestInterceptor {
 
   postConstruct() {
     this.origins = new Set(this.restConfig.cors.origins || []);
-    this.methods = (this.restConfig.cors.methods || []).join(',');
+    this.methods = (this.restConfig.cors.methods || ['PUT', 'POST', 'GET', 'DELETE', 'PATCH']).join(',');
     this.headers = (this.restConfig.cors.headers || []).join(',');
     this.credentials = !!this.restConfig.cors.credentials;
   }
@@ -31,7 +31,7 @@ export class CorsInterceptor extends RestInterceptor {
     if (!this.origins.size || this.origins.has(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');
       res.setHeader('Access-Control-Allow-Credentials', `${this.credentials}`);
-      res.setHeader('Access-Control-Allow-Methods', this.methods || '*');
+      res.setHeader('Access-Control-Allow-Methods', this.methods);
       res.setHeader('Access-Control-Allow-Headers', this.headers || req.header('access-control-request-headers')! || '*');
     }
   }

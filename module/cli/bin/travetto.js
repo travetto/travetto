@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 const { FsUtil } = require('@travetto/boot/src/fs-util');
-const frameworkYetDeclared = FsUtil.toUnix(__dirname).includes('module/cli') && !process.env.TRV_FRAMEWORK_DEV;
+const frameworkYetDeclared = (FsUtil.toUnix(__dirname).includes('module/cli') ||
+  /travetto.*\/module\//.test(process.cwd())
+) && !process.env.TRV_FRAMEWORK_DEV;
 
 if (frameworkYetDeclared) { // If in framework development mode
   const child_process = require('child_process');

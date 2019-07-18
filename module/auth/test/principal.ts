@@ -6,10 +6,10 @@ import { Suite, Test } from '@travetto/test';
 import { PrincipalProvider } from '../src/principal';
 import { Identity, Principal } from '../src/types';
 
-const USERS: { [key: string]: Principal } = {
+const USERS: Record<string, Principal> = {
   a: {
     id: 'a',
-    permissions: new Set(['1', '2', '3']),
+    permissions: ['1', '2', '3'],
     details: {}
   }
 };
@@ -32,21 +32,21 @@ export class PrincipalTest {
     await assert.rejects(() => principalProvider.authorize({
       id: 'b',
       details: {},
-      permissions: new Set(['1', '2']),
+      permissions: ['1', '2'],
       provider: 'none'
     }));
 
     await assert.doesNotReject(() => principalProvider.authorize({
       id: 'a',
       details: {},
-      permissions: new Set(['2', '3']),
+      permissions: ['2', '3'],
       provider: 'none'
     }));
 
     const ctx = await principalProvider.authorize({
       id: 'a',
       details: {},
-      permissions: new Set(),
+      permissions: [],
       provider: 'none'
     });
 
@@ -54,6 +54,6 @@ export class PrincipalTest {
     assert(!!ctx.principal);
     assert(ctx.identity.id === ctx.principal.id);
     assert(ctx.identity.provider === 'none');
-    assert(ctx.principal.permissions === new Set(['1', '2', '3']));
+    assert(ctx.principal.permissions === ['1', '2', '3']);
   }
 }

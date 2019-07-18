@@ -10,7 +10,8 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
   constructor(
     private strategyName: string,
     private strategy: passport.Strategy,
-    private toIdentity: (user: U) => Pick<Identity, 'id' | 'permissions' | 'details'> & { provider?: string }
+    private toIdentity: (user: U) => Pick<Identity, 'id' | 'permissions' | 'details'> & { provider?: string },
+    private passportAuthenticateOptions: any = {}
   ) {
     super();
     passport.use(this.strategyName, this.strategy);
@@ -18,7 +19,7 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
 
   async authenticate(req: Request, res: Response) {
     return new Promise<Identity | undefined>((resolve, reject) => {
-      passport.authenticate(this.strategyName, { session: this.session },
+      passport.authenticate(this.strategyName, { session: this.session, ...this.passportAuthenticateOptions },
         (err, u) => this.authHandler(err, u).then(resolve, reject))(req, res);
     });
   }

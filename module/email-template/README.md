@@ -9,29 +9,47 @@ $ npm install @travetto/email-template
 This is the primary templating email engine.  The templating process is built upon three primary ideas, with the final output being an [`inky`](https://github.com/zurb/inky) rendered html/text email.  
 
 ## Asset Management
-The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying of asset paths, with the following defaults:
+The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying of asset paths, with the following paths (in order of precedence):
 
-1. `@travetto/email/assets`
-1. `%ROOT%/assets`
+1. `%ROOT%/resources`
+1. `@travetto/email-template/resources`
 1. `foundation-emails/scss` (specifically for `sass` files)
 
-When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  All email .html files, are loaded automatically and can be referenced by individual file name.  E.g. `%ROOT%/assets/receipt.html` can be referenced by the name `receipt`.
+When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  All email `.html` files, are loaded automatically and can be referenced by individual file name.  E.g. `/resources/email/receipt.html` can be referenced by the name `email/receipt`.
 
 ## Template Compilation
 
 The general process is as follows:
 
-1. Load in a general wrapper for email.  The default is `@travetto/email/assets/html/wrapper.html`.
-1. Load in the general stylings as `sass`. The default is `%ROOT%/assets/scss/app.scss`.
-1. Resolving all mustache partial templates.
+1. Load in a general wrapper for email, located at `/resources/email/wrapper.html`.
+1. Load in the general stylings as `sass`, from `/resources/email/app.scss`.
+1. Resolving all mustache partial templates, at `/resources/email/**/*.html`.
 1. Render the `inky` directives into the final `html` output.
 1. Inline and optimize all images for email transmission.
 1. Generate markdown version of email to support the alternate text format.
 1. Render the final output via the `mustache` templating process, interpolating the contextual data into the final output.
 
-
 ## Common Email Elements
-In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. `{{{> common-element}}}`
+In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. `{{{> email/common-element}}}`
+
+## Images
+When referencing an image from the `resources` folder in a template, e.g.
+
+```html
+<img src="/email/logo.png">
+```
+
+The image will be extracted out and embedded in the email as a multi part message.  This allows for compression and optimization of images as well as externalizing resources that may not be immediately public. 
+
+## Template Development
+The module provides [`cli`](https://github.com/travetto/travetto/tree/master/module/cli) support for email template development. Running 
+
+**Shell: running template development environment**
+```bash
+$ npx trv email-template
+```
+
+In the development environment, you can toggle between HTML and text views, as well as provide JSON context for the email to see how it would look with real data. This process supports live reload, and should help facilitate any email design work.
 
 ## Supporting Libraries
 Templating emails is achieved through a combination of multiple libraries, specifically:
@@ -57,7 +75,7 @@ A sample template could look like:
 which will then interpolate the context to replace `left` and `right`, and compile to a final html output. When using mustache expressions, make sure to use `{{{ }}}`, triple braces on complex text, to prevent mustache from escaping any characters.
 
 ## Example inky template with partials
-Given two files, `assets/welcome.html` and `assets/footer.hml`
+Given two files, `resources/email/welcome.html` and `resources/email/footer.hml`
 
 **Code: assets/welcome.html**
 ```xml
@@ -66,7 +84,7 @@ Given two files, `assets/welcome.html` and `assets/footer.hml`
     <columns large="{{left}}">Bob</columns>
     <columns large="{{right}}"></columns>
   </row>
-  {{{> footer }}}
+  {{{> email/footer }}}
 </row>
 ```
 

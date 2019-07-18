@@ -11,7 +11,7 @@ import { FsUtil } from '@travetto/boot';
 
 import { AssetRestConfig } from './config';
 
-type AssetMap = { [key: string]: Asset };
+type AssetMap = Record<string, Asset>;
 
 export class AssetRestUtil {
   static readTypeArr(arr?: string[] | string) {

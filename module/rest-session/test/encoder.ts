@@ -22,7 +22,7 @@ export class EncoderTest {
     const instance = await DependencyRegistry.getInstance(HeaderEncoder);
     const config = await DependencyRegistry.getInstance(SessionConfig);
 
-    const headers: { [key: string]: any } = {};
+    const headers: Record<string, any> = {};
 
     await instance.encode({} as any, {
       setHeader(key: string, value: any) {
@@ -43,7 +43,7 @@ export class EncoderTest {
     const instance = await DependencyRegistry.getInstance(HeaderEncoder);
     const config = await DependencyRegistry.getInstance(SessionConfig);
 
-    const headers: { [key: string]: any } = {};
+    const headers: Record<string, any> = {};
 
     await instance.encode({} as any, {
       setHeader(key: string, value: any) {

@@ -13,7 +13,7 @@ export class AssertCheck {
   static check(filename: string, text: string, fn: string, positive: boolean, ...args: any[]) {
     const assertion = AssertCapture.buildAssertion(filename, text, ASSERT_FN_OPERATOR[fn]);
 
-    const common: { [key: string]: string } = {
+    const common: Record<string, string> = {
       state: positive ? 'should' : 'should not'
     };
 

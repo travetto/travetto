@@ -327,7 +327,7 @@ export class ComponentFactory {
     const tagName = Parse5Adapter.getTagName(element);
 
     if (tagName in this.componentTags) {
-      const fnName = (this.componentTags as { [key: string]: string })[tagName];
+      const fnName = (this.componentTags as Record<string, string>)[tagName];
       const text: string = (this as any)[fnName](element);
       return text.trim();
     } else {

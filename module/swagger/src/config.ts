@@ -16,12 +16,12 @@ export class ApiInfoConfig {
 @Config('api.host')
 export class ApiHostConfig {
   servers?: ServerObject[];
-  openapi = '3.0.7';
+  openapi = '3.0.1';
 }
 
 @Config('api.client')
 export class ApiClientConfig {
-  codeGenImage: string = 'swaggerapi/swagger-codegen-cli-v3:3.0.7';
+  codeGenImage: string = 'openapitools/openapi-generator-cli';
   output: string = '';
   format?: string = '';
   formatOptions?: string = '';

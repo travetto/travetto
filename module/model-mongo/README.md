@@ -26,15 +26,16 @@ where the `MongoModelConfig` is defined by:
 
 **Code: Structure of MongoModelConfig**
 ```typescript
-@Config('model.mongo')
+@Config('mongo.model')
 export class MongoModelConfig {
   hosts = 'localhost';
   namespace = 'app';
   port = 27017;
-  options = {};
+  clientOptions = {}; // Passed to Client constructor
+  connectionOptions = {} // Passed as query parameters to connection string
 }
 ```
 
-and can be overridden via environment variables or config files, as defined in [`Config`](https://github.com/travetto/travetto/tree/master/module/config).
+and can be overridden via environment variables or config files, as defined in [`Config`](https://github.com/travetto/travetto/tree/master/module/config).  The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a `ResourceManager` path or just a standard file path.
 
 **NOTE** During testing, the source will automatically spin up a `mongodb` server via a `docker` container if you are not already running the service.

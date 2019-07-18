@@ -44,6 +44,9 @@ export class AsyncContext {
   }
 
   private enter(asyncId: number) {
+    if (!this.active) {
+      return;
+    }
     const exAsyncId = async_hooks.executionAsyncId();
     const triggerId = async_hooks.triggerAsyncId() || asyncId;
     const target = this.threads.get(triggerId) || this.threads.get(exAsyncId);
@@ -54,6 +57,9 @@ export class AsyncContext {
   }
 
   private leave(asyncId: number) {
+    if (!this.active) {
+      return;
+    }
     const exAsyncId = async_hooks.executionAsyncId();
     if (this.threads.has(asyncId)) {
       this.threads.delete(asyncId);
@@ -101,14 +107,13 @@ export class AsyncContext {
     await new Promise(r => process.nextTick(r));
 
     const runId = async_hooks.executionAsyncId() || async_hooks.triggerAsyncId();
-    let val;
-    let err;
-
     this.active += 1;
     this.storageState.set(runId, init);
     this.threads.set(runId, runId);
     this.threadsSet.set(runId, new Set([runId]));
 
+    let val;
+    let err;
     try {
       val = await fn();
     } catch (e) {

@@ -23,7 +23,12 @@ export function fork(cmd: string, args: string[] = []) {
     const err: Buffer[] = [];
     const proc = child_process.spawn(process.argv0, [cmd, ...args], {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-      shell: false
+      shell: false,
+      env: {
+        ...process.env,
+        DEBUG: '0',
+        TRACE: '0'
+      }
     });
     proc.stdout!.on('data', v => text.push(v));
     proc.stderr!.on('data', v => err.push(v));

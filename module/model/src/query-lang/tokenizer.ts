@@ -6,7 +6,7 @@ const SPACE = 0x20, TAB = 0x09;
 const DBL_QUOTE = 0x22, SGL_QUOTE = 0x27, FORWARD_SLASH = 0x2f, BACKSLASH = 0x5c;
 const PERIOD = 0x2e, UNDERSCORE = 0x54, DOLLARSIGN = 0x24, DASH = 0x2d;
 
-const ESCAPE: { [key: string]: string } = {
+const ESCAPE: Record<string, string> = {
   '\\n': '\n',
   '\\r': '\r',
   '\\t': '\t',
@@ -14,7 +14,7 @@ const ESCAPE: { [key: string]: string } = {
   [`\\'`]: `'`
 };
 
-const TOKEN_MAPPING: { [key: string]: Token } = {
+const TOKEN_MAPPING: Record<string, Token> = {
   and: { type: 'boolean', value: 'and' },
   '&&': { type: 'boolean', value: 'and' },
   or: { type: 'boolean', value: 'or' },

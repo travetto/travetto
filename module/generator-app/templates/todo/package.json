@@ -1,19 +1,19 @@
 {
   "author": {
-    "email": "{{author.email}}",
-    "name": "{{author.name}}"
+    "email": "{{{author.email}}}",
+    "name": "{{{author.name}}}"
   },
   "dependencies": {
-    // {{#dependencies.list}}
-    "@travetto/{{.}}": "^{{dependencies.version}}",
-    // {{/dependencies.list}}
-    "@travetto/test": "^{{dependencies.version}}"
+    // {{#frameworkDependencies}}
+    "{{{.}}}": "^{{{frameworkVersion}}}",
+    // {{/frameworkDependencies}}
+    "@travetto/cli": "^{{{frameworkVersion}}}"
   },
   "description": "A travetto based project",
   "keywords": [
-    // {{#modules.mapKeys}}
-    "{{.}}",
-    // {{/modules.mapKeys}}
+    // {{#modules}}
+    "{{{.}}}",
+    // {{/modules}}
     "travetto"
   ],
   "license": "MIT",
@@ -25,6 +25,6 @@
     "src",
     "resources"
   ],
-  "name": "{{app.name}}",
+  "name": "{{{app.name}}}",
   "version": "1.0.0"
 }

@@ -1,0 +1,4 @@
+sql.model:
+  namespace: "sample_e2e"
+  user: root
+  password: password  

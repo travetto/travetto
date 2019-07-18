@@ -20,7 +20,7 @@ export class ClientGenerate {
 
   codeGenCli: DockerContainer;
   workspace: string;
-  internalRoot = '/opt/swagger-codegen-cli';
+  internalRoot = '/opt/openapi-generator/modules/openapi-generator-cli/target';
 
   constructor(private config: ApiClientConfig, private service: SwaggerService) { }
 
@@ -81,12 +81,10 @@ export class ClientGenerate {
     await fsWriteFile(specFile, JSON.stringify(spec, undefined, 2));
     const { result: prom } = await this.codeGenCli.exec([
       'java',
-      '-jar', FsUtil.resolveUnix(this.internalRoot, 'swagger-codegen-cli.jar'),
+      '-jar', FsUtil.resolveUnix(this.internalRoot, 'openapi-generator-cli.jar'),
       'generate',
-      '--remove-operation-id-prefix', '1',
-      '--type-mappings', 'BigDecimal=number',
-      '--template-engine', 'mustache',
-      '-l', this.config.format!,
+      '--remove-operation-id-prefix',
+      '-g', this.config.format!,
       '-o', this.workspace,
       '-i', FsUtil.resolveUnix(this.internalRoot, specFile),
       ...(this.config.formatOptions ? ['--additional-properties', this.config.formatOptions] : [])

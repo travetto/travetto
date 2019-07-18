@@ -2,7 +2,7 @@ import { FsUtil, EnvUtil } from '@travetto/boot';
 
 const PROD_KEY = 'prod';
 
-const PROD_ENV_MAPPING: { [key: string]: string } = {
+const PROD_ENV_MAPPING: Record<string, string> = {
   production: PROD_KEY
 };
 
@@ -43,6 +43,14 @@ class $Env {
       error: c.error.bind(c)
     });
 
+    if (!trace) {
+      console.trace = () => { };
+    }
+
+    if (!debug) {
+      console.debug = () => { };
+    }
+
     if (EnvUtil.isTrue('plain_logs')) {
       return; // Don't decorate
     }
@@ -58,8 +66,12 @@ class $Env {
     console.error = (...args) => {
       logFn(error, 'error', ...args.map(x => x && x.toConsole ? x.toConsole() : (x && x.stack ? x.stack : x)));
     };
-    console.trace = !trace ? () => { } : logFn.bind(null, log, 'trace'); // Suppress trace statements
-    console.debug = !debug ? () => { } : logFn.bind(null, log, 'debug'); // Suppress debug statements
+    if (trace) {
+      console.trace = logFn.bind(null, log, 'trace'); // Suppress trace statements
+    }
+    if (debug) {
+      console.debug = logFn.bind(null, log, 'debug'); // Suppress debug statements
+    }
   }
 
   toJSON() {

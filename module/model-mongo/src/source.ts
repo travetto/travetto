@@ -6,6 +6,7 @@ import {
   ModelRegistry, ModelCore,
   PageableModelQuery,
   BulkOp,
+  Point,
   ModelQuery,
   ValidStringFields,
   WhereClauseRaw
@@ -17,16 +18,21 @@ import { Injectable } from '@travetto/di';
 
 import { MongoUtil } from './util';
 import { MongoModelConfig } from './config';
+import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
+import accepts = require('accepts');
 
 @Injectable()
 export class MongoModelSource extends ModelSource {
 
   private client: mongo.MongoClient;
   private db: mongo.Db;
-  private indices: { [key: string]: IndexConfig<any>[] } = {};
 
   constructor(private config: MongoModelConfig) {
     super();
+  }
+
+  generateId() {
+    return new mongo.ObjectId().toHexString();
   }
 
   async suggestField<T extends ModelCore, U = T>(
@@ -57,6 +63,8 @@ export class MongoModelSource extends ModelSource {
     const col = await this.getCollection(cls);
 
     const projected = MongoUtil.extractTypedWhereClause(cls, query.where || {});
+
+    console.trace('Query', JSON.stringify(projected, null, 2));
 
     let cursor = col.find(projected);
     if (query.select) {
@@ -96,27 +104,51 @@ export class MongoModelSource extends ModelSource {
     return (o as any)._id;
   }
 
-  async postConstruct() {
-    await this.init();
-  }
-
-  async init() {
-    this.client = await mongo.MongoClient.connect(this.config.url);
+  async initClient() {
+    this.client = await mongo.MongoClient.connect(this.config.url, this.config.clientOptions);
     this.db = this.client.db();
-    await this.establishIndices();
   }
 
-  async establishIndices() {
-    const promises = [];
+  async initDatabase() {
+    // Establish geo indices
+    const promises: Promise<any>[] = [];
+    for (const model of ModelRegistry.getClasses()) {
+      promises.push(...this.establishIndices(model));
+    }
+    await Promise.all(promises);
+  }
 
-    for (const colName of Object.keys(this.indices)) {
-      const col = await this.db.collection(colName);
+  async clearDatabase() {
+    await this.db.dropDatabase();
+  }
 
-      for (const { fields, options } of this.indices[colName]) {
-        promises.push(col.createIndex(fields, options));
+  establishIndices<T extends ModelCore>(cls: Class<T>) {
+    const promises: Promise<any>[] = [];
+    for (const idx of ModelRegistry.get(cls).indices) {
+      const [first, ...rest] = idx.fields;
+      rest.reduce((acc, f) => ({ ...acc, f }), first);
+      console.trace('Creating index', first, idx.options);
+      promises.push(
+        this.getCollection(cls)
+          .then((col) => col.createIndex(first, idx.options)));
+    }
+    promises.push(this.establishGeoIndices(cls));
+    return promises;
+  }
+
+  async establishGeoIndices<T extends ModelCore>(cls: Class<T>, path: FieldConfig[] = [], root = cls) {
+    const fields = SchemaRegistry.has(cls) ?
+      Object.values(SchemaRegistry.get(cls).views[ALL_VIEW].schema) :
+      [];
+    for (const field of fields) {
+      if (SchemaRegistry.has(field.type)) {
+        await this.establishGeoIndices(field.type, [...path, field], root);
+      } else if (field.type === Point) {
+        const col = await this.getCollection(root);
+        const name = [...path, field].map(x => x.name).join('.');
+        await col.createIndex({ [name]: '2d' });
       }
     }
-    return Promise.all(promises);
   }
 
   getCollectionName<T extends ModelCore>(cls: Class<T>): string {
@@ -126,23 +158,6 @@ export class MongoModelSource extends ModelSource {
 
   async getCollection<T extends ModelCore>(cls: Class<T>): Promise<mongo.Collection> {
     return this.db.collection(this.getCollectionName(cls));
-  }
-
-  async resetDatabase() {
-    await this.db.dropDatabase();
-    await this.init();
-  }
-
-  registerIndex(cls: Class, fields: { [key: string]: number }, options: mongo.IndexOptions) {
-    const col = this.getCollectionName(cls);
-    this.indices[col] = this.indices[col] || [];
-
-    // TODO: Cleanup
-    this.indices[col].push({ fields, options } as any);
-  }
-
-  getIndices(cls: Class) {
-    return this.indices[this.getCollectionName(cls)];
   }
 
   async getAllByQuery<T extends ModelCore>(cls: Class<T>, query: PageableModelQuery<T> = {}): Promise<T[]> {

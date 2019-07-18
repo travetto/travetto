@@ -123,6 +123,16 @@ assert.throws(() => {
   return err.message.startsWith('Big') && err.message.length > 4 ? undefined : err;
 });
 ```
+
+## Running Tests
+To run the tests you can either call the [`cli`](https://github.com/travetto/travetto/tree/master/module/cli) by invoking
+
+```bash
+$ npx trv test
+```
+
+or via the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin), which will provide even more functionality for real-time testing and debugging.
+
 ## Additional Considerations
 During the test execution, a few things additionally happen that should be helpful.  The primary addition, is that all console output is captured, and will be exposed in the test output.  This allows for investigation at a later point in time by analyzing the output.  
 

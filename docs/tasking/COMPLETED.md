@@ -12,6 +12,17 @@ Model Elasticsearch
 - [X] Regex as strings wrt to binding and schema validation
 - [X] Schema config for text field arrays
 
+Model SQL
+----------------------
+- [X] Building out SQL model support
+  - [X] Add tests to base for 'replace' mode of deepAssign
+  - [X] Support mysql/postgres as first pass
+  - [X] Figure out paradigm for ownership of namespacing
+  - [X] Basic polymorphism support
+  - [X] Sorting/paging
+  - [X] Handle schema changes (columns added removed)
+
+
 Exec
 -----------------------
 - [X] Modify spawn to take in command and args, not full string

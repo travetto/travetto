@@ -13,7 +13,7 @@ import { AllResultsCollector } from './collector';
 
 export class ConsumerManager {
 
-  static FORMAT_MAPPING: { [key: string]: Class<Consumer> } = {
+  static FORMAT_MAPPING: Record<string, Class<Consumer>> = {
     json: JSONEmitter,
     tap: TapEmitter,
     event: EventStream,

@@ -110,7 +110,7 @@ Released  0.5.x: 2018-12-28 - a8c58104a586baa6203f38c9517fbb5a60ecec5c
 * Unified file path usage and resource loading
 
 ------------------------------------------------------
-Release 0.6.x: 2019-04-15 -- BETA -- 215e821ceede371bfc9046e1a902fd09adc7f8c4
+Release 0.6.x: 2019-04-15 -- BETA -- 7bf8998ed07dcf257981ffa73aa1b9630f8ff6b1
 ------------------------------------------------------
 * Test assertions and output cleanup
   * Cleanup tests output on run
@@ -130,5 +130,36 @@ Release 0.6.x: 2019-04-15 -- BETA -- 215e821ceede371bfc9046e1a902fd09adc7f8c4
 * Separated boot (typescript to javascript compile) from base, base is now used by simple modules
 
 ------------------------------------------------------
-Release 0.7.x: 
+Release 0.7.x: 2019-07-15 -- BETA -- 
 ------------------------------------------------------
+### Major Fixes
+* Updated to Node v12 and Typescript 3.5.x as a minimum requirement
+* SQL support in the Model Service (postgres and mysql for initial rollout)
+* Moved to async stack traces, which resulted in a substantial performance improvement
+* Added xUnit as test format output for better integration with build systems
+* Proper GEO distance/within queries for Mongo and Elasticsearch
+   * SQL support is pending
+* Swagger/Client Generation Fixes for ALL endpoints as well as endpoints with path parameters
+   * Switched over to openapitools as swagger-codegen-cli was out of date
+* Rewrote all code transformers to follow specific pattern/framework
+   * Code visiting is now in a single pass
+   * Focuses on methods/fields/classes as specific type of visitation
+   * Makes it very clear what each transformer does and how to modify it
+
+### Minor Fixes
+* Changes to ModelService to support rest-session being able to persist properly
+* Yeoman Genenrator has been updated, and the internal dependency management has been rewritten
+* Library updates to maintain latest working versions
+* Brought support for Map/Set to route serialization as JSON objects and arrays
+* Resolved issues with fastify and path determination
+* Properly support redirects in Net util
+* Worker pools now support async operations fully
+* Resolved CORS issue with headers/methods
+* General bug fixes in 
+   * Rest
+   * Rest Session
+   * Schema
+   * Email
+   * Yeoman Generator
+   * Model
+   * Swagger

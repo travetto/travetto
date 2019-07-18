@@ -18,7 +18,7 @@ function getConf(o?: [Class, Function]) {
   }
 }
 
-function send(e: string, data: { file: string } & { [key: string]: any }) {
+function send(e: string, data: { file: string } & Record<string, any>) {
   if (process.send) {
     process.send({ type: e, ...data });
   } else {

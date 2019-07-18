@@ -12,7 +12,7 @@ export interface HttpHandler {
 }
 
 export class Server {
-  static CONTENT_TYPES: { [key: string]: string } = {
+  static CONTENT_TYPES: Record<string, string> = {
     jpg: 'image/jpeg',
     png: 'image/png',
     gif: 'image/gif',
