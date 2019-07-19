@@ -486,7 +486,8 @@ export class ElasticsearchModelSource extends ModelSource {
 
     const res = await this.client.delete({
       ...this.getIdentity(cls),
-      id
+      id,
+      refresh: true
     });
     return res.found ? 1 : 0;
   }
