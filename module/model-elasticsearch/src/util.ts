@@ -194,7 +194,7 @@ export class ElasticsearchUtil {
     const out = {
       params: {} as Record<string, any>,
       lang: 'painless',
-      inline: ''
+      source: ''
     };
     for (const x of Object.keys(o || {})) {
       const prop = arr ? `${path}[${x}]` : `${path}${path ? '.' : ''}${x}`;
@@ -206,11 +206,11 @@ export class ElasticsearchUtil {
         out.params[param] = o[x];
       } else {
         const sub = this.generateUpdateScript(o[x], prop);
-        ops.push(sub.inline);
+        ops.push(sub.source);
         Object.assign(out.params, sub.params);
       }
     }
-    out.inline = ops.join(';');
+    out.source = ops.join(';');
 
     return out;
   }

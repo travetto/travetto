@@ -289,6 +289,7 @@ class TestSave extends BaseElasticsearchTest {
 
     await service.updatePartial(Person, Person.from({
       id: o2.id,
+      gender: 'f',
       address: {
         street1: 'changed\n',
         street2: undefined
@@ -299,6 +300,7 @@ class TestSave extends BaseElasticsearchTest {
 
     assert(o3.name === 'oscar');
     assert(o3.age === 20);
+    assert(o3.gender === 'f' as any);
     assert(o3.address.street1 === 'changed\n');
     assert(!('street2' in o3.address));
   }
