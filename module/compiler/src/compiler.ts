@@ -103,12 +103,12 @@ class $Compiler {
     }
   }
 
-  markForReload(files: string[] | string) {
+  markForReload(files: string[] | string, unlink = true) {
     if (!Array.isArray(files)) {
       files = [files];
     }
     for (const fileName of files) {
-      this.unload(fileName);
+      this.unload(fileName, unlink);
       // Do not automatically reload
     }
   }
@@ -147,7 +147,7 @@ class $Compiler {
 
     if (changed && (force || this.presenceManager.isWatchedFileLoaded(fileName))) {
       // If file is already loaded, mark for reload
-      this.markForReload(fileName);
+      this.markForReload(fileName, false); // Do not delete the file we just created
     }
 
     return changed;
