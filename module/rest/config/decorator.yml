@@ -18,6 +18,7 @@ rest-param:
 
 rest-endpoint:
   '@travetto/rest':
+    - All
     - Get
     - Post
     - Put

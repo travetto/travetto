@@ -28,12 +28,15 @@ export interface Request {
     updatePrincipalDetails(details: U): Promise<void>;
     checkPermissions(include: Set<string>, exclude: Set<string>, matchAll = false): void; // Throws an error on exception
   }
+  loginContext?: Record<string, any>;
   logout(): Promise<void>;
   login(providers: symbol[]): Promise<AuthContext | undefined>;
 }
 ```
 
 This allows for any filters/middleware to access this information without deeper knowledge of the framework itself.  Also, for performance benefits, the auth context can be stored in the user session as a means to minimize future lookups. If storing the entire principal in the session, it is best to keep the principal as small as possible.
+
+When authenticating, with a multi-step process, it is useful to share information between steps.  The `loginContext` property is intended to be a location in which that information is persisted. Currently only the [`Auth-Passport`](https://github.com/travetto/travetto/tree/master/module/auth-passport) module uses this, when dealing with multi-step logins.
 
 ## Patterns for Integration
 Every external framework integration relies upon the `IdentityProvider` contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
