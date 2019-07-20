@@ -536,7 +536,9 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     if (isArray) {
       const newInstances = [] as InsertWrapper['records'];
       for (const el of instances) {
-        if (Array.isArray(el.value)) {
+        if (el.value === null || el.value === undefined) {
+          continue;
+        } else if (Array.isArray(el.value)) {
           const name = el.stack[el.stack.length - 1].name;
           for (const sel of el.value) {
             newInstances.push({
