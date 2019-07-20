@@ -4,7 +4,7 @@
     "target": "es2018",
     "strict": true,
     "strictPropertyInitialization": false,
-    "sourceMap": true,
+    "inlineSourceMap": true,
     "lib": [
       "es2015.proxy",
       "es2018"

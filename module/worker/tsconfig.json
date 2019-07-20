@@ -1,17 +1,1 @@
-{
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2018",
-    "strict": true,
-    "strictPropertyInitialization": false,
-    "sourceMap": true,
-    "lib": [
-      "es2015.proxy",
-      "es2018"
-    ],
-    "preserveConstEnums": true,
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "outDir": "build/"
-  }
-}
+{ "extends": "./node_modules/@travetto/boot/tsconfig.json" }
