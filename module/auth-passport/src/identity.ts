@@ -19,8 +19,10 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
     }
   }
 
-  static computeExtraOptions(req: Request, state?: any) {
+  static computeExtraOptions(req: Request, passportAuthenticateOptions: any) {
     const extra: Record<string, any> = {};
+
+    let state = passportAuthenticateOptions.state;
 
     state = state && state.call ? state.call(null, req) : (state || {});
     const json = JSON.stringify({ referrer: req.header('referrer'), ...state });
@@ -48,7 +50,7 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
       passport.authenticate(this.strategyName, {
         session: this.session,
         ...this.passportAuthenticateOptions,
-        ...PassportIdentityProvider.computeExtraOptions(req, this.passportAuthenticateOptions.state)
+        ...PassportIdentityProvider.computeExtraOptions(req, this.passportAuthenticateOptions)
       },
         (err, u) => this.authHandler(err, u).then(resolve, reject))(req, res);
     });
