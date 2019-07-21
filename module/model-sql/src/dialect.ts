@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent } from '@travetto/schema';
+import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent, Schema } from '@travetto/schema';
 import { Util } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
 
@@ -9,6 +9,11 @@ import { DeleteWrapper, InsertWrapper, DialectState } from './types';
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
+
+@Schema()
+class Total {
+  total: number;
+}
 
 function makeField(name: string, type: Class, required: boolean, extra: any) {
   return {
@@ -192,8 +197,8 @@ export abstract class SQLDialect implements DialectState {
 
   async getCountForQuery<T>(cls: Class<T>, query: Query<T>) {
     const { records } = await this.executeSQL<{ total: number }>(this.getQueryCountSQL(cls, query));
-    const [{ total }] = records;
-    return total;
+    const [record] = records;
+    return Total.from(record).total;
   }
 
   async handleFieldChange(e: SchemaChangeEvent): Promise<void> {
@@ -285,6 +290,13 @@ export abstract class SQLDialect implements DialectState {
         throw new Error(`Unknown field: ${key}`);
       }
       const sStack = [...stack, field];
+      if (key in foreignMap && field.array && !SchemaRegistry.has(field.type)) {
+        // If dealing with simple external
+        sStack.push({
+          name: field.name,
+          type: field.type
+        });
+      }
       const sPath = this.resolveName(sStack);
 
       if (Util.isPlainObject(top)) {
@@ -645,10 +657,9 @@ ${orderBy};`;
 
   getQueryCountSQL<T>(cls: Class<T>, query: Query<T>) {
     return `
-SELECT COUNT(1) as total
+SELECT COUNT(DISTINCT ${this.rootAlias}.id) as total
 ${this.getFromSQL(cls)}
-${this.getWhereSQL(cls, query.where)}
-${this.getGroupBySQL(cls, query)}`;
+${this.getWhereSQL(cls, query.where)}`;
   }
 
   async fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]> {

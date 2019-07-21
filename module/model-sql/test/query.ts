@@ -76,11 +76,12 @@ export class QueryTest {
     const dct = await DependencyRegistry.getInstance(SQLDialect);
     dct.resolveName = (stack: VisitStack[]) => {
       const field = stack[stack.length - 1] as FieldConfig;
-      return `${field.owner.name}.${field.name}`;
+      const parent = stack[stack.length - 2] as FieldConfig;
+      return `${field.owner ? field.owner.name : parent.name}.${field.name}`;
     };
 
     const qryStr = dct.getWhereGroupingSQL(WhereType, qry);
-    assert(qryStr === `(WhereTypeAB.c = 5 AND WhereTypeD.e = TRUE AND (WhereType.name = 5 OR WhereType.age = 10) AND WhereTypeG.z ALL = ('a','b','c') AND WhereTypeA.d > 20)`);
+    assert(qryStr === `(WhereTypeAB.c = 5 AND WhereTypeD.e = TRUE AND (WhereType.name = 5 OR WhereType.age = 10) AND z.z ALL = ('a','b','c') AND WhereTypeA.d > 20)`);
   }
 
   @Test()
