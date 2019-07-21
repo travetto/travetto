@@ -117,12 +117,15 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     const final = this.getOrCreatePending(cls) as ControllerConfig;
 
     // Handle duplicates, take latest
-    const found = new Map<string, EndpointConfig>();
-    for (const ep of final.endpoints) {
-      ep.id = `${ep.method}#${final.basePath}${typeof ep.path === 'string' ? ep.path : ep.path.source}`;
-      found.set(ep.id, ep);
-    }
-    final.endpoints = Array.from(found.values()).sort((a, b) => b.priority - a.priority); // Run in reverse
+    const foundRoutes = new Set<string>();
+
+    final.endpoints = final.endpoints
+      .sort((a, b) => a.priority - b.priority)
+      .map(ep => {
+        ep.id = `${ep.method}#${final.basePath}${typeof ep.path === 'string' ? ep.path : ep.path.source}`;
+        return ep;
+      })
+      .filter(ep => !foundRoutes.has(ep.id) && !!(foundRoutes.add(ep.id)))
 
     if (this.has(final.basePath)) {
       console.debug('Reloading controller', cls.name, final.basePath);
