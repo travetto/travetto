@@ -103,7 +103,7 @@ export abstract class SQLDialect implements DialectState {
   abstract ident(name: string | FieldConfig): string;
 
   quote(text: string): string {
-    return `'${text}'`;
+    return `'${text.replace(/[']/g, `''`)}'`;
   }
 
   /**
