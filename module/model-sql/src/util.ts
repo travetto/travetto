@@ -282,10 +282,10 @@ export class SQLUtil {
         const key = Object.keys(cl)[0] as string;
         const field = schema.views[ALL_VIEW].schema[key];
         if (Util.isPrimitive(cl[key])) {
-          stack.push(field);
+          stack.push({ ...field });
           return { stack, asc: !!!!cl[key] };
         } else {
-          stack.push(field);
+          stack.push({ ...field });
           schema = SchemaRegistry.get(field.type);
           cl = cl[key];
         }
