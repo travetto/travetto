@@ -1,7 +1,7 @@
 import * as pg from 'pg';
 
 import { AsyncContext } from '@travetto/context';
-import { SQLModelConfig, ConnectionSupport } from '../..';
+import { SQLModelConfig, ConnectionSupport, WithConnection, WithTransaction } from '../..';
 
 /**
  * Connection support
@@ -25,13 +25,14 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
       ...(this.config.options || {})
     });
 
-    const client = await this.pool.connect();
     try {
-      await client.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+      await this.context.run(() =>
+        WithConnection({ conn: this }, () =>
+          WithTransaction({ conn: this }, 'required', () =>
+            this.active.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;'))));
     } catch (err) {
       // swallow
     }
-    await client.release();
   }
 
   public get asyncContext() {
@@ -69,4 +70,8 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
   startTx = async () => { await this.active.query('BEGIN'); };
   commit = async () => { await this.active.query('COMMIT'); };
   rollback = async () => { await this.active.query('ROLLBACK'); };
+
+  startNestedTx = async (id: string) => { await this.active.query(`SAVEPOINT ${id}`); };
+  commitNested = async (id: string) => { await this.active.query(`RELEASE SAVEPOINT ${id}`); };
+  rollbackNested = async (id: string) => { await this.active.query(`ROLLBACK TO ${id}`); };
 }

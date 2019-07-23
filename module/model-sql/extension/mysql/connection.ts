@@ -78,4 +78,8 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
   startTx = () => asAsync(this.active, 'beginTransaction');
   commit = () => asAsync(this.active, 'commit');
   rollback = () => asAsync(this.active, 'rollback');
+
+  startNestedTx = async (id: string) => { await this.active.query(`SAVEPOINT ${id}`); };
+  commitNested = async (id: string) => { await this.active.query(`RELEASE SAVEPOINT ${id}`); };
+  rollbackNested = async (id: string) => { await this.active.query(`ROLLBACK TO ${id}`); };
 }

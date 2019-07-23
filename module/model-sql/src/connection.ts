@@ -1,3 +1,5 @@
+import { Util } from '@travetto/base';
+
 /**
  * Connection is a common enough pattern, that it can
  * be separated out to allow for differences in connection
@@ -14,6 +16,10 @@ export interface ConnectionSupport<C = any> {
   startTx(): Promise<void>;
   commit(): Promise<void>;
   rollback(): Promise<void>;
+
+  startNestedTx(id: string): Promise<void>;
+  commitNested(id: string): Promise<void>;
+  rollbackNested(id: string): Promise<void>;
 }
 
 export type TransactionType = 'required' | 'isolated';
@@ -49,10 +55,9 @@ export async function WithTransaction<V extends ConnectionAware, R>(
   args: any[] = []
 ): Promise<R> {
   let ctx = self.conn.asyncContext;
-  const newTx = mode === 'isolated' || !ctx.pendingTx;
-  if (newTx) {
+  if (!ctx.pendingTx) {
     try {
-      ctx.pendingTx = (ctx.pendingTx || 0) + 1;
+      ctx.pendingTx = 1;
       await self.conn.startTx();
       const res = await fn.apply(self, args);
       await self.conn.commit();
@@ -61,7 +66,21 @@ export async function WithTransaction<V extends ConnectionAware, R>(
       await self.conn.rollback();
       throw e;
     } finally {
-      ctx.pendingTx = (ctx.pendingTx || 1) - 1;
+      ctx.pendingTx = 0;
+    }
+  } else if (mode === 'isolated') {
+    const id = `tx${Util.uuid()}`;
+    try {
+      ctx.pendingTx = ctx.pendingTx + 1;
+      await self.conn.startNestedTx(id);
+      const res = await fn.apply(self, args);
+      await self.conn.commitNested(id);
+      return res;
+    } catch (e) {
+      await self.conn.rollbackNested(id);
+      throw e;
+    } finally {
+      ctx.pendingTx = ctx.pendingTx - 1;
     }
   } else {
     return fn.apply(self, args);

@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class, ChangeEvent } from '@travetto/registry';
 import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent, Schema } from '@travetto/schema';
 import { Util } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
@@ -204,30 +204,18 @@ export abstract class SQLDialect implements DialectState {
   async handleFieldChange(e: SchemaChangeEvent): Promise<void> {
     const rootStack = SQLUtil.classToStack(e.cls);
 
-    const removes = e.change.subs.reduce((acc, v) => {
-      acc.push(...v.fields
-        .filter(ev => ev.type === 'removing')
-        .map(ev => [...rootStack, ...v.path, ev.prev!]));
+    const changes = e.change.subs.reduce((acc, v) => {
+      const path = v.path.map(f => ({ ...f }));
+      for (const ev of v.fields) {
+        (acc[ev.type] = acc[ev.type] || [])
+          .push([...rootStack, ...path, { ...ev.prev! }]);
+      }
       return acc;
-    }, [] as VisitStack[][]);
+    }, {} as Record<ChangeEvent<any>['type'], VisitStack[][]>);
 
-    const modifies = e.change.subs.reduce((acc, v) => {
-      acc.push(...v.fields
-        .filter(ev => ev.type === 'changed')
-        .map(ev => [...rootStack, ...v.path, ev.curr!]));
-      return acc;
-    }, [] as VisitStack[][]);
-
-    const adds = e.change.subs.reduce((acc, v) => {
-      acc.push(...v.fields
-        .filter(ev => ev.type === 'added')
-        .map(ev => [...rootStack, ...v.path, ev.curr!]));
-      return acc;
-    }, [] as VisitStack[][]);
-
-    await Promise.all(adds.map(v => this.executeSQL(this.getAddColumnSQL(v))));
-    await Promise.all(modifies.map(v => this.executeSQL(this.getModifyColumnSQL(v))));
-    await Promise.all(removes.map(v => this.executeSQL(this.getDropColumnSQL(v))));
+    await Promise.all(changes.added.map(v => this.executeSQL(this.getAddColumnSQL(v))));
+    await Promise.all(changes.changed.map(v => this.executeSQL(this.getModifyColumnSQL(v))));
+    await Promise.all(changes.removing.map(v => this.executeSQL(this.getDropColumnSQL(v))));
   }
 
   getDropColumnSQL(stack: VisitStack[]) {
