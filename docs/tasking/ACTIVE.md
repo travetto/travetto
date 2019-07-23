@@ -1,6 +1,10 @@
 In-Progress
 =============
 
+DI
+----------------------
+- [ ] Prevent duplicate constructions via different targets
+
 Compiler
 ----------------------
 - [ ] Support type checking in transformers
