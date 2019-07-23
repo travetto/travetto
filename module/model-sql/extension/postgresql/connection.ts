@@ -34,21 +34,21 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
     await client.release();
   }
 
-  private get ctx() {
-    return this.context.get<{ connection: any, topped?: boolean }>('connection');
+  public get asyncContext() {
+    return this.context.get<{ connection: pg.PoolClient }>('connection');
   }
 
   get active(): pg.PoolClient {
-    return this.ctx.connection;
+    return this.asyncContext.connection;
   }
 
   /**
   * Acquire conn
   */
-  async create() {
+  async acquire() {
     const res = await this.pool.connect();
     if (!this.active) {
-      this.ctx.connection = res;
+      this.asyncContext.connection = res;
     }
     return res;
   }
