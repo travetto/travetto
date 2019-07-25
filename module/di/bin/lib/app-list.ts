@@ -35,9 +35,9 @@ export class AppListUtil {
     }); // Only load files that are candidates
 
     // Get applications
-    const { DependencyRegistry } = await import('../../src/registry');
-    DependencyRegistry.loadApplicationsFromConfig();
-    const res = await DependencyRegistry.getApplications();
+    const { ApplicationRegistry } = await import('../../src/app/registry');
+    ApplicationRegistry.loadAllFromConfig();
+    const res = await ApplicationRegistry.getAll();
 
     const items = Promise.all(res.map(async x => ({
       watchable: x.watchable,

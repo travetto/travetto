@@ -2,7 +2,7 @@ import { Util } from '@travetto/base/src/util';
 
 import { AppListUtil } from './app-list';
 import { handleFailure } from './util';
-import { ApplicationParameter } from '../../src/types';
+import { ApplicationParameter } from '../../src/app/types';
 
 export class RunUtil {
 
@@ -46,8 +46,8 @@ export class RunUtil {
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.init('bootstrap').run();
 
-    const { DependencyRegistry } = await import('../../src/registry');
-    await DependencyRegistry.runApplication(name, typedSub);
+    const { ApplicationRegistry } = await import('../../src/app/registry');
+    await ApplicationRegistry.run(name, typedSub);
   }
 
   static async runDirect() {

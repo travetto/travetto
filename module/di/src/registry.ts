@@ -1,9 +1,8 @@
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
-import { Env, Util, AppInfo } from '@travetto/base';
-import { ConfigSource } from '@travetto/config';
+import { Env, Util } from '@travetto/base';
 import { RetargettingHandler } from '@travetto/compiler';
 
-import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig, ApplicationConfig } from './types';
+import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
 
 export const DEFAULT_INSTANCE = Symbol('__default');
@@ -46,8 +45,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   private proxies = new Map<TargetId, Map<Symbol, Proxy<RetargettingHandler<any>>>>();
   private proxyHandlers = new Map<TargetId, Map<Symbol, RetargettingHandler<any>>>();
-
-  private applications = new Map<string, ApplicationConfig>();
 
   constructor() {
     super(RootRegistry);
@@ -247,41 +244,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return uniqueQualifiers.map(id => this.get(id)! as InjectableConfig<T>);
   }
 
-  registerApplication(app: string, config: ApplicationConfig) {
-    this.applications.set(app, config);
-  }
-
-  loadApplicationsFromConfig() {
-    for (const entries of Object.values(ConfigSource.get('di.application') || {}) as string[][]) {
-      for (const entry of entries) {
-        require(entry);
-      }
-    }
-  }
-
-  getApplications() {
-    return Array.from(this.applications.values());
-  }
-
-  async runApplication(name: string, args: any[]) {
-    const config = this.applications.get(name);
-    if (!config) {
-      throw new InjectionError(`Application: ${name} does not exist`, 'notfound');
-    }
-    const inst = await this.getInstance(config.target);
-    if (!Env.quietInit) {
-      console.log('Running application', name);
-      console.log('Configured', JSON.stringify({
-        app: AppInfo,
-        env: Env.toJSON(),
-        config: ConfigSource.get(''),
-      }, undefined, 2));
-    }
-    if (inst.run) {
-      await inst.run(...args);
-    }
-  }
-
   // Undefined indicates no constructor
   registerConstructor<T>(cls: Class<T>, dependencies?: Dependency<any>[]) {
     const conf = this.getOrCreatePending(cls);
@@ -469,7 +431,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.targetToClass.clear();
     this.classToTarget.clear();
     this.factories.clear();
-    this.applications.clear();
   }
 }
 
