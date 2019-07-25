@@ -20,7 +20,7 @@ export interface InjectableConfig<T = any> extends Dependency<T> {
 }
 
 export interface InjectableFactoryConfig<T> {
-  class: Class<T>;
+  target: Class<T>;
   src: Class<T>;
   qualifier?: symbol;
   dependencies?: Dependency<any>[];
