@@ -149,6 +149,10 @@ Auth Support
  - [x] Rewrite st
 - [X] Move to JWT as session store, prep for Lambda
  
+DI
+----------------------
+- [X] Prevent duplicate constructions via different targets
+  - Rewrite module to align with consistency of naming
 
 Platform Support
 ------------------------

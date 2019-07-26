@@ -5,10 +5,11 @@ travetto: Application
 ```bash
 $ npm install @travetto/app
 ```
+The [`Base`](https://github.com/travetto/travetto/tree/master/module/base) module provides a simplistic bootstrap to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, `@Application` who's job is to register entry points into the application, along with the associated metadata. 
 
-Given that dependency injection is generally a pre-requisite for application execution, it stands as the primary entry point for application invocation.  The [`Base`](https://github.com/travetto/travetto/tree/master/module/base) provides a simplistic bootstrap to allow for the application to run, but that is not sufficient for more complex applications.
+With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di), the `@Application` is a synonym for `@Injectable`, and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
 
-The module provides a decorator, `@Application` who's job is to register entry points into the application.  For example:
+For example:
 
 **Code: Example of @Application target**
 ```typescript
@@ -36,11 +37,11 @@ class SimpleApp {
 }
 ```
 
-The `@Application` decorator exposes some additional functionality, which can be used to launch the application. 
+Additionally, the `@Application` decorator exposes some additional functionality, which can be used to launch the application. 
 
 ### `.run()` Arguments
 
-The arguments specified in the `run` method, will now be able to be specified when invoking the application from the command line.  For instance:
+The arguments specified in the `run` method are extracted via code transformation, and are able to be bound when invoking the application.  Whether from the command line or a plugin, the parameters will be mapped to the inputs of `run`.  For instance:
 
 **Code: Simple Entry Point with Parameters**
 ```typescript
@@ -73,7 +74,9 @@ $ travetto run simple mydomain.biz 4000
 [INFO] Launching mydomain.biz on port 4000
 ```
 
-Additionally, the parameters will be type checked, to ensure proper evaluation.
+### Type Checking
+
+The parameters to `run` will be type checked, to ensure proper evaluation.
 
 **Terminal: Invoke Simple with bad port**
 ```bash
@@ -112,5 +115,5 @@ class ComplexApp {
 }
 ```
 
-*** Note ***
+**Note**
 The applications, by default, will not scan other application's folders.  This means, if you have an application in the `e2e/` folder, all of the code in your `src/` folder will not be picked up automatically.  This defined under the assumption that each application is unique.  If you have an application that is an extension of the primary application (`src/`), you can specify the `@Application` config property of `standalone` to be false.  This will now scan both folders to run your application.
