@@ -1,5 +1,5 @@
-Active Development
-=============
+Active Development (0.8.x - RC Ready)
+=====================================
 
 Compiler
 ----------------------
@@ -24,7 +24,7 @@ Caching
       * Redis
       * Memory
       * Model Service
-      
+
 Tests
 --------------
 - [?] Better unit tests
