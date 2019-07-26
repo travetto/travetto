@@ -29,7 +29,7 @@ Scope: Class, static method
 Purpose: To declare classes/static functions as injectable, and to register declared dependencies as needing to be injected
 Effect:  Classes with @Injectable (or the like) will be registered as injectable, and will have all it's dependencies declared
 
-## di - transformer.application.ts
+## app - transformer.application.ts
 Scope: Class, method
 Purpose: To denote application entry points, and to allow for clean invocation with enforcement of types for invocation parameters
 Effect:  Classes with @Application (or the like) will be registered as entry points, and will be able to be invoked from the command line

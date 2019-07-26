@@ -6,7 +6,7 @@ import { CachedAppConfig, fork, handleFailure } from './util';
 export class AppListUtil {
 
   private static pCwd = process.cwd().replace(/[\\\/]+/g, '/');
-  private static cacheConfig = '@travetto/di/app-cache.json';
+  private static cacheConfig = '@travetto/app/app-cache.json';
   private static fsLstat = util.promisify(fs.lstat);
 
   static maxTime(stat: fs.Stats) {
@@ -35,7 +35,7 @@ export class AppListUtil {
     }); // Only load files that are candidates
 
     // Get applications
-    const { ApplicationRegistry } = await import('../../src/app/registry');
+    const { ApplicationRegistry } = await import('../../src/registry');
     ApplicationRegistry.loadAllFromConfig();
     const res = await ApplicationRegistry.getAll();
 

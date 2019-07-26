@@ -9,18 +9,15 @@
   "dependencies": {
     "@travetto/di": "^0.7.2"
   },
-  "description": "Email transmission module.",
+  "description": "Application registration/management and run support.",
   "devDependencies": {
-    "@travetto/app": "^0.7.2",
     "@travetto/test": "^0.7.2"
-  },
-  "optionalExtensionDependencies": {
-    "nodemailer": "^6.2.1",
-    "@types/nodemailer": "^6.2.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [
-    "email",
+    "ast-transformations",
+    "decorators",
+    "app-execution",
     "travetto",
     "typescript"
   ],
@@ -29,11 +26,13 @@
   "files": [
     "index.ts",
     "src",
-    "extension"
+    "config",
+    "bin",
+    "support"
   ],
-  "name": "@travetto/email",
+  "name": "@travetto/app",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.7.2"
+  "version": "0.7.3"
 }

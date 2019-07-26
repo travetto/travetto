@@ -1,6 +1,6 @@
 import * as child_process from 'child_process';
 
-import { ApplicationConfig } from '../../src/app/types';
+import { ApplicationConfig } from '../../src/types';
 
 export interface CachedAppConfig extends ApplicationConfig {
   appRoot: string;

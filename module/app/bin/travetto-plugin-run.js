@@ -1,3 +1,3 @@
 require('@travetto/boot/bin/init')
-  .libRequire('@travetto/di/bin/lib/run')
+  .libRequire('@travetto/app/bin/lib/run')
   .RunUtil.runDirect();

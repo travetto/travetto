@@ -1,4 +1,5 @@
-import { Application, InjectableFactory } from '@travetto/di';
+import { InjectableFactory } from '@travetto/di';
+import { Application } from '@travetto/app';
 import { RestApp } from '@travetto/rest';
 import { AwsLambdaRestApp } from '../../src/app';
 

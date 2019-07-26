@@ -1,9 +1,8 @@
 import { Env, AppInfo } from '@travetto/base';
 import { ConfigSource } from '@travetto/config';
+import { DependencyRegistry, InjectionError } from '@travetto/di';
 
 import { ApplicationConfig } from './types';
-import { InjectionError } from '../error';
-import { DependencyRegistry } from '../registry';
 
 export class $ApplicationRegistry {
   private applications = new Map<string, ApplicationConfig>();
@@ -13,7 +12,7 @@ export class $ApplicationRegistry {
   }
 
   loadAllFromConfig() {
-    for (const entries of Object.values(ConfigSource.get('di.application') || {}) as string[][]) {
+    for (const entries of Object.values(ConfigSource.get('app.entry') || {}) as string[][]) {
       for (const entry of entries) {
         require(entry);
       }
