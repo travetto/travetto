@@ -125,7 +125,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
         ep.id = `${ep.method}#${final.basePath}${typeof ep.path === 'string' ? ep.path : ep.path.source}`;
         return ep;
       })
-      .filter(ep => !foundRoutes.has(ep.id) && !!(foundRoutes.add(ep.id)))
+      .filter(ep => !foundRoutes.has(ep.id) && !!(foundRoutes.add(ep.id)));
 
     if (this.has(final.basePath)) {
       console.debug('Reloading controller', cls.name, final.basePath);

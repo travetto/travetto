@@ -97,7 +97,6 @@ export class NestedSuite extends BaseSqlTest {
       })
     ], true);
 
-
     const size = await svc.getCountByQuery(Wrapper, {
       where: {
         $or: [{

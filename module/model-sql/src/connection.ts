@@ -54,7 +54,7 @@ export async function WithTransaction<V extends ConnectionAware, R>(
   fn: (this: V, ...args: any[]) => R,
   args: any[] = []
 ): Promise<R> {
-  let ctx = self.conn.asyncContext;
+  const ctx = self.conn.asyncContext;
   if (!ctx.pendingTx) {
     try {
       ctx.pendingTx = 1;

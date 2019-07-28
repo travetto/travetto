@@ -469,7 +469,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   PRIMARY KEY (${this.ident(this.pathField)}),
   FOREIGN KEY (${this.ident(this.parentPathField)}) REFERENCES ${this.parentTable(stack)}(${this.ident(this.pathField)}) ON DELETE CASCADE`}
 );`;
-    return out
+    return out;
   }
 
   /**
