@@ -280,14 +280,15 @@ export class SQLUtil {
       const stack = this.classToStack(cls);
       while (true) {
         const key = Object.keys(cl)[0] as string;
+        const val = cl[key];
         const field = schema.views[ALL_VIEW].schema[key];
-        if (Util.isPrimitive(cl[key])) {
+        if (Util.isPrimitive(val)) {
           stack.push({ ...field });
-          return { stack, asc: !!!!cl[key] };
+          return { stack, asc: val === 1 || val === true };
         } else {
           stack.push({ ...field });
           schema = SchemaRegistry.get(field.type);
-          cl = cl[key];
+          cl = val;
         }
       }
     });
