@@ -1,6 +1,7 @@
 import { Get, RestApp } from '@travetto/rest';
 import { ChangeEvent, Class } from '@travetto/registry';
-import { Injectable, InjectableFactory, Application } from '@travetto/di';
+import { Injectable, InjectableFactory } from '@travetto/di';
+import { Application } from '@travetto/app';
 import { ExpressRestApp } from '@travetto/rest-express';
 import { Schema, Match } from '@travetto/schema';
 

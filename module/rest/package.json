@@ -7,6 +7,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@travetto/app": "^0.7.2",
     "@travetto/di": "^0.7.2",
     "@travetto/exec": "^0.7.2",
     "@types/cookies": "^0.7.2",

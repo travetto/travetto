@@ -21,6 +21,7 @@
   },
   "description": "Email templating module",
   "devDependencies": {
+    "@travetto/app": "^0.7.2",
     "@travetto/test": "^0.7.2",
     "@types/js-beautify": "^1.8.1",
     "js-beautify": "^1.10.0"

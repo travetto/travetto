@@ -1,4 +1,4 @@
-import { Application } from '@travetto/di';
+import { Application } from '@travetto/app';
 import { DefaultMailTemplateEngine } from '../../src/template';
 
 @Application('test-email')

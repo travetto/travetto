@@ -12,6 +12,7 @@
   },
   "description": "Datastore abstraction for CRUD operations with advanced query support.",
   "devDependencies": {
+    "@travetto/app": "^0.7.2",
     "@travetto/test": "^0.7.2"
   },
   "optionalExtensionDependencies": {

@@ -19,6 +19,7 @@
     "express": "^4.17.1"
   },
   "devDependencies": {
+    "@travetto/app": "^0.7.2",
     "@travetto/test": "^0.7.2"
   },
   "description": "AWS lambda provider for the travetto rest module.",

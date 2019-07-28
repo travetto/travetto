@@ -13,6 +13,7 @@
   },
   "description": "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.",
   "devDependencies": {
+    "@travetto/app": "^0.7.2",
     "@travetto/test": "^0.7.2"
   },
   "homepage": "https://travetto.io",

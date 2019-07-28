@@ -1,4 +1,5 @@
-import { Application, InjectableFactory } from '@travetto/di';
+import { Application } from '@travetto/app';
+import { InjectableFactory } from '@travetto/di';
 import { EmailService } from '../../src/email';
 import { NodemailerTransport } from '../../extension/nodemailer';
 import { MailTransport } from '../../src/transport';
