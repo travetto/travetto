@@ -460,7 +460,7 @@ export class ElasticsearchModelSource extends ModelSource {
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
     const res = await this.getAllByQuery(cls, { limit: 2, ...query });
     if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
-      throw new AppError(`Invalid number of results for find by id: ${res ? res.length : res}`, 'data');
+      throw new AppError(`Invalid number of results for find by id: ${res ? res.length : res}`, 'notfound');
     }
     return res[0] as T;
   }
