@@ -58,9 +58,9 @@ export class KoaRestApp extends RestApp<koa> {
   async listen() {
     if (this.config.ssl.active) {
       const https = await import('https');
-      https.createServer((await this.config.getKeys())!, this.raw.callback()).listen(this.config.port);
+      https.createServer((await this.config.getKeys())!, this.raw.callback()).listen(this.config.port, this.config.bindAddress);
     } else {
-      this.raw.listen(this.config.port);
+      this.raw.listen(this.config.port, this.config.bindAddress);
     }
   }
 }

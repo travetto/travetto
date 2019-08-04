@@ -125,6 +125,7 @@ Rest Support
 - [x] HTTP/2
 - [x] Koa
 - [x] Add Swagger generation  
+- [X] Enable host name override for applications
 
 User Tooling
 --------------------
