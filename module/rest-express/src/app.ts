@@ -70,9 +70,9 @@ export class ExpressRestApp extends RestApp<express.Application> {
     if (this.config.ssl.active) {
       const https = await import('https');
       const keys = await this.config.getKeys();
-      https.createServer(keys!, this.raw).listen(this.config.port);
+      https.createServer(keys!, this.raw).listen(this.config.port, this.config.bindAddress);
     } else {
-      this.raw.listen(this.config.port);
+      this.raw.listen(this.config.port, this.config.bindAddress);
     }
   }
 }
