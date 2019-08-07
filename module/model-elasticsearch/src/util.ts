@@ -205,6 +205,7 @@ export class ElasticsearchUtil {
         ops.push(`ctx._source.${prop} = params.${param}`);
         out.params[param] = o[x];
       } else {
+        ops.push(`ctx._source.${prop} = ctx._source.${prop} == null ? [:] : ctx._source.${prop}`);
         const sub = this.generateUpdateScript(o[x], prop);
         ops.push(sub.source);
         Object.assign(out.params, sub.params);

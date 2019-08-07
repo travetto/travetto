@@ -58,6 +58,14 @@ class Numerical {
   floater: number;
 }
 
+
+@Model()
+class User2 {
+  id?: string;
+  address?: Address;
+  name: string;
+}
+
 @Suite('Simple Save')
 class TestSave extends BaseElasticsearchTest {
 
@@ -331,5 +339,27 @@ class TestSave extends BaseElasticsearchTest {
 
     assert(o2.names === ['a', 'd']);
     assert(o2.simples === [Simple.from({ name: 'd' })]);
+  }
+
+  @Test('Verify partial update with field removal and lists')
+  async testBlankPartialUpdate() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    const o = await service.save(User2, User2.from({
+      name: 'bob'
+    }));
+
+    assert(o.address === undefined);
+
+    await service.updatePartial(User2, User2.from({
+      id: o.id,
+      address: {
+        street1: 'blue'
+      }
+    }));
+
+    const o3 = await service.getById(User2, o.id!);
+
+    assert(o3.address !== undefined);
+    assert(o3.address!.street1 === 'blue');
   }
 }
