@@ -5,7 +5,7 @@ import {
   ModelQuery, Query,
   BulkOp, BulkResponse,
   ValidStringFields, WhereClauseRaw,
-  WhereClause
+  WhereClause, ModelUtil
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
@@ -250,10 +250,7 @@ export class SQLModelSource extends ModelSource {
   @Connected()
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
     const res = await this.getAllByQuery(cls, { limit: 2, ...query });
-    if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
-      throw new AppError(`Invalid number of results for find by id: ${res ? res.length : res}`, 'data');
-    }
-    return res[0] as T;
+    return ModelUtil.verifyGetSingleCounts(cls, res, failOnMany);
   }
 
   @Connected()

@@ -9,7 +9,7 @@ import {
   Point,
   ModelQuery,
   ValidStringFields,
-  WhereClauseRaw
+  WhereClauseRaw, ModelUtil
 } from '@travetto/model';
 
 import { Class } from '@travetto/registry';
@@ -19,7 +19,6 @@ import { Injectable } from '@travetto/di';
 import { MongoUtil } from './util';
 import { MongoModelConfig } from './config';
 import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
-import accepts = require('accepts');
 
 @Injectable()
 export class MongoModelSource extends ModelSource {
@@ -174,11 +173,8 @@ export class MongoModelSource extends ModelSource {
   }
 
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
-    const res = await this.getAllByQuery(cls, { limit: 200, ...query });
-    if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
-      throw new AppError(`Invalid number of results for find by id: ${res ? res.length : res}`, 'notfound');
-    }
-    return res[0] as T;
+    const res = await this.getAllByQuery(cls, { limit: 2, ...query });
+    return ModelUtil.verifyGetSingleCounts(cls, res, failOnMany);
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
