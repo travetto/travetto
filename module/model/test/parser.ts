@@ -35,7 +35,7 @@ export class QueryStringTest {
       QueryLanguageTokenizer.tokenize('"hello');
     }, 'Unterminated string literal');
 
-    assert.doesNotReject(() => {
+    assert.doesNotThrow(() => {
       QueryLanguageTokenizer.tokenize('"hello"');
     });
 
@@ -177,5 +177,17 @@ export class QueryStringTest {
     assert(res2 === { user: { role: { $regex: /^admin/ } } });
     assert(res2.user.role.$regex instanceof RegExp);
     assert(res2.user.role.$regex.toString() === '/^admin/');
+  }
+
+  @Test('Parse Regex with flags')
+  async parseRegexWithFlags() {
+    const res = QueryLanguageParser.parseToQuery(`user.role ~ /^admin/i`);
+    assert(res === { user: { role: { $regex: /^admin/i } } });
+    assert(res.user.role.$regex instanceof RegExp);
+    assert(res.user.role.$regex.toString() === '/^admin/i');
+
+    assert.throws(() => {
+      QueryLanguageParser.parseToQuery(`user.role ~ /^admin/gig`);
+    }, /Invalid.*flags/);
   }
 }

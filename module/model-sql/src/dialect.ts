@@ -308,7 +308,7 @@ export abstract class SQLDialect implements DialectState {
 
               if (/^[\^]\S+[.][*][$]?$/.test(src)) {
                 const inner = src.substring(1, src.length - 2);
-                items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(inner)}%`);
+                items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(`${inner}%`)}`);
               } else {
                 const val = resolve(v);
                 items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${val}`);

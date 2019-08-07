@@ -41,7 +41,9 @@ export class QueryLanguageTokenizer {
         value = text.substring(1, text.length - 1)
           .replace(/\\[.]/g, (a, b) => ESCAPE[a] || b);
       } else if (/^\//.test(text)) {
-        value = new RegExp(text.substring(1, text.length - 1));
+        const start = 1;
+        const end = text.lastIndexOf('/');
+        value = new RegExp(text.substring(start, end), text.substring(end + 1));
       } else if (/^\d+$/.test(text)) {
         value = parseInt(text, 10);
       } else if (/^\d+[.]\d+$/.test(text)) {
@@ -61,6 +63,10 @@ export class QueryLanguageTokenizer {
       state.start = state.pos;
     }
     state.mode = mode || state.mode;
+  }
+
+  private static isValidRegexFlag(ch: number) {
+    return ch === 0x69 /*i*/ || ch === 0x67 /*g*/ || ch === 0x6D /*m*/ || ch === 0x73 /*s*/;
   }
 
   private static isValidIdentToken(ch: number) {
@@ -119,6 +125,11 @@ export class QueryLanguageTokenizer {
           this.flush(state);
           state.mode = 'literal';
           state.pos = this.readString(text, state.pos) + 1;
+          if (ch === FORWARD_SLASH) { // Read modifiers, not used by all, but useful in general
+            while (this.isValidRegexFlag(text.charCodeAt(state.pos))) {
+              state.pos += 1;
+            }
+          }
           this.flush(state);
           continue;
         default:
