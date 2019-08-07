@@ -99,5 +99,13 @@ export class QueryTest {
     });
 
     assert(out === `User.name ${dct.SQL_OPS.$regex} 'google.$'`);
+
+    const outBoundary = dct.getWhereGroupingSQL(User, {
+      name: {
+        $regex: /\bgoogle\b/
+      }
+    });
+
+    assert(outBoundary === `User.name ${dct.SQL_OPS.$regex} '\\ygoogle\\y'`);
   }
 }

@@ -331,4 +331,32 @@ class TestSave extends BaseSqlTest {
 
     assert(res.time instanceof Date);
   }
+
+  @Test('verify word boundary')
+  async testWordBoundary() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    await service.bulkProcess(Person, [1, 2, 3, 8].map(x => {
+      return {
+        insert: Person.from({
+          id: `Orange-${x}`,
+          name: 'Bob',
+          age: 20 + x,
+          gender: 'm',
+          address: {
+            street1: 'a',
+            ...(x === 1 ? { street2: 'b' } : {})
+          }
+        })
+      };
+    }));
+
+    const results = await service.getAllByQueryString(Person, { query: 'id ~ /\\borange.*/i' });
+    assert(results.length === 4);
+
+    const results2 = await service.getAllByQueryString(Person, { query: 'id ~ /\\brange.*/i' });
+    assert(results2.length === 0);
+
+    const results3 = await service.getAllByQueryString(Person, { query: 'id ~ /\\borange.*/' });
+    assert(results3.length === 0);
+  }
 }

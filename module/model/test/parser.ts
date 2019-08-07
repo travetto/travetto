@@ -190,4 +190,11 @@ export class QueryStringTest {
       QueryLanguageParser.parseToQuery(`user.role ~ /^admin/gig`);
     }, /Invalid.*flags/);
   }
+
+  @Test('Parse Regex with word boundaries')
+  async parseRegexWithWordBoundaries() {
+    const res = QueryLanguageParser.parseToQuery(`user.role ~ /\badmin\b/i`);
+    assert(res.user.role.$regex instanceof RegExp);
+    assert(res.user.role.$regex.toString() === '/\badmin\b/i');
+  }
 }
