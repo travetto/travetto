@@ -15,7 +15,6 @@ export type VisitStack = {
 export type VisitState = { path: VisitStack[] };
 
 const TABLE_SYM = Symbol('TABLE');
-const PATH_SYM = Symbol('PATH');
 
 interface VisitNode<R> {
   path: VisitStack[];
@@ -116,7 +115,7 @@ export class SQLUtil {
     }
 
     if (!cls) { // If a simple type, it is it's own field
-      const field = top as FieldConfig;
+      const field = { ...top } as FieldConfig;
       return {
         local: [field], localMap: { [field.name]: field },
         foreign: [], foreignMap: {}
@@ -125,7 +124,7 @@ export class SQLUtil {
 
     const model = ModelRegistry.get(cls.class)!;
     const conf = cls.views[ALL_VIEW];
-    const fields = conf.fields.map(x => conf.schema[x]);
+    const fields = conf.fields.map(x => ({ ...conf.schema[x] }));
 
     // Polymorphic
     if (model && (model.baseType || model.subType)) {
@@ -157,7 +156,7 @@ export class SQLUtil {
   }
 
   static visitSchemaSync(config: ClassConfig | FieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }) {
-    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, { ...config }];
+    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
     const descend = () => {
@@ -168,7 +167,7 @@ export class SQLUtil {
           handler.onSimple({
             config: field, descend: null as any, fields: [], path: [
               ...path,
-              { ...field }
+              field
             ]
           });
         }
@@ -183,7 +182,7 @@ export class SQLUtil {
   }
 
   static async visitSchema(config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }) {
-    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, { ...config }];
+    const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
     const descend = async () => {
@@ -194,7 +193,7 @@ export class SQLUtil {
           await handler.onSimple({
             config: field, descend: null as any, fields: [], path: [
               ...path,
-              { ...field }
+              field
             ]
           });
         }
@@ -281,12 +280,12 @@ export class SQLUtil {
       while (true) {
         const key = Object.keys(cl)[0] as string;
         const val = cl[key];
-        const field = schema.views[ALL_VIEW].schema[key];
+        const field = { ...schema.views[ALL_VIEW].schema[key] };
         if (Util.isPrimitive(val)) {
-          stack.push({ ...field });
+          stack.push(field);
           return { stack, asc: val === 1 || val === true };
         } else {
-          stack.push({ ...field });
+          stack.push(field);
           schema = SchemaRegistry.get(field.type);
           cl = val;
         }
@@ -327,11 +326,7 @@ export class SQLUtil {
   }
 
   static buildPath(list: VisitStack[]) {
-    const top = list[list.length - 1] as any;
-    if (!top[PATH_SYM]) {
-      top[PATH_SYM] = list.map((el, i) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
-    }
-    return top[PATH_SYM];
+    return list.map((el, i) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
   }
 
   static async extractInserts<T>(cls: Class<T>, els: T[]): Promise<InsertWrapper[]> {

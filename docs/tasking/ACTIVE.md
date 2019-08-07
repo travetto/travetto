@@ -1,12 +1,6 @@
 Active Development (0.8.x - RC Ready)
 =====================================
 
-Compiler
-----------------------
-- [ ] Support type checking in transformers
-  - [ ] Convert schema/rest/swagger/model/application to use resolved type information
-  - [ ] Investigate auto creating schemas from interfaces for simple one offs
-
 Serverless Initiative
 --------------------------
 - [ ] Lambda for REST

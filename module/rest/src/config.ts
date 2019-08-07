@@ -13,6 +13,7 @@ export class RestConfig {
   disableGetCache = true;
   trustProxy = false;
   hostname = 'localhost';
+  bindAddress = 'localhost';
   baseUrl: string;
 
   defaultMessage = true;
