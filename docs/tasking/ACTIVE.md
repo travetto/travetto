@@ -10,6 +10,8 @@ Compiler
 Serverless Initiative
 --------------------------
 - [ ] Lambda for REST
+  - [ ] Convert over to terraform
+  - [ ] Support AWS/GCP and Azure
   - [x] Entire rest app as an AWS lambda
   - [x] Individual routes as individual lambdas
   - [x] API Gateway configuration
@@ -20,10 +22,10 @@ Caching
 -----------------------
 - [ ] Rework cache infrastructure to allow for multiple providers
 - [ ] Integrate caching with
-      * File System
-      * Redis
-      * Memory
-      * Model Service
+    * File System
+    * Redis
+    * Memory
+    * Model Service
 
 Tests
 --------------
