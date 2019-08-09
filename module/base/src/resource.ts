@@ -4,7 +4,7 @@ import { Readable } from 'stream';
 
 import { EnvUtil, FsUtil } from '@travetto/boot';
 import { Env } from './env';
-import { ScanFs } from './scan-fs';
+import { ScanFs, ScanEntry } from './scan-fs';
 
 import { AppError } from './error';
 
@@ -106,19 +106,34 @@ export class $ResourceManager {
     return res as Readable;
   }
 
+  consumeEntryByExtension(base: string, found: Set<string>, out: string[], r: ScanEntry) {
+    if (r.stats.isDirectory()) {
+      if (r.children) {
+        for (const el of r.children!) {
+          this.consumeEntryByExtension(base, found, out, el);
+        }
+      }
+      return;
+    }
+    const p = `${base}/${r.module}`;
+    if (!found.has(p)) {
+      found.add(p);
+      out.push(p);
+      this.cache[p] = r.file;
+    }
+  }
+
   async findAllByExtension(ext: string, base: string = '') {
     const out: string[] = [];
     const found = new Set<string>();
+    const consume = this.consumeEntryByExtension.bind(this, base, found, out);
+
     for (const root of this.paths) {
       const results = await ScanFs.scanDir({ testFile: x => x.endsWith(ext) },
         FsUtil.resolveUnix(root, base));
+
       for (const r of results) {
-        const p = `${base}/${r.module}`;
-        if (!found.has(p)) {
-          found.add(p);
-          out.push(p);
-          this.cache[p] = r.file;
-        }
+        consume(r);
       }
     }
     return out;
@@ -127,16 +142,14 @@ export class $ResourceManager {
   findAllByExtensionSync(ext: string, base: string = '') {
     const out: string[] = [];
     const found = new Set<string>();
+    const consume = this.consumeEntryByExtension.bind(this, base, found, out);
+
     for (const root of this.paths) {
       const results = ScanFs.scanDirSync({ testFile: x => x.endsWith(ext) },
         FsUtil.resolveUnix(root, base));
+
       for (const r of results) {
-        const p = `${base}/${r.module}`;
-        if (!found.has(p)) {
-          found.add(p);
-          out.push(p);
-          this.cache[p] = r.file;
-        }
+        consume(r);
       }
     }
     return out;
