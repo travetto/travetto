@@ -1,5 +1,22 @@
-Active Development (0.8.x - RC Ready)
+Active Development (1.0.0 - RC Ready)
 =====================================
+
+Assets
+-----------------------
+- [ ] Naming structure for assets
+- [ ] File provider
+- [ ] Move resizing to https://github.com/lovell/sharp
+- [ ] Separate Image processing out of asset
+
+Caching
+-----------------------
+- [ ] Rework cache infrastructure to allow for multiple providers
+- [ ] Integrate caching with
+    * File System
+    * Redis
+    * Memory
+    * Model Service
+- [ ] See if we can integrate with asset service
 
 Serverless Initiative
 --------------------------
@@ -11,16 +28,6 @@ Serverless Initiative
   - [x] API Gateway configuration
   - [ ] Auto deployment of application
   - [x] CLI entry point to facilitate
-
-Caching
------------------------
-- [ ] Rework cache infrastructure to allow for multiple providers
-- [ ] Integrate caching with
-    * File System
-    * Redis
-    * Memory
-    * Model Service
-- [ ] See if we can integrate with asset service
 
 Tests
 --------------
