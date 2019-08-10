@@ -1,5 +1,5 @@
 import { ScanApp } from './scan-app';
-import { Util } from './util';
+import { SystemUtil } from './system-util';
 
 interface Initializer {
   action: Function;
@@ -25,7 +25,7 @@ export class PhaseManager {
   load(upto?: string, after?: string) {
     const pattern = new RegExp(`support/phase[.]${this.scope}[.]ts$`);
     const initFiles = ScanApp.requireFiles('.ts', x => pattern.test(x));
-    this.initializers = Util.computeOrdering(initFiles.map(x => x.init));
+    this.initializers = SystemUtil.computeOrdering(initFiles.map(x => x.init));
 
     if (upto) {
       let end = this.initializers.length - 1;

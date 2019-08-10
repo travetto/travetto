@@ -5,7 +5,7 @@ import { FsUtil } from '@travetto/boot/src/fs-util';
 import { Env } from './env';
 import { ScanEntry, ScanHandler, ScanFs } from './scan-fs';
 
-import { Util } from './util';
+import { SystemUtil } from './system-util';
 
 interface Options {
   maxListeners?: number;
@@ -123,7 +123,7 @@ export class Watcher extends EventEmitter {
 
     try {
       console.trace('Watching Directory', entry.file);
-      const watcher = fs.watch(entry.file, Util.throttle((event, f) => {
+      const watcher = fs.watch(entry.file, SystemUtil.throttle((event, f) => {
         this.processDirectoryChange(entry);
       }, this.options.debounceDelay));
 
