@@ -4,7 +4,7 @@
     "name": "Travetto Framework"
   },
   "engines": {
-    "node": "^12.8.0"
+    "node": "^12.7.0"
   },
   "publishConfig": {
     "access": "public"
