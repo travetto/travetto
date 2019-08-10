@@ -39,5 +39,5 @@
     "prepublish": "cd src-ts; tsc --project .",
     "clean": "rm -f src/"
   },
-  "version": "0.7.2"
+  "version": "1.0.0-beta.0"
 }
