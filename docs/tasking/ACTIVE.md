@@ -20,6 +20,7 @@ Caching
     * Redis
     * Memory
     * Model Service
+- [ ] See if we can integrate with asset service
 
 Tests
 --------------
