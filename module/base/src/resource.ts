@@ -11,6 +11,8 @@ import { AppError } from './error';
 const fsStat = util.promisify(fs.stat);
 const fsReadFile = util.promisify(fs.readFile);
 
+const cleanPath = (p: string) => p.charAt(0) === '/' ? p.substring(1) : p;
+
 export class $ResourceManager {
   private cache: Record<string, string> = {};
 
@@ -32,16 +34,6 @@ export class $ResourceManager {
     this.paths.push(full ? FsUtil.resolveUnix(Env.cwd, searchPath) : FsUtil.resolveUnix(Env.cwd, searchPath, this.folder));
   }
 
-  async getAbsolutePath(rel: string) {
-    await this.find(rel);
-    return this.cache[rel];
-  }
-
-  getAbsolutePathSync(rel: string) {
-    this.findSync(rel);
-    return this.cache[rel];
-  }
-
   getPaths() {
     return this.paths.slice(0);
   }
@@ -50,10 +42,20 @@ export class $ResourceManager {
     return this.paths.slice(0).map(x => x.replace(`${Env.cwd}/`, ''));
   }
 
+  async toAbsolutePath(rel: string) {
+    rel = cleanPath(rel);
+    await this.find(rel);
+    return this.cache[rel];
+  }
+
+  toAbsolutePathSync(rel: string) {
+    rel = cleanPath(rel);
+    this.findSync(rel);
+    return this.cache[rel];
+  }
+
   async find(pth: string) {
-    if (pth.startsWith('/')) {
-      pth = pth.substring(1);
-    }
+    pth = cleanPath(pth);
     if (pth in this.cache) {
       return this.cache[pth];
     }
@@ -69,9 +71,7 @@ export class $ResourceManager {
   }
 
   findSync(pth: string) {
-    if (pth.startsWith('/')) {
-      pth = pth.substring(1);
-    }
+    pth = cleanPath(pth);
     if (pth in this.cache) {
       return this.cache[pth];
     }

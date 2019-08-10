@@ -6,7 +6,7 @@ import { Readable } from 'stream';
 import { AssetSource, Asset, AssetMetadata } from '@travetto/asset';
 import { Injectable } from '@travetto/di';
 
-import { AssetS3Config } from './config';
+import { S3AssetConfig } from './config';
 
 function toTagSet(metadata: AssetMetadata): TagSet {
   return ['name', 'title', 'hash', 'createdDate', 'tags']
@@ -31,11 +31,11 @@ function fromTagSet(tags: TagSet) {
 }
 
 @Injectable()
-export class AssetS3Source extends AssetSource {
+export class S3AssetSource extends AssetSource {
 
   private client: aws.S3;
 
-  constructor(private config: AssetS3Config) {
+  constructor(private config: S3AssetConfig) {
     super();
   }
 
@@ -53,19 +53,19 @@ export class AssetS3Source extends AssetSource {
   }
 
   async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
-    const upload = this.client.upload(this.q(file.filename, {
+    const upload = this.client.upload(this.q(file.path, {
       Body: fs.createReadStream(file.path),
       ContentType: file.contentType,
-      ContentLength: file.length
+      ContentLength: file.size
     })).promise();
 
     await upload;
 
-    await this.client.putObjectTagging(this.q(file.filename, {
+    await this.client.putObjectTagging(this.q(file.path, {
       Tagging: { TagSet: toTagSet(file.metadata) }
     })).promise();
 
-    return this.info(file.filename);
+    return this.info(file.path);
   }
 
   async read(filename: string): Promise<NodeJS.ReadableStream | Readable> {
@@ -88,12 +88,13 @@ export class AssetS3Source extends AssetSource {
       this.client.getObject(query).promise(),
       this.client.getObjectTagging(query).promise()
     ]);
-    return new Asset({
-      contentType: obj.ContentType,
-      filename,
-      length: obj.ContentLength,
+    return {
+      contentType: obj.ContentType!,
+      path: filename,
+      stream: undefined as any,
+      size: obj.ContentLength!,
       metadata: fromTagSet(tags.TagSet)
-    });
+    };
   }
 
   async remove(filename: string): Promise<void> {

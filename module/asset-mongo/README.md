@@ -12,8 +12,8 @@ This provides a [`mongodb`](https://mongodb.com) implementation of the `AssetSou
 ```typescript
 class AppConfig {
   @InjectableFactory()
-  static getSource(cfg: AssetMongoConfig): AssetSource {
-    return new AssetMongoSource(cfg);
+  static getSource(cfg: MongoAssetConfig): AssetSource {
+    return new MongoAssetSource(cfg);
   }
 }
 ```
@@ -22,8 +22,8 @@ There is a default configuration that you can easily use, with some sensible def
 
 **Code: Mongo configuration**
 ```typescript
-@Config('asset.mongo')
-export class AssetMongoConfig {
+@Config('mongo.asset')
+export class MongoAssetConfig {
   hosts = 'localhost';
   schema = 'app';
   port = 27017;

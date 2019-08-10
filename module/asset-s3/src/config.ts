@@ -1,8 +1,8 @@
 import * as aws from 'aws-sdk';
 import { Config } from '@travetto/config';
 
-@Config('asset.s3')
-export class AssetS3Config {
+@Config('s3.asset')
+export class S3AssetConfig {
   region = 'us-east-1';
   base = '';
 

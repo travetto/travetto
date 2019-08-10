@@ -3,15 +3,15 @@ import * as mongo from 'mongodb';
 import { AssetSource, Asset } from '@travetto/asset';
 import { Injectable } from '@travetto/di';
 
-import { AssetMongoConfig } from './config';
+import { MongoAssetConfig } from './config';
 
 @Injectable()
-export class AssetMongoSource extends AssetSource {
+export class MongoAssetSource extends AssetSource {
 
   private mongoClient: mongo.MongoClient;
   private bucket: mongo.GridFSBucket;
 
-  constructor(private config: AssetMongoConfig) {
+  constructor(private config: MongoAssetConfig) {
     super();
   }
 
@@ -21,7 +21,7 @@ export class AssetMongoSource extends AssetSource {
   }
 
   async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
-    const writeStream = this.bucket.openUploadStream(file.filename, {
+    const writeStream = this.bucket.openUploadStream(file.path, {
       contentType: file.contentType,
       metadata: file.metadata
     });
@@ -37,7 +37,7 @@ export class AssetMongoSource extends AssetSource {
 
     while (count++ < 5) {
       try {
-        return await this.info(file.filename);
+        return await this.info(file.path);
       } catch (e) {
         // Wait for load
         await new Promise(res => setTimeout(res, 100));
@@ -65,9 +65,13 @@ export class AssetMongoSource extends AssetSource {
     }
 
     const f = files[0];
-    const out: Asset = new Asset(f);
-    delete f['_id'];
-    return out;
+    return {
+      size: f.length,
+      path: f.filename,
+      contentType: f.contentType,
+      stream: undefined as any,
+      metadata: f.metadata
+    };
   }
 
   async remove(filename: string): Promise<void> {
