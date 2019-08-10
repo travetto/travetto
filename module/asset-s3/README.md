@@ -12,8 +12,8 @@ This provides an [`s3`](https://aws.amazon.com/documentation/s3/) implementation
 ```typescript
 class AppConfig {
   @InjectableFactory()
-  static getSource(cfg: AssetS3Config): AssetSource {
-    return new AssetS3Source(cfg);
+  static getSource(cfg: S3AssetConfig): AssetSource {
+    return new S3AssetSource(cfg);
   }
 }
 ```
@@ -22,8 +22,8 @@ There is a default configuration that you can easily use, with some sensible def
 
 **Code: S3 configuration**
 ```typescript
-@Config('asset.s3')
-export class AssetS3Config {
+@Config('s3.asset')
+export class S3AssetConfig {
   region = 'us-east-1';
   base = '';
 

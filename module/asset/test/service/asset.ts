@@ -5,7 +5,8 @@ import * as assert from 'assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 
-import { AssetService, ImageService, AssetUtil, AssetSource, Asset, AssetMetadata } from '../../';
+import { AssetService, AssetUtil, AssetSource, Asset, AssetMetadata } from '../../';
+import { ResourceManager } from '@travetto/base';
 
 const fsStat = util.promisify(fs.stat);
 
@@ -15,9 +16,9 @@ class MockAssetSource extends AssetSource {
   files = new Map<string, Asset>();
 
   async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
-    this.streams.set(file.filename, (stream as any).path);
-    this.files.set(file.filename, file);
-    return this.info(file.filename);
+    this.streams.set(file.path, (stream as any).path);
+    this.files.set(file.path, file);
+    return this.info(file.path);
   }
 
   update(file: Asset): Promise<Asset> {
@@ -32,7 +33,7 @@ class MockAssetSource extends AssetSource {
     if (!this.files.has(filename)) {
       throw new Error('Not found');
     }
-    return new Asset(this.files.get(filename)!);
+    return this.files.get(filename)!;
   }
 
   find(filter: Partial<AssetMetadata>): Promise<Asset[]> {
@@ -52,45 +53,19 @@ class AssetTest {
     await DependencyRegistry.init();
   }
 
-  @Test('downloads an file from a url')
-  async download() {
+  @Test('loads file from resources and verifies saving')
+  async loadAndSave() {
     const service = await DependencyRegistry.getInstance(AssetService);
 
-    const filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
+    const filePath = await ResourceManager.toAbsolutePath('/google.png');
+
     assert(filePath !== undefined);
     assert(filePath.split('.').pop() === 'png');
 
-    let file = await AssetUtil.localFileToAsset(filePath);
+    let file = await AssetUtil.fileToAsset(filePath);
     file = await service.save(file);
 
     assert(file.contentType === 'image/png');
-    assert(file.length > -1);
-
-    await assert.rejects(() => fsStat(filePath));
-  }
-
-  @Test('Test caching')
-  async cache() {
-    const service = await DependencyRegistry.getInstance(AssetService);
-    const imageService = await DependencyRegistry.getInstance(ImageService);
-
-    const filePath = await AssetUtil.downloadUrl('https://image.freepik.com/free-icon/apple-logo_318-40184.jpg');
-    assert(filePath !== undefined);
-    assert(filePath.split('.').pop() === 'jpeg');
-    let file = await AssetUtil.localFileToAsset(filePath);
-    file = await service.save(file, false, false);
-
-    const asset = await service.get(file.filename);
-    assert.ok(asset);
-
-    let start = Date.now();
-    let resized = await imageService.getImage(file.filename, { w: 10, h: 10 });
-    const diff = Date.now() - start;
-
-    start = Date.now();
-    resized = await imageService.getImage(file.filename, { w: 10, h: 10 });
-    const diff2 = Date.now() - start;
-
-    assert(diff2 < diff);
+    assert(file.size > -1);
   }
 }

@@ -9,7 +9,7 @@ import { Asset, AssetUtil } from '@travetto/asset';
 import { AppError } from '@travetto/base';
 import { FsUtil } from '@travetto/boot';
 
-import { AssetRestConfig } from './config';
+import { RestAssetConfig } from './config';
 
 type AssetMap = Record<string, Asset>;
 
@@ -31,10 +31,10 @@ export class AssetRestUtil {
     await new Promise((res, rej) =>
       data.on('end', (e: any) => e ? rej(e) : res()));
 
-    const asset = await AssetUtil.localFileToAsset(uniqueLocal, relativeRoot);
+    const asset = await AssetUtil.fileToAsset(uniqueLocal);
     asset.metadata.title = fileName;
     asset.metadata.name = fileName;
-    asset.filename = fileName;
+    asset.path = fileName;
 
     const detectedType = await AssetUtil.detectFileType(asset.path);
     const contentType = detectedType ? detectedType.mime : '';
@@ -56,7 +56,7 @@ export class AssetRestUtil {
       `file-upload.${(req.header('content-type') as string)!.split('/').pop()}`;
   }
 
-  static upload(req: Request, config: Partial<AssetRestConfig>, relativeRoot?: string) {
+  static upload(req: Request, config: Partial<RestAssetConfig>, relativeRoot?: string) {
     const allowedTypes = this.readTypeArr(config.allowedTypes);
     const excludeTypes = this.readTypeArr(config.excludeTypes);
 
@@ -106,7 +106,7 @@ export class AssetRestUtil {
         const stream = asset.stream || fs.createReadStream(asset.path);
         res.status(200);
         res.setHeader('Content-Type', asset.contentType);
-        res.setHeader('Content-Disposition', `attachment;filename=${asset.filename}`);
+        res.setHeader('Content-Disposition', `attachment;filename=${asset.path}`);
         await new Promise((resolve, reject) => {
           stream.pipe(res.__raw);
           res.__raw.on('error', reject);

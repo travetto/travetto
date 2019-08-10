@@ -1,4 +1,4 @@
-import { Asset } from './model';
+import { Asset } from './types';
 
 export abstract class AssetSource {
   abstract write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset>;
