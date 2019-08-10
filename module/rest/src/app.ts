@@ -1,4 +1,4 @@
-import { AppInfo, AppError, Util } from '@travetto/base';
+import { AppInfo, AppError, SystemUtil } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { Class, ChangeEvent } from '@travetto/registry';
 
@@ -79,7 +79,7 @@ export abstract class RestApp<T = any> {
     }
 
     const ordered = instances.map(x => ({ key: x.constructor, before: x.before, after: x.after, target: x }));
-    const sorted = Util.computeOrdering(ordered).map(x => x.target);
+    const sorted = SystemUtil.computeOrdering(ordered).map(x => x.target);
 
     console.debug('Sorting interceptors', sorted.length, sorted.map(x => x.constructor.name));
     return sorted;
