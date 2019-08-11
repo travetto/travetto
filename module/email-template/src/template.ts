@@ -70,7 +70,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
       await fsStat(out);
     } catch {
       const stream = await ImageUtil.optimizePng(pth);
-      await SystemUtil.readableToFile(stream, out);
+      await SystemUtil.streamToFile(stream, out);
     }
 
     return fsReadFile(out);

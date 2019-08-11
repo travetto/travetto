@@ -56,7 +56,7 @@ export class SystemUtil {
     }
   }
 
-  static async readableToFile(src: Readable, out: string): Promise<void> {
+  static async streamToFile(src: Readable, out: string): Promise<void> {
     const write = fs.createWriteStream(out);
     const finalStream = src.pipe(write);
     await new Promise((res, rej) => {
