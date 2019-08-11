@@ -12,5 +12,4 @@ export interface Asset {
   path: string;
   contentType: string;
   metadata: AssetMetadata;
-  remove?(): Promise<void> | void;
 }
