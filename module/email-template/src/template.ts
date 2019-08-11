@@ -2,8 +2,9 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { AppCache, EnvUtil, FsUtil } from '@travetto/boot';
-import { ResourceManager } from '@travetto/base';
+import { ResourceManager, SystemUtil } from '@travetto/base';
 import { Injectable, Inject } from '@travetto/di';
+import { ImageUtil } from '@travetto/image';
 import { MailTemplateEngine, MailTemplateContext } from '@travetto/email';
 
 import { TemplateUtil } from './util';
@@ -68,7 +69,8 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     try {
       await fsStat(out);
     } catch {
-      await TemplateUtil.optimizeImage(pth, out);
+      const stream = await ImageUtil.optimizePng(pth);
+      await SystemUtil.readableToFile(stream, out);
     }
 
     return fsReadFile(out);
