@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { Readable } from 'stream';
+import { Readable, PassThrough } from 'stream';
 
 function find<T>(set: Set<T>, pred: (x: T) => boolean): T | undefined {
   for (const i of set) {
@@ -33,7 +33,7 @@ export class SystemUtil {
       return src;
     } else {
       const stream = src as Readable;
-      return new Promise((res, rej) => {
+      return new Promise<Buffer>((res, rej) => {
         const data: Buffer[] = [];
         stream.on('data', d => data.push(d));
         stream.on('error', rej);
@@ -44,18 +44,25 @@ export class SystemUtil {
     }
   }
 
-  static async toReadable(src: Readable | Buffer | string) {
+  static toReadable(src: Readable | Buffer | string) {
     if (typeof src === 'string') {
       return fs.createReadStream(src);
     } else if (src instanceof Buffer) {
-      const readable = new Readable();
-      readable._read = () => { };
-      readable.push(src);
-      readable.push(null);
+      const readable = new PassThrough();
+      readable.end(src);
       return readable;
     } else {
       return src as Readable;
     }
+  }
+
+  static async readableToFile(src: Readable, out: string): Promise<void> {
+    const write = fs.createWriteStream(out);
+    const finalStream = src.pipe(write);
+    await new Promise((res, rej) => {
+      finalStream.on('finish', (err) => err ? rej(err) : res());
+    });
+    return;
   }
 
   static throttle<T, U, V>(fn: (a: T, b: U) => V, threshold?: number): (a: T, b: U) => V;

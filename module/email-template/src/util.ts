@@ -1,16 +1,9 @@
 import * as Mustache from 'mustache';
-import * as fs from 'fs';
 import * as path from 'path';
 
 import { FsUtil } from '@travetto/boot';
-import { CommandService } from '@travetto/exec';
 
 export class TemplateUtil {
-
-  static converter = new CommandService({
-    containerImage: 'agregad/pngquant',
-    localCheck: ['pngquant', ['-h']]
-  });
 
   static async compileSass(file: string, roots: string[]) {
     return new Promise<string>((resolve, reject) => {
@@ -37,13 +30,6 @@ export class TemplateUtil {
   static wrapWithBody(tpl: string, wrapper: string) {
     // Wrap template, with preamble/postamble
     return wrapper.replace('<!-- BODY -->', tpl);
-  }
-
-  static async optimizeImage(file: string, out: string) {
-    const { process: proc, result: prom } = await this.converter.exec('pngquant', '--quality', '40-80', '--speed', '1', '--force', '-');
-    fs.createReadStream(file).pipe(proc.stdin!);
-    proc.stdout!.pipe(fs.createWriteStream(out));
-    await prom;
   }
 
   static async inlineImageSource(html: string, lookup: (src: string) => (Buffer | Promise<Buffer>)) {
