@@ -27,6 +27,10 @@ function fromTagSet(tags: TagSet) {
       return acc;
     }, {} as AssetMetadata);
 
+  if (map.createdDate) {
+    map.createdDate = new Date(map.createdDate);
+  }
+
   return map;
 }
 
@@ -52,7 +56,7 @@ export class S3AssetSource extends AssetSource {
     }
   }
 
-  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
+  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
     const upload = this.client.upload(this.q(file.path, {
       Body: stream,
       ContentType: file.contentType,
@@ -64,8 +68,6 @@ export class S3AssetSource extends AssetSource {
     await this.client.putObjectTagging(this.q(file.path, {
       Tagging: { TagSet: toTagSet(file.metadata) }
     })).promise();
-
-    return this.info(file.path);
   }
 
   async read(filename: string): Promise<NodeJS.ReadableStream | Readable> {
@@ -96,7 +98,7 @@ export class S3AssetSource extends AssetSource {
   }
 
   async remove(filename: string): Promise<void> {
-    await this.client.deleteObject({ Bucket: this.config.bucket, Key: filename });
+    await this.client.deleteObject({ Bucket: this.config.bucket, Key: filename }).promise();
     return;
   }
 }

@@ -20,7 +20,7 @@ export class MongoAssetSource extends AssetSource {
     this.bucket = new mongo.GridFSBucket(this.mongoClient.db());
   }
 
-  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
+  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
     const writeStream = this.bucket.openUploadStream(file.path, {
       contentType: file.contentType,
       metadata: file.metadata
@@ -37,7 +37,8 @@ export class MongoAssetSource extends AssetSource {
 
     while (count++ < 5) {
       try {
-        return await this.info(file.path);
+        await this.info(file.path);
+        return;
       } catch (e) {
         // Wait for load
         await new Promise(res => setTimeout(res, 100));

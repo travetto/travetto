@@ -27,11 +27,9 @@ You will need to select one of the available providers to serve as your `AssetSo
 $ npm install @travetto/asset-{provider}
 ```
 
-## Images
-
 Storing of and retrieving assets uses the [`AssetService`](./src/service/asset.ts).  Below you can see an example of storing and retrieving a user's profile image.
 
-**Code: Storing images**
+**Code: Storing Profile Images**
 ```typescript
 @Injectable()
 class UserProfileService {
@@ -54,3 +52,17 @@ class UserProfileService {
   }
 }
 ```
+
+## Naming Strategies
+By default, the assets are stored by path, as specified in the [`Asset`](./src/types.ts) object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
+
+The underlying contract for a [`AssetNamingStrategy`](./src/strategy.ts) looks like:
+
+**Code: AssetNamingStrategy**
+```typescript
+class AssetNamingStrategy {
+  getPath(Asset: Asset): string;
+}
+```
+
+By extending this, and making it `@Injectable`, the naming strategy will become the default for the system.  

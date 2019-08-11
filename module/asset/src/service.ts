@@ -24,27 +24,29 @@ export class AssetService {
     return this.source.info(file);
   }
 
-  async save(asset: Asset, upsert = true, strategy?: AssetNamingStrategy) {
-    let res: Asset | undefined;
+  async save(asset: Asset, upsert = true, strategy?: AssetNamingStrategy): Promise<string> {
 
     // Apply strategy on save
     asset.path = (strategy || this.namingStrategy!).getPath(asset);
 
-    try {
-      res = await this.info(asset.path);
-    } catch (e) {
-      // Not found
+    if (!upsert) {
+      let missing = false;
+      try {
+        await this.info(asset.path);
+      } catch  {
+        missing = true;
+      }
+      if (!missing) {
+        throw new AppError(`File already exists: ${asset.path}`, 'data');
+      }
     }
 
-    if (res && !upsert) {
-      throw new Error(`File already exists: ${asset.path}`);
-    } else {
-      return await this.source.write(asset, asset.stream);
-    }
+    await this.source.write(asset, asset.stream);
+    return asset.path;
   }
 
-  async get(filename: string, haveTags?: string[]): Promise<Asset> {
-    const info = await this.info(filename);
+  async get(path: string, haveTags?: string[]): Promise<Asset> {
+    const info = await this.info(path);
     if (haveTags) {
       const fin = new Set(info.metadata.tags);
       for (const t of haveTags) {
@@ -54,7 +56,7 @@ export class AssetService {
       }
     }
 
-    info.stream = await this.source.read(filename);
+    info.stream = await this.source.read(path);
 
     return info;
   }

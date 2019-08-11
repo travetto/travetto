@@ -1,4 +1,3 @@
 ---
-asset:
-  mongo:
-    schema: asset-test
+mongo.asset:
+  schema: asset-test

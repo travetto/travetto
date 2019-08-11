@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as util from 'util';
-import { Readable } from 'stream';
 
 import { EnvUtil, FsUtil } from '@travetto/boot';
+
 import { Env } from './env';
 import { ScanFs, ScanEntry } from './scan-fs';
 
@@ -102,8 +102,7 @@ export class $ResourceManager {
 
   async readToStream(pth: string, options?: Parameters<typeof fs.createReadStream>[1]) {
     pth = await this.find(pth);
-    const res = fs.createReadStream(pth, options);
-    return res as Readable;
+    return fs.createReadStream(pth, options);
   }
 
   consumeEntryByExtension(base: string, found: Set<string>, out: string[], r: ScanEntry) {
