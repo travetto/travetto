@@ -110,7 +110,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async createIndex(cls: Class, alias = true) {
-    const schema = ElasticsearchUtil.generateSourceSchema(cls);
+    const schema = ElasticsearchUtil.generateSourceSchema(cls, this.config.schemaConfig);
     const ident = this.getIdentity(cls); // Already namespaced
     const concreteIndex = `${ident.index}_${Date.now()}`;
     try {
@@ -184,7 +184,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
       await this.client.indices.putAlias({ index: next, name: index });
     } else { // Only update
-      const schema = ElasticsearchUtil.generateSourceSchema(e.cls);
+      const schema = ElasticsearchUtil.generateSourceSchema(e.cls, this.config.schemaConfig);
 
       await this.client.indices.putMapping({
         index,
@@ -214,7 +214,7 @@ export class ElasticsearchModelSource extends ModelSource {
   getPlainSearchObject<T extends ModelCore>(cls: Class<T>, query: Query<T>) {
 
     const conf = ModelRegistry.get(cls);
-    const q = ElasticsearchUtil.extractWhereQuery(query.where! || {}, cls);
+    const q = ElasticsearchUtil.extractWhereQuery(query.where! || {}, cls, this.config.schemaConfig);
     const search: es.SearchParams = {
       body: q ? { query: q } : {}
     };
@@ -632,7 +632,7 @@ export class ElasticsearchModelSource extends ModelSource {
         if (sk === 'create') {
           sk = 'insert';
         } else if (sk === 'index') {
-          sk = 'upsert';
+          sk = operations[i].insert ? 'insert' : 'upsert';
         }
 
         if (v.result === 'created') {

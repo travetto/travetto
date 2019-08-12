@@ -94,6 +94,7 @@ export abstract class BasePolymorphismSuite extends BaseModelTest {
 
     const o = await service.bulkProcess(Person, [
       { insert: Doctor.from({ name: 'bob', specialty: 'feet' }) },
+      { insert: Doctor.from({ name: 'bob2', specialty: 'feet' }) },
       { upsert: Firefighter.from({ id: service.generateId(), name: 'rob', firehouse: 20 }) },
       { upsert: Firefighter.from({ name: 'rob', firehouse: 20 }) },
       { update: Doctor.from(created1) },
@@ -101,12 +102,12 @@ export abstract class BasePolymorphismSuite extends BaseModelTest {
       { delete: Doctor.from({ id: created3.id }) }
     ]);
 
-    assert(o.counts.insert === 1);
-    assert(o.counts.upsert === 2);
-    assert(o.counts.update === 2);
+    assert(o.counts.insert === 2);
+    assert(o.counts.update === 1);
     assert(o.counts.delete === 1);
+    assert(o.counts.upsert === 3);
 
-    assert(o.insertedIds.size === 2);
-    assert(Array.from(o.insertedIds.keys()) === [0, 2]);
+    assert(o.insertedIds.size === 4);
+    assert(Array.from(o.insertedIds.keys()).sort() === [0, 1, 2, 3]);
   }
 }
