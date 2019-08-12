@@ -1,6 +1,6 @@
 import { Class, ChangeEvent } from '@travetto/registry';
 import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent, Schema } from '@travetto/schema';
-import { Util } from '@travetto/base';
+import { Util, AppError } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
 
 import { SQLUtil, VisitStack } from './util';
@@ -134,7 +134,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Object) {
       return this.quote(JSON.stringify(value).replace(/[']/g, `''`));
     }
-    throw new Error('Ruh roh?');
+    throw new AppError(`Unknown value type for field ${conf.name}, ${value}`, 'data');
   }
 
   getColumnType(conf: FieldConfig) {

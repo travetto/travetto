@@ -32,7 +32,7 @@ export class WatchTest {
 
     w.close();
 
-    const expected = ScanFs.scanDirSync({} as any, __dirname);
+    const expected = ScanFs.scanDirSync({} as any, __dirname).filter(x => !x.stats.isDirectory());
     assert(found.filter(x => x[0] === 'added').length === expected.length);
     assert(found.filter(x => expected.find(y => y.file === x[1])).length === expected.length);
   }
