@@ -1,10 +1,11 @@
 import * as assert from 'assert';
 
-import { Model, ModelService, ModelCore } from '@travetto/model';
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import { SchemaRegistry, Schema, Text } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
+import { Schema, Text } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
-import { BaseElasticsearchTest } from './base';
+
+import { BaseModelTest } from '../../extension/base.test';
+import { Model, ModelService, ModelCore } from '../..';
 
 @Schema()
 export class NoteEntity {
@@ -19,8 +20,7 @@ export class Note implements ModelCore {
   entities?: NoteEntity[];
 }
 
-@Suite()
-export class NestedSuite extends BaseElasticsearchTest {
+export abstract class BaseNestedSuite extends BaseModelTest {
 
   @Test()
   async verifyQuery() {

@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 
-import { Suite, Test } from '@travetto/test';
+import { Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
-import { Point, Model, ModelService } from '@travetto/model';
 
-import { BaseMongoTest } from './base';
+import { Point, Model, ModelService } from '../..';
+import { BaseModelTest } from '../../extension/base.test';
 
 @Model()
 class Location {
@@ -12,8 +12,13 @@ class Location {
   point: Point;
 }
 
-@Suite()
-export class GeoTestSuite extends BaseMongoTest {
+@Model()
+class Region {
+  id?: string;
+  points: Point[];
+}
+
+export abstract class BaseGeoTestSuite extends BaseModelTest {
   @Test('Test within')
   async testWithin() {
     const svc = await DependencyRegistry.getInstance(ModelService);
@@ -22,7 +27,9 @@ export class GeoTestSuite extends BaseMongoTest {
 
     for (let i = 0; i < 5; i++) {
       for (let j = 0; j < 5; j++) {
-        toAdd.push(Location.from({ point: [i, j] }));
+        toAdd.push(Location.from({
+          point: [i, j],
+        }));
       }
     }
 
@@ -44,8 +51,8 @@ export class GeoTestSuite extends BaseMongoTest {
       where: {
         point: {
           $near: [3, 3],
-          $maxDistance: 1,
-          $unit: 'm'
+          $maxDistance: 100,
+          $unit: 'km'
         }
       }
     });
