@@ -4,11 +4,10 @@ import { AppError } from '@travetto/base';
 import { ControllerRegistry, Request, ParamConfig } from '@travetto/rest';
 import { Class } from '@travetto/registry';
 import { ConfigSource } from '@travetto/config';
-import { Asset } from '@travetto/asset';
+import { AssetMetadata, Asset } from '@travetto/asset';
 
 import { AssetRestUtil } from './util';
 import { RestAssetConfig } from './config';
-import { AssetMetadata } from '@travetto/asset/src/types';
 
 const globalConf = new RestAssetConfig();
 ConfigSource.bindTo(globalConf, 'rest.upload');

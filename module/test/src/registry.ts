@@ -32,17 +32,26 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
 
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
     const config = this.getOrCreatePending(cls) as SuiteConfig;
-    const tests = this.pendingFields.get(cls.__id)!.values();
-    const parent = this.getParentClass(cls);
-    if (parent && this.has(parent)) {
+    const tests = [...this.pendingFields.get(cls.__id)!.values()];
+    let parent = this.getParentClass(cls);
+
+    while (parent && this.has(parent)) {
       const pconf = this.get(parent);
       config.afterAll.push(...pconf.afterAll);
       config.beforeAll.push(...pconf.beforeAll);
       config.afterEach.push(...pconf.afterEach);
       config.beforeEach.push(...pconf.beforeEach);
+      tests.push(...[...pconf.tests.values()].map(t => ({
+        ...t,
+        class: cls,
+        className: cls.__filename,
+      })));
+      parent = this.getParentClass(parent);
     }
+
     config.instance = new config.class();
-    config.tests = Array.from(tests) as TestConfig[];
+    config.tests = tests as TestConfig[];
+
     if (!config.description) {
       config.description = config.className;
     }
@@ -75,7 +84,9 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
         const suite = this.get(cls);
         return { suite };
       } else {
-        const suites = this.getClasses().map(x => this.get(x));
+        const suites = this.getClasses()
+          .map(x => this.get(x))
+          .filter(x => !x.class.__abstract);  // Do not run abstract suites
         return { suites };
       }
     }
