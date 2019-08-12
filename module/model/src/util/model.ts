@@ -22,19 +22,21 @@ export class ModelUtil {
     const limit = query && query.limit || 10;
     const where = { [field]: { $regex: re } } as any;
 
-    return {
-      query: {
-        select: query && query.select || {},
-        where: query && query.where ? { $and: [where, query.where!] } : where,
-        limit
-      }
+    const q = {
+      where: query && query.where ? { $and: [where, query.where!] } : where,
+      limit
     } as Query<T>;
+    if (query && query.select) {
+      q.select = query.select;
+    }
+    return q;
   }
 
   static combineSuggestResults<T, U>(
     cls: Class<T>, field: ValidStringFields<T>,
     prefix: string = '', results: T[],
-    transform: (value: string, entity: T) => U, limit?: number
+    transform: (value: string, entity: T) => U,
+    limit?: number
   ): U[] {
     const pattern = this.getSuggestRegex(prefix);
 
@@ -49,7 +51,7 @@ export class ModelUtil {
     }
     return out
       .sort((a, b) => a[0].localeCompare(b[0])).map((a) => a[1])
-      .slice(limit || 10);
+      .slice(0, limit || 10);
   }
 
   static getSuggestFieldQuery<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>) {
