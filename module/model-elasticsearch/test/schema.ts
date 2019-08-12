@@ -1,8 +1,10 @@
 import * as assert from 'assert';
-import { Suite, Test } from '@travetto/test';
+import { Suite, Test, BeforeAll } from '@travetto/test';
 import { ElasticsearchUtil } from '../src/util';
 import { Model, BaseModel } from '@travetto/model';
-import { Currency, Integer, Precision, Float, Text, Schema } from '@travetto/schema';
+import { Currency, Integer, Precision, Float, Text, Schema, SchemaRegistry } from '@travetto/schema';
+import { init } from '../bin/travetto-cli-es_schema';
+import { ModelRegistry } from '@travetto/model/src/registry';
 
 @Schema()
 class Address {
@@ -42,6 +44,12 @@ class Numerical {
 
 @Suite()
 class SchemaSuite {
+
+  @BeforeAll()
+  async init() {
+    await SchemaRegistry.init();
+    await ModelRegistry.init();
+  }
 
   @Test('verifySchema')
   async verifySchema() {

@@ -46,7 +46,7 @@ class TestMultilayerPolymorphism extends BaseModelTest {
 
   @BeforeAll()
   doInit() {
-    super.init();
+    return super.init();
   }
 
   @Test('Extraction')

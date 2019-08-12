@@ -1,12 +1,10 @@
 import * as assert from 'assert';
 
-import { DependencyRegistry } from '@travetto/di';
-import { Suite, Test } from '@travetto/test';
+import { Test } from '@travetto/test';
 import { Schema, Text } from '@travetto/schema';
 
 import { BaseModelTest } from '../../extension/base.test';
-import { Model, ModelService, BaseModel } from '../..';
-import { ModelSource } from '../../src/service/source';
+import { Model, BaseModel } from '../..';
 
 @Schema()
 class Address {
@@ -48,26 +46,11 @@ class Dated {
   time?: Date;
 }
 
-@Model()
-class Bools {
-  id?: string;
-  value?: boolean;
-}
-
-@Suite('Simple Save')
 export abstract class BaseSimpleSourceSuite extends BaseModelTest {
-
-  @Test()
-  async verifySource() {
-    const source = await DependencyRegistry.getInstance(ModelSource);
-    assert.ok(source);
-
-    assert(source instanceof this.sourceClass);
-  }
 
   @Test('save it')
   async save() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
 
     const people = [1, 2, 3, 8].map(x => Person.from({
       id: service.generateId(),
@@ -84,6 +67,10 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
       people.map(p => ({ upsert: p }))
     );
 
+    assert(res.insertedIds.size === 4);
+    assert.deepStrictEqual([...res.insertedIds.values()].sort(), people.map(p => p.id).sort());
+
+    assert(res.errors.length === 0);
     assert(res.counts.upsert === people.length);
 
     const single = await service.getById(Person, people[2].id!);
@@ -157,7 +144,7 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
   @Test('Verify update')
   async testUpdate() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
     const o = await service.save(Simple, Simple.from({ name: 'bob' }));
     o.name = 'roger';
     const b = await service.update(Simple, o);
@@ -170,7 +157,7 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
   @Test('Verify autocomplete')
   async testAutocomplete() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
     const names = ['Bob', 'Bo', 'Barry', 'Rob', 'Robert', 'Robbie'];
     const people = [0, 1, 2, 3, 4, 5].map(x =>
       Person.from({
@@ -208,7 +195,7 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
   @Test('Verify partial update with field removal')
   async testPartialUpdate() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
     const o = await service.save(Person, Person.from({
       name: 'bob',
       age: 20,
@@ -250,7 +237,7 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
   @Test('Verify partial update with field removal and lists')
   async testPartialUpdateList() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
     const o = await service.save(SimpleList, SimpleList.from({
       names: ['a', 'b', 'c'],
       simples: [
@@ -278,7 +265,7 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
   @Test('Verify partial update with field removal and lists')
   async testBlankPartialUpdate() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
     const o = await service.save(User2, User2.from({
       name: 'bob'
     }));
@@ -300,7 +287,7 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
   @Test('verify dates')
   async testDates() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
     const res = await service.save(Dated, Dated.from({ time: new Date() }));
 
     assert(res.time instanceof Date);
@@ -308,7 +295,7 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
   @Test('verify word boundary')
   async testWordBoundary() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
     const people = [1, 2, 3, 8].map(x => Person.from({
       id: service.generateId(),
       name: 'Bob Ombo',
@@ -330,45 +317,5 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
     const results3 = await service.getAllByQueryString(Person, { query: 'name ~ /\\bomb.*/' });
     assert(results3.length === 0);
-  }
-
-  @Test('verify empty queries')
-  async testEmptyCheck() {
-    const service = await DependencyRegistry.getInstance(ModelService);
-    await service.bulkProcess(Bools, [true, false, null, false, true, undefined, null].map(x => {
-      return {
-        insert: Bools.from({
-          value: x!
-        })
-      };
-    }));
-
-    console.log('Created!');
-
-    const results = await service.getAllByQuery(Bools, {});
-    assert(results.length === 7);
-
-    console.log('Got All!');
-
-    const results2 = await service.getAllByQuery(Bools, {
-      where: {
-        value: {
-          $exists: true
-        }
-      }
-    });
-    console.log('Searched!');
-
-    assert(results2.length === 4);
-
-    const results3 = await service.getAllByQueryString(Bools, {
-      query: 'value != true'
-    });
-    assert(results3.length === 5);
-
-    const results4 = await service.getAllByQueryString(Bools, {
-      query: 'value != false'
-    });
-    assert(results4.length === 5);
   }
 }
