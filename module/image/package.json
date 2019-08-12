@@ -7,19 +7,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^1.0.0-beta.0",
-    "@types/mime": "^2.0.1",
-    "file-type": "^12.1.0",
-    "mime": "^2.4.4"
+    "@travetto/exec": "1.0.0-beta.0"
   },
-  "description": "Modular library for storing and retrieving binary assets",
+  "description": "Image support, resizing, and optimization",
   "devDependencies": {
     "@travetto/test": "^1.0.0-beta.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [
-    "assets",
-    "storage",
+    "images",
     "travetto",
     "typescript"
   ],
@@ -29,7 +25,7 @@
     "index.ts",
     "src"
   ],
-  "name": "@travetto/asset",
+  "name": "@travetto/image",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },

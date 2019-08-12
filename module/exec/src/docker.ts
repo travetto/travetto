@@ -16,7 +16,7 @@ export class DockerContainer {
   }
 
   private dockerCmd: string = 'docker';
-  private execState: ExecutionState;
+  private pendingExecutions = new Set<ExecutionState>();
 
   private container: string;
   private env: Record<string, string> = {};
@@ -42,7 +42,7 @@ export class DockerContainer {
     state.result = state.result.catch(e => {
       if (all || e.killed) {
         this.evict = true;
-        delete this.execState;
+        this.pendingExecutions.clear();
       }
       throw e;
     });
@@ -55,7 +55,8 @@ export class DockerContainer {
   }
 
   get id() {
-    return this.execState && !this.execState.process.killed ? this.execState.process.pid : -1;
+    const first = this.pendingExecutions.size > 0 ? this.pendingExecutions.values().next().value : undefined;
+    return first && !first.process.killed ? first.process.pid : -1;
   }
 
   forceDestroyOnShutdown() {
@@ -189,17 +190,22 @@ export class DockerContainer {
   async stop(args?: string[], flags?: string[]) {
     const toStop = this.runCmd('stop', ...(flags || []), this.container, ...(args || [])).result;
     let prom = toStop;
-    if (this.execState) {
-      prom = Promise.all([toStop, this.execState.result]).then(x => x[0]);
+    if (this.pendingExecutions) {
+      const pendingResults = [...this.pendingExecutions.values()].map(e => e.result);
+      this.pendingExecutions.clear();
+      prom = Promise.all([toStop, ...pendingResults]).then(([first]) => first);
     }
     return prom;
   }
 
   exec(args?: string[], extraFlags?: string[]) {
     const flags = this.getRuntimeFlags(extraFlags);
-    this.execState = this.runCmd('exec', ...flags, this.container, ...(args || []));
-    this.execState.result = this.execState.result.finally(() => delete this.execState);
-    return this.execState;
+    const execState = this.runCmd('exec', ...flags, this.container, ...(args || []));
+    this.pendingExecutions.add(execState);
+
+    execState.result = execState.result.finally(() => this.pendingExecutions.delete(execState));
+
+    return execState;
   }
 
   async run(args?: any[], flags?: string[]) {
@@ -212,10 +218,13 @@ export class DockerContainer {
 
     await this.initTemp();
 
-    const state = this.runCmd('run', `--name=${this.container}`, ...this.getFlags(flags), this.image, ...(args || []));
-    this.execState = this.watchForEviction(state);
-    this.execState.process.unref();
-    return this.execState.result;
+    const execState = this.runCmd('run', `--name=${this.container}`, ...this.getFlags(flags), this.image, ...(args || []));
+    this.pendingExecutions.add(execState);
+
+    this.watchForEviction(execState);
+    execState.process.unref();
+
+    return execState.result.finally(() => this.pendingExecutions.delete(execState));
   }
 
   async validate() {
@@ -236,10 +245,10 @@ export class DockerContainer {
       await Exec.spawn(this.dockerCmd, ['rm', '-fv', this.container]).result;
     } catch (e) { /* ignore */ }
 
-    if (this.execState) {
-      const state = this.execState;
-      delete this.execState;
-      await state.result;
+    if (this.pendingExecutions.size) {
+      const results = [...this.pendingExecutions.values()].map(x => x.result);
+      this.pendingExecutions.clear();
+      await Promise.all(results);
     }
 
     await this.cleanup();

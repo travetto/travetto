@@ -1,7 +1,7 @@
 travetto: Asset
 ===
 
-This module provides the framework for storing/retrieving assets. It also provides additional image functionality for on-the-fly resizing. 
+This module provides the framework for storing/retrieving assets. 
 
 The asset module requires an [`AssetSource`](./src/service/source.ts) to provide functionality for reading and writing files. The `AssetSource` will need to be configured to be picked up by the `AssetService`
 
@@ -15,8 +15,6 @@ class AppConfig {
 }
 ```
 
-After that, both [`AssetService`](./src/service/asset.ts) and [`ImageService`](./src/service/image.ts) will rely upon the [`AssetSource`](./src/service/source.ts) to do their work.  Below you can see an example of storing and retrieving a user's profile image.  
-
 **Install: primary**
 ```bash
 $ npm install @travetto/asset
@@ -29,18 +27,15 @@ You will need to select one of the available providers to serve as your `AssetSo
 $ npm install @travetto/asset-{provider}
 ```
 
-## Images
+Storing of and retrieving assets uses the [`AssetService`](./src/service/asset.ts).  Below you can see an example of storing and retrieving a user's profile image.
 
-Storing of all assets uses the [`AssetService`](./src/service/asset.ts), but retrieval can either be from [`AssetService`](./src/service/asset.ts) or [`ImageService`](./src/service/image.ts) depending on whether or not you want to perform image optimizations on retrieval. The `ImageService` users [`GraphicsMagick`](http://www.graphicsmagick.org) for image transformation.  If the binary is not installed the framework will spin up a [`docker`](https://www.docker.com/community-edition) container to provide needed functionality.
-
-**Code: Storing images**
+**Code: Storing Profile Images**
 ```typescript
 @Injectable()
 class UserProfileService {
 
   constructor(
     private asset: AssetService, 
-    private image: ImageService,
     private model: ModelService
   ) {}
 
@@ -53,9 +48,21 @@ class UserProfileService {
 
   async getProfileImage(userId:string) {
     const user = await this.model.getById(userId);
-    return await this.image.getImage(user.profileImage, { w: 100, h: 100 });
+    return await this.asset.get(user.profileImage);
   }
 }
 ```
 
-Additionally, the `ImageService` currently supports the ability to resize an image on the fly, while auto orienting.  
+## Naming Strategies
+By default, the assets are stored by path, as specified in the [`Asset`](./src/types.ts) object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
+
+The underlying contract for a [`AssetNamingStrategy`](./src/strategy.ts) looks like:
+
+**Code: AssetNamingStrategy**
+```typescript
+class AssetNamingStrategy {
+  getPath(Asset: Asset): string;
+}
+```
+
+By extending this, and making it `@Injectable`, the naming strategy will become the default for the system.  

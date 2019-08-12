@@ -1,8 +1,8 @@
-import { Asset } from './model';
+import { Asset } from './types';
 
 export abstract class AssetSource {
-  abstract write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset>;
-  abstract read(filename: string): Promise<NodeJS.ReadableStream>;
-  abstract info(filename: string): Promise<Asset>;
-  abstract remove(filename: string): Promise<void>;
+  abstract write(asset: Asset, stream: NodeJS.ReadableStream): Promise<void>;
+  abstract read(path: string): Promise<NodeJS.ReadableStream>;
+  abstract info(path: string): Promise<Asset>;
+  abstract remove(path: string): Promise<void>;
 }

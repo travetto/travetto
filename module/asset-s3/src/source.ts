@@ -1,12 +1,12 @@
 import * as aws from 'aws-sdk';
-import * as fs from 'fs';
 import { TagSet } from 'aws-sdk/clients/s3';
 import { Readable } from 'stream';
 
+import { SystemUtil } from '@travetto/base';
 import { AssetSource, Asset, AssetMetadata } from '@travetto/asset';
 import { Injectable } from '@travetto/di';
 
-import { AssetS3Config } from './config';
+import { S3AssetConfig } from './config';
 
 function toTagSet(metadata: AssetMetadata): TagSet {
   return ['name', 'title', 'hash', 'createdDate', 'tags']
@@ -27,15 +27,19 @@ function fromTagSet(tags: TagSet) {
       return acc;
     }, {} as AssetMetadata);
 
+  if (map.createdDate) {
+    map.createdDate = new Date(map.createdDate);
+  }
+
   return map;
 }
 
 @Injectable()
-export class AssetS3Source extends AssetSource {
+export class S3AssetSource extends AssetSource {
 
   private client: aws.S3;
 
-  constructor(private config: AssetS3Config) {
+  constructor(private config: S3AssetConfig) {
     super();
   }
 
@@ -52,30 +56,26 @@ export class AssetS3Source extends AssetSource {
     }
   }
 
-  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<Asset> {
-    const upload = this.client.upload(this.q(file.filename, {
-      Body: fs.createReadStream(file.path),
+  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
+    const upload = this.client.upload(this.q(file.path, {
+      Body: stream,
       ContentType: file.contentType,
-      ContentLength: file.length
+      ContentLength: file.size
     })).promise();
 
     await upload;
 
-    await this.client.putObjectTagging(this.q(file.filename, {
+    await this.client.putObjectTagging(this.q(file.path, {
       Tagging: { TagSet: toTagSet(file.metadata) }
     })).promise();
-
-    return this.info(file.filename);
   }
 
   async read(filename: string): Promise<NodeJS.ReadableStream | Readable> {
     const res = await this.client.getObject({ Bucket: this.config.bucket, Key: filename }).promise();
-    if (res.Body instanceof Buffer || typeof res.Body === 'string') {
-      const strm = new Readable();
-      strm._read = () => { };
-      strm.push(res.Body);
-      strm.push(null);
-      return strm;
+    if (res.Body instanceof Buffer) {
+      return SystemUtil.toReadable(res.Body);
+    } else if (typeof res.Body === 'string') {
+      return SystemUtil.toReadable(Buffer.from(res.Body, 'utf8'));
     } else if (res.Body && ('pipe' in res.Body)) {
       return res.Body as NodeJS.ReadableStream;
     }
@@ -88,16 +88,17 @@ export class AssetS3Source extends AssetSource {
       this.client.getObject(query).promise(),
       this.client.getObjectTagging(query).promise()
     ]);
-    return new Asset({
-      contentType: obj.ContentType,
-      filename,
-      length: obj.ContentLength,
+    return {
+      contentType: obj.ContentType!,
+      path: filename,
+      stream: undefined as any,
+      size: obj.ContentLength!,
       metadata: fromTagSet(tags.TagSet)
-    });
+    };
   }
 
   async remove(filename: string): Promise<void> {
-    await this.client.deleteObject({ Bucket: this.config.bucket, Key: filename });
+    await this.client.deleteObject({ Bucket: this.config.bucket, Key: filename }).promise();
     return;
   }
 }

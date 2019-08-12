@@ -5,7 +5,7 @@ export const init = {
     const { ExecUtil, DockerContainer } = await import('@travetto/exec');
     const { EnvUtil } = await import('@travetto/boot');
 
-    const defPort = EnvUtil.getInt('ASSET_MONGO_PORT', 27017);
+    const defPort = EnvUtil.getInt('MONGO_ASSET_PORT', 27017);
 
     try {
       await ExecUtil.waitForPort(defPort, 10);

@@ -1,89 +1,28 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import * as util from 'util';
-import * as mime from 'mime';
 import * as fileType from 'file-type';
-import * as os from 'os';
 import * as crypto from 'crypto';
-import { IncomingMessage } from 'http';
+import * as mime from 'mime';
 
-import { FsUtil } from '@travetto/boot';
-import { HttpRequest } from '@travetto/net';
-
-import { Asset, AssetFile } from './model';
+import { Asset, AssetMetadata } from './types';
 
 const fsStat = util.promisify(fs.stat);
 const fsOpen = util.promisify(fs.open);
 const fsRead = util.promisify(fs.read);
 const fsRename = util.promisify(fs.rename);
 
-const tmpDir = FsUtil.toUnix(os.tmpdir());
-
 export class AssetUtil {
 
-  static generateTempFile(ext: string): string {
-    const now = new Date();
-    const name = `image-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${process.pid}-${(Math.random() * 100000000 + 1).toString(36)}.${ext}`;
-    return FsUtil.resolveUnix(tmpDir, name);
-  }
-
-  static async localFileToAsset(pth: string, prefix?: string, tags?: string[]) {
-    const hash = crypto.createHash('sha256').setEncoding('hex');
-
+  static async hashFile(pth: string) {
+    const hasher = crypto.createHash('sha256').setEncoding('hex');
     const str = fs.createReadStream(pth);
-    str.pipe(hash);
+    const hashStream = str.pipe(hasher);
 
     await new Promise((res, rej) => {
-      str.on('end', e => e ? rej(e) : res());
+      hashStream.on('finish', e => e ? rej(e) : res());
     });
-
-    const size = (await fsStat(pth)).size;
-
-    const upload = this.fileToAsset({
-      name: pth,
-      hash: hash.read().toString(),
-      size,
-      path: pth,
-    }, prefix);
-
-    if (tags) {
-      upload.metadata.tags = tags;
-    }
-
-    return upload;
-  }
-
-  static fileToAsset(upload: AssetFile, prefix?: string): Asset {
-    const name = upload.name;
-    let type = upload.type as string;
-    if (!type || type === 'application/octet-stream') {
-      type = mime.getType(name) || type;
-    }
-
-    const uploadFile = new Asset({
-      filename: name,
-      length: upload.size,
-      contentType: type,
-      path: upload.path,
-      metadata: {
-        name,
-        title: name.replace(/-_/g, ' '),
-        hash: upload.hash,
-        createdDate: new Date()
-      }
-    });
-
-    let ext = '';
-
-    if (uploadFile.contentType) {
-      ext = mime.getExtension(uploadFile.contentType)!;
-    } else if (uploadFile.filename.indexOf('.') > 0) {
-      ext = uploadFile.filename.split('.').pop() as string;
-    }
-
-    uploadFile.filename = uploadFile.metadata.hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (all, ...others) =>
-      (prefix || '') + others.slice(0, 5).join('/') + (ext ? `.${ext.toLowerCase()}` : ''));
-
-    return uploadFile;
+    return hasher.read().toString() as string;
   }
 
   static async readChunk(filePath: string, bytes: number) {
@@ -98,35 +37,53 @@ export class AssetUtil {
     return fileType(buffer);
   }
 
-  static async downloadUrl(url: string) {
-    let filePath = this.generateTempFile(url.split('/').pop() as string);
-    const file = fs.createWriteStream(filePath);
-    const filePathExt = filePath.indexOf('.') > 0 ? filePath.split('.').pop() : '';
-    let responseExt: string | undefined | null;
+  static async coerceFileType(filePath: string) {
 
-    await HttpRequest.exec({
-      url, responseHandler: async (msg: IncomingMessage) => {
-        responseExt = mime.getExtension((msg.headers['content-type'] as string) || '');
-        await HttpRequest.pipe(msg, file);
-      }
-    });
+    const type = await this.resolveFileType(filePath);
+    const ext = mime.getExtension(type);
+    const newFile = filePath.replace(/[.][^.]+$/, ext!);
 
-    if (!responseExt) {
-      const detectedType = await this.detectFileType(filePath);
-      if (detectedType) {
-        responseExt = detectedType.ext;
-      }
+    if (filePath !== newFile) {
+      await fsRename(filePath, newFile);
+      filePath = newFile;
     }
-    if (filePathExt !== responseExt && responseExt) {
-      let newFilePath = filePath;
-      if (filePathExt) {
-        newFilePath = newFilePath.replace(`.${filePathExt}`, `.${responseExt}`);
-      } else {
-        newFilePath = `${newFilePath}.${responseExt}`;
-      }
-      await fsRename(filePath, newFilePath);
-      filePath = newFilePath;
-    }
+
     return filePath;
+  }
+
+  static async resolveFileType(pth: string) {
+    let contentType: string = path.extname(pth);
+    const detected = await this.detectFileType(pth);
+
+    if (detected) {
+      contentType = detected.mime;
+    }
+
+    return contentType;
+  }
+
+  static async fileToAsset(file: string, metadata: Partial<AssetMetadata> = {}): Promise<Asset> {
+    let hash: string | undefined = metadata.hash;
+
+    if (!hash) {
+      hash = await this.hashFile(file);
+    }
+
+    const size = (await fsStat(file)).size;
+    const contentType = await this.resolveFileType(file);
+
+    return {
+      size,
+      path: file,
+      contentType,
+      stream: fs.createReadStream(file),
+      metadata: {
+        name: path.basename(file),
+        title: path.basename(file).replace(/-_/g, ' '),
+        hash: hash!,
+        createdDate: new Date(),
+        ...(metadata || {})
+      }
+    };
   }
 }

@@ -1,71 +1,99 @@
+import * as aws from 'aws-sdk';
 import * as assert from 'assert';
-import * as fs from 'fs';
-import * as util from 'util';
 
-import { AssetService, AssetUtil, AssetSource, ImageService } from '@travetto/asset';
-import { Suite, BeforeAll, BeforeEach, Test } from '@travetto/test';
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
+import { HashNamingStrategy, AssetService, AssetUtil } from '@travetto/asset';
+import { Suite, Test, BeforeEach, AfterEach, BeforeAll } from '@travetto/test';
+import { DependencyRegistry } from '@travetto/di';
+import { ResourceManager, Util } from '@travetto/base';
 
-import { AssetS3Source } from '../src/source';
-import { AssetS3Config } from '../src/config';
-
-const fsStat = util.promisify(fs.stat);
-
-class Config extends AssetS3Config {
-  @InjectableFactory()
-  static getConf(): AssetS3Config {
-    return new AssetS3Config();
-  }
-  @InjectableFactory()
-  static getSource(cfg: AssetS3Config): AssetSource {
-    return new AssetS3Source(cfg);
-  }
-}
+// tslint:disable-next-line: no-import-side-effect
+import '../';
+import { S3AssetConfig } from '../src/config';
 
 @Suite()
-class TestAssetService {
+class AssetSourceSuite {
 
   @BeforeAll()
-  async init() {
+  async initAll() {
     await DependencyRegistry.init();
   }
 
-  @Test('downloads an file from a url', { skip: true })
-  async download() {
-    const service = await DependencyRegistry.getInstance(AssetService);
-    assert(service);
-    assert((service as any).source);
+  @BeforeEach()
+  async init() {
+    const config = await DependencyRegistry.getInstance(S3AssetConfig);
+    const s3 = new aws.S3(config);
+    const bucket = `trv-${Util.uuid()}`;
+    config.bucket = bucket;
+    config.postConstruct();
 
-    const filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
-    assert(filePath !== undefined);
-    assert(filePath.split('.').pop() === 'png');
-
-    let file = await AssetUtil.localFileToAsset(filePath);
-    file = await service.save(file);
-
-    assert(file.contentType === 'image/png');
-    assert(file.length > 0);
-
-    assert.rejects(fsStat(filePath));
+    await s3.createBucket({ Bucket: bucket }).promise();
   }
 
-  @Test('downloads an file from a url', { skip: true })
-  async downloadAndResize() {
-    const service = await DependencyRegistry.getInstance(ImageService);
-    const assetService = await DependencyRegistry.getInstance(AssetService);
+  @AfterEach()
+  async cleanup() {
+    const config = await DependencyRegistry.getInstance(S3AssetConfig);
+    const s3 = new aws.S3(config);
+    const obs = await s3.listObjects({ Bucket: config.bucket }).promise();
+    if (obs.Contents && obs.Contents.length) {
+      await s3.deleteObjects({
+        Bucket: config.bucket,
+        Delete: {
+          Objects: (obs.Contents || []).map(o => ({ Key: o.Key }))
+        }
+      } as any).promise();
+    }
+    await s3.deleteBucket({ Bucket: config.bucket }).promise();
+  }
 
-    const filePath = await AssetUtil.downloadUrl('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
-    assert(filePath !== undefined);
-    assert(filePath.split('.').pop() === 'png');
+  @Test()
+  async saveBasic() {
+    const service = await DependencyRegistry.getInstance(AssetService);
+    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
+    const file = await AssetUtil.fileToAsset(pth);
 
-    const file = await AssetUtil.localFileToAsset(filePath);
-    const done = await assetService.save(file, true);
+    const out = await service.save(file);
+    assert(file.path === out);
+  }
 
-    assert.ok(done);
+  @Test()
+  async saveHashed() {
+    const service = await DependencyRegistry.getInstance(AssetService);
+    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
+    const file = await AssetUtil.fileToAsset(pth);
+    const outHashed = await service.save(file, false, new HashNamingStrategy());
+    const hash = await AssetUtil.hashFile(pth);
+    assert(outHashed.replace(/\//g, '') === hash);
+  }
 
-    const resized = await service.getImage(file.filename, { w: 40, h: 40 });
+  @Test()
+  async saveAndGet() {
+    const service = await DependencyRegistry.getInstance(AssetService);
+    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
+    const file = await AssetUtil.fileToAsset(pth);
+    await service.save(file);
 
-    assert(resized.contentType === 'image/png');
-    assert.ok(resized.stream);
+    const saved = await service.get(pth);
+
+    assert(file.contentType === saved.contentType);
+    assert(file.size === saved.size);
+    assert.deepStrictEqual(file.metadata, saved.metadata);
+  }
+
+  @Test()
+  async saveAndRemove() {
+    const service = await DependencyRegistry.getInstance(AssetService);
+    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
+    const file = await AssetUtil.fileToAsset(pth);
+    await service.save(file);
+
+    const out = await service.info(pth);
+
+    assert(out.path === pth);
+
+    await service.remove(pth);
+
+    await assert.rejects(async () => {
+      await service.info(pth);
+    });
   }
 }

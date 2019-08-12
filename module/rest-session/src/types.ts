@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { SystemUtil } from '@travetto/base';
 import { ContextProvider } from '@travetto/rest';
 
 @ContextProvider((c, req) => req!.session.data)
@@ -42,11 +42,11 @@ export class Session<T = any> {
       this.expiresAt = new Date(this.maxAge + Date.now());
     }
 
-    this.hash = Util.naiveHash(JSON.stringify(this));
+    this.hash = SystemUtil.naiveHash(JSON.stringify(this));
   }
 
   isChanged() {
-    return this.isTimeChanged() || this.hash !== Util.naiveHash(JSON.stringify(this));
+    return this.isTimeChanged() || this.hash !== SystemUtil.naiveHash(JSON.stringify(this));
   }
 
   isTimeChanged() {

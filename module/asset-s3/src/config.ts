@@ -1,19 +1,25 @@
 import * as aws from 'aws-sdk';
 import { Config } from '@travetto/config';
 
-@Config('asset.s3')
-export class AssetS3Config {
+@Config('s3.asset')
+export class S3AssetConfig {
   region = 'us-east-1';
   base = '';
 
-  accessKeyId = '';
-  secretAccessKey = '';
+  accessKeyId = process.env.AWS_ACCESS_KEY_ID || '';
+  secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || '';
 
   bucket = '';
 
   config: aws.S3.ClientConfiguration;
 
   postConstruct() {
+    if (!this.accessKeyId && !this.secretAccessKey) {
+      const creds = new aws.SharedIniFileCredentials({ profile: process.env.AWS_PROFILE });
+      this.accessKeyId = creds.accessKeyId;
+      this.secretAccessKey = creds.secretAccessKey;
+    }
+
     this.config = {
       apiVersion: '2006-03-01',
       credentials: {

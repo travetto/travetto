@@ -14,7 +14,7 @@ export class ConfigUtil {
       .map(file => ({ file, profile: path.basename(file).replace('.yml', '') }))
       .filter(({ profile }) => Env.hasProfile(profile))
       .map(({ file, profile }) => {
-        const finalPath = ResourceManager.getAbsolutePathSync(file);
+        const finalPath = ResourceManager.toAbsolutePathSync(file);
         return { file: finalPath, profile };
       });
 
