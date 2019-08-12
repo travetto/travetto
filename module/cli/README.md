@@ -41,7 +41,7 @@ travetto compile
 ```
 This command line operation invokes the [`Compiler`](https://github.com/travetto/travetto/tree/master/module/compiler) to pre-compile of all the application source code.  This is useful for production builds when startup performance is critical.
 
-## Dependency Injection
+## Application
 
 **Terminal: Run usage**
 ```bash
@@ -50,7 +50,7 @@ travetto run [application]
   -w, --watch [watch]  # Run the application in watch mode
   -p, --profile [profile]  # Specify additional application profiles
 ```
-The run command allows for invocation of [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di)-based applications as defined by the `@Application` decorator.  Additionally, the environment can manually be specified (dev, test, prod, e2e) as well as whether or not the application should be run in `watch` mode.
+The run command allows for invocation of [`Application`](https://github.com/travetto/travetto/tree/master/module/app)-based applications as defined by the `@Application` decorator.  Additionally, the environment can manually be specified (dev, test, prod, e2e) as well as whether or not the application should be run in `watch` mode.
 
 ## Testing
 

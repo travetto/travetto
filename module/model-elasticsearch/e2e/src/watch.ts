@@ -1,6 +1,7 @@
 import { Model, ModelCore, ModelSource } from '@travetto/model';
 import { Schema } from '@travetto/schema';
-import { InjectableFactory, Application, Inject } from '@travetto/di';
+import { Application } from '@travetto/app';
+import { InjectableFactory, Inject } from '@travetto/di';
 
 import { ElasticsearchModelSource, ElasticsearchModelConfig } from '../..';
 

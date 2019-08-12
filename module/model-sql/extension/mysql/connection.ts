@@ -43,21 +43,21 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
     });
   }
 
-  private get ctx() {
-    return this.context.get<{ connection: any, topped?: boolean }>('connection');
+  public get asyncContext() {
+    return this.context.get<{ connection: mysql.PoolConnection }>('connection');
   }
 
   get active(): mysql.PoolConnection {
-    return this.ctx.connection;
+    return this.asyncContext.connection;
   }
 
   /**
   * Acquire conn
   */
-  async create() {
+  async acquire() {
     const res = await asAsync<mysql.PoolConnection>(this.pool, 'getConnection');
     if (!this.active) {
-      this.ctx.connection = res;
+      this.asyncContext.connection = res;
     }
     return res;
   }
@@ -78,4 +78,8 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
   startTx = () => asAsync(this.active, 'beginTransaction');
   commit = () => asAsync(this.active, 'commit');
   rollback = () => asAsync(this.active, 'rollback');
+
+  startNestedTx = async (id: string) => { await this.active.query(`SAVEPOINT ${id}`); };
+  commitNested = async (id: string) => { await this.active.query(`RELEASE SAVEPOINT ${id}`); };
+  rollbackNested = async (id: string) => { await this.active.query(`ROLLBACK TO ${id}`); };
 }

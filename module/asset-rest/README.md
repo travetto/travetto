@@ -14,22 +14,25 @@ A simple example:
 
 **Code: Rest controller with upload support**
 ```typescript
-@Controller('/avatar')
-class Controller {
+@Controller('/asset')
+export class AssetController {
 
-  constructor(assetService: AssetService, imageService: ImageService) {}
+  constructor(
+    private assetService: AssetService,
+    private imageService: ImageService
+  ) { }
 
   @Post('/')
-  async setAvatar(@Upload() file: Asset) {
-    const stored = await this.assetService.store(asset);
+  async store(@Upload() file: Asset) {
+    const stored = await this.assetService.save(file);
     return {
       path: stored.path
     };
   }
 
   @Get('/:imgPath')
-  async getAvatar(@Path() imgPath: string, @Query() opts:ImageOptions>) {
-    return await this.imageService.get(imgPath, opts);
+  async getImage(@Path() imgPath: string, @Query() opts: ImageOptions) {
+    return await this.imageService.getImage(imgPath, opts);
   }
 }
 ```

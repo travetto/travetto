@@ -148,7 +148,7 @@ Release 0.7.x: 2019-07-15 -- BETA --
 
 ### Minor Fixes
 * Changes to ModelService to support rest-session being able to persist properly
-* Yeoman Genenrator has been updated, and the internal dependency management has been rewritten
+* Yeoman Generator has been updated, and the internal dependency management has been rewritten
 * Library updates to maintain latest working versions
 * Brought support for Map/Set to route serialization as JSON objects and arrays
 * Resolved issues with fastify and path determination

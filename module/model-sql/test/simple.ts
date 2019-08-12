@@ -69,6 +69,12 @@ class Dated {
   time?: Date;
 }
 
+@Model()
+class Bools {
+  id?: string;
+  value?: boolean;
+}
+
 @Suite('Simple Save')
 class TestSave extends BaseSqlTest {
 
@@ -330,5 +336,67 @@ class TestSave extends BaseSqlTest {
     const res = await service.save(Dated, Dated.from({ time: new Date() }));
 
     assert(res.time instanceof Date);
+  }
+
+  @Test('verify word boundary')
+  async testWordBoundary() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    await service.bulkProcess(Person, [1, 2, 3, 8].map(x => {
+      return {
+        insert: Person.from({
+          id: `Orange-${x}`,
+          name: 'Bob',
+          age: 20 + x,
+          gender: 'm',
+          address: {
+            street1: 'a',
+            ...(x === 1 ? { street2: 'b' } : {})
+          }
+        })
+      };
+    }));
+
+    const results = await service.getAllByQueryString(Person, { query: 'id ~ /\\borange.*/i' });
+    assert(results.length === 4);
+
+    const results2 = await service.getAllByQueryString(Person, { query: 'id ~ /\\brange.*/i' });
+    assert(results2.length === 0);
+
+    const results3 = await service.getAllByQueryString(Person, { query: 'id ~ /\\borange.*/' });
+    assert(results3.length === 0);
+  }
+
+  @Test('verify empty queries')
+  async testEmptyCheck() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    await service.bulkProcess(Bools, [true, false, null, false, true, undefined, null].map(x => {
+      return {
+        insert: Bools.from({
+          value: x!
+        })
+      };
+    }));
+
+    const results = await service.getAllByQuery(Bools, {});
+    assert(results.length === 7);
+
+    const results2 = await service.getAllByQuery(Bools, {
+      where: {
+        value: {
+          $exists: true
+        }
+      }
+    });
+    assert(results2.length === 4);
+
+    const results3 = await service.getAllByQueryString(Bools, {
+      query: 'value != true'
+    });
+    assert(results3.length === 5);
+
+    const results4 = await service.getAllByQueryString(Bools, {
+      query: 'value != false'
+    });
+    assert(results4.length === 5);
   }
 }

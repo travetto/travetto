@@ -168,7 +168,7 @@ class InjectableTransformer {
     const args = TransformUtil.extendObjectLiteral({
       dependencies: injectArgs,
       src: (node.parent as ts.ClassDeclaration).name,
-      class: target,
+      target,
       original
     }, injectConfig);
 

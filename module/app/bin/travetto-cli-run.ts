@@ -9,7 +9,7 @@ import { RunUtil } from './lib/run';
 
 const { colorize } = Util;
 
-interface DiCommand {
+interface AppCommand {
   watchReal: boolean;
   env?: string;
 }
@@ -37,7 +37,7 @@ function getAppUsage(app: CachedAppConfig) {
   return usage;
 }
 
-function generateAppHelpList(confs: CachedAppConfig[], cmd: DiCommand) {
+function generateAppHelpList(confs: CachedAppConfig[], cmd: AppCommand) {
   const choices = [];
   if (!confs.length) {
     return `\nNo applications defined, use ${colorize.type('@Application')} to registry entry points`;
@@ -93,7 +93,7 @@ export function init() {
     .option('-r, --root [root]', 'Application root, defaults to associated root by name')
     .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', /^(1|0|yes|no|on|off|auto|true|false)$/i)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
-    .action(async (app: string, args: string[], cmd: commander.Command & DiCommand) => {
+    .action(async (app: string, args: string[], cmd: commander.Command & AppCommand) => {
       cmd.env = cmd.env || process.env.ENV || process.env.env || undefined;
       cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
 

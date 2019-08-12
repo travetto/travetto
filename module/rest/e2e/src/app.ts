@@ -1,6 +1,6 @@
 import { InjectableFactory, Injectable } from '@travetto/di';
 
-import { Application, RouteConfig, RestApp, RestInterceptor, RestAppCustomizer } from '../..';
+import { Application, RouteConfig, RestApp, RestInterceptor } from '../..';
 
 type Inner = {
   use(factory: any): void;
@@ -37,16 +37,6 @@ class DummyApp extends RestApp<Inner> {
 
 @Application('sample')
 export class SampleApp {
-
-  @InjectableFactory()
-  static getCustomer(): RestAppCustomizer<Inner> {
-    return new class extends RestAppCustomizer<Inner> {
-      customize(app: Inner) {
-        console.log('Hello');
-        app.use('something');
-      }
-    }();
-  }
 
   constructor(private app: RestApp) { }
 

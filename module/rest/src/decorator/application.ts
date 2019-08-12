@@ -1,4 +1,4 @@
-import { ApplicationParameter, AppDecorator, Application as ParentApplication } from '@travetto/di';
+import { ApplicationParameter, AppDecorator, Application as ParentApplication } from '@travetto/app';
 
 export function Application(
   name: string,

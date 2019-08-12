@@ -23,6 +23,7 @@ export class Note implements ModelCore {
 export class Wrapper implements ModelCore {
   id: string;
   content: any;
+  tags?: string[];
 }
 
 @Suite()
@@ -67,5 +68,45 @@ export class NestedSuite extends BaseSqlTest {
     const fetched = await service.getById(Wrapper, ret.id);
 
     assert(fetched.content === { a: 5, b: 6 });
+  }
+
+  @Test()
+  async verifyNestedSimple() {
+    const svc = await DependencyRegistry.getInstance(ModelService);
+    await svc.saveAll(Wrapper, [
+      Wrapper.from({
+        id: '20',
+        content: {
+          a: 10
+        },
+        tags: ['a', 'b', 'c', 'orange', 'orange'],
+      }),
+      Wrapper.from({
+        id: '202',
+        content: {
+          a: 10
+        },
+        tags: ['a', 'b', 'c', 'orange', 'orange']
+      }),
+      Wrapper.from({
+        id: '203',
+        content: {
+          a: 10
+        },
+        tags: ['blue']
+      })
+    ], true);
+
+    const size = await svc.getCountByQuery(Wrapper, {
+      where: {
+        $or: [{
+          tags: 'orange'
+        }, {
+          tags: 'blue'
+        }]
+      }
+    });
+
+    assert(size === 3);
   }
 }

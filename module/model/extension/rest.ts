@@ -34,12 +34,23 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(target,
         function getAll(this: Svc, full: Query) {
-          return this.source.getAllByQuery(getCls(), {
-            limit: full.limit,
-            offset: full.offset,
-            sort: full.sort ? JSON.parse(full.sort) : undefined,
-            where: full.where ? JSON.parse(full.where) : undefined
-          });
+          const where = full.where && full.where.includes('{') ? JSON.parse(full.where) : full.where;
+
+          if (where && typeof where === 'string') {
+            return this.source.getAllByQueryString(getCls(), {
+              limit: full.limit,
+              offset: full.offset,
+              sort: full.sort ? JSON.parse(full.sort) : undefined,
+              query: where
+            });
+          } else {
+            return this.source.getAllByQuery(getCls(), {
+              limit: full.limit,
+              offset: full.offset,
+              sort: full.sort ? JSON.parse(full.sort) : undefined,
+              where
+            });
+          }
         }
       ),
       {

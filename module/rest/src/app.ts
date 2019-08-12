@@ -104,7 +104,7 @@ export abstract class RestApp<T = any> {
       ep.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, ep, config);
     }
 
-    await this.registerRoutes(config.class.__id, config.basePath, config.endpoints.reverse());
+    await this.registerRoutes(config.class.__id, config.basePath, config.endpoints);
     console.debug('Registering Controller Instance', config.class.__id, config.basePath, config.endpoints.length);
   }
 

@@ -11,7 +11,7 @@ The following tutorial wil walk you through setting up a `travetto` application 
 * [Building the service layer](#building-the-service-layer)
 * [Writing unit tests](#writing-unit-tests)
 * [Creating the rest routes](#creating-the-rest-routes)
-* [Creating the App Entry-point](#creating-the-app-entry-point)
+* [Creating the App Entry Point](#creating-the-app-entry-point)
 * [Test the final product](#test-the-final-product)
 
 ## Prerequisites

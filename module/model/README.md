@@ -142,6 +142,9 @@ A more complex query would look like:
 user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')
 ```
 
+### Regular Expressions
+When querying with regular expressions,patterns can be specified as `'strings'` or as `/patterns/`.  The latter allows for the case insensitive modifier: `/pattern/i`.  Supporting the insensitive flag is up to the underlying model implementation.
+
 <!-- SUB -->
 
 ## Rest - Extension

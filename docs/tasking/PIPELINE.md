@@ -1,17 +1,17 @@
 Pipelined Tasks
 ==============
 
-New Text Search Module, build upon Model
------------------------
-- [ ] New elasticsearch client support 
-- [ ] Elasticsearch Support
-  - [ ] Extended query language
+Model
+----------------------
+- [ ] Basic aggregation support, to get model counts by a specific attribute
 
-Serverless Initiative
---------------------------
-- [ ] Lambda for REST
-  - [x] Entire rest app as an AWS lambda
-  - [x] Individual routes as individual lambdas
-  - [x] API Gateway configuration
-  - [ ] Auto deployment of application
-  - [x] CLI entry point to facilitate
+Elasticsearch
+----------------------
+- [ ] Upgrade to latest client, and convert code to support all
+
+Compiler
+----------------------
+- [ ] Support type checking in transformers
+  - [ ] Convert schema/rest/swagger/model/application to use resolved type information
+  - [ ] Investigate auto creating schemas from interfaces for simple one offs
+  

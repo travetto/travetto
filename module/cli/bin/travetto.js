@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 const { FsUtil } = require('@travetto/boot/src/fs-util');
 const frameworkYetDeclared = (FsUtil.toUnix(__dirname).includes('module/cli') ||
   /travetto.*\/module\//.test(process.cwd())
@@ -34,7 +35,7 @@ if (cliExternal) {
   // @ts-ignore
   const og = Module._load;
   // @ts-ignore
-  Module._load = function (req, parent) {
+  Module._load = function(req, parent) {
     if (req.startsWith('@travetto/cli')) {
       if (!hasLocal) { // Map all $pkg calls to root of global package
         req = FsUtil.resolveUnix(__dirname, `../${FsUtil.toUnix(req).split(`@travetto/cli/`)[1]}`);
@@ -45,7 +46,6 @@ if (cliExternal) {
     return og.call(Module, req, parent);
   };
 }
-
 
 // @ts-ignore
 require('@travetto/boot/bin/init')

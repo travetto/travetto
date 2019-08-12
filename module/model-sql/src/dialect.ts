@@ -1,5 +1,5 @@
-import { Class } from '@travetto/registry';
-import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent } from '@travetto/schema';
+import { Class, ChangeEvent } from '@travetto/registry';
+import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent, Schema } from '@travetto/schema';
 import { Util } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
 
@@ -9,6 +9,11 @@ import { DeleteWrapper, InsertWrapper, DialectState } from './types';
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
+
+@Schema()
+class Total {
+  total: number;
+}
 
 function makeField(name: string, type: Class, required: boolean, extra: any) {
   return {
@@ -103,7 +108,7 @@ export abstract class SQLDialect implements DialectState {
   abstract ident(name: string | FieldConfig): string;
 
   quote(text: string): string {
-    return `'${text}'`;
+    return `'${text.replace(/[']/g, `''`)}'`;
   }
 
   /**
@@ -192,37 +197,24 @@ export abstract class SQLDialect implements DialectState {
 
   async getCountForQuery<T>(cls: Class<T>, query: Query<T>) {
     const { records } = await this.executeSQL<{ total: number }>(this.getQueryCountSQL(cls, query));
-    const [{ total }] = records;
-    return total;
+    const [record] = records;
+    return Total.from(record).total;
   }
 
   async handleFieldChange(e: SchemaChangeEvent): Promise<void> {
     const rootStack = SQLUtil.classToStack(e.cls);
 
-    const removes = e.change.subs.reduce((acc, v) => {
-      acc.push(...v.fields
-        .filter(ev => ev.type === 'removing')
-        .map(ev => [...rootStack, ...v.path, ev.prev!]));
+    const changes = e.change.subs.reduce((acc, v) => {
+      const path = v.path.map(f => ({ ...f }));
+      for (const ev of v.fields) {
+        acc[ev.type].push([...rootStack, ...path, { ...(ev.type === 'removing' ? ev.prev : ev.curr)! }]);
+      }
       return acc;
-    }, [] as VisitStack[][]);
+    }, { added: [], changed: [], removing: [] } as Record<ChangeEvent<any>['type'], VisitStack[][]>);
 
-    const modifies = e.change.subs.reduce((acc, v) => {
-      acc.push(...v.fields
-        .filter(ev => ev.type === 'changed')
-        .map(ev => [...rootStack, ...v.path, ev.curr!]));
-      return acc;
-    }, [] as VisitStack[][]);
-
-    const adds = e.change.subs.reduce((acc, v) => {
-      acc.push(...v.fields
-        .filter(ev => ev.type === 'added')
-        .map(ev => [...rootStack, ...v.path, ev.curr!]));
-      return acc;
-    }, [] as VisitStack[][]);
-
-    await Promise.all(adds.map(v => this.executeSQL(this.getAddColumnSQL(v))));
-    await Promise.all(modifies.map(v => this.executeSQL(this.getModifyColumnSQL(v))));
-    await Promise.all(removes.map(v => this.executeSQL(this.getDropColumnSQL(v))));
+    await Promise.all(changes.added.map(v => this.executeSQL(this.getAddColumnSQL(v))));
+    await Promise.all(changes.changed.map(v => this.executeSQL(this.getModifyColumnSQL(v))));
+    await Promise.all(changes.removing.map(v => this.executeSQL(this.getDropColumnSQL(v))));
   }
 
   getDropColumnSQL(stack: VisitStack[]) {
@@ -285,6 +277,13 @@ export abstract class SQLDialect implements DialectState {
         throw new Error(`Unknown field: ${key}`);
       }
       const sStack = [...stack, field];
+      if (key in foreignMap && field.array && !SchemaRegistry.has(field.type)) {
+        // If dealing with simple external
+        sStack.push({
+          name: field.name,
+          type: field.type
+        });
+      }
       const sPath = this.resolveName(sStack);
 
       if (Util.isPlainObject(top)) {
@@ -309,7 +308,7 @@ export abstract class SQLDialect implements DialectState {
 
               if (/^[\^]\S+[.][*][$]?$/.test(src)) {
                 const inner = src.substring(1, src.length - 2);
-                items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(inner)}%`);
+                items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(`${inner}%`)}`);
               } else {
                 const val = resolve(v);
                 items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${val}`);
@@ -470,7 +469,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   PRIMARY KEY (${this.ident(this.pathField)}),
   FOREIGN KEY (${this.ident(this.parentPathField)}) REFERENCES ${this.parentTable(stack)}(${this.ident(this.pathField)}) ON DELETE CASCADE`}
 );`;
-    return out
+    return out;
   }
 
   /**
@@ -536,7 +535,9 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     if (isArray) {
       const newInstances = [] as InsertWrapper['records'];
       for (const el of instances) {
-        if (Array.isArray(el.value)) {
+        if (el.value === null || el.value === undefined) {
+          continue;
+        } else if (Array.isArray(el.value)) {
           const name = el.stack[el.stack.length - 1].name;
           for (const sel of el.value) {
             newInstances.push({
@@ -643,10 +644,9 @@ ${orderBy};`;
 
   getQueryCountSQL<T>(cls: Class<T>, query: Query<T>) {
     return `
-SELECT COUNT(1) as total
+SELECT COUNT(DISTINCT ${this.rootAlias}.id) as total
 ${this.getFromSQL(cls)}
-${this.getWhereSQL(cls, query.where)}
-${this.getGroupBySQL(cls, query)}`;
+${this.getWhereSQL(cls, query.where)}`;
   }
 
   async fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]> {

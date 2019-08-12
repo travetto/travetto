@@ -7,13 +7,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/asset": "^0.7.1",
+    "@travetto/asset": "^0.7.4",
     "@types/mongodb": "^3.1.28",
     "mongodb": "^3.2.7"
   },
   "description": "Mongo/GridFS backend for the travetto asset module",
   "devDependencies": {
-    "@travetto/test": "^0.7.1"
+    "@travetto/test": "^0.7.4"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.7.1"
+  "version": "0.7.4"
 }

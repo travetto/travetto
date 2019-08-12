@@ -53,6 +53,6 @@ export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
   }
 
   listen() {
-    this.raw.listen(this.config.port);
+    this.raw.listen(this.config.port, this.config.bindAddress);
   }
 }

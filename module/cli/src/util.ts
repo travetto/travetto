@@ -1,6 +1,9 @@
 import * as commander from 'commander';
 import * as child_process from 'child_process';
-import { FsUtil, EnvUtil } from '@travetto/boot';
+
+// Imported individually to prevent barrel import loading too much
+import { FsUtil } from '@travetto/boot/src/fs-util';
+import { EnvUtil } from '@travetto/boot/src/env';
 
 const COLORS = {
   blue: `\x1b[94m`,

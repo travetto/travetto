@@ -125,6 +125,7 @@ Rest Support
 - [x] HTTP/2
 - [x] Koa
 - [x] Add Swagger generation  
+- [X] Enable host name override for applications
 
 User Tooling
 --------------------
@@ -149,6 +150,10 @@ Auth Support
  - [x] Rewrite st
 - [X] Move to JWT as session store, prep for Lambda
  
+DI
+----------------------
+- [X] Prevent duplicate constructions via different targets
+  - Rewrite module to align with consistency of naming
 
 Platform Support
 ------------------------

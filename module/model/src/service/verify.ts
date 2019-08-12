@@ -256,7 +256,7 @@ export class QueryVerifierService {
     };
 
     for (const [key, fn] of this.mapping) {
-      if (!(key in query)) {
+      if (!(key in query) || (query as any)[key] === undefined || (query as any)[key] === null) {
         continue;
       }
 

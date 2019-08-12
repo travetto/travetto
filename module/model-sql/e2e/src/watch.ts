@@ -1,6 +1,7 @@
 import { Model, ModelCore, ModelService } from '@travetto/model';
 import { Schema } from '@travetto/schema';
-import { Application, Inject } from '@travetto/di';
+import { Application } from '@travetto/app';
+import { Inject } from '@travetto/di';
 
 // tslint:disable-next-line: no-import-side-effect
 import '../../extension/mysql/dialect';

@@ -44,7 +44,7 @@ export interface UnaryNode extends Node {
 export const OP_TRANSLATION: Record<string, string> = {
   '<': '$lt', '<=': '$lte',
   '>': '$gt', '>=': '$gte',
-  '!=': '$neq', '==': '$eq',
+  '!=': '$ne', '==': '$eq',
   '~': '$regex', '!': '$not',
   in: '$in', 'not-in': '$nin'
 };

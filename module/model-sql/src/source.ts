@@ -5,7 +5,7 @@ import {
   ModelQuery, Query,
   BulkOp, BulkResponse,
   ValidStringFields, WhereClauseRaw,
-  WhereClause
+  WhereClause, ModelUtil
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
@@ -14,7 +14,7 @@ import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 
 import { SQLModelConfig } from './config';
-import { Connected } from './connection';
+import { Connected, Transactional, WithTransaction } from './connection';
 import { SQLUtil } from './util';
 import { SQLDialect } from './dialect';
 
@@ -46,7 +46,8 @@ export class SQLModelSource extends ModelSource {
     return this.dialect.generateId();
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async createTables(cls: Class<any>): Promise<void> {
     const config = ModelRegistry.get(cls);
     if (config.subType) {
@@ -59,12 +60,19 @@ export class SQLModelSource extends ModelSource {
     const indices = ModelRegistry.get(cls).indices;
     if (indices) {
       for (const op of this.dialect.getCreateAllIndicesSQL(cls, indices)) {
-        await this.exec(op);
+        try {
+          await WithTransaction(this, 'isolated', this.exec, [op]);
+        } catch (e) {
+          if (!/\bexists\b/i.test(e.message)) {
+            throw e;
+          }
+        }
       }
     }
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async dropTables(cls: Class<any>): Promise<void> {
     for (const op of this.dialect.getDropAllTablesSQL(cls)) {
       await this.exec(op);
@@ -78,7 +86,8 @@ export class SQLModelSource extends ModelSource {
   }
 
   @WithAsyncContext({})
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async initDatabase() {
     if (this.config.autoCreate) {
       for (const cls of ModelRegistry.getClasses()) {
@@ -88,7 +97,8 @@ export class SQLModelSource extends ModelSource {
   }
 
   @WithAsyncContext({})
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async clearDatabase() {
     for (const cls of ModelRegistry.getClasses()) {
       try {
@@ -111,7 +121,8 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async onFieldChange(ev: SchemaChangeEvent) {
     return this.dialect.handleFieldChange(ev);
   }
@@ -171,7 +182,8 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async save<T extends ModelCore>(cls: Class<T>, model: T, keepId?: boolean): Promise<T> {
     if (!keepId || !model.id) {
       model.id = this.dialect.generateId();
@@ -182,7 +194,8 @@ export class SQLModelSource extends ModelSource {
     return model;
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async saveAll<T extends ModelCore>(cls: Class<T>, models: T[], keepId?: boolean): Promise<T[]> {
     for (const model of models) {
       if (!keepId || !model.id) {
@@ -195,26 +208,30 @@ export class SQLModelSource extends ModelSource {
     return models;
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async update<T extends ModelCore>(cls: Class<T>, model: T): Promise<T> {
     await this.deleteById(cls as Class<T & { id: string }>, model.id!);
     return await this.save(cls, model, true);
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await this.exec(this.dialect.getUpdateSQL(SQLUtil.classToStack(cls), data, query.where));
     return -1;
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T> {
     const final = await this.getById(cls, model.id!);
     Util.deepAssign(final, model, 'replace');
     return this.update(cls, final);
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<T> {
     if (!data.id) {
       const item = await this.getByQuery(cls, query);
@@ -233,10 +250,7 @@ export class SQLModelSource extends ModelSource {
   @Connected()
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
     const res = await this.getAllByQuery(cls, { limit: 2, ...query });
-    if (!res || res.length < 1 || (failOnMany && res.length !== 1)) {
-      throw new AppError(`Invalid number of results for find by id: ${res ? res.length : res}`, 'data');
-    }
-    return res[0] as T;
+    return ModelUtil.verifyGetSingleCounts(cls, res, failOnMany);
   }
 
   @Connected()
@@ -249,7 +263,8 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async deleteById<T extends ModelCore>(cls: Class<T & { id: string }>, id: string): Promise<number> {
     return this.deleteByQuery(cls, { where: { id } } as ModelQuery<ModelCore>);
   }
@@ -320,7 +335,8 @@ export class SQLModelSource extends ModelSource {
     return addedIds;
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse> {
     const deleteOps = operations.map(x => x.delete).filter(x => !!x) as T[];
     const insertOps = operations.map(x => x.insert).filter(x => !!x) as T[];
@@ -339,7 +355,8 @@ export class SQLModelSource extends ModelSource {
     return ret;
   }
 
-  @Connected(true)
+  @Connected()
+  @Transactional()
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     return this.dialect.deleteAndGetCount(cls, query);
   }

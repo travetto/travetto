@@ -48,7 +48,7 @@ export class PostgreSQLDialect extends SQLDialect {
 
   getModifyColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
-    const type = this.getColumnType(field as FieldConfig)
+    const type = this.getColumnType(field as FieldConfig);
     const ident = this.ident(field.name);
     return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${ident}  TYPE ${type} USING (${ident}::${type});`;
   }

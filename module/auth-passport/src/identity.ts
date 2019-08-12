@@ -5,6 +5,31 @@ import { Request, Response } from '@travetto/rest';
 import { IdentityProvider } from '@travetto/auth-rest';
 
 export class PassportIdentityProvider<U> extends IdentityProvider {
+
+  static processLoginContext(req: Request) {
+    if (req.query.state) {
+      if (typeof req.query.state === 'string' && req.query.state) {
+        try {
+          const json = Buffer.from(req.query.state, 'base64').toString('utf8');
+          return JSON.parse(json);
+        } catch {
+          console.error('Unable to process previous login state');
+        }
+      }
+    }
+  }
+
+  static computeExtraOptions(req: Request, passportAuthenticateOptions: any) {
+    const extra: Record<string, any> = {};
+
+    let state = passportAuthenticateOptions.state;
+
+    state = state && state.call ? state.call(null, req) : (state || {});
+    const json = JSON.stringify({ referrer: req.header('referrer'), ...state });
+    extra.state = Buffer.from(json, 'utf8').toString('base64');
+    return extra;
+  }
+
   session = false;
 
   constructor(
@@ -19,7 +44,14 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
 
   async authenticate(req: Request, res: Response) {
     return new Promise<Identity | undefined>((resolve, reject) => {
-      passport.authenticate(this.strategyName, { session: this.session, ...this.passportAuthenticateOptions },
+
+      req.loginContext = PassportIdentityProvider.processLoginContext(req);
+
+      passport.authenticate(this.strategyName, {
+        session: this.session,
+        ...this.passportAuthenticateOptions,
+        ...PassportIdentityProvider.computeExtraOptions(req, this.passportAuthenticateOptions)
+      },
         (err, u) => this.authHandler(err, u).then(resolve, reject))(req, res);
     });
   }

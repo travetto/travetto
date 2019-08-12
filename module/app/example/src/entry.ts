@@ -1,4 +1,5 @@
-import { Application, Inject, Injectable } from '../..';
+import { Inject, Injectable } from '@travetto/di';
+import { Application } from '../..';
 
 @Injectable()
 class Element {
