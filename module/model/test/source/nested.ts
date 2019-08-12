@@ -1,11 +1,10 @@
 import * as assert from 'assert';
 
-import { Suite, Test } from '@travetto/test';
+import { Test, BeforeAll } from '@travetto/test';
 import { Schema, Text } from '@travetto/schema';
-import { DependencyRegistry } from '@travetto/di';
 
 import { BaseModelTest } from '../../extension/base.test';
-import { Model, ModelService, ModelCore } from '../..';
+import { Model, ModelCore } from '../..';
 
 @Schema()
 export class NoteEntity {
@@ -24,7 +23,7 @@ export abstract class BaseNestedSuite extends BaseModelTest {
 
   @Test()
   async verifyQuery() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
 
     await service.save(Note, Note.from({
       id: '10',
