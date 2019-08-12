@@ -325,13 +325,18 @@ export class MongoModelSource extends ModelSource {
 
       if (out.counts) {
         out.counts.delete = res.nRemoved;
-        out.counts.update = (res.nModified || 0) + (res.nUpdated || 0);
+        out.counts.update = operations.filter(x => x.update).length;
         out.counts.insert = res.nInserted;
-        out.counts.upsert = res.nUpserted;
+        out.counts.upsert = operations.filter(x => x.upsert).length;
       }
 
       if (res.hasWriteErrors()) {
         out.errors = res.getWriteErrors();
+        for (const err of out.errors) {
+          const op = operations[err.index];
+          const k = Object.keys(op)[0];
+          (out as any).counts[k] -= 1;
+        }
         out.counts.error = out.errors.length;
       }
     }

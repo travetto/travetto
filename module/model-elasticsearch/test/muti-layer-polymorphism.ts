@@ -120,8 +120,8 @@ class TestMultilayerPolymorphism extends BaseModelTest {
       { delete: CivilEngineer.from({ id: created3.id }) }
     ]);
 
-    assert(o.counts.insert === 0);
-    assert(o.counts.upsert === 4);
+    assert(o.counts.insert === 1);
+    assert(o.counts.upsert === 3);
     assert(o.counts.update === 1);
     assert(o.counts.delete === 1);
 
