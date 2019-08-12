@@ -97,10 +97,12 @@ export class ModelService implements IModelSource {
     return o;
   }
 
-  async suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>): Promise<U[]> {
-    const res = await this.source.suggestField(cls, field, query, filter);
-    return res.map(o => this.postLoad(cls, o as any as T) as any as U);
+  suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    return this.source.suggest(cls, field, prefix, query);
+  }
+
+  suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    return this.source.suggestEntities(cls, field, prefix, query);
   }
 
   /** Executes a raw query against the model space */
