@@ -176,7 +176,8 @@ class AssertTransformer {
       const name = FsUtil.toUnix(state.source.fileName);
       // Only apply to test files
       state[isTest] = /\/test\//.test(name) &&
-        !/\/(src|node_modules)\//.test(name) &&
+        // Allow for inherited tests, from node_modules/@travetto/*/test
+        (!/\/(src|node_modules)\//.test(name) || /node_modules\/@travetto\/[^/]+\/test/.test(name)) &&
         /\s+assert[^(]*\(/.test(state.source!.text);
     }
 

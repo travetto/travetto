@@ -1,50 +1,32 @@
 import * as assert from 'assert';
 
-import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
-import { Suite, Test } from '@travetto/test';
+import { Test } from '@travetto/test';
 
-import { BaseElasticsearchTest } from './base';
-import { ElasticsearchModelSource } from '../src/source';
+import { Model, ModelService, BaseModel } from '../..';
+import { BaseModelTest } from '../../extension/base.test';
 
 @Model({ baseType: true })
-class Person extends BaseModel {
+export class Person extends BaseModel {
   name: string;
 }
 
 @Model()
-class Doctor extends Person {
+export class Doctor extends Person {
   specialty: string;
 }
 
 @Model()
-class Firefighter extends Person {
+export class Firefighter extends Person {
   firehouse: number;
 }
 
 @Model()
-class Engineer extends Person {
+export class Engineer extends Person {
   major: string;
 }
 
-@Suite('Polymorphism')
-class TestPolymorphism extends BaseElasticsearchTest {
-
-  @Test()
-  async verifySource() {
-    const source = await DependencyRegistry.getInstance(ModelSource);
-
-    assert.ok(source);
-    assert(source instanceof ElasticsearchModelSource);
-
-  }
-
-  @Test('Extraction')
-  async testRetrieve() {
-    const service = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
-    const res = service.getClassFromIndexType('person', 'doctor');
-    assert(res === Doctor);
-  }
+export abstract class BasePolymorphismSuite extends BaseModelTest {
 
   @Test('Verify save and find and deserialize')
   async testUpdate() {
@@ -127,23 +109,5 @@ class TestPolymorphism extends BaseElasticsearchTest {
 
     assert(o.insertedIds.size === 3);
     assert(Array.from(o.insertedIds.keys()) === [0, 1, 2]);
-  }
-
-  @Test('Multi Query')
-  async testMultiQuery() {
-    const service = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
-    const res = service.buildRawModelFilters([Person, Doctor, Engineer, Firefighter]);
-
-    assert(res.bool.should.length === 4);
-    assert(res.bool.should[0].term);
-    assert(res.bool.should[1].bool);
-    assert(res.bool.should[1].bool!.must.length);
-
-    await this.testBulk();
-
-    const rawRes = await service.getRawMultiQuery<Person>([Firefighter, Engineer], {});
-    const items = await service.convertRawResponse(rawRes);
-    assert(items.length === 2);
-    assert(items[0] instanceof Firefighter);
   }
 }

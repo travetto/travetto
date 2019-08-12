@@ -1,17 +1,12 @@
 import * as assert from 'assert';
 
-import { Index, Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
-import { Schema, Currency, Integer, Precision, Float, Text } from '@travetto/schema';
+import { Schema, Text } from '@travetto/schema';
 
-import { BaseSqlTest } from './base';
-import {
-  SQLModelSource
-} from '../src/source';
-
-// tslint:disable-next-line: no-import-side-effect
-import './dialect';
+import { BaseModelTest } from '../../extension/base.test';
+import { Model, ModelService, BaseModel } from '../..';
+import { ModelSource } from '../../src/service/source';
 
 @Schema()
 class Address {
@@ -27,15 +22,10 @@ class Person extends BaseModel {
   address: Address;
 }
 
-@Schema()
+@Model()
 class Simple {
   id?: string;
   name: string;
-}
-
-@Model()
-class SimpleModel extends Simple {
-
 }
 
 @Model()
@@ -46,21 +36,10 @@ class SimpleList {
 }
 
 @Model()
-@Index({
-  fields: [{ big: true }, { floater: false }]
-})
-class Numerical {
-  @Currency()
-  money: number;
-
-  @Integer()
-  whole: number;
-
-  @Precision(30, 30)
-  big: number;
-
-  @Float()
-  floater: number;
+class User2 {
+  id?: string;
+  address?: Address;
+  name: string;
 }
 
 @Model()
@@ -76,45 +55,43 @@ class Bools {
 }
 
 @Suite('Simple Save')
-class TestSave extends BaseSqlTest {
+export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
   @Test()
   async verifySource() {
     const source = await DependencyRegistry.getInstance(ModelSource);
-
     assert.ok(source);
-    assert(source instanceof SQLModelSource);
 
+    assert(source instanceof this.sourceClass);
   }
 
   @Test('save it')
   async save() {
     const service = await DependencyRegistry.getInstance(ModelService);
 
-    const res = await service.bulkProcess(Person, [1, 2, 3, 8].map(x => {
-      return {
-        insert: Person.from({
-          id: `Orange-${x}`,
-          name: 'Bob',
-          age: 20 + x,
-          gender: 'm',
-          address: {
-            street1: 'a',
-            ...(x === 1 ? { street2: 'b' } : {})
-          }
-        })
-      };
+    const people = [1, 2, 3, 8].map(x => Person.from({
+      id: service.generateId(),
+      name: 'Bob',
+      age: 20 + x,
+      gender: 'm',
+      address: {
+        street1: 'a',
+        ...(x === 1 ? { street2: 'b' } : {})
+      }
     }));
 
-    assert(res);
-    assert(res.counts.insert === 4);
+    const res = await service.bulkProcess(Person,
+      people.map(p => ({ upsert: p }))
+    );
 
-    const single = await service.getById(Person, 'Orange-3');
+    assert(res.counts.upsert === people.length);
+
+    const single = await service.getById(Person, people[2].id!);
     assert(single !== undefined);
     assert(single.age === 23);
 
     await assert.rejects(async () => {
-      await service.getById(Person, 'Orange-20');
+      await service.getById(Person, service.generateId());
     }, /Invalid/);
 
     const match = await service.getAllByQueryString(Person, { query: 'name=="Bob" and age < 24' });
@@ -181,12 +158,12 @@ class TestSave extends BaseSqlTest {
   @Test('Verify update')
   async testUpdate() {
     const service = await DependencyRegistry.getInstance(ModelService);
-    const o = await service.save(SimpleModel, SimpleModel.from({ name: 'bob' }));
+    const o = await service.save(Simple, Simple.from({ name: 'bob' }));
     o.name = 'roger';
-    const b = await service.update(SimpleModel, o);
+    const b = await service.update(Simple, o);
     const id = b.id!;
 
-    const z = await service.getById(SimpleModel, id);
+    const z = await service.getById(Simple, id);
 
     assert(z.name === 'roger');
   }
@@ -195,19 +172,20 @@ class TestSave extends BaseSqlTest {
   async testAutocomplete() {
     const service = await DependencyRegistry.getInstance(ModelService);
     const names = ['Bob', 'Bo', 'Barry', 'Rob', 'Robert', 'Robbie'];
+    const people = [0, 1, 2, 3, 4, 5].map(x =>
+      Person.from({
+        id: service.generateId(),
+        name: names[x],
+        age: 20 + x,
+        gender: 'm',
+        address: {
+          street1: 'a',
+          ...(x === 1 ? { street2: 'b' } : {})
+        }
+      }));
+
     const res = await service.bulkProcess(Person,
-      [0, 1, 2, 3, 4, 5].map(x => ({
-        upsert: Person.from({
-          id: `Orange-${x}`,
-          name: names[x],
-          age: 20 + x,
-          gender: 'm',
-          address: {
-            street1: 'a',
-            ...(x === 1 ? { street2: 'b' } : {})
-          }
-        })
-      }))
+      people.map(x => ({ upsert: x }))
     );
 
     let suggested = await service.suggestField(Person, 'name', 'bo');
@@ -243,7 +221,7 @@ class TestSave extends BaseSqlTest {
     assert(o.id);
     assert(o.name === 'bob');
 
-    const o2 = await service.updatePartial(Person, Person.fromRaw({
+    const o2 = await service.updatePartial(Person, Person.from({
       id: o.id,
       name: 'oscar'
     }));
@@ -254,6 +232,7 @@ class TestSave extends BaseSqlTest {
 
     await service.updatePartial(Person, Person.from({
       id: o2.id,
+      gender: 'f',
       address: {
         street1: 'changed\n',
         street2: undefined
@@ -264,46 +243,13 @@ class TestSave extends BaseSqlTest {
 
     assert(o3.name === 'oscar');
     assert(o3.age === 20);
+    assert(o3.gender === 'f' as any);
     assert(o3.address.street1 === 'changed\n');
     assert(!('street2' in o3.address));
   }
 
-  @Test('Verify sorting')
-  async testSorting() {
-    const service = await DependencyRegistry.getInstance(ModelService);
-    const names = ' '.repeat(26).split('').map((a, i) => String.fromCharCode(65 + i));
-    await service.bulkProcess(Person,
-      names.map((x, i) => ({
-        upsert: Person.from({
-          id: `Orange-${i}`,
-          name: x,
-          age: 20 + i,
-          gender: 'm',
-          address: {
-            street1: x,
-          }
-        })
-      }))
-    );
-
-    const all = await service.query(Person, {
-      select: {
-        name: 1
-      },
-      sort: [{
-        address: { street1: 1 }
-      }],
-      limit: 4,
-      offset: 5
-    });
-
-    assert(all.map(x => x.name) === ['F', 'G', 'H', 'I']);
-  }
-
   @Test('Verify partial update with field removal and lists')
   async testPartialUpdateList() {
-    console.log(Date.now(), 'running');
-
     const service = await DependencyRegistry.getInstance(ModelService);
     const o = await service.save(SimpleList, SimpleList.from({
       names: ['a', 'b', 'c'],
@@ -330,6 +276,28 @@ class TestSave extends BaseSqlTest {
     assert(o2.simples === [Simple.from({ name: 'd' })]);
   }
 
+  @Test('Verify partial update with field removal and lists')
+  async testBlankPartialUpdate() {
+    const service = await DependencyRegistry.getInstance(ModelService);
+    const o = await service.save(User2, User2.from({
+      name: 'bob'
+    }));
+
+    assert(o.address === undefined);
+
+    await service.updatePartial(User2, User2.from({
+      id: o.id,
+      address: {
+        street1: 'blue'
+      }
+    }));
+
+    const o3 = await service.getById(User2, o.id!);
+
+    assert(o3.address !== undefined);
+    assert(o3.address!.street1 === 'blue');
+  }
+
   @Test('verify dates')
   async testDates() {
     const service = await DependencyRegistry.getInstance(ModelService);
@@ -341,28 +309,26 @@ class TestSave extends BaseSqlTest {
   @Test('verify word boundary')
   async testWordBoundary() {
     const service = await DependencyRegistry.getInstance(ModelService);
-    await service.bulkProcess(Person, [1, 2, 3, 8].map(x => {
-      return {
-        insert: Person.from({
-          id: `Orange-${x}`,
-          name: 'Bob',
-          age: 20 + x,
-          gender: 'm',
-          address: {
-            street1: 'a',
-            ...(x === 1 ? { street2: 'b' } : {})
-          }
-        })
-      };
+    const people = [1, 2, 3, 8].map(x => Person.from({
+      id: service.generateId(),
+      name: 'Bob Ombo',
+      age: 20 + x,
+      gender: 'm',
+      address: {
+        street1: 'a',
+        ...(x === 1 ? { street2: 'b' } : {})
+      }
     }));
 
-    const results = await service.getAllByQueryString(Person, { query: 'id ~ /\\borange.*/i' });
+    await service.bulkProcess(Person, people.map(p => ({ upsert: p })));
+
+    const results = await service.getAllByQueryString(Person, { query: 'name ~ /\\bomb.*/i' });
     assert(results.length === 4);
 
-    const results2 = await service.getAllByQueryString(Person, { query: 'id ~ /\\brange.*/i' });
+    const results2 = await service.getAllByQueryString(Person, { query: 'name ~ /\\bmbo.*/i' });
     assert(results2.length === 0);
 
-    const results3 = await service.getAllByQueryString(Person, { query: 'id ~ /\\borange.*/' });
+    const results3 = await service.getAllByQueryString(Person, { query: 'name ~ /\\bomb.*/' });
     assert(results3.length === 0);
   }
 
@@ -377,8 +343,12 @@ class TestSave extends BaseSqlTest {
       };
     }));
 
+    console.log('Created!');
+
     const results = await service.getAllByQuery(Bools, {});
     assert(results.length === 7);
+
+    console.log('Got All!');
 
     const results2 = await service.getAllByQuery(Bools, {
       where: {
@@ -387,6 +357,8 @@ class TestSave extends BaseSqlTest {
         }
       }
     });
+    console.log('Searched!');
+
     assert(results2.length === 4);
 
     const results3 = await service.getAllByQueryString(Bools, {
