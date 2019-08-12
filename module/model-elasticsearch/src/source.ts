@@ -33,6 +33,11 @@ export class ElasticsearchModelSource extends ModelSource {
     super();
   }
 
+  async postConstruct() {
+    await this.initClient();
+    await this.initDatabase();
+  }
+
   generateId() {
     return Util.uuid();
   }
@@ -320,12 +325,20 @@ export class ElasticsearchModelSource extends ModelSource {
     });
   }
 
-  async suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
-  ): Promise<U[]> {
-    const search = this.buildRawMultiSuggestQuery([cls], field, query, filter);
-    const res = await this.client.search<U>(search);
-    return this.safeLoad<U>(search, res);
+  async suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    const search = this.buildRawMultiSuggestQuery([cls], field, prefix, {
+      select: { [field]: 1 } as any,
+      ...query
+    });
+    const res = await this.client.search<T>(search);
+    const safe = this.safeLoad<T>(search, res);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, safe, x => x, query && query.limit);
+  }
+  async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    const search = this.buildRawMultiSuggestQuery([cls], field, prefix, query);
+    const res = await this.client.search<T>(search);
+    const safe = this.safeLoad<T>(search, res);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, safe, (x, v) => v, query && query.limit);
   }
 
   async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>) {
@@ -387,8 +400,8 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   buildRawMultiSuggestQuery<T extends ModelCore = ModelCore>(
-    classes: Class<T>[], field: ValidStringFields<T>, query: string,
-    filter?: PageableModelQuery<T>
+    classes: Class<T>[], field: ValidStringFields<T>, query?: string,
+    filter?: Query<T>
   ) {
     const spec = SchemaRegistry.getViewSchema(classes[0]).schema[field as any].specifier;
     const text = spec && spec.startsWith('text');
@@ -397,13 +410,13 @@ export class ElasticsearchModelSource extends ModelSource {
       console.warn(`${classes[0].__id}.${field} is not registered as @Text, reverting to keyword search`);
     }
 
-    const res = this.buildRawMultiQuery(classes, filter, {
+    const res = this.buildRawMultiQuery(classes, filter, query ? {
       match_phrase_prefix: {
         [text ? `${field}.text` : field]: {
           query
         }
       }
-    });
+    } : {});
 
     res.size = filter && filter.limit || 10;
 

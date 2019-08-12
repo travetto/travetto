@@ -155,8 +155,8 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
     assert(z.name === 'roger');
   }
 
-  @Test('Verify autocomplete')
-  async testAutocomplete() {
+  @Test('Verify suggestion')
+  async testSuggestion() {
     const service = await this.service;
     const names = ['Bob', 'Bo', 'Barry', 'Rob', 'Robert', 'Robbie'];
     const people = [0, 1, 2, 3, 4, 5].map(x =>
@@ -175,13 +175,13 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
       people.map(x => ({ upsert: x }))
     );
 
-    let suggested = await service.suggestField(Person, 'name', 'bo');
+    let suggested = await service.suggest(Person, 'name', 'bo');
     assert(suggested.length === 2);
 
-    suggested = await service.suggestField(Person, 'name', 'b');
+    suggested = await service.suggest(Person, 'name', 'b');
     assert(suggested.length === 3);
 
-    suggested = await service.suggestField(Person, 'name', 'b', {
+    suggested = await service.suggest(Person, 'name', 'b', {
       where: {
         address: {
           street2: {
@@ -191,6 +191,12 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
       }
     });
     assert(suggested.length === 1);
+
+    const suggestedEntities = await service.suggestEntities(Person, 'name', 'bo');
+
+    assert(suggestedEntities.length === 2);
+    assert(suggestedEntities[0].name === 'Bo');
+    assert(suggestedEntities[1].name === 'Bob');
   }
 
   @Test('Verify partial update with field removal')

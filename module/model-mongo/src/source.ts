@@ -1,7 +1,7 @@
 import * as mongo from 'mongodb';
 
 import {
-  ModelSource, IndexConfig, Query,
+  ModelSource, Query,
   BulkResponse,
   ModelRegistry, ModelCore,
   PageableModelQuery,
@@ -9,7 +9,7 @@ import {
   Point,
   ModelQuery,
   ValidStringFields,
-  WhereClauseRaw, ModelUtil
+  ModelUtil
 } from '@travetto/model';
 
 import { Class } from '@travetto/registry';
@@ -30,32 +30,13 @@ export class MongoModelSource extends ModelSource {
     super();
   }
 
-  generateId() {
-    return new mongo.ObjectId().toHexString();
+  async postConstruct() {
+    await this.initClient();
+    await this.initDatabase();
   }
 
-  async suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
-  ): Promise<U[]> {
-    if (!filter) {
-      filter = {};
-    }
-    filter.limit = filter.limit || 10;
-    const suggestQuery = {
-      [field]: new RegExp(`\\b${query}`, 'i')
-    } as any as WhereClauseRaw<T>;
-
-    if (!filter.where) {
-      filter.where = suggestQuery;
-    } else {
-      filter.where = {
-        $and: [
-          filter.where,
-          suggestQuery
-        ]
-      } as WhereClauseRaw<T>;
-    }
-    return this.query(cls, filter);
+  generateId() {
+    return new mongo.ObjectId().toHexString();
   }
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
@@ -180,6 +161,18 @@ export class MongoModelSource extends ModelSource {
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
     const query = { where: { id } } as any as ModelQuery<T>;
     return await this.getByQuery(cls, query);
+  }
+
+  async suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    const q = ModelUtil.getSuggestFieldQuery(cls, field, prefix, query);
+    const results = await this.query(cls, q);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, results, x => x, query && query.limit);
+  }
+
+  async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    const q = ModelUtil.getSuggestQuery(cls, field, prefix, query);
+    const results = await this.query(cls, q);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query && query.limit);
   }
 
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
