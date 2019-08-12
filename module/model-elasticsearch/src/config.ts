@@ -1,5 +1,6 @@
 import { Env } from '@travetto/base';
 import { Config } from '@travetto/config';
+import { EsSchemaConfig } from './types';
 
 @Config('elasticsearch.model')
 export class ElasticsearchModelConfig {
@@ -9,6 +10,10 @@ export class ElasticsearchModelConfig {
   apiVersion = '';
   namespace = 'app';
   autoCreate = !Env.prod;
+  schemaConfig: EsSchemaConfig = {
+    caseSensitive: false
+  };
+
   indexCreate = {
     number_of_replicas: 0,
     number_of_shards: 1
