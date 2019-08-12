@@ -4,17 +4,22 @@ import { AsyncContext } from '@travetto/context';
 
 export class TestUtil {
   static async init(e: BaseModelTest) {
-    // tslint:disable-next-line: no-import-side-effect
     await import('./dialect');
 
     await e.init();
 
     const ctx = await DependencyRegistry.getInstance(AsyncContext);
-    const proto = Object.getPrototypeOf(e);
-
-    for (const k of Object.getOwnPropertyNames(proto)) {
-      const og = proto[k];
-      proto[k] = function () { return ctx.run(og.bind(e)); };
+    let proto = Object.getPrototypeOf(e);
+    while (proto && proto !== Object) {
+      for (const k of Object.getOwnPropertyNames(proto)) {
+        const og = proto[k];
+        if (og && og.call && og.name && og.name !== 'constructor' && !og.name.startsWith('__')) {
+          try {
+            proto[k] = function () { return ctx.run(og.bind(e)); };
+          } catch { }
+        }
+      }
+      proto = Object.getPrototypeOf(proto);
     }
   }
 }

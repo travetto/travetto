@@ -197,6 +197,9 @@ export class ElasticsearchUtil {
       source: ''
     };
     for (const x of Object.keys(o || {})) {
+      if (!path && (x === '_id' || x === 'id')) {
+        continue;
+      }
       const prop = arr ? `${path}[${x}]` : `${path}${path ? '.' : ''}${x}`;
       if (o[x] === undefined || o[x] === null) {
         ops.push(`ctx._source.${path}${path ? '.' : ''}remove("${x}")`);

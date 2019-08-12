@@ -6,12 +6,12 @@ import { Util } from '@travetto/base';
 import { BaseAssetSourceSuite } from '@travetto/asset/test/source';
 
 import { S3AssetConfig } from '../src/config';
-
-// tslint:disable-next-line: no-import-side-effect
-import '../src/source';
+import { S3AssetSource } from '../src/source';
 
 @Suite()
 class AssetSourceSuite extends BaseAssetSourceSuite {
+
+  sourceClass = S3AssetSource;
 
   @BeforeEach()
   async init() {

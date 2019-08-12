@@ -67,7 +67,15 @@ export class MongoModelSource extends ModelSource {
 
     let cursor = col.find(projected);
     if (query.select) {
-      cursor.project(Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select));
+      const select = Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select);
+      // Remove id if not explicitly defined, and selecting fields directly
+      if (!select['_id']) {
+        const values = new Set([...Object.values(select)]);
+        if (values.has(1) || values.has(true)) {
+          select['_id'] = false;
+        }
+      }
+      cursor.project(select);
     }
 
     if (query.sort) {
@@ -93,14 +101,6 @@ export class MongoModelSource extends ModelSource {
 
   prePersist<T extends ModelCore>(cls: Class<T>, o: T) {
     return o;
-  }
-
-  cleanseId<T extends ModelCore>(o: T): mongo.ObjectId {
-    if (o.id) {
-      (o as any)._id = new mongo.ObjectId(o.id);
-      delete o.id;
-    }
-    return (o as any)._id;
   }
 
   async initClient() {
@@ -200,8 +200,10 @@ export class MongoModelSource extends ModelSource {
     const col = await this.getCollection(cls);
     if (!keepId) {
       delete o.id;
+    } else {
+      (o as any)._id = new mongo.ObjectId(o.id); // To mongo
+      delete o.id;
     }
-    this.cleanseId(o);
     const res = await col.insertOne(o);
     o.id = res.insertedId.toHexString();
     return o;
@@ -209,11 +211,13 @@ export class MongoModelSource extends ModelSource {
 
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[], keepId: boolean = false): Promise<T[]> {
     const col = await this.getCollection(cls);
-    for (const x of objs) {
+    for (const o of objs) {
       if (!keepId) {
-        delete x.id;
+        delete o.id;
+      } else {
+        (o as any)._id = new mongo.ObjectId(o.id); // To mongo
+        delete o.id;
       }
-      this.cleanseId(x);
     }
     const res = await col.insertMany(objs);
     for (let i = 0; i < objs.length; i++) {
@@ -224,7 +228,9 @@ export class MongoModelSource extends ModelSource {
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
     o = this.prePersist(cls, o);
-    const id = this.cleanseId(o);
+    const id = new mongo.ObjectId(o.id!);
+    delete o.id;
+
     const col = await this.getCollection(cls);
     const conf = ModelRegistry.get(cls);
     const res = await col.replaceOne({ _id: id, ...(conf.subType ? { type: conf.subType } : {}) }, o);
@@ -313,6 +319,9 @@ export class MongoModelSource extends ModelSource {
 
     if (operations.length > 0) {
       const res = await bulk.execute({});
+      for (const { index, _id } of res.getUpsertedIds() as { index: number, _id: mongo.ObjectID }[]) {
+        out.insertedIds.set(index, _id.toHexString());
+      }
 
       if (out.counts) {
         out.counts.delete = res.nRemoved;
