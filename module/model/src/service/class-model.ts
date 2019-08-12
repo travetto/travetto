@@ -12,8 +12,12 @@ export abstract class ClassModelService<T extends ModelCore> {
 
   abstract get class(): Class<T>;
 
-  suggestField(field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>) {
-    return this.service.suggestField(this.class, field, query, filter);
+  suggest(field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    return this.service.suggest(this.class, field, prefix, query);
+  }
+
+  suggestEntities(field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    return this.service.suggestEntities(this.class, field, prefix, query);
   }
 
   query(query: Query<T>) {

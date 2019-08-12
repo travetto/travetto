@@ -34,12 +34,17 @@ export class SQLModelSource extends ModelSource {
     super();
   }
 
-  get conn() {
-    return this.dialect.conn;
-  }
-
   private exec<T = any>(sql: string) {
     return this.dialect.executeSQL<T>(sql);
+  }
+
+  async postConstruct() {
+    await this.initClient();
+    await this.initDatabase();
+  }
+
+  get conn() {
+    return this.dialect.conn;
   }
 
   generateId() {
@@ -149,37 +154,25 @@ export class SQLModelSource extends ModelSource {
     return o;
   }
 
-  async suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
-  ): Promise<U[]> {
-    if (!filter) {
-      filter = {};
-    }
-    filter.limit = filter.limit || 10;
-    const suggestQuery = {
-      [field]: {
-        $regex: new RegExp(`\\b${query}.*`, 'i')
-      }
-    } as any as WhereClauseRaw<T>;
-
-    if (!filter.where) {
-      filter.where = suggestQuery;
-    } else {
-      filter.where = {
-        $and: [
-          filter.where,
-          suggestQuery
-        ]
-      } as WhereClauseRaw<T>;
-    }
-    return this.query(cls, filter);
-  }
-
   @Connected()
   async insert<T = any>(cls: Class<T>, instance: T) {
     for (const ins of this.dialect.getAllInsertSQL(cls, instance)) {
       await this.exec(ins);
     }
+  }
+
+  @Connected()
+  async suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    const q = ModelUtil.getSuggestFieldQuery(cls, field, prefix, query);
+    const results = await this.query(cls, q);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, results, x => x, query && query.limit);
+  }
+
+  @Connected()
+  async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    const q = ModelUtil.getSuggestQuery(cls, field, prefix, query);
+    const results = await this.query(cls, q);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query && query.limit);
   }
 
   @Connected()
