@@ -25,14 +25,14 @@ function toList<T>(items: T | T[] | Set<T> | undefined) {
 
 export class SystemUtil {
 
-  static async toBuffer(src: Readable | Buffer | string) {
+  static async toBuffer(src: NodeJS.ReadableStream | Buffer | string) {
     if (typeof src === 'string') {
       src = fs.createReadStream(src);
     }
     if (src instanceof Buffer) {
       return src;
     } else {
-      const stream = src as Readable;
+      const stream = src as NodeJS.ReadableStream;
       return new Promise<Buffer>((res, rej) => {
         const data: Buffer[] = [];
         stream.on('data', d => data.push(d));
@@ -44,7 +44,7 @@ export class SystemUtil {
     }
   }
 
-  static toReadable(src: Readable | Buffer | string) {
+  static toReadable(src: NodeJS.ReadableStream | Buffer | string) {
     if (typeof src === 'string') {
       return fs.createReadStream(src);
     } else if (src instanceof Buffer) {
@@ -56,7 +56,7 @@ export class SystemUtil {
     }
   }
 
-  static async streamToFile(src: Readable, out: string): Promise<void> {
+  static async streamToFile(src: NodeJS.ReadableStream, out: string): Promise<void> {
     const write = fs.createWriteStream(out);
     const finalStream = src.pipe(write);
     await new Promise((res, rej) => {

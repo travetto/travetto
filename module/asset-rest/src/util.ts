@@ -6,7 +6,7 @@ import match = require('mime-match');
 
 import { Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
-import { AppError } from '@travetto/base';
+import { AppError, SystemUtil } from '@travetto/base';
 import { FsUtil } from '@travetto/boot';
 
 import { RestAssetConfig } from './config';
@@ -27,23 +27,15 @@ export class AssetRestUtil {
     await FsUtil.mkdirp(uniqueDir);
     const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(fileName));
 
-    data.pipe(fs.createWriteStream(uniqueLocal));
-    await new Promise((res, rej) =>
-      data.on('end', (e: any) => e ? rej(e) : res()));
+    SystemUtil.streamToFile(data, uniqueLocal);
 
     const asset = await AssetUtil.fileToAsset(uniqueLocal);
-    asset.metadata.title = fileName;
-    asset.metadata.name = fileName;
-    asset.path = fileName;
 
-    const detectedType = await AssetUtil.detectFileType(asset.path);
-    const contentType = detectedType ? detectedType.mime : '';
-
-    const notMatchPositive = allowedTypes.length && !this.matchType(allowedTypes, contentType);
-    const matchNegative = excludeTypes.length && this.matchType(excludeTypes, contentType);
+    const notMatchPositive = allowedTypes.length && !this.matchType(allowedTypes, asset.contentType);
+    const matchNegative = excludeTypes.length && this.matchType(excludeTypes, asset.contentType);
 
     if (notMatchPositive || matchNegative) {
-      throw new AppError(`Content type not allowed: ${contentType}`, 'data');
+      throw new AppError(`Content type not allowed: ${asset.contentType}`, 'data');
     }
 
     return asset;
