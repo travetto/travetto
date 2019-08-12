@@ -3,10 +3,22 @@ import * as assert from 'assert';
 import { Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { ResourceManager } from '@travetto/base';
+import { Class } from '@travetto/registry';
 
 import { HashNamingStrategy, AssetService, AssetUtil } from '..';
+import { AssetSource } from '../src/source';
 
 export abstract class BaseAssetSourceSuite {
+
+  abstract get sourceClass(): Class<AssetSource>;
+
+  get source() {
+    return DependencyRegistry.getInstance(this.sourceClass);
+  }
+
+  get service() {
+    return DependencyRegistry.getInstance(AssetService);
+  }
 
   @BeforeAll()
   async initAll() {
@@ -16,7 +28,7 @@ export abstract class BaseAssetSourceSuite {
 
   @Test()
   async saveBasic() {
-    const service = await DependencyRegistry.getInstance(AssetService);
+    const service = await this.service;
     const pth = await ResourceManager.toAbsolutePath('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
 
@@ -26,7 +38,7 @@ export abstract class BaseAssetSourceSuite {
 
   @Test()
   async saveHashed() {
-    const service = await DependencyRegistry.getInstance(AssetService);
+    const service = await this.service;
     const pth = await ResourceManager.toAbsolutePath('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const outHashed = await service.save(file, false, new HashNamingStrategy());
@@ -36,7 +48,7 @@ export abstract class BaseAssetSourceSuite {
 
   @Test()
   async saveAndGet() {
-    const service = await DependencyRegistry.getInstance(AssetService);
+    const service = await this.service;
     const pth = await ResourceManager.toAbsolutePath('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     await service.save(file);
@@ -50,7 +62,7 @@ export abstract class BaseAssetSourceSuite {
 
   @Test()
   async saveAndRemove() {
-    const service = await DependencyRegistry.getInstance(AssetService);
+    const service = await this.service;
     const pth = await ResourceManager.toAbsolutePath('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     await service.save(file);

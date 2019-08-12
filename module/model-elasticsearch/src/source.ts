@@ -297,20 +297,6 @@ export class ElasticsearchModelSource extends ModelSource {
     return o;
   }
 
-  cleanseId<T extends ModelCore>(o: T) {
-    if (o.id) {
-      (o as any)._id = o.id as string;
-      delete o.id;
-    }
-    return (o as any)._id;
-  }
-
-  extractId<T extends ModelCore>(o: T) {
-    const id = this.cleanseId(o);
-    delete (o as any)._id;
-    return id;
-  }
-
   async initClient() {
     this.client = new es.Client(Util.deepAssign({}, this.config));
     await this.client.cluster.health({});
@@ -498,8 +484,6 @@ export class ElasticsearchModelSource extends ModelSource {
     const id = keepId ? o.id : undefined;
     delete o.id;
 
-    this.cleanseId(o);
-
     const res = await this.client.index({
       ...this.getIdentity(o.constructor as Class),
       ... (id ? { id } : {}),
@@ -516,7 +500,6 @@ export class ElasticsearchModelSource extends ModelSource {
       if (!keepId) {
         delete x.id;
       }
-      this.cleanseId(x);
     }
 
     const res = await this.bulkProcess(cls, objs.map(x => ({ upsert: x })));
@@ -528,7 +511,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
-    const id = this.extractId(o);
+    const id = o.id!;
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
       try {
@@ -538,6 +521,7 @@ export class ElasticsearchModelSource extends ModelSource {
       }
 
     }
+    delete o.id;
     await this.client.index({
       ...this.getIdentity(cls),
       id,
@@ -545,12 +529,13 @@ export class ElasticsearchModelSource extends ModelSource {
       refresh: true,
       body: o
     });
+    o.id = id;
 
     return this.getById(cls, id);
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
-    const id = this.extractId(data);
+    const id = data.id;
     const script = ElasticsearchUtil.generateUpdateScript(data);
 
     console.debug('Partial Script', script);
@@ -652,6 +637,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
         if (v.result === 'created') {
           out.insertedIds.set(i, v._id);
+          (operations[i].insert || operations[i].upsert)!.id = v._id;
         }
 
         (out.counts as any)[sk as any] += 1;

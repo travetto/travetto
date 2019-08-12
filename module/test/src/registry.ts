@@ -43,8 +43,8 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       config.beforeEach.push(...pconf.beforeEach);
       tests.push(...[...pconf.tests.values()].map(t => ({
         ...t,
-        class: cls,
-        className: cls.__filename,
+        // class: cls,
+        // className: cls.__filename,
       })));
       parent = this.getParentClass(parent);
     }

@@ -1,7 +1,5 @@
 import * as assert from 'assert';
 
-import { ModelSource } from '@travetto/model';
-import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
 import {
@@ -20,14 +18,14 @@ class PolymorphismSuite extends BasePolymorphismSuite {
 
   @Test('Extraction')
   async testRetrieve() {
-    const service = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
+    const service = (await this.source) as ElasticsearchModelSource;
     const res = service.getClassFromIndexType('person', 'doctor');
     assert(res === Doctor);
   }
 
   @Test('Multi Query')
   async testMultiQuery() {
-    const service = (await DependencyRegistry.getInstance(ModelSource)) as ElasticsearchModelSource;
+    const service = (await this.source) as ElasticsearchModelSource;
     const res = service.buildRawModelFilters([Person, Doctor, Engineer, Firefighter]);
 
     assert(res.bool.should.length === 4);

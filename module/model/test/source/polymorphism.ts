@@ -1,9 +1,8 @@
 import * as assert from 'assert';
 
-import { DependencyRegistry } from '@travetto/di';
 import { Test } from '@travetto/test';
 
-import { Model, ModelService, BaseModel } from '../..';
+import { Model, BaseModel } from '../..';
 import { BaseModelTest } from '../../extension/base.test';
 
 @Model({ baseType: true })
@@ -30,7 +29,7 @@ export abstract class BasePolymorphismSuite extends BaseModelTest {
 
   @Test('Verify save and find and deserialize')
   async testUpdate() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
     const people = [
       Doctor.from({ name: 'bob', specialty: 'feet' }),
       Firefighter.from({ name: 'rob', firehouse: 20 }),
@@ -88,26 +87,26 @@ export abstract class BasePolymorphismSuite extends BaseModelTest {
 
   @Test('Bulk operations')
   async testBulk() {
-    const service = await DependencyRegistry.getInstance(ModelService);
+    const service = await this.service;
     const created1 = await service.save(Doctor, Doctor.from({ name: 'greg', specialty: 'hair' }));
-    const created2 = await service.save(Doctor, Doctor.from({ name: 'b.reg', specialty: 'hearing' }));
-    const created3 = await service.save(Doctor, Doctor.from({ name: 'w.reg', specialty: 'eyes' }));
+    const created2 = await service.save(Doctor, Doctor.from({ name: 'breg', specialty: 'hearing' }));
+    const created3 = await service.save(Doctor, Doctor.from({ name: 'wreg', specialty: 'eyess' }));
 
     const o = await service.bulkProcess(Person, [
-      { insert: Doctor.from({ name: 'bob', speciality: 'feet' }) },
-      { upsert: Firefighter.from({ id: '3534aaaa3c19', name: 'rob', firehouse: 20 }) },
+      { insert: Doctor.from({ name: 'bob', specialty: 'feet' }) },
+      { upsert: Firefighter.from({ id: service.generateId(), name: 'rob', firehouse: 20 }) },
       { upsert: Firefighter.from({ name: 'rob', firehouse: 20 }) },
       { update: Doctor.from(created1) },
-      { upsert: Doctor.from({ id: created2.id, name: 'sh.meg', speciality: 'arms' }) },
+      { upsert: Doctor.from({ id: created2.id, name: 'shmeg', specialty: 'arms' }) },
       { delete: Doctor.from({ id: created3.id }) }
     ]);
 
-    assert(o.counts.insert === 0);
-    assert(o.counts.upsert === 4);
-    assert(o.counts.update === 1);
+    assert(o.counts.insert === 1);
+    assert(o.counts.upsert === 2);
+    assert(o.counts.update === 2);
     assert(o.counts.delete === 1);
 
-    assert(o.insertedIds.size === 3);
-    assert(Array.from(o.insertedIds.keys()) === [0, 1, 2]);
+    assert(o.insertedIds.size === 2);
+    assert(Array.from(o.insertedIds.keys()) === [0, 2]);
   }
 }
