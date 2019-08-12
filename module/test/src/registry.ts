@@ -33,9 +33,10 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
     const config = this.getOrCreatePending(cls) as SuiteConfig;
     const tests = [...this.pendingFields.get(cls.__id)!.values()];
-    let parent = this.getParentClass(cls);
 
-    while (parent && this.has(parent)) {
+    const parent = this.getParentClass(cls);
+
+    if (parent && this.has(parent)) {
       const pconf = this.get(parent);
       config.afterAll.push(...pconf.afterAll);
       config.beforeAll.push(...pconf.beforeAll);
@@ -43,10 +44,8 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       config.beforeEach.push(...pconf.beforeEach);
       tests.push(...[...pconf.tests.values()].map(t => ({
         ...t,
-        // class: cls,
-        // className: cls.__filename,
+        class: cls
       })));
-      parent = this.getParentClass(parent);
     }
 
     config.instance = new config.class();
