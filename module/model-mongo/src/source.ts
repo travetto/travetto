@@ -44,7 +44,7 @@ export class MongoModelSource extends ModelSource {
 
     const projected = MongoUtil.extractTypedWhereClause(cls, query.where || {});
 
-    console.trace('Query', JSON.stringify(projected, null, 2));
+    console.trace('Query', query);
 
     let cursor = col.find(projected);
     if (query.select) {
@@ -166,12 +166,14 @@ export class MongoModelSource extends ModelSource {
   async suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     const q = ModelUtil.getSuggestFieldQuery(cls, field, prefix, query);
     const results = await this.query(cls, q);
-    return ModelUtil.combineSuggestResults(cls, field, prefix, results, x => x, query && query.limit);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => a, query && query.limit);
   }
 
   async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     const q = ModelUtil.getSuggestQuery(cls, field, prefix, query);
+    console.log('Suggested', q);
     const results = await this.query(cls, q);
+    console.log('Suggested', results);
     return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query && query.limit);
   }
 
