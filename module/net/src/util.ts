@@ -1,26 +1,23 @@
+import * as path from 'path';
 import * as os from 'os';
-import * as fs from 'fs';
 import { IncomingMessage } from 'http';
+
 import { HttpRequest } from './request';
 
 import { FsUtil } from '@travetto/boot';
+import { Util, SystemUtil } from '@travetto/base';
 
 const tmpDir = FsUtil.toUnix(os.tmpdir());
 
 export class NetUtil {
-  static generateTempFile(ext: string): string {
-    const now = new Date();
-    const name = `asset-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${process.pid}-${(Math.random() * 100000000 + 1).toString(36)}.${ext}`;
-    return FsUtil.resolveUnix(tmpDir, name);
-  }
-
-  static async downloadUrl(url: string) {
-    const filePath = this.generateTempFile(url.split('/').pop() as string);
-    const file = fs.createWriteStream(filePath);
+  static async download(url: string) {
+    const name = `${Util.uuid()}.${path.basename(url)}`;
+    const filePath = FsUtil.resolveUnix(tmpDir, name);
 
     await HttpRequest.exec({
-      url, responseHandler: async (msg: IncomingMessage) => {
-        await HttpRequest.pipe(msg, file);
+      url,
+      async responseHandler(msg: IncomingMessage) {
+        await SystemUtil.streamToFile(msg, filePath);
       }
     });
 
