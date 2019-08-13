@@ -1,7 +1,7 @@
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
 import { Schema, SchemaRegistry } from '../';
-import { GenerateUtil } from '../extension/faker';
+import { SchemaFakerUtil } from '../extension/faker';
 
 import * as assert from 'assert';
 import { Precision, Max, Min } from '../src/decorator/field';
@@ -55,7 +55,7 @@ class DataGenerationSuite {
 
   @Test()
   verifyValueGen() {
-    const user = GenerateUtil.generate(User);
+    const user = SchemaFakerUtil.generate(User);
 
     assert.ok(user);
 
@@ -68,7 +68,7 @@ class DataGenerationSuite {
 
   @Test()
   verifyNumberGen() {
-    const user = GenerateUtil.generate(UserScore);
+    const user = SchemaFakerUtil.generate(UserScore);
     assert(user.score >= -10);
     assert(user.score <= 100);
     assert(`${user.score}`.split('.')[1].length < 3);
