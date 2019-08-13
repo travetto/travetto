@@ -1,6 +1,12 @@
 Completed Tasks
 ==============
 
+Assets
+-----------------------
+- [x] Naming structure for assets
+- [x] File provider
+- [x] Separate Image processing out of asset
+
 Base
 ----------------------
 - [X] Separate out e2e into a better pattern
@@ -11,6 +17,7 @@ Model Elasticsearch
 -----------------------
 - [X] Regex as strings wrt to binding and schema validation
 - [X] Schema config for text field arrays
+- [X] Migrated to new elasticsearch client as old one was deprecated
 
 Model SQL
 ----------------------
