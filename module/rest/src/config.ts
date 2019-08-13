@@ -1,3 +1,4 @@
+import * as os from 'os';
 import * as cookies from 'cookies';
 
 import { Config } from '@travetto/config';
@@ -13,7 +14,7 @@ export class RestConfig {
   disableGetCache = true;
   trustProxy = false;
   hostname = 'localhost';
-  bindAddress = 'localhost';
+  bindAddress?: string;
   baseUrl: string;
 
   defaultMessage = true;
@@ -47,6 +48,10 @@ export class RestConfig {
     };
 
   postConstruct() {
+    if (!this.bindAddress) {
+      const is4 = !!os.networkInterfaces().lo.find(nic => nic.family === 'IPv4');
+      this.bindAddress = is4 ? '0.0.0.0' : '::';
+    }
     if (this.cookie.secure === undefined) {
       this.cookie.secure = this.ssl.active;
     }
