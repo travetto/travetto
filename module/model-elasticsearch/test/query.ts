@@ -67,7 +67,7 @@ export class QueryTest {
       ]
     };
 
-    out = ElasticsearchUtil.extractWhereQuery(qry, WhereType);
+    out = ElasticsearchUtil.extractWhereQuery(WhereType, qry);
 
     assert.ok(out.bool);
 
@@ -88,11 +88,11 @@ export class QueryTest {
 
   @Test()
   async translateIds() {
-    const out = ElasticsearchUtil.extractWhereQuery({
+    const out = ElasticsearchUtil.extractWhereQuery(User, {
       $and: [
         { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
       ]
-    }, User);
+    });
 
     assert(!!out.bool.must[0].terms._id);
   }
@@ -100,11 +100,11 @@ export class QueryTest {
   @Test()
   async testRegEx() {
 
-    const out = ElasticsearchUtil.extractWhereQuery({
+    const out = ElasticsearchUtil.extractWhereQuery(User, {
       name: {
         $regex: '/google.$/'
       }
-    }, User);
+    });
 
     assert(typeof out.regexp.name === 'string');
     assert(out.regexp.name === 'google.$');

@@ -192,13 +192,13 @@ export class ElasticsearchUtil {
     }
   }
 
-  static extractWhereQuery<T>(o: WhereClause<T>, cls: Class<T>, config?: EsSchemaConfig): Record<string, any> {
+  static extractWhereQuery<T>(cls: Class<T>, o: WhereClause<T>, config?: EsSchemaConfig): Record<string, any> {
     if (has$And(o)) {
-      return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(x, cls, config)) } };
+      return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(cls, x, config)) } };
     } else if (has$Or(o)) {
-      return { bool: { should: o.$or.map(x => this.extractWhereQuery<T>(x, cls, config)), minimum_should_match: 1 } };
+      return { bool: { should: o.$or.map(x => this.extractWhereQuery<T>(cls, x, config)), minimum_should_match: 1 } };
     } else if (has$Not(o)) {
-      return { bool: { must_not: this.extractWhereQuery<T>(o.$not, cls, config) } };
+      return { bool: { must_not: this.extractWhereQuery<T>(cls, o.$not, config) } };
     } else {
       return this.extractWhereTermQuery(o, cls, config);
     }

@@ -169,6 +169,31 @@ export class SQLModelSource extends ModelSource {
   }
 
   @Connected()
+  async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+    const col = this.dialect.ident(field as string);
+    const ttl = this.dialect.ident('count');
+    const q = [
+      `SELECT ${col} as key, COUNT(${col}) as ${ttl}`,
+      this.dialect.getFromSQL(cls),
+    ];
+    if (query && query.where) {
+      q.push(
+        this.dialect.getWhereSQL(cls, query.where)
+      );
+    }
+    q.push(
+      `GROUP BY ${col}`,
+      `ORDER BY ${ttl} DESC`
+    );
+
+    const results = await this.exec(q.join('\n'));
+    return (results.records as any[]).map(x => {
+      x.count = Util.coerceType(x.count, Number);
+      return x;
+    });
+  }
+
+  @Connected()
   async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     const q = ModelUtil.getSuggestQuery(cls, field, prefix, query);
     const results = await this.query(cls, q);
