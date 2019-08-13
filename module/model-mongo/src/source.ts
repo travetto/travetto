@@ -169,11 +169,34 @@ export class MongoModelSource extends ModelSource {
     return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => a, query && query.limit);
   }
 
+  async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+    const col = await this.getCollection(cls);
+    const pipeline: object[] = [{
+      $group: {
+        _id: `$${field}`,
+        count: {
+          $sum: 1
+        }
+      }
+    }];
+
+    if (query && query.where) {
+      pipeline.unshift({
+        $match: MongoUtil.extractTypedWhereClause(cls, query.where)
+      });
+    }
+
+    const result = await col.aggregate(pipeline).toArray();
+
+    return result.map((val: any) => ({
+      key: val._id,
+      count: val.count
+    })).sort((a, b) => b.count - a.count);
+  }
+
   async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     const q = ModelUtil.getSuggestQuery(cls, field, prefix, query);
-    console.log('Suggested', q);
     const results = await this.query(cls, q);
-    console.log('Suggested', results);
     return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query && query.limit);
   }
 

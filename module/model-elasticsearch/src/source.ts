@@ -17,6 +17,7 @@ import { SchemaChangeEvent, SchemaRegistry } from '@travetto/schema';
 import { ElasticsearchModelConfig } from './config';
 import { EsBulkResponse, EsIdentity, EsBulkError } from './types';
 import { ElasticsearchUtil } from './util';
+import { BulkProcessError } from '@travetto/model/src/model/bulk';
 
 @Injectable()
 export class ElasticsearchModelSource extends ModelSource {
@@ -219,7 +220,7 @@ export class ElasticsearchModelSource extends ModelSource {
   getPlainSearchObject<T extends ModelCore>(cls: Class<T>, query: Query<T>) {
 
     const conf = ModelRegistry.get(cls);
-    const q = ElasticsearchUtil.extractWhereQuery(query.where! || {}, cls, this.config.schemaConfig);
+    const q = ElasticsearchUtil.extractWhereQuery(cls, query.where! || {}, this.config.schemaConfig);
     const search: es.SearchParams = {
       body: q ? { query: q } : {}
     };
@@ -334,6 +335,31 @@ export class ElasticsearchModelSource extends ModelSource {
     const safe = this.safeLoad<T>(search, res);
     return ModelUtil.combineSuggestResults(cls, field, prefix, safe, x => x, query && query.limit);
   }
+
+  async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+    const q = query && query.where ? ElasticsearchUtil.extractWhereQuery(cls, query.where) : { match_all: {} };
+    const search = {
+      ...this.getIdentity(cls),
+      body: {
+        query: q,
+        aggs: {
+          [field]: {
+            terms: {
+              field,
+              size: 100
+            },
+          }
+        }
+      },
+      size: 0
+    };
+
+    const res = await this.client.search(search);
+    const buckets: { key: string, doc_count: number }[] = res.aggregations[field].buckets;
+    const out = buckets.map(({ key, doc_count }) => ({ key, count: doc_count }));
+    return out;
+  }
+
   async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     const search = this.buildRawMultiSuggestQuery([cls], field, prefix, query);
     const res = await this.client.search<T>(search);
@@ -516,6 +542,10 @@ export class ElasticsearchModelSource extends ModelSource {
     }
 
     const res = await this.bulkProcess(cls, objs.map(x => ({ upsert: x })));
+    if (res.counts.error > 0) {
+      throw new BulkProcessError(res.errors);
+    }
+
     for (const idx of res.insertedIds.keys()) {
       objs[idx].id = res.insertedIds.get(idx)!;
     }

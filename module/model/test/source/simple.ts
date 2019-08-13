@@ -1,7 +1,8 @@
 import * as assert from 'assert';
 
 import { Test } from '@travetto/test';
-import { Schema, Text } from '@travetto/schema';
+import { Schema, Text, Precision } from '@travetto/schema';
+import { SchemaFakerUtil } from '@travetto/schema/extension/faker';
 
 import { BaseModelTest } from '../../extension/base.test';
 import { Model, BaseModel } from '../..';
@@ -15,6 +16,7 @@ class Address {
 @Model()
 class Person extends BaseModel {
   @Text() name: string;
+  @Precision(3, 0)
   age: number;
   gender: 'm' | 'f';
   address: Address;
@@ -323,5 +325,38 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
     const results3 = await service.getAllByQueryString(Person, { query: 'name ~ /\\bomb.*/' });
     assert(results3.length === 0);
+  }
+
+  @Test('verify aggregations')
+  async testFacet() {
+    const people = ' '.repeat(50)
+      .split('')
+      .map(() => SchemaFakerUtil.generate(Person));
+
+    const svc = await this.service;
+    const saved = await svc.saveAll(Person, people);
+
+    assert(saved.length === 50);
+
+    const results = await svc.facet(Person, 'gender');
+
+    assert(results.length === 2);
+    assert(results[0].count >= results[1].count);
+
+    const genders = { m: 0, f: 0 };
+    for (const el of people) {
+      genders[el.gender] += 1;
+    }
+
+    assert(results.find(x => x.key === 'm')!.count === genders.m);
+    assert(results.find(x => x.key === 'f')!.count === genders.f);
+
+    const names: Record<string, number> = {};
+    for (const el of people) {
+      names[el.name!] = (names[el.name!] || 0) + 1;
+    }
+
+    const nameFacet = await svc.facet(Person, 'name');
+    assert(Object.keys(names).length === nameFacet.length);
   }
 }
