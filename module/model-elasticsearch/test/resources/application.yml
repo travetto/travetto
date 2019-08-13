@@ -1,5 +1,4 @@
 elasticsearch.model:
   schema: "sample-test"
-  apiVersion: 6.8
   schemaConfig:
     caseSensitive: true

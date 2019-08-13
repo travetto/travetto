@@ -5,7 +5,6 @@ Assets
 -----------------------
 - [x] Naming structure for assets
 - [x] File provider
-- [-] Move resizing to https://github.com/lovell/sharp #Skipped
 - [x] Separate Image processing out of asset
 
 Base
@@ -18,6 +17,7 @@ Model Elasticsearch
 -----------------------
 - [X] Regex as strings wrt to binding and schema validation
 - [X] Schema config for text field arrays
+- [X] Migrated to new elasticsearch client as old one was deprecated
 
 Model SQL
 ----------------------
