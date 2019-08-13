@@ -187,17 +187,4 @@ export class HttpRequest {
     const res = await this.rawExec(this.configJSON({ ...opts, payload }));
     return JSON.parse(res) as T;
   }
-
-  static async pipe(readable: NodeJS.ReadableStream, writable: NodeJS.WritableStream) {
-    return new Promise((resolve, reject) => {
-      writable
-        .on('error', reject);
-
-      readable.pipe(writable)
-        .on('finish', resolve)
-        .on('end', resolve)
-        .on('close', resolve)
-        .on('error', reject);
-    });
-  }
 }
