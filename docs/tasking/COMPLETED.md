@@ -1,6 +1,13 @@
 Completed Tasks
 ==============
 
+Assets
+-----------------------
+- [x] Naming structure for assets
+- [x] File provider
+- [-] Move resizing to https://github.com/lovell/sharp #Skipped
+- [x] Separate Image processing out of asset
+
 Base
 ----------------------
 - [X] Separate out e2e into a better pattern

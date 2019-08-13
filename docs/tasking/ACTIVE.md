@@ -1,13 +1,6 @@
 Active Development (1.0.0 - RC Ready)
 =====================================
 
-Assets
------------------------
-- [ ] Naming structure for assets
-- [ ] File provider
-- [ ] Move resizing to https://github.com/lovell/sharp
-- [ ] Separate Image processing out of asset
-
 Caching
 -----------------------
 - [ ] Rework cache infrastructure to allow for multiple providers
