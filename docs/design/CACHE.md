@@ -8,4 +8,20 @@ At a basic level, initially, caching will be single level with a centralized rep
 The caching mechanism, if involving any networking, will require all methods to be asynchronous.  Caching will require a key, that should be derived from the function invocation, or customizable via function.
 
 ## Namespacing
-Caching should be configurable at the method or at the class level
+Caching should be configurable at the method or at the class level.  Eviction should also be at the namespace level. 
+
+## Eviction
+Eviction should be able to be time-based or size-based (memory or counts) for how long something should be allowed to survive
+
+## Serialization
+Serialization needs to account for complex structures, and should be able to rely upon `JSON.stringify` for storage.  There is potentiality for detecting return types and allowing for recreating the objects that were persisted.  Streamed data should be stored in a format that is amenable for streaming as well.
+
+## Errors
+Error states should be cacheable as well, if desired.  These need to be evictable, but can prove useful for situations where the resources it takes to verify something is missing are expensive.
+
+## Stores
+* Disk   - Core
+* Memory - Core
+* Redis  - Module
+* Asset? - Extension
+* Model? - Extension
