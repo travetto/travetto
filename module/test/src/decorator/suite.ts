@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { TestRegistry } from '../registry';
+import { TestRegistry } from '../registry/registry';
 import { SuiteConfig } from '../model/suite';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';

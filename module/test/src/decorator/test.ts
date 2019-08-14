@@ -1,4 +1,4 @@
-import { TestRegistry } from '../registry';
+import { TestRegistry } from '../registry/registry';
 import { TestConfig } from '../model/test';
 
 export function Test(): MethodDecorator;
