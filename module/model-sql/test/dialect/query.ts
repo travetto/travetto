@@ -1,17 +1,15 @@
 import * as assert from 'assert';
 
 import { Schema, SchemaRegistry, FieldConfig } from '@travetto/schema';
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import { WhereClause } from '@travetto/model/';
-
-import { VisitStack } from '../src/util';
-
-import { ModelRegistry } from '@travetto/model/src/registry';
+import { Test, BeforeAll } from '@travetto/test';
+import { ModelRegistry, WhereClause } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
-import { SQLDialect } from '../src/dialect';
 
-// tslint:disable-next-line: no-import-side-effect
-import './dialect';
+import { VisitStack } from '../../src/util';
+import { SQLDialect } from '../../src/dialect';
+import { TestUtil } from '../util';
+import { DialectSuite as Suite } from '../decorator';
+import { ModelService } from '@travetto/model/src/service/model';
 
 @Schema()
 class User {
@@ -50,13 +48,22 @@ class WhereType {
 }
 
 @Suite()
-export class QueryTest {
+export abstract class QueryTest {
+
+  get service() {
+    return DependencyRegistry.getInstance(ModelService);
+  }
 
   @BeforeAll()
   async beforeAll() {
+    await TestUtil.init(this);
     await SchemaRegistry.init();
     await ModelRegistry.init();
     await DependencyRegistry.init();
+  }
+
+  get dialect() {
+    return DependencyRegistry.getInstance(SQLDialect);
   }
 
   @Test()
@@ -100,12 +107,13 @@ export class QueryTest {
 
     assert(out === `User.name ${dct.SQL_OPS.$regex} 'google.$'`);
 
+    const dia = await this.dialect;
     const outBoundary = dct.getWhereGroupingSQL(User, {
       name: {
         $regex: /\bgoogle\b/
       }
     });
 
-    assert(outBoundary === `User.name ${dct.SQL_OPS.$regex} '\\ygoogle\\y'`);
+    assert(outBoundary === `User.name ${dct.SQL_OPS.$regex} '${dia.regexWordBoundary}google${dia.regexWordBoundary}'`);
   }
 }

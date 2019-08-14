@@ -1,14 +1,17 @@
 import { BaseModelTest } from '@travetto/model/extension/base.test';
 import { DependencyRegistry } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
-import { TestRegistry, Test } from '@travetto/test';
+import { TestRegistry } from '@travetto/test';
 import { Class } from '@travetto/registry';
 
 export class TestUtil {
-  static async init(e: BaseModelTest) {
 
-    await import('./dialect');
+  static async init(e: any) {
+  }
+
+  static async initModel(e: BaseModelTest) {
     await e.init();
+
     const ctx = await DependencyRegistry.getInstance(AsyncContext);
 
     for (const t of TestRegistry.get(e.constructor as Class).tests) {

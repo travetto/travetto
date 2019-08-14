@@ -11,6 +11,7 @@ import { AssetSource } from '../src/source';
 export abstract class BaseAssetSourceSuite {
 
   abstract get sourceClass(): Class<AssetSource>;
+  abstract get configClass(): Class<any>;
 
   get source() {
     return DependencyRegistry.getInstance(this.sourceClass);
@@ -20,10 +21,18 @@ export abstract class BaseAssetSourceSuite {
     return DependencyRegistry.getInstance(AssetService);
   }
 
+  get config() {
+    return DependencyRegistry.getInstance(this.configClass);
+  }
+
   @BeforeAll()
   async initAll() {
     ResourceManager.addPath(__dirname);
     await DependencyRegistry.init();
+    const config = await this.config;
+    if ('namespace' in config) {
+      config.namespace = `random_${Math.trunc(Math.random() * 10000)}`; // Randomize namespace
+    }
   }
 
   @Test()

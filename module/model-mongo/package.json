@@ -27,8 +27,7 @@
   "main": "index.ts",
   "files": [
     "index.ts",
-    "src",
-    "support"
+    "src"
   ],
   "name": "@travetto/model-mongo",
   "repository": {

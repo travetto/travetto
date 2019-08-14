@@ -1,15 +1,20 @@
 Active Development (1.0.0 - RC Ready)
 =====================================
 
+SQL
+-----------------------
+- [ ] Resolve issues with multiple tests from same file
+
 Caching
 -----------------------
-- [ ] Rework cache infrastructure to allow for multiple providers
-- [ ] Integrate caching with
-    * File System
+- [X] Rework cache infrastructure to allow for multiple providers
+- [X] Integrate caching with
+    X File System
     * Redis
-    * Memory
+    X Memory
     * Model Service
 - [ ] See if we can integrate with asset service
+- [ ] See if we can integrate with session store
 
 Serverless Initiative
 --------------------------
