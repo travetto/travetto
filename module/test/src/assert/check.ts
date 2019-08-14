@@ -78,6 +78,9 @@ export class AssertCheck {
         case 'ok': asrt.apply(null, args as any); break;
         default:
           if (fn && (assert as any)[fn]) { // Assert call
+            if (/not/i.test(fn)) {
+              common.state = 'should not';
+            }
             (assert as any)[fn].apply(null, args);
           } else if (args[1] && fn && args[1][fn]) { // Method call
             asrt(args[1][fn](args[0]));

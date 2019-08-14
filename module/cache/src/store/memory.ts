@@ -1,8 +1,8 @@
 import { SystemUtil } from '@travetto/base';
 
-import { CacheStore, CacheEntry } from './type';
+import { CacheEntry, LocalCacheStore } from './types';
 
-export class MemoryCacheStore extends CacheStore {
+export class MemoryCacheStore extends LocalCacheStore {
 
   store = new Map<string, CacheEntry>();
 
@@ -15,8 +15,9 @@ export class MemoryCacheStore extends CacheStore {
   }
 
   get(key: string): CacheEntry | undefined {
-    const entry = this.store.get(key)! as CacheEntry;
+    let entry = this.store.get(key)! as CacheEntry;
     if (entry) {
+      entry = { ...entry }; // Clone
       if (entry.stream) {
         entry.data = SystemUtil.toReadable(Buffer.from(entry.data, 'base64'));
       } else {
@@ -29,27 +30,40 @@ export class MemoryCacheStore extends CacheStore {
   }
 
   async set(key: string, entry: CacheEntry): Promise<void> {
-    if (entry.stream) {
-      entry.data = (await SystemUtil.toBuffer(entry.data as NodeJS.ReadableStream)).toString('base64');
+    this.cull();
+
+    let value = entry.data;
+    if (this.isStream(value)) {
+      entry.data = (await SystemUtil.toBuffer(value as NodeJS.ReadableStream)).toString('base64');
+      value = SystemUtil.toReadable(Buffer.from(entry.data, 'base64')); // Refill stream
+      entry.stream = true;
     } else {
-      entry.data = JSON.stringify(entry.data);
+      entry.data = JSON.stringify(value);
+      value = JSON.parse(entry.data); // Decouple
     }
     this.store.set(key, entry);
+    return value;
   }
 
   touch(key: string): boolean {
-    const entry = this.store.get(key);
-
-    if (!entry || !entry.maxAge) {
-      return false;
-    }
-
-    entry.expiresAt = entry.maxAge + Date.now();
-
+    const entry = this.store.get(key)!;
+    entry.expiresAt = Date.now() + entry.maxAge!;
     return true;
   }
 
   evict(key: string): boolean {
     return this.store.delete(key);
+  }
+
+  getAllKeys() {
+    return this.store.keys();
+  }
+
+  isExpired(key: string) {
+    const entry = this.store.get(key);
+    if (entry) {
+      return !!entry.maxAge && entry.expiresAt! < Date.now();
+    }
+    return false;
   }
 }

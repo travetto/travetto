@@ -1,43 +1,36 @@
-import { AppError } from '@travetto/base';
-
-import { CacheStore, ValidCacheFields } from './store/type';
-
-export interface CacheConfig {
-  keyFn?: (...args: any[]) => string;
-  maxAge?: number;
-  storeError?: boolean;
-  namespace?: string;
-}
+import { CacheStore } from './store/types';
+import { CacheConfig, CacheError } from './types';
 
 class $CacheManager {
 
-  async get(cache: CacheStore, key: string): Promise<any> {
+  async get(cache: CacheStore, config: CacheConfig, key: string): Promise<any> {
     const entry = await cache.get(key);
+    const now = Date.now();
     if (entry === undefined) { // Missing
-      throw new AppError('Key not found', 'notfound');
+      throw new CacheError('Key not found', 'notfound');
     }
-    if (entry.expiresAt && entry.expiresAt < Date.now()) {
+    if (entry.expiresAt && entry.expiresAt < now) {
       await this.evict(cache, key);
-      throw new AppError('Key not found', 'notfound');
+      throw new CacheError('Key expired', 'data');
     }
 
     // If half way to eviction, not perfect, but will reduce the amount of unnecessary updates
-    if (entry.extendOnAccess && entry.maxAge && (entry.expiresAt! - Date.now()) < entry.maxAge / 2) {
-      cache.touch(key);
+    if (config.extendOnAccess && entry.maxAge && entry.expiresAt) {
+      const delta = entry.expiresAt - now;
+      const threshold = entry.maxAge / 2;
+      if (delta < threshold) {
+        cache.touch(key); // Do not wait
+      }
     }
 
     return entry.data;
   }
 
   async has(cache: CacheStore, key: string) {
-    const has = cache.has(key);
-    if (has) {
-      await this.get(cache, key); // Ensure timing
-    }
-    return has;
+    return cache.has(key);
   }
 
-  set(cache: CacheStore, key: string, value: any, config: CacheConfig): Promise<void> | void {
+  set(cache: CacheStore, config: CacheConfig, key: string, value: any): Promise<void> | void {
     return cache.set(key, {
       issuedAt: Date.now(),
       expiresAt: config.maxAge ? (Date.now() + config.maxAge) : undefined,
@@ -56,42 +49,21 @@ class $CacheManager {
     }
   }
 
-  decorate<U extends any>(target: U, field: ValidCacheFields<U>, fn: (...args: any[]) => Promise<any>, config: CacheConfig) {
-    const mgr = this as $CacheManager;
+  async getOptional(cache: CacheStore, config: CacheConfig, key: string) {
+    let res: any;
+    const has = await this.has(cache, key);
 
-    if (config.namespace) {
-      config.namespace = `${target.constructor.name}.${fn.name}`;
-    }
-
-    const caching = async function (this: U, ...args: any[]): Promise<any> {
-      const cache = this[field] as any as CacheStore;
-      const finalKeyFn = config.keyFn || cache.computeKey;
-
-      const key = `${config.namespace}:${finalKeyFn.apply(undefined, args)}`;
-      const has = await mgr.has(cache, key);
-
-      if (!has) {
-        try {
-          const res = await fn.apply(this, args || []);
-          await mgr.set(cache, key, res, config);
-          return res;
-        } catch (err) {
-          if (config.storeError) {
-            await mgr.set(cache, key, err, config);
-          }
+    if (has) {
+      try {
+        res = await this.get(cache, config, key);
+      } catch (err) {
+        if (!(err instanceof CacheError)) {
           throw err;
         }
       }
-      const out = await mgr.get(cache, key);
-      if (out instanceof Error && config.storeError) {
-        throw out;
-      }
-      return out;
-    };
+    }
 
-    Object.defineProperty(caching, 'name', { value: fn.name });
-
-    return caching;
+    return res;
   }
 }
 
