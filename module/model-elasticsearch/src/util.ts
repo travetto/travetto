@@ -201,7 +201,7 @@ export class ElasticsearchUtil {
       if (o[x] === undefined || o[x] === null) {
         ops.push(`ctx._source.${path}${path ? '.' : ''}remove("${x}")`);
       } else if (Util.isPrimitive(o[x]) || Array.isArray(o[x])) {
-        const param = prop.replace(/[^a-z0-9_$]/g, '_');
+        const param = prop.toLowerCase().replace(/[^a-z0-9_$]/g, '_');
         ops.push(`ctx._source.${prop} = params.${param}`);
         out.params[param] = o[x];
       } else {
