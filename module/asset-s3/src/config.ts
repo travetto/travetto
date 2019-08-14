@@ -4,7 +4,7 @@ import { Config } from '@travetto/config';
 @Config('s3.asset')
 export class S3AssetConfig {
   region = 'us-east-1';
-  base = '';
+  namespace = '';
 
   accessKeyId = process.env.AWS_ACCESS_KEY_ID || '';
   secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || '';

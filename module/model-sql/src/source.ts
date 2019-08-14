@@ -172,8 +172,9 @@ export class SQLModelSource extends ModelSource {
   async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
     const col = this.dialect.ident(field as string);
     const ttl = this.dialect.ident('count');
+    const key = this.dialect.ident('key');
     const q = [
-      `SELECT ${col} as key, COUNT(${col}) as ${ttl}`,
+      `SELECT ${col} as ${key}, COUNT(${col}) as ${ttl}`,
       this.dialect.getFromSQL(cls),
     ];
     if (query && query.where) {

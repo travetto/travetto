@@ -44,7 +44,8 @@ export class S3AssetSource extends AssetSource {
   }
 
   private q<U extends object>(filename: string, extra: U = {} as U) {
-    return { Key: filename, Bucket: this.config.bucket, ...(extra as any) } as (U & { Key: string, Bucket: string });
+    const key = this.config.namespace ? `${this.config.namespace}/${filename}`.replace(/\/+/g, '/') : filename;
+    return { Key: key, Bucket: this.config.bucket, ...(extra as any) } as (U & { Key: string, Bucket: string });
   }
 
   async postConstruct() {
@@ -71,7 +72,7 @@ export class S3AssetSource extends AssetSource {
   }
 
   async read(filename: string): Promise<NodeJS.ReadableStream | Readable> {
-    const res = await this.client.getObject({ Bucket: this.config.bucket, Key: filename }).promise();
+    const res = await this.client.getObject(this.q(filename)).promise();
     if (res.Body instanceof Buffer) {
       return SystemUtil.toReadable(res.Body);
     } else if (typeof res.Body === 'string') {
@@ -98,7 +99,7 @@ export class S3AssetSource extends AssetSource {
   }
 
   async remove(filename: string): Promise<void> {
-    await this.client.deleteObject({ Bucket: this.config.bucket, Key: filename }).promise();
+    await this.client.deleteObject(this.q(filename)).promise();
     return;
   }
 }

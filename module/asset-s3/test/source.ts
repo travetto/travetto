@@ -12,6 +12,7 @@ import { S3AssetSource } from '../src/source';
 class AssetSourceSuite extends BaseAssetSourceSuite {
 
   sourceClass = S3AssetSource;
+  configClass = S3AssetConfig;
 
   @BeforeEach()
   async init() {

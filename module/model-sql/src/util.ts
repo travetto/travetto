@@ -27,11 +27,6 @@ interface OrderBy {
   asc: boolean;
 }
 
-interface Alias {
-  alias: string;
-  path: VisitStack[];
-}
-
 export interface VisitInstanceNode<R> extends VisitNode<R> {
   value: any;
 }
@@ -43,7 +38,6 @@ export interface VisitHandler<R, U extends VisitNode<R> = VisitNode<R>> {
 }
 
 export class SQLUtil {
-  private static aliasCache = new Map<Class, Map<string, Alias>>();
   static readonly ROOT_ALIAS = '_ROOT';
 
   static schemaFieldsCache = new Map<Class, {
@@ -55,38 +49,6 @@ export class SQLUtil {
 
   static classToStack(type: Class): VisitStack[] {
     return [{ type, name: type.name }];
-  }
-
-  static getAliasCache(stack: VisitStack[], resolve: (path: VisitStack[]) => string) {
-    const cls = stack[0].type;
-
-    if (this.aliasCache.has(cls)) {
-      return this.aliasCache.get(cls)!;
-    }
-
-    const clauses = new Map<string, Alias>();
-    let idx = 0;
-
-    this.visitSchemaSync(SchemaRegistry.get(cls), {
-      onRoot: ({ descend, path }) => {
-        const table = resolve(path);
-        clauses.set(table, { alias: this.ROOT_ALIAS, path });
-        return descend();
-      },
-      onSub: ({ descend, config, path }) => {
-        const table = resolve(path);
-        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
-        return descend();
-      },
-      onSimple: ({ config, path }) => {
-        const table = resolve(path);
-        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
-      }
-    });
-
-    this.aliasCache.set(cls, clauses);
-
-    return clauses;
   }
 
   static cleanResults<T>(dct: DialectState, o: T): T {
