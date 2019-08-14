@@ -1,12 +1,13 @@
 import * as assert from 'assert';
 
-import { Suite, BeforeAll, Test } from '@travetto/test';
+import { BeforeAll, Test } from '@travetto/test';
 import { BaseSimpleSourceSuite } from '@travetto/model/test/source/simple';
 import { Model } from '@travetto/model';
 
 import { SQLModelSource } from '../../src/source';
 import { SQLModelConfig } from '../../src/config';
 import { TestUtil } from '../util';
+import { DialectSuite as Suite } from '../decorator';
 
 @Model()
 class Bools {
@@ -14,20 +15,21 @@ class Bools {
   value?: boolean;
 }
 
-@Suite('Simple Save')
-class SimpleSuite extends BaseSimpleSourceSuite {
+@Suite()
+abstract class SimpleSuite extends BaseSimpleSourceSuite {
 
   configClass = SQLModelConfig;
   sourceClass = SQLModelSource;
 
   @BeforeAll()
-  doInit() {
-    return TestUtil.init(this);
+  async doInit() {
+    await TestUtil.initModel(this);
   }
 
   @Test('verify empty queries')
   async testEmptyCheck() {
     const service = await this.service;
+
     await service.bulkProcess(Bools, [true, false, null, false, true, undefined, null].map(x => {
       return {
         insert: Bools.from({

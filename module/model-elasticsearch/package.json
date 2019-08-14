@@ -30,8 +30,7 @@
   "files": [
     "bin",
     "index.ts",
-    "src",
-    "support"
+    "src"
   ],
   "name": "@travetto/model-elasticsearch",
   "repository": {

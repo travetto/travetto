@@ -10,6 +10,11 @@ const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
 
+interface Alias {
+  alias: string;
+  path: VisitStack[];
+}
+
 @Schema()
 class Total {
   total: number;
@@ -88,6 +93,8 @@ export abstract class SQLDialect implements DialectState {
   regexWordBoundary = '\\b';
 
   rootAlias = SQLUtil.ROOT_ALIAS;
+
+  aliasCache = new Map<Class, Map<string, Alias>>();
 
   constructor(public ns: string) {
     this.namespace = this.namespace.bind(this);
@@ -257,10 +264,42 @@ export abstract class SQLDialect implements DialectState {
     return `${alias}.${this.ident(field)}`;
   }
 
+  getAliasCache(stack: VisitStack[], resolve: (path: VisitStack[]) => string) {
+    const cls = stack[0].type;
+
+    if (this.aliasCache.has(cls)) {
+      return this.aliasCache.get(cls)!;
+    }
+
+    const clauses = new Map<string, Alias>();
+    let idx = 0;
+
+    SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+      onRoot: ({ descend, path }) => {
+        const table = resolve(path);
+        clauses.set(table, { alias: SQLUtil.ROOT_ALIAS, path });
+        return descend();
+      },
+      onSub: ({ descend, config, path }) => {
+        const table = resolve(path);
+        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
+        return descend();
+      },
+      onSimple: ({ config, path }) => {
+        const table = resolve(path);
+        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
+      }
+    });
+
+    this.aliasCache.set(cls, clauses);
+
+    return clauses;
+  }
+
   resolveName(stack: VisitStack[]): string {
     const path = this.namespaceParent(stack);
     const name = stack[stack.length - 1].name;
-    const cache = SQLUtil.getAliasCache(stack, this.namespace);
+    const cache = this.getAliasCache(stack, this.namespace);
     const base = cache.get(path)!;
     return this.alias(name, base.alias);
   }
@@ -391,7 +430,7 @@ export abstract class SQLDialect implements DialectState {
 
   getFromSQL<T>(cls: Class<T>): string {
     const stack = SQLUtil.classToStack(cls);
-    const aliases = SQLUtil.getAliasCache(stack, this.namespace);
+    const aliases = this.getAliasCache(stack, this.namespace);
     const tables = [...aliases.keys()].sort((a, b) => a.length - b.length); // Shortest first
     return `FROM ${tables.map((table, i) => {
       const { alias, path } = aliases.get(table)!;

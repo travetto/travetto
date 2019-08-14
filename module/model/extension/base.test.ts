@@ -1,7 +1,7 @@
 import { SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
-import { AfterEach, AfterAll } from '@travetto/test';
+import { AfterEach, BeforeEach } from '@travetto/test';
 
 import { ModelRegistry } from '../src/registry';
 import { ModelSource } from '../src/service/source';
@@ -28,17 +28,15 @@ export abstract class BaseModelTest {
     await ModelRegistry.init();
   }
 
-  @AfterAll()
-  async clear() {
+  @BeforeEach()
+  async initDb() {
     const mms = await this.source;
-    await mms.clearDatabase();
-
+    await mms.initDatabase();
   }
 
   @AfterEach()
   async reinit() {
     const mms = await this.source;
     await mms.clearDatabase();
-    await mms.initDatabase();
   }
 }

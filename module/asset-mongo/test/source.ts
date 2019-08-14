@@ -2,11 +2,13 @@ import { Suite, BeforeEach } from '@travetto/test';
 import { BaseAssetSourceSuite } from '@travetto/asset/test/source';
 
 import { MongoAssetSource } from '../src/source';
+import { MongoAssetConfig } from '../src/config';
 
 @Suite()
 class AssetSourceSuite extends BaseAssetSourceSuite {
 
   sourceClass = MongoAssetSource;
+  configClass = MongoAssetConfig;
 
   @BeforeEach()
   async resetDb() {

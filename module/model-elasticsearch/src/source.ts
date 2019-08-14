@@ -352,7 +352,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async clearDatabase() {
     await this.client.indices.delete({
-      index: this.getNamespacedIndex('*')
+      index: this.getNamespacedIndex('*'),
     });
   }
 
