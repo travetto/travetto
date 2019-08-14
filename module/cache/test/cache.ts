@@ -1,36 +1,30 @@
-import { Suite, Test, BeforeEach } from '@travetto/test';
 import * as assert from 'assert';
 
-import { CacheManager } from '../src/service';
-import { Cacheable } from '../src/decorator';
+import { Suite, Test } from '@travetto/test';
+
+import { Cache } from '../src/decorator';
+import { MemoryCacheStore } from '../src/store/memory';
 
 class CachingService {
 
-  constructor() { }
+  store = new MemoryCacheStore();
 
-  @Cacheable({
-    max: 5,
-    dispose: (k: string, v: Promise<number>) => {
-
-    }
-  })
+  @Cache('store')
   async smallAndComplex(num: number) {
-    await new Promise(resolve => setTimeout(resolve, 105));
     return num * 2;
   }
 
-  @Cacheable({ maxAge: 1000 })
+  @Cache('store')
   async youngAndComplex(num: number) {
-    await new Promise(resolve => setTimeout(resolve, 105));
     return num * 3;
   }
 
-  @Cacheable({ max: 1000 })
+  @Cache('store')
   async complexInput(config: any, size: number) {
     return { length: Object.keys(config).length, size };
   }
 
-  @Cacheable({ max: 1000 }, config => config.a)
+  @Cache('store', { keyFn: config => config.a })
   async complexInputWithCustomKey(config: any, size: number) {
     return { length: Object.keys(config).length, size };
   }
@@ -38,12 +32,6 @@ class CachingService {
 
 @Suite()
 class TestSuite {
-
-  @BeforeEach()
-  async cleanup() {
-    CacheManager.cleanup();
-    await new Promise(resolve => setTimeout(resolve, 200));
-  }
 
   @Test()
   async basic() {

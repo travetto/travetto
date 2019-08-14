@@ -24,9 +24,8 @@ export class Session<T = any> {
   constructor(data: Partial<Session>) {
     this.issuedAt = new Date();
 
-    for (const k of Object.keys(data) as (keyof Session)[]) {
-      this[k] = data[k];
-    }
+    // Overwrite with data
+    Object.assign(this, data);
 
     if (this.expiresAt && !(this.expiresAt instanceof Date)) {
       this.expiresAt = new Date(this.expiresAt as any);

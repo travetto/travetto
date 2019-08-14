@@ -23,7 +23,7 @@ function register(config: Partial<EndpointConfig | ControllerConfig>) {
 export const Describe = (desc: DescribableConfig) => register(desc);
 
 export const SetHeaders = (headers: HeaderMap) => register({ headers });
-export function Cache(value: number, unit: Units = 's') {
+export function CacheControl(value: number, unit: Units = 's') {
   const delta = UNIT_MAPPING[unit] * value;
   return SetHeaders({
     Expires: value === 0 ? '-1' : () => `${new Date(Date.now() + delta).toUTCString()}`,
@@ -31,7 +31,7 @@ export function Cache(value: number, unit: Units = 's') {
   });
 }
 
-export const DisableCache = Cache.bind(null, 0, 's');
+export const DisableCacheControl = CacheControl.bind(null, 0, 's');
 
 export function Accepts(contentTypes: string[]) {
   const types = new Set(contentTypes);
