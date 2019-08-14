@@ -7,9 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/compiler": "^1.0.0-beta.0",
-    "@types/lru-cache": "^5.1.0",
-    "lru-cache": "^5.1.1"
+    "@travetto/compiler": "^1.0.0-beta.0"
   },
   "description": "Caching functionality with decorators for declarative use.",
   "devDependencies": {
@@ -19,14 +17,14 @@
   "keywords": [
     "typescript",
     "travetto",
+    "decorator",
     "cache"
   ],
   "license": "MIT",
   "main": "index.ts",
   "files": [
     "index.ts",
-    "src",
-    "support"
+    "src"
   ],
   "name": "@travetto/cache",
   "repository": {
