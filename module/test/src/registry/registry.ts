@@ -1,8 +1,12 @@
 import { MetadataRegistry, Class } from '@travetto/registry';
-import { SuiteConfig } from './model/suite';
-import { TestConfig } from './model/test';
+import { SuiteConfig } from '../model/suite';
+import { TestConfig } from '../model/test';
 
 class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
+
+  getValidClasses() {
+    return this.getClasses().filter(c => !c.__abstract);
+  }
 
   createPending(cls: Class): Partial<SuiteConfig> {
     return {
@@ -63,7 +67,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);
-      const suites = this.getClasses().filter(f => f.__filename === file).map(x => this.get(x));
+      const suites = this.getValidClasses().filter(f => f.__filename === file).map(x => this.get(x));
       const suite = suites.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
 
       if (suite) {
@@ -74,16 +78,16 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       }
     } else { // Else lookup directly
       if (method) {
-        const cls = this.getClasses().find(x => x.name === clsName)!;
+        const cls = this.getValidClasses().find(x => x.name === clsName)!;
         const suite = this.get(cls);
         const test = suite.tests.find(x => x.methodName === method)!;
         return { suite, test };
       } else if (clsName) {
-        const cls = this.getClasses().find(x => x.name === clsName)!;
+        const cls = this.getValidClasses().find(x => x.name === clsName)!;
         const suite = this.get(cls);
         return { suite };
       } else {
-        const suites = this.getClasses()
+        const suites = this.getValidClasses()
           .map(x => this.get(x))
           .filter(x => !x.class.__abstract);  // Do not run abstract suites
         return { suites };

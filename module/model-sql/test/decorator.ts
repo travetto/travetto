@@ -1,4 +1,5 @@
-import { TestRegistry, SuiteConfig } from '@travetto/test';
+import { Class } from '@travetto/registry';
+import { TestRegistry, SuiteConfig, TestRegistryUtil } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
 import { PostgreSQLDialect } from '../extension/postgresql/dialect';
@@ -10,17 +11,11 @@ export function DialectSuite(config: Partial<SuiteConfig> = {}) {
     const dialects = [PostgreSQLDialect, MySQLDialect];
 
     for (const el of dialects) {
-      const name = el.name.replace(/Dialect/, '');
-      const Temp = class extends target { };
-      Temp.__filename = target.__filename;
-      Temp.__id = target.__id.replace(/#/, `#${name}`);
-      Temp.__abstract = false;
-
-      Object.defineProperty(Temp, 'name', { value: `${name}${target.name}` });
+      const custom = TestRegistryUtil.customizeClass(target as Class, el, 'Dialect');
 
       DependencyRegistry.getOrCreatePending(el).target = el; // Target self
 
-      TestRegistry.register(Temp, {
+      TestRegistry.register(custom, {
         beforeEach: [async function (this: any) {
           if (!this.__initialized) {
             this.__initialized = true;
@@ -31,7 +26,7 @@ export function DialectSuite(config: Partial<SuiteConfig> = {}) {
           }
         }],
         ...config,
-        description: `${name} ${config.description || target.name} Suite`,
+        description: `${custom.shortName} ${config.description || target.name} Suite`,
       });
     }
   };

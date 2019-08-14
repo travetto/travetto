@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Env } from '@travetto/base';
 import { EnvUtil, FsUtil } from '@travetto/boot';
 
-import { TestRegistry } from '../registry';
+import { TestRegistry } from '../registry/registry';
 import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { Consumer } from '../model/consumer';
