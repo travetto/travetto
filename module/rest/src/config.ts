@@ -49,8 +49,11 @@ export class RestConfig {
 
   postConstruct() {
     if (!this.bindAddress) {
-      const is4 = !!os.networkInterfaces().lo.find(nic => nic.family === 'IPv4');
-      this.bindAddress = is4 ? '0.0.0.0' : '::';
+      let useIPv4 = false;
+      Object.values(os.networkInterfaces()).forEach(networkInterfaceInfos => {
+        useIPv4 = useIPv4 || Boolean(networkInterfaceInfos.find(nii => nii.family === 'IPv4'));
+      });
+      this.bindAddress = useIPv4 ? '0.0.0.0' : '::';
     }
     if (this.cookie.secure === undefined) {
       this.cookie.secure = this.ssl.active;
