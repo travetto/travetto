@@ -1,5 +1,3 @@
-import { SystemUtil } from '@travetto/base';
-
 import { CacheEntry, LocalCacheStore } from './types';
 
 export class MemoryCacheStore extends LocalCacheStore {
@@ -16,33 +14,15 @@ export class MemoryCacheStore extends LocalCacheStore {
 
   get(key: string): CacheEntry | undefined {
     let entry = this.store.get(key)! as CacheEntry;
-    if (entry) {
-      entry = { ...entry }; // Clone
-      if (entry.stream) {
-        entry.data = SystemUtil.toReadable(Buffer.from(entry.data, 'base64'));
-      } else {
-        entry.data = JSON.parse(entry.data);
-      }
-      return entry;
-    } else {
-      return;
-    }
+    return entry && this.postLoad(entry);
   }
 
   async set(key: string, entry: CacheEntry): Promise<void> {
     this.cull();
 
-    let value = entry.data;
-    if (this.isStream(value)) {
-      entry.data = (await SystemUtil.toBuffer(value as NodeJS.ReadableStream)).toString('base64');
-      value = SystemUtil.toReadable(entry.data); // Refill stream
-      entry.stream = true;
-    } else {
-      entry.data = JSON.stringify(value);
-      value = JSON.parse(entry.data); // Decouple
-    }
+    entry = await this.prePersist(entry);
     this.store.set(key, entry);
-    return value;
+    return this.postLoad(entry).data;
   }
 
   touch(key: string, expiresAt: number): boolean {
