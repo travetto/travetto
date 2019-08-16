@@ -7,13 +7,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^1.0.0-beta.0",
+    "@travetto/base": "^1.0.0-beta.1",
     "@types/cron": "^1.7.1",
     "cron": "^1.7.1"
   },
   "description": "Managed registry for scheduling jobs using cron expressions.",
   "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.0"
+    "@travetto/test": "^1.0.0-beta.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -33,5 +33,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-beta.0"
+  "version": "1.0.0-beta.1"
 }
