@@ -13,7 +13,7 @@ export class MemoryCacheStore extends LocalCacheStore {
   }
 
   get(key: string): CacheEntry | undefined {
-    let entry = this.store.get(key)! as CacheEntry;
+    const entry = this.store.get(key)! as CacheEntry;
     return entry && this.postLoad(entry);
   }
 

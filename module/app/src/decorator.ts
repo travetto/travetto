@@ -31,4 +31,3 @@ export function Application(
     return target;
   };
 }
-
