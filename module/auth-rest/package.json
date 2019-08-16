@@ -7,13 +7,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth": "^1.0.0-beta.0",
-    "@travetto/context": "^1.0.0-beta.0",
-    "@travetto/rest": "^1.0.0-beta.0"
+    "@travetto/auth": "^1.0.0-beta.1",
+    "@travetto/context": "^1.0.0-beta.1",
+    "@travetto/rest": "^1.0.0-beta.1"
   },
   "description": "Rest authentication integration support for the travetto framework",
   "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.0"
+    "@travetto/test": "^1.0.0-beta.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -33,5 +33,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-beta.0"
+  "version": "1.0.0-beta.1"
 }
