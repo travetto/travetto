@@ -72,7 +72,7 @@ export class FileCacheStore extends LocalCacheStore {
     await fsWrite(pth, JSON.stringify(entry), 'utf8');
 
     if (entry.maxAge) {
-      await this.touch(pth);
+      await this.touch(pth, entry.expiresAt!);
     }
 
     return value;
@@ -87,7 +87,7 @@ export class FileCacheStore extends LocalCacheStore {
     }
   }
 
-  async touch(key: string): Promise<boolean> {
+  async touch(key: string, expiresAt: number): Promise<boolean> {
     const pth = this.getPath(key);
     if (await this.has(key)) {
       // Convert to epoch seconds
