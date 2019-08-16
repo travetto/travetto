@@ -19,7 +19,7 @@ class $CacheManager {
       const delta = entry.expiresAt - now;
       const threshold = entry.maxAge / 2;
       if (delta < threshold) {
-        cache.touch(key); // Do not wait
+        await cache.touch(key, Date.now() + entry.maxAge); // Do not wait
       }
     }
 

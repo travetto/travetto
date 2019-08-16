@@ -116,8 +116,8 @@ abstract class CacheTestSuite {
     assert(diff > 75);
     assert(res === 30);
 
-    for (let i = 0; i < 3; i += 1) {
-      await wait(50);
+    for (let i = 0; i < 2; i += 1) {
+      await wait(55);
 
       start = Date.now();
       res = await this.service.ageExtension(10);
@@ -169,19 +169,21 @@ abstract class CacheTestSuite {
 
   @Test()
   async culling() {
-    await Promise.all(
-      ' '.repeat(100)
-        .split('')
-        .map((x, i) =>
-          this.service.cullable(i)));
+    if (this.service.store instanceof LocalCacheStore) {
+      await Promise.all(
+        ' '.repeat(100)
+          .split('')
+          .map((x, i) =>
+            this.service.cullable(i)));
 
-    const local = this.service.store as LocalCacheStore;
-    assert([...(await local.getAllKeys())].length > 90);
+      const local = this.service.store as LocalCacheStore;
+      assert([...(await local.getAllKeys())].length > 90);
 
-    await wait(1000);
+      await wait(1000);
 
-    await local.cull(true);
-    assert([...(await local.getAllKeys())].length === 0);
+      await local.cull(true);
+      assert([...(await local.getAllKeys())].length === 0);
+    }
   }
 
   @Test()

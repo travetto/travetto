@@ -25,9 +25,13 @@ function toList<T>(items: T | T[] | Set<T> | undefined) {
 
 export class SystemUtil {
 
-  static async toBuffer(src: NodeJS.ReadableStream | Buffer | string) {
+  static async toBuffer(src: NodeJS.ReadableStream | Buffer | string): Promise<Buffer> {
     if (typeof src === 'string') {
-      src = fs.createReadStream(src);
+      if (src.endsWith('==')) {
+        src = Buffer.from(src, 'base64');
+      } else {
+        src = fs.createReadStream(src);
+      }
     }
     if (src instanceof Buffer) {
       return src;
@@ -44,9 +48,13 @@ export class SystemUtil {
     }
   }
 
-  static toReadable(src: NodeJS.ReadableStream | Buffer | string) {
+  static toReadable(src: NodeJS.ReadableStream | Buffer | string): NodeJS.ReadableStream {
     if (typeof src === 'string') {
-      return fs.createReadStream(src);
+      if (src.endsWith('==')) {
+        return this.toReadable(Buffer.from(src, 'base64'));
+      } else {
+        return fs.createReadStream(src);
+      }
     } else if (src instanceof Buffer) {
       const readable = new PassThrough();
       readable.end(src);
