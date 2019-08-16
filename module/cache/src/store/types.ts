@@ -30,8 +30,9 @@ export abstract class CacheStore {
   abstract has(key: string): Promise<boolean> | boolean;
   abstract set(key: string, entry: CacheEntry): Promise<any> | any;
   abstract evict(key: string): Promise<boolean> | boolean;
-  abstract touch(key: string): Promise<boolean> | boolean;
+  abstract touch(key: string, age: number): Promise<boolean> | boolean;
   reset?(): Promise<void> | void;
+  postConstruct?(): Promise<void> | void;
 }
 
 export abstract class LocalCacheStore extends CacheStore {

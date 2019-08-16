@@ -35,7 +35,7 @@ export class MemoryCacheStore extends LocalCacheStore {
     let value = entry.data;
     if (this.isStream(value)) {
       entry.data = (await SystemUtil.toBuffer(value as NodeJS.ReadableStream)).toString('base64');
-      value = SystemUtil.toReadable(Buffer.from(entry.data, 'base64')); // Refill stream
+      value = SystemUtil.toReadable(entry.data); // Refill stream
       entry.stream = true;
     } else {
       entry.data = JSON.stringify(value);
@@ -45,9 +45,8 @@ export class MemoryCacheStore extends LocalCacheStore {
     return value;
   }
 
-  touch(key: string): boolean {
-    const entry = this.store.get(key)!;
-    entry.expiresAt = Date.now() + entry.maxAge!;
+  touch(key: string, expiresAt: number): boolean {
+    this.store.get(key)!.expiresAt = expiresAt;
     return true;
   }
 
