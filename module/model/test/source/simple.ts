@@ -359,4 +359,52 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
     const nameFacet = await svc.facet(Person, 'name');
     assert(Object.keys(names).length === nameFacet.length);
   }
+
+  @Test('Verify array $in queries work properly')
+  async testArrayContains() {
+    const svc = await this.service;
+    const o = await svc.save(SimpleList, SimpleList.from({
+      names: ['a', 'b', 'c']
+    }));
+
+    const o2 = await svc.save(SimpleList, SimpleList.from({
+      names: ['b', 'c', 'd']
+    }));
+
+    const single = await svc.getAllByQuery(SimpleList, {
+      where: {
+        names: {
+          $in: ['a']
+        }
+      }
+    });
+    assert(single.length === 1);
+
+    const multi = await svc.getAllByQuery(SimpleList, {
+      where: {
+        names: {
+          $in: ['a', 'd']
+        }
+      }
+    });
+    assert(multi.length === 2);
+
+    const multiIntersect = await svc.getAllByQuery(SimpleList, {
+      where: {
+        names: {
+          $in: ['b', 'c']
+        }
+      }
+    });
+    assert(multiIntersect.length === 2);
+
+    const none = await svc.getAllByQuery(SimpleList, {
+      where: {
+        names: {
+          $in: ['z', 'w']
+        }
+      }
+    });
+    assert(none.length === 0);
+  }
 }

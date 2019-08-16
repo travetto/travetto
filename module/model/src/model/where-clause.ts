@@ -43,6 +43,7 @@ type ArrayFieldQuery<T> =
   { $eq?: T | T[] } |
   { $ne?: T | T[] } |
   { $all?: T[]; } |
+  { $in?: T[]; } |
   PropWhereClause<RetainFields<T>> |
   T | T[];
 

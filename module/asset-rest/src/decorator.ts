@@ -14,13 +14,12 @@ ConfigSource.bindTo(globalConf, 'rest.upload');
 
 const extractUpload = (config: ParamConfig, req: Request) => req.files[config.name!];
 
-class UploadAsset implements Asset {
+export class UploadAsset implements Asset {
   stream: NodeJS.ReadableStream;
   size: number;
   path: string;
   contentType: string;
   metadata: AssetMetadata;
-  remove?(): Promise<void> | void;
 }
 
 export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetConfig> = {}) {
