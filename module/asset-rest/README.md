@@ -31,7 +31,8 @@ export class AssetController {
 
   @Get('/:imgPath')
   async getImage(@Path() imgPath: string) {
-    return await this.assetService.get(imgPath);
+    const asset = await this.assetService.get(imgPath);
+    return AssetUtil.downloadable(asset);
   }
 }
 ```
