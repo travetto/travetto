@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { Util, SystemUtil } from '@travetto/base';
 
 export type ValidCacheFields<T> = {
   [K in keyof T]:
@@ -24,6 +24,37 @@ export abstract class CacheStore {
 
   isStream(value: any): value is NodeJS.ReadStream {
     return !Util.isSimple(value) && 'pipe' in value;
+  }
+
+  async prePersist(entry: CacheEntry) {
+    if (this.isStream(entry.data)) {
+      return {
+        ...entry,
+        stream: true,
+        data: (await SystemUtil.toBuffer(entry.data)).toString('base64')
+      };
+    } else {
+      return {
+        ...entry,
+        data: JSON.stringify(entry.data)
+      };
+    }
+  }
+
+  postLoad(entry: CacheEntry): CacheEntry {
+    const data = entry.data;
+    if (entry.stream) {
+      return {
+        ...entry,
+        stream: true,
+        data: SystemUtil.toReadable(data)
+      };
+    } else {
+      return {
+        ...entry,
+        data: data === null || data === undefined ? data : JSON.parse(data)
+      };
+    }
   }
 
   abstract get(key: string): Promise<CacheEntry | undefined> | CacheEntry | undefined;
