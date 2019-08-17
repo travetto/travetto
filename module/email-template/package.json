@@ -9,7 +9,7 @@
   "dependencies": {
     "@travetto/di": "^1.0.0-beta.1",
     "@travetto/email": "^1.0.0-beta.1",
-    "@travetto/image": "^1.0.0-beta.1",
+    "@travetto/image": "^1.0.0-beta.2",
     "@types/html-entities": "^1.2.16",
     "@types/mustache": "^0.8.32",
     "@types/parse5": "^5.0.2",
@@ -47,5 +47,5 @@
     "resources",
     "bin"
   ],
-  "version": "1.0.0-beta.1"
+  "version": "1.0.0-beta.2"
 }
