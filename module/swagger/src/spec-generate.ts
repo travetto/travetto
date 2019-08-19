@@ -147,7 +147,7 @@ export class SpecGenerateUtil {
     if (isEndpointClassType(eType)) {
       const schemaName = this.processSchema(eType.type, state);
       if (schemaName) {
-        const ref: SchemaObject = { $ref: `${DEFINITION}/${schemaName}` };
+        const ref: SchemaObject = this.getType(eType.type, state);
         return {
           content: {
             [MimeType.JSON]: {
