@@ -7,7 +7,7 @@ import { ModelCore } from '../model/core';
 
 export type ValidStringFields<T> = {
   [K in keyof T]:
-  (T[K] extends (String | string | string[] | String[]) ? K : never)
+  (T[K] extends (String | string | string[] | String[] | undefined) ? K : never)
 }[keyof T];
 
 export interface IModelSource {
