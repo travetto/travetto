@@ -4,6 +4,7 @@ import { SystemUtil } from '@travetto/base';
 export interface ImageOptions {
   h?: number;
   w?: number;
+  optimize?: boolean;
 }
 
 type ImageType = NodeJS.ReadableStream | Buffer | string;
@@ -52,7 +53,7 @@ export class ImageUtil {
   static resize(image: Buffer, options: ImageOptions): Promise<Buffer>;
   static resize(image: ImageType, options: ImageOptions): Promise<NodeJS.ReadableStream | Buffer> {
     return this.runCommand(this.converter, image as any,
-      'convert', '-resize', `${options.w || ''}x${options.h || ''}`, '-auto-orient', '-', '-');
+      'convert', '-resize', `${options.w || ''}x${options.h || ''}`, '-auto-orient', ...(options.optimize ? ['-strip', '-quality', '86'] : []), '-', '-');
   }
 
   static optimizePng(image: string | NodeJS.ReadableStream): Promise<NodeJS.ReadableStream>;
