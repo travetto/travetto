@@ -4,7 +4,7 @@ import { Injectable } from '@travetto/di';
 import { Session } from '../types';
 import { SessionStore } from './store';
 
-@Injectable({ target: MemoryStore })
+@Injectable()
 export class MemoryStore extends SessionStore {
   storage = new Map<string, string>();
 
