@@ -12,7 +12,7 @@ function cleanup() {
 
 if [ "$1" == "start" ]; then
   start_if_missing 5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=password -e POSTGRES_DB=app postgres:11.4-alpine 
-  start_if_missing 3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=app mysql:5.7 
+  start_if_missing 3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=app mysql:5.6 
   start_if_missing 9200 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.8.2
   start_if_missing 6379 redis:5-alpine
   start_if_missing 27017 mongo:3.6
