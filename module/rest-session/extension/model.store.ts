@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
-import { ModelService, Model } from '@travetto/model';
+import { Text, ModelService, Model } from '@travetto/model';
 
 import { Session, SessionStore } from '..';
 
@@ -11,6 +11,7 @@ export class SessionModel {
   signature?: string;
   issuedAt: Date;
   data?: any;
+  @Text()
   dataSerialized?: string;
 }
 
@@ -30,17 +31,18 @@ export class ModelStore extends SessionStore {
       const out = res[0];
       if (out.dataSerialized && !out.data) {
         try {
-          out.data = JSON.parse(out.dataSerialized);
-        } catch (e) { }
+          out.data = JSON.parse(Buffer.from(out.dataSerialized, 'base64').toString('utf8'));
+        } catch { }
       }
       if (out.data) {
         return new Session(out);
       }
     }
   }
+
   async store(sess: Session) {
     const data = SessionModel.from(sess);
-    data.dataSerialized = JSON.stringify(data.data);
+    data.dataSerialized = Buffer.from(JSON.stringify(data.data), 'utf8').toString('base64');
     delete data.data;
     await this.modelService.saveOrUpdate(SessionModel, data, { where: { id: data.id }, keepId: true });
   }
