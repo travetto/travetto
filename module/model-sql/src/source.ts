@@ -68,7 +68,7 @@ export class SQLModelSource extends ModelSource {
         try {
           await WithTransaction(this, 'isolated', this.exec, [op]);
         } catch (e) {
-          if (!/\bexists\b/i.test(e.message)) {
+          if (!/\bexists|duplicate\b/i.test(e.message)) {
             throw e;
           }
         }
