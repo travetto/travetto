@@ -13,6 +13,10 @@ export class S3AssetConfig {
 
   config: aws.S3.ClientConfiguration;
 
+  get hostName() {
+    return `${this.bucket}.s3.amazonaws.com`;
+  }
+
   postConstruct() {
     if (!this.accessKeyId && !this.secretAccessKey) {
       const creds = new aws.SharedIniFileCredentials({ profile: process.env.AWS_PROFILE });
