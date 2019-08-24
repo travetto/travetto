@@ -40,6 +40,9 @@ export class $ApplicationRegistry {
     if (inst.run) {
       await inst.run(...args);
     }
+    if (!config.watchable) {
+      setTimeout(() => process.exit(0), 10).unref(); // Kill if not already dead
+    }
   }
 
   onReset() {
