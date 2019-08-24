@@ -33,6 +33,8 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
 
 export abstract class SQLDialect implements DialectState {
   KEY_LEN = 64;
+  DEFAULT_STRING_LEN = 1024;
+
   SQL_OPS = {
     $and: 'AND',
     $or: 'OR',
@@ -177,7 +179,7 @@ export abstract class SQLDialect implements DialectState {
       if (conf.specifier && conf.specifier.startsWith('text')) {
         type = this.COLUMN_TYPES.TEXT;
       } else {
-        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(conf.maxlength ? conf.maxlength.n : 1024);
+        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(conf.maxlength ? conf.maxlength.n : this.DEFAULT_STRING_LEN);
       }
     } else if (conf.type === Object) {
       type = this.COLUMN_TYPES.JSON;

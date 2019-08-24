@@ -31,6 +31,10 @@ export class MySQLDialect extends SQLDialect {
 
     this.regexWordBoundary = '([[:<:]]|[[:>:]])';
     this.idField.minlength = this.idField.maxlength = { n: this.KEY_LEN };
+
+    if (/^5[.][56]/.test(this.config.version)) {
+      this.DEFAULT_STRING_LEN = 191; // Mysql limitation with utf8 and keys
+    }
   }
 
   hash(value: string) {
