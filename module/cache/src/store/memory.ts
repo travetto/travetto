@@ -1,10 +1,11 @@
-import { CacheEntry, LocalCacheStore } from './types';
+import { CullableCacheStore } from './types';
+import { CacheEntry } from '../types';
 
-export class MemoryCacheStore extends LocalCacheStore {
+export class MemoryCacheStore<T extends CacheEntry = CacheEntry> extends CullableCacheStore<T> {
 
-  store = new Map<string, CacheEntry>();
+  store = new Map<string, T>();
 
-  reset() {
+  clear() {
     this.store.clear();
   }
 
@@ -12,16 +13,20 @@ export class MemoryCacheStore extends LocalCacheStore {
     return this.store.has(key);
   }
 
-  get(key: string): CacheEntry | undefined {
-    const entry = this.store.get(key)! as CacheEntry;
-    return entry && this.postLoad(entry);
+  get(key: string): T | undefined {
+    const entry = this.store.get(key);
+    if (entry) {
+      return this.postLoad(entry);
+    }
   }
 
-  async set(key: string, entry: CacheEntry): Promise<void> {
+  async set(key: string, entry: T): Promise<void> {
     this.cull();
 
     entry = await this.prePersist(entry);
+
     this.store.set(key, entry);
+
     return this.postLoad(entry).data;
   }
 
@@ -30,11 +35,11 @@ export class MemoryCacheStore extends LocalCacheStore {
     return true;
   }
 
-  evict(key: string): boolean {
+  delete(key: string): boolean {
     return this.store.delete(key);
   }
 
-  getAllKeys() {
+  keys() {
     return this.store.keys();
   }
 

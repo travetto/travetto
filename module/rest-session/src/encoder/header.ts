@@ -13,7 +13,7 @@ export class HeaderEncoder extends SessionEncoder {
 
   async encode(req: Request, res: Response, session: Session<any> | null): Promise<void> {
     if (session) {
-      res.setHeader(this.config.keyName, session.id!);
+      res.setHeader(this.config.keyName, session.key!);
     }
     return;
   }

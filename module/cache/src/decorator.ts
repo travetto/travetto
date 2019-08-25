@@ -1,22 +1,14 @@
-import { SystemUtil } from '@travetto/base';
+import * as crypto from 'crypto';
 
 import { ValidCacheFields, CacheStore } from './store/types';
-import { CacheManager } from './service';
 import { CoreCacheConfig, CacheConfig } from './types';
 
 type TypedMethodDecorator<T, U> = (target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => U>) => void;
 
 function generateKey(cache: CacheStore, config: CoreCacheConfig, params: any[]) {
   const input = config.params ? config.params(params) : params;
-  let finalKey: string;
-
-  if (config.key) {
-    finalKey = config.key(...input);
-  } else {
-    const key = cache.computeKey(...input);
-    finalKey = `${key.substring(0, 100)}:${SystemUtil.naiveHash(key)}`;
-  }
-  return Buffer.from(`${config.keySpace}:${finalKey}`, 'utf8').toString('base64').replace(/=+$/, '');
+  const keyParams = config.key ? config.key(...input) : input;
+  return cache.computeKey(keyParams);
 }
 
 function initConfig(config: CoreCacheConfig, target: any, fn: Function) {
@@ -34,11 +26,11 @@ export function Cache<U extends any>(field: ValidCacheFields<U>, config: CacheCo
       const cache = this[field] as any as CacheStore;
       const key = generateKey(cache, config, params);
 
-      let res = await CacheManager.getOptional(cache, config, key);
+      let res = await cache.getOptional(config, key);
 
       if (res === undefined) {
-        const val = await og.apply(this, params);
-        res = await CacheManager.set(cache, config, key, val);
+        const data = await og.apply(this, params);
+        res = await cache.setWithAge(config, { key, data });
       }
 
       if (config.transform) {
@@ -61,7 +53,7 @@ export function EvictCache<U extends any>(field: ValidCacheFields<U>, config: Co
       const key = generateKey(cache, config, params);
 
       const val = await og.apply(this, params);
-      await CacheManager.evict(cache, key);
+      await cache.delete(key);
       return val;
     };
     Object.defineProperty(descriptor.value, 'name', { value: propertyKey });

@@ -12,4 +12,14 @@ export interface CacheConfig extends CoreCacheConfig {
   extendOnAccess?: boolean;
 }
 
+export interface CacheEntry {
+  key: string;
+  maxAge?: number;
+  expiresAt?: number;
+  stream?: boolean;
+  issuedAt: number;
+  data: any;
+  extendOnAccess?: boolean;
+}
+
 export class CacheError extends AppError { }
