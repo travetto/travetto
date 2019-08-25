@@ -1,5 +1,6 @@
 import { SystemUtil } from '@travetto/base';
 import { ContextProvider } from '@travetto/rest';
+import { CacheEntry } from '@travetto/cache';
 
 @ContextProvider((c, req) => req!.session.data)
 export class SessionData {
@@ -7,38 +8,29 @@ export class SessionData {
 }
 
 @ContextProvider((c, req) => req!.session)
-export class Session<T = any> {
-  private expiresAtLoaded: Date | undefined;
+export class Session<T = any> implements CacheEntry {
+  private expiresAtLoaded: number | undefined;
   private hash: number;
 
-  readonly id?: string;
-
+  readonly key: string;
   readonly maxAge?: number;
   readonly signature?: string;
-  readonly issuedAt: Date;
+  readonly issuedAt: number;
 
-  expiresAt: Date | undefined;
+  expiresAt: number | undefined;
   action?: 'create' | 'destroy' | 'modify';
   data: T;
 
   constructor(data: Partial<Session>) {
-    this.issuedAt = new Date();
+    this.issuedAt = Date.now();
 
     // Overwrite with data
     Object.assign(this, data);
 
-    if (this.expiresAt && !(this.expiresAt instanceof Date)) {
-      this.expiresAt = new Date(this.expiresAt as any);
-    }
-
-    if (!(this.issuedAt instanceof Date)) {
-      this.issuedAt = new Date(this.issuedAt);
-    }
-
-    this.expiresAtLoaded = this.expiresAt || new Date();
+    this.expiresAtLoaded = this.expiresAt || Date.now();
 
     if (this.maxAge && !this.expiresAt) {
-      this.expiresAt = new Date(this.maxAge + Date.now());
+      this.expiresAt = this.maxAge + Date.now();
     }
 
     this.hash = SystemUtil.naiveHash(JSON.stringify(this));
@@ -53,16 +45,16 @@ export class Session<T = any> {
   }
 
   isAlmostExpired() {
-    return (!!this.maxAge && (this.expiresAt!.getTime() - Date.now()) < this.maxAge / 2);
+    return (!!this.maxAge && (this.expiresAt! - Date.now()) < this.maxAge / 2);
   }
 
   isExpired() {
-    return this.expiresAt && this.expiresAt.getTime() < Date.now();
+    return this.expiresAt && this.expiresAt < Date.now();
   }
 
   refresh() {
     if (this.maxAge) {
-      this.expiresAt = new Date(this.maxAge + Date.now());
+      this.expiresAt = this.maxAge + Date.now();
     }
   }
 
@@ -73,7 +65,7 @@ export class Session<T = any> {
 
   toJSON() {
     return {
-      id: this.id,
+      key: this.key,
       signature: this.signature,
       expiresAt: this.expiresAt,
       maxAge: this.maxAge,

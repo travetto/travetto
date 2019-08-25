@@ -1,14 +1,17 @@
 import { RestApp, Application, Controller, Get, Context } from '@travetto/rest';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { ModelStore } from '../../extension/model.store';
-import { SessionStore } from '../../src/store/store';
+import { CacheStore } from '@travetto/cache';
+import { ModelCacheStore } from '@travetto/cache/extension/model.store';
+
 import { SessionData, Session } from '../../src/types';
+import { SESSION_CACHE } from '../../src/service';
 
 @Application('e2e')
 export class App {
-  @InjectableFactory()
-  static getSessionStore(): SessionStore {
-    return new ModelStore();
+
+  @InjectableFactory(SESSION_CACHE)
+  static getSessionStore(): CacheStore {
+    return new ModelCacheStore();
   }
 
   @Inject()

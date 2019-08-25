@@ -5,7 +5,9 @@ import * as util from 'util';
 import { FsUtil } from '@travetto/boot';
 import { SystemUtil, Shutdown, Util } from '@travetto/base';
 
-import { CacheEntry, LocalCacheStore } from './types';
+import { CullableCacheStore } from './types';
+import { CacheEntry } from '../types';
+import { CacheStoreUtil } from './util';
 
 const fsStat = util.promisify(fs.stat);
 const fsReaddir = util.promisify(fs.readdir);
@@ -14,17 +16,17 @@ const fsWrite = util.promisify(fs.writeFile);
 const fsUpdateTime = util.promisify(fs.utimes);
 const fsUnlink = util.promisify(fs.unlink);
 
-export class FileCacheStore extends LocalCacheStore {
+export class FileCacheStore<T extends CacheEntry = CacheEntry> extends CullableCacheStore<T> {
 
   folder = FsUtil.resolveUnix(os.tmpdir(), Util.uuid(6));
 
   constructor() {
     super();
-    Shutdown.onShutdown(`FileCache.${this.folder}`, () => this.reset());
+    Shutdown.onShutdown(`FileCache.${this.folder}`, () => this.clear());
     fs.mkdirSync(this.folder);
   }
 
-  reset() {
+  clear() {
     FsUtil.unlinkRecursiveSync(this.folder, true);
   }
 
@@ -41,11 +43,11 @@ export class FileCacheStore extends LocalCacheStore {
     }
   }
 
-  async get(key: string): Promise<CacheEntry | undefined> {
+  async get(key: string): Promise<T | undefined> {
     try {
       const pth = this.getPath(key);
       const value = await fsRead(pth, 'utf8');
-      const entry = JSON.parse(value) as CacheEntry;
+      const entry = CacheStoreUtil.readAsSafeJSON(value) as T;
 
       if (entry.stream) {
         entry.data = fs.createReadStream(entry.data); // Convert to stream
@@ -62,14 +64,14 @@ export class FileCacheStore extends LocalCacheStore {
 
     const pth = this.getPath(key);
     let value = entry.data;
-    if (this.isStream(value)) {
+    if (CacheStoreUtil.isStream(value)) {
       const streamed = `${pth}.stream`;
       entry.stream = true;
       entry.data = streamed;
       await SystemUtil.streamToFile(value as NodeJS.ReadableStream, streamed);
       value = fs.createReadStream(streamed);
     }
-    await fsWrite(pth, JSON.stringify(entry), 'utf8');
+    await fsWrite(pth, CacheStoreUtil.storeAsSafeJSON(entry), 'utf8');
 
     if (entry.maxAge) {
       await this.touch(pth, entry.expiresAt!);
@@ -78,7 +80,7 @@ export class FileCacheStore extends LocalCacheStore {
     return value;
   }
 
-  async evict(key: string): Promise<boolean> {
+  async delete(key: string): Promise<boolean> {
     try {
       await fsUnlink(this.getPath(key));
       return true;
@@ -98,7 +100,7 @@ export class FileCacheStore extends LocalCacheStore {
     return false;
   }
 
-  async getAllKeys() {
+  async keys() {
     return fsReaddir(this.folder);
   }
 
@@ -106,10 +108,9 @@ export class FileCacheStore extends LocalCacheStore {
     const pth = FsUtil.resolveUnix(this.folder, key);
     const stat = await fsStat(pth);
     if (stat.mtimeMs !== stat.birthtimeMs) { // If it has been touched at least once
-      const contents = await fsRead(pth, 'utf8');
+      const entry = await this.get(key);
       try {
-        const data = JSON.parse(contents);
-        if (data.expiresAt < Date.now()) {
+        if (entry && entry.expiresAt && entry.expiresAt < Date.now()) {
           return true;
         }
       } catch {

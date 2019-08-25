@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 
-import { Test } from '@travetto/test';
+import { Suite as TestSuite, Test, TestRegistry } from '@travetto/test';
 
 import { Cache, EvictCache } from '../src/decorator';
 import { CacheSuite as Suite } from './decorator';
-import { CacheStore, LocalCacheStore } from '../src/store/types';
+import { CacheStore, CullableCacheStore } from '../src/store/types';
 import { SystemUtil } from '@travetto/base';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
@@ -71,10 +71,11 @@ class CachingService {
   }
 }
 
-@Suite()
-abstract class CacheTestSuite {
+export abstract class CacheTestSuite {
 
   service = new CachingService();
+
+  baseLatency = 10;
 
   @Test()
   async basic() {
@@ -87,7 +88,7 @@ abstract class CacheTestSuite {
     start = Date.now();
     res = await this.service.basic(10);
     diff = Date.now() - start;
-    assert(diff < 105);
+    assert(diff < (100 + this.baseLatency));
     assert(res === 20);
   }
 
@@ -122,7 +123,7 @@ abstract class CacheTestSuite {
       start = Date.now();
       res = await this.service.ageExtension(10);
       diff = Date.now() - start;
-      assert(diff < 10);
+      assert(diff < this.baseLatency);
       assert(res === 30);
     }
 
@@ -169,20 +170,20 @@ abstract class CacheTestSuite {
 
   @Test()
   async culling() {
-    if (this.service.store instanceof LocalCacheStore) {
+    if (this.service.store instanceof CullableCacheStore) {
       await Promise.all(
         ' '.repeat(100)
           .split('')
           .map((x, i) =>
             this.service.cullable(i)));
 
-      const local = this.service.store as LocalCacheStore;
-      assert([...(await local.getAllKeys())].length > 90);
+      const local = this.service.store as CullableCacheStore;
+      assert([...(await local.keys())].length > 90);
 
       await wait(1000);
 
       await local.cull(true);
-      assert([...(await local.getAllKeys())].length === 0);
+      assert([...(await local.keys())].length === 0);
     }
   }
 
@@ -191,11 +192,17 @@ abstract class CacheTestSuite {
     const user = await this.service.getUser('200');
     const start = Date.now();
     const user2 = await this.service.getUser('200');
-    assert((Date.now() - start) <= 10);
+    assert((Date.now() - start) <= this.baseLatency);
 
     await this.service.deleteUser('200');
     const start2 = Date.now();
     const user3 = await this.service.getUser('200');
-    assert((Date.now() - start2) >= 100);
+    assert((Date.now() - start2) >= this.baseLatency);
   }
+}
+
+@Suite()
+@TestSuite()
+export abstract class FullCacheSuite extends CacheTestSuite {
+
 }

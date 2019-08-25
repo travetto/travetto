@@ -66,3 +66,84 @@ Additionally, there is support for planned eviction via the `@EvictCache` decora
     }
   }
 ```
+
+
+## Building a Custom Store
+The module comes with a [`MemoryCacheStore`](./src/store/memory.ts) and a [`FileCacheStore`](./src/store/file.ts). The module also has extension for a [`Redis`] store and [`Model`](https://github.com/travetto/travetto/tree/master/module/model)-backed store.  
+
+**Code: Primary Store structure**
+```typescript
+export abstract class CacheStore {
+  abstract get(key: string): Promise<CacheEntry | undefined> | CacheEntry | undefined;
+  abstract has(key: string): Promise<boolean> | boolean;
+  abstract set(key: string, entry: CacheEntry): Promise<any> | any;
+  abstract delete(key: string): Promise<boolean> | boolean;
+
+  abstract isExpired(key: string): Promise<boolean> | boolean;
+  abstract touch(key: string, expiresAt: number): Promise<boolean> | boolean;
+  abstract keys(): Promise<Iterable<string>> | Iterable<string>;
+
+  clear?(): Promise<void> | void;
+
+  postConstruct?(): Promise<void> | void;
+}
+```
+
+For the store, all abstract methods must be implemented. All of the more complex logic is implemented in other methods within the base `CacheStore`.   The structure follows that of the javascript `Map` class for consistency. All that is needed is basic input/output support:
+
+* `get(key: string)` - Fetch entry from store, and return in the structure of an entry, ready to go
+* `has(key: string)` - Indicates whether or not the key exists
+* `set(key: string, entry: CacheEntry)` - Stores entry, given `key`.  
+* `delete(key: string)` - Removes entry by key
+* `isExpired(key: string)` - Determines if entry is expired
+* `touch(key: string, expiresAt: number)` - Updates expiry information to date provided
+* `keys()` - Returns list of all keys in the store
+
+Additionally, for setting/getting the burden is on the store author to properly serialize/deserialize as needed.  This is a low level detail and cannot be accounted for in a generic way.
+
+**Code: MemoryStore**
+```typescript
+export class MemoryCacheStore extends CacheStore {
+tore = new Map<string, T>();
+
+  clear() { this.store.clear(); }
+
+  keys() { return this.store.keys(); }
+
+  has(key: string) { return this.store.has(key); }
+
+  delete(key: string){ return this.store.delete(key); }
+
+  get(key: string): T | undefined {
+    const entry = this.store.get(key);
+    if (entry) {
+      return this.postLoad(entry);
+    }
+  }
+
+  async set(key: string, entry: T): Promise<void> {
+    this.cull();
+
+    entry = await this.prePersist(entry);
+
+    this.store.set(key, entry);
+
+    return this.postLoad(entry).data;
+  }
+
+  touch(key: string, expiresAt: number): boolean {
+    this.store.get(key)!.expiresAt = expiresAt;
+    return true;
+  }
+
+  isExpired(key: string) {
+    const entry = this.store.get(key);
+    if (entry) {
+      return !!entry.maxAge && entry.expiresAt! < Date.now();
+    }
+    return false;
+  }
+}
+```
+
+The memory store is simple but illustrates the structure well.

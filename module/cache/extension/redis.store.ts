@@ -1,6 +1,7 @@
 import * as redis from 'redis';
 
-import { CacheStore, CacheEntry } from '../src/store/types';
+import { CacheStore } from '../src/store/types';
+import { CacheEntry } from '../src/types';
 
 export class RedisCacheStore extends CacheStore {
 
@@ -15,7 +16,7 @@ export class RedisCacheStore extends CacheStore {
   }
 
   toPromise<V>(fn: (cb: redis.Callback<V>) => void): Promise<V> {
-    return new Promise((res, rej) => fn((err: Error | undefined, v: V) => err ? rej(err) : res(v)));
+    return new Promise((res, rej) => fn((err: Error | undefined | null, v: V) => err ? rej(err) : res(v)));
   }
 
   async get(key: string): Promise<CacheEntry | undefined> {
@@ -39,15 +40,23 @@ export class RedisCacheStore extends CacheStore {
     return this.postLoad(entry).data;
   }
 
-  async evict(key: string): Promise<boolean> {
+  async delete(key: string): Promise<boolean> {
     return !!(await this.toPromise(this.cl.del.bind(this.cl, key)));
+  }
+
+  async isExpired(key: string) {
+    return !(await this.has(key));
   }
 
   async touch(key: string, expiresAt: number): Promise<boolean> {
     return !!(await this.toPromise(this.cl.pexpireat.bind(this.cl, key, expiresAt)));
   }
 
-  async reset() {
+  async clear() {
     await this.toPromise(this.cl.flushall.bind(this.cl));
+  }
+
+  async keys() {
+    return await this.toPromise(this.cl.keys.bind(this.cl, '*'));
   }
 }
