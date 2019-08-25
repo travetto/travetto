@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/rest": "^1.0.0-beta.2",
-    "@travetto/cache": "^1.0.0-beta.1"
+    "@travetto/cache": "^1.0.0-beta.2",
+    "@travetto/rest": "^1.0.0-beta.3"
   },
   "devDependencies": {
     "@travetto/test": "^1.0.0-beta.1"
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-beta.2"
+  "version": "1.0.0-beta.3"
 }
