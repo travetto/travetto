@@ -86,7 +86,7 @@ export class S3AssetSource extends AssetSource {
   async info(filename: string): Promise<Asset> {
     const query = this.q(filename);
     const [obj, tags] = await Promise.all([
-      this.client.getObject(query).promise(),
+      this.client.headObject(query).promise(),
       this.client.getObjectTagging(query).promise()
     ]);
     return {
