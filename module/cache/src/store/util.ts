@@ -1,12 +1,8 @@
 import * as crypto from 'crypto';
 
-import { SystemUtil, Util } from '@travetto/base';
-import { CacheEntry } from '../types';
+import { Util } from '@travetto/base';
 
 export class CacheStoreUtil {
-  static isStream(value: any): value is NodeJS.ReadStream {
-    return value && !Util.isSimple(value) && 'pipe' in value;
-  }
 
   static computeKey(params: any) {
     const value = this.storeAsSafeJSON(params, true);
@@ -14,6 +10,10 @@ export class CacheStoreUtil {
   }
 
   static storeAsSafeJSON(value: any, all = false) {
+    if (value === null || value === undefined) {
+      return value;
+    }
+
     const replacer = all ? (key: string, val: any) => {
       return val instanceof RegExp ? val.source : Util.isFunction(val) ? val.source : val;
     } : undefined;
@@ -22,37 +22,6 @@ export class CacheStoreUtil {
   }
 
   static readAsSafeJSON(value: string) {
-    return JSON.parse(Buffer.from(value, 'base64').toString('utf8'));
-  }
-
-  static deserialize<T extends CacheEntry = CacheEntry>(entry: T): T {
-    const data = entry.data;
-    if (entry.stream) {
-      return {
-        ...entry,
-        stream: true,
-        data: SystemUtil.toReadable(data)
-      };
-    } else {
-      return {
-        ...entry,
-        data: data === null || data === undefined ? data : this.readAsSafeJSON(data)
-      };
-    }
-  }
-
-  static async serialize<T extends CacheEntry = CacheEntry>(entry: T): Promise<T> {
-    if (this.isStream(entry.data)) {
-      return {
-        ...entry,
-        stream: true,
-        data: (await SystemUtil.toBuffer(entry.data)).toString('base64')
-      };
-    } else {
-      return {
-        ...entry,
-        data: this.storeAsSafeJSON(entry.data)
-      };
-    }
+    return value ? JSON.parse(Buffer.from(value, 'base64').toString('utf8')) : value;
   }
 }

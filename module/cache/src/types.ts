@@ -8,7 +8,8 @@ export interface CoreCacheConfig {
 
 export interface CacheConfig extends CoreCacheConfig {
   maxAge?: number;
-  transform?: (output: any) => any;
+  serialize?: (output: any) => string;
+  deserialize?: (input: string) => any;
   extendOnAccess?: boolean;
 }
 

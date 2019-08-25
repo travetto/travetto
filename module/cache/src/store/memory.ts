@@ -1,9 +1,10 @@
 import { CullableCacheStore } from './types';
 import { CacheEntry } from '../types';
+import { CacheStoreUtil } from './util';
 
 export class MemoryCacheStore<T extends CacheEntry = CacheEntry> extends CullableCacheStore<T> {
 
-  store = new Map<string, T>();
+  store = new Map<string, { expiresAt?: number, entry: string }>();
 
   clear() {
     this.store.clear();
@@ -16,18 +17,21 @@ export class MemoryCacheStore<T extends CacheEntry = CacheEntry> extends Cullabl
   get(key: string): T | undefined {
     const entry = this.store.get(key);
     if (entry) {
-      return this.postLoad(entry);
+      return {
+        ...CacheStoreUtil.readAsSafeJSON(entry.entry),
+        expiresAt: entry.expiresAt
+      };
     }
   }
 
-  async set(key: string, entry: T): Promise<void> {
+  async set(key: string, entry: T): Promise<any> {
     this.cull();
 
-    entry = await this.prePersist(entry);
+    const cloned = CacheStoreUtil.storeAsSafeJSON(entry);
 
-    this.store.set(key, entry);
+    this.store.set(key, { entry: cloned, expiresAt: entry.expiresAt });
 
-    return this.postLoad(entry).data;
+    return CacheStoreUtil.readAsSafeJSON(cloned);
   }
 
   touch(key: string, expiresAt: number): boolean {
@@ -46,7 +50,7 @@ export class MemoryCacheStore<T extends CacheEntry = CacheEntry> extends Cullabl
   isExpired(key: string) {
     const entry = this.store.get(key);
     if (entry) {
-      return !!entry.maxAge && entry.expiresAt! < Date.now();
+      return !!entry.expiresAt && entry.expiresAt! < Date.now();
     }
     return false;
   }
