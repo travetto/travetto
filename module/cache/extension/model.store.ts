@@ -1,5 +1,5 @@
 import { ModelService, Model } from '@travetto/model';
-import { Text } from '@travetto/schema';
+import { Text, Precision } from '@travetto/schema';
 
 import { CullableCacheStore } from '../src/store/types';
 import { CacheEntry } from '../src/types';
@@ -9,6 +9,7 @@ import { CacheStoreUtil } from '../src/store/util';
 export class CacheModel {
   id?: string;
   key: string;
+  @Precision(20, 0)
   expiresAt?: number;
   @Text()
   entry: string;
@@ -21,8 +22,11 @@ export class ModelCacheStore extends CullableCacheStore {
   }
 
   async get(key: string) {
-    const model = await this.modelService.getByQuery(CacheModel, { where: { key } });
-    return { ...CacheStoreUtil.readAsSafeJSON(model.entry), expiresAt: model.expiresAt };
+    const models = await this.modelService.getAllByQuery(CacheModel, { where: { key } });
+    if (models.length) {
+      const [model] = models;
+      return { ...CacheStoreUtil.readAsSafeJSON(model.entry), expiresAt: model.expiresAt };
+    }
   }
 
   async set(key: string, entry: CacheEntry) {
