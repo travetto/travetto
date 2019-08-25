@@ -2,6 +2,7 @@ import * as redis from 'redis';
 
 import { CacheStore } from '../src/store/types';
 import { CacheEntry } from '../src/types';
+import { CacheStoreUtil } from '../src/store/util';
 
 export class RedisCacheStore extends CacheStore {
 
@@ -21,7 +22,10 @@ export class RedisCacheStore extends CacheStore {
 
   async get(key: string): Promise<CacheEntry | undefined> {
     const val: any = await this.toPromise(this.cl.get.bind(this.cl, key));
-    return val && this.postLoad(JSON.parse(val));
+    if (val) {
+      const ret = CacheStoreUtil.readAsSafeJSON(val);
+      return { ...ret, expiresAt: ret.maxAge ? ret.maxAge + Date.now() : undefined };
+    }
   }
 
   async has(key: string): Promise<boolean> {
@@ -29,15 +33,15 @@ export class RedisCacheStore extends CacheStore {
   }
 
   async set(key: string, entry: CacheEntry): Promise<any> {
-    entry = await this.prePersist(entry);
+    const cloned = CacheStoreUtil.storeAsSafeJSON(entry);
 
-    await this.toPromise(this.cl.setnx.bind(this.cl, key, JSON.stringify(entry)));
+    await this.toPromise(this.cl.setnx.bind(this.cl, key, cloned));
 
     if (entry.maxAge) {
       await this.touch(key, entry.maxAge + Date.now());
     }
 
-    return this.postLoad(entry).data;
+    return CacheStoreUtil.readAsSafeJSON(cloned);
   }
 
   async delete(key: string): Promise<boolean> {

@@ -9,7 +9,7 @@ $ npm install @travetto/cache
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di).  The code aims to handle use cases surrounding common/basic usage.
 
 ## Decorators
-The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into JSON, or are a node Readable stream.  Any other data types are not currently supported and would require manual usage of the caching services directly.
+The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into JSON.  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.
 
 Additionally, to use the decorators you will need to have a [`CacheStore`](./src/store/types.ts) object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.
 
@@ -38,7 +38,8 @@ The `@Cache` decorator supports configurations on:
   * `params` the function used to determine the inputs for computing the cache key.  This is an easier place to start to define what parameters are important in caching. This defaults to all inputs.
   * `maxAge` the number of milliseconds will hold the value before considering the cache entry to be invalid.  By default values will live infinitely.
   * `extendOnAccess` determines if the cache timeout should be extended on access.  This only applies to cache values that have specified a `maxAge`.
-  * `transform` the function to execute on return of a cached value.  This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.).  This method should not be used often, as the return values of the methods should naturally serialize to/from `JSON` and the values should be usable either way.
+  * `serialize` the function to execute before storing a cacheable value.  This allows for any custom data modification needed to persist as a string properly. 
+  * `deserialize` the function to execute on return of a cached value.  This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.).  This method should not be used often, as the return values of the methods should naturally serialize to/from `JSON` and the values should be usable either way.
 
 ### @EvictCache
 
@@ -76,7 +77,7 @@ The module comes with a [`MemoryCacheStore`](./src/store/memory.ts) and a [`File
 export abstract class CacheStore {
   abstract get(key: string): Promise<CacheEntry | undefined> | CacheEntry | undefined;
   abstract has(key: string): Promise<boolean> | boolean;
-  abstract set(key: string, entry: CacheEntry): Promise<any> | any;
+  abstract set(key: string, entry: CacheEntry): Promise<CacheEntry> | CacheEntry;
   abstract delete(key: string): Promise<boolean> | boolean;
 
   abstract isExpired(key: string): Promise<boolean> | boolean;

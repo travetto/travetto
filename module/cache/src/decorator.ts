@@ -1,5 +1,3 @@
-import * as crypto from 'crypto';
-
 import { ValidCacheFields, CacheStore } from './store/types';
 import { CoreCacheConfig, CacheConfig } from './types';
 
@@ -29,12 +27,15 @@ export function Cache<U extends any>(field: ValidCacheFields<U>, config: CacheCo
       let res = await cache.getOptional(config, key);
 
       if (res === undefined) {
-        const data = await og.apply(this, params);
-        res = await cache.setWithAge(config, { key, data });
+        let data = await og.apply(this, params);
+        if (config.serialize) {
+          data = config.serialize(data);
+        }
+        res = (await cache.setWithAge(config, { key, data })).data;
       }
 
-      if (config.transform) {
-        res = config.transform(res);
+      if (config.deserialize) {
+        res = config.deserialize(res);
       }
 
       return res;

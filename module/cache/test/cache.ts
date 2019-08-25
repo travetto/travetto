@@ -1,11 +1,10 @@
 import * as assert from 'assert';
 
-import { Suite as TestSuite, Test, TestRegistry } from '@travetto/test';
+import { Suite as TestSuite, Test } from '@travetto/test';
 
 import { Cache, EvictCache } from '../src/decorator';
 import { CacheSuite as Suite } from './decorator';
 import { CacheStore, CullableCacheStore } from '../src/store/types';
-import { SystemUtil } from '@travetto/base';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
@@ -46,12 +45,6 @@ class CachingService {
   async customKey(config: any, size: number) {
     await wait(100);
     return { length: Object.keys(config).length, size };
-  }
-
-  @Cache('store')
-  async getStream(value: string) {
-    const stream = Buffer.concat([Buffer.from(value), Buffer.from(value)]);
-    return SystemUtil.toReadable(stream);
   }
 
   @Cache('store', { keySpace: 'user.id' })
@@ -158,14 +151,6 @@ export abstract class CacheTestSuite {
 
     const val6 = await this.service.customKey({ a: 5, b: 100 }, 50);
     assert.deepStrictEqual(val4, val6);
-  }
-
-  @Test()
-  async streaming() {
-    const strm = await this.service.getStream('00001111');
-    assert('pipe' in strm);
-    const ret = (await SystemUtil.toBuffer(strm));
-    assert(ret.toString('utf8') === '00001111'.repeat(2));
   }
 
   @Test()

@@ -10,7 +10,7 @@ export abstract class CacheStore<T extends CacheEntry = CacheEntry> {
 
   abstract get(key: string): Promise<T | undefined> | T | undefined;
   abstract has(key: string): Promise<boolean> | boolean;
-  abstract set(key: string, entry: T): Promise<any> | any;
+  abstract set(key: string, entry: T): Promise<CacheEntry> | CacheEntry;
 
   abstract isExpired(key: string): Promise<boolean> | boolean;
   abstract touch(key: string, expiresAt: number): Promise<boolean> | boolean;
@@ -23,14 +23,6 @@ export abstract class CacheStore<T extends CacheEntry = CacheEntry> {
 
   computeKey(params: any) {
     return CacheStoreUtil.computeKey(params);
-  }
-
-  prePersist(entry: T) {
-    return CacheStoreUtil.serialize(entry);
-  }
-
-  postLoad(entry: T): T {
-    return CacheStoreUtil.deserialize(entry);
   }
 
   async getAndCheckAge(config: CacheConfig, key: string): Promise<any> {
@@ -56,7 +48,7 @@ export abstract class CacheStore<T extends CacheEntry = CacheEntry> {
     return entry.data;
   }
 
-  setWithAge(config: CacheConfig, entry: Partial<T> & { data: any, key: string }): Promise<void> | void {
+  setWithAge(config: CacheConfig, entry: Partial<T> & { data: any, key: string }): Promise<CacheEntry> | CacheEntry {
     return this.set(entry.key, {
       ...entry,
       issuedAt: Date.now(),

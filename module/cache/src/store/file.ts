@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { FsUtil } from '@travetto/boot';
-import { SystemUtil, Shutdown, Util } from '@travetto/base';
+import { Shutdown, Util } from '@travetto/base';
 
 import { CullableCacheStore } from './types';
 import { CacheEntry } from '../types';
@@ -47,37 +47,26 @@ export class FileCacheStore<T extends CacheEntry = CacheEntry> extends CullableC
     try {
       const pth = this.getPath(key);
       const value = await fsRead(pth, 'utf8');
-      const entry = CacheStoreUtil.readAsSafeJSON(value) as T;
-
-      if (entry.stream) {
-        entry.data = fs.createReadStream(entry.data); // Convert to stream
-      }
-
-      return entry;
+      return CacheStoreUtil.readAsSafeJSON(value) as T;
     } catch {
-      return undefined;
+      return;
     }
   }
 
-  async set(key: string, entry: CacheEntry): Promise<any> {
+  async set(key: string, entry: T): Promise<any> {
     this.cull();
 
     const pth = this.getPath(key);
-    let value = entry.data;
-    if (CacheStoreUtil.isStream(value)) {
-      const streamed = `${pth}.stream`;
-      entry.stream = true;
-      entry.data = streamed;
-      await SystemUtil.streamToFile(value as NodeJS.ReadableStream, streamed);
-      value = fs.createReadStream(streamed);
-    }
-    await fsWrite(pth, CacheStoreUtil.storeAsSafeJSON(entry), 'utf8');
+
+    const cloned = CacheStoreUtil.storeAsSafeJSON(entry);
+
+    await fsWrite(pth, cloned, 'utf8');
 
     if (entry.maxAge) {
       await this.touch(pth, entry.expiresAt!);
     }
 
-    return value;
+    return CacheStoreUtil.readAsSafeJSON(cloned);
   }
 
   async delete(key: string): Promise<boolean> {
