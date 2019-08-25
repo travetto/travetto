@@ -1,0 +1,4 @@
+---
+config:
+  '@travetto/config':
+    - Config
