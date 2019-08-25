@@ -1,20 +1,9 @@
 Active Development (1.0.0 - RC Ready)
 =====================================
 
-SQL
------------------------
-- [ ] Resolve issues with multiple tests from same file
-
-Caching
------------------------
-- [X] Rework cache infrastructure to allow for multiple providers
-- [X] Integrate caching with
-    X File System
-    * Redis
-    X Memory
-    * Model Service
-- [ ] See if we can integrate with asset service
-- [ ] See if we can integrate with session store
+Cache/Rest-Session
+--------------------------
+- [ ] Update docs with clearer example of cache usage
 
 Serverless Initiative
 --------------------------
@@ -26,6 +15,12 @@ Serverless Initiative
   - [x] API Gateway configuration
   - [ ] Auto deployment of application
   - [x] CLI entry point to facilitate
+
+Compiler
+----------------------
+- [ ] Support type checking in transformers
+  - [ ] Convert schema/rest/swagger/model/application to use resolved type information
+  - [ ] Investigate auto creating schemas from interfaces for simple one offs  
 
 Tests
 --------------
