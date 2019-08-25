@@ -5,8 +5,8 @@ import { SessionEncoder } from './encoder/encoder';
 import { Session } from './types';
 import { SessionConfig } from './config';
 import { CookieEncoder } from './encoder/cookie';
-import { CacheStore } from '@travetto/cache';
-import { Util } from '@travetto/base';
+import { CacheStore, MemoryCacheStore } from '@travetto/cache';
+import { Util, Env, AppError } from '@travetto/base';
 
 const SESS = Symbol('sess');
 export const SESSION_CACHE = Symbol('SESSION_CACHE');
@@ -20,8 +20,19 @@ export class RestSessionService {
   @Inject({ defaultIfMissing: CookieEncoder })
   encoder: SessionEncoder;
 
-  @Inject(SESSION_CACHE)
+  @Inject({ qualifier: SESSION_CACHE, optional: true })
   store: CacheStore<Session>;
+
+  postContruct() {
+    if (this.store === undefined) {
+      this.store = new MemoryCacheStore<Session>();
+      if (Env.dev) {
+        console.warn('MemoryCacheStore is not intended for production session use');
+      } else if (Env.prod) {
+        throw new AppError('MemoryCacheStore is not intended for production session use', 'general');
+      }
+    }
+  }
 
   async validate(session: Session) {
     if (session.isExpired()) { // Time has passed
