@@ -40,7 +40,9 @@ export class RunUtil {
       ].join(',');
       process.env.ENV = process.env.ENV || 'dev';
       process.env.PROFILE = process.env.PROFILE || '';
-      process.env.WATCH = process.env.WATCH || `${app.watchable}`;
+      if (!process.env.WATCH) {
+        process.env.WATCH = process.env.ENV !== 'dev' ? '0' : `${app.watchable}`;
+      }
     }
 
     const { PhaseManager } = await import('@travetto/base');
