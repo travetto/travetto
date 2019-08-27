@@ -13,7 +13,7 @@ export function init() {
       process.env.PROFILE = cmd.app || '';
 
       const { getSchemas } = await import('./lib');
-      console.log(JSON.stringify(getSchemas(), null, 2));
+      console.log(JSON.stringify(await getSchemas(), null, 2));
     });
 }
 
