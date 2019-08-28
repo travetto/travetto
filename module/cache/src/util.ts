@@ -29,7 +29,7 @@ export class CacheUtil {
   }
 
   static async evict(config: CacheConfig, cache: CacheStore, target: any, fn: Function, params: any[]) {
-    const key = this.generateKey(cache, config, params);
+    const key = this.generateKey(config, cache, params);
     const val = await fn.apply(target, params);
     await cache.delete(key);
     return val;
