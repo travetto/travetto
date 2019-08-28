@@ -110,7 +110,9 @@ export class VisitorFactory {
     const always = this.always[phase].get(target.type);
     if (always && always.length) {
       for (const all of always) {
+        const og = node;
         node = (all[phase]!(state, node) as T) || node;
+        node.parent = og.parent;
       }
     }
 
@@ -122,7 +124,9 @@ export class VisitorFactory {
         if (tgt) {
           for (const el of tgt) {
             if (el[phase]) {
+              const og = node;
               node = (el[phase]!(state, node, dec) as T) || node;
+              node.parent = og.parent;
             }
           }
         }
