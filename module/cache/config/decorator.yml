@@ -1,0 +1,5 @@
+---
+cache:
+ '@travetto/cache': 
+    - Cache
+    - EvictCache
