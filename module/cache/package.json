@@ -28,8 +28,10 @@
   "main": "index.ts",
   "files": [
     "index.ts",
+    "config",
     "extension",
-    "src"
+    "src",
+    "support"
   ],
   "name": "@travetto/cache",
   "repository": {
