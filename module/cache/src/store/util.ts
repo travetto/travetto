@@ -15,7 +15,7 @@ export class CacheStoreUtil {
     }
 
     const replacer = all ? (key: string, val: any) => {
-      return val instanceof RegExp ? val.source : Util.isFunction(val) ? val.source : val;
+      return val && (val instanceof RegExp ? val.source : Util.isFunction(val) ? val.source : val);
     } : undefined;
 
     return Buffer.from(JSON.stringify(value, replacer), 'utf8').toString('base64');
