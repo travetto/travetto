@@ -2,14 +2,14 @@ import { CacheConfig, CoreCacheConfig } from './types';
 import { CacheStore } from './store/types';
 
 export class CacheUtil {
-  static generateKey(cache: CacheStore, config: CoreCacheConfig, params: any[]) {
+  static generateKey(config: CoreCacheConfig, cache: CacheStore, params: any[]) {
     const input = config.params ? config.params(params) : params;
     const keyParams = config.key ? config.key(...input) : input;
-    return cache.computeKey(keyParams);
+    return `${config.keySpace!}::${cache.computeKey(keyParams)}`;
   }
 
   static async cache(config: CacheConfig, cache: CacheStore, target: any, fn: Function, params: any[]) {
-    const key = this.generateKey(cache, config, params);
+    const key = this.generateKey(config, cache, params);
 
     let res = await cache.getOptional(config, key);
 
