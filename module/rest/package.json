@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/app": "^1.0.0-beta.2",
+    "@travetto/app": "^1.0.0-beta.4",
     "@travetto/di": "^1.0.0-beta.1",
     "@travetto/exec": "^1.0.0-beta.1",
     "@types/cookies": "^0.7.2",
@@ -38,5 +38,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-beta.3"
+  "version": "1.0.0-beta.4"
 }
