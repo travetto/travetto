@@ -27,7 +27,7 @@ export class AssetRestUtil {
     await FsUtil.mkdirp(uniqueDir);
     const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(fileName));
 
-    SystemUtil.streamToFile(data, uniqueLocal);
+    await SystemUtil.streamToFile(data, uniqueLocal);
 
     const asset = await AssetUtil.fileToAsset(uniqueLocal);
 
@@ -52,12 +52,12 @@ export class AssetRestUtil {
     const allowedTypes = this.readTypeArr(config.allowedTypes);
     const excludeTypes = this.readTypeArr(config.excludeTypes);
 
-    return new Promise<AssetMap>((resolve, reject) => {
-      if (!/multipart|urlencoded/i.test(req.header('content-type') as string)) {
-        const filename = this.getFileName(req);
-        this.streamFile(req as any as NodeJS.ReadableStream, filename, allowedTypes, excludeTypes, relativeRoot)
-          .then(file => resolve({ file }));
-      } else {
+    if (!/multipart|urlencoded/i.test(req.header('content-type') as string)) {
+      const filename = this.getFileName(req);
+      return this.streamFile(req as any as NodeJS.ReadableStream, filename, allowedTypes, excludeTypes, relativeRoot)
+        .then(file => ({ file }));
+    } else {
+      return new Promise<AssetMap>((resolve, reject) => {
         const mapping: AssetMap = {};
         const uploads: Promise<any>[] = [];
         const uploader = new busboy({
@@ -88,8 +88,8 @@ export class AssetRestUtil {
         });
 
         req.pipe(uploader);
-      }
-    });
+      });
+    }
   }
 
   static downloadable(asset: Asset) {
