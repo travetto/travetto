@@ -16,6 +16,7 @@ export async function getSchemas(clear = true) {
       drops.push(...src.getDropAllTablesSQL(cls));
     }
     creates.push(...src.getCreateAllTablesSQL(cls));
+    creates.push(...src.getCreateAllIndicesSQL(cls, ModelRegistry.get(cls).indices));
   }
 
   return [...drops, ...creates];

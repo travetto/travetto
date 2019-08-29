@@ -547,7 +547,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
     return `CREATE ${idx.options && idx.options.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.ident(table)} (${fields
       .map(([name, sel]) => `${this.ident(name)} ${sel ? 'ASC' : 'DESC'}`)
-      .join(', ')})`;
+      .join(', ')});`;
   }
 
   getDropAllTablesSQL(cls: Class<any>): string[] {
