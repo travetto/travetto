@@ -7,7 +7,7 @@ import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/comp
 import { LogLevels } from '../src/types';
 
 const VALID_METHODS = new Set(['log', ...Object.keys(LogLevels)]);
-const VALID_PROD_METHODS = new Set(['info', 'warn', 'error', 'fatal']);
+const VALID_PROD_METHODS = new Set(['log', 'info', 'warn', 'error', 'fatal']);
 
 const imported = Symbol('imported');
 const isLoggable = Symbol('isLoggable');
