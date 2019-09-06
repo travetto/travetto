@@ -1,5 +1,5 @@
 import { ModelService, Model } from '@travetto/model';
-import { Text, Precision } from '@travetto/schema';
+import { Text, Precision, Long } from '@travetto/schema';
 
 import { CullableCacheStore } from '../src/store/types';
 import { CacheEntry } from '../src/types';
@@ -9,7 +9,7 @@ import { CacheStoreUtil } from '../src/store/util';
 export class CacheModel {
   id?: string;
   key: string;
-  @Precision(20, 0)
+  @Long()
   expiresAt?: number;
   @Text()
   entry: string;

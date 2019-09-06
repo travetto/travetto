@@ -77,6 +77,7 @@ export const Precision = (digits: number, decimals?: number) => numberProp({ pre
 export const Integer = () => Precision(0);
 export const Float = () => Precision(10, 7);
 export const Currency = () => Precision(13, 2);
+export const Long = () => stringNumberProp({ specifier: 'long' });
 
 // For Auto schemas
 export function Ignore(): PropertyDecorator {
