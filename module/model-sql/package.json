@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@travetto/context": "^1.0.0-beta.1",
-    "@travetto/model": "^1.0.0-beta.5"
+    "@travetto/model": "^1.0.0-beta.6"
   },
   "peerDependencies": {
     "mysql": "^2.17.1",
@@ -44,5 +44,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-beta.6"
+  "version": "1.0.0-beta.7"
 }
