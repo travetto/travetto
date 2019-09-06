@@ -411,10 +411,10 @@ export class ElasticsearchModelSource extends ModelSource {
     return classes.map(t => this.getIdentity(t).index).join(',');
   }
 
-  async convertRawResponse<T extends ModelCore>(response: SearchResponse<T>) {
+  async convertRawResponse<T extends ModelCore>(response: es.ApiResponse<SearchResponse<T>>) {
     const out: T[] = [];
 
-    for (const item of response.hits.hits) {
+    for (const item of response.body.hits.hits) {
       const itemCls = this.getClassFromIndexType(item._index, item._source.type!);
       const obj: T = itemCls.from(item._source as T);
       obj.id = item._id;
