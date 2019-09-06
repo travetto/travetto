@@ -199,6 +199,8 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
     assert(suggestedEntities.length === 2);
     assert(suggestedEntities[0].name === 'Bo');
     assert(suggestedEntities[1].name === 'Bob');
+    assert(suggestedEntities[0] instanceof Person);
+    assert(suggestedEntities[1] instanceof Person);
   }
 
   @Test('Verify partial update with field removal')
