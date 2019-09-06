@@ -105,8 +105,9 @@ export class ModelService implements IModelSource {
     return this.source.facet(cls, field, query);
   }
 
-  suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
-    return this.source.suggestEntities(cls, field, prefix, query);
+  async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    const results = await this.source.suggestEntities(cls, field, prefix, query);
+    return results.map(x => this.postLoad(cls, x));
   }
 
   /** Executes a raw query against the model space */
