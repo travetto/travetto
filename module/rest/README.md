@@ -245,7 +245,7 @@ res.cookies.set('name', value, options);
 ## SSL Support
 Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if SSL support is configured, but no keys provided.  This is useful for local development where you implicitly trust the cert.
 
-SSL support can be enabled by setting `rest.ssl.active: true`
+SSL support can be enabled by setting `rest.ssl.active: true`. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the `ResourceManager`.
 
 ## Full Config
 The entire [`config object`](./src/config.ts) which will show the full set of valid configuration parameters for the rest module.

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/generator-app",
-  "version": "0.7.3",
+  "version": "1.0.0-beta.1",
   "description": "Yeoman app generator for the Travetto framework",
   "main": "app/index.js",
   "files": [
@@ -10,14 +10,14 @@
     "tslint.json"
   ],
   "dependencies": {
-    "@travetto/base": "^0.7.3",
+    "@travetto/base": "^1.0.0-beta.1",
     "mustache": "^3.0.1",
     "yeoman-generator": "^4.0.1",
-    "yo": "^2.0.6"
+    "yo": "^3.1.0"
   },
   "devDependencies": {
     "@types/mustache": "^0.8.32",
-    "@types/yeoman-generator": "^3.1.3"
+    "@types/yeoman-generator": "^3.1.4"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

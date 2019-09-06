@@ -1,6 +1,6 @@
 import { Class, ChangeEvent } from '@travetto/registry';
 import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent, Schema } from '@travetto/schema';
-import { Util } from '@travetto/base';
+import { Util, AppError } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
 
 import { SQLUtil, VisitStack } from './util';
@@ -9,6 +9,11 @@ import { DeleteWrapper, InsertWrapper, DialectState } from './types';
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
+
+interface Alias {
+  alias: string;
+  path: VisitStack[];
+}
 
 @Schema()
 class Total {
@@ -28,6 +33,8 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
 
 export abstract class SQLDialect implements DialectState {
   KEY_LEN = 64;
+  DEFAULT_STRING_LEN = 1024;
+
   SQL_OPS = {
     $and: 'AND',
     $or: 'OR',
@@ -89,6 +96,8 @@ export abstract class SQLDialect implements DialectState {
 
   rootAlias = SQLUtil.ROOT_ALIAS;
 
+  aliasCache = new Map<Class, Map<string, Alias>>();
+
   constructor(public ns: string) {
     this.namespace = this.namespace.bind(this);
     this.table = this.table.bind(this);
@@ -134,7 +143,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Object) {
       return this.quote(JSON.stringify(value).replace(/[']/g, `''`));
     }
-    throw new Error('Ruh roh?');
+    throw new AppError(`Unknown value type for field ${conf.name}, ${value}`, 'data');
   }
 
   getColumnType(conf: FieldConfig) {
@@ -170,7 +179,7 @@ export abstract class SQLDialect implements DialectState {
       if (conf.specifier && conf.specifier.startsWith('text')) {
         type = this.COLUMN_TYPES.TEXT;
       } else {
-        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(conf.maxlength ? conf.maxlength.n : 1024);
+        type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(conf.maxlength ? conf.maxlength.n : this.DEFAULT_STRING_LEN);
       }
     } else if (conf.type === Object) {
       type = this.COLUMN_TYPES.JSON;
@@ -257,10 +266,42 @@ export abstract class SQLDialect implements DialectState {
     return `${alias}.${this.ident(field)}`;
   }
 
+  getAliasCache(stack: VisitStack[], resolve: (path: VisitStack[]) => string) {
+    const cls = stack[0].type;
+
+    if (this.aliasCache.has(cls)) {
+      return this.aliasCache.get(cls)!;
+    }
+
+    const clauses = new Map<string, Alias>();
+    let idx = 0;
+
+    SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+      onRoot: ({ descend, path }) => {
+        const table = resolve(path);
+        clauses.set(table, { alias: SQLUtil.ROOT_ALIAS, path });
+        return descend();
+      },
+      onSub: ({ descend, config, path }) => {
+        const table = resolve(path);
+        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
+        return descend();
+      },
+      onSimple: ({ config, path }) => {
+        const table = resolve(path);
+        clauses.set(table, { alias: `${config.name.charAt(0)}${idx++}`, path });
+      }
+    });
+
+    this.aliasCache.set(cls, clauses);
+
+    return clauses;
+  }
+
   resolveName(stack: VisitStack[]): string {
     const path = this.namespaceParent(stack);
     const name = stack[stack.length - 1].name;
-    const cache = SQLUtil.getAliasCache(stack, this.namespace);
+    const cache = this.getAliasCache(stack, this.namespace);
     const base = cache.get(path)!;
     return this.alias(name, base.alias);
   }
@@ -391,7 +432,7 @@ export abstract class SQLDialect implements DialectState {
 
   getFromSQL<T>(cls: Class<T>): string {
     const stack = SQLUtil.classToStack(cls);
-    const aliases = SQLUtil.getAliasCache(stack, this.namespace);
+    const aliases = this.getAliasCache(stack, this.namespace);
     const tables = [...aliases.keys()].sort((a, b) => a.length - b.length); // Shortest first
     return `FROM ${tables.map((table, i) => {
       const { alias, path } = aliases.get(table)!;
@@ -506,7 +547,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
     return `CREATE ${idx.options && idx.options.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.ident(table)} (${fields
       .map(([name, sel]) => `${this.ident(name)} ${sel ? 'ASC' : 'DESC'}`)
-      .join(', ')})`;
+      .join(', ')});`;
   }
 
   getDropAllTablesSQL(cls: Class<any>): string[] {

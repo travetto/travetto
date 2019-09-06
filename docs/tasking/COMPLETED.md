@@ -1,6 +1,27 @@
 Completed Tasks
 ==============
 
+Model
+----------------------
+- [X] Basic aggregation support, to get model counts by a specific attribute
+
+Caching
+-----------------------
+- [X] Rework cache infrastructure to allow for multiple providers
+- [X] Integrate caching with
+    - [X] File System
+    - [X] Redis
+    - [X] Memory
+    - [X] Model Service
+- [/] See if we can integrate with asset service
+- [X] See if we can integrate with session store
+
+Assets
+-----------------------
+- [x] Naming structure for assets
+- [x] File provider
+- [x] Separate Image processing out of asset
+
 Base
 ----------------------
 - [X] Separate out e2e into a better pattern
@@ -9,8 +30,10 @@ Base
 
 Model Elasticsearch
 -----------------------
+- [X] Upgrade to latest client, and convert code to support all
 - [X] Regex as strings wrt to binding and schema validation
 - [X] Schema config for text field arrays
+- [X] Migrated to new elasticsearch client as old one was deprecated
 
 Model SQL
 ----------------------
@@ -21,7 +44,7 @@ Model SQL
   - [X] Basic polymorphism support
   - [X] Sorting/paging
   - [X] Handle schema changes (columns added removed)
-
+- [X] Resolve issues with multiple tests from same file
 
 Exec
 -----------------------

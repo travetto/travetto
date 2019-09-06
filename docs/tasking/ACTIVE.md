@@ -1,5 +1,9 @@
-Active Development (0.8.x - RC Ready)
+Active Development (1.0.0 - RC Ready)
 =====================================
+
+Cache/Rest-Session
+--------------------------
+- [ ] Update docs with clearer example of cache usage
 
 Serverless Initiative
 --------------------------
@@ -12,15 +16,11 @@ Serverless Initiative
   - [ ] Auto deployment of application
   - [x] CLI entry point to facilitate
 
-Caching
------------------------
-- [ ] Rework cache infrastructure to allow for multiple providers
-- [ ] Integrate caching with
-    * File System
-    * Redis
-    * Memory
-    * Model Service
-- [ ] See if we can integrate with asset service
+Compiler
+----------------------
+- [ ] Support type checking in transformers
+  - [ ] Convert schema/rest/swagger/model/application to use resolved type information
+  - [ ] Investigate auto creating schemas from interfaces for simple one offs  
 
 Tests
 --------------

@@ -1,7 +1,7 @@
 import * as mongo from 'mongodb';
 
 import {
-  ModelSource, IndexConfig, Query,
+  ModelSource, Query,
   BulkResponse,
   ModelRegistry, ModelCore,
   PageableModelQuery,
@@ -9,7 +9,7 @@ import {
   Point,
   ModelQuery,
   ValidStringFields,
-  WhereClauseRaw, ModelUtil
+  ModelUtil
 } from '@travetto/model';
 
 import { Class } from '@travetto/registry';
@@ -30,32 +30,13 @@ export class MongoModelSource extends ModelSource {
     super();
   }
 
-  generateId() {
-    return new mongo.ObjectId().toHexString();
+  async postConstruct() {
+    await this.initClient();
+    await this.initDatabase();
   }
 
-  async suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
-  ): Promise<U[]> {
-    if (!filter) {
-      filter = {};
-    }
-    filter.limit = filter.limit || 10;
-    const suggestQuery = {
-      [field]: new RegExp(`\\b${query}`, 'i')
-    } as any as WhereClauseRaw<T>;
-
-    if (!filter.where) {
-      filter.where = suggestQuery;
-    } else {
-      filter.where = {
-        $and: [
-          filter.where,
-          suggestQuery
-        ]
-      } as WhereClauseRaw<T>;
-    }
-    return this.query(cls, filter);
+  generateId() {
+    return new mongo.ObjectId().toHexString();
   }
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
@@ -63,11 +44,19 @@ export class MongoModelSource extends ModelSource {
 
     const projected = MongoUtil.extractTypedWhereClause(cls, query.where || {});
 
-    console.trace('Query', JSON.stringify(projected, null, 2));
+    console.trace('Query', query);
 
     let cursor = col.find(projected);
     if (query.select) {
-      cursor.project(Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select));
+      const select = Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select);
+      // Remove id if not explicitly defined, and selecting fields directly
+      if (!select['_id']) {
+        const values = new Set([...Object.values(select)]);
+        if (values.has(1) || values.has(true)) {
+          select['_id'] = false;
+        }
+      }
+      cursor.project(select);
     }
 
     if (query.sort) {
@@ -93,14 +82,6 @@ export class MongoModelSource extends ModelSource {
 
   prePersist<T extends ModelCore>(cls: Class<T>, o: T) {
     return o;
-  }
-
-  cleanseId<T extends ModelCore>(o: T): mongo.ObjectId {
-    if (o.id) {
-      (o as any)._id = new mongo.ObjectId(o.id);
-      delete o.id;
-    }
-    return (o as any)._id;
   }
 
   async initClient() {
@@ -182,6 +163,43 @@ export class MongoModelSource extends ModelSource {
     return await this.getByQuery(cls, query);
   }
 
+  async suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    const q = ModelUtil.getSuggestFieldQuery(cls, field, prefix, query);
+    const results = await this.query(cls, q);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => a, query && query.limit);
+  }
+
+  async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+    const col = await this.getCollection(cls);
+    const pipeline: object[] = [{
+      $group: {
+        _id: `$${field}`,
+        count: {
+          $sum: 1
+        }
+      }
+    }];
+
+    if (query && query.where) {
+      pipeline.unshift({
+        $match: MongoUtil.extractTypedWhereClause(cls, query.where)
+      });
+    }
+
+    const result = await col.aggregate(pipeline).toArray();
+
+    return result.map((val: any) => ({
+      key: val._id,
+      count: val.count
+    })).sort((a, b) => b.count - a.count);
+  }
+
+  async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    const q = ModelUtil.getSuggestQuery(cls, field, prefix, query);
+    const results = await this.query(cls, q);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query && query.limit);
+  }
+
   async deleteById<T extends ModelCore>(cls: Class<T>, id: string): Promise<number> {
     const col = await this.getCollection(cls);
     const conf = ModelRegistry.get(cls);
@@ -200,8 +218,10 @@ export class MongoModelSource extends ModelSource {
     const col = await this.getCollection(cls);
     if (!keepId) {
       delete o.id;
+    } else {
+      (o as any)._id = new mongo.ObjectId(o.id); // To mongo
+      delete o.id;
     }
-    this.cleanseId(o);
     const res = await col.insertOne(o);
     o.id = res.insertedId.toHexString();
     return o;
@@ -209,11 +229,13 @@ export class MongoModelSource extends ModelSource {
 
   async saveAll<T extends ModelCore>(cls: Class<T>, objs: T[], keepId: boolean = false): Promise<T[]> {
     const col = await this.getCollection(cls);
-    for (const x of objs) {
+    for (const o of objs) {
       if (!keepId) {
-        delete x.id;
+        delete o.id;
+      } else {
+        (o as any)._id = new mongo.ObjectId(o.id); // To mongo
+        delete o.id;
       }
-      this.cleanseId(x);
     }
     const res = await col.insertMany(objs);
     for (let i = 0; i < objs.length; i++) {
@@ -224,7 +246,9 @@ export class MongoModelSource extends ModelSource {
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
     o = this.prePersist(cls, o);
-    const id = this.cleanseId(o);
+    const id = new mongo.ObjectId(o.id!);
+    delete o.id;
+
     const col = await this.getCollection(cls);
     const conf = ModelRegistry.get(cls);
     const res = await col.replaceOne({ _id: id, ...(conf.subType ? { type: conf.subType } : {}) }, o);
@@ -313,16 +337,24 @@ export class MongoModelSource extends ModelSource {
 
     if (operations.length > 0) {
       const res = await bulk.execute({});
+      for (const { index, _id } of res.getUpsertedIds() as { index: number, _id: mongo.ObjectID }[]) {
+        out.insertedIds.set(index, _id.toHexString());
+      }
 
       if (out.counts) {
         out.counts.delete = res.nRemoved;
-        out.counts.update = (res.nModified || 0) + (res.nUpdated || 0);
+        out.counts.update = operations.filter(x => x.update).length;
         out.counts.insert = res.nInserted;
-        out.counts.upsert = res.nUpserted;
+        out.counts.upsert = operations.filter(x => x.upsert).length;
       }
 
       if (res.hasWriteErrors()) {
         out.errors = res.getWriteErrors();
+        for (const err of out.errors) {
+          const op = operations[err.index];
+          const k = Object.keys(op)[0];
+          (out as any).counts[k] -= 1;
+        }
         out.counts.error = out.errors.length;
       }
     }

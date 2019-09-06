@@ -156,7 +156,7 @@ Error: Uh oh
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
 
 ## Util 
-Simple functions for providing a minimal facsimile to [`lodash`](https://lodash.com), but without all the weight. Currently `util` only includes:
+Simple functions for providing a minimal facsimile to [`lodash`](https://lodash.com), but without all the weight. Currently `Util` includes:
 
 * `isPrimitive(el: any)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
 * `isPlainObject(obj: any)` determines if the obj is a simple object
@@ -167,4 +167,12 @@ Simple functions for providing a minimal facsimile to [`lodash`](https://lodash.
   * `loose`, which is the default is the most lenient.  It will not error out, and overwrites will always happen
   * `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out
   * `strict`, will error out if the types do not match  
-* `throttle(fn, threshhold?: number)` produces a function that will execute `fn`, at most once per `threshold`
+* `uuid(len: number)` generates a simple uuid for use within the application.
+
+## SystemUtil
+Unlike `Util`, the `SystemUtil` is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful. `SystemUtil` has functionality for:
+* `toBuffer(src: Readable | Buffer | string): Promise<Buffer>` for converting a stream/buffer/filepath to a Buffer.
+* `toReadable(src: Readable | Buffer | string):Promise<Readable>` for converting a stream/buffer/filepath to a Readable 
+* `streamToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
+* `throttle<T extends Function>(fn: T, threshold = 250): void` will run the function `fn` at most every `threshold`
+* `naiveHash(text: string): number` computes a very naive hash.  Should not be relied upon for scenarios where collisions cannot be tolerated.

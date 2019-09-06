@@ -1,4 +1,4 @@
-export async function getSchemas() {
+export async function getSchemas(clear = true) {
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.init('bootstrap').run();
 
@@ -12,8 +12,11 @@ export async function getSchemas() {
   const creates = [];
 
   for (const cls of ModelRegistry.getClasses()) {
-    drops.push(...src.getDropAllTablesSQL(cls));
+    if (clear) {
+      drops.push(...src.getDropAllTablesSQL(cls));
+    }
     creates.push(...src.getCreateAllTablesSQL(cls));
+    creates.push(...src.getCreateAllIndicesSQL(cls, ModelRegistry.get(cls).indices));
   }
 
   return [...drops, ...creates];

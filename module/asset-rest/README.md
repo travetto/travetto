@@ -18,12 +18,11 @@ A simple example:
 export class AssetController {
 
   constructor(
-    private assetService: AssetService,
-    private imageService: ImageService
+    private assetService: AssetService
   ) { }
 
   @Post('/')
-  async store(@Upload() file: Asset) {
+  async store(@Upload() file: UploadAsset) {
     const stored = await this.assetService.save(file);
     return {
       path: stored.path
@@ -31,8 +30,9 @@ export class AssetController {
   }
 
   @Get('/:imgPath')
-  async getImage(@Path() imgPath: string, @Query() opts: ImageOptions) {
-    return await this.imageService.getImage(imgPath, opts);
+  async getImage(@Path() imgPath: string) {
+    const asset = await this.assetService.get(imgPath);
+    return AssetUtil.downloadable(asset);
   }
 }
 ```

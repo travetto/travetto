@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import { dirname } from 'path';
 
 import { FsUtil, RegisterUtil } from '@travetto/boot';
-import { Util, Env } from '@travetto/base';
+import { SystemUtil, Env } from '@travetto/base';
 import { TransformUtil } from './util';
 import { Import, Documentation } from './types';
 
@@ -122,7 +122,7 @@ export class TransformerState {
 
   importFile(pth: string) {
     if (!this.newImports.has(pth)) {
-      const id = `i_${Util.naiveHash(pth)}`;
+      const id = `i_${SystemUtil.naiveHash(pth)}`;
 
       if (this.imports.has(id)) { // Already imported, be cool
         return this.imports.get(id)!;

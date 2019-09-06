@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
 
 import { FileCache, RegisterUtil } from '@travetto/boot';
-import { Env, AppError, Util } from '@travetto/base';
+import { Env, AppError, SystemUtil } from '@travetto/base';
 
 import { CompilerUtil } from './util';
 
@@ -58,7 +58,7 @@ export class SourceManager {
 
       if (Env.watch && this.hashes.has(fileName)) {
         // Let's see if they are really different
-        hash = Util.naiveHash(content);
+        hash = SystemUtil.naiveHash(content);
         if (hash === this.hashes.get(fileName)) {
           console.trace(`Contents Unchanged: ${fileName}`);
           return false;

@@ -16,7 +16,7 @@ const between = (fromDays: number, toDays: number) => {
   );
 };
 
-export class GenerateUtil {
+export class SchemaFakerUtil {
   static STRING_RE_TO_TYPE: [RegExp, () => any][] = [
     [CommonRegExp.email, faker.internet.email],
     [CommonRegExp.url, faker.internet.url],
@@ -89,8 +89,8 @@ export class GenerateUtil {
       }
     }
 
-    max = max === undefined ? Number.MAX_SAFE_INTEGER : max;
-    min = min === undefined ? Number.MIN_SAFE_INTEGER : min;
+    max = max === undefined ? 1000 : max;
+    min = min === undefined ? 0 : min;
 
     const range = (max - min) * offset;
 
@@ -118,8 +118,6 @@ export class GenerateUtil {
 
   static getStringValue(cfg: FieldConfig) {
     const name = cfg.name.toLowerCase();
-    const max = cfg.max ? cfg.max.n : undefined;
-    const min = cfg.min ? cfg.min.n : undefined;
 
     if (cfg.match) {
       const mre = cfg.match && cfg.match.re;

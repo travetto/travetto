@@ -2,13 +2,14 @@ import { Injectable, Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 
 import { SessionEncoder } from './encoder/encoder';
-import { SessionStore } from './store/store';
 import { Session } from './types';
 import { SessionConfig } from './config';
 import { CookieEncoder } from './encoder/cookie';
-import { MemoryStore } from './store/memory';
+import { CacheStore, MemoryCacheStore } from '@travetto/cache';
+import { Util, Env, AppError } from '@travetto/base';
 
 const SESS = Symbol('sess');
+export const SESSION_CACHE = Symbol('SESSION_CACHE');
 
 @Injectable()
 export class RestSessionService {
@@ -19,14 +20,25 @@ export class RestSessionService {
   @Inject({ defaultIfMissing: CookieEncoder })
   encoder: SessionEncoder;
 
-  @Inject({ defaultIfMissing: MemoryStore })
-  store: SessionStore;
+  @Inject({ qualifier: SESSION_CACHE, optional: true })
+  store: CacheStore<Session>;
+
+  postContruct() {
+    if (this.store === undefined) {
+      this.store = new MemoryCacheStore<Session>();
+      if (Env.dev) {
+        console.warn('MemoryCacheStore is not intended for production session use');
+      } else if (Env.prod) {
+        throw new AppError('MemoryCacheStore is not intended for production session use', 'general');
+      }
+    }
+  }
 
   async validate(session: Session) {
     if (session.isExpired()) { // Time has passed
       return false;
     }
-    return await this.store.validate(session);
+    return !!(await this.store.has(session.key));
   }
 
   async destroy(req: Request) {
@@ -39,7 +51,7 @@ export class RestSessionService {
 
     if (sessionKey) {
       if (typeof sessionKey === 'string') {
-        session = await this.store.load(sessionKey);
+        session = await this.store.get(sessionKey);
       } else if ('id' in sessionKey) { // Is a session object
         session = sessionKey;
       }
@@ -51,7 +63,7 @@ export class RestSessionService {
       if (await this.validate(session)) {
         (req as any)[SESS] = session;
       } else {
-        await this.store.destroy(session); // Invalid session, nuke it
+        await this.store.delete(session.key); // Invalid session, nuke it
         (req as any)[SESS] = new Session({ action: 'destroy' });
       }
     }
@@ -67,20 +79,25 @@ export class RestSessionService {
 
     if (session.action !== 'destroy') {
       if (session.action === 'create') {
-        session = await this.store.create(session.data, this.config.maxAge);
+        session = new Session({
+          key: Util.uuid(),
+          issuedAt: Date.now(),
+          maxAge: this.config.maxAge,
+          data: session.data
+        });
         session.refresh();
       } else if (this.config.rolling || (this.config.renew && session.isAlmostExpired())) {
         session.refresh();
       }
 
       if (session.isChanged()) {
-        await this.store.store(session);
+        await this.store.set(session.key, session);
       }
       if (session.isTimeChanged()) {
         await this.encoder.encode(req, res, session);
       }
-    } else if (session.id) { // If destroy and id
-      await this.store.destroy(session);
+    } else if (session.key) { // If destroy and id
+      await this.store.delete(session.key);
       await this.encoder.encode(req, res, null);
     }
   }

@@ -7,24 +7,29 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/compiler": "^0.7.4",
-    "@types/lru-cache": "^5.1.0",
-    "lru-cache": "^5.1.1"
+    "@travetto/compiler": "^1.0.0-beta.1"
   },
   "description": "Caching functionality with decorators for declarative use.",
   "devDependencies": {
-    "@travetto/test": "^0.7.4"
+    "@travetto/test": "^1.0.0-beta.1"
+  },
+  "optionalExtensionDependencies": {
+    "redis": "^2.8.0",
+    "@types/redis": "^2.8.13"
   },
   "homepage": "https://travetto.io",
   "keywords": [
     "typescript",
     "travetto",
+    "decorator",
     "cache"
   ],
   "license": "MIT",
   "main": "index.ts",
   "files": [
     "index.ts",
+    "config",
+    "extension",
     "src",
     "support"
   ],
@@ -32,5 +37,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.7.4"
+  "version": "1.0.0-beta.8"
 }

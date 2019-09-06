@@ -1,7 +1,7 @@
 import { Config } from '@travetto/config';
 
-@Config('rest.upload')
-export class AssetRestConfig {
+@Config('rest.asset')
+export class RestAssetConfig {
   maxSize = 10 * 1024 * 1024;
   allowedTypes = '';
   excludeTypes = '';

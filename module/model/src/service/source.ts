@@ -7,7 +7,7 @@ import { ModelCore } from '../model/core';
 
 export type ValidStringFields<T> = {
   [K in keyof T]:
-  (T[K] extends (String | string) ? K : never)
+  (T[K] extends (String | string | string[] | String[] | undefined) ? K : never)
 }[keyof T];
 
 export interface IModelSource {
@@ -29,11 +29,11 @@ export interface IModelSource {
   updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T>;
   updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>): Promise<T>;
 
-  suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
-  ): Promise<U[]>;
-
   query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]>;
+
+  suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]>;
+  facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]>;
+  suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]>;
 
   bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse>;
 
@@ -51,10 +51,7 @@ export abstract class ModelSource implements IModelSource {
   onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
   onSchemaChange?(e: SchemaChangeEvent): void;
 
-  async postConstruct() {
-    await this.initClient();
-    await this.initDatabase();
-  }
+  abstract postConstruct(): Promise<void>;
 
   abstract initClient(): Promise<void>;
   abstract initDatabase(): Promise<void>;
@@ -71,10 +68,12 @@ export abstract class ModelSource implements IModelSource {
   abstract updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number>;
   abstract updatePartial<T extends ModelCore>(cls: Class<T>, model: Partial<T>): Promise<T>;
   abstract updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, body: Partial<T>): Promise<T>;
-  abstract suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
-  ): Promise<U[]>;
   abstract query<T extends ModelCore, U = T>(cls: Class<T>, builder: Query<T>): Promise<U[]>;
+
+  abstract suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]>;
+  abstract facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]>;
+  abstract suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]>;
+
   abstract bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse>;
   abstract getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T>;
   abstract getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T>;

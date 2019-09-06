@@ -13,7 +13,7 @@ export class Exec {
       let stderr = '';
       let timer: any;
       let done = false;
-      const finish = async function (result: ExecutionResult) {
+      const finish = function (result: ExecutionResult) {
         if (done) {
           return;
         }

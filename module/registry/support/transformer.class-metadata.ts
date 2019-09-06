@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { FsUtil, RegisterUtil } from '@travetto/boot';
-import { Util } from '@travetto/base';
+import { SystemUtil } from '@travetto/base';
 import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
 
 const REGISTER_MOD = require.resolve('../src/decorator');
@@ -21,12 +21,12 @@ interface RegisterInfo {
 class RegisterTransformer {
 
   static prepareClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
-    state[cls] = Util.naiveHash(node.getText());
+    state[cls] = SystemUtil.naiveHash(node.getText());
     return node;
   }
 
   static transformMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration) {
-    const hash = Util.naiveHash(node.getText());
+    const hash = SystemUtil.naiveHash(node.getText());
 
     const conf = { hash };
 

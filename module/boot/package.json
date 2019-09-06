@@ -4,15 +4,15 @@
     "name": "Travetto Framework"
   },
   "engines": {
-    "node": "^11.0.4"
+    "node": "^12.7.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@types/node": "^11.0.4",
+    "@types/node": "^12.7.1",
     "tslib": "^1.10.0",
-    "typescript": "^3.5.2"
+    "typescript": "^3.5.3"
   },
   "description": "Bootstrapping and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
@@ -39,5 +39,5 @@
     "prepublish": "cd src-ts; tsc --project .",
     "clean": "rm -f src/"
   },
-  "version": "0.7.2"
+  "version": "1.0.0-beta.1"
 }

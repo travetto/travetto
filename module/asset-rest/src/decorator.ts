@@ -4,17 +4,25 @@ import { AppError } from '@travetto/base';
 import { ControllerRegistry, Request, ParamConfig } from '@travetto/rest';
 import { Class } from '@travetto/registry';
 import { ConfigSource } from '@travetto/config';
-import { Asset } from '@travetto/asset';
+import { AssetMetadata, Asset } from '@travetto/asset';
 
 import { AssetRestUtil } from './util';
-import { AssetRestConfig } from './config';
+import { RestAssetConfig } from './config';
 
-const globalConf = new AssetRestConfig();
+const globalConf = new RestAssetConfig();
 ConfigSource.bindTo(globalConf, 'rest.upload');
 
 const extractUpload = (config: ParamConfig, req: Request) => req.files[config.name!];
 
-export function Upload(param: string | Partial<ParamConfig> & Partial<AssetRestConfig> = {}) {
+export class UploadAsset implements Asset {
+  stream: NodeJS.ReadableStream;
+  size: number;
+  path: string;
+  contentType: string;
+  metadata: AssetMetadata;
+}
+
+export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetConfig> = {}) {
 
   if (typeof param === 'string') {
     param = { name: param };
@@ -22,8 +30,8 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<AssetRestC
 
   const finalConf = { ...globalConf, ...param };
 
-  if (finalConf.type !== Asset) {
-    throw new AppError('Cannot use upload decorator with anything but an Asset', 'general');
+  if (finalConf.type !== UploadAsset) {
+    throw new AppError('Cannot use upload decorator with anything but an UploadAsset', 'general');
   }
 
   return function (target: Object, propertyKey: string, index: number) {

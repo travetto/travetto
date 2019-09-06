@@ -1,7 +1,27 @@
-import * as assert from 'assert';
-import { Suite, Test } from '@travetto/test';
-import { SQLUtil } from '../src/util';
+import { BaseModelTest } from '@travetto/model/extension/base.test';
+import { DependencyRegistry } from '@travetto/di';
+import { AsyncContext } from '@travetto/context';
+import { TestRegistry } from '@travetto/test';
+import { Class } from '@travetto/registry';
 
-@Suite()
-export class UtilTest {
+export class TestUtil {
+
+  static async init(e: any) {
+  }
+
+  static async initModel(e: BaseModelTest) {
+    await e.init();
+
+    const ctx = await DependencyRegistry.getInstance(AsyncContext);
+
+    for (const t of TestRegistry.get(e.constructor as Class).tests) {
+      const method = t.methodName as keyof typeof e;
+      const og = e[method] as Function;
+      const fn = function (this: any) {
+        return ctx.run(og.bind(this));
+      };
+      Object.defineProperty(fn, 'name', { value: method });
+      (e as any)[method] = fn;
+    }
+  }
 }

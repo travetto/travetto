@@ -2,6 +2,7 @@ import { Util } from '@travetto/base';
 import { Point, WhereClause, ModelRegistry, SelectClause, SortClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
 import { BindUtil, SchemaRegistry } from '@travetto/schema';
+import { EsSchemaConfig } from './types';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
@@ -53,7 +54,7 @@ export class ElasticsearchUtil {
     });
   }
 
-  static extractWhereTermQuery<T>(o: Record<string, any>, cls: Class<T>, path: string = ''): any {
+  static extractWhereTermQuery<T>(o: Record<string, any>, cls: Class<T>, config?: EsSchemaConfig, path: string = ''): any {
     const items = [];
     const schema = SchemaRegistry.getViewSchema(cls).schema;
 
@@ -68,7 +69,7 @@ export class ElasticsearchUtil {
       if (Util.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
-          const inner = this.extractWhereTermQuery(top, declaredType as Class<any>, `${sPath}.`);
+          const inner = this.extractWhereTermQuery(top, declaredType as Class<any>, config, `${sPath}.`);
           items.push(
             declaredSchema.array ?
               { nested: { path: sPath, query: inner } } :
@@ -126,13 +127,27 @@ export class ElasticsearchUtil {
                 }
               });
               break;
-            case '$regex':
-              items.push({
-                regexp: {
-                  [sPath]: BindUtil.extractRegex(v).source
-                }
-              });
+            case '$regex': {
+              const pattern = BindUtil.extractRegex(v);
+              if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
+                const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
+                  `${sPath}.text_cs` :
+                  `${sPath}.text`;
+                const query = pattern.source.substring(2, pattern.source.length - 2);
+                items.push({
+                  match_phrase_prefix: {
+                    [textField]: query
+                  }
+                });
+              } else {
+                items.push({
+                  regexp: {
+                    [sPath]: pattern.source
+                  }
+                });
+              }
               break;
+            }
             case '$geoWithin':
               items.push({
                 geo_polygon: {
@@ -177,15 +192,15 @@ export class ElasticsearchUtil {
     }
   }
 
-  static extractWhereQuery<T>(o: WhereClause<T>, cls: Class<T>): Record<string, any> {
+  static extractWhereQuery<T>(cls: Class<T>, o: WhereClause<T>, config?: EsSchemaConfig): Record<string, any> {
     if (has$And(o)) {
-      return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(x, cls)) } };
+      return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(cls, x, config)) } };
     } else if (has$Or(o)) {
-      return { bool: { should: o.$or.map(x => this.extractWhereQuery<T>(x, cls)), minimum_should_match: 1 } };
+      return { bool: { should: o.$or.map(x => this.extractWhereQuery<T>(cls, x, config)), minimum_should_match: 1 } };
     } else if (has$Not(o)) {
-      return { bool: { must_not: this.extractWhereQuery<T>(o.$not, cls) } };
+      return { bool: { must_not: this.extractWhereQuery<T>(cls, o.$not, config) } };
     } else {
-      return this.extractWhereTermQuery(o, cls);
+      return this.extractWhereTermQuery(o, cls, config);
     }
   }
 
@@ -197,11 +212,14 @@ export class ElasticsearchUtil {
       source: ''
     };
     for (const x of Object.keys(o || {})) {
+      if (!path && (x === '_id' || x === 'id')) {
+        continue;
+      }
       const prop = arr ? `${path}[${x}]` : `${path}${path ? '.' : ''}${x}`;
       if (o[x] === undefined || o[x] === null) {
         ops.push(`ctx._source.${path}${path ? '.' : ''}remove("${x}")`);
       } else if (Util.isPrimitive(o[x]) || Array.isArray(o[x])) {
-        const param = prop.replace(/[^A-Za-z_$]/g, '_');
+        const param = prop.toLowerCase().replace(/[^a-z0-9_$]/g, '_');
         ops.push(`ctx._source.${prop} = params.${param}`);
         out.params[param] = o[x];
       } else {
@@ -216,21 +234,21 @@ export class ElasticsearchUtil {
     return out;
   }
 
-  static generateSourceSchema(cls: Class) {
+  static generateSourceSchema(cls: Class, config?: EsSchemaConfig) {
     return ModelRegistry.get(cls).baseType ?
-      this.generateAllSourceSchema(cls) :
-      this.generateSingleSourceSchema(cls);
+      this.generateAllSourceSchema(cls, config) :
+      this.generateSingleSourceSchema(cls, config);
   }
 
-  static generateAllSourceSchema(cls: Class) {
+  static generateAllSourceSchema(cls: Class, config?: EsSchemaConfig) {
     const allTypes = ModelRegistry.getClassesByBaseType(cls);
     return allTypes.reduce((acc, scls) => {
-      Util.deepAssign(acc, this.generateSingleSourceSchema(scls));
+      Util.deepAssign(acc, this.generateSingleSourceSchema(scls, config));
       return acc;
     }, {} as any);
   }
 
-  static generateSingleSourceSchema<T>(cls: Class<T>): any {
+  static generateSingleSourceSchema<T>(cls: Class<T>, config?: EsSchemaConfig): any {
     const schema = SchemaRegistry.getViewSchema(cls);
 
     const props: any = {};
@@ -264,15 +282,28 @@ export class ElasticsearchUtil {
       } else if (conf.type === Boolean) {
         props[field] = { type: 'boolean' };
       } else if (conf.type === String) {
-        const text = conf.specifier && conf.specifier.startsWith('text') ?
-          { fields: { text: { type: 'text' } } } : {};
+        let text = {};
+        if (conf.specifier && conf.specifier.startsWith('text')) {
+          text = {
+            fields: {
+              text: { type: 'text' }
+            }
+          };
+          if (config && config.caseSensitive) {
+            Util.deepAssign(text, {
+              fields: {
+                text_cs: { type: 'text', analyzer: 'whitespace' }
+              }
+            });
+          }
+        }
         props[field] = { type: 'keyword', ...text };
       } else if (conf.type === Object) {
         props[field] = { type: 'object', dynamic: true };
       } else if (SchemaRegistry.has(conf.type)) {
         props[field] = {
           type: conf.array ? 'nested' : 'object',
-          ...this.generateSingleSourceSchema(conf.type)
+          ...this.generateSingleSourceSchema(conf.type, config)
         };
       }
     }

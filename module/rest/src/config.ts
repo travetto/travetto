@@ -1,7 +1,8 @@
+import * as os from 'os';
 import * as cookies from 'cookies';
 
 import { Config } from '@travetto/config';
-import { Env, AppError } from '@travetto/base';
+import { Env, AppError, ResourceManager } from '@travetto/base';
 
 import { SSLUtil } from './util/ssl';
 import { Method } from './types';
@@ -13,7 +14,7 @@ export class RestConfig {
   disableGetCache = true;
   trustProxy = false;
   hostname = 'localhost';
-  bindAddress = 'localhost';
+  bindAddress?: string;
   baseUrl: string;
 
   defaultMessage = true;
@@ -47,6 +48,12 @@ export class RestConfig {
     };
 
   postConstruct() {
+    if (!this.bindAddress) {
+      const useIPv4 = !![...Object.values(os.networkInterfaces())]
+        .find(nics => nics.find(nic => nic.family === 'IPv4'));
+
+      this.bindAddress = useIPv4 ? '0.0.0.0' : '::';
+    }
     if (this.cookie.secure === undefined) {
       this.cookie.secure = this.ssl.active;
     }
@@ -66,6 +73,10 @@ export class RestConfig {
         }
         return SSLUtil.generateKeyPair();
       } else {
+        if (this.ssl.keys.key.length < 100) {
+          this.ssl.keys.key = await ResourceManager.read(this.ssl.keys.key, 'utf8');
+          this.ssl.keys.cert = await ResourceManager.read(this.ssl.keys.cert, 'utf8');
+        }
         return this.ssl.keys;
       }
     }

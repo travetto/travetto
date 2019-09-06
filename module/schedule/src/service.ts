@@ -33,7 +33,7 @@ export class Scheduler {
     // Validate expression
     new cron.CronTime(expression);
 
-    const job = new cron.CronJob({ cronTime: expression, ...options });
+    const job = new cron.CronJob({ cronTime: expression, unrefTimeout: true, ...options });
     job.start();
     const id = this.jobId++;
     this.jobs.set(id, job);

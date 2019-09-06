@@ -10,5 +10,6 @@ export class SQLModelConfig {
   namespace = '';
   database = 'app';
   autoCreate = !Env.prod;
+  version = '';
   options = {};
 }

@@ -2,10 +2,11 @@ import * as assert from 'assert';
 
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
-import { Suite, Test } from '@travetto/test';
+import { Suite, Test, BeforeAll } from '@travetto/test';
+import { BaseModelTest } from '@travetto/model/extension/base.test';
 
-import { BaseElasticsearchTest } from './base';
 import { ElasticsearchModelSource } from '../src/source';
+import { ElasticsearchModelConfig } from '../src/config';
 
 @Model({ baseType: true })
 class Person extends BaseModel {
@@ -38,7 +39,15 @@ class CivilEngineer extends Engineer {
 }
 
 @Suite('Polymorphism')
-class TestMultilayerPolymorphism extends BaseElasticsearchTest {
+class TestMultilayerPolymorphism extends BaseModelTest {
+
+  configClass = ElasticsearchModelConfig;
+  sourceClass = ElasticsearchModelSource;
+
+  @BeforeAll()
+  doInit() {
+    return super.init();
+  }
 
   @Test('Extraction')
   async testRetrieve() {
@@ -111,8 +120,8 @@ class TestMultilayerPolymorphism extends BaseElasticsearchTest {
       { delete: CivilEngineer.from({ id: created3.id }) }
     ]);
 
-    assert(o.counts.insert === 0);
-    assert(o.counts.upsert === 4);
+    assert(o.counts.insert === 1);
+    assert(o.counts.upsert === 3);
     assert(o.counts.update === 1);
     assert(o.counts.delete === 1);
 

@@ -1,4 +1,5 @@
-import * as es from 'elasticsearch';
+import * as es from '@elastic/elasticsearch';
+import { Reindex, Search, Index, Update, DeleteByQuery } from '@elastic/elasticsearch/api/requestParams';
 
 import {
   ModelSource, Query,
@@ -6,6 +7,7 @@ import {
   ModelRegistry, ModelCore,
   PageableModelQuery,
   SelectClause,
+  BulkProcessError,
   ModelQuery, WhereClause,
   ValidStringFields, ModelUtil
 } from '@travetto/model';
@@ -15,8 +17,28 @@ import { Injectable } from '@travetto/di';
 import { SchemaChangeEvent, SchemaRegistry } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config';
-import { EsBulkResponse, EsIdentity, EsBulkError } from './types';
+import { EsIdentity, EsBulkError } from './types';
 import { ElasticsearchUtil } from './util';
+
+type Agg =
+  Record<any, {
+    buckets: { doc_count: number, key: string }[]
+  }>;
+
+interface SearchResponse<T> {
+  hits: {
+    total: number;
+    hits: {
+      _source: T,
+      _index: string,
+      _id: string,
+      type: string
+    }[]
+  };
+
+  aggregations: Agg;
+  aggs: Agg;
+}
 
 @Injectable()
 export class ElasticsearchModelSource extends ModelSource {
@@ -31,6 +53,11 @@ export class ElasticsearchModelSource extends ModelSource {
 
   constructor(private config: ElasticsearchModelConfig) {
     super();
+  }
+
+  async postConstruct() {
+    await this.initClient();
+    await this.initDatabase();
   }
 
   generateId() {
@@ -87,9 +114,10 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async computeAliasMappings(force = false) {
     if (force || !this.indexToAlias.size) {
-      const aliases = (await this.client.cat.aliases({
+      const { body: aliases } = (await this.client.cat.aliases({
         format: 'json'
-      })) as { index: string, alias: string }[];
+      })) as { body: { index: string, alias: string }[] };
+
       this.indexToAlias = new Map();
       this.aliasToIndex = new Map();
       for (const al of aliases) {
@@ -110,7 +138,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async createIndex(cls: Class, alias = true) {
-    const schema = ElasticsearchUtil.generateSourceSchema(cls);
+    const schema = ElasticsearchUtil.generateSourceSchema(cls, this.config.schemaConfig);
     const ident = this.getIdentity(cls); // Already namespaced
     const concreteIndex = `${ident.index}_${Date.now()}`;
     try {
@@ -177,14 +205,14 @@ export class ElasticsearchModelSource extends ModelSource {
           }
         },
         waitForCompletion: true
-      });
+      } as Reindex);
 
       await Promise.all(Object.keys(aliases)
         .map(x => this.client.indices.delete({ index: x })));
 
       await this.client.indices.putAlias({ index: next, name: index });
     } else { // Only update
-      const schema = ElasticsearchUtil.generateSourceSchema(e.cls);
+      const schema = ElasticsearchUtil.generateSourceSchema(e.cls, this.config.schemaConfig);
 
       await this.client.indices.putMapping({
         index,
@@ -211,11 +239,11 @@ export class ElasticsearchModelSource extends ModelSource {
     }
   }
 
-  getPlainSearchObject<T extends ModelCore>(cls: Class<T>, query: Query<T>) {
+  getPlainSearchObject<T extends ModelCore>(cls: Class<T>, query: Query<T>): Search {
 
     const conf = ModelRegistry.get(cls);
-    const q = ElasticsearchUtil.extractWhereQuery(query.where! || {}, cls);
-    const search: es.SearchParams = {
+    const q = ElasticsearchUtil.extractWhereQuery(cls, query.where! || {}, this.config.schemaConfig);
+    const search: Search = {
       body: q ? { query: q } : {}
     };
 
@@ -248,7 +276,7 @@ export class ElasticsearchModelSource extends ModelSource {
     return search;
   }
 
-  getSearchObject<T>(cls: Class<T>, query: Query<T>) {
+  getSearchObject<T>(cls: Class<T>, query: Query<T>): Search {
     const conf = ModelRegistry.get(cls);
 
     if (conf.subType) {
@@ -260,7 +288,7 @@ export class ElasticsearchModelSource extends ModelSource {
     return res;
   }
 
-  safeLoad<T>(req: es.SearchParams, results: es.SearchResponse<T>): T[] {
+  safeLoad<T, U = T>(req: Search, results: SearchResponse<T>): U[] {
     const out: T[] = [];
 
     // determine if id
@@ -275,14 +303,19 @@ export class ElasticsearchModelSource extends ModelSource {
       out.push(obj);
     }
 
-    return out;
+    return out as any as U[];
+  }
+
+  async execSearch<T>(search: Search<T>): Promise<SearchResponse<T>> {
+    const { body, statusCode } = await this.client.search(search);
+    return body as SearchResponse<T>;
   }
 
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const req = this.getSearchObject(cls, query);
     console.trace('Querying', JSON.stringify(req, null, 2));
-    const results = await this.client.search<U>(req);
-    return this.safeLoad<U>(req, results);
+    const results = await this.execSearch(req);
+    return this.safeLoad(req, results) as any as U[];
   }
 
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
@@ -297,22 +330,11 @@ export class ElasticsearchModelSource extends ModelSource {
     return o;
   }
 
-  cleanseId<T extends ModelCore>(o: T) {
-    if (o.id) {
-      (o as any)._id = o.id as string;
-      delete o.id;
-    }
-    return (o as any)._id;
-  }
-
-  extractId<T extends ModelCore>(o: T) {
-    const id = this.cleanseId(o);
-    delete (o as any)._id;
-    return id;
-  }
-
   async initClient() {
-    this.client = new es.Client(Util.deepAssign({}, this.config));
+    this.client = new es.Client({
+      nodes: this.config.hosts,
+      ...this.config
+    });
     await this.client.cluster.health({});
   }
 
@@ -330,20 +352,53 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async clearDatabase() {
     await this.client.indices.delete({
-      index: this.getNamespacedIndex('*')
+      index: this.getNamespacedIndex('*'),
     });
   }
 
-  async suggestField<T extends ModelCore, U = T>(
-    cls: Class<T>, field: ValidStringFields<T>, query: string, filter?: PageableModelQuery<T>
-  ): Promise<U[]> {
-    const search = this.buildRawMultiSuggestQuery([cls], field, query, filter);
-    const res = await this.client.search<U>(search);
-    return this.safeLoad<U>(search, res);
+  async suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    const search = this.buildRawMultiSuggestQuery([cls], field, prefix, {
+      select: { [field]: 1 } as any,
+      ...query
+    });
+    const res = await this.execSearch(search);
+    const safe = this.safeLoad<T>(search, res);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, safe, x => x, query && query.limit);
+  }
+
+  async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+    const q = query && query.where ? ElasticsearchUtil.extractWhereQuery(cls, query.where) : { match_all: {} };
+    const search = {
+      ...this.getIdentity(cls),
+      body: {
+        query: q,
+        aggs: {
+          [field]: {
+            terms: {
+              field,
+              size: 100
+            },
+          }
+        }
+      },
+      size: 0
+    };
+
+    const res = await this.execSearch(search);
+    const { buckets } = res.aggregations[field];
+    const out = buckets.map(({ key, doc_count }) => ({ key, count: doc_count }));
+    return out;
+  }
+
+  async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    const search = this.buildRawMultiSuggestQuery([cls], field, prefix, query);
+    const res = await this.execSearch(search);
+    const safe = this.safeLoad<T>(search, res);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, safe, (x, v) => v, query && query.limit);
   }
 
   async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>) {
-    const res = await this.client.search<ModelCore>(this.getSearchObject(cls, {
+    const res = await this.execSearch(this.getSearchObject(cls, {
       select: {
         id: 1
       } as any as SelectClause<T>,
@@ -356,7 +411,7 @@ export class ElasticsearchModelSource extends ModelSource {
     return classes.map(t => this.getIdentity(t).index).join(',');
   }
 
-  async convertRawResponse<T extends ModelCore>(response: es.SearchResponse<T>) {
+  async convertRawResponse<T extends ModelCore>(response: SearchResponse<T>) {
     const out: T[] = [];
 
     for (const item of response.hits.hits) {
@@ -401,8 +456,8 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   buildRawMultiSuggestQuery<T extends ModelCore = ModelCore>(
-    classes: Class<T>[], field: ValidStringFields<T>, query: string,
-    filter?: PageableModelQuery<T>
+    classes: Class<T>[], field: ValidStringFields<T>, query?: string,
+    filter?: Query<T>
   ) {
     const spec = SchemaRegistry.getViewSchema(classes[0]).schema[field as any].specifier;
     const text = spec && spec.startsWith('text');
@@ -411,13 +466,13 @@ export class ElasticsearchModelSource extends ModelSource {
       console.warn(`${classes[0].__id}.${field} is not registered as @Text, reverting to keyword search`);
     }
 
-    const res = this.buildRawMultiQuery(classes, filter, {
+    const res = this.buildRawMultiQuery(classes, filter, query ? {
       match_phrase_prefix: {
         [text ? `${field}.text` : field]: {
           query
         }
       }
-    });
+    } : {});
 
     res.size = filter && filter.limit || 10;
 
@@ -442,7 +497,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async getRawMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query: Query<T>) {
     const searchObj = this.buildRawMultiQuery(classes, query);
-    return await this.client.search<T>(searchObj);
+    return this.execSearch(searchObj);
 
   }
 
@@ -451,7 +506,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
-    const results = await this.client.search(this.getSearchObject(cls, {
+    const results = await this.execSearch(this.getSearchObject(cls, {
       ...query,
       limit: 0
     }));
@@ -481,16 +536,16 @@ export class ElasticsearchModelSource extends ModelSource {
       }
     }
 
-    const res = await this.client.delete({
+    const { body: res } = await this.client.delete({
       ...this.getIdentity(cls),
       id,
-      refresh: true
+      refresh: 'true'
     });
     return res.found ? 1 : 0;
   }
 
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
-    const res = await this.client.deleteByQuery(this.getSearchObject(cls, query) as es.DeleteDocumentByQueryParams);
+    const { body: res } = await this.client.deleteByQuery(this.getSearchObject(cls, query) as DeleteByQuery);
     return res.deleted || 0;
   }
 
@@ -498,12 +553,10 @@ export class ElasticsearchModelSource extends ModelSource {
     const id = keepId ? o.id : undefined;
     delete o.id;
 
-    this.cleanseId(o);
-
-    const res = await this.client.index({
+    const { body: res } = await this.client.index({
       ...this.getIdentity(o.constructor as Class),
       ... (id ? { id } : {}),
-      refresh: true,
+      refresh: 'true',
       body: o
     });
 
@@ -516,10 +569,13 @@ export class ElasticsearchModelSource extends ModelSource {
       if (!keepId) {
         delete x.id;
       }
-      this.cleanseId(x);
     }
 
     const res = await this.bulkProcess(cls, objs.map(x => ({ upsert: x })));
+    if (res.counts.error > 0) {
+      throw new BulkProcessError(res.errors);
+    }
+
     for (const idx of res.insertedIds.keys()) {
       objs[idx].id = res.insertedIds.get(idx)!;
     }
@@ -528,7 +584,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async update<T extends ModelCore>(cls: Class<T>, o: T): Promise<T> {
-    const id = this.extractId(o);
+    const id = o.id!;
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
       try {
@@ -538,19 +594,21 @@ export class ElasticsearchModelSource extends ModelSource {
       }
 
     }
+    delete o.id;
     await this.client.index({
       ...this.getIdentity(cls),
       id,
       opType: 'index',
-      refresh: true,
+      refresh: 'true',
       body: o
-    });
+    } as Index);
+    o.id = id;
 
     return this.getById(cls, id);
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
-    const id = this.extractId(data);
+    const id = data.id;
     const script = ElasticsearchUtil.generateUpdateScript(data);
 
     console.debug('Partial Script', script);
@@ -558,11 +616,11 @@ export class ElasticsearchModelSource extends ModelSource {
     await this.client.update({
       ...this.getIdentity(cls),
       id,
-      refresh: true,
+      refresh: 'true',
       body: {
         script
       }
-    });
+    } as Update);
 
     return this.getById(cls, id);
   }
@@ -580,7 +638,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
     const script = ElasticsearchUtil.generateUpdateScript(data);
 
-    const res = await this.client.updateByQuery({
+    const { body: res } = await this.client.updateByQuery({
       ...this.getIdentity(cls),
       refresh: true,
       body: {
@@ -594,7 +652,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async bulkProcess<T extends ModelCore>(cls: Class<T>, operations: BulkOp<T>[]) {
 
-    const body: es.BulkIndexDocumentsParams['body'] = operations.reduce((acc, op) => {
+    const body = operations.reduce((acc, op) => {
 
       const esIdent = this.getIdentity((op.upsert || op.delete || op.insert || op.update || { constructor: cls }).constructor as Class);
       const ident = { _index: esIdent.index, _type: esIdent.type };
@@ -618,9 +676,9 @@ export class ElasticsearchModelSource extends ModelSource {
       return acc;
     }, [] as any);
 
-    const res: EsBulkResponse = await this.client.bulk({
+    const { body: res } = await this.client.bulk({
       body,
-      refresh: true
+      refresh: 'true'
     });
 
     const out: BulkResponse = {
@@ -643,15 +701,16 @@ export class ElasticsearchModelSource extends ModelSource {
         out.errors.push(v.error);
         out.counts.error += 1;
       } else {
-        let sk: string = k;
+        let sk: string = k as string;
         if (sk === 'create') {
           sk = 'insert';
         } else if (sk === 'index') {
-          sk = 'upsert';
+          sk = operations[i].insert ? 'insert' : 'upsert';
         }
 
         if (v.result === 'created') {
           out.insertedIds.set(i, v._id);
+          (operations[i].insert || operations[i].upsert)!.id = v._id;
         }
 
         (out.counts as any)[sk as any] += 1;

@@ -29,7 +29,7 @@ export class EncoderTest {
         headers[key] = value;
       }
     } as any, new Session({
-      id: 'true',
+      key: 'true',
       data: {
         data: 'hello'
       }

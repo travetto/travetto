@@ -61,7 +61,7 @@ export class AssertUtil {
     // tslint:disable:prefer-const
     let { line, file } = this.getPositionOfError(error, suite.file);
 
-    if (line === 1) {
+    if (line === 1 && suite.lines) {
       line = suite.lines.start;
     }
 

@@ -7,14 +7,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^0.7.5"
+    "@travetto/di": "^1.0.0-beta.1"
   },
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "devDependencies": {
-    "@travetto/test": "^0.7.4"
+    "@travetto/test": "^1.0.0-beta.1"
   },
   "optionalExtensionDependencies": {
-    "@travetto/rest": "^0.6.0-rc.0"
+    "@travetto/rest": "^1.0.0-beta.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -35,5 +35,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "0.7.4"
+  "version": "1.0.0-beta.1"
 }
