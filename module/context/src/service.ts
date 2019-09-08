@@ -60,11 +60,14 @@ export class AsyncContext {
     if (!this.active) {
       return;
     }
-    const exAsyncId = async_hooks.executionAsyncId();
+
     if (this.threads.has(asyncId)) {
       this.threads.delete(asyncId);
-    } else if (this.threads.has(exAsyncId)) {
-      this.threads.delete(exAsyncId);
+    } else {
+      const exAsyncId = async_hooks.executionAsyncId();
+      if (this.threads.has(exAsyncId)) {
+        this.threads.delete(exAsyncId);
+      }
     }
   }
 
@@ -104,13 +107,15 @@ export class AsyncContext {
     }
 
     // Force new context
-    await new Promise(r => process.nextTick(r));
+    await new Promise(process.nextTick);
 
     const runId = async_hooks.executionAsyncId() || async_hooks.triggerAsyncId();
+    const threads = new Set([runId]);
+
     this.active += 1;
     this.storageState.set(runId, init);
+    this.threadsSet.set(runId, threads);
     this.threads.set(runId, runId);
-    this.threadsSet.set(runId, new Set([runId]));
 
     let val;
     let err;
@@ -122,7 +127,9 @@ export class AsyncContext {
 
     this.active -= 1;
     this.storageState.delete(runId);
-    for (const el of this.threadsSet.get(runId)!) {
+    this.threadsSet.delete(runId);
+
+    for (const el of threads) {
       this.threads.delete(el);
     }
 
