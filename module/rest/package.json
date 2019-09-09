@@ -15,7 +15,7 @@
     "cookies": "^0.7.3"
   },
   "devDependencies": {
-    "@travetto/cache": "^1.0.0-beta.1",
+    "@travetto/cache": "^1.0.0-beta.9",
     "@travetto/test": "^1.0.0-beta.1"
   },
   "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
@@ -39,5 +39,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-beta.5"
+  "version": "1.0.0-beta.6"
 }
