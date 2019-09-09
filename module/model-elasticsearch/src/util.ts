@@ -274,6 +274,16 @@ export class ElasticsearchUtil {
                 prop = { type: 'float' };
               }
             }
+          } else if (digits) {
+            if (digits <= 2) {
+              prop = { type: 'byte' };
+            } else if (digits <= 4) {
+              prop = { type: 'short' };
+            } else if (digits <= 9) {
+              prop = { type: 'integer' };
+            } else {
+              prop = { type: 'long' };
+            }
           }
         }
         props[field] = prop;

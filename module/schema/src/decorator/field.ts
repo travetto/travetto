@@ -76,6 +76,7 @@ export const Url = (message?: string) => Match(CommonRegExp.url, message);
 export const Precision = (digits: number, decimals?: number) => numberProp({ precision: [digits, decimals] });
 export const Integer = () => Precision(0);
 export const Float = () => Precision(10, 7);
+export const Long = () => Precision(19, 0);
 export const Currency = () => Precision(13, 2);
 
 // For Auto schemas
