@@ -41,13 +41,19 @@ export class RouteUtil {
         if (isRenderable(output)) {
           await output.render(res);
         } else if (typeof output === 'string') {
-          res.setHeader('Content-Type', MimeType.TEXT);
+          if (!res.getHeader('Content-Type')) {
+            res.setHeader('Content-Type', MimeType.TEXT);
+          }
           res.send(output);
         } else if ('toJSON' in output) {
-          res.setHeader('Content-Type', MimeType.JSON);
+          if (!res.getHeader('Content-Type')) {
+            res.setHeader('Content-Type', MimeType.JSON);
+          }
           res.send((output as any).toJSON());
         } else {
-          res.setHeader('Content-Type', MimeType.JSON);
+          if (!res.getHeader('Content-Type')) {
+            res.setHeader('Content-Type', MimeType.JSON);
+          }
           res.send(JSON.stringify(output as any, undefined, 'pretty' in req.query ? 2 : 0));
         }
       } else {
