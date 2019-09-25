@@ -10,25 +10,6 @@ import { ParamUtil } from './param';
 
 export class RouteUtil {
 
-  static logRequest(req: Request, res: Response, duration: number) {
-    const reqLog = {
-      meta: {
-        method: req.method,
-        path: req.baseUrl ? `${req.baseUrl}${req.path}`.replace(/\/+/, '/') : req.path,
-        query: req.query,
-        params: req.params,
-        statusCode: res.statusCode,
-        duration
-      }
-    };
-
-    if (reqLog.meta.statusCode < 400) {
-      console.info(`Request`, reqLog);
-    } else {
-      console.error(`Request`, reqLog);
-    }
-  }
-
   static async sendOutput(req: Request, res: Response, output: any, headers?: HeaderMap) {
     if (!res.headersSent) {
       if (headers) {
@@ -77,7 +58,6 @@ export class RouteUtil {
   }
 
   static async _routeHandler(filterChain: Filter, headers: HeaderMap, req: Request, res: Response) {
-    const start = Date.now();
     try {
       const output = await filterChain(req, res);
       await this.sendOutput(req, res, output, headers);
@@ -86,8 +66,6 @@ export class RouteUtil {
         error = new AppError(error.message || 'Unexpected error', 'general', error);
       }
       await this.sendOutput(req, res, error);
-    } finally {
-      this.logRequest(req, res, Date.now() - start);
     }
   }
 

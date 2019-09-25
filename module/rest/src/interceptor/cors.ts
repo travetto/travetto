@@ -1,14 +1,23 @@
+import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 
-import { Request, Response, RouteConfig } from '../types';
+import { Request, Response, RouteConfig, Method } from '../types';
 import { RestInterceptor } from './interceptor';
-import { RestConfig } from '../config';
+
+@Config('rest.cors')
+class RestCorsConfig {
+  active: boolean = false;
+  origins?: string[];
+  methods?: Method[];
+  headers?: string[];
+  credentials?: boolean
+}
 
 @Injectable()
 export class CorsInterceptor extends RestInterceptor {
 
   @Inject()
-  restConfig: RestConfig;
+  corsConfig: RestCorsConfig;
 
   origins: Set<string>;
   methods: string;
@@ -16,14 +25,14 @@ export class CorsInterceptor extends RestInterceptor {
   credentials: boolean = false;
 
   postConstruct() {
-    this.origins = new Set(this.restConfig.cors.origins || []);
-    this.methods = (this.restConfig.cors.methods || ['PUT', 'POST', 'GET', 'DELETE', 'PATCH']).join(',');
-    this.headers = (this.restConfig.cors.headers || []).join(',');
-    this.credentials = !!this.restConfig.cors.credentials;
+    this.origins = new Set(this.corsConfig.origins || []);
+    this.methods = (this.corsConfig.methods || ['PUT', 'POST', 'GET', 'DELETE', 'PATCH']).join(',');
+    this.headers = (this.corsConfig.headers || []).join(',');
+    this.credentials = !!this.corsConfig.credentials;
   }
 
   public applies?(route: RouteConfig) {
-    return this.restConfig.cors && this.restConfig.cors.active;
+    return this.corsConfig && this.corsConfig.active;
   }
 
   intercept(req: Request, res: Response) {

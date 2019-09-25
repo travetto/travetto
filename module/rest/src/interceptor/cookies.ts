@@ -2,12 +2,24 @@ import * as cookies from 'cookies';
 import { ServerResponse, IncomingMessage } from 'http';
 
 import { Injectable, Inject } from '@travetto/di';
+import { Config } from '@travetto/config';
 
 import { RouteConfig, Request, Response } from '../types';
 import { RestConfig } from '../config';
 import { RestInterceptor } from './interceptor';
 import { CorsInterceptor } from './cors';
 import { GetCacheInterceptor } from './get-cache';
+
+@Config('rest.cookie')
+export class RestCookieConfig implements cookies.SetOption {
+  active = true;
+  signed = true;
+  httpOnly = true;
+  sameSite: cookies.SetOption['sameSite'] | 'lax' = 'lax';
+  keys = ['default-insecure'];
+  secure?: boolean;
+  domain?: string;
+}
 
 @Injectable()
 export class CookiesInterceptor extends RestInterceptor {
@@ -16,10 +28,22 @@ export class CookiesInterceptor extends RestInterceptor {
   before = GetCacheInterceptor;
 
   @Inject()
-  config: RestConfig;
+  cookieConfig: RestCookieConfig;
+
+  @Inject()
+  restConfig: RestConfig;
 
   postConstruct() {
-    const self = this.config.cookie;
+    const self = this.cookieConfig;
+
+    if (this.cookieConfig.secure === undefined) {
+      this.cookieConfig.secure = this.restConfig.ssl.active;
+    }
+
+    if (this.cookieConfig.domain === undefined) {
+      this.cookieConfig.domain = this.restConfig.hostname;
+    }
+
 
     // Patch all cookies to default to the cookie values
     const set = cookies.prototype.set;
@@ -37,7 +61,7 @@ export class CookiesInterceptor extends RestInterceptor {
   }
 
   applies(route: RouteConfig) {
-    return this.config.cookie.active;
+    return this.cookieConfig.active;
   }
 
   intercept(req: Request, res: Response) {
@@ -45,7 +69,7 @@ export class CookiesInterceptor extends RestInterceptor {
       req.cookies = res.cookies = new cookies(
         req as any as IncomingMessage,
         res as any as ServerResponse,
-        this.config.cookie
+        this.cookieConfig
       );
     }
   }
