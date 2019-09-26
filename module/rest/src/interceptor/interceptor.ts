@@ -7,5 +7,5 @@ export abstract class RestInterceptor {
   public before?: Class<RestInterceptor>[] | Set<Class<RestInterceptor>> | Class<RestInterceptor>;
   public applies?(route: RouteConfig): boolean;
 
-  abstract intercept(req: Request, res: Response, next?: () => Promise<any>): Promise<void> | void;
+  abstract intercept(req: Request, res: Response, next?: () => Promise<any>): Promise<any> | void;
 }

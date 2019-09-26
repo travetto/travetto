@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Cache, Path, Query, Body } from '@travetto/rest';
+import { Controller, Post, Get, CacheControl, Path, Query, Body } from '@travetto/rest';
 import { MockService } from './mock';
 
 @Controller('/simple')
@@ -13,7 +13,7 @@ export class Simple {
     return `/simple/name => ${user.first.toLowerCase()} ${age + page}`;
   }
 
-  @Cache(1, 'd')
+  @CacheControl(1, 'd')
   @Get('/nameAngry')
   async doItAngry() {
     const user = await this.service.fetch();
