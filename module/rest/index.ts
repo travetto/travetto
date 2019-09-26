@@ -16,6 +16,8 @@ export * from './src/interceptor/cors';
 export * from './src/interceptor/cookies';
 export * from './src/interceptor/get-cache';
 export * from './src/interceptor/interceptor';
+export * from './src/interceptor/logging';
+export * from './src/interceptor/serialize';
 export * from './src/types';
 export * from './src/util/mime';
 export * from './src/util/param';

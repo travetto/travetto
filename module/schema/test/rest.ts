@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Controller, Post, ControllerRegistry, Method, RouteUtil, Get } from '@travetto/rest';
+import { Controller, Post, ControllerRegistry, Method, RouteUtil, Get, SerializeInterceptor } from '@travetto/rest';
 
 import { SchemaBody, SchemaQuery } from '../extension/rest';
 
@@ -44,12 +44,13 @@ export class RestTest {
   async verifyBody() {
     const ep = RestTest.getEndpoint('/user', 'post');
 
-    const handler = RouteUtil.createRouteHandler([], ep);
+    const handler = RouteUtil.createRouteHandler([new SerializeInterceptor()], ep);
 
     const res = {
       result: undefined as any,
       statusCode: 201,
       setHeader() { },
+      getHeader(field: String) { return ''; },
       send(val: any) {
         this.result = JSON.parse(val);
       },
@@ -80,12 +81,13 @@ export class RestTest {
   async verifyQuery() {
     const ep = RestTest.getEndpoint('/user', 'get');
 
-    const handler = RouteUtil.createRouteHandler([], ep);
+    const handler = RouteUtil.createRouteHandler([new SerializeInterceptor()], ep);
 
     const res = {
       result: undefined as any,
       statusCode: 201,
       setHeader() { },
+      getHeader(field: String) { return ''; },
       send(val: any) {
         this.result = JSON.parse(val);
       },

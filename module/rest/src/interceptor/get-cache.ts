@@ -20,7 +20,7 @@ export class GetCacheInterceptor extends RestInterceptor {
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
     const result = await next();
     // Only apply on the way out, and on success
-    if (res.getHeader('Expires') !== undefined && res.getHeader('Cache-Control') !== undefined) {
+    if (res.getHeader('Expires') === undefined && res.getHeader('Cache-Control') === undefined) {
       res.setHeader('Expires', '-1');
       res.setHeader('Cache-Control', 'max-age=0, no-cache');
     }

@@ -1,11 +1,9 @@
 import * as os from 'os';
-import * as cookies from 'cookies';
 
 import { Config } from '@travetto/config';
 import { Env, AppError, ResourceManager } from '@travetto/base';
 
 import { SSLUtil } from './util/ssl';
-import { Method } from './types';
 
 @Config('rest')
 export class RestConfig {
@@ -19,30 +17,12 @@ export class RestConfig {
 
   defaultMessage = true;
 
-  cookie: cookies.SetOption & { active: boolean, signed: boolean, keys: string[] } = {
-    active: true,
-    signed: true,
-    httpOnly: true,
-    sameSite: 'lax',
-    keys: ['default-insecure']
-  };
-
   ssl: {
     active?: boolean,
     keys?: {
       cert: string,
       key: string
     }
-  } = {
-      active: false
-    };
-
-  cors: {
-    active: boolean;
-    origins?: string[],
-    methods?: Method[],
-    headers?: string[],
-    credentials?: boolean
   } = {
       active: false
     };
@@ -54,14 +34,8 @@ export class RestConfig {
 
       this.bindAddress = useIPv4 ? '0.0.0.0' : '::';
     }
-    if (this.cookie.secure === undefined) {
-      this.cookie.secure = this.ssl.active;
-    }
     if (this.baseUrl === undefined) {
       this.baseUrl = `http${this.ssl.active ? 's' : ''}://${this.hostname}${[80, 443].includes(this.port) ? '' : `:${this.port}`}`;
-    }
-    if (this.cookie.domain === undefined) {
-      this.cookie.domain = this.hostname;
     }
   }
 
