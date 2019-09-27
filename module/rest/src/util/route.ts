@@ -42,7 +42,7 @@ export class RouteUtil {
 
     const filterChain = [
       ...interceptors
-        .filter(x => x.applies ? x.applies(route) : true)
+        .filter(x => x.applies ? x.applies(route, router) : true)
         .map(x => x.intercept.bind(x)),
       ...filters,
       handlerBound

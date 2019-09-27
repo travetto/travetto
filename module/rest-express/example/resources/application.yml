@@ -1,3 +1,7 @@
 rest.cookie:
   domain: fun.com
   sameSite: strict
+rest.logRoutes:
+  deny:
+    - '/'
+    - '/simple:/name/*'
