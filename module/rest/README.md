@@ -156,7 +156,14 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 * ['CORS support'](./src/interceptor/cors.ts) - This interceptor allows cors functionality to be configured out of the box, by setting properties in your application.yml, specifically, `rest.cors.active: true`
 * ['GET request cache control'](./src/interceptor/get-cache.ts) - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting `res.disableGetCache: true` in your config. 
-* ['Logging'](./src/interceptor/logging.ts) - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so `rest.logRoutes.{deny|allow} = ['/path', /\/path\/.*/]`. 
+* ['Logging'](./src/interceptor/logging.ts) - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so 
+```yaml
+rest.logRoutes.{deny|allow}:
+  - '/controller1'
+  - '/controller1:*'
+  - '/controller2:/path'
+  - '/controller3:/path/*` 
+```
 * ['Serialization'](./src/interceptor/serialize.ts) - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
 
 ## Creating and Running an App
