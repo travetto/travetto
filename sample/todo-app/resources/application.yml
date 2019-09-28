@@ -1,7 +1,5 @@
-api.client:
+swagger:
   output: ./api-client
-  format: typescript-angular
-  formatOptions: supportsES6=true,ngVersion=6.1
 
 sql.model:
   namespace: todo

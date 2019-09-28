@@ -76,16 +76,14 @@ This command is provided by [`email-template`](https://github.com/travetto/trave
 
 Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
 
-## Swagger Client Generation
+## Swagger Spec Generation
 
 **Terminal: Swagger usage**
 ```bash
-travetto swagger-client
+travetto swagger-spec
   -o, --output [output]  # Output folder, defaults to ./api-client
-  -f, --format [format]  # Client format, defaults to 'typescript-angular'
-  -a, --additional-properties [props]  # Additional format properties
 ```
 
-The command relies upon `swagger-codegen` to generate the output client code.  The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `swagger.json`.  Once produced, the code will invoke `swagger-codegen` to produce the desired client code in the desired location.  
+The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `swagger.json`.  Once produced, the code will store the output in the specified location.  
 
-**NOTE** The [`Swagger`](https://github.com/travetto/travetto/tree/master/module/swagger) module supports generating the client in real-time while listening for changes to routes and models.
+**NOTE** The [`Swagger`](https://github.com/travetto/travetto/tree/master/module/swagger) module supports generating the swagger spec in real-time while listening for changes to routes and models.

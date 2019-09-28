@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "test": "npx travetto test",
-    "start": "npx travetto run todo"
+    "start": "npx travetto run"
   },
   "author": "",
   "license": "ISC",

@@ -19,12 +19,9 @@ export class ApiHostConfig {
   openapi = '3.0.1';
 }
 
-@Config('api.client')
-export class ApiClientConfig {
-  codeGenImage: string = 'openapitools/openapi-generator-cli';
+@Config('swagger')
+export class SwaggerConfig {
   output: string = '';
-  format?: string = '';
-  formatOptions?: string = '';
   skipRoutes: boolean = false;
   exposeAllSchemas: boolean = false;
 

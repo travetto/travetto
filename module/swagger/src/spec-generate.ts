@@ -3,7 +3,7 @@ import { ControllerRegistry, MimeType, EndpointClassType, ParamConfig, EndpointI
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, ALL_VIEW } from '@travetto/schema';
 
-import { ApiClientConfig } from './config';
+import { SwaggerConfig } from './config';
 
 import { SchemaObject, OpenAPIObject, SchemasObject, ParameterObject, OperationObject } from 'openapi3-ts';
 
@@ -264,7 +264,7 @@ export class SpecGenerateUtil {
     }
   }
 
-  static generate(config: ApiClientConfig): OpenAPIObject {
+  static generate(config: SwaggerConfig): OpenAPIObject {
     const state: PartialSpec = {
       paths: {},
       components: { schemas: {} },

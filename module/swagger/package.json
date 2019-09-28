@@ -7,7 +7,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/exec": "^1.0.0-beta.1",
     "@travetto/rest": "^1.0.0-beta.10",
     "@travetto/schema": "^1.0.0-beta.3",
     "openapi3-ts": "^1.3.0"

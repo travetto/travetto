@@ -32,12 +32,12 @@ api:
     basePath: <basePath, defaults to '/'>
     host?: <host name>
     swagger: <swagger version, only 2.0 is supported>
-  client:
-    codeGenImage: swaggerapi/swagger-codegen-cli
-    output?: Codegen ouptut directory
-    format?: Codegen language format
-    formatOptions?: Options to pass to the codegen tool
+swagger:
+  output?: Spec output directory
 ```
 
+## Spec Generation
+The framework, when in watch mode, will generate the [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) JSON file. This module integrates with the file watching paradigm and can regenerate the swagger json as changes to endpoints and models are made during development.
+
 ## Client Generation
-In addition to the [`swagger`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerObject) JSON file generation, the module also supports generating a client via `swagger-codegen-cli`.  This module integrates with the file watching paradigm and can regenerate the swagger client as changes to endpoints and models are made during development.
+The outputted spec can be 
