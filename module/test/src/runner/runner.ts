@@ -31,7 +31,7 @@ export class Runner {
   }
 
   async runFiles() {
-    const consumer = ConsumerManager.create(this.state.consumer || this.state.format);
+    const consumer = ConsumerManager.create(this.state.consumer ?? this.state.format);
 
     const files = await this.getFiles();
 
@@ -62,7 +62,7 @@ export class Runner {
   }
 
   async runSingle() {
-    const consumer = ConsumerManager.create(this.state.consumer || this.state.format);
+    const consumer = ConsumerManager.create(this.state.consumer ?? this.state.format);
     if (consumer.onStart) {
       consumer.onStart();
     }

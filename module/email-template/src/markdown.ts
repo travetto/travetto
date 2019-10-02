@@ -26,11 +26,11 @@ export class MarkdownUtil {
   }
 
   private static getIntAttr(attrs: Record<string, string>, name: string, def?: number): number {
-    return (name in attrs ? parseInt(attrs[name], 10) : def) || 0;
+    return (name in attrs ? parseInt(attrs[name], 10) : def) ?? 0;
   }
 
   private static getAttr(attrs: Record<string, string>, name: string) {
-    return (attrs[name] || '').trim();
+    return (attrs[name] ?? '').trim();
   }
 
   static async htmlToMarkdown(html: string) {

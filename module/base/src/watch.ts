@@ -31,9 +31,9 @@ export class Watcher extends EventEmitter {
 
     this.options = {
       maxListeners: opts.maxListeners,
-      interval: opts.interval || 250,
-      debounceDelay: opts.debounceDelay || 250,
-      cwd: opts.cwd || Env.cwd
+      interval: opts.interval ?? 250,
+      debounceDelay: opts.debounceDelay ?? 250,
+      cwd: opts.cwd ?? Env.cwd
     };
 
     // Set maxListeners
@@ -50,7 +50,7 @@ export class Watcher extends EventEmitter {
   }
 
   private processDirectoryChange(dir: ScanEntry) {
-    dir.children = dir.children || [];
+    dir.children = dir.children ?? [];
 
     fs.readdir(dir.file, (err, current) => {
       if (err) {
@@ -65,7 +65,7 @@ export class Watcher extends EventEmitter {
       current = current.filter(x => !x.startsWith('.')).map(x => FsUtil.joinUnix(dir.file, x));
 
       // Get watched files for this dir
-      const previous = (dir.children || []).slice(0);
+      const previous = (dir.children ?? []).slice(0);
 
       // If file was deleted
       for (const child of previous) {
@@ -90,7 +90,7 @@ export class Watcher extends EventEmitter {
         const nextStats = fs.lstatSync(next);
 
         if (!prevSet.has(next) && (nextStats.isDirectory() ||
-          this.findHandlers.find(x => x.testFile ? x.testFile(nextRel) : false))
+          this.findHandlers.find(x => x.testFile?.(nextRel) ?? false))
         ) {
           const sub: ScanEntry = {
             file: next,
@@ -189,7 +189,7 @@ export class Watcher extends EventEmitter {
     if (this.watchers.has(entry.file)) {
       console.trace('Unwatching Directory', entry.file);
 
-      for (const child of (entry.children || [])) {
+      for (const child of (entry.children ?? [])) {
         this.unwatch(child.file);
       }
 

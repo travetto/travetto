@@ -1,6 +1,7 @@
 import { RestApp, Application, Controller, Get, Context } from '@travetto/rest';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { CacheStore } from '@travetto/cache';
+import { ModelService } from '@travetto/model';
 import { ModelCacheStore } from '@travetto/cache/extension/model.store';
 
 import { SessionData, Session } from '../../src/types';
@@ -10,8 +11,8 @@ import { SESSION_CACHE } from '../../src/service';
 export class App {
 
   @InjectableFactory(SESSION_CACHE)
-  static getSessionStore(): CacheStore {
-    return new ModelCacheStore();
+  static getSessionStore(service: ModelService): CacheStore {
+    return new ModelCacheStore(service);
   }
 
   @Inject()

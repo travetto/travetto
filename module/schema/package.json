@@ -12,7 +12,7 @@
   },
   "optionalExtensionDependencies": {
     "@travetto/rest": "^1.0.0-beta.0",
-    "@types/faker": "^4.1.5",
+    "@types/faker": "^4.1.7",
     "faker": "^4.1.0"
   },
   "homepage": "https://travetto.io",

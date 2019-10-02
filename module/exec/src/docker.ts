@@ -12,7 +12,7 @@ const fsWriteFile = util.promisify(fs.writeFile);
 export class DockerContainer {
 
   private static getContainerName(image: string, container?: string) {
-    return container || `${EnvUtil.get('DOCKER_NS', image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
+    return container ?? `${EnvUtil.get('DOCKER_NS', image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
   }
 
   private dockerCmd: string = 'docker';
@@ -50,7 +50,7 @@ export class DockerContainer {
   }
 
   private runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
-    const state = Exec.spawn(this.dockerCmd, [op, ...(args || [])], { shell: this.tty });
+    const state = Exec.spawn(this.dockerCmd, [op, ...(args ?? [])], { shell: this.tty });
     return (op !== 'run' && op !== 'exec') ? this.watchForEviction(state, true) : state;
   }
 
@@ -139,7 +139,7 @@ export class DockerContainer {
         flags.push('-e', `${k}=${this.env[k]}`);
       }
     }
-    flags.push(...(extra || []));
+    flags.push(...(extra ?? []));
     return flags;
   }
 
@@ -179,16 +179,16 @@ export class DockerContainer {
 
   async create(args?: string[], flags?: string[]) {
     const allFlags = this.getFlags(flags);
-    return this.runCmd('create', '--name', this.container, ...allFlags, this.image, ...(args || [])).result;
+    return this.runCmd('create', '--name', this.container, ...allFlags, this.image, ...(args ?? [])).result;
   }
 
   async start(args?: string[], flags?: string[]) {
     await this.initTemp();
-    return this.runCmd('start', ...(flags || []), this.container, ...(args || [])).result;
+    return this.runCmd('start', ...(flags ?? []), this.container, ...(args ?? [])).result;
   }
 
   async stop(args?: string[], flags?: string[]) {
-    const toStop = this.runCmd('stop', ...(flags || []), this.container, ...(args || [])).result;
+    const toStop = this.runCmd('stop', ...(flags ?? []), this.container, ...(args ?? [])).result;
     let prom = toStop;
     if (this.pendingExecutions) {
       const pendingResults = [...this.pendingExecutions.values()].map(e => e.result);
@@ -200,7 +200,7 @@ export class DockerContainer {
 
   exec(args?: string[], extraFlags?: string[]) {
     const flags = this.getRuntimeFlags(extraFlags);
-    const execState = this.runCmd('exec', ...flags, this.container, ...(args || []));
+    const execState = this.runCmd('exec', ...flags, this.container, ...(args ?? []));
     this.pendingExecutions.add(execState);
 
     execState.result = execState.result.finally(() => this.pendingExecutions.delete(execState));
@@ -218,7 +218,7 @@ export class DockerContainer {
 
     await this.initTemp();
 
-    const execState = this.runCmd('run', `--name=${this.container}`, ...this.getFlags(flags), this.image, ...(args || []));
+    const execState = this.runCmd('run', `--name=${this.container}`, ...this.getFlags(flags), this.image, ...(args ?? []));
     this.pendingExecutions.add(execState);
 
     this.watchForEviction(execState);

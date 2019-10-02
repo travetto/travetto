@@ -154,7 +154,7 @@ export class SpecGenerateUtil {
               schema: !eType!.array ? ref : { type: 'array', items: ref }
             }
           },
-          description: state.components.schemas[schemaName!].description || '',
+          description: state.components.schemas[schemaName!].description ?? '',
         };
       } else {
         return {
@@ -258,7 +258,7 @@ export class SpecGenerateUtil {
         { [ep.method!]: op };
 
       state.paths[key] = {
-        ...(state.paths[key] || {}),
+        ...(state.paths[key] ?? {}),
         ...toAdd
       };
     }

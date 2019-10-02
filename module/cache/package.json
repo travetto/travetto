@@ -14,7 +14,7 @@
     "@travetto/test": "^1.0.0-beta.1"
   },
   "optionalExtensionDependencies": {
-    "redis": "^2.8.0",
+    "redis": "^2.8.13",
     "@types/redis": "^2.8.13"
   },
   "homepage": "https://travetto.io",

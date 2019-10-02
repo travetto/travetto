@@ -23,7 +23,7 @@ export class TransformerState {
   }
 
   generateUniqueId(name: string) {
-    const val = (this.ids.get(name) || 0) + 1;
+    const val = (this.ids.get(name) ?? 0) + 1;
     this.ids.set(name, val);
     return ts.createIdentifier(`${name}_${val}`);
   }
@@ -267,7 +267,7 @@ export class TransformerState {
         } else if (ts.isJSDocParameterTag(tag)) {
           out.params!.push({
             name: tag.name && tag.name.getText(),
-            description: tag.comment || '',
+            description: tag.comment ?? '',
             type: tag.typeExpression && this.resolveType(tag.typeExpression.type),
             required: !tag.isBracketed
           });

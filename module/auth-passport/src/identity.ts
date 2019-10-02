@@ -24,7 +24,7 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
 
     let state = passportAuthenticateOptions.state;
 
-    state = state && state.call ? state.call(null, req) : (state || {});
+    state = state && state.call ? state.call(null, req) : (state ?? {});
     const json = JSON.stringify({ referrer: req.header('referrer'), ...state });
     extra.state = Buffer.from(json, 'utf8').toString('base64');
     return extra;

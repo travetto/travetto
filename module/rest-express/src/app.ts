@@ -72,7 +72,7 @@ export class ExpressRestApp extends RestApp<express.Application> {
       const keys = await this.config.getKeys();
       https.createServer(keys!, this.raw).listen(this.config.port, this.config.bindAddress);
     } else {
-      this.raw.listen(this.config.port, this.config.bindAddress);
+      this.raw.listen(this.config.port, this.config.bindAddress!);
     }
   }
 }

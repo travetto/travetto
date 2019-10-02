@@ -183,7 +183,7 @@ export class SchemaValidator {
   }
 
   static async validateAll<T>(obj: T[], view?: string): Promise<T[]> {
-    return await Promise.all<T>((obj || [])
+    return await Promise.all<T>((obj ?? [])
       .map((o, i) => this.validate(o, view)));
   }
 

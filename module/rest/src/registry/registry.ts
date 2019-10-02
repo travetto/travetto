@@ -75,8 +75,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>) {
-    dest.headers = { ...dest.headers!, ...(src.headers || {}) };
-    dest.filters = [...(dest.filters || []), ...(src.filters || [])];
+    dest.headers = { ...dest.headers!, ...(src.headers ?? {}) };
+    dest.filters = [...(dest.filters ?? []), ...(src.filters ?? [])];
     dest.title = src.title || dest.title;
     dest.description = src.description || dest.description;
   }

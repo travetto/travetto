@@ -35,7 +35,7 @@ export class FilePresenceManager {
   }
 
   private handleMissingModule(err: Error) {
-    if (err && (err.message || '').includes('Cannot find module')) { // Handle module reloading
+    if ((err?.message ?? '').includes('Cannot find module')) { // Handle module reloading
       console.error(err);
       return true;
     }

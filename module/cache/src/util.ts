@@ -3,8 +3,8 @@ import { CacheStore } from './store/types';
 
 export class CacheUtil {
   static generateKey(config: CoreCacheConfig, cache: CacheStore, params: any[]) {
-    const input = config.params ? config.params(params) : params;
-    const keyParams = config.key ? config.key(...input) : input;
+    const input = config.params?.(params) ?? params;
+    const keyParams = config.key?.(...input) ?? input;
     return `${config.keySpace!}::${cache.computeKey(keyParams)}`;
   }
 

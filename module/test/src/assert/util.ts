@@ -22,7 +22,7 @@ export class AssertUtil {
   static getPositionOfError(err: Error, filename: string) {
     const base = Env.cwd;
 
-    const lines = (err.stack || new Error().stack!)
+    const lines = (err.stack ?? new Error().stack!)
       .replace(/[\\]/g, '/')
       .split('\n')
       .filter(x => !/[\/]node_modules[\/]/.test(x) && x.includes(base));

@@ -15,7 +15,7 @@ type AssetMap = Record<string, Asset>;
 
 export class AssetRestUtil {
   static readTypeArr(arr?: string[] | string) {
-    return (Array.isArray(arr) ? arr : (arr || '').split(',')).filter(x => !!x);
+    return (Array.isArray(arr) ? arr : (arr ?? '').split(',')).filter(x => !!x);
   }
 
   static matchType(types: string[], type: string) {
@@ -42,8 +42,8 @@ export class AssetRestUtil {
   }
 
   static getFileName(req: Request) {
-    return ((req.header('content-disposition') as string || '')
-      .split('filename=')[1] || '')
+    return ((req.header('content-disposition') as string ?? '')
+      .split('filename=')[1] ?? '')
       .replace(/"/g, '') ||
       `file-upload.${(req.header('content-type') as string)!.split('/').pop()}`;
   }
@@ -95,7 +95,7 @@ export class AssetRestUtil {
   static downloadable(asset: Asset) {
     return {
       async render(res: Response) {
-        const stream = asset.stream || fs.createReadStream(asset.path);
+        const stream = asset.stream ?? fs.createReadStream(asset.path);
         res.status(200);
         res.setHeader('Content-Type', asset.contentType);
         res.setHeader('Content-Disposition', `attachment;filename=${asset.path}`);

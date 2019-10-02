@@ -27,7 +27,7 @@ export class AssetService {
   async save(asset: Asset, upsert = true, strategy?: AssetNamingStrategy): Promise<string> {
 
     // Apply strategy on save
-    asset.path = (strategy || this.namingStrategy!).getPath(asset);
+    asset.path = (strategy ?? this.namingStrategy!).getPath(asset);
 
     if (!upsert) {
       let missing = false;

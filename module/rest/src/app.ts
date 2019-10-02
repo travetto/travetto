@@ -70,7 +70,7 @@ export abstract class RestApp<T = any> {
       try {
         instances.push(await DependencyRegistry.getInstance(op.target, op.qualifier));
       } catch (err) {
-        if ((err.message || '').includes('Cannot find module')) {
+        if ((err.message ?? '').includes('Cannot find module')) {
           console.error(`Unable to load operator ${op.class.name}#${op.qualifier.toString()}, module not found`);
         } else {
           throw err;

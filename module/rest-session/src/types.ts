@@ -27,7 +27,7 @@ export class Session<T = any> implements CacheEntry {
     // Overwrite with data
     Object.assign(this, data);
 
-    this.expiresAtLoaded = this.expiresAt || Date.now();
+    this.expiresAtLoaded = this.expiresAt ?? Date.now();
 
     if (this.maxAge && !this.expiresAt) {
       this.expiresAt = this.maxAge + Date.now();

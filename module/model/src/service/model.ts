@@ -316,11 +316,11 @@ export class ModelService implements IModelSource {
       }
 
       out.errors.push(...res.errors);
-      out.counts.insert += (res.counts.insert || 0);
-      out.counts.upsert += (res.counts.upsert || 0);
-      out.counts.update += (res.counts.update || 0);
-      out.counts.delete += (res.counts.delete || 0);
-      out.counts.error += (res.counts.error || 0);
+      out.counts.insert += (res.counts.insert ?? 0);
+      out.counts.upsert += (res.counts.upsert ?? 0);
+      out.counts.update += (res.counts.update ?? 0);
+      out.counts.delete += (res.counts.delete ?? 0);
+      out.counts.error += (res.counts.error ?? 0);
     }
     return out;
   }

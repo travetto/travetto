@@ -40,8 +40,8 @@ export class CommUtil {
 
   static spawnProcess(config: SpawnConfig) {
     let { opts, command, fork, args } = config;
-    opts = opts || {};
-    args = args || [];
+    opts = opts ?? {};
+    args = args ?? [];
     fork = fork === undefined ? false : fork;
 
     const op: typeof Exec.fork = (fork && process.platform !== 'win32' ? Exec.fork : Exec.spawn);
@@ -50,7 +50,7 @@ export class CommUtil {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       ...opts,
       env: {
-        ...opts.env || {},
+        ...opts.env ?? {},
         ...process.env,
         EXECUTION: true
       }

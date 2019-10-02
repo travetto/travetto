@@ -53,7 +53,7 @@ export class AssertCheck {
       assertion.message = args[2];
       assertion.operator = fn;
     } else {
-      assertion.operator = fn || '';
+      assertion.operator = fn ?? '';
       assertion.message = args[2];
       assertion.expected = args[1];
       assertion.actual = args[0];
@@ -92,7 +92,7 @@ export class AssertCheck {
     } catch (e) {
       if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
-          assertion.message = (OP_MAPPING[fn] || `{state} be {expected}`);
+          assertion.message = (OP_MAPPING[fn] ?? `{state} be {expected}`);
         }
         assertion.message = assertion.message
           .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || (assertion as any)[k])
@@ -123,7 +123,7 @@ export class AssertCheck {
       Object.getPrototypeOf(shouldThrow) !== Object.getPrototypeOf(Function)
     ) { // if not simple function, treat as class
       if (!err || !(err instanceof shouldThrow)) {
-        return new AssertionError({ message: `Expected to throw ${shouldThrow.name}, but got ${err || 'nothing'} ` });
+        return new AssertionError({ message: `Expected to throw ${shouldThrow.name}, but got ${err ?? 'nothing'} ` });
       }
     } else {
       const res = shouldThrow(err);
@@ -143,7 +143,7 @@ export class AssertCheck {
     try {
       action();
       if (negative) {
-        throw (missed = new AppError(`No error thrown, but expected ${shouldThrow || 'an error'}`));
+        throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'}`));
       }
     } catch (e) {
       if (!negative) {
@@ -153,7 +153,7 @@ export class AssertCheck {
 
       e = (missed && e) || this.checkError(shouldThrow, e);
       if (e) {
-        assertion.message = message || (missed ? missed.message : e.message);
+        assertion.message = message || missed?.message || e.message;
         throw (assertion.error = e);
       }
     } finally {
@@ -173,7 +173,7 @@ export class AssertCheck {
         await action();
       }
       if (negative) {
-        throw (missed = new AppError(`No error thrown, but expected ${shouldThrow || 'an error'} `));
+        throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'} `));
       }
     } catch (e) {
       if (!negative) {
@@ -182,7 +182,7 @@ export class AssertCheck {
 
       e = (missed && e) || this.checkError(shouldThrow, e);
       if (e) {
-        assertion.message = message || (missed ? missed.message : e.message);
+        assertion.message = message || missed?.message || e.message;
         throw (assertion.error = e);
       }
     } finally {

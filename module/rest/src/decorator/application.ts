@@ -11,6 +11,6 @@ export function Application(
   if (!('watchable' in config)) {
     config.watchable = true;
   }
-  config.description = `[Rest Server] ${config.description || ''}`.trim();
+  config.description = `[Rest Server] ${config.description ?? ''}`.trim();
   return ParentApplication(name, config, params);
 }

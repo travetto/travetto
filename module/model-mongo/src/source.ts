@@ -42,7 +42,7 @@ export class MongoModelSource extends ModelSource {
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const col = await this.getCollection(cls);
 
-    const projected = MongoUtil.extractTypedWhereClause(cls, query.where || {});
+    const projected = MongoUtil.extractTypedWhereClause(cls, query.where ?? {});
 
     console.trace('Query', query);
 
@@ -63,10 +63,10 @@ export class MongoModelSource extends ModelSource {
       cursor = cursor.sort(query.sort.map(x => MongoUtil.extractSimple(x)));
     }
 
-    cursor = cursor.limit(Math.trunc(query.limit || 200) || 200);
+    cursor = cursor.limit(Math.trunc(query.limit ?? 200));
 
     if (query.offset) {
-      cursor = cursor.skip(Math.trunc(query.offset) || 0);
+      cursor = cursor.skip(Math.trunc(query.offset ?? 0));
     }
     const res = await cursor.toArray() as any as U[];
     return res;
@@ -147,7 +147,7 @@ export class MongoModelSource extends ModelSource {
 
   async getCountByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     const col = await this.getCollection(cls);
-    const cursor = col.count(MongoUtil.extractTypedWhereClause(cls, query.where || {}));
+    const cursor = col.count(MongoUtil.extractTypedWhereClause(cls, query.where ?? {}));
 
     const res = await cursor;
     return res;
@@ -205,13 +205,13 @@ export class MongoModelSource extends ModelSource {
     const conf = ModelRegistry.get(cls);
     const res = await col.deleteOne({ _id: new mongo.ObjectId(id), ...(conf.subType ? { type: conf.subType } : {}) });
 
-    return res.deletedCount || 0;
+    return res.deletedCount ?? 0;
   }
 
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     const col = await this.getCollection(cls);
-    const res = await col.deleteMany(MongoUtil.extractTypedWhereClause(cls, query.where || {}));
-    return res.deletedCount || 0;
+    const res = await col.deleteMany(MongoUtil.extractTypedWhereClause(cls, query.where ?? {}));
+    return res.deletedCount ?? 0;
   }
 
   async save<T extends ModelCore>(cls: Class<T>, o: T, keepId: boolean = false): Promise<T> {
@@ -271,17 +271,17 @@ export class MongoModelSource extends ModelSource {
       const items = MongoUtil.extractSimple(final);
       final = Object.entries(items).reduce((acc, [k, v]) => {
         if (v === null || v === undefined) {
-          acc.$unset = acc.$unset || {};
+          acc.$unset = acc.$unset ?? {};
           acc.$unset[k] = v;
         } else {
-          acc.$set = acc.$set || {};
+          acc.$set = acc.$set ?? {};
           acc.$set[k] = v;
         }
         return acc;
       }, {} as any);
     }
 
-    const res = await col.findOneAndUpdate(MongoUtil.extractTypedWhereClause(cls, query.where || {}), final, { returnOriginal: false });
+    const res = await col.findOneAndUpdate(MongoUtil.extractTypedWhereClause(cls, query.where ?? {}), final, { returnOriginal: false });
     if (!res.value) {
       throw new AppError('Object not found for updating', 'notfound');
     }
@@ -293,7 +293,7 @@ export class MongoModelSource extends ModelSource {
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, data: Partial<T>) {
     const col = await this.getCollection(cls);
 
-    const res = await col.updateMany(MongoUtil.extractTypedWhereClause(cls, query.where || {}), data);
+    const res = await col.updateMany(MongoUtil.extractTypedWhereClause(cls, query.where ?? {}), data);
     return res.matchedCount;
   }
 

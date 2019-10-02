@@ -25,12 +25,12 @@ export class HttpRequest {
     status?: number,
     payload: Record<string, any>
   }) {
-    let finalStatus = HTTP_ERROR_CONVERSION.to.get(config.status!) || 'general';
+    let finalStatus = HTTP_ERROR_CONVERSION.to.get(config.status!) ?? 'general';
     try {
       const parsedMessage = JSON.parse(config.message);
       const { status, statusCode, message, ...rest } = parsedMessage;
-      finalStatus = HTTP_ERROR_CONVERSION.to.get(status) ||
-        HTTP_ERROR_CONVERSION.to.get(statusCode) ||
+      finalStatus = HTTP_ERROR_CONVERSION.to.get(status) ??
+        HTTP_ERROR_CONVERSION.to.get(statusCode) ??
         finalStatus;
       config.message = message || config.message;
       Object.assign(config.payload, rest); // Merge it in
@@ -94,7 +94,7 @@ export class HttpRequest {
         }
       }
       if (Array.from(searchParams.values()).length) {
-        opts.path = `${opts.path || ''}?${searchParams.toString()}`;
+        opts.path = `${opts.path ?? ''}?${searchParams.toString()}`;
       }
     } else {
       const q = Array.from(searchParams.entries())
@@ -137,7 +137,7 @@ export class HttpRequest {
         }
 
         msg.on('data', (chunk: Buffer) => {
-          if ((msg.statusCode || 200) > 299 || !responseHandler) {
+          if ((msg.statusCode ?? 200) > 299 || !responseHandler) {
             body.push(Buffer.from(chunk));
           }
         });
@@ -148,7 +148,7 @@ export class HttpRequest {
 
         msg.on('end', () => {
           const message = Buffer.concat(body);
-          if ((msg.statusCode || 200) > 299) {
+          if ((msg.statusCode ?? 200) > 299) {
             if (msg.statusCode! > 399) {
               reject(this.buildError({ message: message.toString(), status: msg.statusCode, payload: { headers: msg.headers } }));
             } else {
