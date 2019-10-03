@@ -5,12 +5,12 @@ import { Request, Response, RouteConfig, Method } from '../types';
 import { RestInterceptor } from './interceptor';
 
 @Config('rest.cors')
-class RestCorsConfig {
+export class RestCorsConfig {
   active: boolean = false;
   origins?: string[];
   methods?: Method[];
   headers?: string[];
-  credentials?: boolean
+  credentials?: boolean;
 }
 
 @Injectable()
