@@ -333,7 +333,7 @@ export class ElasticsearchModelSource extends ModelSource {
   async initClient() {
     this.client = new es.Client({
       nodes: this.config.hosts,
-      ...this.config
+      ...this.config.options
     });
     await this.client.cluster.health({});
   }

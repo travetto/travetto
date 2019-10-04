@@ -13,7 +13,6 @@ export class ElasticsearchModelConfig {
   schemaConfig: EsSchemaConfig = {
     caseSensitive: false
   };
-  auth: BasicAuth | ApiKeyAuth;
 
   indexCreate = {
     number_of_replicas: 0,
