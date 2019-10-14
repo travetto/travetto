@@ -65,7 +65,6 @@ class $Compiler {
 
   reset() {
     this.sourceManager.clear();
-    this.moduleManager.clear();
     this.presenceManager.reset();
 
     this.active = false;
@@ -124,8 +123,6 @@ class $Compiler {
     if (native in require.cache) {
       delete require.cache[native];
     }
-
-    this.moduleManager.unload(fileName);
   }
 
   transpile(fileName: string, force = false) {
