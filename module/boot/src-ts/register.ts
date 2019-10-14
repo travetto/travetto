@@ -97,7 +97,7 @@ export class RegisterUtil {
     }
 
     // Drop typescript import, and use global. Great speedup;
-    fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript';?/g, '');
+    fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
 
     return `${fileContents};\nexport const __$TRV = 1;`;
   }

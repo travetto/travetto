@@ -1,11 +1,10 @@
 import { EventEmitter } from 'events';
 
-import { FsUtil, AppCache } from '@travetto/boot';
-import { Env, ScanApp, AppError } from '@travetto/base';
+import { FsUtil } from '@travetto/boot';
+import { Env, AppError, FilePresenceManager, Shutdown } from '@travetto/base';
 
 import { TransformerManager } from './transformer/manager';
 import { SourceManager } from './source';
-import { FilePresenceManager } from './presence';
 import { CompilerUtil } from './util';
 
 type WatchEvent = 'required-after' | 'added' | 'changed' | 'removed';
@@ -25,8 +24,17 @@ class $Compiler {
     // Get Files proper like
     this.transformerManager = new TransformerManager(this.cwd);
     this.sourceManager = new SourceManager(this.cwd, {});
-    this.presenceManager = new FilePresenceManager(this.cwd, [...Env.appRoots],
-      {
+
+    const rootPaths = [
+      ...Env.appRoots,
+      ...(Env.appRoots.length && !Env.appRoots.includes('.') ? ['.'] : [])
+    ].map(x => FsUtil.joinUnix(x, 'src'));
+
+    this.presenceManager = new FilePresenceManager({
+      ext: '.ts',
+      cwd: this.cwd,
+      rootPaths,
+      listener: {
         added: (name: string) => {
           if (this.transpile(name)) {
             this.events.emit('added', name);
@@ -41,7 +49,19 @@ class $Compiler {
           this.unload(name);
           this.events.emit('removed', name);
         }
-      });
+      },
+      excludedFiles: [/node_modules/, /[.]d[.]ts$/],
+      initialFileValidator: x => !(x.file in require.cache)
+    });
+
+    if (Env.watch) {
+      Shutdown.onUnhandled(err => {
+        if (err && (err.message || '').includes('Cannot find module')) { // Handle module reloading
+          console.error(err);
+          return true;
+        }
+      }, 0);
+    }
   }
 
   init() {
@@ -145,7 +165,7 @@ class $Compiler {
       }
     }
 
-    if (changed && (force || this.presenceManager.isWatchedFileLoaded(fileName))) {
+    if (changed && (force || this.presenceManager.isWatchedFileKnown(fileName.replace(/[.]js$/, '.ts')))) {
       // If file is already loaded, mark for reload
       this.markForReload(fileName, false); // Do not delete the file we just created
     }
@@ -159,17 +179,6 @@ class $Compiler {
 
   off(event: WatchEvent, callback: (filename: string) => any) {
     this.events.removeListener(event, callback);
-  }
-
-  compileAll() {
-    let compiled = 0;
-    ScanApp.getStandardAppFiles().forEach(x => {
-      if (!AppCache.hasEntry(x)) {
-        compiled += 1;
-        require(x);
-      }
-    });
-    return compiled;
   }
 }
 

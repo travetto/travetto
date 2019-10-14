@@ -6,7 +6,7 @@ import { FsUtil } from '@travetto/boot';
 
 import { Env } from '../src/env';
 import { ScanFs } from '../src/scan-fs';
-import { Watcher } from '../src/watch';
+import { Watcher } from '../src/watch/watcher';
 
 @Suite()
 export class WatchTest {

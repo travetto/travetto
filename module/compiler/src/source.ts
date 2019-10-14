@@ -49,7 +49,7 @@ export class SourceManager {
   }
 
   transpile(fileName: string, options: ts.TranspileOptions, force = false) {
-    if (force || !this.hasCached(fileName)) {
+    if (force || !(this.config.cache && this.cache.hasEntry(fileName))) {
       console.trace('Emitting', fileName);
 
       const content = RegisterUtil.prepareTranspile(fileName);
@@ -78,8 +78,11 @@ export class SourceManager {
       }
 
       this.set(fileName, res.outputText);
+      if (this.config.cache) {
+        this.cache.writeEntry(fileName, res.outputText);
+      }
     } else {
-      const cached = this.getCached(fileName);
+      const cached = this.cache.readEntry(fileName);
       this.contents.set(fileName, cached);
     }
     return true;
@@ -95,23 +98,12 @@ export class SourceManager {
 
   set(name: string, content: string) {
     this.contents.set(name, content);
-    if (this.config.cache) {
-      this.cache.writeEntry(name, content);
-    }
   }
 
   clear() {
     this.contents.clear();
     this.sourceMaps.clear();
     this.hashes.clear();
-  }
-
-  hasCached(file: string) {
-    return this.config.cache && this.cache.hasEntry(file);
-  }
-
-  getCached(file: string) {
-    return this.cache.readEntry(file);
   }
 
   unload(name: string, unlink: boolean = true) {

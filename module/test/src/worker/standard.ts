@@ -1,13 +1,14 @@
-import { PhaseManager } from '@travetto/base';
+import { AppCache } from '@travetto/boot';
+import { ScanApp, PhaseManager } from '@travetto/base';
 import { State } from '../runner/runner';
 
 export class StandardWorker {
   static async run(opts: State) {
     try {
-      const { Compiler } = await import('@travetto/compiler');
-
       // Pre compile all
-      Compiler.compileAll();
+      ScanApp.getStandardAppFiles()
+        .filter(x => !AppCache.hasEntry(x))
+        .map(x => require(x));
 
       const { Runner } = await import('../runner/runner');
       const { TestUtil } = await import('../runner/util');

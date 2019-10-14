@@ -2,10 +2,10 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import { FsUtil } from '@travetto/boot/src/fs-util';
 
-import { Env } from './env';
-import { ScanEntry, ScanHandler, ScanFs } from './scan-fs';
+import { Env } from '../env';
+import { ScanEntry, ScanHandler, ScanFs } from '../scan-fs';
 
-import { SystemUtil } from './system-util';
+import { SystemUtil } from '../system-util';
 
 interface Options {
   maxListeners?: number;

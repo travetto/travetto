@@ -1,43 +1,50 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
-import {
-  ScanEntry, Env, ScanHandler,
-  Watcher, ScanApp, Shutdown
-} from '@travetto/base';
 import { FsUtil } from '@travetto/boot';
 
-export interface Listener {
+import { Watcher } from './watcher';
+import { ScanEntry, ScanHandler } from '../scan-fs';
+import { Env } from '../env';
+import { ScanApp } from '../scan-app';
+
+export interface PresenceListener {
   added(name: string): any;
   changed(name: string): any;
   removed(name: string): any;
 }
 
 export class FilePresenceManager {
-  fileWatchers: Record<string, Watcher> = {};
-  files = new Map<string, { version: number }>();
-  seen = new Set<string>();
-  watchSpaces = new Set<string>();
+  private ext: string;
+  private cwd: string;
+  private rootPaths: string[] = [];
+  private listener: PresenceListener;
+  private excludeFiles: RegExp[] = [];
+  private initialFileValidator: (x: Pick<ScanEntry, 'file' | 'module'>) => boolean = x => true;
+  private watch: boolean = Env.watch
 
-  constructor(private cwd: string, private rootPaths: string[], private listener: Listener, private excludeFiles: RegExp[] = [], private watch: boolean = Env.watch) {
+  private fileWatchers: Record<string, Watcher> = {};
+  private files = new Map<string, { version: number }>();
+  private seen = new Set<string>();
+  private watchSpaces = new Set<string>();
 
-    if (this.rootPaths.length && !this.rootPaths.includes('.')) {
-      this.rootPaths.push('.');
+  constructor(
+    config: {
+      ext: FilePresenceManager['ext'],
+      cwd: FilePresenceManager['cwd'],
+      rootPaths: FilePresenceManager['rootPaths'],
+      listener: FilePresenceManager['listener'],
+      excludedFiles?: FilePresenceManager['excludeFiles'],
+      initialFileValidator?: FilePresenceManager['initialFileValidator'],
+      watch?: FilePresenceManager['watch']
+    }
+  ) {
+    for (const k of Object.keys(config) as (keyof FilePresenceManager)[]) {
+      this[k] = (config as any)[k];
     }
 
     for (const root of this.rootPaths) {
-      this.watchSpaces.add(FsUtil.joinUnix(root, 'src'));
-    }
-
-    if (watch) {
-      Shutdown.onUnhandled(e => this.handleMissingModule(e), 0);
-    }
-  }
-
-  private handleMissingModule(err: Error) {
-    if ((err?.message ?? '').includes('Cannot find module')) { // Handle module reloading
-      console.error(err);
-      return true;
+      this.watchSpaces.add(root);
     }
   }
 
@@ -79,12 +86,18 @@ export class FilePresenceManager {
     return watcher;
   }
 
-  init() {
+  getRootFiles() {
     const SRC_RE = Env.appRootMatcher(this.rootPaths);
 
-    const rootFiles = ScanApp.findFiles('.ts', x => SRC_RE.test(x) && this.validFile(x)) // Only watch own files
-      .filter(x => !(x.file in require.cache)) // Pre-loaded items are fundamental and non-reloadable
+    const rootFiles = ScanApp.findFiles(this.ext, x => SRC_RE.test(x) && this.validFile(x)) // Only watch own files
+      .filter(x => this.initialFileValidator(x)) // Validate root files follow some pattern
       .map(x => x.file);
+
+    return rootFiles;
+  }
+
+  init() {
+    const rootFiles = this.getRootFiles();
 
     for (const fileName of rootFiles) {
       this.files.set(fileName, { version: 0 });
@@ -99,7 +112,7 @@ export class FilePresenceManager {
             console.warn(`Directory ${FsUtil.resolveUnix(FsUtil.cwd, p)} missing, cannot watch`);
             continue;
           }
-          this.buildWatcher(FsUtil.joinUnix(this.cwd, p), [{ testFile: x => this.validFile(x) && x.endsWith('.ts') }]);
+          this.buildWatcher(FsUtil.joinUnix(this.cwd, p), [{ testFile: x => this.validFile(x) }]);
         }
       }, 50); // FIXME: 1000 og
     }
@@ -110,15 +123,12 @@ export class FilePresenceManager {
   }
 
   validFile(name: string) {
-    if (name.endsWith('.d.ts')) {
-      return false;
-    }
     for (const re of this.excludeFiles) {
       if (re.test(name)) {
         return false;
       }
     }
-    return true;
+    return name.endsWith(this.ext);
   }
 
   addNewFile(name: string) {
@@ -127,8 +137,7 @@ export class FilePresenceManager {
     }
     this.seen.add(name);
 
-    // Only watch workspace files, not node_modules
-    if (this.watch && !name.includes('node_modules')) {
+    if (this.watch) {
       // Already known to be a used file, just don't watch node modules
       const topLevel = path.dirname(name);
       if (!this.fileWatchers[topLevel]) {
@@ -150,7 +159,7 @@ export class FilePresenceManager {
     this.files.clear();
   }
 
-  isWatchedFileLoaded(name: string) {
-    return this.watch && this.files.get(name.replace('.js', '.ts'))!.version > 0;
+  isWatchedFileKnown(name: string) {
+    return this.watch && this.files.get(name)!.version > 0;
   }
 }

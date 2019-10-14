@@ -58,7 +58,7 @@ function buildContext(reqUrl: url.URL, content: string) {
 
   for (const k of Array.from(Object.keys(base))) {
     const v = base[k];
-    if (['number', 'boolean', 'string', 'undefiend'].includes(typeof v)) {
+    if (['number', 'boolean', 'string', 'undefined'].includes(typeof v)) {
       const [last, ...rest] = k.split('.').reverse();
       const first = rest.reverse();
       let sub = base;
