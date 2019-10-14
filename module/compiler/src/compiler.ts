@@ -1,11 +1,10 @@
 import { EventEmitter } from 'events';
 
 import { FsUtil, AppCache } from '@travetto/boot';
-import { Env, ScanApp } from '@travetto/base';
+import { Env, ScanApp, AppError } from '@travetto/base';
 
 import { TransformerManager } from './transformer/manager';
 import { SourceManager } from './source';
-import { ModuleManager } from './module';
 import { FilePresenceManager } from './presence';
 import { CompilerUtil } from './util';
 
@@ -13,7 +12,6 @@ type WatchEvent = 'required-after' | 'added' | 'changed' | 'removed';
 
 class $Compiler {
 
-  moduleManager: ModuleManager;
   sourceManager: SourceManager;
   presenceManager: FilePresenceManager;
   transformerManager: TransformerManager;
@@ -26,7 +24,6 @@ class $Compiler {
 
     // Get Files proper like
     this.transformerManager = new TransformerManager(this.cwd);
-    this.moduleManager = new ModuleManager(this.cwd);
     this.sourceManager = new SourceManager(this.cwd, {});
     this.presenceManager = new FilePresenceManager(this.cwd, [...Env.appRoots],
       {
@@ -56,7 +53,6 @@ class $Compiler {
     this.sourceManager.registerSourceMaps();
     this.transformerManager.init();
     require.extensions['.ts'] = this.requireHandler.bind(this);
-    this.moduleManager.init();
 
     const start = Date.now();
     this.presenceManager.init();
@@ -84,18 +80,25 @@ class $Compiler {
     // Log transpiled content as needed
     const content = this.sourceManager.get(tsf)!;
     try {
-      const res = this.moduleManager.compile(m, jsf, content);
+      const res = (m as any)._compile(content, jsf);
       if (isNew) {
         this.events.emit('required-after', tsf);
       }
       return res;
     } catch (e) {
+
+      if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
+        const modName = m.filename.replace(`${this.cwd}/`, '');
+        e = new AppError(`${e.message} ${e.message.includes('from') ? `[via ${modName}]` : `from ${modName}`}`, 'general');
+      }
+
       const file = tsf.replace(`${Env.cwd}/`, '');
       if (tsf.includes('/extension/')) { // If errored out on extension loading
         console.debug(`Ignoring load for ${file}:`, e.message.split(' from ')[0]);
       } else if (Env.watch) {
         console.error(`Stubbing out with error proxy due to error in compiling ${file}: `, e.message);
-        return this.moduleManager.compile(m, jsf, CompilerUtil.getErrorModuleProxySource(e.message));
+        const content = CompilerUtil.getErrorModuleProxySource(e.message);
+        return (m as any)._compile(content, jsf)
       } else {
         throw e;
       }

@@ -25,6 +25,28 @@ export class RegisterUtil {
   static plainLogs = EnvUtil.isTrue('plain_logs');
   static libRequire: (x: string) => any;
 
+  static getErrorModuleProxy(err: string) {
+    const onError = () => {
+      throw new Error(err);
+    };
+    return new Proxy({}, {
+      enumerate: () => [],
+      isExtensible: () => false,
+      getOwnPropertyDescriptor: () => ({}),
+      preventExtensions: () => true,
+      apply: onError,
+      construct: onError,
+      setPrototypeOf: onError,
+      getPrototypeOf: onError,
+      get: onError,
+      has: onError,
+      set: onError,
+      ownKeys: onError,
+      deleteProperty: onError,
+      defineProperty: onError
+    });
+  }
+
   static computeModuleFromFile(fileName: string) {
     /** @type string */
     let mod = FsUtil.toUnix(fileName);
@@ -94,22 +116,34 @@ export class RegisterUtil {
   }
 
   static moduleLoaderHandler(request: string, parent: Module) {
-    const mod = this.ogModuleLoad.apply(null, [request, parent]);
+    try {
+      const mod = this.ogModuleLoad.apply(null, [request, parent]);
 
-    if (!parent.loaded && (!mod || !mod.__$TRV)) {
-      let p;
-      try {
-        // @ts-ignore
-        p = Module._resolveFilename(request, parent);
-      } catch (err) {
-        // Ignore if we can't resolve
+      if (!parent.loaded && (!mod || !mod.__$TRV)) {
+        let p;
+        try {
+          // @ts-ignore
+          p = Module._resolveFilename(request, parent);
+        } catch (err) {
+          // Ignore if we can't resolve
+        }
+        if (p && p.endsWith('.ts')) {
+          throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
+        }
       }
-      if (p && p.endsWith('.ts')) {
-        throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
+
+      return mod;
+    } catch (e) {
+      // @ts-ignore
+      const p = Module._resolveFilename(request, parent);
+
+      if (EnvUtil.isTrue('watch') && !p.includes('/extension/')) { // Build proxy if watching and not an extension
+        console.debug(`Unable to load ${p.replace(`${process.cwd()}/`, '')}: stubbing out with error proxy.`, e.message);
+        return this.getErrorModuleProxy(e.message) as NodeModule;
       }
+
+      throw e;
     }
-
-    return mod;
   }
 
   static compileTypescript(m: Module, tsf: string) {
