@@ -2,11 +2,10 @@ import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
 
 import { FileCache, RegisterUtil } from '@travetto/boot';
-import { Env, AppError, SystemUtil } from '@travetto/base';
+import { Env, SystemUtil } from '@travetto/base';
 
 import { CompilerUtil } from './util';
 import { TransformerManager } from './transformer/manager';
-import { Compiler } from './compiler';
 
 export class SourceManager {
   private transformerManager: TransformerManager;
@@ -25,7 +24,7 @@ export class SourceManager {
 
   private transpileFile(fileName: string, options: ts.TranspileOptions, force = false) {
     if (force || !(this.config.cache && this.cache.hasEntry(fileName))) {
-      console.trace('Emitting', fileName);
+      console.trace('Emitting', fileName.replace(this.cwd, ''));
 
       const content = RegisterUtil.prepareTranspile(fileName);
 
@@ -78,7 +77,7 @@ export class SourceManager {
   }
 
   transpile(fileName: string, force = false) {
-    console.trace('Transpiling', fileName);
+    console.trace('Transpiling', fileName.replace(this.cwd, ''));
     let changed: boolean = false;
     try {
       changed = this.transpileFile(fileName, {
@@ -97,13 +96,14 @@ export class SourceManager {
     return changed;
   }
 
-  compileModule(m: NodeModule, tsf: string) {
+  compile(m: NodeModule, tsf: string) {
+    console.trace('Compiling', tsf.replace(this.cwd, ''));
     const content = this.get(tsf)!;
     return CompilerUtil.compile(this.cwd, m, tsf, content);
   }
 
-  unloadModule(fileName: string, unlink = true) {
-    console.trace('Unloading', fileName);
+  unload(fileName: string, unlink = true) {
+    console.trace('Unloading', fileName.replace(this.cwd, ''), unlink);
 
     if (this.has(fileName)) {
       if (this.config.cache) {

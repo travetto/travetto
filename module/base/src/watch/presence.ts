@@ -33,7 +33,7 @@ export class FilePresenceManager {
       cwd: FilePresenceManager['cwd'],
       rootPaths: FilePresenceManager['rootPaths'],
       listener: FilePresenceManager['listener'],
-      excludedFiles?: FilePresenceManager['excludeFiles'],
+      excludeFiles?: FilePresenceManager['excludeFiles'],
       initialFileValidator?: FilePresenceManager['initialFileValidator'],
       watch?: FilePresenceManager['watch']
     }
@@ -88,7 +88,7 @@ export class FilePresenceManager {
   }
 
   getRootFiles() {
-    const SRC_RE = Env.appRootMatcher(this.rootPaths);
+    const SRC_RE = Env.rootMatcher(this.rootPaths);
 
     const rootFiles = ScanApp.findFiles(this.ext, x => SRC_RE.test(x) && this.validFile(x)) // Only watch own files
       .filter(x => this.initialFileValidator(x)) // Validate root files follow some pattern
@@ -107,13 +107,12 @@ export class FilePresenceManager {
 
     if (this.watch) { // Start watching after startup
       setTimeout(() => {
-        console.debug('Watching files', rootFiles.length);
         for (const p of this.watchSpaces) {
           if (!fs.existsSync(p)) {
             console.warn(`Directory ${FsUtil.resolveUnix(FsUtil.cwd, p)} missing, cannot watch`);
             continue;
           }
-          this.buildWatcher(FsUtil.joinUnix(this.cwd, p), [{ testFile: x => this.validFile(x) }]);
+          this.buildWatcher(FsUtil.joinUnix(this.cwd, p), [{ testFile: x => this.validFile(x), testDir: x => this.validFile(x) }]);
         }
       }, 50); // FIXME: 1000 og
     }
@@ -138,7 +137,7 @@ export class FilePresenceManager {
     }
     this.seen.add(name);
 
-    if (this.watch) {
+    if (this.watch && this.validFile(name)) {
       // Already known to be a used file, just don't watch node modules
       const topLevel = path.dirname(name);
       if (!this.fileWatchers[topLevel]) {

@@ -145,8 +145,6 @@ export class Watcher extends EventEmitter {
       throw new Error(`Not a file: ${entry.file}`);
     }
 
-    console.trace('Watching File', entry.file);
-
     const opts = { persistent: true, interval: this.options.interval };
 
     this.pollers.set(entry.file, (curr: fs.Stats, prev: fs.Stats) => {

@@ -64,12 +64,14 @@ export class ClassSource implements ChangeSource<Class> {
   }
 
   handlePendingFileChanges() {
+    console.trace('Pending changes', PendingRegister.ordered);
     for (const [file, classes] of PendingRegister.flush()) {
       this.handleFileChanges(file, classes);
     }
   }
 
   emit(e: ChangeEvent<Class>) {
+    console.trace('Emitting change', e.type, e.curr && e.curr.__id, e.prev && e.prev.__id);
     this.events.emit('change', e);
   }
 

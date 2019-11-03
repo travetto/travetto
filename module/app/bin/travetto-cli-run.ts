@@ -135,7 +135,6 @@ export function init() {
           }
           Util.showHelp(cmd, app ? `${app} is an unknown application` : 'You must specify an application to run');
         }
-
         await RunUtil.run([app, ...args]);
       } catch (err) {
         if (err.message.startsWith('Invalid parameter')) {

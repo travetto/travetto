@@ -18,8 +18,7 @@ export class CompilerUtil {
       sourceMap: false,
       inlineSourceMap: true,
       outDir: `${dir}`
-    }, `${dir}/${name}`
-    );
+    }, `${dir}/${name}`);
     out.options.importHelpers = true;
     out.options.noEmitOnError = !Env.watch;
     out.options.noErrorTruncation = true;
@@ -62,7 +61,7 @@ export class CompilerUtil {
     return f.startsWith('extension/') || (
       /^node_modules\/@travetto\/[^\/]+\/(src|extension)\/.*/.test(f)
       && !f.includes('node_modules/@travetto/test') // Exclude test code by default
-      && !f.startsWith(`node_modules/${AppInfo.NAME}/`));
+      && !f.startsWith(`node_modules/${AppInfo.NAME}/`)) && !f.endsWith('.d.ts');
   }
 
   static compile(cwd: string, m: NodeModule, tsf: string, content: string) {
@@ -78,7 +77,7 @@ export class CompilerUtil {
 
       const file = tsf.replace(`${Env.cwd}/`, '');
       if (tsf.includes('/extension/')) { // If errored out on extension loading
-        console.debug(`Ignoring load for ${file}:`, e.message.split(' from ')[0]);
+        console.debug(`Ignoring load for ${file}:`, e.message.split(/( from )|\n/)[0]);
       } else if (Env.watch) {
         console.error(`Stubbing out with error proxy due to error in compiling ${file}: `, e.message);
         const errorContent = CompilerUtil.getErrorModuleProxySource(e.message);

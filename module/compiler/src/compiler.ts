@@ -1,18 +1,19 @@
+import { EventEmitter } from 'events';
+
 import { FsUtil } from '@travetto/boot';
-import { Env, Shutdown, FilePresenceManager } from '@travetto/base';
+import { Env, Shutdown, FilePresenceManager, ScanApp } from '@travetto/base';
 
 import { SourceManager } from './source';
-import { EventEmitter } from 'events';
+import { CompilerUtil } from './util';
 
 class $Compiler extends EventEmitter {
 
   private presenceManager: FilePresenceManager;
   private sourceManager: SourceManager;
-  public rootPaths: string[];
 
   active = false;
 
-  constructor(public cwd: string, rootPaths: string[]) {
+  constructor(public cwd: string, private rootPaths: string[]) {
     super();
 
     if (Env.watch) {
@@ -24,23 +25,23 @@ class $Compiler extends EventEmitter {
       }, 0);
     }
 
-    this.rootPaths = [...rootPaths];
-
-    if (rootPaths.length && !rootPaths.includes('.')) {
-      this.rootPaths.push('.');
-    }
-
-    this.rootPaths = this.rootPaths.map(x => FsUtil.joinUnix(x, 'src'));
-
     this.sourceManager = new SourceManager(cwd, {});
     this.presenceManager = new FilePresenceManager({
       ext: '.ts',
       cwd: this.cwd,
       rootPaths: this.rootPaths,
       listener: this,
-      excludedFiles: [/node_modules/, /[.]d[.]ts$/],
+      excludeFiles: [/node_modules/, /[.]d[.]ts$/],
       initialFileValidator: x => !(x.file in require.cache)
     });
+  }
+
+  initialLoad() {
+    const rootsRe = Env.rootMatcher(this.rootPaths);
+
+    ScanApp
+      .findFiles('.ts', f => (rootsRe.test(f) || CompilerUtil.isCompilable(f)))
+      .forEach(x => this.added(x.file)); // Load all files, class scanning
   }
 
   init() {
@@ -51,8 +52,9 @@ class $Compiler extends EventEmitter {
     const start = Date.now();
     this.active = true;
     require.extensions['.ts'] = this.compile.bind(this);
-    this.presenceManager.init();
     this.sourceManager.init();
+    this.presenceManager.init();
+    this.initialLoad();
     console.debug('Initialized', (Date.now() - start) / 1000);
   }
 
@@ -64,47 +66,55 @@ class $Compiler extends EventEmitter {
     this.init();
   }
 
-  added(fileName: string, load = true) {
+  added(fileName: string, load = true, emit = true) {
     console.trace('File Added', fileName);
+    if (!this.presenceManager.has(fileName)) {
+      this.presenceManager.addNewFile(fileName, false);
+    }
+    if (this.presenceManager.isWatchedFileKnown(fileName.replace(/[.]js$/, '.ts'))) {
+      this.removed(fileName, false, false);
+    }
     if (this.sourceManager.transpile(fileName)) {
-      if (this.presenceManager.isWatchedFileKnown(fileName.replace(/[.]js$/, '.ts'))) {
-        this.sourceManager.unloadModule(fileName, false);
-      }
       if (load) {
         require(fileName);
       }
-      this.emit('added', fileName);
+      if (emit) {
+        this.emit('added', fileName);
+      }
     }
   }
 
   changed(fileName: string) {
     console.trace('File Changed', fileName);
     if (this.sourceManager.transpile(fileName, true)) {
-      this.sourceManager.unloadModule(fileName, false);
-      require(fileName);
-      this.emit('changed', fileName);
+      this.removed(fileName, false, false);
+
+      setTimeout(() => {
+        require(fileName);
+        this.emit('changed', fileName);
+      }, 10);
     }
   }
 
-  removed(fileName: string, unlink = true) {
+  removed(fileName: string, unlink = true, emit = true) {
     console.trace('File Removed', fileName);
-    this.sourceManager.unloadModule(fileName, unlink);
-
+    this.sourceManager.unload(fileName, unlink);
     const native = FsUtil.toNative(fileName);
+
     if (native in require.cache) {
       delete require.cache[native];
     }
-
-    this.emit('removed', fileName);
+    if (emit) {
+      this.emit('removed', fileName);
+    }
   }
 
   compile(m: NodeModule, tsf: string) {
-    if (!this.sourceManager.has(tsf)) { // Is new
-      this.presenceManager.addNewFile(tsf, false);
-      this.added(tsf, false);
+    if (!this.presenceManager.has(tsf)) { // Is new
+      this.added(tsf);
     }
-    return this.sourceManager.compileModule(m, tsf);
+    return this.sourceManager.compile(m, tsf);
   }
 }
 
-export const Compiler = new $Compiler(Env.cwd, Env.appRoots);
+export const Compiler = new $Compiler(Env.cwd, Env.computeAppRoots().map(x => FsUtil.joinUnix(x, 'src')));
