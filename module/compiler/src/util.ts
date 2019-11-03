@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { Env, AppError } from '@travetto/base';
+import { Env, AppError, AppInfo } from '@travetto/base';
 import { RegisterUtil } from '@travetto/boot';
 
 export class CompilerUtil {
@@ -33,6 +33,59 @@ export class CompilerUtil {
       return fn();
     } catch {
       throw new AppError(`Cannot use interface '${text}' when a class is required`);
+    }
+  }
+
+  static checkTranspileErrors(cwd: string, fileName: string, res: ts.TranspileOutput) {
+
+    if (res.diagnostics && res.diagnostics.length) {
+
+      const errors = res.diagnostics.slice(0, 5).map(diag => {
+        const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+        if (diag.file) {
+          const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start as number);
+          return ` @ ${diag.file.fileName.replace(`${cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
+        } else {
+          return ` ${message}`;
+        }
+      });
+
+      if (res.diagnostics.length > 5) {
+        errors.push(`${res.diagnostics.length - 5} more ...`);
+      }
+
+      throw new AppError(`Transpiling ${fileName.replace(`${cwd}/`, '')} failed`, 'unavailable', { errors });
+    }
+  }
+
+  static isCompilable(f: string) {
+    return f.startsWith('extension/') || (
+      /^node_modules\/@travetto\/[^\/]+\/(src|extension)\/.*/.test(f)
+      && !f.includes('node_modules/@travetto/test') // Exclude test code by default
+      && !f.startsWith(`node_modules/${AppInfo.NAME}/`));
+  }
+
+  static compile(cwd: string, m: NodeModule, tsf: string, content: string) {
+    const jsf = tsf.replace(/\.ts$/, '.js');
+    try {
+      return (m as any)._compile(content, jsf);
+    } catch (e) {
+
+      if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
+        const modName = m.filename.replace(`${cwd}/`, '');
+        e = new AppError(`${e.message} ${e.message.includes('from') ? `[via ${modName}]` : `from ${modName}`}`, 'general');
+      }
+
+      const file = tsf.replace(`${Env.cwd}/`, '');
+      if (tsf.includes('/extension/')) { // If errored out on extension loading
+        console.debug(`Ignoring load for ${file}:`, e.message.split(' from ')[0]);
+      } else if (Env.watch) {
+        console.error(`Stubbing out with error proxy due to error in compiling ${file}: `, e.message);
+        const errorContent = CompilerUtil.getErrorModuleProxySource(e.message);
+        return (m as any)._compile(errorContent, jsf);
+      } else {
+        throw e;
+      }
     }
   }
 }

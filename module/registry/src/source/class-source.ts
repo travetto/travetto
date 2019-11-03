@@ -1,14 +1,25 @@
 import { EventEmitter } from 'events';
 
-import { FileChangeSource } from '@travetto/compiler';
+import { Compiler } from '@travetto/compiler';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';
 
-export class ClassSource extends FileChangeSource implements ChangeSource<Class> {
+export class ClassSource implements ChangeSource<Class> {
 
   private classes = new Map<string, Map<string, Class>>();
   private events = new EventEmitter();
+
+  constructor() {
+    Compiler.on('added', file => {
+      this.handlePendingFileChanges();
+      this.flush();
+    });
+
+    Compiler.on('changed', file => {
+      this.handlePendingFileChanges();
+    });
+  }
 
   private flush() {
     for (const [file, classes] of PendingRegister.flush()) {
@@ -58,28 +69,15 @@ export class ClassSource extends FileChangeSource implements ChangeSource<Class>
     }
   }
 
-  onFileAdded(name: string) {
-    super.onFileAdded(name);
-    this.handlePendingFileChanges();
-    this.flush();
-  }
-
-  onFileChanged(name: string) {
-    super.onFileChanged(name);
-    this.handlePendingFileChanges();
-  }
-
   emit(e: ChangeEvent<Class>) {
     this.events.emit('change', e);
   }
 
   reset() {
     this.classes.clear();
-    super.reset();
   }
 
   async init() {
-    await super.init();
     this.flush();
   }
 

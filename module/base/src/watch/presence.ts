@@ -20,8 +20,7 @@ export class FilePresenceManager {
   private rootPaths: string[] = [];
   private listener: PresenceListener;
   private excludeFiles: RegExp[] = [];
-  private initialFileValidator: (x: Pick<ScanEntry, 'file' | 'module'>) => boolean = x => true;
-  private watch: boolean = Env.watch
+  private watch: boolean = Env.watch;
 
   private fileWatchers: Record<string, Watcher> = {};
   private files = new Map<string, { version: number }>();
@@ -47,6 +46,8 @@ export class FilePresenceManager {
       this.watchSpaces.add(root);
     }
   }
+
+  private initialFileValidator: (x: Pick<ScanEntry, 'file' | 'module'>) => boolean = x => true;
 
   private watcherListener({ event, entry }: { event: string, entry: ScanEntry }) {
     if (!this.validFile(entry.file)) {
@@ -131,7 +132,7 @@ export class FilePresenceManager {
     return name.endsWith(this.ext);
   }
 
-  addNewFile(name: string) {
+  addNewFile(name: string, notify = true) {
     if (this.seen.has(name)) {
       return;
     }
@@ -147,7 +148,9 @@ export class FilePresenceManager {
     }
 
     this.files.set(name, { version: 0 });
-    this.listener.added(name);
+    if (notify) {
+      this.listener.added(name);
+    }
   }
 
   reset() {

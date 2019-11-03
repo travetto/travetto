@@ -1,21 +1,19 @@
 import { FsUtil } from '@travetto/boot';
-import { Env, AppError, Shutdown } from '@travetto/base';
+import { Env, Shutdown, FilePresenceManager } from '@travetto/base';
 
-import { TransformerManager } from './transformer/manager';
 import { SourceManager } from './source';
-import { CompilerUtil } from './util';
+import { EventEmitter } from 'events';
 
-class $Compiler {
+class $Compiler extends EventEmitter {
 
-  sourceManager: SourceManager;
-  transformerManager: TransformerManager;
+  private presenceManager: FilePresenceManager;
+  private sourceManager: SourceManager;
+  public rootPaths: string[];
+
   active = false;
 
-  constructor(public cwd: string) {
-
-    // Get Files proper like
-    this.transformerManager = new TransformerManager(this.cwd);
-    this.sourceManager = new SourceManager(this.cwd, {});
+  constructor(public cwd: string, rootPaths: string[]) {
+    super();
 
     if (Env.watch) {
       Shutdown.onUnhandled(err => {
@@ -25,6 +23,24 @@ class $Compiler {
         }
       }, 0);
     }
+
+    this.rootPaths = [...rootPaths];
+
+    if (rootPaths.length && !rootPaths.includes('.')) {
+      this.rootPaths.push('.');
+    }
+
+    this.rootPaths = this.rootPaths.map(x => FsUtil.joinUnix(x, 'src'));
+
+    this.sourceManager = new SourceManager(cwd, {});
+    this.presenceManager = new FilePresenceManager({
+      ext: '.ts',
+      cwd: this.cwd,
+      rootPaths: this.rootPaths,
+      listener: this,
+      excludedFiles: [/node_modules/, /[.]d[.]ts$/],
+      initialFileValidator: x => !(x.file in require.cache)
+    });
   }
 
   init() {
@@ -32,82 +48,63 @@ class $Compiler {
       return;
     }
 
-    this.active = true;
-    this.sourceManager.registerSourceMaps();
-    this.transformerManager.init();
-    require.extensions['.ts'] = this.requireHandler.bind(this);
-
     const start = Date.now();
+    this.active = true;
+    require.extensions['.ts'] = this.compile.bind(this);
+    this.presenceManager.init();
+    this.sourceManager.init();
     console.debug('Initialized', (Date.now() - start) / 1000);
   }
 
   reset() {
     this.sourceManager.clear();
+    this.presenceManager.reset();
     this.active = false;
 
     this.init();
   }
 
-  requireHandler(m: NodeModule, tsf: string) {
-    const jsf = tsf.replace(/\.ts$/, '.js');
-
-    // Log transpiled content as needed
-    const content = this.sourceManager.get(tsf)!;
-
-    try {
-      return (m as any)._compile(content, jsf);
-    } catch (e) {
-
-      if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
-        const modName = m.filename.replace(`${this.cwd}/`, '');
-        e = new AppError(`${e.message} ${e.message.includes('from') ? `[via ${modName}]` : `from ${modName}`}`, 'general');
+  added(fileName: string, load = true) {
+    console.trace('File Added', fileName);
+    if (this.sourceManager.transpile(fileName)) {
+      if (this.presenceManager.isWatchedFileKnown(fileName.replace(/[.]js$/, '.ts'))) {
+        this.sourceManager.unloadModule(fileName, false);
       }
-
-      const file = tsf.replace(`${Env.cwd}/`, '');
-      if (tsf.includes('/extension/')) { // If errored out on extension loading
-        console.debug(`Ignoring load for ${file}:`, e.message.split(' from ')[0]);
-      } else if (Env.watch) {
-        console.error(`Stubbing out with error proxy due to error in compiling ${file}: `, e.message);
-        const content = CompilerUtil.getErrorModuleProxySource(e.message);
-        return (m as any)._compile(content, jsf)
-      } else {
-        throw e;
+      if (load) {
+        require(fileName);
       }
+      this.emit('added', fileName);
     }
   }
 
-  unload(fileName: string, unlink = true) {
-    console.trace('Unloading', fileName);
-
-    if (this.sourceManager.has(fileName)) {
-      this.sourceManager.unload(fileName, unlink);
+  changed(fileName: string) {
+    console.trace('File Changed', fileName);
+    if (this.sourceManager.transpile(fileName, true)) {
+      this.sourceManager.unloadModule(fileName, false);
+      require(fileName);
+      this.emit('changed', fileName);
     }
+  }
+
+  removed(fileName: string, unlink = true) {
+    console.trace('File Removed', fileName);
+    this.sourceManager.unloadModule(fileName, unlink);
 
     const native = FsUtil.toNative(fileName);
     if (native in require.cache) {
       delete require.cache[native];
     }
+
+    this.emit('removed', fileName);
   }
 
-  transpile(fileName: string, force = false) {
-    let changed: boolean = false;
-    try {
-      changed = this.sourceManager.transpile(fileName, {
-        fileName,
-        reportDiagnostics: true,
-        transformers: this.transformerManager.transformers ?? {}
-      }, force);
-    } catch (err) {
-      if (Env.watch) { // Handle transpilation errors
-        this.sourceManager.set(fileName, CompilerUtil.getErrorModuleProxySource(err.message));
-        changed = this.sourceManager.transpile(fileName, { fileName }, true);
-      } else {
-        throw err;
-      }
+  compile(m: NodeModule, tsf: string) {
+    if (!this.sourceManager.has(tsf)) { // Is new
+      this.presenceManager.addNewFile(tsf, false);
+      this.added(tsf, false);
     }
-
-    return changed;
+    return this.sourceManager.compileModule(m, tsf);
   }
 }
 
-export const Compiler = new $Compiler(Env.cwd);
+export const Compiler = new $Compiler(Env.cwd, Env.appRoots);

@@ -5,8 +5,12 @@ import { FileCache, RegisterUtil } from '@travetto/boot';
 import { Env, AppError, SystemUtil } from '@travetto/base';
 
 import { CompilerUtil } from './util';
+import { TransformerManager } from './transformer/manager';
+import { Compiler } from './compiler';
 
 export class SourceManager {
+  private transformerManager: TransformerManager;
+
   private sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   private contents = new Map<string, string>();
   private hashes = new Map<string, number>();
@@ -16,39 +20,10 @@ export class SourceManager {
   constructor(private cwd: string, private config: { cache?: boolean }) {
     Object.assign(config, { ... { cache: true }, config });
     this.cache = new FileCache(this.cwd);
+    this.transformerManager = new TransformerManager(this.cwd);
   }
 
-  registerSourceMaps() {
-    sourcemap.install({
-      emptyCacheBetweenOperations: !Env.prod, // Be less strict in non-dev
-      retrieveFile: (p: string) => this.contents.get(p.replace('.js', '.ts'))!,
-      retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
-    });
-  }
-
-  checkTranspileErrors(fileName: string, res: ts.TranspileOutput) {
-
-    if (res.diagnostics && res.diagnostics.length) {
-
-      const errors = res.diagnostics.slice(0, 5).map(diag => {
-        const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
-        if (diag.file) {
-          const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start as number);
-          return ` @ ${diag.file.fileName.replace(`${this.cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
-        } else {
-          return ` ${message}`;
-        }
-      });
-
-      if (res.diagnostics.length > 5) {
-        errors.push(`${res.diagnostics.length - 5} more ...`);
-      }
-
-      throw new AppError(`Transpiling ${fileName.replace(`${this.cwd}/`, '')} failed`, 'unavailable', { errors });
-    }
-  }
-
-  transpile(fileName: string, options: ts.TranspileOptions, force = false) {
+  private transpileFile(fileName: string, options: ts.TranspileOptions, force = false) {
     if (force || !(this.config.cache && this.cache.hasEntry(fileName))) {
       console.trace('Emitting', fileName);
 
@@ -69,9 +44,13 @@ export class SourceManager {
         this.compilerOptions = CompilerUtil.resolveOptions(this.cwd);
       }
 
-      const res = ts.transpileModule(content, { ...options, compilerOptions: this.compilerOptions });
+      const res = ts.transpileModule(content, {
+        ...options,
+        transformers: this.transformerManager.transformers || {},
+        compilerOptions: this.compilerOptions
+      });
 
-      this.checkTranspileErrors(fileName, res);
+      CompilerUtil.checkTranspileErrors(this.cwd, fileName, res);
 
       if (Env.watch) {
         this.hashes.set(fileName, hash);
@@ -86,6 +65,55 @@ export class SourceManager {
       this.contents.set(fileName, cached);
     }
     return true;
+  }
+
+  init() {
+    // register source maps
+    sourcemap.install({
+      emptyCacheBetweenOperations: !Env.prod, // Be less strict in non-dev
+      retrieveFile: (p: string) => this.contents.get(p.replace('.js', '.ts'))!,
+      retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
+    });
+    this.transformerManager.init();
+  }
+
+  transpile(fileName: string, force = false) {
+    console.trace('Transpiling', fileName);
+    let changed: boolean = false;
+    try {
+      changed = this.transpileFile(fileName, {
+        fileName,
+        reportDiagnostics: true
+      }, force);
+    } catch (err) {
+      if (Env.watch) { // Handle transpilation errors
+        this.set(fileName, CompilerUtil.getErrorModuleProxySource(err.message));
+        changed = this.transpileFile(fileName, { fileName }, true);
+      } else {
+        throw err;
+      }
+    }
+
+    return changed;
+  }
+
+  compileModule(m: NodeModule, tsf: string) {
+    const content = this.get(tsf)!;
+    return CompilerUtil.compile(this.cwd, m, tsf, content);
+  }
+
+  unloadModule(fileName: string, unlink = true) {
+    console.trace('Unloading', fileName);
+
+    if (this.has(fileName)) {
+      if (this.config.cache) {
+        this.cache.removeExpiredEntry(fileName, unlink);
+      }
+
+      if (unlink && this.hashes.has(fileName)) {
+        this.hashes.delete(fileName);
+      }
+    }
   }
 
   has(name: string) {
@@ -104,15 +132,5 @@ export class SourceManager {
     this.contents.clear();
     this.sourceMaps.clear();
     this.hashes.clear();
-  }
-
-  unload(name: string, unlink: boolean = true) {
-    if (this.config.cache) {
-      this.cache.removeExpiredEntry(name, unlink);
-    }
-
-    if (unlink && this.hashes.has(name)) {
-      this.hashes.delete(name);
-    }
   }
 }
