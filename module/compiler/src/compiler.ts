@@ -1,58 +1,21 @@
-import { EventEmitter } from 'events';
-
 import { FsUtil } from '@travetto/boot';
-import { Env, AppError, FilePresenceManager, Shutdown } from '@travetto/base';
+import { Env, AppError, Shutdown } from '@travetto/base';
 
 import { TransformerManager } from './transformer/manager';
 import { SourceManager } from './source';
 import { CompilerUtil } from './util';
 
-type WatchEvent = 'required-after' | 'added' | 'changed' | 'removed';
-
 class $Compiler {
 
   sourceManager: SourceManager;
-  presenceManager: FilePresenceManager;
   transformerManager: TransformerManager;
   active = false;
-
-  // Event manager
-  events = new EventEmitter();
 
   constructor(public cwd: string) {
 
     // Get Files proper like
     this.transformerManager = new TransformerManager(this.cwd);
     this.sourceManager = new SourceManager(this.cwd, {});
-
-    const rootPaths = [
-      ...Env.appRoots,
-      ...(Env.appRoots.length && !Env.appRoots.includes('.') ? ['.'] : [])
-    ].map(x => FsUtil.joinUnix(x, 'src'));
-
-    this.presenceManager = new FilePresenceManager({
-      ext: '.ts',
-      cwd: this.cwd,
-      rootPaths,
-      listener: {
-        added: (name: string) => {
-          if (this.transpile(name)) {
-            this.events.emit('added', name);
-          }
-        },
-        changed: (name: string) => {
-          if (this.transpile(name, true)) {
-            this.events.emit('changed', name);
-          }
-        },
-        removed: (name: string) => {
-          this.unload(name);
-          this.events.emit('removed', name);
-        }
-      },
-      excludedFiles: [/node_modules/, /[.]d[.]ts$/],
-      initialFileValidator: x => !(x.file in require.cache)
-    });
 
     if (Env.watch) {
       Shutdown.onUnhandled(err => {
@@ -75,14 +38,11 @@ class $Compiler {
     require.extensions['.ts'] = this.requireHandler.bind(this);
 
     const start = Date.now();
-    this.presenceManager.init();
     console.debug('Initialized', (Date.now() - start) / 1000);
   }
 
   reset() {
     this.sourceManager.clear();
-    this.presenceManager.reset();
-
     this.active = false;
 
     this.init();
@@ -91,20 +51,10 @@ class $Compiler {
   requireHandler(m: NodeModule, tsf: string) {
     const jsf = tsf.replace(/\.ts$/, '.js');
 
-    const isNew = !this.sourceManager.has(tsf);
-
-    if (isNew) {
-      this.presenceManager.addNewFile(tsf); // Will transpile
-    }
-
     // Log transpiled content as needed
     const content = this.sourceManager.get(tsf)!;
     try {
-      const res = (m as any)._compile(content, jsf);
-      if (isNew) {
-        this.events.emit('required-after', tsf);
-      }
-      return res;
+      return (m as any)._compile(content, jsf);
     } catch (e) {
 
       if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
@@ -122,16 +72,6 @@ class $Compiler {
       } else {
         throw e;
       }
-    }
-  }
-
-  markForReload(files: string[] | string, unlink = true) {
-    if (!Array.isArray(files)) {
-      files = [files];
-    }
-    for (const fileName of files) {
-      this.unload(fileName, unlink);
-      // Do not automatically reload
     }
   }
 
@@ -165,20 +105,7 @@ class $Compiler {
       }
     }
 
-    if (changed && (force || this.presenceManager.isWatchedFileKnown(fileName.replace(/[.]js$/, '.ts')))) {
-      // If file is already loaded, mark for reload
-      this.markForReload(fileName, false); // Do not delete the file we just created
-    }
-
     return changed;
-  }
-
-  on(event: WatchEvent, callback: (filename: string) => any) {
-    this.events.addListener(event, callback);
-  }
-
-  off(event: WatchEvent, callback: (filename: string) => any) {
-    this.events.removeListener(event, callback);
   }
 }
 
