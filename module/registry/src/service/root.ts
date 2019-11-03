@@ -1,12 +1,12 @@
 import { Env } from '@travetto/base';
 
 import { Registry } from '../registry';
-import { CompilerClassSource } from '../source/class-source';
+import { ClassSource } from '../source/class-source';
 import { Class, ChangeEvent } from '../types';
 
 class $RootRegistry extends Registry {
   constructor(rootPaths: string[]) {
-    super(new CompilerClassSource(rootPaths));
+    super(new ClassSource(rootPaths));
   }
 
   // Auto propagate

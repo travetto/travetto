@@ -53,6 +53,7 @@ class $Compiler {
 
     // Log transpiled content as needed
     const content = this.sourceManager.get(tsf)!;
+
     try {
       return (m as any)._compile(content, jsf);
     } catch (e) {

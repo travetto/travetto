@@ -1,49 +1,14 @@
 import { EventEmitter } from 'events';
 
-import { Compiler } from '@travetto/compiler';
-import { FsUtil } from '@travetto/boot';
-import { Env, AppInfo, ScanApp, FilePresenceManager } from '@travetto/base';
+import { FileChangeSource } from '@travetto/compiler';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';
 
-export class CompilerClassSource implements ChangeSource<Class> {
+export class ClassSource extends FileChangeSource implements ChangeSource<Class> {
 
   private classes = new Map<string, Map<string, Class>>();
   private events = new EventEmitter();
-  private presenceManager: FilePresenceManager;
-
-  constructor(private rootPaths: string[]) {
-    const sourcedRootPaths = [
-      ...rootPaths,
-      ...(rootPaths.length && !rootPaths.includes('.') ? ['.'] : [])
-    ].map(x => FsUtil.joinUnix(x, 'src'));
-
-    this.presenceManager = new FilePresenceManager({
-      ext: '.ts',
-      cwd: Env.cwd,
-      rootPaths: sourcedRootPaths,
-      listener: {
-        added: (name: string) => {
-          if (Compiler.transpile(name)) {
-            this.onFileChanged(name);
-            this.flush();
-          }
-        },
-        changed: (name: string) => {
-          if (Compiler.transpile(name, true)) {
-            this.onFileChanged(name, true);
-          }
-        },
-        removed: (name: string) => {
-          Compiler.unload(name);
-          this.handleFileChanges(name);
-        }
-      },
-      excludedFiles: [/node_modules/, /[.]d[.]ts$/],
-      initialFileValidator: x => !(x.file in require.cache)
-    });
-  }
 
   private flush() {
     for (const [file, classes] of PendingRegister.flush()) {
@@ -87,16 +52,21 @@ export class CompilerClassSource implements ChangeSource<Class> {
     }
   }
 
-  protected async onFileChanged(fileName: string, force = false) {
-    if (force || this.presenceManager.isWatchedFileKnown(fileName.replace(/[.]js$/, '.ts'))) {
-      Compiler.unload(fileName, false);
-    }
-
-    require(fileName);
-
+  handlePendingFileChanges() {
     for (const [file, classes] of PendingRegister.flush()) {
       this.handleFileChanges(file, classes);
     }
+  }
+
+  onFileAdded(name: string) {
+    super.onFileAdded(name);
+    this.handlePendingFileChanges();
+    this.flush();
+  }
+
+  onFileChanged(name: string) {
+    super.onFileChanged(name);
+    this.handlePendingFileChanges();
   }
 
   emit(e: ChangeEvent<Class>) {
@@ -105,33 +75,11 @@ export class CompilerClassSource implements ChangeSource<Class> {
 
   reset() {
     this.classes.clear();
-    this.presenceManager.reset();
+    super.reset();
   }
 
   async init() {
-
-    this.presenceManager.init();
-
-    if (this.rootPaths.length) {
-      const rootsRe = Env.appRootMatcher(this.rootPaths);
-
-      const entries = await ScanApp.findFiles('.ts', (f: string) => {
-        return this.presenceManager.validFile(f)
-          && (rootsRe.test(f) || f.startsWith('extension/') || (
-            /^node_modules\/@travetto\/[^\/]+\/(src|extension)\/.*/.test(f)
-            && !f.includes('node_modules/@travetto/test') // Exclude test code by default
-            && !f.startsWith(`node_modules/${AppInfo.NAME}/`)
-          )); // No more side effect code, load all files
-      }
-      );
-
-      const files = entries.map(x => x.file);
-
-      for (const f of files) { // Load all files, class scanning
-        require(f);
-      }
-    }
-
+    await super.init();
     this.flush();
   }
 
