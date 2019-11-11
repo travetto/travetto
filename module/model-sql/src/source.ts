@@ -4,7 +4,7 @@ import {
   PageableModelQuery,
   ModelQuery, Query,
   BulkOp, BulkResponse,
-  ValidStringFields, WhereClauseRaw,
+  ValidStringFields,
   WhereClause, ModelUtil
 } from '@travetto/model';
 import { Class, ChangeEvent } from '@travetto/registry';
@@ -116,7 +116,7 @@ export class SQLModelSource extends ModelSource {
 
   @WithAsyncContext({})
   async onSchemaChange(ev: SchemaChangeEvent) {
-    if (this.dialect.handleFieldChange) {
+    if (this.dialect.handleFieldChange(ev)) {
       try {
         await this.onFieldChange(ev);
       } catch (e) {

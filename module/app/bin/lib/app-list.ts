@@ -31,7 +31,7 @@ export class AppListUtil {
     // Load app files
     ScanApp.requireFiles('.ts', x => {
       return /^([^/]+\/)?(src[\/])/.test(x) && x.endsWith('.ts') && !x.endsWith('d.ts') &&
-        fs.readFileSync(x).toString().includes('@Application');
+        fs.readFileSync(x, 'utf-8').includes('@Application');
     }); // Only load files that are candidates
 
     // Get applications

@@ -78,7 +78,7 @@ export class TestChildWorker extends ChildCommChannel<Event> {
     for (const file of Object.keys(require.cache)) {
       if (file.endsWith('.ts') && this.isFileResettable(file)) {
         console.debug(`[${process.pid}]`, 'Unloading', file);
-        this.compiler.removed(file, false);
+        this.compiler.unload(file);
       }
     }
 

@@ -35,11 +35,11 @@ export class CompilerUtil {
     }
   }
 
-  static checkTranspileErrors(cwd: string, fileName: string, res: ts.TranspileOutput) {
+  static checkTranspileErrors(cwd: string, fileName: string, diagnostics: ts.TranspileOutput['diagnostics']) {
 
-    if (res.diagnostics && res.diagnostics.length) {
+    if (diagnostics && diagnostics.length) {
 
-      const errors = res.diagnostics.slice(0, 5).map(diag => {
+      const errors = diagnostics.slice(0, 5).map(diag => {
         const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
           const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start as number);
@@ -49,8 +49,8 @@ export class CompilerUtil {
         }
       });
 
-      if (res.diagnostics.length > 5) {
-        errors.push(`${res.diagnostics.length - 5} more ...`);
+      if (diagnostics.length > 5) {
+        errors.push(`${diagnostics.length - 5} more ...`);
       }
 
       throw new AppError(`Transpiling ${fileName.replace(`${cwd}/`, '')} failed`, 'unavailable', { errors });

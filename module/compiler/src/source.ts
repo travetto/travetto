@@ -22,48 +22,36 @@ export class SourceManager {
     this.transformerManager = new TransformerManager(this.cwd);
   }
 
-  private transpileFile(fileName: string, options: ts.TranspileOptions, force = false) {
+  private transpileFile(fileName: string, content: string, options: ts.TranspileOptions, force = false) {
     if (force || !(this.config.cache && this.cache.hasEntry(fileName))) {
       console.trace('Emitting', fileName.replace(this.cwd, ''));
 
-      const content = RegisterUtil.prepareTranspile(fileName);
-
-      let hash = 0;
-
-      if (Env.watch && this.hashes.has(fileName)) {
-        // Let's see if they are really different
-        hash = SystemUtil.naiveHash(content);
-        if (hash === this.hashes.get(fileName)) {
-          console.trace(`Contents Unchanged: ${fileName}`);
-          return false;
-        }
-      }
+      content = RegisterUtil.prepareTranspile(fileName, content);
 
       if (!this.compilerOptions) {
         this.compilerOptions = CompilerUtil.resolveOptions(this.cwd);
       }
 
-      const res = ts.transpileModule(content, {
+      const { outputText, diagnostics } = ts.transpileModule(content, {
         ...options,
         transformers: this.transformerManager.transformers || {},
         compilerOptions: this.compilerOptions
       });
 
-      CompilerUtil.checkTranspileErrors(this.cwd, fileName, res);
+      CompilerUtil.checkTranspileErrors(this.cwd, fileName, diagnostics);
 
-      if (Env.watch) {
-        this.hashes.set(fileName, hash);
-      }
+      this.contents.set(fileName, outputText);
+      this.hashes.set(fileName, SystemUtil.naiveHash(content));
 
-      this.set(fileName, res.outputText);
       if (this.config.cache) {
-        this.cache.writeEntry(fileName, res.outputText);
+        this.cache.writeEntry(fileName, outputText);
       }
     } else {
       const cached = this.cache.readEntry(fileName);
       this.contents.set(fileName, cached);
     }
-    return true;
+
+    return this.contents.get(fileName)!;
   }
 
   init() {
@@ -76,36 +64,37 @@ export class SourceManager {
     this.transformerManager.init();
   }
 
-  transpile(fileName: string, force = false) {
+  hashChanged(fileName: string, content: string) {
+    // Let's see if they are really different
+    const hash = SystemUtil.naiveHash(content);
+    if (hash === this.hashes.get(fileName)) {
+      console.trace(`Contents Unchanged: ${fileName}`);
+      return false;
+    }
+    return true;
+  }
+
+  transpile(fileName: string, content: string, force = false) {
     console.trace('Transpiling', fileName.replace(this.cwd, ''));
-    let changed: boolean = false;
     try {
-      changed = this.transpileFile(fileName, {
+      return this.transpileFile(fileName, content, {
         fileName,
         reportDiagnostics: true
       }, force);
     } catch (err) {
       if (Env.watch) { // Handle transpilation errors
-        this.set(fileName, CompilerUtil.getErrorModuleProxySource(err.message));
-        changed = this.transpileFile(fileName, { fileName }, true);
+        const errContent = CompilerUtil.getErrorModuleProxySource(err.message);
+        return this.transpileFile(fileName, errContent, { fileName }, true);
       } else {
         throw err;
       }
     }
-
-    return changed;
-  }
-
-  compile(m: NodeModule, tsf: string) {
-    console.trace('Compiling', tsf.replace(this.cwd, ''));
-    const content = this.get(tsf)!;
-    return CompilerUtil.compile(this.cwd, m, tsf, content);
   }
 
   unload(fileName: string, unlink = true) {
-    console.trace('Unloading', fileName.replace(this.cwd, ''), unlink);
+    if (this.contents.has(fileName)) {
+      console.trace('Unloading', fileName.replace(this.cwd, ''), unlink);
 
-    if (this.has(fileName)) {
       if (this.config.cache) {
         this.cache.removeExpiredEntry(fileName, unlink);
       }
@@ -116,19 +105,7 @@ export class SourceManager {
     }
   }
 
-  has(name: string) {
-    return this.contents.has(name);
-  }
-
-  get(name: string) {
-    return this.contents.get(name);
-  }
-
-  set(name: string, content: string) {
-    this.contents.set(name, content);
-  }
-
-  clear() {
+  reset() {
     this.contents.clear();
     this.sourceMaps.clear();
     this.hashes.clear();

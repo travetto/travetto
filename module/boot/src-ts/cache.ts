@@ -37,7 +37,7 @@ export class FileCache {
   }
 
   readEntry(full: string) {
-    return fs.readFileSync(this.toEntryName(full)).toString();
+    return fs.readFileSync(this.toEntryName(full), 'utf-8');
   }
 
   removeExpiredEntry(full: string, force = false) {

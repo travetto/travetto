@@ -102,7 +102,6 @@ export class FilePresenceManager {
 
     for (const fileName of rootFiles) {
       this.files.set(fileName, { version: 0 });
-      this.listener.added(fileName);
     }
 
     if (this.watch) { // Start watching after startup
@@ -135,6 +134,7 @@ export class FilePresenceManager {
     if (this.seen.has(name)) {
       return;
     }
+
     this.seen.add(name);
 
     if (this.watch && this.validFile(name)) {
@@ -147,6 +147,7 @@ export class FilePresenceManager {
     }
 
     this.files.set(name, { version: 0 });
+
     if (notify) {
       this.listener.added(name);
     }

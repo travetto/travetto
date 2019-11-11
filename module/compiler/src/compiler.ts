@@ -1,7 +1,8 @@
+import * as fs from 'fs';
 import { EventEmitter } from 'events';
 
 import { FsUtil } from '@travetto/boot';
-import { Env, Shutdown, FilePresenceManager, ScanApp } from '@travetto/base';
+import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp } from '@travetto/base';
 
 import { SourceManager } from './source';
 import { CompilerUtil } from './util';
@@ -36,12 +37,8 @@ class $Compiler extends EventEmitter {
     });
   }
 
-  initialLoad() {
-    const rootsRe = Env.rootMatcher(this.rootPaths);
-
-    ScanApp
-      .findFiles('.ts', f => (rootsRe.test(f) || CompilerUtil.isCompilable(f)))
-      .forEach(x => this.added(x.file)); // Load all files, class scanning
+  private loadFile(fileName: string) {
+    return fs.readFileSync(fileName, 'utf-8');
   }
 
   init() {
@@ -54,66 +51,66 @@ class $Compiler extends EventEmitter {
     require.extensions['.ts'] = this.compile.bind(this);
     this.sourceManager.init();
     this.presenceManager.init();
-    this.initialLoad();
+
+    const rootsRe = Env.rootMatcher(this.rootPaths);
+    ScanApp.requireFiles('.ts', f => rootsRe.test(f) || CompilerUtil.isCompilable(f))// Load all files, class scanning
+
     console.debug('Initialized', (Date.now() - start) / 1000);
   }
 
   reset() {
-    this.sourceManager.clear();
+    this.sourceManager.reset();
     this.presenceManager.reset();
     this.active = false;
 
     this.init();
   }
 
-  added(fileName: string, load = true, emit = true) {
-    console.trace('File Added', fileName);
-    if (!this.presenceManager.has(fileName)) {
-      this.presenceManager.addNewFile(fileName, false);
+  notify(type: keyof PresenceListener, fileName: string) {
+    console.trace(`File ${type}`, fileName);
+    this.emit(type, fileName);
+  }
+
+  unload(fileName: string, unlink = false) {
+    this.sourceManager.unload(fileName, unlink); // Remove source
+    const native = FsUtil.toNative(fileName);
+    if (native in require.cache) {
+      delete require.cache[native]; // Remove require cached element
     }
-    if (this.presenceManager.isWatchedFileKnown(fileName.replace(/[.]js$/, '.ts'))) {
-      this.removed(fileName, false, false);
+  }
+
+  removed(fileName: string) {
+    this.unload(fileName, true);
+    this.notify('removed', fileName);
+  }
+
+  added(fileName: string) {
+    if (this.presenceManager.isWatchedFileKnown(fileName)) {
+      this.unload(fileName);
     }
-    if (this.sourceManager.transpile(fileName)) {
-      if (load) {
-        require(fileName);
-      }
-      if (emit) {
-        this.emit('added', fileName);
-      }
-    }
+    require(fileName);
+    this.notify('added', fileName);
   }
 
   changed(fileName: string) {
-    console.trace('File Changed', fileName);
-    if (this.sourceManager.transpile(fileName, true)) {
-      this.removed(fileName, false, false);
-
-      setTimeout(() => {
-        require(fileName);
-        this.emit('changed', fileName);
-      }, 10);
-    }
-  }
-
-  removed(fileName: string, unlink = true, emit = true) {
-    console.trace('File Removed', fileName);
-    this.sourceManager.unload(fileName, unlink);
-    const native = FsUtil.toNative(fileName);
-
-    if (native in require.cache) {
-      delete require.cache[native];
-    }
-    if (emit) {
-      this.emit('removed', fileName);
+    if (this.sourceManager.hashChanged(fileName, this.loadFile(fileName))) {
+      this.unload(fileName);
+      require(fileName);
+      this.notify('changed', fileName);
     }
   }
 
   compile(m: NodeModule, tsf: string) {
-    if (!this.presenceManager.has(tsf)) { // Is new
-      this.added(tsf);
+    const isNew = !this.presenceManager.has(tsf);
+    try {
+      const content = this.loadFile(tsf);
+      const js = this.sourceManager.transpile(tsf, content); // Compile
+      return CompilerUtil.compile(this.cwd, m, tsf, js);
+    } finally {
+      if (isNew) {
+        this.presenceManager.addNewFile(tsf, false);
+      }
     }
-    return this.sourceManager.compile(m, tsf);
   }
 }
 

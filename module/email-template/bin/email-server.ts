@@ -5,7 +5,7 @@ import * as fs from 'fs';
 
 import { DefaultMailTemplateEngine } from '../src/template';
 
-const INDEX = fs.readFileSync(`${__dirname}/index.html`).toString();
+const INDEX = fs.readFileSync(`${__dirname}/index.html`, 'utf-8');
 
 async function simpleWatcher(commonFolder: string, paths: string[], handler: {
   changed?(file: string): void;
