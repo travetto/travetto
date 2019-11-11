@@ -6,8 +6,8 @@ import { MimeType } from './util/mime';
 
 // tslint:disable:no-invalid-this
 (Error as any).prototype.render = function (res: Response) {
-  const status = this.status || this.statusCode ||
-    HTTP_ERROR_CONVERSION.from.get(this.category) ||
+  const status = this.status ?? this.statusCode ??
+    HTTP_ERROR_CONVERSION.from.get(this.category) ??
     500;
 
   res.status(status);

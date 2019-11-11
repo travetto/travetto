@@ -14,7 +14,7 @@ export class RouteUtil {
         return it(req, res, next);
       } else {
         const out = it(req, res);
-        return out && out.then ? out.then(next) : next();
+        return out?.then(next) ?? next();
       }
     };
   }
@@ -30,13 +30,13 @@ export class RouteUtil {
     };
 
     const filters: Filter[] = [
-      ...(router.filters || []).map(x => x.bind(router.instance)),
+      ...(router.filters ?? []).map(x => x.bind(router.instance)),
       ...('filters' in route ? route.filters : []).map(x => x.bind(route.instance)),
       ...(route.params.filter(x => x.resolve).map(x => x.resolve!))
     ];
 
     const headers = {
-      ...(router.headers || {}),
+      ...(router.headers ?? {}),
       ...('headers' in route ? route.headers : {})
     };
 

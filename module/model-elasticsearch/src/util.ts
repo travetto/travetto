@@ -161,7 +161,7 @@ export class ElasticsearchUtil {
             case '$maxDistance':
             case '$near': {
               let dist = top.$maxDistance;
-              let unit = top.$unit || 'm';
+              let unit = top.$unit ?? 'm';
               if (unit === 'rad') {
                 dist = 6378.1 * dist;
                 unit = 'km';
@@ -211,7 +211,7 @@ export class ElasticsearchUtil {
       lang: 'painless',
       source: ''
     };
-    for (const x of Object.keys(o || {})) {
+    for (const x of Object.keys(o ?? {})) {
       if (!path && (x === '_id' || x === 'id')) {
         continue;
       }

@@ -28,22 +28,22 @@ function verifyTypes(o: any): o is Payload {
 export async function verify(jwt: string, options: VerifyOptions = {}) {
 
   // clone this object since we are going to mutate it.
-  const headerVerify = { ...(options.header || {}), alg: undefined as any as (string | string[]), typ: 'JWT' };
-  const verifyPayload = { ...(options.payload || {}) };
+  const headerVerify = { ...(options.header ?? {}), alg: undefined as any as (string | string[]), typ: 'JWT' };
+  const verifyPayload = { ...(options.payload ?? {}) };
 
   const oct = (options.clock && options.clock.timestamp);
   const octn = oct instanceof Date ? Math.trunc(oct.getTime() / 1000) : (typeof oct === 'number' ? oct : Math.trunc(Date.now() / 1000));
 
   const clock = {
     tolerance: 0,
-    ...(options.clock || {}),
+    ...(options.clock ?? {}),
     timestamp: octn,
   };
 
   const ignore = {
     exp: false,
     nbf: false,
-    ...options.ignore || {}
+    ...options.ignore ?? {}
   };
 
   const { header, signature, payload } = decodeComplete<Payload>(jwt);
@@ -82,7 +82,7 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
     }
   }
 
-  const valid = jws.verify(jwt, header.alg, key || '');
+  const valid = jws.verify(jwt, header.alg, key ?? '');
 
   if (!valid) {
     throw new JWTError('Token has invalid signature', {}, 'permissions');
@@ -104,7 +104,7 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
 
   if (verifyPayload.aud) {
     const aud = Array.isArray(verifyPayload.aud) ? verifyPayload.aud : [verifyPayload.aud];
-    const target = Array.isArray(payload.aud) ? payload.aud : [payload.aud || ''];
+    const target = Array.isArray(payload.aud) ? payload.aud : [payload.aud ?? ''];
 
     const match = target.some((targetAudience) =>
       aud.some(x => x instanceof RegExp ? x.test(targetAudience) : x === targetAudience)

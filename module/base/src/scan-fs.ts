@@ -48,7 +48,7 @@ class $ScanFs {
       try {
         const out: ScanEntry[] = [];
 
-        entry = (entry! || { file: base, children: [] });
+        entry = (entry! ?? { file: base, children: [] });
 
         for (const file of (await fsReaddir(entry!.file))) {
           if (file.startsWith('.')) {
@@ -73,7 +73,7 @@ class $ScanFs {
               out.push(subEntry, ...await this.scanDir(handler, base, subEntry, visited));
             }
           } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
-            (entry!.children = entry!.children || []).push(subEntry);
+            (entry!.children = entry?.children ?? []).push(subEntry);
             out.push(subEntry);
           }
         }
@@ -102,7 +102,7 @@ class $ScanFs {
   scanDirSync(handler: ScanHandler, base: string, entry?: ScanEntry, visited = new Set<string>()) {
     const out: ScanEntry[] = [];
 
-    entry = (entry! || { file: base, children: [] });
+    entry = (entry! ?? { file: base, children: [] });
 
     for (const file of fs.readdirSync(entry.file)) {
       if (file.startsWith('.')) {
@@ -126,7 +126,7 @@ class $ScanFs {
           out.push(subEntry, ...this.scanDirSync(handler, base, subEntry, visited));
         }
       } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
-        (entry.children = entry.children || []).push(subEntry);
+        (entry.children = entry.children ?? []).push(subEntry);
         out.push(subEntry);
       }
     }

@@ -62,7 +62,7 @@ export class Execute {
   static async getCompletion(args: string[]) {
     const compl: CompletionConfig = { all: [], task: {} };
 
-    const cmd = args.shift() || '';
+    const cmd = args.shift() ?? '';
     await Promise.all(this.loadAllPlugins().map(x => x.complete(compl)));
 
     let last = cmd;
@@ -71,8 +71,8 @@ export class Execute {
     if (!compl.task[cmd]) {
       opts = compl.all;
     } else {
-      last = args.pop() || '';
-      const second = args.pop() || '';
+      last = args.pop() ?? '';
+      const second = args.pop() ?? '';
       let flag = '';
 
       if (last in compl.task[cmd]) {

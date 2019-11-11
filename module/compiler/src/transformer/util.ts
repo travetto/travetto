@@ -40,7 +40,7 @@ export class TransformUtil {
   }
 
   static getDecoratorList(node: ts.Node) {
-    return ((node.decorators || []) as any as DecList)
+    return ((node.decorators ?? []) as any as DecList)
       .map(dec => {
         const ident = TransformUtil.getDecoratorIdent(dec);
         return ({
@@ -169,7 +169,7 @@ export class TransformUtil {
   }
 
   static extendObjectLiteral(addTo: object, lit?: ts.ObjectLiteralExpression) {
-    lit = lit || this.fromLiteral({});
+    lit = lit ?? this.fromLiteral({});
     const props = lit.properties;
     const extra = this.fromLiteral(addTo).properties;
     return ts.updateObjectLiteral(lit, [...props, ...extra]);

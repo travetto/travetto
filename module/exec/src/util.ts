@@ -12,7 +12,7 @@ export class ExecUtil {
     console.debug('Acquired port', port);
 
     while ((Date.now() - start) < ms) {
-      const status = await new Promise((resolve) => {
+      const status = await new Promise<number>((resolve) => {
         try {
           const client = url.startsWith('https') ? https : http;
           const req = client.get(url, (msg) =>

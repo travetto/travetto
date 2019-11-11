@@ -6,7 +6,7 @@ import { ValidStringFields } from '../service/source';
 
 export class ModelUtil {
   static verifyGetSingleCounts<T>(cls: Class<T>, res?: T[], failOnMany = true) {
-    res = res || [];
+    res = res ?? [];
     if (res.length === 1 || res.length > 1 && !failOnMany) {
       return res[0] as T;
     }
@@ -19,7 +19,7 @@ export class ModelUtil {
 
   static getSuggestQuery<T>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>) {
     const re = this.getSuggestRegex(prefix);
-    const limit = query && query.limit || 10;
+    const limit = query?.limit ?? 10;
     const where = { [field]: { $regex: re } } as any;
 
     const q = {
@@ -53,12 +53,12 @@ export class ModelUtil {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map((a) => a[1])
       .filter((x, i, arr) => x !== arr[i - 1])
-      .slice(0, limit || 10);
+      .slice(0, limit ?? 10);
   }
 
   static getSuggestFieldQuery<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>) {
     return this.getSuggestQuery(cls, field, prefix, {
-      ...(query || {}),
+      ...(query ?? {}),
       select: { [field]: true } as any
     });
   }

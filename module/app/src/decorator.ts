@@ -16,15 +16,15 @@ export function Application(
   params?: (Partial<ApplicationParameter> & { name: string })[]
 ): ClassDecorator {
   return (target: Class | any) => {
-    const out: Partial<ApplicationConfig> = (config || {});
-    const paramMap = config && config.paramMap || {};
+    const out: Partial<ApplicationConfig> = config ?? {};
+    const paramMap = config?.paramMap ?? {};
 
     out.target = target;
     out.name = name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-');
     out.standalone = out.standalone === undefined || out.standalone; // Default to standalone
 
     if (params) {
-      out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] || {}), name: x.name! }) as ApplicationParameter);
+      out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] ?? {}), name: x.name! }) as ApplicationParameter);
     }
 
     ApplicationRegistry.register(out.name, out as ApplicationConfig);

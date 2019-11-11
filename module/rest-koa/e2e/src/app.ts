@@ -1,6 +1,6 @@
 import { RestConfig, Application, RestApp } from '@travetto/rest';
 
-@Application('sample')
+@Application('sample', { standalone: false })
 export class SampleApp {
 
   constructor(private server: RestApp, private config: RestConfig) { }

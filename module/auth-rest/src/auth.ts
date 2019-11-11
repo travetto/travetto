@@ -42,7 +42,7 @@ export class AuthService {
     }
 
     const err = new AppError('Unable to authenticate', 'authentication');
-    err.stack = (lastError ? lastError.stack : err.stack);
+    err.stack = lastError?.stack ?? err.stack;
     throw err;
   }
 }

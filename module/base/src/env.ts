@@ -64,7 +64,7 @@ class $Env {
     console.warn = logFn.bind(null, log, 'warn ');
     console.info = logFn.bind(null, log, 'info ');
     console.error = (...args) => {
-      logFn(error, 'error', ...args.map(x => x && x.toConsole ? x.toConsole() : (x && x.stack ? x.stack : x)));
+      logFn(error, 'error', ...args.map(x => x && x.toConsole ? x.toConsole?.() : (x && x.stack ? x.stack : x)));
     };
     if (trace) {
       console.trace = logFn.bind(null, log, 'trace'); // Suppress trace statements

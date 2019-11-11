@@ -12,7 +12,7 @@ export class $ApplicationRegistry {
   }
 
   loadAllFromConfig() {
-    for (const entries of Object.values(ConfigSource.get('app.entry') || {}) as string[][]) {
+    for (const entries of Object.values(ConfigSource.get('app.entry') ?? {}) as string[][]) {
       for (const entry of entries) {
         require(entry);
       }

@@ -313,7 +313,7 @@ export abstract class SQLDialect implements DialectState {
 
     for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
       const top = o[key];
-      const field = localMap[key] || foreignMap[key];
+      const field = localMap[key] ?? foreignMap[key];
       if (!field) {
         throw new Error(`Unknown field: ${key}`);
       }
@@ -452,7 +452,7 @@ LEFT OUTER JOIN ${from} ON
   getLimitSQL<T>(cls: Class<T>, query?: Query<T>): string {
     return !query || (!query.limit && !query.offset) ?
       '' :
-      `LIMIT ${query.limit || 200} OFFSET ${query.offset || 0}`;
+      `LIMIT ${query.limit ?? 200} OFFSET ${query.offset ?? 0}`;
   }
 
   getGroupBySQL<T>(cls: Class<T>, query?: Query<T>): string {
@@ -609,7 +609,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       }
     }
 
-    const idx = config.index || 0;
+    const idx = config.index ?? 0;
 
     for (let i = 0; i < matrix.length; i++) {
       const { stack: elStack } = instances[i];
@@ -707,7 +707,7 @@ ${this.getWhereSQL(cls, query.where)}`;
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
         const selectTop = selectStack[selectStack.length - 1] as any;
-        const subSelectTop = selectTop ? selectTop[config.name] : undefined;
+        const subSelectTop = selectTop?.[config.name];
 
         // See if a selection exists at all
         const sel: FieldConfig[] = subSelectTop ? fields

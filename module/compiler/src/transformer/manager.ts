@@ -15,7 +15,7 @@ export class TransformerManager {
 
     for (const name of ScanApp.findFiles('.ts', x => /support\/transformer[.].*?[.]ts$/.test(x))) {
       const { transformers } = require(name.file);
-      allTransformers.push(...(transformers || []).map((x: any) => { x.file = name.file; return x; }));
+      allTransformers.push(...(transformers ?? []).map((x: any) => { x.file = name.file; return x; }));
     }
 
     console.debug('Transformers',

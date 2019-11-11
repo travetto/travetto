@@ -69,8 +69,8 @@ export class Util {
     return new Promise((resolve, reject) => {
       const text: Buffer[] = [];
       const err: Buffer[] = [];
-      const proc = child_process.fork(cmd, args || [], {
-        env: { ...process.env, ...(env || {}) },
+      const proc = child_process.fork(cmd, args ?? [], {
+        env: { ...process.env, ...(env ?? {}) },
         cwd: FsUtil.cwd,
         stdio: ['pipe', 'pipe', 'pipe', 'ipc']
       });
