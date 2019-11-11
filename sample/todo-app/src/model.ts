@@ -8,6 +8,7 @@ export class Todo {
   created?: Date;
   completed?: boolean;
   priority?: number;
+  who?: string;
 }
 
 @Schema()

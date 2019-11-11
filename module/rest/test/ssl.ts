@@ -11,7 +11,7 @@ export class SSLTest {
 
     assert(!!res.cert);
     assert(!!res.key);
-    assert(/^-+BEGIN CERTIFICATE-+\n/s.test(res.cert));
-    assert(/^-+BEGIN PRIVATE KEY-+\n/s.test(res.key));
+    assert(/^-+BEGIN CERTIFICATE-+(\n|\r)+/s.test(res.cert));
+    assert(/^-+BEGIN( RSA)? PRIVATE KEY-+(\n|\r)+/s.test(res.key));
   }
 }

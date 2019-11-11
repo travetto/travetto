@@ -12,19 +12,20 @@
     "@types/faker": "^4.1.7",
     "@types/js-yaml": "^3.12.1",
     "@types/mysql": "^2.15.8",
-    "@types/pg": "^7.11.2",
     "@types/nodemailer": "^6.2.2",
-    "@types/redis": "^2.8.14",
     "@types/passport-facebook": "^2.1.9",
+    "@types/pg": "^7.11.2",
+    "@types/redis": "^2.8.14",
     "faker": "^4.1.0",
     "js-yaml": "^3.13.1",
     "lerna": "^3.18.4",
     "mysql": "^2.17.1",
-    "pg": "^7.12.1",
-    "redis": "^2.8.0",
+    "node-forge": "^0.9.1",
     "nodemailer": "^6.3.1",
     "nodemailer-sendmail-transport": "^1.0.2",
-    "passport-facebook": "^3.0.0"
+    "passport-facebook": "^3.0.0",
+    "pg": "^7.12.1",
+    "redis": "^2.8.0"
   },
   "dependencies": {
     "typescript": "^3.7.2"

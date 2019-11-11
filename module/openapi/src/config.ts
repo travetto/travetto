@@ -19,12 +19,9 @@ export class ApiHostConfig {
   openapi = '3.0.1';
 }
 
-@Config('api.client')
-export class ApiClientConfig {
-  codeGenImage: string = 'openapitools/openapi-generator-cli';
-  output: string = '';
-  format?: string = '';
-  formatOptions?: string = '';
+@Config('api.spec')
+export class ApiSpecConfig {
+  output: string = 'openapi.json';
   skipRoutes: boolean = false;
   exposeAllSchemas: boolean = false;
 

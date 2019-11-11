@@ -1,7 +1,5 @@
-api.client:
-  output: ./api-client
-  format: typescript-angular
-  formatOptions: supportsES6=true,ngVersion=6.1
+api.spec:
+  output: ./openapi.json
 
 sql.model:
   namespace: todo
