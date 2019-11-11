@@ -19,9 +19,9 @@ export class ApiHostConfig {
   openapi = '3.0.1';
 }
 
-@Config('swagger')
-export class SwaggerConfig {
-  output: string = '';
+@Config('api.spec')
+export class ApiSpecConfig {
+  output: string = 'openapi.json';
   skipRoutes: boolean = false;
   exposeAllSchemas: boolean = false;
 

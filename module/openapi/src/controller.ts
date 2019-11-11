@@ -1,15 +1,15 @@
 import { Controller, Get } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 
-import { SwaggerService } from './service';
+import { OpenApiService } from './service';
 
 @Controller('/')
-export class SwaggerController {
+export class OpenApiController {
 
   @Inject()
-  service: SwaggerService;
+  service: OpenApiService;
 
-  @Get('/swagger.json')
+  @Get('/openapi.json')
   async getSpec() {
     return this.service.getSpec();
   }

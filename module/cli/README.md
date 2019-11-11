@@ -76,14 +76,14 @@ This command is provided by [`email-template`](https://github.com/travetto/trave
 
 Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
 
-## Swagger Spec Generation
+## OpenAPI Spec Generation
 
-**Terminal: Swagger usage**
+**Terminal: OpenAPI usage**
 ```bash
-travetto swagger-spec
-  -o, --output [output]  # Output folder, defaults to ./api-client
+travetto openapi-spec
+  -o, --output [output]  # Output file, defaults to ./openapi.json
 ```
 
-The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `swagger.json`.  Once produced, the code will store the output in the specified location.  
+The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `openapi.json`.  Once produced, the code will store the output in the specified location.  
 
-**NOTE** The [`Swagger`](https://github.com/travetto/travetto/tree/master/module/swagger) module supports generating the swagger spec in real-time while listening for changes to routes and models.
+**NOTE** The [`openapi`](https://github.com/travetto/travetto/tree/master/module/OpenAPI) module supports generating the OpenAPI spec in real-time while listening for changes to routes and models.

@@ -8,13 +8,13 @@ import { Injectable, Inject } from '@travetto/di';
 import { ControllerRegistry, RestConfig } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ApiHostConfig, ApiInfoConfig, SwaggerConfig } from './config';
+import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config';
 import { SpecGenerateUtil } from './spec-generate';
 
 const fsWriteFile = util.promisify(fs.writeFile);
 
 @Injectable()
-export class SwaggerService {
+export class OpenApiService {
 
   @Inject()
   private apiHostConfig: ApiHostConfig;
@@ -23,7 +23,7 @@ export class SwaggerService {
   private apiInfoConfig: ApiInfoConfig;
 
   @Inject()
-  private swaggerConfig: SwaggerConfig;
+  private apiSpecConfig: ApiSpecConfig;
 
   @Inject()
   private restConfig: RestConfig;
@@ -50,7 +50,7 @@ export class SwaggerService {
     }
 
     if (this.generating) {
-      await FsUtil.mkdirp(this.swaggerConfig.output);
+      await FsUtil.mkdirp(this.apiSpecConfig.output);
     }
 
     await this.resetSpec();
@@ -61,7 +61,7 @@ export class SwaggerService {
       this.spec = {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
-        ...SpecGenerateUtil.generate(this.swaggerConfig),
+        ...SpecGenerateUtil.generate(this.apiSpecConfig),
       };
     }
     return this.spec;
@@ -69,8 +69,7 @@ export class SwaggerService {
 
   async generate() {
     const spec = this.getSpec();
-    const specFile = FsUtil.joinUnix(this.swaggerConfig.output, 'spec.json');
-    console.debug('Generating swagger spec file', specFile);
-    await fsWriteFile(specFile, JSON.stringify(spec, undefined, 2));
+    console.debug('Generating OpenAPI spec file', this.apiSpecConfig.output);
+    await fsWriteFile(this.apiSpecConfig.output, JSON.stringify(spec, undefined, 2));
   }
 }

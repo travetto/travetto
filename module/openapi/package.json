@@ -11,7 +11,7 @@
     "@travetto/schema": "^1.0.0-beta.3",
     "openapi3-ts": "^1.3.0"
   },
-  "description": "Swagger integration support for the travetto framework",
+  "description": "OpenAPI integration support for the travetto framework",
   "devDependencies": {
     "@travetto/test": "^1.0.0-beta.1"
   },
@@ -29,7 +29,7 @@
     "src",
     "bin"
   ],
-  "name": "@travetto/swagger",
+  "name": "@travetto/openapi",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },

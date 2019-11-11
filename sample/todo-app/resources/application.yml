@@ -1,5 +1,5 @@
-swagger:
-  output: ./api-client
+api.spec:
+  output: ./openapi.json
 
 sql.model:
   namespace: todo
