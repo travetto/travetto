@@ -1,9 +1,9 @@
-import { ControllerRegistry, MimeType, EndpointClassType, ParamConfig, EndpointIOType } from '@travetto/rest';
+import { ControllerRegistry, MimeType, EndpointClassType, EndpointIOType } from '@travetto/rest';
 
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, ALL_VIEW } from '@travetto/schema';
 
-import { ApiClientConfig } from './config';
+import { ApiSpecConfig } from './config';
 
 import { SchemaObject, OpenAPIObject, SchemasObject, ParameterObject, OperationObject } from 'openapi3-ts';
 
@@ -203,7 +203,7 @@ export class SpecGenerateUtil {
     const ctrl = ControllerRegistry.get(cls);
     const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '');
 
-    if (tagName === 'Swagger') {
+    if (tagName === 'OpenApi') {
       return;
     }
 
@@ -264,7 +264,7 @@ export class SpecGenerateUtil {
     }
   }
 
-  static generate(config: ApiClientConfig): OpenAPIObject {
+  static generate(config: ApiSpecConfig): OpenAPIObject {
     const state: PartialSpec = {
       paths: {},
       components: { schemas: {} },

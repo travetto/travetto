@@ -19,7 +19,7 @@ export const FEATURES: Feature[] = [
       { title: 'Fastify', npm: '@travetto/rest-fastify' },
     ],
     addons: [
-      { title: 'Swagger', npm: '@travetto/swagger' },
+      { title: 'OpenAPI', npm: '@travetto/openapi' },
       { title: 'Logging', npm: '@travetto/log' }
     ],
     default: 'Express.js'
