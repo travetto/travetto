@@ -27,7 +27,7 @@ export class WorkPool<X, T extends Worker<X>> {
       max: WorkPool.DEFAULT_SIZE,
       min: 1,
       evictionRunIntervalMillis: 5000,
-      ...(opts || {}),
+      ...(opts ?? {}),
     };
 
     let createErrors = 0;

@@ -4,7 +4,7 @@ export class Inky {
   static defaultFactory = new ComponentFactory();
 
   static render(text: string, factory?: ComponentFactory) {
-    factory = factory || this.defaultFactory;
+    factory = factory ?? this.defaultFactory;
     // Extract raws
     const raws: string[] = [];
     const html = text.replace(/\< *raw *\>(.*?)\<\/ *raw *\>/gi, (all, inner) => raws.push(inner) ? `###RAW${raws.length - 1}###` : all);

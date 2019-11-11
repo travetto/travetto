@@ -15,8 +15,8 @@
     "@types/parse5": "^5.0.2",
     "foundation-emails": "^2.2.1",
     "html-entities": "^1.2.1",
-    "mustache": "^3.0.1",
-    "parse5": "^5.1.0",
+    "mustache": "^3.1.0",
+    "parse5": "^5.1.1",
     "sass": "1.5.1"
   },
   "description": "Email templating module",

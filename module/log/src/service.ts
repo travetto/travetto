@@ -40,16 +40,16 @@ class $Logger {
   }
 
   listen({ formatter, stdout, stderr, key }: Partial<LogStream> = {}) {
-    formatter = formatter || new LineFormatter({
+    formatter = formatter ?? new LineFormatter({
       colorize: $Logger.COLORIZE,
       timestamp: !EnvUtil.isFalse('log_time'),
       time_millis: !!this.flags.trace
     });
 
-    stderr = stderr || new ConsoleOutput({ method: 'error' });
-    stdout = stdout || new ConsoleOutput({ method: 'log' });
+    stderr = stderr ?? new ConsoleOutput({ method: 'error' });
+    stdout = stdout ?? new ConsoleOutput({ method: 'log' });
 
-    this.listenRaw(key || DEFAULT, (ev: LogEvent) => {
+    this.listenRaw(key ?? DEFAULT, (ev: LogEvent) => {
       const msg = formatter!.format(ev);
       if (ev.level === 'error' || ev.level === 'fatal') {
         stderr!.output(msg);
@@ -60,7 +60,7 @@ class $Logger {
   }
 
   listenRaw(key: string | symbol, handler: (ev: LogEvent) => void) {
-    this.listeners.set(key || DEFAULT, handler);
+    this.listeners.set(key ?? DEFAULT, handler);
     this.listenList = [...this.listeners.values()];
   }
 
@@ -99,7 +99,7 @@ class $Logger {
 
     event.timestamp = Date.now();
 
-    const args = (event.args || []).slice(0);
+    const args = (event.args ?? []).slice(0);
     const last = args[args.length - 1];
 
     if (last && Object.keys(last).length === 1 && last.meta) { // Handle meta

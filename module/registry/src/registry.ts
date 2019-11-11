@@ -89,7 +89,7 @@ export abstract class Registry implements ChangeSource<Class> {
   }
 
   onEvent(event: ChangeEvent<Class>) {
-    console.trace('Received', this.constructor.__id, event.type, (event.curr || event.prev)!.__id);
+    console.trace('Received', this.constructor.__id, event.type, (event.curr ?? event.prev)!.__id);
 
     switch (event.type) {
       case 'removing':

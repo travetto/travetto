@@ -27,7 +27,7 @@ export class EmailService {
         }
       }
 
-      ctx.context = ctx.context || {};
+      ctx.context = ctx.context ?? {};
       ctx.attachments = [];
 
       const { html, text } = await this.tplEngine!.template(ctx.template, ctx.context);

@@ -17,8 +17,8 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
   }
 
   onClassEvent(e: ChangeEvent<Class>) {
-    const next = (e.curr ? e.curr!.__methods : null) || {};
-    const prev = (e.prev ? e.prev!.__methods : null) || {};
+    const next = e.curr?.__methods ?? {};
+    const prev = e.prev?.__methods ?? {};
 
     for (const k of Object.keys(next)) {
       if (!prev[k]) {

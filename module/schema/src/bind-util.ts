@@ -119,7 +119,7 @@ export class BindUtil {
   }
 
   static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: any, view?: string): T {
-    view = view || ALL_VIEW;
+    view = view ?? ALL_VIEW;
 
     if (!!data) {
       const conf = SchemaRegistry.get(cons);
@@ -142,7 +142,7 @@ export class BindUtil {
           if (schemaFieldName in data) {
             inboundField = schemaFieldName;
           } else if (viewConf.schema[schemaFieldName].aliases) {
-            for (const aliasedField of (viewConf.schema[schemaFieldName].aliases || [])) {
+            for (const aliasedField of (viewConf.schema[schemaFieldName].aliases ?? [])) {
               if (aliasedField in data) {
                 inboundField = aliasedField;
                 break;

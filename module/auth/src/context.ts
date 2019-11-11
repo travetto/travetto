@@ -20,11 +20,11 @@ export class AuthContext<
     }
     this.principal = principal;
     this.identity = identity;
-    this.permissions = (principal || {}).permissions || [];
+    this.permissions = principal?.permissions ?? [];
   }
 
   get id() {
-    return (this.principal && this.principal.id) || this.identity.id;
+    return this.principal?.id ?? this.identity.id;
   }
 
   get permissions(): Readonly<string[]> {

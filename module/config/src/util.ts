@@ -51,7 +51,7 @@ export class ConfigUtil {
           sub = (sub[parts.shift()!] = {});
         }
         sub[parts[0]] = data[key];
-        data[top] = data[top] || {};
+        data[top] = data[top] ?? {};
         delete data[key];
         Util.deepAssign(data, subTop);
       }

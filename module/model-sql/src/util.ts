@@ -89,7 +89,7 @@ export class SQLUtil {
     const fields = conf.fields.map(x => ({ ...conf.schema[x] }));
 
     // Polymorphic
-    if (model && (model.baseType || model.subType)) {
+    if (model && (model.baseType ?? model.subType)) {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of ModelRegistry.getClassesByBaseType(ModelRegistry.getBaseModel(cls.class))) {
         const typeConf = SchemaRegistry.get(type).views[ALL_VIEW];
@@ -296,7 +296,7 @@ export class SQLUtil {
 
     const track = (stack: VisitStack[], value: any) => {
       const key = this.buildTable(stack);
-      (ins[key] = ins[key] || { stack, records: [] }).records.push({ stack, value });
+      (ins[key] = ins[key] ?? { stack, records: [] }).records.push({ stack, value });
     };
 
     const all = els.map(el =>

@@ -31,12 +31,12 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
 
   getBaseModel(cls: Class) {
     if (!this.baseModels.has(cls)) {
-      let conf = this.get(cls) || this.getOrCreatePending(cls);
+      let conf = this.get(cls) ?? this.getOrCreatePending(cls);
       let parent = cls;
 
       while (conf && !conf.baseType) {
         parent = this.getParentClass(parent)!;
-        conf = this.get(parent) || this.pending.get(MetadataRegistry.id(parent));
+        conf = this.get(parent) ?? this.pending.get(MetadataRegistry.id(parent));
       }
 
       this.baseModels.set(cls, conf ? parent : cls);
@@ -67,7 +67,7 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   }
 
   getClassesByBaseType(base: Class) {
-    return this.getAllClassesByBaseType().get(base)! || [];
+    return this.getAllClassesByBaseType().get(base) ?? [];
   }
 
   getBaseCollection(cls: Class) {
@@ -76,7 +76,7 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
 
   getCollectionName(cls: Class) {
     if (!this.collections.has(cls)) {
-      const config = this.get(cls) || this.getOrCreatePending(cls);
+      const config = this.get(cls) ?? this.getOrCreatePending(cls);
       this.collections.set(cls, (config.collection || cls.name).toLowerCase());
     }
     return this.collections.get(cls)!;

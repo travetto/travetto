@@ -8,7 +8,7 @@ const TRV_KEY = Symbol('TRV_KEY');
 export class FastifyAppUtil {
   static getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
     if (!(reqs as any)[TRV_KEY]) {
-      let [path] = (reqs.req.url || '').split(/[#?]/g);
+      let [path] = (reqs.req.url ?? '').split(/[#?]/g);
       if (!path.startsWith('/')) {
         path = `/${path}`;
       }
@@ -50,7 +50,7 @@ export class FastifyAppUtil {
           }
         },
         send(data) {
-          if ((reply.getHeader('Content-Type') || '').includes('json') && typeof data === 'string') {
+          if ((reply.getHeader('Content-Type') ?? '').includes('json') && typeof data === 'string') {
             data = Buffer.from(data);
           }
           reply.send(data);

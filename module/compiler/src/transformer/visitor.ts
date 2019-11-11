@@ -41,7 +41,7 @@ export class VisitorFactory {
   }
 
   static computeAliases(transformer: NodeTransformer) {
-    const aliases: Alias[] = (transformer.aliases || []).slice(0);
+    const aliases: Alias[] = (transformer.aliases ?? []).slice(0);
 
     if (transformer.aliasName) {
       TransformUtil.aliasMapper(transformer.aliasName, (pkg, cls) => {
@@ -125,7 +125,7 @@ export class VisitorFactory {
           for (const el of tgt) {
             if (el[phase]) {
               const og = node;
-              node = (el[phase]!(state, node, dec) as T) || node;
+              node = (el[phase]!(state, node, dec) as T) ?? node;
               node.parent = og.parent;
             }
           }

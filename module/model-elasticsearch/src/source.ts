@@ -77,7 +77,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   getClassFromIndexType(idx: string, type: string) {
-    idx = this.indexToAlias.get(idx) || idx;
+    idx = this.indexToAlias.get(idx) ?? idx;
 
     const key = `${idx}.${type}`;
     if (!this.indexToClass.has(key)) {
@@ -242,12 +242,12 @@ export class ElasticsearchModelSource extends ModelSource {
   getPlainSearchObject<T extends ModelCore>(cls: Class<T>, query: Query<T>): Search {
 
     const conf = ModelRegistry.get(cls);
-    const q = ElasticsearchUtil.extractWhereQuery(cls, query.where! || {}, this.config.schemaConfig);
+    const q = ElasticsearchUtil.extractWhereQuery(cls, query.where! ?? {}, this.config.schemaConfig);
     const search: Search = {
       body: q ? { query: q } : {}
     };
 
-    const sort = query.sort || conf.defaultSort;
+    const sort = query.sort ?? conf.defaultSort;
 
     if (query.select) {
       const [inc, exc] = ElasticsearchUtil.getSelect(query.select);
@@ -292,7 +292,7 @@ export class ElasticsearchModelSource extends ModelSource {
     const out: T[] = [];
 
     // determine if id
-    const select = [(req as any)._sourceIncludes as string[] || [], (req as any)._sourceExcludes as string[] || []];
+    const select = [(req as any)._sourceIncludes as string[] ?? [], (req as any)._sourceExcludes as string[] ?? []];
     const includeId = select[0].includes('_id') || (select[0].length === 0 && !select[1].includes('_id'));
 
     for (const r of results.hits.hits) {
@@ -432,7 +432,7 @@ export class ElasticsearchModelSource extends ModelSource {
     const types = classes.map(t => {
       const conf = ModelRegistry.get(t);
       let idx = this.getIdentity(conf.class).index;
-      idx = this.aliasToIndex.get(idx) || idx;
+      idx = this.aliasToIndex.get(idx) ?? idx;
       if (!conf.subType) {
         return { term: { _index: idx } };
       } else {
@@ -474,18 +474,18 @@ export class ElasticsearchModelSource extends ModelSource {
       }
     } : {});
 
-    res.size = filter && filter.limit || 10;
+    res.size = filter?.limit ?? 10;
 
     return res;
   }
 
   buildRawMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query?: Query<T>, raw?: any) {
-    const searchObj = this.getPlainSearchObject(classes[0], query || {});
+    const searchObj = this.getPlainSearchObject(classes[0], query ?? {});
     searchObj.body = {
       query: {
         bool: {
           must: [
-            searchObj.body.query || { match_all: {} },
+            searchObj.body.query ?? { match_all: {} },
             ...(raw ? [raw] : [])
           ],
           filter: this.buildRawModelFilters(classes)
@@ -546,7 +546,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     const { body: res } = await this.client.deleteByQuery(this.getSearchObject(cls, query) as DeleteByQuery);
-    return res.deleted || 0;
+    return res.deleted ?? 0;
   }
 
   async save<T extends ModelCore>(cls: Class<T>, o: T, keepId: boolean = false): Promise<T> {
@@ -654,7 +654,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
     const body = operations.reduce((acc, op) => {
 
-      const esIdent = this.getIdentity((op.upsert || op.delete || op.insert || op.update || { constructor: cls }).constructor as Class);
+      const esIdent = this.getIdentity((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls }).constructor as Class);
       const ident = { _index: esIdent.index, _type: esIdent.type };
 
       if (op.delete) {
@@ -710,7 +710,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
         if (v.result === 'created') {
           out.insertedIds.set(i, v._id);
-          (operations[i].insert || operations[i].upsert)!.id = v._id;
+          (operations[i].insert ?? operations[i].upsert)!.id = v._id;
         }
 
         (out.counts as any)[sk as any] += 1;

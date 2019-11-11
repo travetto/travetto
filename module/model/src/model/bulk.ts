@@ -32,7 +32,7 @@ export class BulkProcessError extends AppError {
       type: this.type,
       errors: this.errors.map(x => {
         const { message, type, errors, payload } = x.error as any;
-        return { message, type, errors: errors || payload, idx: x.idx };
+        return { message, type, errors: errors ?? payload, idx: x.idx };
       })
     });
   }

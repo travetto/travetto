@@ -82,7 +82,7 @@ export class AssetUtil {
         title: path.basename(file).replace(/-_/g, ' '),
         hash: hash!,
         createdDate: new Date(),
-        ...(metadata || {})
+        ...(metadata ?? {})
       }
     };
   }

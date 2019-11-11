@@ -17,7 +17,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   resolveSubTypeForInstance<T extends any>(cls: Class<T>, o: T) {
-    return this.resolveSubType(cls, o.type || o.constructor);
+    return this.resolveSubType(cls, o.type ?? o.constructor);
   }
 
   resolveSubType(cls: Class, type: Class | string) {
@@ -76,7 +76,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   getViewSchema<T>(cls: Class<T>, view?: string) {
-    view = view || ALL_VIEW;
+    view = view ?? ALL_VIEW;
 
     const schm = this.get(cls)!;
     if (!schm) {
@@ -134,7 +134,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
 
   finalizeViews<T>(target: Class<T>, conf: ClassConfig) {
     const allViewConf = conf.views![ALL_VIEW];
-    const pending = this.pendingViews.get(target) || new Map();
+    const pending = this.pendingViews.get(target) ?? new Map();
     this.pendingViews.delete(target);
 
     for (const [view, fields] of pending.entries()) {

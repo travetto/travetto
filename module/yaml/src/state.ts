@@ -31,7 +31,7 @@ export class State {
     while (this.top.indent >= 0) {
       last = this.endBlock();
     }
-    return last || { index: 0, value: {} }; // Default to empty object if nothing returned
+    return last ?? { index: 0, value: {} }; // Default to empty object if nothing returned
   }
 
   nestField(field: string, indent: number) {

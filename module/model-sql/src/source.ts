@@ -300,7 +300,7 @@ export class SQLModelSource extends ModelSource {
     // Polymorphism
     if (conf.subType) {
       builder.where = (builder.where ?
-        { $and: [builder.where || {}, { type: conf.subType }] } :
+        { $and: [builder.where ?? {}, { type: conf.subType }] } :
         { type: conf.subType }) as WhereClause<T>;
     }
 

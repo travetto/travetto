@@ -54,7 +54,7 @@ export class $ConfigSource {
   }
 
   bindTo(obj: any, key: string) {
-    const keys = key ? key.split('.') : [];
+    const keys = key?.split('.') ?? [];
     let sub: any = this.storage;
 
     while (keys.length && sub) {

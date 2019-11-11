@@ -250,7 +250,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     conf.dependencies!.cons = dependencies;
     if (dependencies) {
       for (const dependency of dependencies) {
-        dependency.qualifier = dependency.qualifier || DEFAULT_INSTANCE;
+        dependency.qualifier = dependency.qualifier ?? DEFAULT_INSTANCE;
       }
     }
   }
@@ -259,7 +259,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const conf = this.getOrCreatePending(cls);
 
     conf.dependencies!.fields[field] = dependency;
-    dependency.qualifier = dependency.qualifier || DEFAULT_INSTANCE;
+    dependency.qualifier = dependency.qualifier ?? DEFAULT_INSTANCE;
   }
 
   /**  Last one to register wins */

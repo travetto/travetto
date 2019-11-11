@@ -27,7 +27,7 @@ export class ConsumerManager {
     if (typeof consumer !== 'string') {
       consumers.push(consumer);
     } else {
-      const fmtClass = this.FORMAT_MAPPING[consumer] || NoopConsumer;
+      const fmtClass = this.FORMAT_MAPPING[consumer] ?? NoopConsumer;
 
       if (fmtClass) {
         consumers.push(new fmtClass());

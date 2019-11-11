@@ -30,7 +30,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, U exten
       console.trace(`[${this.parentId}] Sending [${this.id}] ${eventType}`);
     }
     if (this.proc.send) {
-      this.proc.send({ type: eventType, ...(data || {}) });
+      this.proc.send({ type: eventType, ...(data ?? {}) });
     } else {
       throw new Error('this._proc.send was not defined');
     }

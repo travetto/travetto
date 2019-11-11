@@ -5,7 +5,7 @@ export class DomainAsyncContext {
   storageState = new Map<string, any>();
 
   get id() {
-    return process.domain ? (process.domain as any).id || 0 : 0;
+    return (process?.domain as any).id ?? 0;
   }
 
   getNewId() {

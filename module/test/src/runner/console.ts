@@ -22,7 +22,7 @@ export class ConsoleCapture {
         return util.inspect(x, false, 4);
       }
     }).join(' ');
-    this.out[level] = `${this.out[level] || ''}${msg}\n`;
+    this.out[level] = `${this.out[level] ?? ''}${msg}\n`;
   }
 
   static start() {

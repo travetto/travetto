@@ -62,7 +62,7 @@ export async function watch() {
     const methods = new MethodSource(TestRegistry);
 
     methods.on(e => {
-      const conf = getConf(e.prev || e.curr);
+      const conf = getConf(e.prev ?? e.curr);
 
       if (!conf) { return; }
 

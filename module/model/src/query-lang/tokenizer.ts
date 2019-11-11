@@ -52,7 +52,7 @@ export class QueryLanguageTokenizer {
         state.mode = 'identifier';
       }
     }
-    return res || { value, type: state.mode || mode };
+    return res ?? { value, type: state.mode || mode };
   }
 
   private static flush(state: TokenizeState, mode?: TokenType) {

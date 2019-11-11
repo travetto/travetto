@@ -3,20 +3,23 @@ import * as kCompress from 'koa-compress';
 import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
-import { Injectable } from '@travetto/di';
-import { RestApp, RouteConfig } from '@travetto/rest';
+import { Injectable, Inject } from '@travetto/di';
+import { RestApp, RouteConfig, RestCookieConfig } from '@travetto/rest';
 
 import { KoaAppUtil } from './util';
 
 @Injectable()
 export class KoaRestApp extends RestApp<koa> {
 
+  @Inject()
+  cookies: RestCookieConfig;
+
   createRaw(): koa {
     const app = new koa();
     app.use(kCompress());
     app.use(kBodyParser());
 
-    app.keys = this.config.cookie.keys;
+    app.keys = this.cookies.keys;
 
     // Enable proxy for cookies
     if (this.config.trustProxy) {

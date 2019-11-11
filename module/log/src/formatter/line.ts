@@ -77,7 +77,7 @@ export class LineFormatter implements Formatter {
     }
 
     if (message) {
-      out = `${out}${ev.prefix || ''}${message} `;
+      out = `${out}${ev.prefix ?? ''}${message} `;
     }
     return out.substring(0, out.length - 1);
   }

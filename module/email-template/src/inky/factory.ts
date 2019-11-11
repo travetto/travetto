@@ -56,7 +56,7 @@ export class ComponentFactory {
       HtmlUtil.visit(element, (node, descend) => {
         if (Parse5Adapter.getTagName(node) === 'row') {
           hasRow = true;
-        } else if (/\brow\b/.test(HtmlUtil.getAttrMap(node).class || '')) {
+        } else if (/\brow\b/.test(HtmlUtil.getAttrMap(node).class ?? '')) {
           hasRow = true;
         } else {
           descend();
@@ -115,7 +115,7 @@ export class ComponentFactory {
     }
 
     // If the button is expanded, it needs a <center> tag around the content
-    if (/\bexpand(ed)?\b/.test(cls || '')) {
+    if (/\bexpand(ed)?\b/.test(cls ?? '')) {
       inner = this.convertAll(`<center>
         ${inner}
       </center>`);
@@ -213,7 +213,7 @@ export class ComponentFactory {
   }
 
   center(element: Node) {
-    for (const child of (Parse5Adapter.getChildNodes(element) || [])) {
+    for (const child of (Parse5Adapter.getChildNodes(element) ?? [])) {
       if (Parse5Adapter.isElementNode(child)) {
         HtmlUtil.setDomAttribute(child, 'align', 'center');
         HtmlUtil.setDomAttribute(child, 'class', 'float-center');
@@ -224,7 +224,7 @@ export class ComponentFactory {
       descend();
       if (Parse5Adapter.getTagName(node) === 'item') {
         HtmlUtil.setDomAttribute(node, 'class', 'float-center');
-      } else if (/\bmenu-item\b/.test(HtmlUtil.getAttrMap(node).class || '')) {
+      } else if (/\bmenu-item\b/.test(HtmlUtil.getAttrMap(node).class ?? '')) {
         HtmlUtil.setDomAttribute(node, 'class', 'float-center');
       }
     });
@@ -340,7 +340,7 @@ export class ComponentFactory {
   convertAll(document: string): string;
   convertAll(document: string | Node): string | Node {
     const traverse = (node: Node) => {
-      const children = Parse5Adapter.getChildNodes(node) || [];
+      const children = Parse5Adapter.getChildNodes(node) ?? [];
       let i = -1;
       for (const child of children.slice(0)) {
         i = i + 1;

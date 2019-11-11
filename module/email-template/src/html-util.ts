@@ -6,7 +6,7 @@ export class HtmlUtil {
 
   static visit<T>(root: Node, visitor: (node: Node, descend: () => void) => void) {
     function traverse(node: Node) {
-      const children = Parse5Adapter.getChildNodes(node) || [];
+      const children = Parse5Adapter.getChildNodes(node) ?? [];
       for (const child of children) {
         if (child) {
           visitor(child, traverse.bind(null, child));

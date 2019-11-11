@@ -134,7 +134,7 @@ class $Compiler {
       changed = this.sourceManager.transpile(fileName, {
         fileName,
         reportDiagnostics: true,
-        transformers: this.transformerManager.transformers || {}
+        transformers: this.transformerManager.transformers ?? {}
       }, force);
     } catch (err) {
       if (Env.watch) { // Handle transpilation errors

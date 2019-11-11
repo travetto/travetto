@@ -3,8 +3,8 @@ import { InputSource } from './types';
 export class QueueInputSource<X> implements InputSource<X> {
   private items: X[] = [];
 
-  constructor(data?: X[], private tick: number = 500) {
-    this.items = data || [];
+  constructor(data: X[] = [], private tick: number = 500) {
+    this.items = data;
   }
 
   enqueue(item: X) {

@@ -73,14 +73,14 @@ export class MongoUtil {
       } else {
         const isPlain = v && Util.isPlainObject(v);
         const firstKey = isPlain ? Object.keys(v)[0] : '';
-        if ((isPlain && !firstKey.startsWith('$')) || (v && v.constructor && v.constructor.__id)) {
+        if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.__id) {
           Object.assign(out, this.extractSimple(v, `${subpath}.`));
         } else {
           if (firstKey === '$regex') {
             v.$regex = BindUtil.extractRegex(v.$regex);
           } else if (firstKey && '$near' in v) {
             const dist = v.$maxDistance;
-            const distance = dist / RADIANS_TO[(v.$unit as DistanceUnit || 'km')];
+            const distance = dist / RADIANS_TO[(v.$unit as DistanceUnit ?? 'km')];
             v.$maxDistance = distance;
             delete v.$unit;
           } else if (firstKey && '$geoWithin' in v) {

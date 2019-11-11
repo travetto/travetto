@@ -25,7 +25,7 @@ export class StandardWorker {
       }).run();
       return res ? 0 : 1;
     } catch (e) {
-      console.error(e && e.stack ? e.stack : e);
+      console.error(e?.stack ?? e);
       return 1;
     }
   }
