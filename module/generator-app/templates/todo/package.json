@@ -9,7 +9,12 @@
     // {{/frameworkDependencies}}
     "@travetto/cli": "^{{{frameworkVersion}}}"
   },
-  "description": "A travetto based project",
+  "devDependencies": {
+    "eslint": "^6.6.0",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0"
+  },
+  "description": "A Travetto-based project",
   "keywords": [
     // {{#modules}}
     "{{{.}}}",
@@ -18,8 +23,9 @@
   ],
   "license": "MIT",
   "scripts": {
-    "start": "npx travetto run rest",
-    "test": "npx travetto test"
+    "start": "npx trv run rest",
+    "test": "npx trv test",
+    "lint": "npx eslint --ext .ts --ext .js ."
   },
   "files": [
     "src",

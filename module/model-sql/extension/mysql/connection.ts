@@ -3,11 +3,10 @@ import * as mysql from 'mysql';
 import { AsyncContext } from '@travetto/context';
 import { SQLModelConfig, ConnectionSupport } from '../..';
 
-const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) => {
-  return new Promise<V>((res, rej) => (ctx[prop] as any)(
+const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) =>
+  new Promise<V>((res, rej) => (ctx[prop] as any)(
     (err: any, val?: any) => err ? rej(err) : res(val)
   ));
-};
 
 /**
  * Connection support

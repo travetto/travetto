@@ -44,44 +44,38 @@ class $ScanFs {
   }
 
   async scanDir(handler: ScanHandler, base: string, entry?: ScanEntry, visited = new Set<string>()) {
-    return new Promise<ScanEntry[]>(async (resolve, reject) => {
-      try {
-        const out: ScanEntry[] = [];
+    const out: ScanEntry[] = [];
 
-        entry = (entry! ?? { file: base, children: [] });
+    entry = (entry! ?? { file: base, children: [] });
 
-        for (const file of (await fsReaddir(entry!.file))) {
-          if (file.startsWith('.')) {
+    for (const file of (await fsReaddir(entry!.file))) {
+      if (file.startsWith('.')) {
+        continue;
+      }
+
+      const full = FsUtil.resolveUnix(entry!.file, file);
+      const stats = await fsLstat(full);
+      const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
+
+      if (this.isDir(subEntry)) {
+        if (subEntry.stats.isSymbolicLink()) {
+          const p = await fsRealpath(full);
+          if (!visited.has(p)) {
+            visited.add(p);
+          } else {
             continue;
           }
-
-          const full = FsUtil.resolveUnix(entry!.file, file);
-          const stats = await fsLstat(full);
-          const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
-
-          if (this.isDir(subEntry)) {
-            if (subEntry.stats.isSymbolicLink()) {
-              const p = await fsRealpath(full);
-              if (!visited.has(p)) {
-                visited.add(p);
-              } else {
-                continue;
-              }
-            }
-
-            if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
-              out.push(subEntry, ...await this.scanDir(handler, base, subEntry, visited));
-            }
-          } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
-            (entry!.children = entry?.children ?? []).push(subEntry);
-            out.push(subEntry);
-          }
         }
-        resolve(out);
-      } catch (e) {
-        reject(e);
+
+        if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
+          out.push(subEntry, ...await this.scanDir(handler, base, subEntry, visited));
+        }
+      } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
+        (entry!.children = entry?.children ?? []).push(subEntry);
+        out.push(subEntry);
       }
-    });
+    }
+    return out;
   }
 
   async bulkScanDir(handlers: ScanHandler[], base: string) {

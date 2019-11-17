@@ -18,14 +18,12 @@ export class RestConfig {
   defaultMessage = true;
 
   ssl: {
-    active?: boolean,
+    active?: boolean;
     keys?: {
-      cert: string,
-      key: string
-    }
-  } = {
-      active: false
+      cert: string;
+      key: string;
     };
+  } = { active: false };
 
   postConstruct() {
     if (!this.bindAddress) {

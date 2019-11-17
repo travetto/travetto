@@ -27,7 +27,7 @@
   "files": [
     "src",
     "bin",
-    "tslint.json",
+    "eslint.json",
     "tsconfig.json"
   ],
   "name": "@travetto/boot",

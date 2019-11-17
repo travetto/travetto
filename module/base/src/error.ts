@@ -48,7 +48,7 @@ export class AppError extends Error {
   ) {
     super(message);
     this.type = this.constructor.name;
-    this.stack = this.stack;
+    this.stack = this.stack; // eslint-disable-line no-self-assign
   }
 
   toConsole(sub?: string) {

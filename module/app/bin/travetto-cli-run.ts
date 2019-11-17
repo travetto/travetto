@@ -63,6 +63,7 @@ function generateAppHelpList(confs: CachedAppConfig[], cmd: AppCommand) {
     }
     lines.push(`usage: ${usage}`);
 
+    // eslint-disable-next-line no-control-regex
     const len = lines.reduce((acc, v) => Math.max(acc, v.replace(/\x1b\[\d+m/g, '').length), 0);
     lines.splice(1, 0, '-'.repeat(len));
 

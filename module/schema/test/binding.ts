@@ -32,7 +32,6 @@ class DataBinding {
       ]
     });
 
-    const a = 30;
     assert(person.age === 19);
     assert(person.address instanceof Address);
     assert(person.dob instanceof Date);
@@ -139,9 +138,7 @@ class DataBinding {
         names: ['1', '2', '3'],
         age: 30
       }
-    ].map(v => {
-      return (BasePoly as Class).from(v);
-    });
+    ].map(v => (BasePoly as Class).from(v));
 
     assert(items);
     assert(items.length === 2);

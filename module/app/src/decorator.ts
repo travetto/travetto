@@ -5,8 +5,8 @@ import { ApplicationRegistry } from './registry';
 
 export type AppDecorator = Partial<ApplicationConfig> & {
   paramMap?: {
-    [key: string]: Partial<ApplicationParameter> & { name?: never }
-  }
+    [key: string]: Partial<ApplicationParameter> & { name?: never };
+  };
   params?: never;
 };
 

@@ -1,9 +1,11 @@
+type SerializableType = Error & { stack?: any } | RegExp | Function | Set<any> | Map<string, any> | number | boolean | null | string | object;
+
 export class Serializer {
   static clean(key: string) {
     if (/['"@ -:]/.test(key)) {
       return key.includes('"') ?
         `'${key.replace(/[']/g, '\\\'')}'` :
-        `"${key.replace(/["]/g, '\\\"')}"`;
+        `"${key.replace(/["]/g, '\\"')}"`;
     }
     return key;
   }
@@ -46,7 +48,7 @@ export class Serializer {
     return lines;
   }
 
-  static serialize(o: any, indent = 2, wordwrap = 120, indentLevel = 0) {
+  static serialize(o: SerializableType, indent = 2, wordwrap = 120, indentLevel = 0) {
     let out = '';
     const prefix = ' '.repeat(indentLevel);
     if (o instanceof Error) {
@@ -69,8 +71,9 @@ export class Serializer {
         out = ` ${lines[0]}`;
       }
     } else {
-      out = Object.keys(o)
-        .map(x => `${prefix}${this.clean(x)}:${this.serialize(o[x], indent, wordwrap, indentLevel + indent)}`)
+      const fin = o;
+      out = (Object.keys(fin) as (keyof typeof fin)[])
+        .map(x => `${prefix}${this.clean(x)}:${this.serialize(fin[x], indent, wordwrap, indentLevel + indent)}`)
         .join('\n');
       if (indentLevel > 0) {
         out = `\n${out}`;

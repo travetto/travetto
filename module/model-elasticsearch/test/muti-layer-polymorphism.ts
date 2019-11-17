@@ -70,9 +70,9 @@ class TestMultilayerPolymorphism extends BaseModelTest {
 
     assert(o[0] instanceof Doctor);
 
-    await assert.rejects(async () => {
-      return service.update(Engineer, Doctor.from({ ...o[0] }) as any);
-    }, 'Expected object of type Engineer');
+    await assert.rejects(
+      async () => service.update(Engineer, Doctor.from({ ...o[0] }) as any),
+      'Expected object of type Engineer');
 
     assert(o[0] instanceof Doctor);
     assert(o[1] instanceof Firefighter);

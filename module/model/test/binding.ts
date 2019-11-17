@@ -42,7 +42,7 @@ class DataBinding {
     assert(model['source'] instanceof TestSource);
 
     try {
-      const res = await model.getByQuery(Person, {
+      await model.getByQuery(Person, {
         where: {
           $and: [
             {

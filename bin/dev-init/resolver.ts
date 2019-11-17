@@ -64,7 +64,7 @@ export class DepResolver {
       }
     }
 
-    //Store
+    // Store
     return this.DEP_CACHE[mod] = out;
   }
 }

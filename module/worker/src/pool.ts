@@ -32,7 +32,7 @@ export class WorkPool<X, T extends Worker<X>> {
 
     let createErrors = 0;
 
-    // tslint:disable-next-line: no-this-assignment
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     this.pool = gp.createPool({

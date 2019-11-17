@@ -43,7 +43,7 @@ class $Logger {
     formatter = formatter ?? new LineFormatter({
       colorize: $Logger.COLORIZE,
       timestamp: !EnvUtil.isFalse('log_time'),
-      time_millis: !!this.flags.trace
+      timeMillis: !!this.flags.trace
     });
 
     stderr = stderr ?? new ConsoleOutput({ method: 'error' });

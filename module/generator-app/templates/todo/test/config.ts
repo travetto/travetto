@@ -1,22 +1,23 @@
-// {{#modules.map.model-mongo}}
+// {{#modules.model-mongo}}
 import { MongoModelSource, MongoModelConfig } from '@travetto/model-mongo';
-// {{/modules.map.model-mongo}}
-// {{#modules.map.model-elasticsearch}}
+// {{/modules.model-mongo}}
+// {{#modules.model-elasticsearch}}
 import { ElasticsearchModelSource, ElasticsearchModelConfig } from '@travetto/model-elasticsearch';
-// {{/modules.map.model-elasticsearch}}
+// {{/modules.model-elasticsearch}}
 import { ModelSource } from '@travetto/model';
 import { InjectableFactory } from '@travetto/di';
 
 class Config {
+  // {{#modules.model-mongo}}
   @InjectableFactory()
-  // {{#modules.map.model-mongo}}
   static getMongoSource(config: MongoModelConfig): ModelSource {
     return new MongoModelSource(config);
   }
-  // {{/modules.map.model-mongo}}
-  // {{#modules.map.model-elasticsearch}}
+  // {{/modules.model-mongo}}
+  // {{#modules.model-elasticsearch}}
+  @InjectableFactory()
   static getElasticsearchSource(config: ElasticsearchModelConfig): ModelSource {
     return new ElasticsearchModelSource(config);
   }
-  // {{/modules.map.model-elasticsearch}}
+  // {{/modules.model-elasticsearch}}
 }

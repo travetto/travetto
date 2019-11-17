@@ -60,7 +60,7 @@ export class TestExecutor {
       await Promise.race([suite.instance[test.methodName](), timeout]);
 
       // Ensure nothing was meant to be caught
-      throw undefined;
+      throw undefined; // eslint-disable-line no-throw-literal
 
     } catch (err) {
       if (err === TestUtil.TIMEOUT) {

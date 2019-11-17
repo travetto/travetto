@@ -21,9 +21,9 @@ type ResponseHandler<T> = (msg: http.IncomingMessage) => Promise<T>;
 export class HttpRequest {
 
   private static buildError(config: {
-    message: string,
-    status?: number,
-    payload: Record<string, any>
+    message: string;
+    status?: number;
+    payload: Record<string, any>;
   }) {
     let finalStatus = HTTP_ERROR_CONVERSION.to.get(config.status!) ?? 'general';
     try {

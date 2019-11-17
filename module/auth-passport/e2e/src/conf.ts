@@ -24,9 +24,8 @@ export class AppConfig {
           callbackURL: 'http://localhost:3000/auth/facebook/callback',
           profileFields: ['id', 'username', 'displayName', 'photos', 'email'],
         },
-        (accessToken, refreshToken, profile, cb) => {
-          return cb(undefined, profile);
-        }
+        (accessToken, refreshToken, profile, cb) =>
+          cb(undefined, profile)
       ),
       (user: FbUser) => ({
         id: user.username,

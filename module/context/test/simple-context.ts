@@ -45,8 +45,8 @@ class VerifyContext {
 
   @Test()
   async multipleContext() {
-    const attempts = ' '.repeat(10).split('').map((_, i) => {
-      return async () => {
+    const attempts = ' '.repeat(10).split('').map((_, i) =>
+      async () => {
         const start = async_hooks.executionAsyncId();
         this.context.set({ name: `test-${i}` });
         await new Promise(resolve => setTimeout(resolve, 1));
@@ -55,8 +55,8 @@ class VerifyContext {
         if (this.context.get().name !== `test-${i}`) {
           throw new Error(`Didn\'t match: ${start} - ${end}`);
         }
-      };
-    });
+      }
+    );
 
     assert(attempts.length === 10);
 

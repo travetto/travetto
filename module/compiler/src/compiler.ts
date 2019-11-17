@@ -53,7 +53,7 @@ class $Compiler extends EventEmitter {
     this.presenceManager.init();
 
     const rootsRe = Env.rootMatcher(this.rootPaths);
-    ScanApp.requireFiles('.ts', f => rootsRe.test(f) || CompilerUtil.isCompilable(f))// Load all files, class scanning
+    ScanApp.requireFiles('.ts', f => rootsRe.test(f) || CompilerUtil.isCompilable(f)); // Load all files, class scanning
 
     console.debug('Initialized', (Date.now() - start) / 1000);
   }

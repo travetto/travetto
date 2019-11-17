@@ -47,11 +47,12 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
 
       req.loginContext = PassportIdentityProvider.processLoginContext(req);
 
-      passport.authenticate(this.strategyName, {
-        session: this.session,
-        ...this.passportAuthenticateOptions,
-        ...PassportIdentityProvider.computeExtraOptions(req, this.passportAuthenticateOptions)
-      },
+      passport.authenticate(this.strategyName,
+        {
+          session: this.session,
+          ...this.passportAuthenticateOptions,
+          ...PassportIdentityProvider.computeExtraOptions(req, this.passportAuthenticateOptions)
+        },
         (err, u) => this.authHandler(err, u).then(resolve, reject))(req, res);
     });
   }

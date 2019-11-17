@@ -18,7 +18,7 @@ export type RetainFields<T> = Pick<T, ValidFieldNames<T>>;
 type GeneralFieldQuery<T> = {
   $eq?: T;
   $ne?: T;
-  $exists?: boolean
+  $exists?: boolean;
 };
 
 type GeneralScalarFieldQuery<T> =
@@ -26,7 +26,7 @@ type GeneralScalarFieldQuery<T> =
   // Array
   {
     $in?: T[];
-    $nin?: T[]
+    $nin?: T[];
   };
 
 type ComparableFieldQuery<T> =
@@ -42,14 +42,14 @@ type ArrayFieldQuery<T> =
   { $exists?: boolean } |
   { $eq?: T | T[] } |
   { $ne?: T | T[] } |
-  { $all?: T[]; } |
-  { $in?: T[]; } |
+  { $all?: T[] } |
+  { $in?: T[] } |
   PropWhereClause<RetainFields<T>> |
   T | T[];
 
 type StringFieldQuery =
   GeneralScalarFieldQuery<string> |
-  { $regex?: RegExp | string; } |
+  { $regex?: RegExp | string } |
   string;
 
 type GeoFieldQuery =
@@ -74,9 +74,9 @@ export type PropWhereClause<T> = {
 };
 
 export type WhereClauseRaw<T> =
-  ({ $and: WhereClauseRaw<T>[]; } & { [P in keyof T]?: never }) |
-  ({ $or: WhereClauseRaw<T>[]; } & { [P in keyof T]?: never }) |
-  ({ $not: WhereClauseRaw<T>; } & { [P in keyof T]?: never }) |
-  (PropWhereClause<T> & { $and?: never; $or?: never; $not?: never });
+  ({ $and: WhereClauseRaw<T>[] } & { [P in keyof T]?: never }) |
+  ({ $or: WhereClauseRaw<T>[] } & { [P in keyof T]?: never }) |
+  ({ $not: WhereClauseRaw<T> } & { [P in keyof T]?: never }) |
+  (PropWhereClause<T> & { $and?: never, $or?: never, $not?: never });
 
 export type WhereClause<T> = WhereClauseRaw<RetainFields<T>>;

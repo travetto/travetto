@@ -188,9 +188,7 @@ export class QueryVerifierService {
       onSimpleType: (state: State, type: SimpleType, value: any, isArray: boolean) => {
         this.checkOperatorClause(state, type, value, OPERATORS[type], isArray);
       },
-      onComplexType: (state: State, subCls: Class<T>, subVal: T, isArray: boolean): boolean => {
-        return false;
-      }
+      onComplexType: (state: State, subCls: Class<T>, subVal: T, isArray: boolean): boolean => false
     });
   }
 
@@ -219,7 +217,7 @@ export class QueryVerifierService {
           }
           state.log(`Only true, false 0, and 1 are allowed for including/excluding fields`);
         } else {
-        /*if (actual === 'string') {
+        /* if (actual === 'string') {
           if (!/[A-Za-z_$0-9]/.test(value)) {
             state.log(`Only A-Z, a-z, 0-9, '$' and '_' are allowed in aliases for selecting fields`);
             return;

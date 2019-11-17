@@ -28,7 +28,7 @@ export class Tokenizer {
   static isComment = (ch: string, pos: number) => {
     const c = ch.charCodeAt(pos);
     return c === HASH || (c === DASH && ch.charCodeAt(pos + 1) === c && ch.charCodeAt(pos + 2) === c);
-  }
+  };
   static isWhitespace = (c: number) => c === SPC || c === TAB || c === NEWLINE || c === CR;
   static isWhitespaceStr = (c: string) => Tokenizer.isWhitespace(c.charCodeAt(0));
 

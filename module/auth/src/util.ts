@@ -37,7 +37,6 @@ export class AuthUtil {
 
   static permissionChecker(perms: PermSet, matchAll = true, defaultIfEmpty = true) {
     const permArr = [...perms].map(x => x.toLowerCase());
-    const permSet = new Set(permArr);
     if (permArr.length === 0) {
       return () => defaultIfEmpty;
     }

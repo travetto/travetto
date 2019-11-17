@@ -39,14 +39,14 @@ class HS256Suite {
   @Test('should throw with invalid secret')
   @ShouldThrow(jwt.JWTError)
   async testBadSecret() {
-    const decoded = await jwt.verify(this.token, { key: 'invalid secret' });
+    await jwt.verify(this.token, { key: 'invalid secret' });
   }
 
   @Test('should throw with secret and token not signed')
   @ShouldThrow(jwt.JWTError)
   async testUnsigned() {
     const signed = await jwt.sign({ foo: 'bar' }, { key: this.secret, alg: 'none' });
-    const [h, p, s] = signed.split('.');
+    const [h, p,] = signed.split('.');
     const unsigned = `${h}.${p}.`;
     await jwt.verify(unsigned, { key: 'secret' });
   }
@@ -55,7 +55,7 @@ class HS256Suite {
   @ShouldThrow(jwt.JWTError)
   async testNoSig() {
     const signed = await jwt.sign({ foo: 'bar' }, { alg: 'none' });
-    const [h, p, s] = signed.split('.');
+    const [h, p,] = signed.split('.');
     const unsigned = `${h}.${p}.`;
     await jwt.verify(unsigned, { key: 'secret' });
   }

@@ -10,6 +10,7 @@ export class Context {
   frameworkVersion = require('@travetto/base/package.json').version.replace(/[.]\d+$/, '.0');
   frameworkDependencies: string[] = [];
   peerDependencies: string[] = [];
+  modules: Record<string, boolean> = {};
 
   author = {
     name: run('git config user.name') || process.env.USER!,
@@ -21,11 +22,7 @@ export class Context {
     this.app = { name };
   }
 
-  get moduleMap(): Record<string, string> {
-    return this.frameworkDependencies.map(x => x.split('/')[1]).reduce((acc, v) => ({ ...acc, [v]: 1 }), {});
-  }
-
-  get modules() {
-    return Object.keys(this.moduleMap || {}).sort();
+  finalize() {
+    this.modules = this.frameworkDependencies.map(x => x.split('/')[1]).reduce((acc, v) => ({ ...acc, [v]: true }), {});
   }
 }

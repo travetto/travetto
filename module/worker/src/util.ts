@@ -6,9 +6,9 @@ import { Worker } from './pool';
 export class WorkUtil {
   static spawnedWorker<X>(
     config: SpawnConfig & {
-      init?: (channel: ParentCommChannel) => Promise<any>,
-      execute: (channel: ParentCommChannel, input: X) => Promise<any>,
-      destroy?: (channel: ParentCommChannel) => Promise<any>,
+      init?: (channel: ParentCommChannel) => Promise<any>;
+      execute: (channel: ParentCommChannel, input: X) => Promise<any>;
+      destroy?: (channel: ParentCommChannel) => Promise<any>;
     }
   ): Worker<X> {
     const channel = new ParentCommChannel(

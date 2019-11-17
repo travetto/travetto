@@ -66,7 +66,7 @@ export class QueryLanguageTokenizer {
   }
 
   private static isValidRegexFlag(ch: number) {
-    return ch === 0x69 /*i*/ || ch === 0x67 /*g*/ || ch === 0x6D /*m*/ || ch === 0x73 /*s*/;
+    return ch === 0x69 /* i */ || ch === 0x67 /* g */ || ch === 0x6D /* m */ || ch === 0x73 /* s */;
   }
 
   private static isValidIdentToken(ch: number) {

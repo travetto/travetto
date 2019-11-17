@@ -185,7 +185,7 @@ class AssertTransformer {
       return;
     }
 
-    let replaced = false;
+    let replaced = false; // eslint-disable-line @typescript-eslint/no-unused-vars
     const exp = node.expression;
 
     if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) { // Straight assert

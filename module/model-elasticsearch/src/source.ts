@@ -1,6 +1,8 @@
 import * as es from '@elastic/elasticsearch';
 import { Reindex, Search, Index, Update, DeleteByQuery } from '@elastic/elasticsearch/api/requestParams';
 
+/* eslint-disable @typescript-eslint/camelcase */
+
 import {
   ModelSource, Query,
   BulkResponse, BulkOp,
@@ -22,18 +24,18 @@ import { ElasticsearchUtil } from './util';
 
 type Agg =
   Record<any, {
-    buckets: { doc_count: number, key: string }[]
+    buckets: { doc_count: number, key: string }[];
   }>;
 
 interface SearchResponse<T> {
   hits: {
     total: number;
     hits: {
-      _source: T,
-      _index: string,
-      _id: string,
-      type: string
-    }[]
+      _source: T;
+      _index: string;
+      _id: string;
+      type: string;
+    }[];
   };
 
   aggregations: Agg;
@@ -307,7 +309,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async execSearch<T>(search: Search<T>): Promise<SearchResponse<T>> {
-    const { body, statusCode } = await this.client.search(search);
+    const { body } = await this.client.search(search);
     return body as SearchResponse<T>;
   }
 

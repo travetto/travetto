@@ -7,7 +7,7 @@ import { MySQLDialect } from '../extension/mysql/dialect';
 
 export function DialectSuite(config: Partial<SuiteConfig> = {}) {
 
-  return function (target: any /*Class<{ service: Promise<ModelService> }>*/) {
+  return function (target: any /* Class<{ service: Promise<ModelService> }> */) {
     const dialects = [PostgreSQLDialect, MySQLDialect];
 
     for (const el of dialects) {

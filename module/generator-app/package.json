@@ -7,7 +7,8 @@
     "app",
     "templates",
     "tsconfig.json",
-    "tslint.json"
+    ".eslintrc.js",
+    ".eslintignore"
   ],
   "dependencies": {
     "@travetto/base": "^1.0.0-beta.1",
