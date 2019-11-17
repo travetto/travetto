@@ -124,13 +124,13 @@ class $Env {
     return this.profileSet.has(name);
   }
 
-  appRootMatcher(paths: string[]) {
+  rootMatcher(paths: string[]) {
     if (!paths.length) {
       return /^$/;
     } else {
       const finalPaths =
         paths.map(x => x.replace(/^[.]\//, '').replace(/^[.]$/g, ''));
-      const re = new RegExp(`^(${finalPaths.map(x => `${x === '' ? '' : `${x}/`}(index|src\/)`).join('|')})`);
+      const re = new RegExp(`^(${finalPaths.map(x => `${x === '' ? '' : `${x}/`}`).join('|')})`);
       return re;
     }
   }

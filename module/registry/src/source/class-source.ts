@@ -1,19 +1,24 @@
 import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
-import { Env, AppInfo, ScanApp } from '@travetto/base';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';
 
-export class CompilerClassSource implements ChangeSource<Class> {
+export class ClassSource implements ChangeSource<Class> {
 
   private classes = new Map<string, Map<string, Class>>();
   private events = new EventEmitter();
 
-  constructor(private rootPaths: string[]) {
-    this.watch = this.watch.bind(this);
-    this.handleFileChanges = this.handleFileChanges.bind(this);
+  constructor() {
+    Compiler.on('added', file => {
+      this.handlePendingFileChanges();
+      this.flush();
+    });
+
+    Compiler.on('changed', file => {
+      this.handlePendingFileChanges();
+    });
   }
 
   private flush() {
@@ -58,14 +63,15 @@ export class CompilerClassSource implements ChangeSource<Class> {
     }
   }
 
-  protected async watch(rfile: string) {
-    require(rfile);
+  handlePendingFileChanges() {
+    console.trace('Pending changes', PendingRegister.ordered);
     for (const [file, classes] of PendingRegister.flush()) {
       this.handleFileChanges(file, classes);
     }
   }
 
   emit(e: ChangeEvent<Class>) {
+    console.trace('Emitting change', e.type, e.curr && e.curr.__id, e.prev && e.prev.__id);
     this.events.emit('change', e);
   }
 
@@ -74,32 +80,7 @@ export class CompilerClassSource implements ChangeSource<Class> {
   }
 
   async init() {
-    if (this.rootPaths.length) {
-      const rootsRe = Env.appRootMatcher(this.rootPaths);
-
-      const entries = await ScanApp.findFiles('.ts', (f: string) => {
-        return Compiler.presenceManager.validFile(f)
-          && (rootsRe.test(f) || f.startsWith('extension/') || (
-            /^node_modules\/@travetto\/[^\/]+\/(src|extension)\/.*/.test(f)
-            && !f.includes('node_modules/@travetto/test') // Exclude test code by default
-            && !f.startsWith(`node_modules/${AppInfo.NAME}/`)
-          )); // No more side effect code, load all files
-      }
-      );
-
-      const files = entries.map(x => x.file);
-
-      for (const f of files) { // Load all files, class scanning
-        require(f);
-      }
-    }
-
     this.flush();
-
-    Compiler.on('added', this.watch);
-    Compiler.on('changed', this.watch);
-    Compiler.on('removed', this.handleFileChanges);
-    Compiler.on('required-after', () => this.flush());
   }
 
   on(callback: (e: ChangeEvent<Class>) => void): void {

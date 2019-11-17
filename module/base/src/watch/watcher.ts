@@ -2,10 +2,10 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import { FsUtil } from '@travetto/boot/src/fs-util';
 
-import { Env } from './env';
-import { ScanEntry, ScanHandler, ScanFs } from './scan-fs';
+import { Env } from '../env';
+import { ScanEntry, ScanHandler, ScanFs } from '../scan-fs';
 
-import { SystemUtil } from './system-util';
+import { SystemUtil } from '../system-util';
 
 interface Options {
   maxListeners?: number;
@@ -144,8 +144,6 @@ export class Watcher extends EventEmitter {
     if (ScanFs.isDir(entry)) {
       throw new Error(`Not a file: ${entry.file}`);
     }
-
-    console.trace('Watching File', entry.file);
 
     const opts = { persistent: true, interval: this.options.interval };
 
