@@ -36,10 +36,10 @@ export class PromiseCapture {
       final = err;
     }
 
-    const err = new Error(`Pending promises: ${pending.length}`);
-    err.stack = final?.stack ?? err.stack;
-    (err as any).operator = 'unhandled promise';
-    throw err;
+    const ret = new Error(`Pending promises: ${pending.length}`);
+    ret.stack = final?.stack ?? ret.stack;
+    (ret as any).operator = 'unhandled promise';
+    throw ret;
   }
 
   static stop() {

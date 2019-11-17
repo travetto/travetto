@@ -15,7 +15,7 @@ declare const global: {
   trvInit: {
     libRequire: (x: string) => any;
     deinit: () => void;
-  }
+  };
 };
 
 export class RegisterUtil {

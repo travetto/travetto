@@ -22,8 +22,8 @@ export interface CompletionConfig {
   all: string[];
   task: {
     [key: string]: {
-      [key: string]: string[]
-    }
+      [key: string]: string[];
+    };
   };
 }
 
@@ -56,10 +56,10 @@ export class Util {
     subtitle: colorizeAny.bind(null, 'gray')
   };
 
-  static dependOn(cmd: string, args: string[] = [], s_cwd: string = FsUtil.cwd) {
+  static dependOn(cmd: string, args: string[] = [], sCwd: string = FsUtil.cwd) {
     child_process.spawnSync(`${process.argv.slice(0, 2).join(' ')} ${cmd} ${args.join(' ')}`, {
       env: process.env,
-      cwd: s_cwd,
+      cwd: sCwd,
       stdio: [0, 1, 2],
       shell: true
     });
@@ -128,7 +128,9 @@ export class Util {
               desc: string, descSp: string,
               descVal: string
             ) => {
-              return [spacing,
+              const line: string[] = [];
+              line.push(
+                spacing,
                 this.colorize.param(simpleParam),
                 pSep,
                 this.colorize.param(fullParam),
@@ -138,7 +140,8 @@ export class Util {
                 this.colorize.description(descVal)
                   .replace(/([(]default:\s+)(.*?)([)])/g,
                     (all: string, l: string, val: string, r: string) => `${l}${this.colorize.input(val)}${r}`)
-              ]
+              );
+              return line
                 .filter(x => x !== '' && x !== undefined)
                 .join('');
             })
@@ -149,7 +152,7 @@ export class Util {
         out.push(
           commands
             .replace(/\s([^\[\]]\S+)/g, x => this.colorize.param(x))
-            .replace(/(\s*[^\x1b]\[[^\]]+\])/g, x => this.colorize.input(x))
+            .replace(/(\s*[^\x1b]\[[^\]]+\])/g, x => this.colorize.input(x)) // eslint-disable-line no-control-regex
             .replace(/Commands:/, x => this.colorize.title(x))
         );
       }

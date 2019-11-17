@@ -223,9 +223,9 @@ export class Watcher extends EventEmitter {
   }
 
   add(handlers: (string | ScanHandler)[]) {
-    const finalHandlers = handlers.map(x => {
-      return typeof x === 'string' ? { testFile: (rel: string) => rel === x } : x;
-    });
+    const finalHandlers = handlers.map(x =>
+      typeof x === 'string' ? { testFile: (rel: string) => rel === x } : x
+    );
     this.findHandlers = this.findHandlers.concat(finalHandlers);
 
     for (const entry of ScanFs.bulkScanDirSync(finalHandlers, this.options.cwd)) {

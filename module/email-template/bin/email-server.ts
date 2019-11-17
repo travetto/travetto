@@ -17,9 +17,7 @@ async function simpleWatcher(commonFolder: string, paths: string[], handler: {
 
   watcher.add([{
     testFile: x => x.includes(commonFolder),
-    testDir: x => {
-      return !!paths.find(y => x.startsWith(y));
-    }
+    testDir: x => !!paths.find(y => x.startsWith(y))
   }]);
   if (handler.added) {
     watcher.on('added', e => handler.added!(e.file));

@@ -20,9 +20,9 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
 
 export class MongoUtil {
 
-  static has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
-  static has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
-  static has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
+  static has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
+  static has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
+  static has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
 
   static extractTypedWhereClause<T>(cls: Class<T>, o: WhereClause<T>): Record<string, any> {
     const conf = ModelRegistry.get(cls);

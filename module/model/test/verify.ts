@@ -58,8 +58,6 @@ export class VerifyTest {
   async verifyNested() {
     const verifier = await DependencyRegistry.getInstance(QueryVerifierService);
 
-    const t: RetainFields<User['prefs']> = null as any;
-
     const query: ModelQuery<User> = {
       where: {
         id: 5,

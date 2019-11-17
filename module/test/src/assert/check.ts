@@ -75,7 +75,7 @@ export class AssertCheck {
         case 'lessThanEqual': asrt(args[0] <= args[1], args[2]); break;
         case 'greaterThan': asrt(args[0] > args[1], args[2]); break;
         case 'greaterThanEqual': asrt(args[0] >= args[1], args[2]); break;
-        case 'ok': asrt.apply(null, args as any); break;
+        case 'ok': asrt.apply(null, args as any); break; // eslint-disable-line prefer-spread
         default:
           if (fn && (assert as any)[fn]) { // Assert call
             if (/not/i.test(fn)) {

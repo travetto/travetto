@@ -41,10 +41,10 @@ export class SQLUtil {
   static readonly ROOT_ALIAS = '_ROOT';
 
   static schemaFieldsCache = new Map<Class, {
-    local: FieldConfig[],
-    localMap: Record<string, FieldConfig>,
-    foreign: FieldConfig[],
-    foreignMap: Record<string, FieldConfig>
+    local: FieldConfig[];
+    localMap: Record<string, FieldConfig>;
+    foreign: FieldConfig[];
+    foreignMap: Record<string, FieldConfig>;
   }>();
 
   static classToStack(type: Class): VisitStack[] {
@@ -239,7 +239,7 @@ export class SQLUtil {
     return sort.map((cl: any) => {
       let schema: ClassConfig = SchemaRegistry.get(cls);
       const stack = this.classToStack(cls);
-      while (true) {
+      while (true) { // eslint-disable-line no-constant-condition
         const key = Object.keys(cl)[0] as string;
         const val = cl[key];
         const field = { ...schema.views[ALL_VIEW].schema[key] };

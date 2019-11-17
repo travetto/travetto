@@ -12,7 +12,7 @@ const mod = Symbol('module');
 
 interface RegisterInfo {
   [methods]?: {
-    [key: string]: { hash: number }
+    [key: string]: { hash: number };
   };
   [mod]?: string;
   [cls]?: number;
@@ -40,7 +40,7 @@ class RegisterTransformer {
       return node;
     }
 
-    // tslint:disable-next-line: no-bitwise
+    // eslint-disable-next-line no-bitwise
     const isAbstract = !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
 
     // If needed

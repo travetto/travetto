@@ -1,12 +1,11 @@
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
-import { QueueInputSource, Worker } from '@travetto/worker';
 
-import { buildWorkManager } from '../worker/parent';
-import { Events } from '../worker/types';
 import { TestRegistry } from '../registry/registry';
 import { TestConfig } from '../model/test';
 import { SuiteConfig } from '../model/suite';
 import { Consumer } from '../model/consumer';
+
+/* eslint-disable */
 
 function getConf(o?: [Class, Function]) {
   if (o) {

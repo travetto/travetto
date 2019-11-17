@@ -3,7 +3,6 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { ElasticsearchUtil } from '../src/util';
 import { Model, BaseModel } from '@travetto/model';
 import { Currency, Integer, Precision, Float, Text, Schema, SchemaRegistry } from '@travetto/schema';
-import { init } from '../bin/travetto-cli-es_schema';
 import { ModelRegistry } from '@travetto/model/src/registry';
 
 @Schema()

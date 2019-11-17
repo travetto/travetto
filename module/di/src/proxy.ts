@@ -1,4 +1,4 @@
-// @ts-ignore, ignoreing typing constraints on proxyhandler requiring an object
+// ignoring typing constraints on proxyhandler requiring an object
 export class RetargettingHandler<T extends any> implements ProxyHandler<T> {
   constructor(public target: T) { }
 

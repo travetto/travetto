@@ -3,7 +3,7 @@ import { Class } from '@travetto/registry';
 import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry } from './registry';
 
-function extractSymbolOrConfig<T extends { qualifier?: Symbol }>(args: any[]) {
+function extractSymbolOrConfig<T extends { qualifier?: symbol }>(args: any[]) {
   const out = {} as T;
   if (args) {
     let extra = args[0];

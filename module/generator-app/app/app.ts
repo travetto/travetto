@@ -22,6 +22,10 @@ export class TravettoGenerator extends Generator {
     const context = await this._init();
 
     await this._resolveFeatures(context, FEATURES);
+
+    // Finalize
+    context.finalize();
+
     await this._templateFiles(context);
 
     await this.npmInstall();
@@ -99,7 +103,7 @@ export class TravettoGenerator extends Generator {
           message: `Include ${feat.title} support?`
         }]);
 
-        if (ans.choice === 'No') {
+        if (ans.choice === 'No' || ans.choice === false) {
           continue;
         }
       }

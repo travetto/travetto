@@ -7,7 +7,7 @@ class Element {
 }
 
 @Application('test-eptest', { watchable: true })
-class EPTest {
+class EpTest {
 
   @Inject()
   el: Element;

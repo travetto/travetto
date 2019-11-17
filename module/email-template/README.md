@@ -57,7 +57,6 @@ Templating emails is achieved through a combination of multiple libraries, speci
 * [`inky`](https://github.com/zurb/inky) is a email rendering framework that aims to provide a standard set of constructs for building visually appealing emails.  The version of inky being used is a complete rewrite to optimize for size and performance.
 * [`sass`](https://github.com/sass/dart-sass) used for sass compilation.
 * [`mustache`](https://github.com/janl/mustache.js/) allows for interpolation of variables for personalized emails.
-* [`pngquant`](https://pngquant.org/) is used to compress images on the fly for bandwidth optimizations. `pngquant` is not installed as a dependency, but relies upon either the binary being already installed, or spinning up a `docker` container to use as a way of executing the binary.
 
 **NOTE** Many of the libraries were chosen due to size and number of overall dependencies.  Any performance issues are mitigated accordingly.
 

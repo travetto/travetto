@@ -5,7 +5,7 @@ export class Todo implements ModelCore {
   id?: string;
   text: string;
   completed?: boolean;
-  // {{#modules.map.auth-rest}}
+  // {{#modules.auth-rest}}
   userId?: string;
-  // {{/modules.map.auth-rest}}
+  // {{/modules.auth-rest}}
 }

@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { FsUtil } from '@travetto/boot';
 import { Env } from './env';
 

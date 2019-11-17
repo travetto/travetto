@@ -174,14 +174,14 @@ export abstract class CacheTestSuite {
 
   @Test()
   async eviction() {
-    const user = await this.service.getUser('200');
+    await this.service.getUser('200');
     const start = Date.now();
-    const user2 = await this.service.getUser('200');
+    await this.service.getUser('200');
     assert((Date.now() - start) <= this.baseLatency);
 
     await this.service.deleteUser('200');
     const start2 = Date.now();
-    const user3 = await this.service.getUser('200');
+    await this.service.getUser('200');
     assert((Date.now() - start2) >= this.baseLatency);
   }
 }

@@ -19,14 +19,12 @@ export const Delete = (path?: PathType) => Endpoint('delete', path);
 export const Head = (path?: PathType) => Endpoint('head', path);
 export const Options = (path?: PathType) => Endpoint('options', path);
 
-export const ResponseType = (responseType: EndpointIOType) => {
-  return function (target: any, property: string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
+export const ResponseType = (responseType: EndpointIOType) =>
+  function (target: any, property: string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
     return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { responseType });
   } as EndpointDecorator;
-};
 
-export const RequestType = (requestType: EndpointIOType) => {
-  return function (target: any, property: string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
+export const RequestType = (requestType: EndpointIOType) =>
+  function (target: any, property: string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
     return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { requestType });
   } as EndpointDecorator;
-};

@@ -84,11 +84,11 @@ export class SystemUtil {
         clearTimeout(deferTimer);
         deferTimer = setTimeout(function () {
           last = now;
-          fn.apply(null, args);
+          fn.call(null, ...args);
         }, threshold);
       } else {
         last = now;
-        fn.apply(null, args);
+        fn.call(null, ...args);
       }
     } as any as T;
   }
@@ -97,7 +97,7 @@ export class SystemUtil {
     let hash = 5381;
 
     for (let i = 0; i < text.length; i++) {
-      // tslint:disable-next-line: no-bitwise
+      // eslint-disable-next-line no-bitwise
       hash = (hash * 33) ^ text.charCodeAt(i);
     }
 
@@ -106,14 +106,14 @@ export class SystemUtil {
 
   static computeOrdering<T,
     U extends {
-      after?: T | Set<T> | T[],
-      before?: T | Set<T> | T[],
-      key: T
+      after?: T | Set<T> | T[];
+      before?: T | Set<T> | T[];
+      key: T;
     },
     V extends {
       after: Set<T>;
       key: T;
-      target: U
+      target: U;
     }
   >(items: U[]) {
 

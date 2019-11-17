@@ -7,9 +7,9 @@ export function Config(ns: string, depTarget?: new (...args: any[]) => any, name
 
     target.prototype.postConstruct = function () {
       // Apply config
-      ConfigSource.bindTo(this, ns); // tslint:disable-line no-invalid-this
+      ConfigSource.bindTo(this, ns); // eslint-disable-line no-invalid-this
       if (og) {
-        return og.apply(this, arguments); // tslint:disable-line no-invalid-this
+        return og.apply(this, arguments); // eslint-disable-line no-invalid-this, prefer-rest-params
       }
     };
     return target;

@@ -11,7 +11,7 @@ export interface ParamDoc {
 }
 
 export interface Documentation {
-  return?: { description?: string; type?: ts.Expression };
+  return?: { description?: string, type?: ts.Expression };
   description?: string;
   params?: ParamDoc[];
 }

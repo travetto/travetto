@@ -30,13 +30,11 @@ abstract class SimpleSuite extends BaseSimpleSourceSuite {
   async testEmptyCheck() {
     const service = await this.service;
 
-    await service.bulkProcess(Bools, [true, false, null, false, true, undefined, null].map(x => {
-      return {
-        insert: Bools.from({
-          value: x!
-        })
-      };
-    }));
+    await service.bulkProcess(Bools, [true, false, null, false, true, undefined, null].map(x => ({
+      insert: Bools.from({
+        value: x!
+      })
+    })));
 
     const results = await service.getAllByQuery(Bools, {});
     assert(results.length === 7);

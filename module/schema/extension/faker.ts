@@ -9,12 +9,11 @@ import { BindUtil } from '../src/bind-util';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-const between = (fromDays: number, toDays: number) => {
-  return faker.date.between(
+const between = (fromDays: number, toDays: number) =>
+  faker.date.between(
     new Date(Date.now() + fromDays * DAY_IN_MS),
     new Date(Date.now() + toDays * DAY_IN_MS)
   );
-};
 
 export class SchemaFakerUtil {
   static STRING_RE_TO_TYPE: [RegExp, () => any][] = [

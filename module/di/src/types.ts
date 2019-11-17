@@ -7,15 +7,15 @@ export interface Dependency<T = any> {
   qualifier: symbol;
   optional?: boolean;
   defaultIfMissing?: ClassTarget<T>;
-  original?: Symbol | object;
+  original?: symbol | object;
 }
 
 export interface InjectableConfig<T = any> extends Dependency<T> {
   class: Class<T>;
   factory: (...args: any[]) => T;
   dependencies: {
-    cons?: Dependency<any>[],
-    fields: Record<string, Dependency<any>>
+    cons?: Dependency<any>[];
+    fields: Record<string, Dependency<any>>;
   };
 }
 
@@ -24,5 +24,5 @@ export interface InjectableFactoryConfig<T> {
   src: Class<T>;
   qualifier?: symbol;
   dependencies?: Dependency<any>[];
-  original?: Symbol | object;
+  original?: symbol | object;
 }

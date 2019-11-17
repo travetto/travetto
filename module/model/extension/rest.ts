@@ -24,6 +24,7 @@ class SuggestQuery {
   offset?: number;
 }
 
+// eslint-disable no-invalid-this
 export function ModelController<T extends ModelCore>(path: string, cls: Class<T>) {
   function getCls() {
     return ModelRegistry.get(cls).class;
@@ -68,7 +69,8 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
       ControllerRegistry.getOrCreateEndpointConfig(
         target, function getById(this: Svc, id: string) {
           return this.source.getById(getCls(), id);
-        }), {
+        }),
+      {
         description: `Get ${cls.name} by id`,
         priority: 102, method: 'get', path: '/:id', headers: {
           Expires: '-1',
@@ -82,8 +84,9 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
         target, function suggestField(this: Svc, field: string, suggest: SuggestQuery) {
-          return this.source.suggestField(getCls(), field, suggest.q, suggest);
-        }), {
+          return this.source.suggest(getCls(), field, suggest.q, suggest);
+        }),
+      {
         description: `Suggest ${cls.name} by specific field`,
         priority: 101, method: 'get', path: '/suggest/:field', headers: {
           Expires: '-1',
@@ -101,7 +104,8 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
       ControllerRegistry.getOrCreateEndpointConfig(
         target, function update(this: Svc, body: any) {
           return this.source.update(getCls(), body);
-        }), {
+        }),
+      {
         description: `Update ${cls.name}`,
         priority: 103, method: 'put', path: '/',
         params: [schemaParamConfig('body', { type: cls })],
@@ -114,7 +118,8 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
       ControllerRegistry.getOrCreateEndpointConfig(
         target, function create(this: Svc, body: any) {
           return this.source.save(getCls(), body);
-        }), {
+        }),
+      {
         description: `Create ${cls.name}`,
         priority: 104, method: 'post', path: '/',
         params: [schemaParamConfig('body', { type: cls })],
@@ -127,7 +132,8 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
       ControllerRegistry.getOrCreateEndpointConfig(
         target, function remove(this: Svc, id: string) {
           return this.source.deleteById(getCls(), id);
-        }), {
+        }),
+      {
         params: [paramConfig('path', { name: 'id', required: true })],
         description: `Delete ${cls.name} by id`,
         priority: 105, method: 'delete', path: '/:id'

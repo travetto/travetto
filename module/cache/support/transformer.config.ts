@@ -7,12 +7,12 @@ const CACHE_CHECKER = TransformUtil.decoratorMatcher('cache');
 const CACHE_UTIL = 'CacheUtil';
 
 interface CacheState {
-  util: ts.Identifier,
-  cache: ts.PropertyAccessExpression,
-  evict: ts.PropertyAccessExpression
-};
+  util: ts.Identifier;
+  cache: ts.PropertyAccessExpression;
+  evict: ts.PropertyAccessExpression;
+}
 
-class cacheTransformer {
+class CacheTransformer {
 
   static initState(state: TransformerState & CacheState) {
     if (!state.util) {
@@ -68,7 +68,7 @@ class cacheTransformer {
               ts.createThis(),
               fn,
               ts.createArrayLiteral([ts.createSpread(ts.createIdentifier('arguments'))])
-            ] as ReadonlyArray<ts.Expression>)
+            ] as (readonly ts.Expression[]))
           )
         ])
       );
@@ -78,5 +78,5 @@ class cacheTransformer {
 }
 
 export const transformers: NodeTransformer[] = [
-  { type: 'method', before: cacheTransformer.handleMethod.bind(cacheTransformer), aliasName: 'cache' },
+  { type: 'method', before: CacheTransformer.handleMethod.bind(CacheTransformer), aliasName: 'cache' },
 ];

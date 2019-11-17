@@ -8,10 +8,10 @@ export type TransformerType = 'class' | 'method' | 'property' | 'static-method' 
 export type Alias = { name: string, pkg: string };
 
 type TransformerSet = {
-  before: string[],
-  after: string[],
-  type: TransformerType,
-  data: Map<string, Map<string, NodeTransformer[]>>
+  before: string[];
+  after: string[];
+  type: TransformerType;
+  data: Map<string, Map<string, NodeTransformer[]>>;
 };
 
 export interface NodeTransformer<T extends TransformerType = TransformerType, N = ts.Node> {
@@ -29,7 +29,7 @@ export class VisitorFactory {
 
   static nodeToType(node: ts.Node): TransformerType | undefined {
     if (ts.isMethodDeclaration(node)) {
-      // tslint:disable-next-line: no-bitwise
+      // eslint-disable-next-line no-bitwise
       return (ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Static) ? 'static-method' : 'method';
     } else if (ts.isPropertyDeclaration(node)) {
       return 'property';

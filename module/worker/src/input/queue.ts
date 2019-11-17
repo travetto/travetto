@@ -16,7 +16,7 @@ export class QueueInputSource<X> implements InputSource<X> {
   }
 
   async next() {
-    while (true) {
+    while (true) { // eslint-disable-line no-constant-condition
       if (this.items.length) {
         return this.items.shift()!;
       } else {

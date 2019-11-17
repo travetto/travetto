@@ -35,8 +35,8 @@ export interface Formatter {
 }
 
 export type LogStream = {
-  formatter: Formatter,
-  stdout: OutputHandler,
-  stderr: OutputHandler,
-  key: string | symbol
+  formatter: Formatter;
+  stdout: OutputHandler;
+  stderr: OutputHandler;
+  key: string | symbol;
 };

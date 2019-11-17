@@ -94,15 +94,13 @@ export class TransformUtil {
   }
 
   static allDecoratorMatcher() {
-    return this.customDecoratorMatcher('*', (pkg: string, name: string, dec: ts.Decorator) => {
-      return { pkg, name, dec };
-    });
+    return this.customDecoratorMatcher('*', (pkg: string, name: string, dec: ts.Decorator) =>
+      ({ pkg, name, dec })
+    );
   }
 
   static decoratorMatcher(ns: string) {
-    return this.customDecoratorMatcher(ns, (pkg, name, dec) => {
-      return dec;
-    });
+    return this.customDecoratorMatcher(ns, (pkg, name, dec) => dec);
   }
 
   static fromLiteral<T extends ts.Node>(val: T): T;

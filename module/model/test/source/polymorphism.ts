@@ -38,13 +38,13 @@ export abstract class BasePolymorphismSuite extends BaseModelTest {
     const o = await service.saveAll(Person, people);
 
     assert(o[0] instanceof Doctor);
-    await assert.rejects(async () => {
-      return service.update(Engineer, Doctor.from({ ...o[0] }) as any);
-    }, 'Expected object of type Engineer');
+    await assert.rejects(
+      async () => service.update(Engineer, Doctor.from({ ...o[0] }) as any),
+      'Expected object of type Engineer');
 
-    await assert.rejects(async () => {
-      return service.getById(Engineer, o[0].id!);
-    }, 'Invalid number');
+    await assert.rejects(
+      async () => service.getById(Engineer, o[0].id!),
+      'Invalid number');
 
     assert(o[0] instanceof Doctor);
     assert(o[1] instanceof Firefighter);

@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import * as cookies from 'cookies';
+// import * as cookies from 'cookies';
 
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
@@ -7,7 +7,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { HeaderEncoder } from '../src/encoder/header';
 import { Session } from '../src/types';
 import { SessionConfig } from '../src/config';
-import { CookieEncoder } from '../src/encoder/cookie';
+// import { CookieEncoder } from '../src/encoder/cookie';
 
 @Suite()
 export class EncoderTest {

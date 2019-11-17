@@ -46,7 +46,7 @@ export class RelationshipController {
    * @param id User id
    */
   @Delete('/:id')
-  async removeUser(@Path() id: Number): Promise<void> {
+  async removeUser(@Path() id: number): Promise<void> {
 
   }
 }

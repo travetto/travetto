@@ -4,9 +4,11 @@ import { Class } from '@travetto/registry';
 import { BindUtil, SchemaRegistry } from '@travetto/schema';
 import { EsSchemaConfig } from './types';
 
-const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
-const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
-const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
+const has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
+const has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
+const has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
+
+/* eslint-disable @typescript-eslint/camelcase */
 
 export class ElasticsearchUtil {
 
@@ -79,29 +81,34 @@ export class ElasticsearchUtil {
           const v = top[subKey];
 
           switch (subKey) {
-            case '$all':
+            case '$all': {
               const arr = Array.isArray(v) ? v : [v];
               items.push({
                 bool: { must: arr.map(x => ({ term: { [sPath]: x } })) }
               });
               break;
-            case '$in':
+            }
+            case '$in': {
               items.push({ terms: { [sPath]: Array.isArray(v) ? v : [v] } });
               break;
-            case '$nin':
+            }
+            case '$nin': {
               items.push({
                 bool: { must_not: [{ terms: { [sPath]: Array.isArray(v) ? v : [v] } }] }
               });
               break;
-            case '$eq':
+            }
+            case '$eq': {
               items.push({ term: { [sPath]: v } });
               break;
-            case '$ne':
+            }
+            case '$ne': {
               items.push({
                 bool: { must_not: [{ term: { [sPath]: v } }] }
               });
               break;
-            case '$exists':
+            }
+            case '$exists': {
               const q = {
                 exists: {
                   field: sPath
@@ -113,10 +120,11 @@ export class ElasticsearchUtil {
                 }
               });
               break;
+            }
             case '$lt':
             case '$gt':
             case '$gte':
-            case '$lte':
+            case '$lte': {
               const out: any = {};
               for (const k of Object.keys(top)) {
                 out[k.replace(/^[$]/, '')] = top[k];
@@ -127,6 +135,7 @@ export class ElasticsearchUtil {
                 }
               });
               break;
+            }
             case '$regex': {
               const pattern = BindUtil.extractRegex(v);
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
@@ -148,7 +157,7 @@ export class ElasticsearchUtil {
               }
               break;
             }
-            case '$geoWithin':
+            case '$geoWithin': {
               items.push({
                 geo_polygon: {
                   [sPath]: {
@@ -157,6 +166,7 @@ export class ElasticsearchUtil {
                 }
               });
               break;
+            }
             case '$unit':
             case '$maxDistance':
             case '$near': {

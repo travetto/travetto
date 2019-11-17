@@ -13,7 +13,7 @@ export class TransformerState {
   readonly newImports = new Map<string, Import>();
   readonly decorators = new Map<string, ts.PropertyAccessExpression>();
   readonly imports = new Map<string, Import>();
-  readonly ids = new Map<String, number>();
+  readonly ids = new Map<string, number>();
 
   constructor(public source: ts.SourceFile) {
     const pth = require.resolve(source.fileName);
@@ -68,10 +68,11 @@ export class TransformerState {
         return imptStmt;
       });
 
-      const out = ts.updateSourceFileNode(file, ts.createNodeArray([
-        ...importStmts,
-        ...file.statements.filter(x => !(x as any).remove) // Exclude culled imports
-      ]),
+      const out = ts.updateSourceFileNode(file,
+        ts.createNodeArray([
+          ...importStmts,
+          ...file.statements.filter(x => !(x as any).remove) // Exclude culled imports
+        ]),
         file.isDeclarationFile, file.referencedFiles,
         file.typeReferenceDirectives, file.hasNoDefaultLib);
 
@@ -175,7 +176,7 @@ export class TransformerState {
     const kind = type && type!.kind;
 
     switch (kind) {
-      case ts.SyntaxKind.TypeReference:
+      case ts.SyntaxKind.TypeReference: {
         expr = this.importTypeIfExternal(type as ts.TypeReferenceNode);
 
         // Wrapping reference to handle interfaces, and failing gracefully
@@ -188,6 +189,7 @@ export class TransformerState {
             ts.createLiteral(type.getText())
           ]);
         break;
+      }
       case ts.SyntaxKind.VoidKeyword: expr = ts.createIdentifier('undefined'); break;
       case ts.SyntaxKind.LiteralType: expr = this.resolveType((type as any as ts.LiteralTypeNode).literal); break;
       case ts.SyntaxKind.StringLiteral:
@@ -200,7 +202,7 @@ export class TransformerState {
       case ts.SyntaxKind.ArrayType:
         expr = ts.createArrayLiteral([this.resolveType((type as ts.ArrayTypeNode).elementType)]);
         break;
-      case ts.SyntaxKind.TypeLiteral:
+      case ts.SyntaxKind.TypeLiteral: {
         const properties: ts.PropertyAssignment[] = [];
         for (const member of (type as ts.TypeLiteralNode).members) {
           let subMember: ts.TypeNode = (member as any).type;
@@ -211,6 +213,7 @@ export class TransformerState {
         }
         expr = ts.createObjectLiteral(properties);
         break;
+      }
       case ts.SyntaxKind.UnionType: {
         const types = (type as ts.UnionTypeNode).types;
         expr = types.slice(1).reduce((fType, stype) => {
@@ -226,9 +229,7 @@ export class TransformerState {
         break;
       }
       case ts.SyntaxKind.TupleType:
-        expr = ts.createArrayLiteral((type as ts.TupleTypeNode).elementTypes.map(t => {
-          return this.resolveType(t);
-        }));
+        expr = ts.createArrayLiteral((type as ts.TupleTypeNode).elementTypes.map(t => this.resolveType(t)));
         break;
       case ts.SyntaxKind.ObjectKeyword:
       default:

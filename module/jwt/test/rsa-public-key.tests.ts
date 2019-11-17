@@ -9,11 +9,11 @@ class PublicKeySuite {
 
   @Test('should work')
   async test() {
-    const cert_pub = await ResourceManager.read('/rsa-public-key.pem');
-    const cert_priv = await ResourceManager.read('/rsa-private.pem');
+    const certPub = await ResourceManager.read('/rsa-public-key.pem');
+    const certPriv = await ResourceManager.read('/rsa-private.pem');
 
-    const token = await jwt.sign({ foo: 'bar' }, { key: cert_priv, alg: 'RS256' });
+    const token = await jwt.sign({ foo: 'bar' }, { key: certPriv, alg: 'RS256' });
 
-    assert(await jwt.verify(token, { key: cert_pub, alg: 'RS256' }));
+    assert(await jwt.verify(token, { key: certPub, alg: 'RS256' }));
   }
 }

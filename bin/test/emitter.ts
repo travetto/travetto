@@ -59,7 +59,7 @@ export class TapEmitter {
       }
       status += header;
 
-      status += `# (Time: ${test.duration})`
+      status += `# (Time: ${test.duration})`;
 
       this.duration += test.duration;
 

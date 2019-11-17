@@ -1,5 +1,3 @@
-import * as assert from 'assert';
-
 import { Suite, BeforeAll, BeforeEach, AfterEach, Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { ModelRegistry, ModelService, ModelSource } from '@travetto/model';

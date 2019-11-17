@@ -173,7 +173,7 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
         }
       }));
 
-    const res = await service.bulkProcess(Person,
+    await service.bulkProcess(Person,
       people.map(x => ({ upsert: x }))
     );
 
@@ -365,11 +365,11 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
   @Test('Verify array $in queries work properly')
   async testArrayContains() {
     const svc = await this.service;
-    const o = await svc.save(SimpleList, SimpleList.from({
+    await svc.save(SimpleList, SimpleList.from({
       names: ['a', 'b', 'c']
     }));
 
-    const o2 = await svc.save(SimpleList, SimpleList.from({
+    await svc.save(SimpleList, SimpleList.from({
       names: ['b', 'c', 'd']
     }));
 

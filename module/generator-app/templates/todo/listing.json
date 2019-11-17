@@ -2,6 +2,8 @@
   "package.json": {},
   "README.md": {},
   "gitignore.txt": {},
+  ".eslintrc.js": {},
+  ".eslintignore": {},
   "resources/application.yml": {},
   "src/model/todo.ts": {
     "requires": [
