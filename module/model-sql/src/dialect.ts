@@ -6,9 +6,9 @@ import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig
 import { SQLUtil, VisitStack } from './util';
 import { DeleteWrapper, InsertWrapper, DialectState } from './types';
 
-const has$And = (o: any): o is ({ $and: WhereClause<any>[]; }) => '$and' in o;
-const has$Or = (o: any): o is ({ $or: WhereClause<any>[]; }) => '$or' in o;
-const has$Not = (o: any): o is ({ $not: WhereClause<any>; }) => '$not' in o;
+const has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
+const has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
+const has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
 
 interface Alias {
   alias: string;
@@ -31,6 +31,7 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
   } as FieldConfig;
 }
 
+// eslint-disable no-invalid-this
 export abstract class SQLDialect implements DialectState {
   KEY_LEN = 64;
   DEFAULT_STRING_LEN = 1024;
@@ -414,9 +415,9 @@ export abstract class SQLDialect implements DialectState {
   getOrderBySQL<T>(cls: Class<T>, sortBy?: SortClause<T>[]): string {
     return !sortBy ?
       '' :
-      `ORDER BY ${SQLUtil.orderBy(cls, sortBy).map((ob) => {
-        return `${this.resolveName(ob.stack)} ${ob.asc ? 'ASC' : 'DESC'}`;
-      }).join(', ')}`;
+      `ORDER BY ${SQLUtil.orderBy(cls, sortBy).map((ob) =>
+        `${this.resolveName(ob.stack)} ${ob.asc ? 'ASC' : 'DESC'}`
+      ).join(', ')}`;
   }
 
   getSelectSQL<T>(cls: Class<T>, select?: SelectClause<T>): string {
@@ -492,6 +493,7 @@ ${this.getLimitSQL(cls, query)}`;
       }
     }
 
+    /* eslint-disable @typescript-eslint/indent */
     const out = `
 CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   ${fields
@@ -787,12 +789,12 @@ ${this.getWhereSQL(cls, query.where)}`;
       const idx: any = this.idField.name;
 
       await Promise.all([
-        ...upserts.filter(x => x.stack.length === 1).map(i => {
-          return this.deleteByIds(i.stack, i.records.map(v => v.value[idx]));
-        }),
-        ...updates.filter(x => x.stack.length === 1).map(i => {
-          return this.deleteByIds(i.stack, i.records.map(v => v.value[idx]));
-        }),
+        ...upserts.filter(x => x.stack.length === 1).map(i =>
+          this.deleteByIds(i.stack, i.records.map(v => v.value[idx]))
+        ),
+        ...updates.filter(x => x.stack.length === 1).map(i =>
+          this.deleteByIds(i.stack, i.records.map(v => v.value[idx]))
+        ),
       ]);
     }
 
@@ -802,7 +804,7 @@ ${this.getWhereSQL(cls, query.where)}`;
         continue;
       }
       let lvl = 1; // Add by level
-      while (true) {
+      while (true) { // eslint-disable-line no-constant-condition
         const leveled = items.filter(f => f.stack.length === lvl);
         if (!leveled.length) {
           break;

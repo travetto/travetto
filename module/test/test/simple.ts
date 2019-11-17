@@ -3,6 +3,8 @@ import * as assert from 'assert';
 
 let a: any = 0; a = 1;
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 @Suite()
 class Simple {
 
@@ -106,8 +108,8 @@ class Simple {
 
     assert.throws(() => {
       throw new Error('Big Error');
-    }, (err: any) => {
-      return err.message.startsWith('Big') && err.message.length > 4 ? undefined : err;
-    });
+    }, (err: any) =>
+      err.message.startsWith('Big') && err.message.length > 4 ? undefined : err
+    );
   }
 }

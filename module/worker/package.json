@@ -16,7 +16,6 @@
   "homepage": "https://travetto.io",
   "keywords": [
     "exec",
-    "docker",
     "child-process",
     "ipc",
     "travetto",

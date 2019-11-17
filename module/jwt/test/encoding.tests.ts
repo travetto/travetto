@@ -7,7 +7,7 @@ import * as jwt from '..';
 function atob(str: string) {
   return Buffer.from(str, 'base64').toString('binary');
 }
-function b64_to_utf8(str: string) {
+function base64toUtf8(str: string) {
   return decodeURIComponent(escape(atob(str)));
 }
 
@@ -18,16 +18,16 @@ class EncodingTest {
   async testUTF8() {
     const expected = 'José';
     const token = await jwt.sign({ name: expected }, { key: 'shhhhh' });
-    const decoded_name = JSON.parse(b64_to_utf8(token.split('.')[1])).name;
-    assert(decoded_name === expected);
+    const decodedName = JSON.parse(base64toUtf8(token.split('.')[1])).name;
+    assert(decodedName === expected);
   }
 
   @Test('should properly encode the token (binary)')
   async tesBinary() {
     const expected = 'José';
     const token = await jwt.sign({ name: expected }, { key: 'shhhhh', encoding: 'binary' });
-    const decoded_name = JSON.parse(atob(token.split('.')[1])).name;
-    assert(decoded_name === expected);
+    const decodedName = JSON.parse(atob(token.split('.')[1])).name;
+    assert(decodedName === expected);
   }
 
   @Test('should return the same result when decoding')

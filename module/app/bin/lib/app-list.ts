@@ -29,10 +29,12 @@ export class AppListUtil {
     await PhaseManager.init('bootstrap', 'compiler').run();
 
     // Load app files
-    ScanApp.requireFiles('.ts', x => {
-      return /^([^/]+\/)?(src[\/])/.test(x) && x.endsWith('.ts') && !x.endsWith('d.ts') &&
-        fs.readFileSync(x, 'utf-8').includes('@Application');
-    }); // Only load files that are candidates
+    ScanApp.requireFiles('.ts', x =>
+      /^([^/]+\/)?(src[\/])/.test(x) &&
+      x.endsWith('.ts') &&
+      !x.endsWith('d.ts') &&
+      fs.readFileSync(x, 'utf-8').includes('@Application')
+    ); // Only load files that are candidates
 
     // Get applications
     const { ApplicationRegistry } = await import('../../src/registry');
@@ -53,9 +55,11 @@ export class AppListUtil {
 
     let resolved = await items;
 
-    resolved = resolved.sort((a, b) => {
-      return a.appRoot === b.appRoot ? a.name.localeCompare(b.name) : (a.appRoot === '.' ? -1 : 1);
-    });
+    resolved = resolved.sort((a, b) =>
+      a.appRoot === b.appRoot ?
+        a.name.localeCompare(b.name) :
+        (a.appRoot === '.' ? -1 : 1)
+    );
 
     return resolved;
   }

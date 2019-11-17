@@ -2,6 +2,8 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { ElasticsearchUtil } from '../src/util';
 
+/* eslint-disable @typescript-eslint/camelcase */
+
 @Suite()
 export class UtilTest {
 

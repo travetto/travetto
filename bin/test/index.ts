@@ -9,7 +9,7 @@ export async function run() {
     '--ignore', '@travetto/*-app',
     '--ignore', '@travetto/cli',
     '--stream', '--',
-    'npx', 'travetto', 'test', '-f', 'event', '-c', '1'
+    'npx', 'trv', 'test', '-f', 'event', '-c', '1'
   ], { shell: true, stdio: [null, null, 2] });
 
   const emitter = new TapEmitter();

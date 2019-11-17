@@ -13,10 +13,12 @@ export class ElasticsearchModelConfig {
     caseSensitive: false
   };
 
+  /* eslint-disable @typescript-eslint/camelcase */
   indexCreate = {
     number_of_replicas: 0,
     number_of_shards: 1
   };
+  /* eslint-enable @typescript-eslint/camelcase */
 
   postConstruct() {
     console.debug('Constructed', this);

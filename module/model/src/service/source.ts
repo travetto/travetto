@@ -5,10 +5,12 @@ import { ModelQuery, Query, PageableModelQuery } from '../model/query';
 import { BulkResponse, BulkOp } from '../model/bulk';
 import { ModelCore } from '../model/core';
 
+/* eslint-disable @typescript-eslint/ban-types */
 export type ValidStringFields<T> = {
   [K in keyof T]:
   (T[K] extends (String | string | string[] | String[] | undefined) ? K : never)
 }[keyof T];
+/* eslint-enable @typescript-eslint/ban-types */
 
 export interface IModelSource {
   onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;

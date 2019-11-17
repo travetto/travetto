@@ -100,9 +100,7 @@ export class ParameterTest {
 
     assert.doesNotThrow(() =>
       ParamUtil.extractParams(ep.params, {
-        header: (key: string) => {
-          return key;
-        }
+        header: (key: string) => key
       } as any, {} as any)
     );
 

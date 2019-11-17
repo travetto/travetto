@@ -48,10 +48,10 @@ export class Server {
   private reloadRate: number = 500;
 
   constructor(config: {
-    handler: HttpHandler,
-    port: number,
-    open?: boolean,
-    reloadRate?: number
+    handler: HttpHandler;
+    port: number;
+    open?: boolean;
+    reloadRate?: number;
   }) {
     for (const k of Object.keys(config)) {
       (this as any)[k] = (config as any)[k];

@@ -8,6 +8,13 @@
   },
   "name": "@travetto/mono-repo",
   "license": "MIT",
+  "scripts": {
+    "lint": "npx eslint --ext .js --ext .ts .",
+    "init": "./bin/dev-init/init.sh",
+    "reinit": "rm -rf node_modules/; npm i; npm run init",
+    "pretest": "./bin/test/resources.sh start",
+    "test": "./bin/test/run.sh"
+  },
   "devDependencies": {
     "@types/faker": "^4.1.7",
     "@types/js-yaml": "^3.12.1",
@@ -16,9 +23,12 @@
     "@types/passport-facebook": "^2.1.9",
     "@types/pg": "^7.11.2",
     "@types/redis": "^2.8.14",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0",
+    "eslint": "^6.6.0",
     "faker": "^4.1.0",
     "js-yaml": "^3.13.1",
-    "lerna": "^3.18.4",
+    "lerna": "~3.17.0",
     "mysql": "^2.17.1",
     "node-forge": "^0.9.1",
     "nodemailer": "^6.3.1",

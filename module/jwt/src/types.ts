@@ -27,14 +27,14 @@ export type VerifyOptions = {
   clock?: { timestamp?: number | Date, tolerance?: number };
   ignore?: { exp?: boolean, nbf?: boolean };
   maxAgeSec?: number;
-  header?: Record<string, string>
+  header?: Record<string, string>;
   key?: Key;
   encoding?: string;
   alg?: AlgType | AlgType[];
 
   payload?: {
     aud?: string | RegExp | (string | RegExp)[];
-  } & PayloadCore
+  } & PayloadCore;
 };
 
 export interface SignHeader {
@@ -49,7 +49,7 @@ export interface SignOptions {
   header?: {
     typ?: 'JWT';
   } & {
-    [key: string]: string
+    [key: string]: string;
   };
   encoding?: string;
 }

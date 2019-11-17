@@ -34,7 +34,7 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
     throw new AppError('Cannot use upload decorator with anything but an UploadAsset', 'general');
   }
 
-  return function (target: Object, propertyKey: string, index: number) {
+  return function (target: Record<string, any>, propertyKey: string, index: number) {
     const handler = target.constructor.prototype[propertyKey];
     ControllerRegistry.registerEndpointParameter(target.constructor as Class, handler, {
       ...param as ParamConfig,

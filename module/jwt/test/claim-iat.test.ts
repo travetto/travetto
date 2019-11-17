@@ -136,15 +136,15 @@ class IssueAtSuite {
 
     for (const testCase of OPS) {
       const token = await jwt.sign({ iat: NOW }, { key: 'secret', alg: 'none' });
-      await assert.rejects(async () => {
-        return jwt.verify(token, {
+      await assert.rejects(
+        async () => jwt.verify(token, {
           maxAgeSec: testCase.maxAge,
           clock: {
             tolerance: (testCase.clockTolerance || 0),
             timestamp: NOW + testCase.clockAdvance
           }
-        });
-      }, 'maxAge exceeded');
+        }),
+        'maxAge exceeded');
     }
   }
 }

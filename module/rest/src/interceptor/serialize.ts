@@ -11,8 +11,6 @@ import { isRenderable } from '../response/renderable';
 @Injectable()
 export class SerializeInterceptor extends RestInterceptor {
 
-  before = LoggingInterceptor;
-
   static setContentTypeIfUndefined(res: Response, type: string) {
     if (!res.getHeader('Content-Type')) {
       res.setHeader('Content-Type', type);
@@ -40,6 +38,8 @@ export class SerializeInterceptor extends RestInterceptor {
       }
     }
   }
+
+  before = LoggingInterceptor;
 
   async intercept(req: Request, res: Response, next: (() => Promise<any>)): Promise<any> {
     try {

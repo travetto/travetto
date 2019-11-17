@@ -166,7 +166,7 @@ export class MongoModelSource extends ModelSource {
   async suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     const q = ModelUtil.getSuggestFieldQuery(cls, field, prefix, query);
     const results = await this.query(cls, q);
-    return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => a, query && query.limit);
+    return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a) => a, query && query.limit);
   }
 
   async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {

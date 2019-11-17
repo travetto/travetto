@@ -1,5 +1,6 @@
 import { LogEvent } from '../types';
 
+
 export interface JSONFormatterOpts { }
 
 export class JsonFormatter {

@@ -35,16 +35,16 @@ function mergeWithOptional<T extends { original?: symbol | object, qualifier?: s
 export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private pendingFinalize: Class[] = [];
 
-  private instances = new Map<TargetId, Map<Symbol, any>>();
-  private instancePromises = new Map<TargetId, Map<Symbol, Promise<any>>>();
+  private instances = new Map<TargetId, Map<symbol, any>>();
+  private instancePromises = new Map<TargetId, Map<symbol, Promise<any>>>();
 
   private factories = new Map<TargetId, Map<Class, InjectableConfig>>();
 
-  private targetToClass = new Map<TargetId, Map<Symbol, string>>();
-  private classToTarget = new Map<ClassId, Map<Symbol, TargetId>>();
+  private targetToClass = new Map<TargetId, Map<symbol, string>>();
+  private classToTarget = new Map<ClassId, Map<symbol, TargetId>>();
 
-  private proxies = new Map<TargetId, Map<Symbol, Proxy<RetargettingHandler<any>>>>();
-  private proxyHandlers = new Map<TargetId, Map<Symbol, RetargettingHandler<any>>>();
+  private proxies = new Map<TargetId, Map<symbol, Proxy<RetargettingHandler<any>>>>();
+  private proxyHandlers = new Map<TargetId, Map<symbol, RetargettingHandler<any>>>();
 
   constructor() {
     super(RootRegistry);

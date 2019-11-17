@@ -8,35 +8,20 @@ function prop(obj: Record<string, any>) {
   };
 }
 
-const stringProp = prop as
-  (obj: Record<string, any>) =>
-    <T extends Partial<Record<K, string>>, K extends string>(t: T, k: K) =>
-      void;
-
 const stringArrProp = prop as
-  (obj: Record<string, any>) =>
-    <T extends Partial<Record<K, string | any[]>>, K extends string>(t: T, k: K) =>
-      void;
+  (obj: Record<string, any>) => <T extends Partial<Record<K, string | any[]>>, K extends string>(t: T, k: K) => void;
 
 const stringArrStringProp = prop as
-  (obj: Record<string, any>) =>
-    <T extends Partial<Record<K, string | string[]>>, K extends string>(t: T, k: K) =>
-      void;
+  (obj: Record<string, any>) => <T extends Partial<Record<K, string | string[]>>, K extends string>(t: T, k: K) => void;
 
 const numberProp = prop as
-  (obj: Record<string, any>) =>
-    <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K) =>
-      void;
+  (obj: Record<string, any>) => <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K) => void;
 
 const stringNumberProp = prop as
-  (obj: Record<string, any>) =>
-    <T extends Partial<Record<K, string | number>>, K extends string>(t: T, k: K) =>
-      void;
+  (obj: Record<string, any>) => <T extends Partial<Record<K, string | number>>, K extends string>(t: T, k: K) => void;
 
 const dateNumberProp = prop as
-  (obj: Record<string, any>) =>
-    <T extends Partial<Record<K, Date | number>>, K extends string>(t: T, k: K) =>
-      void;
+  (obj: Record<string, any>) => <T extends Partial<Record<K, Date | number>>, K extends string>(t: T, k: K) => void;
 
 function enumKeys(c: any): string[] {
   if (Array.isArray(c) && typeof c[0] === 'string') {

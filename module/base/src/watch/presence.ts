@@ -29,13 +29,13 @@ export class FilePresenceManager {
 
   constructor(
     config: {
-      ext: FilePresenceManager['ext'],
-      cwd: FilePresenceManager['cwd'],
-      rootPaths: FilePresenceManager['rootPaths'],
-      listener: FilePresenceManager['listener'],
-      excludeFiles?: FilePresenceManager['excludeFiles'],
-      initialFileValidator?: FilePresenceManager['initialFileValidator'],
-      watch?: FilePresenceManager['watch']
+      ext: FilePresenceManager['ext'];
+      cwd: FilePresenceManager['cwd'];
+      rootPaths: FilePresenceManager['rootPaths'];
+      listener: FilePresenceManager['listener'];
+      excludeFiles?: FilePresenceManager['excludeFiles'];
+      initialFileValidator?: FilePresenceManager['initialFileValidator'];
+      watch?: FilePresenceManager['watch'];
     }
   ) {
     for (const k of Object.keys(config) as (keyof FilePresenceManager)[]) {

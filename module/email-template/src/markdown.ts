@@ -101,7 +101,7 @@ export class MarkdownUtil {
           }
           break;
         case 'item':
-        case 'li':
+        case 'li': {
           output.push('\n', LI_TOKEN, '  '.repeat(listMode.length));
           const top = listMode[listMode.length - 1];
           if (typeof top === 'number') {
@@ -112,6 +112,7 @@ export class MarkdownUtil {
           }
           descend();
           break;
+        }
         case 'p':
           output.push('\n');
           descend();

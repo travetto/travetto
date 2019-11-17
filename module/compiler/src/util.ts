@@ -13,12 +13,13 @@ export class CompilerUtil {
 
   static resolveOptions(dir: string, name: string = 'tsconfig.json') {
     const out = ts.parseJsonSourceFileConfigFileContent(
-      ts.readJsonConfigFile(`${dir}/${name}`, ts.sys.readFile), ts.sys, dir, {
-      rootDir: `${dir}`,
-      sourceMap: false,
-      inlineSourceMap: true,
-      outDir: `${dir}`
-    }, `${dir}/${name}`);
+      ts.readJsonConfigFile(`${dir}/${name}`, ts.sys.readFile), ts.sys, dir,
+      {
+        rootDir: `${dir}`,
+        sourceMap: false,
+        inlineSourceMap: true,
+        outDir: `${dir}`
+      }, `${dir}/${name}`);
     out.options.importHelpers = true;
     out.options.noEmitOnError = !Env.watch;
     out.options.noErrorTruncation = true;

@@ -6,8 +6,7 @@ import { Principal, Identity } from './types';
 export class AuthContext<
   U = any,
   I extends Identity = Identity,
-  P extends Principal = Principal
-  > {
+  P extends Principal = Principal> {
 
   private permsSet: Set<string>;
   private permsArr: string[];
@@ -31,13 +30,13 @@ export class AuthContext<
     return this.permsArr;
   }
 
-  get permissionSet(): ReadonlySet<string> {
-    return this.permsSet;
-  }
-
   set permissions(perms: Readonly<string[]>) {
     this.permsSet = new Set(perms);
     this.permsArr = [...this.permsSet];
+  }
+
+  get permissionSet(): ReadonlySet<string> {
+    return this.permsSet;
   }
 
   get principalDetails() {

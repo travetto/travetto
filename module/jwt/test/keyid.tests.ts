@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Suite, Test, ShouldThrow } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 
 import * as jwt from '..';
 
@@ -12,6 +12,6 @@ class KeyIdSuite {
     const token = await jwt.sign(claims, { key: 'secret', header: { kid: '1234' } });
     const res = jwt.decodeComplete(token);
     assert(res.header.kid === '1234');
-    const val = await jwt.verify(token, { key: 'secret' });
+    await jwt.verify(token, { key: 'secret' });
   }
 }

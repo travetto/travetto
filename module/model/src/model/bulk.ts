@@ -1,10 +1,10 @@
 import { AppError } from '@travetto/base';
 
 export type BulkOp<T> =
-  { delete?: T; } &
-  { insert?: T; } &
-  { update?: T; } &
-  { upsert?: T; };
+  { delete?: T } &
+  { insert?: T } &
+  { update?: T } &
+  { upsert?: T };
 
 export interface BulkResponse {
   errors: any[];

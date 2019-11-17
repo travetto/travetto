@@ -128,13 +128,15 @@ export class QueryLanguageParser {
 
   static convert(node: Node): any {
     switch (node.type) {
-      case 'unary':
+      case 'unary': {
         const un = node as GroupNode;
         return { [`$${un.op}`]: this.convert(un.value as any as GroupNode) };
-      case 'group':
+      }
+      case 'group': {
         const gn = node as GroupNode;
         return { [`$${gn.op}`]: gn.value.map(x => this.convert(x)) };
-      case 'clause':
+      }
+      case 'clause': {
         const cn = node as ClauseNode;
         const parts = cn.field!.split('.');
         const top: any = {};
@@ -152,6 +154,7 @@ export class QueryLanguageParser {
           sub[cn.op!] = cn.value;
         }
         return top;
+      }
       default: throw new Error(`Unexpected node type: ${node.type}`);
     }
   }

@@ -50,7 +50,7 @@ export class RestTest {
       result: undefined as any,
       statusCode: 201,
       setHeader() { },
-      getHeader(field: String) { return ''; },
+      getHeader(field: string) { return ''; },
       send(val: any) {
         this.result = JSON.parse(val);
       },
@@ -87,7 +87,7 @@ export class RestTest {
       result: undefined as any,
       statusCode: 201,
       setHeader() { },
-      getHeader(field: String) { return ''; },
+      getHeader(field: string) { return ''; },
       send(val: any) {
         this.result = JSON.parse(val);
       },

@@ -58,7 +58,7 @@ export class AssertUtil {
   }
 
   static generateSuiteError(suite: SuiteConfig, methodName: string, error: Error) {
-    // tslint:disable:prefer-const
+    // eslint-disable-next-line prefer-const
     let { line, file } = this.getPositionOfError(error, suite.file);
 
     if (line === 1 && suite.lines) {

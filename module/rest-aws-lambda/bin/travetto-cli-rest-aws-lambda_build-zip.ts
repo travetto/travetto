@@ -31,7 +31,7 @@ export function init() {
 
       child_process.execSync(`cp -r * ${cmd.workspace}`, { cwd: FsUtil.cwd });
 
-      // tslint:disable-next-line: no-invalid-template-strings
+      // eslint-disable-next-line no-template-curly-in-string
       const dirVar = 'process.env.TRV_CACHE_DIR = `${__dirname}/cache`;';
       const lambda = fs.readFileSync(`${__dirname}/../resources/lambda.js`, 'utf-8');
 

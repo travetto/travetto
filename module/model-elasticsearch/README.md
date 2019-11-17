@@ -39,5 +39,3 @@ export class ElasticsearchModelConfig {
 ```
 
 and can be overridden via environment variables or config files, as defined in [`Config`](https://github.com/travetto/travetto/tree/master/module/config).
-
-**NOTE** During testing, the source will automatically spin up an `elasticsearch` server via a `docker` container if you are not already running the service.

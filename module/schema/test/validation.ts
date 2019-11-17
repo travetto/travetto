@@ -145,9 +145,10 @@ class Validation {
       names: ['bc', 'ab', 'bac']
     });
 
-    await assert.rejects(() =>
-      SchemaValidator.validate(obj2)
-      , ValidationResultError);
+    await assert.rejects(
+      () => SchemaValidator.validate(obj2),
+      ValidationResultError
+    );
   }
 
   @Test('manually unrequired')

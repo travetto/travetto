@@ -11,7 +11,7 @@ class AsyncSignTest {
 
   @Test('should work with empty options')
   async testEmptyOptions() {
-    const res = await jwt.sign({ abc: 1 }, { key: 'secret' });
+    await jwt.sign({ abc: 1 }, { key: 'secret' });
   }
 
   @Test('should work with none algorithm where secret is set')
