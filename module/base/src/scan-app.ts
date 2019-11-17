@@ -54,7 +54,7 @@ export class ScanApp {
   }
 
   static requireFiles(ext: string | RegExp, filter: RegExp | ((rel: string) => boolean)) {
-    return ScanApp.findFiles(ext, filter).map(x => require(x.file));
+    return this.findFiles(ext, filter).map(x => require(x.file));
   }
 
   static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {
@@ -71,7 +71,7 @@ export class ScanApp {
   }
 
   static getStandardAppFiles() {
-    const res = ScanApp.findFiles('.ts', x =>
+    const res = this.findFiles('.ts', x =>
       !x.endsWith('.d.ts') && (
         /^(src\/|support\/|index)/.test(x) ||
         /(@travetto\/[^\/]+\/(src\/|support\/|index))/.test(x)

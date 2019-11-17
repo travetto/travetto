@@ -2,14 +2,13 @@ import * as assert from 'assert';
 
 import { Schema, SchemaRegistry, FieldConfig } from '@travetto/schema';
 import { Test, BeforeAll } from '@travetto/test';
-import { ModelRegistry, WhereClause } from '@travetto/model';
+import { ModelRegistry, WhereClause, ModelService } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 
 import { VisitStack } from '../../src/util';
 import { SQLDialect } from '../../src/dialect';
 import { TestUtil } from '../util';
 import { DialectSuite as Suite } from '../decorator';
-import { ModelService } from '@travetto/model/src/service/model';
 
 @Schema()
 class User {

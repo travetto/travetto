@@ -5,7 +5,7 @@ import * as fs from 'fs';
 
 import { DefaultMailTemplateEngine } from '../src/template';
 
-const INDEX = fs.readFileSync(`${__dirname}/index.html`).toString();
+const INDEX = fs.readFileSync(`${__dirname}/index.html`, 'utf-8');
 
 async function simpleWatcher(commonFolder: string, paths: string[], handler: {
   changed?(file: string): void;
@@ -58,7 +58,7 @@ function buildContext(reqUrl: url.URL, content: string) {
 
   for (const k of Array.from(Object.keys(base))) {
     const v = base[k];
-    if (['number', 'boolean', 'string', 'undefiend'].includes(typeof v)) {
+    if (['number', 'boolean', 'string', 'undefined'].includes(typeof v)) {
       const [last, ...rest] = k.split('.').reverse();
       const first = rest.reverse();
       let sub = base;
