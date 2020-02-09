@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import * as util from 'util';
 import { OpenAPIObject } from 'openapi3-ts';
 
@@ -7,9 +8,11 @@ import { Env } from '@travetto/base';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerRegistry, RestConfig } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
+import { YamlUtil } from '@travetto/yaml';
 
 import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config';
 import { SpecGenerateUtil } from './spec-generate';
+
 
 const fsWriteFile = util.promisify(fs.writeFile);
 
@@ -50,7 +53,10 @@ export class OpenApiService {
     }
 
     if (this.generating) {
-      await FsUtil.mkdirp(this.apiSpecConfig.output);
+      if (!/[.](json|yaml)$/.test(this.apiSpecConfig.output)) {
+        this.apiSpecConfig.output = FsUtil.resolveUnix(this.apiSpecConfig.output, 'api.spec.yaml');
+      }
+      await FsUtil.mkdirp(path.dirname(this.apiSpecConfig.output));
     }
 
     await this.resetSpec();
@@ -70,6 +76,11 @@ export class OpenApiService {
   async generate() {
     const spec = this.getSpec();
     console.debug('Generating OpenAPI spec file', this.apiSpecConfig.output);
-    await fsWriteFile(this.apiSpecConfig.output, JSON.stringify(spec, undefined, 2));
+
+    const output = this.apiSpecConfig.output.endsWith('.json') ?
+      JSON.stringify(spec, undefined, 2) :
+      YamlUtil.serialize(spec);
+
+    await fsWriteFile(this.apiSpecConfig.output, output);
   }
 }
