@@ -17,7 +17,8 @@ export class MongoModelConfig {
   port = 27017;
   connectionOptions = {} as any;
   clientOptions = {
-    useNewUrlParser: true
+    useNewUrlParser: true,
+    useUnifiedTopology: true
   } as mongo.MongoClientOptions;
 
   async fetch(val: string) {

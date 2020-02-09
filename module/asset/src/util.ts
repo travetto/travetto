@@ -27,14 +27,14 @@ export class AssetUtil {
 
   static async readChunk(filePath: string, bytes: number) {
     const fd = await fsOpen(filePath, 'r');
-    const buffer = new Buffer(bytes);
+    const buffer = Buffer.alloc(bytes);
     await fsRead(fd, buffer, 0, bytes, 0);
     return buffer;
   }
 
   static async detectFileType(filePath: string) {
-    const buffer = await this.readChunk(filePath, fileType.minimumBytes);
-    return fileType(buffer);
+    const buffer = await this.readChunk(filePath, 4100);
+    return fileType.fromBuffer(buffer);
   }
 
   static async coerceFileType(filePath: string) {

@@ -10,7 +10,7 @@
     "@travetto/app": "^1.0.0-beta.4",
     "@travetto/di": "^1.0.0-beta.1",
     "@types/cookies": "^0.7.4",
-    "@types/express-serve-static-core": "^4.16.11",
+    "@types/express-serve-static-core": "^4.17.2",
     "cookies": "^0.8.0"
   },
   "devDependencies": {
@@ -19,7 +19,7 @@
   },
   "optionalPeerDependencies": {
     "node-forge": "^0.9.1",
-    "@types/node-forge": "^0.8.6"
+    "@types/node-forge": "^0.9.2"
   },
   "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
   "homepage": "https://travetto.io",

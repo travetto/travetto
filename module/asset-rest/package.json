@@ -14,9 +14,6 @@
     "mime-match": "^1.0.2"
   },
   "description": "Provides integration between the travetto asset and rest module.",
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "rest",

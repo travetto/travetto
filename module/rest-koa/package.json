@@ -8,17 +8,14 @@
   },
   "dependencies": {
     "@travetto/rest": "^1.0.0-beta.10",
-    "@types/koa": "^2.0.52",
+    "@types/koa": "^2.11.0",
     "@types/koa-bodyparser": "^4.3.0",
     "@types/koa-compress": "^2.0.9",
-    "@types/koa-router": "^7.0.42",
+    "@types/koa-router": "^7.4.0",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
     "koa-compress": "^3.0.0",
-    "koa-router": "^7.4.0"
-  },
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
+    "koa-router": "^8.0.7"
   },
   "description": "Koa provider for the travetto rest module.",
   "homepage": "https://travetto.io",

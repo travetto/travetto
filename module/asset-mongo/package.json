@@ -8,13 +8,10 @@
   },
   "dependencies": {
     "@travetto/asset": "^1.0.0-beta.1",
-    "@types/mongodb": "^3.3.10",
-    "mongodb": "^3.3.3"
+    "@types/mongodb": "^3.3.15",
+    "mongodb": "^3.5.2"
   },
   "description": "Mongo/GridFS backend for the travetto asset module",
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "mongo",

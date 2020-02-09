@@ -11,9 +11,6 @@
     "@travetto/model": "^1.0.0-beta.8"
   },
   "description": "Model-based authentication and registration support for the travetto framework",
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
-  },
   "optionalExtensionDependencies": {
     "@travetto/auth-rest": "^1.0.0-beta.0"
   },
