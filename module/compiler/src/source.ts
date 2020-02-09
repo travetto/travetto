@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as sourcemap from 'source-map-support';
 
 import { FileCache, RegisterUtil } from '@travetto/boot';
-import { Env, SystemUtil } from '@travetto/base';
+import { Env, SystemUtil, ScanApp } from '@travetto/base';
 
 import { CompilerUtil } from './util';
 import { TransformerManager } from './transformer/manager';
@@ -22,6 +22,16 @@ export class SourceManager {
     this.transformerManager = new TransformerManager(this.cwd);
   }
 
+  private getProgram(opts: any) {
+    const resolved = { ...this.compilerOptions, ...opts };
+    const host = ts.createCompilerHost(resolved);
+    return ts.createProgram({
+      rootNames: ScanApp.getStandardAppFiles(),
+      options: resolved,
+      host
+    });
+  }
+
   private transpileFile(fileName: string, content: string, options: ts.TranspileOptions, force = false) {
     if (force || !(this.config.cache && this.cache.hasEntry(fileName))) {
       console.trace('Emitting', fileName.replace(this.cwd, ''));
@@ -32,14 +42,16 @@ export class SourceManager {
         this.compilerOptions = CompilerUtil.resolveOptions(this.cwd);
       }
 
-      const { outputText, diagnostics } = ts.transpileModule(content, {
+      const prog = this.getProgram({
         ...options,
         transformers: this.transformerManager.transformers || {},
         compilerOptions: this.compilerOptions
       });
 
-      CompilerUtil.checkTranspileErrors(this.cwd, fileName, diagnostics);
+      const emittedFiles = prog.emit(prog.getSourceFile(fileName));
+      CompilerUtil.checkTranspileErrors(this.cwd, fileName, emittedFiles.diagnostics);
 
+      const outputText =;
       this.contents.set(fileName, outputText);
       this.hashes.set(fileName, SystemUtil.naiveHash(content));
 
@@ -61,6 +73,7 @@ export class SourceManager {
       retrieveFile: (p: string) => this.contents.get(p.replace('.js', '.ts'))!,
       retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
     });
+
     this.transformerManager.init();
   }
 

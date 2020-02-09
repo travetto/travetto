@@ -6,11 +6,9 @@ function Wrapped(this: Promise<any>, ex: any) {
   this.catch = prom.catch.bind(prom);
   this.finally = prom.finally.bind(prom);
 
-  // tslint:disable:no-use-before-declare
   if (PromiseCapture.pending) {
     PromiseCapture.pending.push(prom);
   }
-  // tslint:enable:no-use-before-declare
 }
 
 Wrapped.race = Promise.race.bind(Promise);

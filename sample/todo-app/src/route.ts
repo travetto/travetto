@@ -15,7 +15,7 @@ export class TodoController {
    * Get all todos
    */
   @Get('/')
-  async getAll(@SchemaQuery() search: TodoSearch): Promise<Todo[]> {
+  async getAll(@SchemaQuery() search: TodoSearch) {
     return this.svc.getAll(search);
   }
 
@@ -24,7 +24,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Get('/:id')
-  async getById(@Path() id: string): Promise<Todo> {
+  async getById(@Path() id: string) {
     return this.svc.get(id);
   }
 
@@ -32,7 +32,7 @@ export class TodoController {
    * Create a todo
    */
   @Post('/')
-  async create(@SchemaBody() todo: Todo): Promise<Todo> {
+  async create(@SchemaBody() todo: Todo) {
     return await this.svc.add(todo);
   }
 

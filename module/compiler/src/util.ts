@@ -1,8 +1,15 @@
 import * as ts from 'typescript';
+import * as fs from 'fs';
+import * as util from 'util';
+
 import { Env, AppError, AppInfo } from '@travetto/base';
 import { RegisterUtil } from '@travetto/boot';
 
 export class CompilerUtil {
+
+  static log(obj: any) {
+    fs.writeFileSync(`log.text`, `${util.inspect(obj, undefined, 3)}\n`, { flag: 'a' });
+  }
 
   static getErrorModuleProxySource(err: string = 'Module is not found') {
     return RegisterUtil.getErrorModuleProxy.toString().split(/[(]err[)]\s*[{]/)[1]
@@ -36,7 +43,7 @@ export class CompilerUtil {
     }
   }
 
-  static checkTranspileErrors(cwd: string, fileName: string, diagnostics: ts.TranspileOutput['diagnostics']) {
+  static checkTranspileErrors(cwd: string, fileName: string, diagnostics: readonly ts.Diagnostic[]) {
 
     if (diagnostics && diagnostics.length) {
 
