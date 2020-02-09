@@ -96,7 +96,7 @@ export class VisitorFactory {
     }
   }
 
-  generate(): ts.TransformerFactory<ts.SourceFile> {
+  visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) =>
       (file: ts.SourceFile): ts.SourceFile => {
         const state = new TransformerState(file);

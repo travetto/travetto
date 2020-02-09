@@ -3,7 +3,6 @@ import { Schema } from '@travetto/schema';
 import { Application } from '@travetto/app';
 import { Inject } from '@travetto/di';
 
-// tslint:disable-next-line: no-import-side-effect
 import '../../extension/mysql/dialect';
 import { WithAsyncContext, AsyncContext } from '@travetto/context';
 

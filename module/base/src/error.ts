@@ -69,7 +69,6 @@ export class AppError extends Error {
   }
 }
 
-// tslint:disable:no-invalid-this
 (Error as any).prototype.toConsole = function (mid: any = '') {
   const stack = Env.trace ? this.stack : Stacktrace.simplifyStack(this);
   return `${this.message}\n${mid}${stack.substring(stack.indexOf('\n') + 1)}`;

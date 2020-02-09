@@ -15,7 +15,6 @@ export class ExecutionPhaseManager {
   constructor(private consumer: Consumer, private suite: SuiteConfig, private result: SuiteResult) { }
 
   async generateSuiteError(methodName: string, error: Error) {
-    // tslint:disable:prefer-const
     const bad = AssertUtil.generateSuiteError(this.suite, methodName, error);
 
     this.consumer.onEvent({ type: 'test', phase: 'before', test: bad.testConfig });
