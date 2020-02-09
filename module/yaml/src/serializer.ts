@@ -70,7 +70,7 @@ export class Serializer {
       } else {
         out = ` ${lines[0]}`;
       }
-    } else {
+    } else if (o !== undefined) {
       const fin = o;
       out = (Object.keys(fin) as (keyof typeof fin)[])
         .map(x => `${prefix}${this.clean(x)}:${this.serialize(fin[x], indent, wordwrap, indentLevel + indent)}`)
