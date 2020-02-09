@@ -12,7 +12,7 @@ The module is provides an [`OpenAPI`](https://github.com/OAI/OpenAPI-Specificati
 
 
 ## Configuration
-By installing the dependency, the [`OpenAPI`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) endpoint is automatically generated and exposed at the root of the application as `/openapi.json`.  
+By installing the dependency, the [`OpenAPI`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) endpoint is automatically generated and exposed at the root of the application as `/api.spec.yaml` (by default). 
 
 All of the high level configurations can be found in the following structure:
 
@@ -38,7 +38,7 @@ api:
 ```
 
 ## Spec Generation
-The framework, when in watch mode, will generate the [`OpenAPI`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) JSON file. This module integrates with the file watching paradigm and can regenerate the openapi json as changes to endpoints and models are made during development.
+The framework, when in watch mode, will generate the [`OpenAPI`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) specification in either JSON or YAML. This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development.  The output format is defined by the suffix of the output file, `.yaml` or `.json`
 
 ## Client Generation
 The outputted spec can be consumed using the [`OpenAPI client generation tools`](https://github.com/OpenAPITools/openapi-generator).
