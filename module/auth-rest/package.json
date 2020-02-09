@@ -12,9 +12,6 @@
     "@travetto/rest": "^1.0.0-beta.10"
   },
   "description": "Rest authentication integration support for the travetto framework",
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "authentication",

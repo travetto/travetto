@@ -11,12 +11,11 @@
   },
   "description": "Email transmission module.",
   "devDependencies": {
-    "@travetto/app": "^1.0.0-beta.4",
-    "@travetto/test": "^1.0.0-beta.1"
+    "@travetto/app": "^1.0.0-beta.4"
   },
   "optionalExtensionDependencies": {
-    "nodemailer": "^6.3.0",
-    "@types/nodemailer": "^6.2.1"
+    "nodemailer": "^6.4.2",
+    "@types/nodemailer": "^6.4.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [

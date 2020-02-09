@@ -12,9 +12,6 @@
     "openapi3-ts": "^1.3.0"
   },
   "description": "OpenAPI integration support for the travetto framework",
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "rest",

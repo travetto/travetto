@@ -13,7 +13,7 @@ function toTagSet(metadata: AssetMetadata): TagSet {
     .filter(x => x in metadata)
     .map(x => ({
       Key: x,
-      Value: new Buffer(JSON.stringify((metadata as any)[x])).toString('base64')
+      Value: Buffer.from(JSON.stringify((metadata as any)[x])).toString('base64')
     }));
 }
 
@@ -21,7 +21,7 @@ function fromTagSet(tags: TagSet) {
   const allowed = new Set(['name', 'title', 'hash', 'createdDate', 'tags']);
   const map = tags
     .filter(x => allowed.has(x.Key))
-    .map(x => [x.Key, JSON.parse(new Buffer(x.Value, 'base64').toString())] as [string, string])
+    .map(x => [x.Key, JSON.parse(Buffer.from(x.Value, 'base64').toString())] as [string, string])
     .reduce((acc, pair) => {
       (acc as any)[pair[0]] = pair[1];
       return acc;

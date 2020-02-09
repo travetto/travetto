@@ -10,9 +10,6 @@
     "@travetto/cache": "^1.0.0-beta.9",
     "@travetto/rest": "^1.0.0-beta.10"
   },
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
-  },
   "description": "Session provider for the travetto rest module.",
   "homepage": "https://travetto.io",
   "keywords": [
