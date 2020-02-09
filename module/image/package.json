@@ -10,9 +10,6 @@
     "@travetto/exec": "^1.0.0-beta.1"
   },
   "description": "Image support, resizing, and optimization",
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "images",

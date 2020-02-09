@@ -8,10 +8,10 @@
   },
   "dependencies": {
     "@travetto/rest": "^1.0.0-beta.10",
-    "@types/aws-lambda": "^8.10.35",
-    "@types/aws-serverless-express": "^3.3.1",
+    "@types/aws-lambda": "^8.10.40",
+    "@types/aws-serverless-express": "^3.3.3",
     "@types/body-parser": "^1.17.1",
-    "@types/compression": "^1.0.1",
+    "@types/compression": "^1.7.0",
     "@types/express": "^4.17.2",
     "aws-serverless-express": "^3.3.6",
     "body-parser": "^1.19.0",
@@ -19,8 +19,7 @@
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "@travetto/app": "^1.0.0-beta.4",
-    "@travetto/test": "^1.0.0-beta.1"
+    "@travetto/app": "^1.0.0-beta.4"
   },
   "description": "AWS lambda provider for the travetto rest module.",
   "homepage": "https://travetto.io",

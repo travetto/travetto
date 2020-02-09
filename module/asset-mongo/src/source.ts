@@ -16,7 +16,10 @@ export class MongoAssetSource extends AssetSource {
   }
 
   async postConstruct() {
-    this.mongoClient = await mongo.MongoClient.connect(this.config.url);
+    this.mongoClient = await mongo.MongoClient.connect(this.config.url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
     this.bucket = new mongo.GridFSBucket(this.mongoClient.db());
   }
 

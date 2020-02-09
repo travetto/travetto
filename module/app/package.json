@@ -10,9 +10,6 @@
     "@travetto/di": "^1.0.0-beta.1"
   },
   "description": "Application registration/management and run support.",
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "ast-transformations",

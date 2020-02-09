@@ -10,9 +10,6 @@
     "@travetto/compiler": "^1.0.0-beta.1"
   },
   "description": "Logging framework that integrates at the console.log level.",
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "typescript",
