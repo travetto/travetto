@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { ScanApp } from '@travetto/base';
-import { VisitorFactory, NodeTransformer } from '@travetto/compiler/src/transformer/visitor';
+import { VisitorFactory, NodeTransformer } from '@travetto/compiler/src/transformer/visitor'; // Narrow import to minimize scope
 
 export class TransformerManager {
 
@@ -32,7 +32,7 @@ export class TransformerManager {
 
     this.visitor = new VisitorFactory(allTransformers);
     this.transformers = {
-      before: [this.visitor.generate()]
+      before: [this.visitor.visitor()]
     };
   }
 }
