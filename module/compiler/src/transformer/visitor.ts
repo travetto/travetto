@@ -61,7 +61,10 @@ export class VisitorFactory {
     after: new Map<TransformerType, NodeTransformer[]>(),
   };
 
-  constructor(transformers: NodeTransformer<any, any>[]) {
+  constructor(
+    private getState: (src: ts.SourceFile) => TransformerState,
+    transformers: NodeTransformer<any, any>[]
+  ) {
     for (const trn of transformers) {
       if (!this.transformers.has(trn.type)) {
         this.transformers.set(trn.type, { before: [], after: [], type: trn.type, data: new Map() });
@@ -99,7 +102,7 @@ export class VisitorFactory {
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) =>
       (file: ts.SourceFile): ts.SourceFile => {
-        const state = new TransformerState(file);
+        const state = this.getState(file);
         const ret = this.visit(state, context, file);
         const out = state.finalize(ret);
         return out;

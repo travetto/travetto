@@ -2,11 +2,13 @@ import * as ts from 'typescript';
 
 import { ScanApp } from '@travetto/base';
 import { VisitorFactory, NodeTransformer } from '@travetto/compiler/src/transformer/visitor'; // Narrow import to minimize scope
+import { TransformerState } from './state';
 
 export class TransformerManager {
 
   transformers: ts.CustomTransformers = {};
   visitor: VisitorFactory;
+  checker: ts.TypeChecker;
 
   constructor(private cwd: string) { }
 
@@ -30,7 +32,10 @@ export class TransformerManager {
       })
     );
 
-    this.visitor = new VisitorFactory(allTransformers);
+    this.visitor = new VisitorFactory(
+      src => new TransformerState(src, this.checker),
+      allTransformers
+    );
     this.transformers = {
       before: [this.visitor.visitor()]
     };

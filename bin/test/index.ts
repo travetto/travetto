@@ -6,10 +6,11 @@ export async function run() {
 
   const child = child_process.spawn('npx', [
     'lerna', '--no-sort', 'exec', '--no-bail',
+    // '--concurrency', '1',
     '--ignore', '@travetto/*-app',
     '--ignore', '@travetto/cli',
     '--stream', '--',
-    'npx', 'trv', 'test', '-f', 'event', '-c', '1'
+    'npx', 'trv', 'test', '-f', 'event', '-c', '2'
   ], { shell: true, stdio: [null, null, 2] });
 
   const emitter = new TapEmitter();

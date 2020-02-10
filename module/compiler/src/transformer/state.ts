@@ -5,6 +5,7 @@ import { FsUtil, RegisterUtil } from '@travetto/boot';
 import { SystemUtil, Env } from '@travetto/base';
 import { TransformUtil } from './util';
 import { Import, Documentation } from './types';
+import { CompilerUtil } from '../util';
 
 export class TransformerState {
   readonly path: string;
@@ -15,7 +16,7 @@ export class TransformerState {
   readonly imports = new Map<string, Import>();
   readonly ids = new Map<string, number>();
 
-  constructor(public source: ts.SourceFile) {
+  constructor(public source: ts.SourceFile, public checker: ts.TypeChecker) {
     const pth = require.resolve(source.fileName);
     this.path = FsUtil.resolveNative(pth);
     this.modulePath = FsUtil.resolveUnix(pth);
@@ -92,7 +93,7 @@ export class TransformerState {
     //    let { path, name: declName, ident: decl } = this.getTypeInfoForNode(node);
 
     const nodeName = ts.isTypeNode(typeNode) ?
-      (typeNode as ts.TypeReferenceNode).typeName.getText() :
+      ((typeNode as ts.TypeReferenceNode).typeName as any)?.['text'] :
       ((typeNode as ts.Identifier).text || (typeNode as ts.Identifier).escapedText as string);
 
     if (nodeName.match(/^[A-Z]{1,2}$/)) {
@@ -176,18 +177,29 @@ export class TransformerState {
     const kind = type && type!.kind;
 
     switch (kind) {
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.ClassDeclaration: {
+        const decl = (type as ts.InterfaceDeclaration);
+        const fileName = decl.getSourceFile().fileName;
+        if (fileName.endsWith('.d.ts')) {
+          return this.resolveType(null as any);
+        }
+        const { ident } = this.imports.get(fileName) ?? this.importFile(fileName);
+        expr = ts.createPropertyAccess(ident, decl.name);
+        break;
+      }
       case ts.SyntaxKind.TypeReference: {
         expr = this.importTypeIfExternal(type as ts.TypeReferenceNode);
 
         // Wrapping reference to handle interfaces, and failing gracefully
-        const imp = this.importFile(FsUtil.resolveUnix(__dirname, '../util'));
-        expr = ts.createCall(
-          ts.createPropertyAccess(ts.createPropertyAccess(imp.ident, 'CompilerUtil'), 'resolveAsType'), undefined,
-          [
-            ts.createArrowFunction(undefined, undefined,
-              ts.createNodeArray([]), undefined, ts.createToken(ts.SyntaxKind.EqualsGreaterThanToken), expr),
-            ts.createLiteral(type.getText())
-          ]);
+        // const imp = this.importFile(FsUtil.resolveUnix(__dirname, '../util'));
+        // expr = ts.createCall(
+        //   ts.createPropertyAccess(ts.createPropertyAccess(imp.ident, 'CompilerUtil'), 'resolveAsType'), undefined,
+        //   [
+        //     ts.createArrowFunction(undefined, undefined,
+        //       ts.createNodeArray([]), undefined, ts.createToken(ts.SyntaxKind.EqualsGreaterThanToken), expr),
+        //     ts.createLiteral(type.getText())
+        //   ]);
         break;
       }
       case ts.SyntaxKind.VoidKeyword: expr = ts.createIdentifier('undefined'); break;

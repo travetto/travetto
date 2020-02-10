@@ -11,6 +11,7 @@ import { TransformerManager } from './transformer/manager';
 export class SourceManager {
   private transformerManager: TransformerManager;
 
+  private rootNames = new Set<string>();
   private sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   private contents = new Map<string, string>();
   private sources = new Map<string, ts.SourceFile>();
@@ -25,58 +26,51 @@ export class SourceManager {
     this.transformerManager = new TransformerManager(this.cwd);
   }
 
+  private readFile(fileName: string) {
+    let content = ts.sys.readFile(fileName);
+    if (!content) {
+      throw new Error(`Unable to read file  ${fileName}`);
+    }
+    if (fileName.endsWith('.ts') && !fileName.endsWith('.d.ts')) {
+      content = RegisterUtil.prepareTranspile(fileName, content);
+    }
+    return content;
+  }
+
+  private writeFile(fileName: string, content: string) {
+    fileName = fileName.replace(/[.]js$/, '.ts');
+    this.contents.set(fileName, content);
+    this.hashes.set(fileName, SystemUtil.naiveHash(content));
+    if (this.config.cache) {
+      this.cache.writeEntry(fileName, content);
+    }
+  }
+
+  private fileExists(fileName: string) {
+    return this.contents.has(fileName) || ts.sys.fileExists(fileName);
+  }
+
   private getHost(): ts.CompilerHost {
     const host: ts.CompilerHost = {
-      getCurrentDirectory(this: SourceManager) {
-        return this.cwd;
-      },
+      readFile: this.readFile,
+      realpath: process.env.TRV_FRAMEWORK_DEV ? RegisterUtil.resolveFrameworkDevFile : undefined,
+      writeFile: this.writeFile,
+      fileExists: this.fileExists,
+      getDefaultLibFileName: ts.getDefaultLibFileName,
+      getCurrentDirectory: () => this.cwd,
+      getCanonicalFileName: x => x,
+      getNewLine: () => ts.sys.newLine,
+      useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
       getSourceFile(this: SourceManager, fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void, shouldCreateNewSourceFile?: boolean) {
-        // fileName = RegisterUtil.resolveFrameworkDevFile(fileName);
         if (!this.sources.has(fileName) || shouldCreateNewSourceFile) {
-          const content = host.readFile(fileName)!;
+          const content = this.readFile(fileName)!;
           this.sources.set(fileName, ts.createSourceFile(fileName, content ?? '', languageVersion));
         }
         return this.sources.get(fileName);
       },
-      readFile(this: SourceManager, fileName: string) {
-        // fileName = RegisterUtil.resolveFrameworkDevFile(fileName);
-        let content = ts.sys.readFile(fileName);
-        if (!content) {
-          throw new Error(`Unable to read file  ${fileName}`);
-        }
-        if (fileName.endsWith('.ts') && !fileName.endsWith('.d.ts')) {
-          content = RegisterUtil.prepareTranspile(fileName, content);
-        }
-        return content;
-      },
-      realpath(this: SourceManager, file: string) {
-        return RegisterUtil.resolveFrameworkDevFile(file);
-      },
-      writeFile(this: SourceManager, fileName: string, data: string) {
-        // fileName = RegisterUtil.resolveFrameworkDevFile(fileName);
-        if (this.config.cache) {
-          this.cache.writeEntry(fileName, data);
-        }
-      },
-      fileExists(this: SourceManager, fileName: string) {
-        // fileName = RegisterUtil.resolveFrameworkDevFile(fileName);
-        return this.contents.has(fileName) || ts.sys.fileExists(fileName);
-      },
-      getDefaultLibFileName(this: SourceManager, opts) {
-        return ts.getDefaultLibFileName(this.compilerOptions);
-      },
       getDefaultLibLocation(this: SourceManager) {
         return path.dirname(ts.getDefaultLibFilePath(this.compilerOptions));
       },
-      getCanonicalFileName(this: SourceManager, x) {
-        return x;
-      },
-      useCaseSensitiveFileNames(this: SourceManager) {
-        return ts.sys.useCaseSensitiveFileNames;
-      },
-      getNewLine(this: SourceManager) {
-        return ts.sys.newLine;
-      }
     };
     for (const [k, v] of Object.entries(host)) {
       (host as any)[k] = v.bind(this);
@@ -84,42 +78,40 @@ export class SourceManager {
     return host;
   }
 
-  private getProgram() {
+  private getProgram(forFile?: string) {
     if (!this.compilerOptions) {
       this.compilerOptions = CompilerUtil.resolveOptions(this.cwd);
     }
 
-    if (!this.program) {
+    if (!this.program || (forFile && !this.rootNames.has(forFile))) {
+      CompilerUtil.log(`Loading program ${this.rootNames.size}`);
+      if (forFile) {
+        this.rootNames.add(forFile);
+      }
       this.program = ts.createProgram({
-        rootNames: ScanApp.getStandardAppFiles()
-          .filter(x => !require.cache[x])
-          .filter(x => !/support\/transformer/.test(x)),
+        rootNames: [...this.rootNames],
         options: this.compilerOptions,
-        host: this.getHost()
+        host: this.getHost(),
+        oldProgram: this.program
       });
+      this.transformerManager.checker = this.program.getTypeChecker();
     }
     return this.program;
   }
 
-  private transpileFile(fileName: string, force = false) {
+  private compile(fileName: string, force = false) {
     if (force || !(this.config.cache && this.cache.hasEntry(fileName))) {
       console.trace('Emitting', fileName.replace(this.cwd, ''));
 
-      const prog = this.getProgram();
+      const prog = this.getProgram(fileName);
 
       const result = prog.emit(
         prog.getSourceFile(fileName),
-        (file, contents) => {
-          console.error('Completed', file);
-          this.contents.set(file, contents);
-          this.hashes.set(file, SystemUtil.naiveHash(contents));
-        },
+        undefined,
         undefined,
         false,
         this.transformerManager.transformers
       );
-
-      console.error('Done', fileName, this.contents.get(fileName)?.length);
 
       CompilerUtil.checkTranspileErrors(this.cwd, fileName, result.diagnostics);
     } else {
@@ -138,6 +130,23 @@ export class SourceManager {
       retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
     });
 
+    ScanApp.getStandardAppFiles()
+      .filter(x => !require.cache[x])
+      .filter(x => !/support\/transformer/.test(x))
+      .forEach(x => this.rootNames.add(x));
+
+    if (Env.hasProfile('test')) {
+      ScanApp
+        .findFiles('.ts', x =>
+          x.includes('travetto/test/src') || (
+            x.includes('test') &&
+            !x.includes('src') &&
+            !x.includes('node_modules')
+          )
+        )
+        .forEach(x => this.rootNames.add(x.file));
+    }
+
     this.transformerManager.init();
   }
 
@@ -151,15 +160,14 @@ export class SourceManager {
     return true;
   }
 
-  transpile(fileName: string, force = false) {
-    console.trace('Transpiling', fileName.replace(this.cwd, ''));
+  getTranspiled(fileName: string, force = false) {
     try {
-      return this.transpileFile(fileName, force);
+      return this.compile(fileName, force);
     } catch (err) {
       if (Env.watch) { // Handle transpilation errors
         const errContent = CompilerUtil.getErrorModuleProxySource(err.message);
         this.contents.set(fileName, errContent);
-        return this.transpileFile(fileName, true);
+        return this.compile(fileName, true);
       } else {
         throw err;
       }
@@ -177,13 +185,18 @@ export class SourceManager {
       if (unlink && this.hashes.has(fileName)) {
         this.hashes.delete(fileName);
       }
+      this.sources.delete(fileName);
+      this.rootNames.delete(fileName);
     }
   }
 
   reset() {
     this.contents.clear();
+    this.rootNames.clear();
     this.sourceMaps.clear();
     this.sources.clear();
     this.hashes.clear();
+    delete this.program;
+    delete this.compilerOptions;
   }
 }
