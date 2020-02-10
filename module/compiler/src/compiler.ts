@@ -103,8 +103,7 @@ class $Compiler extends EventEmitter {
   compile(m: NodeModule, tsf: string) {
     const isNew = !this.presenceManager.has(tsf);
     try {
-      const content = this.loadFile(tsf);
-      const js = this.sourceManager.transpile(tsf, content); // Compile
+      const js = this.sourceManager.transpile(tsf); // Compile
       return CompilerUtil.compile(this.cwd, m, tsf, js);
     } finally {
       if (isNew) {

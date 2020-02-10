@@ -22,7 +22,7 @@ export class IteratorInputSource<X> implements InputSource<X> {
 
   private async primeNext() {
     const res = await this.src.next();
-    this.done = res.done;
+    this.done = !!res.done;
     this.ondeck = res.value;
   }
 

@@ -1,5 +1,5 @@
 // ignoring typing constraints on proxyhandler requiring an object
-export class RetargettingHandler<T extends any> implements ProxyHandler<T> {
+export class RetargettingHandler<T extends any> implements ProxyHandler<any> {
   constructor(public target: T) { }
 
   isExtensible?(target: T): boolean {
