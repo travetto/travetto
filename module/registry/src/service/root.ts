@@ -6,7 +6,7 @@ import { Class, ChangeEvent } from '../types';
 
 class $RootRegistry extends Registry {
   constructor(rootPaths: string[]) {
-    super(new ClassSource(rootPaths));
+    super(new ClassSource());
   }
 
   // Auto propagate

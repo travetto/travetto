@@ -245,7 +245,7 @@ export class ModelService implements IModelSource {
 
     o = await this.prePersistPartial(cls, o, view);
 
-    const partial = BindUtil.bindSchemaToObject(cls, {}, o, view) as Partial<T>;
+    const partial = BindUtil.bindSchemaToObject(cls, {} as T, o, view) as Partial<T>;
 
     if (!partial.id) {
       partial.id = o.id;
@@ -261,7 +261,7 @@ export class ModelService implements IModelSource {
     this.prepareQuery(cls, query);
 
     o = await this.prePersist(cls, o, view);
-    const partial = BindUtil.bindSchemaToObject(cls, {}, o, view);
+    const partial = BindUtil.bindSchemaToObject(cls, {} as T, o, view);
     const res = await this.source.updatePartialByQuery(cls, query, partial);
 
     return this.postLoad(cls, res);

@@ -22,13 +22,13 @@ export class CompilerUtil {
     const out = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(`${dir}/${name}`, ts.sys.readFile), ts.sys, dir,
       {
-        rootDir: `${dir}`,
+        rootDir: dir,
         sourceMap: false,
         inlineSourceMap: true,
-        outDir: `${dir}`
+        outDir: dir,
       }, `${dir}/${name}`);
     out.options.importHelpers = true;
-    out.options.noEmitOnError = !Env.watch;
+    out.options.noEmitOnError = false; // !Env.watch;
     out.options.noErrorTruncation = true;
     out.options.moduleResolution = ts.ModuleResolutionKind.NodeJs;
 
