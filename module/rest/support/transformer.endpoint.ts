@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, Documentation, ParamDoc, NodeTransformer } from '@travetto/compiler';
+import { TransformUtil, TransformerState, Documentation, ParamDoc, NodeTransformer, CompilerUtil } from '@travetto/compiler';
 import { ParamConfig } from '../src/types';
 
 const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
@@ -110,19 +110,18 @@ class RestTransformer {
     const comments = state.describeByComments(node);
 
     // Get return type from jsdoc comments
-    let retType = comments.return && comments.return.type;
+    const sig = state.checker.getTypeAtLocation(node).getCallSignatures()[0];
+
+    let mType: any = state.checker.getReturnTypeOfSignature(sig);
+    let retType;
 
     // If comments empty, read from method node
-    if (!retType && node.type) {
-      let mType = node.type;
-      if (ts.isTypeReferenceNode(mType) && mType.typeName.getText() === 'Promise') {
-        mType = mType.typeArguments && mType.typeArguments.length ? mType.typeArguments[0] : mType;
-      }
-      if (mType.kind === ts.SyntaxKind.VoidKeyword) {
-        retType = undefined;
-      } else {
-        retType = state.resolveType(mType);
-      }
+    if (mType.symbol.getName() === 'Promise') {
+      mType = mType.resolvedTypeArguments && mType.resolvedTypeArguments.length ? mType.resolvedTypeArguments[0] : mType;
+    }
+    if (mType.intrinsicName !== 'void') {
+      mType = mType.symbol.declarations[0];
+      retType = state.resolveType(mType);
     }
 
     // IF we have a winner, declare response type

@@ -7,7 +7,10 @@ import { RegisterUtil } from '@travetto/boot';
 
 export class CompilerUtil {
 
-  static log(obj: any) {
+  static log(...obj: any[]) {
+    if (obj.length === 1) {
+      obj = obj[0];
+    }
     fs.writeFileSync(`log.text`, `${util.inspect(obj, undefined, 3)}\n`, { flag: 'a' });
   }
 

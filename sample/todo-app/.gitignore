@@ -1,3 +1,4 @@
 cache/**
 dist/**
+openapi.*
 lambda.zip
