@@ -46,3 +46,12 @@ Purpose: To define, and record the structure of specific classes intended to be 
     from types, default variables, etc.
 Effect: Will import schema access, All schema classes will be defined and type information provided appropriately
 
+## config - transformer.config.ts
+Scope: Class, Property
+Purpose: To provide mechanism for supporting ENV vars when intermediate values are not set.
+Effect: None atm
+
+## cache - transformer.config.ts
+Scope: Method
+Purpose: Wrap @Cache/@Evict methods while preserving original method.
+Effect: Caching will work seamlessly, with the benefit of maintaining original method.
