@@ -4,8 +4,8 @@ import { dirname } from 'path';
 import { FsUtil, RegisterUtil } from '@travetto/boot';
 import { SystemUtil, Env } from '@travetto/base';
 import { TransformUtil } from './util';
-import { Import, Documentation } from './types';
-import { CompilerUtil } from '../util';
+import { Import } from './types';
+import { TypeChecker } from './checker';
 
 export class TransformerState {
   readonly path: string;
@@ -15,12 +15,26 @@ export class TransformerState {
   readonly decorators = new Map<string, ts.PropertyAccessExpression>();
   readonly imports = new Map<string, Import>();
   readonly ids = new Map<string, number>();
+  checker: TypeChecker;
 
-  constructor(public source: ts.SourceFile, public checker: ts.TypeChecker) {
+  constructor(public source: ts.SourceFile, checker: ts.TypeChecker) {
     const pth = require.resolve(source.fileName);
     this.path = FsUtil.resolveNative(pth);
     this.modulePath = FsUtil.resolveUnix(pth);
     this.collectInitialImports();
+    this.checker = new TypeChecker(checker, t => this.getOrImport(t));
+  }
+
+  getOrImport(type: ts.Type) {
+    const file = type.symbol.getDeclarations()![0].getSourceFile().fileName;
+    const name = type.symbol.getName();
+
+    if (file === this.source.fileName) {
+      return ts.createIdentifier(name);
+    } else {
+      const { ident } = this.imports.get(file) ?? this.importFile(file);
+      return ts.createPropertyAccess(ident, name);
+    }
   }
 
   generateUniqueId(name: string) {
@@ -170,124 +184,5 @@ export class TransformerState {
       }
     }
     return ret;
-  }
-
-  resolveType(type: ts.Node): ts.Expression { // Should get replaced with TypeChecker as needed
-    let expr: ts.Expression | undefined;
-    const kind = type && type!.kind;
-
-    switch (kind) {
-      case ts.SyntaxKind.InterfaceDeclaration:
-      case ts.SyntaxKind.ClassDeclaration: {
-        const decl = (type as ts.InterfaceDeclaration);
-        const fileName = decl.getSourceFile().fileName;
-        if (fileName.endsWith('.d.ts')) {
-          return this.resolveType(null as any);
-        }
-        const { ident } = this.imports.get(fileName) ?? this.importFile(fileName);
-        expr = ts.createPropertyAccess(ident, decl.name);
-        break;
-      }
-      case ts.SyntaxKind.TypeReference: {
-        expr = this.importTypeIfExternal(type as ts.TypeReferenceNode);
-
-        // Wrapping reference to handle interfaces, and failing gracefully
-        // const imp = this.importFile(FsUtil.resolveUnix(__dirname, '../util'));
-        // expr = ts.createCall(
-        //   ts.createPropertyAccess(ts.createPropertyAccess(imp.ident, 'CompilerUtil'), 'resolveAsType'), undefined,
-        //   [
-        //     ts.createArrowFunction(undefined, undefined,
-        //       ts.createNodeArray([]), undefined, ts.createToken(ts.SyntaxKind.EqualsGreaterThanToken), expr),
-        //     ts.createLiteral(type.getText())
-        //   ]);
-        break;
-      }
-      case ts.SyntaxKind.VoidKeyword: expr = ts.createIdentifier('undefined'); break;
-      case ts.SyntaxKind.LiteralType: expr = this.resolveType((type as any as ts.LiteralTypeNode).literal); break;
-      case ts.SyntaxKind.StringLiteral:
-      case ts.SyntaxKind.StringKeyword: expr = ts.createIdentifier('String'); break;
-      case ts.SyntaxKind.NumericLiteral:
-      case ts.SyntaxKind.NumberKeyword: expr = ts.createIdentifier('Number'); break;
-      case ts.SyntaxKind.TrueKeyword:
-      case ts.SyntaxKind.FalseKeyword:
-      case ts.SyntaxKind.BooleanKeyword: expr = ts.createIdentifier('Boolean'); break;
-      case ts.SyntaxKind.ArrayType:
-        expr = ts.createArrayLiteral([this.resolveType((type as ts.ArrayTypeNode).elementType)]);
-        break;
-      case ts.SyntaxKind.TypeLiteral: {
-        const properties: ts.PropertyAssignment[] = [];
-        for (const member of (type as ts.TypeLiteralNode).members) {
-          let subMember: ts.TypeNode = (member as any).type;
-          if ((subMember as any).literal) {
-            subMember = (subMember as any).literal;
-          }
-          properties.push(ts.createPropertyAssignment(member.name as ts.Identifier, this.resolveType(subMember)));
-        }
-        expr = ts.createObjectLiteral(properties);
-        break;
-      }
-      case ts.SyntaxKind.UnionType: {
-        const types = (type as ts.UnionTypeNode).types;
-        expr = types.slice(1).reduce((fType, stype) => {
-          const fTypeStr = (fType as any).text;
-          if (fTypeStr !== 'Object') {
-            const resolved = this.resolveType(stype);
-            if ((resolved as any).text !== fTypeStr) {
-              fType = ts.createIdentifier('Object');
-            }
-          }
-          return fType;
-        }, this.resolveType(types[0]));
-        break;
-      }
-      case ts.SyntaxKind.TupleType:
-        expr = ts.createArrayLiteral((type as ts.TupleTypeNode).elementTypes.map(t => this.resolveType(t)));
-        break;
-      case ts.SyntaxKind.ObjectKeyword:
-      default:
-        break;
-    }
-    return expr || ts.createIdentifier('Object');
-  }
-
-  describeByComments(node: ts.Node) {
-    while ('original' in node) {
-      node = (node as any).original as ts.Node;
-    }
-    const tags = ts.getJSDocTags(node);
-    const docs = (node as any)['jsDoc'];
-
-    const out: Documentation = {
-      description: undefined,
-      return: undefined,
-      params: []
-    };
-
-    if (docs) {
-      const top = docs[docs.length - 1];
-      if (ts.isJSDoc(top)) {
-        out.description = top.comment;
-      }
-    }
-
-    if (tags && tags.length) {
-      for (const tag of tags) {
-        if (ts.isJSDocReturnTag(tag)) {
-          out.return = {
-            type: tag.typeExpression && this.resolveType(tag.typeExpression.type),
-            description: tag.comment
-          };
-        } else if (ts.isJSDocParameterTag(tag)) {
-          out.params!.push({
-            name: tag.name && tag.name.getText(),
-            description: tag.comment ?? '',
-            type: tag.typeExpression && this.resolveType(tag.typeExpression.type),
-            required: !tag.isBracketed
-          });
-        }
-      }
-    }
-
-    return out;
   }
 }

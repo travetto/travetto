@@ -84,7 +84,7 @@ export class SourceManager {
     }
 
     if (!this.program || (forFile && !this.rootNames.has(forFile))) {
-      CompilerUtil.log(`Loading program ${this.rootNames.size}`);
+      CompilerUtil.log(`Loading program ${this.rootNames.size}`, forFile);
       if (forFile) {
         this.rootNames.add(forFile);
       }
@@ -130,11 +130,13 @@ export class SourceManager {
       retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
     });
 
-    ScanApp.getStandardAppFiles()
+    ScanApp.findFiles('.ts', x => !x.endsWith('.d.ts'))
+      .map(x => x.file)
+      .filter(x => !/travetto\/([^/]*)\/test/.test(x))
       .filter(x => !require.cache[x])
-      .filter(x => !/support\/transformer/.test(x))
       .forEach(x => this.rootNames.add(x));
 
+    // TODO: need to look at app roots
     if (Env.hasProfile('test')) {
       ScanApp
         .findFiles('.ts', x =>

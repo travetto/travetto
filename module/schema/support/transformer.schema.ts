@@ -16,9 +16,10 @@ interface AutoState {
 
 class SchemaTransformer {
 
+  // TODO: Full rewrite
   static computeProperty(state: AutoState & TransformerState, node: ts.PropertyDeclaration) {
 
-    const typeExpr = state.resolveType(node.type!);
+    const typeExpr = state.checker.resolveType(node);
     const properties = [];
     const isUnion = node.type && node.type!.kind === ts.SyntaxKind.UnionType;
 
@@ -49,7 +50,7 @@ class SchemaTransformer {
     const dec = state.createDecorator('Field', ...params);
     const newDecs = [...(node.decorators || []), dec];
 
-    const comments = state.describeByComments(node);
+    const comments = state.checker.describeByJSDocs(node);
     if (comments.description) {
       state.importDecorator(require.resolve('../src/decorator/common'), 'Describe');
 
@@ -90,7 +91,7 @@ class SchemaTransformer {
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators || [])];
 
-    const comments = state.describeByComments(node);
+    const comments = state.checker.describeByJSDocs(node);
 
     if (!state[hasSchema]) {
       state.importDecorator(require.resolve('../src/decorator/schema'), 'Schema');
