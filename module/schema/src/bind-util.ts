@@ -1,28 +1,9 @@
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from './service/registry';
 import { FieldConfig, ALL_VIEW } from './service/types';
-
-const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
+import { Util } from '@travetto/base';
 
 export class BindUtil {
-
-  static extractRegex(val: string | RegExp): RegExp {
-    let out: RegExp;
-    if (typeof val === 'string') {
-      if (REGEX_PAT.test(val)) {
-        val.replace(REGEX_PAT, (all, pat, mod) => {
-          out = new RegExp(pat, mod);
-          return '';
-        });
-        out = out!;
-      } else {
-        out = new RegExp(val);
-      }
-    } else {
-      out = val;
-    }
-    return out;
-  }
 
   static expandPaths(obj: Record<string, any>) {
     const out: Record<string, any> = {};
@@ -72,32 +53,14 @@ export class BindUtil {
   }
 
   static coerceType<T>(conf: FieldConfig, val: any): T | null | undefined {
-    const type = conf.type;
-
-    if (val === undefined || val === null) {
-      return val;
-    } else if (type === Number) {
+    if (conf.type === Number && val !== null && val !== undefined) {
       if (conf.precision && conf.precision[1]) {
         val = +parseFloat(`${val}`).toFixed(conf.precision[1]);
       } else {
         val = parseInt(`${val}`, 10);
       }
-    } else if (val.constructor !== type) {
-      if (type === Boolean) {
-        if (typeof val === 'string') {
-          val = val === 'true';
-        } else {
-          val = !!val;
-        }
-      } else if (type === String) {
-        val = `${val}`;
-      } else if (type === Date) {
-        if (typeof val === 'number' || (typeof val === 'string' && val)) {
-          val = new Date(val);
-        }
-      } else if (type === RegExp) {
-        val = BindUtil.extractRegex(val);
-      }
+    } else {
+      val = Util.coerceType(val, conf.type, false);
     }
 
     return val as T;

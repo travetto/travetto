@@ -68,11 +68,11 @@ export class ConfigUtil {
       return a;
     }
 
-    if (Util.isSimple(val)) {
-      return Util.coerceType(a, val.constructor, false);
-    } else if (Array.isArray(val)) {
+    if (Array.isArray(val)) {
       return `${a}`.split(',').map(x => x.trim()).map(x => this.coerce(x, val[0]));
     }
+
+    return Util.coerceType(a, val.constructor, false);
   }
 
   static getKeyName(key: string, data: Record<string, any>) {

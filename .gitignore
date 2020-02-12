@@ -1,6 +1,7 @@
 .vscode/
 lerna-debug.log
 bin/test/model/**
+**/log.text
 
 **/temp/**
 **/build/**

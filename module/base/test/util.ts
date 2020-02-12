@@ -7,7 +7,7 @@ import { Util } from '../src/util';
 class Test2 { }
 
 @Suite()
-class MergeTests {
+class UtilTests {
 
   @Test()
   testPrimitive() {
@@ -20,6 +20,12 @@ class MergeTests {
     }
 
     assert(Util.isFunction(Test));
+  }
+
+  @Test()
+  testCoerceNothing() {
+    assert(Util.coerceType(null, Boolean) === null);
+    assert(Util.coerceType(undefined, RegExp) === undefined);
   }
 
   @Test()
@@ -58,6 +64,16 @@ class MergeTests {
     assert.throws(() => Util.coerceType('a', Date));
     assert.doesNotThrow(() => Util.coerceType('a', Date, false));
     assert(Number.isNaN(Util.coerceType('a', Date, false).getTime()));
+  }
+
+  @Test()
+  testCoerceRegex() {
+    assert(Util.coerceType(/a/, RegExp).source === 'a');
+    assert(Util.coerceType('/abc/i', RegExp).flags === 'i');
+    assert(Util.coerceType('/abc/i', RegExp).source === 'abc');
+    assert(Util.coerceType('abc', RegExp).source === 'abc');
+    assert(Util.coerceType('(', RegExp, false) === undefined);
+    assert.throws(() => Util.coerceType('(', RegExp));
   }
 
   @Test()

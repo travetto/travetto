@@ -1,6 +1,22 @@
 import * as crypto from 'crypto';
 
+const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
+
 export class Util {
+  private static extractRegex(val: string | RegExp): RegExp {
+    let out: RegExp;
+    if (typeof val === 'string') {
+      if (REGEX_PAT.test(val)) {
+        const [, pat, mod] = val.match(REGEX_PAT) ?? [];
+        out = new RegExp(pat, mod);
+      } else {
+        out = new RegExp(val);
+      }
+    } else {
+      out = val;
+    }
+    return out;
+  }
 
   private static deepAssignRaw(a: any, b: any, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
@@ -59,11 +75,18 @@ export class Util {
   static coerceType(input: any, type: typeof Number, strict?: boolean): number;
   static coerceType(input: any, type: typeof Boolean, strict?: boolean): boolean;
   static coerceType(input: any, type: typeof Date, strict?: boolean): Date;
+  static coerceType(input: any, type: typeof RegExp, strict?: boolean): RegExp;
   static coerceType<T>(input: any, type: { new(...args: any[]): T }, strict?: boolean): T;
   static coerceType(input: any, type: any, strict = true) {
-    if (type && input instanceof type) {
+    // Do nothing
+    if (
+      input === null ||
+      input === undefined ||
+      (type && input instanceof type)
+    ) {
       return input;
     }
+
     switch (type) {
       case Date: {
         const res = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
@@ -81,11 +104,22 @@ export class Util {
         return res;
       }
       case Boolean: {
-        const res = /^(true|yes|1|on)$/.test(input);
+        const res = /^(true|yes|1|on)$/.test(`${input}`);
         if (strict && !/^(false|no|off|0|true|yes|on|1)$/i.test(input)) {
           throw new Error(`Invalid boolean value: ${input}`);
         }
         return res;
+      }
+      case RegExp: {
+        try {
+          return this.extractRegex(input);
+        } catch (err) {
+          if (strict) {
+            throw err;
+          } else {
+            return;
+          }
+        }
       }
       case undefined:
       case String: return `${input}`;
