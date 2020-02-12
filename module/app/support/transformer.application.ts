@@ -4,6 +4,7 @@ import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/comp
 
 class ApplicationTransformer {
 
+  // TODO: Rework
   static readType(node: ts.TypeNode) {
     const kind = node!.kind;
     let type: string;

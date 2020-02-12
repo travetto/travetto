@@ -7,6 +7,7 @@ const INJECTABLE_MATCHER = TransformUtil.decoratorMatcher('injectable');
 
 const INJECTABLE_MOD = require.resolve('../src/decorator');
 
+// TODO: Full rework
 class InjectableTransformer {
 
   static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
