@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, Documentation, ParamDoc, NodeTransformer, CompilerUtil } from '@travetto/compiler';
+import { TransformUtil, TransformerState, Documentation, ParamDoc, NodeTransformer } from '@travetto/compiler';
 import { ParamConfig } from '../src/types';
 
 const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
@@ -11,6 +11,7 @@ const PARAM_MATCHER = TransformUtil.decoratorMatcher('rest-param');
 
 class RestTransformer {
 
+  // TODO: Better resolution
   static defineType(state: TransformerState, type: ts.Expression | ts.TypeNode) {
 
     let typeIdent: ts.Expression | ts.TypeNode = type;
@@ -28,7 +29,7 @@ class RestTransformer {
       }
     }
 
-    const finalTarget = !ts.isTypeNode(typeIdent) ? typeIdent : state.resolveType(typeIdent);
+    const finalTarget = !ts.isTypeNode(typeIdent) ? typeIdent : state.checker.resolveType(typeIdent);
 
     return { type: finalTarget, array: isArray };
   }
@@ -107,22 +108,16 @@ class RestTransformer {
 
     // Process returnType
 
-    const comments = state.describeByComments(node);
+    const comments = state.checker.describeByJSDocs(node);
 
-    // Get return type from jsdoc comments
-    const sig = state.checker.getTypeAtLocation(node).getCallSignatures()[0];
-
-    let mType: any = state.checker.getReturnTypeOfSignature(sig);
-    let retType;
+    let mType = state.checker.getReturnType(node);
 
     // If comments empty, read from method node
-    if (mType.symbol.getName() === 'Promise') {
-      mType = mType.resolvedTypeArguments && mType.resolvedTypeArguments.length ? mType.resolvedTypeArguments[0] : mType;
+    if (state.checker.isPromiseType(mType)) {
+      mType = state.checker.getPrimaryTypeParameter(mType);
     }
-    if (mType.intrinsicName !== 'void') {
-      mType = mType.symbol.declarations[0];
-      retType = state.resolveType(mType);
-    }
+
+    const retType = state.checker.typeToExpression(mType);
 
     // IF we have a winner, declare response type
     if (retType) {
@@ -183,7 +178,7 @@ class RestTransformer {
 
   static handleController(state: TransformerState, node: ts.ClassDeclaration) {
     // Read title/description/summary from jsdoc on class
-    const comments = state.describeByComments(node);
+    const comments = state.checker.describeByJSDocs(node);
     if (comments.description) {
 
       const decls = [...(node.decorators || [])];

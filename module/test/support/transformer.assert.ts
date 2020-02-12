@@ -7,11 +7,13 @@ import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT, DEEP_LITERAL_TYPES } from '../src/
 const ASSERT_CMD = 'assert';
 const ASSERT_UTIL = 'AssertCheck';
 
+// TODO: Rework
 const METHODS: Record<string, string> = {
   includes: 'includes',
   test: 'test'
 };
 
+// TODO: Rework
 const METHOD_REGEX = new RegExp(`[.](${Object.keys(METHODS).join('|')})[(]`);
 
 const OP_TOKEN_TO_NAME = new Map<number, string>();
@@ -59,6 +61,7 @@ class AssertTransformer {
     }
   }
 
+  // TODO: Rework
   static isDeepLiteral(node: ts.Expression) {
     return ts.isArrayLiteralExpression(node) ||
       ts.isObjectLiteralExpression(node) ||
@@ -145,6 +148,7 @@ class AssertTransformer {
   static doMethodCall(comp: ts.Expression, args: Args) {
     // Handle METHOD
     const firstText = comp.getText();
+    // TODO: Rework
     if (METHOD_REGEX.test(`.${firstText}`) && ts.isCallExpression(comp) && ts.isPropertyAccessExpression(comp.expression)) {
       return {
         fn: METHODS[comp.expression.name.text!],
