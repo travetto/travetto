@@ -121,6 +121,13 @@ export class Util {
           }
         }
       }
+      case Object: {
+        if (!strict || this.isPlainObject(input)) {
+          return input;
+        } else {
+          throw new Error('Invalid object type');
+        }
+      }
       case undefined:
       case String: return `${input}`;
     }

@@ -3,6 +3,7 @@ import { dirname } from 'path';
 
 import { FsUtil, RegisterUtil } from '@travetto/boot';
 import { SystemUtil, Env } from '@travetto/base';
+
 import { TransformUtil } from './util';
 import { Import } from './types';
 import { TypeChecker } from './checker';
@@ -22,7 +23,7 @@ export class TransformerState {
     this.path = FsUtil.resolveNative(pth);
     this.modulePath = FsUtil.resolveUnix(pth);
     this.collectInitialImports();
-    this.checker = new TypeChecker(checker, t => this.getOrImport(t));
+    this.checker = new TypeChecker(checker);
   }
 
   getOrImport(type: ts.Type) {
