@@ -53,7 +53,7 @@ export class BindUtil {
   }
 
   static coerceType<T>(conf: FieldConfig, val: any): T | null | undefined {
-    if (conf.type === Number && val !== null && val !== undefined) {
+    if (conf.type === Number && (val || val === 0)) {
       if (conf.precision && conf.precision[1]) {
         val = +parseFloat(`${val}`).toFixed(conf.precision[1]);
       } else {

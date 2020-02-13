@@ -28,7 +28,7 @@ class ApplicationTransformer {
     return type;
   }
 
-  static computeParam(p: ts.ParameterDeclaration) {
+  static computeParam(state: TransformerState, p: ts.ParameterDeclaration) {
     const name = p.name.getText();
     const hasDefault = !!p.initializer || !!p.questionToken;
     const def = p.initializer ? TransformUtil.toLiteral(p.initializer) : undefined;
@@ -70,7 +70,7 @@ class ApplicationTransformer {
         .filter(x => x.name!.getText() === 'run')[0];
 
       if (runMethod && ts.isMethodDeclaration(runMethod)) {
-        const outParams = runMethod.parameters.map(p => ApplicationTransformer.computeParam(p));
+        const outParams = runMethod.parameters.map(p => this.computeParam(state, p));
 
         const declArgs = [...dec.expression.arguments];
 
