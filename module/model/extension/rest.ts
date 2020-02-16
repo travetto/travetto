@@ -25,7 +25,7 @@ class SuggestQuery {
 }
 
 // eslint-disable no-invalid-this
-/** @alias trv/di/Injectable */
+/** @augments trv/di/Injectable */
 export function ModelController<T extends ModelCore>(path: string, cls: Class<T>) {
   function getCls() {
     return ModelRegistry.get(cls).class;

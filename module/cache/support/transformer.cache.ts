@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
+import { TransformUtil, TransformerState, DecoratorMeta, OnMethod } from '@travetto/compiler/src/transform-support';
 
 const CACHE_UTIL = 'CacheUtil';
 
@@ -10,7 +10,10 @@ interface CacheState {
   evict: ts.PropertyAccessExpression;
 }
 
-class CacheTransformer {
+const CACHE_KEY = 'trv/cache/Cache';
+const EVICT_KEY = 'trv/cache/Evict';
+
+export class CacheTransformer {
 
   static initState(state: TransformerState & CacheState) {
     if (!state.util) {
@@ -21,11 +24,11 @@ class CacheTransformer {
     }
   }
 
-  static handleMethod(state: TransformerState & CacheState, node: ts.MethodDeclaration, dec?: ts.Decorator) {
+  @OnMethod([CACHE_KEY, EVICT_KEY])
+  static handleMethod(state: TransformerState & CacheState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
 
-    const decl = TransformUtil.getDecoratorList(node);
-
-    const isCache = !!decl.find(x => x.name === 'Cache');
+    const isCache = dm?.targets?.includes(CACHE_KEY);
+    const dec = dm?.dec;
 
     if (dec && ts.isCallExpression(dec.expression)) {
       this.initState(state);
@@ -75,7 +78,3 @@ class CacheTransformer {
     return node;
   }
 }
-
-export const transformers: NodeTransformer[] = [
-  { type: 'method', before: CacheTransformer.handleMethod.bind(CacheTransformer), alias: ['trv/cache/Cache', 'trv/cache/Evict'] },
-];

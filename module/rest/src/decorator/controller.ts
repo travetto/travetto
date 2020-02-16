@@ -3,8 +3,8 @@ import { ControllerRegistry } from '../registry/registry';
 import { ControllerDecorator } from '../registry/types';
 
 /**
- * @alias trv/di/Injectable
- * @alias trv/rest/Controller
+ * @augments trv/di/Injectable
+ * @augments trv/rest/Controller
  */
 export function Controller(path = '') {
   return function (target: Class) {

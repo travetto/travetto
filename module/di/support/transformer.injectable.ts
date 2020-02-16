@@ -1,21 +1,19 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
-
-const INJECT_MATCHER = TransformUtil.decoratorMatcher('inject');
-const INJECTABLE_MATCHER = TransformUtil.decoratorMatcher('injectable');
+import {
+  TransformUtil, TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, res
+} from '@travetto/compiler/src/transform-support';
 
 const INJECTABLE_MOD = require.resolve('../src/decorator');
 
-// TODO: Full rework
-class InjectableTransformer {
+export class InjectableTransformer {
 
   static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-    const matched = INJECT_MATCHER(param, state.imports);
-    const injection = matched.get('Inject');
+    const injection = state.findDecorator(param, 'trv/di/Inject', 'Inject', INJECTABLE_MOD);
 
     if (injection || ts.isParameter(param)) {
-      const finalTarget = state.importTypeIfExternal(param.type!);
+
+      const finalTarget = state.getOrImport(param);
 
       let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
 
@@ -51,7 +49,8 @@ class InjectableTransformer {
     }
   }
 
-  static handleClass(state: TransformerState, node: ts.ClassDeclaration, dec: ts.Decorator) {
+  @OnClass('trv/di/Injectable')
+  static handleClass(state: TransformerState, node: ts.ClassDeclaration) {
     const clsNode = (node as any as ts.ClassDeclaration);
     const declTemp = (node.decorators || []).slice(0);
     const cons = clsNode.members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
@@ -74,8 +73,9 @@ class InjectableTransformer {
     declTemp.push(state.createDecorator('InjectArgs', injectArgs));
 
     // Add injectable decorator if not there
-    const decs = INJECTABLE_MATCHER(node, state.imports);
-    let injectable = decs.get('Injectable');
+    let injectable = state.getDecoratorList(node)
+      // TODO: might need more strict comparison
+      .find(x => x.targets?.includes('trv/di/Injectable') && x.name === 'Injectable')?.dec;
 
     if (!injectable) { // If missing, add
       state.importDecorator(INJECTABLE_MOD, 'Injectable');
@@ -109,14 +109,18 @@ class InjectableTransformer {
     );
   }
 
-  static handleProperty(state: TransformerState, node: ts.PropertyDeclaration, dec: ts.Decorator) {
+  @OnProperty('trv/di/Inject')
+  static handleProperty(state: TransformerState, node: ts.PropertyDeclaration, dm?: DecoratorMeta) {
     const expr = InjectableTransformer.processDeclaration(state, node)!;
 
     // Replace
     state.importDecorator(INJECTABLE_MOD, 'Inject');
     const final = state.createDecorator('Inject', expr);
+    const injected = state.getDecoratorList(node)
+      .filter(x => x.targets?.includes('Inject'))?.[0]?.dec;
+
     const finalDecs = ((node.decorators as any as ts.Decorator[]) || [])
-      .filter(x => TransformUtil.getDecoratorIdent(x).text !== 'Inject');
+      .filter(x => x !== injected);
 
     // Doing decls
     return ts.updateProperty(
@@ -130,7 +134,8 @@ class InjectableTransformer {
     );
   }
 
-  static handleFactory(state: TransformerState, node: ts.MethodDeclaration, dec: ts.Decorator) {
+  @OnStaticMethod('trv/di/InjectFactory')
+  static handleFactory(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
     let injectArgs: object[] = [];
     let original: any;
 
@@ -141,6 +146,12 @@ class InjectableTransformer {
       if (e.message !== 'Type information not found') {
         throw e;
       }
+    }
+
+    const dec = dm?.dec;
+
+    if (!dec) {
+      return node;
     }
 
     let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(dec);
@@ -162,8 +173,11 @@ class InjectableTransformer {
 
     // Handle when
     let target = TransformUtil.getObjectValue(injectConfig, 'target');
-    if (node.type && target === undefined) {  // TODO: infer from typings, not just text?
-      target = state.importTypeIfExternal(node.type!);
+    if (target === undefined) {  // TODO: infer from typings, not just text?
+      const ret = state.resolveReturnType(node);
+      if (res.isExternalType(ret)) {
+        target = state.getOrImport(ret);
+      }
     }
 
     const args = TransformUtil.extendObjectLiteral({
@@ -196,9 +210,3 @@ class InjectableTransformer {
     );
   }
 }
-
-export const transformers: NodeTransformer[] = [
-  { type: 'class', alias: 'trv/di/Injectable', after: InjectableTransformer.handleClass },
-  { type: 'property', alias: 'trv/di/Inject', before: InjectableTransformer.handleProperty },
-  { type: 'static-method', alias: 'trv/di/InjectableFactory', before: InjectableTransformer.handleFactory }
-];

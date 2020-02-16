@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { EventEmitter } from 'events';
+import * as sourcemap from 'source-map-support';
 
 import { FsUtil } from '@travetto/boot';
 import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp } from '@travetto/base';
@@ -54,6 +55,9 @@ class $Compiler extends EventEmitter {
 
     const rootsRe = Env.rootMatcher(this.rootPaths);
     ScanApp.requireFiles('.ts', f => rootsRe.test(f) || CompilerUtil.isCompilable(f)); // Load all files, class scanning
+
+    // register source maps
+    sourcemap.install(this.sourceManager.getSourceMapHandler());
 
     console.debug('Initialized', (Date.now() - start) / 1000);
   }

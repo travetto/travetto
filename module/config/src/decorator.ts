@@ -1,8 +1,8 @@
 import { ConfigSource } from './source';
 
 /**
- * @alias trv/config/Config
- * @alias trv/di/Injectable
+ * @augments trv/config/Config
+ * @augments trv/di/Injectable
  */
 export function Config(ns: string, depTarget?: new (...args: any[]) => any, name: string = '') {
 

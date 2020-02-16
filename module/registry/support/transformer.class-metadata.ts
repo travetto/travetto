@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import { FsUtil, RegisterUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base';
-import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
+import { TransformUtil, TransformerState, OnMethod, OnClass, AfterClass } from '@travetto/compiler/src/transform-support';
 
 const REGISTER_MOD = require.resolve('../src/decorator');
 
@@ -18,13 +18,15 @@ interface RegisterInfo {
   [cls]?: number;
 }
 
-class RegisterTransformer {
+export class RegisterTransformer {
 
+  @OnClass()
   static prepareClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
     state[cls] = SystemUtil.naiveHash(node.getText());
     return node;
   }
 
+  @OnMethod()
   static transformMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration) {
     const hash = SystemUtil.naiveHash(node.getText());
 
@@ -35,6 +37,7 @@ class RegisterTransformer {
     return node;
   }
 
+  @AfterClass()
   static transformClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
     if (state.source.fileName === REGISTER_MOD) {  // Cannot process self
       return node;
@@ -71,12 +74,3 @@ class RegisterTransformer {
     );
   }
 }
-
-export const transformers: NodeTransformer[] = [
-  {
-    type: 'class', all: true,
-    before: RegisterTransformer.prepareClass,
-    after: RegisterTransformer.transformClass
-  },
-  { type: 'method', all: true, before: RegisterTransformer.transformMethod }
-];

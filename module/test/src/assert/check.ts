@@ -6,6 +6,7 @@ import { ThrowableError, TestConfig } from '../model/test';
 import { AssertCapture } from './capture';
 import { AssertUtil } from './util';
 import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types';
+import { CompilerUtil } from '../../../../../src/util';
 
 const { AssertionError } = assert;
 

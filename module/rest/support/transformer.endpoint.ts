@@ -1,50 +1,30 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, Documentation, ParamDoc, NodeTransformer } from '@travetto/compiler';
-import * as trv from '@travetto/compiler/src/transformer/types';
+import { TransformUtil, TransformerState, res, OnClass, OnMethod } from '@travetto/compiler/src/transform-support';
 
 import { ParamConfig } from '../src/types';
+
+const CONTROLLER_KEY = 'trv/rest/Controller';
+const ENDPOINT_KEY = 'trv/rest/Endpoint';
+const PARAM_KEY = 'trv/rest/Param';
 
 const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
 const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
 const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 
-const PARAM_MATCHER = TransformUtil.decoratorMatcher('rest-param');
+export class RestTransformer {
 
-class RestTransformer {
+  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: res.Documentation) {
+    const dm = state.getDecoratorList(node)
+      .find(x => x.targets?.includes(PARAM_KEY));
 
-  // TODO: Better resolution
-  static defineType(state: TransformerState, type: ts.Expression | ts.TypeNode) {
+    const pDec = dm?.dec;
 
-    let typeIdent: ts.Expression | ts.TypeNode = type;
-    let isArray: boolean = false;
-
-    if (!ts.isTypeNode(typeIdent)) {
-      if (ts.isArrayLiteralExpression(type)) {
-        isArray = true;
-        typeIdent = type.elements[0];
-      }
-    } else {
-      if (ts.isArrayTypeNode(type)) {
-        isArray = true;
-        typeIdent = type.elementType;
-      }
-    }
-
-    const finalTarget = !ts.isTypeNode(typeIdent) ? typeIdent : state.resolveType(typeIdent);
-
-    return { type: finalTarget, array: isArray };
-  }
-
-  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: Documentation) {
     const typeName = node.type ? node.type.getText() : '';
     const pName = node.name.getText();
 
     let decConfig: ParamConfig = { name: pName } as any;
-    let commentConfig: ParamDoc = {} as any;
-
-    const allMatched = PARAM_MATCHER(node, state.imports);
-    const pDec = allMatched.size ? allMatched.values().next().value : undefined;
+    let commentConfig: res.ParamDoc = {} as any;
 
     const pDecArg = TransformUtil.getPrimaryArgument(pDec);
     if (pDecArg) {
@@ -58,14 +38,18 @@ class RestTransformer {
     }
 
     const decs = (node.decorators || []).filter(x => x !== pDec);
-    commentConfig = (comments.params || []).find(x => x.name === decConfig.name) || {} as ParamDoc;
+    commentConfig = (comments.params || []).find(x => x.name === decConfig.name) || {} as res.ParamDoc;
 
-    const type = RestTransformer.defineType(state, commentConfig.type! || node.type! || ts.createIdentifier('String'));
+    let rType: any = state.resolveType(node);
+    const array = res.isRealType(rType) && rType.realType === Array;
+    rType = array ? (rType as res.RealType).realType : rType;
+    const type = rType.realType ? ts.createIdentifier(rType.realType) :
+      state.getImport(rType);
 
     let defaultType = 'Query';
 
     if (typeName === 'Request' || typeName === 'Response') { // Convert to custom types, special handling for interfaces
-      type.type = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, typeName.toUpperCase());
+      rType = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, typeName.toUpperCase());
       defaultType = 'Context'; // White list request/response as context
     }
 
@@ -75,8 +59,8 @@ class RestTransformer {
       ...commentConfig,
       ...decConfig,
       required: decConfig.required !== undefined ? decConfig.required : (!(node.questionToken || node.initializer) || commentConfig.required),
-      type: type.type as any,
-      array: type.array
+      type: type as any,
+      array
     };
 
     if (!pDec) { // Handle default
@@ -103,6 +87,7 @@ class RestTransformer {
     );
   }
 
+  @OnMethod(ENDPOINT_KEY)
   static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration) {
 
     const decls = node.decorators;
@@ -111,7 +96,7 @@ class RestTransformer {
     // Process returnType
     let retType = state.resolveReturnType(node);
 
-    if (trv.isRealType(retType) && retType.realType === Promise) {
+    if (res.isRealType(retType) && retType.realType === Promise) {
       retType = retType.typeArguments?.[0]!; // We have a promise nested
     }
 
@@ -123,7 +108,7 @@ class RestTransformer {
         array: false,
         type: retType
       };
-      if (trv.isRealType(retType) && retType.realType === Array) {
+      if (res.isRealType(retType) && retType.realType === Array) {
         type.array = true;
         type.type = retType.typeArguments?.[0]!;
       }
@@ -174,6 +159,7 @@ class RestTransformer {
     }
   }
 
+  @OnClass(CONTROLLER_KEY)
   static handleController(state: TransformerState, node: ts.ClassDeclaration) {
     // Read title/description/summary from jsdoc on class
     const comments = state.readJSDocs(node);
@@ -199,8 +185,3 @@ class RestTransformer {
     }
   }
 }
-
-export const transformers: NodeTransformer[] = [
-  { type: 'class', before: RestTransformer.handleController, alias: 'trv/rest/Controller' },
-  { type: 'method', before: RestTransformer.handleEndpoint, alias: 'trv/rest/Endpoint' },
-];

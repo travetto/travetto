@@ -1,11 +1,16 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
+import {
+  TransformUtil, TransformerState, DecoratorMeta, OnMethod, OnClass
+} from '@travetto/compiler/src/transform-support';
 
-class AnnotationTransformer {
+export class AnnotationTransformer {
 
-  static annotate<T extends ts.Node>(state: TransformerState, node: T, dec: ts.Decorator) {
-    if (ts.isCallExpression(dec.expression)) {
+  @OnClass('trv/test/Suite')
+  @OnMethod('trv/test/Test')
+  static annotate(state: TransformerState, node: ts.MethodDeclaration | ts.ClassDeclaration, dm?: DecoratorMeta) {
+    const dec = dm?.dec;
+    if (dec && ts.isCallExpression(dec.expression)) {
       const args = [...(dec.expression.arguments || [])];
       const n = ((node as any)['original'] || node) as ts.Node;
       const start = ts.getLineAndCharacterOfPosition(state.source, n.getStart());
@@ -18,8 +23,3 @@ class AnnotationTransformer {
     return node;
   }
 }
-
-export const transformers: NodeTransformer[] = [
-  { type: 'method', alias: 'trv/test/Test', before: AnnotationTransformer.annotate },
-  { type: 'class', alias: 'trv/test/Suite', before: AnnotationTransformer.annotate }
-];

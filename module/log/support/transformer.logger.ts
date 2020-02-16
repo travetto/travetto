@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import { Env } from '@travetto/base';
 import { RegisterUtil } from '@travetto/boot';
-import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
+import { TransformUtil, TransformerState, OnCall } from '@travetto/compiler/src/transform-support';
 
 import { LogLevels } from '../src/types';
 
@@ -19,6 +19,7 @@ interface LoggerState {
 
 export class LoggerTransformer {
 
+  @OnCall()
   static handleCall(state: TransformerState & LoggerState, node: ts.CallExpression) {
     if (state[isLoggable] === undefined) {
       const name = state.source.fileName;
@@ -76,7 +77,3 @@ export class LoggerTransformer {
     return ts.createCall(ts.createPropertyAccess(ts.createPropertyAccess(state[imported]!, 'Logger'), 'log'), undefined, argv);
   }
 }
-
-export const transformers: NodeTransformer[] = [
-  { type: 'call', all: true, before: LoggerTransformer.handleCall }
-];

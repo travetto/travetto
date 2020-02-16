@@ -1,5 +1,7 @@
 import { Simple, Concrete, Custom } from './types';
 
+const name = 'bob';
+
 export class Container {
   @Custom()
   static simpleAdd(a: number, b?: number) {
@@ -7,6 +9,8 @@ export class Container {
   }
 
   special = /a/;
+
+  smiles: number[];
 
   rating: 1 | 2 | 3 | 4 | 5 = 1;
 
@@ -20,5 +24,9 @@ export class Container {
 
   conc(val: Concrete) {
     console.log('WOOHOO', val);
+  }
+
+  test(inp: string = name) {
+    console.log('uHoh');
   }
 }
