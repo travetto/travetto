@@ -9,8 +9,8 @@ export class ScanApp {
 
   static cache: Record<string, SimpleEntry[]> = {};
 
-  static findFiles(ext: string | RegExp, filter?: RegExp | ((rel: string) => boolean)): SimpleEntry[] {
-    const key = typeof ext === 'string' ? ext : ext.source;
+  static findFiles(ext: string | RegExp, filter?: RegExp | ((rel: string) => boolean), root = Env.cwd): SimpleEntry[] {
+    const key = root + (typeof ext === 'string' ? ext : ext.source);
     const testFile = typeof ext === 'string' ? (x: string) => x.endsWith(ext) : (x: string) => ext.test(x);
 
     if (!this.cache[key]) {
@@ -20,7 +20,7 @@ export class ScanApp {
           !x.includes('node_modules') ||
           x.endsWith('node_modules') ||
           x.includes('@travetto')
-      }, Env.cwd)
+      }, root)
         .filter(ScanFs.isNotDir);
 
       if (process.env.TRV_FRAMEWORK_DEV) {

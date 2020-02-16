@@ -1,6 +1,8 @@
 import * as ts from 'typescript';
 
 import { TransformUtil, TransformerState, Documentation, ParamDoc, NodeTransformer } from '@travetto/compiler';
+import * as trv from '@travetto/compiler/src/transformer/types';
+
 import { ParamConfig } from '../src/types';
 
 const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
@@ -29,7 +31,7 @@ class RestTransformer {
       }
     }
 
-    const finalTarget = !ts.isTypeNode(typeIdent) ? typeIdent : state.checker.resolveType(typeIdent);
+    const finalTarget = !ts.isTypeNode(typeIdent) ? typeIdent : state.resolveType(typeIdent);
 
     return { type: finalTarget, array: isArray };
   }
@@ -107,17 +109,13 @@ class RestTransformer {
     const newDecls = [];
 
     // Process returnType
+    let retType = state.resolveReturnType(node);
 
-    const comments = state.checker.describeByJSDocs(node);
-
-    let mType = state.checker.getReturnType(node);
-
-    // If comments empty, read from method node
-    if (state.checker.isPromiseType(mType)) {
-      mType = state.checker.getPrimaryTypeParameter(mType);
+    if (trv.isRealType(retType) && retType.realType === Promise) {
+      retType = retType.typeArguments?.[0]!; // We have a promise nested
     }
 
-    const retType = state.checker.typeToExpression(mType);
+    const comments = state.readJSDocs(node);
 
     // IF we have a winner, declare response type
     if (retType) {
@@ -125,15 +123,15 @@ class RestTransformer {
         array: false,
         type: retType
       };
-      if (ts.isArrayLiteralExpression(retType)) {
+      if (trv.isRealType(retType) && retType.realType === Array) {
         type.array = true;
-        type.type = retType.elements[0];
+        type.type = retType.typeArguments?.[0]!;
       }
       state.importDecorator(ENDPOINT_DEC_FILE, 'ResponseType');
       const produces = state.createDecorator('ResponseType', TransformUtil.fromLiteral({
         ...type,
         array: type.array,
-        title: comments.return && comments.return.description
+        title: comments.return
       }));
       newDecls.push(produces);
     }
@@ -178,7 +176,7 @@ class RestTransformer {
 
   static handleController(state: TransformerState, node: ts.ClassDeclaration) {
     // Read title/description/summary from jsdoc on class
-    const comments = state.checker.describeByJSDocs(node);
+    const comments = state.readJSDocs(node);
     if (comments.description) {
 
       const decls = [...(node.decorators || [])];

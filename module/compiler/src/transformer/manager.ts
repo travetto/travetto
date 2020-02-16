@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { ScanApp } from '@travetto/base';
+import { ScanApp, Env } from '@travetto/base';
 import { VisitorFactory, NodeTransformer } from '@travetto/compiler/src/transformer/visitor'; // Narrow import to minimize scope
 import { TransformerState } from './state';
 
@@ -20,17 +20,19 @@ export class TransformerManager {
       allTransformers.push(...(transformers ?? []).map((x: any) => { x.file = name.file; return x; }));
     }
 
-    console.debug('Transformers',
-      ...allTransformers.map(x => {
-        const name = (x as any).file.split('node_modules/').pop()!.replace('/support/transformer.', ':').replace('.ts', '');
-        const flags = [
-          ...(x.all ? ['all'] : []),
-          ...(x.before ? ['before'] : []),
-          ...(x.after ? ['after'] : [])
-        ];
-        return `\n\t[${x.type}] ${name} - ${flags.join(' ')}`;
-      })
-    );
+    if (!Env.quietInit) {
+      console.debug('Transformers',
+        ...allTransformers.map(x => {
+          const name = (x as any).file.split('node_modules/').pop()!.replace('/support/transformer.', ':').replace('.ts', '');
+          const flags = [
+            ...(x.all ? ['all'] : []),
+            ...(x.before ? ['before'] : []),
+            ...(x.after ? ['after'] : [])
+          ];
+          return `\n\t[${x.type}] ${name} - ${flags.join(' ')}`;
+        })
+      );
+    }
 
     this.visitor = new VisitorFactory(
       src => new TransformerState(src, this.checker),

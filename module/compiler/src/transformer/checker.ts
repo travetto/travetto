@@ -1,76 +1,62 @@
+/* eslint-disable no-bitwise */
 import * as ts from 'typescript';
-import { CompilerUtil } from '../util';
-import { Documentation, Type, ExternalType, RealType, UnionType, TupleType, ShapeType } from './types';
 import { Util } from '@travetto/base';
-
-const GLOBAL_SIMPLE = {
-  RegExp,
-  Date,
-  Number,
-  Boolean,
-  String
-};
-
-const GLOBAL_COMPLEX = {
-  Array,
-  Promise,
-  Set,
-  Map
-};
+import * as trv from './types';
 
 export class TypeChecker {
 
-  constructor(private checker: ts.TypeChecker) { }
+  constructor(private _checker: ts.TypeChecker) { }
 
   getObjectFlags(type: ts.Type): ts.ObjectFlags {
     return (ts as any).getObjectFlags(type);
   }
 
   getAllTypeArguments(ref: ts.Type) {
-    return this.checker.getTypeArguments(ref as any);
+    return this._checker.getTypeArguments(ref as any);
   }
 
   getReturnType(node: ts.MethodDeclaration) {
-    const sig = this.checker.getTypeAtLocation(node).getCallSignatures()[0];
-    return this.checker.getReturnTypeOfSignature(sig);
+    const sig = this._checker.getTypeAtLocation(node).getCallSignatures()[0];
+    return this._checker.getReturnTypeOfSignature(sig);
   }
 
-  readJSDocs(type: ts.Type) {
-    const node = type.getSymbol()?.getDeclarations()![0];
-    const tags = ts.getJSDocTags(node);
-    const docs = (node as any)['jsDoc'];
+  readJSDocs(type: ts.Type | ts.Node) {
+    const node = 'getSourceFile' in type ? type : type.getSymbol()?.getDeclarations()?.[0];
 
-    const out: Documentation = {
+    const out: trv.Documentation = {
       description: undefined,
       return: undefined,
       params: []
     };
 
-    if (docs) {
-      const top = docs[docs.length - 1];
-      if (ts.isJSDoc(top)) {
-        out.description = top.comment;
-      }
-    }
+    if (node) {
+      const tags = ts.getJSDocTags(node);
+      const docs = (node as any)['jsDoc'];
 
-    if (tags && tags.length) {
-      for (const tag of tags) {
-        if (ts.isJSDocReturnTag(tag)) {
-          out.return = tag.comment;
-        } else if (ts.isJSDocParameterTag(tag)) {
-          out.params!.push({
-            name: tag.name && tag.name.getText(),
-            description: tag.comment ?? ''
-          });
+      if (docs) {
+        const top = docs[docs.length - 1];
+        if (ts.isJSDoc(top)) {
+          out.description = top.comment;
+        }
+      }
+
+      if (tags && tags.length) {
+        for (const tag of tags) {
+          if (ts.isJSDocReturnTag(tag)) {
+            out.return = tag.comment;
+          } else if (ts.isJSDocParameterTag(tag)) {
+            out.params!.push({
+              name: tag.name && tag.name.getText(),
+              description: tag.comment ?? ''
+            });
+          }
         }
       }
     }
-
     return out;
   }
 
-  getRealType(type: ts.Type): RealType | undefined {
-    /* eslint-disable no-bitwise */
+  getRealType(type: ts.Type): trv.RealType | undefined {
     const flags = type.getFlags();
 
     if (flags & ts.TypeFlags.Void) {
@@ -79,11 +65,14 @@ export class TypeChecker {
       return { name: 'undefined', realType: undefined };
     }
 
-    const name = type.symbol?.getName() ?? '';
-    const simpleCons = GLOBAL_SIMPLE[name as keyof typeof GLOBAL_SIMPLE];
-    const complexCons = GLOBAL_COMPLEX[name as keyof typeof GLOBAL_COMPLEX];
+    const name = this._checker.typeToString(this._checker.getApparentType(type)) ?? '';
+    const simpleCons = trv.GLOBAL_SIMPLE[name as keyof typeof trv.GLOBAL_SIMPLE];
+    const complexCons = trv.GLOBAL_COMPLEX[name as keyof typeof trv.GLOBAL_COMPLEX];
     if (simpleCons) {
-      const ret = Util.coerceType(this.checker.typeToString(type), simpleCons as typeof String);
+      const ret = flags & (ts.TypeFlags.BooleanLiteral | ts.TypeFlags.NumberLiteral | ts.TypeFlags.StringLiteral) ?
+        Util.coerceType(this._checker.typeToString(type), simpleCons as typeof String, false) :
+        undefined;
+
       return {
         realType: simpleCons,
         value: ret
@@ -92,45 +81,61 @@ export class TypeChecker {
       return {
         realType: complexCons,
         typeArguments: this.getAllTypeArguments(type).map(t => this.resolveType(t))
-      } as RealType;
+      };
     }
-    /* eslint-enable no-bitwise */
   }
 
-  getShapeType(type: ts.Type): ShapeType {
-    const fields: Record<string, Type> = {};
-    for (const member of this.checker.getPropertiesOfType(type)) {
-      const memberType = this.checker.getDeclaredTypeOfSymbol(member);
+  getShapeType(type: ts.Type): trv.ShapeType {
+    const docs = this.readJSDocs(type);
+    const fields: Record<string, trv.Type> = {};
+    for (const member of this._checker.getPropertiesOfType(type)) {
+      const memberType = this._checker.getDeclaredTypeOfSymbol(member);
       if (!(memberType.getCallSignatures()?.length)) {
         fields[member.getName()] = this.resolveType(memberType);
       }
     }
-    return { fields };
+    return { comment: docs.description, fields };
   }
 
-  getExternalType(type: ts.Type): ExternalType {
+  getExternalType(type: ts.Type): trv.ExternalType {
     const sym = type.symbol;
     const decl = sym.declarations?.[0];
-    const fileName = decl?.getSourceFile().fileName;
+    const source = decl?.getSourceFile().fileName;
     const name = sym?.getName();
     const comments = this.readJSDocs(type);
 
+    return { name, source, comment: comments.description };
+  }
+
+  getUnionType(type: ts.UnionType): trv.UnionType {
+    const types = type.types;
+    const unionTypes = types.map(x => this.resolveType(x));
+    let common = unionTypes.reduce((acc, v) => (!acc || acc.name === v.name) ? v : undefined, undefined as any);
+    if (common) {
+      common = { ...common };
+      delete common.value;
+    }
+    const optional = types.findIndex(x => type.flags & ts.TypeFlags.Undefined) >= 0;
+
+    return { optional, commonType: common, unionTypes };
+  }
+
+  getTupleType(type: ts.Type): trv.TupleType {
     return {
-      source: fileName,
-      comment: comments.description,
-      name
+      tupleTypes: this.getAllTypeArguments(type).map(x => this.resolveType(x))
     };
   }
 
-  resolveType(type: ts.Type | ts.Node): Type {
+  resolveType(type: ts.Type | ts.Node): trv.Type {
     if ('getSourceFile' in type) {
-      type = this.checker.getTypeAtLocation(type);
+      type = this._checker.getTypeAtLocation(type);
     }
-    /* eslint-disable no-bitwise */
     const flags = type.getFlags();
     const objectFlags = this.getObjectFlags(type) ?? 0;
 
-    if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
+    if (objectFlags & ts.ObjectFlags.Reference && !type.symbol) { // Tuple type?
+      return this.getTupleType(type);
+    } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
       const obj = this.getExternalType(type);
 
       if (type.isClass()) { // Real type
@@ -153,15 +158,9 @@ export class TypeChecker {
         return res;
       }
     } else if (type.isUnion()) {
-      const types = type.types;
-      return {
-        optional: types.find(x => (flags & ts.TypeFlags.Undefined) > 0),
-        unionTypes: types.map(x => this.resolveType(x))
-      } as UnionType;
+      return this.getUnionType(type);
     } else if (objectFlags & ts.ObjectFlags.Tuple) {
-      return {
-        tupleTypes: this.getAllTypeArguments(type).map(t => this.resolveType(t))
-      } as TupleType;
+      return this.getTupleType(type);
     } else if (type.isLiteral()) {
       return this.getShapeType(type);
     }
@@ -169,7 +168,6 @@ export class TypeChecker {
     return {
       realType: Object,
       name: 'object'
-    } as RealType;
-    /* eslint-enable no-bitwise */
+    } as trv.RealType;
   }
 }
