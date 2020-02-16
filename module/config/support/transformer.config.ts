@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerState, NodeTransformer } from '@travetto/compiler';
+import { TransformerState, DecoratorMeta, OnProperty, OnClass, AfterClass } from '@travetto/compiler/src/transform-support';
 
 const hasConfig = Symbol('hasConfig');
 
@@ -8,13 +8,15 @@ interface AutoState {
   [hasConfig]?: boolean;
 }
 
-class ConfigTransformer {
+export class ConfigTransformer {
 
-  static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: ts.Decorator) {
-    state[hasConfig] = !!dec;
+  @OnClass('trv/config/Config')
+  static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
+    state[hasConfig] = !!dm;
     return node;
   }
 
+  @AfterClass('trv/config/Config')
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators || [])];
 
@@ -31,6 +33,7 @@ class ConfigTransformer {
     );
   }
 
+  @OnProperty()
   static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
     if (state[hasConfig]) {
       if (!node.initializer) {
@@ -40,12 +43,3 @@ class ConfigTransformer {
     return node;
   }
 }
-
-export const transformers: NodeTransformer[] = [
-  { type: 'property', all: true, before: ConfigTransformer.handleProperty.bind(ConfigTransformer) },
-  {
-    type: 'class', alias: 'trv/config/Config',
-    before: ConfigTransformer.handleClassBefore.bind(ConfigTransformer),
-    after: ConfigTransformer.handleClassAfter.bind(ConfigTransformer)
-  }
-];

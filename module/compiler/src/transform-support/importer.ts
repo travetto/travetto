@@ -4,14 +4,16 @@ import { dirname } from 'path';
 import { FsUtil, RegisterUtil } from '@travetto/boot';
 import { Env, SystemUtil } from '@travetto/base';
 
+import { Import } from './types/importer';
+import * as res from './types/resolver';
+
 import { TransformUtil } from './util';
-import * as trv from './types';
 
 export class ImportManager {
   private path: string;
 
-  readonly newImports = new Map<string, trv.Import>();
-  readonly imports = new Map<string, trv.Import>();
+  readonly newImports = new Map<string, Import>();
+  readonly imports = new Map<string, Import>();
 
   constructor(public source: ts.SourceFile) {
     const pth = require.resolve(source.fileName);
@@ -48,7 +50,7 @@ export class ImportManager {
     }
   }
 
-  private addImport(imports: trv.Import[], file = this.source) {
+  private addImport(imports: Import[], file = this.source) {
     try {
       const importStmts = imports.map(({ path, ident }) => {
         const imptStmt = ts.createImportDeclaration(
@@ -98,16 +100,16 @@ export class ImportManager {
     return this.newImports.get(pth)!;
   }
 
-  importFromResolved(type: trv.Type) {
-    if (trv.isExternalType(type)) {
-      if (type.source) {
+  importFromResolved(type: res.Type) {
+    if (res.isExternalType(type)) {
+      if (type.source && type.source !== this.source.fileName) {
         this.importFile(type.source);
       }
     }
 
-    const nested = trv.isExternalType(type) ? type.typeArguments :
-      (trv.isUnionType(type) ? type.unionTypes :
-        (trv.isTupleType(type) ? type.tupleTypes : undefined));
+    const nested = res.isExternalType(type) ? type.typeArguments :
+      (res.isUnionType(type) ? type.unionTypes :
+        (res.isTupleType(type) ? type.tupleTypes : undefined));
 
     if (nested) {
       for (const sub of nested) {
@@ -122,7 +124,7 @@ export class ImportManager {
       ret;
   }
 
-  getOrImport(type: trv.ExternalType) {
+  getOrImport(type: res.ExternalType) {
     if (type.source === this.source.fileName) {
       return ts.createIdentifier(type.name!);
     } else {

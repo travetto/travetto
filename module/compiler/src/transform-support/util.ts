@@ -2,7 +2,6 @@ import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
 import { AppInfo } from '@travetto/base';
-import { DecList, DecoratorMeta } from './types';
 
 export class TransformUtil {
 
@@ -17,31 +16,6 @@ export class TransformUtil {
         pkg = `@travetto/${path.split(/@travetto[\/]/)[1].split(/[\/]/)[0]}`;
       }
       return pkg;
-    }
-  }
-
-  static getDecoratorList(node: ts.Node): DecoratorMeta[] {
-    return ((node.decorators ?? []) as any as DecList)
-      .map(dec => {
-        const ident = TransformUtil.getDecoratorIdent(dec);
-        return ({
-          dec,
-          ident,
-          name: ident ?
-            ident.escapedText! as string :
-            undefined as any as string
-        });
-      })
-      .filter(x => !!x.ident);
-  }
-
-  static getDecoratorIdent(d: ts.Decorator): ts.Identifier {
-    if (ts.isCallExpression(d.expression)) {
-      return d.expression.expression as ts.Identifier;
-    } else if (ts.isIdentifier(d.expression)) {
-      return d.expression;
-    } else {
-      throw new Error('No Identifier');
     }
   }
 

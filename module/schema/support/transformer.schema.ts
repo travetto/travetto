@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
+import { TransformUtil, TransformerState, OnProperty, OnClass, AfterClass } from '@travetto/compiler/src/transform-support';
 
 const IGNORE_CHECKER = TransformUtil.decoratorMatcher('schema-ignore');
 
@@ -14,7 +14,7 @@ interface AutoState {
   [hasSchema]?: boolean;
 }
 
-class SchemaTransformer {
+export class SchemaTransformer {
 
   // TODO: Full rewrite
   static computeProperty(state: AutoState & TransformerState, node: ts.PropertyDeclaration) {
@@ -71,6 +71,7 @@ class SchemaTransformer {
     return res;
   }
 
+  @OnClass('trv/schema/Schema')
   static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const schemas = SCHEMA_CHECKER(node, state.imports);
     const schema = schemas.get('Schema');
@@ -88,6 +89,7 @@ class SchemaTransformer {
     return node;
   }
 
+  @AfterClass('trv/schema/Schema')
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators || [])];
 
@@ -119,6 +121,7 @@ class SchemaTransformer {
     );
   }
 
+  @OnProperty()
   static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
     if (state[inAuto]) {
       const ignore = IGNORE_CHECKER(node, state.imports);
@@ -129,12 +132,3 @@ class SchemaTransformer {
     return node;
   }
 }
-
-export const transformers: NodeTransformer[] = [
-  { type: 'property', all: true, before: SchemaTransformer.handleProperty.bind(SchemaTransformer) },
-  {
-    type: 'class', alias: 'trv/schema/Schema',
-    before: SchemaTransformer.handleClassBefore.bind(SchemaTransformer),
-    after: SchemaTransformer.handleClassAfter.bind(SchemaTransformer)
-  }
-];

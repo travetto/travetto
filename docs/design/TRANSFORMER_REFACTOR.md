@@ -25,3 +25,7 @@ interface Type {
 
 This structure will allow us to identify all types and build against a consistent API and ultimately this data can be built from 
 they typechecker or the AST type information, just with varying degrees of success.
+
+## Tasking
+- assert, deep equals on literals and constant values
+- application/schema support interfaces
