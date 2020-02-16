@@ -22,6 +22,10 @@ export class TransformerState {
     return this.imports.getOrImport(type);
   }
 
+  importFile(file: string) {
+    return this.imports.importFile(file);
+  }
+
   generateUniqueId(name: string) {
     const val = (this.ids.get(name) ?? 0) + 1;
     this.ids.set(name, val);
@@ -40,6 +44,10 @@ export class TransformerState {
 
   readJSDocs(node: ts.Type | ts.Node) {
     return this.checker.readJSDocs(node);
+  }
+
+  readAliasDocs(node: ts.Node) {
+    return this.checker.readAliasDocs(node);
   }
 
   importDecorator(pth: string, name: string) {

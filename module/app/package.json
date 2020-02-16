@@ -23,7 +23,6 @@
   "files": [
     "index.ts",
     "src",
-    "config",
     "bin",
     "support"
   ],

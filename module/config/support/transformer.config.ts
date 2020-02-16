@@ -1,8 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
-
-const CONFIG_CHECKER = TransformUtil.decoratorMatcher('config');
+import { TransformerState, NodeTransformer } from '@travetto/compiler';
 
 const hasConfig = Symbol('hasConfig');
 
@@ -12,12 +10,8 @@ interface AutoState {
 
 class ConfigTransformer {
 
-  static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
-    const configs = CONFIG_CHECKER(node, state.imports);
-    const config = configs.get('Config');
-
-    state[hasConfig] = !!config;
-
+  static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: ts.Decorator) {
+    state[hasConfig] = !!dec;
     return node;
   }
 
@@ -50,7 +44,7 @@ class ConfigTransformer {
 export const transformers: NodeTransformer[] = [
   { type: 'property', all: true, before: ConfigTransformer.handleProperty.bind(ConfigTransformer) },
   {
-    type: 'class', aliasName: 'config',
+    type: 'class', alias: 'trv/config/Config',
     before: ConfigTransformer.handleClassBefore.bind(ConfigTransformer),
     after: ConfigTransformer.handleClassAfter.bind(ConfigTransformer)
   }

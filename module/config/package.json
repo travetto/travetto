@@ -24,7 +24,6 @@
   "main": "index.ts",
   "name": "@travetto/config",
   "files": [
-    "config",
     "index.ts",
     "src",
     "support"

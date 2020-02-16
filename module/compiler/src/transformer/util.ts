@@ -2,28 +2,9 @@ import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
 import { AppInfo } from '@travetto/base';
-import { ConfigSource } from '@travetto/config';
-import { DecList, Import } from './types';
+import { DecList, DecoratorMeta } from './types';
 
 export class TransformUtil {
-
-  static aliasMapper<T>(ns: string, onItem: (pkg: string, cls: string) => T) {
-    // Class to package, to element
-    if (ns && ns !== '*') {
-      const obj = ConfigSource.get(`decorator.${ns}`);
-      for (const pkg of Object.keys(obj)) {
-        const val = obj[pkg];
-        for (const cls of Array.isArray(val) ? val : [val]) {
-          onItem(pkg, cls);
-        }
-      }
-    } else {
-      const obj = ConfigSource.get('decorator');
-      for (const space of Object.keys(obj)) {
-        this.aliasMapper(space, onItem);
-      }
-    }
-  }
 
   static extractPackage(path: string) {
     path = FsUtil.toUnix(path);
@@ -39,13 +20,14 @@ export class TransformUtil {
     }
   }
 
-  static getDecoratorList(node: ts.Node) {
+  static getDecoratorList(node: ts.Node): DecoratorMeta[] {
     return ((node.decorators ?? []) as any as DecList)
       .map(dec => {
         const ident = TransformUtil.getDecoratorIdent(dec);
         return ({
           dec,
-          ident: ts.isIdentifier(ident) ?
+          ident,
+          name: ident ?
             ident.escapedText! as string :
             undefined as any as string
         });
@@ -61,46 +43,6 @@ export class TransformUtil {
     } else {
       throw new Error('No Identifier');
     }
-  }
-
-  static customDecoratorMatcher<T>(
-    ns: string,
-    onDecorator: (pkg: string, name: string, dec: ts.Decorator) => T,
-  ) {
-    const aliases = new Map<string, Set<string>>();
-    this.aliasMapper(ns, (pkg, cls) => {
-      if (!aliases.has(cls)) {
-        aliases.set(cls, new Set());
-      }
-      aliases.get(cls)!.add(pkg);
-    });
-
-    const decCache = Symbol('decCache');
-
-    return (node: ts.Node, imports: Map<string, Import>) => {
-      if (!(node as any)[decCache]) {
-        const out = new Map<string, T>();
-        for (const { ident, dec } of this.getDecoratorList(node)) {
-          const imp = imports.get(ident);
-          const pkgs = aliases.get(ident);
-          if (imp && pkgs && pkgs.has(imp.pkg!)) {
-            out.set(ident, onDecorator(imp.pkg!, ident, dec));
-          }
-        }
-        (node as any)[decCache] = out;
-      }
-      return (node as any)[decCache] as Map<string, T>;
-    };
-  }
-
-  static allDecoratorMatcher() {
-    return this.customDecoratorMatcher('*', (pkg: string, name: string, dec: ts.Decorator) =>
-      ({ pkg, name, dec })
-    );
-  }
-
-  static decoratorMatcher(ns: string) {
-    return this.customDecoratorMatcher(ns, (pkg, name, dec) => dec);
   }
 
   static fromLiteral<T extends ts.Node>(val: T): T;

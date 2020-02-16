@@ -4,6 +4,7 @@ import { SchemaRegistry } from '@travetto/schema';
 import { ModelRegistry } from './registry';
 import { ModelOptions, IndexConfig } from './types';
 
+/** @alias trv/schema/Schema */
 export function Model(conf: Partial<ModelOptions<any>> = {}) {
   return function <T extends Class>(target: T) {
     // Force registry first, and update with extra information after computing

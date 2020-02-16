@@ -16,6 +16,9 @@ function extractSymbolOrConfig<T extends { qualifier?: symbol }>(args: any[]) {
   return out;
 }
 
+/**
+ * @alias InjectableDecorator
+ */
 export function Injectable(qualifier: symbol, config?: Partial<InjectableConfig<any>>): ClassDecorator;
 export function Injectable(config: Partial<InjectableConfig<any>>): ClassDecorator;
 export function Injectable(): ClassDecorator;
@@ -37,6 +40,9 @@ export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
   };
 }
 
+/**
+ * @alias InjectDecorator
+ */
 export function Inject(symbol: symbol, config?: InjectConfig): ParameterDecorator & PropertyDecorator;
 export function Inject(config: InjectConfig): ParameterDecorator & PropertyDecorator;
 export function Inject(): ParameterDecorator & PropertyDecorator;
@@ -54,6 +60,9 @@ export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
   };
 }
 
+/**
+ * @alias InjectableFactoryDecorator
+ */
 export function InjectableFactory(symbol: symbol, config?: InjectableFactoryConfig<any>): MethodDecorator;
 export function InjectableFactory(config: InjectableFactoryConfig<any>): MethodDecorator;
 export function InjectableFactory(): MethodDecorator;

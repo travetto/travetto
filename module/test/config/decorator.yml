@@ -1,6 +1,0 @@
----
-test:
-  '@travetto/test': Test
-
-suite:
-  '@travetto/test': Suite

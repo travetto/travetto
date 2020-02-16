@@ -4,6 +4,11 @@ type Literal = boolean | string | number | RegExp | Date;
 
 export type Import = { path: string, ident: ts.Identifier, stmt?: ts.ImportDeclaration, pkg?: string };
 export type DecList = ts.NodeArray<ts.Decorator>;
+export type DecoratorMeta = {
+  dec: ts.Decorator;
+  ident: ts.Identifier;
+  name?: string;
+};
 
 export const GLOBAL_SIMPLE = {
   RegExp,

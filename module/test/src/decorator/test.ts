@@ -1,6 +1,7 @@
 import { TestRegistry } from '../registry/registry';
 import { TestConfig } from '../model/test';
 
+/** @alias trv/test/Test */
 export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description: string, ...rest: Partial<TestConfig>[]): MethodDecorator;

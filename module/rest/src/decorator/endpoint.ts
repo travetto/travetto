@@ -9,14 +9,21 @@ function Endpoint(method: Method, path: PathType = '/', extra: Partial<EndpointC
     return ret;
   } as EndpointDecorator;
 }
-
+/** @alias trv/rest/Endpoint */
 export const All = (path?: PathType) => Endpoint('all', path);
+/** @alias trv/rest/Endpoint */
 export const Get = (path?: PathType) => Endpoint('get', path);
+/** @alias trv/rest/Endpoint */
 export const Post = (path?: PathType) => Endpoint('post', path);
+/** @alias trv/rest/Endpoint */
 export const Put = (path?: PathType) => Endpoint('put', path);
+/** @alias trv/rest/Endpoint */
 export const Patch = (path?: PathType) => Endpoint('patch', path);
+/** @alias trv/rest/Endpoint */
 export const Delete = (path?: PathType) => Endpoint('delete', path);
+/** @alias trv/rest/Endpoint */
 export const Head = (path?: PathType) => Endpoint('head', path);
+/** @alias trv/rest/Endpoint */
 export const Options = (path?: PathType) => Endpoint('options', path);
 
 export const ResponseType = (responseType: EndpointIOType) =>

@@ -201,6 +201,6 @@ class RestTransformer {
 }
 
 export const transformers: NodeTransformer[] = [
-  { type: 'class', before: RestTransformer.handleController, aliasName: 'rest-controller' },
-  { type: 'method', before: RestTransformer.handleEndpoint, aliasName: 'rest-endpoint' },
+  { type: 'class', before: RestTransformer.handleController, alias: 'trv/rest/Controller' },
+  { type: 'method', before: RestTransformer.handleEndpoint, alias: 'trv/rest/Endpoint' },
 ];

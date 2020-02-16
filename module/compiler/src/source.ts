@@ -130,7 +130,7 @@ export class SourceManager {
       retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
     });
 
-    ScanApp.findFiles('.ts', x => !x.endsWith('.d.ts'))
+    ScanApp.findFiles('.ts', x => !x.endsWith('.d.ts'), this.cwd)
       .map(x => x.file)
       .filter(x => !/travetto\/([^/]*)\/test/.test(x))
       .filter(x => !require.cache[x])
@@ -144,7 +144,7 @@ export class SourceManager {
             x.includes('test') &&
             !x.includes('src') &&
             !x.includes('node_modules')
-          )
+          ), this.cwd
         )
         .forEach(x => this.rootNames.add(x.file));
     }

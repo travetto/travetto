@@ -2,8 +2,6 @@ import * as ts from 'typescript';
 
 import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
 
-const CACHE_CHECKER = TransformUtil.decoratorMatcher('cache');
-
 const CACHE_UTIL = 'CacheUtil';
 
 interface CacheState {
@@ -23,10 +21,11 @@ class CacheTransformer {
     }
   }
 
-  static handleMethod(state: TransformerState & CacheState, node: ts.MethodDeclaration) {
-    const decMap = CACHE_CHECKER(node, state.imports);
-    const isCache = decMap.has('Cache');
-    const dec = decMap.get('Cache') || decMap.get('EvictCache');
+  static handleMethod(state: TransformerState & CacheState, node: ts.MethodDeclaration, dec?: ts.Decorator) {
+
+    const decl = TransformUtil.getDecoratorList(node);
+
+    const isCache = !!decl.find(x => x.name === 'Cache');
 
     if (dec && ts.isCallExpression(dec.expression)) {
       this.initState(state);
@@ -78,5 +77,5 @@ class CacheTransformer {
 }
 
 export const transformers: NodeTransformer[] = [
-  { type: 'method', before: CacheTransformer.handleMethod.bind(CacheTransformer), aliasName: 'cache' },
+  { type: 'method', before: CacheTransformer.handleMethod.bind(CacheTransformer), alias: ['trv/cache/Cache', 'trv/cache/Evict'] },
 ];

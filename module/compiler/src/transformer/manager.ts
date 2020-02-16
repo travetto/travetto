@@ -1,8 +1,9 @@
 import * as ts from 'typescript';
 
 import { ScanApp, Env } from '@travetto/base';
-import { VisitorFactory, NodeTransformer } from '@travetto/compiler/src/transformer/visitor'; // Narrow import to minimize scope
+import { VisitorFactory, NodeTransformer } from './visitor'; // Narrow import to minimize scope
 import { TransformerState } from './state';
+import { CompilerUtil } from '../util';
 
 export class TransformerManager {
 
