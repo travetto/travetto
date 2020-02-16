@@ -4,6 +4,10 @@
 export interface Simple {
   name: string;
   age?: number;
+  sub: {
+    orange: 5 | string;
+    dob: Date;
+  };
 }
 
 /**
@@ -14,7 +18,7 @@ export class Concrete {
   size: number;
 }
 
-/** @alias trv/Custom */
+/** @augments trv/Custom */
 export function Custom(): MethodDecorator {
   return () => { };
 }

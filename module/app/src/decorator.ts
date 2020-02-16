@@ -11,8 +11,8 @@ export type AppDecorator = Partial<ApplicationConfig> & {
 };
 
 /**
- * @alias trv/app/Application
- * @alias trv/di/Injectable
+ * @augments trv/app/Application
+ * @augments trv/di/Injectable
  */
 export function Application(
   name: string,

@@ -1,8 +1,9 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, NodeTransformer } from '@travetto/compiler';
 import { FsUtil } from '@travetto/boot';
+import { TransformUtil, TransformerState, OnCall } from '@travetto/compiler/src/transform-support';
 import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT, DEEP_LITERAL_TYPES } from '../src/assert/types';
+
 
 const ASSERT_CMD = 'assert';
 const ASSERT_UTIL = 'AssertCheck';
@@ -41,7 +42,7 @@ interface Command {
   negate?: boolean;
 }
 
-class AssertTransformer {
+export class AssertTransformer {
 
   static lookupOpToken(key: number) {
     if (OP_TOKEN_TO_NAME.size === 0) {
@@ -175,6 +176,7 @@ class AssertTransformer {
     }
   }
 
+  @OnCall()
   static handleCall(state: TransformerState & AssertState, node: ts.CallExpression) {
     if (state[isTest] === undefined) {
       const name = FsUtil.toUnix(state.source.fileName);
@@ -186,17 +188,15 @@ class AssertTransformer {
     }
 
     if (!state[isTest]) {
-      return;
+      return node;
     }
 
-    let replaced = false; // eslint-disable-line @typescript-eslint/no-unused-vars
     const exp = node.expression;
 
     if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) { // Straight assert
       const cmd = this.getCommand(node.arguments);
       if (cmd) {
         node = this.doAssert(state, node, cmd);
-        replaced = true;
       }
     } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) { // Assert method call
       const ident = exp.expression;
@@ -208,14 +208,9 @@ class AssertTransformer {
           const sub = { ...this.getCommand(node.arguments)!, fn };
           node = this.doAssert(state, node, sub);
         }
-        replaced = true;
       }
     }
 
     return node;
   }
 }
-
-export const transformers: NodeTransformer[] = [
-  { type: 'call', all: true, before: AssertTransformer.handleCall.bind(AssertTransformer) }
-];

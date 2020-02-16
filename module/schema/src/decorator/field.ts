@@ -65,7 +65,7 @@ export const Long = () => Precision(19, 0);
 export const Currency = () => Precision(13, 2);
 
 // For Auto schemas
-/** @alias trv/schema/Ignore */
+/** @augments trv/schema/Ignore */
 export function Ignore(): PropertyDecorator {
   return (target: any, property: string | symbol) => { };
 }

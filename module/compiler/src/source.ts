@@ -1,12 +1,11 @@
 import * as ts from 'typescript';
 import * as path from 'path';
-import * as sourcemap from 'source-map-support';
 
 import { FileCache, RegisterUtil } from '@travetto/boot';
 import { Env, SystemUtil, ScanApp } from '@travetto/base';
 
 import { CompilerUtil } from './util';
-import { TransformerManager } from './transformer/manager';
+import { TransformerManager } from './transformer';
 
 export class SourceManager {
   private transformerManager: TransformerManager;
@@ -99,7 +98,7 @@ export class SourceManager {
     return this.program;
   }
 
-  private compile(fileName: string, force = false) {
+  private transpile(fileName: string, force = false) {
     if (force || !(this.config.cache && this.cache.hasEntry(fileName))) {
       console.trace('Emitting', fileName.replace(this.cwd, ''));
 
@@ -123,14 +122,8 @@ export class SourceManager {
   }
 
   init() {
-    // register source maps
-    sourcemap.install({
-      emptyCacheBetweenOperations: !Env.prod, // Be less strict in non-dev
-      retrieveFile: (p: string) => this.contents.get(p.replace('.js', '.ts'))!,
-      retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
-    });
-
-    ScanApp.findFiles('.ts', x => !x.endsWith('.d.ts'), this.cwd)
+    // TODO: Understand
+    ScanApp.findFiles('.ts', x => !x.endsWith('.d.ts') && !x.startsWith('bin/'), Env.cwd)
       .map(x => x.file)
       .filter(x => !/travetto\/([^/]*)\/test/.test(x))
       .filter(x => !require.cache[x])
@@ -164,12 +157,12 @@ export class SourceManager {
 
   getTranspiled(fileName: string, force = false) {
     try {
-      return this.compile(fileName, force);
+      return this.transpile(fileName, force);
     } catch (err) {
       if (Env.watch) { // Handle transpilation errors
         const errContent = CompilerUtil.getErrorModuleProxySource(err.message);
         this.contents.set(fileName, errContent);
-        return this.compile(fileName, true);
+        return this.transpile(fileName, true);
       } else {
         throw err;
       }
@@ -200,5 +193,13 @@ export class SourceManager {
     this.hashes.clear();
     delete this.program;
     delete this.compilerOptions;
+  }
+
+  getSourceMapHandler() {
+    return {
+      emptyCacheBetweenOperations: !Env.prod, // Be less strict in non-dev
+      retrieveFile: (p: string) => this.contents.get(p.replace('.js', '.ts'))!,
+      retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
+    };
   }
 }
