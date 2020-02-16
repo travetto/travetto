@@ -1,5 +1,9 @@
 import { ConfigSource } from './source';
 
+/**
+ * @alias trv/config/Config
+ * @alias trv/di/Injectable
+ */
 export function Config(ns: string, depTarget?: new (...args: any[]) => any, name: string = '') {
 
   return (target: new (...args: any[]) => any) => {

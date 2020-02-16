@@ -11,9 +11,9 @@ export class TypeSuite {
 
   @Test()
   testStuff() {
-    const src = new SourceManager(Env.cwd, { cache: false });
+    const src = new SourceManager(Env.cwd, { cache: true });
     src.init();
     const output = src.getTranspiled(`${SRC}/sample.ts`, true);
-
+    console.log(output);
   }
 }

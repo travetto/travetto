@@ -36,7 +36,7 @@ class RegisterTransformer {
   }
 
   static transformClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
-    if (state.path === REGISTER_MOD) {  // Cannot process self
+    if (state.source.fileName === REGISTER_MOD) {  // Cannot process self
       return node;
     }
 

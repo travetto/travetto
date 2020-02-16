@@ -1,8 +1,0 @@
----
-schema:
-  '@travetto/model': 
-    - Model
-
-injectable:
-  '@travetto/model': 
-    - ModelController

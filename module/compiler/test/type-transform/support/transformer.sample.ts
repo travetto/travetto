@@ -18,7 +18,7 @@ class ConfigTransformer {
 
   static handleMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration) {
     CompilerUtil.log('Return Type');
-    CompilerUtil.log(state.resolveType(state.checker.getReturnType(node)));
+    CompilerUtil.log(state.resolveReturnType(node));
     if (node.parameters?.length) {
       CompilerUtil.log('Parameters');
       for (const param of node.parameters) {
@@ -30,7 +30,7 @@ class ConfigTransformer {
 }
 
 export const transformers: NodeTransformer[] = [
-  { type: 'property', all: true, before: ConfigTransformer.handleProperty.bind(ConfigTransformer) },
-  { type: 'method', all: true, before: ConfigTransformer.handleMethod.bind(ConfigTransformer) },
-  { type: 'static-method', all: true, before: ConfigTransformer.handleMethod.bind(ConfigTransformer) },
+  // { type: 'property', all: true, before: ConfigTransformer.handleProperty.bind(ConfigTransformer) },
+  // { type: 'method', all: true, before: ConfigTransformer.handleMethod.bind(ConfigTransformer) },
+  { type: 'static-method', alias: 'trv/Custom', before: ConfigTransformer.handleMethod.bind(ConfigTransformer) },
 ];

@@ -27,7 +27,6 @@
   "files": [
     "index.ts",
     "src",
-    "config",
     "support",
     "extension"
   ],

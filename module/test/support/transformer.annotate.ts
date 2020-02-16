@@ -20,6 +20,6 @@ class AnnotationTransformer {
 }
 
 export const transformers: NodeTransformer[] = [
-  { type: 'method', aliasName: 'test', before: AnnotationTransformer.annotate },
-  { type: 'class', aliasName: 'suite', before: AnnotationTransformer.annotate }
+  { type: 'method', alias: 'trv/test/Test', before: AnnotationTransformer.annotate },
+  { type: 'class', alias: 'trv/test/Suite', before: AnnotationTransformer.annotate }
 ];

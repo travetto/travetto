@@ -1,5 +1,9 @@
 import { ApplicationParameter, AppDecorator, Application as ParentApplication } from '@travetto/app';
 
+/**
+ * @alias trv/app/Application
+ * @alias trv/di/Injectable
+ */
 export function Application(
   name: string,
   config?: AppDecorator,
