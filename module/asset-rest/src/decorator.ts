@@ -22,6 +22,9 @@ export class UploadAsset implements Asset {
   metadata: AssetMetadata;
 }
 
+/**
+ * @alias trv/asset-rest/AssetUpload
+ */
 export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetConfig> = {}) {
 
   if (typeof param === 'string') {

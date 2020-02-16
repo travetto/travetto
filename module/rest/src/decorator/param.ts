@@ -25,10 +25,15 @@ export const Param = (location: ParamConfig['location'], extra: string | Partial
   };
 };
 
+/** @alias trv/rest/Param */
 export const Context = (param: string | Partial<ParamConfig> = {}) => Param('context', param);
+/** @alias trv/rest/Param */
 export const Path = (param: string | Partial<ParamConfig> = {}) => Param('path', param);
+/** @alias trv/rest/Param */
 export const Query = (param: string | Partial<ParamConfig> = {}) => Param('query', param);
+/** @alias trv/rest/Param */
 export const Header = (param: string | Partial<ParamConfig> = {}) => Param('header', param);
+/** @alias trv/rest/Param */
 export const Body = (param: Partial<ParamConfig> = {}) => Param('body', param);
 
 export const ContextProvider = ParamUtil.provider.bind(ParamUtil);

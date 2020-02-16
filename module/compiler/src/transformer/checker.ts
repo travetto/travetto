@@ -56,6 +56,14 @@ export class TypeChecker {
     return out;
   }
 
+  readAliasDocs(node: ts.Node) {
+    const type = this._checker.getTypeAtLocation(node);
+    const tags = type.symbol?.getJsDocTags() ?? [];
+    return tags
+      .filter(el => el.name === 'alias')
+      .map(el => el.text!);
+  }
+
   getRealType(type: ts.Type): trv.RealType | undefined {
     const flags = type.getFlags();
 
@@ -115,7 +123,7 @@ export class TypeChecker {
       common = { ...common };
       delete common.value;
     }
-    const optional = types.findIndex(x => type.flags & ts.TypeFlags.Undefined) >= 0;
+    const optional = types.findIndex(x => x.flags & ts.TypeFlags.Undefined) >= 0;
 
     return { optional, commonType: common, unionTypes };
   }
@@ -126,6 +134,21 @@ export class TypeChecker {
     };
   }
 
+  getReferencedType(type: ts.Type) {
+    const obj = this.getExternalType(type);
+
+    if (type.isClass()) { // Real type
+      return obj;
+    } else if (obj.source.includes('typescript/lib')) { // Global Type
+      const ret = this.getRealType(type);
+      if (ret) {
+        return ret;
+      }
+    }
+
+    return this.getShapeType(type); // Handle fall through on interfaces
+  }
+
   resolveType(type: ts.Type | ts.Node): trv.Type {
     if ('getSourceFile' in type) {
       type = this._checker.getTypeAtLocation(type);
@@ -133,20 +156,10 @@ export class TypeChecker {
     const flags = type.getFlags();
     const objectFlags = this.getObjectFlags(type) ?? 0;
 
-    if (objectFlags & ts.ObjectFlags.Reference && !type.symbol) { // Tuple type?
+    if (objectFlags & ts.ObjectFlags.Reference && !type.getSymbol()) { // Tuple type?
       return this.getTupleType(type);
     } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
-      const obj = this.getExternalType(type);
-
-      if (type.isClass()) { // Real type
-        return obj;
-      } else if (obj.source.includes('typescript/lib')) { // Global Type
-        const ret = this.getRealType(type);
-        if (ret) {
-          return ret;
-        }
-      }
-      return this.getShapeType(type); // Handle fall through on interfaces
+      return this.getReferencedType(type);
     } else if (flags & (
       ts.TypeFlags.Boolean | ts.TypeFlags.BooleanLiteral |
       ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral |

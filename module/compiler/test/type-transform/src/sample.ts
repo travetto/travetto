@@ -1,6 +1,7 @@
-import { Simple, Concrete } from './types';
+import { Simple, Concrete, Custom } from './types';
 
 export class Container {
+  @Custom()
   static simpleAdd(a: number, b?: number) {
     return a + (b ?? 0);
   }

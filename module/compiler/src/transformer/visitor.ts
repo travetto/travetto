@@ -5,25 +5,20 @@ import { TransformerState } from './state';
 
 export type TransformerType = 'class' | 'method' | 'property' | 'static-method' | 'call';
 
-export type Alias = { name: string, pkg: string };
-
 type TransformerSet = {
   before: string[];
   after: string[];
   type: TransformerType;
-  data: Map<string, Map<string, NodeTransformer[]>>;
+  aliasMap: Map<string, NodeTransformer[]>;
 };
 
 export interface NodeTransformer<T extends TransformerType = TransformerType, N = ts.Node> {
   type: T;
   all?: boolean;
-  aliasName?: string;
-  aliases?: Alias[];
+  alias?: string[] | string;
   before?(state: TransformerState, node: N, dec?: ts.Decorator): ts.Node | undefined;
   after?(state: TransformerState, node: N, dec?: ts.Decorator): ts.Node | undefined;
 }
-
-const ALL_MATCHER = TransformUtil.allDecoratorMatcher();
 
 export class VisitorFactory {
 
@@ -40,21 +35,6 @@ export class VisitorFactory {
     }
   }
 
-  static computeAliases(transformer: NodeTransformer) {
-    const aliases: Alias[] = (transformer.aliases ?? []).slice(0);
-
-    if (transformer.aliasName) {
-      TransformUtil.aliasMapper(transformer.aliasName, (pkg, cls) => {
-        aliases.push({ pkg, name: cls });
-      });
-    }
-
-    if (transformer.all) {
-      aliases.push({ name: '*', pkg: '*' });
-    }
-    return aliases;
-  }
-
   private transformers = new Map<TransformerType, TransformerSet>();
   private always = {
     before: new Map<TransformerType, NodeTransformer[]>(),
@@ -67,27 +47,24 @@ export class VisitorFactory {
   ) {
     for (const trn of transformers) {
       if (!this.transformers.has(trn.type)) {
-        this.transformers.set(trn.type, { before: [], after: [], type: trn.type, data: new Map() });
+        this.transformers.set(trn.type, { before: [], after: [], type: trn.type, aliasMap: new Map() });
       }
 
-      const aliases = VisitorFactory.computeAliases(trn);
+      const aliases = trn.alias ? Array.isArray(trn.alias) ? trn.alias : [trn.alias] : [];
 
-      for (const { name, pkg } of aliases) {
+      for (const name of aliases) {
         const set = this.transformers.get(trn.type)!;
-        if (!set.data.has(name)) {
-          set.data.set(name, new Map());
+        if (!set.aliasMap.has(name)) {
+          set.aliasMap.set(name, []);
         }
         set.after.push(name);
         set.before.push(name);
-        if (!set.data.get(name)!.has(pkg)) {
-          set.data.get(name)!.set(pkg, []);
-        }
-        set.data.get(name)!.get(pkg)!.push(trn);
+        set.aliasMap.get(name)!.push(trn);
       }
 
       // Handle always run elements
       if (trn.all) {
-        for (const p of ['before', 'after'] as ['before', 'after']) {
+        for (const p of ['before', 'after'] as const) {
           if (trn[p]) {
             if (!this.always[p].has(trn.type)) {
               this.always[p].set(trn.type, []);
@@ -109,7 +86,7 @@ export class VisitorFactory {
       };
   }
 
-  executePhase<T extends ts.Node>(state: TransformerState, target: TransformerSet, phase: 'before' | 'after', node: T) {
+  executePhaseAlways<T extends ts.Node>(state: TransformerState, target: TransformerSet, phase: 'before' | 'after', node: T) {
     const always = this.always[phase].get(target.type);
     if (always && always.length) {
       for (const all of always) {
@@ -117,26 +94,37 @@ export class VisitorFactory {
         node = (all[phase]!(state, node) as T) || node;
         node.parent = og.parent;
       }
+      return node;
     }
+  }
 
+  executePhase<T extends ts.Node>(state: TransformerState, target: TransformerSet, phase: 'before' | 'after', node: T) {
     if (target[phase].length) {
-      const decs = ALL_MATCHER(node, state.imports);
+      const aliases = new Map();
+      for (const dec of TransformUtil.getDecoratorList(node)) {
+        for (const alias of state.readAliasDocs(dec.ident)) {
+          aliases.set(alias, dec.dec);
+        }
+      }
+      if (!aliases.size) {
+        return;
+      }
 
-      for (const [ident, { dec, pkg }] of decs.entries()) {
-        const tgt = target.data.get(ident)!.get(pkg);
-        if (tgt) {
-          for (const el of tgt) {
-            if (el[phase]) {
-              const og = node;
-              node = (el[phase]!(state, node, dec) as T) ?? node;
-              node.parent = og.parent;
-            }
+      for (const [key, values] of target.aliasMap.entries()) {
+        const dec = aliases.get(key);
+        if (!dec) {
+          continue;
+        }
+        for (const item of values) {
+          if (item[phase]) {
+            const og = node;
+            node = (item[phase]!(state, node, dec) as T) ?? node;
+            node.parent = og.parent;
           }
         }
       }
+      return node;
     }
-
-    return node;
   }
 
   visit<T extends ts.Node>(state: TransformerState, context: ts.TransformationContext, node: T): T {
@@ -147,15 +135,17 @@ export class VisitorFactory {
     } else {
       const og = node;
 
-      if (target.before.length || this.always.before.has(target.type)) {
-        node = this.executePhase(state, target, 'before', node);
-      }
+      node =
+        this.executePhaseAlways(state, target, 'before', node) ??
+        this.executePhase(state, target, 'before', node) ??
+        node;
 
       node = ts.visitEachChild(node, c => this.visit(state, context, c), context);
 
-      if (target.after.length || this.always.after.has(target.type)) {
-        node = this.executePhase(state, target, 'after', node);
-      }
+      node =
+        this.executePhaseAlways(state, target, 'after', node) ??
+        this.executePhase(state, target, 'after', node) ??
+        node;
 
       if (og !== node) {
         node.parent = og.parent;

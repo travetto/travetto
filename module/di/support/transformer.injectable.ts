@@ -198,7 +198,7 @@ class InjectableTransformer {
 }
 
 export const transformers: NodeTransformer[] = [
-  { type: 'class', aliasName: 'injectable', after: InjectableTransformer.handleClass },
-  { type: 'property', aliasName: 'inject', before: InjectableTransformer.handleProperty },
-  { type: 'static-method', aliasName: 'injectable-factory', before: InjectableTransformer.handleFactory }
+  { type: 'class', alias: 'trv/di/Injectable', after: InjectableTransformer.handleClass },
+  { type: 'property', alias: 'trv/di/Inject', before: InjectableTransformer.handleProperty },
+  { type: 'static-method', alias: 'trv/di/InjectableFactory', before: InjectableTransformer.handleFactory }
 ];

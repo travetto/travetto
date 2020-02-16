@@ -10,6 +10,10 @@ export type AppDecorator = Partial<ApplicationConfig> & {
   params?: never;
 };
 
+/**
+ * @alias trv/app/Application
+ * @alias trv/di/Injectable
+ */
 export function Application(
   name: string,
   config?: AppDecorator,

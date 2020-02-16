@@ -133,7 +133,7 @@ class SchemaTransformer {
 export const transformers: NodeTransformer[] = [
   { type: 'property', all: true, before: SchemaTransformer.handleProperty.bind(SchemaTransformer) },
   {
-    type: 'class', aliasName: 'schema',
+    type: 'class', alias: 'trv/schema/Schema',
     before: SchemaTransformer.handleClassBefore.bind(SchemaTransformer),
     after: SchemaTransformer.handleClassAfter.bind(SchemaTransformer)
   }

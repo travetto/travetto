@@ -80,7 +80,7 @@ export class ImportManager {
   }
 
   importFile(pth: string) {
-    if (!this.newImports.has(pth)) {
+    if (!pth.endsWith('.d.ts') && !this.newImports.has(pth)) {
       const id = `i_${SystemUtil.naiveHash(pth)}`;
 
       if (this.imports.has(id)) { // Already imported, be cool

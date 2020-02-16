@@ -4,6 +4,7 @@ import { SuiteConfig } from '../model/suite';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 
+/** @alias trv/test/Suite */
 export function Suite(): ClassDecorator;
 export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;

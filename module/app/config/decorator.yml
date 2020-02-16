@@ -1,8 +1,0 @@
----
-injectable:
-   '@travetto/app': 
-      - Application
-
-application:
-   '@travetto/app':
-      - Application

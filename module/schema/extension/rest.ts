@@ -54,6 +54,7 @@ export function schemaParamConfig(location: 'body' | 'query', config: Partial<Pa
   };
 }
 
+/** @alisa @trv/rest/Param */
 export function SchemaBody<T>(config: Partial<ParamConfig> & { view?: string } = {}) {
   return function (target: any, prop: string | symbol, idx: number) {
     ControllerRegistry.registerEndpointParameter(target.constructor, target.constructor.prototype[prop],
@@ -61,6 +62,7 @@ export function SchemaBody<T>(config: Partial<ParamConfig> & { view?: string } =
   };
 }
 
+/** @alisa @trv/rest/Param */
 export function SchemaQuery<T>(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
   return function (target: any, prop: string | symbol, idx: number) {
     ControllerRegistry.registerEndpointParameter(target.constructor, target.constructor.prototype[prop],
