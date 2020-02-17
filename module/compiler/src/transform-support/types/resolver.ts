@@ -1,16 +1,5 @@
 type Primitive = boolean | string | number | RegExp | Date;
 
-export interface ParamDoc {
-  name: string;
-  description: string;
-}
-
-export interface Documentation {
-  return?: string;
-  description?: string;
-  params?: ParamDoc[];
-}
-
 export interface Type {
   name?: string; // Name of type, if nominal, otherwise we will generate a unique identifier
   comment?: string;

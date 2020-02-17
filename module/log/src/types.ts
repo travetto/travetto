@@ -1,3 +1,5 @@
+import { ConsolePayload } from '@travetto/boot';
+
 export const LogLevels = {
   trace: 0,
   debug: 1,
@@ -7,19 +9,12 @@ export const LogLevels = {
   fatal: 5
 };
 
-export type LogLevel = keyof (typeof LogLevels);
-
 export type LogListener = (e: LogEvent) => void;
 
-export interface LogContext {
-  file?: string;
-  line?: number;
-  timestamp: number;
-  level: LogLevel;
-  category?: string;
-}
+export type LogLevel = ConsolePayload['level'];
 
-export interface LogEvent extends LogContext {
+export interface LogEvent extends ConsolePayload {
+  timestamp?: Date;
   prefix?: string;
   message?: string;
   args?: any[];

@@ -1,6 +1,8 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, res, OnClass, OnMethod } from '@travetto/compiler/src/transform-support';
+import {
+  TransformUtil, TransformerState, res, OnClass, OnMethod, ParamDoc, Documentation
+} from '@travetto/compiler/src/transform-support';
 
 import { ParamConfig } from '../src/types';
 
@@ -14,17 +16,13 @@ const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 
 export class RestTransformer {
 
-  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: res.Documentation) {
-    const dm = state.getDecoratorList(node)
-      .find(x => x.targets?.includes(PARAM_KEY));
+  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: Documentation) {
+    const pDec = state.findDecorator(node, PARAM_KEY);
 
-    const pDec = dm?.dec;
-
-    const typeName = node.type ? node.type.getText() : '';
     const pName = node.name.getText();
 
     let decConfig: ParamConfig = { name: pName } as any;
-    let commentConfig: res.ParamDoc = {} as any;
+    let commentConfig: ParamDoc = {} as any;
 
     const pDecArg = TransformUtil.getPrimaryArgument(pDec);
     if (pDecArg) {
@@ -38,18 +36,18 @@ export class RestTransformer {
     }
 
     const decs = (node.decorators || []).filter(x => x !== pDec);
-    commentConfig = (comments.params || []).find(x => x.name === decConfig.name) || {} as res.ParamDoc;
+    commentConfig = (comments.params || []).find(x => x.name === decConfig.name) || {} as ParamDoc;
 
-    let rType: any = state.resolveType(node);
+    let rType: res.Type = state.resolveType(node);
     const array = res.isRealType(rType) && rType.realType === Array;
-    rType = array ? (rType as res.RealType).realType : rType;
-    const type = rType.realType ? ts.createIdentifier(rType.realType) :
-      state.getImport(rType);
+    rType = array && res.isRealType(rType) ? rType.typeArguments?.[0]! : rType;
+
+    const type = state.typeToIdentifier(rType);
 
     let defaultType = 'Query';
 
-    if (typeName === 'Request' || typeName === 'Response') { // Convert to custom types, special handling for interfaces
-      rType = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, typeName.toUpperCase());
+    if (rType.name === 'Request' || rType.name === 'Response') { // Convert to custom types, special handling for interfaces
+      rType = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, rType.name.toUpperCase());
       defaultType = 'Context'; // White list request/response as context
     }
 
@@ -58,7 +56,7 @@ export class RestTransformer {
       defaultValue: node.initializer && TransformUtil.toLiteral(node.initializer),
       ...commentConfig,
       ...decConfig,
-      required: decConfig.required !== undefined ? decConfig.required : (!(node.questionToken || node.initializer) || commentConfig.required),
+      required: decConfig.required !== undefined ? decConfig.required : !(node.questionToken || node.initializer),
       type: type as any,
       array
     };

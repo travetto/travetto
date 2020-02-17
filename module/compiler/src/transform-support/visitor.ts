@@ -1,8 +1,9 @@
 import * as ts from 'typescript';
 
-import { DecoratorMeta } from './types/decorator';
-import { TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
-import { CompilerUtil } from '../util';
+import { ConsoleManager } from '@travetto/base';
+
+import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
+import { TransformUtil } from './util';
 
 export class VisitorFactory<S extends State = State> {
 
@@ -20,10 +21,6 @@ export class VisitorFactory<S extends State = State> {
   }
 
   private transformers = new Map<TransformerType, TransformerSet<S>>();
-  private always = {
-    before: new Map<TransformerType, NodeTransformer<S>[]>(),
-    after: new Map<TransformerType, NodeTransformer<S>[]>(),
-  };
 
   constructor(
     private getState: (src: ts.SourceFile) => S,
@@ -31,56 +28,48 @@ export class VisitorFactory<S extends State = State> {
   ) {
     for (const trn of transformers) {
       if (!this.transformers.has(trn.type)) {
-        this.transformers.set(trn.type, { before: new Set(), after: new Set(), type: trn.type, targetMap: new Map() });
+        this.transformers.set(trn.type, {});
       }
       const set = this.transformers.get(trn.type)!;
-      const targets = trn.target ? Array.isArray(trn.target) ? trn.target : [trn.target] : [];
+      const targets = Array.isArray(trn.target) ? trn.target : [trn.target ?? 'ALL'];
 
       for (const target of targets) {
-        if (trn.after) {
-          set.after.add(target);
-        }
-        if (trn.before) {
-          set.before.add(target);
-        }
-        if (!set.targetMap.has(target)) {
-          set.targetMap.set(target, []);
-        }
-        set.targetMap.get(target)!.push(trn);
-      }
-
-      // Handle always run elements
-      if (!targets.length) {
-        for (const p of ['before', 'after'] as const) {
-          if (trn[p]) {
-            if (!this.always[p].has(trn.type)) {
-              this.always[p].set(trn.type, []);
+        for (const phase of ['before', 'after'] as const) {
+          if (trn[phase]) {
+            if (!set[phase]) {
+              set[phase] = new Map();
             }
-            this.always[p].get(trn.type)!.push(trn);
+            if (!set[phase]!.has(target)) {
+              set[phase]!.set(target, []);
+            }
+            set[phase]!.get(target)!.push(trn);
           }
         }
       }
     }
-    CompilerUtil.log(this.always);
   }
 
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) =>
       (file: ts.SourceFile): ts.SourceFile => {
-        const state = this.getState(file);
-        const ret = this.visit(state, context, file);
-        const out = state.finalize(ret);
-        return out;
+        try {
+          ConsoleManager.set('!compiler.log', TransformUtil.collapseNode, false);
+          const state = this.getState(file);
+          const ret = this.visit(state, context, file);
+          const out = state.finalize(ret);
+          return out;
+        } finally {
+          ConsoleManager.set(null);
+        }
       };
   }
 
   executePhaseAlways<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T) {
-    const always = this.always[phase].get(set.type);
-    if (!always?.length) {
+    if (!set[phase]?.size) {
       return;
     }
 
-    for (const all of always) {
+    for (const all of set[phase]!.get('ALL') ?? []) {
       const og = node;
       node = (all[phase]!(state, node) as T) ?? node;
       node.parent = og.parent;
@@ -89,7 +78,7 @@ export class VisitorFactory<S extends State = State> {
   }
 
   executePhase<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T) {
-    if (!set[phase].size) {
+    if (!set[phase]?.size) {
       return;
     }
 
@@ -105,11 +94,11 @@ export class VisitorFactory<S extends State = State> {
     }
 
     for (const [key, dec] of targets.entries()) {
-      if (!set[phase].has(key)) {
+      const values = set[phase]!.get(key);
+      if (!values || !values.length) {
         continue;
       }
 
-      const values = set.targetMap.get(key) ?? [];
       for (const item of values) {
         const og = node;
         node = (item[phase]!(state, node, dec) as T) ?? node;

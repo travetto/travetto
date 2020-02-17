@@ -153,7 +153,7 @@ export class Util {
 
   static isFunction(o: any): o is Function {
     const proto = o && Object.getPrototypeOf(o);
-    return proto && proto === Function.prototype || proto.constructor.name === 'AsyncFunction';
+    return proto && (proto === Function.prototype || proto.constructor.name === 'AsyncFunction');
   }
 
   static isClass(o: any) {

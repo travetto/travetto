@@ -34,3 +34,6 @@ Transformations are defined by `support/transformer.<name>.ts` as the filename. 
     }
   }
 ```
+
+## Advanced
+When dealing with transformers, logging is somewhat tricky as the compiler executes before the code is loaded.  To that end, a file `compiler.log` is created in the cache directory during the compilation process. This is a location that transformers should be free to log to, for debugging, and any additional feedback.

@@ -32,46 +32,40 @@ class $Env {
     this.debug = this.computeLogLevel('debug', this.dev ? '*' : '');
     this.trace = this.computeLogLevel('trace', '');
     this.quietInit = EnvUtil.isTrue('quiet_init');
-
-    this.initLogging(this.debug, this.trace);
   }
 
-  initLogging(debug: string | boolean, trace: string | boolean) {
-    const c = console as any;
-    const { log, error } = c.raw || (c.raw = {
-      log: c.log.bind(c),
-      error: c.error.bind(c)
-    });
+  private computeProfiles() {
+    const nodeEnv = this.computeNodeEnv();
+    const seen = new Set();
+    return ['application', nodeEnv.includes(PROD_KEY) ? PROD_KEY : '', ...nodeEnv]
+      .filter(x => !!x)
+      .filter(x => {
+        const isNew = !seen.has(x);
+        seen.add(x);
+        return isNew;
+      });
+  }
 
-    if (!trace) {
-      console.trace = () => { };
-    }
+  private computeAppRoots() {
+    let appRoots: string[] = [];
+    if (!EnvUtil.isFalse('app_roots')) {
+      appRoots.push(...EnvUtil.getList('app_roots'));
 
-    if (!debug) {
-      console.debug = () => { };
-    }
+      if (appRoots.length === 0) {
+        appRoots.push('.');
+      }
 
-    if (EnvUtil.isTrue('plain_logs')) {
-      return; // Don't decorate
+      appRoots = appRoots
+        .filter(x => !!x)
+        .map(x => (!x || x === '.') ? './' : FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, '.'));
     }
+    return appRoots;
+  }
 
-    const logFn = EnvUtil.isFalse('log_time') ? (op: typeof log, ...args: string[]) => op(...args) :
-      (trace ?
-        (op: typeof log, ...args: any[]) => op(new Date().toISOString(), ...args) :
-        (op: typeof log, ...args: any[]) => op(new Date().toISOString().split(/[.]/)[0], ...args));
-
-    console.log = logFn.bind(null, log, 'info ');
-    console.warn = logFn.bind(null, log, 'warn ');
-    console.info = logFn.bind(null, log, 'info ');
-    console.error = (...args) => {
-      logFn(error, 'error', ...args.map(x => x && x.toConsole ? x.toConsole?.() : (x && x.stack ? x.stack : x)));
-    };
-    if (trace) {
-      console.trace = logFn.bind(null, log, 'trace'); // Suppress trace statements
-    }
-    if (debug) {
-      console.debug = logFn.bind(null, log, 'debug'); // Suppress debug statements
-    }
+  private computeNodeEnv() {
+    const envs = ['node_env', 'env', 'profile'];
+    const all = envs.reduce((acc, x) => acc.concat(EnvUtil.getList(x)), [] as string[]);
+    return all.map(x => PROD_ENV_MAPPING[x] || x);
   }
 
   toJSON() {
@@ -84,40 +78,6 @@ class $Env {
 
   computeLogLevel(key: string, def?: string) {
     return !EnvUtil.isFalse(key) && (EnvUtil.isTrue(key) || /,(@trv:)?[*],/.test(`,${EnvUtil.get(key, def)},`) || !!EnvUtil.get(key));
-  }
-
-  computeNodeEnv() {
-    const envs = ['node_env', 'env', 'profile'];
-    const all = envs.reduce((acc, x) => acc.concat(EnvUtil.getList(x)), [] as string[]);
-    return all.map(x => PROD_ENV_MAPPING[x] || x);
-  }
-
-  computeProfiles() {
-    const nodeEnv = this.computeNodeEnv();
-    const seen = new Set();
-    return ['application', nodeEnv.includes(PROD_KEY) ? PROD_KEY : '', ...nodeEnv]
-      .filter(x => !!x)
-      .filter(x => {
-        const isNew = !seen.has(x);
-        seen.add(x);
-        return isNew;
-      });
-  }
-
-  computeAppRoots() {
-    let appRoots: string[] = [];
-    if (!EnvUtil.isFalse('APP_ROOTS')) {
-      appRoots.push(...EnvUtil.getList('APP_ROOTS'));
-
-      if (appRoots.length === 0) {
-        appRoots.push('.');
-      }
-
-      appRoots = appRoots
-        .filter(x => !!x)
-        .map(x => (!x || x === '.') ? './' : FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, '.'));
-    }
-    return appRoots;
   }
 
   hasProfile(name: string) {

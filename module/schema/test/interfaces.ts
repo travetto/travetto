@@ -9,10 +9,10 @@ interface Address {
   street2: string;
 }
 
-// @Schema()
-// class User {
-//   address: Address;
-// }
+@Schema()
+class User {
+  address: Address;
+}
 
 @Suite()
 export class ViewsTest {

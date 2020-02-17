@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import { Util } from '@travetto/base';
 
 import * as res from './types/resolver';
-import { CompilerUtil } from '../util';
+import { TransformUtil } from './util';
 
 const GLOBAL_SIMPLE = { RegExp, Date, Number, Boolean, String, Function, Object };
 const GLOBAL_COMPLEX = { Array, Promise, Set, Map };
@@ -55,7 +55,7 @@ export class TypeResolver {
   }
 
   private resolveShapeType(type: ts.Type): res.ShapeType {
-    const docs = this.readJSDocs(type);
+    const docs = TransformUtil.readJSDocs(type);
     const fields: Record<string, res.Type> = {};
     for (const member of this._checker.getPropertiesOfType(type)) {
       const memberType = this._checker.getTypeAtLocation(member.getDeclarations()![0]);
@@ -72,7 +72,7 @@ export class TypeResolver {
     const decl = sym.declarations?.[0];
     const source = decl?.getSourceFile().fileName;
     const name = sym?.getName();
-    const comments = this.readJSDocs(type);
+    const comments = TransformUtil.readJSDocs(type);
 
     return { name, source, comment: comments.description };
   }
@@ -128,42 +128,6 @@ export class TypeResolver {
     return this._checker.getReturnTypeOfSignature(sig);
   }
 
-  readJSDocs(type: ts.Type | ts.Node) {
-    const node = 'getSourceFile' in type ? type : type.getSymbol()?.getDeclarations()?.[0];
-
-    const out: res.Documentation = {
-      description: undefined,
-      return: undefined,
-      params: []
-    };
-
-    if (node) {
-      const tags = ts.getJSDocTags(node);
-      const docs = (node as any)['jsDoc'];
-
-      if (docs) {
-        const top = docs[docs.length - 1];
-        if (ts.isJSDoc(top)) {
-          out.description = top.comment;
-        }
-      }
-
-      if (tags && tags.length) {
-        for (const tag of tags) {
-          if (ts.isJSDocReturnTag(tag)) {
-            out.return = tag.comment;
-          } else if (ts.isJSDocParameterTag(tag)) {
-            out.params!.push({
-              name: tag.name && tag.name.getText(),
-              description: tag.comment ?? ''
-            });
-          }
-        }
-      }
-    }
-    return out;
-  }
-
   readDocsTags(node: ts.Node, name: string): string[] {
     const type = this._checker.getTypeAtLocation(node);
     const tags = type.symbol?.getJsDocTags() ?? [];
@@ -178,6 +142,8 @@ export class TypeResolver {
     }
     const flags = type.getFlags();
     const objectFlags = this.getObjectFlags(type) ?? 0;
+
+    console.log('Resolving type', objectFlags, flags, type);
 
     if (objectFlags & ts.ObjectFlags.Reference && !type.getSymbol()) { // Tuple type?
       return this.resolveTupleType(type);
@@ -207,5 +173,9 @@ export class TypeResolver {
       realType: Object,
       name: 'object'
     } as res.RealType;
+  }
+
+  getDeclarations(node: ts.Node): ts.Declaration[] {
+    return this._checker.getTypeAtLocation(node).symbol?.getDeclarations() ?? [];
   }
 }

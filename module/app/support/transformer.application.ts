@@ -3,7 +3,6 @@ import * as ts from 'typescript';
 import {
   TransformUtil, TransformerState, DecoratorMeta, res, OnClass
 } from '@travetto/compiler/src/transform-support';
-import { CompilerUtil } from '@travetto/compiler';
 
 export class ApplicationTransformer {
 
@@ -12,7 +11,7 @@ export class ApplicationTransformer {
     const name = p.name.getText();
     const def = p.initializer ? TransformUtil.toLiteral(p.initializer) : undefined;
 
-    CompilerUtil.log('COmputing Param', p.getText());
+    console.debug('COmputing Param', p.getText());
 
     let type = state.resolveType(p);
     let subtype;
@@ -39,7 +38,7 @@ export class ApplicationTransformer {
 
   @OnClass('trv/app/Application')
   static handleClass(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
-    CompilerUtil.log('COmputing App', dm?.dec?.getText());
+    console.debug('COmputing App', dm?.dec?.getText());
 
     const dec = dm?.dec;
 

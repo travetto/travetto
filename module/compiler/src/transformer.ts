@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
-
 import { ScanApp, Env } from '@travetto/base';
+
 import {
   NodeTransformer, VisitorFactory, TransformerState, getTransformHandlers
 } from './transform-support'; // Narrow import to minimize scope
@@ -8,6 +8,7 @@ import {
 const TRANSFORMER_RE = /^(?:node_modules\/[^/]*\/(?:[^/]*\/)?)?support\/transformer[.](.*?)[.]ts$/;
 
 type TransformerWithFile = NodeTransformer<TransformerState> & { file: string };
+
 
 export class TransformerManager {
 
