@@ -57,16 +57,7 @@ export class InjectableTransformer {
     let injectArgs = undefined;
 
     if (cons) {
-      try {
-        injectArgs = TransformUtil.fromLiteral(cons.parameters.map(x => InjectableTransformer.processDeclaration(state, x)));
-      } catch (e) {
-        // If error, skip
-        if (e.message !== 'Type information not found') {
-          throw e;
-        } else {
-          console.error(`Cannot get @InjectArgs for ${clsNode.name!.text}`);
-        }
-      }
+      injectArgs = TransformUtil.fromLiteral(cons.parameters.map(x => InjectableTransformer.processDeclaration(state, x)));
     }
 
     state.importDecorator(INJECTABLE_MOD, 'InjectArgs');
@@ -134,19 +125,10 @@ export class InjectableTransformer {
     );
   }
 
-  @OnStaticMethod('trv/di/InjectFactory')
+  @OnStaticMethod('trv/di/InjectableFactory')
   static handleFactory(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
-    let injectArgs: object[] = [];
     let original: any;
-
-    try {
-      injectArgs = node.parameters.map(x => InjectableTransformer.processDeclaration(state, x)!);
-    } catch (e) {
-      // If error, skip
-      if (e.message !== 'Type information not found') {
-        throw e;
-      }
-    }
+    const injectArgs = node.parameters.map(x => InjectableTransformer.processDeclaration(state, x)!);
 
     const dec = dm?.dec;
 
@@ -172,9 +154,10 @@ export class InjectableTransformer {
     }
 
     // Handle when
-    let target = TransformUtil.getObjectValue(injectConfig, 'target');
+    let target: any = TransformUtil.getObjectValue(injectConfig, 'target');
     if (target === undefined) {  // TODO: infer from typings, not just text?
       const ret = state.resolveReturnType(node);
+      console.debug('Resolving type', node.getText(), ret);
       if (res.isExternalType(ret)) {
         target = state.getOrImport(ret);
       }

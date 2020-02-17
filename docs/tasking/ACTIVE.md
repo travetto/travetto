@@ -8,9 +8,9 @@ Cache/Rest-Session
 Compiler
 ----------------------
 - [?] Support type checking in transformers
-  - [?] Convert schema/rest/swagger/model/application to use resolved type information
+  - [?] Convert schema/rest/swagger/test/config/cache/application to use resolved type information
   - [?] Investigate auto creating schemas from interfaces for simple one offs  
-
+  - [?] Rewrite test module/plugin to work with new compiler architecture
 Tests
 --------------
 - [?] Better unit tests

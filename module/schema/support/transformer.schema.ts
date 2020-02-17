@@ -1,10 +1,8 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, OnProperty, OnClass, AfterClass } from '@travetto/compiler/src/transform-support';
-
-const IGNORE_CHECKER = TransformUtil.decoratorMatcher('schema-ignore');
-
-const SCHEMA_CHECKER = TransformUtil.decoratorMatcher('schema');
+import {
+  TransformUtil, TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, res
+} from '@travetto/compiler/src/transform-support';
 
 const inAuto = Symbol('inAuto');
 const hasSchema = Symbol('hasSchema');
@@ -14,33 +12,32 @@ interface AutoState {
   [hasSchema]?: boolean;
 }
 
+const SCHEMA_MOD = require.resolve('../src/decorator/schema');
+const FIELD_MOD = require.resolve('../src/decorator/field');
+
 export class SchemaTransformer {
 
   // TODO: Full rewrite
   static computeProperty(state: AutoState & TransformerState, node: ts.PropertyDeclaration) {
 
-    const typeExpr = state.checker.resolveType(node);
+    const typeExpr = state.resolveType(node);
     const properties = [];
-    const isUnion = node.type && node.type!.kind === ts.SyntaxKind.UnionType;
 
-    if (!node.questionToken && !(isUnion && (node.type as ts.UnionTypeNode).types.find(x => x.kind === ts.SyntaxKind.UndefinedKeyword))) {
+    if (!node.questionToken && !typeExpr.undefinable) {
       properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral({ active: true })));
     }
 
     // If we have a union type
-    if (isUnion && ['Number', 'String'].includes((typeExpr as any).text)) {
-
-      const types = (node.type! as ts.UnionTypeNode).types;
-      const literals = types.map(x => (x as ts.LiteralTypeNode).literal);
-      const values = literals.map(x => x.getText());
+    if (res.isUnionType(typeExpr)) {
+      const values = typeExpr.unionTypes.map(x => res.isRealType(x) ? x.value : undefined);
 
       properties.push(ts.createPropertyAssignment('enum', TransformUtil.fromLiteral({
-        values: literals,
+        values,
         message: `{path} is only allowed to be "${values.join('" or "')}"`
       })));
     }
 
-    const params = [typeExpr];
+    const params = [];
     if (properties.length) {
       params.push(ts.createObjectLiteral(properties));
     }
@@ -50,7 +47,7 @@ export class SchemaTransformer {
     const dec = state.createDecorator('Field', ...params);
     const newDecs = [...(node.decorators || []), dec];
 
-    const comments = state.checker.describeByJSDocs(node);
+    const comments = state.readJSDocs(node);
     if (comments.description) {
       state.importDecorator(require.resolve('../src/decorator/common'), 'Describe');
 
@@ -59,7 +56,7 @@ export class SchemaTransformer {
       })));
     }
 
-    const res = ts.updateProperty(node,
+    const result = ts.updateProperty(node,
       ts.createNodeArray(newDecs),
       node.modifiers,
       node.name,
@@ -68,15 +65,17 @@ export class SchemaTransformer {
       node.initializer
     );
 
-    return res;
+    return result;
   }
 
   @OnClass('trv/schema/Schema')
-  static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
-    const schemas = SCHEMA_CHECKER(node, state.imports);
-    const schema = schemas.get('Schema');
+  static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta) {
+    if (!dec) {
+      return node;
+    }
 
-    let auto = !!schemas.size;
+    const schema = state.findDecorator(node, 'trv/schema/Schema', 'Schema', SCHEMA_MOD);
+    let auto = !!schema;
 
     state[hasSchema] = !!schema;
 
@@ -93,7 +92,7 @@ export class SchemaTransformer {
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators || [])];
 
-    const comments = state.checker.describeByJSDocs(node);
+    const comments = state.readJSDocs(node);
 
     if (!state[hasSchema]) {
       state.importDecorator(require.resolve('../src/decorator/schema'), 'Schema');
@@ -124,8 +123,8 @@ export class SchemaTransformer {
   @OnProperty()
   static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
     if (state[inAuto]) {
-      const ignore = IGNORE_CHECKER(node, state.imports);
-      if (!ignore.size) {
+      const ignore = state.findDecorator(node, 'trv/schema/Ignore', 'Ignore', FIELD_MOD);
+      if (!ignore) {
         return this.computeProperty(state, node);
       }
     }

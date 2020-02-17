@@ -5,6 +5,18 @@ let a: any = 0; a = 1;
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+const BIG = { age: 5 };
+const BIGGER: object = { age: 6 };
+
+class Alt {
+  includes(o: any): boolean {
+    return true;
+  }
+  test(o: any): boolean {
+    return true;
+  }
+}
+
 @Suite()
 class Simple {
 
@@ -111,5 +123,27 @@ class Simple {
     }, (err: any) =>
       err.message.startsWith('Big') && err.message.length > 4 ? undefined : err
     );
+  }
+
+  @Test()
+  testTypes() {
+    const op = () => [1, 2, 3];
+
+    assert([1, 2, 3].includes(3));
+    assert(/[abc]/.test('a'));
+
+    assert(op().includes(3));
+
+    const alt = new Alt();
+    assert(alt.includes(3));
+    assert(alt.test('a'));
+  }
+
+  @Test()
+  testConstVerification() {
+    const c = { name: 20 };
+    const d = { name: 20 };
+
+    assert(c === d);
   }
 }

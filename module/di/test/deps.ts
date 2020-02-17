@@ -57,13 +57,13 @@ export const CUSTOM_EMPTY = Symbol('Custom EMPTY');
 
 class TestConfig {
   @InjectableFactory(CUSTOM_EMPTY)
-  static getNewDb(): DbConfig<any, any> {
+  static getNewDb() {
     const out = new DbConfig();
     return out;
   }
 
   @InjectableFactory(CUSTOM_EMPTY)
-  static getNewEmpty(): Empty {
+  static getNewEmpty() {
     const out = new Empty();
     out.age = 20;
     console.log('Custom EMPTY 1', out);
@@ -71,14 +71,14 @@ class TestConfig {
   }
 
   @InjectableFactory(CUSTOM_SERVICE_INHERIT)
-  static getObject(@Inject(SERVICE_INHERIT_2) svc?: ServiceInherit): ServiceInherit {
-    const out = new ServiceInherit2(svc ? svc.db : new Database());
+  static getObject(@Inject(SERVICE_INHERIT_2) svc?: ServiceInherit) {
+    const out: ServiceInherit = new ServiceInherit2(svc ? svc.db : new Database());
     out.age = 11;
     return out;
   }
 
   @InjectableFactory(CUSTOM_DATABASE)
-  static getCustomDB(@Inject(CUSTOM_EMPTY) empty: Empty): Database {
+  static getCustomDB(@Inject(CUSTOM_EMPTY) empty: Empty) {
     console.log('Custom EMPTY 2', empty);
     const config = new DbConfig();
     config.temp = 'any';

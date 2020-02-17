@@ -18,12 +18,19 @@ declare const global: {
   };
 };
 
+type Preparer = (name: string, contents: string) => string;
+
 export class RegisterUtil {
+  private static preparers: Preparer[] = [];
+
   // @ts-ignore
   static ogModuleLoad = Module._load.bind(Module);
   static pkgName: string;
-  static plainLogs = EnvUtil.isTrue('plain_logs');
   static libRequire: (x: string) => any;
+
+  static addPreparer(fn: Preparer) {
+    this.preparers.push(fn);
+  }
 
   static getErrorModuleProxy(err: string) {
     const onError = () => {
@@ -47,53 +54,11 @@ export class RegisterUtil {
     });
   }
 
-  static computeModuleFromFile(fileName: string) {
-    /** @type string */
-    let mod = FsUtil.toUnix(fileName);
-
-    let ns = '@sys';
-
-    if (mod.includes(FsUtil.cwd)) {
-      mod = mod.split(FsUtil.cwd)[1].replace(/^[\/]+/, '');
-      ns = '@app';
-    }
-
-    if (mod.startsWith('node_modules')) {
-      mod = mod.split('node_modules').pop()!.replace(/^[\/]+/, '');
-    }
-
-    if (mod.startsWith('@')) {
-      const [ns1, ns2, ...rest] = mod.split(/[\/]/);
-      ns = `${ns1}:${ns2}`.replace('@travetto', '@trv');
-      if (rest[0] === 'src') {
-        rest.shift();
-      }
-      mod = rest.join('.');
-    }
-
-    mod = mod
-      .replace(/[\/]+/g, '.')
-      .replace(/^\./, '')
-      .replace(/\.(t|j)s$/, '');
-
-    return `${ns}/${mod}`;
-  }
-
   static prepareTranspile(fileName: string, contents?: string) {
     let fileContents = contents || fs.readFileSync(fileName, 'utf-8');
 
-    let line = 1;
-
-    // Insert filename into all log statements for all components, when logger isn't loaded
-    if (!this.plainLogs && !fileName.includes('/cli/') && !fileName.includes('/bin/')) {
-      fileContents = fileContents.replace(/(\bconsole[.](debug|info|trace|warn|log|error)[(])|\n/g, a => {
-        if (a === '\n') {
-          line += 1;
-          return a;
-        } else {
-          return `${a}'[${this.computeModuleFromFile(fileName)}:${line.toString().padStart(3)}]',`;
-        }
-      });
+    for (const preparer of this.preparers) {
+      fileContents = preparer(fileName, fileContents);
     }
 
     // Drop typescript import, and use global. Great speedup;
