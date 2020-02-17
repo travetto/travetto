@@ -83,7 +83,7 @@ export class SourceManager {
     }
 
     if (!this.program || (forFile && !this.rootNames.has(forFile))) {
-      CompilerUtil.log(`Loading program ${this.rootNames.size}`, forFile);
+      console.log(`Loading program ${this.rootNames.size}`, forFile);
       if (forFile) {
         this.rootNames.add(forFile);
       }
@@ -122,7 +122,7 @@ export class SourceManager {
   }
 
   init() {
-    // TODO: Understand
+    // TODO: Load only what is necessary since it now has a much higher cost
     ScanApp.findFiles('.ts', x => !x.endsWith('.d.ts') && !x.startsWith('bin/'), Env.cwd)
       .map(x => x.file)
       .filter(x => !/travetto\/([^/]*)\/test/.test(x))

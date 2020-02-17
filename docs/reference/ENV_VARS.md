@@ -12,7 +12,7 @@ The common environment variables throughout the code base:
 * `ENV` = dev|prod          - Environment to deploy
 * `PROFILE`=['application'] - Additional profiles to run app under
 
-* `PLAIN_LOGS` = 0|1        - Determines whether or not to augment log information, default is 0
+* `PLAIN_CONSOLE` = 0|1     - Determines whether or not to augment console log information, default is 0
 * `QUIET_INIT` = 0|1        - Display the init information on startup
 * `NO_COLOR` = 0|1          - Suppress color output in all usages, defaults to false if tty is available
 * `FORCE_COLOR` = 0|1       - Require color output in all usages, defaults to true if tty is available

@@ -1,6 +1,5 @@
 import * as ts from 'typescript';
-import { NodeTransformer, State } from './types/visitor';
-import { DecoratorMeta } from './types/decorator';
+import { DecoratorMeta, NodeTransformer, State } from './types/visitor';
 
 const HANDLERS = Symbol('handlers');
 

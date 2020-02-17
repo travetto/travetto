@@ -1,21 +1,17 @@
 import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
-import { TransformUtil, TransformerState, OnCall } from '@travetto/compiler/src/transform-support';
+import { TransformUtil, TransformerState, OnCall, res } from '@travetto/compiler/src/transform-support';
 import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT, DEEP_LITERAL_TYPES } from '../src/assert/types';
 
 
 const ASSERT_CMD = 'assert';
 const ASSERT_UTIL = 'AssertCheck';
 
-// TODO: Rework
-const METHODS: Record<string, string> = {
-  includes: 'includes',
-  test: 'test'
+const METHODS: Record<string, [Function, string]> = {
+  includes: [Array, 'includes'],
+  test: [RegExp, 'test']
 };
-
-// TODO: Rework
-const METHOD_REGEX = new RegExp(`[.](${Object.keys(METHODS).join('|')})[(]`);
 
 const OP_TOKEN_TO_NAME = new Map<number, string>();
 
@@ -62,11 +58,31 @@ export class AssertTransformer {
     }
   }
 
-  // TODO: Rework
-  static isDeepLiteral(node: ts.Expression) {
-    return ts.isArrayLiteralExpression(node) ||
+  static isDeepLiteral(state: TransformerState, node: ts.Expression) {
+    let found = ts.isArrayLiteralExpression(node) ||
       ts.isObjectLiteralExpression(node) ||
-      (ts.isNewExpression(node) && DEEP_LITERAL_TYPES.has(node.expression.getText()));
+      (
+        ts.isNewExpression(node) &&
+        DEEP_LITERAL_TYPES.has(node.expression.getText())
+      );
+
+    // If looking at an identifier, see if it's in a diff file or if its const
+    if (!found && ts.isIdentifier(node)) {
+      const decls = state.getDeclarations(node);
+      found = !!decls.find(x => {
+        if (x.getSourceFile().fileName !== state.source.fileName) {
+          return true; // In a separate file
+        }
+        let s: ts.Node = x;
+        while (!ts.isVariableDeclarationList(s)) {
+          s = s.parent;
+        }
+        return s?.getText().startsWith('const '); // Cheap out on check, ts is being weird
+      }
+      );
+    }
+
+    return found;
   }
 
   static initState(state: TransformerState & AssertState) {
@@ -122,11 +138,11 @@ export class AssertTransformer {
       ]));
   }
 
-  static doBinaryCheck(comp: ts.BinaryExpression, message: Message, args: Args) {
+  static doBinaryCheck(state: TransformerState, comp: ts.BinaryExpression, message: Message, args: Args) {
     let opFn = this.lookupOpToken(comp.operatorToken.kind);
 
     if (opFn) {
-      const literal = this.isDeepLiteral(comp.left) ? comp.left : this.isDeepLiteral(comp.right) ? comp.right : undefined;
+      const literal = this.isDeepLiteral(state, comp.left) ? comp.left : this.isDeepLiteral(state, comp.right) ? comp.right : undefined;
       if (/equal/i.test(opFn) && literal) {
         opFn = DEEP_EQUALS_MAPPING[opFn] || opFn;
       }
@@ -136,43 +152,50 @@ export class AssertTransformer {
     }
   }
 
-  static doUnaryCheck(comp: ts.PrefixUnaryExpression, message: Message, args: Args) {
+  static doUnaryCheck(state: TransformerState, comp: ts.PrefixUnaryExpression, message: Message, args: Args) {
     if (ts.isPrefixUnaryExpression(comp.operand)) {
       const inner = comp.operand.operand;
       return { fn: 'ok', args: [inner, message!] };
     } else {
       const inner = comp.operand;
-      return { ...this.getCommand([inner, ...args.slice(1)])!, negate: true };
+      return { ...this.getCommand(state, [inner, ...args.slice(1)])!, negate: true };
     }
   }
 
-  static doMethodCall(comp: ts.Expression, args: Args) {
-    // Handle METHOD
-    const firstText = comp.getText();
-    // TODO: Rework
-    if (METHOD_REGEX.test(`.${firstText}`) && ts.isCallExpression(comp) && ts.isPropertyAccessExpression(comp.expression)) {
-      return {
-        fn: METHODS[comp.expression.name.text!],
-        args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)]
-      };
-    } else {
-      return { fn: ASSERT_CMD, args: [...args] };
+  static doMethodCall(state: TransformerState, comp: ts.Expression, args: Args) {
+
+    if (ts.isCallExpression(comp) && ts.isPropertyAccessExpression(comp.expression)) {
+      const root = comp.expression.expression;
+      const key = comp.expression.name;
+
+      const matched = METHODS[key.text!];
+      if (matched) {
+        const resolved = state.resolveType(root);
+        if (res.isRealType(resolved) && resolved.realType === matched[0]) { // Ensure method is against real type
+          return {
+            fn: matched[1],
+            args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)]
+          };
+        }
+      }
     }
+
+    return { fn: ASSERT_CMD, args: [...args] };
   }
 
-  static getCommand(args: Args): Command | undefined {
+  static getCommand(state: TransformerState, args: Args): Command | undefined {
 
     const comp = args[0]!;
     const message = args.length === 2 ? args[1] : undefined;
 
     if (ts.isParenthesizedExpression(comp)) {
-      return this.getCommand([comp.expression, ...args.slice(1)]);
+      return this.getCommand(state, [comp.expression, ...args.slice(1)]);
     } else if (ts.isBinaryExpression(comp)) {
-      return this.doBinaryCheck(comp, message, args);
+      return this.doBinaryCheck(state, comp, message, args);
     } else if (ts.isPrefixUnaryExpression(comp) && comp.operator === ts.SyntaxKind.ExclamationToken) {
-      return this.doUnaryCheck(comp, message, args);
+      return this.doUnaryCheck(state, comp, message, args);
     } else {
-      return this.doMethodCall(comp, args);
+      return this.doMethodCall(state, comp, args);
     }
   }
 
@@ -194,7 +217,7 @@ export class AssertTransformer {
     const exp = node.expression;
 
     if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) { // Straight assert
-      const cmd = this.getCommand(node.arguments);
+      const cmd = this.getCommand(state, node.arguments);
       if (cmd) {
         node = this.doAssert(state, node, cmd);
       }
@@ -205,7 +228,7 @@ export class AssertTransformer {
         if (/^(doesNot)?(Throw|Reject)s?$/i.test(fn)) {
           node = this.doThrows(state, node, fn, [...node.arguments]) as ts.CallExpression;
         } else {
-          const sub = { ...this.getCommand(node.arguments)!, fn };
+          const sub = { ...this.getCommand(state, node.arguments)!, fn };
           node = this.doAssert(state, node, sub);
         }
       }

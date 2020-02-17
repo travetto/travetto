@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { FsUtil, RegisterUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base';
 import { TransformUtil, TransformerState, OnMethod, OnClass, AfterClass } from '@travetto/compiler/src/transform-support';
 
@@ -50,7 +50,7 @@ export class RegisterTransformer {
     state.importDecorator(REGISTER_MOD, 'Register');
 
     if (!state[mod]) {
-      state[mod] = RegisterUtil.computeModuleFromFile(state.source.fileName);
+      state[mod] = FsUtil.computeModule(state.source.fileName);
     }
 
     const body = ts.createNodeArray([

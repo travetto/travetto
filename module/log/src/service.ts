@@ -1,7 +1,7 @@
 import { Env } from '@travetto/base';
-import { EnvUtil } from '@travetto/boot';
+import { ConsoleManager, ConsolePayload } from '@travetto/boot';
 
-import { LogEvent, LogListener, LogLevel, LogLevels, LogStream } from './types';
+import { LogEvent, LogListener, LogLevels, LogLevel, LogStream } from './types';
 import { LineFormatter } from './formatter/line';
 import { ConsoleOutput } from './output/console';
 import { LogUtil } from './util';
@@ -9,8 +9,6 @@ import { LogUtil } from './util';
 const DEFAULT = Symbol('default');
 
 class $Logger {
-
-  static COLORIZE = (process.stdout.isTTY && !EnvUtil.isTrue('NO_COLOR')) || EnvUtil.isTrue('FORCE_COLOR');
 
   private listeners = new Map<string | symbol, LogListener>();
   private listenList: LogListener[] = [];
@@ -36,14 +34,15 @@ class $Logger {
     }
 
     // Base logger, for free
+    ConsoleManager.set(this);
     this.listen();
   }
 
   listen({ formatter, stdout, stderr, key }: Partial<LogStream> = {}) {
     formatter = formatter ?? new LineFormatter({
-      colorize: $Logger.COLORIZE,
-      timestamp: !EnvUtil.isFalse('log_time'),
-      timeMillis: !!this.flags.trace
+      colorize: ConsoleManager.colorize,
+      timestamp: ConsoleManager.timestamp,
+      timeMillis: ConsoleManager.timeMillis
     });
 
     stderr = stderr ?? new ConsoleOutput({ method: 'error' });
@@ -51,7 +50,7 @@ class $Logger {
 
     this.listenRaw(key ?? DEFAULT, (ev: LogEvent) => {
       const msg = formatter!.format(ev);
-      if (ev.level === 'error' || ev.level === 'fatal') {
+      if (ev.level === 'error' || ev.level === 'fatal' || ev.level === 'warn') {
         stderr!.output(msg);
       } else {
         stdout!.output(msg);
@@ -78,17 +77,10 @@ class $Logger {
     return !(level in this.exclude);
   }
 
-  log(level: LogLevel, message: string, ...args: any[]): void;
-  log(event: Partial<LogEvent>): void;
-  log(event: LogLevel | Partial<LogEvent>, ...rest: any[]): void {
-    if (typeof event === 'string') {
+  invoke(event: ConsolePayload & Partial<LogEvent>, ...rest: any[]): void {
+    if (!('message' in event)) {
       const message = rest.length && typeof rest[0] === 'string' ? rest.shift() : undefined;
-      this.log({
-        level: event,
-        message,
-        args: rest
-      });
-      return;
+      event.message = message;
     }
 
     event.level = (event.level! in LogLevels) ? event.level : 'info';
@@ -97,7 +89,7 @@ class $Logger {
       return;
     }
 
-    event.timestamp = Date.now();
+    event.timestamp = new Date();
 
     const args = (event.args ?? []).slice(0);
     const last = args[args.length - 1];

@@ -79,6 +79,37 @@ class $FsUtil {
       }
     });
   }
+
+  computeModule(fileName: string) {
+    let mod = this.toUnix(fileName);
+
+    let ns = '@sys';
+
+    if (mod.includes(this.cwd)) {
+      mod = mod.split(this.cwd)[1].replace(/^[\/]+/, '');
+      ns = '@app';
+    }
+
+    if (mod.startsWith('node_modules')) {
+      mod = mod.split('node_modules').pop()!.replace(/^[\/]+/, '');
+    }
+
+    if (mod.startsWith('@')) {
+      const [ns1, ns2, ...rest] = mod.split(/[\/]/);
+      ns = `${ns1}:${ns2}`.replace('@travetto', '@trv');
+      if (rest[0] === 'src') {
+        rest.shift();
+      }
+      mod = rest.join('.');
+    }
+
+    mod = mod
+      .replace(/[\/]+/g, '.')
+      .replace(/^\./, '')
+      .replace(/\.(t|j)s$/, '');
+
+    return `${ns}/${mod}`;
+  }
 }
 
 export const FsUtil = new $FsUtil();

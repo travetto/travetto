@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+
 import { EventEmitter } from 'events';
 import * as sourcemap from 'source-map-support';
 
@@ -7,6 +8,7 @@ import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp } from '@
 
 import { SourceManager } from './source';
 import { CompilerUtil } from './util';
+
 
 class $Compiler extends EventEmitter {
 
@@ -108,7 +110,15 @@ class $Compiler extends EventEmitter {
     const isNew = !this.presenceManager.has(tsf);
     try {
       const js = this.sourceManager.getTranspiled(tsf); // Compile
-      return CompilerUtil.compile(this.cwd, m, tsf, js);
+      const jsf = tsf.replace(/\.ts$/, '.js');
+      try {
+        return (m as any)._compile(js, jsf);
+      } catch (e) {
+        const errorContent = CompilerUtil.handleCompileError(e, this.cwd, m.filename, tsf);
+        if (errorContent) {
+          return (m as any)._compile(errorContent, jsf);
+        }
+      }
     } finally {
       if (isNew) {
         this.presenceManager.addNewFile(tsf, false);
@@ -117,4 +127,4 @@ class $Compiler extends EventEmitter {
   }
 }
 
-export const Compiler = new $Compiler(Env.cwd, Env.computeAppRoots().map(x => FsUtil.joinUnix(x, 'src')));
+export const Compiler = new $Compiler(Env.cwd, Env.appRoots.map(x => FsUtil.joinUnix(x, 'src')));

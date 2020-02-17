@@ -12,7 +12,7 @@ export function init() {
       process.env.ENV = 'prod';
       process.env.APP_ROOTS = cmd.app ? `./${cmd.app}` : '.';
       process.env.PROFILE = cmd.app || '';
-      process.env.PLAIN_LOGS = '1';
+      process.env.PLAIN_CONSOLE = '1';
 
       const clear = cmd.clear === undefined ? true : /^(1|yes|on|true)/.test(cmd.clear);
 
