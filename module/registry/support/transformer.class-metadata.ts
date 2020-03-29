@@ -1,6 +1,5 @@
 import * as ts from 'typescript';
 
-import { FsUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base';
 import { TransformUtil, TransformerState, OnMethod, OnClass, AfterClass } from '@travetto/compiler/src/transform-support';
 
@@ -8,13 +7,11 @@ const REGISTER_MOD = require.resolve('../src/decorator');
 
 const methods = Symbol('methods');
 const cls = Symbol('class');
-const mod = Symbol('module');
 
 interface RegisterInfo {
   [methods]?: {
     [key: string]: { hash: number };
   };
-  [mod]?: string;
   [cls]?: number;
 }
 
@@ -46,21 +43,19 @@ export class RegisterTransformer {
     // eslint-disable-next-line no-bitwise
     const isAbstract = !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
 
-    // If needed
-    state.importDecorator(REGISTER_MOD, 'Register');
+    const ident = state.importDecorator(REGISTER_MOD, 'Register')!;
 
-    if (!state[mod]) {
-      state[mod] = FsUtil.computeModule(state.source.fileName);
-    }
-
-    const body = ts.createNodeArray([
-      TransformUtil.createStaticField('__filename', FsUtil.toUnix(state.source.fileName)),
-      TransformUtil.createStaticField('__id', `${state[mod]}#${node.name!.getText()}`),
-      TransformUtil.createStaticField('__hash', state[cls]!),
-      TransformUtil.createStaticField('__methods', TransformUtil.extendObjectLiteral(state[methods] || {})),
-      TransformUtil.createStaticField('__abstract', TransformUtil.fromLiteral(isAbstract)),
-      ...node.members
-    ]);
+    const meta = ts.createCall(
+      ts.createPropertyAccess(ident, 'initMeta'),
+      [],
+      [
+        ts.createIdentifier(node.name?.getText()!),
+        ts.createIdentifier('__filename'),
+        ts.createLiteral(state[cls]!),
+        TransformUtil.extendObjectLiteral(state[methods] || {}),
+        ts.createLiteral(isAbstract)
+      ]
+    );
 
     state[methods] = {};
 
@@ -70,7 +65,10 @@ export class RegisterTransformer {
       node.name,
       node.typeParameters,
       ts.createNodeArray(node.heritageClauses),
-      body
+      [
+        TransformUtil.createStaticField('__meta', meta),
+        ...node.members
+      ]
     );
   }
 }
