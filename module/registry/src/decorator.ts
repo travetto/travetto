@@ -11,13 +11,26 @@ class $PendingRegister {
     if (!this.modCache.has(file)) {
       this.modCache.set(file, FsUtil.computeModule(file));
     }
-    return {
-      id: `${this.modCache.get(file)}#${cls.name}`,
-      file,
-      hash,
-      methods,
-      abstract,
+    const meta = {
+      __id: `${this.modCache.get(file)}#${cls.name}`,
+      __file: file,
+      __hash: hash,
+      __methods: methods,
+      __abstract: abstract,
+      __init: true
     };
+
+    Object.defineProperties(cls, [...Object.keys(meta)].reduce((all, k) => {
+      all[k] = {
+        value: (meta as any)[k],
+        enumerable: false,
+        configurable: false,
+        writable: k === '__init'
+      };
+      return all;
+    }, {} as any));
+
+    return true;
   }
 
   add(cls: Class<any>) {

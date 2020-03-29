@@ -14,6 +14,7 @@ interface AutoState {
 
 const SCHEMA_MOD = require.resolve('../src/decorator/schema');
 const FIELD_MOD = require.resolve('../src/decorator/field');
+const COMMON_MOD = require.resolve('../src/decorator/common');
 
 export class SchemaTransformer {
 
@@ -42,16 +43,13 @@ export class SchemaTransformer {
       params.push(ts.createObjectLiteral(properties));
     }
 
-    state.importDecorator(require.resolve('../src/decorator/field'), 'Field');
-
-    const dec = state.createDecorator('Field', ...params);
+    const dec = state.createDecorator(FIELD_MOD, 'Field', ...params);
     const newDecs = [...(node.decorators || []), dec];
 
     const comments = state.readJSDocs(node);
     if (comments.description) {
-      state.importDecorator(require.resolve('../src/decorator/common'), 'Describe');
 
-      newDecs.push(state.createDecorator('Describe', TransformUtil.fromLiteral({
+      newDecs.push(state.createDecorator(COMMON_MOD, 'Describe', TransformUtil.fromLiteral({
         description: comments.description
       })));
     }
@@ -95,13 +93,11 @@ export class SchemaTransformer {
     const comments = state.readJSDocs(node);
 
     if (!state[hasSchema]) {
-      state.importDecorator(require.resolve('../src/decorator/schema'), 'Schema');
-      decls.unshift(state.createDecorator('Schema'));
+      decls.unshift(state.createDecorator(SCHEMA_MOD, 'Schema'));
     }
 
     if (comments.description) {
-      state.importDecorator(require.resolve('../src/decorator/common'), 'Describe');
-      decls.push(state.createDecorator('Describe', TransformUtil.fromLiteral({
+      decls.push(state.createDecorator(COMMON_MOD, 'Describe', TransformUtil.fromLiteral({
         title: comments.description
       })));
     }

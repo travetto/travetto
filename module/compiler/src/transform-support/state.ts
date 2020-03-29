@@ -80,24 +80,18 @@ export class TransformerState implements State {
     return this.decorators.get(name);
   }
 
-  createDecorator(name: string, ...contents: (ts.Expression | undefined)[]) {
+  createDecorator(pth: string, name: string, ...contents: (ts.Expression | undefined)[]) {
+    this.importDecorator(pth, name);
     return TransformUtil.createDecorator(this.decorators.get(name)!, ...contents);
-  }
-
-  findDecorator(node: ts.Node, target: string, name?: string, file?: string) {
-    return this.getDecoratorList(node).find(x =>
-      x.targets?.includes(target)
-      && res.isExternalType(x)
-      && (name === undefined || x.name === name)
-      && (file === undefined || x.source === file)
-    )?.dec;
   }
 
   getDecoratorMeta(dec: ts.Decorator): DecoratorMeta {
     const ident = TransformUtil.getDecoratorIdent(dec);
+    const [decl] = this.resolver.getDeclarations(ident);
     return ({
       dec,
       ident,
+      file: decl?.getSourceFile().fileName,
       targets: this.resolver.readDocsTags(ident, 'augments').map(x => x.replace(/trv \//, 'trv/')),
       name: ident ?
         ident.escapedText! as string :
@@ -109,6 +103,14 @@ export class TransformerState implements State {
     return ((node.decorators ?? []) as ts.Decorator[])
       .map(dec => this.getDecoratorMeta(dec))
       .filter(x => !!x.ident);
+  }
+
+  findDecorator(node: ts.Node, target: string, name?: string, file?: string) {
+    return this.getDecoratorList(node).find(x =>
+      x.targets?.includes(target)
+      && (name === undefined || x.name === name)
+      && (file === undefined || x.file === file)
+    )?.dec;
   }
 
   getDeclarations(node: ts.Node): ts.Declaration[] {
