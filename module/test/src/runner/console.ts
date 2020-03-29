@@ -1,5 +1,5 @@
 import * as util from 'util';
-import { ConsoleManager } from '@travetto/boot';
+import { ConsoleManager } from '@travetto/base';
 
 export class ConsoleCapture {
 

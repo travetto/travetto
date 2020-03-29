@@ -46,10 +46,10 @@ export class AppListUtil {
       description: x.description,
       standalone: x.standalone,
       params: x.params,
-      appRoot: this.determineRootFromFile(x.target.__filename),
+      appRoot: this.determineRootFromFile(x.target.__file),
       name: x.name,
-      generatedTime: this.maxTime(await this.fsLstat(x.target.__filename)),
-      filename: x.target.__filename,
+      generatedTime: this.maxTime(await this.fsLstat(x.target.__file)),
+      filename: x.target.__file,
       id: x.target.__id
     })));
 

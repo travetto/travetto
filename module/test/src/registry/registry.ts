@@ -12,7 +12,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     return {
       class: cls,
       className: cls.__id.replace(/^@app./, '').replace(/^test[.]/, '').replace('#', '.'),
-      file: cls.__filename,
+      file: cls.__file,
       tests: [],
       beforeAll: [],
       beforeEach: [],
@@ -24,7 +24,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPendingField(cls: Class, fn: Function) {
     return {
       class: cls,
-      file: cls.__filename,
+      file: cls.__file,
       methodName: fn.name
     };
   }
@@ -67,7 +67,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);
-      const suites = this.getValidClasses().filter(f => f.__filename === file).map(x => this.get(x));
+      const suites = this.getValidClasses().filter(f => f.__file === file).map(x => this.get(x));
       const suite = suites.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
 
       if (suite) {
