@@ -59,14 +59,17 @@ export class RegisterTransformer {
 
     state[methods] = {};
 
-    return ts.updateClassDeclaration(node,
-      ts.createNodeArray([state.createDecorator('Register'), ...(node.decorators || [])]),
+    return ts.updateClassDeclaration(
+      node,
+      TransformUtil.spliceDecorators(
+        node, undefined, [state.createDecorator(REGISTER_MOD, 'Register')], 0
+      ),
       node.modifiers,
       node.name,
       node.typeParameters,
       ts.createNodeArray(node.heritageClauses),
       [
-        TransformUtil.createStaticField('__meta', meta),
+        TransformUtil.createStaticField('__init', meta),
         ...node.members
       ]
     );

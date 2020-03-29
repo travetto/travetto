@@ -62,8 +62,7 @@ export class RestTransformer {
     };
 
     if (!pDec) { // Handle default
-      state.importDecorator(PARAM_DEC_FILE, defaultType);
-      decs.push(state.createDecorator(defaultType,
+      decs.push(state.createDecorator(PARAM_DEC_FILE, defaultType,
         TransformUtil.fromLiteral(common))
       );
     } else if (ts.isCallExpression(pDec.expression)) {
@@ -110,8 +109,7 @@ export class RestTransformer {
         type.array = true;
         type.type = retType.typeArguments?.[0]!;
       }
-      state.importDecorator(ENDPOINT_DEC_FILE, 'ResponseType');
-      const produces = state.createDecorator('ResponseType', TransformUtil.fromLiteral({
+      const produces = state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', TransformUtil.fromLiteral({
         ...type,
         array: type.array,
         title: comments.return
@@ -121,8 +119,7 @@ export class RestTransformer {
 
     // Handle description/title/summary w/e
     if (comments.description) {
-      state.importDecorator(COMMON_DEC_FILE, 'Describe');
-      newDecls.push(state.createDecorator('Describe', TransformUtil.fromLiteral({
+      newDecls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
         title: comments.description,
       })));
     }
@@ -164,8 +161,7 @@ export class RestTransformer {
     if (comments.description) {
 
       const decls = [...(node.decorators || [])];
-      state.importDecorator(COMMON_DEC_FILE, 'Describe');
-      decls.push(state.createDecorator('Describe', TransformUtil.fromLiteral({
+      decls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
         title: comments.description
       })));
 

@@ -11,16 +11,19 @@ const exclude = new Set(['parent', 'checker', 'end', 'pos', 'id']);
 export class TransformUtil {
 
   static collapseNode(x: any) {
+    if (!x || Util.isPrimitive(x)) {
+      return x;
+    }
     const cache = new Set();
-    const ret = JSON.parse(JSON.stringify(x, (k, v) => {
+    const text = JSON.stringify(x, (k, v) => {
       if (exclude.has(k) || Util.isFunction(v) || cache.has(v)) {
         return undefined;
       } else {
         cache.add(v);
         return v;
       }
-    }));
-    return ret;
+    });
+    return JSON.parse(text);
   }
 
   static fromLiteral<T extends ts.Node>(val: T): T;
@@ -43,9 +46,11 @@ export class TransformUtil {
     } else {
       const pairs: ts.PropertyAssignment[] = [];
       for (const k of Object.keys(val)) {
-        pairs.push(
-          ts.createPropertyAssignment(k, this.fromLiteral(val[k]))
-        );
+        if (val[k] !== undefined) {
+          pairs.push(
+            ts.createPropertyAssignment(k, this.fromLiteral(val[k]))
+          );
+        }
       }
       return ts.createObjectLiteral(pairs);
     }
@@ -103,8 +108,8 @@ export class TransformUtil {
     return;
   }
 
-  static getObjectValue(node: ts.ObjectLiteralExpression | undefined, key: string) {
-    if (node && node.properties) {
+  static getObjectValue(node: ts.Expression | undefined, key: string) {
+    if (node && ts.isObjectLiteralExpression(node) && node.properties) {
       for (const prop of node.properties) {
         if (prop.name!.getText() === key) {
           if (ts.isPropertyAssignment(prop)) {
@@ -261,4 +266,9 @@ export class TransformUtil {
     }
   }
 
+  static spliceDecorators(node: { decorators?: ts.MethodDeclaration['decorators'] }, target: ts.Decorator | undefined, replacements: ts.Decorator[], idx = -1) {
+    const out = (node.decorators ?? []).filter(x => x !== target);
+    out.splice(idx, 0, ...replacements);
+    return out;
+  }
 }
