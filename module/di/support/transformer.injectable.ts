@@ -9,89 +9,70 @@ const INJECTABLE_MOD = require.resolve('../src/decorator');
 export class InjectableTransformer {
 
   static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-    const injection = state.findDecorator(param, 'trv/di/Inject', 'Inject', INJECTABLE_MOD);
+    const existing = state.findDecorator(param, 'trv/di/Inject', 'Inject', INJECTABLE_MOD);
 
-    if (injection || ts.isParameter(param)) {
-
-      const finalTarget = state.getOrImport(param);
-
-      let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(injection);
-
-      let original = undefined;
-
-      const callExpr = (injection && injection.expression as any as ts.CallExpression);
-      if (callExpr) {
-        const args = callExpr.arguments! || [];
-
-        // Handle special case
-        if (args.length && ts.isIdentifier(args[0])) {
-          original = args[0];
-          injectConfig = args[1] as any;
-        }
-      }
-
-      if (injectConfig === undefined) {
-        injectConfig = TransformUtil.fromLiteral({});
-      }
-
-      let optional = TransformUtil.getObjectValue(injectConfig, 'optional');
-
-      if (optional === undefined && !!param.questionToken) {
-        optional = ts.createTrue();
-      }
-
-      return TransformUtil.fromLiteral({
-        original,
-        target: finalTarget,
-        optional,
-        qualifier: TransformUtil.getObjectValue(injectConfig, 'qualifier')
-      });
+    if (!(existing || ts.isParameter(param))) {
+      return;
     }
+
+    let injectConfig = existing ? TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(existing) : undefined;
+
+    let original = undefined;
+
+    const callExpr = existing?.expression as ts.CallExpression;
+    if (callExpr) {
+      const args = callExpr.arguments! || [];
+      // Handle special case
+      if (args.length && ts.isIdentifier(args[0])) {
+        original = args[0];
+        injectConfig = args[1] as any;
+      }
+    }
+
+    injectConfig = injectConfig ?? TransformUtil.fromLiteral({});
+
+    let optional = TransformUtil.getObjectValue(injectConfig, 'optional');
+    if (optional === undefined && !!param.questionToken) {
+      optional = ts.createTrue();
+    }
+
+    return TransformUtil.fromLiteral({
+      original,
+      target: state.getOrImport(param),
+      optional,
+      qualifier: TransformUtil.getObjectValue(injectConfig, 'qualifier')
+    });
   }
 
   @OnClass('trv/di/Injectable')
   static handleClass(state: TransformerState, node: ts.ClassDeclaration) {
-    const clsNode = (node as any as ts.ClassDeclaration);
-    const declTemp = (node.decorators || []).slice(0);
-    const cons = clsNode.members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
-    let injectArgs = undefined;
-
-    if (cons) {
-      injectArgs = TransformUtil.fromLiteral(cons.parameters.map(x => InjectableTransformer.processDeclaration(state, x)));
-    }
-
-    state.importDecorator(INJECTABLE_MOD, 'InjectArgs');
-    declTemp.push(state.createDecorator('InjectArgs', injectArgs));
+    const cons = node.members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
+    const injectArgs = cons &&
+      TransformUtil.fromLiteral(cons.parameters.map(x => InjectableTransformer.processDeclaration(state, x)));
 
     // Add injectable decorator if not there
-    let injectable = state.getDecoratorList(node)
-      // TODO: might need more strict comparison
-      .find(x => x.targets?.includes('trv/di/Injectable') && x.name === 'Injectable')?.dec;
+    const decl = state.findDecorator(node, 'trv/di/Injectable', 'Injectable', INJECTABLE_MOD);
 
-    if (!injectable) { // If missing, add
-      state.importDecorator(INJECTABLE_MOD, 'Injectable');
-      injectable = state.createDecorator('Injectable');
-      declTemp.push(injectable);
-    } else { // Otherwise extend
-      const callExpr = injectable.expression as any as ts.CallExpression;
-      let injectConfig = undefined;
-
-      if (callExpr) {
-        const args = callExpr.arguments! || [];
-        injectConfig = args[0] as any;
-        // Handle special case
-        if (args[0] && ts.isIdentifier(args[0])) {
-          injectConfig = args[1] as any;
+    // Find config
+    let config: ts.ObjectLiteralExpression | undefined = undefined;
+    if (decl && ts.isCallExpression(decl.expression)) { // Combine
+      const callExpr = decl.expression;
+      const args = callExpr.arguments;
+      if (args.length) {
+        const first = args[0];
+        if (ts.isObjectLiteralExpression(first)) {
+          config = first;
+        } else {
+          config = TransformUtil.fromLiteral({ qualifier: first });
         }
-        if (injectConfig === undefined) {
-          injectConfig = TransformUtil.fromLiteral({});
-        }
-        ts.updateCall(callExpr, callExpr.expression, callExpr.typeArguments, ts.createNodeArray([injectConfig]));
       }
     }
 
     return ts.updateClassDeclaration(node,
-      ts.createNodeArray(declTemp),
+      TransformUtil.spliceDecorators(node, decl, [
+        state.createDecorator(INJECTABLE_MOD, 'Injectable', config),
+        state.createDecorator(INJECTABLE_MOD, 'InjectArgs', injectArgs)
+      ]),
       node.modifiers,
       node.name,
       node.typeParameters,
@@ -102,21 +83,14 @@ export class InjectableTransformer {
 
   @OnProperty('trv/di/Inject')
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration, dm?: DecoratorMeta) {
-    const expr = InjectableTransformer.processDeclaration(state, node)!;
-
-    // Replace
-    state.importDecorator(INJECTABLE_MOD, 'Inject');
-    const final = state.createDecorator('Inject', expr);
-    const injected = state.getDecoratorList(node)
-      .filter(x => x.targets?.includes('Inject'))?.[0]?.dec;
-
-    const finalDecs = ((node.decorators as any as ts.Decorator[]) || [])
-      .filter(x => x !== injected);
+    const decl = state.findDecorator(node, 'trv/di/Inject', 'Inject', INJECTABLE_MOD);
 
     // Doing decls
     return ts.updateProperty(
       node,
-      ts.createNodeArray([final, ...finalDecs]),
+      TransformUtil.spliceDecorators(node, decl, [
+        state.createDecorator(INJECTABLE_MOD, 'Inject', this.processDeclaration(state, node)!),
+      ], 0),
       node.modifiers,
       node.name,
       node.questionToken,
@@ -127,42 +101,38 @@ export class InjectableTransformer {
 
   @OnStaticMethod('trv/di/InjectableFactory')
   static handleFactory(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
-    let original: any;
-    const injectArgs = node.parameters.map(x => InjectableTransformer.processDeclaration(state, x)!);
-
-    const dec = dm?.dec;
-
-    if (!dec) {
+    if (!dm?.dec) {
       return node;
     }
 
-    let injectConfig = TransformUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(dec);
+    const dec = dm?.dec;
+    let original: any;
 
-    const callExpr = (dec.expression as any as ts.CallExpression);
+    // Extract config
+    const injectArgs = node.parameters.map(x => InjectableTransformer.processDeclaration(state, x)!);
+    let injectConfig = TransformUtil.getPrimaryArgument<ts.Node>(dec);
 
-    if (callExpr) {
-      const callArgs = callExpr.arguments! || [];
-      // Handle special case
-      if (callArgs[0] && ts.isIdentifier(callArgs[0])) {
-        original = callArgs[0];
-        injectConfig = callArgs[1] as any;
-      }
+    if (injectConfig && ts.isIdentifier(injectConfig)) {
+      original = injectConfig; // Shift to original
+      injectConfig = undefined; // Config is empty
     }
 
-    if (injectConfig === undefined) {
-      injectConfig = TransformUtil.fromLiteral({});
+    injectConfig = injectConfig ?? TransformUtil.fromLiteral({});
+
+    if (!ts.isObjectLiteralExpression(injectConfig)) {
+      throw new Error('Unexpected InjectFactory config parameter');
     }
 
-    // Handle when
-    let target: any = TransformUtil.getObjectValue(injectConfig, 'target');
-    if (target === undefined) {  // TODO: infer from typings, not just text?
+    // Read target from config or resolve
+    let target = TransformUtil.getObjectValue(injectConfig, 'target');
+    if (!target) {  // Infer from typings
       const ret = state.resolveReturnType(node);
-      console.debug('Resolving type', node.getText(), ret);
       if (res.isExternalType(ret)) {
         target = state.getOrImport(ret);
       }
     }
 
+    // Build decl
     const args = TransformUtil.extendObjectLiteral({
       dependencies: injectArgs,
       src: (node.parent as ts.ClassDeclaration).name,
@@ -171,16 +141,9 @@ export class InjectableTransformer {
     }, injectConfig);
 
     // Replace decorator
-    const decls = node.decorators;
     return ts.createMethod(
-      decls!.filter(x => x !== dec).concat([
-        ts.createDecorator(
-          ts.createCall(
-            callExpr.expression,
-            callExpr.typeArguments,
-            ts.createNodeArray([args])
-          )
-        )
+      TransformUtil.spliceDecorators(node, dec, [
+        state.createDecorator(INJECTABLE_MOD, 'InjectableFactory', args)
       ]),
       node.modifiers,
       node.asteriskToken,

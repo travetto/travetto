@@ -150,8 +150,6 @@ export class TypeResolver {
     const flags = type.getFlags();
     const objectFlags = this.getObjectFlags(type) ?? 0;
 
-    console.info('Resolving type', objectFlags, flags);
-
     if (objectFlags & ts.ObjectFlags.Reference && !type.getSymbol()) { // Tuple type?
       console.info('Resolved Tuple Type', type);
       return this.resolveTupleType(type);

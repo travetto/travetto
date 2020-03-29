@@ -20,7 +20,8 @@ function getName(symbol: symbol) {
   return symbol.toString().split(/[()]/g)[1];
 }
 
-function mergeWithOptional<T extends { original?: symbol | object, qualifier?: symbol }>(o: T) {
+/** Merge config at runtime as needed */
+function mergeWithOriginal<T extends { original?: symbol | object, qualifier?: symbol }>(o: T) {
   if (o.original) {
     if (typeof o.original === 'symbol') {
       o.qualifier = o.original;
@@ -99,7 +100,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     for (const dep of deps) {
-      mergeWithOptional(dep);
+      mergeWithOriginal(dep);
     }
 
     const promises = deps
@@ -231,7 +232,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const classId = this.resolveClassId(target, qualifier);
 
     if (!this.instances.has(classId) || !this.instances.get(classId)!.has(qualifier)) {
-      console.trace('Getting Instance', classId, getName(qualifier));
       await this.createInstance(target, qualifier); // Wait for proxy
     }
     return this.instances.get(classId)!.get(qualifier)!;
@@ -282,10 +282,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
   }
 
-  registerFactory(config: InjectableFactoryConfig<any> & { fn: (...args: any[]) => any, id?: string }) {
+  registerFactory(config: InjectableFactoryConfig<any> & { fn: (...args: any[]) => any, id: string }) {
     const finalConfig: InjectableConfig<any> = {} as any;
 
-    mergeWithOptional(config);
+    mergeWithOriginal(config);
 
     finalConfig.factory = config.fn;
     finalConfig.target = config.target;
@@ -301,7 +301,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Create mock cls for DI purposes
-    const cls = { __id: config.id || `${config.target.__id}#${config.fn.name}` } as Class<any>;
+    const cls = { __id: config.id } as Class<any>;
 
     finalConfig.class = cls;
 

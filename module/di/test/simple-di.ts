@@ -64,9 +64,10 @@ class DiTest2 {
     assert(30 === 30);
 
     const inst = await DependencyRegistry.getInstance(ServiceInherit);
+    assert.ok(inst.db);
+
     inst.doWork();
 
-    assert.ok(inst.db);
     assert(inst.age === 30);
 
     assert.equal(inst.db.altConfig, undefined);
