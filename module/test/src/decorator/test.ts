@@ -17,7 +17,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
   return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
     TestRegistry.registerField(inst.constructor, descriptor.value, {
       ...extra,
-      file: inst.constructor.__filename,
+      file: inst.constructor.__file,
       description: description as string
     });
     return descriptor;

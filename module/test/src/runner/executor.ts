@@ -52,8 +52,8 @@ export class TestExecutor {
     const [timeout, clear] = TestUtil.asyncTimeout(test.timeout);
 
     try {
-      ConsoleCapture.start();
       PromiseCapture.start();
+      ConsoleCapture.start();
       AssertCapture.start(test, (a) =>
         consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
 

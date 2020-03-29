@@ -3,6 +3,7 @@ import { Util } from '@travetto/base';
 
 import * as res from './types/resolver';
 import { TransformUtil } from './util';
+import { Type } from 'js-yaml';
 
 const GLOBAL_SIMPLE = { RegExp, Date, Number, Boolean, String, Function, Object };
 const GLOBAL_COMPLEX = { Array, Promise, Set, Map };
@@ -21,7 +22,7 @@ export class TypeResolver {
     return this._checker.getTypeArguments(ref as any);
   }
 
-  private resolveRealType(type: ts.Type): res.RealType | undefined {
+  private resolveLiteralType(type: ts.Type): res.RealType | undefined {
     const flags = type.getFlags();
 
     if (flags & ts.TypeFlags.Void) {
@@ -86,10 +87,16 @@ export class TypeResolver {
   private resolveReferencedType(type: ts.Type) {
     const obj = this.resolveExternalType(type);
 
+    console.info('External Type?', obj, type);
+
+    if ('target' in type) {
+      type = type['target'] as ts.Type;
+    }
+
     if (type.isClass()) { // Real type
       return obj;
     } else if (obj.source.includes('typescript/lib')) { // Global Type
-      const ret = this.resolveRealType(type);
+      const ret = this.resolveLiteralType(type);
       if (ret) {
         return ret;
       }
@@ -143,13 +150,16 @@ export class TypeResolver {
     const flags = type.getFlags();
     const objectFlags = this.getObjectFlags(type) ?? 0;
 
-    console.log('Resolving type', objectFlags, flags, type);
+    console.info('Resolving type', objectFlags, flags);
 
     if (objectFlags & ts.ObjectFlags.Reference && !type.getSymbol()) { // Tuple type?
+      console.info('Resolved Tuple Type', type);
       return this.resolveTupleType(type);
     } else if (objectFlags & ts.ObjectFlags.Anonymous) {
+      console.info('Resolved Shape Type', type);
       return this.resolveShapeType(type);
     } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
+      console.info('Resolved Reference Type', type);
       return this.resolveReferencedType(type);
     } else if (flags & (
       ts.TypeFlags.Boolean | ts.TypeFlags.BooleanLiteral |
@@ -157,18 +167,23 @@ export class TypeResolver {
       ts.TypeFlags.String | ts.TypeFlags.StringLiteral |
       ts.TypeFlags.Void | ts.TypeFlags.Undefined
     )) {
-      const result = this.resolveRealType(type);
+      console.info('Resolved Literal Type', type);
+      const result = this.resolveLiteralType(type);
       if (result) {
         return result;
       }
     } else if (type.isUnion()) {
+      console.info('Resolved Union Type', type);
       return this.resolveUnionType(type);
     } else if (objectFlags & ts.ObjectFlags.Tuple) {
+      console.info('Resolved Tuple Type', type);
       return this.resolveTupleType(type);
     } else if (type.isLiteral()) {
+      console.info('Resolved Shape Type', type);
       return this.resolveShapeType(type);
     }
 
+    console.info('Resolved Unknown Type', type);
     return {
       realType: Object,
       name: 'object'

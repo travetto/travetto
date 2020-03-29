@@ -130,7 +130,7 @@ export class TransformUtil {
     }
   }
 
-  static createStaticField(name: string, val: ts.Expression | string | number) {
+  static createStaticField(name: string, val: ts.Expression | string | number): ts.PropertyDeclaration {
     return ts.createProperty(
       undefined,
       [ts.createToken(ts.SyntaxKind.StaticKeyword)],
