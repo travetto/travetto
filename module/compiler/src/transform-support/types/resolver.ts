@@ -16,7 +16,7 @@ export interface ShapeType extends Type {
   fields: Record<string, Type>; // Does not include methods, used for shapes not concrete types
 }
 
-export interface RealType extends Type {
+export interface LiteralType extends Type {
   realType: Function | undefined; // Pointer to real type (String/Date/Number) if applicable
   value?: Primitive; // Applicable real value
   typeArguments?: Type[]; // Type arguments
@@ -33,6 +33,6 @@ export interface TupleType extends Type {
 
 export const isExternalType = (type: Type): type is ExternalType => 'source' in type;
 export const isShapeType = (type: Type): type is ShapeType => 'fields' in type;
-export const isRealType = (type: Type): type is RealType => 'realType' in type;
+export const isLiteralType = (type: Type): type is LiteralType => 'realType' in type;
 export const isUnionType = (type: Type): type is UnionType => 'unionTypes' in type;
 export const isTupleType = (type: Type): type is TupleType => 'tupleTypes' in type;

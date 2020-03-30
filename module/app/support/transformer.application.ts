@@ -19,18 +19,18 @@ export class ApplicationTransformer {
 
     if (res.isUnionType(type)) {
       const choices = type.unionTypes
-        .map(x => res.isRealType(x) ? x.value : undefined)
+        .map(x => res.isLiteralType(x) ? x.value : undefined)
         .filter(x => x !== undefined);
 
       type = type.commonType!;
       subtype = 'choice';
       meta = { choices };
-    } else if (res.isRealType(type)) {
+    } else if (res.isLiteralType(type)) {
       if (type.realType === String && /file$/i.test(name)) {
         subtype = 'file';
       }
     } else {
-      type = { realType: String, name: 'string' } as res.RealType;
+      type = { realType: String, name: 'string' } as res.LiteralType;
     }
 
     return { name, type: type.name!, subtype, meta, optional: def || type.undefinable, def };
