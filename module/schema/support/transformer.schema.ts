@@ -18,10 +18,34 @@ const COMMON_MOD = require.resolve('../src/decorator/common');
 
 export class SchemaTransformer {
 
+  static toFinalType(state: TransformerState, type: res.Type): ts.Expression | undefined {
+    if (res.isExternalType(type)) {
+      return state.getOrImport(type);
+    } else if (res.isLiteralType(type)) {
+      if (type.realType === Array && type.typeArguments?.length) {
+        return TransformUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0])]);
+      } else {
+        return ts.createIdentifier(type.realType!.name!);
+      }
+    } else if (res.isUnionType(type) && type.commonType) {
+      return this.toFinalType(state, type.commonType);
+    } else if (res.isShapeType(type)) {
+      const out: Record<string, ts.Expression | undefined> = {};
+      for (const el of Object.keys(type.fields)) {
+        out[el] = this.toFinalType(state, type.fields[el]);
+      }
+      console.log('Shapely shape', type);
+      return TransformUtil.fromLiteral(type);
+    } else {
+      return undefined;
+    }
+  }
+
   // TODO: Full rewrite
   static computeProperty(state: AutoState & TransformerState, node: ts.PropertyDeclaration) {
 
     const typeExpr = state.resolveType(node);
+    console.log(typeExpr);
     const properties = [];
 
     if (!node.questionToken && !typeExpr.undefinable) {
@@ -30,7 +54,7 @@ export class SchemaTransformer {
 
     // If we have a union type
     if (res.isUnionType(typeExpr)) {
-      const values = typeExpr.unionTypes.map(x => res.isRealType(x) ? x.value : undefined);
+      const values = typeExpr.unionTypes.map(x => res.isLiteralType(x) ? x.value : undefined).filter(x => x !== undefined && x !== null);
 
       properties.push(ts.createPropertyAssignment('enum', TransformUtil.fromLiteral({
         values,
@@ -38,7 +62,9 @@ export class SchemaTransformer {
       })));
     }
 
-    const params = [];
+    const resolved = this.toFinalType(state, typeExpr);
+    const params: ts.Expression[] = resolved ? [resolved] : [];
+
     if (properties.length) {
       params.push(ts.createObjectLiteral(properties));
     }
@@ -48,7 +74,6 @@ export class SchemaTransformer {
 
     const comments = state.readJSDocs(node);
     if (comments.description) {
-
       newDecs.push(state.createDecorator(COMMON_MOD, 'Describe', TransformUtil.fromLiteral({
         description: comments.description
       })));

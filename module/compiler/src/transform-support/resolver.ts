@@ -3,7 +3,6 @@ import { Util } from '@travetto/base';
 
 import * as res from './types/resolver';
 import { TransformUtil } from './util';
-import { Type } from 'js-yaml';
 
 const GLOBAL_SIMPLE = { RegExp, Date, Number, Boolean, String, Function, Object };
 const GLOBAL_COMPLEX = { Array, Promise, Set, Map };
@@ -22,7 +21,7 @@ export class TypeResolver {
     return this._checker.getTypeArguments(ref as any);
   }
 
-  private resolveLiteralType(type: ts.Type): res.RealType | undefined {
+  private resolveLiteralType(type: ts.Type): res.LiteralType | undefined {
     const flags = type.getFlags();
 
     if (flags & ts.TypeFlags.Void) {
@@ -47,6 +46,7 @@ export class TypeResolver {
         value: ret
       };
     } else if (complexCons) {
+      console.log('Complex cons', complexCons.name, this.getAllTypeArguments(type));
       return {
         name: complexCons.name,
         realType: complexCons,
@@ -107,12 +107,12 @@ export class TypeResolver {
 
   private resolveUnionType(type: ts.UnionType): res.Type {
     const types = type.types;
-    const unionTypes = types.map(x => this.resolveType(x));
-    const undefinable = types.findIndex(x => x.flags & ts.TypeFlags.Undefined) >= 0;
-    const nullable = types.findIndex(x => x.flags & ts.TypeFlags.Null) >= 0;
-    const remainderTypes = types.filter(x => !(x.flags & (ts.TypeFlags.Null | ts.TypeFlags.Undefined)));
+    const undefinable = types.some(x => (x.getFlags() & ts.TypeFlags.Undefined));
+    const nullable = types.some(x => x.getFlags() & ts.TypeFlags.Null);
+    const remainderTypes = types.filter(x => !(x.getFlags() & (ts.TypeFlags.Null | ts.TypeFlags.Undefined)));
+    const unionTypes = remainderTypes.map(x => this.resolveType(x));
 
-    if (remainderTypes.length > 1) {
+    if (unionTypes.length > 1) {
       let common = unionTypes.reduce((acc, v) => (!acc || acc.name === v.name) ? v : undefined, undefined as any);
       if (common) {
         common = {
@@ -120,14 +120,18 @@ export class TypeResolver {
           name: common.name
         };
       }
-      return { undefinable, nullable, commonType: common, unionTypes } as res.UnionType;
-    } else {
-      return {
-        undefinable,
-        nullable,
-        ...this.resolveType(remainderTypes[0])
-      };
+      if (common?.realType === Boolean) {
+        return this.resolveLiteralType(remainderTypes[0])!;
+      } else {
+        return { undefinable, nullable, commonType: common, unionTypes } as res.UnionType;
+      }
     }
+
+    return {
+      undefinable,
+      nullable,
+      ...this.resolveType(remainderTypes[0])
+    };
   }
 
   getReturnType(node: ts.MethodDeclaration) {
@@ -158,7 +162,11 @@ export class TypeResolver {
       return this.resolveShapeType(type);
     } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
       console.info('Resolved Reference Type', type);
-      return this.resolveReferencedType(type);
+      const v = this.resolveReferencedType(type);
+      if (res.isLiteralType(v) && v.typeArguments) {
+        v.typeArguments = this.getAllTypeArguments(type).map((x: any) => this.resolveType(x));
+      }
+      return v;
     } else if (flags & (
       ts.TypeFlags.Boolean | ts.TypeFlags.BooleanLiteral |
       ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral |
@@ -185,7 +193,7 @@ export class TypeResolver {
     return {
       realType: Object,
       name: 'object'
-    } as res.RealType;
+    } as res.LiteralType;
   }
 
   getDeclarations(node: ts.Node): ts.Declaration[] {

@@ -85,6 +85,10 @@ export class Util {
       (type && input instanceof type)
     ) {
       return input;
+    } else if (
+      !strict && type !== String && input === ''
+    ) {
+      return undefined; // treat empty string as undefined for non-strings in non-strict mode
     }
 
     switch (type) {

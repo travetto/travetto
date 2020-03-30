@@ -53,7 +53,7 @@ export class VisitorFactory<S extends State = State> {
     return (context: ts.TransformationContext) =>
       (file: ts.SourceFile): ts.SourceFile => {
         try {
-          ConsoleManager.set('!compiler.log', TransformUtil.collapseNode, false);
+          ConsoleManager.set('!compiler.log', x => TransformUtil.collapseNode(x), false);
           const state = this.getState(file);
           const ret = this.visit(state, context, file);
           const out = state.finalize(ret);

@@ -74,7 +74,7 @@ export class AssertTransformer {
           return true; // In a separate file
         }
         let s: ts.Node = x;
-        while (!ts.isVariableDeclarationList(s)) {
+        while (s && !ts.isVariableDeclarationList(s)) {
           s = s.parent;
         }
         return s?.getText().startsWith('const '); // Cheap out on check, ts is being weird
@@ -171,7 +171,7 @@ export class AssertTransformer {
       const matched = METHODS[key.text!];
       if (matched) {
         const resolved = state.resolveType(root);
-        if (res.isRealType(resolved) && resolved.realType === matched[0]) { // Ensure method is against real type
+        if (res.isLiteralType(resolved) && resolved.realType === matched[0]) { // Ensure method is against real type
           return {
             fn: matched[1],
             args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)]

@@ -6,24 +6,38 @@ import { Env, Util } from '@travetto/base';
 
 import { Documentation, Import } from './types/shared';
 
-const exclude = new Set(['parent', 'checker', 'end', 'pos', 'id']);
+const exclude = new Set([
+  'parent', 'checker', 'end', 'pos', 'id', 'source', 'sourceFile', 'getSourceFile',
+  'statements', 'stringIndexInfo', 'numberIndexInfo', 'instantiations', 'thisType',
+  'members', 'properties', 'outerTypeParameters', 'exports', 'transformFlags', 'flowNode',
+  'nextContainer', 'modifierFlagsCache', 'declaredProperties'
+]);
 
 export class TransformUtil {
 
-  static collapseNode(x: any) {
+  static collapseNode(x: any, cache: Set<string> = new Set()): any {
     if (!x || Util.isPrimitive(x)) {
       return x;
     }
-    const cache = new Set();
-    const text = JSON.stringify(x, (k, v) => {
-      if (exclude.has(k) || Util.isFunction(v) || cache.has(v)) {
-        return undefined;
-      } else {
-        cache.add(v);
-        return v;
+
+    if (cache.has(x)) {
+      return;
+    } else {
+      cache.add(x);
+    }
+
+    if (Array.isArray(x)) {
+      return x.map(v => this.collapseNode(v, cache));
+    } else {
+      const out: Record<string, any> = {};
+      for (const key of Object.keys(x)) {
+        if (Util.isFunction(x[key]) || exclude.has(key) || x[key] === undefined) {
+          continue;
+        }
+        out[key] = this.collapseNode(x[key], cache);
       }
-    });
-    return JSON.parse(text);
+      return out;
+    }
   }
 
   static fromLiteral<T extends ts.Node>(val: T): T;

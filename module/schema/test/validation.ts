@@ -163,16 +163,7 @@ class Validation {
   @Test('date tests')
   async dates() {
 
-    assert.rejects(() => {
-      const o = DateTestSchema.fromRaw({ date: '' });
-      return SchemaValidator.validate(o);
-    }, (err: any) => {
-      if (!(err instanceof ValidationResultError && err.errors[0].kind === 'required')) {
-        return err;
-      }
-    });
-
-    assert.rejects(() => {
+    await assert.rejects(() => {
       const o = DateTestSchema.fromRaw({ date: undefined });
       return SchemaValidator.validate(o);
     }, (err: any) => {
@@ -181,7 +172,7 @@ class Validation {
       }
     });
 
-    assert.rejects(() => {
+    await assert.rejects(() => {
       const o = DateTestSchema.fromRaw({ date: NaN });
       return SchemaValidator.validate(o);
     }, (err: any) => {
@@ -190,7 +181,7 @@ class Validation {
       }
     });
 
-    assert.rejects(() => {
+    await assert.rejects(() => {
       const o = CustomValidated.fromRaw({ age: Number.NaN, age2: 1 });
       return SchemaValidator.validate(o);
     }, (err: any) => {
@@ -199,7 +190,7 @@ class Validation {
       }
     });
 
-    assert.rejects(() => {
+    await assert.rejects(() => {
       const o = CustomValidated.fromRaw({ age: 1, age2: 1 });
       return SchemaValidator.validate(o);
     }, (err: any) => {
@@ -208,6 +199,14 @@ class Validation {
       }
     });
 
+    await assert.rejects(() => {
+      const o = DateTestSchema.fromRaw({ date: '' });
+      return SchemaValidator.validate(o);
+    }, (err: any) => {
+      if (!(err instanceof ValidationResultError && err.errors[0].kind === 'required')) {
+        return err;
+      }
+    });
   }
 
   @Test()
