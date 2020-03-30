@@ -39,8 +39,8 @@ export class RestTransformer {
     commentConfig = (comments.params || []).find(x => x.name === decConfig.name) || {} as ParamDoc;
 
     let rType: res.Type = state.resolveType(node);
-    const array = res.isRealType(rType) && rType.realType === Array;
-    rType = array && res.isRealType(rType) ? rType.typeArguments?.[0]! : rType;
+    const array = res.isLiteralType(rType) && rType.realType === Array;
+    rType = array && res.isLiteralType(rType) ? rType.typeArguments?.[0]! : rType;
 
     const type = state.typeToIdentifier(rType);
 
@@ -93,7 +93,7 @@ export class RestTransformer {
     // Process returnType
     let retType = state.resolveReturnType(node);
 
-    if (res.isRealType(retType) && retType.realType === Promise) {
+    if (res.isLiteralType(retType) && retType.realType === Promise) {
       retType = retType.typeArguments?.[0]!; // We have a promise nested
     }
 
@@ -105,7 +105,7 @@ export class RestTransformer {
         array: false,
         type: retType
       };
-      if (res.isRealType(retType) && retType.realType === Array) {
+      if (res.isLiteralType(retType) && retType.realType === Array) {
         type.array = true;
         type.type = retType.typeArguments?.[0]!;
       }

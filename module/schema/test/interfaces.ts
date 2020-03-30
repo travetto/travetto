@@ -6,7 +6,7 @@ import { ALL_VIEW } from '../src/service/types';
 
 interface Address {
   street1: string;
-  street2: string;
+  street2?: string;
 }
 
 @Schema()

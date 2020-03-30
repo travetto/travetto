@@ -49,7 +49,7 @@ export class TransformerState implements State {
     if ('flags' in node) {
       node = this.resolveType(node);
     }
-    if (res.isRealType(node)) {
+    if (res.isLiteralType(node)) {
       return ts.createIdentifier(node.realType!.name);
     } else if (res.isExternalType(node)) {
       return this.getOrImport(node);
