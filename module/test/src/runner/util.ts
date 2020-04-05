@@ -1,16 +1,16 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 
-import { EnvUtil, FileCache } from '@travetto/boot';
+import { FileCache, EnvUtil } from '@travetto/boot';
 import { ScanFs, Env, Shutdown } from '@travetto/base';
 
-const DEFAULT_TIMEOUT = EnvUtil.getInt('DEFAULT_TIMEOUT', 5000);
+const DEFAULT_TIMEOUT = EnvUtil.getInt('default_timeout', 5000);
 
 export class TestUtil {
   static TIMEOUT = Symbol('timeout');
 
   static registerCleanup(scope: string) {
-    if (process.env.TRV_CACHE_DIR === 'PID') {
+    if (EnvUtil.get('trv_cache_dir') === 'PID') {
       Shutdown.onShutdown(`test.${scope}.clearWorkspace`, // Remove when done, this is for single interaction
         () => new FileCache(Env.cwd).clear(), true);
     }
@@ -20,7 +20,7 @@ export class TestUtil {
 
   static asyncTimeout(duration: number = DEFAULT_TIMEOUT): [Promise<any>, Function] {
     let id: NodeJS.Timer;
-    if (EnvUtil.isTrue('DEBUGGER')) {
+    if (EnvUtil.isTrue('debugger')) {
       duration = 600000; // 10 minutes
     }
     const prom = new Promise((_, reject) => {

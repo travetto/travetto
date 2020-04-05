@@ -1,6 +1,6 @@
 import * as Generator from 'yeoman-generator';
 
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, EnvUtil } from '@travetto/boot';
 
 import { FEATURES, Feature } from './features';
 import { verifyDestination, meetsRequirement, template } from './util';
@@ -49,10 +49,10 @@ export class TravettoGenerator extends Generator {
       name = res.name;
     }
 
-    this.destinationRoot(FsUtil.resolveUnix(process.env.FINAL_CWD!, name));
+    this.destinationRoot(FsUtil.resolveUnix(EnvUtil.get('final_cwd')!, name));
 
     try {
-      if (!process.env.NO_VERIFY) {
+      if (!EnvUtil.isTrue('no_verify')) {
         verifyDestination(this.destinationPath('package.json'));
       }
     } catch (err) {
@@ -89,7 +89,7 @@ export class TravettoGenerator extends Generator {
       context.peerDependencies.push(feat.npm);
     }
 
-    for (const addon of (feat.addons || [])) {
+    for (const addon of (feat.addons ?? [])) {
       this._addDependency(context, addon);
     }
   }

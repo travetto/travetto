@@ -6,8 +6,6 @@ export function init() {
     .command('openapi-spec')
     .option('-o, --output [output]', 'Output files', './openapi.json')
     .action(async (cmd: commander.Command) => {
-
-
       process.env.OPENAPI_OUTPUT = cmd.output;
 
       const { PhaseManager } = await import('@travetto/base');

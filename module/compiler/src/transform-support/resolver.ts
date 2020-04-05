@@ -58,6 +58,7 @@ export class TypeResolver {
   private resolveShapeType(type: ts.Type): res.ShapeType {
     const docs = TransformUtil.readJSDocs(type);
     const fields: Record<string, res.Type> = {};
+    const name = type.symbol?.getName();
     for (const member of this._checker.getPropertiesOfType(type)) {
       const memberType = this._checker.getTypeAtLocation(member.getDeclarations()![0]);
       if (memberType.getCallSignatures().length) {
@@ -65,7 +66,7 @@ export class TypeResolver {
       }
       fields[member.getName()] = this.resolveType(memberType);
     }
-    return { comment: docs.description, fields };
+    return { name, comment: docs.description, fields };
   }
 
   private resolveExternalType(type: ts.Type): res.ExternalType {
@@ -89,7 +90,7 @@ export class TypeResolver {
 
     console.info('External Type?', obj, type);
 
-    if ('target' in type) {
+    if ('target' in type && type['target']) {
       type = type['target'] as ts.Type;
     }
 

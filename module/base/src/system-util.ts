@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { Readable, PassThrough } from 'stream';
+import { FsUtil } from '@travetto/boot';
 
 function find<T>(set: Set<T>, pred: (x: T) => boolean): T | undefined {
   for (const i of set) {
@@ -160,5 +161,39 @@ export class SystemUtil {
     }
 
     return out;
+  }
+
+  /**
+   * Compute internal module name from file name
+   */
+  static computeModule(fileName: string) {
+    let mod = FsUtil.toUnix(fileName);
+
+    let ns = '@sys';
+
+    if (mod.includes(FsUtil.cwd)) {
+      mod = mod.split(FsUtil.cwd)[1].replace(/^[\/]+/, '');
+      ns = '@app';
+    }
+
+    if (mod.startsWith('node_modules')) {
+      mod = mod.split('node_modules').pop()!.replace(/^[\/]+/, '');
+    }
+
+    if (mod.startsWith('@')) {
+      const [ns1, ns2, ...rest] = mod.split(/[\/]/);
+      ns = `${ns1}:${ns2}`.replace('@travetto', '@trv');
+      if (rest[0] === 'src') {
+        rest.shift();
+      }
+      mod = rest.join('.');
+    }
+
+    mod = mod
+      .replace(/[\/]+/g, '.')
+      .replace(/^\./, '')
+      .replace(/\.(t|j)s$/, '');
+
+    return `${ns}/${mod}`;
   }
 }

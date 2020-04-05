@@ -70,7 +70,7 @@ export class SchemaTransformer {
     }
 
     const dec = state.createDecorator(FIELD_MOD, 'Field', ...params);
-    const newDecs = [...(node.decorators || []), dec];
+    const newDecs = [...(node.decorators ?? []), dec];
 
     const comments = state.readJSDocs(node);
     if (comments.description) {
@@ -113,7 +113,7 @@ export class SchemaTransformer {
 
   @AfterClass('trv/schema/Schema')
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
-    const decls = [...(node.decorators || [])];
+    const decls = [...(node.decorators ?? [])];
 
     const comments = state.readJSDocs(node);
 

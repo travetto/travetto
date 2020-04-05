@@ -3,6 +3,8 @@ import { Class } from '@travetto/registry';
 import { ApplicationConfig, ApplicationParameter } from './types';
 import { ApplicationRegistry } from './registry';
 
+type AppClass = Class<{ run(...args: any[]): any }>;
+
 export type AppDecorator = Partial<ApplicationConfig> & {
   paramMap?: {
     [key: string]: Partial<ApplicationParameter> & { name?: never };
@@ -18,8 +20,8 @@ export function Application(
   name: string,
   config?: AppDecorator,
   params?: (Partial<ApplicationParameter> & { name: string })[]
-): ClassDecorator {
-  return (target: Class | any) => {
+) {
+  return <T extends AppClass>(target: T) => {
     const out: Partial<ApplicationConfig> = config ?? {};
     const paramMap = config?.paramMap ?? {};
 

@@ -3,20 +3,8 @@ import * as child_process from 'child_process';
 
 // Imported individually to prevent barrel import loading too much
 import { FsUtil } from '@travetto/boot/src/fs-util';
-import { EnvUtil } from '@travetto/boot/src/env';
 
-const COLORS = {
-  blue: `\x1b[94m`,
-  yellow: `\x1b[93m`,
-  green: `\x1b[92m`,
-  gray: `\x1b[37m\x1b[2m`,
-  red: `\x1b[31m`,
-  cyan: `\x1b[96m`,
-  magenta: `\x1b[95m`,
-  white: `\x1b[97m\x1b[1m`,
-  reset: `\x1b[0m`,
-
-};
+import { color } from './color';
 
 export interface CompletionConfig {
   all: string[];
@@ -27,34 +15,11 @@ export interface CompletionConfig {
   };
 }
 
-const HAS_COLOR = process.stdout.isTTY && !EnvUtil.isTrue('NO_COLOR');
-
-function colorizeAny(color: keyof typeof COLORS, value: string | number | boolean): string;
-function colorizeAny(color: keyof typeof COLORS, value: any) {
-  if (HAS_COLOR && value !== undefined && value !== null && value !== '') {
-    const code = COLORS[color];
-    value = `${code}${value}${COLORS.reset}`;
-  }
-  return value;
-}
-
 export class Util {
-  static HAS_COLOR = HAS_COLOR;
   static program = commander;
 
-  static colorize = {
-    input: colorizeAny.bind(null, 'yellow'),
-    output: colorizeAny.bind(null, 'magenta'),
-    path: colorizeAny.bind(null, 'white'),
-    success: colorizeAny.bind(null, 'green'),
-    failure: colorizeAny.bind(null, 'red'),
-    param: colorizeAny.bind(null, 'green'),
-    type: colorizeAny.bind(null, 'blue'),
-    description: colorizeAny.bind(null, 'gray'),
-    title: colorizeAny.bind(null, 'white'),
-    identifier: colorizeAny.bind(null, 'blue'),
-    subtitle: colorizeAny.bind(null, 'gray')
-  };
+  static BOOLEAN_RE = /^(1|0|yes|no|on|off|auto|true|false)$/i;
+  static TRUE_RE = /^(1|yes|on|true)$/i;
 
   static dependOn(cmd: string, args: string[] = [], sCwd: string = FsUtil.cwd) {
     child_process.spawnSync(`${process.argv.slice(0, 2).join(' ')} ${cmd} ${args.join(' ')}`, {
@@ -89,7 +54,7 @@ export class Util {
   static showHelp(cmd: commander.Command, msg = '', code = msg === '' ? 0 : 1) {
 
     if (msg) {
-      console.error(this.colorize['failure'](`${msg}\n`));
+      console.error(color`${{ failure: msg }}\n`);
     }
 
     cmd.outputHelp(text => {
@@ -112,10 +77,7 @@ export class Util {
 
       const out = [];
       if (usage) {
-        out.push(
-          usage
-            .replace(/Usage:/, x => this.colorize.title(x))
-        );
+        out.push(usage.replace(/Usage:/, title => color`${{ title }}`));
       }
       if (options) {
         out.push(
@@ -131,29 +93,29 @@ export class Util {
               const line: string[] = [];
               line.push(
                 spacing,
-                this.colorize.param(simpleParam),
+                color`${{ param: simpleParam }}`,
                 pSep,
-                this.colorize.param(fullParam),
+                color`${{ param: fullParam }}`,
                 subSp,
-                this.colorize.type(subVal),
+                color`${{ type: subVal }}`,
                 descSp,
-                this.colorize.description(descVal)
+                color`${{ description: descVal }}`
                   .replace(/([(]default:\s+)(.*?)([)])/g,
-                    (all: string, l: string, val: string, r: string) => `${l}${this.colorize.input(val)}${r}`)
+                    (_, l, input, r) => color`${l}${{ input }}${r}`)
               );
               return line
                 .filter(x => x !== '' && x !== undefined)
                 .join('');
             })
-            .replace(/Options:/, x => this.colorize.title(x))
+            .replace(/Options:/, title => color`${{ title }}`)
         );
       }
       if (commands) {
         out.push(
           commands
-            .replace(/\s([^\[\]]\S+)/g, x => this.colorize.param(x))
-            .replace(/(\s*[^\x1b]\[[^\]]+\])/g, x => this.colorize.input(x)) // eslint-disable-line no-control-regex
-            .replace(/Commands:/, x => this.colorize.title(x))
+            .replace(/\s([^\[\]]\S+)/g, param => color`${{ param }}`)
+            .replace(/(\s*[^\x1b]\[[^\]]+\])/g, input => color`${{ input }}`) // eslint-disable-line no-control-regex
+            .replace(/Commands:/, title => color`${{ title }}`)
         );
       }
 

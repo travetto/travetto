@@ -7,9 +7,6 @@ import {
 
 const TRANSFORMER_RE = /^(?:node_modules\/[^/]*\/(?:[^/]*\/)?)?support\/transformer[.](.*?)[.]ts$/;
 
-type TransformerWithFile = NodeTransformer<TransformerState> & { file: string };
-
-
 export class TransformerManager {
 
   transformers: ts.CustomTransformers = {};
@@ -19,13 +16,13 @@ export class TransformerManager {
   constructor(private cwd: string) { }
 
   init() {
-    const allTransformers: TransformerWithFile[] = [];
+    const allTransformers: (NodeTransformer<TransformerState> & { file: string })[] = [];
 
     for (const name of ScanApp.findFiles('.ts', x => TRANSFORMER_RE.test(x), this.cwd)) {
       const all = require(name.file);
       const resolved = Object
         .values(all)
-        .map(x => getTransformHandlers(x) as TransformerWithFile[])
+        .map(x => getTransformHandlers(x) as typeof allTransformers)
         .filter(x => !!x && x.length > 0);
 
       for (const transformers of resolved) {

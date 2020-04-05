@@ -14,7 +14,11 @@ export class $ApplicationRegistry {
   loadAllFromConfig() {
     for (const entries of Object.values(ConfigSource.get('app.entry') ?? {}) as string[][]) {
       for (const entry of entries) {
-        require(entry);
+        try {
+          require(entry);
+        } catch (e) {
+          // Ignore
+        }
       }
     }
   }
@@ -31,11 +35,11 @@ export class $ApplicationRegistry {
     const inst = await DependencyRegistry.getInstance(config.target);
     if (!Env.quietInit) {
       console.log('Running application', name);
-      console.log('Configured', JSON.stringify({
+      console.log('Configured', {
         app: AppInfo,
         env: Env.toJSON(),
         config: ConfigSource.get(''),
-      }, undefined, 2));
+      });
     }
     if (inst.run) {
       await inst.run(...args);

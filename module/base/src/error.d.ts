@@ -1,4 +1,4 @@
-import * as all from './error';
+import './error';
 
 declare global {
   export interface Error {

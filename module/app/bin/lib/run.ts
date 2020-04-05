@@ -27,7 +27,7 @@ export class RunUtil {
     let typedSub: (string | number | boolean | Date)[] = sub;
 
     if (app) {
-      const appParams = app.params || [];
+      const appParams = app.params ?? [];
       typedSub = sub.map((x, i) => appParams[i] === undefined ? x : this.enforceParamType(appParams[i], x));
       const reqCount = appParams.filter(x => !x.optional).length;
       if (typedSub.length < reqCount) {
@@ -35,11 +35,11 @@ export class RunUtil {
       }
 
       process.env.APP_ROOTS = [
-        process.env.APP_ROOTS || app.appRoot || '',
+        process.env.APP_ROOTS ?? app.appRoot ?? '',
         !app.standalone && app.appRoot ? '.' : ''
       ].join(',');
-      process.env.ENV = process.env.ENV || 'dev';
-      process.env.PROFILE = process.env.PROFILE || '';
+      process.env.ENV = process.env.ENV ?? 'dev';
+      process.env.PROFILE = process.env.PROFILE ?? '';
       if (!process.env.WATCH) {
         process.env.WATCH = process.env.ENV !== 'dev' ? '0' : `${app.watchable}`;
       }

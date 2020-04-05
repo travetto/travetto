@@ -1,5 +1,6 @@
 import * as commander from 'commander';
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
+import { color } from '@travetto/cli/src/color';
 
 export function init() {
   return Util.program.command('clean')
@@ -10,10 +11,10 @@ export function init() {
         AppCache.clear(true);
 
         if (!cmd.quiet) {
-          console.log(`${Util.colorize.success('Successfully')} deleted temp dir ${Util.colorize.path(AppCache.cacheDir)}`);
+          console.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: AppCache.cacheDir }}`);
         }
       } catch (e) {
-        console.error(`${Util.colorize.failure('Failed')} to delete temp dir ${Util.colorize.path(AppCache.cacheDir)}`);
+        console.error(color`${{ failure: 'Failed' }} to delete temp dir ${{ path: AppCache.cacheDir }}`);
       }
     });
 }

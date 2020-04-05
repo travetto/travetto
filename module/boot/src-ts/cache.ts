@@ -1,6 +1,7 @@
 import * as os from 'os';
 import * as fs from 'fs';
 import { FsUtil } from './fs-util';
+import { EnvUtil } from './env';
 
 function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
   return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
@@ -17,7 +18,7 @@ export class FileCache {
     this.cwd = FsUtil.toUnix(cwd || FsUtil.cwd);
 
     if (!cacheDir) {
-      const peTcd = process.env.TRV_CACHE_DIR;
+      const peTcd = EnvUtil.get('trv_cache_dir');
       const defCache = FsUtil.joinUnix(os.tmpdir(), FsUtil.cwd.replace(/[\/:]/g, '_'));
       cacheDir = peTcd === 'PID' ? `${defCache}_${process.pid}` : (peTcd && peTcd !== '-' ? peTcd : defCache);
     }

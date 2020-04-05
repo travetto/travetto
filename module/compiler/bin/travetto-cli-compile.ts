@@ -2,6 +2,7 @@ import * as commander from 'commander';
 import * as fs from 'fs';
 
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
+import { color } from '@travetto/cli/src/color';
 
 async function rewriteRuntimeDir(runtimeDir: string) {
   const { FsUtil, AppCache } = await import(`@travetto/boot`);
@@ -45,7 +46,7 @@ export function init() {
       }
 
       if (!cmd.quiet) {
-        console.log(`${Util.colorize.success('Successfully')} wrote to ${Util.colorize.path(cmd.output || 'default')}`);
+        console.log(color`${{ success: 'Successfully' }} wrote to ${{ path: cmd.output ?? 'default' }}`);
       }
     });
 }

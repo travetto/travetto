@@ -1,5 +1,5 @@
-import { EnvUtil, FsUtil } from '@travetto/boot';
-import { PhaseManager } from '@travetto/base';
+import { FsUtil, EnvUtil } from '@travetto/boot';
+import { Env, PhaseManager } from '@travetto/base';
 import { WorkPool, ArrayInputSource } from '@travetto/worker';
 
 import { ConsumerManager } from '../consumer/manager';
@@ -41,7 +41,7 @@ export class Runner {
 
     const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
       idleTimeoutMillis: 10000,
-      min: EnvUtil.isTrue('EXECUTION_REUSABLE') ? 1 : 0,
+      min: EnvUtil.isTrue('execution_reusable') ? 1 : 0,
       max: this.state.concurrency
     });
 

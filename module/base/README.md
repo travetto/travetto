@@ -176,3 +176,4 @@ Unlike `Util`, the `SystemUtil` is primarily meant for internal framework suppor
 * `streamToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
 * `throttle<T extends Function>(fn: T, threshold = 250): void` will run the function `fn` at most every `threshold`
 * `naiveHash(text: string): number` computes a very naive hash.  Should not be relied upon for scenarios where collisions cannot be tolerated.
+* `computeModule(file: string): string` computes the internal module name from a given file.

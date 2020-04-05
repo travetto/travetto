@@ -25,12 +25,10 @@ export class SerializeInterceptor extends RestInterceptor {
         } else if (typeof output === 'string') {
           this.setContentTypeIfUndefined(res, MimeType.TEXT);
           res.send(output);
-        } else if ('toJSON' in output) {
-          this.setContentTypeIfUndefined(res, MimeType.JSON);
-          res.send((output as any).toJSON());
         } else {
+          const payload = ('toJSON' in output) ? output.toJSON() : output;
           this.setContentTypeIfUndefined(res, MimeType.JSON);
-          res.send(JSON.stringify(output as any, undefined, 'pretty' in req.query ? 2 : 0));
+          res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
         }
       } else {
         res.status(201);

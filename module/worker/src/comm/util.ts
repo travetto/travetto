@@ -1,8 +1,9 @@
+import { ChildProcess } from 'child_process';
+
 import { Exec } from '@travetto/exec';
 import { Env } from '@travetto/base';
 
 import { SpawnConfig, ChildOptions } from './types';
-import { ChildProcess } from 'child_process';
 
 export class CommUtil {
 
@@ -75,6 +76,10 @@ export class CommUtil {
   }
 
   static killSpawnedProcess(proc: ChildProcess) {
-    proc.kill(process.platform === 'win32' ? undefined : 'SIGTERM');
+    if (process.platform === 'win32') {
+      proc.kill();
+    } else {
+      proc.kill('SIGTERM');
+    }
   }
 }

@@ -1,11 +1,14 @@
 import { YamlUtil } from '@travetto/yaml';
 import { CommUtil } from '@travetto/worker';
 
-import { TestEvent } from '../model/event';
-import { AllSuitesResult } from '../model/suite';
-import { Consumer } from '../model/consumer';
+import { AllSuitesResult } from '../../model/suite';
+import { TestEvent } from '../../model/event';
+import { Consumer } from '../../model/consumer';
+import { Consumable } from '../registry';
+
 import { TapEnhancer, DUMMY_ENHANCER } from './tap-enhancer';
 
+@Consumable('tap')
 export class TapEmitter implements Consumer {
   private count = 0;
 

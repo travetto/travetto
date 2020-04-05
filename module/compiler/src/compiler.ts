@@ -22,7 +22,7 @@ class $Compiler extends EventEmitter {
 
     if (Env.watch) {
       Shutdown.onUnhandled(err => {
-        if (err && (err.message || '').includes('Cannot find module')) { // Handle module reloading
+        if (err && (err.message ?? '').includes('Cannot find module')) { // Handle module reloading
           console.error(err);
           return true;
         }

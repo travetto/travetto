@@ -41,7 +41,7 @@ export class LoggingInterceptor extends RestInterceptor {
 
   static matchRoute(controller: Partial<ControllerConfig>, route: RouteConfig, paths: RouteCheck[]) {
     return paths.some(({ base, sub }) => {
-      if (base === (controller.basePath || '').replace(/^\/+/, '') || base === '*') {
+      if (base === (controller.basePath ?? '').replace(/^\/+/, '') || base === '*') {
         if (!sub || sub === '*') {
           return true;
         } else if (typeof route.path === 'string') {

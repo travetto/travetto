@@ -1,4 +1,4 @@
-import { ConsolePayload } from '@travetto/boot';
+import { ConsolePayload } from '@travetto/base';
 
 export const LogLevels = {
   trace: 0,
