@@ -10,7 +10,7 @@ export function init() {
     .action(async (cmd: commander.Command) => {
       process.env.ENV = 'prod';
       process.env.APP_ROOTS = cmd.app ? `./${cmd.app}` : '.';
-      process.env.PROFILE = cmd.app || '';
+      process.env.PROFILE = cmd.app ?? '';
 
       const { getSchemas } = await import('./lib');
       console.log(JSON.stringify(await getSchemas(), null, 2));

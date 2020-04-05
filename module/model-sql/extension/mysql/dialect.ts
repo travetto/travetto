@@ -54,7 +54,7 @@ export class MySQLDialect extends SQLDialect {
    */
   async executeSQL<T = any>(query: string): Promise<{ count: number, records: T[] }> {
     return new Promise<{ count: number, records: T[] }>((res, rej) => {
-      (console as any).trace(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
+      console.trace(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
       this.conn.active.query(query, (err, results, fields) => {
         if (err) {
           console.debug(err);

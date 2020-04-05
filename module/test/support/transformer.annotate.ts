@@ -11,7 +11,7 @@ export class AnnotationTransformer {
   static annotate(state: TransformerState, node: ts.MethodDeclaration | ts.ClassDeclaration, dm?: DecoratorMeta) {
     const dec = dm?.dec;
     if (dec && ts.isCallExpression(dec.expression)) {
-      const args = [...(dec.expression.arguments || [])];
+      const args = [...(dec.expression.arguments ?? [])];
       const n = ((node as any)['original'] || node) as ts.Node;
       const start = ts.getLineAndCharacterOfPosition(state.source, n.getStart());
       const end = ts.getLineAndCharacterOfPosition(state.source, n.getEnd());

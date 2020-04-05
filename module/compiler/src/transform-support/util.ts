@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { resolve as pathResolve } from 'path';
 
-import { RegisterUtil, FsUtil } from '@travetto/boot';
+import { RegisterUtil, FsUtil, EnvUtil } from '@travetto/boot';
 import { Env, Util } from '@travetto/base';
 
 import { Documentation, Import } from './types/shared';
@@ -178,7 +178,7 @@ export class TransformUtil {
   }
 
   static readJSDocs(type: ts.Type | ts.Node) {
-    const node = 'getSourceFile' in type ? type : type.getSymbol()?.getDeclarations()?.[0];
+    let node = 'getSourceFile' in type ? type : type.getSymbol()?.getDeclarations()?.[0];
 
     const out: Documentation = {
       description: undefined,
@@ -188,6 +188,10 @@ export class TransformUtil {
 
     if (node) {
       const tags = ts.getJSDocTags(node);
+      while (!('jsDoc' in node) && 'original' in node && (node as any).original) {
+        node = (node as any).original as ts.Node;
+      }
+
       const docs = (node as any)['jsDoc'];
 
       if (docs) {
@@ -223,7 +227,7 @@ export class TransformUtil {
       if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
         let path = this.optionalResolve(stmt.moduleSpecifier.text, base);
 
-        if (process.env.TRV_FRAMEWORK_DEV) {
+        if (EnvUtil.isSet('trv_framework_dev')) {
           path = RegisterUtil.resolveFrameworkDevFile(path);
         }
 

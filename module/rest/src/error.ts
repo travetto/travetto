@@ -2,10 +2,10 @@
 import { Env, HTTP_ERROR_CONVERSION } from '@travetto/base';
 
 import { Response } from './types';
-import { MimeType } from './util/mime';
 
 (Error as any).prototype.render = function (res: Response) {
-  const status = this.status ?? this.statusCode ??
+  const status = this.status ??
+    this.statusCode ??
     HTTP_ERROR_CONVERSION.from.get(this.category) ??
     500;
 
@@ -15,10 +15,9 @@ import { MimeType } from './util/mime';
     console.error(this.stack);
   }
 
-  if ('toJSON' in this) {
-    res.setHeader('Content-Type', MimeType.JSON);
-    res.send(this.toJSON({ status }));
-  } else {
-    res.json({ message: this.message, status, type: this.name });
-  }
+  const payload = 'toJSON' in this ?
+    this.toJSON({ status }) :
+    { message: this.message, status, type: this.name };
+
+  res.json(payload);
 };

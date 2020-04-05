@@ -31,8 +31,6 @@ export class AppListUtil {
     // Load app files
     ScanApp.requireFiles('.ts', x =>
       /^([^/]+\/)?(src[\/])/.test(x) &&
-      x.endsWith('.ts') &&
-      !x.endsWith('d.ts') &&
       fs.readFileSync(x, 'utf-8').includes('@Application')
     ); // Only load files that are candidates
 
@@ -95,7 +93,7 @@ export class AppListUtil {
   static async discoverAsJson() {
     try {
       const resolved = await this.discover();
-      (console as any).raw.log(JSON.stringify(resolved));
+      console.log(JSON.stringify(resolved));
     } catch (err) {
       handleFailure(err, 1);
       throw err;

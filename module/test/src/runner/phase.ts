@@ -7,7 +7,7 @@ import { TestUtil } from './util';
 
 export const BREAKOUT = Symbol('breakout');
 
-const DEFAULT_PHASE_TIMEOUT = EnvUtil.getInt('DEFAULT_PHASE_TIMEOUT', 15000);
+const DEFAULT_PHASE_TIMEOUT = EnvUtil.getInt('default_phase_timeout', 15000);
 
 export class ExecutionPhaseManager {
   private progress: ('all' | 'each')[] = [];

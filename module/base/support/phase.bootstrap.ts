@@ -1,3 +1,4 @@
+import { EnvUtil } from '@travetto/boot';
 import { Env } from '../src/env';
 import { Shutdown } from '../src/shutdown';
 import { Stacktrace } from '../src/stacktrace';
@@ -9,8 +10,8 @@ export const init = {
     if (!Env.prod) {
       Stacktrace.initHandler();
     }
-    if (!!process.env.TRV_FRAMEWORK_DEV) {
-      Stacktrace.filter = x => true;
+    if (EnvUtil.isSet('trv_framework_dev')) {
+      Stacktrace.clearStackFilters();
     }
     Shutdown.register();
   }

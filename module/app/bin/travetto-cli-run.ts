@@ -2,12 +2,11 @@ import * as fs from 'fs';
 import * as commander from 'commander';
 
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
+import { color } from '@travetto/cli/src/color';
 
 import { handleFailure, CachedAppConfig } from './lib/util';
 import { AppListUtil } from './lib/app-list';
 import { RunUtil } from './lib/run';
-
-const { colorize } = Util;
 
 interface AppCommand {
   watchReal: boolean;
@@ -21,16 +20,14 @@ function getAppUsage(app: CachedAppConfig) {
   let usage = app.name;
 
   if (app.params) {
-    usage = `${colorize.identifier(usage)} ${app.params.map(x => {
-      const type = colorize.type(RunUtil.getParamType(x));
-      const nm = colorize.param(x.name);
-      const def = x.def !== undefined ? colorize.input(x.def) : undefined;
+    usage = color`${{ identifier: usage }} ${app.params.map(p => {
+      const type = RunUtil.getParamType(p);
 
-      return x.optional ?
-        (x.def !== undefined ?
-          `[${nm}:${type}=${def}]` :
-          `[${nm}:${type}]`
-        ) : `${nm}:${type}`;
+      return p.optional ?
+        (p.def !== undefined ?
+          color`[${{ param: p.name }}:${{ type }}=${{ input: p.def }}]` :
+          color`[${{ param: p.name }}:${{ type }}]`
+        ) : color`${{ param: p.name }}:${{ type }}`;
     }).join(' ')}`;
   }
 
@@ -40,12 +37,12 @@ function getAppUsage(app: CachedAppConfig) {
 function generateAppHelpList(confs: CachedAppConfig[], cmd: AppCommand) {
   const choices = [];
   if (!confs.length) {
-    return `\nNo applications defined, use ${colorize.type('@Application')} to registry entry points`;
+    return color`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
   }
   for (const conf of confs) {
     const lines = [];
 
-    const root = conf.appRoot !== '.' ? `[${colorize.subtitle(conf.appRoot)}${!conf.standalone ? '^' : ''}] ` : '';
+    const root = conf.appRoot !== '.' ? color`[${{ subtitle: conf.appRoot }}${!conf.standalone ? '^' : ''}] ` : '';
     const usage = getAppUsage(conf);
 
     const features = [];
@@ -57,9 +54,9 @@ function generateAppHelpList(confs: CachedAppConfig[], cmd: AppCommand) {
       featureStr = ` | ${features.join(' ')}`;
     }
 
-    lines.push(`${root}${colorize.identifier(conf.name)}${featureStr}`);
+    lines.push(color`${root}${{ identifier: conf.name }}${featureStr}`);
     if (conf.description) {
-      lines.push(`desc:  ${colorize.description(conf.description || '')}`);
+      lines.push(color`desc:  ${{ description: conf.description ?? '' }}`);
     }
     lines.push(`usage: ${usage}`);
 
@@ -86,21 +83,21 @@ export function init() {
   return Util.program
     .command('run [application] [args...]')
     .on('--help', () => {
-      console.log(`\n${Util.colorize.title('Available Applications:')}`);
+      console.log(color`\n${{ title: 'Available Applications:' }}`);
       console.log(`\n${listHelper()}\n`);
     })
     .allowUnknownOption()
     .option('-e, --env [env]', 'Application environment (dev|prod), (default: dev)', /^(dev|prod)$/i)
     .option('-r, --root [root]', 'Application root, defaults to associated root by name')
-    .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', /^(1|0|yes|no|on|off|auto|true|false)$/i)
+    .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', Util.BOOLEAN_RE)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
     .action(async (app: string, args: string[], cmd: commander.Command & AppCommand) => {
-      cmd.env = cmd.env || process.env.ENV || process.env.env || undefined;
-      cmd.watchReal = /^(1|yes|on|true)$/.test(cmd.watch || '');
+      cmd.env = (cmd.env ?? process.env.ENV ?? process.env.env) || undefined;
+      cmd.watchReal = Util.TRUE_RE.test(cmd.watch ?? '');
 
       cmd.profile = [
-        ...(cmd.profile || []),
-        ...(process.env.PROFILE || '').split(/,/g)
+        ...(cmd.profile ?? []),
+        ...(process.env.PROFILE ?? '').split(/,/g)
       ]
         .filter(x => !!x)
         .map(x => x.trim());

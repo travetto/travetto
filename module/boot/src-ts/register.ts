@@ -20,6 +20,8 @@ declare const global: {
 
 type Preparer = (name: string, contents: string) => string;
 
+const IS_WATCH = !EnvUtil.isFalse('watch');
+
 export class RegisterUtil {
   private static preparers: Preparer[] = [];
 
@@ -64,6 +66,7 @@ export class RegisterUtil {
     // Drop typescript import, and use global. Great speedup;
     fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
 
+    // Track loading, for cyclical dependency detection
     return `${fileContents};\nexport const __$TRV = 1;`;
   }
 
@@ -74,7 +77,7 @@ export class RegisterUtil {
       }
       pth = FsUtil.toUnix(pth).replace(/^.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
         const mid = this.pkgName === `@travetto/${name}` ? '' : `node_modules/@travetto/${name}`;
-        return `${FsUtil.cwd}/${mid}${rest || ''}`.replace(/\/\/+/g, '/');
+        return `${FsUtil.cwd}/${mid}${rest ?? ''}`.replace(/\/\/+/g, '/');
       });
     }
     return pth;
@@ -102,7 +105,7 @@ export class RegisterUtil {
       // @ts-ignore
       const p = Module._resolveFilename(request, parent);
 
-      if (EnvUtil.isTrue('watch') && !p.includes('/extension/')) { // Build proxy if watching and not an extension
+      if (IS_WATCH && !p.includes('/extension/')) { // Build proxy if watching and not an extension
         console.debug(`Unable to load ${p.replace(`${process.cwd()}/`, '')}: stubbing out with error proxy.`, e.message);
         return this.getErrorModuleProxy(e.message) as NodeModule;
       }
@@ -161,7 +164,7 @@ export class RegisterUtil {
 
     AppCache.init();
 
-    const tfd = !!process.env.TRV_FRAMEWORK_DEV;
+    const tfd = EnvUtil.isSet('trv_framework_dev');
 
     // @ts-ignore
     Module._load = (tfd ? this.frameworkModuleHandler : this.moduleLoaderHandler).bind(this);

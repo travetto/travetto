@@ -2,7 +2,7 @@ import { EnvUtil } from '@travetto/boot';
 
 const px = process.exit;
 
-const MAX_SHUTDOWN_TIME = EnvUtil.getInt('MAX_SHUTDOWN_WAIT', 2000);
+const MAX_SHUTDOWN_TIME = EnvUtil.getInt('max_shutdown_wait', 2000);
 
 type UnhandledHandler = (err: Error, prom?: Promise<any>) => boolean | undefined | void;
 type Listener = { name: string, handler: Function, final?: boolean };

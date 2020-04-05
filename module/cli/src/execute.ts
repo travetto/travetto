@@ -66,7 +66,7 @@ export class Execute {
     await Promise.all(this.loadAllPlugins().map(x => x.complete(compl)));
 
     let last = cmd;
-    let opts = [];
+    let opts: string[] = [];
 
     if (!compl.task[cmd]) {
       opts = compl.all;
@@ -98,7 +98,7 @@ export class Execute {
     const wantsHelp = args.includes('-h') || args.includes('--help');
 
     if (cmd === 'complete') {
-      this.getCompletion(args.slice(3)).then(x => console.log((x || []).join(' ')));
+      this.getCompletion(args.slice(3)).then(x => console.log((x ?? []).join(' ')));
       return;
     }
 

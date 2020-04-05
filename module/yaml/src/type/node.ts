@@ -1,3 +1,5 @@
+import { Util } from '@travetto/base';
+
 export interface Node<T = any> {
   value: T;
 }
@@ -15,7 +17,7 @@ export class NumberNode implements Node<number> {
   value: number;
 
   constructor(token: string) {
-    this.value = token.includes('.') ? Number.parseFloat(token) : Number.parseInt(token, 10);
+    this.value = Util.coerceType(token, Number, true);
   }
 }
 
@@ -23,7 +25,7 @@ export class BooleanNode implements Node<boolean> {
   value: boolean;
 
   constructor(token: string) {
-    this.value = /yes|on|true/i.test(token);
+    this.value = Util.coerceType(token, Boolean, true);
   }
 }
 

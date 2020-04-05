@@ -21,7 +21,7 @@ export class InjectableTransformer {
 
     const callExpr = existing?.expression as ts.CallExpression;
     if (callExpr) {
-      const args = callExpr.arguments! || [];
+      const args = callExpr.arguments! ?? [];
       // Handle special case
       if (args.length && ts.isIdentifier(args[0])) {
         original = args[0];

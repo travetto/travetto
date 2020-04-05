@@ -8,7 +8,7 @@ export function getTransformHandlers(cls: any): NodeTransformer[] {
 }
 
 function storeHandler(cls: any, handler: NodeTransformer) {
-  cls[HANDLERS] = cls[HANDLERS] || [];
+  cls[HANDLERS] = cls[HANDLERS] ?? [];
   cls[HANDLERS].push(handler);
 }
 

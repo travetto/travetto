@@ -34,7 +34,7 @@ class AssetSourceSuite extends BaseAssetSourceSuite {
       await s3.deleteObjects({
         Bucket: config.bucket,
         Delete: {
-          Objects: (obs.Contents || []).map(o => ({ Key: o.Key }))
+          Objects: (obs.Contents ?? []).map(o => ({ Key: o.Key }))
         }
       } as any).promise();
     }

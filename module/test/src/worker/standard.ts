@@ -8,6 +8,7 @@ export class StandardWorker {
       // Pre compile all
       ScanApp.getStandardAppFiles()
         .filter(x => !AppCache.hasEntry(x))
+        .filter(x => !x.includes('@travetto/test')) // Exclude test
         .map(x => require(x));
 
       const { Runner } = await import('../runner/runner');

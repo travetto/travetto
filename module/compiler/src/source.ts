@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 
-import { FileCache, RegisterUtil } from '@travetto/boot';
+import { FileCache, RegisterUtil, EnvUtil } from '@travetto/boot';
 import { Env, SystemUtil, ScanApp } from '@travetto/base';
 
 import { CompilerUtil } from './util';
@@ -28,9 +28,9 @@ export class SourceManager {
   private readFile(fileName: string) {
     let content = ts.sys.readFile(fileName);
     if (!content) {
-      throw new Error(`Unable to read file  ${fileName}`);
+      throw new Error(`Unable to read file ${fileName}`);
     }
-    if (fileName.endsWith('.ts') && !fileName.endsWith('.d.ts')) {
+    if (ScanApp.TS_TESTER.test(fileName)) {
       content = RegisterUtil.prepareTranspile(fileName, content);
     }
     return content;
@@ -52,7 +52,7 @@ export class SourceManager {
   private getHost(): ts.CompilerHost {
     const host: ts.CompilerHost = {
       readFile: this.readFile,
-      realpath: process.env.TRV_FRAMEWORK_DEV ? RegisterUtil.resolveFrameworkDevFile : undefined,
+      realpath: EnvUtil.isSet('trv_framework_dev') ? RegisterUtil.resolveFrameworkDevFile : undefined,
       writeFile: this.writeFile,
       fileExists: this.fileExists,
       getDefaultLibFileName: ts.getDefaultLibFileName,
@@ -83,7 +83,7 @@ export class SourceManager {
     }
 
     if (!this.program || (forFile && !this.rootNames.has(forFile))) {
-      console.log(`Loading program ${this.rootNames.size}`, forFile);
+      console.debug(`Loading program ${this.rootNames.size}`, forFile);
       if (forFile) {
         this.rootNames.add(forFile);
       }
@@ -123,7 +123,9 @@ export class SourceManager {
 
   init() {
     // TODO: Load only what is necessary since it now has a much higher cost
-    ScanApp.findFiles('.ts', x => !x.endsWith('.d.ts') && !x.startsWith('bin/'), Env.cwd)
+    const SRC_RE = Env.rootMatcher([Env.cwd].map(x => `${x}/src`));
+
+    ScanApp.findFiles('.ts', x => SRC_RE.test(x) || ScanApp.IS_STANDARD_APP_FILE(x), Env.cwd)
       .map(x => x.file)
       .filter(x => !/travetto\/([^/]*)\/test/.test(x))
       .filter(x => !require.cache[x])

@@ -1,7 +1,9 @@
-import { TestEvent } from '../model/event';
-import { AllSuitesResult } from '../model/suite';
-import { Consumer } from '../model/consumer';
+import { AllSuitesResult } from '../../model/suite';
+import { TestEvent } from '../../model/event';
+import { Consumer } from '../../model/consumer';
+import { Consumable } from '../registry';
 
+@Consumable('json')
 export class JSONEmitter implements Consumer {
 
   constructor(private stream: NodeJS.WriteStream = process.stdout) { }

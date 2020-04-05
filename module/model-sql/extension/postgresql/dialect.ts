@@ -41,7 +41,7 @@ export class PostgreSQLDialect extends SQLDialect {
    * Simple query execution
    */
   async executeSQL<T = any>(query: string): Promise<{ count: number, records: T[] }> {
-    (console as any).trace(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
+    console.trace(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
     const out = await this.conn.active.query(query);
     return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as any as T[] };
   }

@@ -57,15 +57,13 @@ export class AppError extends Error {
   }
 
   toJSON(extra: Record<string, any> = {}) {
-    if (this.payload) {
-      Object.assign(extra, this.payload);
-    }
-    return JSON.stringify({
+    return {
       ...extra,
+      ...(this.payload ?? {}),
       message: this.message,
       category: this.category,
       type: this.type
-    });
+    };
   }
 }
 

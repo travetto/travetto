@@ -18,7 +18,7 @@ export class ConfigTransformer {
 
   @AfterClass('trv/config/Config')
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
-    const decls = [...(node.decorators || [])];
+    const decls = [...(node.decorators ?? [])];
 
     delete state[hasConfig];
 

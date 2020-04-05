@@ -53,9 +53,8 @@ export class CompilerUtil {
 
   static isCompilable(f: string) {
     return f.startsWith('extension/') || (
-      /^node_modules\/@travetto\/[^\/]+\/(src|extension)\/.*/.test(f)
-      && !f.includes('node_modules/@travetto/test') // Exclude test code by default
-      && !f.startsWith(`node_modules/${AppInfo.NAME}/`)) && !f.endsWith('.d.ts');
+      /^node_modules\/@travetto\/[^\/]+\/(src|extension)\/.*/.test(f) // Ensure its a travetto src/extension
+    );
   }
 
   static handleCompileError(e: Error, cwd: string, modName: string, tsf: string) {

@@ -16,7 +16,7 @@ ${controllers.map(cont => `
       Runtime: nodejs8.10
       CodeUri: ./lambda.zip
       Description: >-
-        ${cont.description || ''}.
+        ${cont.description ?? ''}.
       MemorySize: 256
       Timeout: 60
       Events:

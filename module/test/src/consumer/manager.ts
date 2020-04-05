@@ -1,25 +1,10 @@
-import { Class } from '@travetto/registry';
-
 import { Consumer } from '../model/consumer';
 
-import { JSONEmitter } from './json';
-import { ExecutionEmitter } from './execution';
-import { EventStream } from './event-stream';
-import { TapEmitter } from './tap';
-import { NoopConsumer } from './noop';
-import { XunitEmitter } from './xunit';
-
+import { ConsumerRegistry } from './registry';
 import { AllResultsCollector } from './collector';
+import './types'; // Load all types
 
 export class ConsumerManager {
-
-  static FORMAT_MAPPING: Record<string, Class<Consumer>> = {
-    json: JSONEmitter,
-    tap: TapEmitter,
-    event: EventStream,
-    exec: ExecutionEmitter,
-    xunit: XunitEmitter
-  };
 
   static create(consumer: string | Consumer): Consumer & { summarize?: () => AllResultsCollector } {
     const consumers: Consumer[] = [];
@@ -27,7 +12,7 @@ export class ConsumerManager {
     if (typeof consumer !== 'string') {
       consumers.push(consumer);
     } else {
-      const fmtClass = this.FORMAT_MAPPING[consumer] ?? NoopConsumer;
+      const fmtClass = ConsumerRegistry.getOrDefault(consumer);
 
       if (fmtClass) {
         consumers.push(new fmtClass());

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { EnvUtil, FsUtil } from '@travetto/boot';
+import { FsUtil, EnvUtil } from '@travetto/boot';
 
 import { Env } from './env';
 import { ScanFs, ScanEntry } from './scan-fs';
@@ -157,5 +157,5 @@ export class $ResourceManager {
 
 export const ResourceManager = new $ResourceManager([
   ...Env.appRoots,
-  ...EnvUtil.getList('RESOURCE_ROOTS')
+  ...EnvUtil.getList('resource_roots')
 ]);
