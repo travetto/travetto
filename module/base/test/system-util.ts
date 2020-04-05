@@ -47,4 +47,14 @@ class SystemUtilTests {
     const ordered2 = order2.map(x => x.key);
     assert(ordered2 === ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
   }
+
+  @Test()
+  async buildModuleName() {
+    const modName = SystemUtil.computeModule(__filename);
+    assert(modName === '@app/test.system-util');
+
+    const modName2 = SystemUtil.computeModule('node_modules/@travetto/base/src/system-util.js');
+    assert(modName2 === '@trv:base/system-util');
+  }
+
 }

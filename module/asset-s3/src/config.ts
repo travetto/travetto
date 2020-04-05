@@ -1,4 +1,5 @@
 import * as aws from 'aws-sdk';
+import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 
 @Config('s3.asset')
@@ -6,8 +7,8 @@ export class S3AssetConfig {
   region = 'us-east-1';
   namespace = '';
 
-  accessKeyId = process.env.AWS_ACCESS_KEY_ID ?? '';
-  secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY ?? '';
+  accessKeyId = EnvUtil.get('AWS_ACCESS_KEY_ID') ?? '';
+  secretAccessKey = EnvUtil.get('AWS_SECRET_ACCESS_KEY') ?? '';
 
   bucket = '';
 
@@ -19,7 +20,7 @@ export class S3AssetConfig {
 
   postConstruct() {
     if (!this.accessKeyId && !this.secretAccessKey) {
-      const creds = new aws.SharedIniFileCredentials({ profile: process.env.AWS_PROFILE });
+      const creds = new aws.SharedIniFileCredentials({ profile: EnvUtil.get('AWS_PROFILE') });
       this.accessKeyId = creds.accessKeyId;
       this.secretAccessKey = creds.secretAccessKey;
     }

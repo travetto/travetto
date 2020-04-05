@@ -1,4 +1,5 @@
 import { FsUtil } from '@travetto/boot';
+import { SystemUtil } from '@travetto/base';
 import { Class } from './types';
 
 class $PendingRegister {
@@ -9,7 +10,7 @@ class $PendingRegister {
   initMeta(cls: Class<any>, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean) {
     file = FsUtil.toUnix(file.replace(/[.]js$/, '.ts'));
     if (!this.modCache.has(file)) {
-      this.modCache.set(file, FsUtil.computeModule(file));
+      this.modCache.set(file, SystemUtil.computeModule(file));
     }
     const meta = {
       __id: `${this.modCache.get(file)}#${cls.name}`,

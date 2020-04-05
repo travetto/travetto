@@ -1,12 +1,13 @@
 import * as os from 'os';
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
+import { ColorSupport } from '@travetto/cli/src/color';
 
 export function init() {
-  const Col = Util.colorize;
+  const Col = ColorSupport;
 
   return Util.program.command('test')
     .arguments('[regexes...]')
-    .option('-f, --format <format>', 'Output format for test results', /^(tap|json|jsonStream|noop|exec|event|xunit)$/, 'tap')
+    .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec|event|xunit)$/, 'tap')
     .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, Math.min(4, os.cpus().length - 1))
     .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
     .action(async (args, cmd) => {
@@ -14,12 +15,11 @@ export function init() {
       const { runTests, prepareEnv } = await import('./lib');
 
       prepareEnv();
-
-      const { PhaseManager } = await import('@travetto/base');
+      const { ConsoleManager, PhaseManager } = await import('@travetto/base');
       await PhaseManager.init('bootstrap', 'compiler').run();
 
-      if (cmd.format === 'tap' && Util.HAS_COLOR) {
-        const { TapEmitter } = await import('../src/consumer/tap');
+      if (cmd.format === 'tap' && ConsoleManager.colorize) {
+        const { TapEmitter } = await import('../src/consumer/types/tap');
         cmd.consumer = new TapEmitter(process.stdout, {
           assertDescription: Col.description,
           testDescription: Col.description,

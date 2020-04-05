@@ -10,12 +10,13 @@ export class Stacktrace {
   static initHandler() {
     this.addStackFilters(
       __filename.replace(/\.js$/, ''),
-      'timers.js',
+      // 'timers.js',
       'typescript.js',
       'async_hooks',
-      'module.js',
       '(native)',
-      '<anonymous>',
+      'internal',
+      'tslib',
+      // '<anonymous>',
       'source-map-support.js'
     );
   }
@@ -23,15 +24,18 @@ export class Stacktrace {
   static addStackFilters(...names: string[]) {
     if (this.filters) {
       this.filters.push(...names);
-      this.filterRegex = new RegExp(`(${names.map(x => x.replace(/[().\[\]|?]/g, z => `\\${z}`)).join('|')})`);
+      this.filterRegex = new RegExp(`(${this.filters.map(x => x.replace(/[().\[\]|?]/g, z => `\\${z}`)).join('|')})`);
     }
   }
 
-  static filter = (line: string) => !/[\/]@travetto[\/](base|compile|registry|exec|worker|context)/.test(line);
+  static clearStackFilters() {
+    this.filters = [];
+    this.filterRegex = /##/;
+  }
 
   static simplifyStack(err: Error, filter = true): string {
     const getName = (x: string) => {
-      const l = x.split(FsUtil.toUnix(Env.cwd))[1];
+      const [, l] = x.split(FsUtil.toUnix(Env.cwd));
       if (l) {
         return l.split(/[.][tj]s/)[0];
       }
@@ -40,7 +44,7 @@ export class Stacktrace {
 
     let lastName: string = '';
     const body = err.stack!.replace(/\\/g, '/').split('\n')
-      .filter(x => !filter || this.filter(x)) // Exclude framework boilerplate
+      .filter(x => !this.filterRegex.test(x)) // Exclude framework boilerplate
       .reduce((acc, l) => {
         const name = getName(l);
 

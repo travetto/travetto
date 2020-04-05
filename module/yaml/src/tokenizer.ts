@@ -118,7 +118,7 @@ export class Tokenizer {
     }
 
     // Remove trailing baggage
-    let lst = tokens[end - 1] || '';
+    let lst = tokens[end - 1] ?? '';
     if (lst && this.isComment(lst, 0)) {
       end -= 1;
     }

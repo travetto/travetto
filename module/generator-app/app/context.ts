@@ -1,5 +1,6 @@
 import * as path from 'path';
 
+import { EnvUtil } from '@travetto/boot';
 import { run } from './util';
 
 export class Context {
@@ -13,7 +14,7 @@ export class Context {
   modules: Record<string, boolean> = {};
 
   author = {
-    name: run('git config user.name') || process.env.USER!,
+    name: run('git config user.name') || EnvUtil.get('user'),
     email: run('git config user.email')
   };
 

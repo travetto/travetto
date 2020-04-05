@@ -9,7 +9,7 @@ export class CommandService {
   private static hasDocker: boolean;
 
   static async dockerAvailable() {
-    if (this.hasDocker === undefined && !EnvUtil.isTrue('NO_DOCKER')) { // Check for docker existence
+    if (this.hasDocker === undefined && !EnvUtil.isTrue('no_docker')) { // Check for docker existence
       const { result: prom } = Exec.spawn('docker', ['ps']);
       this.hasDocker = (await prom).valid;
     }

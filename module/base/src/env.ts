@@ -1,10 +1,6 @@
-import { FsUtil, EnvUtil } from '@travetto/boot';
+import { EnvUtil, FsUtil } from '@travetto/boot';
 
 const PROD_KEY = 'prod';
-
-const PROD_ENV_MAPPING: Record<string, string> = {
-  production: PROD_KEY
-};
 
 class $Env {
 
@@ -65,7 +61,7 @@ class $Env {
   private computeNodeEnv() {
     const envs = ['node_env', 'env', 'profile'];
     const all = envs.reduce((acc, x) => acc.concat(EnvUtil.getList(x)), [] as string[]);
-    return all.map(x => PROD_ENV_MAPPING[x] || x);
+    return all.map(x => x === 'production' ? PROD_KEY : x);
   }
 
   toJSON() {

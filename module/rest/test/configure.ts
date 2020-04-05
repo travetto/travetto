@@ -34,7 +34,7 @@ export class ConfigureTest {
 
     assert(config.class === TestController);
     assert(config.basePath === '/test');
-    assert(/.*Fun.*/.test(config.title || ''));
+    assert(/.*Fun.*/.test(config.title ?? ''));
 
     assert(config.endpoints.length === 1);
 

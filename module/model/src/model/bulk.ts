@@ -24,8 +24,7 @@ export class BulkProcessError extends AppError {
   }
 
   toJSON(extra: Record<string, any> = {}) {
-    console.log(this.errors);
-    return JSON.stringify({
+    return {
       ...extra,
       message: this.message,
       category: this.category,
@@ -34,6 +33,6 @@ export class BulkProcessError extends AppError {
         const { message, type, errors, payload } = x.error as any;
         return { message, type, errors: errors ?? payload, idx: x.idx };
       })
-    });
+    };
   }
 }

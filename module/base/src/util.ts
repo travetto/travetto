@@ -108,8 +108,8 @@ export class Util {
         return res;
       }
       case Boolean: {
-        const res = /^(true|yes|1|on)$/.test(`${input}`);
-        if (strict && !/^(false|no|off|0|true|yes|on|1)$/i.test(input)) {
+        const res = /^(true|yes|1|on)$/i.test(`${input}`);
+        if (strict && !/^(false|no|off|0|true|yes|on|1)$/i.test(`${input}`)) {
           throw new Error(`Invalid boolean value: ${input}`);
         }
         return res;

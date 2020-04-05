@@ -1,5 +1,7 @@
 import * as fs from 'fs';
-import { EnvUtil, FsUtil, RegisterUtil, AppCache } from '@travetto/boot';
+import { SystemUtil } from './system-util';
+import { RegisterUtil, AppCache, EnvUtil } from '@travetto/boot';
+import { Env } from './env';
 
 export type LogLevel = 'info' | 'log' | 'trace' | 'warn' | 'debug' | 'error' | 'fatal';
 export type ConsolePayload = {
@@ -29,7 +31,13 @@ class $ConsoleManager {
 
   constructor() {
     (global as any)[KEY] = this.invoke.bind(this);
-    this.exclude = new Set(['trace', 'debug'].filter(x => !EnvUtil.isTrue(x)));
+    this.exclude = new Set();
+    if (EnvUtil.isFalse('debug')) {
+      this.exclude.add('debug');
+    }
+    if (!EnvUtil.isTrue('trace')) {
+      this.exclude.add('trace');
+    }
     this.set(null); // Init
     RegisterUtil.addPreparer(this.instrument.bind(this)); // Register console manager
   }
@@ -68,7 +76,10 @@ class $ConsoleManager {
   }
 
   instrument(fileName: string, fileContents: string) {
-    // Insert filename into all log statements for all components, when logger isn't loaded
+    if (fileName.includes('/bin/') && (fileName.includes('node_modules') || EnvUtil.isSet('trv_framework_dev'))) {
+      return fileContents; // Skip cli
+    }
+    // Insert filename into all log statements for all components
     let line = 1;
     fileContents = fileContents.replace(CONSOLE_RE, (a, cmd, lvl) => {
       if (a === '\n') {
@@ -76,7 +87,7 @@ class $ConsoleManager {
         return a;
       } else {
         lvl = lvl === 'log' ? 'info' : lvl;
-        return `${KEY}({level:'${lvl}',file:__filename,category:'${FsUtil.computeModule(fileName)}',line:${line}},`;
+        return `${KEY}({level:'${lvl}',file:__filename,category:'${SystemUtil.computeModule(fileName)}',line:${line}},`;
       }
     });
     return fileContents;
@@ -87,7 +98,7 @@ class $ConsoleManager {
       const name = cons.startsWith('!') ? AppCache.toEntryName(cons.substring(1)) : cons;
       cons = new console.Console({
         stdout: fs.createWriteStream(name, { flags: 'a' }),
-        inspectOptions: { depth: 4 }
+        inspectOptions: { depth: 4 },
       });
     }
     this.targetConsole = cons ?? OG_CONSOLE;

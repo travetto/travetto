@@ -35,20 +35,30 @@ export class RestTransformer {
       }
     }
 
-    const decs = (node.decorators || []).filter(x => x !== pDec);
-    commentConfig = (comments.params || []).find(x => x.name === decConfig.name) || {} as ParamDoc;
+    const decs = (node.decorators ?? []).filter(x => x !== pDec);
+    commentConfig = (comments.params ?? []).find(x => x.name === decConfig.name) || {} as ParamDoc;
 
     let rType: res.Type = state.resolveType(node);
-    const array = res.isLiteralType(rType) && rType.realType === Array;
-    rType = array && res.isLiteralType(rType) ? rType.typeArguments?.[0]! : rType;
+    let array = false;
+    if (res.isLiteralType(rType)) {
+      array = rType.realType === Array;
+      if (array) {
+        rType = rType.typeArguments?.[0]!;
+      }
+    }
 
-    const type = state.typeToIdentifier(rType);
-
+    let type: ts.Expression;
     let defaultType = 'Query';
 
+    console.log(rType, node.getText());
+
     if (rType.name === 'Request' || rType.name === 'Response') { // Convert to custom types, special handling for interfaces
-      rType = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, rType.name.toUpperCase());
+      type = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, rType.name.toUpperCase());
       defaultType = 'Context'; // White list request/response as context
+    } else if (res.isUnionType(rType)) {
+      type = ts.createIdentifier('Object');
+    } else {
+      type = state.typeToIdentifier(rType)!;
     }
 
     const common: ParamConfig = {
@@ -158,24 +168,24 @@ export class RestTransformer {
   static handleController(state: TransformerState, node: ts.ClassDeclaration) {
     // Read title/description/summary from jsdoc on class
     const comments = state.readJSDocs(node);
-    if (comments.description) {
 
-      const decls = [...(node.decorators || [])];
-      decls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
-        title: comments.description
-      })));
-
-      return ts.updateClassDeclaration(
-        node,
-        ts.createNodeArray(decls),
-        node.modifiers,
-        node.name,
-        node.typeParameters,
-        node.heritageClauses,
-        node.members
-      );
-    } else {
+    if (!comments.description) {
       return node;
     }
+
+    const decls = [...(node.decorators ?? [])];
+    decls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
+      title: comments.description
+    })));
+
+    return ts.updateClassDeclaration(
+      node,
+      ts.createNodeArray(decls),
+      node.modifiers,
+      node.name,
+      node.typeParameters,
+      node.heritageClauses,
+      node.members
+    );
   }
 }

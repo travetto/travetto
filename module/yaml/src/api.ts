@@ -1,3 +1,4 @@
+import { EnvUtil } from '@travetto/boot';
 import { Parser } from './parser';
 import { Serializer } from './serializer';
 
@@ -6,7 +7,7 @@ export class YamlUtil {
   static serialize = Serializer.serialize.bind(Serializer);
 }
 
-if ('JS_YAML' in process.env || (!('NO_JS_YAML' in process.env) && !/travetto[\/\\]module/.test(__dirname))) {
+if (EnvUtil.isTrue('js_yaml') && !EnvUtil.isSet('trv_framework_dev')) {
   try {
     const yaml = require('js-yaml');
     YamlUtil.parse = (t: string) => Object.assign({}, ...yaml.safeLoadAll(t));

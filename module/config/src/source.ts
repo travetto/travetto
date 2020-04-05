@@ -42,7 +42,7 @@ export class $ConfigSource {
   }
 
   toJSON() {
-    return JSON.stringify(this.storage, null, 2);
+    return this.storage;
   }
 
   reset() {

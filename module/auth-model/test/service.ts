@@ -61,7 +61,7 @@ class TestConfig {
       (u) => ({
         ...(u as any as RegisteredIdentity),
         details: u,
-        permissions: u.permissions || [],
+        permissions: u.permissions ?? [],
         provider: 'model'
       }),
       (registered) => User.from({
