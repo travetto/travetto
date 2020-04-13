@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
-import { Env, ResourceManager, Util } from '@travetto/base';
+import { ResourceManager, Util } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 type Prim = number | string | boolean | null;
@@ -9,10 +9,10 @@ export type Nested = { [key: string]: Prim | Nested | Nested[] };
 
 export class ConfigUtil {
 
-  static getActiveProfileFiles() {
+  static fetchConfigs(test: (profile: string) => boolean) {
     const envFiles = ResourceManager.findAllByExtensionSync('.yml')
       .map(file => ({ file, profile: path.basename(file).replace('.yml', '') }))
-      .filter(({ profile }) => Env.hasProfile(profile))
+      .filter(({ profile }) => test(profile))
       .map(({ file, profile }) => {
         const finalPath = ResourceManager.toAbsolutePathSync(file);
         return { file: finalPath, profile };

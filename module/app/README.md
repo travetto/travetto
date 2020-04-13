@@ -114,6 +114,3 @@ class ComplexApp {
   }
 }
 ```
-
-**Note**
-The applications, by default, will not scan other application's folders.  This means, if you have an application in the `e2e/` folder, all of the code in your `src/` folder will not be picked up automatically.  This defined under the assumption that each application is unique.  If you have an application that is an extension of the primary application (`src/`), you can specify the `@Application` config property of `standalone` to be false.  This will now scan both folders to run your application.

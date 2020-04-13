@@ -11,7 +11,7 @@ import { Response } from './types';
 
   res.status(status);
 
-  if (status === 500 && Env.dev) {
+  if (status === 500 && !Env.prod) {
     console.error(this.stack);
   }
 

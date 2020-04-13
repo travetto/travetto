@@ -27,7 +27,6 @@ export function Application(
 
     out.target = target;
     out.name = name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-');
-    out.standalone = out.standalone === undefined || out.standalone; // Default to standalone
 
     if (params) {
       out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] ?? {}), name: x.name! }) as ApplicationParameter);

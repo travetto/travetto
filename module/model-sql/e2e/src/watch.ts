@@ -30,7 +30,7 @@ class Employee implements ModelCore {
   name: string;
 }
 
-@Application('multi', { watchable: true, standalone: false })
+@Application('multi', { watchable: true })
 export class Service {
 
   @Inject()

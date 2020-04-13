@@ -14,7 +14,6 @@ Boot is basic environment  awareness coupled with typescript bootstrapping for `
 
 ## Environmental Information
 The functionality we support for testing and retrieving environment information:
-* `hasProfile(p: string): boolean;` - Test whether or not a profile is active.
 * `isTrue(key: string): boolean;` - Test whether or not an environment flag is set and is true
 * `isFalse(key: string): boolean;` - Test whether or not an environment flag is set and is false
 * `isSet(key:string): boolean;` - Test whether or not an environment value is set (excludes: `null`, `''`, and `undefined`)

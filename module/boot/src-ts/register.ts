@@ -1,3 +1,5 @@
+/// <reference path="./types.d.ts" />
+
 // @ts-ignore
 import * as Module from 'module';
 import * as fs from 'fs';
@@ -70,15 +72,26 @@ export class RegisterUtil {
     return `${fileContents};\nexport const __$TRV = 1;`;
   }
 
+  /**
+   * Only called in Framework dev mode
+   * @param pth
+   */
   static resolveFrameworkDevFile(pth: string) {
     if (pth.includes('@travetto')) {
-      if (!this.pkgName) {
-        this.pkgName = require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')).name;
-      }
-      pth = FsUtil.toUnix(pth).replace(/^.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
-        const mid = this.pkgName === `@travetto/${name}` ? '' : `node_modules/@travetto/${name}`;
-        return `${FsUtil.cwd}/${mid}${rest ?? ''}`.replace(/\/\/+/g, '/');
-      });
+      // Fetch current module's name
+      this.pkgName = this.pkgName ||
+        require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')).name;
+
+      // Handle self references
+      pth = FsUtil.toUnix(pth)
+        .replace(/^.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
+          rest = rest ?? '';
+          if (this.pkgName !== `@travetto/${name}`) { // If not self, node_modules
+            rest = `node_modules/@travetto/${name}/${rest}`;
+          }
+          return `${FsUtil.cwd}/${rest}`;
+        })
+        .replace(/\/\/+/g, '/'); // De-dupe
     }
     return pth;
   }
@@ -105,8 +118,9 @@ export class RegisterUtil {
       // @ts-ignore
       const p = Module._resolveFilename(request, parent);
 
-      if (IS_WATCH && !p.includes('/extension/')) { // Build proxy if watching and not an extension
-        console.debug(`Unable to load ${p.replace(`${process.cwd()}/`, '')}: stubbing out with error proxy.`, e.message);
+      // Build proxy if watching and not an extension as extensions are allowed to not load
+      if (IS_WATCH && !p.includes('/extension/')) {
+        console.debug(`Unable to load ${p.replace(`${FsUtil.cwd}/`, '')}: stubbing out with error proxy.`, e.message);
         return this.getErrorModuleProxy(e.message) as NodeModule;
       }
 
@@ -136,7 +150,8 @@ export class RegisterUtil {
   }
 
   static frameworkModuleHandler(request: string, parent: Module) {
-    if (/^[.\/]/.test(request) || request.startsWith('@travetto')) { // If relative or framework
+    // If relative or framework
+    if (/^[.\/]/.test(request) || request.startsWith('@travetto')) {
       // @ts-ignore
       const resolved = Module._resolveFilename(request, parent);
       request = this.resolveFrameworkDevFile(resolved);
@@ -164,14 +179,21 @@ export class RegisterUtil {
 
     AppCache.init();
 
-    const tfd = EnvUtil.isSet('trv_framework_dev');
+    // Define
+    Object.defineProperty(global, 'TRV_FRAMEWORK_DEV', {
+      value: EnvUtil.isSet('trv_framework_dev'),
+      writable: false,
+      configurable: true,
+      enumerable: false
+    });
 
     // @ts-ignore
-    Module._load = (tfd ? this.frameworkModuleHandler : this.moduleLoaderHandler).bind(this);
+    Module._load = (TRV_FRAMEWORK_DEV ? this.frameworkModuleHandler : this.moduleLoaderHandler).bind(this);
     // @ts-ignore
-    require.extensions['.ts'] = (tfd ? this.frameworkCompileTypescript : this.compileTypescript).bind(this);
+    require.extensions['.ts'] = (TRV_FRAMEWORK_DEV ? this.frameworkCompileTypescript : this.compileTypescript).bind(this);
 
-    this.libRequire = tfd ? x => require(this.resolveFrameworkDevFile(`/${x}`)) : require;
+    // Supports bootstrapping with framework resolution
+    this.libRequire = TRV_FRAMEWORK_DEV ? x => require(this.resolveFrameworkDevFile(`/${x}`)) : require;
 
     global.trvInit = this;
   }
@@ -187,7 +209,7 @@ export class RegisterUtil {
     Module._load = this.ogModuleLoad;
 
     for (const k of Object.keys(require.cache)) {
-      if (k.includes('@travetto')) {
+      if (k.includes('@travetto')) { // If a travetto module
         delete require.cache[k];
       }
     }

@@ -11,6 +11,7 @@ export class $ApplicationRegistry {
     this.applications.set(app, config);
   }
 
+  // TODO: Need an alternative now that we aren't loading config files
   loadAllFromConfig() {
     for (const entries of Object.values(ConfigSource.get('app.entry') ?? {}) as string[][]) {
       for (const entry of entries) {
@@ -33,7 +34,7 @@ export class $ApplicationRegistry {
       throw new InjectionError(`Application: ${name} does not exist`, 'notfound');
     }
     const inst = await DependencyRegistry.getInstance(config.target);
-    if (!Env.quietInit) {
+    if (!Env.quiet) {
       console.log('Running application', name);
       console.log('Configured', {
         app: AppInfo,

@@ -14,7 +14,7 @@ export class Execute {
   static getPluginMapping() {
     const all: Record<string, string> = {};
     const ROOT_DIR = `${FsUtil.cwd}/node_modules/@travetto`;
-    if (fs.existsSync(ROOT_DIR)) {
+    if (fs.existsSync(ROOT_DIR)) { // If installed and not a dev checkout
       const folders = fs.readdirSync(ROOT_DIR)
         .map(x => `${ROOT_DIR}/${x}/bin`)
         .filter(x => fs.existsSync(x));
@@ -28,7 +28,7 @@ export class Execute {
         }
       }
     }
-    const LOCAL_BIN = `${FsUtil.cwd}/bin`;
+    const LOCAL_BIN = `${FsUtil.cwd}/bin`; // Support local dev
     if (fs.existsSync(LOCAL_BIN)) {
       const files = fs.readdirSync(LOCAL_BIN)
         .filter(x => x.startsWith(PREFIX));
@@ -42,8 +42,8 @@ export class Execute {
 
   static requireModule(f: string) {
     let p = FsUtil.toUnix(fs.realpathSync(f));
-    if (!p.startsWith(FsUtil.cwd)) {
-      p = `${FsUtil.cwd}/node_modules/@travetto/${p.split(/travetto[^/]*\/module\//)[1]}`;
+    if (TRV_FRAMEWORK_DEV && /travetto[^/]*\/module\//.test(p)) { // If a module file
+      p = `${FsUtil.cwd}/node_modules/@travetto/${p.split(/\/module\//)[1]}`; // Convert to proper path
     }
     const res = require(p);
     return res;
