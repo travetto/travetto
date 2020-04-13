@@ -77,9 +77,7 @@ class $ConsoleManager {
 
   instrument(fileName: string, fileContents: string) {
     // Ignore framework /bin/ folders only
-    if (fileName.includes('/bin/') &&
-      (fileName.includes('node_modules/@travetto') || TRV_FRAMEWORK_DEV)
-    ) {
+    if (fileName.includes('/bin/')) {
       return fileContents; // Skip cli
     }
     // Insert filename into all log statements for all components

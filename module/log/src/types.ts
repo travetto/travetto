@@ -14,7 +14,7 @@ export type LogListener = (e: LogEvent) => void;
 export type LogLevel = ConsolePayload['level'];
 
 export interface LogEvent extends ConsolePayload {
-  timestamp?: Date;
+  timestamp: number;
   prefix?: string;
   message?: string;
   args?: any[];

@@ -79,9 +79,14 @@ export class ScanApp {
     ]);
 
     const result = this.findFiles('.ts',
-      f => (PATH_RE.test(f) || (
-        /node_modules\/(@travetto\/[^\/]+\/((src|extension)\/|index))/.test(f) // Only import framework files
-      )) && (!exclude || !exclude(f))
+      f =>
+        !/@travetto\/cli/.test(f) &&
+        (!exclude || !exclude(f)) &&
+        (
+          PATH_RE.test(f) || (
+            /node_modules\/(@travetto\/[^\/]+\/((src|extension)\/|index))/.test(f) // Only import framework files
+          )
+        )
       , root
     )
       .map(x => x.file);

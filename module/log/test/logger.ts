@@ -17,19 +17,19 @@ class LoggerTest {
   @Test('Should Log')
   async shouldLog() {
     const events: LogEvent[] = [];
-    Logger.listenRaw('test', (e) => {
-      events.push(e);
-    });
+    Logger.listenRaw('test', e => events.push(e));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _trvCon = Logger.invoke.bind(Logger);
     console.log('Hello', 1, 2, 3);
     assert(events.length === 1);
-    assert(events[0].message === '[@app/test.logger: 23]');
-    assert.deepStrictEqual(events[0].args, ['Hello', 1, 2, 3]);
+    assert(events[0].message === 'Hello');
+    assert.deepStrictEqual(events[0].args, [1, 2, 3]);
   }
 
   @Test('Formatter')
   async shouldFormat() {
     const formatter = new JsonFormatter({});
     const now = Date.now();
-    assert(formatter.format({ level: 'error', timestamp: now }) === `{"level":"error","timestamp":${now}}`);
+    assert(formatter.format({ level: 'error', timestamp: now } as any) === `{"level":"error","timestamp":${now}}`);
   }
 }
