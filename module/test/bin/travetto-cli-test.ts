@@ -15,10 +15,10 @@ export function init() {
       const { runTests, prepareEnv } = await import('./lib');
 
       prepareEnv();
-      const { ConsoleManager, PhaseManager } = await import('@travetto/base');
+      const { Env, PhaseManager } = await import('@travetto/base');
       await PhaseManager.init('bootstrap', 'compiler').run();
 
-      if (cmd.format === 'tap' && ConsoleManager.colorize) {
+      if (cmd.format === 'tap' && Env.colorize) {
         const { TapEmitter } = await import('../src/consumer/types/tap');
         cmd.consumer = new TapEmitter(process.stdout, {
           assertDescription: Col.description,

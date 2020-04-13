@@ -75,13 +75,13 @@ export class ScanApp {
     const [main, ...rest] = roots;
     const PATH_RE = SystemUtil.pathMatcher([
       ...rest.map(x => FsUtil.joinUnix(x, 'src')),
-      ...['src', 'extension', 'support'].map(x => FsUtil.joinUnix(main, x))
+      ...['src', 'extension'].map(x => FsUtil.joinUnix(main, x))
     ]);
 
     const result = this.findFiles('.ts',
       f => (PATH_RE.test(f) || (
-        /^node_modules\/(@travetto\/[^\/]+\/((src|support|extension)\/|index))/.test(f) // Only import framework files
-      ) && (!exclude || !exclude(f)))
+        /node_modules\/(@travetto\/[^\/]+\/((src|extension)\/|index))/.test(f) // Only import framework files
+      )) && (!exclude || !exclude(f))
       , root
     )
       .map(x => x.file);

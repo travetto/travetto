@@ -1,4 +1,4 @@
-import { ConsoleManager } from '@travetto/base/src/console';
+import { EnvUtil } from '@travetto/boot';
 
 const COLORS = {
   blue: `\x1b[94m`,
@@ -13,9 +13,15 @@ const COLORS = {
 
 };
 
+let colorize: boolean;
+
 function colorizeAny(col: keyof typeof COLORS, value: string | number | boolean): string;
 function colorizeAny(col: keyof typeof COLORS, value: any) {
-  if (ConsoleManager.colorize && value !== undefined && value !== null && value !== '') {
+  if (colorize === undefined) {
+    // Load on demand, synchronously
+    colorize = (process.stdout.isTTY && !EnvUtil.isTrue('no_color')) || EnvUtil.isTrue('force_color');
+  }
+  if (colorize && value !== undefined && value !== null && value !== '') {
     const code = COLORS[col];
     value = `${code}${value}${COLORS.reset}`;
   }

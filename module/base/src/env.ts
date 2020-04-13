@@ -47,6 +47,10 @@ class $Env {
   hasProfile(name: string) {
     return this.profiles.has(name);
   }
+
+  get colorize() {
+    return (process.stdout.isTTY && !EnvUtil.isTrue('no_color')) || EnvUtil.isTrue('force_color');
+  }
 }
 
 export const Env = new $Env();

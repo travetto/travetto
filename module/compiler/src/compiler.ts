@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { EventEmitter } from 'events';
 import * as sourcemap from 'source-map-support';
 
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, RegisterUtil } from '@travetto/boot';
 import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp, SystemUtil } from '@travetto/base';
 
 import { SourceManager } from './source';
@@ -103,6 +103,10 @@ class $Compiler extends EventEmitter {
   }
 
   compile(m: NodeModule, tsf: string) {
+    if (/support\/transformer.*/.test(tsf)) {
+      // Do not try to typecheck the transformers
+      return RegisterUtil.compileTypescript(m, tsf);
+    }
     const isNew = !this.presenceManager.has(tsf);
     try {
       const js = this.sourceManager.getTranspiled(tsf); // Compile
