@@ -34,12 +34,13 @@ export class $ApplicationRegistry {
       throw new InjectionError(`Application: ${name} does not exist`, 'notfound');
     }
     const inst = await DependencyRegistry.getInstance(config.target);
-    if (!Env.quiet) {
+    if (!Env.quietInit) {
       console.log('Running application', name);
+
       console.log('Configured', {
         app: AppInfo,
         env: Env.toJSON(),
-        config: ConfigSource.get(''),
+        config: Env.prod ? ConfigSource.getSecure('') : ConfigSource.get('')
       });
     }
     if (inst.run) {

@@ -43,6 +43,22 @@ export class $ConfigSource {
     return this.bindTo({}, key);
   }
 
+  getSecure(key: string = '') {
+    const str = JSON.stringify(this.get(key), (k, value) => {
+      // TODO: Expand restriction detection
+      if (
+        /^(pass(phrase|word).*|pw|.*key|.*secret.*|credential.*|.*token)$/i.test(k) &&
+        typeof value === 'string'
+      ) {
+        return '*'.repeat(value.length);
+      } else {
+        return value;
+      }
+    });
+
+    return JSON.parse(str);
+  }
+
   toJSON() {
     return this.storage;
   }
@@ -55,7 +71,7 @@ export class $ConfigSource {
     Util.deepAssign(this.storage, ConfigUtil.breakDownKeys(data), 'coerce');
   }
 
-  bindTo(obj: any, key: string) {
+  bindTo(obj: any, key: string): Record<string, any> {
     const keys = key?.split('.') ?? [];
     let sub: any = this.storage;
 

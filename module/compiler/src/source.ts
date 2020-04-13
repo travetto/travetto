@@ -127,7 +127,8 @@ export class SourceManager {
   init() {
     // Find all active app files
     ScanApp.findActiveAppFiles(this.rootPaths,
-      f => f.includes('@travetto/test'),
+      f => f.includes('@travetto/test') &&
+        (Env.env !== 'test' || !f.includes('src/')),
       this.cwd
     )
       .filter(x => !require.cache[x])

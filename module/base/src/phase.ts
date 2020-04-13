@@ -25,7 +25,7 @@ export class PhaseManager {
   load(upto?: string, after?: string) {
     const pattern = new RegExp(`support/phase[.]${this.scope}[.]ts$`);
     // Load all support files
-    const initFiles = ScanApp.requireFiles('.ts', x => pattern.test(x));
+    const initFiles = ScanApp.findFiles('.ts', pattern).map(x => require(x.file));
     this.initializers = SystemUtil.computeOrdering(initFiles.map(x => x.init));
 
     if (upto) {

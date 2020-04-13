@@ -12,7 +12,7 @@ class $Env {
   readonly watch: boolean;
   readonly debug: boolean | string;
   readonly trace: boolean | string;
-  readonly quiet: boolean;
+  readonly quietInit: boolean;
   readonly appRoots: string[];
 
   constructor() {
@@ -26,7 +26,7 @@ class $Env {
     this.watch = EnvUtil.isTrue('watch');
     this.debug = EnvUtil.isSet('debug') ? !EnvUtil.isFalse('debug') : this.prod;
     this.trace = EnvUtil.isSet('trace') && !EnvUtil.isFalse('trace');
-    this.quiet = EnvUtil.isTrue('quiet_init');
+    this.quietInit = EnvUtil.isTrue('quiet_init');
   }
 
   private computeAppRoots() {
