@@ -19,10 +19,6 @@ export class ScanApp {
     test: x => x.endsWith('.ts') && !x.endsWith('.d.ts')
   };
 
-  static IS_MODULE = (x: string) =>
-    x.endsWith('node_modules') || // Is first level node_modules
-    x.includes('@travetto');  // Is framework folder, include everything under it
-
   /**
    * Find files by extension/pattern
    * @param ext Extension (including '.') or a object with a test method {@type Tester}
@@ -38,7 +34,10 @@ export class ScanApp {
     if (!this.cache[key]) {
       this.cache[key] = ScanFs.scanDirSync({
         testFile,
-        testDir: this.IS_MODULE
+        testDir: x => // Ensure its a valid folder or module folder
+          !x.includes('node_modules') || // All non-framework folders
+          x.endsWith('node_modules') || // Is first level node_modules
+          x.includes('@travetto')  // Is framework folder, include everything under it
       }, root)
         .filter(ScanFs.isNotDir);
 
@@ -72,10 +71,6 @@ export class ScanApp {
     }
   }
 
-  static requireFiles(ext: string | RegExp, filter: RegExp | ((rel: string) => boolean), root = Env.cwd) {
-    return this.findFiles(ext, filter, root).map(x => require(x.file));
-  }
-
   static findActiveAppFiles(roots: string[], exclude?: (file: string) => boolean, root = Env.cwd) {
     const [main, ...rest] = roots;
     const PATH_RE = SystemUtil.pathMatcher([
@@ -83,14 +78,13 @@ export class ScanApp {
       ...['src', 'extension', 'support'].map(x => FsUtil.joinUnix(main, x))
     ]);
 
-    const result = ScanApp.findFiles('.ts',
+    const result = this.findFiles('.ts',
       f => (PATH_RE.test(f) || (
-        /(@travetto\/[^\/]+\/((src|support|extension)\/|index))/.test(f) // Only import framework files
-      ) && (!exclude || !exclude(f))), root
+        /^node_modules\/(@travetto\/[^\/]+\/((src|support|extension)\/|index))/.test(f) // Only import framework files
+      ) && (!exclude || !exclude(f)))
+      , root
     )
       .map(x => x.file);
-
-    console.log(PATH_RE, JSON.stringify(result, null, 2));
 
     return result;
   }

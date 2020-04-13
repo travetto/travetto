@@ -31,10 +31,10 @@ export class AppListUtil {
     await PhaseManager.init('bootstrap', 'compiler').run();
 
     // Load app files
-    ScanApp.requireFiles('.ts', x =>
+    ScanApp.findFiles('.ts', x =>
       /^([^/]+\/)?(src[\/])/.test(x) && // Look at all 'src/*' (including sub-apps)
       fs.readFileSync(x, 'utf-8').includes('@Application') // Look for @application annotation
-    ); // Only load files that are candidates
+    ).forEach(x => require(x.file)); // Only load files that are candidates
 
     // Get applications
     const { ApplicationRegistry } = await import('../../src/registry');
