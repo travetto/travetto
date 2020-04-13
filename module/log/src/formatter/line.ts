@@ -28,7 +28,7 @@ export class LineFormatter implements Formatter {
     if (opts.timestamp) {
       let timestamp = new Date(ev.timestamp).toISOString();
       if (!opts.timeMillis) {
-        timestamp = timestamp.split('.')[0];
+        [timestamp] = timestamp.split('.');
       }
       if (opts.colorize) {
         timestamp = stylize(timestamp, 'white', 'bold');

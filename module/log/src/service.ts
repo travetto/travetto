@@ -82,13 +82,17 @@ class $Logger {
       event.message = message;
     }
 
+    if (rest.length && !event.args) {
+      event.args = rest;
+    }
+
     event.level = (event.level! in LogLevels) ? event.level : 'info';
 
     if ((event.level! in this.exclude) || (event.level! in this.filters && !this.filters[event.level!](event.category!))) {
       return;
     }
 
-    event.timestamp = new Date();
+    event.timestamp = Date.now();
 
     const args = (event.args ?? []).slice(0);
     const last = args[args.length - 1];

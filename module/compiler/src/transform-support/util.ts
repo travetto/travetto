@@ -71,13 +71,17 @@ export class TransformUtil {
     return val;
   }
 
-  static toLiteral(val: ts.Node): any {
+  static toLiteral(val: ts.Node, strict = true): any {
     if (!val) {
       throw new Error('Val is not defined');
     } else if (ts.isArrayLiteralExpression(val)) {
-      return val.elements.map(x => this.toLiteral(x));
-    } else if (ts.isIdentifier(val) && val.getText() === 'undefined') {
-      return undefined;
+      return val.elements.map(x => this.toLiteral(x, strict));
+    } else if (ts.isIdentifier(val)) {
+      if (val.getText() === 'undefined') {
+        return undefined;
+      } else if (!strict) {
+        return val.getText();
+      }
     } else if (val.kind === ts.SyntaxKind.NullKeyword) {
       return null;
     } else if (ts.isStringLiteral(val)) {
@@ -97,12 +101,12 @@ export class TransformUtil {
       const out: Record<string, any> = {};
       for (const pair of val.properties) {
         if (ts.isPropertyAssignment(pair)) {
-          out[pair.name.getText()] = this.toLiteral(pair.initializer);
+          out[pair.name.getText()] = this.toLiteral(pair.initializer, strict);
         }
       }
       return out;
     }
-    throw new Error('Not a valid input, should be a valid ts.Node');
+    throw new Error(`Not a valid input, should be a valid ts.Node: ${val.kind}`);
   }
 
   static extendObjectLiteral(addTo: object, lit?: ts.ObjectLiteralExpression) {
