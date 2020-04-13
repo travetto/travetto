@@ -34,7 +34,7 @@ export class TransformerManager {
       }
     }
 
-    if (!Env.quiet) {
+    if (!Env.quietInit) {
       console.debug('Transformers',
         ...allTransformers.map(x => {
           const name = x.file.match(TRANSFORMER_RE)![1];
