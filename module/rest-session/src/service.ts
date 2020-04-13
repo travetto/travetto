@@ -26,9 +26,9 @@ export class RestSessionService {
   postContruct() {
     if (this.store === undefined) {
       this.store = new MemoryCacheStore<Session>();
-      if (Env.dev) {
+      if (!Env.prod) {
         console.warn('MemoryCacheStore is not intended for production session use');
-      } else if (Env.prod) {
+      } else {
         throw new AppError('MemoryCacheStore is not intended for production session use', 'general');
       }
     }

@@ -20,6 +20,8 @@ export class AppListUtil {
   static determineRootFromFile(filename: string) {
     const [, root] = filename.split(this.pCwd);
     const [, first] = root.split('/');
+    // If root is in node_modules or is 'src', default to local
+    // * This supports apps being run from modules vs locally
     return (first === 'node_modules' || first === 'src') ? '.' : first;
   }
 
@@ -30,8 +32,8 @@ export class AppListUtil {
 
     // Load app files
     ScanApp.requireFiles('.ts', x =>
-      /^([^/]+\/)?(src[\/])/.test(x) &&
-      fs.readFileSync(x, 'utf-8').includes('@Application')
+      /^([^/]+\/)?(src[\/])/.test(x) && // Look at all 'src/*' (including sub-apps)
+      fs.readFileSync(x, 'utf-8').includes('@Application') // Look for @application annotation
     ); // Only load files that are candidates
 
     // Get applications
@@ -42,7 +44,6 @@ export class AppListUtil {
     const items = Promise.all(res.map(async x => ({
       watchable: x.watchable,
       description: x.description,
-      standalone: x.standalone,
       params: x.params,
       appRoot: this.determineRootFromFile(x.target.__file),
       name: x.name,

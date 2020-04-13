@@ -1,7 +1,6 @@
 import * as ts from 'typescript';
 
-import { Env } from '@travetto/base';
-import { ConsoleManager } from '@travetto/boot';
+import { ConsoleManager, Env } from '@travetto/base';
 import { TransformerState, OnCall, TransformUtil } from '@travetto/compiler/src/transform-support';
 
 export class LoggerTransformer {

@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 import * as sourcemap from 'source-map-support';
 
 import { FsUtil } from '@travetto/boot';
-import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp } from '@travetto/base';
+import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp, SystemUtil } from '@travetto/base';
 
 import { SourceManager } from './source';
 import { CompilerUtil } from './util';
@@ -29,14 +29,13 @@ class $Compiler extends EventEmitter {
       }, 0);
     }
 
-    this.sourceManager = new SourceManager(cwd, {});
+    this.sourceManager = new SourceManager(cwd, this.rootPaths, {});
     this.presenceManager = new FilePresenceManager({
       ext: '.ts',
       cwd: this.cwd,
-      rootPaths: this.rootPaths,
+      rootPaths: this.rootPaths, // DO not look into node_modules, only user code
       listener: this,
-      excludeFiles: [/node_modules/, /[.]d[.]ts$/],
-      initialFileValidator: x => !(x.file in require.cache)
+      initialFileValidator: x => !(x.file in require.cache) // Skip already imported files
     });
   }
 
@@ -54,9 +53,6 @@ class $Compiler extends EventEmitter {
     require.extensions['.ts'] = this.compile.bind(this);
     this.sourceManager.init();
     this.presenceManager.init();
-
-    const rootsRe = Env.rootMatcher(this.rootPaths);
-    ScanApp.requireFiles('.ts', f => rootsRe.test(f) || CompilerUtil.isCompilable(f)); // Load all files, class scanning
 
     // register source maps
     sourcemap.install(this.sourceManager.getSourceMapHandler());
@@ -127,4 +123,4 @@ class $Compiler extends EventEmitter {
   }
 }
 
-export const Compiler = new $Compiler(Env.cwd, Env.appRoots.map(x => FsUtil.joinUnix(x, 'src')));
+export const Compiler = new $Compiler(Env.cwd, Env.appRoots);

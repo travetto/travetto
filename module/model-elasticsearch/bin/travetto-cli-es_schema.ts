@@ -9,7 +9,7 @@ export function init() {
     .option('-a, --app [app]', 'Application to export, (default: .)')
     .action(async (cmd: commander.Command) => {
       process.env.ENV = 'prod';
-      process.env.APP_ROOTS = cmd.app ? `./${cmd.app}` : '.';
+      process.env.APP_ROOTS = cmd.app ? `./${cmd.app}` : '';
       process.env.PROFILE = cmd.app ?? '';
 
       const { getSchemas } = await import('./lib');

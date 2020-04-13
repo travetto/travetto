@@ -36,7 +36,7 @@
   },
   "scripts": {
     "postinstall": "node bin/postinstall",
-    "prepublish": "cd src-ts; tsc --project .",
+    "prepublish": "cd src-ts; tsc --project . && cp ./types.d.ts ../src && echo '/// <reference path=\"./types.d.ts\" />' >> ../src/index.d.ts",
     "clean": "rm -f src/"
   },
   "version": "1.0.0-beta.1"

@@ -10,7 +10,7 @@ export function init() {
     .option('-c, --clear [clear]', 'Whether or not to clear the database first (default: true)', Util.BOOLEAN_RE)
     .action(async (cmd: commander.Command) => {
       process.env.ENV = 'prod';
-      process.env.APP_ROOTS = cmd.app ? `./${cmd.app}` : '.';
+      process.env.APP_ROOTS = cmd.app ? `./${cmd.app}` : '';
       process.env.PROFILE = cmd.app ?? '';
       process.env.PLAIN_CONSOLE = '1';
 

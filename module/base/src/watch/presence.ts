@@ -7,6 +7,7 @@ import { Watcher } from './watcher';
 import { ScanEntry, ScanHandler } from '../scan-fs';
 import { Env } from '../env';
 import { ScanApp } from '../scan-app';
+import { SystemUtil } from '../system-util';
 
 export interface PresenceListener {
   added(name: string): any;
@@ -88,9 +89,9 @@ export class FilePresenceManager {
   }
 
   getRootFiles() {
-    const SRC_RE = Env.rootMatcher(this.rootPaths);
+    const PATH_RE = SystemUtil.pathMatcher(this.rootPaths);
 
-    const rootFiles = ScanApp.findFiles(this.ext, x => SRC_RE.test(x) && this.validFile(x)) // Only watch own files
+    const rootFiles = ScanApp.findFiles(this.ext, x => PATH_RE.test(x) && this.validFile(x)) // Only watch own files
       .filter(x => this.initialFileValidator(x)) // Validate root files follow some pattern
       .map(x => x.file);
 

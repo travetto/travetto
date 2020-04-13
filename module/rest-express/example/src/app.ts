@@ -1,8 +1,7 @@
 import { Application, RestConfig, RestApp } from '@travetto/rest';
 
 @Application('sample', {
-  description: 'Sample rest application',
-  standalone: false
+  description: 'Sample rest application'
 })
 export class SampleApp {
 

@@ -5,7 +5,8 @@ import {
   NodeTransformer, VisitorFactory, TransformerState, getTransformHandlers
 } from './transform-support'; // Narrow import to minimize scope
 
-const TRANSFORMER_RE = /^(?:node_modules\/[^/]*\/(?:[^/]*\/)?)?support\/transformer[.](.*?)[.]ts$/;
+// Local app support transformer, as well as library support transformer
+const TRANSFORMER_RE = /^(node_modules\/@travetto\/[^/]*\/)?support\/transformer[.](.*?)[.]ts$/;
 
 export class TransformerManager {
 
@@ -33,7 +34,7 @@ export class TransformerManager {
       }
     }
 
-    if (!Env.quietInit) {
+    if (!Env.quiet) {
       console.debug('Transformers',
         ...allTransformers.map(x => {
           const name = x.file.match(TRANSFORMER_RE)![1];

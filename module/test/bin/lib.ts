@@ -6,9 +6,8 @@ export function prepareEnv(extra = {}) {
     DEBUG: process.env.DEBUG || '0',
     PROD: '0',
     LOG_TIME: '0',
-    APP_ROOTS: '0',
     WATCH: '0',
-    PROFILE: 'test',
+    ENV: 'test',
     RESOURCE_ROOTS: 'test',
     ...extra
   });

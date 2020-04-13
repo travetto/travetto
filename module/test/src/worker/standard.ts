@@ -1,15 +1,16 @@
 import { AppCache } from '@travetto/boot';
-import { ScanApp, PhaseManager } from '@travetto/base';
+import { ScanApp, PhaseManager, Env } from '@travetto/base';
 import { State } from '../runner/runner';
 
 export class StandardWorker {
   static async run(opts: State) {
     try {
-      // Pre compile all
-      ScanApp.getStandardAppFiles()
+      // Pre-compile app files, only looking at main src folder
+      ScanApp.findActiveAppFiles([Env.cwd],
+        // Exclude test
+        f => f.includes('@travetto/test'))
         .filter(x => !AppCache.hasEntry(x))
-        .filter(x => !x.includes('@travetto/test')) // Exclude test
-        .map(x => require(x));
+        .map(require);
 
       const { Runner } = await import('../runner/runner');
       const { TestUtil } = await import('../runner/util');

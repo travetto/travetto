@@ -42,7 +42,7 @@ function generateAppHelpList(confs: CachedAppConfig[], cmd: AppCommand) {
   for (const conf of confs) {
     const lines = [];
 
-    const root = conf.appRoot !== '.' ? color`[${{ subtitle: conf.appRoot }}${!conf.standalone ? '^' : ''}] ` : '';
+    const root = conf.appRoot !== '.' ? color`[${{ subtitle: conf.appRoot }}] ` : '';
     const usage = getAppUsage(conf);
 
     const features = [];
@@ -56,7 +56,7 @@ function generateAppHelpList(confs: CachedAppConfig[], cmd: AppCommand) {
 
     lines.push(color`${root}${{ identifier: conf.name }}${featureStr}`);
     if (conf.description) {
-      lines.push(color`desc:  ${{ description: conf.description ?? '' }}`);
+      lines.push(color`desc:  ${{ description: conf.description }}`);
     }
     lines.push(`usage: ${usage}`);
 
@@ -87,7 +87,7 @@ export function init() {
       console.log(`\n${listHelper()}\n`);
     })
     .allowUnknownOption()
-    .option('-e, --env [env]', 'Application environment (dev|prod), (default: dev)', /^(dev|prod)$/i)
+    .option('-e, --env [env]', 'Application environment (dev|prod|<any>), (default: dev)')
     .option('-r, --root [root]', 'Application root, defaults to associated root by name')
     .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', Util.BOOLEAN_RE)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])

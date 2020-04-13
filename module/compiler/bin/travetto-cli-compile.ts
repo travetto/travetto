@@ -10,7 +10,13 @@ async function rewriteRuntimeDir(runtimeDir: string) {
   const files = fs.readdirSync(AppCache.cacheDir).map(x => FsUtil.resolveUnix(AppCache.cacheDir, x));
 
   // Rewrite files to allow for presume different path
-  const FILES = `ScanApp.setFileEntries('.ts', [${files.map(x => `'${x.replace(/node_modules\/@travetto/g, '#')}'`).join(', ')}])`;
+  const FILES = `ScanApp.setFileEntries('.ts', [${
+    files.map(x => `'${
+      x.replace(/node_modules\/@travetto/g, '#')
+      // eslint-disable-next-line @typescript-eslint/indent
+      }'`).join(', ')
+    // eslint-disable-next-line @typescript-eslint/indent
+    }])`;
 
   for (const file of files) {
     let contents = fs.readFileSync(file, 'utf-8');

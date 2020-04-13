@@ -3,21 +3,6 @@ import * as crypto from 'crypto';
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 
 export class Util {
-  private static extractRegex(val: string | RegExp): RegExp {
-    let out: RegExp;
-    if (typeof val === 'string') {
-      if (REGEX_PAT.test(val)) {
-        const [, pat, mod] = val.match(REGEX_PAT) ?? [];
-        out = new RegExp(pat, mod);
-      } else {
-        out = new RegExp(val);
-      }
-    } else {
-      out = val;
-    }
-    return out;
-  }
-
   private static deepAssignRaw(a: any, b: any, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;
@@ -69,6 +54,21 @@ export class Util {
       }
     }
     return ret;
+  }
+
+  static extractRegex(val: string | RegExp): RegExp {
+    let out: RegExp;
+    if (typeof val === 'string') {
+      if (REGEX_PAT.test(val)) {
+        const [, pat, mod] = val.match(REGEX_PAT) ?? [];
+        out = new RegExp(pat, mod);
+      } else {
+        out = new RegExp(val);
+      }
+    } else {
+      out = val;
+    }
+    return out;
   }
 
   static coerceType(input: any, type: typeof String, strict?: boolean): string;

@@ -8,7 +8,6 @@ import {
 
 import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
-import { BindUtil } from '@travetto/schema';
 
 const RADIANS_TO: Record<DistanceUnit, number> = {
   km: 6378,
@@ -77,7 +76,7 @@ export class MongoUtil {
           Object.assign(out, this.extractSimple(v, `${subpath}.`));
         } else {
           if (firstKey === '$regex') {
-            v.$regex = BindUtil.extractRegex(v.$regex);
+            v.$regex = Util.extractRegex(v.$regex);
           } else if (firstKey && '$near' in v) {
             const dist = v.$maxDistance;
             const distance = dist / RADIANS_TO[(v.$unit as DistanceUnit ?? 'km')];

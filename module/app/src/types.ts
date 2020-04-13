@@ -20,7 +20,6 @@ export interface ApplicationParameter {
 export interface ApplicationConfig<T = any> {
   name: string;
   description?: string;
-  standalone?: boolean;
   params?: ApplicationParameter[];
   target: Class<T>;
   watchable?: boolean;

@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { Util, Env } from '@travetto/base';
 
 import { ConfigUtil, Nested } from './util';
 
@@ -9,8 +9,9 @@ export class $ConfigSource {
 
   /*
     Order of specificity (least to most)
-      - Resource profile files
-      - Resource env file
+      - Resource application.yml
+      - Resource {profile}.yml
+      - Resource {env}.yml
       - Environment vars -> Overrides everything (happens at bind time)
   */
   init() {
@@ -23,7 +24,11 @@ export class $ConfigSource {
 
   loadExternal() {
     this.reset();
-    const files = ConfigUtil.getActiveProfileFiles();
+    const files = [
+      ...ConfigUtil.fetchConfigs(p => p === 'application'),
+      ...ConfigUtil.fetchConfigs(p => Env.hasProfile(p)),
+      ...ConfigUtil.fetchConfigs(p => p === Env.env)
+    ];
 
     if (files.length) {
       console.debug('Found configurations for', files.map(x => x.profile));

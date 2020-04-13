@@ -25,7 +25,8 @@ export class AssertUtil {
     const lines = (err.stack ?? new Error().stack!)
       .replace(/[\\]/g, '/')
       .split('\n')
-      .filter(x => !/[\/]node_modules[\/]/.test(x) && x.includes(base));
+      // Exclude node_modules, target self
+      .filter(x => !x.includes('node_modules') && x.includes(base));
 
     let best = lines.filter(x => x.includes(filename))[0];
 
