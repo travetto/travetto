@@ -5,7 +5,10 @@ import { Events } from './types';
 
 type Event = { type: string, error?: any, file?: string, class?: string, method?: string };
 
-const FIXED_MODULES = new Set(['boot', 'base', 'config', 'compiler', 'exec', 'worker', 'yaml']);
+const FIXED_MODULES = new Set([
+  'boot', 'base', 'cache', 'cli', 'config', 'compiler',
+  'exec', 'log', 'net', 'registry', 'test', 'worker', 'yaml'
+]);
 const IS_SUPPORT_FILE = '/support/';
 const IS_SELF_FILE = 'test/src/worker';
 
@@ -16,11 +19,7 @@ const IS_SELF_FILE = 'test/src/worker';
  *  - extension
  *  - index
  */
-const EXTRACT_FILE_MODULE = TRV_FRAMEWORK_DEV ?
-  // With local module lookup
-  /^.*travetto[^/]*\/(module\/)?([^/]+)\/((src|extension)\/.*?|index)([.][tj]s)?$/ :
-  // Without local module lookup
-  /^.*@travetto\/([^/]+)\/((src|extension)\/.*?|index)([.][tj]s)?$/;
+const EXTRACT_FILE_MODULE = /^.*travetto[^/]*\/(?:module\/)?([^/]+)\/(?:src.*|extension.*|support.*|index[.]ts)$/;
 
 export class TestChildWorker extends ChildCommChannel<Event> {
 
@@ -94,7 +93,10 @@ export class TestChildWorker extends ChildCommChannel<Event> {
       }
     }
 
-    // Reload runner
+    // Reload registries, test and root
+    (await import('@travetto/test/src/registry/registry')).TestRegistry.reset();
+    (await import('@travetto/registry')).RootRegistry.reset();
+
     this.compiler.reset();
     Shutdown.execute(-1);
   }

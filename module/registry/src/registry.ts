@@ -130,5 +130,6 @@ export abstract class Registry implements ChangeSource<Class> {
     for (const des of this.descendants) {
       des.reset();
     }
+    delete this.initialized;
   }
 }
