@@ -6,6 +6,7 @@ class $Env {
 
   private profileSet: Set<string>;
 
+  readonly env: string;
   readonly cwd = FsUtil.cwd;
   readonly dev: boolean;
   readonly prod: boolean;
@@ -17,10 +18,11 @@ class $Env {
   readonly appRoots: string[];
 
   constructor() {
-    this.prod = this.computeNodeEnv().includes(PROD_KEY);
+    this.env = (EnvUtil.get('env') ?? EnvUtil.get('node_env') ?? PROD_KEY).replace(/^production$/i, PROD_KEY);
+    this.prod = this.env === PROD_KEY;
     this.dev = !this.prod;
 
-    this.profiles = this.computeProfiles();
+    this.profiles = ['application', ...new Set(EnvUtil.getList('profile')), this.env];
     this.profileSet = new Set(this.profiles);
     this.appRoots = this.computeAppRoots();
 
@@ -28,18 +30,6 @@ class $Env {
     this.debug = this.computeLogLevel('debug', this.dev ? '*' : '');
     this.trace = this.computeLogLevel('trace', '');
     this.quietInit = EnvUtil.isTrue('quiet_init');
-  }
-
-  private computeProfiles() {
-    const nodeEnv = this.computeNodeEnv();
-    const seen = new Set();
-    return ['application', nodeEnv.includes(PROD_KEY) ? PROD_KEY : '', ...nodeEnv]
-      .filter(x => !!x)
-      .filter(x => {
-        const isNew = !seen.has(x);
-        seen.add(x);
-        return isNew;
-      });
   }
 
   private computeAppRoots() {
@@ -56,12 +46,6 @@ class $Env {
         .map(x => (!x || x === '.') ? './' : FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, '.'));
     }
     return appRoots;
-  }
-
-  private computeNodeEnv() {
-    const envs = ['node_env', 'env', 'profile'];
-    const all = envs.reduce((acc, x) => acc.concat(EnvUtil.getList(x)), [] as string[]);
-    return all.map(x => x === 'production' ? PROD_KEY : x);
   }
 
   toJSON() {
