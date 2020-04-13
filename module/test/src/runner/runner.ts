@@ -1,5 +1,5 @@
 import { FsUtil, EnvUtil } from '@travetto/boot';
-import { Env, PhaseManager } from '@travetto/base';
+import { PhaseManager } from '@travetto/base';
 import { WorkPool, ArrayInputSource } from '@travetto/worker';
 
 import { ConsumerManager } from '../consumer/manager';

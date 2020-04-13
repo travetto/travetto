@@ -1,6 +1,8 @@
 import * as fs from 'fs';
-import { SystemUtil } from './system-util';
 import { RegisterUtil, AppCache, EnvUtil } from '@travetto/boot';
+
+import { SystemUtil } from './system-util';
+import { Env } from './env';
 
 export type LogLevel = 'info' | 'log' | 'trace' | 'warn' | 'debug' | 'error' | 'fatal';
 export type ConsolePayload = {
@@ -23,7 +25,6 @@ class $ConsoleManager {
 
   readonly key = KEY;
   readonly defaultPlain = EnvUtil.isTrue('plain_console') || EnvUtil.isTrue('plain');
-  readonly colorize = (process.stdout.isTTY && !EnvUtil.isTrue('no_color')) || EnvUtil.isTrue('force_color');
   readonly timestamp = !EnvUtil.isFalse('log_time');
   readonly timeMillis = EnvUtil.isTrue('trace');
   readonly exclude = new Set<string>([]);
@@ -31,10 +32,10 @@ class $ConsoleManager {
   constructor() {
     (global as any)[KEY] = this.invoke.bind(this);
     this.exclude = new Set();
-    if (EnvUtil.isFalse('debug')) {
+    if (!Env.debug) {
       this.exclude.add('debug');
     }
-    if (!EnvUtil.isTrue('trace')) {
+    if (!Env.trace) {
       this.exclude.add('trace');
     }
     this.set(null); // Init

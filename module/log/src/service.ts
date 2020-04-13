@@ -39,7 +39,7 @@ class $Logger {
 
   listen({ formatter, stdout, stderr, key }: Partial<LogStream> = {}) {
     formatter = formatter ?? new LineFormatter({
-      colorize: ConsoleManager.colorize,
+      colorize: Env.colorize,
       timestamp: ConsoleManager.timestamp,
       timeMillis: ConsoleManager.timeMillis
     });

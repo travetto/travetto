@@ -1,11 +1,9 @@
-import { Env } from '@travetto/base';
-
 import { Registry } from '../registry';
 import { ClassSource } from '../source/class-source';
 import { Class, ChangeEvent } from '../types';
 
 class $RootRegistry extends Registry {
-  constructor(rootPaths: string[]) {
+  constructor() {
     super(new ClassSource());
   }
 
@@ -22,4 +20,4 @@ class $RootRegistry extends Registry {
   }
 }
 
-export const RootRegistry = new $RootRegistry([...Env.appRoots]);
+export const RootRegistry = new $RootRegistry();
