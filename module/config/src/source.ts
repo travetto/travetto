@@ -9,8 +9,8 @@ export class $ConfigSource {
 
   /*
     Order of specificity (least to most)
-      - Module configs -> located in the node_modules/@travetto/<*>/config folder
       - Resource profile files
+      - Resource env file
       - Environment vars -> Overrides everything (happens at bind time)
   */
   init() {
@@ -23,9 +23,6 @@ export class $ConfigSource {
 
   loadExternal() {
     this.reset();
-    for (const data of ConfigUtil.getAllConfigFilesAsData()) {
-      this.putAll(data);
-    }
     const files = ConfigUtil.getActiveProfileFiles();
 
     if (files.length) {
