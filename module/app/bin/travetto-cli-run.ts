@@ -92,7 +92,6 @@ export function init() {
     .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', Util.BOOLEAN_RE)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
     .action(async (app: string, args: string[], cmd: commander.Command & AppCommand) => {
-      cmd.env = (cmd.env ?? process.env.ENV ?? process.env.env) || undefined;
       cmd.watchReal = Util.TRUE_RE.test(cmd.watch ?? '');
 
       cmd.profile = [
@@ -104,6 +103,8 @@ export function init() {
 
       if (cmd.env) {
         process.env.ENV = cmd.env; // Preemptively set b/c env changes how we compile some things
+      } else {
+        cmd.env = (process.env.ENV ?? process.env.env) || undefined;
       }
       if (cmd.root) {
         process.env.APP_ROOTS = cmd.root;

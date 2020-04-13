@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
-import { Env, ScanApp, ResourceManager, Util } from '@travetto/base';
+import { Env, ResourceManager, Util } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 type Prim = number | string | boolean | null;
@@ -19,15 +19,6 @@ export class ConfigUtil {
       });
 
     return envFiles;
-  }
-
-  static getAllConfigFilesAsData() {
-    // Load all namespaces from core
-    return ScanApp.findFiles('.yml', x => /config\/[^/]+.yml$/.test(x))
-      .map(({ file }) => {
-        const ns = path.basename(file).replace('.yml', '');
-        return this.getConfigFileAsData(file, ns);
-      });
   }
 
   static getConfigFileAsData(file: string, ns: string = '') {
