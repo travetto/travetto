@@ -1,7 +1,7 @@
 import { Util } from '@travetto/base';
 import { Point, WhereClause, ModelRegistry, SelectClause, SortClause } from '@travetto/model';
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaRegistry } from '@travetto/schema';
+import { SchemaRegistry } from '@travetto/schema';
 import { EsSchemaConfig } from './types';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
@@ -137,7 +137,7 @@ export class ElasticsearchUtil {
               break;
             }
             case '$regex': {
-              const pattern = BindUtil.extractRegex(v);
+              const pattern = Util.extractRegex(v);
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
                   `${sPath}.text_cs` :

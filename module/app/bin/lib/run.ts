@@ -11,12 +11,15 @@ export class RunUtil {
   }
 
   static enforceParamType(config: ApplicationParameter, param: string) {
-    if (config.type === 'boolean') { return Util.coerceType(param, Boolean); }
-    if (config.type === 'number') { return Util.coerceType(param, Number); }
-    if (config.meta && config.meta.choices && !config.meta.choices.find(c => `${c}` === param)) {
-      throw new Error(`Invalid parameter ${config.name}: Received ${param} expected ${config.meta.choices.join('|')}`);
+    switch (config.type) {
+      case 'boolean': return Util.coerceType(param, Boolean);
+      case 'number': return Util.coerceType(param, Number);
+      default:
+        if (config.meta?.choices && !config.meta.choices.find(c => `${c}` === param)) {
+          throw new Error(`Invalid parameter ${config.name}: Received ${param} expected ${config.meta.choices.join('|')}`);
+        }
+        return Util.coerceType(param, String);
     }
-    return Util.coerceType(param, String);
   }
 
   static async run(args: string[]) {
@@ -34,15 +37,9 @@ export class RunUtil {
         throw new Error(`Invalid parameter count: received ${typedSub.length} but needed ${reqCount}`);
       }
 
-      process.env.APP_ROOTS = [
-        process.env.APP_ROOTS ?? app.appRoot ?? '',
-        !app.standalone && app.appRoot ? '.' : ''
-      ].join(',');
-      process.env.ENV = process.env.ENV ?? 'dev';
-      process.env.PROFILE = process.env.PROFILE ?? '';
-      if (!process.env.WATCH) {
-        process.env.WATCH = process.env.ENV !== 'dev' ? '0' : `${app.watchable}`;
-      }
+      process.env.APP_ROOTS = process.env.APP_ROOTS ?? app.appRoot ?? '';
+      process.env.WATCH = process.env.WATCH ??
+        (/^prod/i.test(`${process.env.ENV}`) ? '0' : `${app.watchable}`);
     }
 
     const { PhaseManager } = await import('@travetto/base');

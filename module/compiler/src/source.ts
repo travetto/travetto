@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 
-import { FileCache, RegisterUtil, EnvUtil } from '@travetto/boot';
+import { FileCache, RegisterUtil } from '@travetto/boot';
 import { Env, SystemUtil, ScanApp } from '@travetto/base';
 
 import { CompilerUtil } from './util';
@@ -19,7 +19,10 @@ export class SourceManager {
   private compilerOptions: ts.CompilerOptions;
   private program: ts.Program;
 
-  constructor(private cwd: string, private config: { cache?: boolean }) {
+  constructor(private cwd: string,
+    private rootPaths: string[],
+    private config: { cache?: boolean }
+  ) {
     Object.assign(config, { ... { cache: true }, config });
     this.cache = new FileCache(this.cwd);
     this.transformerManager = new TransformerManager(this.cwd);
@@ -52,7 +55,7 @@ export class SourceManager {
   private getHost(): ts.CompilerHost {
     const host: ts.CompilerHost = {
       readFile: this.readFile,
-      realpath: EnvUtil.isSet('trv_framework_dev') ? RegisterUtil.resolveFrameworkDevFile : undefined,
+      realpath: TRV_FRAMEWORK_DEV ? RegisterUtil.resolveFrameworkDevFile : undefined,
       writeFile: this.writeFile,
       fileExists: this.fileExists,
       getDefaultLibFileName: ts.getDefaultLibFileName,
@@ -122,29 +125,19 @@ export class SourceManager {
   }
 
   init() {
-    // TODO: Load only what is necessary since it now has a much higher cost
-    const SRC_RE = Env.rootMatcher([Env.cwd].map(x => `${x}/src`));
-
-    ScanApp.findFiles('.ts', x => SRC_RE.test(x) || ScanApp.IS_STANDARD_APP_FILE(x), Env.cwd)
-      .map(x => x.file)
-      .filter(x => !/travetto\/([^/]*)\/test/.test(x))
+    // Find all active app files
+    ScanApp.findActiveAppFiles(this.rootPaths,
+      f => f.includes('@travetto/test'),
+      this.cwd
+    )
       .filter(x => !require.cache[x])
       .forEach(x => this.rootNames.add(x));
 
-    // TODO: need to look at app roots
-    if (Env.hasProfile('test')) {
-      ScanApp
-        .findFiles('.ts', x =>
-          x.includes('travetto/test/src') || (
-            x.includes('test') &&
-            !x.includes('src') &&
-            !x.includes('node_modules')
-          ), this.cwd
-        )
-        .forEach(x => this.rootNames.add(x.file));
-    }
-
     this.transformerManager.init();
+
+    for (const root of this.rootNames) {
+      require(root);
+    }
   }
 
   hashChanged(fileName: string, content: string) {

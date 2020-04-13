@@ -129,7 +129,7 @@ export abstract class SQLDialect implements DialectState {
       return 'NULL';
     } else if (conf.type === String) {
       if (value instanceof RegExp) {
-        const src = BindUtil.extractRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
+        const src = Util.extractRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
         return this.quote(src);
       } else {
         return this.quote(value);
@@ -345,7 +345,7 @@ export abstract class SQLDialect implements DialectState {
             }
             case '$regex': {
               const re = (v as RegExp);
-              const src = BindUtil.extractRegex(re).source;
+              const src = Util.extractRegex(re).source;
               const ins = re.flags && re.flags.includes('i');
 
               if (/^[\^]\S+[.][*][$]?$/.test(src)) {

@@ -6,9 +6,21 @@ import { Events } from './types';
 type Event = { type: string, error?: any, file?: string, class?: string, method?: string };
 
 const FIXED_MODULES = new Set(['boot', 'base', 'config', 'compiler', 'exec', 'worker', 'yaml']);
-const IS_SUPPORT_FILE = /\/support\//;
-const IS_SELF_FILE = /\/test\/src\/worker\//;
-const GET_FILE_MODULE = /^.*travetto(?:\/module)?\/([^/]+)\/(?:src\/|index).*$/;
+const IS_SUPPORT_FILE = '/support/';
+const IS_SELF_FILE = 'test/src/worker';
+
+/**
+ * Get module name from file, ignore node_modules nested
+ * Look at :
+ *  - src
+ *  - extension
+ *  - index
+ */
+const EXTRACT_FILE_MODULE = TRV_FRAMEWORK_DEV ?
+  // With local module lookup
+  /^.*travetto[^/]*\/(module\/)?([^/]+)\/((src|extension)\/.*?|index)([.][tj]s)?$/ :
+  // Without local module lookup
+  /^.*@travetto\/([^/]+)\/((src|extension)\/.*?|index)([.][tj]s)?$/;
 
 export class TestChildWorker extends ChildCommChannel<Event> {
 
@@ -61,13 +73,13 @@ export class TestChildWorker extends ChildCommChannel<Event> {
 
   isFileResettable(path: string) {
     const k = FsUtil.toUnix(path);
-    const frameworkModule = k.replace(GET_FILE_MODULE, (_, mod) => mod);
+    const frameworkModule = k.replace(EXTRACT_FILE_MODULE, (_, mod) => mod);
 
     return !frameworkModule || // A user file
       (
         !FIXED_MODULES.has(frameworkModule) && // Not a core module
-        !IS_SUPPORT_FILE.test(k) && // Not a support file
-        !IS_SELF_FILE.test(k) // Not self
+        !k.includes(IS_SUPPORT_FILE) && // Not a support file
+        !k.includes(IS_SELF_FILE) // Not self
       );
   }
 

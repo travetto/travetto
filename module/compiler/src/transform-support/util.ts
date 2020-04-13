@@ -227,7 +227,7 @@ export class TransformUtil {
       if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
         let path = this.optionalResolve(stmt.moduleSpecifier.text, base);
 
-        if (EnvUtil.isSet('trv_framework_dev')) {
+        if (TRV_FRAMEWORK_DEV) {
           path = RegisterUtil.resolveFrameworkDevFile(path);
         }
 

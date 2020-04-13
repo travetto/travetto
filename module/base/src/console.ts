@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { SystemUtil } from './system-util';
 import { RegisterUtil, AppCache, EnvUtil } from '@travetto/boot';
-import { Env } from './env';
 
 export type LogLevel = 'info' | 'log' | 'trace' | 'warn' | 'debug' | 'error' | 'fatal';
 export type ConsolePayload = {
@@ -76,7 +75,10 @@ class $ConsoleManager {
   }
 
   instrument(fileName: string, fileContents: string) {
-    if (fileName.includes('/bin/') && (fileName.includes('node_modules') || EnvUtil.isSet('trv_framework_dev'))) {
+    // Ignore framework /bin/ folders only
+    if (fileName.includes('/bin/') &&
+      (fileName.includes('node_modules/@travetto') || TRV_FRAMEWORK_DEV)
+    ) {
       return fileContents; // Skip cli
     }
     // Insert filename into all log statements for all components

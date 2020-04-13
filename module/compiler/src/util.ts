@@ -51,12 +51,6 @@ export class CompilerUtil {
     }
   }
 
-  static isCompilable(f: string) {
-    return f.startsWith('extension/') || (
-      /^node_modules\/@travetto\/[^\/]+\/(src|extension)\/.*/.test(f) // Ensure its a travetto src/extension
-    );
-  }
-
   static handleCompileError(e: Error, cwd: string, modName: string, tsf: string) {
     if (e.message.startsWith('Cannot find module') || e.message.startsWith('Unable to load')) {
       modName = modName.replace(`${cwd}/`, '');
@@ -64,7 +58,7 @@ export class CompilerUtil {
     }
 
     const file = tsf.replace(`${cwd}/`, '');
-    if (tsf.includes('/extension/')) { // If errored out on extension loading
+    if (tsf.includes('/extension/')) { // If errors out on extension loading
       console.debug(`Ignoring load for ${file}:`, e.message.split(/( from )|\n/)[0]);
     } else if (Env.watch) {
       console.error(`Stubbing out with error proxy due to error in compiling ${file}: `, e.message);

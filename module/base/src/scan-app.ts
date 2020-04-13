@@ -1,14 +1,10 @@
-import { FsUtil, RegisterUtil, EnvUtil } from '@travetto/boot';
+import { FsUtil, RegisterUtil } from '@travetto/boot';
 
 import { Env } from './env';
 import { ScanEntry, ScanFs } from './scan-fs';
+import { SystemUtil } from './system-util';
 
 type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
-
-const IS_TRAVETTO_MODULE = (x: string) =>
-  !x.includes('node_modules') ||
-  x.endsWith('node_modules') ||
-  x.includes('@travetto');
 
 interface Tester {
   source: string;
@@ -23,10 +19,16 @@ export class ScanApp {
     test: x => x.endsWith('.ts') && !x.endsWith('.d.ts')
   };
 
-  static IS_STANDARD_APP_FILE = (x: string) =>
-    /^(src\/|support\/|index)/.test(x) ||
-    /(@travetto\/[^\/]+\/(src\/|support\/|index))/.test(x); // Is an index file/folder;
+  static IS_MODULE = (x: string) =>
+    x.endsWith('node_modules') || // Is first level node_modules
+    x.includes('@travetto');  // Is framework folder, include everything under it
 
+  /**
+   * Find files by extension/pattern
+   * @param ext Extension (including '.') or a object with a test method {@type Tester}
+   * @param filter Any additional filters, external to the extension.  Caching occurs at the extension level
+   * @param root Starting point for finding files, defaults to cwd
+   */
   static findFiles(ext: string | Tester, filter?: RegExp | ((rel: string) => boolean), root = Env.cwd): SimpleEntry[] {
     ext = ext === '.ts' ? this.TS_TESTER : ext; // Exclude .d.ts when .ts passed in
 
@@ -36,11 +38,11 @@ export class ScanApp {
     if (!this.cache[key]) {
       this.cache[key] = ScanFs.scanDirSync({
         testFile,
-        testDir: IS_TRAVETTO_MODULE
+        testDir: this.IS_MODULE
       }, root)
         .filter(ScanFs.isNotDir);
 
-      if (EnvUtil.isSet('trv_framework_dev')) {
+      if (TRV_FRAMEWORK_DEV) {
         this.cache[key] = this.cache[key].map(x => {
           x.file = RegisterUtil.resolveFrameworkDevFile(x.file);
           x.module = FsUtil.toUnix(x.file).replace(`${root}/`, '');
@@ -74,9 +76,29 @@ export class ScanApp {
     return this.findFiles(ext, filter, root).map(x => require(x.file));
   }
 
+  static findActiveAppFiles(roots: string[], exclude?: (file: string) => boolean, root = Env.cwd) {
+    const [main, ...rest] = roots;
+    const PATH_RE = SystemUtil.pathMatcher([
+      ...rest.map(x => FsUtil.joinUnix(x, 'src')),
+      ...['src', 'extension', 'support'].map(x => FsUtil.joinUnix(main, x))
+    ]);
+
+    const result = ScanApp.findFiles('.ts',
+      f => (PATH_RE.test(f) || (
+        /(@travetto\/[^\/]+\/((src|support|extension)\/|index))/.test(f) // Only import framework files
+      ) && (!exclude || !exclude(f))), root
+    )
+      .map(x => x.file);
+
+    console.log(PATH_RE, JSON.stringify(result, null, 2));
+
+    return result;
+  }
+
   static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {
     this.cache[key] = paths.map(mod => {
-      mod = FsUtil.toUnix(mod).replace('#', 'node_modules/@travetto'); // Compressed for minimizing bundle size
+      // Compressed for minimizing bundle size
+      mod = FsUtil.toUnix(mod).replace('#', 'node_modules/@travetto');
 
       const full = FsUtil.resolveUnix(base!, mod);
 
@@ -85,10 +107,5 @@ export class ScanApp {
       }
       return { file: full, module: mod };
     });
-  }
-
-  static getStandardAppFiles() {
-    return this.findFiles('.ts', this.IS_STANDARD_APP_FILE)
-      .map(x => x.file);
   }
 }

@@ -18,7 +18,7 @@ class $Logger {
 
   init() {
     this.flags = {
-      debug: LogUtil.readEnvVal('debug', Env.dev ? '*' : ''),
+      debug: LogUtil.readEnvVal('debug', !Env.prod ? '*' : ''),
       trace: LogUtil.readEnvVal('trace'),
     };
 
