@@ -3,13 +3,11 @@
 The common environment variables throughout the code base:
 
 * `TRV_FRAMEWORK_DEV` = 0|1 - If we are in development mode, 
-* `TRV_CACHE_DIR` = cwd     - The output directory for compilation, PID is a special value that generates a new folder based on the process id
-* `TRV_TEST_BASE`           - A variable that indicates the fully qualified path for the test module, used to bypass issues with symlinks
-* `TRV_DI_BASE`             - A variable that indicates the fully qualified path for the di module, used to bypass issues with symlinks
+* `TRV_CACHE_DIR` = cwd     - The output directory for compilation, defaults to `.trv_cache` of the cwd
 
 * `APP_ROOTS` = ['.']       - The root of the application search space
 * `RESOURCE_ROOTS` = ['.']  - The root of resource searching
-* `ENV` = dev|prod          - Environment to deploy
+* `ENV` = dev|prod|any      - Environment to deploy
 * `PROFILE`=['application'] - Additional profiles to run app under
 
 * `PLAIN_CONSOLE` = 0|1     - Determines whether or not to augment console log information, default is 0

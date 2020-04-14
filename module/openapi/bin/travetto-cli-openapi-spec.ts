@@ -4,7 +4,7 @@ import { Util, CompletionConfig } from '@travetto/cli/src/util';
 export function init() {
   return Util.program
     .command('openapi-spec')
-    .option('-o, --output [output]', 'Output files', './openapi.json')
+    .option('-o, --output [output]', 'Output files', './openapi.yml')
     .action(async (cmd: commander.Command) => {
       process.env.OPENAPI_OUTPUT = cmd.output;
 

@@ -37,8 +37,9 @@ export function init() {
     .option('-q, --quiet', 'Quiet operation')
     .action(async (cmd: commander.Command) => {
 
-      // process.env.DEBUG = '0';
-      process.env.TRV_CACHE_DIR = cmd.output || '-';
+      if (cmd.output) {
+        process.env.TRV_CACHE_DIR = cmd.output;
+      }
 
       if (cmd.clean) {
         Util.dependOn('clean');

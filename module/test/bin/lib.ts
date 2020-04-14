@@ -1,3 +1,4 @@
+import { EnvUtil } from '@travetto/boot';
 import { State } from '../src/runner/runner';
 
 export function prepareEnv(extra = {}) {
@@ -36,9 +37,9 @@ export async function runTestsDirect() {
   return runTests(
     {
       args: process.argv.slice(2),
-      format: process.env.TEST_FORMAT || 'tap',
-      mode: (process.env.TEST_MODE as any) || 'single',
-      concurrency: parseInt(process.env.TEST_CONCURRENCY || '1', 10)
+      format: EnvUtil.get('test_format', 'tap'),
+      mode: EnvUtil.get('test_mode', 'single') as any,
+      concurrency: EnvUtil.getInt('test_concurrency', 1)
     }
   );
 }

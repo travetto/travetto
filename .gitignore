@@ -1,7 +1,8 @@
 .vscode/
+**/.trv_cache
+**/.DS_STORE
 lerna-debug.log
 bin/test/model/**
-**/log.text
 
 **/temp/**
 **/build/**
@@ -9,6 +10,5 @@ bin/test/model/**
 **/npm-debug.log
 **/package-lock.json
 **/*.lerna_backup
-**/.DS_STORE
 **/api-client/**
 sample/dummy/**

@@ -1,5 +1,6 @@
 .vscode/
-**/node_modules/**
+node_modules/
+.trv_cache/
 **/npm-debug.log
 **/package-lock.json
 **/.DS_STORE

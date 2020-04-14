@@ -33,7 +33,7 @@ export function init() {
 
       // eslint-disable-next-line no-template-curly-in-string
       const dirVar = 'process.env.TRV_CACHE_DIR = `${__dirname}/cache`;';
-      const lambda = fs.readFileSync(`${__dirname}/../resources/lambda.js`, 'utf-8');
+      const lambda = fs.readFileSync(path.resolve(__dirname, '..', 'resources', 'lambda.js'), 'utf-8');
 
       fs.writeFileSync(`${cmd.workspace}/index.js`, `${dirVar}\n${lambda}`);
 

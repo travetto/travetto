@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { EventEmitter } from 'events';
 import * as sourcemap from 'source-map-support';
 
-import { FsUtil, RegisterUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp, SystemUtil } from '@travetto/base';
 
 import { SourceManager } from './source';
@@ -29,7 +29,7 @@ class $Compiler extends EventEmitter {
       }, 0);
     }
 
-    this.sourceManager = new SourceManager(cwd, this.rootPaths, {});
+    this.sourceManager = new SourceManager(cwd, this.rootPaths);
     this.presenceManager = new FilePresenceManager({
       ext: '.ts',
       cwd: this.cwd,
@@ -63,6 +63,7 @@ class $Compiler extends EventEmitter {
   reset() {
     this.sourceManager.reset();
     this.presenceManager.reset();
+    ScanApp.clearCache();
     this.active = false;
 
     this.init();
@@ -103,10 +104,6 @@ class $Compiler extends EventEmitter {
   }
 
   compile(m: NodeModule, tsf: string) {
-    if (/support\/transformer.*/.test(tsf)) {
-      // Do not try to typecheck the transformers
-      return RegisterUtil.compileTypescript(m, tsf);
-    }
     const isNew = !this.presenceManager.has(tsf);
     try {
       const js = this.sourceManager.getTranspiled(tsf); // Compile
@@ -120,7 +117,10 @@ class $Compiler extends EventEmitter {
         }
       }
     } finally {
-      if (isNew) {
+      // If known by the source manager, track it's presence
+      //   some files will be transpile only, and should not trigger
+      //   presence activity
+      if (isNew && this.sourceManager.hasContents(tsf)) {
         this.presenceManager.addNewFile(tsf, false);
       }
     }

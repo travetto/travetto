@@ -6,10 +6,6 @@ import {
 
 import { ParamConfig } from '../src/types';
 
-const CONTROLLER_KEY = 'trv/rest/Controller';
-const ENDPOINT_KEY = 'trv/rest/Endpoint';
-const PARAM_KEY = 'trv/rest/Param';
-
 const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
 const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
 const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
@@ -17,7 +13,7 @@ const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 export class RestTransformer {
 
   static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: Documentation) {
-    const pDec = state.findDecorator(node, PARAM_KEY);
+    const pDec = state.findDecorator(node, 'trv/rest/Param');
 
     const pName = node.name.getText();
 
@@ -50,8 +46,6 @@ export class RestTransformer {
     let type: ts.Expression;
     let defaultType = 'Query';
 
-    console.debug(rType, node.getText());
-
     if (rType.name === 'Request' || rType.name === 'Response') { // Convert to custom types, special handling for interfaces
       type = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, rType.name.toUpperCase());
       defaultType = 'Context'; // White list request/response as context
@@ -68,7 +62,7 @@ export class RestTransformer {
       ...decConfig,
       required: decConfig.required !== undefined ? decConfig.required : !(node.questionToken || node.initializer),
       type: type as any,
-      array
+      ...(array ? { array: true } : {})
     };
 
     if (!pDec) { // Handle default
@@ -94,7 +88,7 @@ export class RestTransformer {
     );
   }
 
-  @OnMethod(ENDPOINT_KEY)
+  @OnMethod('trv/rest/Endpoint')
   static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration) {
 
     const decls = node.decorators;
@@ -111,17 +105,22 @@ export class RestTransformer {
 
     // IF we have a winner, declare response type
     if (retType) {
-      const type = {
-        array: false,
+      const type: Record<string, any> = {
         type: retType
       };
       if (res.isLiteralType(retType) && retType.ctor === Array) {
         type.array = true;
         type.type = retType.typeArguments?.[0]!;
       }
+
+      if (res.isExternalType(type.type)) {
+        type.type = state.typeToIdentifier(type.type) as any;
+      } else if (res.isShapeType(type.type)) { // TODO: How do we handle shapes?
+        delete type.type;
+      }
+
       const produces = state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', TransformUtil.fromLiteral({
         ...type,
-        array: type.array,
         title: comments.return
       }));
       newDecls.push(produces);
@@ -164,7 +163,7 @@ export class RestTransformer {
     }
   }
 
-  @OnClass(CONTROLLER_KEY)
+  @OnClass('trv/rest/Controller')
   static handleController(state: TransformerState, node: ts.ClassDeclaration) {
     // Read title/description/summary from jsdoc on class
     const comments = state.readJSDocs(node);

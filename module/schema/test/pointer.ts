@@ -51,5 +51,11 @@ class PointerSuite {
     } catch (err) {
       assert(err.errors?.[0].kind === 'required');
     }
+
+    await assert.doesNotReject(async () => {
+      await SchemaValidator.validate(Custom.from({ pointer: 100 }));
+      await SchemaValidator.validate(Custom.from({ pointer: true }));
+      await SchemaValidator.validate(Custom.from({ pointer: 'hello' }));
+    });
   }
 }

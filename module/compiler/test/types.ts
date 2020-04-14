@@ -1,22 +1,18 @@
-import * as path from 'path';
-
 import { Suite, Test } from '@travetto/test';
 import { SourceManager } from '..';
-import { AppCache } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 
-const ROOT = path.resolve(__dirname, '../external-test/type-transform');
-const SRC = `${ROOT}/src`;
+const ROOT = FsUtil.resolveUnix(__dirname, '../external-test/type-transform');
 
 @Suite()
 export class TypeSuite {
 
-
   @Test()
   testStuff() {
-    const src = new SourceManager(ROOT, [ROOT], { cache: false });
+    const src = new SourceManager(ROOT, [ROOT]);
     src.init();
-    const output = src.getTranspiled(`${SRC}/sample.ts`, true);
-    AppCache.removeEntry(`${SRC}/sample.ts`);
+    const file = FsUtil.resolveUnix(ROOT, 'src/sample.ts');
+    const output = src.getTranspiled(file, true);
     console.log(output);
   }
 }
