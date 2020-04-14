@@ -14,7 +14,7 @@ import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 
 import { SQLModelConfig } from './config';
-import { Connected, Transactional, WithTransaction } from './connection';
+import { Connected, Transactional, withTransaction } from './connection';
 import { SQLUtil } from './util';
 import { SQLDialect } from './dialect';
 
@@ -66,7 +66,7 @@ export class SQLModelSource extends ModelSource {
     if (indices) {
       for (const op of this.dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {
-          await WithTransaction(this, 'isolated', this.exec, [op]);
+          await withTransaction(this, 'isolated', this.exec, [op]);
         } catch (e) {
           if (!/\bexists|duplicate\b/i.test(e.message)) {
             throw e;

@@ -28,7 +28,7 @@ export interface ConnectionAware<C = any> {
   conn: ConnectionSupport<C>;
 }
 
-export async function WithConnection<V extends ConnectionAware, R>(
+export async function withConnection<V extends ConnectionAware, R>(
   self: V,
   fn: (this: V, ...args: any[]) => R,
   args: any[] = []
@@ -48,7 +48,7 @@ export async function WithConnection<V extends ConnectionAware, R>(
   }
 }
 
-export async function WithTransaction<V extends ConnectionAware, R>(
+export async function withTransaction<V extends ConnectionAware, R>(
   self: V,
   mode: TransactionType,
   fn: (this: V, ...args: any[]) => R,
@@ -91,7 +91,7 @@ export function Connected<T extends ConnectionAware>() {
   return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(this: T, ...args: any[]) => Promise<any>>) {
     const og = desc.value!;
     desc.value = function (this: T, ...args: any[]) {
-      return WithConnection(this, og as any, args);
+      return withConnection(this, og as any, args);
     };
   };
 }
@@ -100,7 +100,7 @@ export function Transactional<T extends ConnectionAware>(mode: TransactionType =
   return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(this: T, ...args: any[]) => Promise<any>>) {
     const og = desc.value!;
     desc.value = function (this: T, ...args: any[]) {
-      return WithTransaction(this, mode, og as any, args);
+      return withTransaction(this, mode, og as any, args);
     };
   };
 }
