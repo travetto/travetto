@@ -1,4 +1,3 @@
-import * as os from 'os';
 import * as fs from 'fs';
 import { FsUtil } from './fs-util';
 import { EnvUtil } from './env';
@@ -8,22 +7,14 @@ function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
 }
 
 export class FileCache {
-  private cache: Record<string, fs.Stats> = {};
+  private cache = new Map<string, fs.Stats>();
 
   readonly cwd: string;
   readonly cacheDir: string;
 
   constructor(cwd: string, cacheDir?: string) {
-    this.cache = {};
     this.cwd = FsUtil.toUnix(cwd || FsUtil.cwd);
-
-    if (!cacheDir) {
-      const peTcd = EnvUtil.get('trv_cache_dir');
-      const defCache = FsUtil.joinUnix(os.tmpdir(), FsUtil.cwd.replace(/[\/:]/g, '_'));
-      cacheDir = peTcd === 'PID' ? `${defCache}_${process.pid}` : (peTcd && peTcd !== '-' ? peTcd : defCache);
-    }
-
-    this.cacheDir = FsUtil.toUnix(cacheDir);
+    this.cacheDir = FsUtil.toUnix(cacheDir ?? EnvUtil.get('trv_cache_dir') ?? `${this.cwd}/.trv_cache`);
   }
 
   init() {
@@ -57,19 +48,19 @@ export class FileCache {
   }
 
   removeEntry(full: string) {
-    delete this.cache[full];
+    this.cache.delete(full);
   }
 
   hasEntry(full: string) {
-    return !!this.cache[full] || fs.existsSync(this.toEntryName(full));
+    return this.cache.has(full) || fs.existsSync(this.toEntryName(full));
   }
 
   statEntry(full: string) {
-    if (!this.cache[full]) {
+    if (!this.cache.has(full)) {
       const stat = fs.statSync(this.toEntryName(full));
-      this.cache[full] = stat;
+      this.cache.set(full, stat);
     }
-    return this.cache[full];
+    return this.cache.get(full)!;
   }
 
   clear(quiet = false) {
@@ -79,7 +70,7 @@ export class FileCache {
         if (!quiet) {
           console.debug(`Deleted ${this.cacheDir}`);
         }
-        this.cache = {}; // Clear it out
+        this.cache.clear(); // Clear it out
       } catch (e) {
         console.error('Failed in deleting');
       }
@@ -89,23 +80,20 @@ export class FileCache {
   fromEntryName(cached: string) {
     return FsUtil.joinUnix(this.cwd, cached
       .replace(this.cacheDir, '')
-      .replace(/\btrv[.]/g, '@travetto/')
-      .replace(/^[.]/, 'node_modules/')
+      .replace(/^[.]/, 'node_modules/@travetto/')
       .replace(/~/g, '/')
     )
-      .replace(/[.]js$/g, '.ts');
+      .replace(/[.]js$/, '.ts');
   }
 
   toEntryName(full: string) {
     const out = FsUtil.joinUnix(this.cacheDir,
       FsUtil.toUnix(full)
-        .replace(this.cwd, '')
-        .replace(/^[\/]+/, '')
-        .replace(/^node_modules\//, '.')
-        .replace('@travetto/', 'trv.')
-        .replace(/[\/]+/g, '~')
+        .replace(`${this.cwd}/`, '')
+        .replace(/^.*node_modules\/@travetto\//, '.')
+        .replace(/[/]+/g, '~')
     )
-      .replace(/[.]ts$/g, '.js');
+      .replace(/[.]ts$/, '.js');
     return out;
   }
 }

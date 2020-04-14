@@ -20,10 +20,8 @@ export class SourceManager {
   private program: ts.Program;
 
   constructor(private cwd: string,
-    private rootPaths: string[],
-    private config: { cache?: boolean }
+    private rootPaths: string[]
   ) {
-    Object.assign(config, { ... { cache: true }, config });
     this.cache = new FileCache(this.cwd);
     this.transformerManager = new TransformerManager(this.cwd);
   }
@@ -43,9 +41,7 @@ export class SourceManager {
     fileName = fileName.replace(/[.]js$/, '.ts');
     this.contents.set(fileName, content);
     this.hashes.set(fileName, SystemUtil.naiveHash(content));
-    if (this.config.cache) {
-      this.cache.writeEntry(fileName, content);
-    }
+    this.cache.writeEntry(fileName, content);
   }
 
   private fileExists(fileName: string) {
@@ -55,7 +51,7 @@ export class SourceManager {
   private getHost(): ts.CompilerHost {
     const host: ts.CompilerHost = {
       readFile: this.readFile,
-      realpath: TRV_FRAMEWORK_DEV ? RegisterUtil.resolveFrameworkDevFile : undefined,
+      realpath: TRV_FRAMEWORK_DEV ? RegisterUtil.resolveForFramework : undefined,
       writeFile: this.writeFile,
       fileExists: this.fileExists,
       getDefaultLibFileName: ts.getDefaultLibFileName,
@@ -102,7 +98,7 @@ export class SourceManager {
   }
 
   private transpile(fileName: string, force = false) {
-    if (force || !(this.config.cache && this.cache.hasEntry(fileName))) {
+    if (force || !this.cache.hasEntry(fileName)) {
       console.trace('Emitting', fileName.replace(this.cwd, ''));
 
       const prog = this.getProgram(fileName);
@@ -127,7 +123,7 @@ export class SourceManager {
   init() {
     // Find all active app files
     ScanApp.findActiveAppFiles(this.rootPaths,
-      f => f.includes('@travetto/test') &&
+      f => f.includes('@travetto/test') && // Exclude test unless in test mode, and it's a src file
         (Env.env !== 'test' || !f.includes('src/')),
       this.cwd
     )
@@ -151,7 +147,16 @@ export class SourceManager {
     return true;
   }
 
+  hasContents(file: string) {
+    return this.contents.has(file);
+  }
+
   getTranspiled(fileName: string, force = false) {
+    // Do not typecheck the support code
+    if (/\/support\/(transformer|phase).+/.test(fileName)) {
+      return RegisterUtil.transpile(fileName, force);
+    }
+
     try {
       return this.transpile(fileName, force);
     } catch (err) {
@@ -169,9 +174,7 @@ export class SourceManager {
     if (this.contents.has(fileName)) {
       console.trace('Unloading', fileName.replace(this.cwd, ''), unlink);
 
-      if (this.config.cache) {
-        this.cache.removeExpiredEntry(fileName, unlink);
-      }
+      this.cache.removeExpiredEntry(fileName, unlink);
 
       if (unlink && this.hashes.has(fileName)) {
         this.hashes.delete(fileName);
