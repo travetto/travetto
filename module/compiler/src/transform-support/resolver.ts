@@ -25,13 +25,13 @@ export class TypeResolver {
     const flags = type.getFlags();
 
     if (flags & ts.TypeFlags.Void) {
-      return { name: 'void', realType: undefined };
+      return { name: 'void', ctor: undefined };
     } else if (flags & ts.TypeFlags.Undefined) {
-      return { name: 'undefined', realType: undefined };
+      return { name: 'undefined', ctor: undefined };
     }
 
     const name = this._checker.typeToString(this._checker.getApparentType(type)) ?? '';
-    const complexName = type.symbol?.getName();
+    const complexName = TransformUtil.getSymbolName(type);
 
     const simpleCons = GLOBAL_SIMPLE[name as keyof typeof GLOBAL_SIMPLE];
     const complexCons = GLOBAL_COMPLEX[complexName as keyof typeof GLOBAL_COMPLEX];
@@ -42,25 +42,27 @@ export class TypeResolver {
 
       return {
         name: SIMPLE_NAMES[simpleCons.name] ?? simpleCons.name,
-        realType: simpleCons,
+        ctor: simpleCons,
         value: ret
       };
     } else if (complexCons) {
-      console.log('Complex cons', complexCons.name, this.getAllTypeArguments(type));
+      console.debug('Complex cons', complexCons.name, this.getAllTypeArguments(type));
       return {
         name: complexCons.name,
-        realType: complexCons,
+        ctor: complexCons,
         typeArguments: this.getAllTypeArguments(type).map(t => this.resolveType(t))
       };
     }
   }
 
-  private resolveShapeType(type: ts.Type): res.ShapeType {
+  private resolveShapeType(type: ts.Type, alias?: ts.Symbol): res.ShapeType {
     const docs = TransformUtil.readJSDocs(type);
     const fields: Record<string, res.Type> = {};
-    const name = type.symbol?.getName();
+    const name = TransformUtil.getSymbolName(alias ?? type);
     for (const member of this._checker.getPropertiesOfType(type)) {
-      const memberType = this._checker.getTypeAtLocation(member.getDeclarations()![0]);
+      const memberType = this._checker.getTypeAtLocation(
+        this.getPrimaryDeclaration(member)
+      );
       if (memberType.getCallSignatures().length) {
         continue;
       }
@@ -70,26 +72,28 @@ export class TypeResolver {
   }
 
   private resolveExternalType(type: ts.Type): res.ExternalType {
-    const sym = type.symbol;
-    const decl = sym.declarations?.[0];
-    const source = decl?.getSourceFile().fileName;
-    const name = sym?.getName();
+    const decl = this.getPrimaryDeclaration(type);
+    const source = decl?.getSourceFile().fileName!;
+    const name = TransformUtil.getSymbolName(type);
     const comments = TransformUtil.readJSDocs(type);
 
     return { name, source, comment: comments.description };
   }
 
   private resolveTupleType(type: ts.Type): res.TupleType {
-    return {
+    const ret = {
       tupleTypes: this.getAllTypeArguments(type).map(x => this.resolveType(x))
     };
+    console.debug('Tuple Type?', ret);
+    return ret;
   }
 
   private resolveReferencedType(type: ts.Type) {
     const obj = this.resolveExternalType(type);
 
-    console.info('External Type?', obj, type);
+    console.debug('External Type?', obj, type);
 
+    // Handle target types
     if ('target' in type && type['target']) {
       type = type['target'] as ts.Type;
     }
@@ -117,21 +121,26 @@ export class TypeResolver {
       let common = unionTypes.reduce((acc, v) => (!acc || acc.name === v.name) ? v : undefined, undefined as any);
       if (common) {
         common = {
-          realType: common.realType,
+          ctor: common.ctor,
           name: common.name
         };
       }
-      if (common?.realType === Boolean) {
+      if (common?.ctor === Boolean) {
         return this.resolveLiteralType(remainderTypes[0])!;
       } else {
-        return { undefinable, nullable, commonType: common, unionTypes } as res.UnionType;
+        const remainder = {
+          name: TransformUtil.getSymbolName(type),
+          undefinable, nullable, commonType: common, unionTypes
+        } as res.UnionType;
+        console.debug('Union Type', remainder);
+        return remainder;
       }
     }
 
     return {
       undefinable,
       nullable,
-      ...this.resolveType(remainderTypes[0])
+      ...this.resolveType(remainderTypes[0], type.aliasSymbol)
     };
   }
 
@@ -141,28 +150,29 @@ export class TypeResolver {
   }
 
   readDocsTags(node: ts.Node, name: string): string[] {
-    const type = this._checker.getTypeAtLocation(node);
-    const tags = type.symbol?.getJsDocTags() ?? [];
-    return tags
-      .filter(el => el.name === name)
-      .map(el => el.text!);
+    return TransformUtil.readJSDocTags(this._checker.getTypeAtLocation(node), name);
   }
 
-  resolveType(type: ts.Type | ts.Node): res.Type {
+  resolveType(type: ts.Type | ts.Node, alias?: ts.Symbol): res.Type {
     if ('getSourceFile' in type) {
       type = this._checker.getTypeAtLocation(type);
     }
+
+    if (type.aliasSymbol) {
+      console.debug(type.aliasSymbol.name, type.aliasSymbol.declarations[0]);
+    }
+
     const flags = type.getFlags();
     const objectFlags = this.getObjectFlags(type) ?? 0;
 
-    if (objectFlags & ts.ObjectFlags.Reference && !type.getSymbol()) { // Tuple type?
-      console.info('Resolved Tuple Type', type);
+    if (objectFlags & ts.ObjectFlags.Reference && !TransformUtil.getSymbol(type)) { // Tuple type?
+      console.debug('Resolved Tuple Type', type);
       return this.resolveTupleType(type);
     } else if (objectFlags & ts.ObjectFlags.Anonymous) {
-      console.info('Resolved Shape Type', type);
+      console.debug('Resolved Shape Type', type);
       return this.resolveShapeType(type);
     } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
-      console.info('Resolved Reference Type', type);
+      console.debug('Resolved Reference Type', type);
       const v = this.resolveReferencedType(type);
       if (res.isLiteralType(v) && v.typeArguments) {
         v.typeArguments = this.getAllTypeArguments(type).map((x: any) => this.resolveType(x));
@@ -174,30 +184,34 @@ export class TypeResolver {
       ts.TypeFlags.String | ts.TypeFlags.StringLiteral |
       ts.TypeFlags.Void | ts.TypeFlags.Undefined
     )) {
-      console.info('Resolved Literal Type', type);
+      console.debug('Resolved Literal Type', type);
       const result = this.resolveLiteralType(type);
       if (result) {
         return result;
       }
     } else if (type.isUnion()) {
-      console.info('Resolved Union Type', type);
+      console.debug('Resolved Union Type', type);
       return this.resolveUnionType(type);
     } else if (objectFlags & ts.ObjectFlags.Tuple) {
-      console.info('Resolved Tuple Type', type);
+      console.debug('Resolved Tuple Type', type);
       return this.resolveTupleType(type);
     } else if (type.isLiteral()) {
-      console.info('Resolved Shape Type', type);
-      return this.resolveShapeType(type);
+      console.debug('Resolved Shape Type', type);
+      return this.resolveShapeType(type, alias);
     }
 
-    console.info('Resolved Unknown Type', type);
+    console.debug('Resolved Unknown Type', type);
     return {
-      realType: Object,
+      ctor: Object,
       name: 'object'
     } as res.LiteralType;
   }
 
-  getDeclarations(node: ts.Node): ts.Declaration[] {
-    return this._checker.getTypeAtLocation(node).symbol?.getDeclarations() ?? [];
+  getDeclarations(node: ts.Node | ts.Type | ts.Symbol): ts.Declaration[] {
+    return TransformUtil.getDeclarations('getSourceFile' in node ? this._checker.getTypeAtLocation(node) : node);
+  }
+
+  getPrimaryDeclaration(node: ts.Node | ts.Symbol | ts.Type): ts.Declaration {
+    return TransformUtil.getPrimaryDeclaration(this.getDeclarations(node));
   }
 }

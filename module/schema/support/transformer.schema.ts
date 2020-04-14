@@ -18,34 +18,36 @@ const COMMON_MOD = require.resolve('../src/decorator/common');
 
 export class SchemaTransformer {
 
-  static toFinalType(state: TransformerState, type: res.Type): ts.Expression | undefined {
+  static toFinalType(state: TransformerState, type: res.Type): ts.Expression {
     if (res.isExternalType(type)) {
       return state.getOrImport(type);
+    } else if (res.isTupleType(type)) {
+      return TransformUtil.fromLiteral(type.tupleTypes.map(x => this.toFinalType(state, x)!));
     } else if (res.isLiteralType(type)) {
-      if (type.realType === Array && type.typeArguments?.length) {
+      if (type.ctor === Array && type.typeArguments?.length) {
         return TransformUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0])]);
       } else {
-        return ts.createIdentifier(type.realType!.name!);
+        return ts.createIdentifier(type.ctor!.name!);
       }
-    } else if (res.isUnionType(type) && type.commonType) {
-      return this.toFinalType(state, type.commonType);
+    } else if (res.isUnionType(type)) {
+      if (type.commonType) {
+        return this.toFinalType(state, type.commonType);
+      }
     } else if (res.isShapeType(type)) {
       const out: Record<string, ts.Expression | undefined> = {};
       for (const el of Object.keys(type.fields)) {
         out[el] = this.toFinalType(state, type.fields[el]);
       }
-      console.log('Shapely shape', type);
+      console.debug('Shapely shape', type);
       return TransformUtil.fromLiteral(type);
-    } else {
-      return undefined;
     }
+    return ts.createIdentifier('Object');
   }
 
   // TODO: Full rewrite
   static computeProperty(state: AutoState & TransformerState, node: ts.PropertyDeclaration) {
 
     const typeExpr = state.resolveType(node);
-    console.log(typeExpr);
     const properties = [];
 
     if (!node.questionToken && !typeExpr.undefinable) {
@@ -98,9 +100,9 @@ export class SchemaTransformer {
     }
 
     const schema = state.findDecorator(node, 'trv/schema/Schema', 'Schema', SCHEMA_MOD);
-    let auto = !!schema;
+    let auto = true;
 
-    state[hasSchema] = !!schema;
+    state[hasSchema] = !!dec;
 
     if (schema) { // Handle schema specific
       const arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);

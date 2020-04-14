@@ -50,7 +50,7 @@ export class TransformerState implements State {
       node = this.resolveType(node);
     }
     if (res.isLiteralType(node)) {
-      return ts.createIdentifier(node.realType!.name);
+      return ts.createIdentifier(node.ctor!.name);
     } else if (res.isExternalType(node)) {
       return this.getOrImport(node);
     } else if (res.isShapeType(node)) {
@@ -59,7 +59,7 @@ export class TransformerState implements State {
   }
 
   resolveReturnType(node: ts.MethodDeclaration) {
-    console.log('Resolving type', node);
+    console.debug('Resolving type', node);
     return this.resolveType(this.resolver.getReturnType(node));
   }
 
@@ -87,7 +87,7 @@ export class TransformerState implements State {
 
   getDecoratorMeta(dec: ts.Decorator): DecoratorMeta {
     const ident = TransformUtil.getDecoratorIdent(dec);
-    const [decl] = this.resolver.getDeclarations(ident);
+    const decl = this.resolver.getPrimaryDeclaration(ident);
     return ({
       dec,
       ident,
