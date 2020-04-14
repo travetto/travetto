@@ -158,8 +158,9 @@ export class TypeResolver {
       type = this._checker.getTypeAtLocation(type);
     }
 
-    if (type.aliasSymbol) {
-      console.debug(type.aliasSymbol.name, type.aliasSymbol.declarations[0]);
+    const concreteType = TransformUtil.resolveConcreteType(type);
+    if (concreteType) {
+      return concreteType;
     }
 
     const flags = type.getFlags();

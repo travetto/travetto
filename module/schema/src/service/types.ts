@@ -29,7 +29,10 @@ export interface FieldConfig extends DescribableConfig {
   owner: Class<any>;
   name: string;
   aliases?: string[];
-  type: Class<any>;
+  type: Class<any> & {
+    bindSchema?(input: any): undefined | any;
+    validateSchema?(input: any): string | undefined;
+  };
   array: boolean;
   specifier?: string;
   precision?: [number, number] | [number, undefined];

@@ -27,7 +27,7 @@ A session allows for defining the expiration time, what state the session should
 @Put('/info')
 async storeInfo(@Context() data: SessionData) {
   data.age = 20;
-  data.name = 'Roger';; // Setting data
+  data.name = 'Roger'; // Setting data
 }
 ...
 @Get('/logout')
