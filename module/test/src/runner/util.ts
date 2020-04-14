@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 
-import { FileCache, EnvUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/boot';
 import { ScanFs, Env, Shutdown } from '@travetto/base';
 
 const DEFAULT_TIMEOUT = EnvUtil.getInt('default_timeout', 5000);
@@ -10,10 +10,6 @@ export class TestUtil {
   static TIMEOUT = Symbol('timeout');
 
   static registerCleanup(scope: string) {
-    if (EnvUtil.get('trv_cache_dir') === 'PID') {
-      Shutdown.onShutdown(`test.${scope}.clearWorkspace`, // Remove when done, this is for single interaction
-        () => new FileCache(Env.cwd).clear(), true);
-    }
     Shutdown.onShutdown(`test.${scope}.bufferOutput`,
       () => new Promise(res => setTimeout(res, 50)));
   }

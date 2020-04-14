@@ -263,7 +263,7 @@ export class TransformUtil {
         let path = this.optionalResolve(stmt.moduleSpecifier.text, base);
 
         if (TRV_FRAMEWORK_DEV) {
-          path = RegisterUtil.resolveFrameworkDevFile(path);
+          path = RegisterUtil.resolveForFramework(path);
         }
 
         if (stmt.importClause) {
@@ -294,7 +294,7 @@ export class TransformUtil {
         const imptStmt = ts.createImportDeclaration(
           undefined, undefined,
           ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
-          ts.createLiteral(require.resolve(path))
+          ts.createLiteral(require.resolve(path).replace(/^.*node_modules.*@travetto/, '@travetto'))
         );
         return imptStmt;
       });

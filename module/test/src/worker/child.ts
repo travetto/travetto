@@ -27,13 +27,12 @@ export class TestChildWorker extends ChildCommChannel<Event> {
   private runs = 0;
 
   constructor() {
-    super(EnvUtil.getInt('idle_timeout', 120000));
+    super(EnvUtil.isTrue('execution_reusable') ?
+      Number.MAX_SAFE_INTEGER / 10000000 : // Max duration
+      EnvUtil.getInt('idle_timeout', 120000)
+    );
 
     import('../runner/util').then(({ TestUtil }) => TestUtil.registerCleanup('worker'));
-
-    if (EnvUtil.isTrue('execution_reusable')) {
-      setTimeout(_ => { }, Number.MAX_SAFE_INTEGER / 10000000);
-    }
   }
 
   async activate() {

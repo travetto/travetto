@@ -1,15 +1,25 @@
 /// <reference path="./types.d.ts" />
 
 // @ts-ignore
-import * as Module from 'module';
+import * as Mod from 'module';
 import * as fs from 'fs';
 
 import { FsUtil } from './fs-util';
 import { AppCache } from './app-cache';
 import { EnvUtil } from './env';
 
-let tsOpts: any;
+type Module = {
+  loaded?: boolean;
+  _load?(req: string, parent: Module): any;
+  _resolveFilename?(req: string, parent: Module): string;
+  _compile?(file: string, contents: string): any;
+} & Mod;
 
+const Module = Mod as any as Module;
+
+type Preparer = (name: string, contents: string) => string;
+
+let tsOpts: any;
 let ts: any;
 
 declare const global: {
@@ -20,17 +30,58 @@ declare const global: {
   };
 };
 
-type Preparer = (name: string, contents: string) => string;
-
 const IS_WATCH = !EnvUtil.isFalse('watch');
+
+// Define
+Object.defineProperty(global, 'TRV_FRAMEWORK_DEV', {
+  value: EnvUtil.isSet('trv_framework_dev'),
+  writable: false,
+  configurable: true,
+  enumerable: false
+});
 
 export class RegisterUtil {
   private static preparers: Preparer[] = [];
 
-  // @ts-ignore
-  static ogModuleLoad = Module._load.bind(Module);
-  static pkgName: string;
+  private static ogModuleLoad = Module._load!.bind(Module);
+  private static pkgName: string;
+
   static libRequire: (x: string) => any;
+
+  private static onModuleLoad(request: string, parent: Module): any {
+    try {
+      const mod = this.ogModuleLoad.apply(null, [request, parent]);
+
+      if (!parent.loaded && (!mod || !mod.__$TRV)) {
+        let p;
+        try {
+          p = Module._resolveFilename!(request, parent);
+        } catch (err) {
+          // Ignore if we can't resolve
+        }
+        if (p && p.endsWith('.ts')) {
+          throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
+        }
+      }
+
+      return mod;
+    } catch (e) {
+      const p = Module._resolveFilename!(request, parent);
+
+      // Build proxy if watching and not an extension as extensions are allowed to not load
+      if (IS_WATCH && !p.includes('/extension/')) {
+        console.debug(`Unable to load ${p.replace(`${FsUtil.cwd}/`, '')}: stubbing out with error proxy.`, e.message);
+        return this.getErrorModuleProxy(e.message) as NodeModule;
+      }
+
+      throw e;
+    }
+  }
+
+  private static compile(m: Module, tsf: string) {
+    const content = this.transpile(tsf);
+    return m._compile!(content, tsf.replace(/\.ts$/, '.js'));
+  }
 
   static addPreparer(fn: Preparer) {
     this.preparers.push(fn);
@@ -76,7 +127,12 @@ export class RegisterUtil {
    * Only called in Framework dev mode
    * @param pth
    */
-  static resolveFrameworkDevFile(pth: string) {
+  static resolveForFramework(pth: string, mod?: Module) {
+    if (mod) {
+      pth = Module._resolveFilename!(pth, mod);
+    }
+
+    // If relative or framework
     if (pth.includes('@travetto')) {
       // Fetch current module's name
       this.pkgName = this.pkgName ||
@@ -96,72 +152,19 @@ export class RegisterUtil {
     return pth;
   }
 
-  static moduleLoaderHandler(request: string, parent: Module) {
-    try {
-      const mod = this.ogModuleLoad.apply(null, [request, parent]);
-
-      if (!parent.loaded && (!mod || !mod.__$TRV)) {
-        let p;
-        try {
-          // @ts-ignore
-          p = Module._resolveFilename(request, parent);
-        } catch (err) {
-          // Ignore if we can't resolve
-        }
-        if (p && p.endsWith('.ts')) {
-          throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
-        }
-      }
-
-      return mod;
-    } catch (e) {
-      // @ts-ignore
-      const p = Module._resolveFilename(request, parent);
-
-      // Build proxy if watching and not an extension as extensions are allowed to not load
-      if (IS_WATCH && !p.includes('/extension/')) {
-        console.debug(`Unable to load ${p.replace(`${FsUtil.cwd}/`, '')}: stubbing out with error proxy.`, e.message);
-        return this.getErrorModuleProxy(e.message) as NodeModule;
-      }
-
-      throw e;
-    }
-  }
-
-  static compileTypescript(m: Module, tsf: string) {
+  static transpile(tsf: string, force = false) {
     const name = FsUtil.toUnix(tsf);
-
-    let content;
-    if (!AppCache.hasEntry(name)) {
+    if (force || !AppCache.hasEntry(name)) {
       if (!tsOpts) {
         const json = ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, ts.sys.readFile);
         tsOpts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options;
       }
-
-      content = ts.transpile(this.prepareTranspile(tsf), tsOpts);
+      const content = ts.transpile(this.prepareTranspile(tsf), tsOpts);
       AppCache.writeEntry(name, content);
+      return content;
     } else {
-      content = AppCache.readEntry(name);
+      return AppCache.readEntry(name);
     }
-
-    // @ts-ignore
-    const r = m._compile(content, tsf.replace(/\.ts$/, '.js'));
-    return r;
-  }
-
-  static frameworkModuleHandler(request: string, parent: Module) {
-    // If relative or framework
-    if (/^[.\/]/.test(request) || request.startsWith('@travetto')) {
-      // @ts-ignore
-      const resolved = Module._resolveFilename(request, parent);
-      request = this.resolveFrameworkDevFile(resolved);
-    }
-
-    return this.moduleLoaderHandler(request, parent);
-  }
-
-  static frameworkCompileTypescript(m: Module, tsf: string) {
-    return this.compileTypescript(m, this.resolveFrameworkDevFile(tsf));
   }
 
   static init() {
@@ -169,7 +172,6 @@ export class RegisterUtil {
       return;
     }
 
-    // @ts-ignore
     ts = global.ts = new Proxy({}, {
       get(t, p, r) {
         ts = (global as any).ts = require('typescript');
@@ -179,21 +181,13 @@ export class RegisterUtil {
 
     AppCache.init();
 
-    // Define
-    Object.defineProperty(global, 'TRV_FRAMEWORK_DEV', {
-      value: EnvUtil.isSet('trv_framework_dev'),
-      writable: false,
-      configurable: true,
-      enumerable: false
-    });
-
-    // @ts-ignore
-    Module._load = (TRV_FRAMEWORK_DEV ? this.frameworkModuleHandler : this.moduleLoaderHandler).bind(this);
-    // @ts-ignore
-    require.extensions['.ts'] = (TRV_FRAMEWORK_DEV ? this.frameworkCompileTypescript : this.compileTypescript).bind(this);
-
     // Supports bootstrapping with framework resolution
-    this.libRequire = TRV_FRAMEWORK_DEV ? x => require(this.resolveFrameworkDevFile(`/${x}`)) : require;
+    this.libRequire = !TRV_FRAMEWORK_DEV ? require :
+      x => require(this.resolveForFramework(`/${x}`));
+    Module._load = !TRV_FRAMEWORK_DEV ? this.onModuleLoad.bind(this) :
+      (req, p) => this.onModuleLoad(this.resolveForFramework(req, p), p);
+    require.extensions['.ts'] = !TRV_FRAMEWORK_DEV ? this.compile.bind(this) :
+      (m, tsf) => this.compile(m, this.resolveForFramework(tsf));
 
     global.trvInit = this;
   }
@@ -205,7 +199,6 @@ export class RegisterUtil {
 
     delete require.extensions['.ts'];
     delete global.trvInit;
-    // @ts-ignore
     Module._load = this.ogModuleLoad;
 
     for (const k of Object.keys(require.cache)) {

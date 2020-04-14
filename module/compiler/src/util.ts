@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
-import { Env, AppError, AppInfo } from '@travetto/base';
-import { RegisterUtil } from '@travetto/boot';
+import { Env, AppError, ScanApp } from '@travetto/base';
+import { RegisterUtil, AppCache } from '@travetto/boot';
 
 export class CompilerUtil {
 
@@ -21,18 +21,17 @@ export class CompilerUtil {
         inlineSourceMap: true,
         outDir: dir,
       }, `${dir}/${name}`);
-    out.options.importHelpers = true;
-    out.options.noEmitOnError = false; // !Env.watch;
-    out.options.noErrorTruncation = true;
-    out.options.moduleResolution = ts.ModuleResolutionKind.NodeJs;
-
-    return out.options;
+    return Object.assign(out.options, {
+      importHelpers: true,
+      noEmitOnError: false,
+      noErrorTruncation: true,
+      moduleResolution: ts.ModuleResolutionKind.NodeJs
+    });
   }
 
   static checkTranspileErrors(cwd: string, fileName: string, diagnostics: readonly ts.Diagnostic[]) {
 
     if (diagnostics && diagnostics.length) {
-
       const errors = diagnostics.slice(0, 5).map(diag => {
         const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
@@ -46,7 +45,6 @@ export class CompilerUtil {
       if (diagnostics.length > 5) {
         errors.push(`${diagnostics.length - 5} more ...`);
       }
-
       throw new AppError(`Transpiling ${fileName.replace(`${cwd}/`, '')} failed`, 'unavailable', { errors });
     }
   }
@@ -66,5 +64,12 @@ export class CompilerUtil {
     } else {
       throw e;
     }
+  }
+
+  /**
+   * Find all uncompiled files
+   */
+  static findAllUncompiledFiles(roots: string[] = ['.']) {
+    return ScanApp.findActiveAppFiles(roots).filter(x => !AppCache.hasEntry(x));
   }
 }
