@@ -1,8 +1,21 @@
+import { Util } from '@travetto/base';
+
 /**
- * @pointer this:Point
+ * @concrete Point
  */
 export type Point = [number, number];
-export const Point = class Point { };
+export const Point = class Point {
+  static validateSchema(input: any) {
+    const ret = this.bindSchema(input);
+    return ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
+  }
+  static bindSchema(input: any): [number, number] | undefined {
+    if (Array.isArray(input) && input.length === 2) {
+      return input.map(x => Util.coerceType(x, Number, false)) as [number, number];
+    }
+  }
+};
+
 export type Primitive = number | boolean | string | Date | Point;
 export type PrimitiveArray = Primitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';

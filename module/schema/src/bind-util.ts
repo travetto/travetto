@@ -53,13 +53,17 @@ export class BindUtil {
   }
 
   static coerceType<T>(conf: FieldConfig, val: any): T | null | undefined {
-    val = Util.coerceType(val, conf.type, false);
+    if (conf.type.bindSchema) {
+      val = conf.type.bindSchema(val);
+    } else {
+      val = Util.coerceType(val, conf.type, false);
 
-    if (conf.type === Number && conf.precision && typeof val === 'number') {
-      if (conf.precision[1]) { // Supports decimal
-        val = +val.toFixed(conf.precision[1]);
-      } else { // 0 digits
-        val = Math.trunc(val);
+      if (conf.type === Number && conf.precision && typeof val === 'number') {
+        if (conf.precision[1]) { // Supports decimal
+          val = +val.toFixed(conf.precision[1]);
+        } else { // 0 digits
+          val = Math.trunc(val);
+        }
       }
     }
     return val as T;
@@ -76,7 +80,7 @@ export class BindUtil {
     if (data instanceof cls) {
       return data;
     } else {
-      return BindUtil.bindSchemaToObject(cls, new cls(), data, view);
+      return this.bindSchemaToObject(cls, new cls(), data, view);
     }
   }
 
@@ -128,14 +132,14 @@ export class BindUtil {
 
             if (SchemaRegistry.has(config.type)) {
               if (config.array) {
-                v = v.map((el: any) => BindUtil.bindSchema(config.type, el));
+                v = v.map((el: any) => this.bindSchema(config.type, el));
               } else {
-                v = BindUtil.bindSchema(config.type, v);
+                v = this.bindSchema(config.type, v);
               }
             } else if (config.array) {
-              v = v.map((el: any) => BindUtil.coerceType(config, el));
+              v = v.map((el: any) => this.coerceType(config, el));
             } else {
-              v = BindUtil.coerceType(config, v);
+              v = this.coerceType(config, v);
             }
           }
 

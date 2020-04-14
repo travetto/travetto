@@ -104,6 +104,16 @@ export class SchemaValidator {
       return [{ kind: 'type', type: field.type.name.toLowerCase() }];
     }
 
+    if (field.type.validateSchema) {
+      const kind = field.type.validateSchema(value);
+      switch (kind) {
+        case undefined: break;
+        case 'type': return [{ kind, type: field.type.name }];
+        default:
+          criteria.push(kind);
+      }
+    }
+
     if (field.match && !field.match.re.test(`${value}`)) {
       criteria.push('match');
     }
