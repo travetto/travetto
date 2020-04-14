@@ -343,3 +343,48 @@ assert.ok(user.address);
 assert(user.address instanceof Address);
 
 ```
+
+## Custom Types
+When working with the schema, the basic types are easily understood, but some of Typescript's more complex constructs are too complex to automate cleanly.  
+To that end, the module supports two concepts:
+
+### Type Adapters
+This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module handles geo data.
+
+**Code: Simple Custom Type**
+```typescript
+/**
+ * @concrete Point
+ */
+export type Point = [number, number];
+
+export const Point = class Point {
+  static validateSchema(input: any) {
+    const ret = this.bindSchema(input);
+    return ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
+  }
+
+  static bindSchema(input: any): [number, number] | undefined {
+    if (Array.isArray(input) && input.length === 2) {
+      return input.map(x => Util.coerceType(x, Number, false)) as [number, number];
+    }
+  }
+};
+```
+
+What you can see here is that the `Point` type is now backed by a class that supports:
+* `validateSchema` - Will run during validation for this specific type.
+* `bindSchema` - Will run during binding to ensure correct behavior.
+
+**Code: Simple Custom Type Usage**
+```typescript
+import { Point } from '@travetto/model';
+
+@Schema()
+class LocationAware {
+  name: string;
+  point: Point;
+}
+```
+
+All that happens now, is the type is exported, and the class above is able to properly handle point as an `[x,y]` tuple.  All standard binding and validation patterns are supported, and type enforcement will work as expected. 

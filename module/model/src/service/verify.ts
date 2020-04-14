@@ -36,7 +36,8 @@ const SORT = 'sort';
 
 const MULTIPLE_KEYS_ALLOWED = new Set([
   '$maxDistance', '$gt',
-  '$minDistance', '$lt'
+  '$minDistance', '$lt',
+  '$near'
 ]);
 
 @Injectable()
@@ -123,8 +124,8 @@ export class QueryVerifierService {
       const keys = Object.keys(value).sort();
 
       if (keys.length !== 1 && !(
-        keys.length === 2 &&
-        MULTIPLE_KEYS_ALLOWED.has(keys[0]) &&
+        keys.length >= 2 &&
+        MULTIPLE_KEYS_ALLOWED.has(keys[0]) ||
         MULTIPLE_KEYS_ALLOWED.has(keys[1])
       )) {
         state.log(`One and only one operation may be specified in an operator clause`);

@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { resolve as pathResolve } from 'path';
 
-import { RegisterUtil, FsUtil, EnvUtil } from '@travetto/boot';
+import { RegisterUtil, FsUtil } from '@travetto/boot';
 import { Env, Util } from '@travetto/base';
 
 import { Documentation, Import } from './types/shared';
@@ -183,20 +183,12 @@ export class TransformUtil {
     }
   }
 
-  static getSymbol(type: ts.Type) {
-    return type.symbol;
+  static getSymbol(type: ts.Type | ts.Symbol) {
+    return 'valueDeclaration' in type ? type : (type.aliasSymbol ?? type.symbol);
   }
 
   static getSymbolName(type: ts.Type | ts.Symbol): string | undefined {
-    if (type && 'getSymbol' in type) {
-      let out = this.getSymbolName(type.symbol);
-      if (type.aliasSymbol) {
-        out = this.getSymbolName(type.aliasSymbol);
-      }
-      return out;
-    } else {
-      return type && type.getName() || undefined;
-    }
+    return this.getSymbol(type)?.getName() || undefined;
   }
 
   static getDeclarations(type: ts.Type | ts.Symbol | ts.Declaration[]): ts.Declaration[] {
@@ -204,10 +196,9 @@ export class TransformUtil {
     if (Array.isArray(type)) {
       decls = type;
     } else {
-      const symbol = 'symbol' in type ? this.getSymbol(type) : type;
-      decls = (symbol && symbol.getDeclarations && symbol.getDeclarations()) || [];
+      decls = this.getSymbol(type)?.getDeclarations?.() ?? [];
     }
-    return decls;
+    return decls.filter(x => !!x);
   }
 
   static getPrimaryDeclaration(decls: ts.Declaration[]): ts.Declaration {
@@ -344,5 +335,17 @@ export class TransformUtil {
       s = s.parent;
     }
     return s?.getText().startsWith('const '); // Cheap out on check, ts is being weird
+  }
+
+  static resolveConcreteType(type: ts.Type) {
+    const tags = TransformUtil.readJSDocTags(type, 'concrete');
+    if (tags.length) {
+      const parts = tags[0].split(':');
+      const fileName = this.getPrimaryDeclaration(this.getDeclarations(type))?.getSourceFile().fileName;
+      if (parts.length === 1) {
+        parts.unshift('.');
+      }
+      return { name: parts[1], source: FsUtil.resolveUnix(fileName, parts[0]) };
+    }
   }
 }
