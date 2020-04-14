@@ -17,7 +17,7 @@ export interface ShapeType extends Type {
 }
 
 export interface LiteralType extends Type {
-  realType: Function | undefined; // Pointer to real type (String/Date/Number) if applicable
+  ctor: Function | undefined; // Pointer to real type (String/Date/Number) if applicable
   value?: Primitive; // Applicable real value
   typeArguments?: Type[]; // Type arguments
 }
@@ -33,6 +33,6 @@ export interface TupleType extends Type {
 
 export const isExternalType = (type: Type): type is ExternalType => 'source' in type;
 export const isShapeType = (type: Type): type is ShapeType => 'fields' in type;
-export const isLiteralType = (type: Type): type is LiteralType => 'realType' in type;
+export const isLiteralType = (type: Type): type is LiteralType => 'ctor' in type;
 export const isUnionType = (type: Type): type is UnionType => 'unionTypes' in type;
 export const isTupleType = (type: Type): type is TupleType => 'tupleTypes' in type;

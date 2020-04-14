@@ -1,6 +1,5 @@
 import * as ts from 'typescript';
-
-import { SystemUtil } from '@travetto/base';
+import * as path from 'path';
 
 import * as res from './types/resolver';
 import { Import } from './types/shared';
@@ -9,25 +8,35 @@ import { TransformUtil } from './util';
 export class ImportManager {
   private newImports = new Map<string, Import>();
   private imports: Map<string, Import>;
+  private idx: Record<string, number> = {};
+  private ids = new Map<string, string>();
 
   constructor(public source: ts.SourceFile) {
     this.imports = TransformUtil.collectImports(source);
   }
 
-  importFile(path: string) {
-    if (!path.endsWith('.d.ts') && !this.newImports.has(path)) {
-      const id = `i_${SystemUtil.naiveHash(path)}`;
+  getId(file: string) {
+    if (!this.ids.has(file)) {
+      const key = path.basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
+      this.ids.set(file, `_${key}_${this.idx[key] = (this.idx[key] || 0) + 1}`);
+    }
+    return this.ids.get(file)!;
+  }
+
+  importFile(file: string) {
+    if (!file.endsWith('.d.ts') && !this.newImports.has(file)) {
+      const id = this.getId(file);
 
       if (this.imports.has(id)) { // Already imported, be cool
         return this.imports.get(id)!;
       }
 
       const ident = ts.createIdentifier(id);
-      const imprt = { path, ident };
+      const imprt = { path: file, ident };
       this.imports.set(ident.escapedText.toString(), imprt);
-      this.newImports.set(path, imprt);
+      this.newImports.set(file, imprt);
     }
-    return this.newImports.get(path)!;
+    return this.newImports.get(file)!;
   }
 
   importFromResolved(type: res.Type) {

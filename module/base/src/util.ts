@@ -79,16 +79,12 @@ export class Util {
   static coerceType<T>(input: any, type: { new(...args: any[]): T }, strict?: boolean): T;
   static coerceType(input: any, type: any, strict = true) {
     // Do nothing
-    if (
-      input === null ||
-      input === undefined ||
-      (type && input instanceof type)
-    ) {
+    if (input === null || input === undefined) {
       return input;
-    } else if (
-      !strict && type !== String && input === ''
-    ) {
+    } else if (!strict && type !== String && input === '') {
       return undefined; // treat empty string as undefined for non-strings in non-strict mode
+    } else if (type && input instanceof type) {
+      return input;
     }
 
     switch (type) {
@@ -101,7 +97,7 @@ export class Util {
         return res;
       }
       case Number: {
-        const res = `${input}`.indexOf('.') >= 0 ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
+        const res = `${input}`.includes('.') ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
         if (strict && Number.isNaN(res)) {
           throw new Error(`Invalid numeric value: ${input}`);
         }

@@ -43,8 +43,14 @@ export class FileCache {
 
   removeExpiredEntry(full: string, force = false) {
     if (this.hasEntry(full)) {
-      if (force || isOlder(this.statEntry(full), fs.statSync(full))) {
-        fs.unlinkSync(this.toEntryName(full));
+      try {
+        if (force || isOlder(this.statEntry(full), fs.statSync(full))) {
+          fs.unlinkSync(this.toEntryName(full));
+        }
+      } catch (e) {
+        if (!e.message.includes('ENOENT')) {
+          throw e;
+        }
       }
       this.removeEntry(full);
     }
