@@ -23,11 +23,11 @@ export class ApplicationTransformer {
       subtype = 'choice';
       meta = { choices };
     } else if (res.isLiteralType(type)) {
-      if (type.realType === String && /file$/i.test(name)) {
+      if (type.ctor === String && /file$/i.test(name)) {
         subtype = 'file';
       }
     } else {
-      type = { realType: String, name: 'string' } as res.LiteralType;
+      type = { ctor: String, name: 'string' } as res.LiteralType;
     }
 
     return { name, type: type.name!, subtype, meta, optional: def || type.undefinable, def };

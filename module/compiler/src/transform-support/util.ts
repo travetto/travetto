@@ -57,6 +57,8 @@ export class TransformUtil {
       val = ts.createNull();
     } else if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
       val = ts.createLiteral(val);
+    } else if (val === String || val === Number || val === Boolean || val === Date || val === RegExp) {
+      val = ts.createIdentifier(val.name);
     } else {
       const pairs: ts.PropertyAssignment[] = [];
       for (const k of Object.keys(val)) {
@@ -181,8 +183,39 @@ export class TransformUtil {
     }
   }
 
+  static getSymbol(type: ts.Type) {
+    return type.symbol;
+  }
+
+  static getSymbolName(type: ts.Type | ts.Symbol): string | undefined {
+    if (type && 'getSymbol' in type) {
+      let out = this.getSymbolName(type.symbol);
+      if (type.aliasSymbol) {
+        out = this.getSymbolName(type.aliasSymbol);
+      }
+      return out;
+    } else {
+      return type && type.getName() || undefined;
+    }
+  }
+
+  static getDeclarations(type: ts.Type | ts.Symbol | ts.Declaration[]): ts.Declaration[] {
+    let decls: ts.Declaration[] = [];
+    if (Array.isArray(type)) {
+      decls = type;
+    } else {
+      const symbol = 'symbol' in type ? this.getSymbol(type) : type;
+      decls = (symbol && symbol.getDeclarations && symbol.getDeclarations()) || [];
+    }
+    return decls;
+  }
+
+  static getPrimaryDeclaration(decls: ts.Declaration[]): ts.Declaration {
+    return decls?.[0];
+  }
+
   static readJSDocs(type: ts.Type | ts.Node) {
-    let node = 'getSourceFile' in type ? type : type.getSymbol()?.getDeclarations()?.[0];
+    let node = 'getSourceFile' in type ? type : this.getPrimaryDeclaration(this.getDeclarations(type));
 
     const out: Documentation = {
       description: undefined,
@@ -219,6 +252,13 @@ export class TransformUtil {
       }
     }
     return out;
+  }
+
+  static readJSDocTags(type: ts.Type, name: string) {
+    const tags = this.getSymbol(type)?.getJsDocTags() ?? [];
+    return tags
+      .filter(el => el.name === name)
+      .map(el => el.text!);
   }
 
   static collectImports(src: ts.SourceFile) {
@@ -292,5 +332,17 @@ export class TransformUtil {
     const out = (node.decorators ?? []).filter(x => x !== target);
     out.splice(idx, 0, ...replacements);
     return out;
+  }
+
+  /**
+   * Searches upward from the node until it finds the variable declaration list,
+   * and then checks the toString for `const `
+   */
+  static isConstantDeclaration(node: ts.Node) {
+    let s: ts.Node = node;
+    while (s && !ts.isVariableDeclarationList(s)) {
+      s = s.parent;
+    }
+    return s?.getText().startsWith('const '); // Cheap out on check, ts is being weird
   }
 }

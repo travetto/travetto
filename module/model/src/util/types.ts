@@ -35,18 +35,17 @@ export class TypeUtil {
 
   static getDeclaredType(f: FieldConfig | Class): SimpleType | undefined {
     const type = 'type' in f ? f.type : f;
-    if (type === String) {
-      return 'string';
-    } else if (type === Number) {
-      return 'number';
-    } else if (type === Boolean) {
-      return 'boolean';
-    } else if (type === Date) {
-      return 'Date';
-    } else if ('type' in f && f.array) {
-      return this.getDeclaredType(f.type);
-    } else if (type === Point) {
-      return 'Point';
+    switch (type) {
+      case String: return 'string';
+      case Number: return 'number';
+      case Boolean: return 'boolean';
+      case Date: return 'Date';
+      case Point: return 'Point';
+      default: {
+        if ('type' in f && f.array) {
+          return this.getDeclaredType(f.type);
+        }
+      }
     }
   }
 

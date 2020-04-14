@@ -34,6 +34,11 @@ const WHERE = 'where';
 const SORT = 'sort';
 // const GROUP_BY = 'groupBy';
 
+const MULTIPLE_KEYS_ALLOWED = new Set([
+  '$maxDistance', '$gt',
+  '$minDistance', '$lt'
+]);
+
 @Injectable()
 export class QueryVerifierService {
 
@@ -117,7 +122,11 @@ export class QueryVerifierService {
     } else {
       const keys = Object.keys(value).sort();
 
-      if (keys.length !== 1 && keys[0] !== '$maxDistance' && keys[0] !== '$gt') {
+      if (keys.length !== 1 && !(
+        keys.length === 2 &&
+        MULTIPLE_KEYS_ALLOWED.has(keys[0]) &&
+        MULTIPLE_KEYS_ALLOWED.has(keys[1])
+      )) {
         state.log(`One and only one operation may be specified in an operator clause`);
         return;
       }

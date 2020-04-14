@@ -1,6 +1,8 @@
-export type Point = [number, number] | { lat: number, lon: number };
+/**
+ * @pointer this:Point
+ */
+export type Point = [number, number];
 export const Point = class Point { };
-
 export type Primitive = number | boolean | string | Date | Point;
 export type PrimitiveArray = Primitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';

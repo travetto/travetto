@@ -68,18 +68,10 @@ export class AssertTransformer {
 
     // If looking at an identifier, see if it's in a diff file or if its const
     if (!found && ts.isIdentifier(node)) {
-      const decls = state.getDeclarations(node);
-      found = !!decls.find(x => {
-        if (x.getSourceFile().fileName !== state.source.fileName) {
-          return true; // In a separate file
-        }
-        let s: ts.Node = x;
-        while (s && !ts.isVariableDeclarationList(s)) {
-          s = s.parent;
-        }
-        return s?.getText().startsWith('const '); // Cheap out on check, ts is being weird
-      }
-      );
+      found = !!state.getDeclarations(node).find(x =>
+        // In a separate file or is const
+        x.getSourceFile().fileName !== state.source.fileName ||
+        TransformUtil.isConstantDeclaration(x));
     }
 
     return found;
@@ -171,7 +163,7 @@ export class AssertTransformer {
       const matched = METHODS[key.text!];
       if (matched) {
         const resolved = state.resolveType(root);
-        if (res.isLiteralType(resolved) && resolved.realType === matched[0]) { // Ensure method is against real type
+        if (res.isLiteralType(resolved) && resolved.ctor === matched[0]) { // Ensure method is against real type
           return {
             fn: matched[1],
             args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)]

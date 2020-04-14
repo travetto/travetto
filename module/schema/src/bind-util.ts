@@ -53,16 +53,15 @@ export class BindUtil {
   }
 
   static coerceType<T>(conf: FieldConfig, val: any): T | null | undefined {
-    if (conf.type === Number && (val || val === 0)) {
-      if (conf.precision && conf.precision[1]) {
-        val = +parseFloat(`${val}`).toFixed(conf.precision[1]);
-      } else {
-        val = parseInt(`${val}`, 10);
-      }
-    } else {
-      val = Util.coerceType(val, conf.type, false);
-    }
+    val = Util.coerceType(val, conf.type, false);
 
+    if (conf.type === Number && conf.precision && typeof val === 'number') {
+      if (conf.precision[1]) { // Supports decimal
+        val = +val.toFixed(conf.precision[1]);
+      } else { // 0 digits
+        val = Math.trunc(val);
+      }
+    }
     return val as T;
   }
 

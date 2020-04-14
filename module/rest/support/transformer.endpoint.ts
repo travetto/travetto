@@ -41,7 +41,7 @@ export class RestTransformer {
     let rType: res.Type = state.resolveType(node);
     let array = false;
     if (res.isLiteralType(rType)) {
-      array = rType.realType === Array;
+      array = rType.ctor === Array;
       if (array) {
         rType = rType.typeArguments?.[0]!;
       }
@@ -50,7 +50,7 @@ export class RestTransformer {
     let type: ts.Expression;
     let defaultType = 'Query';
 
-    console.log(rType, node.getText());
+    console.debug(rType, node.getText());
 
     if (rType.name === 'Request' || rType.name === 'Response') { // Convert to custom types, special handling for interfaces
       type = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, rType.name.toUpperCase());
@@ -103,7 +103,7 @@ export class RestTransformer {
     // Process returnType
     let retType = state.resolveReturnType(node);
 
-    if (res.isLiteralType(retType) && retType.realType === Promise) {
+    if (res.isLiteralType(retType) && retType.ctor === Promise) {
       retType = retType.typeArguments?.[0]!; // We have a promise nested
     }
 
@@ -115,7 +115,7 @@ export class RestTransformer {
         array: false,
         type: retType
       };
-      if (res.isLiteralType(retType) && retType.realType === Array) {
+      if (res.isLiteralType(retType) && retType.ctor === Array) {
         type.array = true;
         type.type = retType.typeArguments?.[0]!;
       }
