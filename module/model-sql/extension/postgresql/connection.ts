@@ -1,7 +1,7 @@
 import * as pg from 'pg';
 
 import { AsyncContext } from '@travetto/context';
-import { SQLModelConfig, ConnectionSupport, WithConnection, WithTransaction } from '../..';
+import { SQLModelConfig, ConnectionSupport, withConnection, withTransaction } from '../..';
 
 /**
  * Connection support
@@ -27,8 +27,8 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
 
     try {
       await this.context.run(() =>
-        WithConnection({ conn: this }, () =>
-          WithTransaction({ conn: this }, 'required', () =>
+        withConnection({ conn: this }, () =>
+          withTransaction({ conn: this }, 'required', () =>
             this.active.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;'))));
     } catch (err) {
       // swallow
