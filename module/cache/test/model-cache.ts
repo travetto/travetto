@@ -1,9 +1,9 @@
-import { Suite, BeforeAll, BeforeEach, AfterEach, Test } from '@travetto/test';
+import { Suite, BeforeAll, BeforeEach, AfterEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { ModelRegistry, ModelService, ModelSource } from '@travetto/model';
 
 import { CacheTestSuite } from './cache';
-import { ModelCacheStore, CacheModel } from '../extension/model.store';
+import { ModelCacheStore } from '../extension/model.store';
 
 import { SchemaRegistry } from '@travetto/schema';
 import { MongoModelConfig } from '@travetto/model-mongo';

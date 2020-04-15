@@ -1,7 +1,7 @@
 import { Env } from '@travetto/base';
 
 import { ParentCommChannel, CommUtil, WorkUtil } from '@travetto/worker';
-import { Events } from './types';
+import { Events, RunEvent } from './types';
 import { Consumer } from '../model/consumer';
 
 export function buildWorkManager(consumer: Consumer) {
@@ -15,9 +15,9 @@ export function buildWorkManager(consumer: Consumer) {
       await channel.listenOnce(Events.INIT_COMPLETE);
       channel.listen(consumer.onEvent as any); // Connect the consumer with the event stream from the child
     },
-    async execute(channel: ParentCommChannel, file: string) {
+    async execute(channel: ParentCommChannel, event: string | RunEvent) {
       const complete = channel.listenOnce(Events.RUN_COMPLETE);
-      channel.send(Events.RUN, { file });
+      channel.send(Events.RUN, typeof event === 'string' ? { file: event } : event);
 
       const { error } = await complete;
 

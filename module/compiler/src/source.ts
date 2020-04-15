@@ -51,7 +51,7 @@ export class SourceManager {
   private getHost(): ts.CompilerHost {
     const host: ts.CompilerHost = {
       readFile: this.readFile,
-      realpath: TRV_FRAMEWORK_DEV ? RegisterUtil.resolveForFramework : undefined,
+      realpath: RegisterUtil.resolveForFramework, // @TRV_DEV
       writeFile: this.writeFile,
       fileExists: this.fileExists,
       getDefaultLibFileName: ts.getDefaultLibFileName,

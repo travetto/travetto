@@ -43,3 +43,12 @@ export async function runTestsDirect() {
     }
   );
 }
+
+export async function watchTests() {
+  prepareEnv({ WATCH: 1 });
+  const { PhaseManager } = await import('@travetto/base');
+  await PhaseManager.init('bootstrap', 'compiler').run();
+
+  const { TestWatcher } = await import('../src/runner/watcher');
+  await TestWatcher.watch();
+}

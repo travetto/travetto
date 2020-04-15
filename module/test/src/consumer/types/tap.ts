@@ -66,12 +66,10 @@ export class TapEmitter implements Consumer {
       }
 
       let status = `${this.enhancer.testNumber(++this.count)} `;
-      if (test.status === 'skip') {
-        status += ' # SKIP';
-      } else if (test.status === 'fail') {
-        status = `${this.enhancer.failure('not ok')} ${status}`;
-      } else {
-        status = `${this.enhancer.success('ok')} ${status}`;
+      switch (test.status) {
+        case 'skip': status += ' # SKIP'; break;
+        case 'fail': status = `${this.enhancer.failure('not ok')} ${status}`; break;
+        default: status = `${this.enhancer.success('ok')} ${status}`;
       }
       status += header;
 

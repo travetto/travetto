@@ -1,7 +1,7 @@
 
 import * as commander from 'commander';
 import * as fs from 'fs';
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, RegisterUtil } from '@travetto/boot';
 
 import { Util, CompletionConfig } from './util';
 
@@ -42,9 +42,7 @@ export class Execute {
 
   static requireModule(f: string) {
     let p = FsUtil.toUnix(fs.realpathSync(f));
-    if (TRV_FRAMEWORK_DEV && /travetto[^/]*\/module\//.test(p)) { // If a module file
-      p = `${FsUtil.cwd}/node_modules/@travetto/${p.split(/\/module\//)[1]}`; // Convert to proper path
-    }
+    p = RegisterUtil.resolveForFramework(p); // @TRV_DEV
     const res = require(p);
     return res;
   }

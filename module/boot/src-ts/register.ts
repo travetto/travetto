@@ -1,5 +1,3 @@
-/// <reference path="./types.d.ts" />
-
 // @ts-ignore
 import * as Mod from 'module';
 import * as fs from 'fs';
@@ -31,14 +29,6 @@ declare const global: {
 };
 
 const IS_WATCH = !EnvUtil.isFalse('watch');
-
-// Define
-Object.defineProperty(global, 'TRV_FRAMEWORK_DEV', {
-  value: EnvUtil.isSet('trv_framework_dev'),
-  writable: false,
-  configurable: true,
-  enumerable: false
-});
 
 export class RegisterUtil {
   private static preparers: Preparer[] = [];
@@ -182,12 +172,16 @@ export class RegisterUtil {
     AppCache.init();
 
     // Supports bootstrapping with framework resolution
-    this.libRequire = !TRV_FRAMEWORK_DEV ? require :
-      x => require(this.resolveForFramework(`/${x}`));
-    Module._load = !TRV_FRAMEWORK_DEV ? this.onModuleLoad.bind(this) :
-      (req, p) => this.onModuleLoad(this.resolveForFramework(req, p), p);
-    require.extensions['.ts'] = !TRV_FRAMEWORK_DEV ? this.compile.bind(this) :
-      (m, tsf) => this.compile(m, this.resolveForFramework(tsf));
+    if (!EnvUtil.isSet('trv_dev')) {
+      this.addPreparer(x => x.replace(/^.*\/\/\s*@TRV_DEV.*/g, '')); // Remove dev specific lines
+      this.libRequire = require;
+      Module._load = this.onModuleLoad.bind(this);
+      require.extensions['.ts'] = this.compile.bind(this);
+    } else {
+      this.libRequire = x => require(this.resolveForFramework(`/${x}`));
+      Module._load = (req, p) => this.onModuleLoad(this.resolveForFramework(req, p), p);
+      require.extensions['.ts'] = (m, tsf) => this.compile(m, this.resolveForFramework(tsf));
+    }
 
     global.trvInit = this;
   }

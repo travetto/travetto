@@ -7,6 +7,7 @@ export interface SuiteConfig {
   className: string;
   file: string;
   lines: { start: number, end: number };
+  skip: boolean;
 
   instance: any;
   description: string;

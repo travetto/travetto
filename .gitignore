@@ -1,5 +1,5 @@
 .vscode/
-**/.trv_cache
+**/.trv_*
 **/.DS_STORE
 lerna-debug.log
 bin/test/model/**

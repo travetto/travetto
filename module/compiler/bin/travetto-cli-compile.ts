@@ -38,7 +38,7 @@ export function init() {
     .action(async (cmd: commander.Command) => {
 
       if (cmd.output) {
-        process.env.TRV_CACHE_DIR = cmd.output;
+        process.env.TRV_CACHE = cmd.output;
       }
 
       if (cmd.clean) {

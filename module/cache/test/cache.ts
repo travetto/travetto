@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 
-import { Suite as TestSuite, Test } from '@travetto/test';
+import { Class } from '@travetto/registry';
+import { Suite, Test, BeforeEach, AfterEach } from '@travetto/test';
 
 import { Cache, EvictCache } from '../src/decorator';
-import { CacheSuite as Suite } from './decorator';
 import { CacheStore, CullableCacheStore } from '../src/store/types';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
@@ -64,6 +64,7 @@ class CachingService {
   }
 }
 
+@Suite({ skip: true })
 export abstract class CacheTestSuite {
 
   service = new CachingService();
@@ -186,8 +187,27 @@ export abstract class CacheTestSuite {
   }
 }
 
-@Suite()
-@TestSuite()
+@Suite({ skip: true })
 export abstract class FullCacheSuite extends CacheTestSuite {
 
+  abstract get store(): Class<CacheStore>;
+
+  @BeforeEach()
+  async postCons() {
+    const store = new this.store();
+    this.service.store = store;
+    if (store instanceof CullableCacheStore) {
+      store.cullRate = 1000;
+    }
+    if (store.postConstruct) {
+      await store.postConstruct();
+    }
+  }
+
+  @AfterEach()
+  async cleanup() {
+    if (this.service.store.clear) {
+      await this.service.store.clear();
+    }
+  }
 }

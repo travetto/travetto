@@ -2,8 +2,8 @@
 
 The common environment variables throughout the code base:
 
-* `TRV_FRAMEWORK_DEV` = 0|1 - If we are in development mode, 
-* `TRV_CACHE_DIR` = cwd     - The output directory for compilation, defaults to `.trv_cache` of the cwd
+* `TRV_DEV` = 0|1 - If we are in development mode, 
+* `TRV_CACHE` = cwd     - The output directory for compilation, defaults to `.trv_cache` of the cwd
 
 * `APP_ROOTS` = ['.']       - The root of the application search space
 * `RESOURCE_ROOTS` = ['.']  - The root of resource searching
