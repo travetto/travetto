@@ -56,22 +56,25 @@ export class FilePresenceManager {
     }
 
     console.trace('Watch', event, entry.file);
-
-    if (event === 'added') {
-      this.files.set(entry.file, { version: 1 });
-      this.listener.added(entry.file);
-    } else if (event === 'changed') {
-      const changed = this.files.has(entry.file);
-      if (changed) {
-        this.listener.changed(entry.file);
-        this.files.get(entry.file)!.version++;
-      } else {
+    switch (event) {
+      case 'added': {
         this.files.set(entry.file, { version: 1 });
-        this.listener.added(entry.file);
+        return this.listener.added(entry.file);
       }
-    } else if (event === 'removed') {
-      this.files.delete(entry.file);
-      this.listener.removed(entry.file);
+      case 'changed': {
+        const changed = this.files.has(entry.file);
+        if (changed) {
+          this.listener.changed(entry.file);
+          return this.files.get(entry.file)!.version++;
+        } else {
+          this.files.set(entry.file, { version: 1 });
+          return this.listener.added(entry.file);
+        }
+      }
+      case 'removed': {
+        this.files.delete(entry.file);
+        return this.listener.removed(entry.file);
+      }
     }
   }
 

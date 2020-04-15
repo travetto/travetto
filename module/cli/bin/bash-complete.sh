@@ -7,7 +7,7 @@ _travetto()
       if (cat ${PWD}/package.json | grep '"name": "@travetto"'); then
         ON=1
       fi
-      local WORDS=`TRV_FRAMEWORK_DEV=$ON NODE_PRESERVE_SYMLINKS=$ON ${TRV_COMP} complete ${COMP_WORDS[@]:1}`
+      local WORDS=`TRV_DEV=$ON NODE_PRESERVE_SYMLINKS=$ON ${TRV_COMP} complete ${COMP_WORDS[@]:1}`
       if [[ -z "$WORDS" ]]; then
         COMPREPLY=( )
       else

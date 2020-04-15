@@ -7,6 +7,6 @@ for x in module/test/src/model/*.ts; do
 done
 
 export DEBUG=0
-export TRV_FRAMEWORK_DEV=1
+export TRV_DEV=1
 export NODE_PRESERVE_SYMLINKS=1
 node -r './module/boot/bin/init' -e 'require("./bin/test").run()';

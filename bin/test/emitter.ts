@@ -48,14 +48,18 @@ export class TapEmitter {
       }
 
       let status = `ok ${++this.count} `;
-      if (test.status === 'skip') {
-        status += ' # SKIP';
-        this.skipped++;
-      } else if (test.status === 'fail') {
-        status = `not ${status}`;
-        this.fail++;
-      } else {
-        this.ok++;
+      switch (test.status) {
+        case 'skip': {
+          status += ' # SKIP';
+          this.skipped++;
+          break;
+        }
+        case 'fail': {
+          status = `not ${status}`;
+          this.fail++;
+          break;
+        }
+        default: this.ok++;
       }
       status += header;
 

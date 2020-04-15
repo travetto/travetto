@@ -11,13 +11,7 @@ export class StandardWorker {
 
       await PhaseManager.init('bootstrap', '*', 'registry').run(); // Registry and up
 
-      const res = await new Runner({
-        format: opts.format,
-        consumer: opts.consumer,
-        mode: opts.mode,
-        concurrency: opts.concurrency,
-        args: opts.args
-      }).run();
+      const res = await new Runner(opts).run();
       return res ? 0 : 1;
     } catch (e) {
       console.error(e?.stack ?? e);
