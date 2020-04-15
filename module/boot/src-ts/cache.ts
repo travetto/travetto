@@ -14,7 +14,7 @@ export class FileCache {
 
   constructor(cwd: string, cacheDir?: string) {
     this.cwd = FsUtil.toUnix(cwd || FsUtil.cwd);
-    this.cacheDir = FsUtil.toUnix(cacheDir ?? EnvUtil.get('trv_cache_dir') ?? `${this.cwd}/.trv_cache`);
+    this.cacheDir = FsUtil.toUnix(cacheDir ?? EnvUtil.get('trv_cache') ?? `${this.cwd}/.trv_cache`);
   }
 
   init() {

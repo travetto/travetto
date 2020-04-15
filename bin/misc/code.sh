@@ -22,6 +22,6 @@ elif [ ! -d "$SOURCE" ]; then
   exit 1
 fi
 
-export TRV_FRAMEWORK_DEV=1
+export TRV_DEV=1
 export NODE_PRESERVE_SYMLINKS=1
 code $SOURCE

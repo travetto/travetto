@@ -22,6 +22,11 @@ export class ScanApp {
     test: x => x.endsWith('.ts') && !x.endsWith('.d.ts')
   };
 
+  private static resolveFramework(x: SimpleEntry, root: string) {
+    const file = RegisterUtil.resolveForFramework(x.file);
+    return { ...x, file, module: file.replace(`${root}/`, '') };
+  }
+
   /**
    * Clears the app scanning cache
    */
@@ -52,13 +57,7 @@ export class ScanApp {
         .filter(ScanFs.isNotDir);
 
       // Align with framework dev
-      if (TRV_FRAMEWORK_DEV) {
-        toCache = toCache.map(x => {
-          x.file = RegisterUtil.resolveForFramework(x.file);
-          x.module = FsUtil.toUnix(x.file).replace(`${root}/`, '');
-          return x;
-        });
-      }
+      toCache = toCache.map(x => this.resolveFramework(x, root)); // @TRV_DEV
 
       // De-deduplicate
       toCache = toCache

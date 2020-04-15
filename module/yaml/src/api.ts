@@ -7,7 +7,7 @@ export class YamlUtil {
   static serialize = Serializer.serialize.bind(Serializer);
 }
 
-if (EnvUtil.isTrue('js_yaml') && !TRV_FRAMEWORK_DEV) {
+if (EnvUtil.isTrue('js_yaml') && !EnvUtil.isTrue('no_js_yaml')) {
   try {
     const yaml = require('js-yaml');
     YamlUtil.parse = (t: string) => Object.assign({}, ...yaml.safeLoadAll(t));

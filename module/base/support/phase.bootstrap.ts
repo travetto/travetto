@@ -10,9 +10,7 @@ export const init = {
     } else {
       Stacktrace.initHandler();
     }
-    if (TRV_FRAMEWORK_DEV) {
-      Stacktrace.clearStackFilters();
-    }
+    Stacktrace.clearStackFilters(); // @TRV_DEV
     Shutdown.register();
   }
 };

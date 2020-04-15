@@ -205,7 +205,7 @@ export class TestExecutor {
 
     if ('suites' in params) {
       for (const suite of params.suites) {
-        if (suite.tests.length) {
+        if (!suite.skip && suite.tests.length) {
           await this.executeSuite(consumer, suite);
         }
       }

@@ -1,121 +1,96 @@
+import * as os from 'os';
+import * as fs from 'fs';
+
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
+import { WorkPool, QueueInputSource } from '@travetto/worker';
+import { FsUtil } from '@travetto/boot';
 
 import { TestRegistry } from '../registry/registry';
+import { EventStreamer } from '../consumer/types/event';
+import { buildWorkManager } from '../worker/parent';
+import { RunEvent } from '../worker/types';
 import { TestConfig } from '../model/test';
 import { SuiteConfig } from '../model/suite';
-import { Consumer } from '../model/consumer';
 
-/* eslint-disable */
+export class TestWatcher {
 
-function getConf(o?: [Class, Function]) {
-  if (o) {
-    const [cls, method] = o;
-    if (TestRegistry.has(cls)) {
-      const conf = TestRegistry.get(cls).tests.find(x => x.methodName === method.name);
-      return conf;
-    }
-  }
-}
-
-function send(e: string, data: { file: string } & Record<string, any>) {
-  if (process.send) {
-    process.send({ type: e, ...data });
-  } else {
-    // console.debug('SENDING', JSON.stringify({ type: e, ...data }));
-  }
-}
-
-export async function watch() {
-  console.debug('Listening for changes');
-  TestRegistry.listen(RootRegistry);
-
-  const queue: (SuiteConfig | TestConfig)[] = [];
-
-  const consumer = {
-    onEvent(e) {
-      if (e.type === 'assertion') {
-        send('assertion', e.assertion);
+  static getConf(o?: Class): SuiteConfig | undefined;
+  static getConf(o?: [Class, Function]): TestConfig | undefined;
+  static getConf(o?: [Class, Function] | Class) {
+    if (o) {
+      if (Array.isArray(o)) {
+        const [cls, method] = o;
+        if (TestRegistry.has(cls)) {
+          const conf = TestRegistry.get(cls).tests.find(x => x.methodName === method.name);
+          return conf;
+        }
+      } else {
+        return TestRegistry.get(o);
       }
     }
-  } as Consumer;
+  }
 
-  TestRegistry.on(e => {
-    if (e.type === 'added') {
-      send('suite-added', {
-        file: e.curr!.__file,
-        class: e.curr!.__id
-      });
-      queue.push(TestRegistry.get(e.curr!));
+  static async watch() {
+    console.debug('Listening for changes');
+    TestRegistry.listen(RootRegistry);
 
-    } else if (e.type === 'removing') {
-      send('suite-removed', {
-        file: e.prev!.__file,
-        class: e.prev!.__id
-      });
-    }
-  });
+    const queue: Omit<RunEvent, 'type'>[] = [];
+    const enqueue = (e: any) => {
+      console.debug('Queueing', e);
+      queue.push(e);
+    };
 
-  await TestRegistry.init();
+    await TestRegistry.init();
 
-  setTimeout(() => {
+    const output = fs.createWriteStream(FsUtil.joinUnix(FsUtil.cwd, '.trv_test_log'), { autoClose: true, flags: 'w' });
+    const consumer = new EventStreamer(output);
+
+    const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
+      idleTimeoutMillis: 10000,
+      min: 0,
+      max: os.cpus.length - 1
+    });
+
     const methods = new MethodSource(TestRegistry);
 
-    methods.on(e => {
-      const conf = getConf(e.prev ?? e.curr);
-
+    RootRegistry.on(e => {
+      const conf = this.getConf(e.prev ?? e.curr);
       if (!conf) { return; }
 
-      if (e.type === 'added' || e.type === 'changed') {
-        send('test-changed', {
-          method: conf.methodName,
-          file: conf.file,
-          class: conf.class.__id
-        });
-        queue.push(conf);
-      } else if (e.type === 'removing') {
-        send('test-removed', {
-          method: conf.methodName,
-          file: conf.file,
-          class: conf.class.__id
-        });
+      switch (e.type) {
+        case 'added': case 'changed': {
+          enqueue({
+            file: conf.file,
+            class: conf.class.__id
+          });
+          break;
+        }
       }
     });
-  }, 1);
 
-  // // const all = client().process(
-  // //   new QueueExecutionSource(queue),
-  // //   async (conf, exe: ChildExecution<any>) => { // TODO: Type incompatibility with ExecutionEvent and TestEvent
-  // //     exe.listen(consumer.onEvent.bind(consumer));
-  // //     let event: any;
-  // //     if (isSuite(conf)) {
-  // //       event = {
-  // //         type: Events.RUN,
-  // //         file: conf.class.__file,
-  // //         class: conf.class.name
-  // //       };
-  // //     } else {
-  // //       event = {
-  // //         type: Events.RUN,
-  // //         file: conf.file,
-  // //         class: conf.class.name,
-  // //         method: conf.methodName
-  // //       };
-  // //     }
-  // //     const complete = exe.listenOnce(Events.RUN_COMPLETE);
-  // //     exe.send(event.type, event);
+    methods.on(e => {
+      const conf = this.getConf(e.prev ?? e.curr);
+      if (!conf) { return; }
 
-  // //     console.debug('Running test', event);
-  // //     await complete;
-  // //   }
-  // // );
+      switch (e.type) {
+        case 'added': case 'changed': {
+          enqueue({
+            method: conf.methodName,
+            file: conf.file,
+            class: conf.class.__id
+          });
+          break;
+        }
+        case 'removing': {
+          /**
+           *
+           */
+        }
+      }
+    });
 
-  // // ScanFs.bulkRequire('test/**/*.ts');
-
-  // console.debug('Waiting');
-
-  // await all;
-}
-
-function isSuite(c: any): c is SuiteConfig {
-  return 'tests' in c;
+    await pool
+      .process(new QueueInputSource(queue))
+      .finally(() => pool.shutdown());
+  }
 }

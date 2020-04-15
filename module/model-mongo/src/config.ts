@@ -52,7 +52,7 @@ export class MongoModelConfig {
       .map(h => h.includes(':') ? h : `${h}:${this.port}`)
       .join(',');
     const opts = Object.entries(this.connectionOptions).map(([k, v]) => `${k}=${v}`).join('&');
-    console.log(hosts);
+    console.debug(hosts);
     return `mongodb://${hosts}/${this.namespace}?${opts}`;
   }
 }

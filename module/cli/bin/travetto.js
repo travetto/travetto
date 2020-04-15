@@ -4,7 +4,7 @@ const { FsUtil } = require('@travetto/boot/src/fs-util');
 const { EnvUtil } = require('@travetto/boot/src/env');
 
 if (
-  !EnvUtil.isSet('trv_framework_dev') && // If not defined
+  !EnvUtil.isSet('trv_dev') && // If not defined
   /travetto.*\/module\//.test(FsUtil.cwd) // And in local module
 ) { // If in framework development mode
   const child_process = require('child_process');
@@ -17,7 +17,7 @@ if (
       ...process.env,
       NO_JS_YAML: '1',
       NODE_PRESERVE_SYMLINKS: '1',
-      TRV_FRAMEWORK_DEV: process.platform,
+      TRV_DEV: '1',
     }
   });
   process.exit(res.status);
