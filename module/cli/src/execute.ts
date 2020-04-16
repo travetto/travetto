@@ -41,10 +41,9 @@ export class Execute {
   }
 
   static requireModule(f: string) {
-    let p = FsUtil.toUnix(fs.realpathSync(f));
-    p = RegisterUtil.resolveForFramework(p); // @TRV_DEV
-    const res = require(p);
-    return res;
+    f = FsUtil.toUnix(fs.realpathSync(f));
+    f = RegisterUtil.devResolve(f); // @TRV_DEV
+    return require(f);
   }
 
   static loadAllPlugins() {

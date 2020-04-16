@@ -50,5 +50,5 @@ export async function watchTests() {
   await PhaseManager.init('bootstrap', 'compiler').run();
 
   const { TestWatcher } = await import('../src/runner/watcher');
-  await TestWatcher.watch();
+  await TestWatcher.watch(EnvUtil.get('test_format', 'event'));
 }

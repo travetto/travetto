@@ -13,7 +13,7 @@ export function buildWorkManager(consumer: Consumer) {
       await channel.listenOnce(Events.READY);
       await channel.send(Events.INIT);
       await channel.listenOnce(Events.INIT_COMPLETE);
-      channel.listen(consumer.onEvent as any); // Connect the consumer with the event stream from the child
+      channel.listen(consumer.onEvent.bind(consumer) as any); // Connect the consumer with the event stream from the child
     },
     async execute(channel: ParentCommChannel, event: string | RunEvent) {
       const complete = channel.listenOnce(Events.RUN_COMPLETE);

@@ -117,9 +117,11 @@ export class RegisterUtil {
    * Only called in Framework dev mode
    * @param pth
    */
-  static resolveForFramework(pth: string, mod?: Module) {
+  static devResolve(pth: string, mod?: Module) {
     if (mod) {
-      pth = Module._resolveFilename!(pth, mod);
+      try {
+        pth = Module._resolveFilename!(pth, mod);
+      } catch{ }
     }
 
     // If relative or framework
@@ -178,9 +180,9 @@ export class RegisterUtil {
       Module._load = this.onModuleLoad.bind(this);
       require.extensions['.ts'] = this.compile.bind(this);
     } else {
-      this.libRequire = x => require(this.resolveForFramework(`/${x}`));
-      Module._load = (req, p) => this.onModuleLoad(this.resolveForFramework(req, p), p);
-      require.extensions['.ts'] = (m, tsf) => this.compile(m, this.resolveForFramework(tsf));
+      this.libRequire = x => require(this.devResolve(`/${x}`));
+      Module._load = (req, p) => this.onModuleLoad(this.devResolve(req, p), p);
+      require.extensions['.ts'] = (m, tsf) => this.compile(m, this.devResolve(tsf));
     }
 
     global.trvInit = this;
@@ -191,6 +193,7 @@ export class RegisterUtil {
       return;
     }
 
+    this.preparers = [];
     delete require.extensions['.ts'];
     delete global.trvInit;
     Module._load = this.ogModuleLoad;

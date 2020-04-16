@@ -12,9 +12,9 @@ This module provides the necessary primitives for handling dependent workers.  A
 With respect to managing multiple executions, [`WorkPool`](./src/pool.ts) is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various [`InputSource`](./src/input/types.ts) implementation that allow for a wide range of use cases.
 
 The supported `InputSource`s are
-* ```Array``` is a list of jobs, will execute in order until list is exhausted. 
 - ```Queue``` is similar to list but will execute forever waiting for new items to be added to the queue.
-- ```Iterator``` is a generator function that will continue to produce jobs until the iterator is exhausted.
+- ```Iterable``` supports any iterable (Array, Set, etc) input as well as any async iterable input. The source will continue to produce jobs until the underlying iterator is exhausted.
+- ```Event``` is an asynchronous source that allows the caller to determine when the next item is available.  Useful triggering work on event driven problems.
 
 Below is a pool that will convert images on demand, while queuing as needed.
 
