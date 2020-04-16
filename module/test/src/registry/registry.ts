@@ -11,7 +11,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPending(cls: Class): Partial<SuiteConfig> {
     return {
       class: cls,
-      className: cls.__id.replace(/^@app./, '').replace(/^test[.]/, '').replace('#', '.'),
+      classId: cls.__id,
       file: cls.__file,
       tests: [],
       beforeAll: [],
@@ -56,10 +56,10 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     config.tests = tests as TestConfig[];
 
     if (!config.description) {
-      config.description = config.className;
+      config.description = config.classId;
     }
     for (const t of config.tests) {
-      t.className = config.className;
+      t.classId = config.classId;
     }
     return config;
   }

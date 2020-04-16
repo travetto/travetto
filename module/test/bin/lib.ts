@@ -1,10 +1,11 @@
-import { EnvUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/boot/src/env';
 import { State } from '../src/runner/runner';
 
 export function prepareEnv(extra = {}) {
   Object.assign(process.env, {
     QUIET_INIT: '1',
     DEBUG: process.env.DEBUG || '0',
+    TRACE: '0',
     PROD: '0',
     LOG_TIME: '0',
     WATCH: '0',
@@ -45,7 +46,7 @@ export async function runTestsDirect() {
 }
 
 export async function watchTests() {
-  prepareEnv({ WATCH: 1 });
+  prepareEnv({ WATCH: 1, DEBUG: 0 });
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.init('bootstrap', 'compiler').run();
 

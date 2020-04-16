@@ -38,7 +38,7 @@ export class MongoAssetSource extends AssetSource {
 
     let count = 0;
 
-    while (count++ < 5) {
+    while (count++ < 5) { // Retry upto 5 times
       try {
         await this.info(file.path);
         return;

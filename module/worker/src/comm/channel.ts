@@ -2,9 +2,7 @@ import { ChildProcess } from 'child_process';
 
 import { Env } from '@travetto/base';
 
-import { CommEvent } from './types';
-
-export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, U extends CommEvent = CommEvent> {
+export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any, U extends { type: string } = V & { type: string }> {
 
   public proc: T;
 
@@ -68,6 +66,10 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, U exten
   }
 
   listen(handler: (e: U, complete: Function) => any) {
+    if (!this.proc) {
+      return;
+    }
+
     let fn: (e: U) => void; // eslint-disable-line prefer-const
 
     const kill = (e?: any) => {

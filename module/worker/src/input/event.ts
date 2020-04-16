@@ -27,11 +27,12 @@ export class EventInputSource<X> implements InputSource<X> {
     return this.queue.shift()!;
   }
 
-  trigger(item: X, immediate = false) {
+  trigger(item: X | X[], immediate = false) {
+    item = Array.isArray(item) ? item : [item];
     if (!immediate) {
-      this.queue.push(item);
+      this.queue.push(...item);
     } else {
-      this.queue.unshift(item);
+      this.queue.unshift(...item);
     }
     this.ready.resolve();
   }

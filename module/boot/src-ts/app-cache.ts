@@ -2,8 +2,13 @@ import * as fs from 'fs';
 
 import { FileCache } from './cache';
 import { FsUtil } from './fs-util';
+import { EnvUtil } from './env';
 
 class $AppCache extends FileCache {
+  constructor() {
+    super(EnvUtil.get('trv_cache', `${FsUtil.cwd}/.trv_cache`));
+  }
+
   init() {
     super.init();
 
@@ -29,4 +34,4 @@ class $AppCache extends FileCache {
   }
 }
 
-export const AppCache = new $AppCache(FsUtil.cwd);
+export const AppCache = new $AppCache();

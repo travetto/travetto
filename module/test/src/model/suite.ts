@@ -4,7 +4,7 @@ import { TestConfig, TestResult } from './test';
 
 export interface SuiteConfig {
   class: Class;
-  className: string;
+  classId: string;
   file: string;
   lines: { start: number, end: number };
   skip: boolean;
@@ -26,7 +26,7 @@ export interface Counts {
 }
 
 export interface SuiteResult extends Counts {
-  className: string;
+  classId: string;
   file: string;
   lines: { start: number, end: number };
   tests: TestResult[];

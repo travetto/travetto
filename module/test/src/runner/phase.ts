@@ -33,7 +33,7 @@ export class ExecutionPhaseManager {
       }
     } catch (error) {
       if (error === TestUtil.TIMEOUT) {
-        error = new Error(`${this.suite.className}: ${phase} timed out`);
+        error = new Error(`${this.suite.classId}: ${phase} timed out`);
       }
       const res = await this.generateSuiteError(`[[${phase}]]`, error);
       this.result.tests.push(res);

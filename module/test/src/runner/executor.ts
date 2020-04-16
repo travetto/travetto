@@ -14,12 +14,14 @@ import { ExecutionPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { TestUtil } from './util';
 import { AssertUtil } from '../assert/util';
+import { TestRegistryUtil } from '../registry/util';
 
 export class TestExecutor {
 
   static failFile(consumer: Consumer, file: string, err: Error) {
     const name = file.split(/\//).pop()!;
-    const suite = { class: { name }, className: name, lines: { start: 1, end: 1 }, file, } as any;
+    const classId = TestRegistryUtil.getClassId(name);
+    const suite = { class: { name }, classId, lines: { start: 1, end: 1 }, file, } as any;
     err.message = err.message.replace(Env.cwd, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
@@ -39,7 +41,7 @@ export class TestExecutor {
     const result: Partial<TestResult> = {
       methodName: test.methodName,
       description: test.description,
-      className: test.className,
+      classId: test.classId,
       lines: { ...test.lines },
       file: test.file,
       status: 'skip'
@@ -101,18 +103,22 @@ export class TestExecutor {
     return result as TestResult;
   }
 
-  static async executeSuiteTest(consumer: Consumer, suite: SuiteConfig, test: TestConfig) {
-    const result: SuiteResult = {
+  static emptySuiteResult(suite: SuiteConfig) {
+    return {
       success: 0,
       fail: 0,
       skip: 0,
       total: 0,
       lines: { ...suite.lines },
       file: suite.file,
-      className: suite.className,
+      classId: suite.classId,
       duration: 0,
       tests: []
     };
+  }
+
+  static async executeSuiteTest(consumer: Consumer, suite: SuiteConfig, test: TestConfig) {
+    const result: SuiteResult = this.emptySuiteResult(suite);
 
     const mgr = new ExecutionPhaseManager(consumer, suite, result);
 
@@ -132,18 +138,7 @@ export class TestExecutor {
   }
 
   static async executeSuite(consumer: Consumer, suite: SuiteConfig) {
-
-    const result: SuiteResult = {
-      success: 0,
-      fail: 0,
-      skip: 0,
-      duration: 0,
-      total: 0,
-      lines: { ...suite.lines },
-      file: suite.file,
-      className: suite.className,
-      tests: []
-    };
+    const result: SuiteResult = this.emptySuiteResult(suite);
 
     const startTime = Date.now();
 
