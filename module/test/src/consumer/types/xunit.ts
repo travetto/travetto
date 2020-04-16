@@ -4,6 +4,7 @@ import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
 import { Consumer } from '../../model/consumer';
 import { Consumable } from '../registry';
+import { TestRegistryUtil } from '../../registry/util';
 
 @Consumable('xunit')
 export class XunitEmitter implements Consumer {
@@ -54,7 +55,7 @@ export class XunitEmitter implements Consumer {
     <testcase
       name="${name}"
       time="${test.duration}"
-      classname="${test.className}"
+      classname="${test.classId}"
     >
       ${body}
       <system-out>${this.buildMeta({ log: test.output.log, info: test.output.info, debug: test.output.debug })}</system-out>
@@ -68,7 +69,7 @@ export class XunitEmitter implements Consumer {
 
       const out = `
   <testsuite
-    name="${suite.className}"
+    name="${suite.classId}"
     time="${suite.duration}"
     tests="${suite.total}"
     failures="${suite.fail}"

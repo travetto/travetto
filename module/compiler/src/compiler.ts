@@ -3,8 +3,8 @@ import * as fs from 'fs';
 import { EventEmitter } from 'events';
 import * as sourcemap from 'source-map-support';
 
-import { FsUtil } from '@travetto/boot';
-import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp, SystemUtil } from '@travetto/base';
+import { FsUtil, AppCache, FileCache } from '@travetto/boot';
+import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp } from '@travetto/base';
 
 import { SourceManager } from './source';
 import { CompilerUtil } from './util';
@@ -17,7 +17,11 @@ class $Compiler extends EventEmitter {
   presenceManager: FilePresenceManager;
   active = false;
 
-  constructor(public cwd: string, private rootPaths: string[]) {
+  constructor(
+    private cwd: string = Env.cwd,
+    private cache: FileCache = AppCache,
+    private rootPaths: string[] = Env.appRoots
+  ) {
     super();
 
     if (Env.watch) {
@@ -29,10 +33,11 @@ class $Compiler extends EventEmitter {
       }, 0);
     }
 
-    this.sourceManager = new SourceManager(cwd, this.rootPaths);
+    this.sourceManager = new SourceManager(this.cwd, this.cache, this.rootPaths);
     this.presenceManager = new FilePresenceManager({
       ext: '.ts',
       cwd: this.cwd,
+      excludeFiles: [/.*.d.ts$/],
       rootPaths: this.rootPaths, // DO not look into node_modules, only user code
       listener: this,
       initialFileValidator: x => !(x.file in require.cache) // Skip already imported files
@@ -127,4 +132,4 @@ class $Compiler extends EventEmitter {
   }
 }
 
-export const Compiler = new $Compiler(Env.cwd, Env.appRoots);
+export const Compiler = new $Compiler();

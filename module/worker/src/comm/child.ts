@@ -1,8 +1,7 @@
 import { IdleManager } from '../idle';
-import { CommEvent } from './types';
 import { ProcessCommChannel } from './channel';
 
-export class ChildCommChannel<U extends CommEvent = CommEvent> extends ProcessCommChannel<NodeJS.Process, U> {
+export class ChildCommChannel<U = any> extends ProcessCommChannel<NodeJS.Process, U> {
   idle: IdleManager;
 
   constructor(timeout?: number) {

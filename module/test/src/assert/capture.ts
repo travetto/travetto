@@ -31,7 +31,7 @@ export class AssertCapture {
     const { file, line } = AssertUtil.getPositionOfError(new Error(), filename.replace(/[.][tj]s$/, ''));
 
     const assertion: Assertion = {
-      className: this.test.className,
+      classId: this.test.classId,
       methodName: this.test.methodName,
       file, line, text,
       operator,

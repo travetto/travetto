@@ -36,7 +36,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
   async activate() {
     // Die if no communication within 120 seconds
-    this.listen(async (event: RunEvent) => {
+    this.listen(async event => {
       console.debug('on message', event);
 
       if (event.type === Events.INIT) {

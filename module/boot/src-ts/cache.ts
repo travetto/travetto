@@ -1,6 +1,7 @@
+import * as os from 'os';
 import * as fs from 'fs';
+import * as path from 'path';
 import { FsUtil } from './fs-util';
-import { EnvUtil } from './env';
 
 function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
   return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
@@ -9,12 +10,14 @@ function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
 export class FileCache {
   private cache = new Map<string, fs.Stats>();
 
-  readonly cwd: string;
   readonly cacheDir: string;
 
-  constructor(cwd: string, cacheDir?: string) {
-    this.cwd = FsUtil.toUnix(cwd || FsUtil.cwd);
-    this.cacheDir = FsUtil.toUnix(cacheDir ?? EnvUtil.get('trv_cache') ?? `${this.cwd}/.trv_cache`);
+  constructor(cacheDir: string) {
+    this.cacheDir = FsUtil.toUnix(cacheDir
+      .replace(/@PID@/, `${process.pid}`)
+      .replace(/@APP@/, path.basename(process.cwd()))
+      .replace(/@TMP@/, os.tmpdir())
+    );
   }
 
   init() {
@@ -78,7 +81,7 @@ export class FileCache {
   }
 
   fromEntryName(cached: string) {
-    return FsUtil.joinUnix(this.cwd, cached
+    return FsUtil.joinUnix(FsUtil.cwd, cached
       .replace(this.cacheDir, '')
       .replace(/^[.]/, 'node_modules/@travetto/')
       .replace(/~/g, '/')
@@ -89,7 +92,7 @@ export class FileCache {
   toEntryName(full: string) {
     const out = FsUtil.joinUnix(this.cacheDir,
       FsUtil.toUnix(full)
-        .replace(`${this.cwd}/`, '')
+        .replace(`${FsUtil.cwd}/`, '')
         .replace(/^.*node_modules\/@travetto\//, '.')
         .replace(/[/]+/g, '~')
     )

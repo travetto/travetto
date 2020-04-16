@@ -1,5 +1,4 @@
 export type RunEvent = {
-  type: string;
   file?: string;
   error?: any;
   class?: string;
