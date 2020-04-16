@@ -23,7 +23,7 @@ export class ScanApp {
   };
 
   private static resolveFramework(x: SimpleEntry, root: string) {
-    const file = RegisterUtil.resolveForFramework(x.file);
+    const file = RegisterUtil.devResolve(x.file);
     return { ...x, file, module: file.replace(`${root}/`, '') };
   }
 

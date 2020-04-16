@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { FsUtil } from '@travetto/boot';
 import { Suite, Test } from '@travetto/test';
 import { WorkPool } from '../src/pool';
-import { IteratorInputSource } from '../src/input/iterator';
+import { IterableInputSource } from '../src/input/iterable';
 import { WorkUtil } from '../src/util';
 
 @Suite()
@@ -12,8 +12,8 @@ export class PoolExecTest {
   @Test()
   async simple() {
 
-    // new ArrayInputSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
-    const input = new IteratorInputSource(function* () {
+    // new IterableInputSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+    const input = new IterableInputSource(function* () {
       for (let i = 0; i < 5; i++) {
         yield `${i}-`;
       }

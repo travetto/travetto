@@ -1,16 +1,15 @@
 import * as os from 'os';
-import * as fs from 'fs';
 
+import { Compiler } from '@travetto/compiler';
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
-import { WorkPool, QueueInputSource } from '@travetto/worker';
-import { FsUtil } from '@travetto/boot';
+import { WorkPool, EventInputSource } from '@travetto/worker';
 
 import { TestRegistry } from '../registry/registry';
-import { EventStreamer } from '../consumer/types/event';
 import { buildWorkManager } from '../worker/parent';
 import { RunEvent } from '../worker/types';
 import { TestConfig } from '../model/test';
 import { SuiteConfig } from '../model/suite';
+import { ConsumerRegistry } from '../consumer/registry';
 
 export class TestWatcher {
 
@@ -21,8 +20,12 @@ export class TestWatcher {
       if (Array.isArray(o)) {
         const [cls, method] = o;
         if (TestRegistry.has(cls)) {
-          const conf = TestRegistry.get(cls).tests.find(x => x.methodName === method.name);
-          return conf;
+          const conf = TestRegistry.get(cls);
+          if (method) {
+            return conf.tests.find(x => x.methodName === method.name);
+          } else {
+            return conf;
+          }
         }
       } else {
         return TestRegistry.get(o);
@@ -30,24 +33,19 @@ export class TestWatcher {
     }
   }
 
-  static async watch() {
+  static async watch(format: string) {
     console.debug('Listening for changes');
-    TestRegistry.listen(RootRegistry);
 
-    const queue: Omit<RunEvent, 'type'>[] = [];
-    const enqueue = (e: any) => {
-      console.debug('Queueing', e);
-      queue.push(e);
-    };
+    const src = new EventInputSource<Omit<RunEvent, 'type'>>();
 
     await TestRegistry.init();
+    TestRegistry.listen(RootRegistry);
 
-    const output = fs.createWriteStream(FsUtil.joinUnix(FsUtil.cwd, '.trv_test_log'), { autoClose: true, flags: 'w' });
-    const consumer = new EventStreamer(output);
+    const consumer = ConsumerRegistry.get(format)!;
 
-    const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
-      idleTimeoutMillis: 10000,
-      min: 0,
+    const pool = new WorkPool(buildWorkManager.bind(null, new consumer()), {
+      idleTimeoutMillis: 120000,
+      min: 2,
       max: os.cpus.length - 1
     });
 
@@ -59,38 +57,42 @@ export class TestWatcher {
 
       switch (e.type) {
         case 'added': case 'changed': {
-          enqueue({
+          src.trigger({
             file: conf.file,
-            class: conf.class.__id
+            class: conf.class.name
           });
           break;
         }
       }
     });
 
-    methods.on(e => {
-      const conf = this.getConf(e.prev ?? e.curr);
-      if (!conf) { return; }
+    Compiler.presenceManager.addNewFolder(`test`);
 
-      switch (e.type) {
-        case 'added': case 'changed': {
-          enqueue({
-            method: conf.methodName,
-            file: conf.file,
-            class: conf.class.__id
-          });
-          break;
-        }
-        case 'removing': {
-          /**
-           *
-           */
-        }
-      }
-    });
 
+    setTimeout(() => {
+      methods.on(e => {
+        const conf = this.getConf(e.prev ?? e.curr);
+        if (!conf) { return; }
+
+        switch (e.type) {
+          case 'added': case 'changed': {
+            src.trigger({
+              method: conf.methodName,
+              file: conf.file,
+              class: conf.class.name
+            }, true); // Shift to front
+            break;
+          }
+          case 'removing': {
+            /**
+             *
+             */
+          }
+        }
+      });
+    }, 100);
     await pool
-      .process(new QueueInputSource(queue))
+      .process(src)
       .finally(() => pool.shutdown());
   }
 }

@@ -262,7 +262,7 @@ export class TransformUtil {
       if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
         let path = this.optionalResolve(stmt.moduleSpecifier.text, base);
 
-        path = RegisterUtil.resolveForFramework(path); // @TRV_DEV
+        path = RegisterUtil.devResolve(path); // @TRV_DEV
 
         if (stmt.importClause) {
           if (stmt.importClause.namedBindings) {

@@ -2,21 +2,22 @@ import { InputSource } from './types';
 
 type Itr<T> = Iterator<T> | AsyncIterator<T>;
 
-function isIterator<T>(o: any): o is Itr<T> {
-  return 'next' in o;
-}
-
-export class IteratorInputSource<X> implements InputSource<X> {
+export class IterableInputSource<X> implements InputSource<X> {
 
   private src: Itr<X>;
   private ondeck: X;
   done = false;
 
-  constructor(src: (() => Itr<X>) | Itr<X>) {
-    if (isIterator(src)) {
+  constructor(src: Iterable<X> | AsyncIterable<X> | (() => Generator<X>) | (() => AsyncGenerator<X>) | Itr<X>) {
+    if ('next' in src) {
       this.src = src;
     } else {
-      this.src = src();
+      if (Symbol.asyncIterator in src) {
+        this.src = (src as any)[Symbol.asyncIterator]();
+      } else if (Symbol.iterator in src) {
+        this.src = (src as any)[Symbol.iterator]();
+      }
+      this.src = (src as any)();
     }
   }
 

@@ -8,6 +8,7 @@ const FIXED_MODULES = new Set([
   'exec', 'log', 'net', 'registry', 'test', 'worker', 'yaml'
 ]);
 const IS_SUPPORT_FILE = '/support/';
+const IS_BIN_FILE = '/bin/';
 const IS_SELF_FILE = 'test/src/worker';
 
 /**
@@ -65,6 +66,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       (
         !FIXED_MODULES.has(frameworkModule) && // Not a core module
         !k.includes(IS_SUPPORT_FILE) && // Not a support file
+        !k.includes(IS_BIN_FILE) && // Not a bin file
         !k.includes(IS_SELF_FILE) // Not self
       );
   }

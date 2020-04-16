@@ -1,6 +1,6 @@
 import { FsUtil, EnvUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
-import { WorkPool, ArrayInputSource } from '@travetto/worker';
+import { WorkPool, IterableInputSource } from '@travetto/worker';
 
 import { ConsumerManager } from '../consumer/manager';
 import { Consumer } from '../model/consumer';
@@ -8,7 +8,6 @@ import { Consumer } from '../model/consumer';
 import { TestExecutor } from './executor';
 import { buildWorkManager } from '../worker/parent';
 
-import { watch } from './watcher';
 import { TestUtil } from './util';
 
 export interface State {
@@ -50,7 +49,7 @@ export class Runner {
     }
 
     await pool
-      .process(new ArrayInputSource(files))
+      .process(new IterableInputSource(files))
       .finally(() => pool.shutdown());
 
     if (consumer.summarize) {
@@ -80,7 +79,6 @@ export class Runner {
   async run() {
     switch (this.state.mode) {
       case 'single': return await this.runSingle();
-      case 'watch': return await watch();
       default: return await this.runFiles();
     }
   }
