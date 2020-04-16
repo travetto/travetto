@@ -4,7 +4,7 @@ export type ThrowableError = string | RegExp | Function;
 
 export interface TestConfig {
   class: Class<any>;
-  className: string;
+  classId: string;
   description: string;
   file: string;
   lines: { start: number, end: number };
@@ -15,7 +15,7 @@ export interface TestConfig {
 }
 
 export interface Assertion {
-  className: string;
+  classId: string;
   methodName: string;
   actual?: any;
   expected?: any;
@@ -33,7 +33,7 @@ export interface TestResult {
   file: string;
   lines: { start: number, end: number };
   methodName: string;
-  className: string;
+  classId: string;
   description: string;
   assertions: Assertion[];
   duration: number;

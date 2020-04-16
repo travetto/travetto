@@ -199,7 +199,7 @@ export class AssertCheck {
     }
 
     AssertCapture.add({
-      className: test.className,
+      classId: test.classId,
       methodName: test.methodName,
       file: test.file.replace(`${Env.cwd}/`, ''),
       line,

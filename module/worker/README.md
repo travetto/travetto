@@ -12,7 +12,6 @@ This module provides the necessary primitives for handling dependent workers.  A
 With respect to managing multiple executions, [`WorkPool`](./src/pool.ts) is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various [`InputSource`](./src/input/types.ts) implementation that allow for a wide range of use cases.
 
 The supported `InputSource`s are
-- ```Queue``` is similar to list but will execute forever waiting for new items to be added to the queue.
 - ```Iterable``` supports any iterable (Array, Set, etc) input as well as any async iterable input. The source will continue to produce jobs until the underlying iterator is exhausted.
 - ```Event``` is an asynchronous source that allows the caller to determine when the next item is available.  Useful triggering work on event driven problems.
 
@@ -42,10 +41,10 @@ class ImageProcessor {
 
 class ImageCompressor extends WorkerPool {
 
-  pendingImages = new QueueInputSource<string>();
+  pendingImages = new EventInputSource<string>();
 
   constructor() {
-    super(async () => new ImageProcess());
+    super(async () => new ImageProcessor());
   }
 
   begin() {
@@ -53,9 +52,7 @@ class ImageCompressor extends WorkerPool {
   }
 
   convert(...images: string[]) {
-    for (const img of images) {
-      this.pendingImages.enqueue(img);
-    }
+    this.pendingImages.trigger(images);
   }
 }
 ```

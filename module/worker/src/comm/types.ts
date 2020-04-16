@@ -8,11 +8,6 @@ export interface ChildOptions extends ExecutionOptions {
   gid?: number;
 }
 
-export interface CommEvent {
-  type?: string;
-  [key: string]: any;
-}
-
 export type Status = 'init' | 'release' | 'destroy';
 
 export type StatusChangeHandler = (status: Status) => any;

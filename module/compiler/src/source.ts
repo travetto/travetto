@@ -15,14 +15,14 @@ export class SourceManager {
   private contents = new Map<string, string>();
   private sources = new Map<string, ts.SourceFile>();
   private hashes = new Map<string, number>();
-  private cache: FileCache;
   private compilerOptions: ts.CompilerOptions;
   private program: ts.Program;
 
-  constructor(private cwd: string,
+  constructor(
+    private cwd: string,
+    private cache: FileCache,
     private rootPaths: string[]
   ) {
-    this.cache = new FileCache(this.cwd);
     this.transformerManager = new TransformerManager(this.cwd);
   }
 

@@ -72,7 +72,7 @@ export class AssertUtil {
 
     const msg = error.message.split(/\n/)[0];
 
-    const core = { file, className: suite.className, methodName };
+    const core = { file, classId: suite.classId, methodName };
     const coreAll = { ...core, description: msg, lines: { start: line, end: line } };
 
     const assert: Assertion = {
