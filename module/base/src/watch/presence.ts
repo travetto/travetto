@@ -109,15 +109,15 @@ export class FilePresenceManager {
     }
 
     if (this.watch) { // Start watching after startup
-      setTimeout(() => {
-        for (const p of this.watchSpaces) {
-          if (!fs.existsSync(p)) {
-            console.warn(`Directory ${FsUtil.resolveUnix(FsUtil.cwd, p)} missing, cannot watch`);
-            continue;
-          }
-          this.buildWatcher(FsUtil.joinUnix(this.cwd, p), [{ testFile: x => this.validFile(x), testDir: x => this.validFile(x) }]);
-        }
-      }, 50); // FIXME: 1000 og
+      setTimeout(() => this.watchSpaces.forEach(p => this.addNewFolder(p)), 50); // FIXME: 1000 og
+    }
+  }
+
+  addNewFolder(folder: string) {
+    if (!fs.existsSync(folder)) {
+      console.warn(`Directory ${FsUtil.resolveUnix(FsUtil.cwd, folder)} missing, cannot watch`);
+    } else {
+      this.buildWatcher(FsUtil.joinUnix(this.cwd, folder), [{ testFile: x => this.validFile(x), testDir: x => this.validFile(x) }]);
     }
   }
 

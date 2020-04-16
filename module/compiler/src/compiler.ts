@@ -12,9 +12,9 @@ import { CompilerUtil } from './util';
 
 class $Compiler extends EventEmitter {
 
-  private presenceManager: FilePresenceManager;
   private sourceManager: SourceManager;
 
+  presenceManager: FilePresenceManager;
   active = false;
 
   constructor(public cwd: string, private rootPaths: string[]) {
