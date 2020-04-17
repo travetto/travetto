@@ -39,14 +39,14 @@ export class TestWatcher {
   static summarizeSuite(test: TestResult): SuiteResult {
     require(test.file);
 
-    this.state[`${test.classId}#${test.methodName}`] = test.status;
+    this.state[`${test.classId}!${test.methodName}`] = test.status;
     const SuiteCls = TestRegistry.getClasses().find(x =>
       x.__id === test.classId
     )!;
 
     const suite = TestRegistry.get(SuiteCls);
     const total = suite.tests.reduce((acc, x) => {
-      const status = this.state[`${x.classId}#${x.methodName}`] ?? 'unknown';
+      const status = this.state[`${x.classId}!${x.methodName}`] ?? 'unknown';
       acc[status] += 1;
       return acc;
     }, { skip: 0, success: 0, fail: 0, unknown: 0 });

@@ -33,7 +33,7 @@ export class AppListUtil {
     // Load app files
     ScanApp.findFiles('.ts', x =>
       /^([^/]+\/)?(src[\/])/.test(x) && // Look at all 'src/*' (including sub-apps)
-      fs.readFileSync(x, 'utf-8').includes('@Application') // Look for @application annotation
+      fs.readFileSync(x, 'utf-8').includes('@Application') // Look for @Application annotation
     ).forEach(x => require(x.file)); // Only load files that are candidates
 
     // Get applications

@@ -255,13 +255,13 @@ export class ElasticsearchUtil {
     return allTypes.reduce((acc, scls) => {
       Util.deepAssign(acc, this.generateSingleSourceSchema(scls, config));
       return acc;
-    }, {} as any);
+    }, {} as Record<string, any>);
   }
 
-  static generateSingleSourceSchema<T>(cls: Class<T>, config?: EsSchemaConfig): any {
+  static generateSingleSourceSchema<T>(cls: Class<T>, config?: EsSchemaConfig): Record<string, any> {
     const schema = SchemaRegistry.getViewSchema(cls);
 
-    const props: any = {};
+    const props: Record<string, any> = {};
 
     for (const field of schema.fields) {
       const conf = schema.schema[field];
@@ -269,7 +269,7 @@ export class ElasticsearchUtil {
       if (conf.type === Point) {
         props[field] = { type: 'geo_point' };
       } else if (conf.type === Number) {
-        let prop: any = { type: 'integer' };
+        let prop: Record<string, any> = { type: 'integer' };
         if (conf.precision) {
           const [digits, decimals] = conf.precision;
           if (decimals) {

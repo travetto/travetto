@@ -1,11 +1,11 @@
 import { InputSource } from './types';
 
 export class EventInputSource<X> implements InputSource<X> {
-  static resolvablePromise<T = void>(): Promise<T> & { resolve: (v: T) => void, reject: (err: Error) => void } {
-    let ops;
+  static resolvablePromise<T = void>() {
+    let ops: { resolve: (v: T) => void, reject: (err: Error) => void };
     const prom = new Promise((resolve, reject) => ops = { resolve, reject });
-    Object.assign((prom as any), ops);
-    return prom as any;
+    Object.assign(prom, ops!);
+    return prom as Promise<T> & (typeof ops);
   }
 
   queue: X[] = [];

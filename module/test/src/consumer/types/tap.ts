@@ -7,7 +7,6 @@ import { Consumer } from '../../model/consumer';
 import { Consumable } from '../registry';
 
 import { TapEnhancer, DUMMY_ENHANCER } from './tap-enhancer';
-import { TestRegistryUtil } from '../../registry/util';
 
 @Consumable('tap')
 export class TapEmitter implements Consumer {
@@ -35,7 +34,7 @@ export class TapEmitter implements Consumer {
   onEvent(e: TestEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
-      let header = `${this.enhancer.suiteName(test.classId.replace('@app.test.', '').replace('#', '.'))} - ${this.enhancer.testName(test.methodName)}`;
+      let header = `${this.enhancer.suiteName(test.classId.replace('@test.', ''))} - ${this.enhancer.testName(test.methodName)}`;
       if (test.description) {
         header += `: ${this.enhancer.testDescription(test.description)}`;
       }

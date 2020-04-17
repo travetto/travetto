@@ -10,9 +10,9 @@ import { ScanApp } from '../scan-app';
 import { SystemUtil } from '../system-util';
 
 export interface PresenceListener {
-  added(name: string): any;
-  changed(name: string): any;
-  removed(name: string): any;
+  added(name: string): void;
+  changed(name: string): void;
+  removed(name: string): void;
 }
 
 export class FilePresenceManager {
@@ -65,7 +65,8 @@ export class FilePresenceManager {
         const changed = this.files.has(entry.file);
         if (changed) {
           this.listener.changed(entry.file);
-          return this.files.get(entry.file)!.version++;
+          this.files.get(entry.file)!.version++;
+          return;
         } else {
           this.files.set(entry.file, { version: 1 });
           return this.listener.added(entry.file);

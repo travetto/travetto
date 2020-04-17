@@ -1,9 +1,9 @@
 export class Util {
-  static deserializeError(e: Error | { message: string, stack: any, name: string }) {
-    if (e && ('$' in (e as any))) {
+  static deserializeError(e: Error | { $?: any, message: string, stack: any, name: string }) {
+    if (e && ('$' in e)) {
       const err = new Error();
-      for (const k of Object.keys(e)) {
-        (err as any)[k] = (e as any)[k];
+      for (const k of Object.keys(e) as (keyof typeof err)[]) {
+        err[k] = e[k];
       }
       err.message = e.message;
       err.stack = e.stack;
