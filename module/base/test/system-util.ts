@@ -51,16 +51,16 @@ class SystemUtilTests {
   @Test()
   async buildModuleName() {
     const modName = SystemUtil.computeModule(__filename);
-    assert(modName === '@app/test.system-util');
+    assert(modName === 'test/system-util');
 
-    const modName2 = SystemUtil.computeModule('node_modules/@travetto/base/src/system-util.js');
+    const modName2 = SystemUtil.computeModule(`${__dirname}/node_modules/@travetto/base/src/system-util.js`);
     assert(modName2 === '@trv:base/system-util');
 
-    const modName3 = SystemUtil.computeModule('test/simple.js');
-    assert(modName3 === '@test:simple');
+    const modName3 = SystemUtil.computeModule(`${__dirname}/../test/simple.js`);
+    assert(modName3 === 'test/simple');
 
-    const modName4 = SystemUtil.computeModule('node_modules/lodash/test');
-    assert(modName4 === '@npm:lodash/test');
+    const modName4 = SystemUtil.computeModule(`${__dirname}/node_modules/lodash/test`);
+    assert(modName4 === '@npm/lodash/test');
   }
 
 }

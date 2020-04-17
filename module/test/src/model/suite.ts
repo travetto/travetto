@@ -19,9 +19,9 @@ export interface SuiteConfig {
 }
 
 export interface Counts {
-  success: number;
-  skip: number;
-  fail: number;
+  passed: number;
+  skipped: number;
+  failed: number;
   total: number;
 }
 

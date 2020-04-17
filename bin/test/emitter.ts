@@ -28,7 +28,7 @@ export class TapEmitter {
       this.suiteDuration += e['suite'].duration;
     } else if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
-      let header = `${pkg}#${test.classId.replace('@test.', '')} - ${test.methodName}`;
+      let header = `${pkg}#${test.classId} - ${test.methodName}`;
       if (test.description) {
         header += `: ${test.description}`;
       }
@@ -49,12 +49,12 @@ export class TapEmitter {
 
       let status = `ok ${++this.count} `;
       switch (test.status) {
-        case 'skip': {
+        case 'skipped': {
           status += ' # SKIP';
           this.skipped++;
           break;
         }
-        case 'fail': {
+        case 'failed': {
           status = `not ${status}`;
           this.fail++;
           break;
@@ -69,7 +69,7 @@ export class TapEmitter {
 
       this.log(status);
 
-      if (test.status === 'fail') {
+      if (test.status === 'failed') {
         if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
           this.logMeta({ error: Util.deserializeError(test.error)!.stack });
         }

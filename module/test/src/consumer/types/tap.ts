@@ -34,7 +34,7 @@ export class TapEmitter implements Consumer {
   onEvent(e: TestEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
-      let header = `${this.enhancer.suiteName(test.classId.replace('@test.', ''))} - ${this.enhancer.testName(test.methodName)}`;
+      let header = `${this.enhancer.suiteName(test.classId)} - ${this.enhancer.testName(test.methodName)}`;
       if (test.description) {
         header += `: ${this.enhancer.testDescription(test.description)}`;
       }
@@ -67,15 +67,15 @@ export class TapEmitter implements Consumer {
 
       let status = `${this.enhancer.testNumber(++this.count)} `;
       switch (test.status) {
-        case 'skip': status += ' # SKIP'; break;
-        case 'fail': status = `${this.enhancer.failure('not ok')} ${status}`; break;
+        case 'skipped': status += ' # SKIP'; break;
+        case 'failed': status = `${this.enhancer.failure('not ok')} ${status}`; break;
         default: status = `${this.enhancer.success('ok')} ${status}`;
       }
       status += header;
 
       this.log(status);
 
-      if (test.status === 'fail') {
+      if (test.status === 'failed') {
         if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
           const err = CommUtil.deserializeError(test.error);
           this.logMeta({ error: err.toConsole() });
@@ -101,15 +101,15 @@ export class TapEmitter implements Consumer {
       }
     }
 
-    const allSuccess = summary.fail === 0;
+    const allSuccess = summary.failed === 0;
 
     this.log([
       this.enhancer[allSuccess ? 'success' : 'failure']('Results'),
-      `${this.enhancer.total(summary.success)}/${this.enhancer.total(summary.total)},`,
+      `${this.enhancer.total(summary.passed)}/${this.enhancer.total(summary.total)},`,
       allSuccess ? 'failed' : this.enhancer.failure('failed'),
-      `${this.enhancer.total(summary.fail)}`,
+      `${this.enhancer.total(summary.failed)}`,
       'skipped',
-      this.enhancer.total(summary.skip)
+      this.enhancer.total(summary.skipped)
     ].join(' '));
   }
 }

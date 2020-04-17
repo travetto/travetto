@@ -5,9 +5,9 @@ import { Consumer } from '../model/consumer';
 export class AllResultsCollector implements Consumer {
 
   public summary: AllSuitesResult = {
-    success: 0,
-    fail: 0,
-    skip: 0,
+    passed: 0,
+    failed: 0,
+    skipped: 0,
     total: 0,
     duration: 0,
     suites: [],
@@ -16,11 +16,11 @@ export class AllResultsCollector implements Consumer {
 
   private merge(src: SuiteResult) {
     this.summary.suites.push(src);
-    this.summary.fail += src.fail;
-    this.summary.success += src.success;
-    this.summary.skip += src.skip;
+    this.summary.failed += src.failed;
+    this.summary.passed += src.passed;
+    this.summary.skipped += src.skipped;
     this.summary.duration += src.duration;
-    this.summary.total += (src.fail + src.success + src.skip);
+    this.summary.total += (src.failed + src.passed + src.skipped);
   }
 
   onEvent(e: TestEvent) {
