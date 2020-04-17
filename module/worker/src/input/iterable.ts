@@ -16,8 +16,9 @@ export class IterableInputSource<X> implements InputSource<X> {
         this.src = (src as any)[Symbol.asyncIterator]();
       } else if (Symbol.iterator in src) {
         this.src = (src as any)[Symbol.iterator]();
+      } else {
+        this.src = (src as any)();
       }
-      this.src = (src as any)();
     }
   }
 

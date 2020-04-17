@@ -20,7 +20,7 @@ export class TestExecutor {
 
   static failFile(consumer: Consumer, file: string, err: Error) {
     const name = path.basename(file);
-    const classId = `${SystemUtil.computeModule(file)}⠶${name}`;
+    const classId = SystemUtil.computeModuleClass(file, name);
     const suite = { class: { name }, classId, lines: { start: 1, end: 1 }, file, } as any;
     err.message = err.message.replace(Env.cwd, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
@@ -28,7 +28,7 @@ export class TestExecutor {
     consumer.onEvent({ type: 'test', phase: 'before', test: res.testConfig });
     consumer.onEvent({ type: 'assertion', phase: 'after', assertion: res.assert });
     consumer.onEvent({ type: 'test', phase: 'after', test: res.testResult });
-    consumer.onEvent({ type: 'suite', phase: 'after', suite: { ...suite, fail: 1, success: 0, total: 1, skip: 0 } });
+    consumer.onEvent({ type: 'suite', phase: 'after', suite: { ...suite, failed: 1, passed: 0, total: 1, skipped: 0 } });
   }
 
   static async executeTest(consumer: Consumer, test: TestConfig) {
@@ -44,7 +44,7 @@ export class TestExecutor {
       classId: test.classId,
       lines: { ...test.lines },
       file: test.file,
-      status: 'skip'
+      status: 'skipped'
     };
 
     if (test.skip) {
@@ -73,9 +73,9 @@ export class TestExecutor {
 
       // If error isn't defined, we are good
       if (!err) {
-        result.status = 'success';
+        result.status = 'passed';
       } else {
-        result.status = 'fail';
+        result.status = 'failed';
         result.error = err;
 
         if (!(err instanceof assert.AssertionError)) {
@@ -86,8 +86,8 @@ export class TestExecutor {
       const err = PromiseCapture.stop();
       const finalErr = await (err && Promise.race([err, timeout]).catch(e => e));
 
-      if (result.status !== 'fail' && finalErr) {
-        result.status = 'fail';
+      if (result.status !== 'failed' && finalErr) {
+        result.status = 'failed';
         result.error = finalErr;
         AssertCheck.checkUnhandled(test, finalErr);
       }
@@ -105,9 +105,9 @@ export class TestExecutor {
 
   static emptySuiteResult(suite: SuiteConfig) {
     return {
-      success: 0,
-      fail: 0,
-      skip: 0,
+      passed: 0,
+      failed: 0,
+      skipped: 0,
       total: 0,
       lines: { ...suite.lines },
       file: suite.file,
@@ -173,7 +173,7 @@ export class TestExecutor {
 
     consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
 
-    result.total = result.success + result.fail;
+    result.total = result.passed + result.failed;
 
     return result as SuiteResult;
   }

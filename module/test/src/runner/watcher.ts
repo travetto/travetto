@@ -49,16 +49,16 @@ export class TestWatcher {
       const status = this.state[`${x.classId}!${x.methodName}`] ?? 'unknown';
       acc[status] += 1;
       return acc;
-    }, { skip: 0, success: 0, fail: 0, unknown: 0 });
+    }, { skipped: 0, passed: 0, failed: 0, unknown: 0 });
 
     return {
       classId: suite.classId,
-      success: total.success,
-      fail: total.fail,
-      skip: total.skip,
+      passed: total.passed,
+      failed: total.failed,
+      skipped: total.skipped,
       file: suite.file,
       lines: suite.lines,
-      total: total.fail + total.success,
+      total: total.failed + total.passed,
       tests: [],
       duration: 0
     };

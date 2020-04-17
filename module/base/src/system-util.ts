@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import { Readable, PassThrough } from 'stream';
 import { FsUtil } from '@travetto/boot';
 
@@ -25,6 +26,8 @@ function toList<T>(items: T | T[] | Set<T> | undefined) {
 }
 
 export class SystemUtil {
+
+  private static modCache = new Map<string, string>();
 
   static async toBuffer(src: NodeJS.ReadableStream | Buffer | string): Promise<Buffer> {
     if (typeof src === 'string') {
@@ -167,19 +170,25 @@ export class SystemUtil {
    * Compute internal module name from file name
    */
   static computeModule(fileName: string) {
-    let mod = FsUtil.toUnix(fileName);
+    fileName = path.resolve(fileName);
 
+    if (this.modCache.has(fileName)) {
+      return this.modCache.get(fileName)!;
+    }
+
+    let mod = FsUtil.toUnix(fileName).replace(/\.(t|j)s$/, ''); // Drop ext
     let ns: string;
 
     if (!mod.includes(FsUtil.cwd)) {
       ns = '@sys';
+      mod = mod.replace(/\/+/g, '.');
     } else {
       [, mod] = mod.split(`${FsUtil.cwd}/`);
       if (mod.includes('node_modules')) {
-        mod = mod.replace(/node_modules(.*node_modules)?\/+/, '');
-        if (mod.startsWith('@')) { // If scoped
-          const [ns1, ns2, ...rest] = mod.split(/\/+/);
-          ns = `${ns1}:${ns2}`.replace('@travetto', '@trv');
+        mod = mod.replace(/.*node_modules(.*node_modules)?\/+/, '');
+        if (mod.startsWith('@travetto')) { // If scoped
+          const [, ns2, ...rest] = mod.split(/\/+/);
+          ns = `@trv:${ns2}`;
           if (rest[0] === 'src') {
             rest.shift();
           }
@@ -187,20 +196,23 @@ export class SystemUtil {
         } else {
           ns = `@npm`;
         }
-      } else if (!mod.startsWith('src/')) {
-        const [ns1, ...rest] = mod.split(/\/+/);
-        ns = `@${ns1}`;
-        mod = rest.join('.');
       } else {
-        ns = '@app';
+        const [ns1, ...rest] = mod.split(/\/+/);
+        ns = `${ns1}`;
+        mod = rest.join('.');
       }
     }
 
-    mod = mod
-      .replace(/\/+/g, '.')
-      .replace(/\.(t|j)s$/, '');
+    const name = `${ns}/${mod}`;
+    this.modCache.set(fileName, name);
+    return name;
+  }
 
-    return `${ns}/${mod}`;
+  /**
+   * Compute internal class-module name from file name
+   */
+  static computeModuleClass(fileName: string, clsName: string) {
+    return `${this.computeModule(fileName)}￮${clsName}`;
   }
 
   /**
