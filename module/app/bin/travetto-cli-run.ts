@@ -34,7 +34,7 @@ function getAppUsage(app: CachedAppConfig) {
   return usage;
 }
 
-function generateAppHelpList(confs: CachedAppConfig[], cmd: AppCommand) {
+function generateAppHelpList(confs: CachedAppConfig[], cmd: Partial<AppCommand>) {
   const choices = [];
   if (!confs.length) {
     return color`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
@@ -72,7 +72,7 @@ function generateAppHelpList(confs: CachedAppConfig[], cmd: AppCommand) {
 export async function setup() {
   try {
     apps = await AppListUtil.getList();
-    listHelper = generateAppHelpList.bind(null, apps, {} as any);
+    listHelper = generateAppHelpList.bind(null, apps, {});
   } catch (e) {
     console.error(e);
     process.exit(1);

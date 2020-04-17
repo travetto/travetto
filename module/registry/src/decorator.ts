@@ -13,7 +13,7 @@ class $PendingRegister {
       this.modCache.set(file, SystemUtil.computeModule(file));
     }
     const meta = {
-      __id: `${this.modCache.get(file)}#${cls.name}`,
+      __id: `${this.modCache.get(file)}⠶${cls.name}`,
       __file: file,
       __hash: hash,
       __methods: methods,

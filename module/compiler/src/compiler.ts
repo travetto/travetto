@@ -9,6 +9,9 @@ import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp } from '@
 import { SourceManager } from './source';
 import { CompilerUtil } from './util';
 
+type Module = {
+  _compile?(file: string, contents: string): any;
+} & NodeModule;
 
 class $Compiler extends EventEmitter {
 
@@ -108,17 +111,17 @@ class $Compiler extends EventEmitter {
     }
   }
 
-  compile(m: NodeModule, tsf: string) {
+  compile(m: Module, tsf: string) {
     const isNew = !this.presenceManager.has(tsf);
     try {
       const js = this.sourceManager.getTranspiled(tsf); // Compile
       const jsf = tsf.replace(/\.ts$/, '.js');
       try {
-        return (m as any)._compile(js, jsf);
+        return m._compile!(js, jsf);
       } catch (e) {
         const errorContent = CompilerUtil.handleCompileError(e, this.cwd, m.filename, tsf);
         if (errorContent) {
-          return (m as any)._compile(errorContent, jsf);
+          return m._compile!(errorContent, jsf);
         }
       }
     } finally {

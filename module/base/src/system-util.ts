@@ -169,29 +169,35 @@ export class SystemUtil {
   static computeModule(fileName: string) {
     let mod = FsUtil.toUnix(fileName);
 
-    let ns = '@sys';
+    let ns: string;
 
-    if (mod.includes(FsUtil.cwd)) {
-      mod = mod.split(FsUtil.cwd)[1].replace(/^[\/]+/, '');
-      ns = '@app';
-    }
-
-    if (mod.startsWith('node_modules')) {
-      mod = mod.split('node_modules').pop()!.replace(/^[\/]+/, '');
-    }
-
-    if (mod.startsWith('@')) {
-      const [ns1, ns2, ...rest] = mod.split(/[\/]/);
-      ns = `${ns1}:${ns2}`.replace('@travetto', '@trv');
-      if (rest[0] === 'src') {
-        rest.shift();
+    if (!mod.includes(FsUtil.cwd)) {
+      ns = '@sys';
+    } else {
+      [, mod] = mod.split(`${FsUtil.cwd}/`);
+      if (mod.includes('node_modules')) {
+        mod = mod.replace(/node_modules(.*node_modules)?\/+/, '');
+        if (mod.startsWith('@')) { // If scoped
+          const [ns1, ns2, ...rest] = mod.split(/\/+/);
+          ns = `${ns1}:${ns2}`.replace('@travetto', '@trv');
+          if (rest[0] === 'src') {
+            rest.shift();
+          }
+          mod = rest.join('.');
+        } else {
+          ns = `@npm`;
+        }
+      } else if (!mod.startsWith('src/')) {
+        const [ns1, ...rest] = mod.split(/\/+/);
+        ns = `@${ns1}`;
+        mod = rest.join('.');
+      } else {
+        ns = '@app';
       }
-      mod = rest.join('.');
     }
 
     mod = mod
-      .replace(/[\/]+/g, '.')
-      .replace(/^\./, '')
+      .replace(/\/+/g, '.')
       .replace(/\.(t|j)s$/, '');
 
     return `${ns}/${mod}`;

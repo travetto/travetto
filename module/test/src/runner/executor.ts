@@ -1,6 +1,7 @@
 import * as assert from 'assert';
+import * as path from 'path';
 
-import { Env } from '@travetto/base';
+import { Env, SystemUtil } from '@travetto/base';
 import { FsUtil, EnvUtil } from '@travetto/boot';
 
 import { TestRegistry } from '../registry/registry';
@@ -14,13 +15,12 @@ import { ExecutionPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { TestUtil } from './util';
 import { AssertUtil } from '../assert/util';
-import { TestRegistryUtil } from '../registry/util';
 
 export class TestExecutor {
 
   static failFile(consumer: Consumer, file: string, err: Error) {
-    const name = file.split(/\//).pop()!;
-    const classId = TestRegistryUtil.getClassId(name);
+    const name = path.basename(file);
+    const classId = `${SystemUtil.computeModule(file)}⠶${name}`;
     const suite = { class: { name }, classId, lines: { start: 1, end: 1 }, file, } as any;
     err.message = err.message.replace(Env.cwd, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);

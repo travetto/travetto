@@ -4,7 +4,6 @@ import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
 import { Consumer } from '../../model/consumer';
 import { Consumable } from '../registry';
-import { TestRegistryUtil } from '../../registry/util';
 
 @Consumable('xunit')
 export class XunitEmitter implements Consumer {

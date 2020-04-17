@@ -110,7 +110,7 @@ export class AssertTransformer {
 
     check.parent = node.parent;
 
-    return check as any as T;
+    return check as T;
   }
 
   static doThrows(state: TransformerState & AssertState, node: ts.CallExpression, key: string, args: ts.Expression[]): ts.Node {
