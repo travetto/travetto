@@ -118,10 +118,15 @@ export class RegisterUtil {
    * @param pth
    */
   static devResolve(pth: string, mod?: Module) {
+
     if (mod) {
       try {
         pth = Module._resolveFilename!(pth, mod);
       } catch{ }
+    }
+
+    if (/travetto[^/]*\/module\/[^/]+\/bin/.test(pth)) { // Convert bin from framework module
+      pth = `${FsUtil.cwd}/node_modules/@travetto/${pth.split(/\/module\//)[1]}`;
     }
 
     // If relative or framework
@@ -174,8 +179,8 @@ export class RegisterUtil {
     AppCache.init();
 
     // Supports bootstrapping with framework resolution
-    if (!EnvUtil.isSet('trv_dev')) {
-      this.addPreparer(x => x.replace(/^.*\/\/\s*@TRV_DEV.*/g, '')); // Remove dev specific lines
+    if (!EnvUtil.isTrue('trv_dev')) {
+      this.addPreparer(x => x.replace(/^.*\/\/\s*@TRV_DEV.*$/g, '// @TRV_DEV_REMOVED')); // Remove dev specific lines
       this.libRequire = require;
       Module._load = this.onModuleLoad.bind(this);
       require.extensions['.ts'] = this.compile.bind(this);

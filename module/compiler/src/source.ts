@@ -112,6 +112,7 @@ export class SourceManager {
       );
 
       CompilerUtil.checkTranspileErrors(this.cwd, fileName, result.diagnostics);
+      // Save writing for typescript program (`writeFile`)
     } else {
       const cached = this.cache.readEntry(fileName);
       this.contents.set(fileName, cached);

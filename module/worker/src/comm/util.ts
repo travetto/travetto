@@ -1,19 +1,23 @@
-import { ChildProcess } from 'child_process';
+import { ChildProcess, SpawnOptions } from 'child_process';
 
 import { Exec } from '@travetto/exec';
 import { Env } from '@travetto/base';
 
 import { SpawnConfig, ChildOptions } from './types';
 
+type ErrorShape = { $?: any, message: string, stack?: string, name: string, toConsole?: any };
+
 export class CommUtil {
 
-  static serializeError(e: Error | any) {
-    let error: any = undefined;
+  static serializeError(e: Error | ErrorShape): ErrorShape;
+  static serializeError(e: undefined): undefined;
+  static serializeError(e: Error | ErrorShape | undefined) {
+    let error: ErrorShape | undefined;
 
     if (e) {
-      error = {};
-      for (const k of Object.keys(e)) {
-        error[k] = e[k];
+      error = {} as ErrorShape;
+      for (const k of Object.keys(e) as (keyof ErrorShape)[]) {
+        error[k] = (e as ErrorShape)[k];
       }
       error.$ = true;
       error.message = e.message;
@@ -24,11 +28,13 @@ export class CommUtil {
     return error;
   }
 
-  static deserializeError(e: any) {
-    if (e && e.$) {
+  static deserializeError(e: Error | ErrorShape): Error;
+  static deserializeError(e: undefined): undefined;
+  static deserializeError(e: Error | ErrorShape | undefined) {
+    if (e && '$' in e) {
       const err = new Error();
-      for (const k of Object.keys(e)) {
-        (err as any)[k] = e[k];
+      for (const k of Object.keys(e) as (keyof typeof err)[]) {
+        err[k] = e[k];
       }
       err.message = e.message;
       err.stack = e.stack;
@@ -60,7 +66,7 @@ export class CommUtil {
     if (fork && op === Exec.spawn) {
       args.unshift(command);
       command = process.argv0;
-      (finalOpts as any).shell = false;
+      (finalOpts as SpawnOptions).shell = false;
     }
 
     const result = op(command, args, finalOpts);

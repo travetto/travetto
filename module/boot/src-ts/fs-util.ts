@@ -12,11 +12,6 @@ class $FsUtil {
   cwd: string;
 
   constructor() {
-    for (const el of Object.keys(this) as (keyof this)[]) {
-      if (this[el] && (this[el] as any).bind) {
-        this[el] = (this[el] as any).bind(this);
-      }
-    }
     this.cwd = this.toUnix(process.cwd()).replace(/\/$/, '');
   }
 

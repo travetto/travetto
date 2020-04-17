@@ -1,7 +1,7 @@
 
 import * as commander from 'commander';
 import * as fs from 'fs';
-import { FsUtil, RegisterUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 
 import { Util, CompletionConfig } from './util';
 
@@ -41,9 +41,7 @@ export class Execute {
   }
 
   static requireModule(f: string) {
-    f = FsUtil.toUnix(fs.realpathSync(f));
-    f = RegisterUtil.devResolve(f); // @TRV_DEV
-    return require(f);
+    return require(FsUtil.toUnix(fs.realpathSync(f)));
   }
 
   static loadAllPlugins() {

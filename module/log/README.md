@@ -97,9 +97,9 @@ The corresponding output would be
 
 **Terminal: Logging output**
 ```bash
-2018-06-23T16:57:58 info  [@app/test.simple:  5] Hello World
-2018-06-23T16:57:58 info  [@app/test.simple:  7] Woah! { a: { b: { c: [Object] } } }
-2018-06-23T16:57:58 info  [@app/test.simple:  9] Woah!
-2018-06-23T16:57:58 debug [@app/test.simple: 11] Test
-2018-06-23T16:57:58 fatal [@app/test.simple: 13] hi
+2018-06-23T16:57:58 info  [@test/simple:  5] Hello World
+2018-06-23T16:57:58 info  [@test/simple:  7] Woah! { a: { b: { c: [Object] } } }
+2018-06-23T16:57:58 info  [@test/simple:  9] Woah!
+2018-06-23T16:57:58 debug [@test/simple: 11] Test
+2018-06-23T16:57:58 fatal [@test/simple: 13] hi
 ```

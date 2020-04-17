@@ -2,6 +2,6 @@ import './error';
 
 declare global {
   export interface Error {
-    toConsole?(sub?: any): string;
+    toConsole(sub?: any): string;
   }
 }

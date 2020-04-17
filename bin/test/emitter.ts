@@ -28,7 +28,7 @@ export class TapEmitter {
       this.suiteDuration += e['suite'].duration;
     } else if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
-      let header = `${pkg}#${test.classId} - ${test.methodName}`;
+      let header = `${pkg}#${test.classId.replace('@test.', '')} - ${test.methodName}`;
       if (test.description) {
         header += `: ${test.description}`;
       }
