@@ -40,8 +40,8 @@ class $Compiler extends EventEmitter {
     this.presenceManager = new FilePresenceManager({
       ext: '.ts',
       cwd: this.cwd,
-      excludeFiles: [/.*.d.ts$/],
-      rootPaths: this.rootPaths, // DO not look into node_modules, only user code
+      excludeFiles: [/.*.d.ts$/, new RegExp(`${this.cwd}/index.ts`), /\/node_modules\//], // DO not look into node_modules, only user code
+      rootPaths: ScanApp.activeAppPaths(this.rootPaths),
       listener: this,
       initialFileValidator: x => !(x.file in require.cache) // Skip already imported files
     });

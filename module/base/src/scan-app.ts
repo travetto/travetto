@@ -83,12 +83,16 @@ export class ScanApp {
     }
   }
 
-  static findActiveAppFiles(roots: string[] = ['.'], exclude?: (file: string) => boolean, root = Env.cwd) {
+  static activeAppPaths(roots: string[] = ['.'], mainSet = ['src', 'extension']) {
     const [main, ...rest] = roots;
-    const PATH_RE = SystemUtil.pathMatcher([
+    return [
       ...rest.map(x => FsUtil.joinUnix(x, 'src')),
-      ...['src', 'extension'].map(x => FsUtil.joinUnix(main, x))
-    ]);
+      ...mainSet.map(x => FsUtil.joinUnix(main, x))
+    ];
+  }
+
+  static findActiveAppFiles(roots: string[] = ['.'], exclude?: (file: string) => boolean, root = Env.cwd, mainSet = ['src', 'extension']) {
+    const PATH_RE = SystemUtil.pathMatcher(this.activeAppPaths(roots, mainSet));
 
     const result = this.findFiles('.ts',
       f =>

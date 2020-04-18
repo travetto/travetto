@@ -6,7 +6,7 @@ class WatchTest {
   @Test()
   async testWatch() {
     setInterval(() => {
-      console.log(compiler.Compiler.cwd);
+      console.log(compiler.Compiler.active);
     }, 2000);
   }
 }
