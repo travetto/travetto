@@ -30,7 +30,7 @@ export class ConsumerManager {
       l.onEvent = l.onEvent.bind(l);
     }
 
-    if (consumers.length === 0) {
+    if (consumers.length === 1) {
       return consumers[0];
     } else {
       const multi: Consumer & { summarize?: () => any } = {

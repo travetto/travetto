@@ -1,6 +1,5 @@
 import * as os from 'os';
 
-import { Compiler } from '@travetto/compiler';
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
 import { WorkPool, EventInputSource } from '@travetto/worker';
 
@@ -11,7 +10,6 @@ import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { ConsumerRegistry } from '../consumer/registry';
 import { Consumer } from '../model/consumer';
-import { ScanApp, Env } from '@travetto/base';
 
 export class TestWatcher {
 
@@ -100,23 +98,17 @@ export class TestWatcher {
       max: os.cpus.length - 1
     });
 
+    // Kick them all off
+    await TestRegistry.getClasses().forEach(cls => {
+      src.trigger({
+        file: cls.__file,
+        class: cls.name
+      });
+    });
+
     const methods = new MethodSource(TestRegistry);
 
-    // RootRegistry.on(e => {
-    //   const conf = this.getConf(e.prev ?? e.curr);
-    //   if (!conf) { return; }
-
-    //   switch (e.type) {
-    //     case 'added': case 'changed': {
-    //       src.trigger({
-    //         file: conf.file,
-    //         class: conf.class.name
-    //       });
-    //       break;
-    //     }
-    //   }
-    // });
-
+    // Wait until after loaded
     methods.on(e => {
       const conf = this.getConf(e.prev ?? e.curr);
       if (!conf) { return; }
@@ -137,12 +129,6 @@ export class TestWatcher {
         }
       }
     });
-
-    Compiler.presenceManager.addNewFolder(`test`);
-
-    // Load all tests
-    ScanApp.findFiles('.ts', undefined, `${Env.cwd}/test`)
-      .forEach(f => require(f.file));
 
     await pool
       .process(src)
