@@ -15,7 +15,7 @@ export function init() {
 
       cmd.output = FsUtil.resolveUnix(FsUtil.cwd, cmd.output);
 
-      FsUtil.mkdirp(path.dirname(cmd.output));
+      await FsUtil.mkdirp(path.dirname(cmd.output));
 
       const { PhaseManager } = await import('@travetto/base');
       await PhaseManager.init('bootstrap').run();

@@ -35,14 +35,31 @@ class $FsUtil {
     return this.toUnix(path.join(...rest));
   }
 
+  makeLinkSync(actual: string, linkPath: string) {
+    try {
+      fs.lstatSync(linkPath);
+    } catch (e) {
+      const file = fs.statSync(actual).isFile();
+      fs.symlinkSync(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
+      fs.lstatSync(linkPath); // Ensure created
+    }
+  }
+
   async mkdirp(pth: string) {
-    if (pth) {
-      try {
-        await fsStat(pth);
-      } catch (e) {
-        await this.mkdirp(path.dirname(pth));
-        await fsMkdir(pth);
-      }
+    try {
+      await fsStat(pth);
+    } catch (e) {
+      await this.mkdirp(path.dirname(pth));
+      await fsMkdir(pth);
+    }
+  }
+
+  mkdirpSync(pth: string) {
+    try {
+      fs.statSync(pth);
+    } catch (e) {
+      this.mkdirpSync(path.dirname(pth));
+      fs.mkdirSync(pth);
     }
   }
 
@@ -68,7 +85,7 @@ class $FsUtil {
   }
 
   unlinkRecursive(pth: string, ignore = false) {
-    execProm(this.unlinkCommand(pth)).catch(err => {
+    return execProm(this.unlinkCommand(pth)).catch(err => {
       if (!ignore) {
         throw err;
       }

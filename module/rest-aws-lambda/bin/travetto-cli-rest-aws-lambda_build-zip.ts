@@ -23,11 +23,11 @@ export function init() {
       cmd.workspace = FsUtil.resolveUnix(FsUtil.cwd, cmd.workspace);
       cmd.output = FsUtil.resolveUnix(FsUtil.cwd, cmd.output);
 
-      FsUtil.mkdirp(path.dirname(cmd.output));
+      FsUtil.mkdirpSync(path.dirname(cmd.output));
 
       FsUtil.unlinkRecursiveSync(cmd.workspace);
       FsUtil.unlinkRecursiveSync(cmd.output);
-      FsUtil.mkdirp(cmd.workspace);
+      FsUtil.mkdirpSync(cmd.workspace);
 
       child_process.execSync(`cp -r * ${cmd.workspace}`, { cwd: FsUtil.cwd });
 
@@ -49,7 +49,7 @@ export function init() {
       FsUtil.unlinkRecursiveSync(`${cmd.workspace}/package-lock.json`);
 
       // Stub out ts
-      FsUtil.mkdirp(`${cmd.workspace}/node_modules/typescript`);
+      FsUtil.mkdirpSync(`${cmd.workspace}/node_modules/typescript`);
       fs.writeFileSync(`${cmd.workspace}/node_modules/typescript/index.js`,
         'module.exports = {};');
 

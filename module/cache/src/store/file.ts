@@ -23,7 +23,7 @@ export class FileCacheStore<T extends CacheEntry = CacheEntry> extends CullableC
   constructor() {
     super();
     Shutdown.onShutdown(`FileCache.${this.folder}`, () => this.clear());
-    fs.mkdirSync(this.folder);
+    FsUtil.mkdirpSync(this.folder);
   }
 
   clear() {

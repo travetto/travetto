@@ -100,7 +100,7 @@ export class RegisterUtil {
   }
 
   static prepareTranspile(fileName: string, contents?: string) {
-    let fileContents = contents || fs.readFileSync(fileName, 'utf-8');
+    let fileContents = contents ?? fs.readFileSync(fileName, 'utf-8');
 
     for (const preparer of this.preparers) {
       fileContents = preparer(fileName, fileContents);
@@ -180,7 +180,7 @@ export class RegisterUtil {
 
     // Supports bootstrapping with framework resolution
     if (!EnvUtil.isTrue('trv_dev')) {
-      this.addPreparer(x => x.replace(/^.*\/\/\s*@TRV_DEV.*$/g, '// @TRV_DEV_REMOVED')); // Remove dev specific lines
+      this.addPreparer((name, x) => x.replace(/^.*\/\/\s*@TRV_DEV.*$/g, '// @TRV_DEV_REMOVED')); // Remove dev specific lines
       this.libRequire = require;
       Module._load = this.onModuleLoad.bind(this);
       require.extensions['.ts'] = this.compile.bind(this);

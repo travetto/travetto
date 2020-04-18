@@ -1,6 +1,4 @@
-import * as os from 'os';
 import * as fs from 'fs';
-import * as path from 'path';
 import { FsUtil } from './fs-util';
 
 function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
@@ -13,17 +11,11 @@ export class FileCache {
   readonly cacheDir: string;
 
   constructor(cacheDir: string) {
-    this.cacheDir = FsUtil.toUnix(cacheDir
-      .replace(/@PID@/, `${process.pid}`)
-      .replace(/@APP@/, path.basename(process.cwd()))
-      .replace(/@TMP@/, os.tmpdir())
-    );
+    this.cacheDir = FsUtil.toUnix(cacheDir);
   }
 
   init() {
-    if (!fs.existsSync(this.cacheDir)) {
-      fs.mkdirSync(this.cacheDir);
-    }
+    FsUtil.mkdirpSync(this.cacheDir);
   }
 
   writeEntry(full: string, contents: string | Buffer) {

@@ -24,25 +24,4 @@ export class Util {
       }
     }
   }
-
-  static makeDir(dir: string) {
-    if (!fs.existsSync(dir)) {
-      try {
-        fs.mkdirSync(dir.replace(/[\\\/]+/g, path.sep));
-      } catch (e) {
-        // Do nothing
-      }
-    }
-  }
-
-  static makeLink(actual: string, linkPath: string) {
-    try {
-      fs.lstatSync(linkPath);
-    } catch (e) {
-      const local = fs.statSync(actual);
-      const file = local.isFile();
-      fs.symlinkSync(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
-      fs.lstatSync(linkPath);
-    }
-  }
 }
