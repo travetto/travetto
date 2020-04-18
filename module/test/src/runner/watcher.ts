@@ -11,7 +11,8 @@ import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { ConsumerRegistry } from '../consumer/registry';
 import { Consumer } from '../model/consumer';
-import { TestRegistryUtil } from '../registry/util';
+import { ScanApp, Env } from '@travetto/base';
+
 export class TestWatcher {
 
   static state: Record<string, TestResult['status']> = {};
@@ -116,31 +117,33 @@ export class TestWatcher {
     //   }
     // });
 
+    methods.on(e => {
+      const conf = this.getConf(e.prev ?? e.curr);
+      if (!conf) { return; }
+
+      switch (e.type) {
+        case 'added': case 'changed': {
+          src.trigger({
+            method: conf.methodName,
+            file: conf.file,
+            class: conf.class.name
+          }, true); // Shift to front
+          break;
+        }
+        case 'removing': {
+          /**
+           *
+           */
+        }
+      }
+    });
+
     Compiler.presenceManager.addNewFolder(`test`);
 
+    // Load all tests
+    ScanApp.findFiles('.ts', undefined, `${Env.cwd}/test`)
+      .forEach(f => require(f.file));
 
-    setTimeout(() => {
-      methods.on(e => {
-        const conf = this.getConf(e.prev ?? e.curr);
-        if (!conf) { return; }
-
-        switch (e.type) {
-          case 'added': case 'changed': {
-            src.trigger({
-              method: conf.methodName,
-              file: conf.file,
-              class: conf.class.name
-            }, true); // Shift to front
-            break;
-          }
-          case 'removing': {
-            /**
-             *
-             */
-          }
-        }
-      });
-    }, 100);
     await pool
       .process(src)
       .finally(() => pool.shutdown());
