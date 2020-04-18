@@ -4,8 +4,8 @@ import { TestEvent } from './model/event';
 
 export class TapEmitter {
   count = 0;
-  fail = 0;
-  ok = 0;
+  failed = 0;
+  passed = 0;
   duration = 0;
   skipped = 0;
   errors: Error[] = [];
@@ -56,10 +56,10 @@ export class TapEmitter {
         }
         case 'failed': {
           status = `not ${status}`;
-          this.fail++;
+          this.failed++;
           break;
         }
-        default: this.ok++;
+        default: this.passed++;
       }
       status += header;
 
@@ -99,6 +99,6 @@ export class TapEmitter {
       }
     }
 
-    this.log(`Results ${this.ok}/${this.count}, failed ${this.fail}, skipped ${this.skipped} # (Test Time: ${this.duration}, Suite Time: ${this.suiteDuration})`);
+    this.log(`Results ${this.passed}/${this.count}, failed ${this.failed}, skipped ${this.skipped} # (Test Time: ${this.duration}, Suite Time: ${this.suiteDuration})`);
   }
 }

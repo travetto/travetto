@@ -71,9 +71,9 @@ export class XunitEmitter implements Consumer {
     name="${suite.classId}"
     time="${suite.duration}"
     tests="${suite.total}"
-    failures="${suite.fail}"
-    errors="${suite.fail}"
-    skipped="${suite.skip}"
+    failures="${suite.failed}"
+    errors="${suite.failed}"
+    skipped="${suite.skipped}"
     file="${suite.file}"
   >
       ${testBodies.join('\n')}
@@ -90,8 +90,8 @@ export class XunitEmitter implements Consumer {
   name="${summary.suites.length ? summary.suites[0].file : 'nameless'}"
   time="${summary.duration}"
   tests="${summary.total}"
-  failures="${summary.fail}"
-  errors="${summary.fail}"
+  failures="${summary.failed}"
+  errors="${summary.failed}"
 >
  ${this.suites.join('\n')}
 </testsuites>

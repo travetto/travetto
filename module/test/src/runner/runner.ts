@@ -54,7 +54,7 @@ export class Runner {
 
     if (consumer.summarize) {
       const result = consumer.summarize();
-      return result.summary.fail <= 0;
+      return result.summary.failed <= 0;
     } else {
       return true;
     }

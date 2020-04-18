@@ -84,6 +84,10 @@ export class ScanApp {
   }
 
   static activeAppPaths(roots: string[] = ['.'], mainSet = ['src', 'extension']) {
+    if (Env.env === 'test') {
+      mainSet.push('test');
+    }
+
     const [main, ...rest] = roots;
     return [
       ...rest.map(x => FsUtil.joinUnix(x, 'src')),

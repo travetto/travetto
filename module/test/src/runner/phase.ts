@@ -37,7 +37,7 @@ export class ExecutionPhaseManager {
       }
       const res = await this.generateSuiteError(`[[${phase}]]`, error);
       this.result.tests.push(res);
-      this.result.fail++;
+      this.result.failed++;
       throw BREAKOUT;
     }
   }
@@ -64,7 +64,7 @@ export class ExecutionPhaseManager {
     if (err !== BREAKOUT) {
       const res = await this.generateSuiteError('all', err);
       this.result.tests.push(res);
-      this.result.fail++;
+      this.result.failed++;
     }
   }
 }
