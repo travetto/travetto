@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { Util } from './util';
 import { DepResolver } from './resolver';
+import { FsUtil } from '../../module/boot/src/fs-util';
 
 export class Finalize {
   static MOD_ROOT = `${Util.ROOT}/module`;
@@ -10,15 +11,15 @@ export class Finalize {
 
   static linkCommon(base: string) {
     for (const dep of this.COMMON_LIBS) {
-      Util.makeLink(`${this.NM_ROOT}/${dep}`, `${base}/${dep}`);
+      FsUtil.makeLinkSync(`${this.NM_ROOT}/${dep}`, `${base}/${dep}`);
     }
   }
 
   static linkFramework(base: string, modules: Set<string>) {
     for (const dep of new Set([...modules, ...(DepResolver.resolve('test', base).regular), '@travetto/cli'])) {
-      const sub = dep.split('@travetto/')[1];
+      const [, sub] = dep.split('@travetto/');
       if (fs.existsSync(`${this.MOD_ROOT}/${sub}`)) {
-        Util.makeLink(`${this.MOD_ROOT}/${sub}`, `${base}/${dep}`);
+        FsUtil.makeLinkSync(`${this.MOD_ROOT}/${sub}`, `${base}/${dep}`);
       }
     }
   }
@@ -35,7 +36,7 @@ export class Finalize {
         }
 
         try {
-          Util.makeLink(`${this.MOD_ROOT}/${smod}/${src}`, `${base}/.bin/${name}`);
+          FsUtil.makeLinkSync(`${this.MOD_ROOT}/${smod}/${src}`, `${base}/.bin/${name}`);
         } catch (e) {
         }
       }
@@ -60,9 +61,9 @@ export class Finalize {
     }
 
     // Create necessary directories
-    Util.makeDir(NM_MOD);
-    Util.makeDir(`${NM_MOD}/@travetto`);
-    Util.makeDir(`${NM_MOD}/.bin`);
+    FsUtil.mkdirpSync(NM_MOD);
+    FsUtil.mkdirpSync(`${NM_MOD}/@travetto`);
+    FsUtil.mkdirpSync(`${NM_MOD}/.bin`);
 
     this.linkCommon(NM_MOD);
     this.linkFramework(NM_MOD, deps.regular);

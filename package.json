@@ -11,6 +11,7 @@
   "scripts": {
     "lint": "npx eslint --ext .js --ext .ts .",
     "init": "./bin/dev-init/init.sh",
+    "prepublish": "cd module/boot; npm run prepublish",
     "reinit": "rm -rf node_modules/; npm i; npm run init",
     "pretest": "./bin/test/resources.sh start",
     "test": "./bin/test/run.sh"

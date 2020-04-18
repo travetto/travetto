@@ -278,8 +278,7 @@ export class DockerContainer {
     if (files) {
       await Promise.all(
         files.map(({ name, content }) =>
-          fsWriteFile(FsUtil.joinUnix(dir, name), content, { mode: '755' })
-        )
+          fsWriteFile(FsUtil.joinUnix(dir, name), content, { mode: '755' }))
       );
     }
     return;
