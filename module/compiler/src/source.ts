@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 
-import { FileCache, RegisterUtil } from '@travetto/boot';
+import { FileCache, RegisterUtil, FsUtil } from '@travetto/boot';
 import { Env, SystemUtil, ScanApp } from '@travetto/base';
 
 import { CompilerUtil } from './util';
@@ -38,7 +38,7 @@ export class SourceManager {
   }
 
   private writeFile(fileName: string, content: string) {
-    fileName = fileName.replace(/[.]js$/, '.ts');
+    fileName = FsUtil.toTS(fileName);
     this.contents.set(fileName, content);
     this.hashes.set(fileName, SystemUtil.naiveHash(content));
     this.cache.writeEntry(fileName, content);
@@ -123,7 +123,7 @@ export class SourceManager {
 
   init() {
     // Find all active app files
-    ScanApp.findActiveAppFiles(this.rootPaths,
+    ScanApp.findAppFiles(this.rootPaths,
       f => f.includes('@travetto/test') && // Exclude test unless in test mode, and it's a src file
         (Env.env !== 'test' || !f.includes('src/')),
       this.cwd
@@ -198,8 +198,8 @@ export class SourceManager {
   getSourceMapHandler() {
     return {
       emptyCacheBetweenOperations: !Env.prod, // Be less strict in non-dev
-      retrieveFile: (p: string) => this.contents.get(p.replace('.js', '.ts'))!,
-      retrieveSourceMap: (source: string) => this.sourceMaps.get(source.replace('.js', '.ts'))!
+      retrieveFile: (p: string) => this.contents.get(FsUtil.toTS(p))!,
+      retrieveSourceMap: (source: string) => this.sourceMaps.get(FsUtil.toTS(source))!
     };
   }
 }

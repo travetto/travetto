@@ -31,7 +31,7 @@ export class AppListUtil {
     await PhaseManager.init('bootstrap', 'compiler').run();
 
     // Load app files
-    ScanApp.findFiles('.ts', x =>
+    ScanApp.findSourceFiles(x =>
       /^([^/]+\/)?(src[\/])/.test(x) && // Look at all 'src/*' (including sub-apps)
       fs.readFileSync(x, 'utf-8').includes('@Application') // Look for @Application annotation
     ).forEach(x => require(x.file)); // Only load files that are candidates

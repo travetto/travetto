@@ -98,15 +98,7 @@ export class TestWatcher {
       max: os.cpus.length - 1
     });
 
-    // Kick them all off
-    await TestRegistry.getClasses().forEach(cls => {
-      src.trigger({
-        file: cls.__file,
-        class: cls.name
-      });
-    });
-
-    const methods = new MethodSource(TestRegistry);
+    const methods = new MethodSource(RootRegistry);
 
     // Wait until after loaded
     methods.on(e => {

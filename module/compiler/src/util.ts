@@ -69,7 +69,7 @@ export class CompilerUtil {
   /**
    * Find all uncompiled files
    */
-  static findAllUncompiledFiles(roots: string[] = ['.']) {
-    return ScanApp.findActiveAppFiles(roots).filter(x => !AppCache.hasEntry(x));
+  static findAllUncompiledFiles() {
+    return ScanApp.findAppFiles(ScanApp.getAppPaths()).filter(x => !AppCache.hasEntry(x));
   }
 }

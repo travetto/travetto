@@ -8,6 +8,7 @@ import { Util, CompletionConfig } from './util';
 commander.version(require('../package.json').version);
 
 const PREFIX = 'travetto-cli';
+const noTS = (x: string) => x.replace(/\.ts$/, '');
 
 export class Execute {
 
@@ -24,7 +25,7 @@ export class Execute {
           .filter(x => x.startsWith(PREFIX));
 
         for (const f of files) {
-          all[f.replace(/[.]ts$/, '')] = `${folder}/${f}`;
+          all[noTS(f)] = `${folder}/${f}`;
         }
       }
     }
@@ -34,7 +35,7 @@ export class Execute {
         .filter(x => x.startsWith(PREFIX));
 
       for (const f of files) {
-        all[f.replace(/[.]ts$/, '')] = `${LOCAL_BIN}/${f}`;
+        all[noTS(f)] = `${LOCAL_BIN}/${f}`;
       }
     }
     return all;

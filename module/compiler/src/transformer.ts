@@ -19,7 +19,7 @@ export class TransformerManager {
   init() {
     const allTransformers: (NodeTransformer<TransformerState> & { file: string })[] = [];
 
-    for (const name of ScanApp.findFiles('.ts', x => TRANSFORMER_RE.test(x), this.cwd)) {
+    for (const name of ScanApp.findSourceFiles(x => TRANSFORMER_RE.test(x), this.cwd)) {
       const all = require(name.file);
       const resolved = Object
         .values(all)

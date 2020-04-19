@@ -7,7 +7,7 @@ class $PendingRegister {
   ordered: [string, Class<any>[]][] = [];
 
   initMeta(cls: Class<any>, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean) {
-    file = FsUtil.toUnix(file.replace(/[.]js$/, '.ts'));
+    file = FsUtil.toUnix(FsUtil.toTS(file));
     const meta = {
       __id: SystemUtil.computeModuleClass(file, cls.name),
       __file: file,
