@@ -73,22 +73,20 @@ export class FileCache {
   }
 
   fromEntryName(cached: string) {
-    return FsUtil.joinUnix(FsUtil.cwd, cached
-      .replace(this.cacheDir, '')
-      .replace(/^[.]/, 'node_modules/@travetto/')
-      .replace(/~/g, '/')
-    )
-      .replace(/[.]js$/, '.ts');
+    return FsUtil.toTS(
+      FsUtil.joinUnix(FsUtil.cwd, FsUtil.toUnix(cached)
+        .replace(this.cacheDir, '')
+        .replace(/^[.]/, 'node_modules/@travetto/')
+        .replace(/~/g, '/')
+      ));
   }
 
   toEntryName(full: string) {
-    const out = FsUtil.joinUnix(this.cacheDir,
-      FsUtil.toUnix(full)
+    return FsUtil.toJS(
+      FsUtil.joinUnix(this.cacheDir, FsUtil.toUnix(full)
         .replace(`${FsUtil.cwd}/`, '')
         .replace(/^.*node_modules\/@travetto\//, '.')
         .replace(/[/]+/g, '~')
-    )
-      .replace(/[.]ts$/, '.js');
-    return out;
+      ));
   }
 }

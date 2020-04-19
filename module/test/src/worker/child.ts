@@ -62,12 +62,14 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     const k = FsUtil.toUnix(path);
     const frameworkModule = k.replace(EXTRACT_FILE_MODULE, (_, mod) => mod);
 
-    return !frameworkModule || // A user file
-      (
-        !FIXED_MODULES.has(frameworkModule) && // Not a core module
-        !k.includes(IS_SUPPORT_FILE) && // Not a support file
-        !k.includes(IS_BIN_FILE) && // Not a bin file
-        !k.includes(IS_SELF_FILE) // Not self
+    return path.endsWith('.ts') && (!path.endsWith('.d.ts')) && // Only look at .ts files
+      (!frameworkModule || // A user file
+        (
+          !FIXED_MODULES.has(frameworkModule) && // Not a core module
+          !k.includes(IS_SUPPORT_FILE) && // Not a support file
+          !k.includes(IS_BIN_FILE) && // Not a bin file
+          !k.includes(IS_SELF_FILE) // Not self
+        )
       );
   }
 
@@ -76,7 +78,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     console.debug('Resetting', Object.keys(require.cache).length);
 
     for (const file of Object.keys(require.cache)) {
-      if (file.endsWith('.ts') && this.isFileResettable(file)) {
+      if (this.isFileResettable(file)) {
         console.debug(`[${process.pid}]`, 'Unloading', file);
         this.compiler.unload(file);
       }

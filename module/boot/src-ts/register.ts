@@ -70,7 +70,7 @@ export class RegisterUtil {
 
   private static compile(m: Module, tsf: string) {
     const content = this.transpile(tsf);
-    return m._compile!(content, tsf.replace(/\.ts$/, '.js'));
+    return m._compile!(content, FsUtil.toJS(tsf));
   }
 
   static addPreparer(fn: Preparer) {

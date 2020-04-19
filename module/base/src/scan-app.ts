@@ -34,6 +34,10 @@ export class ScanApp {
     this.CACHE.clear();
   }
 
+  static findSourceFiles(filter?: RegExp | Pred, root = Env.cwd): SimpleEntry[] {
+    return this.findFiles(this.TS_TESTER, filter, root);
+  }
+
   /**
    * Find files by extension/pattern
    * @param ext Extension (including '.') or a object with a test method {@type Tester}
@@ -41,10 +45,10 @@ export class ScanApp {
    * @param root Starting point for finding files, defaults to cwd
    */
   static findFiles(ext: string | Tester, filter?: RegExp | Pred, root = Env.cwd): SimpleEntry[] {
-    ext = ext === '.ts' ? this.TS_TESTER : ext; // Exclude .d.ts when .ts passed in
+    ext = typeof ext === 'string' ? new RegExp(`${ext}$`) : ext;
 
-    const key = root + (typeof ext === 'string' ? ext : ext.source);
-    const testFile: Pred = typeof ext === 'string' ? x => x.endsWith(ext as string) : x => (ext as Tester).test(x);
+    const key = `${root}:${ext.source}`;
+    const testFile: Pred = ext.test.bind(ext);
 
     if (!this.CACHE.has(key)) {
       let toCache: SimpleEntry[] = ScanFs.scanDirSync({
@@ -83,35 +87,32 @@ export class ScanApp {
     }
   }
 
-  static activeAppPaths(roots: string[] = ['.'], mainSet = ['src', 'extension']) {
-    if (Env.env === 'test') {
-      mainSet.push('test');
-    }
-
+  /**
+   * Determine absolute paths of all application paths from app roots
+   */
+  static getAppPaths(roots = Env.appRoots, pathSet = Env.mainAppFolders) {
     const [main, ...rest] = roots;
     return [
       ...rest.map(x => FsUtil.joinUnix(x, 'src')),
-      ...mainSet.map(x => FsUtil.joinUnix(main, x))
+      ...pathSet.map(x => FsUtil.joinUnix(main, x)) // Only main app gets extensions
     ];
   }
 
-  static findActiveAppFiles(roots: string[] = ['.'], exclude?: (file: string) => boolean, root = Env.cwd, mainSet = ['src', 'extension']) {
-    const PATH_RE = SystemUtil.pathMatcher(this.activeAppPaths(roots, mainSet));
+  /**
+   * Find app files, assuming provided root paths provided
+   */
+  static findAppFiles(rootPaths: string[], exclude?: (file: string) => boolean, root = Env.cwd) {
+    const PATH_RE = SystemUtil.pathMatcher(rootPaths);
 
-    const result = this.findFiles('.ts',
-      f =>
-        !/@travetto\/cli/.test(f) && // Exclude CLI
-        (!exclude || !exclude(f)) && // Exclude any filtered items
-        (
-          PATH_RE.test(f) || ( // Match a root file or
-            /node_modules\/(@travetto\/[^\/]+\/((src|extension)\/|index))/.test(f) // a module with src/, extension/ or index
-          )
+    return this.findSourceFiles(f =>
+      !/@travetto\/cli/.test(f) && // Exclude CLI
+      (!exclude || !exclude(f)) && // Exclude any filtered items
+      (
+        PATH_RE.test(f) || ( // Match an app file or
+          /node_modules\/(@travetto\/[^\/]+\/((src|extension)\/|index))/.test(f) // a module with src/, extension/ or index
         )
-      , root
-    )
+      ), root)
       .map(x => x.file);
-
-    return result;
   }
 
   static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {

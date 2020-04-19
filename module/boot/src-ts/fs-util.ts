@@ -7,6 +7,19 @@ const fsStat = util.promisify(fs.stat);
 const fsMkdir = util.promisify(fs.mkdir);
 const execProm = util.promisify(exec);
 
+function execCmd(sync: false, cmd: string, ignoreErrors?: boolean): Promise<{ stdout: string, stderr: string }>;
+function execCmd(sync: true, cmd: string, ignoreErrors?: boolean): Buffer;
+function execCmd(sync: boolean, cmd: string, ignoreErrors = false) {
+  try {
+    const ret = sync ? execSync(cmd) : execProm(cmd);
+    return 'then' in ret && ignoreErrors ? ret.catch(e => { }) : ret;
+  } catch (e) {
+    if (!ignoreErrors) {
+      throw e;
+    }
+  }
+}
+
 class $FsUtil {
 
   cwd: string;
@@ -14,6 +27,9 @@ class $FsUtil {
   constructor() {
     this.cwd = this.toUnix(process.cwd()).replace(/\/$/, '');
   }
+
+  toJS = (x: string) => x.replace(/\.ts$/, '.js');
+  toTS = (x: string) => x.replace(/\.js$/, '.ts');
 
   toUnix(rest: string) {
     return rest.replace(/[\\\/]+/g, '/');
@@ -74,22 +90,24 @@ class $FsUtil {
     }
   }
 
-  unlinkRecursiveSync(pth: string, ignore = false) {
-    try {
-      execSync(this.unlinkCommand(pth));
-    } catch (e) {
-      if (!ignore) {
-        throw e;
-      }
+  copyCommand(src: string, dest: string) {
+    if (process.platform === 'win32') {
+      return `xcopy /y /h /s ${this.toNative(src)} ${this.toNative(dest)}`;
+    } else {
+      return `cp -r -p ${src} ${dest}`;
     }
   }
 
+  unlinkRecursiveSync(pth: string, ignore = false) {
+    return execCmd(true, this.unlinkCommand(pth), ignore);
+  }
+
   unlinkRecursive(pth: string, ignore = false) {
-    return execProm(this.unlinkCommand(pth)).catch(err => {
-      if (!ignore) {
-        throw err;
-      }
-    });
+    return execCmd(false, this.unlinkCommand(pth), ignore);
+  }
+
+  copyRecursiveSync(src: string, dest: string, ignore = false) {
+    return execCmd(true, this.copyCommand(src, dest), ignore);
   }
 }
 

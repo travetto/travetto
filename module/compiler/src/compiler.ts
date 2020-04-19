@@ -23,7 +23,7 @@ class $Compiler extends EventEmitter {
   constructor(
     private cwd: string = Env.cwd,
     private cache: FileCache = AppCache,
-    private rootPaths: string[] = Env.appRoots
+    private rootPaths: string[] = ScanApp.getAppPaths()
   ) {
     super();
 
@@ -41,7 +41,7 @@ class $Compiler extends EventEmitter {
       ext: '.ts',
       cwd: this.cwd,
       excludeFiles: [/.*.d.ts$/, new RegExp(`${this.cwd}/index.ts`), /\/node_modules\//], // DO not look into node_modules, only user code
-      rootPaths: ScanApp.activeAppPaths(this.rootPaths),
+      rootPaths: this.rootPaths,
       listener: this,
       initialFileValidator: x => !(x.file in require.cache) // Skip already imported files
     });
@@ -115,7 +115,7 @@ class $Compiler extends EventEmitter {
     const isNew = !this.presenceManager.has(tsf);
     try {
       const js = this.sourceManager.getTranspiled(tsf); // Compile
-      const jsf = tsf.replace(/\.ts$/, '.js');
+      const jsf = FsUtil.toJS(tsf);
       try {
         return m._compile!(js, jsf);
       } catch (e) {
