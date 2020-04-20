@@ -1,12 +1,8 @@
-import { CacheError, CacheConfig, CacheEntry } from '../types';
+import { CacheStoreType, CacheEntry, CacheConfig } from '../types';
 import { CacheStoreUtil } from './util';
+import { CacheError } from './error';
 
-export type ValidCacheFields<T> = {
-  [K in keyof T]:
-  (T[K] extends CacheStore ? K : never)
-}[keyof T];
-
-export abstract class CacheStore<T extends CacheEntry = CacheEntry> {
+export abstract class CacheStore<T extends CacheEntry = CacheEntry> implements CacheStoreType<T> {
 
   abstract get(key: string): Promise<T | undefined> | T | undefined;
   abstract has(key: string): Promise<boolean> | boolean;
@@ -25,7 +21,7 @@ export abstract class CacheStore<T extends CacheEntry = CacheEntry> {
     return CacheStoreUtil.computeKey(params);
   }
 
-  async getAndCheckAge(config: CacheConfig, key: string): Promise<any> {
+  async getAndCheckAge(config: CacheConfig, key: string) {
     const entry = await this.get(key);
     const now = Date.now();
     if (entry === undefined) { // Missing
@@ -48,7 +44,7 @@ export abstract class CacheStore<T extends CacheEntry = CacheEntry> {
     return entry.data;
   }
 
-  setWithAge(config: CacheConfig, entry: Partial<T> & { data: any, key: string }): Promise<CacheEntry> | CacheEntry {
+  setWithAge(config: CacheConfig, entry: Partial<T> & { data: any, key: string }) {
     return this.set(entry.key, {
       ...entry,
       issuedAt: Date.now(),
@@ -71,35 +67,5 @@ export abstract class CacheStore<T extends CacheEntry = CacheEntry> {
       }
     }
     return res;
-  }
-}
-
-export abstract class CullableCacheStore<T extends CacheEntry = CacheEntry> extends CacheStore<T> {
-
-  lastCullCheck = Date.now();
-  cullRate = 10 * 60000; // 10 minutes
-
-  async cull(force = false) {
-    if (!force && (Date.now() - this.lastCullCheck) < this.cullRate) {
-      return;
-    }
-
-    this.lastCullCheck = Date.now();
-
-    const all = [];
-    const keys = await this.keys();
-    for (const key of keys) {
-      all.push((async () => {
-        try {
-          const expired = await this.isExpired(key);
-          if (expired) {
-            await this.delete(key);
-          }
-        } catch {
-          await this.delete(key);
-        }
-      })());
-    }
-    await Promise.all(all);
   }
 }

@@ -1,8 +1,8 @@
 import { ModelService, Model } from '@travetto/model';
 import { Text, Long } from '@travetto/schema';
 
-import { CullableCacheStore } from '../src/store/types';
 import { CacheEntry } from '../src/types';
+import { CullableCacheStore } from '../src/store/cullable';
 import { CacheStoreUtil } from '../src/store/util';
 
 @Model()

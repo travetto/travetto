@@ -39,7 +39,7 @@ The `@Cache` decorator supports configurations on:
   * `maxAge` the number of milliseconds will hold the value before considering the cache entry to be invalid.  By default values will live infinitely.
   * `extendOnAccess` determines if the cache timeout should be extended on access.  This only applies to cache values that have specified a `maxAge`.
   * `serialize` the function to execute before storing a cacheable value.  This allows for any custom data modification needed to persist as a string properly. 
-  * `deserialize` the function to execute on return of a cached value.  This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.).  This method should not be used often, as the return values of the methods should naturally serialize to/from `JSON` and the values should be usable either way.
+  * `reinstate` the function to execute on return of a cached value.  This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.).  This method should not be used often, as the return values of the methods should naturally serialize to/from `JSON` and the values should be usable either way.
 
 ### @EvictCache
 

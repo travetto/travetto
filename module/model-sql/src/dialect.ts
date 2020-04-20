@@ -385,7 +385,7 @@ export abstract class SQLDialect implements DialectState {
             case '$lt': case '$gt': case '$gte': case '$lte': {
               const subItems = (Object.keys(top) as (keyof typeof SQL_OPS)[])
                 .map(ssk => `${sPath} ${SQL_OPS[ssk]} ${resolve(top[ssk])}`);
-              items.push(subItems.length > 1 ? `(${subItems.join(SQL_OPS.$and)})` : subItems[0]);
+              items.push(subItems.length > 1 ? `(${subItems.join(` ${SQL_OPS.$and} `)})` : subItems[0]);
               break;
             }
             case '$near':
@@ -403,7 +403,7 @@ export abstract class SQLDialect implements DialectState {
     if (items.length === 1) {
       return items[0];
     } else {
-      return `(${items.join(SQL_OPS.$and)})`;
+      return `(${items.join(` ${SQL_OPS.$and} `)})`;
     }
   }
 
@@ -443,7 +443,7 @@ export abstract class SQLDialect implements DialectState {
     }
     return !columns ?
       `SELECT ${this.rootAlias}.* ` :
-      `SELECT ${columns.join(',')}`;
+      `SELECT ${columns.join(', ')}`;
   }
 
   getFromSQL<T>(cls: Class<T>): string {
