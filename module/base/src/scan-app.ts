@@ -1,4 +1,5 @@
 import { FsUtil, RegisterUtil } from '@travetto/boot';
+import * as fs from 'fs';
 
 import { Env } from './env';
 import { ScanEntry, ScanFs } from './scan-fs';
@@ -17,6 +18,10 @@ export class ScanApp {
 
   private static CACHE = new Map<string, SimpleEntry[]>();
 
+  static mainAppFolders: string[] = ['src', 'extension'];
+  static modAppFolders: string[] = ['src', 'extension', 'index'];
+  static modAppExclude: string[] = ['test', 'cli'];
+
   static TS_TESTER: Tester = {
     source: '.ts',
     test: x => x.endsWith('.ts') && !x.endsWith('.d.ts')
@@ -25,6 +30,17 @@ export class ScanApp {
   private static resolveFramework(x: SimpleEntry, root: string) {
     const file = RegisterUtil.devResolve(x.file);
     return { ...x, file, module: file.replace(`${root}/`, '') };
+  }
+
+  private static getAppModPathMatcher(root = Env.cwd) {
+    const MOD_RE = new RegExp(`node_modules/@travetto/(${
+      fs.readdirSync(`${root}/node_modules/@travetto`)
+        .filter(x => !x.startsWith('.') && this.modAppExclude.includes(x))
+        .join('|')
+      // eslint-disable-next-line @typescript-eslint/indent
+      })/(${this.modAppFolders.join('|')})`);
+
+    return MOD_RE;
   }
 
   /**
@@ -90,7 +106,7 @@ export class ScanApp {
   /**
    * Determine absolute paths of all application paths from app roots
    */
-  static getAppPaths(roots = Env.appRoots, pathSet = Env.mainAppFolders) {
+  static getAppPaths(roots = Env.appRoots, pathSet = ScanApp.mainAppFolders) {
     const [main, ...rest] = roots;
     return [
       ...rest.map(x => FsUtil.joinUnix(x, 'src')),
@@ -103,16 +119,12 @@ export class ScanApp {
    */
   static findAppFiles(rootPaths: string[], exclude?: (file: string) => boolean, root = Env.cwd) {
     const PATH_RE = SystemUtil.pathMatcher(rootPaths);
-
-    return this.findSourceFiles(f =>
-      !/@travetto\/cli/.test(f) && // Exclude CLI
-      (!exclude || !exclude(f)) && // Exclude any filtered items
-      (
-        PATH_RE.test(f) || ( // Match an app file or
-          /node_modules\/(@travetto\/[^\/]+\/((src|extension)\/|index))/.test(f) // a module with src/, extension/ or index
-        )
-      ), root)
-      .map(x => x.file);
+    const MOD_RE = this.getAppModPathMatcher(root);
+    return this.findSourceFiles(
+      // Exclude any filtered items, only return app files or module files
+      f => (!exclude || !exclude!(f)) && (PATH_RE.test(f) || MOD_RE.test(f)),
+      root
+    ).map(x => x.file);
   }
 
   static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {

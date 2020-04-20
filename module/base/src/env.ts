@@ -14,7 +14,6 @@ class $Env {
   readonly trace: boolean | string;
   readonly quietInit: boolean;
   readonly appRoots: string[];
-  readonly mainAppFolders: string[] = ['src', 'extension'];
 
   constructor() {
     this.cwd = FsUtil.cwd;
