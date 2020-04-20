@@ -1,9 +1,10 @@
 import { Class } from '@travetto/registry';
 
-import { ApplicationConfig, ApplicationParameter } from './types';
+import { ApplicationConfig, ApplicationParameter, AppListener } from './types';
 import { ApplicationRegistry } from './registry';
 
-type AppClass = Class<{ run(...args: any[]): any }>;
+type OrProm<T> = T | Promise<T>;
+type AppClass = Class<{ run(...args: any[]): OrProm<AppListener | void | undefined> }>;
 
 export type AppDecorator = Partial<ApplicationConfig> & {
   paramMap?: {

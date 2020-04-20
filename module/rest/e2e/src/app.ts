@@ -1,4 +1,4 @@
-import { InjectableFactory, Injectable } from '@travetto/di';
+import { Injectable } from '@travetto/di';
 
 import { Application, RouteConfig, RestApp, RestInterceptor } from '../..';
 
@@ -20,6 +20,7 @@ class DummyApp extends RestApp<Inner> {
 
   listen() {
     console.log('Listening');
+    return {};
   }
 
   async registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[]) {
@@ -41,6 +42,6 @@ export class SampleApp {
   constructor(private app: RestApp) { }
 
   async run() {
-    await this.app.run();
+    return this.app.run();
   }
 }

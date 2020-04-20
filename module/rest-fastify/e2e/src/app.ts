@@ -7,7 +7,7 @@ export class SampleApp {
 
   run() {
     this.config.port = 3000;
-    this.config.ssl = false;
-    this.server.run();
+    this.config.ssl.active = false;
+    return this.server.run();
   }
 }

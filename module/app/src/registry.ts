@@ -12,8 +12,8 @@ export class $ApplicationRegistry {
     this.applications.set(app, config);
   }
 
-  loadAllFromExtension() {
-    for (const { file } of ScanApp.findFiles('.ts', /extension\/application[.].*/)) {
+  loadPackaged() {
+    for (const { file } of ScanApp.findFiles('.ts', /\/application[.].([^.]+)[.]ts/)) {
       try {
         require(file);
       } catch (e) {

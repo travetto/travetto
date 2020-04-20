@@ -195,11 +195,8 @@ export class AssertTransformer {
   static handleCall(state: TransformerState & AssertState, node: ts.CallExpression) {
     if (state[isTest] === undefined) {
       const name = FsUtil.toUnix(state.source.fileName);
-      // Only apply to test files
-      state[isTest] = /\/test\//.test(name) &&
-        // Allow for inherited tests, from node_modules/@travetto/*/test
-        (!/\/(src|node_modules)\//.test(name) || /node_modules\/@travetto\/[^/]+\/test/.test(name)) &&
-        /\s+assert[^(]*\(/.test(state.source!.text);
+      // Only apply to test files, allowing for inheriting from module test files as well
+      state[isTest] = (name.includes('/test/') && name.includes('/src/')) || /@travetto\/[^/]+\/test/.test(name);
     }
 
     if (!state[isTest]) {

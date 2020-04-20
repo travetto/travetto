@@ -27,6 +27,6 @@ export interface ApplicationConfig<T = any> {
 }
 
 export interface AppListener {
-  kill?(): Promise<void>;
-  wait?(): Promise<void>;
+  kill?(): Promise<any>;
+  wait?(): Promise<any>;
 }

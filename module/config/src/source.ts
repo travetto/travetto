@@ -24,11 +24,7 @@ export class $ConfigSource {
 
   loadExternal() {
     this.reset();
-    const files = [
-      ...ConfigUtil.fetchConfigs(p => p === 'application'),
-      ...ConfigUtil.fetchConfigs(p => Env.hasProfile(p)),
-      ...ConfigUtil.fetchConfigs(p => p === Env.env)
-    ];
+    const files = ConfigUtil.fetchOrderedConfigs();
 
     if (files.length) {
       console.debug('Found configurations for', files.map(x => x.profile));

@@ -13,6 +13,6 @@ export class SampleApp {
   run(port = 3000, ssl = false, fast?: string, toggle?: 'on' | 'off') {
     this.config.port = port;
     this.config.ssl.active = ssl;
-    this.app.run();
+    return this.app.run();
   }
 }

@@ -19,7 +19,13 @@ export class ApplicationTransformer {
         .map(x => res.isLiteralType(x) ? x.value : undefined)
         .filter(x => x !== undefined);
 
-      type = type.commonType!;
+      type = {
+        ...type.commonType,
+        name: type.name,
+        undefinable: type.undefinable,
+        comment: type.comment,
+        nullable: type.nullable
+      };
       subtype = 'choice';
       meta = { choices };
     } else if (res.isLiteralType(type)) {
@@ -30,7 +36,9 @@ export class ApplicationTransformer {
       type = { ctor: String, name: 'string' } as res.LiteralType;
     }
 
-    return { name, type: type.name!, subtype, meta, optional: def || type.undefinable, def };
+    const ret = { name, type: type.name!, subtype, meta, optional: def !== undefined || type.undefinable || type.nullable, def };
+    console.log('Compute Param', ret);
+    return ret;
   }
 
   @OnClass('trv/app/Application')
@@ -42,9 +50,10 @@ export class ApplicationTransformer {
     }
 
     // Find runnable method
-    const [runMethod] = node.members
-      .filter(x => ts.isMethodDeclaration(x))
-      .filter(x => x.name!.getText() === 'run') as ts.MethodDeclaration[];
+    const runMethod = node.members
+      .find(x =>
+        ts.isMethodDeclaration(x) && x.name!.getText() === 'run'
+      ) as ts.MethodDeclaration;
 
     if (!runMethod) {
       return node;

@@ -51,9 +51,8 @@ export class RunUtil {
     await PhaseManager.init('bootstrap').run();
 
     const { ApplicationRegistry } = await import('../../src/registry');
-    if (app && app.filename.includes('/extension/')) {
-      ApplicationRegistry.loadAllFromExtension();
-    }
+    ApplicationRegistry.loadPackaged(); // Load packaged apps as well
+
     await ApplicationRegistry.run(name, typedSub);
   }
 
