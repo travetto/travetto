@@ -43,7 +43,7 @@ class $ConsoleManager {
   }
 
   private buildContext(payload: ConsolePayload) {
-    const out = [`[${payload.level.padEnd(5)}]`, `[${payload.category}:${payload.line}]`];
+    const out = [payload.level.padEnd(5), `[${payload.category}:${payload.line}]`];
     if (this.timestamp) {
       const [time] = new Date().toISOString().split(this.timeMillis ? /~/ : /[.]/);
       out.unshift(time);
