@@ -43,7 +43,6 @@ export class Service {
   async run() {
     await this.src.save(Person, Person.from({ name: 'bob', age: 10, gender: 'm', }));
     await this.src.save(Employee, Employee.from({ name: 'bob2' }));
-
-    setTimeout(() => { }, 100000000);
+    return { wait: () => new Promise(r => setTimeout(r, 100000000)) };
   }
 }

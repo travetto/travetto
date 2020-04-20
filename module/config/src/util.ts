@@ -1,7 +1,6 @@
-import { readFileSync } from 'fs';
 import * as path from 'path';
 
-import { ResourceManager, Util } from '@travetto/base';
+import { ResourceManager, Util, Env } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 type Prim = number | string | boolean | null;
@@ -9,20 +8,24 @@ export type Nested = { [key: string]: Prim | Nested | Nested[] };
 
 export class ConfigUtil {
 
-  static fetchConfigs(test: (profile: string) => boolean) {
+  static fetchOrderedConfigs() {
     const envFiles = ResourceManager.findAllByExtensionSync('.yml')
       .map(file => ({ file, profile: path.basename(file).replace('.yml', '') }))
-      .filter(({ profile }) => test(profile))
-      .map(({ file, profile }) => {
-        const finalPath = ResourceManager.toAbsolutePathSync(file);
-        return { file: finalPath, profile };
+      .sort((a, b) => {
+        if (a.profile === 'application' || b.profile === 'application') {
+          return a.profile === 'application' ? -1 : 1;
+        } else if (a.profile === Env.env || b.profile === Env.env) {
+          return a.profile === Env.env ? 1 : -1;
+        } else {
+          return a.profile.localeCompare(b.profile);
+        }
       });
 
     return envFiles;
   }
 
   static getConfigFileAsData(file: string, ns: string = '') {
-    const data = readFileSync(file, 'utf-8');
+    const data = ResourceManager.readSync(file, 'utf8');
     const doc = YamlUtil.parse(data);
     return ns ? { [ns]: doc } : doc;
   }

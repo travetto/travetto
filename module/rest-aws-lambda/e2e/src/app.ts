@@ -14,6 +14,6 @@ export class SampleApp {
   constructor(private app: RestApp) { }
 
   run() {
-    this.app.run();
+    return this.app.run();
   }
 }

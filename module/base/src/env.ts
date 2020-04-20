@@ -24,7 +24,7 @@ class $Env {
     this.appRoots = this.computeAppRoots();
 
     this.watch = EnvUtil.isTrue('watch');
-    this.debug = EnvUtil.isSet('debug') ? !EnvUtil.isFalse('debug') : this.prod;
+    this.debug = EnvUtil.isSet('debug') ? !EnvUtil.isFalse('debug') : !this.prod;
     this.trace = EnvUtil.isSet('trace') && !EnvUtil.isFalse('trace');
     this.quietInit = EnvUtil.isTrue('quiet_init');
   }

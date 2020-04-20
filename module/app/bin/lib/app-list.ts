@@ -38,7 +38,7 @@ export class AppListUtil {
 
     // Get applications
     const { ApplicationRegistry } = await import('../../src/registry');
-    ApplicationRegistry.loadAllFromExtension();
+    ApplicationRegistry.loadPackaged();
     const res = await ApplicationRegistry.getAll();
 
     const items = Promise.all(res.map(async x => ({
