@@ -9,7 +9,7 @@
   "description": "Data type registry for runtime validation, reflection and binding. ",
   "optionalExtensionDependencies": {
     "@travetto/rest": "^1.0.0-beta.0",
-    "@types/faker": "^4.1.9",
+    "@types/faker": "^4.1.11",
     "faker": "^4.1.0"
   },
   "homepage": "https://travetto.io",
