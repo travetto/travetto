@@ -19,8 +19,14 @@ export interface ApplicationParameter {
 
 export interface ApplicationConfig<T = any> {
   name: string;
+  filename: string;
   description?: string;
   params?: ApplicationParameter[];
   target: Class<T>;
   watchable?: boolean;
+}
+
+export interface AppListener {
+  kill?(): Promise<void>;
+  wait?(): Promise<void>;
 }

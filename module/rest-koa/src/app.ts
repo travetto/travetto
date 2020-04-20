@@ -3,6 +3,7 @@ import * as kCompress from 'koa-compress';
 import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
+import { AppUtil } from '@travetto/app';
 import { Injectable, Inject } from '@travetto/di';
 import { RestApp, RouteConfig, RestCookieConfig } from '@travetto/rest';
 
@@ -59,11 +60,13 @@ export class KoaRestApp extends RestApp<koa> {
   }
 
   async listen() {
+    let server;
     if (this.config.ssl.active) {
       const https = await import('https');
-      https.createServer((await this.config.getKeys())!, this.raw.callback()).listen(this.config.port, this.config.bindAddress);
+      server = https.createServer((await this.config.getKeys())!, this.raw.callback()).listen(this.config.port, this.config.bindAddress);
     } else {
-      this.raw.listen(this.config.port, this.config.bindAddress);
+      server = this.raw.listen(this.config.port, this.config.bindAddress);
     }
+    return AppUtil.listenToCloseable(server);
   }
 }

@@ -100,8 +100,8 @@ export class Util {
                 color`${{ type: subVal }}`,
                 descSp,
                 color`${{ description: descVal }}`
-                  .replace(/([(]default:\s+)(.*?)([)])/g,
-                    (_, l, input, r) => color`${l}${{ input }}${r}`)
+                  .replace(/(\(default:\s+)(.*?)(\))/g,
+                    (_, l, input, r) => color`${l}${{ input }}${{ description: r }}`)
               );
               return line
                 .filter(x => x !== '' && x !== undefined)

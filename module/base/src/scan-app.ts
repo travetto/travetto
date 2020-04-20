@@ -33,9 +33,9 @@ export class ScanApp {
   }
 
   private static getAppModPathMatcher(root = Env.cwd) {
-    const MOD_RE = new RegExp(`node_modules/@travetto/(${
+    const MOD_RE = new RegExp(`^node_modules/@travetto/(${
       fs.readdirSync(`${root}/node_modules/@travetto`)
-        .filter(x => !x.startsWith('.') && this.modAppExclude.includes(x))
+        .filter(x => !x.startsWith('.') && !this.modAppExclude.includes(x))
         .join('|')
       // eslint-disable-next-line @typescript-eslint/indent
       })/(${this.modAppFolders.join('|')})`);

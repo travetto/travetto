@@ -7,6 +7,7 @@ import * as compression from 'compression';
 import * as awsServerlessExpress from 'aws-serverless-express';
 import * as awsServerlessExpressMiddleware from 'aws-serverless-express/middleware';
 
+import { AppUtil } from '@travetto/app';
 import { Inject } from '@travetto/di';
 import { RestApp, RouteConfig, RouteUtil } from '@travetto/rest';
 
@@ -67,7 +68,7 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
     // Register options handler for each controller
     if (key !== RestApp.GLOBAL) {
       const optionHandler = RouteUtil.createRouteHandler(this.interceptors,
-        { method: 'options', path: '*', handler: this.globalHandler });
+        { method: 'options', path: '*', handler: this.globalHandler, params: [] });
 
       router.options('*', optionHandler as any);
     }
@@ -82,7 +83,10 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
   }
 
   listen() {
-    // No-op
+    return {
+      ...AppUtil.listenToCloseable(this.server),
+      async wait() { } // Don't wait
+    };
   }
 
   async handle(event: any, context: any) {

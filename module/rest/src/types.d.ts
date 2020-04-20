@@ -1,5 +1,5 @@
-import * as exp from 'express-serve-static-core';
-import * as cookies from 'cookies';
+import * as exp from 'express-serve-static-core'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as cookies from 'cookies'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { IncomingMessage, ServerResponse } from 'http';
 
 declare global {
@@ -18,7 +18,7 @@ declare global {
       headers: Record<string, string | string[]>;
       cookies: {
         get(name: string, options?: cookies.GetOption): string | undefined;
-      }
+      };
       body: any;
       pipe(stream: NodeJS.WritableStream): any;
       header(key: string): string | string[] | undefined;
@@ -49,7 +49,7 @@ declare global {
       end(val?: any): any;
       cookies: {
         set(name: string, value?: any, options?: cookies.SetOption): void;
-      }
+      };
     }
   }
 }

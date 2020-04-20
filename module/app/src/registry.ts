@@ -1,8 +1,9 @@
-import { Env, AppInfo } from '@travetto/base';
+import { Env, AppInfo, ScanApp } from '@travetto/base';
 import { ConfigSource } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 
 import { ApplicationConfig } from './types';
+import { AppUtil } from './util';
 
 export class $ApplicationRegistry {
   private applications = new Map<string, ApplicationConfig>();
@@ -11,15 +12,12 @@ export class $ApplicationRegistry {
     this.applications.set(app, config);
   }
 
-  // TODO: Need an alternative now that we aren't loading config files
-  loadAllFromConfig() {
-    for (const entries of Object.values(ConfigSource.get('app.entry') ?? {}) as string[][]) {
-      for (const entry of entries) {
-        try {
-          require(entry);
-        } catch (e) {
-          // Ignore
-        }
+  loadAllFromExtension() {
+    for (const { file } of ScanApp.findFiles('.ts', /extension\/application[.].*/)) {
+      try {
+        require(file);
+      } catch (e) {
+        // Ignore
       }
     }
   }
@@ -44,7 +42,10 @@ export class $ApplicationRegistry {
       });
     }
     if (inst.run) {
-      await inst.run(...args);
+      const ret = await inst.run(...args);
+      if (AppUtil.isListener(ret)) {
+        await AppUtil.processListener(ret);
+      }
     }
     if (!config.watchable) {
       setTimeout(() => process.exit(0), 10).unref(); // Kill if not already dead
