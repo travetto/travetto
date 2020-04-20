@@ -38,7 +38,7 @@ export class $ApplicationRegistry {
       console.log('Configured', {
         app: AppInfo,
         env: Env.toJSON(),
-        config: Env.prod ? ConfigSource.getSecure('') : ConfigSource.get('')
+        config: Env.prod ? ConfigSource.getSecure() : ConfigSource.get()
       });
     }
     if (inst.run) {

@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Test, BeforeAll } from '@travetto/test';
 import { Schema, Text } from '@travetto/schema';
 
-import { BaseModelTest } from '../../extension/base.test';
+import { BaseModelTest } from '../../support/test.base';
 import { Model, ModelCore } from '../..';
 
 @Schema()

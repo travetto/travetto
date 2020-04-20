@@ -26,7 +26,7 @@ class $ConsoleManager {
   readonly key = KEY;
   readonly defaultPlain = EnvUtil.isTrue('plain_console') || EnvUtil.isTrue('plain');
   readonly timestamp = !EnvUtil.isFalse('log_time');
-  readonly timeMillis = EnvUtil.isTrue('log_millis') || (Env.trace && !EnvUtil.isFalse('log_millis'));
+  readonly timeMillis = EnvUtil.isTrue('log_millis') || (Env.trace ? !EnvUtil.isFalse('log_millis') : false);
   readonly exclude = new Set<string>([]);
 
   constructor() {

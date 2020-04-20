@@ -4,7 +4,7 @@ import { Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
 import { Point, Model, ModelService } from '../..';
-import { BaseModelTest } from '../../extension/base.test';
+import { BaseModelTest } from '../../support/test.base';
 
 @Model()
 class Location {

@@ -4,6 +4,7 @@ import { Env, Stacktrace } from '@travetto/base';
 
 import { LogEvent, Formatter } from '../types';
 import { stylize, LEVEL_STYLES } from './styles';
+import { FsUtil } from '@travetto/boot';
 
 export interface LineFormatterOpts {
   timestamp?: boolean;
@@ -49,7 +50,7 @@ export class LineFormatter implements Formatter {
 
     if (ev.file && opts.location) {
       const ns = ev.category;
-      const loc = ev.line ? `${ns}:${`${ev.line}`.padStart(3)}` : ns;
+      const loc = ev.line ? `${Env.prod ? ev.category : FsUtil.toTS(ev.file.replace(Env.cwd, '.'))}:${ev.line}` : ns;
       out = `${out}[${stylize(loc!, 'blue')}] `;
     }
 

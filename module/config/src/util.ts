@@ -12,13 +12,10 @@ export class ConfigUtil {
     const envFiles = ResourceManager.findAllByExtensionSync('.yml')
       .map(file => ({ file, profile: path.basename(file).replace('.yml', '') }))
       .sort((a, b) => {
-        if (a.profile === 'application' || b.profile === 'application') {
-          return a.profile === 'application' ? -1 : 1;
-        } else if (a.profile === Env.env || b.profile === Env.env) {
-          return a.profile === Env.env ? 1 : -1;
-        } else {
-          return a.profile.localeCompare(b.profile);
-        }
+        const ap = a.profile, bp = b.profile;
+        return ((ap === 'application' ? 1 : 0) + (bp === 'application' ? -1 : 0)) ||
+          ((ap === Env.env ? -1 : 0) + (bp === Env.env ? 1 : 0)) ||
+          (ap.localeCompare(bp) || a.file.localeCompare(b.file));
       });
 
     return envFiles;
@@ -76,10 +73,10 @@ export class ConfigUtil {
     return next;
   }
 
-  static bindEnvByKey(obj: Nested, key: string) {
+  static bindEnvByKey(obj: Nested, key?: string) {
     // Handle process.env on bind as the structure we need may not
     // fully exist until the config has been created
-    const matcher = new RegExp(`^${key.replace(/[.]/g, '_')}`, 'i'); // Check is case insensitive
+    const matcher = !key ? /./ : new RegExp(`^${key.replace(/[.]/g, '_')}`, 'i'); // Check is case insensitive
     for (const k of Object.keys(process.env)) { // Find all keys that match
       if (k.includes('_') && (!key || matcher.test(k))) { // Require at least one level
         ConfigUtil.bindEnvByParts(obj, key ? k.substring(key.length + 1).split('_') : k.split('_'), process.env[k] as string);

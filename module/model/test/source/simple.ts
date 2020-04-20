@@ -4,7 +4,7 @@ import { Test } from '@travetto/test';
 import { Schema, Text, Precision } from '@travetto/schema';
 import { SchemaFakerUtil } from '@travetto/schema/extension/faker';
 
-import { BaseModelTest } from '../../extension/base.test';
+import { BaseModelTest } from '../../support/test.base';
 import { Model, BaseModel } from '../..';
 
 @Schema()
