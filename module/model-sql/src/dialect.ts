@@ -513,7 +513,7 @@ ${this.getLimitSQL(cls, query)}`;
 CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   ${fields
         .map(f => {
-          const def = this.getColumnDefinition(f)!;
+          const def = this.getColumnDefinition(f) || '';
           return f.name === this.idField.name && !parent ?
             def.replace('DEFAULT NULL', 'NOT NULL') : def;
         })

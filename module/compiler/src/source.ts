@@ -123,11 +123,7 @@ export class SourceManager {
 
   init() {
     // Find all active app files
-    ScanApp.findAppFiles(this.rootPaths,
-      f => f.includes('@travetto/test') && // Exclude test unless in test mode, and it's a src file
-        (Env.env !== 'test' || !f.includes('src/')),
-      this.cwd
-    )
+    ScanApp.findAppFiles(this.rootPaths, undefined, this.cwd)
       .filter(x => !require.cache[x])
       .forEach(x => this.rootNames.add(x));
 

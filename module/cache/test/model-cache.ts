@@ -9,6 +9,8 @@ import { SchemaRegistry } from '@travetto/schema';
 import { SQLModelConfig } from '@travetto/model-sql';
 import { TestUtil } from '@travetto/model-sql/test/util';
 
+import '@travetto/model-sql/extension/postgresql/dialect';
+
 @Suite()
 export class ModelCacheSuite extends CacheTestSuite {
 
