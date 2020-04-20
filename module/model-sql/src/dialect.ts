@@ -1,5 +1,5 @@
 import { Class, ChangeEvent } from '@travetto/registry';
-import { SchemaRegistry, FieldConfig, BindUtil, SchemaChangeEvent, Schema } from '@travetto/schema';
+import { SchemaRegistry, FieldConfig, SchemaChangeEvent, Schema } from '@travetto/schema';
 import { Util, AppError } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
 
@@ -40,7 +40,7 @@ export abstract class SQLDialect implements DialectState {
     $and: 'AND',
     $or: 'OR',
     $not: 'NOT',
-    $all: 'ALL =',
+    $all: '=ALL',
     $regex: '<unknown>',
     $iregex: '<unknown>',
     $in: 'IN',
@@ -338,9 +338,24 @@ export abstract class SQLDialect implements DialectState {
           const resolve = this.resolveValue.bind(this, field);
 
           switch (subKey) {
-            case '$all': case '$nin': case '$in': {
+            case '$nin': case '$in': {
               const arr = (Array.isArray(v) ? v : [v]).map(el => resolve(el));
-              items.push(`${sPath} ${SQL_OPS[subKey]} (${arr})`);
+              items.push(`${sPath} ${SQL_OPS[subKey]} (${arr.join(',')})`);
+              break;
+            }
+            case '$all': {
+              const arr = [...new Set(Array.isArray(v) ? v : [v])].map(el => resolve(el));
+              const valueTable = this.parentTable(sStack);
+              const alias = `_all_${sStack.length}`;
+              const ppath = this.ident(this.parentPathField.name);
+              const rppath = this.resolveName([...sStack, field, this.parentPathField]);
+
+              items.push(`${arr.length} = (
+                SELECT COUNT(DISTINCT ${alias}.${this.ident(field.name)}) 
+                FROM ${valueTable} ${alias} 
+                WHERE ${alias}.${ppath} = ${rppath}
+                AND ${alias}.${this.ident(field.name)} IN (${arr.join(',')})
+              )`);
               break;
             }
             case '$regex': {

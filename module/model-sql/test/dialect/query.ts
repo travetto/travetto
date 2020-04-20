@@ -74,7 +74,7 @@ export abstract class QueryTest {
         {
           $or: [{ name: 5 }, { age: 10 }]
         },
-        { g: { z: { $all: ['a', 'b', 'c'] } } },
+        { g: { z: { $in: ['a', 'b', 'c'] } } },
         { a: { d: { $gt: 20 } } }
       ]
     };
@@ -87,7 +87,7 @@ export abstract class QueryTest {
     };
 
     const qryStr = dct.getWhereGroupingSQL(WhereType, qry);
-    assert(qryStr === `(WhereTypeAB.c = 5 AND WhereTypeD.e = TRUE AND (WhereType.name = 5 OR WhereType.age = 10) AND z.z ALL = ('a','b','c') AND WhereTypeA.d > 20)`);
+    assert(qryStr === `(WhereTypeAB.c = 5 AND WhereTypeD.e = TRUE AND (WhereType.name = 5 OR WhereType.age = 10) AND z.z IN ('a','b','c') AND WhereTypeA.d > 20)`);
   }
 
   @Test()
