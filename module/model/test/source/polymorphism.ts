@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Test } from '@travetto/test';
 
 import { Model, BaseModel } from '../..';
-import { BaseModelTest } from '../../extension/base.test';
+import { BaseModelTest } from '../../support/test.base';
 
 @Model({ baseType: true })
 export class Person extends BaseModel {

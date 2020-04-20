@@ -1,4 +1,3 @@
-import { Env } from '@travetto/base';
 import { EnvUtil } from '@travetto/boot';
 
 export class LogUtil {

@@ -1,4 +1,4 @@
-import { Util, Env } from '@travetto/base';
+import { Util } from '@travetto/base';
 
 import { ConfigUtil, Nested } from './util';
 
@@ -35,11 +35,11 @@ export class $ConfigSource {
     }
   }
 
-  get(key: string) {
+  get(key?: string) {
     return this.bindTo({}, key);
   }
 
-  getSecure(key: string = '') {
+  getSecure(key?: string) {
     const str = JSON.stringify(this.get(key), (k, value) => {
       // TODO: Expand restriction detection
       if (
@@ -67,8 +67,8 @@ export class $ConfigSource {
     Util.deepAssign(this.storage, ConfigUtil.breakDownKeys(data), 'coerce');
   }
 
-  bindTo(obj: any, key: string): Record<string, any> {
-    const keys = key?.split('.') ?? [];
+  bindTo(obj: any, key?: string): Record<string, any> {
+    const keys = (key ? key.split('.') : []);
     let sub: any = this.storage;
 
     while (keys.length && sub) {
