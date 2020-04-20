@@ -4,7 +4,7 @@ import { HtmlUtil, Parse5Adapter } from './html-util';
 
 const allEntities = new htmlEntities.AllHtmlEntities();
 
-const LI_TOKEN = '!@#!@_@#';
+const LI_TOKEN = '⇜⇟⇝';
 
 export class MarkdownUtil {
 
