@@ -1,6 +1,7 @@
 import { IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
+import { AppUtil } from '@travetto/app';
 import { RouteConfig, RestApp } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
@@ -33,7 +34,7 @@ export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
   }
 
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
-    if (this.listening) {
+    if (this.listening) { // Does not support live reload
       return;
     }
     for (const route of routes) {
@@ -52,7 +53,11 @@ export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
     }
   }
 
-  listen() {
-    this.raw.listen(this.config.port, this.config.bindAddress);
+  async listen() {
+    await this.raw.listen(this.config.port, this.config.bindAddress);
+    return {
+      ...AppUtil.listenToCloseable(this.raw.server),
+      kill: this.raw.close.bind(this.raw)
+    };
   }
 }

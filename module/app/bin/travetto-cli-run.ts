@@ -87,7 +87,7 @@ export function init() {
       console.log(`\n${listHelper()}\n`);
     })
     .allowUnknownOption()
-    .option('-e, --env [env]', 'Application environment (dev|prod|<any>), (default: dev)')
+    .option('-e, --env [env]', 'Application environment (dev|prod|<any>)', 'dev')
     .option('-r, --root [root]', 'Application root, defaults to associated root by name')
     .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', Util.BOOLEAN_RE)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
@@ -98,8 +98,8 @@ export function init() {
         ...(cmd.profile ?? []),
         ...(process.env.PROFILE ?? '').split(/,/g)
       ]
-        .filter(x => !!x)
-        .map(x => x.trim());
+        .map(x => x.trim())
+        .filter(x => !!x);
 
       if (cmd.env) {
         process.env.ENV = cmd.env; // Preemptively set b/c env changes how we compile some things
@@ -112,7 +112,7 @@ export function init() {
       if (cmd.profile) {
         process.env.PROFILE = cmd.profile.join(',');
       }
-      if (cmd.watch) {
+      if (cmd.watch !== undefined) {
         process.env.WATCH = `${cmd.watch}`;
       }
 

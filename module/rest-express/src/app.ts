@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 
+import { AppUtil } from '@travetto/app';
 import { Injectable } from '@travetto/di';
 import { RouteUtil, RestApp, RouteConfig, RouteHandler } from '@travetto/rest';
 
@@ -67,12 +68,15 @@ export class ExpressRestApp extends RestApp<express.Application> {
   }
 
   async listen() {
+    let server;
     if (this.config.ssl.active) {
       const https = await import('https');
       const keys = await this.config.getKeys();
-      https.createServer(keys!, this.raw).listen(this.config.port, this.config.bindAddress);
+      server = https.createServer(keys!, this.raw);
+      server.listen(this.config.port, this.config.bindAddress);
     } else {
-      this.raw.listen(this.config.port, this.config.bindAddress!);
+      server = this.raw.listen(this.config.port, this.config.bindAddress!);
     }
+    return AppUtil.listenToCloseable(server);
   }
 }

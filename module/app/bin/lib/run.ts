@@ -38,14 +38,22 @@ export class RunUtil {
       }
 
       process.env.APP_ROOTS = process.env.APP_ROOTS ?? app.appRoot ?? '';
-      process.env.WATCH = process.env.WATCH ??
-        (/^prod/i.test(`${process.env.ENV}`) ? '0' : `${app.watchable}`);
+      if (!process.env.WATCH) {
+        if (/^prod/i.test(`${process.env.ENV}`)) {
+          process.env.WATCH = '0';
+        } else if (app.watchable !== undefined) {
+          process.env.watch = `${app.watchable}`;
+        }
+      }
     }
 
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.init('bootstrap').run();
 
     const { ApplicationRegistry } = await import('../../src/registry');
+    if (app && app.filename.includes('/extension/')) {
+      ApplicationRegistry.loadAllFromExtension();
+    }
     await ApplicationRegistry.run(name, typedSub);
   }
 

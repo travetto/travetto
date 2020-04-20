@@ -33,7 +33,8 @@ class $Env {
     // Include root
     return [this.cwd, ...EnvUtil.getList('app_roots')]
       .filter(x => !!x)
-      .map(x => FsUtil.resolveUnix(this.cwd, x).replace(this.cwd, '.'));
+      .map(x => FsUtil.resolveUnix(this.cwd, x).replace(this.cwd, '.'))
+      .filter((x, i, all) => i === 0 || x !== all[i - 1]); // Dedupe
   }
 
   toJSON() {
