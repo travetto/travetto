@@ -4,9 +4,19 @@ import { Class } from '@travetto/registry';
 import { Suite, Test, BeforeEach, AfterEach } from '@travetto/test';
 
 import { Cache, EvictCache } from '../src/decorator';
-import { CacheStore, CullableCacheStore } from '../src/store/types';
+import { CacheStore } from '../src/store/core';
+import { CullableCacheStore } from '../src/store/cullable';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
+
+class User {
+  static from(obj: any) {
+    return new User(obj);
+  }
+  constructor(values: any) {
+    Object.assign(this, values);
+  }
+}
 
 class CachingService {
 
@@ -47,7 +57,7 @@ class CachingService {
     return { length: Object.keys(config).length, size };
   }
 
-  @Cache('store', { keySpace: 'user.id' })
+  @Cache('store', { keySpace: 'user.id', reinstate: x => User.from(x) })
   async getUser(userId: string) {
     await wait(100);
 
@@ -171,6 +181,15 @@ export abstract class CacheTestSuite {
       await local.cull(true);
       assert([...(await local.keys())].length === 0);
     }
+  }
+
+  @Test()
+  async reinstating() {
+    const user = await this.service.getUser('200');
+    assert(user instanceof User);
+    const user2 = await this.service.getUser('200');
+    assert(user2 instanceof User);
+    assert(user !== user2);
   }
 
   @Test()

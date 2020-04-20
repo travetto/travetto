@@ -5,7 +5,7 @@ import * as util from 'util';
 import { FsUtil } from '@travetto/boot';
 import { Shutdown, Util } from '@travetto/base';
 
-import { CullableCacheStore } from './types';
+import { CullableCacheStore } from './cullable';
 import { CacheEntry } from '../types';
 import { CacheStoreUtil } from './util';
 

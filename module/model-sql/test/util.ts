@@ -1,4 +1,3 @@
-import { BaseModelTest } from '@travetto/model/extension/base.test';
 import { DependencyRegistry } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { TestRegistry } from '@travetto/test';
@@ -9,8 +8,10 @@ export class TestUtil {
   static async init(e: any) {
   }
 
-  static async initModel(e: BaseModelTest) {
-    await e.init();
+  static async initModel(e: { init?(): Promise<void> }) {
+    if (e.init) {
+      await e.init();
+    }
 
     const ctx = await DependencyRegistry.getInstance(AsyncContext);
 

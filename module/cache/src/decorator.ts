@@ -1,5 +1,4 @@
-import { ValidCacheFields } from './store/types';
-import { CoreCacheConfig, CacheConfig } from './types';
+import { CoreCacheConfig, CacheConfig, ValidCacheFields } from './types';
 
 type TypedMethodDecorator<T, U> = (target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => U>) => void;
 

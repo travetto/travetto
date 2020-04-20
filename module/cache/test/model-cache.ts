@@ -6,12 +6,13 @@ import { CacheTestSuite } from './cache';
 import { ModelCacheStore } from '../extension/model.store';
 
 import { SchemaRegistry } from '@travetto/schema';
-import { MongoModelConfig } from '@travetto/model-mongo';
+import { SQLModelConfig } from '@travetto/model-sql';
+import { TestUtil } from '@travetto/model-sql/test/util';
 
 @Suite()
 export class ModelCacheSuite extends CacheTestSuite {
 
-  configClass = MongoModelConfig;
+  configClass = SQLModelConfig;
   baseLatency = 100;
 
   get source() {
@@ -19,10 +20,13 @@ export class ModelCacheSuite extends CacheTestSuite {
   }
 
   @BeforeAll()
-  async init() {
+  async initAll() {
     await SchemaRegistry.init();
     await DependencyRegistry.init();
+    await TestUtil.initModel(this);
     const config = await DependencyRegistry.getInstance(this.configClass);
+    config.user = 'root';
+    config.password = 'password';
     config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
     await ModelRegistry.init();
 

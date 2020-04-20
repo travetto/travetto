@@ -1,7 +1,7 @@
 import * as redis from 'redis';
 
-import { CacheStore } from '../src/store/types';
 import { CacheEntry } from '../src/types';
+import { CacheStore } from '../src/store/core';
 import { CacheStoreUtil } from '../src/store/util';
 
 export class RedisCacheStore extends CacheStore {

@@ -1,4 +1,4 @@
-import { CullableCacheStore } from './types';
+import { CullableCacheStore } from './cullable';
 import { CacheEntry } from '../types';
 import { CacheStoreUtil } from './util';
 
