@@ -48,6 +48,12 @@ class Dated {
   time?: Date;
 }
 
+@Model()
+class Names {
+  id: string;
+  values: string[];
+}
+
 export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
   @Test('save it')
@@ -409,4 +415,72 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
     });
     assert(none.length === 0);
   }
+
+
+  @Test('verify all operators')
+  async testArrayAll() {
+    const service = await this.service;
+
+    await service.bulkProcess(Names, [
+      {
+        insert: Names.from({
+          values: ['a', 'b', 'c']
+        })
+      },
+      {
+        insert: Names.from({
+          values: ['a', 'b']
+        })
+      },
+      {
+        insert: Names.from({
+          values: ['b', 'c']
+        })
+      }
+    ]);
+
+    const results = await service.getAllByQuery(Names, {});
+    assert(results.length === 3);
+
+    const results2 = await service.getAllByQuery(Names, {
+      where: {
+        values: {
+          $all: ['a', 'b', 'c']
+        }
+      }
+    });
+
+    assert(results2.length === 1);
+
+    const results3 = await service.getAllByQuery(Names, {
+      where: {
+        values: {
+          $all: ['a', 'b']
+        }
+      }
+    });
+
+    assert(results3.length === 2);
+
+    const results4 = await service.getAllByQuery(Names, {
+      where: {
+        values: {
+          $all: ['a', 'a', 'b']
+        }
+      }
+    });
+
+    assert(results4.length === 2);
+
+    const results5 = await service.getAllByQuery(Names, {
+      where: {
+        values: {
+          $all: ['b', 'b', 'b']
+        }
+      }
+    });
+
+    assert(results5.length === 3);
+  }
 }
+
