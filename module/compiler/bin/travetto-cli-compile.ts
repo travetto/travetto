@@ -46,7 +46,12 @@ export function init() {
       }
 
       //  Compile
-      await Util.fork(`${__dirname}/compile-target.js`, [], process.env);
+      try {
+        await Util.fork(`${__dirname}/compile-target.js`, [], process.env);
+      } catch (err) {
+        console.error(color`${{ failure: 'Failed' }} to compile to ${{ path: cmd.output ?? 'default' }}`, err);
+        process.exit(1);
+      }
 
       if (cmd.runtimeDir) {
         await rewriteRuntimeDir(cmd.runtimeDir);

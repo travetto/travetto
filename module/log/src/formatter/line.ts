@@ -62,10 +62,6 @@ export class LineFormatter implements Formatter {
         args.unshift(message);
       }
 
-      if (ev.meta) {
-        args.push(ev.meta);
-      }
-
       message = args.map((x: any) =>
         typeof x === 'string' ? x :
           (x instanceof Error ? (Env.prod ? x.stack : Stacktrace.simplifyStack(x)) :

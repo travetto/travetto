@@ -78,17 +78,15 @@ export class LoggingInterceptor extends RestInterceptor {
       const duration = Date.now() - start;
 
       const reqLog = {
-        meta: {
-          method: req.method,
-          path: req.baseUrl ? `${req.baseUrl}${req.path}`.replace(/\/+/, '/') : req.path,
-          query: req.query,
-          params: req.params,
-          statusCode: res.statusCode,
-          duration
-        }
+        method: req.method,
+        path: req.baseUrl ? `${req.baseUrl}${req.path}`.replace(/\/+/, '/') : req.path,
+        query: req.query,
+        params: req.params,
+        statusCode: res.statusCode,
+        duration
       };
 
-      if (reqLog.meta.statusCode < 400) {
+      if (reqLog.statusCode < 400) {
         console.info(`Request`, reqLog);
       } else {
         console.error(`Request`, reqLog);

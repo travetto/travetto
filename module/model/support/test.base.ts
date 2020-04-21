@@ -1,11 +1,10 @@
-import { SchemaRegistry } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
-import { Class } from '@travetto/registry';
+import { Class, RootRegistry } from '@travetto/registry';
 import { AfterEach, BeforeEach } from '@travetto/test';
 
-import { ModelRegistry } from '../src/registry';
 import { ModelSource } from '../src/service/source';
 import { ModelService } from '../src/service/model';
+import '../src/registry'; // Import registry to declare
 
 export abstract class BaseModelTest {
 
@@ -21,11 +20,9 @@ export abstract class BaseModelTest {
   }
 
   async init() {
-    await SchemaRegistry.init();
-    await DependencyRegistry.init();
+    await RootRegistry.init();
     const config = await DependencyRegistry.getInstance(this.configClass);
     config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
-    await ModelRegistry.init();
   }
 
   @BeforeEach()

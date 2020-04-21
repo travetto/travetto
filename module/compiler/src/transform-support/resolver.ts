@@ -4,9 +4,31 @@ import { Util } from '@travetto/base';
 import * as res from './types/resolver';
 import { TransformUtil } from './util';
 
-const GLOBAL_SIMPLE = { RegExp, Date, Number, Boolean, String, Function, Object };
-const GLOBAL_COMPLEX = { Array, Promise, Set, Map };
+const GLOBAL_SIMPLE = {
+  RegExp, Date, Number, Boolean, String, Function, Object, Error,
+  PromiseConstructor: Promise.constructor
+};
+
+export const ITERATOR = function Iterator() { };
+export const ASYNC_ITERATOR = function AsyncIterator() { };
+export const ITERABLE_ITERATOR = function IterableIterator() { };
+export const ITERABLE = function Iterable() { };
+
+const GLOBAL_COMPLEX = {
+  Array, Promise, Set, Map, ReadonlyArray: Array,
+  Iterator: ITERATOR,
+  Iterable: ITERABLE,
+  IterableIterator: ITERABLE_ITERATOR,
+  AsyncIterator: ASYNC_ITERATOR,
+  PropertyDescriptor: Object,
+  TypedPropertyDescriptor: Object
+};
 const SIMPLE_NAMES: Record<string, string> = { String: 'string', Number: 'number', Boolean: 'boolean', Object: 'object' };
+
+const UNKNOWN_TYPE = {
+  ctor: Object,
+  name: 'object'
+} as res.LiteralType;
 
 export class TypeResolver {
   /* eslint-disable no-bitwise */
@@ -107,6 +129,10 @@ export class TypeResolver {
       }
     }
 
+    if (obj.source.includes('typescript/lib')) {
+      return { ...UNKNOWN_TYPE };
+    }
+
     return this.resolveShapeType(type); // Handle fall through on interfaces
   }
 
@@ -145,7 +171,11 @@ export class TypeResolver {
   }
 
   getReturnType(node: ts.MethodDeclaration) {
-    const [sig] = this._checker.getTypeAtLocation(node).getCallSignatures();
+    let type = this._checker.getTypeAtLocation(node);
+    if (type.isUnion()) { // Handle methods that are optional
+      type = type.types.find(x => !(x.flags & ts.TypeFlags.Undefined))!;
+    }
+    const [sig] = type.getCallSignatures();
     return this._checker.getReturnTypeOfSignature(sig);
   }
 
@@ -166,7 +196,9 @@ export class TypeResolver {
     const flags = type.getFlags();
     const objectFlags = this.getObjectFlags(type) ?? 0;
 
-    if (objectFlags & ts.ObjectFlags.Reference && !TransformUtil.getSymbol(type)) { // Tuple type?
+    if (flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) { // Any or unknown
+      return { ...UNKNOWN_TYPE };
+    } else if (objectFlags & ts.ObjectFlags.Reference && !TransformUtil.getSymbol(type)) { // Tuple type?
       console.debug('Resolved Tuple Type', type);
       return this.resolveTupleType(type);
     } else if (objectFlags & ts.ObjectFlags.Anonymous) {
@@ -202,10 +234,7 @@ export class TypeResolver {
     }
 
     console.debug('Resolved Unknown Type', type);
-    return {
-      ctor: Object,
-      name: 'object'
-    } as res.LiteralType;
+    return { ...UNKNOWN_TYPE };
   }
 
   getDeclarations(node: ts.Node | ts.Type | ts.Symbol): ts.Declaration[] {

@@ -27,6 +27,7 @@ export abstract class Registry implements ChangeSource<Class> {
     try {
       this.resolved = false;
 
+      // Handle top level when dealing with non-registry
       const waitFor = this.parents.filter(x => !(x instanceof Registry));
       await Promise.all(waitFor.map(x => x.init()));
 

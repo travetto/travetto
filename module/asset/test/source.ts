@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { ResourceManager } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, RootRegistry } from '@travetto/registry';
 
 import { HashNamingStrategy, AssetService, AssetUtil } from '..';
 import { AssetSource } from '../src/source';
@@ -28,7 +28,7 @@ export abstract class BaseAssetSourceSuite {
   @BeforeAll()
   async initAll() {
     ResourceManager.addPath(__dirname);
-    await DependencyRegistry.init();
+    await RootRegistry.init();
     const config = await this.config;
     if ('namespace' in config) {
       config.namespace = `random_${Math.trunc(Math.random() * 10000)}`; // Randomize namespace

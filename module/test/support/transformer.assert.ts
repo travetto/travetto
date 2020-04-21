@@ -196,7 +196,7 @@ export class AssertTransformer {
     if (state[isTest] === undefined) {
       const name = FsUtil.toUnix(state.source.fileName);
       // Only apply to test files, allowing for inheriting from module test files as well
-      state[isTest] = (name.includes('/test/') && name.includes('/src/')) || /@travetto\/[^/]+\/test/.test(name);
+      state[isTest] = (name.includes('/test/') && !name.includes('/src/')) || /@travetto\/[^/]+\/test/.test(name);
     }
 
     if (!state[isTest]) {

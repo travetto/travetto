@@ -1,28 +1,26 @@
 import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll, AfterAll } from '@travetto/test';
+import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { TodoService } from '../src/service';
-import { ModelSource, ModelRegistry } from '@travetto/model';
-import { ElasticsearchModelSource } from '@travetto/model-elasticsearch';
+import { ModelSource } from '@travetto/model';
+import { BaseSQLModelTest } from '@travetto/model-sql/support/test.model-sql';
 
+import { TodoService } from '../src/service';
 import { Todo } from '../src/model';
 
-require('./config');
-
 @Suite()
-export class TodoTest {
+export class TodoTest extends BaseSQLModelTest {
 
   @BeforeAll()
   async init() {
-    await DependencyRegistry.init();
-    await ModelRegistry.init();
+    await RootRegistry.init();
   }
 
   @AfterAll()
   async destroy() {
     const source = await DependencyRegistry.getInstance(ModelSource);
-    (source as ElasticsearchModelSource).resetDatabase();
+    return source.clearDatabase();
   }
 
   @Test('Create todo')

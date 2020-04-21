@@ -1,18 +1,20 @@
 import * as assert from 'assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
-import { Class } from '@travetto/registry';
+import { Class, RootRegistry } from '@travetto/registry';
 
-import { BindUtil, SchemaRegistry } from '../';
+import { BindUtil } from '../src/bind-util';
 import { Address } from './models/address';
 import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple } from './models/binding';
+
+import '../src/service/registry'; // Force import of registry
 
 @Suite('Data Binding')
 class DataBinding {
 
   @BeforeAll()
   async init() {
-    await SchemaRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test('Validate bind')

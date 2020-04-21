@@ -42,7 +42,7 @@ export class RegisterUtil {
     try {
       const mod = this.ogModuleLoad.apply(null, [request, parent]);
 
-      if (!parent.loaded && (!mod || !mod.__$TRV)) {
+      if (!parent.loaded && (!mod || !mod.ᚕtrv)) {
         let p;
         try {
           p = Module._resolveFilename!(request, parent);
@@ -110,7 +110,7 @@ export class RegisterUtil {
     fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
 
     // Track loading, for cyclical dependency detection
-    return `${fileContents};\nexport const __$TRV = 1;`;
+    return `${fileContents};\nexport const ᚕtrv = 1;`;
   }
 
   /**

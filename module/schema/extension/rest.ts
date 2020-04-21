@@ -3,10 +3,23 @@ import { Util, AppError } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
 import { SchemaRegistry, BindUtil, SchemaValidator } from '..';
+import { Schema } from 'js-yaml';
+
+const QUERY_SCHEMA: unique symbol = Symbol('_query_schema');
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Travetto {
+    interface Request {
+      [QUERY_SCHEMA]: Record<string, Schema>;
+    }
+  }
+}
+
 
 const EXTRACTORS: Record<'body' | 'query', ExtractFn> = {
   body: (c, r) => r.body,
-  query: (c, r) => (r.query._schema && r.query._schema[c.name!])
+  query: (c, r) => r[QUERY_SCHEMA] && r[QUERY_SCHEMA][c.name!]
 };
 
 export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: string) {
@@ -42,9 +55,9 @@ export function schemaParamConfig(location: 'body' | 'query', config: Partial<Pa
     resolve: location === 'query' ?
       async (req: Request) => {
         const cls = SchemaRegistry.get(config.type!).class;
-        req.query._schema = req.query._schema || {};
+        req[QUERY_SCHEMA] = req[QUERY_SCHEMA] || {};
         const exploded = BindUtil.expandPaths(req.query);
-        req.query._schema[config.name!] = await getSchemaInstance(config.key ? exploded[config.key] : exploded, cls!, config.view!);
+        req[QUERY_SCHEMA][config.name!] = await getSchemaInstance(config.key ? exploded[config.key] : exploded, cls!, config.view!);
       } :
       async (req: Request) => {
         const cls = SchemaRegistry.get(config.type!).class;

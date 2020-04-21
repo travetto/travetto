@@ -7,7 +7,7 @@
     "inlineSourceMap": true,
     "lib": [
       "es2015.proxy",
-      "es2018"
+      "es2020"
     ],
     "preserveConstEnums": true,
     "experimentalDecorators": true,

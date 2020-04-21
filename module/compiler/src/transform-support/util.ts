@@ -34,7 +34,11 @@ export class TransformUtil {
         if (Util.isFunction(x[key]) || exclude.has(key) || x[key] === undefined) {
           continue;
         }
-        out[key] = this.collapseNode(x[key], cache);
+        try {
+          out[key] = this.collapseNode(x[key], cache);
+        } catch (err) {
+          return undefined;
+        }
       }
       return out;
     }
