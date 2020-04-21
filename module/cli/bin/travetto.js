@@ -5,7 +5,7 @@ const { EnvUtil } = require('@travetto/boot/src/env');
 
 if (
   !EnvUtil.isSet('trv_dev') && // If not defined
-  /travetto.*\/module\//.test(FsUtil.cwd) // And in local module
+  /\/travetto.*\/(module|sample)\//.test(FsUtil.cwd) // And in local module
 ) { // If in framework development mode
   const child_process = require('child_process');
   const res = child_process.spawnSync(process.argv0, process.argv.slice(1), {

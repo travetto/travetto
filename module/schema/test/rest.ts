@@ -1,10 +1,14 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Controller, Post, ControllerRegistry, Method, RouteUtil, Get, SerializeInterceptor } from '@travetto/rest';
+import { RootRegistry } from '@travetto/registry';
 
 import { SchemaBody, SchemaQuery } from '../extension/rest';
 
-import { Schema, SchemaRegistry } from '..';
+import { Schema } from '../src/decorator/schema';
+
+import '../src/service/registry'; // Force import of registry
+
 
 @Schema()
 class User {
@@ -36,8 +40,7 @@ export class RestTest {
 
   @BeforeAll()
   async before() {
-    await SchemaRegistry.init();
-    await ControllerRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test()

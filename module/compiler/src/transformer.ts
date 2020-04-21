@@ -6,7 +6,7 @@ import {
 } from './transform-support'; // Narrow import to minimize scope
 
 // Local app support transformer, as well as library support transformer
-const TRANSFORMER_RE = /^(node_modules\/@travetto\/[^/]*\/)?support\/transformer[.](.*?)[.]ts$/;
+const TRANSFORMER_RE = /support\/transformer[.](.*?)[.]ts$/;
 
 export class TransformerManager {
 
@@ -18,8 +18,10 @@ export class TransformerManager {
 
   init() {
     const allTransformers: (NodeTransformer<TransformerState> & { file: string })[] = [];
+    const found = ScanApp.findSourceFiles(x => TRANSFORMER_RE.test(x), this.cwd)
+      .filter(x => !ScanApp.modAppExclude.includes(x.module.split(/(@travetto)|\//)[1]));
 
-    for (const name of ScanApp.findSourceFiles(x => TRANSFORMER_RE.test(x), this.cwd)) {
+    for (const name of found) { // Exclude based on blacklist
       const all = require(name.file);
       const resolved = Object
         .values(all)

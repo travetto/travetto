@@ -45,6 +45,7 @@ export class Util {
         if (v === 0) {
           resolve(Buffer.concat(text).toString());
         } else {
+          console.error(Buffer.concat(text).toString());
           reject(Buffer.concat(err).toString());
         }
       });

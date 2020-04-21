@@ -10,6 +10,6 @@ export class NestedSuite extends BaseNestedSuite {
 
   @BeforeAll()
   doInit() {
-    return super.init();
+    return this.init();
   }
 }

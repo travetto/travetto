@@ -30,9 +30,7 @@ export async function run() {
       try {
         emitter.onEvent(name, JSON.parse(body));
       } catch (e) {
-        console.error(line);
-        console.error(e);
-        process.exit(1);
+        console.error('Failed on', body);
       }
     })
     .on('close', () => {
