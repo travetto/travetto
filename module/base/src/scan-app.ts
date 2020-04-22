@@ -1,5 +1,4 @@
-import { FsUtil, RegisterUtil } from '@travetto/boot';
-import * as fs from 'fs';
+import { FsUtil, RegisterUtil, AppCache } from '@travetto/boot';
 
 import { Env } from './env';
 import { ScanEntry, ScanFs } from './scan-fs';
@@ -33,14 +32,9 @@ export class ScanApp {
   }
 
   private static getAppModPathMatcher(root = Env.cwd) {
-    const MOD_RE = new RegExp(`node_modules/@travetto/(${
-      fs.readdirSync(`${root}/node_modules/@travetto`)
-        .filter(x => !x.startsWith('.') && !this.modAppExclude.includes(x))
-        .join('|')
-      // eslint-disable-next-line @typescript-eslint/indent
-      })/(${this.modAppFolders.join('|')})`);
-
-    return MOD_RE;
+    const MOD_MATCH = new RegExp(`node_modules/@travetto/([^/]+)/(${this.modAppFolders.join('|')})`);
+    const MOD_EX = new RegExp(`node_modules/@travetto/(${this.modAppExclude.join('|')})`);
+    return { test: (x: string) => MOD_MATCH.test(x) && !MOD_EX.test(x) };
   }
 
   /**
@@ -50,7 +44,7 @@ export class ScanApp {
     this.CACHE.clear();
   }
 
-  static findSourceFiles(filter?: RegExp | Pred, root = Env.cwd): SimpleEntry[] {
+  static findSourceFiles(filter?: Tester | Pred, root = Env.cwd): SimpleEntry[] {
     return this.findFiles(this.TS_TESTER, filter, root);
   }
 
@@ -60,7 +54,7 @@ export class ScanApp {
    * @param filter Any additional filters, external to the extension.  Caching occurs at the extension level
    * @param root Starting point for finding files, defaults to cwd
    */
-  static findFiles(ext: string | Tester, filter?: RegExp | Pred, root = Env.cwd): SimpleEntry[] {
+  static findFiles(ext: string | Tester, filter?: Tester | Pred, root = Env.cwd): SimpleEntry[] {
     ext = typeof ext === 'string' ? new RegExp(`${ext}$`) : ext;
 
     const key = `${root}:${ext.source}`;
@@ -93,7 +87,7 @@ export class ScanApp {
     }
 
     if (filter) {
-      if (filter instanceof RegExp) {
+      if ('test' in filter) {
         return this.CACHE.get(key)!.filter(x => filter.test(x.module));
       } else {
         return this.CACHE.get(key)!.filter(x => filter(x.module));
@@ -130,8 +124,7 @@ export class ScanApp {
   static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {
     const results = paths.map(mod => {
       // Compressed for minimizing bundle size
-      mod = FsUtil.toUnix(mod).replace('#', 'node_modules/@travetto');
-
+      mod = !/~/.test(mod) ? mod : AppCache.fromEntryName(mod);
       const full = FsUtil.resolveUnix(base!, mod);
 
       if (mod === full) {

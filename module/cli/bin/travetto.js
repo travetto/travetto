@@ -7,15 +7,13 @@ if (
   !EnvUtil.isSet('trv_dev') && // If not defined
   /\/travetto.*\/(module|sample)\//.test(FsUtil.cwd) // And in local module
 ) { // If in framework development mode
-  const child_process = require('child_process');
-  const res = child_process.spawnSync(process.argv0, process.argv.slice(1), {
+  const res = require('child_process').spawnSync(process.argv0, process.argv.slice(1), {
     argv0: process.argv0,
     cwd: process.cwd(),
     stdio: [0, 1, 2],
     shell: true,
     env: { // Handle symlinks, and denote we are in framework dev mode
       ...process.env,
-      NO_JS_YAML: '1',
       NODE_PRESERVE_SYMLINKS: '1',
       TRV_DEV: '1',
     }
@@ -25,17 +23,12 @@ if (
 }
 
 const fs = require('fs');
-const path = require('path');
-const rel = `${FsUtil.cwd}/node_modules/@travetto/cli/bin/${path.basename(__filename)}`;
+const rel = require.resolve('@travetto/cli');
 const hasLocal = fs.existsSync(rel);
-const isLocal = FsUtil.toUnix(__filename) === rel;
-const cliExternal = !hasLocal || !isLocal;
 
-if (cliExternal) {
+if (!hasLocal || FsUtil.toUnix(__filename) !== rel) {
   const Module = require('module');
-  // @ts-ignore
   const og = Module._load;
-  // @ts-ignore
   Module._load = function (req, parent) {
     if (req.startsWith('@travetto/cli')) { // Support delegating to installed CLI
       if (!hasLocal) { // Map all $pkg calls to root of global package

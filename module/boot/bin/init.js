@@ -1,15 +1,10 @@
 #!/usr/bin/env node
 function init() {
-  let root = '..';
-
   const cwd = process.cwd();
-  const isSelf = cwd.includes('/module/boot');
-  const isFwk = cwd.includes('/travetto/');
-  if (isFwk || isSelf) {
-    root = isSelf ? cwd : `${cwd}/node_modules/@travetto/boot`;
-  }
-  const { RegisterUtil } = require(`${root}/src/register`);
-  RegisterUtil.init();
+  const root = !process.env.TRV_DEV ? '..' :
+    cwd.includes('/module/boot') ?
+      cwd : `${cwd}/node_modules/@travetto/boot`;
+  require(`${root}/src/register`).RegisterUtil.init();
 }
 
 if (!global.trvInit) { // Register once

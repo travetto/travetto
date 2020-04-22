@@ -4,25 +4,21 @@ import * as fs from 'fs';
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
 
-async function rewriteRuntimeDir(runtimeDir: string) {
+async function rewriteRuntimeDir(runtimeDir: string = process.cwd()) {
   const { FsUtil, AppCache } = await import(`@travetto/boot`);
 
   const files = fs.readdirSync(AppCache.cacheDir).map(x => FsUtil.resolveUnix(AppCache.cacheDir, x));
 
   // Rewrite files to allow for presume different path
-  const FILES = `ScanApp.setFileEntries('.ts', [${
-    files.map(x => `'${
-      x.replace(/node_modules\/@travetto/g, '#')
-      // eslint-disable-next-line @typescript-eslint/indent
-      }'`).join(', ')
-    // eslint-disable-next-line @typescript-eslint/indent
-    }])`;
+  const FILES = `ScanApp.setFileEntries('.ts', [
+    ${files.map(x => `'${AppCache.toEntryName(x)}'`).join(',')}
+])`;
 
   for (const file of files) {
-    let contents = fs.readFileSync(file, 'utf-8');
-    contents = contents.replace(/[/][/]#.*$/, '');
-    contents = contents.replace('ScanApp.cache = {}', x => `${x};\n${FILES}`);
-    contents = contents.replace(new RegExp(FsUtil.cwd, 'g'), runtimeDir || process.cwd());
+    const contents = fs.readFileSync(file, 'utf-8')
+      .replace(/ScanApp\.cache =.*/, x => `${x};\n${FILES}`) // Only for scan-app
+      .replace(/[/][/]#.*$/, '') // Drop source maps
+      .replace(new RegExp(FsUtil.cwd, 'g'), runtimeDir); // Rewrite paths
     fs.writeFileSync(file, contents);
   }
 }

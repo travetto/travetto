@@ -76,8 +76,9 @@ export class FileCache {
     return FsUtil.toTS(
       FsUtil.joinUnix(FsUtil.cwd, FsUtil.toUnix(cached)
         .replace(this.cacheDir, '')
-        .replace(/^[.]/, 'node_modules/@travetto/')
-        .replace(/~/g, '/')
+        .replace(/^\//, '')
+        .replace(/[.]?…/g, 'node_modules/@travetto')
+        .replace(/•/g, '/')
       ));
   }
 
@@ -85,8 +86,9 @@ export class FileCache {
     return FsUtil.toJS(
       FsUtil.joinUnix(this.cacheDir, FsUtil.toUnix(full)
         .replace(`${FsUtil.cwd}/`, '')
-        .replace(/^.*node_modules\/@travetto\//, '.')
-        .replace(/[/]+/g, '~')
+        .replace(/node_modules\/@travetto/g, '…')
+        .replace(/^…/, '.…')
+        .replace(/[/]+/g, '•')
       ));
   }
 }
