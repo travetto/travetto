@@ -1,3 +1,4 @@
+// @file-if @travetto/model-sql
 import { Suite, BeforeAll, BeforeEach, AfterEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { ModelRegistry, ModelService, ModelSource } from '@travetto/model';
@@ -23,7 +24,7 @@ export class ModelCacheSuite extends CacheTestSuite {
   async initAll() {
     await SchemaRegistry.init();
     await DependencyRegistry.init();
-    await TestUtil.initModel(this);
+    await TestUtil.initModel(this as any);
     const config = await DependencyRegistry.getInstance(this.configClass);
     config.user = 'root';
     config.password = 'password';

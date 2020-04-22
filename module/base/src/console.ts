@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { RegisterUtil, AppCache, EnvUtil } from '@travetto/boot';
+import { AppCache, EnvUtil, TranspileUtil } from '@travetto/boot';
 
 import { SystemUtil } from './system-util';
 import { Env } from './env';
@@ -39,7 +39,7 @@ class $ConsoleManager {
       this.exclude.add('trace');
     }
     this.set(null); // Init
-    RegisterUtil.addPreparer(this.instrument.bind(this)); // Register console manager
+    TranspileUtil.addPreparer(this.instrument.bind(this)); // Register console manager
   }
 
   private buildContext(payload: ConsolePayload) {

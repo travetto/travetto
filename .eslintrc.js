@@ -84,7 +84,7 @@ module.exports = {
         "@typescript-eslint/no-unused-vars": [
             "error",
             {
-                "varsIgnorePattern": "^[A-Z][A-Za-z0-9]",
+                "varsIgnorePattern": "^(__|[A-Z])[A-Za-z0-9]",
                 "args": "none"
             }
         ],
