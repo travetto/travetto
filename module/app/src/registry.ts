@@ -13,7 +13,7 @@ export class $ApplicationRegistry {
   }
 
   loadPackaged() {
-    for (const { file } of ScanApp.findFiles('.ts', /\/application[.].([^.]+)[.]ts/)) {
+    for (const { file } of ScanApp.findSourceFiles(/\/application[.].([^.]+)[.]ts/)) {
       try {
         require(file);
       } catch (e) {
