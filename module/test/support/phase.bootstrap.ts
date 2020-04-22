@@ -5,9 +5,9 @@ export const init = {
   action: async () => {
     const { Env, ScanApp } = await import('@travetto/base');
     if (Env.env === 'test') {
-      // Allow test modules to be searched
+      // Allow test module to be searched
       ScanApp.modAppExclude.splice(ScanApp.modAppExclude.findIndex(x => x === 'test'), 1);
-      // If watching, auto load all tests
+      // If watching, allow auto load of all tests
       if (Env.watch) {
         ScanApp.mainAppFolders.push('test');
       }

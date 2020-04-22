@@ -296,7 +296,7 @@ export class TransformUtil {
         const imptStmt = ts.createImportDeclaration(
           undefined, undefined,
           ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
-          ts.createLiteral(require.resolve(path).replace(/^.*node_modules.*@travetto/, '@travetto'))
+          ts.createLiteral(require.resolve(path))
         );
         return imptStmt;
       });

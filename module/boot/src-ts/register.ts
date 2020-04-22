@@ -1,5 +1,6 @@
 // @ts-ignore
 import * as Mod from 'module';
+import * as path from 'path';
 
 import { FsUtil } from './fs-util';
 import { AppCache } from './app-cache';
@@ -26,7 +27,11 @@ const IS_WATCH = !EnvUtil.isFalse('watch');
 
 export class RegisterUtil {
   private static ogModuleLoad = Module._load!.bind(Module);
-  private static pkgName: string;
+
+  private static readonly devCache = {
+    boot: path.resolve(__dirname, '..'),
+    [require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')).name.split('/')[1]]: FsUtil.cwd // Initial
+  };
 
   static libRequire: (x: string) => any;
 
@@ -65,7 +70,6 @@ export class RegisterUtil {
     return m._compile!(content, FsUtil.toJS(tsf));
   }
 
-
   static getErrorModuleProxy(err: string) {
     const onError = () => {
       throw new Error(err);
@@ -87,6 +91,7 @@ export class RegisterUtil {
       defineProperty: onError
     });
   }
+
   /**
    * Only called in Framework dev mode
    * @param pth
@@ -105,17 +110,13 @@ export class RegisterUtil {
     // If relative or framework
     if (pth.includes('@travetto')) {
       // Fetch current module's name
-      this.pkgName = this.pkgName ||
-        require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')).name;
-
       // Handle self references
       pth = FsUtil.toUnix(pth)
-        .replace(/^.*\/@travetto\/([^/]+)(\/([^@]+)?)?$/g, (all, name, rest) => {
-          rest = rest ?? '';
-          if (this.pkgName !== `@travetto/${name}`) { // If not self, node_modules
-            rest = `node_modules/@travetto/${name}/${rest}`;
+        .replace(/^(.*\/@travetto)\/([^/]+)(\/[^@]*)?$/g, (all, pre, name, rest) => {
+          if (!(name in this.devCache)) {
+            this.devCache[name] = `${pre}/${name}`;
           }
-          return `${FsUtil.cwd}/${rest}`;
+          return `${this.devCache[name]}${rest ? `/${rest}` : ''}`;
         })
         .replace(/\/\/+/g, '/'); // De-dupe
     }
@@ -135,7 +136,7 @@ export class RegisterUtil {
       Module._load = this.onModuleLoad.bind(this);
       require.extensions['.ts'] = this.compile.bind(this);
     } else {
-      this.libRequire = x => require(this.devResolve(`/${x}`));
+      this.libRequire = x => require(this.devResolve(x));
       Module._load = (req, p) => this.onModuleLoad(this.devResolve(req, p), p);
       require.extensions['.ts'] = (m, tsf) => this.compile(m, this.devResolve(tsf));
     }
