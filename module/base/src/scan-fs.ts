@@ -43,36 +43,41 @@ class $ScanFs {
     return !x.stats.isDirectory() && !x.stats.isSymbolicLink();
   }
 
-  async scanDir(handler: ScanHandler, base: string, entry?: ScanEntry, visited = new Set<string>()) {
+  async scanDir(handler: ScanHandler, base: string) {
+    const visited = new Set<string>();
     const out: ScanEntry[] = [];
+    const dirs: ScanEntry[] = [
+      { file: base, children: [] as ScanEntry[] } as ScanEntry
+    ];
 
-    entry = (entry! ?? { file: base, children: [] });
+    while (dirs.length) {
+      const dir = dirs.shift()!;
+      for (const file of (await fsReaddir(dir.file))) {
+        if (file.startsWith('.')) {
+          continue;
+        }
 
-    for (const file of (await fsReaddir(entry!.file))) {
-      if (file.startsWith('.')) {
-        continue;
-      }
+        const full = FsUtil.resolveUnix(dir.file, file);
+        const stats = await fsLstat(full);
+        const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
-      const full = FsUtil.resolveUnix(entry!.file, file);
-      const stats = await fsLstat(full);
-      const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
-
-      if (this.isDir(subEntry)) {
-        if (subEntry.stats.isSymbolicLink()) {
-          const p = await fsRealpath(full);
-          if (!visited.has(p)) {
-            visited.add(p);
-          } else {
-            continue;
+        if (this.isDir(subEntry)) {
+          if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
+            if (subEntry.stats.isSymbolicLink()) {
+              const p = await fsRealpath(full);
+              if (!visited.has(p)) {
+                visited.add(p);
+              } else {
+                continue;
+              }
+            }
+            out.push(subEntry);
+            dirs.push(subEntry);
           }
+        } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
+          (dir.children = dir.children ?? []).push(subEntry);
+          out.push(subEntry);
         }
-
-        if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
-          out.push(subEntry, ...await this.scanDir(handler, base, subEntry, visited));
-        }
-      } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
-        (entry!.children = entry?.children ?? []).push(subEntry);
-        out.push(subEntry);
       }
     }
     return out;
@@ -93,35 +98,44 @@ class $ScanFs {
     return out;
   }
 
-  scanDirSync(handler: ScanHandler, base: string, entry?: ScanEntry, visited = new Set<string>()) {
+  scanDirSync(handler: ScanHandler, base: string) {
+    const visited = new Set<string>();
     const out: ScanEntry[] = [];
+    const dirs: ScanEntry[] = [
+      { file: base, children: [] as ScanEntry[] } as ScanEntry
+    ];
 
-    entry = (entry! ?? { file: base, children: [] });
+    while (dirs.length) {
+      const dir = dirs.shift()!;
+      inner: for (const file of fs.readdirSync(dir.file)) {
+        if (file.startsWith('.')) {
+          continue inner;
+        }
 
-    for (const file of fs.readdirSync(entry.file)) {
-      if (file.startsWith('.')) {
-        continue;
-      }
+        const full = FsUtil.resolveUnix(dir.file, file);
+        const stats = fs.lstatSync(full);
+        const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
-      const full = FsUtil.resolveUnix(entry.file, file);
-      const stats = fs.lstatSync(full);
-      const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
-
-      if (this.isDir(subEntry)) {
-        if (subEntry.stats.isSymbolicLink()) {
-          const p = fs.realpathSync(full);
-          if (!visited.has(p)) {
-            visited.add(p);
-          } else {
-            continue;
+        if (this.isDir(subEntry)) {
+          if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
+            if (subEntry.stats.isSymbolicLink()) {
+              const p = fs.realpathSync(full);
+              if (!visited.has(p)) {
+                visited.add(p);
+              } else {
+                continue inner;
+              }
+            }
+            subEntry.children = [];
+            out.push(subEntry);
+            dirs.push(subEntry);
+          }
+        } else {
+          if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
+            (dir.children = dir.children ?? []).push(subEntry);
+            out.push(subEntry);
           }
         }
-        if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
-          out.push(subEntry, ...this.scanDirSync(handler, base, subEntry, visited));
-        }
-      } else if (!handler.testFile || handler.testFile(subEntry.module, subEntry)) {
-        (entry.children = entry.children ?? []).push(subEntry);
-        out.push(subEntry);
       }
     }
     return out;

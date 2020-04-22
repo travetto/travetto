@@ -130,7 +130,7 @@ export class SourceManager {
     this.transformerManager.init();
 
     for (const root of this.rootNames) {
-      require(root);
+      require(root); // Load all the source files
     }
   }
 
