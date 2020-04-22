@@ -22,8 +22,7 @@
   "main": "index.ts",
   "files": [
     "index.ts",
-    "src",
-    "extension"
+    "src"
   ],
   "name": "@travetto/rest-session",
   "repository": {

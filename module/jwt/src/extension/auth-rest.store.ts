@@ -1,8 +1,10 @@
+// @file-if @travetto/auth-rest
 import { AuthContext } from '@travetto/auth';
 import { AuthContextEncoder } from '@travetto/auth-rest';
 import { Response, Request } from '@travetto/rest';
 
-import { sign, verify } from '..';
+import { sign } from '../sign';
+import { verify } from '../verify';
 
 export class JWTAuthContextStore extends AuthContextEncoder {
 

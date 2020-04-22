@@ -1,8 +1,11 @@
+// @file-if pg
 import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 
-import { SQLModelConfig, SQLDialect, VisitStack } from '../..';
+import { SQLModelConfig } from '../../config';
+import { SQLDialect } from '../../dialect';
+import { VisitStack } from '../../util';
 import { PostgreSQLConnection } from './connection';
 
 @Injectable({

@@ -36,7 +36,6 @@
   "files": [
     "bin",
     "index.ts",
-    "extension",
     "src"
   ],
   "name": "@travetto/model-sql",

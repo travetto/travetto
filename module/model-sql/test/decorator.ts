@@ -2,8 +2,8 @@ import { Class } from '@travetto/registry';
 import { TestRegistry, SuiteConfig, TestRegistryUtil } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
-import { PostgreSQLDialect } from '../extension/postgresql/dialect';
-import { MySQLDialect } from '../extension/mysql/dialect';
+import { PostgreSQLDialect } from '../src/dialects/postgresql/dialect';
+import { MySQLDialect } from '../src/dialects/mysql/dialect';
 
 export function DialectSuite(config: Partial<SuiteConfig> = {}) {
 

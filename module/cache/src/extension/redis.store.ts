@@ -1,8 +1,9 @@
+// @file-if redis
 import * as redis from 'redis';
 
-import { CacheEntry } from '../src/types';
-import { CacheStore } from '../src/store/core';
-import { CacheStoreUtil } from '../src/store/util';
+import { CacheEntry } from '../types';
+import { CacheStore } from '../store/core';
+import { CacheStoreUtil } from '../store/util';
 
 export class RedisCacheStore extends CacheStore {
 

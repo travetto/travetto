@@ -9,6 +9,11 @@ import { AuthService } from './auth';
 @Injectable()
 export class AuthInterceptor extends RestInterceptor {
 
+  after = [
+    require('@travetto/context/src/extension/rest.interceptor').AsyncContextInterceptor, // @line-if @travetto/context
+    require('@travetto/rest-session/src/extension/rest.interceptor').SessionInterceptor, // @line-if @travetto/rest-session
+  ];
+
   @Inject()
   context: AuthContextService;
 

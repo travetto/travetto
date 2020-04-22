@@ -23,8 +23,7 @@
   "main": "index.ts",
   "files": [
     "index.ts",
-    "src",
-    "extension"
+    "src"
   ],
   "name": "@travetto/auth-rest",
   "repository": {

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Path, Query } from '@travetto/rest';
 import { Inject } from '@travetto/di';
-import { SchemaBody, SchemaQuery } from '@travetto/schema/extension/rest';
+import { SchemaBody, SchemaQuery } from '@travetto/schema/src/extension/rest';
 
 import { TodoService } from './service';
 import { Todo, TodoSearch } from './model';

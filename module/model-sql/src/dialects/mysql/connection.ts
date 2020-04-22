@@ -1,7 +1,9 @@
+// @file-if mysql
 import * as mysql from 'mysql';
 
 import { AsyncContext } from '@travetto/context';
-import { SQLModelConfig, ConnectionSupport } from '../..';
+import { ConnectionSupport } from '../../connection';
+import { SQLModelConfig } from '../../config';
 
 const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) =>
   new Promise<V>((res, rej) => (ctx[prop] as any)(

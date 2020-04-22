@@ -1,8 +1,9 @@
+// @file-if @travetto/rest
 import { GetCacheInterceptor, RestInterceptor, Request, Response, RouteConfig } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { ConfigSource } from '@travetto/config';
 
-import { AsyncContext } from '..';
+import { AsyncContext } from '../service';
 
 @Injectable()
 export class AsyncContextInterceptor extends RestInterceptor {

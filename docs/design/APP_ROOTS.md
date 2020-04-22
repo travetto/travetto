@@ -16,7 +16,6 @@ Module Structure
 ## Library (node_modules/@travetto/{x})
 * bin/  - CLI Support
 * support/ - Phase support as well as AST transformer support
-* extension/ - Integrations with external code
 * index.ts - Root index for loading
 
 App Running
@@ -24,7 +23,6 @@ App Running
 ## Auto-Scanning
 * (libraries)/src - Load all library source
 * (libraries)/support - Loading all transformers
-* (libraries)/extension - Load all extensions
 * (root)/index - Main app logic
 * (root)/src - Main app logic
 * (sub-app)/src - Sub app logic
@@ -38,7 +36,6 @@ Test Running
 ## Auto-Scanning
 * (libraries)/src - Load all library source
 * (libraries)/support - Loading all transformers
-* (libraries)/extension - Load all extensions
 * (root)/src - Main app logic
 
 ## Manual loading

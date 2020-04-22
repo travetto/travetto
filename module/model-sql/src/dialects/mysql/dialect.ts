@@ -1,9 +1,13 @@
+// @file-if mysql
 import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model';
 
-import { SQLModelConfig, SQLDialect, VisitStack } from '../..';
+
+import { SQLModelConfig } from '../../config';
+import { SQLDialect } from '../../dialect';
+import { VisitStack } from '../../util';
 import { MySQLConnection } from './connection';
 
 @Injectable({

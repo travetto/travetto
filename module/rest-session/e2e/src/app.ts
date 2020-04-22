@@ -2,7 +2,7 @@ import { RestApp, Application, Controller, Get, Context } from '@travetto/rest';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { CacheStore } from '@travetto/cache';
 import { ModelService } from '@travetto/model';
-import { ModelCacheStore } from '@travetto/cache/extension/model.store';
+import { ModelCacheStore } from '@travetto/cache/src/extension/model.store';
 
 import { SessionData, Session } from '../../src/types';
 import { SESSION_CACHE } from '../../src/service';

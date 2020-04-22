@@ -2,7 +2,7 @@ import { AppError } from '@travetto/base';
 import { Controller, Get, Put, Post, Delete, Path } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 import { ModelService, ModelQuery } from '@travetto/model';
-import { SchemaBody, SchemaQuery } from '@travetto/schema/extension/rest';
+import { SchemaBody, SchemaQuery } from '@travetto/schema/src/extension/rest';
 import { Schema } from '@travetto/schema';
 // {{#modules.auth-rest}}
 import { Authenticated, AuthContextService } from '@travetto/auth-rest';

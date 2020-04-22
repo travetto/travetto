@@ -1,9 +1,10 @@
+// @file-if @travetto/model
 import { ModelService, Model } from '@travetto/model';
 import { Text, Long } from '@travetto/schema';
 
-import { CacheEntry } from '../src/types';
-import { CullableCacheStore } from '../src/store/cullable';
-import { CacheStoreUtil } from '../src/store/util';
+import { CacheEntry } from '../types';
+import { CullableCacheStore } from '../store/cullable';
+import { CacheStoreUtil } from '../store/util';
 
 @Model()
 export class CacheModel {

@@ -56,9 +56,6 @@ loop Require
     Compiler->Node: Return module
     
     alt On Error
-        alt If file is /extension/
-            Compiler->Node: Log error message ignoring require
-        end
         alt If not extension and in watch mode
             Compiler->Node: Return stub module for lazy loading
         end
