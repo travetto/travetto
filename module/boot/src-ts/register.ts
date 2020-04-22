@@ -1,10 +1,10 @@
 // @ts-ignore
 import * as Mod from 'module';
-import * as fs from 'fs';
 
 import { FsUtil } from './fs-util';
 import { AppCache } from './app-cache';
 import { EnvUtil } from './env';
+import { TranspileUtil } from './transpile';
 
 type Module = {
   loaded?: boolean;
@@ -15,29 +15,16 @@ type Module = {
 
 const Module = Mod as any as Module;
 
-type Preparer = (name: string, contents: string) => string;
-
 declare const global: {
-  ts: any;
   trvInit: {
     libRequire: (x: string) => any;
     deinit: () => void;
   };
 };
 
-let tsOpts: any;
-let ts: any = global.ts = new Proxy({}, {
-  get(t, p, r) {
-    ts = (global as any).ts = require('typescript');
-    return ts[p];
-  }
-});
-
 const IS_WATCH = !EnvUtil.isFalse('watch');
 
 export class RegisterUtil {
-  private static preparers: Preparer[] = [];
-
   private static ogModuleLoad = Module._load!.bind(Module);
   private static pkgName: string;
 
@@ -74,13 +61,10 @@ export class RegisterUtil {
   }
 
   private static compile(m: Module, tsf: string) {
-    const content = this.transpile(tsf);
+    const content = TranspileUtil.transpile(tsf);
     return m._compile!(content, FsUtil.toJS(tsf));
   }
 
-  static addPreparer(fn: Preparer) {
-    this.preparers.push(fn);
-  }
 
   static getErrorModuleProxy(err: string) {
     const onError = () => {
@@ -103,66 +87,11 @@ export class RegisterUtil {
       defineProperty: onError
     });
   }
-
-  static resolveToken(token: string) {
-    const [sign, env, key] = token.match(/(-|+)?(\$)?(\S+)/)!;
-    const minus = sign === '-';
-    if (env) {
-      return minus ? EnvUtil.isFalse(key) : EnvUtil.isTrue(key);
-    } else {
-      try {
-        require.resolve(token);
-        return !minus;
-      } catch (err) {
-        if (!minus) {
-          throw err;
-        }
-      }
-    }
-    return true;
-  }
-
-  static resolveMacros(name: string, contents: string) {
-    let hideAll = false;
-
-    // Handle line queries
-    contents = contents.replace(/^.*\/\/\s*@(line|file)-if\s+(.*)\s*$/mg, (all, mode, token: string) => {
-      try {
-        return this.resolveToken(token) ? all : `// @removed ${token} was not satisfied`;
-      } catch (err) {
-        if (mode === 'file') {
-          hideAll = true;
-          // console.error(`Unable to find module ${token}, skipping`);
-          return '';
-        } else {
-          return `// @removed, module ${token} not found`;
-        }
-      }
-    });
-
-    return hideAll ? '' : contents;
-  }
-
-  static prepareTranspile(fileName: string, contents?: string) {
-    let fileContents = contents ?? fs.readFileSync(fileName, 'utf-8');
-
-    for (const preparer of this.preparers) {
-      fileContents = preparer(fileName, fileContents);
-    }
-
-    // Drop typescript import, and use global. Great speedup;
-    fileContents = fileContents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
-
-    // Track loading, for cyclical dependency detection
-    return `${fileContents};\nexport const ᚕtrv = 1;`;
-  }
-
   /**
    * Only called in Framework dev mode
    * @param pth
    */
   static devResolve(pth: string, mod?: Module) {
-
     if (mod) {
       try {
         pth = Module._resolveFilename!(pth, mod);
@@ -193,29 +122,12 @@ export class RegisterUtil {
     return pth;
   }
 
-  static transpile(tsf: string, force = false) {
-    const name = FsUtil.toUnix(tsf);
-    if (force || !AppCache.hasEntry(name)) {
-      if (!tsOpts) {
-        const json = ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, ts.sys.readFile);
-        tsOpts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options;
-      }
-      const content = ts.transpile(this.prepareTranspile(tsf), tsOpts);
-      AppCache.writeEntry(name, content);
-      return content;
-    } else {
-      return AppCache.readEntry(name);
-    }
-  }
-
   static init() {
     if (global.trvInit) {
       return;
     }
 
     AppCache.init();
-
-    this.addPreparer(this.resolveMacros.bind(this));
 
     // Supports bootstrapping with framework resolution
     if (!EnvUtil.isTrue('trv_dev')) {
@@ -236,7 +148,7 @@ export class RegisterUtil {
       return;
     }
 
-    this.preparers = [];
+    TranspileUtil.reset();
     delete require.extensions['.ts'];
     delete global.trvInit;
     Module._load = this.ogModuleLoad;

@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 
-import { FileCache, RegisterUtil, FsUtil } from '@travetto/boot';
+import { FileCache, RegisterUtil, TranspileUtil, FsUtil } from '@travetto/boot';
 import { Env, SystemUtil, ScanApp } from '@travetto/base';
 
 import { CompilerUtil } from './util';
@@ -32,7 +32,7 @@ export class SourceManager {
       throw new Error(`Unable to read file ${fileName}`);
     }
     if (ScanApp.TS_TESTER.test(fileName)) {
-      content = RegisterUtil.prepareTranspile(fileName, content);
+      content = TranspileUtil.prepare(fileName, content);
     }
     return content;
   }
@@ -151,7 +151,7 @@ export class SourceManager {
   getTranspiled(fileName: string, force = false) {
     // Do not typecheck the support code
     if (/\/support\/(transformer|phase).+/.test(fileName)) {
-      return RegisterUtil.transpile(fileName, force);
+      return TranspileUtil.transpile(fileName, force);
     }
 
     try {
