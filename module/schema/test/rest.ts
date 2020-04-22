@@ -3,7 +3,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Controller, Post, ControllerRegistry, Method, RouteUtil, Get, SerializeInterceptor } from '@travetto/rest';
 import { RootRegistry } from '@travetto/registry';
 
-import { SchemaBody, SchemaQuery } from '../extension/rest';
+import { SchemaBody, SchemaQuery } from '../src/extension/rest';
 
 import { Schema } from '../src/decorator/schema';
 

@@ -1,7 +1,8 @@
+// @file-if nodemailer
 import * as nodemailer from 'nodemailer';
 
-import { MessageOptions, SentMessage } from '../src/types';
-import { MailTransport } from '../src/transport';
+import { MessageOptions, SentMessage } from '../types';
+import { MailTransport } from '../transport';
 
 export class NodemailerTransport extends MailTransport {
   private transport: nodemailer.Transporter;

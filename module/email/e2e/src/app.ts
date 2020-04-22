@@ -1,7 +1,7 @@
 import { Application } from '@travetto/app';
 import { InjectableFactory } from '@travetto/di';
 import { EmailService } from '../../src/email';
-import { NodemailerTransport } from '../../extension/nodemailer';
+import { NodemailerTransport } from '../../src/extension/nodemailer';
 import { MailTransport } from '../../src/transport';
 const sendmail = require('nodemailer-sendmail-transport');
 

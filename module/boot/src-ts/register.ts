@@ -17,9 +17,6 @@ const Module = Mod as any as Module;
 
 type Preparer = (name: string, contents: string) => string;
 
-let tsOpts: any;
-let ts: any;
-
 declare const global: {
   ts: any;
   trvInit: {
@@ -27,6 +24,14 @@ declare const global: {
     deinit: () => void;
   };
 };
+
+let tsOpts: any;
+let ts: any = global.ts = new Proxy({}, {
+  get(t, p, r) {
+    ts = (global as any).ts = require('typescript');
+    return ts[p];
+  }
+});
 
 const IS_WATCH = !EnvUtil.isFalse('watch');
 
@@ -59,7 +64,7 @@ export class RegisterUtil {
       const p = Module._resolveFilename!(request, parent);
 
       // Build proxy if watching and not an extension as extensions are allowed to not load
-      if (IS_WATCH && !p.includes('/extension/')) {
+      if (IS_WATCH) {
         console.debug(`Unable to load ${p.replace(`${FsUtil.cwd}/`, '')}: stubbing out with error proxy.`, e.message);
         return this.getErrorModuleProxy(e.message) as NodeModule;
       }
@@ -99,6 +104,45 @@ export class RegisterUtil {
     });
   }
 
+  static resolveToken(token: string) {
+    const [sign, env, key] = token.match(/(-|+)?(\$)?(\S+)/)!;
+    const minus = sign === '-';
+    if (env) {
+      return minus ? EnvUtil.isFalse(key) : EnvUtil.isTrue(key);
+    } else {
+      try {
+        require.resolve(token);
+        return !minus;
+      } catch (err) {
+        if (!minus) {
+          throw err;
+        }
+      }
+    }
+    return true;
+  }
+
+  static resolveMacros(name: string, contents: string) {
+    let hideAll = false;
+
+    // Handle line queries
+    contents = contents.replace(/^.*\/\/\s*@(line|file)-if\s+(.*)\s*$/mg, (all, mode, token: string) => {
+      try {
+        return this.resolveToken(token) ? all : `// @removed ${token} was not satisfied`;
+      } catch (err) {
+        if (mode === 'file') {
+          hideAll = true;
+          // console.error(`Unable to find module ${token}, skipping`);
+          return '';
+        } else {
+          return `// @removed, module ${token} not found`;
+        }
+      }
+    });
+
+    return hideAll ? '' : contents;
+  }
+
   static prepareTranspile(fileName: string, contents?: string) {
     let fileContents = contents ?? fs.readFileSync(fileName, 'utf-8');
 
@@ -107,7 +151,7 @@ export class RegisterUtil {
     }
 
     // Drop typescript import, and use global. Great speedup;
-    fileContents = fileContents.replace(/import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
+    fileContents = fileContents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
 
     // Track loading, for cyclical dependency detection
     return `${fileContents};\nexport const ᚕtrv = 1;`;
@@ -169,18 +213,12 @@ export class RegisterUtil {
       return;
     }
 
-    ts = global.ts = new Proxy({}, {
-      get(t, p, r) {
-        ts = (global as any).ts = require('typescript');
-        return ts[p];
-      }
-    });
-
     AppCache.init();
+
+    this.addPreparer(this.resolveMacros.bind(this));
 
     // Supports bootstrapping with framework resolution
     if (!EnvUtil.isTrue('trv_dev')) {
-      this.addPreparer((name, x) => x.replace(/^.*\/\/\s*@TRV_DEV.*$/g, '// @TRV_DEV_REMOVED')); // Remove dev specific lines
       this.libRequire = require;
       Module._load = this.onModuleLoad.bind(this);
       require.extensions['.ts'] = this.compile.bind(this);

@@ -1,11 +1,12 @@
+// @file-if @travetto/rest
 import { ControllerRegistry, paramConfig } from '@travetto/rest';
-import { schemaParamConfig } from '@travetto/schema/extension/rest';
+import { schemaParamConfig } from '@travetto/schema/src/extension/rest';
 import { Schema } from '@travetto/schema';
-
 import { Class } from '@travetto/registry';
 
-import { ModelService, ModelCore } from '..';
-import { ModelRegistry } from '../src/registry';
+import { ModelService } from '../service/model';
+import { ModelCore } from '../model/core';
+import { ModelRegistry } from '../registry';
 
 type Svc = { source: ModelService };
 

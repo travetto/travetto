@@ -3,7 +3,7 @@ import { Schema } from '@travetto/schema';
 import { Application } from '@travetto/app';
 import { Inject } from '@travetto/di';
 
-import '../../extension/mysql/dialect';
+import '../../src/dialect/mysql/dialect';
 import { WithAsyncContext, AsyncContext } from '@travetto/context';
 
 @Schema()

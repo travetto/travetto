@@ -218,7 +218,7 @@ Finally, we establish the controller at `src/controller.ts`
 ```typescript
 import { Controller, Get, TypedBody, Post, Put, Delete, Request, TypedQuery } from '@travetto/rest';
 import { Inject } from '@travetto/di';
-import { SchemaBody, SchemaQuery } from '@travetto/schema/extension/rest';
+import { SchemaBody, SchemaQuery } from '@travetto/schema/src/extension/rest';
 
 import { TodoService } from './service';
 import { Todo, TodoSearch } from './model';

@@ -15,10 +15,9 @@ const IS_SELF_FILE = 'test/src/worker';
  * Get module name from file, ignore node_modules nested
  * Look at :
  *  - src
- *  - extension
  *  - index
  */
-const EXTRACT_FILE_MODULE = /^.*travetto[^/]*\/(?:module\/)?([^/]+)\/(?:src.*|extension.*|support.*|index[.]ts)$/;
+const EXTRACT_FILE_MODULE = /^.*travetto[^/]*\/(?:module\/)?([^/]+)\/(?:src.*|support.*|index[.]ts)$/;
 
 export class TestChildWorker extends ChildCommChannel<RunEvent> {
 

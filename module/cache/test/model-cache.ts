@@ -2,14 +2,12 @@ import { Suite, BeforeAll, BeforeEach, AfterEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { ModelRegistry, ModelService, ModelSource } from '@travetto/model';
 
-import { CacheTestSuite } from './cache';
-import { ModelCacheStore } from '../extension/model.store';
-
 import { SchemaRegistry } from '@travetto/schema';
 import { SQLModelConfig } from '@travetto/model-sql';
 import { TestUtil } from '@travetto/model-sql/test/util';
 
-import '@travetto/model-sql/extension/postgresql/dialect';
+import { CacheTestSuite } from './cache';
+import { ModelCacheStore } from '../src/extension/model.store';
 
 @Suite()
 export class ModelCacheSuite extends CacheTestSuite {

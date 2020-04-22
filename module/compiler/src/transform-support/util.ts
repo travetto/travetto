@@ -266,7 +266,7 @@ export class TransformUtil {
       if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
         let path = this.optionalResolve(stmt.moduleSpecifier.text, base);
 
-        path = RegisterUtil.devResolve(path); // @TRV_DEV
+        path = RegisterUtil.devResolve(path); // @line-if $TRV_DEV
 
         if (stmt.importClause) {
           if (stmt.importClause.namedBindings) {
@@ -311,13 +311,9 @@ export class TransformUtil {
 
       return out;
     } catch (err) { // Missing import
-      if (file.fileName.includes('/extension/')) {
-        return file; // Swallow missing extensions
-      } else {
-        const out = new Error(`${err.message} in ${file.fileName.replace(`${Env.cwd}/`, '')}`);
-        out.stack = err.stack;
-        throw out;
-      }
+      const out = new Error(`${err.message} in ${file.fileName.replace(`${Env.cwd}/`, '')}`);
+      out.stack = err.stack;
+      throw out;
     }
   }
 

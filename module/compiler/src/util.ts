@@ -56,9 +56,7 @@ export class CompilerUtil {
     }
 
     const file = tsf.replace(`${cwd}/`, '');
-    if (tsf.includes('/extension/')) { // If errors out on extension loading
-      console.debug(`Ignoring load for ${file}:`, e.message.split(/( from )|\n/)[0]);
-    } else if (Env.watch) {
+    if (Env.watch) {
       console.error(`Stubbing out with error proxy due to error in compiling ${file}: `, e.message);
       return this.getErrorModuleProxySource(e.message);
     } else {

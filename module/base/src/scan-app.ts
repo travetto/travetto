@@ -18,9 +18,9 @@ export class ScanApp {
 
   private static CACHE = new Map<string, SimpleEntry[]>();
 
-  static mainAppFolders: string[] = ['src', 'extension'];
-  static modAppFolders: string[] = ['src', 'extension', 'index'];
-  static modAppExclude: string[] = ['test', 'cli'];
+  static mainAppFolders: string[] = ['src'];
+  static modAppFolders: string[] = ['src', 'index'];
+  static modAppExclude: string[] = ['test', 'cli', 'boot'];
 
   static TS_TESTER: Tester = {
     source: '.ts',
@@ -77,7 +77,7 @@ export class ScanApp {
         .filter(ScanFs.isNotDir);
 
       // Align with framework dev
-      toCache = toCache.map(x => this.resolveFramework(x, root)); // @TRV_DEV
+      toCache = toCache.map(x => this.resolveFramework(x, root)); // @line-if $TRV_DEV
 
       // De-deduplicate
       toCache = toCache

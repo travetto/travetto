@@ -1,9 +1,11 @@
+// @file-if @travetto/rest
 import { ControllerRegistry, Request, ParamConfig, ExtractFn } from '@travetto/rest';
 import { Util, AppError } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
-import { SchemaRegistry, BindUtil, SchemaValidator } from '..';
-import { Schema } from 'js-yaml';
+import { SchemaRegistry } from '../service/registry';
+import { BindUtil } from '../bind-util';
+import { SchemaValidator } from '../validate/validator';
 
 const QUERY_SCHEMA: unique symbol = Symbol('_query_schema');
 
@@ -11,7 +13,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Travetto {
     interface Request {
-      [QUERY_SCHEMA]: Record<string, Schema>;
+      [QUERY_SCHEMA]: Record<string, any>;
     }
   }
 }

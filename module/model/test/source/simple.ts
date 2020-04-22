@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Test } from '@travetto/test';
 import { Schema, Text, Precision } from '@travetto/schema';
-import { SchemaFakerUtil } from '@travetto/schema/extension/faker';
+import { SchemaFakerUtil } from '@travetto/schema/support/lib.faker';
 
 import { BaseModelTest } from '../../support/test.base';
 import { Model, BaseModel } from '../..';

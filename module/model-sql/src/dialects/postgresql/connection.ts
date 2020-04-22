@@ -1,7 +1,9 @@
+// @file-if pg
 import * as pg from 'pg';
 
 import { AsyncContext } from '@travetto/context';
-import { SQLModelConfig, ConnectionSupport, withConnection, withTransaction } from '../..';
+import { ConnectionSupport, withConnection, withTransaction } from '../../connection';
+import { SQLModelConfig } from '../../config';
 
 /**
  * Connection support

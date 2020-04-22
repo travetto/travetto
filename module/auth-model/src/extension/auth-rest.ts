@@ -1,9 +1,10 @@
+// @file-if @travetto/auth-rest
 import { Request, Response } from '@travetto/rest';
 import { ModelCore } from '@travetto/model';
 import { IdentityProvider } from '@travetto/auth-rest';
 import { Identity } from '@travetto/auth';
 
-import { ModelPrincipalProvider } from '..';
+import { ModelPrincipalProvider } from '../principal';
 
 export class ModelIdentityProvider<U extends ModelCore> extends IdentityProvider {
 
