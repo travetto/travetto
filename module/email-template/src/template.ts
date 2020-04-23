@@ -20,7 +20,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
   private cache: Record<string, { html: string, text: string }> = {};
 
-  private defaultTemplateWidth = EnvUtil.getInt('email_width', 580);
+  private defaultTemplateWidth = EnvUtil.getInt('EMAIL_WIDTH', 580);
 
   @Inject()
   private config: MailTemplateConfig;

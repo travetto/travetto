@@ -49,10 +49,10 @@ export class TravettoGenerator extends Generator {
       name = res.name;
     }
 
-    this.destinationRoot(FsUtil.resolveUnix(EnvUtil.get('final_cwd')!, name));
+    this.destinationRoot(FsUtil.resolveUnix(EnvUtil.get('FINAL_CWD')!, name));
 
     try {
-      if (!EnvUtil.isTrue('no_verify')) {
+      if (!EnvUtil.isTrue('NO_VERIFY')) {
         verifyDestination(this.destinationPath('package.json'));
       }
     } catch (err) {

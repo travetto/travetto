@@ -68,15 +68,7 @@ export abstract class RestApp<T = any> {
     const interceptors = DependencyRegistry.getCandidateTypes(RestInterceptor as Class);
     const instances: RestInterceptor[] = [];
     for (const op of interceptors) {
-      try {
-        instances.push(await DependencyRegistry.getInstance(op.target, op.qualifier));
-      } catch (err) {
-        if ((err.message ?? '').includes('Cannot find module')) {
-          console.error(`Unable to load operator ${op.class.name}#${op.qualifier.toString()}, module not found`);
-        } else {
-          throw err;
-        }
-      }
+      instances.push(await DependencyRegistry.getInstance(op.target, op.qualifier));
     }
 
     const ordered = instances.map(x => ({ key: x.constructor, before: x.before, after: x.after, target: x }));

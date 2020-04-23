@@ -40,7 +40,7 @@ export class Runner {
 
     const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
       idleTimeoutMillis: 10000,
-      min: EnvUtil.isTrue('execution_reusable') ? 1 : 0,
+      min: 1,
       max: this.state.concurrency
     });
 

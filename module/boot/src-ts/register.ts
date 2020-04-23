@@ -1,6 +1,7 @@
 // @ts-ignore
 import * as Mod from 'module';
 import * as path from 'path';
+import * as fs from 'fs';
 
 import { FsUtil } from './fs-util';
 import { AppCache } from './app-cache';
@@ -23,7 +24,7 @@ declare const global: {
   };
 };
 
-const IS_WATCH = !EnvUtil.isFalse('watch');
+const IS_WATCH = !EnvUtil.isFalse('WATCH');
 
 export class RegisterUtil {
   private static ogModuleLoad = Module._load!.bind(Module);
@@ -114,7 +115,8 @@ export class RegisterUtil {
       pth = FsUtil.toUnix(pth)
         .replace(/^(.*\/@travetto)\/([^/]+)(\/[^@]*)?$/g, (all, pre, name, rest) => {
           if (!(name in this.devCache)) {
-            this.devCache[name] = `${pre}/${name}`;
+            const base = `${FsUtil.cwd}/node_modules/@travetto/${name}`;
+            this.devCache[name] = fs.existsSync(base) ? base : `${pre}/${name}`;
           }
           return `${this.devCache[name]}${rest ? `/${rest}` : ''}`;
         })
@@ -131,7 +133,7 @@ export class RegisterUtil {
     AppCache.init();
 
     // Supports bootstrapping with framework resolution
-    if (!EnvUtil.isTrue('trv_dev')) {
+    if (!EnvUtil.isTrue('TRV_DEV')) {
       this.libRequire = require;
       Module._load = this.onModuleLoad.bind(this);
       require.extensions['.ts'] = this.compile.bind(this);

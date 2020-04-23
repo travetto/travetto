@@ -3,6 +3,7 @@ import { Injectable, Inject } from '@travetto/di';
 
 import { Request, Response, RouteConfig, Method } from '../types';
 import { RestInterceptor } from './interceptor';
+import { SerializeInterceptor } from './serialize';
 
 @Config('rest.cors')
 export class RestCorsConfig {
@@ -23,6 +24,8 @@ export class CorsInterceptor extends RestInterceptor {
   methods: string;
   headers: string;
   credentials: boolean = false;
+
+  after = SerializeInterceptor;
 
   postConstruct() {
     this.origins = new Set(this.corsConfig.origins ?? []);

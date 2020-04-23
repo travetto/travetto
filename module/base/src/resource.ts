@@ -157,5 +157,5 @@ export class $ResourceManager {
 
 export const ResourceManager = new $ResourceManager([
   ...Env.appRoots,
-  ...EnvUtil.getList('resource_roots')
+  ...EnvUtil.getList('RESOURCE_ROOTS')
 ]);

@@ -38,9 +38,9 @@ export async function runTestsDirect() {
   return runTests(
     {
       args: process.argv.slice(2),
-      format: EnvUtil.get('test_format', 'tap'),
-      mode: EnvUtil.get('test_mode', 'single') as any,
-      concurrency: EnvUtil.getInt('test_concurrency', 1)
+      format: EnvUtil.get('TEST_FORMAT', 'tap'),
+      mode: EnvUtil.get('TEST_MODE', 'single') as any,
+      concurrency: EnvUtil.getInt('TEST_CONCURRENCY', 1)
     }
   );
 }
@@ -51,5 +51,5 @@ export async function watchTests() {
   await PhaseManager.init('bootstrap', 'compiler').run();
 
   const { TestWatcher } = await import('../src/runner/watcher');
-  await TestWatcher.watch(EnvUtil.get('test_format', 'event'));
+  await TestWatcher.watch(EnvUtil.get('TEST_FORMAT', 'event'));
 }

@@ -19,7 +19,7 @@ function colorizeAny(col: keyof typeof COLORS, value: string | number | boolean)
 function colorizeAny(col: keyof typeof COLORS, value: any) {
   if (colorize === undefined) {
     // Load on demand, synchronously
-    colorize = (process.stdout.isTTY && !EnvUtil.isTrue('no_color')) || EnvUtil.isTrue('force_color');
+    colorize = (process.stdout.isTTY && !EnvUtil.isTrue('NO_COLOR')) || EnvUtil.isTrue('FORCE_COLOR');
   }
   if (colorize && value !== undefined && value !== null && value !== '') {
     const code = COLORS[col];

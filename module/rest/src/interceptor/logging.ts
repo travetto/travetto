@@ -55,8 +55,6 @@ export class LoggingInterceptor extends RestInterceptor {
     });
   }
 
-  before = CorsInterceptor;
-
   @Inject()
   logConfig: RestLogRoutesConfig;
 
