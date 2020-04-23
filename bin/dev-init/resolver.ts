@@ -33,7 +33,7 @@ export class DepResolver {
       return this.DEP_CACHE[mod];
     }
 
-    const out: typeof DepResolver.DEP_CACHE[''] = {
+    const out = this.DEP_CACHE[mod] = {
       peer: new Set(),
       regular: new Set(),
       bin: {}
@@ -64,7 +64,6 @@ export class DepResolver {
       }
     }
 
-    // Store
-    return this.DEP_CACHE[mod] = out;
+    return out;
   }
 }

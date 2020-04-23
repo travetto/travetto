@@ -15,7 +15,7 @@ export class OpenApiController {
     return this.service.getSpec();
   }
 
-  @Get(/openapi[.]ya?ml/)
+  @Get(/^openapi[.]ya?ml$/)
   @SetHeaders({ 'Content-Type': 'text/vnd.yaml' })
   async getYmlSpec() {
     return YamlUtil.serialize(this.service.getSpec());

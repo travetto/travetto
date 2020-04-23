@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 function init() {
   const cwd = process.cwd();
-  const root = !process.env.TRV_DEV ? '..' :
-    cwd.includes('/module/boot') ?
-      cwd : `${cwd}/node_modules/@travetto/boot`;
+  const root = !process.env.TRV_DEV ? '..' : // Standard
+    cwd.includes('/module/boot') ? cwd : // In boot module
+      !cwd.includes('/module/') ? `${cwd}/module/boot` : // At root
+        `${cwd}/node_modules/@travetto/boot`; // Everywhere else
   require(`${root}/src/register`).RegisterUtil.init();
 }
 

@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const root = process.env.INIT_CWD || process.cwd();
+const root = process.cwd();
 
 if (!fs.existsSync(`${root}/tsconfig.json`)) {
   fs.writeFileSync(`${root}/tsconfig.json`,

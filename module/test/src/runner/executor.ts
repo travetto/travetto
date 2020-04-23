@@ -190,7 +190,7 @@ export class TestExecutor {
       return;
     }
 
-    if (EnvUtil.isTrue('debugger')) {
+    if (EnvUtil.isTrue('DEBUGGER')) {
       await new Promise(t => setTimeout(t, 100));
     }
 

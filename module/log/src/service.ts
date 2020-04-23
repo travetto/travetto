@@ -78,7 +78,7 @@ class $Logger {
 
   invoke(event: ConsolePayload & Partial<LogEvent>, rest: any[]): void {
     if (!('message' in event)) {
-      const message = rest.length && typeof rest[0] === 'string' ? rest.shift() : undefined;
+      const message = (rest.length && typeof rest[0] === 'string') ? rest.shift() : undefined;
       event.message = message;
     }
 

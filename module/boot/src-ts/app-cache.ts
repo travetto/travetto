@@ -6,7 +6,7 @@ import { EnvUtil } from './env';
 
 class $AppCache extends FileCache {
   constructor() {
-    super(EnvUtil.get('trv_cache', `${FsUtil.cwd}/.trv_cache`));
+    super(EnvUtil.get('TRV_CACHE', `${FsUtil.cwd}/.trv_cache`));
   }
 
   init() {

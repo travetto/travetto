@@ -33,7 +33,7 @@ export class ScanApp {
 
   private static getAppModPathMatcher(root = Env.cwd) {
     const MOD_MATCH = new RegExp(`node_modules/@travetto/([^/]+)/(${this.modAppFolders.join('|')})`);
-    const MOD_EX = new RegExp(`node_modules/@travetto/(${this.modAppExclude.join('|')})`);
+    const MOD_EX = new RegExp(`@travetto/(${this.modAppExclude.join('|')})`);
     return { test: (x: string) => MOD_MATCH.test(x) && !MOD_EX.test(x) };
   }
 
@@ -124,7 +124,7 @@ export class ScanApp {
   static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {
     const results = paths.map(mod => {
       // Compressed for minimizing bundle size
-      mod = !/~/.test(mod) ? mod : AppCache.fromEntryName(mod);
+      mod = !/•/.test(mod) ? mod : AppCache.fromEntryName(mod);
       const full = FsUtil.resolveUnix(base!, mod);
 
       if (mod === full) {

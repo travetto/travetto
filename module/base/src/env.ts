@@ -17,21 +17,21 @@ class $Env {
 
   constructor() {
     this.cwd = FsUtil.cwd;
-    this.env = (EnvUtil.get('env') ?? EnvUtil.get('node_env') ?? PROD_KEY).replace(/^production$/i, PROD_KEY).toLowerCase();
+    this.env = (EnvUtil.get('ENV') ?? EnvUtil.get('NODE_ENV') ?? PROD_KEY).replace(/^production$/i, PROD_KEY).toLowerCase();
     this.prod = this.env === PROD_KEY;
 
-    this.profiles = new Set(EnvUtil.getList('profile'));
+    this.profiles = new Set(EnvUtil.getList('PROFILE'));
     this.appRoots = this.computeAppRoots();
 
-    this.watch = EnvUtil.isTrue('watch');
-    this.debug = EnvUtil.isSet('debug') ? !EnvUtil.isFalse('debug') : !this.prod;
-    this.trace = EnvUtil.isSet('trace') && !EnvUtil.isFalse('trace');
-    this.quietInit = EnvUtil.isTrue('quiet_init');
+    this.watch = EnvUtil.isTrue('WATCH');
+    this.debug = EnvUtil.isSet('DEBUG') ? !EnvUtil.isFalse('DEBUG') : !this.prod;
+    this.trace = EnvUtil.isSet('TRACE') && !EnvUtil.isFalse('TRACE');
+    this.quietInit = EnvUtil.isTrue('QUIET_INIT');
   }
 
   private computeAppRoots() {
     // Include root
-    return [this.cwd, ...EnvUtil.getList('app_roots')]
+    return [this.cwd, ...EnvUtil.getList('APP_ROOTS')]
       .filter(x => !!x)
       .map(x => FsUtil.resolveUnix(this.cwd, x).replace(this.cwd, '.'))
       .filter((x, i, all) => i === 0 || x !== all[i - 1]); // Dedupe
@@ -50,7 +50,7 @@ class $Env {
   }
 
   get colorize() {
-    return (process.stdout.isTTY && !EnvUtil.isTrue('no_color')) || EnvUtil.isTrue('force_color');
+    return (process.stdout.isTTY && !EnvUtil.isTrue('NO_COLOR')) || EnvUtil.isTrue('FORCE_COLOR');
   }
 }
 

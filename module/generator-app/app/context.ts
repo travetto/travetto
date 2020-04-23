@@ -14,7 +14,7 @@ export class Context {
   modules: Record<string, boolean> = {};
 
   author = {
-    name: run('git config user.name') || EnvUtil.get('user'),
+    name: run('git config user.name') || EnvUtil.get('USER'),
     email: run('git config user.email')
   };
 

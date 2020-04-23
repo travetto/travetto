@@ -6,19 +6,19 @@ import { YamlUtil } from '@travetto/yaml';
 type Prim = number | string | boolean | null;
 export type Nested = { [key: string]: Prim | Nested | Nested[] };
 
+const cmp = <T>(a: T, b: T, v: T, d: 1 | -1) => a === b ? 0 : (a === v ? -1 * d : (b === v ? 1 * d : 0));
+
 export class ConfigUtil {
 
   static fetchOrderedConfigs() {
-    const envFiles = ResourceManager.findAllByExtensionSync('.yml')
+    return ResourceManager.findAllByExtensionSync('.yml')
       .map(file => ({ file, profile: path.basename(file).replace('.yml', '') }))
-      .sort((a, b) => {
-        const ap = a.profile, bp = b.profile;
-        return ((ap === 'application' ? 1 : 0) + (bp === 'application' ? -1 : 0)) ||
-          ((ap === Env.env ? -1 : 0) + (bp === Env.env ? 1 : 0)) ||
-          (ap.localeCompare(bp) || a.file.localeCompare(b.file));
-      });
-
-    return envFiles;
+      .filter(({ profile }) => profile === 'application' || profile === Env.env || Env.hasProfile(profile))
+      .sort((a, b) =>
+        cmp(a.profile, b.profile, 'application', 1) || // application at top
+        cmp(a.profile, b.profile, Env.env, -1) || // Env at bottom
+        a.file.localeCompare(b.file) // Sort by file name
+      );
   }
 
   static getConfigFileAsData(file: string, ns: string = '') {
@@ -79,7 +79,7 @@ export class ConfigUtil {
     const matcher = !key ? /./ : new RegExp(`^${key.replace(/[.]/g, '_')}`, 'i'); // Check is case insensitive
     for (const k of Object.keys(process.env)) { // Find all keys that match
       if (k.includes('_') && (!key || matcher.test(k))) { // Require at least one level
-        ConfigUtil.bindEnvByParts(obj, key ? k.substring(key.length + 1).split('_') : k.split('_'), process.env[k] as string);
+        ConfigUtil.bindEnvByParts(obj, key ? k.substring(key.length + 1).split('_') : k.split('_'), process.env[k]!);
       }
     }
   }

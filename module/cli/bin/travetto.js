@@ -4,7 +4,7 @@ const { FsUtil } = require('@travetto/boot/src/fs-util');
 const { EnvUtil } = require('@travetto/boot/src/env');
 
 if (
-  !EnvUtil.isSet('trv_dev') && // If not defined
+  !EnvUtil.isSet('TRV_DEV') && // If not defined
   /\/travetto.*\/(module|sample)\//.test(FsUtil.cwd) // And in local module
 ) { // If in framework development mode
   const res = require('child_process').spawnSync(process.argv0, process.argv.slice(1), {
@@ -22,11 +22,10 @@ if (
 
 }
 
-const fs = require('fs');
-const rel = require.resolve('@travetto/cli');
-const hasLocal = fs.existsSync(rel);
+if (!__filename.includes(FsUtil.cwd)) { // If the current file is not under the working directory
+  const fs = require('fs');
+  const hasLocal = fs.existsSync(`${FsUtil.cwd}/node_modules/@travetto/${__filename.split('@travetto/')[1]}`);
 
-if (!hasLocal || FsUtil.toUnix(__filename) !== rel) {
   const Module = require('module');
   const og = Module._load;
   Module._load = function (req, parent) {

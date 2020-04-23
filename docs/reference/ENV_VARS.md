@@ -2,8 +2,8 @@
 
 The common environment variables throughout the code base:
 
-* `TRV_DEV` = 0|1 - If we are in development mode, 
-* `TRV_CACHE` = cwd     - The output directory for compilation, defaults to `.trv_cache` of the cwd
+* `TRV_DEV` = 0|1           - If we are in development mode, 
+* `TRV_CACHE` = cwd         - The output directory for compilation, defaults to `.trv_cache` of the cwd
 
 * `APP_ROOTS` = ['.']       - The root of the application search space
 * `RESOURCE_ROOTS` = ['.']  - The root of resource searching
@@ -22,10 +22,9 @@ The common environment variables throughout the code base:
 * `DEBUGGER` = 0|1          - Indicates whether or not a debugger is attached.  Some timing compensation is needed
 
 * `TEST_FORMAT` = tap|json  - Defaults to tap
-* `TEST_CONCURRENCY` = 4    - Defaults to 4 or 1 - cpu count
+* `TEST_CONCURRENCY` = 4    - Defaults to 4 or cpu count - 1
 * `TEST_MODE` = single|all  - Single vs all
 
 * `JS_YAML` = 0|1           - Defaults to 0, forces use of js-yaml over @travetto/yaml
 
 * `IDLE_TIMEOUT` = 120000   - Default timeout for a test-worker, determines self termination if no request within that time window
-* `EXECUTION_REUSABLE`= 0|1 - Determines if a test-worker can be reused, within the `IDLE_TIMEOUT` window.  Primarily used for integration with external test runners.
