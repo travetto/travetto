@@ -12,7 +12,7 @@ export type ConsolePayload = {
   level: LogLevel;
 };
 
-type SimpleConsole = { invoke(payload: ConsolePayload, args: any[]): void } | Console | Record<LogLevel, (...args: any[]) => void>;
+type SimpleConsole = { invoke(payload: ConsolePayload, ...args: any[]): void } | Console | Record<LogLevel, (...args: any[]) => void>;
 
 const OG_CONSOLE = console;
 const KEY = '_trvCon';
@@ -63,7 +63,7 @@ class $ConsoleManager {
     }
 
     if ('invoke' in this.targetConsole) {
-      return this.targetConsole.invoke(payload, args);
+      return this.targetConsole.invoke(payload, ...args);
     } else {
       const level = payload.level;
       const op = level in this.targetConsole && level !== 'trace' ? level : (/error|warn|fatal/.test(payload.level) ? 'error' : 'log');
