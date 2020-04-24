@@ -13,15 +13,15 @@ export type ConsolePayload = {
 };
 
 type SimpleConsole = { invoke(payload: ConsolePayload, ...args: any[]): void } | Console | Record<LogLevel, (...args: any[]) => void>;
+type State = { console: SimpleConsole, transformer?: (arg: any) => any, plain?: boolean };
 
 const OG_CONSOLE = console;
 const KEY = '_trvCon';
 const CONSOLE_RE = /(\bconsole[.](debug|info|trace|warn|log|error|fatal)[(])|\n/g;
 
 class $ConsoleManager {
-  private targetConsole: SimpleConsole;
-  private argTransformer?: (arg: any) => any;
-  private plain: boolean;
+  private states: State[] = [{ console }];
+  private state: State = this.states[0];
 
   readonly key = KEY;
   readonly defaultPlain = EnvUtil.isTrue('PLAIN_CONSOLE') || EnvUtil.isTrue('PLAIN');
@@ -58,19 +58,19 @@ class $ConsoleManager {
 
     args = args.map(x => (x && x.toConsole) ? x.toConsole() : x);
 
-    if (this.argTransformer) {
-      args = args.map(this.argTransformer!);
+    if (this.state.transformer) {
+      args = args.map(this.state.transformer!);
     }
 
-    if ('invoke' in this.targetConsole) {
-      return this.targetConsole.invoke(payload, ...args);
+    if ('invoke' in this.state.console) {
+      return this.state.console.invoke(payload, ...args);
     } else {
       const level = payload.level;
-      const op = level in this.targetConsole && level !== 'trace' ? level : (/error|warn|fatal/.test(payload.level) ? 'error' : 'log');
-      if (!this.plain) {
-        return this.targetConsole[op](...this.buildContext(payload), ...args);
+      const op = level in this.state.console && level !== 'trace' ? level : (/error|warn|fatal/.test(payload.level) ? 'error' : 'log');
+      if (!this.state.plain) {
+        return this.state.console[op](...this.buildContext(payload), ...args);
       } else {
-        return this.targetConsole[op](...args);
+        return this.state.console[op](...args);
       }
     }
   }
@@ -102,9 +102,14 @@ class $ConsoleManager {
         inspectOptions: { depth: 4 },
       });
     }
-    this.targetConsole = cons ?? OG_CONSOLE;
-    this.argTransformer = transformer;
-    this.plain = plain ?? this.defaultPlain;
+    this.states.push(this.state = { console: cons ?? OG_CONSOLE, transformer, plain: plain ?? this.defaultPlain });
+  }
+
+  clear() {
+    if (this.states.length > 1) {
+      this.states.pop();
+      this.state = this.states[this.states.length - 1];
+    }
   }
 }
 

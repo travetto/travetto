@@ -59,7 +59,7 @@ export class VisitorFactory<S extends State = State> {
           const out = state.finalize(ret);
           return out;
         } finally {
-          ConsoleManager.set(null);
+          ConsoleManager.clear();
         }
       };
   }
