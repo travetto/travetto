@@ -24,6 +24,7 @@ export class UploadAsset implements Asset {
 
 /**
  * @augments trv/asset-rest/AssetUpload
+ * @augments trv/rest/Param
  */
 export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetConfig> = {}) {
 

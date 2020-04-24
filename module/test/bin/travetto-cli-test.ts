@@ -18,10 +18,6 @@ export function init() {
       const { Env, PhaseManager } = await import('@travetto/base');
       await PhaseManager.init('bootstrap', 'compiler').run();
 
-      // Run compile ahead of time
-      const { CompilerUtil } = await import('@travetto/compiler');
-      CompilerUtil.findAllUncompiledFiles().forEach(require);
-
       if (cmd.format === 'tap' && Env.colorize) {
         const { TapEmitter } = await import('../src/consumer/types/tap');
         cmd.consumer = new TapEmitter(process.stdout, {

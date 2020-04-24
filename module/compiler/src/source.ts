@@ -128,10 +128,10 @@ export class SourceManager {
       .forEach(x => this.rootNames.add(x));
 
     this.transformerManager.init();
+  }
 
-    for (const root of this.rootNames) {
-      require(root); // Load all the source files
-    }
+  getRootFiles() {
+    return [...this.rootNames];
   }
 
   hashChanged(fileName: string, content: string) {

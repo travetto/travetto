@@ -1,4 +1,5 @@
 // @file-if mysql
+// @file-if -pg
 import * as mysql from 'mysql';
 
 import { AsyncContext } from '@travetto/context';

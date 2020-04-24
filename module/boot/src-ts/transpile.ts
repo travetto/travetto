@@ -28,7 +28,7 @@ export class TranspileUtil {
       return minus ? EnvUtil.isFalse(key) : EnvUtil.isTrue(key);
     } else {
       try {
-        require.resolve(token);
+        require.resolve(key);
         return !minus;
       } catch (err) {
         if (!minus) {
@@ -48,7 +48,14 @@ export class TranspileUtil {
         return ''; // Short circuit
       }
       try {
-        return this.resolveToken(token) ? all : `// @removed ${token} was not satisfied`;
+        if (this.resolveToken(token)) {
+          return all;
+        } else {
+          if (mode === 'file') {
+            throw new Error('Unable to satisfy');
+          }
+          return `// @removed ${token} was not satisfied`;
+        }
       } catch (err) {
         if (mode === 'file') {
           hideAll = true;

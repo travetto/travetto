@@ -6,7 +6,6 @@
     "strictPropertyInitialization": false,
     "inlineSourceMap": true,
     "lib": [
-      "es2015.proxy",
       "es2020"
     ],
     "preserveConstEnums": true,
