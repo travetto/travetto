@@ -50,18 +50,17 @@ export class VisitorFactory<S extends State = State> {
   }
 
   visitor(): ts.TransformerFactory<ts.SourceFile> {
-    return (context: ts.TransformationContext) =>
-      (file: ts.SourceFile): ts.SourceFile => {
-        try {
-          ConsoleManager.set('!compiler.log', x => TransformUtil.collapseNode(x), false);
-          const state = this.getState(file);
-          const ret = this.visit(state, context, file);
-          const out = state.finalize(ret);
-          return out;
-        } finally {
-          ConsoleManager.clear();
-        }
-      };
+    return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
+      try {
+        ConsoleManager.setFile('!compiler.log', { processArgs: (__, args) => TransformUtil.collapseNodes(args) });
+        const state = this.getState(file);
+        const ret = this.visit(state, context, file);
+        const out = state.finalize(ret);
+        return out;
+      } finally {
+        ConsoleManager.clear();
+      }
+    };
   }
 
   executePhaseAlways<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T) {

@@ -15,6 +15,10 @@ const exclude = new Set([
 
 export class TransformUtil {
 
+  static collapseNodes(all: any[]) {
+    return all.map(x => this.collapseNode(x));
+  }
+
   static collapseNode(x: any, cache: Set<string> = new Set()): any {
     if (!x || Util.isPrimitive(x)) {
       return x;

@@ -76,7 +76,7 @@ class $Logger {
     return !(level in this.exclude);
   }
 
-  invoke(event: ConsolePayload & Partial<LogEvent>, ...rest: any[]): void {
+  invoke(event: ConsolePayload & Partial<LogEvent>, rest: any[]): void {
     if (!('message' in event)) {
       const message = (rest.length && typeof rest[0] === 'string') ? rest.shift() : undefined;
       event.message = message;
