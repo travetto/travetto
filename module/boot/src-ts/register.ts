@@ -52,8 +52,7 @@ export class RegisterUtil {
       return mod;
     } catch (e) {
       const name = Module._resolveFilename!(request, parent);
-      Module._compile!(TranspileUtil.handlePhaseError('load', name, e), name);
-      return this.ogModuleLoad.apply(null, [request, parent]); // Load again
+      return Module._compile!(TranspileUtil.handlePhaseError('load', name, e), name);
     }
   }
 

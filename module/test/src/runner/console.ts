@@ -3,7 +3,7 @@ import { ConsoleManager, ConsolePayload } from '@travetto/base';
 
 export class ConsoleCapture {
 
-  static out: Record<string, string>;
+  static out: Record<string, string[]>;
 
   static start() {
     this.out = {};
@@ -15,13 +15,13 @@ export class ConsoleCapture {
   }
 
   static invoke({ level }: ConsolePayload, args: any[]) {
-    this.out[level] = `${this.out[level] ?? ''}${args.join(' ')}`;
+    (this.out[level] = this.out[level] ?? []).push(args.join(' '));
   }
 
   static end() {
     const ret = this.out;
     this.out = {};
     ConsoleManager.clear();
-    return ret;
+    return Object.fromEntries(Object.entries(ret).map(([k, v]) => [k, v.join('\n')]));
   }
 }

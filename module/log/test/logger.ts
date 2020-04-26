@@ -19,7 +19,7 @@ class LoggerTest {
     const events: LogEvent[] = [];
     Logger.listenRaw('test', e => events.push(e));
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _trvCon = Logger.invoke.bind(Logger);
+    const ᚕlg = (payload: any, ...args: any[]) => Logger.invoke(payload, args);
     console.log('Hello', 1, 2, 3);
     assert(events.length === 1);
     assert(events[0].message === 'Hello');

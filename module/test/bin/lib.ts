@@ -10,7 +10,7 @@ export async function load(env: any = {}) {
   Object.assign(process.env, {
     QUIET_INIT: '1',
     DEBUG: process.env.DEBUG || '0',
-    TRACE: '0',
+    TRACE: process.env.TRACE || '0',
     PROD: '0',
     LOG_TIME: '0',
     WATCH: '0',
