@@ -4,6 +4,9 @@ import { FileCache } from './cache';
 import { FsUtil } from './fs-util';
 import { EnvUtil } from './env';
 
+/**
+ * Cache for all app related files, primarily typescript transpilation output
+ */
 class $AppCache extends FileCache {
   constructor() {
     super(EnvUtil.get('TRV_CACHE', `${FsUtil.cwd}/.trv_cache`));

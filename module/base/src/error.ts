@@ -26,6 +26,9 @@ export const HTTP_ERROR_CONVERSION = (Object.entries(ERROR_CATEGORIES_WITH_CODES
     }
   );
 
+/**
+ * Framework error class, with an eye towards restful activities
+ */
 export class AppError extends Error {
   static build(e: any, cat: ErrorCategory = 'general') {
     if (e instanceof AppError) {

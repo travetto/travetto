@@ -25,25 +25,20 @@ export interface ReadEntry {
   data: string;
 }
 
-class $ScanFs {
+/**
+ * File system scanning utilities
+ */
+export class ScanFs {
 
-  constructor() {
-    for (const el of Object.keys(this) as (keyof this)[]) {
-      if (this[el] && (this[el] as any).bind) {
-        this[el] = (this[el] as any).bind(this);
-      }
-    }
-  }
-
-  isDir(x: ScanEntry) {
+  static isDir(x: ScanEntry) {
     return x.stats.isDirectory() || x.stats.isSymbolicLink();
   }
 
-  isNotDir(x: ScanEntry) {
+  static isNotDir(x: ScanEntry) {
     return !x.stats.isDirectory() && !x.stats.isSymbolicLink();
   }
 
-  async scanDir(handler: ScanHandler, base: string) {
+  static async scanDir(handler: ScanHandler, base: string) {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [
@@ -83,7 +78,7 @@ class $ScanFs {
     return out;
   }
 
-  async bulkScanDir(handlers: ScanHandler[], base: string) {
+  static async bulkScanDir(handlers: ScanHandler[], base: string) {
     const res = await Promise.all(handlers.map(x => this.scanDir(x, base)));
     const names = new Set();
     const out: ScanEntry[] = [];
@@ -98,7 +93,7 @@ class $ScanFs {
     return out;
   }
 
-  scanDirSync(handler: ScanHandler, base: string) {
+  static scanDirSync(handler: ScanHandler, base: string) {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [
@@ -141,7 +136,7 @@ class $ScanFs {
     return out;
   }
 
-  bulkScanDirSync(handlers: ScanHandler[], base: string) {
+  static bulkScanDirSync(handlers: ScanHandler[], base: string) {
     const names = new Set();
     const out = [];
     for (const h of handlers) {
@@ -155,26 +150,24 @@ class $ScanFs {
     return out;
   }
 
-  bulkRequire(handlers: ScanHandler[], cwd: string) {
+  static bulkRequire(handlers: ScanHandler[], cwd: string) {
     return this.bulkScanDirSync(handlers, cwd)
-      .filter(this.isNotDir) // Skip folders
+      .filter(x => this.isNotDir(x)) // Skip folders
       .map(x => require(x.file))
       .filter(x => !!x); // Return non-empty values
   }
 
-  async bulkRead(handlers: ScanHandler[], base: string) {
+  static async bulkRead(handlers: ScanHandler[], base: string) {
     const files = await this.bulkScanDir(handlers, base);
     const promises = files
-      .filter(this.isNotDir)
+      .filter(x => this.isNotDir(x))
       .map(x => fsReadFile(x.file, 'utf-8').then(d => ({ name: x.file, data: d })));
     return await Promise.all(promises);
   }
 
-  bulkReadSync(handlers: ScanHandler[], base: string) {
+  static bulkReadSync(handlers: ScanHandler[], base: string) {
     return this.bulkScanDirSync(handlers, base)
-      .filter(this.isNotDir)
+      .filter(x => this.isNotDir(x))
       .map(x => ({ name: x.file, data: fs.readFileSync(x.file, 'utf-8') }));
   }
 }
-
-export const ScanFs = new $ScanFs();

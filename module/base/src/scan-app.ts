@@ -13,6 +13,9 @@ interface Tester {
   test(value: string): boolean;
 }
 
+/**
+ * File scanning utilities, with a focus on application execution
+ */
 export class ScanApp {
 
   private static CACHE = new Map<string, SimpleEntry[]>();

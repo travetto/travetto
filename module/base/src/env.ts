@@ -2,6 +2,9 @@ import { EnvUtil, FsUtil } from '@travetto/boot';
 
 const PROD_KEY = 'prod';
 
+/**
+ * General Environmental state for the application
+ */
 class $Env {
 
   private profiles: Set<string>;

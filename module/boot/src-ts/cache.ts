@@ -5,6 +5,9 @@ function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
   return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
 }
 
+/**
+ * Standard file cache, with output file name normalization and truncation
+ */
 export class FileCache {
   private cache = new Map<string, fs.Stats>();
 

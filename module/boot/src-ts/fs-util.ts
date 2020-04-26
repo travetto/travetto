@@ -20,6 +20,9 @@ function execCmd(sync: boolean, cmd: string, ignoreErrors = false) {
   }
 }
 
+/**
+ * Standard utils for interacting with the file system
+ */
 class $FsUtil {
 
   cwd: string;

@@ -15,6 +15,9 @@ export interface PresenceListener {
   removed(name: string): void;
 }
 
+/**
+ * Higher level functionality, focused on tracking files, built upon watcher
+ */
 export class FilePresenceManager {
   private ext: string;
   private cwd: string;
