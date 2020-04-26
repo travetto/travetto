@@ -9,6 +9,9 @@ declare const global: { ts: any }; // Used for transformers
 
 const OPTS = Symbol();
 
+/**
+ * Standard transpilation utilities, with support for basic text filters
+ */
 export class TranspileUtil {
   private static preparers: Preparer[] = [];
 

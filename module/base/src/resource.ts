@@ -13,6 +13,9 @@ const fsReadFile = util.promisify(fs.readFile);
 
 const cleanPath = (p: string) => p.charAt(0) === '/' ? p.substring(1) : p;
 
+/**
+ * Standard resource management interface allowing for look up by resource name vs path
+ */
 export class $ResourceManager {
   private cache: Record<string, string> = {};
 

@@ -3,6 +3,9 @@ import { FsUtil } from '@travetto/boot';
 let pkg: any = { name: 'untitled' };
 try { pkg = require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')); } catch { }
 
+/**
+ * General purpose information about the application
+ */
 export const AppInfo = {
   VERSION: pkg.version,
   NAME: pkg.name,

@@ -7,6 +7,9 @@ const MAX_SHUTDOWN_TIME = EnvUtil.getInt('MAX_SHUTDOWN_WAIT', 2000);
 type UnhandledHandler = (err: Error, prom?: Promise<any>) => boolean | undefined | void;
 type Listener = { name: string, handler: Function, final?: boolean };
 
+/**
+ * Shutdown manager, allowing for hooks into the shutdown process
+ */
 export class Shutdown {
   private static listeners: Listener[] = [];
   private static shutdownCode = -1;

@@ -14,6 +14,9 @@ interface Options {
   cwd: string;
 }
 
+/**
+ * Standard watcher built on node fs libs
+ */
 export class Watcher extends EventEmitter {
 
   private watched = new Map<string, ScanEntry>();

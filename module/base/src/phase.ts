@@ -6,6 +6,9 @@ interface Initializer {
   key: string;
 }
 
+/**
+ * Allows for running the code through various phases.
+ */
 export class PhaseManager {
 
   static init(scope: string, upto?: string, after?: string) {

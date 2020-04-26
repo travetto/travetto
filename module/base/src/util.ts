@@ -2,6 +2,9 @@ import * as crypto from 'crypto';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 
+/**
+ * Common utilities for object detection/manipulation
+ */
 export class Util {
   private static deepAssignRaw(a: any, b: any, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
