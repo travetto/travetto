@@ -4,10 +4,14 @@
     "target": "es2018",
     "strict": true,
     "strictPropertyInitialization": false,
+    "sourceMap": false,
+    "moduleResolution": "Node",
     "inlineSourceMap": true,
     "lib": [
       "es2020"
     ],
+    "noEmitOnError": false,
+    "noErrorTruncation": true,
     "preserveConstEnums": true,
     "experimentalDecorators": true,
     "importHelpers": true,

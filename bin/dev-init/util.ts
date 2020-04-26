@@ -12,15 +12,16 @@ export class Util {
   static copyTemplateFiles(src: string, base: string) {
     const module = path.basename(base);
     for (const f of fs.readdirSync(src)) {
-      const resolved = path.resolve(src, f);
-      if (fs.statSync(resolved).isFile()) {
-        const resolvedModule = path.resolve(src, module, f);
-        const srcFile = fs.existsSync(resolvedModule) ? resolvedModule : resolved;
-        const destFile = path.resolve(base, f);
+      const srcFile = [
+        path.resolve(src, module, `${f}.keep`),
+        path.resolve(src, module, f),
+        path.resolve(src, f)
+      ].find(x => fs.existsSync(x) && fs.statSync(x).isFile());
 
-        if (fs.statSync(srcFile).isFile() && fs.existsSync(destFile)) {
-          fs.copyFileSync(srcFile, destFile);
-        }
+      const destFile = path.resolve(base, f);
+
+      if (srcFile && !srcFile.endsWith('.keep') && fs.existsSync(destFile)) {
+        fs.copyFileSync(srcFile, destFile);
       }
     }
   }
