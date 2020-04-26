@@ -34,34 +34,31 @@ export class Stacktrace {
   }
 
   static simplifyStack(err: Error, filter = true): string {
-    const getName = (x: string) => {
-      const [, l] = x.split(FsUtil.toUnix(Env.cwd));
-      if (l) {
-        return l.split(/[.][tj]s/)[0];
-      }
-      return undefined;
+    const getLocation = (x: string) => {
+      const [, l] = x.split(Env.cwd);
+      return l;
     };
 
-    let lastName: string = '';
+    let lastLocation: string = '';
     const body = err.stack!.replace(/\\/g, '/').split('\n')
       .filter(x => !this.filterRegex.test(x)) // Exclude framework boilerplate
-      .reduce((acc, l) => {
-        const name = getName(l);
+      .reduce((acc, line) => {
+        const location = getLocation(line);
 
-        if (name === lastName) {
+        if (location === lastLocation) {
           // Do nothing
         } else {
-          if (name) {
-            lastName = name;
+          if (location) {
+            lastLocation = location;
           }
-          acc.push(l);
+          acc.push(line);
         }
         return acc;
       }, [] as string[])
       .map(x => x
         .replace(`${Env.cwd}/`, '')
         .replace(/^[\/]+/, '')
-        .replace(/\bjs\b/g, (a, f) => `ts`)
+        .replace(/[.]js/g, (a, f) => `.ts`)
       );
 
     if (!filter || body.length > 2) {

@@ -41,11 +41,13 @@ export function init() {
         Util.dependOn('clean');
       }
 
+      const { AppCache } = await import(`@travetto/boot`);
+
       //  Compile
       try {
         await Util.fork(`${__dirname}/compile-target.js`, [], process.env);
       } catch (err) {
-        console.error(color`${{ failure: 'Failed' }} to compile to ${{ path: cmd.output ?? 'default' }}`, err);
+        console.error(color`${{ failure: 'Failed' }} to compile to ${{ path: cmd.output ?? AppCache.cacheDir }}`, err);
         process.exit(1);
       }
 
@@ -54,7 +56,7 @@ export function init() {
       }
 
       if (!cmd.quiet) {
-        console.log(color`${{ success: 'Successfully' }} wrote to ${{ path: cmd.output ?? 'default' }}`);
+        console.log(color`${{ success: 'Successfully' }} wrote to ${{ path: cmd.output ?? AppCache.cacheDir }}`);
       }
     });
 }
