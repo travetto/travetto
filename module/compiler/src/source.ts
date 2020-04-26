@@ -4,8 +4,9 @@ import * as path from 'path';
 import { FileCache, RegisterUtil, TranspileUtil, FsUtil } from '@travetto/boot';
 import { Env, SystemUtil, ScanApp } from '@travetto/base';
 
-import { CompilerUtil } from './util';
 import { TransformerManager } from './transformer';
+
+const SIMPLE_COMPILATION = /\/support\/(transformer|phase).+/;
 
 export class SourceManager {
   private transformerManager: TransformerManager;
@@ -15,8 +16,15 @@ export class SourceManager {
   private contents = new Map<string, string>();
   private sources = new Map<string, ts.SourceFile>();
   private hashes = new Map<string, number>();
-  private compilerOptions: ts.CompilerOptions;
   private program: ts.Program;
+
+  private get compilerOptions() {
+    return {
+      ...TranspileUtil.compilerOptions,
+      rootDir: this.cwd,
+      outDir: this.cwd
+    };
+  }
 
   constructor(
     private cwd: string,
@@ -77,10 +85,6 @@ export class SourceManager {
   }
 
   private getProgram(forFile?: string) {
-    if (!this.compilerOptions) {
-      this.compilerOptions = CompilerUtil.resolveOptions(this.cwd);
-    }
-
     if (!this.program || (forFile && !this.rootNames.has(forFile))) {
       console.debug(`Loading program ${this.rootNames.size}`, forFile);
       if (forFile) {
@@ -111,7 +115,7 @@ export class SourceManager {
         this.transformerManager.transformers
       );
 
-      CompilerUtil.checkTranspileErrors(this.cwd, fileName, result.diagnostics);
+      TranspileUtil.checkTranspileErrors(this.cwd, fileName, result.diagnostics);
       // Save writing for typescript program (`writeFile`)
     } else {
       const cached = this.cache.readEntry(fileName);
@@ -150,20 +154,16 @@ export class SourceManager {
 
   getTranspiled(fileName: string, force = false) {
     // Do not typecheck the support code
-    if (/\/support\/(transformer|phase).+/.test(fileName)) {
+    if (SIMPLE_COMPILATION.test(fileName)) {
       return TranspileUtil.transpile(fileName, force);
     }
 
     try {
       return this.transpile(fileName, force);
     } catch (err) {
-      if (Env.watch) { // Handle transpilation errors
-        const errContent = CompilerUtil.getErrorModuleProxySource(err.message);
-        this.contents.set(fileName, errContent);
-        return this.transpile(fileName, true);
-      } else {
-        throw err;
-      }
+      const errContent = TranspileUtil.handlePhaseError('transpile', fileName, err);
+      this.contents.set(fileName, errContent);
+      return errContent;
     }
   }
 
@@ -188,7 +188,6 @@ export class SourceManager {
     this.sources.clear();
     this.hashes.clear();
     delete this.program;
-    delete this.compilerOptions;
   }
 
   getSourceMapHandler() {
