@@ -9,7 +9,7 @@ export function init() {
       process.env.OPENAPI_OUTPUT = cmd.output;
 
       const { PhaseManager } = await import('@travetto/base');
-      await PhaseManager.run();
+      await PhaseManager.bootstrap();
 
       const { DependencyRegistry } = await import('@travetto/di');
       const { OpenApiService } = await import('../src/service');

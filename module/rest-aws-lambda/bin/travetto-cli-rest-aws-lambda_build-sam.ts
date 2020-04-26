@@ -18,7 +18,7 @@ export function init() {
       await FsUtil.mkdirp(path.dirname(cmd.output));
 
       const { PhaseManager } = await import('@travetto/base');
-      await PhaseManager.init('bootstrap').run();
+      await PhaseManager.bootstrap();
 
       const { ControllerRegistry } = await import('@travetto/rest');
 

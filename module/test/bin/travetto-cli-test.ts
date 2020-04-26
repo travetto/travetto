@@ -12,11 +12,10 @@ export function init() {
     .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
     .action(async (args, cmd) => {
 
-      const { runTests, prepareEnv } = await import('./lib');
+      const { runTests, load } = await import('./lib');
 
-      prepareEnv();
-      const { Env, PhaseManager } = await import('@travetto/base');
-      await PhaseManager.init('bootstrap', 'compiler').run();
+      await load();
+      const { Env } = await import('@travetto/base');
 
       if (cmd.format === 'tap' && Env.colorize) {
         const { TapEmitter } = await import('../src/consumer/types/tap');

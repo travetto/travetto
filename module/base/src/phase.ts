@@ -14,8 +14,12 @@ export class PhaseManager {
     return mgr;
   }
 
-  static run(scope: string = 'bootstrap') {
-    return this.init(scope).run();
+  static bootstrap(upto?: string) {
+    return this.init('bootstrap', upto).run();
+  }
+
+  static bootstrapAfter(after: string) {
+    return this.init('bootstrap', '*', after).run();
   }
 
   initializers: Initializer[] = [];

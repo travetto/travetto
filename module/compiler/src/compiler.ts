@@ -46,6 +46,10 @@ class $Compiler extends EventEmitter {
     return fs.readFileSync(fileName, 'utf-8');
   }
 
+  getRootFiles() {
+    return this.sourceManager.getRootFiles();
+  }
+
   init() {
     if (this.active) {
       return;
@@ -59,11 +63,6 @@ class $Compiler extends EventEmitter {
 
     // register source maps
     sourcemap.install(this.sourceManager.getSourceMapHandler());
-
-    const files = this.sourceManager.getRootFiles();
-    for (const file of files) {
-      require(file); // Load all the files
-    }
 
     console.debug('Initialized', (Date.now() - start) / 1000);
   }

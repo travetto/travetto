@@ -1,5 +1,5 @@
 import { PhaseManager } from '@travetto/base';
-import { State } from '../runner/runner';
+import { State } from '../runner/types';
 
 export class StandardWorker {
   static async run(opts: State) {
@@ -9,7 +9,7 @@ export class StandardWorker {
 
       TestUtil.registerCleanup('runner');
 
-      await PhaseManager.init('bootstrap', '*', 'registry').run(); // Registry and up
+      await PhaseManager.bootstrapAfter('registry');
 
       const res = await new Runner(opts).run();
       return res ? 0 : 1;
