@@ -3,15 +3,10 @@ import * as fs from 'fs';
 import { EventEmitter } from 'events';
 import * as sourcemap from 'source-map-support';
 
-import { FsUtil, AppCache, FileCache } from '@travetto/boot';
+import { FsUtil, AppCache, FileCache, RegisterUtil, TranspileUtil } from '@travetto/boot';
 import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp } from '@travetto/base';
 
 import { SourceManager } from './source';
-import { CompilerUtil } from './util';
-
-type Module = {
-  _compile?(file: string, contents: string): any;
-} & NodeModule;
 
 class $Compiler extends EventEmitter {
 
@@ -58,7 +53,7 @@ class $Compiler extends EventEmitter {
 
     const start = Date.now();
     this.active = true;
-    require.extensions['.ts'] = this.compile.bind(this);
+    require.extensions[TranspileUtil.ext] = this.compile.bind(this);
     this.sourceManager.init();
     this.presenceManager.init();
 
@@ -116,19 +111,10 @@ class $Compiler extends EventEmitter {
     }
   }
 
-  compile(m: Module, tsf: string) {
+  compile(m: NodeModule, tsf: string) {
     const isNew = !this.presenceManager.has(tsf);
     try {
-      const js = this.sourceManager.getTranspiled(tsf); // Compile
-      const jsf = FsUtil.toJS(tsf);
-      try {
-        return m._compile!(js, jsf);
-      } catch (e) {
-        const errorContent = CompilerUtil.handleCompileError(e, this.cwd, m.filename, tsf);
-        if (errorContent) {
-          return m._compile!(errorContent, jsf);
-        }
-      }
+      return RegisterUtil.doCompile(m, this.sourceManager.getTranspiled(tsf), tsf);
     } finally {
       // If known by the source manager, track it's presence
       //   some files will be transpile only, and should not trigger

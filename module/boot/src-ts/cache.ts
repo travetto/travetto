@@ -91,4 +91,15 @@ export class FileCache {
         .replace(/[/]+/g, '•')
       ));
   }
+
+  getOrSet(key: string, create: () => string, force = false) {
+    const name = FsUtil.toUnix(key);
+    let content: string;
+    if (force || !this.hasEntry(name)) {
+      this.writeEntry(name, content = create());
+    } else {
+      content = this.readEntry(name);
+    }
+    return content;
+  }
 }

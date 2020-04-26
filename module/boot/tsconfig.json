@@ -12,7 +12,6 @@
     ],
     "noEmitOnError": false,
     "noErrorTruncation": true,
-    "preserveConstEnums": true,
     "experimentalDecorators": true,
     "importHelpers": true,
     "outDir": "build/"

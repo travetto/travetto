@@ -5,21 +5,22 @@ import { AppCache } from './app-cache';
 
 type Preparer = (name: string, contents: string) => string;
 
-declare const global: {
-  ts: any;
-};
+declare const global: { ts: any }; // Used for transformers
 
-let tsOpts: any;
-let ts: any = global.ts = new Proxy({}, {
-  get(t, p, r) {
-    ts = (global as any).ts = require('typescript');
-    return ts[p];
-  }
-});
+const OPTS = Symbol();
 
 export class TranspileUtil {
-
   private static preparers: Preparer[] = [];
+
+  private static get ts() { // Only registered on first call
+    return global.ts = global.ts ?? new Proxy({}, { // Only in inject as needed
+      get(t, p, r) {
+        return (global.ts = require('typescript'))[p]; // Overwrite
+      }
+    });
+  }
+
+  static readonly ext = '.ts';
 
   private static resolveToken(token: string) {
     const [__all, sign, env, key] = token.match(/(-|\+)?([$])?(.*)/)!;
@@ -70,6 +71,43 @@ export class TranspileUtil {
     return hideAll ? '// @removed, modules not found' : contents;
   }
 
+  /**
+   * Get loaded compiler options
+   */
+  static get compilerOptions(): any {
+    if (!(this as any)[OPTS]) {
+      const json = this.ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, this.ts.sys.readFile);
+      (this as any)[OPTS] = {
+        ...this.ts.parseJsonSourceFileConfigFileContent(json, this.ts.sys, FsUtil.cwd).options,
+        rootDir: FsUtil.cwd,
+        outDir: FsUtil.cwd
+      };
+    }
+    return (this as any)[OPTS];
+  }
+
+  /**
+   * Check transpilation errors
+   */
+  static checkTranspileErrors(cwd: string, fileName: string, diagnostics: readonly any[]) {
+    if (diagnostics && diagnostics.length) {
+      const errors = diagnostics.slice(0, 5).map(diag => {
+        const message = this.ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+        if (diag.file) {
+          const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
+          return ` @ ${diag.file.fileName.replace(`${cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
+        } else {
+          return ` ${message}`;
+        }
+      });
+
+      if (diagnostics.length > 5) {
+        errors.push(`${diagnostics.length - 5} more ...`);
+      }
+      throw new Error(`Transpiling ${fileName.replace(`${cwd}/`, '')} failed: \n${errors.join('\n')}`);
+    }
+  }
+
   static addPreparer(fn: Preparer) {
     this.preparers.push(fn);
   }
@@ -85,28 +123,74 @@ export class TranspileUtil {
     }
 
     // Drop typescript import, and use global. Great speedup;
-    fileContents = fileContents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
+    if (fileName.includes('transform')) { // Should only ever be in transformation code
+      fileContents = fileContents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
+    }
 
-    // Track loading, for cyclical dependency detection
-    return `${fileContents};\nexport const ᚕtrv = 1;`;
+    return fileContents;
   }
 
-  static transpile(tsf: string, force = false) {
-    const name = FsUtil.toUnix(tsf);
-    if (force || !AppCache.hasEntry(name)) {
-      if (!tsOpts) {
-        const json = ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, ts.sys.readFile);
-        tsOpts = ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options;
-      }
-      const content = ts.transpile(this.prepare(tsf), tsOpts);
-      AppCache.writeEntry(name, content);
-      return content;
-    } else {
-      return AppCache.readEntry(name);
+  /**
+   * Process error response
+   */
+  static handlePhaseError(phase: 'load' | 'compile' | 'transpile', tsf: string, err: Error, fileName = tsf.replace(`${FsUtil.cwd}/`, '')) {
+    if (phase === 'compile' &&
+      (err.message.startsWith('Cannot find module') || err.message.startsWith('Unable to load'))
+    ) {
+      err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${fileName}]` : `from ${fileName}`}`);
     }
+
+    if (EnvUtil.isTrue('watch') && !fileName.includes('/node_modules/')) {
+      console.debug(`Unable to ${phase} ${fileName}: stubbing out with error proxy.`, err.message);
+      return `
+module.exports = {
+  const err = () => 
+    throw new Error('${err.message}'});
+  };
+  return new Proxy({}, {
+    enumerate: () => [],
+    isExtensible: () => false,
+    getOwnPropertyDescriptor: () => ({}),
+    preventExtensions: () => true,
+    apply: err,
+    construct: err,
+    setPrototypeOf: err,
+    getPrototypeOf: err,
+    get: err,
+    has: err,
+    set: err,
+    ownKeys: err,
+    deleteProperty: err,
+    defineProperty: err
+  });
+};`;
+    }
+
+    throw err;
+  }
+
+  /**
+   * Transpile, and cache
+   */
+  static transpile(tsf: string, force = false) {
+    return AppCache.getOrSet(tsf, () => {
+      try {
+        const diags: any[] = [];
+        const ret = this.ts.transpile(this.prepare(tsf), this.compilerOptions, tsf, diags);
+        this.checkTranspileErrors(FsUtil.cwd, tsf, diags);
+        return ret;
+      } catch (e) {
+        return this.handlePhaseError('transpile', tsf, e);
+      }
+    }, force);
+  }
+
+  static init() {
+    AppCache.init();
   }
 
   static reset() {
+    AppCache.reset();
     this.preparers = [];
   }
 }

@@ -32,6 +32,14 @@ class $AppCache extends FileCache {
       }
     }
   }
+
+  reset() {
+    for (const k of Object.keys(require.cache)) {
+      if (k.includes('@travetto')) { // If a travetto module
+        delete require.cache[k];
+      }
+    }
+  }
 }
 
 export const AppCache = new $AppCache();
