@@ -12,19 +12,33 @@ export type ConsolePayload = {
   level: LogLevel;
 };
 
-type SimpleConsole = { invoke(payload: ConsolePayload, ...args: any[]): void } | Console | Record<LogLevel, (...args: any[]) => void>;
-type State = { console: SimpleConsole, transformer?: (arg: any) => any, plain?: boolean };
+interface ConsoleState {
+  invoke(payload: ConsolePayload, args: any[]): void;
+  enrich?: boolean;
+  processArgs?(payload: ConsolePayload, args: any[]): any[];
+}
 
-const OG_CONSOLE = console;
-const KEY = '_trvCon';
+const KEY = 'ᚕlg';
 const CONSOLE_RE = /(\bconsole[.](debug|info|trace|warn|log|error|fatal)[(])|\n/g;
 
+
+function wrap(target: Console, enrich: boolean) {
+  return {
+    enrich,
+    invoke(payload: ConsolePayload, args: any[]) {
+      const level = payload.level;
+      const op = level in target && level !== 'trace' ? level : (/error|warn|fatal/.test(payload.level) ? 'error' : 'log');
+      return target[op](...args);
+    }
+  };
+}
+
 class $ConsoleManager {
-  private states: State[] = [{ console }];
-  private state: State = this.states[0];
+  private states: ConsoleState[] = [];
+  private state: ConsoleState;
 
   readonly key = KEY;
-  readonly defaultPlain = EnvUtil.isTrue('PLAIN_CONSOLE') || EnvUtil.isTrue('PLAIN');
+  readonly defaultEnrich = !(EnvUtil.isTrue('PLAIN_CONSOLE') || EnvUtil.isTrue('PLAIN'));
   readonly timestamp = !EnvUtil.isFalse('LOG_TIME');
   readonly timeMillis = EnvUtil.isTrue('LOG_MILLIS') || (Env.trace ? !EnvUtil.isFalse('LOG_MILLIS') : false);
   readonly exclude = new Set<string>([]);
@@ -38,44 +52,23 @@ class $ConsoleManager {
     if (!Env.trace) {
       this.exclude.add('trace');
     }
-    this.set(null); // Init
+    this.set(wrap(console, this.defaultEnrich)); // Init to console
     TranspileUtil.addPreparer(this.instrument.bind(this)); // Register console manager
   }
 
-  private buildContext(payload: ConsolePayload) {
-    const out = [payload.level.padEnd(5), `[${payload.category}:${payload.line}]`];
+  private enrich(payload: ConsolePayload, args: any[]) {
+    args = [
+      payload.level.padEnd(5), `[${payload.category}:${payload.line}]`,
+      ...args
+    ];
     if (this.timestamp) {
       const [time] = new Date().toISOString().split(this.timeMillis ? /~/ : /[.]/);
-      out.unshift(time);
+      args.unshift(time);
     }
-    return out;
+    return args;
   }
 
-  invoke(payload: ConsolePayload, ...args: any[]) {
-    if (this.exclude.has(payload.level)) {
-      return; // Do nothing
-    }
-
-    args = args.map(x => (x && x.toConsole) ? x.toConsole() : x);
-
-    if (this.state.transformer) {
-      args = args.map(this.state.transformer!);
-    }
-
-    if ('invoke' in this.state.console) {
-      return this.state.console.invoke(payload, ...args);
-    } else {
-      const level = payload.level;
-      const op = level in this.state.console && level !== 'trace' ? level : (/error|warn|fatal/.test(payload.level) ? 'error' : 'log');
-      if (!this.state.plain) {
-        return this.state.console[op](...this.buildContext(payload), ...args);
-      } else {
-        return this.state.console[op](...args);
-      }
-    }
-  }
-
-  instrument(fileName: string, fileContents: string) {
+  private instrument(fileName: string, fileContents: string) {
     // Ignore framework /bin/ folders only
     if (fileName.includes('/bin/')) {
       return fileContents; // Skip cli
@@ -94,21 +87,44 @@ class $ConsoleManager {
     return fileContents;
   }
 
-  set(cons: SimpleConsole | string | null, transformer?: (arg: any) => any, plain?: boolean) {
-    if (typeof cons === 'string') {
-      const name = cons.startsWith('!') ? AppCache.toEntryName(cons.substring(1)) : cons;
-      cons = new console.Console({
+  private invoke(payload: ConsolePayload, ...args: any[]) {
+    if (this.exclude.has(payload.level)) {
+      return; // Do nothing
+    }
+
+    args = args.map(x => (x && x.toConsole) ? x.toConsole() : x);
+
+    if (this.state.processArgs) {
+      args = this.state.processArgs(payload, args);
+    }
+
+    if (this.state.enrich) {
+      args = this.enrich(payload, args);
+    }
+
+    return this.state.invoke(payload, args);
+  }
+
+  set(cons: ConsoleState) {
+    this.states.unshift(cons);
+    this.state = this.states[0];
+  }
+
+  setFile(file: string, state: Omit<ConsoleState, 'invoke'> = {}) {
+    const name = file.startsWith('!') ? AppCache.toEntryName(file.substring(1)) : file;
+    this.set({
+      ...wrap(new console.Console({
         stdout: fs.createWriteStream(name, { flags: 'a' }),
         inspectOptions: { depth: 4 },
-      });
-    }
-    this.states.push(this.state = { console: cons ?? OG_CONSOLE, transformer, plain: plain ?? this.defaultPlain });
+      }), state.enrich ?? this.defaultEnrich),
+      ...state
+    });
   }
 
   clear() {
     if (this.states.length > 1) {
-      this.states.pop();
-      this.state = this.states[this.states.length - 1];
+      this.states.shift();
+      this.state = this.states[0];
     }
   }
 }
