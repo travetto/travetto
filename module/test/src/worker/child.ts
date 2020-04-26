@@ -4,7 +4,8 @@ import { CommUtil, ChildCommChannel } from '@travetto/worker';
 import { Events, RunEvent } from './types';
 
 const FIXED_MODULES = new Set([
-  'boot', 'base', 'cache', 'cli', 'config', 'compiler',
+  'jwt', 'exec', 'image',
+  'boot', 'base', 'cache', 'cli', 'config', 'compiler', 'openapi',
   'exec', 'log', 'net', 'registry', 'test', 'worker', 'yaml'
 ]);
 const IS_SUPPORT_FILE = '/support/';
@@ -81,10 +82,8 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     }
 
     // Reload registries, test and root
-    (await import('@travetto/test/src/registry/registry')).TestRegistry.reset();
-    (await import('@travetto/registry')).RootRegistry.reset();
+    await PhaseManager.init('reset').run();
 
-    this.compiler.reset();
     Shutdown.execute(-1);
   }
 

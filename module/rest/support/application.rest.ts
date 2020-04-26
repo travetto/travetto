@@ -1,5 +1,5 @@
-import { Application } from './decorator/application';
-import { RestApp } from './app';
+import { Application } from '../src/decorator/application';
+import { RestApp } from '../src/app';
 
 @Application('rest')
 class EntryPoint {
