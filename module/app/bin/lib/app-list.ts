@@ -28,7 +28,7 @@ export class AppListUtil {
   static async discover() {
     // Initialize up to compiler
     const { PhaseManager, ScanApp } = await import('@travetto/base');
-    await PhaseManager.init('bootstrap', 'compiler').run();
+    await PhaseManager.bootstrap('compile-all');
 
     // Load app files
     ScanApp.findSourceFiles(x =>
@@ -36,9 +36,15 @@ export class AppListUtil {
       fs.readFileSync(x, 'utf-8').includes('@Application') // Look for @Application annotation
     ).forEach(x => require(x.file)); // Only load files that are candidates
 
+    // Load all packaged applications
+    for (const { file } of ScanApp.findSourceFiles(/\/application[.].([^.]+)[.]ts/)) {
+      try {
+        require(file);
+      } catch { }
+    }
+
     // Get applications
     const { ApplicationRegistry } = await import('../../src/registry');
-    ApplicationRegistry.loadPackaged();
     const res = await ApplicationRegistry.getAll();
 
     const items = Promise.all(res.map(async x => ({

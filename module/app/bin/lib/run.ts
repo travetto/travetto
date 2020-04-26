@@ -48,11 +48,9 @@ export class RunUtil {
     }
 
     const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.init('bootstrap').run();
+    await PhaseManager.bootstrap();
 
     const { ApplicationRegistry } = await import('../../src/registry');
-    ApplicationRegistry.loadPackaged(); // Load packaged apps as well
-
     await ApplicationRegistry.run(name, typedSub);
   }
 

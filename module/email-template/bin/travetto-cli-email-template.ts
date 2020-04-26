@@ -5,7 +5,7 @@ export function init() {
   return Util.program.command('email-template').action(async (cmd: commander.Command) => {
     const { Server } = await import('@travetto/cli/src/http');
     const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.run();
+    await PhaseManager.bootstrap();
 
     const { serverHandler } = await import('./email-server');
 

@@ -1,22 +1,14 @@
-import { FsUtil, EnvUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
 
 import { ConsumerManager } from '../consumer/manager';
-import { Consumer } from '../model/consumer';
 
 import { TestExecutor } from './executor';
 import { buildWorkManager } from '../worker/parent';
 
 import { TestUtil } from './util';
-
-export interface State {
-  format: string;
-  consumer?: Consumer;
-  mode: 'single' | 'watch' | 'all';
-  concurrency: number;
-  args: string[];
-}
+import { State } from './types';
 
 export class Runner {
 
@@ -67,6 +59,7 @@ export class Runner {
     }
 
     await PhaseManager.init('test').run();
+
     const res = await TestExecutor.execute(consumer, this.state.args);
 
     if (consumer.summarize) {

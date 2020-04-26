@@ -1,4 +1,4 @@
-import { Env, AppInfo, ScanApp } from '@travetto/base';
+import { Env, AppInfo } from '@travetto/base';
 import { ConfigSource } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 
@@ -10,16 +10,6 @@ export class $ApplicationRegistry {
 
   register(app: string, config: ApplicationConfig) {
     this.applications.set(app, config);
-  }
-
-  loadPackaged() {
-    for (const { file } of ScanApp.findSourceFiles(/\/application[.].([^.]+)[.]ts/)) {
-      try {
-        require(file);
-      } catch (e) {
-        // Ignore
-      }
-    }
   }
 
   getAll() {
