@@ -1,11 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
+import { FsUtil } from '@travetto/boot/src/fs-util';
 import { CachedAppConfig, fork, handleFailure } from './util';
 
 export class AppListUtil {
 
-  private static pCwd = process.cwd().replace(/[\\\/]+/g, '/');
+  private static pCwd = FsUtil.cwd;
   private static cacheConfig = 'app-cache.json';
   private static fsLstat = util.promisify(fs.lstat);
 
@@ -18,8 +19,8 @@ export class AppListUtil {
   }
 
   static determineRootFromFile(filename: string) {
-    const [, root] = filename.split(this.pCwd);
-    const [, first] = root.split('/');
+    const [, root] = filename.split(`${this.pCwd}/`);
+    const [first] = root.split('/');
     // If root is in node_modules or is 'src', default to local
     // * This supports apps being run from modules vs locally
     return (first === 'node_modules' || first === 'src') ? '.' : first;
@@ -37,7 +38,7 @@ export class AppListUtil {
     ).forEach(x => require(x.file)); // Only load files that are candidates
 
     // Load all packaged applications
-    for (const { file } of ScanApp.findSourceFiles(/\/application[.].([^.]+)[.]ts/)) {
+    for (const { file } of ScanApp.findSourceFiles(/\/?support\/application[.].*/)) {
       try {
         require(file);
       } catch { }

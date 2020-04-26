@@ -19,7 +19,8 @@ export class TransformerManager {
   init() {
     const allTransformers: (NodeTransformer<TransformerState> & { file: string })[] = [];
     const found = ScanApp.findSourceFiles(x => TRANSFORMER_RE.test(x), this.cwd)
-      .filter(x => x.module.includes('@travetto') && !ScanApp.modAppExclude.includes(x.module.split(/@travetto\//)[1].split('/')[0]));
+      .filter(x =>
+        !x.module.includes('@travetto') || !ScanApp.modAppExclude.includes(x.module.split(/@travetto\//)[1].split('/')[0]));
 
     for (const name of found) { // Exclude based on blacklist
       const all = require(name.file);

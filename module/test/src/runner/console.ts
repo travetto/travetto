@@ -9,7 +9,7 @@ export class ConsoleCapture {
     this.out = {};
     ConsoleManager.set(
       {
-        invoke: ({ level }, args: any[]) => {
+        invoke: ({ level }, ...args: any[]) => {
           this.out[level] = `${this.out[level] ?? ''}${args.join(' ')}\n`;
         }
       },

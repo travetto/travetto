@@ -3,6 +3,8 @@ export const init = {
   after: ['compile-all'],
   action: async () => {
     const { Compiler } = await import('@travetto/compiler');
-    Compiler.getRootFiles().forEach(require); // Scan all files as compiler source root
+    for (const file of Compiler.getRootFiles()) {
+      require(file); // Scan all files as compiler source root
+    }
   }
 };
