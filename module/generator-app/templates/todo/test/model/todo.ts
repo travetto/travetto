@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 
+import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll, AfterEach } from '@travetto/test';
 import { ModelService, ModelRegistry, ModelSource } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
@@ -15,9 +16,7 @@ class TestCRUD {
 
   @BeforeAll()
   async before() {
-    await SchemaRegistry.init();
-    await DependencyRegistry.init();
-    await ModelRegistry.init();
+    await RootRegistry.init();
   }
 
   @AfterEach()

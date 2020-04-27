@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-import { Suite, Test, BeforeEach } from '@travetto/test';
-import { Class } from '@travetto/registry';
+import { Suite, Test, BeforeEach, BeforeAll } from '@travetto/test';
+import { Class, RootRegistry } from '@travetto/registry';
 
 import { DependencyRegistry } from '../src/registry';
 
@@ -24,7 +24,7 @@ class DiTest {
   @Test('run')
   async run() {
     console.log('starting');
-    await DependencyRegistry.init();
+    await RootRegistry.init();
     let inst = await DependencyRegistry.getInstance(ServiceInherit);
     inst.doWork();
     assert.ok(inst.db);
@@ -53,9 +53,9 @@ class DiTest {
 @Suite('di2')
 class DiTest2 {
 
-  @BeforeEach()
-  async each() {
-    await DependencyRegistry.init();
+  @BeforeAll()
+  async beforeAll() {
+    await RootRegistry.init();
   }
 
   @Test('run')

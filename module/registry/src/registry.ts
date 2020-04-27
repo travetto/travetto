@@ -9,6 +9,7 @@ export abstract class Registry implements ChangeSource<Class> {
   protected events = new EventEmitter();
   protected descendants: Registry[] = [];
   protected parents: ChangeSource<Class>[] = [];
+  protected id = Date.now();
 
   constructor(...parents: ChangeSource<Class>[]) {
     this.parents = parents;
@@ -26,6 +27,7 @@ export abstract class Registry implements ChangeSource<Class> {
   protected async runInit(): Promise<any> {
     try {
       this.resolved = false;
+      console.debug('Initializing', this.constructor.__id, this.id);
 
       // Handle top level when dealing with non-registry
       const waitFor = this.parents.filter(x => !(x instanceof Registry));
@@ -40,7 +42,7 @@ export abstract class Registry implements ChangeSource<Class> {
 
       await Promise.all(this.descendants.map(x => x.init()));
 
-      console.debug('Initialized', this.constructor.__id);
+      console.debug('Initialized', this.constructor.__id, this.id);
     } finally {
       this.resolved = true;
     }
@@ -57,6 +59,8 @@ export abstract class Registry implements ChangeSource<Class> {
   }
 
   async init(): Promise<any> {
+    console.debug('Trying to initialize', this.constructor.__id, this.id, this.initialized);
+
     if (!this.initialized) {
       this.initialized = this.runInit();
     }

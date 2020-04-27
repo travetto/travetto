@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 // import * as cookies from 'cookies';
 
+import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
@@ -14,7 +15,7 @@ export class EncoderTest {
 
   @BeforeEach()
   async init() {
-    await DependencyRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test()

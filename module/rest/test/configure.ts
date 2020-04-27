@@ -1,6 +1,8 @@
 import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { RootRegistry } from '@travetto/registry';
+
 import { Controller, ControllerRegistry, Get, Path } from '../';
 
 /**
@@ -24,7 +26,7 @@ export class ConfigureTest {
 
   @BeforeAll()
   async init() {
-    await ControllerRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test()

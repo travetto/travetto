@@ -1,17 +1,27 @@
 import { Suite, Test, BeforeEach, ShouldThrow } from '@travetto/test';
 import { DependencyRegistry } from '../src/registry';
+import { RootRegistry } from '@travetto/registry';
 
-@Suite('cycle')
+@Suite('cycle', { skip: true })
 class CycleTest {
 
   @BeforeEach()
   async each() {
-    await DependencyRegistry.init();
+    await import('./cycle/a');
+    await import('./cycle/b');
+    await RootRegistry.init();
   }
 
   @Test()
-  @ShouldThrow('cyclical dependency')
+  @ShouldThrow('dependency')
   async tryCycle() {
-    const { BCD } = require('./cycle/b');
+    try {
+      const { ABC } = await import('./cycle/a');
+      const res = await DependencyRegistry.getInstance(ABC);
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   }
 }

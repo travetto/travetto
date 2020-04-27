@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
+import { RootRegistry } from '@travetto/registry';
 
 import { SchemaValidator, ValidationResultError, SchemaRegistry, ValidationError } from '../';
 import {
@@ -17,7 +18,7 @@ class Validation {
 
   @BeforeAll()
   async init() {
-    await SchemaRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test('Url and message')

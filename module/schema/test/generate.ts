@@ -1,9 +1,10 @@
+import * as assert from 'assert';
+
+import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
-import { Schema, SchemaRegistry } from '../';
+import { Schema } from '../';
 import { SchemaFakerUtil } from '../src/extension/faker';
-
-import * as assert from 'assert';
 import { Precision, Max, Min } from '../src/decorator/field';
 
 @Schema()
@@ -50,7 +51,7 @@ class DataGenerationSuite {
 
   @BeforeAll()
   async init() {
-    await SchemaRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test()

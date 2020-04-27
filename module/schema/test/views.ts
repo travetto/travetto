@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { RootRegistry } from '@travetto/registry';
 import { Schema, View } from '../src/decorator/schema';
-import { SchemaRegistry } from '../src/service/registry';
 
 @Schema()
 class BaseAccount {
@@ -24,7 +24,7 @@ export class ViewsTest {
 
   @BeforeAll()
   ready() {
-    return SchemaRegistry.init();
+    return RootRegistry.init();
   }
 
   @Test()

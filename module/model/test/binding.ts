@@ -1,13 +1,13 @@
 import * as assert from 'assert';
 
+import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { Test, Suite, BeforeAll } from '@travetto/test';
-import { SchemaRegistry } from '@travetto/schema';
 
 import { TestSource } from './registry';
 import { Person, Address } from './models';
 
-import { ModelService, ModelRegistry } from '../';
+import { ModelService } from '../';
 
 const street1 = '1234 Fun';
 
@@ -16,9 +16,7 @@ class DataBinding {
 
   @BeforeAll()
   async init() {
-    await DependencyRegistry.init();
-    await SchemaRegistry.init();
-    await ModelRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test('Binding Test One')

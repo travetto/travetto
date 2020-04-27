@@ -1,7 +1,8 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { RootRegistry } from '@travetto/registry';
 
-import { Schema, SchemaRegistry } from '..';
+import { Schema } from '..';
 import { Validator } from '../src/decorator/schema';
 import { SchemaValidator } from '../src/validate/validator';
 import { ValidationResultError } from '../src/validate/error';
@@ -48,7 +49,7 @@ export class CustomTest {
 
   @BeforeAll()
   async init() {
-    await SchemaRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test()
