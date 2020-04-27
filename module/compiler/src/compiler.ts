@@ -72,8 +72,6 @@ class $Compiler extends EventEmitter {
     this.presenceManager.reset();
     ScanApp.clearCache();
     this.active = false;
-
-    this.init();
   }
 
   notify(type: keyof PresenceListener, fileName: string) {
