@@ -8,6 +8,7 @@ import { SQLModelSource } from '../../src/source';
 import { SQLModelConfig } from '../../src/config';
 import { TestUtil } from '../util';
 import { DialectSuite as Suite } from '../decorator';
+import { RootRegistry } from '@travetto/registry';
 
 @Model()
 class Bools {
@@ -23,6 +24,7 @@ abstract class SimpleSuite extends BaseSimpleSourceSuite {
 
   @BeforeAll()
   async doInit() {
+    await RootRegistry.init();
     await TestUtil.initModel(this);
   }
 

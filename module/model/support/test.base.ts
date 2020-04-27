@@ -4,7 +4,6 @@ import { AfterEach, BeforeEach } from '@travetto/test';
 
 import { ModelSource } from '../src/service/source';
 import { ModelService } from '../src/service/model';
-import '../src/registry'; // Import registry to declare
 
 export abstract class BaseModelTest {
 

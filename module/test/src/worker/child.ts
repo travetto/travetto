@@ -1,3 +1,4 @@
+import type { Compiler } from '@travetto/compiler';
 import { FsUtil, EnvUtil } from '@travetto/boot';
 import { PhaseManager, Shutdown } from '@travetto/base';
 import { CommUtil, ChildCommChannel } from '@travetto/worker';
@@ -22,7 +23,7 @@ const EXTRACT_FILE_MODULE = /^.*travetto[^/]*\/(?:module\/)?([^/]+)\/(?:src.*|su
 
 export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
-  private compiler: any;
+  private compiler: typeof Compiler;
   private runs = 0;
 
   constructor() {
@@ -90,6 +91,8 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
   async runTest(event: RunEvent) {
     // Run all remaining bootstraps as needed for tests
+    this.compiler.getRootFiles().forEach(require); // Require all
+
     await PhaseManager.bootstrapAfter('registry');
 
     const { Runner } = await import(`../runner/runner`);
