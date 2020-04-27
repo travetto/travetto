@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 
-import { Class } from '@travetto/registry';
+import { Class, RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { ValidationResultError, Schema, SchemaRegistry } from '@travetto/schema';
+import { ValidationResultError, Schema } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 
 import { Model, ModelQuery, ModelCore, BaseModel, QueryVerifierService, Query, RetainFields } from '../';
@@ -31,8 +31,7 @@ export class VerifyTest {
 
   @BeforeAll()
   async init() {
-    await DependencyRegistry.init();
-    await SchemaRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test()

@@ -5,6 +5,7 @@ import { Inject, Injectable, DependencyRegistry } from '@travetto/di';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
 import { AsyncContext, WithAsyncContext } from '../';
+import { RootRegistry } from '../../registry';
 
 @Injectable()
 class TestService {
@@ -22,7 +23,7 @@ class VerifyContext {
 
   @BeforeAll()
   async init() {
-    await DependencyRegistry.init();
+    await RootRegistry.init();
     const svc = await DependencyRegistry.getInstance(TestService);
     this.context = svc.context;
   }

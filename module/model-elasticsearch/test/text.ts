@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 
+import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { LongText, Text, Schema, SchemaRegistry } from '@travetto/schema';
-import { DependencyRegistry } from '@travetto/di';
+import { LongText, Text, Schema } from '@travetto/schema';
 
 import { ElasticsearchUtil } from '../src/util';
 
@@ -20,8 +20,7 @@ export class TextTestSuite {
 
   @BeforeAll()
   async init() {
-    await DependencyRegistry.init();
-    await SchemaRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test()

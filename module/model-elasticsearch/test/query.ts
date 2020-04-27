@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
-import { Schema, SchemaRegistry } from '@travetto/schema';
+import { RootRegistry } from '@travetto/registry';
+import { Schema } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { WhereClause } from '@travetto/model/';
 
@@ -47,7 +48,7 @@ export class QueryTest {
 
   @BeforeAll()
   async beforeAll() {
-    await SchemaRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test()

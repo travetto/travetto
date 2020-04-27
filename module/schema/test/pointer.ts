@@ -1,8 +1,9 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { RootRegistry } from '@travetto/registry';
+
 import { Schema } from '../';
 import { SpecialType } from './models/pointer';
-import { SchemaRegistry } from '../src/service/registry';
 import { SchemaValidator } from '../src/validate/validator';
 
 @Schema()
@@ -15,7 +16,7 @@ class PointerSuite {
 
   @BeforeAll()
   ready() {
-    return SchemaRegistry.init();
+    return RootRegistry.init();
   }
 
   @Test()

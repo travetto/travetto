@@ -1,17 +1,18 @@
 import * as assert from 'assert';
 
+import { ResourceManager } from '@travetto/base';
+import { RootRegistry } from '@travetto/registry';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
 import { DefaultMailTemplateEngine } from '../';
-import { ResourceManager } from '@travetto/base';
 
 @Suite('Emails')
 class EmailSuite {
 
   @BeforeAll()
   async init() {
-    await DependencyRegistry.init();
+    await RootRegistry.init();
     ResourceManager.addPath('e2e');
   }
 

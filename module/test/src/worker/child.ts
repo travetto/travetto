@@ -7,11 +7,12 @@ import { Events, RunEvent } from './types';
 const FIXED_MODULES = new Set([
   //  'cache', 'openapi',
   'boot', 'base', 'cli', 'config', 'compiler', 'yaml',
-  'worker', 'exec', 'log', 'net', 'jwt', 'image', 'test'
+  'worker', 'exec', 'log', 'net', 'jwt', 'image', 'test',
+  // 'registry'
 ]);
 const IS_SUPPORT_FILE = '/support/';
 const IS_BIN_FILE = '/bin/';
-const IS_SELF_FILE = 'test/src/worker';
+const IS_SELF_FILE = __filename.replace(/.*(test\/.*)([.]ts)?$/, (__, name) => name);
 
 /**
  * Get module name from file, ignore node_modules nested

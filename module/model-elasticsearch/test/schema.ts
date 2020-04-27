@@ -1,9 +1,10 @@
 import * as assert from 'assert';
+
+import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { ElasticsearchUtil } from '../src/util';
 import { Model, BaseModel } from '@travetto/model';
-import { Currency, Integer, Precision, Float, Text, Schema, SchemaRegistry } from '@travetto/schema';
-import { ModelRegistry } from '@travetto/model/src/registry';
+import { Currency, Integer, Precision, Float, Text, Schema } from '@travetto/schema';
 
 @Schema()
 class Address {
@@ -46,8 +47,7 @@ class SchemaSuite {
 
   @BeforeAll()
   async init() {
-    await SchemaRegistry.init();
-    await ModelRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test('verifySchema')

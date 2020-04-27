@@ -1,7 +1,8 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { RootRegistry } from '@travetto/registry';
 
-import { Schema, SchemaRegistry } from '..';
+import { Schema } from '..';
 import { SchemaValidator } from '../src/validate/validator';
 
 @Schema()
@@ -15,7 +16,7 @@ class EdgeCases {
 
   @BeforeAll()
   async init() {
-    await SchemaRegistry.init();
+    await RootRegistry.init();
   }
 
   @Test()
