@@ -1,8 +1,9 @@
 import * as assert from 'assert';
 
-import { Schema, SchemaRegistry, FieldConfig } from '@travetto/schema';
+import { RootRegistry } from '@travetto/registry';
+import { Schema, FieldConfig } from '@travetto/schema';
 import { Test, BeforeAll } from '@travetto/test';
-import { ModelRegistry, WhereClause, ModelService } from '@travetto/model';
+import { WhereClause, ModelService } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 
 import { VisitStack } from '../../src/util';
@@ -55,10 +56,8 @@ export abstract class QueryTest {
 
   @BeforeAll()
   async beforeAll() {
+    await RootRegistry.init();
     await TestUtil.init(this);
-    await SchemaRegistry.init();
-    await ModelRegistry.init();
-    await DependencyRegistry.init();
   }
 
   get dialect() {
