@@ -10,5 +10,8 @@ class SimpleSuite extends BaseSimpleSourceSuite {
   configClass = MongoModelConfig;
   sourceClass = MongoModelSource;
 
-  @BeforeAll() doInit() { return this.init(); }
+  @BeforeAll()
+  async doInit() {
+    return this.init();
+  }
 }

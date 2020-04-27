@@ -24,7 +24,6 @@ abstract class SimpleSuite extends BaseSimpleSourceSuite {
 
   @BeforeAll()
   async doInit() {
-    await RootRegistry.init();
     await TestUtil.initModel(this);
   }
 
