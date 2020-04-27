@@ -128,7 +128,6 @@ export class SourceManager {
   init() {
     // Find all active app files
     ScanApp.findAppFiles(this.rootPaths, undefined, this.cwd)
-      .filter(x => !require.cache[x])
       .forEach(x => this.rootNames.add(x));
 
     this.transformerManager.init();
