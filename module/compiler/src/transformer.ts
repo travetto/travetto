@@ -60,4 +60,10 @@ export class TransformerManager {
       before: [this.visitor.visitor()]
     };
   }
+
+  reset() {
+    this.transformers = {};
+    delete this.visitor;
+    delete this.checker;
+  }
 }

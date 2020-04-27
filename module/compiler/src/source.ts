@@ -181,6 +181,7 @@ export class SourceManager {
   }
 
   reset() {
+    this.transformerManager.reset();
     this.contents.clear();
     this.rootNames.clear();
     this.sourceMaps.clear();

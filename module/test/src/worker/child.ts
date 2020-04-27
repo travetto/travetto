@@ -77,7 +77,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
     for (const file of Object.keys(require.cache)) {
       if (this.isFileResettable(file)) {
-        console.debug(`[${process.pid}]`, 'Unloading', file);
+        console.trace(`[${process.pid}]`, 'Unloading', file);
         this.compiler.unload(file);
       }
     }
@@ -91,7 +91,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
   async runTest(event: RunEvent) {
     // Run all remaining bootstraps as needed for tests
-    this.compiler.getRootFiles().forEach(require); // Require all
+    await PhaseManager.bootstrap('require-all'); // Require all
 
     await PhaseManager.bootstrapAfter('registry');
 
