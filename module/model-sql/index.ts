@@ -4,4 +4,3 @@ export * from './src/source';
 export * from './src/types';
 export * from './src/connection';
 export * from './src/dialect';
-export * from './src/dialects';

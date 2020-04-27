@@ -10,5 +10,8 @@ export class GeoTestSuite extends BaseGeoTestSuite {
   configClass = ElasticsearchModelConfig;
   sourceClass = ElasticsearchModelSource;
 
-  @BeforeAll() doInit() { return this.init(); }
+  @BeforeAll()
+  async doInit() {
+    return await this.init();
+  }
 }

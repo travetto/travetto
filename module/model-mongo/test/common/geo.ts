@@ -10,7 +10,7 @@ export class GeoTestSuite extends BaseGeoTestSuite {
   sourceClass = MongoModelSource;
 
   @BeforeAll()
-  doInit() {
-    return this.init();
+  async doInit() {
+    return await this.init();
   }
 }

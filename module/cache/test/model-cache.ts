@@ -3,7 +3,6 @@ import { Suite, BeforeAll, BeforeEach, AfterEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { ModelRegistry, ModelService, ModelSource } from '@travetto/model';
 
-import { SchemaRegistry } from '@travetto/schema';
 import { SQLModelConfig } from '@travetto/model-sql';
 import { TestUtil } from '@travetto/model-sql/test/util';
 
@@ -22,8 +21,6 @@ export class ModelCacheSuite extends CacheTestSuite {
 
   @BeforeAll()
   async initAll() {
-    await SchemaRegistry.init();
-    await DependencyRegistry.init();
     await TestUtil.initModel(this as any);
     const config = await DependencyRegistry.getInstance(this.configClass);
     config.user = 'root';

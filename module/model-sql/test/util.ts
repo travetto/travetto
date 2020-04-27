@@ -1,7 +1,7 @@
 import { DependencyRegistry } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { TestRegistry } from '@travetto/test';
-import { Class } from '@travetto/registry';
+import { Class, RootRegistry } from '@travetto/registry';
 
 export class TestUtil {
 
@@ -12,6 +12,8 @@ export class TestUtil {
     if (e.init) {
       await e.init();
     }
+
+    await RootRegistry.init();
 
     const ctx = await DependencyRegistry.getInstance(AsyncContext);
 

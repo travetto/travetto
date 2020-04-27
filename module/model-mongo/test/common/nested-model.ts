@@ -10,7 +10,7 @@ export class NestedSuite extends BaseNestedSuite {
   sourceClass = MongoModelSource;
 
   @BeforeAll()
-  doInit() {
+  async doInit() {
     return this.init();
   }
 }
