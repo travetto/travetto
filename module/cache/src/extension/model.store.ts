@@ -1,12 +1,12 @@
 // @file-if @travetto/model
-import { ModelService, Model } from '@travetto/model';
-import { Text, Long } from '@travetto/schema';
+import { ModelService, ModelRegistry } from '@travetto/model';
+import { Schema, Text, Long } from '@travetto/schema';
 
 import { CacheEntry } from '../types';
 import { CullableCacheStore } from '../store/cullable';
 import { CacheStoreUtil } from '../store/util';
 
-@Model()
+@Schema()
 export class CacheModel {
   id?: string;
   key: string;
@@ -20,6 +20,12 @@ export class ModelCacheStore extends CullableCacheStore {
 
   constructor(public modelService: ModelService) {
     super();
+  }
+
+  postConstruct() {
+    // Manually install model on demand
+    ModelRegistry.register(CacheModel, {});
+    ModelRegistry.install(CacheModel, { type: 'added', curr: CacheModel });
   }
 
   async get(key: string) {

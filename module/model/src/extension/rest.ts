@@ -1,7 +1,6 @@
 // @file-if @travetto/rest
 import { ControllerRegistry, paramConfig } from '@travetto/rest';
-import { schemaParamConfig } from '@travetto/schema/src/extension/rest';
-import { Schema } from '@travetto/schema';
+import { Schema, schemaParamConfig } from '@travetto/schema';
 import { Class } from '@travetto/registry';
 
 import { ModelService } from '../service/model';

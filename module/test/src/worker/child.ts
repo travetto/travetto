@@ -10,7 +10,7 @@ const FIXED_MODULES = new Set([
   'worker', 'exec', 'log', 'net', 'jwt', 'image', 'test',
   // 'registry'
 ]);
-const IS_SUPPORT_FILE = '/support/';
+const IS_SUPPORT_FILE = /support\/(transformer|phase)[.]/; // TODO: Testing utils need to be externalized to separate folder
 const IS_BIN_FILE = '/bin/';
 const IS_SELF_FILE = __filename.replace(/.*(test\/.*)([.]ts)?$/, (__, name) => name);
 
@@ -65,7 +65,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       (!frameworkModule || // A user file
         (
           !FIXED_MODULES.has(frameworkModule) && // Not a core module
-          !k.includes(IS_SUPPORT_FILE) && // Not a support file
+          !IS_SUPPORT_FILE.test(k) && // Not a support file
           !k.includes(IS_BIN_FILE) && // Not a bin file
           !k.includes(IS_SELF_FILE) // Not self
         )
