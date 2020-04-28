@@ -230,7 +230,7 @@ The module provides high level access for [`Rest`](https://github.com/travetto/t
  
 **Code: Using SchemaBody for POST requests**
 ```typescript
- import { SearchBody } from '@travetto/schema/src/extension/rest';
+ import { SearchBody } from '@travetto/schema';
 
 class User {
    name: string;
@@ -249,7 +249,7 @@ class User {
 
 **Code: Using SchemaQuery for GET requests**
 ```typescript
- import { SchemaQuery } from '@travetto/schema/src/extension/rest';
+ import { SchemaQuery } from '@travetto/schema';
 
  class SearchParams {
    page: number = 0;

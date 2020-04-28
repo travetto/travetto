@@ -6,7 +6,7 @@ import { Env, SystemUtil, ScanApp } from '@travetto/base';
 
 import { TransformerManager } from './transformer';
 
-const SIMPLE_COMPILATION = /\/support\/(transformer|phase).+/;
+const SIMPLE_COMPILATION = /support\/(transformer|phase)[.].+/;
 
 export class SourceManager {
   private transformerManager: TransformerManager;

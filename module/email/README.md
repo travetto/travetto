@@ -29,7 +29,7 @@ Due to the connection with `nodemailer`, all nodemailer extensions should be usa
 
 **Code: Sendmail transport from nodemailer**
 ```typescript
-import { NodeMailerTransport } from '@travetto/email/src/extension/nodemailer';
+import { NodeMailerTransport } from '@travetto/email';
 
 class Config {
   @InjectableFactory()
@@ -43,7 +43,7 @@ class Config {
 
 **Code: SMTP transport from nodemailer**
 ```typescript
-import { NodeMailerTransport } from '@travetto/email/src/extension/nodemailer';
+import { NodeMailerTransport } from '@travetto/email';
 
 class Config {
   @InjectableFactory()
@@ -57,7 +57,7 @@ class Config {
 
 **Code: SES transport from nodemailer**
 ```typescript
-import { NodeMailerTransport } from '@travetto/email/src/extension/nodemailer';
+import { NodeMailerTransport } from '@travetto/email';
 
 class Config {
   @InjectableFactory()
