@@ -42,13 +42,21 @@ export class RunUtil {
         if (/^prod/i.test(`${process.env.ENV}`)) {
           process.env.WATCH = '0';
         } else if (app.watchable !== undefined) {
-          process.env.watch = `${app.watchable}`;
+          process.env.WATCH = `${app.watchable}`;
         }
       }
     }
 
     const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.bootstrap();
+    await PhaseManager.bootstrap('require-all');
+
+    // Load app if in support folder
+    if (app && app.filename.includes('support')) {
+      const mod = app.filename.replace(/.*node_modules\//, '');
+      require(mod);
+    }
+
+    await PhaseManager.bootstrapAfter('require-all');
 
     const { ApplicationRegistry } = await import('../../src/registry');
     await ApplicationRegistry.run(name, typedSub);
