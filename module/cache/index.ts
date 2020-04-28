@@ -5,3 +5,5 @@ export * from './src/store/memory';
 export * from './src/store/core';
 export * from './src/store/cullable';
 export * from './src/store/util';
+export * from './src/extension/model.store';
+export * from './src/extension/redis.store';

@@ -30,6 +30,7 @@ export class ModelCacheSuite extends CacheTestSuite {
 
     const svc = await DependencyRegistry.getInstance(ModelService);
     this.service.store = new ModelCacheStore(svc);
+    await this.service.store.postConstruct?.();
   }
 
   @BeforeEach()

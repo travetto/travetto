@@ -25,53 +25,70 @@ export class TranspileUtil {
 
   static readonly ext = '.ts';
 
-  private static resolveToken(token: string) {
-    const [__all, sign, env, key] = token.match(/(-|\+)?([$])?(.*)/)!;
+  /**
+   * Build error module
+   */
+  private static getErrorModule(message: string, isModule?: string | boolean, base?: Record<string, any>) {
+    const f = ([k, v]: string[]) => `${k}: (t,k) => ${v}`;
+    const e = '{ throw new Error(msg); }';
+    const map: Record<keyof ProxyHandler<any>, any> = {
+      preventExtensions: true, isExtensible: false, enumerate: '[]', setPrototypeOf: e, getPrototypeOf: e, deleteProperty: e,
+      defineProperty: e, construct: e, apply: e, set: e,
+      getOwnPropertyDescriptor: base ? `({})` : e,
+      ownKeys: base ? `keys` : e,
+      get: base ? `{ const v = values[keys.indexOf(k)]; if (!v) ${e} else return v; }` : e,
+      has: base ? `keys.includes(k)` : e
+    };
+    return [
+      (typeof isModule === 'string') ? `console.debug(\`${isModule}\`);` : '',
+      base ? `let keys = ['${Object.keys(base).join(`','`)}']` : '',
+      base ? `let values = ['${Object.values(base).join(`','`)}']` : '',
+      `let msg = \`${message}\`;`,
+      `module.exports = new Proxy({}, { ${Object.entries(map).map(f).join(',')}});`
+    ].join('\n');
+  }
+
+  /**
+   * Process token
+   */
+  private static resolveToken(token: string): { minus: boolean, key: string, valid: boolean, err?: Error } {
+    const [, sign, env, key] = token.match(/(-|\+)?([$])?(.*)/)!;
     const minus = sign === '-';
     if (env) {
-      return minus ? EnvUtil.isFalse(key) : EnvUtil.isTrue(key);
+      return { minus, key, valid: minus ? EnvUtil.isFalse(key) : EnvUtil.isTrue(key) };
     } else {
       try {
         require.resolve(key);
-        return !minus;
+        return { minus, key, valid: !minus };
       } catch (err) {
-        if (!minus) {
-          throw err;
-        }
+        return { minus, key, valid: minus, err };
       }
     }
-    return true;
   }
 
+  /**
+   * Resolve macros for keeping/removing text
+   */
   private static resolveMacros(name: string, contents: string) {
-    let hideAll = false;
+    const modErrs: string[] = [];
 
     // Handle line queries
     contents = contents.replace(/^.*\/\/\s*@(line|file)-if\s+(.*?)\s*$/mg, (all, mode, token: string) => {
-      if (hideAll) {
+      if (modErrs.length) {
         return ''; // Short circuit
       }
-      try {
-        if (this.resolveToken(token)) {
-          return all;
-        } else {
-          if (mode === 'file') {
-            throw new Error('Unable to satisfy');
-          }
-          return `// @removed ${token} was not satisfied`;
-        }
-      } catch (err) {
+      const { valid, key, minus } = this.resolveToken(token);
+      if (valid) {
+        return all;
+      } else {
         if (mode === 'file') {
-          hideAll = true;
-          // console.error(`Unable to find module ${token}, skipping`);
-          return '';
-        } else {
-          return `// @removed, module ${token} not found`;
+          modErrs.push(`Dependency ${key} should${minus ? ' not' : ''} be installed`);
         }
+        return `// @removed ${token} was not satisfied`;
       }
     });
 
-    return hideAll ? '// @removed, modules not found' : contents;
+    return modErrs.length ? this.getErrorModule(modErrs[0], `Skipping: ${modErrs[0]}`, { ᚕtrv: true, filename: name }) : contents;
   }
 
   /**
@@ -126,10 +143,11 @@ export class TranspileUtil {
     }
 
     // Drop typescript import, and use global. Great speedup;
-    if (fileName.includes('transform')) { // Should only ever be in transformation code
+    if (fileName.includes('/transform')) { // Should only ever be in transformation code
       fileContents = fileContents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
     }
 
+    fileContents = `${fileContents}\nexport const ᚕtrv = true;`;
     return fileContents;
   }
 
@@ -145,28 +163,7 @@ export class TranspileUtil {
 
     if (EnvUtil.isTrue('watch') && !fileName.includes('/node_modules/')) {
       console.debug(`Unable to ${phase} ${fileName}: stubbing out with error proxy.`, err.message);
-      return `
-module.exports = {
-  const err = () => 
-    throw new Error('${err.message}'});
-  };
-  return new Proxy({}, {
-    enumerate: () => [],
-    isExtensible: () => false,
-    getOwnPropertyDescriptor: () => ({}),
-    preventExtensions: () => true,
-    apply: err,
-    construct: err,
-    setPrototypeOf: err,
-    getPrototypeOf: err,
-    get: err,
-    has: err,
-    set: err,
-    ownKeys: err,
-    deleteProperty: err,
-    defineProperty: err
-  });
-};`;
+      return this.getErrorModule(err.message);
     }
 
     throw err;

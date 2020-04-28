@@ -6,3 +6,4 @@ export * from './src/encoder/cookie';
 export * from './src/interceptor';
 export * from './src/types';
 export * from './src/service';
+export * from './src/extension/auth.rest';

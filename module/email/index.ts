@@ -3,3 +3,4 @@ export * from './src/types';
 export * from './src/config';
 export * from './src/transport';
 export * from './src/template';
+export * from './src/extension/nodemailer';

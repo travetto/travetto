@@ -39,11 +39,10 @@ export class RegisterUtil {
   private static onModuleLoad(request: string, parent: Module): any {
     try {
       const mod = this.ogModuleLoad.apply(null, [request, parent]);
-
-      if (!parent.loaded && (!mod || !mod.__esModule)) { // Standard ts compiler output
-        let p;
+      if (!parent.loaded && (!mod || !mod.ᚕtrv)) { // Standard ts compiler output
+        let p = mod.filename || mod.id;
         try {
-          p = Module._resolveFilename!(request, parent);
+          p = p || Module._resolveFilename!(request, parent);
         } catch (err) {
           // Ignore if we can't resolve
         }
