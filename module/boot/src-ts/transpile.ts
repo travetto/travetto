@@ -31,11 +31,8 @@ export class TranspileUtil {
   private static getErrorModule(message: string, isModule?: string | boolean, base?: Record<string, any>) {
     const f = ([k, v]: string[]) => `${k}: (t,k) => ${v}`;
     const e = '{ throw new Error(msg); }';
-    const map: Record<keyof ProxyHandler<any>, any> = {
-      preventExtensions: true, isExtensible: false, enumerate: '[]', setPrototypeOf: e, getPrototypeOf: e, deleteProperty: e,
-      defineProperty: e, construct: e, apply: e, set: e,
+    const map: { [P in keyof ProxyHandler<any>]?: any } = {
       getOwnPropertyDescriptor: base ? `({})` : e,
-      ownKeys: base ? `keys` : e,
       get: base ? `{ const v = values[keys.indexOf(k)]; if (!v) ${e} else return v; }` : e,
       has: base ? `keys.includes(k)` : e
     };
