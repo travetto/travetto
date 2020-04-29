@@ -14,7 +14,6 @@
     "cookies": "^0.8.0"
   },
   "devDependencies": {
-    "@travetto/cache": "^1.0.0-beta.9",
     "@travetto/test": "^1.0.0-beta.1"
   },
   "optionalPeerDependencies": {

@@ -10,7 +10,7 @@
     "@travetto/di": "^1.0.0-beta.1"
   },
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
-  "optionalExtensionDependencies": {
+  "optionalPeerDependencies": {
     "@travetto/rest": "^1.0.0-beta.0"
   },
   "homepage": "https://travetto.io",
