@@ -20,7 +20,7 @@ const IS_SELF_FILE = __filename.replace(/.*(test\/.*)([.]ts)?$/, (__, name) => n
  *  - src
  *  - index
  */
-const EXTRACT_FILE_MODULE = /^.*travetto[^/]*\/(?:module\/)?([^/]+)\/(?:src.*|support.*|index[.]ts)$/;
+const EXTRACT_FILE_MODULE = /^.*travetto[^/]*\/(?:module\/)?([^/]+)\/(?:src\/.*|support\/.*|index[.]ts)$/;
 
 export class TestChildWorker extends ChildCommChannel<RunEvent> {
 

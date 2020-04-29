@@ -36,6 +36,24 @@ class $AppCache extends FileCache {
     }
   }
 
+  fromEntryName(cached: string) {
+    return FsUtil.toTS(
+      FsUtil.joinUnix(FsUtil.cwd,
+        super.fromEntryName(cached)
+          .replace(/\._\./g, 'node_modules/@travetto')
+      )
+    );
+  }
+
+  toEntryName(full: string) {
+    return FsUtil.toJS(
+      super.toEntryName(full.replace(FsUtil.cwd, '')
+        .replace(/node_modules\/@travetto/g, '._.')
+      )
+    );
+  }
+
+
   reset() {
     for (const k of Object.keys(require.cache)) {
       if (k.includes('@travetto')) { // If a travetto module

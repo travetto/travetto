@@ -76,23 +76,17 @@ export class FileCache {
   }
 
   fromEntryName(cached: string) {
-    return FsUtil.toTS(
-      FsUtil.joinUnix(FsUtil.cwd, FsUtil.toUnix(cached)
-        .replace(this.cacheDir, '')
-        .replace(/^\//, '')
-        .replace(/[.]?…/g, 'node_modules/@travetto')
-        .replace(/•/g, '/')
-      ));
+    return FsUtil.toUnix(cached)
+      .replace(this.cacheDir, '')
+      .replace(/~/g, '/')
+      .replace(/\/\/+/g, '/');
   }
 
   toEntryName(full: string) {
-    return FsUtil.toJS(
-      FsUtil.joinUnix(this.cacheDir, FsUtil.toUnix(full)
-        .replace(`${FsUtil.cwd}/`, '')
-        .replace(/node_modules\/@travetto/g, '…')
-        .replace(/^…/, '.…')
-        .replace(/[/]+/g, '•')
-      ));
+    return FsUtil.joinUnix(this.cacheDir, full
+      .replace(/^\//, '')
+      .replace(/\/+/g, '~')
+    );
   }
 
   getOrSet(key: string, create: () => string, force = false) {
