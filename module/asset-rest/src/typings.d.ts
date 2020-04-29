@@ -1,10 +1,10 @@
 import { Asset } from '@travetto/asset';
-import { Response } from '@travetto/rest';
+import '@travetto/rest';
 
 declare global {
-	namespace Travetto {
-		interface Request {
-			files: Record<string, Asset>;
-		}
-	}
+  namespace Travetto {
+    interface Request {
+      files: Record<string, Asset>;
+    }
+  }
 }
