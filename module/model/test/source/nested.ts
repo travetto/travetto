@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 
-import { Test, BeforeAll } from '@travetto/test';
+import { Test } from '@travetto/test';
 import { Schema, Text } from '@travetto/schema';
 
-import { BaseModelTest } from '../../support/test.base';
+import { BaseModelTest } from '../lib/test.base';
 import { Model, ModelCore } from '../..';
 
 @Schema()

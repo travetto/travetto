@@ -2,8 +2,8 @@ import { DependencyRegistry } from '@travetto/di';
 import { Class, RootRegistry } from '@travetto/registry';
 import { AfterEach, BeforeEach } from '@travetto/test';
 
-import { ModelSource } from '../src/service/source';
-import { ModelService } from '../src/service/model';
+import { ModelSource } from '../../src/service/source';
+import { ModelService } from '../../src/service/model';
 
 export abstract class BaseModelTest {
 
