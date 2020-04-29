@@ -17,6 +17,7 @@ Module Structure
 * bin/  - CLI Support
 * support/ - Phase support as well as AST transformer support
 * index.ts - Root index for loading
+* test/lib - Shared libraries for testing
 
 App Running
 -----------------------------
