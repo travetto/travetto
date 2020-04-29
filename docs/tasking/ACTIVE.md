@@ -5,12 +5,17 @@ Cache/Rest-Session
 --------------------------
 - [ ] Update docs with clearer example of cache usage
 
+Rest
+----------------------
+- [ ] Documentation on auth, w.r.t sessions and cookies
+   - [ ] Making sessions optional?
+
 Compiler
 ----------------------
 - [?] Support type checking in transformers
-  - [?] Convert schema/rest/swagger/test/config/cache/application to use resolved type information
   - [?] Investigate auto creating schemas from interfaces for simple one offs  
-  - [?] Rewrite test module/plugin to work with new compiler architecture
+- [ ] 
+
 Tests
 --------------
 - [?] Better unit tests

@@ -1,6 +1,12 @@
 Completed Tasks
 ==============
 
+Transformers
+------------------------
+- [x] Support type checking in transformers
+  - [x] Convert schema/rest/swagger/test/config/cache/application to use resolved type information
+  - [x] Rewrite test module/plugin to work with new compiler architecture
+
 Model
 ----------------------
 - [X] Basic aggregation support, to get model counts by a specific attribute
