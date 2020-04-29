@@ -36,7 +36,8 @@
   "files": [
     "bin",
     "index.ts",
-    "src"
+    "src",
+    "test/lib"
   ],
   "name": "@travetto/model-sql",
   "repository": {
