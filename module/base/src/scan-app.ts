@@ -34,8 +34,8 @@ export class ScanApp {
     return { ...x, file, module: file.replace(`${root}/`, '') };
   }
 
-  private static getAppModPathMatcher(root = Env.cwd) {
-    const MOD_MATCH = new RegExp(`node_modules/@travetto/([^/]+)/(${this.modAppFolders.join('|')})`);
+  private static getAppModPathMatcher() {
+    const MOD_MATCH = new RegExp(`node_modules/@travetto/([^/]+)/(${this.modAppFolders.join('|')})\/`);
     const MOD_EX = new RegExp(`@travetto/(${this.modAppExclude.join('|')})`);
     return { test: (x: string) => MOD_MATCH.test(x) && !MOD_EX.test(x) };
   }
@@ -116,7 +116,7 @@ export class ScanApp {
    */
   static findAppFiles(rootPaths: string[], exclude?: (file: string) => boolean, root = Env.cwd) {
     const PATH_RE = SystemUtil.pathMatcher(rootPaths);
-    const MOD_RE = this.getAppModPathMatcher(root);
+    const MOD_RE = this.getAppModPathMatcher();
     return this.findSourceFiles(
       // Exclude any filtered items, only return app files or module files
       f => (!exclude || !exclude!(f)) && (PATH_RE.test(f) || MOD_RE.test(f)),
