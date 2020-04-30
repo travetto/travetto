@@ -6,7 +6,9 @@ import { Class } from '@travetto/registry';
 
 import { RegisteredIdentity } from './identity';
 
-// TODO: Document
+/**
+ * A model-based principal provider
+ */
 export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvider {
 
   @Inject()
@@ -20,6 +22,9 @@ export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvid
     super();
   }
 
+  /**
+   * Retrieve user by id
+   */
   async retrieve(userId: string) {
     const query = {
       where: this.fromIdentity({ id: userId })
@@ -28,11 +33,17 @@ export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvid
     return user;
   }
 
+  /**
+   * Convert identity to a principal
+   */
   async resolvePrincipal(ident: RegisteredIdentity): Promise<Principal> {
     const user = await this.retrieve(ident.id);
     return this.toIdentity(user);
   }
 
+  /**
+   * Authenticate password for model id
+   */
   async authenticate(userId: string, password: string) {
     const user = await this.retrieve(userId);
     const ident = this.toIdentity(user);
@@ -46,6 +57,9 @@ export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvid
     }
   }
 
+  /**
+   * Register a user
+   */
   async register(user: T) {
     const ident = this.toIdentity(user);
 
@@ -69,6 +83,9 @@ export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvid
     }
   }
 
+  /**
+   * Change a password
+   */
   async changePassword(userId: string, password: string, oldPassword?: string) {
     const user = await this.retrieve(userId);
     const ident = this.toIdentity(user);
@@ -92,6 +109,9 @@ export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvid
     return await this.modelService.update(this.cls, user);
   }
 
+  /**
+   * Generate a reset token
+   */
   async generateResetToken(userId: string): Promise<RegisteredIdentity> {
     const user = await this.retrieve(userId);
     const ident = this.toIdentity(user);

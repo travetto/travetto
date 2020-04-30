@@ -2,13 +2,17 @@ import * as mime from 'mime';
 
 import { Asset } from './types';
 
-// TODO: Document
+/**
+ * Standard class for an asset naming strateigy
+ */
 export abstract class AssetNamingStrategy {
   public readonly prefix: string;
   abstract getPath(Asset: Asset): string;
 }
 
-// TODO: Document
+/**
+ * Straight forward, retains name with optional prefix
+ */
 export class SimpleNamingStrategy implements AssetNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 
@@ -17,7 +21,10 @@ export class SimpleNamingStrategy implements AssetNamingStrategy {
   }
 }
 
-// TODO: Document
+/**
+ * Derives asset name via the hash value, to prevent
+ * file duplication
+ */
 export class HashNamingStrategy implements AssetNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 

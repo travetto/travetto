@@ -34,8 +34,10 @@ function fromTagSet(tags: TagSet) {
   return map;
 }
 
+/**
+ * Asset source backed by S3
+ */
 @Injectable()
-// TODO: Document
 export class S3AssetSource extends AssetSource {
 
   private client: aws.S3;
@@ -49,6 +51,9 @@ export class S3AssetSource extends AssetSource {
     return { Key: key, Bucket: this.config.bucket, ...(extra as any) } as (U & { Key: string, Bucket: string });
   }
 
+  /**
+   * Create bucket if not present
+   */
   async postConstruct() {
     this.client = new aws.S3(this.config.config);
     try {
@@ -58,7 +63,8 @@ export class S3AssetSource extends AssetSource {
     }
   }
 
-  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
+  async set(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
+    // Upload to s3
     const upload = this.client.upload(this.q(file.path, {
       Body: stream,
       ContentType: file.contentType,
@@ -67,24 +73,29 @@ export class S3AssetSource extends AssetSource {
 
     await upload;
 
+    // Tag after uploading
     await this.client.putObjectTagging(this.q(file.path, {
       Tagging: { TagSet: toTagSet(file.metadata) }
     })).promise();
   }
 
-  async read(filename: string): Promise<NodeJS.ReadableStream | Readable> {
+  async get(filename: string): Promise<NodeJS.ReadableStream | Readable> {
+    // Read from s3
     const res = await this.client.getObject(this.q(filename)).promise();
-    if (res.Body instanceof Buffer) {
+    if (res.Body instanceof Buffer) { // If response is buffer
       return SystemUtil.toReadable(res.Body);
-    } else if (typeof res.Body === 'string') {
+    } else if (typeof res.Body === 'string') { // Else if string
       return SystemUtil.toReadable(Buffer.from(res.Body, 'utf8'));
-    } else if (res.Body && ('pipe' in res.Body)) {
+    } else if (res.Body && ('pipe' in res.Body)) { // Else if stream
       return res.Body as NodeJS.ReadableStream;
     }
     throw new Error(`Unable to read type: ${typeof res.Body}`);
   }
 
   async info(filename: string): Promise<Asset> {
+    /**
+     * Get details and tags
+     */
     const query = this.q(filename);
     const [obj, tags] = await Promise.all([
       this.client.headObject(query).promise(),
@@ -99,8 +110,7 @@ export class S3AssetSource extends AssetSource {
     };
   }
 
-  async remove(filename: string): Promise<void> {
+  async delete(filename: string): Promise<void> {
     await this.client.deleteObject(this.q(filename)).promise();
-    return;
   }
 }

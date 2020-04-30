@@ -6,13 +6,20 @@ import { AsyncContext } from '@travetto/context';
 
 const CTX_SYM = Symbol('trv_ctx');
 
+/**
+ * Integration with the context service, to allow for tracking of
+ * user state through async calls.
+ */
 @Injectable()
 @ContextProvider(AuthContext, (c, req) => req!.auth)
-// TODO: Document
 export class AuthContextService {
+
   @Inject()
   context?: AsyncContext;
 
+  /**
+   * Set auth context
+   */
   set(ctx: AuthContext, req?: Request) {
     if (this.context) {
       this.context.set(CTX_SYM, ctx);
@@ -25,6 +32,9 @@ export class AuthContextService {
     }
   }
 
+  /**
+   * Get the context from the request
+   */
   get(req?: Request) {
     if (req) {
       return req.auth;
@@ -39,10 +49,16 @@ export class AuthContextService {
     }
   }
 
+  /**
+   * Get the auth/principal id
+   */
   getId(req?: Request) {
     return this.get(req).id;
   }
 
+  /**
+   * Clear the context
+   */
   clear(req?: Request) {
     if (this.context) {
       this.context.clear(CTX_SYM);

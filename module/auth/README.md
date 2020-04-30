@@ -59,7 +59,7 @@ The [`AuthUtil`](./src/util.ts) provides the following functionality:
 ```typescript
 class AuthUtil {
   static async generateHash(password: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256'): Promise<string>;
-  static async generatePassword(password: string, saltlen = 32, validator?: (password: string) => Promise<boolean>): Promise<string>
+  static async generatePassword(password: string, saltlen = 32): Promise<string>
   static permissionSetChecker(include: PermSet, exclude: PermSet, matchAll = true): (permissions: Set<string>) => boolean;
 ```
 

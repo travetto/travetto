@@ -5,13 +5,18 @@ import { FsUtil } from '@travetto/boot/src/fs-util';
 import { fork } from '@travetto/boot/src/exec';
 import { CachedAppConfig, handleFailure } from './util';
 
-// TODO: Document
+/**
+ * Utilities to fetch list of applications
+ */
 export class AppListUtil {
 
   private static pCwd = FsUtil.cwd;
   private static cacheConfig = 'app-cache.json';
   private static fsLstat = util.promisify(fs.lstat);
 
+  /**
+   * Find latest timestamp between creation and modification
+   */
   static maxTime(stat: fs.Stats) {
     return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
   }
@@ -20,6 +25,9 @@ export class AppListUtil {
     return (await this.getList()).find(x => x.name === name);
   }
 
+  /**
+   * Determine app root form filename
+   */
   static determineRootFromFile(filename: string) {
     const [, root] = filename.split(`${this.pCwd}/`);
     const [first] = root.split('/');
@@ -28,6 +36,9 @@ export class AppListUtil {
     return (first === 'node_modules' || first === 'src') ? '.' : first;
   }
 
+  /**
+   * Compile code, and look for `@Application` annotations
+   */
   static async discover() {
     // Initialize up to compiler
     const { PhaseManager, ScanApp } = await import('@travetto/base');
@@ -50,6 +61,7 @@ export class AppListUtil {
     const { ApplicationRegistry } = await import('../../src/registry');
     const res = await ApplicationRegistry.getAll();
 
+    // Convert each application into an `AppConfig`
     const items = Promise.all(res.map(async x => ({
       watchable: x.watchable,
       description: x.description,
@@ -63,6 +75,7 @@ export class AppListUtil {
 
     let resolved = await items;
 
+    // Sort by local first, and name second
     resolved = resolved.sort((a, b) =>
       a.appRoot === b.appRoot ?
         a.name.localeCompare(b.name) :
@@ -72,6 +85,9 @@ export class AppListUtil {
     return resolved;
   }
 
+  /**
+   * Request list of applications
+   */
   static async getList(): Promise<CachedAppConfig[]> {
     const { AppCache } = await import('@travetto/boot/src/app-cache'); // Should not init the app, only load cache
     try {
@@ -100,6 +116,9 @@ export class AppListUtil {
     }
   }
 
+  /**
+   * Run discover code and return as JSON
+   */
   static async discoverAsJson() {
     try {
       const resolved = await this.discover();

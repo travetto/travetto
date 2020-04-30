@@ -40,7 +40,7 @@ class UserProfileService {
   ) {}
 
   async saveProfileImage(userId: string, image: Asset) {
-    const path = await this.asset.store(image);
+    const path = await this.asset.set(image);
     const user = await this.model.getById(User, userId);
     user.profileImage = path;
     await this.model.update(User, user);

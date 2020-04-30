@@ -6,7 +6,9 @@ import { Identity } from '@travetto/auth';
 
 import { ModelPrincipalProvider } from '../principal';
 
-// TODO: Document
+/**
+ * Auth identity provider for the ModelProvider
+ */
 export class ModelIdentityProvider<U extends ModelCore> extends IdentityProvider {
 
   constructor(private provider: ModelPrincipalProvider<U>) {

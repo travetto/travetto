@@ -1,44 +1,29 @@
-import { Util } from '@travetto/base/src/util';
-
 import { AppListUtil } from './app-list';
-import { handleFailure } from './util';
 import { ApplicationParameter } from '../../src/types';
+import { handleFailure } from './util';
 
-// TODO: Move methods into code base
-// TODO: Document
+/**
+ * Supporting app execution
+ */
 export class RunUtil {
 
+  /**
+   * Get the choices or type for a parameter
+   */
   static getParamType(config: ApplicationParameter) {
     return (config.meta && config.meta.choices) ? config.meta.choices.join('|') : config.type!;
   }
 
-  static enforceParamType(config: ApplicationParameter, param: string) {
-    switch (config.type) {
-      case 'boolean': return Util.coerceType(param, Boolean);
-      case 'number': return Util.coerceType(param, Number);
-      default:
-        if (config.meta?.choices && !config.meta.choices.find(c => `${c}` === param)) {
-          throw new Error(`Invalid parameter ${config.name}: Received ${param} expected ${config.meta.choices.join('|')}`);
-        }
-        return Util.coerceType(param, String);
-    }
-  }
-
+  /**
+   * Execute running of an application, by name.  Setting important environment variables before
+   * loading framework and compiling
+   */
   static async run(args: string[]) {
     const name = args[0];
     const [, ...sub] = args;
     const app = await AppListUtil.getByName(name);
 
-    let typedSub: (string | number | boolean | Date)[] = sub;
-
     if (app) {
-      const appParams = app.params ?? [];
-      typedSub = sub.map((x, i) => appParams[i] === undefined ? x : this.enforceParamType(appParams[i], x));
-      const reqCount = appParams.filter(x => !x.optional).length;
-      if (typedSub.length < reqCount) {
-        throw new Error(`Invalid parameter count: received ${typedSub.length} but needed ${reqCount}`);
-      }
-
       process.env.APP_ROOTS = process.env.APP_ROOTS ?? app.appRoot ?? '';
       if (!process.env.WATCH) {
         if (/^prod/i.test(`${process.env.ENV}`)) {
@@ -49,6 +34,7 @@ export class RunUtil {
       }
     }
 
+    // Compile all code as needed
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.bootstrap('require-all');
 
@@ -58,10 +44,12 @@ export class RunUtil {
       require(mod);
     }
 
+    // Finish registration
     await PhaseManager.bootstrapAfter('require-all');
 
+    // And run
     const { ApplicationRegistry } = await import('../../src/registry');
-    await ApplicationRegistry.run(name, typedSub);
+    await ApplicationRegistry.run(name, sub);
   }
 
   static async runDirect() {

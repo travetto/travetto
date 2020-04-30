@@ -12,9 +12,14 @@ const fsOpen = util.promisify(fs.open);
 const fsRead = util.promisify(fs.read);
 const fsRename = util.promisify(fs.rename);
 
-// TODO: Document
+/**
+ * Utilities for processing assets
+ */
 export class AssetUtil {
 
+  /**
+   * Compute hash from a file location on disk
+   */
   static async hashFile(pth: string) {
     const hasher = crypto.createHash('sha256').setEncoding('hex');
     const str = fs.createReadStream(pth);
@@ -26,6 +31,9 @@ export class AssetUtil {
     return hasher.read().toString() as string;
   }
 
+  /**
+   * Read a chunk from a file, primarily used for mime detection
+   */
   static async readChunk(filePath: string, bytes: number) {
     const fd = await fsOpen(filePath, 'r');
     const buffer = Buffer.alloc(bytes);
@@ -33,12 +41,19 @@ export class AssetUtil {
     return buffer;
   }
 
+  /**
+   * Detect file type from location on disk
+   */
   static async detectFileType(filePath: string) {
     const buffer = await this.readChunk(filePath, 4100);
     return fileType.fromBuffer(buffer);
   }
 
-  static async coerceFileType(filePath: string) {
+  /**
+   * Convert file name to have proper extension if missing.
+   * Extension is determined via mime type if missing.
+   */
+  static async ensureFileExtension(filePath: string) {
 
     const type = await this.resolveFileType(filePath);
     const ext = mime.getExtension(type);
@@ -52,6 +67,9 @@ export class AssetUtil {
     return filePath;
   }
 
+  /**
+   * Read content type from location on disk
+   */
   static async resolveFileType(pth: string) {
     let contentType: string = path.extname(pth);
     const detected = await this.detectFileType(pth);
@@ -63,6 +81,9 @@ export class AssetUtil {
     return contentType;
   }
 
+  /**
+   * Convert local file to asset structure
+   */
   static async fileToAsset(file: string, metadata: Partial<AssetMetadata> = {}): Promise<Asset> {
     let hash: string | undefined = metadata.hash;
 

@@ -1,10 +1,10 @@
 import { Class } from '@travetto/registry';
 
-import { ApplicationConfig, ApplicationParameter, AppListener } from './types';
+import { ApplicationConfig, ApplicationParameter, ApplicationHandle } from './types';
 import { ApplicationRegistry } from './registry';
 
 type OrProm<T> = T | Promise<T>;
-type AppClass = Class<{ run(...args: any[]): OrProm<AppListener | void | undefined> }>;
+type AppClass = Class<{ run(...args: any[]): OrProm<ApplicationHandle | void | undefined> }>;
 
 export type AppDecorator = Partial<ApplicationConfig> & {
   paramMap?: {
@@ -14,10 +14,14 @@ export type AppDecorator = Partial<ApplicationConfig> & {
 };
 
 /**
+ * Marks a class as a candidate for application execution. The application
+ * has a name, and optional configuration for the various parameters.  The
+ * compiler will automatically infer the parameters from the `run` method of
+ * the class.
+ *
  * @augments trv/app/Application
  * @augments trv/di/Injectable
  */
-// TODO: Document
 export function Application(
   name: string,
   config?: AppDecorator,

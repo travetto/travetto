@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Asset metadata
+ */
 export interface AssetMetadata {
   name: string;
   title: string;
@@ -7,7 +9,9 @@ export interface AssetMetadata {
   tags?: string[];
 }
 
-// TODO: Document
+/**
+ * A retrieval/storable asset
+ */
 export interface Asset {
   stream: NodeJS.ReadableStream;
   size: number;

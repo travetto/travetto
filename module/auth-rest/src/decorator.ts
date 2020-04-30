@@ -2,13 +2,19 @@ import { ControllerRegistry, EndpointDecorator } from '@travetto/rest';
 import { AppError } from '@travetto/base';
 import { AuthUtil } from '@travetto/auth';
 
-// TODO: Document
+/**
+ * Authenticate an endpoint with a list of available providers
+ */
 export function Authenticate(provider: symbol, ...providers: symbol[]) {
   const computed = [provider, ...providers];
   return ControllerRegistry.createFilterDecorator(req => req.login(computed)) as EndpointDecorator;
 }
 
-// TODO: Document
+/**
+ * Ensure the controller/route is authenticated, give a set of permissions
+ * @param include Set of required permissions
+ * @param exclude Set of invalid permissions
+ */
 export function Authenticated(include: string[] = [], exclude: string[] = []) {
   const checker = AuthUtil.permissionSetChecker(new Set(include), new Set(exclude));
 
@@ -21,6 +27,9 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
   });
 }
 
+/**
+ * Require the controller/route to be unauthenticated
+ */
 export function Unauthenticated() {
   return ControllerRegistry.createFilterDecorator(req => {
     if (!!req.auth.principal) {
