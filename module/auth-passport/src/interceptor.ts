@@ -10,8 +10,10 @@ interface Handler {
 
 const authenticator = (passport as any as passport.Authenticator<Handler>);
 
+/**
+ * Passport rest interceptor
+ */
 @Injectable()
-// TODO: Document
 export class PassportInterceptor extends RestInterceptor {
 
   private init = authenticator.initialize();

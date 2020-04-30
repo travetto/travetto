@@ -4,9 +4,14 @@ import {
   TransformUtil, TransformerState, DecoratorMeta, res, OnClass
 } from '@travetto/compiler/src/transform-support';
 
-// TODO: Document
+/**
+ * Converts classes with `@Application` to auto register with the `ApplicationRegistry`
+ */
 export class ApplicationTransformer {
 
+  /**
+   * Computes an `AppParameter` state from a TypeScript ParameterDeclaration
+   */
   static computeParam(state: TransformerState, p: ts.ParameterDeclaration) {
     const name = p.name.getText();
     const def = p.initializer ? TransformUtil.toLiteral(p.initializer) : undefined;
@@ -15,6 +20,7 @@ export class ApplicationTransformer {
     let subtype;
     let meta;
 
+    // If a choice type
     if (res.isUnionType(type)) {
       const choices = type.unionTypes
         .map(x => res.isLiteralType(x) ? x.value : undefined)
@@ -29,7 +35,7 @@ export class ApplicationTransformer {
       };
       subtype = 'choice';
       meta = { choices };
-    } else if (res.isLiteralType(type)) {
+    } else if (res.isLiteralType(type)) { // If a file
       if (type.ctor === String && /file$/i.test(name)) {
         subtype = 'file';
       }
@@ -42,6 +48,9 @@ export class ApplicationTransformer {
     return ret;
   }
 
+  /**
+   * On presence of `@Application`
+   */
   @OnClass('trv/app/Application')
   static handleClass(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
     const dec = dm?.dec;

@@ -13,9 +13,12 @@ import { RestAssetConfig } from './config';
 
 type AssetMap = Record<string, Asset>;
 
-// TODO: Document
 // TODO: Cleanup
+/**
+ * General support for handling file uploads/downloads
+ */
 export class AssetRestUtil {
+
   static readTypeArr(arr?: string[] | string) {
     return (Array.isArray(arr) ? arr : (arr ?? '').split(',')).filter(x => !!x);
   }
@@ -24,7 +27,10 @@ export class AssetRestUtil {
     return types.findIndex(match(type)) >= 0;
   }
 
-  static async streamFile(data: NodeJS.ReadableStream, fileName: string, allowedTypes: string[], excludeTypes: string[], relativeRoot?: string) {
+  /**
+   * Stream file to disk, and verify types in the process.  Produce an asset as the output
+   */
+  static async streamToLocalAsset(data: NodeJS.ReadableStream, fileName: string, allowedTypes: string[], excludeTypes: string[], relativeRoot?: string) {
     const uniqueDir = FsUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
     await FsUtil.mkdirp(uniqueDir);
     const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(fileName));
@@ -43,6 +49,9 @@ export class AssetRestUtil {
     return asset;
   }
 
+  /**
+   * Parse filename from the request headers
+   */
   static getFileName(req: Request) {
     return ((req.header('content-disposition') as string ?? '')
       .split('filename=')[1] ?? '')
@@ -50,13 +59,16 @@ export class AssetRestUtil {
       `file-upload.${(req.header('content-type') as string)!.split('/').pop()}`;
   }
 
+  /**
+   * Actually process upload
+   */
   static upload(req: Request, config: Partial<RestAssetConfig>, relativeRoot?: string) {
     const allowedTypes = this.readTypeArr(config.allowedTypes);
     const excludeTypes = this.readTypeArr(config.excludeTypes);
 
     if (!/multipart|urlencoded/i.test(req.header('content-type') as string)) {
       const filename = this.getFileName(req);
-      return this.streamFile(req as any as NodeJS.ReadableStream, filename, allowedTypes, excludeTypes, relativeRoot)
+      return this.streamToLocalAsset(req as any as NodeJS.ReadableStream, filename, allowedTypes, excludeTypes, relativeRoot)
         .then(file => ({ file }));
     } else {
       return new Promise<AssetMap>((resolve, reject) => {
@@ -72,7 +84,7 @@ export class AssetRestUtil {
         uploader.on('file', async (fieldName, file, fileName, encoding, mimeType) => {
           console.debug('Uploading file', fieldName, fileName, encoding, mimeType);
           uploads.push(
-            this.streamFile(file, fileName, allowedTypes, excludeTypes, relativeRoot)
+            this.streamToLocalAsset(file, fileName, allowedTypes, excludeTypes, relativeRoot)
               .then(res => mapping[fieldName] = res)
           );
         });
@@ -94,6 +106,9 @@ export class AssetRestUtil {
     }
   }
 
+  /**
+   * Make any asset downloadable
+   */
   static downloadable(asset: Asset) {
     return {
       async render(res: Response) {

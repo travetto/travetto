@@ -5,8 +5,12 @@ import { Asset } from './types';
 import { AssetSource } from './source';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './strategy';
 
+/**
+ * Services asset CRUD operations.  Takes in a source is defined elsewhere.
+ * Additionally supports a naming strategy that allows for translation of names
+ * to and from the asset source.
+ */
 @Injectable()
-// TODO: Document
 export class AssetService {
 
   constructor(
@@ -24,8 +28,11 @@ export class AssetService {
   info(file: string) {
     return this.source.info(file);
   }
-
-  async save(asset: Asset, upsert = true, strategy?: AssetNamingStrategy): Promise<string> {
+  /**
+   * Stores an asset with the optional ability to upsert if the file is already found. If not
+   * upserting and file exists, an error will be thrown.
+   */
+  async write(asset: Asset, upsert = true, strategy?: AssetNamingStrategy): Promise<string> {
 
     // Apply strategy on save
     asset.path = (strategy ?? this.namingStrategy!).getPath(asset);
@@ -46,7 +53,12 @@ export class AssetService {
     return asset.path;
   }
 
-  async get(path: string, haveTags?: string[]): Promise<Asset> {
+  /**
+   * Retrieve a file from the store, with the ability to ensure certain tags
+   * are set on the asset.  This can be used as a rudimentary ACL to ensure
+   * cross account assets aren't shared.
+   */
+  async read(path: string, haveTags?: string[]): Promise<Asset> {
     const info = await this.info(path);
     if (haveTags) {
       const fin = new Set(info.metadata.tags);

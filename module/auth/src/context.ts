@@ -3,7 +3,11 @@ import { AppError } from '@travetto/base';
 import { AuthUtil } from './util';
 import { Principal, Identity } from './types';
 
-// TODO: Document
+/**
+ * Combination of an identity and a principal, to be used for
+ * authorizing. Provides simple access to permissions and
+ * additional principal details.
+ */
 export class AuthContext<
   U = any,
   I extends Identity = Identity,

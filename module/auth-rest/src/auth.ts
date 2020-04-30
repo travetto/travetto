@@ -7,8 +7,10 @@ import { PrincipalProvider } from '@travetto/auth';
 import { IdentityProvider } from './identity';
 import { AuthContext } from '@travetto/auth/src/context';
 
+/**
+ * Auth service to allow for rest-based interaction
+ */
 @Injectable()
-// TODO: Document
 export class AuthService {
   identityProviders = new Map<string, IdentityProvider>();
 
@@ -16,12 +18,18 @@ export class AuthService {
   principalProvider: PrincipalProvider;
 
   async postConstruct() {
+    // Find all providers
     for (const provider of DependencyRegistry.getCandidateTypes(IdentityProvider as Class<IdentityProvider>)) {
       const dep = await DependencyRegistry.getInstance(IdentityProvider, provider.qualifier);
       this.identityProviders.set(provider.qualifier.toString(), dep);
     }
   }
 
+  /**
+   * Login user via the request. Supports multi-step login.
+   *
+   * @param identityProviders List of valid identity providers
+   */
   async login(req: Request, res: Response, identityProviders: symbol[]): Promise<AuthContext | undefined> {
     let lastError: Error | undefined;
     for (const provider of identityProviders) {

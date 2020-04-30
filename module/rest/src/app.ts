@@ -1,4 +1,4 @@
-import { AppListener } from '@travetto/app';
+import { ApplicationHandle } from '@travetto/app';
 import { AppInfo, AppError, SystemUtil } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { Class, ChangeEvent } from '@travetto/registry';
@@ -45,7 +45,7 @@ export abstract class RestApp<T = any> {
   abstract createRaw(): Promise<T> | T;
   abstract registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[]): Promise<void>;
   abstract unregisterRoutes(key: string | symbol): Promise<void>;
-  abstract listen(): AppListener | Promise<AppListener>;
+  abstract listen(): ApplicationHandle | Promise<ApplicationHandle>;
 
   async init() {
     await ControllerRegistry.init();

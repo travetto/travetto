@@ -8,8 +8,14 @@ import { AuthContextService } from './context';
 import { AuthContextEncoder, HeaderAuthContextEncoder } from './encoder';
 import { AuthService } from './auth';
 
+/**
+ * Authentication interceptor
+ *
+ * - Supports the ability to encode context via request/response.
+ * - Provides functionality on the request for login/logout.
+ * - Connects the AuthContext to the request
+ */
 @Injectable()
-// TODO: Document
 export class AuthInterceptor extends RestInterceptor {
 
   after = [

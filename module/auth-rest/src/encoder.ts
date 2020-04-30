@@ -2,12 +2,23 @@ import { Request, Response } from '@travetto/rest';
 import { AuthContext } from '@travetto/auth';
 import { Injectable } from '@travetto/di';
 
+/**
+ * Encoder for auth context for request/response
+ */
 export abstract class AuthContextEncoder {
+  /**
+   * Read context from request
+   */
   abstract read(req: Request): Promise<AuthContext | undefined> | undefined | AuthContext;
+  /**
+   * Write context to request/response
+   */
   abstract write(ctx: AuthContext, req: Request, res: Response): Promise<void> | void;
 }
 
-// TODO: Document
+/**
+ * Store auth context in http headers
+ */
 @Injectable({ target: HeaderAuthContextEncoder })
 export class HeaderAuthContextEncoder extends AuthContextEncoder {
   key = 'X-Auth-Context';

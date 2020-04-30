@@ -14,6 +14,9 @@ ConfigSource.bindTo(globalConf, 'rest.upload');
 
 const extractUpload = (config: ParamConfig, req: Request) => req.files[config.name!];
 
+/**
+ * A concrete class for dependency injection
+ */
 export class UploadAsset implements Asset {
   stream: NodeJS.ReadableStream;
   size: number;
@@ -23,10 +26,11 @@ export class UploadAsset implements Asset {
 }
 
 /**
+ * Allows for supporting uploads on the route
+ *
  * @augments trv/asset-rest/AssetUpload
  * @augments trv/rest/Param
  */
-// TODO: Document
 export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetConfig> = {}) {
 
   if (typeof param === 'string') {

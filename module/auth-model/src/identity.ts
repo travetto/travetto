@@ -1,6 +1,8 @@
 import { Identity } from '@travetto/auth';
 
-// TODO: Document
+/**
+ * An identity that can be created/registered
+ */
 export interface RegisteredIdentity extends Identity {
   hash: string;
   salt: string;
