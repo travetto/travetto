@@ -33,6 +33,7 @@ function mergeWithOriginal<T extends { original?: symbol | object, qualifier?: s
   return o;
 }
 
+// TODO: Document
 export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private pendingFinalize: Class[] = [];
 

@@ -10,6 +10,7 @@ const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
 const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
 const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 
+// TODO: Document
 export class RestTransformer {
 
   static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: Documentation) {

@@ -1,3 +1,4 @@
+// TODO: Document
 export async function getSchemas(clear = true) {
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.bootstrap();

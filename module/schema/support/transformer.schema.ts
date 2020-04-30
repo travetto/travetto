@@ -16,6 +16,7 @@ const SCHEMA_MOD = require.resolve('../src/decorator/schema');
 const FIELD_MOD = require.resolve('../src/decorator/field');
 const COMMON_MOD = require.resolve('../src/decorator/common');
 
+// TODO: Document
 export class SchemaTransformer {
 
   static toFinalType(state: TransformerState, type: res.Type): ts.Expression {

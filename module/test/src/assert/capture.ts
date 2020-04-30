@@ -1,6 +1,7 @@
 import { Assertion, TestConfig } from '../model/test';
 import { AssertUtil } from './util';
 
+// TODO: Document
 export class AssertCapture {
 
   static assertions: Assertion[] = [];

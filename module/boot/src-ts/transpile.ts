@@ -12,6 +12,7 @@ const OPTS = Symbol();
 /**
  * Standard transpilation utilities, with support for basic text filters
  */
+// TODO: Document
 export class TranspileUtil {
   private static preparers: Preparer[] = [];
 

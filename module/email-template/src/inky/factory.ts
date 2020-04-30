@@ -18,6 +18,7 @@ export const COMPONENT_DEFAULTS = {
   hr: 'hr'
 };
 
+// TODO: Document
 export class ComponentFactory {
   private spacer16: string;
   public componentTags: typeof COMPONENT_DEFAULTS;

@@ -5,6 +5,7 @@ import { Compiler } from '@travetto/compiler';
 import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';
 
+// TODO: Document
 export class ClassSource implements ChangeSource<Class> {
 
   private classes = new Map<string, Map<string, Class>>();

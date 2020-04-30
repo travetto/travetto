@@ -10,6 +10,7 @@ import { RestApp, RouteConfig, RestCookieConfig } from '@travetto/rest';
 import { KoaAppUtil } from './util';
 
 @Injectable()
+// TODO: Document
 export class KoaRestApp extends RestApp<koa> {
 
   @Inject()

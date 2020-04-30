@@ -10,6 +10,7 @@ import { buildWorkManager } from '../worker/parent';
 import { TestUtil } from './util';
 import { State } from './types';
 
+// TODO: Document
 export class Runner {
 
   constructor(private state: State) { }

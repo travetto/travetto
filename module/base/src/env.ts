@@ -5,6 +5,7 @@ const PROD_KEY = 'prod';
 /**
  * General Environmental state for the application
  */
+// TODO: Document
 class $Env {
 
   private profiles: Set<string>;

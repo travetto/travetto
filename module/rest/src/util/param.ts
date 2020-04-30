@@ -5,6 +5,7 @@ import { ParamConfig, Request, Response } from '../types';
 
 export type ExtractFn = (c: ParamConfig, req: Request, res: Response) => any;
 
+// TODO: Document
 export class ParamUtil {
   static CONTEXT_REGISTRY = new Map<Class<any>, ExtractFn>();
 

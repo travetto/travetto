@@ -20,6 +20,7 @@ const GREATER = 0x3e;
 const ZERO = 0x30;
 const NINE = 0x39;
 
+// TODO: Document
 export class Tokenizer {
 
   static isIdentifierStart = (c: number) => c >= 65 && c <= 91 || c >= 97 && c <= 123 || c === 36 || c === 95;

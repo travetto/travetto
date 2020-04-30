@@ -5,6 +5,7 @@ import { OpenApiService } from './service';
 import { YamlUtil } from '@travetto/yaml';
 
 @Controller('/')
+// TODO: Document
 export class OpenApiController {
 
   @Inject()

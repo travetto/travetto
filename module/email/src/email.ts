@@ -5,6 +5,7 @@ import { MailTransport } from './transport';
 import { MailTemplateOptions, MailTemplateEngine } from './template';
 
 @Injectable()
+// TODO: Document
 export class EmailService {
 
   constructor(

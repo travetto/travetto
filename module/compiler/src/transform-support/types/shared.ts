@@ -1,5 +1,6 @@
 import * as ts from 'typescript';
 
+// TODO: Document
 export interface ParamDoc {
   name: string;
   description: string;

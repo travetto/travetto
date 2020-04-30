@@ -1,6 +1,7 @@
 import { CacheEntry } from '../types';
 import { CacheStore } from './core';
 
+// TODO: Document
 export abstract class CullableCacheStore<T extends CacheEntry = CacheEntry> extends CacheStore<T> {
 
   lastCullCheck = Date.now();

@@ -41,6 +41,7 @@ const MULTIPLE_KEYS_ALLOWED = new Set([
 ]);
 
 @Injectable()
+// TODO: Document
 export class QueryVerifierService {
 
   private mapping = [

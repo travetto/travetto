@@ -2,6 +2,7 @@ import { TestRegistry } from '../registry/registry';
 import { TestConfig } from '../model/test';
 
 /** @augments trv/test/Test */
+// TODO: Document
 export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description: string, ...rest: Partial<TestConfig>[]): MethodDecorator;
@@ -24,6 +25,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
   };
 }
 
+// TODO: Document
 export function ShouldThrow(state: TestConfig['shouldThrow']): MethodDecorator {
   return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
     TestRegistry.registerField(inst.constructor, descriptor.value, { shouldThrow: state });
@@ -31,6 +33,7 @@ export function ShouldThrow(state: TestConfig['shouldThrow']): MethodDecorator {
   };
 }
 
+// TODO: Document
 export function Timeout(ms: number): MethodDecorator {
   return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
     TestRegistry.registerField(inst.constructor, descriptor.value, { timeout: ms });

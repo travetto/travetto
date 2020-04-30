@@ -7,6 +7,7 @@ export abstract class AuthContextEncoder {
   abstract write(ctx: AuthContext, req: Request, res: Response): Promise<void> | void;
 }
 
+// TODO: Document
 @Injectable({ target: HeaderAuthContextEncoder })
 export class HeaderAuthContextEncoder extends AuthContextEncoder {
   key = 'X-Auth-Context';

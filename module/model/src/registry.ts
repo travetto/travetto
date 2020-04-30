@@ -4,6 +4,7 @@ import { DependencyRegistry } from '@travetto/di';
 
 import { ModelOptions } from './types';
 
+// TODO: Document
 export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   collections = new Map<Class, string>();
   baseModels = new Map<Class, Class>();

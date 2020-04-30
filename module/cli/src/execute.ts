@@ -10,6 +10,7 @@ commander.version(require('../package.json').version);
 const PREFIX = 'travetto-cli';
 const noTS = (x: string) => x.replace(/\.ts$/, '');
 
+// TODO: Document
 export class Execute {
 
   static getPluginMapping() {

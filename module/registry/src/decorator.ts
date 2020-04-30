@@ -2,6 +2,7 @@ import { FsUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base';
 import { Class } from './types';
 
+// TODO: Document
 class $PendingRegister {
   map = new Map<string, Class<any>[]>();
   ordered: [string, Class<any>[]][] = [];
@@ -49,6 +50,7 @@ class $PendingRegister {
 
 export const PendingRegister = new $PendingRegister();
 
+// TODO: Document
 export function Register() {
   return (target: Class<any>) => PendingRegister.add(target);
 }

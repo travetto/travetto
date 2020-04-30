@@ -2,8 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
 import { FsUtil } from '@travetto/boot/src/fs-util';
-import { CachedAppConfig, fork, handleFailure } from './util';
+import { fork } from '@travetto/boot/src/exec';
+import { CachedAppConfig, handleFailure } from './util';
 
+// TODO: Document
 export class AppListUtil {
 
   private static pCwd = FsUtil.cwd;

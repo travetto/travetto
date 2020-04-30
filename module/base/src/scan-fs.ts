@@ -28,6 +28,7 @@ export interface ReadEntry {
 /**
  * File system scanning utilities
  */
+// TODO: Document
 export class ScanFs {
 
   static isDir(x: ScanEntry) {

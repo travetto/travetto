@@ -1,4 +1,4 @@
-import * as exp from 'express-serve-static-core'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import 'express-serve-static-core';
 import * as cookies from 'cookies'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { IncomingMessage, ServerResponse } from 'http';
 

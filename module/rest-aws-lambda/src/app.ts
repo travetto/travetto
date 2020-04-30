@@ -14,6 +14,7 @@ import { RestApp, RouteConfig, RouteUtil } from '@travetto/rest';
 import { AwsLambdaConfig } from './config';
 import { RouteStack } from './types';
 
+// TODO: Document
 export class AwsLambdaRestApp extends RestApp<express.Application> {
 
   private server: http.Server;

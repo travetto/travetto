@@ -2,6 +2,7 @@ import { Class } from '@travetto/registry/src/types';
 
 import { TestConfig, TestResult } from './test';
 
+// TODO: Document
 export interface SuiteConfig {
   class: Class;
   classId: string;
@@ -25,6 +26,7 @@ export interface Counts {
   total: number;
 }
 
+// TODO: Document
 export interface SuiteResult extends Counts {
   classId: string;
   file: string;
@@ -33,6 +35,7 @@ export interface SuiteResult extends Counts {
   duration: number;
 }
 
+// TODO: Document
 export interface AllSuitesResult extends Counts {
   suites: SuiteResult[];
   errors: Error[];

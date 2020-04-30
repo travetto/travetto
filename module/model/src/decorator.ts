@@ -5,6 +5,7 @@ import { ModelRegistry } from './registry';
 import { ModelOptions, IndexConfig } from './types';
 
 /** @augments trv/schema/Schema */
+// TODO: Document
 export function Model(conf: Partial<ModelOptions<any>> = {}) {
   return function <T extends Class>(target: T) {
     // Force registry first, and update with extra information after computing
@@ -24,6 +25,7 @@ export function Model(conf: Partial<ModelOptions<any>> = {}) {
   };
 }
 
+// TODO: Document
 export function Index(...indices: IndexConfig<any>[]) {
   return function <T extends Class>(target: T) {
     return ModelRegistry.register(target, { indices });

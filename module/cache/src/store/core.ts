@@ -2,6 +2,7 @@ import { CacheStoreType, CacheEntry, CacheConfig } from '../types';
 import { CacheStoreUtil } from './util';
 import { CacheError } from './error';
 
+// TODO: Document
 export abstract class CacheStore<T extends CacheEntry = CacheEntry> implements CacheStoreType<T> {
 
   abstract get(key: string): Promise<T | undefined> | T | undefined;

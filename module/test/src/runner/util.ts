@@ -6,6 +6,7 @@ import { ScanFs, Env, Shutdown } from '@travetto/base';
 
 const DEFAULT_TIMEOUT = EnvUtil.getInt('DEFAULT_TIMEOUT', 5000);
 
+// TODO: Document
 export class TestUtil {
   static TIMEOUT = Symbol('timeout');
 

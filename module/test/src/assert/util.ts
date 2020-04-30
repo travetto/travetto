@@ -4,6 +4,7 @@ import { Env, Util } from '@travetto/base';
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
 
+// TODO: Document
 export class AssertUtil {
   static cleanValue(val: any) {
     if (val && val.toClean) {

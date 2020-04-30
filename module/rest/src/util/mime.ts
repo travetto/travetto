@@ -1,3 +1,4 @@
+// TODO: Needed?
 export const MimeType = {
   JSON: 'application/json',
   HTML: 'text/html',

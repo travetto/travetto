@@ -1,3 +1,4 @@
+// TODO: Document
 export class IdleManager {
 
   private timer: NodeJS.Timer;

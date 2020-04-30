@@ -3,10 +3,12 @@
 const { FsUtil } = require('@travetto/boot/src/fs-util');
 const { EnvUtil } = require('@travetto/boot/src/env');
 
+// TODO: Document
 if (
   !EnvUtil.isSet('TRV_DEV') && // If not defined
   /\/travetto.*\/(module|sample)\//.test(FsUtil.cwd) // And in local module
 ) { // If in framework development mode
+  // TODO: Centralize spawn activity
   const res = require('child_process').spawnSync(process.argv0, process.argv.slice(1), {
     argv0: process.argv0,
     cwd: process.cwd(),

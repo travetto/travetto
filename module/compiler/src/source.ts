@@ -8,6 +8,7 @@ import { TransformerManager } from './transformer';
 
 const SIMPLE_COMPILATION = /support\/(transformer|phase)[.].+/;
 
+// TODO: Document
 export class SourceManager {
   private transformerManager: TransformerManager;
 

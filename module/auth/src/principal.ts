@@ -3,6 +3,7 @@ import { AppError } from '@travetto/base';
 import { Identity, Principal } from './types';
 import { AuthContext } from './context';
 
+// TODO: Document
 export abstract class PrincipalProvider {
 
   createPrincipal?(principal: Principal): Promise<Principal>;

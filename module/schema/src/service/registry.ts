@@ -7,6 +7,7 @@ import {
   SCHEMA_CHANGE_EVENT, FIELD_CHANGE_EVENT
 } from './changes';
 
+// TODO: Document
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
   subTypes = new Map<Class, Map<string, Class>>();

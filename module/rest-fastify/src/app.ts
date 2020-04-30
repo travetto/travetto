@@ -8,6 +8,7 @@ import { Injectable } from '@travetto/di';
 import { FastifyAppUtil } from './util';
 
 @Injectable()
+// TODO: Document
 export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
 
   async createRaw() {

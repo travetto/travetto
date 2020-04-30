@@ -1,5 +1,6 @@
 type SerializableType = Error & { stack?: any } | RegExp | Function | Set<any> | Map<string, any> | number | boolean | null | string | object;
 
+// TODO: Document
 export class Serializer {
   static clean(key: string) {
     if (/['"@ -:]/.test(key)) {

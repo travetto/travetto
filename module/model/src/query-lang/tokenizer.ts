@@ -31,6 +31,7 @@ const TOKEN_MAPPING: Record<string, Token> = {
   false: { type: 'literal', value: false },
 };
 
+// TODO: Document
 export class QueryLanguageTokenizer {
   private static processToken(state: TokenizeState, mode?: TokenType) {
     const text = state.text.substring(state.start, state.pos);

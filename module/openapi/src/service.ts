@@ -17,6 +17,7 @@ import { SpecGenerateUtil } from './spec-generate';
 const fsWriteFile = util.promisify(fs.writeFile);
 
 @Injectable()
+// TODO: Document
 export class OpenApiService {
 
   @Inject()

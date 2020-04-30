@@ -9,6 +9,7 @@ import { AuthContextEncoder, HeaderAuthContextEncoder } from './encoder';
 import { AuthService } from './auth';
 
 @Injectable()
+// TODO: Document
 export class AuthInterceptor extends RestInterceptor {
 
   after = [

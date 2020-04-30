@@ -6,6 +6,7 @@ import { Session } from '../types';
 import { SessionConfig } from '../config';
 
 @Injectable({ target: HeaderEncoder })
+// TODO: Document
 export class HeaderEncoder extends SessionEncoder {
 
   @Inject()

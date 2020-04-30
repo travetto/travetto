@@ -3,7 +3,15 @@ import { SchemaRegistry } from './service/registry';
 import { FieldConfig, ALL_VIEW } from './service/types';
 import { Util } from '@travetto/base';
 
+// TODO: Document
 export class BindUtil {
+
+  static register() {
+    const proto = Object.getPrototypeOf(Function);
+    proto.fromRaw = proto.from = function (data: any, view?: string) {
+      return BindUtil.bindSchema(this, data, view);
+    };
+  }
 
   static expandPaths(obj: Record<string, any>) {
     const out: Record<string, any> = {};

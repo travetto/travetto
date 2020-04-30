@@ -4,6 +4,7 @@ import { ConfigSource } from './source';
  * @augments trv/config/Config
  * @augments trv/di/Injectable
  */
+// TODO: Document
 export function Config(ns: string, depTarget?: new (...args: any[]) => any, name: string = '') {
 
   return (target: new (...args: any[]) => any) => {

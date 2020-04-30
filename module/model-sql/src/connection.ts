@@ -5,6 +5,7 @@ import { Util } from '@travetto/base';
  * be separated out to allow for differences in connection
  * vs querying.
  */
+// TODO: Document
 export interface ConnectionSupport<C = any> {
   active: C;
   asyncContext: { connection: C, pendingTx?: number };
@@ -24,10 +25,12 @@ export interface ConnectionSupport<C = any> {
 
 export type TransactionType = 'required' | 'isolated';
 
+// TODO: Document
 export interface ConnectionAware<C = any> {
   conn: ConnectionSupport<C>;
 }
 
+// TODO: Document
 export async function withConnection<V extends ConnectionAware, R>(
   self: V,
   fn: (this: V, ...args: any[]) => R,
@@ -48,6 +51,7 @@ export async function withConnection<V extends ConnectionAware, R>(
   }
 }
 
+// TODO: Document
 export async function withTransaction<V extends ConnectionAware, R>(
   self: V,
   mode: TransactionType,
@@ -87,6 +91,7 @@ export async function withTransaction<V extends ConnectionAware, R>(
   }
 }
 
+// TODO: Document
 export function Connected<T extends ConnectionAware>() {
   return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(this: T, ...args: any[]) => Promise<any>>) {
     const og = desc.value!;
@@ -96,6 +101,7 @@ export function Connected<T extends ConnectionAware>() {
   };
 }
 
+// TODO: Document
 export function Transactional<T extends ConnectionAware>(mode: TransactionType = 'required') {
   return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(this: T, ...args: any[]) => Promise<any>>) {
     const og = desc.value!;

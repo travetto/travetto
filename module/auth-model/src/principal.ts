@@ -6,6 +6,7 @@ import { Class } from '@travetto/registry';
 
 import { RegisteredIdentity } from './identity';
 
+// TODO: Document
 export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvider {
 
   @Inject()

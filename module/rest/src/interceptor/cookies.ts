@@ -11,6 +11,7 @@ import { CorsInterceptor } from './cors';
 import { GetCacheInterceptor } from './get-cache';
 
 @Config('rest.cookie')
+// TODO: Document
 export class RestCookieConfig implements cookies.SetOption {
   active = true;
   signed = true;
@@ -22,6 +23,7 @@ export class RestCookieConfig implements cookies.SetOption {
 }
 
 @Injectable()
+// TODO: Document
 export class CookiesInterceptor extends RestInterceptor {
 
   after = CorsInterceptor;

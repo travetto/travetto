@@ -3,6 +3,7 @@ import * as ts from 'typescript';
 import { ConsoleManager, Env } from '@travetto/base';
 import { TransformerState, OnCall, TransformUtil } from '@travetto/compiler/src/transform-support';
 
+// TODO: Document
 export class LoggerTransformer {
 
   @OnCall()

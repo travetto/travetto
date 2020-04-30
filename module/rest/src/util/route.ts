@@ -4,6 +4,7 @@ import { RestInterceptor } from '../interceptor/interceptor';
 
 import { ParamUtil } from './param';
 
+// TODO: Document
 export class RouteUtil {
 
   static createFilterChain(filters: (Filter | RestInterceptor['intercept'])[]): Filter<Promise<any>> {

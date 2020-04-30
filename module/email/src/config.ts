@@ -1,6 +1,7 @@
 import { Config } from '@travetto/config';
 
 @Config('mail')
+// TODO: Document
 export class MailConfig {
   transport = {};
   defaults = {

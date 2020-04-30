@@ -9,6 +9,7 @@ import { Util, SystemUtil } from '@travetto/base';
 
 const tmpDir = FsUtil.toUnix(os.tmpdir());
 
+// TODO: Document
 export class NetUtil {
   static async download(url: string) {
     const name = `${Util.uuid()}.${path.basename(url)}`;

@@ -1,6 +1,7 @@
 import { QueryLanguageTokenizer } from './tokenizer';
 import { Node, Token, ClauseNode, UnaryNode, Literal, GroupNode, OP_TRANSLATION } from './types';
 
+// TODO: Document
 export class QueryLanguageParser {
 
   static handleClause(nodes: (Node | Token)[]) {

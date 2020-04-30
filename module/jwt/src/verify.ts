@@ -25,6 +25,7 @@ function verifyTypes(o: any): o is Payload {
   return o;
 }
 
+// TODO: Document
 export async function verify(jwt: string, options: VerifyOptions = {}) {
 
   // clone this object since we are going to mutate it.

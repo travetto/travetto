@@ -8,6 +8,7 @@ import { IdentityProvider } from './identity';
 import { AuthContext } from '@travetto/auth/src/context';
 
 @Injectable()
+// TODO: Document
 export class AuthService {
   identityProviders = new Map<string, IdentityProvider>();
 

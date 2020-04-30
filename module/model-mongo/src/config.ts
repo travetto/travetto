@@ -9,6 +9,7 @@ const exists = util.promisify(fs.exists);
 const read = util.promisify(fs.readFile);
 
 @Config('mongo.model')
+// TODO: Document
 export class MongoModelConfig {
   hosts = ['localhost'];
   namespace = 'app';

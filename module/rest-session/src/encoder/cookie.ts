@@ -6,6 +6,7 @@ import { Session } from '../types';
 import { SessionConfig } from '../config';
 
 @Injectable({ target: CookieEncoder })
+// TODO: Document
 export class CookieEncoder extends SessionEncoder {
 
   @Inject()

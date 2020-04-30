@@ -38,6 +38,7 @@ interface Command {
   negate?: boolean;
 }
 
+// TODO: Document
 export class AssertTransformer {
 
   static lookupOpToken(key: number) {

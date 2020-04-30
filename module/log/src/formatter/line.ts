@@ -6,6 +6,7 @@ import { LogEvent, Formatter } from '../types';
 import { stylize, LEVEL_STYLES } from './styles';
 import { FsUtil } from '@travetto/boot';
 
+// TODO: Document
 export interface LineFormatterOpts {
   timestamp?: boolean;
   timeMillis?: boolean;
@@ -15,6 +16,7 @@ export interface LineFormatterOpts {
   location?: boolean;
 }
 
+// TODO: Document
 export class LineFormatter implements Formatter {
   private opts: LineFormatterOpts;
 

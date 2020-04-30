@@ -16,6 +16,7 @@ const between = (fromDays: number, toDays: number) =>
     new Date(Date.now() + toDays * DAY_IN_MS)
   );
 
+// TODO: Document
 export class SchemaFakerUtil {
   static STRING_RE_TO_TYPE: [RegExp, () => any][] = [
     [CommonRegExp.email, faker.internet.email],

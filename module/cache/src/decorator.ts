@@ -5,6 +5,7 @@ type TypedMethodDecorator<T, U> = (target: T, propertyKey: string, descriptor: T
 /**
  * @augments trv/cache/Cache
  */
+// TODO: Document
 export function Cache<U extends any>(field: ValidCacheFields<U>, config: CacheConfig = {}): TypedMethodDecorator<U, Promise<any>> {
   return function (target: U, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => Promise<any>>) { };
 }
@@ -12,6 +13,7 @@ export function Cache<U extends any>(field: ValidCacheFields<U>, config: CacheCo
 /**
  * @augments trv/cache/Evict
  */
+// TODO: Document
 export function EvictCache<U extends any>(field: ValidCacheFields<U>, config: CoreCacheConfig = {}): TypedMethodDecorator<U, Promise<any>> {
   return function (target: U, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => Promise<any>>) { };
 }

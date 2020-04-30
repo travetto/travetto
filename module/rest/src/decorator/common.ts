@@ -20,9 +20,12 @@ function register(config: Partial<EndpointConfig | ControllerConfig>) {
   } as (EndpointDecorator & ClassDecorator);
 }
 
+// TODO: Document
 export const Describe = (desc: DescribableConfig) => register(desc);
 
+// TODO: Document
 export const SetHeaders = (headers: HeaderMap) => register({ headers });
+// TODO: Document
 export function CacheControl(value: number, unit: Units = 's') {
   const delta = UNIT_MAPPING[unit] * value;
   return SetHeaders({
@@ -31,8 +34,10 @@ export function CacheControl(value: number, unit: Units = 's') {
   });
 }
 
+// TODO: Document
 export const DisableCacheControl = CacheControl.bind(null, 0, 's');
 
+// TODO: Document
 export function Accepts(contentTypes: string[]) {
   const types = new Set(contentTypes);
   const handler = async function (req: Request) {

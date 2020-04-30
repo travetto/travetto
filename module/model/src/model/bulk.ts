@@ -1,11 +1,13 @@
 import { AppError } from '@travetto/base';
 
+// TODO: Document
 export type BulkOp<T> =
   { delete?: T } &
   { insert?: T } &
   { update?: T } &
   { upsert?: T };
 
+// TODO: Document
 export interface BulkResponse {
   errors: any[];
   insertedIds: Map<number, string>;
@@ -18,6 +20,7 @@ export interface BulkResponse {
   };
 }
 
+// TODO: Document
 export class BulkProcessError extends AppError {
   constructor(public errors: { idx: number, error: Error }[]) {
     super('Bulk processing errors have occurred', 'data', { errors });

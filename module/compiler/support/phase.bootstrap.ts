@@ -1,3 +1,4 @@
+// TODO: Document
 export const init = {
   key: 'compiler',
   after: ['config', 'base'],

@@ -5,6 +5,7 @@ import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { ApplicationConfig } from './types';
 import { AppUtil } from './util';
 
+// TODO: Document
 export class $ApplicationRegistry {
   private applications = new Map<string, ApplicationConfig>();
 

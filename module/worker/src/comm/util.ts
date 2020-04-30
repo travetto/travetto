@@ -7,6 +7,7 @@ import { SpawnConfig, ChildOptions } from './types';
 
 type ErrorShape = { $?: any, message: string, stack?: string, name: string, toConsole?: any };
 
+// TODO: Document
 export class CommUtil {
 
   static serializeError(e: Error | ErrorShape): ErrorShape;

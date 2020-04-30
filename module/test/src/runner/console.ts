@@ -1,6 +1,7 @@
 import * as util from 'util';
 import { ConsoleManager, ConsolePayload } from '@travetto/base';
 
+// TODO: Document
 export class ConsoleCapture {
 
   static out: Record<string, string[]>;

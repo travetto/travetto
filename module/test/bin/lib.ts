@@ -1,6 +1,8 @@
 import { EnvUtil } from '@travetto/boot/src/env';
 import { State } from '../src/runner/types';
 
+// TODO: Document
+
 export async function runTests(opts: State) {
   const { StandardWorker } = await import('../src/worker/standard');
   return StandardWorker.run(opts);

@@ -35,6 +35,7 @@ function fromTagSet(tags: TagSet) {
 }
 
 @Injectable()
+// TODO: Document
 export class S3AssetSource extends AssetSource {
 
   private client: aws.S3;

@@ -4,6 +4,7 @@ import { MetadataRegistry, Class } from '@travetto/registry';
 import { EndpointConfig, ControllerConfig, EndpointDecorator, ControllerDecorator } from './types';
 import { Filter, RouteHandler, ParamConfig } from '../types';
 
+// TODO: Document
 class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointConfig> {
 
   constructor() {

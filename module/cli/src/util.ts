@@ -6,6 +6,7 @@ import { FsUtil } from '@travetto/boot/src/fs-util';
 
 import { color } from './color';
 
+// TODO: Document
 export interface CompletionConfig {
   all: string[];
   task: {
@@ -15,6 +16,7 @@ export interface CompletionConfig {
   };
 }
 
+// TODO: Document
 export class Util {
   static program = commander;
 

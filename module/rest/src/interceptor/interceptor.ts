@@ -3,6 +3,7 @@ import { Class } from '@travetto/registry';
 import { RouteConfig, Request, Response } from '../types';
 import { ControllerConfig } from '../registry/types';
 
+// TODO: Document
 export abstract class RestInterceptor {
   public after?: Class<RestInterceptor>[] | Set<Class<RestInterceptor>> | Class<RestInterceptor>;
   public before?: Class<RestInterceptor>[] | Set<Class<RestInterceptor>> | Class<RestInterceptor>;

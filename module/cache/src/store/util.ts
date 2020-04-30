@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 
 import { Util } from '@travetto/base';
 
+// TODO: Document
 export class CacheStoreUtil {
 
   static computeKey(params: any) {

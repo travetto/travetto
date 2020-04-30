@@ -2,6 +2,7 @@ import * as url from 'url';
 import * as http from 'http';
 import { launch } from './os';
 
+// TODO: Document
 export interface HttpHandler {
   onChange?(cb: () => void): void;
   resolve(message: http.IncomingMessage): Promise<{
@@ -11,6 +12,7 @@ export interface HttpHandler {
   }>;
 }
 
+// TODO: Document
 export class Server {
   static CONTENT_TYPES: Record<string, string> = {
     jpg: 'image/jpeg',

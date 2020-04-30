@@ -4,6 +4,7 @@ import {
   TransformUtil, TransformerState, DecoratorMeta, OnMethod, OnClass
 } from '@travetto/compiler/src/transform-support';
 
+// TODO: Document
 export class AnnotationTransformer {
 
   @OnClass('trv/test/Suite')

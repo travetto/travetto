@@ -9,6 +9,7 @@ type Checker = ReturnType<(typeof AuthUtil)['permissionChecker']>;
 
 type PermSet = Set<string> | ReadonlySet<string>;
 
+// TODO: Document
 export class AuthUtil {
 
   private static CHECK_EXC_CACHE = new Map<string, [Checker, Checker]>();

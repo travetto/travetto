@@ -9,6 +9,7 @@ export const BREAKOUT = Symbol('breakout');
 
 const DEFAULT_PHASE_TIMEOUT = EnvUtil.getInt('DEFAULT_PHASE_TIMEOUT', 15000);
 
+// TODO: Document
 export class ExecutionPhaseManager {
   private progress: ('all' | 'each')[] = [];
 

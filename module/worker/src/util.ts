@@ -3,6 +3,7 @@ import { ParentCommChannel } from './comm/parent';
 import { CommUtil } from './comm/util';
 import { Worker } from './pool';
 
+// TODO: Document
 export class WorkUtil {
   static spawnedWorker<X>(
     config: SpawnConfig & {

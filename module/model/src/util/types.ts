@@ -5,6 +5,7 @@ import { Point } from '../model/where-clause';
 
 export type SimpleType = 'string' | 'number' | 'boolean' | 'Date' | 'Point';
 
+// TODO: Document
 export interface ErrorCollector<T> {
   collect(element: T, message: string): void;
 }
@@ -31,6 +32,7 @@ export const OPERATORS: Record<string, Record<string, Set<string>>> = {
   Point: { ...basic('Point'), ...geo('Point') },
 };
 
+// TODO: Document
 export class TypeUtil {
 
   static getDeclaredType(f: FieldConfig | Class): SimpleType | undefined {

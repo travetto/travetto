@@ -2,6 +2,7 @@ import { Util } from '@travetto/base';
 
 import { ConfigUtil, Nested } from './util';
 
+// TODO: Document
 export class $ConfigSource {
 
   private initialized: boolean = false;

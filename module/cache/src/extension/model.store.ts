@@ -16,6 +16,7 @@ export class CacheModel {
   entry: string;
 }
 
+// TODO: Document
 export class ModelCacheStore extends CullableCacheStore {
 
   constructor(public modelService: ModelService) {

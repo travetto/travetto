@@ -1,6 +1,7 @@
 import { Shutdown } from '@travetto/base';
 import { AppListener } from './types';
 
+// TODO: Document
 export class AppUtil {
   static listenToCloseable(server: {
     close(cb?: Function): void;

@@ -7,6 +7,7 @@ import { LogUtil } from './util';
 
 const DEFAULT = Symbol('default');
 
+// TODO: Document
 class $Logger {
 
   private listeners = new Map<string | symbol, LogListener>();

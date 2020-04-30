@@ -10,6 +10,7 @@ const has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
 
 /* eslint-disable @typescript-eslint/camelcase */
 
+// TODO: Document
 export class ElasticsearchUtil {
 
   static extractSimple<T>(o: T, path: string = ''): Record<string, any> {

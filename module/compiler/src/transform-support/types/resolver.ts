@@ -1,5 +1,6 @@
 type Primitive = boolean | string | number | RegExp | Date;
 
+// TODO: Document
 export interface Type {
   name?: string; // Name of type, if nominal, otherwise we will generate a unique identifier
   comment?: string;

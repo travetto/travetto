@@ -1,6 +1,7 @@
 import { Response, Request } from '../types';
 import { MimeType } from './mime';
 
+// TODO: Document
 abstract class BaseResponse implements Partial<Response> {
   json(this: Response, val: any) {
     this.setHeader('Content-Type', MimeType.JSON);
@@ -32,12 +33,14 @@ abstract class BaseResponse implements Partial<Response> {
   }
 }
 
+// TODO: Document
 abstract class BaseRequest implements Partial<Request> {
   header(this: Request, key: string) {
     return this.headers![key.toLowerCase()] as string;
   }
 }
 
+// TODO: Document
 export class RestAppUtil {
   static decorateRequest<T extends Request>(req: Partial<T> & Record<string, any>): T {
     delete req.redirect;

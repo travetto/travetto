@@ -1,3 +1,4 @@
+// TODO: Document
 export interface AssetMetadata {
   name: string;
   title: string;
@@ -6,6 +7,7 @@ export interface AssetMetadata {
   tags?: string[];
 }
 
+// TODO: Document
 export interface Asset {
   stream: NodeJS.ReadableStream;
   size: number;

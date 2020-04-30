@@ -1,3 +1,4 @@
+// TODO: Document
 if (!('DEBUG' in process.env)) {
   process.env.TRACE = process.env.DEBUG = '0';
 }

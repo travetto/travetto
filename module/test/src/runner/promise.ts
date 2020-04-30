@@ -1,5 +1,6 @@
 const og = Promise;
 
+// TODO: Document
 function Wrapped(this: Promise<any>, ex: any) {
   const prom = new og(ex);
   this.then = prom.then.bind(prom);
@@ -16,6 +17,7 @@ Wrapped.all = Promise.all.bind(Promise);
 Wrapped.resolve = Promise.resolve.bind(Promise);
 Wrapped.reject = Promise.reject.bind(Promise);
 
+// TODO: Document
 export class PromiseCapture {
   static pending: Promise<any>[];
   static checker = (process as any).binding('util').getPromiseDetails;

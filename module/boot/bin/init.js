@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// TODO: Document
 function init() {
   const cwd = process.cwd();
   const root = !process.env.TRV_DEV ? '..' : // Standard

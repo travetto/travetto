@@ -16,6 +16,7 @@ interface AppCommand {
 let listHelper: Function;
 let apps: CachedAppConfig[];
 
+// TODO: Document
 function getAppUsage(app: CachedAppConfig) {
   let usage = app.name;
 
@@ -79,6 +80,7 @@ export async function setup() {
   }
 }
 
+// TODO: Document
 export function init() {
   return Util.program
     .command('run [application] [args...]')

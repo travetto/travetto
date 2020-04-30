@@ -2,6 +2,7 @@ import { ChildProcess } from 'child_process';
 
 import { Env } from '@travetto/base';
 
+// TODO: Document
 export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any, U extends { type: string } = V & { type: string }> {
 
   public proc: T;

@@ -8,9 +8,8 @@ import { SQLDialect } from '../../dialect';
 import { VisitStack } from '../../util';
 import { PostgreSQLConnection } from './connection';
 
-@Injectable({
-  target: SQLDialect
-})
+@Injectable({ target: SQLDialect })
+// TODO: Document
 export class PostgreSQLDialect extends SQLDialect {
 
   conn: PostgreSQLConnection;

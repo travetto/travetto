@@ -3,6 +3,7 @@ import { AppError } from '@travetto/base';
 import { AuthUtil } from './util';
 import { Principal, Identity } from './types';
 
+// TODO: Document
 export class AuthContext<
   U = any,
   I extends Identity = Identity,

@@ -1,10 +1,10 @@
-import { EnvUtil } from '@travetto/boot';
-
+// TODO: Document
 export const init = {
   key: 'test',
   before: ['compiler'],
   after: ['base'],
   action: async () => {
+    const { EnvUtil } = await import('@travetto/boot');
     const { Env, ScanApp } = await import('@travetto/base');
     if (Env.env === 'test') {
       // Allow test module to be searched

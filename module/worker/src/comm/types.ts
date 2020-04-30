@@ -1,5 +1,6 @@
 import { ExecutionOptions } from '@travetto/exec';
 
+// TODO: Document
 export interface ChildOptions extends ExecutionOptions {
   cwd?: string;
   env?: any;
@@ -12,6 +13,7 @@ export type Status = 'init' | 'release' | 'destroy';
 
 export type StatusChangeHandler = (status: Status) => any;
 
+// TODO: Document
 export interface SpawnConfig {
   command: string;
   args?: string[];

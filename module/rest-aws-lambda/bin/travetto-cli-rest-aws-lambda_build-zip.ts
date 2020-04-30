@@ -8,6 +8,7 @@ import * as commander from 'commander';
 import { Util } from '@travetto/cli/src/util';
 import { FsUtil } from '@travetto/boot/src/fs-util';
 
+// TODO: Document
 export function init() {
   return Util.program
     .command('rest-aws-lambda:build-zip')

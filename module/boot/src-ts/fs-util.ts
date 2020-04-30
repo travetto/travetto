@@ -23,6 +23,8 @@ function execCmd(sync: boolean, cmd: string, ignoreErrors = false) {
 /**
  * Standard utils for interacting with the file system
  */
+// TODO: Convert to static class
+// TODO: Document
 class $FsUtil {
 
   cwd: string;

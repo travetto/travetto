@@ -3,7 +3,6 @@ import { Config } from '@travetto/config';
 
 import { Request, Response, RouteConfig } from '../types';
 import { RestInterceptor } from './interceptor';
-import { CorsInterceptor } from './cors';
 import { ControllerConfig } from '../registry/types';
 
 interface RouteCheck {
@@ -12,6 +11,7 @@ interface RouteCheck {
 }
 
 @Config('rest.logRoutes')
+// TODO: Document
 export class RestLogRoutesConfig {
   allow: string[] = [];
   deny: string[] = [];
@@ -37,6 +37,7 @@ export class RestLogRoutesConfig {
 }
 
 @Injectable()
+// TODO: Document
 export class LoggingInterceptor extends RestInterceptor {
 
   static matchRoute(controller: Partial<ControllerConfig>, route: RouteConfig, paths: RouteCheck[]) {

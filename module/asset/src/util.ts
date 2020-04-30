@@ -12,6 +12,7 @@ const fsOpen = util.promisify(fs.open);
 const fsRead = util.promisify(fs.read);
 const fsRename = util.promisify(fs.rename);
 
+// TODO: Document
 export class AssetUtil {
 
   static async hashFile(pth: string) {

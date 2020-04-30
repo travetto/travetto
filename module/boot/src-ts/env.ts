@@ -1,6 +1,7 @@
 /**
  * Basic utils for reading environment variables
  */
+// TODO: Document
 export class EnvUtil {
   static get(k: string, def: string): string;
   static get(k: string, def?: string): string | undefined;

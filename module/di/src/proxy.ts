@@ -1,4 +1,5 @@
 // ignoring typing constraints on proxyhandler requiring an object
+// TODO: Document
 export class RetargettingHandler<T extends any> implements ProxyHandler<any> {
   constructor(public target: T) { }
 

@@ -2,6 +2,7 @@ import { Registry } from '../registry';
 import { ClassSource } from '../source/class-source';
 import { Class, ChangeEvent } from '../types';
 
+// TODO: Document
 class $RootRegistry extends Registry {
   constructor() {
     super(new ClassSource());

@@ -1,4 +1,4 @@
-import { Identity, AuthContext } from '@travetto/auth';
+import { AuthContext } from '@travetto/auth';
 
 declare global {
   namespace Travetto {

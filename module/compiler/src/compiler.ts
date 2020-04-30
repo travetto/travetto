@@ -8,6 +8,7 @@ import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp } from '@
 
 import { SourceManager } from './source';
 
+// TODO: Document
 class $Compiler extends EventEmitter {
 
   private sourceManager: SourceManager;
