@@ -2,6 +2,7 @@ import { Class } from '@travetto/registry';
 
 export type ClassTarget<T> = Class<T> | Function;
 
+// TODO: Document
 export interface Dependency<T = any> {
   target: ClassTarget<T>;
   qualifier: symbol;
@@ -10,6 +11,7 @@ export interface Dependency<T = any> {
   original?: symbol | object;
 }
 
+// TODO: Document
 export interface InjectableConfig<T = any> extends Dependency<T> {
   class: Class<T>;
   factory: (...args: any[]) => T;
@@ -19,6 +21,7 @@ export interface InjectableConfig<T = any> extends Dependency<T> {
   };
 }
 
+// TODO: Document
 export interface InjectableFactoryConfig<T> {
   target: Class<T>;
   src: Class<T>;

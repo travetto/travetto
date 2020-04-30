@@ -6,6 +6,7 @@ import { RestInterceptor } from './interceptor';
 import { SerializeInterceptor } from './serialize';
 
 @Config('rest.cors')
+// TODO: Document
 export class RestCorsConfig {
   active: boolean = false;
   origins?: string[];
@@ -15,6 +16,7 @@ export class RestCorsConfig {
 }
 
 @Injectable()
+// TODO: Document
 export class CorsInterceptor extends RestInterceptor {
 
   @Inject()

@@ -6,6 +6,7 @@ import { TextNode } from './type/node';
 const DASH = '-';
 const COLON = ':';
 
+// TODO: Document
 export class Parser {
 
   private static startList(state: State, indent: number) {

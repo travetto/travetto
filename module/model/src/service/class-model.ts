@@ -6,6 +6,7 @@ import { ModelCore } from '../model/core';
 import { ModelService } from './model';
 import { ValidStringFields } from './source';
 
+// TODO: Document
 export abstract class ClassModelService<T extends ModelCore> {
 
   constructor(private service: ModelService) { }

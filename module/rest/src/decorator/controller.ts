@@ -6,6 +6,7 @@ import { ControllerDecorator } from '../registry/types';
  * @augments trv/di/Injectable
  * @augments trv/rest/Controller
  */
+// TODO: Document
 export function Controller(path = '') {
   return function (target: Class) {
     ControllerRegistry.registerPending(target, {

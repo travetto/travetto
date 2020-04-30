@@ -3,6 +3,7 @@ import * as path from 'path';
 
 import { FsUtil } from '@travetto/boot';
 
+// TODO: Document
 export class TemplateUtil {
 
   static async compileSass(file: string, roots: string[]) {

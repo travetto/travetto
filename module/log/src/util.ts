@@ -1,5 +1,6 @@
 import { EnvUtil } from '@travetto/boot';
 
+// TODO: Document
 export class LogUtil {
 
   static truth = () => true;

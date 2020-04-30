@@ -8,6 +8,7 @@ import {
 // Local app support transformer, as well as library support transformer
 const TRANSFORMER_RE = /support\/transformer[.](.*?)[.]ts$/;
 
+// TODO: Document
 export class TransformerManager {
 
   transformers: ts.CustomTransformers = {};

@@ -8,6 +8,7 @@ function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
 /**
  * Standard file cache, with output file name normalization and truncation
  */
+// TODO: Document
 export class FileCache {
   private cache = new Map<string, fs.Stats>();
 

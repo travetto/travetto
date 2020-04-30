@@ -4,6 +4,7 @@ import { Query, PageableModelQuery } from '../model/query';
 import { ModelCore } from '../model/core';
 import { ValidStringFields } from '../service/source';
 
+// TODO: Document
 export class ModelUtil {
   static verifyGetSingleCounts<T>(cls: Class<T>, res?: T[], failOnMany = true) {
     res = res ?? [];

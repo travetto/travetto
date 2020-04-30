@@ -2,6 +2,7 @@ import { MetadataRegistry, Class } from '@travetto/registry';
 import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';
 
+// TODO: Document
 class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
 
   getValidClasses() {

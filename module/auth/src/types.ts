@@ -1,3 +1,4 @@
+// TODO: Document
 export interface Principal {
   id: string;
   permissions: string[];
@@ -5,6 +6,7 @@ export interface Principal {
   expires?: Date;
 }
 
+// TODO: Document
 export interface Identity extends Principal {
   provider: string;
 }

@@ -44,11 +44,13 @@ const ColorMapping = {
 
 type Color = keyof typeof ColorMapping;
 
+// TODO: Document
 export const ColorSupport = (Object.keys(ColorMapping) as Color[]).reduce((acc, k) => {
   acc[k] = v => colorizeAny(ColorMapping[k], v);
   return acc;
 }, {} as Record<Color, (inp: any) => string>);
 
+// TODO: Document
 export function color(values: TemplateStringsArray, ...keys: (Partial<Record<Color, any>> | string)[]) {
   if (keys.length === 0) {
     return values[0];

@@ -1,6 +1,7 @@
 import { Block, ListBlock, MapBlock, TextBlock } from './type/block';
 import { Node, TextNode } from './type/node';
 
+// TODO: Document
 export class State {
   blocks: Block[];
   top: Block;

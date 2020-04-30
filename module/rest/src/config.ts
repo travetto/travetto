@@ -6,6 +6,7 @@ import { Env, AppError, ResourceManager } from '@travetto/base';
 import { SSLUtil } from './util/ssl';
 
 @Config('rest')
+// TODO: Document
 export class RestConfig {
   serve = true;
   port = 3000;

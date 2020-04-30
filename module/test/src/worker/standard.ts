@@ -1,6 +1,7 @@
 import { PhaseManager } from '@travetto/base';
 import { State } from '../runner/types';
 
+// TODO: Document
 export class StandardWorker {
   static async run(opts: State) {
     try {

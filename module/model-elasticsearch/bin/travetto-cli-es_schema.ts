@@ -2,8 +2,8 @@ import * as commander from 'commander';
 
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
 
+// TODO: Document
 export function init() {
-
   return Util.program
     .command('es:schema')
     .option('-a, --app [app]', 'Application to export, (default: .)')

@@ -4,6 +4,7 @@ import { ParentCommChannel, CommUtil, WorkUtil } from '@travetto/worker';
 import { Events, RunEvent } from './types';
 import { Consumer } from '../model/consumer';
 
+// TODO: Document
 export function buildWorkManager(consumer: Consumer) {
   return WorkUtil.spawnedWorker<string>({
     command: `${__dirname}/../../bin/test-worker`,

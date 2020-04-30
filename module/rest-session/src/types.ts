@@ -3,11 +3,13 @@ import { ContextProvider } from '@travetto/rest';
 import { CacheEntry } from '@travetto/cache';
 
 @ContextProvider((c, req) => req!.session.data)
+// TODO: Document
 export class SessionData {
   [key: string]: any;
 }
 
 @ContextProvider((c, req) => req!.session)
+// TODO: Document
 export class Session<T = any> implements CacheEntry {
   private expiresAtLoaded: number | undefined;
   private hash: number;

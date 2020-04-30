@@ -8,6 +8,7 @@ const CTX_SYM = Symbol('trv_ctx');
 
 @Injectable()
 @ContextProvider(AuthContext, (c, req) => req!.auth)
+// TODO: Document
 export class AuthContextService {
   @Inject()
   context?: AsyncContext;

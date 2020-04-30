@@ -9,6 +9,7 @@ import { RouteUtil } from './util/route';
 import { RestInterceptor } from './interceptor/interceptor';
 import { ControllerRegistry } from './registry/registry';
 
+// TODO: Document
 export abstract class RestApp<T = any> {
 
   static GLOBAL = '___GLOBAL___';

@@ -1,6 +1,7 @@
 import { CommandService } from '@travetto/exec';
 import { SystemUtil } from '@travetto/base';
 
+// TODO: Document
 export interface ImageOptions {
   h?: number;
   w?: number;
@@ -9,6 +10,7 @@ export interface ImageOptions {
 
 type ImageType = NodeJS.ReadableStream | Buffer | string;
 
+// TODO: Document
 export class ImageUtil {
 
   static converter = new CommandService({

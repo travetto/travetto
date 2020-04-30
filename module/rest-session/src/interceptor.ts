@@ -4,6 +4,7 @@ import { CookiesInterceptor, RestInterceptor, Request, Response } from '@travett
 import { RestSessionService } from './service';
 
 @Injectable()
+// TODO: Document
 export class SessionInterceptor extends RestInterceptor {
 
   after = CookiesInterceptor;

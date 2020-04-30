@@ -6,6 +6,7 @@ import { RestInterceptor } from './interceptor';
 import { CorsInterceptor } from './cors';
 
 @Injectable()
+// TODO: Document
 export class GetCacheInterceptor extends RestInterceptor {
 
   after = CorsInterceptor;

@@ -18,6 +18,7 @@ type RawExecArgs = ExecArgs & { payload?: any };
 
 type ResponseHandler<T> = (msg: http.IncomingMessage) => Promise<T>;
 
+// TODO: Document
 export class HttpRequest {
 
   private static buildError(config: {

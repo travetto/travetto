@@ -8,6 +8,7 @@ interface AutoState {
   [hasConfig]?: boolean;
 }
 
+// TODO: Document
 export class ConfigTransformer {
 
   @OnClass('trv/config/Config')

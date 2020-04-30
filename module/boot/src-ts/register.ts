@@ -26,6 +26,7 @@ declare const global: {
 /**
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
+// TODO: Document
 export class RegisterUtil {
   private static ogModuleLoad = Module._load!.bind(Module);
 

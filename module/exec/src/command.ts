@@ -4,6 +4,7 @@ import { Exec } from './exec';
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';
 
+// TODO: Document
 export class CommandService {
 
   private static hasDocker: boolean;

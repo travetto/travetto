@@ -3,6 +3,7 @@ import { ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('mail.template')
+// TODO: Document
 export class MailTemplateConfig {
   scssRoots: string[];
 

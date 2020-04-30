@@ -3,6 +3,7 @@ import { Env } from './env';
 /**
  * General tools for manipulating stack traces
  */
+// TODO: Document
 export class Stacktrace {
 
   private static filters: string[] = [];

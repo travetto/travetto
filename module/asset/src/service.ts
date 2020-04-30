@@ -6,6 +6,7 @@ import { AssetSource } from './source';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './strategy';
 
 @Injectable()
+// TODO: Document
 export class AssetService {
 
   constructor(

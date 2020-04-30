@@ -4,6 +4,7 @@ import { AppInfo } from '@travetto/base';
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
 
 @Config('api.info')
+// TODO: Document
 export class ApiInfoConfig {
   contact: ContactObject = AppInfo.AUTHOR;
   description: string = AppInfo.DESCRIPTION;
@@ -14,12 +15,14 @@ export class ApiInfoConfig {
 }
 
 @Config('api.host')
+// TODO: Document
 export class ApiHostConfig {
   servers?: ServerObject[];
   openapi = '3.0.1';
 }
 
 @Config('api.spec')
+// TODO: Document
 export class ApiSpecConfig {
   output: string = 'openapi.json';
   skipRoutes: boolean = false;

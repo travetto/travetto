@@ -5,6 +5,7 @@ import { SuiteConfig } from '../model/suite';
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 
 /** @augments trv/test/Suite */
+// TODO: Document
 export function Suite(): ClassDecorator;
 export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;
@@ -26,6 +27,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
   }) as ClassDecorator;
 }
 
+// TODO: Document
 function listener(phase: SuitePhase) {
   return (inst: any, prop: string, descriptor: PropertyDescriptor) => {
     TestRegistry.registerPendingListener(inst.constructor, descriptor.value, phase);
@@ -33,6 +35,7 @@ function listener(phase: SuitePhase) {
   };
 }
 
+// TODO: Document
 export const BeforeAll = listener.bind(null, 'beforeAll');
 export const BeforeEach = listener.bind(null, 'beforeEach');
 export const AfterAll = listener.bind(null, 'afterAll');

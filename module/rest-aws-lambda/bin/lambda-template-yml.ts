@@ -1,6 +1,7 @@
 import { AppInfo } from '@travetto/base/src/app-info';
 import { ControllerConfig } from '@travetto/rest';
 
+// TODO: Document
 export function template(controllers: ControllerConfig[], lambdaDir?: string) {
   return `
 AWSTemplateFormatVersion: '2010-09-09'

@@ -3,6 +3,7 @@ import * as child_process from 'child_process';
 import { AppError } from '@travetto/base';
 import { ExecutionOptions, ExecutionResult, ExecutionState } from './types';
 
+// TODO: Document
 export class Exec {
 
   static enhanceProcess(p: child_process.ChildProcess, options: ExecutionOptions, cmd: string) {

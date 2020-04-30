@@ -9,6 +9,7 @@ import { Response, Request } from '../types';
 import { isRenderable } from '../response/renderable';
 
 @Injectable()
+// TODO: Document
 export class SerializeInterceptor extends RestInterceptor {
 
   static setContentTypeIfUndefined(res: Response, type: string) {

@@ -1,9 +1,11 @@
 import * as fs from 'fs';
 
+// TODO: Document
 export interface FileOutputOpts {
   file: string;
 }
 
+// TODO: Document
 export class FileOutput {
   stream: fs.WriteStream;
 

@@ -13,6 +13,7 @@ interface CacheState {
 const CACHE_KEY = 'trv/cache/Cache';
 const EVICT_KEY = 'trv/cache/Evict';
 
+// TODO: Document
 export class CacheTransformer {
 
   static initState(state: TransformerState & CacheState) {

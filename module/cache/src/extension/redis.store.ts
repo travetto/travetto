@@ -5,6 +5,7 @@ import { CacheEntry } from '../types';
 import { CacheStore } from '../store/core';
 import { CacheStoreUtil } from '../store/util';
 
+// TODO: Document
 export class RedisCacheStore extends CacheStore {
 
   cl: redis.RedisClient;

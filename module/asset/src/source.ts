@@ -1,5 +1,6 @@
 import { Asset } from './types';
 
+// TODO: Document
 export abstract class AssetSource {
   abstract write(asset: Asset, stream: NodeJS.ReadableStream): Promise<void>;
   abstract read(path: string): Promise<NodeJS.ReadableStream>;

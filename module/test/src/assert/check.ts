@@ -9,6 +9,7 @@ import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types';
 
 const { AssertionError } = assert;
 
+// TODO: Document
 export class AssertCheck {
   static check(filename: string, text: string, fn: string, positive: boolean, ...args: any[]) {
     const assertion = AssertCapture.buildAssertion(filename, text, ASSERT_FN_OPERATOR[fn]);

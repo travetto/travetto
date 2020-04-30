@@ -2,6 +2,7 @@ import { Class } from '@travetto/registry';
 
 import { SortClause } from './model/query';
 
+// TODO: Document
 export interface IndexConfig<T extends any> {
   fields: SortClause<T>[];
   options?: {
@@ -9,6 +10,7 @@ export interface IndexConfig<T extends any> {
   };
 }
 
+// TODO: Document
 export class ModelOptions<T> {
   class: Class<T>;
   collection?: string;

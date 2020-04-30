@@ -2,6 +2,7 @@ import { Class } from '@travetto/registry/src/types';
 
 export type ThrowableError = string | RegExp | Function;
 
+// TODO: Document
 export interface TestConfig {
   class: Class<any>;
   classId: string;
@@ -14,6 +15,7 @@ export interface TestConfig {
   timeout?: number;
 }
 
+// TODO: Document
 export interface Assertion {
   classId: string;
   methodName: string;
@@ -27,6 +29,7 @@ export interface Assertion {
   text: string;
 }
 
+// TODO: Document
 export interface TestResult {
   status: 'passed' | 'skipped' | 'failed';
   error?: Error;

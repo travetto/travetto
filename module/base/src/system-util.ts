@@ -28,6 +28,7 @@ function toList<T>(items: T | T[] | Set<T> | undefined) {
 /**
  * Set of internal system utilities
  */
+// TODO: Document
 export class SystemUtil {
 
   private static modCache = new Map<string, string>();

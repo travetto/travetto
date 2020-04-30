@@ -18,12 +18,12 @@ declare global {
   }
 }
 
-
 const EXTRACTORS: Record<'body' | 'query', ExtractFn> = {
   body: (c, r) => r.body,
   query: (c, r) => r[QUERY_SCHEMA] && r[QUERY_SCHEMA][c.name!]
 };
 
+// TODO: Document
 export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: string) {
   if (!Util.isPlainObject(obj)) {
     throw new AppError(`Object is missing or wrong type: ${obj}`, 'data');
@@ -44,6 +44,7 @@ export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: strin
   return bound;
 }
 
+// TODO: Document
 export function schemaParamConfig(location: 'body' | 'query', config: Partial<ParamConfig> & { view?: string, key?: string } = {}): ParamConfig {
   if (!config.type) {
     throw new AppError('A schema type is required for binding');

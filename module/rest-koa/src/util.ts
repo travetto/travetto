@@ -4,6 +4,7 @@ import { RestAppUtil } from '@travetto/rest';
 const TRV_RES = Symbol('TRV_RES');
 const TRV_REQ = Symbol('TRV_REQ');
 
+// TODO: Document
 export class KoaAppUtil {
   static getRequest(ctx: koa.ParameterizedContext) {
     if (!(ctx as any)[TRV_REQ]) {

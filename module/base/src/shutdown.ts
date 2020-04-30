@@ -10,6 +10,8 @@ type Listener = { name: string, handler: Function, final?: boolean };
 /**
  * Shutdown manager, allowing for hooks into the shutdown process
  */
+// TODO: Document
+// TODO: Expose globally
 export class Shutdown {
   private static listeners: Listener[] = [];
   private static shutdownCode = -1;

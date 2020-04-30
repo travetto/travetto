@@ -2,6 +2,7 @@ import { Env } from '../src/env';
 import { Shutdown } from '../src/shutdown';
 import { Stacktrace } from '../src/stacktrace';
 
+// TODO: Document
 export const init = {
   key: 'base',
   action: () => {

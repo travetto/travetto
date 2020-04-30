@@ -1,6 +1,7 @@
 import { Config } from '@travetto/config';
 
 @Config('mongo.asset')
+// TODO: Document
 export class MongoAssetConfig {
   hosts = 'localhost';
   namespace = 'app';

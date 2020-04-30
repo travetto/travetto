@@ -12,6 +12,7 @@ const SESS = Symbol('sess');
 export const SESSION_CACHE = Symbol('SESSION_CACHE');
 
 @Injectable()
+// TODO: Document
 export class RestSessionService {
 
   @Inject()

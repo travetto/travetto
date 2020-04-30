@@ -1,5 +1,6 @@
 import * as ts from 'typescript';
 
+// TODO: Document
 export type DecoratorMeta = {
   dec: ts.Decorator;
   ident: ts.Identifier;

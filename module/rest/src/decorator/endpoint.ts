@@ -3,6 +3,7 @@ import { Method, PathType, RouteHandler } from '../types';
 import { ControllerRegistry } from '../registry/registry';
 import { EndpointConfig, EndpointIOType, EndpointDecorator } from '../registry/types';
 
+// TODO: Document
 function Endpoint(method: Method, path: PathType = '/', extra: Partial<EndpointConfig> = {}) {
   return function (target: any, prop: symbol | string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
     const ret = ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { method, path, ...extra });
@@ -26,11 +27,13 @@ export const Head = (path?: PathType) => Endpoint('head', path);
 /** @augments trv/rest/Endpoint */
 export const Options = (path?: PathType) => Endpoint('options', path);
 
+// TODO: Document
 export const ResponseType = (responseType: EndpointIOType) =>
   function (target: any, property: string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
     return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { responseType });
   } as EndpointDecorator;
 
+// TODO: Document
 export const RequestType = (requestType: EndpointIOType) =>
   function (target: any, property: string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
     return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { requestType });

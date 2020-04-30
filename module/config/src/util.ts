@@ -8,6 +8,7 @@ export type Nested = { [key: string]: Prim | Nested | Nested[] };
 
 const cmp = <T>(a: T, b: T, v: T, d: 1 | -1) => a === b ? 0 : (a === v ? -1 * d : (b === v ? 1 * d : 0));
 
+// TODO: Document
 export class ConfigUtil {
 
   static fetchOrderedConfigs() {

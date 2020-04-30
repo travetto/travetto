@@ -17,6 +17,7 @@ export type AppDecorator = Partial<ApplicationConfig> & {
  * @augments trv/app/Application
  * @augments trv/di/Injectable
  */
+// TODO: Document
 export function Application(
   name: string,
   config?: AppDecorator,

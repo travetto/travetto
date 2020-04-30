@@ -32,6 +32,7 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
 }
 
 // eslint-disable no-invalid-this
+// TODO: Document
 export abstract class SQLDialect implements DialectState {
   KEY_LEN = 64;
   DEFAULT_STRING_LEN = 1024;

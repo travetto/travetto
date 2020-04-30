@@ -6,6 +6,7 @@ import {
 
 const INJECTABLE_MOD = require.resolve('../src/decorator');
 
+// TODO: Document
 export class InjectableTransformer {
 
   static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {

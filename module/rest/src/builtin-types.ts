@@ -1,3 +1,4 @@
+// TODO: Document
 (Map as any).prototype.toJSON = function (this: Map<any, any>) {
   return [...this.entries()].reduce((acc, [k, v]) => {
     acc[k] = v;

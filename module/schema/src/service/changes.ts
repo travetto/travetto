@@ -32,6 +32,7 @@ export interface SchemaChangeEvent {
 export const SCHEMA_CHANGE_EVENT = 'schema:change';
 export const FIELD_CHANGE_EVENT = 'field:change';
 
+// TODO: Document
 export class $SchemaChangeListener extends EventEmitter {
 
   private mapping = new Map<string, Map<string, FieldMapping>>();

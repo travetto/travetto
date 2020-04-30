@@ -3,6 +3,7 @@ import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 
 @Config('s3.asset')
+// TODO: Document
 export class S3AssetConfig {
   region = 'us-east-1';
   namespace = '';

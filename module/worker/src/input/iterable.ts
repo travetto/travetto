@@ -2,6 +2,7 @@ import { InputSource } from './types';
 
 type Itr<T> = Iterator<T> | AsyncIterator<T>;
 
+// TODO: Document
 export class IterableInputSource<X> implements InputSource<X> {
 
   private src: Itr<X>;

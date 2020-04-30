@@ -1,3 +1,4 @@
+// TODO: Document
 export const ASSERT_FN_OPERATOR: Record<string, string> = {
   equal: '==',
   notEqual: '!=',
@@ -9,8 +10,10 @@ export const ASSERT_FN_OPERATOR: Record<string, string> = {
   lessThan: '<'
 };
 
+// TODO: Document
 export const DEEP_LITERAL_TYPES = new Set(['Set', 'Map', 'Array', 'String', 'Number', 'Object', 'Boolean']);
 
+// TODO: Document
 export const DEEP_EQUALS_MAPPING: Record<string, string> = {
   equal: 'deepEqual',
   notEqual: 'notDeepEqual',
@@ -18,6 +21,7 @@ export const DEEP_EQUALS_MAPPING: Record<string, string> = {
   notStrictEqual: 'notDeepStrictEqual'
 };
 
+// TODO: Document
 export const OP_MAPPING: Record<string, string> = {
   ok: '{actual} {state} {expected}',
   in: '{actual} {state} be in {expected}',
@@ -42,6 +46,7 @@ export const OP_MAPPING: Record<string, string> = {
   lessThan: '{actual} {state} be less than {expected}'
 };
 
+// TODO: Document
 export const OPTOKEN_ASSERT = {
   InKeyword: 'in',
   EqualsEqualsToken: 'equal',

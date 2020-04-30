@@ -4,6 +4,7 @@ import { ModelCore } from './core';
 import { ModelRegistry } from '../registry';
 
 @Schema()
+// TODO: Document
 export abstract class BaseModel implements ModelCore {
 
   id?: string;

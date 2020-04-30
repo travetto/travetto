@@ -1,3 +1,4 @@
+// TODO: Document
 export class SSLUtil {
 
   static async generateKeyPair(subj = { C: 'US', ST: 'CA', O: 'TRAVETTO', OU: 'REST', CN: 'DEV' }) {

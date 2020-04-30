@@ -1,5 +1,6 @@
 import { ConsolePayload } from '@travetto/base';
 
+// TODO: Document
 export const LogLevels = {
   trace: 0,
   debug: 1,
@@ -13,6 +14,7 @@ export type LogListener = (e: LogEvent) => void;
 
 export type LogLevel = ConsolePayload['level'];
 
+// TODO: Document
 export interface LogEvent extends ConsolePayload {
   timestamp: number;
   prefix?: string;
@@ -21,14 +23,17 @@ export interface LogEvent extends ConsolePayload {
   meta?: any;
 }
 
+// TODO: Document
 export interface OutputHandler {
   output(msg: string): void;
 }
 
+// TODO: Document
 export interface Formatter {
   format(e: LogEvent): string;
 }
 
+// TODO: Document
 export type LogStream = {
   formatter: Formatter;
   stdout: OutputHandler;

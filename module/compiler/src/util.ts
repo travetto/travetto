@@ -1,6 +1,7 @@
 import { ScanApp } from '@travetto/base';
 import { AppCache } from '@travetto/boot';
 
+// TODO: Document
 export class CompilerUtil {
 
   /**

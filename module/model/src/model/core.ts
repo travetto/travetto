@@ -1,3 +1,4 @@
+// TODO: Document
 export interface ModelCore {
   id?: string;
   type?: string;

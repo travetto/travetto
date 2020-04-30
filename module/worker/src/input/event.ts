@@ -1,5 +1,6 @@
 import { InputSource } from './types';
 
+// TODO: Document
 export class EventInputSource<X> implements InputSource<X> {
   static resolvablePromise<T = void>() {
     let ops: { resolve: (v: T) => void, reject: (err: Error) => void };

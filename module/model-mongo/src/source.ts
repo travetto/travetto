@@ -21,6 +21,7 @@ import { MongoModelConfig } from './config';
 import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
 @Injectable()
+// TODO: Document
 export class MongoModelSource extends ModelSource {
 
   private client: mongo.MongoClient;

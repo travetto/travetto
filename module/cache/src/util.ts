@@ -1,5 +1,6 @@
 import { CacheStoreType, CacheConfig, CoreCacheConfig } from './types';
 
+// TODO: Document
 export class CacheUtil {
   static generateKey(config: CoreCacheConfig, cache: CacheStoreType, params: any[]) {
     const input = config.params?.(params) ?? params;

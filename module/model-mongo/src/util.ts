@@ -17,6 +17,7 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
   rad: 1
 };
 
+// TODO: Document
 export class MongoUtil {
 
   static has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;

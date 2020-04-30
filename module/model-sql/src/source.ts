@@ -24,6 +24,7 @@ import { SQLDialect } from './dialect';
  * as needed.
  */
 @Injectable()
+// TODO: Document
 export class SQLModelSource extends ModelSource {
 
   constructor(

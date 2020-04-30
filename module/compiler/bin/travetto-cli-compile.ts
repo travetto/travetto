@@ -23,6 +23,7 @@ async function rewriteRuntimeDir(runtimeDir: string = process.cwd()) {
   }
 }
 
+// TODO: Document
 export function init() {
 
   return Util.program

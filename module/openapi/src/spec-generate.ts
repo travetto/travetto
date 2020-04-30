@@ -20,6 +20,7 @@ interface Tag {
 
 type PartialSpec = Required<Pick<OpenAPIObject, 'tags' | 'components' | 'paths'>> & { components: { schemas: SchemasObject } };
 
+// TODO: Document
 export class SpecGenerateUtil {
 
   static schemaToDotParams(state: PartialSpec, location: 'query' | 'header', cls: Class, view?: string, prefix: string = ''): ParameterObject[] {

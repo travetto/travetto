@@ -2,6 +2,7 @@ import { CullableCacheStore } from './cullable';
 import { CacheEntry } from '../types';
 import { CacheStoreUtil } from './util';
 
+// TODO: Document
 export class MemoryCacheStore<T extends CacheEntry = CacheEntry> extends CullableCacheStore<T> {
 
   store = new Map<string, { expiresAt?: number, entry: string }>();

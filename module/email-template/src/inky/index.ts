@@ -1,5 +1,6 @@
 import { ComponentFactory } from './factory';
 
+// TODO: Document
 export class Inky {
   static defaultFactory = new ComponentFactory();
 

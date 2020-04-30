@@ -6,6 +6,7 @@ import { ConfigSource } from '@travetto/config';
 import { AsyncContext } from '../service';
 
 @Injectable()
+// TODO: Document
 export class AsyncContextInterceptor extends RestInterceptor {
 
   after = GetCacheInterceptor;

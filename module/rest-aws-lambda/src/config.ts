@@ -1,6 +1,7 @@
 import { Config } from '@travetto/config';
 
 @Config('rest.aws')
+// TODO: Document
 export class AwsLambdaConfig {
   binaryMimeTypes: [
     'application/javascript',

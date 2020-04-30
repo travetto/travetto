@@ -4,6 +4,7 @@ import { ViewFieldsConfig } from '../service/types';
 import { ValidatorFn } from '../validate/types';
 
 /** @augments trv/schema/Schema */
+// TODO: Document
 export function Schema(auto: boolean = true): ClassDecorator { // Auto is used during compilation
   return (<T>(target: Class<T>): Class<T> => {
     SchemaRegistry.getOrCreatePending(target);
@@ -11,12 +12,14 @@ export function Schema(auto: boolean = true): ClassDecorator { // Auto is used d
   }) as any;
 }
 
+// TODO: Document
 export function Validator<T>(fn: ValidatorFn<T, string>) {
   return (target: Class<T>) => {
     SchemaRegistry.getOrCreatePending(target).validators!.push(fn);
   };
 }
 
+// TODO: Document
 export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
   return (target: Class<Partial<T>>) => {
     SchemaRegistry.registerPendingView(target, name, fields);

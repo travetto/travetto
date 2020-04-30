@@ -30,6 +30,8 @@ function enumKeys(c: any): string[] {
     return Object.values(c).filter((x: any) => typeof x === 'string') as string[];
   }
 }
+
+// TODO: Document
 export function Field(type: ClassList, config?: Partial<FieldConfig>) {
   return (f: any, p: string) => {
     SchemaRegistry.registerPendingFieldConfig(f.constructor, p, type);
@@ -38,30 +40,49 @@ export function Field(type: ClassList, config?: Partial<FieldConfig>) {
     }
   };
 }
+// TODO: Document
 export const Alias = (...aliases: string[]) => prop({ aliases });
+// TODO: Document
 export const Required = (active = true, message?: string) => prop({ required: { active, message } });
+// TODO: Document
 export const Enum = ((vals: string[] | any, message?: string) => {
   const values = enumKeys(vals);
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
   return stringNumberProp({ enum: { values, message } });
 });
 
+// TODO: Document
 export const Trimmed = () => stringArrStringProp({ trim: true });
+// TODO: Document
 export const Text = () => stringArrStringProp({ specifier: 'text' });
+// TODO: Document
 export const LongText = () => stringArrStringProp({ specifier: 'text-long' });
 
+// TODO: Document
 export const Match = (re: RegExp, message?: string) => stringArrStringProp({ match: { re, message } });
+// TODO: Document
 export const MinLength = (n: number, message?: string) => stringArrProp({ minlength: { n, message }, ...(n === 0 ? { required: { active: false } } : {}) });
+// TODO: Document
 export const MaxLength = (n: number, message?: string) => stringArrProp({ maxlength: { n, message } });
+// TODO: Document
 export const Min = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ min: { n, message } });
+// TODO: Document
 export const Max = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ max: { n, message } });
+// TODO: Document
 export const Email = (message?: string) => Match(CommonRegExp.email, message);
+// TODO: Document
 export const Telephone = (message?: string) => Match(CommonRegExp.telephone, message);
+// TODO: Document
 export const Url = (message?: string) => Match(CommonRegExp.url, message);
+// TODO: Document
 export const Precision = (digits: number, decimals?: number) => numberProp({ precision: [digits, decimals] });
+// TODO: Document
 export const Integer = () => Precision(0);
+// TODO: Document
 export const Float = () => Precision(10, 7);
+// TODO: Document
 export const Long = () => Precision(19, 0);
+// TODO: Document
 export const Currency = () => Precision(13, 2);
 
 // For Auto schemas

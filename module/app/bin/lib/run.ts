@@ -4,6 +4,8 @@ import { AppListUtil } from './app-list';
 import { handleFailure } from './util';
 import { ApplicationParameter } from '../../src/types';
 
+// TODO: Move methods into code base
+// TODO: Document
 export class RunUtil {
 
   static getParamType(config: ApplicationParameter) {

@@ -36,6 +36,7 @@ function wrap(target: Console, enrich: boolean) {
 /**
  * Provides a general abstraction against the console.* methods to allow for easier capture and redirection
  */
+// TODO: Document
 class $ConsoleManager {
   private states: ConsoleState[] = [];
   private state: ConsoleState;

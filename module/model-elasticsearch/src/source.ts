@@ -43,6 +43,7 @@ interface SearchResponse<T> {
 }
 
 @Injectable()
+// TODO: Document
 export class ElasticsearchModelSource extends ModelSource {
 
   private indexToAlias: Map<string, string> = new Map();

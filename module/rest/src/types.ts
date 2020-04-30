@@ -12,6 +12,7 @@ export type RouteHandler<T = any> = (...args: any[]) => Promise<T> | T | void;
 
 export type Filter<T = any> = (req: Request, res: Response) => Promise<T> | T | void;
 
+// TODO: Document
 export interface ParamConfig {
   name?: string;
   description?: string;
@@ -24,6 +25,7 @@ export interface ParamConfig {
   extract(config: ParamConfig, req?: Request, res?: Response): any;
 }
 
+// TODO: Document
 export interface RouteConfig {
   instance?: any;
   method: Method;

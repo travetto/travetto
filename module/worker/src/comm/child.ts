@@ -1,6 +1,7 @@
 import { IdleManager } from '../idle';
 import { ProcessCommChannel } from './channel';
 
+// TODO: Document
 export class ChildCommChannel<U = any> extends ProcessCommChannel<NodeJS.Process, U> {
   idle: IdleManager;
 

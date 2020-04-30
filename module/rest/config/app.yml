@@ -1,4 +1,0 @@
----
-entry:
-  '@travetto/rest': 
-    - '@travetto/rest/src/entrypoint'

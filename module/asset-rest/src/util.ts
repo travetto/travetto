@@ -13,6 +13,8 @@ import { RestAssetConfig } from './config';
 
 type AssetMap = Record<string, Asset>;
 
+// TODO: Document
+// TODO: Cleanup
 export class AssetRestUtil {
   static readTypeArr(arr?: string[] | string) {
     return (Array.isArray(arr) ? arr : (arr ?? '').split(',')).filter(x => !!x);

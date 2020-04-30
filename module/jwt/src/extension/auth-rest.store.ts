@@ -6,6 +6,7 @@ import { Response, Request } from '@travetto/rest';
 import { sign } from '../sign';
 import { verify } from '../verify';
 
+// TODO: Document
 export class JWTAuthContextStore extends AuthContextEncoder {
 
   signingKey: string;

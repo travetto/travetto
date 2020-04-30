@@ -4,6 +4,7 @@ import { SuiteConfig, SuiteResult } from './suite';
 export type EventEntity = 'test' | 'suite' | 'assertion';
 export type EventPhase = 'before' | 'after';
 
+// TODO: Document
 export type TestEvent =
   { type: 'assertion', phase: 'after', assertion: Assertion } |
   { type: 'test', phase: 'before', test: TestConfig } |

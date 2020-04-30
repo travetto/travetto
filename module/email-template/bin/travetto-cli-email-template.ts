@@ -1,6 +1,7 @@
 import * as commander from 'commander';
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
 
+// TODO: Document
 export function init() {
   return Util.program.command('email-template').action(async (cmd: commander.Command) => {
     const { Server } = await import('@travetto/cli/src/http');
@@ -17,6 +18,7 @@ export function init() {
   });
 }
 
+// TODO: Document
 export function complete(c: CompletionConfig) {
   c.all.push('email-template');
 }

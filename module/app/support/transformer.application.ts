@@ -4,6 +4,7 @@ import {
   TransformUtil, TransformerState, DecoratorMeta, res, OnClass
 } from '@travetto/compiler/src/transform-support';
 
+// TODO: Document
 export class ApplicationTransformer {
 
   static computeParam(state: TransformerState, p: ts.ParameterDeclaration) {

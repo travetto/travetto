@@ -9,6 +9,7 @@ import { ExecUtil } from './util';
 import { ExecutionState } from './types';
 const fsWriteFile = util.promisify(fs.writeFile);
 
+// TODO: Document
 export class DockerContainer {
 
   private static getContainerName(image: string, container?: string) {

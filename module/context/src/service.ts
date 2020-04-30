@@ -4,6 +4,7 @@ import { Injectable } from '@travetto/di';
 import { AppError } from '@travetto/base';
 
 @Injectable()
+// TODO: Document
 export class AsyncContext {
   private threads = new Map<number, number>();
   private threadsSet = new Map<number, Set<number>>();

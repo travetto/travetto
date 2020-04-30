@@ -6,6 +6,7 @@ const allEntities = new htmlEntities.AllHtmlEntities();
 
 const LI_TOKEN = '⇜⇟⇝';
 
+// TODO: Document
 export class MarkdownUtil {
 
   private static getRawText(node: parse5.Node) {

@@ -16,6 +16,7 @@ const fsStat = util.promisify(fs.stat);
 const fsReadFile = util.promisify(fs.readFile);
 
 @Injectable()
+// TODO: Document
 export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
   private cache: Record<string, { html: string, text: string }> = {};

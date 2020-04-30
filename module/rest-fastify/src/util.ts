@@ -5,6 +5,7 @@ import { RestAppUtil } from '@travetto/rest';
 
 const TRV_KEY = Symbol('TRV_KEY');
 
+// TODO: Document
 export class FastifyAppUtil {
   static getRequest(reqs: fastify.FastifyRequest<IncomingMessage>) {
     if (!(reqs as any)[TRV_KEY]) {

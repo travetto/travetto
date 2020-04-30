@@ -2,6 +2,7 @@ import { TreeAdapter, Node, serialize, DefaultTreeElement } from 'parse5';
 
 export const Parse5Adapter: TreeAdapter = require('parse5/lib/tree-adapters/default');
 
+// TODO: Document
 export class HtmlUtil {
 
   static visit<T>(root: Node, visitor: (node: Node, descend: () => void) => void) {

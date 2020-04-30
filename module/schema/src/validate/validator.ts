@@ -15,6 +15,7 @@ function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
   }
 }
 
+// TODO: Document
 export class SchemaValidator {
 
   private static validateSchema<T>(schema: SchemaConfig, o: T, relative: string) {

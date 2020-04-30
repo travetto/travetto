@@ -2,6 +2,7 @@ import * as os from 'os';
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
 import { ColorSupport } from '@travetto/cli/src/color';
 
+// TODO: Document
 export function init() {
   const Col = ColorSupport;
 

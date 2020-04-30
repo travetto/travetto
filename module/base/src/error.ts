@@ -13,6 +13,7 @@ const ERROR_CATEGORIES_WITH_CODES = {
 
 export type ErrorCategory = keyof typeof ERROR_CATEGORIES_WITH_CODES;
 
+// TODO: Document
 export const HTTP_ERROR_CONVERSION = (Object.entries(ERROR_CATEGORIES_WITH_CODES) as [ErrorCategory, number[]][])
   .reduce(
     (acc, [typ, codes]) => {
@@ -29,6 +30,7 @@ export const HTTP_ERROR_CONVERSION = (Object.entries(ERROR_CATEGORIES_WITH_CODES
 /**
  * Framework error class, with an eye towards restful activities
  */
+// TODO: Document
 export class AppError extends Error {
   static build(e: any, cat: ErrorCategory = 'general') {
     if (e instanceof AppError) {

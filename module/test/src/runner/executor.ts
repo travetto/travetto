@@ -16,6 +16,7 @@ import { PromiseCapture } from './promise';
 import { TestUtil } from './util';
 import { AssertUtil } from '../assert/util';
 
+// TODO: Document
 export class TestExecutor {
 
   static failFile(consumer: Consumer, file: string, err: Error) {

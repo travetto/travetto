@@ -37,6 +37,7 @@ export interface VisitHandler<R, U extends VisitNode<R> = VisitNode<R>> {
   onSimple(config: U & { config: FieldConfig }): R;
 }
 
+// TODO: Document
 export class SQLUtil {
   static readonly ROOT_ALIAS = '_ROOT';
 

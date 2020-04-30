@@ -1,11 +1,13 @@
 type OrProm<T> = Promise<T> | T;
 
+// TODO: Document
 export interface CoreCacheConfig {
   params?: (...params: any[]) => any[];
   key?: (...params: any[]) => string;
   keySpace?: string;
 }
 
+// TODO: Document
 export interface CacheConfig extends CoreCacheConfig {
   maxAge?: number;
   serialize?: (output: any) => string;
@@ -13,6 +15,7 @@ export interface CacheConfig extends CoreCacheConfig {
   extendOnAccess?: boolean;
 }
 
+// TODO: Document
 export interface CacheEntry {
   key: string;
   maxAge?: number;
@@ -23,6 +26,7 @@ export interface CacheEntry {
   extendOnAccess?: boolean;
 }
 
+// TODO: Document
 export interface CacheStoreType<T extends CacheEntry = CacheEntry> {
   get(key: string): OrProm<T | undefined>;
   has(key: string): OrProm<boolean>;

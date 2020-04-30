@@ -3,6 +3,7 @@ import { Env, HTTP_ERROR_CONVERSION } from '@travetto/base';
 
 import { Response } from './types';
 
+// TODO: Document
 (Error as any).prototype.render = function (res: Response) {
   const status = this.status ??
     this.statusCode ??

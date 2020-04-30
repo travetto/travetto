@@ -1,3 +1,4 @@
+// TODO: Document
 export const STYLES: Record<string, [number, number]> = {
   // styles
   bold: [1, 22],
@@ -17,6 +18,7 @@ export const STYLES: Record<string, [number, number]> = {
   yellow: [33, 39]
 };
 
+// TODO: Document
 export const LEVEL_STYLES: Record<string, string[]> = {
   info: ['white'],
   error: ['red'],
@@ -29,6 +31,7 @@ export const LEVEL_STYLES: Record<string, string[]> = {
 /**
  * Taken from masylum's fork (https://github.com/masylum/log4js-node)
  */
+// TODO: Document
 export function stylize(text: string, ...styles: string[]) {
   for (const style of styles) {
     const res = STYLES[style];

@@ -16,6 +16,7 @@ function getClass<T extends any>(o: T) {
   return o.constructor as Class<T>;
 }
 
+// TODO: Document
 @Injectable({ target: ModelService })
 export class ModelService implements IModelSource {
 

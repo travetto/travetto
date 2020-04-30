@@ -17,6 +17,7 @@ export const paramConfig = (location: ParamConfig['location'], extra: string | P
   )
 }) as ParamConfig;
 
+// TODO: Document
 export const Param = (location: ParamConfig['location'], extra: string | Partial<ParamConfig>) => {
   const param = paramConfig(location, extra);
   return (target: any, propertyKey: string | symbol, idx: number) => {
@@ -36,6 +37,7 @@ export const Header = (param: string | Partial<ParamConfig> = {}) => Param('head
 /** @augments trv/rest/Param */
 export const Body = (param: Partial<ParamConfig> = {}) => Param('body', param);
 
+// TODO: Document
 export const ContextProvider = ParamUtil.provider.bind(ParamUtil);
 @ContextProvider((_: any, rq: Request) => rq) export class REQUEST { }
 @ContextProvider((_: any, rq: Request, rs: Response) => rs) export class RESPONSE { }

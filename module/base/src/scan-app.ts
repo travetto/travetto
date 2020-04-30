@@ -16,6 +16,7 @@ interface Tester {
 /**
  * File scanning utilities, with a focus on application execution
  */
+// TODO: Document
 export class ScanApp {
 
   private static CACHE = new Map<string, SimpleEntry[]>();

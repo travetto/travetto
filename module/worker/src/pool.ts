@@ -5,6 +5,7 @@ import { Shutdown } from '@travetto/base';
 
 import { InputSource } from './input/types';
 
+// TODO: Document
 export interface Worker<X> {
   active: boolean;
   id: any;
@@ -14,6 +15,7 @@ export interface Worker<X> {
   release?(): any;
 }
 
+// TODO: Document
 export class WorkPool<X, T extends Worker<X>> {
 
   static DEFAULT_SIZE = Math.min(os.cpus().length - 1, 4);

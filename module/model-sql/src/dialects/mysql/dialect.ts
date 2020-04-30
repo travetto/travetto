@@ -10,9 +10,8 @@ import { SQLDialect } from '../../dialect';
 import { VisitStack } from '../../util';
 import { MySQLConnection } from './connection';
 
-@Injectable({
-  target: SQLDialect
-})
+@Injectable({ target: SQLDialect })
+// TODO: Document
 export class MySQLDialect extends SQLDialect {
 
   conn: MySQLConnection;

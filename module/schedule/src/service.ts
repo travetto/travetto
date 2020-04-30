@@ -9,6 +9,8 @@ export interface CronOptions {
   onComplete?: Callback;
 }
 
+// TODO: Document
+// TODO: Remove?
 export class Scheduler {
   private static jobId = 0;
   private static jobs = new Map<number, cron.CronJob>();

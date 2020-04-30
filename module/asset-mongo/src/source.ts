@@ -6,6 +6,7 @@ import { Injectable } from '@travetto/di';
 import { MongoAssetConfig } from './config';
 
 @Injectable()
+// TODO: Document
 export class MongoAssetSource extends AssetSource {
 
   private mongoClient: mongo.MongoClient;

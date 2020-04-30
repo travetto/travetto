@@ -15,6 +15,7 @@ interface RegisterInfo {
   [cls]?: number;
 }
 
+// TODO: Document
 export class RegisterTransformer {
 
   @OnClass()

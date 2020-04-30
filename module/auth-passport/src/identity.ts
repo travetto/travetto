@@ -4,6 +4,7 @@ import { Identity } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
 import { IdentityProvider } from '@travetto/auth-rest';
 
+// TODO: Document
 export class PassportIdentityProvider<U> extends IdentityProvider {
 
   static processLoginContext(req: Request) {

@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 
 import { Class, ChangeSource, ChangeEvent } from './types';
 
+// TODO: Document
 export abstract class Registry implements ChangeSource<Class> {
 
   protected resolved: boolean;

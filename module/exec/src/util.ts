@@ -2,6 +2,7 @@ import * as net from 'net';
 import * as http from 'http';
 import * as https from 'https';
 
+// TODO: Document
 export class ExecUtil {
 
   static async waitForHttp(url: string, ms = 5000) {

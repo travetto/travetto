@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
 
+// TODO: Document
 export class MethodSource implements ChangeSource<[Class, Function]> {
 
   private events = new EventEmitter();

@@ -12,6 +12,7 @@ export type ValidStringFields<T> = {
 }[keyof T];
 /* eslint-enable @typescript-eslint/ban-types */
 
+// TODO: Document
 export interface IModelSource {
   onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
   onSchemaChange?(e: SchemaChangeEvent): void;
