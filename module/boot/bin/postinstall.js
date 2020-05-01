@@ -2,7 +2,9 @@ const fs = require('fs');
 
 const root = process.cwd();
 
-// TODO: Document
+/**
+ * Set the tsconfig to point to the boot/tsconfig if it doesn't exist
+ */
 if (!fs.existsSync(`${root}/tsconfig.json`)) {
   fs.writeFileSync(`${root}/tsconfig.json`,
     JSON.stringify({
@@ -11,5 +13,6 @@ if (!fs.existsSync(`${root}/tsconfig.json`)) {
   );
 }
 
+// Initialize the app and clear the cache
 require('./init');
 require('../src/app-cache').AppCache.clear();

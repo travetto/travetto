@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as readline from 'readline';
 
 import { EnvUtil } from '@travetto/boot';
-import { ScanFs, Env, Shutdown } from '@travetto/base';
+import { ScanFs, Env, ShutdownManager } from '@travetto/base';
 
 const DEFAULT_TIMEOUT = EnvUtil.getInt('DEFAULT_TIMEOUT', 5000);
 
@@ -11,7 +11,7 @@ export class TestUtil {
   static TIMEOUT = Symbol('timeout');
 
   static registerCleanup(scope: string) {
-    Shutdown.onShutdown(`test.${scope}.bufferOutput`,
+    ShutdownManager.onShutdown(`test.${scope}.bufferOutput`,
       () => new Promise(res => setTimeout(res, 50)));
   }
 

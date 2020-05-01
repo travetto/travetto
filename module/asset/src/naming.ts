@@ -33,8 +33,11 @@ export class HashNamingStrategy implements AssetNamingStrategy {
 
     if (asset.contentType) {
       ext = mime.getExtension(asset.contentType)!;
-    } else if (asset.path.indexOf('.') > 0) {
-      ext = asset.path.split('.').pop()!;
+    } else {
+      const dot = asset.path.indexOf('.');
+      if (dot > 0) {
+        ext = asset.path.substring(dot + 1);
+      }
     }
 
     ext = ext ? `.${ext.toLowerCase()}` : '';

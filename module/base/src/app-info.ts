@@ -4,7 +4,7 @@ let pkg: any = { name: 'untitled' };
 try { pkg = require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')); } catch { }
 
 /**
- * General purpose information about the application
+ * General purpose information about the application.  Derived from the app's package.json
  */
 export const AppInfo = {
   VERSION: pkg.version,

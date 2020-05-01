@@ -118,7 +118,7 @@ As a registered shutdown handler, you can do.
 
 **Code: Registering a shutdown handler**
 ```typescript
-Shutdown.onShutdown('handler-name', async () => {
+ShutdownManager.onShutdown('handler-name', async () => {
   // Do important work, the framework will wait until all async 
   //   operations are completed before finishing shutdown
 })

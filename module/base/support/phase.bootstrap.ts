@@ -1,17 +1,20 @@
 import { Env } from '../src/env';
-import { Shutdown } from '../src/shutdown';
-import { Stacktrace } from '../src/stacktrace';
+import { ShutdownManager } from '../src/shutdown';
+import { StacktraceUtil } from '../src/stacktrace';
 
-// TODO: Document
+/**
+ * Registers stack trace handler for non-prod
+ * And prepare shutdown manager
+ */
 export const init = {
   key: 'base',
   action: () => {
     if (Env.prod) {
       process.env.NODE_ENV = 'production';
     } else {
-      Stacktrace.initHandler();
+      StacktraceUtil.initHandler();
     }
-    Stacktrace.clearStackFilters(); // @line-if $TRV_DEV
-    Shutdown.register();
+    StacktraceUtil.clearStackFilters(); // @line-if $TRV_DEV
+    ShutdownManager.register();
   }
 };

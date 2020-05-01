@@ -1,5 +1,5 @@
 import { ScanApp } from './scan-app';
-import { SystemUtil } from './system-util';
+import { SystemUtil } from './system';
 
 interface Initializer {
   action: Function;
@@ -7,29 +7,61 @@ interface Initializer {
 }
 
 /**
- * Allows for running the code through various phases.
+ * Allows for running application phases.  The manager will
+ * scan all the loaded modules for any phase support files
+ * to allow for automatic registration of additional functionality.
+ *
+ * Each support file is structured as:
+ * {
+ *    key: name,
+ *    before: stage | stages[], // Stage is another files key value
+ *    after: stage | stages[],
+ *    init: execution code
+ * }
  */
-// TODO: Document
 export class PhaseManager {
 
+  /**
+   * Create a new Phase manager for a given scope
+   * @param scope The scope to run
+   * @param upto An optional upper bound on the stages to run, inclusive
+   * @param after An optional lower bound on the stages to run, exclusive
+   */
   static init(scope: string, upto?: string, after?: string) {
     const mgr = new PhaseManager(scope);
     mgr.load(upto, after);
     return mgr;
   }
 
+  /**
+   * Shorthand for running the bootstrap phase
+   * @param upto Optional stopping point
+   */
   static bootstrap(upto?: string) {
     return this.init('bootstrap', upto).run();
   }
 
+  /**
+   * Shorthand for running the bootstrap phase
+   * @param after Optional starting point
+   */
   static bootstrapAfter(after: string) {
     return this.init('bootstrap', '*', after).run();
   }
 
   initializers: Initializer[] = [];
 
+  /**
+   * Create a new manager
+   * @param scope The scope to run against
+   */
   constructor(public scope: string) { }
 
+  /**
+   * Fetch the associated files in the various support/ folders.
+   * @param upto Stopping point, inclusive
+   * @param after Starting point, exclusive
+   */
   load(upto?: string, after?: string) {
     const pattern = new RegExp(`support/phase[.]${this.scope}[.]`);
     // Load all support files
@@ -58,6 +90,9 @@ export class PhaseManager {
     return this;
   }
 
+  /**
+   * Run the phase
+   */
   async run() {
     for (const i of this.initializers) {
       const start = Date.now();

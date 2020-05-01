@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { AppCache, EnvUtil, TranspileUtil } from '@travetto/boot';
 
-import { SystemUtil } from './system-util';
+import { SystemUtil } from './system';
 import { Env } from './env';
 
 export type LogLevel = 'info' | 'log' | 'trace' | 'warn' | 'debug' | 'error' | 'fatal';
@@ -34,9 +34,11 @@ function wrap(target: Console, enrich: boolean) {
 }
 
 /**
- * Provides a general abstraction against the console.* methods to allow for easier capture and redirection
+ * Provides a general abstraction against the console.* methods to allow for easier capture and redirection.
+ *
+ * The transpiler will replace all console.* calls in the typescript files for the framework and those provided by the user.
+ * Any console.log statements elsewhere will not be affected.
  */
-// TODO: Document
 class $ConsoleManager {
   private states: ConsoleState[] = [];
   private state: ConsoleState;
@@ -57,9 +59,12 @@ class $ConsoleManager {
       this.exclude.add('trace');
     }
     this.set(wrap(console, this.defaultEnrich)); // Init to console
-    TranspileUtil.addPreparer(this.instrument.bind(this)); // Register console manager
+    TranspileUtil.addPreProcessor(this.instrument.bind(this)); // Register console manager
   }
 
+  /**
+   * Prepare data for pretty printing
+   */
   private enrich(payload: ConsolePayload, args: any[]) {
     args = [
       payload.level.padEnd(5), `[${payload.category}:${payload.line}]`,
@@ -72,6 +77,9 @@ class $ConsoleManager {
     return args;
   }
 
+  /**
+   * Modify typescript file to point to the Console Manager
+   */
   private instrument(fileName: string, fileContents: string) {
     // Ignore framework /bin/ folders only
     if (fileName.includes('/bin/')) {
@@ -91,6 +99,9 @@ class $ConsoleManager {
     return fileContents;
   }
 
+  /**
+   * Handle direct call in lieu of the console.* commands
+   */
   private invoke(payload: ConsolePayload, ...args: any[]) {
     if (this.exclude.has(payload.level)) {
       return; // Do nothing
@@ -109,11 +120,18 @@ class $ConsoleManager {
     return this.state.invoke(payload, args);
   }
 
+  /**
+   * Set a new console state, works as a stack to allow for nesting
+   */
   set(cons: ConsoleState) {
     this.states.unshift(cons);
     this.state = this.states[0];
   }
 
+  /**
+   * Set console state to log to a file. If the filename starts with an !, then
+   * the file will be relative to the `AppCache`
+   */
   setFile(file: string, state: Omit<ConsoleState, 'invoke'> = {}) {
     const name = file.startsWith('!') ? AppCache.toEntryName(file.substring(1)) : file;
     this.set({
@@ -125,6 +143,9 @@ class $ConsoleManager {
     });
   }
 
+  /**
+   * Pop off the logging stack
+   */
   clear() {
     if (this.states.length > 1) {
       this.states.shift();

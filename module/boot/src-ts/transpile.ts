@@ -3,7 +3,7 @@ import { EnvUtil } from './env';
 import { FsUtil } from './fs-util';
 import { AppCache } from './app-cache';
 
-type Preparer = (name: string, contents: string) => string;
+type Preprocessor = (name: string, contents: string) => string;
 
 declare const global: { ts: any }; // Used for transformers
 
@@ -12,9 +12,8 @@ const OPTS = Symbol();
 /**
  * Standard transpilation utilities, with support for basic text filters
  */
-// TODO: Document
 export class TranspileUtil {
-  private static preparers: Preparer[] = [];
+  private static preProcessors: Preprocessor[] = [];
 
   private static get ts() { // Only registered on first call
     return global.ts = global.ts ?? new Proxy({}, { // Only in inject as needed
@@ -126,18 +125,24 @@ export class TranspileUtil {
     }
   }
 
-  static addPreparer(fn: Preparer) {
-    this.preparers.push(fn);
+  /**
+   * Add support for additional transpilation preprocessor
+   */
+  static addPreProcessor(fn: Preprocessor) {
+    this.preProcessors.push(fn);
   }
 
-  static prepare(fileName: string, contents?: string) {
+  /**
+   * Pre-processes a typescript file before transpilation
+   */
+  static preProcess(fileName: string, contents?: string) {
     let fileContents = contents ?? fs.readFileSync(fileName, 'utf-8');
 
     // Resolve macro
     fileContents = this.resolveMacros(fileName, fileContents);
 
-    for (const preparer of this.preparers) {
-      fileContents = preparer(fileName, fileContents);
+    for (const preProcessor of this.preProcessors) {
+      fileContents = preProcessor(fileName, fileContents);
     }
 
     // Drop typescript import, and use global. Great speedup;
@@ -174,7 +179,7 @@ export class TranspileUtil {
     return AppCache.getOrSet(tsf, () => {
       try {
         const diags: any[] = [];
-        const ret = this.ts.transpile(this.prepare(tsf), this.compilerOptions, tsf, diags);
+        const ret = this.ts.transpile(this.preProcess(tsf), this.compilerOptions, tsf, diags);
         this.checkTranspileErrors(FsUtil.cwd, tsf, diags);
         return ret;
       } catch (e) {
@@ -183,12 +188,18 @@ export class TranspileUtil {
     }, force);
   }
 
+  /**
+   * Initialize
+   */
   static init() {
     AppCache.init();
   }
 
+  /**
+   * Reset
+   */
   static reset() {
     AppCache.reset();
-    this.preparers = [];
+    this.preProcessors = [];
   }
 }

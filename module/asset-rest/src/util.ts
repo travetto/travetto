@@ -13,34 +13,25 @@ import { RestAssetConfig } from './config';
 
 type AssetMap = Record<string, Asset>;
 
-// TODO: Cleanup
 /**
  * General support for handling file uploads/downloads
  */
 export class AssetRestUtil {
 
-  static readTypeArr(arr?: string[] | string) {
-    return (Array.isArray(arr) ? arr : (arr ?? '').split(',')).filter(x => !!x);
-  }
-
-  static matchType(types: string[], type: string) {
-    return types.findIndex(match(type)) >= 0;
-  }
-
   /**
    * Stream file to disk, and verify types in the process.  Produce an asset as the output
    */
-  static async streamToLocalAsset(data: NodeJS.ReadableStream, fileName: string, allowedTypes: string[], excludeTypes: string[], relativeRoot?: string) {
+  static async streamToLocalAsset(data: NodeJS.ReadableStream, fileName: string, allowedTypes: string[], excludedTypes: string[]) {
     const uniqueDir = FsUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
-    await FsUtil.mkdirp(uniqueDir);
+    await FsUtil.mkdirp(uniqueDir); // TODO: Unique dir for each file? Use random file, and override metadata
     const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(fileName));
 
     await SystemUtil.streamToFile(data, uniqueLocal);
 
     const asset = await AssetUtil.fileToAsset(uniqueLocal);
 
-    const notMatchPositive = allowedTypes.length && !this.matchType(allowedTypes, asset.contentType);
-    const matchNegative = excludeTypes.length && this.matchType(excludeTypes, asset.contentType);
+    const notMatchPositive = allowedTypes.length && !allowedTypes.find(match(asset.contentType));
+    const matchNegative = excludedTypes.length && !!excludedTypes.find(match(asset.contentType));
 
     if (notMatchPositive || matchNegative) {
       throw new AppError(`Content type not allowed: ${asset.contentType}`, 'data');
@@ -53,22 +44,26 @@ export class AssetRestUtil {
    * Parse filename from the request headers
    */
   static getFileName(req: Request) {
-    return ((req.header('content-disposition') as string ?? '')
-      .split('filename=')[1] ?? '')
-      .replace(/"/g, '') ||
-      `file-upload.${(req.header('content-type') as string)!.split('/').pop()}`;
+    const fileNameExtract = /filename[*]?=["]?([^";]*)["]?/;
+    const matches = (req.header('content-disposition') as string ?? '').match(fileNameExtract);
+    if (matches && matches.length) {
+      return matches[1];
+    } else {
+      const [, type] = (req.header('content-type') as string).split('/');
+      return `file-upload.${type}`;
+    }
   }
 
   /**
    * Actually process upload
    */
   static upload(req: Request, config: Partial<RestAssetConfig>, relativeRoot?: string) {
-    const allowedTypes = this.readTypeArr(config.allowedTypes);
-    const excludeTypes = this.readTypeArr(config.excludeTypes);
+    const allowedTypes = config.allowedTypesList!;
+    const excludedTypes = config.excludedTypesList!;
 
     if (!/multipart|urlencoded/i.test(req.header('content-type') as string)) {
       const filename = this.getFileName(req);
-      return this.streamToLocalAsset(req as any as NodeJS.ReadableStream, filename, allowedTypes, excludeTypes, relativeRoot)
+      return this.streamToLocalAsset(req as any as NodeJS.ReadableStream, filename, allowedTypes, excludedTypes)
         .then(file => ({ file }));
     } else {
       return new Promise<AssetMap>((resolve, reject) => {
@@ -84,7 +79,7 @@ export class AssetRestUtil {
         uploader.on('file', async (fieldName, file, fileName, encoding, mimeType) => {
           console.debug('Uploading file', fieldName, fileName, encoding, mimeType);
           uploads.push(
-            this.streamToLocalAsset(file, fileName, allowedTypes, excludeTypes, relativeRoot)
+            this.streamToLocalAsset(file, fileName, allowedTypes, excludedTypes)
               .then(res => mapping[fieldName] = res)
           );
         });

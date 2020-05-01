@@ -19,5 +19,5 @@ export abstract class AssetSource {
   /**
    * Remove from asset store
    */
-  abstract remove(path: string): Promise<void>;
+  abstract delete(path: string): Promise<void>;
 }

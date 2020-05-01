@@ -24,7 +24,8 @@
   "main": "index.ts",
   "files": [
     "index.ts",
-    "src"
+    "src",
+    "test/lib"
   ],
   "name": "@travetto/asset",
   "repository": {

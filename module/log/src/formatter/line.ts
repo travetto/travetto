@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { Env, Stacktrace } from '@travetto/base';
+import { Env, StacktraceUtil } from '@travetto/base';
 
 import { LogEvent, Formatter } from '../types';
 import { stylize, LEVEL_STYLES } from './styles';
@@ -66,7 +66,7 @@ export class LineFormatter implements Formatter {
 
       message = args.map((x: any) =>
         typeof x === 'string' ? x :
-          (x instanceof Error ? (Env.prod ? x.stack : Stacktrace.simplifyStack(x)) :
+          (x instanceof Error ? (Env.prod ? x.stack : StacktraceUtil.simplifyStack(x)) :
             util.inspect(x,
               ev.level === 'trace',
               (ev.level === 'debug' || ev.level === 'trace') ? 4 : 2,

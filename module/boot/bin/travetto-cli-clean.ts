@@ -2,7 +2,11 @@ import * as commander from 'commander';
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
 
-// TODO: Document
+/**
+ * `npx trv clean`
+ *
+ * Allows for cleaning of the cache dire
+ */
 export function init() {
   return Util.program.command('clean')
     .option('-q, --quiet', 'Quiet operation')

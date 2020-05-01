@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { FsUtil, EnvUtil } from '@travetto/boot';
-import { Shutdown } from '@travetto/base';
+import { ShutdownManager } from '@travetto/base';
 
 import { Exec } from './exec';
 import { ExecUtil } from './util';
@@ -61,7 +61,7 @@ export class DockerContainer {
   }
 
   forceDestroyOnShutdown() {
-    Shutdown.onShutdown(this.container, () => this.forceDestroy());
+    ShutdownManager.onShutdown(this.container, () => this.forceDestroy());
     return this;
   }
 

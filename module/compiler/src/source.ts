@@ -41,7 +41,7 @@ export class SourceManager {
       throw new Error(`Unable to read file ${fileName}`);
     }
     if (ScanApp.TS_TESTER.test(fileName)) {
-      content = TranspileUtil.prepare(fileName, content);
+      content = TranspileUtil.preProcess(fileName, content);
     }
     return content;
   }

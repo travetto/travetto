@@ -1,15 +1,21 @@
 import { Env } from './env';
 
 /**
- * General tools for manipulating stack traces
+ * General tools for manipulating stack traces.
+ *
+ * The stacktrace handler will not override the global behavior,
+ * but relies on the `.toConsole` method for processing the stacktrace
+ * before providing it to the console.
  */
-// TODO: Document
-export class Stacktrace {
+export class StacktraceUtil {
 
   private static filters: string[] = [];
 
   private static filterRegex: RegExp = /./g;
 
+  /**
+   * Initialize
+   */
   static initHandler() {
     this.addStackFilters(
       __filename.replace(/\.js$/, ''),
@@ -24,6 +30,9 @@ export class Stacktrace {
     );
   }
 
+  /**
+   * Add a filter to hide certain stack frames
+   */
   static addStackFilters(...names: string[]) {
     if (this.filters) {
       this.filters.push(...names);
@@ -31,11 +40,17 @@ export class Stacktrace {
     }
   }
 
+  /**
+   * Unset all filters
+   */
   static clearStackFilters() {
     this.filters = [];
     this.filterRegex = /##/;
   }
 
+  /**
+   * Clean up the stack output for an error
+   */
   static simplifyStack(err: Error, filter = true): string {
     const getLocation = (x: string) => {
       const [, l] = x.split(Env.cwd);

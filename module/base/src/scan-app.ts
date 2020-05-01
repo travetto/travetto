@@ -2,7 +2,7 @@ import { FsUtil, RegisterUtil, AppCache } from '@travetto/boot';
 
 import { Env } from './env';
 import { ScanEntry, ScanFs } from './scan-fs';
-import { SystemUtil } from './system-util';
+import { SystemUtil } from './system';
 
 type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
 
@@ -16,25 +16,42 @@ interface Tester {
 /**
  * File scanning utilities, with a focus on application execution
  */
-// TODO: Document
 export class ScanApp {
 
   private static CACHE = new Map<string, SimpleEntry[]>();
 
+  /**
+   * List of primary app folders to search
+   */
   static mainAppFolders: string[] = ['src'];
+  /**
+   * List of module app folders to search
+   */
   static modAppFolders: string[] = ['src', 'index'];
+  /**
+   * List of modules to not traverse into
+   */
   static modAppExclude: string[] = ['test', 'cli', 'boot'];
 
+  /**
+   * Provides a RegEx compatible object that can scan for typescript files quickly
+   */
   static TS_TESTER: Tester = {
     source: '.ts',
     test: x => x.endsWith('.ts') && !x.endsWith('.d.ts')
   };
 
+  /**
+   * Support framework resolution if active
+   */
   private static resolveFramework(x: SimpleEntry, root: string) {
     const file = RegisterUtil.devResolve(x.file);
     return { ...x, file, module: file.replace(`${root}/`, '') };
   }
 
+  /**
+   * Get regex compatible tester for validating travetto modules in traversal
+   */
   private static getAppModPathMatcher() {
     const MOD_MATCH = new RegExp(`node_modules/@travetto/([^/]+)/(${this.modAppFolders.join('|')})\/`);
     const MOD_EX = new RegExp(`@travetto/(${this.modAppExclude.join('|')})`);
@@ -44,10 +61,13 @@ export class ScanApp {
   /**
    * Clears the app scanning cache
    */
-  static clearCache() {
+  static reset() {
     this.CACHE.clear();
   }
 
+  /**
+   * Find all '.ts' files excluding ones identified by the filter
+   */
   static findSourceFiles(filter?: Tester | Pred, root = Env.cwd): SimpleEntry[] {
     return this.findFiles(this.TS_TESTER, filter, root);
   }
@@ -72,7 +92,7 @@ export class ScanApp {
           x.endsWith('node_modules') || // Is first level node_modules
           x.includes('@travetto')  // Is framework folder, include everything under it
       }, root)
-        .filter(ScanFs.isNotDir);
+        .filter(x => ScanFs.isNotDir(x));
 
       // Align with framework dev
       toCache = toCache.map(x => this.resolveFramework(x, root)); // @line-if $TRV_DEV
@@ -125,6 +145,9 @@ export class ScanApp {
     ).map(x => x.file);
   }
 
+  /**
+   * Preload file entries, useful for precompiling and indexing
+   */
   static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {
     const results = paths.map(mod => {
       // Compressed for minimizing bundle size

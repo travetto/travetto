@@ -8,7 +8,6 @@ function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
 /**
  * Standard file cache, with output file name normalization and truncation
  */
-// TODO: Document
 export class FileCache {
   private cache = new Map<string, fs.Stats>();
 
@@ -22,15 +21,24 @@ export class FileCache {
     FsUtil.mkdirpSync(this.cacheDir);
   }
 
+  /**
+   * Write contents to disk
+   */
   writeEntry(full: string, contents: string | Buffer) {
     fs.writeFileSync(this.toEntryName(full), contents);
     this.statEntry(full);
   }
 
+  /**
+   * Read entry from disk
+   */
   readEntry(full: string) {
     return fs.readFileSync(this.toEntryName(full), 'utf-8');
   }
 
+  /**
+   * Delete expired entries
+   */
   removeExpiredEntry(full: string, force = false) {
     if (this.hasEntry(full)) {
       try {
@@ -46,14 +54,23 @@ export class FileCache {
     }
   }
 
+  /**
+   * Delete entry
+   */
   removeEntry(full: string) {
     this.cache.delete(full);
   }
 
+  /**
+   * Checks to see if a file has been loaded or if it's available on disk
+   */
   hasEntry(full: string) {
     return this.cache.has(full) || fs.existsSync(this.toEntryName(full));
   }
 
+  /**
+   * Retrieve fs.Stats of the associated path
+   */
   statEntry(full: string) {
     if (!this.cache.has(full)) {
       const stat = fs.statSync(this.toEntryName(full));
@@ -62,6 +79,9 @@ export class FileCache {
     return this.cache.get(full)!;
   }
 
+  /**
+   * Clear cache
+   */
   clear(quiet = false) {
     if (this.cacheDir) {
       try {
@@ -76,6 +96,9 @@ export class FileCache {
     }
   }
 
+  /**
+   * Map cached file name to the original source
+   */
   fromEntryName(cached: string) {
     return FsUtil.toUnix(cached)
       .replace(this.cacheDir, '')
@@ -83,6 +106,9 @@ export class FileCache {
       .replace(/\/\/+/g, '/');
   }
 
+  /**
+   * Map the original file name to the cache file space
+   */
   toEntryName(full: string) {
     return FsUtil.joinUnix(this.cacheDir, full
       .replace(/^\//, '')
@@ -90,6 +116,9 @@ export class FileCache {
     );
   }
 
+  /**
+   * Get or set a value (from the create function) if not in the cache
+   */
   getOrSet(key: string, create: () => string, force = false) {
     const name = FsUtil.toUnix(key);
     let content: string;

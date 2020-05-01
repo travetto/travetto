@@ -7,7 +7,7 @@ import { Watcher } from './watcher';
 import { ScanEntry, ScanHandler } from '../scan-fs';
 import { Env } from '../env';
 import { ScanApp } from '../scan-app';
-import { SystemUtil } from '../system-util';
+import { SystemUtil } from '../system';
 
 export interface PresenceListener {
   added(name: string): void;
@@ -16,7 +16,8 @@ export interface PresenceListener {
 }
 
 /**
- * Higher level functionality, focused on tracking files, built upon watcher
+ * Tracks file changes for the application roots,
+ * and handles multiple file roots.
  */
 export class FilePresenceManager {
   private ext: string;
@@ -31,6 +32,11 @@ export class FilePresenceManager {
   private seen = new Set<string>();
   private watchSpaces = new Set<string>();
 
+  /**
+   * Build a new file presence manager
+   *
+   * @param config
+   */
   constructor(
     config: {
       ext: FilePresenceManager['ext'];
@@ -51,8 +57,14 @@ export class FilePresenceManager {
     }
   }
 
+  /**
+   * Default to always true
+   */
   private initialFileValidator: (x: Pick<ScanEntry, 'file' | 'module'>) => boolean = x => true;
 
+  /**
+   * Callback handle for the watcher
+   */
   private watcherListener({ event, entry }: { event: string, entry: ScanEntry }) {
     if (!this.validFile(entry.file)) {
       return;
@@ -82,6 +94,9 @@ export class FilePresenceManager {
     }
   }
 
+  /**
+   * Add a new watcher for a specific root
+   */
   private buildWatcher(cwd: string, handlers: ScanHandler[]) {
     const watcher = new Watcher({
       interval: 250,
@@ -95,6 +110,9 @@ export class FilePresenceManager {
     return watcher;
   }
 
+  /**
+   * Collect all root files given the provided rootPaths
+   */
   getRootFiles() {
     const PATH_RE = SystemUtil.pathMatcher(this.rootPaths);
 
@@ -105,6 +123,9 @@ export class FilePresenceManager {
     return rootFiles;
   }
 
+  /**
+   * Initialize manager
+   */
   init() {
     const rootFiles = this.getRootFiles();
 
@@ -117,6 +138,9 @@ export class FilePresenceManager {
     }
   }
 
+  /**
+   * Add new folder to watch
+   */
   addNewFolder(folder: string) {
     if (!fs.existsSync(folder)) {
       console.warn(`Directory ${FsUtil.resolveUnix(FsUtil.cwd, folder)} missing, cannot watch`);
@@ -125,10 +149,16 @@ export class FilePresenceManager {
     }
   }
 
+  /**
+   * Determine if file is known
+   */
   has(name: string) {
     return this.files.has(name);
   }
 
+  /**
+   * Tests to see if passed in file is valid
+   */
   validFile(name: string) {
     for (const re of this.excludeFiles) {
       if (re.test(name)) {
@@ -138,6 +168,12 @@ export class FilePresenceManager {
     return name.endsWith(this.ext);
   }
 
+  /**
+   * Add an individual file
+   *
+   * @param name File path
+   * @param notify Wether or not to emit on addition
+   */
   addNewFile(name: string, notify = true) {
     if (this.seen.has(name)) {
       return;
@@ -161,6 +197,9 @@ export class FilePresenceManager {
     }
   }
 
+  /**
+   * Reset manager, freeing all watchers
+   */
   reset() {
     if (this.watch) {
       Object.values(this.fileWatchers).map(x => x.close());
@@ -170,6 +209,9 @@ export class FilePresenceManager {
     this.files.clear();
   }
 
+  /**
+   * Has this file been watched before
+   */
   isWatchedFileKnown(name: string) {
     return this.watch && this.files.get(name)!.version > 0;
   }

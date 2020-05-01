@@ -1,6 +1,8 @@
 import * as child_process from 'child_process';
 
-// TODO: Document
+/**
+ * Common fork/spawn operation
+ */
 export function fork(cmd: string, args: string[] = [], opts: child_process.SpawnOptions = {}) {
   return new Promise<string>((resolve, reject) => {
     const text: Buffer[] = [];

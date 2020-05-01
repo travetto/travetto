@@ -7,12 +7,21 @@ const MAX_SHUTDOWN_TIME = EnvUtil.getInt('MAX_SHUTDOWN_WAIT', 2000);
 type UnhandledHandler = (err: Error, prom?: Promise<any>) => boolean | undefined | void;
 type Listener = { name: string, handler: Function, final?: boolean };
 
-/**
- * Shutdown manager, allowing for hooks into the shutdown process
- */
-// TODO: Document
 // TODO: Expose globally
-export class Shutdown {
+
+/**
+ * Shutdown manager, allowing for hooks into the shutdown process.
+ *
+ * On a normal shutdown signal (SIGINT, SIGTERM), the shutdown manager
+ * will start a timer, and begin executing the shutdown handlers.
+ *
+ * The handlers should be synchronous and fast, as once a threshold timeout
+ * has been hit, the application will force kill itself.
+ *
+ * If the application receives another SIGTERM/SIGINT while shutting down,
+ * it will shutdown immediately.
+ */
+export class ShutdownManager {
   private static listeners: Listener[] = [];
   private static shutdownCode = -1;
   private static unhandled: UnhandledHandler[] = [];
@@ -84,10 +93,16 @@ export class Shutdown {
     }
   }
 
+  /**
+   * Begin shutdown process with a given exit code and possible error
+   */
   static execute(exitCode: number = 0, err?: any) {
     this.executeAsync(exitCode, err); // Fire and forget
   }
 
+  /**
+   * Hook into the process to override the shutdown behavior
+   */
   static register() {
     process.exit = this.execute.bind(this) as (() => never); // NOTE: We do not actually throw an error the first time, to allow for graceful shutdown
     process.on('exit', this.execute.bind(this));
@@ -98,10 +113,19 @@ export class Shutdown {
     this.unhandled.push(this.execute.bind(this, 1));
   }
 
+  /**
+   * Register a shutdown handler
+   * @param name  Name to log
+   * @param handler Actual code
+   * @param final If this should be run an attempt to shutdown or only on the final shutdown
+   */
   static onShutdown(name: string, handler: Function, final = false) {
     this.listeners.push({ name, handler, final });
   }
 
+  /**
+   * Listen for unhandled exceptions
+   */
   static onUnhandled(handler: UnhandledHandler, position = -1) {
     if (position < 0) {
       this.unhandled.push(handler);
@@ -110,6 +134,9 @@ export class Shutdown {
     }
   }
 
+  /**
+   * Remove handler for unhandled exceptions
+   */
   static removeUnhandledHandler(handler: UnhandledHandler) {
     const index = this.unhandled.indexOf(handler);
     if (this.unhandled.includes(handler)) {

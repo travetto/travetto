@@ -4,7 +4,7 @@ import { Identity, Principal } from './types';
 import { AuthContext } from './context';
 
 /**
- * Produces a principal form some source
+ * Produces a principal from an identity
  */
 export abstract class PrincipalProvider {
 
