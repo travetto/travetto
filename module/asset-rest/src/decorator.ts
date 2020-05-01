@@ -3,30 +3,16 @@
 import { AppError } from '@travetto/base';
 import { ControllerRegistry, Request, ParamConfig } from '@travetto/rest';
 import { Class } from '@travetto/registry';
-import { ConfigSource } from '@travetto/config';
-import { Asset } from '@travetto/asset';
+import { AssetImpl } from '@travetto/asset/src/internal/types';
 
 import { AssetRestUtil } from './util';
 import { RestAssetConfig } from './config';
-
-const globalConf = new RestAssetConfig();
-ConfigSource.bindTo(globalConf, 'rest.upload');
+import { DependencyRegistry } from '@travetto/di';
 
 const extractUpload = (config: ParamConfig, req: Request) => req.files[config.name!];
 
 /**
- * A concrete class for dependency injection
- */
-export class UploadAsset implements Asset {
-  stream: NodeJS.ReadableStream;
-  size: number;
-  path: string;
-  contentType: string;
-  metadata: Asset['metadata'];
-}
-
-/**
- * Allows for supporting uploads on the route
+ * Allows for supporting uploads
  *
  * @augments trv/asset-rest/AssetUpload
  * @augments trv/rest/Param
@@ -37,9 +23,9 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
     param = { name: param };
   }
 
-  const finalConf = { ...globalConf, ...param };
+  const finalConf = { ...param };
 
-  if (finalConf.type !== UploadAsset) {
+  if (finalConf.type !== AssetImpl) {
     throw new AppError('Cannot use upload decorator with anything but an UploadAsset', 'general');
   }
 
@@ -49,8 +35,10 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
       ...param as ParamConfig,
       location: 'files' as any,
       async resolve(req: Request) {
+        const assetConfig = await DependencyRegistry.getInstance(RestAssetConfig);
+
         if (!req.files) { // Prevent duplication if given multiple decorators
-          req.files = await AssetRestUtil.upload(req, finalConf, `${(target.constructor as any).basePath}/`);
+          req.files = await AssetRestUtil.upload(req, { ...assetConfig, ...finalConf }, `${(target.constructor as any).basePath}/`);
         }
       },
       extract: extractUpload

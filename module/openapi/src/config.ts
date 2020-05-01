@@ -6,12 +6,12 @@ import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
 @Config('api.info')
 // TODO: Document
 export class ApiInfoConfig {
-  contact: ContactObject = AppInfo.AUTHOR;
-  description: string = AppInfo.DESCRIPTION;
-  license: LicenseObject = { name: AppInfo.LICENSE };
+  contact: ContactObject = AppInfo.author;
+  description: string = AppInfo.description;
+  license: LicenseObject = { name: AppInfo.license };
   termsOfService?: string;
-  title: string = AppInfo.NAME;
-  version: string = AppInfo.VERSION;
+  title: string = AppInfo.name;
+  version: string = AppInfo.version;
 }
 
 @Config('api.host')

@@ -1,18 +1,18 @@
 import { FsUtil } from '@travetto/boot';
 
-let pkg: any = { name: 'untitled' };
-try { pkg = require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')); } catch { }
+const pkg: Record<string, string> = { name: 'untitled' };
+try { Object.assign(pkg, require(FsUtil.joinUnix(FsUtil.cwd, 'package.json'))); } catch { }
 
 /**
  * General purpose information about the application.  Derived from the app's package.json
  */
 export const AppInfo = {
-  VERSION: pkg.version,
-  NAME: pkg.name,
-  SIMPLE_NAME: pkg.name.replace(/[@]/g, '').replace(/[\/]/g, '_'),
-  PACKAGE: pkg.name.split('/')[0],
-  LICENSE: pkg.license,
-  AUTHOR: pkg.author,
-  MAIN: pkg.main,
-  DESCRIPTION: pkg.description
+  version: pkg.version,
+  name: pkg.name,
+  simpleName: pkg.name.replace(/[@]/g, '').replace(/[\/]/g, '_'),
+  package: pkg.name.split('/')[0],
+  license: pkg.license,
+  author: pkg.author,
+  main: pkg.main,
+  description: pkg.description
 };

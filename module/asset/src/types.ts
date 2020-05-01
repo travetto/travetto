@@ -1,5 +1,7 @@
 /**
  * A retrieval/storable asset
+ *
+ * @concrete ./internal/types:AssetImpl
  */
 export interface Asset {
   /**
@@ -44,3 +46,4 @@ export interface Asset {
     tags?: string[];
   };
 }
+

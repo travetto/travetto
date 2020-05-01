@@ -2,7 +2,7 @@ import { FsUtil, RegisterUtil, AppCache } from '@travetto/boot';
 
 import { Env } from './env';
 import { ScanEntry, ScanFs } from './scan-fs';
-import { SystemUtil } from './system';
+import { SystemUtil } from './internal/system';
 
 type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
 

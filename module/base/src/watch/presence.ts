@@ -7,7 +7,7 @@ import { Watcher } from './watcher';
 import { ScanEntry, ScanHandler } from '../scan-fs';
 import { Env } from '../env';
 import { ScanApp } from '../scan-app';
-import { SystemUtil } from '../system';
+import { SystemUtil } from '../internal/system';
 
 export interface PresenceListener {
   added(name: string): void;

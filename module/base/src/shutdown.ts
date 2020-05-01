@@ -1,13 +1,11 @@
 import { EnvUtil } from '@travetto/boot';
 
-const px = process.exit;
+const ogExit = process.exit;
 
 const MAX_SHUTDOWN_TIME = EnvUtil.getInt('MAX_SHUTDOWN_WAIT', 2000);
 
 type UnhandledHandler = (err: Error, prom?: Promise<any>) => boolean | undefined | void;
 type Listener = { name: string, handler: Function, final?: boolean };
-
-// TODO: Expose globally
 
 /**
  * Shutdown manager, allowing for hooks into the shutdown process.
@@ -35,6 +33,7 @@ export class ShutdownManager {
     // Retain unused listeners for final attempt, if needed
     this.listeners = this.listeners.filter(x => exitCode < 0 && x.final);
 
+    // Handle each listener
     for (const listener of listeners) {
       const { name, handler } = listener;
 
@@ -42,6 +41,7 @@ export class ShutdownManager {
         console.debug(`Starting ${name}`);
         const res = handler();
         if (res && res.then) {
+          // If a promise, queue for handling
           promises.push(res as Promise<any>);
           res
             .then(() => console.debug(`Completed shut down ${name}`))
@@ -61,7 +61,7 @@ export class ShutdownManager {
 
     if (this.shutdownCode > 0) { // Killed twice
       if (exitCode > 0) { // Handle force kill
-        px(exitCode);
+        ogExit(exitCode);
       } else {
         return;
       }
@@ -70,12 +70,15 @@ export class ShutdownManager {
     }
 
     try {
+      // If the err is not an exit code
       if (err && typeof err !== 'number') {
         console.error(err);
       }
 
+      // Get list of all pending listeners
       const promises = await this.getAvailableListeners(exitCode);
 
+      // Run them all, with the ability for the shutdown to preempt
       if (promises.length) {
         const finalRun = Promise.race([
           ...promises,
@@ -89,7 +92,7 @@ export class ShutdownManager {
     }
 
     if (this.shutdownCode >= 0) {
-      px(this.shutdownCode);
+      ogExit(this.shutdownCode);
     }
   }
 

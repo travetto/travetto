@@ -20,7 +20,7 @@ let apps: CachedAppConfig[];
 export async function setup() {
   try {
     apps = await AppListUtil.getList();
-    listHelper = HelpUtil.generateAppHelpList.bind(null, apps, {});
+    listHelper = HelpUtil.generateAppHelpList.bind(HelpUtil, apps, {});
   } catch (e) {
     console.error(e);
     process.exit(1);
@@ -94,7 +94,7 @@ export function init() {
         if (!selected) {
           if (apps.length) {
             // Show list
-            listHelper = HelpUtil.generateAppHelpList.bind(null, apps, cmd);
+            listHelper = HelpUtil.generateAppHelpList.bind(HelpUtil, apps, cmd);
           }
           // Show help always exists when it's done
           Util.showHelp(cmd, app ? `${app} is an unknown application` : 'You must specify an application to run');

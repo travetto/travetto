@@ -99,7 +99,7 @@ export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvid
 
     if (oldPassword !== undefined) {
       if (oldPassword === ident.resetToken) {
-        if (ident.resetExpires.getTime() < Date.now()) {
+        if (ident.resetExpires && ident.resetExpires.getTime() < Date.now()) {
           throw new AppError('Reset token has expired', 'data');
         }
       } else {

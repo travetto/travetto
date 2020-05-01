@@ -67,7 +67,7 @@ export class AuthUtil {
   }
 
   /**
-   * Build a permission checker off of permissions to include, and exclude
+   * Build a permission checker off of an include, and exclude set
    *
    * @param include Which permissions to include
    * @param exclude Which permissions to exclude

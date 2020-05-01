@@ -1,5 +1,5 @@
 import { ScanApp } from './scan-app';
-import { SystemUtil } from './system';
+import { SystemUtil } from './internal/system';
 
 interface Initializer {
   action: Function;

@@ -32,6 +32,10 @@ export class AuthService {
    */
   async login(req: Request, res: Response, identityProviders: symbol[]): Promise<AuthContext | undefined> {
     let lastError: Error | undefined;
+
+    /**
+     * Attempt to check login with multiple identity providers
+     */
     for (const provider of identityProviders) {
       try {
         const idp = this.identityProviders.get(provider.toString())!;
@@ -50,6 +54,7 @@ export class AuthService {
       console.error(lastError);
     }
 
+    // Take the last error and return
     const err = new AppError('Unable to authenticate', 'authentication');
     err.stack = lastError?.stack ?? err.stack;
     throw err;
