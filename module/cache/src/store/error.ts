@@ -1,4 +1,4 @@
 import { AppError } from '@travetto/base';
 
-// TODO: Document
+/** Cache Error Class */
 export class CacheError extends AppError { }

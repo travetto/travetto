@@ -16,7 +16,9 @@ export class CacheModel {
   entry: string;
 }
 
-// TODO: Document
+/**
+ * A cache store backed by @travetto/model 
+ */
 export class ModelCacheStore extends CullableCacheStore {
 
   constructor(public modelService: ModelService) {

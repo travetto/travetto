@@ -5,7 +5,7 @@ import * as fileType from 'file-type';
 import * as crypto from 'crypto';
 import * as mime from 'mime';
 
-import { Asset, AssetMetadata } from './types';
+import { Asset } from './types';
 
 const fsStat = util.promisify(fs.stat);
 const fsOpen = util.promisify(fs.open);
@@ -84,7 +84,7 @@ export class AssetUtil {
   /**
    * Convert local file to asset structure
    */
-  static async fileToAsset(file: string, metadata: Partial<AssetMetadata> = {}): Promise<Asset> {
+  static async fileToAsset(file: string, metadata: Partial<Asset['metadata']> = {}): Promise<Asset> {
     let hash: string | undefined = metadata.hash;
 
     if (!hash) {

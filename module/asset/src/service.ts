@@ -29,15 +29,15 @@ export class AssetService {
     return this.source.info(file);
   }
   /**
-   * Stores an asset with the optional ability to upsert if the file is already found. If not
-   * upserting and file exists, an error will be thrown.
+   * Stores an asset with the optional ability to overwrite if the file is already found. If not
+   * overwriting and file exists, an error will be thrown.
    */
-  async write(asset: Asset, upsert = true, strategy?: AssetNamingStrategy): Promise<string> {
+  async write(asset: Asset, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
 
     // Apply strategy on save
     asset.path = (strategy ?? this.namingStrategy!).getPath(asset);
 
-    if (!upsert) {
+    if (!overwriteIfFound) {
       let missing = false;
       try {
         await this.info(asset.path);

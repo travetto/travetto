@@ -2,14 +2,22 @@ import * as crypto from 'crypto';
 
 import { Util } from '@travetto/base';
 
-// TODO: Document
+/**
+ * Simple caching utils
+ */
 export class CacheStoreUtil {
 
+  /**
+   * Compute a cache key off the input params for a function
+   */
   static computeKey(params: any) {
     const value = this.storeAsSafeJSON(params, true);
     return crypto.createHash('sha1').update(value).digest('hex');
   }
 
+  /**
+   * Convert value to safe JSON for persistance
+   */
   static storeAsSafeJSON(value: any, all = false) {
     if (value === null || value === undefined) {
       return value;
@@ -22,6 +30,9 @@ export class CacheStoreUtil {
     return Buffer.from(JSON.stringify(value, replacer), 'utf8').toString('base64');
   }
 
+  /**
+   * Read safe JSON back into an object
+   */
   static readAsSafeJSON(value: string) {
     return value ? JSON.parse(Buffer.from(value, 'base64').toString('utf8')) : value;
   }

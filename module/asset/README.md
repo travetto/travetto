@@ -3,17 +3,7 @@ travetto: Asset
 
 This module provides the framework for storing/retrieving assets. 
 
-The asset module requires an [`AssetSource`](./src/service/source.ts) to provide functionality for reading and writing files. The `AssetSource` will need to be configured to be picked up by the `AssetService`
-
-**Code: Registering Asset Source**
-```typescript
-class AppConfig {
-  @InjectableFactory()
-  static getSource(): AssetSource {
-    return new CustomAssetSource();
-  }
-}
-```
+The asset module requires an [`AssetSource`](./src/service/source.ts) to provide functionality for reading and writing files. 
 
 **Install: primary**
 ```bash
@@ -27,9 +17,9 @@ You will need to select one of the available providers to serve as your `AssetSo
 $ npm install @travetto/asset-{provider}
 ```
 
-Storing of and retrieving assets uses the [`AssetService`](./src/service/asset.ts).  Below you can see an example of storing and retrieving a user's profile image.
+Reading of and writing assets uses the [`AssetService`](./src/service/asset.ts).  Below you can see an example dealing with a user's profile image.
 
-**Code: Storing Profile Images**
+**Code: User Profile Images**
 ```typescript
 @Injectable()
 class UserProfileService {
@@ -66,3 +56,37 @@ class AssetNamingStrategy {
 ```
 
 By extending this, and making it `@Injectable`, the naming strategy will become the default for the system.  
+
+## Advanced Usage
+In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the [`Asset`](./src/types.ts) looks like:
+
+**Code: Asset Structure**
+```typescript
+export interface Asset {
+  stream: NodeJS.ReadableStream; // This will not be provided on the request for information only
+  size: number;
+  path: string; // Path in remote service
+  contentType: string;
+    metadata: {
+    name: string;
+    title: string;
+    hash: string;
+    createdDate: Date;
+    tags?: string[]; // Tags for defining additional information on the asset
+  };
+}
+
+```
+
+To get the asset information, you would call:
+
+**Code: Fetching Asset Info**
+```typescript 
+  async checkImageGroup(userId:string) {
+    const user = await this.model.getById(userId);
+    const info = await this.asset.info(user.profileImage);
+
+    // Check asset's tags for a specific group
+    return info.metadata?.tags.includes(user.group);
+  }
+```
