@@ -16,7 +16,9 @@ const fsWrite = util.promisify(fs.writeFile);
 const fsUpdateTime = util.promisify(fs.utimes);
 const fsUnlink = util.promisify(fs.unlink);
 
-// TODO: Document
+/**
+ * A cache store backed into the file system
+ */
 export class FileCacheStore<T extends CacheEntry = CacheEntry> extends CullableCacheStore<T> {
 
   folder = FsUtil.resolveUnix(os.tmpdir(), Util.uuid(6));
