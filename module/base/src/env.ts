@@ -5,18 +5,47 @@ const PROD_KEY = 'prod';
 /**
  * General Environmental state for the application
  */
-// TODO: Document
 class $Env {
 
   private profiles: Set<string>;
 
+  /**
+   * The application env.  Generally 'prod', 'dev', or 'test'
+   */
   readonly env: string;
+  /**
+   * The root directory for the application
+   */
   readonly cwd: string;
+
+  /**
+   * If, and only if the `.env` property is equal to 'prod'
+   */
   readonly prod: boolean;
+
+  /**
+   * Indicates if the application is in watch mode
+   */
   readonly watch: boolean;
-  readonly debug: boolean | string;
-  readonly trace: boolean | string;
+
+  /**
+   * Determines if the debug log level should be visible
+   */
+  readonly debug: boolean;
+
+  /**
+   * Determines if the trace log level should be visible
+   */
+  readonly trace: boolean;
+
+  /**
+   * Whether or not startup logging should be suppressed
+   */
   readonly quietInit: boolean;
+
+  /**
+   * Additional locations for the application search paths
+   */
   readonly appRoots: string[];
 
   constructor() {
@@ -49,10 +78,16 @@ class $Env {
       }, {} as any);
   }
 
+  /**
+   * Will return true if a profile is active
+   */
   hasProfile(name: string) {
     return this.profiles.has(name);
   }
 
+  /**
+   * Determine if color is supported in the terminal
+   */
   get colorize() {
     return (process.stdout.isTTY && !EnvUtil.isTrue('NO_COLOR')) || EnvUtil.isTrue('FORCE_COLOR');
   }

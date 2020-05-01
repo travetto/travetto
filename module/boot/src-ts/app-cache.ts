@@ -7,7 +7,6 @@ import { EnvUtil } from './env';
 /**
  * Cache for all app related files, primarily typescript transpilation output
  */
-// TODO: Document
 class $AppCache extends FileCache {
   constructor() {
     super(EnvUtil.get('TRV_CACHE', `${FsUtil.cwd}/.trv_cache`));
@@ -54,7 +53,9 @@ class $AppCache extends FileCache {
     );
   }
 
-
+  /**
+   * Clear the cache
+   */
   reset() {
     for (const k of Object.keys(require.cache)) {
       if (k.includes('@travetto')) { // If a travetto module

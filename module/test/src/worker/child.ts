@@ -1,6 +1,6 @@
 import type { Compiler } from '@travetto/compiler';
 import { FsUtil, EnvUtil } from '@travetto/boot';
-import { PhaseManager, Shutdown } from '@travetto/base';
+import { PhaseManager, ShutdownManager } from '@travetto/base';
 import { CommUtil, ChildCommChannel } from '@travetto/worker';
 import { Events, RunEvent } from './types';
 
@@ -88,7 +88,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     console.error('Resetting');
     await PhaseManager.init('reset').run();
 
-    Shutdown.execute(-1);
+    ShutdownManager.execute(-1);
   }
 
   async runTest(event: RunEvent) {

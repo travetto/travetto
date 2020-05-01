@@ -1,6 +1,6 @@
 /**
- * The definition of an authentication
- * principal.
+ * A user principal, including permissions and details, does not imply
+ * authentication
  */
 export interface Principal {
   id: string;
@@ -10,8 +10,7 @@ export interface Principal {
 }
 
 /**
- * The identity of a user, as authenticated
- * by a provider.
+ * A principal that has been authenticated by a provider
  */
 export interface Identity extends Principal {
   provider: string;

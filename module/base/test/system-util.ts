@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 
-import { SystemUtil } from '../src/system-util';
+import { SystemUtil } from '../src/system';
 
 class Test2 { }
 

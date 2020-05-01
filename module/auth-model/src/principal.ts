@@ -14,6 +14,13 @@ export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvid
   @Inject()
   private modelService: ModelService;
 
+  /**
+   * Build a Model Principal Provider
+   *
+   * @param cls Model class for the principal
+   * @param toIdentity Convert a model to an identity
+   * @param fromIdentity Convert an identity to the model
+   */
   constructor(
     private cls: Class<T>,
     public toIdentity: (t: T) => RegisteredIdentity,

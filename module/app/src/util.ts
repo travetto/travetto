@@ -1,4 +1,4 @@
-import { Shutdown, Util } from '@travetto/base';
+import { ShutdownManager, Util } from '@travetto/base';
 import { ApplicationParameter, ApplicationHandle } from './types';
 
 export class AppUtil {
@@ -35,7 +35,7 @@ export class AppUtil {
   static async processHandle(o: ApplicationHandle) {
     // If we got back an app listener
     if ('kill' in o) {
-      Shutdown.onShutdown('app.handle', () => o.kill!()); // Tie shutdown into app kill
+      ShutdownManager.onShutdown('app.handle', () => o.kill!()); // Tie shutdown into app kill
     }
     if ('wait' in o) { // Wait for close signal
       await o.wait!();

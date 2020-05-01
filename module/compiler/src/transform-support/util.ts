@@ -262,7 +262,7 @@ export class TransformUtil {
 
   static collectImports(src: ts.SourceFile) {
     const pth = require.resolve(src.fileName);
-    const base = FsUtil.resolveNative(pth);
+    const base = FsUtil.resolveUnix(FsUtil.toUnix(pth));
 
     const imports = new Map<string, Import>();
 

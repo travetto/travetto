@@ -140,4 +140,10 @@ class UtilTests {
     assert(Util.isSimple(test));
     assert(Util.shallowClone(test) === test);
   }
+
+  @Test()
+  verifyUUID() {
+    assert(Util.uuid(32).length === 32);
+    assert(/^[0-9a-f]{32}$/.test(Util.uuid(32)));
+  }
 }

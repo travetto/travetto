@@ -28,11 +28,13 @@ function toList<T>(items: T | T[] | Set<T> | undefined) {
 /**
  * Set of internal system utilities
  */
-// TODO: Document
 export class SystemUtil {
 
   private static modCache = new Map<string, string>();
 
+  /**
+   * Convert input source to a buffer
+   */
   static async toBuffer(src: NodeJS.ReadableStream | Buffer | string): Promise<Buffer> {
     if (typeof src === 'string') {
       if (src.endsWith('==')) {
@@ -56,6 +58,9 @@ export class SystemUtil {
     }
   }
 
+  /**
+   * Convert input source to a stream
+   */
   static toReadable(src: NodeJS.ReadableStream | Buffer | string): NodeJS.ReadableStream {
     if (typeof src === 'string') {
       if (src.endsWith('==')) {
@@ -81,6 +86,9 @@ export class SystemUtil {
     return;
   }
 
+  /**
+   * Throttle a function to run only once within a specific threshold of time
+   */
   static throttle<T, U, V>(fn: (a: T, b: U) => V, threshold?: number): (a: T, b: U) => V;
   static throttle<T extends Function>(fn: T, threshold = 250) {
     let last = 0;
@@ -101,6 +109,9 @@ export class SystemUtil {
     } as any as T;
   }
 
+  /**
+   * A fast and naive hash, used for detecting changes in code
+   */
   static naiveHash(text: string) {
     let hash = 5381;
 
@@ -112,6 +123,9 @@ export class SystemUtil {
     return Math.abs(hash);
   }
 
+  /**
+   * Produces a satisfied ordering for a list of orderable elements
+   */
   static computeOrdering<T,
     U extends {
       after?: T | Set<T> | T[];

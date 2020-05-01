@@ -23,40 +23,51 @@ function execCmd(sync: boolean, cmd: string, ignoreErrors = false) {
 /**
  * Standard utils for interacting with the file system
  */
-// TODO: Convert to static class
-// TODO: Document
-class $FsUtil {
+export class FsUtil {
 
-  cwd: string;
+  static cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
 
-  constructor() {
-    this.cwd = this.toUnix(process.cwd()).replace(/\/$/, '');
-  }
+  /**
+   * Converts filename .ts to .js
+   */
+  static toJS = (x: string) => x.replace(/\.ts$/, '.js');
+  /**
+   * Converts filename .js to .ts
+   */
+  static toTS = (x: string) => x.replace(/\.js$/, '.ts');
 
-  toJS = (x: string) => x.replace(/\.ts$/, '.js');
-  toTS = (x: string) => x.replace(/\.js$/, '.ts');
-
-  toUnix(rest: string) {
+  /**
+   * Convert file to a unix format
+   */
+  static toUnix(rest: string) {
     return rest.replace(/[\\\/]+/g, '/');
   }
 
-  toNative(rest: string) {
+  /**
+   * Convert file to the native format
+   */
+  static toNative(rest: string) {
     return rest.replace(/[\\\/]+/g, path.sep);
   }
 
-  resolveUnix(...rest: string[]) {
+  /**
+   * Resolve path to use / for directory seps
+   */
+  static resolveUnix(...rest: string[]) {
     return this.toUnix(path.resolve(...rest));
   }
 
-  resolveNative(...rest: string[]) {
-    return this.toNative(path.resolve(...rest));
-  }
-
-  joinUnix(...rest: string[]) {
+  /**
+   * Path.join, and coercing to unix
+   */
+  static joinUnix(...rest: string[]) {
     return this.toUnix(path.join(...rest));
   }
 
-  makeLinkSync(actual: string, linkPath: string) {
+  /**
+   * Symlink, with some platform specific support
+   */
+  static makeLinkSync(actual: string, linkPath: string) {
     try {
       fs.lstatSync(linkPath);
     } catch (e) {
@@ -66,7 +77,10 @@ class $FsUtil {
     }
   }
 
-  async mkdirp(pth: string) {
+  /**
+   * Make directory and all intermediate ones as well
+   */
+  static async mkdirp(pth: string) {
     try {
       await fsStat(pth);
     } catch (e) {
@@ -75,7 +89,10 @@ class $FsUtil {
     }
   }
 
-  mkdirpSync(pth: string) {
+  /**
+   * Make directory and all intermediate ones as well, synchronously
+   */
+  static mkdirpSync(pth: string) {
     try {
       fs.statSync(pth);
     } catch (e) {
@@ -84,7 +101,10 @@ class $FsUtil {
     }
   }
 
-  unlinkCommand(pth: string) {
+  /**
+   * Command to remove a folder
+   */
+  static unlinkCommand(pth: string) {
     if (!pth || pth === '/') {
       throw new Error('Path has not been defined');
     }
@@ -95,7 +115,10 @@ class $FsUtil {
     }
   }
 
-  copyCommand(src: string, dest: string) {
+  /**
+   * Command to copy a folder
+   */
+  static copyCommand(src: string, dest: string) {
     if (process.platform === 'win32') {
       return `xcopy /y /h /s ${this.toNative(src)} ${this.toNative(dest)}`;
     } else {
@@ -103,17 +126,24 @@ class $FsUtil {
     }
   }
 
-  unlinkRecursiveSync(pth: string, ignore = false) {
+  /**
+   * Remove directory, determine if errors should be ignored
+   */
+  static unlinkRecursiveSync(pth: string, ignore = false) {
     return execCmd(true, this.unlinkCommand(pth), ignore);
   }
 
-  unlinkRecursive(pth: string, ignore = false) {
+  /**
+   * Remove directory, determine if errors should be ignored
+   */
+  static unlinkRecursive(pth: string, ignore = false) {
     return execCmd(false, this.unlinkCommand(pth), ignore);
   }
 
-  copyRecursiveSync(src: string, dest: string, ignore = false) {
+  /**
+   * Remove directory, determine if errors should be ignored, synchronously
+   */
+  static copyRecursiveSync(src: string, dest: string, ignore = false) {
     return execCmd(true, this.copyCommand(src, dest), ignore);
   }
 }
-
-export const FsUtil = new $FsUtil();

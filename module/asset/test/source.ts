@@ -1,89 +1,55 @@
-import * as assert from 'assert';
+import { Suite, BeforeEach } from '@travetto/test';
+import { Injectable } from '@travetto/di';
 
-import { Test, BeforeAll } from '@travetto/test';
-import { DependencyRegistry } from '@travetto/di';
-import { ResourceManager } from '@travetto/base';
-import { Class, RootRegistry } from '@travetto/registry';
-
-import { HashNamingStrategy, AssetService, AssetUtil } from '..';
+import { BaseAssetSourceSuite } from './lib/source';
 import { AssetSource } from '../src/source';
+import { Asset } from '../src/types';
 
-export abstract class BaseAssetSourceSuite {
+@Injectable()
+class Config { }
 
-  abstract get sourceClass(): Class<AssetSource>;
-  abstract get configClass(): Class<any>;
+@Injectable()
+class MemorySource extends AssetSource {
+  data = new Map<string, Asset>();
 
-  get source() {
-    return DependencyRegistry.getInstance(this.sourceClass);
+  async write(asset: Asset, stream: NodeJS.ReadableStream) {
+    asset.stream = stream;
+    this.data.set(asset.path, asset);
   }
 
-  get service() {
-    return DependencyRegistry.getInstance(AssetService);
-  }
-
-  get config() {
-    return DependencyRegistry.getInstance(this.configClass);
-  }
-
-  @BeforeAll()
-  async initAll() {
-    ResourceManager.addPath(__dirname);
-    await RootRegistry.init();
-    const config = await this.config;
-    if ('namespace' in config) {
-      config.namespace = `random_${Math.trunc(Math.random() * 10000)}`; // Randomize namespace
+  async read(key: string) {
+    if (this.data.has(key)) {
+      return this.data.get(key)!.stream;
+    } else {
+      throw new Error('Not found');
     }
   }
 
-  @Test()
-  async saveBasic() {
-    const service = await this.service;
-    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
-    const file = await AssetUtil.fileToAsset(pth);
-
-    const out = await service.save(file);
-    assert(file.path === out);
+  async info(key: string) {
+    if (this.data.has(key)) {
+      return this.data.get(key)!;
+    } else {
+      throw new Error('Not found');
+    }
   }
 
-  @Test()
-  async saveHashed() {
-    const service = await this.service;
-    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
-    const file = await AssetUtil.fileToAsset(pth);
-    const outHashed = await service.save(file, false, new HashNamingStrategy());
-    const hash = await AssetUtil.hashFile(pth);
-    assert(outHashed.replace(/\//g, '') === hash);
+  async delete(key: string) {
+    if (this.data.has(key)) {
+      this.data.delete(key);
+    } else {
+      throw new Error('Not found');
+    }
   }
+}
 
-  @Test()
-  async saveAndGet() {
-    const service = await this.service;
-    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
-    const file = await AssetUtil.fileToAsset(pth);
-    await service.save(file);
+@Suite()
+export class AssetSourceTest extends BaseAssetSourceSuite {
 
-    const saved = await service.get(pth);
+  sourceClass = MemorySource;
+  configClass = Config;
 
-    assert(file.contentType === saved.contentType);
-    assert(file.size === saved.size);
-    assert.deepStrictEqual(file.metadata, saved.metadata);
-  }
-
-  @Test()
-  async saveAndRemove() {
-    const service = await this.service;
-    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
-    const file = await AssetUtil.fileToAsset(pth);
-    await service.save(file);
-
-    const out = await service.info(pth);
-
-    assert(out.path === pth);
-
-    await service.remove(pth);
-
-    await assert.rejects(async () => {
-      await service.info(pth);
-    });
+  @BeforeEach()
+  async resetDb() {
+    (await this.source as MemorySource).data.clear();
   }
 }

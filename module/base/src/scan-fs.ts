@@ -6,7 +6,6 @@ import { FsUtil } from '@travetto/boot';
 const fsReaddir = util.promisify(fs.readdir);
 const fsLstat = util.promisify(fs.lstat);
 const fsRealpath = util.promisify(fs.realpath);
-const fsReadFile = util.promisify(fs.readFile);
 
 export interface ScanEntry {
   file: string;
@@ -28,17 +27,27 @@ export interface ReadEntry {
 /**
  * File system scanning utilities
  */
-// TODO: Document
 export class ScanFs {
 
+  /**
+   * Detect if entry is a directory
+   */
   static isDir(x: ScanEntry) {
     return x.stats.isDirectory() || x.stats.isSymbolicLink();
   }
 
+  /**
+   * Detect if entry is not a directory
+   */
   static isNotDir(x: ScanEntry) {
-    return !x.stats.isDirectory() && !x.stats.isSymbolicLink();
+    return !this.isDir(x);
   }
 
+  /**
+   * Scan a given directory, with the provided handler and base directory.
+   * Performs a breadth first search, and will deference symlinks to prevent
+   * infinite exploration.
+   */
   static async scanDir(handler: ScanHandler, base: string) {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
@@ -79,6 +88,9 @@ export class ScanFs {
     return out;
   }
 
+  /**
+   * Scan folders multiple times, once per handler, and union the results
+   */
   static async bulkScanDir(handlers: ScanHandler[], base: string) {
     const res = await Promise.all(handlers.map(x => this.scanDir(x, base)));
     const names = new Set();
@@ -94,6 +106,9 @@ export class ScanFs {
     return out;
   }
 
+  /**
+   * Same as scanDir, but synchronous
+   */
   static scanDirSync(handler: ScanHandler, base: string) {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
@@ -137,6 +152,9 @@ export class ScanFs {
     return out;
   }
 
+  /**
+   * Scan folders multiple times, once per handler, and union the results, synchronously
+   */
   static bulkScanDirSync(handlers: ScanHandler[], base: string) {
     const names = new Set();
     const out = [];
@@ -149,26 +167,5 @@ export class ScanFs {
       }
     }
     return out;
-  }
-
-  static bulkRequire(handlers: ScanHandler[], cwd: string) {
-    return this.bulkScanDirSync(handlers, cwd)
-      .filter(x => this.isNotDir(x)) // Skip folders
-      .map(x => require(x.file))
-      .filter(x => !!x); // Return non-empty values
-  }
-
-  static async bulkRead(handlers: ScanHandler[], base: string) {
-    const files = await this.bulkScanDir(handlers, base);
-    const promises = files
-      .filter(x => this.isNotDir(x))
-      .map(x => fsReadFile(x.file, 'utf-8').then(d => ({ name: x.file, data: d })));
-    return await Promise.all(promises);
-  }
-
-  static bulkReadSync(handlers: ScanHandler[], base: string) {
-    return this.bulkScanDirSync(handlers, base)
-      .filter(x => this.isNotDir(x))
-      .map(x => ({ name: x.file, data: fs.readFileSync(x.file, 'utf-8') }));
   }
 }

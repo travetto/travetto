@@ -3,7 +3,7 @@ import * as aws from 'aws-sdk';
 import { Suite, BeforeEach, AfterEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { Util } from '@travetto/base';
-import { BaseAssetSourceSuite } from '@travetto/asset/test/source';
+import { BaseAssetSourceSuite } from '@travetto/asset/test/lib/source';
 
 import { S3AssetConfig } from '../src/config';
 import { S3AssetSource } from '../src/source';

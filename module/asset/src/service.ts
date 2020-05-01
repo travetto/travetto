@@ -3,7 +3,7 @@ import { AppError } from '@travetto/base';
 
 import { Asset } from './types';
 import { AssetSource } from './source';
-import { AssetNamingStrategy, SimpleNamingStrategy } from './strategy';
+import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
 
 /**
  * Services asset CRUD operations.  Takes in a source is defined elsewhere.
@@ -21,8 +21,8 @@ export class AssetService {
     }
   }
 
-  remove(path: string) {
-    return this.source.remove(path);
+  delete(path: string) {
+    return this.source.delete(path);
   }
 
   info(file: string) {

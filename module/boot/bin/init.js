@@ -1,5 +1,9 @@
 #!/usr/bin/env node
-// TODO: Document
+
+/**
+ * Initialization function for all applications, this provides the
+ * necessary structure for handling standard dev and framework dev
+ */
 function init() {
   const cwd = process.cwd();
   const root = !process.env.TRV_DEV ? '..' : // Standard
@@ -9,7 +13,7 @@ function init() {
   require(`${root}/src/register`).RegisterUtil.init();
 }
 
-if (!global.trvInit) { // Register once
+if (!global.trvInit) { // Register once, and mark
   init();
 }
 

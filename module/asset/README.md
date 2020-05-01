@@ -40,7 +40,7 @@ class UserProfileService {
   ) {}
 
   async saveProfileImage(userId: string, image: Asset) {
-    const path = await this.asset.set(image);
+    const path = await this.asset.write(image);
     const user = await this.model.getById(User, userId);
     user.profileImage = path;
     await this.model.update(User, user);
@@ -48,7 +48,7 @@ class UserProfileService {
 
   async getProfileImage(userId:string) {
     const user = await this.model.getById(userId);
-    return await this.asset.get(user.profileImage);
+    return await this.asset.read(user.profileImage);
   }
 }
 ```
@@ -56,7 +56,7 @@ class UserProfileService {
 ## Naming Strategies
 By default, the assets are stored by path, as specified in the [`Asset`](./src/types.ts) object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
 
-The underlying contract for a [`AssetNamingStrategy`](./src/strategy.ts) looks like:
+The underlying contract for a [`AssetNamingStrategy`](./src/naming.ts) looks like:
 
 **Code: AssetNamingStrategy**
 ```typescript

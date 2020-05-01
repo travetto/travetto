@@ -29,7 +29,7 @@ export class MongoAssetSource extends AssetSource {
     this.bucket = new mongo.GridFSBucket(this.mongoClient.db());
   }
 
-  async set(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
+  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
     const writeStream = this.bucket.openUploadStream(file.path, {
       contentType: file.contentType,
       metadata: file.metadata
@@ -57,7 +57,7 @@ export class MongoAssetSource extends AssetSource {
     throw new Error('Unable to find written file');
   }
 
-  async get(filename: string): Promise<NodeJS.ReadableStream> {
+  async read(filename: string): Promise<NodeJS.ReadableStream> {
     return this.bucket.openDownloadStreamByName(filename);
   }
 

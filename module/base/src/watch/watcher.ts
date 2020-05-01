@@ -5,13 +5,16 @@ import { FsUtil } from '@travetto/boot/src/fs-util';
 import { Env } from '../env';
 import { ScanEntry, ScanHandler, ScanFs } from '../scan-fs';
 
-import { SystemUtil } from '../system-util';
+import { SystemUtil } from '../system';
 
-interface Options {
-  maxListeners?: number;
-  interval: number;
-  debounceDelay: number;
-  cwd: string;
+/**
+ * Watch Options
+ */
+interface WatcherOptions {
+  maxListeners?: number; // Max number of file listeners
+  interval: number; // Polling interval for watching
+  debounceDelay: number; // Delay in debounce on changes
+  cwd: string; // Starting location
 }
 
 /**
@@ -27,9 +30,14 @@ export class Watcher extends EventEmitter {
   private pending = true;
   private suppress = false;
 
-  private options: Options;
+  private options: WatcherOptions;
 
-  constructor(opts: Partial<Options> = {}) {
+  /**
+   * Create a new watcher, priming the root direction
+   * as the starting point
+   * @param opts
+   */
+  constructor(opts: Partial<WatcherOptions> = {}) {
     super();
 
     this.options = {
@@ -40,7 +48,7 @@ export class Watcher extends EventEmitter {
     };
 
     // Set maxListeners
-    if (this.options.maxListeners != null) {
+    if (this.options.maxListeners !== undefined) {
       this.setMaxListeners(this.options.maxListeners);
       super.setMaxListeners(this.options.maxListeners);
     }
@@ -52,6 +60,9 @@ export class Watcher extends EventEmitter {
     });
   }
 
+  /**
+   * Handle when a directory if the target of a change event
+   */
   private processDirectoryChange(dir: ScanEntry) {
     dir.children = dir.children ?? [];
 
@@ -112,6 +123,9 @@ export class Watcher extends EventEmitter {
     });
   }
 
+  /**
+   * Emit change to file
+   */
   private registryEmit(type: string, payload?: any) {
     if (!this.suppress) {
       console.trace('Watch Event', type, payload && payload.file);
@@ -119,6 +133,9 @@ export class Watcher extends EventEmitter {
     }
   }
 
+  /**
+   * Start watching a directory using fs.watch
+   */
   private watchDirectory(entry: ScanEntry) {
     if (ScanFs.isNotDir(entry)) {
       throw new Error(`Not a directory: ${entry.file}`);
@@ -143,6 +160,9 @@ export class Watcher extends EventEmitter {
     }
   }
 
+  /**
+   * Start watching a file.  Registers a poller using fs.watch
+   */
   private watchFile(entry: ScanEntry) {
     if (ScanFs.isDir(entry)) {
       throw new Error(`Not a file: ${entry.file}`);
@@ -177,6 +197,9 @@ export class Watcher extends EventEmitter {
     }
   }
 
+  /**
+   * Stop watching a file
+   */
   private unwatchFile(entry: ScanEntry) {
     if (this.pollers.has(entry.file)) {
       console.trace('Unwatching File', entry.file);
@@ -186,6 +209,9 @@ export class Watcher extends EventEmitter {
     }
   }
 
+  /**
+   * Stop watching a directory
+   */
   private unwatchDirectory(entry: ScanEntry) {
     if (this.watchers.has(entry.file)) {
       console.trace('Unwatching Directory', entry.file);
@@ -200,6 +226,9 @@ export class Watcher extends EventEmitter {
     }
   }
 
+  /**
+   * Handle watch error
+   */
   handleError(err: Error & { code?: string }) {
     if (err.code === 'EMFILE') {
       this.registryEmit('error', new Error('EMFILE: Too many opened files.'));
@@ -207,6 +236,9 @@ export class Watcher extends EventEmitter {
     this.registryEmit('error', err);
   }
 
+  /**
+   * Close the watcher, releasing all the file system pollers
+   */
   close() {
     for (const [, watcher] of this.watchers) {
       watcher.close();
@@ -225,6 +257,9 @@ export class Watcher extends EventEmitter {
     });
   }
 
+  /**
+   * Add new patterns of things to search for or to exclude from watching
+   */
   add(handlers: (string | ScanHandler)[]) {
     const finalHandlers = handlers.map(x =>
       typeof x === 'string' ? { testFile: (rel: string) => rel === x } : x
@@ -242,6 +277,10 @@ export class Watcher extends EventEmitter {
     }
   }
 
+  /**
+   * Start watching
+   * @param listenInitial Fire on first events, or only on subsequent changes
+   */
   run(listenInitial = true) {
     this.pending = false;
     if (this.pendingWatched.length) {
@@ -252,6 +291,9 @@ export class Watcher extends EventEmitter {
     }
   }
 
+  /**
+   * Watch an entry, could be a file or a folder
+   */
   watch(entry: ScanEntry) {
     if (this.watched.has(entry.file)) {
       return;
@@ -266,6 +308,9 @@ export class Watcher extends EventEmitter {
     }
   }
 
+  /**
+   * Unwatch a path
+   */
   unwatch(file: string) {
     if (!this.watched.has(file)) {
       return;

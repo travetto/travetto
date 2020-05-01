@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as gp from 'generic-pool';
 
-import { Shutdown } from '@travetto/base';
+import { ShutdownManager } from '@travetto/base';
 
 import { InputSource } from './input/types';
 
@@ -69,7 +69,7 @@ export class WorkPool<X, T extends Worker<X>> {
       }
     }, args);
 
-    Shutdown.onShutdown(`worker.pool.${this.constructor.name}`, () => this.shutdown());
+    ShutdownManager.onShutdown(`worker.pool.${this.constructor.name}`, () => this.shutdown());
   }
 
   async release(worker: T) {

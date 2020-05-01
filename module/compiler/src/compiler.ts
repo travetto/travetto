@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 import * as sourcemap from 'source-map-support';
 
 import { FsUtil, AppCache, FileCache, RegisterUtil, TranspileUtil } from '@travetto/boot';
-import { Env, Shutdown, FilePresenceManager, PresenceListener, ScanApp } from '@travetto/base';
+import { Env, ShutdownManager, FilePresenceManager, PresenceListener, ScanApp } from '@travetto/base';
 
 import { SourceManager } from './source';
 
@@ -24,7 +24,7 @@ class $Compiler extends EventEmitter {
     super();
 
     if (Env.watch) {
-      Shutdown.onUnhandled(err => {
+      ShutdownManager.onUnhandled(err => {
         if (err && (err.message ?? '').includes('Cannot find module')) { // Handle module reloading
           console.error(err);
           return true;
@@ -71,7 +71,7 @@ class $Compiler extends EventEmitter {
   reset() {
     this.sourceManager.reset();
     this.presenceManager.reset();
-    ScanApp.clearCache();
+    ScanApp.reset();
     this.active = false;
   }
 

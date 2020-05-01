@@ -63,7 +63,7 @@ export class S3AssetSource extends AssetSource {
     }
   }
 
-  async set(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
+  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
     // Upload to s3
     const upload = this.client.upload(this.q(file.path, {
       Body: stream,
@@ -79,7 +79,7 @@ export class S3AssetSource extends AssetSource {
     })).promise();
   }
 
-  async get(filename: string): Promise<NodeJS.ReadableStream | Readable> {
+  async read(filename: string): Promise<NodeJS.ReadableStream | Readable> {
     // Read from s3
     const res = await this.client.getObject(this.q(filename)).promise();
     if (res.Body instanceof Buffer) { // If response is buffer

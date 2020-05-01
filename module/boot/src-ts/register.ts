@@ -19,14 +19,13 @@ const Module = Mod as any as Module;
 declare const global: {
   trvInit: {
     libRequire: (x: string) => any;
-    deinit: () => void;
+    reset: () => void;
   };
 };
 
 /**
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
-// TODO: Document
 export class RegisterUtil {
   private static ogModuleLoad = Module._load!.bind(Module);
 
@@ -35,8 +34,16 @@ export class RegisterUtil {
     [require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')).name.split('/')[1]]: FsUtil.cwd // Initial
   };
 
+  /**
+   * The entrypoint for plugins and cli operations to ensure local framework development works
+   */
   static libRequire: (x: string) => any;
 
+  /**
+   * When a module load is requested
+   * @param request path to file
+   * @param parent parent Module
+   */
   private static onModuleLoad(request: string, parent: Module): any {
     try {
       const mod = this.ogModuleLoad.apply(null, [request, parent]);
@@ -59,10 +66,18 @@ export class RegisterUtil {
     }
   }
 
+  /**
+   * Compile and Transpile .ts file to javascript
+   * @param m node module
+   * @param tsf filename
+   */
   private static compile(m: Module, tsf: string) {
     return this.doCompile(m, TranspileUtil.transpile(tsf), tsf);
   }
 
+  /**
+   * Actually compile the content for loading in JS
+   */
   static doCompile(m: Module, content: string, tsf: string) {
     const jsf = FsUtil.toJS(tsf);
     try {
@@ -105,6 +120,9 @@ export class RegisterUtil {
     return pth;
   }
 
+  /**
+   * Initialization
+   */
   static init() {
     if (global.trvInit) {
       return;
@@ -126,7 +144,10 @@ export class RegisterUtil {
     global.trvInit = this;
   }
 
-  static deinit() {
+  /**
+   * Turn of registration
+   */
+  static reset() {
     if (!global.trvInit) {
       return;
     }

@@ -5,7 +5,6 @@ const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 /**
  * Common utilities for object detection/manipulation
  */
-// TODO: Document
 export class Util {
   private static deepAssignRaw(a: any, b: any, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
@@ -60,21 +59,12 @@ export class Util {
     return ret;
   }
 
-  static extractRegex(val: string | RegExp): RegExp {
-    let out: RegExp;
-    if (typeof val === 'string') {
-      if (REGEX_PAT.test(val)) {
-        const [, pat, mod] = val.match(REGEX_PAT) ?? [];
-        out = new RegExp(pat, mod);
-      } else {
-        out = new RegExp(val);
-      }
-    } else {
-      out = val;
-    }
-    return out;
-  }
-
+  /**
+   * Coerce an input of any type to the class provided
+   * @param input Input value
+   * @param type Class to coerce to (String, Boolean, Number, Date, RegEx, Object)
+   * @param strict Should a failure to coerce throw an error?
+   */
   static coerceType(input: any, type: typeof String, strict?: boolean): string;
   static coerceType(input: any, type: typeof Number, strict?: boolean): number;
   static coerceType(input: any, type: typeof Boolean, strict?: boolean): boolean;
@@ -115,14 +105,25 @@ export class Util {
         return res;
       }
       case RegExp: {
-        try {
-          return this.extractRegex(input);
-        } catch (err) {
-          if (strict) {
-            throw err;
-          } else {
-            return;
+        if (typeof input === 'string') {
+          try {
+            if (REGEX_PAT.test(input)) {
+              const [, pat, mod] = input.match(REGEX_PAT) ?? [];
+              return new RegExp(pat, mod);
+            } else {
+              return new RegExp(input);
+            }
+          } catch (err) {
+            if (strict) {
+              throw new Error(`Invalid regex: ${input}`);
+            } else {
+              return;
+            }
           }
+        } else if (strict) {
+          throw new Error('Invalid regex type');
+        } else {
+          return;
         }
       }
       case Object: {
@@ -138,15 +139,24 @@ export class Util {
     throw new Error(`Unknown type ${type.name}`);
   }
 
+  /**
+   * Clone top level properties to a new object
+   */
   static shallowClone(a: any) {
     return Array.isArray(a) ? a.slice(0) : (this.isSimple(a) ? a : { ...a });
   }
 
+  /**
+   * Is a value of primitive type
+   */
   static isPrimitive(el: any): el is (string | boolean | number | RegExp) {
     const type = typeof el;
     return el !== null && el !== undefined && (type === 'string' || type === 'boolean' || type === 'number' || el instanceof RegExp || el instanceof Date);
   }
 
+  /**
+   * Is a value a plain JS object, created using {}
+   */
   static isPlainObject(obj: any): obj is Record<string, any> {
     return typeof obj === 'object' // separate from primitives
       && obj !== undefined
@@ -155,19 +165,34 @@ export class Util {
       && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
   }
 
+  /**
+   * Is a value a function
+   */
   static isFunction(o: any): o is Function {
     const proto = o && Object.getPrototypeOf(o);
     return proto && (proto === Function.prototype || proto.constructor.name === 'AsyncFunction');
   }
 
+  /**
+   * Is a value a class
+   */
   static isClass(o: any) {
     return o && o.prototype && o.prototype.constructor !== Object.getPrototypeOf(Function);
   }
 
+  /**
+   * Is simple, as a primitive, function or class
+   */
   static isSimple(a: any) {
     return this.isPrimitive(a) || this.isFunction(a) || this.isClass(a);
   }
 
+  /**
+   * Deep assign from b to a
+   * @param a The target
+   * @param b The source
+   * @param mode How the assignment should be handled
+   */
   static deepAssign<T extends any, U extends any>(a: T, b: U, mode: | 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
     if (!a || this.isSimple(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
@@ -175,6 +200,9 @@ export class Util {
     return this.deepAssignRaw(a, b, mode) as T & U;
   }
 
+  /**
+   * Generate a random UUID
+   */
   static uuid(len: number = 32) {
     return crypto.randomBytes(Math.ceil(len / 2)).toString('hex').substring(0, len);
   }

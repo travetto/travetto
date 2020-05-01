@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { FsUtil } from '@travetto/boot';
-import { Shutdown, Util } from '@travetto/base';
+import { ShutdownManager, Util } from '@travetto/base';
 
 import { CullableCacheStore } from './cullable';
 import { CacheEntry } from '../types';
@@ -23,7 +23,7 @@ export class FileCacheStore<T extends CacheEntry = CacheEntry> extends CullableC
 
   constructor() {
     super();
-    Shutdown.onShutdown(`FileCache.${this.folder}`, () => this.clear());
+    ShutdownManager.onShutdown(`FileCache.${this.folder}`, () => this.clear());
     FsUtil.mkdirpSync(this.folder);
   }
 

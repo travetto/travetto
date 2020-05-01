@@ -8,7 +8,7 @@ export * from './src/error';
 export * from './src/console';
 export * from './src/shutdown';
 export * from './src/util';
-export * from './src/system-util';
+export * from './src/system';
 export * from './src/scan-app';
 export * from './src/scan-fs';
 export * from './src/watch/watcher';
