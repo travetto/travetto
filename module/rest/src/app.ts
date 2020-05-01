@@ -1,5 +1,6 @@
 import { ApplicationHandle } from '@travetto/app';
-import { AppInfo, AppError, SystemUtil } from '@travetto/base';
+import { AppInfo, AppError } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { Class, ChangeEvent } from '@travetto/registry';
 
@@ -22,8 +23,8 @@ export abstract class RestApp<T = any> {
   listening = false;
 
   info = {
-    TRAVETTO_VERSION: require('../package.json').version,
-    REST_PROVIDER: this.constructor.name,
+    travettoVersion: require('../package.json').version,
+    restProvider: this.constructor.name,
     ...AppInfo
   };
 

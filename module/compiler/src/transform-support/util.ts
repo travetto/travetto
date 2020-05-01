@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { resolve as pathResolve } from 'path';
+import { resolve as pathResolve, dirname } from 'path';
 
 import { RegisterUtil, FsUtil } from '@travetto/boot';
 import { Env, Util } from '@travetto/base';
@@ -347,7 +347,7 @@ export class TransformUtil {
       if (parts.length === 1) {
         parts.unshift('.');
       }
-      return { name: parts[1], source: FsUtil.resolveUnix(fileName, parts[0]) };
+      return { name: parts[1], source: FsUtil.resolveUnix(dirname(fileName), parts[0]) };
     }
   }
 }

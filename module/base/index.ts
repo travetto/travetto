@@ -1,5 +1,4 @@
-/// <reference path="./src/error.d.ts" />
-/// <reference path="./src/console.d.ts" />
+/// <reference path="./src/typings.d.ts" />
 
 export * from './src/app-info';
 export * from './src/env';
@@ -8,7 +7,6 @@ export * from './src/error';
 export * from './src/console';
 export * from './src/shutdown';
 export * from './src/util';
-export * from './src/system';
 export * from './src/scan-app';
 export * from './src/scan-fs';
 export * from './src/watch/watcher';

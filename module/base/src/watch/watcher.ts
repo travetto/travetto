@@ -5,7 +5,7 @@ import { FsUtil } from '@travetto/boot/src/fs-util';
 import { Env } from '../env';
 import { ScanEntry, ScanHandler, ScanFs } from '../scan-fs';
 
-import { SystemUtil } from '../system';
+import { SystemUtil } from '../internal/system';
 
 /**
  * Watch Options

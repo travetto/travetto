@@ -3,12 +3,12 @@ import { TagSet } from 'aws-sdk/clients/s3';
 import { Readable } from 'stream';
 
 import { SystemUtil } from '@travetto/base';
-import { AssetSource, Asset, AssetMetadata } from '@travetto/asset';
+import { AssetSource, Asset } from '@travetto/asset';
 import { Injectable } from '@travetto/di';
 
 import { S3AssetConfig } from './config';
 
-function toTagSet(metadata: AssetMetadata): TagSet {
+function toTagSet(metadata: Asset['metadata']): TagSet {
   return ['name', 'title', 'hash', 'createdDate', 'tags']
     .filter(x => x in metadata)
     .map(x => ({
@@ -25,7 +25,7 @@ function fromTagSet(tags: TagSet) {
     .reduce((acc, pair) => {
       (acc as any)[pair[0]] = pair[1];
       return acc;
-    }, {} as AssetMetadata);
+    }, {} as Asset['metadata']);
 
   if (map.createdDate) {
     map.createdDate = new Date(map.createdDate);

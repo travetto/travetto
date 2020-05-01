@@ -7,7 +7,8 @@ import { Identity } from '@travetto/auth';
 import { ModelPrincipalProvider } from '../principal';
 
 /**
- * Auth identity provider for the ModelProvider
+ * Provides an identity verification provider in conjunction with the
+ * provided principal source.
  */
 export class ModelIdentityProvider<U extends ModelCore> extends IdentityProvider {
 

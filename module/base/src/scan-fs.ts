@@ -8,20 +8,27 @@ const fsLstat = util.promisify(fs.lstat);
 const fsRealpath = util.promisify(fs.realpath);
 
 export interface ScanEntry {
+  /**
+   * Full file path
+   */
   file: string;
+  /**
+   * File path as a relative path, like a module
+   */
   module: string;
+  /**
+   * Stats information
+   */
   stats: fs.Stats;
+  /**
+   * List of child entries
+   */
   children?: ScanEntry[];
 }
 
 export interface ScanHandler {
   testFile?(relative: string, entry?: ScanEntry): boolean;
   testDir?(relative: string, entry?: ScanEntry): boolean;
-}
-
-export interface ReadEntry {
-  name: string;
-  data: string;
 }
 
 /**
