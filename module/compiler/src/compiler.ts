@@ -6,24 +6,35 @@ import * as sourcemap from 'source-map-support';
 import { FsUtil, AppCache, FileCache, RegisterUtil, TranspileUtil } from '@travetto/boot';
 import { Env, ShutdownManager, FilePresenceManager, PresenceListener, ScanApp } from '@travetto/base';
 
-import { SourceManager } from './source';
+import { Transpiler } from './transpiler';
 
-// TODO: Document
+/**
+ * Compilation orchestrator
+ */
 class $Compiler extends EventEmitter {
 
-  private sourceManager: SourceManager;
+  private transpiler: Transpiler;
 
   presenceManager: FilePresenceManager;
   active = false;
 
   constructor(
+    /**
+     * The working directory
+     */
     private cwd: string = Env.cwd,
+    /**
+     * The cache source
+     */
     private cache: FileCache = AppCache,
+    /**
+     * This of paths to compile against
+     */
     private rootPaths: string[] = ScanApp.getAppPaths()
   ) {
     super();
 
-    if (Env.watch) {
+    if (Env.watch) { // If watching, let unhandled imports not kill the program
       ShutdownManager.onUnhandled(err => {
         if (err && (err.message ?? '').includes('Cannot find module')) { // Handle module reloading
           console.error(err);
@@ -32,7 +43,7 @@ class $Compiler extends EventEmitter {
       }, 0);
     }
 
-    this.sourceManager = new SourceManager(this.cwd, this.cache, this.rootPaths);
+    this.transpiler = new Transpiler(this.cwd, this.cache, this.rootPaths);
     this.presenceManager = new FilePresenceManager({
       ext: '.ts',
       cwd: this.cwd,
@@ -43,14 +54,16 @@ class $Compiler extends EventEmitter {
     });
   }
 
-  private loadFile(fileName: string) {
-    return fs.readFileSync(fileName, 'utf-8');
-  }
-
+  /**
+   * Return list of root files captured by the compiler
+   */
   getRootFiles() {
-    return this.sourceManager.getRootFiles();
+    return this.transpiler.getRootFiles();
   }
 
+  /**
+   * Initialize the compiler
+   */
   init() {
     if (this.active) {
       return;
@@ -59,40 +72,55 @@ class $Compiler extends EventEmitter {
     const start = Date.now();
     this.active = true;
     require.extensions[TranspileUtil.ext] = this.compile.bind(this);
-    this.sourceManager.init();
+    this.transpiler.init();
     this.presenceManager.init();
 
     // register source maps
-    sourcemap.install(this.sourceManager.getSourceMapHandler());
+    sourcemap.install(this.transpiler.getSourceMapHandler());
 
     console.debug('Initialized', (Date.now() - start) / 1000);
   }
 
+  /**
+   * Reset the compiler
+   */
   reset() {
-    this.sourceManager.reset();
+    this.transpiler.reset();
     this.presenceManager.reset();
     ScanApp.reset();
     this.active = false;
   }
 
+  /**
+   * Notify of an add/remove/change event
+   */
   notify(type: keyof PresenceListener, fileName: string) {
     console.trace(`File ${type}`, fileName);
     this.emit(type, fileName);
   }
 
+  /**
+   * Remove file from require.cache, and possible the file system
+   */
   unload(fileName: string, unlink = false) {
-    this.sourceManager.unload(fileName, unlink); // Remove source
+    this.transpiler.unload(fileName, unlink); // Remove source
     const native = FsUtil.toNative(fileName);
     if (native in require.cache) {
       delete require.cache[native]; // Remove require cached element
     }
   }
 
+  /**
+   * Handle when a file is removed during watch
+   */
   removed(fileName: string) {
     this.unload(fileName, true);
     this.notify('removed', fileName);
   }
 
+  /**
+   * When a new file is added during watch
+   */
   added(fileName: string) {
     if (this.presenceManager.isWatchedFileKnown(fileName)) {
       this.unload(fileName);
@@ -101,23 +129,29 @@ class $Compiler extends EventEmitter {
     this.notify('added', fileName);
   }
 
+  /**
+   * When a file changes during watch
+   */
   changed(fileName: string) {
-    if (this.sourceManager.hashChanged(fileName, this.loadFile(fileName))) {
+    if (this.transpiler.hashChanged(fileName, fs.readFileSync(fileName, 'utf-8'))) {
       this.unload(fileName);
       require(fileName);
       this.notify('changed', fileName);
     }
   }
 
+  /**
+   * Compile a file, follows the same shape as `Module._compile`
+   */
   compile(m: NodeModule, tsf: string) {
     const isNew = !this.presenceManager.has(tsf);
     try {
-      return RegisterUtil.doCompile(m, this.sourceManager.getTranspiled(tsf), tsf);
+      return RegisterUtil.doCompile(m, this.transpiler.getTranspiled(tsf), tsf);
     } finally {
       // If known by the source manager, track it's presence
       //   some files will be transpile only, and should not trigger
       //   presence activity
-      if (isNew && this.sourceManager.hasContents(tsf)) {
+      if (isNew && this.transpiler.hasContents(tsf)) {
         this.presenceManager.addNewFile(tsf, false);
       }
     }

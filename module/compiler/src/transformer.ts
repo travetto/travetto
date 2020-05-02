@@ -8,17 +8,20 @@ import {
 // Local app support transformer, as well as library support transformer
 const TRANSFORMER_RE = /support\/transformer[.](.*?)[.]ts$/;
 
-// TODO: Document
+/**
+ * Manages the typescript transformers
+ */
 export class TransformerManager {
 
-  transformers: ts.CustomTransformers = {};
-  visitor: VisitorFactory<TransformerState>;
-  checker: ts.TypeChecker;
+  private cached: { before: ts.TransformerFactory<ts.SourceFile>[] };
+  transformers: (NodeTransformer<TransformerState> & { file: string })[] = [];
 
   constructor(private cwd: string) { }
 
+  /**
+   * Read all transformers from disk under the pattern support/transformer.*
+   */
   init() {
-    const allTransformers: (NodeTransformer<TransformerState> & { file: string })[] = [];
     const found = ScanApp.findSourceFiles(x => TRANSFORMER_RE.test(x), this.cwd)
       .filter(x =>
         !x.module.includes('@travetto') || !ScanApp.modAppExclude.includes(x.module.split(/@travetto\//)[1].split('/')[0]));
@@ -27,20 +30,20 @@ export class TransformerManager {
       const all = require(name.file);
       const resolved = Object
         .values(all)
-        .map(x => getTransformHandlers(x) as typeof allTransformers)
+        .map(x => getTransformHandlers(x) as this['transformers'])
         .filter(x => !!x && x.length > 0);
 
       for (const transformers of resolved) {
-        allTransformers.push(...transformers.map(x => {
+        this.transformers.push(...transformers.map(x => {
           x.file = name.module;
           return x;
         }));
       }
     }
 
-    if (!Env.quietInit) {
+    if (!Env.quietInit) { // Log loaded transformers
       console.debug('Transformers',
-        ...allTransformers.map(x => {
+        ...this.transformers.map(x => {
           const name = x.file.match(TRANSFORMER_RE)![1];
           const flags = [
             ...(x.target ? [] : ['all']),
@@ -52,19 +55,33 @@ export class TransformerManager {
       );
     }
 
-    this.visitor = new VisitorFactory(
-      src => new TransformerState(src, this.checker),
-      allTransformers
+    // Prepare a new visitor factory with a given type checker
+  }
+
+  build(checker: ts.TypeChecker) {
+    const visitor = new VisitorFactory(
+      src => new TransformerState(src, checker),
+      this.transformers
     );
 
-    this.transformers = {
-      before: [this.visitor.visitor()]
+    // Define transformers for the compiler
+    this.cached = {
+      before: [visitor.visitor()]
     };
   }
 
+  /**
+   * Get typescript transformer object
+   */
+  getTransformers() {
+    return this.cached;
+  }
+
+  /**
+   * Reset state
+   */
   reset() {
-    this.transformers = {};
-    delete this.visitor;
-    delete this.checker;
+    this.transformers = [];
+    delete this.cached;
   }
 }

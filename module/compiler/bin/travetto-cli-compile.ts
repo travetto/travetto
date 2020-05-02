@@ -4,7 +4,10 @@ import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
 import { CompileUtil } from './lib/util';
 
-// TODO: Document
+/**
+ * Command line support for pre-compiling the code with the ability to
+ * control the output target.
+ */
 export function init() {
 
   return CliUtil.program
