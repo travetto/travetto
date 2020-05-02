@@ -6,7 +6,7 @@ import { Test, BeforeAll } from '@travetto/test';
 import { WhereClause, ModelService } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 
-import { VisitStack } from '../../src/util';
+import { VisitStack } from '../../src/internal/util';
 import { SQLDialect } from '../../src/dialect';
 import { TestUtil } from '../util';
 import { DialectSuite as Suite } from '../decorator';

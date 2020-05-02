@@ -3,8 +3,8 @@ import { SchemaRegistry, FieldConfig, SchemaChangeEvent, Schema } from '@travett
 import { Util, AppError } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
 
-import { SQLUtil, VisitStack } from './util';
-import { DeleteWrapper, InsertWrapper, DialectState } from './types';
+import { SQLUtil, VisitStack } from './internal/util';
+import { DeleteWrapper, InsertWrapper, DialectState } from './internal/types';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
@@ -130,7 +130,7 @@ export abstract class SQLDialect implements DialectState {
       return 'NULL';
     } else if (conf.type === String) {
       if (value instanceof RegExp) {
-        const src = Util.extractRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
+        const src = Util.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
         return this.quote(src);
       } else {
         return this.quote(value);
@@ -361,7 +361,7 @@ export abstract class SQLDialect implements DialectState {
             }
             case '$regex': {
               const re = (v as RegExp);
-              const src = Util.extractRegex(re).source;
+              const src = Util.toRegex(re).source;
               const ins = re.flags && re.flags.includes('i');
 
               if (/^[\^]\S+[.][*][$]?$/.test(src)) {

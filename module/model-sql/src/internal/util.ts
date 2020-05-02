@@ -48,10 +48,16 @@ export class SQLUtil {
     foreignMap: Record<string, FieldConfig>;
   }>();
 
+  /**
+   * Creates a new visitation stack with the class as the root
+   */
   static classToStack(type: Class): VisitStack[] {
     return [{ type, name: type.name }];
   }
 
+  /**
+   * Clean results from db, by dropping internal fields
+   */
   static cleanResults<T>(dct: DialectState, o: T): T {
     if (Array.isArray(o)) {
       return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x)) as any;
@@ -69,6 +75,9 @@ export class SQLUtil {
     }
   }
 
+  /**
+   * Get all available fields at current stack path
+   */
   static getFieldsByLocation(stack: VisitStack[]) {
     const top = stack[stack.length - 1];
     const cls = SchemaRegistry.get(top.type);
@@ -118,6 +127,9 @@ export class SQLUtil {
     return ret;
   }
 
+  /**
+   * Process a schema structure, synchronously
+   */
   static visitSchemaSync(config: ClassConfig | FieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }) {
     const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
@@ -144,6 +156,9 @@ export class SQLUtil {
     }
   }
 
+  /**
+   * Visit a Schema structure
+   */
   static async visitSchema(config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }) {
     const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
@@ -170,6 +185,9 @@ export class SQLUtil {
     }
   }
 
+  /**
+   * Process a schema instance by visiting it synchronously.  This is synchronous to prevent concurrent calls from breaking
+   */
   static visitSchemaInstance<T extends ModelCore>(cls: Class<T>, instance: T, handler: VisitHandler<any, VisitInstanceNode<any>>) {
     const pathObj: any[] = [instance];
     this.visitSchemaSync(SchemaRegistry.get(cls), {
@@ -212,6 +230,9 @@ export class SQLUtil {
     });
   }
 
+  /**
+   * Get list of selected fields
+   */
   static select<T>(cls: Class<T>, select?: SelectClause<T>): FieldConfig[] {
     if (!select || Object.keys(select).length === 0) {
       return [{ type: cls, name: '*' } as FieldConfig];
@@ -236,6 +257,9 @@ export class SQLUtil {
     return [...toGet].map(el => localMap[el]);
   }
 
+  /**
+   * Get list of Order By clauses
+   */
   static orderBy<T>(cls: Class<T>, sort: SortClause<T>[]): OrderBy[] {
     return sort.map((cl: any) => {
       let schema: ClassConfig = SchemaRegistry.get(cls);
@@ -256,6 +280,9 @@ export class SQLUtil {
     });
   }
 
+  /**
+   * Find all dependent fields via child tables
+   */
   static collectDependents<T extends any>(dct: DialectState, parent: any, v: T[], field?: FieldConfig) {
     if (field) {
       const isSimple = SchemaRegistry.has(field.type);
@@ -280,6 +307,9 @@ export class SQLUtil {
     return mapping;
   }
 
+  /**
+   * Build table name via stack path
+   */
   static buildTable(list: VisitStack[]) {
     const top = list[list.length - 1] as any;
     if (!top[TABLE_SYM]) {
@@ -288,11 +318,17 @@ export class SQLUtil {
     return top[TABLE_SYM];
   }
 
+  /**
+   * Build property path for a table/field given the current stack
+   */
   static buildPath(list: VisitStack[]) {
     return list.map((el, i) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
   }
 
-  static async extractInserts<T>(cls: Class<T>, els: T[]): Promise<InsertWrapper[]> {
+  /**
+   * Get insert statements for a given class, and its child tables
+   */
+  static async getInserts<T>(cls: Class<T>, els: T[]): Promise<InsertWrapper[]> {
     const ins = {} as Record<string, InsertWrapper>;
 
     const track = (stack: VisitStack[], value: any) => {

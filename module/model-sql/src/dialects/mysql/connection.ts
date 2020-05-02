@@ -11,9 +11,8 @@ const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) =>
   ));
 
 /**
- * Connection support
+ * Connection support for mysql
  */
-// TODO: Document
 export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> {
 
   pool: mysql.Pool;

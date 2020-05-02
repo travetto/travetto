@@ -5,11 +5,13 @@ import { AsyncContext } from '@travetto/context';
 
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../../dialect';
-import { VisitStack } from '../../util';
+import { VisitStack } from '../../internal/util';
 import { PostgreSQLConnection } from './connection';
 
+/**
+ * Postgresql Dialect for the SQL Model Source
+ */
 @Injectable({ target: SQLDialect })
-// TODO: Document
 export class PostgreSQLDialect extends SQLDialect {
 
   conn: PostgreSQLConnection;

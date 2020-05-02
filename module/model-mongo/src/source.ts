@@ -16,12 +16,14 @@ import { Class } from '@travetto/registry';
 import { AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
-import { MongoUtil } from './util';
+import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
 import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
+/**
+ * Mongo-based model source
+ */
 @Injectable()
-// TODO: Document
 export class MongoModelSource extends ModelSource {
 
   private client: mongo.MongoClient;
