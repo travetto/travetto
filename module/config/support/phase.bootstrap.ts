@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Initializes the config source
+ */
 export const init = {
   key: 'config',
   after: 'base',

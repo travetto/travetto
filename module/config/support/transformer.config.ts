@@ -8,7 +8,12 @@ interface AutoState {
   [hasConfig]?: boolean;
 }
 
-// TODO: Document
+/**
+ * Enables the config classes `@Config` to not have to provide an empty value for every optional field
+ *
+ * By default typescript will compile away fields if they don't have a default value, and config source is
+ * relying on fields being available for enumeration.
+ */
 export class ConfigTransformer {
 
   @OnClass('trv/config/Config')
