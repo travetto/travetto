@@ -2,12 +2,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as commander from 'commander';
 
-import { Util } from '@travetto/cli/src/util';
+import { CliUtil } from '@travetto/cli/src/util';
 import { FsUtil } from '@travetto/boot/src/fs-util';
 
 // TODO: Document
 export function init() {
-  return Util.program
+  return CliUtil.program
     .command('rest-aws-lambda:build-sam')
     .option('-e --env [env]', 'Environment name', 'prod')
     .option('-o --output [output]', 'Output file', 'dist/template.yml')

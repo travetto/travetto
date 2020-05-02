@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as commander from 'commander';
 
-import { Util, CompletionConfig } from '@travetto/cli/src/util';
+import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
 
 import { handleFailure, CachedAppConfig } from './lib/util';
@@ -31,7 +31,7 @@ export async function setup() {
  * The main entry point for the application cli
  */
 export function init() {
-  return Util.program
+  return CliUtil.program
     .command('run [application] [args...]')
     .on('--help', () => {
       console.log(color`\n${{ title: 'Available Applications:' }}`);
@@ -40,12 +40,12 @@ export function init() {
     .allowUnknownOption()
     .option('-e, --env [env]', 'Application environment (dev|prod|<any>)', 'dev')
     .option('-r, --root [root]', 'Application root, defaults to associated root by name')
-    .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', Util.BOOLEAN_RE)
+    .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', CliUtil.BOOLEAN_RE)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
     .action(async (app: string, args: string[], cmd: commander.Command & AppCommand) => {
 
       // Determine if watch was passed in
-      cmd.watchReal = Util.TRUE_RE.test(cmd.watch ?? '');
+      cmd.watchReal = CliUtil.TRUE_RE.test(cmd.watch ?? '');
 
       // Setup profile
       cmd.profile = [
@@ -97,7 +97,7 @@ export function init() {
             listHelper = HelpUtil.generateAppHelpList.bind(HelpUtil, apps, cmd);
           }
           // Show help always exists when it's done
-          Util.showHelp(cmd, app ? `${app} is an unknown application` : 'You must specify an application to run');
+          CliUtil.showHelp(cmd, app ? `${app} is an unknown application` : 'You must specify an application to run');
         } else {
           // Run otherwise
           await RunUtil.run([app, ...args]);

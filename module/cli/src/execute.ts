@@ -3,7 +3,7 @@ import * as commander from 'commander';
 import * as fs from 'fs';
 import { FsUtil } from '@travetto/boot';
 
-import { Util, CompletionConfig } from './util';
+import { CliUtil, CompletionConfig } from './util';
 
 commander.version(require('../package.json').version);
 
@@ -142,17 +142,17 @@ export class ExecutionManager {
         }
         const prog = plugin.init();
         if (wantsHelp) {
-          Util.showHelp(prog);
+          CliUtil.showHelp(prog);
         }
       } catch (err) {
-        Util.showHelp(commander, `Unknown command ${cmd}`);
+        CliUtil.showHelp(commander, `Unknown command ${cmd}`);
       }
     } else {
       // Load all plugins
       this.loadAllPlugins().map(x => x.init());
       // Show help for all available commands
       if (!cmd || wantsHelp) {
-        Util.showHelp(commander);
+        CliUtil.showHelp(commander);
       }
     }
 

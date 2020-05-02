@@ -1,32 +1,13 @@
 import * as commander from 'commander';
-import * as fs from 'fs';
 
-import { Util, CompletionConfig } from '@travetto/cli/src/util';
+import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
-
-async function rewriteRuntimeDir(runtimeDir: string = process.cwd()) {
-  const { FsUtil, AppCache } = await import(`@travetto/boot`);
-
-  const files = fs.readdirSync(AppCache.cacheDir).map(x => FsUtil.resolveUnix(AppCache.cacheDir, x));
-
-  // Rewrite files to allow for presume different path
-  const FILES = `ScanApp.setFileEntries('.ts', [
-    ${files.map(x => `'${AppCache.toEntryName(x)}'`).join(',')}
-])`;
-
-  for (const file of files) {
-    const contents = fs.readFileSync(file, 'utf-8')
-      .replace(/ScanApp\.cache =.*/, x => `${x};\n${FILES}`) // Only for scan-app
-      .replace(/[/][/]#.*$/, '') // Drop source maps
-      .replace(new RegExp(FsUtil.cwd, 'g'), runtimeDir); // Rewrite paths
-    fs.writeFileSync(file, contents);
-  }
-}
+import { CompileUtil } from './lib/util';
 
 // TODO: Document
 export function init() {
 
-  return Util.program
+  return CliUtil.program
     .command('compile')
     .option('-c, --clean', 'Indicates if the cache dir should be cleaned')
     .option('-o, --output <output>', 'Output directory')
@@ -39,21 +20,21 @@ export function init() {
       }
 
       if (cmd.clean) {
-        Util.dependOn('clean');
+        CliUtil.dependOn('clean');
       }
 
       const { AppCache } = await import(`@travetto/boot`);
 
       //  Compile
       try {
-        await Util.fork(`${__dirname}/compile-target.js`, [], process.env);
+        await CliUtil.fork(`${__dirname}/compile-target.js`, [], process.env);
       } catch (err) {
         console.error(color`${{ failure: 'Failed' }} to compile to ${{ path: cmd.output ?? AppCache.cacheDir }}`, err);
         process.exit(1);
       }
 
       if (cmd.runtimeDir) {
-        await rewriteRuntimeDir(cmd.runtimeDir);
+        await CompileUtil.rewriteRuntimeDir(cmd.runtimeDir);
       }
 
       if (!cmd.quiet) {

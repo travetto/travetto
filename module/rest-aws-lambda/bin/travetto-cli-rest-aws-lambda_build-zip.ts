@@ -5,12 +5,12 @@ import * as fs from 'fs';
 import * as child_process from 'child_process';
 import * as commander from 'commander';
 
-import { Util } from '@travetto/cli/src/util';
+import { CliUtil } from '@travetto/cli/src/util';
 import { FsUtil } from '@travetto/boot/src/fs-util';
 
 // TODO: Document
 export function init() {
-  return Util.program
+  return CliUtil.program
     .command('rest-aws-lambda:build-zip')
     .option('-o --output [output]', 'Output file', 'dist/lambda.zip')
     .option('-w --workspace [workspace]', 'Workspace directory')
@@ -38,7 +38,7 @@ export function init() {
 
       fs.writeFileSync(`${cmd.workspace}/index.js`, `${dirVar}\n${lambda}`);
 
-      await Util.dependOn('compile', ['-o', './cache', '-r', '/var/task'], cmd.workspace);
+      await CliUtil.dependOn('compile', ['-o', './cache', '-r', '/var/task'], cmd.workspace);
 
       // Removing baggage
       FsUtil.unlinkRecursiveSync(`${cmd.workspace}/node_modules/typescript`);
