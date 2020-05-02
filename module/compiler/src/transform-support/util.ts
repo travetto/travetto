@@ -4,7 +4,7 @@ import { resolve as pathResolve, dirname } from 'path';
 import { RegisterUtil, FsUtil } from '@travetto/boot';
 import { Env, Util } from '@travetto/base';
 
-import { Documentation, Import } from './types/shared';
+import { DeclDocumentation, Import } from './types/shared';
 
 const exclude = new Set([
   'parent', 'checker', 'end', 'pos', 'id', 'source', 'sourceFile', 'getSourceFile',
@@ -268,7 +268,7 @@ export class TransformUtil {
   static readJSDocs(type: ts.Type | ts.Node) {
     let node = 'getSourceFile' in type ? type : this.getPrimaryDeclaration(this.getDeclarations(type));
 
-    const out: Documentation = {
+    const out: DeclDocumentation = {
       description: undefined,
       return: undefined,
       params: []

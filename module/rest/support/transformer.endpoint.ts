@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformUtil, TransformerState, res, OnClass, OnMethod, ParamDoc, Documentation
+  TransformUtil, TransformerState, res, OnClass, OnMethod, ParamDocumentation, DeclDocumentation
 } from '@travetto/compiler/src/transform-support';
 
 import { ParamConfig } from '../src/types';
@@ -13,13 +13,13 @@ const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 // TODO: Document
 export class RestTransformer {
 
-  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: Documentation) {
+  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation) {
     const pDec = state.findDecorator(node, 'trv/rest/Param');
 
     const pName = node.name.getText();
 
     let decConfig: ParamConfig = { name: pName } as any;
-    let commentConfig: ParamDoc = {} as any;
+    let commentConfig: ParamDocumentation = {} as any;
 
     const pDecArg = TransformUtil.getPrimaryArgument(pDec);
     if (pDecArg) {
@@ -33,7 +33,7 @@ export class RestTransformer {
     }
 
     const decs = (node.decorators ?? []).filter(x => x !== pDec);
-    commentConfig = (comments.params ?? []).find(x => x.name === decConfig.name) || {} as ParamDoc;
+    commentConfig = (comments.params ?? []).find(x => x.name === decConfig.name) || {} as ParamDocumentation;
 
     let rType: res.Type = state.resolveType(node);
     let array = false;
