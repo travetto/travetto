@@ -9,8 +9,12 @@ import { TransformerManager } from './transformer';
 
 const SIMPLE_COMPILATION = /support\/(transformer|phase)[.].+/;
 
-// TODO: Document
-export class SourceManager {
+/**
+ * Handles all transpilation from TS to JS.
+ * Manages the source code and typescript relationship.
+ * Also registers transformers for use in compilation
+ */
+export class Transpiler {
   private transformerManager: TransformerManager;
 
   private rootNames = new Set<string>();
@@ -29,13 +33,25 @@ export class SourceManager {
   }
 
   constructor(
+    /**
+     * Root directory
+     */
     private cwd: string,
+    /**
+     * Cache for transpilation
+     */
     private cache: FileCache,
+    /**
+     * Root paths to load files for
+     */
     private rootPaths: string[]
   ) {
     this.transformerManager = new TransformerManager(this.cwd);
   }
 
+  /**
+   * Read file from disk, using the transpile pre-processor on .ts files
+   */
   private readFile(fileName: string) {
     let content = ts.sys.readFile(fileName);
     if (!content) {
@@ -47,6 +63,9 @@ export class SourceManager {
     return content;
   }
 
+  /**
+   * Write file to disk, and set value in cache as well
+   */
   private writeFile(fileName: string, content: string) {
     fileName = FsUtil.toTS(fileName);
     this.contents.set(fileName, content);
@@ -54,10 +73,16 @@ export class SourceManager {
     this.cache.writeEntry(fileName, content);
   }
 
+  /**
+   * See if a file exists
+   */
   private fileExists(fileName: string) {
     return this.contents.has(fileName) || ts.sys.fileExists(fileName);
   }
 
+  /**
+   * Build typescript compilation host
+   */
   private getHost(): ts.CompilerHost {
     const host: ts.CompilerHost = {
       readFile: this.readFile,
@@ -69,14 +94,14 @@ export class SourceManager {
       getCanonicalFileName: x => x,
       getNewLine: () => ts.sys.newLine,
       useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
-      getSourceFile(this: SourceManager, fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void, shouldCreateNewSourceFile?: boolean) {
+      getSourceFile(this: Transpiler, fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void, shouldCreateNewSourceFile?: boolean) {
         if (!this.sources.has(fileName) || shouldCreateNewSourceFile) {
           const content = this.readFile(fileName)!;
           this.sources.set(fileName, ts.createSourceFile(fileName, content ?? '', languageVersion));
         }
         return this.sources.get(fileName);
       },
-      getDefaultLibLocation(this: SourceManager) {
+      getDefaultLibLocation(this: Transpiler) {
         return path.dirname(ts.getDefaultLibFilePath(this.compilerOptions));
       },
     };
@@ -86,7 +111,12 @@ export class SourceManager {
     return host;
   }
 
-  private getProgram(forFile?: string) {
+  /**
+   * Build typescript program
+   *
+   * @param forFile If this file is new, force a recompilation
+   */
+  private getProgram(forFile?: string): ts.Program {
     if (!this.program || (forFile && !this.rootNames.has(forFile))) {
       console.debug(`Loading program ${this.rootNames.size}`, forFile);
       if (forFile) {
@@ -98,23 +128,25 @@ export class SourceManager {
         host: this.getHost(),
         oldProgram: this.program
       });
-      this.transformerManager.checker = this.program.getTypeChecker();
+      this.transformerManager.build(this.program.getTypeChecker());
     }
     return this.program;
   }
 
+  /**
+   * Perform actual transpilation
+   */
   private transpile(fileName: string, force = false) {
     if (force || !this.cache.hasEntry(fileName)) {
       console.trace('Emitting', fileName.replace(this.cwd, ''));
 
       const prog = this.getProgram(fileName);
-
       const result = prog.emit(
         prog.getSourceFile(fileName),
         undefined,
         undefined,
         false,
-        this.transformerManager.transformers
+        this.transformerManager.getTransformers()
       );
 
       TranspileUtil.checkTranspileErrors(this.cwd, fileName, result.diagnostics);
@@ -127,6 +159,9 @@ export class SourceManager {
     return this.contents.get(fileName)!;
   }
 
+  /**
+   * Initialize
+   */
   init() {
     // Find all active app files
     ScanApp.findAppFiles(this.rootPaths, undefined, this.cwd)
@@ -135,10 +170,16 @@ export class SourceManager {
     this.transformerManager.init();
   }
 
+  /**
+   * Return all root files for the ts compiler
+   */
   getRootFiles() {
     return [...this.rootNames];
   }
 
+  /**
+   * See if a file's hash code has changed
+   */
   hashChanged(fileName: string, content: string) {
     // Let's see if they are really different
     const hash = SystemUtil.naiveHash(content);
@@ -149,10 +190,16 @@ export class SourceManager {
     return true;
   }
 
+  /**
+   * Determine if file has been transpiled yet
+   */
   hasContents(file: string) {
     return this.contents.has(file);
   }
 
+  /**
+   * Get the transpiled content
+   */
   getTranspiled(fileName: string, force = false) {
     // Do not typecheck the support code
     if (SIMPLE_COMPILATION.test(fileName)) {
@@ -168,6 +215,9 @@ export class SourceManager {
     }
   }
 
+  /**
+   * Unload a file from the transpiler
+   */
   unload(fileName: string, unlink = true) {
     if (this.contents.has(fileName)) {
       console.trace('Unloading', fileName.replace(this.cwd, ''), unlink);
@@ -182,6 +232,9 @@ export class SourceManager {
     }
   }
 
+  /**
+   * Reset the transpiler
+   */
   reset() {
     this.transformerManager.reset();
     this.contents.clear();
@@ -192,6 +245,9 @@ export class SourceManager {
     delete this.program;
   }
 
+  /**
+   * Return source map handler for transpiled code
+   */
   getSourceMapHandler() {
     return {
       emptyCacheBetweenOperations: !Env.prod, // Be less strict in non-dev
