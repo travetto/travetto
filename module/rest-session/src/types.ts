@@ -1,4 +1,4 @@
-import { SystemUtil } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 import { ContextProvider } from '@travetto/rest';
 import { CacheEntry } from '@travetto/cache';
 

@@ -1,8 +1,9 @@
 import * as assert from 'assert';
 import * as path from 'path';
 
-import { Env, SystemUtil } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { FsUtil, EnvUtil } from '@travetto/boot';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TestRegistry } from '../registry/registry';
 import { TestConfig, TestResult } from '../model/test';

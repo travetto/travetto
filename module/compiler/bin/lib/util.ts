@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { CliUtil } from '@travetto/cli/src/util';
+import { color } from '@travetto/cli/src/color';
 
 export class CompileUtil {
   /**
@@ -24,10 +25,13 @@ export class CompileUtil {
     }
   }
 
-  static async compile() {
-    const { AppCache } = await import(`@travetto/boot`);
-
+  static async compile(path: string) {
     //  Compile
-    await CliUtil.fork(`${__dirname}/compile-target.js`, [], process.env);
+    try {
+      await CliUtil.fork(`${__dirname}/../compile-target.js`, [], process.env);
+    } catch (err) {
+      console.error(color`${{ failure: 'Failed' }} to compile to ${{ path }}`, err);
+      process.exit(1);
+    }
   }
 }
