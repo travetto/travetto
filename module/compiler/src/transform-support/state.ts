@@ -7,18 +7,22 @@ import { TypeResolver } from './resolver';
 import { ImportManager } from './importer';
 import { TransformUtil } from './util';
 
+/**
+ * Transformer runtime state
+ */
 export class TransformerState implements State {
   private resolver: TypeResolver;
   private imports: ImportManager;
-
-  readonly decorators = new Map<string, ts.PropertyAccessExpression>();
-  readonly ids = new Map<string, number>();
+  private decorators = new Map<string, ts.PropertyAccessExpression>();
 
   constructor(public source: ts.SourceFile, checker: ts.TypeChecker) {
     this.imports = new ImportManager(source);
     this.resolver = new TypeResolver(checker);
   }
 
+  /**
+   * Get or import the node or external type
+   */
   getOrImport(type: res.ExternalType | ts.Node) {
     if ('getSourceFile' in type) {
       type = this.resolveType(type) as res.ExternalType;
@@ -29,22 +33,25 @@ export class TransformerState implements State {
     return this.imports.getOrImport(type);
   }
 
+  /**
+   * Import a given file
+   */
   importFile(file: string) {
     return this.imports.importFile(file);
   }
 
-  generateUniqueId(name: string) {
-    const val = (this.ids.get(name) ?? 0) + 1;
-    this.ids.set(name, val);
-    return ts.createIdentifier(`${name}_${val}`);
-  }
-
+  /**
+   * Resolve a `res.Type` from a `ts.Type` or `ts.Node`
+   */
   resolveType(node: ts.Type | ts.Node) {
     const resolved = this.resolver.resolveType(node);
     this.imports.importFromResolved(resolved);
     return resolved;
   }
 
+  /**
+   * Convert a type to it's identifier, will return undefined if none match
+   */
   typeToIdentifier(node: ts.Type | res.Type) {
     if ('flags' in node) {
       node = this.resolveType(node);
@@ -58,19 +65,31 @@ export class TransformerState implements State {
     }
   }
 
+  /**
+   * Resolve the return type
+   */
   resolveReturnType(node: ts.MethodDeclaration) {
     console.debug('Resolving type', node);
     return this.resolveType(this.resolver.getReturnType(node));
   }
 
+  /**
+   * Read JSDocs for a type
+   */
   readJSDocs(type: ts.Type | ts.Node) {
     return TransformUtil.readJSDocs(type);
   }
 
+  /**
+   * Read all JSDoc tags
+   */
   readDocsTags(node: ts.Node, name: string) {
     return this.resolver.readDocsTags(node, name);
   }
 
+  /**
+   * Import a decorator, generally to handle erasure
+   */
   importDecorator(pth: string, name: string) {
     if (!this.decorators.has(name)) {
       const ref = this.imports.importFile(pth);
@@ -80,11 +99,17 @@ export class TransformerState implements State {
     return this.decorators.get(name);
   }
 
+  /**
+   * Create a decorator to add functionality to a declaration
+   */
   createDecorator(pth: string, name: string, ...contents: (ts.Expression | undefined)[]) {
     this.importDecorator(pth, name);
     return TransformUtil.createDecorator(this.decorators.get(name)!, ...contents);
   }
 
+  /**
+   * Read a decorator's metadata
+   */
   getDecoratorMeta(dec: ts.Decorator): DecoratorMeta {
     const ident = TransformUtil.getDecoratorIdent(dec);
     const decl = this.resolver.getPrimaryDeclaration(ident);
@@ -99,12 +124,24 @@ export class TransformerState implements State {
     });
   }
 
+  /**
+   * Get list of all decorators for a node
+   */
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
     return ((node.decorators ?? []) as ts.Decorator[])
       .map(dec => this.getDecoratorMeta(dec))
       .filter(x => !!x.ident);
   }
 
+  /**
+   * Find a matching decorator.  Will match by target by default, but
+   * if name or file are specified, will include those as matching criteria.
+   *
+   * @param node
+   * @param target Name of decorator group
+   * @param name Specific name of decorator
+   * @param file File of decorator
+   */
   findDecorator(node: ts.Node, target: string, name?: string, file?: string) {
     return this.getDecoratorList(node).find(x =>
       x.targets?.includes(target)
@@ -113,10 +150,16 @@ export class TransformerState implements State {
     )?.dec;
   }
 
+  /**
+   * Get all declarations for a node
+   */
   getDeclarations(node: ts.Node): ts.Declaration[] {
     return this.resolver.getDeclarations(node);
   }
 
+  /**
+   * Finalize the source file for emission
+   */
   finalize(ret: ts.SourceFile) {
     ret = this.imports.finalize(ret);
 

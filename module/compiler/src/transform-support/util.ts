@@ -13,12 +13,21 @@ const exclude = new Set([
   'nextContainer', 'modifierFlagsCache', 'declaredProperties'
 ]);
 
+/**
+ * Transformation util
+ */
 export class TransformUtil {
 
+  /**
+   * Clean up `ts.Node` contents for logging
+   */
   static collapseNodes(all: any[]) {
     return all.map(x => this.collapseNode(x));
   }
 
+  /**
+   * Clean up `ts.Node` contents for logging
+   */
   static collapseNode(x: any, cache: Set<string> = new Set()): any {
     if (!x || Util.isPrimitive(x)) {
       return x;
@@ -48,6 +57,9 @@ export class TransformUtil {
     }
   }
 
+  /**
+   * Convert literal to a `ts.Node` type
+   */
   static fromLiteral<T extends ts.Node>(val: T): T;
   static fromLiteral(val: undefined): ts.Identifier;
   static fromLiteral(val: null): ts.NullLiteral;
@@ -81,6 +93,9 @@ export class TransformUtil {
     return val;
   }
 
+  /**
+   * Convert a `ts.Node` to a JS literal
+   */
   static toLiteral(val: ts.Node, strict = true): any {
     if (!val) {
       throw new Error('Val is not defined');
@@ -119,13 +134,23 @@ export class TransformUtil {
     throw new Error(`Not a valid input, should be a valid ts.Node: ${val.kind}`);
   }
 
-  static extendObjectLiteral(addTo: object, lit?: ts.ObjectLiteralExpression) {
-    lit = lit ?? this.fromLiteral({});
-    const props = lit.properties;
-    const extra = this.fromLiteral(addTo).properties;
-    return ts.updateObjectLiteral(lit, [...props, ...extra]);
+  /**
+   * Extend object literal, whether JSON or ts.ObjectLiteralExpression
+   */
+  static extendObjectLiteral(src: object | ts.ObjectLiteralExpression, ...rest: (object | ts.ObjectLiteralExpression)[]) {
+    let ret = Util.isPlainObject(src) ? this.fromLiteral(src) : src;
+    if (rest.length) {
+      ret = ts.createObjectLiteral([
+        ts.createSpreadAssignment(ret),
+        ...(rest.map(r => Util.isPlainObject(r) ? this.fromLiteral(r) : r).map(r => ts.createSpreadAssignment(r)))
+      ]);
+    }
+    return ret;
   }
 
+  /**
+   * Find the primary argument of a call expression, or decorator.
+   */
   static getPrimaryArgument<T = ts.Node>(node: ts.CallExpression | ts.Decorator | undefined): T | undefined {
     if (node && ts.isDecorator(node)) {
       node = node.expression as any as ts.CallExpression;
@@ -136,6 +161,9 @@ export class TransformUtil {
     return;
   }
 
+  /**
+   * Get a value from the an object expression
+   */
   static getObjectValue(node: ts.Expression | undefined, key: string) {
     if (node && ts.isObjectLiteralExpression(node) && node.properties) {
       for (const prop of node.properties) {
@@ -163,6 +191,9 @@ export class TransformUtil {
     }
   }
 
+  /**
+   * Create a static field for a class
+   */
   static createStaticField(name: string, val: ts.Expression | string | number): ts.PropertyDeclaration {
     return ts.createProperty(
       undefined,
@@ -171,6 +202,9 @@ export class TransformUtil {
     );
   }
 
+  /**
+   * Create a decorator with a given name, and arguments
+   */
   static createDecorator(name: ts.Expression, ...contents: (ts.Expression | undefined)[]) {
     return ts.createDecorator(
       ts.createCall(
@@ -181,6 +215,9 @@ export class TransformUtil {
     );
   }
 
+  /**
+   * Get identifier for a decorator
+   */
   static getDecoratorIdent(d: ts.Decorator): ts.Identifier {
     if (ts.isCallExpression(d.expression)) {
       return d.expression.expression as ts.Identifier;
@@ -191,14 +228,23 @@ export class TransformUtil {
     }
   }
 
+  /**
+   * Get `ts.Symbol` from a `ts.Type`
+   */
   static getSymbol(type: ts.Type | ts.Symbol) {
     return 'valueDeclaration' in type ? type : (type.aliasSymbol ?? type.symbol);
   }
 
+  /**
+   * Get name of symbol from a symbol or type
+   */
   static getSymbolName(type: ts.Type | ts.Symbol): string | undefined {
     return this.getSymbol(type)?.getName() || undefined;
   }
 
+  /**
+   * Find declaration for a type, symbol or a declaration
+   */
   static getDeclarations(type: ts.Type | ts.Symbol | ts.Declaration[]): ts.Declaration[] {
     let decls: ts.Declaration[] = [];
     if (Array.isArray(type)) {
@@ -209,10 +255,16 @@ export class TransformUtil {
     return decls.filter(x => !!x);
   }
 
+  /**
+   * Find primary declaration out of a list of declarations
+   */
   static getPrimaryDeclaration(decls: ts.Declaration[]): ts.Declaration {
     return decls?.[0];
   }
 
+  /**
+   * Read JS Docs from a `ts.Type` or a `ts.Node`
+   */
   static readJSDocs(type: ts.Type | ts.Node) {
     let node = 'getSourceFile' in type ? type : this.getPrimaryDeclaration(this.getDeclarations(type));
 
@@ -253,6 +305,9 @@ export class TransformUtil {
     return out;
   }
 
+  /**
+   * Read JS Doc tags for a type
+   */
   static readJSDocTags(type: ts.Type, name: string) {
     const tags = this.getSymbol(type)?.getJsDocTags() ?? [];
     return tags
@@ -260,6 +315,9 @@ export class TransformUtil {
       .map(el => el.text!);
   }
 
+  /**
+   * Collect all imports for a source file, as a hash map
+   */
   static collectImports(src: ts.SourceFile) {
     const pth = require.resolve(src.fileName);
     const base = FsUtil.resolveUnix(FsUtil.toUnix(pth));
@@ -290,6 +348,9 @@ export class TransformUtil {
     return imports;
   }
 
+  /**
+   * Add imports to a source file
+   */
   public static addImports(file: ts.SourceFile, ...imports: Import[]) {
     if (!imports.length) {
       return file;
@@ -321,6 +382,9 @@ export class TransformUtil {
     }
   }
 
+  /**
+   * Replace or add a decorator to a list of decorators
+   */
   static spliceDecorators(node: { decorators?: ts.MethodDeclaration['decorators'] }, target: ts.Decorator | undefined, replacements: ts.Decorator[], idx = -1) {
     const out = (node.decorators ?? []).filter(x => x !== target);
     out.splice(idx, 0, ...replacements);
@@ -339,6 +403,9 @@ export class TransformUtil {
     return s?.getText().startsWith('const '); // Cheap out on check, ts is being weird
   }
 
+  /**
+   * Resolve a concrete type for a shape type, if the `@concrete` JS Doc tag is in place
+   */
   static resolveConcreteType(type: ts.Type) {
     const tags = TransformUtil.readJSDocTags(type, 'concrete');
     if (tags.length) {

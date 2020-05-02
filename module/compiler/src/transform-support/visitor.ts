@@ -5,8 +5,14 @@ import { ConsoleManager } from '@travetto/base';
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
 import { TransformUtil } from './util';
 
+/**
+ * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler
+ */
 export class VisitorFactory<S extends State = State> {
 
+  /**
+   * Get the type of transformer from a given a ts.node
+   */
   static nodeToType(node: ts.Node): TransformerType | undefined {
     if (ts.isMethodDeclaration(node)) {
       // eslint-disable-next-line no-bitwise
@@ -26,6 +32,13 @@ export class VisitorFactory<S extends State = State> {
     private getState: (src: ts.SourceFile) => S,
     transformers: NodeTransformer<S, any, any>[]
   ) {
+    this.init(transformers);
+  }
+
+  /**
+   * Initialize internal mapping given a list of transformers
+   */
+  init(transformers: NodeTransformer<S, any, any>[]) {
     for (const trn of transformers) {
       if (!this.transformers.has(trn.type)) {
         this.transformers.set(trn.type, {});
@@ -49,20 +62,26 @@ export class VisitorFactory<S extends State = State> {
     }
   }
 
+  /**
+   * Produce a visitor for a given a file
+   */
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
-        ConsoleManager.setFile('!compiler.log', { processArgs: (__, args) => TransformUtil.collapseNodes(args) });
+        ConsoleManager.setFile('!compiler.log', { processArgs: (__, args) => TransformUtil.collapseNodes(args) }); // Suppress logging into an output file
         const state = this.getState(file);
         const ret = this.visit(state, context, file);
         const out = state.finalize(ret);
         return out;
       } finally {
-        ConsoleManager.clear();
+        ConsoleManager.clear(); // Reset logging
       }
     };
   }
 
+  /**
+   * Handle transformer that target both ascent and descent
+   */
   executePhaseAlways<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T) {
     if (!set[phase]?.size) {
       return;
@@ -76,11 +95,15 @@ export class VisitorFactory<S extends State = State> {
     return node;
   }
 
+  /**
+   * Handle a single phase of transformation
+   */
   executePhase<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T) {
     if (!set[phase]?.size) {
       return;
     }
 
+    // Checks for matches of decorators to registered items
     const targets = new Map<string, DecoratorMeta>();
     for (const dec of state.getDecoratorList(node)) {
       for (const sub of dec.targets ?? []) {
@@ -98,6 +121,7 @@ export class VisitorFactory<S extends State = State> {
         continue;
       }
 
+      // For all matching handlers, execute
       for (const item of values) {
         const og = node;
         node = (item[phase]!(state, node, dec) as T) ?? node;
@@ -107,6 +131,9 @@ export class VisitorFactory<S extends State = State> {
     return node;
   }
 
+  /**
+   * Visit an AST node, and check for valid decorators
+   */
   visit<T extends ts.Node>(state: S, context: ts.TransformationContext, node: T): T {
     const targetType = VisitorFactory.nodeToType(node)!;
     const target = this.transformers.get(targetType);
@@ -115,15 +142,16 @@ export class VisitorFactory<S extends State = State> {
       return ts.visitEachChild(node, c => this.visit(state, context, c), context);
     } else {
       const og = node;
-
+      // Before
       node = this.executePhaseAlways(state, target, 'before', node) ?? node;
       node = this.executePhase(state, target, 'before', node) ?? node;
 
       node = ts.visitEachChild(node, c => this.visit(state, context, c), context);
-
+      // After
       node = this.executePhaseAlways(state, target, 'after', node) ?? node;
       node = this.executePhase(state, target, 'after', node) ?? node;
 
+      // Set parents on ascent
       if (og !== node) {
         node.parent = og.parent;
         if (ts.isClassDeclaration(node)) {

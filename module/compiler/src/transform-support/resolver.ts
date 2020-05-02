@@ -4,6 +4,9 @@ import { Util } from '@travetto/base';
 import * as res from './types/resolver';
 import { TransformUtil } from './util';
 
+/**
+ * List of global types that are simple
+ */
 const GLOBAL_SIMPLE = {
   RegExp, Date, Number, Boolean, String, Function, Object, Error,
   PromiseConstructor: Promise.constructor
@@ -14,6 +17,9 @@ export const ASYNC_ITERATOR = function AsyncIterator() { };
 export const ITERABLE_ITERATOR = function IterableIterator() { };
 export const ITERABLE = function Iterable() { };
 
+/**
+ * List of global types that can be parameterized
+ */
 const GLOBAL_COMPLEX = {
   Array, Promise, Set, Map, ReadonlyArray: Array,
   Iterator: ITERATOR,
@@ -23,29 +29,49 @@ const GLOBAL_COMPLEX = {
   PropertyDescriptor: Object,
   TypedPropertyDescriptor: Object
 };
+
+/**
+ * Simple name mapping between JS type and typescript name
+ */
 const SIMPLE_NAMES: Record<string, string> = { String: 'string', Number: 'number', Boolean: 'boolean', Object: 'object' };
 
+/**
+ * Catch all type when dealing with unknown
+ */
 const UNKNOWN_TYPE = {
   ctor: Object,
   name: 'object'
 } as res.LiteralType;
 
+/**
+ * Type resolver
+ */
 export class TypeResolver {
   /* eslint-disable no-bitwise */
 
   constructor(private _checker: ts.TypeChecker) { }
 
+  /**
+   * Resolve the `ts.ObjectFlags`
+   */
   private getObjectFlags(type: ts.Type): ts.ObjectFlags {
     return (ts as any).getObjectFlags(type);
   }
 
+  /**
+   * Fetch all type arguments for a give type
+   */
   private getAllTypeArguments(ref: ts.Type) {
     return this._checker.getTypeArguments(ref as any);
   }
 
+  /**
+   * Resolve `res.LiteralType` from a `ts.Type`
+   */
   private resolveLiteralType(type: ts.Type): res.LiteralType | undefined {
     const flags = type.getFlags();
 
+    // Handle void/undefined
     if (flags & ts.TypeFlags.Void) {
       return { name: 'void', ctor: undefined };
     } else if (flags & ts.TypeFlags.Undefined) {
@@ -57,7 +83,10 @@ export class TypeResolver {
 
     const simpleCons = GLOBAL_SIMPLE[name as keyof typeof GLOBAL_SIMPLE];
     const complexCons = GLOBAL_COMPLEX[complexName as keyof typeof GLOBAL_COMPLEX];
+
+    // If the literal is a simple type
     if (simpleCons) {
+      // Determine type from literal value
       const ret = flags & (ts.TypeFlags.BooleanLiteral | ts.TypeFlags.NumberLiteral | ts.TypeFlags.StringLiteral) ?
         Util.coerceType((type as any).value, simpleCons as typeof String, false) :
         undefined;
@@ -68,6 +97,7 @@ export class TypeResolver {
         value: ret
       };
     } else if (complexCons) {
+      // Else handle complexity and resolve type arguments
       console.debug('Complex cons', complexCons.name, this.getAllTypeArguments(type));
       return {
         name: complexCons.name,
@@ -77,6 +107,9 @@ export class TypeResolver {
     }
   }
 
+  /**
+   * Resolve `res.ShapeType` from `ts.Type`
+   */
   private resolveShapeType(type: ts.Type, alias?: ts.Symbol): res.ShapeType {
     const docs = TransformUtil.readJSDocs(type);
     const fields: Record<string, res.Type> = {};
@@ -93,6 +126,9 @@ export class TypeResolver {
     return { name, comment: docs.description, fields };
   }
 
+  /**
+   * Resolve `res.ExternalType` from `ts.Type`
+   */
   private resolveExternalType(type: ts.Type): res.ExternalType {
     const decl = this.getPrimaryDeclaration(type);
     const source = decl?.getSourceFile().fileName!;
@@ -102,6 +138,9 @@ export class TypeResolver {
     return { name, source, comment: comments.description };
   }
 
+  /**
+   * Resolve `res.TupleType` from a `ts.Type`
+   */
   private resolveTupleType(type: ts.Type): res.TupleType {
     const ret = {
       tupleTypes: this.getAllTypeArguments(type).map(x => this.resolveType(x))
@@ -110,6 +149,9 @@ export class TypeResolver {
     return ret;
   }
 
+  /**
+   * Resolve a referenced `res.Type` from a `ts.Type`
+   */
   private resolveReferencedType(type: ts.Type) {
     const obj = this.resolveExternalType(type);
 
@@ -136,6 +178,9 @@ export class TypeResolver {
     return this.resolveShapeType(type); // Handle fall through on interfaces
   }
 
+  /**
+   * Resolve `res.Type` from a `ts.UnionType`
+   */
   private resolveUnionType(type: ts.UnionType): res.Type {
     const types = type.types;
     const undefinable = types.some(x => (x.getFlags() & ts.TypeFlags.Undefined));
@@ -170,6 +215,9 @@ export class TypeResolver {
     };
   }
 
+  /**
+   * Resolve the return type for a method
+   */
   getReturnType(node: ts.MethodDeclaration) {
     let type = this._checker.getTypeAtLocation(node);
     if (type.isUnion()) { // Handle methods that are optional
@@ -179,10 +227,16 @@ export class TypeResolver {
     return this._checker.getReturnTypeOfSignature(sig);
   }
 
+  /**
+   * Read JS Doc tags by name
+   */
   readDocsTags(node: ts.Node, name: string): string[] {
     return TransformUtil.readJSDocTags(this._checker.getTypeAtLocation(node), name);
   }
 
+  /**
+   * Resolve a `res.Type` from a `ts.Type` or a `ts.Node`
+   */
   resolveType(type: ts.Type | ts.Node, alias?: ts.Symbol): res.Type {
     if ('getSourceFile' in type) {
       type = this._checker.getTypeAtLocation(type);
@@ -237,10 +291,16 @@ export class TypeResolver {
     return { ...UNKNOWN_TYPE };
   }
 
+  /**
+   * Get all declarations of a node
+   */
   getDeclarations(node: ts.Node | ts.Type | ts.Symbol): ts.Declaration[] {
     return TransformUtil.getDeclarations('getSourceFile' in node ? this._checker.getTypeAtLocation(node) : node);
   }
 
+  /**
+   * Get primary declaration of a node
+   */
   getPrimaryDeclaration(node: ts.Node | ts.Symbol | ts.Type): ts.Declaration {
     return TransformUtil.getPrimaryDeclaration(this.getDeclarations(node));
   }

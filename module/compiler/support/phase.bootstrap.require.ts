@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Responsible for loading all available modules
+ */
 export const init = {
   key: 'require-all',
   after: ['compile-all'],

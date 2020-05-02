@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Responsible for compiling all new code
+ */
 export const init = {
   key: 'compile-all',
   after: ['compiler'],
