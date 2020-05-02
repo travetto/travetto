@@ -1,3 +1,3 @@
-import { Execute } from './execute';
+import { ExecutionManager } from './execute';
 
-export const run = Execute.run.bind(Execute);
+export const run = ExecutionManager.run.bind(ExecutionManager);
