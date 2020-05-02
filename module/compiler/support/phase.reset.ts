@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Responsible for resetting the compiler
+ */
 export const init = {
   key: 'compiler',
   action: async () => {

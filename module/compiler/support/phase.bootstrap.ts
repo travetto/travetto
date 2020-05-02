@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Responsible for initializing the compiler
+ */
 export const init = {
   key: 'compiler',
   after: ['config', 'base'],

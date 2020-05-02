@@ -5,6 +5,9 @@ import * as res from './types/resolver';
 import { Import } from './types/shared';
 import { TransformUtil } from './util';
 
+/**
+ * Manages imports within a ts.SourceFile
+ */
 export class ImportManager {
   private newImports = new Map<string, Import>();
   private imports: Map<string, Import>;
@@ -15,6 +18,9 @@ export class ImportManager {
     this.imports = TransformUtil.collectImports(source);
   }
 
+  /**
+   * Produces a unique ID for a given file, importing if needed
+   */
   getId(file: string) {
     if (!this.ids.has(file)) {
       const key = path.basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
@@ -23,6 +29,9 @@ export class ImportManager {
     return this.ids.get(file)!;
   }
 
+  /**
+   * Import a file if needed, and record it's identifier
+   */
   importFile(file: string) {
     if (!file.endsWith('.d.ts') && !this.newImports.has(file)) {
       const id = this.getId(file);
@@ -39,6 +48,9 @@ export class ImportManager {
     return this.newImports.get(file)!;
   }
 
+  /**
+   * Import given an external type
+   */
   importFromResolved(type: res.Type) {
     if (res.isExternalType(type)) {
       if (type.source && type.source !== this.source.fileName) {
@@ -57,10 +69,16 @@ export class ImportManager {
     }
   }
 
+  /**
+   * Reset the imports into the source file
+   */
   finalize(ret: ts.SourceFile) {
     return TransformUtil.addImports(ret, ...this.newImports.values());
   }
 
+  /**
+   * Get the identifier and import if needed
+   */
   getOrImport(type: res.ExternalType) {
     if (type.source === this.source.fileName) {
       return ts.createIdentifier(type.name!);

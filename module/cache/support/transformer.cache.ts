@@ -48,11 +48,9 @@ export class CacheTransformer {
       let config = params.length > 1 ? params[1] : TransformUtil.fromLiteral({});
 
       // Read literal, and extend config onto it
-      if (ts.isObjectLiteralExpression(config)) {
-        const parent = ((node.parent as ts.ClassExpression) || { name: { getText: () => 'unknown' } }).name!;
-        const keySpace = `${parent.getText()}.${node.name.getText()}`;
-        config = TransformUtil.extendObjectLiteral(config, TransformUtil.fromLiteral({ keySpace }));
-      }
+      const parent = ((node.parent as ts.ClassExpression) || { name: { getText: () => 'unknown' } }).name!;
+      const keySpace = `${parent.getText()}.${node.name.getText()}`;
+      config = TransformUtil.extendObjectLiteral({ keySpace }, config);
 
       // Create an arrow function to retain the `this` value.
       const fn = ts.createArrowFunction(
