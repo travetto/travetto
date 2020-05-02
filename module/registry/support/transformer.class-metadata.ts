@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { SystemUtil } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 import { TransformUtil, TransformerState, OnMethod, OnClass, AfterClass } from '@travetto/compiler/src/transform-support';
 
 const REGISTER_MOD = require.resolve('../src/decorator');

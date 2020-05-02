@@ -24,14 +24,7 @@ export function init() {
       }
 
       const { AppCache } = await import(`@travetto/boot`);
-
-      //  Compile
-      try {
-        await CliUtil.fork(`${__dirname}/compile-target.js`, [], process.env);
-      } catch (err) {
-        console.error(color`${{ failure: 'Failed' }} to compile to ${{ path: cmd.output ?? AppCache.cacheDir }}`, err);
-        process.exit(1);
-      }
+      CompileUtil.compile(cmd.output ?? AppCache.cacheDir);
 
       if (cmd.runtimeDir) {
         await CompileUtil.rewriteRuntimeDir(cmd.runtimeDir);

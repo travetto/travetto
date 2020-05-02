@@ -1,5 +1,5 @@
 import { FsUtil } from '@travetto/boot';
-import { SystemUtil } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 import { Class } from './types';
 
 // TODO: Document
