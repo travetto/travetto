@@ -414,7 +414,8 @@ export class TransformUtil {
       if (parts.length === 1) {
         parts.unshift('.');
       }
-      return { name: parts[1], source: FsUtil.resolveUnix(dirname(fileName), parts[0]) };
+      const source = parts[0] === '.' ? fileName : FsUtil.resolveUnix(dirname(fileName), parts[0]);
+      return { name: parts[1], source };
     }
   }
 }
