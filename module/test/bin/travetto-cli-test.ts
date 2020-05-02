@@ -1,10 +1,10 @@
 import * as os from 'os';
-import { Util, CompletionConfig } from '@travetto/cli/src/util';
+import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
 import { Colors } from '@travetto/cli/src/color';
 
 // TODO: Document
 export function init() {
-  return Util.program.command('test')
+  return CliUtil.program.command('test')
     .arguments('[regexes...]')
     .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec|event|xunit)$/, 'tap')
     .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, Math.min(4, os.cpus().length - 1))
@@ -41,7 +41,7 @@ export function init() {
           cmd.mode = 'single';
         }
       } else if (args.length < 1 && cmd.mode === 'single') {
-        Util.showHelp(cmd, 'You must specify a file to run in single mode');
+        CliUtil.showHelp(cmd, 'You must specify a file to run in single mode');
       }
 
       cmd.args = args;

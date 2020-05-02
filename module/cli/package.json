@@ -25,6 +25,7 @@
   "name": "@travetto/cli",
   "files": [
     "src",
+    "resources",
     "bin"
   ],
   "repository": {

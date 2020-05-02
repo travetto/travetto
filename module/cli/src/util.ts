@@ -27,7 +27,7 @@ export interface CompletionConfig {
 /**
  * Common CLI Utilities
  */
-export class Util {
+export class CliUtil {
   static program = commander;
 
   static BOOLEAN_RE = /^(1|0|yes|no|on|off|auto|true|false)$/i;

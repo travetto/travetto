@@ -1,5 +1,5 @@
 import * as commander from 'commander';
-import { Util, CompletionConfig } from '@travetto/cli/src/util';
+import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
 
 /**
@@ -8,7 +8,7 @@ import { color } from '@travetto/cli/src/color';
  * Allows for cleaning of the cache dire
  */
 export function init() {
-  return Util.program.command('clean')
+  return CliUtil.program.command('clean')
     .option('-q, --quiet', 'Quiet operation')
     .action(async (cmd: commander.Command) => {
       const { AppCache } = await import('../src/app-cache');
