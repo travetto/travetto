@@ -1,17 +1,25 @@
 import * as ts from 'typescript';
 
-// TODO: Document
-export interface ParamDoc {
+/**
+ * Param documentation
+ */
+export interface ParamDocumentation {
   name: string;
   description: string;
 }
 
-export interface Documentation {
+/**
+ * Declaration documentation
+ */
+export interface DeclDocumentation {
   return?: string;
   description?: string;
-  params?: ParamDoc[];
+  params?: ParamDocumentation[];
 }
 
+/**
+ * Represents an imported token
+ */
 export type Import = {
   path: string;
   ident: ts.Identifier;
