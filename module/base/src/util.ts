@@ -60,6 +60,20 @@ export class Util {
   }
 
   /**
+   * Create regex from string, including flags
+   */
+  static toRegex(input: string | RegExp) {
+    if (input instanceof RegExp) {
+      return input;
+    } else if (REGEX_PAT.test(input)) {
+      const [, pat, mod] = input.match(REGEX_PAT) ?? [];
+      return new RegExp(pat, mod);
+    } else {
+      return new RegExp(input);
+    }
+  }
+
+  /**
    * Coerce an input of any type to the class provided
    * @param input Input value
    * @param type Class to coerce to (String, Boolean, Number, Date, RegEx, Object)
@@ -107,12 +121,7 @@ export class Util {
       case RegExp: {
         if (typeof input === 'string') {
           try {
-            if (REGEX_PAT.test(input)) {
-              const [, pat, mod] = input.match(REGEX_PAT) ?? [];
-              return new RegExp(pat, mod);
-            } else {
-              return new RegExp(input);
-            }
+            return this.toRegex(input);
           } catch (err) {
             if (strict) {
               throw new Error(`Invalid regex: ${input}`);

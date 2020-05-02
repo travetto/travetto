@@ -1,5 +1,5 @@
 import { Suite, BeforeAll } from '@travetto/test';
-import { BaseGeoTestSuite } from '@travetto/model/test/source/geo';
+import { BaseGeoTestSuite } from '@travetto/model/test/lib/source/geo';
 
 import { MongoModelConfig } from '../../src/config';
 import { MongoModelSource } from '../../src/source';

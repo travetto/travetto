@@ -2,8 +2,8 @@ import * as assert from 'assert';
 
 import { Test } from '@travetto/test';
 
-import { Model, BaseModel } from '../..';
-import { BaseModelTest } from '../lib/test.base';
+import { Model, BaseModel } from '../../..';
+import { BaseModelTest } from '../test.base';
 
 @Model({ baseType: true })
 export class Person extends BaseModel {

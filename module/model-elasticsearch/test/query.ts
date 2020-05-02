@@ -5,7 +5,7 @@ import { Schema } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { WhereClause } from '@travetto/model/';
 
-import { ElasticsearchUtil } from '../src/util';
+import { ElasticsearchUtil } from '../src/internal/util';
 
 @Schema()
 class User {

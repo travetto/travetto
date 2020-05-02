@@ -1,5 +1,5 @@
 import { Suite, BeforeAll } from '@travetto/test';
-import { BaseSimpleSourceSuite } from '@travetto/model/test/source/simple';
+import { BaseSimpleSourceSuite } from '@travetto/model/test/lib/source/simple';
 
 import { ElasticsearchModelSource } from '../../src/source';
 import { ElasticsearchModelConfig } from '../../src/config';

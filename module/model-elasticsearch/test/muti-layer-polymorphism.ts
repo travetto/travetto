@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { BaseModelTest } from '@travetto/model/support/test.base';
+import { BaseModelTest } from '@travetto/model/test/lib/test.base';
 
 import { ElasticsearchModelSource } from '../src/source';
 import { ElasticsearchModelConfig } from '../src/config';

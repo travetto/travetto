@@ -1,9 +1,11 @@
 import { Env } from '@travetto/base';
 import { Config } from '@travetto/config';
-import { EsSchemaConfig } from './types';
+import { EsSchemaConfig } from './internal/types';
 
+/**
+ * Elasticsearch model config
+ */
 @Config('elasticsearch.model')
-// TODO: Document
 export class ElasticsearchModelConfig {
   hosts = ['127.0.0.1'];
   port = 9200;
