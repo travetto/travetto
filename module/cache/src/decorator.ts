@@ -1,4 +1,9 @@
-import { CoreCacheConfig, CacheConfig, ValidCacheFields } from './types';
+import { CoreCacheConfig, CacheConfig, CacheStoreType } from './types';
+
+type ValidCacheFields<T> = {
+  [K in keyof T]:
+  (T[K] extends CacheStoreType ? K : never)
+}[keyof T];
 
 type TypedMethodDecorator<T, U> = (target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => U>) => void;
 

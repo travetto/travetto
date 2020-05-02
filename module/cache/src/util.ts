@@ -1,13 +1,27 @@
 import { CacheStoreType, CacheConfig, CoreCacheConfig } from './types';
 
-// TODO: Document
+/**
+ * Standard cache utilities
+ */
 export class CacheUtil {
+  /**
+   * Generate key given config, cache store and input params
+   */
   static generateKey(config: CoreCacheConfig, cache: CacheStoreType, params: any[]) {
     const input = config.params?.(params) ?? params;
     const keyParams = config.key?.(...input) ?? input;
     return `${config.keySpace!}♯${cache.computeKey(keyParams)}`;
   }
 
+  /**
+   * Cache the function output
+   *
+   * @param config Cache configuration
+   * @param cache Actual cache store
+   * @param target Object to run as context
+   * @param fn Function to execute
+   * @param params input parameters
+   */
   static async cache(config: CacheConfig, cache: CacheStoreType, target: any, fn: Function, params: any[]) {
     const key = this.generateKey(config, cache, params);
 
@@ -28,6 +42,15 @@ export class CacheUtil {
     return res;
   }
 
+  /**
+   * Evict value from cache
+   *
+   * @param config Cache config
+   * @param cache  Cache store
+   * @param target Object to run as context
+   * @param fn Function to execute
+   * @param params Input params to the function
+   */
   static async evict(config: CacheConfig, cache: CacheStoreType, target: any, fn: Function, params: any[]) {
     const key = this.generateKey(config, cache, params);
     const val = await fn.apply(target, params);
