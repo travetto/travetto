@@ -6,10 +6,12 @@ import { AppUtil } from '@travetto/app';
 import { Injectable } from '@travetto/di';
 import { RouteUtil, RestApp, RouteConfig, RouteHandler } from '@travetto/rest';
 
-import { RouteStack } from './types';
+import { RouteStack } from './internal/types';
 
+/**
+ * An express rest app
+ */
 @Injectable()
-// TODO: Document
 export class ExpressRestApp extends RestApp<express.Application> {
 
   createRaw(): express.Application {

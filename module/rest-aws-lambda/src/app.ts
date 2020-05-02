@@ -12,9 +12,11 @@ import { Inject } from '@travetto/di';
 import { RestApp, RouteConfig, RouteUtil } from '@travetto/rest';
 
 import { AwsLambdaConfig } from './config';
-import { RouteStack } from './types';
+import { RouteStack } from './internal/types';
 
-// TODO: Document
+/**
+ * Aws Lambda Rest App
+ */
 export class AwsLambdaRestApp extends RestApp<express.Application> {
 
   private server: http.Server;

@@ -7,10 +7,12 @@ import { AppUtil } from '@travetto/app';
 import { Injectable, Inject } from '@travetto/di';
 import { RestApp, RouteConfig, RestCookieConfig } from '@travetto/rest';
 
-import { KoaAppUtil } from './util';
+import { KoaAppUtil } from './internal/util';
 
+/**
+ * Koa-based Rest App
+ */
 @Injectable()
-// TODO: Document
 export class KoaRestApp extends RestApp<koa> {
 
   @Inject()
