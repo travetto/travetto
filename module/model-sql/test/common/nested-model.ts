@@ -1,4 +1,4 @@
-import { BaseNestedSuite } from '@travetto/model/test/source/nested';
+import { BaseNestedSuite } from '@travetto/model/test/lib/source/nested';
 import { BeforeAll } from '@travetto/test';
 import { SQLModelConfig } from '../../src/config';
 import { TestUtil } from '../util';

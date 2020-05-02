@@ -11,7 +11,7 @@ export async function getSchemas() {
 
   const src = (await DependencyRegistry.getInstance<ElasticsearchModelSource>(ModelSource));
 
-  const { ElasticsearchUtil } = await import('../src/util');
+  const { ElasticsearchUtil } = await import('../src/internal/util');
 
   const out: Record<string, Record<string, string>> = {};
   for (const cls of ModelRegistry.getClasses()) {

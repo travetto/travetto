@@ -19,8 +19,8 @@ import { Injectable } from '@travetto/di';
 import { SchemaChangeEvent, SchemaRegistry } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config';
-import { EsIdentity, EsBulkError } from './types';
-import { ElasticsearchUtil } from './util';
+import { EsIdentity, EsBulkError } from './internal/types';
+import { ElasticsearchUtil } from './internal/util';
 
 type Agg =
   Record<any, {

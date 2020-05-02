@@ -138,7 +138,7 @@ export class ElasticsearchUtil {
               break;
             }
             case '$regex': {
-              const pattern = Util.extractRegex(v);
+              const pattern = Util.toRegex(v);
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
                   `${sPath}.text_cs` :

@@ -3,8 +3,8 @@ import * as assert from 'assert';
 import { Test } from '@travetto/test';
 import { Schema, Text } from '@travetto/schema';
 
-import { BaseModelTest } from '../lib/test.base';
-import { Model, ModelCore } from '../..';
+import { BaseModelTest } from '../test.base';
+import { Model, ModelCore } from '../../..';
 
 @Schema()
 export class NoteEntity {

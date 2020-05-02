@@ -3,8 +3,8 @@ import * as assert from 'assert';
 import { Test } from '@travetto/test';
 import { SchemaFakerUtil, Schema, Text, Precision } from '@travetto/schema';
 
-import { BaseModelTest } from '../lib/test.base';
-import { Model, BaseModel } from '../..';
+import { BaseModelTest } from '../test.base';
+import { Model, BaseModel } from '../../..';
 
 @Schema()
 class Address {

@@ -1,14 +1,13 @@
 import * as assert from 'assert';
 
 import { BeforeAll, Test } from '@travetto/test';
-import { BaseSimpleSourceSuite } from '@travetto/model/test/source/simple';
+import { BaseSimpleSourceSuite } from '@travetto/model/test/lib/source/simple';
 import { Model } from '@travetto/model';
 
 import { SQLModelSource } from '../../src/source';
 import { SQLModelConfig } from '../../src/config';
 import { TestUtil } from '../util';
 import { DialectSuite as Suite } from '../decorator';
-import { RootRegistry } from '@travetto/registry';
 
 @Model()
 class Bools {

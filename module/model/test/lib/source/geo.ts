@@ -3,8 +3,8 @@ import * as assert from 'assert';
 import { Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
-import { Point, Model, ModelService } from '../..';
-import { BaseModelTest } from '../lib/test.base';
+import { Point, Model, ModelService } from '../../..';
+import { BaseModelTest } from '../test.base';
 
 @Model()
 class Location {

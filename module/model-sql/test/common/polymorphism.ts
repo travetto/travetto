@@ -1,4 +1,4 @@
-import { BasePolymorphismSuite } from '@travetto/model/test/source/polymorphism';
+import { BasePolymorphismSuite } from '@travetto/model/test/lib/source/polymorphism';
 import { BeforeAll } from '@travetto/test';
 
 import { SQLModelConfig } from '../../src/config';

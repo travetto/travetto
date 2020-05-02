@@ -1,5 +1,5 @@
 import { Suite, BeforeAll } from '@travetto/test';
-import { BaseNestedSuite } from '@travetto/model/test/source/nested';
+import { BaseNestedSuite } from '@travetto/model/test/lib/source/nested';
 import { ElasticsearchModelConfig } from '../../src/config';
 import { ElasticsearchModelSource } from '../../src/source';
 

@@ -4,7 +4,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 
 import {
   BasePolymorphismSuite, Person, Doctor, Engineer, Firefighter
-} from '@travetto/model/test/source/polymorphism';
+} from '@travetto/model/test/lib/source/polymorphism';
 import { ElasticsearchModelSource } from '../../src/source';
 import { ElasticsearchModelConfig } from '../../src/config';
 
