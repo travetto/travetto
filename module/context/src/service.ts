@@ -3,8 +3,10 @@ import * as async_hooks from 'async_hooks';
 import { Injectable } from '@travetto/di';
 import { AppError } from '@travetto/base';
 
+/**
+ * Async context provider using `async_hooks`
+ */
 @Injectable()
-// TODO: Document
 export class AsyncContext {
   private threads = new Map<number, number>();
   private threadsSet = new Map<number, Set<number>>();
@@ -72,6 +74,9 @@ export class AsyncContext {
     }
   }
 
+  /**
+   * Clear the context entirely or just for a given key
+   */
   clear(key?: string | symbol) {
     if (key) {
       const obj = this.storage();
@@ -81,6 +86,9 @@ export class AsyncContext {
     }
   }
 
+  /**
+   * Get entire context or a portion by key
+   */
   get<T = any>(key: string | symbol): T;
   get(): any;
   get<T>(key?: string | symbol) {
@@ -92,6 +100,9 @@ export class AsyncContext {
     }
   }
 
+  /**
+   * Set entire context or a portion by key
+   */
   set(key: string | symbol, val: any): void;
   set(val: any): void;
   set(keyOrVal: string | symbol, valWithKey?: any) {
@@ -102,6 +113,9 @@ export class AsyncContext {
     }
   }
 
+  /**
+   * Run an async function and ensure the context is available during execution
+   */
   async run(fn: () => Promise<any>, init: any = {}) {
     if (!this.active) {
       this.hooks.enable();
