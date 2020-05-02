@@ -32,11 +32,22 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
 }
 
 // eslint-disable no-invalid-this
-// TODO: Document
+/**
+ * Base sql dialect
+ */
 export abstract class SQLDialect implements DialectState {
+  /**
+   * Default length of unique ids
+   */
   KEY_LEN = 64;
+  /**
+   * Default length for varchar
+   */
   DEFAULT_STRING_LEN = 1024;
 
+  /**
+   * Mapping between query ops and SQL operations
+   */
   SQL_OPS = {
     $and: 'AND',
     $or: 'OR',
@@ -58,6 +69,9 @@ export abstract class SQLDialect implements DialectState {
     $isNot: 'IS NOT'
   };
 
+  /**
+   * Column type mapping
+   */
   COLUMN_TYPES = {
     JSON: '',
     BOOLEAN: 'BOOLEAN',
@@ -70,24 +84,39 @@ export abstract class SQLDialect implements DialectState {
     TEXT: 'TEXT'
   };
 
+  /**
+   * Column types with inputs
+   */
   PARAMETERIZED_COLUMN_TYPES: Record<'VARCHAR' | 'DECIMAL', (...nums: number[]) => string> = {
     VARCHAR: n => `VARCHAR(${n})`,
     DECIMAL: (d, p) => `DECIMAL(${d},${p})`
   };
 
+  /**
+   * Generate an id field
+   */
   idField = makeField('id', String, true, {
     maxlength: { n: 32 },
     minlength: { n: 32 }
   });
 
+  /**
+   * Generate an idx field
+   */
   idxField = makeField('__idx', Number, true, {});
 
+  /**
+   * Parent path reference
+   */
   parentPathField = makeField('__parent_path', String, true, {
     maxlength: { n: this.KEY_LEN },
     minlength: { n: this.KEY_LEN },
     required: { active: true }
   });
 
+  /**
+   * Path reference
+   */
   pathField = makeField('__path', String, true, {
     maxlength: { n: this.KEY_LEN },
     minlength: { n: this.KEY_LEN },
@@ -110,12 +139,24 @@ export abstract class SQLDialect implements DialectState {
     }
   }
 
+  /**
+   * Get connection
+   */
   abstract get conn(): any;
 
+  /**
+   * Hash a value
+   */
   abstract hash(inp: string): string;
 
+  /**
+   * Run SQL Query
+   */
   abstract executeSQL<T>(sql: string): Promise<{ count: number, records: T[] }>;
 
+  /**
+   * Identify a name or field (escape it)
+   */
   abstract ident(name: string | FieldConfig): string;
 
   quote(text: string): string {
@@ -148,6 +189,9 @@ export abstract class SQLDialect implements DialectState {
     throw new AppError(`Unknown value type for field ${conf.name}, ${value}`, 'data');
   }
 
+  /**
+   * Get column type from field config
+   */
   getColumnType(conf: FieldConfig) {
     let type: string = '';
 
@@ -201,17 +245,26 @@ export abstract class SQLDialect implements DialectState {
     return `${this.ident(conf)} ${type} ${(conf.required && conf.required.active) ? 'NOT NULL' : 'DEFAULT NULL'}`;
   }
 
+  /**
+   * Delete query and return count removed
+   */
   async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>) {
     const { count } = await this.executeSQL(this.getDeleteSQL(SQLUtil.classToStack(cls), query.where));
     return count;
   }
 
+  /**
+   * Get the count for a given query
+   */
   async getCountForQuery<T>(cls: Class<T>, query: Query<T>) {
     const { records } = await this.executeSQL<{ total: number }>(this.getQueryCountSQL(cls, query));
     const [record] = records;
     return Total.from(record).total;
   }
 
+  /**
+   * Listen to field change and update the schema as needed
+   */
   async handleFieldChange(e: SchemaChangeEvent): Promise<void> {
     const rootStack = SQLUtil.classToStack(e.cls);
 
@@ -228,46 +281,79 @@ export abstract class SQLDialect implements DialectState {
     await Promise.all(changes.removing.map(v => this.executeSQL(this.getDropColumnSQL(v))));
   }
 
+  /**
+   * Remove a sql column
+   */
   getDropColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
     return `ALTER TABLE ${this.parentTable(stack)} DROP COLUMN ${this.ident(field.name)};`;
   }
 
+  /**
+   * Add a sql column
+   */
   getAddColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
     return `ALTER TABLE ${this.parentTable(stack)} ADD COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
   }
 
+  /**
+   * Modify a sql column
+   */
   abstract getModifyColumnSQL(stack: VisitStack[]): string;
 
+  /**
+   * Generate a UUID
+   */
   generateId(): string {
     return Util.uuid(this.KEY_LEN);
   }
 
+  /**
+   * Determine table/field namespace for a given stack location
+   */
   namespace(stack: VisitStack[]) {
     return `${this.ns}${SQLUtil.buildTable(stack)}`;
   }
 
+  /**
+   * Determine  namespace for a given stack location - 1
+   */
   namespaceParent(stack: VisitStack[]) {
     return this.namespace(stack.slice(0, stack.length - 1));
   }
 
+  /**
+   * Determine table name for a given stack location
+   */
   table(stack: VisitStack[]) {
     return this.ident(this.namespace(stack));
   }
 
+  /**
+   * Determine parent table name for a given stack location
+   */
   parentTable(stack: VisitStack[]) {
     return this.table(stack.slice(0, stack.length - 1));
   }
 
+  /**
+   * Get lookup key for cls and name
+   */
   getKey(cls: Class, name: string) {
     return `${cls.name}:${name}`;
   }
 
+  /**
+   * Alias a field for usage
+   */
   alias(field: string | FieldConfig, alias: string = this.rootAlias) {
     return `${alias}.${this.ident(field)}`;
   }
 
+  /**
+   * Get alias cache for the stack
+   */
   getAliasCache(stack: VisitStack[], resolve: (path: VisitStack[]) => string) {
     const cls = stack[0].type;
 
@@ -300,6 +386,9 @@ export abstract class SQLDialect implements DialectState {
     return clauses;
   }
 
+  /**
+   * Resolve field name for given location in stack
+   */
   resolveName(stack: VisitStack[]): string {
     const path = this.namespaceParent(stack);
     const name = stack[stack.length - 1].name;
@@ -308,6 +397,9 @@ export abstract class SQLDialect implements DialectState {
     return this.alias(name, base.alias);
   }
 
+  /**
+   * Generate WHERE field clause
+   */
   getWhereFieldSQL<T>(stack: VisitStack[], o: Record<string, any>): any {
     const items = [];
     const { foreignMap, localMap } = SQLUtil.getFieldsByLocation(stack);
@@ -408,6 +500,9 @@ export abstract class SQLDialect implements DialectState {
     }
   }
 
+  /**
+   * Grouping of where clauses
+   */
   getWhereGroupingSQL<T>(cls: Class<T>, o: WhereClause<T>): string {
     const SQL_OPS = this.SQL_OPS;
 
@@ -422,12 +517,18 @@ export abstract class SQLDialect implements DialectState {
     }
   }
 
+  /**
+   * Generate WHERE clause
+   */
   getWhereSQL<T>(cls: Class<T>, where?: WhereClause<T>): string {
     return !where || !Object.keys(where).length ?
       '' :
       `WHERE ${this.getWhereGroupingSQL(cls, where)}`;
   }
 
+  /**
+   * Generate ORDER BY clause
+   */
   getOrderBySQL<T>(cls: Class<T>, sortBy?: SortClause<T>[]): string {
     return !sortBy ?
       '' :
@@ -436,6 +537,9 @@ export abstract class SQLDialect implements DialectState {
       ).join(', ')}`;
   }
 
+  /**
+   * Generate SELECT clause
+   */
   getSelectSQL<T>(cls: Class<T>, select?: SelectClause<T>): string {
     const stack = SQLUtil.classToStack(cls);
     const columns = select && SQLUtil.select(cls, select).map((sel) => this.resolveName([...stack, sel]));
@@ -447,6 +551,9 @@ export abstract class SQLDialect implements DialectState {
       `SELECT ${columns.join(', ')}`;
   }
 
+  /**
+   * Generate FROM clause
+   */
   getFromSQL<T>(cls: Class<T>): string {
     const stack = SQLUtil.classToStack(cls);
     const aliases = this.getAliasCache(stack, this.namespace);
@@ -466,16 +573,25 @@ LEFT OUTER JOIN ${from} ON
     }).join('\n')}`;
   }
 
+  /**
+   * Generate LIMIT clause
+   */
   getLimitSQL<T>(cls: Class<T>, query?: Query<T>): string {
     return !query || (!query.limit && !query.offset) ?
       '' :
       `LIMIT ${query.limit ?? 200} OFFSET ${query.offset ?? 0}`;
   }
 
+  /**
+   * Generate GROUP BY clause
+   */
   getGroupBySQL<T>(cls: Class<T>, query?: Query<T>): string {
     return `GROUP BY ${this.alias(this.idField)}`;
   }
 
+  /**
+   * Generate full query
+   */
   getQuerySQL<T>(cls: Class<T>, query: Query<T>) {
     const sortFields = !query.sort ?
       '' :
@@ -532,12 +648,15 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   }
 
   /**
-  * Simple table drop
-  */
+   * Generate drop SQL
+   */
   getDropTableSQL(stack: VisitStack[]) {
     return `DROP TABLE IF EXISTS ${this.table(stack)}; `;
   }
 
+  /**
+   * Get all table creat queries for a class
+   */
   getCreateAllTablesSQL(cls: Class<any>): string[] {
     const out: string[] = [];
     SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
@@ -548,10 +667,16 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     return out;
   }
 
+  /**
+   * Get all create indices need for a given class
+   */
   getCreateAllIndicesSQL<T>(cls: Class<T>, indices: IndexConfig<T>[]): string[] {
     return indices.map(idx => this.getCreateIndexSQL(cls, idx));
   }
 
+  /**
+   * Get CREATE INDEX sql
+   */
   getCreateIndexSQL<T>(cls: Class<T>, idx: IndexConfig<T>): string {
     const table = this.namespace(SQLUtil.classToStack(cls));
     const fields: [string, boolean][] = idx.fields.map(x => {
@@ -568,6 +693,9 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       .join(', ')});`;
   }
 
+  /**
+   * Drop all tables for a given class
+   */
   getDropAllTablesSQL(cls: Class<any>): string[] {
     const out: string[] = [];
     SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
@@ -579,7 +707,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   }
 
   /**
-   * Simple insertion
+   * Get INSERT sql for a given instance and a specific stack location
    */
   getInsertSQL(stack: VisitStack[], instances: InsertWrapper['records']): string | undefined {
     const config = stack[stack.length - 1];
@@ -648,6 +776,9 @@ VALUES
 ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
   }
 
+  /**
+   * Get ALL Insert queries as needed
+   */
   getAllInsertSQL<T>(cls: Class<T>, instance: T): string[] {
     const out: string[] = [];
     const add = (text?: string) => text && out.push(text);
@@ -701,6 +832,9 @@ WHERE ${this.alias(idField)} IN (${ids.map(id => this.resolveValue(idField, id))
 ${orderBy};`;
   }
 
+  /**
+   * Get COUNT(1) query
+   */
   getQueryCountSQL<T>(cls: Class<T>, query: Query<T>) {
     return `
 SELECT COUNT(DISTINCT ${this.rootAlias}.id) as total
@@ -774,6 +908,9 @@ ${this.getWhereSQL(cls, query.where)}`;
     return items;
   }
 
+  /**
+   * Delete all ids
+   */
   async deleteByIds(stack: VisitStack[], ids: string[]) {
     return this.deleteAndGetCount(stack[stack.length - 1].type, {
       where: {
@@ -784,6 +921,9 @@ ${this.getWhereSQL(cls, query.where)}`;
     });
   }
 
+  /**
+   * Do bulk process
+   */
   async bulkProcess(dels: DeleteWrapper[], inserts: InsertWrapper[], upserts: InsertWrapper[], updates: InsertWrapper[]): Promise<BulkResponse> {
     const out = {
       counts: {
