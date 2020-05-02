@@ -13,6 +13,7 @@ The config module provides support for loading application config on startup. Co
 ## Resolution
 Config loading follows a defined resolution path, below is the order in increasing specificity:
 
+1. `resources/application.yml` - Load the default `application.yml` if available.
 1. `resources/*.yml` - Load profile specific configurations as defined by the values in `process.env.PROFILE`
 1. `resources/{env}.yml` - Load environment specific profile configurations as defined by the values of `process.env.ENV`.
 1. `process.env` - Read startup configuration from environment to allow for overriding any values. Because we are overriding a [`yaml`](https://en.wikipedia.org/wiki/YAML) based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as `UPPER_SNAKE_CASE`. When reading from `process.env` we will map `UPPER_SNAKE_CASE` to `upper.snake.case`, and will attempt to match by case-insensitive name.
@@ -62,7 +63,7 @@ database:
 
 ## Consuming
 
-The `ConfigLoader` service provides direct access to all of the loaded configuration. For simplicity, a decorator, `@Config` allows for classes to automatically be bound with config information on post construction. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matterns.
+The `ConfigSource` service provides direct access to all of the loaded configuration. For simplicity, a decorator, `@Config` allows for classes to automatically be bound with config information on post construction. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 

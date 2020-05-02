@@ -4,7 +4,7 @@ import * as yaml from 'js-yaml';
 import { Test, Suite, BeforeEach, AfterEach } from '@travetto/test';
 
 import { ConfigSource } from '../src/source';
-import { ConfigUtil } from '../src/util';
+import { ConfigUtil } from '../src/internal/util';
 
 class DbConfig {
   name: string;

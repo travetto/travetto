@@ -8,9 +8,17 @@ export type Nested = { [key: string]: Prim | Nested | Nested[] };
 
 const cmp = <T>(a: T, b: T, v: T, d: 1 | -1) => a === b ? 0 : (a === v ? -1 * d : (b === v ? 1 * d : 0));
 
-// TODO: Document
+/**
+ * Simple Config Utilities
+ */
 export class ConfigUtil {
 
+  /**
+   * Read ordered config files
+   * - application.yml
+   * - profiles.yml
+   * - env.yml
+   */
   static fetchOrderedConfigs() {
     return ResourceManager.findAllByExtensionSync('.yml')
       .map(file => ({ file, profile: path.basename(file).replace('.yml', '') }))
@@ -22,12 +30,18 @@ export class ConfigUtil {
       );
   }
 
+  /**
+   * Parse config file from YAML into JSON
+   */
   static getConfigFileAsData(file: string, ns: string = '') {
     const data = ResourceManager.readSync(file, 'utf8');
     const doc = YamlUtil.parse(data);
     return ns ? { [ns]: doc } : doc;
   }
 
+  /**
+   * Break down dotted keys into proper objects with nesting
+   */
   static breakDownKeys(data: Nested) {
     for (const key of Object.keys(data)) {
       if (Util.isPlainObject(data[key])) {
@@ -51,6 +65,9 @@ export class ConfigUtil {
     return data;
   }
 
+  /**
+   * Coerce the input type to match the existing field type
+   */
   static coerce(a: any, val: any): any {
     if (a === 'null' && typeof val !== 'string') {
       return null;
@@ -67,6 +84,9 @@ export class ConfigUtil {
     return Util.coerceType(a, val.constructor, false);
   }
 
+  /**
+   * Find the key using case insensitive search
+   */
   static getKeyName(key: string, data: Record<string, any>) {
     key = key.trim();
     const match = new RegExp(key, 'i');
@@ -74,6 +94,10 @@ export class ConfigUtil {
     return next;
   }
 
+  /**
+   * Bind the environment variables onto an object structure when they match by name.
+   * Will split on _ to handle nesting appropriately
+   */
   static bindEnvByKey(obj: Nested, key?: string) {
     // Handle process.env on bind as the structure we need may not
     // fully exist until the config has been created
@@ -85,6 +109,9 @@ export class ConfigUtil {
     }
   }
 
+  /**
+   * Take a split env var and bind to the object
+   */
   static bindEnvByParts(data: Nested, parts: string[], value: Prim) {
     parts = parts.slice(0);
 

@@ -1,10 +1,11 @@
 import { ConfigSource } from './source';
 
 /**
+ * Indicates that the given class should be populated with the configured fields, on instantiation
+ *
  * @augments trv/config/Config
  * @augments trv/di/Injectable
  */
-// TODO: Document
 export function Config(ns: string, depTarget?: new (...args: any[]) => any, name: string = '') {
 
   return (target: new (...args: any[]) => any) => {
