@@ -9,7 +9,7 @@ export class RequestTest {
 
   @Test()
   testArgs() {
-    const args = HttpRequest.requestOpts({
+    const args = HttpRequest.buildRequestContext({
       url: 'https://a:b@google.com:442?q=hello',
       payload: {
         age: 20,
@@ -25,14 +25,14 @@ export class RequestTest {
     assert(args.opts.path === '/?q=hello&age=20&height=5');
 
     const payload = 'age=20&height=5';
-    const args2 = HttpRequest.requestOpts({
+    const args2 = HttpRequest.buildRequestContext({
       url: 'https://google.com?q=hello',
       payload
     });
 
     assert(args2.opts.path, '/?q=hello&age=20&height=5');
 
-    const args2b = HttpRequest.configJSON({
+    const args2b = HttpRequest.withJSONPayload({
       url: 'https://google.com?q=hello',
       payload
     });
@@ -40,14 +40,14 @@ export class RequestTest {
     assert(args2b.headers!['Content-Type'], 'application/json');
 
     const payload3 = { age: 20, height: 5 };
-    const args3 = HttpRequest.configJSON({
+    const args3 = HttpRequest.withJSONPayload({
       method: 'POST',
       url: 'https://google.com?q=hello',
       payload: payload3
     });
     assert(args3.method === 'POST');
 
-    const args3b = HttpRequest.requestOpts({
+    const args3b = HttpRequest.buildRequestContext({
       method: 'POST',
       url: 'https://google.com?q=hello',
       payload: JSON.stringify(payload3)

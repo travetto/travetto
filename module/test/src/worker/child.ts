@@ -10,7 +10,7 @@ const FIXED_MODULES = new Set([
   'worker', 'exec', 'log', 'net', 'jwt', 'image', 'test',
   // 'registry'
 ]);
-const IS_SUPPORT_FILE = /support\/(transformer|phase)[.]/; // TODO: Testing utils need to be externalized to separate folder
+const IS_SUPPORT_FILE = /support\/(transformer|phase)[.]/;
 const IS_BIN_FILE = '/bin/';
 const IS_SELF_FILE = __filename.replace(/.*(test\/.*)([.]ts)?$/, (__, name) => name);
 
