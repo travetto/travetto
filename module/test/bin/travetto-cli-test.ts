@@ -1,11 +1,9 @@
 import * as os from 'os';
 import { Util, CompletionConfig } from '@travetto/cli/src/util';
-import { ColorSupport } from '@travetto/cli/src/color';
+import { Colors } from '@travetto/cli/src/color';
 
 // TODO: Document
 export function init() {
-  const Col = ColorSupport;
-
   return Util.program.command('test')
     .arguments('[regexes...]')
     .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec|event|xunit)$/, 'tap')
@@ -21,18 +19,18 @@ export function init() {
       if (cmd.format === 'tap' && Env.colorize) {
         const { TapEmitter } = await import('../src/consumer/types/tap');
         cmd.consumer = new TapEmitter(process.stdout, {
-          assertDescription: Col.description,
-          testDescription: Col.description,
-          success: Col.success,
-          failure: Col.failure,
-          assertNumber: Col.identifier,
-          testNumber: Col.identifier,
-          assertFile: Col.path,
-          assertLine: Col.input,
-          objectInspect: Col.output,
-          suiteName: Col.subtitle,
-          testName: Col.title,
-          total: Col.title
+          assertDescription: Colors.description,
+          testDescription: Colors.description,
+          success: Colors.success,
+          failure: Colors.failure,
+          assertNumber: Colors.identifier,
+          testNumber: Colors.identifier,
+          assertFile: Colors.path,
+          assertLine: Colors.input,
+          objectInspect: Colors.output,
+          suiteName: Colors.subtitle,
+          testName: Colors.title,
+          total: Colors.title
         });
       }
 
