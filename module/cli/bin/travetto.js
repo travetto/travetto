@@ -3,12 +3,16 @@
 const { FsUtil } = require('@travetto/boot/src/fs-util');
 const { EnvUtil } = require('@travetto/boot/src/env');
 
-// TODO: Document
+/**
+ * Supporting local development
+ */
 if (
   !EnvUtil.isSet('TRV_DEV') && // If not defined
   /\/travetto.*\/(module|sample)\//.test(FsUtil.cwd) // And in local module
 ) { // If in framework development mode
-  // TODO: Centralize spawn activity
+
+  // Spawn the cli with needed flag
+  // TODO: Move to common
   const res = require('child_process').spawnSync(process.argv0, process.argv.slice(1), {
     argv0: process.argv0,
     cwd: process.cwd(),
@@ -24,10 +28,14 @@ if (
 
 }
 
+/**
+ * Handle if cli is install globally
+ */
 if (!__filename.includes(FsUtil.cwd)) { // If the current file is not under the working directory
   const fs = require('fs');
   const hasLocal = fs.existsSync(`${FsUtil.cwd}/node_modules/@travetto/${__filename.split('@travetto/')[1]}`);
 
+  // Map the module loading for targeting the local node_modules
   const Module = require('module');
   const og = Module._load;
   Module._load = function (req, parent) {
@@ -42,7 +50,9 @@ if (!__filename.includes(FsUtil.cwd)) { // If the current file is not under the 
   };
 }
 
-// @ts-ignore
+/**
+ * Start cli
+ */
 require('@travetto/boot/bin/init')
   .libRequire('@travetto/cli/src/launch')
   .run(process.argv); // Allow for handing off to local/external cli

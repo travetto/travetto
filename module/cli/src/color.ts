@@ -1,6 +1,6 @@
 import { EnvUtil } from '@travetto/boot';
 
-const COLORS = {
+const Codes = {
   blue: `\x1b[94m`,
   yellow: `\x1b[93m`,
   green: `\x1b[92m`,
@@ -10,56 +10,62 @@ const COLORS = {
   magenta: `\x1b[95m`,
   white: `\x1b[97m\x1b[1m`,
   reset: `\x1b[0m`,
-
 };
 
 let colorize: boolean;
 
-function colorizeAny(col: keyof typeof COLORS, value: string | number | boolean): string;
-function colorizeAny(col: keyof typeof COLORS, value: any) {
+function colorizeAny(col: string, value: string | number | boolean): string;
+function colorizeAny(col: string, value: any) {
   if (colorize === undefined) {
     // Load on demand, synchronously
     colorize = (process.stdout.isTTY && !EnvUtil.isTrue('NO_COLOR')) || EnvUtil.isTrue('FORCE_COLOR');
   }
   if (colorize && value !== undefined && value !== null && value !== '') {
-    const code = COLORS[col];
-    value = `${code}${value}${COLORS.reset}`;
+    value = `${col}${value}${Codes.reset}`;
   }
   return value;
 }
 
-const ColorMapping = {
-  input: 'yellow',
-  output: 'magenta',
-  path: 'white',
-  success: 'green',
-  failure: 'red',
-  param: 'green',
-  type: 'blue',
-  description: 'gray',
-  title: 'white',
-  identifier: 'blue',
-  subtitle: 'gray'
-} as const;
+function c(key: string) {
+  return (v: any) => colorizeAny(key, v);
+}
 
-type Color = keyof typeof ColorMapping;
+/**
+ * Map of common keys to specific colors
+ */
+export const Colors = {
+  input: c(Codes.yellow),
+  output: c(Codes.magenta),
+  path: c(Codes.white),
+  success: c(Codes.green),
+  failure: c(Codes.red),
+  param: c(Codes.green),
+  type: c(Codes.blue),
+  description: c(Codes.gray),
+  title: c(Codes.white),
+  identifier: c(Codes.blue),
+  subtitle: c(Codes.gray)
+};
 
-// TODO: Document
-export const ColorSupport = (Object.keys(ColorMapping) as Color[]).reduce((acc, k) => {
-  acc[k] = v => colorizeAny(ColorMapping[k], v);
-  return acc;
-}, {} as Record<Color, (inp: any) => string>);
+type Color = keyof typeof Colors;
 
-// TODO: Document
+/**
+ * Colorize a string, as a string interpolation
+ *
+ * @example
+ * ```
+ * color`${{title: 'Main Title'}} is ${{subtitle: 'Sub Title}}`
+ * ```
+ */
 export function color(values: TemplateStringsArray, ...keys: (Partial<Record<Color, any>> | string)[]) {
   if (keys.length === 0) {
     return values[0];
   } else {
     const out = keys.map((el, i) => {
       const subKeys = Object.keys(el);
-      if (subKeys.length === 1 && subKeys[0] in ColorSupport) {
+      if (subKeys.length === 1 && subKeys[0] in Colors) {
         const [k] = subKeys as Color[];
-        el = ColorSupport[k]((el as any)[k]);
+        el = Colors[k]((el as any)[k]);
       }
       return `${values[i] ?? ''}${el ?? ''}`;
     });
