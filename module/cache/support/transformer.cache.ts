@@ -13,9 +13,14 @@ interface CacheState {
 const CACHE_KEY = 'trv/cache/Cache';
 const EVICT_KEY = 'trv/cache/Evict';
 
-// TODO: Document
+/**
+ * Transform the cache headers
+ */
 export class CacheTransformer {
 
+  /**
+   * Manage state for access to cache functions
+   */
   static initState(state: TransformerState & CacheState) {
     if (!state.util) {
       const util = state.importFile(require.resolve('../src/util')).ident;
@@ -25,12 +30,16 @@ export class CacheTransformer {
     }
   }
 
+  /**
+   * When `@Cache` and `@Evict` are present
+   */
   @OnMethod([CACHE_KEY, EVICT_KEY])
   static handleMethod(state: TransformerState & CacheState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
 
     const isCache = dm?.targets?.includes(CACHE_KEY);
     const dec = dm?.dec;
 
+    // If valid function
     if (dec && ts.isCallExpression(dec.expression)) {
       this.initState(state);
 
@@ -38,12 +47,14 @@ export class CacheTransformer {
       const id = params[0] as ts.Identifier;
       let config = params.length > 1 ? params[1] : TransformUtil.fromLiteral({});
 
+      // Read literal, and extend config onto it
       if (ts.isObjectLiteralExpression(config)) {
         const parent = ((node.parent as ts.ClassExpression) || { name: { getText: () => 'unknown' } }).name!;
         const keySpace = `${parent.getText()}.${node.name.getText()}`;
         config = TransformUtil.extendObjectLiteral(config, TransformUtil.fromLiteral({ keySpace }));
       }
 
+      // Create an arrow function to retain the `this` value.
       const fn = ts.createArrowFunction(
         [ts.createModifier(ts.SyntaxKind.AsyncKeyword)],
         undefined,
@@ -53,6 +64,7 @@ export class CacheTransformer {
         node.body!
       );
 
+      // Return new method calling evict or cache depending on decorator.
       return ts.updateMethod(
         node,
         node.decorators,

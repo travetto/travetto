@@ -2,20 +2,20 @@ import { CacheStoreType, CacheEntry, CacheConfig } from '../types';
 import { CacheStoreUtil } from './util';
 import { CacheError } from './error';
 
-// TODO: Document
+/**
+ * Cache store
+ */
 export abstract class CacheStore<T extends CacheEntry = CacheEntry> implements CacheStoreType<T> {
 
   abstract get(key: string): Promise<T | undefined> | T | undefined;
   abstract has(key: string): Promise<boolean> | boolean;
   abstract set(key: string, entry: T): Promise<CacheEntry> | CacheEntry;
-
   abstract isExpired(key: string): Promise<boolean> | boolean;
   abstract touch(key: string, expiresAt: number): Promise<boolean> | boolean;
   abstract delete(key: string): Promise<boolean> | boolean;
   abstract keys(): Promise<Iterable<string>> | Iterable<string>;
 
   clear?(): Promise<void> | void;
-
   postConstruct?(): Promise<void> | void;
 
   computeKey(params: any) {
