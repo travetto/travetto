@@ -5,10 +5,12 @@ import { AppUtil } from '@travetto/app';
 import { RouteConfig, RestApp } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
-import { FastifyAppUtil } from './util';
+import { FastifyAppUtil } from './internal/util';
 
+/**
+ * Fastify-based rest app
+ */
 @Injectable()
-// TODO: Document
 export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
 
   async createRaw() {
