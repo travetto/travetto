@@ -1,6 +1,8 @@
 import { AsyncContext } from './service';
 
-// TODO: Document
+/**
+ * Allows running a function while providing an async context
+ */
 export function WithAsyncContext<T extends { context: AsyncContext }>(data?: any) {
   return function (target: T, prop: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) {
     const og = descriptor.value!;
