@@ -2,7 +2,9 @@ import * as commander from 'commander';
 
 import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
 
-// TODO: Document
+/**
+ * Allow for exporting of all Models as SQL statements to stdout
+ */
 export function init() {
   return CliUtil.program
     .command('sql:schema')

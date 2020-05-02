@@ -15,7 +15,7 @@ import { Injectable } from '@travetto/di';
 
 import { SQLModelConfig } from './config';
 import { Connected, Transactional, withTransaction } from './connection';
-import { SQLUtil } from './util';
+import { SQLUtil } from './internal/util';
 import { SQLDialect } from './dialect';
 
 /**
@@ -24,7 +24,6 @@ import { SQLDialect } from './dialect';
  * as needed.
  */
 @Injectable()
-// TODO: Document
 export class SQLModelSource extends ModelSource {
 
   constructor(
@@ -44,14 +43,23 @@ export class SQLModelSource extends ModelSource {
     await this.initDatabase();
   }
 
+  /**
+   * Get a valid connection
+   */
   get conn() {
     return this.dialect.conn;
   }
 
+  /**
+   * Generate a unique id
+   */
   generateId() {
     return this.dialect.generateId();
   }
 
+  /**
+   * Create all needed tables for a given class
+   */
   @Connected()
   @Transactional()
   async createTables(cls: Class<any>): Promise<void> {
@@ -77,6 +85,9 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
+  /**
+   * Drop all tables for a given class
+   */
   @Connected()
   @Transactional()
   async dropTables(cls: Class<any>): Promise<void> {
@@ -85,12 +96,18 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
+  /**
+   * Initialize connection
+   */
   async initClient() {
     if (this.conn.init) {
       await this.conn.init();
     }
   }
 
+  /**
+   * Initialize database
+   */
   @WithAsyncContext({})
   @Connected()
   @Transactional()
@@ -102,6 +119,9 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
+  /**
+   * Clear database
+   */
   @WithAsyncContext({})
   @Connected()
   @Transactional()
@@ -115,6 +135,9 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
+  /**
+   * When the schema changes, update SQL
+   */
   @WithAsyncContext({})
   async onSchemaChange(ev: SchemaChangeEvent) {
     if (this.dialect.handleFieldChange(ev)) {
@@ -127,12 +150,18 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
+  /**
+   * When the schema changes, update column
+   */
   @Connected()
   @Transactional()
   async onFieldChange(ev: SchemaChangeEvent) {
     return this.dialect.handleFieldChange(ev);
   }
 
+  /**
+   * On model change
+   */
   @WithAsyncContext({})
   async onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>) {
     if (!this.config.autoCreate) {
@@ -155,6 +184,9 @@ export class SQLModelSource extends ModelSource {
     return o;
   }
 
+  /**
+   * Insert a new instance
+   */
   @Connected()
   async insert<T = any>(cls: Class<T>, instance: T) {
     for (const ins of this.dialect.getAllInsertSQL(cls, instance)) {
@@ -162,6 +194,9 @@ export class SQLModelSource extends ModelSource {
     }
   }
 
+  /**
+   * Provide autocomplete suggestions
+   */
   @Connected()
   async suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     const q = ModelUtil.getSuggestFieldQuery(cls, field, prefix, query);
@@ -169,6 +204,9 @@ export class SQLModelSource extends ModelSource {
     return ModelUtil.combineSuggestResults(cls, field, prefix, results, x => x, query && query.limit);
   }
 
+  /**
+   * Produce query facets
+   */
   @Connected()
   async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
     const col = this.dialect.ident(field as string);
@@ -195,6 +233,9 @@ export class SQLModelSource extends ModelSource {
     });
   }
 
+  /**
+   * Suggest entities
+   */
   @Connected()
   async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     const q = ModelUtil.getSuggestQuery(cls, field, prefix, query);
@@ -366,9 +407,9 @@ export class SQLModelSource extends ModelSource {
     const insertedIds = await this.computeInsertedIds(cls, operations);
 
     const deletes = [{ stack: SQLUtil.classToStack(cls), ids: deleteOps.map(x => x.id!) }].filter(x => !!x.ids.length);
-    const inserts = (await SQLUtil.extractInserts(cls, insertOps)).filter(x => !!x.records.length);
-    const upserts = (await SQLUtil.extractInserts(cls, upsertOps)).filter(x => !!x.records.length);
-    const updates = (await SQLUtil.extractInserts(cls, updateOps)).filter(x => !!x.records.length);
+    const inserts = (await SQLUtil.getInserts(cls, insertOps)).filter(x => !!x.records.length);
+    const upserts = (await SQLUtil.getInserts(cls, upsertOps)).filter(x => !!x.records.length);
+    const updates = (await SQLUtil.getInserts(cls, updateOps)).filter(x => !!x.records.length);
 
     const ret = await this.dialect.bulkProcess(deletes, inserts, upserts, updates);
     ret.insertedIds = insertedIds;

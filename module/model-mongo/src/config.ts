@@ -8,8 +8,10 @@ import { Config } from '@travetto/config';
 const exists = util.promisify(fs.exists);
 const read = util.promisify(fs.readFile);
 
+/**
+ * Mongo model config
+ */
 @Config('mongo.model')
-// TODO: Document
 export class MongoModelConfig {
   hosts = ['localhost'];
   namespace = 'app';

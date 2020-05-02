@@ -1,10 +1,12 @@
 import * as commander from 'commander';
 
-import { Util, CompletionConfig } from '@travetto/cli/src/util';
+import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
 
-// TODO: Document
+/**
+ * Allow for exporting of elasticsearch schemas to stdout
+ */
 export function init() {
-  return Util.program
+  return CliUtil.program
     .command('es:schema')
     .option('-a, --app [app]', 'Application to export, (default: .)')
     .action(async (cmd: commander.Command) => {

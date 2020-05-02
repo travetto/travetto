@@ -1,6 +1,8 @@
 import { ElasticsearchModelSource } from '../src/source';
 
-// TODO: Document
+/**
+ * Get all models registered in the application and return as a plain object
+ */
 export async function getSchemas() {
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.bootstrap();

@@ -6,9 +6,8 @@ import { ConnectionSupport, withConnection, withTransaction } from '../../connec
 import { SQLModelConfig } from '../../config';
 
 /**
- * Connection support
+ * Connection support for postgresql
  */
-// TODO: Document
 export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
 
   pool: pg.Pool;

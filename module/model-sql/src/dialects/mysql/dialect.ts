@@ -7,11 +7,13 @@ import { WhereClause } from '@travetto/model';
 
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../../dialect';
-import { VisitStack } from '../../util';
+import { VisitStack } from '../../internal/util';
 import { MySQLConnection } from './connection';
 
+/**
+ * MYSQL Dialect for the SQL Model Source
+ */
 @Injectable({ target: SQLDialect })
-// TODO: Document
 export class MySQLDialect extends SQLDialect {
 
   conn: MySQLConnection;

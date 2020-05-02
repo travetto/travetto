@@ -1,5 +1,5 @@
-import { VisitStack } from './util';
 import { FieldConfig } from '@travetto/schema';
+import { VisitStack } from './util';
 
 export interface InsertWrapper {
   stack: VisitStack[];

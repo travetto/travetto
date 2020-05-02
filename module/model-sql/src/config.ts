@@ -1,8 +1,10 @@
 import { Env } from '@travetto/base';
 import { Config } from '@travetto/config';
 
+/**
+ * SQL Model Config
+ */
 @Config('sql.model')
-// TODO: Document
 export class SQLModelConfig {
   host = '127.0.0.1';
   port = 0;

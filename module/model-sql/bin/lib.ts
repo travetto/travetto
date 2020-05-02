@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Grab all models and generate the CREATE TABLE expression for each one
+ */
 export async function getSchemas(clear = true) {
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.bootstrap();

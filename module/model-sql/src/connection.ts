@@ -5,32 +5,62 @@ import { Util } from '@travetto/base';
  * be separated out to allow for differences in connection
  * vs querying.
  */
-// TODO: Document
 export interface ConnectionSupport<C = any> {
   active: C;
   asyncContext: { connection: C, pendingTx?: number };
 
+  /**
+   * Initialize connection source
+   */
   init?(): Promise<void> | void;
+  /**
+   * Acquire new connection
+   */
   acquire(): Promise<C>;
+  /**
+   * Release provided connection
+   */
   release(conn: C): void;
 
+  /**
+   * Start a transaction
+   */
   startTx(): Promise<void>;
+  /**
+   * Commit active transaction
+   */
   commit(): Promise<void>;
+  /**
+   * Rollback active transaction
+   */
   rollback(): Promise<void>;
 
+  /**
+   * Start a nested transaction by id, not supported in all dbs
+   */
   startNestedTx(id: string): Promise<void>;
+  /**
+   * Commit a nested transaction by id, not supported in all dbs
+   */
   commitNested(id: string): Promise<void>;
+  /**
+   * Rollback a nested transaction by id, not supported in all dbs
+   */
   rollbackNested(id: string): Promise<void>;
 }
 
 export type TransactionType = 'required' | 'isolated';
 
-// TODO: Document
+/**
+ * Indicating something is aware of connections
+ */
 export interface ConnectionAware<C = any> {
   conn: ConnectionSupport<C>;
 }
 
-// TODO: Document
+/**
+ * Run a function with a valid sql connection available.  Relies on @travetto/context.
+ */
 export async function withConnection<V extends ConnectionAware, R>(
   self: V,
   fn: (this: V, ...args: any[]) => R,
@@ -51,7 +81,9 @@ export async function withConnection<V extends ConnectionAware, R>(
   }
 }
 
-// TODO: Document
+/**
+ * Run a function within a valid sql transaction.  Relies on @travetto/context.
+ */
 export async function withTransaction<V extends ConnectionAware, R>(
   self: V,
   mode: TransactionType,
@@ -91,7 +123,9 @@ export async function withTransaction<V extends ConnectionAware, R>(
   }
 }
 
-// TODO: Document
+/**
+ * Decorator to ensure a method runs with a valid connection
+ */
 export function Connected<T extends ConnectionAware>() {
   return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(this: T, ...args: any[]) => Promise<any>>) {
     const og = desc.value!;
@@ -101,7 +135,9 @@ export function Connected<T extends ConnectionAware>() {
   };
 }
 
-// TODO: Document
+/**
+ * Decorator to ensure a method runs with a valid transaction
+ */
 export function Transactional<T extends ConnectionAware>(mode: TransactionType = 'required') {
   return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(this: T, ...args: any[]) => Promise<any>>) {
     const og = desc.value!;
