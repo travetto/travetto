@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-const { FsUtil } = require('@travetto/boot/src/fs-util');
+const { FsUtil } = require('@travetto/boot/src/fs');
+const { ExecUtil } = require('@travetto/boot/src/exec');
 const { EnvUtil } = require('@travetto/boot/src/env');
 
 /**
@@ -11,21 +12,13 @@ if (
   /\/travetto.*\/(module|sample)\//.test(FsUtil.cwd) // And in local module
 ) { // If in framework development mode
 
-  // Spawn the cli with needed flag
-  // TODO: Move to common
-  const res = require('child_process').spawnSync(process.argv0, process.argv.slice(1), {
-    argv0: process.argv0,
-    cwd: process.cwd(),
+  // Spawn the cli with needed flags
+  ExecUtil.fork(process.argv[1], process.argv.slice(2), {
     stdio: [0, 1, 2],
     shell: true,
-    env: { // Handle symlinks, and denote we are in framework dev mode
-      ...process.env,
-      NODE_PRESERVE_SYMLINKS: '1',
-      TRV_DEV: '1',
-    }
-  });
-  process.exit(res.status);
-
+    env: { NODE_PRESERVE_SYMLINKS: '1', TRV_DEV: '1', }
+  }).then(v => process.exit(v.code), err => process.exit(err.meta.code));
+  return;
 }
 
 /**

@@ -1,8 +1,8 @@
 import * as commander from 'commander';
-import * as child_process from 'child_process';
 
 // Imported individually to prevent barrel import loading too much
-import { FsUtil } from '@travetto/boot/src/fs-util';
+import { FsUtil } from '@travetto/boot/src/fs';
+import { ExecUtil } from '@travetto/boot/src/exec';
 
 import { color } from './color';
 
@@ -40,36 +40,8 @@ export class CliUtil {
    * @param args The args to pass in
    * @param sCwd The root working directory
    */
-  static dependOn(cmd: string, args: string[] = [], sCwd: string = FsUtil.cwd) {
-    child_process.spawnSync(`${process.argv.slice(0, 2).join(' ')} ${cmd} ${args.join(' ')}`, {
-      env: process.env,
-      cwd: sCwd,
-      stdio: [0, 1, 2],
-      shell: true
-    });
-  }
-
-  // TODO: MOVE to boot
-  static fork(cmd: string, args: string[], env: Record<string, string | undefined>) {
-    return new Promise((resolve, reject) => {
-      const text: Buffer[] = [];
-      const err: Buffer[] = [];
-      const proc = child_process.fork(cmd, args ?? [], {
-        env: { ...process.env, ...(env ?? {}) },
-        cwd: FsUtil.cwd,
-        stdio: ['pipe', 'pipe', 'pipe', 'ipc']
-      });
-      proc.stdout!.on('data', v => text.push(v));
-      proc.stderr!.on('data', v => err.push(v));
-      proc.on('exit', v => {
-        if (v === 0) {
-          resolve(Buffer.concat(text).toString());
-        } else {
-          console.error(Buffer.concat(text).toString());
-          reject(Buffer.concat(err).toString());
-        }
-      });
-    });
+  static async dependOn(cmd: string, args: string[] = [], sCwd: string = FsUtil.cwd) {
+    await ExecUtil.fork(cmd, args, { cwd: sCwd, shell: true }).result;
   }
 
   /**

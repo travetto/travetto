@@ -1,5 +1,5 @@
 import { CommandService } from '@travetto/exec';
-import { SystemUtil } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 // TODO: Document
 export interface ImageOptions {

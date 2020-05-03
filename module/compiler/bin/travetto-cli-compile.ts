@@ -23,7 +23,7 @@ export function init() {
       }
 
       if (cmd.clean) {
-        CliUtil.dependOn('clean');
+        await CliUtil.dependOn('clean');
       }
 
       const { AppCache } = await import(`@travetto/boot`);

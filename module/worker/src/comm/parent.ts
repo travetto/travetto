@@ -1,13 +1,15 @@
-import * as child_process from 'child_process';
-import { ExecutionState, ExecutionResult } from '@travetto/exec';
+import { ChildProcess } from 'child_process';
+import { ExecUtil } from '@travetto/boot';
 
 import { ProcessCommChannel } from './channel';
 import { CommUtil } from './util';
 
-// TODO: Document
-export class ParentCommChannel<U = any> extends ProcessCommChannel<child_process.ChildProcess, U> {
+type ExecutionState = ReturnType<(typeof ExecUtil)['spawn']>;
 
-  private complete: Promise<ExecutionResult>;
+// TODO: Document
+export class ParentCommChannel<U = any> extends ProcessCommChannel<ChildProcess, U> {
+
+  private complete: ExecutionState['result'];
 
   constructor(state: ExecutionState) {
     super(state.process);

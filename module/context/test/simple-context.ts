@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import * as async_hooks from 'async_hooks';
+import * as asyncHooks from 'async_hooks';
 
 import { Inject, Injectable, DependencyRegistry } from '@travetto/di';
 import { Suite, Test, BeforeAll } from '@travetto/test';
@@ -48,10 +48,10 @@ class VerifyContext {
   async multipleContext() {
     const attempts = ' '.repeat(10).split('').map((__, i) =>
       async () => {
-        const start = async_hooks.executionAsyncId();
+        const start = asyncHooks.executionAsyncId();
         this.context.set({ name: `test-${i}` });
         await new Promise(resolve => setTimeout(resolve, 1));
-        const end = async_hooks.executionAsyncId();
+        const end = asyncHooks.executionAsyncId();
 
         if (this.context.get().name !== `test-${i}`) {
           throw new Error(`Didn\'t match: ${start} - ${end}`);

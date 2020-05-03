@@ -6,26 +6,7 @@ travetto: Exec
 $ npm install @travetto/exec
 ```
 
-The exec module provides the necessary foundation for calling executables at runtime. Additionally special attention is provided to running [`docker`](https://www.docker.com/community-edition) containers.
-
-## Simple Execution
-Just like [`child_process`](https://www.docker.com/community-edition), the module exposes ```spawn```, ```fork```, and ```exec```.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ```Promise``` structure, that throws an error on an non-zero return status.
-
-A simple example would be
-
-**Code: Running a directory listing via ls**
-```typescript
-async function executeListing() {
-  const { result } = Exec.spawn('ls');
-  await result;
-}
-```
-
-As you can see, the call returns not only the child process information, but the ```Promise``` to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
-* `timeout` as the number of milliseconds the process can run before terminating and throwing an error
-* `quiet` which suppresses all stdout/stderr output
-* `stdin` as a string, buffer or stream to provide input to the program you are running;
-* `timeoutKill` allows for registering functionality to execute when a process is force killed by timeout
+The exec module provides the necessary foundation for calling complex commands at runtime. Additionally special attention is provided to running [`docker`](https://www.docker.com/community-edition) containers.
 
 ## Docker Support
 Docker provides a unified way of executing external programs with a high level of consistency and simplicity.  For that reason, the framework leverages this functionality to provide a clean cross-platform experience.  The docker functionality allows you to interact with containers in two ways:
@@ -43,7 +24,7 @@ async function runMongo() {
     .forceDestroyOnShutdown();
 
   container.run(['--storageEngine', 'ephemeralForTest', '--port', port]);
-  await container.waitForPorts();
+  await NetUtil.waitForPort(port);
 
   return;
 }

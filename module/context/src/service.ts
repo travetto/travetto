@@ -1,22 +1,22 @@
-import * as async_hooks from 'async_hooks';
+import * as asyncHooks from 'async_hooks';
 
 import { Injectable } from '@travetto/di';
 import { AppError } from '@travetto/base';
 
 /**
- * Async context provider using `async_hooks`
+ * Async context provider using `asyncHooks`
  */
 @Injectable()
 export class AsyncContext {
   private threads = new Map<number, number>();
   private threadsSet = new Map<number, Set<number>>();
-  private hooks: async_hooks.AsyncHook;
+  private hooks: asyncHooks.AsyncHook;
   private active = 0;
 
   storageState = new Map<number, any>();
 
   constructor() {
-    this.hooks = async_hooks.createHook({
+    this.hooks = asyncHooks.createHook({
       before: this.enter.bind(this),
       init: this.enter.bind(this),
       after: this.leave.bind(this),
@@ -29,7 +29,7 @@ export class AsyncContext {
   private storage(val: any): void;
   private storage(): any;
   private storage(val?: any) {
-    const currId = async_hooks.executionAsyncId();
+    const currId = asyncHooks.executionAsyncId();
     const key = this.threads.get(currId)!;
     if (!key) {
       throw new AppError('Context is not initialized', 'general');
@@ -50,8 +50,8 @@ export class AsyncContext {
     if (!this.active) {
       return;
     }
-    const exAsyncId = async_hooks.executionAsyncId();
-    const triggerId = async_hooks.triggerAsyncId() || asyncId;
+    const exAsyncId = asyncHooks.executionAsyncId();
+    const triggerId = asyncHooks.triggerAsyncId() || asyncId;
     const target = this.threads.get(triggerId) || this.threads.get(exAsyncId);
     if (target) {
       this.threads.set(asyncId, target);
@@ -67,7 +67,7 @@ export class AsyncContext {
     if (this.threads.has(asyncId)) {
       this.threads.delete(asyncId);
     } else {
-      const exAsyncId = async_hooks.executionAsyncId();
+      const exAsyncId = asyncHooks.executionAsyncId();
       if (this.threads.has(exAsyncId)) {
         this.threads.delete(exAsyncId);
       }
@@ -124,7 +124,7 @@ export class AsyncContext {
     // Force new context
     await new Promise(process.nextTick);
 
-    const runId = async_hooks.executionAsyncId() || async_hooks.triggerAsyncId();
+    const runId = asyncHooks.executionAsyncId() || asyncHooks.triggerAsyncId();
     const threads = new Set([runId]);
 
     this.active += 1;

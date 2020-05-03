@@ -2,7 +2,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as url from 'url';
 import * as http from 'http';
-import { OsUtil } from './os';
+
+import { ExecUtil } from '@travetto/boot';
 
 const RESOURCES = path.resolve(__dirname, '..', 'resources');
 const read = (p: string) => fs.readFileSync(path.resolve(RESOURCES, p), 'utf8');
@@ -125,7 +126,7 @@ export class WebServer {
     if (this.open) {
       const finalUrl = `http://localhost:${this.port}`;
       console.debug(`Now running at ${finalUrl}`);
-      OsUtil.launch(finalUrl);
+      ExecUtil.launch(finalUrl);
     }
   }
 }

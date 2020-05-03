@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
-import { FsUtil } from '@travetto/boot/src/fs-util';
-import { fork } from '@travetto/boot/src/exec';
+import { FsUtil } from '@travetto/boot/src/fs';
+import { ExecUtil } from '@travetto/boot/src/exec';
 import { CachedAppConfig, handleFailure } from './util';
 
 /**
@@ -94,7 +94,7 @@ export class AppListUtil {
       // Read cache it
       let text: string;
       if (!AppCache.hasEntry(this.cacheConfig)) {
-        text = await fork(path.resolve(__dirname, '..', 'find-apps'));
+        text = (await ExecUtil.fork(path.resolve(__dirname, '..', 'find-apps')).result).stdout;
         AppCache.writeEntry(this.cacheConfig, text);
       } else {
         text = AppCache.readEntry(this.cacheConfig);

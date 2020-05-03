@@ -1,22 +1,23 @@
 import * as readline from 'readline';
-import * as child_process from 'child_process';
 import { TapEmitter } from './emitter';
+
+import { ExecUtil } from '../../module/boot/src/exec';
 
 export async function run() {
 
-  const child = child_process.spawn('npx', [
+  const child = ExecUtil.spawn('npx', [
     'lerna', '--no-sort', 'exec', '--no-bail',
     // '--concurrency', '1',
     '--ignore', '@travetto/*-app',
     '--ignore', '@travetto/cli',
     '--stream', '--',
     'npx', 'trv', 'test', '-f', 'event', '-c', '2'
-  ], { shell: true, stdio: [null, null, 2] });
+  ], { shell: true, quiet: true });
 
   const emitter = new TapEmitter();
 
   const rl = readline.createInterface({
-    input: child.stdout!,
+    input: child.process.stdout!,
     output: process.stdout,
     terminal: false
   });

@@ -1,15 +1,16 @@
 import * as fs from 'fs';
-import * as child_process from 'child_process';
 import { DepResolver } from './resolver';
 import { Finalize } from './finalize';
 import { Util } from './util';
 
-export function init() {
+import { ExecUtil } from '../../module/boot/src/exec';
+
+export async function init() {
   DepResolver.init();
 
   // Init lerna
-  child_process.spawnSync('npx', ['lerna', 'clean', '--yes'], { stdio: [undefined, process.stdout, process.stderr], shell: true });
-  child_process.spawnSync('npx', ['lerna', 'bootstrap', '--hoist'], { stdio: [undefined, process.stdout, process.stderr], shell: true });
+  await ExecUtil.spawn('npx', ['lerna', 'clean', '--yes'], { shell: true }).result;
+  await ExecUtil.spawn('npx', ['lerna', 'bootstrap', '--hoist'], { shell: true }).result;
 
   // Clear out package-lock
   try {

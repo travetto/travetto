@@ -1,11 +1,10 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { FsUtil, EnvUtil } from '@travetto/boot';
+import { FsUtil, EnvUtil, ExecUtil } from '@travetto/boot';
 import { ShutdownManager } from '@travetto/base';
 
-import { Exec } from './exec';
-import { ExecutionState } from './types';
+type ExecutionState = ReturnType<(typeof ExecUtil)['spawn']>;
 
 const fsWriteFile = util.promisify(fs.writeFile);
 
@@ -51,7 +50,7 @@ export class DockerContainer {
   }
 
   private runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
-    const state = Exec.spawn(this.dockerCmd, [op, ...(args ?? [])], { shell: this.tty });
+    const state = ExecUtil.spawn(this.dockerCmd, [op, ...(args ?? [])], { shell: this.tty });
     return (op !== 'run' && op !== 'exec') ? this.watchForEviction(state, true) : state;
   }
 
@@ -237,13 +236,13 @@ export class DockerContainer {
     this.runAway = this.runAway || runAway;
 
     try {
-      await Exec.spawn(this.dockerCmd, ['kill', this.container]).result;
+      await ExecUtil.spawn(this.dockerCmd, ['kill', this.container]).result;
     } catch (e) { /* ignore */ }
 
     console.debug('Removing', this.image, this.container);
 
     try {
-      await Exec.spawn(this.dockerCmd, ['rm', '-fv', this.container]).result;
+      await ExecUtil.spawn(this.dockerCmd, ['rm', '-fv', this.container]).result;
     } catch (e) { /* ignore */ }
 
     if (this.pendingExecutions.size) {
@@ -257,20 +256,20 @@ export class DockerContainer {
 
   forceDestroy() { // Cannot be async as it's used on exit, that's why it's all sync
     try {
-      Exec.execSync(`${this.dockerCmd} kill ${this.container}`);
+      ExecUtil.execSync(`${this.dockerCmd} kill ${this.container}`);
     } catch (e) { /* ignore */ }
 
     console.debug('Removing', this.image, this.container);
 
     try {
-      Exec.execSync(`${this.dockerCmd} rm -fv ${this.container}`);
+      ExecUtil.execSync(`${this.dockerCmd} rm -fv ${this.container}`);
     } catch (e) { /* ignore */ }
 
     this.cleanupSync();
 
-    const ids = Exec.execSync(`${this.dockerCmd} volume ls -qf dangling=true`);
+    const ids = ExecUtil.execSync(`${this.dockerCmd} volume ls -qf dangling=true`);
     if (ids) {
-      Exec.execSync(`${this.dockerCmd} volume rm ${ids.split('\n').join(' ')}`);
+      ExecUtil.execSync(`${this.dockerCmd} volume rm ${ids.split('\n').join(' ')}`);
     }
   }
 
@@ -304,10 +303,10 @@ export class DockerContainer {
 
   async removeDanglingVolumes() {
     try {
-      const { result } = Exec.spawn(this.dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
+      const { result } = ExecUtil.spawn(this.dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
       const ids = (await result).stdout.trim();
       if (ids) {
-        await Exec.spawn(this.dockerCmd, ['volume', 'rm', ...ids.split('\n')]).result;
+        await ExecUtil.spawn(this.dockerCmd, ['volume', 'rm', ...ids.split('\n')]).result;
       }
     } catch (e) {
       // error
