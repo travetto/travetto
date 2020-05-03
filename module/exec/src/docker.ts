@@ -5,8 +5,8 @@ import { FsUtil, EnvUtil } from '@travetto/boot';
 import { ShutdownManager } from '@travetto/base';
 
 import { Exec } from './exec';
-import { ExecUtil } from './util';
 import { ExecutionState } from './types';
+
 const fsWriteFile = util.promisify(fs.writeFile);
 
 // TODO: Document
@@ -312,12 +312,5 @@ export class DockerContainer {
     } catch (e) {
       // error
     }
-  }
-
-  waitForPorts(timeout = 5000) {
-    return Promise.all(
-      Object.keys(this.ports)
-        .map(x => ExecUtil.waitForPort(parseInt(x, 10), timeout))
-    );
   }
 }
