@@ -202,7 +202,10 @@ export class TranspileUtil {
     // Register source maps for cached files
     require('source-map-support').install({
       emptyCacheBetweenOperations: EnvUtil.isTrue('watch'), // Empty cache when contents can change
-      retrieveFile: (p: string) => this.sourceResolvers.find(r => r(FsUtil.toTS(p)))
+      retrieveFile: (p: string) => {
+        p = FsUtil.toTS(p);
+        return this.sourceResolvers.reduce((v, res) => v || res(p)!, '');
+      }
     });
   }
 
