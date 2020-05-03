@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 
 import { FileCache, RegisterUtil, TranspileUtil, FsUtil } from '@travetto/boot';
-import { Env, ScanApp } from '@travetto/base';
+import { ScanApp } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';
@@ -18,7 +18,6 @@ export class Transpiler {
   private transformerManager: TransformerManager;
 
   private rootNames = new Set<string>();
-  private sourceMaps = new Map<string, { url: string, map: string, content: string }>();
   private contents = new Map<string, string>();
   private sources = new Map<string, ts.SourceFile>();
   private hashes = new Map<string, number>();
@@ -239,20 +238,8 @@ export class Transpiler {
     this.transformerManager.reset();
     this.contents.clear();
     this.rootNames.clear();
-    this.sourceMaps.clear();
     this.sources.clear();
     this.hashes.clear();
     delete this.program;
-  }
-
-  /**
-   * Return source map handler for transpiled code
-   */
-  getSourceMapHandler() {
-    return {
-      emptyCacheBetweenOperations: !Env.prod, // Be less strict in non-dev
-      retrieveFile: (p: string) => this.contents.get(FsUtil.toTS(p))!,
-      retrieveSourceMap: (source: string) => this.sourceMaps.get(FsUtil.toTS(source))!
-    };
   }
 }

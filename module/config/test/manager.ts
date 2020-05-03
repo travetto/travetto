@@ -4,7 +4,6 @@ import { YamlUtil } from '@travetto/yaml';
 import { Test, Suite, BeforeEach, AfterEach } from '@travetto/test';
 
 import { ConfigManager } from '../src/manager';
-import { Config } from '../src/decorator';
 
 class DbConfig {
   name: string;

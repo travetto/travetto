@@ -187,4 +187,17 @@ name: bob
     assert(output === { name: 'bob' });
   }
 
+  @Test()
+  flatList() {
+    const output = YamlUtil.parse(`
+parent:
+  values:
+  - 1
+  - 2
+  - 3
+`);
+
+    assert(output === { parent: { values: [1, 2, 3] } });
+  }
+
 }

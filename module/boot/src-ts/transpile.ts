@@ -191,8 +191,18 @@ export class TranspileUtil {
   /**
    * Initialize
    */
-  static init() {
+  static async init() {
     AppCache.init();
+    try {
+      const sourcemap = await import('source-map-support');
+
+      sourcemap.install({
+        emptyCacheBetweenOperations: !EnvUtil.isTrue('prod'), // Be less strict in non-dev
+        retrieveFile: (p: string) => AppCache.readEntry(FsUtil.toTS(p))!,
+      });
+    } catch (err) {
+      // Do nothing if sourcemap is not installed
+    }
   }
 
   /**

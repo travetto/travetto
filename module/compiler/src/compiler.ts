@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 
 import { EventEmitter } from 'events';
-import * as sourcemap from 'source-map-support';
 
 import { FsUtil, AppCache, FileCache, RegisterUtil, TranspileUtil } from '@travetto/boot';
 import { Env, ShutdownManager, FilePresenceManager, PresenceListener, ScanApp } from '@travetto/base';
@@ -74,9 +73,6 @@ class $Compiler extends EventEmitter {
     require.extensions[TranspileUtil.ext] = this.compile.bind(this);
     this.transpiler.init();
     this.presenceManager.init();
-
-    // register source maps
-    sourcemap.install(this.transpiler.getSourceMapHandler());
 
     console.debug('Initialized', (Date.now() - start) / 1000);
   }
