@@ -3,7 +3,7 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { YamlUtil } from '../src/api';
+import { YamlUtil } from '../src/util';
 
 @Suite()
 export class ParserTest {
