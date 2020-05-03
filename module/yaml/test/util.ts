@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { Tokenizer } from '../src/tokenizer';
+import { Tokenizer } from '../src/internal/tokenizer';
 
 @Suite()
 export class TokenizerTest {

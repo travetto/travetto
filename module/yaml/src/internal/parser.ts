@@ -61,7 +61,7 @@ export class Parser {
     while (pos < end) {
       state.lineCount += 1;
 
-      const res = Parser.readLine(state, text, pos);
+      const res = this.readLine(state, text, pos);
 
       if (res.length === 1) {
         pos = res[0];
@@ -80,13 +80,13 @@ export class Parser {
         const isEndOrSpace = (lastToken || Tokenizer.isWhitespaceStr(tokens[i + 1]));
 
         if (pending.length === 0 && token === DASH && isEndOrSpace) {
-          Parser.startList(state, subIndent);
-          subIndent += token.length + 1;
+          this.startList(state, subIndent);
+          subIndent += token.length - 1;
           if (!lastToken) { // Consume whitespace
             i += 1;
           }
         } else if (pending.length === 1 && token === COLON && isEndOrSpace) {
-          Parser.startMap(state, pending[0], subIndent);
+          this.startMap(state, pending[0], subIndent);
           subIndent += pending[0].length;
           if (!lastToken) {  // Consume whitespace
             i += 1;

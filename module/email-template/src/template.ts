@@ -2,7 +2,8 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { AppCache, FsUtil, EnvUtil } from '@travetto/boot';
-import { ResourceManager, SystemUtil } from '@travetto/base';
+import { ResourceManager } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 import { Injectable, Inject } from '@travetto/di';
 import { ImageUtil } from '@travetto/image';
 import { MailTemplateEngine, MailTemplateContext } from '@travetto/email';
@@ -52,7 +53,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
   private async initTemplates() {
     if (!this.templatesLoaded) {
       this.templatesLoaded = true;
-      for (const f of await ResourceManager.findAllByExtension('.html', 'email')) {
+      for (const f of await ResourceManager.findAllByPattern(/[.]html$/, 'email')) {
         await this.registerTemplate(f, await ResourceManager.read(f));
       }
     }

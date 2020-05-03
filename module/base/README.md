@@ -73,7 +73,7 @@ const imagePath = await ResourceManager.findFirst('/images/asset.gif');
 
 **Code: Finding All Image Resource**
 ```typescript
-const imagePaths = await ResourceManager.findAllByExtension('gif', 'images/');
+const imagePaths = await ResourceManager.findAllByPattern(/[.]gif$/, 'images/');
 ```
 
 ## Lifecycle Support

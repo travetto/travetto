@@ -1,6 +1,6 @@
 import { EnvUtil } from '@travetto/boot';
-import { Parser } from './parser';
-import { Serializer } from './serializer';
+import { Parser } from './internal/parser';
+import { Serializer } from './internal/serializer';
 
 // TODO: Document
 export class YamlUtil {

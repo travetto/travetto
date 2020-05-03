@@ -37,11 +37,11 @@ export class $ResourceManager {
   /**
    * Consume Scan entry into indexing all resources available
    */
-  private consumeEntryByExtension(base: string, found: Set<string>, out: string[], r: ScanEntry) {
+  private scanEntry(base: string, found: Set<string>, out: string[], r: ScanEntry) {
     if (r.stats.isDirectory()) {
       if (r.children) {
         for (const el of r.children!) {
-          this.consumeEntryByExtension(base, found, out, el);
+          this.scanEntry(base, found, out, el);
         }
       }
       return;
@@ -165,38 +165,36 @@ export class $ResourceManager {
   }
 
   /**
-   * Find all resources by a specific extension
+   * Find all resources by a specific pattern
    */
-  async findAllByExtension(ext: string, base: string = '') {
+  async findAllByPattern(pattern: RegExp, base: string = '') {
     const out: string[] = [];
     const found = new Set<string>();
-    const consume = this.consumeEntryByExtension.bind(this, base, found, out);
 
     for (const root of this.paths) {
-      const results = await ScanFs.scanDir({ testFile: x => x.endsWith(ext) },
+      const results = await ScanFs.scanDir({ testFile: x => pattern.test(x) },
         FsUtil.resolveUnix(root, base));
 
       for (const r of results) {
-        consume(r);
+        this.scanEntry(base, found, out, r);
       }
     }
     return out;
   }
 
   /**
-   * Find all resources by a specific extension, synchronously
+   * Find all resources by a specific pattern, synchronously
    */
-  findAllByExtensionSync(ext: string, base: string = '') {
+  findAllByPatternSync(pattern: RegExp, base: string = '') {
     const out: string[] = [];
     const found = new Set<string>();
-    const consume = this.consumeEntryByExtension.bind(this, base, found, out);
 
     for (const root of this.paths) {
-      const results = ScanFs.scanDirSync({ testFile: x => x.endsWith(ext) },
+      const results = ScanFs.scanDirSync({ testFile: x => pattern.test(x) },
         FsUtil.resolveUnix(root, base));
 
       for (const r of results) {
-        consume(r);
+        this.scanEntry(base, found, out, r);
       }
     }
     return out;
