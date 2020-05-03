@@ -76,7 +76,6 @@ export class StacktraceUtil {
       .map(x => x
         .replace(`${Env.cwd}/`, '')
         .replace(/^[\/]+/, '')
-        .replace(/[.]js/g, (a, f) => `.ts`)
       );
 
     if (!filter || body.length > 2) {

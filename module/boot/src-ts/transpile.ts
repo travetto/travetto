@@ -7,6 +7,8 @@ type Preprocessor = (name: string, contents: string) => string;
 
 declare const global: { ts: any }; // Used for transformers
 
+type SourceResolver = (p: string) => string | undefined;
+
 const OPTS = Symbol();
 
 /**
@@ -14,6 +16,9 @@ const OPTS = Symbol();
  */
 export class TranspileUtil {
   private static preProcessors: Preprocessor[] = [];
+  private static sourceResolvers: SourceResolver[] = [
+    p => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined
+  ];
 
   private static get ts() { // Only registered on first call
     return global.ts = global.ts ?? new Proxy({}, { // Only in inject as needed
@@ -194,10 +199,18 @@ export class TranspileUtil {
   static init() {
     AppCache.init();
 
+    // Register source maps for cached files
     require('source-map-support').install({
       emptyCacheBetweenOperations: EnvUtil.isTrue('watch'), // Empty cache when contents can change
-      retrieveFile: (p: string) => AppCache.readEntry(FsUtil.toTS(p))!,
+      retrieveFile: (p: string) => this.sourceResolvers.find(r => r(FsUtil.toTS(p)))
     });
+  }
+
+  /**
+   * Add a new source resolver for source map support
+   */
+  static addSourceResolver(...p: SourceResolver[]) {
+    this.sourceResolvers.unshift(...p);
   }
 
   /**
