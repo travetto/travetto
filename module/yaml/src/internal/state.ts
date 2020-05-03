@@ -1,12 +1,29 @@
 import { Block, ListBlock, MapBlock, TextBlock } from './type/block';
 import { Node, TextNode } from './type/node';
 
-// TODO: Document
+/**
+ * Parser state
+ */
 export class State {
+  /**
+   * Current stack of blocks in process
+   */
   blocks: Block[];
+  /**
+   * Current block
+   */
   top: Block;
+  /**
+   * Collected fields so far
+   */
   fields: [number, string][] = [];
+  /**
+   * Collected lines
+   */
   lines: [number, number][] = [];
+  /**
+   * Line count
+   */
   lineCount: number = 0;
 
   constructor(public text: string) {
@@ -14,10 +31,16 @@ export class State {
     this.blocks = [this.top];
   }
 
+  /**
+   * Get active block identifier
+   */
   get indent() {
     return !this.top ? 0 : this.top.indent;
   }
 
+  /**
+   * Keep popping states until indentation request is satisfied
+   */
   popToLevel(indent: number) {
     while (indent < this.top.indent) { // Block shift left
       this.endBlock();
@@ -27,6 +50,9 @@ export class State {
     }
   }
 
+  /**
+   * Keep popping states until at the top of the document
+   */
   popToTop() {
     let last;
     while (this.top.indent >= 0) {
@@ -35,6 +61,9 @@ export class State {
     return last ?? { index: 0, value: {} }; // Default to empty object if nothing returned
   }
 
+  /**
+   * Start sub item with a given field name and indentation
+   */
   nestField(field: string, indent: number) {
     if (this.fields.length && this.fields[this.fields.length - 1][0] === indent) {
       this.fields[this.fields.length - 1][1] = field;
@@ -43,6 +72,9 @@ export class State {
     }
   }
 
+  /**
+   * Start a new block
+   */
   startBlock(block: Block) {
     if (this.top instanceof TextBlock) {
       throw new Error(`Cannot nest in current block ${this.top.constructor.name}`);
@@ -51,6 +83,9 @@ export class State {
     this.blocks.push(block);
   }
 
+  /**
+   * Complete a block
+   */
   endBlock() {
     const ret = this.blocks.pop()!;
     this.top = this.blocks[this.blocks.length - 1];
@@ -61,6 +96,9 @@ export class State {
     return ret;
   }
 
+  /**
+   * Include node in output content, popping as needed
+   */
   consumeNode(node: Node) {
     if (!this.top.consume) {
       throw new Error(`Cannot consume in current block ${this.top.constructor.name}`);
@@ -77,6 +115,9 @@ export class State {
     }
   }
 
+  /**
+   * Read a line of tokens
+   */
   readTextLine(tokens: string[], indent: number) {
     if (this.top instanceof TextBlock && (
       this.top.indent === undefined ||
@@ -94,6 +135,9 @@ export class State {
     return false;
   }
 
+  /**
+   * Build error message
+   */
   buildError(message: string) {
     const [start, end] = this.lines[this.lineCount - 1];
     return new Error(`${message}, line: ${this.lineCount}\n${this.text.substring(start, end)}`);

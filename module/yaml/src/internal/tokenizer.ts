@@ -23,16 +23,31 @@ const NINE = 0x39;
 // TODO: Document
 export class Tokenizer {
 
+  /**
+   * Test to see if identifier is starting
+   */
   static isIdentifierStart = (c: number) => c >= 65 && c <= 91 || c >= 97 && c <= 123 || c === 36 || c === 95;
+  /**
+   * Test to see if identifier is complete
+   */
   static isIdentifierFull = (c: number) => Tokenizer.isIdentifierStart(c) || c >= 48 && c <= 57;
 
+  /**
+   * Test for comment
+   */
   static isComment = (ch: string, pos: number) => {
     const c = ch.charCodeAt(pos);
     return c === HASH || (c === DASH && ch.charCodeAt(pos + 1) === c && ch.charCodeAt(pos + 2) === c);
   };
+  /**
+   * Test for whitespace
+   */
   static isWhitespace = (c: number) => c === SPC || c === TAB || c === NEWLINE || c === CR;
   static isWhitespaceStr = (c: string) => Tokenizer.isWhitespace(c.charCodeAt(0));
 
+  /**
+   * Handle replacing key pieces within text
+   */
   static handleReplacements(text: string, replacements: [string, number, number][]) {
     const out: string[] = [];
     let replPos = 0;
@@ -44,6 +59,9 @@ export class Tokenizer {
     return out.join('');
   }
 
+  /**
+   * Read quote from the text
+   */
   static readQuote(text: string, pos: number, end: number) {
     const start = pos;
     const ch = text.charCodeAt(pos++);
@@ -56,6 +74,9 @@ export class Tokenizer {
     return [pos, text.substring(start, pos + 1)] as [number, string];
   }
 
+  /**
+   * Read identifier from the text
+   */
   static readIdentifier(text: string, pos: number, end: number) {
     const start = pos++;
     while (this.isIdentifierFull(text.charCodeAt(pos)) && pos < end) {
@@ -64,6 +85,9 @@ export class Tokenizer {
     return [pos, text.substring(start, pos)] as [number, string];
   }
 
+  /**
+   * Parse JSON subdocument as it is valid YAML
+   */
   static readJSON(text: string, pos: number = 0, end: number = text.length) {
     const start = pos;
     const stack: number[] = [];
@@ -107,10 +131,16 @@ export class Tokenizer {
     return [pos, final] as [number, string];
   }
 
+  /**
+   * Get total indentation from the tokens
+   */
   static getIndent(tokens: string[]) {
     return this.isWhitespaceStr(tokens[0]) ? tokens[0].length : 0;
   }
 
+  /**
+   * Clean token list, removing unneeded pieces
+   */
   static cleanTokens(tokens: string[]) {
     let start = 0;
     let end = tokens.length;
@@ -131,6 +161,9 @@ export class Tokenizer {
     return tokens.slice(start, end);
   }
 
+  /**
+   * Tokenize a piece of text, starting at pos, and running until end
+   */
   static tokenize(text: string, pos: number = 0, end: number = text.length) {
     const tokens: string[] = [];
     let token = '';
@@ -187,6 +220,9 @@ export class Tokenizer {
     return tokens;
   }
 
+  /**
+   * Read single value from a token
+   */
   static readValue(token: string): Node | undefined {
     switch (token.charCodeAt(0)) {
       case OPEN_BRACE: case OPEN_SQ_BRACE: return new JSONNode(token);

@@ -6,9 +6,14 @@ import { TextNode } from './type/node';
 const DASH = '-';
 const COLON = ':';
 
-// TODO: Document
+/**
+ * Standard YAML parser
+ */
 export class Parser {
 
+  /**
+   * Start an Array
+   */
   private static startList(state: State, indent: number) {
     if (indent === state.top.indent) {
       if (!(state.top instanceof ListBlock)) {
@@ -19,6 +24,9 @@ export class Parser {
     }
   }
 
+  /**
+   * Start a map object
+   */
   private static startMap(state: State, field: string, indent: number) {
     state.nestField(new TextNode(field).value, indent);
 
@@ -31,7 +39,10 @@ export class Parser {
     }
   }
 
-  private static readLine(state: State, text: string, pos: number) {
+  /**
+   * Read a single line, and return continuation point, and optionally list of tokens produced
+   */
+  private static readLine(state: State, text: string, pos: number): [number] | [number, number, string[]] {
     const nlPos = text.indexOf('\n', pos);
     const nextLineStart = nlPos < 0 ? text.length + 1 : nlPos + 1;
     let tokens = Tokenizer.tokenize(text, pos, nextLineStart);
@@ -44,14 +55,17 @@ export class Parser {
     state.lines.push([pos, nextLineStart - 1]);
 
     if (state.readTextLine(tokens, indent)) {
-      return [nextLineStart] as [number];
+      return [nextLineStart];
     }
 
     tokens = Tokenizer.cleanTokens(tokens);
 
-    return [nextLineStart, indent, tokens] as [number, number, string[]];
+    return [nextLineStart, indent, tokens];
   }
 
+  /**
+   * Parse via `State`
+   */
   static parseRaw(state: State) {
     let pos = 0;
     const text = state.text;
@@ -113,6 +127,9 @@ export class Parser {
     return state.popToTop()!.value;
   }
 
+  /**
+   * Convert input text to javascript object
+   */
   static parse(text: string) {
     const state = new State(text);
     try {

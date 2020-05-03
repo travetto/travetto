@@ -1,7 +1,12 @@
 type SerializableType = Error & { stack?: any } | RegExp | Function | Set<any> | Map<string, any> | number | boolean | null | string | object;
 
-// TODO: Document
+/**
+ * Handles serialization of object to YAML output
+ */
 export class Serializer {
+  /**
+   * Clean value, escaping as needed
+   */
   static clean(key: string) {
     if (/['"@ -:]/.test(key)) {
       return key.includes('"') ?
@@ -11,6 +16,9 @@ export class Serializer {
     return key;
   }
 
+  /**
+   * Perform word wrap on text, with a given width
+   */
   static wordWrap(text: string, width: number = 120) {
     const lines: string[] = [];
     let line: string[] = [];
@@ -49,6 +57,9 @@ export class Serializer {
     return lines;
   }
 
+  /**
+   * Serialize object with indentation and wordwrap support
+   */
   static serialize(o: SerializableType, indent = 2, wordwrap = 120, indentLevel = 0) {
     let out = '';
     const prefix = ' '.repeat(indentLevel);
