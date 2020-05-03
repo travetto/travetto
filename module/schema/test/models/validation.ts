@@ -94,7 +94,7 @@ export class Address {
   city?: string;
   zip: 200 | 500;
 
-  @Match(CommonRegExp.postal_code)
+  @Match(CommonRegExp.postalCode)
   postal: string;
 }
 

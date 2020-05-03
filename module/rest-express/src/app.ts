@@ -4,7 +4,7 @@ import * as compression from 'compression';
 
 import { AppUtil } from '@travetto/app';
 import { Injectable } from '@travetto/di';
-import { RouteUtil, RestApp, RouteConfig, RouteHandler } from '@travetto/rest';
+import { RouteUtil, RestApp, RouteConfig, RouteHandler, TRV_RAW } from '@travetto/rest';
 
 import { RouteStack } from './internal/types';
 
@@ -22,8 +22,8 @@ export class ExpressRestApp extends RestApp<express.Application> {
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use((req, res, next) => {
-      (req as any).__raw = req;
-      (res as any).__raw = res;
+      (req as any)[TRV_RAW] = req;
+      (res as any)[TRV_RAW] = res;
       next();
     });
 

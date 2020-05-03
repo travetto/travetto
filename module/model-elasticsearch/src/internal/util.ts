@@ -8,8 +8,6 @@ const has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 // TODO: Document
 export class ElasticsearchUtil {
 
@@ -95,7 +93,7 @@ export class ElasticsearchUtil {
             }
             case '$nin': {
               items.push({
-                bool: { must_not: [{ terms: { [sPath]: Array.isArray(v) ? v : [v] } }] }
+                bool: { ['must_not']: [{ terms: { [sPath]: Array.isArray(v) ? v : [v] } }] }
               });
               break;
             }
@@ -105,7 +103,7 @@ export class ElasticsearchUtil {
             }
             case '$ne': {
               items.push({
-                bool: { must_not: [{ term: { [sPath]: v } }] }
+                bool: { ['must_not']: [{ term: { [sPath]: v } }] }
               });
               break;
             }
@@ -117,7 +115,7 @@ export class ElasticsearchUtil {
               };
               items.push(v ? q : {
                 bool: {
-                  must_not: q
+                  ['must_not']: q
                 }
               });
               break;
@@ -145,7 +143,7 @@ export class ElasticsearchUtil {
                   `${sPath}.text`;
                 const query = pattern.source.substring(2, pattern.source.length - 2);
                 items.push({
-                  match_phrase_prefix: {
+                  ['match_phrase_prefix']: {
                     [textField]: query
                   }
                 });
@@ -160,7 +158,7 @@ export class ElasticsearchUtil {
             }
             case '$geoWithin': {
               items.push({
-                geo_polygon: {
+                ['geo_polygon']: {
                   [sPath]: {
                     points: v
                   }
@@ -178,7 +176,7 @@ export class ElasticsearchUtil {
                 unit = 'km';
               }
               items.push({
-                geo_distance: {
+                ['geo_distance']: {
                   distance: `${dist}${unit}`,
                   [sPath]: top.$near
                 }
@@ -207,9 +205,9 @@ export class ElasticsearchUtil {
     if (has$And(o)) {
       return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(cls, x, config)) } };
     } else if (has$Or(o)) {
-      return { bool: { should: o.$or.map(x => this.extractWhereQuery<T>(cls, x, config)), minimum_should_match: 1 } };
+      return { bool: { should: o.$or.map(x => this.extractWhereQuery<T>(cls, x, config)), ['minimum_should_match']: 1 } };
     } else if (has$Not(o)) {
-      return { bool: { must_not: this.extractWhereQuery<T>(cls, o.$not, config) } };
+      return { bool: { ['must_not']: this.extractWhereQuery<T>(cls, o.$not, config) } };
     } else {
       return this.extractWhereTermQuery(o, cls, config);
     }
@@ -275,7 +273,7 @@ export class ElasticsearchUtil {
           const [digits, decimals] = conf.precision;
           if (decimals) {
             if ((decimals + digits) < 16) {
-              prop = { type: 'scaled_float', scaling_factor: decimals };
+              prop = { type: 'scaled_float', ['scaling_factor']: decimals };
             } else {
               if (digits < 6 && decimals < 9) {
                 prop = { type: 'half_float' };
@@ -313,7 +311,7 @@ export class ElasticsearchUtil {
           if (config && config.caseSensitive) {
             Util.deepAssign(text, {
               fields: {
-                text_cs: { type: 'text', analyzer: 'whitespace' }
+                ['text_cs']: { type: 'text', analyzer: 'whitespace' }
               }
             });
           }

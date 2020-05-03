@@ -113,12 +113,10 @@ module.exports = {
             "warn",
             {
                 "ignoreDestructuring": true,
+                "ignoreImports": true,
                 "allow": [
-                    "child_process",
                     "async_hooks",
-                    "_id",
-                    "simple_name",
-                    "postal_code"
+                    "child_process"
                 ]
             },
 
@@ -146,27 +144,14 @@ module.exports = {
                 "allow": [
                     "log",
                     "warn",
-                    "dir",
                     "fatal",
-                    "timeLog",
                     "trace",
-                    "assert",
-                    "clear",
-                    "count",
-                    "countReset",
-                    "group",
-                    "groupEnd",
-                    "table",
                     "debug",
                     "info",
-                    "dirxml",
                     "error",
-                    "groupCollapsed",
                     "Console",
                     "profile",
                     "profileEnd",
-                    "timeStamp",
-                    "context"
                 ]
             }
         ],

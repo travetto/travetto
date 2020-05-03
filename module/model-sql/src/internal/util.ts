@@ -264,19 +264,21 @@ export class SQLUtil {
     return sort.map((cl: any) => {
       let schema: ClassConfig = SchemaRegistry.get(cls);
       const stack = this.classToStack(cls);
-      while (true) { // eslint-disable-line no-constant-condition
+      let found: OrderBy | undefined;
+      while (!found) {
         const key = Object.keys(cl)[0] as string;
         const val = cl[key];
         const field = { ...schema.views[ALL_VIEW].schema[key] };
         if (Util.isPrimitive(val)) {
           stack.push(field);
-          return { stack, asc: val === 1 || val === true };
+          found = { stack, asc: val === 1 || val === true };
         } else {
           stack.push(field);
           schema = SchemaRegistry.get(field.type);
           cl = val;
         }
       }
+      return found;
     });
   }
 

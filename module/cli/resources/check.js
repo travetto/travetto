@@ -1,11 +1,11 @@
-let last_ts = undefined;
+/* eslint-disable no-undef */
+let lastTs = undefined;
 setInterval(() => {
-  const now = Date.now();
   fetch('/check', { method: 'POST' }).then(res => {
     res.json().then(({ timestamp }) => {
-      if (last_ts === undefined) {
-        last_ts = timestamp;
-      } else if (last_ts !== timestamp) {
+      if (lastTs === undefined) {
+        lastTs = timestamp;
+      } else if (lastTs !== timestamp) {
         location.reload();
       }
     });

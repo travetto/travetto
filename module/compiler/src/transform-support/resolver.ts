@@ -49,7 +49,7 @@ const UNKNOWN_TYPE = {
 export class TypeResolver {
   /* eslint-disable no-bitwise */
 
-  constructor(private _checker: ts.TypeChecker) { }
+  constructor(private tsChecker: ts.TypeChecker) { }
 
   /**
    * Resolve the `ts.ObjectFlags`
@@ -62,7 +62,7 @@ export class TypeResolver {
    * Fetch all type arguments for a give type
    */
   private getAllTypeArguments(ref: ts.Type) {
-    return this._checker.getTypeArguments(ref as any);
+    return this.tsChecker.getTypeArguments(ref as any);
   }
 
   /**
@@ -78,7 +78,7 @@ export class TypeResolver {
       return { name: 'undefined', ctor: undefined };
     }
 
-    const name = this._checker.typeToString(this._checker.getApparentType(type)) ?? '';
+    const name = this.tsChecker.typeToString(this.tsChecker.getApparentType(type)) ?? '';
     const complexName = TransformUtil.getSymbolName(type);
 
     const simpleCons = GLOBAL_SIMPLE[name as keyof typeof GLOBAL_SIMPLE];
@@ -114,8 +114,8 @@ export class TypeResolver {
     const docs = TransformUtil.readJSDocs(type);
     const fields: Record<string, res.Type> = {};
     const name = TransformUtil.getSymbolName(alias ?? type);
-    for (const member of this._checker.getPropertiesOfType(type)) {
-      const memberType = this._checker.getTypeAtLocation(
+    for (const member of this.tsChecker.getPropertiesOfType(type)) {
+      const memberType = this.tsChecker.getTypeAtLocation(
         this.getPrimaryDeclaration(member)
       );
       if (memberType.getCallSignatures().length) {
@@ -219,19 +219,19 @@ export class TypeResolver {
    * Resolve the return type for a method
    */
   getReturnType(node: ts.MethodDeclaration) {
-    let type = this._checker.getTypeAtLocation(node);
+    let type = this.tsChecker.getTypeAtLocation(node);
     if (type.isUnion()) { // Handle methods that are optional
       type = type.types.find(x => !(x.flags & ts.TypeFlags.Undefined))!;
     }
     const [sig] = type.getCallSignatures();
-    return this._checker.getReturnTypeOfSignature(sig);
+    return this.tsChecker.getReturnTypeOfSignature(sig);
   }
 
   /**
    * Read JS Doc tags by name
    */
   readDocsTags(node: ts.Node, name: string): string[] {
-    return TransformUtil.readJSDocTags(this._checker.getTypeAtLocation(node), name);
+    return TransformUtil.readJSDocTags(this.tsChecker.getTypeAtLocation(node), name);
   }
 
   /**
@@ -239,7 +239,7 @@ export class TypeResolver {
    */
   resolveType(type: ts.Type | ts.Node, alias?: ts.Symbol): res.Type {
     if ('getSourceFile' in type) {
-      type = this._checker.getTypeAtLocation(type);
+      type = this.tsChecker.getTypeAtLocation(type);
     }
 
     const concreteType = TransformUtil.resolveConcreteType(type);
@@ -295,7 +295,7 @@ export class TypeResolver {
    * Get all declarations of a node
    */
   getDeclarations(node: ts.Node | ts.Type | ts.Symbol): ts.Declaration[] {
-    return TransformUtil.getDeclarations('getSourceFile' in node ? this._checker.getTypeAtLocation(node) : node);
+    return TransformUtil.getDeclarations('getSourceFile' in node ? this.tsChecker.getTypeAtLocation(node) : node);
   }
 
   /**

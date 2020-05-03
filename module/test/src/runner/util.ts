@@ -20,7 +20,7 @@ export class TestUtil {
     if (EnvUtil.isTrue('DEBUGGER')) {
       duration = 600000; // 10 minutes
     }
-    const prom = new Promise((_, reject) => {
+    const prom = new Promise((__, reject) => {
       id = setTimeout(() => reject(this.TIMEOUT), duration);
       id.unref();
     });

@@ -3,8 +3,6 @@ import * as assert from 'assert';
 
 let a: any = 0; a = 1;
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 const BIG = { age: 5 };
 const BIGGER: object = { age: 6 };
 
@@ -70,6 +68,7 @@ class Simple {
 
     assert.doesNotThrow(() => {
       const c = 5;
+      console.log(c);
     });
 
     await assert.rejects(async () => {
@@ -78,6 +77,7 @@ class Simple {
 
     await assert.doesNotReject(async () => {
       const c = 5;
+      console.log(c);
     });
 
     assert.throws(() => {
@@ -89,6 +89,7 @@ class Simple {
     assert.throws(() => {
       assert.throws(() => {
         const c = 5;
+        console.log(c);
       });
     });
 
@@ -100,6 +101,7 @@ class Simple {
     await assert.rejects(async () => {
       await assert.rejects(async () => {
         const c = 5;
+        console.log(c);
       });
     });
   }

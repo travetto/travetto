@@ -1,5 +1,8 @@
 import { Class } from '@travetto/registry';
 
+export const TRV_RAW = Symbol('RAW');
+export const TRV_ORIG = Symbol('ORIG');
+
 export type HeaderMap = Record<string, (string | (() => string))>;
 
 export type Method = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head';

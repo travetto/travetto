@@ -50,7 +50,7 @@ export class RouteUtil {
     ];
 
     if (headers && Object.keys(headers).length > 1) {
-      filterChain.splice(filterChain.length - 1, 0, (async (_: Request, res: Response, next: () => Promise<any>) => {
+      filterChain.splice(filterChain.length - 1, 0, (async (__: Request, res: Response, next: () => Promise<any>) => {
         try {
           return await next();
         } finally {

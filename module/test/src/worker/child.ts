@@ -31,7 +31,10 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   constructor() {
     super(EnvUtil.getInt('IDLE_TIMEOUT', 120000));
 
-    import('../runner/util').then(({ TestUtil }) => TestUtil.registerCleanup('worker'));
+    (async () => {
+      const { TestUtil } = await import('../runner/util');
+      TestUtil.registerCleanup('worker');
+    })();
   }
 
   async activate() {
@@ -60,7 +63,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
   isFileResettable(path: string) {
     const k = FsUtil.toUnix(path);
-    const frameworkModule = k.replace(EXTRACT_FILE_MODULE, (_, mod) => mod);
+    const frameworkModule = k.replace(EXTRACT_FILE_MODULE, (__, mod) => mod);
 
     return path.endsWith('.ts') && (!path.endsWith('.d.ts')) && // Only look at .ts files
       (!frameworkModule || // A user file

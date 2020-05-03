@@ -17,6 +17,8 @@ import { PromiseCapture } from './promise';
 import { TestUtil } from './util';
 import { AssertUtil } from '../assert/util';
 
+const MISSING_ERROR = '☆';
+
 // TODO: Document
 export class TestExecutor {
 
@@ -64,7 +66,7 @@ export class TestExecutor {
       await Promise.race([suite.instance[test.methodName](), timeout]);
 
       // Ensure nothing was meant to be caught
-      throw undefined; // eslint-disable-line no-throw-literal
+      throw new Error(MISSING_ERROR);
 
     } catch (err) {
       if (err === TestUtil.TIMEOUT) {
@@ -74,7 +76,7 @@ export class TestExecutor {
       }
 
       // If error isn't defined, we are good
-      if (!err) {
+      if (err.message === MISSING_ERROR) {
         result.status = 'passed';
       } else {
         result.status = 'failed';

@@ -1,8 +1,6 @@
 import * as es from '@elastic/elasticsearch';
 import { Reindex, Search, Index, Update, DeleteByQuery } from '@elastic/elasticsearch/api/requestParams';
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import {
   ModelSource, Query,
   BulkResponse, BulkOp,
@@ -372,7 +370,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
-    const q = query && query.where ? ElasticsearchUtil.extractWhereQuery(cls, query.where) : { match_all: {} };
+    const q = query && query.where ? ElasticsearchUtil.extractWhereQuery(cls, query.where) : { ['match_all']: {} };
     const search = {
       ...this.getIdentity(cls),
       body: {
@@ -391,7 +389,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
     const res = await this.execSearch(search);
     const { buckets } = res.aggregations[field];
-    const out = buckets.map(({ key, doc_count }) => ({ key, count: doc_count }));
+    const out = buckets.map(b => ({ key: b.key, count: b.doc_count }));
     return out;
   }
 
@@ -454,7 +452,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
     return {
       bool: {
-        minimum_should_match: 1,
+        ['minimum_should_match']: 1,
         should: types
       }
     };
@@ -472,7 +470,7 @@ export class ElasticsearchModelSource extends ModelSource {
     }
 
     const res = this.buildRawMultiQuery(classes, filter, query ? {
-      match_phrase_prefix: {
+      ['match_phrase_prefix']: {
         [text ? `${field}.text` : field]: {
           query
         }
@@ -490,7 +488,7 @@ export class ElasticsearchModelSource extends ModelSource {
       query: {
         bool: {
           must: [
-            searchObj.body.query ?? { match_all: {} },
+            searchObj.body.query ?? { ['match_all']: {} },
             ...(raw ? [raw] : [])
           ],
           filter: this.buildRawModelFilters(classes)

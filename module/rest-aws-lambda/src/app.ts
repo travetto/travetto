@@ -9,7 +9,7 @@ import * as awsServerlessExpressMiddleware from 'aws-serverless-express/middlewa
 
 import { AppUtil } from '@travetto/app';
 import { Inject } from '@travetto/di';
-import { RestApp, RouteConfig, RouteUtil } from '@travetto/rest';
+import { RestApp, RouteConfig, RouteUtil, TRV_RAW } from '@travetto/rest';
 
 import { AwsLambdaConfig } from './config';
 import { RouteStack } from './internal/types';
@@ -34,8 +34,8 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use(awsServerlessExpressMiddleware.eventContext());
     app.use((req, res, next) => {
-      (req as any).__raw = req;
-      (res as any).__raw = res;
+      (req as any)[TRV_RAW] = req;
+      (res as any)[TRV_RAW] = res;
       next();
     });
 

@@ -3,11 +3,11 @@ import { Consumer } from '../model/consumer';
 
 export class ConsumerRegistry {
   private static registered = new Map<string, Class<Consumer>>();
-  private static _default: Class<Consumer>;
+  private static primary: Class<Consumer>;
 
   static add(type: string, cls: Class<Consumer>, isDefault = false) {
     if (isDefault) {
-      this._default = cls;
+      this.primary = cls;
     }
     this.registered.set(type, cls);
   }
@@ -17,7 +17,7 @@ export class ConsumerRegistry {
   }
 
   static getOrDefault(type: string) {
-    return this.get(type) ?? this._default;
+    return this.get(type) ?? this.primary;
   }
 }
 

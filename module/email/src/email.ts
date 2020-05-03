@@ -34,7 +34,7 @@ export class EmailService {
       const { html, text } = await this.tplEngine!.template(ctx.template, ctx.context);
       let x = 0;
 
-      ctx.html = html.replace(/data:(image\/[^;]+);base64,([^"]+)/g, (_, type, content) => {
+      ctx.html = html.replace(/data:(image\/[^;]+);base64,([^"]+)/g, (__, type, content) => {
         const cid = `${++x}`;
         ctx.attachments!.push({
           cid,

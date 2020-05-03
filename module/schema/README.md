@@ -277,7 +277,7 @@ By default all types are mapped as-is:
   * email
   * url
   * telephone
-  * postal_code
+  * postalCode
 * Sub-schemas as registered via `@Schema` decorators.
 
 In addition to the general types, the code relies upon name matching to provide additional refinement:

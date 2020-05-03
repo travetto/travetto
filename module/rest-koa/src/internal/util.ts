@@ -1,5 +1,6 @@
 import * as koa from 'koa';
 import { RestAppUtil } from '@travetto/rest';
+import { TRV_ORIG, TRV_RAW } from '@travetto/rest/src/types';
 
 const TRV_RES = Symbol('TRV_RES');
 const TRV_REQ = Symbol('TRV_REQ');
@@ -9,8 +10,8 @@ export class KoaAppUtil {
   static getRequest(ctx: koa.ParameterizedContext) {
     if (!(ctx as any)[TRV_REQ]) {
       (ctx as any)[TRV_REQ] = RestAppUtil.decorateRequest({
-        __og: ctx,
-        __raw: ctx.req,
+        [TRV_ORIG]: ctx,
+        [TRV_RAW]: ctx.req,
         protocol: ctx.protocol,
         method: ctx.request.method,
         path: ctx.request.path,
@@ -32,8 +33,8 @@ export class KoaAppUtil {
   static getResponse(ctx: koa.ParameterizedContext) {
     if (!(ctx as any)[TRV_RES]) {
       (ctx as any)[TRV_RES] = RestAppUtil.decorateResponse({
-        __og: ctx,
-        __raw: ctx.res,
+        [TRV_ORIG]: ctx,
+        [TRV_RAW]: ctx.res,
         get headersSent() {
           return ctx.headerSent;
         },
