@@ -1,4 +1,4 @@
-import { ConfigSource } from './source';
+import { ConfigManager } from './manager';
 
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation
@@ -13,9 +13,9 @@ export function Config(ns: string, depTarget?: new (...args: any[]) => any, name
 
     target.prototype.postConstruct = function () {
       // Apply config
-      ConfigSource.bindTo(this, ns); // eslint-disable-line no-invalid-this
+      ConfigManager.bindTo(this, ns);
       if (og) {
-        return og.apply(this, arguments); // eslint-disable-line no-invalid-this, prefer-rest-params
+        return og.call(this);
       }
     };
     return target;

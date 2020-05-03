@@ -3,9 +3,9 @@ import { Util } from '@travetto/base';
 import { ConfigUtil, Nested } from './internal/util';
 
 /**
- * Source for all configuration
+ * Manager for application configuration
  */
-export class ConfigSource {
+export class ConfigManager {
 
   private static initialized: boolean = false;
   private static storage = {};   // Lowered, and flattened
