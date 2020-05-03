@@ -1,10 +1,10 @@
 import * as assert from 'assert';
-import * as yaml from 'js-yaml';
 
+import { YamlUtil } from '@travetto/yaml';
 import { Test, Suite, BeforeEach, AfterEach } from '@travetto/test';
 
 import { ConfigManager } from '../src/manager';
-import { ConfigUtil } from '../src/internal/util';
+import { Config } from '../src/decorator';
 
 class DbConfig {
   name: string;
@@ -40,7 +40,7 @@ test.alpha:
 `;
 
 @Suite()
-export class ConfigTest {
+export class ManagerTest {
 
   envCopy: any;
 
@@ -97,7 +97,8 @@ export class ConfigTest {
 
   @Test()
   async verifyTopLevelKeys() {
-    yaml.safeLoadAll(SAMPLE_YAML, (doc: any) => ConfigManager.putAll(doc));
+    ConfigManager.putAll(YamlUtil.parse(SAMPLE_YAML));
+    console.log(ConfigManager.get());
     const conf = new Test2Config();
     ConfigManager.bindTo(conf, 'test.beta');
     assert(conf.values.length === 3);
@@ -105,33 +106,6 @@ export class ConfigTest {
     const conf2 = new Test2Config();
     ConfigManager.bindTo(conf2, 'test.alpha');
     assert(conf2.values.length === 3);
-  }
-
-  @Test()
-  async breakDownKeys() {
-    const data = yaml.safeLoad(`
-a.b.c:
-  - 1
-  - 2
-  - 3
-a.b:
-   d: name
-a:
-  e:
-    g: test`);
-
-    const broken: any = ConfigUtil.breakDownKeys(data);
-    assert(broken['a.b.c'] === undefined);
-    assert(broken['a.b'] === undefined);
-
-    assert.ok(broken.a);
-    assert.ok(broken.a.b);
-    assert.ok(broken.a.b.c);
-    assert(broken.a.b.c.length === 3);
-
-    assert(broken.a.b.d === 'name');
-
-    assert(broken.a.e.g === 'test');
   }
 
   @Test()

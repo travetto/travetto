@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Serializer } from '../src/serializer';
+import { Serializer } from '../src/internal/serializer';
 
 @Suite()
 export class SerializeTest {

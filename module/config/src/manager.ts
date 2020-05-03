@@ -9,6 +9,16 @@ export class ConfigManager {
 
   private static initialized: boolean = false;
   private static storage = {};   // Lowered, and flattened
+  private static redactedKeys = [
+    'passphrase.*',
+    'password.*',
+    'credential.*',
+    '.*secret.*',
+    '.*key',
+    '.*token',
+    'pw',
+  ];
+  private static redactTest: RegExp;
 
   /*
     Order of specificity (least to most)
@@ -21,6 +31,7 @@ export class ConfigManager {
     if (this.initialized) {
       return;
     }
+    this.redactTest = new RegExp(`^(${this.redactedKeys.join('|')})$`, 'i');
     this.initialized = true;
     this.load();
   }
@@ -52,19 +63,7 @@ export class ConfigManager {
    * Get a sub tree with sensitive fields redacted
    */
   static getSecure(key?: string) {
-    const str = JSON.stringify(this.get(key), (k, value) => {
-      // TODO: Expand restriction detection
-      if (
-        /^(pass(phrase|word).*|pw|.*key|.*secret.*|credential.*|.*token)$/i.test(k) &&
-        typeof value === 'string'
-      ) {
-        return '*'.repeat(value.length);
-      } else {
-        return value;
-      }
-    });
-
-    return JSON.parse(str);
+    return ConfigUtil.sanitizeValuesByKey(this.get(key), [this.redactTest]);
   }
 
   /**
@@ -92,20 +91,6 @@ export class ConfigManager {
    * Apply config subtree to a given object
    */
   static bindTo(obj: any, key?: string): Record<string, any> {
-    const keys = (key ? key.split('.') : []);
-    let sub: any = this.storage;
-
-    while (keys.length && sub) {
-      const next = keys.shift()!;
-      sub = sub[next];
-    }
-
-    if (sub) {
-      Util.deepAssign(obj, sub);
-    }
-
-    ConfigUtil.bindEnvByKey(obj, key);
-
-    return obj;
+    return ConfigUtil.bindTo(this.storage, obj, key);
   }
 }

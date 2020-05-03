@@ -1,0 +1,37 @@
+import * as assert from 'assert';
+
+import { Test, Suite } from '@travetto/test';
+import { YamlUtil } from '@travetto/yaml';
+
+import { ConfigUtil } from '../src/internal/util';
+
+@Suite()
+export class UtilTest {
+
+  @Test()
+  async breakDownKeys() {
+    const data = YamlUtil.parse(`
+a.b.c:
+  - 1
+  - 2
+  - 3
+a.b:
+   d: name
+a:
+  e:
+    g: test`);
+
+    const broken: any = ConfigUtil.breakDownKeys(data);
+    assert(broken['a.b.c'] === undefined);
+    assert(broken['a.b'] === undefined);
+
+    assert.ok(broken.a);
+    assert.ok(broken.a.b);
+    assert.ok(broken.a.b.c);
+    assert(broken.a.b.c.length === 3);
+
+    assert(broken.a.b.d === 'name');
+
+    assert(broken.a.e.g === 'test');
+  }
+}

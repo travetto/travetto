@@ -20,8 +20,8 @@ export class ConfigUtil {
    * - env.yml
    */
   static fetchOrderedConfigs() {
-    return ResourceManager.findAllByExtensionSync('.yml')
-      .map(file => ({ file, profile: path.basename(file).replace('.yml', '') }))
+    return ResourceManager.findAllByPatternSync(/[.]ya?ml$/)
+      .map(file => ({ file, profile: path.basename(file).replace(/[.]ya?ml$/, '') }))
       .filter(({ profile }) => profile === 'application' || profile === Env.env || Env.hasProfile(profile))
       .sort((a, b) =>
         cmp(a.profile, b.profile, 'application', 1) || // application at top
@@ -139,5 +139,47 @@ export class ConfigUtil {
     data[key] = this.coerce(value, data[key]);
 
     return true;
+  }
+
+  /**
+   * Bind `src` to `target`
+   */
+  // TODO: Write Tests
+  static bindTo(src: any, target: any, key?: string) {
+    const keys = (key ? key.split('.') : []);
+    let sub: any = src;
+
+    while (keys.length && sub) {
+      const next = keys.shift()!;
+      sub = sub[next];
+    }
+
+    if (sub) {
+      Util.deepAssign(target, sub);
+    }
+
+    ConfigUtil.bindEnvByKey(target, key);
+
+    return target;
+  }
+
+
+  /**
+   * Sanitize payload
+   */
+  // TODO: Write Tests
+  static sanitizeValuesByKey(obj: any, patterns: RegExp[]) {
+    const str = JSON.stringify(obj, (k, value) => {
+      // TODO: Expand restriction detection
+      if (
+        typeof value === 'string' && patterns.find(p => p.test(k))
+      ) {
+        return '*'.repeat(value.length);
+      } else {
+        return value;
+      }
+    });
+
+    return JSON.parse(str);
   }
 }

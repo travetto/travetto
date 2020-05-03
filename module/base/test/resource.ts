@@ -7,10 +7,10 @@ import { ResourceManager } from '../src/resource';
 export class ResourceManagerSuite {
   @Test()
   async readResources() {
-    const files = await ResourceManager.findAllByExtension('.md');
+    const files = await ResourceManager.findAllByPattern(/[.]md$/);
     assert(files.length === 2);
 
-    const altFiles = await ResourceManager.findAllByExtension('alt.md');
+    const altFiles = await ResourceManager.findAllByPattern(/alt[.]md$/);
     assert(altFiles.length === 1);
   }
 }
