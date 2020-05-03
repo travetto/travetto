@@ -46,6 +46,9 @@ export class Transpiler {
     private rootPaths: string[]
   ) {
     this.transformerManager = new TransformerManager(this.cwd);
+
+    // Provide a new source lookup
+    TranspileUtil.addSourceResolver(p => this.contents.get(p));
   }
 
   /**
