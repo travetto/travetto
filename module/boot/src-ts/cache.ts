@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { FsUtil } from './fs-util';
+import { FsUtil } from './fs';
 
 function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
   return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;

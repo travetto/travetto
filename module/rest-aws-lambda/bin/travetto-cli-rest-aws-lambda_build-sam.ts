@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as commander from 'commander';
 
 import { CliUtil } from '@travetto/cli/src/util';
-import { FsUtil } from '@travetto/boot/src/fs-util';
+import { FsUtil } from '@travetto/boot/src/fs';
 
 // TODO: Document
 export function init() {

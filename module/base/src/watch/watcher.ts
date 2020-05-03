@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
-import { FsUtil } from '@travetto/boot/src/fs-util';
+import { FsUtil } from '@travetto/boot/src/fs';
 
 import { Env } from '../env';
 import { ScanEntry, ScanHandler, ScanFs } from '../scan-fs';

@@ -113,11 +113,7 @@ module.exports = {
             "warn",
             {
                 "ignoreDestructuring": true,
-                "ignoreImports": true,
-                "allow": [
-                    "async_hooks",
-                    "child_process"
-                ]
+                "ignoreImports": true
             },
 
         ],

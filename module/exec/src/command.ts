@@ -1,6 +1,5 @@
-import { EnvUtil } from '@travetto/boot';
+import { EnvUtil, ExecUtil } from '@travetto/boot';
 
-import { Exec } from './exec';
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';
 
@@ -11,7 +10,7 @@ export class CommandService {
 
   static async dockerAvailable() {
     if (this.hasDocker === undefined && !EnvUtil.isTrue('NO_DOCKER')) { // Check for docker existence
-      const { result: prom } = Exec.spawn('docker', ['ps']);
+      const { result: prom } = ExecUtil.spawn('docker', ['ps']);
       this.hasDocker = (await prom).valid;
     }
     return this.hasDocker;
@@ -35,7 +34,7 @@ export class CommandService {
     const { localCheck } = this.config;
 
     const useLocal = await (Array.isArray(localCheck) ?
-      Exec.spawn(...localCheck).result.then(x => x.valid, () => false) :
+      ExecUtil.spawn(...localCheck).result.then(x => x.valid, () => false) :
       localCheck());
 
     const useContainer = this.config.allowDocker && !useLocal && (await CommandService.dockerAvailable());
@@ -69,7 +68,7 @@ export class CommandService {
     if (container) {
       return container.exec(args);
     } else {
-      return Exec.spawn(args[0], args.slice(1), { shell: true, quiet: false });
+      return ExecUtil.spawn(args[0], args.slice(1), { shell: true, quiet: false });
     }
   }
 
@@ -81,7 +80,7 @@ export class CommandService {
     if (container) {
       return container.setEntryPoint(cmd).run(rest);
     } else {
-      return await Exec.spawn(cmd, rest, { shell: true, quiet: false }).result;
+      return await ExecUtil.spawn(cmd, rest, { shell: true, quiet: false }).result;
     }
   }
 }

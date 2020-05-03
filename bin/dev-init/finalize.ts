@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { Util } from './util';
 import { DepResolver } from './resolver';
-import { FsUtil } from '../../module/boot/src/fs-util';
+import { FsUtil } from '../../module/boot/src/fs';
 
 export class Finalize {
   static MOD_ROOT = `${Util.ROOT}/module`;

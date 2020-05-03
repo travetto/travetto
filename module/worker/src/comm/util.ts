@@ -1,6 +1,4 @@
-import { ChildProcess, SpawnOptions } from 'child_process';
-
-import { Exec } from '@travetto/exec';
+import { ExecUtil } from '@travetto/boot';
 import { Env } from '@travetto/base';
 
 import { SpawnConfig, ChildOptions } from './types';
@@ -52,7 +50,7 @@ export class CommUtil {
     args = args ?? [];
     fork = fork === undefined ? false : fork;
 
-    const op: typeof Exec.fork = (fork && process.platform !== 'win32' ? Exec.fork : Exec.spawn);
+    const op: typeof ExecUtil.fork = (fork && process.platform !== 'win32' ? ExecUtil.fork : ExecUtil.spawn);
 
     const finalOpts: ChildOptions = {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
@@ -64,13 +62,13 @@ export class CommUtil {
       }
     };
 
-    if (fork && op === Exec.spawn) {
+    if (fork && op === ExecUtil.spawn) {
       args.unshift(command);
       command = process.argv0;
-      (finalOpts as SpawnOptions).shell = false;
+      (finalOpts as any).shell = false;
     }
 
-    const result = op.call(Exec, command, args, finalOpts);
+    const result = op.call(ExecUtil, command, args, finalOpts);
 
     console.trace(`[${process.pid}] Launched ${result.process.pid}`);
 
@@ -82,7 +80,7 @@ export class CommUtil {
     return result;
   }
 
-  static killSpawnedProcess(proc: ChildProcess) {
+  static killSpawnedProcess(proc: { kill(sig?: string | number): void }) {
     if (process.platform === 'win32') {
       proc.kill();
     } else {

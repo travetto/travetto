@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { EnvUtil } from './env';
-import { FsUtil } from './fs-util';
+import { FsUtil } from './fs';
 import { AppCache } from './app-cache';
 
 type Preprocessor = (name: string, contents: string) => string;

@@ -1,13 +1,14 @@
 import * as fs from 'fs';
-import * as cp from 'child_process';
 import * as path from 'path';
 import * as util from 'util';
 import * as mustache from 'mustache';
 
+import { ExecUtil } from '@travetto/boot';
+
 const fsRead = util.promisify(fs.readFile);
 
 export const run = (x: string, cwd = process.cwd()) => {
-  const res = cp.execSync(x, { env: process.env, cwd });
+  const res = ExecUtil.execSync(x);
   return res.toString().trim();
 };
 

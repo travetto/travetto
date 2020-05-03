@@ -11,6 +11,7 @@ Boot is basic environment  awareness coupled with typescript bootstrapping for `
 * Cache Support
 * File Operations
 * Typescript bootstrapping
+* Process execution 
 
 ## Environmental Information
 The functionality we support for testing and retrieving environment information:
@@ -45,3 +46,22 @@ This functionality allows the program to opt in the typescript compiler.  This a
 
 ## File System Interaction
 `FsUtil` provides some high level functionality (like recursive directory delete). 
+
+## Process Execution
+Just like [`child_process`], the `ExecUtil` exposes ```spawn``` and ```fork```.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ```Promise``` structure, that throws an error on an non-zero return status.
+
+A simple example would be
+
+**Code: Running a directory listing via ls**
+```typescript
+async function executeListing() {
+  const { result } = ExecUtil.spawn('ls');
+  await result;
+}
+```
+
+As you can see, the call returns not only the child process information, but the ```Promise``` to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
+* `timeout` as the number of milliseconds the process can run before terminating and throwing an error
+* `quiet` which suppresses all stdout/stderr output
+* `stdin` as a string, buffer or stream to provide input to the program you are running;
+* `timeoutKill` allows for registering functionality to execute when a process is force killed by timeout

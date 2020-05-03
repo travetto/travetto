@@ -2,11 +2,11 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import * as child_process from 'child_process';
 import * as commander from 'commander';
 
 import { CliUtil } from '@travetto/cli/src/util';
-import { FsUtil } from '@travetto/boot/src/fs-util';
+import { FsUtil } from '@travetto/boot/src/fs';
+import { ExecUtil } from '@travetto/boot/src/exec';
 
 // TODO: Document
 export function init() {
@@ -30,7 +30,7 @@ export function init() {
       FsUtil.unlinkRecursiveSync(cmd.output);
       FsUtil.mkdirpSync(cmd.workspace);
 
-      child_process.execSync(`cp -r * ${cmd.workspace}`, { cwd: FsUtil.cwd });
+      await ExecUtil.spawn('cp', ['-r', '*', cmd.workspace]).result;
 
       const dirVar = 'process.env.TRV_CACHE = __dirname + "/cache";';
       const lambda = fs.readFileSync(path.resolve(__dirname, '..', 'resources', 'lambda.js'), 'utf-8');
@@ -85,7 +85,7 @@ export function init() {
         // Ignore
       }
 
-      child_process.execSync(`zip -qr ${cmd.output} . `, { cwd: cmd.workspace });
+      await ExecUtil.spawn('zip', ['-qr', cmd.output, '.'], { cwd: cmd.workspace }).result;
       // remove(DIST);
     });
 }

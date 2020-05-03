@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 import { FileCache } from './cache';
-import { FsUtil } from './fs-util';
+import { FsUtil } from './fs';
 import { EnvUtil } from './env';
 
 /**
