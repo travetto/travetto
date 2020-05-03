@@ -18,9 +18,9 @@ class LoggerTest {
   async shouldLog() {
     const events: LogEvent[] = [];
     Logger.listenRaw('test', e => events.push(e));
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const ᚕlg = (payload: any, ...args: any[]) => Logger.invoke(payload, args);
-    console.log('Hello', 1, 2, 3);
+    (function (ᚕlg) {
+      console.log('Hello', 1, 2, 3);
+    })((payload: any, ...args: any[]) => Logger.invoke(payload, args));
     assert(events.length === 1);
     assert(events[0].message === 'Hello');
     assert.deepStrictEqual(events[0].args, [1, 2, 3]);

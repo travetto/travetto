@@ -4,7 +4,7 @@ import * as os from 'os';
 import * as busboy from 'busboy';
 import match = require('mime-match');
 
-import { Request, Response } from '@travetto/rest';
+import { Request, Response, TRV_RAW } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 import { AppError, SystemUtil } from '@travetto/base';
 import { FsUtil } from '@travetto/boot';
@@ -112,10 +112,10 @@ export class AssetRestUtil {
         res.setHeader('Content-Type', asset.contentType);
         res.setHeader('Content-Disposition', `attachment;filename=${asset.path}`);
         await new Promise((resolve, reject) => {
-          stream.pipe(res.__raw);
-          res.__raw.on('error', reject);
-          res.__raw.on('drain', resolve);
-          res.__raw.on('close', resolve);
+          stream.pipe(res[TRV_RAW]);
+          res[TRV_RAW].on('error', reject);
+          res[TRV_RAW].on('drain', resolve);
+          res[TRV_RAW].on('close', resolve);
         });
       }
     };

@@ -71,13 +71,13 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
       return;
     }
 
-    let fn: (e: U) => void; // eslint-disable-line prefer-const
+    const holder: { fn?(e: U): void } = {};
 
     const kill = (e?: any) => {
-      this.removeListener(fn);
+      this.removeListener(holder.fn!);
     };
 
-    fn = (e: U) => {
+    holder.fn = (e: U) => {
       if (Env.trace) {
         console.trace(`[${this.parentId}] Received [${this.id}] ${e.type}`);
       }
@@ -93,7 +93,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
       }
     };
 
-    this.proc.on('message', fn);
+    this.proc.on('message', holder.fn);
 
     return kill;
   }

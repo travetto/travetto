@@ -34,13 +34,10 @@ export class WorkPool<X, T extends Worker<X>> {
 
     let createErrors = 0;
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-
     this.pool = gp.createPool({
-      async create() {
+      create: async () => {
         try {
-          self.pendingAcquires += 1;
+          this.pendingAcquires += 1;
           const res = await getWorker();
 
           if (res.init) {
@@ -57,16 +54,14 @@ export class WorkPool<X, T extends Worker<X>> {
           }
           throw e;
         } finally {
-          self.pendingAcquires -= 1;
+          this.pendingAcquires -= 1;
         }
       },
-      async destroy(x: T) {
+      destroy: async (x: T) => {
         console.trace(`[${process.pid}] Destroying ${x.id}`);
         return x.destroy();
       },
-      async validate(x: T) {
-        return x.active;
-      }
+      validate: async (x: T) => x.active
     }, args);
 
     ShutdownManager.onShutdown(`worker.pool.${this.constructor.name}`, () => this.shutdown());

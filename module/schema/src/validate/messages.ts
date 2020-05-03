@@ -11,7 +11,7 @@ export const Messages = new Map<any, string>(Object.entries({
   max: '{path} is bigger than ({n})',
   telephone: '{path} is not a valid phone number',
   url: '{path} is not a valid url',
-  simple_name: '{path} is not a proper name',
-  postal_code: '{path} is not a valid postal code',
+  simpleName: '{path} is not a proper name',
+  postalCode: '{path} is not a valid postal code',
   email: '{path} is not a valid email address'
 }));

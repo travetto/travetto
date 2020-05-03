@@ -114,7 +114,7 @@ export class CliUtil {
         descSp,
         color`${{ description: descVal }}`
           .replace(/(\(default:\s+)(.*?)(\))/g,
-            (_, l, input, r) => color`${l}${{ input }}${{ description: r }}`)
+            (__, l, input, r) => color`${l}${{ input }}${{ description: r }}`)
       );
 
       return line.filter(x => !!x).join('');

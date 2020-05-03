@@ -24,7 +24,6 @@ class SuggestQuery {
   offset?: number;
 }
 
-// eslint-disable no-invalid-this
 /** @augments trv/di/Injectable */
 // TODO: Document
 export function ModelController<T extends ModelCore>(path: string, cls: Class<T>) {

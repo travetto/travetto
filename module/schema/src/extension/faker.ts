@@ -22,7 +22,7 @@ export class SchemaFakerUtil {
     [CommonRegExp.email, faker.internet.email],
     [CommonRegExp.url, faker.internet.url],
     [CommonRegExp.telephone, faker.phone.phoneNumber],
-    [CommonRegExp.postal_code, faker.address.zipCode]
+    [CommonRegExp.postalCode, faker.address.zipCode]
   ];
 
   static NAMES_TO_TYPE: Record<string, [RegExp, () => any][]> = {

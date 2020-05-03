@@ -20,14 +20,14 @@ type QueryOptionsRaw<T> = {
   offset?: number;
 };
 
-type QueryMain_<T> = {
+type QueryMain<T> = {
   select?: SelectClauseRaw<T>;
   where?: WhereClauseRaw<T>;
   // TODO: Add grouping in later
   // group?: GroupClauseRaw<T>;
 };
 
-type QueryRaw<T> = QueryMain_<T> & QueryOptionsRaw<T>;
+type QueryRaw<T> = QueryMain<T> & QueryOptionsRaw<T>;
 type ModelQueryRaw<T> = { where?: WhereClauseRaw<T> };
 type PageableModelQueryRaw<T> = ModelQueryRaw<T> & QueryOptionsRaw<T>;
 type PageableModelQueryStringQueryRaw<T> = QueryOptionsRaw<T> & { query: string };

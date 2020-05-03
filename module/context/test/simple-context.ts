@@ -46,7 +46,7 @@ class VerifyContext {
 
   @Test()
   async multipleContext() {
-    const attempts = ' '.repeat(10).split('').map((_, i) =>
+    const attempts = ' '.repeat(10).split('').map((__, i) =>
       async () => {
         const start = async_hooks.executionAsyncId();
         this.context.set({ name: `test-${i}` });

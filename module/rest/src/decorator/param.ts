@@ -6,7 +6,7 @@ const EXTRACTORS: Record<ParamConfig['location'], ExtractFn> = {
   path: (c, r) => ParamUtil.convertValue(c, r.params[c.name!]),
   query: (c, r) => ParamUtil.convertValue(c, r.query[c.name!]),
   header: (c, r) => ParamUtil.convertValue(c, r.header(c.name!)),
-  body: (_, r) => r.body,
+  body: (__, r) => r.body,
   context: ParamUtil.extractContext.bind(ParamUtil)
 };
 
@@ -39,5 +39,5 @@ export const Body = (param: Partial<ParamConfig> = {}) => Param('body', param);
 
 // TODO: Document
 export const ContextProvider = ParamUtil.provider.bind(ParamUtil);
-@ContextProvider((_: any, rq: Request) => rq) export class REQUEST { }
-@ContextProvider((_: any, rq: Request, rs: Response) => rs) export class RESPONSE { }
+@ContextProvider((__: any, rq: Request) => rq) export class REQUEST { }
+@ContextProvider((__: any, rq: Request, rs: Response) => rs) export class RESPONSE { }

@@ -2,6 +2,7 @@ import { ServerResponse, IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
 import { RestAppUtil } from '@travetto/rest';
+import { TRV_ORIG, TRV_RAW } from '@travetto/rest/src/types';
 
 const TRV_KEY = Symbol('TRV_KEY');
 
@@ -14,8 +15,8 @@ export class FastifyAppUtil {
         path = `/${path}`;
       }
       (reqs as any)[TRV_KEY] = RestAppUtil.decorateRequest({
-        __og: reqs,
-        __raw: reqs.req,
+        [TRV_ORIG]: reqs,
+        [TRV_RAW]: reqs.req,
         protocol: 'encrypted' in reqs.req.socket ? 'https' : 'http',
         method: reqs.req.method,
         path,
@@ -37,8 +38,8 @@ export class FastifyAppUtil {
   static getResponse(reply: fastify.FastifyReply<ServerResponse>) {
     if (!(reply as any)[TRV_KEY]) {
       (reply as any)[TRV_KEY] = RestAppUtil.decorateResponse({
-        __og: reply,
-        __raw: reply.res,
+        [TRV_ORIG]: reply,
+        [TRV_RAW]: reply.res,
         get headersSent() {
           return reply.sent;
         },

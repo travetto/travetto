@@ -959,7 +959,7 @@ ${this.getWhereSQL(cls, query.where)}`;
         continue;
       }
       let lvl = 1; // Add by level
-      while (true) { // eslint-disable-line no-constant-condition
+      for (; ;) { // Loop until done
         const leveled = items.filter(f => f.stack.length === lvl);
         if (!leveled.length) {
           break;

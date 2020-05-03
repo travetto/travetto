@@ -1,12 +1,13 @@
 import 'express-serve-static-core';
-import * as cookies from 'cookies'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SetOption, GetOption } from 'cookies';
 import { IncomingMessage, ServerResponse } from 'http';
+import { TRV_RAW, TRV_ORIG } from './types';
 
 declare global {
   namespace Travetto {
     interface Request {
-      __og?: any;
-      __raw: IncomingMessage;
+      [TRV_ORIG]?: any;
+      [TRV_RAW]: IncomingMessage;
       method?: string;
       path: string;
       url: string;
@@ -17,7 +18,7 @@ declare global {
       params: Record<string, any>;
       headers: Record<string, string | string[]>;
       cookies: {
-        get(name: string, options?: cookies.GetOption): string | undefined;
+        get(name: string, options?: GetOption): string | undefined;
       };
       body: any;
       pipe(stream: NodeJS.WritableStream): any;
@@ -26,8 +27,8 @@ declare global {
     }
 
     interface Response {
-      __og?: any;
-      __raw: ServerResponse;
+      [TRV_ORIG]?: any;
+      [TRV_RAW]: ServerResponse;
       statusCode: number;
       status(code?: number): (number | undefined);
       headersSent: boolean;
@@ -48,7 +49,7 @@ declare global {
       write(value: any): any;
       end(val?: any): any;
       cookies: {
-        set(name: string, value?: any, options?: cookies.SetOption): void;
+        set(name: string, value?: any, options?: SetOption): void;
       };
     }
   }

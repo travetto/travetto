@@ -249,7 +249,7 @@ export class SpecGenerateUtil {
 
       const epPath = (
         !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source
-      ).replace(/:([A-Za-z0-9_]+)\b/g, (_, param) => `{${param}}`);
+      ).replace(/:([A-Za-z0-9_]+)\b/g, (__, param) => `{${param}}`);
 
       const key = `${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/');
 
