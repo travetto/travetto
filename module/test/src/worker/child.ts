@@ -12,7 +12,7 @@ const FIXED_MODULES = new Set([
 ]);
 const IS_SUPPORT_FILE = /support\/(transformer|phase)[.]/;
 const IS_BIN_FILE = '/bin/';
-const IS_SELF_FILE = __filename.replace(/.*(test\/.*)([.]ts)?$/, (__, name) => name);
+const IS_SELF_FILE = __filename.replace(/.*(test\/.*)([.][tj]s)?$/, (__, name) => name);
 
 /**
  * Get module name from file, ignore node_modules nested
