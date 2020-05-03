@@ -31,7 +31,6 @@ function makeField(name: string, type: Class, required: boolean, extra: any) {
   } as FieldConfig;
 }
 
-// eslint-disable no-invalid-this
 /**
  * Base sql dialect
  */

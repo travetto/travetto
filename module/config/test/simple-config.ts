@@ -3,7 +3,7 @@ import * as yaml from 'js-yaml';
 
 import { Test, Suite, BeforeEach, AfterEach } from '@travetto/test';
 
-import { ConfigSource } from '../src/source';
+import { ConfigManager } from '../src/manager';
 import { ConfigUtil } from '../src/internal/util';
 
 class DbConfig {
@@ -45,8 +45,8 @@ export class ConfigTest {
   envCopy: any;
 
   private reinit() {
-    delete ConfigSource['initialized'];
-    ConfigSource.init();
+    delete ConfigManager['initialized'];
+    ConfigManager.init();
   }
 
   @BeforeEach()
@@ -63,7 +63,7 @@ export class ConfigTest {
   @Test()
   async verifyBasic() {
     const conf = new TestConfig();
-    ConfigSource.bindTo(conf, 'db.mysql');
+    ConfigManager.bindTo(conf, 'db.mysql');
     assert(conf.name === 'Oscar');
   }
 
@@ -73,14 +73,14 @@ export class ConfigTest {
     this.reinit();
 
     const conf = new TestConfig();
-    ConfigSource.bindTo(conf, 'db.mysql');
+    ConfigManager.bindTo(conf, 'db.mysql');
     assert(conf.name === 'Roger');
   }
 
   @Test()
   async verifyNotdefined() {
     const conf = new TestConfig();
-    ConfigSource.bindTo(conf, 'model.mongo');
+    ConfigManager.bindTo(conf, 'model.mongo');
 
     // Default value from
     assert(conf.anonHosts === ['a', 'b']);
@@ -89,7 +89,7 @@ export class ConfigTest {
     this.reinit();
 
     const newConf = new TestConfig();
-    ConfigSource.bindTo(newConf, 'model.mongo');
+    ConfigManager.bindTo(newConf, 'model.mongo');
 
     // Default value from
     assert(newConf.anonHosts === ['a', 'b', 'c', 'd']);
@@ -97,13 +97,13 @@ export class ConfigTest {
 
   @Test()
   async verifyTopLevelKeys() {
-    yaml.safeLoadAll(SAMPLE_YAML, (doc: any) => ConfigSource.putAll(doc));
+    yaml.safeLoadAll(SAMPLE_YAML, (doc: any) => ConfigManager.putAll(doc));
     const conf = new Test2Config();
-    ConfigSource.bindTo(conf, 'test.beta');
+    ConfigManager.bindTo(conf, 'test.beta');
     assert(conf.values.length === 3);
 
     const conf2 = new Test2Config();
-    ConfigSource.bindTo(conf2, 'test.alpha');
+    ConfigManager.bindTo(conf2, 'test.alpha');
     assert(conf2.values.length === 3);
   }
 
@@ -139,7 +139,7 @@ a:
     process.env.NAME_ACTIVE = 'false';
     this.reinit();
 
-    const res = ConfigSource.bindTo(new NameConfig(), 'name');
+    const res = ConfigManager.bindTo(new NameConfig(), 'name');
 
     assert(res.active === false);
   }
