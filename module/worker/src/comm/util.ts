@@ -70,7 +70,7 @@ export class CommUtil {
       (finalOpts as SpawnOptions).shell = false;
     }
 
-    const result = op(command, args, finalOpts);
+    const result = op.call(Exec, command, args, finalOpts);
 
     console.trace(`[${process.pid}] Launched ${result.process.pid}`);
 

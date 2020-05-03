@@ -1,4 +1,4 @@
-import * as child_process from 'child_process';
+import { ChildProcess, fork, spawn, exec, execSync, SpawnOptions, ForkOptions, ExecOptions } from 'child_process';
 
 import { AppError } from '@travetto/base';
 import { ExecutionOptions, ExecutionResult, ExecutionState } from './types';
@@ -6,15 +6,15 @@ import { ExecutionOptions, ExecutionResult, ExecutionState } from './types';
 // TODO: Document
 export class Exec {
 
-  static enhanceProcess(p: child_process.ChildProcess, options: ExecutionOptions, cmd: string) {
+  static enhanceProcess(p: ChildProcess, options: ExecutionOptions, cmd: string) {
     const timeout = options.timeout;
 
     const prom = new Promise<ExecutionResult>((resolve, reject) => {
-      let stdout = '';
-      let stderr = '';
+      const stdout: string[] = [];
+      const stderr: string[] = [];
       let timer: any;
       let done = false;
-      const finish = function (result: ExecutionResult) {
+      const finish = function (result: Omit<ExecutionResult, 'stderr' | 'stdout'>) {
         if (done) {
           return;
         }
@@ -23,23 +23,29 @@ export class Exec {
         }
         done = true;
 
-        if (!result.valid) {
-          reject(new AppError(`Error executing ${cmd}: ${result.message || result.stderr || result.stdout || 'failed'}`, 'general', result));
+        const final = {
+          stdout: stdout.join('\n'),
+          stderr: stderr.join('\n'),
+          ...result
+        };
+
+        if (!final.valid) {
+          reject(new AppError(`Error executing ${cmd}: ${final.message || final.stderr || final.stdout || 'failed'}`, 'general', final));
         } else {
-          resolve(result);
+          resolve(final);
         }
       };
 
       if (!options.quiet) {
-        p.stdout!.on('data', (d: string) => stdout += `${d}\n`);
-        p.stderr!.on('data', (d: string) => stderr += `${d}\n`);
+        p.stdout!.on('data', (d: string) => stdout.push(d));
+        p.stderr!.on('data', (d: string) => stderr.push(d));
       }
 
       p.on('error', (err: Error) =>
-        finish({ code: 1, stdout, stderr, message: err.message, valid: false }));
+        finish({ code: 1, message: err.message, valid: false }));
 
       p.on('close', (code: number) =>
-        finish({ code, stdout, stderr, valid: code === null || code === 0 || code === 130 || code === 143 })); // Sigint/term
+        finish({ code, valid: code === null || code === 0 || code === 130 || code === 143 })); // Sigint/term
 
       if (timeout) {
         timer = setTimeout(async x => {
@@ -48,7 +54,7 @@ export class Exec {
           } else {
             p.kill('SIGKILL');
           }
-          finish({ code: 1, stderr, stdout, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
+          finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
         }, timeout);
       }
     });
@@ -56,30 +62,27 @@ export class Exec {
     return prom;
   }
 
-  static spawn(cmd: string, args: string[], options: ExecutionOptions & child_process.SpawnOptions = {}): ExecutionState {
-    args = args.map(x => `${x}`);
-    const p = child_process.spawn(cmd, args, { shell: false, ...options });
-    const result = Exec.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
+  static spawn(cmd: string, args: string[], options: ExecutionOptions & SpawnOptions = {}): ExecutionState {
+    const p = spawn(cmd, args, { shell: false, ...options });
+    const result = this.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
     return { process: p, result };
   }
 
-  static fork(cmd: string, args: string[], options: ExecutionOptions & child_process.ForkOptions = {}): ExecutionState {
-    args = args.map(x => `${x}`);
-    const p = child_process.fork(cmd, args, options);
-    const result = Exec.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
+  static fork(cmd: string, args: string[], options: ExecutionOptions & ForkOptions = {}): ExecutionState {
+    const p = fork(cmd, args, options);
+    const result = this.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
     return { process: p, result };
   }
 
-  static exec(cmd: string, args: string[], options: ExecutionOptions & child_process.ExecOptions = {}): ExecutionState {
-    args = args.map(x => `${x}`);
+  static exec(cmd: string, args: string[], options: ExecutionOptions & ExecOptions = {}): ExecutionState {
     const cmdStr = `${cmd} ${args.join(' ')}`;
-    const p = child_process.exec(cmdStr, options);
-    const result = Exec.enhanceProcess(p, options, cmdStr);
+    const p = exec(cmdStr, options);
+    const result = this.enhanceProcess(p, options, cmdStr);
     return { process: p, result };
   }
 
   static execSync(command: string) {
     console.debug('execSync', command);
-    return child_process.execSync(command, { stdio: ['pipe', 'pipe'] }).toString().trim();
+    return execSync(command, { stdio: ['pipe', 'pipe'] }).toString().trim();
   }
 }
