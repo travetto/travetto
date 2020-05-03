@@ -8,9 +8,7 @@
   },
   "dependencies": {
     "@travetto/base": "^1.0.0-beta.1",
-    "@travetto/config": "^1.0.0-beta.1",
-    "@types/source-map-support": "^0.5.1",
-    "source-map-support": "^0.5.16"
+    "@travetto/config": "^1.0.0-beta.1"
   },
   "description": "Node-integration of Typescript Compiler with advanced functionality for collecting AST transformers, and detecting changes in classes and methods.",
   "homepage": "https://travetto.io",

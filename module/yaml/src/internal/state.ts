@@ -45,7 +45,7 @@ export class State {
     while (indent < this.top.indent) { // Block shift left
       this.endBlock();
       if (this.top.indent < 0) {
-        throw new Error('Invalid indentation, could not find matching level');
+        throw this.buildError('Invalid indentation, could not find matching level');
       }
     }
   }
@@ -77,7 +77,7 @@ export class State {
    */
   startBlock(block: Block) {
     if (this.top instanceof TextBlock) {
-      throw new Error(`Cannot nest in current block ${this.top.constructor.name}`);
+      throw this.buildError(`Cannot nest in current block ${this.top.constructor.name}`);
     }
     this.top = block;
     this.blocks.push(block);
@@ -101,13 +101,14 @@ export class State {
    */
   consumeNode(node: Node) {
     if (!this.top.consume) {
-      throw new Error(`Cannot consume in current block ${this.top.constructor.name}`);
+      throw this.buildError(`Cannot consume in current block ${this.top.constructor.name}`);
     }
 
     if (this.top instanceof MapBlock) {
-      const [ind, field] = this.fields.pop()!;
+      const [ind, field] = this.fields.pop()! ?? [];
       if ('indent' in node && this.top.indent !== ind) {
-        throw new Error('Unable to set value, incorrect nesting');
+        console.log(node, this.top);
+        throw this.buildError('Unable to set value, incorrect nesting');
       }
       this.top.consume(node, field);
     } else {
@@ -138,8 +139,10 @@ export class State {
   /**
    * Build error message
    */
-  buildError(message: string) {
+  buildError(msg: string) {
     const [start, end] = this.lines[this.lineCount - 1];
-    return new Error(`${message}, line: ${this.lineCount}\n${this.text.substring(start, end)}`);
+    const err = new Error(`${msg}, line: ${this.lineCount}\n${this.text.substring(start, end)}`);
+    err.stack = err.stack?.split(/\n/g).slice(2).join('\n');
+    return err;
   }
 }

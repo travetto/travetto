@@ -15,11 +15,13 @@ export class Parser {
    * Start an Array
    */
   private static startList(state: State, indent: number) {
-    if (indent === state.top.indent) {
-      if (!(state.top instanceof ListBlock)) {
+    if (indent === state.top.indent) { // If at the same level
+      if (!(state.top instanceof ListBlock) && !(state.top instanceof MapBlock)) { // If not a map or a list, as maps can have lists at same level
         throw new Error('Invalid mixing of elements');
       }
-    } else {
+    }
+    // If not a list or different indentations, start a new list
+    if (!(state.top instanceof ListBlock) || indent !== state.top.indent) {
       state.startBlock(new ListBlock(indent));
     }
   }
@@ -30,8 +32,8 @@ export class Parser {
   private static startMap(state: State, field: string, indent: number) {
     state.nestField(new TextNode(field).value, indent);
 
-    if (indent === state.top.indent) {
-      if (!(state.top instanceof MapBlock)) {
+    if (indent === state.top.indent) { // If at the same level
+      if (!(state.top instanceof MapBlock)) { // If not in a map
         throw new Error('Invalid mixing of elements');
       }
     } else {
@@ -66,7 +68,9 @@ export class Parser {
   /**
    * Parse via `State`
    */
-  static parseRaw(state: State) {
+  static parse(input: string | State) {
+    const state = typeof input === 'string' ? new State(input) : input;
+
     let pos = 0;
     const text = state.text;
 
@@ -92,10 +96,9 @@ export class Parser {
         const token = tokens[i];
         const lastToken = i === tokens.length - 1;
         const isEndOrSpace = (lastToken || Tokenizer.isWhitespaceStr(tokens[i + 1]));
-
         if (pending.length === 0 && token === DASH && isEndOrSpace) {
           this.startList(state, subIndent);
-          subIndent += token.length - 1;
+          subIndent += token.length + 1;
           if (!lastToken) { // Consume whitespace
             i += 1;
           }
@@ -125,17 +128,5 @@ export class Parser {
     }
 
     return state.popToTop()!.value;
-  }
-
-  /**
-   * Convert input text to javascript object
-   */
-  static parse(text: string) {
-    const state = new State(text);
-    try {
-      return this.parseRaw(state);
-    } catch (e) {
-      throw state.buildError(e.message);
-    }
   }
 }
