@@ -6,7 +6,8 @@ import match = require('mime-match');
 
 import { Request, Response, TRV_RAW } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
-import { AppError, SystemUtil } from '@travetto/base';
+import { AppError } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 import { FsUtil } from '@travetto/boot';
 
 import { RestAssetConfig } from './config';

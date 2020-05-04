@@ -2,7 +2,7 @@ import * as aws from 'aws-sdk';
 import { TagSet } from 'aws-sdk/clients/s3';
 import { Readable } from 'stream';
 
-import { SystemUtil } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 import { AssetSource, Asset } from '@travetto/asset';
 import { Injectable } from '@travetto/di';
 
