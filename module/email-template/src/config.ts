@@ -2,9 +2,15 @@ import { FsUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
 
+/**
+ * Simple mail template config
+ */
 @Config('mail.template')
-// TODO: Document
 export class MailTemplateConfig {
+
+  /**
+   * Additional folders to read SCSS files from
+   */
   scssRoots: string[];
 
   async postConstruct() {
@@ -15,7 +21,7 @@ export class MailTemplateConfig {
       // Never assume direct access to node_modules
       require
         .resolve('foundation-emails/gulpfile.js')
-        .replace('gulpfile.js', 'scss')
+        .replace('gulpfile.js', 'scss') // Include foundation-emails as part of available roots
     ];
   }
 }

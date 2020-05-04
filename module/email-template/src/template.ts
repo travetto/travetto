@@ -6,18 +6,19 @@ import { ResourceManager } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { Injectable, Inject } from '@travetto/di';
 import { ImageUtil } from '@travetto/image';
-import { MailTemplateEngine, MailTemplateContext } from '@travetto/email';
+import { MailTemplateEngine } from '@travetto/email';
 
 import { TemplateUtil } from './util';
 import { MailTemplateConfig } from './config';
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
 
-const fsStat = util.promisify(fs.stat);
 const fsReadFile = util.promisify(fs.readFile);
 
+/**
+ * Default mail template engine
+ */
 @Injectable()
-// TODO: Document
 export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
   private cache: Record<string, { html: string, text: string }> = {};
@@ -31,6 +32,9 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
   private templatesLoaded: boolean;
   private templates: Record<string, string> = {};
 
+  /**
+   * Get compiled styles
+   */
   get compiledStyles(): Promise<string> {
     if (!this.compiledSass) {
       this.compiledSass = (async () => {
@@ -50,6 +54,9 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     return this.compiledSass;
   }
 
+  /**
+   * Initialize all templates
+   */
   private async initTemplates() {
     if (!this.templatesLoaded) {
       this.templatesLoaded = true;
@@ -59,18 +66,22 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     }
   }
 
+  /**
+   * Register a new template
+   */
   registerTemplate(name: string, partial: string | Buffer) {
     console.debug('Registering template', name);
     this.templates[name] = partial.toString();
   }
 
+  /**
+   * Fetch image and return as buffer
+   */
   async getImage(rel: string) {
     const pth = await ResourceManager.find(rel);
     const out = AppCache.toEntryName(pth);
 
-    try {
-      await fsStat(out);
-    } catch {
+    if (await FsUtil.exists(out)) {
       const stream = await ImageUtil.optimizePng(pth);
       await SystemUtil.streamToFile(stream, out);
     }
@@ -78,10 +89,16 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     return fsReadFile(out);
   }
 
+  /**
+   * Get wrapper html contents
+   */
   get wrapper() {
     return this.templates['email/wrapper.html'];
   }
 
+  /**
+   * Compile template
+   */
   async compile(tpl: string) {
     // Load wrapper
     tpl = TemplateUtil.wrapWithBody(tpl, this.wrapper);
@@ -91,6 +108,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
     let html = Inky.render(tpl);
 
+    // Inline compiled styles
     const css = await this.compiledStyles;
     const styles = [`<style>\n${css}\n</style>`];
 
@@ -99,6 +117,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
       return '';
     });
 
+    // Macro support
     html = html
       .replace(/<\/head>/, all => `${styles.join('\n')}\n${all}`)
       .replace(/%EMAIL_WIDTH%/g, `${this.defaultTemplateWidth}`);
@@ -112,6 +131,9 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     return { html, text };
   }
 
+  /**
+   * Get compiled template
+   */
   async getCompiled(template: string) {
     if (!this.cache[template]) {
       await this.initTemplates();
@@ -120,11 +142,17 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
     return this.cache[template];
   }
 
-  async interpolate(text: string, context: MailTemplateContext = {}) {
+  /**
+   * Simple interpolation
+   */
+  async interpolate(text: string, context: Record<string, any> = {}) {
     return TemplateUtil.interpolate(text, context);
   }
 
-  async template(template: string, context: MailTemplateContext = {}) {
+  /**
+   * Template entire email
+   */
+  async template(template: string, context: Record<string, any> = {}) {
     const { html, text } = await this.getCompiled(template);
 
     // Render final template

@@ -3,9 +3,14 @@ import * as path from 'path';
 
 import { FsUtil } from '@travetto/boot';
 
-// TODO: Document
+/**
+ * Utilities for templating
+ */
 export class TemplateUtil {
 
+  /**
+   * Compile SCSS content with roots as search paths for additional assets
+   */
   static async compileSass(file: string, roots: string[]) {
     return new Promise<string>((resolve, reject) => {
       const sass = require('sass') as { render(args: any, cb: (err: any, results: { css: string | Buffer }) => void): void };
@@ -24,15 +29,24 @@ export class TemplateUtil {
     });
   }
 
+  /**
+   * Interpolate text with data
+   */
   static interpolate(text: string, data: any) {
     return Mustache.render(text, data);
   }
 
+  /**
+   * Wrap HTML tpl with the wrapper
+   */
   static wrapWithBody(tpl: string, wrapper: string) {
     // Wrap template, with preamble/postamble
     return wrapper.replace('<!-- BODY -->', tpl);
   }
 
+  /**
+   * Inline image sources
+   */
   static async inlineImageSource(html: string, lookup: (src: string) => (Buffer | Promise<Buffer>)) {
     const srcs: string[] = [];
 
@@ -66,6 +80,9 @@ export class TemplateUtil {
     return html;
   }
 
+  /**
+   * Resolve nested templates
+   */
   static resolveNestedTemplates(template: string, templates: Record<string, string>) {
     return template.replace(/[{]{2}>\s+(\S+)\s*[}]{2}/g, (all: string, name: string): any => {
       name = FsUtil.toUnix(name);
