@@ -1,7 +1,7 @@
 import { Schema, View, Field, Float, Integer, Alias, Url } from '../..';
 import { Address } from './address';
 
-@Schema(false)
+@Schema()
 export class SuperAddress extends Address {
   @Field(String)
   unit: string;
@@ -12,7 +12,7 @@ export class RegexSimple {
   regex: RegExp;
 }
 
-@Schema(false)
+@Schema()
 export class Count {
 
   @Field(String)
@@ -23,7 +23,7 @@ export class Count {
   value: number;
 }
 
-@Schema(true)
+@Schema()
 @View('test', { with: ['address', 'counts'] })
 export class Person {
 
@@ -40,7 +40,7 @@ export class Person {
   counts: Count[];
 }
 
-@Schema(true)
+@Schema()
 export class Response {
 
   questionId: string;
