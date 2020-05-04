@@ -1,7 +1,8 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { ResourceManager, SystemUtil } from '@travetto/base';
+import { ResourceManager } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 import { ImageUtil } from '../src/util';
 
 @Suite('ImageUtils')

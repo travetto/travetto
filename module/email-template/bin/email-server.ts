@@ -4,9 +4,17 @@ import * as Mustache from 'mustache';
 import * as fs from 'fs';
 
 import { DefaultMailTemplateEngine } from '../src/template';
+import { ConfigUtil } from '@travetto/config/src/internal/util';
+
+/**
+ * Creates a simple web app for testing and viewing emails
+ */
 
 const INDEX = fs.readFileSync(`${__dirname}/index.html`, 'utf-8');
 
+/**
+ * Listen for file changes
+ */
 async function simpleWatcher(commonFolder: string, paths: string[], handler: {
   changed?(file: string): void;
   removed?(file: string): void;
@@ -34,6 +42,9 @@ async function simpleWatcher(commonFolder: string, paths: string[], handler: {
   return watcher;
 }
 
+/**
+ * Create email context via URL and template
+ */
 function buildContext(reqUrl: url.URL, content: string) {
 
   const base: Record<string, any> = {};
@@ -54,24 +65,12 @@ function buildContext(reqUrl: url.URL, content: string) {
     }
   }
 
-  for (const k of Array.from(Object.keys(base))) {
-    const v = base[k];
-    if (['number', 'boolean', 'string', 'undefined'].includes(typeof v)) {
-      const [last, ...rest] = k.split('.').reverse();
-      const first = rest.reverse();
-      let sub = base;
-      for (const el of first) {
-        sub = (sub[el] = (sub[el] || {}));
-      }
-      if (!(last in sub)) {
-        sub[last] = v;
-      }
-    }
-  }
-
-  return base;
+  return ConfigUtil.breakDownKeys(base);
 }
 
+/**
+ * Resolve template into output
+ */
 async function resolve(engine: DefaultMailTemplateEngine, request: http.IncomingMessage) {
 
   const reqUrl = new url.URL(request.url!);
@@ -114,6 +113,9 @@ async function resolve(engine: DefaultMailTemplateEngine, request: http.Incoming
   }
 }
 
+/**
+ * Process requests
+ */
 export async function serverHandler() {
   const { DependencyRegistry } = await import('@travetto/di');
   const { ResourceManager } = await import('@travetto/base');

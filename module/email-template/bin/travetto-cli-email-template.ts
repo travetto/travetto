@@ -1,7 +1,9 @@
 import * as commander from 'commander';
 import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
 
-// TODO: Document
+/**
+ * CLI Entry point for running the email server
+ */
 export function init() {
   return CliUtil.program.command('email-template').action(async (cmd: commander.Command) => {
     const { WebServer } = await import('@travetto/cli/src/http');
