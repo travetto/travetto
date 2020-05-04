@@ -1,7 +1,6 @@
 import * as path from 'path';
 
-import { EnvUtil } from '@travetto/boot';
-import { run } from './util';
+import { EnvUtil, ExecUtil } from '@travetto/boot';
 
 export class Context {
   cwd: string;
@@ -14,8 +13,8 @@ export class Context {
   modules: Record<string, boolean> = {};
 
   author = {
-    name: run('git config user.name') || EnvUtil.get('USER'),
-    email: run('git config user.email')
+    name: ExecUtil.execSync('git config user.name').trim() || EnvUtil.get('USER'),
+    email: ExecUtil.execSync('git config user.email').trim()
   };
 
   constructor(public name: string) {

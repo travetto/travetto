@@ -18,7 +18,7 @@ export class Finalize {
   static linkFramework(base: string, modules: Set<string>) {
     for (const dep of new Set([...modules, ...(DepResolver.resolve('test', base).regular), '@travetto/cli'])) {
       const [, sub] = dep.split('@travetto/');
-      if (fs.existsSync(`${this.MOD_ROOT}/${sub}`)) {
+      if (FsUtil.existsSync(`${this.MOD_ROOT}/${sub}`)) {
         FsUtil.makeLinkSync(`${this.MOD_ROOT}/${sub}`, `${base}/${dep}`);
       }
     }
@@ -30,7 +30,7 @@ export class Finalize {
       for (const name of Object.keys(bin[smod])) {
         const src = bin[smod][name];
 
-        if (fs.existsSync(`${base}/.bin/${name}.cmd`)) {
+        if (FsUtil.existsSync(`${base}/.bin/${name}.cmd`)) {
           fs.unlinkSync(`${base}/.bin/${name}.cmd`);
           fs.unlinkSync(`${base}/.bin/${name}`);
         }

@@ -31,7 +31,7 @@ export class $ResourceManager {
 
     this.paths = this.paths
       .map(x => FsUtil.resolveUnix(Env.cwd, x, this.folder))
-      .filter(x => fs.existsSync(x));
+      .filter(x => FsUtil.existsSync(x));
   }
 
   /**
@@ -106,7 +106,7 @@ export class $ResourceManager {
 
     for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
       try {
-        await fsStat(f);
+        await FsUtil.exists(f);
         this.cache.set(pth, f);
         return f;
       } catch { }
@@ -127,7 +127,7 @@ export class $ResourceManager {
 
     for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
       try {
-        fs.statSync(f);
+        FsUtil.existsSync(f);
         this.cache.set(pth, f);
         return f;
       } catch { }

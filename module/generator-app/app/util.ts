@@ -2,24 +2,18 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
 import * as mustache from 'mustache';
-
-import { ExecUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot/src/fs';
 
 const fsRead = util.promisify(fs.readFile);
 
-export const run = (x: string, cwd = process.cwd()) => {
-  const res = ExecUtil.execSync(x);
-  return res.toString().trim();
-};
-
 export const verifyDestination = (target: string) => {
-  if (fs.existsSync(target)) {
+  if (FsUtil.existsSync(target)) {
     throw new Error(`Cannot create project inside of an existing folder: ${path.dirname(target)}`);
   }
 
   let base = path.dirname(target);
   while (base) {
-    if (fs.existsSync(`${base}/package.json`)) {
+    if (FsUtil.existsSync(`${base}/package.json`)) {
       throw new Error(`Cannot create project inside of an existing node project ${base}`);
     }
     const next = path.dirname(base);

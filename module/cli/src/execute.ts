@@ -22,11 +22,11 @@ export class ExecutionManager {
     const all: Record<string, string> = {};
     // Scan from the root directory
     const ROOT_DIR = `${FsUtil.cwd}/node_modules/@travetto`;
-    if (fs.existsSync(ROOT_DIR)) { // If installed and not a dev checkout
+    if (FsUtil.existsSync(ROOT_DIR)) { // If installed and not a dev checkout
       // Find all folders
       const folders = fs.readdirSync(ROOT_DIR)
         .map(x => `${ROOT_DIR}/${x}/bin`)
-        .filter(x => fs.existsSync(x));
+        .filter(x => FsUtil.existsSync(x));
 
       // For each folder, load the plugin
       for (const folder of folders) {
@@ -41,7 +41,7 @@ export class ExecutionManager {
 
     // Check the bin folder
     const LOCAL_BIN = `${FsUtil.cwd}/bin`; // Support local dev
-    if (fs.existsSync(LOCAL_BIN)) {
+    if (FsUtil.existsSync(LOCAL_BIN)) {
       const files = fs.readdirSync(LOCAL_BIN)
         .filter(x => x.startsWith(PREFIX));
 
