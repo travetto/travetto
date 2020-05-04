@@ -1,19 +1,25 @@
 import { Readable } from 'stream';
 import { Url } from 'url';
 
-// TODO: Document
+/**
+ * An address
+ */
 interface Address {
   name: string;
   address: string;
 }
 
-// TODO: Document
+/**
+ * An attachment for the email
+ */
 interface AttachmentLike {
   content?: string | Buffer | Readable;
   path?: string | Url;
 }
 
-// TODO: Document
+/**
+ * A full attachment
+ */
 interface Attachment extends AttachmentLike {
   filename?: string | false;
   cid?: string;
@@ -25,7 +31,9 @@ interface Attachment extends AttachmentLike {
   raw?: string | Buffer | Readable | AttachmentLike;
 }
 
-// TODO: Document
+/**
+ * Full message options
+ */
 export interface MessageOptions {
   from?: string | Address;
   sender?: string | Address;

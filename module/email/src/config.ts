@@ -1,12 +1,18 @@
 import { Config } from '@travetto/config';
 
+/**
+ * Simple mail configuration
+ */
 @Config('mail')
-// TODO: Document
 export class MailConfig {
+  /** Transport specific config */
   transport = {};
   defaults = {
+    /**  Default email title */
     title: 'Email Title',
-    from: 'Travetto Mailer <mailer@travetto.org>',
-    replyTo: 'Travetto Mailer <mailer@travetto.org>',
+    /** Default from */
+    from: 'Travetto Mailer <mailer@travetto.dev>',
+    /** Default reply-to */
+    replyTo: 'Travetto Mailer <mailer@travetto.dev>',
   };
 }

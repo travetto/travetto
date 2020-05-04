@@ -1,11 +1,15 @@
 import { MessageOptions, SentMessage } from './types';
 
-// TODO: Document
+/**
+ * Default mail transport
+ */
 export abstract class MailTransport {
   abstract sendMail(mail: MessageOptions): Promise<SentMessage>;
 }
 
-// TODO: Document
+/**
+ * Transport that consumes messages without sending
+ */
 export class NullTransport extends MailTransport {
   async sendMail(mail: MessageOptions): Promise<SentMessage> {
     return {};
