@@ -1,10 +1,10 @@
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 
 import { InjectableFactory } from '@travetto/di';
-import { PrincipalProvider, Identity } from '@travetto/auth';
-import { IdentityProvider } from '@travetto/auth-rest';
+import { PrincipalSource, Identity } from '@travetto/auth';
+import { IdentitySource } from '@travetto/auth-rest';
 
-import { PassportIdentityProvider } from '../../';
+import { PassportIdentitySource } from '../../';
 
 export class FbUser {
   username: string;
@@ -15,8 +15,8 @@ export const FB_AUTH = Symbol('facebook');
 
 export class AppConfig {
   @InjectableFactory(FB_AUTH)
-  static facebookPassport(): IdentityProvider {
-    return new PassportIdentityProvider('facebook',
+  static facebookPassport(): IdentitySource {
+    return new PassportIdentitySource('facebook',
       new FacebookStrategy(
         {
           clientID: '<appId>',
@@ -36,8 +36,8 @@ export class AppConfig {
   }
 
   @InjectableFactory()
-  static principalProvider(): PrincipalProvider {
-    return new class extends PrincipalProvider {
+  static principalSource(): PrincipalSource {
+    return new class extends PrincipalSource {
       async resolvePrincipal(ident: Identity) {
         return ident;
       }

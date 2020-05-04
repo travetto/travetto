@@ -37,11 +37,11 @@ Overall, the structure is simple, but drives home the primary use cases of the f
 * To have access to the raw identity
 
 ## Customization
-By default, the module does not provide an implementation for the [`PrincipalProvider`](./src/principal.ts). By default the structure of the provider can be boiled down to:
+By default, the module does not provide an implementation for the [`PrincipalSource`](./src/principal.ts). By default the structure of the provider can be boiled down to:
 
-**Code: Principal Provider**
+**Code: Principal Source**
 ```typescript
-export abstract class PrincipalProvider {
+export abstract class PrincipalSource {
   get autoCreate() { return false; }
   createPrincipal?(principal: Principal): Promise<Principal>;
   abstract resolvePrincipal(ident: Identity): Promise<Principal>;

@@ -22,11 +22,11 @@ export interface Principal {
 }
 
 /**
- * A principal that has been authenticated by a provider
+ * A principal that has been authenticated by an identity source
  */
 export interface Identity extends Principal {
   /**
    * The source of the identity verification
    */
-  provider: string;
+  source: string;
 }

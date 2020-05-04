@@ -4,7 +4,7 @@ import { Injectable } from '@travetto/di';
 import { AppError } from '@travetto/base';
 
 /**
- * Async context provider using `asyncHooks`
+ * Async context using `asyncHooks`
  */
 @Injectable()
 export class AsyncContext {

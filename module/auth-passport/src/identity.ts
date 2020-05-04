@@ -2,16 +2,16 @@ import * as passport from 'passport';
 
 import { Identity } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
-import { IdentityProvider } from '@travetto/auth-rest';
+import { IdentitySource } from '@travetto/auth-rest';
 
 interface PassportAuthOptions {
   state?: ((req: Request) => any) | Record<string, any>;
 }
 
 /**
- * Identity provider via passport
+ * Identity source via passport
  */
-export class PassportIdentityProvider<U> extends IdentityProvider {
+export class PassportIdentitySource<U> extends IdentitySource {
 
   /**
    * Process request read state from query
@@ -44,7 +44,7 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
   session = false;
 
   /**
-   * Creating a new PassportIdentityProvider
+   * Creating a new PassportIdentitySource
    *
    * @param strategyName Name of passport strategy
    * @param strategy  A passport strategy
@@ -54,7 +54,7 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
   constructor(
     private strategyName: string,
     private strategy: passport.Strategy,
-    private toIdentity: (user: U) => Pick<Identity, 'id' | 'permissions' | 'details'> & { provider?: string },
+    private toIdentity: (user: U) => Pick<Identity, 'id' | 'permissions' | 'details'> & { source?: string },
     private passportAuthenticateOptions: passport.AuthenticateOptions = {},
     private extraOptions: PassportAuthOptions = {}
   ) {
@@ -69,13 +69,13 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
     return new Promise<Identity | undefined>((resolve, reject) => {
 
       // Get the login context
-      req.loginContext = PassportIdentityProvider.processLoginContext(req);
+      req.loginContext = PassportIdentitySource.processLoginContext(req);
 
       const filter = passport.authenticate(this.strategyName,
         {
           session: this.session,
           ...this.passportAuthenticateOptions,
-          ...PassportIdentityProvider.processExtraOptions(req, this.extraOptions)
+          ...PassportIdentitySource.processExtraOptions(req, this.extraOptions)
         },
         (err, u) => this.authHandler(err, u).then(resolve, reject));
 
@@ -91,15 +91,15 @@ export class PassportIdentityProvider<U> extends IdentityProvider {
       throw err;
     } else {
       // Remove profile fields from passport
-      const du = user as U & { _json: any, _raw: any, provider: any };
+      const du = user as U & { _json: any, _raw: any, source: any };
       delete du._json;
       delete du._raw;
-      delete du.provider;
+      delete du.source;
 
       const ident = this.toIdentity(user);
 
-      if (!ident.provider) {
-        ident.provider = this.strategyName;
+      if (!ident.source) {
+        ident.source = this.strategyName;
       }
       return ident as Identity;
     }

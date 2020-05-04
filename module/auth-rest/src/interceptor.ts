@@ -34,8 +34,8 @@ export class AuthInterceptor extends RestInterceptor {
 
   async configure(req: Request, res: Response) {
     req.logout = async function () { delete this.auth.principal; };
-    req.login = async (providers: symbol[]) => {
-      const ctx = await this.service.login(req, res, providers);
+    req.login = async (sources: symbol[]) => {
+      const ctx = await this.service.login(req, res, sources);
       if (ctx) {
         this.context.set(ctx, req);
       }

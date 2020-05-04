@@ -1,5 +1,5 @@
-import { PrincipalProvider, Identity } from '@travetto/auth';
-import { IdentityProvider } from '@travetto/auth-rest';
+import { PrincipalSource, Identity } from '@travetto/auth';
+import { IdentitySource } from '@travetto/auth-rest';
 import { InjectableFactory } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { AppError } from '@travetto/base';
@@ -8,8 +8,8 @@ export const BASIC = Symbol('BASIC');
 
 class AuthConfig {
   @InjectableFactory()
-  static getPrincipalProvider(): PrincipalProvider { // Simply mirrors the identity back as the principal
-    return new class extends PrincipalProvider {
+  static getPrincipalSource(): PrincipalSource { // Simply mirrors the identity back as the principal
+    return new class extends PrincipalSource {
       async resolvePrincipal(ident: Identity) {
         return ident;
       }
@@ -17,8 +17,8 @@ class AuthConfig {
   }
 
   @InjectableFactory(BASIC)
-  static getIdentityProvider(): IdentityProvider {
-    return new class extends IdentityProvider {
+  static getIdentitySource(): IdentitySource {
+    return new class extends IdentitySource {
       async authenticate(req: Request, res: Response) {
         const obj = req.body && req.body.username ? req.body : req.params;
 
@@ -27,7 +27,7 @@ class AuthConfig {
             id: obj.username,
             permissions: [],
             details: {},
-            provider: 'insecure'
+            source: 'insecure'
           } as Identity;
         } else {
           throw new AppError('Unknown user', 'authentication');

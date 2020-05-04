@@ -6,7 +6,7 @@ import { AuthContext } from './context';
 /**
  * Produces a principal from an identity
  */
-export abstract class PrincipalProvider {
+export abstract class PrincipalSource {
 
   /**
    * Optional ability to create a principal as opposed to just reading
