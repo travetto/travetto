@@ -1,23 +1,23 @@
 // @file-if @travetto/auth-rest
 import { Request, Response } from '@travetto/rest';
 import { ModelCore } from '@travetto/model';
-import { IdentityProvider } from '@travetto/auth-rest';
+import { IdentitySource } from '@travetto/auth-rest';
 import { Identity } from '@travetto/auth';
 
-import { ModelPrincipalProvider } from '../principal';
+import { ModelPrincipalSource } from '../principal';
 
 /**
- * Provides an identity verification provider in conjunction with the
+ * Provides an identity verification source in conjunction with the
  * provided principal source.
  */
-export class ModelIdentityProvider<U extends ModelCore> extends IdentityProvider {
+export class ModelIdentitySource<U extends ModelCore> extends IdentitySource {
 
-  constructor(private provider: ModelPrincipalProvider<U>) {
+  constructor(private source: ModelPrincipalSource<U>) {
     super();
   }
 
   async authenticate(req: Request, res: Response): Promise<Identity | undefined> {
-    const ident = this.provider.toIdentity(req.body);
-    return this.provider.authenticate(ident.id!, ident.password!);
+    const ident = this.source.toIdentity(req.body);
+    return this.source.authenticate(ident.id!, ident.password!);
   }
 }

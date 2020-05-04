@@ -37,13 +37,13 @@ class User extends BaseModel implements RegisteredIdentity {
 Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogeonized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
 
 
-**Code: Principal Provider configuration**
+**Code: Principal Source configuration**
 ```typescript
 
 class AuthConfig {
   @InjectableFactory()
-  static getModelPrincipalProvider(): PrincipalProvider {
-    new ModelPrincipalProvider(
+  static getModelPrincipalSource(): PrincipalSource {
+    new ModelPrincipalSource(
       User,
       (u:User) => ({    // This converts User to a RegisteredIdentity
         provider: 'model',
@@ -76,7 +76,7 @@ class UserService {
   ...
 
   @Inject()
-  private auth: ModelPrincipalProvider<User>;
+  private auth: ModelPrincipalSource<User>;
 
   async authenticate(identity: RegisteredIdentity) {
     try {

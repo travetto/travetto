@@ -19,8 +19,8 @@ export class FbUser {
 
 export class AppConfig {
   @InjectableFactory(FB_AUTH)
-  static facebookPassport(): IdentityProvider {
-    return new PassportIdentityProvider('facebook',
+  static facebookPassport(): IdentitySource {
+    return new PassportIdentitySource('facebook',
       new FacebookStrategy(
         {
           clientID: '<clientId>',
@@ -41,7 +41,7 @@ export class AppConfig {
 }
 ```
 
-As you can see, ```PassportIdentityProvider``` will take care of the majority of the work, and all that is required is:
+As you can see, ```PassportIdentitySource``` will take care of the majority of the work, and all that is required is:
 * Provide the name of the strategy (should be unique)
 * Provide the strategy instance. **NOTE** you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework
 * The conversion functions which defines the mapping between external and local identities.

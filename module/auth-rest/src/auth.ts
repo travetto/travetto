@@ -2,9 +2,9 @@ import { AppError } from '@travetto/base';
 import { Request, Response } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { Class } from '@travetto/registry';
-import { PrincipalProvider } from '@travetto/auth';
+import { PrincipalSource } from '@travetto/auth';
 
-import { IdentityProvider } from './identity';
+import { IdentitySource } from './identity';
 import { AuthContext } from '@travetto/auth/src/context';
 
 /**
@@ -12,36 +12,36 @@ import { AuthContext } from '@travetto/auth/src/context';
  */
 @Injectable()
 export class AuthService {
-  identityProviders = new Map<string, IdentityProvider>();
+  identitySources = new Map<string, IdentitySource>();
 
   @Inject()
-  principalProvider: PrincipalProvider;
+  principalSource: PrincipalSource;
 
   async postConstruct() {
-    // Find all providers
-    for (const provider of DependencyRegistry.getCandidateTypes(IdentityProvider as Class<IdentityProvider>)) {
-      const dep = await DependencyRegistry.getInstance(IdentityProvider, provider.qualifier);
-      this.identityProviders.set(provider.qualifier.toString(), dep);
+    // Find all identity sources
+    for (const source of DependencyRegistry.getCandidateTypes(IdentitySource as Class<IdentitySource>)) {
+      const dep = await DependencyRegistry.getInstance(IdentitySource, source.qualifier);
+      this.identitySources.set(source.qualifier.toString(), dep);
     }
   }
 
   /**
    * Login user via the request. Supports multi-step login.
    *
-   * @param identityProviders List of valid identity providers
+   * @param identitySources List of valid identity sources
    */
-  async login(req: Request, res: Response, identityProviders: symbol[]): Promise<AuthContext | undefined> {
+  async login(req: Request, res: Response, identitySources: symbol[]): Promise<AuthContext | undefined> {
     let lastError: Error | undefined;
 
     /**
-     * Attempt to check login with multiple identity providers
+     * Attempt to check login with multiple identity sources
      */
-    for (const provider of identityProviders) {
+    for (const source of identitySources) {
       try {
-        const idp = this.identityProviders.get(provider.toString())!;
+        const idp = this.identitySources.get(source.toString())!;
         const ident = await idp.authenticate(req, res);
         if (ident) { // Multi-step login process
-          return await this.principalProvider.authorize(ident);
+          return await this.principalSource.authorize(ident);
         } else {
           return;
         }

@@ -66,8 +66,12 @@ export class ExecUtil {
       };
 
       if (!options.quiet) {
-        p.stdout!.on('data', (d: string) => stdout.push(Buffer.from(d)));
-        p.stderr!.on('data', (d: string) => stderr.push(Buffer.from(d)));
+        if (p.stdout) {
+          p.stdout!.on('data', (d: string) => stdout.push(Buffer.from(d)));
+        }
+        if (p.stderr) {
+          p.stderr!.on('data', (d: string) => stderr.push(Buffer.from(d)));
+        }
       }
 
       p.on('error', (err: Error) =>

@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { AppError } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 
-import { PrincipalProvider } from '../src/principal';
+import { PrincipalSource } from '../src/principal';
 import { Identity, Principal } from '../src/types';
 
 const USERS: Record<string, Principal> = {
@@ -14,7 +14,7 @@ const USERS: Record<string, Principal> = {
   }
 };
 
-class CustomPP extends PrincipalProvider {
+class CustomSource extends PrincipalSource {
   async resolvePrincipal(ident: Identity): Promise<Principal> {
     if (!(ident.id in USERS)) {
       throw new AppError('User is not found', 'notfound');
@@ -28,32 +28,32 @@ export class PrincipalTest {
 
   @Test()
   async verifyTypings() {
-    const principalProvider = new CustomPP();
-    await assert.rejects(() => principalProvider.authorize({
+    const source = new CustomSource();
+    await assert.rejects(() => source.authorize({
       id: 'b',
       details: {},
       permissions: ['1', '2'],
-      provider: 'none'
+      source: 'none'
     }));
 
-    await assert.doesNotReject(() => principalProvider.authorize({
+    await assert.doesNotReject(() => source.authorize({
       id: 'a',
       details: {},
       permissions: ['2', '3'],
-      provider: 'none'
+      source: 'none'
     }));
 
-    const ctx = await principalProvider.authorize({
+    const ctx = await source.authorize({
       id: 'a',
       details: {},
       permissions: [],
-      provider: 'none'
+      source: 'none'
     });
 
     assert(!!ctx.identity);
     assert(!!ctx.principal);
     assert(ctx.identity.id === ctx.principal.id);
-    assert(ctx.identity.provider === 'none');
+    assert(ctx.identity.source === 'none');
     assert(ctx.principal.permissions === ['1', '2', '3']);
   }
 }

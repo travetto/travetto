@@ -1,21 +1,21 @@
 import { AppError, Util } from '@travetto/base';
 import { Inject } from '@travetto/di';
 import { ModelService, Query, ModelCore } from '@travetto/model';
-import { AuthUtil, Principal, PrincipalProvider } from '@travetto/auth';
+import { AuthUtil, Principal, PrincipalSource } from '@travetto/auth';
 import { Class } from '@travetto/registry';
 
 import { RegisteredIdentity } from './identity';
 
 /**
- * A model-based principal provider
+ * A model-based principal source
  */
-export class ModelPrincipalProvider<T extends ModelCore> extends PrincipalProvider {
+export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
 
   @Inject()
   private modelService: ModelService;
 
   /**
-   * Build a Model Principal Provider
+   * Build a Model Principal Source
    *
    * @param cls Model class for the principal
    * @param toIdentity Convert a model to an identity

@@ -17,7 +17,7 @@ if (
     stdio: [0, 1, 2],
     shell: true,
     env: { NODE_PRESERVE_SYMLINKS: '1', TRV_DEV: '1', }
-  }).then(v => process.exit(v.code), err => process.exit(err.meta.code));
+  }).result.then(v => process.exit(v.code), err => process.exit(err.meta.code));
   return;
 }
 

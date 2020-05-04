@@ -39,11 +39,11 @@ This allows for any filters/middleware to access this information without deeper
 When authenticating, with a multi-step process, it is useful to share information between steps.  The `loginContext` property is intended to be a location in which that information is persisted. Currently only the [`Auth-Passport`](https://github.com/travetto/travetto/tree/master/module/auth-passport) module uses this, when dealing with multi-step logins.
 
 ## Patterns for Integration
-Every external framework integration relies upon the `IdentityProvider` contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
+Every external framework integration relies upon the `IdentitySource` contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
-**Code: Structure for the AuthProvider**
+**Code: Structure for the Identity Source**
 ```typescript
-export abstract class IdentityProvider {
+export abstract class IdentitySource {
   // Undefined allows for multi step identification
   abstract async authenticate(req: Request, res: Response): Promise<Identity | undefined>;
 }
@@ -56,9 +56,9 @@ The only required method to be defined is the `authenticate` method.  This takes
 
 A sample auth provider would look like:
 
-**Code: Sample Dummy Provider**
+**Code: Sample Identity Source**
 ```typescript
-class DumbProvider extends Identity<any> {
+class SimpleIdentitySource extends IdentitySource {
   async authenticate(req: Request, res: Response) {
     const { username, password } = req.body;
     if (username === 'test' && password === 'test') {
@@ -76,7 +76,7 @@ class DumbProvider extends Identity<any> {
 }
 ```
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered `IdentityProvider`s are collected and stored for reference at runtime, via symbol. For example:
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered `IdentitySource`s are collected and stored for reference at runtime, via symbol. For example:
 
 **Code: Potential Facebook provider**
 ```typescript
@@ -84,8 +84,8 @@ export const FB_AUTH = Symbol('facebook');
 
 export class AppConfig {
   @InjectableFactory(FB_AUTH)
-  static facebookProvider(): IdentityProvider<any> {
-    return new IdentityProvider(...);
+  static facebookIdentity(): IdentitySource<any> {
+    return new IdentitySource(...);
   }
 }
 ```

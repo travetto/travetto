@@ -5,9 +5,9 @@ import { Suite, Test } from '@travetto/test';
 import { Request, Response } from '@travetto/rest';
 import { Identity } from '@travetto/auth';
 
-import { IdentityProvider } from '../';
+import { IdentitySource } from '../';
 
-class DumbProvider extends IdentityProvider {
+class SimpleIdentitySource extends IdentitySource {
   toContext(user: { id: string, username: string }) {
     return {
       id: user.id,
@@ -19,7 +19,7 @@ class DumbProvider extends IdentityProvider {
     if (username === 'test' && password === 'test') {
       return {
         id: 'test',
-        provider: 'dummy',
+        source: 'dummy',
         permissions: [],
         details: {
           username: 'test'
@@ -32,10 +32,10 @@ class DumbProvider extends IdentityProvider {
 }
 
 @Suite()
-export class ProviderTest {
+export class IdentitySourceTest {
   @Test()
-  async validateProvider() {
-    const ctx = await new DumbProvider().authenticate({ body: { username: 'test', password: 'test' } } as any, undefined as any);
+  async validateIdentitySource() {
+    const ctx = await new SimpleIdentitySource().authenticate({ body: { username: 'test', password: 'test' } } as any, undefined as any);
     assert(ctx.id === 'test');
   }
 }
