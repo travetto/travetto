@@ -111,7 +111,7 @@ export class RegisterUtil {
         .replace(/^(.*\/@travetto)\/([^/]+)(\/[^@]*)?$/g, (all, pre, name, rest) => {
           if (!(name in this.devCache)) {
             const base = `${FsUtil.cwd}/node_modules/@travetto/${name}`;
-            this.devCache[name] = fs.existsSync(base) ? base : `${pre}/${name}`;
+            this.devCache[name] = FsUtil.existsSync(base) ? base : `${pre}/${name}`;
           }
           return `${this.devCache[name]}${rest ? `/${rest}` : ''}`;
         })

@@ -142,7 +142,7 @@ export class FilePresenceManager {
    * Add new folder to watch
    */
   addNewFolder(folder: string) {
-    if (!fs.existsSync(folder)) {
+    if (!FsUtil.existsSync(folder)) {
       console.warn(`Directory ${FsUtil.resolveUnix(FsUtil.cwd, folder)} missing, cannot watch`);
     } else {
       this.buildWatcher(FsUtil.joinUnix(this.cwd, folder), [{ testFile: x => this.validFile(x), testDir: x => this.validFile(x) }]);

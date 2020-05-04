@@ -65,7 +65,7 @@ export class FileCache {
    * Checks to see if a file has been loaded or if it's available on disk
    */
   hasEntry(full: string) {
-    return this.cache.has(full) || fs.existsSync(this.toEntryName(full));
+    return this.cache.has(full) || FsUtil.existsSync(this.toEntryName(full));
   }
 
   /**

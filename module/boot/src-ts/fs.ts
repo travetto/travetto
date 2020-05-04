@@ -67,6 +67,24 @@ export class FsUtil {
   }
 
   /**
+   * See if file exists
+   */
+  static existsSync(f: string) {
+    try {
+      return fs.statSync(f);
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * See if file exists
+   */
+  static exists(f: string) {
+    return fsStat(f).catch(() => undefined);
+  }
+
+  /**
    * Symlink, with some platform specific support
    */
   static makeLinkSync(actual: string, linkPath: string) {
