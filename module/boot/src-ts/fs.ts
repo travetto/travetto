@@ -1,18 +1,20 @@
 import * as fs from 'fs';
 import * as util from 'util';
 import * as path from 'path';
-import { execSync, exec } from 'child_process';
+import { ExecUtil } from './exec';
 
 const fsStat = util.promisify(fs.stat);
 const fsMkdir = util.promisify(fs.mkdir);
-const execProm = util.promisify(exec);
+const sym = Symbol('blah');
 
-function execCmd(sync: false, cmd: string, ignoreErrors?: boolean): Promise<{ stdout: string, stderr: string }>;
-function execCmd(sync: true, cmd: string, ignoreErrors?: boolean): Buffer;
-function execCmd(sync: boolean, cmd: string, ignoreErrors = false) {
+type ExecResult = ReturnType<(typeof ExecUtil)['spawn']>['result'] & { [sym]?: undefined };
+
+function execCmd(sync: false, [cmd, args]: [string, string[]], ignoreErrors?: boolean): ExecResult;
+function execCmd(sync: true, [cmd, args]: [string, string[]], ignoreErrors?: boolean): string;
+function execCmd(sync: boolean, [cmd, args]: [string, string[]], ignoreErrors = false): string | undefined | ExecResult {
   try {
-    const ret = sync ? execSync(cmd) : execProm(cmd);
-    return 'then' in ret && ignoreErrors ? ret.catch(e => { }) : ret;
+    const ret = sync ? ExecUtil.execSync(`${cmd} ${args.join(' ')}`) : ExecUtil.spawn(cmd, args).result;
+    return typeof ret !== 'string' && ignoreErrors ? ret.catch(e => e.meta as ExecResult) : ret;
   } catch (e) {
     if (!ignoreErrors) {
       throw e;
@@ -104,25 +106,25 @@ export class FsUtil {
   /**
    * Command to remove a folder
    */
-  static unlinkCommand(pth: string) {
+  static unlinkCommand(pth: string): [string, string[]] {
     if (!pth || pth === '/') {
       throw new Error('Path has not been defined');
     }
     if (process.platform === 'win32') {
-      return `rmdir /Q /S ${this.toNative(pth)}`;
+      return ['rmdir', ['/Q', '/S', this.toNative(pth)]];
     } else {
-      return `rm -rf ${pth}`;
+      return ['rm', ['-rf', pth]];
     }
   }
 
   /**
    * Command to copy a folder
    */
-  static copyCommand(src: string, dest: string) {
+  static copyCommand(src: string, dest: string): [string, string[]] {
     if (process.platform === 'win32') {
-      return `xcopy /y /h /s ${this.toNative(src)} ${this.toNative(dest)}`;
+      return ['xcopy', ['/y', '/h', '/s', this.toNative(src), this.toNative(dest)]];
     } else {
-      return `cp -r -p ${src} ${dest}`;
+      return ['cp', ['-r', '-p', src, dest]];
     }
   }
 

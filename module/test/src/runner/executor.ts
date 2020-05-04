@@ -76,7 +76,7 @@ export class TestExecutor {
       }
 
       // If error isn't defined, we are good
-      if (err.message === MISSING_ERROR) {
+      if (!err || err.message === MISSING_ERROR) {
         result.status = 'passed';
       } else {
         result.status = 'failed';

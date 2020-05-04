@@ -16,8 +16,9 @@ if (
   ExecUtil.fork(process.argv[1], process.argv.slice(2), {
     stdio: [0, 1, 2],
     shell: true,
+    exitOnComplete: true,
     env: { NODE_PRESERVE_SYMLINKS: '1', TRV_DEV: '1', }
-  }).result.then(v => process.exit(v.code), err => process.exit(err.meta.code));
+  });
   return;
 }
 
