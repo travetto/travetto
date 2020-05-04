@@ -5,7 +5,7 @@ import { ValidatorFn } from '../validate/types';
 
 /** @augments trv/schema/Schema */
 // TODO: Document
-export function Schema(auto: boolean = true): ClassDecorator { // Auto is used during compilation
+export function Schema(): ClassDecorator { // Auto is used during compilation
   return (<T>(target: Class<T>): Class<T> => {
     SchemaRegistry.getOrCreatePending(target);
     return target;

@@ -4,11 +4,9 @@ import {
   TransformUtil, TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, res
 } from '@travetto/compiler/src/transform-support';
 
-const inAuto = Symbol('inAuto');
 const hasSchema = Symbol('hasSchema');
 
 interface AutoState {
-  [inAuto]?: boolean;
   [hasSchema]?: boolean;
 }
 
@@ -96,21 +94,7 @@ export class SchemaTransformer {
 
   @OnClass('trv/schema/Schema')
   static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta) {
-    if (!dec) {
-      return node;
-    }
-
-    const schema = state.findDecorator(node, 'trv/schema/Schema', 'Schema', SCHEMA_MOD);
-    let auto = true;
-
-    state[hasSchema] = !!dec;
-
-    if (schema) { // Handle schema specific
-      const arg = TransformUtil.getPrimaryArgument<ts.LiteralExpression>(schema);
-      auto = (!arg || arg.kind !== ts.SyntaxKind.FalseKeyword);
-    }
-
-    state[inAuto] = auto;
+    state[hasSchema] = true;
     return node;
   }
 
@@ -131,7 +115,6 @@ export class SchemaTransformer {
     }
 
     delete state[hasSchema];
-    delete state[inAuto];
 
     return ts.updateClassDeclaration(
       node,
@@ -146,12 +129,9 @@ export class SchemaTransformer {
 
   @OnProperty()
   static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
-    if (state[inAuto]) {
-      const ignore = state.findDecorator(node, 'trv/schema/Ignore', 'Ignore', FIELD_MOD);
-      if (!ignore) {
-        return this.computeProperty(state, node);
-      }
-    }
-    return node;
+    const ignore = state.findDecorator(node, 'trv/schema/Ignore', 'Ignore', FIELD_MOD);
+    const isPublic = !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier); // eslint-disable-line no-bitwise
+    return state[hasSchema] && !ignore && isPublic ?
+      this.computeProperty(state, node) : node;
   }
 }
