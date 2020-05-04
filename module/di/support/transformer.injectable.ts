@@ -6,9 +6,14 @@ import {
 
 const INJECTABLE_MOD = require.resolve('../src/decorator');
 
-// TODO: Document
+/**
+ * Injectable/Injection transformer
+ */
 export class InjectableTransformer {
 
+  /**
+   * Handle a specific declaration param/property
+   */
   static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
     const existing = state.findDecorator(param, 'trv/di/Inject', 'Inject', INJECTABLE_MOD);
 
@@ -45,6 +50,9 @@ export class InjectableTransformer {
     });
   }
 
+  /**
+   * Mark class as Injectable
+   */
   @OnClass('trv/di/Injectable')
   static handleClass(state: TransformerState, node: ts.ClassDeclaration) {
     const cons = node.members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
@@ -82,6 +90,9 @@ export class InjectableTransformer {
     );
   }
 
+  /**
+   * Handle Inject annotations for fields/args
+   */
   @OnProperty('trv/di/Inject')
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration, dm?: DecoratorMeta) {
     const decl = state.findDecorator(node, 'trv/di/Inject', 'Inject', INJECTABLE_MOD);
@@ -100,6 +111,9 @@ export class InjectableTransformer {
     );
   }
 
+  /**
+   * Handle InjectableFactory creation
+   */
   @OnStaticMethod('trv/di/InjectableFactory')
   static handleFactory(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
     if (!dm?.dec) {

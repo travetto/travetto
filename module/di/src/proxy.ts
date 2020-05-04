@@ -1,5 +1,6 @@
-// ignoring typing constraints on proxyhandler requiring an object
-// TODO: Document
+/**
+ * Handler for for proxying modules while watching
+ */
 export class RetargettingHandler<T extends any> implements ProxyHandler<any> {
   constructor(public target: T) { }
 

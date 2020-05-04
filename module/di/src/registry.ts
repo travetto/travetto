@@ -33,7 +33,9 @@ function mergeWithOriginal<T extends { original?: symbol | object, qualifier?: s
   return o;
 }
 
-// TODO: Document
+/**
+ * Dependency registry
+ */
 export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   private pendingFinalize: Class[] = [];
 
@@ -52,7 +54,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     super(RootRegistry);
   }
 
-  resolveTargetToClass<T>(target: ClassTarget<T>, qualifier: symbol): InjectableConfig<any> {
+  /**
+   * Convert target to actual injectable config
+   */
+  private resolveTargetToClass<T>(target: ClassTarget<T>, qualifier: symbol): InjectableConfig<any> {
     const targetId = target.__id;
 
     const qualifiers = this.targetToClass.get(targetId);
@@ -65,37 +70,16 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return this.get(clz);
   }
 
-  resolveClassId<T>(target: ClassTarget<T>, qualifier: symbol): string {
+  private resolveClassId<T>(target: ClassTarget<T>, qualifier: symbol): string {
     const managed = this.resolveTargetToClass(target, qualifier);
     return (managed.factory ? managed.target : managed.class).__id;
   }
 
-  async initialInstall() {
-    const finalizing = this.pendingFinalize;
-    this.pendingFinalize = [];
 
-    for (const cls of finalizing) {
-      this.install(cls, { type: 'added', curr: cls });
-    }
-  }
-
-  createPending(cls: Class) {
-    if (!this.resolved) {
-      this.pendingFinalize.push(cls);
-    }
-
-    return {
-      qualifier: DEFAULT_INSTANCE,
-      class: cls,
-      target: cls,
-      dependencies: {
-        fields: {},
-        cons: []
-      }
-    };
-  }
-
-  async fetchDependencies(managed: InjectableConfig<any>, deps?: Dependency<any>[]) {
+  /**
+   * Retrieve all dependencies
+   */
+  private async fetchDependencies(managed: InjectableConfig<any>, deps?: Dependency<any>[]) {
     if (!deps || !deps.length) {
       return [];
     }
@@ -131,7 +115,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return await Promise.all(promises);
   }
 
-  async resolveFieldDependencies<T>(keys: string[], config: InjectableConfig<T>, instance: T) {
+  /**
+   * Resolve all field dependencies
+   */
+  private async resolveFieldDependencies<T>(keys: string[], config: InjectableConfig<T>, instance: T) {
     // And auto-wire
     if (keys.length) {
       const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]));
@@ -141,7 +128,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
   }
 
-  async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
+  /**
+   * Actually construct an instance while resolving the dependencies
+   */
+  private async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
     const managed = this.resolveTargetToClass(target, qualifier);
 
     // Only fetch constructor values
@@ -177,7 +167,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return inst;
   }
 
-  async createInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE) {
+  /**
+   * Create the instance and handle proxying during watch
+   */
+  private async createInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE) {
     const classId = this.resolveClassId(target, qualifier);
 
     if (!this.instances.has(classId)) {
@@ -227,6 +220,41 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.instances.get(classId)!.set(qualifier, out);
   }
 
+  /**
+   * Handle initial installation for the entire registry
+   */
+  async initialInstall() {
+    const finalizing = this.pendingFinalize;
+    this.pendingFinalize = [];
+
+    for (const cls of finalizing) {
+      this.install(cls, { type: 'added', curr: cls });
+    }
+  }
+
+  /**
+   * Register a cls as pending
+   */
+  createPending(cls: Class) {
+    if (!this.resolved) {
+      this.pendingFinalize.push(cls);
+    }
+
+    return {
+      qualifier: DEFAULT_INSTANCE,
+      class: cls,
+      target: cls,
+      dependencies: {
+        fields: {},
+        cons: []
+      }
+    };
+  }
+
+
+  /**
+   * Get an instance by type and qualifier
+   */
   async getInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
     this.verifyInitialized();
 
@@ -238,6 +266,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return this.instances.get(classId)!.get(qualifier)!;
   }
 
+  /**
+   * Get all available candidate types for the target
+   */
   getCandidateTypes<T>(target: Class<T>) {
     const targetId = target.__id;
     const qualifiers = this.targetToClass.get(targetId)!;
@@ -245,7 +276,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return uniqueQualifiers.map(id => this.get(id)! as InjectableConfig<T>);
   }
 
-  // Undefined indicates no constructor
+  /**
+   * Register a constructor with dependencies
+   */
   registerConstructor<T>(cls: Class<T>, dependencies?: Dependency<any>[]) {
     const conf = this.getOrCreatePending(cls);
     conf.dependencies!.cons = dependencies;
@@ -256,6 +289,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
   }
 
+  /**
+   * Register a property as a dependency
+   */
   registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency<any>) {
     const conf = this.getOrCreatePending(cls);
 
@@ -263,7 +299,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     dependency.qualifier = dependency.qualifier ?? DEFAULT_INSTANCE;
   }
 
-  /**  Last one to register wins */
+  /**
+   * Register a class
+   *
+   * Last one to register wins
+   */
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
     const config = this.getOrCreatePending(pconfig.class!);
 
@@ -283,6 +323,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
   }
 
+  /**
+   * Register a factory configuration
+   */
   registerFactory(config: InjectableFactoryConfig<any> & { fn: (...args: any[]) => any, id: string }) {
     const finalConfig: InjectableConfig<any> = {} as any;
 
@@ -315,6 +358,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.factories.get(config.src.__id)!.set(cls, finalConfig);
   }
 
+  /**
+   * On Install event
+   */
   onInstall<T>(cls: Class<T>, e: ChangeEvent<Class<T>>) {
     super.onInstall(cls, e);
 
@@ -326,6 +372,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
   }
 
+  /**
+   * Handle installing a class
+   */
   onInstallFinalize<T>(cls: Class<T>) {
     const classId = cls.__id;
 
@@ -395,6 +444,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return config;
   }
 
+  /**
+   * Handle uninstalling a class
+   */
   onUninstallFinalize(cls: Class) {
     const classId = cls.__id;
 
@@ -421,6 +473,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
   }
 
+  /**
+   * Reset registry
+   */
   onReset() {
     super.onReset();
     this.resolved = false;
