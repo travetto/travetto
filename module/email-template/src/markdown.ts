@@ -6,9 +6,14 @@ const allEntities = new htmlEntities.AllHtmlEntities();
 
 const LI_TOKEN = '⇜⇟⇝';
 
-// TODO: Document
+/**
+ * Markdown processing
+ */
 export class MarkdownUtil {
 
+  /**
+   * Get raw text from DOM node
+   */
   private static getRawText(node: parse5.Node) {
     let txt: string;
     if (Parse5Adapter.isTextNode(node)) {
@@ -19,6 +24,9 @@ export class MarkdownUtil {
     return txt;
   }
 
+  /**
+   * Convert to raw text
+   */
   private static getText(node: parse5.Node) {
     return this.getRawText(node).replace(/ +/g, ' ')
       .replace(/ +[\n]/g, '\n')
@@ -26,14 +34,23 @@ export class MarkdownUtil {
       .replace(/[\n\s]+$/, ' ');
   }
 
+  /**
+   * Get attribute as a number
+   */
   private static getIntAttr(attrs: Record<string, string>, name: string, def?: number): number {
     return (name in attrs ? parseInt(attrs[name], 10) : def) ?? 0;
   }
 
+  /**
+   * Get attribute as string
+   */
   private static getAttr(attrs: Record<string, string>, name: string) {
     return (attrs[name] ?? '').trim();
   }
 
+  /**
+   * Convert HTML to a markdown blob
+   */
   static async htmlToMarkdown(html: string) {
 
     // Cleanup html from templating

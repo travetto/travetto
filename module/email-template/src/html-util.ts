@@ -2,9 +2,14 @@ import { TreeAdapter, Node, serialize, DefaultTreeElement } from 'parse5';
 
 export const Parse5Adapter: TreeAdapter = require('parse5/lib/tree-adapters/default');
 
-// TODO: Document
+/**
+ * Utilities for visiting html trees
+ */
 export class HtmlUtil {
 
+  /**
+   * Visit the tree
+   */
   static visit<T>(root: Node, visitor: (node: Node, descend: () => void) => void) {
     function traverse(node: Node) {
       const children = Parse5Adapter.getChildNodes(node) ?? [];
@@ -17,6 +22,9 @@ export class HtmlUtil {
     traverse(root);
   }
 
+  /**
+   * Get hashmap of all attributes on the node
+   */
   static getAttrMap(el: Node) {
     const attrs = Parse5Adapter.getAttrList(el);
     if (!attrs) {
@@ -29,6 +37,9 @@ export class HtmlUtil {
     }
   }
 
+  /**
+   * Convert property map to html
+   */
   static toStr(o: string[] | Record<string, string>) {
     if (Array.isArray(o)) {
       return o.join(' ');
@@ -37,6 +48,9 @@ export class HtmlUtil {
     }
   }
 
+  /**
+   * Process all CSS classes
+   */
   static classes(...args: string[]) {
     return args.reduce((acc, v) => {
       if (v) {
@@ -46,6 +60,9 @@ export class HtmlUtil {
     }, [] as string[]).join(' ');
   }
 
+  /**
+   * Set DOM Attribute to value
+   */
   static setDomAttribute(node: Node, attrName: string, value: string) {
     let attrList = Parse5Adapter.getAttrList(node);
     if (!attrList) {
@@ -63,10 +80,16 @@ export class HtmlUtil {
     }
   }
 
+  /**
+   * Get inner content
+   */
   static getInner(node: Node) {
     return serialize(node);
   }
 
+  /**
+   * Get inner text
+   */
   static getInnerText(node: Node) {
     return serialize(node).replace(/<\/?[^>]+>/g, '');
   }

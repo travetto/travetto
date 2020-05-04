@@ -20,7 +20,6 @@ export function init() {
   });
 }
 
-// TODO: Document
 export function complete(c: CompletionConfig) {
   c.all.push('email-template');
 }
