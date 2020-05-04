@@ -18,7 +18,7 @@ export class AnnotationTransformer {
       const end = ts.getLineAndCharacterOfPosition(state.source, n.getEnd());
 
       dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
-        lines: TransformUtil.fromLiteral({ start: start.line + 1, end: end.line + 1 })
+        lines: { start: start.line + 1, end: end.line + 1 }
       })]);
     }
     return node;

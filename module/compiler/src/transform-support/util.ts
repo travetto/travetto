@@ -137,7 +137,7 @@ export class TransformUtil {
   /**
    * Extend object literal, whether JSON or ts.ObjectLiteralExpression
    */
-  static extendObjectLiteral(src: object | ts.ObjectLiteralExpression, ...rest: (object | ts.ObjectLiteralExpression)[]) {
+  static extendObjectLiteral(src: object | ts.Expression, ...rest: (object | ts.Expression)[]) {
     let ret = Util.isPlainObject(src) ? this.fromLiteral(src) : src;
     if (rest.length) {
       ret = ts.createObjectLiteral([

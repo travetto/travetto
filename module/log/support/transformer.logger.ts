@@ -12,6 +12,7 @@ export class LoggerTransformer {
       return node;
     }
     if (node.arguments.length) {
+      // Oay since we create the object ourselves
       const { level } = TransformUtil.toLiteral(node.arguments[0], false);
       if (Env.prod && (level === 'debug' || level === 'trace')) {
         return ts.createIdentifier('undefined'); // Lose the logging if in prod

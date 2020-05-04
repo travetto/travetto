@@ -18,18 +18,12 @@ export class RestTransformer {
 
     const pName = node.name.getText();
 
-    let decConfig: ParamConfig = { name: pName } as any;
+    const decConfig: ParamConfig = { name: pName } as any;
     let commentConfig: ParamDocumentation = {} as any;
 
-    const pDecArg = TransformUtil.getPrimaryArgument(pDec);
-    if (pDecArg) {
-      if (ts.isObjectLiteralExpression(pDecArg)) {
-        decConfig = { ...decConfig, ...TransformUtil.toLiteral(pDecArg), };
-      } else if (ts.isStringLiteral(pDecArg)) {
-        decConfig = { ...decConfig, name: TransformUtil.toLiteral(pDecArg) };
-      } else {
-        throw new Error('Only literal objects and or strings allows in parameter declarations');
-      }
+    let pDecArg = TransformUtil.getPrimaryArgument(pDec) as ts.Expression;
+    if (pDecArg && ts.isStringLiteral(pDecArg)) {
+      pDecArg = TransformUtil.fromLiteral({ name: pDecArg });
     }
 
     const decs = (node.decorators ?? []).filter(x => x !== pDec);
@@ -58,23 +52,20 @@ export class RestTransformer {
 
     const common: ParamConfig = {
       description: decConfig.name,
-      defaultValue: node.initializer && TransformUtil.toLiteral(node.initializer),
+      defaultValue: node.initializer,
       ...commentConfig,
       ...decConfig,
-      required: decConfig.required !== undefined ? decConfig.required : !(node.questionToken || node.initializer),
+      required: !(node.questionToken || node.initializer),
       type: type as any,
       ...(array ? { array: true } : {})
     };
 
+    const conf = TransformUtil.extendObjectLiteral(common, pDecArg);
+
     if (!pDec) { // Handle default
-      decs.push(state.createDecorator(PARAM_DEC_FILE, defaultType,
-        TransformUtil.fromLiteral(common))
-      );
+      decs.push(state.createDecorator(PARAM_DEC_FILE, defaultType, conf));
     } else if (ts.isCallExpression(pDec.expression)) {
-      pDec.expression.arguments = ts.createNodeArray([
-        TransformUtil.fromLiteral(common),
-        ...pDec.expression.arguments.slice(1)]
-      );
+      pDec.expression.arguments = ts.createNodeArray([conf, ...pDec.expression.arguments.slice(1)]);
       decs.push(pDec);
     }
 

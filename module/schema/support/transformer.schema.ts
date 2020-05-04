@@ -5,18 +5,25 @@ import {
 } from '@travetto/compiler/src/transform-support';
 
 const hasSchema = Symbol('hasSchema');
+const inSchema = Symbol('inSchema');
 
 interface AutoState {
   [hasSchema]?: boolean;
+  [inSchema]?: boolean;
 }
 
 const SCHEMA_MOD = require.resolve('../src/decorator/schema');
 const FIELD_MOD = require.resolve('../src/decorator/field');
 const COMMON_MOD = require.resolve('../src/decorator/common');
 
-// TODO: Document
+/**
+ * Processes `@Schema` to register class as a valid Schema
+ */
 export class SchemaTransformer {
 
+  /**
+   * Produce final type given transformer type
+   */
   static toFinalType(state: TransformerState, type: res.Type): ts.Expression {
     if (res.isExternalType(type)) {
       return state.getOrImport(type);
@@ -43,7 +50,9 @@ export class SchemaTransformer {
     return ts.createIdentifier('Object');
   }
 
-  // TODO: Full rewrite
+  /**
+   * Compute property information from declaration
+   */
   static computeProperty(state: AutoState & TransformerState, node: ts.PropertyDeclaration) {
 
     const typeExpr = state.resolveType(node);
@@ -92,12 +101,19 @@ export class SchemaTransformer {
     return result;
   }
 
+  /**
+   * Track schema on start
+   */
   @OnClass('trv/schema/Schema')
   static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta) {
-    state[hasSchema] = true;
+    state[inSchema] = true;
+    state[hasSchema] = !!state.findDecorator(node, 'trv/schema/Schema', 'Schema', SCHEMA_MOD);
     return node;
   }
 
+  /**
+   * Mark the end of the schema, document
+   */
   @AfterClass('trv/schema/Schema')
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators ?? [])];
@@ -127,6 +143,9 @@ export class SchemaTransformer {
     );
   }
 
+  /**
+   * Handle all properties, while in schema
+   */
   @OnProperty()
   static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
     const ignore = state.findDecorator(node, 'trv/schema/Ignore', 'Ignore', FIELD_MOD);
