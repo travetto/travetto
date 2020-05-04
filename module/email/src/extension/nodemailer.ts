@@ -4,7 +4,9 @@ import * as nodemailer from 'nodemailer';
 import { MessageOptions, SentMessage } from '../types';
 import { MailTransport } from '../transport';
 
-// TODO: Document
+/**
+ * Nodemailer transport, takes in a transport factory as the input
+ */
 export class NodemailerTransport extends MailTransport {
   private transport: nodemailer.Transporter;
 

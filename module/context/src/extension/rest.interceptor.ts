@@ -1,7 +1,7 @@
 // @file-if @travetto/rest
 import { GetCacheInterceptor, RestInterceptor, Request, Response, RouteConfig } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
-import { ConfigSource } from '@travetto/config';
+import { ConfigManager } from '@travetto/config';
 
 import { AsyncContext } from '../service';
 
@@ -17,7 +17,7 @@ export class AsyncContextInterceptor extends RestInterceptor {
   context: AsyncContext;
 
   public applies?(route: RouteConfig): boolean {
-    return !ConfigSource.get('rest.context').disabled;
+    return !ConfigManager.get('rest.context').disabled;
   }
 
   async intercept(req: Request, res: Response, next: () => Promise<void>) {

@@ -4,8 +4,10 @@ import { MessageOptions } from './types';
 import { MailTransport } from './transport';
 import { MailTemplateOptions, MailTemplateEngine } from './template';
 
+/**
+ * Email service for sending and templating emails
+ */
 @Injectable()
-// TODO: Document
 export class EmailService {
 
   constructor(
@@ -13,6 +15,9 @@ export class EmailService {
     private tplEngine?: MailTemplateEngine
   ) { }
 
+  /**
+   * Send a templated email to one or more mail contexts
+   */
   async sendTemplatedEmail(contexts: MailTemplateOptions | MailTemplateOptions[], base?: MailTemplateOptions) {
     if (!this.tplEngine) {
       throw new Error('Template engine has not been loaded, perhaps you should install @travetto/email-template');
@@ -56,6 +61,9 @@ export class EmailService {
     return Promise.all(promises);
   }
 
+  /**
+   * Send a single email message
+   */
   async sendEmail(options: MessageOptions) {
     return this.transport.sendMail(options);
   }
