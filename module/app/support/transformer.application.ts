@@ -14,7 +14,7 @@ export class ApplicationTransformer {
    */
   static computeParam(state: TransformerState, p: ts.ParameterDeclaration) {
     const name = p.name.getText();
-    const def = p.initializer ? TransformUtil.toLiteral(p.initializer) : undefined;
+    const def = p.initializer;
 
     let type = state.resolveType(p);
     let subtype;
@@ -43,9 +43,7 @@ export class ApplicationTransformer {
       type = { ctor: String, name: 'string' } as res.LiteralType;
     }
 
-    const ret = { name, type: type.name!, subtype, meta, optional: def !== undefined || type.undefinable || type.nullable, def };
-    console.log('Compute Param', ret);
-    return ret;
+    return { name, type: type.name!, subtype, meta, optional: !!def || type.undefinable || type.nullable, def };
   }
 
   /**
