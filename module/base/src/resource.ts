@@ -8,7 +8,6 @@ import { ScanFs, ScanEntry } from './scan-fs';
 
 import { AppError } from './error';
 
-const fsStat = util.promisify(fs.stat);
 const fsReadFile = util.promisify(fs.readFile);
 
 const cleanPath = (p: string) => p.charAt(0) === '/' ? p.substring(1) : p;
@@ -105,11 +104,10 @@ export class $ResourceManager {
     }
 
     for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
-      try {
-        await FsUtil.exists(f);
+      if (await FsUtil.exists(f)) {
         this.cache.set(pth, f);
         return f;
-      } catch { }
+      }
     }
 
     throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`, 'notfound');
