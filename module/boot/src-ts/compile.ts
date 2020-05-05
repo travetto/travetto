@@ -4,7 +4,7 @@ import * as Mod from 'module';
 import { FsUtil } from './fs';
 import { EnvUtil } from './env';
 import { TranspileUtil } from './transpile';
-import { FrameworkUtil } from './internal/framework';
+import { FrameworkUtil } from './framework';
 
 type Module = {
   loaded?: boolean;
@@ -25,7 +25,7 @@ declare const global: {
 /**
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
-export class RegisterUtil {
+export class CompileUtil {
   private static ogModuleLoad = Module._load!.bind(Module);
 
   /**
@@ -83,7 +83,7 @@ export class RegisterUtil {
   }
 
   /**
-   * Initialization
+   * Enable compile support
    */
   static init() {
     if (global.trvInit) {
@@ -107,7 +107,7 @@ export class RegisterUtil {
   }
 
   /**
-   * Turn of registration
+   * Turn off compile support
    */
   static reset() {
     if (!global.trvInit) {

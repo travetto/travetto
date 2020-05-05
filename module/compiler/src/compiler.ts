@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { FsUtil, AppCache, FileCache, RegisterUtil, TranspileUtil } from '@travetto/boot';
+import { FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil } from '@travetto/boot';
 import { Env, ScanApp } from '@travetto/base';
 
 import { Transpiler } from './transpiler';
@@ -88,7 +88,7 @@ class $Compiler extends EventEmitter {
    * Compile a file, follows the same shape as `Module._compile`
    */
   compile(m: NodeModule, tsf: string) {
-    return RegisterUtil.doCompile(m, this.transpiler.getTranspiled(tsf), tsf);
+    return CompileUtil.doCompile(m, this.transpiler.getTranspiled(tsf), tsf);
   }
 }
 

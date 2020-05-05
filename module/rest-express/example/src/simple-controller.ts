@@ -10,7 +10,7 @@ export class Simple {
   @Get('/name/:age')
   async doIt(@Path() age: number, @Query() page: number = 5): Promise<string> {
     const user = await this.service.fetch();
-    return `/simple/name => ${user.first.toLowerCase()} ${age + page}`;
+    return `/simple/names => ${user.first.toLowerCase()} ${age + page}`;
   }
 
   @CacheControl(1, 'd')
