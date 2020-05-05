@@ -6,7 +6,7 @@ import { RetargettingProxy } from '../proxy';
 /**
  * Wraps the Dependency Registry to support proxying instances
  */
-export function DiAdaptor($DependencyRegistry: { new(...args: any[]): typeof DependencyRegistry }) {
+export function DiAdaptor($DependencyRegistry: Class<typeof DependencyRegistry>) {
 
   const { DEFAULT_INSTANCE } = require('@travetto/di/src/registry');
 
@@ -19,7 +19,7 @@ export function DiAdaptor($DependencyRegistry: { new(...args: any[]): typeof Dep
     /**
      * Proxy the created instance
      */
-    protected proxyInstance<T>(target: ClassTarget<T>, qualifier: symbol, instance: T): RetargettingProxy<T> {
+    protected proxyInstance<T>(target: ClassTarget<T>, qualifier: symbol, instance: T): T {
       const classId = this.resolveClassId(target, qualifier);
       let proxy: RetargettingProxy<T>;
 
@@ -37,7 +37,7 @@ export function DiAdaptor($DependencyRegistry: { new(...args: any[]): typeof Dep
         console.trace('Updating target', target.__id, qualifier, instance);
       }
 
-      return proxy;
+      return proxy.get();
     }
 
     /**
@@ -48,8 +48,8 @@ export function DiAdaptor($DependencyRegistry: { new(...args: any[]): typeof Dep
       const classId = this.resolveClassId(target, qualifier);
       // Reset as proxy instance
       const proxied = this.proxyInstance(target, qualifier, instance);
-      this.instances.get(classId)!.set(qualifier, proxied.get());
-      return proxied.get();
+      this.instances.get(classId)!.set(qualifier, proxied);
+      return proxied;
     }
 
     /**
