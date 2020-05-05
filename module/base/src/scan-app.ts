@@ -31,7 +31,7 @@ export class ScanApp {
   /**
    * List of modules to not traverse into
    */
-  static modAppExclude: string[] = ['test', 'cli', 'boot'];
+  static modAppExclude: string[] = ['test', 'cli', 'boot', 'watch'];
 
   /**
    * Provides a RegEx compatible object that can scan for typescript files quickly

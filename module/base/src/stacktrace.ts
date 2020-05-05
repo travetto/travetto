@@ -17,6 +17,8 @@ export class StacktraceUtil {
    * Initialize
    */
   static initHandler() {
+    Error.stackTraceLimit = Env.trace ? 100 : 10;
+
     this.addStackFilters(
       __filename.replace(/\.js$/, ''),
       // 'timers.js',

@@ -4,9 +4,8 @@ import * as assert from 'assert';
 import { Test, Suite } from '@travetto/test';
 import { FsUtil } from '@travetto/boot';
 
-import { Env } from '../../base/src/env';
-import { ScanFs } from '../../base/src/scan-fs';
-import { Watcher } from '../src/watch/watcher';
+import { Env, ScanFs } from '@travetto/base';
+import { Watcher } from '../src/watcher';
 
 @Suite()
 export class WatchTest {
