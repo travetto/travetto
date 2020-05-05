@@ -2,7 +2,7 @@
 import * as Mod from 'module';
 import * as path from 'path';
 
-import { FsUtil } from '../fs';
+import { FsUtil } from './fs';
 
 type Module = {
   loaded?: boolean;
