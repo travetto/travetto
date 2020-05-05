@@ -3,7 +3,7 @@ import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 /**
  * Result of an execution
  */
-interface ExecutionResult {
+export interface ExecutionResult {
   /**
    * Exit code
    */
@@ -31,9 +31,17 @@ interface ExecutionResult {
 }
 
 /**
+ * Execution State
+ */
+export interface ExecutionState {
+  process: ChildProcess;
+  result: Promise<ExecutionResult>;
+}
+
+/**
  * Options for running executions
  */
-interface ExecutionOptions extends SpawnOptions {
+export interface ExecutionOptions extends SpawnOptions {
   /**
    * Built in timeout for any execution
    */
@@ -148,7 +156,7 @@ export class ExecUtil {
   /**
    * Run a command directly, as a stand alone operation
    */
-  static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}) {
+  static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
     const p = spawn(cmd, args, this.getOpts(options));
     const result = this.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
     return { process: p, result };
@@ -158,7 +166,7 @@ export class ExecUtil {
    * Run a command relative to the current node executable.  Mimics how node's
    * fork operation is just spawn with the command set to `process.argv0`
    */
-  static fork(cmd: string, args: string[] = [], options: ExecutionOptions = {}) {
+  static fork(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
     const p = spawn(process.argv0, [cmd, ...args], this.getOpts(options));
     const result = this.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
     return { process: p, result };

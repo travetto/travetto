@@ -1,10 +1,10 @@
 // @ts-ignore
 import * as Mod from 'module';
-import * as path from 'path';
 
 import { FsUtil } from './fs';
 import { EnvUtil } from './env';
 import { TranspileUtil } from './transpile';
+import { FrameworkUtil } from './internal/framework';
 
 type Module = {
   loaded?: boolean;
@@ -27,11 +27,6 @@ declare const global: {
  */
 export class RegisterUtil {
   private static ogModuleLoad = Module._load!.bind(Module);
-
-  private static readonly devCache = {
-    boot: path.resolve(__dirname, '..'),
-    [require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')).name.split('/')[1]]: FsUtil.cwd // Initial
-  };
 
   /**
    * The entrypoint for plugins and cli operations to ensure local framework development works
@@ -88,38 +83,6 @@ export class RegisterUtil {
   }
 
   /**
-   * Only called in Framework dev mode
-   * @param pth
-   */
-  static devResolve(pth: string, mod?: Module) {
-    if (mod) {
-      try {
-        pth = Module._resolveFilename!(pth, mod);
-      } catch{ }
-    }
-
-    if (/travetto[^/]*\/module\/[^/]+\/bin/.test(pth)) { // Convert bin from framework module
-      pth = `${FsUtil.cwd}/node_modules/@travetto/${pth.split(/\/module\//)[1]}`;
-    }
-
-    // If relative or framework
-    if (pth.includes('@travetto')) {
-      // Fetch current module's name
-      // Handle self references
-      pth = FsUtil.toUnix(pth)
-        .replace(/^(.*\/@travetto)\/([^/]+)(\/[^@]*)?$/g, (all, pre, name, rest) => {
-          if (!(name in this.devCache)) {
-            const base = `${FsUtil.cwd}/node_modules/@travetto/${name}`;
-            this.devCache[name] = FsUtil.existsSync(base) ? base : `${pre}/${name}`;
-          }
-          return `${this.devCache[name]}${rest ? `/${rest}` : ''}`;
-        })
-        .replace(/\/\/+/g, '/'); // De-dupe
-    }
-    return pth;
-  }
-
-  /**
    * Initialization
    */
   static init() {
@@ -135,9 +98,9 @@ export class RegisterUtil {
       Module._load = this.onModuleLoad.bind(this);
       require.extensions[TranspileUtil.ext] = this.compile.bind(this);
     } else {
-      this.libRequire = x => require(this.devResolve(x));
-      Module._load = (req, p) => this.onModuleLoad(this.devResolve(req, p), p);
-      require.extensions[TranspileUtil.ext] = (m, tsf) => this.compile(m, this.devResolve(tsf));
+      this.libRequire = x => require(FrameworkUtil.devResolve(x));
+      Module._load = (req, p) => this.onModuleLoad(FrameworkUtil.devResolve(req, p), p);
+      require.extensions[TranspileUtil.ext] = (m, tsf) => this.compile(m, FrameworkUtil.devResolve(tsf));
     }
 
     global.trvInit = this;

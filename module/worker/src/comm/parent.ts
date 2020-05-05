@@ -1,10 +1,8 @@
 import { ChildProcess } from 'child_process';
-import { ExecUtil } from '@travetto/boot';
+import { ExecutionState } from '@travetto/boot';
 
 import { ProcessCommChannel } from './channel';
 import { CommUtil } from './util';
-
-type ExecutionState = ReturnType<(typeof ExecUtil)['spawn']>;
 
 // TODO: Document
 export class ParentCommChannel<U = any> extends ProcessCommChannel<ChildProcess, U> {

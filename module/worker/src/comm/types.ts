@@ -1,6 +1,5 @@
-import { ExecUtil } from '@travetto/boot';
+import { ExecutionOptions } from '@travetto/boot';
 
-type ExecutionOptions = ReturnType<(typeof ExecUtil)['getOpts']>;
 
 // TODO: Document
 export interface ChildOptions extends ExecutionOptions {
