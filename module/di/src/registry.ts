@@ -1,6 +1,5 @@
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
-import { Env, Util } from '@travetto/base';
-import { RetargettingHandler } from './proxy';
+import { Util } from '@travetto/base';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
@@ -13,8 +12,6 @@ export interface ManagedExtra {
 
 type TargetId = string;
 type ClassId = string;
-
-type Proxy<T = any> = any;
 
 function getName(symbol: symbol) {
   return symbol.toString().split(/[()]/g)[1];
@@ -37,18 +34,15 @@ function mergeWithOriginal<T extends { original?: symbol | object, qualifier?: s
  * Dependency registry
  */
 export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
-  private pendingFinalize: Class[] = [];
+  protected pendingFinalize: Class[] = [];
 
-  private instances = new Map<TargetId, Map<symbol, any>>();
-  private instancePromises = new Map<TargetId, Map<symbol, Promise<any>>>();
+  protected instances = new Map<TargetId, Map<symbol, any>>();
+  protected instancePromises = new Map<TargetId, Map<symbol, Promise<any>>>();
 
-  private factories = new Map<TargetId, Map<Class, InjectableConfig>>();
+  protected factories = new Map<TargetId, Map<Class, InjectableConfig>>();
 
-  private targetToClass = new Map<TargetId, Map<symbol, string>>();
-  private classToTarget = new Map<ClassId, Map<symbol, TargetId>>();
-
-  private proxies = new Map<TargetId, Map<symbol, Proxy<RetargettingHandler<any>>>>();
-  private proxyHandlers = new Map<TargetId, Map<symbol, RetargettingHandler<any>>>();
+  protected targetToClass = new Map<TargetId, Map<symbol, string>>();
+  protected classToTarget = new Map<ClassId, Map<symbol, TargetId>>();
 
   constructor() {
     super(RootRegistry);
@@ -57,7 +51,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Convert target to actual injectable config
    */
-  private resolveTargetToClass<T>(target: ClassTarget<T>, qualifier: symbol): InjectableConfig<any> {
+  protected resolveTargetToClass<T>(target: ClassTarget<T>, qualifier: symbol): InjectableConfig<any> {
     const targetId = target.__id;
 
     const qualifiers = this.targetToClass.get(targetId);
@@ -70,16 +64,15 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return this.get(clz);
   }
 
-  private resolveClassId<T>(target: ClassTarget<T>, qualifier: symbol): string {
+  protected resolveClassId<T>(target: ClassTarget<T>, qualifier: symbol): string {
     const managed = this.resolveTargetToClass(target, qualifier);
     return (managed.factory ? managed.target : managed.class).__id;
   }
 
-
   /**
    * Retrieve all dependencies
    */
-  private async fetchDependencies(managed: InjectableConfig<any>, deps?: Dependency<any>[]) {
+  protected async fetchDependencies(managed: InjectableConfig<any>, deps?: Dependency<any>[]) {
     if (!deps || !deps.length) {
       return [];
     }
@@ -118,7 +111,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Resolve all field dependencies
    */
-  private async resolveFieldDependencies<T>(keys: string[], config: InjectableConfig<T>, instance: T) {
+  protected async resolveFieldDependencies<T>(keys: string[], config: InjectableConfig<T>, instance: T) {
     // And auto-wire
     if (keys.length) {
       const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]));
@@ -131,7 +124,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Actually construct an instance while resolving the dependencies
    */
-  private async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
+  protected async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
     const managed = this.resolveTargetToClass(target, qualifier);
 
     // Only fetch constructor values
@@ -168,9 +161,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   /**
-   * Create the instance and handle proxying during watch
+   * Create the instance
    */
-  private async createInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE) {
+  protected async createInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE) {
     const classId = this.resolveClassId(target, qualifier);
 
     if (!this.instances.has(classId)) {
@@ -186,38 +179,28 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.instancePromises.get(classId)!.set(qualifier, instancePromise);
 
     const instance = await instancePromise;
+    this.instances.get(classId)!.set(qualifier, instance);
 
-    if (Env.watch) {
-      if (!this.proxies.has(classId)) {
-        this.proxies.set(classId, new Map());
-        this.proxyHandlers.set(classId, new Map());
-      }
+    console.trace('Creating Instance', classId);
+
+    return instance;
+  }
+
+  /**
+   * Destroy an instance
+   */
+  protected destroyInstance(cls: Class, qualifier: symbol) {
+    const classId = cls.__id;
+
+    const activeInstance = this.instances.get(classId)!.get(qualifier);
+    if (activeInstance && activeInstance.preDestroy) {
+      activeInstance.preDestroy();
     }
 
-    let out: any = instance;
-
-    console.trace('Creating Instance', classId, Env.watch,
-      !this.proxyHandlers.has(classId),
-      this.proxyHandlers.has(classId) && !this.proxyHandlers.get(classId)!.has(qualifier));
-
-    // if in watch mode, create proxies
-    if (Env.watch) {
-      if (!this.proxies.get(classId)!.has(qualifier)) {
-        const handler = new RetargettingHandler(out);
-        const proxy = new Proxy({}, handler);
-        this.proxyHandlers.get(classId)!.set(qualifier, handler);
-        this.proxies.get(classId)!.set(qualifier, proxy);
-        out = proxy;
-        console.trace('Registering proxy', target.__id, qualifier);
-      } else {
-        const handler = this.proxyHandlers.get(classId)!.get(qualifier)!;
-        console.trace('Updating target', target.__id, qualifier, out);
-        handler.target = out;
-        out = this.proxies.get(classId)!.get(qualifier);
-      }
-    }
-
-    this.instances.get(classId)!.set(qualifier, out);
+    this.instances.get(classId)!.delete(qualifier);
+    this.instancePromises.get(classId)!.delete(qualifier);
+    this.classToTarget.get(cls.__id)!.delete(qualifier);
+    console.trace('On uninstall', cls.__id, qualifier, classId);
   }
 
   /**
@@ -431,16 +414,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.classToTarget.get(classId)!.set(qualifier, parentId);
     }
 
-    // If already loaded, reload
-    if (Env.watch &&
-      this.proxies.has(classId) &&
-      this.proxies.get(classId)!.has(config.qualifier)
-    ) {
-      console.debug('Reloading on next tick');
-      // Timing matters due to create instance being asynchronous
-      process.nextTick(() => this.createInstance(config.target, config.qualifier));
-    }
-
     return config;
   }
 
@@ -456,19 +429,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     if (this.instances.has(classId)) {
       for (const qualifier of this.classToTarget.get(classId)!.keys()) {
-        const activeInstance = this.instances.get(classId)!.get(qualifier);
-        if (activeInstance && activeInstance.preDestroy) {
-          activeInstance.preDestroy();
-        }
-
-        const handler = this.proxyHandlers.get(classId)!.get(qualifier);
-        if (handler) {
-          handler.target = null;
-        }
-        this.instances.get(classId)!.delete(qualifier);
-        this.instancePromises.get(classId)!.delete(qualifier);
-        console.trace('On uninstall', cls.__id, qualifier, classId, handler);
-        this.classToTarget.get(cls.__id)!.delete(qualifier);
+        this.destroyInstance(cls, qualifier);
       }
     }
   }
@@ -482,12 +443,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.pendingFinalize = [];
     this.instances.clear();
     this.instancePromises.clear();
-    this.proxies.clear();
-    this.proxyHandlers.clear();
     this.targetToClass.clear();
     this.classToTarget.clear();
     this.factories.clear();
   }
 }
 
-export const DependencyRegistry = new $DependencyRegistry();
+export const DependencyRegistry = new /* WATCH */$DependencyRegistry/* WATCH */();

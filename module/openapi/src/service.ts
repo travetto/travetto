@@ -34,13 +34,9 @@ export class OpenApiService {
 
   private spec: OpenAPIObject;
 
-  get generating() {
-    return Env.watch;
-  }
-
   async resetSpec() {
     delete this.spec;
-    if (this.generating) {
+    if (Env.watch) {
       await this.generate();
     }
   }
@@ -53,7 +49,7 @@ export class OpenApiService {
       this.apiHostConfig.servers = [{ url: this.restConfig.baseUrl }];
     }
 
-    if (this.generating) {
+    if (Env.watch) {
       if (!/[.](json|yaml)$/.test(this.apiSpecConfig.output)) {
         this.apiSpecConfig.output = FsUtil.resolveUnix(this.apiSpecConfig.output, 'api.spec.yaml');
       }

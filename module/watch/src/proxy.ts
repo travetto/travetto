@@ -63,3 +63,29 @@ export class RetargettingHandler<T extends any> implements ProxyHandler<any> {
     return Object.defineProperty(this.target, p, attributes);
   }
 }
+
+interface Proxy<T> { }
+
+/**
+ * Generate Retargetting Proxy
+ */
+export class RetargettingProxy<T> {
+  private handler: RetargettingHandler<T>;
+  private instance: Proxy<T>;
+  constructor(initial: T) {
+    this.handler = new RetargettingHandler(initial);
+    this.instance = new Proxy({}, this.handler);
+  }
+  setTarget(next: T) {
+    this.handler.target = next;
+  }
+
+  getTarget(): T {
+    return this.handler.target;
+  }
+
+  get(): T {
+    return this.instance as T;
+  }
+}
+

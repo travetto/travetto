@@ -1,11 +1,9 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
-import { FsUtil } from '@travetto/boot/src/fs';
 
-import { Env } from '../env';
-import { ScanEntry, ScanHandler, ScanFs } from '../scan-fs';
-
-import { SystemUtil } from '../internal/system';
+import { FsUtil } from '@travetto/boot';
+import { Env, ScanEntry, ScanHandler, ScanFs } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 /**
  * Watch Options

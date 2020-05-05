@@ -1,5 +1,5 @@
 import { Env, AppInfo } from '@travetto/base';
-import { ConfigSource } from '@travetto/config';
+import { ConfigManager } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 
 import { ApplicationConfig } from './types';
@@ -38,7 +38,7 @@ export class $ApplicationRegistry {
       console.log('Configured', {
         app: AppInfo,
         env: Env.toJSON(),
-        config: Env.prod ? ConfigSource.getSecure() : ConfigSource.get()
+        config: Env.prod ? ConfigManager.getSecure() : ConfigManager.get()
       });
     }
 

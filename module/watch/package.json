@@ -9,7 +9,11 @@
   "dependencies": {
     "@travetto/base": "^1.0.0-beta.1"
   },
-  "description": "U.",
+  "devDependencies": {
+    "@travetto/compiler": "^1.0.0-beta.1",
+    "@travetto/di": "^1.0.0-beta.1"
+  },
+  "description": "Support for making files watchable during runtime",
   "homepage": "https://travetto.io",
   "keywords": [
     "file-watching",
@@ -20,8 +24,7 @@
   "main": "index.ts",
   "files": [
     "index.ts",
-    "src",
-    "support"
+    "src"
   ],
   "name": "@travetto/watch",
   "repository": {

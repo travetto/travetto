@@ -1,12 +1,10 @@
 import * as path from 'path';
 
 import { FsUtil } from '@travetto/boot';
+import { ScanApp, ScanEntry, ScanHandler } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { Watcher } from './watcher';
-import { ScanEntry, ScanHandler } from '../scan-fs';
-import { Env } from '../env';
-import { ScanApp } from '../scan-app';
-import { SystemUtil } from '../internal/system';
 
 export interface PresenceListener {
   added(name: string): void;
@@ -24,7 +22,6 @@ export class FilePresenceManager {
   private rootPaths: string[] = [];
   private listener: PresenceListener;
   private excludeFiles: RegExp[] = [];
-  private watch: boolean = Env.watch;
 
   private fileWatchers: Record<string, Watcher> = {};
   private files = new Map<string, { version: number }>();
@@ -44,7 +41,6 @@ export class FilePresenceManager {
       listener: FilePresenceManager['listener'];
       excludeFiles?: FilePresenceManager['excludeFiles'];
       initialFileValidator?: FilePresenceManager['initialFileValidator'];
-      watch?: FilePresenceManager['watch'];
     }
   ) {
     for (const k of Object.keys(config) as (keyof FilePresenceManager)[]) {
@@ -132,9 +128,7 @@ export class FilePresenceManager {
       this.files.set(fileName, { version: 0 });
     }
 
-    if (this.watch) { // Start watching after startup
-      setTimeout(() => this.watchSpaces.forEach(p => this.addNewFolder(p)), 50); // FIXME: 1000 og
-    }
+    setTimeout(() => this.watchSpaces.forEach(p => this.addNewFolder(p)), 50); // FIXME: 1000 og
   }
 
   /**
@@ -180,7 +174,7 @@ export class FilePresenceManager {
 
     this.seen.add(name);
 
-    if (this.watch && this.validFile(name)) {
+    if (this.validFile(name)) {
       // Already known to be a used file, just don't watch node modules
       const topLevel = path.dirname(name);
       if (!this.fileWatchers[topLevel]) {
@@ -200,10 +194,8 @@ export class FilePresenceManager {
    * Reset manager, freeing all watchers
    */
   reset() {
-    if (this.watch) {
-      Object.values(this.fileWatchers).map(x => x.close());
-      this.fileWatchers = {};
-    }
+    Object.values(this.fileWatchers).map(x => x.close());
+    this.fileWatchers = {};
     this.seen.clear();
     this.files.clear();
   }
@@ -211,7 +203,7 @@ export class FilePresenceManager {
   /**
    * Has this file been watched before
    */
-  isWatchedFileKnown(name: string) {
-    return this.watch && this.files.get(name)!.version > 0;
+  isKnown(name: string) {
+    return this.files.get(name)!.version > 0;
   }
 }

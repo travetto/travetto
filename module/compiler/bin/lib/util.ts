@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { ExecUtil } from '@travetto/boot';
 import { CliUtil } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
 
@@ -28,7 +29,7 @@ export class CompileUtil {
   static async compile(path: string) {
     //  Compile
     try {
-      await CliUtil.fork(`${__dirname}/../compile-target.js`, [], process.env);
+      await ExecUtil.fork(`${__dirname}/../compile-target.js`);
     } catch (err) {
       console.error(color`${{ failure: 'Failed' }} to compile to ${{ path }}`, err);
       process.exit(1);
