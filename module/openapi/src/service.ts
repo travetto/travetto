@@ -1,10 +1,7 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import * as util from 'util';
 import { OpenAPIObject } from 'openapi3-ts';
 
-import { FsUtil } from '@travetto/boot';
-import { Env } from '@travetto/base';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerRegistry, RestConfig } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
@@ -36,24 +33,17 @@ export class OpenApiService {
 
   async resetSpec() {
     delete this.spec;
-    if (Env.watch) {
+    if (this.apiSpecConfig.persist) {
       await this.generate();
     }
   }
 
   async postConstruct() {
-    ControllerRegistry.on(ev => this.resetSpec());
-    SchemaRegistry.on(ev => this.resetSpec());
+    ControllerRegistry.on(() => this.resetSpec());
+    SchemaRegistry.on(() => this.resetSpec());
 
     if (!this.apiHostConfig.servers) {
       this.apiHostConfig.servers = [{ url: this.restConfig.baseUrl }];
-    }
-
-    if (Env.watch) {
-      if (!/[.](json|yaml)$/.test(this.apiSpecConfig.output)) {
-        this.apiSpecConfig.output = FsUtil.resolveUnix(this.apiSpecConfig.output, 'api.spec.yaml');
-      }
-      await FsUtil.mkdirp(path.dirname(this.apiSpecConfig.output));
     }
 
     await this.resetSpec();

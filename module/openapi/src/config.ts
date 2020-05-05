@@ -1,7 +1,9 @@
+import * as path from 'path';
+import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
+
 import { Config } from '@travetto/config';
 import { FsUtil } from '@travetto/boot';
-import { AppInfo } from '@travetto/base';
-import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
+import { AppInfo, Env } from '@travetto/base';
 
 @Config('api.info')
 // TODO: Document
@@ -25,10 +27,17 @@ export class ApiHostConfig {
 // TODO: Document
 export class ApiSpecConfig {
   output: string = 'openapi.json';
+  persist: boolean = !Env.prod;
   skipRoutes: boolean = false;
   exposeAllSchemas: boolean = false;
 
-  postConstruct() {
+  async postConstruct() {
     this.output = FsUtil.toUnix(this.output);
+    if (this.persist) {
+      if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder
+        this.output = FsUtil.resolveUnix(this.output, 'api.spec.yml');
+      }
+      await FsUtil.mkdirp(path.dirname(this.output));
+    }
   }
 }

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import type { Compiler } from '@travetto/compiler/src/compiler';
 import { ShutdownManager } from '@travetto/base';
 
-import { FilePresenceManager } from './presence';
+import { FilePresenceManager } from '../presence';
 
 /**
  * Wraps the compiler supporting real-time changes to files

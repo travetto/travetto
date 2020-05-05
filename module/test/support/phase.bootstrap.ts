@@ -10,7 +10,7 @@ export const init = {
       // Allow test module to be searched
       ScanApp.modAppExclude.splice(ScanApp.modAppExclude.findIndex(x => x === 'test'), 1);
       // If watching, allow auto load of all tests
-      if (Env.watch || EnvUtil.isTrue('COMPILE_TESTS')) {
+      if (EnvUtil.isTrue('COMPILE_TESTS')) {
         ScanApp.mainAppFolders.push('test');
       }
     }
