@@ -10,24 +10,35 @@ const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
 const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
 const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 
-// TODO: Document
+/**
+ * Handle @Controller, @Endpoint
+ */
 export class RestTransformer {
 
-  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation) {
-    const pDec = state.findDecorator(node, 'trv/rest/Param');
-
+  /**
+   * Get base parameter config
+   */
+  static getParameterConfig(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation): ParamConfig {
     const pName = node.name.getText();
 
     const decConfig: ParamConfig = { name: pName } as any;
-    let commentConfig: ParamDocumentation = {} as any;
 
-    let pDecArg = TransformUtil.getPrimaryArgument(pDec) as ts.Expression;
-    if (pDecArg && ts.isStringLiteral(pDecArg)) {
-      pDecArg = TransformUtil.fromLiteral({ name: pDecArg });
-    }
 
-    const decs = (node.decorators ?? []).filter(x => x !== pDec);
-    commentConfig = (comments.params ?? []).find(x => x.name === decConfig.name) || {} as ParamDocumentation;
+    const commentConfig = (comments.params ?? []).find(x => x.name === decConfig.name) || {} as ParamDocumentation;
+
+    return {
+      description: decConfig.name,
+      defaultValue: node.initializer,
+      ...commentConfig,
+      ...decConfig,
+      required: !(node.questionToken || node.initializer)
+    };
+  }
+
+  /**
+   * Compute the parameter type
+   */
+  static getParameterType(state: TransformerState, node: ts.ParameterDeclaration) {
 
     let rType: res.Type = state.resolveType(node);
     let array = false;
@@ -50,17 +61,28 @@ export class RestTransformer {
       type = state.typeToIdentifier(rType)!;
     }
 
-    const common: ParamConfig = {
-      description: decConfig.name,
-      defaultValue: node.initializer,
-      ...commentConfig,
-      ...decConfig,
-      required: !(node.questionToken || node.initializer),
+    return { array, type, defaultType };
+  }
+
+  /**
+   * Handle endpoint parameter
+   */
+  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation) {
+    const pDec = state.findDecorator(node, 'trv/rest/Param');
+    let pDecArg = TransformUtil.getPrimaryArgument(pDec) as ts.Expression;
+    if (pDecArg && ts.isStringLiteral(pDecArg)) {
+      pDecArg = TransformUtil.fromLiteral({ name: pDecArg });
+    }
+
+    const { type, array, defaultType } = this.getParameterType(state, node);
+    const common = {
+      ...this.getParameterConfig(state, node, comments),
       type: type as any,
       ...(array ? { array: true } : {})
     };
 
     const conf = TransformUtil.extendObjectLiteral(common, pDecArg);
+    const decs = (node.decorators ?? []).filter(x => x !== pDec);
 
     if (!pDec) { // Handle default
       decs.push(state.createDecorator(PARAM_DEC_FILE, defaultType, conf));
@@ -80,6 +102,9 @@ export class RestTransformer {
     );
   }
 
+  /**
+   * On @Endpoint method
+   */
   @OnMethod('trv/rest/Endpoint')
   static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration) {
 
@@ -155,6 +180,9 @@ export class RestTransformer {
     }
   }
 
+  /**
+   * Handle @Controller
+   */
   @OnClass('trv/rest/Controller')
   static handleController(state: TransformerState, node: ts.ClassDeclaration) {
     // Read title/description/summary from jsdoc on class

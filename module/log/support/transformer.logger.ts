@@ -3,7 +3,10 @@ import * as ts from 'typescript';
 import { ConsoleManager, Env } from '@travetto/base';
 import { TransformerState, OnCall, TransformUtil } from '@travetto/compiler/src/transform-support';
 
-// TODO: Document
+/**
+ * Allows for removal of debug/trace log messages depending on whether app is running
+ * in prod mode.
+ */
 export class LoggerTransformer {
 
   @OnCall()
@@ -11,9 +14,10 @@ export class LoggerTransformer {
     if (!ts.isIdentifier(node.expression) || node.expression.text !== ConsoleManager.key) {
       return node;
     }
-    if (node.arguments.length) {
+    const arg = TransformUtil.getPrimaryArgument(node);
+    if (arg) {
       // Oay since we create the object ourselves
-      const { level } = TransformUtil.toLiteral(node.arguments[0], false);
+      const { level } = TransformUtil.toLiteral(arg, false);
       if (Env.prod && (level === 'debug' || level === 'trace')) {
         return ts.createIdentifier('undefined'); // Lose the logging if in prod
       }
