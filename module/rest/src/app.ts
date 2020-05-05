@@ -23,7 +23,7 @@ export abstract class RestApp<T = any> {
   listening = false;
 
   info = {
-    travettoVersion: require('../package.json').version,
+    travetto: require('../package.json').version,
     restProvider: this.constructor.name,
     ...AppInfo
   };

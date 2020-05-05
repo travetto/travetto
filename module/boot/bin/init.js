@@ -10,7 +10,7 @@ function init() {
     cwd.includes('/module/boot') ? cwd : // In boot module
       !/\/(module|sample)\//.test(cwd) ? `${cwd}/module/boot` : // At root
         `${cwd}/node_modules/@travetto/boot`; // Everywhere else
-  require(`${root}/src/register`).RegisterUtil.init();
+  require(`${root}/src/compile`).CompileUtil.init();
 }
 
 if (!global.trvInit) { // Register once, and mark
