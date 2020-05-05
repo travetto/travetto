@@ -1,0 +1,31 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@travetto/base": "^1.0.0-beta.1"
+  },
+  "description": "U.",
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "file-watching",
+    "travetto",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src",
+    "support"
+  ],
+  "name": "@travetto/watch",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "version": "1.0.0-beta.1"
+}

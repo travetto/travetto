@@ -9,7 +9,5 @@ export * from './src/shutdown';
 export * from './src/util';
 export * from './src/scan-app';
 export * from './src/scan-fs';
-export * from './src/watch/watcher';
-export * from './src/watch/presence';
 export * from './src/phase';
 export * from './src/resource';
