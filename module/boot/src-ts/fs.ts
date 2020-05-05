@@ -1,20 +1,20 @@
 import * as fs from 'fs';
 import * as util from 'util';
 import * as path from 'path';
-import { ExecUtil } from './exec';
+import { ExecUtil, ExecutionResult } from './exec';
 
 const fsStat = util.promisify(fs.stat);
 const fsMkdir = util.promisify(fs.mkdir);
-const sym = Symbol('blah');
 
-type ExecResult = ReturnType<(typeof ExecUtil)['spawn']>['result'] & { [sym]?: undefined };
-
-function execCmd(sync: false, [cmd, args]: [string, string[]], ignoreErrors?: boolean): ExecResult;
+/**
+ * Execute a command
+ */
+function execCmd(sync: false, [cmd, args]: [string, string[]], ignoreErrors?: boolean): Promise<ExecutionResult>;
 function execCmd(sync: true, [cmd, args]: [string, string[]], ignoreErrors?: boolean): string;
-function execCmd(sync: boolean, [cmd, args]: [string, string[]], ignoreErrors = false): string | undefined | ExecResult {
+function execCmd(sync: boolean, [cmd, args]: [string, string[]], ignoreErrors = false): string | undefined | Promise<ExecutionResult> {
   try {
     const ret = sync ? ExecUtil.execSync(`${cmd} ${args.join(' ')}`) : ExecUtil.spawn(cmd, args).result;
-    return typeof ret !== 'string' && ignoreErrors ? ret.catch(e => e.meta as ExecResult) : ret;
+    return typeof ret !== 'string' && ignoreErrors ? ret.catch(e => e.meta as ExecutionResult) : ret;
   } catch (e) {
     if (!ignoreErrors) {
       throw e;

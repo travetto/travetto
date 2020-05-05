@@ -1,10 +1,8 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { FsUtil, EnvUtil, ExecUtil } from '@travetto/boot';
+import { FsUtil, EnvUtil, ExecUtil, ExecutionState } from '@travetto/boot';
 import { ShutdownManager } from '@travetto/base';
-
-type ExecutionState = ReturnType<(typeof ExecUtil)['spawn']>;
 
 const fsWriteFile = util.promisify(fs.writeFile);
 
