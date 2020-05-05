@@ -1,7 +1,7 @@
 import type { DependencyRegistry } from '@travetto/di/src/registry';
 import type { ClassTarget } from '@travetto/di/src/types';
 import type { Class } from '@travetto/registry';
-import { RetargettingProxy } from './proxy';
+import { RetargettingProxy } from '../proxy';
 
 /**
  * Wraps the Dependency Registry to support proxying instances
