@@ -1,7 +1,8 @@
 import { TranspileUtil } from '@travetto/boot';
 import { Env } from '@travetto/base';
-import { CompilerAdaptor } from './compiler';
-import { DiAdaptor } from './di';
+import { CompilerAdaptor } from './extension/compiler';
+import { DiAdaptor } from './extension/di';
+import { ModelAdaptor } from './extension/model';
 
 export class WatchUtil {
   static init() {
@@ -12,9 +13,10 @@ export class WatchUtil {
 
   static register(tgt: any) {
     if (Env.watch) {
-      switch (tgt.name) {
+      switch (tgt.name || tgt.constructor.name) {
         case '$Compiler': return CompilerAdaptor(tgt);
         case '$DependencyRegistry': return DiAdaptor(tgt);
+        case 'ModelService': return ModelAdaptor(tgt);
       }
     }
     return tgt;

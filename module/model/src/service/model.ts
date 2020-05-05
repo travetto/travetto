@@ -39,18 +39,7 @@ export class ModelService implements IModelSource {
 
   async init() {
     await ModelRegistry.init();
-    if (Env.watch) {
-      if (this.source.onSchemaChange) {
-        SchemaRegistry.onSchemaChange(event => {
-          if (ModelRegistry.has(event.cls)) {
-            this.source.onSchemaChange!(event);
-          }
-        });
-      }
-      if (this.source.onChange) {
-        ModelRegistry.on(this.source.onChange.bind(this.source));
-      }
-    }
+    /* WATCH */ this /* WATCH */;
   }
 
   /** Handles subtyping on polymorphic endpoints */
