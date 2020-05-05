@@ -13,6 +13,8 @@ interface Wrapper<T> {
   items: T[];
 }
 
+const OPTIONAL = { required: false };
+
 interface Complex { }
 
 @Controller('/')
@@ -37,6 +39,10 @@ class ParamController {
 
   @Get('/job/output/:jobId')
   async jobOutput(@Path() jobId: string, @Query({ required: false }) time: Date) { }
+
+  @Get('/job/output2')
+  async jobOutput2(@Query({ ...OPTIONAL, name: 'optional' }) time: Date) { }
+
 
   /**
    * @param name User's name
