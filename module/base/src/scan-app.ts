@@ -27,11 +27,11 @@ export class ScanApp {
   /**
    * List of module app folders to search
    */
-  static modAppFolders: string[] = ['src', 'index'];
+  static modAppFolders: string[] = ['src'];
   /**
    * List of modules to not traverse into
    */
-  static modAppExclude: string[] = ['test', 'cli', 'boot', 'watch'];
+  static modAppExclude: string[] = ['test', 'cli', 'boot', 'watch', 'compiler'];
 
   /**
    * Provides a RegEx compatible object that can scan for typescript files quickly
@@ -45,7 +45,7 @@ export class ScanApp {
    * Support framework resolution if active
    */
   private static resolveFramework(x: SimpleEntry, root: string) {
-    const file = /* @check:devResolve */ x.file /* @end */;
+    const file = /* @inline:devResolve */ x.file /* @end */;
     return { ...x, file, module: file.replace(`${root}/`, '') };
   }
 
@@ -53,7 +53,7 @@ export class ScanApp {
    * Get regex compatible tester for validating travetto modules in traversal
    */
   private static getAppModPathMatcher() {
-    const MOD_MATCH = new RegExp(`node_modules/@travetto/([^/]+)/(${this.modAppFolders.join('|')})\/`);
+    const MOD_MATCH = new RegExp(`node_modules/@travetto/([^/]+)/((${this.modAppFolders.join('|')})\/|index)`);
     const MOD_EX = new RegExp(`@travetto/(${this.modAppExclude.join('|')})`);
     return { test: (x: string) => MOD_MATCH.test(x) && !MOD_EX.test(x) };
   }

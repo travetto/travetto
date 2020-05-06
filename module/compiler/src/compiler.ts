@@ -122,4 +122,4 @@ class $Compiler extends EventEmitter {
   }
 }
 
-export const Compiler = new /* @check:watch */$Compiler/* @end */();
+export const Compiler = new /* @inline:watch */$Compiler/* @end */();
