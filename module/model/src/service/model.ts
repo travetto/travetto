@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry } from '@travetto/schema';
+import { BindUtil, SchemaValidator, ALL_VIEW } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-import { Env, Util, AppError } from '@travetto/base';
+import { Util, AppError } from '@travetto/base';
 
 import { QueryVerifierService } from './verify';
 import { ModelOptions } from '../types';
@@ -10,7 +10,7 @@ import { ModelCore } from '../model/core';
 import { BulkOp, BulkResponse, BulkProcessError } from '../model/bulk';
 import { ModelSource, IModelSource, ValidStringFields } from './source';
 import { ModelRegistry } from '../registry';
-import { QueryLanguageParser } from '../query-lang/parser';
+import { QueryLanguageParser } from '../internal/query-lang/parser';
 
 function getClass<T extends any>(o: T) {
   return o.constructor as Class<T>;
