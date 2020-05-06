@@ -94,11 +94,18 @@ export class AppListUtil {
       // Read cache it
       let text: string;
       if (!AppCache.hasEntry(this.cacheConfig)) {
-        text = (await ExecUtil.fork(path.resolve(__dirname, '..', 'find-apps')).result).stdout;
+        text = (await ExecUtil.fork(path.resolve(__dirname, '..', 'find-apps'), [], {
+          env: {
+            DEBUG: '0',
+            TRACE: '0',
+            QUIET_INIT: '1'
+          }
+        }).result).stdout;
         AppCache.writeEntry(this.cacheConfig, text);
       } else {
         text = AppCache.readEntry(this.cacheConfig);
       }
+
       const res = JSON.parse(text);
 
       for (const el of res) {
