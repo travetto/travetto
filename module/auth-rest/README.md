@@ -80,7 +80,7 @@ The provider must be registered with a custom symbol to be used within the frame
 
 **Code: Potential Facebook provider**
 ```typescript
-export const FB_AUTH = Symbol('facebook');
+export const FB_AUTH = Symbol.for('auth-facebook');
 
 export class AppConfig {
   @InjectableFactory(FB_AUTH)

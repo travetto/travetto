@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import { TransformerState, OnProperty, OnStaticMethod, OnMethod, DecoratorMeta, res } from '@travetto/compiler/src/transform-support';
 
-const hasConfig = Symbol('hasConfig');
+const hasConfig = Symbol.for('_trv_config_has');
 
 interface AutoState {
   [hasConfig]?: boolean;

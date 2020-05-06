@@ -2,8 +2,8 @@ import * as koa from 'koa';
 import { RestAppUtil } from '@travetto/rest';
 import { TRV_ORIG, TRV_RAW } from '@travetto/rest/src/types';
 
-const TRV_RES = Symbol('TRV_RES');
-const TRV_REQ = Symbol('TRV_REQ');
+const TRV_RES = Symbol.for('_trv_koa_response');
+const TRV_REQ = Symbol.for('_trv_koa_request');
 
 // TODO: Document
 export class KoaAppUtil {

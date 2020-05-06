@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { DecoratorMeta, NodeTransformer, State } from './types/visitor';
 
-const HANDLERS = Symbol('handlers');
+const HANDLERS = Symbol.for('_trv_transform_handlers');
 
 // Retrieve from class
 export function getTransformHandlers(cls: any): NodeTransformer[] {
