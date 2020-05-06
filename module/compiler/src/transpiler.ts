@@ -2,7 +2,6 @@ import * as ts from 'typescript';
 import * as path from 'path';
 
 import { FileCache, TranspileUtil, FsUtil } from '@travetto/boot';
-import { FrameworkUtil } from '@travetto/boot/src/framework';
 
 import { ScanApp } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
@@ -90,7 +89,7 @@ export class Transpiler {
   private getHost(): ts.CompilerHost {
     const host: ts.CompilerHost = {
       readFile: this.readFile,
-      realpath: x => FrameworkUtil.devResolve(x), // @line-if $TRV_DEV
+      realpath: x => /* @check:devResolve */ x /* @end */, // @line-if $TRV_DEV
       writeFile: this.writeFile,
       fileExists: this.fileExists,
       getDefaultLibFileName: ts.getDefaultLibFileName,

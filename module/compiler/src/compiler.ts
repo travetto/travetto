@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import * as fs from 'fs';
 
 import { FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil } from '@travetto/boot';
 import { Env, ScanApp } from '@travetto/base';
@@ -75,7 +76,6 @@ class $Compiler extends EventEmitter {
     }
   }
 
-
   /**
    * Notify of an add/remove/change event
    */
@@ -90,6 +90,36 @@ class $Compiler extends EventEmitter {
   compile(m: NodeModule, tsf: string) {
     return CompileUtil.doCompile(m, this.transpiler.getTranspiled(tsf), tsf);
   }
+
+  /**
+   * Unload if file is known
+   */
+  added(fileName: string) {
+    if (fileName in require.cache) { // if already loaded
+      this.unload(fileName);
+    }
+    require(fileName);
+    this.notify('added', fileName);
+  }
+
+  /**
+   * Handle when a file is removed during watch
+   */
+  removed(fileName: string) {
+    this.unload(fileName, true);
+    this.notify('removed', fileName);
+  }
+
+  /**
+   * When a file changes during watch
+   */
+  changed(fileName: string) {
+    if (this.transpiler.hashChanged(fileName, fs.readFileSync(fileName, 'utf8'))) {
+      this.unload(fileName);
+      require(fileName);
+      this.notify('changed', fileName);
+    }
+  }
 }
 
-export const Compiler = new /* WATCH */$Compiler/* WATCH */();
+export const Compiler = new /* @check:watch */$Compiler/* @end */();
