@@ -3,17 +3,19 @@ import type { Compiler } from '@travetto/compiler/src/compiler';
 import { ShutdownManager } from '@travetto/base';
 
 import { FilePresenceManager } from '../presence';
+import { RetargettingProxy } from '../proxy';
+import { CompileUtil } from '@travetto/boot';
 
 /**
  * Wraps the compiler supporting real-time changes to files
  */
 export function CompilerAdaptor($Compiler: Class<typeof Compiler>) {
-
   /**
    * Extending the $Compiler class to add some functionality
    */
   const Cls = class extends $Compiler {
     presenceManager: FilePresenceManager;
+    modules = new Map<string, RetargettingProxy<any>>();
 
     constructor(...args: any[]) {
       super(...args);
@@ -33,6 +35,20 @@ export function CompilerAdaptor($Compiler: Class<typeof Compiler>) {
           return true;
         }
       }, 0);
+
+      // Proxy all file loads
+      CompileUtil.addModuleHandler((name, mod) => {
+        if (name.includes(this.cwd) && !name.includes('node_modules')) {
+          if (!this.modules.has(name)) {
+            this.modules.set(name, new RetargettingProxy(mod));
+          } else {
+            this.modules.get(name)!.setTarget(mod);
+          }
+          return this.modules.get(name)!;
+        } else {
+          return mod;
+        }
+      });
     }
 
     init() {
@@ -42,6 +58,7 @@ export function CompilerAdaptor($Compiler: Class<typeof Compiler>) {
 
     reset() {
       super.reset();
+      this.modules.clear();
       this.presenceManager.reset();
     }
 
