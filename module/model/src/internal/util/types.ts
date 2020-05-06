@@ -3,13 +3,6 @@ import { Class } from '@travetto/registry';
 
 import { Point } from '../../model/where-clause';
 
-export type SimpleType = 'string' | 'number' | 'boolean' | 'Date' | 'Point';
-
-// TODO: Document
-export interface ErrorCollector<T> {
-  collect(element: T, message: string): void;
-}
-
 const st = (t: string, arr: boolean = false) => new Set([arr ? `${t}[]` : t]);
 
 const basic = (type: string) => ({ $ne: st(type), $eq: st(type), $exists: st('boolean') });
@@ -24,18 +17,17 @@ const geo = (type: string) => ({
   $geoIntersects: st(type, true)
 });
 
-export const OPERATORS: Record<string, Record<string, Set<string>>> = {
-  string: { ...basic('string'), ...scalar('string'), ...str('string') },
-  number: { ...basic('number'), ...scalar('number'), ...comp('number') },
-  boolean: { ...basic('boolean'), ...scalar('boolean') },
-  Date: { ...basic('Date'), ...scalar('Date'), ...comp('Date') },
-  Point: { ...basic('Point'), ...geo('Point') },
-};
-
 // TODO: Document
 export class TypeUtil {
+  static OPERATORS = {
+    string: { ...basic('string'), ...scalar('string'), ...str('string') } as Record<string, Set<string>>,
+    number: { ...basic('number'), ...scalar('number'), ...comp('number') } as Record<string, Set<string>>,
+    boolean: { ...basic('boolean'), ...scalar('boolean') } as Record<string, Set<string>>,
+    Date: { ...basic('Date'), ...scalar('Date'), ...comp('Date') } as Record<string, Set<string>>,
+    Point: { ...basic('Point'), ...geo('Point') } as Record<string, Set<string>>,
+  };
 
-  static getDeclaredType(f: FieldConfig | Class): SimpleType | undefined {
+  static getDeclaredType(f: FieldConfig | Class): keyof typeof TypeUtil.OPERATORS | undefined {
     const type = 'type' in f ? f.type : f;
     switch (type) {
       case String: return 'string';
