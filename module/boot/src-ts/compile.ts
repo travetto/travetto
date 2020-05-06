@@ -27,6 +27,7 @@ declare const global: {
  */
 export class CompileUtil {
   private static ogModuleLoad = Module._load!.bind(Module);
+  private static moduleHandlers: ((name: string, o: any) => any)[] = [];
 
   /**
    * The entrypoint for plugins and cli operations to ensure local framework development works
@@ -39,8 +40,9 @@ export class CompileUtil {
    * @param parent parent Module
    */
   private static onModuleLoad(request: string, parent: Module): any {
+    let mod: any;
     try {
-      const mod = this.ogModuleLoad.apply(null, [request, parent]);
+      mod = this.ogModuleLoad.apply(null, [request, parent]);
       if (!parent.loaded && (!mod || !mod.ᚕtrv)) { // Standard ts compiler output
         let p = mod.filename || mod.id;
         try {
@@ -52,12 +54,17 @@ export class CompileUtil {
           throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
         }
       }
-
-      return mod;
     } catch (e) {
       const name = Module._resolveFilename!(request, parent);
-      return Module._compile!(TranspileUtil.handlePhaseError('load', name, e), name);
+      mod = Module._compile!(TranspileUtil.handlePhaseError('load', name, e), name);
     }
+    if (this.moduleHandlers) {
+      const name = Module._resolveFilename!(request, parent);
+      for (const fn of this.moduleHandlers) {
+        mod = fn(name, mod);
+      }
+    }
+    return mod;
   }
 
   /**
@@ -104,6 +111,10 @@ export class CompileUtil {
     }
 
     global.trvInit = this;
+  }
+
+  static addModuleHandler(handler: (name: string, o: any) => any) {
+    this.moduleHandlers.push(handler);
   }
 
   /**
