@@ -94,7 +94,7 @@ export class TranspileUtil {
     });
 
     // Handle inline functions
-    contents = contents.replace(/[/][*]\s*@inline:([^*]+)\s*[*][/]([^/]*)[/][*]\s*@end\s*[*][/]/mg, (all, key, val) => {
+    contents = contents.replace(/[/][*]\s*@inline:([^* ]+)\s*[*][/]([^/]*)[/][*]\s*@end\s*[*][/]/mg, (all, key, val) => {
       const fn = this.inlineFunctions[key];
       return fn ? fn(val) : val;
     });

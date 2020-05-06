@@ -10,7 +10,7 @@ export class WatchUtil {
       console.debug('Running in watch mode');
     }
     TranspileUtil.addInlineFunction('watch',
-      text => `(require('${__filename}').WatchUtil.register(${text}))`);
+      text => `(require('@travetto/watch').WatchUtil.register(${text}))`);
   }
 
   static register(tgt: any) {
