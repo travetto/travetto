@@ -8,7 +8,7 @@ const DEFAULT_TIMEOUT = EnvUtil.getInt('DEFAULT_TIMEOUT', 5000);
 
 // TODO: Document
 export class TestUtil {
-  static TIMEOUT = Symbol.for('_trv_test_timeout');
+  static TIMEOUT = Symbol.for('@trv:test/timeout');
 
   static registerCleanup(scope: string) {
     ShutdownManager.onShutdown(`test.${scope}.bufferOutput`,
