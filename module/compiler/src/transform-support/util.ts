@@ -326,7 +326,7 @@ export class TransformUtil {
 
     for (const stmt of src.statements) {
       if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
-        const path = /* @check:devResolve */ this.optionalResolve(stmt.moduleSpecifier.text, base) /* @end */;
+        const path = /* @inline:devResolve */ this.optionalResolve(stmt.moduleSpecifier.text, base) /* @end */;
 
         if (stmt.importClause) {
           if (stmt.importClause.namedBindings) {

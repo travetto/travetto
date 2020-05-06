@@ -130,6 +130,7 @@ export class SchemaTransformer {
       })));
     }
 
+    delete state[inSchema];
     delete state[hasSchema];
 
     return ts.updateClassDeclaration(
@@ -150,7 +151,7 @@ export class SchemaTransformer {
   static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
     const ignore = state.findDecorator(node, 'trv/schema/Ignore', 'Ignore', FIELD_MOD);
     const isPublic = !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier); // eslint-disable-line no-bitwise
-    return state[hasSchema] && !ignore && isPublic ?
+    return state[inSchema] && !ignore && isPublic ?
       this.computeProperty(state, node) : node;
   }
 }

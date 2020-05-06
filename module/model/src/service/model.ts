@@ -39,7 +39,7 @@ export class ModelService implements IModelSource {
 
   async init() {
     await ModelRegistry.init();
-    /* @check:watch */ this /* @end */;
+    /* @inline:watch */ this /* @end */;
   }
 
   /** Handles subtyping on polymorphic endpoints */
