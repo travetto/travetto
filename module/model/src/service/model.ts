@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { BindUtil, SchemaValidator, ALL_VIEW } from '@travetto/schema';
+import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Util, AppError } from '@travetto/base';
 
@@ -123,7 +123,9 @@ export class ModelService implements IModelSource {
       query.sort = config.defaultSort;
     }
     const res = await this.source.getAllByQuery(cls, query);
-    return Promise.all(res.map(o => this.postLoad(cls, o)));
+    const ret = await Promise.all(res.map(o => this.postLoad(cls, o)));
+    console.log('Got res', ret, SchemaRegistry.get(cls)!.views.__all.fields);
+    return ret;
   }
 
   /** Find the count of matching documetns by query */
