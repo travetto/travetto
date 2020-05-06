@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { QueryLanguageParser } from '../src/query-lang/parser';
 import { WhereClause } from '../src/model/where-clause';
-import { QueryLanguageTokenizer } from '../src/query-lang/tokenizer';
+import { QueryLanguageParser } from '../src/internal/query-lang/parser';
+import { QueryLanguageTokenizer } from '../src/internal/query-lang/tokenizer';
 
 @Suite('Query String Tests')
 export class QueryStringTest {

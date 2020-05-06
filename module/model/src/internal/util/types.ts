@@ -1,7 +1,7 @@
 import { FieldConfig } from '@travetto/schema';
 import { Class } from '@travetto/registry';
 
-import { Point } from '../model/where-clause';
+import { Point } from '../../model/where-clause';
 
 export type SimpleType = 'string' | 'number' | 'boolean' | 'Date' | 'Point';
 

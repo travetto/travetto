@@ -5,8 +5,8 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { ValidationResultError, Schema } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 
-import { Model, ModelQuery, ModelCore, BaseModel, QueryVerifierService, Query, RetainFields } from '../';
-import { QueryLanguageParser } from '../src/query-lang/parser';
+import { Model, ModelQuery, ModelCore, BaseModel, QueryVerifierService, Query } from '../';
+import { QueryLanguageParser } from '../src/internal/query-lang/parser';
 
 @Schema()
 class Preferences {
