@@ -7,9 +7,7 @@ type Preprocessor = (name: string, contents: string) => string;
 
 declare const global: { ts: any }; // Used for transformers
 
-type SourceResolver = (p: string) => string | undefined;
-
-const OPTS = Symbol();
+const OPTS = Symbol.for('_compiler_options');
 
 /**
  * Standard transpilation utilities, with support for basic text filters
