@@ -44,7 +44,7 @@ export function CompilerAdaptor($Compiler: Class<typeof Compiler>) {
           } else {
             this.modules.get(name)!.setTarget(mod);
           }
-          return this.modules.get(name)!;
+          return this.modules.get(name)!.get();
         } else {
           return mod;
         }

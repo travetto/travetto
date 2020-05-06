@@ -9,6 +9,7 @@ import { Transpiler } from './transpiler';
 /**
  * Compilation orchestrator
  */
+// TODO: @Watchable
 class $Compiler extends EventEmitter {
 
   protected transpiler: Transpiler;
@@ -122,4 +123,4 @@ class $Compiler extends EventEmitter {
   }
 }
 
-export const Compiler = new /* @inline:watch */$Compiler/* @end */();
+export const Compiler = new $Compiler();

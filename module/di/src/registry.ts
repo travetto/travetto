@@ -33,6 +33,7 @@ function mergeWithOriginal<T extends { original?: symbol | object, qualifier?: s
 /**
  * Dependency registry
  */
+// TODO: @Watchable
 export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   protected pendingFinalize: Class[] = [];
 
@@ -449,4 +450,4 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 }
 
-export const DependencyRegistry = new /* @inline:watch */$DependencyRegistry/* @end */();
+export const DependencyRegistry = new $DependencyRegistry();
