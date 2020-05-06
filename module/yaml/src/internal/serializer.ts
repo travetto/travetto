@@ -66,7 +66,11 @@ export class Serializer {
     if (o instanceof Error) {
       out = `${this.serialize(o.stack, indent, wordwrap, indentLevel + indent)}\n`;
     } else if (typeof o === 'function' || o instanceof RegExp || o instanceof Set || o instanceof Map) {
-      throw new Error('Types are not supported');
+      if ('toJSON' in o) {
+        out = this.serialize((o as any).toJSON(), indent, wordwrap, indentLevel);
+      } else {
+        throw new Error('Types are not supported');
+      }
     } else if (Array.isArray(o)) {
       out = o.map(el => `${prefix}-${this.serialize(el, indent, wordwrap, indentLevel + indent)}`).join('\n');
       if (indentLevel > 0) {
