@@ -1,3 +1,5 @@
+import * as util from 'util';
+
 import { Env, AppInfo } from '@travetto/base';
 import { ConfigManager } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
@@ -35,11 +37,11 @@ export class $ApplicationRegistry {
     if (!Env.quietInit) {
       console.log('Running application', name);
 
-      console.log('Configured', {
+      console.log(`Configured`, util.inspect({
         app: AppInfo,
         env: Env.toJSON(),
         config: Env.prod ? ConfigManager.getSecure() : ConfigManager.get()
-      });
+      }, false, 10, true));
     }
 
     // If run command exists on app
