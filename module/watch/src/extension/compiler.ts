@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-
 import type { Compiler } from '@travetto/compiler/src/compiler';
 import { ShutdownManager } from '@travetto/base';
 
@@ -60,36 +58,6 @@ export function CompilerAdaptor($Compiler: { new(...args: any[]): typeof Compile
         if (isNew && this.transpiler.hasContents(tsf)) {
           this.presenceManager.addNewFile(tsf, false);
         }
-      }
-    }
-
-    /**
-     * Unload if file is known
-     */
-    added(fileName: string) {
-      if (this.presenceManager.isKnown(fileName)) {
-        this.unload(fileName);
-      }
-      require(fileName);
-      this.notify('added', fileName);
-    }
-
-    /**
-     * Handle when a file is removed during watch
-     */
-    removed(fileName: string) {
-      this.unload(fileName, true);
-      this.notify('removed', fileName);
-    }
-
-    /**
-     * When a file changes during watch
-     */
-    changed(fileName: string) {
-      if (this.transpiler.hashChanged(fileName, fs.readFileSync(fileName, 'utf8'))) {
-        this.unload(fileName);
-        require(fileName);
-        this.notify('changed', fileName);
       }
     }
   };

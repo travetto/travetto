@@ -18,7 +18,6 @@ Base is the foundation of all `travetto` applications.  It is intended to be a m
 The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers as well. The information that is available is:
 * `prod` - Determines if app is in prod mode.  A `boolean` flag that should indicate a production run.
 * `env` - The environment name.  Will usually be one of `dev`, `test`, or `prod`.  Can be anything that is passed in.
-* `watch: boolean` - Does the current run support file watching.  Primarily used internally, but should be useful to indicate if the program will finish immediately or wait indefinitely.
 * `profiles: Set<string>` - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.
 * `debug`/`trace` - Simple logging flags.  These `boolean` flags will enable or disable logging at various levels. By default `debug` is on in non-`prod` or `e2e` mode, and nowhere else.  `trace` is always off by default.
 * `cwd: string` - The root of the current project, 
