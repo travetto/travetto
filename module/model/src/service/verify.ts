@@ -5,7 +5,7 @@ import { Util } from '@travetto/base';
 
 import { ModelQuery, Query, PageableModelQuery } from '../model/query';
 
-import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from '../util/types';
+import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from '../internal/util/types';
 
 interface State extends ErrorCollector<string> {
   path: string;
