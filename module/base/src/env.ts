@@ -56,7 +56,6 @@ class $Env {
     this.profiles = new Set(EnvUtil.getList('PROFILE'));
     this.appRoots = this.computeAppRoots();
 
-    this.watch = EnvUtil.isTrue('WATCH');
     this.debug = EnvUtil.isSet('DEBUG') ? !EnvUtil.isFalse('DEBUG') : !this.prod;
     this.trace = EnvUtil.isSet('TRACE') && !EnvUtil.isFalse('TRACE');
     this.quietInit = EnvUtil.isTrue('QUIET_INIT');

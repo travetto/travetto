@@ -449,4 +449,4 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 }
 
-export const DependencyRegistry = new /* WATCH */$DependencyRegistry/* WATCH */();
+export const DependencyRegistry = new /* @check:watch */$DependencyRegistry/* @end */();

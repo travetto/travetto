@@ -40,7 +40,7 @@ export function init() {
     .allowUnknownOption()
     .option('-e, --env [env]', 'Application environment (dev|prod|<any>)', 'dev')
     .option('-r, --root [root]', 'Application root, defaults to associated root by name')
-    .option('-w, --watch [watch]', 'Run the application in watch mode, (default: auto)', CliUtil.BOOLEAN_RE)
+    .option('-w, --watch [watch]', 'Run the application in watch mode, requires @travetto/watch (default: auto)', CliUtil.BOOLEAN_RE)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
     .action(async (app: string, args: string[], cmd: commander.Command & AppCommand) => {
 

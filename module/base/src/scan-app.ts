@@ -1,5 +1,4 @@
 import { FsUtil, AppCache } from '@travetto/boot';
-import { FrameworkUtil } from '@travetto/boot/src/framework';
 
 import { Env } from './env';
 import { ScanEntry, ScanFs } from './scan-fs';
@@ -46,7 +45,7 @@ export class ScanApp {
    * Support framework resolution if active
    */
   private static resolveFramework(x: SimpleEntry, root: string) {
-    const file = FrameworkUtil.devResolve(x.file);
+    const file = /* @check:devResolve */ x.file /* @end */;
     return { ...x, file, module: file.replace(`${root}/`, '') };
   }
 
