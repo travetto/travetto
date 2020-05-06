@@ -4,8 +4,8 @@ import {
   TransformUtil, TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, res
 } from '@travetto/compiler/src/transform-support';
 
-const hasSchema = Symbol('hasSchema');
-const inSchema = Symbol('inSchema');
+const hasSchema = Symbol.for('_trv_schema_has');
+const inSchema = Symbol.for('_trv_schema_valid');
 
 interface AutoState {
   [hasSchema]?: boolean;

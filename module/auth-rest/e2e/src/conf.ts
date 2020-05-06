@@ -8,7 +8,7 @@ export class FbUser {
   roles: string[];
 }
 
-export const SIMPLE_AUTH = Symbol('simple-auth');
+export const SIMPLE_AUTH = Symbol.for('simple-auth');
 
 export class AppConfig {
 

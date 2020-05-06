@@ -5,7 +5,7 @@ import { LineFormatter } from './formatter/line';
 import { ConsoleOutput } from './output/console';
 import { LogUtil } from './util';
 
-const DEFAULT = Symbol('default');
+const DEFAULT = Symbol.for('_trv_log_default');
 
 // TODO: Document
 class $Logger {

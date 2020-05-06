@@ -10,7 +10,7 @@ Within the node ecosystem, the most prevalent auth framework is [`passport`](htt
 
 **Code: Sample Facebook/passport config**
 ```typescript
-export const FB_AUTH = Symbol('facebook');
+export const FB_AUTH = Symbol.for('auth-facebook');
 
 export class FbUser {
   id: string;

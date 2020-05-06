@@ -43,17 +43,17 @@ export class ServiceInherit extends Service {
   }
 }
 
-export const SERVICE_INHERIT_2 = Symbol('SVC_I_2');
-export const SERVICE_INHERIT_3 = Symbol('SVC_I_3');
+export const SERVICE_INHERIT_2 = Symbol.for('SVC_I_2');
+export const SERVICE_INHERIT_3 = Symbol.for('SVC_I_3');
 
 @Injectable(SERVICE_INHERIT_2)
 export class ServiceInherit2 extends ServiceInherit {
   age = 31;
 }
 
-export const CUSTOM_SERVICE_INHERIT = Symbol('Custom');
-export const CUSTOM_DATABASE = Symbol('CUSTOM DB');
-export const CUSTOM_EMPTY = Symbol('Custom EMPTY');
+export const CUSTOM_SERVICE_INHERIT = Symbol.for('Custom');
+export const CUSTOM_DATABASE = Symbol.for('CUSTOM DB');
+export const CUSTOM_EMPTY = Symbol.for('Custom EMPTY');
 
 class TestConfig {
   @InjectableFactory(CUSTOM_EMPTY)

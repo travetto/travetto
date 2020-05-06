@@ -11,7 +11,7 @@ export class FbUser {
   roles: string[];
 }
 
-export const FB_AUTH = Symbol('facebook');
+export const FB_AUTH = Symbol.for('auth_facebook');
 
 export class AppConfig {
   @InjectableFactory(FB_AUTH)

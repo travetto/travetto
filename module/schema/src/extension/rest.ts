@@ -7,7 +7,7 @@ import { SchemaRegistry } from '../service/registry';
 import { BindUtil } from '../bind-util';
 import { SchemaValidator } from '../validate/validator';
 
-const QUERY_SCHEMA: unique symbol = Symbol('_query_schema');
+const QUERY_SCHEMA: unique symbol = Symbol.for('_trv_query_schema');
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

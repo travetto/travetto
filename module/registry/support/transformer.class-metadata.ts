@@ -5,8 +5,8 @@ import { TransformUtil, TransformerState, OnMethod, OnClass, AfterClass } from '
 
 const REGISTER_MOD = require.resolve('../src/decorator');
 
-const methods = Symbol('methods');
-const cls = Symbol('class');
+const methods = Symbol.for('_trv_registry_methods');
+const cls = Symbol.for('_trv_registry_class');
 
 interface RegisterInfo {
   [methods]?: {
