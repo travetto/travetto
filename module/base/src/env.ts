@@ -24,11 +24,6 @@ class $Env {
   readonly prod: boolean;
 
   /**
-   * Indicates if the application is in watch mode
-   */
-  readonly watch: boolean;
-
-  /**
    * Determines if the debug log level should be visible
    */
   readonly debug: boolean;
