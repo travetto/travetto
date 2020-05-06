@@ -2,6 +2,8 @@ import * as ts from 'typescript';
 import { resolve as pathResolve, dirname } from 'path';
 
 import { FsUtil } from '@travetto/boot';
+import { FrameworkUtil } from '@travetto/boot/src/framework';
+
 import { Env, Util } from '@travetto/base';
 
 import { DeclDocumentation, Import } from './types/shared';
@@ -326,7 +328,8 @@ export class TransformUtil {
 
     for (const stmt of src.statements) {
       if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
-        const path = /* @inline:devResolve */ this.optionalResolve(stmt.moduleSpecifier.text, base) /* @end */;
+        let path = this.optionalResolve(stmt.moduleSpecifier.text, base);
+        path = FrameworkUtil.devResolve(path); // @line-if $TRV_DEV
 
         if (stmt.importClause) {
           if (stmt.importClause.namedBindings) {

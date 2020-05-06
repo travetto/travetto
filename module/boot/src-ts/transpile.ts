@@ -16,9 +16,6 @@ const OPTS = Symbol();
  */
 export class TranspileUtil {
   private static preProcessors: Preprocessor[] = [];
-  private static inlineFunctions: Record<string, (text: string) => string> = {
-    devResolve: text => `require('@travetto/boot/src/framework').FrameworkUtil.devResolve(${text})`
-  };
   private static sourceResolvers: SourceResolver[] = [
     p => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined
   ];
@@ -93,12 +90,6 @@ export class TranspileUtil {
       }
     });
 
-    // Handle inline functions
-    contents = contents.replace(/[/][*]\s*@inline:([^* ]+)\s*[*][/]([^/]*)[/][*]\s*@end\s*[*][/]/mg, (all, key, val) => {
-      const fn = this.inlineFunctions[key];
-      return fn ? fn(val) : val;
-    });
-
     return modErrs.length ? this.getErrorModule(modErrs[0], `Skipping: ${modErrs[0]}`, { ᚕtrv: true, filename: name }) : contents;
   }
 
@@ -144,13 +135,6 @@ export class TranspileUtil {
    */
   static addPreProcessor(fn: Preprocessor) {
     this.preProcessors.push(fn);
-  }
-
-  /**
-   * Add an inline function processor
-   */
-  static addInlineFunction(key: string, fn: (text: string) => string) {
-    this.inlineFunctions[key] = fn;
   }
 
   /**

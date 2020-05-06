@@ -17,6 +17,7 @@ function getClass<T extends any>(o: T) {
 }
 
 // TODO: Document
+// TODO: @Watchable
 @Injectable({ target: ModelService })
 export class ModelService implements IModelSource {
 
@@ -39,7 +40,6 @@ export class ModelService implements IModelSource {
 
   async init() {
     await ModelRegistry.init();
-    /* @inline:watch */ this /* @end */;
   }
 
   /** Handles subtyping on polymorphic endpoints */
