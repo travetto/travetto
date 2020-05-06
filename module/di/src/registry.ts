@@ -1,10 +1,11 @@
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
 import { Util } from '@travetto/base';
+import { Watchable } from '@travetto/base/src/internal/watchable';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
 
-export const DEFAULT_INSTANCE = Symbol('__default');
+export const DEFAULT_INSTANCE = Symbol.for('__di_default');
 
 export interface ManagedExtra {
   postConstruct?: () => any;
@@ -33,7 +34,7 @@ function mergeWithOriginal<T extends { original?: symbol | object, qualifier?: s
 /**
  * Dependency registry
  */
-// TODO: @Watchable
+@Watchable('@travetto/di/support/watch')
 export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   protected pendingFinalize: Class[] = [];
 
