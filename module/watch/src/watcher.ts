@@ -166,7 +166,7 @@ export class Watcher extends EventEmitter {
       throw new Error(`Not a file: ${entry.file}`);
     }
 
-    const opts = { persistent: true, interval: this.options.interval };
+    const opts = { persistent: false, interval: this.options.interval };
 
     this.pollers.set(entry.file, (curr: fs.Stats, prev: fs.Stats) => {
       // Only emit changed if the file still exists
