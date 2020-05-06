@@ -32,7 +32,7 @@ When declaring a dependency, you can also provide a token to allow for multiple 
     }
   }
 
-  const CUSTOM2 = Symbol('custom2');
+  const CUSTOM2 = Symbol.for('di-custom2');
 
   @Injectable({ target: CustomService, symbol: CUSTOM2 })
   class CustomService2 extends CustomService {

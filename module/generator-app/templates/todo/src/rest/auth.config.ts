@@ -4,7 +4,7 @@ import { InjectableFactory } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { AppError } from '@travetto/base';
 
-export const BASIC = Symbol('BASIC');
+export const BASIC = Symbol.for('AUTH_BASIC');
 
 class AuthConfig {
   @InjectableFactory()

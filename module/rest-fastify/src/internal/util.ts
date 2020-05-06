@@ -4,7 +4,7 @@ import * as fastify from 'fastify';
 import { RestAppUtil } from '@travetto/rest';
 import { TRV_ORIG, TRV_RAW } from '@travetto/rest/src/types';
 
-const TRV_KEY = Symbol('TRV_KEY');
+const TRV_KEY = Symbol.for('_trv_fastify');
 
 // TODO: Document
 export class FastifyAppUtil {

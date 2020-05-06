@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { AuthContext } from '@travetto/auth';
 import { AsyncContext } from '@travetto/context';
 
-const CTX_SYM = Symbol('trv_ctx');
+const CTX_SYM = Symbol.for('trv_ctx');
 
 /**
  * Integration with the context service, to allow for tracking of

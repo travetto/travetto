@@ -14,7 +14,7 @@ export type VisitStack = {
 
 export type VisitState = { path: VisitStack[] };
 
-const TABLE_SYM = Symbol('TABLE');
+const TABLE_SYM = Symbol.for('_trv_model_sql_table');
 
 interface VisitNode<R> {
   path: VisitStack[];
