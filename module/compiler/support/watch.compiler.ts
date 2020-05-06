@@ -1,15 +1,13 @@
-import { Class } from '@travetto/registry';
-import type { Compiler } from '@travetto/compiler/src/compiler';
 import { ShutdownManager } from '@travetto/base';
-
-import { FilePresenceManager } from '../presence';
-import { RetargettingProxy } from '../proxy';
+import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
 import { CompileUtil } from '@travetto/boot';
+
+import { Compiler } from '../src/compiler';
 
 /**
  * Wraps the compiler supporting real-time changes to files
  */
-export function CompilerAdaptor($Compiler: Class<typeof Compiler>) {
+export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
   /**
    * Extending the $Compiler class to add some functionality
    */
@@ -49,6 +47,12 @@ export function CompilerAdaptor($Compiler: Class<typeof Compiler>) {
           return mod;
         }
       });
+
+      // Update sourcemap support
+      require('source-map-support').install({
+        emptyCacheBetweenOperations: true, // Empty cache when contents can change
+        retrieveFile: (p: string) => this.transpiler.getContents(p)
+      });
     }
 
     init() {
@@ -80,7 +84,7 @@ export function CompilerAdaptor($Compiler: Class<typeof Compiler>) {
     }
   };
 
-  Object.defineProperty(Cls, 'name', { value: '$Compiler' });
+  Object.defineProperty(Cls, 'name', { value: $Compiler.name });
 
   return Cls;
 }

@@ -1,14 +1,15 @@
-import type { DependencyRegistry } from '@travetto/di/src/registry';
-import type { ClassTarget } from '@travetto/di/src/types';
+import { RetargettingProxy } from '@travetto/watch';
 import type { Class } from '@travetto/registry';
-import { RetargettingProxy } from '../proxy';
+
+import type { DependencyRegistry } from '../src/registry';
+import type { ClassTarget } from '../src/types';
 
 /**
  * Wraps the Dependency Registry to support proxying instances
  */
-export function DiAdaptor($DependencyRegistry: Class<typeof DependencyRegistry>) {
+export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
 
-  const { DEFAULT_INSTANCE } = require('@travetto/di/src/registry');
+  const DEFAULT_INSTANCE = Symbol.for('__di_default');
 
   /**
    * Extending the $DependencyRegistry class to add some functionality for watching
@@ -89,6 +90,6 @@ export function DiAdaptor($DependencyRegistry: Class<typeof DependencyRegistry>)
     }
   };
 
-  Object.defineProperty(Cls, 'name', { value: '$DependencyRegistry' });
+  Object.defineProperty(Cls, 'name', { value: $DependencyRegistry.name });
   return Cls;
 }

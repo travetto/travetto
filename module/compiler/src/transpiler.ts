@@ -9,7 +9,7 @@ import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';
 
-const SIMPLE_COMPILATION = /support\/(transformer|phase)[.].+/;
+const SIMPLE_COMPILATION = /support\/(transformer|phase|watch)[.].+/;
 
 /**
  * Handles all transpilation from TS to JS.
@@ -48,9 +48,6 @@ export class Transpiler {
     private rootPaths: string[]
   ) {
     this.transformerManager = new TransformerManager(this.cwd);
-
-    // Provide a new source lookup
-    TranspileUtil.addSourceResolver(p => this.contents.get(p));
   }
 
   /**
@@ -199,6 +196,13 @@ export class Transpiler {
    */
   hasContents(file: string) {
     return this.contents.has(file);
+  }
+
+  /**
+   * Get contents
+   */
+  getContents(file: string) {
+    return this.contents.get(file);
   }
 
   /**

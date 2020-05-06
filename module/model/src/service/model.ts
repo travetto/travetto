@@ -2,6 +2,7 @@ import { Class } from '@travetto/registry';
 import { BindUtil, SchemaValidator, ALL_VIEW, SchemaRegistry } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Util, AppError } from '@travetto/base';
+import { Watchable } from '@travetto/base/src/internal/watchable';
 
 import { QueryVerifierService } from './verify';
 import { ModelOptions } from '../types';
@@ -17,7 +18,7 @@ function getClass<T extends any>(o: T) {
 }
 
 // TODO: Document
-// TODO: @Watchable
+@Watchable('@travetto/model/support/watch')
 @Injectable({ target: ModelService })
 export class ModelService implements IModelSource {
 
