@@ -5,7 +5,7 @@ import { SuiteConfig, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
 import { TestUtil } from './util';
 
-export const BREAKOUT = Symbol.for('_trv_test_breakout');
+export const BREAKOUT = Symbol.for('@trv:test/breakout');
 
 const DEFAULT_PHASE_TIMEOUT = EnvUtil.getInt('DEFAULT_PHASE_TIMEOUT', 15000);
 

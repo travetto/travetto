@@ -401,7 +401,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // If targeting self (default @Injectable behavior)
     if (classId === targetId && (parentConfig || parentClass.__abstract)) {
       const parentId = parentClass.__id;
-      const qualifier = config.qualifier === DEFAULT_INSTANCE ? Symbol.for(`_trv_di_Extends-${parentId}-${classId}`) : config.qualifier;
+      const qualifier = config.qualifier === DEFAULT_INSTANCE ? Symbol.for(`@trv:di/Extends-${parentId}-${classId}`) : config.qualifier;
 
       if (!this.targetToClass.has(parentId)) {
         this.targetToClass.set(parentId, new Map());

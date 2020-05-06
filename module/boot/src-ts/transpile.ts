@@ -7,7 +7,7 @@ type Preprocessor = (name: string, contents: string) => string;
 
 declare const global: { ts: any }; // Used for transformers
 
-const OPTS = Symbol.for('_compiler_options');
+const OPTS = Symbol.for('@trv:compiler/options');
 
 /**
  * Standard transpilation utilities, with support for basic text filters

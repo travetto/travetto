@@ -15,8 +15,8 @@ const METHODS: Record<string, [Function, string]> = {
 
 const OP_TOKEN_TO_NAME = new Map<number, string>();
 
-const asrt = Symbol.for('_trv_test_assert');
-const isTest = Symbol.for('_trv_test_valid');
+const asrt = Symbol.for('@trv:test/assert');
+const isTest = Symbol.for('@trv:test/valid');
 
 interface AssertState {
   [asrt]?: {

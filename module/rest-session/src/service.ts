@@ -8,8 +8,8 @@ import { CookieEncoder } from './encoder/cookie';
 import { CacheStore, MemoryCacheStore } from '@travetto/cache';
 import { Util, Env, AppError } from '@travetto/base';
 
-const SESS = Symbol.for('_trv_session');
-export const SESSION_CACHE = Symbol.for('_trv_session_cache');
+const SESS = Symbol.for('@trv:rest-session/self');
+export const SESSION_CACHE = Symbol.for('@trv:session/cache');
 
 @Injectable()
 // TODO: Document
