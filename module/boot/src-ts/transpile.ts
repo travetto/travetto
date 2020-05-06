@@ -16,9 +16,6 @@ const OPTS = Symbol();
  */
 export class TranspileUtil {
   private static preProcessors: Preprocessor[] = [];
-  private static sourceResolvers: SourceResolver[] = [
-    p => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined
-  ];
 
   private static get ts() { // Only registered on first call
     return global.ts = global.ts ?? new Proxy({}, { // Only in inject as needed
@@ -151,7 +148,7 @@ export class TranspileUtil {
     }
 
     // Drop typescript import, and use global. Great speedup;
-    if (fileName.includes('/transform')) { // Should only ever be in transformation code
+    if (fileName.includes('transform')) { // Should only ever be in transformation code
       fileContents = fileContents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
     }
 
@@ -169,7 +166,7 @@ export class TranspileUtil {
       err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${fileName}]` : `from ${fileName}`}`);
     }
 
-    if (EnvUtil.isTrue('watch') && !fileName.includes('/node_modules/')) {
+    if (EnvUtil.isTrue('WATCH') && !fileName.includes('/node_modules/')) {
       console.debug(`Unable to ${phase} ${fileName}: stubbing out with error proxy.`, err.message);
       return this.getErrorModule(err.message);
     }
@@ -201,19 +198,8 @@ export class TranspileUtil {
 
     // Register source maps for cached files
     require('source-map-support').install({
-      emptyCacheBetweenOperations: EnvUtil.isTrue('watch'), // Empty cache when contents can change
-      retrieveFile: (p: string) => {
-        p = FsUtil.toTS(p);
-        return this.sourceResolvers.reduce((v, res) => v || res(p)!, '');
-      }
+      retrieveFile: (p: string) => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined
     });
-  }
-
-  /**
-   * Add a new source resolver for source map support
-   */
-  static addSourceResolver(...p: SourceResolver[]) {
-    this.sourceResolvers.unshift(...p);
   }
 
   /**

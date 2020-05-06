@@ -3,13 +3,14 @@ import * as fs from 'fs';
 
 import { FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil } from '@travetto/boot';
 import { Env, ScanApp } from '@travetto/base';
+import { Watchable } from '@travetto/base/src/internal/watchable';
 
 import { Transpiler } from './transpiler';
 
 /**
  * Compilation orchestrator
  */
-// TODO: @Watchable
+@Watchable('@travetto/compiler/support/watch')
 class $Compiler extends EventEmitter {
 
   protected transpiler: Transpiler;
