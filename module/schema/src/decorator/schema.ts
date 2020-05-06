@@ -3,8 +3,11 @@ import { SchemaRegistry } from '../service/registry';
 import { ViewFieldsConfig } from '../service/types';
 import { ValidatorFn } from '../validate/types';
 
-/** @augments trv/schema/Schema */
-// TODO: Document
+/**
+ * TODO: Document
+ *
+ * @augments trv/schema/Schema
+ */
 export function Schema(): ClassDecorator { // Auto is used during compilation
   return (<T>(target: Class<T>): Class<T> => {
     SchemaRegistry.getOrCreatePending(target);

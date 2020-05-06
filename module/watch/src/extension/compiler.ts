@@ -1,3 +1,4 @@
+import { Class } from '@travetto/registry';
 import type { Compiler } from '@travetto/compiler/src/compiler';
 import { ShutdownManager } from '@travetto/base';
 
@@ -6,7 +7,7 @@ import { FilePresenceManager } from '../presence';
 /**
  * Wraps the compiler supporting real-time changes to files
  */
-export function CompilerAdaptor($Compiler: { new(...args: any[]): typeof Compiler }) {
+export function CompilerAdaptor($Compiler: Class<typeof Compiler>) {
 
   /**
    * Extending the $Compiler class to add some functionality

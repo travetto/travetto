@@ -78,7 +78,7 @@ export class TranspileUtil {
     const modErrs: string[] = [];
 
     // Handle line queries
-    contents = contents.replace(/^.*\/\/\s*@(line|file)-if\s+(.*?)\s*$/mg, (all, mode, token: string) => {
+    contents = contents.replace(/^.*[/][/]\s*@(line|file)-if\s+(.*?)\s*$/mg, (all, mode, token: string) => {
       if (modErrs.length) {
         return ''; // Short circuit
       }
@@ -94,7 +94,7 @@ export class TranspileUtil {
     });
 
     // Handle inline functions
-    contents = contents.replace(/\/[*]\s*@inline:(\S+)\s*[*]\/([^\/]*)\/[*]\s*@end\s*[*]\//g, (all, key, val) => {
+    contents = contents.replace(/[/][*]\s*@inline:([^*]+)\s*[*][/]([^/]*)[/][*]\s*@end\s*[*][/]/g, (all, key, val) => {
       const fn = this.inlineFunctions[name];
       return fn ? fn(val) : all;
     });
