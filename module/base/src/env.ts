@@ -65,7 +65,7 @@ class $Env {
   }
 
   toJSON() {
-    return (['trace', 'debug', 'cwd', 'env', 'prod', 'watch', 'profiles', 'appRoots'] as (keyof this)[])
+    return (['trace', 'debug', 'cwd', 'env', 'prod', 'profiles', 'appRoots'] as (keyof this)[])
       .reduce((acc, k) => {
         acc[k] = this[k];
         return acc;
