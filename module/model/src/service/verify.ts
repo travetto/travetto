@@ -5,10 +5,13 @@ import { Util } from '@travetto/base';
 
 import { ModelQuery, Query, PageableModelQuery } from '../model/query';
 
-import { SimpleType, ErrorCollector, OPERATORS, TypeUtil } from '../internal/util/types';
+import { TypeUtil } from '../internal/util/types';
 
-interface State extends ErrorCollector<string> {
+type SimpleType = keyof typeof TypeUtil.OPERATORS;
+
+interface State {
   path: string;
+  collect(element: string, message: string): void;
   extend(path: string): State;
   log(err: string): void;
 }
@@ -197,7 +200,7 @@ export class QueryVerifierService {
         return false;
       },
       onSimpleType: (state: State, type: SimpleType, value: any, isArray: boolean) => {
-        this.checkOperatorClause(state, type, value, OPERATORS[type], isArray);
+        this.checkOperatorClause(state, type, value, TypeUtil.OPERATORS[type], isArray);
       },
       onComplexType: (state: State, subCls: Class<T>, subVal: T, isArray: boolean): boolean => false
     });
