@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
 
-export const TRV_RAW = Symbol.for('_trv_rest_raw');
-export const TRV_ORIG = Symbol.for('_trv_rest_original');
+export const TRV_RAW = Symbol.for('@trv:rest/raw');
+export const TRV_ORIG = Symbol.for('@trv:rest/original');
 
 export type HeaderMap = Record<string, (string | (() => string))>;
 
