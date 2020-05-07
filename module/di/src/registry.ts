@@ -34,7 +34,7 @@ function mergeWithOriginal<T extends { original?: symbol | object, qualifier?: s
 /**
  * Dependency registry
  */
-@Watchable('@travetto/di/support/watch')
+@Watchable('@travetto/di/support/watch.injection')
 export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   protected pendingFinalize: Class[] = [];
 
