@@ -18,7 +18,7 @@ function getClass<T extends any>(o: T) {
 }
 
 // TODO: Document
-@Watchable('@travetto/model/support/watch')
+@Watchable('@travetto/model/support/watch.schema')
 @Injectable({ target: ModelService })
 export class ModelService implements IModelSource {
 
@@ -125,7 +125,6 @@ export class ModelService implements IModelSource {
     }
     const res = await this.source.getAllByQuery(cls, query);
     const ret = await Promise.all(res.map(o => this.postLoad(cls, o)));
-    console.log('Got res', ret, SchemaRegistry.get(cls)!.views.__all.fields);
     return ret;
   }
 

@@ -9,7 +9,6 @@ export class Todo {
   completed?: boolean;
   priority?: number;
   who?: string;
-  age = 20;
 }
 
 @Schema()

@@ -10,7 +10,7 @@ import { Transpiler } from './transpiler';
 /**
  * Compilation orchestrator
  */
-@Watchable('@travetto/compiler/support/watch')
+@Watchable('@travetto/compiler/support/watch.compiler')
 class $Compiler extends EventEmitter {
 
   protected transpiler: Transpiler;
