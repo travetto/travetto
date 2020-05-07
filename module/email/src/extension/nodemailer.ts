@@ -16,14 +16,6 @@ export class NodemailerTransport extends MailTransport {
   }
 
   sendMail(mail: MessageOptions): Promise<SentMessage> {
-    return new Promise<SentMessage>((resolve, reject) => {
-      this.transport.sendMail(mail as nodemailer.SendMailOptions, (err, val) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(val);
-        }
-      });
-    });
+    return this.transport.sendMail(mail as nodemailer.SendMailOptions);
   }
 }

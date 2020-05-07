@@ -110,7 +110,7 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
     // Inline compiled styles
     const css = await this.compiledStyles;
-    const styles = [`<style>\n${css}\n</style>`];
+    const styles = [`<style type="text/css">\n${css}\n</style>`];
 
     html = html.replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (all) => {
       styles.push(all);
