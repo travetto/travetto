@@ -1,6 +1,6 @@
 import { Application } from '@travetto/app';
 import { InjectableFactory } from '@travetto/di';
-import { EmailService } from '../../src/email';
+import { MailService } from '../../src/service';
 import { NodemailerTransport } from '../../src/extension/nodemailer';
 import { MailTransport } from '../../src/transport';
 const sendmail = require('nodemailer-sendmail-transport');
@@ -14,7 +14,7 @@ class EmailConfig {
 
 @Application('sample')
 export class Sample {
-  constructor(private service: EmailService) { }
+  constructor(private service: MailService) { }
 
   async run() {
     await this.service.sendEmail({

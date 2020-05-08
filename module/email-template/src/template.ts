@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as util from 'util';
+import * as inlineCss from 'inline-css'; // @line-if inline-css
 
 import { AppCache, FsUtil, EnvUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
@@ -124,6 +125,14 @@ export class DefaultMailTemplateEngine extends MailTemplateEngine {
 
     // Inline Images
     html = await TemplateUtil.inlineImageSource(html, (k) => this.getImage(k));
+
+    // Inline css
+    html = (await inlineCss(html, {
+      url: 'https://google.com',
+      preserveMediaQueries: true,
+      removeStyleTags: true,
+      applyStyleTags: true
+    }));
 
     // Generate text version
     const text = await MarkdownUtil.htmlToMarkdown(tpl);
