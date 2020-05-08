@@ -10,7 +10,7 @@ export class HtmlUtil {
   /**
    * Visit the tree
    */
-  static visit<T>(root: Node, visitor: (node: Node, descend: () => void) => void) {
+  static visit(root: Node, visitor: (node: Node, descend: () => void) => void) {
     function traverse(node: Node) {
       const children = Parse5Adapter.getChildNodes(node) ?? [];
       for (const child of children) {

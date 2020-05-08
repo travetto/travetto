@@ -22,12 +22,13 @@ export class TransformerManager {
    * Read all transformers from disk under the pattern support/transformer.*
    */
   init() {
-    const found = ScanApp.findSourceFiles(x => TRANSFORMER_RE.test(x), this.cwd)
-      .filter(x =>
-        !x.module.includes('@travetto') || !ScanApp.modAppExclude.includes(x.module.split(/@travetto\//)[1].split('/')[0]));
+    // FIXME: Fix this so it doesn't pick up other apps
+    //  Fix for all support ops
+    const found = ScanApp.findAppFiles(Env.appRoots, undefined, this.cwd)
+      .filter(x => TRANSFORMER_RE.test(x));
 
     for (const name of found) { // Exclude based on blacklist
-      const all = require(name.file);
+      const all = require(name);
       const resolved = Object
         .values(all)
         .map(x => getTransformHandlers(x) as this['transformers'])
@@ -35,7 +36,7 @@ export class TransformerManager {
 
       for (const transformers of resolved) {
         this.transformers.push(...transformers.map(x => {
-          x.file = name.module;
+          x.file = name;
           return x;
         }));
       }

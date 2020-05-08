@@ -9,7 +9,7 @@ interface AutoState {
 }
 
 export class SampleTransformer {
-  @OnProperty()
+  // @OnProperty()
   static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration, dm?: DecoratorMeta) {
     console.debug('Property Type');
     const resolved = state.resolveType(node);
@@ -17,8 +17,8 @@ export class SampleTransformer {
     return node;
   }
 
-  @OnStaticMethod('trv/Custom')
-  @OnMethod()
+  // @OnStaticMethod('trv/Custom')
+  // @OnMethod()
   static handleMethod(state: TransformerState & AutoState, node: ts.MethodDeclaration) {
     console.debug('Return Type');
     console.debug(state.resolveReturnType(node));
