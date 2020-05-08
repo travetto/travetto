@@ -6,6 +6,8 @@ import * as fs from 'fs';
 import { FsUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
 import { FilePresenceManager } from '@travetto/watch';
+import { MailTemplateEngine } from '@travetto/email';
+import { DependencyRegistry } from '@travetto/di';
 
 import { TemplateUtil } from './util';
 import { ImageUtil } from './image';
@@ -23,7 +25,8 @@ export class EmailServerApp {
   static async resolveIndex() {
     return {
       content: Mustache.render(this.INDEX, {
-        templates: (await ResourceManager.findAllByPattern(/[.]html$/, 'email')).sort()
+        templates: (await ResourceManager.findAllByPattern(/[.]tpl[.]html$/, 'email'))
+          .sort()
       }),
       contentType: 'text/html',
       static: true
@@ -35,9 +38,9 @@ export class EmailServerApp {
    */
   static async resolveTemplate(filename: string, reqUrl: url.URL) {
     const key = filename.replace(/[.]txt$/, '.html');
-    const { text: templateText } = await TemplateUtil.compile(key);
-    const data = TemplateUtil.buildContext(reqUrl, templateText);
-    const { text, html } = await TemplateUtil.compile(key);
+    const resolved = await ResourceManager.read(key, 'utf8');
+    const { text, html } = await TemplateUtil.compile(resolved);
+    const data = TemplateUtil.buildContext(reqUrl, text);
 
     let content = html;
 
@@ -51,7 +54,9 @@ export class EmailServerApp {
 </html>`;
     }
 
-    return { content: Mustache.render(content, data), contentType: 'text/html' };
+    // Let the engine template
+    const engine = await DependencyRegistry.getInstance(MailTemplateEngine);
+    return { content: await engine.template(content, data), contentType: 'text/html' };
   }
 
   /**
@@ -91,6 +96,9 @@ export class EmailServerApp {
           listener: {
             changed(file) {
               console.log('Updating file', file);
+              if (file.endsWith('.tpl.html')) {
+                // Recompile
+              }
               cb();
             }
           }

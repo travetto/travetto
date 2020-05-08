@@ -2,7 +2,7 @@ import { Application, AppUtil } from '@travetto/app';
 import { WebServer } from '@travetto/cli/src/http';
 import { EmailServerApp } from '../bin/lib/server';
 
-@Application('email-dev')
+@Application('email-dev', { watchable: false })
 class EntryPoint {
 
   run(port = 3839, reloadRate = 1000) {
@@ -16,5 +16,4 @@ class EntryPoint {
     const http = server.start();
     return AppUtil.listenToCloseable(http);
   }
-
 }

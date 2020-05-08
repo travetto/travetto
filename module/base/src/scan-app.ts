@@ -138,6 +138,7 @@ export class ScanApp {
   /**
    * Find app files, assuming provided root paths provided
    */
+  // FIXME: Currently is including non-app files from modules (sub-apps)
   static findAppFiles(rootPaths: string[], exclude?: (file: string) => boolean, root = Env.cwd) {
     const PATH_RE = SystemUtil.pathMatcher(rootPaths);
     const MOD_RE = this.getAppModPathMatcher();
