@@ -20,7 +20,7 @@ async function simpleWatcher(commonFolder: string, paths: string[], handler: {
   removed?(file: string): void;
   added?(file: string): void;
 }) {
-  const { Watcher } = await import('@travetto/base');
+  const { Watcher } = await import('@travetto/watch');
   const watcher = new Watcher();
 
   watcher.add([{

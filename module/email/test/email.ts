@@ -4,7 +4,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 
-import { EmailService, MailTransport, NullTransport } from '../';
+import { MailService, MailTransport, NullTransport } from '../';
 
 class Config {
   @InjectableFactory()
@@ -23,9 +23,11 @@ class EmailSuite {
 
   @Test('Send email')
   async sendEmail() {
-    const instance = await DependencyRegistry.getInstance(EmailService);
+    const instance = await DependencyRegistry.getInstance(MailService);
 
-    const opts = await instance.sendEmail({});
+    const opts = await instance.send({
+      html: 'Message'
+    });
     assert(opts);
   }
 }

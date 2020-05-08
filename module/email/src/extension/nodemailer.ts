@@ -15,7 +15,7 @@ export class NodemailerTransport extends MailTransport {
     this.transport = nodemailer.createTransport(transportFactory);
   }
 
-  sendMail(mail: MessageOptions): Promise<SentMessage> {
+  send(mail: MessageOptions): Promise<SentMessage> {
     return this.transport.sendMail(mail as nodemailer.SendMailOptions);
   }
 }
