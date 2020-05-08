@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
 import { cleanseOutput, cleanseTemplate } from './util';
-import { ComponentFactory } from '../../src/inky/factory';
+import { ComponentFactory } from '../../bin/lib/inky/factory';
 
 @Suite('Inky')
 class InkyTest {
