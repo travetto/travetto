@@ -4,7 +4,7 @@ import { Url } from 'url';
 /**
  * An address
  */
-interface Address {
+export interface Address {
   name: string;
   address: string;
 }
@@ -20,7 +20,7 @@ interface AttachmentLike {
 /**
  * A full attachment
  */
-interface Attachment extends AttachmentLike {
+export interface Attachment extends AttachmentLike {
   filename?: string | false;
   cid?: string;
   encoding?: string;
@@ -35,6 +35,10 @@ interface Attachment extends AttachmentLike {
  * Full message options
  */
 export interface MessageOptions {
+  html: string;
+  text?: string;
+  context?: Record<string, any>; // For templating
+
   from?: string | Address;
   sender?: string | Address;
   to?: string | Address | (string | Address)[];
@@ -44,8 +48,6 @@ export interface MessageOptions {
   inReplyTo?: string | Address;
   references?: string | string[];
   subject?: string;
-  text?: string | Buffer | Readable | AttachmentLike;
-  html?: string | Buffer | Readable | AttachmentLike;
   headers?: Record<string, string | string[]>;
   attachments?: Attachment[];
   alternatives?: Attachment[];

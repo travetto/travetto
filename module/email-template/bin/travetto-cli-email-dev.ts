@@ -5,7 +5,7 @@ import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
  * CLI Entry point for running the email server
  */
 export function init() {
-  return CliUtil.program.command('email-template').action(async (cmd: commander.Command) => {
+  return CliUtil.program.command('email:dev').action(async (cmd: commander.Command) => {
     const { WebServer } = await import('@travetto/cli/src/http');
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.bootstrap();
