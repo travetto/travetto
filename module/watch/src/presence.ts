@@ -17,7 +17,7 @@ export interface PresenceListener {
  * and handles multiple file roots.
  */
 export class FilePresenceManager {
-  private ext: string;
+  private ext: string | RegExp;
   private cwd: string;
   private rootPaths: string[] = [];
   private listener: PresenceListener;
@@ -38,11 +38,15 @@ export class FilePresenceManager {
       ext: FilePresenceManager['ext'];
       cwd: FilePresenceManager['cwd'];
       rootPaths: FilePresenceManager['rootPaths'];
-      listener: FilePresenceManager['listener'];
+      listener: Partial<FilePresenceManager['listener']>;
       excludeFiles?: FilePresenceManager['excludeFiles'];
       initialFileValidator?: FilePresenceManager['initialFileValidator'];
     }
   ) {
+    for (const k of ['added', 'removed', 'changed'] as const) {
+      config.listener[k] = config.listener[k] || (() => { });
+    }
+
     for (const k of Object.keys(config) as (keyof FilePresenceManager)[]) {
       this[k] = (config as any)[k];
     }
@@ -158,7 +162,7 @@ export class FilePresenceManager {
         return false;
       }
     }
-    return name.endsWith(this.ext);
+    return typeof this.ext === 'string' ? name.endsWith(this.ext) : this.ext.test(name);
   }
 
   /**

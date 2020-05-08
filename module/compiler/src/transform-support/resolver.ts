@@ -43,6 +43,7 @@ const UNKNOWN_TYPE = {
   name: 'object'
 } as res.LiteralType;
 
+// FIXME: Provide support for recursive types and resolution
 /**
  * Type resolver
  */

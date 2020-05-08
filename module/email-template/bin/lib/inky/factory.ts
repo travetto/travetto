@@ -1,6 +1,6 @@
 import { Node, serialize, parse, parseFragment } from 'parse5';
 
-import { HtmlUtil, Parse5Adapter } from '../html-util';
+import { HtmlUtil, Parse5Adapter } from '../html';
 
 export const COMPONENT_DEFAULTS = {
   button: 'button',

@@ -116,17 +116,19 @@ export class WebServer {
   /**
    * Run the server
    */
-  run() {
+  start() {
     if (this.handler.onChange) {
       this.handler.onChange(this.onChange.bind(this));
     }
 
-    http.createServer(this.handle.bind(this)).listen(this.port);
+    const server = http.createServer(this.handle.bind(this)).listen(this.port);
 
     if (this.open) {
       const finalUrl = `http://localhost:${this.port}`;
       console.debug(`Now running at ${finalUrl}`);
       ExecUtil.launch(finalUrl);
     }
+
+    return server;
   }
 }

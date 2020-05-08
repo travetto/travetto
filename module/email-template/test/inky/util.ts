@@ -1,7 +1,7 @@
 import { html } from 'js-beautify';
 
-import { Inky } from '../../src/inky';
-import { ComponentFactory } from '../../src/inky/factory';
+import { Inky } from '../../bin/lib/inky';
+import { ComponentFactory } from '../../bin/lib/inky/factory';
 
 const OPTS = {
   ['indent_size']: 2,
