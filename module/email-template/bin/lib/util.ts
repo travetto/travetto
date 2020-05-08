@@ -1,10 +1,13 @@
 import * as url from 'url';
 
+
+import { ResourceManager } from '@travetto/base';
 import { ConfigUtil } from '@travetto/config/src/internal/util';
+import { DependencyRegistry } from '@travetto/di';
+import { MailTemplateEngine } from '@travetto/email';
 
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
-import { FileUtil } from './file';
 import { StyleUtil } from './style';
 import { ImageUtil } from './image';
 
@@ -43,11 +46,13 @@ export class TemplateUtil {
    * Compile template
    */
   static async compile(tpl: string) {
-    // Load wrapper
-    tpl = await FileUtil.wrapWithBody(tpl);
+    const engine = await DependencyRegistry.getInstance(MailTemplateEngine);
+
+    // Wrap with body
+    tpl = (await ResourceManager.read('email/wrapper.html', 'utf8')).replace('<!-- BODY -->', tpl);
 
     // Resolve mustache partials
-    tpl = await FileUtil.resolveNestedTemplates(tpl);
+    tpl = await engine.resolveNested(tpl);
 
     // Transform inky markup
     let html = Inky.render(tpl);
