@@ -1,8 +1,6 @@
 import * as inlineCss from 'inline-css';
 
-import { ResourceManager } from '@travetto/base';
 import { FsUtil, EnvUtil } from '@travetto/boot';
-
 
 /**
  * Style Utils
@@ -36,7 +34,9 @@ export class StyleUtil {
    * Get compiled styles
    */
   static async getStyles() {
-    const partial = '/email/app.scss';
+    const { ResourceManager } = await import('@travetto/base');
+
+    const partial = 'email/app.scss';
     const file = await ResourceManager.find(partial);
     return await this.compileSass(file, [
       require

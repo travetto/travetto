@@ -16,6 +16,7 @@ export interface HttpHandler {
   resolve(message: http.IncomingMessage): Promise<{
     content: string | Buffer;
     contentType?: string;
+    statusCode?: number;
     static?: boolean;
   }>;
 }
@@ -77,6 +78,7 @@ export class WebServer {
         const res = await this.handler.resolve(request);
         content = res.content;
         isStatic = !!res.static;
+        response.statusCode = res.statusCode || 200;
 
         if (res.contentType) {
           contentType = res.contentType;
