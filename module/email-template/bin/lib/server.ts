@@ -1,32 +1,21 @@
 import * as http from 'http';
 import * as url from 'url';
 import * as Mustache from 'mustache';
-import * as fs from 'fs';
 
-import { FsUtil } from '@travetto/boot';
-import { ResourceManager } from '@travetto/base';
-import { FilePresenceManager } from '@travetto/watch';
-import { MailTemplateEngine } from '@travetto/email';
-import { DependencyRegistry } from '@travetto/di';
-
-import { TemplateUtil } from './util';
+import { TemplateUtil, MapLite } from './util';
 import { ImageUtil } from './image';
 
-export class EmailServerApp {
-
-  /**
-   * Creates a simple web app for testing and viewing emails
-   */
-  static INDEX = fs.readFileSync(`${__dirname}/index.html`, 'utf-8');
+export class DevServerUtil {
 
   /**
    * Resolves listing
    */
   static async resolveIndex() {
+    const { ResourceManager } = await import('@travetto/base');
+
     return {
-      content: Mustache.render(this.INDEX, {
-        templates: (await ResourceManager.findAllByPattern(/[.]tpl[.]html$/, 'email'))
-          .sort()
+      content: Mustache.render(await ResourceManager.read('email/index.dev.html', 'utf-8'), {
+        templates: await TemplateUtil.findAllTemplates()
       }),
       contentType: 'text/html',
       static: true
@@ -36,25 +25,21 @@ export class EmailServerApp {
   /**
    * Resolve template
    */
-  static async resolveTemplate(filename: string, reqUrl: url.URL) {
-    const key = filename.replace(/[.]txt$/, '.html');
-    const resolved = await ResourceManager.read(key, 'utf8');
-    const { text, html } = await TemplateUtil.compile(resolved);
-    const data = TemplateUtil.buildContext(reqUrl, text);
+  static async resolveTemplate(key: string, format: string, context: Record<string, any>, overrides: MapLite<string, string>) {
+    const compiled = await TemplateUtil.compileToDisk(key, true);
 
-    let content = html;
+    const { ResourceManager } = await import('@travetto/base');
 
-    if (filename.endsWith('.txt')) {
-      content = `
-<html>
-<head></head>
-<body style="background-color: #eee">
-  <pre style="background-color: white; width: 80%; padding: 1em; margin: 1em auto;">${text}</pre>
-</body>
-</html>`;
-    }
+    const content = format === 'txt' ?
+      Mustache.render(await ResourceManager.read(`email/text.dev.html`, 'utf-8'), compiled) :
+      compiled.html;
+
+    const data = await TemplateUtil.buildContext(context, compiled.text, overrides);
 
     // Let the engine template
+    const { MailTemplateEngine } = await import('@travetto/email');
+    const { DependencyRegistry } = await import('@travetto/di');
+
     const engine = await DependencyRegistry.getInstance(MailTemplateEngine);
     return { content: await engine.template(content, data), contentType: 'text/html' };
   }
@@ -72,41 +57,34 @@ export class EmailServerApp {
    */
   static async resolve(request: http.IncomingMessage) {
     const reqUrl = new url.URL(request.url!);
-    const filename = reqUrl.pathname.substring(1);
+    const filename = reqUrl.pathname.substring(1) || 'index.html';
+    const ext = filename.replace(/^.*?(?=[.](tpl[.])?[^.]+)/, '');
+    console.debug('Resolving', filename, ext);
 
-    if (!filename || filename === 'index.html') {
-      return this.resolveIndex();
-    } else if (filename.endsWith('.txt') || filename.endsWith('.html')) {
-      return this.resolveTemplate(filename, reqUrl);
-    } else {
-      return this.resolveImage(filename);
+    switch (ext) {
+      case '.jpg':
+      case '.png':
+      case '.ico':
+      case '.gif': return this.resolveImage(filename);
+      case '.html': return this.resolveIndex();
+      case '.tpl.html': {
+        const format = (reqUrl.searchParams.get('format') || 'html').toLowerCase();
+        const context = await (async () => JSON.parse(reqUrl.searchParams.get('jsonContext') || '{}'))().catch(e => ({}));
+        return this.resolveTemplate(filename, format, context, reqUrl.searchParams);
+      }
+      default: {
+        console.log('Unknown request', request.url);
+        return {
+          content: '', contentType: 'text/plain', statusCode: 404
+        };
+      }
     }
   }
 
   /**
-   * Process requests
+   * Register a change listener
    */
-  static getHandler() {
-    return {
-      async onChange(cb: () => void) {
-        const watcher = new FilePresenceManager({
-          cwd: FsUtil.cwd,
-          ext: /[.](html|txt|scss|css|png|jpg|gif)$/,
-          rootPaths: ResourceManager.getRelativePaths(),
-          listener: {
-            changed(file) {
-              console.log('Updating file', file);
-              if (file.endsWith('.tpl.html')) {
-                // Recompile
-              }
-              cb();
-            }
-          }
-        });
-
-        await watcher.init();
-      },
-      resolve: this.resolve.bind(this)
-    };
+  static onChange(cb: () => void) {
+    TemplateUtil.watchCompile(cb);
   }
 }

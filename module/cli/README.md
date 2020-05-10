@@ -65,11 +65,12 @@ The regexes are the patterns of tests you want to run, and all tests must be fou
 
 The test command is the only supported method for invoking the [`Test`](https://github.com/travetto/travetto/tree/master/module/test) module via the command line.  As stated in the test documentation, the primary output format is `tap`.  Additionally the code supports `json` and `event` as formats that can be consumed programmatically.  `exec` is used internally for sub-dividing tests to run concurrently, and communicate results over IPC.
 
+// FIXME: Rewrite
 ## Email Templating
 
 **Terminal: Email template usage**
 ```bash
-travetto email-template
+travetto email:compile
 ``` 
 
 This command is provided by [`email-template`](https://github.com/travetto/travetto/tree/master/module/email-template).  It will spin up a web server (port 3839) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline.  You would navigate to the path of an asset, e.g. `http://localhost:3839/my-email.html`, to test and develop the file in `<root>/resources/email/my-email.html`.  You can also change the extension to `.txt` to see the textual representation.

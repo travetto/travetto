@@ -2,9 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { ResourceManager } from '@travetto/base';
 import { AppCache, FsUtil } from '@travetto/boot';
-import { ImageUtil as ImgUtil } from '@travetto/image';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 const fsReadFile = util.promisify(fs.readFile);
@@ -51,6 +49,9 @@ export class ImageUtil {
    * Fetch image, compress and return as buffer
    */
   static async getImage(rel: string) {
+    const { ResourceManager } = await import('@travetto/base');
+    const { ImageUtil: ImgUtil } = await import('@travetto/image');
+
     const pth = await ResourceManager.find(rel);
     const out = AppCache.toEntryName(pth);
 

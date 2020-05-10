@@ -138,7 +138,7 @@ export class $ResourceManager {
    * Read a resource, mimicking fs.read
    */
   async read(pth: string): Promise<Buffer>;
-  async read(pth: string, options?: 'utf8' | { encoding: 'utf8' }): Promise<string>;
+  async read(pth: string, options?: 'utf8' | 'utf-8' | { encoding: 'utf8' | 'utf-8' }): Promise<string>;
   async read(pth: string, options?: string | { encoding?: string, flag?: string }) {
     pth = await this.find(pth);
     return fsReadFile(pth, options);
@@ -148,7 +148,7 @@ export class $ResourceManager {
    * Read a resource, mimicking fs.read, and doing it synchronously
    */
   readSync(pth: string): Buffer;
-  readSync(pth: string, options: 'utf8' | { encoding: 'utf8' }): string;
+  readSync(pth: string, options: 'utf8' | 'utf-8' | { encoding: 'utf8' | 'utf-8' }): string;
   readSync(pth: string, options?: string | { encoding?: string, flag?: string }) {
     pth = this.findSync(pth);
     return fs.readFileSync(pth, options);
