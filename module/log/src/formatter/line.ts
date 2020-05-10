@@ -8,8 +8,7 @@ import { FsUtil } from '@travetto/boot';
 
 // TODO: Document
 export interface LineFormatterOpts {
-  timestamp?: boolean;
-  timeMillis?: boolean;
+  timestamp?: 'ms' | 's' | false;
   colorize?: boolean;
   align?: boolean;
   level?: boolean;
@@ -21,7 +20,7 @@ export class LineFormatter implements Formatter {
   private opts: LineFormatterOpts;
 
   constructor(opts: LineFormatterOpts) {
-    this.opts = { colorize: true, timestamp: true, align: true, level: true, location: true, ...opts };
+    this.opts = { colorize: true, timestamp: 'ms', align: true, level: true, location: true, ...opts };
   }
 
   format(ev: LogEvent) {
@@ -30,8 +29,8 @@ export class LineFormatter implements Formatter {
 
     if (opts.timestamp) {
       let timestamp = new Date(ev.timestamp).toISOString();
-      if (!opts.timeMillis) {
-        [timestamp] = timestamp.split('.');
+      if (opts.timestamp === 's') {
+        timestamp = timestamp.replace(/[.]\d{3}/, '');
       }
       if (opts.colorize) {
         timestamp = stylize(timestamp, 'white', 'bold');

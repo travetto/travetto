@@ -43,7 +43,7 @@ export class CompileUtil {
     let mod: any;
     try {
       mod = this.ogModuleLoad.apply(null, [request, parent]);
-      if (!parent.loaded && (!mod || !mod.ᚕtrv)) { // Standard ts compiler output
+      if (!parent.loaded && (mod === undefined || !('ᚕtrv' in Object.getOwnPropertyDescriptors(mod)))) { // Standard ts compiler output
         let p = mod.filename || mod.id;
         try {
           p = p || Module._resolveFilename!(request, parent);
