@@ -22,7 +22,6 @@ export class TransformerManager {
    * Read all transformers from disk under the pattern support/transformer.*
    */
   init() {
-    // FIXME: Fix this so it doesn't pick up other apps
     //  Fix for all support ops
     const found = ScanApp.findAppFiles(Env.appRoots, undefined, this.cwd)
       .filter(x => TRANSFORMER_RE.test(x));
