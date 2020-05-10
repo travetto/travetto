@@ -1,32 +1,22 @@
-import * as inlineCss from 'inline-css';
-
-import { FsUtil, EnvUtil } from '@travetto/boot';
+import * as util from 'util';
+import { FsUtil } from '@travetto/boot';
 
 /**
  * Style Utils
  */
 export class StyleUtil {
-  private static defaultTemplateWidth = EnvUtil.getInt('EMAIL_WIDTH', 580);
 
   /**
    * Compile SCSS content with roots as search paths for additional assets
    */
   static async compileSass(file: string, roots: string[]) {
-    return new Promise<string>((resolve, reject) => {
-      const sass = require('sass') as { render(args: any, cb: (err: any, results: { css: string | Buffer }) => void): void };
-      sass.render({
-        file,
-        sourceMap: false,
-        includePaths: roots
-      }, (err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          const css = res.css.toString();
-          resolve(css);
-        }
-      });
+    const sass = await import('node-sass');
+    const result = await util.promisify(sass.render)({
+      file,
+      sourceMap: false,
+      includePaths: roots
     });
+    return result.css.toString();
   }
 
 
@@ -36,8 +26,7 @@ export class StyleUtil {
   static async getStyles() {
     const { ResourceManager } = await import('@travetto/base');
 
-    const partial = 'email/app.scss';
-    const file = await ResourceManager.find(partial);
+    const file = await ResourceManager.find('email/app.scss');
     return await this.compileSass(file, [
       require
         .resolve('foundation-emails/gulpfile.js')
@@ -61,12 +50,12 @@ export class StyleUtil {
 
     // Macro support
     html = html
-      .replace(/<\/head>/, all => `${styles.join('\n')}\n${all}`)
-      .replace(/%EMAIL_WIDTH%/g, `${this.defaultTemplateWidth}`);
+      .replace(/<\/head>/, all => `${styles.join('\n')}\n${all}`);
 
     // Inline css
+    const inlineCss = await import('inline-css');
     html = (await inlineCss(html, {
-      url: 'https://google.com',
+      url: 'https://app.dev',
       preserveMediaQueries: true,
       removeStyleTags: true,
       applyStyleTags: true
