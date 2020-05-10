@@ -21,6 +21,10 @@ The common environment variables throughout the code base:
 * `DEBUGGER` = 0|1          - Indicates whether or not a debugger is attached.  Some timing compensation is needed
 * `IDLE_TIMEOUT` = 120000   - Default timeout for a test-worker, determines self termination if no request within that time window
 
+## Exec
+* `NO_DOCKER` = 0|1         - Indicates if docker should even be considered when running a command service, defaults to 0
+* `DOCKER_NS` =             - Defaults to undefined, but can be specified to ensure unique instantation
+
 ## Framework
 * `TRV_DEV` = 0|1           - If we are in development mode, 
 * `TRV_CACHE` = cwd         - The output directory for compilation, defaults to `.trv_cache` of the cwd

@@ -3,7 +3,6 @@ import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
 import { WebServer } from '@travetto/cli/src/http';
 import { color } from '@travetto/cli/src/color';
 
-
 /**
  * CLI Entry point for running the email server
  */
