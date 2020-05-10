@@ -43,15 +43,19 @@ export class CompileUtil {
     let mod: any;
     try {
       mod = this.ogModuleLoad.apply(null, [request, parent]);
-      if (!parent.loaded && (mod === undefined || !('ᚕtrv' in Object.getOwnPropertyDescriptors(mod)))) { // Standard ts compiler output
-        let p = mod.filename || mod.id;
-        try {
-          p = p || Module._resolveFilename!(request, parent);
-        } catch (err) {
-          // Ignore if we can't resolve
-        }
-        if (p && p.endsWith(TranspileUtil.ext)) {
-          throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
+      if (!parent.loaded) { // Standard ts compiler output
+        const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
+        if (!mod || !('ᚕtrv' in desc)) {
+          let p = 'filename' in desc ? mod.filename : ('id' in desc ? mod.id : undefined);
+          try {
+            p = p || Module._resolveFilename!(request, parent);
+          } catch (err) {
+            // Ignore if we can't resolve
+          }
+          if (p && p.endsWith(TranspileUtil.ext)) {
+            throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
+          }
+
         }
       }
     } catch (e) {

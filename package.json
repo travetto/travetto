@@ -20,14 +20,15 @@
 		"@types/faker": "^4.1.11",
 		"@types/js-yaml": "^3.12.3",
 		"@types/mysql": "^2.15.10",
+		"@types/node-forge": "0.7.2",
 		"@types/nodemailer": "^6.4.0",
 		"@types/passport-facebook": "^2.1.9",
-		"@types/node-forge": "0.7.2",
 		"@types/pg": "^7.14.3",
 		"@types/redis": "^2.8.18",
+		"@types/inline-css": "^0.0.33",
+		"@types/node-sass": "3.10.32",
 		"@typescript-eslint/eslint-plugin": "^2.30.0",
 		"@typescript-eslint/parser": "^2.30.0",
-		"source-map-support": "^0.5.19",
 		"eslint": "^6.8.0",
 		"faker": "^4.1.0",
 		"js-yaml": "^3.13.1",
@@ -38,7 +39,10 @@
 		"nodemailer-sendmail-transport": "^1.0.2",
 		"passport-facebook": "^3.0.0",
 		"pg": "^8.0.3",
-		"redis": "^3.0.2"
+		"redis": "^3.0.2",
+		"source-map-support": "^0.5.19",
+		"inline-css": "^2.6.3",
+		"node-sass": "^4.14.1"
 	},
 	"dependencies": {
 		"typescript": "^3.8.3"
