@@ -34,11 +34,6 @@ class $Env {
   readonly trace: boolean;
 
   /**
-   * Whether or not startup logging should be suppressed
-   */
-  readonly quietInit: boolean;
-
-  /**
    * Additional locations for the application search paths
    */
   readonly appRoots: string[];
@@ -53,7 +48,6 @@ class $Env {
 
     this.debug = EnvUtil.isSet('DEBUG') ? !EnvUtil.isFalse('DEBUG') : !this.prod;
     this.trace = EnvUtil.isSet('TRACE') && !EnvUtil.isFalse('TRACE');
-    this.quietInit = EnvUtil.isTrue('QUIET_INIT');
   }
 
   private computeAppRoots() {
@@ -83,7 +77,7 @@ class $Env {
    * Determine if color is supported in the terminal
    */
   get colorize() {
-    return (process.stdout.isTTY && !EnvUtil.isTrue('NO_COLOR')) || EnvUtil.isTrue('FORCE_COLOR');
+    return EnvUtil.isSetTrueOrFalse('FORCE_COLOR', 'NO_COLOR', process.stdout.isTTY);
   }
 }
 

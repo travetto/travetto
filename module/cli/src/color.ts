@@ -18,7 +18,7 @@ function colorizeAny(col: string, value: string | number | boolean): string;
 function colorizeAny(col: string, value: any) {
   if (colorize === undefined) {
     // Load on demand, synchronously
-    colorize = (process.stdout.isTTY && !EnvUtil.isTrue('NO_COLOR')) || EnvUtil.isTrue('FORCE_COLOR');
+    colorize = EnvUtil.isSetTrueOrFalse('FORCE_COLOR', 'NO_COLOR', process.stdout.isTTY);
   }
   if (colorize && value !== undefined && value !== null && value !== '') {
     value = `${col}${value}${Codes.reset}`;

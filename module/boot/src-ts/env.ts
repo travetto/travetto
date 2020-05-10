@@ -52,4 +52,24 @@ export class EnvUtil {
     const val = this.get(k);
     return val !== undefined && val !== '' && /^(0|false|off|no)$/i.test(val);
   }
+
+  /**
+   * Checks to see if the negative is set
+   */
+  static isSetTrueOrFalse(pos: string, neg: string, def: boolean) {
+    return this.isSet(pos) ?
+      this.isTrue(pos) :
+      this.isSet(neg) ?
+        this.isFalse(neg) :
+        def;
+  }
+
+  /**
+   * Checks to see if the negative is set
+   */
+  static isValueOrFalse<T extends string>(key: string, def: T): T | undefined {
+    return this.isFalse(key) ?
+      undefined :
+      this.get(key, def) as typeof def;
+  }
 }

@@ -41,8 +41,7 @@ class $Logger {
   listen({ formatter, stdout, stderr, key }: Partial<LogStream> = {}) {
     formatter = formatter ?? new LineFormatter({
       colorize: Env.colorize,
-      timestamp: ConsoleManager.timestamp,
-      timeMillis: ConsoleManager.timeMillis
+      timestamp: ConsoleManager.timestamp
     });
 
     stderr = stderr ?? new ConsoleOutput({ method: 'error' });

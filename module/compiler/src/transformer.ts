@@ -42,7 +42,7 @@ export class TransformerManager {
       }
     }
 
-    if (!Env.quietInit) { // Log loaded transformers
+    if (Env.debug) { // Log loaded transformers
       console.debug('Transformers',
         ...this.transformers.map(x => {
           const name = x.file.match(TRANSFORMER_RE)![1];
