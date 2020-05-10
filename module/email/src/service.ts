@@ -41,8 +41,8 @@ export class MailService {
   async sendCompiled(key: string, msg: Omit<MessageOptions, 'html' | 'text'>): Promise<any> {
     if (!this.compiled.has(key)) {
       this.compiled.set(key, {
-        html: await ResourceManager.read(`/email/compiled/${key}.html`, 'utf8'),
-        text: await ResourceManager.read(`/email/compiled/${key}.txt`, 'utf8').catch(err => undefined),
+        html: await ResourceManager.read(`email/${key}.compiled.html`, 'utf8'),
+        text: await ResourceManager.read(`email/${key}.compiled.txt`, 'utf8').catch(err => undefined),
       });
     }
     return this.send({

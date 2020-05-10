@@ -12,3 +12,4 @@ bin/test/model/**
 **/*.lerna_backup
 **/api-client/**
 sample/dummy/**
+**/resources/email/*.compiled.*
