@@ -3,11 +3,18 @@ import { EnvUtil, ExecUtil } from '@travetto/boot';
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';
 
-// TODO: Document
+/**
+ * A command to be executed.  A command can be thought of as a
+ * program or operation that can be provided via a pre-installed binary or by using
+ * a docker container.
+ */
 export class CommandService {
 
   private static hasDocker: boolean;
 
+  /**
+   * Check to see if docker is available
+   */
   static async dockerAvailable() {
     if (this.hasDocker === undefined && !EnvUtil.isTrue('NO_DOCKER')) { // Check for docker existence
       const { result: prom } = ExecUtil.spawn('docker', ['ps']);
@@ -30,6 +37,9 @@ export class CommandService {
     };
   }
 
+  /**
+   * Get the container for a given command
+   */
   async getContainer(): Promise<DockerContainer | undefined> {
     const { localCheck } = this.config;
 
@@ -46,10 +56,17 @@ export class CommandService {
     }
   }
 
+  /**
+   * Get the container to support the `docker run` command
+   */
   getRunContainer() {
     return this.runContainer = this.runContainer || this.getContainer();
   }
 
+  /**
+   * Get a version of the container using `docker exec`. This is meant to be used in
+   * scenarios where multiple executions are desired.
+   */
   getExecContainer() {
     return this.execContainer = this.execContainer || this.getContainer().then(async c => {
       if (c) {
@@ -61,6 +78,9 @@ export class CommandService {
     });
   }
 
+  /**
+   * Execute a command, either via a docker exec or the locally installed program
+   */
   async exec(...args: string[]) {
     const container = await this.getExecContainer();
     args = (container ? this.config.containerCommand : this.config.localCommand)(args);
@@ -72,6 +92,9 @@ export class CommandService {
     }
   }
 
+  /**
+   * Run a single command, if using docker, run once and terminate.
+   */
   async run(...args: string[]) {
     const container = await this.getRunContainer();
     const [cmd, ...rest] = (container ? this.config.containerCommand : this.config.localCommand)(args);
