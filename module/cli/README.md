@@ -65,17 +65,22 @@ The regexes are the patterns of tests you want to run, and all tests must be fou
 
 The test command is the only supported method for invoking the [`Test`](https://github.com/travetto/travetto/tree/master/module/test) module via the command line.  As stated in the test documentation, the primary output format is `tap`.  Additionally the code supports `json` and `event` as formats that can be consumed programmatically.  `exec` is used internally for sub-dividing tests to run concurrently, and communicate results over IPC.
 
-// FIXME: Rewrite
 ## Email Templating
 
-**Terminal: Email template usage**
+**Terminal: Email template compilation**
 ```bash
 travetto email:compile
 ``` 
 
-This command is provided by [`email-template`](https://github.com/travetto/travetto/tree/master/module/email-template).  It will spin up a web server (port 3839) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline.  You would navigate to the path of an asset, e.g. `http://localhost:3839/my-email.html`, to test and develop the file in `<root>/resources/email/my-email.html`.  You can also change the extension to `.txt` to see the textual representation.
+This command is provided by [`email-template`](https://github.com/travetto/travetto/tree/master/module/email-template).  It is used to compile the email templates ahead of time for use during execution.  The generated files are `.compiled.html` and `.compiled.txt` for the html/text output respectivevly.  By default these files are added to the `.gitignore` as they are generally not intended to be saved but to be generated during the build process.
 
-Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
+
+**Terminal: Email template development**
+```bash
+travetto email:dev
+``` 
+
+This command is provided by [`email-template`](https://github.com/travetto/travetto/tree/master/module/email-template).  It will spin up a web server (port 3839) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline. Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
 
 ## OpenAPI Spec Generation
 
