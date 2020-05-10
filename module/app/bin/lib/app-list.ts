@@ -97,8 +97,7 @@ export class AppListUtil {
         text = (await ExecUtil.fork(path.resolve(__dirname, '..', 'find-apps'), [], {
           env: {
             DEBUG: '0',
-            TRACE: '0',
-            QUIET_INIT: '1'
+            TRACE: '0'
           }
         }).result).stdout;
         AppCache.writeEntry(this.cacheConfig, text);

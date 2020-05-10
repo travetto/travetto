@@ -34,15 +34,13 @@ export class $ApplicationRegistry {
     // Fetch instance of app class
     const inst = await DependencyRegistry.getInstance(config.target);
 
-    if (!Env.quietInit) {
-      console.log('Running application', name);
-
-      console.log(`Configured`, util.inspect({
-        app: AppInfo,
-        env: Env.toJSON(),
-        config: Env.prod ? ConfigManager.getSecure() : ConfigManager.get()
-      }, false, 10, true));
-    }
+    // Log startup
+    console.log('Running application', name);
+    console.log(`Configured`, util.inspect({
+      app: AppInfo,
+      env: Env.toJSON(),
+      config: Env.prod ? ConfigManager.getSecure() : ConfigManager.get()
+    }, false, 10, true));
 
     // If run command exists on app
     if (inst.run) {

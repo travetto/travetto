@@ -45,8 +45,7 @@ class $ConsoleManager {
 
   readonly key = KEY;
   readonly defaultEnrich = !(EnvUtil.isTrue('PLAIN_CONSOLE') || EnvUtil.isTrue('PLAIN'));
-  readonly timestamp = !EnvUtil.isFalse('LOG_TIME');
-  readonly timeMillis = EnvUtil.isTrue('LOG_MILLIS') || (Env.trace ? !EnvUtil.isFalse('LOG_MILLIS') : false);
+  readonly timestamp = EnvUtil.isValueOrFalse('LOG_TIME', 'ms' as 'ms' | 's');
   readonly exclude = new Set<string>([]);
 
   constructor() {
@@ -71,8 +70,11 @@ class $ConsoleManager {
       ...args
     ];
     if (this.timestamp) {
-      const [time] = new Date().toISOString().split(this.timeMillis ? /~/ : /[.]/);
-      args.unshift(time);
+      let timestamp = new Date().toISOString();
+      if (this.timestamp === 's') {
+        timestamp = timestamp.replace(/[.]\d{3}/, '');
+      }
+      args.unshift(timestamp);
     }
     return args;
   }

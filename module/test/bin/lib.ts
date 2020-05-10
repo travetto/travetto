@@ -10,7 +10,6 @@ export async function runTests(opts: State) {
 
 export async function load(env: any = {}) {
   Object.assign(process.env, {
-    QUIET_INIT: '1',
     DEBUG: process.env.DEBUG || '0',
     TRACE: process.env.TRACE || '0',
     PROD: '0',
@@ -24,14 +23,14 @@ export async function load(env: any = {}) {
   await PhaseManager.bootstrap('require-all');
 }
 
-export async function runTestsDirect() {
+export async function runTestsDirect(format: string = 'tap', mode: any = 'single', concurrency = 1) {
   await load({ DEBUGGER: true });
 
   return runTests({
     args: process.argv.slice(2),
-    format: EnvUtil.get('TEST_FORMAT', 'tap'),
-    mode: EnvUtil.get('TEST_MODE', 'single') as any,
-    concurrency: EnvUtil.getInt('TEST_CONCURRENCY', 1)
+    format,
+    mode,
+    concurrency
   });
 }
 
