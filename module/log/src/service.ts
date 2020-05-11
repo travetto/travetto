@@ -1,3 +1,4 @@
+import { ColorUtil } from '@travetto/boot';
 import { Env, ConsoleManager, LogLevel, ConsolePayload } from '@travetto/base';
 
 import { LogEvent, LogLevels, LogStream } from './types';
@@ -62,7 +63,7 @@ class $Logger {
    */
   listen({ formatter, stdout, stderr, key }: Partial<LogStream> = {}) {
     formatter = formatter ?? new LineFormatter({
-      colorize: Env.colorize,
+      colorize: ColorUtil.colorize,
       timestamp: ConsoleManager.timestamp
     });
 

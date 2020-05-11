@@ -9,9 +9,22 @@ export class Finalize {
   static NM_ROOT = `${Util.ROOT}/node_modules`;
   static COMMON_LIBS = ['typescript', 'tslib'];
 
+  /**
+   * Symlink, with some platform specific support
+   */
+  static makeLinkSync(actual: string, linkPath: string) {
+    try {
+      fs.lstatSync(linkPath);
+    } catch (e) {
+      const file = fs.statSync(actual).isFile();
+      fs.symlinkSync(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
+      fs.lstatSync(linkPath); // Ensure created
+    }
+  }
+
   static linkCommon(base: string) {
     for (const dep of this.COMMON_LIBS) {
-      FsUtil.makeLinkSync(`${this.NM_ROOT}/${dep}`, `${base}/${dep}`);
+      this.makeLinkSync(`${this.NM_ROOT}/${dep}`, `${base}/${dep}`);
     }
   }
 
@@ -19,7 +32,7 @@ export class Finalize {
     for (const dep of new Set([...modules, ...(DepResolver.resolve('test', base).regular), '@travetto/cli'])) {
       const [, sub] = dep.split('@travetto/');
       if (FsUtil.existsSync(`${this.MOD_ROOT}/${sub}`)) {
-        FsUtil.makeLinkSync(`${this.MOD_ROOT}/${sub}`, `${base}/${dep}`);
+        this.makeLinkSync(`${this.MOD_ROOT}/${sub}`, `${base}/${dep}`);
       }
     }
   }
@@ -36,7 +49,7 @@ export class Finalize {
         }
 
         try {
-          FsUtil.makeLinkSync(`${this.MOD_ROOT}/${smod}/${src}`, `${base}/.bin/${name}`);
+          this.makeLinkSync(`${this.MOD_ROOT}/${smod}/${src}`, `${base}/.bin/${name}`);
         } catch (e) {
         }
       }

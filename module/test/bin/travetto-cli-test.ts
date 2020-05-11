@@ -1,5 +1,6 @@
 import * as os from 'os';
 import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
+import { ColorUtil } from '@travetto/boot';
 import { Colors } from '@travetto/cli/src/color';
 
 // TODO: Document
@@ -14,9 +15,8 @@ export function init() {
       const { runTests, load } = await import('./lib');
 
       await load();
-      const { Env } = await import('@travetto/base');
 
-      if (cmd.format === 'tap' && Env.colorize) {
+      if (cmd.format === 'tap' && ColorUtil.colorize) {
         const { TapEmitter } = await import('../src/consumer/types/tap');
         cmd.consumer = new TapEmitter(process.stdout, {
           assertDescription: Colors.description,

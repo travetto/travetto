@@ -72,13 +72,6 @@ class $Env {
   hasProfile(name: string) {
     return this.profiles.has(name);
   }
-
-  /**
-   * Determine if color is supported in the terminal
-   */
-  get colorize() {
-    return EnvUtil.isSetTrueOrFalse('FORCE_COLOR', 'NO_COLOR', process.stdout.isTTY);
-  }
 }
 
 export const Env = new $Env();
