@@ -1,22 +1,41 @@
-import { Env, ConsoleManager, ConsolePayload } from '@travetto/base';
+import { Env, ConsoleManager, LogLevel, ConsolePayload } from '@travetto/base';
 
-import { LogEvent, LogListener, LogLevels, LogLevel, LogStream } from './types';
+import { LogEvent, LogLevels, LogStream } from './types';
 import { LineFormatter } from './formatter/line';
 import { ConsoleOutput } from './output/console';
 import { LogUtil } from './util';
 
 const DEFAULT = Symbol.for('@trv:log/default');
 
-// TODO: Document
+/**
+ * Logger service
+ */
 class $Logger {
 
-  private listeners = new Map<string | symbol, LogListener>();
-  private listenList: LogListener[] = [];
+  /**
+   * Listeners for logging events
+   */
+  private listeners = new Map<string | symbol, (ev: LogEvent) => void>();
+  /**
+   * List of all listeners
+   */
+  private listenList: ((ev: LogEvent) => void)[] = [];
 
-  private filters: Record<string, (x: string) => boolean> = {};
-  private exclude: Record<string, boolean> = { debug: true, trace: true };
+  /**
+   * List of logging filters
+   */
+  private filters: Partial<Record<LogLevel, (x: string) => boolean>> = {};
+  /**
+   * Which log levels to exclude
+   */
+  private exclude: Partial<Record<LogLevel, boolean>> = { debug: true, trace: true };
+  /**
+   * Which flags
+   */
   private flags: { debug?: string, trace?: string };
-
+  /**
+   * Initialize
+   */
   init() {
     this.flags = {
       debug: LogUtil.readEnvVal('debug', !Env.prod ? '*' : ''),
@@ -35,9 +54,12 @@ class $Logger {
 
     // Base logger, for free
     ConsoleManager.set(this);
-    this.listen();
+    this.listen(); // Register console listener
   }
 
+  /**
+   * Regigster a new listener with default support for formatters and output mechanisms
+   */
   listen({ formatter, stdout, stderr, key }: Partial<LogStream> = {}) {
     formatter = formatter ?? new LineFormatter({
       colorize: Env.colorize,
@@ -57,25 +79,40 @@ class $Logger {
     });
   }
 
+  /**
+   * Listen directly without any support
+   */
   listenRaw(key: string | symbol, handler: (ev: LogEvent) => void) {
     this.listeners.set(key ?? DEFAULT, handler);
     this.listenList = [...this.listeners.values()];
   }
 
+  /**
+   * Clear all listeners
+   */
   removeAll() {
     this.listeners.clear();
     this.listenList = [];
   }
 
+  /**
+   * Remove specific listener
+   */
   removeListener(key: string | symbol) {
     this.listeners.delete(key);
     this.listenList = [...this.listeners.values()];
   }
 
+  /**
+   * See if log level is enabled
+   */
   enabled(level: LogLevel): boolean {
     return !(level in this.exclude);
   }
 
+  /**
+   * Endpoint for listening, endpoint registered with ConsoleManager
+   */
   invoke(event: ConsolePayload & Partial<LogEvent>, rest: any[]): void {
     if (!('message' in event)) {
       const message = (rest.length && typeof rest[0] === 'string') ? rest.shift() : undefined;
@@ -88,21 +125,14 @@ class $Logger {
 
     event.level = (event.level! in LogLevels) ? event.level : 'info';
 
-    if ((event.level! in this.exclude) || (event.level! in this.filters && !this.filters[event.level!](event.category!))) {
+    if ((event.level! in this.exclude) || (event.level! in this.filters && !this.filters[event.level!]!(event.category!))) {
       return;
     }
 
     event.timestamp = Date.now();
 
-    const args = (event.args ?? []).slice(0);
-    const last = args[args.length - 1];
-
-    if (last && Object.keys(last).length === 1 && last.meta) { // Handle meta
-      event.meta = args.pop().meta;
-    }
-
     // Use sliced values
-    event.args = args;
+    event.args = (event.args ?? []).slice(0);
 
     for (const l of this.listenList) {
       l(event as LogEvent);
