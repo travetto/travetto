@@ -8,6 +8,9 @@ const RSA: AlgType[] = ['RS256', 'RS384', 'RS512'];
 const ES: AlgType[] = ['ES256', 'ES384', 'ES512'];
 const HS: AlgType[] = ['HS256', 'HS384', 'HS512'];
 
+/**
+ * Verify signature types
+ */
 function verifyTypes(o: any): o is Payload {
   for (const [t, f] of [
     ['string', ['iss', 'sub', 'jti', 'kid']],
@@ -25,7 +28,9 @@ function verifyTypes(o: any): o is Payload {
   return o;
 }
 
-// TODO: Document
+/**
+ * Verify the token
+ */
 export async function verify(jwt: string, options: VerifyOptions = {}) {
 
   // clone this object since we are going to mutate it.
@@ -130,7 +135,7 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
   }
 
   if (verifyPayload.jti && payload.jti !== verifyPayload.jti) {
-    throw new JWTError(`Token id id invalid. expected: ${verifyPayload.jti}`);
+    throw new JWTError(`Token id is invalid. expected: ${verifyPayload.jti}`);
   }
 
   if (options.maxAgeSec) {
