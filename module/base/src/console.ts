@@ -4,7 +4,7 @@ import { AppCache, EnvUtil, TranspileUtil } from '@travetto/boot';
 import { SystemUtil } from './internal/system';
 import { Env } from './env';
 
-export type LogLevel = 'info' | 'log' | 'trace' | 'warn' | 'debug' | 'error' | 'fatal';
+export type LogLevel = 'info' | 'trace' | 'warn' | 'debug' | 'error' | 'fatal';
 export type ConsolePayload = {
   line: number;
   file: string;
