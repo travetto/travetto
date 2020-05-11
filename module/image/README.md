@@ -17,7 +17,7 @@ class Service {
   async resizeImage(imgPath: string, width: number, height: number): Promise<string> {
     const stream = await ImageUtil.resize(imgPath, { w: width, h: height});
     const out = imgPath.replace(/[.][^.]+$/, (ext) => `.resized${ext}`);
-    await SystemUtil.streamToFile(stream, out);
+    await StreamUtil.writeToFile(stream, out);
     return out;
   }
 }

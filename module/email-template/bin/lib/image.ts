@@ -2,8 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { AppCache, FsUtil } from '@travetto/boot';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { AppCache, FsUtil, StreamUtil } from '@travetto/boot';
 
 const fsReadFile = util.promisify(fs.readFile);
 
@@ -57,7 +56,7 @@ export class ImageUtil {
 
     if (!(await FsUtil.exists(out))) {
       const stream = await ImgUtil.optimizePng(pth);
-      await SystemUtil.streamToFile(stream, out);
+      await StreamUtil.writeToFile(stream, out);
     }
 
     return fsReadFile(out);

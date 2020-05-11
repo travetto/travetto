@@ -2,7 +2,7 @@ import * as aws from 'aws-sdk';
 import { TagSet } from 'aws-sdk/clients/s3';
 import { Readable } from 'stream';
 
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { StreamUtil } from '@travetto/boot';
 import { AssetSource, Asset } from '@travetto/asset';
 import { Injectable } from '@travetto/di';
 
@@ -83,9 +83,9 @@ export class S3AssetSource extends AssetSource {
     // Read from s3
     const res = await this.client.getObject(this.q(filename)).promise();
     if (res.Body instanceof Buffer) { // If response is buffer
-      return SystemUtil.toReadable(res.Body);
+      return StreamUtil.toReadable(res.Body);
     } else if (typeof res.Body === 'string') { // Else if string
-      return SystemUtil.toReadable(Buffer.from(res.Body, 'utf8'));
+      return StreamUtil.toReadable(Buffer.from(res.Body, 'utf8'));
     } else if (res.Body && ('pipe' in res.Body)) { // Else if stream
       return res.Body as NodeJS.ReadableStream;
     }

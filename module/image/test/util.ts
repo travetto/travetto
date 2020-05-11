@@ -1,8 +1,9 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
+
+import { StreamUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
-import { SystemUtil } from '@travetto/base/src/internal/system';
 import { ImageUtil } from '../src/util';
 
 @Suite('ImageUtils')
@@ -11,7 +12,7 @@ class ImageUtilTest {
   @Test('resize test')
   async resizeImage() {
 
-    const imgBuffer = await ResourceManager.read('/apple.jpg');
+    const imgBuffer = await ResourceManager.read('apple.jpg');
 
     assert(imgBuffer.length > 0);
 
@@ -24,12 +25,12 @@ class ImageUtilTest {
 
   @Test('compress png')
   async compressPng() {
-    const imgStream = await ResourceManager.readToStream('/google.png');
-    const imgBuffer = await ResourceManager.read('/google.png');
+    const imgStream = await ResourceManager.readToStream('google.png');
+    const imgBuffer = await ResourceManager.read('google.png');
 
     const out = await ImageUtil.optimizePng(imgStream);
 
-    const optimized = await SystemUtil.toBuffer(out);
+    const optimized = await StreamUtil.toBuffer(out);
 
     assert(optimized.length > 0);
 
