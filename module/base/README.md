@@ -172,9 +172,6 @@ Simple functions for providing a minimal facsimile to [`lodash`](https://lodash.
 
 ## SystemUtil
 Unlike `Util`, the `SystemUtil` is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful. `SystemUtil` has functionality for:
-* `toBuffer(src: Readable | Buffer | string): Promise<Buffer>` for converting a stream/buffer/filepath to a Buffer.
-* `toReadable(src: Readable | Buffer | string):Promise<Readable>` for converting a stream/buffer/filepath to a Readable 
-* `streamToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
 * `throttle<T extends Function>(fn: T, threshold = 250): void` will run the function `fn` at most every `threshold`
 * `naiveHash(text: string): number` computes a very naive hash.  Should not be relied upon for scenarios where collisions cannot be tolerated.
 * `computeModule(file: string): string` computes the internal module name from a given file.

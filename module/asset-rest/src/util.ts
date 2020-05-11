@@ -7,8 +7,7 @@ import match = require('mime-match');
 import { Request, Response, TRV_RAW } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 import { AppError } from '@travetto/base';
-import { SystemUtil } from '@travetto/base/src/internal/system';
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, StreamUtil } from '@travetto/boot';
 
 import { RestAssetConfig } from './config';
 
@@ -27,7 +26,7 @@ export class AssetRestUtil {
     await FsUtil.mkdirp(uniqueDir); // TODO: Unique dir for each file? Use random file, and override metadata
     const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(fileName));
 
-    await SystemUtil.streamToFile(data, uniqueLocal);
+    await StreamUtil.writeToFile(data, uniqueLocal);
 
     const asset = await AssetUtil.fileToAsset(uniqueLocal);
 

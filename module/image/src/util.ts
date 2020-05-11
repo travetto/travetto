@@ -1,67 +1,72 @@
 import { CommandService } from '@travetto/exec';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { ExecUtil } from '@travetto/boot';
 
-// TODO: Document
+/**
+ * Image output options
+ */
 export interface ImageOptions {
+  /**
+   * New height
+   */
   h?: number;
+  /**
+   * New width
+   */
   w?: number;
+  /**
+   * Should the image be optimized?
+   */
   optimize?: boolean;
 }
 
 type ImageType = NodeJS.ReadableStream | Buffer | string;
 
-// TODO: Document
+/**
+ * Simple support for image manipulation.  Built upon @travetto/exec, it can
+ * run imagemagick and pngquant locally or via docker as needed.
+ */
 export class ImageUtil {
 
+  /**
+   * Resize/conversion util
+   */
   static converter = new CommandService({
     containerImage: 'v4tech/imagemagick',
     localCheck: ['convert', ['--version']]
   });
 
+  /**
+   * Compressor
+   */
   static pngCompressor = new CommandService({
     containerImage: 'agregad/pngquant',
     localCheck: ['pngquant', ['-h']]
   });
 
-  static async runCommand(svc: CommandService, image: Buffer, cmd: string, ...args: string[]): Promise<Buffer>;
-  static async runCommand(svc: CommandService, image: string | NodeJS.ReadableStream, cmd: string, ...args: string[]): Promise<NodeJS.ReadableStream>;
-  static async runCommand(svc: CommandService, image: ImageType, cmd: string, ...args: string[]): Promise<NodeJS.ReadableStream | Buffer> {
-    const { process: proc, result: prom } = await svc.exec(cmd, ...args);
-    SystemUtil.toReadable(image).pipe(proc.stdin!);
-    if (image instanceof Buffer) {
-      const outBuffer = SystemUtil.toBuffer(proc.stdout!);
-      await prom;
-      return outBuffer;
-    } else {
-      const stream = proc.stdout!; // Stream if requesting stream
-      const ogListen = stream.addListener;
-
-      // Allow for process to end before calling end handler
-      stream.on = stream.addListener = function (this: NodeJS.ReadableStream, type: string, handler: Function) {
-        let outHandler = handler;
-        if (type === 'end') {
-          outHandler = async (...params: any[]) => {
-            await prom;
-            handler(...params);
-          };
-        }
-        return ogListen.call(this, type, outHandler as any);
-      };
-      return stream;
-    }
-  }
-
+  /**
+   * Resize image using image magick
+   */
   static resize(image: string | NodeJS.ReadableStream, options: ImageOptions): Promise<NodeJS.ReadableStream>;
   static resize(image: Buffer, options: ImageOptions): Promise<Buffer>;
-  static resize(image: ImageType, options: ImageOptions): Promise<NodeJS.ReadableStream | Buffer> {
-    return this.runCommand(this.converter, image as any,
-      'convert', '-resize', `${options.w ?? ''}X${options.h ?? ''}`, '-auto-orient', ...(options.optimize ? ['-strip', '-quality', '86'] : []), '-', '-');
+  static async resize(image: ImageType, options: ImageOptions): Promise<NodeJS.ReadableStream | Buffer> {
+    const state = await this.converter.exec(
+      'convert', '-resize', `
+      ${options.w ?? ''}X${options.h ?? ''}`,
+      '-auto-orient',
+      ...(options.optimize ? ['-strip', '-quality', '86'] : []),
+      '-', '-');
+
+    return await ExecUtil.pipe(state, image as Buffer);
   }
 
+  /**
+   * Optimize png usng pngquant
+   */
   static optimizePng(image: string | NodeJS.ReadableStream): Promise<NodeJS.ReadableStream>;
   static optimizePng(image: Buffer): Promise<Buffer>;
-  static optimizePng(image: ImageType): Promise<NodeJS.ReadableStream | Buffer> {
-    return this.runCommand(this.pngCompressor, image as any,
+  static async optimizePng(image: ImageType): Promise<NodeJS.ReadableStream | Buffer> {
+    const state = await this.pngCompressor.exec(
       'pngquant', '--quality', '40-80', '--speed', '1', '--force', '-');
+    return await ExecUtil.pipe(state, image as Buffer);
   }
 }

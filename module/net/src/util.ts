@@ -6,9 +6,8 @@ import * as net from 'net';
 
 import { HttpRequest } from './request';
 
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, StreamUtil } from '@travetto/boot';
 import { Util } from '@travetto/base';
-import { SystemUtil } from '@travetto/base/src/internal/system';
 
 const tmpDir = FsUtil.toUnix(os.tmpdir());
 
@@ -26,7 +25,7 @@ export class NetUtil {
     await HttpRequest.exec({
       url,
       async responseHandler(msg: http.IncomingMessage) {
-        await SystemUtil.streamToFile(msg, filePath);
+        await StreamUtil.writeToFile(msg, filePath);
       }
     });
 
