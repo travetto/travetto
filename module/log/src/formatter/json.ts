@@ -1,10 +1,15 @@
-import { LogEvent } from '../types';
+import { LogEvent, Formatter } from '../types';
 
 
+/**
+ * JSON Options
+ */
 export interface JSONFormatterOpts { }
 
-// TODO: Document
-export class JsonFormatter {
+/**
+ * JSON Formatter
+ */
+export class JsonFormatter implements Formatter {
   constructor(private opts: JSONFormatterOpts) { }
 
   format(ev: LogEvent) {

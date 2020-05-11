@@ -6,7 +6,9 @@ import { LogEvent, Formatter } from '../types';
 import { stylize, LEVEL_STYLES } from './styles';
 import { FsUtil } from '@travetto/boot';
 
-// TODO: Document
+/**
+ * Line formatting options
+ */
 export interface LineFormatterOpts {
   timestamp?: 'ms' | 's' | false;
   colorize?: boolean;
@@ -15,7 +17,9 @@ export interface LineFormatterOpts {
   location?: boolean;
 }
 
-// TODO: Document
+/**
+ * Line formatter
+ */
 export class LineFormatter implements Formatter {
   private opts: LineFormatterOpts;
 
@@ -23,6 +27,9 @@ export class LineFormatter implements Formatter {
     this.opts = { colorize: true, timestamp: 'ms', align: true, level: true, location: true, ...opts };
   }
 
+  /**
+   * Format an event into a single line
+   */
   format(ev: LogEvent) {
     const opts = this.opts;
     let out = '';
@@ -75,7 +82,7 @@ export class LineFormatter implements Formatter {
     }
 
     if (message) {
-      out = `${out}${ev.prefix ?? ''}${message} `;
+      out = `${out}${message} `;
     }
     return out.substring(0, out.length - 1);
   }

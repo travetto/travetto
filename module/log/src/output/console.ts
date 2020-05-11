@@ -1,11 +1,15 @@
 import { OutputHandler } from '../types';
 
-// TODO: Document
+/**
+ * Console logging config
+ */
 export interface ConsoleOutputOpts {
   method: 'log' | 'error';
 }
 
-// TODO: Document
+/**
+ * Console.output
+ */
 export class ConsoleOutput implements OutputHandler {
   constructor(private opts: ConsoleOutputOpts) { }
 

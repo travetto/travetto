@@ -1,11 +1,16 @@
 import { EnvUtil } from '@travetto/boot';
 
-// TODO: Document
+/**
+ * Logging utilities
+ */
 export class LogUtil {
 
   static truth = () => true;
   static falsehood = () => false;
 
+  /**
+   * Read environment variable to determine filter
+   */
   static readEnvVal(key: string, def: string = '') {
     if (EnvUtil.isFalse(key)) {
       return;
@@ -25,6 +30,9 @@ export class LogUtil {
     return val;
   }
 
+  /**
+   * Convert filter into teset function for filtering
+   */
   static buildFilter(v: string | undefined) {
     if (!v) {
       return this.falsehood;
