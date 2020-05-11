@@ -2,7 +2,9 @@ import * as jws from 'jws';
 import { TypedSig, Payload } from './types';
 import { JWTError } from './error';
 
-// TODO: Document
+/**
+ * Decode and return full object with signatures
+ */
 export function decodeComplete<T extends Payload = Payload>(jwt: string): TypedSig<T> {
 
   // In lieu of splitting
@@ -29,6 +31,9 @@ export function decodeComplete<T extends Payload = Payload>(jwt: string): TypedS
   return decoded;
 }
 
+/**
+ * Decode and return payload
+ */
 export function decode<T extends Payload = Payload>(jwt: string): T {
   return decodeComplete<T>(jwt).payload;
 }

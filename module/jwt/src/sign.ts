@@ -3,7 +3,9 @@ import * as jws from 'jws';
 import { JWTError } from './error';
 import { Payload, SignOptions, SignHeader } from './types';
 
-// TODO: Document
+/**
+ * Sign the payload
+ */
 export async function sign<T extends Payload>(payload: T, options: SignOptions = {}): Promise<string> {
   const header: SignHeader = {
     alg: options.alg || 'HS256',
