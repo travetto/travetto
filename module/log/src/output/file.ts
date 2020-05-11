@@ -1,12 +1,17 @@
 import * as fs from 'fs';
+import { OutputHandler } from '../types';
 
-// TODO: Document
+/**
+ * File output options
+ */
 export interface FileOutputOpts {
   file: string;
 }
 
-// TODO: Document
-export class FileOutput {
+/**
+ * File output logger
+ */
+export class FileOutput implements OutputHandler {
   stream: fs.WriteStream;
 
   constructor(private opts: FileOutputOpts) {
