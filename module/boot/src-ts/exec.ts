@@ -1,4 +1,5 @@
 import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
+import { StreamUtil } from './stream';
 
 /**
  * Result of an execution
@@ -188,5 +189,24 @@ export class ExecUtil {
         ['xdg-open', path];
 
     this.spawn(op[0], op.slice(1));
+  }
+
+  /**
+   * Pipe a buffer into an execution state
+   */
+  static pipe(state: ExecutionState, input: Buffer): Promise<Buffer>;
+  static pipe(state: ExecutionState, input: string | NodeJS.ReadableStream): Promise<NodeJS.ReadableStream>;
+  static async pipe(state: ExecutionState, input: Buffer | NodeJS.ReadableStream | string): Promise<Buffer | NodeJS.ReadableStream> {
+    const { process: proc, result: prom } = state;
+
+    StreamUtil.toReadable(input).pipe(proc.stdin!);
+
+    if (input instanceof Buffer) { // If passing buffers
+      const buf = StreamUtil.toBuffer(proc.stdout!);
+      await prom;
+      return buf;
+    } else {
+      return StreamUtil.waitForCompletion(proc.stdout!, () => prom);
+    }
   }
 }

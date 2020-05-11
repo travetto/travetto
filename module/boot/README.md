@@ -12,6 +12,7 @@ Boot is basic environment  awareness coupled with typescript bootstrapping for `
 * File Operations
 * Typescript bootstrapping
 * Process execution 
+* Stream Support
 
 ## Environmental Information
 The functionality we support for testing and retrieving environment information:
@@ -65,3 +66,10 @@ As you can see, the call returns not only the child process information, but the
 * `quiet` which suppresses all stdout/stderr output
 * `stdin` as a string, buffer or stream to provide input to the program you are running;
 * `timeoutKill` allows for registering functionality to execute when a process is force killed by timeout
+
+## Stream Support
+The `StreamUtil` class provides basic stream utilities for use within the framework:
+* `toBuffer(src: Readable | Buffer | string): Promise<Buffer>` for converting a stream/buffer/filepath to a Buffer.
+* `toReadable(src: Readable | Buffer | string):Promise<Readable>` for converting a stream/buffer/filepath to a Readable 
+* `writeToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
+* `waitForCompletion(src: Readable, finish:()=>Promise<any>)` will ensure the stream remains open until the promise finish produces is satisfied.

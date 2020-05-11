@@ -1,6 +1,4 @@
-import * as fs from 'fs';
 import * as path from 'path';
-import { Readable, PassThrough } from 'stream';
 import { FsUtil } from '@travetto/boot';
 
 function find<T>(set: Set<T>, pred: (x: T) => boolean): T | undefined {
@@ -31,60 +29,6 @@ function toList<T>(items: T | T[] | Set<T> | undefined) {
 export class SystemUtil {
 
   private static modCache = new Map<string, string>();
-
-  /**
-   * Convert input source to a buffer
-   */
-  static async toBuffer(src: NodeJS.ReadableStream | Buffer | string): Promise<Buffer> {
-    if (typeof src === 'string') {
-      if (src.endsWith('==')) {
-        src = Buffer.from(src, 'base64');
-      } else {
-        src = fs.createReadStream(src);
-      }
-    }
-    if (src instanceof Buffer) {
-      return src;
-    } else {
-      const stream = src as NodeJS.ReadableStream;
-      return new Promise<Buffer>((res, rej) => {
-        const data: Buffer[] = [];
-        stream.on('data', d => data.push(d));
-        stream.on('error', rej);
-        stream.on('end', (err: any) => {
-          err ? rej(err) : res(Buffer.concat(data));
-        });
-      });
-    }
-  }
-
-  /**
-   * Convert input source to a stream
-   */
-  static toReadable(src: NodeJS.ReadableStream | Buffer | string): NodeJS.ReadableStream {
-    if (typeof src === 'string') {
-      if (src.endsWith('==')) {
-        return this.toReadable(Buffer.from(src, 'base64'));
-      } else {
-        return fs.createReadStream(src);
-      }
-    } else if (src instanceof Buffer) {
-      const readable = new PassThrough();
-      readable.end(src);
-      return readable;
-    } else {
-      return src as Readable;
-    }
-  }
-
-  static async streamToFile(src: NodeJS.ReadableStream, out: string): Promise<void> {
-    const write = fs.createWriteStream(out);
-    const finalStream = src.pipe(write);
-    await new Promise((res, rej) => {
-      finalStream.on('finish', (err) => err ? rej(err) : res());
-    });
-    return;
-  }
 
   /**
    * Throttle a function to run only once within a specific threshold of time
