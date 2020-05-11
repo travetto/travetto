@@ -10,8 +10,8 @@ export class EnvUtil {
   static get(k: string, def?: string): string | undefined;
   static get(k: string, def?: string | undefined): string | undefined {
     return process.env[k] ??
-      process.env[k.toLowerCase()] ??
       process.env[k.toUpperCase()] ??
+      process.env[k.toLowerCase()] ??
       def;
   }
 
@@ -56,20 +56,15 @@ export class EnvUtil {
   /**
    * Checks to see if the negative is set
    */
-  static isSetTrueOrFalse(pos: string, neg: string, def: boolean) {
-    return this.isSet(pos) ?
-      this.isTrue(pos) :
-      this.isSet(neg) ?
-        this.isFalse(neg) :
-        def;
-  }
-
-  /**
-   * Checks to see if the negative is set
-   */
-  static isValueOrFalse<T extends string>(key: string, def: T): T | undefined {
-    return this.isFalse(key) ?
-      undefined :
-      this.get(key, def) as typeof def;
+  static isValueOrFalse<T extends readonly string[]>(key: string, values: T, def?: T[number]): T[number] | false {
+    if (this.isFalse(key)) {
+      return false;
+    } else {
+      let val: T[number] | false = this.get(key, def) as T[number];
+      if (!values.includes(val)) {
+        val = def as T[number];
+      }
+      return val === undefined ? false : val;
+    }
   }
 }

@@ -90,7 +90,7 @@ class $Compiler extends EventEmitter {
    * Compile a file, follows the same shape as `Module._compile`
    */
   compile(m: NodeModule, tsf: string) {
-    return CompileUtil.doCompile(m, this.transpiler.getTranspiled(tsf), tsf);
+    return CompileUtil.compileJavascript(m, this.transpiler.transpile(tsf), tsf);
   }
 
   /**

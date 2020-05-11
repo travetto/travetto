@@ -8,9 +8,9 @@ import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT, DEEP_LITERAL_TYPES } from '../src/
 const ASSERT_CMD = 'assert';
 const ASSERT_UTIL = 'AssertCheck';
 
-const METHODS: Record<string, [Function, string]> = {
-  includes: [Array, 'includes'],
-  test: [RegExp, 'test']
+const METHODS: Record<string, Function[]> = {
+  includes: [Array, String],
+  test: [RegExp]
 };
 
 const OP_TOKEN_TO_NAME = new Map<number, string>();
@@ -164,9 +164,9 @@ export class AssertTransformer {
       const matched = METHODS[key.text!];
       if (matched) {
         const resolved = state.resolveType(root);
-        if (res.isLiteralType(resolved) && resolved.ctor === matched[0]) { // Ensure method is against real type
+        if (res.isLiteralType(resolved) && matched.find(x => resolved.ctor === x)) { // Ensure method is against real type
           return {
-            fn: matched[1],
+            fn: key.text,
             args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)]
           };
         }

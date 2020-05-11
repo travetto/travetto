@@ -45,7 +45,7 @@ class $ConsoleManager {
 
   readonly key = KEY;
   readonly defaultEnrich = !(EnvUtil.isTrue('PLAIN_CONSOLE') || EnvUtil.isTrue('PLAIN'));
-  readonly timestamp = EnvUtil.isValueOrFalse('LOG_TIME', 'ms' as 'ms' | 's');
+  readonly timestamp = EnvUtil.isValueOrFalse('LOG_TIME', ['s', 'ms'] as const, 'ms');
   readonly exclude = new Set<string>([]);
 
   constructor() {

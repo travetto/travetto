@@ -137,7 +137,7 @@ export class Transpiler {
   /**
    * Perform actual transpilation
    */
-  private transpile(fileName: string, force = false) {
+  private _transpile(fileName: string, force = false) {
     if (force || !this.cache.hasEntry(fileName)) {
       console.trace('Emitting', fileName.replace(this.cwd, ''));
 
@@ -208,14 +208,14 @@ export class Transpiler {
   /**
    * Get the transpiled content
    */
-  getTranspiled(fileName: string, force = false) {
+  transpile(fileName: string, force = false) {
     // Do not typecheck the support code
     if (SIMPLE_COMPILATION.test(fileName)) {
       return TranspileUtil.transpile(fileName, force);
     }
 
     try {
-      return this.transpile(fileName, force);
+      return this._transpile(fileName, force);
     } catch (err) {
       const errContent = TranspileUtil.handlePhaseError('transpile', fileName, err);
       this.contents.set(fileName, errContent);

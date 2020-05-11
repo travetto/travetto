@@ -13,6 +13,8 @@ const OPTS = Symbol.for('@trv:compiler/options');
  * Standard transpilation utilities, with support for basic text filters
  */
 export class TranspileUtil {
+  private static [OPTS]: any;
+
   private static preProcessors: Preprocessor[] = [];
 
   private static get ts() { // Only registered on first call
@@ -28,7 +30,7 @@ export class TranspileUtil {
   /**
    * Build error module
    */
-  private static getErrorModule(message: string, isModule?: string | boolean, base?: Record<string, any>) {
+  static getErrorModule(message: string, isModule?: string | boolean, base?: Record<string, any>) {
     const f = ([k, v]: string[]) => `${k}: (t,k) => ${v}`;
     const e = '{ throw new Error(msg); }';
     const map: { [P in keyof ProxyHandler<any>]?: any } = {
@@ -41,6 +43,7 @@ export class TranspileUtil {
       base ? `let keys = ['${Object.keys(base).join(`','`)}']` : '',
       base ? `let values = ['${Object.values(base).join(`','`)}']` : '',
       `let msg = \`${message}\`;`,
+      `Object.defineProperty(exports, 'ᚕtrvError', { value: true })`,
       `module.exports = new Proxy({}, { ${Object.entries(map).map(f).join(',')}});`
     ].join('\n');
   }
@@ -48,7 +51,7 @@ export class TranspileUtil {
   /**
    * Process token
    */
-  private static resolveToken(token: string): { minus: boolean, key: string, valid: boolean, err?: Error } {
+  static resolveToken(token: string): { minus: boolean, key: string, valid: boolean, err?: Error } {
     const [, sign, env, key] = token.match(/(-|\+)?([$])?(.*)/)!;
     const minus = sign === '-';
     if (env) {
@@ -66,7 +69,7 @@ export class TranspileUtil {
   /**
    * Resolve macros for keeping/removing text
    */
-  private static resolveMacros(name: string, contents: string) {
+  static resolveMacros(name: string, contents: string) {
     const modErrs: string[] = [];
 
     // Handle line queries
@@ -92,15 +95,15 @@ export class TranspileUtil {
    * Get loaded compiler options
    */
   static get compilerOptions(): any {
-    if (!(this as any)[OPTS]) {
+    if (!this[OPTS]) {
       const json = this.ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, this.ts.sys.readFile);
-      (this as any)[OPTS] = {
+      this[OPTS] = {
         ...this.ts.parseJsonSourceFileConfigFileContent(json, this.ts.sys, FsUtil.cwd).options,
         rootDir: FsUtil.cwd,
         outDir: FsUtil.cwd
       };
     }
-    return (this as any)[OPTS];
+    return this[OPTS];
   }
 
   /**
@@ -129,7 +132,7 @@ export class TranspileUtil {
    * Add support for additional transpilation preprocessor
    */
   static addPreProcessor(fn: Preprocessor) {
-    this.preProcessors.push(fn);
+    this.preProcessors.unshift(fn);
   }
 
   /**
@@ -145,12 +148,6 @@ export class TranspileUtil {
       fileContents = preProcessor(fileName, fileContents);
     }
 
-    // Drop typescript import, and use global. Great speedup;
-    if (fileName.includes('transform')) { // Should only ever be in transformation code
-      fileContents = fileContents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
-    }
-
-    fileContents = `${fileContents}\nexport const ᚕtrv = true;`;
     return fileContents;
   }
 
