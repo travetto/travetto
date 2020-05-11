@@ -45,17 +45,15 @@ export class CompileUtil {
       mod = this.ogModuleLoad.apply(null, [request, parent]);
       if (!parent.loaded) { // Standard ts compiler output
         const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
-        if (!mod || !('ᚕtrv' in desc)) {
-          let p = 'filename' in desc ? mod.filename : ('id' in desc ? mod.id : undefined);
+        if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
           try {
-            p = p || Module._resolveFilename!(request, parent);
+            const p = Module._resolveFilename!(request, parent);
+            if (p && p.endsWith(TranspileUtil.ext)) {
+              throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
+            }
           } catch (err) {
             // Ignore if we can't resolve
           }
-          if (p && p.endsWith(TranspileUtil.ext)) {
-            throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
-          }
-
         }
       }
     } catch (e) {
@@ -77,13 +75,13 @@ export class CompileUtil {
    * @param tsf filename
    */
   private static compile(m: Module, tsf: string) {
-    return this.doCompile(m, TranspileUtil.transpile(tsf), tsf);
+    return this.compileJavascript(m, TranspileUtil.transpile(tsf), tsf);
   }
 
   /**
    * Actually compile the content for loading in JS
    */
-  static doCompile(m: Module, content: string, tsf: string) {
+  static compileJavascript(m: Module, content: string, tsf: string) {
     const jsf = FsUtil.toJS(tsf);
     try {
       return m._compile!(content, jsf);
@@ -103,6 +101,18 @@ export class CompileUtil {
 
     TranspileUtil.init();
 
+    // Drop typescript import, and use global. Great speedup;
+    TranspileUtil.addPreProcessor((name, contents) => {
+      if (name.includes('transform')) { // Should only ever be in transformation code
+        contents = contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
+      }
+      return contents;
+    });
+
+    // Tag output to indicate it was succefully processed by the framework
+    TranspileUtil.addPreProcessor((__, contents) =>
+      `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { value: true })`);
+
     // Supports bootstrapping with framework resolution
     if (!EnvUtil.isTrue('TRV_DEV')) {
       this.libRequire = require;
@@ -117,6 +127,9 @@ export class CompileUtil {
     global.trvInit = this;
   }
 
+  /**
+   * Add module post processor (post-load)
+   */
   static addModuleHandler(handler: (name: string, o: any) => any) {
     this.moduleHandlers.push(handler);
   }

@@ -126,10 +126,10 @@ export class ExecUtil {
 
       if (!options.quiet) {
         if (p.stdout) {
-          p.stdout!.on('data', (d: string) => stdout.push(Buffer.from(d)));
+          p.stdout!.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
         }
         if (p.stderr) {
-          p.stderr!.on('data', (d: string) => stderr.push(Buffer.from(d)));
+          p.stderr!.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
         }
       }
 
@@ -181,17 +181,6 @@ export class ExecUtil {
   }
 
   /**
-   * Platform aware file opening
-   */
-  static launch(path: string) {
-    const op = process.platform === 'darwin' ? ['open', path] :
-      process.platform === 'win32' ? ['cmd', '/c', 'start', path] :
-        ['xdg-open', path];
-
-    this.spawn(op[0], op.slice(1));
-  }
-
-  /**
    * Pipe a buffer into an execution state
    */
   static pipe(state: ExecutionState, input: Buffer): Promise<Buffer>;
@@ -199,7 +188,7 @@ export class ExecUtil {
   static async pipe(state: ExecutionState, input: Buffer | NodeJS.ReadableStream | string): Promise<Buffer | NodeJS.ReadableStream> {
     const { process: proc, result: prom } = state;
 
-    StreamUtil.toReadable(input).pipe(proc.stdin!);
+    (await StreamUtil.toStream(input)).pipe(proc.stdin!);
 
     if (input instanceof Buffer) { // If passing buffers
       const buf = StreamUtil.toBuffer(proc.stdout!);

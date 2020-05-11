@@ -4,7 +4,14 @@ import { EnvUtil } from './env';
  * Utilities for dealing with coloring console text
  */
 export class ColorUtil {
-  private static colorize: boolean;
+  private static _colorize: boolean;
+
+  static get colorize() {
+    if (this._colorize === undefined) {
+      this._colorize = EnvUtil.isTrue('FORCE_COLOR') || (!EnvUtil.isTrue('NO_COLOR') && process.stdout.isTTY);
+    }
+    return this._colorize;
+  }
 
   /**
    * Types of text styles
@@ -41,9 +48,6 @@ export class ColorUtil {
    * Taken from masylum's fork (https://github.com/masylum/log4js-node)
    */
   static color(textColor: keyof typeof ColorUtil.COLORS, styles: (keyof typeof ColorUtil.STYLES)[], value: any): string {
-    if (this.colorize === undefined) {
-      this.colorize = EnvUtil.isSetTrueOrFalse('FORCE_COLOR', 'NO_COLOR', process.stdout.isTTY);
-    }
     if (this.colorize && value !== undefined && value !== null && value !== '') {
       for (const style of [this.COLORS[textColor], ...styles.map(s => this.STYLES[s])]) {
         value = `\x1b[${style[0]}m${value}\x1b[${style[1]}m`;

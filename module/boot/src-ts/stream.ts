@@ -1,61 +1,69 @@
 import * as fs from 'fs';
-import { Readable, PassThrough } from 'stream';
+import { PassThrough } from 'stream';
+
+type All = Buffer | string | NodeJS.ReadableStream | Uint8Array;
 
 /**
  * Utilities for managing streams/buffers/etc
  */
 export class StreamUtil {
+
+  /**
+   * Convert buffer to a stream
+   */
+  static async bufferToStream(src: Buffer): Promise<NodeJS.ReadableStream> {
+    const readable = new PassThrough();
+    readable.end(src);
+    return readable;
+  }
+
+  /**
+   * Read stream to buffer
+   */
+  static async streamToBuffer(src: NodeJS.ReadableStream): Promise<Buffer> {
+    const stream = src as NodeJS.ReadableStream;
+    return new Promise<Buffer>((res, rej) => {
+      const data: Buffer[] = [];
+      stream.on('data', d => data.push(d));
+      stream.on('error', rej);
+      stream.on('end', (err: any) => {
+        err ? rej(err) : res(Buffer.concat(data));
+      });
+    });
+  }
+
   /**
    * Convert input source to a buffer
    */
-  static async toBuffer(src: NodeJS.ReadableStream | Buffer | string): Promise<Buffer> {
-    if (typeof src === 'string') {
-      if (src.endsWith('==')) {
-        src = Buffer.from(src, 'base64');
-      } else {
-        src = fs.createReadStream(src);
-      }
-    }
+  static async toBuffer(src: All): Promise<Buffer> {
     if (src instanceof Buffer) {
       return src;
+    } else if (src instanceof Uint8Array) {
+      return Buffer.from(src);
+    } else if (typeof src !== 'string' && 'pipe' in src) {
+      return this.streamToBuffer(src);
     } else {
-      const stream = src as NodeJS.ReadableStream;
-      return new Promise<Buffer>((res, rej) => {
-        const data: Buffer[] = [];
-        stream.on('data', d => data.push(d));
-        stream.on('error', rej);
-        stream.on('end', (err: any) => {
-          err ? rej(err) : res(Buffer.concat(data));
-        });
-      });
+      return Buffer.from(src, src.endsWith('=') ? 'base64' : 'utf8');
     }
   }
 
   /**
    * Convert input source to a stream
    */
-  static toReadable(src: NodeJS.ReadableStream | Buffer | string): NodeJS.ReadableStream {
-    if (typeof src === 'string') {
-      if (src.endsWith('==')) {
-        return this.toReadable(Buffer.from(src, 'base64'));
-      } else {
-        return fs.createReadStream(src);
-      }
-    } else if (src instanceof Buffer) {
-      const readable = new PassThrough();
-      readable.end(src);
-      return readable;
+  static async toStream(src: All): Promise<NodeJS.ReadableStream> {
+    if (typeof src !== 'string' && 'pipe' in src) {
+      return src;
     } else {
-      return src as Readable;
+      return this.bufferToStream(await this.toBuffer(src));
     }
   }
 
   /**
-   * Persist stream to a file
+   * Persist to a file
    */
-  static async writeToFile(src: NodeJS.ReadableStream, out: string): Promise<void> {
+  static async writeToFile(src: All, out: string): Promise<void> {
     const write = fs.createWriteStream(out);
-    const finalStream = src.pipe(write);
+    const finalStream = (await this.toStream(src)).pipe(write);
     await new Promise((res, rej) => {
       finalStream.on('finish', (err) => err ? rej(err) : res());
     });

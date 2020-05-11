@@ -27,7 +27,34 @@ function execCmd(sync: boolean, [cmd, args]: [string, string[]], ignoreErrors = 
  */
 export class FsUtil {
 
-  static cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
+  static readonly cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
+
+
+  /**
+   * Command to remove a folder
+   */
+  private static unlinkCommand(pth: string): [string, string[]] {
+    if (!pth || pth === '/') {
+      throw new Error('Path has not been defined');
+    }
+    if (process.platform === 'win32') {
+      return ['rmdir', ['/Q', '/S', this.toNative(pth)]];
+    } else {
+      return ['rm', ['-r', pth]];
+    }
+  }
+
+  /**
+   * Command to copy a folder
+   */
+  private static copyCommand(src: string, dest: string): [string, string[]] {
+    if (process.platform === 'win32') {
+      return ['xcopy', ['/y', '/h', '/s', this.toNative(src), this.toNative(dest)]];
+    } else {
+      return ['cp', ['-r', '-p', src, dest]];
+    }
+  }
+
 
   /**
    * Converts filename .ts to .js
@@ -85,19 +112,6 @@ export class FsUtil {
   }
 
   /**
-   * Symlink, with some platform specific support
-   */
-  static makeLinkSync(actual: string, linkPath: string) {
-    try {
-      fs.lstatSync(linkPath);
-    } catch (e) {
-      const file = fs.statSync(actual).isFile();
-      fs.symlinkSync(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
-      fs.lstatSync(linkPath); // Ensure created
-    }
-  }
-
-  /**
    * Make directory and all intermediate ones as well
    */
   static async mkdirp(pth: string) {
@@ -118,31 +132,6 @@ export class FsUtil {
     } catch (e) {
       this.mkdirpSync(path.dirname(pth));
       fs.mkdirSync(pth);
-    }
-  }
-
-  /**
-   * Command to remove a folder
-   */
-  static unlinkCommand(pth: string): [string, string[]] {
-    if (!pth || pth === '/') {
-      throw new Error('Path has not been defined');
-    }
-    if (process.platform === 'win32') {
-      return ['rmdir', ['/Q', '/S', this.toNative(pth)]];
-    } else {
-      return ['rm', ['-rf', pth]];
-    }
-  }
-
-  /**
-   * Command to copy a folder
-   */
-  static copyCommand(src: string, dest: string): [string, string[]] {
-    if (process.platform === 'win32') {
-      return ['xcopy', ['/y', '/h', '/s', this.toNative(src), this.toNative(dest)]];
-    } else {
-      return ['cp', ['-r', '-p', src, dest]];
     }
   }
 

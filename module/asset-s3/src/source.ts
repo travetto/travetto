@@ -82,12 +82,11 @@ export class S3AssetSource extends AssetSource {
   async read(filename: string): Promise<NodeJS.ReadableStream | Readable> {
     // Read from s3
     const res = await this.client.getObject(this.q(filename)).promise();
-    if (res.Body instanceof Buffer) { // If response is buffer
-      return StreamUtil.toReadable(res.Body);
-    } else if (typeof res.Body === 'string') { // Else if string
-      return StreamUtil.toReadable(Buffer.from(res.Body, 'utf8'));
-    } else if (res.Body && ('pipe' in res.Body)) { // Else if stream
-      return res.Body as NodeJS.ReadableStream;
+    if (res.Body instanceof Buffer || // Buffer
+      typeof res.Body === 'string' || // string
+      res.Body && ('pipe' in res.Body) // Stream
+    ) {
+      return StreamUtil.toStream(res.Body);
     }
     throw new Error(`Unable to read type: ${typeof res.Body}`);
   }

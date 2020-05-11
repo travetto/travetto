@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as url from 'url';
 import * as http from 'http';
 
-import { ExecUtil } from '@travetto/boot';
+import { CliUtil } from './util';
 
 const RESOURCES = path.resolve(__dirname, '..', 'resources');
 const read = (p: string) => fs.readFileSync(path.resolve(RESOURCES, p), 'utf8');
@@ -128,7 +128,7 @@ export class WebServer {
     if (this.open) {
       const finalUrl = `http://localhost:${this.port}`;
       console.debug(`Now running at ${finalUrl}`);
-      ExecUtil.launch(finalUrl);
+      CliUtil.launch(finalUrl);
     }
 
     return server;
