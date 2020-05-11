@@ -1,10 +1,23 @@
 import * as util from 'util';
 
 import { Env, StacktraceUtil } from '@travetto/base';
+import { FsUtil, ColorUtil } from '@travetto/boot';
 
 import { LogEvent, Formatter } from '../types';
-import { stylize, LEVEL_STYLES } from './styles';
-import { FsUtil } from '@travetto/boot';
+
+/**
+ * Level coloring
+ */
+export const STYLES = {
+  info: ColorUtil.makeColorer('white'),
+  error: ColorUtil.makeColorer('red'),
+  debug: ColorUtil.makeColorer('yellow'),
+  warn: ColorUtil.makeColorer('magenta'),
+  fatal: ColorUtil.makeColorer('cyan', 'inverse'),
+  trace: ColorUtil.makeColorer('white', 'faint'),
+  timestamp: ColorUtil.makeColorer('white', 'bold'),
+  location: ColorUtil.makeColorer('blue')
+};
 
 /**
  * Line formatting options
@@ -40,7 +53,7 @@ export class LineFormatter implements Formatter {
         timestamp = timestamp.replace(/[.]\d{3}/, '');
       }
       if (opts.colorize) {
-        timestamp = stylize(timestamp, 'white', 'bold');
+        timestamp = STYLES.timestamp(timestamp);
       }
       out = `${out}${timestamp} `;
     }
@@ -48,7 +61,7 @@ export class LineFormatter implements Formatter {
     if (opts.level) {
       let level: string = ev.level;
       if (opts.colorize) {
-        level = stylize(level, ...LEVEL_STYLES[level]);
+        level = STYLES[ev.level](ev.level);
       }
       if (opts.align) {
         level += ' '.repeat(5 - ev.level.length);
@@ -58,8 +71,11 @@ export class LineFormatter implements Formatter {
 
     if (ev.file && opts.location) {
       const ns = ev.category;
-      const loc = ev.line ? `${Env.prod ? ev.category : FsUtil.toTS(ev.file.replace(Env.cwd, '.'))}:${ev.line}` : ns;
-      out = `${out}[${stylize(loc!, 'blue')}] `;
+      let loc = ev.line ? `${Env.prod ? ev.category : FsUtil.toTS(ev.file.replace(Env.cwd, '.'))}:${ev.line}` : ns;
+      if (opts.colorize) {
+        loc = STYLES.location(loc);
+      }
+      out = `${out}[${loc}] `;
     }
 
     let message = ev.message;
