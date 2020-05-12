@@ -4,25 +4,9 @@ import * as commander from 'commander';
 import { FsUtil } from '@travetto/boot/src/fs';
 import { ExecUtil } from '@travetto/boot/src/exec';
 
+import { CompletionConfig } from './types';
 import { color } from './color';
-
-/**
- * Completion interface
- */
-export interface CompletionConfig {
-  /**
-   * All top level commands
-   */
-  all: string[];
-  /**
-   * Flags for sub tasks
-   */
-  task: {
-    [key: string]: {
-      [key: string]: string[];
-    };
-  };
-}
+import { HelpUtil } from './help';
 
 /**
  * Common CLI Utilities
@@ -30,8 +14,13 @@ export interface CompletionConfig {
 export class CliUtil {
   static program = commander;
 
-  static BOOLEAN_RE = /^(1|0|yes|no|on|off|auto|true|false)$/i;
-  static TRUE_RE = /^(1|yes|on|true)$/i;
+  static isBoolean(x: string) {
+    return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);
+  }
+
+  static isTrue(x: string) {
+    return /^(1|yes|on|true)$/i.test(x);
+  }
 
   /**
    * Allow the plugin to depend on another command by executing
@@ -45,8 +34,8 @@ export class CliUtil {
   }
 
   /**
- * Platform aware file opening
- */
+   * Platform aware file opening
+   */
   static launch(path: string) {
     const op = process.platform === 'darwin' ? ['open', path] :
       process.platform === 'win32' ? ['cmd', '/c', 'start', path] :
@@ -56,71 +45,43 @@ export class CliUtil {
   }
 
   /**
-   * Extract key from the text
-   * @param text Source text
-   * @param key
+   * Get code completion values
    */
-  static extractValue(text: string, key: string) {
-    let sub = '';
-    if (text.includes(key)) {
-      const start = text.indexOf(key);
-      let end = text.indexOf('\n\n', start);
-      if (end < 0) {
-        end = text.length;
+  static async getCompletion(compl: CompletionConfig, args: string[]) {
+    args = args.slice(0); // Copy as we mutate
+
+    const cmd = args.shift()!;
+
+    let last = cmd;
+    let opts: string[] = [];
+
+    // List all commands
+    if (!compl.task[cmd]) {
+      opts = compl.all;
+    } else {
+      // Look available sub commands
+      last = args.pop() ?? '';
+      const second = args.pop() ?? '';
+      let flag = '';
+
+      if (last in compl.task[cmd]) {
+        flag = last;
+        last = '';
+      } else if (second in compl.task[cmd]) {
+        // Look for available flags
+        if (compl.task[cmd][second].includes(last)) {
+          flag = '';
+          last = '';
+        } else {
+          flag = second;
+        }
       }
-      sub = text.substring(start, end);
-      text = text.substring(end);
+      opts = compl.task[cmd][flag];
     }
-    return [sub, text] as const;
+
+    return last ? opts.filter(x => x.startsWith(last)) : opts.filter(x => !x.startsWith('-'));
   }
 
-  /**
-   * Colorize Usage
-   */
-  static colorizeOptions(option: string) {
-    return option.replace(/(\s*)(-[^, ]+)(,?\s*)(--\S+)?((\s+)?((?:\[[^\]]+\])|(?:\<[^>]+>)))?((\s+)(.*))?/g, (
-      p: string, spacing: string,
-      simpleParam: string, pSep: string,
-      fullParam: string, sub: string,
-      subSp: string, subVal: string,
-      desc: string, descSp: string,
-      descVal: string
-    ) => {
-      const line: string[] = [];
-      line.push(
-        spacing,
-        color`${{ param: simpleParam }}`,
-        pSep,
-        color`${{ param: fullParam }}`,
-        subSp,
-        color`${{ type: subVal }}`,
-        descSp,
-        color`${{ description: descVal }}`
-          .replace(/(\(default:\s+)(.*?)(\))/g,
-            (__, l, input, r) => color`${l}${{ input }}${{ description: r }}`)
-      );
-
-      return line.filter(x => !!x).join('');
-    })
-      .replace(/Options:/, title => color`${{ title }}`);
-  }
-
-  /**
-   * Colorize command section
-   */
-  static colorizeCommands(commands: string) {
-    return commands
-      .replace(/\s([^\[\]]\S+)/g, param => color`${{ param }}`)
-      .replace(/(\s*[^\x1b]\[[^\]]+\])/g, input => color`${{ input }}`) // eslint-disable-line no-control-regex
-      .replace(/Commands:/, title => color`${{ title }}`);
-  }
-
-  /**
-   * Colorize usage
-   */
-  static colorizeUsage(usage: string) {
-    return usage.replace(/Usage:/, title => color`${{ title }}`);
-  }
 
   /**
    * Show the help usage
@@ -134,22 +95,7 @@ export class CliUtil {
       console.error(color`${{ failure: msg }}\n`);
     }
 
-    cmd.outputHelp(text => {
-      const [usage, text2] = this.extractValue(text, 'Usage:');
-      const [options, text3] = this.extractValue(text2, 'Options:');
-      const [commands, textFinal] = this.extractValue(text3, 'Commands:');
-
-      const out: string = [
-        this.colorizeUsage(usage),
-        this.colorizeOptions(options),
-        this.colorizeCommands(commands),
-        textFinal
-      ]
-        .map(x => x.trim())
-        .filter(x => !!x)
-        .join('\n\n');
-      return `${out}\n`;
-    });
+    cmd.outputHelp(text => HelpUtil.getHelpText(text));
     process.exit(code);
   }
 }

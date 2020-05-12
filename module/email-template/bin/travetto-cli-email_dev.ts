@@ -1,7 +1,9 @@
 import * as commander from 'commander';
-import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
+
+import { CliUtil } from '@travetto/cli/src/util';
 import { WebServer } from '@travetto/cli/src/http';
 import { color } from '@travetto/cli/src/color';
+import { CompletionConfig } from '@travetto/cli/src/types';
 
 /**
  * CLI Entry point for running the email server
@@ -11,7 +13,7 @@ export function init() {
     .command('email:dev')
     .option('-p, --port [port]', 'Port to serve ui on', 3839)
     .option('-r, --reload-rate [reloadRate]', 'The rate to reload the UI at', 1000)
-    .option('-o, --open [open]', 'Open the ui automatically on start', CliUtil.BOOLEAN_RE, true)
+    .option('-o, --open [open]', 'Open the ui automatically on start', CliUtil.isBoolean, true)
     .action(async (cmd: commander.Command) => {
       process.env.RESOURCE_ROOTS = `${process.env.RESOURCE_ROOTS || ''},${__dirname}/lib`;
 
@@ -24,7 +26,7 @@ export function init() {
       const count = (await TemplateUtil.compileAllToDisk()).length;
       console.log(color`Successfully compiled ${{ param: count }} templates`);
 
-      const server = new WebServer({ handler: DevServerUtil, port: cmd.port, open: cmd.open, reloadRate: cmd.reloadRate });
+      const server = new WebServer({ handler: DevServerUtil, port: cmd.port, open: CliUtil.isTrue(cmd.open), reloadRate: cmd.reloadRate });
       const http = server.start();
 
       const { ShutdownManager } = await import('@travetto/base');

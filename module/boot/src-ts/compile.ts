@@ -101,14 +101,6 @@ export class CompileUtil {
 
     TranspileUtil.init();
 
-    // Drop typescript import, and use global. Great speedup;
-    TranspileUtil.addPreProcessor((name, contents) => {
-      if (name.includes('transform')) { // Should only ever be in transformation code
-        contents = contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
-      }
-      return contents;
-    });
-
     // Tag output to indicate it was succefully processed by the framework
     TranspileUtil.addPreProcessor((__, contents) =>
       `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { value: true })`);

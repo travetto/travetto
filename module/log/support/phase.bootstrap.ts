@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Initializes the logger to take over from base
+ */
 export const init = {
   key: 'log',
   after: 'base',

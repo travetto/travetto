@@ -1,26 +1,27 @@
 import * as fs from 'fs';
-import { OutputHandler } from '../types';
+import { Appender } from '../types';
 
 /**
- * File output options
+ * File appender options
  */
-export interface FileOutputOpts {
+export interface FileAppenderOpts {
   file: string;
 }
 
 /**
- * File output logger
+ * File appender logger
  */
-export class FileOutput implements OutputHandler {
+export class FileAppender implements Appender {
   stream: fs.WriteStream;
 
-  constructor(private opts: FileOutputOpts) {
+  constructor(private opts: FileAppenderOpts) {
     this.stream = fs.createWriteStream(opts.file, {
       autoClose: true,
       flags: 'a'
     });
   }
-  output(msg: string) {
+
+  append(msg: string) {
     this.stream.write(`${msg}\n`);
   }
 }
