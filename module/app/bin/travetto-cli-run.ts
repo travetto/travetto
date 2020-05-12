@@ -1,8 +1,9 @@
 import * as fs from 'fs';
 import * as commander from 'commander';
 
-import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
+import { CliUtil } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
+import { CompletionConfig } from '@travetto/cli/src/types';
 
 import { handleFailure, CachedAppConfig } from './lib/util';
 import { AppListUtil } from './lib/app-list';
@@ -40,12 +41,12 @@ export function init() {
     .allowUnknownOption()
     .option('-e, --env [env]', 'Application environment (dev|prod|<any>)', 'dev')
     .option('-r, --root [root]', 'Application root, defaults to associated root by name')
-    .option('-w, --watch [watch]', 'Run the application in watch mode, requires @travetto/watch (default: auto)', CliUtil.BOOLEAN_RE)
+    .option('-w, --watch [watch]', 'Run the application in watch mode, requires @travetto/watch (default: auto)', CliUtil.isBoolean)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
     .action(async (app: string, args: string[], cmd: commander.Command & AppCommand) => {
 
       // Determine if watch was passed in
-      cmd.watchReal = CliUtil.TRUE_RE.test(cmd.watch ?? '');
+      cmd.watchReal = CliUtil.isTrue(cmd.watch ?? '');
 
       // Setup profile
       cmd.profile = [

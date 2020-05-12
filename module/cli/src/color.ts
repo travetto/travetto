@@ -1,4 +1,4 @@
-import { ColorUtil } from '@travetto/boot';
+import { ColorUtil } from '@travetto/boot/src/color';
 
 /**
  * Map of common keys to specific colors
@@ -6,7 +6,7 @@ import { ColorUtil } from '@travetto/boot';
 export const Colors = {
   input: ColorUtil.makeColorer('yellow'),
   output: ColorUtil.makeColorer('magenta'),
-  path: ColorUtil.makeColorer('cyan', 'bold'),
+  path: ColorUtil.makeColorer('cyan'),
   success: ColorUtil.makeColorer('green', 'bold'),
   failure: ColorUtil.makeColorer('red', 'bold'),
   param: ColorUtil.makeColorer('green', 'bold'),

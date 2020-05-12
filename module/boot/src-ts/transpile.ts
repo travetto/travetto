@@ -191,6 +191,14 @@ export class TranspileUtil {
   static init() {
     AppCache.init();
 
+    // Drop typescript import, and use global. Great speedup;
+    this.addPreProcessor((name, contents) => {
+      if (name.includes('transform')) { // Should only ever be in transformation code
+        contents = contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
+      }
+      return contents;
+    });
+
     // Register source maps for cached files
     require('source-map-support').install({
       retrieveFile: (p: string) => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined

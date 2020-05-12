@@ -1,9 +1,9 @@
 import { ColorUtil } from '@travetto/boot';
 import { Env, ConsoleManager, LogLevel, ConsolePayload } from '@travetto/base';
 
-import { LogEvent, LogLevels, LogStream } from './types';
+import { LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
-import { ConsoleOutput } from './output/console';
+import { ConsoleAppender } from './output/console';
 import { LogUtil } from './util';
 
 const DEFAULT = Symbol.for('@trv:log/default');
@@ -16,11 +16,11 @@ class $Logger {
   /**
    * Listeners for logging events
    */
-  private listeners = new Map<string | symbol, (ev: LogEvent) => void>();
+  private listenerMap = new Map<string | symbol, (ev: LogEvent) => void>();
   /**
    * List of all listeners
    */
-  private listenList: ((ev: LogEvent) => void)[] = [];
+  private listeners: ((ev: LogEvent) => void)[] = [];
 
   /**
    * List of logging filters
@@ -54,54 +54,52 @@ class $Logger {
     }
 
     // Base logger, for free
-    ConsoleManager.set(this);
-    this.listen(); // Register console listener
-  }
-
-  /**
-   * Regigster a new listener with default support for formatters and output mechanisms
-   */
-  listen({ formatter, stdout, stderr, key }: Partial<LogStream> = {}) {
-    formatter = formatter ?? new LineFormatter({
+    const formatter = new LineFormatter({
       colorize: ColorUtil.colorize,
       timestamp: ConsoleManager.timestamp
     });
 
-    stderr = stderr ?? new ConsoleOutput({ method: 'error' });
-    stdout = stdout ?? new ConsoleOutput({ method: 'log' });
+    // Register default listener
+    this.listen(DEFAULT, LogUtil.buildListener(
+      formatter,
+      new ConsoleAppender({ method: 'log' }),
+      ({ level: x }) => x === 'info' || x === 'debug' || x === 'trace')
+    );
 
-    this.listenRaw(key ?? DEFAULT, (ev: LogEvent) => {
-      const msg = formatter!.format(ev);
-      if (ev.level === 'error' || ev.level === 'fatal' || ev.level === 'warn') {
-        stderr!.output(msg);
-      } else {
-        stdout!.output(msg);
-      }
-    });
+    this.listen(DEFAULT, LogUtil.buildListener(
+      formatter,
+      new ConsoleAppender({ method: 'error' }),
+      ({ level: x }) => x === 'error' || x === 'warn' || x === 'fatal')
+    );
+
+    ConsoleManager.set(this);
   }
 
   /**
-   * Listen directly without any support
+   * Add log event listener
    */
-  listenRaw(key: string | symbol, handler: (ev: LogEvent) => void) {
-    this.listeners.set(key ?? DEFAULT, handler);
-    this.listenList = [...this.listeners.values()];
+  listen(key: string | symbol, handler: (ev: LogEvent) => void) {
+    this.listenerMap.set(key, handler);
+    this.listeners.push(handler);
   }
 
   /**
    * Clear all listeners
    */
   removeAll() {
-    this.listeners.clear();
-    this.listenList = [];
+    this.listenerMap.clear();
+    this.listeners = [];
   }
 
   /**
    * Remove specific listener
    */
   removeListener(key: string | symbol) {
-    this.listeners.delete(key);
-    this.listenList = [...this.listeners.values()];
+    const handler = this.listenerMap.get(key);
+    if (handler) {
+      this.listenerMap.delete(key);
+      this.listeners.splice(this.listeners.indexOf(handler), 1);
+    }
   }
 
   /**
@@ -124,9 +122,9 @@ class $Logger {
       event.args = rest;
     }
 
-    event.level = (event.level! in LogLevels) ? event.level : 'info';
+    event.level = (event.level in LogLevels) ? event.level : 'info';
 
-    if ((event.level! in this.exclude) || (event.level! in this.filters && !this.filters[event.level!]!(event.category!))) {
+    if ((event.level in this.exclude) || (event.level in this.filters && !this.filters[event.level]!(event.category!))) {
       return;
     }
 
@@ -135,7 +133,7 @@ class $Logger {
     // Use sliced values
     event.args = (event.args ?? []).slice(0);
 
-    for (const l of this.listenList) {
+    for (const l of this.listeners) {
       l(event as LogEvent);
     }
   }

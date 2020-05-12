@@ -1,4 +1,5 @@
 import { EnvUtil } from '@travetto/boot';
+import { LogEvent, Formatter, Appender } from './types';
 
 /**
  * Logging utilities
@@ -7,6 +8,21 @@ export class LogUtil {
 
   static truth = () => true;
   static falsehood = () => false;
+
+  /**
+   * Produce an event listener
+   */
+  static buildListener(formatter: Formatter, appender: Appender, filter?: (ev: LogEvent) => boolean) {
+    if (filter) {
+      return (ev: LogEvent) => {
+        if (filter(ev)) {
+          appender.append(formatter.format(ev));
+        }
+      };
+    } else {
+      return (ev: LogEvent) => appender.append(formatter.format(ev));
+    }
+  }
 
   /**
    * Read environment variable to determine filter

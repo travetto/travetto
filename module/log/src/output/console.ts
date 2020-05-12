@@ -1,19 +1,19 @@
-import { OutputHandler } from '../types';
+import { Appender } from '../types';
 
 /**
  * Console logging config
  */
-export interface ConsoleOutputOpts {
+export interface ConsoleAppenderOpts {
   method: 'log' | 'error';
 }
 
 /**
  * Console.output
  */
-export class ConsoleOutput implements OutputHandler {
-  constructor(private opts: ConsoleOutputOpts) { }
+export class ConsoleAppender implements Appender {
+  constructor(private opts: ConsoleAppenderOpts) { }
 
-  output(message: string) {
+  append(message: string) {
     (console as any)[this.opts.method](message);
   }
 }

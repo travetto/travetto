@@ -1,6 +1,8 @@
 import * as commander from 'commander';
-import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
+
+import { CliUtil } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
+import { CompletionConfig } from '@travetto/cli/src/types';
 
 /**
  * CLI Entry point for running the email server
@@ -8,7 +10,7 @@ import { color } from '@travetto/cli/src/color';
 export function init() {
   return CliUtil.program
     .command('email:compile')
-    .option('-w, --watch [watch]', 'Compile in watch mode, requires @travetto/watch (default: false)', CliUtil.BOOLEAN_RE)
+    .option('-w, --watch [watch]', 'Compile in watch mode, requires @travetto/watch (default: false)', CliUtil.isBoolean)
     .action(async (cmd: commander.Command) => {
       // process.env.RESOURCE_ROOTS = `${process.env.RESOURCE_ROOTS || ''},${__dirname}/lib`;
 
@@ -19,7 +21,7 @@ export function init() {
       const count = (await TemplateUtil.compileAllToDisk()).length;
       console.log(color`Successfully compiled ${{ param: count }} templates`);
 
-      if (cmd.watch) {
+      if (CliUtil.isTrue(cmd.watch)) {
         await TemplateUtil.watchCompile();
         await new Promise(r => process.on('exit', r));
       }
