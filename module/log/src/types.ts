@@ -32,10 +32,10 @@ export interface LogEvent extends ConsolePayload {
 }
 
 /**
- * Output handler for the logger
+ * Output appender for the logger
  */
-export interface OutputHandler {
-  output(msg: string): void;
+export interface Appender {
+  append(msg: string): void;
 }
 
 /**
@@ -44,13 +44,3 @@ export interface OutputHandler {
 export interface Formatter {
   format(e: LogEvent): string;
 }
-
-/**
- * Log stream definition
- */
-export type LogStream = {
-  formatter: Formatter;
-  stdout: OutputHandler;
-  stderr: OutputHandler;
-  key: string | symbol;
-};
