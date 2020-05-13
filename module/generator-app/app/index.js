@@ -1,5 +1,5 @@
-process.env.FINAL_CWD = process.cwd();
+process.env.TRV_GEN_CWD = process.cwd();
 process.chdir(`${__dirname}/..`);
-process.env.ENV = 'prod';
+process.env.TRV_ENV = 'prod';
 require('@travetto/boot/bin/init');
 module.exports = require('./app.ts').TravettoGenerator;

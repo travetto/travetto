@@ -12,7 +12,7 @@ const fsWriteFile = util.promisify(fs.writeFile);
 export class DockerContainer {
 
   private static getContainerName(image: string, container?: string) {
-    return container ?? `${EnvUtil.get('DOCKER_NS', image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
+    return container ?? `${EnvUtil.get('TRV_DOCKER_NS', image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
   }
 
   /** Command to run */

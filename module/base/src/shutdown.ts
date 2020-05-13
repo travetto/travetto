@@ -2,7 +2,7 @@ import { EnvUtil } from '@travetto/boot';
 
 const ogExit = process.exit;
 
-const MAX_SHUTDOWN_TIME = EnvUtil.getInt('MAX_SHUTDOWN_WAIT', 2000);
+const SHUTDOWN_WAIT = EnvUtil.getTime('TRV_SHUTDOWN_WAIT', 2000);
 
 type UnhandledHandler = (err: Error, prom?: Promise<any>) => boolean | undefined | void;
 type Listener = { name: string, handler: Function, final?: boolean };
@@ -82,7 +82,7 @@ export class ShutdownManager {
       if (promises.length) {
         const finalRun = Promise.race([
           ...promises,
-          new Promise((r, rej) => setTimeout(() => rej(new Error('Timeout on shutdown')), MAX_SHUTDOWN_TIME))
+          new Promise((r, rej) => setTimeout(() => rej(new Error('Timeout on shutdown')), SHUTDOWN_WAIT))
         ]);
         await finalRun;
       }

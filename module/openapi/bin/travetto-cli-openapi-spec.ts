@@ -1,5 +1,6 @@
 import * as commander from 'commander';
-import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
+import { CliUtil } from '@travetto/cli/src/util';
+import { CompletionConfig } from '@travetto/cli/src/types';
 
 // TODO: Document
 export function init() {
@@ -7,7 +8,7 @@ export function init() {
     .command('openapi-spec')
     .option('-o, --output [output]', 'Output files', './openapi.yml')
     .action(async (cmd: commander.Command) => {
-      process.env.OPENAPI_OUTPUT = cmd.output;
+      process.env.API_SPEC_OUTPUT = cmd.output;
 
       const { PhaseManager } = await import('@travetto/base');
       await PhaseManager.bootstrap();

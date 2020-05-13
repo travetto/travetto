@@ -12,7 +12,7 @@ export function init() {
     .command('email:compile')
     .option('-w, --watch [watch]', 'Compile in watch mode, requires @travetto/watch (default: false)', CliUtil.isBoolean)
     .action(async (cmd: commander.Command) => {
-      // process.env.RESOURCE_ROOTS = `${process.env.RESOURCE_ROOTS || ''},${__dirname}/lib`;
+      // process.env.TRV_RESOURCE_ROOTS = `${process.env.TRV_RESOURCE_ROOTS || ''},${__dirname}/lib`;
 
       const { PhaseManager } = await import('@travetto/base');
       await PhaseManager.bootstrap();

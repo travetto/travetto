@@ -289,8 +289,7 @@ $ npx travetto run
   "appRoots": [
     "./"
   ],
-  "debug": true,
-  "watch": true
+  "debug": true
 }
 2019-03-22T04:51:28 debug [@trv:base/phase] Initializing Phase bootstrap [ 'base', 'log', 'config', 'compiler', 'registry', 'schema' ]
 2019-03-22T04:51:28 debug [@trv:config/source] Found configurations for [ 'application' ]

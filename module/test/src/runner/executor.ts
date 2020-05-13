@@ -194,7 +194,7 @@ export class TestExecutor {
       return;
     }
 
-    if (EnvUtil.isTrue('DEBUGGER')) {
+    if (EnvUtil.isTrue('TRV_TEST_DEBUGGER')) {
       await new Promise(t => setTimeout(t, 100));
     }
 
