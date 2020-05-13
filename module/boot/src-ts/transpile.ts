@@ -161,7 +161,7 @@ export class TranspileUtil {
       err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${fileName}]` : `from ${fileName}`}`);
     }
 
-    if (EnvUtil.isTrue('WATCH') && !fileName.includes('/node_modules/')) {
+    if (EnvUtil.isTrue('TRV_WATCH') && !fileName.includes('/node_modules/')) {
       console.debug(`Unable to ${phase} ${fileName}: stubbing out with error proxy.`, err.message);
       return this.getErrorModule(err.message);
     }

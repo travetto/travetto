@@ -4,7 +4,7 @@ import * as readline from 'readline';
 import { EnvUtil } from '@travetto/boot';
 import { ScanFs, Env, ShutdownManager } from '@travetto/base';
 
-const DEFAULT_TIMEOUT = EnvUtil.getInt('DEFAULT_TIMEOUT', 5000);
+const TEST_TIMEOUT = EnvUtil.getTime('TRV_TEST_TIMEOUT', 5000);
 
 // TODO: Document
 export class TestUtil {
@@ -15,9 +15,9 @@ export class TestUtil {
       () => new Promise(res => setTimeout(res, 50)));
   }
 
-  static asyncTimeout(duration: number = DEFAULT_TIMEOUT): [Promise<any>, Function] {
+  static asyncTimeout(duration: number = TEST_TIMEOUT): [Promise<any>, Function] {
     let id: NodeJS.Timer;
-    if (EnvUtil.isTrue('DEBUGGER')) {
+    if (EnvUtil.isTrue('TRV_TEST_DEBUGGER')) {
       duration = 600000; // 10 minutes
     }
     const prom = new Promise((__, reject) => {

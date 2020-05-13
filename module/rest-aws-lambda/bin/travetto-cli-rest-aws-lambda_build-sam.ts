@@ -12,7 +12,7 @@ export function init() {
     .option('-e --env [env]', 'Environment name', 'prod')
     .option('-o --output [output]', 'Output file', 'dist/template.yml')
     .action(async (cmd: commander.Command) => {
-      process.env.ENV = cmd.env;
+      process.env.TRV_ENV = cmd.env;
 
       cmd.output = FsUtil.resolveUnix(FsUtil.cwd, cmd.output);
 

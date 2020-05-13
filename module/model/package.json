@@ -17,9 +17,6 @@
   "optionalPeerDependencies": {
     "@travetto/rest": "^1.0.0-beta.0"
   },
-  "supplementalDependencies": {
-    "@travetto/app": "^1.0.0-beta.4"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "datastore",

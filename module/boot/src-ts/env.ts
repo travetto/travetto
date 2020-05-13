@@ -30,6 +30,26 @@ export class EnvUtil {
   }
 
   /**
+   * Get time as milliseconds
+   */
+  static getTime(k: string, defMs: number) {
+    const text = this.get(k, '');
+    let mult = 1;
+    const match = text.match(/^(\d+)([hms]?)$/);
+    if (match) {
+      const [, val, unit] = match;
+      switch (unit) {
+        case 'h': mult = 60 * 60 * 1000; break;
+        case 'm': mult = 60 * 1000; break;
+        case 's': mult = 1000; break;
+      }
+      return parseInt(val, 10) * mult;
+    } else {
+      return defMs;
+    }
+  }
+
+  /**
    * Determine if value is set explicitly
    */
   static isSet(k: string) {

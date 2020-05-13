@@ -24,12 +24,12 @@ export class RunUtil {
     const app = await AppListUtil.getByName(name);
 
     if (app) {
-      process.env.APP_ROOTS = process.env.APP_ROOTS ?? app.appRoot ?? '';
-      if (!process.env.WATCH) {
-        if (/^prod/i.test(`${process.env.ENV}`)) {
-          process.env.WATCH = '0';
+      process.env.TRV_APP_ROOTS = process.env.TRV_APP_ROOTS ?? app.appRoot ?? '';
+      if (!process.env.TRV_WATCH) {
+        if (/^prod/i.test(`${process.env.TRV_ENV}`)) {
+          process.env.TRV_WATCH = '0';
         } else if (app.watchable !== undefined) {
-          process.env.WATCH = `${app.watchable}`;
+          process.env.TRV_WATCH = `${app.watchable}`;
         }
       }
     }

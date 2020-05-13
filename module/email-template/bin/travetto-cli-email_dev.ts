@@ -15,7 +15,7 @@ export function init() {
     .option('-r, --reload-rate [reloadRate]', 'The rate to reload the UI at', 1000)
     .option('-o, --open [open]', 'Open the ui automatically on start', CliUtil.isBoolean, true)
     .action(async (cmd: commander.Command) => {
-      process.env.RESOURCE_ROOTS = `${process.env.RESOURCE_ROOTS || ''},${__dirname}/lib`;
+      process.env.TTRV_RESOURCE_ROOTS = `${process.env.TRV_RESOURCE_ROOTS || ''},${__dirname}/lib`;
 
       const { PhaseManager } = await import('@travetto/base');
       await PhaseManager.bootstrap();

@@ -1,4 +1,3 @@
-import { EnvUtil } from '@travetto/boot/src/env';
 import { State } from '../src/runner/types';
 
 // TODO: Document
@@ -12,11 +11,10 @@ export async function load(env: any = {}) {
   Object.assign(process.env, {
     DEBUG: process.env.DEBUG || '0',
     TRACE: process.env.TRACE || '0',
-    PROD: '0',
-    LOG_TIME: '0',
-    WATCH: '0',
-    ENV: 'test',
-    RESOURCE_ROOTS: 'test',
+    TRV_LOG_TIME: '0',
+    TRV_WATCH: '0',
+    TRV_ENV: 'test',
+    TRV_RESOURCE_ROOTS: 'test',
     ...env
   });
   const { PhaseManager } = await import('@travetto/base');
@@ -24,7 +22,7 @@ export async function load(env: any = {}) {
 }
 
 export async function runTestsDirect(format: string = 'tap', mode: any = 'single', concurrency = 1) {
-  await load({ DEBUGGER: true });
+  await load({ TRV_TEST_DEBUGGER: true });
 
   return runTests({
     args: process.argv.slice(2),
@@ -41,9 +39,9 @@ export async function worker() {
   return new TestChildWorker().activate();
 }
 
-export async function watchTests() {
-  await load({ WATCH: 1, DEBUG: 0 });
+export async function watchTests(format: string = 'event') {
+  await load({ TRV_WATCH: 1, DEBUG: 0 });
 
   const { TestWatcher } = await import('../src/runner/watcher');
-  await TestWatcher.watch(EnvUtil.get('TEST_FORMAT', 'event'));
+  await TestWatcher.watch(format);
 }

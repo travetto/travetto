@@ -16,7 +16,7 @@ export class CommandService {
    * Check to see if docker is available
    */
   static async dockerAvailable() {
-    if (this.hasDocker === undefined && !EnvUtil.isTrue('NO_DOCKER')) { // Check for docker existence
+    if (this.hasDocker === undefined && !EnvUtil.isTrue('TRV_DOCKER_DISABLE')) { // Check for docker existence
       const { result: prom } = ExecUtil.spawn('docker', ['ps']);
       this.hasDocker = (await prom).valid;
     }
