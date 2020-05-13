@@ -38,7 +38,7 @@ export class SerializeInterceptor extends RestInterceptor {
     }
   }
 
-  after = LoggingInterceptor;
+  after = [LoggingInterceptor];
 
   async intercept(req: Request, res: Response, next: (() => Promise<any>)): Promise<any> {
     try {

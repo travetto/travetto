@@ -1,4 +1,4 @@
-import { ChildCommChannel } from '../src/comm/child';
+import { ChildCommChannel } from '../../src/comm/child';
 
 const exec = new ChildCommChannel<{ data: string }>();
 

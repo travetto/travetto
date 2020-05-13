@@ -215,4 +215,14 @@ export class Util {
   static uuid(len: number = 32) {
     return crypto.randomBytes(Math.ceil(len / 2)).toString('hex').substring(0, len);
   }
+
+  /**
+   * Produce a promise that is externally resolvable
+   */
+  static resolvablePromise<T = void>() {
+    let ops: { resolve: (v: T) => void, reject: (err: Error) => void };
+    const prom = new Promise((resolve, reject) => ops = { resolve, reject });
+    Object.assign(prom, ops!);
+    return prom as Promise<T> & (typeof ops);
+  }
 }

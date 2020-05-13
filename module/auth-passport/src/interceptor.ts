@@ -18,7 +18,7 @@ export class PassportInterceptor extends RestInterceptor {
 
   private init = authenticator.initialize();
 
-  after = AuthInterceptor;
+  after = [AuthInterceptor];
 
   async intercept(req: Request, res: Response) {
     await new Promise((resolve, reject) => {

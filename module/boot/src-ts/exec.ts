@@ -198,4 +198,15 @@ export class ExecUtil {
       return StreamUtil.waitForCompletion(proc.stdout!, () => prom);
     }
   }
+
+  /**
+   * Kill a spawned proces
+   */
+  static kill(proc: { kill(sig?: string | number): void }) {
+    if (process.platform === 'win32') {
+      proc.kill();
+    } else {
+      proc.kill('SIGTERM');
+    }
+  }
 }

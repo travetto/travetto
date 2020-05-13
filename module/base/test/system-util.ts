@@ -20,7 +20,7 @@ class SystemUtilTests {
         key: 'fifth'
       },
       {
-        after: 'first',
+        after: ['first'],
         key: 'third'
       },
       {
@@ -28,11 +28,11 @@ class SystemUtilTests {
         key: 'second'
       },
       {
-        after: new Set(['first', 'second']),
+        after: ['first', 'second'],
         key: 'fourth'
       },
       {
-        after: new Set(['fifth']),
+        after: ['fifth'],
         key: 'sixth'
       }
     ];

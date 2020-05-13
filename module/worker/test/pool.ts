@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
-import { FsUtil } from '@travetto/boot';
 import { Suite, Test } from '@travetto/test';
+import { ResourceManager } from '@travetto/base';
 import { WorkPool } from '../src/pool';
 import { IterableInputSource } from '../src/input/iterable';
 import { WorkUtil } from '../src/util';
@@ -21,7 +21,7 @@ export class PoolExecTest {
 
     const pool = new WorkPool(() =>
       WorkUtil.spawnedWorker<string>({
-        command: FsUtil.resolveUnix(__dirname, 'simple.child-launcher.js'),
+        command: ResourceManager.toAbsolutePathSync('simple.child-launcher.js'),
         fork: true,
         init: channel => channel.listenOnce('ready'),
         async execute(channel, inp) {

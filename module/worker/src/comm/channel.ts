@@ -2,7 +2,9 @@ import { ChildProcess } from 'child_process';
 
 import { Env } from '@travetto/base';
 
-// TODO: Document
+/**
+ * Channel that represents communication between parent/child
+ */
 export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any, U extends { type: string } = V & { type: string }> {
 
   public proc: T;
@@ -16,14 +18,23 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
     return process.pid;
   }
 
+  /**
+   * Get's channel unique identifier
+   */
   get id() {
     return this.proc && this.proc.pid;
   }
 
+  /**
+   * Determines if channel is active
+   */
   get active() {
     return !!this.proc;
   }
 
+  /**
+   * Send data to the parent
+   */
   send(eventType: string, data?: any) {
     if (Env.trace) {
       console.trace(`[${this.parentId}] Sending [${this.id}] ${eventType}`);
@@ -35,6 +46,9 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
     }
   }
 
+  /**
+   * Listen for an event, once
+   */
   listenOnce(eventType: string): Promise<U>;
   listenOnce(eventType: string, callback: (e: U) => any): void;
   listenOnce(eventType: string, callback?: (e: U) => any) {
@@ -53,10 +67,16 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
     }
   }
 
+  /**
+   * Remove a specific listener
+   */
   removeListener(fn: (e: U) => any) {
     this.proc.removeListener('message', fn);
   }
 
+  /**
+   * Listen for a specific message type
+   */
   listenFor(eventType: string, callback: (e: U, complete: Function) => any) {
     const fn = (event: U, kill: Function) => {
       if (event.type === eventType) {
@@ -66,6 +86,9 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
     this.listen(fn);
   }
 
+  /**
+   * Listen, and return a handle to remove listener when desired
+   */
   listen(handler: (e: U, complete: Function) => any) {
     if (!this.proc) {
       return;
@@ -98,6 +121,9 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
     return kill;
   }
 
+  /**
+   * Destroy self
+   */
   async destroy() {
     if (this.proc) {
       console.trace(`[${this.parentId}] Killing [${this.id}]`);
@@ -106,6 +132,9 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
     delete this.proc;
   }
 
+  /**
+   * Remove all listeners, but do not destroy
+   */
   release() {
     if (this.proc) {
       console.trace(`[${this.parentId}] Released [${this.id}]`);
