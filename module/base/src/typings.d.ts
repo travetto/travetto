@@ -7,6 +7,4 @@ declare global {
   interface Console {
     fatal: (msg?: string, ...extra: any[]) => void;
   }
-  namespace NodeJS {
-  }
 }

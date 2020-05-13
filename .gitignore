@@ -3,6 +3,7 @@
 **/.DS_STORE
 lerna-debug.log
 bin/test/model/**
+bin/test/error.ts
 
 **/temp/**
 **/build/**

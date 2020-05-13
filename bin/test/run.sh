@@ -6,6 +6,9 @@ for x in module/test/src/model/*.ts; do
   cat $x | sed -e 's|import.*Class.*|interface Class<T = any> { new (...args: any[]): T }|g' > bin/test/model/$NAME
 done
 
+echo 'declare global { interface Error { toConsole(sub?: any): string; } }' > bin/test/error.ts
+cat module/base/src/internal/error.ts >> bin/test/error.ts
+
 export DEBUG=0
 export TRV_DEV=1
 export NODE_PRESERVE_SYMLINKS=1

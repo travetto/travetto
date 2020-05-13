@@ -6,6 +6,5 @@ declare global {
     type?: string;
     status?: number;
     statusCode?: number;
-    toJSON?(): any;
   }
 }
