@@ -8,7 +8,11 @@ export class ColorUtil {
 
   static get colorize() {
     if (this._colorize === undefined) {
-      this._colorize = EnvUtil.isTrue('FORCE_COLOR') || (!EnvUtil.isTrue('NO_COLOR') && process.stdout.isTTY);
+      if (EnvUtil.isSet('TRV_COLOR')) {
+        this._colorize = EnvUtil.isTrue('TRV_COLOR');
+      } else {
+        this._colorize = EnvUtil.isTrue('FORCE_COLOR') || (!EnvUtil.isTrue('NO_COLOR') && process.stdout.isTTY);
+      }
     }
     return this._colorize;
   }

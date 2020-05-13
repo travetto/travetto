@@ -12,10 +12,10 @@ export function init() {
     .option('-a, --app [app]', 'Application root to export, (default: .)')
     .option('-c, --clear [clear]', 'Whether or not to clear the database first (default: true)', CliUtil.isBoolean)
     .action(async (cmd: commander.Command) => {
-      process.env.ENV = 'prod';
-      process.env.APP_ROOTS = cmd.app ? `./${cmd.app}` : '';
-      process.env.PROFILE = cmd.app ?? '';
-      process.env.PLAIN_CONSOLE = '1';
+      process.env.TRV_ENV = 'prod';
+      process.env.TRV_APP_ROOTS = cmd.app ? `./${cmd.app}` : '';
+      process.env.TRV_PROFILE = cmd.app ?? '';
+      process.env.TRV_LOG_PLAIN = '1';
 
       const clear = cmd.clear === undefined ? true : CliUtil.isTrue(cmd.clear);
 

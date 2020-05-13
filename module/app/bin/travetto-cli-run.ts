@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as commander from 'commander';
 
 import { CliUtil } from '@travetto/cli/src/util';
+import { EnvUtil } from '@travetto/boot/src/env';
 import { color } from '@travetto/cli/src/color';
 import { CompletionConfig } from '@travetto/cli/src/types';
 
@@ -51,30 +52,30 @@ export function init() {
       // Setup profile
       cmd.profile = [
         ...(cmd.profile ?? []),
-        ...(process.env.PROFILE ?? '').split(/,/g)
+        ...EnvUtil.getList('TRV_PROFILE')
       ]
         .map(x => x.trim())
         .filter(x => !!x);
 
       // Process env
       if (cmd.env) {
-        process.env.ENV = cmd.env; // Preemptively set b/c env changes how we compile some things
+        process.env.TRV_ENV = cmd.env; // Preemptively set b/c env changes how we compile some things
       } else {
-        cmd.env = (process.env.ENV ?? process.env.env) || undefined;
+        cmd.env = EnvUtil.get('TRV_ENV');
       }
 
       // Handle root
       if (cmd.root) {
-        process.env.APP_ROOTS = cmd.root;
+        process.env.TRV_APP_ROOTS = cmd.root;
       }
       // Join profiles if passed
       if (cmd.profile) {
-        process.env.PROFILE = cmd.profile.join(',');
+        process.env.TRV_PROFILE = cmd.profile.join(',');
       }
 
       // Set watch if passed in
       if (cmd.watch !== undefined) {
-        process.env.WATCH = `${cmd.watch}`;
+        process.env.TRV_WATCH = `${cmd.watch}`;
       }
 
       try {

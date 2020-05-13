@@ -7,7 +7,7 @@ import { TestUtil } from './util';
 
 export const BREAKOUT = Symbol.for('@trv:test/breakout');
 
-const DEFAULT_PHASE_TIMEOUT = EnvUtil.getInt('DEFAULT_PHASE_TIMEOUT', 15000);
+const TEST_PHASE_TIMEOUT = EnvUtil.getTime('TRV_TEST_PHASE_TIMEOUT', 15000);
 
 // TODO: Document
 export class ExecutionPhaseManager {
@@ -28,7 +28,7 @@ export class ExecutionPhaseManager {
   async runPhase(phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
     try {
       for (const fn of this.suite[phase]) {
-        const [timeout, clear] = TestUtil.asyncTimeout(DEFAULT_PHASE_TIMEOUT);
+        const [timeout, clear] = TestUtil.asyncTimeout(TEST_PHASE_TIMEOUT);
         await Promise.race([timeout, fn.call(this.suite.instance)]);
         clear();
       }

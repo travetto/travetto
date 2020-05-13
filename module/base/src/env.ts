@@ -1,7 +1,5 @@
 import { EnvUtil, FsUtil } from '@travetto/boot';
 
-const PROD_KEY = 'prod';
-
 /**
  * General Environmental state for the application
  */
@@ -40,10 +38,13 @@ class $Env {
 
   constructor() {
     this.cwd = FsUtil.cwd;
-    this.env = (EnvUtil.get('ENV') ?? EnvUtil.get('NODE_ENV') ?? PROD_KEY).replace(/^production$/i, PROD_KEY).toLowerCase();
-    this.prod = this.env === PROD_KEY;
+    this.env = EnvUtil.get('TRV_ENV', EnvUtil.get('NODE_ENV', 'dev'))
+      .replace(/^production$/i, 'prod')
+      .replace(/^development$/i, 'dev')
+      .toLowerCase();
+    this.prod = this.env === 'prod';
 
-    this.profiles = new Set(EnvUtil.getList('PROFILE'));
+    this.profiles = new Set(EnvUtil.getList('TRV_PROFILE'));
     this.appRoots = this.computeAppRoots();
 
     this.debug = EnvUtil.isSet('DEBUG') ? !EnvUtil.isFalse('DEBUG') : !this.prod;
@@ -52,12 +53,15 @@ class $Env {
 
   private computeAppRoots() {
     // Include root
-    return [this.cwd, ...EnvUtil.getList('APP_ROOTS')]
+    return [this.cwd, ...EnvUtil.getList('TRV_APP_ROOTS')]
       .filter(x => !!x)
       .map(x => FsUtil.resolveUnix(this.cwd, x).replace(this.cwd, '.'))
       .filter((x, i, all) => i === 0 || x !== all[i - 1]); // Dedupe
   }
 
+  /**
+   * Generate to JSON
+   */
   toJSON() {
     return (['trace', 'debug', 'cwd', 'env', 'prod', 'profiles', 'appRoots'] as (keyof this)[])
       .reduce((acc, k) => {

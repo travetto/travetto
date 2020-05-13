@@ -99,7 +99,7 @@ export class $ResourceManager {
    */
   async find(pth: string) {
     pth = cleanPath(pth);
-    if (pth in this.cache) {
+    if (this.cache.has(pth)) {
       return this.cache.get(pth)!;
     }
 
@@ -119,16 +119,15 @@ export class $ResourceManager {
    */
   findSync(pth: string) {
     pth = cleanPath(pth);
-    if (pth in this.cache) {
+    if (this.cache.has(pth)) {
       return this.cache.get(pth)!;
     }
 
     for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
-      try {
-        FsUtil.existsSync(f);
+      if (FsUtil.existsSync(f)) {
         this.cache.set(pth, f);
         return f;
-      } catch { }
+      }
     }
 
     throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`, 'notfound');
@@ -201,5 +200,5 @@ export class $ResourceManager {
 
 export const ResourceManager = new $ResourceManager([
   ...Env.appRoots,
-  ...EnvUtil.getList('RESOURCE_ROOTS')
+  ...EnvUtil.getList('TRV_RESOURCE_ROOTS')
 ]);

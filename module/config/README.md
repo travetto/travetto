@@ -14,8 +14,8 @@ The config module provides support for loading application config on startup. Co
 Config loading follows a defined resolution path, below is the order in increasing specificity:
 
 1. `resources/application.yml` - Load the default `application.yml` if available.
-1. `resources/*.yml` - Load profile specific configurations as defined by the values in `process.env.PROFILE`
-1. `resources/{env}.yml` - Load environment specific profile configurations as defined by the values of `process.env.ENV`.
+1. `resources/*.yml` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILE`
+1. `resources/{env}.yml` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
 1. `process.env` - Read startup configuration from environment to allow for overriding any values. Because we are overriding a [`yaml`](https://en.wikipedia.org/wiki/YAML) based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as `UPPER_SNAKE_CASE`. When reading from `process.env` we will map `UPPER_SNAKE_CASE` to `upper.snake.case`, and will attempt to match by case-insensitive name.
 
 ### A Complete Example

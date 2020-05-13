@@ -65,7 +65,7 @@ export class StreamUtil {
     const write = fs.createWriteStream(out);
     const finalStream = (await this.toStream(src)).pipe(write);
     await new Promise((res, rej) => {
-      finalStream.on('finish', (err) => err ? rej(err) : res());
+      finalStream.on('finish', res).on('error', rej);
     });
     return;
   }
