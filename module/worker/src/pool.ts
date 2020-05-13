@@ -5,7 +5,9 @@ import { ShutdownManager } from '@travetto/base';
 
 import { InputSource } from './input/types';
 
-// TODO: Document
+/**
+ * Worker defintion
+ */
 export interface Worker<X> {
   active: boolean;
   id: any;
@@ -15,15 +17,36 @@ export interface Worker<X> {
   release?(): any;
 }
 
-// TODO: Document
+/**
+ * Work pool support
+ */
 export class WorkPool<X, T extends Worker<X>> {
 
   static DEFAULT_SIZE = Math.min(os.cpus().length - 1, 4);
 
+  /**
+   * Generic-pool pool
+   */
   private pool: gp.Pool<T>;
+  /**
+   * Number of acquistions in process
+   */
   private pendingAcquires = 0;
+  /**
+   * List of errors during processing
+   */
   private errors: Error[] = [];
 
+  /**
+   * Error count during creation
+   */
+  private createErrors = 0;
+
+  /**
+   *
+   * @param getWorker Produces a new worker for the pool
+   * @param opts Pool options
+   */
   constructor(getWorker: () => Promise<T> | T, opts?: gp.Options) {
     const args = {
       max: WorkPool.DEFAULT_SIZE,
@@ -32,41 +55,54 @@ export class WorkPool<X, T extends Worker<X>> {
       ...(opts ?? {}),
     };
 
-    let createErrors = 0;
-
+    // Create the pool
     this.pool = gp.createPool({
-      create: async () => {
-        try {
-          this.pendingAcquires += 1;
-          const res = await getWorker();
-
-          if (res.init) {
-            await res.init();
-          }
-
-          createErrors = 0; // Reset errors on success
-
-          return res;
-        } catch (e) {
-          if (createErrors++ > args.max) { // If error count is bigger than pool size, we broke
-            console.error(e);
-            process.exit(1);
-          }
-          throw e;
-        } finally {
-          this.pendingAcquires -= 1;
-        }
-      },
-      destroy: async (x: T) => {
-        console.trace(`[${process.pid}] Destroying ${x.id}`);
-        return x.destroy();
-      },
+      create: () => this.createAndTrack(getWorker, args),
+      destroy: x => this.destroy(x),
       validate: async (x: T) => x.active
     }, args);
 
     ShutdownManager.onShutdown(`worker.pool.${this.constructor.name}`, () => this.shutdown());
   }
 
+
+  /**
+   * Creates and tracks new worker
+   */
+  async createAndTrack(getWorker: () => Promise<T> | T, opts: gp.Options) {
+    try {
+      this.pendingAcquires += 1;
+      const res = await getWorker();
+
+      if (res.init) {
+        await res.init();
+      }
+
+      this.createErrors = 0; // Reset errors on success
+
+      return res;
+    } catch (e) {
+      if (this.createErrors++ > opts.max!) { // If error count is bigger than pool size, we broke
+        console.error(e);
+        process.exit(1);
+      }
+      throw e;
+    } finally {
+      this.pendingAcquires -= 1;
+    }
+  }
+
+  /**
+   * Destroy the worker
+   */
+  async destroy(worker: T) {
+    console.trace(`[${process.pid}] Destroying ${worker.id}`);
+    return worker.destroy();
+  }
+
+  /**
+   * Free worker on completion
+   */
   async release(worker: T) {
     console.trace(`[${process.pid}] Releasing ${worker.id}`);
     try {
@@ -83,6 +119,9 @@ export class WorkPool<X, T extends Worker<X>> {
     } catch { }
   }
 
+  /**
+   * Process a given input source
+   */
   async process(src: InputSource<X>) {
     const pending = new Set<Promise<any>>();
 
@@ -106,6 +145,9 @@ export class WorkPool<X, T extends Worker<X>> {
     }
   }
 
+  /**
+   * Shutdown pool
+   */
   async shutdown() {
     while (this.pendingAcquires) {
       await new Promise(r => setTimeout(r, 10));

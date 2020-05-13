@@ -90,7 +90,7 @@ An example would be something like `phase.bootstrap.ts` in the [`Config`](https:
 ```typescript
 export const init = {
   key: 'config',
-  after: 'base',
+  after: ['base'],
   action: () => {
     require('../src/service/config').init();
   }

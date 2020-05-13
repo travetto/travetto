@@ -1,7 +1,7 @@
 // TODO: Document
 export const init = {
-  after: 'base',
   key: 'schedule',
+  after: ['base'],
   action: async () => {
     const { ShutdownManager } = await import('@travetto/base');
     const { Scheduler } = await import('../src/service');

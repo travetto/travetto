@@ -9,7 +9,7 @@ import { CorsInterceptor } from './cors';
 // TODO: Document
 export class GetCacheInterceptor extends RestInterceptor {
 
-  after = CorsInterceptor;
+  after = [CorsInterceptor];
 
   @Inject()
   config: RestConfig;

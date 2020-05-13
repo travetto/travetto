@@ -26,8 +26,8 @@ export class RestCookieConfig implements cookies.SetOption {
 // TODO: Document
 export class CookiesInterceptor extends RestInterceptor {
 
-  after = CorsInterceptor;
-  before = GetCacheInterceptor;
+  after = [CorsInterceptor];
+  before = [GetCacheInterceptor];
 
   @Inject()
   cookieConfig: RestCookieConfig;

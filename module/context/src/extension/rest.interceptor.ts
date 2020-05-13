@@ -11,7 +11,7 @@ import { AsyncContext } from '../service';
 @Injectable()
 export class AsyncContextInterceptor extends RestInterceptor {
 
-  after = GetCacheInterceptor;
+  after = [GetCacheInterceptor];
 
   @Inject()
   context: AsyncContext;

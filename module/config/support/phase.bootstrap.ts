@@ -3,7 +3,7 @@
  */
 export const init = {
   key: 'config',
-  after: 'base',
+  after: ['base'],
   action: async () => {
     const { ConfigManager } = await import('../src/manager');
     ConfigManager.init();

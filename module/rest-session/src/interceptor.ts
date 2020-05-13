@@ -7,7 +7,7 @@ import { RestSessionService } from './service';
 // TODO: Document
 export class SessionInterceptor extends RestInterceptor {
 
-  after = CookiesInterceptor;
+  after = [CookiesInterceptor];
 
   @Inject()
   service: RestSessionService;
