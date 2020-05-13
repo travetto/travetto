@@ -14,8 +14,8 @@ interface Initializer {
  * Each support file is structured as:
  * {
  *    key: name,
- *    before: stage | stages[], // Stage is another files key value
- *    after: stage | stages[],
+ *    before?: stages[], // Stage is another files key value
+ *    after?: stages[],
  *    init: execution code
  * }
  */

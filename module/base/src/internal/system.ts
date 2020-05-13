@@ -1,28 +1,6 @@
 import * as path from 'path';
 import { FsUtil } from '@travetto/boot';
 
-function find<T>(set: Set<T>, pred: (x: T) => boolean): T | undefined {
-  for (const i of set) {
-    if (pred(i)) {
-      return i;
-    }
-  }
-  return undefined;
-}
-
-function toList<T>(items: T | T[] | Set<T> | undefined) {
-  if (!items) {
-    return [];
-  }
-  if (Array.isArray(items)) {
-    return items;
-  }
-  if (items instanceof Set) {
-    return Array.from(items);
-  }
-  return [items];
-}
-
 /**
  * Set of internal system utilities
  */
@@ -31,26 +9,54 @@ export class SystemUtil {
   private static modCache = new Map<string, string>();
 
   /**
+   * Track idle activity with ability to extend
+   */
+  static idle(timeout: number, onTimeout: () => void) {
+    let timer: NodeJS.Timer | undefined;
+    /**
+     * Stop countdown
+     */
+    function stop() {
+      if (timer) {
+        clearTimeout(timer);
+        timer = undefined;
+      }
+    }
+
+    /**
+     * Start countdown
+     */
+    function start(force = false) {
+      if (timer) {
+        if (force) {
+          stop();
+        } else {
+          return;
+        }
+      }
+      timer = setTimeout(onTimeout, timeout);
+      timer.unref();
+    }
+    return { start, stop, restart: start.bind(null, true) };
+  }
+
+  /**
    * Throttle a function to run only once within a specific threshold of time
    */
-  static throttle<T, U, V>(fn: (a: T, b: U) => V, threshold?: number): (a: T, b: U) => V;
-  static throttle<T extends Function>(fn: T, threshold = 250) {
+  static throttle<T extends any[]>(fn: (...args: T[]) => void, threshold = 250) {
     let last = 0;
     let deferTimer: NodeJS.Timer;
-    return function (...args: any[]) {
+    return function check(...args: any[]) {
       const now = Date.now();
+      // Still within throttle window
       if (last && now < last + threshold) {
-        // hold on to it
         clearTimeout(deferTimer);
-        deferTimer = setTimeout(function () {
-          last = now;
-          fn.call(null, ...args);
-        }, threshold);
-      } else {
+        deferTimer = setTimeout(check, threshold + 1);
+      } else { // Must call
         last = now;
-        fn.call(null, ...args);
+        fn(...args);
       }
-    } as any as T;
+    };
   }
 
   /**
@@ -72,8 +78,8 @@ export class SystemUtil {
    */
   static computeOrdering<T,
     U extends {
-      after?: T | Set<T> | T[];
-      before?: T | Set<T> | T[];
+      after?: T[];
+      before?: T[];
       key: T;
     },
     V extends {
@@ -88,7 +94,7 @@ export class SystemUtil {
       x.key, {
         key: x.key,
         target: x,
-        after: new Set(toList(x.after))
+        after: new Set(x.after || [])
       }
     ] as [T, V]));
 
@@ -96,7 +102,7 @@ export class SystemUtil {
 
     // Loop through all new items of type V, converting before into after
     for (const item of all) {
-      const before = toList(item.target.before);
+      const before = item.target.before || [];
       for (const bf of before) {
         if (allMap.has(bf)) {
           allMap.get(bf)!.after.add(item.key);
@@ -110,9 +116,9 @@ export class SystemUtil {
     while (all.size > 0) {
 
       // Find node with no dependencies
-      const next = find(all, x => x.after.size === 0);
+      const next = [...all].find(x => x.after.size === 0);
       if (!next) {
-        throw new Error(`Unsatisfiable dependency: ${Array.from(all).map(x => x.target)}`);
+        throw new Error(`Unsatisfiable dependency: ${[...all].map(x => x.target)}`);
       }
 
       // Store, and remove

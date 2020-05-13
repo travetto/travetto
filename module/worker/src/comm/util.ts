@@ -5,9 +5,14 @@ import { SpawnConfig, ChildOptions } from './types';
 
 type ErrorShape = { $?: any, message: string, stack?: string, name: string, toConsole?: any };
 
-// TODO: Document
+/**
+ * Communications Util
+ */
 export class CommUtil {
 
+  /**
+   * Prepare error for transmission
+   */
   static serializeError(e: Error | ErrorShape): ErrorShape;
   static serializeError(e: undefined): undefined;
   static serializeError(e: Error | ErrorShape | undefined) {
@@ -27,6 +32,9 @@ export class CommUtil {
     return error;
   }
 
+  /**
+   * Reconstitute the error, post serialization
+   */
   static deserializeError(e: Error | ErrorShape): Error;
   static deserializeError(e: undefined): undefined;
   static deserializeError(e: Error | ErrorShape | undefined) {
@@ -44,6 +52,9 @@ export class CommUtil {
     }
   }
 
+  /**
+   * Actually spawn a process
+   */
   static spawnProcess(config: SpawnConfig) {
     let { opts, command, fork, args } = config;
     opts = opts ?? {};
@@ -78,13 +89,5 @@ export class CommUtil {
     }
 
     return result;
-  }
-
-  static killSpawnedProcess(proc: { kill(sig?: string | number): void }) {
-    if (process.platform === 'win32') {
-      proc.kill();
-    } else {
-      proc.kill('SIGTERM');
-    }
   }
 }

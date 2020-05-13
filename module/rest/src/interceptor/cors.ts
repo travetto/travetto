@@ -27,7 +27,7 @@ export class CorsInterceptor extends RestInterceptor {
   headers: string;
   credentials: boolean = false;
 
-  after = SerializeInterceptor;
+  after = [SerializeInterceptor];
 
   postConstruct() {
     this.origins = new Set(this.corsConfig.origins ?? []);

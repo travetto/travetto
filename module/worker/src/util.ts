@@ -3,8 +3,13 @@ import { ParentCommChannel } from './comm/parent';
 import { CommUtil } from './comm/util';
 import { Worker } from './pool';
 
-// TODO: Document
+/**
+ * Spawned worker
+ */
 export class WorkUtil {
+  /**
+   * Create a process channel worker from a given spawn config
+   */
   static spawnedWorker<X>(
     config: SpawnConfig & {
       init?: (channel: ParentCommChannel) => Promise<any>;
