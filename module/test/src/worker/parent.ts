@@ -1,15 +1,11 @@
-import { Env } from '@travetto/base';
-
-import { ParentCommChannel, CommUtil, WorkUtil } from '@travetto/worker';
+import { ErrorUtil } from '@travetto/base/src/internal/error';
+import { ParentCommChannel, WorkUtil } from '@travetto/worker';
 import { Events, RunEvent } from './types';
 import { Consumer } from '../model/consumer';
 
 // TODO: Document
 export function buildWorkManager(consumer: Consumer) {
-  return WorkUtil.spawnedWorker<string>({
-    command: `${__dirname}/../../bin/test-worker`,
-    fork: true,
-    opts: { cwd: Env.cwd },
+  return WorkUtil.spawnedWorker<string>(`${__dirname}/../../bin/test-worker`, [], {}, {
     async init(channel: ParentCommChannel) {
       await channel.listenOnce(Events.READY);
       await channel.send(Events.INIT);
@@ -23,8 +19,7 @@ export function buildWorkManager(consumer: Consumer) {
       const { error } = await complete;
 
       if (error) {
-        const fullError = CommUtil.deserializeError(error);
-        throw fullError;
+        throw ErrorUtil.deserializeError(error);
       }
     }
   });
