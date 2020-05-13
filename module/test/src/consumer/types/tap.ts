@@ -1,5 +1,5 @@
 import { YamlUtil } from '@travetto/yaml';
-import { CommUtil } from '@travetto/worker';
+import { ErrorUtil } from '@travetto/base/src/internal/error';
 
 import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
@@ -8,6 +8,7 @@ import { Consumable } from '../registry';
 
 import { TapEnhancer, DUMMY_ENHANCER } from './tap-enhancer';
 
+// TODO: Document
 @Consumable('tap')
 export class TapEmitter implements Consumer {
   private count = 0;
@@ -77,7 +78,7 @@ export class TapEmitter implements Consumer {
 
       if (test.status === 'failed') {
         if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
-          const err = CommUtil.deserializeError(test.error);
+          const err = ErrorUtil.deserializeError(test.error);
           this.logMeta({ error: err.toConsole() });
         }
       }

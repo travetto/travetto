@@ -1,7 +1,8 @@
 import type { Compiler } from '@travetto/compiler';
 import { FsUtil, EnvUtil } from '@travetto/boot';
+import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager } from '@travetto/base';
-import { CommUtil, ChildCommChannel } from '@travetto/worker';
+import { ChildCommChannel } from '@travetto/worker';
 import { Events, RunEvent } from './types';
 
 const FIXED_MODULES = new Set([
@@ -122,7 +123,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       await this.runTest(event);
       this.send(Events.RUN_COMPLETE);
     } catch (e) {
-      this.send(Events.RUN_COMPLETE, { error: CommUtil.serializeError(e) });
+      this.send(Events.RUN_COMPLETE, { error: ErrorUtil.serializeError(e) });
     }
 
     this.runs += 1;

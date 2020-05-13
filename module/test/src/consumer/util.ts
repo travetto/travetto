@@ -1,5 +1,4 @@
-import { CommUtil } from '@travetto/worker';
-
+import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { TestEvent, } from '../model/event';
 
 export class ConsumerUtil {
@@ -7,11 +6,11 @@ export class ConsumerUtil {
     if (out.phase === 'after') {
       if (out.type === 'test') {
         if (out.test.error) {
-          out.test.error = CommUtil.serializeError(out.test.error);
+          out.test.error = ErrorUtil.serializeError(out.test.error) as Error;
         }
       } else if (out.type === 'assertion') {
         if (out.assertion.error) {
-          out.assertion.error = CommUtil.serializeError(out.assertion.error);
+          out.assertion.error = ErrorUtil.serializeError(out.assertion.error) as Error;
         }
       }
     }

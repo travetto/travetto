@@ -2,7 +2,6 @@ export * from './src/comm/channel';
 export * from './src/comm/child';
 export * from './src/comm/parent';
 export * from './src/comm/types';
-export * from './src/comm/util';
 export * from './src/input/iterable';
 export * from './src/input/event';
 export * from './src/input/types';

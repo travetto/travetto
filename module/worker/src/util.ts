@@ -1,6 +1,5 @@
-import { SpawnConfig } from './comm/types';
+import { ExecUtil, ExecutionOptions, } from '@travetto/boot';
 import { ParentCommChannel } from './comm/parent';
-import { CommUtil } from './comm/util';
 import { Worker } from './pool';
 
 /**
@@ -11,14 +10,17 @@ export class WorkUtil {
    * Create a process channel worker from a given spawn config
    */
   static spawnedWorker<X>(
-    config: SpawnConfig & {
+    command: string,
+    args: string[],
+    opts: ExecutionOptions,
+    config: {
       init?: (channel: ParentCommChannel) => Promise<any>;
       execute: (channel: ParentCommChannel, input: X) => Promise<any>;
       destroy?: (channel: ParentCommChannel) => Promise<any>;
     }
   ): Worker<X> {
     const channel = new ParentCommChannel(
-      CommUtil.spawnProcess(config)
+      ExecUtil.fork(command, args, opts)
     );
     return {
       get id() { return channel.id; },

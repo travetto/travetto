@@ -3,7 +3,8 @@ import * as https from 'https';
 import * as qs from 'querystring';
 import * as url from 'url';
 
-import { AppError, HTTP_ERROR_CONVERSION } from '@travetto/base';
+import { AppError } from '@travetto/base';
+import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { RawExecArgs, ResponseHandler, RequestContext, URLContext, HttpClient, ExecArgs } from './types';
 
 /**
@@ -16,13 +17,11 @@ export class HttpRequest {
     status?: number;
     payload: Record<string, any>;
   }) {
-    let finalStatus = HTTP_ERROR_CONVERSION.to.get(config.status!) ?? 'general';
+    let finalStatus = ErrorUtil.categoryFromCode(config.status);
     try {
       const parsedMessage = JSON.parse(config.message);
       const { status, statusCode, message, ...rest } = parsedMessage;
-      finalStatus = HTTP_ERROR_CONVERSION.to.get(status) ??
-        HTTP_ERROR_CONVERSION.to.get(statusCode) ??
-        finalStatus;
+      finalStatus = ErrorUtil.categoryFromCode(status, statusCode, config.status);
       config.message = message || config.message;
       Object.assign(config.payload, rest); // Merge it in
     } catch { }

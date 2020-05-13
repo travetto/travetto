@@ -1,5 +1,5 @@
 import * as yaml from 'js-yaml';
-import { Util } from './util';
+import { ErrorUtil } from './error';
 import { TestEvent } from './model/event';
 
 export class TapEmitter {
@@ -71,7 +71,7 @@ export class TapEmitter {
 
       if (test.status === 'failed') {
         if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
-          this.logMeta({ error: Util.deserializeError(test.error)!.stack });
+          this.logMeta({ error: ErrorUtil.deserializeError(test.error)!.stack });
         }
         if (test.error) {
           this.errors.push(test.error);
