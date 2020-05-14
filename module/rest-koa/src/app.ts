@@ -8,6 +8,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { RestApp, RouteConfig, RestCookieConfig } from '@travetto/rest';
 
 import { KoaAppUtil } from './internal/util';
+import Router = require('koa-router');
 
 /**
  * Koa-based Rest App
@@ -35,7 +36,7 @@ export class KoaRestApp extends RestApp<koa> {
 
   async unregisterRoutes(key: string | symbol) {
     // Delete previous
-    const pos = this.raw.middleware.findIndex(x => (x as any).key === key);
+    const pos = this.raw.middleware.findIndex(x => (x as { key?: symbol | string }).key === key);
     if (pos >= 0) {
       this.raw.middleware.splice(pos, 1);
     }
@@ -52,8 +53,8 @@ export class KoaRestApp extends RestApp<koa> {
       });
     }
 
-    const middleware = router.routes();
-    (middleware as any).key = key;
+    const middleware: ReturnType<Router['routes']> & { key?: string | symbol } = router.routes();
+    middleware.key = key;
     this.raw.use(middleware);
 
     if (this.listening && key !== RestApp.GLOBAL) {

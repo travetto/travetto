@@ -47,9 +47,7 @@ export class FilePresenceManager {
       config.listener[k] = config.listener[k] || (() => { });
     }
 
-    for (const k of Object.keys(config) as (keyof FilePresenceManager)[]) {
-      this[k] = (config as any)[k];
-    }
+    Object.assign(this, config);
 
     for (const root of this.rootPaths) {
       this.watchSpaces.add(root);

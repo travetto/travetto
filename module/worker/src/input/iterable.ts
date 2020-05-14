@@ -2,6 +2,9 @@ import { InputSource } from './types';
 
 type Itr<T> = Iterator<T> | AsyncIterator<T>;
 
+const hasAsyncItr = (o: any): o is AsyncIterable<any> => Symbol.asyncIterator in o;
+const hasItr = (o: any): o is Iterable<any> => Symbol.iterator in o;
+
 /**
  * Bassic input source given an iterable input
  */
@@ -15,12 +18,12 @@ export class IterableInputSource<X> implements InputSource<X> {
     if ('next' in src) {
       this.src = src;
     } else {
-      if (Symbol.asyncIterator in src) {
-        this.src = (src as any)[Symbol.asyncIterator]();
-      } else if (Symbol.iterator in src) {
-        this.src = (src as any)[Symbol.iterator]();
+      if (hasAsyncItr(src)) {
+        this.src = src[Symbol.asyncIterator]();
+      } else if (hasItr(src)) {
+        this.src = src[Symbol.iterator]();
       } else {
-        this.src = (src as any)();
+        this.src = src();
       }
     }
   }

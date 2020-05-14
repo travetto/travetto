@@ -12,6 +12,12 @@ const GLOBAL_SIMPLE = {
   PromiseConstructor: Promise.constructor
 };
 
+function isLiteralType(type: ts.Type): type is ts.LiteralType {
+  const flags = type.getFlags();
+  // eslint-disable-next-line no-bitwise
+  return (flags & (ts.TypeFlags.BooleanLiteral | ts.TypeFlags.NumberLiteral | ts.TypeFlags.StringLiteral)) > 0;
+}
+
 export const ITERATOR = function Iterator() { };
 export const ASYNC_ITERATOR = function AsyncIterator() { };
 export const ITERABLE_ITERATOR = function IterableIterator() { };
@@ -56,14 +62,16 @@ export class TypeResolver {
    * Resolve the `ts.ObjectFlags`
    */
   private getObjectFlags(type: ts.Type): ts.ObjectFlags {
-    return (ts as any).getObjectFlags(type);
+    // @ts-ignore
+    return ts.getObjectFlags(type);
   }
 
   /**
    * Fetch all type arguments for a give type
    */
-  private getAllTypeArguments(ref: ts.Type) {
-    return this.tsChecker.getTypeArguments(ref as any);
+  private getAllTypeArguments(ref: ts.Type): readonly ts.Type[] {
+    // @ts-ignore
+    return this.tsChecker.getTypeArguments(ref);
   }
 
   /**
@@ -88,8 +96,7 @@ export class TypeResolver {
     // If the literal is a simple type
     if (simpleCons) {
       // Determine type from literal value
-      const ret = flags & (ts.TypeFlags.BooleanLiteral | ts.TypeFlags.NumberLiteral | ts.TypeFlags.StringLiteral) ?
-        Util.coerceType((type as any).value, simpleCons as typeof String, false) :
+      const ret = isLiteralType(type) ? Util.coerceType(type.value, simpleCons as typeof String, false) :
         undefined;
 
       return {
@@ -190,11 +197,12 @@ export class TypeResolver {
     const unionTypes = remainderTypes.map(x => this.resolveType(x));
 
     if (unionTypes.length > 1) {
-      let common = unionTypes.reduce((acc, v) => (!acc || acc.name === v.name) ? v : undefined, undefined as any);
-      if (common) {
+      let common: res.LiteralType | undefined;
+      const first = unionTypes[0];
+      if (res.isLiteralType(first) && unionTypes.every(el => el.name === first.name)) { // We have a common
         common = {
-          ctor: common.ctor,
-          name: common.name
+          ctor: first.ctor,
+          name: first.name
         };
       }
       if (common?.ctor === Boolean) {

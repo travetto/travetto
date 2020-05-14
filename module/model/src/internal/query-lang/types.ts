@@ -41,6 +41,12 @@ export interface UnaryNode extends Node {
   value: Node;
 }
 
+export interface ArrayNode extends Node {
+  type: 'list';
+  op?: 'not';
+  value: Literal[];
+}
+
 export const OP_TRANSLATION: Record<string, string> = {
   '<': '$lt', '<=': '$lte',
   '>': '$gt', '>=': '$gte',

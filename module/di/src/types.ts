@@ -39,7 +39,7 @@ export interface InjectableConfig<T = any> extends Dependency<T> {
   /**
    * Factory function for the injectable
    */
-  factory: (...args: any[]) => T;
+  factory?: (...args: any[]) => T;
   /**
    * List of dependencies as fields or as constructor arguments
    */

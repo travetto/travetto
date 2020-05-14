@@ -3,7 +3,7 @@ import { EnvUtil } from '@travetto/boot';
 import { Consumer } from '../model/consumer';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
-import { TestUtil } from './util';
+import { Timeout } from './timeout';
 
 export const BREAKOUT = Symbol.for('@trv:test/breakout');
 
@@ -28,14 +28,11 @@ export class ExecutionPhaseManager {
   async runPhase(phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
     try {
       for (const fn of this.suite[phase]) {
-        const [timeout, clear] = TestUtil.asyncTimeout(TEST_PHASE_TIMEOUT);
-        await Promise.race([timeout, fn.call(this.suite.instance)]);
-        clear();
+        const timeout = new Timeout(TEST_PHASE_TIMEOUT, `${this.suite.classId}: ${phase}`);
+        await Promise.race([fn.call(this.suite.instance), timeout.wait()]);
+        timeout.cancel();
       }
     } catch (error) {
-      if (error === TestUtil.TIMEOUT) {
-        error = new Error(`${this.suite.classId}: ${phase} timed out`);
-      }
       const res = await this.generateSuiteError(`[[${phase}]]`, error);
       this.result.tests.push(res);
       this.result.failed++;

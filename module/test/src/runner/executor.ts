@@ -14,10 +14,11 @@ import { AssertCapture } from '../assert/capture';
 import { ConsoleCapture } from './console';
 import { ExecutionPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
-import { TestUtil } from './util';
 import { AssertUtil } from '../assert/util';
+import { Timeout } from './timeout';
 
 const MISSING_ERROR = '☆';
+const TEST_TIMEOUT = EnvUtil.getTime('TRV_TEST_TIMEOUT', 5000);
 
 // TODO: Document
 export class TestExecutor {
@@ -25,7 +26,7 @@ export class TestExecutor {
   static failFile(consumer: Consumer, file: string, err: Error) {
     const name = path.basename(file);
     const classId = SystemUtil.computeModuleClass(file, name);
-    const suite = { class: { name }, classId, lines: { start: 1, end: 1 }, file, } as any;
+    const suite = { class: { name }, classId, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
     err.message = err.message.replace(Env.cwd, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
@@ -55,7 +56,7 @@ export class TestExecutor {
       return result as TestResult;
     }
 
-    const [timeout, clear] = TestUtil.asyncTimeout(test.timeout);
+    const timeout = new Timeout(test.timeout || TEST_TIMEOUT);
 
     try {
       PromiseCapture.start();
@@ -63,15 +64,13 @@ export class TestExecutor {
       AssertCapture.start(test, (a) =>
         consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
 
-      await Promise.race([suite.instance[test.methodName](), timeout]);
+      await Promise.race([suite.instance[test.methodName](), timeout.wait()]);
 
       // Ensure nothing was meant to be caught
       throw new Error(MISSING_ERROR);
 
     } catch (err) {
-      if (err === TestUtil.TIMEOUT) {
-        err = new Error('Operation timed out');
-      } else if (test.shouldThrow) {
+      if (err !== timeout && test.shouldThrow) {
         err = AssertCheck.checkError(test.shouldThrow!, err)!;
       }
 
@@ -87,15 +86,18 @@ export class TestExecutor {
         }
       }
     } finally {
-      const err = PromiseCapture.stop();
-      const finalErr = await (err && Promise.race([err, timeout]).catch(e => e));
+      const pending = PromiseCapture.stop();
+      const finalErr = await (pending && Promise.race([pending, timeout.wait()]).catch(e => e));
+      timeout.cancel();
 
       if (result.status !== 'failed' && finalErr) {
         result.status = 'failed';
         result.error = finalErr;
-        AssertCheck.checkUnhandled(test, finalErr);
+        if (finalErr !== timeout) {
+          AssertCheck.checkUnhandled(test, finalErr);
+        }
       }
-      clear();
+
       result.output = ConsoleCapture.end();
       result.assertions = AssertCapture.end();
     }

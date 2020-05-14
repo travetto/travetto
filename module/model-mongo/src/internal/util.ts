@@ -44,17 +44,21 @@ export class MongoUtil {
     }
   }
 
-  static replaceId<T>(v: T): T {
+
+  static replaceId(v: Record<string, string>): Record<string, mongo.ObjectId>;
+  static replaceId(v: string[]): mongo.ObjectId[];
+  static replaceId(v: string): mongo.ObjectId;
+  static replaceId(v: string | string[] | Record<string, string>) {
     if (typeof v === 'string') {
-      return new mongo.ObjectId(v) as any as T;
+      return new mongo.ObjectId(v);
     } else if (Array.isArray(v)) {
-      return v.map(x => this.replaceId(x)) as any as T;
+      return v.map(x => this.replaceId(x));
     } else if (Util.isPlainObject(v)) {
       const out: any = {};
       for (const k of Object.keys(v)) {
-        out[k] = this.replaceId((v as any)[k]);
+        out[k] = this.replaceId(v[k]);
       }
-      return out as T;
+      return out;
     } else {
       return v;
     }

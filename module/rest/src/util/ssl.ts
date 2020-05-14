@@ -29,7 +29,7 @@ export class SSLUtil {
     cert.setIssuer(attrs);
 
     // the actual certificate signing
-    cert.sign(keys.privateKey, undefined as any);
+    cert.sign(keys.privateKey);
 
     return {
       cert: pki.certificateToPem(cert),

@@ -20,18 +20,18 @@ export class PoolExecTest {
     });
 
     const pool = new WorkPool(() =>
-      WorkUtil.spawnedWorker<string>({
-        command: ResourceManager.toAbsolutePathSync('simple.child-launcher.js'),
-        fork: true,
-        init: channel => channel.listenOnce('ready'),
-        async execute(channel, inp) {
-          const res = channel.listenOnce('response');
-          channel.send('request', { data: inp });
+      WorkUtil.spawnedWorker(ResourceManager.toAbsolutePathSync('simple.child-launcher.js'), {
+        handlers: {
+          init: channel => channel.listenOnce('ready'),
+          async execute(channel, inp: string) {
+            const res = channel.listenOnce('response');
+            channel.send('request', { data: inp });
 
-          const { data } = await res;
-          console.log('Sent', inp, 'Received', data);
+            const { data } = await res;
+            console.log('Sent', inp, 'Received', data);
 
-          assert(inp + inp === data);
+            assert(inp + inp === data);
+          }
         }
       })
     );

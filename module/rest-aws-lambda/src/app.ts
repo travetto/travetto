@@ -1,5 +1,5 @@
 import * as http from 'http';
-
+import type * as lambda from 'aws-lambda';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
@@ -24,7 +24,10 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
   @Inject()
   private awsLambdaConfig: AwsLambdaConfig;
 
-  private handler: (event: any, context: any) => void;
+  private handler: (
+    event: lambda.APIGatewayProxyEvent,
+    context: lambda.Context
+  ) => void;
 
   createRaw(): express.Application {
     const app = express();
@@ -33,9 +36,13 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use(awsServerlessExpressMiddleware.eventContext());
-    app.use((req, res, next) => {
-      (req as any)[TRV_RAW] = req;
-      (res as any)[TRV_RAW] = res;
+    app.use((
+      req: express.Request & { [TRV_RAW]?: express.Request },
+      res: express.Response & { [TRV_RAW]?: express.Response },
+      next
+    ) => {
+      req[TRV_RAW] = req;
+      res[TRV_RAW] = res;
       next();
     });
 
@@ -50,7 +57,7 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
   async init() {
     await super.init();
     this.server = awsServerlessExpress.createServer(this.raw);
-    this.handler = awsServerlessExpress.proxy.bind(awsServerlessExpress, this.server) as any /** TODO: Typings seem off */;
+    this.handler = (event, ctx) => awsServerlessExpress.proxy(this.server, event, ctx);
   }
 
   async unregisterRoutes(key: string | symbol) {
@@ -62,10 +69,12 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
   }
 
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
-    const router = express.Router({ mergeParams: true });
+    const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {
-      router[route.method!](route.path!, route.handlerFinalized! as any);
+      router[route.method!](route.path!,
+        // @ts-ignore
+        route.handlerFinalized!);
     }
 
     // Register options handler for each controller
@@ -73,10 +82,12 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
       const optionHandler = RouteUtil.createRouteHandler(this.interceptors,
         { method: 'options', path: '*', handler: this.globalHandler, params: [] });
 
-      router.options('*', optionHandler as any);
+      router.options('*',
+        // @ts-ignore
+        optionHandler);
     }
 
-    (router as any).key = key;
+    router.key = key;
     this.raw.use(path, router);
 
     if (this.listening && key !== RestApp.GLOBAL) {

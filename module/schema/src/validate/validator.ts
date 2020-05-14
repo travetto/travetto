@@ -2,7 +2,7 @@ import { Class } from '@travetto/registry';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
-import { ValidationError } from './types';
+import { ValidationError, ValidationKind, ValidationResult } from './types';
 import { Messages } from './messages';
 import { ValidationResultError } from './error';
 
@@ -23,7 +23,8 @@ export class SchemaValidator {
 
     for (const field of Object.keys(schema)) {
       const fieldSchema = schema[field];
-      const val = (o as any)[field];
+      // @ts-ignore
+      const val = o[field];
       const path = `${relative}${relative && '.'}${field}`;
 
       const hasValue = !(val === undefined || val === null || val === '' || (Array.isArray(val) && val.length === 0));
@@ -92,8 +93,8 @@ export class SchemaValidator {
     return false;
   }
 
-  static validateField(field: FieldConfig, value: any, parent: any) {
-    const criteria: string[] = [];
+  static validateField(field: FieldConfig, value: any, parent: any): ValidationResult[] {
+    const criteria: ValidationKind[] = [];
 
     if (
       (field.type === String && (typeof value !== 'string')) ||
@@ -111,7 +112,7 @@ export class SchemaValidator {
         case undefined: break;
         case 'type': return [{ kind, type: field.type.name }];
         default:
-          criteria.push(kind);
+          criteria.push(kind as 'type');
       }
     }
 
@@ -139,38 +140,41 @@ export class SchemaValidator {
       criteria.push('max');
     }
 
-    const errors: ValidationError[] = [];
+    const errors: ValidationResult[] = [];
     for (const key of criteria) {
-      const block = (field as any)[key];
+      const block = field[key];
       errors.push({ ...block, kind: key, value });
     }
 
     return errors;
   }
 
-  static prepareErrors(path: string, errs: any[]) {
-    const out = [];
-    for (const err of errs) {
-      err.path = path;
+  static prepareErrors(path: string, results: ValidationResult[]): ValidationError[] {
+    const out: ValidationError[] = [];
+    for (const res of results) {
+      const err: Partial<ValidationError> = {
+        ...(res as ValidationError),
+        path
+      };
 
-      const msg = err.message ||
-        (err.re && Messages.get(err.re)) ||
-        Messages.get(err.kind) ||
-        Messages.get('default');
+      const msg = res.message ||
+        (res.re && Messages.get(res.re)) ||
+        Messages.get(res.kind) ||
+        Messages.get('default')!;
 
-      if (err.re) {
-        err.re = err.re.source;
+      if (res.re) {
+        err.re = res.re.source;
       }
 
       err.message = msg
-        .replace(/\{([^}]+)\}/g, (a: string, k: string) => err[k]);
+        .replace(/\{([^}]+)\}/g, (a: string, k: string) => err[k as (keyof ValidationError)]!);
 
-      out.push(err);
+      out.push(err as ValidationError);
     }
     return out;
   }
 
-  static async validate<T extends any>(o: T, view?: string): Promise<T> {
+  static async validate<T extends object>(o: T, view?: string): Promise<T> {
     let cls = o.constructor as Class;
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
 
@@ -193,12 +197,12 @@ export class SchemaValidator {
     return o;
   }
 
-  static async validateAll<T>(obj: T[], view?: string): Promise<T[]> {
+  static async validateAll<T extends object>(obj: T[], view?: string): Promise<T[]> {
     return await Promise.all<T>((obj ?? [])
       .map(o => this.validate(o, view)));
   }
 
-  static async validatePartial<T>(o: T, view?: string): Promise<T> {
+  static async validatePartial<T extends object>(o: T, view?: string): Promise<T> {
     try {
       await this.validate(o, view);
     } catch (e) {

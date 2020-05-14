@@ -1,6 +1,8 @@
+/// <reference path="error.d.ts" />
+
 import * as assert from 'assert';
 
-import { Env, AppError } from '@travetto/base';
+import { Util, Env, AppError } from '@travetto/base';
 
 import { ThrowableError, TestConfig } from '../model/test';
 import { AssertCapture } from './capture';
@@ -76,13 +78,14 @@ export class AssertCheck {
         case 'lessThanEqual': asrt(args[0] <= args[1], args[2]); break;
         case 'greaterThan': asrt(args[0] > args[1], args[2]); break;
         case 'greaterThanEqual': asrt(args[0] >= args[1], args[2]); break;
-        case 'ok': asrt.apply(null, args as any); break; // eslint-disable-line prefer-spread
+        case 'ok': asrt.apply(null, args as [any, string]); break; // eslint-disable-line prefer-spread
         default:
-          if (fn && (assert as any)[fn]) { // Assert call
+          if (fn && assert[fn as keyof typeof assert]) { // Assert call
             if (/not/i.test(fn)) {
               common.state = 'should not';
             }
-            (assert as any)[fn].apply(null, args);
+            // @ts-ignore
+            assert[fn].apply(null, args);
           } else if (args[1] && fn && args[1][fn]) { // Method call
             asrt(args[1][fn](args[0]));
           }
@@ -91,12 +94,12 @@ export class AssertCheck {
       // Pushing on not error
       AssertCapture.add(assertion);
     } catch (e) {
-      if (e instanceof assert.AssertionError) {
+      if (e instanceof AssertionError) {
         if (!assertion.message) {
           assertion.message = (OP_MAPPING[fn] ?? `{state} be {expected}`);
         }
         assertion.message = assertion.message
-          .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || (assertion as any)[k])
+          .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || assertion[k as keyof typeof assertion])
           .replace(/not not/g, ''); // Handle double negatives
         assertion.error = e;
         e.message = assertion.message;
@@ -191,8 +194,10 @@ export class AssertCheck {
     }
   }
 
-  static checkUnhandled(test: TestConfig, err: Error) {
-    delete (err as any).toJSON; // Do not allow the value to propagate as JSON
+  static checkUnhandled(test: TestConfig, err: Error | assert.AssertionError) {
+    if (Util.hasToJSON(err)) {
+      delete err.toJSON; // Do not allow the value to propagate as JSON
+    }
 
     let line = AssertUtil.getPositionOfError(err, test.file).line;
     if (line === 1) {
@@ -207,7 +212,7 @@ export class AssertCheck {
       operator: 'throws',
       error: err,
       message: err.message,
-      text: (err as any).operator || '(uncaught)'
+      text: ('operator' in err ? err.operator : '') || '(uncaught)'
     });
   }
 }

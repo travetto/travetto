@@ -14,7 +14,7 @@ import {
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Util, AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { SchemaChangeEvent, SchemaRegistry } from '@travetto/schema';
+import { SchemaChangeEvent, SchemaRegistry, SchemaConfig } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config';
 import { EsIdentity, EsBulkError } from './internal/types';
@@ -38,6 +38,10 @@ interface SearchResponse<T> {
 
   aggregations: Agg;
   aggs: Agg;
+}
+
+function hasRawId(o: any): o is { _id: string } {
+  return '_id' in o;
 }
 
 /**
@@ -256,11 +260,13 @@ export class ElasticsearchModelSource extends ModelSource {
       const [inc, exc] = ElasticsearchUtil.getSelect(query.select);
       if (inc.length) {
         // search._sourceInclude = inc;
-        (search as any)['_sourceIncludes'] = inc;
+        // @ts-ignore
+        search['_sourceIncludes'] = inc;
       }
       if (exc.length) {
         // search._sourceExclude = exc;
-        (search as any)['_sourceExcludes'] = exc;
+        // @ts-ignore
+        search['_sourceExcludes'] = exc;
       }
     }
 
@@ -295,18 +301,25 @@ export class ElasticsearchModelSource extends ModelSource {
     const out: T[] = [];
 
     // determine if id
-    const select = [(req as any)._sourceIncludes as string[] ?? [], (req as any)._sourceExcludes as string[] ?? []];
+    const select = [
+      // @ts-ignore
+      req._sourceIncludes as string[] ?? [],
+      // @ts-ignore
+      req._sourceExcludes as string[] ?? []
+    ];
     const includeId = select[0].includes('_id') || (select[0].length === 0 && !select[1].includes('_id'));
 
     for (const r of results.hits.hits) {
       const obj = r._source;
       if (includeId) {
-        (obj as any)._id = r._id;
+        // @ts-ignore
+        obj._id = r._id;
       }
       out.push(obj);
     }
 
-    return out as any as U[];
+    // @ts-ignore
+    return out as U[];
   }
 
   async execSearch<T>(search: Search<T>): Promise<SearchResponse<T>> {
@@ -318,13 +331,13 @@ export class ElasticsearchModelSource extends ModelSource {
     const req = this.getSearchObject(cls, query);
     console.trace('Querying', JSON.stringify(req, null, 2));
     const results = await this.execSearch(req);
-    return this.safeLoad(req, results) as any as U[];
+    return this.safeLoad(req, results);
   }
 
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
-    if ((o as any)._id) {
-      o.id = (o as any)._id as string;
-      delete (o as any)._id;
+    if (hasRawId(o)) {
+      o.id = o._id;
+      delete o._id;
     }
     return o;
   }
@@ -361,7 +374,8 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     const search = this.buildRawMultiSuggestQuery([cls], field, prefix, {
-      select: { [field]: 1 } as any,
+      // @ts-ignore
+      select: { [field]: 1 },
       ...query
     });
     const res = await this.execSearch(search);
@@ -402,9 +416,8 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>) {
     const res = await this.execSearch(this.getSearchObject(cls, {
-      select: {
-        id: 1
-      } as any as SelectClause<T>,
+      // @ts-ignore
+      select: { id: 1 } as SelectClause<T>,
       ...query
     }));
     return res.hits.hits.map(x => x._source.id);
@@ -462,7 +475,7 @@ export class ElasticsearchModelSource extends ModelSource {
     classes: Class<T>[], field: ValidStringFields<T>, query?: string,
     filter?: Query<T>
   ) {
-    const spec = SchemaRegistry.getViewSchema(classes[0]).schema[field as any].specifier;
+    const spec = SchemaRegistry.getViewSchema(classes[0]).schema[field as keyof SchemaConfig].specifier;
     const text = spec && spec.startsWith('text');
 
     if (!text) {
@@ -522,7 +535,8 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
     try {
-      const res = await this.getByQuery(cls, { where: { id } } as any as ModelQuery<T>);
+      // @ts-ignore
+      const res = await this.getByQuery(cls, { where: { id } } as ModelQuery<T>);
       return res;
     } catch (err) {
       throw new AppError(`Invalid number of results for find by id: 0`, 'notfound');
@@ -634,7 +648,7 @@ export class ElasticsearchModelSource extends ModelSource {
       this.postLoad(cls, item);
       data.id = item.id;
     }
-    return await this.updatePartial(cls, data as any);
+    return await this.updatePartial(cls, data as Partial<T> & { id: string });
   }
 
   async updateAllByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, data: Partial<T>) {
@@ -677,7 +691,7 @@ export class ElasticsearchModelSource extends ModelSource {
         delete op.update.id;
       }
       return acc;
-    }, [] as any);
+    }, [] as Record<string, any>[]);
 
     const { body: res } = await this.client.bulk({
       body,
@@ -696,19 +710,23 @@ export class ElasticsearchModelSource extends ModelSource {
       errors: [] as EsBulkError[]
     };
 
+    type Count = keyof typeof out['counts'];
+
     for (let i = 0; i < res.items.length; i++) {
       const item = res.items[i];
-      const k = Object.keys(item)[0] as (keyof typeof res.items[0]);
+      const [k] = Object.keys(item) as (Count | 'create' | 'index')[];
       const v = item[k]!;
       if (v.error) {
         out.errors.push(v.error);
         out.counts.error += 1;
       } else {
-        let sk: string = k as string;
-        if (sk === 'create') {
+        let sk: Count;
+        if (k === 'create') {
           sk = 'insert';
-        } else if (sk === 'index') {
+        } else if (k === 'index') {
           sk = operations[i].insert ? 'insert' : 'upsert';
+        } else {
+          sk = k;
         }
 
         if (v.result === 'created') {
@@ -716,7 +734,7 @@ export class ElasticsearchModelSource extends ModelSource {
           (operations[i].insert ?? operations[i].upsert)!.id = v._id;
         }
 
-        (out.counts as any)[sk as any] += 1;
+        out.counts[sk] += 1;
       }
     }
 

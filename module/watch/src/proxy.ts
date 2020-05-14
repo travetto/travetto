@@ -1,7 +1,7 @@
 /**
  * Handler for for proxying modules while watching
  */
-export class RetargettingHandler<T extends any> implements ProxyHandler<any> {
+export class RetargettingHandler<T> implements ProxyHandler<any> {
   constructor(public target: T) { }
 
   isExtensible?(target: T): boolean {
@@ -21,9 +21,11 @@ export class RetargettingHandler<T extends any> implements ProxyHandler<any> {
   }
 
   apply(target: T, thisArg: any, argArray?: any): any {
+    // @ts-expect-error
     return this.target.apply(thisArg, argArray);
   }
   construct(target: T, argArray: any, newTarget?: any) {
+    // @ts-expect-error
     return new this.target(...argArray);
   }
 
@@ -36,14 +38,17 @@ export class RetargettingHandler<T extends any> implements ProxyHandler<any> {
   }
 
   get(target: T, prop: PropertyKey, receiver: any) {
+    // @ts-expect-error
     return this.target[prop];
   }
 
   has(target: T, prop: PropertyKey) {
+    // @ts-expect-error
     return this.target.hasOwnProperty(prop);
   }
 
   set(target: T, prop: PropertyKey, value: any) {
+    // @ts-expect-error
     this.target[prop] = value;
     return true;
   }
@@ -56,6 +61,7 @@ export class RetargettingHandler<T extends any> implements ProxyHandler<any> {
   }
 
   deleteProperty(target: T, p: PropertyKey) {
+    // @ts-expect-error
     return delete this.target[p];
   }
 

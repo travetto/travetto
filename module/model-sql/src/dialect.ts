@@ -857,12 +857,13 @@ ${this.getWhereSQL(cls, query.where)}`;
       onSub: async ({ config, descend, fields, path }) => {
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
-        const selectTop = selectStack[selectStack.length - 1] as any;
-        const subSelectTop = selectTop?.[config.name];
+        const selectTop = selectStack[selectStack.length - 1];
+        // @ts-ignore
+        const subSelectTop: SelectClause<T> | undefined = selectTop?.[config.name];
 
         // See if a selection exists at all
         const sel: FieldConfig[] = subSelectTop ? fields
-          .filter(f => (subSelectTop as any)[f.name] === 1)
+          .filter(f => subSelectTop[f.name as keyof SelectClause<T>] === 1)
           : [];
 
         if (sel.length) {

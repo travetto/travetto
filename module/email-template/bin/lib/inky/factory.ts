@@ -329,7 +329,7 @@ export class ComponentFactory {
 
     if (tagName in this.componentTags) {
       const fnName = (this.componentTags as Record<string, string>)[tagName];
-      const text: string = (this as any)[fnName](element);
+      const text: string = this[fnName as 'hr'](element);
       return text.trim();
     } else {
       // If it's not a custom component, return it as-is
@@ -340,7 +340,7 @@ export class ComponentFactory {
   convertAll(document: Node): Node;
   convertAll(document: string): string;
   convertAll(document: string | Node): string | Node {
-    const traverse = (node: Node) => {
+    const traverse = (node: Node & { hasColumns?: boolean }) => {
       const children = Parse5Adapter.getChildNodes(node) ?? [];
       let i = -1;
       for (const child of children.slice(0)) {
@@ -352,7 +352,7 @@ export class ComponentFactory {
         traverse(child);
         if (tagName in this.componentTags) {
           if (tagName === this.componentTags.columns && !('hasColumns' in node)) {
-            (node as any).hasColumns = true;
+            node.hasColumns = true;
             const all = children.filter(x => Parse5Adapter.isElementNode(x));
             HtmlUtil.setDomAttribute(all[0], 'class', 'first');
             HtmlUtil.setDomAttribute(all[all.length - 1], 'class', 'last');

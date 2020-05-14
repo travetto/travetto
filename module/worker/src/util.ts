@@ -11,12 +11,14 @@ export class WorkUtil {
    */
   static spawnedWorker<X>(
     command: string,
-    args: string[],
-    opts: ExecutionOptions,
-    config: {
-      init?: (channel: ParentCommChannel) => Promise<any>;
-      execute: (channel: ParentCommChannel, input: X) => Promise<any>;
-      destroy?: (channel: ParentCommChannel) => Promise<any>;
+    { args, opts, handlers }: {
+      args?: string[];
+      opts?: ExecutionOptions;
+      handlers: {
+        init?: (channel: ParentCommChannel) => Promise<any>;
+        execute: (channel: ParentCommChannel, input: X) => Promise<any>;
+        destroy?: (channel: ParentCommChannel) => Promise<any>;
+      };
     }
   ): Worker<X> {
     const channel = new ParentCommChannel(
@@ -25,11 +27,11 @@ export class WorkUtil {
     return {
       get id() { return channel.id; },
       get active() { return channel.active; },
-      init: config.init ? config.init.bind(config, channel) : undefined,
-      execute: config.execute.bind(config, channel),
+      init: handlers.init ? handlers.init.bind(handlers, channel) : undefined,
+      execute: handlers.execute.bind(handlers, channel),
       async destroy() {
-        if (config.destroy) {
-          await config.destroy(channel);
+        if (handlers.destroy) {
+          await handlers.destroy(channel);
         }
         await channel.destroy();
       },

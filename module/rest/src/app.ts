@@ -4,7 +4,7 @@ import { SystemUtil } from '@travetto/base/src/internal/system';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { Class, ChangeEvent } from '@travetto/registry';
 
-import { RouteConfig, Request, RouteHandler } from './types';
+import { RouteConfig, Request, RouteHandler, ParamConfig } from './types';
 import { RestConfig } from './config';
 import { RouteUtil } from './util/route';
 import { RestInterceptor } from './interceptor/interceptor';
@@ -109,7 +109,7 @@ export abstract class RestApp<T = any> {
 
   async registerGlobal() {
     const route: RouteConfig = {
-      params: [{ extract: (c: any, r: any) => r } as any],
+      params: [{ extract: (c: any, r: any) => r } as ParamConfig],
       instance: {},
       handler: this.globalHandler as RouteHandler,
       method: 'all', path: '*'

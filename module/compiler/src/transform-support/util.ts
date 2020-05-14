@@ -21,6 +21,19 @@ const exclude = new Set([
 export class TransformUtil {
 
   /**
+   * See if inbound node has an original property
+   */
+  static hasOriginal(o: ts.Node): o is (ts.Node & { original: ts.Node }) {
+    return 'original' in o && !!o['original'];
+  }
+
+  /**
+   * See if node has js docs
+   */
+  static hasJSDoc(o: ts.Node): o is (ts.Node & { jsDoc: ts.JSDoc[] }) {
+    return 'jsDoc' in o;
+  }
+  /**
    * Clean up `ts.Node` contents for logging
    */
   static collapseNodes(all: any[]) {
@@ -153,12 +166,12 @@ export class TransformUtil {
   /**
    * Find the primary argument of a call expression, or decorator.
    */
-  static getPrimaryArgument<T = ts.Node>(node: ts.CallExpression | ts.Decorator | undefined): T | undefined {
+  static getPrimaryArgument<T extends ts.Expression = ts.Expression>(node: ts.CallExpression | ts.Decorator | undefined): T | undefined {
     if (node && ts.isDecorator(node)) {
-      node = node.expression as any as ts.CallExpression;
+      node = node.expression as ts.CallExpression;
     }
     if (node && node!.arguments && node!.arguments.length) {
-      return node.arguments[0] as any as T;
+      return node.arguments[0] as T;
     }
     return;
   }
@@ -200,7 +213,8 @@ export class TransformUtil {
     return ts.createProperty(
       undefined,
       [ts.createToken(ts.SyntaxKind.StaticKeyword)],
-      name, undefined, undefined, ['string', 'number'].includes(typeof val) ? ts.createLiteral(val as any) : val as ts.Expression
+      name, undefined, undefined,
+      (typeof val === 'string' || typeof val === 'number') ? ts.createLiteral(val) : val as ts.Expression
     );
   }
 
@@ -278,11 +292,11 @@ export class TransformUtil {
 
     if (node) {
       const tags = ts.getJSDocTags(node);
-      while (!('jsDoc' in node) && 'original' in node && (node as any).original) {
-        node = (node as any).original as ts.Node;
+      while (!this.hasJSDoc(node) && this.hasOriginal(node)) {
+        node = node.original;
       }
 
-      const docs = (node as any)['jsDoc'];
+      const docs = this.hasJSDoc(node) ? node.jsDoc : undefined;
 
       if (docs) {
         const top = docs[docs.length - 1];
@@ -370,7 +384,7 @@ export class TransformUtil {
       const out = ts.updateSourceFileNode(file,
         ts.createNodeArray([
           ...importStmts,
-          ...file.statements.filter(x => !(x as any).remove) // Exclude culled imports
+          ...file.statements.filter((x: ts.Statement & { remove?: boolean }) => !x.remove) // Exclude culled imports
         ]),
         file.isDeclarationFile, file.referencedFiles,
         file.typeReferenceDirectives, file.hasNoDefaultLib);

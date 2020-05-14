@@ -47,7 +47,7 @@ export class PostgreSQLDialect extends SQLDialect {
   async executeSQL<T = any>(query: string): Promise<{ count: number, records: T[] }> {
     console.trace(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
     const out = await this.conn.active.query(query);
-    return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as any as T[] };
+    return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as T[] };
   }
 
   getModifyColumnSQL(stack: VisitStack[]) {

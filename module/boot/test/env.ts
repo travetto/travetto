@@ -1,10 +1,23 @@
 import * as assert from 'assert';
 
-import { Test, Suite } from '@travetto/test';
+import { Test, Suite, AfterEach, BeforeEach } from '@travetto/test';
 import { EnvUtil } from '../src';
 
 @Suite()
 export class EnvUtilTest {
+
+  private env: any;
+
+  @BeforeEach()
+  copy() {
+    this.env = { ...process.env };
+  }
+
+  @AfterEach()
+  restore() {
+    process.env = this.env;
+    delete this.env;
+  }
 
   @Test()
   verifyGet() {
@@ -90,5 +103,20 @@ export class EnvUtilTest {
     process.env.COLOR3 = 'gray';
     assert(EnvUtil.isValueOrFalse('color3', ['red', 'green', 'blue'] as const) === false);
     assert(EnvUtil.isValueOrFalse('color3', ['red', 'green', 'blue'] as const, 'green') === 'green');
+  }
+
+  @Test()
+  verifyTime() {
+    assert(EnvUtil.getTime('max_age', 1000) === 1000);
+    process.env.MAX_AGE = '5s';
+    assert(EnvUtil.getTime('max_age', 1000) === 5000);
+    process.env.MAX_AGE = '5';
+    assert(EnvUtil.getTime('max_age', 1000) === 5);
+    process.env.MAX_AGE = '5m';
+    assert(EnvUtil.getTime('max_age', 1000) === 5 * 1000 * 60);
+    process.env.MAX_AGE = '5h';
+    assert(EnvUtil.getTime('max_age', 1000) === 5 * 1000 * 60 * 60);
+    process.env.MAX_AGE = '5mh';
+    assert(EnvUtil.getTime('max_age', 1000) === 1000);
   }
 }

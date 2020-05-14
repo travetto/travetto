@@ -268,7 +268,10 @@ export class QueryVerifierService {
     };
 
     for (const [key, fn] of this.mapping) {
-      if (!(key in query) || (query as any)[key] === undefined || (query as any)[key] === null) {
+      if (!(key in query)
+        || query[key as keyof typeof query] === undefined
+        || query[key as keyof typeof query] === null
+      ) {
         continue;
       }
 

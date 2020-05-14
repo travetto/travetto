@@ -45,7 +45,7 @@ export class AppError extends Error {
 }
 
 // Add .toConsole to the default Error as well
-(Error as any).prototype.toConsole = function (mid: any = '') {
-  const stack = Env.trace ? this.stack : StacktraceUtil.simplifyStack(this);
+Error.prototype.toConsole = function (mid: any = '') {
+  const stack = Env.trace ? this.stack! : StacktraceUtil.simplifyStack(this);
   return `${this.message}\n${mid}${stack.substring(stack.indexOf('\n') + 1)}`;
 };

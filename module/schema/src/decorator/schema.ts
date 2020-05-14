@@ -12,7 +12,7 @@ export function Schema(): ClassDecorator { // Auto is used during compilation
   return (<T>(target: Class<T>): Class<T> => {
     SchemaRegistry.getOrCreatePending(target);
     return target;
-  }) as any;
+  }) as ClassDecorator;
 }
 
 // TODO: Document

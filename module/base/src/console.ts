@@ -18,7 +18,6 @@ interface ConsoleState {
   processArgs?(payload: ConsolePayload, args: any[]): any[];
 }
 
-const KEY = 'ᚕlg';
 const CONSOLE_RE = /(\bconsole[.](debug|info|trace|warn|log|error|fatal)[(])|\n/g;
 
 
@@ -43,13 +42,13 @@ class $ConsoleManager {
   private states: ConsoleState[] = [];
   private state: ConsoleState;
 
-  readonly key = KEY;
   readonly defaultEnrich = !EnvUtil.isTrue('TRV_LOG_PLAIN');
   readonly timestamp = EnvUtil.isValueOrFalse('TRV_LOG_TIME', ['s', 'ms'] as const, 'ms');
   readonly exclude = new Set<string>([]);
 
-  constructor() {
-    (global as any)[KEY] = this.invoke.bind(this);
+  constructor(public readonly key: string) {
+    // @ts-expect-error
+    global[this.key] = this.invoke.bind(this);
     this.exclude = new Set();
     if (!Env.debug) {
       this.exclude.add('debug');
@@ -95,7 +94,7 @@ class $ConsoleManager {
         return a;
       } else {
         lvl = lvl === 'log' ? 'info' : lvl;
-        return `${KEY}({level:'${lvl}',file:__filename,category:'${SystemUtil.computeModule(fileName)}',line:${line}},`;
+        return `${this.key}({level:'${lvl}',file:__filename,category:'${SystemUtil.computeModule(fileName)}',line:${line}},`;
       }
     });
     return fileContents;
@@ -156,4 +155,4 @@ class $ConsoleManager {
   }
 }
 
-export const ConsoleManager = new $ConsoleManager();
+export const ConsoleManager = new $ConsoleManager('ᚕlg');
