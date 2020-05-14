@@ -43,7 +43,7 @@ export class SpecGenerateUtil {
           } : this.getType(field.type, state),
           required: field.required && !!field.required.active,
           in: location,
-          extract: undefined as any
+          extract: undefined
         });
       }
       return acc;
@@ -231,7 +231,7 @@ export class SpecGenerateUtil {
       ep.params.forEach(param => {
         if (param.location) {
           if (param.location === 'body') {
-            op.requestBody = this.buildRequestBody(state, param) as any;
+            op.requestBody = this.buildRequestBody(state, param);
           } else if (param.type && SchemaRegistry.has(param.type) && (param.location === 'query' || param.location === 'header')) {
             op.parameters!.push(...this.schemaToDotParams(state, param.location, param.type));
           } else if (param.location !== 'context') {

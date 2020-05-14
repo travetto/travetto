@@ -1,6 +1,6 @@
 
-import { ProcessCommChannel } from './channel';
 import { SystemUtil } from '@travetto/base/src/internal/system';
+import { ProcessCommChannel } from './channel';
 
 /**
  * Child channel, communicates only to parent

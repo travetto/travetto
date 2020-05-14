@@ -5,21 +5,23 @@ import { Consumer } from '../model/consumer';
 
 // TODO: Document
 export function buildWorkManager(consumer: Consumer) {
-  return WorkUtil.spawnedWorker<string>(`${__dirname}/../../bin/test-worker`, [], {}, {
-    async init(channel: ParentCommChannel) {
-      await channel.listenOnce(Events.READY);
-      await channel.send(Events.INIT);
-      await channel.listenOnce(Events.INIT_COMPLETE);
-      channel.listen(consumer.onEvent.bind(consumer) as any); // Connect the consumer with the event stream from the child
-    },
-    async execute(channel: ParentCommChannel, event: string | RunEvent) {
-      const complete = channel.listenOnce(Events.RUN_COMPLETE);
-      channel.send(Events.RUN, typeof event === 'string' ? { file: event } : event);
+  return WorkUtil.spawnedWorker(`${__dirname}/../../bin/test-worker`, {
+    handlers: {
+      async init(channel: ParentCommChannel) {
+        await channel.listenOnce(Events.READY);
+        await channel.send(Events.INIT);
+        await channel.listenOnce(Events.INIT_COMPLETE);
+        channel.listen(consumer.onEvent.bind(consumer)); // Connect the consumer with the event stream from the child
+      },
+      async execute(channel: ParentCommChannel, event: string | RunEvent) {
+        const complete = channel.listenOnce(Events.RUN_COMPLETE);
+        channel.send(Events.RUN, typeof event === 'string' ? { file: event } : event);
 
-      const { error } = await complete;
+        const { error } = await complete;
 
-      if (error) {
-        throw ErrorUtil.deserializeError(error);
+        if (error) {
+          throw ErrorUtil.deserializeError(error);
+        }
       }
     }
   });

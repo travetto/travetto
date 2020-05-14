@@ -227,7 +227,7 @@ export class SQLModelSource extends ModelSource {
     );
 
     const results = await this.exec(q.join('\n'));
-    return (results.records as any[]).map(x => {
+    return results.records.map(x => {
       x.count = Util.coerceType(x.count, Number);
       return x;
     });
@@ -299,7 +299,7 @@ export class SQLModelSource extends ModelSource {
       this.postLoad(cls, item);
       data.id = item.id;
     }
-    return await this.updatePartial(cls, data as any);
+    return await this.updatePartial(cls, data);
   }
 
   @Connected()
@@ -317,7 +317,8 @@ export class SQLModelSource extends ModelSource {
   @Connected()
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
     try {
-      const res = await this.getByQuery(cls, { where: { id } } as any as ModelQuery<T>);
+      // @ts-ignore
+      const res = await this.getByQuery(cls, { where: { id } } as ModelQuery<T>);
       return res;
     } catch (err) {
       throw new AppError(`Invalid number of results for find by id: ${err.message}`, 'notfound');
@@ -350,8 +351,8 @@ export class SQLModelSource extends ModelSource {
     if (ModelRegistry.has(cls)) {
       await this.dialect.fetchDependents(cls, res, builder && builder.select);
     }
-    SQLUtil.cleanResults(this.dialect, res);
-    return res as any as U[];
+    // @ts-ignore
+    return SQLUtil.cleanResults(this.dialect, res) as U[];
   }
 
   /**

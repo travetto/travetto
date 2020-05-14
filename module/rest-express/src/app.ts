@@ -7,6 +7,7 @@ import { Injectable } from '@travetto/di';
 import { RouteUtil, RestApp, RouteConfig, RouteHandler, TRV_RAW } from '@travetto/rest';
 
 import { RouteStack } from './internal/types';
+import { ParamConfig } from '@travetto/rest/src/types';
 
 /**
  * An express rest app
@@ -22,8 +23,8 @@ export class ExpressRestApp extends RestApp<express.Application> {
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use((req, res, next) => {
-      (req as any)[TRV_RAW] = req;
-      (res as any)[TRV_RAW] = res;
+      req[TRV_RAW] = req;
+      res[TRV_RAW] = res;
       next();
     });
 
@@ -43,10 +44,12 @@ export class ExpressRestApp extends RestApp<express.Application> {
   }
 
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
-    const router = express.Router({ mergeParams: true });
+    const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {
-      router[route.method!](route.path!, route.handlerFinalized! as any);
+      router[route.method!](route.path!,
+        // @ts-ignore
+        route.handlerFinalized!);
     }
 
     // Register options handler for each controller
@@ -55,13 +58,15 @@ export class ExpressRestApp extends RestApp<express.Application> {
         {
           method: 'options', path: '*',
           handler: this.globalHandler as RouteHandler,
-          params: [{ extract: (c: any, r: any) => r } as any]
+          params: [{ extract: (__, r: any) => r } as ParamConfig]
         });
 
-      router.options('*', optionHandler as any);
+      router.options('*',
+        // @ts-ignore
+        optionHandler);
     }
 
-    (router as any).key = key;
+    router.key = key;
     this.raw.use(path, router);
 
     if (this.listening && key !== RestApp.GLOBAL) {

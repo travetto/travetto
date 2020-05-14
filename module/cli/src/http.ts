@@ -50,9 +50,7 @@ export class WebServer {
     open?: boolean;
     reloadRate?: number;
   }) {
-    for (const k of Object.keys(config)) {
-      (this as any)[k] = (config as any)[k];
-    }
+    Object.assign(this, config);
   }
 
   /**

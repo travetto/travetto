@@ -1,5 +1,7 @@
 const og = Promise;
 
+import { AssertionError } from 'assert';
+
 // TODO: Document
 function Wrapped(this: Promise<any>, ex: any) {
   const prom = new og(ex);
@@ -20,7 +22,8 @@ Wrapped.reject = Promise.reject.bind(Promise);
 // TODO: Document
 export class PromiseCapture {
   static pending: Promise<any>[];
-  static checker = (process as any).binding('util').getPromiseDetails;
+  // @ts-ignore
+  static checker = process.binding('util').getPromiseDetails;
   static isPending = (prom: Promise<any>) => PromiseCapture.checker(prom)[0] === 0;
 
   static start() {
@@ -36,9 +39,9 @@ export class PromiseCapture {
       final = err;
     }
 
-    const ret = new Error(`Pending promises: ${pending.length}`);
+    const ret = new AssertionError({ message: `Pending promises: ${pending.length}` });
     ret.stack = final?.stack ?? ret.stack;
-    (ret as any).operator = 'unhandled promise';
+    ret.operator = 'unhandled promise';
     throw ret;
   }
 

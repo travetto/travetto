@@ -1,4 +1,5 @@
 import { AppError } from '@travetto/base';
+import { ValidationResultError } from '@travetto/schema';
 
 // TODO: Document
 export type BulkOp<T> =
@@ -33,7 +34,7 @@ export class BulkProcessError extends AppError {
       category: this.category,
       type: this.type,
       errors: this.errors.map(x => {
-        const { message, type, errors, payload } = x.error as any;
+        const { message, type, errors, payload } = x.error as ValidationResultError;
         return { message, type, errors: errors ?? payload, idx: x.idx };
       })
     };

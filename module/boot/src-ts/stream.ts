@@ -77,7 +77,7 @@ export class StreamUtil {
     const ogListen = stream.addListener;
 
     // Allow for process to end before calling end handler
-    stream.on = stream.addListener = function (this: NodeJS.ReadableStream, type: string, handler: Function) {
+    stream.on = stream.addListener = function (this: NodeJS.ReadableStream, type: string, handler: (...params: any[]) => void) {
       let outHandler = handler;
       if (type === 'end') {
         outHandler = async (...params: any[]) => {
@@ -85,7 +85,7 @@ export class StreamUtil {
           handler(...params);
         };
       }
-      return ogListen.call(this, type, outHandler as any);
+      return ogListen.call(this, type, outHandler);
     };
     return stream;
   }

@@ -31,10 +31,10 @@ function verifyTypes(o: any): o is Payload {
 /**
  * Verify the token
  */
-export async function verify(jwt: string, options: VerifyOptions = {}) {
+export async function verify<T>(jwt: string, options: VerifyOptions = {}): Promise<Payload & T> {
 
   // clone this object since we are going to mutate it.
-  const headerVerify = { ...(options.header ?? {}), alg: undefined as any as (string | string[]), typ: 'JWT' };
+  const headerVerify = { ...(options.header ?? {}), alg: undefined! as (string | string[]), typ: 'JWT' };
   const verifyPayload = { ...(options.payload ?? {}) };
 
   const oct = (options.clock && options.clock.timestamp);
@@ -150,5 +150,5 @@ export async function verify(jwt: string, options: VerifyOptions = {}) {
     }
   }
 
-  return payload;
+  return payload as (Payload & T);
 }

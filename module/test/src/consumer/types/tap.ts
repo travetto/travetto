@@ -98,7 +98,7 @@ export class TapEmitter implements Consumer {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.enhancer.failure(err instanceof Error ? err.toConsole!() : `${err}`) as string);
+        this.log(this.enhancer.failure(err instanceof Error ? err.toConsole() : `${err}`) as string);
       }
     }
 

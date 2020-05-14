@@ -130,7 +130,7 @@ export function Connected<T extends ConnectionAware>() {
   return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(this: T, ...args: any[]) => Promise<any>>) {
     const og = desc.value!;
     desc.value = function (this: T, ...args: any[]) {
-      return withConnection(this, og as any, args);
+      return withConnection(this, og, args);
     };
   };
 }
@@ -142,7 +142,7 @@ export function Transactional<T extends ConnectionAware>(mode: TransactionType =
   return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(this: T, ...args: any[]) => Promise<any>>) {
     const og = desc.value!;
     desc.value = function (this: T, ...args: any[]) {
-      return withTransaction(this, mode, og as any, args);
+      return withTransaction(this, mode, og, args);
     };
   };
 }

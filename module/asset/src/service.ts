@@ -69,8 +69,8 @@ export class AssetService {
       }
     }
 
-    info.stream = await this.source.read(path);
-
-    return info;
+    const full: Partial<Asset> = info;
+    full.stream = await this.source.read(path);
+    return full as Asset;
   }
 }

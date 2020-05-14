@@ -118,7 +118,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     if (keys.length) {
       const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]));
       for (let i = 0; i < keys.length; i++) {
-        (instance as any)[keys[i]] = deps[i];
+        instance[keys[i] as keyof T] = deps[i];
       }
     }
   }
@@ -304,7 +304,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       config.target = pconfig.target;
     }
     if (pconfig.dependencies) {
-      config.dependencies = { fields: {}, ...pconfig.dependencies };
+      config.dependencies = {
+        // @ts-ignore
+        fields: {},
+        ...pconfig.dependencies
+      };
     }
   }
 
@@ -312,7 +316,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Register a factory configuration
    */
   registerFactory(config: InjectableFactoryConfig<any> & { fn: (...args: any[]) => any, id: string }) {
-    const finalConfig: InjectableConfig<any> = {} as any;
+    const finalConfig: Partial<InjectableConfig<any>> = {};
 
     mergeWithOriginal(config);
 
@@ -340,7 +344,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.factories.set(config.src.__id, new Map());
     }
 
-    this.factories.get(config.src.__id)!.set(cls, finalConfig);
+    this.factories.get(config.src.__id)!.set(cls, finalConfig as InjectableConfig);
   }
 
   /**

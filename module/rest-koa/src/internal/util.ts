@@ -7,9 +7,9 @@ const TRV_REQ = Symbol.for('@trv:rest-koa/request');
 
 // TODO: Document
 export class KoaAppUtil {
-  static getRequest(ctx: koa.ParameterizedContext) {
-    if (!(ctx as any)[TRV_REQ]) {
-      (ctx as any)[TRV_REQ] = RestAppUtil.decorateRequest({
+  static getRequest(ctx: koa.ParameterizedContext & { [TRV_REQ]?: Travetto.Request }) {
+    if (!ctx[TRV_REQ]) {
+      ctx[TRV_REQ] = RestAppUtil.decorateRequest({
         [TRV_ORIG]: ctx,
         [TRV_RAW]: ctx.req,
         protocol: ctx.protocol,
@@ -22,17 +22,17 @@ export class KoaAppUtil {
         headers: ctx.request.headers,
         cookies: ctx.cookies,
         files: {},
-        auth: undefined as any,
+        auth: undefined,
         pipe: ctx.req.pipe.bind(ctx.req),
         on: ctx.req.on.bind(ctx.req)
       });
     }
-    return (ctx as any)[TRV_REQ] as Travetto.Request;
+    return ctx[TRV_REQ]!;
   }
 
-  static getResponse(ctx: koa.ParameterizedContext) {
-    if (!(ctx as any)[TRV_RES]) {
-      (ctx as any)[TRV_RES] = RestAppUtil.decorateResponse({
+  static getResponse(ctx: koa.ParameterizedContext & { [TRV_RES]?: Travetto.Response }) {
+    if (!ctx[TRV_RES]) {
+      ctx[TRV_RES] = RestAppUtil.decorateResponse({
         [TRV_ORIG]: ctx,
         [TRV_RAW]: ctx.res,
         get headersSent() {
@@ -65,6 +65,6 @@ export class KoaAppUtil {
         cookies: ctx.cookies,
       });
     }
-    return (ctx as any)[TRV_RES] as Travetto.Response;
+    return ctx[TRV_RES]!;
   }
 }

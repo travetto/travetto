@@ -18,16 +18,14 @@ export class RestTransformer {
   /**
    * Get base parameter config
    */
-  static getParameterConfig(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation): ParamConfig {
+  static getParameterConfig(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation): Partial<ParamConfig> {
     const pName = node.name.getText();
 
-    const decConfig: ParamConfig = { name: pName } as any;
-
-
-    const commentConfig = (comments.params ?? []).find(x => x.name === decConfig.name) || {} as ParamDocumentation;
+    const decConfig: Partial<ParamConfig> = { name: pName };
+    const commentConfig = (comments.params ?? []).find(x => x.name === decConfig.name) || {} as Partial<ParamDocumentation>;
 
     return {
-      description: decConfig.name,
+      description: decConfig.name!,
       defaultValue: node.initializer,
       ...commentConfig,
       ...decConfig,
@@ -69,7 +67,7 @@ export class RestTransformer {
    */
   static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation) {
     const pDec = state.findDecorator(node, 'trv/rest/Param');
-    let pDecArg = TransformUtil.getPrimaryArgument(pDec) as ts.Expression;
+    let pDecArg = TransformUtil.getPrimaryArgument(pDec)!;
     if (pDecArg && ts.isStringLiteral(pDecArg)) {
       pDecArg = TransformUtil.fromLiteral({ name: pDecArg });
     }
@@ -77,7 +75,7 @@ export class RestTransformer {
     const { type, array, defaultType } = this.getParameterType(state, node);
     const common = {
       ...this.getParameterConfig(state, node, comments),
-      type: type as any,
+      type,
       ...(array ? { array: true } : {})
     };
 
@@ -131,7 +129,7 @@ export class RestTransformer {
       }
 
       if (res.isExternalType(type.type)) {
-        type.type = state.typeToIdentifier(type.type) as any;
+        type.type = state.typeToIdentifier(type.type);
       } else if (res.isShapeType(type.type)) { // TODO: How do we handle shapes?
         delete type.type;
       }
@@ -154,7 +152,7 @@ export class RestTransformer {
 
     // Handle parameters
     if (node.parameters.length) {
-      const params = [] as ts.ParameterDeclaration[];
+      const params: ts.ParameterDeclaration[] = [];
       // If there are parameters to process
       for (const p of node.parameters) {
         params.push(RestTransformer.handleEndpointParameter(state, p, comments));

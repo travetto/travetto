@@ -7,8 +7,8 @@ import { SessionConfig } from './config';
 import { CookieEncoder } from './encoder/cookie';
 import { CacheStore, MemoryCacheStore } from '@travetto/cache';
 import { Util, Env, AppError } from '@travetto/base';
+import { TRV_SESSION } from './internal/types';
 
-const SESS = Symbol.for('@trv:rest-session/self');
 export const SESSION_CACHE = Symbol.for('@trv:session/cache');
 
 @Injectable()
@@ -62,17 +62,17 @@ export class RestSessionService {
       session = session instanceof Session ? session : new Session(session);
 
       if (await this.validate(session)) {
-        (req as any)[SESS] = session;
+        req[TRV_SESSION] = session;
       } else {
         await this.store.delete(session.key); // Invalid session, nuke it
-        (req as any)[SESS] = new Session({ action: 'destroy' });
+        req[TRV_SESSION] = new Session({ action: 'destroy' });
       }
     }
   }
 
   async storeToExternal(req: Request, res: Response) {
 
-    let session: Session | undefined = (req as any)[SESS]; // Do not create automatically
+    let session: Session | undefined = req[TRV_SESSION]; // Do not create automatically
 
     if (!session) {
       return;
@@ -107,10 +107,10 @@ export class RestSessionService {
     Object.defineProperties(req, {
       session: {
         get(this: Request) {
-          if (!(SESS in this) || (this as any)[SESS].action === 'destroy') {
-            (this as any)[SESS] = new Session({ action: 'create', data: {} });
+          if (!(TRV_SESSION in this) || this[TRV_SESSION].action === 'destroy') {
+            this[TRV_SESSION] = new Session({ action: 'create', data: {} });
           }
-          return (this as any)[SESS];
+          return this[TRV_SESSION];
         },
         enumerable: true,
         configurable: false

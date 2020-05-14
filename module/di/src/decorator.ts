@@ -29,7 +29,7 @@ export function Injectable(...args: any[]): ClassDecorator {
     const config = extractSymbolOrConfig(args) as Partial<InjectableConfig<any>>;
 
     config.class = target;
-    DependencyRegistry.registerClass(target, config as any as InjectableConfig<any>);
+    DependencyRegistry.registerClass(target, config as InjectableConfig<any>);
     return target;
   };
 }
@@ -38,7 +38,7 @@ export type InjectConfig = { qualifier?: symbol, optional?: boolean, defaultIfMi
 
 export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
   return (target: any) => {
-    DependencyRegistry.registerConstructor(target, configs as any as Dependency[]);
+    DependencyRegistry.registerConstructor(target, configs as Dependency[]);
   };
 }
 
@@ -59,7 +59,7 @@ export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
       DependencyRegistry.registerProperty(
         target.constructor,
         propertyKey as string,
-        (typeof config === 'symbol' ? { qualifier: config } : config) as any as Dependency);
+        (typeof config === 'symbol' ? { qualifier: config } : config) as Dependency);
     }
   };
 }

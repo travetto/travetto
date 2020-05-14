@@ -5,7 +5,10 @@ import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/sc
 
 import { DialectState, InsertWrapper } from './types';
 
+const TABLE_SYM = Symbol.for('@trv:model-sql/table');
+
 export type VisitStack = {
+  [TABLE_SYM]?: string;
   array?: boolean;
   type: Class;
   name: string;
@@ -13,8 +16,6 @@ export type VisitStack = {
 };
 
 export type VisitState = { path: VisitStack[] };
-
-const TABLE_SYM = Symbol.for('@trv:model-sql/table');
 
 interface VisitNode<R> {
   path: VisitStack[];
@@ -34,7 +35,7 @@ export interface VisitInstanceNode<R> extends VisitNode<R> {
 export interface VisitHandler<R, U extends VisitNode<R> = VisitNode<R>> {
   onRoot(config: U & { config: ClassConfig }): R;
   onSub(config: U & { config: FieldConfig }): R;
-  onSimple(config: U & { config: FieldConfig }): R;
+  onSimple(config: Omit<U, 'descend'> & { config: FieldConfig }): R;
 }
 
 // TODO: Document
@@ -58,9 +59,11 @@ export class SQLUtil {
   /**
    * Clean results from db, by dropping internal fields
    */
-  static cleanResults<T>(dct: DialectState, o: T): T {
+  static cleanResults<T>(dct: DialectState, o: T[]): T[];
+  static cleanResults<T>(dct: DialectState, o: T): T;
+  static cleanResults<T>(dct: DialectState, o: T | T[]): T | T[] {
     if (Array.isArray(o)) {
-      return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x)) as any;
+      return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x));
     } else if (!Util.isSimple(o)) {
       for (const k of Object.keys(o) as (keyof T)[]) {
         if (o[k] === null || o[k] === undefined || k === dct.parentPathField.name || k === dct.pathField.name || k === dct.idxField.name) {
@@ -140,7 +143,8 @@ export class SQLUtil {
           this.visitSchemaSync(field, handler, { path });
         } else {
           handler.onSimple({
-            config: field, descend: null as any, fields: [], path: [
+            config: field,
+            fields: [], path: [
               ...path,
               field
             ]
@@ -169,7 +173,8 @@ export class SQLUtil {
           await this.visitSchema(field, handler, { path });
         } else {
           await handler.onSimple({
-            config: field, descend: null as any, fields: [], path: [
+            config: field,
+            fields: [], path: [
               ...path,
               field
             ]
@@ -193,7 +198,7 @@ export class SQLUtil {
     this.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: (config) => {
         const { path } = config;
-        path[0].name = instance['id'] as any;
+        path[0].name = instance['id']!;
         handler.onRoot({ ...config, value: instance });
         return config.descend();
       },
@@ -243,7 +248,7 @@ export class SQLUtil {
     let toGet = new Set<string>();
 
     for (const [k, v] of Object.entries(select)) {
-      if (!Util.isPlainObject((select as any)[k]) && localMap[k]) {
+      if (!Util.isPlainObject(select[k as keyof typeof select]) && localMap[k]) {
         if (!v) {
           if (toGet.size === 0) {
             toGet = new Set(SchemaRegistry.get(cls).views[ALL_VIEW].fields);
@@ -285,26 +290,28 @@ export class SQLUtil {
   /**
    * Find all dependent fields via child tables
    */
-  static collectDependents<T extends any>(dct: DialectState, parent: any, v: T[], field?: FieldConfig) {
+  static collectDependents<T>(dct: DialectState, parent: any, v: T[], field?: FieldConfig) {
     if (field) {
       const isSimple = SchemaRegistry.has(field.type);
       for (const el of v) {
-        const root = parent[el[dct.parentPathField.name]];
+        const root = parent[el[dct.parentPathField.name as keyof T]];
         if (field.array) {
           if (!root[field.name]) {
-            root[field.name] = [isSimple ? el : el[field.name]];
+            root[field.name] = [isSimple ? el : el[field.name as keyof T]];
           } else {
-            root[field.name].push(isSimple ? el : el[field.name]);
+            root[field.name].push(isSimple ? el : el[field.name as keyof T]);
           }
         } else {
-          root[field.name] = isSimple ? el : el[field.name];
+          root[field.name] = isSimple ? el : el[field.name as keyof T];
         }
       }
     }
 
     const mapping: Record<string, T> = {};
     for (const el of v) {
-      mapping[(el as any)[dct.pathField.name]] = el;
+      const key = el[dct.pathField.name as keyof T];
+      // @ts-ignore
+      mapping[key] = el;
     }
     return mapping;
   }
@@ -313,11 +320,11 @@ export class SQLUtil {
    * Build table name via stack path
    */
   static buildTable(list: VisitStack[]) {
-    const top = list[list.length - 1] as any;
+    const top = list[list.length - 1];
     if (!top[TABLE_SYM]) {
       top[TABLE_SYM] = list.map((el, i) => i === 0 ? ModelRegistry.getBaseCollection(el.type) : el.name).join('_');
     }
-    return top[TABLE_SYM];
+    return top[TABLE_SYM]!;
   }
 
   /**

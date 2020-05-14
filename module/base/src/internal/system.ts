@@ -27,15 +27,11 @@ export class SystemUtil {
      * Start countdown
      */
     function start(force = false) {
-      if (timer) {
-        if (force) {
-          stop();
-        } else {
-          return;
-        }
+      if (!timer || force) {
+        stop();
+        timer = setTimeout(onTimeout, timeout);
+        timer.unref();
       }
-      timer = setTimeout(onTimeout, timeout);
-      timer.unref();
     }
     return { start, stop, restart: start.bind(null, true) };
   }
@@ -43,10 +39,10 @@ export class SystemUtil {
   /**
    * Throttle a function to run only once within a specific threshold of time
    */
-  static throttle<T extends any[]>(fn: (...args: T[]) => void, threshold = 250) {
+  static throttle<T extends Function>(fn: T, threshold = 250) {
     let last = 0;
     let deferTimer: NodeJS.Timer;
-    return function check(...args: any[]) {
+    function check(...args: any[]) {
       const now = Date.now();
       // Still within throttle window
       if (last && now < last + threshold) {
@@ -56,7 +52,9 @@ export class SystemUtil {
         last = now;
         fn(...args);
       }
-    };
+    }
+    // @ts-ignore
+    return check as T;
   }
 
   /**

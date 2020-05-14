@@ -100,12 +100,12 @@ export class QueryLanguageTokenizer {
   }
 
   static tokenize(text: string): Token[] {
-    const state = {
+    const state: TokenizeState = {
       out: [] as Token[],
       pos: 0,
       start: 0,
       text,
-      mode: undefined as any
+      mode: undefined! as TokenType
     };
     const len = text.length;
     while (state.pos < len) {

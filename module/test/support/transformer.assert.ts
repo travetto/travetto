@@ -48,7 +48,7 @@ export class AssertTransformer {
         .filter(x => !/^(Last|First)/.test(x))
         .forEach(x =>
           OP_TOKEN_TO_NAME.set(
-            parseInt((ts.SyntaxKind as any)[x], 10), x));
+            ts.SyntaxKind[x as 'Unknown'], x));
     }
 
     const name = OP_TOKEN_TO_NAME.get(key)!;

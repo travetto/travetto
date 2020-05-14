@@ -4,7 +4,7 @@ import * as path from 'path';
 import { FileCache, TranspileUtil, FsUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 
-import { ScanApp } from '@travetto/base';
+import { ScanApp, Util } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';
@@ -106,8 +106,10 @@ export class Transpiler {
         return path.dirname(ts.getDefaultLibFilePath(this.compilerOptions));
       },
     };
-    for (const [k, v] of Object.entries(host)) {
-      (host as any)[k] = v.bind(this);
+    for (const [k, v] of Object.entries(host) as [(keyof ts.CompilerHost), any][]) {
+      if (Util.isFunction(v)) {
+        host[k] = v.bind(this);
+      }
     }
     return host;
   }

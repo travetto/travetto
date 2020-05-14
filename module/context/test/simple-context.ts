@@ -1,20 +1,11 @@
 import * as assert from 'assert';
 import * as asyncHooks from 'async_hooks';
 
-import { Inject, Injectable, DependencyRegistry } from '@travetto/di';
+import { DependencyRegistry } from '@travetto/di';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { RootRegistry } from '@travetto/registry';
 
 import { AsyncContext, WithAsyncContext } from '../';
-import { RootRegistry } from '../../registry';
-
-@Injectable()
-class TestService {
-  @Inject() context: AsyncContext;
-
-  postConstruct() {
-    console.log('Context Found', this.context);
-  }
-}
 
 @Suite()
 class VerifyContext {
@@ -24,8 +15,7 @@ class VerifyContext {
   @BeforeAll()
   async init() {
     await RootRegistry.init();
-    const svc = await DependencyRegistry.getInstance(TestService);
-    this.context = svc.context;
+    this.context = await DependencyRegistry.getInstance(AsyncContext);
   }
 
   @Test()

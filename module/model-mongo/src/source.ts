@@ -15,10 +15,14 @@ import {
 import { Class } from '@travetto/registry';
 import { AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
+import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
 import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
-import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
+
+function hasRawId(o: any): o is { _id: mongo.ObjectID } {
+  return '_id' in o;
+}
 
 /**
  * Mongo-based model source
@@ -49,7 +53,7 @@ export class MongoModelSource extends ModelSource {
 
     console.trace('Query', query);
 
-    let cursor = col.find(projected);
+    let cursor = col.find<U>(projected);
     if (query.select) {
       const select = Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select);
       // Remove id if not explicitly defined, and selecting fields directly
@@ -71,14 +75,13 @@ export class MongoModelSource extends ModelSource {
     if (query.offset) {
       cursor = cursor.skip(Math.trunc(query.offset ?? 0));
     }
-    const res = await cursor.toArray() as any as U[];
-    return res;
+    return await cursor.toArray();
   }
 
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
-    if ((o as any)._id) {
-      o.id = ((o as any)._id as any as mongo.ObjectId).toHexString();
-      delete (o as any)._id;
+    if (hasRawId(o)) {
+      o.id = (o._id as mongo.ObjectId).toHexString();
+      delete o._id;
     }
     return o;
   }
@@ -152,8 +155,7 @@ export class MongoModelSource extends ModelSource {
     const col = await this.getCollection(cls);
     const cursor = col.count(MongoUtil.extractTypedWhereClause(cls, query.where ?? {}));
 
-    const res = await cursor;
-    return res;
+    return await cursor;
   }
 
   async getByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T> = {}, failOnMany = true): Promise<T> {
@@ -162,7 +164,8 @@ export class MongoModelSource extends ModelSource {
   }
 
   async getById<T extends ModelCore>(cls: Class<T>, id: string): Promise<T> {
-    const query = { where: { id } } as any as ModelQuery<T>;
+    // @ts-ignore
+    const query = { where: { id } } as ModelQuery<T>;
     return await this.getByQuery(cls, query);
   }
 
@@ -222,7 +225,8 @@ export class MongoModelSource extends ModelSource {
     if (!keepId) {
       delete o.id;
     } else {
-      (o as any)._id = new mongo.ObjectId(o.id); // To mongo
+      // @ts-ignore
+      o._id = new mongo.ObjectId(o.id); // To mongo
       delete o.id;
     }
     const res = await col.insertOne(o);
@@ -236,7 +240,8 @@ export class MongoModelSource extends ModelSource {
       if (!keepId) {
         delete o.id;
       } else {
-        (o as any)._id = new mongo.ObjectId(o.id); // To mongo
+        // @ts-ignore
+        o._id = new mongo.ObjectId(o.id); // To mongo
         delete o.id;
       }
     }
@@ -262,7 +267,7 @@ export class MongoModelSource extends ModelSource {
   }
 
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T>): Promise<T> {
-    return await this.updatePartialByQuery(cls, { where: { id: data.id } } as any as ModelQuery<T>, data);
+    return await this.updatePartialByQuery(cls, { where: { id: data.id } } as ModelQuery<T>, data);
   }
 
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<T> {
@@ -281,7 +286,7 @@ export class MongoModelSource extends ModelSource {
           acc.$set[k] = v;
         }
         return acc;
-      }, {} as any);
+      }, {} as Record<string, any>);
     }
 
     const res = await col.findOneAndUpdate(MongoUtil.extractTypedWhereClause(cls, query.where ?? {}), final, { returnOriginal: false });
@@ -355,8 +360,8 @@ export class MongoModelSource extends ModelSource {
         out.errors = res.getWriteErrors();
         for (const err of out.errors) {
           const op = operations[err.index];
-          const k = Object.keys(op)[0];
-          (out as any).counts[k] -= 1;
+          const k = Object.keys(op)[0] as keyof BulkResponse['counts'];
+          out.counts[k] -= 1;
         }
         out.counts.error = out.errors.length;
       }

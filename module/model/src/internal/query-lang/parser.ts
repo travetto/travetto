@@ -1,15 +1,19 @@
 import { QueryLanguageTokenizer } from './tokenizer';
-import { Node, Token, ClauseNode, UnaryNode, Literal, GroupNode, OP_TRANSLATION } from './types';
+import { Node, Token, ClauseNode, UnaryNode, Literal, GroupNode, OP_TRANSLATION, ArrayNode } from './types';
+
+function isBoolean(o: any): o is Token & { type: 'boolean' } {
+  return o && o.type && o.type === 'boolean';
+}
 
 // TODO: Document
 export class QueryLanguageParser {
 
   static handleClause(nodes: (Node | Token)[]) {
-    const val = nodes.pop()! as Token;
+    const val = nodes.pop()! as Token | ArrayNode;
     const op = nodes.pop()! as Token;
     const ident = nodes.pop()! as Token;
 
-    if (val.type !== 'literal') {
+    if (val.type !== 'literal' && val.type !== 'list') {
       throw new Error(`Unexpected token: ${val.value}`);
     }
 
@@ -26,7 +30,7 @@ export class QueryLanguageParser {
       type: 'clause',
       field: ident.value as string,
       op: finalOp,
-      value: val.value as any
+      value: val.value
     } as ClauseNode);
 
     this.unary(nodes);
@@ -35,7 +39,7 @@ export class QueryLanguageParser {
 
   static condense(nodes: (Node | Token)[], op: string) {
     let second = nodes[nodes.length - 2];
-    while (second && second.type && second.type === 'boolean' && (second as any).value === op) {
+    while (isBoolean(second) && second.value === op) {
       const right = nodes.pop()!;
       nodes.pop()!;
       const left = nodes.pop()!;
@@ -70,7 +74,7 @@ export class QueryLanguageParser {
   static parse(tokens: Token[], pos: number = 0): Node {
 
     let top: (Node | Token)[] = [];
-    const stack: (Node | Token)[][] = [top];
+    const stack: (typeof top)[] = [top];
     let arr: Literal[] | undefined;
 
     let token = tokens[pos];
@@ -92,7 +96,7 @@ export class QueryLanguageParser {
           if (token.value === 'start') {
             arr = [];
           } else {
-            top.push({ type: 'literal', value: arr } as any);
+            top.push({ type: 'list', value: arr! } as ArrayNode);
             arr = undefined;
             this.handleClause(top);
           }
@@ -130,8 +134,8 @@ export class QueryLanguageParser {
   static convert(node: Node): any {
     switch (node.type) {
       case 'unary': {
-        const un = node as GroupNode;
-        return { [`$${un.op}`]: this.convert(un.value as any as GroupNode) };
+        const un = node as UnaryNode;
+        return { [`$${un.op}`]: this.convert(un.value) };
       }
       case 'group': {
         const gn = node as GroupNode;

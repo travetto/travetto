@@ -61,7 +61,7 @@ export class MongoAssetSource extends AssetSource {
     return this.bucket.openDownloadStreamByName(filename);
   }
 
-  async info(filename: string, filter?: Partial<Asset>): Promise<Asset> {
+  async info(filename: string, filter?: Partial<Asset>) {
     const query = { filename };
 
     if (!!filter) {
@@ -79,7 +79,6 @@ export class MongoAssetSource extends AssetSource {
       size: f.length,
       path: f.filename,
       contentType: f.contentType,
-      stream: undefined as any,
       metadata: f.metadata
     };
   }

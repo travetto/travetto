@@ -30,8 +30,10 @@ export class JWTAuthContextStore extends AuthContextEncoder {
    * Write context
    */
   async write(ctx: AuthContext, req: Request, res: Response) {
-    const body = { ...ctx, exp: ctx.principal.expires!.getTime() / 1000 };
-    (body.principal as any).permissions = [...ctx.principal.permissions];
+    const body: Pick<AuthContext, 'identity' | 'principal'> & { exp: number } = {
+      ...ctx, exp: ctx.principal.expires!.getTime() / 1000
+    };
+    body.principal.permissions = [...ctx.principal.permissions];
     const token = await sign(body, { key: this.signingKey });
     if (this.location === 'cookie') {
       res.cookies.set(this.name, token);
@@ -44,8 +46,8 @@ export class JWTAuthContextStore extends AuthContextEncoder {
    * Read JWT from location
    */
   async read(req: Request) {
-    const input = this.location === 'cookie' ? req.cookies.get(this.name) : req.header(this.name);
-    const ac = (await verify(input!, { key: this.signingKey })) as any as AuthContext;
-    return ac;
+    const input = this.location === 'cookie' ? req.cookies.get(this.name) : req.header(this.name) as string;
+    const ac = await verify<AuthContext>(input!, { key: this.signingKey });
+    return new AuthContext(ac.identity, ac.principal);
   }
 }

@@ -58,7 +58,7 @@ export class SchemaTransformer {
     const typeExpr = state.resolveType(node);
     const properties = [];
 
-    if (!node.questionToken && !typeExpr.undefinable) {
+    if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
       properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral({ active: true })));
     }
 

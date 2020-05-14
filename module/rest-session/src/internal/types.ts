@@ -1,0 +1,1 @@
+export const TRV_SESSION = Symbol.for('@trv:rest-session/self');
