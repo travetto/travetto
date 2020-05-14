@@ -17,11 +17,11 @@ export interface TapEnhancer {
 
 const ident = (x: Primitive) => `${x}`;
 
-export const DUMMY_ENHANCER = [
+export const DUMMY_ENHANCER = ([
   'objectInspect', 'suiteName', 'testName', 'testDescription', 'assertDescription',
   'assertFile', 'assertLine', 'testNumber', 'assertNumber', 'success', 'failure', 'total'
-]
+] as const)
   .reduce((acc, v) => {
-    (acc as any)[v] = ident;
+    acc[v] = ident;
     return acc;
   }, {} as TapEnhancer);

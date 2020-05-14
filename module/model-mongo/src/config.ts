@@ -18,7 +18,7 @@ export class MongoModelConfig {
   username = '';
   password = '';
   port = 27017;
-  connectionOptions = {} as any;
+  connectionOptions = {};
   clientOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true

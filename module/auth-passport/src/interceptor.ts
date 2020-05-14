@@ -8,7 +8,8 @@ interface Handler {
   (req: Request, res: Response, next: Function): any;
 }
 
-const authenticator = (passport as any as passport.Authenticator<Handler>);
+// @ts-expect-error
+const authenticator = (passport as passport.Authenticator<Handler>);
 
 /**
  * Passport rest interceptor

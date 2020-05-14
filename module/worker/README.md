@@ -83,20 +83,20 @@ When creating your work, via process spawning, you will need to provide the scri
 **Code: Simple Spawned Worker**
 ```typescript
     const pool = new WorkPool(() =>
-      WorkUtil.spawnedWorker<string>({
-        command: FsUtil.resolveUnix(__dirname, 'simple.child-launcher.js'),
-        fork: true,
-        async init(channel) {
-          return channel.listenOnce('ready'); // Wait for child to indicate it is ready
-        },
-        async execute(channel, inp) {
-          const res = channel.listenOnce('response'); //  Register response listener
-          channel.send('request', { data: inp }); // Send request
+      WorkUtil.spawnedWorker<string>(FsUtil.resolveUnix(__dirname, 'simple.child-launcher.js'), {
+        handlers: {
+          async init(channel) {
+            return channel.listenOnce('ready'); // Wait for child to indicate it is ready
+          },
+          async execute(channel, inp) {
+            const res = channel.listenOnce('response'); //  Register response listener
+            channel.send('request', { data: inp }); // Send request
 
-          const { data } = await res; // Get answer
-          console.log('Sent', inp, 'Received', data);
+            const { data } = await res; // Get answer
+            console.log('Sent', inp, 'Received', data);
 
-          assert(inp + inp === data); // Ensure the answer is double the input
+            assert(inp + inp === data); // Ensure the answer is double the input
+          } 
         }
       })
     );

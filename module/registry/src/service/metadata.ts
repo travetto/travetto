@@ -60,7 +60,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any, F = 
 
   getParentClass(cls: Class): Class | null {
     const parent = Object.getPrototypeOf(cls) as Class;
-    return parent.name && (parent as any) !== Object ? parent : null;
+    return parent.name && parent !== Object ? parent : null;
   }
 
   getOrCreatePending(cls: Class): Partial<C> {

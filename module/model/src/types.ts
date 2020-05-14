@@ -3,7 +3,7 @@ import { Class } from '@travetto/registry';
 import { SortClause } from './model/query';
 
 // TODO: Document
-export interface IndexConfig<T extends any> {
+export interface IndexConfig<T> {
   fields: SortClause<T>[];
   options?: {
     unique?: boolean;

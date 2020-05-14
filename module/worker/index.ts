@@ -3,7 +3,7 @@ export * from './src/comm/child';
 export * from './src/comm/parent';
 export * from './src/comm/types';
 export * from './src/input/iterable';
-export * from './src/input/event';
+export * from './src/input/async-iterator';
 export * from './src/input/types';
 export * from './src/pool';
 export * from './src/util';

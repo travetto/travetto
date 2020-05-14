@@ -23,7 +23,7 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
         cwd: this.cwd,
         excludeFiles: [/.*.d.ts$/, new RegExp(`${this.cwd}/index.ts`), /\/node_modules\//], // DO not look into node_modules, only user code
         rootPaths: this.rootPaths,
-        listener: this as any,
+        listener: this,
         initialFileValidator: x => !(x.file in require.cache) // Skip already imported files
       });
 

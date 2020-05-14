@@ -45,7 +45,9 @@ export class AuthInterceptor extends RestInterceptor {
 
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
     try {
-      const ctx = (await this.contextStore.read(req)) || new AuthContext(null as any);
+      const ctx = (await this.contextStore.read(req))
+        // @ts-ignore
+        || new AuthContext();
       this.context.set(ctx, req);
 
       await this.configure(req, res);

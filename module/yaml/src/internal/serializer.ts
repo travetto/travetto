@@ -1,3 +1,5 @@
+import { Util } from '@travetto/base';
+
 type SerializableType = Error & { stack?: any } | RegExp | Function | Set<any> | Map<string, any> | number | boolean | null | string | object;
 
 /**
@@ -66,8 +68,8 @@ export class Serializer {
     if (o instanceof Error) {
       out = `${this.serialize(o.stack, indent, wordwrap, indentLevel + indent)}\n`;
     } else if (typeof o === 'function' || o instanceof RegExp || o instanceof Set || o instanceof Map) {
-      if ('toJSON' in o) {
-        out = this.serialize((o as any).toJSON(), indent, wordwrap, indentLevel);
+      if (Util.hasToJSON(o)) {
+        out = this.serialize(o.toJSON(), indent, wordwrap, indentLevel);
       } else {
         throw new Error('Types are not supported');
       }

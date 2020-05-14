@@ -9,21 +9,20 @@ import { Injectable } from '@travetto/di';
 import { S3AssetConfig } from './config';
 
 function toTagSet(metadata: Asset['metadata']): TagSet {
-  return ['name', 'title', 'hash', 'createdDate', 'tags']
+  return (['name', 'title', 'hash', 'createdDate', 'tags'] as const)
     .filter(x => x in metadata)
     .map(x => ({
       Key: x,
-      Value: Buffer.from(JSON.stringify((metadata as any)[x])).toString('base64')
+      Value: Buffer.from(JSON.stringify(metadata[x])).toString('base64')
     }));
 }
 
 function fromTagSet(tags: TagSet) {
-  const allowed = new Set(['name', 'title', 'hash', 'createdDate', 'tags']);
-  const map = tags
-    .filter(x => allowed.has(x.Key))
-    .map(x => [x.Key, JSON.parse(Buffer.from(x.Value, 'base64').toString())] as [string, string])
-    .reduce((acc, pair) => {
-      (acc as any)[pair[0]] = pair[1];
+  const all = ['name', 'title', 'hash', 'createdDate', 'tags'] as const;
+  const map = (tags as { Key: (typeof all)[number], Value: string }[])
+    .filter(x => all.includes(x.Key))
+    .reduce((acc, x) => {
+      acc[x.Key] = JSON.parse(Buffer.from(x.Value, 'base64').toString());
       return acc;
     }, {} as Asset['metadata']);
 
@@ -48,7 +47,7 @@ export class S3AssetSource extends AssetSource {
 
   private q<U extends object>(filename: string, extra: U = {} as U) {
     const key = this.config.namespace ? `${this.config.namespace}/${filename}`.replace(/\/+/g, '/') : filename;
-    return { Key: key, Bucket: this.config.bucket, ...(extra as any) } as (U & { Key: string, Bucket: string });
+    return { Key: key, Bucket: this.config.bucket, ...extra } as (U & { Key: string, Bucket: string });
   }
 
   /**
@@ -91,7 +90,7 @@ export class S3AssetSource extends AssetSource {
     throw new Error(`Unable to read type: ${typeof res.Body}`);
   }
 
-  async info(filename: string): Promise<Asset> {
+  async info(filename: string) {
     /**
      * Get details and tags
      */
@@ -103,7 +102,6 @@ export class S3AssetSource extends AssetSource {
     return {
       contentType: obj.ContentType!,
       path: filename,
-      stream: undefined as any,
       size: obj.ContentLength!,
       metadata: fromTagSet(tags.TagSet)
     };

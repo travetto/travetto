@@ -11,7 +11,7 @@ export function WithAsyncContext<T extends { context: AsyncContext }>(data?: any
         data ? JSON.parse(JSON.stringify(data)) : {});
     };
 
-    Object.defineProperty(descriptor.value, 'name', { value: (og as any).name });
+    Object.defineProperty(descriptor.value, 'name', { value: og.name });
 
     return descriptor;
   };

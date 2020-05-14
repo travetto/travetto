@@ -60,6 +60,11 @@ export class Util {
   }
 
   /**
+   * Has to JSON
+   */
+  static hasToJSON = (o: any): o is { toJSON(): any } => 'toJSON' in o;
+
+  /**
    * Create regex from string, including flags
    */
   static toRegex(input: string | RegExp) {
@@ -202,7 +207,7 @@ export class Util {
    * @param b The source
    * @param mode How the assignment should be handled
    */
-  static deepAssign<T extends any, U extends any>(a: T, b: U, mode: | 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
+  static deepAssign<T, U>(a: T, b: U, mode: | 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
     if (!a || this.isSimple(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
     }

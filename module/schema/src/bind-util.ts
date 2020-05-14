@@ -1,7 +1,7 @@
+import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from './service/registry';
 import { FieldConfig, ALL_VIEW } from './service/types';
-import { Util } from '@travetto/base';
 
 // TODO: Document
 export class BindUtil {
@@ -100,8 +100,8 @@ export class BindUtil {
 
       // If no configuration
       if (!conf) {
-        for (const k of Object.keys(data)) {
-          (obj as any)[k] = data[k];
+        for (const k of Object.keys(data) as (keyof typeof obj)[]) {
+          obj[k] = data[k];
         }
       } else {
 
@@ -151,7 +151,7 @@ export class BindUtil {
             }
           }
 
-          (obj as any)[schemaFieldName] = v;
+          obj[schemaFieldName as keyof typeof obj] = v;
         }
       }
     }

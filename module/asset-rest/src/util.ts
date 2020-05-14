@@ -63,7 +63,7 @@ export class AssetRestUtil {
 
     if (!/multipart|urlencoded/i.test(req.header('content-type') as string)) {
       const filename = this.getFileName(req);
-      return this.streamToLocalAsset(req as any as NodeJS.ReadableStream, filename, allowedTypes, excludedTypes)
+      return this.streamToLocalAsset(req[TRV_RAW], filename, allowedTypes, excludedTypes)
         .then(file => ({ file }));
     } else {
       return new Promise<AssetMap>((resolve, reject) => {

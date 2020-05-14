@@ -5,10 +5,13 @@ import { AsyncContext } from '@travetto/context';
 import { ConnectionSupport } from '../../connection';
 import { SQLModelConfig } from '../../config';
 
-const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) =>
-  new Promise<V>((res, rej) => (ctx[prop] as any)(
+const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) => {
+  // @ts-ignore
+  const fn = ctx[prop] as Function;
+  return new Promise<V>((res, rej) => fn(
     (err: any, val?: any) => err ? rej(err) : res(val)
   ));
+};
 
 /**
  * Connection support for mysql
@@ -30,8 +33,8 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
       host: this.config.host,
       port: this.config.port,
       typeCast: (field, next) => {
-        const res = next() as any;
-        if ((field.type === 'JSON' || field.type === 'BLOB') && typeof res === 'string') {
+        const res: any = next();
+        if (typeof res === 'string' && (field.type === 'JSON' || field.type === 'BLOB')) {
           if (res.charAt(0) === '{' && res.charAt(res.length - 1) === '}') {
             try {
               return (JSON.parse(res));

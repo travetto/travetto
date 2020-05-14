@@ -120,7 +120,7 @@ export class TransformerState implements State {
       targets: this.resolver.readDocsTags(ident, 'augments').map(x => x.replace(/trv \//, 'trv/')),
       name: ident ?
         ident.escapedText! as string :
-        undefined as any as string
+        undefined
     });
   }
 

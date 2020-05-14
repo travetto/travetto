@@ -7,9 +7,11 @@ abstract class BaseResponse implements Partial<Response> {
     this.setHeader('Content-Type', MimeType.JSON);
     this.send(val);
   }
+  // @ts-ignore
   get statusCode(this: Response): number {
     return this.status() as number;
   }
+  // @ts-ignore
   set statusCode(this: Response, val: number) {
     this.status(val);
   }
@@ -21,12 +23,16 @@ abstract class BaseResponse implements Partial<Response> {
 
     this.setHeader('Location', path);
   }
-  redirect(this: Response & BaseResponse, code: number | string, path?: string) {
-    if (!path) {
-      path = code as any;
-      code = 302;
+  redirect(this: Response & BaseResponse, code: number, path: string): void;
+  redirect(this: Response & BaseResponse, path: string): void;
+  redirect(this: Response & BaseResponse, pathOrCode: number | string, path?: string) {
+    let code = 302;
+    if (path) {
+      code = pathOrCode as number;
+    } else {
+      path = pathOrCode as string;
     }
-    this.status(code as number);
+    this.status(code);
     this.location(path!);
     this.setHeader('Content-Length', '0');
     this.send('');
@@ -46,7 +52,8 @@ export class RestAppUtil {
     delete req.redirect;
     Object.setPrototypeOf(req, BaseRequest.prototype);
     req.url = req.path;
-    (req as Record<string, any>).connection = {};
+    // @ts-ignore
+    req.connection = {};
     return req as T;
   }
 

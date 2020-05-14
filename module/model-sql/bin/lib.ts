@@ -9,7 +9,7 @@ export async function getSchemas(clear = true) {
   const { ModelRegistry } = await import('@travetto/model');
   const { SQLDialect } = await import('../src/dialect');
 
-  const src = (await DependencyRegistry.getInstance(SQLDialect)) as any;
+  const src = (await DependencyRegistry.getInstance(SQLDialect));
 
   const drops = [];
   const creates = [];

@@ -6,6 +6,10 @@ import {
   SCHEMA_CHANGE_EVENT, FIELD_CHANGE_EVENT
 } from './changes';
 
+function hasType<T>(o: any): o is { type: Class<T> | string } {
+  return 'type' in o && o.type;
+}
+
 // TODO: Document
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
@@ -16,8 +20,8 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     super(RootRegistry);
   }
 
-  resolveSubTypeForInstance<T extends any>(cls: Class<T>, o: T) {
-    return this.resolveSubType(cls, o.type ?? o.constructor);
+  resolveSubTypeForInstance<T extends object>(cls: Class<T>, o: T) {
+    return this.resolveSubType(cls, hasType<T>(o) ? o.type : o.constructor as Class<T>);
   }
 
   resolveSubType(cls: Class, type: Class | string) {
@@ -101,7 +105,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
 
     if (!allViewConf.schema[prop]) {
       allViewConf.fields.push(prop);
-      allViewConf.schema[prop] = {} as any;
+      allViewConf.schema[prop] = {} as FieldConfig;
     }
 
     Object.assign(allViewConf.schema[prop], config);
@@ -110,12 +114,11 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   registerPendingFieldConfig(target: Class, prop: string, type: ClassList, specifier?: string) {
-    const isArray = Array.isArray(type);
     const fieldConf: FieldConfig = {
       owner: target,
       name: prop,
-      array: isArray,
-      type: isArray ? (type as any)[0] : type,
+      array: Array.isArray(type),
+      type: Array.isArray(type) ? type[0] : type,
       specifier
     };
 

@@ -1,7 +1,7 @@
 /// <reference path="./typings.d.ts" />
 
 import { AppError } from '@travetto/base';
-import { ControllerRegistry, Request, ParamConfig } from '@travetto/rest';
+import { ControllerRegistry, Request, ParamConfig, ControllerConfig } from '@travetto/rest';
 import { Class } from '@travetto/registry';
 import { AssetImpl } from '@travetto/asset/src/internal/types';
 
@@ -33,12 +33,16 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
     const handler = target.constructor.prototype[propertyKey];
     ControllerRegistry.registerEndpointParameter(target.constructor as Class, handler, {
       ...param as ParamConfig,
-      location: 'files' as any,
+      // @ts-ignore
+      location: 'files',
       async resolve(req: Request) {
         const assetConfig = await DependencyRegistry.getInstance(RestAssetConfig);
 
         if (!req.files) { // Prevent duplication if given multiple decorators
-          req.files = await AssetRestUtil.upload(req, { ...assetConfig, ...finalConf }, `${(target.constructor as any).basePath}/`);
+          req.files = await AssetRestUtil.upload(req, { ...assetConfig, ...finalConf },
+            // @ts-ignore
+            `${target.constructor.basePath}/`
+          );
         }
       },
       extract: extractUpload

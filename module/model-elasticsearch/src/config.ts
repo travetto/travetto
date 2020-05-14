@@ -25,6 +25,6 @@ export class ElasticsearchModelConfig {
     console.debug('Constructed', this);
     this.hosts = this.hosts
       .map(x => x.includes(':') ? x : `${x}:${this.port}`)
-      .map(x => x.startsWith('http') ? x : `http://${x}`) as any;
+      .map(x => x.startsWith('http') ? x : `http://${x}`);
   }
 }

@@ -15,7 +15,7 @@ export abstract class AssetSource {
   /**
    * Get info for asset
    */
-  abstract info(path: string): Promise<Asset>;
+  abstract info(path: string): Promise<Omit<Asset, 'stream'>>;
   /**
    * Remove from asset store
    */

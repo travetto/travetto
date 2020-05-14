@@ -141,7 +141,7 @@ export class Watcher extends EventEmitter {
 
     try {
       console.trace('Watching Directory', entry.file);
-      const watcher = fs.watch(entry.file, SystemUtil.throttle((event, f) => {
+      const watcher = fs.watch(entry.file, SystemUtil.throttle(() => {
         this.processDirectoryChange(entry);
       }, this.options.debounceDelay));
 

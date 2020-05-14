@@ -13,7 +13,7 @@ import { ModelSource, IModelSource, ValidStringFields } from './source';
 import { ModelRegistry } from '../registry';
 import { QueryLanguageParser } from '../internal/query-lang/parser';
 
-function getClass<T extends any>(o: T) {
+function getClass<T extends object>(o: T) {
   return o.constructor as Class<T>;
 }
 
@@ -106,7 +106,8 @@ export class ModelService implements IModelSource {
     this.prepareQuery(cls, query);
 
     const res = await this.source.query<T, U>(cls, query);
-    return res.map(o => this.postLoad(cls, o as any as T) as any as U);
+    // @ts-ignore
+    return res.map(o => this.postLoad(cls, o as T) as U);
   }
 
   async getAllByQueryString<T extends ModelCore>(cls: Class<T>, query: PageableModelQueryStringQuery<T>) {

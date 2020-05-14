@@ -31,7 +31,7 @@ export class InjectableTransformer {
       // Handle special case
       if (args.length && ts.isIdentifier(args[0])) {
         original = args[0];
-        injectConfig = args[1] as any;
+        injectConfig = args[1] as ts.ObjectLiteralExpression;
       }
     }
 

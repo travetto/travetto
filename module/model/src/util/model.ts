@@ -1,8 +1,9 @@
 import { Class } from '@travetto/registry';
 import { AppError } from '@travetto/base';
-import { Query, PageableModelQuery } from '../model/query';
+import { Query, PageableModelQuery, SelectClause } from '../model/query';
 import { ModelCore } from '../model/core';
 import { ValidStringFields } from '../service/source';
+import { WhereClauseRaw } from '../model/where-clause';
 
 // TODO: Document
 export class ModelUtil {
@@ -21,7 +22,8 @@ export class ModelUtil {
   static getSuggestQuery<T>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>) {
     const re = this.getSuggestRegex(prefix);
     const limit = query?.limit ?? 10;
-    const where = { [field]: { $regex: re } } as any;
+    // @ts-ignore
+    const where: WhereClauseRaw<T> = { [field]: { $regex: re } };
 
     const q = {
       where: query && query.where ? { $and: [where, query.where!] } : where,
@@ -43,7 +45,8 @@ export class ModelUtil {
 
     const out: [string, U][] = [];
     for (const r of results) {
-      const val = (r as any)[field] as string | string[];
+      // @ts-ignore
+      const val: string | string[] = r[field];
       if (Array.isArray(val)) {
         out.push(...val.filter(f => pattern.test(f)).map(f => [f, transform(f, r)] as [string, U]));
       } else {
@@ -60,7 +63,7 @@ export class ModelUtil {
   static getSuggestFieldQuery<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>) {
     return this.getSuggestQuery(cls, field, prefix, {
       ...(query ?? {}),
-      select: { [field]: true } as any
+      select: { [field]: true } as SelectClause<T>
     });
   }
 }

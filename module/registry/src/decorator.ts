@@ -18,15 +18,15 @@ class $PendingRegister {
       __init: true
     };
 
-    Object.defineProperties(cls, [...Object.keys(meta)].reduce((all, k) => {
+    Object.defineProperties(cls, [...Object.keys(meta) as (keyof typeof meta)[]].reduce((all, k) => {
       all[k] = {
-        value: (meta as any)[k],
+        value: meta[k],
         enumerable: false,
         configurable: false,
         writable: k === '__init'
       };
       return all;
-    }, {} as any));
+    }, {} as Record<keyof typeof meta, PropertyDescriptor>));
 
     return true;
   }
