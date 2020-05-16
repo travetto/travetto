@@ -1,9 +1,9 @@
 // @file-if redis
 import { Suite } from '@travetto/test';
 import { FullCacheSuite } from './cache';
-import { RedisCacheStore } from '../src/extension/redis.store';
+import { RedisCacheSource } from '../src/extension/redis';
 
 @Suite()
 export class RedisCacheSuite extends FullCacheSuite {
-  store = RedisCacheStore;
+  source = RedisCacheSource;
 }

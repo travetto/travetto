@@ -4,8 +4,8 @@ import { Class } from '@travetto/registry';
 import { Suite, Test, BeforeEach, AfterEach } from '@travetto/test';
 
 import { Cache, EvictCache } from '../src/decorator';
-import { CacheStore } from '../src/store/core';
-import { CullableCacheStore } from '../src/store/cullable';
+import { CacheSource } from '../src/source/core';
+import { CullableCacheSource } from '../src/source/cullable';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
@@ -20,44 +20,44 @@ class User {
 
 class CachingService {
 
-  store: CacheStore;
+  source: CacheSource;
 
-  @Cache('store', { maxAge: 10 })
+  @Cache('source', { maxAge: 10 })
   async cullable(num: number) {
     return num * 2;
   }
 
-  @Cache('store')
+  @Cache('source')
   async basic(num: number) {
     await wait(100);
     return num * 2;
   }
 
-  @Cache('store', { maxAge: 500 })
+  @Cache('source', { maxAge: 500 })
   async agesQuickly(num: number) {
     await wait(100);
     return num * 3;
   }
 
-  @Cache('store', { maxAge: 200, extendOnAccess: true })
+  @Cache('source', { maxAge: 200, extendOnAccess: true })
   async ageExtension(num: number) {
     await wait(100);
     return num * 3;
   }
 
-  @Cache('store')
+  @Cache('source')
   async complexInput(config: any, size: number) {
     await wait(100);
     return { length: Object.keys(config).length, size };
   }
 
-  @Cache('store', { key: config => config.a })
+  @Cache('source', { key: config => config.a })
   async customKey(config: any, size: number) {
     await wait(100);
     return { length: Object.keys(config).length, size };
   }
 
-  @Cache('store', { keySpace: 'user.id', reinstate: x => User.from(x) })
+  @Cache('source', { keySpace: 'user.id', reinstate: x => User.from(x) })
   async getUser(userId: string) {
     await wait(100);
 
@@ -67,7 +67,7 @@ class CachingService {
     };
   }
 
-  @EvictCache('store', { keySpace: 'user.id' })
+  @EvictCache('source', { keySpace: 'user.id' })
   async deleteUser(userId: string) {
     await wait(100);
     return true;
@@ -151,7 +151,7 @@ export abstract class CacheTestSuite {
     assert(val3 !== val4);
     assert.deepStrictEqual(val3, val5);
 
-    assert(this.service.store.computeKey(/abc/) !== this.service.store.computeKey(/cde/));
+    assert(this.service.source.computeKey(/abc/) !== this.service.source.computeKey(/cde/));
   }
 
   @Test()
@@ -166,14 +166,14 @@ export abstract class CacheTestSuite {
 
   @Test()
   async culling() {
-    if (this.service.store instanceof CullableCacheStore) {
+    if (this.service.source instanceof CullableCacheSource) {
       await Promise.all(
         ' '.repeat(100)
           .split('')
           .map((x, i) =>
             this.service.cullable(i)));
 
-      const local = this.service.store as CullableCacheStore;
+      const local = this.service.source as CullableCacheSource;
       assert([...(await local.keys())].length > 90);
 
       await wait(1000);
@@ -209,24 +209,24 @@ export abstract class CacheTestSuite {
 @Suite({ skip: true })
 export abstract class FullCacheSuite extends CacheTestSuite {
 
-  abstract get store(): Class<CacheStore>;
+  abstract get source(): Class<CacheSource>;
 
   @BeforeEach()
   async postCons() {
-    const store = new this.store();
-    this.service.store = store;
-    if (store instanceof CullableCacheStore) {
-      store.cullRate = 1000;
+    const source = new this.source();
+    this.service.source = source;
+    if (source instanceof CullableCacheSource) {
+      source.cullRate = 1000;
     }
-    if (store.postConstruct) {
-      await store.postConstruct();
+    if (source.postConstruct) {
+      await source.postConstruct();
     }
   }
 
   @AfterEach()
   async cleanup() {
-    if (this.service.store.clear) {
-      await this.service.store.clear();
+    if (this.service.source.clear) {
+      await this.service.source.clear();
     }
   }
 }

@@ -3,8 +3,8 @@ import { ModelService, ModelRegistry } from '@travetto/model';
 import { Schema, Text, Long } from '@travetto/schema';
 
 import { CacheEntry } from '../types';
-import { CullableCacheStore } from '../store/cullable';
-import { CacheStoreUtil } from '../store/util';
+import { CullableCacheSource } from '../source/cullable';
+import { CacheSourceUtil } from '../source/util';
 
 @Schema()
 export class CacheModel {
@@ -19,7 +19,7 @@ export class CacheModel {
 /**
  * A cache store backed by @travetto/model
  */
-export class ModelCacheStore extends CullableCacheStore {
+export class ModelCacheSource extends CullableCacheSource {
 
   constructor(public modelService: ModelService) {
     super();
@@ -35,13 +35,13 @@ export class ModelCacheStore extends CullableCacheStore {
     const models = await this.modelService.getAllByQuery(CacheModel, { where: { key } });
     if (models.length) {
       const [model] = models;
-      return { ...CacheStoreUtil.readAsSafeJSON(model.entry), expiresAt: model.expiresAt };
+      return { ...CacheSourceUtil.readAsSafeJSON(model.entry), expiresAt: model.expiresAt };
     }
   }
 
   async set(key: string, entry: CacheEntry) {
 
-    const cloned = CacheStoreUtil.storeAsSafeJSON(entry);
+    const cloned = CacheSourceUtil.storeAsSafeJSON(entry);
 
     await this.modelService.saveOrUpdate(CacheModel,
       CacheModel.from({
@@ -52,7 +52,7 @@ export class ModelCacheStore extends CullableCacheStore {
       { where: { key } }
     );
 
-    return CacheStoreUtil.readAsSafeJSON(cloned);
+    return CacheSourceUtil.readAsSafeJSON(cloned);
   }
 
   async has(key: string) {

@@ -1,11 +1,11 @@
-import { CacheStoreType, CacheEntry, CacheConfig } from '../types';
-import { CacheStoreUtil } from './util';
+import { CacheSourceType, CacheEntry, CacheConfig } from '../types';
+import { CacheSourceUtil } from './util';
 import { CacheError } from './error';
 
 /**
  * Cache store
  */
-export abstract class CacheStore<T extends CacheEntry = CacheEntry> implements CacheStoreType<T> {
+export abstract class CacheSource<T extends CacheEntry = CacheEntry> implements CacheSourceType<T> {
 
   abstract get(key: string): Promise<T | undefined> | T | undefined;
   abstract has(key: string): Promise<boolean> | boolean;
@@ -19,7 +19,7 @@ export abstract class CacheStore<T extends CacheEntry = CacheEntry> implements C
   postConstruct?(): Promise<void> | void;
 
   computeKey(params: any) {
-    return CacheStoreUtil.computeKey(params);
+    return CacheSourceUtil.computeKey(params);
   }
 
   async getAndCheckAge(config: CacheConfig, key: string) {

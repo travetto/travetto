@@ -4,10 +4,10 @@ import { DependencyRegistry } from '@travetto/di';
 import { ModelRegistry, ModelService, ModelSource } from '@travetto/model';
 
 import { SQLModelConfig } from '@travetto/model-sql';
-import { TestUtil } from '@travetto/model-sql/test/util';
+import { TestUtil } from '@travetto/model-sql/test/lib/util';
 
 import { CacheTestSuite } from './cache';
-import { ModelCacheStore } from '../src/extension/model.store';
+import { ModelCacheSource } from '../src/extension/model';
 
 @Suite()
 export class ModelCacheSuite extends CacheTestSuite {
@@ -29,8 +29,8 @@ export class ModelCacheSuite extends CacheTestSuite {
     await ModelRegistry.init();
 
     const svc = await DependencyRegistry.getInstance(ModelService);
-    this.service.store = new ModelCacheStore(svc);
-    await this.service.store.postConstruct?.();
+    this.service.source = new ModelCacheSource(svc);
+    await this.service.source.postConstruct?.();
   }
 
   @BeforeEach()
