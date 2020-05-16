@@ -3,7 +3,7 @@ import { Class } from '@travetto/registry';
 import { ModelRegistry, ModelCore, SelectClause, SortClause } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
-import { DialectState, InsertWrapper } from './types';
+import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
 
 const TABLE_SYM = Symbol.for('@trv:model-sql/table');
 
@@ -15,30 +15,9 @@ export type VisitStack = {
   index?: number;
 };
 
-export type VisitState = { path: VisitStack[] };
-
-interface VisitNode<R> {
-  path: VisitStack[];
-  fields: FieldConfig[];
-  descend: () => R;
-}
-
-interface OrderBy {
-  stack: VisitStack[];
-  asc: boolean;
-}
-
-export interface VisitInstanceNode<R> extends VisitNode<R> {
-  value: any;
-}
-
-export interface VisitHandler<R, U extends VisitNode<R> = VisitNode<R>> {
-  onRoot(config: U & { config: ClassConfig }): R;
-  onSub(config: U & { config: FieldConfig }): R;
-  onSimple(config: Omit<U, 'descend'> & { config: FieldConfig }): R;
-}
-
-// TODO: Document
+/**
+ * Utilities for dealing with SQL operations
+ */
 export class SQLUtil {
   static readonly ROOT_ALIAS = '_ROOT';
 
@@ -144,10 +123,8 @@ export class SQLUtil {
         } else {
           handler.onSimple({
             config: field,
-            fields: [], path: [
-              ...path,
-              field
-            ]
+            fields: [],
+            path: [...path, field]
           });
         }
       }
@@ -174,10 +151,8 @@ export class SQLUtil {
         } else {
           await handler.onSimple({
             config: field,
-            fields: [], path: [
-              ...path,
-              field
-            ]
+            fields: [],
+            path: [...path, field]
           });
         }
       }
@@ -355,7 +330,6 @@ export class SQLUtil {
     await Promise.all(all);
 
     const ret = [...Object.values(ins)].sort((a, b) => a.stack.length - b.stack.length);
-
     return ret;
   }
 }

@@ -32,22 +32,27 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
       database: this.config.database,
       host: this.config.host,
       port: this.config.port,
-      typeCast: (field, next) => {
-        const res: any = next();
-        if (typeof res === 'string' && (field.type === 'JSON' || field.type === 'BLOB')) {
-          if (res.charAt(0) === '{' && res.charAt(res.length - 1) === '}') {
-            try {
-              return (JSON.parse(res));
-            } catch { }
-          }
-        }
-        return res;
-      },
+      typeCast: this.typeCast.bind(this),
       ...(this.config.options || {})
     });
   }
 
-  public get asyncContext() {
+  /**
+   * Support some basic type support for JSON data
+   */
+  typeCast(field: Parameters<Exclude<mysql.TypeCast, boolean>>[0], next: () => void) {
+    const res: any = next();
+    if (typeof res === 'string' && (field.type === 'JSON' || field.type === 'BLOB')) {
+      if (res.charAt(0) === '{' && res.charAt(res.length - 1) === '}') {
+        try {
+          return (JSON.parse(res));
+        } catch { }
+      }
+    }
+    return res;
+  }
+
+  get asyncContext() {
     return this.context.get<{ connection: mysql.PoolConnection }>('connection');
   }
 

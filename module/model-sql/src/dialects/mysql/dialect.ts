@@ -24,32 +24,48 @@ export class MySQLDialect extends SQLDialect {
     super(config.namespace);
     this.conn = new MySQLConnection(context, config);
 
+    // Customer operators
     Object.assign(this.SQL_OPS, {
       $regex: 'REGEXP BINARY',
       $iregex: 'REGEXP'
     });
 
+    // Custom types
     Object.assign(this.COLUMN_TYPES, {
       TIMESTAMP: 'DATETIME',
       JSON: 'TEXT'
     });
 
+    // Word boundary
     this.regexWordBoundary = '([[:<:]]|[[:>:]])';
+    // Field maxlen
     this.idField.minlength = this.idField.maxlength = { n: this.KEY_LEN };
 
+    /**
+     * Set string length limit bsaed on version
+     */
     if (/^5[.][56]/.test(this.config.version)) {
       this.DEFAULT_STRING_LEN = 191; // Mysql limitation with utf8 and keys
     }
   }
 
+  /**
+   * Compute hash
+   */
   hash(value: string) {
     return `SHA2('${value}', ${this.KEY_LEN * 4})`;
   }
 
+  /**
+   * Build identifier
+   */
   ident(field: FieldConfig | string) {
     return `\`${typeof field === 'string' ? field : field.name}\``;
   }
 
+  /**
+   * Create table, adding in specific engine options
+   */
   getCreateTableSQL(stack: VisitStack[]) {
     return super.getCreateTableSQL(stack).replace(/;$/, ` ${this.tablePostfix};`);
   }
@@ -72,11 +88,17 @@ export class MySQLDialect extends SQLDialect {
     });
   }
 
+  /**
+   * Define column modification
+   */
   getModifyColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
     return `ALTER TABLE ${this.parentTable(stack)} MODIFY COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
   }
 
+  /**
+   * Add root alias to delete clause
+   */
   getDeleteSQL(stack: VisitStack[], where?: WhereClause<any>) {
     const sql = super.getDeleteSQL(stack, where);
     return sql.replace(/\bDELETE\b/g, `DELETE ${this.rootAlias}`);
