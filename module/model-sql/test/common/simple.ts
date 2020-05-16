@@ -6,7 +6,7 @@ import { Model } from '@travetto/model';
 
 import { SQLModelSource } from '../../src/source';
 import { SQLModelConfig } from '../../src/config';
-import { TestUtil } from '../util';
+import { TestUtil } from '../lib/util';
 import { DialectSuite as Suite } from '../decorator';
 
 @Model()

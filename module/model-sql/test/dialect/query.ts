@@ -8,7 +8,7 @@ import { DependencyRegistry } from '@travetto/di';
 
 import { VisitStack } from '../../src/internal/util';
 import { SQLDialect } from '../../src/dialect';
-import { TestUtil } from '../util';
+import { TestUtil } from '../lib/util';
 import { DialectSuite as Suite } from '../decorator';
 
 @Schema()
