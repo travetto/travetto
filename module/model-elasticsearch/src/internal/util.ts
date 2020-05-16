@@ -8,9 +8,14 @@ const has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
 const has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
 
-// TODO: Document
+/**
+ * Support tools for dealing with elasticsearch specific requirements
+ */
 export class ElasticsearchUtil {
 
+  /**
+   * Convert `a.b.c` to `a : { b : { c : ... }}`
+   */
   static extractSimple<T>(o: T, path: string = ''): Record<string, any> {
     const out: Record<string, any> = {};
     const sub = o as Record<string, any>;
@@ -26,6 +31,9 @@ export class ElasticsearchUtil {
     return out;
   }
 
+  /**
+   * Build include/exclude from the select clause
+   */
   static getSelect<T>(clause: SelectClause<T>) {
     const simp = ElasticsearchUtil.extractSimple(clause);
     const include: string[] = [];
@@ -42,6 +50,9 @@ export class ElasticsearchUtil {
     return [include, exclude];
   }
 
+  /**
+   * Build sort mechanism
+   */
   static getSort<T>(sort: SortClause<T>[]) {
     return sort.map(x => {
       const o = ElasticsearchUtil.extractSimple(x);
@@ -55,11 +66,14 @@ export class ElasticsearchUtil {
     });
   }
 
+  /**
+   * Extract specific term for a class, and a given field
+   */
   static extractWhereTermQuery<T>(o: Record<string, any>, cls: Class<T>, config?: EsSchemaConfig, path: string = ''): any {
     const items = [];
     const schema = SchemaRegistry.getViewSchema(cls).schema;
 
-    for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
+    for (const key of Object.keys(o) as (keyof typeof o)[]) {
       const top = o[key];
       const declaredSchema = schema[key];
       const declaredType = declaredSchema.type;
@@ -71,10 +85,9 @@ export class ElasticsearchUtil {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
           const inner = this.extractWhereTermQuery(top, declaredType as Class<any>, config, `${sPath}.`);
-          items.push(
-            declaredSchema.array ?
-              { nested: { path: sPath, query: inner } } :
-              inner
+          items.push(declaredSchema.array ?
+            { nested: { path: sPath, query: inner } } :
+            inner
           );
         } else {
           const v = top[subKey];
@@ -83,7 +96,9 @@ export class ElasticsearchUtil {
             case '$all': {
               const arr = Array.isArray(v) ? v : [v];
               items.push({
-                bool: { must: arr.map(x => ({ term: { [sPath]: x } })) }
+                bool: {
+                  must: arr.map(x => ({ term: { [sPath]: x } }))
+                }
               });
               break;
             }
@@ -93,7 +108,13 @@ export class ElasticsearchUtil {
             }
             case '$nin': {
               items.push({
-                bool: { ['must_not']: [{ terms: { [sPath]: Array.isArray(v) ? v : [v] } }] }
+                bool: {
+                  ['must_not']: [{
+                    terms: {
+                      [sPath]: Array.isArray(v) ? v : [v]
+                    }
+                  }]
+                }
               });
               break;
             }
@@ -108,16 +129,8 @@ export class ElasticsearchUtil {
               break;
             }
             case '$exists': {
-              const q = {
-                exists: {
-                  field: sPath
-                }
-              };
-              items.push(v ? q : {
-                bool: {
-                  ['must_not']: q
-                }
-              });
+              const q = { exists: { field: sPath } };
+              items.push(v ? q : { bool: { ['must_not']: q } });
               break;
             }
             case '$lt':
@@ -128,11 +141,7 @@ export class ElasticsearchUtil {
               for (const k of Object.keys(top)) {
                 out[k.replace(/^[$]/, '')] = top[k];
               }
-              items.push({
-                range: {
-                  [sPath]: out
-                }
-              });
+              items.push({ range: { [sPath]: out } });
               break;
             }
             case '$regex': {
@@ -148,22 +157,12 @@ export class ElasticsearchUtil {
                   }
                 });
               } else {
-                items.push({
-                  regexp: {
-                    [sPath]: pattern.source
-                  }
-                });
+                items.push({ regexp: { [sPath]: pattern.source } });
               }
               break;
             }
             case '$geoWithin': {
-              items.push({
-                ['geo_polygon']: {
-                  [sPath]: {
-                    points: v
-                  }
-                }
-              });
+              items.push({ ['geo_polygon']: { [sPath]: { points: v } } });
               break;
             }
             case '$unit':
@@ -201,6 +200,9 @@ export class ElasticsearchUtil {
     }
   }
 
+  /**
+   * Build query from the where clause
+   */
   static extractWhereQuery<T>(cls: Class<T>, o: WhereClause<T>, config?: EsSchemaConfig): Record<string, any> {
     if (has$And(o)) {
       return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(cls, x, config)) } };
@@ -213,6 +215,9 @@ export class ElasticsearchUtil {
     }
   }
 
+  /**
+   * Build the update script for a given object
+   */
   static generateUpdateScript(o: any, path: string = '', arr = false) {
     const ops: string[] = [];
     const out = {
@@ -243,12 +248,18 @@ export class ElasticsearchUtil {
     return out;
   }
 
+  /**
+   * Build one or more schemas depending on the polymorphic state
+   */
   static generateSourceSchema(cls: Class, config?: EsSchemaConfig) {
     return ModelRegistry.get(cls).baseType ?
       this.generateAllSourceSchema(cls, config) :
       this.generateSingleSourceSchema(cls, config);
   }
 
+  /**
+   * Generate all schemas
+   */
   static generateAllSourceSchema(cls: Class, config?: EsSchemaConfig) {
     const allTypes = ModelRegistry.getClassesByBaseType(cls);
     return allTypes.reduce((acc, scls) => {
@@ -257,6 +268,9 @@ export class ElasticsearchUtil {
     }, {} as Record<string, any>);
   }
 
+  /**
+   * Build a schema for a given class
+   */
   static generateSingleSourceSchema<T>(cls: Class<T>, config?: EsSchemaConfig): Record<string, any> {
     const schema = SchemaRegistry.getViewSchema(cls);
 
