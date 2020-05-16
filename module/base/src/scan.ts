@@ -1,8 +1,7 @@
-import { FsUtil, AppCache } from '@travetto/boot';
+import { ScanEntry, ScanFs, FsUtil, AppCache } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 
 import { Env } from './env';
-import { ScanEntry, ScanFs } from './scan-fs';
 import { SystemUtil } from './internal/system';
 
 type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
@@ -71,7 +70,7 @@ export class ScanApp {
   /**
    * Find all '.ts' files excluding ones identified by the filter
    */
-  static findSourceFiles(filter?: Tester | Pred, root = Env.cwd): SimpleEntry[] {
+  static findSourceFiles(filter?: Tester | Pred, root = FsUtil.cwd): SimpleEntry[] {
     return this.findFiles(this.TS_TESTER, filter, root);
   }
 
@@ -81,7 +80,7 @@ export class ScanApp {
    * @param filter Any additional filters, external to the extension.  Caching occurs at the extension level
    * @param root Starting point for finding files, defaults to cwd
    */
-  static findFiles(ext: string | Tester, filter?: Tester | Pred, root = Env.cwd): SimpleEntry[] {
+  static findFiles(ext: string | Tester, filter?: Tester | Pred, root = FsUtil.cwd): SimpleEntry[] {
     ext = typeof ext === 'string' ? new RegExp(`${ext}$`) : ext;
 
     const key = `${root}:${ext.source}`;
@@ -139,7 +138,7 @@ export class ScanApp {
    * Find app files, assuming provided root paths provided
    */
   // FIXME: Currently is including non-app files from modules (sub-apps)
-  static findAppFiles(rootPaths: string[], exclude?: (file: string) => boolean, root = Env.cwd) {
+  static findAppFiles(rootPaths: string[], exclude?: (file: string) => boolean, root = FsUtil.cwd) {
     const PATH_RE = SystemUtil.pathMatcher(rootPaths);
     const MOD_RE = this.getAppModPathMatcher();
     return this.findSourceFiles(
@@ -152,7 +151,7 @@ export class ScanApp {
   /**
    * Preload file entries, useful for precompiling and indexing
    */
-  static setFileEntries(key: string, paths: string[], base: string = Env.cwd) {
+  static setFileEntries(key: string, paths: string[], base: string = FsUtil.cwd) {
     const results = paths.map(mod => {
       // Compressed for minimizing bundle size
       mod = !/•/.test(mod) ? mod : AppCache.fromEntryName(mod);

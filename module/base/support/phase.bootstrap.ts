@@ -12,6 +12,9 @@ export const init = {
     if (Env.prod) {
       process.env.NODE_ENV = 'production';
     } else {
+      if (Env.trace) {
+        Error.stackTraceLimit = 100;
+      }
       StacktraceUtil.initHandler();
     }
     StacktraceUtil.clearStackFilters(); // @line-if $TRV_DEV

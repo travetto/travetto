@@ -2,9 +2,8 @@ import * as fs from 'fs';
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, ScanFs } from '@travetto/boot';
 
-import { Env, ScanFs } from '@travetto/base';
 import { Watcher } from '../src/watcher';
 
 @Suite()
@@ -13,7 +12,7 @@ export class WatchTest {
   @Test()
   async runWatcher() {
     const found: [string, string][] = [];
-    const w = new Watcher({ cwd: FsUtil.joinUnix(Env.cwd, 'src') });
+    const w = new Watcher({ cwd: FsUtil.joinUnix(FsUtil.cwd, 'src') });
     w
       .on('all', ({ event, entry }) => {
         console.log(event, entry.file);

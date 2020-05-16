@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 
-import { ScanFs, Env, ShutdownManager } from '@travetto/base';
+import { ScanFs, FsUtil } from '@travetto/boot';
+import { ShutdownManager } from '@travetto/base';
 
 // TODO: Document
 export class TestUtil {
@@ -26,7 +27,7 @@ export class TestUtil {
   }
 
   static async getTests(globs: RegExp[]) {
-    const files = (await ScanFs.bulkScanDir(globs.map(x => ({ testFile: (y: string) => x.test(y) })), Env.cwd))
+    const files = (await ScanFs.bulkScanDir(globs.map(x => ({ testFile: (y: string) => x.test(y) })), FsUtil.cwd))
       .filter(x => !x.stats.isDirectory())
       .filter(x => !x.file.includes('node_modules'))
       .map(f => this.isTest(f.file).then(valid => ({ file: f.file, valid })));

@@ -1,3 +1,4 @@
+import { FsUtil } from '@travetto/boot';
 import { Env } from './env';
 
 /**
@@ -17,8 +18,6 @@ export class StacktraceUtil {
    * Initialize
    */
   static initHandler() {
-    Error.stackTraceLimit = Env.trace ? 100 : 10;
-
     this.addStackFilters(
       __filename.replace(/\.js$/, ''),
       // 'timers.js',
@@ -55,7 +54,7 @@ export class StacktraceUtil {
    */
   static simplifyStack(err: Error, filter = true): string {
     const getLocation = (x: string) => {
-      const [, l] = x.split(Env.cwd);
+      const [, l] = x.split(FsUtil.cwd);
       return l;
     };
 
@@ -76,7 +75,7 @@ export class StacktraceUtil {
         return acc;
       }, [] as string[])
       .map(x => x
-        .replace(`${Env.cwd}/`, '')
+        .replace(`${FsUtil.cwd}/`, '')
         .replace(/^[\/]+/, '')
       );
 

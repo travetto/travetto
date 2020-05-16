@@ -1,6 +1,7 @@
 import * as util from 'util';
 
-import { Env, Util } from '@travetto/base';
+import { FsUtil } from '@travetto/boot';
+import { Util } from '@travetto/base';
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
 
@@ -21,7 +22,7 @@ export class AssertUtil {
   }
 
   static getPositionOfError(err: Error, filename: string) {
-    const base = Env.cwd;
+    const base = FsUtil.cwd;
     const lines = (err.stack ?? new Error().stack!)
       .replace(/[\\]/g, '/')
       .split('\n')
