@@ -24,7 +24,10 @@ const IS_SELF_FILE = __filename.ᚕunix.replace(/.*(test\/.*)([.][tj]s)?$/, (__,
  */
 const EXTRACT_FILE_MODULE = /^.*travetto[^/]*\/(?:module\/)?([^/]+)\/(?:src\/.*|support\/.*|index[.]ts)$/;
 
-// TODO: Document
+/**
+ * Child Worker for the Test Runner.  Recieves events as commands
+ * to run specific tests
+ */
 export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
   private compiler: typeof Compiler;
@@ -39,30 +42,50 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     })();
   }
 
+  /**
+   * Start the worker
+   */
   async activate() {
-    // Die if no communication within 120 seconds
-    this.listen(async event => {
-      console.debug('on message', event);
+    // Listen for inbound requests
+    this.listen(this.onCommand.bind(this));
 
-      if (event.type === Events.INIT) {
-        await this.initEvent();
-      } else if (event.type === Events.RUN) {
-        await this.onRunEvent(event);
-      }
-
-      return false;
-    });
-
+    // Let parent know the child is ready for handling commands
     this.send(Events.READY);
   }
 
-  async initEvent() {
-    console.debug('Init');
-    this.compiler = (await import('@travetto/compiler')).Compiler;
+  /**
+   * When we receive a command from the parent
+   */
+  async onCommand(event: RunEvent & { type: string }) {
+    console.debug('on message', event);
 
-    this.send(Events.INIT_COMPLETE);
+    if (event.type === Events.INIT) { // On request to init, start initialization
+      await this.onInitCommand();
+      this.send(Events.INIT_COMPLETE); // Respond
+    } else if (event.type === Events.RUN) { // On request to run, start running
+      try {
+        await this.onRunCommand(event); // Run the test
+        this.send(Events.RUN_COMPLETE); // Mark complete
+      } catch (e) {
+        // Mark as errored out
+        this.send(Events.RUN_COMPLETE, { error: ErrorUtil.serializeError(e) });
+      }
+    }
+
+    return false;
   }
 
+  /**
+   * In response to the initialization command
+   */
+  async onInitCommand() {
+    // Load the compiler
+    this.compiler = (await import('@travetto/compiler')).Compiler;
+  }
+
+  /**
+   * Determine if a file is able to be reset from the require cache
+   */
   isFileResettable(filePath: string) {
     const frameworkModule = filePath.replace(EXTRACT_FILE_MODULE, (__, mod) => mod);
 
@@ -77,6 +100,9 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       );
   }
 
+  /**
+   * Reset the state to prepare for the next run
+   */
   async resetForRun() {
     // Clear require cache of all data loaded minus base framework pieces
     console.debug('Resetting', Object.keys(require.cache).length);
@@ -93,7 +119,17 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     ShutdownManager.execute(-1);
   }
 
-  async runTest(event: RunEvent) {
+  /**
+   * Run a specific test/suite
+   */
+  async onRunCommand(event: RunEvent) {
+    this.runs += 1;
+    console.debug('Run');
+
+    if (this.runs > 1) {
+      await this.resetForRun();
+    }
+
     // Run all remaining bootstraps as needed for tests
     await PhaseManager.bootstrap('require-all'); // Require all
 
@@ -109,21 +145,5 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       args: [event.file!, event.class!, event.method!],
       concurrency: 1
     }).run();
-  }
-
-  async onRunEvent(event: RunEvent) {
-    console.debug('Run');
-
-    try {
-      if (this.runs > 0) {
-        await this.resetForRun();
-      }
-      await this.runTest(event);
-      this.send(Events.RUN_COMPLETE);
-    } catch (e) {
-      this.send(Events.RUN_COMPLETE, { error: ErrorUtil.serializeError(e) });
-    }
-
-    this.runs += 1;
   }
 }

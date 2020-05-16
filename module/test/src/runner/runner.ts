@@ -1,5 +1,5 @@
 import { FsUtil } from '@travetto/boot';
-import { PhaseManager, CatchUnhandled } from '@travetto/base';
+import { PhaseManager } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
 
 import { ConsumerManager } from '../consumer/manager';
@@ -8,13 +8,18 @@ import { TestExecutor } from './executor';
 import { buildWorkManager } from '../worker/parent';
 
 import { TestUtil } from './util';
-import { State } from './types';
+import { RunState } from './types';
 
-// TODO: Document
+/**
+ * Test Runner
+ */
 export class Runner {
 
-  constructor(private state: State) { }
+  constructor(private state: RunState) { }
 
+  /**
+   * Find all available test files
+   */
   async getFiles() {
     const { args } = this.state; // strip off node and worker name
     // Glob to module path
@@ -22,6 +27,9 @@ export class Runner {
     return files;
   }
 
+  /**
+   * Run all files
+   */
   async runFiles() {
     const consumer = ConsumerManager.create(this.state.consumer ?? this.state.format);
 
@@ -53,7 +61,9 @@ export class Runner {
     }
   }
 
-  @CatchUnhandled()
+  /**
+   * Run a single file
+   */
   async runSingle() {
     const consumer = ConsumerManager.create(this.state.consumer ?? this.state.format);
     if (consumer.onStart) {
@@ -61,7 +71,7 @@ export class Runner {
     }
 
     await PhaseManager.init('test').run();
-    const res = await TestExecutor.execute(consumer, this.state.args);
+    const res = await TestExecutor.execute(consumer, this.state.args[0], ...this.state.args.slice(1));
 
     if (consumer.summarize) {
       consumer.summarize();
@@ -70,6 +80,9 @@ export class Runner {
     return res;
   }
 
+  /**
+   * Run the runner, based on the inputs passed to the constructor
+   */
   async run() {
     switch (this.state.mode) {
       case 'single': return await this.runSingle();

@@ -1,7 +1,7 @@
 import * as os from 'os';
 
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
-import { WorkPool, EventInputSource } from '@travetto/worker';
+import { WorkPool, IterableInputSource, DynamicAsyncIterator } from '@travetto/worker';
 
 import { TestRegistry } from '../registry/registry';
 import { buildWorkManager } from '../worker/parent';
@@ -11,10 +11,21 @@ import { SuiteConfig, SuiteResult } from '../model/suite';
 import { ConsumerRegistry } from '../consumer/registry';
 import { Consumer } from '../model/consumer';
 
+/**
+ * Test Watcher.
+ *
+ * Runsa ll tests on startup, and then listens for changes to run tests again
+ */
 export class TestWatcher {
 
-  static state: Record<string, TestResult['status']> = {};
+  /**
+   * Total state of all tests run so far
+   */
+  private static state: Record<string, TestResult['status']> = {};
 
+  /**
+   * Build a test configuration given various inputs
+   */
   static getConf(o?: Class): SuiteConfig | undefined;
   static getConf(o?: [Class, Function]): TestConfig | undefined;
   static getConf(o?: [Class, Function] | Class) {
@@ -35,6 +46,10 @@ export class TestWatcher {
     }
   }
 
+  /**
+   * Sumamrize a given test suite using the new result and the historical
+   * state
+   */
   static summarizeSuite(test: TestResult): SuiteResult {
     require(test.file);
 
@@ -63,10 +78,14 @@ export class TestWatcher {
     };
   }
 
+  /**
+   * Start watching all test files
+   */
   static async watch(format: string) {
     console.debug('Listening for changes');
 
-    const src = new EventInputSource<RunEvent>();
+    const itr = new DynamicAsyncIterator<RunEvent>();
+    const src = new IterableInputSource(itr);
 
     await TestRegistry.init();
     TestRegistry.listen(RootRegistry);
@@ -107,7 +126,7 @@ export class TestWatcher {
 
       switch (e.type) {
         case 'added': case 'changed': {
-          src.trigger({
+          itr.add({
             method: conf.methodName,
             file: conf.file,
             class: conf.class.name
