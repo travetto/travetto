@@ -34,6 +34,9 @@ export class KoaRestApp extends RestApp<koa> {
     return app;
   }
 
+  /**
+   * Use during development to remove routes
+   */
   async unregisterRoutes(key: string | symbol) {
     // Delete previous
     const pos = this.raw.middleware.findIndex(x => (x as { key?: symbol | string }).key === key);
@@ -42,9 +45,13 @@ export class KoaRestApp extends RestApp<koa> {
     }
   }
 
+  /**
+   * Register routes, is used during development for live-reloading as well
+   */
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
     const router = new kRouter(path !== '/' ? { prefix: path } : {});
 
+    // Register all routes to extract the proper request/response for the framework
     for (const route of routes) {
       router[route.method!](route.path!, async (ctx) => {
         const req = KoaAppUtil.getRequest(ctx);
@@ -53,10 +60,12 @@ export class KoaRestApp extends RestApp<koa> {
       });
     }
 
+    // Register routes
     const middleware: ReturnType<Router['routes']> & { key?: string | symbol } = router.routes();
     middleware.key = key;
     this.raw.use(middleware);
 
+    // If already running and not global routes, re-register
     if (this.listening && key !== RestApp.GLOBAL) {
       await this.unregisterGlobal();
       await this.registerGlobal();
