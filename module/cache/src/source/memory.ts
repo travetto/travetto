@@ -1,11 +1,11 @@
-import { CullableCacheStore } from './cullable';
+import { CullableCacheSource } from './cullable';
 import { CacheEntry } from '../types';
-import { CacheStoreUtil } from './util';
+import { CacheSourceUtil } from './util';
 
 /**
- * A cache store backed by a JS Map
+ * A cache source backed by `Map`
  */
-export class MemoryCacheStore<T extends CacheEntry = CacheEntry> extends CullableCacheStore<T> {
+export class MemoryCacheSource<T extends CacheEntry = CacheEntry> extends CullableCacheSource<T> {
 
   store = new Map<string, { expiresAt?: number, entry: string }>();
 
@@ -21,7 +21,7 @@ export class MemoryCacheStore<T extends CacheEntry = CacheEntry> extends Cullabl
     const entry = this.store.get(key);
     if (entry) {
       return {
-        ...CacheStoreUtil.readAsSafeJSON(entry.entry),
+        ...CacheSourceUtil.readAsSafeJSON(entry.entry),
         expiresAt: entry.expiresAt
       };
     }
@@ -30,11 +30,11 @@ export class MemoryCacheStore<T extends CacheEntry = CacheEntry> extends Cullabl
   async set(key: string, entry: T): Promise<any> {
     this.cull();
 
-    const cloned = CacheStoreUtil.storeAsSafeJSON(entry);
+    const cloned = CacheSourceUtil.storeAsSafeJSON(entry);
 
     this.store.set(key, { entry: cloned, expiresAt: entry.expiresAt });
 
-    return CacheStoreUtil.readAsSafeJSON(cloned);
+    return CacheSourceUtil.readAsSafeJSON(cloned);
   }
 
   touch(key: string, expiresAt: number): boolean {

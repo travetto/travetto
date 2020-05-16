@@ -2,13 +2,13 @@
 import * as redis from 'redis';
 
 import { CacheEntry } from '../types';
-import { CacheStore } from '../store/core';
-import { CacheStoreUtil } from '../store/util';
+import { CacheSource } from '../source/core';
+import { CacheSourceUtil } from '../source/util';
 
 /**
- * A cache store backed by redis
+ * A cache source backed by redis
  */
-export class RedisCacheStore extends CacheStore {
+export class RedisCacheSource extends CacheSource {
 
   cl: redis.RedisClient;
 
@@ -27,7 +27,7 @@ export class RedisCacheStore extends CacheStore {
   async get(key: string): Promise<CacheEntry | undefined> {
     const val: any = await this.toPromise(this.cl.get.bind(this.cl, key));
     if (val) {
-      const ret = CacheStoreUtil.readAsSafeJSON(val);
+      const ret = CacheSourceUtil.readAsSafeJSON(val);
       return { ...ret, expiresAt: ret.maxAge ? ret.maxAge + Date.now() : undefined };
     }
   }
@@ -37,7 +37,7 @@ export class RedisCacheStore extends CacheStore {
   }
 
   async set(key: string, entry: CacheEntry): Promise<any> {
-    const cloned = CacheStoreUtil.storeAsSafeJSON(entry);
+    const cloned = CacheSourceUtil.storeAsSafeJSON(entry);
 
     await this.toPromise(this.cl.setnx.bind(this.cl, key, cloned));
 
@@ -45,7 +45,7 @@ export class RedisCacheStore extends CacheStore {
       await this.touch(key, entry.maxAge + Date.now());
     }
 
-    return CacheStoreUtil.readAsSafeJSON(cloned);
+    return CacheSourceUtil.readAsSafeJSON(cloned);
   }
 
   async delete(key: string): Promise<boolean> {

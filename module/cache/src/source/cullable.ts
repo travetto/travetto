@@ -1,12 +1,12 @@
 import { CacheEntry } from '../types';
-import { CacheStore } from './core';
+import { CacheSource } from './core';
 
 /**
- * Cullable cache store.
+ * Cullable cache source.
  *
- * This implies the data store can be culled as on expiry
+ * This implies the data source can be culled as on expiry
  */
-export abstract class CullableCacheStore<T extends CacheEntry = CacheEntry> extends CacheStore<T> {
+export abstract class CullableCacheSource<T extends CacheEntry = CacheEntry> extends CacheSource<T> {
 
   /**
    * Time of last culling

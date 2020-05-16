@@ -75,9 +75,9 @@ export interface CacheEntry {
 }
 
 /**
- * Cache Store contract
+ * Cache Source contract
  */
-export interface CacheStoreType<T extends CacheEntry = CacheEntry> {
+export interface CacheSourceType<T extends CacheEntry = CacheEntry> {
   /**
    * Get value for key, returns undefined if missing
    */
@@ -110,6 +110,9 @@ export interface CacheStoreType<T extends CacheEntry = CacheEntry> {
    * Clear entire cache
    */
   clear?(): OrProm<void> | void;
+  /**
+   * Post construction hook, used for async initliazations
+   */
   postConstruct?(): OrProm<void>;
   /**
    * How to compute the key from input params
