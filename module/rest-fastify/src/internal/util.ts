@@ -1,4 +1,4 @@
-import { ServerResponse } from 'http';
+import { IncomingMessage, ServerResponse } from 'http';
 import * as fastify from 'fastify';
 
 import { RestAppUtil } from '@travetto/rest';
@@ -6,19 +6,24 @@ import { TRV_ORIG, TRV_RAW, Request, Response } from '@travetto/rest/src/types';
 
 const TRV_KEY = Symbol.for('@trv:rest-fastify/req');
 
-type FRequest = fastify.FastifyRequest & {
+type FRequest = fastify.FastifyRequest<IncomingMessage> & {
   [TRV_KEY]?: Travetto.Request;
   session?: Record<string, any>;
-  req?: { cookies: Request['cookies'] };
+  req?: { cookies?: Request['cookies'] };
 };
 
 type FResponse = fastify.FastifyReply<ServerResponse> & {
-  [TRV_KEY]: Travetto.Response;
-  res?: { cookies: Response['cookies'] };
+  [TRV_KEY]?: Travetto.Response;
+  res?: { cookies?: Response['cookies'] };
 };
 
-// TODO: Document
+/**
+ * Provide a mapping between fastify request/response and the framework analogs
+ */
 export class FastifyAppUtil {
+  /**
+   * Build a Travetto Request from a Fastify Request
+   */
   static getRequest(reqs: FRequest) {
     if (!reqs[TRV_KEY]) {
       let [path] = (reqs.req.url ?? '').split(/[#?]/g);
@@ -46,6 +51,9 @@ export class FastifyAppUtil {
     return reqs[TRV_KEY]!;
   }
 
+  /**
+   * Build a Travetto Response from a Fastify Reply
+   */
   static getResponse(reply: FResponse) {
     if (!reply[TRV_KEY]) {
       reply[TRV_KEY] = RestAppUtil.decorateResponse({

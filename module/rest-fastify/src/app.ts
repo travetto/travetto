@@ -13,6 +13,9 @@ import { FastifyAppUtil } from './internal/util';
 @Injectable()
 export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
 
+  /**
+   * Build the fastify server
+   */
   async createRaw() {
     const fastConf: any = {};
     if (this.config.ssl.active) {
@@ -32,10 +35,16 @@ export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
     return app;
   }
 
+  /**
+   * Fastify does not support live reload, this will just log at runtime
+   */
   async unregisterRoutes(key: string | symbol) {
     console.debug('Fastify does not allow for route reloading');
   }
 
+  /**
+   * Register routes, does not support live reload
+   */
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
     if (this.listening) { // Does not support live reload
       return;
