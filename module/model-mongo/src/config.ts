@@ -13,17 +13,41 @@ const read = util.promisify(fs.readFile);
  */
 @Config('mongo.model')
 export class MongoModelConfig {
+  /**
+   * Hosts
+   */
   hosts = ['localhost'];
+  /**
+   * Collection prefix
+   */
   namespace = 'app';
+  /**
+   * Username
+   */
   username = '';
+  /**
+   * Password
+   */
   password = '';
+  /**
+   * Server port
+   */
   port = 27017;
+  /**
+   * Direct mongo connection options
+   */
   connectionOptions = {};
+  /**
+   * Mongo client options
+   */
   clientOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true
   } as mongo.MongoClientOptions;
 
+  /**
+   * Load a resource
+   */
   async fetch(val: string) {
     try {
       return (await exists(val)) ? read(val) : ResourceManager.read(val);
@@ -32,6 +56,9 @@ export class MongoModelConfig {
     }
   }
 
+  /**
+   * Load all the ssl certs as needed
+   */
   async postConstruct() {
     const opts = this.clientOptions;
     if (opts.ssl) {
@@ -50,6 +77,9 @@ export class MongoModelConfig {
     }
   }
 
+  /**
+   * Build connection URLs
+   */
   get url() {
     const hosts = this.hosts
       .map(h => h.includes(':') ? h : `${h}:${this.port}`)
