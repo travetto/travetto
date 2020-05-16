@@ -1,7 +1,6 @@
 // @ts-ignore
 import * as Mod from 'module';
 
-import { FsUtil } from './fs';
 import { EnvUtil } from './env';
 import { TranspileUtil } from './transpile';
 import { FrameworkUtil } from './framework';
@@ -82,7 +81,7 @@ export class CompileUtil {
    * Actually compile the content for loading in JS
    */
   static compileJavascript(m: Module, content: string, tsf: string) {
-    const jsf = FsUtil.toJS(tsf);
+    const jsf = tsf.replace(/[.]ts$/, '.js');
     try {
       return m._compile!(content, jsf);
     } catch (e) {
@@ -103,7 +102,7 @@ export class CompileUtil {
 
     // Registering unix conversion to use for filenames
     Object.defineProperty(String.prototype, 'ᚕunix', {
-      enumerable: false, get() { return this.replace(/[\\/]+/g, '/'); }
+      enumerable: false, get() { return this.replace(/[\\/]+/g, '/').replace(/[.]js$/, '.ts'); }
     });
 
     // Tag output to indicate it was succefully processed by the framework

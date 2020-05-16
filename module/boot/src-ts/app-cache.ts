@@ -37,20 +37,16 @@ class $AppCache extends FileCache {
   }
 
   fromEntryName(cached: string) {
-    return FsUtil.toTS(
-      FsUtil.joinUnix(FsUtil.cwd,
-        super.fromEntryName(cached)
-          .replace(/\._\./g, 'node_modules/@travetto')
-      )
-    );
+    return FsUtil.joinUnix(FsUtil.cwd,
+      super.fromEntryName(cached)
+        .replace(/\._\./g, 'node_modules/@travetto')
+    ).replace(/[.]js$/, '.ts');
   }
 
   toEntryName(full: string) {
-    return FsUtil.toJS(
-      super.toEntryName(full.replace(FsUtil.cwd, '')
-        .replace(/node_modules\/@travetto/g, '._.')
-      )
-    );
+    return super.toEntryName(full.replace(FsUtil.cwd, '')
+      .replace(/node_modules\/@travetto/g, '._.')
+    ).replace(/[.]ts$/, '.js');
   }
 
   /**
