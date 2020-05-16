@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { Env, StacktraceUtil } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { FsUtil, ColorUtil } from '@travetto/boot';
 
 import { LogEvent, Formatter } from '../types';
@@ -71,7 +71,7 @@ export class LineFormatter implements Formatter {
 
     if (ev.file && opts.location) {
       const ns = ev.category;
-      let loc = ev.line ? `${Env.prod ? ev.category : FsUtil.toTS(ev.file.replace(FsUtil.cwd, '.'))}:${ev.line}` : ns;
+      let loc = ev.line ? `${Env.prod ? ev.category : ev.file.replace(FsUtil.cwd, '.')}:${ev.line}` : ns;
       if (opts.colorize) {
         loc = STYLES.location(loc);
       }
@@ -87,14 +87,13 @@ export class LineFormatter implements Formatter {
       }
 
       message = args.map((x: any) =>
-        typeof x === 'string' ? x :
-          (x instanceof Error ? (Env.prod ? x.stack : StacktraceUtil.simplifyStack(x)) :
-            util.inspect(x,
-              ev.level === 'trace',
-              (ev.level === 'debug' || ev.level === 'trace') ? 4 : 2,
-              opts.colorize !== false
-            )
-          )).join(' ');
+        (typeof x === 'string' || x instanceof Error) ? x :
+          util.inspect(x,
+            ev.level === 'trace',
+            (ev.level === 'debug' || ev.level === 'trace') ? 4 : 2,
+            opts.colorize !== false
+          )
+      ).join(' ');
     }
 
     if (message) {

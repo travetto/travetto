@@ -55,16 +55,6 @@ export class FsUtil {
     }
   }
 
-
-  /**
-   * Converts filename .ts to .js
-   */
-  static toJS = (x: string) => x.replace(/\.ts$/, '.js');
-  /**
-   * Converts filename .js to .ts
-   */
-  static toTS = (x: string) => x.replace(/\.js$/, '.ts');
-
   /**
    * Convert file to a unix format
    */

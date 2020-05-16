@@ -1,4 +1,3 @@
-import { FsUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { Class } from './types';
 
@@ -8,7 +7,6 @@ class $PendingRegister {
   ordered: [string, Class<any>[]][] = [];
 
   initMeta(cls: Class<any>, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean) {
-    file = FsUtil.toTS(file);
     const meta = {
       __id: SystemUtil.computeModuleClass(file, cls.name),
       __file: file,
