@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Initialize the registry after all files have been loaded
+ */
 export const init = {
   key: 'registry',
   after: ['require-all'],

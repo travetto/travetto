@@ -15,15 +15,23 @@ interface RegisterInfo {
   [cls]?: number;
 }
 
-// TODO: Document
+/**
+ * Registration of all classes to support the registry
+ */
 export class RegisterTransformer {
 
+  /**
+   * Hash each class
+   */
   @OnClass()
   static prepareClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
     state[cls] = SystemUtil.naiveHash(node.getText());
     return node;
   }
 
+  /**
+   * Hash each method
+   */
   @OnMethod()
   static transformMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration) {
     const hash = SystemUtil.naiveHash(node.getText());
@@ -35,6 +43,9 @@ export class RegisterTransformer {
     return node;
   }
 
+  /**
+   * After visiting each class, register all the collected metadata
+   */
   @AfterClass()
   static transformClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
     if (state.source.fileName === REGISTER_MOD) {  // Cannot process self

@@ -1,5 +1,8 @@
 import * as http from 'http';
 
+/**
+ * Simple HTTP Client
+ */
 export interface HttpClient {
   request(args: http.ClientRequestArgs, cb: (response: http.IncomingMessage) => void): {
     on(type: 'error', cb: (err: any) => void): void;
@@ -8,11 +11,20 @@ export interface HttpClient {
   };
 }
 
-export type ExecArgs = { [k in keyof http.RequestOptions]?: NonNullable<http.RequestOptions[k]> } & { url: string };
-export type RawExecArgs = ExecArgs & { payload?: any };
+/**
+ * HTTP Exec arguments
+ */
+export type HttpExecArgs = { [k in keyof http.RequestOptions]?: NonNullable<http.RequestOptions[k]> } & { url: string };
+export type HttpRawExecArgs = HttpExecArgs & { payload?: any };
 
-export type ResponseHandler<T> = (msg: http.IncomingMessage) => Promise<T>;
+/**
+ * Http Response Handler
+ */
+export type HttpResponseHandler<T> = (msg: http.IncomingMessage) => Promise<T>;
 
+/**
+ * URL context
+ */
 export type URLContext = {
   host?: string;
   port?: number | string;
@@ -23,10 +35,13 @@ export type URLContext = {
   headers: Record<string, undefined | number | string | string[]>;
 };
 
-export type RequestContext = {
+/**
+ * HTTP Request Context
+ */
+export type HttpRequestContext = {
   client: HttpClient;
   payload: any;
-  responseHandler?: ResponseHandler<any>;
+  responseHandler?: HttpResponseHandler<any>;
   opts: URLContext;
   binary?: boolean;
 };
