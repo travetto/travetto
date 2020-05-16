@@ -42,10 +42,16 @@ export class MongoModelSource extends ModelSource {
     await this.initDatabase();
   }
 
+  /**
+   * Build a mongo identifier
+   */
   generateId() {
     return new mongo.ObjectId().toHexString();
   }
 
+  /**
+   * Run a mongo query
+   */
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const col = await this.getCollection(cls);
 
@@ -75,9 +81,13 @@ export class MongoModelSource extends ModelSource {
     if (query.offset) {
       cursor = cursor.skip(Math.trunc(query.offset ?? 0));
     }
+
     return await cursor.toArray();
   }
 
+  /**
+   * Convert ids on load
+   */
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
     if (hasRawId(o)) {
       o.id = (o._id as mongo.ObjectId).toHexString();
@@ -90,11 +100,17 @@ export class MongoModelSource extends ModelSource {
     return o;
   }
 
+  /**
+   * Initialize client
+   */
   async initClient() {
     this.client = await mongo.MongoClient.connect(this.config.url, this.config.clientOptions);
     this.db = this.client.db();
   }
 
+  /**
+   * Initialize db, setting up indicies
+   */
   async initDatabase() {
     // Establish geo indices
     const promises: Promise<any>[] = [];
@@ -104,10 +120,16 @@ export class MongoModelSource extends ModelSource {
     await Promise.all(promises);
   }
 
+  /**
+   * Drop all collections
+   */
   async clearDatabase() {
     await this.db.dropDatabase();
   }
 
+  /**
+   * Establish an index
+   */
   establishIndices<T extends ModelCore>(cls: Class<T>) {
     const promises: Promise<any>[] = [];
     for (const idx of ModelRegistry.get(cls).indices) {
@@ -122,6 +144,9 @@ export class MongoModelSource extends ModelSource {
     return promises;
   }
 
+  /**
+   * Build a geo index
+   */
   async establishGeoIndices<T extends ModelCore>(cls: Class<T>, path: FieldConfig[] = [], root = cls) {
     const fields = SchemaRegistry.has(cls) ?
       Object.values(SchemaRegistry.get(cls).views[ALL_VIEW].schema) :
@@ -137,11 +162,17 @@ export class MongoModelSource extends ModelSource {
     }
   }
 
+  /**
+   * Get name of collection from a cls
+   */
   getCollectionName<T extends ModelCore>(cls: Class<T>): string {
     cls = ModelRegistry.getBaseModel(cls);
     return ModelRegistry.getCollectionName(cls);
   }
 
+  /**
+   * Get mongo collection
+   */
   async getCollection<T extends ModelCore>(cls: Class<T>): Promise<mongo.Collection> {
     return this.db.collection(this.getCollectionName(cls));
   }
@@ -175,6 +206,9 @@ export class MongoModelSource extends ModelSource {
     return ModelUtil.combineSuggestResults(cls, field, prefix, results, (a) => a, query && query.limit);
   }
 
+  /**
+   * Facet using the aggregation pipeline
+   */
   async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
     const col = await this.getCollection(cls);
     const pipeline: object[] = [{
@@ -270,6 +304,9 @@ export class MongoModelSource extends ModelSource {
     return await this.updatePartialByQuery(cls, { where: { id: data.id } } as ModelQuery<T>, data);
   }
 
+  /**
+   * Update partial by using $set operations
+   */
   async updatePartialByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<T> {
     const col = await this.getCollection(cls);
 
