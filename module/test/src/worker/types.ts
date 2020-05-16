@@ -1,3 +1,6 @@
+/**
+ * Test Run Event
+ */
 export type RunEvent = {
   file?: string;
   error?: any;
@@ -5,6 +8,9 @@ export type RunEvent = {
   method?: string;
 };
 
+/**
+ * Test Run Event Keys
+ */
 export const Events = {
   RUN: 'run',
   RUN_COMPLETE: 'runComplete',

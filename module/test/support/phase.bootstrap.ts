@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Test Bootstrapping
+ */
 export const init = {
   key: 'test',
   before: ['compiler'],
@@ -6,6 +8,8 @@ export const init = {
   action: async () => {
     const { EnvUtil } = await import('@travetto/boot');
     const { Env, ScanApp } = await import('@travetto/base');
+
+    // Only apply if we are running tests
     if (Env.env === 'test') {
       // Allow test module to be searched
       ScanApp.modAppExclude.splice(ScanApp.modAppExclude.findIndex(x => x === 'test'), 1);

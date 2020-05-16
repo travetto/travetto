@@ -18,6 +18,7 @@ export class RedisCacheStore extends CacheStore {
 
   async postConstruct() {
     this.cl = new redis.RedisClient(this.config);
+    await this.toPromise(this.cl.echo.bind(this.cl, '-'));
   }
 
   toPromise<V>(fn: (cb: redis.Callback<V>) => void): Promise<V> {
