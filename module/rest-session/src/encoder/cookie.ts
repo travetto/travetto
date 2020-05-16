@@ -5,8 +5,12 @@ import { SessionEncoder } from './encoder';
 import { Session } from '../types';
 import { SessionConfig } from '../config';
 
+/**
+ * Uses cookies for maintaining the session coherency with the user.
+ * Primarily encode the user identifier, but relies on cookie behavior for
+ * encoding the expiry time.
+ */
 @Injectable({ target: CookieEncoder })
-// TODO: Document
 export class CookieEncoder extends SessionEncoder {
 
   @Inject()
