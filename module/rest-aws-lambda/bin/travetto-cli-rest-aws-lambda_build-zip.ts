@@ -53,7 +53,7 @@ export function init() {
       fs.writeFileSync(`${cmd.workspace}/node_modules/typescript/index.js`,
         'module.exports = {};');
 
-      const { ScanFs } = await import('@travetto/base');
+      const { ScanFs } = await import('@travetto/boot');
 
       // Invert
       for (const p of ['test', 'dist']) {

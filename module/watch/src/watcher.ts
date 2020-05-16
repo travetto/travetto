@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 
-import { FsUtil } from '@travetto/boot';
-import { Env, ScanEntry, ScanHandler, ScanFs } from '@travetto/base';
+import { ScanEntry, ScanHandler, ScanFs, FsUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 /**
@@ -42,7 +41,7 @@ export class Watcher extends EventEmitter {
       maxListeners: opts.maxListeners,
       interval: opts.interval ?? 250,
       debounceDelay: opts.debounceDelay ?? 250,
-      cwd: opts.cwd ?? Env.cwd
+      cwd: opts.cwd ?? FsUtil.cwd
     };
 
     // Set maxListeners

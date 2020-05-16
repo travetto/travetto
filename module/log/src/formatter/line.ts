@@ -71,7 +71,7 @@ export class LineFormatter implements Formatter {
 
     if (ev.file && opts.location) {
       const ns = ev.category;
-      let loc = ev.line ? `${Env.prod ? ev.category : FsUtil.toTS(ev.file.replace(Env.cwd, '.'))}:${ev.line}` : ns;
+      let loc = ev.line ? `${Env.prod ? ev.category : FsUtil.toTS(ev.file.replace(FsUtil.cwd, '.'))}:${ev.line}` : ns;
       if (opts.colorize) {
         loc = STYLES.location(loc);
       }

@@ -1,4 +1,4 @@
-import { ScanApp } from './scan-app';
+import { ScanApp } from './scan';
 import { SystemUtil } from './internal/system';
 
 interface Initializer {
