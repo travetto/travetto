@@ -20,7 +20,6 @@ The framework provides basic environment information, e.g. in prod/test/dev.  Th
 * `env` - The environment name.  Will usually be one of `dev`, `test`, or `prod`.  Can be anything that is passed in.
 * `profiles: Set<string>` - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.
 * `debug`/`trace` - Simple logging flags.  These `boolean` flags will enable or disable logging at various levels. By default `debug` is on in non-`prod` or `e2e` mode, and nowhere else.  `trace` is always off by default.
-* `cwd: string` - The root of the current project, 
 * `appRoots: string[]` - The file root paths for the application, the default set is the current project. Order matters with respect to resource resolution. All paths should be relative to the project base
 * `hasProfile(p: string): boolean;` - Test whether or not a profile is active.
 
@@ -45,20 +44,6 @@ A simple example of finding specific `.config` files in your codebase:
       ... do work
     }
   }
-```
-
-The framework utilizes caching to enable these lookups to be repeated without performance impact.  In addition to file system scanning, the framework offers a simple file watching library.  The goal is to provide a substantially smaller footprint than [`gaze`](https://github.com/shama/gaze) or [`chokidar`](https://github.com/paulmillr/chokidar).  Utilizing the patterns from the file scanning, you create a `Watcher` that either has files added manually, or has patterns added that will recursively look for files. 
-
-**Code: Example of watching for specific files**
-```typescript
-const watcher = new Watcher({cwd: 'base/path/to/...'});
-watcher.add([
-  'local.config',
-  {
-    testFile: x => x.endsWith('.config') || x.endsWith('.config.json')
-  }
-]);
-watcher.run();
 ```
 
 ## Application Resources
@@ -172,6 +157,5 @@ Simple functions for providing a minimal facsimile to [`lodash`](https://lodash.
 
 ## SystemUtil
 Unlike `Util`, the `SystemUtil` is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful. `SystemUtil` has functionality for:
-* `throttle<T extends Function>(fn: T, threshold = 250): void` will run the function `fn` at most every `threshold`
 * `naiveHash(text: string): number` computes a very naive hash.  Should not be relied upon for scenarios where collisions cannot be tolerated.
 * `computeModule(file: string): string` computes the internal module name from a given file.

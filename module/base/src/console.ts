@@ -94,7 +94,7 @@ class $ConsoleManager {
         return a;
       } else {
         lvl = lvl === 'log' ? 'info' : lvl;
-        return `${this.key}({level:'${lvl}',file:__filename,category:'${SystemUtil.computeModule(fileName)}',line:${line}},`;
+        return `${this.key}({level:'${lvl}',file:__filename.ᚕunix,category:'${SystemUtil.computeModule(fileName)}',line:${line}},`;
       }
     });
     return fileContents;

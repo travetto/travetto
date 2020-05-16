@@ -22,18 +22,17 @@ export class AssertUtil {
   }
 
   static getPositionOfError(err: Error, filename: string) {
-    const base = FsUtil.cwd;
     const lines = (err.stack ?? new Error().stack!)
       .replace(/[\\]/g, '/')
       .split('\n')
       // Exclude node_modules, target self
-      .filter(x => x.includes(base) &&
+      .filter(x => x.includes(FsUtil.cwd) &&
         (!x.includes('node_modules') || /node_modules\/@travetto\/[^/]+\/test\//.test(x)));
 
     let best = lines.filter(x => x.includes(filename))[0];
 
     if (!best) {
-      best = lines.filter(x => x.includes(`${base}/test`))[0];
+      [best] = lines.filter(x => x.includes(`${FsUtil.cwd}/test`));
     }
 
     if (!best) {
@@ -55,7 +54,7 @@ export class AssertUtil {
       line = -1;
     }
 
-    const outFileParts = file.split(base.replace(/^[A-Za-z]:/, ''));
+    const outFileParts = file.split(FsUtil.cwd.replace(/^[A-Za-z]:/, ''));
 
     const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
 

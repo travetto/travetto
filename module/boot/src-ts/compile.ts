@@ -101,9 +101,14 @@ export class CompileUtil {
 
     TranspileUtil.init();
 
+    // Registering unix conversion to use for filenames
+    Object.defineProperty(String.prototype, 'ᚕunix', {
+      enumerable: false, get() { return this.replace(/[\\/]+/g, '/'); }
+    });
+
     // Tag output to indicate it was succefully processed by the framework
     TranspileUtil.addPreProcessor((__, contents) =>
-      `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { value: true })`);
+      `${contents}Object.defineProperty(exports, 'ᚕtrv', { value: true });`);
 
     // Supports bootstrapping with framework resolution
     if (!EnvUtil.isTrue('TRV_DEV')) {

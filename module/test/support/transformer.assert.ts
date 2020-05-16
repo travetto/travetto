@@ -98,7 +98,7 @@ export class AssertTransformer {
 
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
     const check = ts.createCall(state[asrt]!.assertCheck, undefined, ts.createNodeArray([
-      ts.createIdentifier('__filename'),
+      ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
       ts.createLiteral(firstText),
       ts.createLiteral(cmd.fn),
       ts.createLiteral(!cmd.negate),
@@ -123,7 +123,7 @@ export class AssertTransformer {
       /reject/i.test(key) ? state[asrt]!.checkThrowAsync : state[asrt]!.checkThrow,
       undefined,
       ts.createNodeArray([
-        ts.createIdentifier('__filename'),
+        ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
         ts.createLiteral(`${key} ${firstText}`),
         ts.createLiteral(`${key}`),
         ts.createLiteral(!key.startsWith('doesNot')),

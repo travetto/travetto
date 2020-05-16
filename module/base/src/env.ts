@@ -11,10 +11,6 @@ class $Env {
    * The application env.  Generally 'prod', 'dev', or 'test'
    */
   readonly env: string;
-  /**
-   * The root directory for the application
-   */
-  readonly cwd: string;
 
   /**
    * If, and only if the `.env` property is equal to 'prod'
@@ -37,7 +33,6 @@ class $Env {
   readonly appRoots: string[];
 
   constructor() {
-    this.cwd = FsUtil.cwd;
     this.env = EnvUtil.get('TRV_ENV', EnvUtil.get('NODE_ENV', 'dev'))
       .replace(/^production$/i, 'prod')
       .replace(/^development$/i, 'dev')
@@ -53,9 +48,9 @@ class $Env {
 
   private computeAppRoots() {
     // Include root
-    return [this.cwd, ...EnvUtil.getList('TRV_APP_ROOTS')]
+    return [FsUtil.cwd, ...EnvUtil.getList('TRV_APP_ROOTS')]
       .filter(x => !!x)
-      .map(x => FsUtil.resolveUnix(this.cwd, x).replace(this.cwd, '.'))
+      .map(x => FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, '.'))
       .filter((x, i, all) => i === 0 || x !== all[i - 1]); // Dedupe
   }
 
@@ -63,7 +58,7 @@ class $Env {
    * Generate to JSON
    */
   toJSON() {
-    return (['trace', 'debug', 'cwd', 'env', 'prod', 'profiles', 'appRoots'] as const)
+    return (['trace', 'debug', 'env', 'prod', 'profiles', 'appRoots'] as const)
       .reduce((acc, k) => {
         acc[k] = this[k];
         return acc;

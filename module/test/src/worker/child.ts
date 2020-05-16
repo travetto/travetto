@@ -13,7 +13,8 @@ const FIXED_MODULES = new Set([
 ]);
 const IS_SUPPORT_FILE = /support\/(transformer|phase)[.]/;
 const IS_BIN_FILE = '/bin/';
-const IS_SELF_FILE = __filename.replace(/.*(test\/.*)([.][tj]s)?$/, (__, name) => name);
+// @ts-ignore
+const IS_SELF_FILE = __filename.ᚕunix.replace(/.*(test\/.*)([.][tj]s)?$/, (__, name) => name);
 
 /**
  * Get module name from file, ignore node_modules nested
@@ -62,17 +63,16 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     this.send(Events.INIT_COMPLETE);
   }
 
-  isFileResettable(path: string) {
-    const k = FsUtil.toUnix(path);
-    const frameworkModule = k.replace(EXTRACT_FILE_MODULE, (__, mod) => mod);
+  isFileResettable(filePath: string) {
+    const frameworkModule = filePath.replace(EXTRACT_FILE_MODULE, (__, mod) => mod);
 
-    return path.endsWith('.ts') && (!path.endsWith('.d.ts')) && // Only look at .ts files
+    return filePath.endsWith('.ts') && (!filePath.endsWith('.d.ts')) && // Only look at .ts files
       (!frameworkModule || // A user file
         (
           !FIXED_MODULES.has(frameworkModule) && // Not a core module
-          !IS_SUPPORT_FILE.test(k) && // Not a support file
-          !k.includes(IS_BIN_FILE) && // Not a bin file
-          !k.includes(IS_SELF_FILE) // Not self
+          !IS_SUPPORT_FILE.test(filePath) && // Not a support file
+          !filePath.includes(IS_BIN_FILE) && // Not a bin file
+          !filePath.includes(IS_SELF_FILE) // Not self
         )
       );
   }
@@ -81,7 +81,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     // Clear require cache of all data loaded minus base framework pieces
     console.debug('Resetting', Object.keys(require.cache).length);
 
-    for (const file of Object.keys(require.cache)) {
+    for (const file of Object.keys(require.cache).map(FsUtil.toUnix)) {
       if (this.isFileResettable(file)) {
         console.trace(`[${process.pid}]`, 'Unloading', file);
         this.compiler.unload(file);

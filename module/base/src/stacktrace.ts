@@ -1,5 +1,4 @@
 import { FsUtil } from '@travetto/boot';
-import { Env } from './env';
 
 /**
  * General tools for manipulating stack traces.

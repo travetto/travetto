@@ -22,6 +22,7 @@ The functionality we support for testing and retrieving environment information:
 * `get(key: string, def?: string): string;` - Retrieve an environmental value with a potential default
 * `getInt(key: string, def?: number): number;` - Retrieve an environmental value as a number
 * `getList(key: string): string[];` - Retrieve an environmental value as a list
+* `getTime(key: string, def: number):number` - Reads an environment variable as milliseconds, with support for `s`, `m`, and `h` suffixes to provide succinct time units.
 
 ## File Cache
 The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  `AppCache` is the cache that is used specific to the framework, and is an instance of `FileCache`.  `FileCache` is the generic structure for supporting a file cache that invalidates on modification/creation changes.
@@ -47,6 +48,9 @@ This functionality allows the program to opt in the typescript compiler.  This a
 
 ## File System Interaction
 `FsUtil` provides some high level functionality (like recursive directory delete). 
+
+## File System Scanning
+`ScanFs` provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 ## Process Execution
 Just like [`child_process`], the `ExecUtil` exposes ```spawn``` and ```fork```.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ```Promise``` structure, that throws an error on an non-zero return status.
