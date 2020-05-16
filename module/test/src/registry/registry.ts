@@ -2,9 +2,14 @@ import { MetadataRegistry, Class } from '@travetto/registry';
 import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';
 
-// TODO: Document
+/**
+ * Test registry
+ */
 class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
 
+  /**
+   * Find all valid tests (ignoring abstract)
+   */
   getValidClasses() {
     return this.getClasses().filter(c => !c.__abstract);
   }
@@ -30,11 +35,18 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     };
   }
 
-  registerPendingListener<T>(cls: Class<T>, listener: Function, phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach', ) {
+  /**
+   * Add a new phase listeners
+   */
+  registerPendingListener<T>(cls: Class<T>, listener: Function, phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach',) {
     const suiteConfig = this.getOrCreatePending(cls)! as SuiteConfig;
     suiteConfig[phase].push(listener);
   }
 
+  /**
+   * On finalize, collapse state with super classes to create
+   * a full projection of all listeners and tests.
+   */
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
     const config = this.getOrCreatePending(cls) as SuiteConfig;
     const tests = [...this.pendingFields.get(cls.__id)!.values()];
@@ -65,6 +77,9 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     return config;
   }
 
+  /**
+   * Get run parameters from provided input
+   */
   getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);

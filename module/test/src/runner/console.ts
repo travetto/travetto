@@ -1,7 +1,10 @@
 import * as util from 'util';
 import { ConsoleManager, ConsolePayload } from '@travetto/base';
 
-// TODO: Document
+/**
+ * Console capturer.  Hooks into the Console manager, and collects the
+ * output into a map for test results
+ */
 export class ConsoleCapture {
 
   static out: Record<string, string[]>;

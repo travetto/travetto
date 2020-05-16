@@ -8,6 +8,9 @@ import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT, DEEP_LITERAL_TYPES } from '../src/
 const ASSERT_CMD = 'assert';
 const ASSERT_UTIL = 'AssertCheck';
 
+/**
+ * Special methods with special treatment (vs just boolean checking)
+ */
 const METHODS: Record<string, Function[]> = {
   includes: [Array, String],
   test: [RegExp]
@@ -15,11 +18,14 @@ const METHODS: Record<string, Function[]> = {
 
 const OP_TOKEN_TO_NAME = new Map<number, string>();
 
-const asrt = Symbol.for('@trv:test/assert');
+const ASSERT = Symbol.for('@trv:test/assert');
 const isTest = Symbol.for('@trv:test/valid');
 
+/**
+ * Assert transformation state
+ */
 interface AssertState {
-  [asrt]?: {
+  [ASSERT]?: {
     assert: ts.Identifier;
     hasAssertCall?: boolean;
     assertCheck: ts.PropertyAccessExpression;
@@ -29,16 +35,29 @@ interface AssertState {
   [isTest]?: boolean;
 }
 
+/**
+ * List of assertion arguments
+ */
 type Args = ts.Expression[] | ts.NodeArray<ts.Expression>;
+
+/**
+ * Asertion message
+ */
 type Message = ts.Expression | undefined;
 
+/**
+ * A specific assertion command
+ */
 interface Command {
   fn: string;
   args: ts.Expression[];
   negate?: boolean;
 }
 
-// TODO: Document
+/**
+ * Looks within test files to instrument `assert()` calls to allow for detection,
+ * and result generation
+ */
 export class AssertTransformer {
 
   static lookupOpToken(key: number) {
@@ -59,6 +78,9 @@ export class AssertTransformer {
     }
   }
 
+  /**
+   * Determine if element is a deep literal (should use deep comparison)
+   */
   static isDeepLiteral(state: TransformerState, node: ts.Expression) {
     let found = ts.isArrayLiteralExpression(node) ||
       ts.isObjectLiteralExpression(node) ||
@@ -78,10 +100,13 @@ export class AssertTransformer {
     return found;
   }
 
+  /**
+   * Initialize transformer state
+   */
   static initState(state: TransformerState & AssertState) {
-    if (!state[asrt]) {
+    if (!state[ASSERT]) {
       const assrt = state.importFile(require.resolve('../src/assert/check')).ident;
-      state[asrt] = {
+      state[ASSERT] = {
         assert: assrt,
         assertCheck: ts.createPropertyAccess(ts.createPropertyAccess(assrt, ASSERT_UTIL), 'check'),
         checkThrow: ts.createPropertyAccess(ts.createPropertyAccess(assrt, ASSERT_UTIL), 'checkThrow'),
@@ -90,6 +115,9 @@ export class AssertTransformer {
     }
   }
 
+  /**
+   * Convert the assert to call the framework `AssertUtil.check` call
+   */
   static doAssert<T extends ts.CallExpression>(state: TransformerState & AssertState, node: T, cmd: Command): T {
     this.initState(state);
 
@@ -97,7 +125,7 @@ export class AssertTransformer {
     const firstText = first!.getText();
 
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
-    const check = ts.createCall(state[asrt]!.assertCheck, undefined, ts.createNodeArray([
+    const check = ts.createCall(state[ASSERT]!.assertCheck, undefined, ts.createNodeArray([
       ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
       ts.createLiteral(firstText),
       ts.createLiteral(cmd.fn),
@@ -114,13 +142,16 @@ export class AssertTransformer {
     return check as T;
   }
 
+  /**
+   * Convert `assert.(throws|rejects|doesNotThrow|doesNotReject)` to the approprate structure
+   */
   static doThrows(state: TransformerState & AssertState, node: ts.CallExpression, key: string, args: ts.Expression[]): ts.Node {
     const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);
     const firstText = first!.getText();
 
     this.initState(state);
     return ts.createCall(
-      /reject/i.test(key) ? state[asrt]!.checkThrowAsync : state[asrt]!.checkThrow,
+      /reject/i.test(key) ? state[ASSERT]!.checkThrowAsync : state[ASSERT]!.checkThrow,
       undefined,
       ts.createNodeArray([
         ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
@@ -131,6 +162,9 @@ export class AssertTransformer {
       ]));
   }
 
+  /**
+   * Check a binary expression (left and right) to see how we should communicate the assert
+   */
   static doBinaryCheck(state: TransformerState, comp: ts.BinaryExpression, message: Message, args: Args) {
     let opFn = this.lookupOpToken(comp.operatorToken.kind);
 
@@ -145,6 +179,9 @@ export class AssertTransformer {
     }
   }
 
+  /**
+   * Check unary operator
+   */
   static doUnaryCheck(state: TransformerState, comp: ts.PrefixUnaryExpression, message: Message, args: Args) {
     if (ts.isPrefixUnaryExpression(comp.operand)) {
       const inner = comp.operand.operand;
@@ -155,6 +192,9 @@ export class AssertTransformer {
     }
   }
 
+  /**
+   * Check various `assert.*` method calls
+   */
   static doMethodCall(state: TransformerState, comp: ts.Expression, args: Args) {
 
     if (ts.isCallExpression(comp) && ts.isPropertyAccessExpression(comp.expression)) {
@@ -176,6 +216,9 @@ export class AssertTransformer {
     return { fn: ASSERT_CMD, args: [...args] };
   }
 
+  /**
+   * Determine which type of check to perform
+   */
   static getCommand(state: TransformerState, args: Args): Command | undefined {
 
     const comp = args[0]!;
@@ -192,29 +235,37 @@ export class AssertTransformer {
     }
   }
 
+  /**
+   * Listen for all call expression
+   */
   @OnCall()
   static handleCall(state: TransformerState & AssertState, node: ts.CallExpression) {
+    // If not in test mode, see if file is valid
     if (state[isTest] === undefined) {
       const name = FsUtil.toUnix(state.source.fileName);
       // Only apply to test files, allowing for inheriting from module test files as well
       state[isTest] = (name.includes('/test/') && !name.includes('/src/')) || /@travetto\/[^/]+\/test/.test(name);
     }
 
+    // Only check in test mode
     if (!state[isTest]) {
       return node;
     }
 
     const exp = node.expression;
 
+    // Determine if calling assert directly
     if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) { // Straight assert
       const cmd = this.getCommand(state, node.arguments);
       if (cmd) {
         node = this.doAssert(state, node, cmd);
       }
+      // If calling `assert.*`
     } else if (ts.isPropertyAccessExpression(exp) && ts.isIdentifier(exp.expression)) { // Assert method call
       const ident = exp.expression;
       const fn = exp.name.escapedText.toString();
       if (ident.escapedText === ASSERT_CMD) {
+        // Look for reject/throw
         if (/^(doesNot)?(Throw|Reject)s?$/i.test(fn)) {
           node = this.doThrows(state, node, fn, [...node.arguments]) as ts.CallExpression;
         } else {

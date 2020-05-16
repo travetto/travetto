@@ -15,12 +15,18 @@ export class Timeout extends Error {
     this.listener = new EventEmitter();
   }
 
+  /**
+   * Stop timeout from firing
+   */
   cancel() {
     clearTimeout(this.id);
     this.listener.removeAllListeners('timeout');
     delete this.id;
   }
 
+  /**
+   * Wait for timeout as a promise
+   */
   wait() {
     if (!this.id) {
       this.id = setTimeout(() => this.listener.emit('timeout'), this.duration);

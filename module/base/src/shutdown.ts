@@ -148,29 +148,19 @@ export class ShutdownManager {
       this.unhandled.splice(index, 1);
     }
   }
-
-  /**
-   * Wait until an unhandled event occurs, or the handler is disconnected
-   */
-  static waitForUnhandled() {
-    const uncaught = Util.resolvablePromise() as Promise<void> & { cancel?: () => void };
-    // @ts-ignore
-    const h = ShutdownManager.onUnhandled(err => uncaught.reject(err) || true, 0);
-    uncaught.cancel = h;
-    return uncaught as Promise<void> & { cancel: () => void };
-  }
 }
 
-export const CatchUnhandled = (): MethodDecorator =>
-  (target: any, prop: string | symbol, desc: PropertyDescriptor) => {
-    const fn = desc.value;
-    desc.value = async function (...args: any[]) {
-      const unhandled = ShutdownManager.waitForUnhandled();
-      const prom = fn.apply(this, args);
-      try {
-        return await Promise.race([prom, unhandled]);
-      } finally {
-        unhandled.cancel();
-      }
-    };
+export const CatchUnhandled = () => <T, U>(target: T, __prop: any, desc: TypedPropertyDescriptor<(...params: any[]) => Promise<U>>) => {
+  const fn = desc.value!;
+  desc.value = async function (...args: any[]) {
+    const uncaught = Util.resolvablePromise();
+    // @ts-ignore
+    const cancel = ShutdownManager.onUnhandled(err => uncaught.reject(err) || true, 0);
+    const prom = fn.apply(this, args);
+    try {
+      return (await Promise.race([prom, uncaught])) as U;
+    } finally {
+      cancel();
+    }
   };
+};
