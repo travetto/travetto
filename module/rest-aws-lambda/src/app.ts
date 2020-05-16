@@ -12,7 +12,6 @@ import { Inject } from '@travetto/di';
 import { RestApp, RouteConfig, RouteUtil, TRV_RAW } from '@travetto/rest';
 
 import { AwsLambdaConfig } from './config';
-import { RouteStack } from './internal/types';
 
 /**
  * Aws Lambda Rest App
@@ -24,11 +23,17 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
   @Inject()
   private awsLambdaConfig: AwsLambdaConfig;
 
+  /**
+   * Handler method for the proxy, will get initialized on first request
+   */
   private handler: (
     event: lambda.APIGatewayProxyEvent,
     context: lambda.Context
   ) => void;
 
+  /**
+   * Create the raw handler using the aws serverless framework
+   */
   createRaw(): express.Application {
     const app = express();
     app.use(compression());
@@ -54,21 +59,30 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
     return app;
   }
 
+  /**
+   * Initiatlize handler
+   */
   async init() {
     await super.init();
     this.server = awsServerlessExpress.createServer(this.raw);
     this.handler = (event, ctx) => awsServerlessExpress.proxy(this.server, event, ctx);
   }
 
+  /**
+   * Remove routes, does not work for aws
+   */
   async unregisterRoutes(key: string | symbol) {
-    const routes = (this.raw._router.stack as RouteStack[]);
-    const pos = routes.findIndex(x => x.handle.key === key);
-    if (pos >= 0) {
-      routes.splice(pos, 1);
-    }
+    console.debug('Reloading not supported in aws lambda');
   }
 
+  /**
+   * Register routes during install, live reload will not work
+   */
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
+    if (this.listening) {
+      console.warn('Reloading not supported in aws lambda');
+      return;
+    }
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {
@@ -96,6 +110,9 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
     }
   }
 
+  /**
+   * Listen for the application toclose, don't wait up
+   */
   listen() {
     return {
       ...AppUtil.listenToCloseable(this.server),
@@ -103,9 +120,12 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
     };
   }
 
-  async handle(event: any, context: any) {
+  /**
+   * Handle the inbound event, context
+   */
+  async handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
     if (!this.handler) {
-      await this.run();
+      await this.run(); // Initialize the app if not setup
     }
 
     this.handler(event, context);

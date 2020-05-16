@@ -5,6 +5,9 @@ import { Config } from '@travetto/config';
  */
 @Config('rest.aws')
 export class AwsLambdaConfig {
+  /**
+   * List of endpoint mime types to return as binary
+  */
   binaryMimeTypes = [
     'application/javascript',
     'application/json',
