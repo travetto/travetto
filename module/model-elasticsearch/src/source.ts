@@ -79,10 +79,16 @@ export class ElasticsearchModelSource extends ModelSource {
     }
   }
 
+  /**
+   * Find collection name given a clas
+   */
   getCollectionName(cls: Class) {
     return ModelRegistry.getBaseCollection(cls)!;
   }
 
+  /**
+   * Derive the desired class given an index type
+   */
   getClassFromIndexType(idx: string, type: string) {
     idx = this.indexToAlias.get(idx) ?? idx;
 
@@ -110,6 +116,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return this.indexToClass.get(key)!;
   }
 
+  /**
+   * Build the elasticsearch identity set for a given class (index, type)
+   */
   getIdentity<T extends ModelCore>(cls: Class<T>): EsIdentity {
     if (!this.identities.has(cls)) {
       const col = this.getCollectionName(cls);
@@ -119,6 +128,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return { ...this.identities.get(cls)! };
   }
 
+  /**
+   * Build alias mappings from the current state in the database
+   */
   async computeAliasMappings(force = false) {
     if (force || !this.indexToAlias.size) {
       const { body: aliases } = (await this.client.cat.aliases({
@@ -134,6 +146,9 @@ export class ElasticsearchModelSource extends ModelSource {
     }
   }
 
+  /**
+   * Build an index if missing
+   */
   async createIndexIfMissing(cls: Class) {
     cls = ModelRegistry.getBaseModel(cls);
     const ident = this.getIdentity(cls);
@@ -144,6 +159,9 @@ export class ElasticsearchModelSource extends ModelSource {
     }
   }
 
+  /**
+   * Create an index
+   */
   async createIndex(cls: Class, alias = true) {
     const schema = ElasticsearchUtil.generateSourceSchema(cls, this.config.schemaConfig);
     const ident = this.getIdentity(cls); // Already namespaced
@@ -176,7 +194,11 @@ export class ElasticsearchModelSource extends ModelSource {
     return concreteIndex;
   }
 
+  /**
+   * When the schema changes, update the database (does not run in production)
+   */
   async onSchemaChange(e: SchemaChangeEvent) {
+    // Find which fields are gone
     const removes = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'removing')
@@ -184,6 +206,7 @@ export class ElasticsearchModelSource extends ModelSource {
       return acc;
     }, [] as string[]);
 
+    // Find which types have changed
     const typeChanges = e.change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'changed')
@@ -193,6 +216,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
     const { index, type } = this.getIdentity(e.cls);
 
+    // If removing fields or changing types, run as script to update data
     if (removes.length || typeChanges.length) { // Removing and adding
       const next = await this.createIndex(e.cls, false);
 
@@ -218,7 +242,7 @@ export class ElasticsearchModelSource extends ModelSource {
         .map(x => this.client.indices.delete({ index: x })));
 
       await this.client.indices.putAlias({ index: next, name: index });
-    } else { // Only update
+    } else { // Only update the schema
       const schema = ElasticsearchUtil.generateSourceSchema(e.cls, this.config.schemaConfig);
 
       await this.client.indices.putMapping({
@@ -229,6 +253,9 @@ export class ElasticsearchModelSource extends ModelSource {
     }
   }
 
+  /**
+   * When the model changes, update the database (does not run in production)
+   */
   onChange<T extends ModelCore>(e: ChangeEvent<Class<T>>): void {
     console.debug('Model Changed', e);
 
@@ -246,6 +273,9 @@ export class ElasticsearchModelSource extends ModelSource {
     }
   }
 
+  /**
+   * Build a base search object from a class and a query
+   */
   getPlainSearchObject<T extends ModelCore>(cls: Class<T>, query: Query<T>): Search {
 
     const conf = ModelRegistry.get(cls);
@@ -285,6 +315,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return search;
   }
 
+  /**
+   * Get the search object for a class, handling polymoropohism
+   */
   getSearchObject<T>(cls: Class<T>, query: Query<T>): Search {
     const conf = ModelRegistry.get(cls);
 
@@ -297,6 +330,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return res;
   }
 
+  /**
+   * Safely load the data, excluding ids if needed
+   */
   safeLoad<T, U = T>(req: Search, results: SearchResponse<T>): U[] {
     const out: T[] = [];
 
@@ -322,11 +358,17 @@ export class ElasticsearchModelSource extends ModelSource {
     return out as U[];
   }
 
+  /**
+   * Directly run the search
+   */
   async execSearch<T>(search: Search<T>): Promise<SearchResponse<T>> {
     const { body } = await this.client.search(search);
     return body as SearchResponse<T>;
   }
 
+  /**
+   * Run the search after preparing.  Clean data response
+   */
   async query<T extends ModelCore, U = T>(cls: Class<T>, query: Query<T>): Promise<U[]> {
     const req = this.getSearchObject(cls, query);
     console.trace('Querying', JSON.stringify(req, null, 2));
@@ -334,6 +376,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return this.safeLoad(req, results);
   }
 
+  /**
+   * Convert _id to id
+   */
   postLoad<T extends ModelCore>(cls: Class<T>, o: T) {
     if (hasRawId(o)) {
       o.id = o._id;
@@ -342,10 +387,16 @@ export class ElasticsearchModelSource extends ModelSource {
     return o;
   }
 
+  /**
+   * Noop
+   */
   prePersist<T extends ModelCore>(cls: Class<T>, o: T) {
     return o;
   }
 
+  /**
+   * Initialize the client, check the health on startup
+   */
   async initClient() {
     this.client = new es.Client({
       nodes: this.config.hosts,
@@ -354,6 +405,9 @@ export class ElasticsearchModelSource extends ModelSource {
     await this.client.cluster.health({});
   }
 
+  /**
+   * Setup the database if auto creating
+   */
   async initDatabase() {
     // PreCreate indexes if missing
     if (this.config.autoCreate) {
@@ -366,12 +420,18 @@ export class ElasticsearchModelSource extends ModelSource {
     await this.computeAliasMappings(true);
   }
 
+  /**
+   * Clear the database
+   */
   async clearDatabase() {
     await this.client.indices.delete({
       index: this.getNamespacedIndex('*'),
     });
   }
 
+  /**
+   * Support basic suggestion queries for autocompleting
+   */
   async suggest<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     const search = this.buildRawMultiSuggestQuery([cls], field, prefix, {
       // @ts-ignore
@@ -383,6 +443,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return ModelUtil.combineSuggestResults(cls, field, prefix, safe, x => x, query && query.limit);
   }
 
+  /**
+   * Basic faceting support
+   */
   async facet<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
     const q = query && query.where ? ElasticsearchUtil.extractWhereQuery(cls, query.where) : { ['match_all']: {} };
     const search = {
@@ -391,10 +454,7 @@ export class ElasticsearchModelSource extends ModelSource {
         query: q,
         aggs: {
           [field]: {
-            terms: {
-              field,
-              size: 100
-            },
+            terms: { field, size: 100 },
           }
         }
       },
@@ -407,6 +467,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return out;
   }
 
+  /**
+   * Suggesting entire objects vs just fields
+   */
   async suggestEntities<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     const search = this.buildRawMultiSuggestQuery([cls], field, prefix, query);
     const res = await this.execSearch(search);
@@ -427,6 +490,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return classes.map(t => this.getIdentity(t).index).join(',');
   }
 
+  /**
+   * Transform the search response to build full instantiated objects
+   */
   async convertRawResponse<T extends ModelCore>(response: SearchResponse<T>) {
     const out: T[] = [];
 
@@ -444,6 +510,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return out;
   }
 
+  /**
+   * Buidl the raw model filters, supporting polymorphism
+   */
   buildRawModelFilters<T extends ModelCore = ModelCore>(classes: Class<T>[]) {
     const types = classes.map(t => {
       const conf = ModelRegistry.get(t);
@@ -471,6 +540,9 @@ export class ElasticsearchModelSource extends ModelSource {
     };
   }
 
+  /**
+   * Build query to support searching multiple fields
+   */
   buildRawMultiSuggestQuery<T extends ModelCore = ModelCore>(
     classes: Class<T>[], field: ValidStringFields<T>, query?: string,
     filter?: Query<T>
@@ -495,6 +567,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return res;
   }
 
+  /**
+   * Support searching multiple indices at the same time
+   */
   buildRawMultiQuery<T extends ModelCore = ModelCore>(classes: Class<T>[], query?: Query<T>, raw?: any) {
     const searchObj = this.getPlainSearchObject(classes[0], query ?? {});
     searchObj.body = {
@@ -624,6 +699,9 @@ export class ElasticsearchModelSource extends ModelSource {
     return this.getById(cls, id);
   }
 
+  /**
+   * Partially updates using a painless script to target the specific fields
+   */
   async updatePartial<T extends ModelCore>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
     const id = data.id;
     const script = ElasticsearchUtil.generateUpdateScript(data);
