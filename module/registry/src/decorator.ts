@@ -1,11 +1,21 @@
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { Class } from './types';
 
-// TODO: Document
+/**
+ * Register a class as pending
+ */
 class $PendingRegister {
   map = new Map<string, Class<any>[]>();
   ordered: [string, Class<any>[]][] = [];
 
+  /**
+   * Initialize the meta data for the cls
+   * @param cls Class
+   * @param file Filename
+   * @param hash Hash of class contents
+   * @param methods Methods and their hashes
+   * @param abstract Is the class abstract
+   */
   initMeta(cls: Class<any>, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean) {
     const meta = {
       __id: SystemUtil.computeModuleClass(file, cls.name),
@@ -29,6 +39,9 @@ class $PendingRegister {
     return true;
   }
 
+  /**
+   * Register class as pending
+   */
   add(cls: Class<any>) {
     if (!this.map.has(cls.__file)) {
       const sub: Class<any>[] = [];
@@ -38,6 +51,9 @@ class $PendingRegister {
     this.map.get(cls.__file)!.push(cls);
   }
 
+  /**
+   * Clear pending classes
+   */
   flush() {
     const out = this.ordered.slice(0);
     this.map.clear();
@@ -48,9 +64,11 @@ class $PendingRegister {
 
 export const PendingRegister = new $PendingRegister();
 
-// TODO: Document
+/**
+ * Decorator to track class as pending
+ */
 export function Register() {
   return (target: Class<any>) => PendingRegister.add(target);
 }
 
-Register.initMeta = PendingRegister.initMeta.bind(PendingRegister);
+Register.initMeta = PendingRegister.initMeta;

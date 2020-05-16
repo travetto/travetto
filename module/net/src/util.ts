@@ -32,7 +32,12 @@ export class NetUtil {
     return filePath;
   }
 
-
+  /**
+   * Wait for the http url to return a valid response
+   *
+   * @param url URL to check
+   * @param ms Maximum time to wait in milliseconds
+   */
   static async waitForHttp(url: string, ms = 5000) {
     const start = Date.now();
     const port = /:\d+/.test(url) ? parseInt(url.replace(/.*:(\d+).*/, (all, p) => p), 10) : (url.startsWith('https') ? 443 : 80);
@@ -62,6 +67,9 @@ export class NetUtil {
     }
   }
 
+  /**
+   * Wait for a TCP port to become available
+   */
   static async waitForPort(port: number, ms = 5000) {
     const start = Date.now();
     while ((Date.now() - start) < ms) {

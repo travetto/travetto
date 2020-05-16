@@ -5,13 +5,16 @@ import * as url from 'url';
 
 import { AppError } from '@travetto/base';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
-import { RawExecArgs, ResponseHandler, RequestContext, URLContext, HttpClient, ExecArgs } from './types';
+import { HttpRawExecArgs, HttpResponseHandler, HttpRequestContext, URLContext, HttpClient, HttpExecArgs } from './types';
 
 /**
  * Simple http rest client
  */
 export class HttpRequest {
 
+  /**
+   * Build the http error
+   */
   private static buildError(config: {
     message: string;
     status?: number;
@@ -32,7 +35,7 @@ export class HttpRequest {
   /**
    * Make a raw request.  Actually trigger the http(s) request to send
    */
-  private static async rawRequest<T>({ client, opts: requestOpts, payload, responseHandler, binary }: RequestContext) {
+  private static async rawRequest<T>({ client, opts: requestOpts, payload, responseHandler, binary }: HttpRequestContext) {
     return new Promise<string | Buffer | T>((resolve, reject) => {
       const req = client.request(requestOpts, (msg: http.IncomingMessage) => {
         const body: Buffer[] = [];
@@ -83,10 +86,13 @@ export class HttpRequest {
     });
   }
 
-  private static async rawExec(opts: RawExecArgs, retry?: number): Promise<string>;
-  private static async rawExec<T>(opts: RawExecArgs & { binary: true }, retry?: number): Promise<Buffer>;
-  private static async rawExec<T>(opts: RawExecArgs & { responseHandler: ResponseHandler<T> }, retry?: number): Promise<T>;
-  private static async rawExec<T = any>(inOpts: RawExecArgs & { responseHandler?: ResponseHandler<T> }, retry = 0): Promise<string | Buffer | T> {
+  /**
+   * Raw execution of the http request
+   */
+  private static async rawExec(opts: HttpRawExecArgs, retry?: number): Promise<string>;
+  private static async rawExec<T>(opts: HttpRawExecArgs & { binary: true }, retry?: number): Promise<Buffer>;
+  private static async rawExec<T>(opts: HttpRawExecArgs & { responseHandler: HttpResponseHandler<T> }, retry?: number): Promise<T>;
+  private static async rawExec<T = any>(inOpts: HttpRawExecArgs & { responseHandler?: HttpResponseHandler<T> }, retry = 0): Promise<string | Buffer | T> {
     try {
       return await this.rawRequest(this.buildRequestContext(inOpts));
     } catch (e) {
@@ -110,7 +116,7 @@ export class HttpRequest {
   /**
    * Produces the necessary data for the request to be executed
    */
-  static buildRequestContext<T>(inOpts: RawExecArgs & { binary?: boolean, responseHandler?: ResponseHandler<T> }): RequestContext {
+  static buildRequestContext<T>(inOpts: HttpRawExecArgs & { binary?: boolean, responseHandler?: HttpResponseHandler<T> }): HttpRequestContext {
     const { url: requestUrl, payload: inPayload, responseHandler, ...rest } = inOpts;
     const { hostname: host, port, pathname: path, username, password, searchParams, protocol } = new url.URL(requestUrl) as Required<url.URL>;
 
@@ -157,8 +163,8 @@ export class HttpRequest {
   /**
    * Add a JSON payload to the request
    */
-  static withJSONPayload(opts: RawExecArgs) {
-    const out: RawExecArgs = { ...opts };
+  static withJSONPayload(opts: HttpRawExecArgs) {
+    const out: HttpRawExecArgs = { ...opts };
 
     if (!out.headers) {
       out.headers = {};
@@ -178,17 +184,17 @@ export class HttpRequest {
   /**
    * Execute a simple http request
    */
-  static async exec(opts: ExecArgs, payload?: any): Promise<string>;
-  static async exec(opts: ExecArgs & { binary: true }, payload?: any): Promise<Buffer>;
-  static async exec<T>(opts: ExecArgs & { responseHandler: ResponseHandler<T> }, payload?: any): Promise<T>;
-  static async exec<T>(opts: ExecArgs & { binary?: boolean, responseHandler?: ResponseHandler<T> }, payload?: any): Promise<string | Buffer | T> {
+  static async exec(opts: HttpExecArgs, payload?: any): Promise<string>;
+  static async exec(opts: HttpExecArgs & { binary: true }, payload?: any): Promise<Buffer>;
+  static async exec<T>(opts: HttpExecArgs & { responseHandler: HttpResponseHandler<T> }, payload?: any): Promise<T>;
+  static async exec<T>(opts: HttpExecArgs & { binary?: boolean, responseHandler?: HttpResponseHandler<T> }, payload?: any): Promise<string | Buffer | T> {
     return await this.rawExec({ ...opts, payload });
   }
 
   /**
    * Execute a request, assuming the payload and response are both JSON
    */
-  static async execJSON<T, U = any>(opts: ExecArgs, payload?: U): Promise<T> {
+  static async execJSON<T, U = any>(opts: HttpExecArgs, payload?: U): Promise<T> {
     const res = await this.rawExec(this.withJSONPayload({ ...opts, payload }));
     return JSON.parse(res) as T;
   }

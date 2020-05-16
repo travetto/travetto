@@ -2,11 +2,17 @@ import { EventEmitter } from 'events';
 
 import { Class, ChangeSource, ChangeEvent } from '../types';
 
-// TODO: Document
+/**
+ * Change source specific to individual methods of classes.  Useful
+ * for method based registries
+ */
 export class MethodSource implements ChangeSource<[Class, Function]> {
 
   private events = new EventEmitter();
 
+  /**
+   * Define parent change source, generally will be the class source
+   */
   constructor(public classSource: ChangeSource<Class>) {
     classSource.on(e => this.onClassEvent(e));
   }
@@ -17,10 +23,16 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
     this.events.emit('change', ev);
   }
 
+  /**
+   * On a class being emitted, check methods
+   */
   onClassEvent(e: ChangeEvent<Class>) {
     const next = e.curr?.__methods ?? {};
     const prev = e.prev?.__methods ?? {};
 
+    /**
+     * Go through each method, comparing hashes.  To see added/removed and changed
+     */
     for (const k of Object.keys(next)) {
       if (!prev[k]) {
         this.emit({ type: 'added', curr: [e.curr!, e.curr!.prototype[k]] });

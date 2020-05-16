@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Reset the registry, and it's children
+ */
 export const init = {
   key: 'registry',
   before: ['compiler'],

@@ -2,18 +2,25 @@ import { Registry } from '../registry';
 import { ClassSource } from '../source/class-source';
 import { Class, ChangeEvent } from '../types';
 
-// TODO: Document
+/**
+ * The root registry that controls alll registries
+ */
 class $RootRegistry extends Registry {
   constructor() {
     super(new ClassSource());
   }
 
-  // Auto propagate
+  /**
+   * Send event to all all of the children
+   */
   async onEvent(e: ChangeEvent<Class>) {
-    await super.onEvent(e);
-    this.emit(e);
+    await super.onEvent(e); // Process event, and
+    this.emit(e); // Send to children
   }
 
+  /**
+   * Reset self and parents
+   */
   onReset() {
     for (const parent of this.parents) {
       parent!.reset();
