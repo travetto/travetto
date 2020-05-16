@@ -7,7 +7,9 @@ function id(cls: string | Class) {
   return cls && typeof cls !== 'string' ? cls.__id : cls;
 }
 
-// TODO: Document
+/**
+ * Metadata registry
+ */
 export abstract class MetadataRegistry<C extends { class: Class }, M = any, F = Function> extends Registry {
 
   static id = id;

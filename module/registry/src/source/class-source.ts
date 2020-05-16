@@ -5,7 +5,11 @@ import { Compiler } from '@travetto/compiler';
 import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';
 
-// TODO: Document
+/**
+ * A class change source. Meant to be hooked into the
+ * compiler as a way to listen to changes via the compiler
+ * watching.
+ */
 export class ClassSource implements ChangeSource<Class> {
 
   private classes = new Map<string, Map<string, Class>>();
@@ -22,6 +26,9 @@ export class ClassSource implements ChangeSource<Class> {
     });
   }
 
+  /**
+   * Flush classes
+   */
   private flush() {
     for (const [file, classes] of PendingRegister.flush()) {
       if (!classes || !classes.length) {
@@ -35,6 +42,9 @@ export class ClassSource implements ChangeSource<Class> {
     }
   }
 
+  /**
+   * Listen for a single file, and process all the classes within
+   */
   protected async handleFileChanges(file: string, classes: Class<any>[] = []) {
     const next = new Map(classes.map(cls => [cls.__id, cls] as [string, Class]));
 
@@ -49,6 +59,9 @@ export class ClassSource implements ChangeSource<Class> {
       this.classes.set(file, new Map());
     }
 
+    /**
+     * Determine delta based on the various classes (if being added, removed or updatd)
+     */
     for (const k of keys) {
       if (!next.has(k)) {
         this.emit({ type: 'removing', prev: prev.get(k)! });
@@ -64,6 +77,9 @@ export class ClassSource implements ChangeSource<Class> {
     }
   }
 
+  /**
+   * Flush all pending classes
+   */
   handlePendingFileChanges() {
     console.trace('Pending changes', PendingRegister.ordered);
     for (const [file, classes] of PendingRegister.flush()) {
@@ -71,19 +87,31 @@ export class ClassSource implements ChangeSource<Class> {
     }
   }
 
+  /**
+   * Emit a change event
+   */
   emit(e: ChangeEvent<Class>) {
     console.trace('Emitting change', e.type, e.curr && e.curr.__id, e.prev && e.prev.__id);
     this.events.emit('change', e);
   }
 
+  /**
+   * Clear all classes
+   */
   reset() {
     this.classes.clear();
   }
 
+  /**
+   * Initialize
+   */
   async init() {
     this.flush();
   }
 
+  /**
+   * Add callback for change events
+   */
   on(callback: (e: ChangeEvent<Class>) => void): void {
     this.events.on('change', callback);
   }
