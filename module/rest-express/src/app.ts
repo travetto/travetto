@@ -4,10 +4,22 @@ import * as compression from 'compression';
 
 import { AppUtil } from '@travetto/app';
 import { Injectable } from '@travetto/di';
-import { RouteUtil, RestApp, RouteConfig, RouteHandler, TRV_RAW } from '@travetto/rest';
+import { RouteUtil, RestApp, ParamConfig, RouteConfig, RouteHandler, TRV_RAW } from '@travetto/rest';
 
 import { RouteStack } from './internal/types';
-import { ParamConfig } from '@travetto/rest/src/types';
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    interface Request {
+      [TRV_RAW]: Request;
+    }
+    interface Response {
+      [TRV_RAW]: Response;
+    }
+  }
+}
+
 
 /**
  * An express rest app
@@ -23,7 +35,7 @@ export class ExpressRestApp extends RestApp<express.Application> {
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use((req, res, next) => {
-      req[TRV_RAW] = req;
+      req[TRV_RAW] = req; // Express objects match the framework structure
       res[TRV_RAW] = res;
       next();
     });
@@ -35,6 +47,9 @@ export class ExpressRestApp extends RestApp<express.Application> {
     return app;
   }
 
+  /**
+   * Remove routes
+   */
   async unregisterRoutes(key: string | symbol) {
     const routes = (this.raw._router.stack as RouteStack[]);
     const pos = routes.findIndex(x => x.handle.key === key);
@@ -43,6 +58,9 @@ export class ExpressRestApp extends RestApp<express.Application> {
     }
   }
 
+  /**
+   * Register or update routes
+   */
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
@@ -75,6 +93,9 @@ export class ExpressRestApp extends RestApp<express.Application> {
     }
   }
 
+  /**
+   * Listen to the application
+   */
   async listen() {
     let server;
     if (this.config.ssl.active) {
