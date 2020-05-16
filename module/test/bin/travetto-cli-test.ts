@@ -1,5 +1,6 @@
 import * as os from 'os';
-import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
+import { CliUtil } from '@travetto/cli/src/util';
+import { CompletionConfig } from '@travetto/cli/src/types';
 import { ColorUtil } from '@travetto/boot';
 import { Colors } from '@travetto/cli/src/color';
 
@@ -8,7 +9,7 @@ export function init() {
   return CliUtil.program.command('test')
     .arguments('[regexes...]')
     .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec|event|xunit)$/, 'tap')
-    .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, Math.min(4, os.cpus().length - 1))
+    .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, `${Math.min(4, os.cpus().length - 1)}`)
     .option('-m, --mode <mode>', 'Test run mode', /^(single|all)$/, 'all')
     .action(async (args, cmd) => {
 
