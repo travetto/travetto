@@ -1,4 +1,5 @@
 import { EnvUtil } from '@travetto/boot';
+import { Util } from './util';
 
 const ogExit = process.exit;
 
@@ -111,7 +112,7 @@ export class ShutdownManager {
     process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
     process.on('SIGTERM', this.execute.bind(this, 143));
-    process.on('uncaughtException', this.execute.bind(this, 1));
+    process.on('uncaughtException', (err) => this.unhandled.find(x => !!x(err as Error)));
     process.on('unhandledRejection', (err, p) => this.unhandled.find(x => !!x(err as Error, p)));
     this.unhandled.push(this.execute.bind(this, 1));
   }
@@ -135,6 +136,7 @@ export class ShutdownManager {
     } else {
       this.unhandled.splice(position, 0, handler);
     }
+    return this.removeUnhandledHandler.bind(this, handler);
   }
 
   /**
@@ -142,8 +144,33 @@ export class ShutdownManager {
    */
   static removeUnhandledHandler(handler: UnhandledHandler) {
     const index = this.unhandled.indexOf(handler);
-    if (this.unhandled.includes(handler)) {
+    if (index >= 0) {
       this.unhandled.splice(index, 1);
     }
   }
+
+  /**
+   * Wait until an unhandled event occurs, or the handler is disconnected
+   */
+  static waitForUnhandled() {
+    const uncaught = Util.resolvablePromise() as Promise<void> & { cancel?: () => void };
+    // @ts-ignore
+    const h = ShutdownManager.onUnhandled(err => uncaught.reject(err) || true, 0);
+    uncaught.cancel = h;
+    return uncaught as Promise<void> & { cancel: () => void };
+  }
 }
+
+export const CatchUnhandled = (): MethodDecorator =>
+  (target: any, prop: string | symbol, desc: PropertyDescriptor) => {
+    const fn = desc.value;
+    desc.value = async function (...args: any[]) {
+      const unhandled = ShutdownManager.waitForUnhandled();
+      const prom = fn.apply(this, args);
+      try {
+        return await Promise.race([prom, unhandled]);
+      } finally {
+        unhandled.cancel();
+      }
+    };
+  };

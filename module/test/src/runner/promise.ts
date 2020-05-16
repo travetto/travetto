@@ -1,7 +1,5 @@
 const og = Promise;
 
-import { AssertionError } from 'assert';
-
 // TODO: Document
 function Wrapped(this: Promise<any>, ex: any) {
   const prom = new og(ex);
@@ -39,9 +37,8 @@ export class PromiseCapture {
       final = err;
     }
 
-    const ret = new AssertionError({ message: `Pending promises: ${pending.length}` });
+    const ret = new Error(`Pending promises: ${pending.length}`);
     ret.stack = final?.stack ?? ret.stack;
-    ret.operator = 'unhandled promise';
     throw ret;
   }
 

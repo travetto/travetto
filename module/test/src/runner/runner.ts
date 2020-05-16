@@ -1,5 +1,5 @@
 import { FsUtil } from '@travetto/boot';
-import { PhaseManager } from '@travetto/base';
+import { PhaseManager, CatchUnhandled } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
 
 import { ConsumerManager } from '../consumer/manager';
@@ -53,6 +53,7 @@ export class Runner {
     }
   }
 
+  @CatchUnhandled()
   async runSingle() {
     const consumer = ConsumerManager.create(this.state.consumer ?? this.state.format);
     if (consumer.onStart) {
@@ -60,7 +61,6 @@ export class Runner {
     }
 
     await PhaseManager.init('test').run();
-
     const res = await TestExecutor.execute(consumer, this.state.args);
 
     if (consumer.summarize) {

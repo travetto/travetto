@@ -21,7 +21,7 @@ export class RedisCacheStore extends CacheStore {
   }
 
   toPromise<V>(fn: (cb: redis.Callback<V>) => void): Promise<V> {
-    return new Promise((res, rej) => fn((err: Error | undefined | null, v: V) => err ? rej(err) : res(v)));
+    return new Promise((res, rej) => fn((err, v) => err ? rej(err) : res(v)));
   }
 
   async get(key: string): Promise<CacheEntry | undefined> {
