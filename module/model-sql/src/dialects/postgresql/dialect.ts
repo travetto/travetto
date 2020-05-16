@@ -21,18 +21,24 @@ export class PostgreSQLDialect extends SQLDialect {
     super(config.namespace);
     this.conn = new PostgreSQLConnection(context, config);
 
+    // Special operators
     Object.assign(this.SQL_OPS, {
       $regex: '~',
       $iregex: '~*'
     });
 
+    // Special types
     Object.assign(this.COLUMN_TYPES, {
       JSON: 'json'
     });
 
+    // Word boundary
     this.regexWordBoundary = '\\y';
   }
 
+  /**
+   * How to hash
+   */
   hash(value: string) {
     return `encode(digest('${value}', 'sha1'), 'hex')`;
   }
@@ -50,6 +56,9 @@ export class PostgreSQLDialect extends SQLDialect {
     return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as T[] };
   }
 
+  /**
+   * Define column modification
+   */
   getModifyColumnSQL(stack: VisitStack[]) {
     const field = stack[stack.length - 1];
     const type = this.getColumnType(field as FieldConfig);

@@ -17,6 +17,9 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
     private config: SQLModelConfig
   ) { }
 
+  /**
+   * Initializes connection and establishes crypto extension for use with hashing
+   */
   async init() {
     this.pool = new pg.Pool({
       user: this.config.user,
