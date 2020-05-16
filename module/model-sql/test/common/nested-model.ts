@@ -1,7 +1,7 @@
 import { BaseNestedSuite } from '@travetto/model/test/lib/source/nested';
 import { BeforeAll } from '@travetto/test';
 import { SQLModelConfig } from '../../src/config';
-import { TestUtil } from '../util';
+import { TestUtil } from '../lib/util';
 import { SQLModelSource } from '../../src/source';
 import { DialectSuite as Suite } from '../decorator';
 
