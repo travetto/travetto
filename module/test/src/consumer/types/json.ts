@@ -1,10 +1,13 @@
 import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
-import { Consumer } from '../../model/consumer';
+import { TestConsumer } from '../../model/consumer';
 import { Consumable } from '../registry';
 
+/**
+ * Returns the entire result set as a single JSON document
+ */
 @Consumable('json')
-export class JSONEmitter implements Consumer {
+export class JSONEmitter implements TestConsumer {
 
   constructor(private stream: NodeJS.WriteStream = process.stdout) { }
 

@@ -60,6 +60,9 @@ interface Command {
  */
 export class AssertTransformer {
 
+  /**
+   * Resolves optoken to syntax kind.  Relies on `ts`
+   */
   static lookupOpToken(key: number) {
     if (OP_TOKEN_TO_NAME.size === 0) {
       Object.keys(ts.SyntaxKind)

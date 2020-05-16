@@ -1,11 +1,14 @@
 import { Writable } from 'stream';
 import { TestEvent } from '../../model/event';
-import { Consumer } from '../../model/consumer';
+import { TestConsumer } from '../../model/consumer';
 import { ConsumerUtil } from '../util';
 import { Consumable } from '../registry';
 
+/**
+ * Streams all test events a JSON payload, in an ndjson format
+ */
 @Consumable('event')
-export class EventStreamer implements Consumer {
+export class EventStreamer implements TestConsumer {
 
   constructor(private stream: Writable = process.stdout) { }
 

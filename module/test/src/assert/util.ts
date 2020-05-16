@@ -5,22 +5,34 @@ import { Util } from '@travetto/base';
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
 
-// TODO: Document
+/**
+ * Assertion utilities
+ */
 export class AssertUtil {
+
+  /**
+   * Clean a value for displaying in the output
+   */
   static cleanValue(val: any) {
     if (val && val.toClean) {
       return val.toClean();
-    } else if (val === null || val === undefined || (!(val instanceof RegExp) && Util.isPrimitive(val)) || Util.isPlainObject(val) || Array.isArray(val)) {
+    } else if (val === null || val === undefined
+      || (!(val instanceof RegExp) && Util.isPrimitive(val))
+      || Util.isPlainObject(val) || Array.isArray(val)
+    ) {
       return JSON.stringify(val);
     } else {
-      if (val.__id || !val.constructor || (!val.constructor.__id && Util.isFunction(val))) {
+      if (val.__id || !val.constructor || (!val.constructor.__id && Util.isFunction(val))) { // If a function, show name
         return val.name;
-      } else {
+      } else { // Else inspect
         return util.inspect(val, false, 1).replace(/\n/g, ' ');
       }
     }
   }
 
+  /**
+   * Determine file location for a given error and the stack trace
+   */
   static getPositionOfError(err: Error, filename: string) {
     const lines = (err.stack ?? new Error().stack!)
       .replace(/[\\]/g, '/')
@@ -63,6 +75,9 @@ export class AssertUtil {
     return res;
   }
 
+  /**
+   * Generate a suite error given a suite config, and an error
+   */
   static generateSuiteError(suite: SuiteConfig, methodName: string, error: Error) {
     const { file, ...pos } = this.getPositionOfError(error, suite.file);
     let line = pos.line;

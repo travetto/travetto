@@ -1,24 +1,49 @@
 import { Class } from '@travetto/registry/src/types';
 
 import { TestConfig, TestResult } from './test';
+import { SuiteCore } from './common';
 
-// TODO: Document
-export interface SuiteConfig {
+/**
+ * Suite configuration
+ */
+export interface SuiteConfig extends SuiteCore {
+  /**
+   * Class suite is in
+   */
   class: Class;
-  classId: string;
-  file: string;
-  lines: { start: number, end: number };
+  /**
+   * Should this be skipped
+   */
   skip: boolean;
-
+  /**
+   * Actual class instance
+   */
   instance: any;
-  description: string;
+  /**
+   * List of tests to run
+   */
   tests: TestConfig[];
+  /**
+   * Before all handlers
+   */
   beforeAll: Function[];
+  /**
+   * Before each handlers
+   */
   beforeEach: Function[];
+  /**
+   * After each handlers
+   */
   afterEach: Function[];
+  /**
+   * After all handlers
+   */
   afterAll: Function[];
 }
 
+/**
+ * All counts for the suite summary
+ */
 export interface Counts {
   passed: number;
   skipped: number;
@@ -26,18 +51,46 @@ export interface Counts {
   total: number;
 }
 
-// TODO: Document
+/**
+ * Results of a suite run
+ */
 export interface SuiteResult extends Counts {
+  /**
+   * Class identifier
+   */
   classId: string;
+  /**
+   * File suite is in
+   */
   file: string;
+  /**
+   * Lines of the suite
+   */
   lines: { start: number, end: number };
+  /**
+   * ALl test results
+   */
   tests: TestResult[];
+  /**
+   * Suite duration
+   */
   duration: number;
 }
 
-// TODO: Document
+/**
+ * All suite results
+ */
 export interface AllSuitesResult extends Counts {
+  /**
+   * List of all suites
+   */
   suites: SuiteResult[];
+  /**
+   * List of all errors
+   */
   errors: Error[];
+  /**
+   * Total duration
+   */
   duration: number;
 }

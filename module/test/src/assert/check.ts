@@ -12,17 +12,31 @@ import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types';
 
 const { AssertionError } = assert;
 
-// TODO: Document
+/**
+ * Check assertion
+ */
 export class AssertCheck {
+  /**
+   * Check a given assertion
+   * @param filename The file to assert in
+   * @param text The text representation of the assertion
+   * @param fn The name of the assertion operation
+   * @param positive Is the check positive or negative
+   * @param args The arguments passed in
+   */
   static check(filename: string, text: string, fn: string, positive: boolean, ...args: any[]) {
+    // Build the assertion object
     const assertion = AssertCapture.buildAssertion(filename, text, ASSERT_FN_OPERATOR[fn]);
 
+    // Determine text based on positivity
     const common: Record<string, string> = {
       state: positive ? 'should' : 'should not'
     };
 
+    // Invert check for negative
     const asrt = positive ? assert : (x: any, msg?: string) => assert(!x, msg);
 
+    // Check fn to call
     if (fn === 'fail') {
       if (args.length > 1) {
         assertion.actual = args[0];
@@ -56,7 +70,7 @@ export class AssertCheck {
       assertion.actual = (args[0] === null || args[0] === undefined) ? args[0] : args[0].constructor;
       assertion.message = args[2];
       assertion.operator = fn;
-    } else {
+    } else { // Handle unknown
       assertion.operator = fn ?? '';
       assertion.message = args[2];
       assertion.expected = args[1];
@@ -64,6 +78,7 @@ export class AssertCheck {
     }
 
     try {
+      // Clean actual/expected
       if (assertion.actual !== undefined) {
         assertion.actual = AssertUtil.cleanValue(assertion.actual);
       }
@@ -72,6 +87,7 @@ export class AssertCheck {
         assertion.expected = AssertUtil.cleanValue(assertion.expected);
       }
 
+      // Actually run the assertion
       switch (fn) {
         case 'instanceof': asrt(args[0] instanceof args[1], args[2]); break;
         case 'in': asrt(args[0] in args[1], args[2]); break;
@@ -95,6 +111,7 @@ export class AssertCheck {
       // Pushing on not error
       AssertCapture.add(assertion);
     } catch (e) {
+      // On error, produce the approprate error message
       if (e instanceof AssertionError) {
         if (!assertion.message) {
           assertion.message = (OP_MAPPING[fn] ?? `{state} be {expected}`);
@@ -110,19 +127,28 @@ export class AssertCheck {
     }
   }
 
+  /**
+   * Check a given error
+   * @param shouldThrow  Shoudl the test throw anything
+   * @param err The provided error
+   */
   static checkError(shouldThrow: ThrowableError | undefined, err: Error | string | undefined): Error | undefined {
-    if (!shouldThrow) {
-      return; // If nothing defined, then all errors are expected
+    if (!shouldThrow) { // If we shouldn't be throwing anything, we are good
+      return;
     }
+    // If should throw is a string or a regexp
     if (typeof shouldThrow === 'string' || shouldThrow instanceof RegExp) {
       const actual = `${err instanceof Error ? `'${err.message}'` : (err ? `'${err}'` : 'nothing')}`;
 
+      // If a string, check if error exists, and then see if the string is included in the message
       if (typeof shouldThrow === 'string' && (!err || !(err instanceof Error ? err.message : err).includes(shouldThrow))) {
         return new AssertionError({ message: `Expected error containing text '${shouldThrow}', but got ${actual}` });
       }
+      // If a regexp, check if error exists, and then test the error message against the regex
       if (shouldThrow instanceof RegExp && (!err || !shouldThrow.test(typeof err === 'string' ? err : err.message))) {
         return new AssertionError({ message: `Expected error with message matching '${shouldThrow.source}', but got ${actual} ` });
       }
+      // If passing in a constructor
     } else if (shouldThrow === Error ||
       shouldThrow === AppError ||
       Object.getPrototypeOf(shouldThrow) !== Object.getPrototypeOf(Function)
@@ -131,6 +157,7 @@ export class AssertCheck {
         return new AssertionError({ message: `Expected to throw ${shouldThrow.name}, but got ${err ?? 'nothing'} ` });
       }
     } else {
+      // Else treat as a simple function to build an error or not
       const res = shouldThrow(err);
       if (res && !(res instanceof Error)) {
         return new AppError(`Invalid check, "${shouldThrow.name}" should return an Error or undefined`, 'data');
@@ -140,6 +167,16 @@ export class AssertCheck {
     }
   }
 
+  /**
+   * Check the throw, doesNotThrow behavior of an assertion
+   * @param filename File
+   * @param text Text of assertion
+   * @param key Method to call
+   * @param negative Is the test positive or negative
+   * @param action Function to run
+   * @param shouldThrow Should this action throw
+   * @param message Message to share on failure
+   */
   static checkThrow(filename: string, text: string, key: string, negative: boolean,
     action: Function, shouldThrow?: ThrowableError, message?: string) {
     const assertion = AssertCapture.buildAssertion(filename, text, key);
@@ -166,6 +203,16 @@ export class AssertCheck {
     }
   }
 
+  /**
+   * Check the rejects, doesNotReject behavior of an assertion
+   * @param filename File
+   * @param text Text of assertion
+   * @param key Method to call
+   * @param negative Is the test positive or negative
+   * @param action Aync function to run
+   * @param shouldThrow Should this action reject
+   * @param message Message to share on failure
+   */
   static async checkThrowAsync(filename: string, text: string, key: string, negative: boolean,
     action: Function | Promise<any>, shouldThrow?: ThrowableError, message?: string) {
     const assertion = AssertCapture.buildAssertion(filename, text, key);
@@ -195,6 +242,9 @@ export class AssertCheck {
     }
   }
 
+  /**
+   * Look for any unhandled exceptions
+   */
   static checkUnhandled(test: TestConfig, err: Error | assert.AssertionError) {
     if (Util.hasToJSON(err)) {
       delete err.toJSON; // Do not allow the value to propagate as JSON

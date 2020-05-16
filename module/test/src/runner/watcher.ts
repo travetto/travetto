@@ -8,8 +8,8 @@ import { buildWorkManager } from '../worker/parent';
 import { RunEvent } from '../worker/types';
 import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
-import { ConsumerRegistry } from '../consumer/registry';
-import { Consumer } from '../model/consumer';
+import { TestConsumerRegistry } from '../consumer/registry';
+import { TestConsumer } from '../model/consumer';
 
 /**
  * Test Watcher.
@@ -90,10 +90,10 @@ export class TestWatcher {
     await TestRegistry.init();
     TestRegistry.listen(RootRegistry);
 
-    const ConsumerCls = ConsumerRegistry.get(format)!;
+    const ConsumerCls = TestConsumerRegistry.get(format)!;
     const hidden = new ConsumerCls();
 
-    const consumer: Consumer = {
+    const consumer: TestConsumer = {
       onEvent: (e) => {
         hidden.onEvent(e);
         try {

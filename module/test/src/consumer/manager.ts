@@ -1,18 +1,21 @@
-import { Consumer } from '../model/consumer';
+import { TestConsumer } from '../model/consumer';
 
-import { ConsumerRegistry } from './registry';
+import { TestConsumerRegistry } from './registry';
 import { AllResultsCollector } from './collector';
 import './types'; // Load all types
 
-export class ConsumerManager {
+/**
+ * Handles constructing a consumer
+ */
+export class TestConsumerManager {
 
-  static create(consumer: string | Consumer): Consumer & { summarize?: () => AllResultsCollector } {
-    const consumers: Consumer[] = [];
+  static create(consumer: string | TestConsumer): TestConsumer & { summarize?: () => AllResultsCollector } {
+    const consumers: TestConsumer[] = [];
 
     if (typeof consumer !== 'string') {
       consumers.push(consumer);
     } else {
-      const fmtClass = ConsumerRegistry.getOrDefault(consumer);
+      const fmtClass = TestConsumerRegistry.getOrDefault(consumer);
 
       if (fmtClass) {
         consumers.push(new fmtClass());
@@ -33,7 +36,7 @@ export class ConsumerManager {
     if (consumers.length === 1) {
       return consumers[0];
     } else {
-      const multi: Consumer & { summarize?: () => any } = {
+      const multi: TestConsumer & { summarize?: () => any } = {
         onStart() {
           for (const c of consumers) {
             if (c.onStart) {

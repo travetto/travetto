@@ -1,4 +1,4 @@
-import { Consumer } from '../model/consumer';
+import { TestConsumer } from '../model/consumer';
 
 /**
  * Run state
@@ -11,7 +11,7 @@ export interface RunState {
   /**
    * The run consumer
    */
-  consumer?: Consumer;
+  consumer?: TestConsumer;
   /**
    * Test mode
    */
