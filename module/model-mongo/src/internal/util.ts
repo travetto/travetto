@@ -9,6 +9,9 @@ import {
 import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
 
+/**
+ * Covnerting units to various radians
+ */
 const RADIANS_TO: Record<DistanceUnit, number> = {
   km: 6378,
   mi: 3963,
@@ -17,13 +20,18 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
   rad: 1
 };
 
-// TODO: Document
+/**
+ * Basic mongo utils for conforming to the model module
+ */
 export class MongoUtil {
 
   static has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
   static has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
   static has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
 
+  /**
+   * Get a where clause with type
+   */
   static extractTypedWhereClause<T>(cls: Class<T>, o: WhereClause<T>): Record<string, any> {
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
@@ -32,6 +40,9 @@ export class MongoUtil {
     return this.extractWhereClause(o);
   }
 
+  /**
+   * Build mongo where clause
+   */
   static extractWhereClause<T>(o: WhereClause<T>): Record<string, any> {
     if (this.has$And(o)) {
       return { $and: o.$and.map(x => this.extractWhereClause<T>(x)) };
@@ -44,7 +55,9 @@ export class MongoUtil {
     }
   }
 
-
+  /**
+   * Convert ids from '_id' to 'id'
+   */
   static replaceId(v: Record<string, string>): Record<string, mongo.ObjectId>;
   static replaceId(v: string[]): mongo.ObjectId[];
   static replaceId(v: string): mongo.ObjectId;
@@ -64,6 +77,9 @@ export class MongoUtil {
     }
   }
 
+  /**
+   * Convert `'a.b.c'` to `{ a: { b: { c: ... }}}`
+   */
   static extractSimple<T>(o: T, path: string = ''): Record<string, any> {
     const out: Record<string, any> = {};
     const sub = o as Record<string, any>;
