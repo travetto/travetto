@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import * as path from 'path';
 
+import { CatchUnhandled } from '@travetto/base';
 import { FsUtil, EnvUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
@@ -35,13 +36,49 @@ export class TestExecutor {
     consumer.onEvent({ type: 'suite', phase: 'after', suite: { ...suite, failed: 1, passed: 0, total: 1, skipped: 0 } });
   }
 
+  @CatchUnhandled()
+  static async _executeTest(test: TestConfig): Promise<Error | undefined> {
+    const suite = TestRegistry.get(test.class);
+    const timeout = new Timeout(test.timeout || TEST_TIMEOUT);
+
+    let err: Error | undefined;
+
+    try {
+      await Promise.race([timeout.wait(), suite.instance[test.methodName]()]);
+    } catch (e) {
+      err = e;
+    }
+
+    const pending = PromiseCapture.stop();
+    if (pending) {
+      try {
+        await Promise.race([timeout.wait(), pending]);
+      } catch (e) {
+        err = e;
+      }
+    }
+
+    // Cancel timeout
+    timeout.cancel();
+
+    // Errors that are not expected
+    if (err && !(err instanceof assert.AssertionError)) {
+      throw err;
+    }
+
+    if (test.shouldThrow) {
+      err = AssertCheck.checkError(test.shouldThrow!, err)!;
+    }
+
+    return err;
+  }
+
   static async executeTest(consumer: Consumer, test: TestConfig) {
 
     consumer.onEvent({ type: 'test', phase: 'before', test });
 
     const startTime = Date.now();
 
-    const suite = TestRegistry.get(test.class);
     const result: Partial<TestResult> = {
       methodName: test.methodName,
       description: test.description,
@@ -55,53 +92,26 @@ export class TestExecutor {
       return result as TestResult;
     }
 
-    const timeout = new Timeout(test.timeout || TEST_TIMEOUT);
+    PromiseCapture.start();
+    ConsoleCapture.start();
+    AssertCapture.start(test, (a) =>
+      consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
 
+    let error: Error | undefined;
     try {
-      PromiseCapture.start();
-      ConsoleCapture.start();
-      AssertCapture.start(test, (a) =>
-        consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
-
-      await Promise.race([suite.instance[test.methodName](), timeout.wait()]);
-
-      // Ensure nothing was meant to be caught
-      throw new Error(MISSING_ERROR);
-
-    } catch (err) {
-      if (err !== timeout && test.shouldThrow) {
-        err = AssertCheck.checkError(test.shouldThrow!, err)!;
-      }
-
-      // If error isn't defined, we are good
-      if (!err || err.message === MISSING_ERROR) {
-        result.status = 'passed';
-      } else {
-        result.status = 'failed';
-        result.error = err;
-
-        if (!(err instanceof assert.AssertionError)) {
-          AssertCheck.checkUnhandled(test, err);
-        }
-      }
-    } finally {
-      const pending = PromiseCapture.stop();
-      const finalErr = await (pending && Promise.race([pending, timeout.wait()]).catch(e => e));
-      timeout.cancel();
-
-      if (result.status !== 'failed' && finalErr) {
-        result.status = 'failed';
-        result.error = finalErr;
-        if (finalErr !== timeout) {
-          AssertCheck.checkUnhandled(test, finalErr);
-        }
-      }
-
-      result.output = ConsoleCapture.end();
-      result.assertions = AssertCapture.end();
+      error = await this._executeTest(test);
+    } catch (badErr) {
+      error = badErr;
+      AssertCheck.checkUnhandled(test, badErr);
     }
 
-    result.duration = Date.now() - startTime;
+    Object.assign(result, {
+      status: error ? 'failed' : 'passed',
+      output: ConsoleCapture.end(),
+      assertions: AssertCapture.end(),
+      duration: Date.now() - startTime,
+      ...(error ? { error } : {})
+    });
 
     consumer.onEvent({ type: 'test', phase: 'after', test: result as TestResult });
 

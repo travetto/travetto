@@ -89,9 +89,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     }
 
     // Reload registries, test and root
-    console.error('Resetting');
     await PhaseManager.init('reset').run();
-
     ShutdownManager.execute(-1);
   }
 
