@@ -3,8 +3,11 @@ import { CookiesInterceptor, RestInterceptor, Request, Response } from '@travett
 
 import { RestSessionService } from './service';
 
+/**
+ * Tracks the user activity and loads/stores the session for a given
+ * request/response depending on session existence and state change
+ */
 @Injectable()
-// TODO: Document
 export class SessionInterceptor extends RestInterceptor {
 
   after = [CookiesInterceptor];
