@@ -1,3 +1,6 @@
+/**
+ * Route structure within express
+ */
 export class RouteStack {
   name: string;
   keys: string[];
