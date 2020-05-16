@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { FsUtil, EnvUtil } from '@travetto/boot';
+import { FsUtil, EnvUtil, ScanFs, ScanEntry } from '@travetto/boot';
 
 import { Env } from './env';
-import { ScanFs, ScanEntry } from './scan-fs';
 
 import { AppError } from './error';
 
@@ -29,7 +28,7 @@ export class $ResourceManager {
     this.paths.push(...this.rootPaths);
 
     this.paths = this.paths
-      .map(x => FsUtil.resolveUnix(Env.cwd, x, this.folder))
+      .map(x => FsUtil.resolveUnix(FsUtil.cwd, x, this.folder))
       .filter(x => FsUtil.existsSync(x));
   }
 
@@ -59,7 +58,7 @@ export class $ResourceManager {
    * @param full Is the path fully qualified or should it be relative to the cwd
    */
   addPath(searchPath: string, full = false) {
-    this.paths.push(full ? FsUtil.resolveUnix(Env.cwd, searchPath) : FsUtil.resolveUnix(Env.cwd, searchPath, this.folder));
+    this.paths.push(full ? FsUtil.resolveUnix(FsUtil.cwd, searchPath) : FsUtil.resolveUnix(FsUtil.cwd, searchPath, this.folder));
   }
 
   /**
@@ -73,7 +72,7 @@ export class $ResourceManager {
    * List all paths as relative to the cwd
    */
   getRelativePaths() {
-    return this.paths.slice(0).map(x => x.replace(`${Env.cwd}/`, ''));
+    return this.paths.slice(0).map(x => x.replace(`${FsUtil.cwd}/`, ''));
   }
 
   /**

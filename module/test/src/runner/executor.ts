@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 import * as path from 'path';
 
-import { Env } from '@travetto/base';
 import { FsUtil, EnvUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
@@ -27,7 +26,7 @@ export class TestExecutor {
     const name = path.basename(file);
     const classId = SystemUtil.computeModuleClass(file, name);
     const suite = { class: { name }, classId, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
-    err.message = err.message.replace(Env.cwd, '.');
+    err.message = err.message.replace(FsUtil.cwd, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
     consumer.onEvent({ type: 'test', phase: 'before', test: res.testConfig });
@@ -185,8 +184,8 @@ export class TestExecutor {
   }
 
   static async execute(consumer: Consumer, [file, ...args]: string[]) {
-    if (!file.startsWith(Env.cwd)) {
-      file = FsUtil.joinUnix(Env.cwd, file);
+    if (!file.startsWith(FsUtil.cwd)) {
+      file = FsUtil.joinUnix(FsUtil.cwd, file);
     }
 
     try {

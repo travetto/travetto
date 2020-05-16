@@ -391,7 +391,7 @@ export class TransformUtil {
 
       return out;
     } catch (err) { // Missing import
-      const out = new Error(`${err.message} in ${file.fileName.replace(`${Env.cwd}/`, '')}`);
+      const out = new Error(`${err.message} in ${file.fileName.replace(`${FsUtil.cwd}/`, '')}`);
       out.stack = err.stack;
       throw out;
     }

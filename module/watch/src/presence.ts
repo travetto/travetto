@@ -1,7 +1,7 @@
 import * as path from 'path';
 
-import { FsUtil } from '@travetto/boot';
-import { ScanApp, ScanEntry, ScanHandler } from '@travetto/base';
+import { FsUtil, ScanEntry, ScanHandler } from '@travetto/boot';
+import { ScanApp } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { Watcher } from './watcher';

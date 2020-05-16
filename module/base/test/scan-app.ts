@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { ScanApp } from '../src/scan-app';
+import { ScanApp } from '../src/scan';
 
 @Suite()
 class ScanTests {

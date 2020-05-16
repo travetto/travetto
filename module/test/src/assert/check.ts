@@ -2,7 +2,8 @@
 
 import * as assert from 'assert';
 
-import { Util, Env, AppError } from '@travetto/base';
+import { FsUtil } from '@travetto/boot';
+import { Util, AppError } from '@travetto/base';
 
 import { ThrowableError, TestConfig } from '../model/test';
 import { AssertCapture } from './capture';
@@ -207,7 +208,7 @@ export class AssertCheck {
     AssertCapture.add({
       classId: test.classId,
       methodName: test.methodName,
-      file: test.file.replace(`${Env.cwd}/`, ''),
+      file: test.file.replace(`${FsUtil.cwd}/`, ''),
       line,
       operator: 'throws',
       error: err,

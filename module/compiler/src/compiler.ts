@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 
 import { FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil } from '@travetto/boot';
-import { Env, ScanApp } from '@travetto/base';
+import { ScanApp } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
 import { Transpiler } from './transpiler';
@@ -21,7 +21,7 @@ class $Compiler extends EventEmitter {
     /**
      * The working directory
      */
-    protected readonly cwd: string = Env.cwd,
+    protected readonly cwd: string = FsUtil.cwd,
     /**
      * The cache source
      */
