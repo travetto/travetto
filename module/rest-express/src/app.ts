@@ -8,19 +8,6 @@ import { RouteUtil, RestApp, ParamConfig, RouteConfig, RouteHandler, TRV_RAW } f
 
 import { RouteStack } from './internal/types';
 
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Express {
-    interface Request {
-      [TRV_RAW]: Request;
-    }
-    interface Response {
-      [TRV_RAW]: Response;
-    }
-  }
-}
-
-
 /**
  * An express rest app
  */
@@ -34,7 +21,10 @@ export class ExpressRestApp extends RestApp<express.Application> {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded());
     app.use(bodyParser.raw({ type: 'image/*' }));
-    app.use((req, res, next) => {
+    app.use((
+      req: express.Request & { [TRV_RAW]?: express.Request },
+      res: express.Response & { [TRV_RAW]?: express.Response },
+      next) => {
       req[TRV_RAW] = req; // Express objects match the framework structure
       res[TRV_RAW] = res;
       next();
