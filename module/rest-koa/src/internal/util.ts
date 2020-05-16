@@ -5,8 +5,13 @@ import { TRV_ORIG, TRV_RAW } from '@travetto/rest/src/types';
 const TRV_RES = Symbol.for('@trv:rest-koa/response');
 const TRV_REQ = Symbol.for('@trv:rest-koa/request');
 
-// TODO: Document
+/**
+ * Provides translation between koa request/response objects and the framework
+ */
 export class KoaAppUtil {
+  /**
+   * Build a Travetto Request from a koa context
+   */
   static getRequest(ctx: koa.ParameterizedContext & { [TRV_REQ]?: Travetto.Request }) {
     if (!ctx[TRV_REQ]) {
       ctx[TRV_REQ] = RestAppUtil.decorateRequest({
@@ -30,6 +35,9 @@ export class KoaAppUtil {
     return ctx[TRV_REQ]!;
   }
 
+  /**
+   * Build a Travetto Response from a koa context
+   */
   static getResponse(ctx: koa.ParameterizedContext & { [TRV_RES]?: Travetto.Response }) {
     if (!ctx[TRV_RES]) {
       ctx[TRV_RES] = RestAppUtil.decorateResponse({
