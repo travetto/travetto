@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Assertion method name to the textual operator
+ */
 export const ASSERT_FN_OPERATOR: Record<string, string> = {
   equal: '==',
   notEqual: '!=',
@@ -10,10 +12,14 @@ export const ASSERT_FN_OPERATOR: Record<string, string> = {
   lessThan: '<'
 };
 
-// TODO: Document
+/**
+ * Which types are candidates for deep literal checking
+ */
 export const DEEP_LITERAL_TYPES = new Set(['Set', 'Map', 'Array', 'String', 'Number', 'Object', 'Boolean']);
 
-// TODO: Document
+/**
+ * Mapping of assert equal methods to assert deep equal methods
+ */
 export const DEEP_EQUALS_MAPPING: Record<string, string> = {
   equal: 'deepEqual',
   notEqual: 'notDeepEqual',
@@ -21,7 +27,9 @@ export const DEEP_EQUALS_MAPPING: Record<string, string> = {
   notStrictEqual: 'notDeepStrictEqual'
 };
 
-// TODO: Document
+/**
+ * Message patterns for assertion operations
+ */
 export const OP_MAPPING: Record<string, string> = {
   ok: '{actual} {state} {expected}',
   in: '{actual} {state} be in {expected}',
@@ -46,7 +54,9 @@ export const OP_MAPPING: Record<string, string> = {
   lessThan: '{actual} {state} be less than {expected}'
 };
 
-// TODO: Document
+/**
+ * Typescript optoken to assert methods
+ */
 export const OPTOKEN_ASSERT = {
   InKeyword: 'in',
   EqualsEqualsToken: 'equal',

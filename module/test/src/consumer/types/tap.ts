@@ -3,14 +3,16 @@ import { ErrorUtil } from '@travetto/base/src/internal/error';
 
 import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
-import { Consumer } from '../../model/consumer';
+import { TestConsumer } from '../../model/consumer';
 import { Consumable } from '../registry';
 
 import { TapEnhancer, DUMMY_ENHANCER } from './tap-enhancer';
 
-// TODO: Document
+/**
+ * TAP Format consumer
+ */
 @Consumable('tap')
-export class TapEmitter implements Consumer {
+export class TapEmitter implements TestConsumer {
   private count = 0;
 
   constructor(
@@ -22,16 +24,25 @@ export class TapEmitter implements Consumer {
     this.stream.write(`${message}\n`);
   }
 
+  /**
+   * Preamble
+   */
   onStart() {
     this.log(this.enhancer.suiteName('TAP version 13'));
   }
 
+  /**
+   * Output supplemental data (e.g. lgos)
+   */
   logMeta(obj: any) {
     let body = YamlUtil.serialize(obj);
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.enhancer.objectInspect(body)}\n...`);
   }
 
+  /**
+   * Listen for each event
+   */
   onEvent(e: TestEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
@@ -41,6 +52,7 @@ export class TapEmitter implements Consumer {
       }
       this.log(`# ${header}`);
 
+      // Handle each assertion
       if (test.assertions.length) {
         let subCount = 0;
         for (const a of test.assertions) {
@@ -66,6 +78,7 @@ export class TapEmitter implements Consumer {
         this.log(`    ${this.enhancer.assertNumber(1)}..${this.enhancer.assertNumber(subCount)}`);
       }
 
+      // Track test result
       let status = `${this.enhancer.testNumber(++this.count)} `;
       switch (test.status) {
         case 'skipped': status += ' # SKIP'; break;
@@ -76,12 +89,15 @@ export class TapEmitter implements Consumer {
 
       this.log(status);
 
+      // Handle error
       if (test.status === 'failed') {
         if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
           const err = ErrorUtil.deserializeError(test.error);
           this.logMeta({ error: err.toConsole() });
         }
       }
+
+      // Track output
       if (test.output) {
         for (const key of ['log', 'info', 'error', 'debug', 'warn']) {
           if (test.output[key]) {
@@ -92,6 +108,9 @@ export class TapEmitter implements Consumer {
     }
   }
 
+  /**
+   * Summarize all results
+   */
   onSummary(summary: AllSuitesResult) {
     this.log(`${this.enhancer.testNumber(1)}..${this.enhancer.testNumber(summary.total)}`);
 

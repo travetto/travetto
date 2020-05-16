@@ -1,10 +1,18 @@
 import { Assertion, TestConfig, TestResult } from './test';
 import { SuiteConfig, SuiteResult } from './suite';
 
+/**
+ * Targets
+ */
 export type EventEntity = 'test' | 'suite' | 'assertion';
+/**
+ * Phases
+ */
 export type EventPhase = 'before' | 'after';
 
-// TODO: Document
+/**
+ * Different test event shapes
+ */
 export type TestEvent =
   { type: 'assertion', phase: 'after', assertion: Assertion } |
   { type: 'test', phase: 'before', test: TestConfig } |

@@ -1,12 +1,12 @@
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { ParentCommChannel, WorkUtil } from '@travetto/worker';
 import { Events, RunEvent } from './types';
-import { Consumer } from '../model/consumer';
+import { TestConsumer } from '../model/consumer';
 
 /**
  *  Produce a handler for the child worker
  */
-export function buildWorkManager(consumer: Consumer) {
+export function buildWorkManager(consumer: TestConsumer) {
   /**
    * Spawn a child
    */

@@ -1,11 +1,11 @@
 import { Class } from '@travetto/registry';
-import { Consumer } from '../model/consumer';
+import { TestConsumer } from '../model/consumer';
 
-export class ConsumerRegistry {
-  private static registered = new Map<string, Class<Consumer>>();
-  private static primary: Class<Consumer>;
+export class TestConsumerRegistry {
+  private static registered = new Map<string, Class<TestConsumer>>();
+  private static primary: Class<TestConsumer>;
 
-  static add(type: string, cls: Class<Consumer>, isDefault = false) {
+  static add(type: string, cls: Class<TestConsumer>, isDefault = false) {
     if (isDefault) {
       this.primary = cls;
     }
@@ -22,7 +22,7 @@ export class ConsumerRegistry {
 }
 
 export function Consumable(type: string, isDefault = false) {
-  return function (cls: Class<Consumer>) {
-    ConsumerRegistry.add(type, cls, isDefault);
+  return function (cls: Class<TestConsumer>) {
+    TestConsumerRegistry.add(type, cls, isDefault);
   };
 }

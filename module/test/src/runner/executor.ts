@@ -1,4 +1,3 @@
-import * as assert from 'assert';
 import * as path from 'path';
 
 import { CatchUnhandled } from '@travetto/base';
@@ -8,7 +7,7 @@ import { SystemUtil } from '@travetto/base/src/internal/system';
 import { TestRegistry } from '../registry/registry';
 import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
-import { Consumer } from '../model/consumer';
+import { TestConsumer } from '../model/consumer';
 import { AssertCheck } from '../assert/check';
 import { AssertCapture } from '../assert/capture';
 import { ConsoleCapture } from './console';
@@ -16,6 +15,7 @@ import { ExecutionPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { AssertUtil } from '../assert/util';
 import { Timeout } from './timeout';
+import { ExecutionError } from './error';
 
 const TEST_TIMEOUT = EnvUtil.getTime('TRV_TEST_TIMEOUT', 5000);
 
@@ -39,9 +39,6 @@ export class TestExecutor {
     try {
       await Promise.race([timeout.wait(), suite.instance[test.methodName]()]);
     } catch (e) {
-      if (e !== timeout && !(e instanceof assert.AssertionError)) {
-        // We have a non-assertion error
-      }
       err = e;
     }
 
@@ -56,7 +53,7 @@ export class TestExecutor {
     timeout.cancel();
 
     // Errors that are not expected
-    if (err && !(err instanceof assert.AssertionError)) {
+    if (err && err instanceof ExecutionError) {
       throw err;
     }
 
@@ -70,7 +67,7 @@ export class TestExecutor {
   /**
    * Fail an entire file, marking the whole file as failed
    */
-  static failFile(consumer: Consumer, file: string, err: Error) {
+  static failFile(consumer: TestConsumer, file: string, err: Error) {
     const name = path.basename(file);
     const classId = SystemUtil.computeModuleClass(file, name);
     const suite = { class: { name }, classId, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
@@ -103,7 +100,7 @@ export class TestExecutor {
   /**
    * Execute the test, capture output, assertions and promises
    */
-  static async executeTest(consumer: Consumer, test: TestConfig) {
+  static async executeTest(consumer: TestConsumer, test: TestConfig) {
 
     // Mark test start
     consumer.onEvent({ type: 'test', phase: 'before', test });
@@ -153,7 +150,7 @@ export class TestExecutor {
   /**
    * Execute a single test within a suite
    */
-  static async executeSuiteTest(consumer: Consumer, suite: SuiteConfig, test: TestConfig) {
+  static async executeSuiteTest(consumer: TestConsumer, suite: SuiteConfig, test: TestConfig) {
     const result: SuiteResult = this.createSuiteResult(suite);
 
     const mgr = new ExecutionPhaseManager(consumer, suite, result);
@@ -176,7 +173,7 @@ export class TestExecutor {
   /**
    * Execute an entire suite
    */
-  static async executeSuite(consumer: Consumer, suite: SuiteConfig) {
+  static async executeSuite(consumer: TestConsumer, suite: SuiteConfig) {
     const result: SuiteResult = this.createSuiteResult(suite);
 
     const startTime = Date.now();
@@ -229,7 +226,7 @@ export class TestExecutor {
    * Handle executing a suite's test/tests based on command line inputs
    */
   @CatchUnhandled()
-  static async execute(consumer: Consumer, file: string, ...args: string[]) {
+  static async execute(consumer: TestConsumer, file: string, ...args: string[]) {
 
     if (!file.startsWith(FsUtil.cwd)) {
       file = FsUtil.joinUnix(FsUtil.cwd, file);

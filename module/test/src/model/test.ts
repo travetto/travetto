@@ -1,47 +1,110 @@
 import { Class } from '@travetto/registry/src/types';
+import { SuiteCore } from './common';
 
 export type ThrowableError = string | RegExp | Function;
 
-// TODO: Document
-export interface TestConfig {
+/**
+ * Specific configuration for a test
+ */
+export interface TestConfig extends SuiteCore {
+  /**
+   * The Class it's a part of
+   */
   class: Class<any>;
-  classId: string;
-  description: string;
-  file: string;
-  lines: { start: number, end: number };
+  /**
+   * The test's method name
+   */
   methodName: string;
+  /**
+   * Should the test throw
+   */
   shouldThrow?: ThrowableError;
+  /**
+   * Should it be skipped
+   */
   skip: boolean;
+  /**
+   * Override the timeout duration
+   */
   timeout?: number;
 }
 
-// TODO: Document
+/**
+ * A specific assertion output
+ */
 export interface Assertion {
+  /**
+   * Class the assertion is in
+   */
   classId: string;
+  /**
+   * The method of the assertion is in
+   */
   methodName: string;
+  /**
+   * Provided value
+   */
   actual?: any;
+  /**
+   * Expected value
+   */
   expected?: any;
+  /**
+   * Operator
+   */
   operator: string;
+  /**
+   * Error message
+   */
   message?: string;
+  /**
+   * Actual error
+   */
   error?: Error;
+  /**
+   * File of assertion
+   */
   file: string;
+  /**
+   * Line number
+   */
   line: number;
+  /**
+   * Full text of expression
+   */
   text: string;
 }
 
-// TODO: Document
-export interface TestResult {
-  status: 'passed' | 'skipped' | 'failed';
-  error?: Error;
-  file: string;
-  lines: { start: number, end: number };
+/**
+ * Test results
+ */
+export interface TestResult extends SuiteCore {
+  /**
+   * The test's method name
+   */
   methodName: string;
-  classId: string;
-  description: string;
+  /**
+   * status
+   */
+  status: 'passed' | 'skipped' | 'failed';
+  /**
+   * Error if failed
+   */
+  error?: Error;
+  /**
+   * List of assertions
+   */
   assertions: Assertion[];
+  /**
+   * Duration for the test
+   */
   duration: number;
+  /**
+   * Total duration including before/after
+   */
   durationTotal: number;
-  output: {
-    [key: string]: string;
-  };
+  /**
+   * Logging output
+   */
+  output: Record<string, string>;
 }

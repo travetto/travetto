@@ -2,11 +2,14 @@ import { YamlUtil } from '@travetto/yaml';
 
 import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
-import { Consumer } from '../../model/consumer';
+import { TestConsumer } from '../../model/consumer';
 import { Consumable } from '../registry';
 
+/**
+ * Xunit consumer, compatible with JUnit formatters
+ */
 @Consumable('xunit')
-export class XunitEmitter implements Consumer {
+export class XunitEmitter implements TestConsumer {
   private tests: string[] = [];
   private suites: string[] = [];
 
@@ -14,6 +17,9 @@ export class XunitEmitter implements Consumer {
     private stream: NodeJS.WriteStream = process.stdout
   ) { }
 
+  /**
+   * Process metadata information (e.g. logs)
+   */
   buildMeta(obj: any) {
     if (!obj) {
       return '';
@@ -33,6 +39,9 @@ export class XunitEmitter implements Consumer {
     }
   }
 
+  /**
+   * Handle each test event
+   */
   onEvent(e: TestEvent) {
     if (e.type === 'test' && e.phase === 'after') {
 
@@ -83,6 +92,9 @@ export class XunitEmitter implements Consumer {
     }
   }
 
+  /**
+   * Summarize all results
+   */
   onSummary(summary: AllSuitesResult) {
     this.stream.write(`
 <?xml version="1.0" encoding="UTF-8"?>
