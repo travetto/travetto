@@ -46,7 +46,7 @@ This usage should be comparable to express, koa and mostly every other framework
 ## Configuration
 Session mechanics are defined by two main components, encoders and a cache store.  The encoders are provided within the module, but the stores are provided via the [`Cache`](https://github.com/travetto/travetto/tree/master/module/cache) module.  
 
-By default, the module supplies the [`CookieEncoder`](./src/encoder/cookie.ts) and the [`MemoryCacheStore`] as default usage. 
+By default, the module supplies the [`CookieEncoder`](./src/encoder/cookie.ts) and the [`MemoryCacheSource`] as default usage. 
 
 ### Building an Encoder
 Encoders are pieces that enable you read/write the session state from the request/response.  This allows for sessions to be read/written to cookies, headers, url parameters, etc. The structure for the encoder is fairly straightforward:
