@@ -1,20 +1,17 @@
-
-import { SystemUtil } from '@travetto/base/src/internal/system';
 import { ProcessCommChannel } from './channel';
 
 /**
  * Child channel, communicates only to parent
  */
 export class ChildCommChannel<U = any> extends ProcessCommChannel<NodeJS.Process, U> {
-  idle: ReturnType<(typeof SystemUtil)['idle']>;
+  idleTimer: NodeJS.Timer | undefined;
 
-  constructor(timeout?: number) {
+  constructor(private timeout?: number) {
     super(process);
 
     if (timeout) {
-      this.idle = SystemUtil.idle(timeout, () => process.exit(0));
-      process.on('message', () => this.idle.restart());
-      this.idle.start();
+      process.on('message', () => this.idle());
+      this.idle();
     }
   }
 
@@ -23,8 +20,18 @@ export class ChildCommChannel<U = any> extends ProcessCommChannel<NodeJS.Process
    */
   async destroy() {
     await super.destroy();
-    if (this.idle) {
-      this.idle.stop();
+    this.idle(0);
+  }
+
+  /**
+   * Control the idle behavior of the process
+   */
+  async idle(timeout: number | undefined = this.timeout) {
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+    }
+    if (timeout) {
+      this.idleTimer = setTimeout(() => process.exit(0), timeout).unref();
     }
   }
 }

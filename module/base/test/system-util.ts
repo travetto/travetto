@@ -63,4 +63,10 @@ class SystemUtilTests {
     assert(modName4 === '@npm/lodash/test');
   }
 
+  @Test()
+  async testHash() {
+    const allHashes = ' '.repeat(1000).split('').map((x, i) => SystemUtil.naiveHash(' '.repeat(i + 2)));
+    const hashForSpace = SystemUtil.naiveHash(' ');
+    assert(!allHashes.includes(hashForSpace));
+  }
 }

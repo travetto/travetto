@@ -25,8 +25,8 @@ if (
 /**
  * Handle if cli is install globally
  */
-if (!__filename.includes(FsUtil.cwd)) { // If the current file is not under the working directory
-  const hasLocal = FsUtil.existsSync(`${FsUtil.cwd}/node_modules/@travetto/${__filename.split('@travetto/')[1]}`);
+if (!FsUtil.toUnix(__filename).includes(FsUtil.cwd)) { // If the current file is not under the working directory
+  const hasLocal = FsUtil.existsSync(`${FsUtil.cwd}/node_modules/@travetto/${FsUtil.toUnix(__filename).split('@travetto/')[1]}`);
 
   // Map the module loading for targeting the local node_modules
   const Module = require('module');
