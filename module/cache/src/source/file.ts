@@ -5,9 +5,9 @@ import * as util from 'util';
 import { FsUtil } from '@travetto/boot';
 import { ShutdownManager, Util } from '@travetto/base';
 
-import { CullableCacheStore } from './cullable';
+import { CullableCacheSource } from './cullable';
 import { CacheEntry } from '../types';
-import { CacheStoreUtil } from './util';
+import { CacheSourceUtil } from './util';
 
 const fsStat = util.promisify(fs.stat);
 const fsReaddir = util.promisify(fs.readdir);
@@ -17,9 +17,9 @@ const fsUpdateTime = util.promisify(fs.utimes);
 const fsUnlink = util.promisify(fs.unlink);
 
 /**
- * A cache store backed into the file system
+ * A cache source backed by the file system
  */
-export class FileCacheStore<T extends CacheEntry = CacheEntry> extends CullableCacheStore<T> {
+export class FileCacheSource<T extends CacheEntry = CacheEntry> extends CullableCacheSource<T> {
 
   folder = FsUtil.resolveUnix(os.tmpdir(), Util.uuid(6));
 
@@ -50,7 +50,7 @@ export class FileCacheStore<T extends CacheEntry = CacheEntry> extends CullableC
     try {
       const pth = this.getPath(key);
       const value = await fsRead(pth, 'utf8');
-      return CacheStoreUtil.readAsSafeJSON(value) as T;
+      return CacheSourceUtil.readAsSafeJSON(value) as T;
     } catch {
       return;
     }
@@ -61,7 +61,7 @@ export class FileCacheStore<T extends CacheEntry = CacheEntry> extends CullableC
 
     const pth = this.getPath(key);
 
-    const cloned = CacheStoreUtil.storeAsSafeJSON(entry);
+    const cloned = CacheSourceUtil.storeAsSafeJSON(entry);
 
     await fsWrite(pth, cloned, 'utf8');
 
@@ -69,7 +69,7 @@ export class FileCacheStore<T extends CacheEntry = CacheEntry> extends CullableC
       await this.touch(pth, entry.expiresAt!);
     }
 
-    return CacheStoreUtil.readAsSafeJSON(cloned);
+    return CacheSourceUtil.readAsSafeJSON(cloned);
   }
 
   async delete(key: string): Promise<boolean> {

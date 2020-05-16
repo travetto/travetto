@@ -5,7 +5,7 @@ import { Util } from '@travetto/base';
 /**
  * Simple caching utils
  */
-export class CacheStoreUtil {
+export class CacheSourceUtil {
 
   /**
    * Compute a cache key off the input params for a function
