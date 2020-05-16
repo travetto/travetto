@@ -1,4 +1,5 @@
 import { EnvUtil } from '@travetto/boot';
+import { ShutdownManager } from '@travetto/base';
 
 import { TestConsumer } from '../model/consumer';
 import { SuiteConfig, SuiteResult } from '../model/suite';
@@ -39,8 +40,12 @@ export class ExecutionPhaseManager {
     try {
       for (const fn of this.suite[phase]) {
         const timeout = new Timeout(TEST_PHASE_TIMEOUT, `${this.suite.classId}: ${phase}`);
-        await Promise.race([fn.call(this.suite.instance), timeout.wait()]);
-        timeout.cancel();
+        try {
+          await ShutdownManager.captureUnhandled(() => // Handle earch phase as potentially breaking
+            Promise.race([fn.call(this.suite.instance), timeout.wait()]));
+        } finally {
+          timeout.cancel();
+        }
       }
     } catch (error) {
       const res = await this.triggerSuiteError(`[[${phase}]]`, error);
