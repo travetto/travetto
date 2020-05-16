@@ -2,7 +2,6 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 
 import { ScanEntry, ScanHandler, ScanFs, FsUtil } from '@travetto/boot';
-import { SystemUtil } from '@travetto/base/src/internal/system';
 
 /**
  * Watch Options
@@ -12,6 +11,27 @@ interface WatcherOptions {
   interval: number; // Polling interval for watching
   debounceDelay: number; // Delay in debounce on changes
   cwd: string; // Starting location
+}
+
+/**
+ * Throttle a function to run only once within a specific threshold of time
+ */
+function throttle<T extends Function>(fn: T, threshold = 250) {
+  let last = 0;
+  let deferTimer: NodeJS.Timer;
+  function check(...args: any[]) {
+    const now = Date.now();
+    // Still within throttle window
+    if (last && now < last + threshold) {
+      clearTimeout(deferTimer);
+      deferTimer = setTimeout(check, threshold + 1);
+    } else { // Must call
+      last = now;
+      fn(...args);
+    }
+  }
+  // @ts-ignore
+  return check as T;
 }
 
 /**
@@ -44,6 +64,8 @@ export class Watcher extends EventEmitter {
       cwd: opts.cwd ?? FsUtil.cwd
     };
 
+    this.options.cwd = FsUtil.toUnix(this.options.cwd);
+
     // Set maxListeners
     if (this.options.maxListeners !== undefined) {
       this.setMaxListeners(this.options.maxListeners);
@@ -52,7 +74,7 @@ export class Watcher extends EventEmitter {
 
     this.pendingWatched.push({
       file: this.options.cwd,
-      module: FsUtil.toUnix(this.options.cwd),
+      module: this.options.cwd,
       stats: fs.lstatSync(this.options.cwd)
     });
   }
@@ -105,7 +127,7 @@ export class Watcher extends EventEmitter {
         ) {
           const sub: ScanEntry = {
             file: next,
-            module: FsUtil.toUnix(next),
+            module: next,
             stats: nextStats
           };
           this.watch(sub);
@@ -140,7 +162,7 @@ export class Watcher extends EventEmitter {
 
     try {
       console.trace('Watching Directory', entry.file);
-      const watcher = fs.watch(entry.file, SystemUtil.throttle(() => {
+      const watcher = fs.watch(entry.file, throttle(() => {
         this.processDirectoryChange(entry);
       }, this.options.debounceDelay));
 

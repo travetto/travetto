@@ -51,7 +51,7 @@ export class RegisterTransformer {
       [],
       [
         ts.createIdentifier(node.name?.getText()!),
-        ts.createIdentifier('__filename'),
+        ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
         ts.createLiteral(state[cls]!),
         TransformUtil.extendObjectLiteral(state[methods] || {}),
         ts.createLiteral(isAbstract)

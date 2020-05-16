@@ -9,55 +9,6 @@ export class SystemUtil {
   private static modCache = new Map<string, string>();
 
   /**
-   * Track idle activity with ability to extend
-   */
-  static idle(timeout: number, onTimeout: () => void) {
-    let timer: NodeJS.Timer | undefined;
-    /**
-     * Stop countdown
-     */
-    function stop() {
-      if (timer) {
-        clearTimeout(timer);
-        timer = undefined;
-      }
-    }
-
-    /**
-     * Start countdown
-     */
-    function start(force = false) {
-      if (!timer || force) {
-        stop();
-        timer = setTimeout(onTimeout, timeout);
-        timer.unref();
-      }
-    }
-    return { start, stop, restart: start.bind(null, true) };
-  }
-
-  /**
-   * Throttle a function to run only once within a specific threshold of time
-   */
-  static throttle<T extends Function>(fn: T, threshold = 250) {
-    let last = 0;
-    let deferTimer: NodeJS.Timer;
-    function check(...args: any[]) {
-      const now = Date.now();
-      // Still within throttle window
-      if (last && now < last + threshold) {
-        clearTimeout(deferTimer);
-        deferTimer = setTimeout(check, threshold + 1);
-      } else { // Must call
-        last = now;
-        fn(...args);
-      }
-    }
-    // @ts-ignore
-    return check as T;
-  }
-
-  /**
    * A fast and naive hash, used for detecting changes in code
    */
   static naiveHash(text: string) {
@@ -142,7 +93,7 @@ export class SystemUtil {
       return this.modCache.get(fileName)!;
     }
 
-    let mod = FsUtil.toUnix(fileName).replace(/\.(t|j)s$/, ''); // Drop ext
+    let mod = fileName.replace(/\.(t|j)s$/, ''); // Drop ext
     let ns: string;
 
     if (!mod.includes(FsUtil.cwd)) {

@@ -146,7 +146,9 @@ export class TransformUtil {
       }
       return out;
     }
-    throw new Error(`Not a valid input, should be a valid ts.Node: ${val.kind}`);
+    if (strict) {
+      throw new Error(`Not a valid input, should be a valid ts.Node: ${val.kind}`);
+    }
   }
 
   /**
