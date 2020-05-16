@@ -14,6 +14,6 @@ export class ConsoleAppender implements Appender {
   constructor(private opts: ConsoleAppenderOpts) { }
 
   append(message: string) {
-    (console as typeof console)[this.opts.method](message);
+    console![this.opts.method](message);
   }
 }

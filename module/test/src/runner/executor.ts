@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { CatchUnhandled } from '@travetto/base';
+import { ShutdownManager } from '@travetto/base';
 import { FsUtil, EnvUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
@@ -28,25 +28,33 @@ export class TestExecutor {
    * Raw execution, runs the method and then returns any thrown errors as the result.
    * Unexpected errors are thrown (timeout, uncaught, unresolved promises)
    */
-  @CatchUnhandled()
   private static async _executeTestMethod(test: TestConfig): Promise<Error | undefined> {
     const suite = TestRegistry.get(test.class);
     const timeout = new Timeout(test.timeout || TEST_TIMEOUT);
 
     let err: Error | undefined;
 
-    // Run
+    //  Unsure uncaught exceptions and unhandle rejections stop here
     try {
-      await Promise.race([timeout.wait(), suite.instance[test.methodName]()]);
-    } catch (e) {
-      err = e;
-    }
+      await ShutdownManager.captureUnhandled(async () => {
+        // Run
+        try {
+          await Promise.race([timeout.wait(), suite.instance[test.methodName]()]);
+        } catch (e) {
+          err = e;
+        }
 
-    // Catch pending promises
-    try {
-      await Promise.race([timeout.wait(), PromiseCapture.stop()]);
+        // Catch pending promises
+        try {
+          await Promise.race([timeout.wait(), PromiseCapture.stop()]);
+        } catch (e) {
+          err = e;
+        }
+      });
     } catch (e) {
-      err = e;
+      // FIXME: Should this be needed?
+      await ShutdownManager.captureUnhandled(() => PromiseCapture.stop()).catch(() => { });
+      err = new ExecutionError(e.message, e.stack);
     }
 
     // Cancel timeout
@@ -225,7 +233,6 @@ export class TestExecutor {
   /**
    * Handle executing a suite's test/tests based on command line inputs
    */
-  @CatchUnhandled()
   static async execute(consumer: TestConsumer, file: string, ...args: string[]) {
 
     if (!file.startsWith(FsUtil.cwd)) {

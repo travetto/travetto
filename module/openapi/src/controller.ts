@@ -4,8 +4,10 @@ import { Inject } from '@travetto/di';
 import { OpenApiService } from './service';
 import { YamlUtil } from '@travetto/yaml';
 
+/**
+ * Basic controller for surfacing the api spec
+ */
 @Controller('/')
-// TODO: Document
 export class OpenApiController {
 
   @Inject()
@@ -13,12 +15,12 @@ export class OpenApiController {
 
   @Get('openapi.json')
   async getSpec() {
-    return this.service.getSpec();
+    return this.service.spec;
   }
 
   @Get(/openapi[.]ya?ml$/)
   @SetHeaders({ 'Content-Type': 'text/vnd.yaml' })
   async getYmlSpec() {
-    return YamlUtil.serialize(this.service.getSpec());
+    return YamlUtil.serialize(this.service.spec);
   }
 }

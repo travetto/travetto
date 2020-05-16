@@ -13,8 +13,10 @@ import { SpecGenerateUtil } from './spec-generate';
 
 const fsWriteFile = util.promisify(fs.writeFile);
 
+/**
+ * Open API generation service
+ */
 @Injectable()
-// TODO: Document
 export class OpenApiService {
 
   @Inject()
@@ -29,15 +31,21 @@ export class OpenApiService {
   @Inject()
   private restConfig: RestConfig;
 
-  private spec: OpenAPIObject;
+  private _spec: OpenAPIObject;
 
+  /**
+   * Reset specification
+   */
   async resetSpec() {
-    delete this.spec;
+    delete this._spec;
     if (this.apiSpecConfig.persist) {
-      await this.generate();
+      await this.persist();
     }
   }
 
+  /**
+   * Initialize after schemas are readied
+   */
   async postConstruct() {
     ControllerRegistry.on(() => this.resetSpec());
     SchemaRegistry.on(() => this.resetSpec());
@@ -49,24 +57,29 @@ export class OpenApiService {
     await this.resetSpec();
   }
 
-  getSpec(): OpenAPIObject {
-    if (!this.spec) {
-      this.spec = {
+  /**
+   * Get specification object
+   */
+  get spec(): OpenAPIObject {
+    if (!this._spec) {
+      this._spec = {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
-        ...SpecGenerateUtil.generate(this.apiSpecConfig),
-      };
+        ...SpecGenerateUtil.generate(this.apiSpecConfig) as Partial<OpenAPIObject>,
+      } as OpenAPIObject;
     }
-    return this.spec;
+    return this._spec;
   }
 
-  async generate() {
-    const spec = this.getSpec();
+  /**
+   * Persist to local file
+   */
+  async persist() {
     console.debug('Generating OpenAPI spec file', this.apiSpecConfig.output);
 
     const output = this.apiSpecConfig.output.endsWith('.json') ?
-      JSON.stringify(spec, undefined, 2) :
-      YamlUtil.serialize(spec);
+      JSON.stringify(this.spec, undefined, 2) :
+      YamlUtil.serialize(this.spec);
 
     await fsWriteFile(this.apiSpecConfig.output, output);
   }
