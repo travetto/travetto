@@ -1,5 +1,5 @@
 import { BeforeAll, Suite } from '@travetto/test';
-import { TestUtil } from '../util';
+import { TestUtil } from './util';
 
 @Suite()
 export abstract class BaseSQLModelTest {
