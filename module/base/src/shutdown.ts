@@ -148,19 +148,15 @@ export class ShutdownManager {
       this.unhandled.splice(index, 1);
     }
   }
-}
 
-export const CatchUnhandled = () => <T, U>(target: T, __prop: any, desc: TypedPropertyDescriptor<(...params: any[]) => Promise<U>>) => {
-  const fn = desc.value!;
-  desc.value = async function (...args: any[]) {
+  static async captureUnhandled<U>(fn: Function): Promise<U> {
     const uncaught = Util.resolvablePromise();
     // @ts-ignore
-    const cancel = ShutdownManager.onUnhandled(err => uncaught.reject(err) || true, 0);
-    const prom = fn.apply(this, args);
+    const cancel = this.onUnhandled(err => uncaught.reject(err) || true, 0);
     try {
-      return (await Promise.race([prom, uncaught])) as U;
+      return (await Promise.race([uncaught, fn()])) as U;
     } finally {
       cancel();
     }
-  };
-};
+  }
+}
