@@ -2,7 +2,7 @@ import { FsUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
 
-import { ConsumerManager } from '../consumer/manager';
+import { TestConsumerManager } from '../consumer/manager';
 
 import { TestExecutor } from './executor';
 import { buildWorkManager } from '../worker/parent';
@@ -31,7 +31,7 @@ export class Runner {
    * Run all files
    */
   async runFiles() {
-    const consumer = ConsumerManager.create(this.state.consumer ?? this.state.format);
+    const consumer = TestConsumerManager.create(this.state.consumer ?? this.state.format);
 
     const files = await this.getFiles();
 
@@ -65,7 +65,7 @@ export class Runner {
    * Run a single file
    */
   async runSingle() {
-    const consumer = ConsumerManager.create(this.state.consumer ?? this.state.format);
+    const consumer = TestConsumerManager.create(this.state.consumer ?? this.state.format);
     if (consumer.onStart) {
       consumer.onStart();
     }

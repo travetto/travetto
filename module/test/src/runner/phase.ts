@@ -1,6 +1,6 @@
 import { EnvUtil } from '@travetto/boot';
 
-import { Consumer } from '../model/consumer';
+import { TestConsumer } from '../model/consumer';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
 import { Timeout } from './timeout';
@@ -17,12 +17,12 @@ const TEST_PHASE_TIMEOUT = EnvUtil.getTime('TRV_TEST_PHASE_TIMEOUT', 15000);
 export class ExecutionPhaseManager {
   private progress: ('all' | 'each')[] = [];
 
-  constructor(private consumer: Consumer, private suite: SuiteConfig, private result: SuiteResult) { }
+  constructor(private consumer: TestConsumer, private suite: SuiteConfig, private result: SuiteResult) { }
 
   /**
    * Creeate the appropriate events when a suite has an error
    */
-  async generateSuiteError(methodName: string, error: Error) {
+  async triggerSuiteError(methodName: string, error: Error) {
     const bad = AssertUtil.generateSuiteError(this.suite, methodName, error);
 
     this.consumer.onEvent({ type: 'test', phase: 'before', test: bad.testConfig });
@@ -43,7 +43,7 @@ export class ExecutionPhaseManager {
         timeout.cancel();
       }
     } catch (error) {
-      const res = await this.generateSuiteError(`[[${phase}]]`, error);
+      const res = await this.triggerSuiteError(`[[${phase}]]`, error);
       this.result.tests.push(res);
       this.result.failed++;
       throw BREAKOUT;
@@ -79,7 +79,7 @@ export class ExecutionPhaseManager {
     this.progress = [];
 
     if (err !== BREAKOUT) {
-      const res = await this.generateSuiteError('all', err);
+      const res = await this.triggerSuiteError('all', err);
       this.result.tests.push(res);
       this.result.failed++;
     }

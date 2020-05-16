@@ -1,8 +1,11 @@
 import { AllSuitesResult, SuiteResult } from '../model/suite';
 import { TestEvent } from '../model/event';
-import { Consumer } from '../model/consumer';
+import { TestConsumer } from '../model/consumer';
 
-export class AllResultsCollector implements Consumer {
+/**
+ * Test Reuslt Collector, combines all results into a single Suite Result
+ */
+export class AllResultsCollector implements TestConsumer {
 
   public summary: AllSuitesResult = {
     passed: 0,
@@ -23,6 +26,9 @@ export class AllResultsCollector implements Consumer {
     this.summary.total += (src.failed + src.passed + src.skipped);
   }
 
+  /**
+   * Merge all test results into a single Suite Result
+   */
   onEvent(e: TestEvent) {
     if (e.phase === 'after' && e.type === 'suite') {
       this.merge(e.suite);

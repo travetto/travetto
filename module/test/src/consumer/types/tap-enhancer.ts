@@ -1,5 +1,8 @@
 type Primitive = string | number | boolean | null | undefined;
 
+/**
+ * Format for enhancing the tap output
+ */
 export interface TapEnhancer {
   objectInspect(val: Primitive): string;
   suiteName(val: string): string;
@@ -17,6 +20,9 @@ export interface TapEnhancer {
 
 const ident = (x: Primitive) => `${x}`;
 
+/**
+ * Dummy enhancer does nothing
+ */
 export const DUMMY_ENHANCER = ([
   'objectInspect', 'suiteName', 'testName', 'testDescription', 'assertDescription',
   'assertFile', 'assertLine', 'testNumber', 'assertNumber', 'success', 'failure', 'total'

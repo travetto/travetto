@@ -1,11 +1,12 @@
 import { EventEmitter } from 'events';
+import { ExecutionError } from './error';
 
 const PROM = Promise;
 
 /**
  * Timeout support, throws self on timeout
  */
-export class Timeout extends Error {
+export class Timeout extends ExecutionError {
 
   private id: NodeJS.Timer;
   private listener: EventEmitter;

@@ -1,19 +1,36 @@
 import { Assertion, TestConfig } from '../model/test';
 import { AssertUtil } from './util';
 
-// TODO: Document
+/**
+ * Assertion capturer
+ */
 export class AssertCapture {
 
+  /**
+   * Assertions captured so far
+   */
   static assertions: Assertion[] = [];
+  /**
+   * Listener for captured asserts
+   */
   static listener?: (a: Assertion) => void;
+  /**
+   * Test the asserts are for
+   */
   static test: TestConfig;
 
+  /**
+   * Start capturing
+   */
   static start(test: TestConfig, listener?: (a: Assertion) => void) {
     this.test = test;
     this.listener = listener;
     this.assertions = [];
   }
 
+  /**
+   * Add a new assertion
+   */
   static add(a: Assertion) {
     this.assertions.push(a);
     if (this.listener) {
@@ -21,6 +38,9 @@ export class AssertCapture {
     }
   }
 
+  /**
+   * Stop listening
+   */
   static end() {
     const ret = this.assertions;
     this.assertions = [];
@@ -28,6 +48,9 @@ export class AssertCapture {
     return ret;
   }
 
+  /**
+   * Build full assertion for a given operator
+   */
   static buildAssertion(filename: string, text: string, operator: string) {
     const { file, line } = AssertUtil.getPositionOfError(new Error(), filename.replace(/[.][tj]s$/, ''));
 

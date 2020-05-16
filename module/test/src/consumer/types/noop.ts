@@ -1,8 +1,11 @@
 import { TestEvent } from '../../model/event';
-import { Consumer } from '../../model/consumer';
+import { TestConsumer } from '../../model/consumer';
 import { Consumable } from '../registry';
 
+/**
+ * Does nothing consumer
+ */
 @Consumable('noop', true)
-export class NoopConsumer implements Consumer {
+export class NoopConsumer implements TestConsumer {
   onEvent(event: TestEvent): void { }
 }

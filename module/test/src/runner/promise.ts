@@ -1,3 +1,5 @@
+import { ExecutionError } from './error';
+
 const og = Promise;
 
 /**
@@ -50,7 +52,7 @@ export class PromiseCapture {
       final = err;
     }
     // If any return in an error, make that the final result
-    const ret = new Error(`Pending promises: ${pending.length}`);
+    const ret = new ExecutionError(`Pending promises: ${pending.length}`);
     ret.stack = final?.stack ?? ret.stack;
     throw ret;
   }
