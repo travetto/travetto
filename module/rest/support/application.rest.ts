@@ -1,5 +1,5 @@
 import { Application } from '@travetto/app';
-import { RestServer } from '../src/server';
+import { RestServer } from '../src/server/server';
 
 /**
  * Default application entrypoint

@@ -1,13 +1,13 @@
 import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { SSLUtil } from '../src/util/ssl';
+import { RestServerUtil } from '../src/server/util';
 
 @Suite()
 export class SSLTest {
   @Test()
   async verify() {
-    const res = await SSLUtil.generateKeyPair();
+    const res = await RestServerUtil.generateSslKeyPair();
 
     assert(!!res.cert);
     assert(!!res.key);
