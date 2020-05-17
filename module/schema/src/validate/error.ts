@@ -1,7 +1,11 @@
 import { AppError } from '@travetto/base';
 import { ValidationError } from './types';
 
-// TODO: Document
+/**
+ * Validation results error.
+ *
+ * Hold all the validation errors for a given schema validation
+ */
 export class ValidationResultError extends AppError {
   constructor(public errors: ValidationError[]) {
     super('Validation errors have occurred', 'data', { errors });
