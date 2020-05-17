@@ -1,19 +1,19 @@
 import { InjectableFactory } from '@travetto/di';
 import { Application } from '@travetto/app';
-import { RestApp } from '@travetto/rest';
-import { AwsLambdaRestApp } from '../../src/app';
+import { RestServer } from '@travetto/rest';
+import { AwsLambdaRestServer } from '../../src/app';
 
 @Application('sample')
 export class SampleApp {
 
   @InjectableFactory()
-  static getProvider(): RestApp {
-    return new AwsLambdaRestApp();
+  static getProvider(): RestServer {
+    return new AwsLambdaRestServer();
   }
 
-  constructor(private app: RestApp) { }
+  constructor(private server: RestServer) { }
 
   run() {
-    return this.app.run();
+    return this.server.run();
   }
 }

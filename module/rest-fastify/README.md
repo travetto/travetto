@@ -6,15 +6,15 @@ travetto: Rest-Fastify
 $ npm install @travetto/rest-fastify
 ```
 
-The module is a [`fastify`](https://www.fastify.io/) implementation of a [`RestApp`](https://github.com/travetto/travetto/tree/master/module/rest). A valid customization of the [`RestApp`](./src/app.ts) would look like:
+The module is a [`fastify`](https://www.fastify.io/) implementation of a [`RestServer`](https://github.com/travetto/travetto/tree/master/module/rest). A valid customization of the [`RestServer`](./src/server.ts) would look like:
 
 **Code: Customizing a Fastify App**
 ```typescript
 export class SampleConfig {
 
   @InjectableFactory()
-  static customizer(): RestAppCustomizer<fastify.FastifyInstance> {
-    return new (class extends RestAppCustomizer<fastify.FastifyInstance> {
+  static customizer(): RestServerCustomizer<fastify.FastifyInstance> {
+    return new (class extends RestServerCustomizer<fastify.FastifyInstance> {
       customize(raw: fastify.FastifyInstance) {
         raw.register(fastifyCaching, {
            privacy: fastifyCaching.privacy.NOCACHE,

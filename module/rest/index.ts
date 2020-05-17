@@ -1,9 +1,8 @@
 /// <reference path="./src/types.d.ts" />
 
-export * from './src/app';
+export * from './src/server';
 export * from './src/config';
 export * from './src/error';
-export * from './src/decorator/application';
 export * from './src/decorator/common';
 export * from './src/decorator/controller';
 export * from './src/decorator/param';
@@ -21,6 +20,6 @@ export * from './src/interceptor/serialize';
 export * from './src/types';
 export * from './src/util/mime';
 export * from './src/util/param';
-export * from './src/util/rest-app';
+export * from './src/util/server';
 export * from './src/util/route';
 export * from './src/util/ssl';

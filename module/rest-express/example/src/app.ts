@@ -1,4 +1,5 @@
-import { Application, RestConfig, RestApp } from '@travetto/rest';
+import { Application } from '@travetto/app';
+import { RestConfig, RestServer } from '@travetto/rest';
 
 @Application('sample', {
   description: 'Sample rest application'
@@ -6,13 +7,13 @@ import { Application, RestConfig, RestApp } from '@travetto/rest';
 export class SampleApp {
 
   constructor(
-    private app: RestApp,
+    private server: RestServer,
     private config: RestConfig
   ) { }
 
   run(port = 3000, ssl = false, fast?: string, toggle?: 'on' | 'off') {
     this.config.port = port;
     this.config.ssl.active = ssl;
-    return this.app.run();
+    return this.server.run();
   }
 }

@@ -10,15 +10,33 @@ interface RouteCheck {
   base: string;
 }
 
+/**
+ * Rest logging configuration
+ */
 @Config('rest.logRoutes')
-// TODO: Document
 export class RestLogRoutesConfig {
+  /**
+   * List of routes to allow
+   */
   allow: string[] = [];
+  /**
+   * List of routes to deny
+   */
   deny: string[] = [];
 
+  /**
+   * Allow as a list of route checks
+   */
   allowList: RouteCheck[];
+  /**
+   * Deny as a list of route checks
+   */
   denyList: RouteCheck[];
 
+  /**
+   * Clean a list of routes into route checks
+   * @param arr The list of routes as strings
+   */
   clean(arr: string[]) {
     return arr.map(x => x.split(':')).map(([base, sub]) => {
       let final: string | RegExp = sub || '*';
@@ -36,8 +54,10 @@ export class RestLogRoutesConfig {
   }
 }
 
+/**
+ * Logging interceptor, to show activity for all requests
+ */
 @Injectable()
-// TODO: Document
 export class LoggingInterceptor extends RestInterceptor {
 
   static matchRoute(controller: Partial<ControllerConfig>, route: RouteConfig, paths: RouteCheck[]) {
