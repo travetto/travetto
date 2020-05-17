@@ -27,7 +27,8 @@ export class AuthService {
 
   /**
    * Login user via the request. Supports multi-step login.
-   *
+   * @param req The travetto request
+   * @param res The travetto response
    * @param identitySources List of valid identity sources
    */
   async login(req: Request, res: Response, identitySources: symbol[]): Promise<AuthContext | undefined> {

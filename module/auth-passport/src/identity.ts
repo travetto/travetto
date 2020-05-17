@@ -15,6 +15,7 @@ export class PassportIdentitySource<U> extends IdentitySource {
 
   /**
    * Process request read state from query
+   * @param req The travetto request
    */
   static processLoginContext(req: Request) {
     if (req.query.state) {
@@ -31,6 +32,8 @@ export class PassportIdentitySource<U> extends IdentitySource {
 
   /**
    * Compute extra passport options, convert state to a base64 value
+   * @param req The travetto request,
+   * @param state The passport auth config state
    */
   static processExtraOptions(req: Request, { state }: PassportAuthOptions): Partial<passport.AuthenticateOptions> {
     const stateRec = state && state.call ? state.call(null, req) : (state ?? {});
@@ -64,6 +67,8 @@ export class PassportIdentitySource<U> extends IdentitySource {
 
   /**
    * Authenticate a request given passport config
+   * @param req The travetto request
+   * @param res The travetto response
    */
   async authenticate(req: Request, res: Response) {
     return new Promise<Identity | undefined>((resolve, reject) => {
@@ -85,6 +90,8 @@ export class PassportIdentitySource<U> extends IdentitySource {
 
   /**
    * Handler for auth context
+   * @param err A possible error from authentication
+   * @param user The authenticated user
    */
   async authHandler(err: Error | undefined, user: U) {
     if (err) {

@@ -31,6 +31,7 @@ export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
 
   /**
    * Retrieve user by id
+   * @param userId The user id to retrieve
    */
   async retrieve(userId: string) {
     const query = {
@@ -42,6 +43,7 @@ export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
 
   /**
    * Convert identity to a principal
+   * @param ident The registered identity to resolve
    */
   async resolvePrincipal(ident: RegisteredIdentity): Promise<Principal> {
     const user = await this.retrieve(ident.id);
@@ -50,6 +52,8 @@ export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
 
   /**
    * Authenticate password for model id
+   * @param userId The user id to authenticate against
+   * @param password The password to authenticate against
    */
   async authenticate(userId: string, password: string) {
     const user = await this.retrieve(userId);
@@ -66,6 +70,7 @@ export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
 
   /**
    * Register a user
+   * @param user The user to register
    */
   async register(user: T) {
     const ident = this.toIdentity(user);
@@ -92,6 +97,9 @@ export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
 
   /**
    * Change a password
+   * @param userId The user id to affet
+   * @param password The new password
+   * @param oldPassword The old password
    */
   async changePassword(userId: string, password: string, oldPassword?: string) {
     const user = await this.retrieve(userId);
@@ -118,6 +126,7 @@ export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
 
   /**
    * Generate a reset token
+   * @param userId The user to reset for
    */
   async generateResetToken(userId: string): Promise<RegisteredIdentity> {
     const user = await this.retrieve(userId);
