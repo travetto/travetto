@@ -4,6 +4,8 @@ import { AuthUtil } from '@travetto/auth';
 
 /**
  * Authenticate an endpoint with a list of available identity sources
+ * @param source The symbol to target the specific authenticator
+ * @param sources Additional providers to support
  */
 export function Authenticate(source: symbol, ...sources: symbol[]) {
   const computed = [source, ...sources];

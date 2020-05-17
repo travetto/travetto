@@ -73,7 +73,7 @@ export class AuthUtil {
    * @param exclude Which permissions to exclude
    * @param matchAll Whether not all permissions should be matched
    */
-  static permissionSetChecker(include: PermSet, exclude: PermSet, matchAll = true) {
+  static permissionSetChecker(include: PermSet, exclude: PermSet, mode: 'all' | 'any' = 'any') {
     const incKey = Array.from(include).sort().join(',');
     const excKey = Array.from(include).sort().join(',');
 
@@ -84,8 +84,8 @@ export class AuthUtil {
       this.CHECK_EXC_CACHE.set(excKey, [this.permissionChecker(exclude, true, false), this.permissionChecker(exclude, false, false)]);
     }
 
-    const includes = this.CHECK_INC_CACHE.get(incKey)![matchAll ? 1 : 0];
-    const excludes = this.CHECK_EXC_CACHE.get(excKey)![matchAll ? 1 : 0];
+    const includes = this.CHECK_INC_CACHE.get(incKey)![mode === 'all' ? 1 : 0];
+    const excludes = this.CHECK_EXC_CACHE.get(excKey)![mode === 'all' ? 1 : 0];
 
     return (perms: PermSet) => includes(perms) && !excludes(perms);
   }

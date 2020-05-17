@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { AuthContext } from '@travetto/auth';
 import { AsyncContext } from '@travetto/context';
 
-const CTX_SYM = Symbol.for('trv_ctx');
+const CTX_SYM = Symbol.for('@travetto/auth-rest:context');
 
 /**
  * Integration with the context service, to allow for tracking of
@@ -19,6 +19,8 @@ export class AuthContextService {
 
   /**
    * Set auth context
+   * @param ctx The auth context
+   * @param req The travetto request
    */
   set(ctx: AuthContext, req?: Request) {
     if (this.context) {
@@ -34,6 +36,7 @@ export class AuthContextService {
 
   /**
    * Get the context from the request
+   * @param req The travetto request
    */
   get(req?: Request) {
     if (req) {
@@ -51,6 +54,7 @@ export class AuthContextService {
 
   /**
    * Get the auth/principal id
+   * @param req The travetto request
    */
   getId(req?: Request) {
     return this.get(req).id;
@@ -58,6 +62,7 @@ export class AuthContextService {
 
   /**
    * Clear the context
+   * @param req The travetto request
    */
   clear(req?: Request) {
     if (this.context) {
