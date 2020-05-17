@@ -26,8 +26,21 @@ export interface ScanEntry {
   children?: ScanEntry[];
 }
 
+/**
+ * Handler for searching through files
+ */
 export interface ScanHandler {
+  /**
+   * File test to see if valid
+   * @param relative The relative file
+   * @param entry The full entry
+   */
   testFile?(relative: string, entry?: ScanEntry): boolean;
+  /**
+   * Dir test to see if valid
+   * @param relative The relative dir
+   * @param entry The full entry
+   */
   testDir?(relative: string, entry?: ScanEntry): boolean;
 }
 
@@ -38,6 +51,7 @@ export class ScanFs {
 
   /**
    * Detect if entry is a directory
+   * @param x The entry to check
    */
   static isDir(x: ScanEntry) {
     return x.stats.isDirectory() || x.stats.isSymbolicLink();
@@ -45,6 +59,7 @@ export class ScanFs {
 
   /**
    * Detect if entry is not a directory
+   * @param x The entry to check
    */
   static isNotDir(x: ScanEntry) {
     return !this.isDir(x);
@@ -54,6 +69,9 @@ export class ScanFs {
    * Scan a given directory, with the provided handler and base directory.
    * Performs a breadth first search, and will deference symlinks to prevent
    * infinite exploration.
+   *
+   * @param handler Handler to search with
+   * @param base The starting point
    */
   static async scanDir(handler: ScanHandler, base: string) {
     const visited = new Set<string>();
@@ -97,6 +115,8 @@ export class ScanFs {
 
   /**
    * Scan folders multiple times, once per handler, and union the results
+   * @param handlers Handlers to search with
+   * @param base The starting point
    */
   static async bulkScanDir(handlers: ScanHandler[], base: string) {
     const res = await Promise.all(handlers.map(x => this.scanDir(x, base)));
@@ -115,6 +135,8 @@ export class ScanFs {
 
   /**
    * Same as scanDir, but synchronous
+   * @param handler Handler to search with
+   * @param base The starting point
    */
   static scanDirSync(handler: ScanHandler, base: string) {
     const visited = new Set<string>();
@@ -161,6 +183,8 @@ export class ScanFs {
 
   /**
    * Scan folders multiple times, once per handler, and union the results, synchronously
+   * @param handlers Handlers to search with
+   * @param base The starting point
    */
   static bulkScanDirSync(handlers: ScanHandler[], base: string) {
     const names = new Set();
