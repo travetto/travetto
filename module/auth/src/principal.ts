@@ -10,6 +10,7 @@ export abstract class PrincipalSource {
 
   /**
    * Optional ability to create a principal as opposed to just reading
+   * @param principal The principal to create
    */
   createPrincipal?(principal: Principal): Promise<Principal>;
 
@@ -20,11 +21,13 @@ export abstract class PrincipalSource {
 
   /**
    * Resolves an identity to a principal
+   * @param ident The denitity to resolve as  Principal
    */
   abstract resolvePrincipal(ident: Identity): Promise<Principal>;
 
   /**
    * Resolves or creates a principal as needed
+   * @param ident The identity to resolve or create as a principal
    */
   async resolveOrCreatePrincipal(ident: Identity) {
     try {
@@ -40,6 +43,7 @@ export abstract class PrincipalSource {
 
   /**
    * Authorizes an identity to produce an AuthContext
+   * @param ident The identity to authorize
    */
   async authorize(ident: Identity): Promise<AuthContext> {
     return new AuthContext(ident, await this.resolveOrCreatePrincipal(ident));
