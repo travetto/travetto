@@ -39,13 +39,31 @@ function wrap(target: Console, enrich: boolean) {
  * Any console.log statements elsewhere will not be affected.
  */
 class $ConsoleManager {
+  /**
+   * Stack of nested states
+   */
   private states: ConsoleState[] = [];
+  /**
+   * The current state
+   */
   private state: ConsoleState;
 
+  /**
+   * Should we enrich the console by deafault
+   */
   readonly defaultEnrich = !EnvUtil.isTrue('TRV_LOG_PLAIN');
+  /**
+   * Should the timestamp be included
+   */
   readonly timestamp = EnvUtil.isValueOrFalse('TRV_LOG_TIME', ['s', 'ms'] as const, 'ms');
+  /**
+   * List of log levels to exlcude
+   */
   readonly exclude = new Set<string>([]);
 
+  /**
+   * Unique key to use as a logger function
+   */
   constructor(public readonly key: string) {
     // @ts-expect-error
     global[this.key] = this.invoke.bind(this);
@@ -62,6 +80,8 @@ class $ConsoleManager {
 
   /**
    * Prepare data for pretty printing
+   * @param payload Console payload
+   * @param args Supplemental arguments
    */
   private enrich(payload: ConsolePayload, args: any[]) {
     args = [
@@ -132,6 +152,9 @@ class $ConsoleManager {
   /**
    * Set console state to log to a file. If the filename starts with an !, then
    * the file will be relative to the `AppCache`
+   *
+   * @param file The file to log to
+   * @param state Additional log state config
    */
   setFile(file: string, state: Omit<ConsoleState, 'invoke'> = {}) {
     const name = file.startsWith('!') ? AppCache.toEntryName(file.substring(1)) : file;

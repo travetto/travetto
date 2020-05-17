@@ -61,11 +61,13 @@ export class Util {
 
   /**
    * Has to JSON
+   * @param o Object to check
    */
   static hasToJSON = (o: any): o is { toJSON(): any } => 'toJSON' in o;
 
   /**
    * Create regex from string, including flags
+   * @param input Convert input to a regex
    */
   static toRegex(input: string | RegExp) {
     if (input instanceof RegExp) {
@@ -155,6 +157,7 @@ export class Util {
 
   /**
    * Clone top level properties to a new object
+   * @param o Object to clone
    */
   static shallowClone(a: any) {
     return Array.isArray(a) ? a.slice(0) : (this.isSimple(a) ? a : { ...a });
@@ -162,6 +165,7 @@ export class Util {
 
   /**
    * Is a value of primitive type
+   * @param el Value to check
    */
   static isPrimitive(el: any): el is (string | boolean | number | RegExp) {
     const type = typeof el;
@@ -170,6 +174,7 @@ export class Util {
 
   /**
    * Is a value a plain JS object, created using {}
+   * @param obj Object to check
    */
   static isPlainObject(obj: any): obj is Record<string, any> {
     return typeof obj === 'object' // separate from primitives
@@ -181,6 +186,7 @@ export class Util {
 
   /**
    * Is a value a function
+   * @param o Object to check
    */
   static isFunction(o: any): o is Function {
     const proto = o && Object.getPrototypeOf(o);
@@ -189,6 +195,7 @@ export class Util {
 
   /**
    * Is a value a class
+   * @param o Object to check
    */
   static isClass(o: any) {
     return o && o.prototype && o.prototype.constructor !== Object.getPrototypeOf(Function);
@@ -216,6 +223,7 @@ export class Util {
 
   /**
    * Generate a random UUID
+   * @param len The length of the uuid to generate
    */
   static uuid(len: number = 32) {
     return crypto.randomBytes(Math.ceil(len / 2)).toString('hex').substring(0, len);

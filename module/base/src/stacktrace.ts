@@ -32,6 +32,7 @@ export class StacktraceUtil {
 
   /**
    * Add a filter to hide certain stack frames
+   * @param names List files to exclude from the stack traces
    */
   static addStackFilters(...names: string[]) {
     if (this.filters) {
@@ -50,6 +51,8 @@ export class StacktraceUtil {
 
   /**
    * Clean up the stack output for an error
+   * @param err The error to filter
+   * @param filter Should the stack be filtered
    */
   static simplifyStack(err: Error, filter = true): string {
     const getLocation = (x: string) => {
