@@ -6,9 +6,15 @@ import type { ModelService } from '../src/service/model';
  */
 export function watch(svc: Class<ModelService>) {
   const ogInit = svc.prototype.init;
+
+  /**
+   * Updates the init operation
+   */
   svc.prototype.init = async function (this: ModelService) {
     await ogInit.call(this);
     const src = this['source'];
+
+    // Listen for changes
     if (src.onChange || src.onSchemaChange) {
 
       const { ModelRegistry } = await import('../src/registry');

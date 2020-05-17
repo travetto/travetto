@@ -5,7 +5,7 @@ import { ModelRegistry } from './registry';
 import { ModelOptions, IndexConfig } from './types';
 
 /**
- * TODO: Document
+ * Model decorator, extends `@Schema`
  *
  * @augments trv/schema/Schema
  */
@@ -28,7 +28,9 @@ export function Model(conf: Partial<ModelOptions<any>> = {}) {
   };
 }
 
-// TODO: Document
+/**
+ * Defines an index on a model
+ */
 export function Index(...indices: IndexConfig<any>[]) {
   return function <T extends Class>(target: T) {
     return ModelRegistry.register(target, { indices });

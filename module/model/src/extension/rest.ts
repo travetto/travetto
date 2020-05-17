@@ -24,8 +24,19 @@ class SuggestQuery {
   offset?: number;
 }
 
-/** @augments trv/di/Injectable */
-// TODO: Document
+/**
+ * Provides a basic CRUD controller for a given model:
+ *
+ * - Create
+ * - Read
+ * - Update
+ * - Delete
+ * - List
+ * - Read all
+ * - Suggest by field
+ *
+ * @augments trv/di/Injectable
+ */
 export function ModelController<T extends ModelCore>(path: string, cls: Class<T>) {
   function getCls() {
     return ModelRegistry.get(cls).class;
