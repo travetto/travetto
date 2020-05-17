@@ -44,7 +44,7 @@ async getInfo(@Context() data: SessionData) {
 This usage should be comparable to express, koa and mostly every other framework.
 
 ## Configuration
-Session mechanics are defined by two main components, encoders and a cache store.  The encoders are provided within the module, but the stores are provided via the [`Cache`](https://github.com/travetto/travetto/tree/master/module/cache) module.  
+Session mechanics are defined by two main components, encoders and a cache source.  The encoders are provided within the module, but the stores are provided via the [`Cache`](https://github.com/travetto/travetto/tree/master/module/cache) module.  
 
 By default, the module supplies the [`CookieEncoder`](./src/encoder/cookie.ts) and the [`MemoryCacheSource`] as default usage. 
 

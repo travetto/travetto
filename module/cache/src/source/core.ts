@@ -5,7 +5,7 @@ import { CacheError } from './error';
 type OrProm<T> = T | Promise<T>;
 
 /**
- * Cache store
+ * Cache source
  */
 export abstract class CacheSource<T extends CacheEntry = CacheEntry> implements ICacheSource<T> {
   abstract get(key: string): OrProm<T | undefined>;
