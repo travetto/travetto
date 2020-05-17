@@ -62,10 +62,10 @@ export class S3AssetSource extends AssetSource {
     }
   }
 
-  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
+  async write(file: Asset): Promise<void> {
     // Upload to s3
     const upload = this.client.upload(this.q(file.path, {
-      Body: stream,
+      Body: file.stream,
       ContentType: file.contentType,
       ContentLength: file.size
     })).promise();
