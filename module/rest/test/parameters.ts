@@ -6,7 +6,7 @@ import { Query, Header, Path, Context } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
 import { ControllerRegistry } from '../src/registry/registry';
-import { Method, Request, Response } from '../src/types';
+import { MethodOrAll, Request, Response } from '../src/types';
 import { ParamUtil } from '../src/util/param';
 
 interface Wrapper<T> {
@@ -70,7 +70,7 @@ class ParamController {
 
 @Suite()
 export class ParameterTest {
-  static getEndpoint(path: string, method: Method) {
+  static getEndpoint(path: string, method: MethodOrAll) {
     return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.method === method)!;
   }
 

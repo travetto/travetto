@@ -53,7 +53,7 @@ export class KoaRestServer extends RestServer<koa> {
 
     // Register all routes to extract the proper request/response for the framework
     for (const route of routes) {
-      router[route.method!](route.path!, async (ctx) => {
+      router[route.method as 'get'](route.path!, async (ctx) => {
         const req = KoaServerUtil.getRequest(ctx);
         const res = KoaServerUtil.getResponse(ctx);
         return await route.handlerFinalized!(req, res);
