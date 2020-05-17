@@ -3,7 +3,7 @@ import * as os from 'os';
 import { Config } from '@travetto/config';
 import { Env, AppError, ResourceManager } from '@travetto/base';
 
-import { SSLUtil } from './util/ssl';
+import { RestServerUtil } from './util';
 
 /**
  * Restful configuration
@@ -85,7 +85,7 @@ export class RestConfig {
         if (Env.prod) {
           throw new AppError('Cannot use test keys in production', 'permissions');
         }
-        return SSLUtil.generateKeyPair();
+        return RestServerUtil.generateSslKeyPair();
       } else {
         if (this.ssl.keys.key.length < 100) {
           this.ssl.keys.key = await ResourceManager.read(this.ssl.keys.key, 'utf8');

@@ -4,7 +4,6 @@ import { Injectable } from '@travetto/di';
 import { RestInterceptor } from './interceptor';
 import { LoggingInterceptor } from './logging';
 
-import { MimeType } from '../util/mime';
 import { Response, Request } from '../types';
 import { isRenderable } from '../response/renderable';
 
@@ -37,11 +36,11 @@ export class SerializeInterceptor extends RestInterceptor {
         if (isRenderable(output)) {
           await output.render(res);
         } else if (typeof output === 'string') {
-          this.setContentTypeIfUndefined(res, MimeType.TEXT);
+          this.setContentTypeIfUndefined(res, 'text/plain');
           res.send(output);
         } else {
           const payload = ('toJSON' in output) ? output.toJSON() : output;
-          this.setContentTypeIfUndefined(res, MimeType.JSON);
+          this.setContentTypeIfUndefined(res, 'application/json');
           res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
         }
       } else {
