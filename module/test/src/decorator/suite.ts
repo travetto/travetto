@@ -4,8 +4,11 @@ import { SuiteConfig } from '../model/suite';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 
-/** @augments trv/test/Suite */
-// TODO: Document
+/**
+ * Register a class to be defined as a test suite, and a candiate for testing
+ * @param description The Suite description
+ * @augments trv/test/Suite
+ */
 export function Suite(): ClassDecorator;
 export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;
@@ -27,7 +30,6 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
   }) as ClassDecorator;
 }
 
-// TODO: Document
 function listener(phase: SuitePhase) {
   return (inst: any, prop: string, descriptor: PropertyDescriptor) => {
     TestRegistry.registerPendingListener(inst.constructor, descriptor.value, phase);
@@ -35,8 +37,19 @@ function listener(phase: SuitePhase) {
   };
 }
 
-// TODO: Document
+/**
+ * Registers function to run before any tests are run
+ */
 export const BeforeAll = listener.bind(null, 'beforeAll');
+/**
+ * Registers function to run before each test is run
+ */
 export const BeforeEach = listener.bind(null, 'beforeEach');
+/**
+ * Registers function to run after all tests are run
+ */
 export const AfterAll = listener.bind(null, 'afterAll');
+/**
+ * Registers function to run after each test is run
+ */
 export const AfterEach = listener.bind(null, 'afterEach');

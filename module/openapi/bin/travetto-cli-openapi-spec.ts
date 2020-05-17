@@ -2,7 +2,9 @@ import * as commander from 'commander';
 import { CliUtil } from '@travetto/cli/src/util';
 import { CompletionConfig } from '@travetto/cli/src/types';
 
-// TODO: Document
+/**
+ * CLI for outputting the open api spec to a local file
+ */
 export function init() {
   return CliUtil.program
     .command('openapi-spec')
@@ -17,7 +19,7 @@ export function init() {
       const { OpenApiService } = await import('../src/service');
 
       const instance = await DependencyRegistry.getInstance(OpenApiService);
-      await instance.generate();
+      await instance.spec;
     });
 }
 
