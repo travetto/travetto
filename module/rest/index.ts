@@ -1,5 +1,4 @@
 /// <reference path="./src/types.d.ts" />
-import './src/response/builtin-types';
 
 export * from './src/server/server';
 export * from './src/server/config';
