@@ -1,7 +1,11 @@
 import { AppInfo } from '@travetto/base/src/app-info';
 import { ControllerConfig } from '@travetto/rest';
 
-// TODO: Document
+/**
+ * Produce the cloudformation script from the list of controllers
+ * @param controllers List of controllers to deploy
+ * @param lambdaDir
+ */
 export function template(controllers: ControllerConfig[], lambdaDir?: string) {
   return `
 AWSTemplateFormatVersion: '2010-09-09'

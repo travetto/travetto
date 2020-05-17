@@ -8,7 +8,9 @@ import { CliUtil } from '@travetto/cli/src/util';
 import { FsUtil } from '@travetto/boot/src/fs';
 import { ExecUtil } from '@travetto/boot/src/exec';
 
-// TODO: Document
+/**
+ * Supports building the aws lambda zip file
+ */
 export function init() {
   return CliUtil.program
     .command('rest-aws-lambda:build-zip')

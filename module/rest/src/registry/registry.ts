@@ -4,7 +4,9 @@ import { MetadataRegistry, Class } from '@travetto/registry';
 import { EndpointConfig, ControllerConfig, EndpointDecorator, ControllerDecorator } from './types';
 import { Filter, RouteHandler, ParamConfig } from '../types';
 
-// TODO: Document
+/**
+ * Controller registery
+ */
 class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointConfig> {
 
   constructor() {
@@ -42,21 +44,44 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     return fieldConf;
   }
 
+  /**
+   * Register the endpoint config
+   * @param cls Controller class
+   * @param handler Route handler
+   */
   getOrCreateEndpointConfig(cls: Class, handler: RouteHandler) {
     const fieldConf = this.getOrCreatePendingField(cls, handler) as EndpointConfig;
     return fieldConf;
   }
 
+  /**
+   * Regiseter the controller filter
+   * @param cls Controller class
+   * @param fn The filter to call
+   */
   registerControllerFilter(target: Class, fn: Filter) {
     const config = this.getOrCreatePending(target);
     config.filters!.push(fn);
   }
 
+  /**
+   * Regiseter the controller filter
+   * @param cls Controller class
+   * @param handler Route handler
+   * @param fn The filter to call
+   */
   registerEndpointFilter(target: Class, handler: RouteHandler, fn: Filter) {
     const config = this.getOrCreateEndpointConfig(target, handler);
     config.filters!.unshift(fn);
   }
 
+  /**
+   * Regiseter the endpoing parameter
+   * @param cls Controller class
+   * @param handler Route handler
+   * @param param The param config
+   * @param index The parameter index
+   */
   registerEndpointParameter(target: Class, handler: RouteHandler, param: ParamConfig, index: number) {
     const config = this.getOrCreateEndpointConfig(target, handler);
     if (index >= config.params.length) {
@@ -65,6 +90,10 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     config.params[index] = param;
   }
 
+  /**
+   * Create a filter decorator
+   * @param fn The filter to call
+   */
   createFilterDecorator(fn: Filter) {
     return ((target: any, prop: string, descriptor: TypedPropertyDescriptor<RouteHandler>) => {
       if (prop) {
@@ -75,6 +104,11 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     }) as (ControllerDecorator & EndpointDecorator);
   }
 
+  /**
+   * Merge descriptions
+   * @param src Root descriable (controller, endpoint)
+   * @param dest Target (controller, endpoint)
+   */
   mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>) {
     dest.headers = { ...dest.headers!, ...(src.headers ?? {}) };
     dest.filters = [...(dest.filters ?? []), ...(src.filters ?? [])];
@@ -82,6 +116,12 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     dest.description = src.description || dest.description;
   }
 
+  /**
+   * Register an endpoint as pending
+   * @param target Controller class
+   * @param descriptor Prop descriptor
+   * @param config The endpoint config
+   */
   registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<RouteHandler>, config: Partial<EndpointConfig>) {
     const srcConf = this.getOrCreateEndpointConfig(target, descriptor.value!);
     srcConf.method = config.method || srcConf.method;

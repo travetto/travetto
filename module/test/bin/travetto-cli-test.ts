@@ -4,7 +4,9 @@ import { CompletionConfig } from '@travetto/cli/src/types';
 import { ColorUtil } from '@travetto/boot';
 import { Colors } from '@travetto/cli/src/color';
 
-// TODO: Document
+/**
+ * Launch test framework and execute tests
+ */
 export function init() {
   return CliUtil.program.command('test')
     .arguments('[regexes...]')

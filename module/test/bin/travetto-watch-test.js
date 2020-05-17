@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Triggers the test watcher
+ */
 process.env.TRV_TEST_COMPILE = '1';
 process.env.TRV_CACHE = process.env.TRV_CACHE || `${process.cwd()}/.trv-cache_${Date.now()}`;
 require('@travetto/boot/bin/init')

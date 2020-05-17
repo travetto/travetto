@@ -5,7 +5,9 @@ import * as commander from 'commander';
 import { CliUtil } from '@travetto/cli/src/util';
 import { FsUtil } from '@travetto/boot/src/fs';
 
-// TODO: Document
+/**
+ * Supports building the SAM for the aws lambda
+ */
 export function init() {
   return CliUtil.program
     .command('rest-aws-lambda:build-sam')
