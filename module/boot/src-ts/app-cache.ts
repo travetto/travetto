@@ -36,6 +36,10 @@ class $AppCache extends FileCache {
     }
   }
 
+  /**
+   * Convert from cached entry name to local file
+   * @param cached Cached entry location
+   */
   fromEntryName(cached: string) {
     return FsUtil.joinUnix(FsUtil.cwd,
       super.fromEntryName(cached)
@@ -43,8 +47,12 @@ class $AppCache extends FileCache {
     ).replace(/[.]js$/, '.ts');
   }
 
-  toEntryName(full: string) {
-    return super.toEntryName(full.replace(FsUtil.cwd, '')
+  /**
+   * Convert from local entry name to cache
+   * @param local Local entry location
+   */
+  toEntryName(local: string) {
+    return super.toEntryName(local.replace(FsUtil.cwd, '')
       .replace(/node_modules\/@travetto/g, '._.')
     ).replace(/[.]ts$/, '.js');
   }

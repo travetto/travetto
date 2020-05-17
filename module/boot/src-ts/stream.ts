@@ -10,6 +10,7 @@ export class StreamUtil {
 
   /**
    * Convert buffer to a stream
+   * @param src The buffer to stream
    */
   static async bufferToStream(src: Buffer): Promise<NodeJS.ReadableStream> {
     const readable = new PassThrough();
@@ -19,6 +20,7 @@ export class StreamUtil {
 
   /**
    * Read stream to buffer
+   * @param src The stream to convert to a buffer
    */
   static async streamToBuffer(src: NodeJS.ReadableStream): Promise<Buffer> {
     const stream = src as NodeJS.ReadableStream;
@@ -34,6 +36,7 @@ export class StreamUtil {
 
   /**
    * Convert input source to a buffer
+   * @param src The input to convert to a buffer
    */
   static async toBuffer(src: All): Promise<Buffer> {
     if (src instanceof Buffer) {
@@ -49,6 +52,7 @@ export class StreamUtil {
 
   /**
    * Convert input source to a stream
+   * @param src The input to convert to a stram
    */
   static async toStream(src: All): Promise<NodeJS.ReadableStream> {
     if (typeof src !== 'string' && 'pipe' in src) {
@@ -60,6 +64,8 @@ export class StreamUtil {
 
   /**
    * Persist to a file
+   * @param src The input to write to file
+   * @param out The location to write to
    */
   static async writeToFile(src: All, out: string): Promise<void> {
     const write = fs.createWriteStream(out);
@@ -72,6 +78,8 @@ export class StreamUtil {
 
   /**
    * Delay ending stream until some milestone is achieved
+   * @param stream The stream to wait for
+   * @param waitUntil The function to track completion before the stream is done
    */
   static async waitForCompletion(stream: NodeJS.ReadableStream, waitUntil: () => Promise<any>) {
     const ogListen = stream.addListener;

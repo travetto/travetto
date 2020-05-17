@@ -29,6 +29,9 @@ export class TranspileUtil {
 
   /**
    * Build error module
+   * @param message Error message to show
+   * @param isModule Is the error a module that should have been loaded
+   * @param base The base set of properties to support
    */
   static getErrorModule(message: string, isModule?: string | boolean, base?: Record<string, any>) {
     const f = ([k, v]: string[]) => `${k}: (t,k) => ${v}`;
@@ -50,6 +53,7 @@ export class TranspileUtil {
 
   /**
    * Process token
+   * @param token The token to process
    */
   static resolveToken(token: string): { minus: boolean, key: string, valid: boolean, err?: Error } {
     const [, sign, env, key] = token.match(/(-|\+)?([$])?(.*)/)!;
@@ -68,6 +72,8 @@ export class TranspileUtil {
 
   /**
    * Resolve macros for keeping/removing text
+   * @param name The name of the file to resolve macros for
+   * @param contents The file contents
    */
   static resolveMacros(name: string, contents: string) {
     const modErrs: string[] = [];
@@ -108,6 +114,9 @@ export class TranspileUtil {
 
   /**
    * Check transpilation errors
+   * @param cwd The root of the execution
+   * @param fileName The naem of the file
+   * @param diagnostics The diagnostic errors
    */
   static checkTranspileErrors(cwd: string, fileName: string, diagnostics: readonly any[]) {
     if (diagnostics && diagnostics.length) {
@@ -130,6 +139,7 @@ export class TranspileUtil {
 
   /**
    * Add support for additional transpilation preprocessor
+   * @param fn The preprocessor to add
    */
   static addPreProcessor(fn: Preprocessor) {
     this.preProcessors.unshift(fn);
@@ -137,6 +147,8 @@ export class TranspileUtil {
 
   /**
    * Pre-processes a typescript file before transpilation
+   * @param fileName The file to preprocess
+   * @param contents The file contents to process
    */
   static preProcess(fileName: string, contents?: string) {
     let fileContents = contents ?? fs.readFileSync(fileName, 'utf-8');
@@ -153,6 +165,10 @@ export class TranspileUtil {
 
   /**
    * Process error response
+   * @param phase The load/compile phase to care about
+   * @param tsf The typescript filename
+   * @param err The error produced
+   * @param fileName The relative filename
    */
   static handlePhaseError(phase: 'load' | 'compile' | 'transpile', tsf: string, err: Error, fileName = tsf.replace(`${FsUtil.cwd}/`, '')) {
     if (phase === 'compile' &&
@@ -171,6 +187,8 @@ export class TranspileUtil {
 
   /**
    * Transpile, and cache
+   * @param tsf The typescript file to transpile
+   * @param force Force transpilation, even if cached
    */
   static transpile(tsf: string, force = false) {
     return AppCache.getOrSet(tsf, () => {

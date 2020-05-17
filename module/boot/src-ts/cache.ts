@@ -13,6 +13,9 @@ export class FileCache {
 
   readonly cacheDir: string;
 
+  /**
+   * Directory to cache into
+   */
   constructor(cacheDir: string) {
     this.cacheDir = FsUtil.toUnix(cacheDir);
   }
@@ -23,64 +26,73 @@ export class FileCache {
 
   /**
    * Write contents to disk
+   * @param local Local location
+   * @param contents Contents to write
    */
-  writeEntry(full: string, contents: string | Buffer) {
-    fs.writeFileSync(this.toEntryName(full), contents);
-    this.statEntry(full);
+  writeEntry(local: string, contents: string | Buffer) {
+    fs.writeFileSync(this.toEntryName(local), contents);
+    this.statEntry(local);
   }
 
   /**
    * Read entry from disk
+   * @param local Read the entry given the local name
    */
-  readEntry(full: string) {
-    return fs.readFileSync(this.toEntryName(full), 'utf-8');
+  readEntry(local: string) {
+    return fs.readFileSync(this.toEntryName(local), 'utf-8');
   }
 
   /**
    * Delete expired entries
+   * @param full The local location
+   * @param force Should deletion be force
    */
-  removeExpiredEntry(full: string, force = false) {
-    if (this.hasEntry(full)) {
+  removeExpiredEntry(local: string, force = false) {
+    if (this.hasEntry(local)) {
       try {
-        if (force || isOlder(this.statEntry(full), fs.statSync(full))) {
-          fs.unlinkSync(this.toEntryName(full));
+        if (force || isOlder(this.statEntry(local), fs.statSync(local))) {
+          fs.unlinkSync(this.toEntryName(local));
         }
       } catch (e) {
         if (!e.message.includes('ENOENT')) {
           throw e;
         }
       }
-      this.removeEntry(full);
+      this.removeEntry(local);
     }
   }
 
   /**
    * Delete entry
+   * @param local The location to delete
    */
-  removeEntry(full: string) {
-    this.cache.delete(full);
+  removeEntry(local: string) {
+    this.cache.delete(local);
   }
 
   /**
    * Checks to see if a file has been loaded or if it's available on disk
+   * @param local The location to verify
    */
-  hasEntry(full: string) {
-    return this.cache.has(full) || FsUtil.existsSync(this.toEntryName(full));
+  hasEntry(local: string) {
+    return this.cache.has(local) || FsUtil.existsSync(this.toEntryName(local));
   }
 
   /**
    * Retrieve fs.Stats of the associated path
+   * @param local The location to stat
    */
-  statEntry(full: string) {
-    if (!this.cache.has(full)) {
-      const stat = fs.statSync(this.toEntryName(full));
-      this.cache.set(full, stat);
+  statEntry(local: string) {
+    if (!this.cache.has(local)) {
+      const stat = fs.statSync(this.toEntryName(local));
+      this.cache.set(local, stat);
     }
-    return this.cache.get(full)!;
+    return this.cache.get(local)!;
   }
 
   /**
    * Clear cache
+   * @param quiet Should the clear produce output
    */
   clear(quiet = false) {
     if (this.cacheDir) {
@@ -97,10 +109,11 @@ export class FileCache {
   }
 
   /**
-   * Map cached file name to the original source
+   * Map entry file name to the original source
+   * @param entry The entry path
    */
-  fromEntryName(cached: string) {
-    return FsUtil.toUnix(cached)
+  fromEntryName(entry: string) {
+    return FsUtil.toUnix(entry)
       .replace(this.cacheDir, '')
       .replace(/~/g, '/')
       .replace(/\/\/+/g, '/');
@@ -108,9 +121,10 @@ export class FileCache {
 
   /**
    * Map the original file name to the cache file space
+   * @param local Local path
    */
-  toEntryName(full: string) {
-    return FsUtil.joinUnix(this.cacheDir, full
+  toEntryName(local: string) {
+    return FsUtil.joinUnix(this.cacheDir, local
       .replace(/^\//, '')
       .replace(/\/+/g, '~')
     );
@@ -118,9 +132,12 @@ export class FileCache {
 
   /**
    * Get or set a value (from the create function) if not in the cache
+   * @param local The local location
+   * @param create The method to execute if the entry is not found
+   * @param force Should create be executed always
    */
-  getOrSet(key: string, create: () => string, force = false) {
-    const name = FsUtil.toUnix(key);
+  getOrSet(local: string, create: () => string, force = false) {
+    const name = FsUtil.toUnix(local);
     let content: string;
     if (force || !this.hasEntry(name)) {
       this.writeEntry(name, content = create());

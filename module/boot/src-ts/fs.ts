@@ -7,31 +7,15 @@ const fsStat = util.promisify(fs.stat);
 const fsMkdir = util.promisify(fs.mkdir);
 
 /**
- * Execute a command
- */
-function execCmd(sync: false, [cmd, args]: [string, string[]], ignoreErrors?: boolean): Promise<ExecutionResult>;
-function execCmd(sync: true, [cmd, args]: [string, string[]], ignoreErrors?: boolean): string;
-function execCmd(sync: boolean, [cmd, args]: [string, string[]], ignoreErrors = false): string | undefined | Promise<ExecutionResult> {
-  try {
-    const ret = sync ? ExecUtil.execSync(`${cmd} ${args.join(' ')}`) : ExecUtil.spawn(cmd, args).result;
-    return typeof ret !== 'string' && ignoreErrors ? ret.catch(e => e.meta as ExecutionResult) : ret;
-  } catch (e) {
-    if (!ignoreErrors) {
-      throw e;
-    }
-  }
-}
-
-/**
  * Standard utils for interacting with the file system
  */
 export class FsUtil {
 
   static readonly cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
 
-
   /**
    * Command to remove a folder
+   * @param pth Thefolder to delete
    */
   private static unlinkCommand(pth: string): [string, string[]] {
     if (!pth || pth === '/') {
@@ -46,6 +30,7 @@ export class FsUtil {
 
   /**
    * Command to copy a folder
+   * @param pth The folder to copy
    */
   private static copyCommand(src: string, dest: string): [string, string[]] {
     if (process.platform === 'win32') {
@@ -57,34 +42,39 @@ export class FsUtil {
 
   /**
    * Convert file to a unix format
+   * @param pth The path to convert
    */
-  static toUnix(rest: string) {
-    return rest.replace(/[\\\/]+/g, '/');
+  static toUnix(pth: string) {
+    return pth.replace(/[\\\/]+/g, '/');
   }
 
   /**
    * Convert file to the native format
+   * @param pth The path to convert
    */
-  static toNative(rest: string) {
-    return rest.replace(/[\\\/]+/g, path.sep);
+  static toNative(pth: string) {
+    return pth.replace(/[\\\/]+/g, path.sep);
   }
 
   /**
    * Resolve path to use / for directory seps
+   * @param pths The paths to resolve
    */
-  static resolveUnix(...rest: string[]) {
-    return this.toUnix(path.resolve(...rest));
+  static resolveUnix(...pths: string[]) {
+    return this.toUnix(path.resolve(...pths));
   }
 
   /**
    * Path.join, and coercing to unix
+   * @param pths The paths to join
    */
-  static joinUnix(...rest: string[]) {
-    return this.toUnix(path.join(...rest));
+  static joinUnix(...pths: string[]) {
+    return this.toUnix(path.join(...pths));
   }
 
   /**
    * See if file exists
+   * @param f The file to check
    */
   static existsSync(f: string) {
     try {
@@ -96,6 +86,7 @@ export class FsUtil {
 
   /**
    * See if file exists
+   * @param f The file to check
    */
   static exists(f: string) {
     return fsStat(f).catch(() => undefined);
@@ -103,6 +94,7 @@ export class FsUtil {
 
   /**
    * Make directory and all intermediate ones as well
+   * @param pth The folder to make
    */
   static async mkdirp(pth: string) {
     try {
@@ -115,6 +107,7 @@ export class FsUtil {
 
   /**
    * Make directory and all intermediate ones as well, synchronously
+   * @param pth The folder to make
    */
   static mkdirpSync(pth: string) {
     try {
@@ -127,22 +120,42 @@ export class FsUtil {
 
   /**
    * Remove directory, determine if errors should be ignored
+   * @param pth The folder to delete
+   * @param ignore Should errors be ignored
    */
   static unlinkRecursiveSync(pth: string, ignore = false) {
-    return execCmd(true, this.unlinkCommand(pth), ignore);
+    try {
+      return ExecUtil.execSync(...this.unlinkCommand(pth));
+    } catch (err) {
+      if (!ignore) {
+        throw err;
+      }
+    }
   }
 
   /**
    * Remove directory, determine if errors should be ignored
+   * @param pth The folder to delete
+   * @param ignore Should errors be ignored
    */
   static unlinkRecursive(pth: string, ignore = false) {
-    return execCmd(false, this.unlinkCommand(pth), ignore);
+    const prom = ExecUtil.spawn(...this.unlinkCommand(pth)).result;
+    return ignore ? prom.catch(e => e.meta) : prom;
   }
 
   /**
    * Remove directory, determine if errors should be ignored, synchronously
+   * @param src The folder to copy
+   * @param dest The folder to copy to
+   * @param ignore Should errors be ignored
    */
   static copyRecursiveSync(src: string, dest: string, ignore = false) {
-    return execCmd(true, this.copyCommand(src, dest), ignore);
+    try {
+      return ExecUtil.execSync(...this.copyCommand(src, dest));
+    } catch (err) {
+      if (!ignore) {
+        throw err;
+      }
+    }
   }
 }

@@ -45,11 +45,14 @@ export class ColorUtil {
     yellow: [33, 39]
   };
 
-
   /**
    * Simple function for colorizing text
    *
    * Taken from masylum's fork (https://github.com/masylum/log4js-node)
+   *
+   * @param textColor Text color
+   * @param styles Text styles to apply
+   * @param value The value to color
    */
   static color(textColor: keyof typeof ColorUtil.COLORS, styles: (keyof typeof ColorUtil.STYLES)[], value: any): string {
     if (this.colorize && value !== undefined && value !== null && value !== '') {
@@ -61,7 +64,10 @@ export class ColorUtil {
   }
 
   /**
-   * Make a colorer
+   * Produce a factory to color text with a specific style
+   *
+   * @param textColor Text color
+   * @param styles Text styles to apply
    */
   static makeColorer(textColor: keyof typeof ColorUtil.COLORS, ...styles: (keyof typeof ColorUtil.STYLES)[]) {
     return this.color.bind(this, textColor, styles);
@@ -69,6 +75,8 @@ export class ColorUtil {
 
   /**
    * Creates a string interpolator for a given palette
+   *
+   * @param palette The list of supported keys for the string template
    */
   static makeTemplate<T extends Record<string, (text: string) => string>>(palette: T) {
     /**

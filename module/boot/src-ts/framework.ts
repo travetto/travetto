@@ -25,7 +25,8 @@ export class FrameworkUtil {
 
   /**
    * Only called in Framework dev mode
-   * @param pth
+   * @param pth The full path to translate
+   * @param mod The module to check against
    */
   static devResolve(pth: string, mod?: Module) {
     if (mod) {

@@ -5,6 +5,8 @@ export class EnvUtil {
 
   /**
    * Get, check for key as passed, as all upper and as all lowercase
+   * @param k The environment key to search for
+   * @param def The default value if the key isn't found
    */
   static get(k: string, def: string): string;
   static get(k: string, def?: string): string | undefined;
@@ -17,6 +19,7 @@ export class EnvUtil {
 
   /**
    * Read value as a comma-separated list
+   * @param k The environment key to search for
    */
   static getList(k: string) {
     return (this.get(k) ?? '').split(/[, ]+/g).filter(x => !!x);
@@ -24,6 +27,8 @@ export class EnvUtil {
 
   /**
    * Read value as an integer
+   * @param k The environment key to search for
+   * @param def The default value if the key isn't found
    */
   static getInt(k: string, def: number | string) {
     return parseInt(this.get(k, `${def}`) ?? '', 10);
@@ -31,6 +36,8 @@ export class EnvUtil {
 
   /**
    * Get time as milliseconds
+   * @param k The environment key to search for
+   * @param defMs The default millisecons if the key isn't found
    */
   static getTime(k: string, defMs: number) {
     const text = this.get(k, '');
@@ -51,6 +58,7 @@ export class EnvUtil {
 
   /**
    * Determine if value is set explicitly
+   * @param k The environment key to search for
    */
   static isSet(k: string) {
     const val = this.get(k);
@@ -59,6 +67,7 @@ export class EnvUtil {
 
   /**
    * Read value as true
+   * @param k The environment key to search for
    */
   static isTrue(k: string) {
     const val = this.get(k);
@@ -67,6 +76,7 @@ export class EnvUtil {
 
   /**
    * Read value as false
+   * @param k The environment key to search for
    */
   static isFalse(k: string) {
     const val = this.get(k);
@@ -75,6 +85,9 @@ export class EnvUtil {
 
   /**
    * Checks to see if the negative is set
+   * @param key The environment key to search for
+   * @param values The list of acceptable values for the key
+   * @param def The default value if the key isn't found
    */
   static isValueOrFalse<T extends readonly string[]>(key: string, values: T, def?: T[number]): T[number] | false {
     if (this.isFalse(key)) {
