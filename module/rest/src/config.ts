@@ -5,27 +5,65 @@ import { Env, AppError, ResourceManager } from '@travetto/base';
 
 import { SSLUtil } from './util/ssl';
 
+/**
+ * Restful configuration
+ */
 @Config('rest')
-// TODO: Document
 export class RestConfig {
+  /**
+   * Should the app run
+   */
   serve = true;
+  /**
+   * The port to listen to
+   */
   port = 3000;
+  /**
+   * Disable cache on all gets, unless overridden
+   */
   disableGetCache = true;
+  /**
+   * Should we trust the proxy requests implicitly
+   */
   trustProxy = false;
+  /**
+   * The hostname for the server
+   */
   hostname = 'localhost';
+  /**
+   * The bind address, defaults to 0.0.0.0
+   */
   bindAddress?: string;
+  /**
+   * The base url for the application
+   */
   baseUrl: string;
 
+  /**
+   * Shoudl the app provide the global route for app info
+   */
   defaultMessage = true;
 
+  /**
+   * SSL Configuration
+   */
   ssl: {
+    /**
+     * Enabled
+     */
     active?: boolean;
+    /**
+     * SSL Keys
+     */
     keys?: {
       cert: string;
       key: string;
     };
   } = { active: false };
 
+  /**
+   * Redfine base url to be the full URL if not specified
+   */
   postConstruct() {
     if (!this.bindAddress) {
       const useIPv4 = !![...Object.values(os.networkInterfaces())]
@@ -38,6 +76,9 @@ export class RestConfig {
     }
   }
 
+  /**
+   * Get SSL keys, will generate if missing, and in dev
+   */
   async getKeys() {
     if (this.ssl.active) {
       if (!this.ssl.keys) {

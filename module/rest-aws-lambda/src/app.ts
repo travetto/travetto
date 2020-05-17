@@ -9,14 +9,14 @@ import * as awsServerlessExpressMiddleware from 'aws-serverless-express/middlewa
 
 import { AppUtil } from '@travetto/app';
 import { Inject } from '@travetto/di';
-import { RestApp, RouteConfig, RouteUtil, TRV_RAW } from '@travetto/rest';
+import { RestServer, RouteConfig, RouteUtil, TRV_RAW } from '@travetto/rest';
 
 import { AwsLambdaConfig } from './config';
 
 /**
- * Aws Lambda Rest App
+ * Aws Lambda Rest Server
  */
-export class AwsLambdaRestApp extends RestApp<express.Application> {
+export class AwsLambdaRestServer extends RestServer<express.Application> {
 
   private server: http.Server;
 
@@ -92,7 +92,7 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
     }
 
     // Register options handler for each controller
-    if (key !== RestApp.GLOBAL) {
+    if (key !== RestServer.GLOBAL) {
       const optionHandler = RouteUtil.createRouteHandler(this.interceptors,
         { method: 'options', path: '*', handler: this.globalHandler, params: [] });
 
@@ -104,7 +104,7 @@ export class AwsLambdaRestApp extends RestApp<express.Application> {
     router.key = key;
     this.raw.use(path, router);
 
-    if (this.listening && key !== RestApp.GLOBAL) {
+    if (this.listening && key !== RestServer.GLOBAL) {
       await this.unregisterGlobal();
       await this.registerGlobal();
     }

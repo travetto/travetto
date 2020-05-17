@@ -10,20 +10,33 @@ import { RouteUtil } from './util/route';
 import { RestInterceptor } from './interceptor/interceptor';
 import { ControllerRegistry } from './registry/registry';
 
-// TODO: Document
-export abstract class RestApp<T = any> {
+/**
+ * The rest server
+ */
+export abstract class RestServer<T = any> {
 
   static GLOBAL = '___GLOBAL___';
 
   @Inject()
   config: RestConfig;
 
+  /**
+   * The underlying raw application
+   */
   raw: T;
+  /**
+   * List of provided interceptors
+   */
   interceptors: RestInterceptor[] = [];
+  /**
+   * Is the application listening
+   */
   listening = false;
 
+  /**
+   * Provide the base information for the app
+   */
   info = {
-    travetto: require('../package.json').version,
     restProvider: this.constructor.name,
     ...AppInfo
   };
@@ -33,6 +46,10 @@ export abstract class RestApp<T = any> {
     this.globalHandler = this.globalHandler.bind(this);
   }
 
+  /**
+   * Handle the global request
+   * @param req The http request
+   */
   async globalHandler(req: Request) {
     if (req.method === 'OPTIONS') {
       return '';
@@ -43,11 +60,30 @@ export abstract class RestApp<T = any> {
     }
   }
 
+  /**
+   * Create the raw application
+   */
   abstract createRaw(): Promise<T> | T;
+  /**
+   * Register new routes
+   * @param key The identifier for the set of routes
+   * @param path The path to add the routes to
+   * @param endpoints The list of endpoints to add
+   */
   abstract registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[]): Promise<void>;
+  /**
+   * The routes to unregister
+   * @param key The key to unregister by
+   */
   abstract unregisterRoutes(key: string | symbol): Promise<void>;
+  /**
+   * Start the listening proccess
+   */
   abstract listen(): ApplicationHandle | Promise<ApplicationHandle>;
 
+  /**
+   * Initialize the application
+   */
   async init() {
     await ControllerRegistry.init();
 
@@ -66,6 +102,9 @@ export abstract class RestApp<T = any> {
     ControllerRegistry.on(this.onControllerChange);
   }
 
+  /**
+   * Get the list of installed interceptors
+   */
   async getInterceptors() {
     const interceptors = DependencyRegistry.getCandidateTypes(RestInterceptor as Class);
     const instances: RestInterceptor[] = [];
@@ -80,6 +119,10 @@ export abstract class RestApp<T = any> {
     return sorted;
   }
 
+  /**
+   * When a controller changes, unregister and re-register the class
+   * @param e The change event
+   */
   async onControllerChange(e: ChangeEvent<Class>) {
     console.trace('Registry event', e);
     if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
@@ -90,6 +133,10 @@ export abstract class RestApp<T = any> {
     }
   }
 
+  /**
+   * Register a controller
+   * @param c The class to register
+   */
   async registerController(c: Class) {
     const config = ControllerRegistry.get(c);
     config.instance = await DependencyRegistry.getInstance(config.class);
@@ -103,10 +150,17 @@ export abstract class RestApp<T = any> {
     console.debug('Registering Controller Instance', config.class.__id, config.basePath, config.endpoints.length);
   }
 
+  /**
+   * Unregister a controller
+   * @param c The class to unregister
+   */
   async unregisterController(c: Class) {
     await this.unregisterRoutes(c.__id);
   }
 
+  /**
+   * Register the global listener as a hardcoded path
+   */
   async registerGlobal() {
     const route: RouteConfig = {
       params: [{ extract: (c: any, r: any) => r } as ParamConfig],
@@ -115,13 +169,19 @@ export abstract class RestApp<T = any> {
       method: 'all', path: '*'
     };
     route.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, route);
-    await this.registerRoutes(RestApp.GLOBAL, '/', [route]);
+    await this.registerRoutes(RestServer.GLOBAL, '/', [route]);
   }
 
+  /**
+   * Remvoe the global listener
+   */
   async unregisterGlobal() {
-    await this.unregisterRoutes(RestApp.GLOBAL);
+    await this.unregisterRoutes(RestServer.GLOBAL);
   }
 
+  /**
+   * Run the application
+   */
   async run() {
     await this.init();
     console.info(`Listening on ${this.config.port}`);

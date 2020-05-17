@@ -5,16 +5,16 @@ import * as kRouter from 'koa-router';
 
 import { AppUtil } from '@travetto/app';
 import { Injectable, Inject } from '@travetto/di';
-import { RestApp, RouteConfig, RestCookieConfig } from '@travetto/rest';
+import { RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
 
 import { KoaAppUtil } from './internal/util';
 import Router = require('koa-router');
 
 /**
- * Koa-based Rest App
+ * Koa-based Rest server
  */
 @Injectable()
-export class KoaRestApp extends RestApp<koa> {
+export class KoaRestServer extends RestServer<koa> {
 
   @Inject()
   cookies: RestCookieConfig;
@@ -66,7 +66,7 @@ export class KoaRestApp extends RestApp<koa> {
     this.raw.use(middleware);
 
     // If already running and not global routes, re-register
-    if (this.listening && key !== RestApp.GLOBAL) {
+    if (this.listening && key !== RestServer.GLOBAL) {
       await this.unregisterGlobal();
       await this.registerGlobal();
     }
