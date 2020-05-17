@@ -1,6 +1,6 @@
 import { Class } from '@travetto/registry';
 
-import { SortClause } from './model/query';
+import { SortClause } from '../model/query';
 
 /**
  * Index options
