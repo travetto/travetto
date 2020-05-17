@@ -143,6 +143,11 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     return descriptor;
   }
 
+  /**
+   * Register a pending configuration
+   * @param target The target class
+   * @param config The controller configuration
+   */
   registerPending(target: Class, config: Partial<ControllerConfig>) {
     const srcConf = this.getOrCreatePending(target);
     srcConf.basePath = config.basePath || srcConf.basePath;
@@ -154,6 +159,9 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     this.mergeDescribable(config, srcConf);
   }
 
+  /**
+   * Finalize routes, removing duplicates based on ids
+   */
   onInstallFinalize(cls: Class) {
     const final = this.getOrCreatePending(cls) as ControllerConfig;
 

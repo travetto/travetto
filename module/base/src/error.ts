@@ -1,5 +1,6 @@
-import { StacktraceUtil } from './stacktrace';
-import { Env } from './env';
+/// <reference path="./internal/global-types.d.ts" />
+
+
 import { ErrorCategory } from './internal/error';
 export { ErrorCategory } from './internal/error'; // Re-export
 
@@ -53,9 +54,3 @@ export class AppError extends Error {
     };
   }
 }
-
-// Add .toConsole to the default Error as well
-Error.prototype.toConsole = function (mid: any = '') {
-  const stack = (Env.prod || Env.trace) ? this.stack! : StacktraceUtil.simplifyStack(this);
-  return `${this.message}\n${mid}${stack.substring(stack.indexOf('\n') + 1)}`;
-};
