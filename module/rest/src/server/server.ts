@@ -4,11 +4,11 @@ import { SystemUtil } from '@travetto/base/src/internal/system';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { Class, ChangeEvent } from '@travetto/registry';
 
-import { RouteConfig, Request, RouteHandler, ParamConfig } from './types';
+import { RouteConfig, Request, RouteHandler, ParamConfig } from '../types';
 import { RestConfig } from './config';
-import { RouteUtil } from './util/route';
-import { RestInterceptor } from './interceptor/interceptor';
-import { ControllerRegistry } from './registry/registry';
+import { RouteUtil } from '../util/route';
+import { RestInterceptor } from '../interceptor/interceptor';
+import { ControllerRegistry } from '../registry/registry';
 
 /**
  * The rest server

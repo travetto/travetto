@@ -1,4 +1,4 @@
-import { Response } from './types';
+import { Response } from '../types';
 
 declare global {
   export interface Error {

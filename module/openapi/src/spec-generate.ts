@@ -1,4 +1,4 @@
-import { ControllerRegistry, MimeType, EndpointClassType, EndpointIOType, EndpointConfig, ControllerConfig, ParamConfig } from '@travetto/rest';
+import { ControllerRegistry, EndpointClassType, EndpointIOType, EndpointConfig, ControllerConfig, ParamConfig } from '@travetto/rest';
 
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
@@ -171,7 +171,7 @@ export class SpecGenerateUtil {
         const ref: SchemaObject = this.getType(eType.type, state);
         return {
           content: {
-            [MimeType.JSON]: {
+            'application/json': {
               schema: !eType!.array ? ref : { type: 'array', items: ref }
             }
           },
@@ -204,7 +204,7 @@ export class SpecGenerateUtil {
     if (type && type.type === 'file') {
       return {
         content: {
-          [MimeType.MULTIPART]: {
+          'multipart/form-data': {
             schema: {
               properties: {
                 file: {

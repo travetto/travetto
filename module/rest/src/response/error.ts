@@ -2,7 +2,7 @@
 import { Env, AppError } from '@travetto/base';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 
-import { Response } from './types';
+import { Response } from '../types';
 
 /**
  * Render the error to the resposne objecet
