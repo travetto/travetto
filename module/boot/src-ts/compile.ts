@@ -125,6 +125,8 @@ export class CompileUtil {
 
   /**
    * Add module post processor (post-load)
+   *
+   * @param handler The code to run on post module load
    */
   static addModuleHandler(handler: (name: string, o: any) => any) {
     this.moduleHandlers.push(handler);

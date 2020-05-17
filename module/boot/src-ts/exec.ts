@@ -71,6 +71,7 @@ export interface ExecutionOptions extends SpawnOptions {
 export class ExecUtil {
   /**
    * Get standard execution options
+   * @param opts The options to build out
    */
   static getOpts(opts: ExecutionOptions) {
     return {
@@ -89,6 +90,10 @@ export class ExecUtil {
    * Take a child process, and some additional options, and produce a promise that
    * represents the entire execution.  On successful completion the promise will resolve, and
    * on failed completion the promise will reject.
+   *
+   * @param p The process to enhance
+   * @param options The options to use to ehance the process
+   * @param cmd The command being run
    */
   static enhanceProcess(p: ChildProcess, options: ExecutionOptions, cmd: string) {
     const timeout = options.timeout;
@@ -156,6 +161,9 @@ export class ExecUtil {
 
   /**
    * Run a command directly, as a stand alone operation
+   * @param cmd The command to run
+   * @param args The command line argumetns to pass
+   * @param options The enhancement options
    */
   static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
     const p = spawn(cmd, args, this.getOpts(options));
@@ -166,6 +174,9 @@ export class ExecUtil {
   /**
    * Run a command relative to the current node executable.  Mimics how node's
    * fork operation is just spawn with the command set to `process.argv0`
+   * @param cmd The command to run
+   * @param args The command line argumetns to pass
+   * @param options The enhancement options
    */
   static fork(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
     const p = spawn(process.argv0, [cmd, ...args], this.getOpts(options));
@@ -175,13 +186,20 @@ export class ExecUtil {
 
   /**
    * Execute command synchronously
+   * @param cmd The cmd to run
+   * @param args The arguments to pass
    */
-  static execSync(command: string) {
-    return execSync(command, { stdio: ['pipe', 'pipe'] }).toString().trim();
+  static execSync(cmd: string, args?: string[]) {
+    if (args) {
+      cmd = `${cmd} ${args.join(' ')}`;
+    }
+    return execSync(cmd, { stdio: ['pipe', 'pipe'] }).toString().trim();
   }
 
   /**
    * Pipe a buffer into an execution state
+   * @param state The execution state to pipe
+   * @param input The data to input into the process
    */
   static pipe(state: ExecutionState, input: Buffer): Promise<Buffer>;
   static pipe(state: ExecutionState, input: string | NodeJS.ReadableStream): Promise<NodeJS.ReadableStream>;
@@ -201,6 +219,7 @@ export class ExecUtil {
 
   /**
    * Kill a spawned proces
+   * @param proc The process to kill
    */
   static kill(proc: { kill(sig?: string | number): void }) {
     if (process.platform === 'win32') {
