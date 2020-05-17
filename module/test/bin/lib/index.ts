@@ -1,8 +1,10 @@
-import { State } from '../../src/runner/types';
+import { RunState } from '../../src/runner/types';
 
-// TODO: Document
-
-export async function runTests(opts: State) {
+/**
+ * Run tests given the input state
+ * @param opts
+ */
+export async function runTests(opts: RunState) {
   const { StandardWorker } = await import('../../src/worker/standard');
   return StandardWorker.run(opts);
 }
