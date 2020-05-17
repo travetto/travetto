@@ -17,8 +17,8 @@ export class KoaServerUtil {
       ctx[TRV_REQ] = RestServerUtil.decorateRequest({
         [TRV_ORIG]: ctx,
         [TRV_RAW]: ctx.req,
-        protocol: ctx.protocol,
-        method: ctx.request.method,
+        protocol: ctx.protocol as 'http',
+        method: ctx.request.method as 'get',
         path: ctx.request.path,
         query: ctx.request.query,
         params: ctx.params,

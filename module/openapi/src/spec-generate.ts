@@ -1,11 +1,10 @@
-import { ControllerRegistry, EndpointClassType, EndpointIOType, EndpointConfig, ControllerConfig, ParamConfig } from '@travetto/rest';
+import { SchemaObject, OpenAPIObject, SchemasObject, ParameterObject, OperationObject } from 'openapi3-ts';
 
+import { ControllerRegistry, EndpointClassType, EndpointIOType, EndpointConfig, ControllerConfig, ParamConfig } from '@travetto/rest';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
 import { ApiSpecConfig } from './config';
-
-import { SchemaObject, OpenAPIObject, SchemasObject, ParameterObject, OperationObject } from 'openapi3-ts';
 
 export function isEndpointClassType(o: EndpointIOType): o is EndpointClassType {
   return !!o && !('mime' in o);
@@ -271,9 +270,9 @@ export class SpecGenerateUtil {
     const key = `${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/');
 
     const toAdd = ep.method === 'all' ?
-      ['get', 'post', 'put', 'delete'].reduce((acc, v) =>
+      ['get', 'post', 'put', 'delete', 'patch'].reduce((acc, v) =>
         ({ ...acc, [v]: { ...op, operationId: `${op.operationId}_${v}` } }), {}) :
-      { [ep.method!]: op };
+      { [ep.method]: op };
 
     state.paths[key] = {
       ...(state.paths[key] ?? {}),

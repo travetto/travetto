@@ -1,7 +1,7 @@
 // @file-if @travetto/rest
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Controller, Post, ControllerRegistry, Method, RouteUtil, Get, SerializeInterceptor } from '@travetto/rest';
+import { Controller, Post, ControllerRegistry, RouteUtil, Get, SerializeInterceptor, MethodOrAll } from '@travetto/rest';
 import { RootRegistry } from '@travetto/registry';
 
 import { SchemaBody, SchemaQuery } from '../src/extension/rest';
@@ -31,7 +31,7 @@ class API {
 @Suite()
 export class RestTest {
 
-  static getEndpoint(path: string, method: Method) {
+  static getEndpoint(path: string, method: MethodOrAll) {
     return ControllerRegistry.get(API).endpoints.find(x => x.path === path && x.method === method)!;
   }
 
