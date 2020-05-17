@@ -1,6 +1,8 @@
 import { Util } from '@travetto/base';
 
 /**
+ * Point as [number,number] with validation and binding support
+ *
  * @concrete Point
  */
 export type Point = [number, number];
@@ -87,10 +89,16 @@ export type PropWhereClause<T> = {
               (T[P] extends (object | undefined) ? PropWhereClause<RetainFields<T[P]>> : never)))))));
 };
 
+/**
+ * Raw query type
+ */
 export type WhereClauseRaw<T> =
   ({ $and: WhereClauseRaw<T>[] } & { [P in keyof T]?: never }) |
   ({ $or: WhereClauseRaw<T>[] } & { [P in keyof T]?: never }) |
   ({ $not: WhereClauseRaw<T> } & { [P in keyof T]?: never }) |
   (PropWhereClause<T> & { $and?: never, $or?: never, $not?: never });
 
+/**
+ * Full where clause, typed against the input type T
+ */
 export type WhereClause<T> = WhereClauseRaw<RetainFields<T>>;

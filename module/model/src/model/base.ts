@@ -3,8 +3,10 @@ import { Schema } from '@travetto/schema';
 import { ModelCore } from './core';
 import { ModelRegistry } from '../registry';
 
+/**
+ * Base model, provides basic functionality dates and subtype support
+ */
 @Schema()
-// TODO: Document
 export abstract class BaseModel implements ModelCore {
 
   id?: string;
@@ -20,6 +22,9 @@ export abstract class BaseModel implements ModelCore {
     }
   }
 
+  /**
+   * Update timestamps on save
+   */
   prePersist() {
     if (!this.createdDate) {
       this.createdDate = new Date();

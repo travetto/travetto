@@ -5,12 +5,17 @@ import { ModelQuery, Query, PageableModelQuery } from '../model/query';
 import { BulkResponse, BulkOp } from '../model/bulk';
 import { ModelCore } from '../model/core';
 
+/**
+ * Provides all the valid string type fields from a given type T
+ */
 export type ValidStringFields<T> = {
   [K in keyof T]:
   (T[K] extends (String | string | string[] | String[] | undefined) ? K : never) // eslint-disable-line @typescript-eslint/ban-types
 }[keyof T];
 
-// TODO: Document
+/**
+ * The contract for a model source
+ */
 export interface IModelSource {
   onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
   onSchemaChange?(e: SchemaChangeEvent): void;
@@ -47,7 +52,9 @@ export interface IModelSource {
   deleteByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>): Promise<number>;
 }
 
-// Stupid but necessary
+/**
+ * Duplicate as the abstract class is not directly useful due to weirdness
+ */
 export abstract class ModelSource implements IModelSource {
   onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
   onSchemaChange?(e: SchemaChangeEvent): void;

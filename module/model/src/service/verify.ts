@@ -43,10 +43,15 @@ const MULTIPLE_KEYS_ALLOWED = new Set([
   '$near'
 ]);
 
+/**
+ * Query verification service.  Used to verify the query is valid before running.
+ */
 @Injectable()
-// TODO: Document
 export class QueryVerifierService {
 
+  /**
+   * Internal mapping for various clauses
+   */
   private mapping = [
     [SELECT, this.processSelectClause.bind(this)],
     [WHERE, this.processWhereClause.bind(this)],
@@ -57,6 +62,9 @@ export class QueryVerifierService {
     (state: State, cls: Class, val: any) => any
   ][];
 
+  /**
+   * Handle generic clauses
+   */
   processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler) {
     const view = SchemaRegistry.getViewSchema(cls);
 
@@ -71,6 +79,7 @@ export class QueryVerifierService {
 
     for (const [key, value] of Object.entries(val)) {
 
+      // Validate value is correct, and key is valid
       if (value === undefined || value === null) {
         // state.log(`${key} cannot be undefined or null`);
         continue;
@@ -85,12 +94,15 @@ export class QueryVerifierService {
         continue;
       }
 
+      // Find field
       const field = view.schema[key];
       const op = TypeUtil.getDeclaredType(field);
 
+      // If a simple operation
       if (op) {
         handler.onSimpleType(state.extend(key), op, value, field.array);
       } else {
+        // Otherwise recurse
         const subCls = field.type;
         const subVal = value;
         if (handler.onComplexType && handler.onComplexType(state, subCls, subVal, field.array)) {
@@ -101,12 +113,17 @@ export class QueryVerifierService {
     }
   }
 
+  /**
+   * Ensure types match
+   */
   typesMatch(declared: string, actual: string | undefined) {
     return declared === actual;
   }
 
+  /**
+   * Check operator clause
+   */
   checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: Record<string, Set<string>>, isArray: boolean) {
-
     if (isArray) {
       if (Array.isArray(value)) {
         // Handle array literal
@@ -167,6 +184,9 @@ export class QueryVerifierService {
     }
   }
 
+  /**
+   * Process where clause
+   */
   processWhereClause<T>(st: State, cls: Class<T>, passed: object) {
     return this.processGenericClause(st, cls, passed, {
       preMember: (state: State, value: any) => {
@@ -178,7 +198,7 @@ export class QueryVerifierService {
         }
 
         const sub = value[firstKey];
-
+        // Verify boolean clauses
         if (firstKey === $AND || firstKey === $OR) {
           if (!Array.isArray(sub)) {
             state.log(`${firstKey} requires the value to be an array`);
@@ -206,10 +226,16 @@ export class QueryVerifierService {
     });
   }
 
+  /**
+   * Handle group by clause
+   */
   processGroupByClause(state: State, value: object) {
 
   }
 
+  /**
+   * Handle sort clause
+   */
   processSortClause<T>(st: State, cls: Class<T>, passed: object) {
     return this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
@@ -221,6 +247,9 @@ export class QueryVerifierService {
     });
   }
 
+  /**
+   * Handle select clause
+   */
   processSelectClause<T>(st: State, cls: Class<T>, passed: object) {
     return this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
@@ -251,6 +280,9 @@ export class QueryVerifierService {
     });
   }
 
+  /**
+   * Verify the query
+   */
   verify<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>) {
     const errors: ValidationError[] = [];
 
@@ -267,6 +299,7 @@ export class QueryVerifierService {
       }
     };
 
+    // Check all the clauses
     for (const [key, fn] of this.mapping) {
       if (!(key in query)
         || query[key as keyof typeof query] === undefined

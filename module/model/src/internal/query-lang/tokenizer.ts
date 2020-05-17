@@ -14,6 +14,9 @@ const ESCAPE: Record<string, string> = {
   [`\\'`]: `'`
 };
 
+/**
+ * Mapping of keywords to node types and values
+ */
 const TOKEN_MAPPING: Record<string, Token> = {
   and: { type: 'boolean', value: 'and' },
   '&&': { type: 'boolean', value: 'and' },
@@ -31,8 +34,14 @@ const TOKEN_MAPPING: Record<string, Token> = {
   false: { type: 'literal', value: false },
 };
 
-// TODO: Document
+/**
+ * Tokenizer for the query language
+ */
 export class QueryLanguageTokenizer {
+
+  /**
+   * Process the next token.  Can specify expected type as needed
+   */
   private static processToken(state: TokenizeState, mode?: TokenType) {
     const text = state.text.substring(state.start, state.pos);
     const res = TOKEN_MAPPING[text.toLowerCase()];
@@ -56,6 +65,9 @@ export class QueryLanguageTokenizer {
     return res ?? { value, type: state.mode || mode };
   }
 
+  /**
+   * Flush state to output
+   */
   private static flush(state: TokenizeState, mode?: TokenType) {
     if ((!mode || !state.mode || mode !== state.mode) && state.start !== state.pos) {
       if (state.mode !== 'whitespace') {
@@ -66,10 +78,16 @@ export class QueryLanguageTokenizer {
     state.mode = mode || state.mode;
   }
 
+  /**
+   * Determine if valid regex flag
+   */
   private static isValidRegexFlag(ch: number) {
     return ch === 0x69 /* i */ || ch === 0x67 /* g */ || ch === 0x6D /* m */ || ch === 0x73 /* s */;
   }
 
+  /**
+   * Determine if valid token identifier
+   */
   private static isValidIdentToken(ch: number) {
     return (ch >= 0x30 /* ZERO */ && ch <= 0x39 /* NINE */) ||
       (ch >= 0x41 /* A */ && ch <= 0x5a /* Z */) ||
@@ -80,6 +98,9 @@ export class QueryLanguageTokenizer {
       (ch === PERIOD);
   }
 
+  /**
+   * Read string until quote
+   */
   static readString(text: string, pos: number) {
     const len = text.length;
     const ch = text.charCodeAt(pos);
@@ -99,6 +120,9 @@ export class QueryLanguageTokenizer {
     return pos;
   }
 
+  /**
+   * Tokenize a text string
+   */
   static tokenize(text: string): Token[] {
     const state: TokenizeState = {
       out: [] as Token[],
@@ -108,20 +132,26 @@ export class QueryLanguageTokenizer {
       mode: undefined! as TokenType
     };
     const len = text.length;
+    // Loop through each char
     while (state.pos < len) {
+      // Read code as a number, more efficient
       const ch = text.charCodeAt(state.pos);
       switch (ch) {
+        // Handle puncation
         case OPEN_PARENS: case CLOSE_PARENS: case OPEN_BRACKET: case CLOSE_BRACKET: case COMMA:
           this.flush(state);
           state.mode = 'punctuation';
           break;
+        // Handle operator
         case GREATER_THAN: case LESS_THAN: case EQUAL:
         case MODULO: case NOT: case TILDE: case AND: case OR:
           this.flush(state, 'operator');
           break;
+        // Handle whitespace
         case SPACE: case TAB:
           this.flush(state, 'whitespace');
           break;
+        // Handle quotes and slashes
         case DBL_QUOTE: case SGL_QUOTE: case FORWARD_SLASH:
           this.flush(state);
           state.mode = 'literal';
@@ -133,6 +163,7 @@ export class QueryLanguageTokenizer {
           }
           this.flush(state);
           continue;
+        // Handle literal
         default:
           if (this.isValidIdentToken(ch)) {
             this.flush(state, 'literal');

@@ -17,8 +17,13 @@ const geo = (type: string) => ({
   $geoIntersects: st(type, true)
 });
 
-// TODO: Document
+/**
+ * Basic type support
+ */
 export class TypeUtil {
+  /**
+   * Mapping types to various operators
+   */
   static OPERATORS = {
     string: { ...basic('string'), ...scalar('string'), ...str('string') } as Record<string, Set<string>>,
     number: { ...basic('number'), ...scalar('number'), ...comp('number') } as Record<string, Set<string>>,
@@ -27,6 +32,9 @@ export class TypeUtil {
     Point: { ...basic('Point'), ...geo('Point') } as Record<string, Set<string>>,
   };
 
+  /**
+   * Get declared type of a given field, only for primtive types
+   */
   static getDeclaredType(f: FieldConfig | Class): keyof typeof TypeUtil.OPERATORS | undefined {
     const type = 'type' in f ? f.type : f;
     switch (type) {
@@ -43,6 +51,9 @@ export class TypeUtil {
     }
   }
 
+  /**
+   * Get the actual type of a given field, only for primtive types
+   */
   static getActualType(v: any): string {
     const type = typeof v;
     if (['string', 'number', 'boolean'].includes(type)) {

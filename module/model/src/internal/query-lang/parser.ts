@@ -1,26 +1,37 @@
 import { QueryLanguageTokenizer } from './tokenizer';
 import { Node, Token, ClauseNode, UnaryNode, Literal, GroupNode, OP_TRANSLATION, ArrayNode } from './types';
 
+/**
+ * Determine if a token is boolean
+ */
 function isBoolean(o: any): o is Token & { type: 'boolean' } {
   return o && o.type && o.type === 'boolean';
 }
 
-// TODO: Document
+/**
+ * Language parser
+ */
 export class QueryLanguageParser {
 
+  /**
+   * Handle all clauses
+   */
   static handleClause(nodes: (Node | Token)[]) {
     const val = nodes.pop()! as Token | ArrayNode;
     const op = nodes.pop()! as Token;
     const ident = nodes.pop()! as Token;
 
+    // value isn't a literal or a list, bail
     if (val.type !== 'literal' && val.type !== 'list') {
       throw new Error(`Unexpected token: ${val.value}`);
     }
 
+    // If operator is not an operator, bail
     if (op.type !== 'operator') {
       throw new Error(`Unexpected token: ${op.value}`);
     }
 
+    // If operator is not known, bail
     const finalOp = OP_TRANSLATION[op.value as string];
     if (!finalOp) {
       throw new Error(`Unexpected operator: ${op.value}`);
@@ -33,12 +44,19 @@ export class QueryLanguageParser {
       value: val.value
     } as ClauseNode);
 
+    // Handle unary support
     this.unary(nodes);
+    // Simplify as we go along
     this.condense(nodes, 'and');
   }
 
+  /**
+   * Condense nodes to remove unnecessary groupings
+   * (a AND (b AND (c AND d))) => (a AND b AND c)
+   */
   static condense(nodes: (Node | Token)[], op: string) {
     let second = nodes[nodes.length - 2];
+
     while (isBoolean(second) && second.value === op) {
       const right = nodes.pop()!;
       nodes.pop()!;
@@ -58,6 +76,10 @@ export class QueryLanguageParser {
     }
   }
 
+  /**
+   * Remove unnecessary unary nodes
+   * (((5))) => 5
+   */
   static unary(nodes: (Node | Token)[]) {
     const second = nodes[nodes.length - 2] as Token;
     if (second && second.type === 'unary' && second.value === 'not') {
@@ -71,6 +93,9 @@ export class QueryLanguageParser {
     }
   }
 
+  /**
+   * Parse all tokens
+   */
   static parse(tokens: Token[], pos: number = 0): Node {
 
     let top: (Node | Token)[] = [];
@@ -125,12 +150,9 @@ export class QueryLanguageParser {
     return top[0];
   }
 
-  static parseToQuery(text: string) {
-    const tokens = QueryLanguageTokenizer.tokenize(text);
-    const node = this.parse(tokens);
-    return this.convert(node);
-  }
-
+  /**
+   * Convert Query AST to output
+   */
   static convert(node: Node): any {
     switch (node.type) {
       case 'unary': {
@@ -162,5 +184,14 @@ export class QueryLanguageParser {
       }
       default: throw new Error(`Unexpected node type: ${node.type}`);
     }
+  }
+
+  /**
+   * Tokenize and parse text
+   */
+  static parseToQuery(text: string) {
+    const tokens = QueryLanguageTokenizer.tokenize(text);
+    const node = this.parse(tokens);
+    return this.convert(node);
   }
 }
