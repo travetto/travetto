@@ -16,8 +16,11 @@ const between = (fromDays: number, toDays: number) =>
     new Date(Date.now() + toDays * DAY_IN_MS)
   );
 
-// TODO: Document
+/**
+ * Provide a faker utilitiy for generating content
+ */
 export class SchemaFakerUtil {
+
   static STRING_RE_TO_TYPE: [RegExp, () => any][] = [
     [CommonRegExp.email, faker.internet.email],
     [CommonRegExp.url, faker.internet.url],
@@ -25,6 +28,9 @@ export class SchemaFakerUtil {
     [CommonRegExp.postalCode, faker.address.zipCode]
   ];
 
+  /**
+   * Mapping of field types to faker utils
+   */
   static NAMES_TO_TYPE: Record<string, [RegExp, () => any][]> = {
     string: [
       [/^(image|img).*url$/, faker.image.imageUrl],
@@ -58,6 +64,10 @@ export class SchemaFakerUtil {
     ]
   };
 
+  /**
+   * Get an array of values
+   * @param cfg Field configuration
+   */
   static getArrayValue(cfg: FieldConfig) {
     const min = cfg.minlength ? cfg.minlength.n : 0;
     const max = cfg.maxlength ? cfg.maxlength.n : 10;
@@ -69,6 +79,10 @@ export class SchemaFakerUtil {
     return out;
   }
 
+  /**
+   * Get a new number value
+   * @param cfg Number config
+   */
   static getNumberValue(cfg: FieldConfig) {
     let min = cfg.min ? cfg.min.n as number : undefined;
     let max = cfg.max ? cfg.max.n as number : undefined;
@@ -100,6 +114,10 @@ export class SchemaFakerUtil {
     return (val / offset) + min;
   }
 
+  /**
+   * Get a date value
+   * @param cfg Field config
+   */
   static getDateValue(cfg: FieldConfig) {
     const name = cfg.name.toUpperCase();
     const min = cfg.min ? cfg.min.n as Date : undefined;
@@ -117,6 +135,10 @@ export class SchemaFakerUtil {
     }
   }
 
+  /**
+   * Get a string value
+   * @param cfg Field config
+   */
   static getStringValue(cfg: FieldConfig) {
     const name = cfg.name.toLowerCase();
 
@@ -138,6 +160,10 @@ export class SchemaFakerUtil {
     return faker.random.word();
   }
 
+  /**
+   * Get a value for a field config
+   * @param cfg Field config
+   */
   static getValue(cfg: FieldConfig, subArray = false): any {
     if (!subArray && cfg.array) {
       return this.getArrayValue(cfg);
@@ -161,6 +187,11 @@ export class SchemaFakerUtil {
     }
   }
 
+  /**
+   * Generate a new intance of a class
+   * @param cls The class to get an instance of
+   * @param view The view to define specifically
+   */
   static generate<T>(cls: Class<T>, view?: string) {
     const cfg = SchemaRegistry.getViewSchema(cls, view);
     const out: Record<string, any> = {};

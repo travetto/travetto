@@ -31,7 +31,11 @@ function enumKeys(c: any): string[] {
   }
 }
 
-// TODO: Document
+/**
+ * Registering a field
+ * @param type The type for the field
+ * @param config The field configuration
+ */
 export function Field(type: ClassList, config?: Partial<FieldConfig>) {
   return (f: any, p: string) => {
     SchemaRegistry.registerPendingFieldConfig(f.constructor, p, type);
@@ -40,53 +44,127 @@ export function Field(type: ClassList, config?: Partial<FieldConfig>) {
     }
   };
 }
-// TODO: Document
+
+/**
+ * Alias for the field
+ * @param aliases List of all aliases for a field
+ */
 export const Alias = (...aliases: string[]) => prop({ aliases });
-// TODO: Document
+/**
+ * Mark a field as required
+ * @param active This determines if this field is required or not.
+ * @param message The error message when a the constraint fials.
+ */
 export const Required = (active = true, message?: string) => prop({ required: { active, message } });
-// TODO: Document
+/**
+ * Define a field as a set of enumerated values
+ * @param vals The list of values allowed for the enumeration
+ * @param message The error message to show when the constraint fails
+ */
 export const Enum = ((vals: string[] | any, message?: string) => {
   const values = enumKeys(vals);
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
   return stringNumberProp({ enum: { values, message } });
 });
 
-// TODO: Document
+/**
+ * Should the field be trimmed on storage
+ */
 export const Trimmed = () => stringArrStringProp({ trim: true });
-// TODO: Document
+/**
+ * Mark the field as indicating it's storing textual data
+ */
 export const Text = () => stringArrStringProp({ specifier: 'text' });
-// TODO: Document
+/**
+ * Mark the field to indicate it's for long form text
+ */
 export const LongText = () => stringArrStringProp({ specifier: 'text-long' });
 
-// TODO: Document
+/**
+ * Require the field to match a specific RegExp
+ * @param re The regular expression to match against
+ * @param message The message to show when the constraint fails
+ */
 export const Match = (re: RegExp, message?: string) => stringArrStringProp({ match: { re, message } });
-// TODO: Document
+
+/**
+ * The minimum length for the string or array
+ * @param n The minimum length
+ * @param message The message to show when the constraint fails
+ */
 export const MinLength = (n: number, message?: string) => stringArrProp({ minlength: { n, message }, ...(n === 0 ? { required: { active: false } } : {}) });
-// TODO: Document
+
+/**
+ * The maximum length for the string or array
+ * @param n The maximum length
+ * @param message The message to show when the constraint fails
+ */
 export const MaxLength = (n: number, message?: string) => stringArrProp({ maxlength: { n, message } });
-// TODO: Document
+
+/**
+ * The minimum valume
+ * @param n The minimum value
+ * @param message The message to show when the constraint fails
+ */
 export const Min = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ min: { n, message } });
-// TODO: Document
+
+/**
+ * The maximum valume
+ * @param n The maximum value
+ * @param message The message to show when the constraint fails
+ */
 export const Max = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ max: { n, message } });
-// TODO: Document
+
+/**
+ * Mark a field as an email
+ * @param message The message to show when the constraint fails
+ */
 export const Email = (message?: string) => Match(CommonRegExp.email, message);
-// TODO: Document
+
+/**
+ * Mark a field as an telephone number
+ * @param message The message to show when the constraint fails
+ */
 export const Telephone = (message?: string) => Match(CommonRegExp.telephone, message);
-// TODO: Document
+
+/**
+ * Mark a field as a url
+ * @param message The message to show when the constraint fails
+ */
 export const Url = (message?: string) => Match(CommonRegExp.url, message);
-// TODO: Document
+
+/**
+ * Determine the numeric precision of the value
+ * @param digits The number of digits a number should have
+ * @param decimals The number of decimal digits to support
+ */
 export const Precision = (digits: number, decimals?: number) => numberProp({ precision: [digits, decimals] });
-// TODO: Document
+
+/**
+ * Mark a number as an integer
+ */
 export const Integer = () => Precision(0);
-// TODO: Document
+
+/**
+ * Mark a number as a float
+ */
 export const Float = () => Precision(10, 7);
-// TODO: Document
+
+/**
+ * Mark a number as a long value
+ */
 export const Long = () => Precision(19, 0);
-// TODO: Document
+
+/**
+ * Mark a number as a currency
+ */
 export const Currency = () => Precision(13, 2);
 
-// For Auto schemas
-/** @augments trv/schema/Ignore */
+/**
+ * Mark a field as ignored
+ *
+ * @augments trv/schema/Ignore
+ */
 export function Ignore(): PropertyDecorator {
   return (target: any, property: string | symbol) => { };
 }

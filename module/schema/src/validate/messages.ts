@@ -1,5 +1,6 @@
-// TODO: Document
-// TODO: Move?
+/**
+ * List of validation messages
+ */
 export const Messages = new Map<any, string>(Object.entries({
   default: '{path} is not valid',
   type: '{path} is not a valid {type}',

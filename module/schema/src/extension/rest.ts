@@ -23,8 +23,13 @@ const EXTRACTORS: Record<'body' | 'query', ExtractFn> = {
   query: (c, r) => r[QUERY_SCHEMA] && r[QUERY_SCHEMA][c.name!]
 };
 
-// TODO: Document
-export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: string) {
+/**
+ * Get a schema instance for a class and an object
+ * @param obj The object to bind to the class instance
+ * @param cls The class to create an instance for
+ * @param view The view to bind with
+ */
+export async function getSchemaInstance<T extends { constructor: Class }>(obj: any, cls: Class<T>, view?: string) {
   if (!Util.isPlainObject(obj)) {
     throw new AppError(`Object is missing or wrong type: ${obj}`, 'data');
   }
@@ -44,7 +49,11 @@ export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: strin
   return bound;
 }
 
-// TODO: Document
+/**
+ * Get a schema parameter configuration for a class and an object
+ * @param location The location for a parameter
+ * @param config The field configuration
+ */
 export function schemaParamConfig(location: 'body' | 'query', config: Partial<ParamConfig> & { view?: string, key?: string } = {}): ParamConfig {
   if (!config.type) {
     throw new AppError('A schema type is required for binding');
@@ -70,7 +79,11 @@ export function schemaParamConfig(location: 'body' | 'query', config: Partial<Pa
   };
 }
 
-/** @augments trv/rest/Param */
+/**
+ * Define as the request body as being defined by a schema
+ * @param config The schema configuration
+ * @augments trv/rest/Param
+ */
 export function SchemaBody<T>(config: Partial<ParamConfig> & { view?: string } = {}) {
   return function (target: any, prop: string | symbol, idx: number) {
     ControllerRegistry.registerEndpointParameter(target.constructor, target.constructor.prototype[prop],
@@ -78,7 +91,11 @@ export function SchemaBody<T>(config: Partial<ParamConfig> & { view?: string } =
   };
 }
 
-/** @augments trv/rest/Param */
+/**
+ * Define the query parameters as a schema class
+ * @param config The schema configuration
+ * @augments trv/rest/Param
+ */
 export function SchemaQuery<T>(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
   return function (target: any, prop: string | symbol, idx: number) {
     ControllerRegistry.registerEndpointParameter(target.constructor, target.constructor.prototype[prop],

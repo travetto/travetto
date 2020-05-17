@@ -32,19 +32,34 @@ export interface SchemaChangeEvent {
 export const SCHEMA_CHANGE_EVENT = 'schema:change';
 export const FIELD_CHANGE_EVENT = 'field:change';
 
-// TODO: Document
+/**
+ * Schema change listener.  Handles all changes that occur via the SchemaRegistry
+ */
 export class $SchemaChangeListener extends EventEmitter {
 
   private mapping = new Map<string, Map<string, FieldMapping>>();
 
+  /**
+   * Reset the listener
+   */
   reset() {
     this.mapping.clear();
   }
 
+  /**
+   * Clear dependency mappings for a given class
+   */
   clearSchemaDependency(cls: Class) {
     this.mapping.delete(id(cls));
   }
 
+  /**
+   * Track a specific class for dependencies
+   * @param src The target class
+   * @param parent The parent class
+   * @param path The path within the object hierachy to arrive at the class
+   * @param config The configuration or the class
+   */
   trackSchemaDependency(src: Class, parent: Class, path: FieldConfig[], config: ClassConfig) {
     const idValue = id(src);
     if (!this.mapping.has(idValue)) {
@@ -53,6 +68,11 @@ export class $SchemaChangeListener extends EventEmitter {
     this.mapping.get(idValue)!.set(id(parent), { path, config });
   }
 
+  /**
+   * Emit changes to the schema
+   * @param cls The class of the event
+   * @param changes The changes to send
+   */
   emitSchemaChanges({ cls, changes }: FieldChangeEvent) {
     const updates = new Map<string, SchemaChange>();
     const clsId = id(cls);
@@ -76,6 +96,11 @@ export class $SchemaChangeListener extends EventEmitter {
     }
   }
 
+  /**
+   * Emit field level changes in the schema
+   * @param prev The previous class config
+   * @param curr The current class config
+   */
   emitFieldChanges({ prev, curr }: ChangeEvent<ClassConfig>) {
 
     const prevView = prev!.views[ALL_VIEW];

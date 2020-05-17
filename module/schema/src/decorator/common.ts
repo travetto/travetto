@@ -1,7 +1,10 @@
 import { DescribableConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
 
-// TODO: Document
+/**
+ * Describe a model or a field
+ * @param config The describe configuration
+ */
 export function Describe(config: Partial<DescribableConfig>) {
   return (target: any, property?: string, descriptor?: PropertyDescriptor) => {
     if (property) {

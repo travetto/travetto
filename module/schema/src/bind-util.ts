@@ -3,9 +3,14 @@ import { Class } from '@travetto/registry';
 import { SchemaRegistry } from './service/registry';
 import { FieldConfig, ALL_VIEW } from './service/types';
 
-// TODO: Document
+/**
+ * Utilities for binding objects to schemas
+ */
 export class BindUtil {
 
+  /**
+   * Register fromRaw and from on the Function prototype
+   */
   static register() {
     const proto = Object.getPrototypeOf(Function);
     proto.fromRaw = proto.from = function (data: any, view?: string) {
@@ -13,6 +18,13 @@ export class BindUtil {
     };
   }
 
+  /**
+   * Convert dotted paths into a full object
+   *
+   * This will convert `{ 'a.b[3].c[age]': 5 }` => `{ a : { b : [,,,{ c: { age: 5 }}]}}`
+   *
+   * @param obj The object to convert
+   */
   static expandPaths(obj: Record<string, any>) {
     const out: Record<string, any> = {};
     for (const k of Object.keys(obj)) {
@@ -60,6 +72,11 @@ export class BindUtil {
     return out;
   }
 
+  /**
+   * Coerce a value to match the field config type
+   * @param conf The field config to coerce to
+   * @param val The provided value
+   */
   static coerceType<T>(conf: FieldConfig, val: any): T | null | undefined {
     if (conf.type.bindSchema) {
       val = conf.type.bindSchema(val);
@@ -77,6 +94,12 @@ export class BindUtil {
     return val as T;
   }
 
+  /**
+   * Bind data to the schema for a class, with an optional view
+   * @param cons The schema class to bind against
+   * @param data The provided data to bind
+   * @param view The optional view to limit the binding against
+   */
   static bindSchema<T>(cons: Class<T>, data?: undefined, view?: string): undefined;
   static bindSchema<T>(cons: Class<T>, data?: null, view?: string): null;
   static bindSchema<T>(cons: Class<T>, data?: any, view?: string): T;
@@ -92,6 +115,13 @@ export class BindUtil {
     }
   }
 
+  /**
+   * Bind the schema to the object
+   * @param cons The schema class
+   * @param obj The target object (instance of cons)
+   * @param data The data to bind
+   * @param view The desired view
+   */
   static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: any, view?: string): T {
     view = view ?? ALL_VIEW;
 
