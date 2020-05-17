@@ -4,13 +4,25 @@ import { DependencyRegistry } from '@travetto/di';
 
 import { ModelOptions } from './types';
 
-// TODO: Document
+/**
+ * Registry for all models, built on the Metadata registry
+ */
 export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
+  /**
+   * All collection names
+   */
   collections = new Map<Class, string>();
+  /**
+   * All base model classes (inherited from)
+   */
   baseModels = new Map<Class, Class>();
+  /**
+   * Indexed base model classes to all subclasses
+   */
   baseModelGrouped = new Map<Class, Class[]>();
 
   constructor() {
+    // Listen to schema and dependency
     super(SchemaRegistry, DependencyRegistry);
   }
 
@@ -25,11 +37,14 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   onUninstallFinalize(cls: Class) {
     this.collections.delete(cls);
 
-    // Need to recompute
+    // Force system to recompute on uninstall
     this.baseModels.clear();
     this.baseModelGrouped.clear();
   }
 
+  /**
+   * Find base class for a given model
+   */
   getBaseModel(cls: Class) {
     if (!this.baseModels.has(cls)) {
       let conf = this.get(cls) ?? this.getOrCreatePending(cls);
@@ -45,6 +60,9 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
     return this.baseModels.get(cls)!;
   }
 
+  /**
+   * Find all classes by their base types
+   */
   getAllClassesByBaseType() {
     if (!this.baseModelGrouped.size) {
       const out = new Map<Class, Class[]>();
@@ -67,14 +85,23 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
     return this.baseModelGrouped;
   }
 
+  /**
+   * Get all classes for a given base type
+   */
   getClassesByBaseType(base: Class) {
     return this.getAllClassesByBaseType().get(base) ?? [];
   }
 
+  /**
+   * Find the base collection for a type
+   */
   getBaseCollection(cls: Class) {
     return this.getCollectionName(this.getBaseModel(cls));
   }
 
+  /**
+   * Get name of the collection
+   */
   getCollectionName(cls: Class) {
     if (!this.collections.has(cls)) {
       const config = this.get(cls) ?? this.getOrCreatePending(cls);

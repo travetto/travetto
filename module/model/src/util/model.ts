@@ -5,8 +5,13 @@ import { ModelCore } from '../model/core';
 import { ValidStringFields } from '../service/source';
 import { WhereClauseRaw } from '../model/where-clause';
 
-// TODO: Document
+/**
+ * Common model utils, that should be usable by end users
+ */
 export class ModelUtil {
+  /**
+   * Verify result set is singular, and decide if failing on many should happen
+   */
   static verifyGetSingleCounts<T>(cls: Class<T>, res?: T[], failOnMany = true) {
     res = res ?? [];
     if (res.length === 1 || res.length > 1 && !failOnMany) {
@@ -15,10 +20,16 @@ export class ModelUtil {
     throw new AppError(`Invalid number of results for find by id: ${res.length}`, res.length < 1 ? 'notfound' : 'data');
   }
 
+  /**
+   * Build regex for suggesting
+   */
   static getSuggestRegex(prefix?: string) {
     return prefix ? new RegExp(`\\b${prefix}.*`, 'i') : /./;
   }
 
+  /**
+   * Build suggest query on top of query language
+   */
   static getSuggestQuery<T>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>) {
     const re = this.getSuggestRegex(prefix);
     const limit = query?.limit ?? 10;
@@ -35,6 +46,9 @@ export class ModelUtil {
     return q;
   }
 
+  /**
+   * Join suggestion results
+   */
   static combineSuggestResults<T, U>(
     cls: Class<T>, field: ValidStringFields<T>,
     prefix: string = '', results: T[],
@@ -60,6 +74,9 @@ export class ModelUtil {
       .slice(0, limit ?? 10);
   }
 
+  /**
+   * Build suggestion query
+   */
   static getSuggestFieldQuery<T extends ModelCore>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>) {
     return this.getSuggestQuery(cls, field, prefix, {
       ...(query ?? {}),
