@@ -129,6 +129,8 @@ export class ShutdownManager {
 
   /**
    * Listen for unhandled exceptions
+   * @param handler Listener for all uncaught exceptions if valid
+   * @param position Handler list priority
    */
   static onUnhandled(handler: UnhandledHandler, position = -1) {
     if (position < 0) {
@@ -141,6 +143,7 @@ export class ShutdownManager {
 
   /**
    * Remove handler for unhandled exceptions
+   * @param handler The handler to remove
    */
   static removeUnhandledHandler(handler: UnhandledHandler) {
     const index = this.unhandled.indexOf(handler);
@@ -149,6 +152,11 @@ export class ShutdownManager {
     }
   }
 
+  /**
+   * Wraps a function to capture unhandled exceptions for a period of time.
+   * Converts uncaught exception to a thrown error
+   * @param fn The function to wrap
+   */
   static async captureUnhandled<U>(fn: Function): Promise<U> {
     const uncaught = Util.resolvablePromise();
     // @ts-ignore
