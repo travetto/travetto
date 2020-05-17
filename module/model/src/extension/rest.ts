@@ -6,6 +6,7 @@ import { Class } from '@travetto/registry';
 import { ModelService } from '../service/model';
 import { ModelCore } from '../model/core';
 import { ModelRegistry } from '../registry';
+import { ValidStringFields } from '../service/source';
 
 type Svc = { source: ModelService };
 
@@ -95,7 +96,7 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
 
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
-        target, function suggestField(this: Svc, field: string, suggest: SuggestQuery) {
+        target, function suggestField(this: Svc, field: ValidStringFields<T>, suggest: SuggestQuery) {
           return this.source.suggest(getCls(), field, suggest.q, suggest);
         }),
       {

@@ -5,7 +5,7 @@ import { Util, AppError } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
 import { QueryVerifierService } from './verify';
-import { ModelOptions } from '../types';
+import { ModelOptions } from '../registry/types';
 import { Query, ModelQuery, PageableModelQuery, PageableModelQueryStringQuery } from '../model/query';
 import { ModelCore } from '../model/core';
 import { BulkOp, BulkResponse, BulkProcessError } from '../model/bulk';
@@ -13,9 +13,8 @@ import { ModelSource, IModelSource, ValidStringFields } from './source';
 import { ModelRegistry } from '../registry';
 import { QueryLanguageParser } from '../internal/query-lang/parser';
 
-function getClass<T extends object>(o: T) {
-  return o.constructor as Class<T>;
-}
+// @ts-ignore
+const getClass = <T>(o: T) => o.constructor as Class<T>;
 
 /**
  * Model Service, takes in a model source as provided by various db implementations
@@ -24,8 +23,7 @@ function getClass<T extends object>(o: T) {
 @Injectable({ target: ModelService })
 export class ModelService implements IModelSource {
 
-  constructor(private source: ModelSource, private queryService: QueryVerifierService) {
-  }
+  constructor(private source: ModelSource, private queryService: QueryVerifierService) { }
 
   /**
    * Prepare the query

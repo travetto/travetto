@@ -21,6 +21,12 @@ function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
 }
 
 /**
+ * Get the constructor for a class
+ */
+// @ts-ignore
+const getClass = <T>(o: T) => o.constructor as Class<T>;
+
+/**
  * The schema validator applies the schema constraints to a given object and looks
  * for errors
  */
@@ -211,8 +217,8 @@ export class SchemaValidator {
    * @param o The object to validate
    * @param view The optional view to limit the scope to
    */
-  static async validate<T extends { constructor: Class }>(o: T, view?: string): Promise<T> {
-    let cls = o.constructor;
+  static async validate<T>(o: T, view?: string): Promise<T> {
+    let cls = getClass(o);
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
 
     const config = SchemaRegistry.getViewSchema(cls, view);
@@ -239,7 +245,7 @@ export class SchemaValidator {
    * @param obj The values to validate
    * @param view The view to limit by
    */
-  static async validateAll<T extends { constructor: Class }>(obj: T[], view?: string): Promise<T[]> {
+  static async validateAll<T>(obj: T[], view?: string): Promise<T[]> {
     return await Promise.all<T>((obj ?? [])
       .map(o => this.validate(o, view)));
   }
@@ -250,7 +256,7 @@ export class SchemaValidator {
    * @param o The value to validate
    * @param view The view to limit by
    */
-  static async validatePartial<T extends { constructor: Class }>(o: T, view?: string): Promise<T> {
+  static async validatePartial<T>(o: T, view?: string): Promise<T> {
     try {
       await this.validate(o, view);
     } catch (e) {
