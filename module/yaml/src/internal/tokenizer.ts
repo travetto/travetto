@@ -20,7 +20,9 @@ const GREATER = 0x3e;
 const ZERO = 0x30;
 const NINE = 0x39;
 
-// TODO: Document
+/**
+ * YAML Tokenizer, turning yaml content into a stream of tokens
+ */
 export class Tokenizer {
 
   /**

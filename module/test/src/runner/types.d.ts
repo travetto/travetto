@@ -7,7 +7,7 @@ export interface RunState {
   /**
    * Output format
    */
-  format: 'json' | 'exec' | 'tap' | 'events' | 'noop';
+  format: string;
   /**
    * The run consumer
    */
