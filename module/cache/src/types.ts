@@ -75,7 +75,7 @@ export interface CacheEntry {
 
 
 /**
- * Cache store
+ * Cache source contract
  */
 export interface ICacheSource<T extends CacheEntry = CacheEntry> {
   /**

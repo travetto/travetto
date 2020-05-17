@@ -17,7 +17,7 @@ export class CacheModel {
 }
 
 /**
- * A cache store backed by @travetto/model
+ * A cache source backed by @travetto/model
  */
 export class ModelCacheSource extends CullableCacheSource {
 
