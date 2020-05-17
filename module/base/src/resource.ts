@@ -77,6 +77,7 @@ export class $ResourceManager {
 
   /**
    * Provide an absolute path for a resource identifier
+   * @param rel The relative path of a resource
    */
   async toAbsolutePath(rel: string) {
     rel = cleanPath(rel);
@@ -86,6 +87,7 @@ export class $ResourceManager {
 
   /**
    * Provide an absolute path for a resource identifier, synchronously
+   * @param rel The relative path of a resource
    */
   toAbsolutePathSync(rel: string) {
     rel = cleanPath(rel);
@@ -95,6 +97,7 @@ export class $ResourceManager {
 
   /**
    * Find a given resource and return it's location
+   * @param pth The relative path of a resource to find
    */
   async find(pth: string) {
     pth = cleanPath(pth);
@@ -115,6 +118,7 @@ export class $ResourceManager {
 
   /**
    * Find a given resource and return it's location, synchronously
+   * @param pth The relative path of a resource to find
    */
   findSync(pth: string) {
     pth = cleanPath(pth);
@@ -134,9 +138,15 @@ export class $ResourceManager {
 
   /**
    * Read a resource, mimicking fs.read
+   * @param pth The path to read
    */
   async read(pth: string): Promise<Buffer>;
   async read(pth: string, options?: 'utf8' | 'utf-8' | { encoding: 'utf8' | 'utf-8' }): Promise<string>;
+  /**
+   * Read a resource, mimicking fs.read
+   * @param pth The path to read
+   * @param options The options to determine the read behavior
+   */
   async read(pth: string, options?: string | { encoding?: string, flag?: string }) {
     pth = await this.find(pth);
     return fsReadFile(pth, options);
@@ -144,9 +154,15 @@ export class $ResourceManager {
 
   /**
    * Read a resource, mimicking fs.read, and doing it synchronously
+   * @param pth The path to read
    */
   readSync(pth: string): Buffer;
   readSync(pth: string, options: 'utf8' | 'utf-8' | { encoding: 'utf8' | 'utf-8' }): string;
+  /**
+   * Read a resource, mimicking fs.read, and doing it synchronously
+   * @param pth The path to read
+   * @param options The options to determine the read behavior
+   */
   readSync(pth: string, options?: string | { encoding?: string, flag?: string }) {
     pth = this.findSync(pth);
     return fs.readFileSync(pth, options);
@@ -154,6 +170,8 @@ export class $ResourceManager {
 
   /**
    * Read a resource as a stream, mimicking fs.readStream
+   * @param pth The path to read
+   * @param options The options to determine the read behavior
    */
   async readToStream(pth: string, options?: Parameters<typeof fs.createReadStream>[1]) {
     pth = await this.find(pth);
@@ -162,6 +180,8 @@ export class $ResourceManager {
 
   /**
    * Find all resources by a specific pattern
+   * @param pattern Pattern to search against
+   * @param base The base folder to start searching from
    */
   async findAllByPattern(pattern: RegExp, base: string = '') {
     const out: string[] = [];
@@ -180,6 +200,8 @@ export class $ResourceManager {
 
   /**
    * Find all resources by a specific pattern, synchronously
+   * @param pattern Pattern to search against
+   * @param base The base folder to start searching from
    */
   findAllByPatternSync(pattern: RegExp, base: string = '') {
     const out: string[] = [];

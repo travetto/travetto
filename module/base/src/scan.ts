@@ -69,6 +69,8 @@ export class ScanApp {
 
   /**
    * Find all '.ts' files excluding ones identified by the filter
+   * @param filter Any additional filters, external to the extension.  Caching occurs at the extension level
+   * @param root Starting point for finding files, defaults to cwd
    */
   static findSourceFiles(filter?: Tester | Pred, root = FsUtil.cwd): SimpleEntry[] {
     return this.findFiles(this.TS_TESTER, filter, root);
@@ -136,6 +138,9 @@ export class ScanApp {
 
   /**
    * Find app files, assuming provided root paths provided
+   * @param rootPaths List of root paths to search through
+   * @param exclude Predicadte to determine if a file should be exclude
+   * @param root The starting point
    */
   // FIXME: Currently is including non-app files from modules (sub-apps)
   static findAppFiles(rootPaths: string[], exclude?: (file: string) => boolean, root = FsUtil.cwd) {
@@ -150,6 +155,9 @@ export class ScanApp {
 
   /**
    * Preload file entries, useful for precompiling and indexing
+   * @param key The cache key to store results to
+   * @param paths List of paths to set
+   * @param base The root folder the paths are relative to
    */
   static setFileEntries(key: string, paths: string[], base: string = FsUtil.cwd) {
     const results = paths.map(mod => {

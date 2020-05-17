@@ -10,6 +10,14 @@ export class AppError extends Error {
 
   type: string;
 
+  /**
+   * Build an app error
+   *
+   * @param message The error message
+   * @param category The error category, can be mapped to HTTP statuses
+   * @param payload Optional error payload
+   * @param stack A stack to override if needed
+   */
   constructor(
     public message: string,
     public category: ErrorCategory = 'general',
@@ -24,6 +32,7 @@ export class AppError extends Error {
 
   /**
    * Console pretty printing
+   * @param sub The sub object to decoratore
    */
   toConsole(sub?: string) {
     sub = sub || (this.payload ? `${JSON.stringify(this.payload, null, 2)}\n` : '');
@@ -32,6 +41,7 @@ export class AppError extends Error {
 
   /**
    * The format of the JSON output
+   * @param extra Extra data to build into the context
    */
   toJSON(extra: Record<string, any> = {}) {
     return {
