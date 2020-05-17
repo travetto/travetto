@@ -1,27 +1,71 @@
-import { CacheSourceType, CacheEntry, CacheConfig } from '../types';
+import { CacheEntry, CacheConfig } from '../types';
 import { CacheSourceUtil } from './util';
 import { CacheError } from './error';
+
+type OrProm<T> = T | Promise<T>;
 
 /**
  * Cache store
  */
-export abstract class CacheSource<T extends CacheEntry = CacheEntry> implements CacheSourceType<T> {
+export abstract class CacheSource<T extends CacheEntry = CacheEntry> {
+  /**
+    * Get value for key, returns undefined if missing
+    * @param key The key to resolve
+    */
+  abstract get(key: string): OrProm<T | undefined>;
+  /**
+   * Determine if value is currently cached
+   * @param key The key to resolve
+   */
+  abstract has(key: string): OrProm<boolean>;
+  /**
+   * Set cache entry at key
+   * @param key The key to set
+   * @param entry The entry to store
+   */
+  abstract set(key: string, entry: T): OrProm<CacheEntry>;
+  /**
+   * Determines if key is expired
+   * @param key The key to check
+   */
+  abstract isExpired(key: string): OrProm<boolean>;
+  /**
+   * Extend expiry time for a key
+   * @param key The key to touch
+   * @param expiresAt The time to push expiration to
+   */
+  abstract touch(key: string, expiresAt: number): OrProm<boolean>;
+  /**
+   * Remove key from cache
+   * @param key The key to delete
+   */
+  abstract delete(key: string): OrProm<boolean>;
+  /**
+   * Get list of keys
+   */
+  abstract keys(): OrProm<Iterable<string>>;
+  /**
+   * Clear entire cache
+   */
+  clear?(): OrProm<void> | void;
+  /**
+   * Post construction hook, used for async initliazations
+   */
+  postConstruct?(): OrProm<void>;
 
-  abstract get(key: string): Promise<T | undefined> | T | undefined;
-  abstract has(key: string): Promise<boolean> | boolean;
-  abstract set(key: string, entry: T): Promise<CacheEntry> | CacheEntry;
-  abstract isExpired(key: string): Promise<boolean> | boolean;
-  abstract touch(key: string, expiresAt: number): Promise<boolean> | boolean;
-  abstract delete(key: string): Promise<boolean> | boolean;
-  abstract keys(): Promise<Iterable<string>> | Iterable<string>;
-
-  clear?(): Promise<void> | void;
-  postConstruct?(): Promise<void> | void;
-
+  /**
+   * How to compute the key from input params
+   * @param key The params used to compute a key
+   */
   computeKey(params: any) {
     return CacheSourceUtil.computeKey(params);
   }
 
+  /**
+   * Get item and verify expiry time against the provided config
+   * @param config The cache config to resolve against
+   * @param key The key to check/get
+   */
   async getAndCheckAge(config: CacheConfig, key: string) {
     const entry = await this.get(key);
     const now = Date.now();
@@ -45,6 +89,11 @@ export abstract class CacheSource<T extends CacheEntry = CacheEntry> implements 
     return entry.data;
   }
 
+  /**
+   * Set item and mark expiry time with the provided config
+   * @param config The cache config to resolve against
+   * @param entry The etnry to set
+   */
   setWithAge(config: CacheConfig, entry: Partial<T> & { data: any, key: string }) {
     return this.set(entry.key, {
       ...entry,
@@ -54,6 +103,11 @@ export abstract class CacheSource<T extends CacheEntry = CacheEntry> implements 
     } as T);
   }
 
+  /**
+   * Get optional value as defined by config
+   * @param config The cache config to resolve against
+   * @param key The key to get
+   */
   async getOptional(config: CacheConfig, key: string) {
     let res: any;
     const has = await this.has(key);
