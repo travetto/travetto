@@ -1,7 +1,7 @@
 import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 
-import { Request, Response, RouteConfig, Method } from '../types';
+import { Request, Response, RouteConfig } from '../types';
 import { RestInterceptor } from './interceptor';
 import { SerializeInterceptor } from './serialize';
 
@@ -21,7 +21,7 @@ export class RestCorsConfig {
   /**
    * Allowed http methods
    */
-  methods?: Method[];
+  methods?: Request['method'][];
   /**
    * Allowed http headers
    */
@@ -50,7 +50,7 @@ export class CorsInterceptor extends RestInterceptor {
 
   postConstruct() {
     this.origins = new Set(this.corsConfig.origins ?? []);
-    this.methods = (this.corsConfig.methods ?? ['PUT', 'POST', 'GET', 'DELETE', 'PATCH']).join(',');
+    this.methods = (this.corsConfig.methods ?? ['put', 'post', 'get', 'delete', 'patch']).join(',');
     this.headers = (this.corsConfig.headers ?? []).join(',');
     this.credentials = !!this.corsConfig.credentials;
   }
@@ -64,7 +64,7 @@ export class CorsInterceptor extends RestInterceptor {
     if (!this.origins.size || this.origins.has(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');
       res.setHeader('Access-Control-Allow-Credentials', `${this.credentials}`);
-      res.setHeader('Access-Control-Allow-Methods', this.methods);
+      res.setHeader('Access-Control-Allow-Methods', this.methods.toUpperCase());
       res.setHeader('Access-Control-Allow-Headers', this.headers || req.header('access-control-request-headers')! || '*');
     }
   }

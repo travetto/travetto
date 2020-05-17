@@ -34,7 +34,7 @@ export class FastifyServerUtil {
         [TRV_ORIG]: reqs,
         [TRV_RAW]: reqs.req,
         protocol: 'encrypted' in reqs.req.socket ? 'https' : 'http',
-        method: reqs.req.method,
+        method: reqs.req.method as Request['method'],
         path,
         query: reqs.query,
         params: reqs.params,

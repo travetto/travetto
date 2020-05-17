@@ -55,7 +55,7 @@ export class ExpressRestServer extends RestServer<express.Application> {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {
-      router[route.method!](route.path!,
+      router[route.method as 'get'](route.path!,
         // @ts-ignore
         route.handlerFinalized!);
     }

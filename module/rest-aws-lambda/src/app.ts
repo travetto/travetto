@@ -86,15 +86,16 @@ export class AwsLambdaRestServer extends RestServer<express.Application> {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {
-      router[route.method!](route.path!,
+      router[route.method as 'get'](route.path!,
         // @ts-ignore
         route.handlerFinalized!);
     }
 
     // Register options handler for each controller
     if (key !== RestServer.GLOBAL) {
-      const optionHandler = RouteUtil.createRouteHandler(this.interceptors,
-        { method: 'options', path: '*', handler: this.globalHandler, params: [] });
+      const optionHandler = RouteUtil.createRouteHandler(this.interceptors, {
+        method: 'options', path: '*', handler: this.globalHandler, params: []
+      });
 
       router.options('*',
         // @ts-ignore

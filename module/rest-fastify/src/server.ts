@@ -57,7 +57,7 @@ export class FastifyRestServer extends RestServer<fastify.FastifyInstance> {
         sub = `${path}/${route.path.source}`;
       }
       sub = sub.replace(/\/+/g, '/').replace(/\/+$/, '');
-      this.raw[route.method!](sub, async (reqs, reply) => {
+      this.raw[route.method as 'get'](sub, async (reqs, reply) => {
         const req = FastifyServerUtil.getRequest(reqs);
         const res = FastifyServerUtil.getResponse(reply);
         await route.handlerFinalized!(req, res);

@@ -5,11 +5,12 @@ export const TRV_ORIG = Symbol.for('@trv:rest/original');
 
 export type HeaderMap = Record<string, (string | (() => string))>;
 
-export type Method = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head';
 export type PathType = string | RegExp;
 
 export type Request = Travetto.Request;
 export type Response = Travetto.Response;
+
+export type MethodOrAll = Request['method'] | 'all';
 
 export type RouteHandler<T = any> = (...args: any[]) => Promise<T> | T | void;
 
@@ -71,7 +72,7 @@ export interface RouteConfig {
   /**
    * The HTTP method the route is for
    */
-  method: Method;
+  method: MethodOrAll;
   /**
    * The path of the route
    */
