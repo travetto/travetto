@@ -15,25 +15,77 @@ export type RouteHandler<T = any> = (...args: any[]) => Promise<T> | T | void;
 
 export type Filter<T = any> = (req: Request, res: Response) => Promise<T> | T | void;
 
-// TODO: Document
+/**
+ * Param configuration
+ */
 export interface ParamConfig {
+  /**
+   * Name of the parameter
+   */
   name?: string;
+  /**
+   * The description
+   */
   description?: string;
+  /**
+   * Is the parameter required
+   */
   required?: boolean;
+  /**
+   * Location of the parameter
+   */
   location: 'path' | 'query' | 'body' | 'header' | 'context';
+  /**
+   * The type of the parameter
+   */
   type: Class;
+  /**
+   * Is the parameter an array
+   */
   array?: boolean;
+  /**
+   * Resolves the value by executing with req/res as input
+   */
   resolve?: Filter;
+  /**
+   * Default value fo rthe field
+   */
   defaultValue?: any;
+  /**
+   * Extract the value from request
+   * @param config Param configuration
+   * @param req The request
+   * @param res The response
+   */
   extract(config: ParamConfig, req?: Request, res?: Response): any;
 }
 
-// TODO: Document
+/**
+ * The route configuration
+ */
 export interface RouteConfig {
+  /**
+   * Instance the route is for
+   */
   instance?: any;
+  /**
+   * The HTTP method the route is for
+   */
   method: Method;
+  /**
+   * The path of the route
+   */
   path: PathType;
+  /**
+   * The function the route will call
+   */
   handler: RouteHandler;
+  /**
+   * The compiled and finalized handler
+   */
   handlerFinalized?: Filter;
+  /**
+   * List of params for the route
+   */
   params: ParamConfig[];
 }

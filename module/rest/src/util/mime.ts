@@ -1,4 +1,6 @@
-// TODO: Needed?
+/**
+ * List of supported MIME types
+ */
 export const MimeType = {
   JSON: 'application/json',
   HTML: 'text/html',

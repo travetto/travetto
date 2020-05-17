@@ -1,11 +1,19 @@
 import { Response } from '../types';
 
-// TODO: Document
+/**
+ * Renderable contract
+ */
 export interface Renderable {
+  /**
+   * Render the output given a response
+   * @param res
+   */
   render(res: Response): void | Promise<any>;
 }
 
-// TODO: Document
+/**
+ * Determine if an object is renderable
+ */
 export function isRenderable(o: any): o is Renderable {
   return !!o['render'];
 }

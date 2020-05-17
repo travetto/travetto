@@ -5,6 +5,7 @@
     return acc;
   }, {} as Record<string, any>);
 };
+
 (Set as any).prototype.toJSON = function (this: Set<any>) {
   return [...this.values()];
 };
