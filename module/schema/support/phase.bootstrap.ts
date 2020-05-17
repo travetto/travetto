@@ -1,4 +1,6 @@
-// TODO: Document
+/**
+ * Registers the bind utilities on class
+ */
 export const init = {
   key: 'schema',
   after: ['registry'], // Should be global

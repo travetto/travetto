@@ -4,7 +4,7 @@ import { ViewFieldsConfig } from '../service/types';
 import { ValidatorFn } from '../validate/types';
 
 /**
- * TODO: Document
+ * Register a class as a Schema
  *
  * @augments trv/schema/Schema
  */
@@ -15,14 +15,22 @@ export function Schema(): ClassDecorator { // Auto is used during compilation
   }) as ClassDecorator;
 }
 
-// TODO: Document
+/**
+ * Add a custom validator, can be at the class level or at the field leve.
+ *
+ * @param fn The validator function
+ */
 export function Validator<T>(fn: ValidatorFn<T, string>) {
   return (target: Class<T>) => {
     SchemaRegistry.getOrCreatePending(target).validators!.push(fn);
   };
 }
 
-// TODO: Document
+/**
+ * Register a specific view for a class
+ * @param name The name of the view
+ * @param fields The specific fields to add as part of a view
+ */
 export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
   return (target: Class<Partial<T>>) => {
     SchemaRegistry.registerPendingView(target, name, fields);

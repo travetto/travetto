@@ -6,6 +6,11 @@ import { ValidationError, ValidationKind, ValidationResult } from './types';
 import { Messages } from './messages';
 import { ValidationResultError } from './error';
 
+/**
+ * Get the schema config for Class/Schema config, including support for polymorphism
+ * @param base The starting type or config
+ * @param o The value to use for the polymorphic check
+ */
 function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
   if (base.__id) {
     return SchemaRegistry.getViewSchema(
@@ -15,9 +20,18 @@ function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
   }
 }
 
-// TODO: Document
+/**
+ * The schema validator applies the schema constraints to a given object and looks
+ * for errors
+ */
 export class SchemaValidator {
 
+  /**
+   * Validate the schema for a given object
+   * @param schema The config to validate against
+   * @param o The object to validate
+   * @param relative The relative path as the validation recurses
+   */
   private static validateSchema<T>(schema: SchemaConfig, o: T, relative: string) {
     let errors: ValidationError[] = [];
 
@@ -67,6 +81,12 @@ export class SchemaValidator {
     return errors;
   }
 
+  /**
+   * Validate the range for a number, date
+   * @param field The config to validate against
+   * @param key The bounds to check
+   * @param value The value to validate
+   */
   static validateRange(field: FieldConfig, key: 'min' | 'max', value: any) {
     const f = field[key];
     if (f) {
@@ -93,6 +113,12 @@ export class SchemaValidator {
     return false;
   }
 
+  /**
+   * Validate a given field by checking all the appropriate constraints
+   *
+   * @param field The config of the field to validate
+   * @param value The actual value
+   */
   static validateField(field: FieldConfig, value: any, parent: any): ValidationResult[] {
     const criteria: ValidationKind[] = [];
 
@@ -142,13 +168,19 @@ export class SchemaValidator {
 
     const errors: ValidationResult[] = [];
     for (const key of criteria) {
-      const block = field[key];
+      const block = field[key as keyof FieldConfig];
+      // @ts-expect-error
       errors.push({ ...block, kind: key, value });
     }
 
     return errors;
   }
 
+  /**
+   * Convert validation results into proper errors
+   * @param path The object path
+   * @param results The list of results for that specific path
+   */
   static prepareErrors(path: string, results: ValidationResult[]): ValidationError[] {
     const out: ValidationError[] = [];
     for (const res of results) {
@@ -174,8 +206,13 @@ export class SchemaValidator {
     return out;
   }
 
-  static async validate<T extends object>(o: T, view?: string): Promise<T> {
-    let cls = o.constructor as Class;
+  /**
+   * Validate an object against it's constructor's schema
+   * @param o The object to validate
+   * @param view The optional view to limit the scope to
+   */
+  static async validate<T extends { constructor: Class }>(o: T, view?: string): Promise<T> {
+    let cls = o.constructor;
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
 
     const config = SchemaRegistry.getViewSchema(cls, view);
@@ -197,12 +234,23 @@ export class SchemaValidator {
     return o;
   }
 
-  static async validateAll<T extends object>(obj: T[], view?: string): Promise<T[]> {
+  /**
+   * Validate an entire array of values
+   * @param obj The values to validate
+   * @param view The view to limit by
+   */
+  static async validateAll<T extends { constructor: Class }>(obj: T[], view?: string): Promise<T[]> {
     return await Promise.all<T>((obj ?? [])
       .map(o => this.validate(o, view)));
   }
 
-  static async validatePartial<T extends object>(o: T, view?: string): Promise<T> {
+  /**
+   * Validate partial, ignoring reuqired fields as they are partial
+   *
+   * @param o The value to validate
+   * @param view The view to limit by
+   */
+  static async validatePartial<T extends { constructor: Class }>(o: T, view?: string): Promise<T> {
     try {
       await this.validate(o, view);
     } catch (e) {
