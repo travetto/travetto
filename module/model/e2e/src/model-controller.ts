@@ -1,8 +1,8 @@
-import { Get, RestApp } from '@travetto/rest';
+import { Get, RestServer } from '@travetto/rest';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { Injectable, InjectableFactory } from '@travetto/di';
 import { Application } from '@travetto/app';
-import { ExpressRestApp } from '@travetto/rest-express';
+import { ExpressRestServer } from '@travetto/rest-express';
 import { Schema, Match } from '@travetto/schema';
 
 import { ModelController } from '../../src/extension/rest';
@@ -131,8 +131,8 @@ class Config {
   }
 
   @InjectableFactory()
-  static getRest(): RestApp {
-    return new ExpressRestApp();
+  static getRest(): RestServer {
+    return new ExpressRestServer();
   }
 }
 
@@ -151,7 +151,7 @@ export class SimpleModelController {
 
 @Application('simple')
 class App {
-  constructor(private app: RestApp) { }
+  constructor(private app: RestServer) { }
 
   run() {
     return this.app.run();

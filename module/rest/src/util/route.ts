@@ -4,9 +4,15 @@ import { RestInterceptor } from '../interceptor/interceptor';
 
 import { ParamUtil } from './param';
 
-// TODO: Document
+/**
+ * Route specific utilities
+ */
 export class RouteUtil {
 
+  /**
+   * Create a full filter chain given the provided filters
+   * @param filters Filters to chain
+   */
   static createFilterChain(filters: (Filter | RestInterceptor['intercept'])[]): Filter<Promise<any>> {
     return function filterChain(req: Request, res: Response, idx: number = filters.length - 1): Promise<any> | any {
       const it = filters[idx];
@@ -20,6 +26,12 @@ export class RouteUtil {
     };
   }
 
+  /**
+   * Create a full route handler
+   * @param interceptors Intercpetors to apply
+   * @param route The route/endpoint to call
+   * @param router The controller to tie to
+   */
   static createRouteHandler(
     interceptors: RestInterceptor[],
     route: RouteConfig | EndpointConfig,

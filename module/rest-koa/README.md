@@ -6,15 +6,15 @@ travetto: Rest-Koa
 $ npm install @travetto/rest-koa
 ```
 
-The module is a [`koa`](https://koajs.com/) implementation of a [`RestApp`](https://github.com/travetto/travetto/tree/master/module/rest). A valid customization of the [`RestApp`](./src/app.ts) would look like:
+The module is a [`koa`](https://koajs.com/) implementation of a [`RestServer`](https://github.com/travetto/travetto/tree/master/module/rest). A valid customization of the [`RestServer`](./src/server.ts) would look like:
 
 **Code: Customizing a Koa App**
 ```typescript
 export class SampleConfig {
 
  @InjectableFactory()
-  static customizer(): RestAppCustomizer<koa> {
-    return new (class extends RestAppCustomizer<koa> {
+  static customizer(): RestServerCustomizer<koa> {
+    return new (class extends RestServerCustomizer<koa> {
       customize(raw: koa) {
         raw.use(koaBunyanLogger());
     })();

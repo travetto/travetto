@@ -8,16 +8,29 @@ import { MimeType } from '../util/mime';
 import { Response, Request } from '../types';
 import { isRenderable } from '../response/renderable';
 
+/**
+ * Serialization interceptor
+ */
 @Injectable()
-// TODO: Document
 export class SerializeInterceptor extends RestInterceptor {
 
+  /**
+   * Set outbound content type if not defined
+   * @param res Respponse
+   * @param type mime type
+   */
   static setContentTypeIfUndefined(res: Response, type: string) {
     if (!res.getHeader('Content-Type')) {
       res.setHeader('Content-Type', type);
     }
   }
 
+  /**
+   * Send output to the response
+   * @param req Inbound request
+   * @param res Outbound response
+   * @param output The value to output
+   */
   static async sendOutput(req: Request, res: Response, output: any) {
     if (!res.headersSent) {
       if (output) {

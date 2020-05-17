@@ -5,18 +5,37 @@ import { Request, Response, RouteConfig, Method } from '../types';
 import { RestInterceptor } from './interceptor';
 import { SerializeInterceptor } from './serialize';
 
+/**
+ * Rest cors support
+ */
 @Config('rest.cors')
-// TODO: Document
 export class RestCorsConfig {
+  /**
+   * Is cors active
+   */
   active: boolean = false;
+  /**
+   * Allowed origins
+   */
   origins?: string[];
+  /**
+   * Allowed http methods
+   */
   methods?: Method[];
+  /**
+   * Allowed http headers
+   */
   headers?: string[];
+  /**
+   * Support credentials?
+   */
   credentials?: boolean;
 }
 
+/**
+ * Interceptor that will provide cors support across all requests
+ */
 @Injectable()
-// TODO: Document
 export class CorsInterceptor extends RestInterceptor {
 
   @Inject()

@@ -1,13 +1,13 @@
 import { Injectable } from '@travetto/di';
-
-import { Application, RouteConfig, RestApp, RestInterceptor } from '../..';
+import { Application } from '@travetto/app';
+import { RouteConfig, RestServer, RestInterceptor } from '../..';
 
 type Inner = {
   use(factory: any): void;
 };
 
 @Injectable()
-class DummyApp extends RestApp<Inner> {
+class DummyServer extends RestServer<Inner> {
   raw: any = {};
 
   async createRaw() {
@@ -39,7 +39,7 @@ class DummyApp extends RestApp<Inner> {
 @Application('sample')
 export class SampleApp {
 
-  constructor(private app: RestApp) { }
+  constructor(private app: RestServer) { }
 
   async run() {
     return this.app.run();
