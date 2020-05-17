@@ -1,8 +1,10 @@
-import { Application } from '../src/decorator/application';
 import { RestApp } from '../src/app';
+import { Application } from '@travetto/app';
 
-@Application('rest')
-// TODO: Document
+/**
+ * Default application entrypoint
+ */
+@Application('rest', { watchable: true })
 class EntryPoint {
   constructor(private app: RestApp) { }
   run() {

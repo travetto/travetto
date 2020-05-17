@@ -7,6 +7,7 @@ try { Object.assign(pkg, require(FsUtil.joinUnix(FsUtil.cwd, 'package.json'))); 
  * General purpose information about the application.  Derived from the app's package.json
  */
 export const AppInfo = {
+  travetto: require('../package.json').version, // Travetto version
   version: pkg.version as string,
   name: pkg.name as string,
   simpleName: pkg.name.replace(/[@]/g, '').replace(/[\/]/g, '_') as string,

@@ -20,12 +20,23 @@ function register(config: Partial<EndpointConfig | ControllerConfig>) {
   } as (EndpointDecorator & ClassDecorator);
 }
 
-// TODO: Document
+/**
+ * Decorator used to add description metadata to a class or method
+ * @param desc The describe config
+ */
 export const Describe = (desc: DescribableConfig) => register(desc);
 
-// TODO: Document
+/**
+ * Set response headers on success
+ * @param headers The response headers to set
+ */
 export const SetHeaders = (headers: HeaderMap) => register({ headers });
-// TODO: Document
+
+/**
+ * Set the max-age of a response based on the config
+ * @param value The value for the duration
+ * @param unit The unit of measurement
+ */
 export function CacheControl(value: number, unit: Units = 's') {
   const delta = UNIT_MAPPING[unit] * value;
   return SetHeaders({
@@ -34,10 +45,15 @@ export function CacheControl(value: number, unit: Units = 's') {
   });
 }
 
-// TODO: Document
+/**
+ * Disable cache control, ensuring endpoint will not cache
+ */
 export const DisableCacheControl = CacheControl.bind(null, 0, 's');
 
-// TODO: Document
+/**
+ * Define an endpoint to support specific input types
+ * @param contentTypes The list of mime types to support
+ */
 export function Accepts(contentTypes: string[]) {
   const types = new Set(contentTypes);
   const handler = async function (req: Request) {

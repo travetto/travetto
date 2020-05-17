@@ -2,16 +2,16 @@ import { IncomingMessage } from 'http';
 import * as fastify from 'fastify';
 
 import { AppUtil } from '@travetto/app';
-import { RouteConfig, RestApp } from '@travetto/rest';
+import { RouteConfig, RestServer } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
 import { FastifyAppUtil } from './internal/util';
 
 /**
- * Fastify-based rest app
+ * Fastify-based rest server
  */
 @Injectable()
-export class FastifyRestApp extends RestApp<fastify.FastifyInstance> {
+export class FastifyRestServer extends RestServer<fastify.FastifyInstance> {
 
   /**
    * Build the fastify server

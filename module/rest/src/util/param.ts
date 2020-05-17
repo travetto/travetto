@@ -5,16 +5,29 @@ import { ParamConfig, Request, Response } from '../types';
 
 export type ExtractFn = (c: ParamConfig, req: Request, res: Response) => any;
 
-// TODO: Document
+/**
+ * Parameter utils
+ */
 export class ParamUtil {
   static CONTEXT_REGISTRY = new Map<Class<any>, ExtractFn>();
 
+  /**
+   * Get the provider for a given input
+   * @param type Class to check for
+   * @param fn Extraction function
+   */
   static provider(type: Class, fn: ExtractFn): Function;
   static provider(fnOrType: ExtractFn): Function;
   static provider(fnOrType: ExtractFn | Class, fn?: ExtractFn) {
     return (target: any) => this.registerContext(target, fnOrType, fn);
   }
 
+  /**
+   * Register a new context providder
+   * @param finalType The class to check against
+   * @param fnOrTypeOverride The Extraction class ofr type
+   * @param fn Optional fxtraction function
+   */
   static registerContext(finalType: Class, fnOrTypeOverride: ExtractFn | Class, fn?: ExtractFn) {
     if (fn) {
       finalType = fnOrTypeOverride as Class;
@@ -24,6 +37,12 @@ export class ParamUtil {
     this.CONTEXT_REGISTRY.set(finalType, fn);
   }
 
+  /**
+   * Extract param context via param type
+   * @param c The param configuration
+   * @param req The request
+   * @param res The response
+   */
   static extractContext(c: ParamConfig, req: Request, res: Response) {
     const fn = this.CONTEXT_REGISTRY.get(c.type);
     if (!fn) {
@@ -32,6 +51,11 @@ export class ParamUtil {
     return fn(c, req, res);
   }
 
+  /**
+   * Convert an inbound value against the parameter config
+   * @param config The param config
+   * @param paramValue The value provided
+   */
   static convertValue(config: ParamConfig, paramValue: any) {
     if (paramValue !== undefined && paramValue !== null) {
       try {
@@ -50,6 +74,12 @@ export class ParamUtil {
     return paramValue;
   }
 
+  /**
+   * Extract all parameters for a given route/request/response combo
+   * @param configs The list of all the params to extract
+   * @param req The request
+   * @param res The response
+   */
   static extractParams(configs: ParamConfig[], req: Request, res: Response) {
     const params: any[] = [];
     for (const config of configs) {

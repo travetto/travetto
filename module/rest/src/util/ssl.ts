@@ -1,6 +1,12 @@
-// TODO: Document
+/**
+ * Utilities for generating SSL certs
+ */
 export class SSLUtil {
 
+  /**
+   * Generate SSL key pair on demand
+   * @param subj The subject for the app
+   */
   static async generateKeyPair(subj = { C: 'US', ST: 'CA', O: 'TRAVETTO', OU: 'REST', CN: 'DEV' }) {
     let forge;
 
