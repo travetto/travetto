@@ -11,7 +11,7 @@ export function template(controllers: ControllerConfig[], lambdaDir?: string) {
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Description: >-
-  Travetto Application deployment for ${AppInfo.simpleName}
+  Travetto Application deployment for ${AppInfo.name}
 Resources:
 ${controllers.map(cont => `
   ${cont.class.name}:
