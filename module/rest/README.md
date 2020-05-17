@@ -167,7 +167,7 @@ rest.logRoutes.{deny|allow}:
 * ['Serialization'](./src/interceptor/serialize.ts) - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
 
 ## Creating and Running an App
-To run a REST server, you will need to construct an entry point using the `@Application` decorator, as well as define a valid [`RestApp`](./src/types.ts) to provide initialization for the application.  This could look like:
+To run a REST server, you will need to construct an entry point using the `@Application` decorator, as well as define a valid [`RestServer`](./src/server.ts) to provide initialization for the application.  This could look like:
 
 **Code: Application entry point for Rest Applications**
 ```typescript
@@ -177,10 +177,10 @@ export class SampleApp {
   @Inject()
   contextInterceptor: AsyncContextInterceptor;
 
-  constructor(private app: RestApp) { }
+  constructor(private server: RestServer) { }
 
   run() {
-    this.app.run();
+    this.server.run();
   }
 }
 ```

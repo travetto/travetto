@@ -1,4 +1,5 @@
-import { RestApp, Application, Controller, Get, Context } from '@travetto/rest';
+import { Application } from '@travetto/app';
+import { RestServer, Controller, Get, Context } from '@travetto/rest';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { ModelCacheSource, CacheSource } from '@travetto/cache';
 import { ModelService } from '@travetto/model';
@@ -15,10 +16,10 @@ export class App {
   }
 
   @Inject()
-  app: RestApp;
+  server: RestServer;
 
   run() {
-    return this.app.run();
+    return this.server.run();
   }
 }
 

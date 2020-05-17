@@ -6,7 +6,7 @@ travetto: Rest-Express
 $ npm install @travetto/rest-express
 ```
 
-The module is an [`express`](https://expressjs.com/) implementation of a [`RestApp`](https://github.com/travetto/travetto/tree/master/module/rest). A valid customization of the [`RestApp`](./src/app.ts) would look like:
+The module is an [`express`](https://expressjs.com/) implementation of a [`RestServer`](https://github.com/travetto/travetto/tree/master/module/rest). A valid customization of the [`RestServer`](./src/server.ts) would look like:
 
 
 **Code: Customizing an Express App**
@@ -14,8 +14,8 @@ The module is an [`express`](https://expressjs.com/) implementation of a [`RestA
 export class SampleConfig {
 
  @InjectableFactory()
-  static customizer(): RestAppCustomizer<express.Application> {
-    return new (class extends RestAppCustomizer<express.Application> {
+  static customizer(): RestServerCustomizer<express.Application> {
+    return new (class extends RestServerCustomizer<express.Application> {
       customize(raw: express.Application) {
         const limiter = rateLimit({
           windowMs: 15 * 60 * 1000, // 15 minutes

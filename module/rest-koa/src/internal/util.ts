@@ -1,5 +1,5 @@
 import * as koa from 'koa';
-import { RestAppUtil } from '@travetto/rest';
+import { RestServerUtil } from '@travetto/rest';
 import { TRV_ORIG, TRV_RAW } from '@travetto/rest/src/types';
 
 const TRV_RES = Symbol.for('@trv:rest-koa/response');
@@ -8,13 +8,13 @@ const TRV_REQ = Symbol.for('@trv:rest-koa/request');
 /**
  * Provides translation between koa request/response objects and the framework
  */
-export class KoaAppUtil {
+export class KoaServerUtil {
   /**
    * Build a Travetto Request from a koa context
    */
   static getRequest(ctx: koa.ParameterizedContext & { [TRV_REQ]?: Travetto.Request }) {
     if (!ctx[TRV_REQ]) {
-      ctx[TRV_REQ] = RestAppUtil.decorateRequest({
+      ctx[TRV_REQ] = RestServerUtil.decorateRequest({
         [TRV_ORIG]: ctx,
         [TRV_RAW]: ctx.req,
         protocol: ctx.protocol,
@@ -40,7 +40,7 @@ export class KoaAppUtil {
    */
   static getResponse(ctx: koa.ParameterizedContext & { [TRV_RES]?: Travetto.Response }) {
     if (!ctx[TRV_RES]) {
-      ctx[TRV_RES] = RestAppUtil.decorateResponse({
+      ctx[TRV_RES] = RestServerUtil.decorateResponse({
         [TRV_ORIG]: ctx,
         [TRV_RAW]: ctx.res,
         get headersSent() {

@@ -5,8 +5,10 @@ import { RestConfig } from '../config';
 import { RestInterceptor } from './interceptor';
 import { CorsInterceptor } from './cors';
 
+/**
+ * Determines if we should cache all get requests
+ */
 @Injectable()
-// TODO: Document
 export class GetCacheInterceptor extends RestInterceptor {
 
   after = [CorsInterceptor];

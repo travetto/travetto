@@ -7,7 +7,7 @@ import { AppUtil } from '@travetto/app';
 import { Injectable, Inject } from '@travetto/di';
 import { RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
 
-import { KoaAppUtil } from './internal/util';
+import { KoaServerUtil } from './internal/util';
 import Router = require('koa-router');
 
 /**
@@ -54,8 +54,8 @@ export class KoaRestServer extends RestServer<koa> {
     // Register all routes to extract the proper request/response for the framework
     for (const route of routes) {
       router[route.method!](route.path!, async (ctx) => {
-        const req = KoaAppUtil.getRequest(ctx);
-        const res = KoaAppUtil.getResponse(ctx);
+        const req = KoaServerUtil.getRequest(ctx);
+        const res = KoaServerUtil.getResponse(ctx);
         return await route.handlerFinalized!(req, res);
       });
     }

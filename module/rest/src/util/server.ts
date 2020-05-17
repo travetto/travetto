@@ -16,14 +16,14 @@ abstract class BaseResponse implements Partial<Response> {
    * Get the status code
    */
   // @ts-ignore
-  get statusCode(): number {
+  get statusCode(this: Response): number {
     return this.status!() as number;
   }
   /**
    * Set the status code
    */
   // @ts-ignore
-  set statusCode(val: number) {
+  set statusCode(this: Response, val: number) {
     this.status(val);
   }
 
@@ -74,9 +74,9 @@ abstract class BaseRequest implements Partial<Request> {
 }
 
 /**
- * Rest app utilities
+ * Rest server utilities
  */
-export class RestAppUtil {
+export class RestServerUtil {
   /**
    * Add base request as support for the provided
    * @param req Inbound request

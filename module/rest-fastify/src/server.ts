@@ -5,7 +5,7 @@ import { AppUtil } from '@travetto/app';
 import { RouteConfig, RestServer } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
-import { FastifyAppUtil } from './internal/util';
+import { FastifyServerUtil } from './internal/util';
 
 /**
  * Fastify-based rest server
@@ -58,8 +58,8 @@ export class FastifyRestServer extends RestServer<fastify.FastifyInstance> {
       }
       sub = sub.replace(/\/+/g, '/').replace(/\/+$/, '');
       this.raw[route.method!](sub, async (reqs, reply) => {
-        const req = FastifyAppUtil.getRequest(reqs);
-        const res = FastifyAppUtil.getResponse(reply);
+        const req = FastifyServerUtil.getRequest(reqs);
+        const res = FastifyServerUtil.getResponse(reply);
         await route.handlerFinalized!(req, res);
       });
     }

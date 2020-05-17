@@ -10,20 +10,45 @@ import { RestInterceptor } from './interceptor';
 import { CorsInterceptor } from './cors';
 import { GetCacheInterceptor } from './get-cache';
 
+/**
+ * Rest cookie configuration
+ */
 @Config('rest.cookie')
-// TODO: Document
 export class RestCookieConfig implements cookies.SetOption {
+  /**
+   * Are cookies supported
+   */
   active = true;
+  /**
+   * Are they signed
+   */
   signed = true;
+  /**
+   * Supported only via http (not in JS)
+   */
   httpOnly = true;
+  /**
+   * Enforce same site policy
+   */
   sameSite: cookies.SetOption['sameSite'] | 'lax' = 'lax';
+  /**
+   * The signing keys
+   */
   keys = ['default-insecure'];
+  /**
+   * Is the cookie only valid for https
+   */
   secure?: boolean;
+  /**
+   * The domain of the cookie
+   */
   domain?: string;
 }
 
+/**
+ * Loads cookies from the request, verifies, exposes, and then signs and sets
+ */
 @Injectable()
-// TODO: Document
 export class CookiesInterceptor extends RestInterceptor {
 
   after = [CorsInterceptor];
