@@ -11,8 +11,7 @@ export class Redirect implements Renderable {
    * @param location Location to redirect to
    * @param status Status code
    */
-  constructor(private location: string, private status = 302) {
-  }
+  constructor(private location: string, private status = 302) { }
 
   /**
    * Render the response
