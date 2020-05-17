@@ -9,6 +9,7 @@ export class CacheSourceUtil {
 
   /**
    * Compute a cache key off the input params for a function
+   * @params The params to use to compute the key
    */
   static computeKey(params: any) {
     const value = this.storeAsSafeJSON(params, true);
@@ -17,6 +18,8 @@ export class CacheSourceUtil {
 
   /**
    * Convert value to safe JSON for persistance
+   * @param value The value to make safe for storage
+   * @param all Should functions and regex be included
    */
   static storeAsSafeJSON(value: any, all = false) {
     if (value === null || value === undefined) {
@@ -32,6 +35,7 @@ export class CacheSourceUtil {
 
   /**
    * Read safe JSON back into an object
+   * @param value The value to read as safe JSON
    */
   static readAsSafeJSON(value: string) {
     return value ? JSON.parse(Buffer.from(value, 'base64').toString('utf8')) : value;

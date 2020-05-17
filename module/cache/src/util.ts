@@ -1,4 +1,5 @@
-import { CacheSourceType, CacheConfig, CoreCacheConfig } from './types';
+import type { CacheSource } from './source/core';
+import { CacheConfig, CoreCacheConfig } from './types';
 
 /**
  * Standard cache utilities
@@ -7,7 +8,7 @@ export class CacheUtil {
   /**
    * Generate key given config, cache source and input params
    */
-  static generateKey(config: CoreCacheConfig, cache: CacheSourceType, params: any[]) {
+  static generateKey(config: CoreCacheConfig, cache: CacheSource, params: any[]) {
     const input = config.params?.(params) ?? params;
     const keyParams = config.key?.(...input) ?? input;
     return `${config.keySpace!}♯${cache.computeKey(keyParams)}`;
@@ -22,7 +23,7 @@ export class CacheUtil {
    * @param fn Function to execute
    * @param params input parameters
    */
-  static async cache(config: CacheConfig, cache: CacheSourceType, target: any, fn: Function, params: any[]) {
+  static async cache(config: CacheConfig, cache: CacheSource, target: any, fn: Function, params: any[]) {
     const key = this.generateKey(config, cache, params);
 
     let res = await cache.getOptional(config, key);
@@ -51,7 +52,7 @@ export class CacheUtil {
    * @param fn Function to execute
    * @param params Input params to the function
    */
-  static async evict(config: CacheConfig, cache: CacheSourceType, target: any, fn: Function, params: any[]) {
+  static async evict(config: CacheConfig, cache: CacheSource, target: any, fn: Function, params: any[]) {
     const key = this.generateKey(config, cache, params);
     const val = await fn.apply(target, params);
     await cache.delete(key);
