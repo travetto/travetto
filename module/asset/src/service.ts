@@ -21,16 +21,29 @@ export class AssetService {
     }
   }
 
+  /**
+   * Delete a given path
+   * @param path The path to an asset
+   */
   delete(path: string) {
     return this.source.delete(path);
   }
 
-  info(file: string) {
+  /**
+   * Get the asset info
+   * @param file The file to read
+   */
+  info(file: string): Promise<Omit<Asset, 'stream'>> {
     return this.source.info(file);
   }
+
   /**
    * Stores an asset with the optional ability to overwrite if the file is already found. If not
    * overwriting and file exists, an error will be thrown.
+   *
+   * @param asset The asset to store
+   * @param overwriteIfFound Overwite the asset if found
+   * @param strategy The naming strategy to use, defaults to the service's strategy if not provided
    */
   async write(asset: Asset, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
 
@@ -49,7 +62,7 @@ export class AssetService {
       }
     }
 
-    await this.source.write(asset, asset.stream);
+    await this.source.write(asset);
     return asset.path;
   }
 
@@ -57,6 +70,9 @@ export class AssetService {
    * Retrieve a file from the store, with the ability to ensure certain tags
    * are set on the asset.  This can be used as a rudimentary ACL to ensure
    * cross account assets aren't shared.
+   *
+   * @param path The path to find.
+   * @param haveTags The tags to to ensure exist
    */
   async read(path: string, haveTags?: string[]): Promise<Asset> {
     const info = await this.info(path);

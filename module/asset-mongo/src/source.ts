@@ -29,17 +29,17 @@ export class MongoAssetSource extends AssetSource {
     this.bucket = new mongo.GridFSBucket(this.mongoClient.db());
   }
 
-  async write(file: Asset, stream: NodeJS.ReadableStream): Promise<void> {
+  async write(file: Asset): Promise<void> {
     const writeStream = this.bucket.openUploadStream(file.path, {
       contentType: file.contentType,
       metadata: file.metadata
     });
 
-    stream.pipe(writeStream);
+    file.stream.pipe(writeStream);
 
     await new Promise<any>((resolve, reject) => {
-      stream.on('end', resolve);
-      stream.on('error', reject);
+      file.stream.on('end', resolve);
+      file.stream.on('error', reject);
     });
 
     let count = 0;
