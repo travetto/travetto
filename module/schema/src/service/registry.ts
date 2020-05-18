@@ -11,6 +11,12 @@ function hasType<T>(o: any): o is { type: Class<T> | string } {
 }
 
 /**
+ * Get the constructor for a class
+ */
+// @ts-ignore
+const getClass = <T>(o: T) => o.constructor as Class<T>;
+
+/**
  * Scheam registry for listening to changes
  */
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
@@ -27,8 +33,8 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
    * @param cls Class for instance
    * @param o Actual instance
    */
-  resolveSubTypeForInstance<T extends { constructor?: any }>(cls: Class<T>, o: T) {
-    return this.resolveSubType(cls, hasType<T>(o) ? o.type : o.constructor as Class<T>);
+  resolveSubTypeForInstance<T>(cls: Class<T>, o: T) {
+    return this.resolveSubType(cls, hasType<T>(o) ? o.type : getClass(o));
   }
 
   /**
@@ -144,7 +150,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
    * @param prop The property name
    * @param config The config to register
    */
-  registerPendingFieldFacet(target: Class, prop: string, config: FieldConfig) {
+  registerPendingFieldFacet(target: Class, prop: string, config: Partial<FieldConfig>) {
     const allViewConf = this.getOrCreatePending(target).views![ALL_VIEW];
 
     if (!allViewConf.schema[prop]) {
