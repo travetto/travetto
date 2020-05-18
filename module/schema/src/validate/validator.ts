@@ -94,26 +94,24 @@ export class SchemaValidator {
    * @param value The value to validate
    */
   static validateRange(field: FieldConfig, key: 'min' | 'max', value: any) {
-    const f = field[key];
-    if (f) {
-      if (typeof f.n === 'number') {
-        if (typeof value !== 'number') {
-          value = parseInt(value, 10);
-        }
-        if (field.type === Date) {
-          value = new Date(value);
-        }
-        if (key === 'min' && value < f.n || key === 'max' && value > f.n) {
-          return true;
-        }
-      } else {
-        const date = f.n.getTime();
-        if (typeof value === 'string') {
-          value = Date.parse(value);
-        }
-        if (key === 'min' && value < date || key === 'max' && value > date) {
-          return true;
-        }
+    const f = field[key]!;
+    if (typeof f.n === 'number') {
+      if (typeof value !== 'number') {
+        value = parseInt(value, 10);
+      }
+      if (field.type === Date) {
+        value = new Date(value);
+      }
+      if (key === 'min' && value < f.n || key === 'max' && value > f.n) {
+        return true;
+      }
+    } else {
+      const date = f.n.getTime();
+      if (typeof value === 'string') {
+        value = Date.parse(value);
+      }
+      if (key === 'min' && value < date || key === 'max' && value > date) {
+        return true;
       }
     }
     return false;
@@ -164,11 +162,11 @@ export class SchemaValidator {
       criteria.push('enum');
     }
 
-    if (this.validateRange(field, 'min', value)) {
+    if (field.min && this.validateRange(field, 'min', value)) {
       criteria.push('min');
     }
 
-    if (this.validateRange(field, 'max', value)) {
+    if (field.max && this.validateRange(field, 'max', value)) {
       criteria.push('max');
     }
 
@@ -224,8 +222,10 @@ export class SchemaValidator {
     const config = SchemaRegistry.getViewSchema(cls, view);
     const validators = SchemaRegistry.get(cls).validators;
 
+    // Validate using standard behaviors
     const errors = this.validateSchema(config.schema, o, '');
 
+    // Handle class level validators
     for (const fn of validators) {
       const res = await fn(o, view);
       if (res) {
