@@ -1,6 +1,16 @@
 Completed Tasks
 ==============
 
+General
+--------------------------
+- [x] Reorganize rest module
+- [x] Consider transformer as a separate module
+- [x] General support for fork/spawn, standardize on a single approach
+- [x] File Cache move to base?
+- [x] Cleanup general index to ensure only public api is exposed
+- [x] Standardize /bin/ contents naming and structure
+- [x] Move as much of /bin/ code into /src/ as possible
+
 Transformers
 ------------------------
 - [x] Support type checking in transformers
