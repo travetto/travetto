@@ -153,18 +153,33 @@ export class ShutdownManager {
   }
 
   /**
+   * Listen for an unhandled event, as a promise
+   */
+  static listenForUnhandled(): Promise<void> & { cancel: () => void } {
+    const uncaught = Util.resolvablePromise();
+    // @ts-ignore
+    const cancel = this.onUnhandled(err => uncaught.reject(err) || true, 0);
+    Object.assign(uncaught, {
+      cancel: () => {
+        cancel(); // Remove the handler
+        uncaught.resolve(); // Close the promise
+      }
+    });
+    // @ts-ignore
+    return uncaught;
+  }
+
+  /**
    * Wraps a function to capture unhandled exceptions for a period of time.
    * Converts uncaught exception to a thrown error
    * @param fn The function to wrap
    */
   static async captureUnhandled<U>(fn: Function): Promise<U> {
-    const uncaught = Util.resolvablePromise();
-    // @ts-ignore
-    const cancel = this.onUnhandled(err => uncaught.reject(err) || true, 0);
+    const uncaught = this.listenForUnhandled();
     try {
       return (await Promise.race([uncaught, fn()])) as U;
     } finally {
-      cancel();
+      uncaught.cancel();
     }
   }
 }
