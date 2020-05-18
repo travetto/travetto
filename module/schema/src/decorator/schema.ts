@@ -16,7 +16,7 @@ export function Schema(): ClassDecorator { // Auto is used during compilation
 }
 
 /**
- * Add a custom validator, can be at the class level or at the field leve.
+ * Add a custom validator, can be at the class level
  *
  * @param fn The validator function
  */

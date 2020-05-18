@@ -29,7 +29,7 @@ const EXTRACTORS: Record<'body' | 'query', ExtractFn> = {
  * @param cls The class to create an instance for
  * @param view The view to bind with
  */
-export async function getSchemaInstance<T extends { constructor: Class }>(obj: any, cls: Class<T>, view?: string) {
+export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: string) {
   if (!Util.isPlainObject(obj)) {
     throw new AppError(`Object is missing or wrong type: ${obj}`, 'data');
   }

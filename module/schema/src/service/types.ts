@@ -82,7 +82,7 @@ export interface FieldConfig extends DescribableConfig {
    */
   aliases?: string[];
   /**
-   * Specific type for the field
+   * Specific type for the field, with optional binding/validation support
    */
   type: Class<any> & {
     bindSchema?(input: any): undefined | any;
