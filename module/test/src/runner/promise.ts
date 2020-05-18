@@ -2,6 +2,12 @@ import { ExecutionError } from './error';
 
 const og = Promise;
 
+declare global {
+  interface Promise<T> {
+    status: 'ok' | 'error';
+  }
+}
+
 /**
  * Promise stub to track creation
  */
@@ -10,6 +16,8 @@ function Wrapped(this: Promise<any>, ex: any) {
   this.then = prom.then.bind(prom);
   this.catch = prom.catch.bind(prom);
   this.finally = prom.finally.bind(prom);
+  this.then(() => this.status = 'ok',
+    () => this.status = 'error');
 
   if (PromiseCapture.pending) {
     PromiseCapture.pending.push(prom);
@@ -26,12 +34,6 @@ Wrapped.reject = Promise.reject.bind(Promise);
  */
 export class PromiseCapture {
   static pending: Promise<any>[];
-  // @ts-ignore // This relies upon internals of node until Promise.allSettled becomes available
-  static checker = process.binding('util').getPromiseDetails;
-  /**
-   * Determine if a promise is done or not
-   */
-  static isPending = (prom: Promise<any>) => PromiseCapture.checker(prom)[0] === 0;
 
   /**
    * Swap method and track progress
@@ -45,16 +47,13 @@ export class PromiseCapture {
    * Wait for all promises to resolve
    */
   static async resolvePending(pending: Promise<any>[]) {
-    let final;
-    try {
-      await Promise.all(pending);
-    } catch (err) {
-      final = err;
+    if (pending.length) {
+      let final: Error | undefined;
+      await Promise.all(pending).catch(err => final = err);
+
+      // If any return in an error, make that the final result
+      throw new ExecutionError(`Pending promises: ${pending.length}`, final?.stack);
     }
-    // If any return in an error, make that the final result
-    const ret = new ExecutionError(`Pending promises: ${pending.length}`);
-    ret.stack = final?.stack ?? ret.stack;
-    throw ret;
   }
 
   /**
@@ -63,12 +62,6 @@ export class PromiseCapture {
   static stop() {
     // Restore the promise
     global.Promise = og;
-    // Find all incomplete
-    const pending = this.pending.filter(this.isPending);
-    delete this.pending;
-
-    if (pending.length) {
-      return this.resolvePending(pending);
-    }
+    return this.resolvePending(this.pending.filter(x => x.status === undefined));
   }
 }

@@ -5,6 +5,7 @@ import { TestConsumer } from '../model/consumer';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
 import { Timeout } from './timeout';
+import { Barrier } from './barrier';
 
 export const BREAKOUT = Symbol.for('@trv:test/breakout');
 
@@ -37,17 +38,24 @@ export class ExecutionPhaseManager {
    * Run a distinct phase of the test execution
    */
   async runPhase(phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
-    try {
-      for (const fn of this.suite[phase]) {
-        const timeout = new Timeout(TEST_PHASE_TIMEOUT, `${this.suite.classId}: ${phase}`);
-        try {
-          await ShutdownManager.captureUnhandled(() => // Handle earch phase as potentially breaking
-            Promise.race([fn.call(this.suite.instance), timeout.wait()]));
-        } finally {
-          timeout.cancel();
-        }
+    let error: Error | undefined;
+    for (const fn of this.suite[phase]) {
+      const timeout = new Timeout(TEST_PHASE_TIMEOUT);
+      const unhandled = ShutdownManager.listenForUnhandled();
+
+      // Ensure all the criteria below are satisfied before moving forward
+      const barrier = new Barrier();
+      barrier.add(timeout.wait(), true); // Let timeout end the test immediately
+      barrier.add(unhandled, true); // Let unhandled exceptions end the test immediately
+      barrier.add(async () => fn.call(this.suite.instance));
+
+      // Wait for all barriers to be satisifed
+      error = await barrier.wait();
+      if (error) {
+        break;
       }
-    } catch (error) {
+    }
+    if (error) {
       const res = await this.triggerSuiteError(`[[${phase}]]`, error);
       this.result.tests.push(res);
       this.result.failed++;

@@ -1,7 +1,5 @@
-import { EventEmitter } from 'events';
+import { Util } from '@travetto/base';
 import { ExecutionError } from './error';
-
-const PROM = Promise;
 
 /**
  * Timeout support, throws self on timeout
@@ -9,11 +7,10 @@ const PROM = Promise;
 export class Timeout extends ExecutionError {
 
   private id: NodeJS.Timer;
-  private listener: EventEmitter;
+  private promise = Util.resolvablePromise();
 
   constructor(private duration: number, op: string = 'Operation') {
     super(`${op} timed out after ${duration}ms`);
-    this.listener = new EventEmitter();
   }
 
   /**
@@ -21,7 +18,7 @@ export class Timeout extends ExecutionError {
    */
   cancel() {
     clearTimeout(this.id);
-    this.listener.removeAllListeners('timeout');
+    this.promise.resolve();
     delete this.id;
   }
 
@@ -30,9 +27,9 @@ export class Timeout extends ExecutionError {
    */
   wait() {
     if (!this.id) {
-      this.id = setTimeout(() => this.listener.emit('timeout'), this.duration);
+      this.id = setTimeout(() => this.promise.reject(this), this.duration);
       this.id.unref();
     }
-    return new PROM<Error>((__, rej) => this.listener.on('timeout', () => rej(this)));
+    return this.promise;
   }
 }
