@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager, Util } from '@travetto/base';
 import { FsUtil, EnvUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
@@ -13,6 +13,7 @@ import { AssertCapture } from '../assert/capture';
 import { ConsoleCapture } from './console';
 import { ExecutionPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
+import { Barrier } from './barrier';
 import { AssertUtil } from '../assert/util';
 import { Timeout } from './timeout';
 import { ExecutionError } from './error';
@@ -26,50 +27,31 @@ export class TestExecutor {
 
   /**
    * Raw execution, runs the method and then returns any thrown errors as the result.
-   * Unexpected errors are thrown (timeout, uncaught, unresolved promises)
+   *
+   * This method should never throw under any circumstances.
    */
-  private static async _executeTestMethod(test: TestConfig): Promise<Error | undefined> {
+  private static _executeTestMethod(test: TestConfig): Promise<Error | undefined> {
     const suite = TestRegistry.get(test.class);
     const timeout = new Timeout(test.timeout || TEST_TIMEOUT);
+    const unhandled = ShutdownManager.listenForUnhandled();
+    const promCleanup = Util.resolvablePromise();
 
-    let err: Error | undefined;
+    // Ensure all the criteria below are satisfied before moving forward
+    const barrier = new Barrier();
+    barrier.add(timeout.wait(), true); // Let timeout end the test immediately
+    barrier.add(unhandled, true); // Let unhandled exceptions end the test immediately
+    barrier.add(promCleanup, true); // If not timeout or unhandled, ensure all promises are cleaned up
+    barrier.add(async () => {
+      try {
+        PromiseCapture.start(); // Listen for all promises to detect any unfinished, only start once method is invoked
+        await suite.instance[test.methodName](); // Run
+      } finally {
+        PromiseCapture.stop().then(promCleanup.resolve, promCleanup.reject); // Stop cleanup
+      }
+    });
 
-    //  Unsure uncaught exceptions and unhandle rejections stop here
-    try {
-      await ShutdownManager.captureUnhandled(async () => {
-        // Run
-        try {
-          await Promise.race([timeout.wait(), suite.instance[test.methodName]()]);
-        } catch (e) {
-          err = e;
-        }
-
-        // Catch pending promises
-        try {
-          await Promise.race([timeout.wait(), PromiseCapture.stop()]);
-        } catch (e) {
-          err = e;
-        }
-      });
-    } catch (e) {
-      // FIXME: Should this be needed?
-      await ShutdownManager.captureUnhandled(() => PromiseCapture.stop()).catch(() => { });
-      err = new ExecutionError(e.message, e.stack);
-    }
-
-    // Cancel timeout
-    timeout.cancel();
-
-    // Errors that are not expected
-    if (err && err instanceof ExecutionError) {
-      throw err;
-    }
-
-    if (test.shouldThrow) {
-      err = AssertCheck.checkError(test.shouldThrow!, err)!;
-    }
-
-    return err;
+    // Wait for all barriers to be satisifed
+    return barrier.wait();
   }
 
   /**
@@ -127,18 +109,19 @@ export class TestExecutor {
     if (test.skip) {
       return result as TestResult;
     }
+
     // Emit every assertion as it occurs
     AssertCapture.start(test, (a) => consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
-    PromiseCapture.start(); // Listen for all promises, to detect any unfinished
     ConsoleCapture.start(); // Capture all output from transpiled code
 
     // Run method and get result
-    let error: Error | undefined;
-    try {
-      error = await this._executeTestMethod(test);
-    } catch (badErr) { // If we have a non-assertion error
-      error = badErr;
-      AssertCheck.checkUnhandled(test, badErr);
+    let error = await this._executeTestMethod(test);
+    if (error) {
+      if (error instanceof ExecutionError) { // Errors that are not expected
+        AssertCheck.checkUnhandled(test, error);
+      } else if (test.shouldThrow) { // Errors that are
+        error = AssertCheck.checkError(test.shouldThrow!, error)!; // Rewrite error
+      }
     }
 
     Object.assign(result, {
