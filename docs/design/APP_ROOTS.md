@@ -11,7 +11,7 @@ Module Structure
   
 ## Test
 * test/
-  * src/lib
+  * lib
   * resources/
 
 ## Library (node_modules/@travetto/{x})
