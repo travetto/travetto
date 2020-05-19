@@ -2,11 +2,14 @@ import { ScanEntry, ScanFs, FsUtil, AppCache } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 
 import { Env } from './env';
-import { SystemUtil } from './internal/system';
 
-type SimpleEntry = Pick<ScanEntry, 'file' | 'module'>;
+type SimpleEntry = Pick<ScanEntry, 'module' | 'file'>;
 
-type Pred = (val: string) => boolean;
+type FindConfig =
+  { folder?: string, filter?: Tester, rootPaths: string[] } |
+  { folder?: string, filter?: Tester, appRoots?: string[] };
+
+type AppFindConfig = { folder?: string, filter?: Tester, appRoots?: string[] };
 
 interface Tester {
   source: string;
@@ -18,6 +21,7 @@ interface Tester {
  */
 export class ScanApp {
 
+  private static __INDEX: Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>;
   private static CACHE = new Map<string, SimpleEntry[]>();
 
   /**
@@ -25,39 +29,78 @@ export class ScanApp {
    */
   static mainAppFolders: string[] = ['src'];
   /**
-   * List of module app folders to search
-   */
-  static modAppFolders: string[] = ['src'];
-  /**
    * List of modules to not traverse into
    */
   static modAppExclude: string[] = ['test', 'cli', 'boot', 'watch'];
 
   /**
-   * Provides a RegEx compatible object that can scan for typescript files quickly
+   * Compute index for a scan entry
+   * @param entry
    */
-  static TS_TESTER: Tester = {
-    source: '.ts',
-    test: x => x.endsWith('.ts') && !x.endsWith('.d.ts')
-  };
-
-  /**
-   * Support framework resolution if active
-   */
-  private static resolveFramework(x: SimpleEntry, root: string) {
-    const file =
-      FrameworkUtil.devResolve(x.file) || // @line-if $TRV_DEV
-      x.file;
-    return { ...x, file, module: file.replace(`${root}/`, '') };
+  static computeIndex(entry: ScanEntry) {
+    const file = entry.module;
+    if (file.includes('node_modules')) {
+      if (file.includes('@travetto/')) { // External module
+        const mod = file.replace(/^.*node_modules\/(@travetto\/[^/]+)(\/?.*?)$/, (a, b) => b);
+        if (mod.includes('node_modules')) {
+          return;
+        } else if (entry.stats.isDirectory() || entry.stats.isSymbolicLink()) {
+          return { mod, sub: '' };
+        } else {
+          const [sub] = file.split(`${mod}/`)[1].split('/');
+          return { mod, sub };
+        }
+      }
+    } else if (/^alt(\/.*)$/.test(file)) { // Alt app
+      if (file === 'alt') {
+        return;
+      }
+      const mod = file.split('alt/')[1].split('/')[0];
+      if (entry.stats.isDirectory() || entry.stats.isSymbolicLink()) {
+        return { mod, sub: '' };
+      } else {
+        const [sub] = file.split(`${mod}/`)[1].split('/');
+        return { mod, sub };
+      }
+    } else { // Core app
+      const mod = '.';
+      const [sub] = file.split('/');
+      return { mod, sub };
+    }
   }
 
   /**
-   * Get regex compatible tester for validating travetto modules in traversal
+   * Get the map of all modules currently supported in the application
    */
-  private static getAppModPathMatcher() {
-    const MOD_MATCH = new RegExp(`node_modules/@travetto/([^/]+)/(${[...this.modAppFolders.map(x => `${x}/`), 'index'].join('|')})`);
-    const MOD_EX = new RegExp(`@travetto/(${this.modAppExclude.join('|')})`);
-    return { test: (x: string) => MOD_MATCH.test(x) && !MOD_EX.test(x) };
+  static get index() {
+    if (this.__INDEX === undefined) {
+      this.__INDEX = new Map([['.', { base: FsUtil.cwd, files: new Map() }]]);
+      for (const el of ScanFs.scanFramework(x => !x.endsWith('.d.ts') && x.endsWith('.ts'))) {
+        const res = this.computeIndex(el);
+        if (!res) {
+          continue;
+        }
+
+        const { mod, sub } = res;
+
+        el.file = FrameworkUtil.devResolve(el.file); // @line-if $TRV_DEV
+        el.module = el.file.replace(`${FsUtil.cwd}/`, ''); // @line-if $TRV_DEV
+
+        if (el.stats.isDirectory() || el.stats.isSymbolicLink()) {
+          if (!this.__INDEX.has(mod)) {
+            this.__INDEX.set(mod, { base: el.file, files: new Map() });
+          }
+        } else if (sub === 'index.ts') {
+          this.__INDEX.get(mod)!.index = el;
+        } else {
+          if (!this.__INDEX.get(mod)!.files.has(sub)) {
+            this.__INDEX.get(mod)!.files.set(sub, []);
+          }
+          this.__INDEX.get(mod)!.files.get(sub)!.push({ file: el.file, module: el.module });
+        }
+      }
+    }
+    return this.__INDEX;
   }
 
   /**
@@ -65,112 +108,90 @@ export class ScanApp {
    */
   static reset() {
     this.CACHE.clear();
+    this.__INDEX.clear();
   }
 
   /**
-   * Find all '.ts' files excluding ones identified by the filter
-   * @param filter Any additional filters, external to the extension.  Caching occurs at the extension level
-   * @param root Starting point for finding files, defaults to cwd
+   * Finnd search keys
+   * @param appRoots App paths
    */
-  static findSourceFiles(filter?: Tester | Pred, root = FsUtil.cwd): SimpleEntry[] {
-    return this.findFiles(this.TS_TESTER, filter, root);
+  static getRootPaths(appRoots?: string[]) {
+    return [...this.index.keys()]
+      .filter(key => (key.startsWith('@travetto') && !this.modAppExclude.includes(key)) || (appRoots || Env.appRoots).includes(key));
   }
 
   /**
-   * Find files by extension/pattern
-   * @param ext Extension (including '.') or a object with a test method {@type Tester}
-   * @param filter Any additional filters, external to the extension.  Caching occurs at the extension level
-   * @param root Starting point for finding files, defaults to cwd
+   * Find all folders for the given root paths
+   * @param rootPaths The root paths to check
+   * @param folder The folder to check into
    */
-  static findFiles(ext: string | Tester, filter?: Tester | Pred, root = FsUtil.cwd): SimpleEntry[] {
-    ext = typeof ext === 'string' ? new RegExp(`${ext}$`) : ext;
+  static findFolders(config: FindConfig) {
+    const all: string[] = [];
+    const paths = 'rootPaths' in config ? config.rootPaths : this.getRootPaths(config.appRoots);
+    for (const key of paths) {
+      if (this.index.has(key)) {
+        if (config.folder) {
+          all.push(FsUtil.resolveUnix(this.index.get(key)!.base, config.folder));
+        } else {
+          all.push(this.index.get(key)!.base);
+        }
+      }
+    }
+    return all;
 
-    const key = `${root}:${ext.source}`;
-    const testFile: Pred = ext.test.bind(ext);
+  }
 
-    if (!this.CACHE.has(key)) {
-      let toCache: SimpleEntry[] = ScanFs.scanDirSync({
-        testFile,
-        testDir: x => // Ensure its a valid folder or module folder
-          !x.includes('node_modules') || // All non-framework folders
-          x.endsWith('node_modules') || // Is first level node_modules
-          x.includes('@travetto')  // Is framework folder, include everything under it
-      }, root)
-        .filter(x => ScanFs.isNotDir(x));
-
-      // Align with framework dev
-      toCache = toCache.map(x => this.resolveFramework(x, root)); // @line-if $TRV_DEV
-
-      // De-deduplicate
-      toCache = toCache
-        .sort((a, b) => a.file.localeCompare(b.file))
-        .reduce((acc: SimpleEntry[], x: SimpleEntry) => {
-          if (!acc.length || x.file !== acc[acc.length - 1].file) {
-            acc.push(x);
+  /**
+   * Find files from the index
+   * @param rootPaths The main application paths to check
+   * @param folder The folder to check into
+   * @param filter The filter to determine if this is a valid support file
+   */
+  static findFiles(config: FindConfig) {
+    const { filter, folder } = config;
+    const paths = 'rootPaths' in config ? config.rootPaths : this.getRootPaths(config.appRoots);
+    const all: SimpleEntry[][] = [];
+    const idx = this.index;
+    for (const key of paths) {
+      if (idx.has(key)) {
+        if (folder) {
+          const tgt = idx.get(key)!;
+          const sub = tgt.files.get(folder) || [];
+          if (filter) {
+            all.push(sub.filter(el => filter!.test(el.module)));
+          } else {
+            all.push(sub);
           }
-          return acc;
-        }, []);
-
-      this.CACHE.set(key, toCache);
-    }
-
-    if (filter) {
-      if ('test' in filter) {
-        return this.CACHE.get(key)!.filter(x => filter.test(x.module));
-      } else {
-        return this.CACHE.get(key)!.filter(x => filter(x.module));
+          if (folder === 'src' && tgt.index && (!filter || filter!.test(tgt.index.module))) {
+            all.push([tgt.index]);
+          }
+        } else {
+          for (const sub of idx.get(key)!.files.values()) {
+            if (filter) {
+              all.push(sub.filter(el => filter!.test(el.module)));
+            } else {
+              all.push(sub);
+            }
+          }
+        }
       }
-    } else {
-      return this.CACHE.get(key)!.slice(0);
     }
+    return all.flat();
   }
 
   /**
-   * Determine absolute paths of all application paths from app roots
+   * Find source files for a given set of rootPaths
+   * @param appRoots List of all app root paths
    */
-  static getAppPaths(roots = Env.appRoots, pathSet = ScanApp.mainAppFolders) {
-    const [main, ...rest] = roots;
-    return [
-      ...rest.map(x => FsUtil.joinUnix(x, 'src')),
-      ...pathSet.map(x => FsUtil.joinUnix(main, x)) // Only main app gets extensions
+  static findAppSourceFiles(config: Pick<AppFindConfig, 'appRoots'> = {}) {
+    const all: SimpleEntry[][] = [
+      this.findFiles({ folder: 'src', appRoots: config.appRoots }),
     ];
-  }
-
-  /**
-   * Find app files, assuming provided root paths provided
-   * @param rootPaths List of root paths to search through
-   * @param exclude Predicadte to determine if a file should be exclude
-   * @param root The starting point
-   */
-  // FIXME: Currently is including non-app files from modules (sub-apps)
-  static findAppFiles(rootPaths: string[], exclude?: (file: string) => boolean, root = FsUtil.cwd) {
-    const PATH_RE = SystemUtil.pathMatcher(rootPaths);
-    const MOD_RE = this.getAppModPathMatcher();
-    return this.findSourceFiles(
-      // Exclude any filtered items, only return app files or module files
-      f => (!exclude || !exclude!(f)) && (PATH_RE.test(f) || MOD_RE.test(f)),
-      root
-    ).map(x => x.file);
-  }
-
-  /**
-   * Preload file entries, useful for precompiling and indexing
-   * @param key The cache key to store results to
-   * @param paths List of paths to set
-   * @param base The root folder the paths are relative to
-   */
-  static setFileEntries(key: string, paths: string[], base: string = FsUtil.cwd) {
-    const results = paths.map(mod => {
-      // Compressed for minimizing bundle size
-      mod = !/•/.test(mod) ? mod : AppCache.fromEntryName(mod);
-      const full = FsUtil.resolveUnix(base!, mod);
-
-      if (mod === full) {
-        mod = full.replace(`${base}/`, '');
+    for (const folder of this.mainAppFolders) {
+      if (folder !== 'src') {
+        all.push(this.findFiles({ folder, rootPaths: config.appRoots || Env.appRoots }));
       }
-      return { file: full, module: mod };
-    });
-
-    this.CACHE.set(key, results);
+    }
+    return all.flat();
   }
 }

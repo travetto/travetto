@@ -5,7 +5,7 @@ import { Class } from '@travetto/registry';
 
 import { ModelService } from '../service/model';
 import { ModelCore } from '../model/core';
-import { ModelRegistry } from '../registry';
+import { ModelRegistry } from '../registry/registry';
 import { ValidStringFields } from '../service/source';
 
 type Svc = { source: ModelService };

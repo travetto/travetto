@@ -1,6 +1,7 @@
 import * as commander from 'commander';
-import { CliUtil, CompletionConfig } from '@travetto/cli/src/util';
+import { CliUtil } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
+import { CompletionConfig } from '@travetto/cli/src/types';
 
 /**
  * `npx trv clean`

@@ -114,17 +114,16 @@ export class TranspileUtil {
 
   /**
    * Check transpilation errors
-   * @param cwd The root of the execution
    * @param fileName The naem of the file
    * @param diagnostics The diagnostic errors
    */
-  static checkTranspileErrors(cwd: string, fileName: string, diagnostics: readonly any[]) {
+  static checkTranspileErrors(fileName: string, diagnostics: readonly any[]) {
     if (diagnostics && diagnostics.length) {
       const errors = diagnostics.slice(0, 5).map(diag => {
         const message = this.ts.flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
           const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
-          return ` @ ${diag.file.fileName.replace(`${cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
+          return ` @ ${diag.file.fileName.replace(`${FsUtil.cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
         } else {
           return ` ${message}`;
         }
@@ -133,7 +132,7 @@ export class TranspileUtil {
       if (diagnostics.length > 5) {
         errors.push(`${diagnostics.length - 5} more ...`);
       }
-      throw new Error(`Transpiling ${fileName.replace(`${cwd}/`, '')} failed: \n${errors.join('\n')}`);
+      throw new Error(`Transpiling ${fileName.replace(`${FsUtil.cwd}/`, '')} failed: \n${errors.join('\n')}`);
     }
   }
 
@@ -195,7 +194,7 @@ export class TranspileUtil {
       try {
         const diags: any[] = [];
         const ret = this.ts.transpile(this.preProcess(tsf), this.compilerOptions, tsf, diags);
-        this.checkTranspileErrors(FsUtil.cwd, tsf, diags);
+        this.checkTranspileErrors(tsf, diags);
         return ret;
       } catch (e) {
         return this.handlePhaseError('transpile', tsf, e);

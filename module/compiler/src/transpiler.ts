@@ -28,26 +28,22 @@ export class Transpiler {
   private get compilerOptions() {
     return {
       ...TranspileUtil.compilerOptions,
-      rootDir: this.cwd,
-      outDir: this.cwd
+      rootDir: FsUtil.cwd,
+      outDir: FsUtil.cwd
     };
   }
 
   constructor(
     /**
-     * Root directory
-     */
-    private cwd: string,
-    /**
      * Cache for transpilation
      */
     private cache: FileCache,
     /**
-     * Root paths to load files for
+     * App Root paths to load files for
      */
-    private rootPaths: string[]
+    private appRoots: string[]
   ) {
-    this.transformerManager = new TransformerManager(this.cwd);
+    this.transformerManager = new TransformerManager();
   }
 
   /**
@@ -58,7 +54,7 @@ export class Transpiler {
     if (!content) {
       throw new Error(`Unable to read file ${fileName}`);
     }
-    if (ScanApp.TS_TESTER.test(fileName)) {
+    if (!fileName.endsWith('.d.ts') && fileName.endsWith('.ts')) {
       content = TranspileUtil.preProcess(fileName, content);
     }
     return content;
@@ -91,11 +87,11 @@ export class Transpiler {
       writeFile: this.writeFile,
       fileExists: this.fileExists,
       getDefaultLibFileName: ts.getDefaultLibFileName,
-      getCurrentDirectory: () => this.cwd,
+      getCurrentDirectory: () => FsUtil.cwd,
       getCanonicalFileName: x => x,
       getNewLine: () => ts.sys.newLine,
       useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
-      getSourceFile(this: Transpiler, fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void, shouldCreateNewSourceFile?: boolean) {
+      getSourceFile(this: Transpiler, fileName: string, languageVersion: ts.ScriptTarget, _, shouldCreateNewSourceFile?: boolean) {
         if (!this.sources.has(fileName) || shouldCreateNewSourceFile) {
           const content = this.readFile(fileName)!;
           this.sources.set(fileName, ts.createSourceFile(fileName, content ?? '', languageVersion));
@@ -141,7 +137,7 @@ export class Transpiler {
    */
   private _transpile(fileName: string, force = false) {
     if (force || !this.cache.hasEntry(fileName)) {
-      console.trace('Emitting', fileName.replace(this.cwd, ''));
+      console.trace('Emitting', fileName.replace(`${FsUtil.cwd}/`, ''));
 
       const prog = this.getProgram(fileName);
       const result = prog.emit(
@@ -152,7 +148,7 @@ export class Transpiler {
         this.transformerManager.getTransformers()
       );
 
-      TranspileUtil.checkTranspileErrors(this.cwd, fileName, result.diagnostics);
+      TranspileUtil.checkTranspileErrors(fileName, result.diagnostics);
       // Save writing for typescript program (`writeFile`)
     } else {
       const cached = this.cache.readEntry(fileName);
@@ -167,8 +163,8 @@ export class Transpiler {
    */
   init() {
     // Find all active app files
-    ScanApp.findAppFiles(this.rootPaths, undefined, this.cwd)
-      .forEach(x => this.rootNames.add(x));
+    ScanApp.findAppSourceFiles({ appRoots: this.appRoots })
+      .forEach(x => this.rootNames.add(x.file));
 
     this.transformerManager.init();
   }
@@ -230,7 +226,7 @@ export class Transpiler {
    */
   unload(fileName: string, unlink = true) {
     if (this.contents.has(fileName)) {
-      console.trace('Unloading', fileName.replace(this.cwd, ''), unlink);
+      console.trace('Unloading', fileName.replace(FsUtil.cwd, ''), unlink);
 
       this.cache.removeExpiredEntry(fileName, unlink);
 

@@ -1,8 +1,6 @@
 import * as path from 'path';
 
-import { FsUtil, ScanEntry, ScanHandler } from '@travetto/boot';
-import { ScanApp } from '@travetto/base';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { FsUtil, ScanEntry } from '@travetto/boot';
 
 import { Watcher } from './watcher';
 
@@ -17,13 +15,13 @@ export interface PresenceListener {
  * and handles multiple file roots.
  */
 export class FilePresenceManager {
-  private ext: string | RegExp;
+  private validFile: (f: string) => boolean;
   private cwd: string;
-  private rootPaths: string[] = [];
+  private rootFolders: string[] = [];
+  private initialFiles: string[] = [];
   private listener: PresenceListener;
-  private excludeFiles: RegExp[] = [];
 
-  private fileWatchers: Record<string, Watcher> = {};
+  private fileWatchers = new Map<string, Watcher>();
   private files = new Map<string, { version: number }>();
   private seen = new Set<string>();
   private watchSpaces = new Set<string>();
@@ -35,12 +33,11 @@ export class FilePresenceManager {
    */
   constructor(
     config: {
-      ext: FilePresenceManager['ext'];
+      validFile: FilePresenceManager['validFile'];
       cwd: FilePresenceManager['cwd'];
-      rootPaths: FilePresenceManager['rootPaths'];
+      rootFolders: FilePresenceManager['rootFolders'];
+      initialFiles: FilePresenceManager['initialFiles'];
       listener: Partial<FilePresenceManager['listener']>;
-      excludeFiles?: FilePresenceManager['excludeFiles'];
-      initialFileValidator?: FilePresenceManager['initialFileValidator'];
     }
   ) {
     for (const k of ['added', 'removed', 'changed'] as const) {
@@ -49,15 +46,10 @@ export class FilePresenceManager {
 
     Object.assign(this, config);
 
-    for (const root of this.rootPaths) {
+    for (const root of this.rootFolders) {
       this.watchSpaces.add(root);
     }
   }
-
-  /**
-   * Default to always true
-   */
-  private initialFileValidator: (x: Pick<ScanEntry, 'file' | 'module'>) => boolean = x => true;
 
   /**
    * Callback handle for the watcher
@@ -94,39 +86,18 @@ export class FilePresenceManager {
   /**
    * Add a new watcher for a specific root
    */
-  private buildWatcher(cwd: string, handlers: ScanHandler[]) {
-    const watcher = new Watcher({
-      interval: 250,
-      cwd
-    });
-
-    watcher.on('all', this.watcherListener.bind(this));
-
-    watcher.add(handlers); // Watch ts files
-    watcher.run(false);
-    return watcher;
-  }
-
-  /**
-   * Collect all root files given the provided rootPaths
-   */
-  getRootFiles() {
-    const PATH_RE = SystemUtil.pathMatcher(this.rootPaths);
-
-    const rootFiles = ScanApp.findFiles(this.ext, x => PATH_RE.test(x) && this.validFile(x)) // Only watch own files
-      .filter(x => this.initialFileValidator(x)) // Validate root files follow some pattern
-      .map(x => x.file);
-
-    return rootFiles;
+  private buildWatcher(cwd: string) {
+    return new Watcher({ interval: 250, cwd })
+      .on('all', this.watcherListener.bind(this))
+      .add([{ testFile: this.validFile, testDir: this.validFile }])
+      .run(false);
   }
 
   /**
    * Initialize manager
    */
   init() {
-    const rootFiles = this.getRootFiles();
-
-    for (const fileName of rootFiles) {
+    for (const fileName of this.initialFiles) {
       this.files.set(fileName, { version: 0 });
     }
 
@@ -140,7 +111,7 @@ export class FilePresenceManager {
     if (!FsUtil.existsSync(folder)) {
       console.warn(`Directory ${FsUtil.resolveUnix(FsUtil.cwd, folder)} missing, cannot watch`);
     } else {
-      this.buildWatcher(FsUtil.joinUnix(this.cwd, folder), [{ testFile: x => this.validFile(x), testDir: x => this.validFile(x) }]);
+      this.buildWatcher(FsUtil.resolveUnix(this.cwd, folder));
     }
   }
 
@@ -149,18 +120,6 @@ export class FilePresenceManager {
    */
   has(name: string) {
     return this.files.has(name);
-  }
-
-  /**
-   * Tests to see if passed in file is valid
-   */
-  validFile(name: string) {
-    for (const re of this.excludeFiles) {
-      if (re.test(name)) {
-        return false;
-      }
-    }
-    return typeof this.ext === 'string' ? name.endsWith(this.ext) : this.ext.test(name);
   }
 
   /**
@@ -179,10 +138,10 @@ export class FilePresenceManager {
     if (this.validFile(name)) {
       // Already known to be a used file, just don't watch node modules
       const topLevel = path.dirname(name);
-      if (!this.fileWatchers[topLevel]) {
-        this.fileWatchers[topLevel] = this.buildWatcher(topLevel, []);
+      if (!this.fileWatchers.has(topLevel)) {
+        this.fileWatchers.set(topLevel, this.buildWatcher(topLevel));
       }
-      this.fileWatchers[topLevel].add([name.replace(`${topLevel}/`, '')]);
+      this.fileWatchers.get(topLevel)!.add([name.replace(`${topLevel}/`, '')]);
     }
 
     this.files.set(name, { version: 0 });
@@ -196,16 +155,9 @@ export class FilePresenceManager {
    * Reset manager, freeing all watchers
    */
   reset() {
-    Object.values(this.fileWatchers).map(x => x.close());
-    this.fileWatchers = {};
+    [...this.fileWatchers.values()].forEach(x => x.close());
+    this.fileWatchers.clear();
     this.seen.clear();
     this.files.clear();
-  }
-
-  /**
-   * Has this file been watched before
-   */
-  isKnown(name: string) {
-    return this.files.get(name)!.version > 0;
   }
 }

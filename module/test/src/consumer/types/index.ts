@@ -1,4 +1,4 @@
-import { ScanApp } from '@travetto/base';
+import { ScanFs } from '@travetto/boot';
 
-ScanApp.findSourceFiles(/^(?!index)/, __dirname)
+ScanFs.scanDirSync({ testFile: x => /^(?!index)/.test(x) }, __dirname)
   .forEach(x => require(x.file));

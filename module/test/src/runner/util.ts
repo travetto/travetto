@@ -1,8 +1,7 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 
-import { ScanFs, FsUtil } from '@travetto/boot';
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager, ScanApp, Env } from '@travetto/base';
 
 /**
  * Simple Test Utilities
@@ -38,12 +37,13 @@ export class TestUtil {
    * Find all valid test files given the globs
    */
   static async getTests(globs: RegExp[]) {
-    const files = (await ScanFs.bulkScanDir(globs.map(x => ({ testFile: (y: string) => x.test(y) })), FsUtil.cwd))
-      .filter(x => !x.stats.isDirectory())
-      .filter(x => !x.file.includes('node_modules'))
+    const files = ScanApp.findFiles({ rootPaths: Env.appRoots, folder: 'test' })
+      .filter(f => globs.some(g => g.test(f.module)));
+
+    const validFiles = files
       .map(f => this.isTest(f.file).then(valid => ({ file: f.file, valid })));
 
-    return (await Promise.all(files))
+    return (await Promise.all(validFiles))
       .filter(x => x.valid)
       .map(x => x.file);
   }

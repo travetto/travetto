@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import { ExecUtil } from '@travetto/boot';
-import { CliUtil } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
 
 export class CompileUtil {
@@ -12,17 +11,11 @@ export class CompileUtil {
 
     const files = fs.readdirSync(AppCache.cacheDir).map(x => FsUtil.resolveUnix(AppCache.cacheDir, x));
 
-    // Rewrite files to allow for presume different path
-    const FILES = `ScanApp.setFileEntries('.ts', [
-    ${files.map(x => `'${AppCache.toEntryName(x)}'`).join(',')}
-])`;
-
     for (const file of files) {
       const contents = fs.readFileSync(file, 'utf-8')
-        .replace(/ScanApp\.cache =.*/, x => `${x};\n${FILES}`) // Only for scan-app
         .replace(/[/][/]#.*$/, '') // Drop source maps
         .replace(new RegExp(FsUtil.cwd, 'g'), runtimeDir); // Rewrite paths
-      fs.writeFileSync(file, contents);
+      fs.writeFileSync(file, contents, 'utf-8');
     }
   }
 

@@ -1,7 +1,7 @@
 import { EnvUtil } from '@travetto/boot';
 import { ShutdownManager } from '@travetto/base';
 
-import { TestConsumer } from '../model/consumer';
+import { TestConsumer } from '../consumer/types';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
 import { Timeout } from './timeout';

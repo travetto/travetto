@@ -9,7 +9,7 @@ import { RunEvent } from '../worker/types';
 import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { TestConsumerRegistry } from '../consumer/registry';
-import { TestConsumer } from '../model/consumer';
+import { TestConsumer } from '../consumer/types';
 
 /**
  * Test Watcher.

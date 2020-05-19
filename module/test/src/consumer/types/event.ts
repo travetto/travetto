@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 import { TestEvent } from '../../model/event';
-import { TestConsumer } from '../../model/consumer';
+import { TestConsumer } from '../types';
 import { ConsumerUtil } from '../util';
 import { Consumable } from '../registry';
 

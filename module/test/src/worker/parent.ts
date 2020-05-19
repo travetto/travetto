@@ -1,7 +1,7 @@
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { ParentCommChannel, WorkUtil } from '@travetto/worker';
 import { Events, RunEvent } from './types';
-import { TestConsumer } from '../model/consumer';
+import { TestConsumer } from '../consumer/types';
 
 /**
  *  Produce a handler for the child worker
