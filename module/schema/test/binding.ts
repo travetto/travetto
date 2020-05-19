@@ -7,8 +7,6 @@ import { BindUtil } from '../src/bind-util';
 import { Address } from './models/address';
 import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple } from './models/binding';
 
-import '../src/service/registry'; // Force import of registry
-
 @Suite('Data Binding')
 class DataBinding {
 
@@ -127,7 +125,7 @@ class DataBinding {
 
   @Test('Should handle polymorphic structure')
   validatePolymorphism() {
-    const items = [
+    const items: any[] = [
       {
         type: 'poly1',
         name: 'bob',
@@ -145,10 +143,10 @@ class DataBinding {
     assert(items);
     assert(items.length === 2);
     assert(items[0] instanceof Poly1);
-    assert(!items[0].names);
+    assert(!('names' in items[0]));
     assert(items[1] instanceof Poly2);
-    assert(!items[1].name);
-    assert(typeof items[1].age === 'string');
+    assert(!('name' in items[1]));
+    assert(typeof items[1]['age'] === 'string');
   }
 
   @Test('should handle regex fields')

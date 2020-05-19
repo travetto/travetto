@@ -38,7 +38,7 @@ export class VisitorFactory<S extends State = State> {
   /**
    * Initialize internal mapping given a list of transformers
    */
-  init(transformers: NodeTransformer<S, any, any>[]) {
+  private init(transformers: NodeTransformer<S, any, any>[]) {
     for (const trn of transformers) {
       if (!this.transformers.has(trn.type)) {
         this.transformers.set(trn.type, {});
@@ -69,6 +69,7 @@ export class VisitorFactory<S extends State = State> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
         ConsoleManager.setFile('!compiler.log', { processArgs: (__, args) => TransformUtil.collapseNodes(args) }); // Suppress logging into an output file
+        console.log(process.pid, 'Processing', file.fileName, [...this.transformers.keys()]);
         const state = this.getState(file);
         const ret = this.visit(state, context, file);
         const out = state.finalize(ret);

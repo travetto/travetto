@@ -7,7 +7,7 @@ import { SystemUtil } from '@travetto/base/src/internal/system';
 import { TestRegistry } from '../registry/registry';
 import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
-import { TestConsumer } from '../model/consumer';
+import { TestConsumer } from '../consumer/types';
 import { AssertCheck } from '../assert/check';
 import { AssertCapture } from '../assert/capture';
 import { ConsoleCapture } from './console';
@@ -223,7 +223,7 @@ export class TestExecutor {
     }
 
     try {
-      await import(FsUtil.toUnix(file)); // Path to module
+      require(FsUtil.toUnix(file)); // Path to module
     } catch (err) {
       this.failFile(consumer, file, err);
       return;

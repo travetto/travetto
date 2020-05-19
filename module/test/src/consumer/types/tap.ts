@@ -3,13 +3,13 @@ import { ErrorUtil } from '@travetto/base/src/internal/error';
 
 import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
-import { TestConsumer } from '../../model/consumer';
+import { TestConsumer } from '../types';
 import { Consumable } from '../registry';
 
 import { TapEnhancer, DUMMY_ENHANCER } from './tap-enhancer';
 
 /**
- * TAP Format consumer
+  * TAP Format consumer
  */
 @Consumable('tap')
 export class TapEmitter implements TestConsumer {

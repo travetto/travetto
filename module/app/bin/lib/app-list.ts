@@ -10,7 +10,6 @@ import { CachedAppConfig, handleFailure } from './util';
  */
 export class AppListUtil {
 
-  private static pCwd = FsUtil.cwd;
   private static cacheConfig = 'app-cache.json';
   private static fsLstat = util.promisify(fs.lstat);
 
@@ -29,7 +28,7 @@ export class AppListUtil {
    * Determine app root form filename
    */
   static determineRootFromFile(filename: string) {
-    const [, root] = filename.split(`${this.pCwd}/`);
+    const [, root] = filename.split(`${FsUtil.cwd}/`);
     const [first] = root.split('/');
     // If root is in node_modules or is 'src', default to local
     // * This supports apps being run from modules vs locally
@@ -45,13 +44,12 @@ export class AppListUtil {
     await PhaseManager.bootstrap('compile-all');
 
     // Load app files
-    ScanApp.findSourceFiles(x =>
-      /^([^/]+\/)?(src[\/])/.test(x) && // Look at all 'src/*' (including sub-apps)
-      fs.readFileSync(x, 'utf-8').includes('@Application') // Look for @Application annotation
-    ).forEach(x => require(x.file)); // Only load files that are candidates
+    ScanApp.findAppSourceFiles()
+      .filter(x => fs.readFileSync(x.file, 'utf-8').includes('@Application'))
+      .forEach(x => require(x.file)); // Only load files that are candidates
 
     // Load all packaged applications
-    for (const { file } of ScanApp.findSourceFiles(/\/?support\/application[.].*/)) {
+    for (const { file } of ScanApp.findFiles({ folder: 'support', filter: /application[.].*[.]ts/ })) {
       try {
         require(file);
       } catch { }

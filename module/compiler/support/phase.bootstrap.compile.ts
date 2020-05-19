@@ -8,9 +8,9 @@ export const init = {
     const { AppCache } = await import('@travetto/boot');
     const { ScanApp } = await import('@travetto/base');
 
-    for (const x of ScanApp.findAppFiles(ScanApp.getAppPaths())) {
-      if (!AppCache.hasEntry(x)) {
-        require(x); // Load all uncompiled files
+    for (const x of ScanApp.findAppSourceFiles()) {
+      if (!AppCache.hasEntry(x.file)) {
+        require(x.file); // Load all uncompiled files
       }
     }
   }

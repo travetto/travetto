@@ -1,7 +1,7 @@
 import { Class } from '@travetto/registry';
 import { Schema } from '@travetto/schema';
 import { ModelCore } from './core';
-import { ModelRegistry } from '../registry';
+import { ModelRegistry } from '../registry/registry';
 
 /**
  * Base model, provides basic functionality dates and subtype support

@@ -2,13 +2,12 @@ import { FsUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
 
-import { TestConsumerManager } from '../consumer/manager';
-
 import { TestExecutor } from './executor';
 import { buildWorkManager } from '../worker/parent';
 
 import { TestUtil } from './util';
 import { RunState } from './types';
+import { RunnableTestConsumer } from './consumer';
 
 /**
  * Test Runner
@@ -31,7 +30,7 @@ export class Runner {
    * Run all files
    */
   async runFiles() {
-    const consumer = TestConsumerManager.create(this.state.consumer ?? this.state.format);
+    const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
 
     const files = await this.getFiles();
 
@@ -45,16 +44,14 @@ export class Runner {
       max: this.state.concurrency
     });
 
-    if (consumer.onStart) {
-      consumer.onStart();
-    }
+    consumer.onStart();
 
     await pool
       .process(new IterableInputSource(files))
       .finally(() => pool.shutdown());
 
-    if (consumer.summarize) {
-      const result = consumer.summarize();
+    const result = consumer.summarize();
+    if (result) {
       return result.summary.failed <= 0;
     } else {
       return true;
@@ -65,17 +62,13 @@ export class Runner {
    * Run a single file
    */
   async runSingle() {
-    const consumer = TestConsumerManager.create(this.state.consumer ?? this.state.format);
-    if (consumer.onStart) {
-      consumer.onStart();
-    }
+    const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
+    consumer.onStart();
 
     await PhaseManager.init('test').run();
     const res = await TestExecutor.execute(consumer, this.state.args[0], ...this.state.args.slice(1));
 
-    if (consumer.summarize) {
-      consumer.summarize();
-    }
+    consumer.summarize();
 
     return res;
   }

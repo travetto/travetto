@@ -5,7 +5,7 @@ Module Structure
   * src/
   * resources/
 
-* (sub-app)
+* alt/(sub-app)
   * src/  
   * resources/
   
@@ -28,11 +28,11 @@ App Running
 * (libraries)/support - Loading all transformers
 * (root)/index - Main app logic
 * (root)/src - Main app logic
-* (sub-app)/src - Sub app logic
+* alt/(sub-app)/src - Sub app logic
 
 ## Config
 * (root)/resources/*.yml
-* (sub-app)/resources/*.yml
+* alt/(sub-app)/resources/*.yml
 
 Test Running
 -----------------------------

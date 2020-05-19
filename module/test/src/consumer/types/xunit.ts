@@ -2,7 +2,7 @@ import { YamlUtil } from '@travetto/yaml';
 
 import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
-import { TestConsumer } from '../../model/consumer';
+import { TestConsumer } from '../types';
 import { Consumable } from '../registry';
 
 /**

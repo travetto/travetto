@@ -10,7 +10,7 @@ import { Query, ModelQuery, PageableModelQuery, PageableModelQueryStringQuery } 
 import { ModelCore } from '../model/core';
 import { BulkOp, BulkResponse, BulkProcessError } from '../model/bulk';
 import { ModelSource, IModelSource, ValidStringFields } from './source';
-import { ModelRegistry } from '../registry';
+import { ModelRegistry } from '../registry/registry';
 import { QueryLanguageParser } from '../internal/query-lang/parser';
 
 // @ts-ignore

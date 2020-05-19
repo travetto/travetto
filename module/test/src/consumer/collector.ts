@@ -1,11 +1,11 @@
 import { AllSuitesResult, SuiteResult } from '../model/suite';
 import { TestEvent } from '../model/event';
-import { TestConsumer } from '../model/consumer';
+import { TestConsumer } from './types';
 
 /**
  * Test Reuslt Collector, combines all results into a single Suite Result
  */
-export class AllResultsCollector implements TestConsumer {
+export class TestResultsSummarizer implements TestConsumer {
 
   public summary: AllSuitesResult = {
     passed: 0,

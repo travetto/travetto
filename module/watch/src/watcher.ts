@@ -248,7 +248,7 @@ export class Watcher extends EventEmitter {
   /**
    * Handle watch error
    */
-  handleError(err: Error & { code?: string }) {
+  private handleError(err: Error & { code?: string }) {
     if (err.code === 'EMFILE') {
       this.registryEmit('error', new Error('EMFILE: Too many opened files.'));
     }
@@ -274,6 +274,7 @@ export class Watcher extends EventEmitter {
       this.registryEmit('end');
       this.removeAllListeners();
     });
+    return this;
   }
 
   /**
@@ -294,6 +295,7 @@ export class Watcher extends EventEmitter {
         }
       }
     }
+    return this;
   }
 
   /**
@@ -308,6 +310,7 @@ export class Watcher extends EventEmitter {
       this.pendingWatched = [];
       setImmediate(() => this.suppress = false);
     }
+    return this;
   }
 
   /**
@@ -325,6 +328,7 @@ export class Watcher extends EventEmitter {
     } else { // Watch File
       this.watchFile(entry);
     }
+    return this;
   }
 
   /**
@@ -342,5 +346,6 @@ export class Watcher extends EventEmitter {
     } else {
       this.unwatchFile(entry);
     }
+    return this;
   }
 }

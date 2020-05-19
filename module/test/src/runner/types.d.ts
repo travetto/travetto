@@ -1,4 +1,4 @@
-import { TestConsumer } from '../model/consumer';
+import { TestConsumer } from '../consumer/types';
 
 /**
  * Run state

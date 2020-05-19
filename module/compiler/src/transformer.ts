@@ -5,9 +5,6 @@ import {
   NodeTransformer, VisitorFactory, TransformerState, getTransformHandlers
 } from './transform-support'; // Narrow import to minimize scope
 
-// Local app support transformer, as well as library support transformer
-const TRANSFORMER_RE = /support\/transformer[.](.*?)[.]ts$/;
-
 /**
  * Manages the typescript transformers
  */
@@ -16,18 +13,21 @@ export class TransformerManager {
   private cached: { before: ts.TransformerFactory<ts.SourceFile>[] };
   transformers: (NodeTransformer<TransformerState> & { file: string })[] = [];
 
-  constructor(private cwd: string) { }
+  constructor() { }
 
   /**
    * Read all transformers from disk under the pattern support/transformer.*
    */
   init() {
-    //  Fix for all support ops
-    const found = ScanApp.findAppFiles(Env.appRoots, undefined, this.cwd)
-      .filter(x => TRANSFORMER_RE.test(x));
+    if (this.cached) {
+      return;
+    }
 
-    for (const name of found) { // Exclude based on blacklist
-      const all = require(name);
+    // Modules
+    const found = ScanApp.findFiles({ folder: 'support', filter: /\/transformer.*[.]ts/ });
+
+    for (const entry of found) { // Exclude based on blacklist
+      const all = require(entry.file);
       const resolved = Object
         .values(all)
         .map(x => getTransformHandlers(x) as this['transformers'])
@@ -35,7 +35,7 @@ export class TransformerManager {
 
       for (const transformers of resolved) {
         this.transformers.push(...transformers.map(x => {
-          x.file = name;
+          x.file = entry.file;
           return x;
         }));
       }
@@ -44,7 +44,7 @@ export class TransformerManager {
     if (Env.debug) { // Log loaded transformers
       console.debug('Transformers',
         ...this.transformers.map(x => {
-          const name = x.file.match(TRANSFORMER_RE)![1];
+          const name = x.file.split(/[.]/).slice(1, -1).join('.');
           const flags = [
             ...(x.target ? [] : ['all']),
             ...(x.before ? ['before'] : []),
