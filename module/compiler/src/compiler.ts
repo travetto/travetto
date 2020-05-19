@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 
 import { FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil } from '@travetto/boot';
-import { ScanApp } from '@travetto/base';
+import { ScanApp, Env } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
 import { Transpiler } from './transpiler';
@@ -19,21 +19,17 @@ class $Compiler extends EventEmitter {
 
   constructor(
     /**
-     * The working directory
-     */
-    protected readonly cwd: string = FsUtil.cwd,
-    /**
      * The cache source
      */
     protected cache: FileCache = AppCache,
     /**
      * This of paths to compile against
      */
-    protected readonly rootPaths: string[] = ScanApp.getAppPaths()
+    protected readonly appRoots: string[] = Env.appRoots
   ) {
     super();
 
-    this.transpiler = new Transpiler(this.cwd, this.cache, this.rootPaths);
+    this.transpiler = new Transpiler(this.cache, this.appRoots);
   }
 
   /**

@@ -1,6 +1,6 @@
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager, ScanApp } from '@travetto/base';
 import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
-import { CompileUtil } from '@travetto/boot';
+import { CompileUtil, FsUtil } from '@travetto/boot';
 
 import { Compiler } from '../src/compiler';
 
@@ -19,12 +19,17 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
       super(...args);
 
       this.presenceManager = new FilePresenceManager({
-        ext: '.ts',
-        cwd: this.cwd,
-        excludeFiles: [/.*.d.ts$/, new RegExp(`${this.cwd}/index.ts`), /\/node_modules\//], // DO not look into node_modules, only user code
-        rootPaths: this.rootPaths,
+        validFile: f =>
+          !f.includes('node_modules') &&
+          f.endsWith('.ts') &&
+          !f.endsWith('.d.ts') &&
+          f !== `${FsUtil.cwd}/index.ts`,
+        cwd: FsUtil.cwd,
+        initialFiles: ScanApp.findFiles({ rootPaths: this.appRoots, folder: 'src' })
+          .filter(x => !(x.file in require.cache)) // Skip already imported files
+          .map(x => x.file),
+        rootFolders: ScanApp.findFolders({ rootPaths: this.appRoots, folder: 'src' }),
         listener: this,
-        initialFileValidator: x => !(x.file in require.cache) // Skip already imported files
       });
 
       ShutdownManager.onUnhandled(err => {
@@ -36,7 +41,7 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
 
       // Proxy all file loads
       CompileUtil.addModuleHandler((name, mod) => {
-        if (name.includes(this.cwd) && !name.includes('node_modules')) {
+        if (name.includes(FsUtil.cwd) && !name.includes('node_modules')) {
           if (!this.modules.has(name)) {
             this.modules.set(name, new RetargettingProxy(mod));
           } else {

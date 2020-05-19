@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { FsUtil } from './fs';
+import { EnvUtil } from './env';
+import { FrameworkUtil } from './framework';
 
 const fsReaddir = util.promisify(fs.readdir);
 const fsLstat = util.promisify(fs.lstat);
@@ -198,5 +200,21 @@ export class ScanFs {
       }
     }
     return out;
+  }
+
+  /**
+   * Scan the framework for folder/files only the framework should care about
+   * @param testFile The test to determine if a file is desired
+   */
+  static scanFramework(testFile?: (x: string) => boolean) {
+    return this.scanDirSync({
+      testFile,
+      testDir: x => // Ensure its a valid folder or module folder
+        !x.includes('node_modules') || // All non-framework folders
+        x.endsWith('node_modules') || // Is first level node_modules
+        (x.includes('@travetto')  // Is framework folder, include everything under it
+          && !/node_modules[/][^@]/.test(x) // Excluding non framework node modules
+        )
+    }, FsUtil.cwd);
   }
 }

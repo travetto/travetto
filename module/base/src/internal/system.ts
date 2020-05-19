@@ -142,7 +142,7 @@ export class SystemUtil {
     } else {
       const finalPaths = paths
         .map(x => x.replace(/^[.]\/?/g, ''))
-        .map(x => `${x === '' ? '' : `${x}/`}`);
+        .map(x => x === '' ? x : `${x}/`);
       return new RegExp(`^(${finalPaths.join('|')})`);
     }
   }
