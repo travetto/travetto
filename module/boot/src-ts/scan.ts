@@ -2,8 +2,6 @@ import * as fs from 'fs';
 import * as util from 'util';
 
 import { FsUtil } from './fs';
-import { EnvUtil } from './env';
-import { FrameworkUtil } from './framework';
 
 const fsReaddir = util.promisify(fs.readdir);
 const fsLstat = util.promisify(fs.lstat);
