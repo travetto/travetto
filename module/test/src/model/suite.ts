@@ -76,21 +76,3 @@ export interface SuiteResult extends Counts {
    */
   duration: number;
 }
-
-/**
- * All suite results
- */
-export interface AllSuitesResult extends Counts {
-  /**
-   * List of all suites
-   */
-  suites: SuiteResult[];
-  /**
-   * List of all errors
-   */
-  errors: Error[];
-  /**
-   * Total duration
-   */
-  duration: number;
-}

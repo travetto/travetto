@@ -7,7 +7,7 @@ import { buildWorkManager } from '../worker/parent';
 
 import { TestUtil } from './util';
 import { RunState } from './types';
-import { RunnableTestConsumer } from './consumer';
+import { RunnableTestConsumer } from '../consumer/types/runnable';
 
 /**
  * Test Runner

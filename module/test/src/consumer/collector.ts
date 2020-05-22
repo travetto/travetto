@@ -1,13 +1,13 @@
-import { AllSuitesResult, SuiteResult } from '../model/suite';
+import { SuiteResult } from '../model/suite';
 import { TestEvent } from '../model/event';
-import { TestConsumer } from './types';
+import { SuitesSummary, TestConsumer } from './types';
 
 /**
  * Test Reuslt Collector, combines all results into a single Suite Result
  */
 export class TestResultsSummarizer implements TestConsumer {
 
-  public summary: AllSuitesResult = {
+  public summary: SuitesSummary = {
     passed: 0,
     failed: 0,
     skipped: 0,
