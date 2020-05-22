@@ -1,4 +1,9 @@
-import { ScanFs } from '@travetto/boot';
-
-ScanFs.scanDirSync({ testFile: x => /^(?!index)/.test(x) }, __dirname)
-  .forEach(x => require(x.file));
+import './cumulative';
+import './event';
+import './execution';
+import './json';
+import './noop';
+import './runnable';
+import './summarizer';
+import './tap';
+import './xunit';
