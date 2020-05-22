@@ -1,12 +1,12 @@
-travetto: Exec
+travetto: Command
 ===
 
 **Install: primary**
 ```bash
-$ npm install @travetto/exec
+$ npm install @travetto/command
 ```
 
-The exec module provides the necessary foundation for calling complex commands at runtime. Additionally special attention is provided to running [`docker`](https://www.docker.com/community-edition) containers.
+The command module provides the necessary foundation for calling complex commands at runtime. Additionally special attention is provided to running [`docker`](https://www.docker.com/community-edition) containers.
 
 ## Docker Support
 Docker provides a unified way of executing external programs with a high level of consistency and simplicity.  For that reason, the framework leverages this functionality to provide a clean cross-platform experience.  The docker functionality allows you to interact with containers in two ways:
