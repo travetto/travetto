@@ -1,5 +1,5 @@
 import { TestConsumer } from '../types';
-import { TestResultsSummarizer } from '../collector';
+import { TestResultsSummarizer } from './summarizer';
 import { TestConsumerRegistry } from '../registry';
 
 /**

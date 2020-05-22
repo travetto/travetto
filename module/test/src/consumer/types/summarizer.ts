@@ -1,6 +1,6 @@
-import { SuiteResult } from '../model/suite';
-import { TestEvent } from '../model/event';
-import { SuitesSummary, TestConsumer } from './types';
+import { SuiteResult } from '../../model/suite';
+import { TestEvent } from '../../model/event';
+import { SuitesSummary, TestConsumer } from '../types';
 
 /**
  * Test Reuslt Collector, combines all results into a single Suite Result
