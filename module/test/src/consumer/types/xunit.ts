@@ -1,8 +1,7 @@
 import { YamlUtil } from '@travetto/yaml';
 
-import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
-import { TestConsumer } from '../types';
+import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 
 /**
@@ -95,7 +94,7 @@ export class XunitEmitter implements TestConsumer {
   /**
    * Summarize all results
    */
-  onSummary(summary: AllSuitesResult) {
+  onSummary(summary: SuitesSummary) {
     this.stream.write(`
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites

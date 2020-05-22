@@ -1,6 +1,5 @@
-import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
-import { TestConsumer } from '../types';
+import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 
 /**
@@ -13,7 +12,7 @@ export class JSONEmitter implements TestConsumer {
 
   onEvent(event: TestEvent) { }
 
-  onSummary(summary: AllSuitesResult) {
+  onSummary(summary: SuitesSummary) {
     this.stream.write(JSON.stringify(summary, undefined, 2));
   }
 }

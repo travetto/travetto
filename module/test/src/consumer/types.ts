@@ -1,5 +1,23 @@
 import { TestEvent } from '../model/event';
-import { AllSuitesResult } from '../model/suite';
+import { Counts, SuiteResult } from '../model/suite';
+
+/**
+ * All suite results
+ */
+export interface SuitesSummary extends Counts {
+  /**
+   * List of all suites
+   */
+  suites: SuiteResult[];
+  /**
+   * List of all errors
+   */
+  errors: Error[];
+  /**
+   * Total duration
+   */
+  duration: number;
+}
 
 /**
  * A test result handler
@@ -16,5 +34,5 @@ export interface TestConsumer {
   /**
    * Summarize all results
    */
-  onSummary?(summary: AllSuitesResult): void;
+  onSummary?(summary: SuitesSummary): void;
 }

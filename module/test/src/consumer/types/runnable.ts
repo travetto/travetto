@@ -1,6 +1,6 @@
-import { TestConsumer } from '../consumer/types';
-import { TestResultsSummarizer } from '../consumer/collector';
-import { TestConsumerRegistry } from '../consumer/registry';
+import { TestConsumer } from '../types';
+import { TestResultsSummarizer } from '../collector';
+import { TestConsumerRegistry } from '../registry';
 
 /**
  * Test consumer with support for multiple nested consumers, and summarization
