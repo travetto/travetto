@@ -4,9 +4,9 @@ import { CliUtil } from '@travetto/cli/src/util';
 import { FsUtil, ExecUtil } from '@travetto/boot';
 
 /**
- * Launch test framework and execute tests
+ * Launch test framework for monorepo and execute tests
  */
-function initFn() {
+export function init() {
   return CliUtil.program.command('test:lerna')
     .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, `${Math.min(4, os.cpus().length - 1)}`)
     .action(async (args, cmd) => {
@@ -16,8 +16,8 @@ function initFn() {
       const child = ExecUtil.spawn('npx', [
         'lerna', '--no-sort', 'exec', '--no-bail',
         // '--concurrency', '1',
-        '--ignore', '@travetto/*-app',
-        '--ignore', '@travetto/cli',
+        '--ignore', '@travetto/*-app', // @line-if $TRV_DEV
+        '--ignore', '@travetto/cli',  // @line-if $TRV_DEV
         '--stream', '--',
         'npx', 'trv', 'test', '-f', 'event', '-c', '2'
       ], { shell: true, quiet: true, cwd: FsUtil.resolveUnix(__dirname, '..', '..') });
@@ -49,5 +49,3 @@ function initFn() {
         });
     });
 }
-
-export const init = initFn;   // @line-if $TRV_DEV
