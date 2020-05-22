@@ -1,8 +1,9 @@
 import * as path from 'path';
 
-import { ShutdownManager, Util } from '@travetto/base';
+import { Util } from '@travetto/base';
 import { FsUtil, EnvUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
+import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { TestRegistry } from '../registry/registry';
 import { TestConfig, TestResult } from '../model/test';
@@ -11,12 +12,9 @@ import { TestConsumer } from '../consumer/types';
 import { AssertCheck } from '../assert/check';
 import { AssertCapture } from '../assert/capture';
 import { ConsoleCapture } from './console';
-import { ExecutionPhaseManager } from './phase';
+import { TestPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
-import { Barrier } from './barrier';
 import { AssertUtil } from '../assert/util';
-import { Timeout } from './timeout';
-import { ExecutionError } from './error';
 
 const TEST_TIMEOUT = EnvUtil.getTime('TRV_TEST_TIMEOUT', 5000);
 
@@ -32,23 +30,19 @@ export class TestExecutor {
    */
   private static _executeTestMethod(test: TestConfig): Promise<Error | undefined> {
     const suite = TestRegistry.get(test.class);
-    const timeout = new Timeout(test.timeout || TEST_TIMEOUT);
-    const unhandled = ShutdownManager.listenForUnhandled();
     const promCleanup = Util.resolvablePromise();
 
     // Ensure all the criteria below are satisfied before moving forward
-    const barrier = new Barrier();
-    barrier.add(timeout.wait(), true); // Let timeout end the test immediately
-    barrier.add(unhandled, true); // Let unhandled exceptions end the test immediately
-    barrier.add(promCleanup, true); // If not timeout or unhandled, ensure all promises are cleaned up
-    barrier.add(async () => {
-      try {
-        PromiseCapture.start(); // Listen for all promises to detect any unfinished, only start once method is invoked
-        await suite.instance[test.methodName](); // Run
-      } finally {
-        PromiseCapture.stop().then(promCleanup.resolve, promCleanup.reject); // Stop cleanup
-      }
-    });
+    const barrier = new Barrier(test.timeout || TEST_TIMEOUT, true)
+      .add(promCleanup, true) // If not timeout or unhandled, ensure all promises are cleaned up
+      .add(async () => {
+        try {
+          PromiseCapture.start(); // Listen for all promises to detect any unfinished, only start once method is invoked
+          await suite.instance[test.methodName](); // Run
+        } finally {
+          PromiseCapture.stop().then(promCleanup.resolve, promCleanup.reject); // Stop cleanup
+        }
+      });
 
     // Wait for all barriers to be satisifed
     return barrier.wait();
@@ -144,7 +138,7 @@ export class TestExecutor {
   static async executeSuiteTest(consumer: TestConsumer, suite: SuiteConfig, test: TestConfig) {
     const result: SuiteResult = this.createSuiteResult(suite);
 
-    const mgr = new ExecutionPhaseManager(consumer, suite, result);
+    const mgr = new TestPhaseManager(consumer, suite, result);
 
     try {
       await mgr.startPhase('all');
@@ -172,7 +166,7 @@ export class TestExecutor {
     // Mark suite start
     consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
-    const mgr = new ExecutionPhaseManager(consumer, suite, result);
+    const mgr = new TestPhaseManager(consumer, suite, result);
 
     try {
       // Handle the BeforeAll calls

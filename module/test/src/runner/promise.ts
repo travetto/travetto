@@ -1,4 +1,4 @@
-import { ExecutionError } from './error';
+import { ExecutionError } from '@travetto/worker';
 
 const og = Promise;
 

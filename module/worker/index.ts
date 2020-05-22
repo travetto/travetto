@@ -5,5 +5,8 @@ export * from './src/comm/types';
 export * from './src/input/iterable';
 export * from './src/input/async-iterator';
 export * from './src/input/types';
+export * from './src/support/barrier';
+export * from './src/support/timeout';
+export * from './src/support/error';
 export * from './src/pool';
 export * from './src/util';
