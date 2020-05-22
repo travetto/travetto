@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "Common wrapper around process execution with high level docker support.",
+  "description": "Support for executing complex commands at runtime.",
   "dependencies": {
     "@travetto/base": "^1.0.0-beta.1"
   },
@@ -15,10 +15,8 @@
   },
   "homepage": "https://travetto.io",
   "keywords": [
-    "exec",
+    "command",
     "docker",
-    "child-process",
-    "ipc",
     "travetto",
     "typescript"
   ],
@@ -28,7 +26,7 @@
     "index.ts",
     "src"
   ],
-  "name": "@travetto/exec",
+  "name": "@travetto/command",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },

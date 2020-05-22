@@ -33,8 +33,8 @@ export class CommandService {
       containerCommand: x => x,
       localCheck: async () => false,
       allowDocker: true, containerEntry: '/bin/sh',
-      ...(config as CommandConfig)
-    };
+      ...config
+    } as CommandConfig;
   }
 
   /**
