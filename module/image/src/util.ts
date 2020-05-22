@@ -1,4 +1,4 @@
-import { CommandService } from '@travetto/exec';
+import { CommandService } from '@travetto/command';
 import { ExecUtil } from '@travetto/boot';
 
 /**
@@ -22,7 +22,7 @@ export interface ImageOptions {
 type ImageType = NodeJS.ReadableStream | Buffer | string;
 
 /**
- * Simple support for image manipulation.  Built upon @travetto/exec, it can
+ * Simple support for image manipulation.  Built upon @travetto/command, it can
  * run imagemagick and pngquant locally or via docker as needed.
  */
 export class ImageUtil {
