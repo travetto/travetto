@@ -1,11 +1,9 @@
 import { EnvUtil } from '@travetto/boot';
-import { ShutdownManager } from '@travetto/base';
+import { Barrier } from '@travetto/worker';
 
 import { TestConsumer } from '../consumer/types';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
-import { Timeout } from './timeout';
-import { Barrier } from './barrier';
 
 export const BREAKOUT = Symbol.for('@trv:test/breakout');
 
@@ -16,7 +14,7 @@ const TEST_PHASE_TIMEOUT = EnvUtil.getTime('TRV_TEST_PHASE_TIMEOUT', 15000);
  *
  * Handles BeforeAll, BeforeEach, AfterEach, AfterAll
  */
-export class ExecutionPhaseManager {
+export class TestPhaseManager {
   private progress: ('all' | 'each')[] = [];
 
   constructor(private consumer: TestConsumer, private suite: SuiteConfig, private result: SuiteResult) { }
@@ -40,17 +38,12 @@ export class ExecutionPhaseManager {
   async runPhase(phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
     let error: Error | undefined;
     for (const fn of this.suite[phase]) {
-      const timeout = new Timeout(TEST_PHASE_TIMEOUT);
-      const unhandled = ShutdownManager.listenForUnhandled();
 
       // Ensure all the criteria below are satisfied before moving forward
-      const barrier = new Barrier();
-      barrier.add(timeout.wait(), true); // Let timeout end the test immediately
-      barrier.add(unhandled, true); // Let unhandled exceptions end the test immediately
-      barrier.add(async () => fn.call(this.suite.instance));
+      error = await new Barrier(TEST_PHASE_TIMEOUT, true)
+        .add(async () => fn.call(this.suite.instance))
+        .wait();
 
-      // Wait for all barriers to be satisifed
-      error = await barrier.wait();
       if (error) {
         break;
       }
