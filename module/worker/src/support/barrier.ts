@@ -1,4 +1,5 @@
-import { Util } from '@travetto/base';
+import { Util, ShutdownManager } from '@travetto/base';
+import { Timeout } from './timeout';
 
 /**
  * Build an execution barrier to handle various limitations
@@ -7,7 +8,17 @@ export class Barrier {
   private support = [] as string[];
   private barriers = new Map<string, Promise<any>>([]);
 
-  constructor() { }
+  constructor(
+    timeout?: number,
+    unhandled?: boolean
+  ) {
+    if (timeout !== undefined) {
+      this.add(new Timeout(timeout).wait(), true);
+    }
+    if (unhandled) {
+      this.add(ShutdownManager.listenForUnhandled());
+    }
+  }
 
   /**
    * Add a new barrier
@@ -28,7 +39,7 @@ export class Barrier {
     }
 
     this.barriers.set(k, p);
-    return p;
+    return this;
   }
 
   /**
