@@ -1,12 +1,11 @@
 import { YamlUtil } from '@travetto/yaml';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 
-import { AllSuitesResult } from '../../model/suite';
 import { TestEvent } from '../../model/event';
-import { TestConsumer } from '../types';
+import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 
-import { TapEnhancer, DUMMY_ENHANCER } from './tap-enhancer';
+import { TestResultsEnhancer, DUMMY_ENHANCER } from '../enhancer';
 
 /**
   * TAP Format consumer
@@ -14,14 +13,19 @@ import { TapEnhancer, DUMMY_ENHANCER } from './tap-enhancer';
 @Consumable('tap')
 export class TapEmitter implements TestConsumer {
   private count = 0;
+  private namespace: string;
 
   constructor(
     private stream: NodeJS.WriteStream = process.stdout,
-    private enhancer: TapEnhancer = DUMMY_ENHANCER
+    private enhancer: TestResultsEnhancer = DUMMY_ENHANCER
   ) { }
 
-  private log(message: string) {
+  protected log(message: string) {
     this.stream.write(`${message}\n`);
+  }
+
+  setNamespace(namespace: string) {
+    this.namespace = namespace;
   }
 
   /**
@@ -46,7 +50,8 @@ export class TapEmitter implements TestConsumer {
   onEvent(e: TestEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
-      let header = `${this.enhancer.suiteName(test.classId)} - ${this.enhancer.testName(test.methodName)}`;
+      const suiteId = this.enhancer.suiteName(this.namespace ? `${this.namespace}#${test.classId}` : test.classId);
+      let header = `${suiteId} - ${this.enhancer.testName(test.methodName)}`;
       if (test.description) {
         header += `: ${this.enhancer.testDescription(test.description)}`;
       }
@@ -111,7 +116,7 @@ export class TapEmitter implements TestConsumer {
   /**
    * Summarize all results
    */
-  onSummary(summary: AllSuitesResult) {
+  onSummary(summary: SuitesSummary) {
     this.log(`${this.enhancer.testNumber(1)}..${this.enhancer.testNumber(summary.total)}`);
 
     if (summary.errors.length) {
@@ -131,5 +136,7 @@ export class TapEmitter implements TestConsumer {
       'skipped',
       this.enhancer.total(summary.skipped)
     ].join(' '));
+
+    this.log(`# (Total Time: ${summary.duration})`);
   }
 }
