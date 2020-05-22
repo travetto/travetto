@@ -1,9 +1,9 @@
 type Primitive = string | number | boolean | null | undefined;
 
 /**
- * Format for enhancing the tap output
+ * Format for enhancing the output
  */
-export interface TapEnhancer {
+export interface TestResultsEnhancer {
   objectInspect(val: Primitive): string;
   suiteName(val: string): string;
   testName(val: string): string;
@@ -30,4 +30,4 @@ export const DUMMY_ENHANCER = ([
   .reduce((acc, v) => {
     acc[v] = ident;
     return acc;
-  }, {} as TapEnhancer);
+  }, {} as TestResultsEnhancer);
