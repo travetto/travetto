@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 
+import { FsUtil } from '@travetto/boot/src';
 import { Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { ResourceManager } from '@travetto/base';
@@ -27,7 +28,7 @@ export abstract class BaseAssetSourceSuite {
 
   @BeforeAll()
   async initAll() {
-    ResourceManager.addPath(__dirname);
+    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '..'));
     await RootRegistry.init();
     const config = await this.config;
     if ('namespace' in config) {

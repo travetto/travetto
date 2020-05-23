@@ -27,8 +27,8 @@ export class UtilTest {
         age: undefined
       }
     });
-    assert(text3.source === 'ctx._source.child = ctx._source.child == null ? [:] : ctx._source.child;ctx._source.child.name = params.childName;ctx._source.child.remove("age")');
-    assert(text3.params === { childName: 'bob' });
+    assert(text3.source === 'ctx._source.child = ctx._source.child == null ? [:] : ctx._source.child;ctx._source.child.name = params.child_name;ctx._source.child.remove("age")');
+    assert(text3.params === { child_name: 'bob' });
 
     const text4 = ElasticsearchUtil.generateUpdateScript({
       child: {
@@ -36,8 +36,8 @@ export class UtilTest {
         age: undefined
       }
     });
-    assert(text4.source === 'ctx._source.child = ctx._source.child == null ? [:] : ctx._source.child;ctx._source.child.name = params.childName;ctx._source.child.remove("age")');
-    assert(text4.params === { childName: 'bob\n' });
+    assert(text4.source === 'ctx._source.child = ctx._source.child == null ? [:] : ctx._source.child;ctx._source.child.name = params.child_name;ctx._source.child.remove("age")');
+    assert(text4.params === { child_name: 'bob\n' });
 
     // const text5 = ElasticsearchUtil.generateUpdateScript({
     //   child: {

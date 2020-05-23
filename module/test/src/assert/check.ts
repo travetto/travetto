@@ -172,23 +172,23 @@ export class AssertCheck {
    * @param filename File
    * @param text Text of assertion
    * @param key Method to call
-   * @param negative Is the test positive or negative
+   * @param positive Is the test positive or negative
    * @param action Function to run
    * @param shouldThrow Should this action throw
    * @param message Message to share on failure
    */
-  static checkThrow(filename: string, text: string, key: string, negative: boolean,
+  static checkThrow(filename: string, text: string, key: string, positive: boolean,
     action: Function, shouldThrow?: ThrowableError, message?: string) {
     const assertion = AssertCapture.buildAssertion(filename, text, key);
     let missed: Error | undefined;
 
     try {
       action();
-      if (negative) {
+      if (!positive) {
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'}`));
       }
     } catch (e) {
-      if (!negative) {
+      if (positive) {
         missed = new AppError(`Error thrown, but expected no errors`);
         missed.stack = e.stack;
       }
@@ -208,12 +208,12 @@ export class AssertCheck {
    * @param filename File
    * @param text Text of assertion
    * @param key Method to call
-   * @param negative Is the test positive or negative
+   * @param positive Is the test positive or negative
    * @param action Aync function to run
    * @param shouldThrow Should this action reject
    * @param message Message to share on failure
    */
-  static async checkThrowAsync(filename: string, text: string, key: string, negative: boolean,
+  static async checkThrowAsync(filename: string, text: string, key: string, positive: boolean,
     action: Function | Promise<any>, shouldThrow?: ThrowableError, message?: string) {
     const assertion = AssertCapture.buildAssertion(filename, text, key);
     let missed: Error | undefined;
@@ -224,11 +224,11 @@ export class AssertCheck {
       } else {
         await action();
       }
-      if (negative) {
+      if (!positive) {
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'} `));
       }
     } catch (e) {
-      if (!negative) {
+      if (positive) {
         missed = new AppError(`Error thrown, but expected no errors`);
       }
 

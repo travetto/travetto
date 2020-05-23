@@ -25,20 +25,6 @@ export class FsTest {
   }
 
   @Test()
-  async toJs() {
-    assert(FsUtil.toJS('google') === 'google');
-    assert(FsUtil.toJS('google.png') === 'google.png');
-    assert(FsUtil.toJS('google.ts') === 'google.js');
-  }
-
-  @Test()
-  async toTs() {
-    assert(FsUtil.toTS('google') === 'google');
-    assert(FsUtil.toTS('google.png') === 'google.png');
-    assert(FsUtil.toTS('google.js') === 'google.ts');
-  }
-
-  @Test()
   async exists() {
     assert(FsUtil.existsSync(__dirname));
     assert(!FsUtil.existsSync(`${__dirname}.gone`));

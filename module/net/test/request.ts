@@ -20,7 +20,7 @@ export class RequestTest {
     assert(args.opts.method === 'GET');
     assert(args.opts.port === '442');
     assert(args.opts.auth === 'a:b');
-    assert(args.opts.protocol === undefined);
+    assert(args.opts.protocol === 'https:');
     assert(args.client === https);
     assert(args.opts.path === '/?q=hello&age=20&height=5');
 

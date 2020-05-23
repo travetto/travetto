@@ -14,7 +14,8 @@
 		"prepublish": "cd module/boot; npm run prepublish",
 		"reinit": "rm -rf node_modules/; npm i; npm run init",
 		"service": "./bin/run.sh test/resources",
-		"test": "cd module/boot; npx trv test:lerna"
+		"test": "cd module/boot; npx trv test:lerna",
+		"boot": "cd module/boot/src-ts; tsc -w -p ."
 	},
 	"devDependencies": {
 		"@types/faker": "^4.1.11",
