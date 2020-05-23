@@ -15,16 +15,13 @@ export interface PresenceListener {
  * and handles multiple file roots.
  */
 export class FilePresenceManager {
+  private fileWatchers = new Map<string, Watcher>();
+
   private validFile: (f: string) => boolean;
   private cwd: string;
-  private rootFolders: string[] = [];
-  private initialFiles: string[] = [];
   private listener: PresenceListener;
-
-  private fileWatchers = new Map<string, Watcher>();
-  private files = new Map<string, { version: number }>();
-  private seen = new Set<string>();
-  private watchSpaces = new Set<string>();
+  private files = new Set<string>();
+  private folders = new Set<string>();
 
   /**
    * Build a new file presence manager
@@ -35,20 +32,19 @@ export class FilePresenceManager {
     config: {
       validFile: FilePresenceManager['validFile'];
       cwd: FilePresenceManager['cwd'];
-      rootFolders: FilePresenceManager['rootFolders'];
-      initialFiles: FilePresenceManager['initialFiles'];
+      folders: FilePresenceManager['folders'] | string[];
+      files: FilePresenceManager['files'] | string[];
       listener: Partial<FilePresenceManager['listener']>;
     }
   ) {
+    config.files = new Set(config.files);
+    config.folders = new Set(config.folders);
+
     for (const k of ['added', 'removed', 'changed'] as const) {
       config.listener[k] = config.listener[k] || (() => { });
     }
 
     Object.assign(this, config);
-
-    for (const root of this.rootFolders) {
-      this.watchSpaces.add(root);
-    }
   }
 
   /**
@@ -62,17 +58,16 @@ export class FilePresenceManager {
     console.trace('Watch', event, entry.file);
     switch (event) {
       case 'added': {
-        this.files.set(entry.file, { version: 1 });
+        this.files.add(entry.file);
         return this.listener.added(entry.file);
       }
       case 'changed': {
         const changed = this.files.has(entry.file);
         if (changed) {
           this.listener.changed(entry.file);
-          this.files.get(entry.file)!.version++;
           return;
         } else {
-          this.files.set(entry.file, { version: 1 });
+          this.files.add(entry.file);
           return this.listener.added(entry.file);
         }
       }
@@ -97,11 +92,7 @@ export class FilePresenceManager {
    * Initialize manager
    */
   init() {
-    for (const fileName of this.initialFiles) {
-      this.files.set(fileName, { version: 0 });
-    }
-
-    setTimeout(() => this.watchSpaces.forEach(p => this.addNewFolder(p)), 50); // FIXME: 1000 og
+    setTimeout(() => this.folders.forEach(p => this.addNewFolder(p)), 50); // FIXME: 1000 og
   }
 
   /**
@@ -129,11 +120,9 @@ export class FilePresenceManager {
    * @param notify Wether or not to emit on addition
    */
   addNewFile(name: string, notify = true) {
-    if (this.seen.has(name)) {
+    if (this.files.has(name)) {
       return;
     }
-
-    this.seen.add(name);
 
     if (this.validFile(name)) {
       // Already known to be a used file, just don't watch node modules
@@ -144,7 +133,7 @@ export class FilePresenceManager {
       this.fileWatchers.get(topLevel)!.add([name.replace(`${topLevel}/`, '')]);
     }
 
-    this.files.set(name, { version: 0 });
+    this.files.add(name);
 
     if (notify) {
       this.listener.added(name);
@@ -152,12 +141,12 @@ export class FilePresenceManager {
   }
 
   /**
-   * Reset manager, freeing all watchers
+   * Close manager, freeing all watchers
    */
-  reset() {
+  close() {
     [...this.fileWatchers.values()].forEach(x => x.close());
     this.fileWatchers.clear();
-    this.seen.clear();
     this.files.clear();
+    this.folders.clear();
   }
 }

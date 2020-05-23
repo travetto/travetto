@@ -18,20 +18,6 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
     constructor(...args: any[]) {
       super(...args);
 
-      this.presenceManager = new FilePresenceManager({
-        validFile: f =>
-          !f.includes('node_modules') &&
-          f.endsWith('.ts') &&
-          !f.endsWith('.d.ts') &&
-          f !== `${FsUtil.cwd}/index.ts`,
-        cwd: FsUtil.cwd,
-        initialFiles: ScanApp.findFiles({ rootPaths: this.appRoots, folder: 'src' })
-          .filter(x => !(x.file in require.cache)) // Skip already imported files
-          .map(x => x.file),
-        rootFolders: ScanApp.findFolders({ rootPaths: this.appRoots, folder: 'src' }),
-        listener: this,
-      });
-
       ShutdownManager.onUnhandled(err => {
         if (err && (err.message ?? '').includes('Cannot find module')) { // Handle module reloading
           console.error(err);
@@ -62,13 +48,25 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
 
     init() {
       super.init();
-      this.presenceManager.init();
+      this.presenceManager = new FilePresenceManager({ // Kick off listener
+        validFile: f =>
+          !f.includes('node_modules') &&
+          f.endsWith('.ts') &&
+          !f.endsWith('.d.ts') &&
+          f !== `${FsUtil.cwd}/index.ts`,
+        cwd: FsUtil.cwd,
+        files: ScanApp.findFiles({ rootPaths: this.appRoots, folder: 'src' })
+          .filter(x => !(x.file in require.cache)) // Skip already imported files
+          .map(x => x.file),
+        folders: ScanApp.findFolders({ rootPaths: this.appRoots, folder: 'src' }),
+        listener: this,
+      });
     }
 
     reset() {
       super.reset();
       this.modules.clear();
-      this.presenceManager.reset();
+      this.presenceManager.close();
     }
 
     /**

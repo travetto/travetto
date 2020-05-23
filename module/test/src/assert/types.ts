@@ -13,21 +13,6 @@ export const ASSERT_FN_OPERATOR: Record<string, string> = {
 };
 
 /**
- * Which types are candidates for deep literal checking
- */
-export const DEEP_LITERAL_TYPES = new Set(['Set', 'Map', 'Array', 'String', 'Number', 'Object', 'Boolean']);
-
-/**
- * Mapping of assert equal methods to assert deep equal methods
- */
-export const DEEP_EQUALS_MAPPING: Record<string, string> = {
-  equal: 'deepEqual',
-  notEqual: 'notDeepEqual',
-  strictEqual: 'deepStrictEqual',
-  notStrictEqual: 'notDeepStrictEqual'
-};
-
-/**
  * Message patterns for assertion operations
  */
 export const OP_MAPPING: Record<string, string> = {
@@ -52,20 +37,4 @@ export const OP_MAPPING: Record<string, string> = {
   instanceof: '{actual} instance {state} be of type {expected}',
   lessThanEqual: '{actual} {state} be less than or equal to {expected}',
   lessThan: '{actual} {state} be less than {expected}'
-};
-
-/**
- * Typescript optoken to assert methods
- */
-export const OPTOKEN_ASSERT = {
-  InKeyword: 'in',
-  EqualsEqualsToken: 'equal',
-  ExclamationEqualsToken: 'notEqual',
-  EqualsEqualsEqualsToken: 'strictEqual',
-  ExclamationEqualsEqualsToken: 'notStrictEqual',
-  GreaterThanEqualsToken: 'greaterThanEqual',
-  GreaterThanToken: 'greaterThan',
-  LessThanEqualsToken: 'lessThanEqual',
-  LessThanToken: 'lessThan',
-  InstanceOfKeyword: 'instanceof',
 };
