@@ -26,26 +26,26 @@ export class PhaseManager {
    * @param upto An optional upper bound on the stages to run, inclusive
    * @param after An optional lower bound on the stages to run, exclusive
    */
-  static init(scope: string, upto?: string, after?: string) {
+  static create(scope: string, upto?: string, after?: string) {
     const mgr = new PhaseManager(scope);
     mgr.load(upto, after);
     return mgr;
   }
 
   /**
-   * Shorthand for running the bootstrap phase
+   * Shorthand for running the init phase
    * @param upto Optional stopping point
    */
-  static bootstrap(upto?: string) {
-    return this.init('bootstrap', upto).run();
+  static init(upto?: string) {
+    return this.create('init', upto).run();
   }
 
   /**
-   * Shorthand for running the bootstrap phase
+   * Shorthand for running the init phase
    * @param after Optional starting point
    */
-  static bootstrapAfter(after: string) {
-    return this.init('bootstrap', '*', after).run();
+  static initAfter(after: string) {
+    return this.create('init', '*', after).run();
   }
 
   initializers: Initializer[] = [];

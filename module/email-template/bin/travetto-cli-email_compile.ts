@@ -15,7 +15,7 @@ export function init() {
       // process.env.TRV_RESOURCE_ROOTS = `${process.env.TRV_RESOURCE_ROOTS || ''},${__dirname}/lib`;
 
       const { PhaseManager } = await import('@travetto/base');
-      await PhaseManager.bootstrap();
+      await PhaseManager.init();
 
       const { TemplateUtil } = await import('./lib/util');
       const count = (await TemplateUtil.compileAllToDisk()).length;

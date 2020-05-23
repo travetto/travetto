@@ -11,14 +11,14 @@ import { CompletionConfig } from '@travetto/cli/src/types';
 export function init() {
   return CliUtil.program
     .command('email:dev')
-    .option('-p, --port [port]', 'Port to serve ui on', 3839)
-    .option('-r, --reload-rate [reloadRate]', 'The rate to reload the UI at', 1000)
+    .option('-p, --port [port]', 'Port to serve ui on', '3839')
+    .option('-r, --reload-rate [reloadRate]', 'The rate to reload the UI at', '1000')
     .option('-o, --open [open]', 'Open the ui automatically on start', CliUtil.isBoolean, true)
     .action(async (cmd: commander.Command) => {
       process.env.TTRV_RESOURCE_ROOTS = `${process.env.TRV_RESOURCE_ROOTS || ''},${__dirname}/lib`;
 
       const { PhaseManager } = await import('@travetto/base');
-      await PhaseManager.bootstrap();
+      await PhaseManager.init();
 
       const { TemplateUtil } = await import('./lib/util');
       const { DevServerUtil } = await import('./lib/server');
