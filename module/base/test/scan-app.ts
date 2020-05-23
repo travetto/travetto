@@ -9,6 +9,6 @@ class ScanTests {
   testFind() {
     const files = ScanApp.findAppSourceFiles();
 
-    assert(files.find(x => x.file.endsWith('src/scan-app.ts')));
+    assert(files.some(x => x.file.endsWith('src/scan.ts')));
   }
 }

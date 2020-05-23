@@ -21,8 +21,7 @@ interface Tester {
  */
 export class ScanApp {
 
-  private static __INDEX: Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>;
-  private static CACHE = new Map<string, SimpleEntry[]>();
+  private static __INDEX = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
 
   /**
    * List of primary app folders to search
@@ -73,8 +72,9 @@ export class ScanApp {
    * Get the map of all modules currently supported in the application
    */
   static get index() {
-    if (this.__INDEX === undefined) {
-      this.__INDEX = new Map([['.', { base: FsUtil.cwd, files: new Map() }]]);
+    if (this.__INDEX.size === 0) {
+      this.__INDEX.set('.', { base: FsUtil.cwd, files: new Map() });
+
       for (const el of ScanFs.scanFramework(x => !x.endsWith('.d.ts') && x.endsWith('.ts'))) {
         const res = this.computeIndex(el);
         if (!res) {
@@ -107,7 +107,6 @@ export class ScanApp {
    * Clears the app scanning cache
    */
   static reset() {
-    this.CACHE.clear();
     this.__INDEX.clear();
   }
 
