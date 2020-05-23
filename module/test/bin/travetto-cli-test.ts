@@ -2,7 +2,7 @@ import * as os from 'os';
 import { CliUtil } from '@travetto/cli/src/util';
 import { CompletionConfig } from '@travetto/cli/src/types';
 import { ColorUtil } from '@travetto/boot';
-import { Colors } from '@travetto/cli/src/color';
+import { getTapConsumer } from './lib/consumer';
 
 /**
  * Launch test framework and execute tests
@@ -20,21 +20,7 @@ export function init() {
       await load();
 
       if (cmd.format === 'tap' && ColorUtil.colorize) {
-        const { TapEmitter } = await import('../src/consumer/types/tap');
-        cmd.consumer = new TapEmitter(process.stdout, {
-          assertDescription: Colors.description,
-          testDescription: Colors.description,
-          success: Colors.success,
-          failure: Colors.failure,
-          assertNumber: Colors.identifier,
-          testNumber: Colors.identifier,
-          assertFile: Colors.path,
-          assertLine: Colors.input,
-          objectInspect: Colors.output,
-          suiteName: Colors.subtitle,
-          testName: Colors.title,
-          total: Colors.title
-        });
+        cmd.consumer = await getTapConsumer();
       }
 
       if (cmd.mode === 'all') {
