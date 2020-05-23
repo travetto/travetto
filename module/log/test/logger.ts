@@ -17,7 +17,7 @@ class LoggerTest {
   @Test('Should Log')
   async shouldLog() {
     const events: LogEvent[] = [];
-    Logger.listenRaw('test', e => events.push(e));
+    Logger.listen('test', e => events.push(e));
     (function (ᚕlg) {
       console.log('Hello', 1, 2, 3);
     })((payload: any, ...args: any[]) => Logger.invoke(payload, args));
