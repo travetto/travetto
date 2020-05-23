@@ -131,9 +131,9 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     }
 
     // Run all remaining bootstraps as needed for tests
-    await PhaseManager.bootstrap('require-all'); // Require all
+    await PhaseManager.init('require-all'); // Require all
 
-    await PhaseManager.bootstrapAfter('registry');
+    await PhaseManager.initAfter('registry');
 
     const { Runner } = await import(`../runner/runner`);
 
