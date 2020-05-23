@@ -40,7 +40,7 @@ export class TestExecutor {
           PromiseCapture.start(); // Listen for all promises to detect any unfinished, only start once method is invoked
           await suite.instance[test.methodName](); // Run
         } finally {
-          PromiseCapture.stop().then(promCleanup.resolve, promCleanup.reject); // Stop cleanup
+          PromiseCapture.stop().then(() => setTimeout(promCleanup.resolve, 1), promCleanup.reject);
         }
       });
 
