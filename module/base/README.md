@@ -6,7 +6,7 @@ travetto: Base
 $ npm install @travetto/base
 ```
 
-Base is the foundation of all `travetto` applications.  It is intended to be a minimal application bootstrap, as well as support for commonly shared functionality. It has support for the following key areas:
+Base is the foundation of all `travetto` applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 * Environmental Information
 * File Operations
 * Resource Management
@@ -69,15 +69,16 @@ During the lifecycle of an application, there is a need to handle different phas
 * The list of handlers that should be dependent on the current handler, if any.
 * The actual functionality to execute
 
-An example would be something like `phase.bootstrap.ts` in the [`Config`](https://github.com/travetto/travetto/tree/master/module/config) module.  
+An example would be something like `phase.init.ts` in the [`Config`](https://github.com/travetto/travetto/tree/master/module/config) module.  
 
-**Code: Sample phase bootstrap**
+**Code: Sample phase init**
 ```typescript
 export const init = {
   key: 'config',
   after: ['base'],
-  action: () => {
-    require('../src/service/config').init();
+  action: async () => {
+    const { ConfigManager} = await import('../src/service/config');
+    await ConfigManager.init();
   }
 }
 ```

@@ -115,7 +115,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     }
 
     // Reload registries, test and root
-    await PhaseManager.init('reset').run();
+    await PhaseManager.create('reset').run();
     ShutdownManager.execute(-1);
   }
 
@@ -130,7 +130,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       await this.resetForRun();
     }
 
-    // Run all remaining bootstraps as needed for tests
+    // Run all remaining initializations as needed for tests
     await PhaseManager.init('require-all'); // Require all
 
     await PhaseManager.initAfter('registry');

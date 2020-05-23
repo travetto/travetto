@@ -15,7 +15,7 @@ export class StandardWorker {
 
       TestUtil.registerCleanup('runner');
 
-      // Bootstrap the app
+      // Init the app
       await PhaseManager.initAfter('registry');
 
       // Run the tests

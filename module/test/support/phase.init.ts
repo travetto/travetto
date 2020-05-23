@@ -1,5 +1,5 @@
 /**
- * Test Bootstrapping
+ * Test initialization
  */
 export const init = {
   key: 'test',
