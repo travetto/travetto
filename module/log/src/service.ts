@@ -3,7 +3,7 @@ import { Env, ConsoleManager, LogLevel, ConsolePayload } from '@travetto/base';
 
 import { LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
-import { ConsoleAppender } from './output/console';
+import { ConsoleAppender } from './appender/console';
 import { LogUtil } from './util';
 
 const DEFAULT = Symbol.for('@trv:log/default');
