@@ -81,7 +81,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
 
   /**
    * Track changes to schemas, and track the dependent chagnes
-   * @param cls The class to change
+   * @param cls The root class of the hierarchy
    * @param curr The new class
    * @param path The path within the object hierachy
    */
@@ -93,7 +93,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
     // Read children
     const view = config.views[ALL_VIEW];
     for (const k of view.fields) {
-      if (this.has(view.schema[k].type)) {
+      if (this.has(view.schema[k].type) && view.schema[k].type !== cls) {
         this.trackSchemaDependencies(cls, view.schema[k].type, [...path, view.schema[k]]);
       }
     }

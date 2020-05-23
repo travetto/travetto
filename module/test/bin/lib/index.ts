@@ -9,7 +9,7 @@ export async function runTests(opts: RunState) {
   return StandardWorker.run(opts);
 }
 
-export async function load(env: any = {}) {
+export async function load(env: any = {}, console = false) {
   Object.assign(process.env, {
     DEBUG: process.env.DEBUG || '0',
     TRACE: process.env.TRACE || '0',
@@ -19,7 +19,12 @@ export async function load(env: any = {}) {
     TRV_RESOURCE_ROOTS: 'test',
     ...env
   });
-  const { PhaseManager } = await import('@travetto/base');
+  const { PhaseManager, ConsoleManager } = await import('@travetto/base');
+  if (console) {
+    ConsoleManager.setFile(`!test-worker.${process.pid}.log`, {
+      processArgs: (payload, args: any[]) => [process.pid, ...args]
+    });
+  }
   await PhaseManager.init('require-all');
 }
 
@@ -35,7 +40,7 @@ export async function runTestsDirect(format: string = 'tap', mode: any = 'single
 }
 
 export async function worker() {
-  await load();
+  await load({}, true);
 
   const { TestChildWorker } = await import('../../src/worker/child');
   return new TestChildWorker().activate();
