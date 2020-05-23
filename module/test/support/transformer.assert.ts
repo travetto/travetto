@@ -2,8 +2,37 @@ import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
 import { TransformUtil, TransformerState, OnCall, res } from '@travetto/compiler/src/transform-support';
-import { DEEP_EQUALS_MAPPING, OPTOKEN_ASSERT, DEEP_LITERAL_TYPES } from '../src/assert/types';
 
+/**
+ * Which types are candidates for deep literal checking
+ */
+export const DEEP_LITERAL_TYPES = new Set(['Set', 'Map', 'Array', 'String', 'Number', 'Object', 'Boolean']);
+
+/**
+ * Mapping of assert equal methods to assert deep equal methods
+ */
+export const DEEP_EQUALS_MAPPING: Record<string, string> = {
+  equal: 'deepEqual',
+  notEqual: 'notDeepEqual',
+  strictEqual: 'deepStrictEqual',
+  notStrictEqual: 'notDeepStrictEqual'
+};
+
+/**
+ * Typescript optoken to assert methods
+ */
+export const OPTOKEN_ASSERT = {
+  InKeyword: 'in',
+  EqualsEqualsToken: 'equal',
+  ExclamationEqualsToken: 'notEqual',
+  EqualsEqualsEqualsToken: 'strictEqual',
+  ExclamationEqualsEqualsToken: 'notStrictEqual',
+  GreaterThanEqualsToken: 'greaterThanEqual',
+  GreaterThanToken: 'greaterThan',
+  LessThanEqualsToken: 'lessThanEqual',
+  LessThanToken: 'lessThan',
+  InstanceOfKeyword: 'instanceof',
+};
 
 const ASSERT_CMD = 'assert';
 const ASSERT_UTIL = 'AssertCheck';

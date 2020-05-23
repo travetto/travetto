@@ -97,7 +97,7 @@ export class PhaseManager {
     for (const i of this.initializers) {
       const start = Date.now();
       await i.action();
-      console.trace(this.scope, 'Phase', i.key, Date.now() - start);
+      console.debug(this.scope, 'Phase', i.key, Date.now() - start);
     }
   }
 }

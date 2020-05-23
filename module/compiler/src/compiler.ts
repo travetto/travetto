@@ -11,9 +11,10 @@ import { Transpiler } from './transpiler';
  * Compilation orchestrator
  */
 @Watchable('@travetto/compiler/support/watch.compiler')
-class $Compiler extends EventEmitter {
+class $Compiler {
 
   protected transpiler: Transpiler;
+  protected emitter = new EventEmitter();
 
   active = false;
 
@@ -27,8 +28,6 @@ class $Compiler extends EventEmitter {
      */
     protected readonly appRoots: string[] = Env.appRoots
   ) {
-    super();
-
     this.transpiler = new Transpiler(this.cache, this.appRoots);
   }
 
@@ -79,14 +78,29 @@ class $Compiler extends EventEmitter {
    */
   notify(type: 'added' | 'removed' | 'changed', fileName: string) {
     console.trace(`File ${type}`, fileName);
-    this.emit(type, fileName);
+    this.emitter.emit(type, fileName);
+  }
+
+  /**
+   * Listen for events
+   */
+  on<T extends 'added' | 'removed' | 'changed'>(type: T, handler: (filename: string) => void) {
+    this.emitter.on(type, handler);
   }
 
   /**
    * Compile a file, follows the same shape as `Module._compile`
    */
   compile(m: NodeModule, tsf: string) {
-    return CompileUtil.compileJavascript(m, this.transpiler.transpile(tsf), tsf);
+    return CompileUtil.compileJavascript(m, this.transpile(tsf), tsf);
+  }
+
+  /**
+   * Transpile a given file
+   * @param tsf The typescript file to transpile
+   */
+  transpile(tsf: string) {
+    return this.transpiler.transpile(tsf);
   }
 
   /**
