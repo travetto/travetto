@@ -28,6 +28,6 @@ export function init() {
         consumer.onEvent(ev);
       }, () => consumer.summarize());
 
-      await child.result.catch(console.error);
+      await child.result.catch(() => { });
     });
 }

@@ -12,8 +12,7 @@ class Config { }
 class MemorySource extends AssetSource {
   data = new Map<string, Asset>();
 
-  async write(asset: Asset, stream: NodeJS.ReadableStream) {
-    asset.stream = stream;
+  async write(asset: Asset) {
     this.data.set(asset.path, asset);
   }
 

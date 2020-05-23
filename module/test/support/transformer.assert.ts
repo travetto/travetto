@@ -189,7 +189,7 @@ export class AssertTransformer {
         ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
         ts.createLiteral(`${key} ${firstText}`),
         ts.createLiteral(`${key}`),
-        ts.createLiteral(!key.startsWith('doesNot')),
+        ts.createLiteral(key.startsWith('doesNot')),
         ...args
       ]));
   }
