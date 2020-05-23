@@ -134,9 +134,8 @@ export class TapEmitter implements TestConsumer {
       allPassed ? 'failed' : this.enhancer.failure('failed'),
       `${this.enhancer.total(summary.failed)}`,
       'skipped',
-      this.enhancer.total(summary.skipped)
+      this.enhancer.total(summary.skipped),
+      `# (Total Time: ${summary.duration}ms)`
     ].join(' '));
-
-    this.log(`# (Total Time: ${summary.duration})`);
   }
 }

@@ -124,8 +124,9 @@ export class FsUtil {
    * @param ignore Should errors be ignored
    */
   static unlinkRecursiveSync(pth: string, ignore = false) {
+    const cmd = this.unlinkCommand(pth);
     try {
-      return ExecUtil.execSync(...this.unlinkCommand(pth));
+      return ExecUtil.execSync(...cmd);
     } catch (err) {
       if (!ignore) {
         throw err;

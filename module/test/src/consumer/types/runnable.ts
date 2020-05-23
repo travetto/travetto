@@ -45,7 +45,7 @@ export class RunnableTestConsumer implements TestConsumer {
 
   summarize() {
     if (this.results) {
-      for (const c of this.consumers.slice(1)) {
+      for (const c of this.consumers) {
         if (c.onSummary) {
           c.onSummary(this.results.summary);
         }
