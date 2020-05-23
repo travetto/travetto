@@ -36,7 +36,7 @@ export class Runner {
 
     console.debug('Running', files);
 
-    await PhaseManager.init('test').run();
+    await PhaseManager.create('test').run();
 
     const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
       idleTimeoutMillis: 10000,
@@ -65,7 +65,7 @@ export class Runner {
     const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
     consumer.onStart();
 
-    await PhaseManager.init('test').run();
+    await PhaseManager.create('test').run();
     const res = await TestExecutor.execute(consumer, this.state.args[0], ...this.state.args.slice(1));
 
     consumer.summarize();
