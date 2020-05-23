@@ -41,7 +41,7 @@ export class AppListUtil {
   static async discover() {
     // Initialize up to compiler
     const { PhaseManager, ScanApp } = await import('@travetto/base');
-    await PhaseManager.bootstrap('compile-all');
+    await PhaseManager.init('compile-all');
 
     // Load app files
     ScanApp.findAppSourceFiles()

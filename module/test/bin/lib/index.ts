@@ -20,7 +20,7 @@ export async function load(env: any = {}) {
     ...env
   });
   const { PhaseManager } = await import('@travetto/base');
-  await PhaseManager.bootstrap('require-all');
+  await PhaseManager.init('require-all');
 }
 
 export async function runTestsDirect(format: string = 'tap', mode: any = 'single', concurrency = 1) {
