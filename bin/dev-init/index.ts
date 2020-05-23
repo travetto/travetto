@@ -5,7 +5,7 @@ import { Util } from './util';
 
 import { ExecUtil } from '../../module/boot/src/exec';
 
-export async function init() {
+export async function run() {
   DepResolver.init();
 
   // Init lerna

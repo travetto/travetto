@@ -10,11 +10,11 @@
 	"license": "MIT",
 	"scripts": {
 		"lint": "npx eslint --ignore-pattern '**/node_modules/**' --ext .js --ext .ts .",
-		"init": "./bin/dev-init/init.sh",
+		"init": "./bin/run.sh dev-init/index",
 		"prepublish": "cd module/boot; npm run prepublish",
 		"reinit": "rm -rf node_modules/; npm i; npm run init",
-		"pretest": "./bin/test/resources.sh start",
-		"test": "./bin/test/run.sh"
+		"service": "./bin/run.sh test/resources",
+		"test": "cd module/boot; npx trv test:lerna"
 	},
 	"devDependencies": {
 		"@types/faker": "^4.1.11",
