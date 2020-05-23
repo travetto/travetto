@@ -1,0 +1,6 @@
+{
+  "name": "redis",
+  "version": "5",
+  "port": 6379,
+  "image": "redis:5-alpine"
+}

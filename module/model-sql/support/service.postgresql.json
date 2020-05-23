@@ -1,0 +1,11 @@
+{
+  "name": "postgresql",
+  "version": "12.2",
+  "port": 5432,
+  "image": "postgres:12.2-alpine",
+  "env": {
+    "POSTGRES_USER": "root",
+    "POSTGRES_PASSWORD": "password",
+    "POSTGRES_DB": "app"
+  }
+}

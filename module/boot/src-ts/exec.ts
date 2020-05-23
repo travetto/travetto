@@ -193,7 +193,7 @@ export class ExecUtil {
     if (args) {
       cmd = `${cmd} ${args.join(' ')}`;
     }
-    return execSync(cmd, { stdio: ['pipe', 'pipe'] }).toString().trim();
+    return execSync(cmd, { stdio: ['pipe', 'pipe'], encoding: 'utf8' }).toString().trim();
   }
 
   /**
