@@ -5,7 +5,7 @@ travetto: Application
 ```bash
 $ npm install @travetto/app
 ```
-The [`Base`](https://github.com/travetto/travetto/tree/master/module/base) module provides a simplistic bootstrap to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, `@Application` who's job is to register entry points into the application, along with the associated metadata. 
+The [`Base`](https://github.com/travetto/travetto/tree/master/module/base) module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, `@Application` who's job is to register entry points into the application, along with the associated metadata. 
 
 With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di), the `@Application` is a synonym for `@Injectable`, and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
 

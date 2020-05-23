@@ -291,7 +291,7 @@ $ npx travetto run
   ],
   "debug": true
 }
-2019-03-22T04:51:28 debug [@trv:base/phase] Initializing Phase bootstrap [ 'base', 'log', 'config', 'compiler', 'registry', 'schema' ]
+2019-03-22T04:51:28 debug [@trv:base/phase] Initializing Phase init [ 'base', 'log', 'config', 'compiler', 'registry', 'schema' ]
 2019-03-22T04:51:28 debug [@trv:config/source] Found configurations for [ 'application' ]
 2019-03-22T04:51:28 info  [@trv:config/source] Configured {
   "registry": {
