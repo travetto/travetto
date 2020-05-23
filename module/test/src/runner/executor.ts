@@ -16,7 +16,7 @@ import { TestPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { AssertUtil } from '../assert/util';
 
-const TEST_TIMEOUT = EnvUtil.getTime('TRV_TEST_TIMEOUT', 5000);
+const TEST_TIMEOUT = EnvUtil.getTime('TRV_TEST_TIMEOUT', 5, 's');
 
 /**
  * Support execution of the tests

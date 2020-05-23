@@ -34,7 +34,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   private runs = 0;
 
   constructor() {
-    super(EnvUtil.getTime('TRV_TEST_IDLE_TIMEOUT', 120000));
+    super(EnvUtil.getTime('TRV_TEST_IDLE_TIMEOUT', 2, 'm'));
 
     (async () => {
       const { TestUtil } = await import('../runner/util');

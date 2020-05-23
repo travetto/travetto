@@ -3,6 +3,23 @@
  */
 export class EnvUtil {
 
+  private static parseTime(time: string | undefined) {
+    if (!time) {
+      return;
+    }
+    const match = time.match(/^(\d+)([hms]?)$/);
+    if (match) {
+      const [, val, unit] = match;
+      let mult = 1;
+      switch (unit) {
+        case 'h': mult = 60 * 60 * 1000; break;
+        case 'm': mult = 60 * 1000; break;
+        case 's': mult = 1000; break;
+      }
+      return parseInt(val, 10) * mult;
+    }
+  }
+
   /**
    * Get, check for key as passed, as all upper and as all lowercase
    * @param k The environment key to search for
@@ -39,21 +56,8 @@ export class EnvUtil {
    * @param k The environment key to search for
    * @param defMs The default millisecons if the key isn't found
    */
-  static getTime(k: string, defMs: number) {
-    const text = this.get(k, '');
-    let mult = 1;
-    const match = text.match(/^(\d+)([hms]?)$/);
-    if (match) {
-      const [, val, unit] = match;
-      switch (unit) {
-        case 'h': mult = 60 * 60 * 1000; break;
-        case 'm': mult = 60 * 1000; break;
-        case 's': mult = 1000; break;
-      }
-      return parseInt(val, 10) * mult;
-    } else {
-      return defMs;
-    }
+  static getTime(k: string, defTime: number, unit?: 'h' | 'm' | 's'): number {
+    return this.parseTime(this.get(k)) ?? this.parseTime(`${defTime}${unit || ''}`)!;
   }
 
   /**

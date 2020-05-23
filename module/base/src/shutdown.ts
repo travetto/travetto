@@ -3,7 +3,7 @@ import { Util } from './util';
 
 const ogExit = process.exit;
 
-const SHUTDOWN_WAIT = EnvUtil.getTime('TRV_SHUTDOWN_WAIT', 2000);
+const SHUTDOWN_WAIT = EnvUtil.getTime('TRV_SHUTDOWN_WAIT', 2, 's');
 
 type UnhandledHandler = (err: Error, prom?: Promise<any>) => boolean | undefined | void;
 type Listener = { name: string, handler: Function, final?: boolean };
