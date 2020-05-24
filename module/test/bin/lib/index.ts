@@ -46,8 +46,8 @@ export async function worker() {
   return new TestChildWorker().activate();
 }
 
-export async function watchTests(format: string = 'event') {
-  await load({ TRV_WATCH: 1, DEBUG: 0 });
+export async function watchTests(format: string = 'tap') {
+  await load({ TRV_WATCH: 1, DEBUG: process.env.DEBUG ?? '0' });
 
   const { TestWatcher } = await import('../../src/runner/watcher');
   await TestWatcher.watch(format);
