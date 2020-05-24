@@ -1,11 +1,13 @@
+const IS_PROXIED = Symbol.for('@travetto/watch:proxy');
+
 /**
  * Handler for for proxying modules while watching
  */
 export class RetargettingHandler<T> implements ProxyHandler<any> {
   constructor(public target: T) { }
 
-  isExtensible?(target: T): boolean {
-    return Object.isFrozen(this.target);
+  isExtensible(target: T): boolean {
+    return !Object.isFrozen(this.target);
   }
 
   getOwnPropertyDescriptor(target: T, property: PropertyKey) {
@@ -24,6 +26,7 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
     // @ts-expect-error
     return this.target.apply(thisArg, argArray);
   }
+
   construct(target: T, argArray: any, newTarget?: any) {
     // @ts-expect-error
     return new this.target(...argArray);
@@ -43,6 +46,9 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   has(target: T, prop: PropertyKey) {
+    if (prop === IS_PROXIED) {
+      return true;
+    }
     // @ts-expect-error
     return this.target.hasOwnProperty(prop);
   }
@@ -76,6 +82,10 @@ interface Proxy<T> { }
  * Generate Retargetting Proxy
  */
 export class RetargettingProxy<T> {
+  static isProxied(o: any): o is RetargettingProxy<any> {
+    return o && IS_PROXIED in o;
+  }
+
   private handler: RetargettingHandler<T>;
   private instance: Proxy<T>;
   constructor(initial: T) {
@@ -94,4 +104,3 @@ export class RetargettingProxy<T> {
     return this.instance as T;
   }
 }
-

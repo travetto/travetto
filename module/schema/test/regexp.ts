@@ -21,4 +21,13 @@ export class RegExpTest {
 
     assert(!CommonRegExp.email.test('d@'));
   }
+
+
+  @Test()
+  simpleName() {
+    assert(CommonRegExp.simpleName.test('Billy Bob'));
+    assert(CommonRegExp.simpleName.test('Samuel Sammy'));
+
+    assert(!CommonRegExp.simpleName.test('5ro'));
+  }
 }
