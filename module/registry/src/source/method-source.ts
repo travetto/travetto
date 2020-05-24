@@ -50,8 +50,9 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
     }
   }
 
-  on(callback: (e: ChangeEvent<[Class<any>, Function]>) => void): void {
+  on(callback: (e: ChangeEvent<[Class<any>, Function]>) => void): this {
     this.events.on('change', callback);
+    return this;
   }
 
   reset(): void { }

@@ -6,40 +6,15 @@ import { WorkPool, IterableInputSource, DynamicAsyncIterator } from '@travetto/w
 import { TestRegistry } from '../registry/registry';
 import { buildWorkManager } from '../worker/parent';
 import { RunEvent } from '../worker/types';
-import { TestConfig } from '../model/test';
-import { SuiteConfig } from '../model/suite';
 import { TestConsumerRegistry } from '../consumer/registry';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
 
 /**
  * Test Watcher.
  *
- * Runsa ll tests on startup, and then listens for changes to run tests again
+ * Runs all tests on startup, and then listens for changes to run tests again
  */
 export class TestWatcher {
-
-  /**
-   * Build a test configuration given various inputs
-   */
-  static getConf(o?: Class): SuiteConfig | undefined;
-  static getConf(o?: [Class, Function]): TestConfig | undefined;
-  static getConf(o?: [Class, Function] | Class) {
-    if (o) {
-      if (Array.isArray(o)) {
-        const [cls, method] = o;
-        if (TestRegistry.has(cls)) {
-          const conf = TestRegistry.get(cls);
-          if (method) {
-            return conf.tests.find(x => x.methodName === method.name);
-          } else {
-            return conf;
-          }
-        }
-      } else {
-        return TestRegistry.get(o);
-      }
-    }
-  }
 
   /**
    * Start watching all test files
@@ -61,45 +36,30 @@ export class TestWatcher {
       max: os.cpus.length - 1
     });
 
-    const methods = new MethodSource(RootRegistry);
-
-    // Wait until after loaded
-    methods.on(e => {
-      const conf = this.getConf(e.prev ?? e.curr);
-      if (!conf) { return; }
-
-      switch (e.type) {
-        case 'added': case 'changed': {
+    new MethodSource(RootRegistry).on(e => {
+      const [cls, method] = (e.prev ?? e.curr ?? []) as [Class, Function];
+      const conf = TestRegistry.getByClassAndMethod(cls, method)!;
+      if (e.type !== 'removing') {
+        if (conf) {
           itr.add({
             method: conf.methodName,
             file: conf.file,
             class: conf.class.name
           }, true); // Shift to front
-          break;
         }
-        case 'removing': {
-          /**
-           *
-           */
-        }
+      } else if (process.send) {
+        process.send({
+          type: 'removeTest',
+          method: method?.name,
+          classId: cls?.__id,
+          file: cls?.__file,
+        });
       }
     });
 
-    // Trigger all existing tests
-    for (const cls of TestRegistry.getClasses()) {
-      const suite = TestRegistry.get(cls);
-      for (const test of suite.tests) {
-        itr.add({
-          method: test.methodName,
-          file: test.file,
-          class: test.class.name
-        });
-      }
-    }
+    await RootRegistry.init();
 
-
-    await pool
-      .process(src)
+    await pool.process(src)
       .finally(() => pool.shutdown());
   }
 }

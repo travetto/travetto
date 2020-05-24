@@ -107,7 +107,7 @@ export class CompileUtil {
 
     // Tag output to indicate it was succefully processed by the framework
     TranspileUtil.addPreProcessor((__, contents) =>
-      `${contents}Object.defineProperty(exports, 'ᚕtrv', { value: true });`);
+      `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`);
 
     // Supports bootstrapping with framework resolution
     if (!EnvUtil.isTrue('TRV_DEV')) {
