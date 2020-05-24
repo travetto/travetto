@@ -28,14 +28,14 @@ export async function load(env: any = {}, console = false) {
   await PhaseManager.init('require-all');
 }
 
-export async function runTestsDirect(format: string = 'tap', mode: any = 'single', concurrency = 1) {
+export async function runTestsDirect(...args: string[]) {
   await load({ TRV_TEST_DEBUGGER: true });
 
   return runTests({
-    args: process.argv.slice(2),
-    format,
-    mode,
-    concurrency
+    args,
+    format: 'tap',
+    mode: 'single',
+    concurrency: 1
   });
 }
 
