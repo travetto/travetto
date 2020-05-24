@@ -7,10 +7,8 @@ import { SQLModelConfig } from '../../config';
 
 const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) => {
   // @ts-ignore
-  const fn = ctx[prop].bind(ctx) as Function;
-  return new Promise<V>((res, rej) => fn(
-    (err: any, val?: any) => err ? rej(err) : res(val)
-  ));
+  const fn = ctx[prop].bind(ctx) as (cb: (err: any, val?: any) => void) => void;
+  return new Promise<V>((res, rej) => fn((e, v) => e ? rej(e) : res(v)));
 };
 
 /**
