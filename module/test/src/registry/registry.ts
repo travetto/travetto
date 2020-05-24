@@ -110,6 +110,16 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       }
     }
   }
+
+  /**
+   * Find a test configuration given class and optionally a method
+   */
+  getByClassAndMethod(cls: Class, method: Function) {
+    if (this.has(cls)) {
+      const conf = this.get(cls);
+      return conf.tests.find(x => x.methodName === method.name);
+    }
+  }
 }
 
 export const TestRegistry = new $TestRegistry();

@@ -9,7 +9,7 @@ export async function runTests(opts: RunState) {
   return StandardWorker.run(opts);
 }
 
-export async function load(env: any = {}, console = false) {
+export async function load(env: any = {}, logToFile = false) {
   Object.assign(process.env, {
     DEBUG: process.env.DEBUG || '0',
     TRACE: process.env.TRACE || '0',
@@ -20,7 +20,7 @@ export async function load(env: any = {}, console = false) {
     ...env
   });
   const { PhaseManager, ConsoleManager } = await import('@travetto/base');
-  if (console) {
+  if (logToFile) {
     ConsoleManager.setFile(`!test-worker.${process.pid}.log`, {
       processArgs: (payload, args: any[]) => [process.pid, ...args]
     });

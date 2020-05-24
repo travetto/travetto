@@ -17,8 +17,6 @@ export const init = {
       if (EnvUtil.isTrue('TRV_TEST_COMPILE')) {
         ScanApp.mainAppFolders.push('test');
       }
-
-      ScanApp.reset();
     }
   }
 };

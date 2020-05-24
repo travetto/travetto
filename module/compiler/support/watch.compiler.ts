@@ -27,7 +27,7 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
 
       // Proxy all file loads
       CompileUtil.addModuleHandler((name, mod) => {
-        if (name.includes(FsUtil.cwd) && !name.includes('node_modules')) {
+        if (name.includes(FsUtil.cwd) && !name.includes('node_modules') && /(src|test)\//.test(name)) {
           if (!this.modules.has(name)) {
             this.modules.set(name, new RetargettingProxy(mod));
           } else {
@@ -73,7 +73,7 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
      * Wrap compile, listening for new additions
      */
     compile(mod: NodeModule, tsf: string) {
-      const isNew = !this.presenceManager.has(tsf);
+      const isNew = !this.presenceManager?.has(tsf);
       try {
         return super.compile(mod, tsf);
       } finally {
