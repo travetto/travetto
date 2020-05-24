@@ -85,6 +85,19 @@ export class TestWatcher {
       }
     });
 
+    // Trigger all existing tests
+    for (const cls of TestRegistry.getClasses()) {
+      const suite = TestRegistry.get(cls);
+      for (const test of suite.tests) {
+        itr.add({
+          method: test.methodName,
+          file: test.file,
+          class: test.class.name
+        });
+      }
+    }
+
+
     await pool
       .process(src)
       .finally(() => pool.shutdown());
