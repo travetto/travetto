@@ -1,4 +1,6 @@
-import { AppListUtil } from './app-list';
+import { EnvUtil } from '@travetto/boot';
+
+import { FindUtil } from './find';
 import { ApplicationParameter } from '../../src/types';
 import { handleFailure } from './util';
 
@@ -21,11 +23,11 @@ export class RunUtil {
   static async run(args: string[]) {
     const name = args[0];
     const [, ...sub] = args;
-    const app = await AppListUtil.getByName(name);
+    const app = await FindUtil.getByName(name);
 
     if (app) {
-      process.env.TRV_APP_ROOTS = process.env.TRV_APP_ROOTS ?? app.appRoot ?? '';
-      if (!process.env.TRV_WATCH) {
+      process.env.TRV_APP_ROOTS = EnvUtil.get('TRV_APP_ROOTS', app.appRoot || '');
+      if (!EnvUtil.isSet('TRV_WATCH')) {
         if (/^prod/i.test(`${process.env.TRV_ENV}`)) {
           process.env.TRV_WATCH = '0';
         } else if (app.watchable !== undefined) {
