@@ -218,6 +218,7 @@ export class TranspileUtil {
 
     // Register source maps for cached files
     require('source-map-support').install({
+      emptyCacheBetweenOperations: EnvUtil.isTrue('TRV_WATCH'),
       retrieveFile: (p: string) => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined
     });
   }

@@ -41,7 +41,6 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
 
       // Update sourcemap support
       require('source-map-support').install({
-        emptyCacheBetweenOperations: true, // Empty cache when contents can change
         retrieveFile: (p: string) => this.transpiler.getContents(p)
       });
     }
