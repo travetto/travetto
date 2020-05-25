@@ -2,47 +2,50 @@ import * as commander from 'commander';
 
 import { CliUtil } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
+import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { CompileUtil } from './lib/util';
-import { CompletionConfig } from '@travetto/cli/src/types';
+
 
 /**
  * Command line support for pre-compiling the code with the ability to
  * control the output target.
  */
-export function init() {
+export class CompilerCompilePlugin extends BasePlugin {
 
-  return CliUtil.program
-    .command('compile')
-    .option('-c, --clean', 'Indicates if the cache dir should be cleaned')
-    .option('-o, --output <output>', 'Output directory')
-    .option('-r, --runtime-dir [runtimeDir]', 'Expected path during runtime')
-    .option('-q, --quiet', 'Quiet operation')
-    .action(async (cmd: commander.Command) => {
+  name = 'compile';
 
-      if (cmd.output) {
-        process.env.TRV_CACHE = cmd.output;
-      }
+  init(cmd: commander.Command) {
+    return cmd
+      .option('-c, --clean', 'Indicates if the cache dir should be cleaned')
+      .option('-o, --output <output>', 'Output directory')
+      .option('-r, --runtime-dir [runtimeDir]', 'Expected path during runtime')
+      .option('-q, --quiet', 'Quiet operation');
+  }
 
-      if (cmd.clean) {
-        await CliUtil.dependOn('clean');
-      }
+  async action() {
+    if (this._cmd.output) {
+      process.env.TRV_CACHE = this._cmd.output;
+    }
 
-      const { AppCache } = await import(`@travetto/boot`);
-      CompileUtil.compile(cmd.output ?? AppCache.cacheDir);
+    if (this._cmd.clean) {
+      await CliUtil.dependOn('clean');
+    }
 
-      if (cmd.runtimeDir) {
-        await CompileUtil.rewriteRuntimeDir(cmd.runtimeDir);
-      }
+    const { AppCache } = await import(`@travetto/boot`);
+    CompileUtil.compile(this._cmd.output ?? AppCache.cacheDir);
 
-      if (!cmd.quiet) {
-        console!.log(color`${{ success: 'Successfully' }} wrote to ${{ path: cmd.output ?? AppCache.cacheDir }}`);
-      }
-    });
-}
+    if (this._cmd.runtimeDir) {
+      await CompileUtil.rewriteRuntimeDir(this._cmd.runtimeDir);
+    }
 
-export function complete(c: CompletionConfig) {
-  c.all.push('compile');
-  c.task.compile = {
-    '': ['--clean', '--quiet', '--runtime-dir', '--output']
-  };
+    if (!this._cmd.quiet) {
+      console!.log(color`${{ success: 'Successfully' }} wrote to ${{ path: this._cmd.output ?? AppCache.cacheDir }}`);
+    }
+  }
+
+  complete() {
+    return {
+      '': ['--clean', '--quiet', '--runtime-dir', '--output']
+    };
+  }
 }

@@ -5,6 +5,6 @@ if (!('DEBUG' in process.env)) {
   process.env.TRACE = process.env.DEBUG = '0';
 }
 require('@travetto/boot/bin/init')
-  .libRequire('@travetto/app/bin/lib/find')
-  .FindUtil.findAll()
+  .libRequire('@travetto/app/bin/lib/list')
+  .AppListManager.findAll()
   .then(x => console.log(JSON.stringify(x)));

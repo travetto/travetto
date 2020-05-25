@@ -1,29 +1,29 @@
 import * as commander from 'commander';
 
 import { CliUtil } from '@travetto/cli/src/util';
-import { CompletionConfig } from '@travetto/cli/src/types';
+import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 /**
  * Allow for exporting of all Models as SQL statements to stdout
  */
-export function init() {
-  return CliUtil.program
-    .command('sql:schema')
-    .option('-a, --app [app]', 'Application root to export, (default: .)')
-    .option('-c, --clear [clear]', 'Whether or not to clear the database first (default: true)', CliUtil.isBoolean)
-    .action(async (cmd: commander.Command) => {
-      CliUtil.initAppEnv({ env: 'prod', app: cmd.app, plainLog: true });
+export class SqlSchemaPlugin extends BasePlugin {
+  name = 'sql:schema';
+  init(cmd: commander.Command) {
+    return cmd
+      .option('-a, --app [app]', 'Application root to export, (default: .)')
+      .option('-c, --clear [clear]', 'Whether or not to clear the database first (default: true)', CliUtil.isBoolean);
+  }
 
-      const clear = cmd.clear === undefined ? true : CliUtil.isTrue(cmd.clear);
+  async action() {
+    CliUtil.initAppEnv({ env: 'prod', app: this._cmd.app });
 
-      const { getSchemas } = await import('./lib');
-      console!.log((await getSchemas(clear)).join('\n'));
-    });
-}
+    const clear = this._cmd.clear === undefined ? true : CliUtil.isTrue(this._cmd.clear);
 
-export async function complete(c: CompletionConfig) {
-  c.all.push('sql:schema');
-  c.task.compile = {
-    '': ['--clear']
-  };
+    const { getSchemas } = await import('./lib');
+    console!.log((await getSchemas(clear)).join('\n'));
+  }
+
+  complete() {
+    return { '': ['--clear'] };
+  }
 }

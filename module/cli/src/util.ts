@@ -1,13 +1,9 @@
-import * as commander from 'commander';
-
 // Imported individually to prevent barrel import loading too much
 import { FsUtil } from '@travetto/boot/src/fs';
 import { EnvUtil } from '@travetto/boot/src/env';
 import { ExecUtil } from '@travetto/boot/src/exec';
 
 import { CompletionConfig } from './types';
-import { color } from './color';
-import { HelpUtil } from './help';
 
 type AppEnv = {
   env?: string;
@@ -22,8 +18,6 @@ type AppEnv = {
  * Common CLI Utilities
  */
 export class CliUtil {
-  static program = commander;
-
   static isBoolean(x: string) {
     return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);
   }
@@ -92,28 +86,11 @@ export class CliUtil {
     return last ? opts.filter(x => x.startsWith(last)) : opts.filter(x => !x.startsWith('-'));
   }
 
-
-  /**
-   * Show the help usage
-   * @param cmd The commander object
-   * @param msg The failure message
-   * @param code The exit code
-   */
-  static showHelp(cmd: commander.Command, msg = '', code = msg === '' ? 0 : 1) {
-
-    if (msg) {
-      console!.error(color`${{ failure: msg }}\n`);
-    }
-
-    cmd.outputHelp(text => HelpUtil.getHelpText(text));
-    process.exit(code);
-  }
-
   /**
    * Initialize the app environment
    */
   static initAppEnv({ env, watch, app, appRoots, profiles, plainLog }: AppEnv) {
-    if (env === undefined) {
+    if (env !== undefined) {
       process.env.TRV_ENV = env; // Preemptively set b/c env changes how we compile some things
     }
     // Set watch if passed in, as a default to the env vars, being in prod disables watch defaulting

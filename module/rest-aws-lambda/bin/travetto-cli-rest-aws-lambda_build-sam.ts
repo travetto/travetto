@@ -2,35 +2,39 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as commander from 'commander';
 
-import { CliUtil } from '@travetto/cli/src/util';
+import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { FsUtil } from '@travetto/boot/src/fs';
 
 /**
  * Supports building the SAM for the aws lambda
  */
-export function init() {
-  return CliUtil.program
-    .command('rest-aws-lambda:build-sam')
-    .option('-e --env [env]', 'Environment name', 'prod')
-    .option('-o --output [output]', 'Output file', 'dist/template.yml')
-    .action(async (cmd: commander.Command) => {
-      process.env.TRV_ENV = cmd.env;
+export class RestAwsLambdaBuildSamPlugin extends BasePlugin {
+  name = 'rest-aws-lambda:build-sam';
 
-      cmd.output = FsUtil.resolveUnix(FsUtil.cwd, cmd.output);
+  init(cmd: commander.Command) {
+    return cmd
+      .option('-e --env [env]', 'Environment name', 'prod')
+      .option('-o --output [output]', 'Output file', 'dist/template.yml');
+  }
 
-      await FsUtil.mkdirp(path.dirname(cmd.output));
+  async action(config: string) {
+    process.env.TRV_ENV = this._cmd.env;
 
-      const { PhaseManager } = await import('@travetto/base');
-      await PhaseManager.init();
+    this._cmd.output = FsUtil.resolveUnix(FsUtil.cwd, this._cmd.output);
 
-      const { ControllerRegistry } = await import('@travetto/rest');
+    await FsUtil.mkdirp(path.dirname(this._cmd.output));
 
-      await ControllerRegistry.init();
-      const controllers = ControllerRegistry.getClasses().map(x => ControllerRegistry.get(x));
+    const { PhaseManager } = await import('@travetto/base');
+    await PhaseManager.init();
 
-      const { template } = await import('./lambda-template-yml');
-      const sam = template(controllers, FsUtil.resolveUnix(__dirname, '../resources'));
+    const { ControllerRegistry } = await import('@travetto/rest');
 
-      fs.writeFileSync(cmd.output, sam, 'utf-8');
-    });
+    await ControllerRegistry.init();
+    const controllers = ControllerRegistry.getClasses().map(x => ControllerRegistry.get(x));
+
+    const { template } = await import('./lambda-template-yml');
+    const sam = template(controllers, FsUtil.resolveUnix(__dirname, '../resources'));
+
+    fs.writeFileSync(this._cmd.output, sam, 'utf-8');
+  }
 }

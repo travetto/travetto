@@ -28,9 +28,9 @@ export class HelpUtil {
   /**
    * Generate list of all help entries
    */
-  static generateAppHelpList(confs: CachedAppConfig[]) {
+  static generateAppHelpList(confs: CachedAppConfig[] | undefined) {
     const choices = [];
-    if (!confs.length) {
+    if (!confs || !confs.length) {
       return color`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
     }
     for (const conf of confs) {

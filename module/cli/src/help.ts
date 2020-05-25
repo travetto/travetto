@@ -1,4 +1,5 @@
 import { color } from './color';
+import commander = require('commander');
 
 /**
  * Utilities for formatting help
@@ -75,7 +76,7 @@ export class HelpUtil {
   /**
    * Get full help text
    */
-  static getHelpText(text: string) {
+  static getHelpText(text: string, extraText?: string) {
     const [usage, text2] = this.extractValue(text, 'Usage:');
     const [options, text3] = this.extractValue(text2, 'Options:');
     const [commands, textFinal] = this.extractValue(text3, 'Commands:');
@@ -89,6 +90,21 @@ export class HelpUtil {
       .map(x => x.trim())
       .filter(x => !!x)
       .join('\n\n');
-    return `${out}\n`;
+
+    return `${[out, extraText].filter(x => !!x).join('\n')}\n`;
+  }
+
+  /**
+   * Show the help
+   * @param command
+   * @param message
+   * @param extra
+   */
+  static showHelp(command: commander.Command, message?: string, extra?: string) {
+    if (message) {
+      console!.error(color`${{ failure: message }}\n`);
+    }
+    command.outputHelp(text => HelpUtil.getHelpText(text, extra));
+    process.exit(-1);
   }
 }
