@@ -5,7 +5,8 @@ import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 
-import { TestResultsEnhancer, DUMMY_ENHANCER } from '../enhancer';
+import { TestResultsEnhancer, COLOR_ENHANCER, DUMMY_ENHANCER } from '../enhancer';
+import { ColorUtil } from '@travetto/boot';
 
 /**
   * TAP Format consumer
@@ -17,7 +18,7 @@ export class TapEmitter implements TestConsumer {
 
   constructor(
     private stream: NodeJS.WriteStream = process.stdout,
-    private enhancer: TestResultsEnhancer = DUMMY_ENHANCER
+    private enhancer: TestResultsEnhancer = ColorUtil.colorize ? COLOR_ENHANCER : DUMMY_ENHANCER
   ) { }
 
   protected log(message: string) {
