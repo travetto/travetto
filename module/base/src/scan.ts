@@ -54,12 +54,11 @@ export class ScanApp {
       if (file === 'alt') {
         return;
       }
-      const mod = file.split('alt/')[1].split('/')[0];
+      const [, mod, sub] = file.match(/^(.*alt\/[^\/]+)\/?(?:([^/]+)(?:\/(.*)))?$/)!;
       if (entry.stats.isDirectory() || entry.stats.isSymbolicLink()) {
-        return { mod, sub: '' };
+        return { mod: `./${mod}`, sub: '' };
       } else {
-        const [sub] = file.split(`${mod}/`)[1].split('/');
-        return { mod, sub };
+        return { mod: `./${mod}`, sub };
       }
     } else { // Core app
       const mod = '.';

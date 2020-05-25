@@ -35,7 +35,7 @@ export function init() {
       }
 
       if (!cmd.quiet) {
-        console.log(color`${{ success: 'Successfully' }} wrote to ${{ path: cmd.output ?? AppCache.cacheDir }}`);
+        console!.log(color`${{ success: 'Successfully' }} wrote to ${{ path: cmd.output ?? AppCache.cacheDir }}`);
       }
     });
 }

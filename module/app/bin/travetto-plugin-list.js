@@ -2,4 +2,5 @@
 //  all information is passed as env vars
 require('@travetto/boot/bin/init')
   .libRequire('@travetto/app/bin/lib/find')
-  .FindUtil.getList();
+  .FindUtil.getList()
+  .then(x => console.log(JSON.stringify(x)));

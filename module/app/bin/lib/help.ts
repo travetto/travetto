@@ -2,11 +2,6 @@ import { color } from '@travetto/cli/src/color';
 import { RunUtil } from './run';
 import { CachedAppConfig } from '../../src/types';
 
-export interface AppCommand {
-  watchReal: boolean;
-  env?: string;
-}
-
 export class HelpUtil {
 
   /**
@@ -33,7 +28,7 @@ export class HelpUtil {
   /**
    * Generate list of all help entries
    */
-  static generateAppHelpList(confs: CachedAppConfig[], cmd: Partial<AppCommand>) {
+  static generateAppHelpList(confs: CachedAppConfig[]) {
     const choices = [];
     if (!confs.length) {
       return color`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
@@ -46,7 +41,7 @@ export class HelpUtil {
 
       const features = [];
       let featureStr = '';
-      if (cmd.watchReal || (conf.watchable && cmd.env !== 'prod')) {
+      if (conf.watchable) {
         features.push('{watch}');
       }
       if (features.length) {

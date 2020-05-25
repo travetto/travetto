@@ -1,5 +1,11 @@
 import { Class } from '@travetto/registry';
 
+type OrProm<T> = T | Promise<T>;
+
+export type AppClass = {
+  run(...args: any[]): OrProm<ApplicationHandle | void | undefined>;
+};
+
 /**
  * An individual parameter of an application config
  */
@@ -19,7 +25,7 @@ export interface ApplicationParameter {
 /**
  * The application's configuration
  */
-export interface ApplicationConfig<T = any> {
+export interface ApplicationConfig<T extends AppClass = AppClass> {
   name: string; // App name
   filename: string; // Location of file for app
   description?: string;

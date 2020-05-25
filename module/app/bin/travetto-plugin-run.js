@@ -2,4 +2,4 @@
 //  all information is passed as env vars
 require('@travetto/boot/bin/init')
   .libRequire('@travetto/app/bin/lib/run')
-  .RunUtil.runDirect(...process.argv.slice(2));
+  .RunUtil.run(...process.argv.slice(2));

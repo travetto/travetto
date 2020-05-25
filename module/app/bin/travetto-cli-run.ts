@@ -2,14 +2,12 @@ import * as fs from 'fs';
 import * as commander from 'commander';
 
 import { CliUtil } from '@travetto/cli/src/util';
-import { EnvUtil } from '@travetto/boot/src/env';
 import { color } from '@travetto/cli/src/color';
 import { CompletionConfig } from '@travetto/cli/src/types';
 
-import { handleFailure } from './lib/util';
 import { FindUtil } from './lib/find';
 import { RunUtil } from './lib/run';
-import { HelpUtil, AppCommand } from './lib/help';
+import { HelpUtil } from './lib/help';
 import { CachedAppConfig } from '../src/types';
 
 
@@ -21,13 +19,8 @@ let apps: CachedAppConfig[];
  * architecture will call this automatically.
  */
 export async function setup() {
-  try {
-    apps = (await FindUtil.getList()) || [];
-    listHelper = HelpUtil.generateAppHelpList.bind(HelpUtil, apps, {});
-  } catch (e) {
-    console.error(e);
-    process.exit(1);
-  }
+  apps = (await FindUtil.getList()) || [];
+  listHelper = HelpUtil.generateAppHelpList.bind(HelpUtil, apps, {});
 }
 
 /**
@@ -37,47 +30,15 @@ export function init() {
   return CliUtil.program
     .command('run [application] [args...]')
     .on('--help', () => {
-      console.log(color`\n${{ title: 'Available Applications:' }}`);
-      console.log(`\n${listHelper()}\n`);
+      console!.log(color`\n${{ title: 'Available Applications:' }}`);
+      console!.log(`\n${listHelper()}\n`);
     })
     .allowUnknownOption()
     .option('-e, --env [env]', 'Application environment (dev|prod|<any>)', 'dev')
     .option('-r, --root [root]', 'Application root, defaults to associated root by name')
     .option('-w, --watch [watch]', 'Run the application in watch mode, requires @travetto/watch (default: auto)', CliUtil.isBoolean)
     .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [] as string[])
-    .action(async (app: string, args: string[], cmd: commander.Command & AppCommand) => {
-
-      // Determine if watch was passed in
-      cmd.watchReal = CliUtil.isTrue(cmd.watch ?? '');
-
-      // Setup profile
-      cmd.profile = [
-        ...(cmd.profile ?? []),
-        ...EnvUtil.getList('TRV_PROFILE')
-      ]
-        .map(x => x.trim())
-        .filter(x => !!x);
-
-      // Process env
-      if (cmd.env) {
-        process.env.TRV_ENV = cmd.env; // Preemptively set b/c env changes how we compile some things
-      } else {
-        cmd.env = EnvUtil.get('TRV_ENV');
-      }
-
-      // Handle root
-      if (cmd.root) {
-        process.env.TRV_APP_ROOTS = cmd.root;
-      }
-      // Join profiles if passed
-      if (cmd.profile) {
-        process.env.TRV_PROFILE = cmd.profile.join(',');
-      }
-
-      // Set watch if passed in
-      if (cmd.watch !== undefined) {
-        process.env.TRV_WATCH = `${cmd.watch}`;
-      }
+    .action(async (app: string, args: string[], cmd: commander.Command) => {
 
       try {
         // Find app
@@ -89,7 +50,7 @@ export function init() {
           if (rootApps.length === 1) {
             selected = rootApps[0];
             app = selected.name;
-            console.log('No app selected, defaulting to', app, 'as the only root target');
+            console!.log('No app selected, defaulting to', app, 'as the only root target');
           }
         }
 
@@ -97,23 +58,22 @@ export function init() {
         if (!selected) {
           if (apps.length) {
             // Show list
-            listHelper = HelpUtil.generateAppHelpList.bind(HelpUtil, apps, cmd);
+            listHelper = HelpUtil.generateAppHelpList.bind(HelpUtil, apps);
           }
           // Show help always exists when it's done
           CliUtil.showHelp(cmd, app ? `${app} is an unknown application` : 'You must specify an application to run');
         } else {
           // Run otherwise
-          await RunUtil.run([app, ...args]);
+          await RunUtil.run(app, ...args);
         }
       } catch (err) {
         if (err.message.startsWith('Invalid parameter')) {
-          console.error(err.message);
-          console.error();
-          console.error(`Usage: ${HelpUtil.getAppUsage((await FindUtil.getByName(app))!)}`);
+          console!.error(err.message);
+          console!.error();
+          console!.error(`Usage: ${HelpUtil.getAppUsage((await FindUtil.findByName(app))!)}`);
           process.exit(1);
-        } else {
-          handleFailure(err), 1;
         }
+        throw err;
       }
     });
 }
@@ -121,27 +81,24 @@ export function init() {
 /**
  * Tab completion support
  */
-export async function complete(c: CompletionConfig) {
-  try {
-    apps = await FindUtil.getList() || [];
-    const env = ['prod', 'dev'];
-    const bool = ['yes', 'no'];
-    const profiles = fs.readdirSync(process.cwd())
-      .filter(x => x.endsWith('.yml'))
-      .map(x => x.replace('.yml', ''));
 
-    profiles.push('application');
-    c.all.push('run');
-    c.task.run = {
-      '': apps.map(x => x.name).concat(['--env', '--watch', '--profile']),
-      '--env': env,
-      '-e': env,
-      '--watch': bool,
-      '-w': bool,
-      '--profile': profiles,
-      '-p': profiles,
-    };
-  } catch (err) {
-    handleFailure(err, 1);
-  }
+export async function complete(c: CompletionConfig) {
+  apps = await FindUtil.getList() || [];
+  const env = ['prod', 'dev'];
+  const bool = ['yes', 'no'];
+  const profiles = fs.readdirSync(process.cwd())
+    .filter(x => x.endsWith('.yml'))
+    .map(x => x.replace('.yml', ''));
+
+  profiles.push('application');
+  c.all.push('run');
+  c.task.run = {
+    '': apps.map(x => x.name).concat(['--env', '--watch', '--profile']),
+    '--env': env,
+    '-e': env,
+    '--watch': bool,
+    '-w': bool,
+    '--profile': profiles,
+    '-p': profiles,
+  };
 }
